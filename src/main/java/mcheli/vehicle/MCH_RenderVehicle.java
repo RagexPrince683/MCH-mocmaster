@@ -2,18 +2,19 @@ package mcheli.vehicle;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.Iterator;
 import mcheli.MCH_Lib;
 import mcheli.MCH_ModelManager;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.vehicle.MCH_EntityVehicle;
+import mcheli.vehicle.MCH_VehicleInfo;
 import mcheli.weapon.MCH_WeaponSet;
 import mcheli.wrapper.W_Lib;
 import mcheli.wrapper.W_Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
-
-import java.util.Iterator;
 
 @SideOnly(Side.CLIENT)
 public class MCH_RenderVehicle extends MCH_RenderAircraft {
@@ -55,8 +56,7 @@ public class MCH_RenderVehicle extends MCH_RenderAircraft {
       int index = 0;
 
       MCH_VehicleInfo.VPart vp;
-      for(Iterator i$ = info.partList.iterator(); i$.hasNext(); 
-    		  index = this.drawPart(vp, vehicle, info, yaw, pitch, rotBrl, tickTime, ws, index)) {
+      for(Iterator i$ = info.partList.iterator(); i$.hasNext(); index = this.drawPart(vp, vehicle, info, yaw, pitch, rotBrl, tickTime, ws, index)) {
          vp = (MCH_VehicleInfo.VPart)i$.next();
       }
 

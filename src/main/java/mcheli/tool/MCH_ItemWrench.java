@@ -3,6 +3,8 @@ package mcheli.tool;
 import com.google.common.collect.Multimap;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.List;
+import java.util.Random;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntitySeat;
@@ -19,14 +21,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-
-import java.util.List;
-import java.util.Random;
 
 public class MCH_ItemWrench extends W_Item {
 
@@ -39,8 +39,7 @@ public class MCH_ItemWrench extends W_Item {
       super(itemId);
       this.toolMaterial = material;
       super.maxStackSize = 1;
-     // this.setMaxDamage(material.getMaxUses());
-      this.setMaxDamage(0);
+      this.setMaxDamage(material.getMaxUses());
       this.damageVsEntity = 4.0F + material.getDamageVsEntity();
    }
 
@@ -84,7 +83,15 @@ public class MCH_ItemWrench extends W_Item {
    }
 
    public boolean hitEntity(ItemStack itemStack, EntityLivingBase entity, EntityLivingBase player) {
+      if(!player.worldObj.isRemote) {
+         if(rand.nextInt(40) == 0) {
+            entity.entityDropItem(new ItemStack(W_Item.getItemByName("iron_ingot"), 1, 0), 0.0F);
+         } else if(rand.nextInt(20) == 0) {
+            entity.entityDropItem(new ItemStack(W_Item.getItemByName("gunpowder"), 1, 0), 0.0F);
+         }
+      }
 
+      itemStack.damageItem(2, player);
       return true;
    }
 
@@ -110,15 +117,8 @@ public class MCH_ItemWrench extends W_Item {
 
       if(!player.worldObj.isRemote && count < this.getMaxItemUseDuration(stack) && count % 20 == 0) {
          ac = this.getMouseOverAircraft(player);
-         if(ac != null && ac.getHP() > 0 && ac.repair(1)) {
-        	
-            //stack.damageItem(100, player);
-        	 for(int i = 0; i< player.inventory.getSizeInventory(); i++) {
-        		 if(player.inventory.getStackInSlot(i) == stack) {
-        			 player.inventory.setInventorySlotContents(i, null); 
-        		 }
-        	 }
-        	
+         if(ac != null && ac.getHP() > 0 && ac.repair(10)) {
+            stack.damageItem(1, player);
             W_WorldFunc.MOD_playSoundEffect(player.worldObj, (double)((int)ac.posX), (double)((int)ac.posY), (double)((int)ac.posZ), "wrench", 1.0F, 0.9F + rand.nextFloat() * 0.2F);
          }
       }

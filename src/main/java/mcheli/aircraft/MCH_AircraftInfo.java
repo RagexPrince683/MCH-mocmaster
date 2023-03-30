@@ -1,7 +1,17 @@
 package mcheli.aircraft;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import mcheli.MCH_BaseInfo;
 import mcheli.MCH_MOD;
+import mcheli.aircraft.MCH_BoundingBox;
+import mcheli.aircraft.MCH_MobDropOption;
+import mcheli.aircraft.MCH_SeatInfo;
+import mcheli.aircraft.MCH_SeatRackInfo;
 import mcheli.hud.MCH_Hud;
 import mcheli.hud.MCH_HudManager;
 import mcheli.weapon.MCH_WeaponInfoManager;
@@ -10,8 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.model.IModelCustom;
-
-import java.util.*;
 
 public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
 
@@ -138,14 +146,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    private String lastWeaponType = "";
    private int lastWeaponIndex = -1;
    private MCH_AircraftInfo.PartWeapon lastWeaponPart;
-   public int radarPower=0;
-   public int radarMax = 0;
-   public List<MCH_Hardpoint> hardpointList = new ArrayList<MCH_Hardpoint>();
-   public int surfaceSearch=0;
-   public double esmPower = 0.0f;
-   public boolean isNaval = false;
 
-   Hashtable<String, Integer>fuelDict = new Hashtable<String, Integer>();
 
    public abstract Item getItem();
 
@@ -184,12 +185,12 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.floatOffset = 0.0F;
       this.gravity = -0.04F;
       this.gravityInWater = -0.04F;
-      this.maxHp = 10;
+      this.maxHp = 50;
       this.damageFactor = 0.2F;
       this.submergedDamageHeight = 0.0F;
       this.inventorySize = 0;
-      this.armorDamageFactor = 0.0F;
-      this.armorMaxDamage = 0.0F;
+      this.armorDamageFactor = 1.0F;
+      this.armorMaxDamage = 100000.0F;
       this.armorMinDamage = 0.0F;
       this.enableBack = false;
       this.isUAV = false;
@@ -279,8 +280,6 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.partWheel = new ArrayList();
       this.partSteeringWheel = new ArrayList();
       this.lightHatchList = new ArrayList();
-      this.radarPower = 0;
-
    }
 
    public float getDefaultSoundRange() {
@@ -505,53 +504,13 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
             if(s != null && s.length == 2) {
                this.displayNameLang.put(s[0].trim(), s[1].trim());
             }
-         } else if(item.equalsIgnoreCase("radarPower")) {
-				this.radarPower = toInt(data);	
-         } else if(item.equalsIgnoreCase("surfaceSearch")) {
-				this.surfaceSearch = toInt(data);
-		}else if(item.equalsIgnoreCase("radarMax")){
-        	 this.radarMax = toInt(data);
-         }else if(item.equalsIgnoreCase("addFuel")){
-            String[] data2 = data.split(" ");
-            try{
-               String fuelName = data2[0];
-               int fuelVal = Integer.parseInt(data2[1]);
-               this.fuelDict.put(fuelName, fuelVal);
-            }catch(Exception e){}
-         }else if(item.compareTo("addhardpoint") == 0) {
- 			s = data.split("\\s*,\\s*");
- 			String[] types = s[0].split(";");
- 			float y = (s.length >= 5) ? toFloat(s[4]) : 0.0F;
- 			float p = (s.length >= 6) ? toFloat(s[5]) : 0.0F;
- 			boolean canUsePilot = (s.length >= 7) ? toBool(s[6]) : true;
- 			int seatID = (s.length >= 8) ? (toInt(s[7], 1, getInfo_MaxSeatNum()) - 1) : 0;
- 			if (seatID <= 0) canUsePilot = true; 
- 			float dfy = (s.length >= 9) ? toFloat(s[8]) : 0.0F;
- 			dfy = MathHelper.wrapAngleTo180_float(dfy);
- 			float mny = (s.length >= 10) ? toFloat(s[9]) : 0.0F;
- 			float mxy = (s.length >= 11) ? toFloat(s[10]) : 0.0F;
- 			float mnp = (s.length >= 12) ? toFloat(s[11]) : 0.0F;
- 			float mxp = (s.length >= 13) ? toFloat(s[12]) : 0.0F;
- 			//System.out.println("HARDPOINT " + s[0]);
- 			MCH_Hardpoint hardpoint = new MCH_Hardpoint(toFloat(s[1]), toFloat(s[2]), toFloat(s[3]),y,p,canUsePilot,seatID,dfy,mny,mxy,mnp,mxp);
-
- 			for(String t : types){
-               String[] x = t.split(":");
-               int qty = toInt(x[1]);
-               hardpoint.addWeaponData(x[0], qty);
-            }
- 			this.hardpointList.add(hardpoint);
- 	 	}else  if(item.equalsIgnoreCase("Category")) {
+         } else if(item.equalsIgnoreCase("Category")) {
             this.category = data.toUpperCase().replaceAll("[,;:]", ".").replaceAll("[ \t]", "");
          } else if(item.equalsIgnoreCase("CanRide")) {
             this.canRide = this.toBool(data, true);
-         } else if(item.equalsIgnoreCase("isNaval")) {
-            this.isNaval = this.toBool(data, false);
          } else if(item.equalsIgnoreCase("MaxFuel")) {
             this.maxFuel = this.toInt(data, 0, 100000000);
-         } else if(item.equalsIgnoreCase("ESM")) {
-             this.esmPower = this.toFloat(data, 0.0F, 10.0F);
-          }else if(item.equalsIgnoreCase("FuelConsumption")) {
+         } else if(item.equalsIgnoreCase("FuelConsumption")) {
             this.fuelConsumption = this.toFloat(data, 0.0F, 10000.0F);
          } else if(item.equalsIgnoreCase("FuelSupplyRange")) {
             this.fuelSupplyRange = this.toFloat(data, 0.0F, 1000.0F);
@@ -765,7 +724,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                  } else if(item.equalsIgnoreCase("ThrottleUpDownOnEntity")) {
                                     this.throttleUpDownOnEntity = this.toFloat(data, 0.0F, 100000.0F);
                                  } else if(item.equalsIgnoreCase("Stealth")) {
-                                    this.stealth = this.toFloat(data, 0.0F, 1000.0F);
+                                    this.stealth = this.toFloat(data, 0.0F, 1.0F);
                                  } else if(item.equalsIgnoreCase("EntityWidth")) {
                                     this.entityWidth = this.toFloat(data, -100.0F, 100.0F);
                                  } else if(item.equalsIgnoreCase("EntityHeight")) {
@@ -791,7 +750,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                           }
                                        } else if(item.compareTo("addrecipe") != 0 && item.compareTo("addshapelessrecipe") != 0) {
                                           if(item.compareTo("maxhp") == 0) {
-                                            // this.maxHp = this.toInt(data, 1, 100000);
+                                             this.maxHp = this.toInt(data, 1, 100000);
                                           } else if(item.compareTo("inventorysize") == 0) {
                                              this.inventorySize = this.toInt(data, 0, 54);
                                           } else if(item.compareTo("damagefactor") == 0) {
@@ -912,11 +871,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                             s = data.split("\\s*,\\s*");
                                                             if(s.length >= 5) {
                                                                var15 = s.length >= 6?this.toFloat(s[5]):1.0F;
-                                                               if(s.length >= 7) {
-                                                            	   System.out.println("MM: " + s[6]);
-                                                               }
-                                                               int mm = s.length >= 7?this.toInt(s[6]):0;
-                                                               MCH_BoundingBox var49 = new MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), var15, mm);
+                                                               MCH_BoundingBox var49 = new MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), var15);
                                                                this.extraBoundingBox.add(var49);
                                                                if(var49.boundingBox.maxY > (double)this.markerHeight) {
                                                                   this.markerHeight = (float)var49.boundingBox.maxY;
@@ -1031,8 +986,8 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                              }
                                           }
                                        } else {
-                                         // this.isShapedRecipe = item.compareTo("addrecipe") == 0;
-                                          //this.recipeString.add(data.toUpperCase());
+                                          this.isShapedRecipe = item.compareTo("addrecipe") == 0;
+                                          this.recipeString.add(data.toUpperCase());
                                        }
                                     } else {
                                        s = data.split("\\s*,\\s*");

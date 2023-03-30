@@ -1,10 +1,9 @@
 package mcheli.plane;
 
 import com.google.common.io.ByteArrayDataInput;
-import mcheli.aircraft.MCH_PacketPlayerControlBase;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
+import mcheli.aircraft.MCH_PacketPlayerControlBase;
 
 public class MCP_PlanePacketPlayerControl extends MCH_PacketPlayerControlBase {
 

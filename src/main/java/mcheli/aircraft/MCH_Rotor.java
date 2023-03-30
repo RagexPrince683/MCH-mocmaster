@@ -1,5 +1,7 @@
 package mcheli.aircraft;
 
+import mcheli.aircraft.MCH_Blade;
+
 public class MCH_Rotor {
 
    public MCH_Blade[] blades;

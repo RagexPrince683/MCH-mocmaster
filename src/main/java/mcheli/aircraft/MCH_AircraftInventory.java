@@ -1,5 +1,7 @@
 package mcheli.aircraft;
 
+import java.util.Random;
+import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.parachute.MCH_ItemParachute;
 import mcheli.wrapper.W_NBTTag;
 import net.minecraft.entity.item.EntityItem;
@@ -8,8 +10,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-
-import java.util.Random;
 
 public class MCH_AircraftInventory implements IInventory {
 

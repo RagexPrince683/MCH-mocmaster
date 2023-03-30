@@ -1,9 +1,21 @@
 package mcheli.multiplay;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import mcheli.multiplay.MCH_ContainerScoreboard;
+import mcheli.multiplay.MCH_IGuiScoreboard;
 import mcheli.wrapper.W_GuiContainer;
 import mcheli.wrapper.W_ScaledResolution;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.*;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiPlayerInfo;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
@@ -12,8 +24,6 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.util.EnumChatFormatting;
 import org.lwjgl.opengl.GL11;
-
-import java.util.*;
 
 public abstract class MCH_GuiScoreboard_Base extends W_GuiContainer {
 

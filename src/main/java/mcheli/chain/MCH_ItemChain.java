@@ -1,7 +1,9 @@
 package mcheli.chain;
 
+import java.util.List;
 import mcheli.aircraft.MCH_EntityHitBox;
 import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.chain.MCH_EntityChain;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.wrapper.W_Entity;
@@ -14,8 +16,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-
-import java.util.List;
 
 public class MCH_ItemChain extends W_Item {
 

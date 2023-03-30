@@ -1,6 +1,10 @@
 package mcheli.throwable;
 
 import mcheli.MCH_Lib;
+import mcheli.throwable.MCH_EntityThrowable;
+import mcheli.throwable.MCH_ItemThrowable;
+import mcheli.throwable.MCH_ThrowableInfo;
+import mcheli.throwable.MCH_ThrowableInfoManager;
 import mcheli.wrapper.W_BlockDispenser;
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;
 import net.minecraft.dispenser.IBlockSource;

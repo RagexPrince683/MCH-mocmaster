@@ -1,5 +1,7 @@
 package mcheli.aircraft;
 
+import mcheli.aircraft.MCH_BoundingBox;
+import mcheli.aircraft.MCH_EntityAircraft;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -7,7 +9,6 @@ import net.minecraft.util.Vec3;
 public class MCH_AircraftBoundingBox extends AxisAlignedBB {
 
    private final MCH_EntityAircraft ac;
-   private MCH_BoundingBox lastBB;
 
 
    protected MCH_AircraftBoundingBox(MCH_EntityAircraft ac) {
@@ -33,18 +34,14 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
    }
 
    public boolean intersectsWith(AxisAlignedBB aabb) {
-	  
       boolean ret = false;
       double dist = 1.0E7D;
       this.ac.lastBBDamageFactor = 1.0F;
-      ac.lastBB = null;
       if(super.intersectsWith(aabb)) {
          dist = this.getDistSq(aabb, this);
          ret = true;
       }
 
-      
-      
       MCH_BoundingBox[] arr$ = this.ac.extraBoundingBox;
       int len$ = arr$.length;
 
@@ -55,8 +52,6 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
             if(dist2 < dist) {
                dist = dist2;
                this.ac.lastBBDamageFactor = bb.damegeFactor;
-               this.ac.lastBB = bb;
-             // System.out.println("Updating BB " + bb.armor);
             }
 
             ret = true;

@@ -1,15 +1,21 @@
 package mcheli.weapon;
 
+import java.util.Random;
 import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.weapon.MCH_Cartridge;
+import mcheli.weapon.MCH_IEntityLockChecker;
+import mcheli.weapon.MCH_SightType;
+import mcheli.weapon.MCH_WeaponGuidanceSystem;
+import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.weapon.MCH_WeaponParam;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
-
 import java.util.Random;
 
 public abstract class MCH_WeaponBase {
@@ -76,22 +82,6 @@ public abstract class MCH_WeaponBase {
    public String getName() {
       return this.displayName;
    }
-   
-   public MCH_WeaponParam setAccuracy(MCH_WeaponParam prm) {
-	   if(weaponInfo.accuracy > 0.0F) {
-       	double accuracy = weaponInfo.accuracy;
-          if(prm.entity.motionX > 0 || prm.entity.motionZ > 0) {
-       	   if(weaponInfo.stabilizer != 0) {
-       		   accuracy *= (100 / weaponInfo.stabilizer);
-       	   }else {
-       		   accuracy *= 100;
-       	   }
-          }
-          prm.rotYaw += (rand.nextFloat() - 0.5F) * accuracy;
-          prm.rotPitch += (rand.nextFloat() - 0.5F) * accuracy;
-       }
-	   return prm;
-   }
 
    public abstract boolean shot(MCH_WeaponParam var1);
 
@@ -131,7 +121,7 @@ public abstract class MCH_WeaponBase {
       return this.getInfo().sight;
    }
 
-   public MCH_GuidanceSystem getGuidanceSystem() {
+   public MCH_WeaponGuidanceSystem getGuidanceSystem() {
       return null;
    }
 
@@ -148,7 +138,6 @@ public abstract class MCH_WeaponBase {
 
    public void modifyCommonParameters() {
       this.modifyParameters();
-      
    }
 
    public void modifyParameters() {}
@@ -179,7 +168,6 @@ public abstract class MCH_WeaponBase {
       prm.posX += v.xCoord;
       prm.posY += v.yCoord;
       prm.posZ += v.zCoord;
-      
       if(this.shot(prm)) {
          this.tick = 0;
          return true;
@@ -190,10 +178,8 @@ public abstract class MCH_WeaponBase {
 
    public Vec3 getShotPos(Entity entity) {
       if(entity instanceof MCH_EntityAircraft && this.onTurret) {
-    	 // System.out.println("On turret");
          return ((MCH_EntityAircraft)entity).calcOnTurretPos(this.position);
       } else {
-    	 // System.out.println("NOT on turret");
          Vec3 v = Vec3.createVectorHelper(this.position.xCoord, this.position.yCoord, this.position.zCoord);
          float roll = entity instanceof MCH_EntityAircraft?((MCH_EntityAircraft)entity).getRotRoll():0.0F;
          return MCH_Lib.RotVec3(v, -entity.rotationYaw, -entity.rotationPitch, -roll);

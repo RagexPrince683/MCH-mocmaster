@@ -1,5 +1,7 @@
 package mcheli.gltd;
 
+import java.util.List;
+import mcheli.gltd.MCH_EntityGLTD;
 import mcheli.wrapper.W_Item;
 import mcheli.wrapper.W_MovingObjectPosition;
 import mcheli.wrapper.W_WorldFunc;
@@ -11,8 +13,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-
-import java.util.List;
 
 public class MCH_ItemGLTD extends W_Item {
 

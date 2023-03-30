@@ -4,6 +4,8 @@ import mcheli.MCH_Explosion;
 import mcheli.MCH_Lib;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
+import mcheli.throwable.MCH_ThrowableInfo;
+import mcheli.throwable.MCH_ThrowableInfoManager;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;

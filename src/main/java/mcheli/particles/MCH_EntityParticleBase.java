@@ -1,6 +1,17 @@
 package mcheli.particles;
 
+import java.util.ArrayList;
+import java.util.List;
 import mcheli.wrapper.W_EntityFX;
+import mcheli.wrapper.W_WorldFunc;
+import net.minecraft.block.Block;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.entity.Entity;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.ReportedException;
 import net.minecraft.world.World;
 
 public abstract class MCH_EntityParticleBase extends W_EntityFX {
@@ -39,7 +50,7 @@ public abstract class MCH_EntityParticleBase extends W_EntityFX {
    public int getFXLayer() {
       return 2;
    }
-   /*
+
    public void moveEntity(double par1, double par3, double par5) {
       if(super.noClip) {
          super.boundingBox.offset(par1, par3, par5);
@@ -49,15 +60,18 @@ public abstract class MCH_EntityParticleBase extends W_EntityFX {
       } else {
          super.worldObj.theProfiler.startSection("move");
          super.ySize *= 0.4F;
+         double d3 = super.posX;
+         double d4 = super.posY;
+         double d5 = super.posZ;
          double d6 = par1;
          double d7 = par3;
          double d8 = par5;
+         AxisAlignedBB axisalignedbb = super.boundingBox.copy();
+         boolean flag = false;
          List list = super.worldObj.getCollidingBoundingBoxes(this, super.boundingBox.addCoord(par1, par3, par5));
 
          for(int flag1 = 0; flag1 < list.size(); ++flag1) {
-            if (list.get(flag1) != null){
-               par3 = ((AxisAlignedBB)list.get(flag1)).calculateYOffset(super.boundingBox, par3);
-            }
+            par3 = ((AxisAlignedBB)list.get(flag1)).calculateYOffset(super.boundingBox, par3);
          }
 
          super.boundingBox.offset(0.0D, par3, 0.0D);
@@ -67,12 +81,16 @@ public abstract class MCH_EntityParticleBase extends W_EntityFX {
             par1 = 0.0D;
          }
 
+         boolean var10000;
+         if(!super.onGround && (d7 == par3 || d7 >= 0.0D)) {
+            var10000 = false;
+         } else {
+            var10000 = true;
+         }
+
          int j;
          for(j = 0; j < list.size(); ++j) {
-            if (list.get(j) != null){
-               par1 = ((AxisAlignedBB)list.get(j)).calculateXOffset(super.boundingBox, par1);
-            }
-
+            par1 = ((AxisAlignedBB)list.get(j)).calculateXOffset(super.boundingBox, par1);
          }
 
          super.boundingBox.offset(par1, 0.0D, 0.0D);
@@ -83,10 +101,7 @@ public abstract class MCH_EntityParticleBase extends W_EntityFX {
          }
 
          for(j = 0; j < list.size(); ++j) {
-            if (list.get(j) != null){
-               par5 = ((AxisAlignedBB)list.get(j)).calculateZOffset(super.boundingBox, par5);
-            }
-
+            par5 = ((AxisAlignedBB)list.get(j)).calculateZOffset(super.boundingBox, par5);
          }
 
          super.boundingBox.offset(0.0D, 0.0D, par5);
@@ -117,6 +132,11 @@ public abstract class MCH_EntityParticleBase extends W_EntityFX {
          if(d8 != par5) {
             super.motionZ = 0.0D;
          }
+
+         double var35 = super.posX - d3;
+         var35 = super.posY - d4;
+         var35 = super.posZ - d5;
+
          try {
             this.doBlockCollisions();
          } catch (Throwable var34) {
@@ -130,7 +150,33 @@ public abstract class MCH_EntityParticleBase extends W_EntityFX {
       }
 
    }
-   */
 
+   public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+      ArrayList collidingBoundingBoxes = new ArrayList();
+      int i = MathHelper.floor_double(par2AxisAlignedBB.minX);
+      int j = MathHelper.floor_double(par2AxisAlignedBB.maxX + 1.0D);
+      int k = MathHelper.floor_double(par2AxisAlignedBB.minY);
+      int l = MathHelper.floor_double(par2AxisAlignedBB.maxY + 1.0D);
+      int i1 = MathHelper.floor_double(par2AxisAlignedBB.minZ);
+      int j1 = MathHelper.floor_double(par2AxisAlignedBB.maxZ + 1.0D);
 
+      for(int k1 = i; k1 < j; ++k1) {
+         for(int l1 = i1; l1 < j1; ++l1) {
+            if(super.worldObj.blockExists(k1, 64, l1)) {
+               for(int i2 = k - 1; i2 < l; ++i2) {
+                  Block block;
+                  if(k1 >= -30000000 && k1 < 30000000 && l1 >= -30000000 && l1 < 30000000) {
+                     block = W_WorldFunc.getBlock(super.worldObj, k1, i2, l1);
+                  } else {
+                     block = Blocks.stone;
+                  }
+
+                  block.addCollisionBoxesToList(super.worldObj, k1, i2, l1, par2AxisAlignedBB, collidingBoundingBoxes, par1Entity);
+               }
+            }
+         }
+      }
+
+      return collidingBoundingBoxes;
+   }
 }

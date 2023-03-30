@@ -1,6 +1,8 @@
 package mcheli.aircraft;
 
 import mcheli.MCH_Lib;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_ItemAircraft;
 import mcheli.wrapper.W_BlockDispenser;
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;
 import net.minecraft.dispenser.IBlockSource;

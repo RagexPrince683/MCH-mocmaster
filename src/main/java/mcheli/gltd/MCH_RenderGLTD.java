@@ -2,7 +2,9 @@ package mcheli.gltd;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.Random;
 import mcheli.MCH_RenderLib;
+import mcheli.gltd.MCH_EntityGLTD;
 import mcheli.wrapper.W_Lib;
 import mcheli.wrapper.W_Render;
 import net.minecraft.client.Minecraft;
@@ -11,8 +13,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.model.IModelCustom;
 import org.lwjgl.opengl.GL11;
-
-import java.util.Random;
 
 @SideOnly(Side.CLIENT)
 public class MCH_RenderGLTD extends W_Render {

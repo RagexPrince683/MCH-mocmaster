@@ -6,6 +6,8 @@ import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
+import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.gui.MCH_Gui;
 import mcheli.hud.MCH_Hud;
 import mcheli.weapon.MCH_EntityTvMissile;
@@ -24,9 +26,7 @@ public abstract class MCH_AircraftCommonGui extends MCH_Gui {
    }
 
    public void drawHud(MCH_EntityAircraft ac, EntityPlayer player, int seatId) {
-	   
       MCH_AircraftInfo info = ac.getAcInfo();
-
       if(info != null) {
          if(ac.isMissileCameraMode(player) && ac.getTVMissile() != null && info.hudTvMissile != null) {
             info.hudTvMissile.draw(ac, player, super.smoothCamPartialTicks);
@@ -42,7 +42,7 @@ public abstract class MCH_AircraftCommonGui extends MCH_Gui {
                }
             }
          }
-         
+
       }
    }
 
@@ -55,7 +55,6 @@ public abstract class MCH_AircraftCommonGui extends MCH_Gui {
    }
 
    public void drawNightVisionNoise() {
-	  Minecraft.getMinecraft().gameSettings.hideGUI = false;
       GL11.glEnable(3042);
       GL11.glColor4f(0.0F, 1.0F, 0.0F, 0.3F);
       int srcBlend = GL11.glGetInteger(3041);

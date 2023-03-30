@@ -5,6 +5,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.uav.MCH_EntityUavStation;
+import mcheli.weapon.MCH_EntityBaseBullet;
+import mcheli.weapon.MCH_RenderBulletBase;
 import mcheli.wrapper.W_Render;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;

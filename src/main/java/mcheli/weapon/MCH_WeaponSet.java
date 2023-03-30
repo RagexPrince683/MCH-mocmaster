@@ -1,20 +1,22 @@
 package mcheli.weapon;
 
+import java.util.Random;
 import mcheli.MCH_Lib;
 import mcheli.vehicle.MCH_EntityVehicle;
+import mcheli.weapon.MCH_EntityCartridge;
+import mcheli.weapon.MCH_WeaponBase;
+import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.weapon.MCH_WeaponParam;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 
-import java.util.ArrayList;
-import java.util.Random;
-
 public class MCH_WeaponSet {
 
    private static Random rand = new Random();
    private final String name;
-   protected ArrayList<MCH_WeaponBase> weapons;
+   protected MCH_WeaponBase[] weapons;
    private int currentWeaponIndex;
    public float rotationYaw;
    public float rotationPitch;
@@ -45,10 +47,7 @@ public class MCH_WeaponSet {
       this.lastUsedOptionParameter1 = 0;
       this.lastUsedOptionParameter2 = 0;
       this.name = weapon[0].name;
-      this.weapons = new ArrayList<MCH_WeaponBase>();
-      for(MCH_WeaponBase w : weapon) {
-    	  weapons.add(w);
-      }
+      this.weapons = weapon;
       this.currentWeaponIndex = 0;
       this.countWait = 0;
       this.countReloadWait = 0;
@@ -78,14 +77,6 @@ public class MCH_WeaponSet {
       this(new MCH_WeaponBase[]{weapon});
    }
 
-   public void removeWeapon(MCH_WeaponBase weapon) {
-	   weapons.remove(weapon);
-   }
-   
-   public void addWeapon(MCH_WeaponBase weapon) {
-	   weapons.add(weapon);
-   }
-   
    public boolean isEqual(String s) {
       return this.name.equalsIgnoreCase(s);
    }
@@ -176,11 +167,11 @@ public class MCH_WeaponSet {
 
    public void switchMode() {
       boolean isChanged = false;
-      Object[] cntSwitch = (Object[]) this.weapons.toArray();
+      MCH_WeaponBase[] cntSwitch = this.weapons;
       int len$ = cntSwitch.length;
 
       for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_WeaponBase w = (MCH_WeaponBase) cntSwitch[i$];
+         MCH_WeaponBase w = cntSwitch[i$];
          if(w != null) {
             isChanged = w.switchMode() || isChanged;
          }
@@ -276,13 +267,12 @@ public class MCH_WeaponSet {
 
          this.prevRotationYaw = this.rotationYaw;
          this.prevRotationPitch = this.rotationPitch;
-         if(this.weapons != null && this.weapons.size() > 0) {
-           // MCH_WeaponBase[] var8 = (MCH_WeaponBase[]) this.weapons.toArray();
-            //int len$ = var8.length;
+         if(this.weapons != null && this.weapons.length > 0) {
+            MCH_WeaponBase[] var8 = this.weapons;
+            int len$ = var8.length;
 
-            //for(int i$ = 0; i$ < len$; ++i$) {
-               //MCH_WeaponBase w = var8[i$];
-        	 for(MCH_WeaponBase w : this.weapons) {
+            for(int i$ = 0; i$ < len$; ++i$) {
+               MCH_WeaponBase w = var8[i$];
                if(w != null) {
                   w.update(this.countWait);
                }
@@ -360,9 +350,6 @@ public class MCH_WeaponSet {
 
    }
 
-   
-
-   
    public boolean use(MCH_WeaponParam prm) {
       MCH_WeaponBase crtWpn = this.getCurrentWeapon();
       if(crtWpn != null && crtWpn.getInfo() != null) {
@@ -374,18 +361,9 @@ public class MCH_WeaponSet {
             prm.rotYaw += this.rotationYaw + crtWpn.fixRotationYaw;
             prm.rotPitch += this.rotationPitch + crtWpn.fixRotationPitch;
             if(info.accuracy > 0.0F) {
-            	double accuracy = info.accuracy;
-               if(prm.entity.motionX > 0 || prm.entity.motionZ > 0) {
-            	   if(info.stabilizer != 0) {
-            		   accuracy *= (100 / info.stabilizer);
-            	   }else {
-            		   accuracy *= 100;
-            	   }
-               }
-               prm.rotYaw += (rand.nextFloat() - 0.5F) * accuracy;
-               prm.rotPitch += (rand.nextFloat() - 0.5F) * accuracy;
+               prm.rotYaw += (rand.nextFloat() - 0.5F) * info.accuracy;
+               prm.rotPitch += (rand.nextFloat() - 0.5F) * info.accuracy;
             }
-            
 
             prm.rotYaw = MathHelper.wrapAngleTo180_float(prm.rotYaw);
             prm.rotPitch = MathHelper.wrapAngleTo180_float(prm.rotPitch);
@@ -409,7 +387,7 @@ public class MCH_WeaponSet {
                   this.lastUsedCount[this.currentWeaponIndex] = crtWpn.getReloadCount() - 10;
                }
 
-               this.currentWeaponIndex = (this.currentWeaponIndex + 1) % this.weapons.size();
+               this.currentWeaponIndex = (this.currentWeaponIndex + 1) % this.weapons.length;
                this.countWait = crtWpn.interval;
                this.countReloadWait = 0;
                if(this.getAmmoNum() > 0) {
@@ -472,11 +450,11 @@ public class MCH_WeaponSet {
    }
 
    public MCH_WeaponBase getWeapon(int idx) {
-      return this.weapons != null && this.weapons.size() > 0 && idx < this.weapons.size()?this.weapons.get(idx):null;
+      return this.weapons != null && this.weapons.length > 0 && idx < this.weapons.length?this.weapons[idx]:null;
    }
 
    public int getWeaponNum() {
-      return this.weapons != null?this.weapons.size():0;
+      return this.weapons != null?this.weapons.length:0;
    }
 
    public MCH_WeaponInfo getInfo() {

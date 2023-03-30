@@ -1,13 +1,13 @@
 package mcheli.tank;
 
+import java.util.ArrayList;
+import java.util.List;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.tank.MCH_ItemTank;
 import net.minecraft.item.Item;
 import net.minecraft.util.Vec3;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MCH_TankInfo extends MCH_AircraftInfo {
 

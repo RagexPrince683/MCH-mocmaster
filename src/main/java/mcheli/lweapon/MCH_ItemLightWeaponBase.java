@@ -1,5 +1,6 @@
 package mcheli.lweapon;
 
+import mcheli.lweapon.MCH_ItemLightWeaponBullet;
 import mcheli.wrapper.W_Item;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;

@@ -1,13 +1,13 @@
 package mcheli.aircraft;
 
-import mcheli.MCH_IRecipeList;
-import mcheli.MCH_InfoManagerBase;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipe;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import mcheli.MCH_IRecipeList;
+import mcheli.MCH_InfoManagerBase;
+import mcheli.aircraft.MCH_AircraftInfo;
+import net.minecraft.item.Item;
+import net.minecraft.item.crafting.IRecipe;
 
 public abstract class MCH_AircraftInfoManager extends MCH_InfoManagerBase implements MCH_IRecipeList {
 

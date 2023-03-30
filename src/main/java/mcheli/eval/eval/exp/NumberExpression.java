@@ -1,6 +1,9 @@
 package mcheli.eval.eval.exp;
 
 import mcheli.eval.eval.EvalException;
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.ShareExpValue;
+import mcheli.eval.eval.exp.WordExpression;
 import mcheli.eval.eval.lex.Lex;
 import mcheli.eval.util.NumberUtil;
 

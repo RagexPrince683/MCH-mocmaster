@@ -1,10 +1,9 @@
 package mcheli.lweapon;
 
 import com.google.common.io.ByteArrayDataInput;
-import mcheli.MCH_Packet;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
+import mcheli.MCH_Packet;
 
 public class MCH_PacketLightWeaponPlayerControl extends MCH_Packet {
 

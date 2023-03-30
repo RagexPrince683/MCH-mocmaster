@@ -1,5 +1,7 @@
 package mcheli.hud;
 
+import mcheli.hud.MCH_HudItem;
+
 public class MCH_HudItemColor extends MCH_HudItem {
 
    private final String updateColor;

@@ -1,5 +1,6 @@
 package mcheli.particles;
 
+import mcheli.particles.MCH_EntityParticleBase;
 import mcheli.wrapper.W_Block;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_WorldFunc;

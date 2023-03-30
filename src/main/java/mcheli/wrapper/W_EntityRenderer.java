@@ -18,17 +18,22 @@
 package mcheli.wrapper;
 
 import com.google.gson.JsonSyntaxException;
+import java.io.IOException;
 import mcheli.MCH_Config;
+import mcheli.MCH_ConfigPrm;
 import mcheli.MCH_Lib;
+import mcheli.wrapper.W_Reflection;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
-
-import java.io.IOException;
 
 public class W_EntityRenderer {
     public static void setItemRenderer(Minecraft mc, ItemRenderer ir) {

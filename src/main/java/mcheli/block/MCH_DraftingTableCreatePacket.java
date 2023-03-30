@@ -1,18 +1,17 @@
 package mcheli.block;
 
 import com.google.common.io.ByteArrayDataInput;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import mcheli.MCH_Lib;
 import mcheli.MCH_Packet;
 import mcheli.wrapper.W_Item;
 import mcheli.wrapper.W_Network;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.IRecipe;
-
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 public class MCH_DraftingTableCreatePacket extends MCH_Packet {
 

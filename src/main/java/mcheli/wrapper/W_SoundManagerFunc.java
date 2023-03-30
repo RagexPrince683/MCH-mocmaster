@@ -9,6 +9,8 @@
  */
 package mcheli.wrapper;
 
+import mcheli.wrapper.W_MOD;
+import mcheli.wrapper.W_Sound;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SoundManager;
 import net.minecraft.entity.Entity;

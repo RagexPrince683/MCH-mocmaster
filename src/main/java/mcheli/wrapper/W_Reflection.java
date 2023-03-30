@@ -20,6 +20,8 @@
 package mcheli.wrapper;
 
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
+import java.util.List;
+import java.util.Queue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.client.renderer.EntityRenderer;
@@ -33,9 +35,6 @@ import net.minecraft.network.NetworkSystem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
-
-import java.util.List;
-import java.util.Queue;
 
 public class W_Reflection {
 

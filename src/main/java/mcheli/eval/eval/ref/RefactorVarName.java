@@ -1,5 +1,7 @@
 package mcheli.eval.eval.ref;
 
+import mcheli.eval.eval.ref.RefactorAdapter;
+
 public class RefactorVarName extends RefactorAdapter {
 
    protected Class targetClass;

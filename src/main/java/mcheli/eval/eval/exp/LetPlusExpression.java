@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.PlusExpression;
+import mcheli.eval.eval.exp.ShareExpValue;
+
 public class LetPlusExpression extends PlusExpression {
 
    public LetPlusExpression() {

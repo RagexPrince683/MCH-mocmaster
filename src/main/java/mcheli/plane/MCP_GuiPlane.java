@@ -8,6 +8,8 @@ import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_AircraftCommonGui;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.gui.MCH_Gui;
+import mcheli.plane.MCP_EntityPlane;
+import mcheli.plane.MCP_PlaneInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.input.Keyboard;
@@ -30,9 +32,7 @@ public class MCP_GuiPlane extends MCH_AircraftCommonGui {
          MCP_EntityPlane plane = (MCP_EntityPlane)ac;
          int seatID = ac.getSeatIdByEntity(player);
          GL11.glLineWidth((float)MCH_Gui.scaleFactor);
-         
          if(plane.getCameraMode(player) == 1) {
-             Minecraft.getMinecraft().gameSettings.hideGUI = false;
             this.drawNightVisionNoise();
          }
 

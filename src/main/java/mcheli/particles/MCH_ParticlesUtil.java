@@ -1,18 +1,48 @@
 package mcheli.particles;
 
-import com.hbm.particle.ParticleRocketFlame;
 import cpw.mods.fml.client.FMLClientHandler;
+import mcheli.particles.MCH_EntityBlockDustFX;
+import mcheli.particles.MCH_EntityParticleBase;
+import mcheli.particles.MCH_EntityParticleExplode;
+import mcheli.particles.MCH_EntityParticleMarkPoint;
+import mcheli.particles.MCH_EntityParticleSmoke;
+import mcheli.particles.MCH_EntityParticleSplash;
+import mcheli.particles.MCH_ParticleParam;
 import mcheli.wrapper.W_Particle;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.*;
+import net.minecraft.client.particle.EntityAuraFX;
+import net.minecraft.client.particle.EntityBreakingFX;
+import net.minecraft.client.particle.EntityBubbleFX;
+import net.minecraft.client.particle.EntityCloudFX;
+import net.minecraft.client.particle.EntityCritFX;
+import net.minecraft.client.particle.EntityDiggingFX;
+import net.minecraft.client.particle.EntityDropParticleFX;
+import net.minecraft.client.particle.EntityEnchantmentTableParticleFX;
+import net.minecraft.client.particle.EntityExplodeFX;
+import net.minecraft.client.particle.EntityFX;
+import net.minecraft.client.particle.EntityFireworkSparkFX;
+import net.minecraft.client.particle.EntityFishWakeFX;
+import net.minecraft.client.particle.EntityFlameFX;
+import net.minecraft.client.particle.EntityFootStepFX;
+import net.minecraft.client.particle.EntityHeartFX;
+import net.minecraft.client.particle.EntityHugeExplodeFX;
+import net.minecraft.client.particle.EntityLargeExplodeFX;
+import net.minecraft.client.particle.EntityLavaFX;
+import net.minecraft.client.particle.EntityNoteFX;
+import net.minecraft.client.particle.EntityPortalFX;
+import net.minecraft.client.particle.EntityReddustFX;
+import net.minecraft.client.particle.EntitySmokeFX;
+import net.minecraft.client.particle.EntitySnowShovelFX;
+import net.minecraft.client.particle.EntitySpellParticleFX;
+import net.minecraft.client.particle.EntitySplashFX;
+import net.minecraft.client.particle.EntitySuspendFX;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
-import zmaster587.advancedRocketry.entity.fx.RocketFx;
 
 public class MCH_ParticlesUtil {
 
@@ -27,59 +57,13 @@ public class MCH_ParticlesUtil {
       FMLClientHandler.instance().getClient().effectRenderer.addEffect(epe);
    }
 
-   public static void spawnParticleExplodeLarge(World w, double x, double y, double z, float size, float r, float g, float b, float a, int age) {
-      MCH_EntityParticleExplodeLarge epe = new MCH_EntityParticleExplodeLarge(w, x, y, z, (double)size, (double)age, 0.0D);
-      epe.setParticleMaxAge(age);
-      epe.setRBGColorF(r, g, b);
-      epe.setAlphaF(a);
-      FMLClientHandler.instance().getClient().effectRenderer.addEffect(epe);
-   }
-
-   public static void spawnParticleDarkSmoke(World w, double x, double y, double z, float size, float r, float g, float b, float a, int age) {
-      MCH_EntityParticleDarkSmoke epe = new MCH_EntityParticleDarkSmoke(w, x, y, z, size, age, 0.0D);
-      epe.setRBGColorF(r, g, b);
-      epe.setAlphaF(a);
-      FMLClientHandler.instance().getClient().effectRenderer.addEffect(epe);
-   }
-
-
-      public static void spawnParticleTileCrack(World w, int blockX, int blockY, int blockZ, double x, double y, double z, double mx, double my, double mz) {
+   public static void spawnParticleTileCrack(World w, int blockX, int blockY, int blockZ, double x, double y, double z, double mx, double my, double mz) {
       String name = W_Particle.getParticleTileCrackName(w, blockX, blockY, blockZ);
       if(!name.isEmpty()) {
          DEF_spawnParticle(name, x, y, z, mx, my, mz, 20.0F);
       }
 
    }
-
-   public static void spawnParticleRocketFx(World w, double x, double y, double z, double motx, double moty, double motz, float size){
-      RocketFx fx = new RocketFx(w, x, y, z, motx, moty, motz, size);
-      FMLClientHandler.instance().getClient().effectRenderer.addEffect(fx);
-   }
-
-   public static void spawnParticleRocketFlame(World w, double x, double y, double z, float size) {
-      ParticleRocketFlame fx = new ParticleRocketFlame(Minecraft.getMinecraft().renderEngine, w, x + w.rand.nextGaussian() * size /2 , y, z + w.rand.nextGaussian() * size / 2);
-      fx.motionY = 0.75 + w.rand.nextDouble() * 0.5;
-      FMLClientHandler.instance().getClient().effectRenderer.addEffect(fx);
-   }
-
-   public static void spawnParticleRocketSmoke(World w, double x, double y, double z, double motx, double moty, double motz, float size){
-      MCH_EntityParticleRocket fx = new MCH_EntityParticleRocket(w, x, y, z, motx, moty, motz, size);
-      FMLClientHandler.instance().getClient().effectRenderer.addEffect(fx);
-   }
-
-   public static void spawnParticleFlame(World world, double x, double y, double z, double size, int age, boolean onGround) {
-      MCH_EntityParticleFlame epe = new MCH_EntityParticleFlame(world, x, y , z, size, (double)age, 0.0D);
-      epe.nowCount = age - 11;
-      epe.setParticleMaxAge(age);
-      epe.setRBGColorF(100, 100, 100);
-      epe.setAlphaF(100);
-      if(onGround) {
-         epe.setVelocity(0, 0.05, 0);
-      }
-      FMLClientHandler.instance().getClient().effectRenderer.addEffect(epe);
-   }
-
-
 
    public static boolean spawnParticleTileDust(World w, int blockX, int blockY, int blockZ, double x, double y, double z, double mx, double my, double mz, float scale) {
       boolean ret = false;
@@ -110,7 +94,7 @@ public class MCH_ParticlesUtil {
       return e;
    }
 
-   public static EntityFX doSpawnParticle(String name, double x, double y, double z, double p_72726_8_, double p_72726_10_, double p_72726_12_) {
+   public static EntityFX doSpawnParticle(String p_72726_1_, double p_72726_2_, double p_72726_4_, double p_72726_6_, double p_72726_8_, double p_72726_10_, double p_72726_12_) {
       Minecraft mc = Minecraft.getMinecraft();
       RenderGlobal renderGlobal = mc.renderGlobal;
       if(mc != null && mc.renderViewEntity != null && mc.effectRenderer != null) {
@@ -119,26 +103,16 @@ public class MCH_ParticlesUtil {
             i = 2;
          }
 
-         double d6 = mc.renderViewEntity.posX - x;
-         double d7 = mc.renderViewEntity.posY - y;
-         double d8 = mc.renderViewEntity.posZ - z;
+         double d6 = mc.renderViewEntity.posX - p_72726_2_;
+         double d7 = mc.renderViewEntity.posY - p_72726_4_;
+         double d8 = mc.renderViewEntity.posZ - p_72726_6_;
          Object entityfx = null;
-         if(name.equalsIgnoreCase("hugeexplosion")) {
-        	 spawnParticleExplode(mc.theWorld, x, y, z, 10, 0, 0, 0, 0, 10);
-        	 //mc.effectRenderer.addEffect((EntityFX) (entityfx = new EntityHugeExplodeFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_)));
-         } else if(name.equalsIgnoreCase("largeexplode")) {
-        	 spawnParticleExplodeLarge(mc.theWorld, x, y, z, 10, 0, 0, 0, 0, 10);
-
-            mc.effectRenderer.addEffect((EntityFX) (entityfx = new EntityLargeExplodeFX(mc.renderEngine, mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_)));
-         } else if(name.equalsIgnoreCase("fireworksSpark")) {
-            mc.effectRenderer.addEffect((EntityFX) (entityfx = new EntityFireworkSparkFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_, mc.effectRenderer)));
-         } else if(name.equalsIgnoreCase("darksmoke")) {
-            MCH_EntityParticleDarkSmoke epe = new MCH_EntityParticleDarkSmoke(mc.theWorld, x, y, z, 1, (int)(8.0D / (Math.random() * 0.8D + 0.3D) * 2.5*2), 0.0D);
-            epe.setRBGColorF(100, 100, 100);
-            epe.setAlphaF(100);
-            FMLClientHandler.instance().getClient().effectRenderer.addEffect(epe);
-         }else if(name.equalsIgnoreCase("rocket")){
-            spawnParticleRocketSmoke(mc.theWorld, x, y, z, 0, 0, 0, 1);
+         if(p_72726_1_.equalsIgnoreCase("hugeexplosion")) {
+            mc.effectRenderer.addEffect((EntityFX) (entityfx = new EntityHugeExplodeFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_)));
+         } else if(p_72726_1_.equalsIgnoreCase("largeexplode")) {
+            mc.effectRenderer.addEffect((EntityFX) (entityfx = new EntityLargeExplodeFX(mc.renderEngine, mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_)));
+         } else if(p_72726_1_.equalsIgnoreCase("fireworksSpark")) {
+            mc.effectRenderer.addEffect((EntityFX) (entityfx = new EntityFireworkSparkFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_, mc.effectRenderer)));
          }
 
          if(entityfx != null) {
@@ -150,108 +124,107 @@ public class MCH_ParticlesUtil {
             } else if(i > 1) {
                return null;
             } else {
-
-               if(name.equalsIgnoreCase("bubble")) {
-                  entityfx = new EntityBubbleFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("suspended")) {
-                  entityfx = new EntitySuspendFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("depthsuspend")) {
-                  entityfx = new EntityAuraFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("townaura")) {
-                  entityfx = new EntityAuraFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("crit")) {
-                  entityfx = new EntityCritFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("magicCrit")) {
-                  entityfx = new EntityCritFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
+               if(p_72726_1_.equalsIgnoreCase("bubble")) {
+                  entityfx = new EntityBubbleFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("suspended")) {
+                  entityfx = new EntitySuspendFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("depthsuspend")) {
+                  entityfx = new EntityAuraFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("townaura")) {
+                  entityfx = new EntityAuraFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("crit")) {
+                  entityfx = new EntityCritFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("magicCrit")) {
+                  entityfx = new EntityCritFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
                   ((EntityFX)entityfx).setRBGColorF(((EntityFX)entityfx).getRedColorF() * 0.3F, ((EntityFX)entityfx).getGreenColorF() * 0.8F, ((EntityFX)entityfx).getBlueColorF());
                   ((EntityFX)entityfx).nextTextureIndexX();
-               } else if(name.equalsIgnoreCase("smoke")) {
-                  entityfx = new EntitySmokeFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("mobSpell")) {
-                  entityfx = new EntitySpellParticleFX(mc.theWorld, x, y, z, 0.0D, 0.0D, 0.0D);
+               } else if(p_72726_1_.equalsIgnoreCase("smoke")) {
+                  entityfx = new EntitySmokeFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("mobSpell")) {
+                  entityfx = new EntitySpellParticleFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, 0.0D, 0.0D, 0.0D);
                   ((EntityFX)entityfx).setRBGColorF((float)p_72726_8_, (float)p_72726_10_, (float)p_72726_12_);
-               } else if(name.equalsIgnoreCase("mobSpellAmbient")) {
-                  entityfx = new EntitySpellParticleFX(mc.theWorld, x, y, z, 0.0D, 0.0D, 0.0D);
+               } else if(p_72726_1_.equalsIgnoreCase("mobSpellAmbient")) {
+                  entityfx = new EntitySpellParticleFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, 0.0D, 0.0D, 0.0D);
                   ((EntityFX)entityfx).setAlphaF(0.15F);
                   ((EntityFX)entityfx).setRBGColorF((float)p_72726_8_, (float)p_72726_10_, (float)p_72726_12_);
-               } else if(name.equalsIgnoreCase("spell")) {
-                  entityfx = new EntitySpellParticleFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("instantSpell")) {
-                  entityfx = new EntitySpellParticleFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("spell")) {
+                  entityfx = new EntitySpellParticleFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("instantSpell")) {
+                  entityfx = new EntitySpellParticleFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
                   ((EntitySpellParticleFX)entityfx).setBaseSpellTextureIndex(144);
-               } else if(name.equalsIgnoreCase("witchMagic")) {
-                  entityfx = new EntitySpellParticleFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("witchMagic")) {
+                  entityfx = new EntitySpellParticleFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
                   ((EntitySpellParticleFX)entityfx).setBaseSpellTextureIndex(144);
                   float k = mc.theWorld.rand.nextFloat() * 0.5F + 0.35F;
                   ((EntityFX)entityfx).setRBGColorF(1.0F * k, 0.0F * k, 1.0F * k);
-               } else if(name.equalsIgnoreCase("note")) {
-                  entityfx = new EntityNoteFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("portal")) {
-                  entityfx = new EntityPortalFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("enchantmenttable")) {
-                  entityfx = new EntityEnchantmentTableParticleFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("explode")) {
-                  entityfx = new EntityExplodeFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("flame")) {
-                  entityfx = new EntityFlameFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("lava")) {
-                  entityfx = new EntityLavaFX(mc.theWorld, x, y, z);
-               } else if(name.equalsIgnoreCase("footstep")) {
-                  entityfx = new EntityFootStepFX(mc.renderEngine, mc.theWorld, x, y, z);
-               } else if(name.equalsIgnoreCase("splash")) {
-                  entityfx = new EntitySplashFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("wake")) {
-                  entityfx = new EntityFishWakeFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("largesmoke")) {
-                  entityfx = new EntitySmokeFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_, 2.5F);
-               } else if(name.equalsIgnoreCase("cloud")) {
-                  entityfx = new EntityCloudFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("reddust")) {
-                  entityfx = new EntityReddustFX(mc.theWorld, x, y, z, (float)p_72726_8_, (float)p_72726_10_, (float)p_72726_12_);
-               } else if(name.equalsIgnoreCase("snowballpoof")) {
-                  entityfx = new EntityBreakingFX(mc.theWorld, x, y, z, Items.snowball);
-               } else if(name.equalsIgnoreCase("dripWater")) {
-                  entityfx = new EntityDropParticleFX(mc.theWorld, x, y, z, Material.water);
-               } else if(name.equalsIgnoreCase("dripLava")) {
-                  entityfx = new EntityDropParticleFX(mc.theWorld, x, y, z, Material.lava);
-               } else if(name.equalsIgnoreCase("snowshovel")) {
-                  entityfx = new EntitySnowShovelFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("slime")) {
-                  entityfx = new EntityBreakingFX(mc.theWorld, x, y, z, Items.slime_ball);
-               } else if(name.equalsIgnoreCase("heart")) {
-                  entityfx = new EntityHeartFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
-               } else if(name.equalsIgnoreCase("angryVillager")) {
-                  entityfx = new EntityHeartFX(mc.theWorld, x, y + 0.5D, z, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("note")) {
+                  entityfx = new EntityNoteFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("portal")) {
+                  entityfx = new EntityPortalFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("enchantmenttable")) {
+                  entityfx = new EntityEnchantmentTableParticleFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("explode")) {
+                  entityfx = new EntityExplodeFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("flame")) {
+                  entityfx = new EntityFlameFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("lava")) {
+                  entityfx = new EntityLavaFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_);
+               } else if(p_72726_1_.equalsIgnoreCase("footstep")) {
+                  entityfx = new EntityFootStepFX(mc.renderEngine, mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_);
+               } else if(p_72726_1_.equalsIgnoreCase("splash")) {
+                  entityfx = new EntitySplashFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("wake")) {
+                  entityfx = new EntityFishWakeFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("largesmoke")) {
+                  entityfx = new EntitySmokeFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_, 2.5F);
+               } else if(p_72726_1_.equalsIgnoreCase("cloud")) {
+                  entityfx = new EntityCloudFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("reddust")) {
+                  entityfx = new EntityReddustFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, (float)p_72726_8_, (float)p_72726_10_, (float)p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("snowballpoof")) {
+                  entityfx = new EntityBreakingFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, Items.snowball);
+               } else if(p_72726_1_.equalsIgnoreCase("dripWater")) {
+                  entityfx = new EntityDropParticleFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, Material.water);
+               } else if(p_72726_1_.equalsIgnoreCase("dripLava")) {
+                  entityfx = new EntityDropParticleFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, Material.lava);
+               } else if(p_72726_1_.equalsIgnoreCase("snowshovel")) {
+                  entityfx = new EntitySnowShovelFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("slime")) {
+                  entityfx = new EntityBreakingFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, Items.slime_ball);
+               } else if(p_72726_1_.equalsIgnoreCase("heart")) {
+                  entityfx = new EntityHeartFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("angryVillager")) {
+                  entityfx = new EntityHeartFX(mc.theWorld, p_72726_2_, p_72726_4_ + 0.5D, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
                   ((EntityFX)entityfx).setParticleTextureIndex(81);
                   ((EntityFX)entityfx).setRBGColorF(1.0F, 1.0F, 1.0F);
-               } else if(name.equalsIgnoreCase("happyVillager")) {
-                  entityfx = new EntityAuraFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_);
+               } else if(p_72726_1_.equalsIgnoreCase("happyVillager")) {
+                  entityfx = new EntityAuraFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_);
                   ((EntityFX)entityfx).setParticleTextureIndex(82);
                   ((EntityFX)entityfx).setRBGColorF(1.0F, 1.0F, 1.0F);
                } else {
                   String[] astring;
                   int k1;
-                  if(name.startsWith("iconcrack_")) {
-                     astring = name.split("_", 3);
+                  if(p_72726_1_.startsWith("iconcrack_")) {
+                     astring = p_72726_1_.split("_", 3);
                      int block = Integer.parseInt(astring[1]);
                      if(astring.length > 2) {
                         k1 = Integer.parseInt(astring[2]);
-                        entityfx = new EntityBreakingFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_, Item.getItemById(block), k1);
+                        entityfx = new EntityBreakingFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_, Item.getItemById(block), k1);
                      } else {
-                        entityfx = new EntityBreakingFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_, Item.getItemById(block), 0);
+                        entityfx = new EntityBreakingFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_, Item.getItemById(block), 0);
                      }
                   } else {
                      Block block1;
-                     if(name.startsWith("blockcrack_")) {
-                        astring = name.split("_", 3);
+                     if(p_72726_1_.startsWith("blockcrack_")) {
+                        astring = p_72726_1_.split("_", 3);
                         block1 = Block.getBlockById(Integer.parseInt(astring[1]));
                         k1 = Integer.parseInt(astring[2]);
-                        entityfx = (new EntityDiggingFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_, block1, k1)).applyRenderColor(k1);
-                     } else if(name.startsWith("blockdust_")) {
-                        astring = name.split("_", 3);
+                        entityfx = (new EntityDiggingFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_, block1, k1)).applyRenderColor(k1);
+                     } else if(p_72726_1_.startsWith("blockdust_")) {
+                        astring = p_72726_1_.split("_", 3);
                         block1 = Block.getBlockById(Integer.parseInt(astring[1]));
                         k1 = Integer.parseInt(astring[2]);
-                        entityfx = (new MCH_EntityBlockDustFX(mc.theWorld, x, y, z, p_72726_8_, p_72726_10_, p_72726_12_, block1, k1)).applyRenderColor(k1);
+                        entityfx = (new MCH_EntityBlockDustFX(mc.theWorld, p_72726_2_, p_72726_4_, p_72726_6_, p_72726_8_, p_72726_10_, p_72726_12_, block1, k1)).applyRenderColor(k1);
                      }
                   }
                }

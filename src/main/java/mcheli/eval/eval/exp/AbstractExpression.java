@@ -1,8 +1,8 @@
 package mcheli.eval.eval.exp;
 
-import mcheli.eval.eval.EvalException;
-
 import java.util.List;
+import mcheli.eval.eval.EvalException;
+import mcheli.eval.eval.exp.ShareExpValue;
 
 public abstract class AbstractExpression {
 

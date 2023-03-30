@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.MinusExpression;
+import mcheli.eval.eval.exp.ShareExpValue;
+
 public class LetMinusExpression extends MinusExpression {
 
    public LetMinusExpression() {

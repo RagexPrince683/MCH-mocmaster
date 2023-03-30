@@ -1,5 +1,7 @@
 package mcheli.weapon;
 
+import java.util.ArrayList;
+import java.util.List;
 import mcheli.MCH_BaseInfo;
 import mcheli.MCH_Color;
 import mcheli.MCH_DamageFactor;
@@ -7,14 +9,14 @@ import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.vehicle.MCH_EntityVehicle;
+import mcheli.weapon.MCH_BulletModel;
+import mcheli.weapon.MCH_Cartridge;
+import mcheli.weapon.MCH_SightType;
 import mcheli.wrapper.W_Item;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MCH_WeaponInfo extends MCH_BaseInfo {
 
@@ -30,8 +32,6 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
    public int explosionBlock;
    public int explosionInWater;
    public int explosionAltitude;
-
-   public int impactFuze;
    public int delayFuse;
    public float bound;
    public int timeFuse;
@@ -100,7 +100,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
    public String group;
    public List listMuzzleFlash;
    public List listMuzzleFlashSmoke;
-   public int stabilizer = 100;
+
 
    public MCH_WeaponInfo(String name) {
       this.name = name;
@@ -232,9 +232,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
          }
       } else if(item.compareTo("group") == 0) {
          this.group = data.toLowerCase().trim();
-      } else if(item.compareTo("stabilizer") == 0) {
-          this.stabilizer = this.toInt(data);
-      }else if(item.compareTo("power") == 0) {
+      } else if(item.compareTo("power") == 0) {
          this.power = this.toInt(data);
       } else if(item.equalsIgnoreCase("sound")) {
          this.soundFileName = data.toLowerCase().trim();
@@ -260,9 +258,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
          this.timeFuse = this.toInt(data, 0, 100000);
       } else if(item.equalsIgnoreCase("DelayFuse")) {
          this.delayFuse = this.toInt(data, 0, 100000);
-      }  else if(item.equalsIgnoreCase("ImpactFuze")) {
-         this.impactFuze = this.toInt(data, 0, 100000);
-      }else if(item.equalsIgnoreCase("Bound")) {
+      } else if(item.equalsIgnoreCase("Bound")) {
          this.bound = this.toFloat(data, 0.0F, 100000.0F);
       } else if(item.compareTo("flaming") == 0) {
          this.flaming = this.toBool(data);
@@ -297,7 +293,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
             this.delay = this.toInt(data, 0, 100000);
          } else if(item.equalsIgnoreCase("nukeYield")) {
             this.nukeYield = this.toInt(data, 0, 100000);
-         }else if(item.equalsIgnoreCase("chemYield")) {
+         } else if(item.equalsIgnoreCase("chemYield")) {
             this.chemYield = this.toInt(data, 0, 100000);
          } else if(item.compareTo("reloadtime") == 0) {
             this.reloadTime = this.toInt(data, 3, 1000);
@@ -313,7 +309,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
                c = this.toInt(s[0], 1, 64);
                if(c > 0) {
                   int className = s.length >= 3?this.toInt(s[2], 0, 100000000):0;
-                  this.roundItems.add(new MCH_WeaponInfo.RoundItem(c, s[1].trim(), className));
+                  this.roundItems.add(new MCH_WeaponInfo.RoundItem(c, s[1].toLowerCase().trim(), className));
                }
             }
          } else if(item.compareTo("sounddelay") == 0) {

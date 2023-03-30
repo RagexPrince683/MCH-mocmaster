@@ -7,13 +7,14 @@ import mcheli.MCH_KeyName;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.gui.MCH_Gui;
+import mcheli.tool.rangefinder.MCH_ItemRangeFinder;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)

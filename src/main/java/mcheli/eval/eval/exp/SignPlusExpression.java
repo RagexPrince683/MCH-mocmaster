@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.Col1Expression;
+import mcheli.eval.eval.exp.ShareExpValue;
+
 public class SignPlusExpression extends Col1Expression {
 
    public SignPlusExpression() {

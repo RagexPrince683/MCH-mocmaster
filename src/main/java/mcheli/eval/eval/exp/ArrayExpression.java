@@ -1,6 +1,9 @@
 package mcheli.eval.eval.exp;
 
 import mcheli.eval.eval.EvalException;
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.Col2OpeExpression;
+import mcheli.eval.eval.exp.ShareExpValue;
 
 public class ArrayExpression extends Col2OpeExpression {
 

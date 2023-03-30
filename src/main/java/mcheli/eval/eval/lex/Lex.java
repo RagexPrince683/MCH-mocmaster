@@ -1,10 +1,9 @@
 package mcheli.eval.eval.lex;
 
+import java.util.List;
 import mcheli.eval.eval.exp.AbstractExpression;
 import mcheli.eval.eval.exp.ShareExpValue;
 import mcheli.eval.util.CharUtil;
-
-import java.util.List;
 
 public class Lex {
 

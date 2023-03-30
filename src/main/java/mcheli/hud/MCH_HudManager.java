@@ -1,15 +1,16 @@
 package mcheli.hud;
 
-import mcheli.MCH_InputFile;
-import mcheli.MCH_Lib;
-import net.minecraft.client.Minecraft;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
+import mcheli.MCH_InputFile;
+import mcheli.MCH_Lib;
+import mcheli.hud.MCH_Hud;
+import mcheli.hud.MCH_HudItem;
+import net.minecraft.client.Minecraft;
 
 public class MCH_HudManager {
 

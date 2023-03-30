@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.BitAndExpression;
+import mcheli.eval.eval.exp.ShareExpValue;
+
 public final class LetAndExpression extends BitAndExpression {
 
    public LetAndExpression() {

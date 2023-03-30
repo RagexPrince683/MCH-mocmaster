@@ -2,16 +2,16 @@ package mcheli;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Random;
+import mcheli.MCH_MOD;
 import mcheli.wrapper.W_ModelBase;
 import mcheli.wrapper.W_ResourcePath;
 import mcheli.wrapper.modelloader.W_ModelCustom;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraftforge.client.model.IModelCustom;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Random;
 
 @SideOnly(Side.CLIENT)
 public class MCH_ModelManager extends W_ModelBase {

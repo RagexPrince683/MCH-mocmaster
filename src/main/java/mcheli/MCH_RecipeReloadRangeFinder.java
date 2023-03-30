@@ -1,5 +1,6 @@
 package mcheli;
 
+import mcheli.MCH_MOD;
 import mcheli.tool.rangefinder.MCH_ItemRangeFinder;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemRedstone;

@@ -1,8 +1,27 @@
 package mcheli.aircraft;
 
 import com.google.common.io.ByteArrayDataInput;
+import java.util.List;
+import java.util.UUID;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.aircraft.MCH_PacketIndNotifyAmmoNum;
+import mcheli.aircraft.MCH_PacketIndReload;
+import mcheli.aircraft.MCH_PacketIndRotation;
+import mcheli.aircraft.MCH_PacketNotifyAmmoNum;
+import mcheli.aircraft.MCH_PacketNotifyClientSetting;
+import mcheli.aircraft.MCH_PacketNotifyHitBullet;
+import mcheli.aircraft.MCH_PacketNotifyInfoReloaded;
+import mcheli.aircraft.MCH_PacketNotifyOnMountEntity;
+import mcheli.aircraft.MCH_PacketNotifyTVMissileEntity;
+import mcheli.aircraft.MCH_PacketNotifyWeaponID;
+import mcheli.aircraft.MCH_PacketSeatListRequest;
+import mcheli.aircraft.MCH_PacketSeatListResponse;
+import mcheli.aircraft.MCH_PacketSeatPlayerControl;
+import mcheli.aircraft.MCH_PacketStatusRequest;
+import mcheli.aircraft.MCH_PacketStatusResponse;
 import mcheli.weapon.MCH_EntityTvMissile;
 import mcheli.weapon.MCH_WeaponInfoManager;
 import mcheli.wrapper.W_Entity;
@@ -11,9 +30,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
-
-import java.util.List;
-import java.util.UUID;
 
 public class MCH_AircraftPacketHandler {
 
@@ -321,7 +337,6 @@ public class MCH_AircraftPacketHandler {
             } else if(pc1.parachuting) {
                ac.unmount(player);
             }
-            
 
          }
       }

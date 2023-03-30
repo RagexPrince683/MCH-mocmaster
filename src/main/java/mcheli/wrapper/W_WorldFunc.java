@@ -11,6 +11,8 @@
  */
 package mcheli.wrapper;
 
+import mcheli.wrapper.W_Block;
+import mcheli.wrapper.W_MOD;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;

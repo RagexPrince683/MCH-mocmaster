@@ -2,6 +2,7 @@ package mcheli.weapon;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mcheli.weapon.MCH_EntityCartridge;
 import mcheli.wrapper.W_Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;

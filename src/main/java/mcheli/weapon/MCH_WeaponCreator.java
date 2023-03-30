@@ -1,5 +1,24 @@
 package mcheli.weapon;
 
+import mcheli.weapon.MCH_IEntityLockChecker;
+import mcheli.weapon.MCH_WeaponAAMissile;
+import mcheli.weapon.MCH_WeaponASMissile;
+import mcheli.weapon.MCH_WeaponATMissile;
+import mcheli.weapon.MCH_WeaponBase;
+import mcheli.weapon.MCH_WeaponBomb;
+import mcheli.weapon.MCH_WeaponCAS;
+import mcheli.weapon.MCH_WeaponDispenser;
+import mcheli.weapon.MCH_WeaponDummy;
+import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.weapon.MCH_WeaponInfoManager;
+import mcheli.weapon.MCH_WeaponMachineGun1;
+import mcheli.weapon.MCH_WeaponMachineGun2;
+import mcheli.weapon.MCH_WeaponMarkerRocket;
+import mcheli.weapon.MCH_WeaponRocket;
+import mcheli.weapon.MCH_WeaponSmoke;
+import mcheli.weapon.MCH_WeaponTargetingPod;
+import mcheli.weapon.MCH_WeaponTorpedo;
+import mcheli.weapon.MCH_WeaponTvMissile;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -12,12 +31,7 @@ public class MCH_WeaponCreator {
          if(info.type.compareTo("machinegun1") == 0) {
             weapon = new MCH_WeaponMachineGun1(w, v, yaw, pitch, weaponName, info);
          }
-         if(info.type.compareTo("nuke")==0) {
-        	 weapon = new MCH_WeaponNuke(w, v, yaw, pitch, weaponName, info);
-         }
-         if(info.type.compareTo("ballistic")==0) {
-        	 weapon = new MCH_WeaponBallistic(w, v, yaw, pitch, weaponName, info);
-         }
+
          if(info.type.compareTo("machinegun2") == 0) {
             weapon = new MCH_WeaponMachineGun2(w, v, yaw, pitch, weaponName, info);
          }
@@ -41,23 +55,11 @@ public class MCH_WeaponCreator {
          if(info.type.compareTo("asmissile") == 0) {
             weapon = new MCH_WeaponASMissile(w, v, yaw, pitch, weaponName, info);
          }
-         
-         if(info.type.compareTo("ashm") == 0) {
-             weapon = new MCH_WeaponAShM(w, v, yaw, pitch, weaponName, info);
-          }
-         
-         if(info.type.compareTo("arm") == 0) {
-             weapon = new MCH_WeaponARM(w, v, yaw, pitch, weaponName, info);
-          }
-         
+
          if(info.type.compareTo("aamissile") == 0) {
             weapon = new MCH_WeaponAAMissile(w, v, yaw, pitch, weaponName, info);
          }
 
-         if(info.type.compareTo("irmissile") == 0) {
-             weapon = new MCH_WeaponIRMissile(w, v, yaw, pitch, weaponName, info);
-          }
-         	
          if(info.type.compareTo("atmissile") == 0) {
             weapon = new MCH_WeaponATMissile(w, v, yaw, pitch, weaponName, info);
          }

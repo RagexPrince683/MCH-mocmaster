@@ -1,5 +1,6 @@
 package mcheli.aircraft;
 
+import mcheli.aircraft.MCH_AircraftInfo;
 import net.minecraft.util.Vec3;
 
 public class MCH_SeatInfo {

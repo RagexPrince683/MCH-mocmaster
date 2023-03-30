@@ -1,5 +1,8 @@
 package mcheli.aircraft;
 
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_SeatRackInfo;
+
 public interface MCH_IEntityCanRideAircraft {
 
    boolean isSkipNormalRender();

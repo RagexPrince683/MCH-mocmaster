@@ -3,6 +3,7 @@ package mcheli.tool;
 import mcheli.MCH_ClientTickHandlerBase;
 import mcheli.MCH_Config;
 import mcheli.MCH_Key;
+import mcheli.tool.MCH_ItemWrench;
 import mcheli.tool.rangefinder.MCH_ItemRangeFinder;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_Reflection;

@@ -3,6 +3,8 @@ package mcheli.eval.eval.rule;
 import mcheli.eval.eval.exp.AbstractExpression;
 import mcheli.eval.eval.exp.Col2Expression;
 import mcheli.eval.eval.lex.Lex;
+import mcheli.eval.eval.rule.AbstractRule;
+import mcheli.eval.eval.rule.ShareRuleValue;
 
 public class Col2Rule extends AbstractRule {
 

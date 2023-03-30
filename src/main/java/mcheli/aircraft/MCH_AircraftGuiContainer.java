@@ -1,14 +1,22 @@
 package mcheli.aircraft;
 
+import java.util.List;
 import mcheli.MCH_Lib;
+import mcheli.aircraft.MCH_AircraftInventory;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_ItemFuel;
 import mcheli.parachute.MCH_ItemParachute;
 import mcheli.uav.MCH_EntityUavStation;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.IFluidContainerItem;
+import net.minecraft.world.World;
 
 public class MCH_AircraftGuiContainer
 extends Container {
@@ -124,7 +132,7 @@ extends Container {
             MCH_AircraftInventory iv = this.aircraft.getGuiInventory();
             for (i = 0; i < 3; ++i) {
                 is = iv.getFuelSlotItemStack(i);
-                if (is == null || is.getItem() instanceof IFluidContainerItem) continue;
+                if (is == null || is.getItem() instanceof MCH_ItemFuel) continue;
                 iv.getClass();
                 this.dropPlayerItem(player, 0 + i);
             }

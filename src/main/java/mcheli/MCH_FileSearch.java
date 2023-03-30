@@ -25,7 +25,7 @@ public class MCH_FileSearch {
    public File[] listFiles(String directoryPath, String fileNamePattern, int type, boolean isRecursive, int period) {
       File dir = new File(directoryPath);
       if(!dir.isDirectory()) {
-         throw new IllegalArgumentException("[" + dir.getAbsolutePath() + "]");
+         throw new IllegalArgumentException("引数で指定されたパス[" + dir.getAbsolutePath() + "]はディレクトリではありません。");
       } else {
          File[] files = dir.listFiles();
 

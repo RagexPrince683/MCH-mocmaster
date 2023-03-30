@@ -1,11 +1,11 @@
 package mcheli.wrapper.modelloader;
 
+import java.net.URL;
+import mcheli.wrapper.modelloader.W_WavefrontObject;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.IModelCustom;
 import net.minecraftforge.client.model.IModelCustomLoader;
 import net.minecraftforge.client.model.ModelFormatException;
-
-import java.net.URL;
 
 public class W_ObjModelLoader implements IModelCustomLoader {
 

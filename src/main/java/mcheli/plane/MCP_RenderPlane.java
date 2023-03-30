@@ -2,15 +2,16 @@ package mcheli.plane;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.Iterator;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.plane.MCP_EntityPlane;
+import mcheli.plane.MCP_PlaneInfo;
 import mcheli.wrapper.W_Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
-
-import java.util.Iterator;
 
 @SideOnly(Side.CLIENT)
 public class MCP_RenderPlane extends MCH_RenderAircraft {
@@ -21,13 +22,10 @@ public class MCP_RenderPlane extends MCH_RenderAircraft {
 
    public void renderAircraft(MCH_EntityAircraft entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
       MCP_PlaneInfo planeInfo = null;
-      
       if(entity != null && entity instanceof MCP_EntityPlane) {
          MCP_EntityPlane plane = (MCP_EntityPlane)entity;
          planeInfo = plane.getPlaneInfo();
          if(planeInfo != null) {
-        	 
-        	 
             this.renderDebugHitBox(plane, posX, posY, posZ, yaw, pitch);
             this.renderDebugPilotSeat(plane, posX, posY, posZ, yaw, pitch, roll);
             GL11.glTranslated(posX, posY, posZ);
@@ -46,10 +44,7 @@ public class MCP_RenderPlane extends MCH_RenderAircraft {
             if(planeInfo.haveRotor() && plane.partNozzle != null) {
                this.renderRotor(plane, planeInfo, tickTime);
             }
-            //for(MCH_RadarContact contact : plane.contacts) {
-            	//System.out.println("yeet yeet fucko");
-            	//MCH_RenderAircraft.renderRadarMarker(contact.x, contact.y, contact.z, contact.width, contact.height);
-            //}
+
             renderBody(planeInfo.model);
          }
       }

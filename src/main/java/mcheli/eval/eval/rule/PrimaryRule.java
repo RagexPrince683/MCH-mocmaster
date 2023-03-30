@@ -1,8 +1,15 @@
 package mcheli.eval.eval.rule;
 
 import mcheli.eval.eval.EvalException;
-import mcheli.eval.eval.exp.*;
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.CharExpression;
+import mcheli.eval.eval.exp.Col1Expression;
+import mcheli.eval.eval.exp.NumberExpression;
+import mcheli.eval.eval.exp.StringExpression;
+import mcheli.eval.eval.exp.VariableExpression;
 import mcheli.eval.eval.lex.Lex;
+import mcheli.eval.eval.rule.AbstractRule;
+import mcheli.eval.eval.rule.ShareRuleValue;
 
 public class PrimaryRule extends AbstractRule {
 

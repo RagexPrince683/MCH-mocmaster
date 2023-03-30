@@ -9,6 +9,8 @@ import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_AircraftCommonGui;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.gui.MCH_Gui;
+import mcheli.helicopter.MCH_EntityHeli;
+import mcheli.helicopter.MCH_HeliInfo;
 import mcheli.weapon.MCH_EntityTvMissile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,7 +35,6 @@ public class MCH_GuiHeli extends MCH_AircraftCommonGui {
          int seatID = ac.getSeatIdByEntity(player);
          GL11.glLineWidth((float)MCH_Gui.scaleFactor);
          if(heli.getCameraMode(player) == 1) {
-            Minecraft.getMinecraft().gameSettings.hideGUI = false;
             this.drawNightVisionNoise();
          }
 

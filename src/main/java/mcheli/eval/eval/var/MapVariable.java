@@ -4,6 +4,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import mcheli.eval.eval.var.Variable;
 
 public class MapVariable implements Variable {
 

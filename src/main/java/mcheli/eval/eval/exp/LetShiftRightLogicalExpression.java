@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.ShareExpValue;
+import mcheli.eval.eval.exp.ShiftRightLogicalExpression;
+
 public class LetShiftRightLogicalExpression extends ShiftRightLogicalExpression {
 
    public LetShiftRightLogicalExpression() {

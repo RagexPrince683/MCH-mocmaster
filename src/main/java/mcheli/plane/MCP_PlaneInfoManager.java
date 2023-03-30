@@ -1,13 +1,13 @@
 package mcheli.plane;
 
-import mcheli.MCH_BaseInfo;
-import mcheli.aircraft.MCH_AircraftInfoManager;
-import net.minecraft.item.Item;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import mcheli.MCH_BaseInfo;
+import mcheli.aircraft.MCH_AircraftInfoManager;
+import mcheli.plane.MCP_PlaneInfo;
+import net.minecraft.item.Item;
 
 public class MCP_PlaneInfoManager extends MCH_AircraftInfoManager {
 

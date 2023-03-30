@@ -83,8 +83,48 @@ public class EvalException extends RuntimeException {
    }
 
    public static String getErrCodeMessage(int code) {
-
-      return "shits fucked bruh sry";
+      switch(code) {
+      case 1001:
+         return "演算子「%0」が在りません。";
+      case 1002:
+         return "演算子の文法エラーです。";
+      case 1003:
+         return "未対応の識別子です。";
+      case 1004:
+         return "式の解釈の途中で文字列が終了しています。";
+      case 1005:
+         return "式の解釈が終わりましたが文字列が残っています。";
+      case 1101:
+         return "関数として使用できません。";
+      case 2001:
+         return "禁止されているメソッドを呼び出しました。";
+      case 2002:
+         return "変数として使用できません。";
+      case 2003:
+         return "数値として使用できません。";
+      case 2004:
+         return "代入できません。";
+      case 2101:
+         return "変数の値が取得できません。";
+      case 2102:
+         return "変数に代入できません。";
+      case 2103:
+         return "変数が未定義です。";
+      case 2104:
+         return "オブジェクトが未定義です。";
+      case 2201:
+         return "配列の値が取得できません。";
+      case 2202:
+         return "配列に代入できません。";
+      case 2301:
+         return "フィールドの値が取得できません。";
+      case 2302:
+         return "フィールドに代入できません。";
+      case 2401:
+         return "関数の呼び出しに失敗しました。";
+      default:
+         return "エラーが発生しました。";
+      }
    }
 
    public String getDefaultFormat(String msgFmt) {
@@ -99,7 +139,7 @@ public class EvalException extends RuntimeException {
       }
 
       if(bWord) {
-         fmt.append(" word=%w");
+         fmt.append(" word=「%w」");
       }
 
       if(this.pos >= 0) {
@@ -107,7 +147,7 @@ public class EvalException extends RuntimeException {
       }
 
       if(this.string != null) {
-         fmt.append(" string=%s");
+         fmt.append(" string=「%s」");
       }
 
       if(this.getCause() != null) {

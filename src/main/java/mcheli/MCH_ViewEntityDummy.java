@@ -1,5 +1,6 @@
 package mcheli;
 
+import mcheli.MCH_Camera;
 import mcheli.wrapper.W_Session;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;

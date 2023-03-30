@@ -2,6 +2,7 @@ package mcheli.hud;
 
 import mcheli.MCH_Camera;
 import mcheli.MCH_Lib;
+import mcheli.hud.MCH_HudItem;
 import net.minecraft.entity.Entity;
 
 public class MCH_HudItemCameraRot extends MCH_HudItem {

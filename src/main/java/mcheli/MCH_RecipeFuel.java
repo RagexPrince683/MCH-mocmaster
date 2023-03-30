@@ -1,5 +1,6 @@
 package mcheli;
 
+import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_ItemFuel;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemCoal;

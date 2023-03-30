@@ -1,24 +1,27 @@
 package mcheli.weapon;
 
+import mcheli.weapon.MCH_IEntityLockChecker;
+import mcheli.weapon.MCH_WeaponBase;
+import mcheli.weapon.MCH_WeaponGuidanceSystem;
+import mcheli.weapon.MCH_WeaponInfo;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public abstract class MCH_WeaponEntitySeeker extends MCH_WeaponBase {
 
    public MCH_IEntityLockChecker entityLockChecker;
-   public MCH_GuidanceSystem guidanceSystem;
+   public MCH_WeaponGuidanceSystem guidanceSystem;
 
 
    public MCH_WeaponEntitySeeker(World w, Vec3 v, float yaw, float pitch, String nm, MCH_WeaponInfo wi) {
       super(w, v, yaw, pitch, nm, wi);
-      this.guidanceSystem = new MCH_RadarGuidanceSystem(w);
-      this.guidanceSystem.lockRange = guidanceSystem.lockRange = wi.radius;
+      this.guidanceSystem = new MCH_WeaponGuidanceSystem(w);
+      this.guidanceSystem.lockRange = 200.0D;
       this.guidanceSystem.lockAngle = 5;
       this.guidanceSystem.setLockCountMax(25);
    }
 
-   
-   public MCH_GuidanceSystem getGuidanceSystem() {
+   public MCH_WeaponGuidanceSystem getGuidanceSystem() {
       return this.guidanceSystem;
    }
 

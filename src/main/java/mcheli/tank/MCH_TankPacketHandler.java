@@ -2,6 +2,8 @@ package mcheli.tank;
 
 import com.google.common.io.ByteArrayDataInput;
 import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.tank.MCH_EntityTank;
+import mcheli.tank.MCH_TankPacketPlayerControl;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.weapon.MCH_WeaponParam;
 import net.minecraft.entity.player.EntityPlayer;

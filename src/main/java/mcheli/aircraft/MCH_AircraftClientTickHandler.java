@@ -1,12 +1,17 @@
 package mcheli.aircraft;
 
-import mcheli.*;
-import mcheli.weapon.MCH_WeaponSet;
+import mcheli.MCH_ClientTickHandlerBase;
+import mcheli.MCH_Config;
+import mcheli.MCH_Key;
+import mcheli.MCH_MOD;
+import mcheli.MCH_PacketIndOpenScreen;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_PacketPlayerControlBase;
+import mcheli.aircraft.MCH_PacketSeatPlayerControl;
 import mcheli.wrapper.W_Network;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ChatComponentText;
 import org.lwjgl.input.Keyboard;
 
 public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandlerBase {
@@ -32,16 +37,8 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
    public MCH_Key KeyPutToRack;
    public MCH_Key KeyDownFromRack;
    public MCH_Key KeyBrake;
-   public MCH_Key KeyThrottleUp;
-   public MCH_Key KeyThrottleDown;
-   public MCH_Key tdcUp;
-   public MCH_Key tdcDown;
-   public MCH_Key tdcLeft;
-   public MCH_Key tdcRight;
-   public MCH_Key tdcModeDecr;
-   public MCH_Key tdcModeIncr;
-   public MCH_Key tdcLock;
-   
+
+
    public MCH_AircraftClientTickHandler(Minecraft minecraft, MCH_Config config) {
       super(minecraft);
       this.updateKeybind(config);
@@ -67,18 +64,6 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
       this.KeyPutToRack = new MCH_Key(MCH_Config.KeyPutToRack.prmInt);
       this.KeyDownFromRack = new MCH_Key(MCH_Config.KeyDownFromRack.prmInt);
       this.KeyBrake = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
-      
-      this.KeyThrottleDown = new MCH_Key(MCH_Config.KeyThrottleDown.prmInt);
-      this.KeyThrottleUp = new MCH_Key(MCH_Config.KeyThrottleUp.prmInt);
-      
-      
-      this.tdcUp = new MCH_Key(MCH_Config.KeyTDCUp.prmInt);
-      this.tdcDown = new MCH_Key(MCH_Config.KeyTDCDown.prmInt);
-      this.tdcLeft = new MCH_Key(MCH_Config.KeyTDCLeft.prmInt);
-      this.tdcRight = new MCH_Key(MCH_Config.KeyTDCRight.prmInt);
-      tdcModeDecr = new MCH_Key(MCH_Config.KeyTDCModeDecr.prmInt);
-      tdcModeIncr= new MCH_Key(MCH_Config.KeyTDCModeIncr.prmInt);
-      tdcLock= new MCH_Key(MCH_Config.KeyTDCLock.prmInt);
    }
 
    protected void commonPlayerControlInGUI(EntityPlayer player, MCH_EntityAircraft ac, boolean isPilot, MCH_PacketPlayerControlBase pc) {}
@@ -86,30 +71,6 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
    public boolean commonPlayerControl(EntityPlayer player, MCH_EntityAircraft ac, boolean isPilot, MCH_PacketPlayerControlBase pc) {
       MCH_Config var10000 = MCH_MOD.config;
       MCH_PacketSeatPlayerControl send;
-     
-      if(tdcLock.isKeyDown()) {
-    	  ac.lock();
-      }
-      
-      if(tdcUp.isKeyPress()) {
-    	 ac.tdcY --;
-      }else if(tdcDown.isKeyPress()) {
-    	  ac.tdcY ++;
-      }
-
-      if(tdcLeft.isKeyPress()) {
-    	  ac.tdcX --;
-      }else if(tdcRight.isKeyPress()) {
-    	  ac.tdcX ++;
-      }
-
-      if(tdcModeIncr.isKeyDown()) {
-    	  ac.tdcMode++;
-      }else if(tdcModeDecr.isKeyDown()) {
-    	  ac.tdcMode--;
-      }
-      
-      
       if(Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
          if(this.KeyGUI.isKeyDown() || this.KeyExtra.isKeyDown()) {
             send = new MCH_PacketSeatPlayerControl();
@@ -123,20 +84,6 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
             W_Network.sendToServer(send);
             return false;
          }
-         
-         if(tdcUp.isKeyDown()) {
-        	 if(ac.radarMode == -1) {
-        		 ac.radarMode = 0;
-        	 }else if(ac.radarMode == 0) {
-        		 ac.radarMode = 3;
-        	 }
-         }else if(tdcDown.isKeyDown()) {
-        	 if(ac.radarMode == 0) {
-        		 ac.radarMode = -1;
-        	 }else if(ac.radarMode == 3) {
-        		 ac.radarMode = 0;
-        	 }
-         }
       } else if(!isPilot && ac.getSeatNum() > 1) {
          send = new MCH_PacketSeatPlayerControl();
          if(this.KeyGUI.isKeyDown()) {
@@ -144,7 +91,7 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
             W_Network.sendToServer(send);
             return false;
          }
-         
+
          if(this.KeyExtra.isKeyDown()) {
             send.switchSeat = 2;
             W_Network.sendToServer(send);
@@ -152,8 +99,6 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
          }
       }
 
-      
-      pc.radarMode = ac.radarMode;
       boolean var12 = false;
       if(this.KeyCameraMode.isKeyDown()) {
          if(ac.haveSearchLight()) {
@@ -256,14 +201,11 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
                   break;
                }
             }
-            
-            
-            pc.throttleDown = ac.throttleDown = this.KeyThrottleDown.isKeyPress();
-            pc.throttleUp = ac.throttleUp = this.KeyThrottleUp.isKeyPress();
+
+            pc.throttleDown = ac.throttleDown = this.KeyDown.isKeyPress();
+            pc.throttleUp = ac.throttleUp = this.KeyUp.isKeyPress();
             pc.moveRight = ac.moveRight = this.KeyRight.isKeyPress();
             pc.moveLeft = ac.moveLeft = this.KeyLeft.isKeyPress();
-            pc.moveUp = ac.moveUp = this.KeyUp.isKeyPress();
-            pc.moveDown = ac.moveDown = this.KeyDown.isKeyPress();
          }
       }
 
@@ -294,28 +236,7 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
             if(getMouseWheel() > 0) {
                pc.switchWeapon = (byte)ac.getNextWeaponID(player, -1);
             } else {
-                String s = ac.getWeapon(ac.getCurrentWeaponID(player) ).getWeapon(0).name;
-                if(s.equalsIgnoreCase("dummy")) {
-                	if(ac.currentHardpoint+1 == ac.hardpointWeps.size()) {
-                		ac.currentHardpoint = -1;
-                		pc.switchWeapon = (byte)ac.getNextWeaponID(player, -1);
-                	}else {
-                		pc.switchWeapon = (byte) ac.getCurrentWeaponID(player);
-                		
-                		ac.currentHardpoint++;
-                		pc.currentHardpoint = (byte) ac.currentHardpoint;
-                		MCH_WeaponSet ws = ac.hardpointWeps.get(ac.currentHardpoint);
-                		
-                        Minecraft.getMinecraft().thePlayer.addChatComponentMessage(new ChatComponentText("Selected Station " + ac.currentHardpoint));
-                        Minecraft.getMinecraft().thePlayer.addChatComponentMessage(new ChatComponentText("Weapon: " + ws.getInfo().name));
-
-                	}
-             	   
-                }else {
-                	pc.switchWeapon = (byte)ac.getNextWeaponID(player, 1);
-                }
-
-               
+               pc.switchWeapon = (byte)ac.getNextWeaponID(player, 1);
             }
 
             setMouseWheel(0);

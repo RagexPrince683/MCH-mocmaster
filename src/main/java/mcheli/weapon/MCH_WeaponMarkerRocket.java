@@ -1,6 +1,10 @@
 package mcheli.weapon;
 
 import mcheli.MCH_Lib;
+import mcheli.weapon.MCH_EntityMarkerRocket;
+import mcheli.weapon.MCH_WeaponBase;
+import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.weapon.MCH_WeaponParam;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 

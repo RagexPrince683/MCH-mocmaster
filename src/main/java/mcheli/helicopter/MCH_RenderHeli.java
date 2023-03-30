@@ -6,6 +6,8 @@ import mcheli.aircraft.MCH_Blade;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_RenderAircraft;
 import mcheli.aircraft.MCH_Rotor;
+import mcheli.helicopter.MCH_EntityHeli;
+import mcheli.helicopter.MCH_HeliInfo;
 import mcheli.wrapper.W_Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;

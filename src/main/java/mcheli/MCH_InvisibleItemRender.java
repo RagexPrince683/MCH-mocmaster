@@ -2,6 +2,8 @@ package mcheli;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 public class MCH_InvisibleItemRender implements IItemRenderer {
 

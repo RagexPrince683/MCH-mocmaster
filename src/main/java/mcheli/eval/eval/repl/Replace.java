@@ -1,6 +1,12 @@
 package mcheli.eval.eval.repl;
 
-import mcheli.eval.eval.exp.*;
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.Col1Expression;
+import mcheli.eval.eval.exp.Col2Expression;
+import mcheli.eval.eval.exp.Col2OpeExpression;
+import mcheli.eval.eval.exp.Col3Expression;
+import mcheli.eval.eval.exp.FunctionExpression;
+import mcheli.eval.eval.exp.WordExpression;
 
 public interface Replace {
 

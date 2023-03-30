@@ -1,10 +1,13 @@
 package mcheli.tool.rangefinder;
 
 import mcheli.MCH_ModelManager;
+import mcheli.tool.rangefinder.MCH_ItemRangeFinder;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import org.lwjgl.opengl.GL11;
 
 public class MCH_ItemRenderRangeFinder implements IItemRenderer {

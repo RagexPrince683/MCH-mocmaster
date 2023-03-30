@@ -1,5 +1,7 @@
 package mcheli.block;
 
+import java.util.Iterator;
+import java.util.Map;
 import mcheli.MCH_IRecipeList;
 import mcheli.MCH_ItemRecipe;
 import mcheli.MCH_Lib;
@@ -20,9 +22,6 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-
-import java.util.Iterator;
-import java.util.Map;
 
 public class MCH_DraftingTableGuiContainer extends Container {
 

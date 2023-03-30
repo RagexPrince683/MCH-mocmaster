@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.BitXorExpression;
+import mcheli.eval.eval.exp.ShareExpValue;
+
 public class LetXorExpression extends BitXorExpression {
 
    public LetXorExpression() {

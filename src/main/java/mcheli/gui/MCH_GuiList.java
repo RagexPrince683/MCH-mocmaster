@@ -1,11 +1,12 @@
 package mcheli.gui;
 
-import mcheli.wrapper.W_GuiButton;
-import net.minecraft.client.Minecraft;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import mcheli.gui.MCH_GuiListItem;
+import mcheli.gui.MCH_GuiSliderVertical;
+import mcheli.wrapper.W_GuiButton;
+import net.minecraft.client.Minecraft;
 
 public class MCH_GuiList extends W_GuiButton {
 

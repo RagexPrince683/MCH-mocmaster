@@ -19,6 +19,7 @@
  */
 package mcheli.wrapper;
 
+import mcheli.wrapper.W_Block;
 import net.minecraft.block.Block;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;

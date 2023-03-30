@@ -12,8 +12,12 @@
  */
 package mcheli.wrapper;
 
+import mcheli.wrapper.W_MOD;
+import mcheli.wrapper.W_Sound;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.SoundHandler;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;

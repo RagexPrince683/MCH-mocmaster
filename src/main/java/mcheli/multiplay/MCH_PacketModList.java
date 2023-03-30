@@ -1,14 +1,13 @@
 package mcheli.multiplay;
 
 import com.google.common.io.ByteArrayDataInput;
-import mcheli.MCH_Packet;
-import mcheli.wrapper.W_Network;
-import net.minecraft.entity.player.EntityPlayer;
-
 import java.io.DataOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import mcheli.MCH_Packet;
+import mcheli.wrapper.W_Network;
+import net.minecraft.entity.player.EntityPlayer;
 
 public class MCH_PacketModList extends MCH_Packet {
 

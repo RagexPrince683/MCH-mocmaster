@@ -1,14 +1,14 @@
 package mcheli.eval.eval.rule;
 
-import mcheli.eval.eval.exp.AbstractExpression;
-import mcheli.eval.eval.exp.ParenExpression;
-import mcheli.eval.eval.exp.ShareExpValue;
-import mcheli.eval.eval.lex.Lex;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.ParenExpression;
+import mcheli.eval.eval.exp.ShareExpValue;
+import mcheli.eval.eval.lex.Lex;
+import mcheli.eval.eval.rule.ShareRuleValue;
 
 public abstract class AbstractRule {
 

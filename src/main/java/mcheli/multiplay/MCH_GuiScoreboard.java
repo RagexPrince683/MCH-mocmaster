@@ -1,5 +1,13 @@
 package mcheli.multiplay;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import mcheli.multiplay.MCH_ContainerScoreboard;
+import mcheli.multiplay.MCH_GuiScoreboard_Base;
+import mcheli.multiplay.MCH_GuiScoreboard_CreateTeam;
+import mcheli.multiplay.MCH_GuiScoreboard_Main;
+import mcheli.multiplay.MCH_IGuiScoreboard;
 import mcheli.wrapper.W_GuiButton;
 import mcheli.wrapper.W_GuiContainer;
 import net.minecraft.client.Minecraft;
@@ -9,10 +17,6 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 public class MCH_GuiScoreboard extends W_GuiContainer implements MCH_IGuiScoreboard {
 

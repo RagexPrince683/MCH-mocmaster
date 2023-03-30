@@ -1,5 +1,8 @@
 package mcheli.block;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import mcheli.MCH_IRecipeList;
 import mcheli.MCH_MOD;
 import mcheli.MCH_ModelManager;
@@ -12,10 +15,6 @@ import mcheli.weapon.MCH_WeaponInfoManager;
 import mcheli.wrapper.modelloader.W_ModelCustom;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.ResourceLocation;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MCH_CurrentRecipe {
 

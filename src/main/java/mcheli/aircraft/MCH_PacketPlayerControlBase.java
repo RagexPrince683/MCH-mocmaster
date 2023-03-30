@@ -1,10 +1,9 @@
 package mcheli.aircraft;
 
 import com.google.common.io.ByteArrayDataInput;
-import mcheli.MCH_Packet;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
+import mcheli.MCH_Packet;
 
 public abstract class MCH_PacketPlayerControlBase extends MCH_Packet {
 
@@ -23,8 +22,6 @@ public abstract class MCH_PacketPlayerControlBase extends MCH_Packet {
    public boolean throttleDown = false;
    public boolean moveLeft = false;
    public boolean moveRight = false;
-   public boolean moveUp = false;
-   public boolean moveDown = false;
    public boolean openGui;
    public byte switchHatch = 0;
    public byte switchFreeLook = 0;
@@ -33,8 +30,6 @@ public abstract class MCH_PacketPlayerControlBase extends MCH_Packet {
    public byte putDownRack = 0;
    public boolean switchSearchLight = false;
    public boolean useBrake = false;
-   public byte currentHardpoint;
-   public int radarMode;
 
 
    public void readData(ByteArrayDataInput data) {
@@ -68,10 +63,6 @@ public abstract class MCH_PacketPlayerControlBase extends MCH_Packet {
          this.switchHatch = (byte)(e >> 4 & 3);
          this.switchFreeLook = (byte)(e >> 2 & 3);
          this.switchGear = (byte)(e >> 0 & 3);
-         this.currentHardpoint = data.readByte();
-         this.moveUp = data.readBoolean();
-         this.moveDown = data.readBoolean();
-         this.radarMode = data.readInt();
       } catch (Exception var3) {
          var3.printStackTrace();
       }
@@ -105,10 +96,6 @@ public abstract class MCH_PacketPlayerControlBase extends MCH_Packet {
 
          e1 = (short)((byte)((this.switchCameraMode & 3) << 6 | (this.switchHatch & 3) << 4 | (this.switchFreeLook & 3) << 2 | (this.switchGear & 3) << 0));
          dos.writeByte(e1);
-         dos.writeByte(currentHardpoint);
-         dos.writeBoolean(this.moveUp);
-         dos.writeBoolean(this.moveDown);
-         dos.writeInt(this.radarMode);
       } catch (IOException var3) {
          var3.printStackTrace();
       }

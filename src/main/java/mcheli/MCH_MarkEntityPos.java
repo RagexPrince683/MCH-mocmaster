@@ -1,9 +1,8 @@
 package mcheli;
 
+import java.nio.FloatBuffer;
 import net.minecraft.entity.Entity;
 import org.lwjgl.BufferUtils;
-
-import java.nio.FloatBuffer;
 
 public class MCH_MarkEntityPos {
 

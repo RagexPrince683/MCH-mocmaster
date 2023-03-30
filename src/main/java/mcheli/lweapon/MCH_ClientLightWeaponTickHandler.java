@@ -1,14 +1,26 @@
 package mcheli.lweapon;
 
-import mcheli.*;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import mcheli.MCH_ClientTickHandlerBase;
+import mcheli.MCH_Config;
+import mcheli.MCH_Key;
+import mcheli.MCH_Lib;
+import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.gltd.MCH_EntityGLTD;
+import mcheli.lweapon.MCH_ItemLightWeaponBase;
+import mcheli.lweapon.MCH_PacketLightWeaponPlayerControl;
 import mcheli.weapon.MCH_IEntityLockChecker;
 import mcheli.weapon.MCH_WeaponBase;
 import mcheli.weapon.MCH_WeaponCreator;
 import mcheli.weapon.MCH_WeaponGuidanceSystem;
-import mcheli.wrapper.*;
+import mcheli.wrapper.W_Entity;
+import mcheli.wrapper.W_EntityPlayer;
+import mcheli.wrapper.W_McClient;
+import mcheli.wrapper.W_Network;
+import mcheli.wrapper.W_Reflection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.Entity;
@@ -20,9 +32,6 @@ import net.minecraft.util.Vec3;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
-
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 
 public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase {
 
@@ -75,7 +84,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          float h = i != null?i.markerHeight:entity.height;
          GLU.gluProject((float)x + w, (float)y + h, (float)z + w, matModel, matProjection, matViewport, screenPosBB);
          markEntity = entity;
-      } 
+      }
 
    }
 
@@ -132,13 +141,12 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          if(this.prevItemStack == null || !this.prevItemStack.isItemEqual(var7) && !this.prevItemStack.getUnlocalizedName().equals(var7.getUnlocalizedName())) {
             this.initWeaponParam(var6);
             weapon = MCH_WeaponCreator.createWeapon(var6.worldObj, MCH_ItemLightWeaponBase.getName(var7), Vec3.createVectorHelper(0.0D, 0.0D, 0.0D), 0.0F, 0.0F, (MCH_IEntityLockChecker)null, false);
-            if(weapon != null && weapon.getInfo() != null ) {
-            System.out.println("Name: " + MCH_ItemLightWeaponBase.getName(var7) + " info name " + weapon.getInfo().name + " type " +  weapon.weaponInfo.getWeaponTypeName());
-               gs = (MCH_WeaponGuidanceSystem) weapon.getGuidanceSystem();
+            if(weapon != null && weapon.getInfo() != null && weapon.getGuidanceSystem() != null) {
+               gs = weapon.getGuidanceSystem();
             }
          }
 
-         if(weapon == null) {
+         if(weapon == null || gs == null) {
             return;
          }
 
@@ -152,7 +160,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          }
 
          if(var7.getItemDamage() < var7.getMaxDamage()) {
-            //if(var6.getItemInUseDuration() > 10) {
+            if(var6.getItemInUseDuration() > 10) {
                gs.lock(var6);
                if(gs.getLockCount() > 0) {
                   if(lockonSoundCount > 0) {
@@ -164,20 +172,14 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
                         lockonSoundCount = 2;
                      }
 
-                     W_McClient.MOD_playSoundFX("ir_lock_tone", 1.0F, 1.0F);
-
+                     W_McClient.MOD_playSoundFX("lockon", 1.0F, 1.0F);
                   }
-               }else {
-            	   W_McClient.MOD_playSoundFX("ir_basic_tone", 1.0F, 1.0F);
                }
-            //} else {
-               
-              // gs.clearLock();
-               
-           // }
-            if(var6.getItemInUseDuration() < 10) {
-            	W_Reflection.restoreCameraZoom();
+            } else {
+               W_Reflection.restoreCameraZoom();
+               gs.clearLock();
             }
+
             reloadCount = 0;
          } else {
             lockonSoundCount = 0;
@@ -251,9 +253,9 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
 
       if(this.KeyAttack.isKeyPress() || autoShot) {
          boolean pe = false;
-         if(is.getItemDamage() < is.getMaxDamage()) {
+         if(is.getItemDamage() < is.getMaxDamage() && gs.isLockComplete()) {
             boolean canFire = true;
-            if(weaponMode > 0) {
+            if(weaponMode > 0 && gs.getTargetEntity() != null) {
                double dx = gs.getTargetEntity().posX - player.posX;
                double dz = gs.getTargetEntity().posZ - player.posZ;
                canFire = Math.sqrt(dx * dx + dz * dz) >= 40.0D;

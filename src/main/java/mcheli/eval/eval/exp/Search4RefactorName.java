@@ -1,6 +1,12 @@
 package mcheli.eval.eval.exp;
 
 import mcheli.eval.eval.EvalException;
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.Col2Expression;
+import mcheli.eval.eval.exp.FieldExpression;
+import mcheli.eval.eval.exp.FunctionExpression;
+import mcheli.eval.eval.exp.VariableExpression;
+import mcheli.eval.eval.exp.WordExpression;
 import mcheli.eval.eval.ref.Refactor;
 import mcheli.eval.eval.srch.SearchAdapter;
 

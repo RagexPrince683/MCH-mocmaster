@@ -1,6 +1,10 @@
 package mcheli.weapon;
 
 import mcheli.MCH_Lib;
+import mcheli.weapon.MCH_EntityBullet;
+import mcheli.weapon.MCH_WeaponBase;
+import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.weapon.MCH_WeaponParam;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -28,10 +32,6 @@ public class MCH_WeaponMachineGun2 extends MCH_WeaponBase {
 
    public boolean shot(MCH_WeaponParam prm) {
       if(!super.worldObj.isRemote) {
-    	  if(prm.isTurret) {
-    		  prm.rotYaw = prm.user.rotationYaw;
-    		  prm.rotPitch = prm.user.rotationPitch;
-    		}
          Vec3 v = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -prm.rotYaw, -prm.rotPitch, -prm.rotRoll);
          MCH_EntityBullet e = new MCH_EntityBullet(super.worldObj, prm.posX, prm.posY, prm.posZ, v.xCoord, v.yCoord, v.zCoord, prm.rotYaw, prm.rotPitch, (double)super.acceleration);
          e.setName(super.name);

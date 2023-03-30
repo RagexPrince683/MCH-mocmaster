@@ -1,16 +1,20 @@
 package mcheli.weapon;
 
-import mcheli.MCH_Lib;
-import mcheli.MCH_MOD;
-//import mcheli.wrapper.W_Item;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+import mcheli.MCH_Lib;
+import mcheli.MCH_MOD;
+import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.wrapper.W_Item;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 
 public class MCH_WeaponInfoManager {
 
@@ -112,13 +116,13 @@ public class MCH_WeaponInfoManager {
 
          MCH_WeaponInfo.RoundItem r;
          Item item;
-         //for(Iterator i$1 = w.roundItems.iterator(); i$1.hasNext(); r.itemStack = new ItemStack(item, 1, r.damage)) {
-            //r = (MCH_WeaponInfo.RoundItem)i$1.next();
-            //item = W_Item.getItemByName(r.itemName);
+         for(Iterator i$1 = w.roundItems.iterator(); i$1.hasNext(); r.itemStack = new ItemStack(item, 1, r.damage)) {
+            r = (MCH_WeaponInfo.RoundItem)i$1.next();
+            item = W_Item.getItemByName(r.itemName);
          }
       }
 
-   //}
+   }
 
    public static MCH_WeaponInfo get(String name) {
       return (MCH_WeaponInfo)map.get(name);

@@ -1,5 +1,7 @@
 package mcheli.weapon;
 
+import mcheli.weapon.MCH_BulletModel;
+
 public class MCH_DefaultBulletModels {
 
    public static MCH_BulletModel Bullet;

@@ -1,6 +1,9 @@
 package mcheli.eval.eval.exp;
 
 import java.util.List;
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.Col2OpeExpression;
+import mcheli.eval.eval.exp.ShareExpValue;
 
 public class FuncArgExpression extends Col2OpeExpression {
 

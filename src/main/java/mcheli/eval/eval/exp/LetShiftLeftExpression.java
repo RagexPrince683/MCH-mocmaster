@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.ShareExpValue;
+import mcheli.eval.eval.exp.ShiftLeftExpression;
+
 public final class LetShiftLeftExpression extends ShiftLeftExpression {
 
    public LetShiftLeftExpression() {

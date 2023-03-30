@@ -2,6 +2,8 @@ package mcheli.eval.eval.rule;
 
 import mcheli.eval.eval.ExpRuleFactory;
 import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.rule.AbstractRule;
+import mcheli.eval.eval.rule.ShareRuleValue;
 
 public class JavaRuleFactory extends ExpRuleFactory {
 

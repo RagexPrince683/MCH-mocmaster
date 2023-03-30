@@ -6,6 +6,7 @@ import mcheli.MCH_Camera;
 import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_MOD;
+import mcheli.gltd.MCH_EntityGLTD;
 import mcheli.gui.MCH_Gui;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_WorldFunc;

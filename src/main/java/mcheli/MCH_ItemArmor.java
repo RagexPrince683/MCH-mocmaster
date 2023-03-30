@@ -2,6 +2,7 @@ package mcheli;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mcheli.MCH_TEST_ModelBiped;
 import mcheli.wrapper.W_ItemArmor;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.entity.Entity;

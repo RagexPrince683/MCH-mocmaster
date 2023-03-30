@@ -1,9 +1,9 @@
 package mcheli.eval.eval.lex;
 
-import mcheli.eval.eval.exp.ShareExpValue;
-import mcheli.eval.eval.rule.ShareRuleValue;
-
 import java.util.List;
+import mcheli.eval.eval.exp.ShareExpValue;
+import mcheli.eval.eval.lex.Lex;
+import mcheli.eval.eval.rule.ShareRuleValue;
 
 public class LexFactory {
 

@@ -1,6 +1,11 @@
 package mcheli.eval.eval.srch;
 
-import mcheli.eval.eval.exp.*;
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.Col1Expression;
+import mcheli.eval.eval.exp.Col2Expression;
+import mcheli.eval.eval.exp.Col3Expression;
+import mcheli.eval.eval.exp.FunctionExpression;
+import mcheli.eval.eval.exp.WordExpression;
 
 public interface Search {
 

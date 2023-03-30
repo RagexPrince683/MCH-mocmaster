@@ -2,6 +2,9 @@ package mcheli;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mcheli.MCH_Config;
+import mcheli.MCH_Lib;
+import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.client.Minecraft;

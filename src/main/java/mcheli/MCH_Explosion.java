@@ -1,11 +1,26 @@
 package mcheli;
 
-import com.bloodnbonesgaming.blockphysics.BlockPhysics;
-import cpw.mods.fml.client.FMLClientHandler;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import mcheli.MCH_Config;
+import mcheli.MCH_DamageFactor;
+import mcheli.MCH_Lib;
+import mcheli.MCH_MOD;
+import mcheli.MCH_PacketEffectExplosion;
+import mcheli.flare.MCH_EntityFlare;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.weapon.MCH_EntityBaseBullet;
-import mcheli.wrapper.*;
+import mcheli.wrapper.W_AxisAlignedBB;
+import mcheli.wrapper.W_Block;
+import mcheli.wrapper.W_ChunkPosition;
+import mcheli.wrapper.W_Entity;
+import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.Entity;
@@ -21,9 +36,6 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
-import net.shadowmage.ancientwarfare.core.util.BlockPosition;
-
-import java.util.*;
 
 public class MCH_Explosion extends Explosion {
 
@@ -57,8 +69,6 @@ public class MCH_Explosion extends Explosion {
       return this.world.isRemote;
    }
 
-   
-   
    public void doExplosionA() {
       HashSet hashset = new HashSet();
       int i = 0;
@@ -67,9 +77,9 @@ public class MCH_Explosion extends Explosion {
          this.getClass();
          int j;
          int k;
-         double x;
-         double y;
-         double z;
+         double d0;
+         double d1;
+         double d2;
          if(i >= 16) {
             float var33 = super.explosionSize;
             super.affectedBlockPositions.addAll(hashset);
@@ -86,18 +96,18 @@ public class MCH_Explosion extends Explosion {
 
             for(int var37 = 0; var37 < var35.size(); ++var37) {
                Entity entity = (Entity)var35.get(var37);
-               double distance = entity.getDistance(super.explosionX, super.explosionY, super.explosionZ) / (double)super.explosionSize;
-               if(distance <= 1.0D) {
-                  x = entity.posX - super.explosionX;
-                  y = entity.posY + (double)entity.getEyeHeight() - super.explosionY;
-                  z = entity.posZ - super.explosionZ;
-                  double var39 = (double)MathHelper.sqrt_double(x * x + y * y + z * z);
+               double var38 = entity.getDistance(super.explosionX, super.explosionY, super.explosionZ) / (double)super.explosionSize;
+               if(var38 <= 1.0D) {
+                  d0 = entity.posX - super.explosionX;
+                  d1 = entity.posY + (double)entity.getEyeHeight() - super.explosionY;
+                  d2 = entity.posZ - super.explosionZ;
+                  double var39 = (double)MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
                   if(var39 != 0.0D) {
-                     x /= var39;
-                     y /= var39;
-                     z /= var39;
-                     double blockDensity = this.getBlockDensity(vec3, entity.boundingBox);
-                     double var41 = (1.0D - distance) * blockDensity;
+                     d0 /= var39;
+                     d1 /= var39;
+                     d2 /= var39;
+                     double var40 = this.getBlockDensity(vec3, entity.boundingBox);
+                     double var41 = (1.0D - var38) * var40;
                      float damage = (float)((int)((var41 * var41 + var41) / 2.0D * 8.0D * (double)super.explosionSize + 1.0D));
                      if(damage > 0.0F && this.result != null && !(entity instanceof EntityItem) && !(entity instanceof EntityExpBottle) && !(entity instanceof EntityXPOrb) && !W_Entity.isEntityFallingBlock(entity)) {
                         if(entity instanceof MCH_EntityBaseBullet && super.exploder instanceof EntityPlayer) {
@@ -117,15 +127,15 @@ public class MCH_Explosion extends Explosion {
                      damage = MCH_Config.applyDamageVsEntity(entity, ds, damage);
                      damage *= this.damageFactor != null?this.damageFactor.getDamageFactor(entity):1.0F;
                      W_Entity.attackEntityFrom(entity, ds, damage);
-                     double y1 = EnchantmentProtection.func_92092_a(entity, var41);
+                     double d11 = EnchantmentProtection.func_92092_a(entity, var41);
                      if(!(entity instanceof MCH_EntityBaseBullet)) {
-                        entity.motionX += x * y1 * 0.4D;
-                        entity.motionY += y * y1 * 0.1D;
-                        entity.motionZ += z * y1 * 0.4D;
+                        entity.motionX += d0 * d11 * 0.4D;
+                        entity.motionY += d1 * d11 * 0.1D;
+                        entity.motionZ += d2 * d11 * 0.4D;
                      }
 
                      if(entity instanceof EntityPlayer) {
-                        this.field_77288_k.put((EntityPlayer)entity, W_WorldFunc.getWorldVec3(this.world, x * var41, y * var41, z * var41));
+                        this.field_77288_k.put((EntityPlayer)entity, W_WorldFunc.getWorldVec3(this.world, d0 * var41, d1 * var41, d2 * var41));
                      }
 
                      if(damage > 0.0F && this.countSetFireEntity > 0) {
@@ -188,22 +198,22 @@ public class MCH_Explosion extends Explosion {
                   i2 /= k2;
                   list /= k2;
                   float d7 = this.explosionSizeBlock * (0.7F + this.world.rand.nextFloat() * 0.6F);
-                  x = super.explosionX;
-                  y = super.explosionY;
-                  z = super.explosionZ;
+                  d0 = super.explosionX;
+                  d1 = super.explosionY;
+                  d2 = super.explosionZ;
 
                   for(float f2 = 0.3F; d7 > 0.0F; d7 -= 0.22500001F) {
-                     int d8 = MathHelper.floor_double(x);
-                     int i1 = MathHelper.floor_double(y);
-                     int d9 = MathHelper.floor_double(z);
+                     int d8 = MathHelper.floor_double(d0);
+                     int i1 = MathHelper.floor_double(d1);
+                     int d9 = MathHelper.floor_double(d2);
                      int k1 = W_WorldFunc.getBlockId(this.world, d8, i1, d9);
                      if(k1 > 0) {
-                        Block y0 = W_WorldFunc.getBlock(this.world, d8, i1, d9);
+                        Block d10 = W_WorldFunc.getBlock(this.world, d8, i1, d9);
                         float f3;
                         if(super.exploder != null) {
-                           f3 = W_Entity.getBlockExplosionResistance(super.exploder, this, this.world, d8, i1, d9, y0);
+                           f3 = W_Entity.getBlockExplosionResistance(super.exploder, this, this.world, d8, i1, d9, d10);
                         } else {
-                           f3 = y0.getExplosionResistance(super.exploder, this.world, d8, i1, d9, super.explosionX, super.explosionY, super.explosionZ);
+                           f3 = d10.getExplosionResistance(super.exploder, this.world, d8, i1, d9, super.explosionX, super.explosionY, super.explosionZ);
                         }
 
                         if(this.isInWater) {
@@ -217,9 +227,9 @@ public class MCH_Explosion extends Explosion {
                         hashset.add(new ChunkPosition(d8, i1, d9));
                      }
 
-                     x += f * 0.30000001192092896D;
-                     y += i2 * 0.30000001192092896D;
-                     z += list * 0.30000001192092896D;
+                     d0 += f * 0.30000001192092896D;
+                     d1 += i2 * 0.30000001192092896D;
+                     d2 += list * 0.30000001192092896D;
                   }
                }
 
@@ -230,16 +240,16 @@ public class MCH_Explosion extends Explosion {
    }
 
    private double getBlockDensity(Vec3 vec3, AxisAlignedBB p_72842_2_) {
-      double x = 1.0D / ((p_72842_2_.maxX - p_72842_2_.minX) * 2.0D + 1.0D);
-      double y = 1.0D / ((p_72842_2_.maxY - p_72842_2_.minY) * 2.0D + 1.0D);
-      double z = 1.0D / ((p_72842_2_.maxZ - p_72842_2_.minZ) * 2.0D + 1.0D);
-      if(x >= 0.0D && y >= 0.0D && z >= 0.0D) {
+      double d0 = 1.0D / ((p_72842_2_.maxX - p_72842_2_.minX) * 2.0D + 1.0D);
+      double d1 = 1.0D / ((p_72842_2_.maxY - p_72842_2_.minY) * 2.0D + 1.0D);
+      double d2 = 1.0D / ((p_72842_2_.maxZ - p_72842_2_.minZ) * 2.0D + 1.0D);
+      if(d0 >= 0.0D && d1 >= 0.0D && d2 >= 0.0D) {
          int i = 0;
          int j = 0;
 
-         for(float f = 0.0F; f <= 1.0F; f = (float)((double)f + x)) {
-            for(float f1 = 0.0F; f1 <= 1.0F; f1 = (float)((double)f1 + y)) {
-               for(float f2 = 0.0F; f2 <= 1.0F; f2 = (float)((double)f2 + z)) {
+         for(float f = 0.0F; f <= 1.0F; f = (float)((double)f + d0)) {
+            for(float f1 = 0.0F; f1 <= 1.0F; f1 = (float)((double)f1 + d1)) {
+               for(float f2 = 0.0F; f2 <= 1.0F; f2 = (float)((double)f2 + d2)) {
                   double d3 = p_72842_2_.minX + (p_72842_2_.maxX - p_72842_2_.minX) * (double)f;
                   double d4 = p_72842_2_.minY + (p_72842_2_.maxY - p_72842_2_.minY) * (double)f1;
                   double d5 = p_72842_2_.minZ + (p_72842_2_.maxZ - p_72842_2_.minZ) * (double)f2;
@@ -258,51 +268,11 @@ public class MCH_Explosion extends Explosion {
       }
    }
 
-   public void playDistantExplosionSounds(){
-      for(Object o : this.world.playerEntities){
-         if(o instanceof EntityPlayer){
-            EntityPlayer p = (EntityPlayer)o;
-            double dist = p.getDistance(explosionX, explosionY, explosionZ);
-            if(dist > 32){
-               W_WorldFunc.MOD_playSoundAtEntity(p, "distant_explosion", explosionSize * getExplosionDistMult(dist), (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
-            }
-         }
-      }
-   }
-
-   public void jumpPlayers(){
-      for(Object o : this.world.playerEntities){
-         if(o instanceof EntityPlayer){
-            EntityPlayer p = (EntityPlayer)o;
-            double dist = p.getDistance(explosionX, explosionY, explosionZ);
-            if(dist < 32){
-               p.addVelocity(0, 1.0, 0);
-            }
-         }
-      }
-   }
-
-   private float getExplosionDistMult(double dist) {
-      if(dist < 150){
-         return 1.0f;
-      }else{
-         return (float) (150/dist);
-      }
-   }
-
    public void doExplosionB(boolean par1) {
       if(this.isPlaySound) {
-         W_WorldFunc.DEF_playSoundEffect(this.world, super.explosionX, super.explosionY, super.explosionZ, "random.explode", explosionSize, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
-         playDistantExplosionSounds();
-         jumpPlayers();
+         W_WorldFunc.DEF_playSoundEffect(this.world, super.explosionX, super.explosionY, super.explosionZ, "random.explode", 4.0F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
       }
-      
-      if(this.isDestroyBlock && this.explosionSizeBlock > 0.0F && MCH_Config.Explosion_DestroyBlock.prmBool){
-    	  float a = this.explosionSize;
-    	  this.explosionSize = this.explosionSizeBlock;
-    	  BlockPhysics.doExplosionA(world, this);
-    	  this.explosionSize = a;
-      }
+
       MCH_Config var10000;
       Iterator iterator;
       ChunkPosition chunkposition;
@@ -322,12 +292,12 @@ public class MCH_Explosion extends Explosion {
             l = W_WorldFunc.getBlockId(this.world, i, j, k);
             if(l > 0 && this.isDestroyBlock && this.explosionSizeBlock > 0.0F) {
                var10000 = MCH_MOD.config;
-               if(false) {//(MCH_Config.Explosion_DestroyBlock.prmBool) {
+               if(MCH_Config.Explosion_DestroyBlock.prmBool) {
                   b = W_Block.getBlockById(l);
                   if(b.canDropFromExplosion(this)) {
                      b.dropBlockAsItemWithChance(this.world, i, j, k, this.world.getBlockMetadata(i, j, k), 1.0F / this.explosionSizeBlock, 0);
                   }
-                  
+
                   b.onBlockExploded(this.world, i, j, k, this);
                }
             }
@@ -432,9 +402,9 @@ public class MCH_Explosion extends Explosion {
       int i;
       int j;
       int k;
-      double x;
-      double y;
-      double z;
+      double d0;
+      double d1;
+      double d2;
       for(i = 0; i < 16; ++i) {
          for(j = 0; j < 16; ++j) {
             for(k = 0; k < 16; ++k) {
@@ -447,14 +417,14 @@ public class MCH_Explosion extends Explosion {
                   l /= d6;
                   flareCnt /= d6;
                   float f1 = explosionSize * (0.7F + world.rand.nextFloat() * 0.6F);
-                  x = explosionX;
-                  y = explosionY;
-                  z = explosionZ;
+                  d0 = explosionX;
+                  d1 = explosionY;
+                  d2 = explosionZ;
 
                   for(float mz = 0.3F; f1 > 0.0F; f1 -= mz * 0.75F) {
-                     int l1 = MathHelper.floor_double(x);
-                     int d61 = MathHelper.floor_double(y);
-                     int j1 = MathHelper.floor_double(z);
+                     int l1 = MathHelper.floor_double(d0);
+                     int d61 = MathHelper.floor_double(d1);
+                     int j1 = MathHelper.floor_double(d2);
                      int d7 = W_WorldFunc.getBlockId(world, l1, d61, j1);
                      if(d7 > 0) {
                         Block block = W_Block.getBlockById(d7);
@@ -466,9 +436,9 @@ public class MCH_Explosion extends Explosion {
                         hashset.add(new ChunkPosition(l1, d61, j1));
                      }
 
-                     x += iterator * (double)mz;
-                     y += l * (double)mz;
-                     z += flareCnt * (double)mz;
+                     d0 += iterator * (double)mz;
+                     d1 += l * (double)mz;
+                     d2 += flareCnt * (double)mz;
                   }
                }
             }
@@ -486,30 +456,7 @@ public class MCH_Explosion extends Explosion {
          Iterator var50 = affectedBlockPositions.iterator();
          int cnt = 0;
          int var51 = (int)explosionSize;
-         
-         for(int l = 0; l <=10; l++) {
-        	 double deltaX = 0.1 * explosionSize * (world.rand.nextFloat()-0.5);
-        	 double deltaY = 0.1 * explosionSize * (world.rand.nextFloat()-0.5);
-        	 double deltaZ = 0.1 * explosionSize * (world.rand.nextFloat()-0.5);
-        	 BlockPosition b = new BlockPosition(explosionX + deltaX, explosionY + deltaY, explosionZ + deltaZ);
-        	 Vec3 vec = Vec3.createVectorHelper(deltaX, deltaY, deltaZ);
-        	 vec.normalize();
-        	 double vecLength = 0.05 * explosionSize;
-        	 vec.xCoord *= vecLength;
-        	 vec.yCoord *= vecLength;
-        	 vec.zCoord *= vecLength;
-        	 
-        	 double size = explosionSize;
-             MCH_ParticlesUtil.spawnParticleExplode(world, b.x, b.y, b.z, (float) size, 100, 100, 100, 100,48);
-        	 //MCH_EntityParticleExplode epe = new MCH_EntityParticleExplode(world, b.x, b.y, b.z, size, (double)48, 0.0D);
-             //MCH_EntityParticleExplodeLarge epe = new MCH_EntityParticleExplodeLarge(world, b.x, b.y, b.z, size, (double)48, 0.0D);
-             //epe.setParticleMaxAge(49);
-             //epe.setRBGColorF(100, 100, 100);
-             //epe.setAlphaF(100);
-             //epe.setVelocity(vec.xCoord, vec.yCoord, vec.zCoord);
-             //FMLClientHandler.instance().getClient().effectRenderer.addEffect(epe);
-         }
-         
+
          while(var50.hasNext()) {
             ChunkPosition chunkposition = (ChunkPosition)var50.next();
             i = W_ChunkPosition.getChunkPosX(chunkposition);
@@ -517,12 +464,12 @@ public class MCH_Explosion extends Explosion {
             k = W_ChunkPosition.getChunkPosZ(chunkposition);
             W_WorldFunc.getBlockId(world, i, j, k);
             ++cnt;
-            x = (double)((float)i + world.rand.nextFloat());
-            y = (double)((float)j + world.rand.nextFloat());
-            z = (double)((float)k + world.rand.nextFloat());
-            double mx = x - explosionX;
-            double my = y - explosionY;
-            double var52 = z - explosionZ;
+            d0 = (double)((float)i + world.rand.nextFloat());
+            d1 = (double)((float)j + world.rand.nextFloat());
+            d2 = (double)((float)k + world.rand.nextFloat());
+            double mx = d0 - explosionX;
+            double my = d1 - explosionY;
+            double var52 = d2 - explosionZ;
             double var53 = (double)MathHelper.sqrt_double(mx * mx + my * my + var52 * var52);
             mx /= var53;
             my /= var53;
@@ -532,13 +479,13 @@ public class MCH_Explosion extends Explosion {
             mx *= var54 * 0.5D;
             my *= var54 * 0.5D;
             var52 *= var54 * 0.5D;
-            double var55 = (x + explosionX * 1.0D) / 2.0D;
-            double py = (y + explosionY * 1.0D) / 2.0D;
-            double pz = (z + explosionZ * 1.0D) / 2.0D;
+            double var55 = (d0 + explosionX * 1.0D) / 2.0D;
+            double py = (d1 + explosionY * 1.0D) / 2.0D;
+            double pz = (d2 + explosionZ * 1.0D) / 2.0D;
             double r = 3.141592653589793D * (double)world.rand.nextInt(360) / 180.0D;
             if(explosionSize >= 4.0F && var51 > 0) {
                double es = Math.min((double)(explosionSize / 12.0F), 0.6D) * (double)(0.5F + world.rand.nextFloat() * 0.5F);
-              // world.spawnEntityInWorld(new MCH_EntityFlare(world, var55, py + 2.0D, pz, Math.sin(r) * es, (1.0D + my / 5.0D) * es, Math.cos(r) * es, 2.0F, 0));
+               world.spawnEntityInWorld(new MCH_EntityFlare(world, var55, py + 2.0D, pz, Math.sin(r) * es, (1.0D + my / 5.0D) * es, Math.cos(r) * es, 2.0F, 0));
                --var51;
             }
 
@@ -568,10 +515,7 @@ public class MCH_Explosion extends Explosion {
                prm.age = (int)((float)prm.age * (explosionSize < 6.0F?explosionSize:6.0F));
                prm.age = prm.age * 2 / 3;
                prm.diffusible = true;
-               //MCH_ParticlesUtil.spawnParticle(prm);
-               
-        	  	//MCH_ParticlesUtil.spawnParticleExplode(world, (x + explosionX * 1.0D) / 2.0D, (y + explosionY * 1.0D) / 2.0D, (z + explosionZ * 1.0D) / 2.0D, 1f, 220f, 100f, 100f, 10.0F, 80);
-
+               MCH_ParticlesUtil.spawnParticle(prm);
             }
          }
       }
@@ -586,9 +530,9 @@ public class MCH_Explosion extends Explosion {
       int i;
       int j;
       int k;
-      double x;
-      double y;
-      double z;
+      double d0;
+      double d1;
+      double d2;
       for(i = 0; i < 16; ++i) {
          for(j = 0; j < 16; ++j) {
             for(k = 0; k < 16; ++k) {
@@ -601,14 +545,14 @@ public class MCH_Explosion extends Explosion {
                   l /= d6;
                   d5 /= d6;
                   float f1 = explosionSize * (0.7F + world.rand.nextFloat() * 0.6F);
-                  x = explosionX;
-                  y = explosionY;
-                  z = explosionZ;
+                  d0 = explosionX;
+                  d1 = explosionY;
+                  d2 = explosionZ;
 
                   for(float d61 = 0.3F; f1 > 0.0F; f1 -= d61 * 0.75F) {
-                     int l1 = MathHelper.floor_double(x);
-                     int d7 = MathHelper.floor_double(y);
-                     int j1 = MathHelper.floor_double(z);
+                     int l1 = MathHelper.floor_double(d0);
+                     int d7 = MathHelper.floor_double(d1);
+                     int j1 = MathHelper.floor_double(d2);
                      int k1 = W_WorldFunc.getBlockId(world, l1, d7, j1);
                      if(k1 > 0) {
                         Block block = W_Block.getBlockById(k1);
@@ -620,9 +564,9 @@ public class MCH_Explosion extends Explosion {
                         hashset.add(new ChunkPosition(l1, d7, j1));
                      }
 
-                     x += iterator * (double)d61;
-                     y += l * (double)d61;
-                     z += d5 * (double)d61;
+                     d0 += iterator * (double)d61;
+                     d1 += l * (double)d61;
+                     d2 += d5 * (double)d61;
                   }
                }
             }
@@ -631,11 +575,9 @@ public class MCH_Explosion extends Explosion {
 
       affectedBlockPositions.addAll(hashset);
       if(explosionSize >= 2.0F && isSmoking) {
-    	  MCH_ParticlesUtil.spawnParticleExplodeLarge(world, explosionX, explosionY, explosionZ, explosionSize, 160f, 140f, 120f, 1000, 50);
-         //MCH_ParticlesUtil.DEF_spawnParticle("hugeexplosion", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D, 10.0F);
+         MCH_ParticlesUtil.DEF_spawnParticle("hugeexplosion", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D, 10.0F);
       } else {
-    	  MCH_ParticlesUtil.spawnParticleExplodeLarge(world, explosionX, explosionY, explosionZ, explosionSize, 160f, 140f, 120f, 1000, 50);
-         //MCH_ParticlesUtil.DEF_spawnParticle("largeexplode", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D, 10.0F);
+         MCH_ParticlesUtil.DEF_spawnParticle("largeexplode", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D, 10.0F);
       }
 
       if(isSmoking) {
@@ -647,12 +589,12 @@ public class MCH_Explosion extends Explosion {
             j = W_ChunkPosition.getChunkPosY(chunkposition);
             k = W_ChunkPosition.getChunkPosZ(chunkposition);
             W_WorldFunc.getBlockId(world, i, j, k);
-            x = (double)((float)i + world.rand.nextFloat());
-            y = (double)((float)j + world.rand.nextFloat());
-            z = (double)((float)k + world.rand.nextFloat());
-            double d3 = x - explosionX;
-            double d4 = y - explosionY;
-            double d51 = z - explosionZ;
+            d0 = (double)((float)i + world.rand.nextFloat());
+            d1 = (double)((float)j + world.rand.nextFloat());
+            d2 = (double)((float)k + world.rand.nextFloat());
+            double d3 = d0 - explosionX;
+            double d4 = d1 - explosionY;
+            double d51 = d2 - explosionZ;
             double var40 = (double)MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d51 * d51);
             d3 /= var40;
             d4 /= var40;
@@ -662,9 +604,8 @@ public class MCH_Explosion extends Explosion {
             d3 *= var41;
             d4 *= var41;
             d51 *= var41;
-      	  	MCH_ParticlesUtil.spawnParticleExplodeLarge(world, (x + explosionX * 1.0D) / 2.0D, (y + explosionY * 1.0D) / 2.0D, (z + explosionZ * 1.0D) / 2.0D, 10f, (float)d3, (float)d4, (float)d51, 10.0F, 50);
-            //MCH_ParticlesUtil.DEF_spawnParticle("explode", (x + explosionX * 1.0D) / 2.0D, (y + explosionY * 1.0D) / 2.0D, (z + explosionZ * 1.0D) / 2.0D, d3, d4, d51, 10.0F);
-            //MCH_ParticlesUtil.DEF_spawnParticle("smoke", x, y, z, d3, d4, d51, 10.0F);
+            MCH_ParticlesUtil.DEF_spawnParticle("explode", (d0 + explosionX * 1.0D) / 2.0D, (d1 + explosionY * 1.0D) / 2.0D, (d2 + explosionZ * 1.0D) / 2.0D, d3, d4, d51, 10.0F);
+            MCH_ParticlesUtil.DEF_spawnParticle("smoke", d0, d1, d2, d3, d4, d51, 10.0F);
          }
       }
 

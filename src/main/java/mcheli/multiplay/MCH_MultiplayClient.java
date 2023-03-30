@@ -3,18 +3,13 @@ package mcheli.multiplay;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.relauncher.CoreModManager;
-import mcheli.*;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.client.shader.Framebuffer;
-import net.minecraft.util.EnumChatFormatting;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -22,6 +17,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+import javax.imageio.ImageIO;
+import mcheli.MCH_Config;
+import mcheli.MCH_FileSearch;
+import mcheli.MCH_Lib;
+import mcheli.MCH_MOD;
+import mcheli.MCH_OStream;
+import mcheli.multiplay.MCH_PacketLargeData;
+import mcheli.multiplay.MCH_PacketModList;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.client.shader.Framebuffer;
+import net.minecraft.util.EnumChatFormatting;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
 
 public class MCH_MultiplayClient {
 

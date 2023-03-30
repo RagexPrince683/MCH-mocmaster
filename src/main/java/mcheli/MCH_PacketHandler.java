@@ -1,6 +1,8 @@
 package mcheli;
 
 import com.google.common.io.ByteArrayDataInput;
+import mcheli.MCH_CommonPacketHandler;
+import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_AircraftPacketHandler;
 import mcheli.block.MCH_DraftingTablePacketHandler;
 import mcheli.command.MCH_CommandPacketHandler;
@@ -9,7 +11,6 @@ import mcheli.helicopter.MCH_HeliPacketHandler;
 import mcheli.lweapon.MCH_LightWeaponPacketHandler;
 import mcheli.multiplay.MCH_MultiplayPacketHandler;
 import mcheli.plane.MCP_PlanePacketHandler;
-import mcheli.sensors.MCH_SensorPacketHandler;
 import mcheli.tank.MCH_TankPacketHandler;
 import mcheli.tool.MCH_ToolPacketHandler;
 import mcheli.uav.MCH_UavPacketHandler;
@@ -26,15 +27,6 @@ public class MCH_PacketHandler extends W_PacketHandler {
       default:
          MCH_Lib.DbgLog(entityPlayer.worldObj, "MCH_PacketHandler.onPacket invalid MSGID=0x%X(%d)", new Object[]{Integer.valueOf(msgid), Integer.valueOf(msgid)});
          break;
-      case 546873982:
-     	  MCH_SensorPacketHandler.onPacketESM(entityPlayer, data);
-     	  break;
-      case 546873984:
-    	 // System.out.println("Radar packet recieved");
-    	  MCH_SensorPacketHandler.onPacketRadar(entityPlayer, data);
-    	  break;
-      case 546873974:
-    	  MCH_SensorPacketHandler.onPacketSTT(entityPlayer, data);
       case 268437520:
          MCH_CommonPacketHandler.onPacketEffectExplosion(entityPlayer, data);
          break;

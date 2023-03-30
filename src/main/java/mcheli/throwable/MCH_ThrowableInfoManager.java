@@ -1,13 +1,17 @@
 package mcheli.throwable;
 
-import mcheli.MCH_InputFile;
-import mcheli.MCH_Lib;
-import net.minecraft.item.Item;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Set;
+import mcheli.MCH_InputFile;
+import mcheli.MCH_Lib;
+import mcheli.throwable.MCH_ThrowableInfo;
+import net.minecraft.item.Item;
 
 public class MCH_ThrowableInfoManager {
 

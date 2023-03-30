@@ -1,5 +1,15 @@
 package mcheli;
 
+import java.io.File;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import mcheli.MCH_ConfigPrm;
+import mcheli.MCH_InputFile;
+import mcheli.MCH_Lib;
+import mcheli.MCH_MOD;
+import mcheli.MCH_OutputFile;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.tank.MCH_EntityTank;
@@ -11,13 +21,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
-import org.lwjgl.input.Keyboard;
-
-import java.io.File;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public class MCH_Config {
 
@@ -61,18 +64,6 @@ public class MCH_Config {
    public static MCH_ConfigPrm KeyDownFromRack;
    public static MCH_ConfigPrm KeyScoreboard;
    public static MCH_ConfigPrm KeyMultiplayManager;
-   
-   public static MCH_ConfigPrm KeyTDCUp;
-   public static MCH_ConfigPrm KeyTDCDown;
-   public static MCH_ConfigPrm KeyTDCLeft;
-   public static MCH_ConfigPrm KeyTDCRight;
-   public static MCH_ConfigPrm KeyTDCModeIncr;
-   public static MCH_ConfigPrm KeyTDCModeDecr;
-   public static MCH_ConfigPrm KeyTDCLock;
-   public static MCH_ConfigPrm KeyThrottleUp;
-   public static MCH_ConfigPrm KeyThrottleDown;
-   
-   
    public static List DamageVs;
    public static List IgnoreBulletHitList;
    public static MCH_ConfigPrm IgnoreBulletHitItem;
@@ -231,19 +222,7 @@ public class MCH_Config {
       KeyDownFromRack = new MCH_ConfigPrm("KeyDownFromRack", 22);
       KeyScoreboard = new MCH_ConfigPrm("KeyScoreboard", 38);
       KeyMultiplayManager = new MCH_ConfigPrm("KeyMultiplayManager", 50);
-      
-      KeyTDCUp = new MCH_ConfigPrm("KeyTDCUp", Keyboard.KEY_UP);
-      KeyTDCDown = new MCH_ConfigPrm("KeyTDCDown", Keyboard.KEY_DOWN);
-      KeyTDCLeft = new MCH_ConfigPrm("KeyTDCLeft", Keyboard.KEY_LEFT);
-      KeyTDCRight = new MCH_ConfigPrm("KeyTDCRight", Keyboard.KEY_RIGHT);
-      KeyTDCModeIncr = new MCH_ConfigPrm("KeyTDCModeIncr", Keyboard.KEY_HOME);
-      KeyTDCModeDecr = new MCH_ConfigPrm("KeyTDCModeDecr", Keyboard.KEY_END);
-      KeyTDCLock = new MCH_ConfigPrm("KeyTDCLock", Keyboard.KEY_RETURN);
-      KeyThrottleUp = new MCH_ConfigPrm("KeyThrottleUp", Keyboard.KEY_RBRACKET);
-      KeyThrottleDown = new MCH_ConfigPrm("KeyThrottleDown", Keyboard.KEY_LBRACKET);
-      
-      
-      KeyConfig = new MCH_ConfigPrm[]{KeyUp, KeyDown, KeyRight, KeyLeft, KeySwitchMode, KeySwitchHovering, KeySwitchWeapon1, KeySwitchWeapon2, KeySwWeaponMode, KeyZoom, KeyCameraMode, KeyUnmount, KeyFlare, KeyExtra, KeyCameraDistUp, KeyCameraDistDown, KeyFreeLook, KeyGUI, KeyGearUpDown, KeyPutToRack, KeyDownFromRack, KeyScoreboard, KeyMultiplayManager, KeyTDCUp, KeyTDCDown, KeyTDCLeft,KeyTDCRight,KeyTDCModeIncr,KeyTDCModeDecr,KeyTDCLock,KeyThrottleUp,KeyThrottleDown};
+      KeyConfig = new MCH_ConfigPrm[]{KeyUp, KeyDown, KeyRight, KeyLeft, KeySwitchMode, KeySwitchHovering, KeySwitchWeapon1, KeySwitchWeapon2, KeySwWeaponMode, KeyZoom, KeyCameraMode, KeyUnmount, KeyFlare, KeyExtra, KeyCameraDistUp, KeyCameraDistDown, KeyFreeLook, KeyGUI, KeyGearUpDown, KeyPutToRack, KeyDownFromRack, KeyScoreboard, KeyMultiplayManager};
       DamageVs = new ArrayList();
       CommandPermission = new ArrayList();
       CommandPermissionList = new ArrayList();

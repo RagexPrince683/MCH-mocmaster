@@ -1,13 +1,13 @@
 package mcheli;
 
 import com.google.common.io.ByteArrayDataInput;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import mcheli.MCH_Packet;
 import mcheli.wrapper.W_Network;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-
-import java.io.DataOutputStream;
-import java.io.IOException;
 
 public class MCH_PacketNotifyLock extends MCH_Packet {
 
@@ -35,19 +35,14 @@ public class MCH_PacketNotifyLock extends MCH_Packet {
       }
 
    }
-   
-   public static void send (int entityID) {
-	   MCH_PacketNotifyLock s = new MCH_PacketNotifyLock();
-	   s.entityID = entityID;
-	   W_Network.sendToServer(s);
-   }
-   
+
    public static void send(Entity target) {
       if(target != null) {
          MCH_PacketNotifyLock s = new MCH_PacketNotifyLock();
          s.entityID = target.getEntityId();
          W_Network.sendToServer(s);
       }
+
    }
 
    public static void sendToPlayer(EntityPlayer entity) {
@@ -55,5 +50,6 @@ public class MCH_PacketNotifyLock extends MCH_Packet {
          MCH_PacketNotifyLock s = new MCH_PacketNotifyLock();
          W_Network.sendToPlayer(s, entity);
       }
+
    }
 }

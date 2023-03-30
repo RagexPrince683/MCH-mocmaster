@@ -7,6 +7,8 @@ import mcheli.MCH_ViewEntityDummy;
 import mcheli.aircraft.MCH_AircraftClientTickHandler;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_SeatInfo;
+import mcheli.plane.MCP_EntityPlane;
+import mcheli.plane.MCP_PlanePacketPlayerControl;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.wrapper.W_Network;
 import mcheli.wrapper.W_Reflection;
@@ -19,7 +21,6 @@ public class MCP_ClientPlaneTickHandler extends MCH_AircraftClientTickHandler {
    public MCH_Key KeySwitchMode;
    public MCH_Key KeyEjectSeat;
    public MCH_Key KeyZoom;
-
    public MCH_Key[] Keys;
 
 
@@ -33,10 +34,7 @@ public class MCP_ClientPlaneTickHandler extends MCH_AircraftClientTickHandler {
       this.KeySwitchMode = new MCH_Key(MCH_Config.KeySwitchMode.prmInt);
       this.KeyEjectSeat = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
       this.KeyZoom = new MCH_Key(MCH_Config.KeyZoom.prmInt);
-      
-     
-      
-      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, super.KeyUseWeapon, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack, super.tdcUp, tdcDown, tdcRight, tdcLeft, super.tdcModeIncr, tdcModeDecr, tdcLock, KeyThrottleDown, KeyThrottleUp};
+      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, super.KeyUseWeapon, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
    }
 
    protected void update(EntityPlayer player, MCP_EntityPlane plane) {
@@ -60,7 +58,6 @@ public class MCP_ClientPlaneTickHandler extends MCH_AircraftClientTickHandler {
          viewEntityDummy.update();
       }
 
-      
       super.isBeforeRiding = super.isRiding;
       EntityClientPlayerMP var7 = super.mc.thePlayer;
       MCP_EntityPlane var8 = null;

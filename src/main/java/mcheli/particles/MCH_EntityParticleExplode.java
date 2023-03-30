@@ -1,5 +1,6 @@
 package mcheli.particles;
 
+import mcheli.particles.MCH_EntityParticleBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.RenderHelper;

@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.Col2Expression;
+import mcheli.eval.eval.exp.ShareExpValue;
+
 public class MinusExpression extends Col2Expression {
 
    public MinusExpression() {

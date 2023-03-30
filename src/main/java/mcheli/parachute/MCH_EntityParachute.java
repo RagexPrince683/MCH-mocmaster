@@ -2,10 +2,15 @@ package mcheli.parachute;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.List;
 import mcheli.MCH_Lib;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
-import mcheli.wrapper.*;
+import mcheli.wrapper.W_AxisAlignedBB;
+import mcheli.wrapper.W_Block;
+import mcheli.wrapper.W_Entity;
+import mcheli.wrapper.W_Lib;
+import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -16,8 +21,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-
-import java.util.List;
 
 public class MCH_EntityParachute extends W_Entity {
 

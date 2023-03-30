@@ -1,8 +1,9 @@
 package mcheli;
 
-import net.minecraft.util.Vec3;
-
 import java.io.File;
+import mcheli.MCH_InputFile;
+import mcheli.MCH_Lib;
+import net.minecraft.util.Vec3;
 
 public class MCH_BaseInfo {
 

@@ -7,6 +7,8 @@ import mcheli.MCH_KeyName;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_AircraftCommonGui;
 import mcheli.gui.MCH_Gui;
+import mcheli.vehicle.MCH_EntityVehicle;
+import mcheli.vehicle.MCH_VehicleInfo;
 import mcheli.weapon.MCH_WeaponSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;

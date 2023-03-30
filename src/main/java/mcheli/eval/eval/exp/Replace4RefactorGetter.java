@@ -1,6 +1,11 @@
 package mcheli.eval.eval.exp;
 
 import mcheli.eval.eval.Rule;
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.Col2OpeExpression;
+import mcheli.eval.eval.exp.FieldExpression;
+import mcheli.eval.eval.exp.VariableExpression;
+import mcheli.eval.eval.exp.WordExpression;
 import mcheli.eval.eval.ref.Refactor;
 import mcheli.eval.eval.repl.ReplaceAdapter;
 import mcheli.eval.eval.rule.ShareRuleValue;

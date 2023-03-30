@@ -1,5 +1,8 @@
 package mcheli.gui;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import mcheli.MCH_ClientCommonTickHandler;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
@@ -7,6 +10,12 @@ import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_PacketNotifyInfoReloaded;
+import mcheli.gui.MCH_ConfigGuiContainer;
+import mcheli.gui.MCH_GuiList;
+import mcheli.gui.MCH_GuiListItem;
+import mcheli.gui.MCH_GuiListItemKeyBind;
+import mcheli.gui.MCH_GuiOnOffButton;
+import mcheli.gui.MCH_GuiSlider;
 import mcheli.multiplay.MCH_GuiTargetMarker;
 import mcheli.weapon.MCH_WeaponInfoManager;
 import mcheli.wrapper.W_GuiButton;
@@ -19,10 +28,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public class MCH_ConfigGui extends W_GuiContainer {
 

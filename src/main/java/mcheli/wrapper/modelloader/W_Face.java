@@ -2,6 +2,8 @@ package mcheli.wrapper.modelloader;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mcheli.wrapper.modelloader.W_TextureCoordinate;
+import mcheli.wrapper.modelloader.W_Vertex;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.Vec3;
 

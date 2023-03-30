@@ -1,12 +1,11 @@
 package mcheli.multiplay;
 
 import com.google.common.io.ByteArrayDataInput;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import mcheli.MCH_Packet;
 import mcheli.wrapper.W_Network;
 import net.minecraft.entity.player.EntityPlayer;
-
-import java.io.DataOutputStream;
-import java.io.IOException;
 
 public class MCH_PacketIndClient extends MCH_Packet {
 

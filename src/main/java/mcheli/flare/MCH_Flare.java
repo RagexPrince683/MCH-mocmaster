@@ -1,7 +1,9 @@
 package mcheli.flare;
 
+import java.util.Random;
 import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.flare.MCH_EntityFlare;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.wrapper.W_McClient;
@@ -9,8 +11,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-
-import java.util.Random;
 
 public class MCH_Flare {
 
@@ -189,7 +189,7 @@ public class MCH_Flare {
             fuseCount = 10;
          }
 
-         MCH_EntityFlare e = new MCH_EntityFlare(this.worldObj, x, y, z, tx * 0.5D, ty * 0.5D, tz * 0.5D, 6.0F, 100);
+         MCH_EntityFlare e = new MCH_EntityFlare(this.worldObj, x, y, z, tx * 0.5D, ty * 0.5D, tz * 0.5D, 6.0F, fuseCount);
          e.rotationPitch = this.rand.nextFloat() * 360.0F;
          e.rotationYaw = this.rand.nextFloat() * 360.0F;
          e.prevRotationPitch = this.rand.nextFloat() * 360.0F;

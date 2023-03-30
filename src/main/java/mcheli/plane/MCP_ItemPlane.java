@@ -3,6 +3,9 @@ package mcheli.plane;
 import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.plane.MCP_EntityPlane;
+import mcheli.plane.MCP_PlaneInfo;
+import mcheli.plane.MCP_PlaneInfoManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 

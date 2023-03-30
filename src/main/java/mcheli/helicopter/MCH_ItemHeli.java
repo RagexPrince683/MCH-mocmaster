@@ -3,6 +3,9 @@ package mcheli.helicopter;
 import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.helicopter.MCH_EntityHeli;
+import mcheli.helicopter.MCH_HeliInfo;
+import mcheli.helicopter.MCH_HeliInfoManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 

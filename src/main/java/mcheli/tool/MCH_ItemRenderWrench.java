@@ -1,10 +1,13 @@
 package mcheli.tool;
 
 import mcheli.MCH_ModelManager;
+import mcheli.tool.MCH_ItemWrench;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import org.lwjgl.opengl.GL11;
 
 public class MCH_ItemRenderWrench implements IItemRenderer {

@@ -1,5 +1,7 @@
 package mcheli;
 
+import mcheli.MCH_Lib;
+
 public class MCH_ConfigPrm {
 
    public final int type;

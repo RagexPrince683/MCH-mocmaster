@@ -3,6 +3,8 @@ package mcheli.weapon;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Lib;
+import mcheli.weapon.MCH_EntityAAMissile;
+import mcheli.weapon.MCH_RenderBulletBase;
 import mcheli.wrapper.W_Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;

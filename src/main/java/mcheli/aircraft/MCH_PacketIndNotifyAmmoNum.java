@@ -1,12 +1,12 @@
 package mcheli.aircraft;
 
 import com.google.common.io.ByteArrayDataInput;
-import mcheli.MCH_Packet;
-import mcheli.wrapper.W_Entity;
-import mcheli.wrapper.W_Network;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
+import mcheli.MCH_Packet;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.wrapper.W_Entity;
+import mcheli.wrapper.W_Network;
 
 public class MCH_PacketIndNotifyAmmoNum extends MCH_Packet {
 

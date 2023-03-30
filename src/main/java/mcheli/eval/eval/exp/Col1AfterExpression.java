@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.Col1Expression;
+import mcheli.eval.eval.exp.ShareExpValue;
+
 public abstract class Col1AfterExpression extends Col1Expression {
 
    protected Col1AfterExpression() {}

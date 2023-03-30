@@ -2,15 +2,15 @@ package mcheli.parachute;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.Random;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.MCH_ModelManager;
+import mcheli.parachute.MCH_EntityParachute;
 import mcheli.wrapper.W_Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
-
-import java.util.Random;
 
 @SideOnly(Side.CLIENT)
 public class MCH_RenderParachute extends W_Render {

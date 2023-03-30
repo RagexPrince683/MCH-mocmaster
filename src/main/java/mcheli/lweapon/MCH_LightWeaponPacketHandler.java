@@ -2,6 +2,8 @@ package mcheli.lweapon;
 
 import com.google.common.io.ByteArrayDataInput;
 import mcheli.MCH_Lib;
+import mcheli.lweapon.MCH_ItemLightWeaponBase;
+import mcheli.lweapon.MCH_PacketLightWeaponPlayerControl;
 import mcheli.weapon.MCH_IEntityLockChecker;
 import mcheli.weapon.MCH_WeaponBase;
 import mcheli.weapon.MCH_WeaponCreator;

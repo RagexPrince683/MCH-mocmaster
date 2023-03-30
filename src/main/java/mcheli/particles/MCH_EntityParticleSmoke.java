@@ -2,14 +2,14 @@ package mcheli.particles;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.List;
 import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.particles.MCH_EntityParticleBase;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
-
-import java.util.List;
 
 public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase {
 
@@ -48,7 +48,7 @@ public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase {
          } else {
             super.motionY += (double)super.gravity;
          }
-         if (this.boundingBox == null) System.out.println("Bounding box is null");
+
          this.moveEntity(super.motionX, super.motionY, super.motionZ);
          if(super.diffusible) {
             super.motionX *= 0.96D;
@@ -87,7 +87,7 @@ public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase {
 
          for(int i = 0; i < list.size(); ++i) {
             MCH_EntityAircraft ac = (MCH_EntityAircraft)list.get(i);
-            if(ac != null && ac.getThrottle() > 0.10000000149011612D) {
+            if(ac.getThrottle() > 0.10000000149011612D) {
                float dist = this.getDistanceToEntity(ac);
                double vel = (23.0D - (double)dist) * 0.009999999776482582D * ac.getThrottle();
                double mx = ac.posX - super.posX;

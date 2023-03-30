@@ -2,12 +2,6 @@ package mcheli.wrapper.modelloader;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.resources.IResource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.ModelFormatException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +9,16 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
+import mcheli.wrapper.modelloader.W_Face;
+import mcheli.wrapper.modelloader.W_GroupObject;
+import mcheli.wrapper.modelloader.W_ModelCustom;
+import mcheli.wrapper.modelloader.W_TextureCoordinate;
+import mcheli.wrapper.modelloader.W_Vertex;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.resources.IResource;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.model.ModelFormatException;
 
 @SideOnly(Side.CLIENT)
 public class W_MetasequoiaObject extends W_ModelCustom {
@@ -67,21 +71,6 @@ public class W_MetasequoiaObject extends W_ModelCustom {
 
       return true;
    }
-   
-   public W_GroupObject getPart(String partName) {
-	      Iterator i$ = this.groupObjects.iterator();
-
-	      W_GroupObject groupObject;
-	      do {
-	         if(!i$.hasNext()) {
-	            return null;
-	         }
-
-	         groupObject = (W_GroupObject)i$.next();
-	      } while(!partName.equalsIgnoreCase(groupObject.name));
-
-	      return groupObject;
-	   }
 
    private void loadObjModel(InputStream inputStream) throws ModelFormatException {
       BufferedReader reader = null;

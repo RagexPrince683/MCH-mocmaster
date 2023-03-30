@@ -1,13 +1,12 @@
 package mcheli.aircraft;
 
 import com.google.common.io.ByteArrayDataInput;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import mcheli.MCH_Packet;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Network;
 import net.minecraft.entity.Entity;
-
-import java.io.DataOutputStream;
-import java.io.IOException;
 
 public class MCH_PacketNotifyWeaponID extends MCH_Packet {
 

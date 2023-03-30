@@ -6,6 +6,8 @@ import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.chain.MCH_EntityChain;
 import mcheli.container.MCH_EntityContainer;
+import mcheli.helicopter.MCH_EntityHeli;
+import mcheli.helicopter.MCH_HeliPacketPlayerControl;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.weapon.MCH_WeaponParam;
 import net.minecraft.entity.Entity;

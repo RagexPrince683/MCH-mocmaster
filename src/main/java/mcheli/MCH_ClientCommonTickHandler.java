@@ -2,7 +2,21 @@ package mcheli;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import mcheli.aircraft.*;
+import java.util.Iterator;
+import mcheli.MCH_ClientEventHook;
+import mcheli.MCH_ClientTickHandlerBase;
+import mcheli.MCH_Config;
+import mcheli.MCH_GuiCommon;
+import mcheli.MCH_Key;
+import mcheli.MCH_MOD;
+import mcheli.MCH_PacketIndOpenScreen;
+import mcheli.MCH_ServerSettings;
+import mcheli.MCH_ViewEntityDummy;
+import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.MCH_ClientSeatTickHandler;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.aircraft.MCH_SeatInfo;
 import mcheli.command.MCH_GuiTitle;
 import mcheli.gltd.MCH_ClientGLTDTickHandler;
 import mcheli.gltd.MCH_EntityGLTD;
@@ -31,7 +45,11 @@ import mcheli.vehicle.MCH_ClientVehicleTickHandler;
 import mcheli.vehicle.MCH_EntityVehicle;
 import mcheli.vehicle.MCH_GuiVehicle;
 import mcheli.weapon.MCH_WeaponSet;
-import mcheli.wrapper.*;
+import mcheli.wrapper.W_Lib;
+import mcheli.wrapper.W_McClient;
+import mcheli.wrapper.W_Reflection;
+import mcheli.wrapper.W_TickHandler;
+import mcheli.wrapper.W_Vec3;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.GuiChat;
@@ -42,8 +60,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.Display;
-
-import java.util.Iterator;
 
 @SideOnly(Side.CLIENT)
 public class MCH_ClientCommonTickHandler extends W_TickHandler {
@@ -303,18 +319,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
    }
 
-   public void renderCompass(){
-      boolean hasCompass = true;
-
-      if(hasCompass){
-        // MCH_HudItemGraduation yaw = new MCH_HudItemGraduation(0, 0, "plyr_yaw", "0", "0", "-100");
-         //yaw.drawCommonGraduationYaw(Minecraft.getMinecraft().thePlayer.rotationYaw, 0,  0, -100);
-      }
-   }
-
    public void onRenderTickPre(float partialTicks) {
-      renderCompass();
-
       MCH_GuiTargetMarker.clearMarkEntityPos();
       if(!MCH_ServerSettings.enableDebugBoundingBox) {
          RenderManager.debugBoundingBox = false;

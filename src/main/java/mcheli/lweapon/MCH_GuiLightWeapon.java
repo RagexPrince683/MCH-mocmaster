@@ -9,6 +9,8 @@ import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.gltd.MCH_EntityGLTD;
 import mcheli.gui.MCH_Gui;
+import mcheli.lweapon.MCH_ClientLightWeaponTickHandler;
+import mcheli.lweapon.MCH_ItemLightWeaponBase;
 import mcheli.weapon.MCH_WeaponGuidanceSystem;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.client.Minecraft;

@@ -57,7 +57,6 @@ public class MCH_EntityGLTD extends W_Entity {
       super.yOffset = super.height / 2.0F;
       this.camera = new MCH_Camera(world, this);
       MCH_WeaponInfo wi = MCH_WeaponInfoManager.get("a10gau8");
-      
       this.weaponCAS = new MCH_WeaponCAS(world, Vec3.createVectorHelper(0.0D, 0.0D, 0.0D), 0.0F, 0.0F, "a10gau8", wi);
       this.weaponCAS.interval += this.weaponCAS.interval > 0?150:-150;
       this.weaponCAS.displayName = "A-10 GAU-8 Avenger";
@@ -70,7 +69,6 @@ public class MCH_EntityGLTD extends W_Entity {
       this.renderRotaionYaw = 0.0F;
       this.renderRotaionPitch = 0.0F;
       this.zoomDir = true;
-      
       super.renderDistanceWeight = 2.0D;
    }
 

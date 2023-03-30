@@ -1,5 +1,7 @@
 package mcheli;
 
+import mcheli.MCH_Queue;
+
 public class MCH_LowPassFilterFloat {
 
    private MCH_Queue filter;

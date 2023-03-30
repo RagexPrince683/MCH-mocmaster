@@ -3,6 +3,9 @@ package mcheli;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Map;
+import mcheli.MCH_BaseInfo;
+import mcheli.MCH_InputFile;
+import mcheli.MCH_Lib;
 
 public abstract class MCH_InfoManagerBase {
 

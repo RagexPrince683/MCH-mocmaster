@@ -1,5 +1,8 @@
 package mcheli.multiplay;
 
+import mcheli.multiplay.MCH_GuiScoreboard_Base;
+import mcheli.multiplay.MCH_IGuiScoreboard;
+import mcheli.multiplay.MCH_PacketIndMultiplayCommand;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_ScaledResolution;
 import net.minecraft.client.gui.GuiButton;

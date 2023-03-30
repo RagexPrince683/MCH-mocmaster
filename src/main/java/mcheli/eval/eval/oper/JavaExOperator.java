@@ -2,6 +2,7 @@ package mcheli.eval.eval.oper;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import mcheli.eval.eval.oper.Operator;
 
 public class JavaExOperator implements Operator {
 

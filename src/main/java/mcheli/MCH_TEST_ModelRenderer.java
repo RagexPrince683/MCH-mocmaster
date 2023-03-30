@@ -1,5 +1,6 @@
 package mcheli;
 
+import mcheli.MCH_ModelManager;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelRenderer;
 import org.lwjgl.opengl.GL11;

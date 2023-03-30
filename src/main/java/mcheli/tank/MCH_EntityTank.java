@@ -2,14 +2,25 @@ package mcheli.tank;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.Iterator;
+import java.util.List;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.MCH_Math;
-import mcheli.aircraft.*;
+import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.MCH_BoundingBox;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityHitBox;
+import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.aircraft.MCH_PacketStatusRequest;
+import mcheli.aircraft.MCH_Parts;
 import mcheli.chain.MCH_EntityChain;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
+import mcheli.tank.MCH_TankInfo;
+import mcheli.tank.MCH_TankInfoManager;
+import mcheli.tank.MCH_WheelManager;
 import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.weapon.MCH_WeaponSet;
 import mcheli.wrapper.W_Block;
@@ -35,9 +46,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-
-import java.util.Iterator;
-import java.util.List;
 
 public class MCH_EntityTank extends MCH_EntityAircraft {
 
@@ -330,7 +338,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
       super.worldObj.theProfiler.endSection();
    }
-
+//help
    private void rotationByKey(float partialTicks) {
       float rot = 0.2F;
       if(super.moveLeft && !super.moveRight) {
@@ -373,6 +381,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
             double dx = super.posX - super.prevPosX;
             double dz = super.posZ - super.prevPosZ;
             double dist = dx * dx + dz * dz;
+
             if(pivotTurnThrottle1 <= 0.0F || this.getCurrentThrottle() >= (double)pivotTurnThrottle1 || super.throttleBack >= pivotTurnThrottle1 / 10.0F || dist > (double)super.throttleBack * 0.01D) {
                float sf = (float)Math.sqrt(dist <= 1.0D?dist:1.0D);
                if(pivotTurnThrottle1 <= 0.0F) {
@@ -387,6 +396,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                if(super.moveRight && !super.moveLeft) {
                   this.setRotYaw(this.getRotYaw() + 0.6F * gmy * partialTicks * flag * sf);
                }
+
             }
          }
 
@@ -423,8 +433,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       if(this.getCurrentThrottle() < 0.0D) {
          this.setCurrentThrottle(0.0D);
       }
-      this.setCurrentThrottle(Math.min(this.getCurrentThrottle(), getMaxMove()));
-      
+
       if(super.worldObj.isRemote) {
          if(!W_Lib.isClientPlayer(this.getRiddenByEntity()) || this.getCountOnUpdate() % 200 == 0) {
             double ct = this.getThrottle();
@@ -439,6 +448,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       } else {
          this.setThrottle(this.getCurrentThrottle());
       }
+
    }
 
    protected void onUpdate_ControlSub() {
@@ -456,7 +466,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                super.throttleBack = (float)((double)super.throttleBack - 0.01D * (double)f);
             } else {
                super.throttleBack = 0.0F;
-               if(this.getCurrentThrottle() < getMaxMove()) {
+               if(this.getCurrentThrottle() < 1.0D) {
                   this.addCurrentThrottle(0.01D * (double)f);
                } else {
                   this.setCurrentThrottle(1.0D);
@@ -467,10 +477,23 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                this.addCurrentThrottle(-0.01D * (double)throttleUpDown);
             } else {
                this.setCurrentThrottle(0.0D);
-               if(this.getAcInfo().enableBack) {
+               if(this.getAcInfo().enableBack) {//potential source of problem
                   super.throttleBack = (float)((double)super.throttleBack + 0.0025D * (double)throttleUpDown);
                   if(super.throttleBack > 0.6F) {
                      super.throttleBack = 0.6F;
+                  }
+                  float pivotTurnThrottle1 = this.getAcInfo().pivotTurnThrottle;
+                  if (pivotTurnThrottle1 > 0) {
+                     if (super.throttleBack > 0) {
+                        //add opposite of what should be doing here
+                        if(super.moveLeft && !super.moveRight) {
+                           this.setRotYaw(this.getRotYaw() + 1.2F);
+                        }
+
+                        if(super.moveRight && !super.moveLeft) {
+                           this.setRotYaw(this.getRotYaw() - 1.2F);
+                        }
+                     }
                   }
                }
             }
@@ -567,9 +590,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          prm.motionZ = (double)size * (super.rand.nextDouble() - 0.5D) * 0.3D;
          prm.size = size * ((float)super.rand.nextInt(5) + 5.0F) * 1.0F;
          prm.setColor(0.7F + super.rand.nextFloat() * 0.1F, c, c, c);
-         //MCH_ParticlesUtil.spawnParticle(prm);
-
-
+         MCH_ParticlesUtil.spawnParticle(prm);
       }
 
       super.prevDamageSmokePos[ri].xCoord = x;
@@ -689,7 +710,6 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
       this.updateWheels();
       this.onUpdate_Particle2();
-      //onUpdateDeath();
       this.updateSound();
       if(super.worldObj.isRemote) {
          this.onUpdate_ParticleLandingGear();
@@ -700,37 +720,8 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       this.updateCamera(super.posX, super.posY, super.posZ);
    }
 
-
-
    public void applyOnGroundPitch(float factor) {}
-   
-   
-   public float getMaxMove() {
-	   return 1.0F;
-   }
-   public float getMaxMove2() {
-	   int id = MCH_Lib.getBlockIdY(this, 1, -2);
-	   if(this.getTankInfo().weightType == 1) { //I'm a car
-		   if(id == 2 || id == 3) { //dirt or grass
-			   return 0.7f;
-		   }else if(id == 12 || id ==78) { //snow or sand
-			   return 0.5f;
-		   }else if(id == 4 || id == 13 || id == 564|| id == 97 || id == 701) { //cobble, gravel, chiseled dirt, stonebrick
-			   return 1.0f;
-		   }else if(id == 560 || id == 1756 || id == 1731 || id == 1726) { //asphalt, concrete, etc
-			   return 1.2f;
-		   }
-	   }else {
-		   if(id == 12 || id ==78) { //snow/sand
-			   return 0.7f;
-		   }else if(id == 560 || id == 1756 || id == 1731 || id == 1726) {
-			   return 1.2f;
-		   }
-		   return 1.0f;
-	   }
-	   return 0.5f;
-   }
-   
+
    private void onUpdate_Server() {
       Entity rdnEnt = this.getRiddenByEntity();
       double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
@@ -999,7 +990,6 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                               m = (Block)i$.next();
                               if(Block.isEqualTo(block, m)) {
                                  this.destroyBlock(bx, by, bz);
-                               //  this.setCurrentThrottle(this.getThrottle() * 0.95); //MOCC CHANGE
                                  mat = null;
                                  break;
                               }
@@ -1014,7 +1004,6 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                            while(i$.hasNext()) {
                               Material var21 = (Material)i$.next();
                               if(block.getMaterial() == var21) {
-                            	  //this.setCurrentThrottle(this.getThrottle() * 0.95); //MOCC CHANGE
                                  this.destroyBlock(bx, by, bz);
                                  break;
                               }

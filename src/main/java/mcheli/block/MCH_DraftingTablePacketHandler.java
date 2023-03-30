@@ -2,6 +2,8 @@ package mcheli.block;
 
 import com.google.common.io.ByteArrayDataInput;
 import mcheli.MCH_Lib;
+import mcheli.block.MCH_DraftingTableCreatePacket;
+import mcheli.block.MCH_DraftingTableGuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class MCH_DraftingTablePacketHandler {

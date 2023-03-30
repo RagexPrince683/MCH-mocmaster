@@ -4,6 +4,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Lib;
 import mcheli.MCH_ModelManager;
+import mcheli.chain.MCH_EntityChain;
 import mcheli.wrapper.W_Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;

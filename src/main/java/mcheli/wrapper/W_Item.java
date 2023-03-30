@@ -8,9 +8,10 @@
  */
 package mcheli.wrapper;
 
-import cpw.mods.fml.common.registry.GameData;
+import mcheli.wrapper.W_MOD;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.util.RegistryNamespaced;
 
 public class W_Item
 extends Item {
@@ -37,9 +38,7 @@ extends Item {
         if (nm.indexOf(58) < 0) {
             nm = "minecraft:" + nm;
         }
-        //return (Item)Item.itemRegistry.getObject(nm);
-        //return GameData.getItemRegistry().getObject(nm);
-        return GameData.getItemRegistry().get(nm);
+        return (Item)Item.itemRegistry.getObject(nm);
     }
 
     public static String getNameForItem(Item item) {

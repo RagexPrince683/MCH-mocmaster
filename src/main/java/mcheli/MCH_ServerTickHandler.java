@@ -4,14 +4,12 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
-import mcheli.sensors.MCH_ESMHandler;
-import mcheli.wrapper.W_Reflection;
-import net.minecraft.network.NetworkManager;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import mcheli.wrapper.W_Reflection;
+import net.minecraft.network.NetworkManager;
 
 public class MCH_ServerTickHandler {
 
@@ -26,13 +24,11 @@ public class MCH_ServerTickHandler {
    public void onServerTickEvent(ServerTickEvent event) {
       Phase var10001 = event.phase;
       if(event.phase == Phase.START) {
-    	  
          ;
       }
 
       var10001 = event.phase;
       if(event.phase == Phase.END) {
-    	  MCH_ESMHandler.getInstance().onTick();
          ;
       }
 

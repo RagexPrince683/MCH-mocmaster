@@ -3,6 +3,8 @@ package mcheli.aircraft;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Lib;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_SeatRackInfo;
 import mcheli.tool.MCH_ItemWrench;
 import mcheli.wrapper.W_Entity;
 import net.minecraft.entity.Entity;
@@ -154,7 +156,7 @@ public class MCH_EntitySeat extends W_Entity {
             }
 
             this.setParent((MCH_EntityAircraft)null);
-            MCH_Lib.DbgLog(super.worldObj, "[Error]seat=%d, parentUniqueID=%s", new Object[]{Integer.valueOf(this.seatID), this.parentUniqueID});
+            MCH_Lib.DbgLog(super.worldObj, "[Error]座席エンティティは本体が見つからないため削除 seat=%d, parentUniqueID=%s", new Object[]{Integer.valueOf(this.seatID), this.parentUniqueID});
          } else {
             ++this.parentSearchCount;
          }

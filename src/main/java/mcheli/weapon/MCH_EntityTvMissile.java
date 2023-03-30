@@ -1,6 +1,9 @@
 package mcheli.weapon;
 
 import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.weapon.MCH_BulletModel;
+import mcheli.weapon.MCH_DefaultBulletModels;
+import mcheli.weapon.MCH_EntityBaseBullet;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;

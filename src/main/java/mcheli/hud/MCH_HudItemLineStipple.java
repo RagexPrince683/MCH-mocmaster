@@ -1,5 +1,7 @@
 package mcheli.hud;
 
+import mcheli.hud.MCH_HudItem;
+
 public class MCH_HudItemLineStipple extends MCH_HudItem {
 
    private final String pat;

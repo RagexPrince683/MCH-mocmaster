@@ -1,14 +1,13 @@
 package mcheli.throwable;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import mcheli.MCH_BaseInfo;
 import mcheli.MCH_Color;
 import mcheli.wrapper.W_Item;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.model.IModelCustom;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class MCH_ThrowableInfo extends MCH_BaseInfo {
 

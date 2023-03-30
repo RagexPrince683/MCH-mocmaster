@@ -1,5 +1,22 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.AndExpression;
+import mcheli.eval.eval.exp.ArrayExpression;
+import mcheli.eval.eval.exp.CharExpression;
+import mcheli.eval.eval.exp.Col1Expression;
+import mcheli.eval.eval.exp.Col2Expression;
+import mcheli.eval.eval.exp.Col2OpeExpression;
+import mcheli.eval.eval.exp.Col3Expression;
+import mcheli.eval.eval.exp.CommaExpression;
+import mcheli.eval.eval.exp.FieldExpression;
+import mcheli.eval.eval.exp.NumberExpression;
+import mcheli.eval.eval.exp.OrExpression;
+import mcheli.eval.eval.exp.ParenExpression;
+import mcheli.eval.eval.exp.SignPlusExpression;
+import mcheli.eval.eval.exp.StringExpression;
+import mcheli.eval.eval.exp.VariableExpression;
+import mcheli.eval.eval.exp.WordExpression;
 import mcheli.eval.eval.repl.ReplaceAdapter;
 
 public class OptimizeObject extends ReplaceAdapter {

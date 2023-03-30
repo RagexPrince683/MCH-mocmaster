@@ -2,6 +2,8 @@ package mcheli.plane;
 
 import com.google.common.io.ByteArrayDataInput;
 import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.plane.MCP_EntityPlane;
+import mcheli.plane.MCP_PlanePacketPlayerControl;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.weapon.MCH_WeaponParam;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,8 +30,6 @@ public class MCP_PlanePacketHandler {
          }
 
          if(plane != null) {
-        	 plane.currentHardpoint = pc.currentHardpoint;
-             plane.radarMode = pc.radarMode;
             if(pc.isUnmount == 1) {
                plane.unmountEntity();
             } else if(pc.isUnmount == 2) {
@@ -88,8 +88,6 @@ public class MCP_PlanePacketHandler {
                   plane.throttleDown = pc.throttleDown;
                   plane.moveLeft = pc.moveLeft;
                   plane.moveRight = pc.moveRight;
-                  plane.moveUp = pc.moveUp;
-                  plane.moveDown = pc.moveDown;
                }
 
                if(pc.useFlareType > 0) {

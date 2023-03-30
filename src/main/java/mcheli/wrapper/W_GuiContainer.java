@@ -16,10 +16,15 @@
  */
 package mcheli.wrapper;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
@@ -44,7 +49,6 @@ extends GuiContainer {
         GL11.glEnable((int)2896);
         GuiScreen.itemRender.renderItemAndEffectIntoGUI(font, this.mc.getTextureManager(), item, x, y);
         GuiScreen.itemRender.renderItemOverlayIntoGUI(font, this.mc.getTextureManager(), item, x, y, null);
-
         this.zLevel = 0.0f;
         GuiScreen.itemRender.zLevel = 0.0f;
     }

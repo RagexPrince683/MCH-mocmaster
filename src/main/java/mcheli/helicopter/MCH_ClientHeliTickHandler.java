@@ -7,6 +7,8 @@ import mcheli.MCH_ViewEntityDummy;
 import mcheli.aircraft.MCH_AircraftClientTickHandler;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_SeatInfo;
+import mcheli.helicopter.MCH_EntityHeli;
+import mcheli.helicopter.MCH_HeliPacketPlayerControl;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Network;
@@ -33,9 +35,7 @@ public class MCH_ClientHeliTickHandler extends MCH_AircraftClientTickHandler {
       this.KeySwitchMode = new MCH_Key(MCH_Config.KeySwitchMode.prmInt);
       this.KeySwitchHovering = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
       this.KeyZoom = new MCH_Key(MCH_Config.KeyZoom.prmInt);
-     // this.KeyThrottleUp = this.KeyUp;
-      //this.KeyThrottleDown = this.KeyDown;
-      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeySwitchHovering, super.KeyUseWeapon, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack, KeyThrottleDown, KeyThrottleUp, tdcRight, tdcLeft};
+      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeySwitchHovering, super.KeyUseWeapon, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
    }
 
    protected void update(EntityPlayer player, MCH_EntityHeli heli, boolean isPilot) {
@@ -147,17 +147,6 @@ public class MCH_ClientHeliTickHandler extends MCH_AircraftClientTickHandler {
             } else {
                playSoundNG();
             }
-         }
-         
-         if(tdcLeft.isKeyPress()) {
-       	  	heli.yawLeft = true;
-         }else {
-        	 heli.yawLeft = false;
-         }
-         if(tdcRight.isKeyPress()) {
-       	  	heli.yawRight = true;
-         }else {
-        	 heli.yawRight = false;
          }
 
          if(this.KeySwitchHovering.isKeyDown()) {

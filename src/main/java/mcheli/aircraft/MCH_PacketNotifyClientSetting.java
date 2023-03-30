@@ -1,14 +1,13 @@
 package mcheli.aircraft;
 
 import com.google.common.io.ByteArrayDataInput;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.MCH_Packet;
 import mcheli.wrapper.W_EntityRenderer;
 import mcheli.wrapper.W_Network;
-
-import java.io.DataOutputStream;
-import java.io.IOException;
 
 public class MCH_PacketNotifyClientSetting extends MCH_Packet {
 

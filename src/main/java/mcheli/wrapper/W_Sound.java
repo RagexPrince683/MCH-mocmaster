@@ -9,7 +9,9 @@
  */
 package mcheli.wrapper;
 
+import mcheli.wrapper.W_McClient;
 import net.minecraft.client.audio.MovingSound;
+import net.minecraft.client.audio.PositionedSound;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 

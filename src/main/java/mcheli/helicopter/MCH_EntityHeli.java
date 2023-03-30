@@ -1,5 +1,6 @@
 package mcheli.helicopter;
 
+import java.util.Iterator;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
@@ -7,6 +8,8 @@ import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_PacketStatusRequest;
 import mcheli.aircraft.MCH_Rotor;
+import mcheli.helicopter.MCH_HeliInfo;
+import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.wrapper.W_Entity;
@@ -18,8 +21,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-
-import java.util.Iterator;
 
 public class MCH_EntityHeli extends MCH_EntityAircraft {
 
@@ -34,10 +35,8 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
    public byte lastFoldBladeStat;
    public int foldBladesCooldown;
    public float prevRollFactor = 0.0F;
-   public float goalAngle = 70.0F;
-   public boolean yawLeft = false;
-   public boolean yawRight = false;
-   
+
+
    public MCH_EntityHeli(World world) {
       super(world);
       super.currentSpeed = 0.07D;
@@ -50,7 +49,6 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
       super.weapons = this.createWeapon(0);
       this.rotors = new MCH_Rotor[0];
       this.lastFoldBladeStat = -1;
-      
       if(super.worldObj.isRemote) {
          this.foldBladesCooldown = 40;
       }
@@ -95,11 +93,7 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
       MCH_Config var10000 = MCH_MOD.config;
       return MCH_Config.MountMinecartHeli.prmBool;
    }
-   
-   public float getMaxMove() {
-	   return 1.0F;
-   }
-   
+
    protected void entityInit() {
       super.entityInit();
       super.dataWatcher.addObject(30, Byte.valueOf((byte)2));
@@ -328,8 +322,8 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
          this.onUpdate_Rotor();
          super.prevPosX = super.posX;
          super.prevPosY = super.posY;
-         super.prevPosZ = super.posZ; 
-         if(!this.isDestroyed() && this.isHovering() && MathHelper.abs(this.getRotPitch()) < this.goalAngle) { //if(!this.isDestroyed() && this.isHovering() && MathHelper.abs(this.getRotPitch()) < 70.0F) {
+         super.prevPosZ = super.posZ;
+         if(!this.isDestroyed() && this.isHovering() && MathHelper.abs(this.getRotPitch()) < 70.0F) {
             this.setRotPitch(this.getRotPitch() * 0.95F);
          }
 
@@ -417,11 +411,6 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
             if(super.moveRight && !super.moveLeft) {
                this.setRotRoll(this.getRotRoll() + 1.2F * partialTicks);
             }
-            if(super.moveUp && ! super.moveDown) {
-            	 this.setRotPitch(this.getRotPitch() + 1.2F * partialTicks);
-            }else if(super.moveDown && ! super.moveUp) {
-            	this.setRotPitch(this.getRotPitch() - 1.2F * partialTicks);
-            }
          } else {
             if(MathHelper.abs(this.getRotPitch()) < 40.0F) {
                this.applyOnGroundPitch(0.97F);
@@ -437,11 +426,7 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
                }
             }
          }
-         if(this.yawRight && ! this.yawLeft) {
-        	 this.setRotYaw(this.getRotYaw() + 1.0F * partialTicks);
-         }else if(this.yawLeft && !this.yawRight) {
-        	 this.setRotYaw(this.getRotYaw() - 1.0F * partialTicks);
-         }
+
       }
    }
 
@@ -533,7 +518,6 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
       float rp1 = (float)(1.0D - this.getCurrentThrottle());
       this.rotationRotor += (double)((1.0F - rp1 * rp1 * rp1) * this.getAcInfo().rotorSpeed);
       this.rotationRotor %= 360.0D;
-      
    }
 
    protected void onUpdate_ControlNotHovering() {
@@ -600,7 +584,6 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
          double x = 0.0D;
          double z = 0.0D;
          if(super.throttleUp) {
-        	this.goalAngle -= 1;
             yaw = this.getRotYaw();
             x += Math.sin((double)yaw * 3.141592653589793D / 180.0D);
             z += Math.cos((double)yaw * 3.141592653589793D / 180.0D);
@@ -608,7 +591,6 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
          }
 
          if(super.throttleDown) {
-        	this.goalAngle += 1;
             yaw = this.getRotYaw() - 180.0F;
             x += Math.sin((double)yaw * 3.141592653589793D / 180.0D);
             z += Math.cos((double)yaw * 3.141592653589793D / 180.0D);
@@ -630,7 +612,6 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
          }
 
          if(move) {
-        	this.setRotPitch(this.goalAngle);
             double d = Math.sqrt(x * x + z * z);
             super.motionX -= x / d * 0.009999999776482582D * (double)this.getAcInfo().speed;
             super.motionZ += z / d * 0.009999999776482582D * (double)this.getAcInfo().speed;
@@ -813,7 +794,7 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
                throttle *= 0.65D;
             }
 
-            super.motionY += (y * 0.025D+0.023D) * throttle;
+            super.motionY += (y * 0.025D + 0.03D) * throttle;
          } else {
             if(MathHelper.abs(this.getRotPitch()) < 40.0F) {
                speedLimit = this.getRotPitch();

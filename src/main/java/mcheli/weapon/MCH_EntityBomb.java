@@ -1,12 +1,14 @@
 package mcheli.weapon;
 
+import java.util.List;
+import mcheli.weapon.MCH_BulletModel;
+import mcheli.weapon.MCH_DefaultBulletModels;
+import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_Lib;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-
-import java.util.List;
 
 public class MCH_EntityBomb extends MCH_EntityBaseBullet {
 
@@ -18,10 +20,6 @@ public class MCH_EntityBomb extends MCH_EntityBaseBullet {
       super(par1World, posX, posY, posZ, targetX, targetY, targetZ, yaw, pitch, acceleration);
    }
 
-   
-   
-  
-   
    public void onUpdate() {
       super.onUpdate();
       if(!super.worldObj.isRemote && this.getInfo() != null) {

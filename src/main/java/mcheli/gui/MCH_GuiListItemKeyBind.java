@@ -2,6 +2,7 @@ package mcheli.gui;
 
 import mcheli.MCH_ConfigPrm;
 import mcheli.MCH_KeyName;
+import mcheli.gui.MCH_GuiListItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 

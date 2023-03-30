@@ -1,6 +1,8 @@
 package mcheli.weapon;
 
 import mcheli.MCH_Color;
+import mcheli.weapon.MCH_BulletModel;
+import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_Block;
 import mcheli.wrapper.W_Render;
 import mcheli.wrapper.W_WorldFunc;
@@ -35,7 +37,6 @@ public abstract class MCH_RenderBulletBase extends W_Render {
       dstBlend = GL11.glGetInteger(3040);
       GL11.glBlendFunc(770, 771);
       this.renderBullet(e, var2, var4, var6, var8, var9);
-      renderMissileTrail((MCH_EntityBaseBullet) e);
       GL11.glColor4f(0.75F, 0.75F, 0.75F, 1.0F);
       GL11.glBlendFunc(var13, dstBlend);
       GL11.glDisable(3042);
@@ -48,13 +49,6 @@ public abstract class MCH_RenderBulletBase extends W_Render {
          model.model.renderAll();
       }
 
-   }
-
-   public void renderMissileTrail(MCH_EntityBaseBullet b){
-      if(b.shouldRenderRocketTrail()){
-         b.spawnParticle("rocket", 1,  1);
-
-      }
    }
 
    public abstract void renderBullet(Entity var1, double var2, double var4, double var6, float var8, float var9);

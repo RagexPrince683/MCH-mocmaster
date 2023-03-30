@@ -2,6 +2,9 @@ package mcheli.weapon;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mcheli.weapon.MCH_EntityBullet;
+import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.weapon.MCH_WeaponInfoManager;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.entity.Entity;

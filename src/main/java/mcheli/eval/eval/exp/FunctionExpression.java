@@ -1,9 +1,13 @@
 package mcheli.eval.eval.exp;
 
-import mcheli.eval.eval.EvalException;
-
 import java.util.ArrayList;
 import java.util.List;
+import mcheli.eval.eval.EvalException;
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.Col1Expression;
+import mcheli.eval.eval.exp.FieldExpression;
+import mcheli.eval.eval.exp.ShareExpValue;
+import mcheli.eval.eval.exp.VariableExpression;
 
 public class FunctionExpression extends Col1Expression {
 
@@ -144,11 +148,11 @@ public class FunctionExpression extends Col1Expression {
    }
 
    protected long operateLong(long val) {
-      throw new RuntimeException("");
+      throw new RuntimeException("この関数が呼ばれてはいけない。サブクラスで実装要");
    }
 
    protected double operateDouble(double val) {
-      throw new RuntimeException("");
+      throw new RuntimeException("この関数が呼ばれてはいけない。サブクラスで実装要");
    }
 
    protected void search() {

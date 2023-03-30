@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.DivExpression;
+import mcheli.eval.eval.exp.ShareExpValue;
+
 public class LetDivExpression extends DivExpression {
 
    public LetDivExpression() {

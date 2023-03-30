@@ -1,5 +1,6 @@
 package mcheli.eval.eval.rule;
 
+import java.util.List;
 import mcheli.eval.eval.EvalException;
 import mcheli.eval.eval.Expression;
 import mcheli.eval.eval.Rule;
@@ -9,10 +10,9 @@ import mcheli.eval.eval.lex.Lex;
 import mcheli.eval.eval.lex.LexFactory;
 import mcheli.eval.eval.oper.Operator;
 import mcheli.eval.eval.ref.Refactor;
+import mcheli.eval.eval.rule.AbstractRule;
 import mcheli.eval.eval.srch.Search;
 import mcheli.eval.eval.var.Variable;
-
-import java.util.List;
 
 public class ShareRuleValue extends Rule {
 

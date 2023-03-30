@@ -4,6 +4,9 @@ import mcheli.MCH_ClientTickHandlerBase;
 import mcheli.MCH_Config;
 import mcheli.MCH_Key;
 import mcheli.MCH_Lib;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.aircraft.MCH_PacketSeatPlayerControl;
 import mcheli.wrapper.W_Network;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -18,7 +21,6 @@ public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
    public MCH_Key KeyParachuting;
    public MCH_Key KeyFreeLook;
    public MCH_Key KeyUnmountForce;
-
    public MCH_Key[] Keys;
 
 
@@ -33,8 +35,6 @@ public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
       this.KeyParachuting = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
       this.KeyUnmountForce = new MCH_Key(42);
       this.KeyFreeLook = new MCH_Key(MCH_Config.KeyFreeLook.prmInt);
-
-
       this.Keys = new MCH_Key[]{this.KeySwitchNextSeat, this.KeySwitchPrevSeat, this.KeyParachuting, this.KeyUnmountForce, this.KeyFreeLook};
    }
 
@@ -76,12 +76,10 @@ public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
    private void playerControl(EntityPlayer player, MCH_EntitySeat seat, MCH_EntityAircraft ac) {
       MCH_PacketSeatPlayerControl pc = new MCH_PacketSeatPlayerControl();
       boolean send = false;
-      
       if(this.KeyFreeLook.isKeyDown() && ac.canSwitchGunnerFreeLook(player)) {
          ac.switchGunnerFreeLookMode();
       }
 
-      
       if(this.KeyParachuting.isKeyDown()) {
          if(ac.canParachuting(player)) {
             pc.parachuting = true;

@@ -1,9 +1,13 @@
 package mcheli.aircraft;
 
 import mcheli.MCH_ModelManager;
+import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.MCH_ItemAircraft;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import org.lwjgl.opengl.GL11;
 
 public class MCH_ItemAircraftRender implements IItemRenderer {

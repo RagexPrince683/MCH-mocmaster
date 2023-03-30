@@ -3,6 +3,9 @@ package mcheli.vehicle;
 import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.vehicle.MCH_EntityVehicle;
+import mcheli.vehicle.MCH_VehicleInfo;
+import mcheli.vehicle.MCH_VehicleInfoManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 

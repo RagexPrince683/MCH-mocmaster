@@ -1,6 +1,12 @@
 package mcheli.gltd;
 
-import mcheli.*;
+import mcheli.MCH_ClientTickHandlerBase;
+import mcheli.MCH_Config;
+import mcheli.MCH_Key;
+import mcheli.MCH_Lib;
+import mcheli.MCH_ViewEntityDummy;
+import mcheli.gltd.MCH_EntityGLTD;
+import mcheli.gltd.MCH_PacketGLTDPlayerControl;
 import mcheli.wrapper.W_Network;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;

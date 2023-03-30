@@ -2,10 +2,10 @@ package mcheli.wrapper.modelloader;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.renderer.Tessellator;
-
 import java.util.ArrayList;
 import java.util.Iterator;
+import mcheli.wrapper.modelloader.W_Face;
+import net.minecraft.client.renderer.Tessellator;
 
 @SideOnly(Side.CLIENT)
 public class W_GroupObject {

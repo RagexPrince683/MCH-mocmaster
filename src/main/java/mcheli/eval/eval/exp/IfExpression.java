@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.Col3Expression;
+import mcheli.eval.eval.exp.ShareExpValue;
+
 public class IfExpression extends Col3Expression {
 
    public IfExpression() {

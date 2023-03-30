@@ -1,12 +1,14 @@
 package mcheli.multiplay;
 
+import java.util.Iterator;
+import java.util.List;
 import mcheli.MCH_ServerSettings;
+import mcheli.multiplay.MCH_GuiScoreboard_Base;
+import mcheli.multiplay.MCH_IGuiScoreboard;
+import mcheli.multiplay.MCH_PacketIndMultiplayCommand;
 import mcheli.wrapper.W_GuiButton;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.entity.player.EntityPlayer;
-
-import java.util.Iterator;
-import java.util.List;
 
 public class MCH_GuiScoreboard_Main extends MCH_GuiScoreboard_Base {
 

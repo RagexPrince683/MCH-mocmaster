@@ -2,6 +2,7 @@ package mcheli.chain;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.List;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_WorldFunc;
@@ -12,8 +13,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-
-import java.util.List;
 
 public class MCH_EntityChain extends W_Entity {
 

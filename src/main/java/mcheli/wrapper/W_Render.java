@@ -11,15 +11,17 @@
  */
 package mcheli.wrapper;
 
+import java.nio.Buffer;
+import java.nio.FloatBuffer;
 import mcheli.MCH_Config;
+import mcheli.MCH_ConfigPrm;
+import mcheli.wrapper.W_MOD;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
-
-import java.nio.FloatBuffer;
 
 public abstract class W_Render
 extends Render {

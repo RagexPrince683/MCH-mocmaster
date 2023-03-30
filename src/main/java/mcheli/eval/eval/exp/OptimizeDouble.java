@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.NumberExpression;
+import mcheli.eval.eval.exp.OptimizeObject;
+
 public class OptimizeDouble extends OptimizeObject {
 
    protected boolean isTrue(AbstractExpression x) {

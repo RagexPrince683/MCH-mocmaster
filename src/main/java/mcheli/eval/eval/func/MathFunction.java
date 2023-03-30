@@ -1,6 +1,7 @@
 package mcheli.eval.eval.func;
 
 import java.lang.reflect.Method;
+import mcheli.eval.eval.func.Function;
 
 public class MathFunction implements Function {
 

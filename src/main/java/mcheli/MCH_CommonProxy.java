@@ -1,6 +1,9 @@
 package mcheli;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import mcheli.MCH_Config;
+import mcheli.MCH_Lib;
+import mcheli.MCH_ServerTickHandler;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_SoundUpdater;
 import net.minecraft.entity.Entity;

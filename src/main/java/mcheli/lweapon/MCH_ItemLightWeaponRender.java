@@ -5,12 +5,15 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.MCH_ModelManager;
+import mcheli.lweapon.MCH_ItemLightWeaponBase;
 import mcheli.wrapper.W_Lib;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import org.lwjgl.opengl.GL11;
 
 public class MCH_ItemLightWeaponRender implements IItemRenderer {

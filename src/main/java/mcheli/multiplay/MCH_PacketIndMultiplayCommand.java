@@ -1,11 +1,10 @@
 package mcheli.multiplay;
 
 import com.google.common.io.ByteArrayDataInput;
-import mcheli.MCH_Packet;
-import mcheli.wrapper.W_Network;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
+import mcheli.MCH_Packet;
+import mcheli.wrapper.W_Network;
 
 public class MCH_PacketIndMultiplayCommand extends MCH_Packet {
 

@@ -1,6 +1,8 @@
 package mcheli.uav;
 
 import com.google.common.io.ByteArrayDataInput;
+import mcheli.uav.MCH_EntityUavStation;
+import mcheli.uav.MCH_UavPacketStatus;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class MCH_UavPacketHandler {

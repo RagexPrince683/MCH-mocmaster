@@ -8,6 +8,8 @@ import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_AircraftCommonGui;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.gui.MCH_Gui;
+import mcheli.tank.MCH_EntityTank;
+import mcheli.tank.MCH_TankInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.opengl.GL11;

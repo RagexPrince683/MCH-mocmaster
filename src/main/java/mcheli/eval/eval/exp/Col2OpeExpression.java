@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.Col2Expression;
+import mcheli.eval.eval.exp.ShareExpValue;
+
 public abstract class Col2OpeExpression extends Col2Expression {
 
    protected Col2OpeExpression() {}
@@ -9,15 +13,15 @@ public abstract class Col2OpeExpression extends Col2Expression {
    }
 
    protected final long operateLong(long vl, long vr) {
-      throw new RuntimeException("");
+      throw new RuntimeException("この関数が呼ばれてはいけない");
    }
 
    protected final double operateDouble(double vl, double vr) {
-      throw new RuntimeException("");
+      throw new RuntimeException("この関数が呼ばれてはいけない");
    }
 
    protected final Object operateObject(Object vl, Object vr) {
-      throw new RuntimeException("");
+      throw new RuntimeException("この関数が呼ばれてはいけない");
    }
 
    protected AbstractExpression replace() {

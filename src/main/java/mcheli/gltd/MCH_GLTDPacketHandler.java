@@ -1,6 +1,8 @@
 package mcheli.gltd;
 
 import com.google.common.io.ByteArrayDataInput;
+import mcheli.gltd.MCH_EntityGLTD;
+import mcheli.gltd.MCH_PacketGLTDPlayerControl;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 

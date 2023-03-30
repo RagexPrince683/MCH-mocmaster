@@ -1,5 +1,9 @@
 package mcheli.eval.eval.exp;
 
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.ModExpression;
+import mcheli.eval.eval.exp.ShareExpValue;
+
 public class LetModExpression extends ModExpression {
 
    public LetModExpression() {

@@ -1,6 +1,7 @@
 package mcheli.hud;
 
 import mcheli.MCH_Lib;
+import mcheli.hud.MCH_HudItem;
 import org.lwjgl.opengl.GL11;
 
 public class MCH_HudItemGraduation extends MCH_HudItem {
@@ -122,7 +123,7 @@ public class MCH_HudItemGraduation extends MCH_HudItem {
       this.drawLine(var18, color, 3);
    }
 
-   public void drawCommonGraduationYaw(double playerYaw, int color, int posX, int posY) {
+   private void drawCommonGraduationYaw(double playerYaw, int color, int posX, int posY) {
       double yaw = MCH_Lib.getRotate360(playerYaw);
       boolean INVX = true;
       posX -= 90;

@@ -1,13 +1,14 @@
 package mcheli.hud;
 
+import java.util.Date;
 import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
+import mcheli.hud.MCH_HudItem;
+import mcheli.hud.MCH_HudItemStringArgs;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.MathHelper;
-
-import java.util.Date;
 
 public class MCH_HudItemString extends MCH_HudItem {
 
@@ -140,7 +141,7 @@ public class MCH_HudItemString extends MCH_HudItem {
             prm[i] = "1.7.10";
             break;
          case 24:
-            prm[i] = MCH_MOD.VER; 
+            prm[i] = MCH_MOD.VER;
             break;
          case 25:
             prm[i] = "MC Helicopter MOD";
@@ -185,7 +186,6 @@ public class MCH_HudItemString extends MCH_HudItem {
          case 38:
             prm[i] = Double.valueOf(MCH_HudItem.ac.getCurrentThrottle() * 100.0D);
          case 39:
-        
          }
       }
 
@@ -434,36 +434,11 @@ public class MCH_HudItemString extends MCH_HudItem {
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.TGT_AZ.ordinal()] = 39;
+            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.NONE.ordinal()] = 39;
          } catch (NoSuchFieldError var1) {
             ;
          }
-         
-         try {
-             $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.TGT_RANGE.ordinal()] = 40;
-          } catch (NoSuchFieldError var1) {
-             ;
-          }
-         
-         try {
-             $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.TGT_ALT.ordinal()] = 41;
-          } catch (NoSuchFieldError var1) {
-             ;
-          }
-         
-         try {
-             $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.TGT_SPD.ordinal()] = 42;
-          } catch (NoSuchFieldError var1) {
-             ;
-          }
-         
-         
-         try {
-             $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.NONE.ordinal()] = 43	;
-          } catch (NoSuchFieldError var1) {
-             ;
-          }
-         
+
       }
    }
 }

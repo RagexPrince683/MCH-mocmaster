@@ -1,5 +1,6 @@
 package mcheli.parachute;
 
+import mcheli.parachute.MCH_EntityParachute;
 import mcheli.wrapper.W_Item;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;

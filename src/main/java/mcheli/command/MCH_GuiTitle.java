@@ -3,6 +3,9 @@ package mcheli.command;
 import com.google.common.collect.Lists;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import mcheli.gui.MCH_Gui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ChatLine;
@@ -12,10 +15,6 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class MCH_GuiTitle extends MCH_Gui {

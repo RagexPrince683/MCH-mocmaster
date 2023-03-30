@@ -7,6 +7,8 @@ import mcheli.MCH_ViewEntityDummy;
 import mcheli.aircraft.MCH_AircraftClientTickHandler;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_SeatInfo;
+import mcheli.tank.MCH_EntityTank;
+import mcheli.tank.MCH_TankPacketPlayerControl;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.wrapper.W_Network;
 import mcheli.wrapper.W_Reflection;
@@ -30,8 +32,6 @@ public class MCH_ClientTankTickHandler extends MCH_AircraftClientTickHandler {
       super.updateKeybind(config);
       this.KeySwitchMode = new MCH_Key(MCH_Config.KeySwitchMode.prmInt);
       this.KeyZoom = new MCH_Key(MCH_Config.KeyZoom.prmInt);
-      this.KeyThrottleUp = this.KeyUp;
-      this.KeyThrottleDown = this.KeyDown;
       this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, super.KeyUseWeapon, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyBrake, super.KeyPutToRack, super.KeyDownFromRack};
    }
 

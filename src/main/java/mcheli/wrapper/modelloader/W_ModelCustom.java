@@ -1,5 +1,6 @@
 package mcheli.wrapper.modelloader;
 
+import mcheli.wrapper.modelloader.W_Vertex;
 import net.minecraftforge.client.model.IModelCustom;
 
 public abstract class W_ModelCustom implements IModelCustom {

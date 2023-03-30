@@ -1,5 +1,9 @@
 package mcheli.hud;
 
+import mcheli.hud.MCH_Hud;
+import mcheli.hud.MCH_HudItem;
+import mcheli.hud.MCH_HudManager;
+
 public class MCH_HudItemCall extends MCH_HudItem {
 
    private final String hudName;

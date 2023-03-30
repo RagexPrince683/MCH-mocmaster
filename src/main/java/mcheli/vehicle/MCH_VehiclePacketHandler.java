@@ -2,6 +2,8 @@ package mcheli.vehicle;
 
 import com.google.common.io.ByteArrayDataInput;
 import mcheli.chain.MCH_EntityChain;
+import mcheli.vehicle.MCH_EntityVehicle;
+import mcheli.vehicle.MCH_PacketVehiclePlayerControl;
 import mcheli.weapon.MCH_WeaponParam;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;

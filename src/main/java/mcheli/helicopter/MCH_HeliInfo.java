@@ -1,12 +1,12 @@
 package mcheli.helicopter;
 
+import java.util.ArrayList;
+import java.util.List;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.helicopter.MCH_ItemHeli;
 import net.minecraft.item.Item;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MCH_HeliInfo extends MCH_AircraftInfo {
 

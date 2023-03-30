@@ -4,9 +4,13 @@ import cpw.mods.fml.common.network.IGuiHandler;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.*;
+import mcheli.aircraft.MCH_AircraftGui;
+import mcheli.aircraft.MCH_AircraftGuiContainer;
+import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.block.MCH_DraftingTableGui;
 import mcheli.block.MCH_DraftingTableGuiContainer;
+import mcheli.gui.MCH_ConfigGui;
+import mcheli.gui.MCH_ConfigGuiContainer;
 import mcheli.multiplay.MCH_ContainerScoreboard;
 import mcheli.multiplay.MCH_GuiScoreboard;
 import mcheli.uav.MCH_ContainerUavStation;
@@ -62,23 +66,6 @@ public class MCH_GuiCommonHandler implements IGuiHandler {
          }
 
          return new MCH_ContainerScoreboard(player);
-
-         case 6:
-            System.out.println("opening GUI");
-            ac = null;
-            if(player.ridingEntity instanceof MCH_EntityAircraft) {
-               ac = (MCH_EntityAircraft)player.ridingEntity;
-            } else if(player.ridingEntity instanceof MCH_EntityUavStation) {
-               ac = ((MCH_EntityUavStation)player.ridingEntity).getControlAircract();
-            }
-
-            if(ac != null) {
-               ac.print("aaaaaaaaaaaaaaaaa");
-               MCH_ContainerHardpoint container = new MCH_ContainerHardpoint(player, (int)player.posX, (int)player.posY, (int)player.posZ, ac);
-               return container;
-            }
-            System.out.println("ffailed to g GUI");
-
       }
 
       return null;
@@ -113,22 +100,6 @@ public class MCH_GuiCommonHandler implements IGuiHandler {
          return new MCH_DraftingTableGui(player, x, y, z);
       case 5:
          return new MCH_GuiScoreboard(player);
-      case 6:
-         System.out.println("opening GUI");
-         ac = null;
-         if(player.ridingEntity instanceof MCH_EntityAircraft) {
-            ac = (MCH_EntityAircraft)player.ridingEntity;
-         } else if(player.ridingEntity instanceof MCH_EntityUavStation) {
-            ac = ((MCH_EntityUavStation)player.ridingEntity).getControlAircract();
-         }
-
-         if(ac != null) {
-            ac.print("aaaaaaaaaaaaaaaaa");
-            MCH_ContainerHardpoint container = new MCH_ContainerHardpoint(player, (int)player.posX, (int)player.posY, (int)player.posZ, ac);
-            return new MCH_HardpointGui(container);
-         }
-         System.out.println("ffailed to g GUI");
-
       }
 
       return null;

@@ -6,6 +6,8 @@ import mcheli.eval.eval.exp.Col1Expression;
 import mcheli.eval.eval.exp.Col2Expression;
 import mcheli.eval.eval.exp.FunctionExpression;
 import mcheli.eval.eval.lex.Lex;
+import mcheli.eval.eval.rule.AbstractRule;
+import mcheli.eval.eval.rule.ShareRuleValue;
 
 public class Col1AfterRule extends AbstractRule {
 

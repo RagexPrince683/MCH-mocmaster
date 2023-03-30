@@ -2,6 +2,12 @@ package mcheli.eval.eval.exp;
 
 import mcheli.eval.eval.Expression;
 import mcheli.eval.eval.Rule;
+import mcheli.eval.eval.exp.AbstractExpression;
+import mcheli.eval.eval.exp.OptimizeDouble;
+import mcheli.eval.eval.exp.OptimizeLong;
+import mcheli.eval.eval.exp.OptimizeObject;
+import mcheli.eval.eval.exp.Replace4RefactorGetter;
+import mcheli.eval.eval.exp.Search4RefactorName;
 import mcheli.eval.eval.func.InvokeFunction;
 import mcheli.eval.eval.oper.JavaExOperator;
 import mcheli.eval.eval.oper.Operator;

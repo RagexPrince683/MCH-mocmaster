@@ -1,6 +1,14 @@
 package mcheli;
 
 import cpw.mods.fml.common.registry.GameRegistry;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import mcheli.MCH_Config;
+import mcheli.MCH_IRecipeList;
+import mcheli.MCH_MOD;
+import mcheli.MCH_RecipeFuel;
+import mcheli.MCH_RecipeReloadRangeFinder;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_AircraftInfoManager;
 import mcheli.helicopter.MCH_HeliInfo;
@@ -23,10 +31,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public class MCH_ItemRecipe implements MCH_IRecipeList {
 

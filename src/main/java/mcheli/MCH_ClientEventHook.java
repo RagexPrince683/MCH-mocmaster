@@ -1,5 +1,15 @@
 package mcheli;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import mcheli.MCH_ClientCommonTickHandler;
+import mcheli.MCH_ClientTickHandlerBase;
+import mcheli.MCH_Config;
+import mcheli.MCH_Lib;
+import mcheli.MCH_MOD;
+import mcheli.MCH_TextureManagerDummy;
+import mcheli.MCH_ViewEntityDummy;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_RenderAircraft;
@@ -23,10 +33,6 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.WorldEvent.Unload;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 public class MCH_ClientEventHook extends W_ClientEventHook {
 
    MCH_TextureManagerDummy dummyTextureManager = null;
@@ -47,9 +53,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
 
    }
 
-   public void renderLivingEventSpecialsPost(Post event) {
-      
-   }
+   public void renderLivingEventSpecialsPost(Post event) {}
 
    private void renderIRStrobe(EntityLivingBase entity, Post event) {
       int cm = MCH_ClientCommonTickHandler.cameraMode;
@@ -59,7 +63,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
             float alpha = ticks != 2 && ticks != 1?0.5F:1.0F;
             EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
             if(player != null) {
-               //if(!player.isOnSameTeam(entity) && player.getDisplayName().equalsIgnoreCase("mocpages") && MCH_EntityAircraft.debug == true) {
+               if(player.isOnSameTeam(entity)) {
                   short j = 240;
                   short k = 240;
                   OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j / 1.0F, (float)k / 1.0F);
@@ -87,7 +91,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
                   tessellator.draw();
                   GL11.glEnable(2896);
                   GL11.glPopMatrix();
-              // }
+               }
             }
          }
       }
@@ -106,7 +110,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
 
    public void renderLivingEventPre(net.minecraftforge.client.event.RenderLivingEvent.Pre event) {
       Iterator rm = haveSearchLightAircraft.iterator();
-      
+
       while(rm.hasNext()) {
          MCH_EntityAircraft ac = (MCH_EntityAircraft)rm.next();
          OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, ac.getSearchLightValue(event.entity), 240.0F);

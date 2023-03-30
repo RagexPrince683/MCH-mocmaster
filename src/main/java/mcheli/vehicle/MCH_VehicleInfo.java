@@ -1,11 +1,11 @@
 package mcheli.vehicle;
 
-import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
-import net.minecraft.item.Item;
-
 import java.util.ArrayList;
 import java.util.List;
+import mcheli.MCH_MOD;
+import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.vehicle.MCH_ItemVehicle;
+import net.minecraft.item.Item;
 
 public class MCH_VehicleInfo extends MCH_AircraftInfo {
 

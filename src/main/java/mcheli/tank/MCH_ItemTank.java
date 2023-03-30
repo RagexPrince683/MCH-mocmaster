@@ -3,6 +3,9 @@ package mcheli.tank;
 import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.tank.MCH_EntityTank;
+import mcheli.tank.MCH_TankInfo;
+import mcheli.tank.MCH_TankInfoManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 

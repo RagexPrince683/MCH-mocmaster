@@ -1,6 +1,10 @@
 package mcheli.weapon;
 
 import mcheli.MCH_Lib;
+import mcheli.weapon.MCH_EntityRocket;
+import mcheli.weapon.MCH_WeaponBase;
+import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.weapon.MCH_WeaponParam;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -19,7 +23,7 @@ public class MCH_WeaponRocket extends MCH_WeaponBase {
    }
 
    public String getName() {
-      return super.getName() + (this.getCurrentMode() == 0?"":" [AIRBURST]");
+      return super.getName() + (this.getCurrentMode() == 0?"":" [HEIAP]");
    }
 
    public boolean shot(MCH_WeaponParam prm) {
@@ -28,13 +32,10 @@ public class MCH_WeaponRocket extends MCH_WeaponBase {
          Vec3 v = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -prm.rotYaw, -prm.rotPitch, -prm.rotRoll);
          MCH_EntityRocket e = new MCH_EntityRocket(super.worldObj, prm.posX, prm.posY, prm.posZ, v.xCoord, v.yCoord, v.zCoord, prm.rotYaw, prm.rotPitch, (double)super.acceleration);
          e.setName(super.name);
-         if(prm.option1 == 1) {
-            e.isAirburst = true;
-         }else{
-            this.weaponInfo.explosionAltitude = 0;
-         }
-         //this.aircraft.print("Airburst: "  + prm.option1);
          e.setParameterFromWeapon(this, prm.entity, prm.user);
+         if(prm.option1 == 0 && super.numMode > 1) {
+            e.piercing = 0;
+         }
 
          super.worldObj.spawnEntityInWorld(e);
       } else {

@@ -1,5 +1,6 @@
 package mcheli.hud;
 
+import mcheli.hud.MCH_HudItem;
 import mcheli.wrapper.W_TextureUtil;
 import org.lwjgl.opengl.GL11;
 
@@ -32,9 +33,6 @@ public class MCH_HudItemTexture extends MCH_HudItem {
       this.vHeight = toFormula(vHeight);
       this.rot = toFormula(rot);
       this.textureWidth = this.textureHeight = 0;
-      
-
-     // System.out.println("Name: " + name + " l " + left + " t " + top + " w " + width + " h " + height + "uLeft " + uLeft + " vTop " + vTop + " uWidth " + uWidth + " vHeight " +vHeight);
    }
 
    public void execute() {
@@ -47,13 +45,12 @@ public class MCH_HudItemTexture extends MCH_HudItem {
          if(prm != null) {
             w = prm.width;
             h = prm.height;
-         } 	
+         }
 
          this.textureWidth = w > 0?w:256;
          this.textureHeight = h > 0?h:256;
       }
-      
-      
+
       this.drawTexture(this.name, MCH_HudItem.centerX + calc(this.left), MCH_HudItem.centerY + calc(this.top), calc(this.width), calc(this.height), calc(this.uLeft), calc(this.vTop), calc(this.uWidth), calc(this.vHeight), (float)calc(this.rot), this.textureWidth, this.textureHeight);
    }
 }

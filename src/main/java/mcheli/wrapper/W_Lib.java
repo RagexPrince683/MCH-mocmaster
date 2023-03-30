@@ -9,10 +9,13 @@
  */
 package mcheli.wrapper;
 
+import mcheli.MCH_CommonProxy;
 import mcheli.MCH_MOD;
+import mcheli.wrapper.W_Entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.World;
 
 public class W_Lib {
     public static boolean isEntityLivingBase(Entity entity) {

@@ -2,6 +2,8 @@ package mcheli.gui;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.ArrayList;
+import java.util.Random;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_ScaledResolution;
 import net.minecraft.client.Minecraft;
@@ -9,9 +11,6 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.opengl.GL11;
-
-import java.util.ArrayList;
-import java.util.Random;
 
 @SideOnly(Side.CLIENT)
 public abstract class MCH_Gui extends GuiScreen {

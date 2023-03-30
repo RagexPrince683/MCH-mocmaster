@@ -4,6 +4,8 @@ import mcheli.MCH_ModelManager;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import org.lwjgl.opengl.GL11;
 
 public class MCH_DraftingTableItemRender implements IItemRenderer {

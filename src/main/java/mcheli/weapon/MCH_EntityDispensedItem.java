@@ -2,10 +2,10 @@ package mcheli.weapon;
 
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
-import mcheli.throwable.MCH_EntityThrowable;
-import mcheli.throwable.MCH_ItemThrowable;
-import mcheli.throwable.MCH_ThrowableInfo;
-import mcheli.throwable.MCH_ThrowableInfoManager;
+import mcheli.weapon.MCH_BulletModel;
+import mcheli.weapon.MCH_DefaultBulletModels;
+import mcheli.weapon.MCH_DummyEntityPlayer;
+import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_Item;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
@@ -49,7 +49,7 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
       this.onUpdateBomblet();
    }
 
-   public void onImpact(MovingObjectPosition m, float damageFactor) {
+   protected void onImpact(MovingObjectPosition m, float damageFactor) {
       if(!super.worldObj.isRemote) {
          super.boundingBox.maxY += 2000.0D;
          super.boundingBox.minY += 2000.0D;
@@ -119,13 +119,6 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
                   }
                }
             }
-         }else if(item instanceof MCH_ItemThrowable){
-            MCH_ItemThrowable throwable = ((MCH_ItemThrowable)item);
-            MCH_EntityThrowable entity = new MCH_EntityThrowable(worldObj, dummyPlayer, 0);
-            MCH_ThrowableInfo info = MCH_ThrowableInfoManager.get(item);
-            info.delayFuse = 0;
-            entity.setInfo(info);
-            worldObj.spawnEntityInWorld(entity);
          } else if(!item.onItemUseFirst(new ItemStack(item, 1, itemDamage), dummyPlayer, super.worldObj, x, y, z, 1, (float)x, (float)y, (float)z) && !item.onItemUse(new ItemStack(item, 1, itemDamage), dummyPlayer, super.worldObj, x, y, z, 1, (float)x, (float)y, (float)z)) {
             item.onItemRightClick(new ItemStack(item, 1, itemDamage), super.worldObj, dummyPlayer);
          }

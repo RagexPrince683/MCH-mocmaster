@@ -6,6 +6,9 @@ import mcheli.MCH_Lib;
 import mcheli.MCH_ViewEntityDummy;
 import mcheli.aircraft.MCH_AircraftClientTickHandler;
 import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.vehicle.MCH_EntityVehicle;
+import mcheli.vehicle.MCH_PacketVehiclePlayerControl;
+import mcheli.vehicle.MCH_VehicleInfo;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Network;
 import net.minecraft.client.Minecraft;
@@ -32,7 +35,7 @@ public class MCH_ClientVehicleTickHandler extends MCH_AircraftClientTickHandler 
       this.KeySwitchHovering = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
       this.KeyZoom = new MCH_Key(MCH_Config.KeyZoom.prmInt);
       this.KeyExtra = new MCH_Key(MCH_Config.KeyExtra.prmInt);
-      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeySwitchHovering, super.KeyUseWeapon, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, this.KeyExtra, super.KeyGUI,tdcUp, tdcDown, tdcRight, tdcLeft, super.tdcModeIncr, tdcModeDecr, tdcLock};
+      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeySwitchHovering, super.KeyUseWeapon, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, this.KeyExtra, super.KeyGUI};
    }
 
    protected void update(EntityPlayer player, MCH_EntityVehicle vehicle, MCH_VehicleInfo info) {

@@ -1,16 +1,26 @@
 package mcheli.block;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import mcheli.MCH_IRecipeList;
 import mcheli.MCH_ItemRecipe;
 import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.block.MCH_CurrentRecipe;
+import mcheli.block.MCH_DraftingTableCreatePacket;
+import mcheli.block.MCH_DraftingTableGuiContainer;
 import mcheli.gui.MCH_GuiSliderVertical;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.tank.MCH_TankInfoManager;
 import mcheli.vehicle.MCH_VehicleInfoManager;
-import mcheli.wrapper.*;
+import mcheli.wrapper.W_GuiButton;
+import mcheli.wrapper.W_GuiContainer;
+import mcheli.wrapper.W_KeyBinding;
+import mcheli.wrapper.W_McClient;
+import mcheli.wrapper.W_ScaledResolution;
 import mcheli.wrapper.modelloader.W_ModelCustom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -26,10 +36,6 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public class MCH_DraftingTableGui extends W_GuiContainer {
 
