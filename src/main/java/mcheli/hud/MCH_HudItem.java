@@ -1,28 +1,13 @@
 package mcheli.hud;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Random;
-import mcheli.MCH_ClientCommonTickHandler;
-import mcheli.MCH_Config;
-import mcheli.MCH_Lib;
-import mcheli.MCH_LowPassFilterFloat;
-import mcheli.MCH_MOD;
+import mcheli.*;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.eval.eval.ExpRuleFactory;
 import mcheli.eval.eval.Expression;
 import mcheli.eval.eval.var.MapVariable;
 import mcheli.helicopter.MCH_EntityHeli;
-import mcheli.hud.MCH_Hud;
-import mcheli.hud.MCH_HudItemExit;
 import mcheli.plane.MCP_EntityPlane;
-import mcheli.weapon.MCH_EntityTvMissile;
-import mcheli.weapon.MCH_SightType;
-import mcheli.weapon.MCH_WeaponBase;
-import mcheli.weapon.MCH_WeaponInfo;
-import mcheli.weapon.MCH_WeaponSet;
+import mcheli.weapon.*;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_OpenGlHelper;
 import mcheli.wrapper.W_WorldFunc;
@@ -32,6 +17,8 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
+
+import java.util.*;
 
 public abstract class MCH_HudItem extends Gui {
 
@@ -91,7 +78,7 @@ public abstract class MCH_HudItem extends Gui {
       updateStick();
       updateAltitude(ac);
       updateTvMissile(ac);
-      updateUAV(ac);
+      //updateUAV(ac);
       updateWeapon(ac, ws);
       updateVarMap(ac, ws);
    }
@@ -138,6 +125,7 @@ public abstract class MCH_HudItem extends Gui {
    }
 
    public static void drawRect(double par0, double par1, double par2, double par3, int par4) {
+      //System.out.println("Drawing l " + par0 + " t " + par1 + " w " + par2 + " h " + par3);
       double j1;
       if(par0 < par2) {
          j1 = par0;
@@ -229,6 +217,11 @@ public abstract class MCH_HudItem extends Gui {
          varMap = new LinkedHashMap();
       }
 
+      updateVarMapItem("radarmode", ac.radarMode);
+      updateVarMapItem("tgtaz", ac.getTargetAz());
+      updateVarMapItem("tdcmode", ac.tdcMode);
+      updateVarMapItem("tdcx", ac.tdcX);
+      updateVarMapItem("tdcy", ac.tdcY);
       updateVarMapItem("color", getColor());
       updateVarMapItem("center_x", centerX);
       updateVarMapItem("center_y", centerY);
@@ -274,6 +267,7 @@ public abstract class MCH_HudItem extends Gui {
       updateVarMapItem("hovering", ac instanceof MCH_EntityHeli && ac.isHoveringMode()?1.0D:0.0D);
       updateVarMapItem("is_uav", ac.isUAV()?1.0D:0.0D);
       updateVarMapItem("uav_fs", getUAV_Fs(ac));
+      updateVarMapItem("have_esm", ac.getAcInfo().esmPower>0 ? 1.0D:0.0D);
    }
 
    public static void updateVarMapItem(String key, double value) {
@@ -507,13 +501,17 @@ public abstract class MCH_HudItem extends Gui {
    }
 
    public static void updateUAV(MCH_EntityAircraft ac) {
+
       if(ac.isUAV() && ac.getUavStation() != null) {
-         double dx = ac.posX - ac.getUavStation().posX;
+         double dx = ac.posX -ac.getUavStation().posX;
          double dz = ac.posZ - ac.getUavStation().posZ;
          UAV_Dist = (double)((float)Math.sqrt(dx * dx + dz * dz));
       } else {
-         UAV_Dist = 0.0D;
+         UAV_Dist =
+                 0.0D;
       }
+
+      UAV_Dist = (Double) varMap.get("speed");
 
    }
 

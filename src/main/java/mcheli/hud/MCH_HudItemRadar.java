@@ -26,6 +26,20 @@ public class MCH_HudItemRadar extends MCH_HudItem {
       this.height = toFormula(height);
    }
 
+   public static double[] getRelOffset(double x, double z, double angle, double offX, double offZ) {
+      angle = Math.toRadians(angle);
+      double xPrime = x * Math.cos(angle) + z * Math.sin(angle);
+      double zPrime = -x  * Math.sin(angle) + z * Math.cos(angle);
+
+      zPrime += offZ;
+      xPrime += offX;
+
+      double x2 = xPrime * Math.cos(angle) - zPrime * Math.sin(angle);
+      double z2 = xPrime  * Math.sin(angle) + zPrime * Math.cos(angle);
+
+      return new double[] {x2,z2};
+   }
+
    public void execute() {
       if(this.isEntityRadar) {
          if(MCH_HudItem.EntityList != null && MCH_HudItem.EntityList.size() > 0) {

@@ -1,8 +1,5 @@
 package mcheli.weapon;
 
-import mcheli.weapon.MCH_BulletModel;
-import mcheli.weapon.MCH_DefaultBulletModels;
-import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
 import net.minecraft.util.MathHelper;
