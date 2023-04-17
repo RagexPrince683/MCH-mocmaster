@@ -468,8 +468,10 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                super.throttleBack = 0.0F;
                if(this.getCurrentThrottle() < 1.0D) {
                   this.addCurrentThrottle(0.01D * (double)f);
+                  //here as well?
                } else {
                   this.setCurrentThrottle(1.0D);
+                  //implement a new variable here to add throttle control for specific vehicles specifically 1.8D
                }
             }
          } else if(super.throttleDown) {

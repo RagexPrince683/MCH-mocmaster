@@ -45,6 +45,7 @@ public class MCH_TankInfo extends MCH_AircraftInfo {
 
    public float getMaxSpeed() {
       return 1.8F;
+      //wtf does this do, it does something idk lmao
    }
 
    public int getDefaultMaxZoom() {
