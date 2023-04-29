@@ -146,9 +146,6 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    private String lastWeaponType = "";
    private int lastWeaponIndex = -1;
    private MCH_AircraftInfo.PartWeapon lastWeaponPart;
-   public int radarPower=0;
-   public int radarMax = 0;
-   public double esmPower = 0.0f;
 
 
    public abstract Item getItem();

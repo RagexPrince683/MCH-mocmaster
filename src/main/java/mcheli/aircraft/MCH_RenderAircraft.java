@@ -226,15 +226,19 @@ public abstract class MCH_RenderAircraft extends W_Render {
    }
 
    protected void bindTexture(String path, MCH_EntityAircraft ac) {
-      if(ac == MCH_ClientCommonTickHandler.ridingAircraft) {
-         int bk = MCH_ClientCommonTickHandler.cameraMode;
-         MCH_ClientCommonTickHandler.cameraMode = 0;
-         super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, path));
-         MCH_ClientCommonTickHandler.cameraMode = bk;
-      } else {
+      // if(ac == MCH_ClientCommonTickHandler.ridingAircraft) {
+      //    int bk = MCH_ClientCommonTickHandler.cameraMode;
+      //    MCH_ClientCommonTickHandler.cameraMode = 0;
+      //    super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, path));
+      //    MCH_ClientCommonTickHandler.cameraMode = bk;
+      // } else {
+      //   super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, path));
+      //}
+      if(MCH_ClientCommonTickHandler.cameraMode == 2) {
+         super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, "textures/test.png"));
+      }else {
          super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, path));
       }
-
    }
 
    public void renderRiddenEntity(MCH_EntityAircraft ac, float tickTime, float yaw, float pitch, float roll, float width, float height) {

@@ -168,7 +168,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
       this.recoilBufCount = 2;
       this.recoilBufCountSpeed = 3;
       this.length = 0.0F;
-      this.radius = 0.0F;
+      this.radius = 200.0F;
       this.target = 1;
       this.recoil = 0.0F;
       this.damageFactor = null;
