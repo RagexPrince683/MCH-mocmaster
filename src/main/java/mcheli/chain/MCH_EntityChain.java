@@ -243,6 +243,7 @@ public class MCH_EntityChain extends W_Entity {
          this.towedEntity.motionX -= dx * (double)accl / tmp;
          this.towedEntity.motionY -= dy * (double)accl / tmp;
          this.towedEntity.motionZ -= dz * (double)accl / tmp;
+         this.towedEntity.setPosition(this.towedEntity.posX, this.towEntity.posY + dy * (double) MAX_DIST / dist, this.towedEntity.posZ);
          if(dist > (double)MAX_DIST) {
             this.towedEntity.setPosition(this.towEntity.posX + dx * (double)MAX_DIST / dist, this.towEntity.posY + dy * (double)MAX_DIST / dist, this.towEntity.posZ + dz * (double)MAX_DIST / dist);
          }

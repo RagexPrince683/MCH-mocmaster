@@ -20,6 +20,9 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
       return (new MCH_AircraftBoundingBox(this.ac)).setBounds(p_72324_1_, p_72324_3_, p_72324_5_, p_72324_7_, p_72324_9_, p_72324_11_);
    }
 
+
+
+
    public double getDistSq(AxisAlignedBB a1, AxisAlignedBB a2) {
       double x1 = (a1.maxX + a1.minX) / 2.0D;
       double y1 = (a1.maxY + a1.minY) / 2.0D;
@@ -132,6 +135,10 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
    public AxisAlignedBB getOffsetBoundingBox(double x, double y, double z) {
       return this.NewAABB(super.minX + x, super.minY + y, super.minZ + z, super.maxX + x, super.maxY + y, super.maxZ + z);
    }
+
+
+
+
 
    public MovingObjectPosition calculateIntercept(Vec3 v1, Vec3 v2) {
       this.ac.lastBBDamageFactor = 1.0F;
