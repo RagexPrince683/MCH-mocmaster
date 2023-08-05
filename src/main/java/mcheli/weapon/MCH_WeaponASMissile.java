@@ -42,7 +42,7 @@ public class MCH_WeaponASMissile extends MCH_WeaponBase {
       double tX = (double) (-MathHelper.sin(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
       double tZ = (double) (MathHelper.cos(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
       double tY = (double) (-MathHelper.sin(pitch / 180.0F * 3.1415927F));
-      double dist = Math.sqrt(tX * tX + tY * tY + tZ * tZ);
+      double dist = (double) MathHelper.sqrt_double(tX * tX + tY * tY + tZ * tZ);
 
       tX = tX * 250.0D / dist;
       tY = tY * 250.0D / dist;
@@ -57,21 +57,16 @@ public class MCH_WeaponASMissile extends MCH_WeaponBase {
       if (prm.entity instanceof MCH_EntityAircraft) {
          MCH_EntityAircraft ac = (MCH_EntityAircraft) prm.entity;
 
-         double targetX, targetY, targetZ;
-
-         // Shared logic for both sides
-         MCH_EntityParticleMarkPoint target = MCH_ParticlesUtil.markPoint;
-
-         if (target != null) {
-            targetX = target.posX;
-            targetY = 0;
-            targetZ = target.posZ;
-         } else {
-            // Fallback to using calculated target position
-            targetX = prm.posX + tX;
-            targetY = 0;
-            targetZ = prm.posZ + tZ;
+         if (super.worldObj.isRemote) {
+            // Client-side code (handleClientMarkTarget method)
+            handleClientMarkTarget(prm);
+            return true;
          }
+
+         // Server-side code (custom target logic)
+         double targetX = prm.posX + tX; // Use server-side logic here
+         double targetY = 0; // Use server-side logic here
+         double targetZ = prm.posZ + tZ; // Use server-side logic here
 
          e = new MCH_EntityASMissile(this.worldObj, prm.posX, prm.posY, prm.posZ, tX, tY, tZ, yaw, pitch, this.acceleration);
          e.setName(this.name);
@@ -92,9 +87,8 @@ public class MCH_WeaponASMissile extends MCH_WeaponBase {
    private void handleClientMarkTarget(MCH_WeaponParam prm) {
       MCH_EntityParticleMarkPoint target = MCH_ParticlesUtil.markPoint;
 
-
       // Customize the client-side behavior of marking the target here
-      // this just logs in the built in command prompt for mcheli, it is absolutely redundant and something that should probably be removed
+      // For example, you can send a packet to the server to mark the target
       if (target != null) {
          MCH_PacketCommandSave.send("mark " + (int) target.posX + " " + (int) target.posY + " " + (int) target.posZ);
       }
