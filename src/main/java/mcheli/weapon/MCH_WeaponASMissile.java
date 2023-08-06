@@ -44,9 +44,15 @@ public class MCH_WeaponASMissile extends MCH_WeaponBase {
       double tY = (double) (-MathHelper.sin(pitch / 180.0F * 3.1415927F));
       double dist = (double) MathHelper.sqrt_double(tX * tX + tY * tY + tZ * tZ);
 
-      tX = tX * 250.0D / dist;
-      tY = tY * 250.0D / dist;
-      tZ = tZ * 250.0D / dist;
+      if(super.worldObj.isRemote) {
+         tX = tX * 200.0D / dist;
+         tY = tY * 200.0D / dist;
+         tZ = tZ * 200.0D / dist;
+      } else {
+         tX = tX * 250.0D / dist;
+         tY = tY * 250.0D / dist;
+         tZ = tZ * 250.0D / dist;
+      }
 
       Vec3 src = W_WorldFunc.getWorldVec3(super.worldObj, prm.entity.posX, prm.entity.posY + 1.62D, prm.entity.posZ);
       Vec3 dst = W_WorldFunc.getWorldVec3(super.worldObj, prm.entity.posX + tX, prm.entity.posY + 1.62D + tY, prm.entity.posZ + tZ);
@@ -57,11 +63,11 @@ public class MCH_WeaponASMissile extends MCH_WeaponBase {
       if (prm.entity instanceof MCH_EntityAircraft) {
          MCH_EntityAircraft ac = (MCH_EntityAircraft) prm.entity;
 
-         if (super.worldObj.isRemote) {
+         //if (super.worldObj.isRemote) {
             // Client-side code (handleClientMarkTarget method)
-            handleClientMarkTarget(prm);
-            return true;
-         }
+         //handleClientMarkTarget(prm);
+           // return true;
+         //}
 
          // Server-side code (custom target logic)
          double targetX = prm.posX + tX; // Use server-side logic here
