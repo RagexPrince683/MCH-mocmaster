@@ -208,6 +208,7 @@ public class MCP_PlaneInfo extends MCH_AircraftInfo {
 
 
       public Wing(float px, float py, float pz, float rx, float ry, float rz, float mr, String name) {
+
          super(px, py, pz, rx, ry, rz, name);
          this.maxRot = mr;
          this.maxRotFactor = this.maxRot / 90.0F;

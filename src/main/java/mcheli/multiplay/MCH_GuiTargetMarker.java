@@ -2,11 +2,6 @@ package mcheli.multiplay;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.MCH_MarkEntityPos;
@@ -14,8 +9,6 @@ import mcheli.MCH_ServerSettings;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.gui.MCH_Gui;
-import mcheli.multiplay.MCH_Multiplay;
-import mcheli.multiplay.MCH_TargetType;
 import mcheli.particles.MCH_ParticlesUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -26,6 +19,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
+
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 @SideOnly(Side.CLIENT)
 public class MCH_GuiTargetMarker extends MCH_Gui {

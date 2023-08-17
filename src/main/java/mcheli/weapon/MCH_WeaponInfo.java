@@ -179,6 +179,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
       this.fixCameraPitch = false;
       this.cameraRotationSpeedPitch = 1.0F;
       this.nukeYield=0;
+      //this.chemYield=0;
    }
 
    public void checkData() {

@@ -1,17 +1,8 @@
 package mcheli.multiplay;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.helicopter.MCH_EntityHeli;
-import mcheli.multiplay.MCH_PacketNotifyMarkPoint;
-import mcheli.multiplay.MCH_PacketNotifySpotedEntity;
-import mcheli.multiplay.MCH_TargetType;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.vehicle.MCH_EntityVehicle;
@@ -27,8 +18,10 @@ import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.util.Vec3;
+
+import java.util.*;
 
 public class MCH_Multiplay {
 
@@ -279,7 +272,7 @@ public class MCH_Multiplay {
    public static boolean markPoint(EntityPlayer player, double posX, double posY, double posZ) {
       Vec3 vs = Vec3.createVectorHelper(posX, posY, posZ);
       Vec3 ve = MCH_Lib.Rot2Vec3(player.rotationYaw, player.rotationPitch);
-      ve = vs.addVector(ve.xCoord * 300.0D, ve.yCoord * 300.0D, ve.zCoord * 300.0D);
+      ve = vs.addVector(ve.xCoord * 1000.0D, ve.yCoord * 1000.0D, ve.zCoord * 1000.0D);
       MovingObjectPosition mop = player.worldObj.rayTraceBlocks(vs, ve, true);
       if(mop != null && mop.typeOfHit == MovingObjectType.BLOCK) {
          sendMarkPointToSameTeam(player, mop.blockX, mop.blockY + 2, mop.blockZ);

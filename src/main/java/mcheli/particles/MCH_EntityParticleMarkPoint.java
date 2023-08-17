@@ -2,7 +2,6 @@ package mcheli.particles;
 
 import mcheli.MCH_Lib;
 import mcheli.multiplay.MCH_GuiTargetMarker;
-import mcheli.particles.MCH_EntityParticleBase;
 import mcheli.wrapper.W_Reflection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -11,8 +10,8 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
@@ -52,6 +51,7 @@ public class MCH_EntityParticleMarkPoint extends MCH_EntityParticleBase {
    }
 
    public void renderParticle(Tessellator par1Tessellator, float par2, float par3, float par4, float par5, float par6, float par7) {
+      //System.out.println("x " +this.posX+ " z " +this.posZ);
       GL11.glPushMatrix();
       Minecraft mc = Minecraft.getMinecraft();
       EntityClientPlayerMP player = mc.thePlayer;

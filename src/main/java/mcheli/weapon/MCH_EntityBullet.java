@@ -1,12 +1,8 @@
 package mcheli.weapon;
 
-import java.util.List;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.weapon.MCH_BulletModel;
-import mcheli.weapon.MCH_DefaultBulletModels;
-import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_MovingObjectPosition;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
@@ -16,6 +12,8 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+
+import java.util.List;
 
 public class MCH_EntityBullet extends MCH_EntityBaseBullet {
 
@@ -109,6 +107,7 @@ public class MCH_EntityBullet extends MCH_EntityBaseBullet {
                if(m1 != null) {
                   double d1 = vec3.distanceTo(m1.hitVec);
                   if(d1 < var24 || var24 == 0.0D) {
+
                      var22 = entity1;
                      var24 = d1;
                   }
