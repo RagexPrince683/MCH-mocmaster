@@ -3,7 +3,6 @@ package mcheli.aircraft;
 import mcheli.MCH_Lib;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
-import mcheli.tank.MCH_EntityTank;
 
 public class MCH_BoundingBox {
 
@@ -41,7 +40,6 @@ public class MCH_BoundingBox {
    public void updatePosition(double posX, double posY, double posZ, float yaw, float pitch, float roll) {
       Vec3 v = Vec3.createVectorHelper(this.offsetX, this.offsetY, this.offsetZ);
       this.rotatedOffset = MCH_Lib.RotVec3(v, -yaw, -pitch, -roll);
-      Vec3 rot = this.rotatedOffset;
       float w = this.width;
       float h = this.height;
       double x = posX + this.rotatedOffset.xCoord;

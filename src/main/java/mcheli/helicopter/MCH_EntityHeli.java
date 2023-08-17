@@ -522,54 +522,50 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
 
    protected void onUpdate_ControlNotHovering() {
       float throttleUpDown = this.getAcInfo().throttleUpDown;
-      if (super.throttleUp) {
-         if (this.getCurrentThrottle() < 1.0D) {
-            this.addCurrentThrottle(0.02D * (double) throttleUpDown);
+      if(super.throttleUp) {
+         if(this.getCurrentThrottle() < 1.0D) {
+            this.addCurrentThrottle(0.02D * (double)throttleUpDown);
          } else {
             this.setCurrentThrottle(1.0D);
          }
-      } else if (super.throttleDown) {
-         if (this.getCurrentThrottle() > 0.0D) {
-            this.addCurrentThrottle(-0.014285714285714285D * (double) throttleUpDown);
+      } else if(super.throttleDown) {
+         if(this.getCurrentThrottle() > 0.0D) {
+            this.addCurrentThrottle(-0.014285714285714285D * (double)throttleUpDown);
          } else {
             this.setCurrentThrottle(0.0D);
          }
-      } else if ((!super.worldObj.isRemote || W_Lib.isClientPlayer(this.getRiddenByEntity())) && super.cs_heliAutoThrottleDown) {
-         if (this.getCurrentThrottle() > 0.52D) {
-            this.addCurrentThrottle(-0.01D * (double) throttleUpDown);
-         } else if (this.getCurrentThrottle() < 0.48D) {
-            this.addCurrentThrottle(0.01D * (double) throttleUpDown);
-            //if (!this.isAirBorne) {
-
-            //}
-
+      } else if((!super.worldObj.isRemote || W_Lib.isClientPlayer(this.getRiddenByEntity())) && super.cs_heliAutoThrottleDown) {
+         if(this.getCurrentThrottle() > 0.52D) {
+            this.addCurrentThrottle(-0.01D * (double)throttleUpDown);
+         } else if(this.getCurrentThrottle() < 0.48D) {
+            this.addCurrentThrottle(0.01D * (double)throttleUpDown);
          }
       }
 
-      if (!super.worldObj.isRemote) {
+      if(!super.worldObj.isRemote) {
          boolean move = false;
          float yaw = this.getRotYaw();
          double x = 0.0D;
          double z = 0.0D;
-         if (super.moveLeft && !super.moveRight) {
+         if(super.moveLeft && !super.moveRight) {
             yaw = this.getRotYaw() - 90.0F;
-            x += Math.sin((double) yaw * 3.141592653589793D / 180.0D);
-            z += Math.cos((double) yaw * 3.141592653589793D / 180.0D);
+            x += Math.sin((double)yaw * 3.141592653589793D / 180.0D);
+            z += Math.cos((double)yaw * 3.141592653589793D / 180.0D);
             move = true;
          }
 
-         if (super.moveRight && !super.moveLeft) {
+         if(super.moveRight && !super.moveLeft) {
             yaw = this.getRotYaw() + 90.0F;
-            x += Math.sin((double) yaw * 3.141592653589793D / 180.0D);
-            z += Math.cos((double) yaw * 3.141592653589793D / 180.0D);
+            x += Math.sin((double)yaw * 3.141592653589793D / 180.0D);
+            z += Math.cos((double)yaw * 3.141592653589793D / 180.0D);
             move = true;
          }
 
-         if (move) {
+         if(move) {
             double f = 1.0D;
             double d = Math.sqrt(x * x + z * z);
-            super.motionX -= x / d * 0.019999999552965164D * f * (double) this.getAcInfo().speed;
-            super.motionZ += z / d * 0.019999999552965164D * f * (double) this.getAcInfo().speed;
+            super.motionX -= x / d * 0.019999999552965164D * f * (double)this.getAcInfo().speed;
+            super.motionZ += z / d * 0.019999999552965164D * f * (double)this.getAcInfo().speed;
          }
       }
 
@@ -857,9 +853,6 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
          }
       }
 
-
-
-      //boolean wasInAir = !super.onGround;
       if(super.onGround) {
          super.motionX *= 0.5D;
          super.motionZ *= 0.5D;
@@ -874,37 +867,12 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
          if(MathHelper.abs(this.getRotRoll()) < 40.0F) {
             this.setRotRoll(this.getRotRoll() * 0.9F);
          }
-      } //else if (super.motionY < 0.71D && wasInAir) {
-         //if(super.onGround) {
-            //recieve damage
-            //int newDamage = super.getDamageTaken() + 5;
-            //super.setDamageTaken(newDamage);
+      }
 
-         //}
-      //}
-
-
-      //double previousMotionY = super.motionY;
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
       super.motionY *= 0.95D;
       super.motionX *= 0.99D;
       super.motionZ *= 0.99D;
-      //if (super.motionY < 0.7D && previousMotionY > 0.7D) {
-         //double throttle = this.getCurrentThrottle();
-         //double minThrottle = 0.7D;  // Minimum throttle value
-
-         // Calculate the interpolated motionY value based on the throttle
-         //double minMotionY = 0.0D;  // Minimum motionY value (adjust as needed)
-         //double maxMotionY = 0.7D;  // Maximum motionY value (adjust as needed)
-         //double range = maxMotionY - minMotionY;
-         //double interpolatedMotionY = ((throttle - minThrottle) * range / (1.0D - minThrottle)) + minMotionY;
-
-         //super.motionY = interpolatedMotionY;
-      //}
-
-      
-
-
       this.setRotation(this.getRotYaw(), this.getRotPitch());
       this.onUpdate_updateBlock();
       if(this.getRiddenByEntity() != null && this.getRiddenByEntity().isDead) {
