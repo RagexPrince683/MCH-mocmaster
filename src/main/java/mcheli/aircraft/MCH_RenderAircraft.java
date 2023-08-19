@@ -38,6 +38,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec3;
 import net.minecraftforge.client.model.IModelCustom;
 import org.lwjgl.opengl.GL11;
 
@@ -80,6 +81,15 @@ public abstract class MCH_RenderAircraft extends W_Render {
          renderEntityMarker(ac);
       }
 
+   }
+
+
+
+
+   public void renderTargets(MCH_EntityAircraft ac) {
+      for(Vec3 vec : ac.targets) {
+
+      }
    }
 
    public static boolean shouldSkipRender(Entity entity) {

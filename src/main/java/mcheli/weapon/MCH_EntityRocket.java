@@ -1,12 +1,10 @@
 package mcheli.weapon;
 
-import mcheli.weapon.MCH_BulletModel;
-import mcheli.weapon.MCH_DefaultBulletModels;
-import mcheli.weapon.MCH_EntityBaseBullet;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 
 public class MCH_EntityRocket extends MCH_EntityBaseBullet {
-
+   public boolean isAirburst = false;
    public MCH_EntityRocket(World par1World) {
       super(par1World);
    }
@@ -18,10 +16,21 @@ public class MCH_EntityRocket extends MCH_EntityBaseBullet {
    public void onUpdate() {
       super.onUpdate();
       this.onUpdateBomblet();
-      if(super.isBomblet <= 0 && this.getInfo() != null && !this.getInfo().disableSmoke) {
+      if(super.isBomblet <= 0 && this.getInfo() != null && !this.getInfo().disableSmoke && this.ticksExisted >= this.getInfo().trajectoryParticleStartTick) {
          this.spawnParticle(this.getInfo().trajectoryParticleName, 3, 5.0F * this.getInfo().smokeSize * 0.5F);
       }
 
+   }
+
+   @Override
+   public void onImpact(MovingObjectPosition m, float damageFactor) {
+      if(!isAirburst){
+         super.onImpact(m, damageFactor);
+      }else{
+         this.getInfo().explosionBlock = 0;
+         sprinkleBomblet();
+         super.onImpact(m, damageFactor);
+      }
    }
 
    public void sprinkleBomblet() {

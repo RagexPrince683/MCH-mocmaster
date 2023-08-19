@@ -214,6 +214,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private static final MCH_EntitySeat[] seatsDummy = new MCH_EntitySeat[0];
    private boolean switchSeat = false;
    public int airburst;
+
    public Vec3 target = Vec3.createVectorHelper(0, 0, 0);
    public ArrayList<MCH_RadarContact> contacts = new ArrayList<MCH_RadarContact>();
    public ArrayList<MCH_RadarContact> surfaceContacts = new ArrayList<MCH_RadarContact>();
@@ -894,54 +895,25 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   if(!isDamegeSourcePlayer) {
                      MCH_AircraftInfo cmd1 = this.getAcInfo();
                      if(cmd1 != null && !dmt.equalsIgnoreCase("lava") && !dmt.equalsIgnoreCase("onFire")) {
-                        //	System.out.println("We got this far!");
-                        try {
-                           if(dmt.startsWith("explosion")) {
-                              System.out.println("Taking explosion damage " + damage);
-                              damage *= 0.5 * getHEMult(getArmor(damageSource.getSourceOfDamage()));
-
-                           }
-                           if(dmt.contains("bullet")) {
-                              System.out.println("BulleT!!!");
-                              damage = getSmallArmsDamage(this.getArmor(damageSource.getSourceOfDamage()), damage);
-                              //System.out.println ("Bullet damage " + damage +  " mult " + mult);
-                              //damage *= mult;
-                           }else if(dmt.contains("flan") || dmt.contains("mmp") || dmt.contains("44_")) {
-                              if(damageSource instanceof EntityDamageSourceGun) {
-                                 EntityDamageSourceGun ds = (EntityDamageSourceGun) damageSource;
-                                 if(ds.getSourceOfDamage() instanceof EntityBullet) {
-                                    EntityBullet bullet = (EntityBullet)ds.getSourceOfDamage();
-                                    if(bullet.type.damageVsVehicles > 1) {
-                                       System.out.println("Doing AP damage");
-                                       damage = getAPDamage(bullet.type.damageVsVehicles, bullet);
-
-                                    }else {
-
-                                       damage = getSmallArmsDamage(this.getArmor(damageSource.getSourceOfDamage()), damage);
-                                    }
-                                 }
-                                 System.out.println("Flan " + damageSource.getSourceOfDamage().getCommandSenderName());
-
-                              }else {
-                                 damage = getSmallArmsDamage(this.getArmor(damageSource.getSourceOfDamage()), damage);
-                              }
-                              //System.out.println ("Damage " + damage +  " mult " + mult);
-                              //	damage *= mult;
-                           }else if(dmt.startsWith("thrown")) {
-                              //System.out.println("Yeet + " + damageSource.getSourceOfDamage().getCommandSenderName());
-                              //damage = (float) getAPMult(lastBB.getArmor(), damage);
-                              damage = getAPDamage(damage, damageSource.getSourceOfDamage());
-                           }else {
-                              System.out.println("Src: " + dmt);
-                           }
-                        }catch(Exception e) {
-                           e.printStackTrace();
+                        if(damage > cmd1.armorMaxDamage) {
+                           damage = cmd1.armorMaxDamage;
                         }
+
+                        if(damageFactor <= 1.0F) {
+                           damage *= damageFactor;
+                        }
+
+                        damage *= cmd1.armorDamageFactor;
+                        damage -= cmd1.armorMinDamage;
 
 
                         if(damage <= 0.0F) {
                            MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.attackEntityFrom:no damage=%.1f -> %.1f(factor=%.2f):%s", new Object[]{Float.valueOf(org_damage), Float.valueOf(damage), Float.valueOf(damageFactor), dmt});
                            return false;
+                        }
+
+                        if(damageFactor > 1.0F) {
+                           damage *= damageFactor;
                         }
 
 
@@ -1006,118 +978,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
    }
 
-   private float getSmallArmsDamage(double armor, float damage) {
-      double ratio = 0.1; //Wargame damage : flans mod damage, rough estimate.
-      double output = 0;
-      System.out.println("Doing " + damage + " damage to " + armor + " armor.");
-      if(armor == 0) { //For unarmored vehicles
-         if(damage <= 8) {//pistol
-            if(Math.random() >= 0.9) { //Pistols have a 10% chance to do 1 damage
-               damage = 1;
-            }else {
-               damage = 0;
-            }
-         }else if(damage <= 15) { //AR
-            if(Math.random() >= 0.8) { //Intermediate rifles have a 20% chance to do 1 damage
-               damage = 1;
-            }else {
-               damage = 0;
-            }
-         }else if(damage <= 25) { //BR / GPMG
-            if(Math.random() >= 0.5) { //BRs have a 50% chance to do 1 damage
-               damage = 1;
-            }else {
-               damage = 0;
-            }
-         }else { //HMG or antimateriel rifle
-            damage = 2;
-         }
-      }
-      if(armor == 1) { //For light armor
-         if(damage <= 15) {//pistol
-            damage=0; //Light armor ignores pistol and rifle fire
-         }else if(damage <= 25) { //BR / GPMG
-            if(Math.random() >= 0.8) { //BRs have a 20% chance to do 1 damage
-               damage = 1;
-            }else {
-               damage = 0;
-            }
-         }else { //HMG or antimateriel rifle
-            damage = 1;
-         }
-      }
-      if(armor == 2) {
-         if(damage <= 45) { //BR / GPMG
-            damage = 0;
-         }else { //HMG or antimateriel rifle
-            if(Math.random() >= 0.5) {damage = 1;}else {damage = 0;}
-         }
-      }
-      if(armor > 2) { return 0;}
-      //System.out.println("Armor = " + armor + " output =  " + output);
-      return damage;
-   }
 
-   private float getAPDamage(float damage, Entity e) {
-      int armor = getArmor(e);
-      Random rand = new Random();
-      double r = rand.nextGaussian() * damage * 2 + damage;
-      return getAPMult(armor, (float)r);
-   }
-
-   private int getArmor(Entity e) {
-      //this.acInfo.armorDamageFactor; //Rear
-      //this.acInfo.armorMaxDamage; //Frontal
-      //this.acInfo.armorMinDamage; //Side
-      if (e == null) return 0; //Unsure.
-      double bearing = this.getBearingToEntity(e);
-      bearing -= this.rotationYaw;
-
-      //if(e.posY >= this.posY+this.height) {
-      //System.out.println("Top Armor");
-      //return (int)this.acInfo.armorMinDamage; //Top
-      //}
-      if(isWithin(Math.abs(bearing),180,70)) {
-         return (int) acInfo.armorMaxDamage; //Frontal
-      }else if(isWithin(Math.abs(bearing),0,50)) {
-         return (int)acInfo.armorDamageFactor; //Rear
-      }else {
-         return (int)this.acInfo.armorMinDamage; //Side
-      }
-   }
-
-   private boolean isWithin(double num, int goal, int range) { //Checks if num is within range of goal. IE for 2,10,5 it would check if 2 is between 5 and 15.
-      return(num >= goal - range && num <= goal + range);
-   }
-
-   private float getAPMult(int armor, float damage) {
-      System.out.println("AP damage. Armor = " + armor + " damage = " + damage);
-      if(armor == 0) {
-         return 2.0F * damage;
-      }else {
-
-         float rem = damage - armor;
-         if(rem <= -5) {
-            return 0;
-         }else if(rem <= 0) {
-            return 1;
-         }
-
-         return 1+0.5F * (rem);
-      }
-   }
-
-   private double getHEMult(int armor) {
-      System.out.println("Getting HE damage mult for armor " + armor);
-      if(armor <= 1) {return 1.0;}
-      if(armor <= 2) {return 0.4;}
-      if(armor <=3) {return 0.3;}
-      if(armor <= 4) {return 0.2;}
-      if(armor <= 5) {return 0.15;}
-      if(armor <= 7) {return 0.1;}
-      if(armor <= 13) {return 0.05;}
-      return 0.01;
-   }
 
    public boolean isExploded() {
       return this.isDestroyed() && this.damageSinceDestroyed > this.getMaxHP() / 10 + 1;
@@ -1509,16 +1370,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public abstract void onUpdateAircraft();
 
-   public boolean isDebug() {
-      if(this.debug) {
-         if(this.getFirstMountPlayer()!= null) {
-            if(this.getFirstMountPlayer().getDisplayName().equalsIgnoreCase("mocpages")) {
-               return true;
-            }
-         }
-      }
-      return false;
-   }
+
 
    public double getBearingToVec3(Vec3 v) {
 
@@ -1625,7 +1477,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       int range = this.getAcInfo().radarPower;
       List<Entity> list = worldObj.getEntitiesWithinAABBExcludingEntity(this,this.boundingBox.expand(range, range, range));
       for(Entity e : list) {
-         if(e instanceof MCH_EntityAircraft && (MCH_RadarHelper.isTargetVisible(this, e, acInfo.radarPower) || this.isDebug())) {
+         if(e instanceof MCH_EntityAircraft && (MCH_RadarHelper.isTargetVisible(this, e, acInfo.radarPower))) {
             double result = Math.abs(getBearingToEntity(e) - getYaw());
             //.out.println("Bearing: " + getBearingToEntity(e) + " yaw " + getYaw() + " result " + result + " rotate " + this.radarRotate);
             if(result <= acInfo.radarMax/2) {
@@ -1660,7 +1512,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       range = this.getAcInfo().surfaceSearch;
       list = worldObj.getEntitiesWithinAABBExcludingEntity(this,this.boundingBox.expand(range, range, range));
       for(Entity e : list) {
-         if(e instanceof MCH_EntityAircraft && (MCH_RadarHelper.isTargetVisible(this, e, acInfo.radarPower) || this.isDebug())) {
+         if(e instanceof MCH_EntityAircraft && (MCH_RadarHelper.isTargetVisible(this, e, acInfo.radarPower))) {
             //print("Ship detected");
             double result = Math.abs(getBearingToEntity(e) - getYaw());
             if(result <= acInfo.radarMax/2) {
@@ -3136,7 +2988,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          //System.out.println("yeet");
          return false;
       }
-      if(!this.isDebug() && !MCH_RadarHelper.isTargetVisible(this, e, acInfo.radarPower)) {
+      if(!MCH_RadarHelper.isTargetVisible(this, e, acInfo.radarPower)) {
          return false;
       }else {
          return true;
