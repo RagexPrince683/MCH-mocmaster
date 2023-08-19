@@ -1,10 +1,11 @@
 package mcheli;
 
 import com.google.common.io.ByteArrayDataInput;
+import mcheli.wrapper.W_PacketBase;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import mcheli.wrapper.W_PacketBase;
 
 public abstract class MCH_Packet extends W_PacketBase {
 

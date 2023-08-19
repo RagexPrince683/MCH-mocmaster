@@ -1,12 +1,13 @@
 package mcheli.command;
 
 import com.google.common.io.ByteArrayDataInput;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import mcheli.MCH_Packet;
 import mcheli.wrapper.W_Network;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.IChatComponent.Serializer;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class MCH_PacketTitle extends MCH_Packet {
 

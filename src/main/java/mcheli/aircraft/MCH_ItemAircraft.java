@@ -1,12 +1,8 @@
 package mcheli.aircraft;
 
-import java.util.List;
 import mcheli.MCH_Achievement;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_ItemAircraftDispenseBehavior;
 import mcheli.wrapper.W_EntityPlayer;
 import mcheli.wrapper.W_Item;
 import mcheli.wrapper.W_MovingObjectPosition;
@@ -24,6 +20,8 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+
+import java.util.List;
 
 public abstract class MCH_ItemAircraft extends W_Item {
 

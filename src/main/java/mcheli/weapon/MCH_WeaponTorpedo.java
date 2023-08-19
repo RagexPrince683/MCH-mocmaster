@@ -1,10 +1,6 @@
 package mcheli.weapon;
 
 import mcheli.MCH_Lib;
-import mcheli.weapon.MCH_EntityTorpedo;
-import mcheli.weapon.MCH_WeaponBase;
-import mcheli.weapon.MCH_WeaponInfo;
-import mcheli.weapon.MCH_WeaponParam;
 import mcheli.wrapper.W_MovingObjectPosition;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.util.MathHelper;

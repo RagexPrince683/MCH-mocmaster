@@ -3,9 +3,6 @@ package mcheli.command;
 import com.google.common.collect.Lists;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import mcheli.gui.MCH_Gui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ChatLine;
@@ -15,6 +12,10 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class MCH_GuiTitle extends MCH_Gui {
@@ -179,21 +180,21 @@ public class MCH_GuiTitle extends MCH_Gui {
       GL11.glPushMatrix();
       float posY = 0.0F;
       switch(this.position) {
-      case 0:
-      default:
-         posY = (float)(super.mc.displayHeight / 2 / MCH_Gui.scaleFactor) - (float)this.chatLines.size() / 2.0F * 9.0F * scale;
-         break;
-      case 1:
-         posY = 0.0F;
-         break;
-      case 2:
-         posY = (float)(super.mc.displayHeight / MCH_Gui.scaleFactor) - (float)this.chatLines.size() * 9.0F * scale;
-         break;
-      case 3:
-         posY = (float)(super.mc.displayHeight / 3 / MCH_Gui.scaleFactor) - (float)this.chatLines.size() / 2.0F * 9.0F * scale;
-         break;
-      case 4:
-         posY = (float)(super.mc.displayHeight * 2 / 3 / MCH_Gui.scaleFactor) - (float)this.chatLines.size() / 2.0F * 9.0F * scale;
+         case 0:
+         default:
+            posY = (float)(super.mc.displayHeight / 2 / MCH_Gui.scaleFactor) - (float)this.chatLines.size() / 2.0F * 9.0F * scale;
+            break;
+         case 1:
+            posY = 0.0F;
+            break;
+         case 2:
+            posY = (float)(super.mc.displayHeight / MCH_Gui.scaleFactor) - (float)this.chatLines.size() * 9.0F * scale;
+            break;
+         case 3:
+            posY = (float)(super.mc.displayHeight / 3 / MCH_Gui.scaleFactor) - (float)this.chatLines.size() / 2.0F * 9.0F * scale;
+            break;
+         case 4:
+            posY = (float)(super.mc.displayHeight * 2 / 3 / MCH_Gui.scaleFactor) - (float)this.chatLines.size() / 2.0F * 9.0F * scale;
       }
 
       GL11.glTranslatef(0.0F, posY, 0.0F);

@@ -1,14 +1,14 @@
 package mcheli.aircraft;
 
 import com.google.common.io.ByteArrayDataInput;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import mcheli.MCH_Packet;
-import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Network;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class MCH_PacketNotifyAmmoNum extends MCH_Packet {
 

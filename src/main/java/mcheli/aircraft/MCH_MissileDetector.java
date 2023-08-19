@@ -1,8 +1,6 @@
 package mcheli.aircraft;
 
-import java.util.List;
 import mcheli.MCH_PacketNotifyLock;
-import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_Lib;
 import mcheli.wrapper.W_McClient;
@@ -10,6 +8,8 @@ import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.World;
+
+import java.util.List;
 
 public class MCH_MissileDetector {
 
@@ -60,7 +60,7 @@ public class MCH_MissileDetector {
 
             if(var4 != null) {
                if(this.ac.isFlareUsing()) {
-                  this.destroyMissile();
+                  // this.destroyMissile();
                } else if(!this.ac.isUAV() && !this.world.isRemote) {
                   if(this.alertCount == 0 && (isLocked || this.isLockedByMissile())) {
                      this.alertCount = 20;
