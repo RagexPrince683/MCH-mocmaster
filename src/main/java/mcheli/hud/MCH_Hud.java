@@ -1,14 +1,26 @@
 package mcheli.hud;
 
-import mcheli.MCH_BaseInfo;
-import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.wrapper.W_ScaledResolution;
-import net.minecraft.entity.player.EntityPlayer;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import mcheli.MCH_BaseInfo;
+import mcheli.MCH_Lib;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.hud.MCH_HudItem;
+import mcheli.hud.MCH_HudItemCall;
+import mcheli.hud.MCH_HudItemCameraRot;
+import mcheli.hud.MCH_HudItemColor;
+import mcheli.hud.MCH_HudItemConditional;
+import mcheli.hud.MCH_HudItemExit;
+import mcheli.hud.MCH_HudItemGraduation;
+import mcheli.hud.MCH_HudItemLine;
+import mcheli.hud.MCH_HudItemLineStipple;
+import mcheli.hud.MCH_HudItemRadar;
+import mcheli.hud.MCH_HudItemRect;
+import mcheli.hud.MCH_HudItemString;
+import mcheli.hud.MCH_HudItemTexture;
+import mcheli.wrapper.W_ScaledResolution;
+import net.minecraft.entity.player.EntityPlayer;
 
 public class MCH_Hud extends MCH_BaseInfo {
 
@@ -104,7 +116,7 @@ public class MCH_Hud extends MCH_BaseInfo {
                      if(type2 == 1) {
                         this.list.add(new MCH_HudItemCall(fileLine, prm[0]));
                      }
-                  } else if(!item.equalsIgnoreCase("DrawEntityRadar") && !item.equalsIgnoreCase("DrawEnemyRadar") && !item.equalsIgnoreCase("RWR")) {
+                  } else if(!item.equalsIgnoreCase("DrawEntityRadar") && !item.equalsIgnoreCase("DrawEnemyRadar")) {
                      if(!item.equalsIgnoreCase("DrawGraduationYaw") && !item.equalsIgnoreCase("DrawGraduationPitch1") && !item.equalsIgnoreCase("DrawGraduationPitch2") && !item.equalsIgnoreCase("DrawGraduationPitch3")) {
                         if(item.equalsIgnoreCase("DrawCameraRot") && prm.length == 2) {
                            this.list.add(new MCH_HudItemCameraRot(fileLine, prm[0], prm[1]));
@@ -130,7 +142,7 @@ public class MCH_Hud extends MCH_BaseInfo {
                         this.list.add(new MCH_HudItemGraduation(fileLine, type3, prm[0], prm[1], prm[2], prm[3]));
                      }
                   } else if(prm.length == 5) {
-                     this.list.add(new MCH_HudItemRadar(fileLine, item, prm[0], prm[1], prm[2], prm[3], prm[4]));
+                     this.list.add(new MCH_HudItemRadar(fileLine, item.equalsIgnoreCase("DrawEntityRadar"), prm[0], prm[1], prm[2], prm[3], prm[4]));
                   }
                }
             } else if(prm.length >= 3) {
@@ -146,8 +158,6 @@ public class MCH_Hud extends MCH_BaseInfo {
    }
 
    public void draw(MCH_EntityAircraft ac, EntityPlayer player, float partialTicks) {
-
-
       MCH_HudItem.ac = ac;
       MCH_HudItem.player = player;
       MCH_HudItem.partialTicks = partialTicks;

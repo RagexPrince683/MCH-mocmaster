@@ -1,69 +1,41 @@
-/*    */ package mcheli.command;
-/*    */
-/*    */
+package mcheli.command;
 
 import com.google.common.io.ByteArrayDataInput;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import mcheli.MCH_Packet;
 import mcheli.wrapper.W_Network;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-/*    */
-/*    */
-/*    */
-/*    */
-/*    */
-/*    */
-/*    */
-/*    */ public class MCH_PacketCommandSave
-        /*    */   extends MCH_Packet
-        /*    */ {
-   /* 18 */   public String str = "";
-   /*    */
-   /*    */
-   /*    */
-   /*    */
-   /* 23 */   public int getMessageID() { return 536873729; }
-   /*    */
-   /*    */
-   /*    */
-   /*    */
-   /*    */
-   /*    */
-   /*    */   public void readData(ByteArrayDataInput data) {
-      /*    */     try {
-         /* 32 */       this.str = data.readUTF();
-         /*    */     }
-      /* 34 */     catch (Exception e) {
-         /*    */
-         /* 36 */       e.printStackTrace();
-         /*    */     }
-      /*    */   }
-   /*    */
-   /*    */
-   /*    */
-   /*    */
-   /*    */   public void writeData(DataOutputStream dos) {
-      /*    */     try {
-         /* 45 */       dos.writeUTF(this.str);
-         /*    */     }
-      /* 47 */     catch (IOException e) {
-         /*    */
-         /* 49 */       e.printStackTrace();
-         /*    */     }
-      /*    */   }
-   /*    */
-   /*    */
-   /*    */   public static void send(String cmd) {
-      /* 55 */     MCH_PacketCommandSave s = new MCH_PacketCommandSave();
-      /* 56 */     s.str = cmd;
-      //System.out.println("u wot m8 " + s.str);
-      /* 57 */     W_Network.sendToServer(s);
-      /*    */   }
-   /*    */ }
+public class MCH_PacketCommandSave extends MCH_Packet {
+
+   public String str = "";
 
 
-/* Location:              C:\Users\tani\Desktop\!\mcheli\command\MCH_PacketCommandSave.class
- * Java compiler version: 6 (50.0)
- * JD-Core Version:       1.0.7
- */
+   public int getMessageID() {
+      return 536873729;
+   }
+
+   public void readData(ByteArrayDataInput data) {
+      try {
+         this.str = data.readUTF();
+      } catch (Exception var3) {
+         var3.printStackTrace();
+      }
+
+   }
+
+   public void writeData(DataOutputStream dos) {
+      try {
+         dos.writeUTF(this.str);
+      } catch (IOException var3) {
+         var3.printStackTrace();
+      }
+
+   }
+
+   public static void send(String cmd) {
+      MCH_PacketCommandSave s = new MCH_PacketCommandSave();
+      s.str = cmd;
+      W_Network.sendToServer(s);
+   }
+}

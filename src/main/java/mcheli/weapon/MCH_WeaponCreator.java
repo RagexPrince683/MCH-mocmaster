@@ -2,6 +2,7 @@ package mcheli.weapon;
 
 import mcheli.weapon.MCH_IEntityLockChecker;
 import mcheli.weapon.MCH_WeaponAAMissile;
+import mcheli.weapon.MCH_WeaponASMissile;
 import mcheli.weapon.MCH_WeaponATMissile;
 import mcheli.weapon.MCH_WeaponBase;
 import mcheli.weapon.MCH_WeaponBomb;

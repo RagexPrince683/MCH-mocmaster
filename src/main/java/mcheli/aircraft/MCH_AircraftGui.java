@@ -1,11 +1,12 @@
 package mcheli.aircraft;
 
-import cpw.mods.fml.common.registry.GameData;
-import mcheli.MCH_Lib;
+import java.util.Iterator;
 import mcheli.MCH_PacketIndOpenScreen;
+import mcheli.aircraft.MCH_AircraftGuiContainer;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_PacketIndReload;
 import mcheli.command.MCH_PacketCommandSave;
-import mcheli.particles.MCH_ParticlesUtil;
-import mcheli.plane.MCP_EntityPlane;
+import mcheli.multiplay.MCH_PacketIndMultiplayCommand;
 import mcheli.weapon.MCH_WeaponDummy;
 import mcheli.weapon.MCH_WeaponInfo;
 import mcheli.weapon.MCH_WeaponSet;
@@ -15,12 +16,7 @@ import mcheli.wrapper.W_ScaledResolution;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
-
-import java.util.Iterator;
 
 public class MCH_AircraftGui extends W_GuiContainer {
 
@@ -64,9 +60,6 @@ public class MCH_AircraftGui extends W_GuiContainer {
       this.buttonInventory = new GuiButton(6, super.guiLeft + 210 - 30 - 60, super.guiTop + 90, 80, 20, "Inventory");
       super.buttonList.add(new GuiButton(5, super.guiLeft + 210 - 30 - 60, super.guiTop + 110, 80, 20, "MOD Options"));
       super.buttonList.add(new GuiButton(4, super.guiLeft + 210 - 30 - 20, super.guiTop + 10, 40, 20, "Close"));
-
-      //super.buttonList.add(new GuiButton(7, super.guiLeft, super.guiTop + 110, 80, 20, "Hardpoints"));
-
       super.buttonList.add(this.buttonReload);
       super.buttonList.add(this.buttonNext);
       super.buttonList.add(this.buttonPrev);
@@ -81,40 +74,9 @@ public class MCH_AircraftGui extends W_GuiContainer {
       this.reloadWait = 10;
    }
 
-
-
    public void closeScreen() {
-      String[] split = editCommand.getText().split(" ");
-      try {
-
-         if((!split[0].equalsIgnoreCase("debug") && !split[0].equalsIgnoreCase("fuel"))|| (thePlayer.getDisplayName().equalsIgnoreCase("mocpages"))) {
-            MCH_PacketCommandSave.send(this.editCommand.getText());
-         }else {
-            System.out.println(thePlayer.getDisplayName());
-         }
-
-         if(split[0].equalsIgnoreCase("tgt")) {
-            int x = Integer.parseInt(split[1]);
-            int y = Integer.parseInt(split[2]);
-            int z = Integer.parseInt(split[3]);
-            MCH_ParticlesUtil.spawnMarkPoint(this.thePlayer, x, y, z);
-            aircraft.target = Vec3.createVectorHelper(x, y, z);
-         }else if(split[0].equalsIgnoreCase("base")) {
-            if(this.aircraft instanceof MCP_EntityPlane) {
-               MCP_EntityPlane p = (MCP_EntityPlane)this.aircraft;
-               if(p.onGround || MCH_Lib.getBlockIdY(p, 1, -2) > 0) {
-                  p.base.x = p.posX;
-                  p.base.y = p.posZ;
-                  this.thePlayer.addChatComponentMessage(new ChatComponentText("Base location set to X: " + p.base.x + " Z: " + p.base.y));
-               }
-            }
-         }else if(split[0].equalsIgnoreCase("hardpoint")) {
-            this.aircraft.weaponTest(split[1], split[2]);
-         }
-      }catch(Exception e) {
-         e.printStackTrace();
-      }
-      this.mc.thePlayer.closeScreen();
+      MCH_PacketCommandSave.send(this.editCommand.getText());
+      super.mc.thePlayer.closeScreen();
    }
 
    public boolean canReload(EntityPlayer player) {
@@ -130,9 +92,8 @@ public class MCH_AircraftGui extends W_GuiContainer {
             this.reloadWait = 20;
          }
       }
-      try {
-         this.editCommand.updateCursorCounter();
-      }catch(Exception e) {}
+
+      this.editCommand.updateCursorCounter();
    }
 
    protected void mouseClicked(int p_73864_1_, int p_73864_2_, int p_73864_3_) {
@@ -144,52 +105,47 @@ public class MCH_AircraftGui extends W_GuiContainer {
       super.onGuiClosed();
    }
 
-
    protected void actionPerformed(GuiButton button) {
       super.actionPerformed(button);
       if(button.enabled) {
          switch(button.id) {
-            case 1:
-               this.buttonReload.enabled = this.canReload(this.thePlayer);
-               if(this.buttonReload.enabled) {
-                  MCH_PacketIndReload.send(this.aircraft, this.currentWeaponId);
-                  this.aircraft.supplyAmmo(this.currentWeaponId);
-                  this.reloadWait = 3;
-                  this.buttonReload.enabled = false;
-               }
-               break;
-            case 2:
-               ++this.currentWeaponId;
-               if(this.currentWeaponId >= this.aircraft.getWeaponNum()) {
-                  this.currentWeaponId = 0;
-               }
+         case 1:
+            this.buttonReload.enabled = this.canReload(this.thePlayer);
+            if(this.buttonReload.enabled) {
+               MCH_PacketIndReload.send(this.aircraft, this.currentWeaponId);
+               this.aircraft.supplyAmmo(this.currentWeaponId);
+               this.reloadWait = 3;
+               this.buttonReload.enabled = false;
+            }
+            break;
+         case 2:
+            ++this.currentWeaponId;
+            if(this.currentWeaponId >= this.aircraft.getWeaponNum()) {
+               this.currentWeaponId = 0;
+            }
 
-               this.buttonReload.enabled = this.canReload(this.thePlayer);
-               break;
-            case 3:
-               --this.currentWeaponId;
-               if(this.currentWeaponId < 0) {
-                  this.currentWeaponId = this.aircraft.getWeaponNum() - 1;
-               }
+            this.buttonReload.enabled = this.canReload(this.thePlayer);
+            break;
+         case 3:
+            --this.currentWeaponId;
+            if(this.currentWeaponId < 0) {
+               this.currentWeaponId = this.aircraft.getWeaponNum() - 1;
+            }
 
-               this.buttonReload.enabled = this.canReload(this.thePlayer);
-               break;
-            case 4:
-               this.closeScreen();
-               break;
-            case 5:
-               MCH_PacketIndOpenScreen.send(2);
-               break;
-            case 6:
-               MCH_PacketIndOpenScreen.send(3);
-               break;
-            case 7:
-               MCH_PacketIndOpenScreen.send(6);
+            this.buttonReload.enabled = this.canReload(this.thePlayer);
+            break;
+         case 4:
+            this.closeScreen();
+            break;
+         case 5:
+            MCH_PacketIndOpenScreen.send(2);
+            break;
+         case 6:
+            MCH_PacketIndOpenScreen.send(3);
          }
+
       }
    }
-
-
 
    protected void drawGuiContainerForegroundLayer(int par1, int par2) {
       super.drawGuiContainerForegroundLayer(par1, par2);
@@ -214,19 +170,12 @@ public class MCH_AircraftGui extends W_GuiContainer {
             for(i$ = ws.getInfo().roundItems.iterator(); i$.hasNext(); itemPosX += 20) {
                r = (MCH_WeaponInfo.RoundItem)i$.next();
                this.drawString("" + r.num, itemPosX, 80, 16777215);
-               this.drawString("" + r.itemStack.getDisplayName(), itemPosX, 90, 16777215);
-
             }
 
             itemPosX = 85;
 
             for(i$ = ws.getInfo().roundItems.iterator(); i$.hasNext(); itemPosX += 20) {
                r = (MCH_WeaponInfo.RoundItem)i$.next();
-               Item i = GameData.getItemRegistry().getObject(r.itemName);
-               //	this.aircraft.print("Item Name: " + r.itemName + " r.ItemStack null: " + (r.itemStack.getItem() == null) + " item null: " + (i == null));
-
-               // ItemStack stack = new ItemStack(i);
-               // r.itemStack = stack;
                this.drawItemStack(r.itemStack, itemPosX, 62);
             }
          }
@@ -246,14 +195,13 @@ public class MCH_AircraftGui extends W_GuiContainer {
          }
 
          if(!s.isEmpty()) {
-            // MCH_PacketIndMultiplayCommand.send(768, s);
+            MCH_PacketIndMultiplayCommand.send(768, s);
          }
       } else {
          this.editCommand.textboxKeyTyped(c, code);
       }
 
    }
-
 
    protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
       W_ScaledResolution scaledresolution = new W_ScaledResolution(super.mc, super.mc.displayWidth, super.mc.displayHeight);

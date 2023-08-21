@@ -3,14 +3,33 @@ package mcheli;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.*;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartedEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
-import mcheli.aircraft.*;
-//import mcheli.block.BlockSewingMachine;
+import java.io.File;
+import java.util.Iterator;
+import mcheli.MCH_Achievement;
+import mcheli.MCH_CommonProxy;
+import mcheli.MCH_Config;
+import mcheli.MCH_CreativeTabs;
+import mcheli.MCH_EventHook;
+import mcheli.MCH_InvisibleItem;
+import mcheli.MCH_ItemRecipe;
+import mcheli.MCH_Lib;
+import mcheli.MCH_PacketHandler;
+import mcheli.MCH_SoundsJson;
+import mcheli.aircraft.MCH_EntityHide;
+import mcheli.aircraft.MCH_EntityHitBox;
+import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.aircraft.MCH_ItemFuel;
 import mcheli.block.MCH_DraftingTableBlock;
 import mcheli.block.MCH_DraftingTableTileEntity;
 import mcheli.chain.MCH_EntityChain;
@@ -50,29 +69,36 @@ import mcheli.vehicle.MCH_EntityVehicle;
 import mcheli.vehicle.MCH_ItemVehicle;
 import mcheli.vehicle.MCH_VehicleInfo;
 import mcheli.vehicle.MCH_VehicleInfoManager;
-import mcheli.weapon.*;
-import mcheli.wrapper.*;
+import mcheli.weapon.MCH_EntityA10;
+import mcheli.weapon.MCH_EntityAAMissile;
+import mcheli.weapon.MCH_EntityASMissile;
+import mcheli.weapon.MCH_EntityATMissile;
+import mcheli.weapon.MCH_EntityBomb;
+import mcheli.weapon.MCH_EntityBullet;
+import mcheli.weapon.MCH_EntityDispensedItem;
+import mcheli.weapon.MCH_EntityMarkerRocket;
+import mcheli.weapon.MCH_EntityRocket;
+import mcheli.weapon.MCH_EntityTorpedo;
+import mcheli.weapon.MCH_EntityTvMissile;
+import mcheli.weapon.MCH_WeaponInfoManager;
+import mcheli.wrapper.NetworkMod;
+import mcheli.wrapper.W_Item;
+import mcheli.wrapper.W_ItemList;
+import mcheli.wrapper.W_LanguageRegistry;
+import mcheli.wrapper.W_NetworkRegistry;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
-import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.MinecraftForge;
 
-import java.io.File;
-import java.util.Iterator;
-import java.util.List;
-
 @Mod(
-        modid = "mcheli",
-        name = "mcheli",
-        dependencies = "required-after:Forge@[10.13.2.1230,)"
+   modid = "mcheli",
+   name = "mcheli",
+   dependencies = "required-after:Forge@[10.13.2.1230,)"
 )
 @NetworkMod(
-        clientSideRequired = true,
-        serverSideRequired = false
+   clientSideRequired = true,
+   serverSideRequired = false
 )
 public class MCH_MOD {
 
@@ -84,8 +110,8 @@ public class MCH_MOD {
    @Instance("mcheli")
    public static MCH_MOD instance;
    @SidedProxy(
-           clientSide = "mcheli.MCH_ClientProxy",
-           serverSide = "mcheli.MCH_CommonProxy"
+      clientSide = "mcheli.MCH_ClientProxy",
+      serverSide = "mcheli.MCH_CommonProxy"
    )
    public static MCH_CommonProxy proxy;
    public static MCH_PacketHandler packetHandler = new MCH_PacketHandler();
@@ -111,9 +137,6 @@ public class MCH_MOD {
    public static MCH_CreativeTabs creativeTabsVehicle;
    public static MCH_DraftingTableBlock blockDraftingTable;
    public static MCH_DraftingTableBlock blockDraftingTableLit;
-
-   //public static BlockSewingMachine blockSewingMachine;
-
    public static Item sampleHelmet;
 
 
@@ -167,15 +190,8 @@ public class MCH_MOD {
       blockDraftingTableLit.setBlockName("lit_drafting_table");
       GameRegistry.registerBlock(blockDraftingTable, "drafting_table");
       GameRegistry.registerBlock(blockDraftingTableLit, "lit_drafting_table");
-
-      //blockSewingMachine = new BlockSewingMachine(-1, false);
-      //blockSewingMachine.setBlockName("sewing_machine");
-      //blockSewingMachine.setCreativeTab(creativeTabs);
-     // GameRegistry.registerBlock(blockSewingMachine, "sewing_machine");
-     // W_LanguageRegistry.addName(blockSewingMachine, "Sewing Machine");
-
       W_LanguageRegistry.addName(blockDraftingTable, "Drafting Table");
-      W_LanguageRegistry.addNameForObject(blockDraftingTable, "ja_JP", "è£½å›³å�°");
+      W_LanguageRegistry.addNameForObject(blockDraftingTable, "ja_JP", "製図台");
       MCH_Achievement.PreInit();
       MCH_Lib.Log("Register system", new Object[0]);
       W_NetworkRegistry.registerChannel(packetHandler, "MCHeli_CH");
@@ -191,19 +207,6 @@ public class MCH_MOD {
       MCH_Lib.Log("Register Sounds", new Object[0]);
       proxy.registerSounds();
       W_LanguageRegistry.updateLang(sourcePath + "/assets/" + "mcheli" + "/lang/");
-      FMLInterModComms.sendMessage("LookingGlass", "API", "mcheli.MCH_MOD.register");
-      ForgeChunkManager.setForcedChunkLoadingCallback(this, new LoadingCallback() {
-
-         @Override
-         public void ticketsLoaded(List<Ticket> tickets, World world) {
-            for(Ticket ticket : tickets) {
-               if(ticket.getEntity() instanceof MCH_EntityBullet) {
-                  ((MCH_EntityBullet)ticket.getEntity()).init(ticket);
-               }
-            }
-         }
-      });
-
       MCH_Lib.Log("End load", new Object[0]);
    }
 
@@ -278,7 +281,7 @@ public class MCH_MOD {
       itemRangeFinder = item;
       registerItem(item, "rangefinder", creativeTabs);
       W_LanguageRegistry.addName(item, "Laser Rangefinder");
-      W_LanguageRegistry.addNameForObject(item, "ja_JP", "ãƒ¬ãƒ¼ã‚¶ãƒ¼ ãƒ¬ãƒ³ã‚¸ ãƒ•ã‚¡ã‚¤ãƒ³ãƒ€ãƒ¼");
+      W_LanguageRegistry.addNameForObject(item, "ja_JP", "レーザー レンジ ファインダー");
    }
 
    private void registerItemWrench() {
@@ -289,7 +292,7 @@ public class MCH_MOD {
       itemWrench = item;
       registerItem(item, "wrench", creativeTabs);
       W_LanguageRegistry.addName(item, "Wrench");
-      W_LanguageRegistry.addNameForObject(item, "ja_JP", "ãƒ¬ãƒ³ãƒ�");
+      W_LanguageRegistry.addNameForObject(item, "ja_JP", "レンチ");
    }
 
    public void registerItemInvisible() {
@@ -303,7 +306,7 @@ public class MCH_MOD {
 
    public void registerItemUavStation() {
       String[] dispName = new String[]{"UAV Station", "Portable UAV Controller"};
-      String[] localName = new String[]{"UAVã‚¹ãƒ†ãƒ¼ã‚·ãƒ§ãƒ³", "æ�ºå¸¯UAVåˆ¶å¾¡ç«¯æœ«"};
+      String[] localName = new String[]{"UAVステーション", "携帯UAV制御端末"};
       itemUavStation = new MCH_ItemUavStation[MCH_ItemUavStation.UAV_STATION_KIND_NUM];
       String name = "uav_station";
 
@@ -328,7 +331,7 @@ public class MCH_MOD {
       itemParachute = item;
       registerItem(item, "parachute", creativeTabs);
       W_LanguageRegistry.addName(item, "Parachute");
-      W_LanguageRegistry.addNameForObject(item, "ja_JP", "ãƒ‘ãƒ©ã‚·ãƒ¥ãƒ¼ãƒˆ");
+      W_LanguageRegistry.addNameForObject(item, "ja_JP", "パラシュート");
    }
 
    public void registerItemContainer() {
@@ -339,7 +342,7 @@ public class MCH_MOD {
       itemContainer = item;
       registerItem(item, "container", creativeTabs);
       W_LanguageRegistry.addName(item, "Container");
-      W_LanguageRegistry.addNameForObject(item, "ja_JP", "ã‚³ãƒ³ãƒ†ãƒŠ");
+      W_LanguageRegistry.addNameForObject(item, "ja_JP", "コンテナ");
    }
 
    public void registerItemLightWeapon() {
@@ -384,7 +387,7 @@ public class MCH_MOD {
       itemChain = item;
       registerItem(item, "chain", creativeTabs);
       W_LanguageRegistry.addName(item, "Chain");
-      W_LanguageRegistry.addNameForObject(item, "ja_JP", "éŽ–");
+      W_LanguageRegistry.addNameForObject(item, "ja_JP", "鎖");
    }
 
    public void registerItemFuel() {
@@ -395,7 +398,7 @@ public class MCH_MOD {
       itemFuel = item;
       registerItem(item, "fuel", creativeTabs);
       W_LanguageRegistry.addName(item, "Fuel");
-      W_LanguageRegistry.addNameForObject(item, "ja_JP", "ç‡ƒæ–™");
+      W_LanguageRegistry.addNameForObject(item, "ja_JP", "燃料");
    }
 
    public void registerItemGLTD() {
@@ -406,7 +409,7 @@ public class MCH_MOD {
       itemGLTD = item;
       registerItem(item, "gltd", creativeTabs);
       W_LanguageRegistry.addName(item, "GLTD:Target Designator");
-      W_LanguageRegistry.addNameForObject(item, "ja_JP", "GLTD:ãƒ¬ãƒ¼ã‚¶ãƒ¼ç›®æ¨™æŒ‡ç¤ºè£…ç½®");
+      W_LanguageRegistry.addNameForObject(item, "ja_JP", "GLTD:レーザー目標指示装置");
    }
 
    public static void registerItem(W_Item item, String name, MCH_CreativeTabs ct) {

@@ -1,5 +1,11 @@
 package mcheli;
 
+import java.util.List;
+import java.util.UUID;
+import mcheli.MCH_Config;
+import mcheli.MCH_Lib;
+import mcheli.MCH_MOD;
+import mcheli.MCH_PacketNotifyServerSettings;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_ItemAircraft;
@@ -14,14 +20,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.CommandEvent;
-import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
-
-import java.util.List;
-import java.util.UUID;
 
 public class MCH_EventHook extends W_EventHook {
 

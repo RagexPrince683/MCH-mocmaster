@@ -1,6 +1,22 @@
 package mcheli;
 
-import mcheli.wrapper.*;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import mcheli.MCH_Config;
+import mcheli.MCH_ItemRendererDummy;
+import mcheli.MCH_MOD;
+import mcheli.MCH_Vector2;
+import mcheli.MCH_ViewEntityDummy;
+import mcheli.wrapper.W_Block;
+import mcheli.wrapper.W_McClient;
+import mcheli.wrapper.W_Reflection;
+import mcheli.wrapper.W_Vec3;
+import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -17,10 +33,6 @@ import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 public class MCH_Lib {
 
@@ -405,14 +417,14 @@ public class MCH_Lib {
    public static void enableFirstPersonItemRender() {
       MCH_Config var10000 = MCH_MOD.config;
       switch(MCH_Config.DisableItemRender.prmInt) {
-         case 1:
-         default:
-            break;
-         case 2:
-            MCH_ItemRendererDummy.disableDummyItemRenderer();
-            break;
-         case 3:
-            W_Reflection.restoreCameraZoom();
+      case 1:
+      default:
+         break;
+      case 2:
+         MCH_ItemRendererDummy.disableDummyItemRenderer();
+         break;
+      case 3:
+         W_Reflection.restoreCameraZoom();
       }
 
    }
@@ -426,14 +438,14 @@ public class MCH_Lib {
    public static void disableFirstPersonItemRender() {
       MCH_Config var10000 = MCH_MOD.config;
       switch(MCH_Config.DisableItemRender.prmInt) {
-         case 1:
-            W_Reflection.setItemRenderer_ItemToRender(new ItemStack(MCH_MOD.invisibleItem));
-            break;
-         case 2:
-            MCH_ItemRendererDummy.enableDummyItemRenderer();
-            break;
-         case 3:
-            W_Reflection.setCameraZoom(1.01F);
+      case 1:
+         W_Reflection.setItemRenderer_ItemToRender(new ItemStack(MCH_MOD.invisibleItem));
+         break;
+      case 2:
+         MCH_ItemRendererDummy.enableDummyItemRenderer();
+         break;
+      case 3:
+         W_Reflection.setCameraZoom(1.01F);
       }
 
    }

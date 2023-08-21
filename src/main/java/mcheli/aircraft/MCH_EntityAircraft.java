@@ -1,29 +1,76 @@
 package mcheli.aircraft;
 
-import com.flansmod.common.guns.EntityBullet;
-import com.flansmod.common.guns.EntityDamageSourceGun;
-import com.hbm.blocks.ModBlocks;
-import com.hbm.potion.HbmPotion;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-//import cuchaz.ships.EntityShip;
 import io.netty.buffer.ByteBuf;
-import mcheli.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import mcheli.MCH_Achievement;
+import mcheli.MCH_Camera;
+import mcheli.MCH_Config;
+import mcheli.MCH_Explosion;
+import mcheli.MCH_Lib;
+import mcheli.MCH_LowPassFilterFloat;
+import mcheli.MCH_MOD;
+import mcheli.MCH_Math;
+import mcheli.MCH_Queue;
+import mcheli.MCH_ViewEntityDummy;
+import mcheli.aircraft.MCH_AircraftBoundingBox;
+import mcheli.aircraft.MCH_AircraftGuiContainer;
+import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.MCH_AircraftInventory;
+import mcheli.aircraft.MCH_BoundingBox;
+import mcheli.aircraft.MCH_DummyCommandSender;
+import mcheli.aircraft.MCH_EntityHide;
+import mcheli.aircraft.MCH_EntityHitBox;
+import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.aircraft.MCH_IEntityCanRideAircraft;
+import mcheli.aircraft.MCH_ItemFuel;
+import mcheli.aircraft.MCH_MissileDetector;
+import mcheli.aircraft.MCH_PacketIndNotifyAmmoNum;
+import mcheli.aircraft.MCH_PacketIndRotation;
+import mcheli.aircraft.MCH_PacketNotifyAmmoNum;
+import mcheli.aircraft.MCH_PacketNotifyClientSetting;
+import mcheli.aircraft.MCH_PacketNotifyWeaponID;
+import mcheli.aircraft.MCH_PacketSeatListRequest;
+import mcheli.aircraft.MCH_Parts;
+import mcheli.aircraft.MCH_Radar;
+import mcheli.aircraft.MCH_SeatInfo;
+import mcheli.aircraft.MCH_SeatRackInfo;
+import mcheli.aircraft.MCH_SoundUpdater;
 import mcheli.chain.MCH_EntityChain;
 import mcheli.command.MCH_Command;
 import mcheli.flare.MCH_Flare;
-import mcheli.hud.MCH_HudItemRadar;
 import mcheli.multiplay.MCH_Multiplay;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
-import mcheli.sensors.*;
 import mcheli.tool.MCH_ItemWrench;
 import mcheli.uav.MCH_EntityUavStation;
-import mcheli.vehicle.MCH_EntityVehicle;
-import mcheli.weapon.*;
-import mcheli.wrapper.*;
+import mcheli.weapon.MCH_EntityTvMissile;
+import mcheli.weapon.MCH_IEntityLockChecker;
+import mcheli.weapon.MCH_WeaponBase;
+import mcheli.weapon.MCH_WeaponCreator;
+import mcheli.weapon.MCH_WeaponDummy;
+import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.weapon.MCH_WeaponParam;
+import mcheli.weapon.MCH_WeaponSet;
+import mcheli.weapon.MCH_WeaponSmoke;
+import mcheli.wrapper.W_AxisAlignedBB;
+import mcheli.wrapper.W_Block;
+import mcheli.wrapper.W_Entity;
+import mcheli.wrapper.W_EntityContainer;
+import mcheli.wrapper.W_EntityPlayer;
+import mcheli.wrapper.W_EntityRenderer;
+import mcheli.wrapper.W_Item;
+import mcheli.wrapper.W_Lib;
+import mcheli.wrapper.W_NBTTag;
+import mcheli.wrapper.W_Reflection;
+import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.crash.CrashReport;
@@ -33,7 +80,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecartEmpty;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPickaxe;
@@ -42,13 +88,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.*;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.ReportedException;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidContainerItem;
 
-import java.util.*;
 public abstract class MCH_EntityAircraft extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideAircraft, IEntityAdditionalSpawnData {
 
    private static final int DATAWT_ID_DAMAGE = 19;
@@ -82,7 +129,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    protected static final int PART_ID_HATCH = 4;
    public static final byte LIMIT_GROUND_PITCH = 40;
    public static final byte LIMIT_GROUND_ROLL = 40;
-   public static boolean debug = false;
    public boolean isRequestedSyncStatus = false;
    private MCH_AircraftInfo acInfo;
    private int commonStatus;
@@ -117,8 +163,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public boolean throttleDown = false;
    public boolean moveLeft = false;
    public boolean moveRight = false;
-   public boolean moveUp = false;
-   public boolean moveDown = false;
    public MCH_LowPassFilterFloat lowPassPartialTicks;
    private MCH_Radar entityRadar;
    private int radarRotate;
@@ -174,6 +218,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public double prevRidingEntityPosZ;
    public boolean canRideRackStatus;
    private int modeSwitchCooldown;
+   public Vec3 target = Vec3.createVectorHelper(0, 0, 0);
    public MCH_BoundingBox[] extraBoundingBox;
    public float lastBBDamageFactor;
    private final MCH_AircraftInventory inventory;
@@ -213,25 +258,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private double lastLandInDistance;
    private static final MCH_EntitySeat[] seatsDummy = new MCH_EntitySeat[0];
    private boolean switchSeat = false;
-   public int airburst;
 
-   public Vec3 target = Vec3.createVectorHelper(0, 0, 0);
-   public ArrayList<MCH_RadarContact> contacts = new ArrayList<MCH_RadarContact>();
-   public ArrayList<MCH_RadarContact> surfaceContacts = new ArrayList<MCH_RadarContact>();
-   public ArrayList<MCH_ESMContact> ESMContacts = new ArrayList<MCH_ESMContact>();
-   public ArrayList<Vec3> targets = new ArrayList<Vec3>();
-
-   public MCH_RadarContact radarTarget;
-   public MCH_BoundingBox lastBB;
-   //public List<MCH_Hardpoint> hardpoints = new ArrayList<MCH_Hardpoint>();
-   public List<MCH_WeaponSet> hardpointWeps = new ArrayList<MCH_WeaponSet>();
-   //public InventoryBackpack hardpointInventory;
-   public int currentHardpoint = -1;
-
-   public int tdcX = 0;
-   public int tdcY = 0;
-   public int tdcMode = 0;
-   public int radarMode = -1; //0 = RWS; 1=STT; 2=TWS; -1=OFF; 3=SURF
 
    public MCH_EntityAircraft(World world) {
       super(world);
@@ -306,7 +333,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.isParachuting = false;
       this.prevPosition = new MCH_Queue(10, Vec3.createVectorHelper(0.0D, 0.0D, 0.0D));
       this.lastSearchLightYaw = this.lastSearchLightPitch = 0.0F;
-
    }
 
    protected void entityInit() {
@@ -611,7 +637,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if(this.isTargetDrone()) {
          this.setDespawnCount(50);
       } else {
-         this.setDespawnCount(90 * 20);
+         this.setDespawnCount(500);
       }
 
       this.rotDestroyedPitch = super.rand.nextFloat() - 0.5F;
@@ -721,7 +747,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public void onAcInfoReloaded() {
       if(this.getAcInfo() != null) {
-         //this.hardpoints = this.getAcInfo().hardpointList;
          this.setSize(this.getAcInfo().bodyWidth, this.getAcInfo().bodyHeight);
       }
    }
@@ -779,12 +804,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if(this.haveSearchLight() && nbt.hasKey("SearchLight")) {
          this.setSearchLight(nbt.getBoolean("SearchLight"));
       }
-      double throttle = nbt.getDouble("Throttle");
-      this.setCurrentThrottle(throttle);
-      //if(this.getAlt(this.posX, this.posY, this.posZ) > 0) { this.setCurrentThrottle(1.0D);}
 
       this.dismountedUserCtrl = nbt.getBoolean("AcDismounted");
-      //InventoryTools.readInventoryFromNBT(hardpointInventory, nbt.getCompoundTag("hardpointInventory"));
    }
 
    protected void writeEntityToNBT(NBTTagCompound nbt) {
@@ -799,8 +820,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       nbt.setFloat("AcLastRYaw", this.getLastRiderYaw());
       nbt.setFloat("AcLastRPitch", this.getLastRiderPitch());
       nbt.setString("AcCommand", this.getCommand());
-      nbt.setDouble("Throttle", this.getCurrentThrottle());
-
       super.writeEntityToNBT(nbt);
       this.getGuiInventory().writeEntityToNBT(nbt);
       int[] wa_list = new int[this.getWeaponNum()];
@@ -812,13 +831,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       nbt.setTag("AcWeaponsAmmo", W_NBTTag.newTagIntArray("AcWeaponsAmmo", wa_list));
       nbt.setInteger("AcDamage", this.getDamageTaken());
       nbt.setBoolean("AcDismounted", this.dismountedUserCtrl);
-
    }
 
    public boolean attackEntityFrom(DamageSource damageSource, float org_damage) {
       float damageFactor = this.lastBBDamageFactor;
       this.lastBBDamageFactor = 1.0F;
-
       if(this.isEntityInvulnerable()) {
          return false;
       } else if(super.isDead) {
@@ -827,7 +844,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          return false;
       } else {
          String dmt = damageSource.getDamageType();
-         System.out.println("Damage Source: " + dmt + " amt " + org_damage);
          if(dmt.equalsIgnoreCase("inFire")) {
             return false;
          } else if(dmt.equalsIgnoreCase("cactus")) {
@@ -868,7 +884,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                      if(isCreative) {
                         isDamegeSourcePlayer = true;
                      } else {
-
                         var10000 = MCH_MOD.config;
                         if(!MCH_Config.PreventingBroken.prmBool) {
                            var10000 = MCH_MOD.config;
@@ -879,9 +894,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                            } else {
                               isDamegeSourcePlayer = !this.isRidePlayer();
                            }
-                        }
-                        if(this.acInfo.category.contains("breakable") || this.acInfo.category.equalsIgnoreCase("breakable")){
-                           isDamegeSourcePlayer=true;
                         }
                      }
                   }
@@ -905,8 +917,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                         damage *= cmd1.armorDamageFactor;
                         damage -= cmd1.armorMinDamage;
-
-
                         if(damage <= 0.0F) {
                            MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.attackEntityFrom:no damage=%.1f -> %.1f(factor=%.2f):%s", new Object[]{Float.valueOf(org_damage), Float.valueOf(damage), Float.valueOf(damageFactor), dmt});
                            return false;
@@ -915,8 +925,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                         if(damageFactor > 1.0F) {
                            damage *= damageFactor;
                         }
-
-
                      }
 
                      MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.attackEntityFrom:damage=%.1f(factor=%.2f):%s", new Object[]{Float.valueOf(damage), Float.valueOf(damageFactor), dmt});
@@ -977,8 +985,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          }
       }
    }
-
-
 
    public boolean isExploded() {
       return this.isDestroyed() && this.damageSinceDestroyed > this.getMaxHP() / 10 + 1;
@@ -1370,304 +1376,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public abstract void onUpdateAircraft();
 
-
-
-   public double getBearingToVec3(Vec3 v) {
-
-      double delta_x = v.xCoord- this.posX;
-      double delta_z = posZ - v.zCoord;
-      double angle = Math.atan2(delta_x, delta_z);
-      angle = Math.toDegrees(angle);
-      if(angle < 0) { angle += 360;}
-
-      return angle;
-   }
-
-   public double getBearingToEntity(Entity e) {
-
-      double delta_x = e.posX- this.posX;
-      double delta_z = posZ - e.posZ;
-      double angle = Math.atan2(delta_x, delta_z);
-      angle = Math.toDegrees(angle);
-      if(angle < 0) { angle += 360;}
-
-      return angle;
-   }
-
-   //N = 0 = -z
-   //S = 180 = +z
-   //E = 90 = +X
-   //W = 270 = -X
-   public double getBearingToContact(MCH_RadarContact c) {
-      double delta_x = c.x - posX;
-      double delta_z = posZ - c.z;
-      double angle = Math.atan2(delta_x, delta_z);
-      angle = Math.toDegrees(angle);
-
-      if(angle < 0) { angle += 360;}
-
-      return angle;
-   }
-
-   public void cleanContacts() {
-      ArrayList<MCH_RadarContact> toRemove = new ArrayList<MCH_RadarContact>(); //don't edit on an arraylist as we iterate over it
-      for(MCH_RadarContact c : contacts) {
-         c.updated++;
-         if(!this.canDetectEntity(worldObj.getEntityByID(c.entityID))) {
-            //System.out.println("Removing Server. Remote: " + this.worldObj.isRemote);
-            toRemove.add(c);
-         }
-      }
-      contacts.removeAll(toRemove);
-      if(!this.contacts.contains(this.radarTarget)) {
-         radarTarget = null;
-         radarMode = 0;
-      }
-
-
-   }
-
-   public void cleanContacts_client() {
-      ArrayList<MCH_RadarContact> toRemove = new ArrayList<MCH_RadarContact>(); //don't edit on an arraylist as we iterate over it
-      for(MCH_RadarContact c : contacts) {
-         c.updated++;
-         //System.out.println("Updated: " + c.updated);
-         if(c.updated >= 200) {
-            //System.out.println("Removing Client. Remote: " + this.worldObj.isRemote);
-            toRemove.add(c);
-         }
-      }
-      contacts.removeAll(toRemove);
-      if(!this.contacts.contains(this.radarTarget)) {
-         radarTarget = null;
-      }
-
-      ArrayList<MCH_ESMContact> removeList = new ArrayList<MCH_ESMContact>();
-      for(MCH_ESMContact c : this.ESMContacts) {
-         c.updated++;
-         if(c.updated >= 200) {
-            removeList.add(c);
-         }
-      }
-      ESMContacts.removeAll(removeList);
-   }
-
-   public double getYaw() {
-      double yaw = MCH_Lib.getRotate360(this.rotationYaw)-180;
-      if(yaw < 0) { yaw += 360;}
-      return yaw;
-   }
-
-   public void updateRadar() {
-      this.radarRotate += 1;
-      if(this.radarRotate >= acInfo.radarMax/2) {
-         this.radarRotate = -acInfo.radarMax/2;
-      }
-
-      cleanContacts();
-
-      if(this.radarMode != -1) {
-         MCH_ESMHandler.getInstance().addEmitter(this);
-      }
-
-      if(!this.contacts.contains(this.radarTarget)) {
-         radarTarget = null;
-      }
-
-      int range = this.getAcInfo().radarPower;
-      List<Entity> list = worldObj.getEntitiesWithinAABBExcludingEntity(this,this.boundingBox.expand(range, range, range));
-      for(Entity e : list) {
-         if(e instanceof MCH_EntityAircraft && (MCH_RadarHelper.isTargetVisible(this, e, acInfo.radarPower))) {
-            double result = Math.abs(getBearingToEntity(e) - getYaw());
-            //.out.println("Bearing: " + getBearingToEntity(e) + " yaw " + getYaw() + " result " + result + " rotate " + this.radarRotate);
-            if(result <= acInfo.radarMax/2) {
-
-               //System.out.println("Updating " + this.radarRotate +" Bearing: " + getBearingToEntity(e) +" name: "+ e.getCommandSenderName());
-               boolean foundMatch = false;
-               for(MCH_RadarContact c : this.contacts) {
-                  if(c.entityID == e.getEntityId()) {
-                     c.updated = 0;
-                     c.x = e.posX;
-                     c.y = e.posY;
-                     c.z = e.posZ;
-                     foundMatch = true;
-                  }
-               }
-               if(!foundMatch) {
-                  this.contacts.add(new MCH_RadarContact(e.posX,e.posY,e.posZ,e.getEntityId(), e.width,e.height, e.rotationYaw));
-               }
-               MCH_PacketRadar pkt = new MCH_PacketRadar();
-               if(this.getFirstMountPlayer() != null) {
-                  pkt.sendToPlayer(this.getFirstMountPlayer(), e);
-               }
-            }else if(e instanceof MCH_EntityAircraft){
-               //System.out.println("Not updating this one!");
-            }
-         }
-
-
-      }
-
-      //Update surface search - look for ships.
-      range = this.getAcInfo().surfaceSearch;
-      list = worldObj.getEntitiesWithinAABBExcludingEntity(this,this.boundingBox.expand(range, range, range));
-      for(Entity e : list) {
-         if(e instanceof MCH_EntityAircraft && (MCH_RadarHelper.isTargetVisible(this, e, acInfo.radarPower))) {
-            //print("Ship detected");
-            double result = Math.abs(getBearingToEntity(e) - getYaw());
-            if(result <= acInfo.radarMax/2) {
-               boolean foundMatch = false;
-               for(MCH_RadarContact c : this.surfaceContacts) {
-                  if(c.entityID == e.getEntityId()) {
-                     c.updated = 0;
-                     c.x = e.posX;
-                     c.y = e.posY;
-                     c.z = e.posZ;
-                     foundMatch = true;
-                  }
-               }
-               if(!foundMatch) {
-                  this.surfaceContacts.add(new MCH_RadarContact(e.posX,e.posY,e.posZ,e.getEntityId(), e.width,e.height, e.rotationYaw));
-               }
-               MCH_PacketRadar pkt = new MCH_PacketRadar();
-               pkt.isShip = true;
-               pkt.sendToPlayer(this.getFirstMountPlayer(), e);
-            }
-         }
-      }
-   }
-
-   public void addRads(Entity entity){
-      PotionEffect effect = new PotionEffect(HbmPotion.radiation.id, 10 * 60 * 20, 0);
-      effect.setCurativeItems(new ArrayList());
-      ((EntityLivingBase) entity).addPotionEffect(effect);
-   }
-
-   public void addRadsToAll(){
-      if(this.getRiddenByEntity() != null) {
-         addRads(this.getRiddenByEntity());
-      }
-
-
-      MCH_EntitySeat[] arr$ = this.getSeats();
-      int len$ = arr$.length;
-
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_EntitySeat seat = arr$[i$];
-         if(seat != null && seat.riddenByEntity != null) {
-            addRads(seat.riddenByEntity);
-         }
-      }
-
-   }
-
-
-   public void onUpdateDeath(){
-      if(!isDestroyed()){return;}
-      if(getDespawnCount() % 20 != 0){return;}
-      //if(getDespawnCount() <= 60 * 20){return;}
-      //if(getDespawnCount() <= 90 * 20 - 2){return;}
-      //TextureManager man = Minecraft.getMinecraft().renderEngine;
-      //ParticleRocketFlame fx = new ParticleRocketFlame(man, worldObj, posX + rand.nextGaussian() * width, posY, posZ + rand.nextGaussian() * width);
-      //fx.motionY = 0.75 + rand.nextDouble() * 0.5;
-
-      float flameSize = width/2;
-      //if (this.worldObj.isRemote) {
-      //MCH_ParticlesUtil.spawnParticleRocketFlame(this.worldObj, this.posX, this.posY, this.posZ, flameSize);
-      //MCH_ParticlesUtil.spawnParticleFlame(this.worldObj, this.posX, this.posY + flameSize, this.posZ, flameSize, 64, this.onGround);
-      //MCH_ParticlesUtil.spawnParticleDarkSmoke(this.worldObj, this.posX, this.posY, this.posZ, flameSize * 9, 100, 100, 100, 100, 37 + 1000);
-      // }
-
-      //MCH_EntityParticleFlame epe = new MCH_EntityParticleFlame(worldObj, posX, posY+(flameSize), posZ, flameSize, (double)64, 0.0D);
-      //MCH_EntityParticleDarkSmoke epe = new MCH_EntityParticleDarkSmoke(this.worldObj,this.posX, this.posY, this.posZ, flameSize*9, (double)37+1000, 0.0D);
-      // epe.nowCount = 48 - 11;
-      //epe.setParticleMaxAge(48);
-      //epe.setRBGColorF(100, 100, 100);
-      //epe.setAlphaF(100);
-      //if(this.onGround) {
-      //epe.setVelocity(0, 0.05, 0);
-      //}
-      //FMLClientHandler.instance().getClient().effectRenderer.addEffect(epe);
-
-   }
-
    public void onUpdate() {
-      if(this.isDestroyed()){
-         onUpdateDeath();
-      }
       if(this.getCountOnUpdate() < 2) {
          this.prevPosition.clear(Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
       }
 
-      if(this.radarMode == 1 && this.radarTarget == null) {
-         this.radarMode = 0;
-      }
-      if(this.radarMode != 1) {
-         this.radarTarget = null;
-      }
-
-      if(this.worldObj.isRemote) {
-         Block b = worldObj.getBlock((int)posX, (int)posY-1, (int)posZ);
-         if(b != null) {
-            //print("block: " + b.getLocalizedName() + " isequal " + (b == ModBlocks.waste_mycelium) + " " + (b == ModBlocks.waste_earth));
-         }
-         if(b == ModBlocks.waste_earth){
-            addRadsToAll();
-         }
-
-
-         if(this instanceof MCH_EntityVehicle) {
-            if(this.tdcMode == 0) { //B Scope Radar
-               if(this.tdcX >= 128) {
-                  tdcX = 128;
-               }else if(tdcX <= -128) {
-                  tdcX = -128;
-               }
-               if(tdcY >= 128) {
-                  tdcY = 128;
-               }else if(tdcY <= -128) {
-                  tdcY = -128;
-               }
-            }
-         }else {
-
-
-
-            if(this.tdcMode == 0) { //B Scope Radar
-               if(this.tdcX >= 32) {
-                  tdcX = 32;
-               }else if(tdcX <= -32) {
-                  tdcX = -32;
-               }
-               if(tdcY >= 32) {
-                  tdcY = 32;
-               }else if(tdcY <= -32) {
-                  tdcY = -32;
-               }
-            }
-         }
-      }
-
-      //this.contacts.clear();
-      if(!this.worldObj.isRemote && this.getFirstMountPlayer() != null) {
-         updateRadar();
-
-
-         //handle world wrap
-         if(this.posX <= -40000) { //west world edge
-            this.setPosition(40000, this.posY, this.posZ);
-            this.updateRiderPosition();
-         }else if(this.posX > 40000) {
-            this.setPosition(-40000, this.posY, this.posZ);
-            this.updateRiderPosition();
-         }
-
-
-      }
-
       this.prevCurrentThrottle = this.getCurrentThrottle();
       this.lastBBDamageFactor = 1.0F;
-      this.lastBB = null;
       this.updateControl();
       this.checkServerNoMove();
       this.onUpdate_RidingEntity();
@@ -1719,8 +1434,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.setDamageTaken(this.getMaxHP());
          this.destroyAircraft();
          MCH_Explosion.newExplosion(super.worldObj, (Entity)null, (Entity)null, super.posX, super.posY, super.posZ, 2.0F, 2.0F, true, true, true, true, 5);
-         this.setDead(true);
-
       }
 
       if(super.worldObj.isRemote && this.getAcInfo() != null && this.getHP() <= 0 && this.getDespawnCount() <= 0) {
@@ -1753,7 +1466,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.supplyAmmoToOtherAircraft();
       this.updateFuel();
       this.repairOtherAircraft();
-
       if(this.modeSwitchCooldown > 0) {
          --this.modeSwitchCooldown;
       }
@@ -1775,7 +1487,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.commonStatus = this.getDataWatcher().getWatchableObjectInt(23);
       }
 
-      super.fallDistance = 0.0F; //YEET YEET
+      super.fallDistance = 0.0F;
       if(super.riddenByEntity != null) {
          super.riddenByEntity.fallDistance = 0.0F;
       }
@@ -1858,41 +1570,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.lastRiddenByEntity = this.getRiddenByEntity();
       this.lastRidingEntity = this.getRidingEntity();
       this.prevPosition.put(Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
-
-
-   }
-
-
-   public MCH_RadarContact getClosestContact() {
-      MCH_RadarContact closest = null;
-      double d = Double.MAX_VALUE;
-
-      for(MCH_RadarContact c : contacts) {
-         double t = this.getDistance(c.x, c.y, c.z);
-         if(t < d) {
-            d = t;
-            closest = c;
-         }
-      }
-      return closest;
-   }
-
-
-
-   public void notifyLock(Entity e) {
-      if(e instanceof MCH_EntityAircraft) {
-         MCH_EntityAircraft ac = (MCH_EntityAircraft)e;
-         if(ac.haveFlare() && !ac.isDestroyed()) {
-            for(int i = 0; i < 2; ++i) {
-               Entity entity = ac.getEntityBySeatId(i);
-               if(entity instanceof EntityPlayerMP) {
-                  MCH_PacketNotifyLock.sendToPlayer((EntityPlayerMP)entity);
-               }
-            }
-         }
-      }
-
-      MCH_PacketNotifyLock.send(e);
    }
 
    private void updateNoCollisionEntities() {
@@ -1948,15 +1625,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.setCommonStatus(8, this.moveRight);
          this.setCommonStatus(9, this.throttleUp);
          this.setCommonStatus(10, this.throttleDown);
-         this.setCommonStatus(12, this.moveUp);
-         this.setCommonStatus(13,  this.moveDown);
       } else if(MCH_MOD.proxy.getClientPlayer() != this.getRiddenByEntity()) {
          this.moveLeft = this.getCommonStatus(7);
          this.moveRight = this.getCommonStatus(8);
          this.throttleUp = this.getCommonStatus(9);
          this.throttleDown = this.getCommonStatus(10);
-         this.moveUp = this.getCommonStatus(12);
-         this.moveUp = this.getCommonStatus(13);
       }
 
    }
@@ -2466,7 +2139,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                double hpp = (double)this.getHP() / (double)this.getMaxHP();
                MCH_Config var10001 = MCH_MOD.config;
                if(hpp >= MCH_Config.AutoRepairHP.prmDouble) {
-                  //this.repair(this.getMaxHP() / 100);
+                  this.repair(this.getMaxHP() / 100);
                }
             }
          }
@@ -2559,7 +2232,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public boolean canSupply() {
       return this.canFloatWater()?MCH_Lib.getBlockIdY(this, 1, -3) != 0:MCH_Lib.getBlockIdY(this, 1, -3) != 0 && !this.isInWater();
-
    }
 
    public void setFuel(int fuel) {
@@ -2614,7 +2286,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                      if(fc > 30) {
                         fc = 30;
                      }
-                     this.setFuel(this.getFuel() - fc);
+
                      ac.setFuel(ac.getFuel() + fc);
                   }
 
@@ -2626,10 +2298,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
    }
 
-
-
    public void updateFuel() {
-
       if(this.getMaxFuel() != 0) {
          if(this.fuelSuppliedCount > 0) {
             --this.fuelSuppliedCount;
@@ -2650,45 +2319,32 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                }
             }
 
-            int fuel = this.getFuel();
-            //print("Updating");
-            if(this.canSupply() && this.getCountOnUpdate() % 10 == 0 && fuel < this.getMaxFuel()) {
-               //print("Yeet");
+            int var5 = this.getFuel();
+            if(this.canSupply() && this.getCountOnUpdate() % 10 == 0 && var5 < this.getMaxFuel()) {
                for(int i = 0; i < 3; ++i) {
-                  if(fuel < this.getMaxFuel()) {
-                     ItemStack stack = this.getGuiInventory().getFuelSlotItemStack(i);
-                     if(stack != null && stack.getItem() instanceof IFluidContainerItem) {
-                        //print("Stack not null");
-                        IFluidContainerItem container = (IFluidContainerItem)stack.getItem();
-                        FluidStack fluid = container.getFluid(stack);
-                        if(fluid == null) {return;}
-                        if(fluid.getFluid() == null) {return;}
-                        if(fluid.getFluid().getUnlocalizedName() == null) {return;}
-                        String fluidName = fluid.getFluid().getUnlocalizedName().toLowerCase();
-                        Integer multiplier = this.getAcInfo().fuelDict.get(fluidName);
-                        if(multiplier != null) {
-                           //print("Stack is heavy oil " + fluid.amount);
-                           int fuelcapacity = this.getMaxFuel() - fuel;
-
-                           if(fuelcapacity > 100) {
-                              fuelcapacity = 100;
-                           }
-                           fuelcapacity = container.drain(stack, fuelcapacity, true).amount;
-
-                           fuel += fuelcapacity * multiplier;
-                        }else {
-                           //print("Fluid name: " + fluid.getFluid().getUnlocalizedName());
+                  if(var5 < this.getMaxFuel()) {
+                     ItemStack var6 = this.getGuiInventory().getFuelSlotItemStack(i);
+                     if(var6 != null && var6.getItem() instanceof MCH_ItemFuel && var6.getItemDamage() < var6.getMaxDamage()) {
+                        int fc = this.getMaxFuel() - var5;
+                        if(fc > 100) {
+                           fc = 100;
                         }
-                     }
 
+                        if(var6.getItemDamage() > var6.getMaxDamage() - fc) {
+                           fc = var6.getMaxDamage() - var6.getItemDamage();
+                        }
+
+                        var6.setItemDamage(var6.getItemDamage() + fc);
+                        var5 += fc;
+                     }
                   }
                }
 
-               if(this.getFuel() != fuel) {
+               if(this.getFuel() != var5) {
                   MCH_Achievement.addStat(super.riddenByEntity, MCH_Achievement.supplyFuel, 1);
                }
 
-               this.setFuel(fuel);
+               this.setFuel(var5);
             }
          }
 
@@ -2913,7 +2569,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void switchCameraMode(EntityPlayer player) {
-
       this.switchCameraMode(player, this.camera.getMode(this.getSeatIdByEntity(player)) + 1);
    }
 
@@ -2952,47 +2607,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public ArrayList getRadarEntityList() {
-      cleanContacts_client();
-      ArrayList<MCH_Vector2> radarContacts = new ArrayList<MCH_Vector2>();
-      double scale = this.getAcInfo().surfaceSearch / 64;
-      for(MCH_RadarContact contact : surfaceContacts) {
-         if(contact.updated < 25) {
-            //double x = contact.x - this.posX;
-            //double z = contact.z - this.posZ;
-            radarContacts.add(new MCH_Vector2(contact.x, contact.z));
-         }
-      }
-      return radarContacts;
+      return this.entityRadar.getEntityList();
    }
-
 
    public ArrayList getRadarEnemyList() {
-      cleanContacts_client();
-      ArrayList<MCH_Vector2> radarContacts = new ArrayList<MCH_Vector2>();
-      double scale = this.getAcInfo().radarPower / 64;
-      for(MCH_RadarContact contact : contacts) {
-         if(contact.updated < 25) {
-            //double x = contact.x - this.posX;
-            //double z = contact.z - this.posZ;
-            radarContacts.add(new MCH_Vector2(contact.x, contact.z));
-         }
-      }
-
-      return radarContacts;
-   }
-
-   public boolean canDetectEntity(Entity e) {
-      //System.out.println("isRemote " + worldObj.isRemote + " e is null " + e == null);
-      if(e == null || e.isDead) { return false;}
-      if(this.getDistanceToEntity(e) > this.acInfo.radarPower) {
-         //System.out.println("yeet");
-         return false;
-      }
-      if(!MCH_RadarHelper.isTargetVisible(this, e, acInfo.radarPower)) {
-         return false;
-      }else {
-         return true;
-      }
+      return this.entityRadar.getEnemyList();
    }
 
    public void moveEntity(double par1, double par3, double par5) {
@@ -3008,7 +2627,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          AxisAlignedBB axisalignedbb = super.boundingBox.copy();
          List list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(par1, par3, par5));
 
-         for(int flag1 = 0; flag1 < list.size(); flag1++) {
+         for(int flag1 = 0; flag1 < list.size(); ++flag1) {
             par3 = ((AxisAlignedBB)list.get(flag1)).calculateYOffset(super.boundingBox, par3);
          }
 
@@ -3178,7 +2797,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       for(int var17 = 0; var17 < var16.size(); ++var17) {
          Entity entity = (Entity)var16.get(var17);
-         if(!W_Lib.isEntityLivingBase(entity) && !(entity instanceof MCH_EntitySeat) && !(entity instanceof MCH_EntityHitBox)) { //&& not ship
+         if(!W_Lib.isEntityLivingBase(entity) && !(entity instanceof MCH_EntitySeat) && !(entity instanceof MCH_EntityHitBox)) {
             AxisAlignedBB axisalignedbb1 = entity.getBoundingBox();
             if(axisalignedbb1 != null && axisalignedbb1.intersectsWith(par2AxisAlignedBB)) {
                collidingBoundingBoxes.add(axisalignedbb1);
@@ -3189,13 +2808,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                collidingBoundingBoxes.add(axisalignedbb1);
             }
          }
-       //  else if(entity instanceof EntityShip) {
-       //     EntityShip ship = (EntityShip)entity;
-       //     List<AxisAlignedBB> shipBoxes = ship.getCollider().getAllColliding(par2AxisAlignedBB);// .getCollidingBoxes(par1Entity);
-       //     for(AxisAlignedBB box : shipBoxes) {
-       //        collidingBoundingBoxes.add(box);
-       //     }
-       //  }
       }
 
       return collidingBoundingBoxes;
@@ -3635,10 +3247,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public Vec3 calcOnTurretPos(Vec3 pos) {
       float ry = this.getLastRiderYaw();
       if(this.getRiddenByEntity() != null) {
-
          ry = this.getRiddenByEntity().rotationYaw;
       }
-
 
       Vec3 tpos = this.getAcInfo().turretPosition.addVector(0.0D, pos.yCoord, 0.0D);
       Vec3 v = pos.addVector(-tpos.xCoord, -tpos.yCoord, -tpos.zCoord);
@@ -4235,12 +3845,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public boolean unmountEntityFromSeat(Entity entity) {
-
-      if(entity instanceof EntityPlayer && ((EntityPlayer)entity).getDisplayName().equalsIgnoreCase("Witixin")){
-         if(this.isAirBorne) {
-            return false;
-         }
-      }
       if(entity != null && this.seats != null && this.seats.length != 0) {
          MCH_EntitySeat[] arr$ = this.seats;
          int len$ = arr$.length;
@@ -4259,7 +3863,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void ejectSeat(Entity entity) {
-      if(entity instanceof EntityPlayer && ((EntityPlayer)entity).getDisplayName().equalsIgnoreCase("Witixin")){return;}
       int sid = this.getSeatIdByEntity(entity);
       if(sid >= 0 && sid <= 1) {
          if(this.getGuiInventory().haveParachute()) {
@@ -5164,7 +4767,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       MCH_Lib.DbgLog(super.worldObj, "initCurrentWeapon:" + W_Entity.getEntityId(entity) + ":%d", new Object[]{Integer.valueOf(sid)});
       if(sid >= 0 && sid < this.currentWeaponID.length) {
          this.currentWeaponID[sid] = -1;
-
+         if(entity instanceof EntityPlayer) {
+            this.currentWeaponID[sid] = this.getNextWeaponID(entity, 1);
+            this.switchWeapon(entity, this.getCurrentWeaponID(entity));
+            if(super.worldObj.isRemote) {
+               MCH_PacketIndNotifyAmmoNum.send(this, -1);
+            }
+         }
 
       }
    }
@@ -5180,7 +4789,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    protected MCH_WeaponSet getWeapon(int id) {
       return id >= 0 && this.weapons.length > 0 && id < this.weapons.length?this.weapons[id]:this.dummyWeapon;
    }
-
 
    public int getWeaponIDBySeatID(int sid) {
       return sid >= 0 && sid < this.currentWeaponID.length?this.currentWeaponID[sid]:-1;
@@ -5219,22 +4827,17 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public boolean useCurrentWeapon(MCH_WeaponParam prm) {
-      //System.out.println("Firing");
       prm.isInfinity = this.isInfinityAmmo(prm.user);
       if(prm.user != null) {
          MCH_WeaponSet currentWs = this.getCurrentWeapon(prm.user);
-         //System.out.println("CP1");
          if(currentWs != null && currentWs.canUse()) {
-            //System.out.println("CP2");
             int sid = this.getSeatIdByEntity(prm.user);
             if(this.getAcInfo().getWeaponSetById(sid) != null) {
                prm.isTurret = ((MCH_AircraftInfo.Weapon)this.getAcInfo().getWeaponSetById(sid).weapons.get(0)).turret;
-               //System.out.println("Is turret: " + prm.isTurret);
             }
 
             int lastUsedIndex = currentWs.getCurrentWeaponIndex();
             if(currentWs.use(prm)) {
-               //System.out.println("CP3 " + this.worldObj.isRemote);
                MCH_WeaponSet[] shift = this.weapons;
                int arr$ = shift.length;
 
@@ -5388,162 +4991,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          shift += index;
          return shift < 32?(this.useWeaponStat & 1 << shift) != 0:false;
       }
-   }
-
-
-
-   public void updateWeapon(MCH_WeaponSet w) {
-      float yaw = MathHelper.wrapAngleTo180_float(this.getRotYaw());
-      float pitch = MathHelper.wrapAngleTo180_float(this.getRotPitch());
-      int wid = this.getWeaponIdByName(w.getName());
-      int prevUseWeaponStat = this.useWeaponStat;
-      int id = 0;
-
-      boolean isLongDelay = false;
-      if(w.getFirstWeapon() != null) {
-         isLongDelay = w.isLongDelayWeapon();
-      }
-
-      boolean isSelected = false;
-      int[] isWpnUsed = this.currentWeaponID;
-      int wi = isWpnUsed.length;
-      int entity = 0;
-
-      while(true) {
-         if(entity < wi) {
-            int ep = isWpnUsed[entity];
-            if(ep != wid) {
-               ++entity;
-               continue;
-            }
-
-            isSelected = true;
-         }
-
-         for(int i = 0; i < this.getSeatNum(); i++) {
-            Entity e = this.getEntityBySeatId(i);
-            if(w == this.getCurrentWeapon(e)) {
-               isSelected = true;
-            }
-         }
-
-
-         boolean var16 = false;
-
-         float ey;
-         for(wi = 0; wi < w.getWeaponNum(); ++wi) {
-            boolean var18 = id < 32 && (prevUseWeaponStat & 1 << id) != 0;
-            boolean var20 = id < 32 && (this.useWeaponStat & 1 << id) != 0;
-            if(isLongDelay && var18 && var20) {
-               var20 = false;
-            }
-
-            var16 |= var20;
-            if(!var18 && var20) {
-               ey = w.getInfo().recoil;
-               if(ey > 0.0F) {
-                  this.recoilCount = 30;
-                  this.recoilValue = ey;
-                  this.recoilYaw = w.rotationYaw;
-               }
-            }
-
-            if(super.worldObj.isRemote && var20) {
-               Vec3 var21 = MCH_Lib.RotVec3(0.0D, 0.0D, -1.0D, -w.rotationYaw - yaw, -w.rotationPitch);
-               Vec3 targetYaw = w.getCurrentWeapon().getShotPos(this);
-               this.spawnParticleMuzzleFlash(super.worldObj, w.getInfo(), super.posX + targetYaw.xCoord, super.posY + targetYaw.yCoord, super.posZ + targetYaw.zCoord, var21);
-            }
-
-            w.updateWeapon(this, var20, wi);
-            ++id;
-         }
-
-         w.update(this, isSelected, var16);
-         MCH_AircraftInfo.Weapon var17 = this.getAcInfo().getWeaponById(wid);
-         if(var17 != null && !this.isDestroyed()) {
-            Entity var19 = this.getEntityBySeatId(this.getWeaponSeatID(this.getWeaponInfoById(wid), var17));
-            if(var17.canUsePilot && !(var19 instanceof EntityPlayer)) {
-               var19 = this.getEntityBySeatId(0);
-            }
-
-            if(var19 instanceof EntityPlayer) {
-               float var22;
-               if((int)var17.minYaw != 0 || (int)var17.maxYaw != 0) {
-                  var22 = var17.turret?MathHelper.wrapAngleTo180_float(this.getLastRiderYaw()) - yaw:0.0F;
-                  ey = MathHelper.wrapAngleTo180_float(var19.rotationYaw - yaw - var17.defaultYaw - var22);
-                  if(Math.abs((int)var17.minYaw) < 360 && Math.abs((int)var17.maxYaw) < 360) {
-                     float var23 = MCH_Lib.RNG(ey, var17.minYaw, var17.maxYaw);
-                     float wy = w.rotationYaw - var17.defaultYaw - var22;
-                     if(var23 < wy) {
-                        if(wy - var23 > 15.0F) {
-                           wy -= 15.0F;
-                        } else {
-                           wy = var23;
-                        }
-                     } else if(var23 > wy) {
-                        if(var23 - wy > 15.0F) {
-                           wy += 15.0F;
-                        } else {
-                           wy = var23;
-                        }
-                     }
-
-                     w.rotationYaw = wy + var17.defaultYaw + var22;
-                  } else {
-                     w.rotationYaw = ey + var22;
-                  }
-               }
-
-               var22 = MathHelper.wrapAngleTo180_float(var19.rotationPitch - pitch);
-               w.rotationPitch = MCH_Lib.RNG(var22, var17.minPitch, var17.maxPitch);
-               w.rotationTurretYaw = 0.0F;
-            } else {
-               w.rotationTurretYaw = this.getLastRiderYaw() - this.getRotYaw();
-               if(this.getTowedChainEntity() != null || super.ridingEntity != null) {
-                  w.rotationYaw = 0.0F;
-               }
-            }
-         }
-
-         ++wid;
-         break;
-      }
-   }
-
-   public boolean isWepSelected(MCH_WeaponSet w) {
-      boolean isSelected = false;
-      for(int i = 0; i < this.getSeatNum(); i++) {
-         Entity e = this.getEntityBySeatId(i);
-         if(w == this.getCurrentWeapon(e)) {
-            isSelected = true;
-         }
-      }
-      return isSelected;
-   }
-
-   public void updateWeapon2(MCH_WeaponSet w) {
-      int prevUseWeaponStat = this.useWeaponStat;
-      float yaw = MathHelper.wrapAngleTo180_float(this.getRotYaw());
-      float pitch = MathHelper.wrapAngleTo180_float(this.getRotPitch());
-      boolean isSelected = isWepSelected(w);
-      boolean isSetUsed = false;
-
-      for(int i = 0; i < w.getWeaponNum(); i++) {
-         boolean var18 = i < 32 && (prevUseWeaponStat & 1 << i) != 0;
-         boolean isUsed = i < 32 && (this.useWeaponStat & 1 << i) != 0;
-
-         if(isUsed) {isSetUsed = true;}
-
-         if(worldObj.isRemote && isUsed) {
-            Vec3 var21 = MCH_Lib.RotVec3(0.0D, 0.0D, -1.0D, -w.rotationYaw - yaw, -w.rotationPitch);
-            Vec3 targetYaw = w.getCurrentWeapon().getShotPos(this);
-            this.spawnParticleMuzzleFlash(super.worldObj, w.getInfo(), super.posX + targetYaw.xCoord, super.posY + targetYaw.yCoord, super.posZ + targetYaw.zCoord, var21);
-         }
-
-         w.updateWeapon(this, isUsed, i);
-      }
-      w.update(this, isSelected, isSetUsed);
-
    }
 
    public void updateWeapons() {
@@ -5710,7 +5157,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                               } else if(targetYaw > wy) {
                                  if(targetYaw - wy > 15.0F) {
                                     wy += 15.0F;
-                                    System.out.println("Yeet.");
                                  } else {
                                     wy = targetYaw;
                                  }
@@ -5868,10 +5314,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.extraBoundingBox = this.createExtraBoundingBox();
          this.partEntities = this.createParts();
          super.stepHeight = info.stepHeight;
-         //this.hardpoints = info.hardpointList;
-         //if(hardpointInventory == null){
-         //hardpointInventory = new InventoryBackpack(32 * hardpoints.size());
-         //}
       }
 
    }
@@ -5895,41 +5337,35 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public void updateUAV() {
       if(this.isUAV()) {
-
-
-         int udx = this.getDataWatcher().getWatchableObjectInt(22);
-         if(udx > 0) {
-            if(this.uavStation == null) {
-               Entity uavEntity = super.worldObj.getEntityByID(udx);
-               if(uavEntity instanceof MCH_EntityUavStation) {
-                  this.uavStation = (MCH_EntityUavStation)uavEntity;
-                  this.uavStation.setControlAircract(this);
+         if(super.worldObj.isRemote) {
+            int udx = this.getDataWatcher().getWatchableObjectInt(22);
+            if(udx > 0) {
+               if(this.uavStation == null) {
+                  Entity uavEntity = super.worldObj.getEntityByID(udx);
+                  if(uavEntity instanceof MCH_EntityUavStation) {
+                     this.uavStation = (MCH_EntityUavStation)uavEntity;
+                     this.uavStation.setControlAircract(this);
+                  }
                }
+            } else if(this.uavStation != null) {
+               this.uavStation.setControlAircract((MCH_EntityAircraft)null);
+               this.uavStation = null;
             }
          } else if(this.uavStation != null) {
-            this.uavStation.setControlAircract((MCH_EntityAircraft)null);
+            double udx1 = super.posX - this.uavStation.posX;
+            double udz = super.posZ - this.uavStation.posZ;
+            if(udx1 * udx1 + udz * udz > 15129.0D) {
+               this.uavStation.setControlAircract((MCH_EntityAircraft)null);
+               this.setUavStation((MCH_EntityUavStation)null);
+               this.attackEntityFrom(DamageSource.outOfWorld, this.getMaxHP() + 10);
+            }
+         }
+
+         if(this.uavStation != null && this.uavStation.isDead) {
             this.uavStation = null;
          }
-      } else if(this.uavStation != null) {
 
-         double udx1 = super.posX - this.uavStation.posX;
-         double udz = super.posZ - this.uavStation.posZ;
-         if(udx1 * udx1 + udz * udz > 15129.0D) {
-
-            //MOC UNDO THIS PLS
-            //Chunk c = this.worldObj.getChunkFromChunkCoords(this.chunkCoordX, this.chunkCoordZ);
-
-            //this.uavStation.setControlAircract((MCH_EntityAircraft)null);
-            //this.setUavStation((MCH_EntityUavStation)null);
-            //this.attackEntityFrom(DamageSource.outOfWorld, this.getMaxHP() + 10);
-         }
       }
-
-      if(this.uavStation != null && this.uavStation.isDead) {
-         this.uavStation = null;
-      }
-
-      //}
    }
 
    public void switchGunnerMode(boolean mode) {
@@ -6380,197 +5816,5 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.posY = y;
          this.posZ = z;
       }
-   }
-
-   public double getTargetAz() {
-      double bearing = 0;
-      if(radarTarget != null) {
-         bearing = getBearingToContact(radarTarget);
-      }
-      //System.out.println("Bearing: " + bearing);
-      return bearing;
-   }
-
-
-   public double getBearingToContactRadar(MCH_RadarContact c) {
-      double delta_x = c.x - this.posX;
-      double delta_z = posZ - c.z;
-      double angle = Math.atan2(delta_x, delta_z);
-      angle = Math.toDegrees(angle);
-      if(angle < 0) { angle += 360;}
-      angle -= getYaw();
-      return angle;
-   }
-
-   public double getDistanceToContact(MCH_RadarContact c) {
-      double dx = c.x - posX;
-      double dz = c.z - posZ;
-      return Math.sqrt(dx * dx + dz * dz);
-   }
-
-   public void print(String s) {
-      EntityPlayer p = this.getFirstMountPlayer();
-      if(p!= null) {
-         p.addChatComponentMessage(new ChatComponentText(s));
-      }
-   }
-
-   public void lock_vic() {
-      double scale = acInfo.radarPower / 256;
-      double x = tdcX;
-      double y = tdcY;
-
-      for(MCH_RadarContact c : this.contacts) {
-
-         double bearing = getBearingToContactRadar(c) + 90;
-         double range = getDistanceToContact(c);
-         double[] pos = MCH_HudItemRadar.getRelOffset(0,0,bearing,range,0);
-         pos[0] *= scale;
-         pos[1] *= scale;
-         //print("TDCX " + x + " BEARING " + pos[0] + " TDCY " + y + " RANGE " + pos[1]);
-
-         if(Math.abs(x - pos[0]) <= 3){
-            if(Math.abs(y - pos[1]) <= 5) {
-               //print("Locking!");
-               this.radarTarget = c;
-               this.radarMode = 1;
-               MCH_PacketSTT pkt = new MCH_PacketSTT();
-               pkt.id = c.entityID;
-               W_Network.sendToServer(pkt);
-               return;
-            }
-         }
-      }
-      if(this.radarMode == 1) {
-         this.radarMode = 0;
-         MCH_PacketSTT pkt = new MCH_PacketSTT();
-         pkt.id = 0;
-         W_Network.sendToServer(pkt);
-      }
-   }
-
-   public void lock() {
-      if(this instanceof MCH_EntityVehicle) {
-         lock_vic();
-         return;
-      }
-      double scale = acInfo.radarPower / 64;
-      double x = tdcX;
-      double y = 45 + tdcY;
-      for(MCH_RadarContact c : this.contacts) {
-
-         double bearing = getBearingToContactRadar(c)/360 * 64;
-         double range = 15 + 64 - getDistanceToContact(c) / scale;
-         //	System.out.println("TDCX " + x + " BEARING " + bearing + " TDCY " + y + " RANGE " + range);
-
-         if(Math.abs(x - bearing) <= 3){
-            if(Math.abs(y - range) <= 5) {
-               this.radarTarget = c;
-               this.radarMode = 1;
-               MCH_PacketSTT pkt = new MCH_PacketSTT();
-               pkt.id = c.entityID;
-               W_Network.sendToServer(pkt);
-               return;
-            }
-         }
-      }
-      if(this.radarMode == 1) {
-         this.radarMode = 0;
-         MCH_PacketSTT pkt = new MCH_PacketSTT();
-         pkt.id = 0;
-         W_Network.sendToServer(pkt);
-      }
-   }
-
-   public double rangeToTarget() {
-      try {
-         return getDistanceToContact(this.radarTarget);
-      }catch(Exception e) {
-         return 0;
-      }
-   }
-
-/*	public int hasType(MCH_Hardpoint s, String type) {
-		int i = 0;
-		for(String t : s.types) {
-			if(t.equalsIgnoreCase(type)) {
-				return i;
-			}
-			i++;
-		}
-		return -1;
-	}*/
-
-   public void weaponTest(String hp, String wep) {
-      //updateHardpoints();
-		/*
-		System.out.println("Received weapon. Is remote: " + this.worldObj.isRemote);
-		MCH_Hardpoint station = this.hardpoints.get(Integer.parseInt(hp));
-		int index = hasType(station, wep);*/
-		/*if(index >= 0) {
-			station.setActiveWeapon(index);
-			insertWeapon(station);
-		}*/
-
-
-      //System.out.println("Replacing wep 0 with " + wep + " is remote: " + worldObj.isRemote);
-      //MCH_WeaponBase w = MCH_WeaponCreator.createWeapon(super.worldObj, wep, Vec3.createVectorHelper(0, 0, 0), rotationYaw, rotationPitch, this, false);
-      //w.aircraft = this;
-      //this.weapons[0] = new MCH_WeaponSet(w);
-
-      //if(worldObj.isRemote) {
-      //for(MCH_Hardpoint h : this.hardpoints) {
-      //System.out.println("Possible weapons for station " + this.hardpoints.indexOf(h) +":");
-      //for(String str : h.types) {
-      //MCH_WeaponInfo info = MCH_WeaponInfoManager.get(str);
-      //System.out.println("    " + str);
-      //	}
-      //	}
-      //}
-   }
-
-   /*	public MCH_WeaponBase getWeaponForHardpoint(MCH_Hardpoint h) {
-    *//*		MCH_WeaponBase w = MCH_WeaponCreator.createWeapon(super.worldObj, h.types[h.active], Vec3.createVectorHelper(h.x, h.y, h.z), h.yaw, h.pitch, this, false);
-		w.aircraft = this;
-		return w;*//*
-	}*/
-
-   //public void insertWeapon(MCH_Hardpoint h) {
-	/*	MCH_WeaponInfo wi;
-		try {
-		wi = MCH_WeaponInfoManager.get(h.types[h.active]);
-		}catch(Exception e) {
-			System.out.println("ERROR, FUCK YOU MOC");
-			return;
-		}
-		if(wi != null) {
-			//System.out.println("Not null");
-			for(MCH_WeaponSet ws : hardpointWeps) {
-				if(ws.getInfo().name == wi.name) {
-					ws.setAmmoNum(ws.getAmmoNum() + wi.round);
-					ws.addWeapon(getWeaponForHardpoint(h));
-					System.out.println("Inc ammo to " + ws.getAmmoNum());
-					return;
-				}
-			}
-
-			System.out.println("Adding hardpoint " + wi.name);
-			MCH_WeaponSet ws = new MCH_WeaponSet(getWeaponForHardpoint(h));
-			ws.countReloadWait = 0;
-			ws.countWait = 0;
-			hardpointWeps.add(ws);
-		}else {
-			System.out.println("IS NULL " + h.active + " break " + h.types[h.active]);
-		}*/
-   //}
-
-   public void updateHardpoints() {
-	/*	int i = 0;
-		for(MCH_Hardpoint h : hardpoints) {
-			i++;
-			h.setActiveWeapon(i);
-			System.out.println("Station " + i);
-			insertWeapon(h);
-		}*/
    }
 }

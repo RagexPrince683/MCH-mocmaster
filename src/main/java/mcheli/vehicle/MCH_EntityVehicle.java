@@ -2,33 +2,24 @@ package mcheli.vehicle;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-//import cuchaz.ships.EntityShip;
-//import cuchaz.ships.ShipLocator;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_PacketStatusRequest;
-import mcheli.sensors.MCH_RadarContact;
-import mcheli.weapon.MCH_EntityAAMissile;
-import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.vehicle.MCH_VehicleInfo;
+import mcheli.vehicle.MCH_VehicleInfoManager;
 import mcheli.weapon.MCH_WeaponParam;
 import mcheli.weapon.MCH_WeaponSet;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Lib;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MCH_EntityVehicle extends MCH_EntityAircraft {
 
@@ -36,9 +27,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
    public boolean isUsedPlayer;
    public float lastRiderYaw;
    public float lastRiderPitch;
-   public String team;
-   public ArrayList<MCH_EntityAAMissile> missiles = new ArrayList<MCH_EntityAAMissile>();
-   public int firingTimer = 0;
+
 
    public MCH_EntityVehicle(World world) {
       super(world);
@@ -95,17 +84,10 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
 
    protected void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
       super.writeEntityToNBT(par1NBTTagCompound);
-      try {
-         par1NBTTagCompound.setString("team", this.team);
-      }catch(Exception e) {}
-
    }
 
    protected void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
       super.readEntityFromNBT(par1NBTTagCompound);
-      try {
-         this.team = par1NBTTagCompound.getString("team");
-      }catch(Exception e) {}
       if(this.vehicleInfo == null) {
          this.vehicleInfo = MCH_VehicleInfoManager.get(this.getTypeName());
          if(this.vehicleInfo == null) {
@@ -188,29 +170,6 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
       return result;
    }
 
-//   public void handleShip(){
-//      if(!this.getAcInfo().isNaval){return;} //Only naval turrets work on ships - duh
-//      for(MCH_EntityAircraft ship : ShipLocator.getShips(worldObj)) {
-//         List<Entity> riders = ship.getCollider().getRiders();
-//         if(riders.contains(this)) { //The stolen plans are on board this vessel
-//            for(Entity e : riders) {
-//               if(e instanceof EntityPlayer) {
-//                  EntityPlayer player = (EntityPlayer)e;
-//                  if(player.getHeldItem() != null) {
-//                     if(player.getHeldItem().getItem() == Items.wooden_sword) {
-//                        lastRiderYaw = player.rotationYaw;
-//                        lastRiderPitch = player.rotationPitch;
-//                        this.lastRiddenByEntity = player;
-//                        //this.rotationYaw = player.rotationYaw;
-//                     }
-//                  }
-//               }
-//            }
-//         }else {
-//         }
-//      }
-//   }
-
    public void onUpdateAircraft() {
       if(this.vehicleInfo == null) {
          this.changeType(this.getTypeName());
@@ -230,18 +189,6 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
             this.getRiddenByEntity().prevRotationPitch = 0.0F;
             this.initCurrentWeapon(this.getRiddenByEntity());
          }
-
-    //     if(this.getFirstMountPlayer() == null) {
-    //        //handleShip();
-    //        if(this.ridingEntity != null){
-    //           this.lastRiderPitch = 0;
-    //           this.lastRiderYaw = this.rotationYaw;
-    //        }else if(rotationPitch != 0){
-    //           rotationPitch = 0;
-    //        }
-    //     }
-
-         //lastRiderPitch = this.worldObj.getWorldTime() % 360;
 
          this.updateWeapons();
          this.onUpdate_Seats();
@@ -377,7 +324,6 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
    }
 
    protected void onUpdate_Client() {
-
       this.updateCameraViewers();
       if(super.riddenByEntity != null && W_Lib.isClientPlayer(this.getRiddenByEntity())) {
          this.getRiddenByEntity().rotationPitch = this.getRiddenByEntity().prevRotationPitch;
@@ -411,173 +357,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
       this.updateCamera(super.posX, super.posY, super.posZ);
    }
 
-   private void updateMissiles() {
-      ArrayList<MCH_EntityAAMissile> newMissiles = new ArrayList<MCH_EntityAAMissile>();
-      for(MCH_EntityAAMissile missile : missiles) {
-         if(missile != null && !missile.isDead) {
-            newMissiles.add(missile);
-         }
-      }
-      missiles = newMissiles;
-   }
-
-   public boolean getShotMissile(MCH_RadarContact target) { //returns whether we have already fired a missile at a given target
-      for(MCH_EntityAAMissile missile : missiles) {
-         if((missile.getRadarTarget() != null && missile.getRadarTarget().entityID == target.entityID) || missile.targetEntity.getEntityId() == target.entityID) {
-
-            return true;
-         }else {
-            //return true;
-         }
-      }
-      return false;
-   }
-
-   public boolean getShotMissile(Entity target) { //returns whether we have already fired a missile at a given target
-      for(MCH_EntityAAMissile missile : missiles) {
-         if((missile.getRadarTarget() != null && missile.getRadarTarget().entityID == target.getEntityId()) || missile.targetEntity.getEntityId() == target.getEntityId()) {
-
-            return true;
-         }else {
-            //return true;
-         }
-      }
-      return false;
-   }
-
-
-   @Override
-   public MCH_RadarContact getClosestContact() {
-      MCH_RadarContact closest = null;
-      double d = Double.MAX_VALUE;
-
-      for(MCH_RadarContact c : contacts) {
-         double t = this.getDistance(c.x, c.y, c.z);
-         if(t < d) {
-            Entity e = this.worldObj.getEntityByID(c.entityID);
-            if(!e.isDead && e instanceof MCH_EntityAircraft && !this.getShotMissile(e)) {
-               MCH_EntityAircraft ac = (MCH_EntityAircraft)e;
-               if(ac.getFirstMountPlayer() != null) {
-                  //ac.print("Ping");
-                  if(ac.getFirstMountPlayer().getTeam().getRegisteredName() != this.team){
-                     //ac.print("YEET");
-                     d = t;
-                     closest = c;
-                  }
-               }else if(ac.isTargetDrone()) {
-                  d = t;
-                  closest = c;
-               }
-            }
-         }
-      }
-      return closest;
-   }
-
-
-   public Entity getTarget() {
-      Entity e = this.worldObj.getEntityByID(this.getClosestContact().entityID);
-
-      return e;
-
-      //double range = 100;
-      //List<Entity> list =worldObj.getEntitiesWithinAABBExcludingEntity(this,this.boundingBox.expand(range, range, range));
-      //for(Entity e : list) {
-      //  if(e instanceof MCH_EntityASMissile || e instanceof MCH_EntitySARHMissile || e instanceof MCH_EntityAShM) {
-      //   if(!getShotMissile(e)) {
-      //   return e;
-      // }
-      // }
-      // }
-      //  return null;
-   }
-
-//   private void updateAutoTurret() {
-//      if(this.isDestroyed()) {return;}
-//      this.radarMode = 0;
-//      super.updateRadar();
-//
-//      updateMissiles();
-//      if(this.getFirstSeatWeapon().getAmmoNum() == 0) {
-//         return;
-//      }
-//
-//      try {
-//         Entity e = getTarget();
-//
-//         if(e != null) {
-//            //System.out.println("Target: " + e.getCommandSenderName());
-//
-//            notifyLock(e);
-//            // if(!getShotMissile(radarTarget)) {
-//            fireMissile(e, new MCH_WeaponInfo("sa-2"));
-//            MCH_WeaponSet ws = this.getFirstSeatWeapon();
-//            ws.setAmmoNum(ws.getAmmoNum() - 1);
-//            //}
-//         }else {
-//            // System.out.println("E is null");
-//         }
-//      }catch(Exception e) {}
-//   }
-
-   public void fireMissile(Entity target, MCH_WeaponInfo info) {
-
-      W_WorldFunc.MOD_playSoundAtEntity(this, info.soundFileName, 1.0F, 1.0F);
-
-      float yaw = rotationYaw;
-      float pitch = rotationPitch;
-
-      double tX = (double)(-MathHelper.sin(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
-      double tZ = (double)(MathHelper.cos(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
-      double tY = (double)(-MathHelper.sin(pitch-90 / 180.0F * 3.1415927F));
-      MCH_EntityAAMissile e = new MCH_EntityAAMissile(super.worldObj, posX, posY, posZ, tX, tY, tZ, yaw, pitch, 3.5);
-      e.setName(info.name);
-      e.explosionPower = 15;
-
-      e.type = "ir";
-      e.explosionPowerInWater = info.explosionInWater;
-      e.setPower(info.power);
-      e.piercing = info.piercing;
-      e.shootingAircraft = this;
-      e.shootingEntity = this;
-
-      e.setTargetEntity(target);
-      this.missiles.add(e);
-      super.worldObj.spawnEntityInWorld(e);
-   }
-
-
-
-   /*
-    * //private Vec3 getTarget() { double range = 10; List<Entity> list =
-    * worldObj.getEntitiesWithinAABBExcludingEntity(this,this.boundingBox.expand(
-    * range, range, range)); for(Entity e : list) { if(e instanceof EntityPlayer) {
-    * return Vec3.createVectorHelper(e.posX, e.posY, e.posZ); } } return null; }
-    */
-
-   public float getYawToVector(Vec3 target) {
-      double delta_x = target.xCoord - posX;
-      double delta_z = posZ - target.zCoord;
-      float angle = (float) Math.atan2(delta_x, delta_z);
-      //angle = Math.toDegrees(angle);
-
-      //if(angle < 0) { angle += 360;}
-
-      return angle;
-   }
-
    private void onUpdate_Server() {
-      firingTimer--;
-      if(this.getFirstMountPlayer() == null && this.team!= null){
-         if(this.worldObj.getWorldTime() % 10 == 0) {
-            //updateAutoTurret();
-            }
-      }
-      else {
-         //  System.out.println("Yeet " + team);
-         //   updateAutoTurret();
-      }
-
       double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       this.updateCameraViewers();
       double dp = 0.0D;

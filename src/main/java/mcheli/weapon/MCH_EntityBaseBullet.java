@@ -5,8 +5,13 @@ import com.hbm.entity.logic.EntityNukeExplosionMK5;
 import com.hbm.explosion.ExplosionChaos;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-//import cuchaz.ships.EntityShip;
-import mcheli.*;
+import java.util.Iterator;
+import java.util.List;
+import mcheli.MCH_Achievement;
+import mcheli.MCH_Config;
+import mcheli.MCH_Explosion;
+import mcheli.MCH_Lib;
+import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntityHitBox;
 import mcheli.aircraft.MCH_EntitySeat;
@@ -14,6 +19,12 @@ import mcheli.aircraft.MCH_PacketNotifyHitBullet;
 import mcheli.chain.MCH_EntityChain;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
+import mcheli.weapon.MCH_BulletModel;
+import mcheli.weapon.MCH_EntityBullet;
+import mcheli.weapon.MCH_EntityRocket;
+import mcheli.weapon.MCH_WeaponBase;
+import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.weapon.MCH_WeaponInfoManager;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_EntityPlayer;
 import mcheli.wrapper.W_MovingObjectPosition;
@@ -23,16 +34,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.*;
-import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.common.ForgeChunkManager.Ticket;
-import net.minecraftforge.common.ForgeChunkManager.Type;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public abstract class MCH_EntityBaseBullet extends W_Entity {
 
@@ -65,9 +72,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    public double prevMotionX;
    public double prevMotionY;
    public double prevMotionZ;
-   private Ticket loaderTicket;
 
-   //private final MCH_Fuze fuze = new MCH_Fuze(this);;
 
    public MCH_EntityBaseBullet(World par1World) {
       super(par1World);
@@ -87,7 +92,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       this.isBomblet = -1;
       this.weaponInfo = null;
       super.ignoreFrustumCheck = true;
-      this.nukeYield = 0;
       if(par1World.isRemote) {
          this.model = null;
       }
@@ -116,49 +120,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       this.acceleration = acceleration;
    }
 
-   //Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
-   public void init(Ticket ticket) {
-      if(!worldObj.isRemote) {
-         if(ticket != null) {
-            if(loaderTicket == null) {
-               loaderTicket = ticket;
-               loaderTicket.bindEntity(this);
-               loaderTicket.getModData();
-            }
-            ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
-         }
-      }
-   }
-
-   List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
-
-   public void loadNeighboringChunks(int newChunkX, int newChunkZ)
-   {
-      if(!worldObj.isRemote && loaderTicket != null)
-      {
-         for(ChunkCoordIntPair chunk : loadedChunks)
-         {
-            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-         }
-
-         loadedChunks.clear();
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ + 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ - 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ - 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ + 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ + 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ - 1));
-
-         for(ChunkCoordIntPair chunk : loadedChunks)
-         {
-            ForgeChunkManager.forceChunk(loaderTicket, chunk);
-         }
-      }
-   }
-
    public void setLocationAndAngles(double par1, double par3, double par5, float par7, float par8) {
       super.setLocationAndAngles(par1, par3, par5, par7, par8);
       this.prevPosX2 = par1;
@@ -168,7 +129,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
    protected void entityInit() {
       super.entityInit();
-      init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, Type.ENTITY));
       this.getDataWatcher().addObject(27, Integer.valueOf(0));
       this.getDataWatcher().addObject(29, String.valueOf(""));
       this.getDataWatcher().addObject(30, String.valueOf(""));
@@ -219,7 +179,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
    public void setDead() {
       super.setDead();
-      //System.out.println("Setting dead " + this.isDead);
    }
 
    public void setBomblet() {
@@ -286,14 +245,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          double x2 = (super.prevPosX - this.prevPosX2) / (double)num;
          double y2 = (super.prevPosY - this.prevPosY2) / (double)num;
          double z2 = (super.prevPosZ - this.prevPosZ2) / (double)num;
-
-       //  if(this.shouldRenderRocketTrail() && name != "rocket"){
-       //     double var7 = 40;
-       //     //x -= super.motionX * (double)var7;
-       //     //y -= super.motionY * (double)var7;
-       //     //z -= super.motionZ * (double)var7;
-       //  }
-
          int i;
          if(name.equals("explode")) {
             for(i = 0; i < num; ++i) {
@@ -428,8 +379,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          }
       }
 
-      loadNeighboringChunks((int)(posX / 16), (int)(posZ / 16));
-
       if(this.prevMotionX != super.motionX || this.prevMotionY != super.motionY || this.prevMotionZ != super.motionZ) {
          double var5 = (double)((float)Math.atan2(super.motionZ, super.motionX));
          super.rotationYaw = (float)(var5 * 180.0D / 3.141592653589793D) - 90.0F;
@@ -526,10 +475,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          super.worldObj.spawnParticle("bubble", super.posX - super.motionX * (double)var7, super.posY - super.motionY * (double)var7, super.posZ - super.motionZ * (double)var7, super.motionX, super.motionY, super.motionZ);
       }
 
-    //  if(this.shouldRenderRocketTrail()){
-    //     //spawnParticle("rocket", 1,  1);
-    //  }
-
       this.setPosition(super.posX, super.posY, super.posZ);
    }
 
@@ -604,43 +549,43 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
    public void boundBullet(int sideHit) {
       switch(sideHit) {
-         case 0:
-            if(super.motionY > 0.0D) {
-               super.motionY = -super.motionY * (double)this.getInfo().bound;
-            }
-            break;
-         case 1:
-            if(super.motionY < 0.0D) {
-               super.motionY = -super.motionY * (double)this.getInfo().bound;
-            }
-            break;
-         case 2:
-            if(super.motionZ > 0.0D) {
-               super.motionZ = -super.motionZ * (double)this.getInfo().bound;
-            } else {
-               super.posZ += super.motionZ;
-            }
-            break;
-         case 3:
-            if(super.motionZ < 0.0D) {
-               super.motionZ = -super.motionZ * (double)this.getInfo().bound;
-            } else {
-               super.posZ += super.motionZ;
-            }
-            break;
-         case 4:
-            if(super.motionX > 0.0D) {
-               super.motionX = -super.motionX * (double)this.getInfo().bound;
-            } else {
-               super.posX += super.motionX;
-            }
-            break;
-         case 5:
-            if(super.motionX < 0.0D) {
-               super.motionX = -super.motionX * (double)this.getInfo().bound;
-            } else {
-               super.posX += super.motionX;
-            }
+      case 0:
+         if(super.motionY > 0.0D) {
+            super.motionY = -super.motionY * (double)this.getInfo().bound;
+         }
+         break;
+      case 1:
+         if(super.motionY < 0.0D) {
+            super.motionY = -super.motionY * (double)this.getInfo().bound;
+         }
+         break;
+      case 2:
+         if(super.motionZ > 0.0D) {
+            super.motionZ = -super.motionZ * (double)this.getInfo().bound;
+         } else {
+            super.posZ += super.motionZ;
+         }
+         break;
+      case 3:
+         if(super.motionZ < 0.0D) {
+            super.motionZ = -super.motionZ * (double)this.getInfo().bound;
+         } else {
+            super.posZ += super.motionZ;
+         }
+         break;
+      case 4:
+         if(super.motionX > 0.0D) {
+            super.motionX = -super.motionX * (double)this.getInfo().bound;
+         } else {
+            super.posX += super.motionX;
+         }
+         break;
+      case 5:
+         if(super.motionX < 0.0D) {
+            super.motionX = -super.motionX * (double)this.getInfo().bound;
+         } else {
+            super.posX += super.motionX;
+         }
       }
 
    }
@@ -719,8 +664,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       }
    }
 
-
-
    public boolean canBeCollidedEntity(Entity entity) {
       if(entity instanceof MCH_EntityChain) {
          return false;
@@ -741,25 +684,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
                return false;
             }
          }
-         //if(entity instanceof EntityShip) {
-         //EntityShip ship = (EntityShip)entity;
-         //if(W_Entity.isEqual(entity, this.shootingEntity)){return false;}
-         //if(W_Entity.isEqual(entity, this.shootingAircraft)){return false;}
 
-         //if(ship.getCollider().getAllColliding(super.boundingBox).size() == 0){
-				/*if(ship.getCollider().getCollidingBoxes(this).size() == 0) {
-
-					//System.out.println("Yote");
-					return false;
-				}else {
-					//System.out.println("Yeet");
-					return true;
-				}*/
-         //		if(!ship.getCollider().isColliding(this.boundingBox)) {
-         //		return false;
-         //	}
-         //	System.out.println("colliding " + this.shootingEntity + " " + entity);
-         //}
          if(entity instanceof MCH_EntitySeat) {
             return false;
          } else if(entity instanceof MCH_EntityHitBox) {
@@ -805,7 +730,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
    }
 
-
    protected void onImpact(MovingObjectPosition m, float damageFactor) {
       float p;
       if(!super.worldObj.isRemote) {
@@ -822,7 +746,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          if(this.piercing > 0) {
             --this.piercing;
             if(p > 0.0F) {
-               //this.worldObj.setBlockToAir((int)m.hitVec.xCoord, (int)m.hitVec.yCoord, (int)m.hitVec.zCoord);
                this.newExplosion(m.hitVec.xCoord + dx, m.hitVec.yCoord + dy, m.hitVec.zCoord + dz, 1.0F, 1.0F, false);
             }
          } else {
@@ -862,19 +785,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
    }
 
-
-
    public void onImpactEntity(Entity entity, float damageFactor) {
       if(!entity.isDead) {
          MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseBullet.onImpactEntity:Damage=%d:" + entity.getClass(), new Object[]{Integer.valueOf(this.getPower())});
          MCH_Lib.applyEntityHurtResistantTimeConfig(entity);
          DamageSource ds = DamageSource.causeThrownDamage(this, this.shootingEntity);
-       //  if(this.power == 1) {
-       //     ds = new MCH_DamageSource("bullet", this);
-//
-       //     this.power *= this.weaponInfo.damageFactor.getDamageFactor(EntityPlayer.class);
-       //  }
-
          MCH_Config var10000 = MCH_MOD.config;
          float damage = MCH_Config.applyDamageVsEntity(entity, ds, (float)this.getPower() * damageFactor);
          damage *= this.getInfo() != null?this.getInfo().getDamageFactor(entity):1.0F;
@@ -909,7 +824,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
       if(this.nukeYield >0){
          worldObj.spawnEntityInWorld(EntityNukeExplosionMK5.statFac(worldObj, this.nukeYield, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5));
-         worldObj.spawnEntityInWorld(EntityNukeCloudSmall.statFac(worldObj, this.posX, this.posY, this.posZ, this.nukeYield));
+         worldObj.spawnEntityInWorld(EntityNukeCloudSmall.statFac(worldObj, this.posX, this.posY, this.posZ, this.nukeYield * 10));
 
       }
 
@@ -978,8 +893,4 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    public void setPower(int power) {
       this.power = power;
    }
-  // public boolean shouldRenderRocketTrail() {
-  //    return true;
-  // }
 }
-

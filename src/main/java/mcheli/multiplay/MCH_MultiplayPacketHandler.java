@@ -1,9 +1,25 @@
 package mcheli.multiplay;
 
 import com.google.common.io.ByteArrayDataInput;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
 import mcheli.MCH_Lib;
 import mcheli.MCH_PacketNotifyServerSettings;
 import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.multiplay.MCH_GuiTargetMarker;
+import mcheli.multiplay.MCH_Multiplay;
+import mcheli.multiplay.MCH_MultiplayClient;
+import mcheli.multiplay.MCH_PacketIndClient;
+import mcheli.multiplay.MCH_PacketIndMultiplayCommand;
+import mcheli.multiplay.MCH_PacketLargeData;
+import mcheli.multiplay.MCH_PacketModList;
+import mcheli.multiplay.MCH_PacketNotifyMarkPoint;
+import mcheli.multiplay.MCH_PacketNotifySpotedEntity;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.server.CommandScoreboard;
 import net.minecraft.command.server.CommandSummon;
@@ -14,14 +30,6 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
 
 public class MCH_MultiplayPacketHandler {
 
@@ -42,27 +50,27 @@ public class MCH_MultiplayPacketHandler {
             pc.readData(data);
             MCH_Lib.DbgLog(false, "MCH_MultiplayPacketHandler.onPacket_Command cmd:%d:%s", new Object[]{Integer.valueOf(pc.CmdID), pc.CmdStr});
             switch(pc.CmdID) {
-               case 256:
-                  MCH_Multiplay.shuffleTeam(player);
-                  break;
-               case 512:
-                  MCH_Multiplay.jumpSpawnPoint(player);
-                  break;
-               case 768:
-                  ICommandManager icommandmanager = minecraftServer.getCommandManager();
-                  icommandmanager.executeCommand(player, pc.CmdStr);
-                  break;
-               case 1024:
-                  if((new CommandScoreboard()).canCommandSenderUseCommand(player)) {
-                     minecraftServer.setAllowPvp(!minecraftServer.isPVPEnabled());
-                     MCH_PacketNotifyServerSettings.send((EntityPlayerMP)null);
-                  }
-                  break;
-               case 1280:
-                  destoryAllAircraft(player);
-                  break;
-               default:
-                  MCH_Lib.DbgLog(false, "MCH_MultiplayPacketHandler.onPacket_Command unknown cmd:%d:%s", new Object[]{Integer.valueOf(pc.CmdID), pc.CmdStr});
+            case 256:
+               MCH_Multiplay.shuffleTeam(player);
+               break;
+            case 512:
+               MCH_Multiplay.jumpSpawnPoint(player);
+               break;
+            case 768:
+               ICommandManager icommandmanager = minecraftServer.getCommandManager();
+               icommandmanager.executeCommand(player, pc.CmdStr);
+               break;
+            case 1024:
+               if((new CommandScoreboard()).canCommandSenderUseCommand(player)) {
+                  minecraftServer.setAllowPvp(!minecraftServer.isPVPEnabled());
+                  MCH_PacketNotifyServerSettings.send((EntityPlayerMP)null);
+               }
+               break;
+            case 1280:
+               destoryAllAircraft(player);
+               break;
+            default:
+               MCH_Lib.DbgLog(false, "MCH_MultiplayPacketHandler.onPacket_Command unknown cmd:%d:%s", new Object[]{Integer.valueOf(pc.CmdID), pc.CmdStr});
             }
 
          }

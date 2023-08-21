@@ -1,16 +1,17 @@
 package mcheli.plane;
 
+import java.util.Iterator;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.MCH_Vector2;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_PacketStatusRequest;
 import mcheli.aircraft.MCH_Parts;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
-import mcheli.sensors.MCH_ESMHandler;
+import mcheli.plane.MCP_PlaneInfo;
+import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.wrapper.W_Block;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Lib;
@@ -25,9 +26,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
 public class MCP_EntityPlane extends MCH_EntityAircraft {
 
    private MCP_PlaneInfo planeInfo = null;
@@ -37,22 +35,12 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    public float rotationRotor;
    public float prevRotationRotor;
    public float addkeyRotValue;
-   public float addKeyPitchValue;
-   public float[] target;
-   public MCH_Vector2 vec = new MCH_Vector2();
-   public MCH_Vector2 base = new MCH_Vector2();
-   public ArrayList<MCH_Vector2> entityList = new ArrayList<MCH_Vector2>();
-   public ArrayList<MCH_Vector2> shipList = new ArrayList<MCH_Vector2>();
-   public double energy = 0;
+
 
    public MCP_EntityPlane(World world) {
       super(world);
       super.currentSpeed = 0.07D;
-      try {
-         super.preventEntitySpawning = true;
-      }  catch(Exception e) {
-         System.out.println("caught exception in entityplane init");
-      }
+      super.preventEntitySpawning = true;
       this.setSize(2.0F, 0.7F);
       super.yOffset = super.height / 2.0F;
       super.motionX = 0.0D;
@@ -93,13 +81,10 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          this.partNozzle = this.createNozzle(this.planeInfo);
          this.partWing = this.createWing(this.planeInfo);
          super.weapons = this.createWeapon(1 + this.getSeatNum());
-         //this.hardpoints = this.planeInfo.hardpointList;
          this.initPartRotation(this.getRotYaw(), this.getRotPitch());
       }
 
    }
-
-
 
    public Item getItem() {
       return this.getPlaneInfo() != null?this.getPlaneInfo().item:null;
@@ -159,16 +144,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       }
    }
 
-   //@Override
-   //public ArrayList<MCH_Vector2> getRadarEnemyList() {
-   //  return this.entityList;
-   //}
-
-   //	@Override
-//	public  ArrayList<MCH_Vector2> getRadarEntityList() {
-   //	return this.shipList;
-//	}
-
    public void onUpdateAircraft() {
       if(this.planeInfo == null) {
          this.changeType(this.getTypeName());
@@ -190,7 +165,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          this.updateWeapons();
          this.onUpdate_Seats();
          this.onUpdate_Control();
-
          this.prevRotationRotor = this.rotationRotor;
          this.rotationRotor = (float)((double)this.rotationRotor + this.getCurrentThrottle() * (double)this.getAcInfo().rotorSpeed);
          if(this.rotationRotor > 360.0F) {
@@ -210,7 +184,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          super.prevPosX = super.posX;
          super.prevPosY = super.posY;
          super.prevPosZ = super.posZ;
-
          if(!this.isDestroyed() && this.isHovering() && MathHelper.abs(this.getRotPitch()) < 70.0F) {
             this.setRotPitch(this.getRotPitch() * 0.95F, "isHovering()");
          }
@@ -304,15 +277,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          this.addkeyRotValue += rot * partialTicks;
       }
 
-
-
-
-
-
-
-
    }
-
 
    public void onUpdateAngles(float partialTicks) {
       if(!this.isDestroyed()) {
@@ -333,8 +298,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
                   this.rotationByKey(partialTicks);
                   this.setRotRoll(this.getRotRoll() + this.addkeyRotValue * 0.5F * this.getAcInfo().mobilityRoll);
                }
-
-
             }
          } else {
             rot = 1.0F;
@@ -473,7 +436,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       if(super.worldObj.isRemote) {
          if((double)this.getHP() < (double)this.getMaxHP() * 0.5D) {
             if(this.getPlaneInfo() != null) {
-
                int rotorNum = this.getPlaneInfo().rotorList.size();
                if(rotorNum < 0) {
                   rotorNum = 0;
@@ -522,15 +484,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
                   var17 += pos.yCoord;
                   pz += pos.zCoord;
                }
-               //ExplosionLarge.spawnParticles(worldObj, var15, var17, pz, 75);
-               //if(this.worldObj.getWorldTime() % 10 == 0) {
-                  //EntitySmokeFX smoke = new EntitySmokeFX(this.worldObj, this.posX, this.posY + 3.5D, this.posZ, 0.0, 0.0, 0.0);
-                  //smoke.motionY = 0.1;
-                  //smoke.maxAge = 250;
-                  // 	this.worldObj.spawnEntityInWorld(smoke);
-                  //ExplosionLarge.spawnParticles(worldObj, var15, var17, pz, 3);
-
-               //}
 
                this.onUpdate_Particle2SpawnSmoke(rotorNum, var15, var17, pz, rotorNum == 0?2.0F:1.0F, spawnSmoke);
                super.isFirstDamageSmoke = false;
@@ -669,17 +622,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    }
 
    protected void onUpdate_Client() {
-
-      //if(this.worldObj.getWorldTime() % 20 == 0) {
-      //if(this.ESMContacts.size() == 0) {
-      //System.out.println("ESM contacts: " + ESMContacts.size());
-      //}
-      //for(MCH_ESMContact c : this.ESMContacts) {
-      //  this.print("Contact: " + c.airborne);
-      //	  }
-      //}
-      //this.ESMContacts.clear();
-
       if(this.getRiddenByEntity() != null && W_Lib.isClientPlayer(this.getRiddenByEntity())) {
          this.getRiddenByEntity().rotationPitch = this.getRiddenByEntity().prevRotationPitch;
       }
@@ -727,214 +669,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       this.updateCamera(super.posX, super.posY, super.posZ);
    }
 
-//   public float getMaxMove2() {
-//      int id = MCH_Lib.getBlockIdY(this, 1, -2);
-//      if(id == 0) {
-//         return 1.0f;
-//      }
-//      if(this.getPlaneInfo().isEnableVtol) {
-//         return 1.0f;
-//      }else if(this.getPlaneInfo().isFloat && id == 9) {
-//         return 1.0f;
-//      }else if(id == 35 || id ==173 || id == 159 || id ==172 || id == 45|| id == 112 || id == 4 || id ==5 || id ==155|| id ==43|| id ==24 || id ==13|| id ==89|| id ==123|| id ==124|| id ==152|| id ==98) {
-//         return 1.0f;
-//      }
-//      return 0.2f;
-//   }
-//
-//   public float getMaxMove() {
-//      //System.out.println("YO " + this.planeInfo.category);
-//      return 1.0f;
-//      /*
-//       * int id = MCH_Lib.getBlockIdY(this, 1, -2); if(this.getAcInfo().isFloat && id
-//       * == 9) { return 1.0f;} if(id == 2 || id == 3) { //dirt or grass return 0.2f;
-//       * }else if(id == 12 || id ==78) { //snow or sand return 0.2f; }else if(id == 4
-//       * || id == 13 || id == 564|| id == 97 || id == 701) { //cobble, gravel,
-//       * chiseled dirt, stonebrick if(this.planeInfo.category.equalsIgnoreCase("rus"))
-//       * { // System.out.println("yeet"); return 1.2f; }else { return 0.5f; } }else
-//       * if(id == 560 || id == 1756 || id == 1731 || id == 1726) { //asphalt,
-//       * concrete, etc return 1.2f; }else if(id == 0) { return 1.0f; } return 0.2f;
-//       */
-//   }
-
-   public Vec3 multiplyVector(Vec3 vec, double d) {
-      Vec3 output = Vec3.createVectorHelper(vec.xCoord * d, vec.yCoord * d, vec.zCoord * d);
-
-      return output;
-   }
-
- //  private Vec3 calcDrag() {
- //     Vec3 vec = Vec3.createVectorHelper(motionX, motionY, motionZ);
- //     double vel = vec.lengthVector();
- //     double drag = -200*this.planeInfo.dragCoefficient *(vel * vel); //* getPressureForAlt(this.posY);
- //     //print("Velocity: " + vel + "Drag: " + drag + " accel " + drag / this.getMass());
- //     vec = vec.normalize();
- //     vec = multiplyVector(vec, drag);
-//
- //     //if(vec.lengthVector() <= 0.5 && this.getCurrentThrottle() == 0) {
- //     //   print("FUck");
- //     //  return Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
- //     //}
-//
- //     return vec;
- //  }
-
-
-
- //  //Input: rpm, pitch and diameter in inches, and velocity in m/s
- //  //Output: thrust in N
- //  public static double getThrustForProp(int rpm, double pitch, double diameter, double v, double alt){
- //     return getPressureForAlt(alt) * (4.3924/100000000 * rpm * (Math.pow(diameter, 3.5) / Math.sqrt(pitch)) * (0.000423*rpm*pitch-v));
- //     //return getPressureForAlt(alt) * (4.3924/100000000 * rpm * (Math.pow(diameter, 3.5) / Math.sqrt(pitch)) * (0.000423*rpm*pitch));
-//
- //  }
-//
- //  protected static double getLiftCoeff(double angleOfAttack, double maxLiftCoeff){
- //     if(angleOfAttack == 0){
- //        return 0;
- //     }else if(Math.abs(angleOfAttack) <= 15*1.25){
- //        return maxLiftCoeff*Math.sin(Math.PI/2*angleOfAttack/15);
- //     }else if(Math.abs(angleOfAttack) <= 15*1.5){
- //        if(angleOfAttack > 0){
- //           return maxLiftCoeff*(0.4 + 1/(angleOfAttack - 15));
- //        }else{
- //           return maxLiftCoeff*(-0.4 + 1/(angleOfAttack + 15));
- //        }
- //     }else{
- //        return maxLiftCoeff*Math.sin(Math.PI/6*angleOfAttack/15);
- //     }
- //  }
-//
- //  private Vec3 calcThrust() {
- //     double throttle = this.getCurrentThrottle();
- //     if(throttle <= 0.01) { return null;}
- //     double maxThrust = this.planeInfo.numProps * this.getThrustForProp(planeInfo.maxRPM, planeInfo.propPitch, planeInfo.propDiameter, currentSpeed, posY);
- //     double thrust = throttle * maxThrust;
- //     Vec3 vec = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch()).normalize();
-//
- //     vec.yCoord *= thrust;
- //     vec.xCoord *= thrust;
- //     vec.zCoord *= thrust;
-//
- //     System.out.println("Throttle: " + throttle + " Thrust: " + thrust + " x " + vec.xCoord + " z " + vec.zCoord);
- //     System.out.println("NumProps: " + planeInfo.numProps + " rpm: " + planeInfo.maxRPM + " pitch " + planeInfo.propPitch + " diameter " + planeInfo.propDiameter + " speed " + currentSpeed);
-//
- //     return vec;
- //  }
-//
- //  private Vec3 calcGrav(double mass) {
- //     Vec3 vec = Vec3.createVectorHelper(0, -mass * 0.5, 0); //Meters per TICK, not second. Dumbass.
- //     return vec;
- //  }
-
-   Vec3 addVector(Vec3 vec1, Vec3 vec2) {
-      if(vec2 == null) { return vec1;}
-      return Vec3.createVectorHelper(vec1.xCoord + vec2.xCoord, vec1.yCoord + vec2.yCoord, vec1.zCoord + vec2.zCoord);
-   }
-
-   //Input: ABSOLUTE altitude in meters aka Y coordinate
-   //Output: Pressure in kilopascals
-   //Sea level = 62m, altitude scale is 1:100
-   //So an altitude of 70 would map to a real-world alt of 800 meters ASL
-//   public static double getPressureForAlt(double alt) {
-//      alt -= 62; //Adjust altitude for sea level
-//      if(alt < 0){ alt = 0;} //Make sure nothing fucky happens at negatives
-   public float getSoundPitch() {
-      return (float)(0.6D + this.getCurrentThrottle() * 0.4D);
-   }
-//      alt *= 10; //Adjust altitude for scale.
-//      //return 101.325 *Math.pow((1-2.25577*Math.pow(10,-5)*alt), 5.25588);
-//      return 1.0; //Math.pow((1-2.25577*Math.pow(10,-5)*alt), 5.25588);
-//   }
-//
-//
-//   //returns temp in degrees C
-//   public double getTemp(double alt) {
-//      alt -= 62; //Adjust altitude for sea level
-//      alt *= 100; //Adjust altitude for scale.
-//
-//      if(alt <= 11000) { //Troposphere
-//         return 15.04 - 0.00649*alt;
-//      }else if(alt <= 25000) { //Stratosphere
-//         return -56.46;
-//      }else { //Mesosphere?
-//         return -131.21 + 0.00299 * alt;
-//      }
-//   }
-//
-//   public double convert_celsius_to_kelvin(double celsius) {
-//      return celsius + 273;
-//   }
-//
-//   public double getDensityFromPressure(double pressure, double alt) {
-//      double temperature = getTemp(alt); //Temp in degrees C
-//      double R = 287.058; //Specific gas constant for air in J/(kg/K)
-//      return pressure / (temperature * R);
-//   }
-//
-//
-//
-//
-//
-//   public double getMass() {
-//      return this.planeInfo.mass + currentFuel * 0.0007; //Assuming 1 bucket = 1L and that the fuel is gasoline
-//   }
-//
-//   private void addVectorToVelocity(Vec3 thrust) {
-//      double mass = getMass();
-//      super.motionX += thrust.xCoord / mass;
-//      super.motionY += thrust.yCoord / mass;
-//      super.motionZ += thrust.zCoord / mass;
-//   }
-//
-//   public double getCd(double alpha, double minCD) {
-//      return minCD + Math.pow(0.02*alpha, 2);
-//   }
-//
-//   public double getCl(double alpha, double maxCl) {
-//      double a = Math.abs(alpha);
-//      if(a > 20) {
-//         return 0; //Stall
-//      }else if(a <= 15) {
-//         return maxCl * Math.abs((alpha + 5)/15);
-//      }else {
-//         return 1 - maxCl * Math.abs((alpha + 20)/15);
-//      }
-//   }
-
-//   private void updateEnergy(double cD) {
-//      if(super.onGround) {
-//         energy=0;
-//         return;
-//      }
-//      if(motionY > 0 && energy > 0) { //If we're climbing and energy > 0
-//         energy -= motionY * getMass();
-//      }else if(motionY < 0) {
-//         energy -= motionY * getMass();
-//      }
-//      //if(motionY >= 0) {
-//      //energy -= cD * planeInfo.wingArea;
-//      //}
-//      energy *= 0.99;
-//
-//      if(Math.abs(energy) <= 1) { energy = 0;}
-//   }
-
-//   private void findAndKillCDTLaurel(){}
-//
    private void onUpdate_Server() {
-//      findAndKillCDTLaurel();
-
-
-	   /*Vec3 velocity = Vec3.createVectorHelper(super.motionX, super.motionY, super.motionZ);
-	   Vec3 velocity_normalized = velocity.normalize();
-	   Vec3 facing = MCH_Lib._Rot2Vec3(-this.getRotYaw(), -this.getRotPitch(), -this.getRotRoll()).normalize();
-	   double alpha = Math.toDegrees(Math.acos(velocity_normalized.dotProduct(facing)));
-       this.print("Alpha: " + alpha);
-	   double cL = getCl(-super.rotationPitch, 1.0);
-	   double cD = getCd(alpha, 1.0);
-	   updateEnergy(cD);*/
-
       Entity rdnEnt = this.getRiddenByEntity();
       double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       double dp = 0.0D;
@@ -965,11 +700,9 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             }
          }
 
-         if(!levelOff) { // Lift
+         if(!levelOff) {
             super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
             super.motionY += -0.047D * (1.0D - this.getCurrentThrottle());
-
-
          } else {
             super.motionY *= 0.8D;
          }
@@ -1002,7 +735,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          }
       } else {
          v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - 10.0F);
-         //v = MCH_Lib._Rot2Vec3(rotationYaw, rotationPitch, rotationRoll);
       }
 
       if(!levelOff) {
@@ -1033,11 +765,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
       double motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       float speedLimit = this.getMaxSpeed();
- //     if(energy > 5) {
- //        speedLimit *= 1.5;
- //     }else if(energy < -5) {
- //        speedLimit /= 1.5;
- //     }
       if(motion1 > (double)speedLimit) {
          super.motionX *= (double)speedLimit / motion1;
          super.motionZ *= (double)speedLimit / motion1;
@@ -1064,8 +791,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          }
       }
 
-      //if(this.canFloatWater()){motionY = Math.min(motionY, 0);}
-
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
       super.motionY *= 0.95D;
       super.motionX *= (double)this.getAcInfo().motionFactor;
@@ -1078,224 +803,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       }
 
    }
-
-//   private void onUpdate_Server2() {
-//
-//      double mass = getMass();
-//      double pressure = getPressureForAlt(this.posY);
-//
-//      Vec3 velocity = Vec3.createVectorHelper(super.motionX, super.motionY, super.motionZ);
-//      double speed = velocity.lengthVector();
-//      Vec3 velocity_normalized = velocity.normalize();
-//      Vec3 facing = MCH_Lib._Rot2Vec3(-this.getRotYaw(), -this.getRotPitch(), -this.getRotRoll()).normalize();
-//
-//      double alpha = Math.toDegrees(Math.acos(velocity_normalized.dotProduct(facing)));
-//      double cL = getLiftCoeff(alpha, 2);
-//      double cD = 0.0004F*Math.pow(alpha, 2) + 0.03; //this.getPlaneInfo().dragCoefficient;
-//      double area = this.getPlaneInfo().wingArea;
-//      double axialVelocity = Math.abs(velocity.dotProduct(facing));
-//
-//      double dragForce = pressure * 0.5 * cD * speed * speed * area;
-//      double liftForce = pressure * 0.5 * cL * axialVelocity * axialVelocity * area;
-//      double thrustForce = this.planeInfo.numProps * getThrustForProp((int)(getCurrentThrottle()*planeInfo.maxRPM), planeInfo.propPitch, planeInfo.propDiameter, currentSpeed, posY);
-//      double gravitationalForce = mass * 9.8/400; //9.8 is gravity, 400 is ticks^2
-//
-//      Vec3 thrustVec = this.multiplyVector(facing, thrustForce * 0.5);
-//      Vec3 dragVec = multiplyVector(velocity_normalized, -dragForce);
-//      //print("Drag: " + dragVec.lengthVector());
-//      //Vec3 gravityVec = Vec3.createVectorHelper(0, -gravitationalForce, 0);
-//      //Vec3 liftVec = multiplyVector(facing.crossProduct(velocity_normalized).normalize(), liftForce);
-//
-//      addVectorToVelocity(thrustVec);
-//      addVectorToVelocity(dragVec);
-//      //addVectorToVelocity(gravityVec);
-//      //addVectorToVelocity(liftVec);
-//
-//      MCH_ESMHandler.getInstance().getESMContacts(this);
-//      //System.out.println("NumProps: " + planeInfo.numProps + " rpm: " + planeInfo.maxRPM + " pitch " + planeInfo.propPitch + " diameter " + planeInfo.propDiameter + " speed " + currentSpeed);
-//      // System.out.println("SPEED: " + this.isCollidedHorizontally);
-//      if(this.isCollidedHorizontally) {
-//         this.setThrottle(0.1);
-//         this.setCurrentThrottle(0.1);
-//      }
-//
-//      double distFromBase = 0;
-//
-//      if(!this.onGround && !this.isTargetDrone()) {
-//         distFromBase= this.getDistance(base.x, this.posY, base.y);
-//         if(distFromBase >= this.getPlaneInfo().range * 4) {
-//            //  this.setFuel((int) (this.getFuel() * 0.99));
-//         }
-//      }
-//      Entity rdnEnt = this.getRiddenByEntity();
-//      double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-//      double speedPercent = prevMotion / this.getAcInfo().getMaxSpeed();
-//      //this.print("Speed: " + speedPercent);
-//      double dp = 0.0D;
-//      if(this.canFloatWater()) {
-//         dp = this.getWaterDepth();
-//      }
-//      double motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-//      boolean levelOff = super.isGunnerMode;
-//      if(dp == 0.0D) {
-//         if(this.isTargetDrone() && this.canUseFuel() && !this.isDestroyed()) {
-//            Block throttle = MCH_Lib.getBlockY(this, 3, -40, true);
-//            if(throttle != null && !W_Block.isEqual(throttle, Blocks.air)) {
-//               throttle = MCH_Lib.getBlockY(this, 3, -5, true);
-//               if(throttle == null || W_Block.isEqual(throttle, Blocks.air)) {
-//                  this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 2.0F);
-//                  if(this.getRotPitch() > -20.0F) {
-//                     this.setRotPitch(this.getRotPitch() - 0.5F);
-//                  }
-//               }
-//            } else {
-//               this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 1.0F);
-//               this.setRotPitch(this.getRotPitch() * 0.95F);
-//               if(this.canFoldLandingGear()) {
-//                  this.foldLandingGear();
-//               }
-//
-//               levelOff = true;
-//            }
-//         }
-//
-//         if(!levelOff) {
-//            //super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
-//            //super.motionY += -0.047D; //* (1.0D - this.getCurrentThrottle());
-//            //double lift = prevMotion * prevMotion * planeInfo.wingArea * getPressureForAlt(posY);
-//            // print("Lift: " + lift + " Modified " + lift * 10 / getMass());
-//            //lift *= 2.6 / getMass();
-//
-//            //Vec3 vec = MCH_Lib.RotVec3(0, lift, 0, rotationYaw, rotationPitch,rotationRoll);
-//
-//
-//            //super.motionX += vec.xCoord;
-//            //super.motionY += vec.yCoord;
-//            //super.motionZ += vec.zCoord;
-//            //Real gravity code?
-//         } else {
-//            super.motionY *= 0.8D;
-//         }
-//      } else {
-//         this.setRotPitch(this.getRotPitch() * 0.8F, "getWaterDepth != 0");
-//         if(MathHelper.abs(this.getRotRoll()) < 40.0F) {
-//            this.setRotRoll(this.getRotRoll() * 0.9F);
-//         }
-//
-//         if(dp < 1.0D) {
-//            if(Math.abs(this.getRotPitch()) >= 2 || speedPercent <= 0.5) {
-//               super.motionY -= 1.0E-4D;
-//               super.motionY += 0.007D * speedPercent; //this.getCurrentThrottle();
-//
-//            }
-//            // if(motion1 / this.getMaxSpeed() >= 0.8) {
-//            //		super.motionY += 0.007D*  (this.currentSpeed / this.getMaxSpeed());
-//            // }
-//         } else {
-//            if(super.motionY < 0.0D) {
-//               super.motionY /= 2.0D;
-//            }
-//
-//            super.motionY += 0.007D;
-//         }
-//      }
-//
-//      float throttle1 = (float)(this.getCurrentThrottle() / 10.0D);
-//      Vec3 v;
-//      if(this.getNozzleRotation() > 0.001F) {
-//         this.setRotPitch(this.getRotPitch() * 0.95F);
-//         v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - this.getNozzleRotation());
-//         if(this.getNozzleRotation() >= 90.0F) {
-//            v.xCoord *= 0.800000011920929D;
-//            v.zCoord *= 0.800000011920929D;
-//         }
-//      } else {
-//         // v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - 10.0F);
-//         //double thrust = this.planeInfo.numProps * getThrustForProp((int)getCurrentThrottle()*planeInfo.maxRPM, planeInfo.propPitch, planeInfo.propDiameter, currentSpeed, posY);
-//         //v = MCH_Lib.RotVec3(0, 0, thrust  * 0.05 / getMass(), -rotationYaw, -rotationPitch,rotationRoll);
-//      }
-//
-//      if(!levelOff) {
-//         if(this.getNozzleRotation() <= 0.01F) {
-//            // super.motionY += v.yCoord * (double)throttle1 / 2.0D;
-//         } else {
-//            //   super.motionY += v.yCoord / 8.0D;// * (double)throttle1 / 8.0D;
-//         }
-//      }
-//
-//      boolean canMove = true;
-//      if(!this.getAcInfo().canMoveOnGround) {
-//         Block motion = MCH_Lib.getBlockY(this, 3, -2, false);
-//         if(!W_Block.isEqual(motion, W_Block.getWater()) && !W_Block.isEqual(motion, Blocks.air) && !W_Block.isEqual(motion, Blocks.flowing_water)) {
-//            canMove = false;
-//         }
-//      }
-//
-//      if(canMove) {
-//         if(this.getAcInfo().enableBack && super.throttleBack > 0.0F) {
-//            //super.motionX -= v.xCoord;// * (double)super.throttleBack;
-//            //super.motionZ -= v.zCoord;// * (double)super.throttleBack;
-//         } else {
-//            // super.motionX += v.xCoord;// * (double)throttle1;
-//            //super.motionZ += v.zCoord;// * (double)throttle1;
-//         }
-//      }
-//
-//
-//      //float speedLimit = this.getMaxSpeed();
-//      //if(motion1 > (double)speedLimit) {
-//      //  super.motionX *= (double)speedLimit / motion1;
-//      //  super.motionZ *= (double)speedLimit / motion1;
-//      //  motion1 = (double)speedLimit;
-//      //}
-//
-//      //if(motion1 > prevMotion && super.currentSpeed < (double)speedLimit) {
-//      //  super.currentSpeed += ((double)speedLimit - super.currentSpeed) / 35.0D;
-//      //  if(super.currentSpeed > (double)speedLimit) {
-//      //    super.currentSpeed = (double)speedLimit;
-//      //  }
-//      //} else {
-//      //   super.currentSpeed -= (super.currentSpeed - 0.07D) / 35.0D;
-//      //  if(super.currentSpeed < 0.07D) {
-//      //    super.currentSpeed = 0.07D;
-//      //}
-//      // }
-//
-//      if(super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0) {
-//         super.motionX *= (double)this.getAcInfo().motionFactor;
-//         super.motionZ *= (double)this.getAcInfo().motionFactor;
-//         if(MathHelper.abs(this.getRotPitch()) < 40.0F) {
-//            this.applyOnGroundPitch(0.8F);
-//         }
-//      }
-//      try {
-//         if(this.posY >= this.getPlaneInfo().maxAlt) {
-//            this.motionY = Math.min(0, this.motionY);
-//         }
-//      }catch(Exception e) {
-//
-//      }
-//
-//      //drag
-//
-//      //Vec3 drag = calcDrag();
-//      //print("Drag: " + drag.lengthVector() + " x " + drag.xCoord + " y " + drag.yCoord + " z " + drag.zCoord);
-//      //super.motionY += 20 * drag.yCoord/getMass();
-//      //super.motionX += 20 * drag.xCoord/getMass();
-//      //super.motionZ += 20 * drag.zCoord/getMass();
-//
-//
-//      this.moveEntity(super.motionX, super.motionY, super.motionZ);
-//
-//
-//      this.setRotation(this.getRotYaw(), this.getRotPitch());
-//      this.onUpdate_updateBlock();
-//      if(this.getRiddenByEntity() != null && this.getRiddenByEntity().isDead) {
-//         this.unmountEntity();
-//         super.riddenByEntity = null;
-//      }
-//
-//   }
 
    public float getMaxSpeed() {
       float f = 0.0F;
@@ -1310,24 +817,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
    public float getSoundVolume() {
       return this.getAcInfo() != null && this.getAcInfo().throttleUpDown <= 0.0F?0.0F:this.soundVolume * 0.7F;
-//      if(this.getAcInfo() != null && this.getAcInfo().throttleUpDown <= 0.0F) {
-//         return 0.0F;
-//      }else {
-//         return this.soundVolume * 0.7F;
-//      }
-//      //return this.getAcInfo() != null && this.getAcInfo().throttleUpDown <= 0.0F?0.0F:this.soundVolume * 0.7F;
-//   }
-//
-//   public float getSoundPitch() {
-//      //double mach = 17.15; //Meters / tick
-//      //mach /= 15; //scale down
-//      //double theta = this.getBearingToEntity(Minecraft.getMinecraft().thePlayer);
-//      float base_pitch = (float)(0.6D + this.getCurrentThrottle() * 0.4D); //Base pitch for current throttle setting
-//      // double radial_speed = this.currentSpeed * Math.cos(Math.toRadians(theta));
-//
-//      // float doppler_modifier = (float) (mach/(mach + radial_speed));
-//
-//      return base_pitch;
    }
 
    public void updateSound() {
@@ -1350,7 +839,9 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
    }
 
-
+   public float getSoundPitch() {
+      return (float)(0.6D + this.getCurrentThrottle() * 0.4D);
+   }
 
    public String getDefaultSoundName() {
       return "plane";

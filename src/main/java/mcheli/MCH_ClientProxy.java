@@ -3,8 +3,26 @@ package mcheli;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.relauncher.Side;
-import mcheli.aircraft.*;
-import mcheli.block.*;
+import java.util.Iterator;
+import mcheli.MCH_ClientCommonTickHandler;
+import mcheli.MCH_ClientEventHook;
+import mcheli.MCH_CommonProxy;
+import mcheli.MCH_Config;
+import mcheli.MCH_InvisibleItemRender;
+import mcheli.MCH_Lib;
+import mcheli.MCH_MOD;
+import mcheli.MCH_ModelManager;
+import mcheli.MCH_RenderNull;
+import mcheli.MCH_ViewEntityDummy;
+import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityHide;
+import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_SoundUpdater;
+import mcheli.block.MCH_DraftingTableItemRender;
+import mcheli.block.MCH_DraftingTableRenderer;
+import mcheli.block.MCH_DraftingTableTileEntity;
 import mcheli.chain.MCH_EntityChain;
 import mcheli.chain.MCH_RenderChain;
 import mcheli.command.MCH_GuiTitle;
@@ -46,16 +64,41 @@ import mcheli.vehicle.MCH_EntityVehicle;
 import mcheli.vehicle.MCH_RenderVehicle;
 import mcheli.vehicle.MCH_VehicleInfo;
 import mcheli.vehicle.MCH_VehicleInfoManager;
-import mcheli.weapon.*;
-import mcheli.wrapper.*;
+import mcheli.weapon.MCH_BulletModel;
+import mcheli.weapon.MCH_DefaultBulletModels;
+import mcheli.weapon.MCH_EntityA10;
+import mcheli.weapon.MCH_EntityAAMissile;
+import mcheli.weapon.MCH_EntityASMissile;
+import mcheli.weapon.MCH_EntityATMissile;
+import mcheli.weapon.MCH_EntityBomb;
+import mcheli.weapon.MCH_EntityBullet;
+import mcheli.weapon.MCH_EntityCartridge;
+import mcheli.weapon.MCH_EntityDispensedItem;
+import mcheli.weapon.MCH_EntityMarkerRocket;
+import mcheli.weapon.MCH_EntityRocket;
+import mcheli.weapon.MCH_EntityTorpedo;
+import mcheli.weapon.MCH_EntityTvMissile;
+import mcheli.weapon.MCH_RenderA10;
+import mcheli.weapon.MCH_RenderAAMissile;
+import mcheli.weapon.MCH_RenderASMissile;
+import mcheli.weapon.MCH_RenderBomb;
+import mcheli.weapon.MCH_RenderBullet;
+import mcheli.weapon.MCH_RenderCartridge;
+import mcheli.weapon.MCH_RenderNone;
+import mcheli.weapon.MCH_RenderTvMissile;
+import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.weapon.MCH_WeaponInfoManager;
+import mcheli.wrapper.W_Item;
+import mcheli.wrapper.W_McClient;
+import mcheli.wrapper.W_MinecraftForgeClient;
+import mcheli.wrapper.W_Reflection;
+import mcheli.wrapper.W_TickRegistry;
 import mcheli.wrapper.modelloader.W_ModelCustom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.model.IModelCustom;
 import net.minecraftforge.common.MinecraftForge;
-
-import java.util.Iterator;
 
 public class MCH_ClientProxy extends MCH_CommonProxy {
 
@@ -85,10 +128,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityBullet.class, new MCH_RenderBullet());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityA10.class, new MCH_RenderA10());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityAAMissile.class, new MCH_RenderAAMissile());
-      RenderingRegistry.registerEntityRenderingHandler(MCH_EntitySARHMissile.class, new MCH_RenderSARHMissile());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityASMissile.class, new MCH_RenderASMissile());
-      RenderingRegistry.registerEntityRenderingHandler(MCH_EntityAShM.class, new MCH_RenderASMissile());
-      RenderingRegistry.registerEntityRenderingHandler(MCH_EntityARM.class, new MCH_RenderASMissile());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityATMissile.class, new MCH_RenderTvMissile());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityTorpedo.class, new MCH_RenderBullet());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityBomb.class, new MCH_RenderBomb());
@@ -107,10 +147,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    public void registerBlockRenderer() {
       ClientRegistry.bindTileEntitySpecialRenderer(MCH_DraftingTableTileEntity.class, new MCH_DraftingTableRenderer());
       W_MinecraftForgeClient.registerItemRenderer(W_Item.getItemFromBlock(MCH_MOD.blockDraftingTable), new MCH_DraftingTableItemRender());
-
-
-      //ClientRegistry.bindTileEntitySpecialRenderer(SewingTileEntity.class, new BlockRenderer());
-      //W_MinecraftForgeClient.registerItemRenderer(W_Item.getItemFromBlock(MCH_MOD.blockSewingMachine), new MCH_DraftingTableItemRender());
    }
 
    public void registerModels() {
@@ -180,7 +216,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       }
 
       MCH_ModelManager.load("blocks", "drafting_table");
-      //MCH_ModelManager.load("blocks", "sewing_machine");
    }
 
    public static void registerModels_Bullet() {
@@ -424,8 +459,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       W_McClient.addSound("fim92_snd.ogg");
       W_McClient.addSound("fim92_reload.ogg");
       W_McClient.addSound("lockon.ogg");
-      W_McClient.addSound("ir_basic_tone.ogg");
-      W_McClient.addSound("ir_lock_tone.ogg");
       Iterator i$ = MCH_WeaponInfoManager.getValues().iterator();
 
       while(i$.hasNext()) {

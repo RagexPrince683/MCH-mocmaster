@@ -12,10 +12,10 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-//import java.util.Random;
+import java.util.Random;
 
 public class MCH_WeaponASMissile extends MCH_WeaponBase {
-   //Random random = new Random();
+   Random random = new Random();
 
 
    public MCH_WeaponASMissile(World w, Vec3 v, float yaw, float pitch, String nm, MCH_WeaponInfo wi) {
@@ -60,29 +60,35 @@ public class MCH_WeaponASMissile extends MCH_WeaponBase {
       MCH_EntityASMissile e;
 
       if(prm.entity instanceof MCH_EntityAircraft) {
-         MCH_EntityAircraft ac = (MCH_EntityAircraft)prm.entity;
-         if(this.worldObj.isRemote) {
-            if(MCH_ParticlesUtil.markPoint != null) {
+         MCH_EntityAircraft ac = (MCH_EntityAircraft) prm.entity;
+         MCH_EntityParticleMarkPoint target = MCH_ParticlesUtil.markPoint;
+         if (this.worldObj.isRemote) {
+            if (MCH_ParticlesUtil.markPoint != null) {
 
                //System.out.println("Yeet");
-               MCH_EntityParticleMarkPoint target = MCH_ParticlesUtil.markPoint;
-               if(target.posY >= 500){
-                  MCH_Multiplay.markPoint((EntityPlayer)prm.user, prm.posX, prm.posY, prm.posZ);
+               target = MCH_ParticlesUtil.markPoint;
+               if (target.posY >= 500) {
+                  MCH_Multiplay.markPoint((EntityPlayer) prm.user, prm.posX, prm.posY, prm.posZ);
                }
-               if(ac.getDistance(target.posX, ac.posY, target.posZ) > this.getInfo().radius) {return false;}
-               MCH_PacketCommandSave.send("tgt " + (int)ac.target.xCoord + " " + (int)ac.target.yCoord + " " + (int)ac.target.zCoord);
+               if (ac.getDistance(target.posX, ac.posY, target.posZ) > this.getInfo().radius) {
+                  return false;
+               }
+               MCH_PacketCommandSave.send("tgt " + (int) target.posX + " " + (int) target.posY + " " + (int) target.posZ);
                return true;
-            }{return false;}
-         }else { //Server
+            }
+            {
+               return false;
+            }
+         } else { //Server
             e = new MCH_EntityASMissile(this.worldObj, prm.posX, prm.posY, prm.posZ, tX, tY, tZ, yaw, pitch, this.acceleration);
             e.setName(this.name);
             e.setParameterFromWeapon(this, prm.entity, prm.user);
             //System.out.println("AC tgt " + ac.target[0] + " "+ ac.target[1] + " "+ ac.target[2]);
 
 
-            e.targetPosX = ac.target.xCoord;
+            e.targetPosX = (int)target.posX;
             e.targetPosY = ac.target.yCoord;
-            e.targetPosZ = ac.target.zCoord;
+            e.targetPosZ = (int)target.posZ;
             this.worldObj.spawnEntityInWorld(e);
             playSound(prm.entity);
             return true;

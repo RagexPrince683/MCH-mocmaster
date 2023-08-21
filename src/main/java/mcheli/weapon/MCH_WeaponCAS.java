@@ -1,6 +1,10 @@
 package mcheli.weapon;
 
 import mcheli.MCH_Lib;
+import mcheli.weapon.MCH_EntityA10;
+import mcheli.weapon.MCH_WeaponBase;
+import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.weapon.MCH_WeaponParam;
 import mcheli.wrapper.W_MovingObjectPosition;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.entity.Entity;
@@ -115,7 +119,6 @@ public class MCH_WeaponCAS extends MCH_WeaponBase {
       a10.shootingAircraft = this.shooter;
       a10.explosionPower = super.explosionPower;
       a10.power = super.power;
-
       a10.acceleration = super.acceleration;
       super.worldObj.spawnEntityInWorld(a10);
       W_WorldFunc.MOD_playSoundEffect(super.worldObj, x, y, z, "a-10_snd", 150.0F, 1.0F);
