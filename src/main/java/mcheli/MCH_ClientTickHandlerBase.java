@@ -87,17 +87,22 @@ public abstract class MCH_ClientTickHandlerBase {
    public static boolean updateMouseWheel(int wheel) {
       boolean cancelEvent = false;
       if(wheel != 0) {
-         MCH_Config var10000 = MCH_MOD.config;
+         //wheel isn't 0 and config initialized
+         MCH_Config EntityClientPlayerMP = MCH_MOD.config;
          if(MCH_Config.SwitchWeaponWithMouseWheel.prmBool) {
+            //prmBool = false set earlier in code
+            //if switchweaponwithmousewheel is false then let the player use the scroll wheel
             setMouseWheel(0);
+
             EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
             if(player != null) {
                MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(player);
                if(ac != null) {
                   int cwid = ac.getWeaponIDBySeatID(ac.getSeatIdByEntity(player));
-                  int nwid = ac.getNextWeaponID(player, 1);
+                  int nwid = ac.getNextWeaponID(player, wheel);
                   if(cwid != nwid) {
                      setMouseWheel(wheel);
+                     //stops the mouse from scrolling? but needs to also change the weapon once scrolled I am unsure how to do this
                      cancelEvent = true;
                   }
                }

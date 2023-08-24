@@ -130,7 +130,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
          super.buttonList.add(idr);
       }
 
-      this.listRenderButtons = new ArrayList();
+      this.listRenderButtons = new ArrayList<W_GuiButton>();
       this.buttonShowHUDTP = new MCH_GuiOnOffButton(0, x1, y + 25, 150, 20, "Show HUD Third Person : ");
       this.buttonHideKeyBind = new MCH_GuiOnOffButton(0, x1, y + 50, 150, 20, "Hide Key Binding : ");
       this.sliderHitMark = new MCH_GuiSlider[]{new MCH_GuiSlider(0, x1 + 0, y + 125, 75, 20, "Alpha:%.0f", 0.0F, 0.0F, 255.0F, 16.0F), new MCH_GuiSlider(0, x1 + 75, y + 75, 75, 20, "Red:%.0f", 0.0F, 0.0F, 255.0F, 16.0F), new MCH_GuiSlider(0, x1 + 75, y + 100, 75, 20, "Green:%.0f", 0.0F, 0.0F, 255.0F, 16.0F), new MCH_GuiSlider(0, x1 + 75, y + 125, 75, 20, "Blue:%.0f", 0.0F, 0.0F, 255.0F, 16.0F)};
@@ -288,131 +288,96 @@ public class MCH_ConfigGui extends W_GuiContainer {
    }
 
    public void getAllStatusFromConfig() {
-      MCH_Config var10001 = MCH_MOD.config;
-      this.buttonMouseInv.setOnOff(MCH_Config.InvertMouse.prmBool);
-      var10001 = MCH_MOD.config;
-      this.buttonStickModeHeli.setOnOff(MCH_Config.MouseControlStickModeHeli.prmBool);
-      var10001 = MCH_MOD.config;
-      this.buttonStickModePlane.setOnOff(MCH_Config.MouseControlStickModePlane.prmBool);
-      var10001 = MCH_MOD.config;
-      this.sliderSensitivity.setSliderValue((float)MCH_Config.MouseSensitivity.prmDouble);
-      var10001 = MCH_MOD.config;
-      this.buttonShowHUDTP.setOnOff(MCH_Config.DisplayHUDThirdPerson.prmBool);
-      var10001 = MCH_MOD.config;
-      this.buttonSmoothShading.setOnOff(MCH_Config.SmoothShading.prmBool);
-      var10001 = MCH_MOD.config;
-      this.buttonHideKeyBind.setOnOff(MCH_Config.HideKeybind.prmBool);
-      var10001 = MCH_MOD.config;
-      this.buttonShowEntityMarker.setOnOff(MCH_Config.DisplayEntityMarker.prmBool);
-      var10001 = MCH_MOD.config;
-      this.buttonMarkThroughWall.setOnOff(MCH_Config.DisplayMarkThroughWall.prmBool);
-      var10001 = MCH_MOD.config;
-      this.sliderEntityMarkerSize.setSliderValue((float)MCH_Config.EntityMarkerSize.prmDouble);
-      var10001 = MCH_MOD.config;
-      this.sliderBlockMarkerSize.setSliderValue((float)MCH_Config.BlockMarkerSize.prmDouble);
-      var10001 = MCH_MOD.config;
-      this.buttonReplaceCamera.setOnOff(MCH_Config.ReplaceRenderViewEntity.prmBool);
-      var10001 = MCH_MOD.config;
-      this.buttonNewExplosion.setOnOff(MCH_Config.DefaultExplosionParticle.prmBool);
-      MCH_GuiSlider var10000 = this.sliderHitMark[0];
-      var10001 = MCH_MOD.config;
-      var10000.setSliderValue(MCH_Config.hitMarkColorAlpha * 255.0F);
-      var10000 = this.sliderHitMark[1];
-      var10001 = MCH_MOD.config;
-      var10000.setSliderValue((float)(MCH_Config.hitMarkColorRGB >> 16 & 255));
-      var10000 = this.sliderHitMark[2];
-      var10001 = MCH_MOD.config;
-      var10000.setSliderValue((float)(MCH_Config.hitMarkColorRGB >> 8 & 255));
-      var10000 = this.sliderHitMark[3];
-      var10001 = MCH_MOD.config;
-      var10000.setSliderValue((float)(MCH_Config.hitMarkColorRGB >> 0 & 255));
-      var10001 = MCH_MOD.config;
-      this.buttonThrottleHeli.setOnOff(MCH_Config.AutoThrottleDownHeli.prmBool);
-      var10001 = MCH_MOD.config;
-      this.buttonThrottlePlane.setOnOff(MCH_Config.AutoThrottleDownPlane.prmBool);
-      var10001 = MCH_MOD.config;
-      this.buttonThrottleTank.setOnOff(MCH_Config.AutoThrottleDownTank.prmBool);
-      var10001 = MCH_MOD.config;
-      this.buttonTestMode.setOnOff(MCH_Config.TestMode.prmBool);
-      var10001 = MCH_MOD.config;
-      this.buttonFlightSimMode.setOnOff(MCH_Config.MouseControlFlightSimMode.prmBool);
-      var10001 = MCH_MOD.config;
-      this.buttonSwitchWeaponWheel.setOnOff(MCH_Config.SwitchWeaponWithMouseWheel.prmBool);
+      MCH_Config config = MCH_MOD.config; // Get the configuration instance
+
+      this.buttonMouseInv.setOnOff(config.InvertMouse.prmBool);
+      this.buttonStickModeHeli.setOnOff(config.MouseControlStickModeHeli.prmBool);
+      this.buttonStickModePlane.setOnOff(config.MouseControlStickModePlane.prmBool);
+
+      this.sliderSensitivity.setSliderValue((float) config.MouseSensitivity.prmDouble);
+
+      this.buttonShowHUDTP.setOnOff(config.DisplayHUDThirdPerson.prmBool);
+      this.buttonSmoothShading.setOnOff(config.SmoothShading.prmBool);
+      this.buttonHideKeyBind.setOnOff(config.HideKeybind.prmBool);
+
+      this.buttonShowEntityMarker.setOnOff(config.DisplayEntityMarker.prmBool);
+      this.buttonMarkThroughWall.setOnOff(config.DisplayMarkThroughWall.prmBool);
+
+      this.sliderEntityMarkerSize.setSliderValue((float) config.EntityMarkerSize.prmDouble);
+      this.sliderBlockMarkerSize.setSliderValue((float) config.BlockMarkerSize.prmDouble);
+
+      this.buttonReplaceCamera.setOnOff(config.ReplaceRenderViewEntity.prmBool);
+      this.buttonNewExplosion.setOnOff(config.DefaultExplosionParticle.prmBool);
+
+      this.sliderHitMark[0].setSliderValue(config.hitMarkColorAlpha * 255.0F);
+      this.sliderHitMark[1].setSliderValue((config.hitMarkColorRGB >> 16) & 0xFF);
+      this.sliderHitMark[2].setSliderValue((config.hitMarkColorRGB >> 8) & 0xFF);
+      this.sliderHitMark[3].setSliderValue((config.hitMarkColorRGB >> 0) & 0xFF);
+
+      this.buttonThrottleHeli.setOnOff(config.AutoThrottleDownHeli.prmBool);
+      this.buttonThrottlePlane.setOnOff(config.AutoThrottleDownPlane.prmBool);
+      this.buttonThrottleTank.setOnOff(config.AutoThrottleDownTank.prmBool);
+
+      this.buttonTestMode.setOnOff(config.TestMode.prmBool);
+      this.buttonFlightSimMode.setOnOff(config.MouseControlFlightSimMode.prmBool);
+      this.buttonSwitchWeaponWheel.setOnOff(config.SwitchWeaponWithMouseWheel.prmBool);
    }
 
    public void saveAndApplyConfig() {
-      MCH_Config var10000;
-      label20: {
-         boolean n = false;
-         var10000 = MCH_MOD.config;
-         MCH_Config.InvertMouse.setPrm(this.buttonMouseInv.getOnOff());
-         var10000 = MCH_MOD.config;
-         MCH_Config.MouseControlStickModeHeli.setPrm(this.buttonStickModeHeli.getOnOff());
-         var10000 = MCH_MOD.config;
-         MCH_Config.MouseControlStickModePlane.setPrm(this.buttonStickModePlane.getOnOff());
-         var10000 = MCH_MOD.config;
-         MCH_Config.MouseControlFlightSimMode.setPrm(this.buttonFlightSimMode.getOnOff());
-         var10000 = MCH_MOD.config;
-         MCH_Config.SwitchWeaponWithMouseWheel.setPrm(this.buttonSwitchWeaponWheel.getOnOff());
-         var10000 = MCH_MOD.config;
-         MCH_Config.MouseSensitivity.setPrm((double)this.sliderSensitivity.getSliderValueInt(1));
-         var10000 = MCH_MOD.config;
-         MCH_Config.DisplayHUDThirdPerson.setPrm(this.buttonShowHUDTP.getOnOff());
-         var10000 = MCH_MOD.config;
-         MCH_Config.SmoothShading.setPrm(this.buttonSmoothShading.getOnOff());
-         var10000 = MCH_MOD.config;
-         MCH_Config.HideKeybind.setPrm(this.buttonHideKeyBind.getOnOff());
-         var10000 = MCH_MOD.config;
-         MCH_Config.DisplayEntityMarker.setPrm(this.buttonShowEntityMarker.getOnOff());
-         var10000 = MCH_MOD.config;
-         MCH_Config.DisplayMarkThroughWall.setPrm(this.buttonMarkThroughWall.getOnOff());
-         var10000 = MCH_MOD.config;
-         MCH_Config.EntityMarkerSize.setPrm((double)this.sliderEntityMarkerSize.getSliderValueInt(1));
-         var10000 = MCH_MOD.config;
-         MCH_Config.BlockMarkerSize.setPrm((double)this.sliderBlockMarkerSize.getSliderValueInt(1));
-         var10000 = MCH_MOD.config;
-         MCH_Config.ReplaceRenderViewEntity.setPrm(this.buttonReplaceCamera.getOnOff());
-         var10000 = MCH_MOD.config;
-         MCH_Config.DefaultExplosionParticle.setPrm(this.buttonNewExplosion.getOnOff());
-         float a = this.sliderHitMark[0].getSliderValue();
-         int r = (int)this.sliderHitMark[1].getSliderValue();
-         int g = (int)this.sliderHitMark[2].getSliderValue();
-         int b = (int)this.sliderHitMark[3].getSliderValue();
-         var10000 = MCH_MOD.config;
-         MCH_Config.hitMarkColorAlpha = a / 255.0F;
-         var10000 = MCH_MOD.config;
-         MCH_Config.hitMarkColorRGB = r << 16 | g << 8 | b;
-         var10000 = MCH_MOD.config;
-         MCH_Config.HitMarkColor.setPrm(String.format("%d, %d, %d, %d", new Object[]{Integer.valueOf((int)a), Integer.valueOf(r), Integer.valueOf(g), Integer.valueOf(b)}));
-         var10000 = MCH_MOD.config;
-         boolean b1 = MCH_Config.AutoThrottleDownHeli.prmBool;
-         var10000 = MCH_MOD.config;
-         boolean b2 = MCH_Config.AutoThrottleDownPlane.prmBool;
-         var10000 = MCH_MOD.config;
-         MCH_Config.AutoThrottleDownHeli.setPrm(this.buttonThrottleHeli.getOnOff());
-         var10000 = MCH_MOD.config;
-         MCH_Config.AutoThrottleDownPlane.setPrm(this.buttonThrottlePlane.getOnOff());
-         var10000 = MCH_MOD.config;
-         MCH_Config.AutoThrottleDownTank.setPrm(this.buttonThrottleTank.getOnOff());
-         MCH_Config var10001 = MCH_MOD.config;
-         if(b1 == MCH_Config.AutoThrottleDownHeli.prmBool) {
-            var10001 = MCH_MOD.config;
-            if(b2 == MCH_Config.AutoThrottleDownPlane.prmBool) {
-               break label20;
-            }
-         }
+      MCH_Config config = MCH_MOD.config; // Get the configuration instance
 
-         this.sendClientSettings();
+      // Set parameter values
+      config.InvertMouse.setPrm(buttonMouseInv.getOnOff());
+      config.MouseControlStickModeHeli.setPrm(buttonStickModeHeli.getOnOff());
+      config.MouseControlStickModePlane.setPrm(buttonStickModePlane.getOnOff());
+      config.MouseControlFlightSimMode.setPrm(buttonFlightSimMode.getOnOff());
+      config.SwitchWeaponWithMouseWheel.setPrm(buttonSwitchWeaponWheel.getOnOff());
+
+      config.MouseSensitivity.setPrm(sliderSensitivity.getSliderValueInt(1));
+
+      config.DisplayHUDThirdPerson.setPrm(buttonShowHUDTP.getOnOff());
+      config.SmoothShading.setPrm(buttonSmoothShading.getOnOff());
+      config.HideKeybind.setPrm(buttonHideKeyBind.getOnOff());
+
+      config.DisplayEntityMarker.setPrm(buttonShowEntityMarker.getOnOff());
+      config.DisplayMarkThroughWall.setPrm(buttonMarkThroughWall.getOnOff());
+
+      config.EntityMarkerSize.setPrm(sliderEntityMarkerSize.getSliderValueInt(1));
+      config.BlockMarkerSize.setPrm(sliderBlockMarkerSize.getSliderValueInt(1));
+
+      config.ReplaceRenderViewEntity.setPrm(buttonReplaceCamera.getOnOff());
+      config.DefaultExplosionParticle.setPrm(buttonNewExplosion.getOnOff());
+
+      // Set hit mark color
+      float a = sliderHitMark[0].getSliderValue();
+      int r = (int) sliderHitMark[1].getSliderValue();
+      int g = (int) sliderHitMark[2].getSliderValue();
+      int b = (int) sliderHitMark[3].getSliderValue();
+      config.hitMarkColorAlpha = a / 255.0F;
+      config.hitMarkColorRGB = (r << 16) | (g << 8) | b;
+      config.HitMarkColor.setPrm(String.format("%d, %d, %d, %d", r, g, b, (int) a));
+
+      // Set throttle parameters
+      boolean b1 = config.AutoThrottleDownHeli.prmBool;
+      boolean b2 = config.AutoThrottleDownPlane.prmBool;
+      config.AutoThrottleDownHeli.setPrm(buttonThrottleHeli.getOnOff());
+      config.AutoThrottleDownPlane.setPrm(buttonThrottlePlane.getOnOff());
+      config.AutoThrottleDownTank.setPrm(buttonThrottleTank.getOnOff());
+
+      // Check if throttle settings have changed
+      if (b1 != config.AutoThrottleDownHeli.prmBool || b2 != config.AutoThrottleDownPlane.prmBool) {
+         sendClientSettings();
       }
 
-      for(int i = 0; i < this.keyBindingList.getItemNum(); ++i) {
-         ((MCH_GuiListItemKeyBind)this.keyBindingList.getItem(i)).applyKeycode();
+      // Apply key codes
+      for (int i = 0; i < keyBindingList.getItemNum(); i++) {
+         ((MCH_GuiListItemKeyBind) keyBindingList.getItem(i)).applyKeycode();
       }
 
-      MCH_ClientCommonTickHandler.instance.updatekeybind(MCH_MOD.config);
-      var10000 = MCH_MOD.config;
-      MCH_Config.TestMode.setPrm(this.buttonTestMode.getOnOff());
-      MCH_MOD.config.write();
+      // Update key binds and write the configuration
+      MCH_ClientCommonTickHandler.instance.updatekeybind(config);
+      config.TestMode.setPrm(buttonTestMode.getOnOff());
+      config.write();
    }
 
    public void switchScreen(int screenID) {
