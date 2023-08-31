@@ -355,7 +355,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       int b = (int) sliderHitMark[3].getSliderValue();
       config.hitMarkColorAlpha = a / 255.0F;
       config.hitMarkColorRGB = (r << 16) | (g << 8) | b;
-      config.HitMarkColor.setPrm(String.format("%d, %d, %d, %d", r, g, b, (int) a));
+      MCH_Config.HitMarkColor.setPrm(String.format("%d, %d, %d, %d", new Object[]{Integer.valueOf((int)a), Integer.valueOf(r), Integer.valueOf(g), Integer.valueOf(b)}));
 
       // Set throttle parameters
       boolean b1 = config.AutoThrottleDownHeli.prmBool;

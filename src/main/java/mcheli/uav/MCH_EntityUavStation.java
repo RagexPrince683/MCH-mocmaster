@@ -396,7 +396,7 @@ public class MCH_EntityUavStation extends W_EntityContainer {
 
    public void searchLastControlAircraft() {
       if(!this.loadedLastControlAircraftGuid.isEmpty()) {
-         List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, this.getBoundingBox().expand(1200.0D, 1200.0D, 1200.0D));
+         List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, this.getBoundingBox().expand(120.0D, 120.0D, 120.0D));
          if(list != null) {
             for(int i = 0; i < list.size(); ++i) {
                MCH_EntityAircraft ac = (MCH_EntityAircraft)list.get(i);

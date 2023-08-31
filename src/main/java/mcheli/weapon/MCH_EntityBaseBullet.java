@@ -1,6 +1,7 @@
 package mcheli.weapon;
 
-import com.hbm.entity.effect.EntityNukeCloudSmall;
+//import com.hbm.entity.effect.EntityNukeCloudSmall;
+import com.hbm.entity.effect.EntityNukeTorex;
 import com.hbm.entity.logic.EntityNukeExplosionMK5;
 import com.hbm.explosion.ExplosionChaos;
 import cpw.mods.fml.relauncher.Side;
@@ -40,6 +41,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import com.hbm.config.BombConfig;
 
 public abstract class MCH_EntityBaseBullet extends W_Entity {
 
@@ -824,7 +826,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
       if(this.nukeYield >0){
          worldObj.spawnEntityInWorld(EntityNukeExplosionMK5.statFac(worldObj, this.nukeYield, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5));
-         worldObj.spawnEntityInWorld(EntityNukeCloudSmall.statFac(worldObj, this.posX, this.posY, this.posZ, this.nukeYield));
+         EntityNukeTorex.statFac(worldObj, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5, (float) this.nukeYield);
 
       }
 
