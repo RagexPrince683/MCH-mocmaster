@@ -104,6 +104,7 @@ public abstract class MCH_ClientTickHandlerBase {
                      setMouseWheel(wheel);
                      //stops the mouse from scrolling? but needs to also change the weapon once scrolled I am unsure how to do this
                      cancelEvent = true;
+                     ac.getNextWeaponID(player, nwid);
                   }
                }
             }

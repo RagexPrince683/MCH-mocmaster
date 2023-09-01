@@ -298,7 +298,7 @@ public class MCH_Config {
       EntityMarkerSize = new MCH_ConfigPrm("EntityMarkerSize", 10.0D);
       BlockMarkerSize = new MCH_ConfigPrm("BlockMarkerSize", 10.0D);
       ReplaceRenderViewEntity = new MCH_ConfigPrm("ReplaceRenderViewEntity", true);
-      StingerLockRange = new MCH_ConfigPrm("StingerLockRange", 320.0D);
+      StingerLockRange = new MCH_ConfigPrm("StingerLockRange", 4988.0D);
       StingerLockRange.validVer = "1.0.0";
       DefaultExplosionParticle = new MCH_ConfigPrm("DefaultExplosionParticle", false);
       RangeFinderSpotDist = new MCH_ConfigPrm("RangeFinderSpotDist", 400);
