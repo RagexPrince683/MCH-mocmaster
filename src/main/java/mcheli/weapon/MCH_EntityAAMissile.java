@@ -33,16 +33,43 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet {
 
       if (!super.worldObj.isRemote && this.getInfo() != null) {
          if (super.shootingEntity != null && super.targetEntity != null && !super.targetEntity.isDead) {
+            double x = super.posX - super.targetEntity.posX;
+            double y = super.posY - super.targetEntity.posY;
+            double z = super.posZ - super.targetEntity.posZ;
+            //square of distance between coordinates
+            double d = x * x + y * y + z * z;
+            if(d > 3422500.0D) {
+               this.setDead();
+            } else if(this.getCountOnUpdate() > this.getInfo().rigidityTime) {
+               if (this.getInfo().proximityFuseDist >= 0.1F && d < (double) this.getInfo().proximityFuseDist) {
+                  MovingObjectPosition mop = new MovingObjectPosition(super.targetEntity);
+                  super.posX = (super.targetEntity.posX + super.posX) / 2.0D;
+                  super.posY = (super.targetEntity.posY + super.posY) / 2.0D;
+                  super.posZ = (super.targetEntity.posZ + super.posZ) / 2.0D;
+                  this.onImpact(mop, 1.0F);
+               } else {
+                  this.guidanceToTarget(super.targetEntity.posX, super.targetEntity.posY, super.targetEntity.posZ);
+               }
+            }
             // Rest of the original onUpdate logic
 
             // Replace this line
             // this.guidanceToTarget(super.targetEntity.posX, super.targetEntity.posY, super.targetEntity.posZ);
 
             // With this line
-            this.guidanceToTargetLimited(super.targetEntity.posX, super.targetEntity.posY, super.targetEntity.posZ);
+            double missileHeading = Math.toDegrees(Math.atan2(super.motionZ, super.motionX));
+            missileHeading = (missileHeading + 360) % 360;
+            System.out.println(missileHeading);
+            double angleToTarget = Math.abs(missileHeading - rotationYaw);
+            if (angleToTarget > maxTurningAngle) {
+               this.setDead();
+            } else {
+               this.guidanceToTargetLimited(super.targetEntity.posX, super.targetEntity.posY, super.targetEntity.posZ);
+            }
 
             // Rest of the original onUpdate logic
          } else {
+            this.newExplosion(super.posX, super.posY, super.posZ, 1, 1, false);
             this.setDead();
          }
       }
