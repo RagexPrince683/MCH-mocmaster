@@ -24,6 +24,7 @@ public class MCH_ThrowableInfo extends MCH_BaseInfo {
    public float accelerationInWater;
    public float dispenseAcceleration;
    public int explosion;
+   public int explosionBlock;
    public int delayFuse;
    public float bound;
    public int timeFuse;

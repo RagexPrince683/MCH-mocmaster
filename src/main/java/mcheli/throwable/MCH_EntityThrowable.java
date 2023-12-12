@@ -120,7 +120,7 @@ public class MCH_EntityThrowable extends EntityThrowable {
          if(!super.isDead) {
             if(!super.worldObj.isRemote) {
                if(this.countOnUpdate == this.getInfo().timeFuse && this.getInfo().explosion > 0) {
-                  MCH_Explosion.newExplosion(super.worldObj, (Entity)null, (Entity)null, super.posX, super.posY, super.posZ, (float)this.getInfo().explosion, (float)this.getInfo().explosion, true, true, false, true, 0);
+                  MCH_Explosion.newExplosion(super.worldObj, (Entity)null, (Entity)null, super.posX, super.posY, super.posZ, (float)this.getInfo().explosion, (float)this.getInfo().explosionBlock, true, true, this.getInfo().flaming, true, 0);
                   this.setDead();
                   return;
                }
