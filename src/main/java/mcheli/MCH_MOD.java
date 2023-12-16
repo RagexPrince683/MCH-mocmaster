@@ -123,6 +123,8 @@ public class MCH_MOD {
    public static MCH_ItemLightWeaponBase itemStinger;
    public static MCH_ItemLightWeaponBullet itemJavelinBullet;
    public static MCH_ItemLightWeaponBase itemJavelin;
+   public static MCH_ItemLightWeaponBase itemRpg;
+   public static MCH_ItemLightWeaponBullet itemRpgBullet;
    public static MCH_ItemUavStation[] itemUavStation;
    public static MCH_ItemParachute itemParachute;
    public static MCH_ItemContainer itemContainer;
@@ -360,6 +362,13 @@ public class MCH_MOD {
       itemJavelin = item;
       registerItem(item, name, creativeTabs);
       W_LanguageRegistry.addName(item, "FGM-148 Javelin");
+      name = "rpg7";
+      var10000 = new MCH_ItemLightWeaponBase(MCH_Config.ItemID_Stinger.prmInt, itemRpgBullet);
+      var10002 = config;
+      item = var10000;
+      itemRpg = item;
+      registerItem(item, name, creativeTabs);
+      W_LanguageRegistry.addName(item, "RPG-7");
    }
 
    public void registerItemLightWeaponBullet() {
@@ -377,6 +386,13 @@ public class MCH_MOD {
       itemJavelinBullet = item;
       registerItem(item, name, creativeTabs);
       W_LanguageRegistry.addName(item, "FGM-148 Javelin missile");
+      name = "rpg7_bullet";
+      var10000 = new MCH_ItemLightWeaponBullet(MCH_Config.ItemID_StingerMissile.prmInt);
+      var10002 = config;
+      item = var10000;
+      itemRpgBullet = item;
+      registerItem(item, name, creativeTabs);
+      W_LanguageRegistry.addName(item, "RPG-7 Warhead");
    }
 
    public void registerItemChain() {
