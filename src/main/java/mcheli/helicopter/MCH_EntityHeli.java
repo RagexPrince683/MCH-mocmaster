@@ -18,6 +18,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -35,6 +36,7 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
    public byte lastFoldBladeStat;
    public int foldBladesCooldown;
    public float prevRollFactor = 0.0F;
+   public boolean wasspeeding = false;
 
 
    public MCH_EntityHeli(World world) {
@@ -295,6 +297,22 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
 
    public void onUpdateAircraft() {
       if(this.heliInfo == null) {
+         //if(this.isAirBorne) {
+       //  if (this.getCurrentThrottle() <= 0.48) {
+       //     //this.motionY = this.motionY - 2.0;
+       //     //this.posY = this.posY - 0.40;
+//moved       //     this.wasspeeding = true;
+       //  } else if (this.getCurrentThrottle() > 0.48) {
+       //     this.wasspeeding = false; // Reset wasspeeding when throttle is above 0.48
+       //  }
+      //}
+ //        if(this.wasspeeding == true) { //this.isAirBorne == false &&
+ //           //this.onUpdate_CollisionGroundDamage();
+ //           this.attackEntityFrom(DamageSource.fall, 50);
+ //           System.out.println("test");
+ //           //damage here this.aircraft
+ //        }
+ //        wasspeeding = false;
          this.changeType(this.getTypeName());
          super.prevPosX = super.posX;
          super.prevPosY = super.posY;
@@ -487,6 +505,7 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
          }
       } else {
          if(this.getCurrentThrottle() > 0.0D) {
+            //System.out.println("added -0. etc to current throttle");
             this.addCurrentThrottle(-0.00125D);
          } else {
             this.setCurrentThrottle(0.0D);
@@ -504,6 +523,7 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
                this.addCurrentThrottle(-0.01D);
             } else if(this.getCurrentThrottle() < rp) {
                this.addCurrentThrottle(0.01D);
+               //may be the going up movement, unsure
             }
          }
       } else {
@@ -539,6 +559,13 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
             this.addCurrentThrottle(-0.01D * (double)throttleUpDown);
          } else if(this.getCurrentThrottle() < 0.48D) {
             this.addCurrentThrottle(0.01D * (double)throttleUpDown);
+            if(this.getCurrentThrottle() < 0.45 && this.isAirBorne) {
+               this.motionY = this.motionY - 2.0;
+               this.posY = this.posY - 0.40;
+               if (this.motionY <= -0.75) {
+                  this.attackEntityFrom(DamageSource.fall, 50);
+               }
+            }
          }
       }
 

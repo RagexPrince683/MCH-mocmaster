@@ -61,6 +61,7 @@ public class MCH_MissileDetector {
             if(var4 != null) {
                if(this.ac.isFlareUsing()) {
                   this.destroyMissile();
+                  //add missile det logic here
                } else if(!this.ac.isUAV() && !this.world.isRemote) {
                   if(this.alertCount == 0 && (isLocked || this.isLockedByMissile())) {
                      this.alertCount = 20;
@@ -85,6 +86,8 @@ public class MCH_MissileDetector {
             MCH_EntityBaseBullet msl = (MCH_EntityBaseBullet)list.get(i);
             if(msl.targetEntity != null && (this.ac.isMountedEntity(msl.targetEntity) || msl.targetEntity.equals(this.ac))) {
                msl.targetEntity = null;
+               //actually here
+               msl.newExplosion(msl.posX, msl.posY, msl.posZ, 1, 1, false);
                msl.setDead();
             }
          }

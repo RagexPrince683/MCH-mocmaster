@@ -8,7 +8,7 @@ import net.minecraft.world.World;
 
 public class MCH_EntityAAMissile extends MCH_EntityBaseBullet {
 
-   private float maxTurningAngle = 45.0F; // Maximum turning angle in degrees
+   private float maxTurningAngle = 90.0F; // Maximum turning angle in degrees
 
    public MCH_EntityAAMissile(World par1World) {
       super(par1World);
@@ -57,15 +57,34 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet {
             // this.guidanceToTarget(super.targetEntity.posX, super.targetEntity.posY, super.targetEntity.posZ);
 
             // With this line
+            // Calculate the angle between the missile's motion vector and the target direction
             double missileHeading = Math.toDegrees(Math.atan2(super.motionZ, super.motionX));
             missileHeading = (missileHeading + 360) % 360;
-            System.out.println(missileHeading);
-            double angleToTarget = Math.abs(missileHeading - rotationYaw);
-            if (angleToTarget > maxTurningAngle) {
-               this.setDead();
-            } else {
-               this.guidanceToTargetLimited(super.targetEntity.posX, super.targetEntity.posY, super.targetEntity.posZ);
+            double targetDirection = Math.toDegrees(Math.atan2(super.targetEntity.posZ - super.posZ, super.targetEntity.posX - super.posX));
+            targetDirection = (targetDirection + 360) % 360;
+
+// Calculate the absolute angle difference between missileHeading and targetDirection
+            double angleToTarget = Math.abs(targetDirection - missileHeading);
+
+// Ensure angleToTarget is within [0, 180] degrees
+            if (angleToTarget > 180) {
+               angleToTarget = 360 - angleToTarget;
             }
+
+// Check if angleToTarget exceeds maxTurningAngle
+            if (angleToTarget > maxTurningAngle) {
+
+               double speedReductionFactor = 0.5; // Example: Reduce speed to half
+               super.motionX *= speedReductionFactor;
+               super.motionY *= speedReductionFactor;
+               super.motionZ *= speedReductionFactor;
+               // Limit the turning angle
+               double angleChange = Math.signum(targetDirection - missileHeading) * maxTurningAngle;
+               missileHeading += angleChange;
+
+            }
+
+            this.guidanceToTargetLimited(super.targetEntity.posX, super.targetEntity.posY, super.targetEntity.posZ);
 
             // Rest of the original onUpdate logic
          } else {
