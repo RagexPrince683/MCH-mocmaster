@@ -98,6 +98,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
       addRecipeList(addRecipe(MCH_MOD.itemRpg, MCH_Config.ItemRecipe_Rpg.prmString));
       var1 = MCH_MOD.itemRpgBullet;
       var3 = (new StringBuilder()).append("2,");
+      addRecipeList(addRecipe(var1, var3.append(MCH_Config.ItemRecipe_RpgMissile.prmString).toString()));
       var10001 = MCH_MOD.config;
       addRecipeList(addRecipe(var2, MCH_Config.ItemRecipe_DraftingTable.prmString));
    }

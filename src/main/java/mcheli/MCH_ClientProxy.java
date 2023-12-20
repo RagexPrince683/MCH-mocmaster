@@ -161,6 +161,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       MCH_ModelManager.load("parachute2");
       MCH_ModelManager.load("lweapons", "fim92");
       MCH_ModelManager.load("lweapons", "fgm148");
+      MCH_ModelManager.load("lweapons", "rpg7");
       String[] i$ = MCH_RenderUavStation.MODEL_NAME;
       int wi = i$.length;
 

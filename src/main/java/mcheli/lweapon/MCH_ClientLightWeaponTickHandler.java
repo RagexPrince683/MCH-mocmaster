@@ -158,7 +158,10 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          } else {
             W_Reflection.restoreCameraZoom();
          }
+//add not rpg check here
+        // if("rpg7".equalsIgnoreCase(!MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
 
+        // }
          if(var7.getItemDamage() < var7.getMaxDamage()) {
             if(var6.getItemInUseDuration() > 10) {
                gs.lock(var6);
@@ -244,6 +247,16 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
       MCH_Config var10000 = MCH_MOD.config;
       if(MCH_Config.LWeaponAutoFire.prmBool && is.getItemDamage() < is.getMaxDamage() && gs.isLockComplete()) {
          autoShot = true;
+         //rpg stuff here
+      }
+      if("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
+         if(this.KeyAttack.isKeyDown()) {
+            pc.useWeapon = true;
+            pc.useWeaponPosX = player.posX;
+            pc.useWeaponPosY = player.posY;
+            pc.useWeaponPosZ = player.posZ;
+            send = true;
+         }
       }
 
       if(this.KeySwWeaponMode.isKeyDown() && weapon.numMode > 1) {
@@ -274,6 +287,8 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
             }
          }
 
+         //if(this.KeyAttack.isKeyDown() && !pe && player.getItemInUseDuration() > 5 && ) {
+         //add expression to check if isn't rpg also TODO: stop lock on feature for rpg
          if(this.KeyAttack.isKeyDown() && !pe && player.getItemInUseDuration() > 5) {
             playSoundNG();
          }
