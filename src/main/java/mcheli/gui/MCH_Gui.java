@@ -12,6 +12,8 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.opengl.GL11;
 
+import static mcheli.hud.MCH_HudItem.shaders_fix;
+
 @SideOnly(Side.CLIENT)
 public abstract class MCH_Gui extends GuiScreen {
 
@@ -70,6 +72,7 @@ public abstract class MCH_Gui extends GuiScreen {
       float f = 0.00390625F;
       Tessellator tessellator = Tessellator.instance;
       tessellator.startDrawingQuads();
+      Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
       tessellator.addVertexWithUV(-width / 2.0D, height / 2.0D, (double)super.zLevel, uLeft * 0.00390625D, (vTop + vHeight) * 0.00390625D);
       tessellator.addVertexWithUV(width / 2.0D, height / 2.0D, (double)super.zLevel, (uLeft + uWidth) * 0.00390625D, (vTop + vHeight) * 0.00390625D);
       tessellator.addVertexWithUV(width / 2.0D, -height / 2.0D, (double)super.zLevel, (uLeft + uWidth) * 0.00390625D, vTop * 0.00390625D);
@@ -83,6 +86,7 @@ public abstract class MCH_Gui extends GuiScreen {
       float fy = (float)(1.0D / textureHeight);
       Tessellator tessellator = Tessellator.instance;
       tessellator.startDrawingQuads();
+      Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
       tessellator.addVertexWithUV(left, top + height, (double)super.zLevel, uLeft * (double)fx, (vTop + vHeight) * (double)fy);
       tessellator.addVertexWithUV(left + width, top + height, (double)super.zLevel, (uLeft + uWidth) * (double)fx, (vTop + vHeight) * (double)fy);
       tessellator.addVertexWithUV(left + width, top, (double)super.zLevel, (uLeft + uWidth) * (double)fx, vTop * (double)fy);
@@ -140,9 +144,10 @@ public abstract class MCH_Gui extends GuiScreen {
       GL11.glColor4ub((byte)(color >> 16 & 255), (byte)(color >> 8 & 255), (byte)(color >> 0 & 255), (byte)(color >> 24 & 255));
       Tessellator tessellator = Tessellator.instance;
       tessellator.startDrawing(mode);
+      Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
 
       for(int i = 0; i < line.length; i += 2) {
-         tessellator.addVertex(line[i + 0], line[i + 1], (double)super.zLevel);
+         tessellator.addVertexWithUV(line[i + 0], line[i + 1], (double)super.zLevel,0,1);
       }
 
       tessellator.draw();
@@ -162,9 +167,10 @@ public abstract class MCH_Gui extends GuiScreen {
       GL11.glPointSize((float)pointWidth);
       Tessellator tessellator = Tessellator.instance;
       tessellator.startDrawing(0);
+      Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
 
       for(int i = 0; i < points.length; i += 2) {
-         tessellator.addVertex(points[i], points[i + 1], 0.0D);
+         tessellator.addVertexWithUV(points[i], points[i + 1], 0.0D,0,1);
       }
 
       tessellator.draw();
@@ -185,9 +191,10 @@ public abstract class MCH_Gui extends GuiScreen {
       GL11.glPointSize((float)pointWidth);
       Tessellator tessellator = Tessellator.instance;
       tessellator.startDrawing(0);
+      Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
 
       for(int i = 0; i < points.size(); i += 2) {
-         tessellator.addVertex(((Double)points.get(i)).doubleValue(), ((Double)points.get(i + 1)).doubleValue(), 0.0D);
+         tessellator.addVertexWithUV(((Double)points.get(i)).doubleValue(), ((Double)points.get(i + 1)).doubleValue(), 0.0D,0,1);
       }
 
       tessellator.draw();
