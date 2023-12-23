@@ -41,6 +41,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.IModelCustom;
 import org.lwjgl.opengl.GL11;
 
+import static mcheli.hud.MCH_HudItem.shaders_fix;
+
 public abstract class MCH_RenderAircraft extends W_Render {
 
    public static boolean renderingEntity = false;
@@ -121,6 +123,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       float f6 = 0.0F;
       int i = 0;
       tessellator.startDrawingQuads();
+      Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
 
       while(f4 > 0.0F) {
          IIcon iicon2 = i % 2 == 0?iicon:iicon1;
@@ -201,6 +204,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
                float width = sl.width / 2.0F;
                Tessellator tessellator = Tessellator.instance;
                tessellator.startDrawing(6);
+               Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
                tessellator.setColorRGBA_I(16777215 & sl.colorStart, sl.colorStart >> 24 & 255);
                tessellator.addVertex(0.0D, 0.0D, 0.0D);
                tessellator.setColorRGBA_I(16777215 & sl.colorEnd, sl.colorEnd >> 24 & 255);
@@ -408,6 +412,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       FontRenderer fontrenderer = this.getFontRendererFromRenderManager();
       Tessellator tessellator = Tessellator.instance;
       tessellator.startDrawingQuads();
+      Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
       int i = fontrenderer.getStringWidth(s) / 2;
       tessellator.setColorRGBA_F(0.0F, 0.0F, 0.0F, 0.4F);
       tessellator.addVertex((double)(-i - 1), -1.0D, 0.1D);
@@ -840,6 +845,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
                GL11.glDisable(3553);
                GL11.glDisable(3042);
                tessellator.startDrawing(0);
+               Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
 
                for(L = 0; L < c.cx.length; ++L) {
                   tessellator.setColorRGBA((int)(255.0F / (float)c.cx.length * (float)L), 80, 255 - (int)(255.0F / (float)c.cx.length * (float)L), 255);
@@ -1117,6 +1123,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
 
                         Tessellator tessellator = Tessellator.instance;
                         tessellator.startDrawing(2);
+                        Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
                         tessellator.setBrightness(240);
                         boolean isLockEntity = gs.isLockingEntity(entity);
                         if(isLockEntity) {
@@ -1136,6 +1143,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
                         if(!ac.isUAV() && isLockEntity && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0) {
                            GL11.glPushMatrix();
                            tessellator.startDrawing(1);
+                           Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
                            GL11.glLineWidth(1.0F);
                            tessellator.setColorRGBA_F(1.0F, 0.0F, 0.0F, 1.0F);
                            tessellator.addVertex(x, y + (double)(entity.height / 2.0F), z);
@@ -1169,6 +1177,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
 
          for(int i = 0; i < info.repellingHooks.size(); ++i) {
             tessellator.startDrawing(3);
+            Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
             tessellator.setColorOpaque_I(0);
             tessellator.addVertex(((MCH_AircraftInfo.RepellingHook)info.repellingHooks.get(i)).pos.xCoord, ((MCH_AircraftInfo.RepellingHook)info.repellingHooks.get(i)).pos.yCoord, ((MCH_AircraftInfo.RepellingHook)info.repellingHooks.get(i)).pos.zCoord);
             tessellator.addVertex(((MCH_AircraftInfo.RepellingHook)info.repellingHooks.get(i)).pos.xCoord, ((MCH_AircraftInfo.RepellingHook)info.repellingHooks.get(i)).pos.yCoord + (double)ac.ropesLength, ((MCH_AircraftInfo.RepellingHook)info.repellingHooks.get(i)).pos.zCoord);

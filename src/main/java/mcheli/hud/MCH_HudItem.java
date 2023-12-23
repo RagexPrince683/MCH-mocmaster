@@ -31,6 +31,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 public abstract class MCH_HudItem extends Gui {
@@ -71,6 +72,8 @@ public abstract class MCH_HudItem extends Gui {
    protected static Map varMap = null;
    protected MCH_Hud parent;
    protected static float partialTicks;
+
+   public static final ResourceLocation shaders_fix = new ResourceLocation(MCH_MOD.MOD_ID, "shaders_workaround.png");
    private static MCH_HudItemExit dummy = new MCH_HudItemExit(0);
 
 
@@ -161,10 +164,11 @@ public abstract class MCH_HudItem extends Gui {
       W_OpenGlHelper.glBlendFunc(770, 771, 1, 0);
       GL11.glColor4f(f, f1, f2, f3);
       tessellator.startDrawingQuads();
-      tessellator.addVertex(par0, par3, 0.0D);
-      tessellator.addVertex(par2, par3, 0.0D);
-      tessellator.addVertex(par2, par1, 0.0D);
-      tessellator.addVertex(par0, par1, 0.0D);
+      Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
+      tessellator.addVertexWithUV(par0, par3, 0.0D,0,1);
+      tessellator.addVertexWithUV(par2, par3, 0.0D,0,1);
+      tessellator.addVertexWithUV(par2, par1, 0.0D,0,1);
+      tessellator.addVertexWithUV(par0, par1, 0.0D,0,1);
       tessellator.draw();
       GL11.glEnable(3553);
       GL11.glDisable(3042);
@@ -182,9 +186,10 @@ public abstract class MCH_HudItem extends Gui {
       GL11.glColor4ub((byte)(color >> 16 & 255), (byte)(color >> 8 & 255), (byte)(color >> 0 & 255), (byte)(color >> 24 & 255));
       Tessellator tessellator = Tessellator.instance;
       tessellator.startDrawing(mode);
+      Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
 
       for(int i = 0; i < line.length; i += 2) {
-         tessellator.addVertex(line[i + 0], line[i + 1], (double)super.zLevel);
+         tessellator.addVertexWithUV(line[i + 0], line[i + 1], (double)super.zLevel,0,1);
       }
 
       tessellator.draw();
@@ -211,9 +216,10 @@ public abstract class MCH_HudItem extends Gui {
       GL11.glPointSize((float)pointWidth);
       Tessellator tessellator = Tessellator.instance;
       tessellator.startDrawing(0);
+      Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
 
       for(int i = 0; i < points.size(); i += 2) {
-         tessellator.addVertex(((Double)points.get(i)).doubleValue(), ((Double)points.get(i + 1)).doubleValue(), 0.0D);
+         tessellator.addVertexWithUV(((Double)points.get(i)).doubleValue(), ((Double)points.get(i + 1)).doubleValue(), 0.0D,0,1);
       }
 
       tessellator.draw();

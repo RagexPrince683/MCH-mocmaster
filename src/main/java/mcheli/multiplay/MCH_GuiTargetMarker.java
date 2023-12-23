@@ -27,6 +27,8 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
+import static mcheli.hud.MCH_HudItem.shaders_fix;
+
 @SideOnly(Side.CLIENT)
 public class MCH_GuiTargetMarker extends MCH_Gui {
 
@@ -217,6 +219,7 @@ public class MCH_GuiTargetMarker extends MCH_Gui {
       for(int i = 0; i < 2; ++i) {
          if(i == 0) {
             tessellator.startDrawing(i == 0?4:1);
+            Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
          }
 
          Iterator i$ = entityPos.iterator();
@@ -259,9 +262,11 @@ public class MCH_GuiTargetMarker extends MCH_Gui {
 
                   GL11.glDisable(3553);
                   tessellator.startDrawing(1);
+                  Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
                   drawRhombus(tessellator, 15, x, y, (double)super.zLevel, MARK_SIZE, color);
                } else {
                   tessellator.startDrawing(1);
+                  Minecraft.getMinecraft().renderEngine.bindTexture(shaders_fix);
                   S = 30.0D;
                   if(x < S) {
                      drawRhombus(tessellator, 1, S, (double)(DSH / 2), (double)super.zLevel, MARK_SIZE, color);
@@ -295,50 +300,50 @@ public class MCH_GuiTargetMarker extends MCH_Gui {
       tessellator.setColorRGBA_I(16777215 & color, color >> 24 & 255);
       double M = size / 3.0D;
       if((dir & 1) != 0) {
-         tessellator.addVertex(x - size, y, z);
-         tessellator.addVertex(x - size + M, y - M, z);
-         tessellator.addVertex(x - size, y, z);
-         tessellator.addVertex(x - size + M, y + M, z);
+         tessellator.addVertexWithUV(x - size, y, z,0,1);
+         tessellator.addVertexWithUV(x - size + M, y - M, z,0,1);
+         tessellator.addVertexWithUV(x - size, y, z,0,1);
+         tessellator.addVertexWithUV(x - size + M, y + M, z,0,1);
       }
 
       if((dir & 4) != 0) {
-         tessellator.addVertex(x + size, y, z);
-         tessellator.addVertex(x + size - M, y - M, z);
-         tessellator.addVertex(x + size, y, z);
-         tessellator.addVertex(x + size - M, y + M, z);
+         tessellator.addVertexWithUV(x + size, y, z,0,1);
+         tessellator.addVertexWithUV(x + size - M, y - M, z,0,1);
+         tessellator.addVertexWithUV(x + size, y, z,0,1);
+         tessellator.addVertexWithUV(x + size - M, y + M, z,0,1);
       }
 
       if((dir & 8) != 0) {
-         tessellator.addVertex(x, y - size, z);
-         tessellator.addVertex(x + M, y - size + M, z);
-         tessellator.addVertex(x, y - size, z);
-         tessellator.addVertex(x - M, y - size + M, z);
+         tessellator.addVertexWithUV(x, y - size, z,0,1);
+         tessellator.addVertexWithUV(x + M, y - size + M, z,0,1);
+         tessellator.addVertexWithUV(x, y - size, z,0,1);
+         tessellator.addVertexWithUV(x - M, y - size + M, z,0,1);
       }
 
       if((dir & 2) != 0) {
-         tessellator.addVertex(x, y + size, z);
-         tessellator.addVertex(x + M, y + size - M, z);
-         tessellator.addVertex(x, y + size, z);
-         tessellator.addVertex(x - M, y + size - M, z);
+         tessellator.addVertexWithUV(x, y + size, z,0,1);
+         tessellator.addVertexWithUV(x + M, y + size - M, z,0,1);
+         tessellator.addVertexWithUV(x, y + size, z,0,1);
+         tessellator.addVertexWithUV(x - M, y + size - M, z,0,1);
       }
 
    }
 
    public void drawTriangle1(Tessellator tessellator, double x, double y, double size, int color) {
       tessellator.setColorRGBA_I(16777215 & color, color >> 24 & 255);
-      tessellator.addVertex(x + size / 2.0D, y - 10.0D - size, (double)super.zLevel);
-      tessellator.addVertex(x - size / 2.0D, y - 10.0D - size, (double)super.zLevel);
-      tessellator.addVertex(x + 0.0D, y - 10.0D, (double)super.zLevel);
+      tessellator.addVertexWithUV(x + size / 2.0D, y - 10.0D - size, (double)super.zLevel,0,1);
+      tessellator.addVertexWithUV(x - size / 2.0D, y - 10.0D - size, (double)super.zLevel,0,1);
+      tessellator.addVertexWithUV(x + 0.0D, y - 10.0D, (double)super.zLevel,0,1);
    }
 
    public void drawTriangle2(Tessellator tessellator, double x, double y, double size, int color) {
       tessellator.setColorRGBA_I(8355711 & color, color >> 24 & 255);
-      tessellator.addVertex(x + size / 2.0D, y - 10.0D - size, (double)super.zLevel);
-      tessellator.addVertex(x - size / 2.0D, y - 10.0D - size, (double)super.zLevel);
-      tessellator.addVertex(x - size / 2.0D, y - 10.0D - size, (double)super.zLevel);
-      tessellator.addVertex(x + 0.0D, y - 10.0D, (double)super.zLevel);
-      tessellator.addVertex(x + 0.0D, y - 10.0D, (double)super.zLevel);
-      tessellator.addVertex(x + size / 2.0D, y - 10.0D - size, (double)super.zLevel);
+      tessellator.addVertexWithUV(x + size / 2.0D, y - 10.0D - size, (double)super.zLevel,0,1);
+      tessellator.addVertexWithUV(x - size / 2.0D, y - 10.0D - size, (double)super.zLevel,0,1);
+      tessellator.addVertexWithUV(x - size / 2.0D, y - 10.0D - size, (double)super.zLevel,0,1);
+      tessellator.addVertexWithUV(x + 0.0D, y - 10.0D, (double)super.zLevel,0,1);
+      tessellator.addVertexWithUV(x + 0.0D, y - 10.0D, (double)super.zLevel,0,1);
+      tessellator.addVertexWithUV(x + size / 2.0D, y - 10.0D - size, (double)super.zLevel,0,1);
    }
 
    public static void markPoint(int px, int py, int pz) {
