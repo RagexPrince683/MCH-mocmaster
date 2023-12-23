@@ -76,6 +76,7 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
                if("fgm148".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
                   this.drawGuiFGM148(player, gs, canFire1, player.getHeldItem());
                   this.drawKeyBind(-805306369, true);
+                  //TODO: add another conditional for RPG/T sight
                } else {
                   GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                   W_McClient.MOD_bindTexture("textures/gui/stinger.png");

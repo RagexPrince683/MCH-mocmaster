@@ -289,6 +289,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
 
          //if(this.KeyAttack.isKeyDown() && !pe && player.getItemInUseDuration() > 5 && ) {
          //add expression to check if isn't rpg also TODO: stop lock on feature for rpg
+         //TODO: change RPG scope to be the T one
          if(this.KeyAttack.isKeyDown() && !pe && player.getItemInUseDuration() > 5) {
             playSoundNG();
          }

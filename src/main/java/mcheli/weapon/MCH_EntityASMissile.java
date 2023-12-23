@@ -6,6 +6,8 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 
+//TODO: Also rework, I just really hate this thing
+
 public class MCH_EntityASMissile extends MCH_EntityBaseBullet {
 
    public double targetPosX;

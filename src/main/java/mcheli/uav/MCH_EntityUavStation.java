@@ -135,6 +135,7 @@ public class MCH_EntityUavStation extends W_EntityContainer {
 
    public void setControlAircract(MCH_EntityAircraft ac) {
       this.controlAircraft = ac;
+      //this.setLastControlAircraft(ac);
       if(ac != null && !ac.isDead) {
          this.setLastControlAircraft(ac);
       }
@@ -396,7 +397,8 @@ public class MCH_EntityUavStation extends W_EntityContainer {
 
    public void searchLastControlAircraft() {
       if(!this.loadedLastControlAircraftGuid.isEmpty()) {
-         List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, this.getBoundingBox().expand(120.0D, 120.0D, 120.0D));
+         //TODO: bigger box, also better method such as teleporting the player or something
+         List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, this.getBoundingBox().expand(250.0D, 250.0D, 250.0D));
          if(list != null) {
             for(int i = 0; i < list.size(); ++i) {
                MCH_EntityAircraft ac = (MCH_EntityAircraft)list.get(i);

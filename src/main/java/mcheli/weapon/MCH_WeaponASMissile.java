@@ -14,6 +14,8 @@ import net.minecraft.world.World;
 
 import java.util.Random;
 
+//TODO: just rework or something idk this thing sucks
+
 public class MCH_WeaponASMissile extends MCH_WeaponBase {
    Random random = new Random();
 

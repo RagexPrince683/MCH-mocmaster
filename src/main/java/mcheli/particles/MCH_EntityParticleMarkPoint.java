@@ -18,6 +18,11 @@ import org.lwjgl.opengl.GL11;
 
 public class MCH_EntityParticleMarkPoint extends MCH_EntityParticleBase {
 
+   //TODO: rework, it's dog water, I actually hate this thing,
+   // it has caused immense suffering given the client server skill gap it had,
+   // still no idea why I couldn't cast the ASMissile to it's position.
+   // Probably due to particle base.
+
    final Team taem;
 
 

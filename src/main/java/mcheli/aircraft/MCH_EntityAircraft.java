@@ -857,8 +857,18 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                return false;
             } else {
                if(dmt.equalsIgnoreCase("lava")) {
-                  damage *= (float)(super.rand.nextInt(8) + 2);
-                  this.timeSinceHit = 2;
+                  if (!damageSource.isProjectile()) { //attempt to check for hand made guns projectiles
+                     damage *= (float) (super.rand.nextInt(8) + 2);
+                     //it does not work
+
+                     //if (worldObj.getWorldTime() % 20 == 0) { // Apply damage every second (20 ticks)
+                        //attackEntityFrom(DamageSource.lava, 5); //JUST WORK
+                     //}
+                  }
+                  //damage = org_damage; that isn't a number
+                  //this.setOnFireFromLava(); crashes game for some reason
+
+                  this.timeSinceHit = 1;
                }
 
                if(dmt.startsWith("explosion")) {
@@ -868,7 +878,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                }
 
                if(dmt.equalsIgnoreCase("onFire")) {
-                  this.timeSinceHit = 10;
+                  //fun TODO: maybe something here for HMG???
+                  this.timeSinceHit = 1;
                }
 
                boolean isCreative = false;
@@ -906,7 +917,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                if(!this.isDestroyed()) {
                   if(!isDamegeSourcePlayer) {
                      MCH_AircraftInfo cmd1 = this.getAcInfo();
-                     if(cmd1 != null && !dmt.equalsIgnoreCase("lava") && !dmt.equalsIgnoreCase("onFire")) {
+                     if(cmd1 != null) {
+                        //deranged statements below removed from above statement
+                        //&& !dmt.equalsIgnoreCase("lava") && !dmt.equalsIgnoreCase("onFire")
                         if(damage > cmd1.armorMaxDamage) {
                            damage = cmd1.armorMaxDamage;
                         }
@@ -1381,6 +1394,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.prevPosition.clear(Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
       }
 
+
+
       this.prevCurrentThrottle = this.getCurrentThrottle();
       this.lastBBDamageFactor = 1.0F;
       this.updateControl();
@@ -1404,6 +1419,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          }
       }
 
+      //TODO: idrk
+
+      //if (isInLava()) {
+      //   // Apply lava damage at regular intervals
+      //   if (worldObj.getWorldTime() % 20 == 0) { // Apply damage every second (20 ticks)
+      //      attackEntityFrom(DamageSource.LAVA, lavaDamageAmount);
+      //   }
+      //}
+
       Entity e;
       int var7;
       if(this.isDestroyed() && this.getCountOnUpdate() % 20 == 0) {
@@ -1413,6 +1437,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                MCH_Config var10000 = MCH_MOD.config;
                if(MCH_Config.applyDamageVsEntity(e, DamageSource.inFire, 1.0F) > 0.0F) {
                   e.setFire(5);
+                  //TODO: add damage for HMG/GVC here
                }
             }
          }
@@ -5354,7 +5379,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          } else if(this.uavStation != null) {
             double udx1 = super.posX - this.uavStation.posX;
             double udz = super.posZ - this.uavStation.posZ;
-            if(udx1 * udx1 + udz * udz > 15129.0D) {
+            //haha gotcha
+            //TODO: better
+            if(udx1 * udx1 + udz * udz > 15625000.0D) {
                this.uavStation.setControlAircract((MCH_EntityAircraft)null);
                this.setUavStation((MCH_EntityUavStation)null);
                this.attackEntityFrom(DamageSource.outOfWorld, this.getMaxHP() + 10);
