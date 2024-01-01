@@ -858,7 +858,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             } else {
                if(dmt.equalsIgnoreCase("lava")) {
                   if (!damageSource.isProjectile()) { //attempt to check for hand made guns projectiles
-                     damage *= (float) (super.rand.nextInt(8) + 2);
+                     damage *= (float) (super.rand.nextInt(50) + 2);
                      //it does not work
 
                      //if (worldObj.getWorldTime() % 20 == 0) { // Apply damage every second (20 ticks)

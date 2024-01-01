@@ -16,6 +16,8 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
+//import static mcheli.hud.MCH_HudItem.*;
+
 public class MCH_WeaponGuidanceSystem {
 
    protected World worldObj;
@@ -175,6 +177,8 @@ public class MCH_WeaponGuidanceSystem {
             if(!this.canLockInAir && !var27) {
                var26 = false;
             }
+
+
 
             if(var26) {
                double var28 = this.targetEntity.posX - user.posX;
