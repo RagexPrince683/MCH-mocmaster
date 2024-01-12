@@ -99,13 +99,13 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
          }
       }
 
-      boolean var12 = false;
+      boolean alsosend = false;
       if(this.KeyCameraMode.isKeyDown()) {
          if(ac.haveSearchLight()) {
             if(ac.canSwitchSearchLight(player)) {
                pc.switchSearchLight = true;
                playSoundOK();
-               var12 = true;
+               alsosend = true;
             }
          } else if(ac.canSwitchCameraMode()) {
             int dKey = ac.getCameraMode(player);
@@ -114,7 +114,7 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
             if(arr$ != dKey) {
                pc.switchCameraMode = (byte)(arr$ + 1);
                playSoundOK();
-               var12 = true;
+               alsosend = true;
             }
          } else {
             playSoundNG();
@@ -128,46 +128,46 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
       if(isPilot) {
          if(this.KeyUnmount.isKeyDown()) {
             pc.isUnmount = 2;
-            var12 = true;
+            alsosend = true;
          }
 
          if(this.KeyPutToRack.isKeyDown()) {
             ac.checkRideRack();
             if(ac.canRideRack()) {
                pc.putDownRack = 3;
-               var12 = true;
+               alsosend = true;
             } else if(ac.canPutToRack()) {
                pc.putDownRack = 1;
-               var12 = true;
+               alsosend = true;
             }
          } else if(this.KeyDownFromRack.isKeyDown()) {
             if(ac.ridingEntity != null) {
                pc.isUnmount = 3;
-               var12 = true;
+               alsosend = true;
             } else if(ac.canDownFromRack()) {
                pc.putDownRack = 2;
-               var12 = true;
+               alsosend = true;
             }
          }
 
          if(this.KeyGearUpDown.isKeyDown() && ac.getAcInfo().haveLandingGear()) {
             if(ac.canFoldLandingGear()) {
                pc.switchGear = 1;
-               var12 = true;
+               alsosend = true;
             } else if(ac.canUnfoldLandingGear()) {
                pc.switchGear = 2;
-               var12 = true;
+               alsosend = true;
             }
          }
 
          if(this.KeyFreeLook.isKeyDown() && ac.canSwitchFreeLook()) {
             pc.switchFreeLook = (byte)(ac.isFreeLookMode()?2:1);
-            var12 = true;
+            alsosend = true;
          }
 
          if(this.KeyGUI.isKeyDown()) {
             pc.openGui = true;
-            var12 = true;
+            alsosend = true;
          }
 
          if(ac.isRepelling()) {
@@ -176,7 +176,7 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
             pc.moveRight = ac.moveRight = false;
             pc.moveLeft = ac.moveLeft = false;
          } else if(ac.hasBrake() && this.KeyBrake.isKeyPress()) {
-            var12 |= this.KeyBrake.isKeyDown();
+            alsosend |= this.KeyBrake.isKeyDown();
             pc.throttleDown = ac.throttleDown = false;
             pc.throttleUp = ac.throttleUp = false;
             double var14 = ac.posX - ac.prevPosX;
@@ -189,7 +189,7 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
 
             pc.useBrake = true;
          } else {
-            var12 |= this.KeyBrake.isKeyUp();
+            alsosend |= this.KeyBrake.isKeyUp();
             MCH_Key[] var13 = new MCH_Key[]{this.KeyUp, this.KeyDown, this.KeyRight, this.KeyLeft};
             MCH_Key[] var15 = var13;
             int len$ = var13.length;
@@ -197,7 +197,7 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
             for(int i$ = 0; i$ < len$; ++i$) {
                MCH_Key k = var15[i$];
                if(k.isKeyDown() || k.isKeyUp()) {
-                  var12 = true;
+                  alsosend = true;
                   break;
                }
             }
@@ -213,15 +213,16 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
          if(ac.canUseFlare() && ac.useFlare(ac.getCurrentFlareType())) {
             pc.useFlareType = (byte)ac.getCurrentFlareType();
             ac.nextFlareType();
-            var12 = true;
+            alsosend = true;
          } else {
             playSoundNG();
          }
       }
 
       if(!ac.isDestroyed() && !ac.isPilotReloading()) {
-         if(!this.KeySwitchWeapon1.isKeyDown() && !this.KeySwitchWeapon2.isKeyDown() && getMouseWheel() == 0) {
+         if(!this.KeySwitchWeapon1.isKeyDown() || this.KeySwitchWeapon2.isKeyDown() && getMouseWheel() != 0) {
             if(this.KeySwWeaponMode.isKeyDown()) {
+               //todo: MAKE IT WORK!!!
                ac.switchCurrentWeaponMode(player);
             } else if(this.KeyUseWeapon.isKeyPress() && ac.useCurrentWeapon((Entity)player)) {
                pc.useWeapon = true;
@@ -230,21 +231,22 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
                pc.useWeaponPosX = ac.prevPosX;
                pc.useWeaponPosY = ac.prevPosY;
                pc.useWeaponPosZ = ac.prevPosZ;
-               var12 = true;
+               alsosend = true;
             }
          } else {
             if(getMouseWheel() > 0) {
+               //TODO: CAUGHT YOU!!!
                pc.switchWeapon = (byte)ac.getNextWeaponID(player, -1);
             } else {
                pc.switchWeapon = (byte)ac.getNextWeaponID(player, 1);
             }
 
-            setMouseWheel(0);
+            MCH_ClientTickHandlerBase.setMouseWheel(0);
             ac.switchWeapon(player, pc.switchWeapon);
-            var12 = true;
+            alsosend = true;
          }
       }
 
-      return var12 || player.ticksExisted % 100 == 0;
+      return alsosend || player.ticksExisted % 100 == 0;
    }
 }
