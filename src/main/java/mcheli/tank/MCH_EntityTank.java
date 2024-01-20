@@ -366,13 +366,13 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          this.setRotRoll(this.getRotRoll() + (this.WheelMng.targetRoll - this.getRotRoll()) * partialTicks);
          boolean isFly = MCH_Lib.getBlockIdY(this, 3, -3) == 0;
          if(!isFly || this.getAcInfo().isFloat && this.getWaterDepth() > 0.0D) {
-            float gmy = 1.0F;
+            float rotonground = 1.0F;
             if(!isFly) {
-               gmy = this.getAcInfo().mobilityYawOnGround;
+               rotonground = this.getAcInfo().mobilityYawOnGround;
                if(!this.getAcInfo().canRotOnGround) {
                   Block pivotTurnThrottle = MCH_Lib.getBlockY(this, 3, -2, false);
                   if(!W_Block.isEqual(pivotTurnThrottle, W_Block.getWater()) && !W_Block.isEqual(pivotTurnThrottle, Blocks.air)) {
-                     gmy = 0.0F;
+                     rotonground = 0.0F;
                   }
                }
             }
@@ -390,11 +390,11 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
                float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D?-1.0F:1.0F;
                if(super.moveLeft && !super.moveRight) {
-                  this.setRotYaw(this.getRotYaw() - 0.6F * gmy * partialTicks * flag * sf);
+                  this.setRotYaw(this.getRotYaw() - 0.6F * rotonground * partialTicks * flag * sf);
                }
 
                if(super.moveRight && !super.moveLeft) {
-                  this.setRotYaw(this.getRotYaw() + 0.6F * gmy * partialTicks * flag * sf);
+                  this.setRotYaw(this.getRotYaw() + 0.6F * rotonground * partialTicks * flag * sf);
                }
 
             }
@@ -411,7 +411,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
       super.throttleBack = (float)((double)super.throttleBack * 0.8D);
       if(this.getBrake()) {
-         super.throttleBack = (float)((double)super.throttleBack * 0.5D);
+         super.throttleBack = (float)((double)super.throttleBack * 0.5D); //todo: add braking force variable here
          if(this.getCurrentThrottle() > 0.0D) {
             this.addCurrentThrottle(-0.02D * (double)this.getAcInfo().throttleUpDown);
          } else {
@@ -481,19 +481,20 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                this.setCurrentThrottle(0.0D);
                if(this.getAcInfo().enableBack) {//potential source of problem
                   super.throttleBack = (float)((double)super.throttleBack + 0.0025D * (double)throttleUpDown);
-                  if(super.throttleBack > 0.6F) {
+                  if(super.throttleBack > 0.6F) {//todo: add a new variable here for reversespeed
                      super.throttleBack = 0.6F;
                   }
                   float pivotTurnThrottle1 = this.getAcInfo().pivotTurnThrottle;
                   if (pivotTurnThrottle1 > 0) {
                      if (super.throttleBack > 0) {
                         //add opposite of what should be doing here
+                        //todo: add partial ticks in here
                         if(super.moveLeft && !super.moveRight) {
-                           this.setRotYaw(this.getRotYaw() + 1.2F);
+                           this.setRotYaw(this.getRotYaw() + 0.6F);
                         }
 
                         if(super.moveRight && !super.moveLeft) {
-                           this.setRotYaw(this.getRotYaw() - 1.2F);
+                           this.setRotYaw(this.getRotYaw() - 0.6F);
                         }
                      }
                   }

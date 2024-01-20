@@ -20,12 +20,6 @@ import mcheli.aircraft.MCH_PacketNotifyHitBullet;
 import mcheli.chain.MCH_EntityChain;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
-import mcheli.weapon.MCH_BulletModel;
-import mcheli.weapon.MCH_EntityBullet;
-import mcheli.weapon.MCH_EntityRocket;
-import mcheli.weapon.MCH_WeaponBase;
-import mcheli.weapon.MCH_WeaponInfo;
-import mcheli.weapon.MCH_WeaponInfoManager;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_EntityPlayer;
 import mcheli.wrapper.W_MovingObjectPosition;
@@ -41,7 +35,11 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import com.hbm.config.BombConfig;
+import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.ForgeChunkManager.Ticket;
+
+import java.util.ArrayList;
 
 public abstract class MCH_EntityBaseBullet extends W_Entity {
 
@@ -74,6 +72,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    public double prevMotionX;
    public double prevMotionY;
    public double prevMotionZ;
+   private Ticket loaderTicket;
 
 
    public MCH_EntityBaseBullet(World par1World) {
@@ -120,6 +119,56 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       this.prevMotionY = super.motionY;
       this.prevMotionZ = super.motionZ;
       this.acceleration = acceleration;
+   }
+
+
+   //Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
+   //todo: add if statement for checking if gravity is down
+   //if this.MCH_EntityBaseBullet.
+
+
+   public void init(Ticket ticket) {
+      if(!worldObj.isRemote) {
+         if(ticket != null) {
+            if(loaderTicket == null) {
+               loaderTicket = ticket;
+               loaderTicket.bindEntity(this);
+               loaderTicket.getModData();
+            }
+            ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
+            System.out.println("chunk loaded for bullet");
+         }
+      }
+   }
+
+   List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
+
+   public void loadNeighboringChunks(int newChunkX, int newChunkZ)
+   {
+      if(!worldObj.isRemote && loaderTicket != null)
+      {
+         for(ChunkCoordIntPair chunk : loadedChunks)
+         {
+            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+         }
+
+         loadedChunks.clear();
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ + 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ - 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ - 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ + 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ + 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ - 1));
+
+         for(ChunkCoordIntPair chunk : loadedChunks)
+         {
+            ForgeChunkManager.forceChunk(loaderTicket, chunk);
+            System.out.println("new chunk thing loaded");
+         }
+      }
    }
 
    public void setLocationAndAngles(double par1, double par3, double par5, float par7, float par8) {
@@ -379,6 +428,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          if(f3 > 0) {
             this.setTargetEntity(super.worldObj.getEntityByID(f3));
          }
+      }
+
+      if(this.getGravity() < 0.0) {
+         loadNeighboringChunks((int)(posX), (int)(posZ));
+         //System.out.println("it loaded the chunk apparently at X: " + this.posX / 16 + "Z: " + this.posZ / 16);
+         //why are we dividing by 16? maybe that's why it isn't working
       }
 
       if(this.prevMotionX != super.motionX || this.prevMotionY != super.motionY || this.prevMotionZ != super.motionZ) {

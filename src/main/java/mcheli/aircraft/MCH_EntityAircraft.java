@@ -80,6 +80,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecartEmpty;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPickaxe;
@@ -95,6 +96,10 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+
+import static mcheli.hud.MCH_HudItem.player;
+import static net.minecraft.command.CommandBase.getCommandSenderAsPlayer;
+import static net.minecraft.command.CommandBase.getPlayer;
 
 public abstract class MCH_EntityAircraft extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideAircraft, IEntityAdditionalSpawnData {
 
@@ -258,6 +263,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private double lastLandInDistance;
    private static final MCH_EntitySeat[] seatsDummy = new MCH_EntitySeat[0];
    private boolean switchSeat = false;
+   public EntityPlayerMP playerEntity = (EntityPlayerMP) getCommandSenderAsPlayer(player);
 
 
    public MCH_EntityAircraft(World world) {
@@ -844,7 +850,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          return false;
       } else {
          String dmt = damageSource.getDamageType();
-         if(dmt.equalsIgnoreCase("inFire")) {
+         if(dmt.equalsIgnoreCase("inFire") && !damageSource.isProjectile()) {
             return false;
          } else if(dmt.equalsIgnoreCase("cactus")) {
             return false;
@@ -858,7 +864,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             } else {
                if(dmt.equalsIgnoreCase("lava")) {
                   if (!damageSource.isProjectile()) { //attempt to check for hand made guns projectiles
-                     damage *= (float) (super.rand.nextInt(50) + 2);
+                     //damage *= (float) (super.rand.nextInt(50) + 2);
+                     this.setDamageTaken(this.getDamageTaken() + (int)damage);
+                     //System.out.println("testing" + " damage taken:" + this.getDamageTaken());
                      //it does not work
 
                      //if (worldObj.getWorldTime() % 20 == 0) { // Apply damage every second (20 ticks)
@@ -873,12 +881,16 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                if(dmt.startsWith("explosion")) {
                   this.timeSinceHit = 1;
+                  this.setDamageTaken(this.getDamageTaken() + (int)damage);
+                  System.out.println("testing" + " explosion damage taken:" + this.getDamageTaken());
                } else if(this.isMountedEntity(damageSource.getEntity())) {
                   return false;
                }
 
                if(dmt.equalsIgnoreCase("onFire")) {
                   //fun TODO: maybe something here for HMG???
+                  this.setDamageTaken(this.getDamageTaken() + (int)damage);
+                  System.out.println("testing" + " fire damage taken:" + this.getDamageTaken());
                   this.timeSinceHit = 1;
                }
 
@@ -5379,12 +5391,17 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          } else if(this.uavStation != null) {
             double udx1 = super.posX - this.uavStation.posX;
             double udz = super.posZ - this.uavStation.posZ;
+
             //haha gotcha
             //TODO: better
             if(udx1 * udx1 + udz * udz > 15625000.0D) {
                this.uavStation.setControlAircract((MCH_EntityAircraft)null);
                this.setUavStation((MCH_EntityUavStation)null);
                this.attackEntityFrom(DamageSource.outOfWorld, this.getMaxHP() + 10);
+               //TODO: teleport player as invulnerable entity
+               //EntityPlayerMP
+
+
             }
          }
 
