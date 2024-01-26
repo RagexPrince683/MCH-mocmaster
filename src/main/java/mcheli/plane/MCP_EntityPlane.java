@@ -202,6 +202,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             this.currentSpeed *= this.currentSpeed*2+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY;
             //System.out.println(this.currentSpeed + "speed" + this.aircraftPitch + "pitch" + this.getMaxFuel + "max fuel divided" + this.motionY + "Y motion");
             this.motionY = this.motionY-this.aircraftPitch;
+            this.aircraftY--;
             //this.setThrottle(this.getThrottle()+this.motionY);
 
          //   if (this.motionX < 0) {
@@ -860,8 +861,11 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       }
 
       if(super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0) {
-         super.motionX *= (double)this.getAcInfo().motionFactor;
-         super.motionZ *= (double)this.getAcInfo().motionFactor;
+         //todo if this.throttledown
+         if(this.getAcInfo().throttleUpDown > 0.0F) {
+            super.motionX *= (double) this.getAcInfo().motionFactor;
+            super.motionZ *= (double) this.getAcInfo().motionFactor;
+         }
          if(MathHelper.abs(this.getRotPitch()) < 40.0F) {
             this.applyOnGroundPitch(0.8F);
          }
