@@ -199,10 +199,13 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             //this.motionY = this.motionY-this.liftfactor/4;
             //maxfueldivonek == this.getMaxFuel() / 1000;
 
-            this.currentSpeed *= this.currentSpeed*2+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY;
+            this.currentSpeed *= (this.currentSpeed*6)+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY;
             //System.out.println(this.currentSpeed + "speed" + this.aircraftPitch + "pitch" + this.getMaxFuel + "max fuel divided" + this.motionY + "Y motion");
-            this.motionY = this.motionY-this.aircraftPitch;
-            this.aircraftY--;
+            if(this.aircraftPitch >= 50 && this.isEntityAlive() && this.isAirBorne) {
+               this.motionY = (this.motionY*1.2)+this.aircraftPitch;
+               this.aircraftY = this.aircraftY - (this.aircraftY*2);
+            }
+            //System.out.println(this.aircraftY + " this.aircraftY, " + this.motionY + " this.motionY"); print statements don't work here idk why
             //this.setThrottle(this.getThrottle()+this.motionY);
 
          //   if (this.motionX < 0) {
@@ -255,6 +258,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             //this.stallfactor;
             this.motionX = v1;
             this.motionZ = v2;
+            //sets motionY to be slowed
             this.motionY = identify;
          }
 
@@ -866,15 +870,26 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             super.motionX *= (double) this.getAcInfo().motionFactor;
             super.motionZ *= (double) this.getAcInfo().motionFactor;
          }
+         if (this.getAcInfo().throttleUpDown <= 0.0F) {
+            super.motionX /= (double) this.getAcInfo().motionFactor;
+            super.motionZ /= (double) this.getAcInfo().motionFactor;
+         }
          if(MathHelper.abs(this.getRotPitch()) < 40.0F) {
             this.applyOnGroundPitch(0.8F);
          }
       }
 
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
-      super.motionY *= 0.95D;
-      super.motionX *= (double)this.getAcInfo().motionFactor;
-      super.motionZ *= (double)this.getAcInfo().motionFactor;
+      //super.motionY *= 0.95D;
+      //todo here aswell
+      if(this.getAcInfo().throttleUpDown > 0.0F) {
+         super.motionX *= (double) this.getAcInfo().motionFactor;
+         super.motionZ *= (double) this.getAcInfo().motionFactor;
+      }
+      if (this.getAcInfo().throttleUpDown <= 0.0F) {
+         super.motionX /= (double) this.getAcInfo().motionFactor;
+         super.motionZ /= (double) this.getAcInfo().motionFactor;
+      }
       this.setRotation(this.getRotYaw(), this.getRotPitch());
       this.onUpdate_updateBlock();
       if(this.getRiddenByEntity() != null && this.getRiddenByEntity().isDead) {
