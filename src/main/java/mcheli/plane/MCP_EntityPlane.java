@@ -22,6 +22,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -195,6 +196,40 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             this.swithVtolMode(true);
          }
 
+         if(this.aircraftPitch >= -15 && this.isEntityAlive() && this.isAirBorne) { //if the aircraft is between 15 degrees up
+            if (this.aircraftPitch <= 3) {//and 3 degrees down
+               this.motionY = (this.motionY*1.2)+this.aircraftPitch; //go up
+               this.aircraftY = this.aircraftY + (this.aircraftY*1.2);
+               this.currentSpeed *= (this.currentSpeed*2)+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY;
+            }
+
+         }
+
+         //if this.aircraftPitch <= -15
+
+         if(this.getThrottle() <= 0.90 && this.isAirBorne) { //should apply a slow descent
+            this.aircraftY = this.aircraftY - (this.aircraftY*0.2);
+         }
+
+
+
+         //TODO: if (this.motionY >= 2.0 && this.landing) { apply damage
+         //todo: add the check for flying hurty was put in wrong place
+         //this.getAlt();
+         if(this.motionY <= -2.0) { // I cannot detect if the aircraft hit or touched the ground
+            //System.out.println("nose dive"); //this works I just can't detect when I touch the ground and I need to work on back end again because everyone is incompetent
+
+            //isfly if() {
+            //if (this.getAlt() ) {
+
+            //}
+        //    if(this.onGround) {
+        //       System.out.println("impact");
+        //       this.onUpdate_CollisionGroundDamage();
+        //       this.attackEntityFrom(DamageSource.fall, this.getMaxHP() + 10);
+        //    }
+         }
+
          if(this.aircraftPitch >= 1.2 && this.isEntityAlive() && this.isAirBorne) { //going down save this.motionY for helicopters
             //this.motionY = this.motionY-this.liftfactor/4;
             //maxfueldivonek == this.getMaxFuel() / 1000;
@@ -203,7 +238,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             //System.out.println(this.currentSpeed + "speed" + this.aircraftPitch + "pitch" + this.getMaxFuel + "max fuel divided" + this.motionY + "Y motion");
             if(this.aircraftPitch >= 50 && this.isEntityAlive() && this.isAirBorne) {
                this.motionY = (this.motionY*1.2)+this.aircraftPitch;
-               this.aircraftY = this.aircraftY - (this.aircraftY*2);
+               this.aircraftY = this.aircraftY - (this.aircraftY*0.64);
             }
             //System.out.println(this.aircraftY + " this.aircraftY, " + this.motionY + " this.motionY"); print statements don't work here idk why
             //this.setThrottle(this.getThrottle()+this.motionY);
