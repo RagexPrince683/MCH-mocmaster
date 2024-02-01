@@ -198,7 +198,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
          if(this.aircraftPitch >= -15 && this.isEntityAlive() && this.isAirBorne) { //if the aircraft is between 15 degrees up
             if (this.aircraftPitch <= 3) {//and 3 degrees down
-               this.motionY = (this.motionY*1.2)+this.aircraftPitch; //go up
+               this.motionY = (this.motionY*0.61)+this.aircraftPitch; //go up
                this.aircraftY = this.aircraftY + (this.aircraftY*1.2);
                this.currentSpeed *= (this.currentSpeed*2)+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY;
             }
@@ -217,6 +217,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          //todo: add the check for flying hurty was put in wrong place
          //this.getAlt();
          if(this.motionY <= -2.0) { // I cannot detect if the aircraft hit or touched the ground
+
             //System.out.println("nose dive"); //this works I just can't detect when I touch the ground and I need to work on back end again because everyone is incompetent
 
             //isfly if() {
@@ -234,11 +235,11 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             //this.motionY = this.motionY-this.liftfactor/4;
             //maxfueldivonek == this.getMaxFuel() / 1000;
 
-            this.currentSpeed *= (this.currentSpeed*6)+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY;
+            this.currentSpeed *= (this.currentSpeed*6)+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY; //speed up
             //System.out.println(this.currentSpeed + "speed" + this.aircraftPitch + "pitch" + this.getMaxFuel + "max fuel divided" + this.motionY + "Y motion");
-            if(this.aircraftPitch >= 50 && this.isEntityAlive() && this.isAirBorne) {
-               this.motionY = (this.motionY*1.2)+this.aircraftPitch;
-               this.aircraftY = this.aircraftY - (this.aircraftY*0.64);
+            if(this.aircraftPitch >= 50 && this.isEntityAlive() && this.isAirBorne) { //going down again
+               this.motionY = (this.motionY*0.61)+this.aircraftPitch;
+               this.aircraftY = this.aircraftY*0.61;
             }
             //System.out.println(this.aircraftY + " this.aircraftY, " + this.motionY + " this.motionY"); print statements don't work here idk why
             //this.setThrottle(this.getThrottle()+this.motionY);
