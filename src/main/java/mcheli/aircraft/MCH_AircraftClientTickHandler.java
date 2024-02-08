@@ -219,34 +219,32 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
          }
       }
 
-      if(!ac.isDestroyed() && !ac.isPilotReloading()) {
-         if(!this.KeySwitchWeapon1.isKeyDown() || this.KeySwitchWeapon2.isKeyDown() && getMouseWheel() != 0) {
-            if(this.KeySwWeaponMode.isKeyDown()) {
-               //todo: MAKE IT WORK!!!
-               ac.switchCurrentWeaponMode(player);
-            } else if(this.KeyUseWeapon.isKeyPress() && ac.useCurrentWeapon((Entity)player)) {
-               pc.useWeapon = true;
-               pc.useWeaponOption1 = ac.getCurrentWeapon(player).getLastUsedOptionParameter1();
-               pc.useWeaponOption2 = ac.getCurrentWeapon(player).getLastUsedOptionParameter2();
-               pc.useWeaponPosX = ac.prevPosX;
-               pc.useWeaponPosY = ac.prevPosY;
-               pc.useWeaponPosZ = ac.prevPosZ;
-               alsosend = true;
+      if (!ac.isDestroyed() && !ac.isPilotReloading()) {
+         if (this.KeySwitchWeapon1.isKeyDown() || this.KeySwitchWeapon2.isKeyDown() || getMouseWheel() != 0) {
+            if (getMouseWheel() > 0) {
+               pc.switchWeapon = (byte)ac.getNextWeaponID((Entity)player, -1);
+               //it was infact not it
             }
-         } else {
-            if(getMouseWheel() > 0) {
-               //TODO: CAUGHT YOU!!!
-               pc.switchWeapon = (byte)ac.getNextWeaponID(player, -1);
-            } else {
-               pc.switchWeapon = (byte)ac.getNextWeaponID(player, 1);
+            else {
+               pc.switchWeapon = (byte)ac.getNextWeaponID((Entity)player, 1);
             }
-
             MCH_ClientTickHandlerBase.setMouseWheel(0);
-            ac.switchWeapon(player, pc.switchWeapon);
+            ac.switchWeapon((Entity)player, pc.switchWeapon);
+            alsosend = true;
+         }
+         else if (this.KeySwWeaponMode.isKeyDown()) {
+            ac.switchCurrentWeaponMode((Entity)player);
+         }
+         else if (this.KeyUseWeapon.isKeyPress() && ac.useCurrentWeapon((Entity)player)) {
+            pc.useWeapon = true;
+            pc.useWeaponOption1 = ac.getCurrentWeapon((Entity)player).getLastUsedOptionParameter1();
+            pc.useWeaponOption2 = ac.getCurrentWeapon((Entity)player).getLastUsedOptionParameter2();
+            pc.useWeaponPosX = ac.prevPosX;
+            pc.useWeaponPosY = ac.prevPosY;
+            pc.useWeaponPosZ = ac.prevPosZ;
             alsosend = true;
          }
       }
-
       return alsosend || player.ticksExisted % 100 == 0;
    }
 }

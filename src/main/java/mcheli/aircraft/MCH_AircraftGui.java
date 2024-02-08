@@ -96,54 +96,60 @@ public class MCH_AircraftGui extends W_GuiContainer {
       this.editCommand.updateCursorCounter();
    }
 
-   protected void mouseClicked(int p_73864_1_, int p_73864_2_, int p_73864_3_) {
-      this.editCommand.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
-      super.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
+   protected void mouseClicked(final int mouseX, final int mouseY, final int mouseButton) {
+      this.editCommand.mouseClicked(mouseX, mouseY, mouseButton);
+      super.mouseClicked(mouseX, mouseY, mouseButton);
    }
 
    public void onGuiClosed() {
       super.onGuiClosed();
    }
 
-   protected void actionPerformed(GuiButton button) {
+   protected void actionPerformed(final GuiButton button) {
       super.actionPerformed(button);
-      if(button.enabled) {
-         switch(button.id) {
-         case 1:
+      if (!button.enabled) {
+         return;
+      }
+      switch (button.id) {
+         case 4: {
+            this.closeScreen();
+            break;
+         }
+         case 1: {
             this.buttonReload.enabled = this.canReload(this.thePlayer);
-            if(this.buttonReload.enabled) {
+            if (this.buttonReload.enabled) {
                MCH_PacketIndReload.send(this.aircraft, this.currentWeaponId);
                this.aircraft.supplyAmmo(this.currentWeaponId);
                this.reloadWait = 3;
                this.buttonReload.enabled = false;
+               break;
             }
             break;
-         case 2:
+         }
+         case 2: {
             ++this.currentWeaponId;
-            if(this.currentWeaponId >= this.aircraft.getWeaponNum()) {
+            if (this.currentWeaponId >= this.aircraft.getWeaponNum()) {
                this.currentWeaponId = 0;
             }
-
             this.buttonReload.enabled = this.canReload(this.thePlayer);
             break;
-         case 3:
+         }
+         case 3: {
             --this.currentWeaponId;
-            if(this.currentWeaponId < 0) {
+            if (this.currentWeaponId < 0) {
                this.currentWeaponId = this.aircraft.getWeaponNum() - 1;
             }
-
             this.buttonReload.enabled = this.canReload(this.thePlayer);
             break;
-         case 4:
-            this.closeScreen();
-            break;
-         case 5:
+         }
+         case 5: {
             MCH_PacketIndOpenScreen.send(2);
             break;
-         case 6:
-            MCH_PacketIndOpenScreen.send(3);
          }
-
+         case 6: {
+            MCH_PacketIndOpenScreen.send(3);
+            break;
+         }
       }
    }
 

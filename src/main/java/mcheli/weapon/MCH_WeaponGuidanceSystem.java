@@ -1,11 +1,8 @@
 package mcheli.weapon;
 
-import java.util.List;
 import mcheli.MCH_Lib;
-import mcheli.MCH_PacketNotifyLock;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.uav.MCH_EntityUavStation;
-import mcheli.weapon.MCH_IEntityLockChecker;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Lib;
 import mcheli.wrapper.W_MovingObjectPosition;
@@ -16,25 +13,12 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-//import static mcheli.hud.MCH_HudItem.*;
+import java.util.List;
 
-public class MCH_WeaponGuidanceSystem {
+public class MCH_WeaponGuidanceSystem extends MCH_GuidanceSystem{
 
-   protected World worldObj;
    public Entity lastLockEntity;
    private Entity targetEntity;
-   private int lockCount;
-   private int lockSoundCount;
-   private int continueLockCount;
-   private int lockCountMax;
-   private int prevLockCount;
-   public boolean canLockInWater;
-   public boolean canLockOnGround;
-   public boolean canLockInAir;
-   public boolean ridableOnly;
-   public double lockRange;
-   public int lockAngle;
-   public MCH_IEntityLockChecker checker;
 
 
    public MCH_WeaponGuidanceSystem() {
@@ -53,7 +37,7 @@ public class MCH_WeaponGuidanceSystem {
       this.canLockOnGround = false;
       this.canLockInAir = false;
       this.ridableOnly = false;
-      this.lockRange = 50.0D;
+      this.lockRange = 100.0D;
       this.lockAngle = 10;
       this.checker = null;
    }
@@ -66,15 +50,16 @@ public class MCH_WeaponGuidanceSystem {
       this.lockCountMax = i > 0?i:1;
    }
 
+   @Override
    public int getLockCountMax() {
       float stealth = getEntityStealth(this.targetEntity);
       return (int)((float)this.lockCountMax + (float)this.lockCountMax * stealth);
    }
-
+   @Override
    public int getLockCount() {
       return this.lockCount;
    }
-
+   @Override
    public boolean isLockingEntity(Entity entity) {
       return this.getLockCount() > 0 && this.targetEntity != null && !this.targetEntity.isDead && W_Entity.isEqual(entity, this.targetEntity);
    }
@@ -91,6 +76,7 @@ public class MCH_WeaponGuidanceSystem {
       return this.getLockCount() == this.getLockCountMax() && this.lastLockEntity != null;
    }
 
+   @Override
    public void update() {
       if(this.worldObj != null && this.worldObj.isRemote) {
          if(this.lockCount != this.prevLockCount) {
@@ -122,11 +108,13 @@ public class MCH_WeaponGuidanceSystem {
       return false;
    }
 
+   @Override
    public boolean lock(Entity user) {
       return this.lock(user, true);
    }
 
    public boolean lock(Entity user, boolean isLockContinue) {
+
       if(!this.worldObj.isRemote) {
          return false;
       } else {
@@ -146,7 +134,7 @@ public class MCH_WeaponGuidanceSystem {
                   double d = dz * dz + stealth * stealth + dz1 * dz1;
                   Entity entityLocker1 = this.getLockEntity(user);
                   float stealth1 = 1.0F - getEntityStealth(ong);
-                  double range1 = this.lockRange * (double)stealth1;
+                  double range1 = this.lockRange;
                   float angle = (float)this.lockAngle * (stealth1 / 2.0F + 0.5F);
                   if(d < range1 * range1 && d < dist && inLockRange(entityLocker1, user.rotationYaw, user.rotationPitch, ong, angle)) {
                      Vec3 v1 = W_WorldFunc.getWorldVec3(this.worldObj, entityLocker1.posX, entityLocker1.posY, entityLocker1.posZ);
@@ -178,8 +166,6 @@ public class MCH_WeaponGuidanceSystem {
                var26 = false;
             }
 
-
-
             if(var26) {
                double var28 = this.targetEntity.posX - user.posX;
                double dy = this.targetEntity.posY - user.posY;
@@ -188,7 +174,8 @@ public class MCH_WeaponGuidanceSystem {
                double range = this.lockRange * (double)var29;
                if(var28 * var28 + dy * dy + dz * dz < range * range) {
                   if(this.worldObj.isRemote && this.lockSoundCount == 1) {
-                     MCH_PacketNotifyLock.send(this.getTargetEntity());
+                     //MCH_PacketNotifyLock.send(this.getTargetEntity());
+
                   }
 
                   this.lockSoundCount = (this.lockSoundCount + 1) % 15;
@@ -232,6 +219,19 @@ public class MCH_WeaponGuidanceSystem {
          } else {
             this.clearLock();
          }
+         result = this.lockCount >= this.getLockCountMax();
+
+         if(result) {
+            this.lastLockEntity= targetEntity;
+            this.worldObj.playSoundAtEntity(user, "mcheli:ir_basic_tone", 1.0f, 1.0f);
+            //playSound(user, );
+            //System.out.println("Lock successful. " + lastLockEntity.getCommandSenderName());
+         }else {
+            // playSound(user, "ir_lock_tone");
+            this.worldObj.playSoundAtEntity(user, "mcheli:ir_lock_tone", 1.0f, 1.0f);
+         }
+         // System.out.println("Locking! Result: " + result + " LockCount " + lockCount + " countMax " + getLockCountMax());
+
 
          return result;
       }
@@ -247,6 +247,8 @@ public class MCH_WeaponGuidanceSystem {
       this.continueLockCount = 0;
       this.lockSoundCount = 0;
    }
+
+
 
    public Entity getLockEntity(Entity entity) {
       if(entity.ridingEntity instanceof MCH_EntityUavStation) {
@@ -290,5 +292,11 @@ public class MCH_WeaponGuidanceSystem {
       float targetPitch = -((float)(Math.atan2(dy, dxz) * 180.0D / 3.141592653589793D));
       float diffPitch = targetPitch - rotationPitch;
       return (diffYaw < lockAng || diffYaw > 360.0F - lockAng) && Math.abs(diffPitch) < lockAng;
+   }
+
+   @Override
+   protected Entity getLastLockEntity() {
+      // TODO Auto-generated method stub
+      return null;
    }
 }

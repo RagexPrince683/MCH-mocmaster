@@ -1,15 +1,5 @@
 package mcheli;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import mcheli.MCH_ClientCommonTickHandler;
-import mcheli.MCH_ClientTickHandlerBase;
-import mcheli.MCH_Config;
-import mcheli.MCH_Lib;
-import mcheli.MCH_MOD;
-import mcheli.MCH_TextureManagerDummy;
-import mcheli.MCH_ViewEntityDummy;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_RenderAircraft;
@@ -33,6 +23,10 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.WorldEvent.Unload;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 public class MCH_ClientEventHook extends W_ClientEventHook {
 
    MCH_TextureManagerDummy dummyTextureManager = null;
@@ -53,7 +47,9 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
 
    }
 
-   public void renderLivingEventSpecialsPost(Post event) {}
+   public void renderLivingEventSpecialsPost(Post event) {
+
+   }
 
    private void renderIRStrobe(EntityLivingBase entity, Post event) {
       int cm = MCH_ClientCommonTickHandler.cameraMode;
@@ -63,45 +59,47 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
             float alpha = ticks != 2 && ticks != 1?0.5F:1.0F;
             EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
             if(player != null) {
-               if(player.isOnSameTeam(entity)) {
-                  short j = 240;
-                  short k = 240;
-                  OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j / 1.0F, (float)k / 1.0F);
-                  GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-                  float f1 = 0.080000006F;
-                  GL11.glPushMatrix();
-                  GL11.glTranslated(event.x, event.y + (double)((float)((double)entity.height * 0.75D)), event.z);
-                  GL11.glNormal3f(0.0F, 1.0F, 0.0F);
-                  GL11.glRotatef(-RenderManager.instance.playerViewY, 0.0F, 1.0F, 0.0F);
-                  GL11.glRotatef(RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
-                  GL11.glScalef(-f1, -f1, f1);
-                  GL11.glEnable(3042);
-                  OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-                  GL11.glEnable(3553);
-                  RenderManager.instance.renderEngine.bindTexture(ir_strobe);
-                  GL11.glAlphaFunc(516, 0.003921569F);
-                  Tessellator tessellator = Tessellator.instance;
-                  tessellator.startDrawingQuads();
-                  tessellator.setColorRGBA_F(1.0F, 1.0F, 1.0F, alpha * (cm == 1?0.9F:0.5F));
-                  int i = (int)Math.max(entity.width, entity.height) * 20;
-                  tessellator.addVertexWithUV((double)(-i), (double)(-i), 0.1D, 0.0D, 0.0D);
-                  tessellator.addVertexWithUV((double)(-i), (double)i, 0.1D, 0.0D, 1.0D);
-                  tessellator.addVertexWithUV((double)i, (double)i, 0.1D, 1.0D, 1.0D);
-                  tessellator.addVertexWithUV((double)i, (double)(-i), 0.1D, 1.0D, 0.0D);
-                  tessellator.draw();
-                  GL11.glEnable(2896);
-                  GL11.glPopMatrix();
-               }
+               //if(!player.isOnSameTeam(entity) && player.getDisplayName().equalsIgnoreCase("mocpages") && MCH_EntityAircraft.debug == true) {
+               short j = 240;
+               short k = 240;
+               OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j / 1.0F, (float)k / 1.0F);
+               GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+               float f1 = 0.080000006F;
+               GL11.glPushMatrix();
+               GL11.glTranslated(event.x, event.y + (double)((float)((double)entity.height * 0.75D)), event.z);
+               GL11.glNormal3f(0.0F, 1.0F, 0.0F);
+               GL11.glRotatef(-RenderManager.instance.playerViewY, 0.0F, 1.0F, 0.0F);
+               GL11.glRotatef(RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
+               GL11.glScalef(-f1, -f1, f1);
+               GL11.glEnable(3042);
+               OpenGlHelper.glBlendFunc(770, 771, 1, 0);
+               GL11.glEnable(3553);
+               RenderManager.instance.renderEngine.bindTexture(ir_strobe);
+               GL11.glAlphaFunc(516, 0.003921569F);
+               Tessellator tessellator = Tessellator.instance;
+               tessellator.startDrawingQuads();
+               tessellator.setColorRGBA_F(1.0F, 1.0F, 1.0F, alpha * (cm == 1?0.9F:0.5F));
+               int i = (int)Math.max(entity.width, entity.height) * 20;
+               tessellator.addVertexWithUV((double)(-i), (double)(-i), 0.1D, 0.0D, 0.0D);
+               tessellator.addVertexWithUV((double)(-i), (double)i, 0.1D, 0.0D, 1.0D);
+               tessellator.addVertexWithUV((double)i, (double)i, 0.1D, 1.0D, 1.0D);
+               tessellator.addVertexWithUV((double)i, (double)(-i), 0.1D, 1.0D, 0.0D);
+               tessellator.draw();
+               GL11.glEnable(2896);
+               GL11.glPopMatrix();
+               // }
             }
          }
       }
    }
 
-   public void mouseEvent(MouseEvent event) {
-      if(MCH_ClientTickHandlerBase.updateMouseWheel(event.dwheel)) {
-         event.setCanceled(true);
-      }
 
+   @Override
+   public void mouseEvent(final MouseEvent event) {
+      if (MCH_ClientTickHandlerBase.updateMouseWheel(event.dwheel)) {
+         event.setCanceled(true);
+         //todo HELP HELP ME HEEEEELLLLPP
+      }
    }
 
    public static void setCancelRender(boolean cancel) {

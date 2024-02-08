@@ -1,9 +1,5 @@
 package mcheli.weapon;
 
-import mcheli.weapon.MCH_EntityATMissile;
-import mcheli.weapon.MCH_WeaponEntitySeeker;
-import mcheli.weapon.MCH_WeaponInfo;
-import mcheli.weapon.MCH_WeaponParam;
 import mcheli.wrapper.W_Entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
@@ -11,7 +7,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class MCH_WeaponATMissile extends MCH_WeaponEntitySeeker {
-
+   MCH_WeaponGuidanceSystem guidanceSystem= new MCH_WeaponGuidanceSystem(this.worldObj);
    public MCH_WeaponATMissile(World w, Vec3 v, float yaw, float pitch, String nm, MCH_WeaponInfo wi) {
       super(w, v, yaw, pitch, nm, wi);
       super.power = 32;
@@ -23,8 +19,18 @@ public class MCH_WeaponATMissile extends MCH_WeaponEntitySeeker {
       }
 
       super.numMode = 2;
+      //this.guidanceSystem = new MCH_WeaponGuidanceSystem(this.worldObj);
       super.guidanceSystem.canLockOnGround = true;
       super.guidanceSystem.ridableOnly = wi.ridableOnly;
+      this.guidanceSystem.canLockOnGround = true;
+      this.guidanceSystem.ridableOnly = wi.ridableOnly;
+      this.guidanceSystem.setLockCountMax(wi.lockTime);
+   }
+
+
+   @Override
+   public MCH_WeaponGuidanceSystem getGuidanceSystem() {
+      return this.guidanceSystem;
    }
 
    public boolean isCooldownCountReloadTime() {
@@ -50,9 +56,10 @@ public class MCH_WeaponATMissile extends MCH_WeaponEntitySeeker {
 
    protected boolean shotClient(Entity entity, Entity user) {
       boolean result = false;
-      if(super.guidanceSystem.lock(user) && super.guidanceSystem.lastLockEntity != null) {
+      if(this.guidanceSystem.lock(user) && this.guidanceSystem.lastLockEntity != null) {
          result = true;
-         super.optionParameter1 = W_Entity.getEntityId(super.guidanceSystem.lastLockEntity);
+         System.out.println("Firing!");
+         super.optionParameter1 = W_Entity.getEntityId((Entity)this.guidanceSystem.lastLockEntity); //TODO FIX
       }
 
       super.optionParameter2 = this.getCurrentMode();

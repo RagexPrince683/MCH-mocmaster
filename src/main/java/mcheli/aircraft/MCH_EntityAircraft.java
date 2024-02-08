@@ -1,5 +1,6 @@
 package mcheli.aircraft;
 
+import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -19,6 +20,8 @@ import mcheli.MCH_MOD;
 import mcheli.MCH_Math;
 import mcheli.MCH_Queue;
 import mcheli.MCH_ViewEntityDummy;
+import net.minecraft.util.ChunkCoordinates;
+
 import mcheli.aircraft.MCH_AircraftBoundingBox;
 import mcheli.aircraft.MCH_AircraftGuiContainer;
 import mcheli.aircraft.MCH_AircraftInfo;
@@ -49,6 +52,7 @@ import mcheli.multiplay.MCH_Multiplay;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
+//import mcheli.sensors.MCH_RadarContact;
 import mcheli.tool.MCH_ItemWrench;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.weapon.MCH_EntityTvMissile;
@@ -96,12 +100,15 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.util.FakePlayer;
 
 import static mcheli.hud.MCH_HudItem.player;
-import static net.minecraft.command.CommandBase.getCommandSenderAsPlayer;
-import static net.minecraft.command.CommandBase.getPlayer;
+//import static net.minecraft.command.CommandBase.getCommandSenderAsPlayer;
+//import static net.minecraft.command.CommandBase.getPlayer;
 
 public abstract class MCH_EntityAircraft extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideAircraft, IEntityAdditionalSpawnData {
+   private FakePlayer fakePlayer;
+   private boolean hasTeleportedPlayer = false;
 
    private static final int DATAWT_ID_DAMAGE = 19;
    private static final int DATAWT_ID_TYPE = 20;
@@ -263,7 +270,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private double lastLandInDistance;
    private static final MCH_EntitySeat[] seatsDummy = new MCH_EntitySeat[0];
    private boolean switchSeat = false;
-   public EntityPlayerMP playerEntity = (EntityPlayerMP) getCommandSenderAsPlayer(player);
+   //public ArrayList<MCH_RadarContact> contacts = new ArrayList<MCH_RadarContact>();
+   //public ArrayList<MCH_RadarContact> surfaceContacts = new ArrayList<MCH_RadarContact>();
+   //public MCH_RadarContact radarTarget;
+   //moc things when they almost want to work
+   //public ArrayList<MCH_ESMContact> ESMContacts = new ArrayList<MCH_ESMContact>();
+   //public EntityPlayerMP playerEntity = (EntityPlayerMP) getCommandSenderAsPlayer(player);
 
 
    public MCH_EntityAircraft(World world) {
@@ -2131,6 +2143,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
          if(this.getCountOnUpdate() % 30 == 0 && (this.getAcInfo() == null || !this.getAcInfo().isFloat) && MCH_Lib.isBlockInWater(super.worldObj, (int)(super.posX + 0.5D), (int)(super.posY + 1.5D + (double)this.getAcInfo().submergedDamageHeight), (int)(super.posZ + 0.5D))) {
             int hp1 = this.getMaxHP() / 10;
+            //todo: stop vehicle from moving and remove damage
             if(hp1 <= 0) {
                hp1 = 1;
             }
@@ -5395,11 +5408,27 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             //haha gotcha
             //TODO: better
             if(udx1 * udx1 + udz * udz > 15625000.0D) {
-               this.uavStation.setControlAircract((MCH_EntityAircraft)null);
-               this.setUavStation((MCH_EntityUavStation)null);
-               this.attackEntityFrom(DamageSource.outOfWorld, this.getMaxHP() + 10);
-               //TODO: teleport player as invulnerable entity
+               //out of this world crap for when the UAV was out of range, let's get rid of it and use something better:
+               //this.uavStation.setControlAircract((MCH_EntityAircraft)null);
+               //this.setUavStation((MCH_EntityUavStation)null);
+               //this.attackEntityFrom(DamageSource.outOfWorld, this.getMaxHP() + 10);
+               //TODO: teleport player as invulnerable, invisible entity for the position of the UAV once outside of this range, create a fake player where the UAV station is, disable invulnerability and transfer player back to position of UAV station when UAV dies
                //EntityPlayerMP
+               if (hasTeleportedPlayer = false) { //gpt said this was needed, idk why: && this.fakePlayer != null
+                  EntityPlayerMP player = (EntityPlayerMP) this.getFirstMountPlayer();
+                  player.setPositionAndUpdate(this.aircraftX, this.aircraftY, this.aircraftZ); //this could be a problem, could be this.uav.whatever
+                  // possible fix now, changed this.x to this.aircraftx
+                  player.capabilities.disableDamage = true;
+                  player.capabilities.isFlying = true;
+                  player.capabilities.allowFlying = true;
+
+                  FakePlayer fakePlayer = new FakePlayer((WorldServer) this.uavStation.worldObj, new GameProfile(player.getUniqueID(), player.getDisplayName())); //assuming getUniqueID gets the current player's ID, hope GPT is right.
+                  fakePlayer.setPosition(this.uavStation.posX, this.uavStation.posY, this.uavStation.posZ); //may need adjusting based on where UAV station seat is, look in UAV station code for more
+                  this.uavStation.worldObj.spawnEntityInWorld(fakePlayer);
+                  this.fakePlayer = fakePlayer;
+                  hasTeleportedPlayer = true;
+                  System.out.println("player teleported to drone coordinates");
+               }
 
 
             }
@@ -5407,6 +5436,22 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
          if(this.uavStation != null && this.uavStation.isDead) {
             this.uavStation = null;
+
+            if (fakePlayer != null) {
+               ChunkCoordinates fakePlayerPos = this.fakePlayer.getPlayerCoordinates();
+               int x = fakePlayerPos.posX;
+               int y = fakePlayerPos.posY;
+               int z = fakePlayerPos.posZ;
+               EntityPlayerMP player = (EntityPlayerMP) this.getFirstMountPlayer();
+               player.setPositionAndUpdate(x + 0.5, y, z + 0.5);
+               this.fakePlayer.setDead();
+               this.fakePlayer = null;
+
+            }
+            player.capabilities.disableDamage = false;
+            player.capabilities.isFlying = false;
+            player.capabilities.allowFlying = false;
+            //need to add check for dismount
          }
 
       }

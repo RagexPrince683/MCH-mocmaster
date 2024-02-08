@@ -63,6 +63,8 @@ public class MCH_ConfigGui extends W_GuiContainer {
    public MCH_GuiList keyBindingList;
    public int waitKeyButtonId;
    public int waitKeyAcceptCount;
+   private GuiButton buttonNext;
+   private GuiButton buttonPrev;
    public static final int BUTTON_RENDER = 50;
    public static final int BUTTON_KEY_BINDING = 51;
    public static final int BUTTON_PREV_CONTROL = 52;
@@ -288,96 +290,148 @@ public class MCH_ConfigGui extends W_GuiContainer {
    }
 
    public void getAllStatusFromConfig() {
-      MCH_Config config = MCH_MOD.config; // Get the configuration instance
-
-      this.buttonMouseInv.setOnOff(config.InvertMouse.prmBool);
-      this.buttonStickModeHeli.setOnOff(config.MouseControlStickModeHeli.prmBool);
-      this.buttonStickModePlane.setOnOff(config.MouseControlStickModePlane.prmBool);
-
-      this.sliderSensitivity.setSliderValue((float) config.MouseSensitivity.prmDouble);
-
-      this.buttonShowHUDTP.setOnOff(config.DisplayHUDThirdPerson.prmBool);
-      this.buttonSmoothShading.setOnOff(config.SmoothShading.prmBool);
-      this.buttonHideKeyBind.setOnOff(config.HideKeybind.prmBool);
-
-      this.buttonShowEntityMarker.setOnOff(config.DisplayEntityMarker.prmBool);
-      this.buttonMarkThroughWall.setOnOff(config.DisplayMarkThroughWall.prmBool);
-
-      this.sliderEntityMarkerSize.setSliderValue((float) config.EntityMarkerSize.prmDouble);
-      this.sliderBlockMarkerSize.setSliderValue((float) config.BlockMarkerSize.prmDouble);
-
-      this.buttonReplaceCamera.setOnOff(config.ReplaceRenderViewEntity.prmBool);
-      this.buttonNewExplosion.setOnOff(config.DefaultExplosionParticle.prmBool);
-
-      this.sliderHitMark[0].setSliderValue(config.hitMarkColorAlpha * 255.0F);
-      this.sliderHitMark[1].setSliderValue((config.hitMarkColorRGB >> 16) & 0xFF);
-      this.sliderHitMark[2].setSliderValue((config.hitMarkColorRGB >> 8) & 0xFF);
-      this.sliderHitMark[3].setSliderValue((config.hitMarkColorRGB >> 0) & 0xFF);
-
-      this.buttonThrottleHeli.setOnOff(config.AutoThrottleDownHeli.prmBool);
-      this.buttonThrottlePlane.setOnOff(config.AutoThrottleDownPlane.prmBool);
-      this.buttonThrottleTank.setOnOff(config.AutoThrottleDownTank.prmBool);
-
-      this.buttonTestMode.setOnOff(config.TestMode.prmBool);
-      this.buttonFlightSimMode.setOnOff(config.MouseControlFlightSimMode.prmBool);
-      this.buttonSwitchWeaponWheel.setOnOff(config.SwitchWeaponWithMouseWheel.prmBool);
+      final MCH_GuiOnOffButton buttonMouseInv = this.buttonMouseInv;
+      final MCH_Config config = MCH_MOD.config;
+      buttonMouseInv.setOnOff(MCH_Config.InvertMouse.prmBool);
+      final MCH_GuiOnOffButton buttonStickModeHeli = this.buttonStickModeHeli;
+      final MCH_Config config2 = MCH_MOD.config;
+      buttonStickModeHeli.setOnOff(MCH_Config.MouseControlStickModeHeli.prmBool);
+      final MCH_GuiOnOffButton buttonStickModePlane = this.buttonStickModePlane;
+      final MCH_Config config3 = MCH_MOD.config;
+      buttonStickModePlane.setOnOff(MCH_Config.MouseControlStickModePlane.prmBool);
+      final MCH_GuiSlider sliderSensitivity = this.sliderSensitivity;
+      final MCH_Config config4 = MCH_MOD.config;
+      sliderSensitivity.setSliderValue((float)MCH_Config.MouseSensitivity.prmDouble);
+      final MCH_GuiOnOffButton buttonShowHUDTP = this.buttonShowHUDTP;
+      final MCH_Config config5 = MCH_MOD.config;
+      buttonShowHUDTP.setOnOff(MCH_Config.DisplayHUDThirdPerson.prmBool);
+      final MCH_GuiOnOffButton buttonSmoothShading = this.buttonSmoothShading;
+      final MCH_Config config6 = MCH_MOD.config;
+      buttonSmoothShading.setOnOff(MCH_Config.SmoothShading.prmBool);
+      final MCH_GuiOnOffButton buttonHideKeyBind = this.buttonHideKeyBind;
+      final MCH_Config config7 = MCH_MOD.config;
+      buttonHideKeyBind.setOnOff(MCH_Config.HideKeybind.prmBool);
+      final MCH_GuiOnOffButton buttonShowEntityMarker = this.buttonShowEntityMarker;
+      final MCH_Config config8 = MCH_MOD.config;
+      buttonShowEntityMarker.setOnOff(MCH_Config.DisplayEntityMarker.prmBool);
+      final MCH_GuiOnOffButton buttonMarkThroughWall = this.buttonMarkThroughWall;
+      final MCH_Config config9 = MCH_MOD.config;
+      buttonMarkThroughWall.setOnOff(MCH_Config.DisplayMarkThroughWall.prmBool);
+      final MCH_GuiSlider sliderEntityMarkerSize = this.sliderEntityMarkerSize;
+      final MCH_Config config10 = MCH_MOD.config;
+      sliderEntityMarkerSize.setSliderValue((float)MCH_Config.EntityMarkerSize.prmDouble);
+      final MCH_GuiSlider sliderBlockMarkerSize = this.sliderBlockMarkerSize;
+      final MCH_Config config11 = MCH_MOD.config;
+      sliderBlockMarkerSize.setSliderValue((float)MCH_Config.BlockMarkerSize.prmDouble);
+      final MCH_GuiOnOffButton buttonReplaceCamera = this.buttonReplaceCamera;
+      final MCH_Config config12 = MCH_MOD.config;
+      buttonReplaceCamera.setOnOff(MCH_Config.ReplaceRenderViewEntity.prmBool);
+      final MCH_GuiOnOffButton buttonNewExplosion = this.buttonNewExplosion;
+      final MCH_Config config13 = MCH_MOD.config;
+      buttonNewExplosion.setOnOff(MCH_Config.DefaultExplosionParticle.prmBool);
+      final MCH_GuiSlider mch_GuiSlider = this.sliderHitMark[0];
+      final MCH_Config config14 = MCH_MOD.config;
+      mch_GuiSlider.setSliderValue(MCH_Config.hitMarkColorAlpha * 255.0f);
+      final MCH_GuiSlider mch_GuiSlider2 = this.sliderHitMark[1];
+      final MCH_Config config15 = MCH_MOD.config;
+      mch_GuiSlider2.setSliderValue((float)(MCH_Config.hitMarkColorRGB >> 16 & 0xFF));
+      final MCH_GuiSlider mch_GuiSlider3 = this.sliderHitMark[2];
+      final MCH_Config config16 = MCH_MOD.config;
+      mch_GuiSlider3.setSliderValue((float)(MCH_Config.hitMarkColorRGB >> 8 & 0xFF));
+      final MCH_GuiSlider mch_GuiSlider4 = this.sliderHitMark[3];
+      final MCH_Config config17 = MCH_MOD.config;
+      mch_GuiSlider4.setSliderValue((float)(MCH_Config.hitMarkColorRGB >> 0 & 0xFF));
+      final MCH_GuiOnOffButton buttonThrottleHeli = this.buttonThrottleHeli;
+      final MCH_Config config18 = MCH_MOD.config;
+      buttonThrottleHeli.setOnOff(MCH_Config.AutoThrottleDownHeli.prmBool);
+      final MCH_GuiOnOffButton buttonThrottlePlane = this.buttonThrottlePlane;
+      final MCH_Config config19 = MCH_MOD.config;
+      buttonThrottlePlane.setOnOff(MCH_Config.AutoThrottleDownPlane.prmBool);
+      final MCH_GuiOnOffButton buttonThrottleTank = this.buttonThrottleTank;
+      final MCH_Config config20 = MCH_MOD.config;
+      buttonThrottleTank.setOnOff(MCH_Config.AutoThrottleDownTank.prmBool);
+      final MCH_GuiOnOffButton buttonTestMode = this.buttonTestMode;
+      final MCH_Config config21 = MCH_MOD.config;
+      buttonTestMode.setOnOff(MCH_Config.TestMode.prmBool);
+      final MCH_GuiOnOffButton buttonFlightSimMode = this.buttonFlightSimMode;
+      final MCH_Config config22 = MCH_MOD.config;
+      buttonFlightSimMode.setOnOff(MCH_Config.MouseControlFlightSimMode.prmBool);
+      final MCH_GuiOnOffButton buttonSwitchWeaponWheel = this.buttonSwitchWeaponWheel;
+      final MCH_Config config23 = MCH_MOD.config;
+      buttonSwitchWeaponWheel.setOnOff(MCH_Config.SwitchWeaponWithMouseWheel.prmBool);
    }
 
    public void saveAndApplyConfig() {
-      MCH_Config config = MCH_MOD.config; // Get the configuration instance
-
-      // Set parameter values
-      config.InvertMouse.setPrm(buttonMouseInv.getOnOff());
-      config.MouseControlStickModeHeli.setPrm(buttonStickModeHeli.getOnOff());
-      config.MouseControlStickModePlane.setPrm(buttonStickModePlane.getOnOff());
-      config.MouseControlFlightSimMode.setPrm(buttonFlightSimMode.getOnOff());
-      config.SwitchWeaponWithMouseWheel.setPrm(buttonSwitchWeaponWheel.getOnOff());
-
-      config.MouseSensitivity.setPrm(sliderSensitivity.getSliderValueInt(1));
-
-      config.DisplayHUDThirdPerson.setPrm(buttonShowHUDTP.getOnOff());
-      config.SmoothShading.setPrm(buttonSmoothShading.getOnOff());
-      config.HideKeybind.setPrm(buttonHideKeyBind.getOnOff());
-
-      config.DisplayEntityMarker.setPrm(buttonShowEntityMarker.getOnOff());
-      config.DisplayMarkThroughWall.setPrm(buttonMarkThroughWall.getOnOff());
-
-      config.EntityMarkerSize.setPrm(sliderEntityMarkerSize.getSliderValueInt(1));
-      config.BlockMarkerSize.setPrm(sliderBlockMarkerSize.getSliderValueInt(1));
-
-      config.ReplaceRenderViewEntity.setPrm(buttonReplaceCamera.getOnOff());
-      config.DefaultExplosionParticle.setPrm(buttonNewExplosion.getOnOff());
-
-      // Set hit mark color
-      float a = sliderHitMark[0].getSliderValue();
-      int r = (int) sliderHitMark[1].getSliderValue();
-      int g = (int) sliderHitMark[2].getSliderValue();
-      int b = (int) sliderHitMark[3].getSliderValue();
-      config.hitMarkColorAlpha = a / 255.0F;
-      config.hitMarkColorRGB = (r << 16) | (g << 8) | b;
-      MCH_Config.HitMarkColor.setPrm(String.format("%d, %d, %d, %d", new Object[]{Integer.valueOf((int)a), Integer.valueOf(r), Integer.valueOf(g), Integer.valueOf(b)}));
-
-      // Set throttle parameters
-      boolean b1 = config.AutoThrottleDownHeli.prmBool;
-      boolean b2 = config.AutoThrottleDownPlane.prmBool;
-      config.AutoThrottleDownHeli.setPrm(buttonThrottleHeli.getOnOff());
-      config.AutoThrottleDownPlane.setPrm(buttonThrottlePlane.getOnOff());
-      config.AutoThrottleDownTank.setPrm(buttonThrottleTank.getOnOff());
-
-      // Check if throttle settings have changed
-      if (b1 != config.AutoThrottleDownHeli.prmBool || b2 != config.AutoThrottleDownPlane.prmBool) {
-         sendClientSettings();
+      final int n = 0;
+      final MCH_Config config = MCH_MOD.config;
+      MCH_Config.InvertMouse.setPrm(this.buttonMouseInv.getOnOff());
+      final MCH_Config config2 = MCH_MOD.config;
+      MCH_Config.MouseControlStickModeHeli.setPrm(this.buttonStickModeHeli.getOnOff());
+      final MCH_Config config3 = MCH_MOD.config;
+      MCH_Config.MouseControlStickModePlane.setPrm(this.buttonStickModePlane.getOnOff());
+      final MCH_Config config4 = MCH_MOD.config;
+      MCH_Config.MouseControlFlightSimMode.setPrm(this.buttonFlightSimMode.getOnOff());
+      final MCH_Config config5 = MCH_MOD.config;
+      MCH_Config.SwitchWeaponWithMouseWheel.setPrm(this.buttonSwitchWeaponWheel.getOnOff());
+      final MCH_Config config6 = MCH_MOD.config;
+      MCH_Config.MouseSensitivity.setPrm(this.sliderSensitivity.getSliderValueInt(1));
+      final MCH_Config config7 = MCH_MOD.config;
+      MCH_Config.DisplayHUDThirdPerson.setPrm(this.buttonShowHUDTP.getOnOff());
+      final MCH_Config config8 = MCH_MOD.config;
+      MCH_Config.SmoothShading.setPrm(this.buttonSmoothShading.getOnOff());
+      final MCH_Config config9 = MCH_MOD.config;
+      MCH_Config.HideKeybind.setPrm(this.buttonHideKeyBind.getOnOff());
+      final MCH_Config config10 = MCH_MOD.config;
+      MCH_Config.DisplayEntityMarker.setPrm(this.buttonShowEntityMarker.getOnOff());
+      final MCH_Config config11 = MCH_MOD.config;
+      MCH_Config.DisplayMarkThroughWall.setPrm(this.buttonMarkThroughWall.getOnOff());
+      final MCH_Config config12 = MCH_MOD.config;
+      MCH_Config.EntityMarkerSize.setPrm(this.sliderEntityMarkerSize.getSliderValueInt(1));
+      final MCH_Config config13 = MCH_MOD.config;
+      MCH_Config.BlockMarkerSize.setPrm(this.sliderBlockMarkerSize.getSliderValueInt(1));
+      final MCH_Config config14 = MCH_MOD.config;
+      MCH_Config.ReplaceRenderViewEntity.setPrm(this.buttonReplaceCamera.getOnOff());
+      final MCH_Config config15 = MCH_MOD.config;
+      MCH_Config.DefaultExplosionParticle.setPrm(this.buttonNewExplosion.getOnOff());
+      final float a = this.sliderHitMark[0].getSliderValue();
+      final int r = (int)this.sliderHitMark[1].getSliderValue();
+      final int g = (int)this.sliderHitMark[2].getSliderValue();
+      final int b = (int)this.sliderHitMark[3].getSliderValue();
+      final MCH_Config config16 = MCH_MOD.config;
+      MCH_Config.hitMarkColorAlpha = a / 255.0f;
+      final MCH_Config config17 = MCH_MOD.config;
+      MCH_Config.hitMarkColorRGB = (r << 16 | g << 8 | b);
+      final MCH_Config config18 = MCH_MOD.config;
+      MCH_Config.HitMarkColor.setPrm(String.format("%d, %d, %d, %d", (int)a, r, g, b));
+      final MCH_Config config19 = MCH_MOD.config;
+      final boolean b2 = MCH_Config.AutoThrottleDownHeli.prmBool;
+      final MCH_Config config20 = MCH_MOD.config;
+      final boolean b3 = MCH_Config.AutoThrottleDownPlane.prmBool;
+      final MCH_Config config21 = MCH_MOD.config;
+      MCH_Config.AutoThrottleDownHeli.setPrm(this.buttonThrottleHeli.getOnOff());
+      final MCH_Config config22 = MCH_MOD.config;
+      MCH_Config.AutoThrottleDownPlane.setPrm(this.buttonThrottlePlane.getOnOff());
+      final MCH_Config config23 = MCH_MOD.config;
+      MCH_Config.AutoThrottleDownTank.setPrm(this.buttonThrottleTank.getOnOff());
+      final boolean b4 = b2;
+      final MCH_Config config24 = MCH_MOD.config;
+      Label_0499: {
+         if (b4 == MCH_Config.AutoThrottleDownHeli.prmBool) {
+            final boolean b5 = b3;
+            final MCH_Config config25 = MCH_MOD.config;
+            if (b5 == MCH_Config.AutoThrottleDownPlane.prmBool) {
+               break Label_0499;
+            }
+         }
+         this.sendClientSettings();
       }
-
-      // Apply key codes
-      for (int i = 0; i < keyBindingList.getItemNum(); i++) {
-         ((MCH_GuiListItemKeyBind) keyBindingList.getItem(i)).applyKeycode();
+      for (int i = 0; i < this.keyBindingList.getItemNum(); ++i) {
+         ((MCH_GuiListItemKeyBind)this.keyBindingList.getItem(i)).applyKeycode();
       }
-
-      // Update key binds and write the configuration
-      MCH_ClientCommonTickHandler.instance.updatekeybind(config);
-      config.TestMode.setPrm(buttonTestMode.getOnOff());
-      config.write();
+      MCH_ClientCommonTickHandler.instance.updatekeybind(MCH_MOD.config);
+      final MCH_Config config26 = MCH_MOD.config;
+      MCH_Config.TestMode.setPrm(this.buttonTestMode.getOnOff());
+      MCH_MOD.config.write();
    }
 
    public void switchScreen(int screenID) {
@@ -506,16 +560,17 @@ public class MCH_ConfigGui extends W_GuiContainer {
 
    public void handleMouseInput() {
       super.handleMouseInput();
-      if(this.waitKeyButtonId == 0) {
-         int var16 = Mouse.getEventDWheel();
-         if(var16 != 0) {
-            if(var16 > 0) {
-               this.keyBindingList.scrollDown(2.0F);
-            } else if(var16 < 0) {
-               this.keyBindingList.scrollUp(2.0F);
-            }
+      if (this.waitKeyButtonId != 0) {
+         return;
+      }
+      final int var16 = Mouse.getEventDWheel();
+      if (var16 != 0) {
+         if (var16 > 0) {
+            this.keyBindingList.scrollDown(2.0f);
          }
-
+         else if (var16 < 0) {
+            this.keyBindingList.scrollUp(2.0f);
+         }
       }
    }
 

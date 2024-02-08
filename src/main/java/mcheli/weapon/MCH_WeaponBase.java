@@ -121,7 +121,7 @@ public abstract class MCH_WeaponBase {
       return this.getInfo().sight;
    }
 
-   public MCH_WeaponGuidanceSystem getGuidanceSystem() {
+   public MCH_GuidanceSystem getGuidanceSystem() {
       return null;
    }
 

@@ -16,6 +16,7 @@ import mcheli.gui.MCH_Gui;
 import mcheli.lweapon.MCH_ClientLightWeaponTickHandler;
 import mcheli.multiplay.MCH_GuiTargetMarker;
 import mcheli.uav.MCH_EntityUavStation;
+import mcheli.weapon.MCH_GuidanceSystem;
 import mcheli.weapon.MCH_WeaponGuidanceSystem;
 import mcheli.weapon.MCH_WeaponSet;
 import mcheli.wrapper.W_Entity;
@@ -1088,7 +1089,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
 
             if(ac != null) {
                if(!W_Entity.isEqual(ac, entity)) {
-                  MCH_WeaponGuidanceSystem gs = ac.getCurrentWeapon(player).getCurrentWeapon().getGuidanceSystem();
+                  MCH_GuidanceSystem gs = ac.getCurrentWeapon(player).getCurrentWeapon().getGuidanceSystem();
                   if(gs != null && gs.canLockEntity(entity)) {
                      RenderManager rm = RenderManager.instance;
                      double dist = entity.getDistanceSqToEntity(rm.livingPlayer);
