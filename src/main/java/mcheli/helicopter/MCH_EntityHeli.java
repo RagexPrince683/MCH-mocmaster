@@ -870,7 +870,7 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
       }
 
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
-      super.motionY *= 0.95D;
+      //super.motionY *= 0.95D;
       super.motionX *= 0.99D;
       super.motionZ *= 0.99D;
       this.setRotation(this.getRotYaw(), this.getRotPitch());

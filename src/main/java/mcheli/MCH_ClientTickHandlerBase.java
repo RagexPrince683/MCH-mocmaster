@@ -92,6 +92,7 @@ public abstract class MCH_ClientTickHandlerBase {
          if(MCH_Config.SwitchWeaponWithMouseWheel.prmBool) {
             //prmBool = false set earlier in code
             //if switchweaponwithmousewheel is false then let the player use the scroll wheel
+            //TODO: AAAAAAAAAAAAAA
             setMouseWheel(0);
 
             EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
