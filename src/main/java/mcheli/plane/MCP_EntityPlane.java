@@ -39,6 +39,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    public float prevRotationRotor;
    public float addkeyRotValue;
    public float maxfueldiv = this.getMaxFuel() / 800;
+   public int timer = 0;
 
 
    public MCP_EntityPlane(World world) {
@@ -237,10 +238,26 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
             this.currentSpeed *= (this.currentSpeed*6)+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY; //speed up
             //System.out.println(this.currentSpeed + "speed" + this.aircraftPitch + "pitch" + this.getMaxFuel + "max fuel divided" + this.motionY + "Y motion");
-            if(this.aircraftPitch >= 50 && this.isEntityAlive() && this.isAirBorne) { //going down again
-               this.motionY = (this.motionY*0.61)+this.aircraftPitch;
-               this.aircraftY = this.aircraftY*0.61;
-            }
+//<<<<<<< Updated upstream
+            //if(this.aircraftPitch >= 70 && this.isEntityAlive() && this.isAirBorne) { //going down again
+            //   this.motionY = (this.motionY * 0.20) + this.aircraftPitch;
+            //   this.aircraftY = (this.aircraftY * 0.20) + this.getThrottle();
+//=======
+               timer++;
+               this.motionY = (this.motionY * 0.20) + this.aircraftPitch / 4;
+               this.aircraftY = this.aircraftY * 0.20;
+               if (timer > 100) {//added a timer because aircraft fell too fast, this will later be declared in the aircraft so for heavier aircraft the timer is faster to activate
+                  if (this.aircraftPitch >= 50 && this.isEntityAlive() && this.isAirBorne) { //going down again
+                     this.motionY = (this.motionY * 0.61) + this.aircraftPitch;
+                     this.aircraftY = this.aircraftY * 0.61;
+                     if (this.aircraftPitch <= 1.0) {
+                        timer = 0;
+                     }
+                  }
+//>>>>>>> Stashed changes
+               }
+           // }
+
             //System.out.println(this.aircraftY + " this.aircraftY, " + this.motionY + " this.motionY"); print statements don't work here idk why
             //this.setThrottle(this.getThrottle()+this.motionY);
 
