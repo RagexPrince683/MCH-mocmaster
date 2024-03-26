@@ -256,6 +256,8 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
                   }
 //>>>>>>> Stashed changes
                }
+
+               //todo: debug and ensure this works as intended
            // }
 
             //System.out.println(this.aircraftY + " this.aircraftY, " + this.motionY + " this.motionY"); print statements don't work here idk why

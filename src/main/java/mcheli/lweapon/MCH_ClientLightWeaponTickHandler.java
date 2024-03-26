@@ -264,7 +264,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          W_McClient.MOD_playSoundFX("pi", 0.5F, 0.9F);
       }
 
-      if(this.KeyAttack.isKeyPress() || autoShot) {
+      if(this.KeyAttack.isKeyPress() || autoShot && !("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem())))) {
          boolean pe = false;
          if(is.getItemDamage() < is.getMaxDamage() && gs.isLockComplete()) {
             boolean canFire = true;
@@ -286,11 +286,23 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
                pe = true;
             }
          }
+         if(this.KeyAttack.isKeyPress()) {
+            if ("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
+               boolean canFire = false;
+               if (is.getItemDamage() < is.getMaxDamage() && this.KeyZoom.isKeyDown()) {//todo: check for scoped
+                  canFire = true;
+               }
+               if (canFire) {
+                  pc.useWeapon = true;
+               }
+            }
+         }
 
          //if(this.KeyAttack.isKeyDown() && !pe && player.getItemInUseDuration() > 5 && ) {
          //add expression to check if isn't rpg also TODO: stop lock on feature for rpg
+         //&& //check rpg here
          //TODO: change RPG scope to be the T one
-         if(this.KeyAttack.isKeyDown() && !pe && player.getItemInUseDuration() > 5) {
+         if(this.KeyAttack.isKeyDown() && !pe && player.getItemInUseDuration() > 5 && !("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem())))) {
             playSoundNG();
          }
       }

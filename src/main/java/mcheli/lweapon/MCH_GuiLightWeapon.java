@@ -56,7 +56,7 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
             MCH_WeaponGuidanceSystem gs = MCH_ClientLightWeaponTickHandler.gs;
             if(gs != null && MCH_ClientLightWeaponTickHandler.weapon != null && MCH_ClientLightWeaponTickHandler.weapon.getInfo() != null) {
                PotionEffect pe = player.getActivePotionEffect(Potion.nightVision);
-               if(pe != null) {
+               if (pe != null) {
                   this.drawNightVisionNoise();
                }
 
@@ -66,18 +66,25 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
                int dstBlend = GL11.glGetInteger(3040);
                GL11.glBlendFunc(770, 771);
                double dist = 0.0D;
-               if(gs.getTargetEntity() != null) {
+               if (gs.getTargetEntity() != null) {
                   double canFire = gs.getTargetEntity().posX - player.posX;
                   double dz = gs.getTargetEntity().posZ - player.posZ;
                   dist = Math.sqrt(canFire * canFire + dz * dz);
                }
 
                boolean canFire1 = MCH_ClientLightWeaponTickHandler.weaponMode == 0 || dist >= 40.0D || gs.getLockCount() <= 0;
-               if("fgm148".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
+               if ("fgm148".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
                   this.drawGuiFGM148(player, gs, canFire1, player.getHeldItem());
                   this.drawKeyBind(-805306369, true);
-                  //TODO: add another conditional for RPG/T sight
-               } else {
+                  //DONE: add another conditional for RPG/T sight
+                  //todo: test
+               } else if("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
+                  GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+                  W_McClient.MOD_bindTexture("textures/gui/t.png");
+
+
+            }else if("fim92".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
+
                   GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                   W_McClient.MOD_bindTexture("textures/gui/stinger.png");
 
@@ -85,6 +92,7 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
                   for(size = 512.0D; size < (double)super.width || size < (double)super.height; size *= 2.0D) {
                      ;
                   }
+
 
                   this.drawTexturedModalRectRotate(-(size - (double)super.width) / 2.0D, -(size - (double)super.height) / 2.0D - 20.0D, size, size, 0.0D, 0.0D, 256.0D, 256.0D, 0.0F);
                   this.drawKeyBind(-805306369, false);
