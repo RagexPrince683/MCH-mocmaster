@@ -80,7 +80,7 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
                   //todo: test
                } else if("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
                   GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-                  W_McClient.MOD_bindTexture("textures/gui/t.png");
+                  W_McClient.MOD_bindTexture("textures/gui/rpg.png");
 
 
             }else if("fim92".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {

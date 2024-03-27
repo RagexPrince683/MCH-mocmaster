@@ -73,6 +73,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    public double prevMotionY;
    public double prevMotionZ;
    private Ticket loaderTicket;
+   private ChunkCoordIntPair loadedChunk;
 
 
    public MCH_EntityBaseBullet(World par1World) {
@@ -430,10 +431,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          }
       }
 
-      if(this.getGravity() < 0.0) {
+      if(this.getGravity() < 0.0 && this.isEntityAlive()) {
          loadNeighboringChunks((int)(posX), (int)(posZ));
-         //System.out.println("it loaded the chunk apparently at X: " + this.posX / 16 + "Z: " + this.posZ / 16);
+         ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
+         System.out.println("it loaded the chunk apparently at X: " + this.posX / 16 + "Z: " + this.posZ / 16);
          //why are we dividing by 16? maybe that's why it isn't working
+         //todo: fix this shit
+      } else {
+         ForgeChunkManager.unforceChunk(loaderTicket, loadedChunk);
       }
 
       if(this.prevMotionX != super.motionX || this.prevMotionY != super.motionY || this.prevMotionZ != super.motionZ) {

@@ -98,8 +98,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 import static mcheli.hud.MCH_HudItem.player;
-import static net.minecraft.command.CommandBase.getCommandSenderAsPlayer;
-import static net.minecraft.command.CommandBase.getPlayer;
+//import static net.minecraft.command.CommandBase.getCommandSenderAsPlayer;
+//import static net.minecraft.command.CommandBase.getPlayer;
 
 public abstract class MCH_EntityAircraft extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideAircraft, IEntityAdditionalSpawnData {
 
@@ -263,7 +263,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private double lastLandInDistance;
    private static final MCH_EntitySeat[] seatsDummy = new MCH_EntitySeat[0];
    private boolean switchSeat = false;
-   public EntityPlayerMP playerEntity = (EntityPlayerMP) getCommandSenderAsPlayer(player);
+   //public EntityPlayerMP playerEntity = (EntityPlayerMP) getCommandSenderAsPlayer(player);
 
 
    public MCH_EntityAircraft(World world) {
