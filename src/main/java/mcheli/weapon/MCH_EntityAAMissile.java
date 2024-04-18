@@ -7,8 +7,9 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 
 public class MCH_EntityAAMissile extends MCH_EntityBaseBullet {
+   double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);
+   private double maxTurningAngle = 180.0 + speed * 0.1; // Maximum turning angle in degrees
 
-   private float maxTurningAngle = 45.0F; // Maximum turning angle in degrees
 
    public MCH_EntityAAMissile(World par1World) {
       super(par1World);
@@ -62,6 +63,7 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet {
             System.out.println(missileHeading);
             double angleToTarget = Math.abs(missileHeading - rotationYaw);
             if (angleToTarget > maxTurningAngle) {
+               this.newExplosion(super.posX, super.posY, super.posZ, 1, 1, false);
                this.setDead();
             } else {
                this.guidanceToTargetLimited(super.targetEntity.posX, super.targetEntity.posY, super.targetEntity.posZ);
