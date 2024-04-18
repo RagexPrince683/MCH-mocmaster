@@ -83,6 +83,22 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet {
          double deltaY = targetY - super.posY;
          double deltaZ = targetZ - super.posZ;
 
+         double desiredHeading = Math.toDegrees(Math.atan2(deltaZ, deltaX));
+         double currentHeading = Math.toDegrees(Math.atan2(super.motionZ, super.motionX));
+         double headingError = desiredHeading - currentHeading;
+         headingError = (headingError + 180) % 360 - 180;
+         double adjustmentFactor = 0.1; // Adjust this value as needed
+         double adjustedHeading = currentHeading + headingError * adjustmentFactor;
+         double adjustedHeadingRad = Math.toRadians(adjustedHeading);
+         double adjustedMotionX = Math.cos(adjustedHeadingRad);
+         double adjustedMotionZ = Math.sin(adjustedHeadingRad);
+         super.motionX = adjustedMotionX;
+         super.motionZ = adjustedMotionZ;
+         super.rotationYaw = (float) adjustedHeading;
+
+
+
+
          double distanceToTarget = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
 
          if (distanceToTarget > 0) {
