@@ -53,7 +53,7 @@ public class MCP_PlaneInfo extends MCH_AircraftInfo {
    }
 
    public float getMaxSpeed() {
-      return 1.8F;
+      return 5.8F;
    }
 
    public int getDefaultMaxZoom() {
