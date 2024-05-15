@@ -21,3 +21,6 @@ build
 
 then if all goes well go to build/libs and a java file will be there. If you have made edits to the src you want to open the jar file with a archiver tool such as winrar. You can put this compiled class code into mcheli/mcheli in a actual mcheli instance/folder/the yknow mod and test things out yourself. If you want to make sure there are no errors just copy and paste over the mcheli/mcheli with this stuff.
    
+3. Why so many branches?
+
+I am bad at coding/this project has taken my soul
