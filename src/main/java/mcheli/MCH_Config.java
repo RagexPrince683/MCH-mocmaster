@@ -44,7 +44,9 @@ public class MCH_Config {
    public static MCH_ConfigPrm KeyRight;
    public static MCH_ConfigPrm KeyLeft;
    public static MCH_ConfigPrm KeySwitchMode;
+
    public static MCH_ConfigPrm KeySwitchHovering;
+   public static MCH_ConfigPrm KeyEjectHeli;
    public static MCH_ConfigPrm KeyAttack;
    public static MCH_ConfigPrm KeyUseWeapon;
    public static MCH_ConfigPrm KeySwitchWeapon1;
@@ -205,6 +207,7 @@ public class MCH_Config {
       KeyLeft = new MCH_ConfigPrm("KeyLeft", 30);
       KeySwitchMode = new MCH_ConfigPrm("KeySwitchGunner", 35);
       KeySwitchHovering = new MCH_ConfigPrm("KeySwitchHovering", 57);
+      KeyEjectHeli = new MCH_ConfigPrm("KeyEjectHeli", 54);
       KeyAttack = new MCH_ConfigPrm("KeyAttack", -100);
       KeyUseWeapon = new MCH_ConfigPrm("KeyUseWeapon", -99);
       KeySwitchWeapon1 = new MCH_ConfigPrm("KeySwitchWeapon1", -98);

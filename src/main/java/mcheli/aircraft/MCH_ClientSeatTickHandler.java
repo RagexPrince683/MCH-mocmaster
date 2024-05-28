@@ -19,6 +19,7 @@ public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
    public MCH_Key KeySwitchNextSeat;
    public MCH_Key KeySwitchPrevSeat;
    public MCH_Key KeyParachuting;
+   public MCH_Key KeyHeliEject;
    public MCH_Key KeyFreeLook;
    public MCH_Key KeyUnmountForce;
    public MCH_Key[] Keys;
@@ -33,6 +34,7 @@ public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
       this.KeySwitchNextSeat = new MCH_Key(MCH_Config.KeyExtra.prmInt);
       this.KeySwitchPrevSeat = new MCH_Key(MCH_Config.KeyGUI.prmInt);
       this.KeyParachuting = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
+      this.KeyHeliEject = new MCH_Key(MCH_Config.KeyEjectHeli.prmInt);
       this.KeyUnmountForce = new MCH_Key(42);
       this.KeyFreeLook = new MCH_Key(MCH_Config.KeyFreeLook.prmInt);
       this.Keys = new MCH_Key[]{this.KeySwitchNextSeat, this.KeySwitchPrevSeat, this.KeyParachuting, this.KeyUnmountForce, this.KeyFreeLook};
@@ -80,7 +82,7 @@ public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
          ac.switchGunnerFreeLookMode();
       }
 
-      if(this.KeyParachuting.isKeyDown()) {
+      if(this.KeyParachuting.isKeyDown() || this.KeyHeliEject.isKeyDown()) {
          if(ac.canParachuting(player)) {
             pc.parachuting = true;
             send = true;

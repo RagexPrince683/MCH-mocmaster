@@ -136,37 +136,26 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
                loaderTicket.bindEntity(this);
                loaderTicket.getModData();
             }
-            ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
+            //todo: git blame
+            ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX/16, chunkCoordZ/16));
          }
       }
    }
 
    List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
 
-   public void loadNeighboringChunks(int newChunkX, int newChunkZ)
-   {
-      if(!worldObj.isRemote && loaderTicket != null)
-      {
-         for(ChunkCoordIntPair chunk : loadedChunks)
-         {
-            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-         }
+   public void loadNeighboringChunks(int newChunkX, int newChunkZ) {
+      if (!worldObj.isRemote && loaderTicket != null) {
+         // Unforce the previous loaded chunk
 
-         loadedChunks.clear();
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ + 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ - 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ - 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ + 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ + 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ - 1));
+         ForgeChunkManager.unforceChunk(loaderTicket, loadedChunk);
 
-         for(ChunkCoordIntPair chunk : loadedChunks)
-         {
-            ForgeChunkManager.forceChunk(loaderTicket, chunk);
-         }
+         // Update the loaded chunk to the new coordinates
+         loadedChunk = new ChunkCoordIntPair(newChunkX, newChunkZ);
+
+         // Force the new loaded chunk
+         //todo: need check, if this chunk is not loaded
+         ForgeChunkManager.forceChunk(loaderTicket, loadedChunk);
       }
    }
 
@@ -429,16 +418,22 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          }
       }
 
-      if(this.getGravity() < 0.0 && this.isEntityAlive()) {
-         loadNeighboringChunks((int)(posX / 16), (int)(posZ / 16));
-         ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
-         System.out.println("it loaded the chunk apparently at X: " + posX / 16 + "Z: " + posZ / 16);
-         //why are we dividing by 16? maybe that's why it isn't working
-         //todo: fix this shit
-      } else {
-         ForgeChunkManager.unforceChunk(loaderTicket, loadedChunk);
+      if (!worldObj.isRemote && loaderTicket != null) {
+         int newChunkX = (int) (posX / 16);
+         int newChunkZ = (int) (posZ / 16);
+         if (newChunkX != loadedChunk.chunkXPos || newChunkZ != loadedChunk.chunkZPos) {
+            if (this.getGravity() < 0.0 && this.isEntityAlive()) {
+               //loadNeighboringChunks((int) (posX / 16), (int) (posZ / 16));
+               ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX/16, chunkCoordZ/16));
+               System.out.println("it loaded the chunk apparently at X: " + posX / 16 + "Z: " + posZ / 16);
+               System.out.println("normal coords X: " + posX + "Z: " + posZ);
+               //pray this works
+               //todo: fix this shit
+            } else {
+               ForgeChunkManager.unforceChunk(loaderTicket, loadedChunk);
+            }
+         }
       }
-
 
       if(this.prevMotionX != super.motionX || this.prevMotionY != super.motionY || this.prevMotionZ != super.motionZ) {
          double var5 = (double)((float)Math.atan2(super.motionZ, super.motionX));
@@ -505,6 +500,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          if(this.getInfo().timeFuse > 0 && this.getCountOnUpdate() > this.getInfo().timeFuse) {
             this.onUpdateTimeout();
             this.setDead();
+            //check dispenser
+
             return;
          }
 

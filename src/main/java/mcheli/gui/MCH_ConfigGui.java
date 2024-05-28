@@ -240,6 +240,8 @@ public class MCH_ConfigGui extends W_GuiContainer {
       var10000[21] = var10003;
       var10003 = new MCH_GuiListItemKeyBind(222, 322, x1, "[MP][OP]Multiplay manager", MCH_Config.KeyMultiplayManager);
       var10009 = MCH_MOD.config;
+      var10003 = new MCH_GuiListItemKeyBind(223, 323, x1, "Eject Seat Heli", MCH_Config.KeyEjectHeli);
+      var10009 = MCH_MOD.config;
       var10000[22] = var10003;
       MCH_GuiListItemKeyBind[] listKeyBindItems = var10000;
       MCH_GuiListItemKeyBind[] i$ = listKeyBindItems;

@@ -38,6 +38,9 @@ public class MCH_HeliPacketHandler {
                heli.unmountEntity();
             } else if(pc.isUnmount == 2) {
                heli.unmountCrew();
+            } else if(pc.ejectSeat) {
+                  heli.ejectSeat(player);
+                  //heli.killselfnow!!!
             } else {
                if(pc.switchFold == 0) {
                   heli.setFoldBladeStat((byte)3);
@@ -62,6 +65,9 @@ public class MCH_HeliPacketHandler {
                if(pc.switchMode == 3) {
                   heli.switchHoveringMode(true);
                }
+
+               //possibly add a switch mode for the eject thing here
+               //TODO: gitblame
 
                if(pc.switchSearchLight) {
                   heli.setSearchLight(!heli.isSearchLightON());

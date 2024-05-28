@@ -14,6 +14,7 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.Iterator;
 import mcheli.MCH_Achievement;
 import mcheli.MCH_CommonProxy;
@@ -91,6 +92,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
 import net.minecraftforge.common.MinecraftForge;
 
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipEntry;
+import java.io.FileOutputStream;
+
 @Mod(
    modid = "mcheli",
    name = "mcheli",
@@ -144,6 +149,12 @@ public class MCH_MOD {
 
    @EventHandler
    public void PreInit(FMLPreInitializationEvent evt) {
+
+     // try {
+     //    ZipInputStream zis = new ZipInputStream(new FileInputStream("path/to/your/assets.zip"));
+     //    ZipEntry entry = zis.getNextEntry();
+     // }
+      //sorry but we're gonna need a loader mod to unzip this crap
       VER = Loader.instance().activeModContainer().getVersion();
       MCH_Lib.init();
       MCH_Lib.Log("MC Ver:1.7.10 MOD Ver:" + VER + "", new Object[0]);

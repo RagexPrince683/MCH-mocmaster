@@ -134,6 +134,13 @@ public class MCH_GuiHeli extends MCH_AircraftCommonGui {
                }
             }
 
+            if(heli.canEjectSeat(player)) {
+               var11 = (new StringBuilder()).append("Eject seat: ");
+               var10001 = MCH_MOD.config;
+               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeyEjectHeli.prmInt)).toString();
+               this.drawString(msg, RX, super.centerY - 30, colorActive);
+            }
+
             if(seatID == 0) {
                if(heli.getTowChainEntity() != null && !heli.getTowChainEntity().isDead) {
                   var11 = (new StringBuilder()).append("Drop  : ");

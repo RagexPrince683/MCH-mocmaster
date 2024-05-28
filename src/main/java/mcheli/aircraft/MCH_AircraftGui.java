@@ -67,15 +67,15 @@ public class MCH_AircraftGui extends W_GuiContainer {
          super.buttonList.add(this.buttonInventory);
       }
 
-      this.editCommand = new GuiTextField(super.fontRendererObj, super.guiLeft + 25, super.guiTop + 215, 160, 15);
-      this.editCommand.setText(this.aircraft.getCommand());
-      this.editCommand.setMaxStringLength(512);
+      //this.editCommand = new GuiTextField(super.fontRendererObj, super.guiLeft + 25, super.guiTop + 215, 160, 15);
+      //this.editCommand.setText(this.aircraft.getCommand());
+      //this.editCommand.setMaxStringLength(512);
       this.currentWeaponId = 0;
       this.reloadWait = 10;
    }
 
    public void closeScreen() {
-      MCH_PacketCommandSave.send(this.editCommand.getText());
+      //MCH_PacketCommandSave.send(this.editCommand.getText());
       super.mc.thePlayer.closeScreen();
    }
 
@@ -92,12 +92,13 @@ public class MCH_AircraftGui extends W_GuiContainer {
             this.reloadWait = 20;
          }
       }
-
-      this.editCommand.updateCursorCounter();
+      //wtf is this
+      //this.editCommand.updateCursorCounter();
    }
 
    protected void mouseClicked(int p_73864_1_, int p_73864_2_, int p_73864_3_) {
-      this.editCommand.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
+      //fear and loathing
+      //this.editCommand.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
       super.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
    }
 
@@ -189,16 +190,16 @@ public class MCH_AircraftGui extends W_GuiContainer {
       if(code == 1) {
          this.closeScreen();
       } else if(code == 28) {
-         String s = this.editCommand.getText().trim();
-         if(s.startsWith("/")) {
-            s = s.substring(1);
-         }
+        // String s = this.editCommand.getText().trim();
+        // if(s.startsWith("/")) {
+        //    s = s.substring(1);
+        // }
 
-         if(!s.isEmpty()) {
-            MCH_PacketIndMultiplayCommand.send(768, s);
-         }
+      //   if(!s.isEmpty()) {
+      //      //MCH_PacketIndMultiplayCommand.send(768, s);
+      //   }
       } else {
-         this.editCommand.textboxKeyTyped(c, code);
+         //this.editCommand.textboxKeyTyped(c, code);
       }
 
    }
@@ -226,6 +227,6 @@ public class MCH_AircraftGui extends W_GuiContainer {
       ff = (int)((double)(this.aircraft.getFuelP() * 100.0F) + 0.5D);
       int color = ff > 20?-14101432:16711680;
       this.drawString(String.format("%3d", new Object[]{Integer.valueOf(ff)}) + "%", x + 30, y + 65, color);
-      this.editCommand.drawTextBox();
+      //this.editCommand.drawTextBox();
    }
 }
