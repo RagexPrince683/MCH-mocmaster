@@ -202,6 +202,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             double throttlereal = this.getThrottle(); //decrease throttle slowly over time if the aircraft is pitched upwards
             throttlereal -= 0.1;
             this.setThrottle(throttlereal);
+            addCurrentThrottle(-throttlereal);
          }
 
          if (this.aircraftPitch <= 3 && this.isEntityAlive() && this.isAirBorne) {//and 3 degrees down is greater
