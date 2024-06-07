@@ -197,19 +197,23 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             this.swithVtolMode(true);
          }
 
-         if(this.aircraftPitch >= -15 && this.isEntityAlive() && this.isAirBorne) { //if the aircraft is between 15 degrees up
-            if (this.aircraftPitch <= 3) {//and 3 degrees down
-               this.motionY = (this.motionY*0.61)+this.aircraftPitch; //go up
-               this.aircraftY = this.aircraftY + (this.aircraftY*1.2);
-               this.currentSpeed *= (this.currentSpeed*2)+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY;
-            }
+         if(this.aircraftPitch <= -25 && this.isEntityAlive() && this.isAirBorne) { //if the aircraft is 25 degrees up
 
+            double throttlereal = this.getThrottle(); //decrease throttle slowly over time if the aircraft is pitched upwards
+            throttlereal -= 0.1;
+            this.setThrottle(throttlereal);
+         }
+
+         if (this.aircraftPitch <= 3 && this.isEntityAlive() && this.isAirBorne) {//and 3 degrees down is greater
+            this.motionY = (this.motionY*0.61)+this.aircraftPitch; //go up
+            this.aircraftY = this.aircraftY + (this.aircraftY*1.2);
+            this.currentSpeed *= (this.currentSpeed*2)+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY;
          }
 
          //if this.aircraftPitch <= -15
 
          if(this.getThrottle() <= 0.90 && this.isAirBorne) { //should apply a slow descent
-            this.aircraftY = this.aircraftY - (this.aircraftY*0.2);
+            this.aircraftY = this.aircraftY - (this.aircraftY*(0.2*this.getThrottle()));
          }
 
 
@@ -219,78 +223,40 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          //this.getAlt();
          if(this.motionY <= -2.0) { // I cannot detect if the aircraft hit or touched the ground
 
-            //System.out.println("nose dive"); //this works I just can't detect when I touch the ground and I need to work on back end again because everyone is incompetent
-
-            //isfly if() {
-            //if (this.getAlt() ) {
-
-            //}
-        //    if(this.onGround) {
-        //       System.out.println("impact");
-        //       this.onUpdate_CollisionGroundDamage();
-        //       this.attackEntityFrom(DamageSource.fall, this.getMaxHP() + 10);
-        //    }
          }
 
          if(this.aircraftPitch >= 1.2 && this.isEntityAlive() && this.isAirBorne) { //going down save this.motionY for helicopters
-            //this.motionY = this.motionY-this.liftfactor/4;
-            //maxfueldivonek == this.getMaxFuel() / 1000;
+
 
             this.currentSpeed *= (this.currentSpeed*6)+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY; //speed up
-            //System.out.println(this.currentSpeed + "speed" + this.aircraftPitch + "pitch" + this.getMaxFuel + "max fuel divided" + this.motionY + "Y motion");
-//<<<<<<< Updated upstream
-            //if(this.aircraftPitch >= 70 && this.isEntityAlive() && this.isAirBorne) { //going down again
-            //   this.motionY = (this.motionY * 0.20) + this.aircraftPitch;
-            //   this.aircraftY = (this.aircraftY * 0.20) + this.getThrottle();
-//=======
-               timer++;
-               this.motionY = (this.motionY * 0.20) + this.aircraftPitch / 4;
-               this.aircraftY = this.aircraftY * 0.20;
-               if (timer > 100) {//added a timer because aircraft fell too fast, this will later be declared in the aircraft so for heavier aircraft the timer is faster to activate
-                  if (this.aircraftPitch >= 50 && this.isEntityAlive() && this.isAirBorne) { //going down again
-                     this.motionY = (this.motionY * 0.61) + this.aircraftPitch;
-                     this.aircraftY = this.aircraftY * 0.61;
-                     if (this.aircraftPitch <= 1.0) {
-                        timer = 0;
-                     }
-                  }
-//>>>>>>> Stashed changes
-               }
+
+
+
+               //added a timer because aircraft fell too fast, this will later be declared in the aircraft so for heavier aircraft the timer is faster to activate
+
+
+
 
                //todo: debug and ensure this works as intended
-           // }
 
-            //System.out.println(this.aircraftY + " this.aircraftY, " + this.motionY + " this.motionY"); print statements don't work here idk why
-            //this.setThrottle(this.getThrottle()+this.motionY);
-
-         //   if (this.motionX < 0) {
-         //      // Apply gradual deceleration
-         //      this.motionX += 0.1; // Adjust the value as needed
-         //      if (this.motionX > 0) {
-         //         this.motionX -= 0.1; // Ensure it doesn't go past 0
-         //      }
-         //   }
-         //   if (this.motionZ < 0) {
-         //      // Apply gradual deceleration
-         //      this.motionZ += 0.1; // Adjust the value as needed
-         //      if (this.motionZ > 0) {
-         //         this.motionZ -= 0.1; // Ensure it doesn't go past 0
-         //      }
-         //   }
-            // don't fucking do that
-            //how do I convert the motionY to always be positive integer? I need to speed the aircraft up in the way it's going.
-         //   double absoluteMotionY = Math.abs(this.motionY/5);
-         //   if (this.motionX > 0) {
-         //      this.motionX += absoluteMotionY;
-         //   } else {
-         //      this.motionX -= absoluteMotionY;
-         //   }
-         //   if (this.motionZ > 0) {
-         //      this.motionZ += absoluteMotionY;
-         //   } else {
-         //      this.motionZ -= absoluteMotionY;
-         //   } goofy used motion instead of looking at speed laugh at him
          }
+
+         if (this.aircraftPitch >= 50 && this.isEntityAlive() && this.isAirBorne) { //going down again
+            timer++;
+            this.motionY = (this.motionY * 0.20) + this.aircraftPitch / 4;
+            this.aircraftY = this.aircraftY * 0.20;
+            //System.out.println(timer);
+            if (timer > 900) {
+               this.motionY = (this.motionY * 0.61) + this.aircraftPitch;
+               this.aircraftY = this.aircraftY * 0.61;
+
+               if (this.aircraftPitch <= 1.0) {
+                  //System.out.println(timer);
+                  timer = 0;
+               }
+            }
+         }
+
          if(this.motionY >= this.stallfactor) { //stall factor is 80 for now
             double v1 = this.motionX - this.liftfactor; //how about stallfactor divided by 2 instead of liftfactor here? //it works ok
             double v2 = this.motionZ - this.liftfactor;

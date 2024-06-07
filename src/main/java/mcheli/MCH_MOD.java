@@ -210,6 +210,7 @@ public class MCH_MOD {
       W_NetworkRegistry.registerChannel(packetHandler, "MCHeli_CH");
       MinecraftForge.EVENT_BUS.register(new MCH_EventHook());
       proxy.registerClientTick();
+
       W_NetworkRegistry.registerGuiHandler(this, new MCH_GuiCommonHandler());
       MCH_Lib.Log("Register entity", new Object[0]);
       this.registerEntity();

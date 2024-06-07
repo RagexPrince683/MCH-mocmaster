@@ -1,7 +1,11 @@
 package mcheli;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
@@ -9,16 +13,21 @@ import mcheli.MCH_PacketNotifyServerSettings;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.aircraft.MCH_PacketAircraftLocation;
 import mcheli.chain.MCH_ItemChain;
 import mcheli.command.MCH_Command;
+import mcheli.plane.MCP_EntityPlane;
 import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_EntityPlayer;
 import mcheli.wrapper.W_EventHook;
 import mcheli.wrapper.W_Lib;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.World;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
@@ -30,6 +39,24 @@ public class MCH_EventHook extends W_EventHook {
 
    public void commandEvent(CommandEvent event) {
       MCH_Command.onCommandEvent(event);
+   }
+
+   @SubscribeEvent
+   public void onWorldTick(TickEvent.WorldTickEvent evt){
+      System.out.println("THIS WORKS");
+      World worldObj = evt.world;
+      for(Object O : worldObj.playerEntities){
+         EntityPlayer player = (EntityPlayer)O;
+         AxisAlignedBB aabb = player.boundingBox.expand(350,350,350);
+         List<MCH_EntityAircraft> list = new ArrayList<>();
+         for(Object e : worldObj.getEntitiesWithinAABBExcludingEntity(player,aabb)) {
+            if (e instanceof MCH_EntityAircraft) { //&& is ridden
+               list.add((MCH_EntityAircraft)e);
+               MCH_PacketAircraftLocation.send((MCH_EntityAircraft)e, player);
+               System.out.println("idk testing I think this won't fire");
+            }
+         }
+      }
    }
 
    public void entitySpawn(EntityJoinWorldEvent event) {

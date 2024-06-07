@@ -14,6 +14,9 @@
 package mcheli.wrapper;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_PacketAircraftLocation;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -28,6 +31,11 @@ public class W_EventHook {
     }
 
     public void entitySpawn(EntityJoinWorldEvent event) {
+
+    }
+
+    public void onWorldTick(TickEvent.WorldTickEvent evt) {
+        System.out.println("test");
     }
 
     @SubscribeEvent

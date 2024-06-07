@@ -419,11 +419,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       }
 
       if (!worldObj.isRemote && loaderTicket != null) {
+         System.out.println("test");
          int newChunkX = (int) (posX / 16);
          int newChunkZ = (int) (posZ / 16);
          if (newChunkX != loadedChunk.chunkXPos || newChunkZ != loadedChunk.chunkZPos) {
-            if (this.getGravity() < 0.0 && this.isEntityAlive()) {
+            System.out.println("test2");
+            if (this.getGravity() < 0.0) {
                //loadNeighboringChunks((int) (posX / 16), (int) (posZ / 16));
+
                ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX/16, chunkCoordZ/16));
                System.out.println("it loaded the chunk apparently at X: " + posX / 16 + "Z: " + posZ / 16);
                System.out.println("normal coords X: " + posX + "Z: " + posZ);
