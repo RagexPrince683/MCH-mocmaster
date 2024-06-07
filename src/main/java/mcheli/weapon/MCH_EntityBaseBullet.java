@@ -39,6 +39,7 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 
+
 import java.util.ArrayList;
 
 public abstract class MCH_EntityBaseBullet extends W_Entity {
@@ -123,41 +124,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    }
 
 
-   //Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
-   //todo: add if statement for checking if gravity is down
-   //if this.MCH_EntityBaseBullet.
 
-
-   public void init(Ticket ticket) {
-      if(!worldObj.isRemote) {
-         if(ticket != null) {
-            if(loaderTicket == null) {
-               loaderTicket = ticket;
-               loaderTicket.bindEntity(this);
-               loaderTicket.getModData();
-            }
-            //todo: git blame
-            ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX/16, chunkCoordZ/16));
-         }
-      }
-   }
-
-   List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
-
-   public void loadNeighboringChunks(int newChunkX, int newChunkZ) {
-      if (!worldObj.isRemote && loaderTicket != null) {
-         // Unforce the previous loaded chunk
-
-         ForgeChunkManager.unforceChunk(loaderTicket, loadedChunk);
-
-         // Update the loaded chunk to the new coordinates
-         loadedChunk = new ChunkCoordIntPair(newChunkX, newChunkZ);
-
-         // Force the new loaded chunk
-         //todo: need check, if this chunk is not loaded
-         ForgeChunkManager.forceChunk(loaderTicket, loadedChunk);
-      }
-   }
 
    public void setLocationAndAngles(double par1, double par3, double par5, float par7, float par8) {
       super.setLocationAndAngles(par1, par3, par5, par7, par8);
@@ -167,11 +134,66 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    }
 
    protected void entityInit() {
+
       super.entityInit();
       this.getDataWatcher().addObject(27, Integer.valueOf(0));
       this.getDataWatcher().addObject(29, String.valueOf(""));
       this.getDataWatcher().addObject(30, String.valueOf(""));
       this.getDataWatcher().addObject(31, Byte.valueOf((byte)0));
+
+      ForgeChunkManager.requestTicket(this, worldObj, ForgeChunkManager.Type.NORMAL);
+   }
+
+   public void init(Ticket ticket) {
+      if(!worldObj.isRemote && ticket != null) {
+         if(loaderTicket == null) {
+            loaderTicket = ticket;
+            loaderTicket.bindEntity(this);
+            loaderTicket.getModData();
+         }
+         ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
+      }
+   }
+
+
+
+   public void loadChunk(int x, int z) {
+
+      if(this.loadedChunk == null) {
+         this.loadedChunk = new ChunkCoordIntPair(x, z);
+         ForgeChunkManager.forceChunk(loaderTicket, loadedChunk);
+      }
+   }
+
+
+
+   List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
+   public void loadNeighboringChunks(int newChunkX, int newChunkZ) {
+      if (!worldObj.isRemote && loaderTicket != null) {
+
+         clearChunkLoader();
+
+         loadedChunks.clear();
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX + (int) Math.ceil((this.posX + this.motionX) / 16D), newChunkZ + (int) Math.ceil((this.posZ + this.motionZ) / 16D)));
+      }
+      for(ChunkCoordIntPair chunk : loadedChunks) {
+         ForgeChunkManager.forceChunk(loaderTicket, chunk);
+      }
+   }
+
+   public void clearChunkLoader() {
+      if(!worldObj.isRemote && loaderTicket != null) {
+         for(ChunkCoordIntPair chunk : loadedChunks) {
+            ForgeChunkManager.unforceChunk(loaderTicket, loadedChunk);
+            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+
+         }
+      }
+      //if (!worldObj.isRemote && loaderTicket != null && loadedChunk != null) {
+      //   ForgeChunkManager.unforceChunk(loaderTicket, loadedChunk);
+      //   ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+      //}
    }
 
    public void setName(String s) {
@@ -218,6 +240,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
    public void setDead() {
       super.setDead();
+      this.clearChunkLoader();
    }
 
    public void setBomblet() {
@@ -418,6 +441,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          }
       }
 
+      if(!worldObj.isRemote) loadChunk((int) Math.floor(posX / 16D), (int) Math.floor(posZ / 16D)); {
+         loadNeighboringChunks((int) (posX / 16), (int) (posZ / 16));
+      }
       if (!worldObj.isRemote && loaderTicket != null) {
          System.out.println("test");
          int newChunkX = (int) (posX / 16);
@@ -425,6 +451,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          if (newChunkX != loadedChunk.chunkXPos || newChunkZ != loadedChunk.chunkZPos) {
             System.out.println("test2");
             if (this.getGravity() < 0.0) {
+
                //loadNeighboringChunks((int) (posX / 16), (int) (posZ / 16));
 
                ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX/16, chunkCoordZ/16));
@@ -491,21 +518,28 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             if(this.delayFuse == 0) {
                this.onUpdateTimeout();
                this.setDead();
+               this.clearChunkLoader();
                return;
             }
          }
 
          if(!this.checkValid()) {
             this.setDead();
+            this.clearChunkLoader();
             return;
          }
 
          if(this.getInfo().timeFuse > 0 && this.getCountOnUpdate() > this.getInfo().timeFuse) {
             this.onUpdateTimeout();
             this.setDead();
+            this.clearChunkLoader();
             //check dispenser
 
             return;
+         }
+
+         if(!this.isEntityAlive()) {
+            this.clearChunkLoader();
          }
 
          if(this.getInfo().explosionAltitude > 0 && MCH_Lib.getBlockIdY(this, 3, -this.getInfo().explosionAltitude) != 0) {
