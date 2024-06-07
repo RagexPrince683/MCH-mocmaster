@@ -441,29 +441,30 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          }
       }
 
-      if(!worldObj.isRemote) loadChunk((int) Math.floor(posX / 16D), (int) Math.floor(posZ / 16D)); {
+      if (this.getGravity() < 0.0) {
          loadNeighboringChunks((int) (posX / 16), (int) (posZ / 16));
       }
-      if (!worldObj.isRemote && loaderTicket != null) {
-         System.out.println("test");
-         int newChunkX = (int) (posX / 16);
-         int newChunkZ = (int) (posZ / 16);
-         if (newChunkX != loadedChunk.chunkXPos || newChunkZ != loadedChunk.chunkZPos) {
-            System.out.println("test2");
-            if (this.getGravity() < 0.0) {
 
-               //loadNeighboringChunks((int) (posX / 16), (int) (posZ / 16));
-
-               ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX/16, chunkCoordZ/16));
-               System.out.println("it loaded the chunk apparently at X: " + posX / 16 + "Z: " + posZ / 16);
-               System.out.println("normal coords X: " + posX + "Z: " + posZ);
-               //pray this works
-               //todo: fix this shit
-            } else {
-               ForgeChunkManager.unforceChunk(loaderTicket, loadedChunk);
-            }
-         }
-      }
+    //  if (!worldObj.isRemote && loaderTicket != null) {
+    //     System.out.println("test");
+    //     int newChunkX = (int) (posX / 16);
+    //     int newChunkZ = (int) (posZ / 16);
+    //     if (newChunkX != loadedChunk.chunkXPos || newChunkZ != loadedChunk.chunkZPos) {
+    //        System.out.println("test2");
+    //        if (this.getGravity() < 0.0) {
+//
+    //           //loadNeighboringChunks((int) (posX / 16), (int) (posZ / 16));
+//
+    //           ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX/16, chunkCoordZ/16));
+    //           System.out.println("it loaded the chunk apparently at X: " + posX / 16 + "Z: " + posZ / 16);
+    //           System.out.println("normal coords X: " + posX + "Z: " + posZ);
+    //           //pray this works
+    //           //todo: fix this shit
+    //        } else {
+    //           ForgeChunkManager.unforceChunk(loaderTicket, loadedChunk);
+    //        }
+    //     }
+    //  }
 
       if(this.prevMotionX != super.motionX || this.prevMotionY != super.motionY || this.prevMotionZ != super.motionZ) {
          double var5 = (double)((float)Math.atan2(super.motionZ, super.motionX));
