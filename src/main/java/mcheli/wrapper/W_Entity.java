@@ -1,6 +1,6 @@
 /*
  * Decompiled with CFR 0_123.
- * 
+ *
  * Could not load the following classes:
  *  net.minecraft.block.Block
  *  net.minecraft.crash.CrashReportCategory
@@ -19,7 +19,6 @@
  */
 package mcheli.wrapper;
 
-import mcheli.wrapper.W_Block;
 import net.minecraft.block.Block;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
@@ -36,7 +35,7 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
 public abstract class W_Entity
-extends Entity {
+        extends Entity {
     public W_Entity(World par1World) {
         super(par1World);
     }

@@ -142,7 +142,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
             this.initWeaponParam(var6);
             weapon = MCH_WeaponCreator.createWeapon(var6.worldObj, MCH_ItemLightWeaponBase.getName(var7), Vec3.createVectorHelper(0.0D, 0.0D, 0.0D), 0.0F, 0.0F, (MCH_IEntityLockChecker)null, false);
             if(weapon != null && weapon.getInfo() != null && weapon.getGuidanceSystem() != null) {
-               gs = weapon.getGuidanceSystem();
+               gs = (MCH_WeaponGuidanceSystem) weapon.getGuidanceSystem();
             }
          }
 
