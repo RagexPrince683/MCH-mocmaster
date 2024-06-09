@@ -118,43 +118,43 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    }
 
    //Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
- //  public void init(Ticket ticket) {
- //     if (!worldObj.isRemote) {
- //        if (ticket != null) {
- //           if (loaderTicket == null) {
- //              loaderTicket = ticket;
- //              loaderTicket.bindEntity(this);
- //              loaderTicket.getModData();
- //           }
- //           ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
- //        }
- //     }
- //  }
-//
- //  List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
-//
- //  public void loadNeighboringChunks(int newChunkX, int newChunkZ) {
- //     if (!worldObj.isRemote && loaderTicket != null) {
- //        for (ChunkCoordIntPair chunk : loadedChunks) {
- //           ForgeChunkManager.unforceChunk(loaderTicket, chunk);
- //        }
-//
- //        loadedChunks.clear();
- //        loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ));
- //        loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ + 1));
- //        loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ - 1));
- //        loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ - 1));
- //        loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ + 1));
- //        loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ));
- //        loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ + 1));
- //        loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ));
- //        loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ - 1));
-//
- //        for (ChunkCoordIntPair chunk : loadedChunks) {
- //           ForgeChunkManager.forceChunk(loaderTicket, chunk);
- //        }
- //     }
- //  }
+   public void init(Ticket ticket) {
+      if (!worldObj.isRemote) {
+         if (ticket != null) {
+            if (loaderTicket == null) {
+               loaderTicket = ticket;
+               loaderTicket.bindEntity(this);
+               loaderTicket.getModData();
+            }
+            ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
+         }
+      }
+   }
+
+   List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
+
+   public void loadNeighboringChunks(int newChunkX, int newChunkZ) {
+      if (!worldObj.isRemote && loaderTicket != null) {
+         for (ChunkCoordIntPair chunk : loadedChunks) {
+            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+         }
+
+         loadedChunks.clear();
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ + 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ - 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ - 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ + 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ + 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ - 1));
+
+         for (ChunkCoordIntPair chunk : loadedChunks) {
+            ForgeChunkManager.forceChunk(loaderTicket, chunk);
+         }
+      }
+   }
 
    public void setLocationAndAngles(double par1, double par3, double par5, float par7, float par8) {
       super.setLocationAndAngles(par1, par3, par5, par7, par8);
@@ -165,7 +165,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
    protected void entityInit() {
       super.entityInit();
-      //init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, Type.ENTITY));
+      init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, Type.ENTITY));
       this.getDataWatcher().addObject(27, Integer.valueOf(0));
       this.getDataWatcher().addObject(29, String.valueOf(""));
       this.getDataWatcher().addObject(30, String.valueOf(""));
@@ -213,10 +213,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       }
 
    }
+   //todo add a gravity check here
 
    public void setDead() {
       super.setDead();
-      //System.out.println("Setting dead " + this.isDead);
+      System.out.println("Setting dead " + this.isDead);
    }
 
    public void setBomblet() {
@@ -339,6 +340,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    @SideOnly(Side.CLIENT)
    public boolean isInRangeToRenderDist(double par1) {
       double d1 = super.boundingBox.getAverageEdgeLength() * 4.0D;
+      //todo: check that this may fix the issue
       d1 *= 64.0D;
       return par1 < d1 * d1;
    }
@@ -426,7 +428,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          }
       }
 
-      //loadNeighboringChunks((int) (posX / 16), (int) (posZ / 16));
+      loadNeighboringChunks((int) (posX / 16), (int) (posZ / 16));
+      System.out.println("loadneighboring chunks");
 
       if (this.prevMotionX != super.motionX || this.prevMotionY != super.motionY || this.prevMotionZ != super.motionZ) {
          double var5 = (double) ((float) Math.atan2(super.motionZ, super.motionX));
@@ -486,7 +489,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          }
 
          if (!this.checkValid()) {
-            this.setDead();
+            //this.setDead();
+            System.out.println("entity is not valid");
             return;
          }
 

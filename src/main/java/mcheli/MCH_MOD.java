@@ -1,5 +1,6 @@
 package mcheli;
 
+import com.hbm.entity.logic.IChunkLoader;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
@@ -90,8 +91,11 @@ import mcheli.wrapper.W_NetworkRegistry;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
+import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
 
+import java.util.List;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
 import java.io.FileOutputStream;
@@ -222,13 +226,32 @@ public class MCH_MOD {
       proxy.registerSounds();
       W_LanguageRegistry.updateLang(sourcePath + "/assets/" + "mcheli" + "/lang/");
       MCH_Lib.Log("End load", new Object[0]);
+
+      ForgeChunkManager.setForcedChunkLoadingCallback(this, new ForgeChunkManager.LoadingCallback() {
+
+         @Override
+         public void ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world) {
+            for (ForgeChunkManager.Ticket ticket : tickets) {
+               if(ticket.getEntity() instanceof MCH_EntityBullet) {
+                  ((IChunkLoader) ticket.getEntity()).init(ticket);
+               }
+            }
+         }
+      });
+
    }
 
-   @EventHandler
+
+
+
+      @EventHandler
    public void init(FMLInitializationEvent evt) {
       GameRegistry.registerTileEntity(MCH_DraftingTableTileEntity.class, "drafting_table");
       proxy.registerBlockRenderer();
+
    }
+
+
 
    @EventHandler
    public void postInit(FMLPostInitializationEvent evt) {
@@ -242,6 +265,9 @@ public class MCH_MOD {
       creativeTabsTank.setFixedIconItem(MCH_Config.CreativeTabIconTank.prmString);
       var10001 = config;
       creativeTabsVehicle.setFixedIconItem(MCH_Config.CreativeTabIconVehicle.prmString);
+
+
+
       MCH_ItemRecipe.registerItemRecipe();
       MCH_WeaponInfoManager.setRoundItems();
       proxy.readClientModList();
@@ -250,9 +276,12 @@ public class MCH_MOD {
    @EventHandler
    public void onStartServer(FMLServerStartingEvent event) {
       proxy.registerServerTick();
+
    }
 
-   public void registerEntity() {
+
+
+      public void registerEntity() {
       EntityRegistry.registerModEntity(MCH_EntitySeat.class, "MCH.E.Seat", 100, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityHeli.class, "MCH.E.Heli", 101, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityGLTD.class, "MCH.E.GLTD", 102, this, 200, 10, true);
