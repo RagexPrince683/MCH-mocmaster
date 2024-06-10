@@ -131,26 +131,25 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       }
    }
 
+   public void clearChunkLoader() {
+      if(!worldObj.isRemote && loaderTicket != null) {
+         for(ChunkCoordIntPair chunk : loadedChunks) {
+            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+         }
+      }
+   }
+
    List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
 
    public void loadNeighboringChunks(int newChunkX, int newChunkZ) {
-      if (!worldObj.isRemote && loaderTicket != null) {
-         for (ChunkCoordIntPair chunk : loadedChunks) {
-            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-         }
+      if(!worldObj.isRemote && loaderTicket != null) {
+
+         clearChunkLoader();
 
          loadedChunks.clear();
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ + 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ - 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ - 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ + 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ + 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ - 1));
+         for(int i = -1; i <= 1; i++) for(int j = -1; j <= 1; j++) loadedChunks.add(new ChunkCoordIntPair(newChunkX + i, newChunkZ + j));
 
-         for (ChunkCoordIntPair chunk : loadedChunks) {
+         for(ChunkCoordIntPair chunk : loadedChunks) {
             ForgeChunkManager.forceChunk(loaderTicket, chunk);
          }
       }
