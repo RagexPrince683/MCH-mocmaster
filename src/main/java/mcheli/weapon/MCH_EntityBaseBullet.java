@@ -3,6 +3,7 @@ package mcheli.weapon;
 import com.hbm.entity.effect.EntityNukeCloudSmall;
 import com.hbm.entity.effect.EntityNukeTorex;
 import com.hbm.entity.logic.EntityNukeExplosionMK5;
+import com.hbm.entity.logic.IChunkLoader;
 import com.hbm.explosion.ExplosionChaos;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -35,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public abstract class MCH_EntityBaseBullet extends W_Entity {
+public abstract class MCH_EntityBaseBullet extends W_Entity implements IChunkLoader {
 
    public static final int DATAWT_RESERVE1 = 26;
    public static final int DATAWT_TARGET_ENTITY = 27;
@@ -67,6 +68,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    public double prevMotionY;
    public double prevMotionZ;
    private Ticket loaderTicket;
+   public boolean bomblet;
+   public boolean gravitydown;
 
    //private final MCH_Fuze fuze = new MCH_Fuze(this);;
 
@@ -118,15 +121,31 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    }
 
    //Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
+   @Override
    public void init(Ticket ticket) {
-      if (!worldObj.isRemote) {
-         if (ticket != null) {
-            if (loaderTicket == null) {
-               loaderTicket = ticket;
-               loaderTicket.bindEntity(this);
-               loaderTicket.getModData();
-            }
-            ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
+      if(!worldObj.isRemote && ticket != null) {
+         if(loaderTicket == null) {
+            loaderTicket = ticket;
+            loaderTicket.bindEntity(this);
+            loaderTicket.getModData();
+         }
+         ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
+      }
+   }
+
+   List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
+
+   public void loadNeighboringChunks(int newChunkX, int newChunkZ) {
+      if(!worldObj.isRemote && loaderTicket != null) {
+
+         clearChunkLoader();
+
+         loadedChunks.clear();
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ));
+         //loadedChunks.add(new ChunkCoordIntPair(newChunkX + (int) Math.floor((this.posX + this.motionX) / 16D), newChunkZ + (int) Math.floor((this.posZ + this.motionZ) / 16D)));
+
+         for(ChunkCoordIntPair chunk : loadedChunks) {
+            ForgeChunkManager.forceChunk(loaderTicket, chunk);
          }
       }
    }
@@ -139,21 +158,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       }
    }
 
-   List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
 
-   public void loadNeighboringChunks(int newChunkX, int newChunkZ) {
-      if(!worldObj.isRemote && loaderTicket != null) {
-
-         clearChunkLoader();
-
-         loadedChunks.clear();
-         for(int i = -1; i <= 1; i++) for(int j = -1; j <= 1; j++) loadedChunks.add(new ChunkCoordIntPair(newChunkX + i, newChunkZ + j));
-
-         for(ChunkCoordIntPair chunk : loadedChunks) {
-            ForgeChunkManager.forceChunk(loaderTicket, chunk);
-         }
-      }
-   }
 
    public void setLocationAndAngles(double par1, double par3, double par5, float par7, float par8) {
       super.setLocationAndAngles(par1, par3, par5, par7, par8);
@@ -194,6 +199,20 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    }
 
    public void onSetWeasponInfo() {
+
+      if (this.getInfo().gravity < 0.0) {
+         gravitydown = true;
+      } else {
+         gravitydown = false;
+         System.out.println("no gravity defined");
+      }
+
+      if(this.getInfo().bomblet >= 1) {
+         bomblet = true;
+      } else {
+         bomblet = false;
+      }
+
       if (!super.worldObj.isRemote) {
          this.isBomblet = 0;
       }
@@ -216,6 +235,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
    public void setDead() {
       super.setDead();
+      this.clearChunkLoader();
       System.out.println("Setting dead " + this.isDead);
    }
 
@@ -339,7 +359,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    @SideOnly(Side.CLIENT)
    public boolean isInRangeToRenderDist(double par1) {
       double d1 = super.boundingBox.getAverageEdgeLength() * 4.0D;
-      //todo: check that this may fix the issue
       d1 *= 64.0D;
       return par1 < d1 * d1;
    }
@@ -427,8 +446,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          }
       }
 
-      loadNeighboringChunks((int) (posX / 16), (int) (posZ / 16));
-      System.out.println("loadneighboring chunks");
+
 
       if (this.prevMotionX != super.motionX || this.prevMotionY != super.motionY || this.prevMotionZ != super.motionZ) {
          double var5 = (double) ((float) Math.atan2(super.motionZ, super.motionX));
@@ -452,7 +470,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       if (this.getInfo() == null) {
          if (this.countOnUpdate >= 2) {
             MCH_Lib.Log((Entity) this, "##### MCH_EntityBaseBullet onUpdate() Weapon info null %d, %s, Name=%s", new Object[]{Integer.valueOf(W_Entity.getEntityId(this)), this.getEntityName(), this.getName()});
-            this.setDead();
+            System.out.println("ENTITY IS NULL!!!");
+            //this.setDead();
             return;
          }
 
@@ -469,7 +488,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       if (!super.worldObj.isRemote) {
          if ((int) super.posY <= 255 && !super.worldObj.blockExists((int) super.posX, (int) super.posY, (int) super.posZ)) {
             if (this.getInfo().delayFuse <= 0) {
-               this.setDead();
+               //this.setDead();
                return;
             }
 
@@ -482,7 +501,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             --this.delayFuse;
             if (this.delayFuse == 0) {
                this.onUpdateTimeout();
-               this.setDead();
+               //this.setDead();
                return;
             }
          }
@@ -510,8 +529,19 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          super.motionY += (double) this.getGravityInWater();
       }
 
+
+      //this.getGravity() < 0.0 || this.istvmissile or aa missile
+      //|| this.istvmissile
+      //isbomblet is true for everything
+      //this.type.equalsIgnoreCase("TVMissile"
+      //this.getInfo().gravity < 0.0 &&
       if (!super.isDead) {
+         if (!bomblet && gravitydown) {
+            loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
+            System.out.println("loadneighboring chunks");
+         }
          this.onUpdateCollided();
+
       }
 
       super.posX += super.motionX * this.accelerationFactor;
@@ -595,8 +625,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             for (int i = 0; i < this.getInfo().bomblet; ++i) {
                this.sprinkleBomblet();
             }
-
-            this.setDead();
+            //todo if the z alignment doesn't work make this logic more sound by ensuring that the bomblet variable is even defined
+            System.out.println("fucking kill me would have set dead BOMBLET EDITION");
+            //this.setDead();
          }
       }
 
@@ -807,8 +838,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
    public void onImpact(MovingObjectPosition m, float damageFactor) {
       float p;
-      if (!super.worldObj.isRemote) {
+      if (!super.worldObj.isRemote) { //if on the server
          if (m.entityHit != null) {
+            //todo maybe initiate another chunk loaded here
+            if (!bomblet && gravitydown) { //new chunk loader
+               loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
+               System.out.println("loadneighboring chunks server");
+               //this.setDead();
+               System.out.println("hit a vehicle");
+               //this is infact not an impact, it is hitting a vehicle
+            }
             this.onImpactEntity(m.entityHit, damageFactor);
             this.piercing = 0;
          }
@@ -850,6 +889,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             }
 
             this.setDead();
+            //this is an impact
+            System.out.println("impact? set dead");
          }
       } else if (this.getInfo() != null && (this.getInfo().explosion == 0 || this.getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(m)) {
          p = (float) this.getInfo().power;
@@ -931,7 +972,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    }
 
    public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
-      this.setDead();
+      System.out.println("read entity from nbt, would set dead but commented out");
+      //this.setDead();
    }
 
    public boolean canBeCollidedWith() {
