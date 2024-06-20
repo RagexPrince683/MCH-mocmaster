@@ -186,7 +186,8 @@ public class MCH_Config {
    public static MCH_ConfigPrm ItemRecipe_RangeFinder;
    public static MCH_ConfigPrm[] KeyConfig;
    public static MCH_ConfigPrm[] General;
-   public final String destroyBlockNames = "glass_pane, stained_glass_pane, tallgrass, double_plant, yellow_flower, red_flower, vine, wheat, reeds, waterlily";
+    public static MCH_ConfigPrm MultiThreadedModelLoading;
+    public final String destroyBlockNames = "glass_pane, stained_glass_pane, tallgrass, double_plant, yellow_flower, red_flower, vine, wheat, reeds, waterlily";
 
 
    public MCH_Config(String minecraftPath, String cfgFile) {
@@ -236,6 +237,7 @@ public class MCH_Config {
       TestMode = new MCH_ConfigPrm("TestMode", false);
       EnableCommand = new MCH_ConfigPrm("EnableCommand", true);
       PlaceableOnSpongeOnly = new MCH_ConfigPrm("PlaceableOnSpongeOnly", false);
+      MultiThreadedModelLoading = new MCH_ConfigPrm("MultiThreadedModelLoading", true);
       HideKeybind = new MCH_ConfigPrm("HideKeybind", false);
       ItemDamage = new MCH_ConfigPrm("ItemDamage", true);
       ItemFuel = new MCH_ConfigPrm("ItemFuel", true);

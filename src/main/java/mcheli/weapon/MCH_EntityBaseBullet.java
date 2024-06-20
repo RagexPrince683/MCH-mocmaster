@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public abstract class MCH_EntityBaseBullet extends W_Entity implements IChunkLoader {
+public abstract class MCH_EntityBaseBullet extends W_Entity {
 
    public static final int DATAWT_RESERVE1 = 26;
    public static final int DATAWT_TARGET_ENTITY = 27;
@@ -121,42 +121,58 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements IChunkLoa
    }
 
    //Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
-   @Override
+
    public void init(Ticket ticket) {
-      if(!worldObj.isRemote && ticket != null) {
-         if(loaderTicket == null) {
-            loaderTicket = ticket;
-            loaderTicket.bindEntity(this);
-            loaderTicket.getModData();
+      if (!worldObj.isRemote) {
+         if (ticket != null) {
+            if (loaderTicket == null) {
+               loaderTicket = ticket;
+               loaderTicket.bindEntity(this);
+               loaderTicket.getModData();
+            }
+            ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
          }
-         ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
       }
    }
 
    List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
 
-   public void loadNeighboringChunks(int newChunkX, int newChunkZ) {
-      if(!worldObj.isRemote && loaderTicket != null) {
 
-         clearChunkLoader();
+
+   public void loadNeighboringChunks(int newChunkX, int newChunkZ)
+   {
+      if(!worldObj.isRemote && loaderTicket != null)
+      {
+         for(ChunkCoordIntPair chunk : loadedChunks)
+         {
+            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+         }
 
          loadedChunks.clear();
          loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ));
-         //loadedChunks.add(new ChunkCoordIntPair(newChunkX + (int) Math.floor((this.posX + this.motionX) / 16D), newChunkZ + (int) Math.floor((this.posZ + this.motionZ) / 16D)));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ + 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ - 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ - 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ + 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ + 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ - 1));
 
-         for(ChunkCoordIntPair chunk : loadedChunks) {
+         for(ChunkCoordIntPair chunk : loadedChunks)
+         {
             ForgeChunkManager.forceChunk(loaderTicket, chunk);
          }
       }
    }
 
-   public void clearChunkLoader() {
-      if(!worldObj.isRemote && loaderTicket != null) {
-         for(ChunkCoordIntPair chunk : loadedChunks) {
-            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-         }
-      }
-   }
+   //public void clearChunkLoader() {
+   //   if(!worldObj.isRemote && loaderTicket != null) {
+   //      for(ChunkCoordIntPair chunk : loadedChunks) {
+   //         ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+   //      }
+   //   }
+   //}
 
 
 
@@ -235,7 +251,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements IChunkLoa
 
    public void setDead() {
       super.setDead();
-      this.clearChunkLoader();
+      //this.clearChunkLoader();
       System.out.println("Setting dead " + this.isDead);
    }
 
@@ -471,7 +487,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements IChunkLoa
          if (this.countOnUpdate >= 2) {
             MCH_Lib.Log((Entity) this, "##### MCH_EntityBaseBullet onUpdate() Weapon info null %d, %s, Name=%s", new Object[]{Integer.valueOf(W_Entity.getEntityId(this)), this.getEntityName(), this.getName()});
             System.out.println("ENTITY IS NULL!!!");
-            //this.setDead();
+            this.setDead();
             return;
          }
 
@@ -488,7 +504,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements IChunkLoa
       if (!super.worldObj.isRemote) {
          if ((int) super.posY <= 255 && !super.worldObj.blockExists((int) super.posX, (int) super.posY, (int) super.posZ)) {
             if (this.getInfo().delayFuse <= 0) {
-               //this.setDead();
+               this.setDead();
                return;
             }
 
@@ -501,13 +517,13 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements IChunkLoa
             --this.delayFuse;
             if (this.delayFuse == 0) {
                this.onUpdateTimeout();
-               //this.setDead();
+               this.setDead();
                return;
             }
          }
 
          if (!this.checkValid()) {
-            //this.setDead();
+            this.setDead();
             System.out.println("entity is not valid");
             return;
          }
@@ -627,7 +643,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements IChunkLoa
             }
             //todo if the z alignment doesn't work make this logic more sound by ensuring that the bomblet variable is even defined
             System.out.println("fucking kill me would have set dead BOMBLET EDITION");
-            //this.setDead();
+            this.setDead();
          }
       }
 
@@ -842,10 +858,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements IChunkLoa
          if (m.entityHit != null) {
             //todo maybe initiate another chunk loaded here
             if (!bomblet && gravitydown) { //new chunk loader
-               loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
-               System.out.println("loadneighboring chunks server");
+               //loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
+               //System.out.println("loadneighboring chunks server");
                //this.setDead();
-               System.out.println("hit a vehicle");
+               //System.out.println("hit a vehicle");
                //this is infact not an impact, it is hitting a vehicle
             }
             this.onImpactEntity(m.entityHit, damageFactor);
@@ -973,7 +989,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements IChunkLoa
 
    public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
       System.out.println("read entity from nbt, would set dead but commented out");
-      //this.setDead();
+      this.setDead();
    }
 
    public boolean canBeCollidedWith() {

@@ -99,6 +99,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.model.IModelCustom;
 import net.minecraftforge.common.MinecraftForge;
+import mcheli.multithread.MultiThreadModelManager;
 
 public class MCH_ClientProxy extends MCH_CommonProxy {
 
@@ -173,6 +174,13 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       MCH_ModelManager.load("wrench");
       MCH_ModelManager.load("rangefinder");
       MCH_HeliInfoManager.getInstance();
+
+      if (MCH_Config.MultiThreadedModelLoading.prmBool) {
+         System.out.println("Starting multithreaded model loading");
+         MultiThreadModelManager.start(this);
+         return;
+      }
+
       Iterator var5 = MCH_HeliInfoManager.map.keySet().iterator();
 
       String var6;
@@ -218,6 +226,25 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       }
 
       MCH_ModelManager.load("blocks", "drafting_table");
+   }
+
+   public static void registerModels_Throwable(){
+      System.out.println("Loading throwable");
+
+      for (Object obj : MCH_ThrowableInfoManager.getValues()) {
+         if (obj instanceof MCH_ThrowableInfo) { // Ensure the object is of type MCH_ThrowableInfo
+            MCH_ThrowableInfo throwableInfo = (MCH_ThrowableInfo) obj;
+            IModelCustom modelCustom = MCH_ModelManager.load("throwable", throwableInfo.name);
+            if (modelCustom != null) {
+               System.out.println("Adding model for " + throwableInfo.name);
+               throwableInfo.model = modelCustom;
+            } else {
+               System.out.println("ERROR: No model found for throwable " + throwableInfo.name);
+            }
+         } else {
+            System.out.println("ERROR: Invalid object type in throwable info manager");
+         }
+      }
    }
 
    public static void registerModels_Bullet() {
