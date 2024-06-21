@@ -4,12 +4,18 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Queue;
+
+import java.util.*;
+
+import mcheli.aircraft.MCH_PacketAircraftLocation;
+import mcheli.plane.MCP_EntityPlane;
 import mcheli.wrapper.W_Reflection;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.WorldServer;
 
 public class MCH_ServerTickHandler {
 
@@ -22,16 +28,25 @@ public class MCH_ServerTickHandler {
 
    @SubscribeEvent
    public void onServerTickEvent(ServerTickEvent event) {
-      Phase var10001 = event.phase;
-      if(event.phase == Phase.START) {
-         ;
-      }
+      if (event.phase != Phase.END) return;
+      //MCH_ESMHandler.getInstance().onTick();
+      MinecraftServer minecraftServer = MinecraftServer.getServer();
 
-      var10001 = event.phase;
-      if(event.phase == Phase.END) {
-         ;
+      for (WorldServer server : MinecraftServer.getServer().worldServers) {
+         for (Object playerObj : server.playerEntities) {
+            EntityPlayer player = (EntityPlayer) playerObj;
+            AxisAlignedBB aabb = player.boundingBox.expand(350, 350, 350);
+            List<MCP_EntityPlane> list = new ArrayList<>();
+            List<Entity> entities = player.worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb);
+            for (Entity e : entities) {
+               if (e instanceof MCP_EntityPlane && !e.onGround) {
+                  MCP_EntityPlane plane = (MCP_EntityPlane) e;
+                  list.add(plane);
+                  MCH_PacketAircraftLocation.send(plane, player);
+               }
+            }
+         }
       }
-
    }
 
    private void onServerTickPre() {

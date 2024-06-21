@@ -69,6 +69,7 @@ public class MCH_PacketAircraftLocation extends MCH_Packet {
 
     public static void send(MCH_EntityAircraft ac, EntityPlayer target) {
         if(target != null && ac != null) {
+            System.out.println("send MCH_EntityAircraft etc");
             MCH_PacketAircraftLocation s = new MCH_PacketAircraftLocation();
             if (ac instanceof MCP_EntityPlane) {
                 s.type = 0;
@@ -111,6 +112,7 @@ public class MCH_PacketAircraftLocation extends MCH_Packet {
             s.entityId = ac.getEntityId();
 
             W_Network.sendToPlayer(s, target);
+            System.out.println("W_Network");
         }
     }
 

@@ -17,17 +17,21 @@ import mcheli.aircraft.MCH_PacketAircraftLocation;
 import mcheli.chain.MCH_ItemChain;
 import mcheli.command.MCH_Command;
 import mcheli.plane.MCP_EntityPlane;
+import mcheli.sensors.MCH_VisualContact;
+import mcheli.sensors.Mk1Eyeball;
 import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_EntityPlayer;
 import mcheli.wrapper.W_EventHook;
 import mcheli.wrapper.W_Lib;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
@@ -42,9 +46,10 @@ public class MCH_EventHook extends W_EventHook {
    }
 
    @SubscribeEvent
-   public void onWorldTick(TickEvent.WorldTickEvent evt){
-      System.out.println("THIS WORKS");
-      World worldObj = evt.world;
+   public void onRenderWorldLastEvent(RenderWorldLastEvent evt) {
+      //System.out.println("THIS WORKS");
+      //it indeed works
+      World worldObj = Minecraft.getMinecraft().theWorld;
       for(Object O : worldObj.playerEntities){
          EntityPlayer player = (EntityPlayer)O;
          AxisAlignedBB aabb = player.boundingBox.expand(350,350,350);
@@ -53,11 +58,30 @@ public class MCH_EventHook extends W_EventHook {
             if (e instanceof MCH_EntityAircraft) { //&& is ridden
                list.add((MCH_EntityAircraft)e);
                MCH_PacketAircraftLocation.send((MCH_EntityAircraft)e, player);
-               System.out.println("idk testing I think this won't fire");
+               //System.out.println("idk testing I think this won't fire");
             }
          }
       }
    }
+
+   private void drawContacts(float partialTick) {
+      EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+
+      for(MCH_VisualContact contact : Mk1Eyeball.getInstance().contacts){
+         if(player.getDistance(contact.x, contact.y, contact.z) >= 64) {
+            Mk1Eyeball.renderContact(contact, partialTick);
+            System.out.println("mk1 eyeball get instance contacts and mk1 eyeball render contact");
+         }
+      }
+   }
+   @SubscribeEvent
+   public void onRenderWorldEvent(RenderWorldLastEvent event){
+      System.out.println("onrenderworldevent");
+      Mk1Eyeball.getInstance().update();
+      drawContacts(event.partialTicks);
+   }
+
+
 
    public void entitySpawn(EntityJoinWorldEvent event) {
       if(W_Lib.isEntityLivingBase(event.entity) && !W_EntityPlayer.isPlayer(event.entity)) {

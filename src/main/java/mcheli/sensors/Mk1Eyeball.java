@@ -29,8 +29,11 @@ public class Mk1Eyeball {
 
 
     public void addContact(MCH_PacketAircraftLocation pc) {
+        //System.out.println("mk1 eyeball loaded");
         for(MCH_VisualContact c : this.contacts) {
+            //System.out.println("mk1 eyeball loaded2");
             if(c.entityId == pc.entityId) {
+                //System.out.println("mk1 eyeball loaded3");
                 c.updated = 0;
                 c.x = pc.x;
                 c.y = pc.y;
@@ -42,7 +45,7 @@ public class Mk1Eyeball {
                 return;
             }
         }
-
+        //System.out.println("mk1 eyeball loaded4");
         this.contacts.add(new MCH_VisualContact(pc.x, pc.y, pc.z, pc.rotX, pc.rotY, pc.rotZ, pc.model, pc.texture, pc.entityId, pc.type));
 
     }

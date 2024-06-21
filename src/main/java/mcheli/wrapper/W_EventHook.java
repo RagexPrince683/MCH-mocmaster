@@ -17,12 +17,20 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_PacketAircraftLocation;
+import mcheli.plane.MCP_EntityPlane;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.World;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class W_EventHook {
     @SubscribeEvent
@@ -34,8 +42,27 @@ public class W_EventHook {
 
     }
 
-    public void onWorldTick(TickEvent.WorldTickEvent evt) {
-        System.out.println("test");
+    @SubscribeEvent
+    void onWorldTick(TickEvent.WorldTickEvent evt) {
+        System.out.println("onworldtick");
+        World worldObj = evt.world;
+        for (Object obj : worldObj.playerEntities) {
+            if (obj instanceof EntityPlayer) {
+                EntityPlayer player = (EntityPlayer) obj;
+                AxisAlignedBB aabb = player.boundingBox.expand(350, 350, 350);
+                List<MCH_EntityAircraft> list = new ArrayList<>();
+                for (Object entityObj : worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb)) {
+                    if (entityObj instanceof MCH_EntityAircraft) {
+                        System.out.println("MCH_EntityAircraft");
+                        MCH_EntityAircraft plane = (MCH_EntityAircraft) entityObj;
+                        if (!plane.onGround) {
+                            list.add(plane);
+                            MCH_PacketAircraftLocation.send(plane, player);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @SubscribeEvent

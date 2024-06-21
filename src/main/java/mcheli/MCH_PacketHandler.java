@@ -4,6 +4,7 @@ import com.google.common.io.ByteArrayDataInput;
 import mcheli.MCH_CommonPacketHandler;
 import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_AircraftPacketHandler;
+import mcheli.aircraft.MCH_PacketAircraftLocation;
 import mcheli.block.MCH_DraftingTablePacketHandler;
 import mcheli.command.MCH_CommandPacketHandler;
 import mcheli.gltd.MCH_GLTDPacketHandler;
@@ -11,6 +12,7 @@ import mcheli.helicopter.MCH_HeliPacketHandler;
 import mcheli.lweapon.MCH_LightWeaponPacketHandler;
 import mcheli.multiplay.MCH_MultiplayPacketHandler;
 import mcheli.plane.MCP_PlanePacketHandler;
+import mcheli.sensors.Mk1Eyeball;
 import mcheli.tank.MCH_TankPacketHandler;
 import mcheli.tool.MCH_ToolPacketHandler;
 import mcheli.uav.MCH_UavPacketHandler;
@@ -19,6 +21,8 @@ import mcheli.wrapper.W_PacketHandler;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class MCH_PacketHandler extends W_PacketHandler {
+
+
 
    public void onPacket(ByteArrayDataInput data, EntityPlayer entityPlayer) {
       int msgid = this.getMessageId(data);
@@ -134,9 +138,16 @@ public class MCH_PacketHandler extends W_PacketHandler {
          break;
       case 537919504:
          MCH_TankPacketHandler.onPacket_PlayerControl(entityPlayer, data);
+      case 536875026:
+         MCH_AircraftPacketHandler.onPacketAircraftLocation(entityPlayer, data);
+         System.out.println("onpacketaircraftlocation");
+         break;
+
       }
 
    }
+
+
 
    protected int getMessageId(ByteArrayDataInput data) {
       try {
