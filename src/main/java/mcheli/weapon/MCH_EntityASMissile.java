@@ -42,6 +42,7 @@ public class MCH_EntityASMissile extends MCH_EntityBaseBullet {
             double dist = this.getDistance(this.targetPosX, this.targetPosY, this.targetPosZ);
             if(dist < (double)this.getInfo().proximityFuseDist) {
                if(this.getInfo().bomblet > 0) {
+                  //todo: here
                   for(int x = 0; x < this.getInfo().bomblet; ++x) {
                      this.sprinkleBomblet();
                   }

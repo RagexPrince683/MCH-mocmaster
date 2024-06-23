@@ -11,6 +11,9 @@ import net.minecraft.client.entity.EntityPlayerSP;
 @SideOnly(Side.CLIENT)
 public class MCH_SoundUpdater extends W_SoundUpdater {
 
+
+   //todo: rewrite completely for xradar compat
+
    private final MCH_EntityAircraft theAircraft;
    private final EntityPlayerSP thePlayer;
    private boolean isMoving;

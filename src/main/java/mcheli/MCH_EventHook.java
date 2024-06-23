@@ -45,24 +45,26 @@ public class MCH_EventHook extends W_EventHook {
       MCH_Command.onCommandEvent(event);
    }
 
-   @SubscribeEvent
-   public void onRenderWorldLastEvent(RenderWorldLastEvent evt) {
-      //System.out.println("THIS WORKS");
-      //it indeed works
-      World worldObj = Minecraft.getMinecraft().theWorld;
-      for(Object O : worldObj.playerEntities){
-         EntityPlayer player = (EntityPlayer)O;
-         AxisAlignedBB aabb = player.boundingBox.expand(350,350,350);
-         List<MCH_EntityAircraft> list = new ArrayList<>();
-         for(Object e : worldObj.getEntitiesWithinAABBExcludingEntity(player,aabb)) {
-            if (e instanceof MCH_EntityAircraft) { //&& is ridden
-               list.add((MCH_EntityAircraft)e);
-               MCH_PacketAircraftLocation.send((MCH_EntityAircraft)e, player);
-               //System.out.println("idk testing I think this won't fire");
-            }
-         }
-      }
-   }
+
+
+//  @SubscribeEvent
+//  public void onRenderWorldLastEvent(RenderWorldLastEvent evt) {
+//     //System.out.println("THIS WORKS");
+//     //it indeed works
+//     World worldObj = Minecraft.getMinecraft().theWorld;
+//     for(Object O : worldObj.playerEntities){
+//        EntityPlayer player = (EntityPlayer)O;
+//        AxisAlignedBB aabb = player.boundingBox.expand(350,350,350);
+//        List<MCH_EntityAircraft> list = new ArrayList<>();
+//        for(Object e : worldObj.getEntitiesWithinAABBExcludingEntity(player,aabb)) {
+//           if (e instanceof MCH_EntityAircraft) { //&& is ridden
+//              list.add((MCH_EntityAircraft)e);
+//              MCH_PacketAircraftLocation.send((MCH_EntityAircraft)e, player);
+//              //System.out.println("idk testing I think this won't fire");
+//           }
+//        }
+//     }
+//  }
 
    private void drawContacts(float partialTick) {
       EntityPlayer player = Minecraft.getMinecraft().thePlayer;
@@ -76,7 +78,8 @@ public class MCH_EventHook extends W_EventHook {
    }
    @SubscribeEvent
    public void onRenderWorldEvent(RenderWorldLastEvent event){
-      System.out.println("onrenderworldevent");
+      //System.out.println("onrenderworldevent");
+      //is firing
       Mk1Eyeball.getInstance().update();
       drawContacts(event.partialTicks);
    }

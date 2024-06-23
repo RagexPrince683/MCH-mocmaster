@@ -212,7 +212,10 @@ public class MCH_MOD {
       MCH_Achievement.PreInit();
       MCH_Lib.Log("Register system", new Object[0]);
       W_NetworkRegistry.registerChannel(packetHandler, "MCHeli_CH");
-      MinecraftForge.EVENT_BUS.register(new MCH_EventHook());
+      MCH_EventHook evtxcum = new MCH_EventHook();
+      FMLCommonHandler.instance().bus().register(evtxcum);
+      MinecraftForge.EVENT_BUS.register(evtxcum);
+
       proxy.registerClientTick();
 
       W_NetworkRegistry.registerGuiHandler(this, new MCH_GuiCommonHandler());

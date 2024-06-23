@@ -46,6 +46,7 @@ public class MCH_PacketAircraftLocation extends MCH_Packet {
 
     @Override
     public void writeData(DataOutputStream var1) {
+        System.out.println("started write");
         try {
             var1.writeDouble(x);
             var1.writeDouble(y);
@@ -60,7 +61,10 @@ public class MCH_PacketAircraftLocation extends MCH_Packet {
 
             var1.writeUTF(model);
             var1.writeUTF(texture);
+            System.out.println("end write");
         } catch (IOException e) {
+            System.out.println("exception");
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -112,7 +116,8 @@ public class MCH_PacketAircraftLocation extends MCH_Packet {
             s.entityId = ac.getEntityId();
 
             W_Network.sendToPlayer(s, target);
-            System.out.println("W_Network");
+            System.out.println("W_Network" + target.worldObj.isRemote);
+            //is working
         }
     }
 

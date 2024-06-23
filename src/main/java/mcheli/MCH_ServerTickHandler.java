@@ -1,12 +1,14 @@
 package mcheli;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 
 import java.util.*;
 
+import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_PacketAircraftLocation;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.wrapper.W_Reflection;
@@ -15,6 +17,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 public class MCH_ServerTickHandler {
@@ -42,7 +45,31 @@ public class MCH_ServerTickHandler {
                if (e instanceof MCP_EntityPlane && !e.onGround) {
                   MCP_EntityPlane plane = (MCP_EntityPlane) e;
                   list.add(plane);
+                  System.out.println("server tick handler");
                   MCH_PacketAircraftLocation.send(plane, player);
+               }
+            }
+         }
+      }
+   }
+
+   @SubscribeEvent
+   void onWorldTick(TickEvent.WorldTickEvent evtxcum) {
+      System.out.println("onworldtick");
+      World worldObj = evtxcum.world;
+      for (Object obj : worldObj.playerEntities) {
+         if (obj instanceof EntityPlayer) {
+            EntityPlayer player = (EntityPlayer) obj;
+            AxisAlignedBB aabb = player.boundingBox.expand(350, 350, 350);
+            List<MCH_EntityAircraft> list = new ArrayList<>();
+            for (Object entityObj : worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb)) {
+               if (entityObj instanceof MCH_EntityAircraft) {
+                  System.out.println("MCH_EntityAircraft");
+                  MCH_EntityAircraft plane = (MCH_EntityAircraft) entityObj;
+                  if (!plane.onGround) {
+                     list.add(plane);
+                     MCH_PacketAircraftLocation.send(plane, player);
+                  }
                }
             }
          }

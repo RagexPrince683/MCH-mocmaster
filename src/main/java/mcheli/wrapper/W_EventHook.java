@@ -42,28 +42,7 @@ public class W_EventHook {
 
     }
 
-    @SubscribeEvent
-    void onWorldTick(TickEvent.WorldTickEvent evt) {
-        System.out.println("onworldtick");
-        World worldObj = evt.world;
-        for (Object obj : worldObj.playerEntities) {
-            if (obj instanceof EntityPlayer) {
-                EntityPlayer player = (EntityPlayer) obj;
-                AxisAlignedBB aabb = player.boundingBox.expand(350, 350, 350);
-                List<MCH_EntityAircraft> list = new ArrayList<>();
-                for (Object entityObj : worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb)) {
-                    if (entityObj instanceof MCH_EntityAircraft) {
-                        System.out.println("MCH_EntityAircraft");
-                        MCH_EntityAircraft plane = (MCH_EntityAircraft) entityObj;
-                        if (!plane.onGround) {
-                            list.add(plane);
-                            MCH_PacketAircraftLocation.send(plane, player);
-                        }
-                    }
-                }
-            }
-        }
-    }
+
 
     @SubscribeEvent
     public void onEvent_livingHurtEvent(LivingHurtEvent event) {
