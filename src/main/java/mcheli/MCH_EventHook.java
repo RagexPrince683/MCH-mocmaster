@@ -68,6 +68,7 @@ public class MCH_EventHook extends W_EventHook {
 
    private void drawContacts(float partialTick) {
       EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+      if (player == null) return;
 
       for(MCH_VisualContact contact : Mk1Eyeball.getInstance().contacts){
          if(player.getDistance(contact.x, contact.y, contact.z) >= 64) {

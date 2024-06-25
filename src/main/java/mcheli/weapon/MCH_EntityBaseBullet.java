@@ -223,7 +223,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          System.out.println("no gravity defined");
       }
 
-      if(this.getInfo().bomblet >= 1) {
+      if(this.getInfo().bomblet >= 50) {
          bomblet = true;
       } else {
          bomblet = false;
