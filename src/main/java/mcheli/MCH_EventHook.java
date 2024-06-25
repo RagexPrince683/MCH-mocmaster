@@ -66,24 +66,24 @@ public class MCH_EventHook extends W_EventHook {
 //     }
 //  }
 
-   private void drawContacts(float partialTick) {
-      EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-      if (player == null) return;
-
-      for(MCH_VisualContact contact : Mk1Eyeball.getInstance().contacts){
-         if(player.getDistance(contact.x, contact.y, contact.z) >= 64) {
-            Mk1Eyeball.renderContact(contact, partialTick);
-            System.out.println("mk1 eyeball get instance contacts and mk1 eyeball render contact");
-         }
-      }
-   }
-   @SubscribeEvent
-   public void onRenderWorldEvent(RenderWorldLastEvent event){
-      //System.out.println("onrenderworldevent");
-      //is firing
-      Mk1Eyeball.getInstance().update();
-      drawContacts(event.partialTicks);
-   }
+ //  private void drawContacts(float partialTick) {
+ //     EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+ //     if (player == null) return;
+//
+ //     for(MCH_VisualContact contact : Mk1Eyeball.getInstance().contacts){
+ //        if(player.getDistance(contact.x, contact.y, contact.z) >= 64) {
+ //           Mk1Eyeball.renderContact(contact, partialTick);
+ //           System.out.println("mk1 eyeball get instance contacts and mk1 eyeball render contact");
+ //        }
+ //     }
+ //  }
+ //  @SubscribeEvent
+ //  public void onRenderWorldEvent(RenderWorldLastEvent event){
+ //     //System.out.println("onrenderworldevent");
+ //     //is firing
+ //     Mk1Eyeball.getInstance().update();
+ //     drawContacts(event.partialTicks);
+ //  }
 
 
 
