@@ -12,6 +12,8 @@ public class MCH_EntityTvMissile extends MCH_EntityBaseBullet {
 
    public boolean isSpawnParticle = true;
 
+   //public static boolean isTVMissile = true;
+
 
    public MCH_EntityTvMissile(World par1World) {
       super(par1World);
@@ -23,6 +25,7 @@ public class MCH_EntityTvMissile extends MCH_EntityBaseBullet {
 
    public void onUpdate() {
       super.onUpdate();
+      this.onUpdateBomblet();
       if(this.isSpawnParticle && this.getInfo() != null && !this.getInfo().disableSmoke) {
          this.spawnParticle(this.getInfo().trajectoryParticleName, 3, 5.0F * this.getInfo().smokeSize * 0.5F);
       }
@@ -57,6 +60,23 @@ public class MCH_EntityTvMissile extends MCH_EntityBaseBullet {
             this.setMotion(tX, tY, tZ);
             this.setRotation(yaw, pitch);
          }
+      }
+
+   }
+
+
+   public void sprinkleBomblet() {
+      if(!super.worldObj.isRemote) {
+         MCH_EntityRocket e = new MCH_EntityRocket(super.worldObj, super.posX, super.posY, super.posZ, super.motionX, super.motionY, super.motionZ, super.rotationYaw, super.rotationPitch, super.acceleration);
+         e.setName(this.getName());
+         e.setParameterFromWeapon(this, super.shootingAircraft, super.shootingEntity);
+         float MOTION = this.getInfo().bombletDiff;
+         float RANDOM = 1.2F;
+         e.motionX += ((double)super.rand.nextFloat() - 0.5D) * (double)MOTION;
+         e.motionY += ((double)super.rand.nextFloat() - 0.5D) * (double)MOTION;
+         e.motionZ += ((double)super.rand.nextFloat() - 0.5D) * (double)MOTION;
+         e.setBomblet();
+         super.worldObj.spawnEntityInWorld(e);
       }
 
    }

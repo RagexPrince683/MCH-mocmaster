@@ -217,16 +217,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    public void onSetWeasponInfo() {
 
       if (this.getInfo().gravity < 0.0) {
-         gravitydown = true;
+         this.gravitydown = true;
       } else {
-         gravitydown = false;
+         this.gravitydown = false;
          System.out.println("no gravity defined");
       }
 
       if(this.getInfo().bomblet >= 50) {
-         bomblet = true;
+         this.bomblet = true;
       } else {
-         bomblet = false;
+         this.bomblet = false;
       }
 
       if (!super.worldObj.isRemote) {
@@ -638,11 +638,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       if (!super.worldObj.isRemote && this.sprinkleTime > 0 && !super.isDead) {
          --this.sprinkleTime;
          if (this.sprinkleTime == 0) {
+          //  if (this.isTVGuided) {
+          //
+          //  }
             for (int i = 0; i < this.getInfo().bomblet; ++i) {
                this.sprinkleBomblet();
             }
             //todo if the z alignment doesn't work make this logic more sound by ensuring that the bomblet variable is even defined
-            System.out.println("fucking kill me would have set dead BOMBLET EDITION");
+            System.out.println("set dead BOMBLET EDITION");
             this.setDead();
          }
       }
