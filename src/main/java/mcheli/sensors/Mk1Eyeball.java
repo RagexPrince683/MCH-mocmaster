@@ -23,16 +23,22 @@ public class Mk1Eyeball {
 
     public List<MCH_VisualContact> contacts = new ArrayList<>();
 
-    public static Mk1Eyeball getInstance(){
+    public static Mk1Eyeball getInstance() {
+        if (instance == null) {
+            instance = new Mk1Eyeball();
+        }
         return instance;
     }
 
 
     public void addContact(MCH_PacketAircraftLocation pc) {
+        System.out.println("Adding contact for entityId: " + pc.entityId);
         //System.out.println("mk1 eyeball loaded");
         for(MCH_VisualContact c : this.contacts) {
             //System.out.println("mk1 eyeball loaded2");
+
             if(c.entityId == pc.entityId) {
+                System.out.println("Updated existing contact for entityId: " + pc.entityId);
                 //System.out.println("mk1 eyeball loaded3");
                 c.updated = 0;
                 c.x = pc.x;
@@ -47,7 +53,7 @@ public class Mk1Eyeball {
         }
         //System.out.println("mk1 eyeball loaded4");
         this.contacts.add(new MCH_VisualContact(pc.x, pc.y, pc.z, pc.rotX, pc.rotY, pc.rotZ, pc.model, pc.texture, pc.entityId, pc.type));
-
+        System.out.println("Added new contact for entityId: " + pc.entityId);
     }
 
     public void clean_contacts() {
@@ -57,6 +63,7 @@ public class Mk1Eyeball {
             //System.out.println("Updated: " + c.updated);
             if (c.updated >= 20) {
                 //System.out.println("Removing Client. Remote: " + this.worldObj.isRemote);
+                System.out.println("Removing contact for entityId: " + c.entityId);
                 toRemove.add(c);
 
             }
@@ -67,8 +74,13 @@ public class Mk1Eyeball {
     public static boolean shouldRender(MCH_VisualContact c){
         EntityPlayer player = Minecraft.getMinecraft().thePlayer;
         Entity e = player.worldObj.getEntityByID(c.entityId);
-        if(e == null){return true;}
+        if(e == null){
+            System.out.println("Entity not found, should render contact for entityId: " + c.entityId);
+            return true;
+        }
         else{
+            boolean shouldRender = !e.isInRangeToRender3d(player.posX, player.posY, player.posZ);
+            System.out.println("Should render contact for entityId: " + c.entityId + ": " + shouldRender);
             return !e.isInRangeToRender3d(player.posX, player.posY, player.posZ);
         }
     }

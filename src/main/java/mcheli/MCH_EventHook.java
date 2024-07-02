@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
@@ -84,6 +86,40 @@ public class MCH_EventHook extends W_EventHook {
  //     Mk1Eyeball.getInstance().update();
  //     drawContacts(event.partialTicks);
  //  }
+
+      @SideOnly(Side.CLIENT)
+      @SubscribeEvent
+      public void onRenderWorldEvent(RenderWorldLastEvent event) {
+         System.out.println("onrenderworldevent");
+         //firing
+         Mk1Eyeball.getInstance().update();
+         drawContacts(event.partialTicks);
+      }
+
+   @SideOnly(Side.CLIENT)
+   private void drawContacts(float partialTicks) {
+      EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+      if (player == null) {
+         System.out.println("Player is null");
+         return;
+      }
+
+      List<MCH_VisualContact> contacts = Mk1Eyeball.getInstance().contacts;
+      if (contacts == null || contacts.isEmpty()) {
+         System.out.println("No contacts found");
+         return;
+      }
+
+      for (MCH_VisualContact contact : contacts) {
+         System.out.println("Contact found at " + contact.x + ", " + contact.y + ", " + contact.z);
+         if (player.getDistance(contact.x, contact.y, contact.z) <= 64) {
+            System.out.println("Rendering contact within range");
+            Mk1Eyeball.renderContact(contact, partialTicks);
+         } else {
+            System.out.println("Contact out of range");
+         }
+      }
+   }
 
 
 

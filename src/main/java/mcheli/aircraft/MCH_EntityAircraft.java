@@ -2651,120 +2651,120 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return this.entityRadar.getEnemyList();
    }
 
-   public void moveEntity(double parX, double parY, double parZ) {
+   public void moveEntity(double par1, double par3, double par5) {
 
-      //todo: what in god's green fuck is this spaghetti
+      //todo: learn how this works and why
       if(this.getAcInfo() != null) {
          super.worldObj.theProfiler.startSection("move");
          super.ySize *= 0.4F;
          double d3 = super.posX;
          double d4 = super.posY;
          double d5 = super.posZ;
-         double d6 = parX;
-         double d7 = parY;
-         double d8 = parZ;
+         double d6 = par1;
+         double d7 = par3;
+         double d8 = par5;
          AxisAlignedBB axisalignedbb = super.boundingBox.copy();
-         List list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(parX, parY, parZ));
+         List list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(par1, par3, par5));
 
          for(int flag1 = 0; flag1 < list.size(); ++flag1) {
-            parY = ((AxisAlignedBB)list.get(flag1)).calculateYOffset(super.boundingBox, parY);
+            par3 = ((AxisAlignedBB)list.get(flag1)).calculateYOffset(super.boundingBox, par3);
          }
 
-         super.boundingBox.offset(0.0D, parY, 0.0D);
-         if(!super.field_70135_K && d7 != parY) {
-            parZ = 0.0D;
-            parY = 0.0D;
-            parX = 0.0D;
+         super.boundingBox.offset(0.0D, par3, 0.0D);
+         if(!super.field_70135_K && d7 != par3) {
+            par5 = 0.0D;
+            par3 = 0.0D;
+            par1 = 0.0D;
          }
 
-         boolean var34 = super.onGround || d7 != parY && d7 < 0.0D;
+         boolean var34 = super.onGround || d7 != par3 && d7 < 0.0D;
 
          int j;
          for(j = 0; j < list.size(); ++j) {
-            parX = ((AxisAlignedBB)list.get(j)).calculateXOffset(super.boundingBox, parX);
+            par1 = ((AxisAlignedBB)list.get(j)).calculateXOffset(super.boundingBox, par1);
          }
 
-         super.boundingBox.offset(parX, 0.0D, 0.0D);
-         if(!super.field_70135_K && d6 != parX) {
-            parZ = 0.0D;
-            parY = 0.0D;
-            parX = 0.0D;
+         super.boundingBox.offset(par1, 0.0D, 0.0D);
+         if(!super.field_70135_K && d6 != par1) {
+            par5 = 0.0D;
+            par3 = 0.0D;
+            par1 = 0.0D;
          }
 
          for(j = 0; j < list.size(); ++j) {
-            parZ = ((AxisAlignedBB)list.get(j)).calculateZOffset(super.boundingBox, parZ);
+            par5 = ((AxisAlignedBB)list.get(j)).calculateZOffset(super.boundingBox, par5);
          }
 
-         super.boundingBox.offset(0.0D, 0.0D, parZ);
-         if(!super.field_70135_K && d8 != parZ) {
-            parZ = 0.0D;
-            parY = 0.0D;
-            parX = 0.0D;
+         super.boundingBox.offset(0.0D, 0.0D, par5);
+         if(!super.field_70135_K && d8 != par5) {
+            par5 = 0.0D;
+            par3 = 0.0D;
+            par1 = 0.0D;
          }
 
-         if(super.stepHeight > 0.0F && var34 && super.ySize < 0.05F && (d6 != parX || d8 != parZ)) {
-            double d12 = parX;
-            double d10 = parY;
-            double d11 = parZ;
-            parX = d6;
-            parY = (double)super.stepHeight;
-            parZ = d8;
+         if(super.stepHeight > 0.0F && var34 && super.ySize < 0.05F && (d6 != par1 || d8 != par5)) {
+            double d12 = par1;
+            double d10 = par3;
+            double d11 = par5;
+            par1 = d6;
+            par3 = (double)super.stepHeight;
+            par5 = d8;
             AxisAlignedBB throwable = super.boundingBox.copy();
             super.boundingBox.setBB(axisalignedbb);
-            list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(d6, parY, d8));
+            list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(d6, par3, d8));
 
             int k;
             for(k = 0; k < list.size(); ++k) {
-               parY = ((AxisAlignedBB)list.get(k)).calculateYOffset(super.boundingBox, parY);
+               par3 = ((AxisAlignedBB)list.get(k)).calculateYOffset(super.boundingBox, par3);
             }
 
-            super.boundingBox.offset(0.0D, parY, 0.0D);
-            if(!super.field_70135_K && d7 != parY) {
-               parZ = 0.0D;
-               parY = 0.0D;
-               parX = 0.0D;
-            }
-
-            for(k = 0; k < list.size(); ++k) {
-               parX = ((AxisAlignedBB)list.get(k)).calculateXOffset(super.boundingBox, parX);
-            }
-
-            super.boundingBox.offset(parX, 0.0D, 0.0D);
-            if(!super.field_70135_K && d6 != parX) {
-               parZ = 0.0D;
-               parY = 0.0D;
-               parX = 0.0D;
+            super.boundingBox.offset(0.0D, par3, 0.0D);
+            if(!super.field_70135_K && d7 != par3) {
+               par5 = 0.0D;
+               par3 = 0.0D;
+               par1 = 0.0D;
             }
 
             for(k = 0; k < list.size(); ++k) {
-               parZ = ((AxisAlignedBB)list.get(k)).calculateZOffset(super.boundingBox, parZ);
+               par1 = ((AxisAlignedBB)list.get(k)).calculateXOffset(super.boundingBox, par1);
             }
 
-            super.boundingBox.offset(0.0D, 0.0D, parZ);
-            if(!super.field_70135_K && d8 != parZ) {
-               parZ = 0.0D;
-               parY = 0.0D;
-               parX = 0.0D;
+            super.boundingBox.offset(par1, 0.0D, 0.0D);
+            if(!super.field_70135_K && d6 != par1) {
+               par5 = 0.0D;
+               par3 = 0.0D;
+               par1 = 0.0D;
             }
 
-            if(!super.field_70135_K && d7 != parY) {
-               parZ = 0.0D;
-               parY = 0.0D;
-               parX = 0.0D;
+            for(k = 0; k < list.size(); ++k) {
+               par5 = ((AxisAlignedBB)list.get(k)).calculateZOffset(super.boundingBox, par5);
+            }
+
+            super.boundingBox.offset(0.0D, 0.0D, par5);
+            if(!super.field_70135_K && d8 != par5) {
+               par5 = 0.0D;
+               par3 = 0.0D;
+               par1 = 0.0D;
+            }
+
+            if(!super.field_70135_K && d7 != par3) {
+               par5 = 0.0D;
+               par3 = 0.0D;
+               par1 = 0.0D;
             } else {
-               parY = (double)(-super.stepHeight);
+               par3 = (double)(-super.stepHeight);
 
                for(k = 0; k < list.size(); ++k) {
-                  parY = ((AxisAlignedBB)list.get(k)).calculateYOffset(super.boundingBox, parY);
+                  par3 = ((AxisAlignedBB)list.get(k)).calculateYOffset(super.boundingBox, par3);
                }
 
-               super.boundingBox.offset(0.0D, parY, 0.0D);
+               super.boundingBox.offset(0.0D, par3, 0.0D);
             }
 
-            if(d12 * d12 + d11 * d11 >= parX * parX + parZ * parZ) {
-               parX = d12;
-               parY = d10;
-               parZ = d11;
+            if(d12 * d12 + d11 * d11 >= par1 * par1 + par5 * par5) {
+               par1 = d12;
+               par3 = d10;
+               par5 = d11;
                super.boundingBox.setBB(throwable);
             }
          }
@@ -2774,20 +2774,20 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          super.posX = (super.boundingBox.minX + super.boundingBox.maxX) / 2.0D;
          super.posY = super.boundingBox.minY + (double)super.yOffset - (double)super.ySize;
          super.posZ = (super.boundingBox.minZ + super.boundingBox.maxZ) / 2.0D;
-         super.isCollidedHorizontally = d6 != parX || d8 != parZ;
-         super.isCollidedVertically = d7 != parY;
-         super.onGround = d7 != parY && d7 < 0.0D;
+         super.isCollidedHorizontally = d6 != par1 || d8 != par5;
+         super.isCollidedVertically = d7 != par3;
+         super.onGround = d7 != par3 && d7 < 0.0D;
          super.isCollided = super.isCollidedHorizontally || super.isCollidedVertically;
-         this.updateFallState(parY, super.onGround);
-         if(d6 != parX) {
+         this.updateFallState(par3, super.onGround);
+         if(d6 != par1) {
             super.motionX = 0.0D;
          }
 
-         if(d7 != parY) {
+         if(d7 != par3) {
             super.motionY = 0.0D;
          }
 
-         if(d8 != parZ) {
+         if(d8 != par5) {
             super.motionZ = 0.0D;
          }
 
