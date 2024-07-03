@@ -53,19 +53,23 @@ public class MCH_ServerTickHandler {
       }
    }
 
+   double visualDistance = 2500;
    @SubscribeEvent
-   void onWorldTick(TickEvent.WorldTickEvent evtxcum) {
+   void onWorldTick(TickEvent.WorldTickEvent evt) {
       System.out.println("onworldtick");
-      World worldObj = evtxcum.world;
+      World worldObj = evt.world;
       for (Object obj : worldObj.playerEntities) {
+         System.out.println("for player entity obj");
          if (obj instanceof EntityPlayer) {
+            System.out.println("if is player");
             EntityPlayer player = (EntityPlayer) obj;
-            AxisAlignedBB aabb = player.boundingBox.expand(350, 350, 350);
-            List<MCH_EntityAircraft> list = new ArrayList<>();
+            AxisAlignedBB aabb = player.boundingBox.expand(visualDistance, visualDistance, visualDistance);
+            List<MCP_EntityPlane> list = new ArrayList<>();
             for (Object entityObj : worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb)) {
-               if (entityObj instanceof MCH_EntityAircraft) {
-                  System.out.println("MCH_EntityAircraft");
-                  MCH_EntityAircraft plane = (MCH_EntityAircraft) entityObj;
+               System.out.println("get entities within box");
+               if (entityObj instanceof MCP_EntityPlane) {
+                  System.out.println("is plane");
+                  MCP_EntityPlane plane = (MCP_EntityPlane) entityObj;
                   if (!plane.onGround) {
                      list.add(plane);
                      MCH_PacketAircraftLocation.send(plane, player);

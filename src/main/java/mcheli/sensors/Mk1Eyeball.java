@@ -23,23 +23,16 @@ public class Mk1Eyeball {
 
     public List<MCH_VisualContact> contacts = new ArrayList<>();
 
-    public static Mk1Eyeball getInstance() {
-        if (instance == null) {
-            instance = new Mk1Eyeball();
-        }
+    public static Mk1Eyeball getInstance(){
         return instance;
     }
 
 
     public void addContact(MCH_PacketAircraftLocation pc) {
-        System.out.println("Adding contact for entityId: " + pc.entityId);
-        //System.out.println("mk1 eyeball loaded");
+        System.out.println("addcontact init");
         for(MCH_VisualContact c : this.contacts) {
-            //System.out.println("mk1 eyeball loaded2");
-
             if(c.entityId == pc.entityId) {
-                System.out.println("Updated existing contact for entityId: " + pc.entityId);
-                //System.out.println("mk1 eyeball loaded3");
+                System.out.println("addcontact is working");
                 c.updated = 0;
                 c.x = pc.x;
                 c.y = pc.y;
@@ -51,19 +44,19 @@ public class Mk1Eyeball {
                 return;
             }
         }
-        //System.out.println("mk1 eyeball loaded4");
-        this.contacts.add(new MCH_VisualContact(pc.x, pc.y, pc.z, pc.rotX, pc.rotY, pc.rotZ, pc.model, pc.texture, pc.entityId, pc.type));
-        System.out.println("Added new contact for entityId: " + pc.entityId);
+
+        this.contacts.add(new MCH_VisualContact(pc.x, pc.y, pc.z, pc.rotX, pc.rotY, pc.rotZ, pc.model, pc.texture, pc.entityId));
+
     }
 
     public void clean_contacts() {
         ArrayList<MCH_VisualContact> toRemove = new ArrayList<MCH_VisualContact>(); //don't edit on an arraylist as we iterate over it
         for (MCH_VisualContact c : contacts) {
             c.updated++;
+            System.out.println("contacts cleared");
             //System.out.println("Updated: " + c.updated);
             if (c.updated >= 20) {
                 //System.out.println("Removing Client. Remote: " + this.worldObj.isRemote);
-                System.out.println("Removing contact for entityId: " + c.entityId);
                 toRemove.add(c);
 
             }
@@ -72,15 +65,12 @@ public class Mk1Eyeball {
     }
 
     public static boolean shouldRender(MCH_VisualContact c){
+        System.out.println("should render");
         EntityPlayer player = Minecraft.getMinecraft().thePlayer;
         Entity e = player.worldObj.getEntityByID(c.entityId);
-        if(e == null){
-            System.out.println("Entity not found, should render contact for entityId: " + c.entityId);
-            return true;
-        }
+        if(e == null){return true;}
         else{
-            boolean shouldRender = !e.isInRangeToRender3d(player.posX, player.posY, player.posZ);
-            System.out.println("Should render contact for entityId: " + c.entityId + ": " + shouldRender);
+            System.out.println("should not render");
             return !e.isInRangeToRender3d(player.posX, player.posY, player.posZ);
         }
     }
@@ -90,10 +80,11 @@ public class Mk1Eyeball {
     public static void renderAircraft(float x, float y, float z, float rotX, float rotY, float rotZ, String texture, String model, float partialTick){
         boolean fogSetting = GL11.glIsEnabled(GL11.GL_FOG);
         EntityPlayer p = Minecraft.getMinecraft().thePlayer;
-
+        System.out.println("renderaircraft");
         GL11.glDisable(GL11.GL_FOG);
 
         try {
+            System.out.println("try render");
 
             RenderHelper.enableStandardItemLighting();
             GL11.glTranslated(- RenderManager.renderPosX, - RenderManager.renderPosY, - RenderManager.renderPosZ);
@@ -113,14 +104,12 @@ public class Mk1Eyeball {
 
             W_McClient.MOD_bindTexture(texture);
             MCH_ModelManager.render("planes", model);
-            MCH_ModelManager.render("helicopters", model);
-            MCH_ModelManager.render("tanks", model);
-            MCH_ModelManager.render("vehicles", model);
             RenderHelper.disableStandardItemLighting();
             Minecraft.getMinecraft().entityRenderer.disableLightmap(partialTick);
 
 
         }catch(Exception e){
+            System.out.println("some error occured");
             e.printStackTrace();
         }
         if(fogSetting){
@@ -137,21 +126,8 @@ public class Mk1Eyeball {
             try {
                 texture = contact.texture;
                 if (texture == null) {
-                    switch (contact.type) {
-                        case 0:
-                            texture = "textures/planes/" + contact.model + ".png";
-                            break;
-                        case 1:
-                            texture = "textures/helicopters/" + contact.model + ".png";
-                            break;
-                        case 2:
-                            texture = "textures/tanks/" + contact.model + ".png";
-                            break;
-                        case 3:
-                            texture = "textures/vehicles/" + contact.model + ".png";
-                            break;
-
-                }
+                    System.out.println("textures planes png loaded");
+                    texture = "textures/planes/" + contact.model + ".png";
                 }
             } catch (Exception e) {
                 texture = "ERROR";
@@ -167,6 +143,7 @@ public class Mk1Eyeball {
 
     public void update() {
         try {
+            System.out.println("update, clean contacts after");
             clean_contacts();
 
 

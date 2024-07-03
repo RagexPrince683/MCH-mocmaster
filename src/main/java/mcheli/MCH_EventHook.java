@@ -47,6 +47,25 @@ public class MCH_EventHook extends W_EventHook {
       MCH_Command.onCommandEvent(event);
    }
 
+   private void drawContacts(float partialTick) {
+      EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+      for (MCH_VisualContact contact : Mk1Eyeball.getInstance().contacts) {
+         if (player.getDistance(contact.x, contact.y, contact.z) >= 64) {
+            Mk1Eyeball.renderContact(contact, partialTick);
+            System.out.println("eventhook drawcontacts");
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public void onRenderWorldEvent(RenderWorldLastEvent event) {
+      Mk1Eyeball.getInstance().update();
+      System.out.println("onrenderworldevent drawcontacts time");
+      System.out.println(Mk1Eyeball.getInstance().contacts + " is mk1 eyeball contacts");
+      drawContacts(event.partialTicks);
+   }
+
+
 
 
 //  @SubscribeEvent
@@ -87,39 +106,39 @@ public class MCH_EventHook extends W_EventHook {
  //     drawContacts(event.partialTicks);
  //  }
 
-      @SideOnly(Side.CLIENT)
-      @SubscribeEvent
-      public void onRenderWorldEvent(RenderWorldLastEvent event) {
-         System.out.println("onrenderworldevent");
-         //firing
-         Mk1Eyeball.getInstance().update();
-         drawContacts(event.partialTicks);
-      }
-
-   @SideOnly(Side.CLIENT)
-   private void drawContacts(float partialTicks) {
-      EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-      if (player == null) {
-         System.out.println("Player is null");
-         return;
-      }
-
-      List<MCH_VisualContact> contacts = Mk1Eyeball.getInstance().contacts;
-      if (contacts == null || contacts.isEmpty()) {
-         System.out.println("No contacts found");
-         return;
-      }
-
-      for (MCH_VisualContact contact : contacts) {
-         System.out.println("Contact found at " + contact.x + ", " + contact.y + ", " + contact.z);
-         if (player.getDistance(contact.x, contact.y, contact.z) <= 64) {
-            System.out.println("Rendering contact within range");
-            Mk1Eyeball.renderContact(contact, partialTicks);
-         } else {
-            System.out.println("Contact out of range");
-         }
-      }
-   }
+ //     @SideOnly(Side.CLIENT)
+ //     @SubscribeEvent
+ //     public void onRenderWorldEvent(RenderWorldLastEvent event) {
+ //        System.out.println("onrenderworldevent");
+ //        //firing
+ //        Mk1Eyeball.getInstance().update();
+ //        drawContacts(event.partialTicks);
+ //     }
+//
+ //  @SideOnly(Side.CLIENT)
+ //  private void drawContacts(float partialTicks) {
+ //     EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+ //     if (player == null) {
+ //        System.out.println("Player is null");
+ //        return;
+ //     }
+//
+ //     List<MCH_VisualContact> contacts = Mk1Eyeball.getInstance().contacts;
+ //     if (contacts == null || contacts.isEmpty()) {
+ //        System.out.println("No contacts found");
+ //        return;
+ //     }
+//
+ //     for (MCH_VisualContact contact : contacts) {
+ //        System.out.println("Contact found at " + contact.x + ", " + contact.y + ", " + contact.z);
+ //        if (player.getDistance(contact.x, contact.y, contact.z) <= 64) {
+ //           System.out.println("Rendering contact within range");
+ //           Mk1Eyeball.renderContact(contact, partialTicks);
+ //        } else {
+ //           System.out.println("Contact out of range");
+ //        }
+ //     }
+ //  }
 
 
 
