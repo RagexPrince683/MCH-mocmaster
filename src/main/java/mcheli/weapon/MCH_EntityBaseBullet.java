@@ -24,6 +24,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.*;
 import net.minecraft.world.ChunkCoordIntPair;
@@ -70,6 +71,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    private Ticket loaderTicket;
    public boolean bomblet;
    public boolean gravitydown;
+   public boolean bigdelay;
 
    //private final MCH_Fuze fuze = new MCH_Fuze(this);;
 
@@ -227,6 +229,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          this.bomblet = true;
       } else {
          this.bomblet = false;
+      }
+
+      if(this.getInfo().delay < 3) {
+         this.bigdelay = false;
+      } else {
+         this.bigdelay = true;
       }
 
       if (!super.worldObj.isRemote) {
@@ -451,7 +459,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    }
 
    public float getGravityInWater() {
-      return this.getInfo() != null ? this.getInfo().gravityInWater : 0.0F;
+      //oh naw
+      return this.getInfo() != null ? this.getInfo().gravityInWater : -1F;
    }
 
    public void onUpdate() {
@@ -552,7 +561,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       //this.type.equalsIgnoreCase("TVMissile"
       //this.getInfo().gravity < 0.0 &&
       if (!super.isDead) {
-         if (!bomblet && gravitydown) {
+         if (!bomblet && gravitydown && bigdelay) {
             loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
             System.out.println("loadneighboring chunks");
          }
@@ -879,8 +888,18 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          if (this.piercing > 0) {
             --this.piercing;
             if (p > 0.0F) {
-               this.worldObj.setBlockToAir((int) m.hitVec.xCoord, (int) m.hitVec.yCoord, (int) m.hitVec.zCoord);
-               this.newExplosion(m.hitVec.xCoord + dx, m.hitVec.yCoord + dy, m.hitVec.zCoord + dz, 1.0F, 1.0F, false);
+               //todo: oh haha no
+               int x = (int) m.hitVec.xCoord;
+               int y = (int) m.hitVec.yCoord;
+               int z = (int) m.hitVec.zCoord;
+               Block block = this.worldObj.getBlock(x, y, z);
+               if (block == Blocks.bedrock) { //or xradar flag
+                  //this.worldObj.setBlockToAir((int) m.hitVec.xCoord, (int) m.hitVec.yCoord, (int) m.hitVec.zCoord);
+                  this.newExplosion(m.hitVec.xCoord + dx, m.hitVec.yCoord + dy, m.hitVec.zCoord + dz, 1.0F, 1.0F, false);
+               } else {
+                  this.worldObj.setBlockToAir((int) m.hitVec.xCoord, (int) m.hitVec.yCoord, (int) m.hitVec.zCoord);
+                  this.newExplosion(m.hitVec.xCoord + dx, m.hitVec.yCoord + dy, m.hitVec.zCoord + dz, 1.0F, 1.0F, false);
+               }
             }
          } else {
             if (i == 0.0F) {

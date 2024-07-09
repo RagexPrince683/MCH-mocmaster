@@ -198,11 +198,12 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          }
 
          if(this.aircraftPitch <= -25 && this.isEntityAlive() && this.isAirBorne) { //if the aircraft is 25 degrees up
+            //maybe add more checks here to ensure this is a plane although idk if this is causing the dancing vehicles bug
 
-            double throttlereal = this.getThrottle(); //decrease throttle slowly over time if the aircraft is pitched upwards
-            throttlereal -= 0.1;
-            this.setThrottle(throttlereal);
-            addCurrentThrottle(-throttlereal);
+           // double throttlereal = this.getThrottle(); //decrease throttle slowly over time if the aircraft is pitched upwards
+           // throttlereal -= 0.1;
+           // this.setThrottle(throttlereal);
+           // addCurrentThrottle(-throttlereal);
          }
 
          if (this.aircraftPitch <= 3 && this.isEntityAlive() && this.isAirBorne) {//and 3 degrees down is greater

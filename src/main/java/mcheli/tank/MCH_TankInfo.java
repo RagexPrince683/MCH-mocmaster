@@ -44,7 +44,7 @@ public class MCH_TankInfo extends MCH_AircraftInfo {
    }
 
    public float getMaxSpeed() {
-      return 7.8F;
+      return 1.8F;
       //wtf does this do, it does something idk lmao
    }
 

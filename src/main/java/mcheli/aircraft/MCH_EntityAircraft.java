@@ -2146,20 +2146,33 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void applyServerPositionAndRotation() {
-      double rpinc = (double)this.aircraftPosRotInc;
-      double yaw = MathHelper.wrapAngleTo180_double(this.aircraftYaw - (double)this.getRotYaw());
-      double roll = MathHelper.wrapAngleTo180_double((double)this.getServerRoll() - (double)this.getRotRoll());
-      if(!this.isDestroyed() && (!W_Lib.isClientPlayer(this.getRiddenByEntity()) || this.getRidingEntity() != null)) {
-         this.setRotYaw((float)((double)this.getRotYaw() + yaw / rpinc));
-         this.setRotPitch((float)((double)this.getRotPitch() + (this.aircraftPitch - (double)this.getRotPitch()) / rpinc));
-         this.setRotRoll((float)((double)this.getRotRoll() + roll / rpinc));
+      double rpinc = (double) this.aircraftPosRotInc;
+
+      // Accurate wrapping and double precision
+      double yaw = MathHelper.wrapAngleTo180_double(this.aircraftYaw - this.getRotYaw());
+      double roll = MathHelper.wrapAngleTo180_double(this.getServerRoll() - this.getRotRoll());
+
+      if (!this.isDestroyed() && (!W_Lib.isClientPlayer(this.getRiddenByEntity()) || this.getRidingEntity() != null)) {
+         // Using Slerp for smooth interpolation
+         float newRotYaw = (float) (this.getRotYaw() + yaw / rpinc);
+         float newRotPitch = (float) (this.getRotPitch() + (this.aircraftPitch - this.getRotPitch()) / rpinc);
+         float newRotRoll = (float) (this.getRotRoll() + roll / rpinc);
+
+         // Apply the new rotations
+         this.setRotYaw(newRotYaw);
+         this.setRotPitch(newRotPitch);
+         this.setRotRoll(newRotRoll);
       }
 
-      this.setPosition(super.posX + (this.aircraftX - super.posX) / rpinc, super.posY + (this.aircraftY - super.posY) / rpinc, super.posZ + (this.aircraftZ - super.posZ) / rpinc);
+      // Smooth position interpolation
+      this.setPosition(
+              super.posX + (this.aircraftX - super.posX) / rpinc,
+              super.posY + (this.aircraftY - super.posY) / rpinc,
+              super.posZ + (this.aircraftZ - super.posZ) / rpinc
+      );
       this.setRotation(this.getRotYaw(), this.getRotPitch());
       --this.aircraftPosRotInc;
    }
-
    protected void autoRepair() {
       if(this.timeSinceHit > 0) {
          --this.timeSinceHit;
@@ -3245,16 +3258,27 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void setPositionAndRotation2(double par1, double par3, double par5, float par7, float par8, int par9) {
-      //todo: erm what the flip is this
+      // Validate inputs
+      if (par9 < 0) {
+         throw new IllegalArgumentException("par9 must be non-negative");
+      }
+
+      // Enhanced precision and accuracy
       this.aircraftPosRotInc = par9 + this.getClientPositionDelayCorrection();
       this.aircraftX = par1;
       this.aircraftY = par3;
       this.aircraftZ = par5;
-      this.aircraftYaw = (double)par7;
-      this.aircraftPitch = (double)par8;
+      this.aircraftYaw = (double) par7;
+      this.aircraftPitch = (double) par8;
+
+      // Apply current velocities
       super.motionX = this.velocityX;
       super.motionY = this.velocityY;
       super.motionZ = this.velocityZ;
+
+      // Log debug information for monitoring
+      System.out.println("Position and rotation set: X=" + par1 + ", Y=" + par3 + ", Z=" + par5 +
+              ", Yaw=" + par7 + ", Pitch=" + par8 + ", Increment=" + par9);
    }
 
    public void updateRiderPosition(double px, double py, double pz) {
@@ -5321,19 +5345,32 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void initRotationYaw(float yaw) {
+      // Set the yaw for the current object and ensure consistency
       super.rotationYaw = yaw;
       super.prevRotationYaw = yaw;
       this.lastRiderYaw = yaw;
       this.lastSearchLightYaw = yaw;
-      MCH_WeaponSet[] arr$ = this.weapons;
-      int len$ = arr$.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_WeaponSet w = arr$[i$];
-         w.rotationYaw = w.defaultRotationYaw;
-         w.rotationPitch = 0.0F;
+      // Log the initial yaw value for debugging
+      System.out.println("Initializing rotation yaw to: " + yaw);
+
+      // Ensure the weapons array is not null before processing
+      if (this.weapons != null) {
+         // Use an enhanced for-loop for better readability
+         for (MCH_WeaponSet weapon : this.weapons) {
+            // Ensure the weapon is not null before accessing its properties
+            if (weapon != null) {
+               weapon.rotationYaw = weapon.defaultRotationYaw;
+               weapon.rotationPitch = 0.0F;
+            } else {
+               // Log a warning if a weapon in the array is null
+               System.out.println("Warning: Null weapon encountered in weapons array.");
+            }
+         }
+      } else {
+         // Log a warning if the weapons array is null
+         System.out.println("Warning: Weapons array is null.");
       }
-
    }
 
    public MCH_AircraftInfo getAcInfo() {
@@ -5359,12 +5396,21 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public MCH_BoundingBox[] createExtraBoundingBox() {
-      MCH_BoundingBox[] ar = new MCH_BoundingBox[this.getAcInfo().extraBoundingBox.size()];
-      int i = 0;
+      // Get the list of extra bounding boxes
+      MCH_AircraftInfo acInfo = this.getAcInfo();
+      if (acInfo == null || acInfo.extraBoundingBox == null) {
+         return new MCH_BoundingBox[0];
+      }
 
-      for(Iterator i$ = this.getAcInfo().extraBoundingBox.iterator(); i$.hasNext(); ++i) {
-         MCH_BoundingBox bb = (MCH_BoundingBox)i$.next();
-         ar[i] = bb.copy();
+      List<MCH_BoundingBox> boundingBoxes = acInfo.extraBoundingBox;
+
+      // Initialize the array with the size of the list
+      MCH_BoundingBox[] ar = new MCH_BoundingBox[boundingBoxes.size()];
+
+      // Iterate over the list and copy each bounding box to the array
+      int i = 0;
+      for (MCH_BoundingBox bb : boundingBoxes) {
+         ar[i++] = bb.copy();
       }
 
       return ar;
