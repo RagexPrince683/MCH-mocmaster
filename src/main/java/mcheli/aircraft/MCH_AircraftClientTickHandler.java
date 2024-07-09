@@ -219,12 +219,24 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
          }
       }
 
-      if(!ac.isDestroyed() && !ac.isPilotReloading()) {
-         if(!this.KeySwitchWeapon1.isKeyDown() || this.KeySwitchWeapon2.isKeyDown() && getMouseWheel() != 0) {
-            if(this.KeySwWeaponMode.isKeyDown()) {
-               //todo: MAKE IT WORK!!!
+      if (!ac.isDestroyed() && !ac.isPilotReloading()) {
+         boolean isSwitchWeapon1Down = this.KeySwitchWeapon1.isKeyDown();
+         boolean isSwitchWeapon2Down = this.KeySwitchWeapon2.isKeyDown();
+         int value = getMouseWheel();
+         boolean isSwWeaponModeDown = this.KeySwWeaponMode.isKeyDown();
+         boolean isUseWeaponPress = this.KeyUseWeapon.isKeyPress();
+
+         System.out.println("ac is not destroyed and pilot is not reloading");
+         System.out.println("KeySwitchWeapon1 is " + (isSwitchWeapon1Down ? "down" : "up"));
+         System.out.println("KeySwitchWeapon2 is " + (isSwitchWeapon2Down ? "down" : "up"));
+         System.out.println("MouseWheel value: " + value);
+
+         if (!isSwitchWeapon1Down || isSwitchWeapon2Down && value != 0) {
+            if (isSwWeaponModeDown) {
+               System.out.println("Switching current weapon mode");
                ac.switchCurrentWeaponMode(player);
-            } else if(this.KeyUseWeapon.isKeyPress() && ac.useCurrentWeapon((Entity)player)) {
+            } else if (isUseWeaponPress && ac.useCurrentWeapon((Entity) player)) {
+               System.out.println("Using current weapon");
                pc.useWeapon = true;
                pc.useWeaponOption1 = ac.getCurrentWeapon(player).getLastUsedOptionParameter1();
                pc.useWeaponOption2 = ac.getCurrentWeapon(player).getLastUsedOptionParameter2();
@@ -234,11 +246,14 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
                alsosend = true;
             }
          } else {
-            if(getMouseWheel() > 0) {
-               //TODO: CAUGHT YOU!!!
-               pc.switchWeapon = (byte)ac.getNextWeaponID(player, -1);
-            } else {
-               pc.switchWeapon = (byte)ac.getNextWeaponID(player, 1);
+            if (value > 0) {
+               System.out.println("Switching to next weapon (mouse wheel up)");
+               pc.switchWeapon = (byte) ac.getNextWeaponID(player, -1);
+               ac.switchWeapon(player, pc.switchWeapon - 1);
+            } else if (value < 0) { // Ensure we handle both directions
+               System.out.println("Switching to next weapon (mouse wheel down)");
+               pc.switchWeapon = (byte) ac.getNextWeaponID(player, 1);
+               ac.switchWeapon(player, pc.switchWeapon + 1);
             }
 
             MCH_ClientTickHandlerBase.setMouseWheel(0);

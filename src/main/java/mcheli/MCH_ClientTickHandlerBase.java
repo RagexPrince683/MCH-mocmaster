@@ -30,7 +30,7 @@ public abstract class MCH_ClientTickHandlerBase {
       playerRotMinPitch = min;
       playerRotMaxPitch = max;
       playerRotLimitPitch = true;
-      if(player != null) {
+      if (player != null) {
          player.rotationPitch = MCH_Lib.RNG(player.rotationPitch, playerRotMinPitch, playerRotMaxPitch);
       }
 
@@ -40,11 +40,11 @@ public abstract class MCH_ClientTickHandlerBase {
       playerRotMinYaw = min;
       playerRotMaxYaw = max;
       playerRotLimitYaw = true;
-      if(e != null) {
-         if(e.rotationPitch < playerRotMinPitch) {
+      if (e != null) {
+         if (e.rotationPitch < playerRotMinPitch) {
             e.rotationPitch = playerRotMinPitch;
             e.prevRotationPitch = playerRotMinPitch;
-         } else if(e.rotationPitch > playerRotMaxPitch) {
+         } else if (e.rotationPitch > playerRotMaxPitch) {
             e.rotationPitch = playerRotMaxPitch;
             e.prevRotationPitch = playerRotMaxPitch;
          }
@@ -62,18 +62,18 @@ public abstract class MCH_ClientTickHandlerBase {
    }
 
    public static void applyRotLimit(Entity e) {
-      if(e != null) {
-         if(playerRotLimitPitch) {
-            if(e.rotationPitch < playerRotMinPitch) {
+      if (e != null) {
+         if (playerRotLimitPitch) {
+            if (e.rotationPitch < playerRotMinPitch) {
                e.rotationPitch = playerRotMinPitch;
                e.prevRotationPitch = playerRotMinPitch;
-            } else if(e.rotationPitch > playerRotMaxPitch) {
+            } else if (e.rotationPitch > playerRotMaxPitch) {
                e.rotationPitch = playerRotMaxPitch;
                e.prevRotationPitch = playerRotMaxPitch;
             }
          }
 
-         if(playerRotLimitYaw) {
+         if (playerRotLimitYaw) {
             ;
          }
       }
@@ -86,31 +86,30 @@ public abstract class MCH_ClientTickHandlerBase {
 
    public static boolean updateMouseWheel(int wheel) {
       boolean cancelEvent = false;
-      if(wheel != 0) {
-         //wheel isn't 0 and config initialized
+      if (wheel != 0) {
+         // wheel isn't 0 and config initialized
          MCH_Config EntityClientPlayerMP = MCH_MOD.config;
-         if(MCH_Config.SwitchWeaponWithMouseWheel.prmBool) {
-            //prmBool = false set earlier in code
-            //if switchweaponwithmousewheel is false then let the player use the scroll wheel
+         if (MCH_Config.SwitchWeaponWithMouseWheel.prmBool) {
+            // prmBool = false set earlier in code
+            // if switchweaponwithmousewheel is false then let the player use the scroll wheel
             setMouseWheel(0);
 
             EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
-            if(player != null) {
+            if (player != null) {
                MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(player);
-               if(ac != null) {
+               if (ac != null) {
                   int cwid = ac.getWeaponIDBySeatID(ac.getSeatIdByEntity(player));
                   int nwid = ac.getNextWeaponID(player, wheel);
-                  if(cwid != nwid) {
+                  if (cwid != nwid) {
                      setMouseWheel(wheel);
-                     //stops the mouse from scrolling? but needs to also change the weapon once scrolled I am unsure how to do this
+                     // stops the mouse from scrolling and changes the weapon
                      cancelEvent = true;
-                     ac.getNextWeaponID(player, nwid);
+                     ac.switchWeapon(player, nwid); // Ensure this line switches the weapon
                   }
                }
             }
          }
       }
-
       return cancelEvent;
    }
 
@@ -132,12 +131,12 @@ public abstract class MCH_ClientTickHandlerBase {
       W_McClient.MOD_playSoundFX(name, vol, pitch);
    }
 
+
    public static int getMouseWheel() {
       return mouseWheel;
    }
 
-   public static void setMouseWheel(int mouseWheel) {
-      mouseWheel = mouseWheel;
+   public static void setMouseWheel(int value) {
+      mouseWheel = value;
    }
-
 }
