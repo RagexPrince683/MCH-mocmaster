@@ -19,8 +19,8 @@ import mcheli.aircraft.MCH_PacketAircraftLocation;
 import mcheli.chain.MCH_ItemChain;
 import mcheli.command.MCH_Command;
 import mcheli.plane.MCP_EntityPlane;
-import mcheli.sensors.MCH_VisualContact;
-import mcheli.sensors.Mk1Eyeball;
+//import mcheli.sensors.MCH_VisualContact;
+//import mcheli.sensors.Mk1Eyeball;
 import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_EntityPlayer;
@@ -47,23 +47,23 @@ public class MCH_EventHook extends W_EventHook {
       MCH_Command.onCommandEvent(event);
    }
 
-   private void drawContacts(float partialTick) {
-      EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-      for (MCH_VisualContact contact : Mk1Eyeball.getInstance().contacts) {
-         if (player.getDistance(contact.x, contact.y, contact.z) >= 64) {
-            Mk1Eyeball.renderContact(contact, partialTick);
-            System.out.println("eventhook drawcontacts");
-         }
-      }
-   }
+   //private void drawContacts(float partialTick) {
+   //   EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+   //   for (MCH_VisualContact contact : Mk1Eyeball.getInstance().contacts) {
+   //      if (player.getDistance(contact.x, contact.y, contact.z) >= 64) {
+   //         Mk1Eyeball.renderContact(contact, partialTick);
+   //         System.out.println("eventhook drawcontacts");
+   //      }
+   //   }
+   //}
 
-   @SubscribeEvent
-   public void onRenderWorldEvent(RenderWorldLastEvent event) {
-      Mk1Eyeball.getInstance().update();
-      System.out.println("onrenderworldevent drawcontacts time");
-      System.out.println(Mk1Eyeball.getInstance().contacts + " is mk1 eyeball contacts");
-      drawContacts(event.partialTicks);
-   }
+  //@SubscribeEvent
+  //public void onRenderWorldEvent(RenderWorldLastEvent event) {
+  //   Mk1Eyeball.getInstance().update();
+  //   System.out.println("onrenderworldevent drawcontacts time");
+  //   System.out.println(Mk1Eyeball.getInstance().contacts + " is mk1 eyeball contacts");
+  //   drawContacts(event.partialTicks);
+  //}
 
 
 

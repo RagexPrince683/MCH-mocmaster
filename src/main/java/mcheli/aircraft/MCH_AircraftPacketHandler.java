@@ -22,7 +22,7 @@ import mcheli.aircraft.MCH_PacketSeatListResponse;
 import mcheli.aircraft.MCH_PacketSeatPlayerControl;
 import mcheli.aircraft.MCH_PacketStatusRequest;
 import mcheli.aircraft.MCH_PacketStatusResponse;
-import mcheli.sensors.Mk1Eyeball;
+//import mcheli.sensors.Mk1Eyeball;
 import mcheli.weapon.MCH_EntityTvMissile;
 import mcheli.weapon.MCH_WeaponInfoManager;
 import mcheli.wrapper.W_Entity;
@@ -423,7 +423,7 @@ public class MCH_AircraftPacketHandler {
          MCH_PacketAircraftLocation pc = new MCH_PacketAircraftLocation();
          pc.readData(data);
 
-         Mk1Eyeball.getInstance().addContact(pc);
+         //Mk1Eyeball.getInstance().addContact(pc);
       }
    }
 }

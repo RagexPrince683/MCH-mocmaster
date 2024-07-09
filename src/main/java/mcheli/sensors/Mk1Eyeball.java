@@ -29,10 +29,10 @@ public class Mk1Eyeball {
 
 
     public void addContact(MCH_PacketAircraftLocation pc) {
-        System.out.println("addcontact init");
+        //System.out.println("addcontact init");
         for(MCH_VisualContact c : this.contacts) {
             if(c.entityId == pc.entityId) {
-                System.out.println("addcontact is working");
+                //System.out.println("addcontact is working");
                 c.updated = 0;
                 c.x = pc.x;
                 c.y = pc.y;
@@ -53,7 +53,7 @@ public class Mk1Eyeball {
         ArrayList<MCH_VisualContact> toRemove = new ArrayList<MCH_VisualContact>(); //don't edit on an arraylist as we iterate over it
         for (MCH_VisualContact c : contacts) {
             c.updated++;
-            System.out.println("contacts cleared");
+            //System.out.println("contacts cleared");
             //System.out.println("Updated: " + c.updated);
             if (c.updated >= 20) {
                 //System.out.println("Removing Client. Remote: " + this.worldObj.isRemote);
@@ -70,7 +70,7 @@ public class Mk1Eyeball {
         Entity e = player.worldObj.getEntityByID(c.entityId);
         if(e == null){return true;}
         else{
-            System.out.println("should not render");
+            //System.out.println("should not render");
             return !e.isInRangeToRender3d(player.posX, player.posY, player.posZ);
         }
     }
@@ -80,11 +80,11 @@ public class Mk1Eyeball {
     public static void renderAircraft(float x, float y, float z, float rotX, float rotY, float rotZ, String texture, String model, float partialTick){
         boolean fogSetting = GL11.glIsEnabled(GL11.GL_FOG);
         EntityPlayer p = Minecraft.getMinecraft().thePlayer;
-        System.out.println("renderaircraft");
+        //System.out.println("renderaircraft");
         GL11.glDisable(GL11.GL_FOG);
 
         try {
-            System.out.println("try render");
+            //System.out.println("try render");
 
             RenderHelper.enableStandardItemLighting();
             GL11.glTranslated(- RenderManager.renderPosX, - RenderManager.renderPosY, - RenderManager.renderPosZ);
@@ -109,7 +109,7 @@ public class Mk1Eyeball {
 
 
         }catch(Exception e){
-            System.out.println("some error occured");
+            //System.out.println("some error occured");
             e.printStackTrace();
         }
         if(fogSetting){
@@ -126,7 +126,7 @@ public class Mk1Eyeball {
             try {
                 texture = contact.texture;
                 if (texture == null) {
-                    System.out.println("textures planes png loaded");
+                    //System.out.println("textures planes png loaded");
                     texture = "textures/planes/" + contact.model + ".png";
                 }
             } catch (Exception e) {
@@ -143,7 +143,7 @@ public class Mk1Eyeball {
 
     public void update() {
         try {
-            System.out.println("update, clean contacts after");
+            //System.out.println("update, clean contacts after");
             clean_contacts();
 
 

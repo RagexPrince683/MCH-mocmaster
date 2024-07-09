@@ -11,7 +11,7 @@ public class MCH_VisualContact {
     public int brightness;
 
     public MCH_VisualContact(double x, double y, double z, double rotX, double rotY, double rotZ, String model, String texture, int entityId) {
-        System.out.println("MCH_VisualContact");
+        //System.out.println("MCH_VisualContact");
         this.x = x;
         this.y = y;
         this.z = z;

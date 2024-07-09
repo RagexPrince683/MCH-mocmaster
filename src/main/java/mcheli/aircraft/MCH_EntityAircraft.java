@@ -2665,159 +2665,180 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void moveEntity(double par1, double par3, double par5) {
-
-      //todo: learn how this works and why
-      if(this.getAcInfo() != null) {
+      // Ensure the entity's AcInfo is not null
+      if (this.getAcInfo() != null) {
+         // Start profiling section for movement
          super.worldObj.theProfiler.startSection("move");
          super.ySize *= 0.4F;
-         double d3 = super.posX;
-         double d4 = super.posY;
-         double d5 = super.posZ;
-         double d6 = par1;
-         double d7 = par3;
-         double d8 = par5;
-         AxisAlignedBB axisalignedbb = super.boundingBox.copy();
-         List list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(par1, par3, par5));
 
-         for(int flag1 = 0; flag1 < list.size(); ++flag1) {
-            par3 = ((AxisAlignedBB)list.get(flag1)).calculateYOffset(super.boundingBox, par3);
+         // Store initial position
+         double initialPosX = super.posX;
+         double initialPosY = super.posY;
+         double initialPosZ = super.posZ;
+
+         // Attempted movement deltas
+         double deltaX = par1;
+         double deltaY = par3;
+         double deltaZ = par5;
+
+         // Create a copy of the bounding box
+         AxisAlignedBB initialBoundingBox = super.boundingBox.copy();
+
+         // Get colliding bounding boxes
+         List<AxisAlignedBB> collisionBoxes = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(par1, par3, par5));
+
+         // Calculate Y offset based on collisions
+         for (AxisAlignedBB box : collisionBoxes) {
+            par3 = box.calculateYOffset(super.boundingBox, par3);
          }
 
+         // Offset bounding box by calculated Y offset
          super.boundingBox.offset(0.0D, par3, 0.0D);
-         if(!super.field_70135_K && d7 != par3) {
-            par5 = 0.0D;
-            par3 = 0.0D;
-            par1 = 0.0D;
+
+         // Check if movement is obstructed
+         if (!super.field_70135_K && deltaY != par3) {
+            deltaX = deltaY = deltaZ = 0.0D;
          }
 
-         boolean var34 = super.onGround || d7 != par3 && d7 < 0.0D;
+         // Check if the entity is on the ground
+         boolean onGround = super.onGround || deltaY != par3 && deltaY < 0.0D;
 
-         int j;
-         for(j = 0; j < list.size(); ++j) {
-            par1 = ((AxisAlignedBB)list.get(j)).calculateXOffset(super.boundingBox, par1);
+         // Calculate X offset based on collisions
+         for (AxisAlignedBB box : collisionBoxes) {
+            par1 = box.calculateXOffset(super.boundingBox, par1);
          }
 
+         // Offset bounding box by calculated X offset
          super.boundingBox.offset(par1, 0.0D, 0.0D);
-         if(!super.field_70135_K && d6 != par1) {
-            par5 = 0.0D;
-            par3 = 0.0D;
-            par1 = 0.0D;
+
+         // Check if movement is obstructed
+         if (!super.field_70135_K && deltaX != par1) {
+            deltaX = deltaY = deltaZ = 0.0D;
          }
 
-         for(j = 0; j < list.size(); ++j) {
-            par5 = ((AxisAlignedBB)list.get(j)).calculateZOffset(super.boundingBox, par5);
+         // Calculate Z offset based on collisions
+         for (AxisAlignedBB box : collisionBoxes) {
+            par5 = box.calculateZOffset(super.boundingBox, par5);
          }
 
+         // Offset bounding box by calculated Z offset
          super.boundingBox.offset(0.0D, 0.0D, par5);
-         if(!super.field_70135_K && d8 != par5) {
-            par5 = 0.0D;
-            par3 = 0.0D;
-            par1 = 0.0D;
+
+         // Check if movement is obstructed
+         if (!super.field_70135_K && deltaZ != par5) {
+            deltaX = deltaY = deltaZ = 0.0D;
          }
 
-         if(super.stepHeight > 0.0F && var34 && super.ySize < 0.05F && (d6 != par1 || d8 != par5)) {
-            double d12 = par1;
-            double d10 = par3;
-            double d11 = par5;
-            par1 = d6;
-            par3 = (double)super.stepHeight;
-            par5 = d8;
-            AxisAlignedBB throwable = super.boundingBox.copy();
-            super.boundingBox.setBB(axisalignedbb);
-            list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(d6, par3, d8));
-
-            int k;
-            for(k = 0; k < list.size(); ++k) {
-               par3 = ((AxisAlignedBB)list.get(k)).calculateYOffset(super.boundingBox, par3);
-            }
-
-            super.boundingBox.offset(0.0D, par3, 0.0D);
-            if(!super.field_70135_K && d7 != par3) {
-               par5 = 0.0D;
-               par3 = 0.0D;
-               par1 = 0.0D;
-            }
-
-            for(k = 0; k < list.size(); ++k) {
-               par1 = ((AxisAlignedBB)list.get(k)).calculateXOffset(super.boundingBox, par1);
-            }
-
-            super.boundingBox.offset(par1, 0.0D, 0.0D);
-            if(!super.field_70135_K && d6 != par1) {
-               par5 = 0.0D;
-               par3 = 0.0D;
-               par1 = 0.0D;
-            }
-
-            for(k = 0; k < list.size(); ++k) {
-               par5 = ((AxisAlignedBB)list.get(k)).calculateZOffset(super.boundingBox, par5);
-            }
-
-            super.boundingBox.offset(0.0D, 0.0D, par5);
-            if(!super.field_70135_K && d8 != par5) {
-               par5 = 0.0D;
-               par3 = 0.0D;
-               par1 = 0.0D;
-            }
-
-            if(!super.field_70135_K && d7 != par3) {
-               par5 = 0.0D;
-               par3 = 0.0D;
-               par1 = 0.0D;
-            } else {
-               par3 = (double)(-super.stepHeight);
-
-               for(k = 0; k < list.size(); ++k) {
-                  par3 = ((AxisAlignedBB)list.get(k)).calculateYOffset(super.boundingBox, par3);
-               }
-
-               super.boundingBox.offset(0.0D, par3, 0.0D);
-            }
-
-            if(d12 * d12 + d11 * d11 >= par1 * par1 + par5 * par5) {
-               par1 = d12;
-               par3 = d10;
-               par5 = d11;
-               super.boundingBox.setBB(throwable);
-            }
+         // Handle step height logic
+         if (super.stepHeight > 0.0F && onGround && super.ySize < 0.05F && (deltaX != par1 || deltaZ != par5)) {
+            handleStepHeightMovement(par1, par3, par5, deltaX, deltaY, deltaZ, initialBoundingBox, collisionBoxes);
          }
 
-         super.worldObj.theProfiler.endSection();
-         super.worldObj.theProfiler.startSection("rest");
-         super.posX = (super.boundingBox.minX + super.boundingBox.maxX) / 2.0D;
-         super.posY = super.boundingBox.minY + (double)super.yOffset - (double)super.ySize;
-         super.posZ = (super.boundingBox.minZ + super.boundingBox.maxZ) / 2.0D;
-         super.isCollidedHorizontally = d6 != par1 || d8 != par5;
-         super.isCollidedVertically = d7 != par3;
-         super.onGround = d7 != par3 && d7 < 0.0D;
+         // Update entity position based on bounding box
+         updateEntityPosition();
+
+         // Update collision state
+         super.isCollidedHorizontally = deltaX != par1 || deltaZ != par5;
+         super.isCollidedVertically = deltaY != par3;
+         super.onGround = deltaY != par3 && deltaY < 0.0D;
          super.isCollided = super.isCollidedHorizontally || super.isCollidedVertically;
+
+         // Update fall state
          this.updateFallState(par3, super.onGround);
-         if(d6 != par1) {
-            super.motionX = 0.0D;
-         }
 
-         if(d7 != par3) {
-            super.motionY = 0.0D;
-         }
+         // Reset motion if obstructed
+         if (deltaX != par1) super.motionX = 0.0D;
+         if (deltaY != par3) super.motionY = 0.0D;
+         if (deltaZ != par5) super.motionZ = 0.0D;
 
-         if(d8 != par5) {
-            super.motionZ = 0.0D;
-         }
+         // Handle block collisions
+         handleBlockCollisions();
 
-         double var10000 = super.posX - d3;
-         var10000 = super.posY - d4;
-         var10000 = super.posZ - d5;
-
-         try {
-            this.doBlockCollisions();
-         } catch (Throwable var33) {
-            CrashReport crashreport = CrashReport.makeCrashReport(var33, "Checking entity tile collision");
-            CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being checked for collision");
-            this.addEntityCrashInfo(crashreportcategory);
-            throw new ReportedException(crashreport);
-         }
-
+         // End profiling section
          super.worldObj.theProfiler.endSection();
+      }
+   }
+
+   private void handleStepHeightMovement(double par1, double par3, double par5, double deltaX, double deltaY, double deltaZ, AxisAlignedBB initialBoundingBox, List<AxisAlignedBB> collisionBoxes) {
+      // Store initial deltas
+      double initialDeltaX = par1;
+      double initialDeltaY = par3;
+      double initialDeltaZ = par5;
+
+      // Attempt step height movement
+      par1 = deltaX;
+      par3 = (double) super.stepHeight;
+      par5 = deltaZ;
+
+      // Create a copy of the bounding box
+      AxisAlignedBB stepBoundingBox = super.boundingBox.copy();
+      super.boundingBox.setBB(initialBoundingBox);
+
+      // Get colliding bounding boxes
+      List<AxisAlignedBB> stepCollisionBoxes = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(deltaX, par3, deltaZ));
+
+      // Calculate Y offset based on collisions
+      for (AxisAlignedBB box : stepCollisionBoxes) {
+         par3 = box.calculateYOffset(super.boundingBox, par3);
+      }
+
+      // Offset bounding box by calculated Y offset
+      super.boundingBox.offset(0.0D, par3, 0.0D);
+
+      // Check if movement is obstructed
+      if (!super.field_70135_K && deltaY != par3) {
+         deltaX = deltaY = deltaZ = 0.0D;
+      }
+
+      // Calculate X offset based on collisions
+      for (AxisAlignedBB box : stepCollisionBoxes) {
+         par1 = box.calculateXOffset(super.boundingBox, par1);
+      }
+
+      // Offset bounding box by calculated X offset
+      super.boundingBox.offset(par1, 0.0D, 0.0D);
+
+      // Check if movement is obstructed
+      if (!super.field_70135_K && deltaX != par1) {
+         deltaX = deltaY = deltaZ = 0.0D;
+      }
+
+      // Calculate Z offset based on collisions
+      for (AxisAlignedBB box : stepCollisionBoxes) {
+         par5 = box.calculateZOffset(super.boundingBox, par5);
+      }
+
+      // Offset bounding box by calculated Z offset
+      super.boundingBox.offset(0.0D, 0.0D, par5);
+
+      // Check if movement is obstructed
+      if (!super.field_70135_K && deltaZ != par5) {
+         deltaX = deltaY = deltaZ = 0.0D;
+      }
+
+      // Revert to initial deltas if step movement was less efficient
+      if (initialDeltaX * initialDeltaX + initialDeltaZ * initialDeltaZ >= par1 * par1 + par5 * par5) {
+         par1 = initialDeltaX;
+         par3 = initialDeltaY;
+         par5 = initialDeltaZ;
+         super.boundingBox.setBB(stepBoundingBox);
+      }
+   }
+
+   private void updateEntityPosition() {
+      super.posX = (super.boundingBox.minX + super.boundingBox.maxX) / 2.0D;
+      super.posY = super.boundingBox.minY + (double) super.yOffset - (double) super.ySize;
+      super.posZ = (super.boundingBox.minZ + super.boundingBox.maxZ) / 2.0D;
+   }
+
+   private void handleBlockCollisions() {
+      try {
+         this.doBlockCollisions();
+      } catch (Throwable throwable) {
+         CrashReport crashReport = CrashReport.makeCrashReport(throwable, "Checking entity tile collision");
+         CrashReportCategory crashReportCategory = crashReport.makeCategory("Entity being checked for collision");
+         this.addEntityCrashInfo(crashReportCategory);
+         throw new ReportedException(crashReport);
       }
    }
 

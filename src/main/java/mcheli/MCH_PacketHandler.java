@@ -12,7 +12,7 @@ import mcheli.helicopter.MCH_HeliPacketHandler;
 import mcheli.lweapon.MCH_LightWeaponPacketHandler;
 import mcheli.multiplay.MCH_MultiplayPacketHandler;
 import mcheli.plane.MCP_PlanePacketHandler;
-import mcheli.sensors.Mk1Eyeball;
+//import mcheli.sensors.Mk1Eyeball;
 import mcheli.tank.MCH_TankPacketHandler;
 import mcheli.tool.MCH_ToolPacketHandler;
 import mcheli.uav.MCH_UavPacketHandler;
