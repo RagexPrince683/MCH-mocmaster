@@ -86,34 +86,26 @@ public abstract class MCH_ClientTickHandlerBase {
 
    public static boolean updateMouseWheel(int wheel) {
       boolean cancelEvent = false;
-      if (wheel != 0) {
-         // wheel isn't 0 and config initialized
-         MCH_Config EntityClientPlayerMP = MCH_MOD.config;
+      if (wheel != 0)
          if (MCH_Config.SwitchWeaponWithMouseWheel.prmBool) {
-            // prmBool = false set earlier in code
-            // if switchweaponwithmousewheel is false then let the player use the scroll wheel
             setMouseWheel(0);
-
-            EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
-            if (player != null) {
-               MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(player);
+            EntityClientPlayerMP entityClientPlayerMP = (Minecraft.getMinecraft()).thePlayer;
+            if (entityClientPlayerMP != null) {
+               MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl((Entity)entityClientPlayerMP);
                if (ac != null) {
-                  int cwid = ac.getWeaponIDBySeatID(ac.getSeatIdByEntity(player));
-                  int nwid = ac.getNextWeaponID(player, wheel);
+                  int cwid = ac.getWeaponIDBySeatID(ac.getSeatIdByEntity((Entity)entityClientPlayerMP));
+                  int nwid = ac.getNextWeaponID((Entity)entityClientPlayerMP, 1);
                   if (cwid != nwid) {
                      setMouseWheel(wheel);
-                     // stops the mouse from scrolling and changes the weapon
                      cancelEvent = true;
-                     ac.switchWeapon(player, nwid); // Ensure this line switches the weapon
                   }
                }
             }
          }
-      }
       return cancelEvent;
    }
 
-   protected abstract void onTick(boolean var1);
+   protected abstract void onTick(boolean paramBoolean);
 
    public static void playSoundOK() {
       W_McClient.DEF_playSoundFX("random.click", 1.0F, 1.0F);
@@ -136,7 +128,7 @@ public abstract class MCH_ClientTickHandlerBase {
       return mouseWheel;
    }
 
-   public static void setMouseWheel(int value) {
-      mouseWheel = value;
+   public static void setMouseWheel(int mouseWheel) {
+      MCH_ClientTickHandlerBase.mouseWheel = mouseWheel;
    }
 }

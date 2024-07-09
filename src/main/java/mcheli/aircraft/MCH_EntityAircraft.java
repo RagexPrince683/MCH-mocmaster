@@ -410,7 +410,18 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public float calcRotYaw(float partialTicks) {
-      return super.prevRotationYaw + (this.getRotYaw() - super.prevRotationYaw) * partialTicks;
+      float prevYaw = super.prevRotationYaw;
+      float currentYaw = this.getRotYaw();
+
+      // Normalize the angles to avoid interpolation issues across the 360° boundary
+      while (currentYaw - prevYaw < -180.0F) {
+         currentYaw += 360.0F;
+      }
+      while (currentYaw - prevYaw >= 180.0F) {
+         currentYaw -= 360.0F;
+      }
+
+      return prevYaw + (currentYaw - prevYaw) * partialTicks;
    }
 
    public float calcRotPitch(float partialTicks) {
@@ -4757,14 +4768,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public void switchWeapon(Entity entity, int id) {
       int sid = this.getSeatIdByEntity(entity);
-      if(this.isValidSeatID(sid)) {
-         int var10000 = this.currentWeaponID[sid];
-         if(this.getWeaponNum() > 0 && this.currentWeaponID.length > 0) {
-            if(id < 0) {
-               this.currentWeaponID[sid] = -1;
+      if (this.isValidSeatID(sid)) {
+         if (this.getWeaponNum() > 0 && this.currentWeaponID.length > 0) {
+            if (id < 0) {
+               id = 0; // Ensure id is not negative
             }
 
-            if(id >= this.getWeaponNum()) {
+            if (id >= this.getWeaponNum()) {
                id = this.getWeaponNum() - 1;
             }
 
@@ -4773,10 +4783,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             this.currentWeaponID[sid] = id;
             MCH_WeaponSet ws = this.getCurrentWeapon(entity);
             ws.onSwitchWeapon(super.worldObj.isRemote, this.isInfinityAmmo(entity));
-            if(!super.worldObj.isRemote) {
+            if (!super.worldObj.isRemote) {
                MCH_PacketNotifyWeaponID.send(this, sid, id, ws.getAmmoNum(), ws.getRestAllAmmoNum());
             }
-
          }
       }
    }
