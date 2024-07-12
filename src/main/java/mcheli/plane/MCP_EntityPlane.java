@@ -193,6 +193,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             this.prevRotationRotor += 360.0F;
          }
 
+         //todo: use super.onGround to better check crash physics
          if(super.onGround && this.getVtolMode() == 0 && this.planeInfo.isDefaultVtol) {
             this.swithVtolMode(true);
          }
@@ -243,14 +244,14 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
          }
 
-         if (this.aircraftPitch >= 50 && this.isEntityAlive() && this.isAirBorne) { //going down again
+         if (this.aircraftPitch >= 60 && this.isEntityAlive() && this.isAirBorne) { //going down again
             timer++;
             this.motionY = (this.motionY * 0.20) + this.aircraftPitch / 4;
             this.aircraftY = this.aircraftY * 0.20;
             //System.out.println(timer);
-            if (timer > 900) {
-               this.motionY = (this.motionY * 0.61) + this.aircraftPitch;
-               this.aircraftY = this.aircraftY * 0.61;
+            if (timer > 1200) {
+               this.motionY = (this.motionY * 0.11) + this.aircraftPitch;
+               this.aircraftY = this.aircraftY * 0.11;
 
                if (this.aircraftPitch <= 1.0) {
                   //System.out.println(timer);

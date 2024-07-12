@@ -4,6 +4,10 @@ import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
+import mcheli.weapon.MCH_BulletModel;
+import mcheli.weapon.MCH_DefaultBulletModels;
+import mcheli.weapon.MCH_EntityBaseBullet;
+import mcheli.weapon.MCH_EntityBomb;
 import mcheli.wrapper.W_MovingObjectPosition;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.init.Blocks;
@@ -48,37 +52,6 @@ public class MCH_EntityMarkerRocket extends MCH_EntityBaseBullet {
       return false;
    }
 
-   public void spawnBombs() {
-
-      int var5 = this.getInfo().bomblet;
-      float accuracy = 30.0f;
-      double alt = 1000f;
-      for(int i = 0; i < var5; ++i) {
-
-         MCH_EntityBomb e = new MCH_EntityBomb(super.worldObj, super.posX + (double)((super.rand.nextFloat() - 0.5F) * accuracy), (double)(alt + super.rand.nextFloat() * 10.0F + (float)(i * 30)), super.posZ + (double)((super.rand.nextFloat() - 0.5F) * accuracy), 0.0D, -0.5D, 0.0D, 0.0F, 90.0F, 4.0D);
-         e.setName(this.getName());
-         e.explosionPower = 3 + super.rand.nextInt(2);
-         e.explosionPowerInWater = 0;
-         e.setPower(30);
-         e.piercing = 0;
-         e.shootingAircraft = super.shootingAircraft;
-         e.shootingEntity = super.shootingEntity;
-         super.worldObj.spawnEntityInWorld(e);
-      }
-   }
-
-   public int timer = -1;
-
-   public void timer(){
-      if(timer == -1){
-         timer = getInfo().dispenseRange;
-      }else if(timer > 0){
-         timer --;
-      }else{
-         setDead();
-      }
-   }
-
    public void onUpdate() {
       int status = this.getMarkerStatus();
       if(super.worldObj.isRemote) {
@@ -92,8 +65,7 @@ public class MCH_EntityMarkerRocket extends MCH_EntityBaseBullet {
                this.spawnParticle(this.getInfo().trajectoryParticleName, 3, 5.0F * this.getInfo().smokeSize * 0.5F);
             } else {
                float num = super.rand.nextFloat() * 0.3F;
-
-               this.spawnParticle("explode", 5, 3*(float)(10 + super.rand.nextInt(4)), 255,255,255, (super.rand.nextFloat() - 0.5F) * 0.7F, 0.3F + super.rand.nextFloat() * 0.3F, (super.rand.nextFloat() - 0.5F) * 0.7F);
+               this.spawnParticle("explode", 5, (float)(10 + super.rand.nextInt(4)), super.rand.nextFloat() * 0.2F + 0.8F, num, num, (super.rand.nextFloat() - 0.5F) * 0.7F, 0.3F + super.rand.nextFloat() * 0.3F, (super.rand.nextFloat() - 0.5F) * 0.7F);
             }
          }
       } else if(status != 0 && !this.isInWater()) {
@@ -101,8 +73,20 @@ public class MCH_EntityMarkerRocket extends MCH_EntityBaseBullet {
             super.onUpdate();
          } else if(this.countDown > 0) {
             --this.countDown;
-            if(this.countDown == 1) {
-               spawnBombs();
+            if(this.countDown == 40) {
+               int var5 = 6 + super.rand.nextInt(2);
+
+               for(int i = 0; i < var5; ++i) {
+                  MCH_EntityBomb e = new MCH_EntityBomb(super.worldObj, super.posX + (double)((super.rand.nextFloat() - 0.5F) * 15.0F), (double)(260.0F + super.rand.nextFloat() * 10.0F + (float)(i * 30)), super.posZ + (double)((super.rand.nextFloat() - 0.5F) * 15.0F), 0.0D, -0.5D, 0.0D, 0.0F, 90.0F, 4.0D);
+                  e.setName(this.getName());
+                  e.explosionPower = 3 + super.rand.nextInt(2);
+                  e.explosionPowerInWater = 0;
+                  e.setPower(30);
+                  e.piercing = 0;
+                  e.shootingAircraft = super.shootingAircraft;
+                  e.shootingEntity = super.shootingEntity;
+                  super.worldObj.spawnEntityInWorld(e);
+               }
             }
          } else {
             this.setDead();
@@ -186,13 +170,11 @@ public class MCH_EntityMarkerRocket extends MCH_EntityBaseBullet {
                   super.prevPosX = super.posX;
                   super.prevPosY = super.posY;
                   super.prevPosZ = super.posZ;
-                  this.countDown = 1800;
+                  this.countDown = 100;
                } else {
-                  spawnBombs();
                   this.setDead();
                }
             } else {
-               spawnBombs();
                this.setDead();
             }
 

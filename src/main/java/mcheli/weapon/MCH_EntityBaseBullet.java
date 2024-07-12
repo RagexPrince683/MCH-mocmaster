@@ -72,6 +72,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    public boolean bomblet;
    public boolean gravitydown;
    public boolean bigdelay;
+   private boolean bigcheck = false;
 
    //private final MCH_Fuze fuze = new MCH_Fuze(this);;
 
@@ -564,6 +565,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          if (!bomblet && gravitydown && bigdelay) {
             loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
             System.out.println("loadneighboring chunks");
+            bigcheck = true;
          }
          this.onUpdateCollided();
 
@@ -869,13 +871,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       if (!super.worldObj.isRemote) { //if on the server
          if (m.entityHit != null) {
             //todo maybe initiate another chunk loaded here
-            if (!bomblet && gravitydown) { //new chunk loader
+            if (this.bigcheck = true) {
+               loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
+            }
+            //if (!bomblet && gravitydown) { //new chunk loader
                //loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
                //System.out.println("loadneighboring chunks server");
                //this.setDead();
                //System.out.println("hit a vehicle");
                //this is infact not an impact, it is hitting a vehicle
-            }
+            //}
             this.onImpactEntity(m.entityHit, damageFactor);
             this.piercing = 0;
          }
