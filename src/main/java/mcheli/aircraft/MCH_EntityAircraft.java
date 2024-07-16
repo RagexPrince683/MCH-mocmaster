@@ -2163,6 +2163,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       double yaw = MathHelper.wrapAngleTo180_double(this.aircraftYaw - this.getRotYaw());
       double roll = MathHelper.wrapAngleTo180_double(this.getServerRoll() - this.getRotRoll());
 
+      System.out.println("applyServerPositionAndRotation called:");
+      System.out.println("  Current Yaw: " + this.getRotYaw() + ", Target Yaw: " + this.aircraftYaw + ", Yaw Difference: " + yaw);
+      System.out.println("  Current Roll: " + this.getRotRoll() + ", Target Roll: " + this.getServerRoll() + ", Roll Difference: " + roll);
+
       if (!this.isDestroyed() && (!W_Lib.isClientPlayer(this.getRiddenByEntity()) || this.getRidingEntity() != null)) {
          // Using Slerp for smooth interpolation
          float newRotYaw = (float) (this.getRotYaw() + yaw / rpinc);
@@ -2173,6 +2177,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.setRotYaw(newRotYaw);
          this.setRotPitch(newRotPitch);
          this.setRotRoll(newRotRoll);
+
+         System.out.println("  New Rotations: Yaw=" + newRotYaw + ", Pitch=" + newRotPitch + ", Roll=" + newRotRoll);
       }
 
       // Smooth position interpolation
@@ -2183,6 +2189,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       );
       this.setRotation(this.getRotYaw(), this.getRotPitch());
       --this.aircraftPosRotInc;
+
+      System.out.println("  New Position: X=" + super.posX + ", Y=" + super.posY + ", Z=" + super.posZ);
+      System.out.println("  Remaining Increment: " + this.aircraftPosRotInc);
    }
    protected void autoRepair() {
       if(this.timeSinceHit > 0) {
@@ -3309,8 +3318,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       super.motionZ = this.velocityZ;
 
       // Log debug information for monitoring
-      System.out.println("Position and rotation set: X=" + par1 + ", Y=" + par3 + ", Z=" + par5 +
-              ", Yaw=" + par7 + ", Pitch=" + par8 + ", Increment=" + par9);
+      System.out.println("setPositionAndRotation2 called:");
+      System.out.println("  Position set to: X=" + par1 + ", Y=" + par3 + ", Z=" + par5);
+      System.out.println("  Rotation set to: Yaw=" + par7 + ", Pitch=" + par8);
+      System.out.println("  Increment: " + par9);
+      System.out.println("  Motion set to: motionX=" + super.motionX + ", motionY=" + super.motionY + ", motionZ=" + super.motionZ);
    }
 
    public void updateRiderPosition(double px, double py, double pz) {
