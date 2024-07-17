@@ -277,11 +277,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.entityRadar = new MCH_Radar(world);
       this.radarRotate = 0;
       this.currentWeaponID = new int[0];
-      this.aircraftPosRotInc = 0;
+      //this.aircraftPosRotInc = 0;
       this.aircraftX = 0.0D;
       this.aircraftY = 0.0D;
       this.aircraftZ = 0.0D;
-      this.aircraftYaw = 0.0D;
+      //this.aircraftYaw = 0.0D;
       this.aircraftPitch = 0.0D;
       this.currentSpeed = 0.0D;
       this.setCurrentThrottle(0.0D);
@@ -1200,12 +1200,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
+      System.out.println("set angles");
       if(partialTicks < 0.03F) {
          partialTicks = 0.4F;
+         System.out.println("partial ticks = 0.4");
       }
 
       if(partialTicks > 0.9F) {
          partialTicks = 0.6F;
+         System.out.println("Partial ticks = 0.6");
       }
 
       this.lowPassPartialTicks.put(partialTicks);
@@ -1334,14 +1337,17 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       if(!this.isOverridePlayerPitch() && !fixRot) {
+         System.out.println("some shit went wrong?");
          player.setAngles(0.0F, deltaY);
       } else {
+         System.out.println("God's unholy retribution");
          player.prevRotationPitch = this.getRotPitch() + (fixRot?fixPitch:0.0F);
          player.rotationPitch = this.getRotPitch() + (fixRot?fixPitch:0.0F);
       }
 
       if(this.getRidingEntity() == null && ac_yaw != this.getRotYaw() || ac_pitch != this.getRotPitch() || ac_roll != this.getRotRoll()) {
          this.aircraftRotChanged = true;
+         System.out.println("aircraft rot changed");
       }
 
    }
@@ -2157,21 +2163,21 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void applyServerPositionAndRotation() {
-      double rpinc = (double) this.aircraftPosRotInc;
+      double increment = (double) this.aircraftPosRotInc;
 
       // Accurate wrapping and double precision
-      double yaw = MathHelper.wrapAngleTo180_double(this.aircraftYaw - this.getRotYaw());
-      double roll = MathHelper.wrapAngleTo180_double(this.getServerRoll() - this.getRotRoll());
+      double yawDiff = MathHelper.wrapAngleTo180_double(this.aircraftYaw - this.getRotYaw());
+      double rollDiff = MathHelper.wrapAngleTo180_double(this.getServerRoll() - this.getRotRoll());
 
       System.out.println("applyServerPositionAndRotation called:");
-      System.out.println("  Current Yaw: " + this.getRotYaw() + ", Target Yaw: " + this.aircraftYaw + ", Yaw Difference: " + yaw);
-      System.out.println("  Current Roll: " + this.getRotRoll() + ", Target Roll: " + this.getServerRoll() + ", Roll Difference: " + roll);
+      System.out.println("  Current Yaw: " + this.getRotYaw() + ", Target Yaw: " + this.aircraftYaw + ", Yaw Difference: " + yawDiff);
+      System.out.println("  Current Roll: " + this.getRotRoll() + ", Target Roll: " + this.getServerRoll() + ", Roll Difference: " + rollDiff);
 
       if (!this.isDestroyed() && (!W_Lib.isClientPlayer(this.getRiddenByEntity()) || this.getRidingEntity() != null)) {
-         // Using Slerp for smooth interpolation
-         float newRotYaw = (float) (this.getRotYaw() + yaw / rpinc);
-         float newRotPitch = (float) (this.getRotPitch() + (this.aircraftPitch - this.getRotPitch()) / rpinc);
-         float newRotRoll = (float) (this.getRotRoll() + roll / rpinc);
+         // Smooth interpolation
+         float newRotYaw = (float) (this.getRotYaw() + yawDiff / increment);
+         float newRotPitch = (float) (this.getRotPitch() + (this.aircraftPitch - this.getRotPitch()) / increment);
+         float newRotRoll = (float) (this.getRotRoll() + rollDiff / increment);
 
          // Apply the new rotations
          this.setRotYaw(newRotYaw);
@@ -2183,9 +2189,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       // Smooth position interpolation
       this.setPosition(
-              super.posX + (this.aircraftX - super.posX) / rpinc,
-              super.posY + (this.aircraftY - super.posY) / rpinc,
-              super.posZ + (this.aircraftZ - super.posZ) / rpinc
+              super.posX + (this.aircraftX - super.posX) / increment,
+              super.posY + (this.aircraftY - super.posY) / increment,
+              super.posZ + (this.aircraftZ - super.posZ) / increment
       );
       this.setRotation(this.getRotYaw(), this.getRotPitch());
       --this.aircraftPosRotInc;

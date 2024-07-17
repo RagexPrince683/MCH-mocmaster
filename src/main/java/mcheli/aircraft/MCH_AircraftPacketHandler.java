@@ -44,6 +44,7 @@ public class MCH_AircraftPacketHandler {
                MCH_EntityAircraft ac = (MCH_EntityAircraft)e;
                ac.setRotRoll(req.roll);
                if(req.rollRev) {
+                  System.out.println("req.rollRev");
                   MCH_Lib.DbgLog(ac.worldObj, "onPacketIndRotation Error:req.rollRev y=%.2f, p=%.2f, r=%.2f", new Object[]{Float.valueOf(req.yaw), Float.valueOf(req.pitch), Float.valueOf(req.roll)});
                   if(ac.getRiddenByEntity() != null) {
                      ac.getRiddenByEntity().rotationYaw = req.yaw;
@@ -54,12 +55,15 @@ public class MCH_AircraftPacketHandler {
                      Entity entity = ac.getEntityBySeatId(1 + sid);
                      if(entity != null) {
                         entity.rotationYaw += entity.rotationYaw <= 0.0F?180.0F:-180.0F;
+                        System.out.println("entity isn't null yaw applied");
                      }
                   }
                }
 
                ac.setRotYaw(req.yaw);
+               System.out.println("yaw changed");
                ac.setRotPitch(req.pitch);
+               System.out.println("pitch changed");
             }
 
          }
@@ -67,6 +71,7 @@ public class MCH_AircraftPacketHandler {
    }
 
    public static void onPacketOnMountEntity(EntityPlayer player, ByteArrayDataInput data) {
+      System.out.println("player mount entity");
       if(player != null && player.worldObj.isRemote) {
          MCH_PacketNotifyOnMountEntity req = new MCH_PacketNotifyOnMountEntity();
          req.readData(data);
@@ -127,6 +132,7 @@ public class MCH_AircraftPacketHandler {
          req.readData(data);
          if(req.entityID_AC > 0) {
             Entity e = player.worldObj.getEntityByID(req.entityID_AC);
+            System.out.println("I have schizophrenia and I am going insane, MCH_AircraftPacketHandler");
             if(e instanceof MCH_EntityAircraft) {
                MCH_PacketStatusResponse.sendStatus((MCH_EntityAircraft)e, player);
             }
@@ -173,11 +179,14 @@ public class MCH_AircraftPacketHandler {
       if(player.worldObj.isRemote) {
          MCH_PacketStatusResponse status = new MCH_PacketStatusResponse();
          status.readData(data);
+         System.out.println("reading data");
          String msg = "onPacketStatusResponse:";
          if(status.entityID_AC > 0) {
             msg = msg + "EID=" + status.entityID_AC + ":";
             Entity e = player.worldObj.getEntityByID(status.entityID_AC);
+            System.out.println("player is an object");
             if(e instanceof MCH_EntityAircraft) {
+               System.out.println("is player MCH_EntityAircraft, MCH_AircraftPacketHandler");
                MCH_EntityAircraft ac = (MCH_EntityAircraft)e;
                if(status.seatNum > 0 && status.weaponIDs != null && status.weaponIDs.length == status.seatNum) {
                   msg = msg + "seatNum=" + status.seatNum + ":";

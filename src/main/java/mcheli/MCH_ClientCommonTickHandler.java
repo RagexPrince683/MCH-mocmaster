@@ -399,7 +399,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                if(var26 != null && var26.fixRot && var19.getIsGunnerMode(var17) && !var19.isGunnerLookMode(var17)) {
                   var22 = true;
                   var23 = var26.fixYaw;
-                  System.out.println("yaw1");
+                  //System.out.println("yaw1");
                   var25 = var26.fixPitch;
                   mouseRollDeltaX *= 0.0D;
                   mouseRollDeltaY *= 0.0D;
@@ -409,7 +409,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                   MCH_AircraftInfo.CameraPosition var28 = var19.getCameraPosInfo();
                   if(var28 != null) {
                      var23 = var28.yaw;
-                     System.out.println("yaw2");
+                     //System.out.println("yaw2");
                      var25 = var28.pitch;
                   }
                }
@@ -429,7 +429,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
                p = MathHelper.wrapAngleTo180_float(var19.getRotRoll());
                r = MathHelper.wrapAngleTo180_float(var19.getRotYaw() - var17.rotationYaw);
-               System.out.println("yaw3");
+               //System.out.println("yaw3");
                p *= MathHelper.cos((float)((double)r * 3.141592653589793D / 180.0D));
                if(var19.getTVMissile() != null && W_Lib.isClientPlayer(var19.getTVMissile().shootingEntity) && var19.getIsGunnerMode(var17)) {
                   p = 0.0F;
@@ -458,47 +458,47 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                   mouseDeltaY *= ws != null && ws.getInfo() != null?(double)ws.getInfo().cameraRotationSpeedPitch:1.0D;
                   var17.setAngles((float)mouseDeltaX, (float)mouseDeltaY);
                   float y = var19.getRotYaw();
-                  System.out.println("yaw4");
+                  //System.out.println("yaw4");
                   p = var19.getRotPitch();
                   r = var19.getRotRoll();
                   var19.setRotYaw(var19.calcRotYaw(partialTicks));
-                  System.out.println("yaw5");
+                  //System.out.println("yaw5");
                   var19.setRotPitch(var19.calcRotPitch(partialTicks));
                   var19.setRotRoll(var19.calcRotRoll(partialTicks));
                   float revRoll = 0.0F;
                   if(wi) {
                      var17.rotationYaw = var19.getRotYaw() + seatInfo.fixYaw;
-                     System.out.println("yaw6");
+                     //System.out.println("yaw6");
                      var17.rotationPitch = var19.getRotPitch() + seatInfo.fixPitch;
                      if(var17.rotationPitch > 90.0F) {
                         var17.prevRotationPitch -= (var17.rotationPitch - 90.0F) * 2.0F;
                         var17.rotationPitch -= (var17.rotationPitch - 90.0F) * 2.0F;
                         var17.prevRotationYaw += 180.0F;
                         var17.rotationYaw += 180.0F;
-                        System.out.println("yaw7");
+                        //System.out.println("yaw7");
                         revRoll = 180.0F;
                      } else if(var17.rotationPitch < -90.0F) {
                         var17.prevRotationPitch -= (var17.rotationPitch - 90.0F) * 2.0F;
                         var17.rotationPitch -= (var17.rotationPitch - 90.0F) * 2.0F;
                         var17.prevRotationYaw += 180.0F;
                         var17.rotationYaw += 180.0F;
-                        System.out.println("yaw8");
+                        //System.out.println("yaw8");
                         revRoll = 180.0F;
                      }
                   }
 
                   var19.setupAllRiderRenderPosition(partialTicks, var17);
                   var19.setRotYaw(y);
-                  System.out.println("yaw9");
+                  //System.out.println("yaw9");
                   var19.setRotPitch(p);
                   var19.setRotRoll(r);
                   mouseRollDeltaX *= 0.9D;
                   mouseRollDeltaY *= 0.9D;
                   float roll = MathHelper.wrapAngleTo180_float(var19.getRotRoll());
                   float yaw = MathHelper.wrapAngleTo180_float(var19.getRotYaw() - var17.rotationYaw);
-                  System.out.println("yaw10");
+                  //System.out.println("yaw10");
                   roll *= MathHelper.cos((float)((double)yaw * 3.141592653589793D / 180.0D));
-                  System.out.println("yaw11");
+                  //System.out.println("yaw11");
                   if(var19.getTVMissile() != null && W_Lib.isClientPlayer(var19.getTVMissile().shootingEntity) && var19.getIsGunnerMode(var17)) {
                      roll = 0.0F;
                   }
@@ -519,9 +519,9 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             if(var19 != null) {
                if(var19.getSeatIdByEntity(var17) == 0 && !var19.isDestroyed()) {
                   var19.lastRiderYaw = var17.rotationYaw;
-                  System.out.println("yaw12");
+                  //System.out.println("yaw12");
                   var19.prevLastRiderYaw = var17.prevRotationYaw;
-                  System.out.println("yaw13");
+                  //System.out.println("yaw13");
                   var19.lastRiderPitch = var17.rotationPitch;
                   var19.prevLastRiderPitch = var17.prevRotationPitch;
                }
@@ -532,9 +532,9 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             MCH_ViewEntityDummy var24 = MCH_ViewEntityDummy.getInstance(var17.worldObj);
             if(var24 != null) {
                var24.rotationYaw = var17.rotationYaw;
-               System.out.println("yaw14");
+               //System.out.println("yaw14");
                var24.prevRotationYaw = var17.prevRotationYaw;
-               System.out.println("yaw15");
+               //System.out.println("yaw15");
                if(var19 != null) {
                   MCH_WeaponSet var27 = var19.getCurrentWeapon(var17);
                   if(var27 != null && var27.getInfo() != null && var27.getInfo().fixCameraPitch) {
@@ -552,11 +552,11 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       MCH_ViewEntityDummy de = MCH_ViewEntityDummy.getInstance(entity.worldObj);
       if(de != null) {
          if(de.rotationYaw - de.prevRotationYaw > 180.0F) {
-            System.out.println("yaw16");
+            //System.out.println("yaw16");
             de.prevRotationYaw += 360.0F;
          } else if(de.rotationYaw - de.prevRotationYaw < -180.0F) {
             de.prevRotationYaw -= 360.0F;
-            System.out.println("yaw17");
+            //System.out.println("yaw17");
          }
       }
 
