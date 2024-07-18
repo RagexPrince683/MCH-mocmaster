@@ -56,6 +56,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    public float prevRotationRotor;
    public float addkeyRotValue;
    public final MCH_WheelManager WheelMng;
+   public float partialTicks;
 
 
    public MCH_EntityTank(World world) {
@@ -157,6 +158,10 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    }
 
    public void onUpdateAircraft() {
+
+      //add partial ticks here???
+
+
       if(this.tankInfo == null) {
          this.changeType(this.getTypeName());
          super.prevPosX = super.posX;
@@ -176,7 +181,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
          this.updateWeapons();
          this.onUpdate_Seats();
-         this.onUpdate_Control();
+         this.onUpdate_Control(partialTicks);
          this.prevRotationRotor = this.rotationRotor;
          this.rotationRotor = (float)((double)this.rotationRotor + this.getCurrentThrottle() * (double)this.getAcInfo().rotorSpeed);
          if(this.rotationRotor > 360.0F) {
@@ -365,6 +370,8 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          this.setRotPitch(this.getRotPitch() + (this.WheelMng.targetPitch - this.getRotPitch()) * partialTicks);
          this.setRotRoll(this.getRotRoll() + (this.WheelMng.targetRoll - this.getRotRoll()) * partialTicks);
          boolean isFly = MCH_Lib.getBlockIdY(this, 3, -3) == 0;
+
+         //logic for like rotation
          if(!isFly || this.getAcInfo().isFloat && this.getWaterDepth() > 0.0D) {
             float rotonground = 1.0F;
             if(!isFly) {
@@ -404,7 +411,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       }
    }
 
-   protected void onUpdate_Control() {
+   protected void onUpdate_Control(float partialTicks) {
       if(super.isGunnerMode && !this.canUseFuel()) {
          this.switchGunnerMode(false);
       }
@@ -420,10 +427,10 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       }
 
       if(this.getRiddenByEntity() != null && !this.getRiddenByEntity().isDead && this.isCanopyClose() && this.canUseFuel() && !this.isDestroyed()) {
-         this.onUpdate_ControlSub();
+         this.onUpdate_ControlSub(partialTicks);
       } else if(this.isTargetDrone() && this.canUseFuel() && !this.isDestroyed()) {
          super.throttleUp = true;
-         this.onUpdate_ControlSub();
+         this.onUpdate_ControlSub(partialTicks);
       } else if(this.getCurrentThrottle() > 0.0D) {
          this.addCurrentThrottle(-0.0025D * (double)this.getAcInfo().throttleUpDown);
       } else {
@@ -451,7 +458,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
    }
 
-   protected void onUpdate_ControlSub() {
+   protected void onUpdate_ControlSub(float partialTicks) {
       if(!super.isGunnerMode) {
          float throttleUpDown = this.getAcInfo().throttleUpDown;
          if(super.throttleUp) {
@@ -474,27 +481,53 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                   //implement a new variable here to add throttle control for specific vehicles specifically 1.8D
                }
             }
+
+
+
          } else if(super.throttleDown) {
+
+
+
             if(this.getCurrentThrottle() > 0.0D) {
                this.addCurrentThrottle(-0.01D * (double)throttleUpDown);
             } else {
                this.setCurrentThrottle(0.0D);
-               if(this.getAcInfo().enableBack) {//potential source of problem
+               if(this.getAcInfo().enableBack) {
                   super.throttleBack = (float)((double)super.throttleBack + 0.0025D * (double)throttleUpDown);
-                  if(super.throttleBack > 0.6F) {//todo: add a new variable here for reversespeed
+                  if(super.throttleBack > 0.6F) { //todo: add a new variable here for reversespeed
                      super.throttleBack = 0.6F;
                   }
                   float pivotTurnThrottle1 = this.getAcInfo().pivotTurnThrottle;
                   if (pivotTurnThrottle1 > 0) {
                      if (super.throttleBack > 0) {
-                        //add opposite of what should be doing here
-                        //todo: add partial ticks in here
+                        double dx = super.posX - super.prevPosX;
+                        double dz = super.posZ - super.prevPosZ;
+                        double dist = dx * dx + dz * dz;
+                        float sf = (float)Math.sqrt(dist <= 1.0D ? dist : 1.0D);
+                        if (pivotTurnThrottle1 <= 0.0F) {
+                           sf = 1.0F;
+                        }
+
+                        float rotonground = 1.0F;
+                        boolean isFly = MCH_Lib.getBlockIdY(this, 3, -3) == 0;
+
+                        if (!isFly) {
+                           rotonground = this.getAcInfo().mobilityYawOnGround;
+                           if (!this.getAcInfo().canRotOnGround) {
+                              Block pivotTurnThrottle = MCH_Lib.getBlockY(this, 3, -2, false);
+                              if (!W_Block.isEqual(pivotTurnThrottle, W_Block.getWater()) && !W_Block.isEqual(pivotTurnThrottle, Blocks.air)) {
+                                 rotonground = 0.0F;
+                              }
+                           }
+                        }
+
+                        float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D ? -1.0F : 1.0F;
                         if(super.moveLeft && !super.moveRight) {
-                           this.setRotYaw(this.getRotYaw() + 0.6F);
+                           this.setRotYaw(this.getRotYaw() + 0.6F * rotonground * partialTicks * flag * sf);
                         }
 
                         if(super.moveRight && !super.moveLeft) {
-                           this.setRotYaw(this.getRotYaw() - 0.6F);
+                           this.setRotYaw(this.getRotYaw() - 0.6F * rotonground * partialTicks * flag * sf);
                         }
                      }
                   }
