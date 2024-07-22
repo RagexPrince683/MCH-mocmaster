@@ -12,7 +12,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 public class MCH_SoundUpdater extends W_SoundUpdater {
 
 
-   //todo: rewrite completely for xradar compat
+   //todo: rewrite completely or something for xradar compat
 
    private final MCH_EntityAircraft theAircraft;
    private final EntityPlayerSP thePlayer;

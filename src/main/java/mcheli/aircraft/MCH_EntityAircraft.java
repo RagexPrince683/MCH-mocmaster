@@ -2194,6 +2194,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
               super.posZ + (this.aircraftZ - super.posZ) / increment
       );
       this.setRotation(this.getRotYaw(), this.getRotPitch());
+
+      //possible culprit of the bullshit??????
+      //commenting this out makes vehicles behave like leap frogger but it might also cause the vehicle shake bug so I'm like actually lost as to what to do here
       --this.aircraftPosRotInc;
 
       System.out.println("  New Position: X=" + super.posX + ", Y=" + super.posY + ", Z=" + super.posZ);
@@ -3307,6 +3310,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public void setPositionAndRotation2(double par1, double par3, double par5, float par7, float par8, int par9) {
       // Validate inputs
       if (par9 < 0) {
+         System.out.println("get fucked");
          throw new IllegalArgumentException("par9 must be non-negative");
       }
 
