@@ -883,6 +883,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             //}
             this.onImpactEntity(m.entityHit, damageFactor);
             this.piercing = 0;
+
+            m.entityHit.motionX = 0;
+            m.entityHit.motionY = 0;
+            m.entityHit.motionZ = 0;
+
          }
 
          p = (float) this.explosionPower * damageFactor;
@@ -947,30 +952,36 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
 
    public void onImpactEntity(Entity entity, float damageFactor) {
-      if (!entity.isDead) {
-         MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseBullet.onImpactEntity:Damage=%d:" + entity.getClass(), new Object[]{Integer.valueOf(this.getPower())});
-         MCH_Lib.applyEntityHurtResistantTimeConfig(entity);
-         DamageSource ds = DamageSource.causeThrownDamage(this, this.shootingEntity);
-         if (this.power == 1) {
-            ds = new MCH_DamageSource("bullet", this);
+      if (this.piercing > 0) {
+         --this.piercing;
+      } else {
+         if (!entity.isDead) {
+            MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseBullet.onImpactEntity:Damage=%d:" + entity.getClass(), new Object[]{Integer.valueOf(this.getPower())});
+            MCH_Lib.applyEntityHurtResistantTimeConfig(entity);
+            DamageSource ds = DamageSource.causeThrownDamage(this, this.shootingEntity);
+            if (this.power == 1) {
+               ds = new MCH_DamageSource("bullet", this);
 
-            this.power *= this.weaponInfo.damageFactor.getDamageFactor(EntityPlayer.class);
+               this.power *= this.weaponInfo.damageFactor.getDamageFactor(EntityPlayer.class);
+            }
+            //todo: add piercing compat here
+
+
+            MCH_Config var10000 = MCH_MOD.config;
+            float damage = MCH_Config.applyDamageVsEntity(entity, ds, (float) this.getPower() * damageFactor);
+            damage *= this.getInfo() != null ? this.getInfo().getDamageFactor(entity) : 1.0F;
+            entity.attackEntityFrom(ds, damage);
+            if (this instanceof MCH_EntityBullet && entity instanceof EntityVillager && this.shootingEntity != null && this.shootingEntity.ridingEntity instanceof MCH_EntitySeat) {
+               MCH_Achievement.addStat(this.shootingEntity, MCH_Achievement.aintWarHell, 1);
+            }
+
+            if (entity.isDead) {
+               ;
+            }
          }
 
-         MCH_Config var10000 = MCH_MOD.config;
-         float damage = MCH_Config.applyDamageVsEntity(entity, ds, (float) this.getPower() * damageFactor);
-         damage *= this.getInfo() != null ? this.getInfo().getDamageFactor(entity) : 1.0F;
-         entity.attackEntityFrom(ds, damage);
-         if (this instanceof MCH_EntityBullet && entity instanceof EntityVillager && this.shootingEntity != null && this.shootingEntity.ridingEntity instanceof MCH_EntitySeat) {
-            MCH_Achievement.addStat(this.shootingEntity, MCH_Achievement.aintWarHell, 1);
-         }
-
-         if (entity.isDead) {
-            ;
-         }
+         this.notifyHitBullet();
       }
-
-      this.notifyHitBullet();
    }
 
    public void newFAExplosion(double x, double y, double z, float exp, float expBlock) {
