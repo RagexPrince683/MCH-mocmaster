@@ -577,6 +577,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                         float var18;
                         boolean var31;
                         if(item.equalsIgnoreCase("AddRack")) {
+                           //todo: fix addrack bug where it won't go up block with
                            s = data.toLowerCase().split("\\s*,\\s*");
                            if(s != null && s.length >= 7) {
                               var17 = s[0].split("\\s*/\\s*");
