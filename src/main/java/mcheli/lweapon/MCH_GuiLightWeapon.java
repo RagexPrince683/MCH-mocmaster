@@ -81,6 +81,14 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
                } else if("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
                   GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                   W_McClient.MOD_bindTexture("textures/gui/rpg.png");
+                  double size;
+                  for(size = 512.0D; size < (double)super.width || size < (double)super.height; size *= 2.0D) {
+                     ;
+                  }
+                  this.drawTexturedModalRectRotate(-(size - (double)super.width) / 2.0D, -(size - (double)super.height) / 2.0D - 20.0D, size, size, 0.0D, 0.0D, 256.0D, 256.0D, 0.0F);
+                  this.drawKeyBind(-805306369, false);
+                  GL11.glBlendFunc(srcBlend, dstBlend);
+                  GL11.glDisable(3042);
 
 
             }else if("fim92".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
@@ -132,7 +140,10 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
    }
 
    void drawRange(EntityPlayer player, MCH_WeaponGuidanceSystem gs, boolean canFire, int color1, int color2) {
-      String msgLockDist = "[--.--]";
+      //if {
+      //if is not rpg
+         String msgLockDist = "[--.--]";
+
       int color = color2;
       if(gs.getLockCount() > 0) {
          Entity target = gs.getLockingEntity();
@@ -151,7 +162,8 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
       }
 
       this.drawCenteredString(msgLockDist, super.centerX, super.centerY + 50, color);
-   }
+      }
+   //}
 
    void drawGuiFGM148(EntityPlayer player, MCH_WeaponGuidanceSystem gs, boolean canFire, ItemStack itemStack) {
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);

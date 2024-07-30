@@ -5,6 +5,7 @@ import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.tank.MCH_TankInfoManager;
 import mcheli.vehicle.MCH_VehicleInfoManager;
+import mcheli.weapon.MCH_DefaultBulletModels;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -46,8 +47,12 @@ public class MultiThreadModelManager {
                 .thenRun(() -> completion("vehicle"));
 
         CompletableFuture
-                .runAsync(MCH_ClientProxy::registerModels_Bullet)
+                .runAsync(() -> {
+                    proxy.registerModels_Bullet();
+                    loadDefaultBulletModels(proxy);
+                }, executor)
                 .thenRun(() -> completion("bullet"));
+
 
         CompletableFuture
                 .runAsync(MCH_ClientProxy::registerModels_Throwable)
@@ -55,6 +60,16 @@ public class MultiThreadModelManager {
 
         executor.shutdown();
 
+    }
+    private static void loadDefaultBulletModels(MCH_ClientProxy proxy) {
+        proxy.registerModels_Bullet();
+        MCH_DefaultBulletModels.Bullet = proxy.loadBulletModel("bullet");
+        MCH_DefaultBulletModels.AAMissile = proxy.loadBulletModel("aamissile");
+        MCH_DefaultBulletModels.ATMissile = proxy.loadBulletModel("asmissile");
+        MCH_DefaultBulletModels.ASMissile = proxy.loadBulletModel("asmissile");
+        MCH_DefaultBulletModels.Bomb = proxy.loadBulletModel("bomb");
+        MCH_DefaultBulletModels.Rocket = proxy.loadBulletModel("rocket");
+        MCH_DefaultBulletModels.Torpedo = proxy.loadBulletModel("torpedo");
     }
 
     public static void completion(String type) {

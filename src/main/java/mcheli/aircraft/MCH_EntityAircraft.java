@@ -851,6 +851,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public boolean attackEntityFrom(DamageSource damageSource, float org_damage) {
+      //System.out.println("the damage source is " + damageSource.getDamageType());
+      //System.out.println("org damage: " + org_damage);
+      //System.out.println("damage taken: " + getDamageTaken());
       float damageFactor = this.lastBBDamageFactor;
       this.lastBBDamageFactor = 1.0F;
       if(this.isEntityInvulnerable()) {
@@ -1200,15 +1203,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
-      System.out.println("set angles");
+      //System.out.println("set angles");
       if(partialTicks < 0.03F) {
          partialTicks = 0.4F;
-         System.out.println("partial ticks = 0.4");
+         //System.out.println("partial ticks = 0.4");
       }
 
       if(partialTicks > 0.9F) {
          partialTicks = 0.6F;
-         System.out.println("Partial ticks = 0.6");
+         //System.out.println("Partial ticks = 0.6");
       }
 
       this.lowPassPartialTicks.put(partialTicks);
@@ -1337,17 +1340,17 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       if(!this.isOverridePlayerPitch() && !fixRot) {
-         System.out.println("some shit went wrong?");
+         //System.out.println("this is when the helicopter is hovering");
          player.setAngles(0.0F, deltaY);
       } else {
-         System.out.println("God's unholy retribution");
+         //System.out.println("God's unholy retribution");
          player.prevRotationPitch = this.getRotPitch() + (fixRot?fixPitch:0.0F);
          player.rotationPitch = this.getRotPitch() + (fixRot?fixPitch:0.0F);
       }
 
       if(this.getRidingEntity() == null && ac_yaw != this.getRotYaw() || ac_pitch != this.getRotPitch() || ac_roll != this.getRotRoll()) {
          this.aircraftRotChanged = true;
-         System.out.println("aircraft rot changed");
+         //System.out.println("aircraft rot changed");
       }
 
    }
@@ -2169,9 +2172,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       double yawDiff = MathHelper.wrapAngleTo180_double(this.aircraftYaw - this.getRotYaw());
       double rollDiff = MathHelper.wrapAngleTo180_double(this.getServerRoll() - this.getRotRoll());
 
-      System.out.println("applyServerPositionAndRotation called:");
-      System.out.println("  Current Yaw: " + this.getRotYaw() + ", Target Yaw: " + this.aircraftYaw + ", Yaw Difference: " + yawDiff);
-      System.out.println("  Current Roll: " + this.getRotRoll() + ", Target Roll: " + this.getServerRoll() + ", Roll Difference: " + rollDiff);
+      //System.out.println("applyServerPositionAndRotation called:");
+      //System.out.println("  Current Yaw: " + this.getRotYaw() + ", Target Yaw: " + this.aircraftYaw + ", Yaw Difference: " + yawDiff);
+      //System.out.println("  Current Roll: " + this.getRotRoll() + ", Target Roll: " + this.getServerRoll() + ", Roll Difference: " + rollDiff);
 
       if (!this.isDestroyed() && (!W_Lib.isClientPlayer(this.getRiddenByEntity()) || this.getRidingEntity() != null)) {
          // Smooth interpolation
@@ -2184,7 +2187,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.setRotPitch(newRotPitch);
          this.setRotRoll(newRotRoll);
 
-         System.out.println("  New Rotations: Yaw=" + newRotYaw + ", Pitch=" + newRotPitch + ", Roll=" + newRotRoll);
+         //System.out.println("  New Rotations: Yaw=" + newRotYaw + ", Pitch=" + newRotPitch + ", Roll=" + newRotRoll);
       }
 
       // Smooth position interpolation
@@ -2199,8 +2202,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       //commenting this out makes vehicles behave like leap frogger but it might also cause the vehicle shake bug so I'm like actually lost as to what to do here
       --this.aircraftPosRotInc;
 
-      System.out.println("  New Position: X=" + super.posX + ", Y=" + super.posY + ", Z=" + super.posZ);
-      System.out.println("  Remaining Increment: " + this.aircraftPosRotInc);
+      //System.out.println("  New Position: X=" + super.posX + ", Y=" + super.posY + ", Z=" + super.posZ);
+      //System.out.println("  Remaining Increment: " + this.aircraftPosRotInc);
    }
    protected void autoRepair() {
       if(this.timeSinceHit > 0) {
@@ -3328,11 +3331,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       super.motionZ = this.velocityZ;
 
       // Log debug information for monitoring
-      System.out.println("setPositionAndRotation2 called:");
-      System.out.println("  Position set to: X=" + par1 + ", Y=" + par3 + ", Z=" + par5);
-      System.out.println("  Rotation set to: Yaw=" + par7 + ", Pitch=" + par8);
-      System.out.println("  Increment: " + par9);
-      System.out.println("  Motion set to: motionX=" + super.motionX + ", motionY=" + super.motionY + ", motionZ=" + super.motionZ);
+
+      //this was the last debug stuff I had not commented out
+      //System.out.println("setPositionAndRotation2 called:");
+      //System.out.println("  Position set to: X=" + par1 + ", Y=" + par3 + ", Z=" + par5);
+      //System.out.println("  Rotation set to: Yaw=" + par7 + ", Pitch=" + par8);
+      //System.out.println("  Increment: " + par9);
+      //System.out.println("  Motion set to: motionX=" + super.motionX + ", motionY=" + super.motionY + ", motionZ=" + super.motionZ);
    }
 
    public void updateRiderPosition(double px, double py, double pz) {
@@ -5402,7 +5407,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.lastSearchLightYaw = yaw;
 
       // Log the initial yaw value for debugging
-      System.out.println("Initializing rotation yaw to: " + yaw);
+      //System.out.println("Initializing rotation yaw to: " + yaw);
 
       // Ensure the weapons array is not null before processing
       if (this.weapons != null) {

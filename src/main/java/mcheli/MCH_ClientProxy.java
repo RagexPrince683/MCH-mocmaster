@@ -151,6 +151,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       W_MinecraftForgeClient.registerItemRenderer(W_Item.getItemFromBlock(MCH_MOD.blockDraftingTable), new MCH_DraftingTableItemRender());
    }
 
+
    public void registerModels() {
       MCH_ModelManager.setForceReloadMode(true);
       MCH_RenderAircraft.debugModel = MCH_ModelManager.load("box");
@@ -358,7 +359,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       MCH_ModelManager.setForceReloadMode(false);
    }
 
-   private MCH_BulletModel loadBulletModel(String name) {
+   public MCH_BulletModel loadBulletModel(String name) {
       IModelCustom m = MCH_ModelManager.load("bullets", name);
       return m != null?new MCH_BulletModel(name, m):null;
    }

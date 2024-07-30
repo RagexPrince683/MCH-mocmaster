@@ -414,6 +414,7 @@ public class MCH_EntityUavStation extends W_EntityContainer {
 
          }
       }
+      //System.out.println("test");
    }
 
    protected void onUpdate_Client() {
