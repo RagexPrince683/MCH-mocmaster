@@ -223,7 +223,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          this.gravitydown = true;
       } else {
          this.gravitydown = false;
-         System.out.println("no gravity defined");
+         System.out.println("hey this weapon has no gravity defined, that's probably not a good thing");
       }
 
       if(this.getInfo().bomblet >= 50) {
@@ -568,7 +568,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       if (!super.isDead) {
          if (!bomblet && gravitydown && bigdelay) {
             loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
-            System.out.println("loadneighboring chunks");
+            System.out.println("bullet is loading neighboring chunks");
             bigcheck = true;
          }
          this.onUpdateCollided();
@@ -660,7 +660,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
                this.sprinkleBomblet();
             }
             //todo if the z alignment doesn't work make this logic more sound by ensuring that the bomblet variable is even defined
-            System.out.println("set dead BOMBLET EDITION");
+            //System.out.println("set dead BOMBLET EDITION");
             this.setDead();
          }
       }
@@ -942,7 +942,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
             this.setDead();
             //this is an impact
-            System.out.println("impact? set dead");
+            //System.out.println("impact? set dead");
          }
       } else if (this.getInfo() != null && (this.getInfo().explosion == 0 || this.getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(m)) {
          p = (float) this.getInfo().power;
@@ -1047,7 +1047,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    }
 
    public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
-      System.out.println("read entity from nbt, would set dead but commented out");
+      //("read entity from nbt, would set dead but commented out");
       this.setDead();
    }
 
