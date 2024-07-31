@@ -1,6 +1,7 @@
 package mcheli.multithread;
 
 import mcheli.MCH_ClientProxy;
+import mcheli.MCH_ModelManager;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.tank.MCH_TankInfoManager;
@@ -27,6 +28,7 @@ public class MultiThreadModelManager {
      */
 
     public static void start(MCH_ClientProxy proxy) {
+        MCH_ModelManager.load("blocks", "drafting_table");
 
         ExecutorService executor = Executors.newWorkStealingPool();
 
@@ -71,6 +73,8 @@ public class MultiThreadModelManager {
         MCH_DefaultBulletModels.Rocket = proxy.loadBulletModel("rocket");
         MCH_DefaultBulletModels.Torpedo = proxy.loadBulletModel("torpedo");
     }
+
+
 
     public static void completion(String type) {
         System.out.println("Successfully registered " + type + " models");

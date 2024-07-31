@@ -3,7 +3,6 @@ package mcheli.weapon;
 import com.hbm.entity.effect.EntityNukeCloudSmall;
 import com.hbm.entity.effect.EntityNukeTorex;
 import com.hbm.entity.logic.EntityNukeExplosionMK5;
-import com.hbm.entity.logic.IChunkLoader;
 import com.hbm.explosion.ExplosionChaos;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -877,6 +876,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             //todo maybe initiate another chunk loaded here
             if (this.bigcheck = true) {
                loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
+               System.out.println("extra chunk loader");
             }
             //if (!bomblet && gravitydown) { //new chunk loader
                //loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
@@ -942,7 +942,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
             this.setDead();
             //this is an impact
-            //System.out.println("impact? set dead");
+            System.out.println("impact? set dead");
          }
       } else if (this.getInfo() != null && (this.getInfo().explosion == 0 || this.getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(m)) {
          p = (float) this.getInfo().power;
