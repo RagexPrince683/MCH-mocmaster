@@ -175,15 +175,13 @@ public class MCH_MOD {
       W_ItemList.init();
       config = proxy.loadConfig("config/mcheli.cfg");
       proxy.loadHUD(sourcePath + "/assets/" + "mcheli" + "/hud");
-      String basePath = (sourcePath + "/assets/" + "mcheli").toLowerCase();
-
-      MCH_WeaponInfoManager.load(basePath + "/weapons");
-      MCH_HeliInfoManager.getInstance().load(basePath + "/", "helicopters");
-      MCP_PlaneInfoManager.getInstance().load(basePath + "/", "planes");
-      MCH_TankInfoManager.getInstance().load(basePath + "/", "tanks");
-      MCH_VehicleInfoManager.getInstance().load(basePath + "/", "vehicles");
-      MCH_ThrowableInfoManager.load(basePath + "/throwable");
-      MCH_SoundsJson.update(basePath + "/");
+      MCH_WeaponInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/weapons");
+      MCH_HeliInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "helicopters");
+      MCP_PlaneInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "planes");
+      MCH_TankInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "tanks");
+      MCH_VehicleInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "vehicles");
+      MCH_ThrowableInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/throwable");
+      MCH_SoundsJson.update(sourcePath + "/assets/" + "mcheli" + "/");
       MCH_Lib.Log("Register item", new Object[0]);
       this.registerItemRangeFinder();
       this.registerItemWrench();
