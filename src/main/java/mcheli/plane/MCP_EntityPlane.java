@@ -244,14 +244,23 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
          }
 
-         if (this.aircraftPitch >= 60 && this.isEntityAlive() && this.isAirBorne) { //going down again
+         if (this.aircraftPitch >= 80 && this.isEntityAlive() && this.isAirBorne) { // going down again
             timer++;
-            this.motionY = (this.motionY * 0.20) + this.aircraftPitch / 4;
-            this.aircraftY = this.aircraftY * 0.20;
+
+            // Use a gradual acceleration
+            double accelerationFactor = 0.05; // Adjust this value to control the rate of acceleration
+            double pitchFactor = this.aircraftPitch / 100; // Adjust this value to control how pitch affects the descent
+
+            // Apply the gradual acceleration
+            this.motionY = (this.motionY * 0.95) + (pitchFactor * accelerationFactor);
+            this.aircraftY = this.aircraftY * 0.95;
+
             //System.out.println(timer);
             if (timer > 1200) {
-               this.motionY = (this.motionY * 0.11) + this.aircraftPitch;
-               this.aircraftY = this.aircraftY * 0.11;
+               // Increase the acceleration factor for prolonged dive
+               accelerationFactor = 0.02; // Adjust this value to control the prolonged acceleration rate
+               this.motionY = (this.motionY * 0.89) + (this.aircraftPitch * accelerationFactor);
+               this.aircraftY = this.aircraftY * 0.89;
 
                if (this.aircraftPitch <= 1.0) {
                   //System.out.println(timer);

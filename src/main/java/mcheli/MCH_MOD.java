@@ -1,6 +1,6 @@
 package mcheli;
 
-import com.hbm.entity.logic.IChunkLoader;
+//import com.hbm.entity.logic.IChunkLoader;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
@@ -92,6 +92,7 @@ import net.minecraft.command.CommandHandler;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.world.World;
+import mcheli.MCH_IChunkLoader;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -228,17 +229,22 @@ public class MCH_MOD {
       W_LanguageRegistry.updateLang(sourcePath + "/assets/" + "mcheli" + "/lang/");
       MCH_Lib.Log("End load", new Object[0]);
 
-      ForgeChunkManager.setForcedChunkLoadingCallback(this, new ForgeChunkManager.LoadingCallback() {
 
-         @Override
-         public void ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world) {
-            for (ForgeChunkManager.Ticket ticket : tickets) {
-               if(ticket.getEntity() instanceof MCH_EntityBullet) {
-                  ((IChunkLoader) ticket.getEntity()).init(ticket);
+      try {
+         ForgeChunkManager.setForcedChunkLoadingCallback(this, new ForgeChunkManager.LoadingCallback() {
+
+            @Override
+            public void ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world) {
+               for (ForgeChunkManager.Ticket ticket : tickets) {
+                  if (ticket.getEntity() instanceof MCH_EntityBullet) {
+                     ((MCH_IChunkLoader) ticket.getEntity()).init(ticket);
+                  }
                }
             }
-         }
-      });
+         });
+      } catch (Exception e) {
+         System.out.println("error loading chunk");
+      }
 
    }
 

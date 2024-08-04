@@ -1021,7 +1021,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          result = MCH_Explosion.newExplosionInWater(super.worldObj, this, this.shootingEntity, x, y, z, exp, expBlock, this.isBomblet == 1 ? super.rand.nextInt(3) == 0 : true, true, this.getInfo().flaming, true, 0, this.getInfo() != null ? this.getInfo().damageFactor : null);
       }
 
-      if (this.nukeYield > 0) {
+      if (this.nukeYield > 0) { //todo: issue a try case here
          worldObj.spawnEntityInWorld(EntityNukeExplosionMK5.statFac(worldObj, this.nukeYield, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5));
          EntityNukeTorex.statFac(worldObj, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5, (float) this.nukeYield);
 
