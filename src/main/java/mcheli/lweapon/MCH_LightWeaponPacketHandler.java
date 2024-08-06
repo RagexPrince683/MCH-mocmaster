@@ -18,23 +18,28 @@ import net.minecraft.util.Vec3;
 public class MCH_LightWeaponPacketHandler {
 
    public static void onPacket_PlayerControl(EntityPlayer player, ByteArrayDataInput data) {
+
       if(!player.worldObj.isRemote) {
+         System.out.println("Server: Handling player control packet for player: " + player.getCommandSenderName());
          MCH_PacketLightWeaponPlayerControl pc = new MCH_PacketLightWeaponPlayerControl();
          pc.readData(data);
+         System.out.println("Server: Packet camMode: " + pc.camMode);
          if(pc.camMode == 1) {
-            player.removePotionEffect(Potion.nightVision.getId());
+            //player.removePotionEffect(Potion.nightVision.getId());
          }
 
          ItemStack is = player.getHeldItem();
          if(is != null) {
             if(is.getItem() instanceof MCH_ItemLightWeaponBase) {
                MCH_ItemLightWeaponBase lweapon = (MCH_ItemLightWeaponBase)is.getItem();
+               //System.out.println("Server: Handling light weapon: " + lweapon.getUnlocalizedName());
                if(pc.camMode == 2 && MCH_ItemLightWeaponBase.isHeld(player)) {
-                  player.addPotionEffect(new PotionEffect(Potion.nightVision.getId(), 255, 0, false));
+                  //System.out.println("Server: Adding night vision effect to player: " + player.getCommandSenderName());
+                  //player.addPotionEffect(new PotionEffect(Potion.nightVision.getId(), 255, 0, false));
                }
 
                if(pc.camMode > 0) {
-                  MCH_Lib.DbgLog(false, "MCH_LightWeaponPacketHandler NV=%s", new Object[]{pc.camMode == 2?"ON":"OFF"});
+                  //MCH_Lib.DbgLog(false, "MCH_LightWeaponPacketHandler NV=%s", new Object[]{pc.camMode == 2?"ON":"OFF"});
                }
 
                if(pc.useWeapon && is.getItemDamage() < is.getMaxDamage()) {

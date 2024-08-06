@@ -192,9 +192,9 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
                }
 
                boolean var10 = true;
-               if(reloadCount < 40) {
+               if(reloadCount < 110) {
                   ++reloadCount;
-                  if(reloadCount == 40) {
+                  if(reloadCount == 110) {
                      this.onCompleteReload();
                   }
                }
@@ -223,15 +223,33 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
                MCH_PacketLightWeaponPlayerControl var9 = new MCH_PacketLightWeaponPlayerControl();
                var9.camMode = 1;
                W_Network.sendToServer(var9);
-               var6.removePotionEffectClient(Potion.nightVision.getId());
+               prevThePlayer.removePotionEffect(Potion.nightVision.getId());
             }
 
             W_Reflection.restoreCameraZoom();
          }
       }
 
+      int lightWeaponCount = countLightWeapons(var6);
+      if (lightWeaponCount > 1) {
+         var6.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, 2, true));
+      } else {
+         prevThePlayer.removePotionEffect(Potion.moveSlowdown.getId());
+      }
+
       this.prevItemStack = var7;
       gs.update();
+
+   }
+
+   private int countLightWeapons(EntityPlayer player) {
+      int count = 0;
+      for (ItemStack itemStack : player.inventory.mainInventory) {
+         if (itemStack != null && itemStack.getItem() instanceof MCH_ItemLightWeaponBase) {
+            count++;
+         }
+      }
+      return count;
    }
 
    protected void onCompleteReload() {
@@ -299,9 +317,9 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          }
 
          //if(this.KeyAttack.isKeyDown() && !pe && player.getItemInUseDuration() > 5 && ) {
-         //add expression to check if isn't rpg also TODO: stop lock on feature for rpg
+         //add expression to check if isn't rpg also TODOne?: stop lock on feature for rpg
          //&& //check rpg here
-         //TODO: change RPG scope to be the T one
+         //TODOne: change RPG scope to be the T one
          if(this.KeyAttack.isKeyDown() && !pe && player.getItemInUseDuration() > 5 && !("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem())))) {
             playSoundNG();
          }
@@ -319,7 +337,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          PotionEffect pe2 = player.getActivePotionEffect(Potion.nightVision);
          MCH_Lib.DbgLog(true, "LWeapon NV %s", new Object[]{pe2 != null?"ON->OFF":"OFF->ON"});
          if(pe2 != null) {
-            player.removePotionEffectClient(Potion.nightVision.getId());
+            prevThePlayer.removePotionEffect(Potion.nightVision.getId());
             pc.camMode = 1;
             send = true;
             W_McClient.MOD_playSoundFX("pi", 0.5F, 0.9F);
