@@ -223,7 +223,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
                MCH_PacketLightWeaponPlayerControl var9 = new MCH_PacketLightWeaponPlayerControl();
                var9.camMode = 1;
                W_Network.sendToServer(var9);
-               prevThePlayer.removePotionEffect(Potion.nightVision.getId());
+               var6.removePotionEffect(Potion.nightVision.getId());
             }
 
             W_Reflection.restoreCameraZoom();
@@ -333,15 +333,15 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          }
       }
 
-      if(this.KeyCameraMode.isKeyDown()) {
-         PotionEffect pe2 = player.getActivePotionEffect(Potion.nightVision);
-         MCH_Lib.DbgLog(true, "LWeapon NV %s", new Object[]{pe2 != null?"ON->OFF":"OFF->ON"});
-         if(pe2 != null) {
-            prevThePlayer.removePotionEffect(Potion.nightVision.getId());
+      if (this.KeyCameraMode.isKeyDown()) {
+         PotionEffect pe = player.getActivePotionEffect(Potion.nightVision);
+         MCH_Lib.DbgLog(true, "LWeapon NV %s", new Object[] { (pe != null) ? "ON->OFF" : "OFF->ON" });
+         if (pe != null) {
+            player.removePotionEffect(Potion.nightVision.getId());
             pc.camMode = 1;
             send = true;
             W_McClient.MOD_playSoundFX("pi", 0.5F, 0.9F);
-         } else if(player.getItemInUseDuration() > 60) {
+         } else if (player.getItemInUseDuration() > 60) {
             pc.camMode = 2;
             send = true;
             W_McClient.MOD_playSoundFX("pi", 0.5F, 0.9F);
