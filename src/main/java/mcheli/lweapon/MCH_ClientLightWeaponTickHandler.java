@@ -159,9 +159,9 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
             W_Reflection.restoreCameraZoom();
          }
 //add not rpg check here
-        // if("rpg7".equalsIgnoreCase(!MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
+         // if("rpg7".equalsIgnoreCase(!MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
 
-        // }
+         // }
          if(var7.getItemDamage() < var7.getMaxDamage()) {
             if(var6.getItemInUseDuration() > 10) {
                gs.lock(var6);
@@ -222,8 +222,10 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
             if(getPotionNightVisionDuration(var6) < 250) {
                MCH_PacketLightWeaponPlayerControl var9 = new MCH_PacketLightWeaponPlayerControl();
                var9.camMode = 1;
+               System.out.println("pre sent dogshit to the server");
                W_Network.sendToServer(var9);
-               var6.removePotionEffect(Potion.nightVision.getId());
+               System.out.println("sent dogshit to the server");
+               prevThePlayer.removePotionEffect(Potion.nightVision.getId());
             }
 
             W_Reflection.restoreCameraZoom();
@@ -236,6 +238,8 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
       } else {
          prevThePlayer.removePotionEffect(Potion.moveSlowdown.getId());
       }
+
+
 
       this.prevItemStack = var7;
       gs.update();
@@ -258,7 +262,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
       W_Network.sendToServer(pc);
    }
 
-   protected void playerControl(EntityPlayer player, ItemStack is, MCH_ItemLightWeaponBase item) {
+   public void playerControl(EntityPlayer player, ItemStack is, MCH_ItemLightWeaponBase item) {
       MCH_PacketLightWeaponPlayerControl pc = new MCH_PacketLightWeaponPlayerControl();
       boolean send = false;
       boolean autoShot = false;
@@ -333,15 +337,25 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          }
       }
 
-      if (this.KeyCameraMode.isKeyDown()) {
-         PotionEffect pe = player.getActivePotionEffect(Potion.nightVision);
-         MCH_Lib.DbgLog(true, "LWeapon NV %s", new Object[] { (pe != null) ? "ON->OFF" : "OFF->ON" });
-         if (pe != null) {
-            player.removePotionEffect(Potion.nightVision.getId());
+      //if (lightWeaponCount > 1) {
+      //         var6.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, 2, true));
+      //      } else {
+      //         prevThePlayer.removePotionEffect(Potion.moveSlowdown.getId());
+      //      }
+
+      if(this.KeyCameraMode.isKeyDown()) {
+         EntityClientPlayerMP var6 = super.mc.thePlayer;
+         PotionEffect pe2 = player.getActivePotionEffect(Potion.nightVision);
+         MCH_Lib.DbgLog(true, "LWeapon NV %s", new Object[]{pe2 != null?"ON->OFF":"OFF->ON"});
+         if(pe2 != null) {
+            var6.removePotionEffect(Potion.nightVision.getId());
+            System.out.println("pe2 is not null");
             pc.camMode = 1;
             send = true;
             W_McClient.MOD_playSoundFX("pi", 0.5F, 0.9F);
-         } else if (player.getItemInUseDuration() > 60) {
+         } else if(player.getItemInUseDuration() > 60) {
+            System.out.println("fat error most likely");
+            var6.addPotionEffect(new PotionEffect(Potion.nightVision.getId(), 250, 0, false));
             pc.camMode = 2;
             send = true;
             W_McClient.MOD_playSoundFX("pi", 0.5F, 0.9F);
