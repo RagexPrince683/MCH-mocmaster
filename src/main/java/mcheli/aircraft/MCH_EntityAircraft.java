@@ -51,15 +51,7 @@ import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.tool.MCH_ItemWrench;
 import mcheli.uav.MCH_EntityUavStation;
-import mcheli.weapon.MCH_EntityTvMissile;
-import mcheli.weapon.MCH_IEntityLockChecker;
-import mcheli.weapon.MCH_WeaponBase;
-import mcheli.weapon.MCH_WeaponCreator;
-import mcheli.weapon.MCH_WeaponDummy;
-import mcheli.weapon.MCH_WeaponInfo;
-import mcheli.weapon.MCH_WeaponParam;
-import mcheli.weapon.MCH_WeaponSet;
-import mcheli.weapon.MCH_WeaponSmoke;
+import mcheli.weapon.*;
 import mcheli.wrapper.W_AxisAlignedBB;
 import mcheli.wrapper.W_Block;
 import mcheli.wrapper.W_Entity;
@@ -94,8 +86,10 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.ForgeChunkManager;
 
 import static mcheli.hud.MCH_HudItem.player;
 //import static net.minecraft.command.CommandBase.getCommandSenderAsPlayer;
@@ -103,6 +97,7 @@ import static mcheli.hud.MCH_HudItem.player;
 
 public abstract class MCH_EntityAircraft extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideAircraft, IEntityAdditionalSpawnData {
 
+   private ForgeChunkManager.Ticket chunkTicket;
    private static final int DATAWT_ID_DAMAGE = 19;
    private static final int DATAWT_ID_TYPE = 20;
    private static final int DATAWT_ID_TEXTURE_NAME = 21;
@@ -5476,12 +5471,31 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return list;
    }
 
+   private void forceChunkLoading() {
+      if (!super.worldObj.isRemote) {
+         // Request a chunk loading ticket
+         this.chunkTicket = ForgeChunkManager.requestTicket(MCH_MOD.instance, super.worldObj, ForgeChunkManager.Type.NORMAL);
+         if (this.chunkTicket != null) {
+            // Mark the chunk for loading
+            int chunkX = MathHelper.floor_double(super.posX) >> 4;
+            int chunkZ = MathHelper.floor_double(super.posZ) >> 4;
+            ForgeChunkManager.forceChunk(this.chunkTicket, new ChunkCoordIntPair(chunkX, chunkZ));
+         }
+      }
+   }
+
+
+ //  private void fakeplayermaker() {
+
+  // }
+
    public void updateUAV() {
       if(this.isUAV()) {
          if(super.worldObj.isRemote) {
             int udx = this.getDataWatcher().getWatchableObjectInt(22);
             if(udx > 0) {
                if(this.uavStation == null) {
+                  System.out.println("is null");
                   Entity uavEntity = super.worldObj.getEntityByID(udx);
                   if(uavEntity instanceof MCH_EntityUavStation) {
                      this.uavStation = (MCH_EntityUavStation)uavEntity;
@@ -5491,7 +5505,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             } else if(this.uavStation != null) {
                this.uavStation.setControlAircract((MCH_EntityAircraft)null);
                this.uavStation = null;
+               System.out.println("null");
             }
+
+
+            System.out.println("everything is WORKING");
          } else if(this.uavStation != null) {
             double udx1 = super.posX - this.uavStation.posX;
             double udz = super.posZ - this.uavStation.posZ;
@@ -5499,21 +5517,31 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             //haha gotcha
             //TODO: better
             if(udx1 * udx1 + udz * udz > 15625000.0D) {
+               System.out.println("test 4");
                this.uavStation.setControlAircract((MCH_EntityAircraft)null);
                this.setUavStation((MCH_EntityUavStation)null);
-               this.attackEntityFrom(DamageSource.outOfWorld, this.getMaxHP() + 10);
+               System.out.println("null 2");
+
+               //this will stop this shit from working
+
+               //this.attackEntityFrom(DamageSource.outOfWorld, this.getMaxHP() + 10);
                //TODO: teleport player as invulnerable entity
                //EntityPlayerMP
 
 
             }
+            this.forceChunkLoading();
+            System.out.println("everything is working, now chunk loading");
          }
+         System.out.println("everything is working 2");
 
          if(this.uavStation != null && this.uavStation.isDead) {
+            System.out.println("setting to null, uav station is dead");
             this.uavStation = null;
          }
 
       }
+      System.out.println("working 3");
    }
 
    public void switchGunnerMode(boolean mode) {

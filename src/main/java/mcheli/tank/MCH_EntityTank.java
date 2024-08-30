@@ -875,7 +875,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                            var10000 = MCH_MOD.config;
                            return MCH_Config.Collision_EntityTankDamage.prmBool;
                         }
-                     }
+                     } //todo: fix up how this works as in collision because this is not fair to xradar perms/block protection
 
                      var10000 = MCH_MOD.config;
                      return MCH_Config.Collision_EntityDamage.prmBool;

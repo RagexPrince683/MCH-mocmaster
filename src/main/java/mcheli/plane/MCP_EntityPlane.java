@@ -166,7 +166,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          }
 
          //prevRotationYaw
-
+//todo possible deletion
          if (this.prevRotationYaw > this.aircraftYaw || this.prevRotationYaw < this.aircraftYaw) {//if(this.aircraftYaw.isupdated)
             if (this.getThrottle() > 0.2) {
                double difference = this.aircraftYaw - this.prevRotationYaw;
@@ -174,6 +174,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
                this.setThrottle(this.getThrottle() - 0.06);
             }
          }
+         //end
          if(super.lastRiddenByEntity == null && this.getRiddenByEntity() != null) {
             this.initCurrentWeapon(this.getRiddenByEntity());
          }

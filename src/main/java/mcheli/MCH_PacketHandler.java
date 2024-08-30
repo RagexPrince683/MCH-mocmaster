@@ -140,10 +140,10 @@ public class MCH_PacketHandler extends W_PacketHandler {
          MCH_TankPacketHandler.onPacket_PlayerControl(entityPlayer, data);
          break;
       case 536875026:
-         System.out.println("pre onpacketaircraftlocation");
+         //System.out.println("pre onpacketaircraftlocation");
          //I have developed schizophrenia
          MCH_AircraftPacketHandler.onPacketAircraftLocation(entityPlayer, data);
-         System.out.println("onpacketaircraftlocation");
+         //System.out.println("onpacketaircraftlocation");
          break;
 
       }

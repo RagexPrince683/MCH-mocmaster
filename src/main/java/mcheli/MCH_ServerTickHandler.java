@@ -45,7 +45,7 @@ public class MCH_ServerTickHandler {
                if (e instanceof MCP_EntityPlane && !e.onGround) {
                   MCP_EntityPlane plane = (MCP_EntityPlane) e;
                   list.add(plane);
-                  System.out.println("server tick handler");
+                  //System.out.println("server tick handler");
                   MCH_PacketAircraftLocation.send(plane, player);
                }
             }
@@ -56,19 +56,19 @@ public class MCH_ServerTickHandler {
    double visualDistance = 2500;
    @SubscribeEvent
    void onWorldTick(TickEvent.WorldTickEvent evt) {
-      System.out.println("onworldtick");
+      //System.out.println("onworldtick");
       World worldObj = evt.world;
       for (Object obj : worldObj.playerEntities) {
-         System.out.println("for player entity obj");
+         //System.out.println("for player entity obj");
          if (obj instanceof EntityPlayer) {
-            System.out.println("if is player");
+            //System.out.println("if is player");
             EntityPlayer player = (EntityPlayer) obj;
             AxisAlignedBB aabb = player.boundingBox.expand(visualDistance, visualDistance, visualDistance);
             List<MCP_EntityPlane> list = new ArrayList<>();
             for (Object entityObj : worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb)) {
-               System.out.println("get entities within box");
+               //System.out.println("get entities within box");
                if (entityObj instanceof MCP_EntityPlane) {
-                  System.out.println("is plane");
+                  //System.out.println("is plane");
                   MCP_EntityPlane plane = (MCP_EntityPlane) entityObj;
                   if (!plane.onGround) {
                      list.add(plane);

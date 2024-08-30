@@ -1,6 +1,6 @@
 package mcheli;
 
-//import com.hbm.entity.logic.IChunkLoader;
+
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;

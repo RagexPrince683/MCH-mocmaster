@@ -141,7 +141,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
 
 
-   public void loadNeighboringChunks(int newChunkX, int newChunkZ)
+   public void loadNeighboringChunks(int newChunkX, int newChunkZ) //todo issue a try case so that exceptions aren't absolutely fucked
    {
       if(!worldObj.isRemote && loaderTicket != null)
       {
@@ -870,6 +870,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
 
    public void onImpact(MovingObjectPosition m, float damageFactor) {
+      //TODO: fix not fair to xradar perms/block protection
       float p;
       if (!super.worldObj.isRemote) { //if on the server
          if (m.entityHit != null) {
