@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static mcheli.MCH_Config.delayrangeloader;
+
 public abstract class MCH_EntityBaseBullet extends W_Entity {
 
    public static final int DATAWT_RESERVE1 = 26;
@@ -72,6 +74,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    public boolean gravitydown;
    public boolean bigdelay;
    private boolean bigcheck = false;
+   public MCH_ConfigPrm delayrangeloaderconfigsetting = delayrangeloader;
 
    //private final MCH_Fuze fuze = new MCH_Fuze(this);;
 
@@ -231,7 +234,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          this.bomblet = false;
       }
 
-      if(this.getInfo().delay < 3) {
+      if(this.getInfo().delay < delayrangeloader.prmInt) { //todo implement config setting here
+         //< delayrangeloaderconfigsetting
          this.bigdelay = false;
       } else {
          this.bigdelay = true;

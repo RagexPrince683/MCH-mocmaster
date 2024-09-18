@@ -5533,7 +5533,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             this.forceChunkLoading();
             System.out.println("everything is working, now chunk loading");
          }
-         System.out.println("everything is working 2");
+         //System.out.println("everything is working 2");
 
          if(this.uavStation != null && this.uavStation.isDead) {
             System.out.println("setting to null, uav station is dead");
@@ -5541,7 +5541,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          }
 
       }
-      System.out.println("working 3");
+      //System.out.println("working 3");
    }
 
    public void switchGunnerMode(boolean mode) {
