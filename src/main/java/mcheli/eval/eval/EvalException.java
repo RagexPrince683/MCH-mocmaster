@@ -85,45 +85,45 @@ public class EvalException extends RuntimeException {
    public static String getErrCodeMessage(int code) {
       switch(code) {
       case 1001:
-         return "演算子「%0」が在りません。";
+         return "The operator \"%0\" is missing.";
       case 1002:
-         return "演算子の文法エラーです。";
+         return "Operator grammar error.";
       case 1003:
-         return "未対応の識別子です。";
+         return "An unsupported identifier.";
       case 1004:
-         return "式の解釈の途中で文字列が終了しています。";
+         return "The string is terminated in the middle of interpreting the expression.";
       case 1005:
-         return "式の解釈が終わりましたが文字列が残っています。";
+         return "The expression has been interpreted, but the string remains.";
       case 1101:
-         return "関数として使用できません。";
+         return "It cannot be used as a function.";
       case 2001:
-         return "禁止されているメソッドを呼び出しました。";
+         return "You called the forbidden method.";
       case 2002:
-         return "変数として使用できません。";
+         return "Cannot be used as a variable.";
       case 2003:
-         return "数値として使用できません。";
+         return "Cannot be used as a number.";
       case 2004:
-         return "代入できません。";
+         return "Cannot be assigned.";
       case 2101:
-         return "変数の値が取得できません。";
+         return "The value of the variable cannot be retrieved.";
       case 2102:
-         return "変数に代入できません。";
+         return "Cannot be assigned to a variable.";
       case 2103:
-         return "変数が未定義です。";
+         return "The variable is undefined.";
       case 2104:
-         return "オブジェクトが未定義です。";
+         return "The object is undefined.";
       case 2201:
-         return "配列の値が取得できません。";
+         return "I can't get the value of the array.";
       case 2202:
-         return "配列に代入できません。";
+         return "Cannot be assigned to an array.";
       case 2301:
-         return "フィールドの値が取得できません。";
+         return "The value of the field cannot be retrieved.";
       case 2302:
-         return "フィールドに代入できません。";
+         return "Cannot be assigned to a field.";
       case 2401:
-         return "関数の呼び出しに失敗しました。";
+         return "The function call failed.";
       default:
-         return "エラーが発生しました。";
+         return "An error occurred.";
       }
    }
 
@@ -147,7 +147,7 @@ public class EvalException extends RuntimeException {
       }
 
       if(this.string != null) {
-         fmt.append(" string=「%s」");
+         fmt.append(" string=%s");
       }
 
       if(this.getCause() != null) {

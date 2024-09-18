@@ -148,11 +148,11 @@ public class FunctionExpression extends Col1Expression {
    }
 
    protected long operateLong(long val) {
-      throw new RuntimeException("この関数が呼ばれてはいけない。サブクラスで実装要");
+      throw new RuntimeException("This function must not be called.Need to be implemented in a subclass");
    }
 
    protected double operateDouble(double val) {
-      throw new RuntimeException("この関数が呼ばれてはいけない。サブクラスで実装要");
+      throw new RuntimeException("This function must not be called.Need to be implemented in a subclass");
    }
 
    protected void search() {

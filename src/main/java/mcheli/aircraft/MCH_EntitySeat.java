@@ -156,7 +156,7 @@ public class MCH_EntitySeat extends W_Entity {
             }
 
             this.setParent((MCH_EntityAircraft)null);
-            MCH_Lib.DbgLog(super.worldObj, "[Error]座席エンティティは本体が見つからないため削除 seat=%d, parentUniqueID=%s", new Object[]{Integer.valueOf(this.seatID), this.parentUniqueID});
+            MCH_Lib.DbgLog(super.worldObj, "[Error]The seat entity is removed because the body cannot be found seat=%d, parentUniqueID=%s", new Object[]{Integer.valueOf(this.seatID), this.parentUniqueID});
          } else {
             ++this.parentSearchCount;
          }

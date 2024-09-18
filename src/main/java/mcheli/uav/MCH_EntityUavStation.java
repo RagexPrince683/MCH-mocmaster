@@ -379,8 +379,6 @@ public class MCH_EntityUavStation extends W_EntityContainer {
       return this.getLastControlAircraft();
    }
 
-
-
    public void setLastControlAircraft(MCH_EntityAircraft ac) {
       MCH_Lib.DbgLog(super.worldObj, "MCH_EntityUavStation.setLastControlAircraft:" + ac, new Object[0]);
       this.lastControlAircraft = ac;
@@ -415,9 +413,8 @@ public class MCH_EntityUavStation extends W_EntityContainer {
             }
 
          }
-         System.out.println("nothing is loaded x2");
       }
-      System.out.println("nothing is in and no UAV is loaded");
+      //System.out.println("test");
    }
 
    protected void onUpdate_Client() {

@@ -60,7 +60,7 @@ public class JavaExOperator implements Operator {
          c = x.getClass().getName();
       }
 
-      return new RuntimeException("未定義単項演算：" + c);
+      return new RuntimeException("Undefined unary operation：" + c);
    }
 
    RuntimeException undefined(Object x, Object y) {
@@ -74,7 +74,7 @@ public class JavaExOperator implements Operator {
          c2 = y.getClass().getName();
       }
 
-      return new RuntimeException("未定義二項演算：" + c1 + " , " + c2);
+      return new RuntimeException("Undefined binary operation：" + c1 + " , " + c2);
    }
 
    public Object power(Object x, Object y) {

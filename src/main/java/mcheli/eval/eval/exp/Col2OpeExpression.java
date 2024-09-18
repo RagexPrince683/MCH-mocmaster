@@ -13,15 +13,15 @@ public abstract class Col2OpeExpression extends Col2Expression {
    }
 
    protected final long operateLong(long vl, long vr) {
-      throw new RuntimeException("この関数が呼ばれてはいけない");
+      throw new RuntimeException("This function must not be called");
    }
 
    protected final double operateDouble(double vl, double vr) {
-      throw new RuntimeException("この関数が呼ばれてはいけない");
+      throw new RuntimeException("This function must not be called");
    }
 
    protected final Object operateObject(Object vl, Object vr) {
-      throw new RuntimeException("この関数が呼ばれてはいけない");
+      throw new RuntimeException("This function must not be called");
    }
 
    protected AbstractExpression replace() {
