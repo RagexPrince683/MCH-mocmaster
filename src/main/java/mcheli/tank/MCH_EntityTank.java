@@ -55,6 +55,11 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    public final MCH_WheelManager WheelMng;
    public float partialTicks;
 
+   private int currentGear = 1;  // Starting gear
+   private final int maxGear = 5;  // Number of gears
+   private double[] gearSpeedLimits = {5.0D, 10.0D, 20.0D, 30.0D, 40.0D};  // Speed limits for each gear
+   private double[] gearAccelerationMultipliers = {1.0D, 0.8D, 0.6D, 0.4D, 0.2D};  // Acceleration dampening for higher gears
+
 
    public MCH_EntityTank(World world) {
       super(world);
@@ -716,6 +721,14 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       super.rotDestroyedYaw = 0.0F;
    }
 
+   public void performActionIfWeightTypeIsOne() {
+      // Check if TankInfo exists and weightType is 1
+      if (this.getTankInfo() != null && this.getTankInfo().weightType == 1) {
+         System.out.println("Weight type is 1.");
+
+      }
+   }
+
    public int getClientPositionDelayCorrection() {
       return this.getTankInfo() == null?7:(this.getTankInfo().weightType == 1?2:7);
    }
@@ -756,6 +769,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    public void applyOnGroundPitch(float factor) {}
 
    private void onUpdate_Server() {
+      //todo gear shifts here
       Entity rdnEnt = this.getRiddenByEntity();
       double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       double dp = 0.0D;
@@ -853,79 +867,100 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          super.riddenByEntity = null;
       }
 
+      //if(this.) todo gear check
+
    }
 
    private void collisionEntity(AxisAlignedBB bb) {
-      if(bb != null) {
+      if (bb != null) {
+         // Calculate speed
          double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);
-         if(speed > 0.05D) {
+
+         if (speed > 0.05D) {
             Entity rider = this.getRiddenByEntity();
             float damage = (float)(speed * 15.0D);
-            final MCH_EntityAircraft rideAc = super.ridingEntity instanceof MCH_EntityAircraft?(MCH_EntityAircraft)super.ridingEntity:(super.ridingEntity instanceof MCH_EntitySeat?((MCH_EntitySeat)super.ridingEntity).getParent():null);
-            List list = super.worldObj.getEntitiesWithinAABBExcludingEntity(this, bb.expand(0.3D, 0.3D, 0.3D), new IEntitySelector() {
+
+            // Get the aircraft entity the tank is riding on, if applicable
+            final MCH_EntityAircraft rideAc = super.ridingEntity instanceof MCH_EntityAircraft
+                    ? (MCH_EntityAircraft) super.ridingEntity
+                    : (super.ridingEntity instanceof MCH_EntitySeat
+                    ? ((MCH_EntitySeat) super.ridingEntity).getParent()
+                    : null);
+
+            // Get a list of entities within the bounding box
+            List<Entity> list = super.worldObj.getEntitiesWithinAABBExcludingEntity(this, bb.expand(0.3D, 0.3D, 0.3D), new IEntitySelector() {
+               @Override
                public boolean isEntityApplicable(Entity e) {
-                  if(e != rideAc && !(e instanceof EntityItem) && !(e instanceof EntityXPOrb) && !(e instanceof MCH_EntityBaseBullet) && !(e instanceof MCH_EntityChain) && !(e instanceof MCH_EntitySeat)) {
-                     MCH_Config var10000;
-                     if(e instanceof MCH_EntityTank) {
-                        MCH_EntityTank tank = (MCH_EntityTank)e;
-                        if(tank.getTankInfo() != null && tank.getTankInfo().weightType == 2) {
-                           var10000 = MCH_MOD.config;
+                  // Exclude certain entity types from being affected by collision
+                  if (e != rideAc && !(e instanceof EntityItem) && !(e instanceof EntityXPOrb)
+                          && !(e instanceof MCH_EntityBaseBullet) && !(e instanceof MCH_EntityChain)
+                          && !(e instanceof MCH_EntitySeat)) {
+
+                     // Special handling for tanks
+                     if (e instanceof MCH_EntityTank) {
+                        MCH_EntityTank tank = (MCH_EntityTank) e;
+                        if (tank.getTankInfo() != null && tank.getTankInfo().weightType == 2) {
                            return MCH_Config.Collision_EntityTankDamage.prmBool;
                         }
-                     } //todo: fix up how this works as in collision because this is not fair to xradar perms/block protection
+                        //todo: fix up how this works as in collision because this is not fair to xradar perms/block protection
+                     }
 
-                     var10000 = MCH_MOD.config;
+                     // Default collision entity damage
                      return MCH_Config.Collision_EntityDamage.prmBool;
-                  } else {
-                     return false;
                   }
+                  return false;
                }
             });
 
-            for(int i = 0; i < list.size(); ++i) {
-               Entity e = (Entity)list.get(i);
-               if(this.shouldCollisionDamage(e)) {
+            // Process each entity within the bounding box
+            for (Entity e : list) {
+               if (this.shouldCollisionDamage(e)) {
                   double dx = e.posX - super.posX;
                   double dz = e.posZ - super.posZ;
                   double dist = Math.sqrt(dx * dx + dz * dz);
-                  if(dist > 5.0D) {
+
+                  if (dist > 5.0D) {
                      dist = 5.0D;
                   }
 
-                  damage = (float)((double)damage + (5.0D - dist));
-                  DamageSource ds;
-                  if(rider instanceof EntityLivingBase) {
-                     ds = DamageSource.causeMobDamage((EntityLivingBase)rider);
-                  } else {
-                     ds = DamageSource.generic;
-                  }
+                  // Adjust damage based on distance
+                  damage += (5.0D - dist);
 
+                  // Determine the damage source
+                  DamageSource ds = (rider instanceof EntityLivingBase)
+                          ? DamageSource.causeMobDamage((EntityLivingBase) rider)
+                          : DamageSource.generic;
+
+                  // Apply damage and collision effects
                   MCH_Lib.applyEntityHurtResistantTimeConfig(e);
                   e.attackEntityFrom(ds, damage);
-                  if(e instanceof MCH_EntityAircraft) {
+
+                  if (e instanceof MCH_EntityAircraft) {
+                     // Slight pushback for aircrafts
                      e.motionX += super.motionX * 0.05D;
                      e.motionZ += super.motionZ * 0.05D;
-                  } else if(e instanceof EntityArrow) {
+                  } else if (e instanceof EntityArrow) {
+                     // Destroy arrows on impact
                      e.setDead();
                   } else {
+                     // Apply strong pushback for other entities
                      e.motionX += super.motionX * 1.5D;
                      e.motionZ += super.motionZ * 1.5D;
                   }
 
-                  if(this.getTankInfo().weightType != 2 && (e.width >= 1.0F || (double)e.height >= 1.5D)) {
-                     if(e instanceof EntityLivingBase) {
-                        ds = DamageSource.causeMobDamage((EntityLivingBase)e);
-                     } else {
-                        ds = DamageSource.generic;
-                     }
+                  // Damage self based on collision with large entities
+                  if (this.getTankInfo().weightType != 2 && (e.width >= 1.0F || e.height >= 1.5D)) {
+                     ds = (e instanceof EntityLivingBase)
+                             ? DamageSource.causeMobDamage((EntityLivingBase) e)
+                             : DamageSource.generic;
 
                      this.attackEntityFrom(ds, damage / 3.0F);
                   }
 
-                  MCH_Lib.DbgLog(super.worldObj, "MCH_EntityTank.collisionEntity damage=%.1f %s", new Object[]{Float.valueOf(damage), e.toString()});
+                  // Log the collision
+                  MCH_Lib.DbgLog(super.worldObj, "MCH_EntityTank.collisionEntity damage=%.1f %s", damage, e.toString());
                }
             }
-
          }
       }
    }
@@ -1074,6 +1109,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       return this.getTankInfo().speed + 0.0F;
    }
 
+   //set angles is le turret (1.12.2)
    public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
       if(partialTicks < 0.03F) {
          partialTicks = 0.4F;

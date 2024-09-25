@@ -64,6 +64,7 @@ public class MCH_TankInfo extends MCH_AircraftInfo {
    }
 
    public void loadItemData(String item, String data) {
+      //this is not item data wtf
       super.loadItemData(item, data);
       if(item.equalsIgnoreCase("WeightType")) {
          data = data.toLowerCase();

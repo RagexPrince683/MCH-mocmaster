@@ -568,7 +568,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       //isbomblet is true for everything
       //this.type.equalsIgnoreCase("TVMissile"
       //this.getInfo().gravity < 0.0 &&
-      if (!super.isDead) {
+      int chunkX = (int)Math.floor(this.posX / 16D);
+      int chunkZ = (int)Math.floor(this.posZ / 16D);
+      //todone: check chunk isnt loaded already(?) test
+      //todo: , prioritize chunk loading for a higher delay, lower bomblet value, not in water, and higher gravity
+      if (!super.isDead && !this.worldObj.getChunkProvider().chunkExists(chunkX, chunkZ)) {
          if (!bomblet && gravitydown && bigdelay) {
             loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
             System.out.println("bullet is loading neighboring chunks");
