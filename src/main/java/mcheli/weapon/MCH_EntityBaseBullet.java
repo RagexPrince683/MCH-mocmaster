@@ -145,6 +145,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
 
    public void loadNeighboringChunks(int newChunkX, int newChunkZ) //todo issue a try case so that exceptions aren't absolutely fucked
+           //todo: incorporate 4j studios tier chunk loading, the closer a player the more priority, also somehow make it so bullets do not despawn on unload
    {
       if(!worldObj.isRemote && loaderTicket != null)
       {
@@ -154,15 +155,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          }
 
          loadedChunks.clear();
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ + 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ - 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ - 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ + 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ + 1));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ));
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ - 1));
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ));       // Current chunk
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ));   // +X
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ));   // -X
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ + 1));   // +Z
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ - 1));   // -Z
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ + 1));  // +X, +Z (diagonal)
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ - 1));  // -X, -Z (diagonal)
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ - 1));  // +X, -Z (diagonal)
+         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ + 1));  // -X, +Z (diagonal)
+         //im have autism destroyer of code
 
          for(ChunkCoordIntPair chunk : loadedChunks)
          {
@@ -380,6 +382,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
    }
 
+
+
+
+
    public int getCountOnUpdate() {
       return this.countOnUpdate;
    }
@@ -568,19 +574,27 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       //isbomblet is true for everything
       //this.type.equalsIgnoreCase("TVMissile"
       //this.getInfo().gravity < 0.0 &&
+
       int chunkX = (int)Math.floor(this.posX / 16D);
       int chunkZ = (int)Math.floor(this.posZ / 16D);
+
       //todone: check chunk isnt loaded already(?) test
       //todo: , prioritize chunk loading for a higher delay, lower bomblet value, not in water, and higher gravity
-      if (!super.isDead && !this.worldObj.getChunkProvider().chunkExists(chunkX, chunkZ)) {
+      //if (!super.isDead && !this.worldObj.getChunkProvider().chunkExists(chunkX, chunkZ)) {
+      //god hates this idk why
+      if (!super.isDead) {
          if (!bomblet && gravitydown && bigdelay) {
-            loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
-            System.out.println("bullet is loading neighboring chunks");
-            bigcheck = true;
+            if (!worldObj.getChunkProvider().chunkExists(chunkX, chunkZ)) {
+               loadNeighboringChunks((int) Math.floor(posX / 16D), (int) Math.floor(posZ / 16D));
+               System.out.println("bullet is loading neighboring chunks");
+               bigcheck = true;
+            }
          }
          this.onUpdateCollided();
 
       }
+
+
 
       super.posX += super.motionX * this.accelerationFactor;
       super.posY += super.motionY * this.accelerationFactor;
@@ -718,6 +732,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    }
 
    protected void onUpdateCollided() {
+      //todo: unforce chunk here too just to prevent the biggest destroyer of computers from activating
       float damageFator = 1.0F;
       double mx = super.motionX * this.accelerationFactor;
       double my = super.motionY * this.accelerationFactor;
@@ -952,6 +967,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             this.setDead();
             //this is an impact
             System.out.println("impact? set dead");
+            //todone?: clear chunk loader
+            for(ChunkCoordIntPair chunk : loadedChunks)
+            {
+               System.out.println("chunk loader cleared as impact");
+
+               ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+            }
+
          }
       } else if (this.getInfo() != null && (this.getInfo().explosion == 0 || this.getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(m)) {
          p = (float) this.getInfo().power;
