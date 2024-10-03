@@ -144,34 +144,51 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
 
 
-   public void loadNeighboringChunks(int newChunkX, int newChunkZ) //todo issue a try case so that exceptions aren't absolutely fucked
-           //todo: incorporate 4j studios tier chunk loading, the closer a player the more priority, also somehow make it so bullets do not despawn on unload
-   {
-      if(!worldObj.isRemote && loaderTicket != null)
-      {
-         for(ChunkCoordIntPair chunk : loadedChunks)
-         {
+   public void checkAndLoadChunks() {
+      // Get the current chunk coordinates for the bullet
+      int chunkX = (int) Math.floor(posX / 16D);
+      int chunkZ = (int) Math.floor(posZ / 16D);
+
+      // This will always attempt to load neighboring chunks to prevent gaps in loading
+      loadNeighboringChunks(chunkX, chunkZ);
+   }
+
+   // Chunk loading method that ensures neighboring chunks are loaded
+   public void loadNeighboringChunks(int chunkX, int chunkZ) {
+      if (!worldObj.isRemote && loaderTicket != null) {
+         // Unload previously loaded chunks to avoid memory bloat
+         for (ChunkCoordIntPair chunk : loadedChunks) {
             ForgeChunkManager.unforceChunk(loaderTicket, chunk);
          }
 
          loadedChunks.clear();
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ));       // Current chunk
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ));   // +X
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ));   // -X
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ + 1));   // +Z
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX, newChunkZ - 1));   // -Z
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ + 1));  // +X, +Z (diagonal)
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ - 1));  // -X, -Z (diagonal)
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX + 1, newChunkZ - 1));  // +X, -Z (diagonal)
-         loadedChunks.add(new ChunkCoordIntPair(newChunkX - 1, newChunkZ + 1));  // -X, +Z (diagonal)
-         //im have autism destroyer of code
 
-         for(ChunkCoordIntPair chunk : loadedChunks)
-         {
-            ForgeChunkManager.forceChunk(loaderTicket, chunk);
+         // Define the neighboring chunks (including diagonals)
+         ChunkCoordIntPair[] neighboringChunks = {
+                 new ChunkCoordIntPair(chunkX, chunkZ),           // Current chunk
+                 new ChunkCoordIntPair(chunkX + 1, chunkZ),       // +X
+                 new ChunkCoordIntPair(chunkX - 1, chunkZ),       // -X
+                 new ChunkCoordIntPair(chunkX, chunkZ + 1),       // +Z
+                 new ChunkCoordIntPair(chunkX, chunkZ - 1),       // -Z
+                 new ChunkCoordIntPair(chunkX + 1, chunkZ + 1),   // +X, +Z
+                 new ChunkCoordIntPair(chunkX - 1, chunkZ - 1),   // -X, -Z
+                 new ChunkCoordIntPair(chunkX + 1, chunkZ - 1),   // +X, -Z
+                 new ChunkCoordIntPair(chunkX - 1, chunkZ + 1)    // -X, +Z
+         };
+
+         // Load surrounding chunks if not already loaded
+         for (ChunkCoordIntPair chunk : neighboringChunks) {
+            if (!worldObj.getChunkProvider().chunkExists(chunk.chunkXPos, chunk.chunkZPos)) {
+               loadedChunks.add(chunk);  // Only add if the chunk is not already loaded
+               ForgeChunkManager.forceChunk(loaderTicket, chunk);
+            }
          }
+
+         System.out.println("Loaded surrounding chunks at: " + chunkX + ", " + chunkZ);
       }
    }
+
+
 
    //public void clearChunkLoader() {
    //   if(!worldObj.isRemote && loaderTicket != null) {
@@ -478,6 +495,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    }
 
    public void onUpdate() {
+      checkAndLoadChunks();
       if (super.worldObj.isRemote && this.countOnUpdate == 0) {
          int f3 = this.getTargetEntityID();
          if (f3 > 0) {
