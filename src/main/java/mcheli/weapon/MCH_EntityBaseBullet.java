@@ -142,7 +142,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
    List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
 
-
+//todo: determine, what direction that the bullet is going and load the chunks in front of the bullet based on the bullet direction. This is pain. This is suffering God help us all.
 
    public void checkAndLoadChunks() {
       // Get the current chunk coordinates for the bullet
