@@ -178,10 +178,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
          // Load surrounding chunks if not already loaded
          for (ChunkCoordIntPair chunk : neighboringChunks) {
-            if (!worldObj.getChunkProvider().chunkExists(chunk.chunkXPos, chunk.chunkZPos)) {
-               loadedChunks.add(chunk);  // Only add if the chunk is not already loaded
-               ForgeChunkManager.forceChunk(loaderTicket, chunk);
-            }
+            loadedChunks.add(chunk);  // add chunk directly without checking
+            ForgeChunkManager.forceChunk(loaderTicket, chunk);
          }
 
          System.out.println("Loaded surrounding chunks at: " + chunkX + ", " + chunkZ);
