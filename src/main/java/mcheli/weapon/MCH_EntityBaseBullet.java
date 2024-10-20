@@ -1,6 +1,6 @@
 package mcheli.weapon;
 
-import com.hbm.entity.effect.EntityNukeCloudSmall;
+//import com.hbm.entity.effect.EntityNukeCloudSmall;
 import com.hbm.entity.effect.EntityNukeTorex;
 import com.hbm.entity.logic.EntityNukeExplosionMK5;
 import com.hbm.explosion.ExplosionChaos;
@@ -37,15 +37,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import static mcheli.MCH_Config.delayrangeloader;
+import static mcheli.MCH_Config.bombletloader;
 
 public abstract class MCH_EntityBaseBullet extends W_Entity {
 
-   public static final int DATAWT_RESERVE1 = 26;
-   public static final int DATAWT_TARGET_ENTITY = 27;
-   public static final int DATAWT_MARKER_STAT = 28;
-   public static final int DATAWT_NAME = 29;
-   public static final int DATAWT_BULLET_MODEL = 30;
-   public static final int DATAWT_BOMBLET_FLAG = 31;
+  //public static final int DATAWT_RESERVE1 = 26;
+  //public static final int DATAWT_TARGET_ENTITY = 27;
+  //public static final int DATAWT_MARKER_STAT = 28;
+  //public static final int DATAWT_NAME = 29;
+  //public static final int DATAWT_BULLET_MODEL = 30;
+  //public static final int DATAWT_BOMBLET_FLAG = 31;
    public Entity shootingEntity;
    public Entity shootingAircraft;
    private int countOnUpdate;
@@ -74,7 +75,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    public boolean gravitydown;
    public boolean bigdelay;
    private boolean bigcheck = false;
-   public MCH_ConfigPrm delayrangeloaderconfigsetting = delayrangeloader;
+   //public MCH_ConfigPrm delayrangeloaderconfigsetting = delayrangeloader;
 
    //private final MCH_Fuze fuze = new MCH_Fuze(this);;
 
@@ -115,7 +116,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          acceleration = 3.9D;
       }
 
-      double d = (double) MathHelper.sqrt_double(mx * mx + my * my + mz * mz);
+      double d = MathHelper.sqrt_double(mx * mx + my * my + mz * mz);
       super.motionX = mx * acceleration / d;
       super.motionY = my * acceleration / d;
       super.motionZ = mz * acceleration / d;
@@ -245,7 +246,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
          System.out.println("hey this weapon has no gravity defined, that's probably not a good thing");
       }
 
-      if(this.getInfo().bomblet >= 50) {
+      if(this.getInfo().bomblet >= bombletloader.prmInt) {
          this.bomblet = true;
       } else {
          this.bomblet = false;
@@ -493,15 +494,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    }
 
    public void onUpdate() {
-      checkAndLoadChunks();
+      checkAndLoadChunks();  // If this method handles any critical chunk loading, it stays here
+
       if (super.worldObj.isRemote && this.countOnUpdate == 0) {
          int f3 = this.getTargetEntityID();
          if (f3 > 0) {
             this.setTargetEntity(super.worldObj.getEntityByID(f3));
          }
       }
-
-
 
       if (this.prevMotionX != super.motionX || this.prevMotionY != super.motionY || this.prevMotionZ != super.motionZ) {
          double var5 = (double) ((float) Math.atan2(super.motionZ, super.motionX));
@@ -522,9 +522,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       this.prevPosY2 = super.prevPosY;
       this.prevPosZ2 = super.prevPosZ;
       super.onUpdate();
+
       if (this.getInfo() == null) {
          if (this.countOnUpdate >= 2) {
-            MCH_Lib.Log((Entity) this, "##### MCH_EntityBaseBullet onUpdate() Weapon info null %d, %s, Name=%s", new Object[]{Integer.valueOf(W_Entity.getEntityId(this)), this.getEntityName(), this.getName()});
+            MCH_Lib.Log((Entity) this, "##### MCH_EntityBaseBullet onUpdate() Weapon info null %d, %s, Name=%s",
+                    new Object[]{Integer.valueOf(W_Entity.getEntityId(this)), this.getEntityName(), this.getName()});
             System.out.println("ENTITY IS NULL!!!");
             this.setDead();
             return;
@@ -567,69 +569,87 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             return;
          }
 
-         //if(this.fuze.shouldDetonate()){
-         //   MovingObjectPosition m = new MovingObjectPosition(this);
-         //   this.onImpact(m, 1);
-         //}
-
          if(this.getInfo().explosionAltitude > 0 && MCH_Lib.getBlockIdY(this, 3, -this.getInfo().explosionAltitude) != 0) {
-         	MovingObjectPosition var6 = new MovingObjectPosition((int)super.posX, (int)super.posY, (int)super.posZ, 0, Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
-         	this.onImpact(var6, 1.0F);
+            MovingObjectPosition var6 = new MovingObjectPosition((int)super.posX, (int)super.posY, (int)super.posZ, 0,
+                    Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
+            this.onImpact(var6, 1.0F);
          }
       }
 
+      // Apply gravity effects based on whether it's in water
       if (!this.isInWater()) {
          super.motionY += (double) this.getGravity();
       } else {
          super.motionY += (double) this.getGravityInWater();
       }
 
-
-      //this.getGravity() < 0.0 || this.istvmissile or aa missile
-      //|| this.istvmissile
-      //isbomblet is true for everything
-      //this.type.equalsIgnoreCase("TVMissile"
-      //this.getInfo().gravity < 0.0 &&
-
-      int chunkX = (int)Math.floor(this.posX / 16D);
-      int chunkZ = (int)Math.floor(this.posZ / 16D);
-
-      //todone: check chunk isnt loaded already(?) test
-      //todo: , prioritize chunk loading for a higher delay, lower bomblet value, not in water, and higher gravity
-      //if (!super.isDead && !this.worldObj.getChunkProvider().chunkExists(chunkX, chunkZ)) {
-      //god hates this idk why
+      // Chunk loading logic based on bullet motion
       if (!super.isDead) {
-         if (!bomblet && gravitydown && bigdelay) {
-            if (!worldObj.getChunkProvider().chunkExists(chunkX, chunkZ)) {
-               loadNeighboringChunks((int) Math.floor(posX / 16D), (int) Math.floor(posZ / 16D));
-               System.out.println("bullet is loading neighboring chunks");
-               bigcheck = true;
+         int chunkX = (int) Math.floor(this.posX / 16D);
+         int chunkZ = (int) Math.floor(this.posZ / 16D);
+
+         // Directional chunk loading based on bullet velocity
+         List<ChunkCoordIntPair> neighboringChunks = new ArrayList<>();
+
+         // Check motion direction to determine which chunks to load
+       // if (this.motionX > 0) {
+       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX + 1, chunkZ));  // Positive X direction
+       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX + 2, chunkZ));  // Further in X direction
+       // } else if (this.motionX < 0) {
+       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX - 1, chunkZ));  // Negative X direction
+       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX - 2, chunkZ));
+       // }
+
+       // if (this.motionZ > 0) {
+       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX, chunkZ + 1));  // Positive Z direction
+       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX, chunkZ + 2));  // Further in Z direction
+       // } else if (this.motionZ < 0) {
+       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX, chunkZ - 1));  // Negative Z direction
+       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX, chunkZ - 2));
+       // }
+
+         //im gonna blow my brains out in minecraft
+
+         // Load only the necessary chunks
+         //todo?: make sure EntityBaseBullet actually exists
+         if (!super.isDead) {
+            if (!bomblet && gravitydown && bigdelay) {
+               for (ChunkCoordIntPair chunk : neighboringChunks) {
+                  if (!worldObj.getChunkProvider().chunkExists(chunk.chunkXPos, chunk.chunkZPos)) {
+                     loadNeighboringChunks(chunk.chunkXPos, chunk.chunkZPos);
+                     System.out.println("Bullet is loading neighboring chunks: " + chunk);
+                     bigcheck = true;
+                  }
+               }
             }
          }
-         this.onUpdateCollided();
 
+         this.onUpdateCollided();
       }
 
-
-
+      // Apply bullet's motion
       super.posX += super.motionX * this.accelerationFactor;
       super.posY += super.motionY * this.accelerationFactor;
       super.posZ += super.motionZ * this.accelerationFactor;
+
       if (super.worldObj.isRemote) {
          this.updateSplash();
       }
 
+      // Handle water particles if in water
       if (this.isInWater()) {
          float var7 = 0.25F;
-         super.worldObj.spawnParticle("bubble", super.posX - super.motionX * (double) var7, super.posY - super.motionY * (double) var7, super.posZ - super.motionZ * (double) var7, super.motionX, super.motionY, super.motionZ);
+         super.worldObj.spawnParticle("bubble", super.posX - super.motionX * (double) var7,
+                 super.posY - super.motionY * (double) var7,
+                 super.posZ - super.motionZ * (double) var7,
+                 super.motionX, super.motionY, super.motionZ);
       }
-
-    //  if (this.shouldRenderRocketTrail()) {
-    //     //spawnParticle("rocket", 1,  1);
-    //  }
 
       this.setPosition(super.posX, super.posY, super.posZ);
    }
+
+
+
 
    public void updateSplash() {
       if (this.getInfo() != null) {
