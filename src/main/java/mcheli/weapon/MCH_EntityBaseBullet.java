@@ -74,6 +74,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    public boolean bomblet;
    public boolean gravitydown;
    public boolean bigdelay;
+   //public boolean keepchunkloaded;
    private boolean bigcheck = false;
    //public MCH_ConfigPrm delayrangeloaderconfigsetting = delayrangeloader;
 
@@ -126,6 +127,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       this.acceleration = acceleration;
    }
 
+
+
     // Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
 
     public void init(Ticket ticket) {
@@ -160,7 +163,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         if (!worldObj.isRemote && loaderTicket != null) {
             // Unload previously loaded chunks to avoid memory bloat
             for (ChunkCoordIntPair chunk : loadedChunks) {
-                ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+                //if (this.keepchunkloaded = false) {
+                    ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+                //}
             }
 
             loadedChunks.clear();
@@ -190,12 +195,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     // Dynamically load chunks ahead of the bullet based on its current position and motion
     public void loadChunksInBulletPath(int currentChunkX, int currentChunkZ, double motionX, double motionZ) {
         if (!worldObj.isRemote && loaderTicket != null) {
-            // Unload previously loaded chunks to avoid memory bloat
             for (ChunkCoordIntPair chunk : loadedChunks) {
                 ForgeChunkManager.unforceChunk(loaderTicket, chunk);
             }
-            loadedChunks.clear();
 
+            loadedChunks.clear();
             // Calculate the next chunk in the direction of the bullet's motion
             int nextChunkX = currentChunkX + (motionX > 0 ? 1 : (motionX < 0 ? -1 : 0));
             int nextChunkZ = currentChunkZ + (motionZ > 0 ? 1 : (motionZ < 0 ? -1 : 0));
@@ -215,6 +219,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
                     ForgeChunkManager.forceChunk(loaderTicket, chunk);
                 }
             }
+            //System.out.println("Bullet Position: X=" + this.posX + " Y=" + this.posY + " Z=" + this.posZ);
 
             System.out.println("Loaded chunks for bullet at: " + currentChunkX + ", " + currentChunkZ +
                     " moving to: " + nextChunkX + ", " + nextChunkZ);
@@ -223,12 +228,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
     // Clear chunk loader after bullet impact or despawn to free memory
     public void clearChunkLoader() {
-        if (!worldObj.isRemote && loaderTicket != null) {
-            for (ChunkCoordIntPair chunk : loadedChunks) {
-                ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+       // if (keepchunkloaded = false) {
+            if (!worldObj.isRemote && loaderTicket != null) {
+                for (ChunkCoordIntPair chunk : loadedChunks) {
+                   // if (this.keepchunkloaded = false) {
+                        ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+                  //  }
+                    loadedChunks.clear();
+                }
             }
-            loadedChunks.clear();
-        }
+       // }
     }
 
 
@@ -313,8 +322,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    }
    //todo add a gravity check here
 
+
+
    public void setDead() {
-      super.setDead();
+        //System.out.println("Bullet is being removed at: X=" + this.posX + " Y=" + this.posY + " Z=" + this.posZ);
+        super.setDead();
       //this.clearChunkLoader();
       //if (this.piercing <= 0) {
       //   super.setDead();
@@ -622,6 +634,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
            // Get current chunk coordinates based on the bullet's position
            int chunkX = (int) Math.floor(this.posX / 16D);
            int chunkZ = (int) Math.floor(this.posZ / 16D);
+           System.out.println("Bullet motion: X=" + this.motionX + " Z=" + this.motionZ);
 
            // Check if the bullet still exists before proceeding
            if (!super.isDead) {
@@ -633,7 +646,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
                    // Log that chunks are being loaded
                    System.out.println("Bullet is loading chunks at: " + chunkX + ", " + chunkZ);
-
                    bigcheck = true;  // Mark that the chunks have been checked and loaded
                }
            }
@@ -1018,13 +1030,22 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             this.setDead();
             //this is an impact
             System.out.println("impact? set dead");
-            //todone?: clear chunk loader
-            for(ChunkCoordIntPair chunk : loadedChunks)
-            {
-               System.out.println("chunk loader cleared as impact");
+           // keepchunkloaded = false;
 
-               ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-            }
+
+
+             //if (this.keepchunkloaded = false) {
+                 System.out.println("chunk loader cleared as impact");
+                 for(ChunkCoordIntPair chunk : loadedChunks)
+                 {
+                     //double clearing to ENSURE the chunks are cleared
+                     this.clearChunkLoader();
+                     ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+                 }
+             //} else {
+             //    keepchunkloaded = true;
+             //}
+
 
          }
       } else if (this.getInfo() != null && (this.getInfo().explosion == 0 || this.getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(m)) {
