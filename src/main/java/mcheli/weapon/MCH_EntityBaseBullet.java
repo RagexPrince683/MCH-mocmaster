@@ -126,76 +126,110 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       this.acceleration = acceleration;
    }
 
-   //Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
+    // Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
 
-   public void init(Ticket ticket) {
-      if (!worldObj.isRemote) {
-         if (ticket != null) {
-            if (loaderTicket == null) {
-               loaderTicket = ticket;
-               loaderTicket.bindEntity(this);
-               loaderTicket.getModData();
+    public void init(Ticket ticket) {
+        if (!worldObj.isRemote) {
+            if (ticket != null) {
+                if (loaderTicket == null) {
+                    loaderTicket = ticket;
+                    loaderTicket.bindEntity(this);
+                    loaderTicket.getModData();
+                }
+                // Force load the initial chunk where the bullet is spawned
+                ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
             }
-            ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
-         }
-      }
-   }
-
-   List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
-
-//todo: determine, what direction that the bullet is going and load the chunks in front of the bullet based on the bullet direction. This is pain. This is suffering God help us all.
-
-   public void checkAndLoadChunks() {
-      // Get the current chunk coordinates for the bullet
-      int chunkX = (int) Math.floor(posX / 16D);
-      int chunkZ = (int) Math.floor(posZ / 16D);
-
-      // This will always attempt to load neighboring chunks to prevent gaps in loading
-      loadNeighboringChunks(chunkX, chunkZ);
-   }
-
-   // Chunk loading method that ensures neighboring chunks are loaded
-   public void loadNeighboringChunks(int chunkX, int chunkZ) {
-      if (!worldObj.isRemote && loaderTicket != null) {
-         // Unload previously loaded chunks to avoid memory bloat
-         for (ChunkCoordIntPair chunk : loadedChunks) {
-            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-         }
-
-         loadedChunks.clear();
-
-         // Define the neighboring chunks (including diagonals)
-         ChunkCoordIntPair[] neighboringChunks = {
-                 new ChunkCoordIntPair(chunkX, chunkZ),           // Current chunk
-                 new ChunkCoordIntPair(chunkX + 1, chunkZ),       // +X
-                 new ChunkCoordIntPair(chunkX - 1, chunkZ),       // -X
-                 new ChunkCoordIntPair(chunkX, chunkZ + 1),       // +Z
-                 new ChunkCoordIntPair(chunkX, chunkZ - 1),       // -Z
-                 new ChunkCoordIntPair(chunkX + 1, chunkZ + 1),   // +X, +Z
-                 new ChunkCoordIntPair(chunkX - 1, chunkZ - 1),   // -X, -Z
-                 new ChunkCoordIntPair(chunkX + 1, chunkZ - 1),   // +X, -Z
-                 new ChunkCoordIntPair(chunkX - 1, chunkZ + 1)    // -X, +Z
-         };
-
-         // Load surrounding chunks if not already loaded
-         for (ChunkCoordIntPair chunk : neighboringChunks) {
-            loadedChunks.add(chunk);  // add chunk directly without checking
-            ForgeChunkManager.forceChunk(loaderTicket, chunk);
-         }
-
-         System.out.println("Loaded surrounding chunks at: " + chunkX + ", " + chunkZ);
-      }
-   }
+        }
+    }
 
 
 
-   //public void clearChunkLoader() {
-   //   if(!worldObj.isRemote && loaderTicket != null) {
-   //      for(ChunkCoordIntPair chunk : loadedChunks) {
-   //         ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-   //      }
-   //   }
-   //}
+    List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
+
+    // Dynamically load chunks based on bullet's movement
+    public void checkAndLoadChunks() {
+        // Get the current chunk coordinates for the bullet
+        int currentChunkX = MathHelper.floor_double(posX) >> 4;
+        int currentChunkZ = MathHelper.floor_double(posZ) >> 4;
+
+        // Determine the direction of bullet movement and load chunks in front
+        loadChunksInBulletPath(currentChunkX, currentChunkZ, motionX, motionZ);
+    }
+
+    public void loadNeighboringChunks(int chunkX, int chunkZ) {
+        if (!worldObj.isRemote && loaderTicket != null) {
+            // Unload previously loaded chunks to avoid memory bloat
+            for (ChunkCoordIntPair chunk : loadedChunks) {
+                ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+            }
+
+            loadedChunks.clear();
+
+            // Define the neighboring chunks (including diagonals)
+            ChunkCoordIntPair[] neighboringChunks = {
+                    new ChunkCoordIntPair(chunkX, chunkZ),           // Current chunk
+                    new ChunkCoordIntPair(chunkX + 1, chunkZ),       // +X
+                    new ChunkCoordIntPair(chunkX - 1, chunkZ),       // -X
+                    new ChunkCoordIntPair(chunkX, chunkZ + 1),       // +Z
+                    new ChunkCoordIntPair(chunkX, chunkZ - 1),       // -Z
+                    new ChunkCoordIntPair(chunkX + 1, chunkZ + 1),   // +X, +Z
+                    new ChunkCoordIntPair(chunkX - 1, chunkZ - 1),   // -X, -Z
+                    new ChunkCoordIntPair(chunkX + 1, chunkZ - 1),   // +X, -Z
+                    new ChunkCoordIntPair(chunkX - 1, chunkZ + 1)    // -X, +Z
+            };
+
+            // Load surrounding chunks if not already loaded
+            for (ChunkCoordIntPair chunk : neighboringChunks) {
+                loadedChunks.add(chunk);  // add chunk directly without checking
+                ForgeChunkManager.forceChunk(loaderTicket, chunk);
+            }
+
+            System.out.println("Loaded surrounding chunks at: " + chunkX + ", " + chunkZ);
+        }
+    }
+    // Dynamically load chunks ahead of the bullet based on its current position and motion
+    public void loadChunksInBulletPath(int currentChunkX, int currentChunkZ, double motionX, double motionZ) {
+        if (!worldObj.isRemote && loaderTicket != null) {
+            // Unload previously loaded chunks to avoid memory bloat
+            for (ChunkCoordIntPair chunk : loadedChunks) {
+                ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+            }
+            loadedChunks.clear();
+
+            // Calculate the next chunk in the direction of the bullet's motion
+            int nextChunkX = currentChunkX + (motionX > 0 ? 1 : (motionX < 0 ? -1 : 0));
+            int nextChunkZ = currentChunkZ + (motionZ > 0 ? 1 : (motionZ < 0 ? -1 : 0));
+
+            // Define the chunks to load (current, next in X, next in Z, and diagonal)
+            ChunkCoordIntPair[] chunksToLoad = {
+                    new ChunkCoordIntPair(currentChunkX, currentChunkZ),      // Current chunk
+                    new ChunkCoordIntPair(nextChunkX, currentChunkZ),         // Next chunk in X direction
+                    new ChunkCoordIntPair(currentChunkX, nextChunkZ),         // Next chunk in Z direction
+                    new ChunkCoordIntPair(nextChunkX, nextChunkZ)             // Diagonal chunk
+            };
+
+            // Load the chunks ahead of the bullet's path
+            for (ChunkCoordIntPair chunk : chunksToLoad) {
+                if (!loadedChunks.contains(chunk)) {
+                    loadedChunks.add(chunk);
+                    ForgeChunkManager.forceChunk(loaderTicket, chunk);
+                }
+            }
+
+            System.out.println("Loaded chunks for bullet at: " + currentChunkX + ", " + currentChunkZ +
+                    " moving to: " + nextChunkX + ", " + nextChunkZ);
+        }
+    }
+
+    // Clear chunk loader after bullet impact or despawn to free memory
+    public void clearChunkLoader() {
+        if (!worldObj.isRemote && loaderTicket != null) {
+            for (ChunkCoordIntPair chunk : loadedChunks) {
+                ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+            }
+            loadedChunks.clear();
+        }
+    }
 
 
 
@@ -584,48 +618,29 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
       }
 
       // Chunk loading logic based on bullet motion
-      if (!super.isDead) {
-         int chunkX = (int) Math.floor(this.posX / 16D);
-         int chunkZ = (int) Math.floor(this.posZ / 16D);
+       if (!super.isDead) {
+           // Get current chunk coordinates based on the bullet's position
+           int chunkX = (int) Math.floor(this.posX / 16D);
+           int chunkZ = (int) Math.floor(this.posZ / 16D);
 
-         // Directional chunk loading based on bullet velocity
-         List<ChunkCoordIntPair> neighboringChunks = new ArrayList<>();
+           // Check if the bullet still exists before proceeding
+           if (!super.isDead) {
+               // Ensure the bullet has the specific conditions (e.g., no bomblet, gravityDown, and bigDelay)
+               if (!bomblet && gravitydown && bigdelay) {
 
-         // Check motion direction to determine which chunks to load
-       // if (this.motionX > 0) {
-       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX + 1, chunkZ));  // Positive X direction
-       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX + 2, chunkZ));  // Further in X direction
-       // } else if (this.motionX < 0) {
-       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX - 1, chunkZ));  // Negative X direction
-       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX - 2, chunkZ));
-       // }
+                   // Load the necessary chunks in front of the bullet
+                   loadChunksInBulletPath(chunkX, chunkZ, this.motionX, this.motionZ);
 
-       // if (this.motionZ > 0) {
-       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX, chunkZ + 1));  // Positive Z direction
-       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX, chunkZ + 2));  // Further in Z direction
-       // } else if (this.motionZ < 0) {
-       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX, chunkZ - 1));  // Negative Z direction
-       //    neighboringChunks.add(new ChunkCoordIntPair(chunkX, chunkZ - 2));
-       // }
+                   // Log that chunks are being loaded
+                   System.out.println("Bullet is loading chunks at: " + chunkX + ", " + chunkZ);
 
-         //im gonna blow my brains out in minecraft
-
-         // Load only the necessary chunks
-         //todo?: make sure EntityBaseBullet actually exists
-         if (!super.isDead) {
-            if (!bomblet && gravitydown && bigdelay) {
-               for (ChunkCoordIntPair chunk : neighboringChunks) {
-                  if (!worldObj.getChunkProvider().chunkExists(chunk.chunkXPos, chunk.chunkZPos)) {
-                     loadNeighboringChunks(chunk.chunkXPos, chunk.chunkZPos);
-                     System.out.println("Bullet is loading neighboring chunks: " + chunk);
-                     bigcheck = true;
-                  }
+                   bigcheck = true;  // Mark that the chunks have been checked and loaded
                }
-            }
-         }
+           }
 
-         this.onUpdateCollided();
-      }
+           // Handle the collision and update the bullet state
+           this.onUpdateCollided();
+       }
 
       // Apply bullet's motion
       super.posX += super.motionX * this.accelerationFactor;
