@@ -41,91 +41,66 @@ import static mcheli.MCH_Config.bombletloader;
 
 public abstract class MCH_EntityBaseBullet extends W_Entity {
 
-  //public static final int DATAWT_RESERVE1 = 26;
-  //public static final int DATAWT_TARGET_ENTITY = 27;
-  //public static final int DATAWT_MARKER_STAT = 28;
-  //public static final int DATAWT_NAME = 29;
-  //public static final int DATAWT_BULLET_MODEL = 30;
-  //public static final int DATAWT_BOMBLET_FLAG = 31;
-   public Entity shootingEntity;
-   public Entity shootingAircraft;
-   private int countOnUpdate;
-   public int explosionPower;
-   public int explosionPowerInWater;
-   public int nukeYield;
-   public int chemYield = 0;
-   private int power;
-   public double acceleration;
-   public double accelerationFactor;
-   public Entity targetEntity;
-   public int piercing;
-   public int delayFuse;
-   public int sprinkleTime;
-   public byte isBomblet;
-   private MCH_WeaponInfo weaponInfo;
-   private MCH_BulletModel model;
-   public double prevPosX2;
-   public double prevPosY2;
-   public double prevPosZ2;
-   public double prevMotionX;
-   public double prevMotionY;
-   public double prevMotionZ;
-   private Ticket loaderTicket;
-   public boolean bomblet;
-   public boolean gravitydown;
-   public boolean bigdelay;
-   //public boolean keepchunkloaded;
-   private boolean bigcheck = false;
-   //public MCH_ConfigPrm delayrangeloaderconfigsetting = delayrangeloader;
+    //public static final int DATAWT_RESERVE1 = 26;
+    //public static final int DATAWT_TARGET_ENTITY = 27;
+    //public static final int DATAWT_MARKER_STAT = 28;
+    //public static final int DATAWT_NAME = 29;
+    //public static final int DATAWT_BULLET_MODEL = 30;
+    //public static final int DATAWT_BOMBLET_FLAG = 31;
+    public Entity shootingEntity;
+    public Entity shootingAircraft;
+    private int countOnUpdate;
+    public int explosionPower;
+    public int explosionPowerInWater;
+    public int nukeYield;
+    public int chemYield = 0;
+    private int power;
+    public double acceleration;
+    public double accelerationFactor;
+    public Entity targetEntity;
+    public int piercing;
+    public int delayFuse;
+    public int sprinkleTime;
+    public byte isBomblet;
+    private MCH_WeaponInfo weaponInfo;
+    private MCH_BulletModel model;
+    public double prevPosX2;
+    public double prevPosY2;
+    public double prevPosZ2;
+    public double prevMotionX;
+    public double prevMotionY;
+    public double prevMotionZ;
+    private Ticket loaderTicket;
+    public boolean bomblet;
+    public boolean gravitydown;
+    public boolean bigdelay;
+    private boolean bigcheck = false;
+    //public MCH_ConfigPrm delayrangeloaderconfigsetting = delayrangeloader;
 
-   //private final MCH_Fuze fuze = new MCH_Fuze(this);;
+    //private final MCH_Fuze fuze = new MCH_Fuze(this);;
 
-   public MCH_EntityBaseBullet(World par1World) {
-      super(par1World);
-      this.countOnUpdate = 0;
-      this.setSize(1.0F, 1.0F);
-      super.prevRotationYaw = super.rotationYaw;
-      super.prevRotationPitch = super.rotationPitch;
-      this.targetEntity = null;
-      this.setPower(1);
-      this.acceleration = 1.0D;
-      this.accelerationFactor = 1.0D;
-      this.piercing = 0;
-      this.explosionPower = 0;
-      this.explosionPowerInWater = 0;
-      this.delayFuse = 0;
-      this.sprinkleTime = 0;
-      this.isBomblet = -1;
-      this.weaponInfo = null;
-      super.ignoreFrustumCheck = true;
-      this.nukeYield = 0;
-      if (par1World.isRemote) {
-         this.model = null;
-      }
-
-   }
-
-   public MCH_EntityBaseBullet(World par1World, double px, double py, double pz, double mx, double my, double mz, float yaw, float pitch, double acceleration) {
-      this(par1World);
-      this.setSize(1.0F, 1.0F);
-      this.setLocationAndAngles(px, py, pz, yaw, pitch);
-      this.setPosition(px, py, pz);
-      super.prevRotationYaw = yaw;
-      super.prevRotationPitch = pitch;
-      super.yOffset = 0.0F;
-      if (acceleration > 3.9D) {
-         acceleration = 3.9D;
-      }
-
-      double d = MathHelper.sqrt_double(mx * mx + my * my + mz * mz);
-      super.motionX = mx * acceleration / d;
-      super.motionY = my * acceleration / d;
-      super.motionZ = mz * acceleration / d;
-      this.prevMotionX = super.motionX;
-      this.prevMotionY = super.motionY;
-      this.prevMotionZ = super.motionZ;
-      this.acceleration = acceleration;
-   }
+    public MCH_EntityBaseBullet(World par1World) {
+        super(par1World);
+        this.countOnUpdate = 0;
+        this.setSize(1.0F, 1.0F);
+        super.prevRotationYaw = super.rotationYaw;
+        super.prevRotationPitch = super.rotationPitch;
+        this.targetEntity = null;
+        this.setPower(1);
+        this.acceleration = 1.0D;
+        this.accelerationFactor = 1.0D;
+        this.piercing = 0;
+        this.explosionPower = 0;
+        this.explosionPowerInWater = 0;
+        this.delayFuse = 0;
+        this.sprinkleTime = 0;
+        this.isBomblet = -1;
+        this.weaponInfo = null;
+        super.ignoreFrustumCheck = true;
+        this.nukeYield = 0;
+        if (par1World.isRemote) {
+            this.model = null;
+        }
 
     }
 
