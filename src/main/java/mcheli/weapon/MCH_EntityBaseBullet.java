@@ -74,7 +74,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
    public boolean bomblet;
    public boolean gravitydown;
    public boolean bigdelay;
-   //public boolean keepchunkloaded;
+   public boolean keepchunkloaded;
+   public boolean impact;
    private boolean bigcheck = false;
    //public MCH_ConfigPrm delayrangeloaderconfigsetting = delayrangeloader;
 
@@ -132,6 +133,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     // Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
 
     public void init(Ticket ticket) {
+        this.keepchunkloaded = true;
+        System.out.println("should keep chunk loaded" + keepchunkloaded);
         if (!worldObj.isRemote) {
             if (ticket != null) {
                 if (loaderTicket == null) {
@@ -147,7 +150,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
 
 
-    List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
+    private List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
 
     // Dynamically load chunks based on bullet's movement
     public void checkAndLoadChunks() {
@@ -162,13 +165,13 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     public void loadNeighboringChunks(int chunkX, int chunkZ) {
         if (!worldObj.isRemote && loaderTicket != null) {
             // Unload previously loaded chunks to avoid memory bloat
-            for (ChunkCoordIntPair chunk : loadedChunks) {
-                //if (this.keepchunkloaded = false) {
+            if (!this.keepchunkloaded && this.impact) { //todo check for this bullet being cleared
+                for (ChunkCoordIntPair chunk : loadedChunks) {
                     ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-                //}
-            }
+                }
 
-            loadedChunks.clear();
+                loadedChunks.clear();
+            }
 
             // Define the neighboring chunks (including diagonals)
             ChunkCoordIntPair[] neighboringChunks = {
@@ -195,11 +198,13 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     // Dynamically load chunks ahead of the bullet based on its current position and motion
     public void loadChunksInBulletPath(int currentChunkX, int currentChunkZ, double motionX, double motionZ) {
         if (!worldObj.isRemote && loaderTicket != null) {
-            for (ChunkCoordIntPair chunk : loadedChunks) {
-                ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-            }
+            if (this.keepchunkloaded = false) {
+                for (ChunkCoordIntPair chunk : loadedChunks) {
+                    ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+                }
 
-            loadedChunks.clear();
+                loadedChunks.clear();
+            }
             // Calculate the next chunk in the direction of the bullet's motion
             int nextChunkX = currentChunkX + (motionX > 0 ? 1 : (motionX < 0 ? -1 : 0));
             int nextChunkZ = currentChunkZ + (motionZ > 0 ? 1 : (motionZ < 0 ? -1 : 0));
@@ -228,16 +233,17 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
     // Clear chunk loader after bullet impact or despawn to free memory
     public void clearChunkLoader() {
-       // if (keepchunkloaded = false) {
+        if (!this.keepchunkloaded && this.impact) { //todone: this impact = true
             if (!worldObj.isRemote && loaderTicket != null) {
-                for (ChunkCoordIntPair chunk : loadedChunks) {
-                   // if (this.keepchunkloaded = false) {
+                if (loadedChunks != null) {
+                    for (ChunkCoordIntPair chunk : new ArrayList<>(loadedChunks)) {
                         ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-                  //  }
+                    }
                     loadedChunks.clear();
                 }
             }
-       // }
+
+        }
     }
 
 
@@ -1028,23 +1034,20 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             }
 
             this.setDead();
+            this.impact = true;
             //this is an impact
             System.out.println("impact? set dead");
-           // keepchunkloaded = false;
+            this.keepchunkloaded = false;
+            System.out.println("should keep chunk loaded" + keepchunkloaded);
 
 
 
-             //if (this.keepchunkloaded = false) {
-                 System.out.println("chunk loader cleared as impact");
-                 for(ChunkCoordIntPair chunk : loadedChunks)
-                 {
-                     //double clearing to ENSURE the chunks are cleared
-                     this.clearChunkLoader();
-                     ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+
+             System.out.println("chunk loader cleared as impact");
+             for(ChunkCoordIntPair chunk : loadedChunks)
+                 if (loadedChunks != null && loaderTicket != null) {
+                     clearChunkLoader(); // Clear all chunks once
                  }
-             //} else {
-             //    keepchunkloaded = true;
-             //}
 
 
          }
