@@ -75,6 +75,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     public boolean gravitydown;
     public boolean bigdelay;
     private boolean bigcheck = false;
+
+    //public int delayrangeloaderint = delayrangeloader;
+
     //public MCH_ConfigPrm delayrangeloaderconfigsetting = delayrangeloader;
 
     //private final MCH_Fuze fuze = new MCH_Fuze(this);;
@@ -280,13 +283,13 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             System.out.println("hey this weapon has no gravity defined, that's probably not a good thing");
         }
 
-        if(this.getInfo().bomblet >= bombletloader.prmInt) {
+        if(this.getInfo().bomblet >= (float)MCH_Config.bombletloader.prmInt) {
             this.bomblet = true;
         } else {
             this.bomblet = false;
         }
 
-        if(this.getInfo().delay < delayrangeloader.prmInt) { //todo implement config setting here
+        if(this.getInfo().delay < (float)MCH_Config.delayrangeloader.prmInt) { //todo implement config setting here
             //< delayrangeloaderconfigsetting
             this.bigdelay = false;
         } else {
@@ -528,7 +531,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     }
 
     public void onUpdate() {
-        checkAndLoadChunks();  // If this method handles any critical chunk loading, it stays here
+        if (!bomblet && gravitydown && bigdelay) {
+            checkAndLoadChunks();  // If this method handles any critical chunk loading, it stays here
+        }
 
         if (super.worldObj.isRemote && this.countOnUpdate == 0) {
             int f3 = this.getTargetEntityID();
