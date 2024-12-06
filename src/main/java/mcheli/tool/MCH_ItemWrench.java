@@ -5,6 +5,8 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.List;
 import java.util.Random;
+
+import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntitySeat;
@@ -83,16 +85,21 @@ public class MCH_ItemWrench extends W_Item {
    }
 
    public boolean hitEntity(ItemStack itemStack, EntityLivingBase entity, EntityLivingBase player) {
-      if(!player.worldObj.isRemote) {
-         if(rand.nextInt(40) == 0) {
-            entity.entityDropItem(new ItemStack(W_Item.getItemByName("iron_ingot"), 1, 0), 0.0F);
-         } else if(rand.nextInt(20) == 0) {
-            entity.entityDropItem(new ItemStack(W_Item.getItemByName("gunpowder"), 1, 0), 0.0F);
+      //todo config option here
+      if (MCH_Config.wrenchdropitem.prmBool) {
+         if (!player.worldObj.isRemote) {
+            if (rand.nextInt(40) == 0) {
+               entity.entityDropItem(new ItemStack(W_Item.getItemByName("iron_ingot"), 1, 0), 0.0F);
+            } else if (rand.nextInt(20) == 0) {
+               entity.entityDropItem(new ItemStack(W_Item.getItemByName("gunpowder"), 1, 0), 0.0F);
+            }
          }
-      }
 
-      itemStack.damageItem(2, player);
-      return true;
+         itemStack.damageItem(2, player);
+         return true;
+      } else {
+         return false;
+      }
    }
 
    public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int count) {
