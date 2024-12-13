@@ -49,7 +49,15 @@ public abstract class MCH_RenderAircraft extends W_Render {
 
 
    public void doRender(Entity entity, double posX, double posY, double posZ, float par8, float tickTime) {
+
+
+
       MCH_EntityAircraft ac = (MCH_EntityAircraft)entity;
+      if(ac.getAcInfo() != null) {
+         ac.getAcInfo().reload();
+         ac.changeType(ac.getAcInfo().name);
+         ac.onAcInfoReloaded();
+      }
       MCH_AircraftInfo info = ac.getAcInfo();
       if(info != null) {
          GL11.glPushMatrix();

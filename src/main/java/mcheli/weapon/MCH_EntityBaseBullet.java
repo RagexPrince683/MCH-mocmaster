@@ -954,9 +954,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         if (!super.worldObj.isRemote) { //if on the server
             if (m.entityHit != null) {
                 //todo maybe initiate another chunk loaded here
-                if (this.bigcheck = true) {
-                    loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
-                    System.out.println("extra chunk loader");
+                if (!bomblet && gravitydown && bigdelay) {
+                    if (this.bigcheck = true) {
+                        loadNeighboringChunks((int) Math.floor(posX / 16D), (int) Math.floor(posZ / 16D));
+                        System.out.println("extra chunk loader");
+                    }
                 }
                 //if (!bomblet && gravitydown) { //new chunk loader
                 //loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
@@ -965,8 +967,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
                 //System.out.println("hit a vehicle");
                 //this is infact not an impact, it is hitting a vehicle
                 //}
+
                 this.onImpactEntity(m.entityHit, damageFactor);
-                this.piercing = 0;
+                //this.piercing = 0;
 
                 m.entityHit.motionX = 0;
                 m.entityHit.motionY = 0;
@@ -1024,11 +1027,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
                 //this is an impact
                 System.out.println("impact? set dead");
                 //todone?: clear chunk loader
-                for(ChunkCoordIntPair chunk : loadedChunks)
-                {
-                    System.out.println("chunk loader cleared as impact");
+                if (!bomblet && gravitydown && bigdelay) {
+                    for (ChunkCoordIntPair chunk : loadedChunks) {
+                        System.out.println("chunk loader cleared as impact");
 
-                    ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+                        ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+                    }
                 }
 
             }
@@ -1044,26 +1048,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
 
     public void onImpactEntity(Entity entity, float damageFactor) {
-        //if (this.piercing > 0) {
-        //piercing decrement based on entities
-        // if (!entity.isDead) {
-        //    MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseBullet.onImpactEntity:Damage=%d:" + entity.getClass(), new Object[]{Integer.valueOf(this.getPower())});
-        //    MCH_Lib.applyEntityHurtResistantTimeConfig(entity);
-        //    DamageSource ds = DamageSource.causeThrownDamage(this, this.shootingEntity);
-        //    if (this.power == 1) {
-        //       ds = new MCH_DamageSource("piercing", this);
-//
-        //       this.power *= this.weaponInfo.damageFactor.getDamageFactor(EntityPlayer.class);
-        //    }
-//
-        //    float damage = MCH_Config.applyDamageVsEntity(entity, ds, (float) this.getPower() * damageFactor);
-        //    damage *= this.getInfo() != null ? this.getInfo().getDamageFactor(entity) : 1.0F;
-        //    entity.attackEntityFrom(ds, damage);
-//
-        //    --this.piercing;
-        // }
-        //} else {
-        if (!entity.isDead) {
+        if (this.piercing > 0) {
             MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseBullet.onImpactEntity:Damage=%d:" + entity.getClass(), new Object[]{Integer.valueOf(this.getPower())});
             MCH_Lib.applyEntityHurtResistantTimeConfig(entity);
             DamageSource ds = DamageSource.causeThrownDamage(this, this.shootingEntity);
@@ -1072,25 +1057,43 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
                 this.power *= this.weaponInfo.damageFactor.getDamageFactor(EntityPlayer.class);
             }
-            //todo: add piercing compat here
-            //rip didn't work
-
-
             MCH_Config var10000 = MCH_MOD.config;
             float damage = MCH_Config.applyDamageVsEntity(entity, ds, (float) this.getPower() * damageFactor);
             damage *= this.getInfo() != null ? this.getInfo().getDamageFactor(entity) : 1.0F;
             entity.attackEntityFrom(ds, damage);
-            if (this instanceof MCH_EntityBullet && entity instanceof EntityVillager && this.shootingEntity != null && this.shootingEntity.ridingEntity instanceof MCH_EntitySeat) {
-                MCH_Achievement.addStat(this.shootingEntity, MCH_Achievement.aintWarHell, 1);
+            --this.piercing;
+        } else {
+            this.piercing = 0;
+
+            if (!entity.isDead) {
+                MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseBullet.onImpactEntity:Damage=%d:" + entity.getClass(), new Object[]{Integer.valueOf(this.getPower())});
+                MCH_Lib.applyEntityHurtResistantTimeConfig(entity);
+                DamageSource ds = DamageSource.causeThrownDamage(this, this.shootingEntity);
+                if (this.power == 1) {
+                    ds = new MCH_DamageSource("bullet", this);
+
+                    this.power *= this.weaponInfo.damageFactor.getDamageFactor(EntityPlayer.class);
+                }
+                //todo: add piercing compat here
+                //rip didn't work
+
+
+                MCH_Config var10000 = MCH_MOD.config;
+                float damage = MCH_Config.applyDamageVsEntity(entity, ds, (float) this.getPower() * damageFactor);
+                damage *= this.getInfo() != null ? this.getInfo().getDamageFactor(entity) : 1.0F;
+                entity.attackEntityFrom(ds, damage);
+                if (this instanceof MCH_EntityBullet && entity instanceof EntityVillager && this.shootingEntity != null && this.shootingEntity.ridingEntity instanceof MCH_EntitySeat) {
+                    MCH_Achievement.addStat(this.shootingEntity, MCH_Achievement.aintWarHell, 1);
+                }
+
+                if (entity.isDead) {
+                    ;
+                }
             }
 
-            if (entity.isDead) {
-                ;
-            }
+            this.notifyHitBullet();
+            //}
         }
-
-        this.notifyHitBullet();
-        //}
     }
 
     public void newFAExplosion(double x, double y, double z, float exp, float expBlock) {

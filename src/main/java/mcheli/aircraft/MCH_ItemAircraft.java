@@ -115,6 +115,11 @@ public abstract class MCH_ItemAircraft extends W_Item {
                   }
                }
 
+               if(ac.getAcInfo() != null) {
+                  ac.getAcInfo().reload();
+                  ac.changeType(ac.getAcInfo().name);
+                  ac.onAcInfoReloaded();
+               }
                this.spawnAircraft(par1ItemStack, world, player, mop.blockX, mop.blockY, mop.blockZ);
             }
 
