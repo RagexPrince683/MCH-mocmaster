@@ -44,11 +44,19 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    public abstract MCH_EntityAircraft createAircraft(World var1, double var2, double var4, double var6, ItemStack var8);
 
+   MCH_EntityAircraft ac;
    public MCH_EntityAircraft onTileClick(ItemStack itemStack, World world, float rotationYaw, int x, int y, int z) {
+
       MCH_EntityAircraft ac = this.createAircraft(world, (double)((float)x + 0.5F), (double)((float)y + 1.0F), (double)((float)z + 0.5F), itemStack);
       if(ac == null) {
          return null;
       } else {
+         //hopefully reloads the 'aircraft' (vehicle)'s textures when placed.
+         if(ac.getAcInfo() != null) {
+            ac.getAcInfo().reload();
+            ac.changeType(ac.getAcInfo().name);
+            ac.onAcInfoReloaded();
+         }
          ac.initRotationYaw((float)(((MathHelper.floor_double((double)(rotationYaw * 4.0F / 360.0F) + 0.5D) & 3) - 1) * 90));
          return !world.getCollidingBoundingBoxes(ac, ac.boundingBox.expand(-0.1D, -0.1D, -0.1D)).isEmpty()?null:ac;
       }

@@ -77,6 +77,7 @@ public class MCH_BaseInfo {
    }
 
    private boolean reload(MCH_BaseInfo info) {
+      System.out.println("reloading items");
       int line = 0;
       MCH_InputFile inFile = new MCH_InputFile();
       Object br = null;

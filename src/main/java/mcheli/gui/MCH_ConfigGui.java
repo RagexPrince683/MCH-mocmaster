@@ -600,6 +600,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
             super.mc.thePlayer.closeScreen();
             break;
          case 401:
+            //reloads the vehicle assets
             MCH_Lib.DbgLog(true, "MCH_BaseInfo.reload all weapon info.", new Object[0]);
             MCH_PacketNotifyInfoReloaded.sendRealodAllWeapon();
             MCH_WeaponInfoManager.reload();
@@ -694,7 +695,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
             this.drawString("< Key Binding >", 170, 10, 16777215);
             if(this.waitKeyButtonId != 0) {
                drawRect(30, 30, super.xSize - 30, super.ySize - 30, -533712848);
-               String var13 = "Please ant key or mouse button.";
+               String var13 = "Press any key or mouse button.";
                var12 = this.getStringWidth(var13);
                this.drawString(var13, (super.xSize - var12) / 2, super.ySize / 2 - 4, 16777215);
             }
