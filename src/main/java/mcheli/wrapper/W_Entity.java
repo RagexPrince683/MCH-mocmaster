@@ -42,10 +42,10 @@ public abstract class W_Entity
 
     protected void entityInit() {
     }
-    public boolean shouldDespawn() {
-        // Prevent despawning by overriding this method
-        return false;
-    }
+   //public boolean shouldDespawn() {
+   //    // Prevent despawning by overriding this method
+   //    return false;
+   //}
 
     public static boolean isEntityFallingBlock(Entity entity) {
         return entity instanceof EntityFallingBlock;
