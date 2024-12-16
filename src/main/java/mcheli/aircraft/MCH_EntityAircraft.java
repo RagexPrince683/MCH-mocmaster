@@ -96,7 +96,6 @@ import static mcheli.hud.MCH_HudItem.player;
 //import static net.minecraft.command.CommandBase.getPlayer;
 
 public abstract class MCH_EntityAircraft extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideAircraft, IEntityAdditionalSpawnData {
-
    private ForgeChunkManager.Ticket chunkTicket;
    private static final int DATAWT_ID_DAMAGE = 19;
    private static final int DATAWT_ID_TYPE = 20;

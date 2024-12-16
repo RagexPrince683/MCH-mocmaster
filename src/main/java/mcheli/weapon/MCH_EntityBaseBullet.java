@@ -1063,7 +1063,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             entity.attackEntityFrom(ds, damage);
             --this.piercing;
         } else {
-            this.piercing = 0;
+            //this.piercing = 0;
 
             if (!entity.isDead) {
                 MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseBullet.onImpactEntity:Damage=%d:" + entity.getClass(), new Object[]{Integer.valueOf(this.getPower())});

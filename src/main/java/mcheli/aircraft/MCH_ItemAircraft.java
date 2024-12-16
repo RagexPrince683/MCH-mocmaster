@@ -115,11 +115,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
                   }
                }
 
-               if(ac.getAcInfo() != null) {
-                  ac.getAcInfo().reload();
-                  ac.changeType(ac.getAcInfo().name);
-                  ac.onAcInfoReloaded();
-               }
+
                this.spawnAircraft(par1ItemStack, world, player, mop.blockX, mop.blockY, mop.blockZ);
             }
 
@@ -129,6 +125,8 @@ public abstract class MCH_ItemAircraft extends W_Item {
    }
 
    public MCH_EntityAircraft spawnAircraft(ItemStack itemStack, World world, EntityPlayer player, int x, int y, int z) {
+
+
       MCH_EntityAircraft ac = this.onTileClick(itemStack, world, player.rotationYaw, x, y, z);
       if(ac != null) {
          if(ac.isUAV()) {
@@ -145,6 +143,10 @@ public abstract class MCH_ItemAircraft extends W_Item {
             if(!world.isRemote) {
                ac.getAcDataFromItem(itemStack);
                world.spawnEntityInWorld(ac);
+               if(ac.getAcInfo() != null) {
+                  ac.getAcInfo().reload();
+                  //ac.onAcInfoReloaded();
+               }
                MCH_Achievement.addStat(player, MCH_Achievement.welcome, 1);
             }
 

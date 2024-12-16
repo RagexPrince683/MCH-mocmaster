@@ -31,6 +31,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -42,6 +43,8 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 
 public class MCH_EventHook extends W_EventHook {
+
+   int acloaded = 0;
 
    public void commandEvent(CommandEvent event) {
       MCH_Command.onCommandEvent(event);
@@ -143,10 +146,26 @@ public class MCH_EventHook extends W_EventHook {
 
 
    public void entitySpawn(EntityJoinWorldEvent event) {
+
+
+
       if(W_Lib.isEntityLivingBase(event.entity) && !W_EntityPlayer.isPlayer(event.entity)) {
          MCH_Config var10002 = MCH_MOD.config;
          event.entity.renderDistanceWeight *= MCH_Config.MobRenderDistanceWeight.prmDouble;
       } else if(event.entity instanceof MCH_EntityAircraft) {
+         //reload aircraft render setting here
+         //if (event.world.isRemote) {
+//
+         //   if (event.entity instanceof MCH_EntityAircraft && acloaded == 0) {
+         //      MCH_EntityAircraft ac = (MCH_EntityAircraft) event.entity;
+//
+         //      // Safely call getAcInfo() on the instance
+         //      if (ac.getAcInfo() != null) {
+         //         ac.getAcInfo().reload();
+         //         acloaded++;
+         //      }
+         //   }
+         //}
          MCH_EntityAircraft b = (MCH_EntityAircraft)event.entity;
          if(!b.worldObj.isRemote && !b.isCreatedSeats()) {
             b.createSeats(UUID.randomUUID().toString());
@@ -278,7 +297,7 @@ public class MCH_EventHook extends W_EventHook {
    public void entityCanUpdate(CanUpdate event) {
       if(event.entity instanceof MCH_EntityBaseBullet) {
          MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet)event.entity;
-         //todo: maybe meddle with this to see if it can maybe preserve the bullet if unloaded
+         //todo: maybe meddle with this to see if it can maybe preserve the bullet if unloaded and having a gravity going down
          bullet.setDead();
       }
 
