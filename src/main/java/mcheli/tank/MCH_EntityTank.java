@@ -372,7 +372,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          this.setRotPitch(this.getRotPitch() + (this.WheelMng.targetPitch - this.getRotPitch()) * partialTicks);
          this.setRotRoll(this.getRotRoll() + (this.WheelMng.targetRoll - this.getRotRoll()) * partialTicks);
          boolean isFly = MCH_Lib.getBlockIdY(this, 3, -3) == 0;
-
+         //System.out.println("isfly" + isFly);
 
          //logic for like rotation
          if(!isFly || this.getAcInfo().isFloat && this.getWaterDepth() > 0.0D) {

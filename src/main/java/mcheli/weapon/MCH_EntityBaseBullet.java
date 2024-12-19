@@ -982,6 +982,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             double dx = 0.0D;
             double dy = 0.0D;
             double dz = 0.0D;
+            //explosive type logic
             if (this.piercing > 0) {
                 --this.piercing;
                 if (p > 0.0F) {
@@ -999,6 +1000,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
                     }
                 }
             } else {
+                //regular type logic???
+                //added for block updates
+                int x = (int) m.hitVec.xCoord;
+                int y = (int) m.hitVec.yCoord;
+                int z = (int) m.hitVec.zCoord;
+                Block block = this.worldObj.getBlock(x, y, z);
                 if (i == 0.0F) {
                     if (this.getInfo().isFAE) {
                         this.newFAExplosion(super.posX, super.posY, super.posZ, p, (float) this.getInfo().explosionBlock);
@@ -1023,15 +1030,17 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
                     this.newExplosion((double) m.blockX, (double) m.blockY, (double) m.blockZ, i, i, true);
                 }
 
-                this.setDead();
-                //this is an impact
-                System.out.println("impact? set dead");
-                //todone?: clear chunk loader
-                if (!bomblet && gravitydown && bigdelay) {
-                    for (ChunkCoordIntPair chunk : loadedChunks) {
-                        System.out.println("chunk loader cleared as impact");
+                if (this.piercing <= 0) {
+                    this.setDead();
+                    //this is an impact
+                    System.out.println("impact? set dead");
+                    //todone?: clear chunk loader
+                    if (!bomblet && gravitydown && bigdelay) {
+                        for (ChunkCoordIntPair chunk : loadedChunks) {
+                            System.out.println("chunk loader cleared as impact");
 
-                        ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+                            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+                        }
                     }
                 }
 
@@ -1040,6 +1049,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             p = (float) this.getInfo().power;
 
             for (int var11 = 0; (float) var11 < p / 3.0F; ++var11) {
+                //spawns a particle tile for shells with piercing but dont do explosive damage
                 MCH_ParticlesUtil.spawnParticleTileCrack(super.worldObj, m.blockX, m.blockY, m.blockZ, m.hitVec.xCoord + ((double) super.rand.nextFloat() - 0.5D) * (double) p / 10.0D, m.hitVec.yCoord + 0.1D, m.hitVec.zCoord + ((double) super.rand.nextFloat() - 0.5D) * (double) p / 10.0D, -super.motionX * (double) p / 2.0D, (double) (p / 2.0F), -super.motionZ * (double) p / 2.0D);
             }
         }
@@ -1048,7 +1058,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
 
     public void onImpactEntity(Entity entity, float damageFactor) {
-        if (this.piercing > 0) {
+        if (this.piercing > 0 || !entity.isDead) { //entity.isDead check to not decrease piercing for dead targets
             MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseBullet.onImpactEntity:Damage=%d:" + entity.getClass(), new Object[]{Integer.valueOf(this.getPower())});
             MCH_Lib.applyEntityHurtResistantTimeConfig(entity);
             DamageSource ds = DamageSource.causeThrownDamage(this, this.shootingEntity);
@@ -1087,6 +1097,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
                 }
 
                 if (entity.isDead) {
+                    System.out.println("isdead");
                     ;
                 }
             }
@@ -1140,6 +1151,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
         //("read entity from nbt, would set dead but commented out");
         this.setDead();
+        System.out.println("setting dead due to readentityfromnbt");
     }
 
     public boolean canBeCollidedWith() {
