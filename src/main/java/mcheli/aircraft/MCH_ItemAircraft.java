@@ -52,11 +52,12 @@ public abstract class MCH_ItemAircraft extends W_Item {
          return null;
       } else {
          //hopefully reloads the 'aircraft' (vehicle)'s textures when placed.
-         if(ac.getAcInfo() != null) {
-            ac.getAcInfo().reload();
-            ac.changeType(ac.getAcInfo().name);
-            ac.onAcInfoReloaded();
-         }
+         //if(ac.getAcInfo() != null) {
+         //   ac.getAcInfo().reload();
+         //   ac.changeType(ac.getAcInfo().name);
+         //   ac.onAcInfoReloaded();
+         //}
+         //causes a crash when the fucking model is not loaded
          ac.initRotationYaw((float)(((MathHelper.floor_double((double)(rotationYaw * 4.0F / 360.0F) + 0.5D) & 3) - 1) * 90));
          return !world.getCollidingBoundingBoxes(ac, ac.boundingBox.expand(-0.1D, -0.1D, -0.1D)).isEmpty()?null:ac;
       }

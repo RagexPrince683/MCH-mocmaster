@@ -60,7 +60,8 @@ public class MultiThreadModelManager {
                 .runAsync(MCH_ClientProxy::registerModels_Throwable)
                 .thenRun(() -> completion("throwable"));
 
-        executor.shutdown();
+        //should fix the issue of models not loading sometimes
+        executor.shutdownNow();
 
     }
     private static void loadDefaultBulletModels(MCH_ClientProxy proxy) {
