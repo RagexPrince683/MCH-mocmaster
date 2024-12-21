@@ -40,6 +40,8 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    public float addkeyRotValue;
    public float maxfueldiv = this.getMaxFuel() / 800;
    public int timer = 0;
+   private static final double LIFT_CONSTANT = 0.5;
+   private static final double DRAG_CONSTANT = 0.02;
 
 
    public MCP_EntityPlane(World world) {
@@ -151,7 +153,23 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       }
    }
 
+   public double getLiftFactor() {
+      double airspeed = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ); // Calculate forward speed
+      double angleOfAttack = Math.toDegrees(Math.atan2(this.motionY, airspeed)) - this.aircraftPitch; // Simplified AoA
+      double liftCoefficient = LIFT_CONSTANT * Math.max(0, Math.cos(Math.toRadians(angleOfAttack))); // Adjust for max lift
+      return liftCoefficient * airspeed * airspeed; // Lift = Cl * v^2
+   }
+
+   public double getDragFactor() {
+      double airspeed = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ); // Calculate forward speed
+      double dragCoefficient = DRAG_CONSTANT; // Can vary based on plane type and configuration
+      return dragCoefficient * airspeed * airspeed; // Drag = Cd * v^2
+   }
+
    public void onUpdateAircraft() {
+
+
+
       if(this.planeInfo == null) {
          this.changeType(this.getTypeName());
          super.prevPosX = super.posX;
@@ -275,6 +293,8 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             double v2 = this.motionZ - this.liftfactor;
             this.currentSpeed = this.currentSpeed - this.stallfactor/4; //was 8
             double identify = this.motionY - this.stallfactor;
+
+
             if (v1 < 0) {
                // Apply gradual deceleration
                v1 += 0.1; // Adjust the value as needed
