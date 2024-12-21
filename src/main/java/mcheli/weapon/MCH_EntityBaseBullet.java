@@ -32,9 +32,7 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static mcheli.MCH_Config.delayrangeloader;
 import static mcheli.MCH_Config.bombletloader;
@@ -948,134 +946,129 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     }
 
 
-    public void onImpact(MovingObjectPosition m, float damageFactor) {
-        //TODO: fix not fair to xradar perms/block protection
-        float p;
-        if (!super.worldObj.isRemote) { //if on the server
-            if (m.entityHit != null) {
-                //todo maybe initiate another chunk loaded here
-                if (!bomblet && gravitydown && bigdelay) {
-                    if (this.bigcheck = true) {
-                        loadNeighboringChunks((int) Math.floor(posX / 16D), (int) Math.floor(posZ / 16D));
-                        System.out.println("extra chunk loader");
-                    }
+    public void onImpact(MovingObjectPosition hit, float damageFactor) {
+        // TODO: Fix XRadar permissions/block protection issues
+
+        if (!worldObj.isRemote) { // Server-side logic
+            if (hit.entityHit != null) {
+                // Handle additional chunk loading for certain conditions
+                if (!bomblet && gravitydown && bigdelay && bigcheck) {
+                    loadNeighboringChunks((int) Math.floor(posX / 16.0), (int) Math.floor(posZ / 16.0));
+                    System.out.println("Extra chunk loader activated.");
                 }
-                //if (!bomblet && gravitydown) { //new chunk loader
-                //loadNeighboringChunks((int)Math.floor(posX / 16D), (int)Math.floor(posZ / 16D));
-                //System.out.println("loadneighboring chunks server");
-                //this.setDead();
-                //System.out.println("hit a vehicle");
-                //this is infact not an impact, it is hitting a vehicle
-                //}
 
-                this.onImpactEntity(m.entityHit, damageFactor);
-                //this.piercing = 0;
-
-                m.entityHit.motionX = 0;
-                m.entityHit.motionY = 0;
-                m.entityHit.motionZ = 0;
-
+                // Process entity hit
+                onImpactEntity(hit.entityHit, damageFactor);
+                hit.entityHit.motionX = 0;
+                hit.entityHit.motionY = 0;
+                hit.entityHit.motionZ = 0;
             }
 
-            p = (float) this.explosionPower * damageFactor;
-            float i = (float) this.explosionPowerInWater * damageFactor;
-            double dx = 0.0D;
-            double dy = 0.0D;
-            double dz = 0.0D;
-            //explosive type logic
-            if (this.piercing > 0) {
-                --this.piercing;
-                if (p > 0.0F) {
-                    //todo: oh haha no
-                    int x = (int) m.hitVec.xCoord;
-                    int y = (int) m.hitVec.yCoord;
-                    int z = (int) m.hitVec.zCoord;
-                    Block block = this.worldObj.getBlock(x, y, z);
-                    if (block == Blocks.bedrock) { //or xradar flag
-                        //this.worldObj.setBlockToAir((int) m.hitVec.xCoord, (int) m.hitVec.yCoord, (int) m.hitVec.zCoord);
-                        this.newExplosion(m.hitVec.xCoord + dx, m.hitVec.yCoord + dy, m.hitVec.zCoord + dz, 1.0F, 1.0F, false);
-                    } else {
-                        this.worldObj.setBlockToAir((int) m.hitVec.xCoord, (int) m.hitVec.yCoord, (int) m.hitVec.zCoord);
-                        this.newExplosion(m.hitVec.xCoord + dx, m.hitVec.yCoord + dy, m.hitVec.zCoord + dz, 1.0F, 1.0F, false);
-                    }
-                }
-            } else {
-                //regular type logic???
-                //added for block updates
-                int x = (int) m.hitVec.xCoord;
-                int y = (int) m.hitVec.yCoord;
-                int z = (int) m.hitVec.zCoord;
-                Block block = this.worldObj.getBlock(x, y, z);
-                if (i == 0.0F) {
-                    if (this.getInfo().isFAE) {
-                        this.newFAExplosion(super.posX, super.posY, super.posZ, p, (float) this.getInfo().explosionBlock);
-                    } else if (p > 0.0F) {
-                        this.newExplosion(m.hitVec.xCoord + dx, m.hitVec.yCoord + dy, m.hitVec.zCoord + dz, p, (float) this.getInfo().explosionBlock, false);
-                    } else if (p < 0.0F) {
-                        this.playExplosionSound();
-                    }
-                } else if (m.entityHit != null) {
-                    if (this.isInWater()) {
-                        this.newExplosion(m.hitVec.xCoord + dx, m.hitVec.yCoord + dy, m.hitVec.zCoord + dz, i, i, true);
-                    } else {
-                        this.newExplosion(m.hitVec.xCoord + dx, m.hitVec.yCoord + dy, m.hitVec.zCoord + dz, p, (float) this.getInfo().explosionBlock, false);
-                    }
-                } else if (!this.isInWater() && !MCH_Lib.isBlockInWater(super.worldObj, m.blockX, m.blockY, m.blockZ)) {
-                    if (p > 0.0F) {
-                        this.newExplosion(m.hitVec.xCoord + dx, m.hitVec.yCoord + dy, m.hitVec.zCoord + dz, p, (float) this.getInfo().explosionBlock, false);
-                    } else if (p < 0.0F) {
-                        this.playExplosionSound();
-                    }
-                } else {
-                    this.newExplosion((double) m.blockX, (double) m.blockY, (double) m.blockZ, i, i, true);
-                }
+            float explosionPower = this.explosionPower * damageFactor;
+            float waterExplosionPower = this.explosionPowerInWater * damageFactor;
 
-                if (this.piercing <= 0) {
-                    this.setDead();
-                    //this is an impact
-                    System.out.println("impact? set dead");
-                    //todone?: clear chunk loader
+            if (piercing > 0) {
+                handlePiercingHit(hit, explosionPower);
+            } else {
+                handleRegularHit(hit, explosionPower, waterExplosionPower);
+
+                if (piercing <= 0) {
+                    setDead();
+                    System.out.println("Impact detected, entity set to dead.");
+
+                    // Clear chunk loaders if required
                     if (!bomblet && gravitydown && bigdelay) {
                         for (ChunkCoordIntPair chunk : loadedChunks) {
-                            System.out.println("chunk loader cleared as impact");
-
+                            System.out.println("Clearing chunk loader due to impact.");
                             ForgeChunkManager.unforceChunk(loaderTicket, chunk);
                         }
                     }
                 }
-
             }
-        } else if (this.getInfo() != null && (this.getInfo().explosion == 0 || this.getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(m)) {
-            p = (float) this.getInfo().power;
-
-            for (int var11 = 0; (float) var11 < p / 3.0F; ++var11) {
-                //spawns a particle tile for shells with piercing but dont do explosive damage
-                MCH_ParticlesUtil.spawnParticleTileCrack(super.worldObj, m.blockX, m.blockY, m.blockZ, m.hitVec.xCoord + ((double) super.rand.nextFloat() - 0.5D) * (double) p / 10.0D, m.hitVec.yCoord + 0.1D, m.hitVec.zCoord + ((double) super.rand.nextFloat() - 0.5D) * (double) p / 10.0D, -super.motionX * (double) p / 2.0D, (double) (p / 2.0F), -super.motionZ * (double) p / 2.0D);
-            }
+        } else if (getInfo() != null && (getInfo().explosion == 0 || getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(hit)) {
+            handleTileHit(hit);
         }
-
     }
 
+    private void handlePiercingHit(MovingObjectPosition hit, float explosionPower) {
+        piercing--;
+
+        if (explosionPower > 0.0F) {
+            int x = (int) hit.hitVec.xCoord;
+            int y = (int) hit.hitVec.yCoord;
+            int z = (int) hit.hitVec.zCoord;
+            Block block = worldObj.getBlock(x, y, z);
+
+            if (block == Blocks.bedrock) {
+                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
+            } else {
+                worldObj.setBlockToAir(x, y, z);
+                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
+            }
+        } else {
+            int x = (int) hit.hitVec.xCoord;
+            int y = (int) hit.hitVec.yCoord;
+            int z = (int) hit.hitVec.zCoord;
+            Block block = worldObj.getBlock(x, y, z);
+        }
+    }
+
+    private void handleRegularHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower) {
+        int x = (int) hit.hitVec.xCoord;
+        int y = (int) hit.hitVec.yCoord;
+        int z = (int) hit.hitVec.zCoord;
+        Block block = worldObj.getBlock(x, y, z);
+
+        if (waterExplosionPower == 0.0F) {
+            if (getInfo().isFAE) {
+                newFAExplosion(posX, posY, posZ, explosionPower, getInfo().explosionBlock);
+            } else if (explosionPower > 0.0F) {
+                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, explosionPower, getInfo().explosionBlock, false);
+            } else if (explosionPower < 0.0F) {
+                playExplosionSound();
+            }
+        } else if (hit.entityHit != null) {
+            if (isInWater()) {
+                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, waterExplosionPower, waterExplosionPower, true);
+            } else {
+                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, explosionPower, getInfo().explosionBlock, false);
+            }
+        } else if (!isInWater() && !MCH_Lib.isBlockInWater(worldObj, hit.blockX, hit.blockY, hit.blockZ)) {
+            if (explosionPower > 0.0F) {
+                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, explosionPower, getInfo().explosionBlock, false);
+            } else if (explosionPower < 0.0F) {
+                playExplosionSound();
+            }
+        } else {
+            newExplosion(hit.blockX, hit.blockY, hit.blockZ, waterExplosionPower, waterExplosionPower, true);
+        }
+    }
+
+    private void handleTileHit(MovingObjectPosition hit) {
+        float power = getInfo().power;
+
+        for (int i = 0; i < power / 3.0F; i++) {
+            MCH_ParticlesUtil.spawnParticleTileCrack(
+                    worldObj,
+                    hit.blockX,
+                    hit.blockY,
+                    hit.blockZ,
+                    hit.hitVec.xCoord + (rand.nextFloat() - 0.5) * power / 10.0,
+                    hit.hitVec.yCoord + 0.1,
+                    hit.hitVec.zCoord + (rand.nextFloat() - 0.5) * power / 10.0,
+                    -motionX * power / 2.0,
+                    power / 2.0F,
+                    -motionZ * power / 2.0
+            );
+        }
+    }
+
+    private final Set<Entity> hitEntities = new HashSet<>();
 
     public void onImpactEntity(Entity entity, float damageFactor) {
-        if (this.piercing > 0 || !entity.isDead) { //entity.isDead check to not decrease piercing for dead targets
-            MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseBullet.onImpactEntity:Damage=%d:" + entity.getClass(), new Object[]{Integer.valueOf(this.getPower())});
-            MCH_Lib.applyEntityHurtResistantTimeConfig(entity);
-            DamageSource ds = DamageSource.causeThrownDamage(this, this.shootingEntity);
-            if (this.power == 1) {
-                ds = new MCH_DamageSource("bullet", this);
-
-                this.power *= this.weaponInfo.damageFactor.getDamageFactor(EntityPlayer.class);
-            }
-            MCH_Config var10000 = MCH_MOD.config;
-            float damage = MCH_Config.applyDamageVsEntity(entity, ds, (float) this.getPower() * damageFactor);
-            damage *= this.getInfo() != null ? this.getInfo().getDamageFactor(entity) : 1.0F;
-            entity.attackEntityFrom(ds, damage);
-            --this.piercing;
-        } else {
-            //this.piercing = 0;
-
-            if (!entity.isDead) {
+        if (!hitEntities.contains(entity)) {
+            hitEntities.add(entity);
+            if (this.piercing > 0 || !entity.isDead) { //entity.isDead check to not decrease piercing for dead targets
                 MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseBullet.onImpactEntity:Damage=%d:" + entity.getClass(), new Object[]{Integer.valueOf(this.getPower())});
                 MCH_Lib.applyEntityHurtResistantTimeConfig(entity);
                 DamageSource ds = DamageSource.causeThrownDamage(this, this.shootingEntity);
@@ -1084,26 +1077,44 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
                     this.power *= this.weaponInfo.damageFactor.getDamageFactor(EntityPlayer.class);
                 }
-                //todo: add piercing compat here
-                //rip didn't work
-
-
                 MCH_Config var10000 = MCH_MOD.config;
                 float damage = MCH_Config.applyDamageVsEntity(entity, ds, (float) this.getPower() * damageFactor);
                 damage *= this.getInfo() != null ? this.getInfo().getDamageFactor(entity) : 1.0F;
                 entity.attackEntityFrom(ds, damage);
-                if (this instanceof MCH_EntityBullet && entity instanceof EntityVillager && this.shootingEntity != null && this.shootingEntity.ridingEntity instanceof MCH_EntitySeat) {
-                    MCH_Achievement.addStat(this.shootingEntity, MCH_Achievement.aintWarHell, 1);
-                }
+                --this.piercing;
+            } else {
+                //this.piercing = 0;
 
-                if (entity.isDead) {
-                    System.out.println("isdead");
-                    ;
-                }
+                //if (!entity.isDead) {
+                    MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseBullet.onImpactEntity:Damage=%d:" + entity.getClass(), new Object[]{Integer.valueOf(this.getPower())});
+                    MCH_Lib.applyEntityHurtResistantTimeConfig(entity);
+                    DamageSource ds = DamageSource.causeThrownDamage(this, this.shootingEntity);
+                    if (this.power == 1) {
+                        ds = new MCH_DamageSource("bullet", this);
+
+                        this.power *= this.weaponInfo.damageFactor.getDamageFactor(EntityPlayer.class);
+                    }
+                    //todo: add piercing compat here
+                    //rip didn't work
+
+
+                    MCH_Config var10000 = MCH_MOD.config;
+                    float damage = MCH_Config.applyDamageVsEntity(entity, ds, (float) this.getPower() * damageFactor);
+                    damage *= this.getInfo() != null ? this.getInfo().getDamageFactor(entity) : 1.0F;
+                    entity.attackEntityFrom(ds, damage);
+                    if (this instanceof MCH_EntityBullet && entity instanceof EntityVillager && this.shootingEntity != null && this.shootingEntity.ridingEntity instanceof MCH_EntitySeat) {
+                        MCH_Achievement.addStat(this.shootingEntity, MCH_Achievement.aintWarHell, 1);
+                    }
+
+                    if (entity.isDead) {
+                        System.out.println("isdead");
+                        ;
+                    }
+                //}
+
+                this.notifyHitBullet();
+                //}
             }
-
-            this.notifyHitBullet();
-            //}
         }
     }
 
