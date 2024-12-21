@@ -42,6 +42,10 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    public int timer = 0;
    private static final double LIFT_CONSTANT = 0.5;
    private static final double DRAG_CONSTANT = 0.02;
+   private static final double GRAVITY = 0.08;
+   private static final double CRITICAL_AOA = 15.0; // Stall threshold
+   private static final double MIN_AIRSPEED_FOR_LIFT = 0.5;
+   private static final double CRASH_THRESHOLD = 2.0;
 
 
    public MCP_EntityPlane(World world) {
@@ -166,180 +170,129 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       return dragCoefficient * airspeed * airspeed; // Drag = Cd * v^2
    }
 
+   private void handleStall() {
+      this.motionY -= 0.1; // Rapid descent
+      this.motionX *= 0.9; // Reduce forward motion
+      this.motionZ *= 0.9;
+   }
+
+   private void handleLandingPhysics() {
+      this.motionX *= 0.7; // Slow down on ground
+      this.motionZ *= 0.7;
+
+      if (Math.abs(this.motionY) > CRASH_THRESHOLD) {
+         this.setDead(); // Trigger crash
+      }
+   }
+
+
+
    public void onUpdateAircraft() {
-
-
-
-      if(this.planeInfo == null) {
+      if (this.planeInfo == null) {
          this.changeType(this.getTypeName());
          super.prevPosX = super.posX;
          super.prevPosY = super.posY;
          super.prevPosZ = super.posZ;
+         return;
+      }
+
+      if (!super.isRequestedSyncStatus) {
+         super.isRequestedSyncStatus = true;
+         if (super.worldObj.isRemote) {
+            MCH_PacketStatusRequest.requestStatus(this);
+         }
+      }
+
+      if (super.lastRiddenByEntity == null && this.getRiddenByEntity() != null) {
+         this.initCurrentWeapon(this.getRiddenByEntity());
+      }
+
+      this.updateWeapons();
+      this.onUpdate_Seats();
+      this.onUpdate_Control();
+
+      // Rotor rotation logic
+      this.prevRotationRotor = this.rotationRotor;
+      this.rotationRotor += this.getCurrentThrottle() * this.getAcInfo().rotorSpeed;
+      if (this.rotationRotor > 360.0F) {
+         this.rotationRotor -= 360.0F;
+         this.prevRotationRotor -= 360.0F;
+      }
+
+      // Stall and lift physics
+
+
+      // Update motion with aerodynamic forces
+      if (!super.onGround) {
+         // Apply lift and drag forces only in the air
+         double airspeed = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+         double lift = this.getLiftFactor();
+         double drag = this.getDragFactor();
+         double gravity = 0.08;
+
+         this.motionY += lift - gravity;
+
+         // Prevent excessive downward velocity
+         if (this.motionY < -2.0) {
+            this.motionY = -2.0; // Clamp downward speed
+         }
+
+         // Apply drag to horizontal motion
+         this.motionX -= drag * Math.signum(this.motionX);
+         this.motionZ -= drag * Math.signum(this.motionZ);
       } else {
-         if(!super.isRequestedSyncStatus) {
-            super.isRequestedSyncStatus = true;
-            if(super.worldObj.isRemote) {
-               MCH_PacketStatusRequest.requestStatus(this);
-            }
+         // Behavior when touching the ground
+         if (this.motionY < 0) {
+            this.motionY = 0; // Stop downward motion
          }
 
-         //prevRotationYaw
-//todo possible deletion
-         if (this.prevRotationYaw > this.aircraftYaw || this.prevRotationYaw < this.aircraftYaw) {//if(this.aircraftYaw.isupdated)
-            if (this.getThrottle() > 0.2) {
-               double difference = this.aircraftYaw - this.prevRotationYaw;
-               this.currentSpeed = this.currentSpeed - difference;
-               this.setThrottle(this.getThrottle() - 0.06);
-            }
+         // Apply ground friction
+         this.motionX *= 0.7;
+         this.motionZ *= 0.7;
+
+         // Simulate bounce or resistance when landing
+         if (Math.abs(this.motionY) > 1.0) {
+            this.motionY *= -0.2; // Bounce slightly
          }
-         //end
-         if(super.lastRiddenByEntity == null && this.getRiddenByEntity() != null) {
-            this.initCurrentWeapon(this.getRiddenByEntity());
-         }
+      }
 
-         this.updateWeapons();
-         this.onUpdate_Seats();
-         this.onUpdate_Control();
-         this.prevRotationRotor = this.rotationRotor;
-         this.rotationRotor = (float)((double)this.rotationRotor + this.getCurrentThrottle() * (double)this.getAcInfo().rotorSpeed);
-         if(this.rotationRotor > 360.0F) {
-            this.rotationRotor -= 360.0F;
-            this.prevRotationRotor -= 360.0F;
-         }
+      //this.motionX += -drag * Math.signum(this.motionX); // Drag slows motion
+      //this.motionZ += -drag * Math.signum(this.motionZ);
 
-         if(this.rotationRotor < 0.0F) {
-            this.rotationRotor += 360.0F;
-            this.prevRotationRotor += 360.0F;
-         }
+      // Stall detection (AoA or low speed)
+      //double angleOfAttack = Math.toDegrees(Math.atan2(this.motionY, airspeed)) - this.aircraftPitch;
+      //if (angleOfAttack > CRITICAL_AOA || airspeed < MIN_AIRSPEED_FOR_LIFT) {
+      //   this.handleStall();
+      //}
 
-         //todo: use super.onGround to better check crash physics
-         if(super.onGround && this.getVtolMode() == 0 && this.planeInfo.isDefaultVtol) {
-            this.swithVtolMode(true);
-         }
+      // Dive acceleration (when nose is down)
+      if (this.aircraftPitch >= 80) {
+         this.motionY += 0.05 * (this.aircraftPitch / 100); // Increase acceleration as pitch steepens
+      }
 
-         if(this.aircraftPitch <= -25 && this.isEntityAlive() && this.isAirBorne) { //if the aircraft is 25 degrees up
-            //maybe add more checks here to ensure this is a plane although idk if this is causing the dancing vehicles bug
+      // Adjust motionX and motionZ for smooth descent
+      if (this.getThrottle() <= 0.90 && this.isAirBorne) {
+         this.motionY -= 0.005; // Gradual descent
+      }
 
-           // double throttlereal = this.getThrottle(); //decrease throttle slowly over time if the aircraft is pitched upwards
-           // throttlereal -= 0.1;
-           // this.setThrottle(throttlereal);
-           // addCurrentThrottle(-throttlereal);
-         }
+      // Landing and ground interaction
+      if (super.onGround) {
+         this.handleLandingPhysics();
+      }
 
-         if (this.aircraftPitch <= 3 && this.isEntityAlive() && this.isAirBorne) {//and 3 degrees down is greater
-            this.motionY = (this.motionY*0.61)+this.aircraftPitch; //go up
-            this.aircraftY = this.aircraftY + (this.aircraftY*1.2);
-            this.currentSpeed *= (this.currentSpeed*2)+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY;
-         }
+      // Update position and visuals
+      super.prevPosX = super.posX;
+      super.prevPosY = super.posY;
+      super.prevPosZ = super.posZ;
 
-         //if this.aircraftPitch <= -15
+      if (!this.isDestroyed() && this.isHovering() && Math.abs(this.getRotPitch()) < 70.0F) {
+         this.setRotPitch(this.getRotPitch() * 0.95F, "isHovering()");
+      }
 
-         if(this.getThrottle() <= 0.90 && this.isAirBorne) { //should apply a slow descent
-            this.aircraftY = this.aircraftY - (this.aircraftY*(0.2*this.getThrottle()));
-         }
-
-
-
-         //TODO: if (this.motionY >= 2.0 && this.landing) { apply damage
-         //todo: add the check for flying hurty was put in wrong place
-         //this.getAlt();
-         if(this.motionY <= -2.0) { // I cannot detect if the aircraft hit or touched the ground
-
-         }
-
-         if(this.aircraftPitch >= 1.2 && this.isEntityAlive() && this.isAirBorne) { //going down save this.motionY for helicopters
-
-
-            this.currentSpeed *= (this.currentSpeed*6)+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY; //speed up
-
-
-
-               //added a timer because aircraft fell too fast, this will later be declared in the aircraft so for heavier aircraft the timer is faster to activate
-
-
-
-
-               //todo: debug and ensure this works as intended
-
-         }
-
-         if (this.aircraftPitch >= 80 && this.isEntityAlive() && this.isAirBorne) { // going down again
-            timer++;
-
-            // Use a gradual acceleration
-            double accelerationFactor = 0.05; // Adjust this value to control the rate of acceleration
-            double pitchFactor = this.aircraftPitch / 100; // Adjust this value to control how pitch affects the descent
-
-            // Apply the gradual acceleration
-            this.motionY = (this.motionY * 0.95) + (pitchFactor * accelerationFactor);
-            this.aircraftY = this.aircraftY * 0.95;
-
-            //System.out.println(timer);
-            if (timer > 1200) {
-               // Increase the acceleration factor for prolonged dive
-               accelerationFactor = 0.02; // Adjust this value to control the prolonged acceleration rate
-               this.motionY = (this.motionY * 0.89) + (this.aircraftPitch * accelerationFactor);
-               this.aircraftY = this.aircraftY * 0.89;
-
-               if (this.aircraftPitch <= 1.0) {
-                  //System.out.println(timer);
-                  timer = 0;
-               }
-            }
-         }
-
-         if(this.motionY >= this.stallfactor) { //stall factor is 80 for now
-            double v1 = this.motionX - this.liftfactor; //how about stallfactor divided by 2 instead of liftfactor here? //it works ok
-            double v2 = this.motionZ - this.liftfactor;
-            this.currentSpeed = this.currentSpeed - this.stallfactor/4; //was 8
-            double identify = this.motionY - this.stallfactor;
-
-
-            if (v1 < 0) {
-               // Apply gradual deceleration
-               v1 += 0.1; // Adjust the value as needed
-               if (v1 > 0) {
-                  v1 = 0; // Ensure it doesn't go past 0
-               }
-            }
-            if (v2 < 0) {
-               // Apply gradual deceleration
-               v2 += 0.1; // Adjust the value as needed
-               if (v2 > 0) {
-                  v2 = 0; // Ensure it doesn't go past 0
-               }
-            }
-            //this.stallfactor;
-            this.motionX = v1;
-            this.motionZ = v2;
-            //sets motionY to be slowed
-            this.motionY = identify;
-         }
-
-         super.prevPosX = super.posX;
-         super.prevPosY = super.posY;
-         super.prevPosZ = super.posZ;
-         if(!this.isDestroyed() && this.isHovering() && MathHelper.abs(this.getRotPitch()) < 70.0F) {
-            this.setRotPitch(this.getRotPitch() * 0.95F, "isHovering()");
-         }
-
-         if(this.isDestroyed() && this.getCurrentThrottle() > 0.0D) {
-            if(MCH_Lib.getBlockIdY(this, 3, -2) > 0) {
-               this.setCurrentThrottle(this.getCurrentThrottle() * 0.8D);
-            }
-
-            if(this.isExploded()) {
-               this.setCurrentThrottle(this.getCurrentThrottle() * 0.98D);
-            }
-         }
-
-         this.updateCameraViewers();
-         if(super.worldObj.isRemote) {
-            this.onUpdate_Client();
-         } else {
-            this.onUpdate_Server();
-         }
-
+      if (super.worldObj.isRemote) {
+         this.onUpdate_Client();
+      } else {
+         this.onUpdate_Server();
       }
    }
 
