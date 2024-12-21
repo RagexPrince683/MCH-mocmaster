@@ -38,9 +38,8 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    public float rotationRotor;
    public float prevRotationRotor;
    public float addkeyRotValue;
-   public float weight = this.getMaxFuel() / 800;
-   //public int timer = 0;
-   public float maxDiveSpeed;
+   public float maxfueldiv = this.getMaxFuel() / 800;
+   public int timer = 0;
 
 
    public MCP_EntityPlane(World world) {
@@ -56,7 +55,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       this.soundVolume = 0.0F;
       this.liftfactor = 0.08F;
       this.stallfactor = 0.80F;
-      this.maxDiveSpeed = 300F;
       this.partNozzle = null;
       this.partWing = null;
       super.stepHeight = 0.6F;
@@ -247,26 +245,56 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
          }
 
-         if (this.aircraftPitch >= 80 && this.isEntityAlive() && this.isAirBorne) {
-            double drag = 0.02 * this.currentSpeed; // Air resistance factor
-            this.motionY = Math.max(this.motionY - drag, -this.maxDiveSpeed);
-            this.currentSpeed += (0.1 * Math.sin(Math.toRadians(this.aircraftPitch))) - drag;
+         if (this.aircraftPitch >= 80 && this.isEntityAlive() && this.isAirBorne) { // going down again
+            timer++;
+
+            // Use a gradual acceleration
+            double accelerationFactor = 0.05; // Adjust this value to control the rate of acceleration
+            double pitchFactor = this.aircraftPitch / 100; // Adjust this value to control how pitch affects the descent
+
+            // Apply the gradual acceleration
+            this.motionY = (this.motionY * 0.95) + (pitchFactor * accelerationFactor);
+            this.aircraftY = this.aircraftY * 0.95;
+
+            //System.out.println(timer);
+            if (timer > 1200) {
+               // Increase the acceleration factor for prolonged dive
+               accelerationFactor = 0.02; // Adjust this value to control the prolonged acceleration rate
+               this.motionY = (this.motionY * 0.89) + (this.aircraftPitch * accelerationFactor);
+               this.aircraftY = this.aircraftY * 0.89;
+
+               if (this.aircraftPitch <= 1.0) {
+                  //System.out.println(timer);
+                  timer = 0;
+               }
+            }
          }
 
-         if (this.motionY >= this.stallfactor) {
-            //double stallEffect = Math.min(1.0, (this.motionY - this.stallfactor) / this.stallfactor);
-            //this.liftfactor *= (1.0 - stallEffect);
-            //this.motionX -= this.liftfactor * stallEffect;
-            //this.motionZ -= this.liftfactor * stallEffect;
-            double angleOfAttack = MathHelper.abs((float)this.aircraftPitch);
-            double lift = Math.max(0, Math.cos(Math.toRadians(angleOfAttack)) - 0.1); // Adjust coefficient
-            this.motionY += lift * this.liftfactor - (this.weight * 9.8); // Simulate gravity pull
+         if(this.motionY >= this.stallfactor) { //stall factor is 80 for now
+            double v1 = this.motionX - this.liftfactor; //how about stallfactor divided by 2 instead of liftfactor here? //it works ok
+            double v2 = this.motionZ - this.liftfactor;
+            this.currentSpeed = this.currentSpeed - this.stallfactor/4; //was 8
+            double identify = this.motionY - this.stallfactor;
+            if (v1 < 0) {
+               // Apply gradual deceleration
+               v1 += 0.1; // Adjust the value as needed
+               if (v1 > 0) {
+                  v1 = 0; // Ensure it doesn't go past 0
+               }
+            }
+            if (v2 < 0) {
+               // Apply gradual deceleration
+               v2 += 0.1; // Adjust the value as needed
+               if (v2 > 0) {
+                  v2 = 0; // Ensure it doesn't go past 0
+               }
+            }
+            //this.stallfactor;
+            this.motionX = v1;
+            this.motionZ = v2;
+            //sets motionY to be slowed
+            this.motionY = identify;
          }
-
-         ////i have no idea how this works but hopefully if the aircraft is like maneuvering or slowing down it will get drag or something
-         //double drag = 0.01 * Math.pow(this.currentSpeed, 2);
-         //this.motionX *= (1 - drag);
-         //this.motionZ *= (1 - drag);
 
          super.prevPosX = super.posX;
          super.prevPosY = super.posY;
@@ -356,8 +384,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          rot *= 0.0F;
       }
 
-
-      //probably increase drag as moving???
       if(super.moveLeft && !super.moveRight) {
          this.addkeyRotValue -= rot * partialTicks;
       }
