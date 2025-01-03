@@ -27,7 +27,13 @@ https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8
 https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8u361-windows-x64.exe
 https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8u361-windows-x64.zip
 
+
 # YOU NEED INTELLIJ COMMUNITY 2022.3 I HAVE NO IDEA WHAT HAPPENED IN THE NEW INTELLIJ VERSIONS BUT IT LOOKS TO BE ABSOLUTELY FUCKED THANKS TO WHAT I CAN ONLY PERCIEVE AS VERSION DISCRIMINATION
+
+
+You may also need this in project settings>SDK>Open JDK 1.8.0_241:
+https://drive.usercontent.google.com/download?id=1FN9nxH7fh0TvNDssj5qrC2hFcawstPhs&export=download
+
 
 open gradle console you should see gradle and then a bunch of things, then you want to type
 
