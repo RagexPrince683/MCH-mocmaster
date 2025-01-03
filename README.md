@@ -2,7 +2,7 @@
 
 This repository is meant to enhance the mcheli minecraft mod far beyond what it is capable of. Any and all help would be resourceful. This is a derivative of the source code found [[here](https://github.com/RagexPrince683/MCH-defaultmaster)] 
 
-# NOTICE: most work for MCHO is done in the experimental branch!
+# NOTICE: most work for MCHO is done in the **experimental** branch!
 
 
 
@@ -28,7 +28,6 @@ https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8
 https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8u361-windows-x64.zip
 
 # YOU NEED INTELLIJ COMMUNITY 2022.3 I HAVE NO IDEA WHAT HAPPENED IN THE NEW INTELLIJ VERSIONS BUT IT LOOKS TO BE ABSOLUTELY FUCKED THANKS TO WHAT I CAN ONLY PERCIEVE AS VERSION DISCRIMINATION
-
 
 open gradle console you should see gradle and then a bunch of things, then you want to type
 
