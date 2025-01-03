@@ -38,6 +38,11 @@ import static mcheli.MCH_Config.delayrangeloader;
 import static mcheli.MCH_Config.bombletloader;
 
 public abstract class MCH_EntityBaseBullet extends W_Entity {
+    //@Override
+    //public boolean shouldDespawn() {
+    //    //    // Prevent despawning by overriding this method
+    //    return false;
+    //}
 
     //public static final int DATAWT_RESERVE1 = 26;
     //public static final int DATAWT_TARGET_ENTITY = 27;

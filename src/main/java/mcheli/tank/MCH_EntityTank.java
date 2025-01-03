@@ -60,6 +60,10 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    private double[] gearSpeedLimits = {5.0D, 10.0D, 20.0D, 30.0D, 40.0D};  // Speed limits for each gear
    private double[] gearAccelerationMultipliers = {1.0D, 0.8D, 0.6D, 0.4D, 0.2D};  // Acceleration dampening for higher gears
 
+   private boolean immobile = false; // Tracks if the tank is immobilized
+
+   //public boolean MCH_EntityWheel.immobile;
+
 
    public MCH_EntityTank(World world) {
       super(world);
@@ -157,6 +161,11 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
    public boolean canSwitchGunnerMode() {
       return !super.canSwitchGunnerMode()?false:false;
+   }
+
+   public void onWheelDestroyed() {
+      this.immobile = true; // Mark tank as immobilized
+      System.out.println("Tank immobilized due to wheel damage!");
    }
 
    public void onUpdateAircraft() {
@@ -262,6 +271,9 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    }
 
    public void moveEntity(double parX, double parY, double parZ) {
+      //if (this.immobile) {
+      //   return; // Prevent movement if the tank is immobilized
+      //}
       super.worldObj.theProfiler.startSection("move");
       super.ySize *= 0.4F;
       double nowPosX = super.posX;
@@ -854,8 +866,9 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
             this.applyOnGroundPitch(0.8F);
          }
       }
-
-      this.updateWheels();
+      //if(!this.WheelMng.isAnyWheelImmobile()) {
+         this.updateWheels();
+      //}
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
       super.motionY *= 0.95D;
       super.motionX *= (double)this.getAcInfo().motionFactor;
@@ -1103,7 +1116,9 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    }
 
    private void updateWheels() {
-      this.WheelMng.move(super.motionX, super.motionY, super.motionZ);
+      //if(!(this.WheelMng.isAnyWheelImmobile())) {
+         this.WheelMng.move(super.motionX, super.motionY, super.motionZ);
+      //}
    }
 
    public float getMaxSpeed() {

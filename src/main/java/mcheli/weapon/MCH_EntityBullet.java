@@ -29,6 +29,7 @@ public class MCH_EntityBullet extends MCH_EntityBaseBullet {
 
    public void onUpdate() {
       super.onUpdate();
+      //explosionpower > 0
       if(!super.isDead && !super.worldObj.isRemote && this.getCountOnUpdate() > 1 && this.getInfo() != null && super.explosionPower > 0) {
          float pDist = this.getInfo().proximityFuseDist;
          if((double)pDist > 0.1D) {
