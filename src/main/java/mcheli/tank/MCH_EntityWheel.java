@@ -2,6 +2,8 @@ package mcheli.tank;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import mcheli.aircraft.MCH_BoundingBox;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntityHitBox;
 import mcheli.aircraft.MCH_EntitySeat;
@@ -37,6 +39,10 @@ public class MCH_EntityWheel extends W_Entity {
       this.pos = pos;
       this.isPlus = pos.zCoord >= weightedCenter.zCoord;
    }
+
+   //public MCH_BoundingBox copy() {
+   //   return new MCH_BoundingBox(this.offsetX, this.offsetY, this.offsetZ, this.width, this.height, this.damegeFactor);
+   //}
 
    public void travelToDimension(int p_71027_1_) {}
 

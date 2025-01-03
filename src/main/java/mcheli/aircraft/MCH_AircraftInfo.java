@@ -17,6 +17,7 @@ import mcheli.hud.MCH_HudManager;
 import mcheli.weapon.MCH_WeaponInfoManager;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.model.IModelCustom;
@@ -845,6 +846,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                                py = s.length >= 10?this.toFloat(s[8]):this.toFloat(s[1]);
                                                                pz = s.length >= 10?this.toFloat(s[9]):this.toFloat(s[2]);
                                                                this.partWheel.add(new MCH_AircraftInfo.PartWheel(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), var18, ry, rz, var15, var26, py, pz, "wheel" + this.partWheel.size()));
+                                                               //TODO: define a boundingbox here
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddPartSteeringWheel")) {
                                                             s = this.splitParam(data);
@@ -852,6 +854,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                                this.partSteeringWheel.add(new MCH_AircraftInfo.PartWheel(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "steering_wheel" + this.partSteeringWheel.size()));
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddTrackRoller")) {
+                                                            //TODO: define a boundingbox here aswell
                                                             s = this.splitParam(data);
                                                             if(s.length >= 3) {
                                                                this.partTrackRoller.add(new MCH_AircraftInfo.TrackRoller(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), "track_roller" + this.partTrackRoller.size()));
@@ -1444,6 +1447,16 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       public PartWheel(float px, float py, float pz, float rx, float ry, float rz, float rd, String name) {
          this(px, py, pz, rx, ry, rz, rd, px, py, pz, name);
       }
+
+      public AxisAlignedBB getBoundingBox() {
+         // Define a bounding box around pos2
+         float size = 0.5F; // Adjust size to match wheel dimensions
+         return AxisAlignedBB.getBoundingBox(
+                 pos2.xCoord - size, pos2.yCoord - size, pos2.zCoord - size,
+                 pos2.xCoord + size, pos2.yCoord + size, pos2.zCoord + size
+         );
+      }
+
    }
 
    public class Camera extends MCH_AircraftInfo.DrawnPart {

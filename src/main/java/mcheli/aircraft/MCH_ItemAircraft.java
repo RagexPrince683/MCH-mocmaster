@@ -144,10 +144,11 @@ public abstract class MCH_ItemAircraft extends W_Item {
             if(!world.isRemote) {
                ac.getAcDataFromItem(itemStack);
                world.spawnEntityInWorld(ac);
-               if(ac.getAcInfo() != null) {
-                  ac.getAcInfo().reload();
-                  //ac.onAcInfoReloaded();
-               }
+               //crashes randomly?
+               //if(ac.getAcInfo() != null) {
+               //   ac.getAcInfo().reload();
+               //   //ac.onAcInfoReloaded();
+               //}
                MCH_Achievement.addStat(player, MCH_Achievement.welcome, 1);
             }
 
