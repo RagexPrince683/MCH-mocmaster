@@ -13,7 +13,9 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.*;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class MCH_EntityWheel extends W_Entity {
@@ -22,126 +24,14 @@ public class MCH_EntityWheel extends W_Entity {
    public Vec3 pos;
    boolean isPlus;
 
-   public boolean immobile = false;
-   private float health = 20.0F; // Set default health
-
 
    public MCH_EntityWheel(World w) {
       super(w);
-      //this.health = getHealth();
       this.setSize(1.0F, 1.0F);
       super.stepHeight = 1.5F;
       super.isImmuneToFire = true;
       this.isPlus = false;
    }
-
-  //@Override
-  //public AxisAlignedBB getBoundingBox() {
-  //   return this.boundingBox; // Use the entity's bounding box for interactions
-  //}
-
-  //@Override
-  //public AxisAlignedBB getCollisionBox(Entity entity) {
-  //   return this.boundingBox; // Use the same bounding box for collisions
-  //}
-
-  //@Override
-  //public void setSize(float width, float height) {
-  //   super.setSize(width, height);
-  //   this.boundingBox.setBounds(
-  //           this.posX - (width / 2), this.posY, this.posZ - (width / 2),
-  //           this.posX + (width / 2), this.posY + height, this.posZ + (width / 2)
-  //   );
-  //}
-
-   //@Override
-   //public boolean attackEntityFrom(DamageSource source, float amount) {
-   //   if (this.immobile) {
-   //      return false; // Ignore damage if already immobile
-   //   }
-//
-   //   this.health -= amount;
-   //   if (this.health <= 0.0F) {
-   //      this.immobile = true; // Mark wheel as immobile
-   //      if (this.parents instanceof MCH_EntityTank) {
-   //         ((MCH_EntityTank) this.parents).onWheelDestroyed(); // Notify tank
-   //      }
-   //   }
-   //   return true;
-   //}
-
-   @Override
-   public AxisAlignedBB getBoundingBox() {
-      return AxisAlignedBB.getBoundingBox(
-              this.posX - 0.5, this.posY - 0.5, this.posZ - 0.5,
-              this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5
-      );
-   }
-
-   @Override
-   public AxisAlignedBB getCollisionBox(Entity entity) {
-      return this.getBoundingBox(); // Use the same box for collisions
-   }
-
-   //@Override
-   //public boolean attackEntityFrom(DamageSource source, float amount) {
-   //   if (this.immobile) {
-   //      return false; // Ignore damage if already immobile
-   //   }
-//
-   //   // Determine the attack location
-   //   Vec3 damagePos = null;
-   //   if (source.getEntity() != null) {
-   //      damagePos = Vec3.createVectorHelper(
-   //              source.getEntity().posX,
-   //              source.getEntity().posY,
-   //              source.getEntity().posZ
-   //      );
-   //   } else if (source instanceof EntityDamageSourceIndirect) {
-   //      Entity indirectEntity = ((EntityDamageSourceIndirect) source).getSourceOfDamage();
-   //      if (indirectEntity != null) {
-   //         damagePos = Vec3.createVectorHelper(
-   //                 indirectEntity.posX,
-   //                 indirectEntity.posY,
-   //                 indirectEntity.posZ
-   //         );
-   //      }
-   //   }
-//
-   //   // Check if the damage is within the wheel's hitbox
-   //   if (damagePos != null && this.getBoundingBox().isVecInside(damagePos)) {
-   //      this.health -= amount;
-   //      if (this.health <= 0.0F) {
-   //         this.immobile = true; // Mark wheel as immobile
-   //         if (this.parents instanceof MCH_EntityTank) {
-   //            ((MCH_EntityTank) this.parents).onWheelDestroyed(); // Notify tank
-   //         }
-   //      }
-   //      return true;
-   //   }
-//
-   //   return false; // Ignore if the damage is outside the hitbox
-   //}
-
-   @Override
-   public boolean attackEntityFrom(DamageSource source, float amount) {
-      this.health -= amount;
-      if (this.health <= 0.0F) {
-         this.immobile = true; // Mark wheel as immobile
-         if (this.parents instanceof MCH_EntityTank) {
-            ((MCH_EntityTank) this.parents).onWheelDestroyed(); // Notify tank
-         }
-      }
-      return true;
-   }
-
-  //public float getHealth() {
-  //   return this.health;
-  //}
-
-  //public void setHealth(float health) {
-  //   this.health = health;
-  //}
 
    public void setWheelPos(Vec3 pos, Vec3 weightedCenter) {
       this.pos = pos;
@@ -158,22 +48,13 @@ public class MCH_EntityWheel extends W_Entity {
       this.parents = parents;
    }
 
-   //DO NOT CHANGE p_70014_1_ p_70014_1_ KEEPS THIS FUNCTIONING DESPITE HAVING 0 USES, MCHELI CODE IS JUST MAGIC BRO JUST DON'T CHANGE IT OKAY
-   protected void readEntityFromNBT(NBTTagCompound p_70014_1_) {
+   protected void readEntityFromNBT(NBTTagCompound p_70037_1_) {
       this.setDead();
-      //this.immobile = nbt.getBoolean("Immobile");
-      //this.health = nbt.getFloat("Health");
    }
 
-   protected void writeEntityToNBT(NBTTagCompound p_70014_1_) {
-      //nbt.setBoolean("Immobile", this.immobile);
-      //nbt.setFloat("Health", this.health);
-   }
+   protected void writeEntityToNBT(NBTTagCompound p_70014_1_) {}
 
    public void moveEntity(double parX, double parY, double parZ) {
-      //if (this.immobile) {
-      //   return; // Prevent movement when immobile
-      //}
       super.worldObj.theProfiler.startSection("move");
       super.ySize *= 0.4F;
       double nowPosX = super.posX;

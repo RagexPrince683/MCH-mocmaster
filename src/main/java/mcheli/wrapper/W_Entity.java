@@ -42,8 +42,6 @@ public abstract class W_Entity
 
     protected void entityInit() {
     }
-
-    //this is a wrapper for a lot of things, this is not smart, should go in like the actual bullet entity
    //public boolean shouldDespawn() {
    //    // Prevent despawning by overriding this method
    //    return false;
