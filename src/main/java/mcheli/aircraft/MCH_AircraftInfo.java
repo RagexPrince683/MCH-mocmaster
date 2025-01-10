@@ -854,9 +854,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                                this.partSteeringWheel.add(new MCH_AircraftInfo.PartWheel(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "steering_wheel" + this.partSteeringWheel.size()));
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddTrackRoller")) {
+
+
                                                             //TODO: define a boundingbox here aswell
                                                             s = this.splitParam(data);
                                                             if(s.length >= 3) {
+                                                               //caused tracked vehicles to stop working :(
+                                                               //MCH_BoundingBox wheelBoundingBox = new MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.partTrackRoller.size(), 1); //xyz, height, damagefactor, we need a new boundingbox type for this to work correctly
+                                                               //this.extraBoundingBox.add(wheelBoundingBox);
                                                                this.partTrackRoller.add(new MCH_AircraftInfo.TrackRoller(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), "track_roller" + this.partTrackRoller.size()));
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddCrawlerTrack")) {
@@ -874,6 +879,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                          } else if(item.equalsIgnoreCase("BoundingBox")) {
                                                             s = data.split("\\s*,\\s*");
                                                             if(s.length >= 5) {
+                                                               //defines a custom boundingbox based on TXT, the last value is optional and is the damagefactor
                                                                var15 = s.length >= 6?this.toFloat(s[5]):1.0F;
                                                                MCH_BoundingBox var49 = new MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), var15);
                                                                this.extraBoundingBox.add(var49);
