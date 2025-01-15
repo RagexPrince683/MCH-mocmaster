@@ -1454,14 +1454,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
          this(px, py, pz, rx, ry, rz, rd, px, py, pz, name);
       }
 
-      public AxisAlignedBB getBoundingBox() {
-         // Define a bounding box around pos2
-         float size = 0.5F; // Adjust size to match wheel dimensions
-         return AxisAlignedBB.getBoundingBox(
-                 pos2.xCoord - size, pos2.yCoord - size, pos2.zCoord - size,
-                 pos2.xCoord + size, pos2.yCoord + size, pos2.zCoord + size
-         );
-      }
+      //public AxisAlignedBB getBoundingBox() {
+      //   // Define a bounding box around pos2
+      //   float size = 0.5F; // Adjust size to match wheel dimensions
+      //   return AxisAlignedBB.getBoundingBox(
+      //           pos2.xCoord - size, pos2.yCoord - size, pos2.zCoord - size,
+      //           pos2.xCoord + size, pos2.yCoord + size, pos2.zCoord + size
+      //   );
+      //}
 
    }
 
