@@ -51,8 +51,8 @@ public abstract class MCH_RenderAircraft extends W_Render {
 
 
    public void doRender(Entity entity, double posX, double posY, double posZ, float par8, float tickTime) {
-
-
+      //might fix something idk
+      MCH_ClientEventHook.setCancelRender(false);
 
       MCH_EntityAircraft ac = (MCH_EntityAircraft)entity;
       //this will fire like constantly so yay emoji

@@ -219,6 +219,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private int modeSwitchCooldown;
    public Vec3 target = Vec3.createVectorHelper(0, 0, 0);
    public MCH_BoundingBox[] extraBoundingBox;
+   //public WheelBoundingBox[] extraWheelBox;
+   //die in a fire
    public float lastBBDamageFactor;
    private final MCH_AircraftInventory inventory;
    private double fuelConsumption;
@@ -258,6 +260,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private static final MCH_EntitySeat[] seatsDummy = new MCH_EntitySeat[0];
    private boolean switchSeat = false;
    //public EntityPlayerMP playerEntity = (EntityPlayerMP) getCommandSenderAsPlayer(player);
+   private List<WheelBoundingBox> extraWheelBox = new ArrayList<>();
 
 
    public MCH_EntityAircraft(World world) {
@@ -324,6 +327,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.prevRotationRoll = 0.0F;
       this.lowPassPartialTicks = new MCH_LowPassFilterFloat(10);
       this.extraBoundingBox = new MCH_BoundingBox[0];
+      //this.extraWheelBox.add(new WheelBoundingBox(/* parameters */));
+      //wtf
+      //possibly uncomment if fucked
+      //this.extraWheelBox = new WheelBoundingBox[0];
+      //may explain why when NTM tries to do something with reflections, mcheli just has a fit
       W_Reflection.setBoundingBox(this, new MCH_AircraftBoundingBox(this));
       this.lastBBDamageFactor = 1.0F;
       this.inventory = new MCH_AircraftInventory(this);
@@ -857,6 +865,52 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       } else if(this.timeSinceHit > 0) {
          return false;
       } else {
+         System.out.println("attacked");
+
+         //for (MCH_BoundingBox bb : this.extraBoundingBox) {
+         //   // if (bb.boundingBox.intersectsWith(this.boundingBox)) {
+         //   System.out.println("Intersection detected with normal box ");
+         //   //we are detecting impacts with a normal bounding box, this is working fine.
+         //   if (bb instanceof WheelBoundingBox) {
+         //      //this is not.
+         //      System.out.println("Applying damage to WheelBoundingBox.");
+         //      float effectiveDamage = org_damage;
+         //      ((WheelBoundingBox) bb).takeDamage((int) effectiveDamage);
+         //   }
+         //   //}
+         //}
+         //god hates this and he hates me for ever trying to attempt this
+
+         //never fires
+        // for (WheelBoundingBox wheelBB : this.extraWheelBox) {
+        //    System.out.println("Checking WheelBoundingBox: " + wheelBB);
+        //    // Apply damage directly
+        //    wheelBB.takeDamage((int) (org_damage * damageFactor));
+        // }
+
+         //if (MCH_BoundingBox.getType().equals("wheel")) {
+         //   System.out.println("This is a wheel bounding box!");
+         //} im gonna actually kill someone
+
+         //uncomment this if the other one decides to crash and god hates everything you do, if both do not work I am crashing out
+         for (MCH_BoundingBox box : this.extraBoundingBox) {
+            if (box instanceof WheelBoundingBox) {
+               System.out.println("Found a WheelBoundingBox!");
+               ((WheelBoundingBox) box).takeDamage((int) org_damage);
+            } else {
+               System.out.println("This is not a WheelBoundingBox.");
+            }
+         }
+
+        // for (MCH_BoundingBox box : this.extraBoundingBox) {
+        //    if (box.getType().equals("wheel")) {
+        //       System.out.println("This is a wheel bounding box!");
+        //    } else {
+        //       System.out.println("This is a default bounding box.");
+        //    }
+        // }
+
+
          String dmt = damageSource.getDamageType();
          if(dmt.equalsIgnoreCase("inFire") && !damageSource.isProjectile()) {
             return false;
@@ -949,6 +1003,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                         }
 
                         damage *= cmd1.armorDamageFactor;
+                        //todo: make this more of a APS behavior instead of how OP it is currently:
                         damage -= cmd1.armorMinDamage;
                         if(damage <= 0.0F) {
                            MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.attackEntityFrom:no damage=%.1f -> %.1f(factor=%.2f):%s", new Object[]{Float.valueOf(org_damage), Float.valueOf(damage), Float.valueOf(damageFactor), dmt});
@@ -1714,14 +1769,28 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    }
 
+
+
    public void updateExtraBoundingBox() {
       MCH_BoundingBox[] arr$ = this.extraBoundingBox;
       int len$ = arr$.length;
-
       for(int i$ = 0; i$ < len$; ++i$) {
          MCH_BoundingBox bb = arr$[i$];
          bb.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
       }
+
+      //theoretically all this shit is the same so like this might not be needed but I swear to fucking god mcheli
+      //for (WheelBoundingBox wheelBB : this.extraWheelBox) {
+      //   wheelBB.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
+      //}
+
+     //WheelBoundingBox[] wheelbb = this.extraWheelBox;
+     //int wheelb = wheelbb.length;
+     //for(int i$ = 0; i$ < wheelb; ++i$) {
+     //   MCH_BoundingBox bb = wheelbb[i$];
+     //   bb.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
+     //}
+      //im gonna crash out
 
    }
 
@@ -2868,6 +2937,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
    }
 
+
+   //handles collision (crash?) physics?
    public static List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
       ArrayList collidingBoundingBoxes = new ArrayList();
       collidingBoundingBoxes.clear();
@@ -5438,6 +5509,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.rotPartRotation = new float[info.partRotPart.size()];
          this.prevRotPartRotation = new float[info.partRotPart.size()];
          this.extraBoundingBox = this.createExtraBoundingBox();
+         //this.extraWheelBox = this.createExtraWheelBox();
+
          this.partEntities = this.createParts();
          super.stepHeight = info.stepHeight;
       }
@@ -5464,6 +5537,27 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       return ar;
    }
+
+ /*  public WheelBoundingBox[] createExtraWheelBox() {
+      // Get the list of extra bounding boxes
+      MCH_AircraftInfo acInfo = this.getAcInfo();
+      if (acInfo == null || acInfo.extraBoundingBox == null) {
+         return new WheelBoundingBox[0];
+      }
+
+      List<WheelBoundingBox> boundingBoxes = acInfo.extraBoundingBox;
+
+      // Initialize the array with the size of the list
+      WheelBoundingBox[] wheel3 = new WheelBoundingBox[boundingBoxes.size()];
+
+      // Iterate over the list and copy each bounding box to the array
+      int i = 0;
+      for (WheelBoundingBox bb : boundingBoxes) {
+         wheel3[i++] = (WheelBoundingBox) bb.copy();
+      }
+
+      return wheel3;
+   }*/
 
    public Entity[] createParts() {
       Entity[] list = new Entity[]{this.partEntities[0]};

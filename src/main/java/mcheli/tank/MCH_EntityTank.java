@@ -8,13 +8,7 @@ import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.MCH_Math;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_BoundingBox;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_EntityHitBox;
-import mcheli.aircraft.MCH_EntitySeat;
-import mcheli.aircraft.MCH_PacketStatusRequest;
-import mcheli.aircraft.MCH_Parts;
+import mcheli.aircraft.*;
 import mcheli.chain.MCH_EntityChain;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
@@ -46,6 +40,8 @@ import net.minecraft.world.World;
 
 public class MCH_EntityTank extends MCH_EntityAircraft {
 
+   public boolean mobile = true;
+
    private MCH_TankInfo tankInfo = null;
    public float soundVolume;
    public float soundVolumeTarget;
@@ -60,9 +56,11 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    private double[] gearSpeedLimits = {5.0D, 10.0D, 20.0D, 30.0D, 40.0D};  // Speed limits for each gear
    private double[] gearAccelerationMultipliers = {1.0D, 0.8D, 0.6D, 0.4D, 0.2D};  // Acceleration dampening for higher gears
 
-
    public MCH_EntityTank(World world) {
       super(world);
+
+
+      //WheelBoundingBox.setParentTank(this); // Non-static call, valid in this context
       super.currentSpeed = 0.07D;
       super.preventEntitySpawning = true;
       this.setSize(2.0F, 0.7F);
@@ -421,8 +419,8 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
       super.throttleBack = (float)((double)super.throttleBack * 0.8D);
       if(this.getBrake()) {
-         super.throttleBack = (float)((double)super.throttleBack * 0.5D); //todo: add braking force variable here
-         if(this.getCurrentThrottle() > 0.0D) {
+         super.throttleBack = (float)((double)super.throttleBack * 0.5D); //todo LATER: add braking force variable here
+         if(this.getCurrentThrottle() > 0.0D) { //todo add that the wheel boundingbox has not been murdered/immobile check
             this.addCurrentThrottle(-0.02D * (double)this.getAcInfo().throttleUpDown);
          } else {
             this.setCurrentThrottle(0.0D);
@@ -456,7 +454,13 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
             }
          }
       } else {
-         this.setThrottle(this.getCurrentThrottle());
+         //todo add that the wheel boundingbox has not been murdered
+         if (this.mobile) {
+            this.setThrottle(this.getCurrentThrottle());
+         } else {
+            this.setThrottle(0.0D);
+            //todo needsrepair
+         }
       }
 
    }
@@ -464,7 +468,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    protected void onUpdate_ControlSub(float partialTicks) {
       if(!super.isGunnerMode) {
          float throttleUpDown = this.getAcInfo().throttleUpDown;
-         if(super.throttleUp) {
+         if(super.throttleUp && this.mobile) {
             float f = throttleUpDown;
             if(this.getRidingEntity() != null) {
                double mx = this.getRidingEntity().motionX;
@@ -487,7 +491,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
 
 
-         } else if(super.throttleDown) {
+         } else if(super.throttleDown && this.mobile) {
 
 
 
@@ -548,6 +552,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
    protected void onUpdate_Particle2() {
       if(super.worldObj.isRemote) {
+         //spawns smoke particles if the vehicle is below 50% health
          if((double)this.getHP() < (double)this.getMaxHP() * 0.5D) {
             if(this.getTankInfo() != null) {
                int bbNum = this.getTankInfo().extraBoundingBox.size();
@@ -880,6 +885,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          if (speed > 0.05D) {
             Entity rider = this.getRiddenByEntity();
             float damage = (float)(speed * 15.0D);
+            //runover physics above
 
             // Get the aircraft entity the tank is riding on, if applicable
             final MCH_EntityAircraft rideAc = super.ridingEntity instanceof MCH_EntityAircraft

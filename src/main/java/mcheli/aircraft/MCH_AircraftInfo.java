@@ -853,16 +853,32 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                             if(s.length >= 7) {
                                                                this.partSteeringWheel.add(new MCH_AircraftInfo.PartWheel(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "steering_wheel" + this.partSteeringWheel.size()));
                                                             }
-                                                         } else if(item.equalsIgnoreCase("AddTrackRoller")) {
-
-
-                                                            //TODO: define a boundingbox here aswell
+                                                         } else if (item.equalsIgnoreCase("AddTrackRoller")) {
                                                             s = this.splitParam(data);
-                                                            if(s.length >= 3) {
-                                                               //caused tracked vehicles to stop working :(
-                                                               //MCH_BoundingBox wheelBoundingBox = new MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.partTrackRoller.size(), 1); //xyz, height, damagefactor, we need a new boundingbox type for this to work correctly
-                                                               //this.extraBoundingBox.add(wheelBoundingBox);
-                                                               this.partTrackRoller.add(new MCH_AircraftInfo.TrackRoller(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), "track_roller" + this.partTrackRoller.size()));
+                                                            if (s.length >= 3) {
+                                                               float x = this.toFloat(s[0]);
+                                                               float y = this.toFloat(s[1]);
+                                                               float z = this.toFloat(s[2]);
+
+                                                               // Define the bounding box dimensions relative to the wheel's center
+                                                               float halfWidth = 0.6f;  // Adjust to match the wheel width
+                                                               float halfHeight = 0.6f; // Adjust to match the wheel height
+                                                               float halfDepth = 0.3f;  // Adjust to match the wheel depth
+
+                                                               // Create the bounding box
+                                                               WheelBoundingBox wheelBoundingBox = new WheelBoundingBox(
+                                                                       x, y, z,  // Min point
+                                                                       halfWidth, halfHeight, 1,   // Max point
+                                                                       20 //health, 20 for now, im gonna do like 20 health for tracks and 5 for like car wheels
+                                                               );
+                                                               System.out.println("Created object of type: " + wheelBoundingBox.getClass().getName());
+
+
+                                                               // Store the bounding box in a collection (e.g., extraBoundingBox)
+                                                               this.extraBoundingBox.add(wheelBoundingBox);
+
+                                                               // Add the wheel to the list of rollers
+                                                               this.partTrackRoller.add(new MCH_AircraftInfo.TrackRoller(x, y, z, "track_roller" + this.partTrackRoller.size()));
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddCrawlerTrack")) {
                                                             this.partCrawlerTrack.add(this.createCrawlerTrack(data, "crawler_track" + this.partCrawlerTrack.size()));
@@ -1454,14 +1470,16 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
          this(px, py, pz, rx, ry, rz, rd, px, py, pz, name);
       }
 
-      public AxisAlignedBB getBoundingBox() {
-         // Define a bounding box around pos2
-         float size = 0.5F; // Adjust size to match wheel dimensions
-         return AxisAlignedBB.getBoundingBox(
-                 pos2.xCoord - size, pos2.yCoord - size, pos2.zCoord - size,
-                 pos2.xCoord + size, pos2.yCoord + size, pos2.zCoord + size
-         );
-      }
+
+      //probably not needed
+      //public AxisAlignedBB getBoundingBox() {
+      //   // Define a bounding box around pos2
+      //   float size = 0.5F; // Adjust size to match wheel dimensions
+      //   return AxisAlignedBB.getBoundingBox(
+      //           pos2.xCoord - size, pos2.yCoord - size, pos2.zCoord - size,
+      //           pos2.xCoord + size, pos2.yCoord + size, pos2.zCoord + size
+      //   );
+      //}
 
    }
 

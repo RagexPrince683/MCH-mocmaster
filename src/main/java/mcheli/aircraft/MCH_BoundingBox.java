@@ -4,7 +4,10 @@ import mcheli.MCH_Lib;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 
-public class MCH_BoundingBox {
+public class MCH_BoundingBox implements BoundingBoxType {
+   public String getType() {
+      return "default";
+   }
 
    public final AxisAlignedBB boundingBox;
    public final AxisAlignedBB backupBoundingBox;
@@ -17,6 +20,9 @@ public class MCH_BoundingBox {
    public Vec3 nowPos;
    public Vec3 prevPos;
    public final float damegeFactor;
+   private final String type; // Add this field
+
+
 
 
    public MCH_BoundingBox(double x, double y, double z, float w, float h, float df) {
@@ -26,12 +32,15 @@ public class MCH_BoundingBox {
       this.width = w;
       this.height = h;
       this.damegeFactor = df;
+      this.type = "default"; // Default type
       this.boundingBox = AxisAlignedBB.getBoundingBox(x - (double)(w / 2.0F), y - (double)(h / 2.0F), z - (double)(w / 2.0F), x + (double)(w / 2.0F), y + (double)(h / 2.0F), z + (double)(w / 2.0F));
       this.backupBoundingBox = AxisAlignedBB.getBoundingBox(x - (double)(w / 2.0F), y - (double)(h / 2.0F), z - (double)(w / 2.0F), x + (double)(w / 2.0F), y + (double)(h / 2.0F), z + (double)(w / 2.0F));
       this.nowPos = Vec3.createVectorHelper(x, y, z);
       this.prevPos = Vec3.createVectorHelper(x, y, z);
       this.updatePosition(0.0D, 0.0D, 0.0D, 0.0F, 0.0F, 0.0F);
    }
+
+
 
    public MCH_BoundingBox copy() {
       return new MCH_BoundingBox(this.offsetX, this.offsetY, this.offsetZ, this.width, this.height, this.damegeFactor);

@@ -6,6 +6,11 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 
+   /*
+   I think this is the rectangular blue BoundingBox thing that generates with every vehicle,
+   however this also deals with reflection and uses 6 inputs so might also incorporate MCH_BoundingBox txt values
+   using space magic and autism
+   */
 public class MCH_AircraftBoundingBox extends AxisAlignedBB {
 
    private final MCH_EntityAircraft ac;
@@ -46,6 +51,7 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
       }
 
       MCH_BoundingBox[] arr$ = this.ac.extraBoundingBox;
+      //WheelBoundingBox[] arr$ = this.ac.extraWheelBox;
       int len$ = arr$.length;
 
       for(int i$ = 0; i$ < len$; ++i$) {
@@ -57,9 +63,23 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
                this.ac.lastBBDamageFactor = bb.damegeFactor;
             }
 
+
             ret = true;
          }
       }
+
+      /*WheelBoundingBox[] wheelBB = this.ac.extraWheelBox; // Assuming this is NOT an array of MCH_BoundingBox
+      for (WheelBoundingBox bb : wheelBB) { //fuck every last one of you
+         if (bb.boundingBox.intersectsWith(aabb)) {
+            double dist2 = this.getDistSq(aabb, this);
+            if (dist2 < dist) {
+               dist = dist2;
+               this.ac.lastBBDamageFactor = bb.damegeFactor;
+            }
+            ret = true;
+         }
+      }*/
+
 
       return ret;
    }
@@ -163,6 +183,19 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
             }
          }
       }
+
+      /*WheelBoundingBox[] wheelBB = this.ac.extraWheelBox; // Assuming this is NOT an array of MCH_BoundingBox
+      for (WheelBoundingBox bb : wheelBB) {
+         MovingObjectPosition mop2 = bb.boundingBox.calculateIntercept(v1, v2);
+         if (mop2 != null) {
+            double dist2 = v1.distanceTo(mop2.hitVec);
+            if (dist2 < dist) {
+               mop = mop2;
+               dist = dist2;
+               this.ac.lastBBDamageFactor = bb.damegeFactor;
+            }
+         }
+      }*/
 
       return mop;
    }
