@@ -49,6 +49,7 @@ import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.helicopter.MCH_ItemHeli;
 import mcheli.lweapon.MCH_ItemLightWeaponBase;
 import mcheli.lweapon.MCH_ItemLightWeaponBullet;
+import mcheli.mob.MCH_ItemSpawnGunner;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.parachute.MCH_ItemParachute;
 import mcheli.plane.MCP_EntityPlane;
@@ -103,7 +104,7 @@ import java.io.FileOutputStream;
 
 @Mod(
    modid = "mcheli",
-   name = "mcheli",
+   name = "Mcheli Overdrive",
    dependencies = "required-after:Forge@[10.13.2.1230,)"
 )
 @NetworkMod(
@@ -142,6 +143,8 @@ public class MCH_MOD {
    public static MCH_ItemFuel itemFuel;
    public static MCH_ItemWrench itemWrench;
    public static MCH_ItemRangeFinder itemRangeFinder;
+   public static MCH_ItemSpawnGunner itemSpawnGunnerVsPlayer;
+   /*     */   public static MCH_ItemSpawnGunner itemSpawnGunnerVsMonster;
    public static MCH_CreativeTabs creativeTabs;
    public static MCH_CreativeTabs creativeTabsHeli;
    public static MCH_CreativeTabs creativeTabsPlane;
@@ -333,6 +336,27 @@ public class MCH_MOD {
       W_LanguageRegistry.addName(item, "Laser Rangefinder");
       W_LanguageRegistry.addNameForObject(item, "ja_JP", "レーザー レンジ ファインダー");
    }
+
+   private void registerItemSpawnGunner() {
+      /* 270 */     String name = "spawn_gunner_vs_monster";
+      /* 271 */     MCH_ItemSpawnGunner item = new MCH_ItemSpawnGunner();
+      /* 272 */     item.targetType = 0;
+      /* 273 */     item.primaryColor = 12632224;
+      /* 274 */     item.secondaryColor = 12582912;
+      /* 275 */     itemSpawnGunnerVsMonster = item;
+      /* 276 */     registerItem((W_Item)item, name, creativeTabs);
+      /* 277 */     W_LanguageRegistry.addName(item, "Gunner (vs Monster)");
+      /* 278 */     W_LanguageRegistry.addNameForObject(item, "ja_JP", "対モンスター 射撃手");
+      /* 279 */     name = "spawn_gunner_vs_player";
+      /* 280 */     item = new MCH_ItemSpawnGunner();
+      /* 281 */     item.targetType = 1;
+      /* 282 */     item.primaryColor = 12632224;
+      /* 283 */     item.secondaryColor = 49152;
+      /* 284 */     itemSpawnGunnerVsPlayer = item;
+      /* 285 */     registerItem((W_Item)item, name, creativeTabs);
+      /* 286 */     W_LanguageRegistry.addName(item, "Gunner (vs Player of other team)");
+      /* 287 */     W_LanguageRegistry.addNameForObject(item, "ja_JP", "対他チームプレイヤー 射撃手");
+      /*     */   }
 
    private void registerItemWrench() {
       String name = "wrench";

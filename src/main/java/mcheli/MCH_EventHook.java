@@ -227,35 +227,37 @@ public class MCH_EventHook extends W_EventHook {
    }
 
    public void livingHurtEvent(LivingHurtEvent event) {
-      MCH_EntityAircraft ac = this.getRiddenAircraft(event.entity);
-      if(ac != null) {
-         if(ac.getAcInfo() != null) {
-            if(!ac.isDestroyed()) {
-               Entity attackEntity = event.source.getEntity();
-               if(attackEntity == null) {
-                  ac.attackEntityFrom(event.source, event.ammount * 2.0F);
-                  event.ammount *= ac.getAcInfo().damageFactor;
-               } else if(W_Entity.isEqual(attackEntity, event.entity)) {
-                  ac.attackEntityFrom(event.source, event.ammount * 2.0F);
-                  event.ammount *= ac.getAcInfo().damageFactor;
-               } else if(ac.isMountedEntity(attackEntity)) {
-                  event.ammount = 0.0F;
-                  event.setCanceled(true);
-               } else {
-                  MCH_EntityAircraft atkac = this.getRiddenAircraft(attackEntity);
-                  if(W_Entity.isEqual(atkac, ac)) {
-                     event.ammount = 0.0F;
+           MCH_EntityAircraft ac = getRiddenAircraft(event.entity);
+           if (ac != null &&
+                     ac.getAcInfo() != null) {
+               if (ac.isNewUAV()) {
                      event.setCanceled(true);
-                  } else {
-                     ac.attackEntityFrom(event.source, event.ammount * 2.0F);
-                     event.ammount *= ac.getAcInfo().damageFactor;
-                  }
-               }
-
-            }
+                     return;
+                   }
+                if (!ac.isDestroyed()) {
+                     Entity attackEntity = event.source.getEntity();
+                     if (attackEntity == null) {
+                          ac.attackEntityFrom(event.source, event.ammount * 2.0F);
+                          event.ammount *= (ac.getAcInfo()).damageFactor;
+                        } else if (W_Entity.isEqual(attackEntity, event.entity)) {
+                          ac.attackEntityFrom(event.source, event.ammount * 2.0F);
+                          event.ammount *= (ac.getAcInfo()).damageFactor;
+                        } else if (ac.isMountedEntity(attackEntity)) {
+                          event.ammount = 0.0F;
+                          event.setCanceled(true);
+                        } else {
+                          MCH_EntityAircraft atkac = getRiddenAircraft(attackEntity);
+                          if (W_Entity.isEqual((Entity)atkac, (Entity)ac)) {
+                               event.ammount = 0.0F;
+                               event.setCanceled(true);
+                             } else {
+                               ac.attackEntityFrom(event.source, event.ammount * 2.0F);
+                               event.ammount *= (ac.getAcInfo()).damageFactor;
+                             }
+                        }
+                   }
+              }
          }
-      }
-   }
 
    public MCH_EntityAircraft getRiddenAircraft(Entity entity) {
       MCH_EntityAircraft ac = null;

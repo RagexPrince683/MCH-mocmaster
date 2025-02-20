@@ -60,7 +60,7 @@ public class MCH_ItemUavStation extends W_Item {
          Vec3 vec32 = par3EntityPlayer.getLook(f);
          boolean flag = false;
          float f9 = 1.0F;
-         List list = par2World.getEntitiesWithinAABBExcludingEntity(par3EntityPlayer, par3EntityPlayer.boundingBox.addCoord(vec32.xCoord * d3, vec32.yCoord * d3, vec32.zCoord * d3).expand((double)f9, (double)f9, (double)f9));
+         List<Entity> list = par2World.getEntitiesWithinAABBExcludingEntity(par3EntityPlayer, par3EntityPlayer.boundingBox.addCoord(vec32.xCoord * d3, vec32.yCoord * d3, vec32.zCoord * d3).expand((double)f9, (double)f9, (double)f9));
 
          int i;
          for(i = 0; i < list.size(); ++i) {

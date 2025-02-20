@@ -25,7 +25,7 @@ implements IMessage {
     public void fromBytes(ByteBuf buf) {
         byte[] dst = new byte[buf.array().length - 1];
         buf.getBytes(0, dst);
-        this.data = ByteStreams.newDataInput((byte[])dst);
+        this.data = ByteStreams.newDataInput(dst);
     }
 
     public void toBytes(ByteBuf buf) {

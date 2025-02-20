@@ -19,10 +19,7 @@ import net.minecraft.entity.item.EntityMinecartEmpty;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.*;
 import net.minecraft.world.World;
 
 public abstract class MCH_ItemAircraft extends W_Item {
@@ -34,10 +31,25 @@ public abstract class MCH_ItemAircraft extends W_Item {
       super(i);
    }
 
+
+
    public static void registerDispenseBehavior(Item item) {
       if(!isRegistedDispenseBehavior) {
          BlockDispenser.dispenseBehaviorRegistry.putObject(item, new MCH_ItemAircraftDispenseBehavior());
       }
+   }
+
+   public void addInformation(ItemStack stack, EntityPlayer player, List lines, boolean par4) {
+      MCH_EntityAircraft ac = createAircraft(player.worldObj, -1.0D, -1.0D, -1.0D, stack);
+      if (ac != null &&
+              ac.isNewUAV()) {
+         lines.add(EnumChatFormatting.RED + "DANGER!");
+         lines.add(EnumChatFormatting.RED + "This drone has a new UAV mechanic!");
+         lines.add(EnumChatFormatting.RED + "It may contain a lot of bugs!");
+         lines.add(EnumChatFormatting.RED + "Clear your inventory before use!");
+      }
+//
+      super.addInformation(stack, player, lines, par4);
    }
 
    public abstract MCH_AircraftInfo getAircraftInfo();
@@ -130,7 +142,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
       MCH_EntityAircraft ac = this.onTileClick(itemStack, world, player.rotationYaw, x, y, z);
       if(ac != null) {
-         if(ac.isUAV()) {
+         if(ac.isUAV() || ac.isNewUAV()) {
             if(world.isRemote) {
                if(ac.isSmallUAV()) {
                   W_EntityPlayer.addChatMessage(player, "Please use the UAV station OR Portable Controller");
