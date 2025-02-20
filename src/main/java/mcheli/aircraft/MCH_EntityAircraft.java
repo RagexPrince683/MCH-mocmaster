@@ -5538,7 +5538,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             }
 
 
-            System.out.println("everything is WORKING");
+            //System.out.println("everything is WORKING");
          } else if(this.uavStation != null) {
             double udx1 = super.posX - this.uavStation.posX;
             double udz = super.posZ - this.uavStation.posZ;
@@ -5546,10 +5546,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             //haha gotcha
             //TODO: better
             if(udx1 * udx1 + udz * udz > 15625000.0D) {
-               System.out.println("test 4");
+               //System.out.println("test 4");
                this.uavStation.setControlAircract((MCH_EntityAircraft)null);
                this.setUavStation((MCH_EntityUavStation)null);
-               System.out.println("null 2");
+               //System.out.println("null 2");
 
                //this will stop this shit from working
 
@@ -5565,7 +5565,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          //System.out.println("everything is working 2");
 
          if(this.uavStation != null && this.uavStation.isDead) {
-            System.out.println("setting to null, uav station is dead");
+            //System.out.println("setting to null, uav station is dead");
             this.uavStation = null;
          }
 
