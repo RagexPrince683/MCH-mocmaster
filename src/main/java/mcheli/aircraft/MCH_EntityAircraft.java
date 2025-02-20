@@ -5519,7 +5519,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
   // }
 
    public void updateUAV() {
-      if(this.isUAV()) {
+      if(this.isUAV() || this.isNewUAV()) {
          if(super.worldObj.isRemote) {
             int udx = this.getDataWatcher().getWatchableObjectInt(22);
             if(udx > 0) {

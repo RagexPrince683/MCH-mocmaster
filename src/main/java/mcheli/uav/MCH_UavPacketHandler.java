@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayer;
 public class MCH_UavPacketHandler
         /*    */ {
     /*    */   public static void onPacketUavStatus(EntityPlayer player, ByteArrayDataInput data) {
+        System.out.println("onPacketUavStatus fired for player: " + player.getCommandSenderName());
         /* 11 */     if (!player.worldObj.isRemote) {
             /* 12 */       MCH_UavPacketStatus status = new MCH_UavPacketStatus();
             /* 13 */       status.readData(data);

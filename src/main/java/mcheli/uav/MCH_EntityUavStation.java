@@ -414,51 +414,51 @@ public class MCH_EntityUavStation
          }
 
 
-      protected void onUpdate_Client() {
-           if (this.aircraftPosRotInc > 0) {
-                double rpinc = this.aircraftPosRotInc;
-                double yaw = MathHelper.wrapAngleTo180_double(this.aircraftYaw - this.rotationYaw);
-                this.rotationYaw = (float)(this.rotationYaw + yaw / rpinc);
-                this.rotationPitch = (float)(this.rotationPitch + (this.aircraftPitch - this.rotationPitch) / rpinc);
-                setPosition(this.posX + (this.aircraftX - this.posX) / rpinc, this.posY + (this.aircraftY - this.posY) / rpinc, this.posZ + (this.aircraftZ - this.posZ) / rpinc);
-                setRotation(this.rotationYaw, this.rotationPitch);
-                this.aircraftPosRotInc--;
-              } else {
-                setPosition(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-                this.motionY *= 0.96D;
-                this.motionX = 0.0D;
-                this.motionZ = 0.0D;
-              }
+             protected void onUpdate_Client() {
+                 /* 430 */     if (this.aircraftPosRotInc > 0) {
+                     /* 431 */       double rpinc = this.aircraftPosRotInc;
+                     /* 432 */       double yaw = MathHelper.wrapAngleTo180_double(this.aircraftYaw - this.rotationYaw);
+                     /* 433 */       this.rotationYaw = (float)(this.rotationYaw + yaw / rpinc);
+                     /* 434 */       this.rotationPitch = (float)(this.rotationPitch + (this.aircraftPitch - this.rotationPitch) / rpinc);
+                     /* 435 */       setPosition(this.posX + (this.aircraftX - this.posX) / rpinc, this.posY + (this.aircraftY - this.posY) / rpinc, this.posZ + (this.aircraftZ - this.posZ) / rpinc);
+                     /* 436 */       setRotation(this.rotationYaw, this.rotationPitch);
+                     /* 437 */       this.aircraftPosRotInc--;
+                     /*     */     } else {
+                     /* 439 */       setPosition(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+                     /* 440 */       this.motionY *= 0.96D;
+                     /* 441 */       this.motionX = 0.0D;
+                     /* 442 */       this.motionZ = 0.0D;
+                     /*     */     }
+                 /*     */
+                 /* 445 */     updateUavPosition();
+                 /*     */   }
 
-           updateUavPosition();
-         }
-
-      private void onUpdate_Server() {
-           this.motionY -= 0.03D;
-           moveEntity(0.0D, this.motionY, 0.0D);
-           this.motionY *= 0.96D;
-           this.motionX = 0.0D;
-           this.motionZ = 0.0D;
-           setRotation(this.rotationYaw, this.rotationPitch);
-           if (this.riddenByEntity != null) {
-                if (this.riddenByEntity.isDead) {
-                     unmountEntity(true);
-                     this.riddenByEntity = null;
-                   } else {
-                     ItemStack item = getStackInSlot(0);
-                     if (item != null && item.stackSize > 0) {
-                          handleItem(this.riddenByEntity, item);
-                          if (item.stackSize == 0) {
-                               setInventorySlotContents(0, (ItemStack)null);
-                             }
-                        }
-                  }
-              }
-
-           if (getLastControlAircraft() == null && this.ticksExisted % 40 == 0) {
-                searchLastControlAircraft();
-              }
-         }
+             private void onUpdate_Server() {
+                 /* 449 */     this.motionY -= 0.03D;
+                 /* 450 */     moveEntity(0.0D, this.motionY, 0.0D);
+                 /* 451 */     this.motionY *= 0.96D;
+                 /* 452 */     this.motionX = 0.0D;
+                 /* 453 */     this.motionZ = 0.0D;
+                 /* 454 */     setRotation(this.rotationYaw, this.rotationPitch);
+                 /* 455 */     if (this.riddenByEntity != null) {
+                     /* 456 */       if (this.riddenByEntity.isDead) {
+                         /* 457 */         unmountEntity(true);
+                         /* 458 */         this.riddenByEntity = null;
+                         /*     */       } else {
+                         /* 460 */         ItemStack item = getStackInSlot(0);
+                         /* 461 */         if (item != null && item.stackSize > 0) {
+                             /* 462 */           handleItem(this.riddenByEntity, item);
+                             /* 463 */           if (item.stackSize == 0) {
+                                 /* 464 */             setInventorySlotContents(0, (ItemStack)null);
+                                 /*     */           }
+                             /*     */         }
+                         /*     */       }
+                     /*     */     }
+                 /*     */
+                 /* 470 */     if (getLastControlAircraft() == null && this.ticksExisted % 40 == 0) {
+                     /* 471 */       searchLastControlAircraft();
+                     /*     */     }
+                 /*     */   }
 
 
       public void setPositionAndRotation2(double par1, double par3, double par5, float par7, float par8, int par9) {
@@ -473,33 +473,64 @@ public class MCH_EntityUavStation
            this.motionZ = this.velocityZ;
          }
 
-      public void updateRiderPosition() {
-           if (this.riddenByEntity != null) {
-                double x = -Math.sin(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
-                double z = Math.cos(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
-                this.riddenByEntity.setPosition(this.posX + x, this.posY + getMountedYOffset() + this.riddenByEntity.getYOffset(), this.posZ + z);
-              }
-        }
+             public void updateRiderPosition() {
+                 /* 489 */     if (this.riddenByEntity != null) {
+                     /* 490 */       double x = -Math.sin(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
+                     /* 491 */       double z = Math.cos(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
+                     /* 492 */       this.riddenByEntity.setPosition(this.posX + x, this.posY + getMountedYOffset() + this.riddenByEntity.getYOffset(), this.posZ + z);
+                     /*     */     }
+                 /*     */   }
 
 
-     public void controlLastAircraft(Entity user) {
-           if (getLastControlAircraft() != null && !(getLastControlAircraft()).isDead) {
-                getLastControlAircraft().setUavStation(this);
-                setControlAircract(getLastControlAircraft());
-                if (this.controlAircraft != null &&
-                          (this.controlAircraft.getAcInfo()).isNewUAV &&
-                          this.controlAircraft.ticksExisted >= 10)
-                   {
-                       //System.out.println(Entity);
+             public void controlLastAircraft(Entity user) {
+                 MCH_EntityAircraft lastAircraft = getLastControlAircraft();
 
-                     this.riddenByEntity.mountEntity((Entity)this.controlAircraft);
-                   }
+                 if (lastAircraft == null || lastAircraft.isDead) {
+                     System.out.println("controlLastAircraft: No valid last control aircraft found.");
+                     return;
+                 }
 
+                 // Set the UAV station for the aircraft
+                 lastAircraft.setUavStation(this);
+                 setControlAircract(lastAircraft);
 
+                 // Ensure controlAircraft is set properly
+                 if (this.controlAircraft == null) {
+                     System.out.println("controlLastAircraft: controlAircraft is still null after setting.");
+                     return;
+                 }
 
-                W_EntityPlayer.closeScreen(user);
-              }
-         }
+                 System.out.println("controlLastAircraft: controlAircraft set successfully.");
+
+                 // Ensure the aircraft is a New UAV and has existed for long enough
+                 if (this.controlAircraft.getAcInfo() == null) {
+                     System.out.println("controlLastAircraft: Aircraft has no AcInfo.");
+                     return;
+                 }
+
+                 if (!this.controlAircraft.getAcInfo().isNewUAV) {
+                     System.out.println("controlLastAircraft: Aircraft is not a NewUAV.");
+                     return;
+                 }
+
+                 if (this.controlAircraft.ticksExisted < 10) {
+                     System.out.println("controlLastAircraft: Aircraft exists for only " + this.controlAircraft.ticksExisted + " ticks.");
+                     return;
+                 }
+
+                 // Ensure the player is valid before mounting
+                 if (this.riddenByEntity == null) {
+                     System.out.println("controlLastAircraft: riddenByEntity is null, cannot mount.");
+                     return;
+                 }
+
+                 // Mount the player onto the UAV
+                 System.out.println("controlLastAircraft: Mounting player to UAV.");
+                 this.riddenByEntity.mountEntity((Entity) this.controlAircraft);
+
+                 // Close GUI for user
+                 W_EntityPlayer.closeScreen(user);
+             }
 
 
      public void handleItem(Entity user, ItemStack itemStack) {
