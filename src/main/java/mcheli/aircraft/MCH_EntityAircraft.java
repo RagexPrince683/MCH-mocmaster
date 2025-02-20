@@ -4515,8 +4515,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             /*      */       }
          /*      */
          /* 4374 */       return false;
-         /* 4375 */     }  if (itemStack != null && itemStack.getItem() instanceof mcheli.mob.MCH_ItemSpawnGunner)
-         /* 4376 */       return false;
+         /* 4375 */     }
+      //if (itemStack != null && itemStack.getItem() instanceof mcheli.mob.MCH_ItemSpawnGunner)
+         /* 4376 */ //      return false;
       /* 4377 */     if (player.isSneaking()) {
          /* 4378 */       openInventory(player);
          /* 4379 */       return false;
@@ -4896,7 +4897,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       /* 4761 */     MCH_Lib.DbgLog(this.worldObj, "initCurrentWeapon:" + W_Entity.getEntityId(entity) + ":%d", new Object[] { Integer.valueOf(sid) });
       /* 4762 */     if (sid >= 0 && sid < this.currentWeaponID.length) {
          /* 4763 */       this.currentWeaponID[sid] = -1;
-         /* 4764 */       if (entity instanceof EntityPlayer || entity instanceof mcheli.mob.MCH_EntityGunner) {
+         /* 4764 */       if (entity instanceof EntityPlayer ) { //|| entity instanceof mcheli.mob.MCH_EntityGunner
             /* 4765 */         this.currentWeaponID[sid] = getNextWeaponID(entity, 1);
             /* 4766 */         switchWeapon(entity, getCurrentWeaponID(entity));
             /* 4767 */         if (this.worldObj.isRemote) {
@@ -5016,7 +5017,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public int getCurrentWeaponID(Entity entity) {
-      /* 4881 */     if (!(entity instanceof EntityPlayer) && !(entity instanceof mcheli.mob.MCH_EntityGunner)) {
+      /* 4881 */     if (!(entity instanceof EntityPlayer) ) { //&& !(entity instanceof mcheli.mob.MCH_EntityGunner)
          /* 4882 */       return -1;
          /*      */     }
       /* 4884 */     int id = getSeatIdByEntity(entity);
@@ -5045,7 +5046,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          /* 4908 */       if (w != null) {
             /* 4909 */         MCH_WeaponInfo wi = getWeaponInfoById(id);
             /* 4910 */         int wpsid = getWeaponSeatID(wi, w);
-            /* 4911 */         if (wpsid < getSeatNum() + 1 + 1 && (wpsid == sid || (sid == 0 && w.canUsePilot && !(getEntityBySeatId(wpsid) instanceof EntityPlayer) && !(getEntityBySeatId(wpsid) instanceof mcheli.mob.MCH_EntityGunner)))) {
+            /* 4911 */         if (wpsid < getSeatNum() + 1 + 1 && (wpsid == sid || (sid == 0 && w.canUsePilot && !(getEntityBySeatId(wpsid) instanceof EntityPlayer) ))) { //&& !(getEntityBySeatId(wpsid) instanceof mcheli.mob.MCH_EntityGunner)
                /*      */           break;
                /*      */         }
             /*      */       }
@@ -5195,7 +5196,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   MCH_AircraftInfo.Weapon var17 = this.getAcInfo().getWeaponById(wid);
                   if(var17 != null && !this.isDestroyed()) {
                      Entity var19 = this.getEntityBySeatId(this.getWeaponSeatID(this.getWeaponInfoById(wid), var17));
-                     if(var17.canUsePilot && !(var19 instanceof EntityPlayer) && !(entity instanceof mcheli.mob.MCH_EntityGunner)) {
+                     if(var17.canUsePilot && !(var19 instanceof EntityPlayer) ) { //&& !(entity instanceof mcheli.mob.MCH_EntityGunner)
                         var19 = this.getEntityBySeatId(0);
                      }
 
@@ -5275,7 +5276,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   MCH_AircraftInfo.Weapon wi = this.getAcInfo().getWeaponById(wid);
                   if(wi != null) {
                      Entity entity = this.getEntityBySeatId(this.getWeaponSeatID(this.getWeaponInfoById(wid), wi));
-                     if (wi.canUsePilot && !(entity instanceof EntityPlayer) && !(entity instanceof mcheli.mob.MCH_EntityGunner)) {
+                     if (wi.canUsePilot && !(entity instanceof EntityPlayer) ) { //&& !(entity instanceof mcheli.mob.MCH_EntityGunner)
                         /* 5125 */             entity = getEntityBySeatId(0);
                         /*      */           }
 

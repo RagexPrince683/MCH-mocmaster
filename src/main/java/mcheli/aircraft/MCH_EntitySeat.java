@@ -196,8 +196,8 @@
          /* 196 */       ItemStack itemStack = player.getCurrentEquippedItem();
          /* 197 */       if (itemStack != null && itemStack.getItem() instanceof mcheli.tool.MCH_ItemWrench)
             /* 198 */         return getParent().interactFirst(player);
-         /* 199 */       if (itemStack != null && itemStack.getItem() instanceof mcheli.mob.MCH_ItemSpawnGunner)
-            /* 200 */         return getParent().interactFirst(player);
+         /* 199 */      // if (itemStack != null && itemStack.getItem() instanceof mcheli.mob.MCH_ItemSpawnGunner)
+            /* 200 */   //      return getParent().interactFirst(player);
          /* 201 */       if (this.riddenByEntity != null)
             /* 202 */         return false;
          /* 203 */       if (player.ridingEntity != null)
