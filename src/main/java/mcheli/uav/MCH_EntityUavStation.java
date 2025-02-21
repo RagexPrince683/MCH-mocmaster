@@ -59,6 +59,8 @@ public class MCH_EntityUavStation
 
       private boolean continuePressed = false;
 
+
+
              public void setContinuePressed(boolean flag) {
                  this.continuePressed = flag;
              }
@@ -210,7 +212,9 @@ public class MCH_EntityUavStation
            this.loadedLastControlAircraftGuid = nbt.getString("LastCtrlAc");
          }
 
-      public void initUavPostion() {
+
+
+             public void initUavPostion() {
            int rt = (int)(MCH_Lib.getRotate360((this.rotationYaw + 45.0F)) / 90.0D);
            boolean D = true;
            this.posUavX = (rt != 0 && rt != 3) ? -12 : 12;
@@ -220,12 +224,26 @@ public class MCH_EntityUavStation
          }
 
       public void setDead() {
+          double gotox = MCH_EntityUavStation.storedStationX;
+          double gotoy = MCH_EntityUavStation.storedStationY;
+          double gotoz = MCH_EntityUavStation.storedStationZ;
+          EntityPlayer player = (EntityPlayer) this.riddenByEntity;
+
            if (this.controlAircraft != null &&
-                     this.controlAircraft.isNewUAV() && this.controlAircraft.getRiddenByEntity() != null &&
-                     this.controlAircraft.getRiddenByEntity() instanceof EntityPlayer) {
+                     this.controlAircraft.isNewUAV() &&
+                     this.controlAircraft.getRiddenByEntity() instanceof EntityPlayer) { //&& this.controlAircraft.getRiddenByEntity() != null
                 ((EntityPlayer)this.controlAircraft.getRiddenByEntity()).addChatMessage((IChatComponent)new ChatComponentText(EnumChatFormatting.RED + "Station destroyed!"));
                 ((EntityPlayer)this.controlAircraft.getRiddenByEntity()).addPotionEffect(new PotionEffect(11, 20, 50));
                 this.controlAircraft.getRiddenByEntity().mountEntity((Entity)this);
+                //unmount player
+               unmountEntity(true);
+               // Teleport player
+               player.setPositionAndUpdate(
+                       gotox,
+                       gotoy,
+                       gotoz
+               );
+
               }
 
 
@@ -262,11 +280,28 @@ public class MCH_EntityUavStation
 
            setBeenAttacked();
            if (damage > 0.0F) {
-                if (this.riddenByEntity != null) {
-                     this.riddenByEntity.mountEntity((Entity)this);
-                   }
+               //i might want to store these at the top of the class idk tho
+               double gotox = MCH_EntityUavStation.storedStationX;
+               double gotoy = MCH_EntityUavStation.storedStationY;
+               double gotoz = MCH_EntityUavStation.storedStationZ;
+               EntityPlayer player = (EntityPlayer) this.riddenByEntity;
+               if (this.riddenByEntity != null) {
+                   this.riddenByEntity.mountEntity((Entity) this);
+               }
 
-                this.dropContentsWhenDead = true;
+               this.dropContentsWhenDead = true;
+               if (this.riddenByEntity != null){ //!isDamegeSourcePlayer &&
+               System.out.println(MCH_EntityUavStation.storedStationX + " " +
+                       MCH_EntityUavStation.storedStationY + " " +
+                       MCH_EntityUavStation.storedStationZ + " " + "station pos");
+
+               // Teleport player
+               player.setPositionAndUpdate(
+                       gotox,
+                       gotoy,
+                       gotoz
+               );
+           }
                 setDead();
                 if (!isDamegeSourcePlayer) {
                      MCH_Explosion.newExplosion(this.worldObj, (Entity)null, this.riddenByEntity, this.posX, this.posY, this.posZ, 1.0F, 0.0F, true, true, false, false, 0);
@@ -338,6 +373,7 @@ public class MCH_EntityUavStation
          }
 
       public void onUpdate() {
+          EntityPlayer player = (EntityPlayer)this.riddenByEntity;
            super.onUpdate();
            this.prevRotCover = this.rotCover;
            if (isOpen()) {
@@ -355,6 +391,18 @@ public class MCH_EntityUavStation
            if (this.riddenByEntity == null &&
                      this.lastRiddenByEntity != null) {
                 unmountEntity(true);
+               //if (controlAircraft.isNewUAV()) {
+               //    System.out.println(MCH_EntityUavStation.storedStationX + " " +
+               //            MCH_EntityUavStation.storedStationY + " " +
+               //            MCH_EntityUavStation.storedStationZ + " " + "station pos");
+
+               //    // Teleport player
+               //    player.setPositionAndUpdate(
+               //            MCH_EntityUavStation.storedStationX,
+               //            MCH_EntityUavStation.storedStationY,
+               //            MCH_EntityUavStation.storedStationZ
+               //    );
+               //}
               }
 
 
