@@ -26,6 +26,7 @@ import mcheli.wrapper.W_EntityPlayer;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -397,7 +398,14 @@ public class MCH_EntityUavStation
           if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
               player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
               player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
+              // Prevent picking up items by removing them from collision
+              List<EntityItem> items = this.worldObj.getEntitiesWithinAABB(EntityItem.class, player.boundingBox.expand(1.5, 1.5, 1.5));
+              for (EntityItem item : items) {
+                  item.delayBeforeCanPickup = 999999; // Stops item from being picked up
+              }
           }
+
+
 
 
            if (this.riddenByEntity == null &&
