@@ -332,6 +332,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.lastSearchLightYaw = this.lastSearchLightPitch = 0.0F;
    }
 
+
+
    protected void entityInit() {
       super.entityInit();
       this.getDataWatcher().addObject(20, "");

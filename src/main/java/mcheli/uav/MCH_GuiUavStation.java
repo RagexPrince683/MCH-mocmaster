@@ -79,9 +79,13 @@ public class MCH_GuiUavStation
       /*     */   }
    /*     */
    /*     */   protected void actionPerformed(GuiButton btn) {
+                     System.out.println("actionPerformed fired");
       /*  80 */     if (btn != null && btn.enabled) {
+                        System.out.println("btn enabled");
          /*  81 */       if (btn.id == 256) {
+                              this.uavStation.setContinuePressed(true);
             /*  82 */         if (this.uavStation != null && !this.uavStation.isDead && this.uavStation.getLastControlAircraft() != null && !(this.uavStation.getLastControlAircraft()).isDead) {
+                                   System.out.println("found uav station and last control aircraft");
                /*  83 */           MCH_UavPacketStatus pos = new MCH_UavPacketStatus();
                /*  84 */           pos.posUavX = (byte)this.uavStation.posUavX;
                /*  85 */           pos.posUavY = (byte)this.uavStation.posUavY;

@@ -53,6 +53,20 @@ public class MCH_EntityUavStation
       protected int aircraftPosRotInc;
       protected double aircraftX;
 
+      private double storedStationX;
+      private double storedStationY;
+      private double storedStationZ;
+
+      private boolean continuePressed = false;
+
+             public void setContinuePressed(boolean flag) {
+                 this.continuePressed = flag;
+             }
+
+             public boolean isContinuePressed() {
+                 return this.continuePressed;
+             }
+
       public MCH_EntityUavStation(World world) {
            super(world);
            this.dropContentsWhenDead = false;
@@ -483,6 +497,9 @@ public class MCH_EntityUavStation
 
 
              public void controlLastAircraft(Entity user) {
+                 storedStationX = this.posX;
+                 storedStationY = this.posY;
+                 storedStationZ = this.posZ;
                  MCH_EntityAircraft lastAircraft = getLastControlAircraft();
 
                  if (lastAircraft == null || lastAircraft.isDead) {
@@ -667,6 +684,15 @@ public class MCH_EntityUavStation
            if (this.worldObj.isRemote) {
                 W_EntityPlayer.closeScreen(rByEntity);
               }
+
+
+            //should hopefully teleport the player back to the original station pos
+          //needs to work after the player presses continue
+          if (rByEntity != null && this.continuePressed) { //&& MCH_GuiUavStation.buttonContinue.enabled == true
+              System.out.println("continue pressed, teleporting player back to station.");
+              //this.controlAircraft.isNewUAV() causes a crash
+              rByEntity.setPosition(storedStationX, storedStationY, storedStationZ);
+          }
 
            this.riddenByEntity = null;
            this.lastRiddenByEntity = null;
