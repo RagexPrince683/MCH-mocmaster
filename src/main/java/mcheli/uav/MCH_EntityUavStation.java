@@ -53,9 +53,9 @@ public class MCH_EntityUavStation
       protected int aircraftPosRotInc;
       protected double aircraftX;
 
-      private double storedStationX;
-      private double storedStationY;
-      private double storedStationZ;
+      public static double storedStationX;
+      public static double storedStationY;
+      public static double storedStationZ;
 
       private boolean continuePressed = false;
 
@@ -65,6 +65,24 @@ public class MCH_EntityUavStation
 
              public boolean isContinuePressed() {
                  return this.continuePressed;
+             }
+
+             public void storeStationPosition() {
+                 storedStationX = this.posX;
+                 storedStationY = this.posY;
+                 storedStationZ = this.posZ;
+             }
+
+             public double getStoredStationX() {
+                 return storedStationX;
+             }
+
+             public double getStoredStationY() {
+                 return storedStationY;
+             }
+
+             public double getStoredStationZ() {
+                 return storedStationZ;
              }
 
       public MCH_EntityUavStation(World world) {
@@ -497,56 +515,29 @@ public class MCH_EntityUavStation
 
 
              public void controlLastAircraft(Entity user) {
-                 storedStationX = this.posX;
-                 storedStationY = this.posY;
-                 storedStationZ = this.posZ;
-                 MCH_EntityAircraft lastAircraft = getLastControlAircraft();
+                 MCH_EntityAircraft lastAc = getLastControlAircraft();
+                 if (lastAc != null && !lastAc.isDead) {
+                     lastAc.setUavStation(this);
+                     setControlAircract(lastAc);
 
-                 if (lastAircraft == null || lastAircraft.isDead) {
-                     System.out.println("controlLastAircraft: No valid last control aircraft found.");
-                     return;
+                     // Store the current station position
+                     System.out.println("stationposition" + storedStationX + " " + storedStationY + " " + storedStationZ);
+                     storeStationPosition();
+
+                     // If it's a new UAV and it's been alive long enough, mount the player to the UAV.
+                     if (this.controlAircraft != null &&
+                             this.controlAircraft.getAcInfo() != null &&
+                             this.controlAircraft.getAcInfo().isNewUAV &&
+                             this.controlAircraft.ticksExisted >= 10) {
+                         this.riddenByEntity.mountEntity((Entity)this.controlAircraft);
+                     }
+                     W_EntityPlayer.closeScreen(user);
                  }
-
-                 // Set the UAV station for the aircraft
-                 lastAircraft.setUavStation(this);
-                 setControlAircract(lastAircraft);
-
-                 // Ensure controlAircraft is set properly
-                 if (this.controlAircraft == null) {
-                     System.out.println("controlLastAircraft: controlAircraft is still null after setting.");
-                     return;
+                 if (this.controlAircraft.getAcInfo().isNewUAV && this.isDead) {
+                     System.out.println("UAV is dead, teleporting to stored station position");
+                        this.setPosition(storedStationX, storedStationY, storedStationZ);
+                        //todo probably also set the fuckin mount thing to null before setting position so minecraft doesnt tardmax
                  }
-
-                 System.out.println("controlLastAircraft: controlAircraft set successfully.");
-
-                 // Ensure the aircraft is a New UAV and has existed for long enough
-                 if (this.controlAircraft.getAcInfo() == null) {
-                     System.out.println("controlLastAircraft: Aircraft has no AcInfo.");
-                     return;
-                 }
-
-                 if (!this.controlAircraft.getAcInfo().isNewUAV) {
-                     System.out.println("controlLastAircraft: Aircraft is not a NewUAV.");
-                     return;
-                 }
-
-                 if (this.controlAircraft.ticksExisted < 10) {
-                     System.out.println("controlLastAircraft: Aircraft exists for only " + this.controlAircraft.ticksExisted + " ticks.");
-                     return;
-                 }
-
-                 // Ensure the player is valid before mounting
-                 if (this.riddenByEntity == null) {
-                     System.out.println("controlLastAircraft: riddenByEntity is null, cannot mount.");
-                     return;
-                 }
-
-                 // Mount the player onto the UAV
-                 System.out.println("controlLastAircraft: Mounting player to UAV.");
-                 this.riddenByEntity.mountEntity((Entity) this.controlAircraft);
-
-                 // Close GUI for user
-                 W_EntityPlayer.closeScreen(user);
              }
 
 
@@ -691,6 +682,7 @@ public class MCH_EntityUavStation
           if (rByEntity != null && this.continuePressed) { //&& MCH_GuiUavStation.buttonContinue.enabled == true
               System.out.println("continue pressed, teleporting player back to station.");
               //this.controlAircraft.isNewUAV() causes a crash
+
               rByEntity.setPosition(storedStationX, storedStationY, storedStationZ);
           }
 

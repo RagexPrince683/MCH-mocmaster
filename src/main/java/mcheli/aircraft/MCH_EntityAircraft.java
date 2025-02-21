@@ -660,16 +660,32 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.rotDestroyedRoll = (super.rand.nextFloat() - 0.5F) * 0.5F;
       this.rotDestroyedYaw = 0.0F;
       if (getRiddenByEntity() != null) {
-         /*  602 */       if (isUAV()) {
-            /*  603 */         getRiddenByEntity().mountEntity((Entity)null);
-            /*  604 */       } else if (isNewUAV()) {
-            /*  605 */         if (getRiddenByEntity() instanceof EntityPlayer) {
-               /*  606 */           ((EntityPlayer)getRiddenByEntity()).addChatMessage((IChatComponent)new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed!"));
-               /*  607 */           ((EntityPlayer)getRiddenByEntity()).addPotionEffect(new PotionEffect(11, 20, 50));
-               /*      */         }
-            /*  609 */         getRiddenByEntity().mountEntity((Entity)getUavStation());
-            /*      */       }
-         /*      */     }
+         if (isUAV()) {
+            // For normal UAVs, perform the standard dismount.
+            getRiddenByEntity().mountEntity(null);
+         } else if (isNewUAV()) {
+            if (getRiddenByEntity() instanceof EntityPlayer) {
+               ((EntityPlayer)getRiddenByEntity()).addChatMessage(
+                       new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed!"));
+               ((EntityPlayer)getRiddenByEntity()).addPotionEffect(new PotionEffect(11, 20, 50));
+               getRiddenByEntity().mountEntity(null);
+               System.out.println(MCH_EntityUavStation.storedStationX + " " + MCH_EntityUavStation.storedStationY + " " + MCH_EntityUavStation.storedStationZ + " " + "station pos");
+               player.setPosition(MCH_EntityUavStation.storedStationX, MCH_EntityUavStation.storedStationY, MCH_EntityUavStation.storedStationZ);
+               player.setPosition(MCH_EntityUavStation.storedStationX, MCH_EntityUavStation.storedStationY, MCH_EntityUavStation.storedStationZ);
+               player.setPosition(MCH_EntityUavStation.storedStationX, MCH_EntityUavStation.storedStationY, MCH_EntityUavStation.storedStationZ);
+            }
+            // Teleport the player back to the stored station position.
+            //if (getUavStation() != null) {
+               // Optionally mount the player on the station entity.
+               //getRiddenByEntity().mountEntity((Entity)getUavStation());
+               //getRiddenByEntity().setPosition(
+               //        getUavStation().getStoredStationX(),
+               //        getUavStation().getStoredStationY(),
+               //        getUavStation().getStoredStationZ());
+
+            //}
+         }
+      }
 
       if(!super.worldObj.isRemote) {
          this.ejectSeat(this.getRiddenByEntity());
@@ -1484,6 +1500,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                /*      */         }
             /*      */       }
          /*      */     }
+
+     // if (isDestroyed() && isNewUAV()) {
+     //
+     // }
 
       if((this.aircraftRotChanged || this.aircraftRollRev) && super.worldObj.isRemote && this.getRiddenByEntity() != null) {
          MCH_PacketIndRotation.send(this);

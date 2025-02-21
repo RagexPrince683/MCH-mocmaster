@@ -29,7 +29,10 @@ public class MCH_ItemUavStation extends W_Item {
 
    public MCH_EntityUavStation createUavStation(World world, double x, double y, double z, int kind) {
       MCH_EntityUavStation uavst = new MCH_EntityUavStation(world);
+      System.out.println("UavStation pos" + x + " " + y + " " + z);
+
       uavst.setPosition(x, y + (double)uavst.yOffset, z);
+      uavst.storeStationPosition();
       uavst.prevPosX = x;
       uavst.prevPosY = y;
       uavst.prevPosZ = z;
