@@ -281,6 +281,7 @@ public class MCH_EntityUavStation
            setBeenAttacked();
            if (damage > 0.0F) {
                //i might want to store these at the top of the class idk tho
+               //nvm this works perfectly fine
                double gotox = MCH_EntityUavStation.storedStationX;
                double gotoy = MCH_EntityUavStation.storedStationY;
                double gotoz = MCH_EntityUavStation.storedStationZ;
@@ -387,6 +388,17 @@ public class MCH_EntityUavStation
               } else {
                 this.rotCover = 0.0F;
               }
+
+          if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
+              //((EntityPlayer) this.riddenByEntity).inventory.pickupSlot = -1; // Prevents item pickup for new UAVs only
+              ((EntityPlayer) this.riddenByEntity).inventoryContainer.detectAndSendChanges();
+          }
+
+          if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
+              player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
+              player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
+          }
+
 
            if (this.riddenByEntity == null &&
                      this.lastRiddenByEntity != null) {
@@ -704,37 +716,41 @@ public class MCH_EntityUavStation
            return 1;
          }
 
-      public void unmountEntity(boolean unmountAllEntity) {
-           Entity rByEntity = null;
-           if (this.riddenByEntity != null) {
-                if (!this.worldObj.isRemote) {
-                     rByEntity = this.riddenByEntity;
-                     this.riddenByEntity.mountEntity((Entity)null);
-                   }
-              } else if (this.lastRiddenByEntity != null) {
-                rByEntity = this.lastRiddenByEntity;
-              }
+             public void unmountEntity(boolean unmountAllEntity) {
+                 Entity rByEntity = null;
+                 if (this.riddenByEntity != null) {
+                     if (!this.worldObj.isRemote) {
+                         rByEntity = this.riddenByEntity;
+                         this.riddenByEntity.mountEntity((Entity) null);
+                     }
+                 } else if (this.lastRiddenByEntity != null) {
+                     rByEntity = this.lastRiddenByEntity;
+                 }
 
-           if (getControlAircract() != null) {
-                getControlAircract().setUavStation((MCH_EntityUavStation)null);
-              }
+                 if (getControlAircract() != null) {
+                     getControlAircract().setUavStation((MCH_EntityUavStation) null);
+                 }
 
-           setControlAircract((MCH_EntityAircraft)null);
-           if (this.worldObj.isRemote) {
-                W_EntityPlayer.closeScreen(rByEntity);
-              }
+                 setControlAircract((MCH_EntityAircraft) null);
+                 if (this.worldObj.isRemote) {
+                     W_EntityPlayer.closeScreen(rByEntity);
+                 }
 
+                 EntityPlayer player = (EntityPlayer) this.riddenByEntity;
 
-            //should hopefully teleport the player back to the original station pos
-          //needs to work after the player presses continue
-          if (rByEntity != null && this.continuePressed) { //&& MCH_GuiUavStation.buttonContinue.enabled == true
-              System.out.println("continue pressed, teleporting player back to station.");
-              //this.controlAircraft.isNewUAV() causes a crash
+                 // Ensure player teleports back to the UAV station when dismounting
+                 //I don't know that this will ever fire considering rByEntity is null but I will trust the plan gpt
+                 if (rByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
+                     System.out.println("Teleporting player back to stored station position.");
+                     player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
+                 }
 
-              rByEntity.setPosition(storedStationX, storedStationY, storedStationZ);
-          }
+                 if (player != null && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
+                     System.out.println("Teleporting player back to stored station position (New UAV).");
+                     player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
+                 }
 
-           this.riddenByEntity = null;
-           this.lastRiddenByEntity = null;
-         }
+                 this.riddenByEntity = null;
+                 this.lastRiddenByEntity = null;
+             }
     }
