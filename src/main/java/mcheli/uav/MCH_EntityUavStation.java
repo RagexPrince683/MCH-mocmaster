@@ -225,27 +225,56 @@ public class MCH_EntityUavStation
          }
 
       public void setDead() {
+          //maybe i need to bind the UAV to the UAV station a little more and if those two things are linked and one or the other gets fucked
+          //then fuck it over, but then why the actual fuck would this not fire
+          System.out.println("setDead fired");
           double gotox = MCH_EntityUavStation.storedStationX;
           double gotoy = MCH_EntityUavStation.storedStationY;
           double gotoz = MCH_EntityUavStation.storedStationZ;
-          EntityPlayer player = (EntityPlayer) this.riddenByEntity;
+          //EntityPlayer player = (EntityPlayer) this.riddenByEntity;
+          //causes a crash
+          //System.out.println(controlAircraft + " " + controlAircraft.getAcInfo().isNewUAV);
 
-           if (this.controlAircraft != null &&
-                     this.controlAircraft.isNewUAV() &&
-                     this.controlAircraft.getRiddenByEntity() instanceof EntityPlayer) { //&& this.controlAircraft.getRiddenByEntity() != null
-                ((EntityPlayer)this.controlAircraft.getRiddenByEntity()).addChatMessage((IChatComponent)new ChatComponentText(EnumChatFormatting.RED + "Station destroyed!"));
-                ((EntityPlayer)this.controlAircraft.getRiddenByEntity()).addPotionEffect(new PotionEffect(11, 20, 50));
-                this.controlAircraft.getRiddenByEntity().mountEntity((Entity)this);
-                //unmount player
-               unmountEntity(true);
-               // Teleport player
-               player.setPositionAndUpdate(
-                       gotox,
-                       gotoy,
-                       gotoz
-               );
+          //cant call getRiddenByEntity() here, is a MCH_EntityAircraft method or something idk fuck im tired man
+          //Entity rider = getRiddenByEntity();
+          //if (rider instanceof EntityPlayer) {
+          //
+          //}
 
+          if (this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
+              //why the fuck does this not fire
+              //how the fuck does this not fire
+              //who the fuck is preventing this from firing
+              System.out.println("non null and new UAV");
+              EntityPlayer player = (EntityPlayer) this.controlAircraft.getRiddenByEntity();
+
+              if (player != null) {
+                  //todo add as many methods as possible to stop the player being in the fucking UAV
+                  System.out.println("[NEW UAV] UAV Station destroyed! Teleporting player back.");
+                  this.controlAircraft.setUavStation(null);
+                  setControlAircract(null);
+                  player.mountEntity(null); // Force eject
+                  player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
               }
+          }
+
+          //never fires loooooool
+          // if (this.controlAircraft != null &&
+          //           this.controlAircraft.isNewUAV() &&
+          //           this.controlAircraft.getRiddenByEntity() instanceof EntityPlayer) { //&& this.controlAircraft.getRiddenByEntity() != null
+          //      ((EntityPlayer)this.controlAircraft.getRiddenByEntity()).addChatMessage((IChatComponent)new ChatComponentText(EnumChatFormatting.RED + "Station destroyed!"));
+          //      ((EntityPlayer)this.controlAircraft.getRiddenByEntity()).addPotionEffect(new PotionEffect(11, 20, 50));
+          //      this.controlAircraft.getRiddenByEntity().mountEntity((Entity)this);
+          //      //unmount player
+          //     unmountEntity(true);
+          //     // Teleport player
+          //     player.setPositionAndUpdate(
+          //             gotox,
+          //             gotoy,
+          //             gotoz
+          //     );
+//
+          //    }
 
 
            super.setDead();
@@ -390,10 +419,11 @@ public class MCH_EntityUavStation
                 this.rotCover = 0.0F;
               }
 
-          if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
-              //((EntityPlayer) this.riddenByEntity).inventory.pickupSlot = -1; // Prevents item pickup for new UAVs only
-              ((EntityPlayer) this.riddenByEntity).inventoryContainer.detectAndSendChanges();
-          }
+           //99% sure does not work lool... I would FUCKING KNOW IF THERE WERE PRINT STATEMENTS
+          //if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
+          //    //((EntityPlayer) this.riddenByEntity).inventory.pickupSlot = -1; // Prevents item pickup for new UAVs only
+          //    ((EntityPlayer) this.riddenByEntity).inventoryContainer.detectAndSendChanges();
+          //}
 
           if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
               player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV

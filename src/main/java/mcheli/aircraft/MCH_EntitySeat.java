@@ -86,17 +86,19 @@ public class MCH_EntitySeat extends W_Entity {
 
 
       // If this seat belongs to a new UAV and the player dismounts, teleport them except it does not work
-      if (this.riddenByEntity == null && this.lastRiddenByEntity instanceof EntityPlayer) {
+      if (this.lastRiddenByEntity instanceof EntityPlayer && this.riddenByEntity == null) {
          EntityPlayer player = (EntityPlayer) this.lastRiddenByEntity;
 
          if (this.parent != null && this.parent.getAcInfo().isNewUAV) {
-            System.out.println("Seat detected player dismount! Teleporting to UAV Station.");
+            System.out.println("[NEW UAV] Player dismounted! Teleporting to UAV Station.");
             player.setPositionAndUpdate(
                     MCH_EntityUavStation.storedStationX,
                     MCH_EntityUavStation.storedStationY,
                     MCH_EntityUavStation.storedStationZ
             );
          }
+
+         this.lastRiddenByEntity = null; // Prevent repeat teleport
       }
 
       if (this.lastRiddenByEntity == null && this.riddenByEntity != null) {
