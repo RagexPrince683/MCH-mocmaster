@@ -59,6 +59,9 @@ public class MCH_EntityUavStation
       public static double storedStationZ;
 
       private boolean continuePressed = false;
+      private EntityPlayer storedPlayer;
+      public boolean isridingnewuav = false;
+
 
 
 
@@ -228,6 +231,9 @@ public class MCH_EntityUavStation
           //maybe i need to bind the UAV to the UAV station a little more and if those two things are linked and one or the other gets fucked
           //then fuck it over, but then why the actual fuck would this not fire
           System.out.println("setDead fired");
+
+          //this fires when the UAV station is set to dead
+
           double gotox = MCH_EntityUavStation.storedStationX;
           double gotoy = MCH_EntityUavStation.storedStationY;
           double gotoz = MCH_EntityUavStation.storedStationZ;
@@ -241,12 +247,18 @@ public class MCH_EntityUavStation
           //
           //}
 
-          if (this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
+          if (MCH_EntityAircraft.newuavvariable && isridingnewuav) { //this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV
               //why the fuck does this not fire
               //how the fuck does this not fire
               //who the fuck is preventing this from firing
               System.out.println("non null and new UAV");
-              EntityPlayer player = (EntityPlayer) this.controlAircraft.getRiddenByEntity();
+              EntityPlayer player = null;
+             // if (this.riddenByEntity instanceof EntityPlayer) {
+             //     player = (EntityPlayer)this.riddenByEntity;
+             // } else
+                  if (this.controlAircraft.storedRider != null) {
+                  player = this.controlAircraft.storedRider;
+              }
 
               if (player != null) {
                   //todo add as many methods as possible to stop the player being in the fucking UAV
@@ -254,7 +266,7 @@ public class MCH_EntityUavStation
                   this.controlAircraft.setUavStation(null);
                   setControlAircract(null);
                   player.mountEntity(null); // Force eject
-                  player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
+                  player.setPositionAndUpdate(gotox, gotoy, gotoz);
               }
           }
 
@@ -426,6 +438,7 @@ public class MCH_EntityUavStation
           //}
 
           if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
+              isridingnewuav = true;
               player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
               player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
               // Prevent picking up items by removing them from collision
@@ -617,6 +630,10 @@ public class MCH_EntityUavStation
                  if (lastAc != null && !lastAc.isDead) {
                      lastAc.setUavStation(this);
                      setControlAircract(lastAc);
+
+                     if(this.riddenByEntity instanceof EntityPlayer) {
+                         lastAc.storedRider = (EntityPlayer)this.riddenByEntity;
+                     }
 
                      // Store the current station position
                      System.out.println("stationposition" + storedStationX + " " + storedStationY + " " + storedStationZ);

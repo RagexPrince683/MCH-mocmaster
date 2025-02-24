@@ -253,6 +253,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private double lastCalcLandInDistanceCount;
    private double lastLandInDistance;
    private static final MCH_EntitySeat[] seatsDummy = new MCH_EntitySeat[0];
+   public static boolean newuavvariable = false;
+   public EntityPlayer storedRider;
+
    private boolean switchSeat = false;
    //public EntityPlayerMP playerEntity = (EntityPlayerMP) getCommandSenderAsPlayer(player);
 
@@ -3857,17 +3860,18 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       setCommonStatus(1, false);
-      /* 3697 */     if (rByEntity != null) {
-         /* 3698 */       if (isUAV()) {
-            /* 3699 */         if (rByEntity.ridingEntity instanceof MCH_EntityUavStation) {
-               /* 3700 */           rByEntity.mountEntity((Entity)null);
-               /*      */         }
-            /* 3702 */       } else if (isNewUAV()) {
-            /* 3703 */         rByEntity.mountEntity((Entity)getUavStation());
-            /*      */       } else {
-            /* 3705 */         setUnmountPosition(rByEntity, (getSeatsInfo()[0]).pos);
-            /*      */       }
-         /*      */     }
+           if (rByEntity != null) {
+                if (isUAV()) {
+                     if (rByEntity.ridingEntity instanceof MCH_EntityUavStation) {
+                          rByEntity.mountEntity((Entity)null);
+                        }
+                   } else if (isNewUAV()) {
+                     newuavvariable = true;
+                     rByEntity.mountEntity((Entity)getUavStation());
+                   } else {
+                     setUnmountPosition(rByEntity, (getSeatsInfo()[0]).pos);
+                   }
+              }
 
       super.riddenByEntity = null;
       this.lastRiddenByEntity = null;
