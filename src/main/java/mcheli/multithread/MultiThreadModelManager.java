@@ -30,39 +30,47 @@ public class MultiThreadModelManager {
     public static void start(MCH_ClientProxy proxy) {
         MCH_ModelManager.load("blocks", "drafting_table");
 
-        ExecutorService executor = Executors.newWorkStealingPool();
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-        CompletableFuture
-                .runAsync(() -> MCH_HeliInfoManager.map.keySet().forEach(key -> proxy.registerModelsHeli((String) key, false)), executor)
+        CompletableFuture<Void> heliFuture = CompletableFuture.runAsync(() ->
+                        MCH_HeliInfoManager.map.keySet().forEach(key -> proxy.registerModelsHeli((String) key, false)), executor)
                 .thenRun(() -> completion("helicopter"));
 
-        CompletableFuture
-                .runAsync(() -> MCP_PlaneInfoManager.map.keySet().forEach(key -> proxy.registerModelsPlane((String) key, false)), executor)
+        CompletableFuture<Void> planeFuture = CompletableFuture.runAsync(() ->
+                        MCP_PlaneInfoManager.map.keySet().forEach(key -> proxy.registerModelsPlane((String) key, false)), executor)
                 .thenRun(() -> completion("plane"));
 
-        CompletableFuture
-                .runAsync(() -> MCH_TankInfoManager.map.keySet().forEach(key -> proxy.registerModelsTank((String) key, false)), executor)
+        CompletableFuture<Void> tankFuture = CompletableFuture.runAsync(() ->
+                        MCH_TankInfoManager.map.keySet().forEach(key -> proxy.registerModelsTank((String) key, false)), executor)
                 .thenRun(() -> completion("tank"));
 
-        CompletableFuture
-                .runAsync(() -> MCH_VehicleInfoManager.map.keySet().forEach(key -> proxy.registerModelsVehicle((String) key, false)), executor)
+        CompletableFuture<Void> vehicleFuture = CompletableFuture.runAsync(() ->
+                        MCH_VehicleInfoManager.map.keySet().forEach(key -> proxy.registerModelsVehicle((String) key, false)), executor)
                 .thenRun(() -> completion("vehicle"));
 
-        CompletableFuture
-                .runAsync(() -> {
-                    proxy.registerModels_Bullet();
-                    loadDefaultBulletModels(proxy);
-                }, executor)
-                .thenRun(() -> completion("bullet"));
+        CompletableFuture<Void> bulletFuture = CompletableFuture.runAsync(() -> {
+            proxy.registerModels_Bullet();
+            loadDefaultBulletModels(proxy);
+        }, executor).thenRun(() -> completion("bullet"));
 
-
-        CompletableFuture
-                .runAsync(MCH_ClientProxy::registerModels_Throwable)
+        CompletableFuture<Void> throwableFuture = CompletableFuture.runAsync(MCH_ClientProxy::registerModels_Throwable, executor)
                 .thenRun(() -> completion("throwable"));
 
-        //should fix the issue of models not loading sometimes
-        executor.shutdownNow();
+        // Wait for all tasks to complete before shutting down the executor
+        CompletableFuture<Void> allTasks = CompletableFuture.allOf(
+                heliFuture, planeFuture, tankFuture, vehicleFuture, bulletFuture, throwableFuture
+        );
 
+        // Ensure proper shutdown after completion
+        allTasks.thenRun(() -> {
+            executor.shutdown();
+            System.out.println("All model rendering tasks completed successfully.");
+        }).exceptionally(ex -> {
+            System.err.println("Error during model rendering: " + ex.getMessage());
+            ex.printStackTrace();
+            executor.shutdown();
+            return null;
+        });
     }
     private static void loadDefaultBulletModels(MCH_ClientProxy proxy) {
         proxy.registerModels_Bullet();
