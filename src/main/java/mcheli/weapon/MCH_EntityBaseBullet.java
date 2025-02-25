@@ -1024,6 +1024,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         if (!super.isDead) {
             setDead();
             System.out.println("Impact detected, entity set to dead.");
+            //there should be a check to ensure that the bullet is chunk loading here. otherwise you may end up clearing a chunk loader you don't want to.
+            //actually nevermind. shouldClearChunkLoaders() should handle that.
             clearChunkLoaders();
         }
     }
