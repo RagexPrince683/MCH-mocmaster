@@ -963,7 +963,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         float waterExplosionPower = this.explosionPowerInWater * damageFactor;
 
         if (piercing > 0) {
-            handlePiercingHit(hit, explosionPower, waterExplosionPower);
+            handlePiercingHit(hit, explosionPower, waterExplosionPower, damageFactor);
         } else {
             handleRegularHit(hit, explosionPower, waterExplosionPower);
             finalizeImpact();
@@ -979,19 +979,20 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         resetEntityMotion(hit.entityHit);
     }
 
-    private void handlePiercingHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower) {
+    private void handlePiercingHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower, float damageFactor) {
         piercing--;
         if (piercing <= 0) {
             handleRegularHit(hit, explosionPower, waterExplosionPower);
         }
-        processBlockDestruction(hit);
+        processBlockDestruction(hit, damageFactor);
     }
 
-    private void processBlockDestruction(MovingObjectPosition hit) {
+    private void processBlockDestruction(MovingObjectPosition hit, float damageFactor) {
         int x = (int) hit.hitVec.xCoord;
         int y = (int) hit.hitVec.yCoord;
         int z = (int) hit.hitVec.zCoord;
         Block block = worldObj.getBlock(x, y, z);
+        float waterExplosionPower = this.explosionPowerInWater * damageFactor;
 
         if (block == Blocks.bedrock) {
             newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
@@ -1000,6 +1001,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
                 worldObj.setBlockToAir(x, y, z);
                 newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
             } else {
+                if (piercing > 0) {
+                    handlePiercingHit(hit, explosionPower, waterExplosionPower, damageFactor);
+                }
                 //hopefully stops bullshit where things that should NOT explode are exploding YAY THIS IS SO COOL I LOVE THIS FUCKNIG MOD YAY YAY YAY FUCK
                 newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 0.0F, 0.0F, false);
             }
