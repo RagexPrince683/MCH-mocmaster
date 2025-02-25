@@ -996,8 +996,13 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         if (block == Blocks.bedrock) {
             newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
         } else {
-            worldObj.setBlockToAir(x, y, z);
-            newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
+            if (explosionPower > 0.0F) {
+                worldObj.setBlockToAir(x, y, z);
+                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
+            } else {
+                //hopefully stops bullshit where things that should NOT explode are exploding YAY THIS IS SO COOL I LOVE THIS FUCKNIG MOD YAY YAY YAY FUCK
+                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 0.0F, 0.0F, false);
+            }
         }
     }
 
