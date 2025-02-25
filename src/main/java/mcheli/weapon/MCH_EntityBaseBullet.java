@@ -955,19 +955,41 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     }
 
     private void handleServerSideImpact(MovingObjectPosition hit, float damageFactor) {
-        // Process entity impact if applicable (only once)
+        float explosionPower = this.explosionPower * damageFactor;
+        float waterExplosionPower = this.explosionPowerInWater * damageFactor;
+
+        // If the shell has piercing left, let the piercing logic handle both entity and block hits.
+        if (piercing > 0) {
+            handlePiercingHit(hit, explosionPower, waterExplosionPower, damageFactor);
+        } else {
+            // If not piercing, process entity hit (if any) then do regular hit logic.
+            if (hit.entityHit != null) {
+                processEntityImpact(hit, damageFactor);
+            }
+            handleRegularHit(hit, explosionPower, waterExplosionPower);
+            finalizeImpact();
+        }
+    }
+
+    private void handlePiercingHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower, float damageFactor) {
+        // Process entity impact if an entity is hit.
         if (hit.entityHit != null) {
             processEntityImpact(hit, damageFactor);
         }
 
-        float explosionPower = this.explosionPower * damageFactor;
-        float waterExplosionPower = this.explosionPowerInWater * damageFactor;
+        // Decrement the piercing counter for every impact.
+        piercing--;
 
-        if (piercing > 0) {
-            handlePiercingHit(hit, explosionPower, waterExplosionPower);
-        } else {
+        // If a block was hit and explosion power > 0, process block destruction.
+        if (hit.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+            if (explosionPower > 0.0F) {
+                processBlockDestruction(hit, explosionPower);
+            }
+        }
+
+        // If we've exhausted piercing, process a regular hit.
+        if (piercing <= 0) {
             handleRegularHit(hit, explosionPower, waterExplosionPower);
-            finalizeImpact();
         }
     }
 
@@ -978,26 +1000,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         }
         onImpactEntity(hit.entityHit, damageFactor);
         resetEntityMotion(hit.entityHit);
-    }
-
-    private void handlePiercingHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower) {
-        // Do not call processEntityImpact here to avoid double processing
-        piercing--;
-
-        if (hit.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-            // If it's a block and explosion power is greater than 0, process block destruction
-            if (explosionPower > 0.0F) {
-                processBlockDestruction(hit, explosionPower);
-            }
-            if (piercing <= 0) {
-                handleRegularHit(hit, explosionPower, waterExplosionPower);
-            }
-            return;
-        }
-
-        if (piercing <= 0) {
-            handleRegularHit(hit, explosionPower, waterExplosionPower);
-        }
     }
 
     private void processBlockDestruction(MovingObjectPosition hit, float explosionPower) {
