@@ -948,7 +948,35 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
         if (!worldObj.isRemote) { // Server-side logic
-            handleServerSideImpact(hit, damageFactor);
+            // Calculate effective explosion power
+            float explosionPower = this.explosionPower * damageFactor;
+            float waterExplosionPower = this.explosionPowerInWater * damageFactor;
+
+            // Process entity hit (this method already applies damage and decrements piercing)
+            if (hit.entityHit != null) {
+                onImpactEntity(hit.entityHit, damageFactor);
+                // Reset entity motion if needed
+                resetEntityMotion(hit.entityHit);
+            }
+
+            // Process block hit:
+            if (hit.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+                // If explosion power > 0, use explosion logic to destroy the block
+                if (explosionPower > 0.0F) {
+                    processBlockDestruction(hit, explosionPower);
+                }
+                // Whether explosive or not, a block hit should cost one piercing point
+                piercing--;
+            }
+
+            // If piercing is exhausted, finalize the impact.
+            if (piercing <= 0) {
+                // If explosive, apply any final explosion effects.
+                if (explosionPower > 0.0F) {
+                    handleRegularHit(hit, explosionPower, waterExplosionPower);
+                }
+                finalizeImpact();
+            }
         } else if (shouldHandleTileHit(hit)) {
             handleTileHit(hit);
         }
