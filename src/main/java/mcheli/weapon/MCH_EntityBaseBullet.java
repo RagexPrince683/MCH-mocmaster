@@ -947,106 +947,102 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
 
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
-        // TODO: Fix XRadar permissions/block protection issues
-
         if (!worldObj.isRemote) { // Server-side logic
-            if (hit.entityHit != null) {
-                // Handle additional chunk loading for certain conditions
-                if (!bomblet && gravitydown && bigdelay && bigcheck) {
-                    loadNeighboringChunks((int) Math.floor(posX / 16.0), (int) Math.floor(posZ / 16.0));
-                    System.out.println("Extra chunk loader activated.");
-                }
-
-                // Process entity hit
-                onImpactEntity(hit.entityHit, damageFactor);
-                hit.entityHit.motionX = 0;
-                hit.entityHit.motionY = 0;
-                hit.entityHit.motionZ = 0;
-            }
-
-            float explosionPower = this.explosionPower * damageFactor;
-            float waterExplosionPower = this.explosionPowerInWater * damageFactor;
-
-            if (piercing > 0) {
-                handlePiercingHit(hit, explosionPower, waterExplosionPower);
-            } else {
-                handleRegularHit(hit, explosionPower, waterExplosionPower);
-
-                if (piercing <= 0 && !super.isDead) {
-                    setDead();
-                    System.out.println("Impact detected, entity set to dead.");
-
-                    // Clear chunk loaders if required
-                    if (!bomblet && gravitydown && bigdelay) {
-                        for (ChunkCoordIntPair chunk : loadedChunks) {
-                            System.out.println("Clearing chunk loader due to impact.");
-                            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-                        }
-                    }
-                }
-            }
-        } else if (getInfo() != null && (getInfo().explosion == 0 || getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(hit)) {
+            handleServerSideImpact(hit, damageFactor);
+        } else if (shouldHandleTileHit(hit)) {
             handleTileHit(hit);
         }
     }
 
-    private void handlePiercingHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower) {
-        piercing--;
-
-        if (piercing <= 0) {
-            handleRegularHit(hit, explosionPower, waterExplosionPower);
+    private void handleServerSideImpact(MovingObjectPosition hit, float damageFactor) {
+        if (hit.entityHit != null) {
+            processEntityImpact(hit, damageFactor);
         }
 
-        if (explosionPower > 0.0F) {
-            int x = (int) hit.hitVec.xCoord;
-            int y = (int) hit.hitVec.yCoord;
-            int z = (int) hit.hitVec.zCoord;
-            Block block = worldObj.getBlock(x, y, z);
+        float explosionPower = this.explosionPower * damageFactor;
+        float waterExplosionPower = this.explosionPowerInWater * damageFactor;
 
-            if (block == Blocks.bedrock) {
-                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
-            } else {
-                worldObj.setBlockToAir(x, y, z);
-                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
-            }
+        if (piercing > 0) {
+            handlePiercingHit(hit, explosionPower, waterExplosionPower);
         } else {
-            int x = (int) hit.hitVec.xCoord;
-            int y = (int) hit.hitVec.yCoord;
-            int z = (int) hit.hitVec.zCoord;
-            Block block = worldObj.getBlock(x, y, z);
+            handleRegularHit(hit, explosionPower, waterExplosionPower);
+            finalizeImpact();
         }
     }
 
-    private void handleRegularHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower) {
+    private void processEntityImpact(MovingObjectPosition hit, float damageFactor) {
+        if (shouldLoadChunks()) {
+            loadNeighboringChunks(getChunkX(), getChunkZ());
+            System.out.println("Extra chunk loader activated.");
+        }
+        onImpactEntity(hit.entityHit, damageFactor);
+        resetEntityMotion(hit.entityHit);
+    }
+
+    private void handlePiercingHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower) {
+        piercing--;
+        if (piercing <= 0) {
+            handleRegularHit(hit, explosionPower, waterExplosionPower);
+        }
+        processBlockDestruction(hit);
+    }
+
+    private void processBlockDestruction(MovingObjectPosition hit) {
         int x = (int) hit.hitVec.xCoord;
         int y = (int) hit.hitVec.yCoord;
         int z = (int) hit.hitVec.zCoord;
         Block block = worldObj.getBlock(x, y, z);
 
-        if (waterExplosionPower == 0.0F) {
-            if (getInfo().isFAE) {
-                newFAExplosion(posX, posY, posZ, explosionPower, getInfo().explosionBlock);
-            } else if (explosionPower > 0.0F) {
-                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, explosionPower, getInfo().explosionBlock, false);
-            } else if (explosionPower < 0.0F) {
-                playExplosionSound();
-            }
-        } else if (hit.entityHit != null) {
-            if (isInWater()) {
-                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, waterExplosionPower, waterExplosionPower, true);
-            } else {
-                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, explosionPower, getInfo().explosionBlock, false);
-            }
-        } else if (!isInWater() && !MCH_Lib.isBlockInWater(worldObj, hit.blockX, hit.blockY, hit.blockZ)) {
-            if (explosionPower > 0.0F) {
-                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, explosionPower, getInfo().explosionBlock, false);
-            } else if (explosionPower < 0.0F) {
-                playExplosionSound();
-            }
+        if (block == Blocks.bedrock) {
+            newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
         } else {
-            newExplosion(hit.blockX, hit.blockY, hit.blockZ, waterExplosionPower, waterExplosionPower, true);
+            worldObj.setBlockToAir(x, y, z);
+            newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
         }
     }
+
+    private void handleRegularHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower) {
+        if (shouldCreateFAExplosion()) {
+            newFAExplosion(posX, posY, posZ, explosionPower, getInfo().explosionBlock);
+        } else if (explosionPower > 0.0F) {
+            newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, explosionPower, getInfo().explosionBlock, false);
+        } else if (explosionPower < 0.0F) {
+            playExplosionSound();
+        }
+    }
+
+    private void finalizeImpact() {
+        if (!super.isDead) {
+            setDead();
+            System.out.println("Impact detected, entity set to dead.");
+            clearChunkLoaders();
+        }
+    }
+
+    private void clearChunkLoaders() {
+        if (shouldClearChunkLoaders()) {
+            for (ChunkCoordIntPair chunk : loadedChunks) {
+                System.out.println("Clearing chunk loader due to impact.");
+                ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+            }
+        }
+    }
+
+    // Utility methods
+    private int getChunkX() { return (int) Math.floor(posX / 16.0); }
+    private int getChunkZ() { return (int) Math.floor(posZ / 16.0); }
+    private boolean shouldLoadChunks() { return !bomblet && gravitydown && bigdelay && bigcheck; }
+    private boolean shouldClearChunkLoaders() { return !bomblet && gravitydown && bigdelay; }
+    private boolean shouldCreateFAExplosion() { return getInfo().isFAE; }
+    private boolean shouldHandleTileHit(MovingObjectPosition hit) {
+        return getInfo() != null && (getInfo().explosion == 0 || getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(hit);
+    }
+    private void resetEntityMotion(Entity entity) {
+        entity.motionX = 0;
+        entity.motionY = 0;
+        entity.motionZ = 0;
+    }
+
 
     private void handleTileHit(MovingObjectPosition hit) {
         float power = getInfo().power;
