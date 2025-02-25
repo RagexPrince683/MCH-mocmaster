@@ -963,7 +963,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         float waterExplosionPower = this.explosionPowerInWater * damageFactor;
 
         if (piercing > 0) {
-            handlePiercingHit(hit, explosionPower, waterExplosionPower, damageFactor);
+            handlePiercingHit(hit, explosionPower, waterExplosionPower);
         } else {
             handleRegularHit(hit, explosionPower, waterExplosionPower);
             finalizeImpact();
@@ -979,8 +979,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         resetEntityMotion(hit.entityHit);
     }
 
-    private void handlePiercingHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower, float damageFactor) {
-        processEntityImpact(hit, damageFactor);
+    private void handlePiercingHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower) {
         piercing--;
         if (piercing <= 0) {
             handleRegularHit(hit, explosionPower, waterExplosionPower);
