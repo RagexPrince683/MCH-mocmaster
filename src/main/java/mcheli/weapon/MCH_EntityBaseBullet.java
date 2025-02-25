@@ -982,34 +982,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     private void handlePiercingHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower, float damageFactor) {
         processEntityImpact(hit, damageFactor);
         piercing--;
-
-        if (hit.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-            // If it's a block and explosion power is greater than 0, destroy it
-            if (explosionPower > 0.0F) {
-                processBlockDestruction(hit, explosionPower);
-            }
-            if (piercing <= 0) {
-                handleRegularHit(hit, explosionPower, waterExplosionPower);
-            }
-            return;
-        }
-
         if (piercing <= 0) {
             handleRegularHit(hit, explosionPower, waterExplosionPower);
-        }
-    }
-
-    private void processBlockDestruction(MovingObjectPosition hit, float explosionPower) {
-        int x = (int) hit.hitVec.xCoord;
-        int y = (int) hit.hitVec.yCoord;
-        int z = (int) hit.hitVec.zCoord;
-        Block block = worldObj.getBlock(x, y, z);
-
-        if (block == Blocks.bedrock) {
-            newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
-        } else {
-            worldObj.setBlockToAir(x, y, z);
-            newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
         }
     }
 
@@ -1054,7 +1028,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         entity.motionY = 0;
         entity.motionZ = 0;
     }
-
 
 
     private void handleTileHit(MovingObjectPosition hit) {
