@@ -968,11 +968,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             float waterExplosionPower = this.explosionPowerInWater * damageFactor;
 
             if (piercing > 0) {
-                handlePiercingHit(hit, explosionPower);
+                handlePiercingHit(hit, explosionPower, waterExplosionPower);
             } else {
                 handleRegularHit(hit, explosionPower, waterExplosionPower);
 
-                if (piercing <= 0) {
+                if (piercing <= 0 && !super.isDead) {
                     setDead();
                     System.out.println("Impact detected, entity set to dead.");
 
@@ -990,8 +990,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         }
     }
 
-    private void handlePiercingHit(MovingObjectPosition hit, float explosionPower) {
+    private void handlePiercingHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower) {
         piercing--;
+
+        if (piercing <= 0) {
+            handleRegularHit(hit, explosionPower, waterExplosionPower);
+        }
 
         if (explosionPower > 0.0F) {
             int x = (int) hit.hitVec.xCoord;
