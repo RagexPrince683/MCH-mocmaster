@@ -38,6 +38,8 @@ import net.minecraft.world.World;
 public class MCH_EntityUavStation
            extends W_EntityContainer
          {
+      private MCH_EntityAircraft linkedUAV;
+      public static boolean newuavvariable = MCH_EntityAircraft.newuavvariable;
       protected static final int DATAWT_ID_KIND = 27;
       protected static final int DATAWT_ID_LAST_AC = 28;
       protected static final int DATAWT_ID_UAV_X = 29;
@@ -227,6 +229,10 @@ public class MCH_EntityUavStation
            setUavPosition(this.posUavX, this.posUavY, this.posUavZ);
          }
 
+             public Entity getRiddenByEntity(MCH_EntityAircraft aircraft) {
+                 return aircraft.getRiddenByEntity();
+             }
+
       public void setDead() {
           //maybe i need to bind the UAV to the UAV station a little more and if those two things are linked and one or the other gets fucked
           //then fuck it over, but then why the actual fuck would this not fire
@@ -252,22 +258,54 @@ public class MCH_EntityUavStation
               //how the fuck does this not fire
               //who the fuck is preventing this from firing
               System.out.println("non null and new UAV");
-              EntityPlayer player = null;
+              //EntityPlayer player = null;
              // if (this.riddenByEntity instanceof EntityPlayer) {
              //     player = (EntityPlayer)this.riddenByEntity;
              // } else
-                  if (this.controlAircraft.storedRider != null) {
-                  player = this.controlAircraft.storedRider;
+
+              //we need to call a method that does the same behavior as drone destroyed
+
+              if (newuavvariable) {
+                  Entity rider = getRiddenByEntity(MCH_EntityAircraft.linkedUAV);
+                  if (rider instanceof EntityPlayer) {
+                      EntityPlayer player = (EntityPlayer) rider;
+
+                      player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed!"));
+                      player.addPotionEffect(new PotionEffect(11, 20, 50));
+
+                      // Ensure the player is properly dismounted before teleporting
+                      player.mountEntity(null);
+
+                      System.out.println(MCH_EntityUavStation.storedStationX + " " +
+                              MCH_EntityUavStation.storedStationY + " " +
+                              MCH_EntityUavStation.storedStationZ + " " + "station pos");
+
+                      // Teleport player
+                      player.setPositionAndUpdate(
+                              MCH_EntityUavStation.storedStationX,
+                              MCH_EntityUavStation.storedStationY,
+                              MCH_EntityUavStation.storedStationZ
+                      );
+                  }
               }
 
-              if (player != null) {
-                  //todo add as many methods as possible to stop the player being in the fucking UAV
-                  System.out.println("[NEW UAV] UAV Station destroyed! Teleporting player back.");
-                  this.controlAircraft.setUavStation(null);
-                  setControlAircract(null);
-                  player.mountEntity(null); // Force eject
-                  player.setPositionAndUpdate(gotox, gotoy, gotoz);
-              }
+              //this crashes the game second time riding after a station is destroyed apparently?
+              // also I hit the world border then this fired for some reason so thats when this fires
+              // but it just crashes so yea
+             //    if (this.controlAircraft.storedRider != null) {
+             //    player = this.controlAircraft.storedRider;
+             //}
+
+
+              //does not work
+              //if (player != null) {
+              //    //todo add as many methods as possible to stop the player being in the fucking UAV
+              //    System.out.println("[NEW UAV] UAV Station destroyed! Teleporting player back.");
+              //    this.controlAircraft.setUavStation(null);
+              //    setControlAircract(null);
+              //    player.mountEntity(null); // Force eject
+              //    player.setPositionAndUpdate(gotox, gotoy, gotoz);
+              //}
           }
 
           //never fires loooooool

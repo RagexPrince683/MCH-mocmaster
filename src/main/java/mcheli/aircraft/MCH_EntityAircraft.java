@@ -257,6 +257,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public EntityPlayer storedRider;
 
    private boolean switchSeat = false;
+   public static MCH_EntityAircraft linkedUAV;
    //public EntityPlayerMP playerEntity = (EntityPlayerMP) getCommandSenderAsPlayer(player);
 
 
@@ -5559,6 +5560,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
   // }
 
    public void updateUAV() {
+      int uavID = this.getDataWatcher().getWatchableObjectInt(22);
+      if (this.isNewUAV()) {
+         if (super.worldObj.isRemote) return;
+         //this.linkedUAV = uav;
+         if (uavID > 0) {
+            Entity entity = super.worldObj.getEntityByID(uavID);
+            this.linkedUAV = (MCH_EntityAircraft) entity;
+         }
+      }
       if(this.isUAV() || this.isNewUAV()) {
          if(super.worldObj.isRemote) {
             int udx = this.getDataWatcher().getWatchableObjectInt(22);
