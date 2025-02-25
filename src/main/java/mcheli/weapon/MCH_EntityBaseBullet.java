@@ -985,21 +985,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         if (piercing <= 0) {
             handleRegularHit(hit, explosionPower, waterExplosionPower);
         }
-        processBlockDestruction(hit);
-    }
-
-    private void processBlockDestruction(MovingObjectPosition hit) {
-        int x = (int) hit.hitVec.xCoord;
-        int y = (int) hit.hitVec.yCoord;
-        int z = (int) hit.hitVec.zCoord;
-        Block block = worldObj.getBlock(x, y, z);
-
-        if (block == Blocks.bedrock) {
-            newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
-        } else {
-            worldObj.setBlockToAir(x, y, z);
-            newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
-        }
     }
 
     private void handleRegularHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower) {
