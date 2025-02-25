@@ -955,6 +955,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     }
 
     private void handleServerSideImpact(MovingObjectPosition hit, float damageFactor) {
+        // Process entity impact if applicable (only once)
         if (hit.entityHit != null) {
             processEntityImpact(hit, damageFactor);
         }
@@ -980,14 +981,26 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     }
 
     private void handlePiercingHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower) {
+        // Do not call processEntityImpact here to avoid double processing
         piercing--;
+
+        if (hit.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+            // If it's a block and explosion power is greater than 0, process block destruction
+            if (explosionPower > 0.0F) {
+                processBlockDestruction(hit, explosionPower);
+            }
+            if (piercing <= 0) {
+                handleRegularHit(hit, explosionPower, waterExplosionPower);
+            }
+            return;
+        }
+
         if (piercing <= 0) {
             handleRegularHit(hit, explosionPower, waterExplosionPower);
         }
-        processBlockDestruction(hit);
     }
 
-    private void processBlockDestruction(MovingObjectPosition hit) {
+    private void processBlockDestruction(MovingObjectPosition hit, float explosionPower) {
         int x = (int) hit.hitVec.xCoord;
         int y = (int) hit.hitVec.yCoord;
         int z = (int) hit.hitVec.zCoord;
@@ -1035,7 +1048,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     private boolean shouldClearChunkLoaders() { return !bomblet && gravitydown && bigdelay; }
     private boolean shouldCreateFAExplosion() { return getInfo().isFAE; }
     private boolean shouldHandleTileHit(MovingObjectPosition hit) {
-        return getInfo() != null && (getInfo().explosion == 0 || getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(hit);
+        return getInfo() != null && (getInfo().explosion == 0 || getInfo().modeNum >= 2)
+                && W_MovingObjectPosition.isHitTypeTile(hit);
     }
     private void resetEntityMotion(Entity entity) {
         entity.motionX = 0;
