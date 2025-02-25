@@ -339,6 +339,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       if(this.isUAV || this.isNewUAV) {
          this.alwaysCameraView = true;
          if(this.seatList.size() == 0) {
+            //I think it adds the seat to the UAV to keep the UAV working beyond its usual range. Maybe not.
             MCH_SeatInfo i = new MCH_SeatInfo(Vec3.createVectorHelper(0.0D, 0.0D, 0.0D), false);
             this.seatList.add(i);
          }

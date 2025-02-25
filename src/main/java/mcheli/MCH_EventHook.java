@@ -231,6 +231,7 @@ public class MCH_EventHook extends W_EventHook {
            if (ac != null &&
                      ac.getAcInfo() != null) {
                if (ac.isNewUAV()) {
+
                      event.setCanceled(true);
                      return;
                    }
