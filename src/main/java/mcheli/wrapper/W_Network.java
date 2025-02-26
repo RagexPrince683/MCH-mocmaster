@@ -41,5 +41,6 @@ public class W_Network {
     public static void sendToAllPlayers(W_PacketBase pkt) {
         INSTANCE.sendToAll((IMessage)pkt);
     }
+
 }
 

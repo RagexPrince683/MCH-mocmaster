@@ -328,7 +328,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
          System.out.println("Client: Stored new UAV player UUID in station: " + station.newUavPlayerUUID);
 
-         // Send to Server
+         // Send this info to the server
          MCH_PacketUpdateUavStationUUID packet = new MCH_PacketUpdateUavStationUUID(station.getEntityId(), this.newUavPlayerUUID);
          mcheli.wrapper.W_Network.sendToServer(packet);
       }
