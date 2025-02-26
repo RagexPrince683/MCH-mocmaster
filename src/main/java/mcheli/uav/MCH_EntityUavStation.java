@@ -32,7 +32,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
 
@@ -230,12 +229,6 @@ public class MCH_EntityUavStation
              public void setDead() {
                  System.out.println("setDead fired in UAV Station");
 
-                 // Ensure this runs on the SERVER
-                 if (worldObj.isRemote) {
-                     System.out.println("WARNING: setDead() was called on CLIENT! Aborting teleport.");
-                     return; // Don't execute anything on the client.
-                 }
-
                  if (this.controlAircraft != null) {
                      System.out.println("Retrieving stored player UUID from controlled UAV.");
                      this.newUavPlayerUUID = this.controlAircraft.newUavPlayerUUID;
@@ -254,28 +247,26 @@ public class MCH_EntityUavStation
                                  MCH_EntityAircraft aircraft = (MCH_EntityAircraft) player.ridingEntity;
                                  System.out.println("Player is currently in UAV. Calling unmountAircraft...");
                                  aircraft.unmountAircraft(); // Call the method on the aircraft
-                             }
-
-                             // Ensure the player is dismounted before teleporting
-                             if (player.ridingEntity != null) {
-                                 System.out.println("Player still mounted, force dismounting.");
-                                 player.mountEntity(null);
                              } else {
-                                 System.out.println("Player successfully dismounted.");
+                                 System.out.println("Player is NOT riding a UAV, forcing dismount.");
+                                 player.mountEntity(null);
+                                 player.addPotionEffect(new PotionEffect(11, 20, 50));
+                                 player.setPositionAndUpdate(
+                                         MCH_EntityUavStation.storedStationX,
+                                         MCH_EntityUavStation.storedStationY,
+                                         MCH_EntityUavStation.storedStationZ
+                                 );
                              }
 
-                             // Perform teleportation (Only on Server)
-                             System.out.println("Teleporting player to UAV station position...");
+                             // Notify and teleport
+                             player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
+                             player.addPotionEffect(new PotionEffect(11, 20, 50));
+
                              player.setPositionAndUpdate(
                                      MCH_EntityUavStation.storedStationX,
                                      MCH_EntityUavStation.storedStationY,
                                      MCH_EntityUavStation.storedStationZ
                              );
-
-                             // Notify and add effects
-                             player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
-                             player.addPotionEffect(new PotionEffect(11, 20, 50));
-
                              break;
                          }
                      }
@@ -286,8 +277,6 @@ public class MCH_EntityUavStation
                  super.setDead();
                  System.out.println("UAV Station setDead completed.");
              }
-
-
 
 
              public boolean attackEntityFrom(DamageSource damageSource, float damage) {
