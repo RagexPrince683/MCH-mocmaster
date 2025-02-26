@@ -225,151 +225,110 @@ public class MCH_EntityUavStation
            setUavPosition(this.posUavX, this.posUavY, this.posUavZ);
          }
 
+             @Override
              public void setDead() {
-                 if (worldObj.isRemote) {
-                     System.out.println(" WARNING: setDead() was called on CLIENT! Sending packet to SERVER...");
-                     super.setDead();
-                     // Send a packet to the server to properly destroy the UAV Station
-                     //MCH_PacketUavStationDestroy packet = new MCH_PacketUavStationDestroy(this.getEntityId());
-                    // mcheli.wrapper.W_Network.sendToServer(packet);
-                     //no more bullshit
-
-                     return; // Stop execution on the client
-                 }
-
-                 // SERVER-SIDE EXECUTION
-                 System.out.println(" SERVER: setDead() fired in UAV Station");
+                 //if (worldObj.isRemote) {
+                 //    System.out.println("CLIENT: setDead() was called! Ignoring.");
+                 //    return; // Block execution on the client.
+                 //}
 
 
 
                  super.setDead();
-                 System.out.println(" SERVER: UAV Station setDead() completed.");
              }
 
 
 
 
+             @Override
              public boolean attackEntityFrom(DamageSource damageSource, float damage) {
-           if (isEntityInvulnerable())
-                return false;
-           if (this.isDead)
-               return true;
-          if (this.worldObj.isRemote) {
-                return true;
-              }
-           String dmt = damageSource.getDamageType();
-           MCH_Config var10000 = MCH_MOD.config;
-           damage = MCH_Config.applyDamageByExternal((Entity)this, damageSource, damage);
-           if (!MCH_Multiplay.canAttackEntity(damageSource, (Entity)this)) {
-                return false;
-              }
-           boolean isCreative = false;
-           Entity entity = damageSource.getEntity();
-           boolean isDamegeSourcePlayer = false;
-           if (entity instanceof EntityPlayer) {
-                isCreative = ((EntityPlayer)entity).capabilities.isCreativeMode;
-                if (dmt.compareTo("player") == 0) {
-                     isDamegeSourcePlayer = true;
-                   }
+                 if (isEntityInvulnerable()) {
+                     return false;
+                 }
 
-                W_WorldFunc.MOD_playSoundAtEntity((Entity)this, "hit", 1.0F, 1.0F);
+                 if (this.isDead) {
+                     return true;
+                 }
 
-               if (this.controlAircraft != null) {
-                   System.out.println("Retrieving stored player UUID from controlled UAV.");
-                   this.newUavPlayerUUID = this.controlAircraft.newUavPlayerUUID;
-               }
+                 if (this.worldObj.isRemote) {
+                     System.out.println("❌ CLIENT: attackEntityFrom() called, ignoring.");
+                     return true;
+                 }
 
-               if (this.newUavPlayerUUID != null) {
-                   System.out.println("Stored player UUID: " + this.newUavPlayerUUID);
-                   for (Object obj : worldObj.playerEntities) {
-                       EntityPlayer player = (EntityPlayer) obj;
-                       if (player.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
-                           // Found the correct player
-                           System.out.println("Found matching player by UUID. Dismounting and teleporting...");
+                 System.out.println("✅ SERVER: UAV Station took damage: " + damage);
 
-                           // Check if the player is riding an aircraft
-                           if (player.ridingEntity instanceof MCH_EntityAircraft) {
-                               MCH_EntityAircraft aircraft = (MCH_EntityAircraft) player.ridingEntity;
-                               System.out.println("Player is currently in UAV. Calling unmountAircraft...");
-                               aircraft.unmountAircraft(); // Call the method on the aircraft
-                           }
+                 damage = MCH_Config.applyDamageByExternal((Entity) this, damageSource, damage);
+                 if (!MCH_Multiplay.canAttackEntity(damageSource, (Entity) this)) {
+                     return false;
+                 }
 
-                           // Ensure the player is dismounted before teleporting
-                           if (player.ridingEntity != null) {
-                               System.out.println("Player still mounted, force dismounting.");
-                               player.mountEntity(null);
-                           } else {
-                               System.out.println("Player successfully dismounted.");
-                           }
+                 Entity entity = damageSource.getEntity();
+                 boolean isDamageSourcePlayer = (entity instanceof EntityPlayer);
 
-                           // Perform teleportation (Only on Server)
-                           System.out.println("Teleporting player to UAV station position...");
-                           player.setPositionAndUpdate(
-                                   MCH_EntityUavStation.storedStationX,
-                                   MCH_EntityUavStation.storedStationY,
-                                   MCH_EntityUavStation.storedStationZ
-                           );
+                 W_WorldFunc.MOD_playSoundAtEntity((Entity) this, "hit", 1.0F, 1.0F);
 
-                           // Notify and add effects
-                           player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
-                           player.addPotionEffect(new PotionEffect(11, 20, 50));
+                 if (this.controlAircraft != null) {
+                     System.out.println("Retrieving stored player UUID from controlled UAV.");
+                     this.newUavPlayerUUID = this.controlAircraft.newUavPlayerUUID;
+                 }
 
-                           break;
-                       }
-                   }
-               } else {
-                   System.out.println("No stored player UUID in UAV station.");
-               }
+                 if (this.newUavPlayerUUID != null) {
+                     System.out.println("Stored player UUID: " + this.newUavPlayerUUID);
 
+                     for (Object obj : this.worldObj.playerEntities) {  // ✅ Use Object to avoid casting issues
+                         if (obj instanceof EntityPlayer) {
+                             EntityPlayer player = (EntityPlayer) obj;
+                             if (player.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
+                                 System.out.println("Found matching player by UUID. Dismounting and teleporting...");
 
-              } else {
-                W_WorldFunc.MOD_playSoundAtEntity((Entity)this, "helidmg", 1.0F, 0.9F + this.rand.nextFloat() * 0.1F);
-              }
+                                 if (player.ridingEntity instanceof MCH_EntityAircraft) {
+                                     MCH_EntityAircraft aircraft = (MCH_EntityAircraft) player.ridingEntity;
+                                     System.out.println("Player is currently in UAV. Calling unmountAircraft...");
+                                     aircraft.unmountAircraft();
+                                 }
 
-           setBeenAttacked();
-           if (damage > 0.0F) {
-               //i might want to store these at the top of the class idk tho
-               //nvm this works perfectly fine
-               double gotox = MCH_EntityUavStation.storedStationX;
-               double gotoy = MCH_EntityUavStation.storedStationY;
-               double gotoz = MCH_EntityUavStation.storedStationZ;
-               EntityPlayer player = (EntityPlayer) this.riddenByEntity;
-               if (this.riddenByEntity != null) {
-                   this.riddenByEntity.mountEntity((Entity) this);
-               }
+                                 if (player.ridingEntity != null) {
+                                     System.out.println("Player still mounted, force dismounting.");
+                                     player.mountEntity(null);  // ✅ 1.7.10-compatible dismount method
+                                 } else {
+                                     System.out.println("Player successfully dismounted.");
+                                 }
 
-               this.dropContentsWhenDead = true;
-               if (this.riddenByEntity != null){ //!isDamegeSourcePlayer &&
-               System.out.println(MCH_EntityUavStation.storedStationX + " " +
-                       MCH_EntityUavStation.storedStationY + " " +
-                       MCH_EntityUavStation.storedStationZ + " " + "station pos");
+                                 // ✅ Debug stored coordinates
+                                 System.out.println("Teleporting player to UAV station position: "
+                                         + MCH_EntityUavStation.storedStationX + ", "
+                                         + MCH_EntityUavStation.storedStationY + ", "
+                                         + MCH_EntityUavStation.storedStationZ);
 
-               // Teleport player
-               player.setPositionAndUpdate(
-                       gotox,
-                       gotoy,
-                       gotoz
-               );
-           }
-                setDead();
-                if (!isDamegeSourcePlayer) {
-                     MCH_Explosion.newExplosion(this.worldObj, (Entity)null, this.riddenByEntity, this.posX, this.posY, this.posZ, 1.0F, 0.0F, true, true, false, false, 0);
-                   }
+                                 player.setPositionAndUpdate(
+                                         MCH_EntityUavStation.storedStationX,
+                                         MCH_EntityUavStation.storedStationY,
+                                         MCH_EntityUavStation.storedStationZ
+                                 );
 
-                if (!isCreative) {
-                     int kind = getKind();
-                     if (kind > 0) {
-                          dropItemWithOffset((Item)MCH_MOD.itemUavStation[kind - 1], 1, 0.0F);
-                        }
-                   }
-              }
+                                 player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
+                                 player.addPotionEffect(new PotionEffect(11, 20, 50));
 
-           return true;
-         }
+                                 break;
+                             }
+                         }
+                     }
+                 } else {
+                     System.out.println("No stored player UUID in UAV station.");
+                 }
+
+                 // ✅ Force Server to Call setDead()
+                 System.out.println("✅ SERVER: Calling setDead()");
+                 this.setDead();
+
+                 return true;
+             }
 
 
 
-      protected boolean canTriggerWalking() {
+
+
+             protected boolean canTriggerWalking() {
            return false;
          }
 
