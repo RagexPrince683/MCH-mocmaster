@@ -235,17 +235,33 @@ public class MCH_EntityUavStation
                  }
 
                  if (this.newUavPlayerUUID != null) {
-                     //REJOICE IT FINALLY FIRES!!!
                      System.out.println("Stored player UUID: " + this.newUavPlayerUUID);
                      for (Object obj : worldObj.playerEntities) {
                          EntityPlayer player = (EntityPlayer) obj;
                          if (player.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
-                             //finally fucking works
+                             // Found the correct player
                              System.out.println("Found matching player by UUID. Dismounting and teleporting...");
-                             player.mountEntity(null);
+
+                             // Check if the player is riding an aircraft
+                             if (player.ridingEntity instanceof MCH_EntityAircraft) {
+                                 MCH_EntityAircraft aircraft = (MCH_EntityAircraft) player.ridingEntity;
+                                 System.out.println("Player is currently in UAV. Calling unmountAircraft...");
+                                 aircraft.unmountAircraft(); // Call the method on the aircraft
+                             } else {
+                                 System.out.println("Player is NOT riding a UAV, forcing dismount.");
+                                 player.mountEntity(null);
+                                 player.addPotionEffect(new PotionEffect(11, 20, 50));
+                                 player.setPositionAndUpdate(
+                                         MCH_EntityUavStation.storedStationX,
+                                         MCH_EntityUavStation.storedStationY,
+                                         MCH_EntityUavStation.storedStationZ
+                                 );
+                             }
+
+                             // Notify and teleport
                              player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
                              player.addPotionEffect(new PotionEffect(11, 20, 50));
-                             //MCH_EntityAircraft.unmountAircraft();
+
                              player.setPositionAndUpdate(
                                      MCH_EntityUavStation.storedStationX,
                                      MCH_EntityUavStation.storedStationY,
@@ -262,7 +278,8 @@ public class MCH_EntityUavStation
                  System.out.println("UAV Station setDead completed.");
              }
 
-      public boolean attackEntityFrom(DamageSource damageSource, float damage) {
+
+             public boolean attackEntityFrom(DamageSource damageSource, float damage) {
            if (isEntityInvulnerable())
                 return false;
            if (this.isDead)

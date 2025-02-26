@@ -2073,6 +2073,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void unmountAircraft() {
+      System.out.println("unmount fired");
       //if this is a newUAV go back to the fuckin station pos.
       Vec3 v = Vec3.createVectorHelper(super.posX, super.posY, super.posZ);
       if(super.ridingEntity instanceof MCH_EntitySeat) {
