@@ -227,72 +227,65 @@ public class MCH_EntityUavStation
            setUavPosition(this.posUavX, this.posUavY, this.posUavZ);
          }
 
-      public void setDead() {
-          //maybe i need to bind the UAV to the UAV station a little more and if those two things are linked and one or the other gets fucked
-          //then fuck it over, but then why the actual fuck would this not fire
-          System.out.println("setDead fired");
+             public void setDead() {
+                 System.out.println("setDead fired");
 
-          //this fires when the UAV station is set to dead
+                 // Get stored station coordinates
+                 double gotox = MCH_EntityUavStation.storedStationX;
+                 double gotoy = MCH_EntityUavStation.storedStationY;
+                 double gotoz = MCH_EntityUavStation.storedStationZ;
+                 System.out.println("Stored Station Coords: " + gotox + ", " + gotoy + ", " + gotoz);
 
-          double gotox = MCH_EntityUavStation.storedStationX;
-          double gotoy = MCH_EntityUavStation.storedStationY;
-          double gotoz = MCH_EntityUavStation.storedStationZ;
-          //EntityPlayer player = (EntityPlayer) this.riddenByEntity;
-          //causes a crash
-          //System.out.println(controlAircraft + " " + controlAircraft.getAcInfo().isNewUAV);
+                 // Attempt to get the player from various sources
+                 EntityPlayer player = null;
+                 if (this.riddenByEntity instanceof EntityPlayer) {
+                     player = (EntityPlayer) this.riddenByEntity;
+                     System.out.println("Player found in riddenByEntity: " + player);
+                 } else {
+                     System.out.println("riddenByEntity is not an EntityPlayer or is null.");
+                 }
 
-          //cant call getRiddenByEntity() here, is a MCH_EntityAircraft method or something idk fuck im tired man
-          //Entity rider = getRiddenByEntity();
-          //if (rider instanceof EntityPlayer) {
-          //
-          //}
+                 if (player == null && this.lastRiddenByEntity instanceof EntityPlayer) {
+                     player = (EntityPlayer) this.lastRiddenByEntity;
+                     System.out.println("Player found in lastRiddenByEntity: " + player);
+                 } else if (player == null) {
+                     System.out.println("lastRiddenByEntity is not an EntityPlayer or is null.");
+                 }
 
-          if (MCH_EntityAircraft.newuavvariable && isridingnewuav) { //this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV
-              //why the fuck does this not fire
-              //how the fuck does this not fire
-              //who the fuck is preventing this from firing
-              System.out.println("non null and new UAV");
-              EntityPlayer player = null;
-             // if (this.riddenByEntity instanceof EntityPlayer) {
-             //     player = (EntityPlayer)this.riddenByEntity;
-             // } else
+                 if (player == null && this.controlAircraft != null && this.controlAircraft.storedRider instanceof EntityPlayer) {
+                     player = this.controlAircraft.storedRider;
+                     System.out.println("Player found in controlAircraft.storedRider: " + player);
+                 } else if (player == null) {
+                     System.out.println("controlAircraft.storedRider is not an EntityPlayer or is null.");
+                 }
 
-              //this randomly causes a crash when going away from the uav station/uav
-              //    if (this.controlAircraft.storedRider != null) {
-              //    player = this.controlAircraft.storedRider;
-              //}
+                 // Debug the new UAV flags
+                 System.out.println("MCH_EntityAircraft.newuavvariable: " + MCH_EntityAircraft.newuavvariable);
+                 System.out.println("isridingnewuav: " + isridingnewuav);
 
-              if (player != null) {
-                  //todo add as many methods as possible to stop the player being in the fucking UAV
-                  System.out.println("[NEW UAV] UAV Station destroyed! Teleporting player back.");
-                  this.controlAircraft.setUavStation(null);
-                  setControlAircract(null);
-                  player.mountEntity(null); // Force eject
-                  player.setPositionAndUpdate(gotox, gotoy, gotoz);
-              }
-          }
+                 // Teleport the player if conditions are met
+                 if (MCH_EntityAircraft.newuavvariable && isridingnewuav && player != null) {
+                     System.out.println("[NEW UAV] Conditions met. Teleporting player back to stored station position.");
+                     if (this.controlAircraft != null) {
+                         this.controlAircraft.setUavStation(null);
+                         System.out.println("Cleared UAV station reference from controlAircraft.");
+                     }
+                     setControlAircract(null);
+                     player.mountEntity(null); // Force dismount
+                     System.out.println("Player dismounted. Proceeding to teleport...");
+                     player.setPositionAndUpdate(gotox, gotoy, gotoz);
+                     System.out.println("Player teleported to: " + gotox + ", " + gotoy + ", " + gotoz);
+                 } else {
+                     if (player == null) {
+                         System.out.println("No valid player found for teleportation.");
+                     } else {
+                         System.out.println("Conditions not met for new UAV teleportation.");
+                     }
+                 }
 
-          //never fires loooooool
-          // if (this.controlAircraft != null &&
-          //           this.controlAircraft.isNewUAV() &&
-          //           this.controlAircraft.getRiddenByEntity() instanceof EntityPlayer) { //&& this.controlAircraft.getRiddenByEntity() != null
-          //      ((EntityPlayer)this.controlAircraft.getRiddenByEntity()).addChatMessage((IChatComponent)new ChatComponentText(EnumChatFormatting.RED + "Station destroyed!"));
-          //      ((EntityPlayer)this.controlAircraft.getRiddenByEntity()).addPotionEffect(new PotionEffect(11, 20, 50));
-          //      this.controlAircraft.getRiddenByEntity().mountEntity((Entity)this);
-          //      //unmount player
-          //     unmountEntity(true);
-          //     // Teleport player
-          //     player.setPositionAndUpdate(
-          //             gotox,
-          //             gotoy,
-          //             gotoz
-          //     );
-//
-          //    }
-
-
-           super.setDead();
-         }
+                 super.setDead();
+                 System.out.println("super.setDead() called. Entity marked as dead.");
+             }
 
       public boolean attackEntityFrom(DamageSource damageSource, float damage) {
            if (isEntityInvulnerable())
