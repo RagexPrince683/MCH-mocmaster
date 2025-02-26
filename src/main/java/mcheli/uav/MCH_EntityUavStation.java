@@ -256,9 +256,11 @@ public class MCH_EntityUavStation
              // if (this.riddenByEntity instanceof EntityPlayer) {
              //     player = (EntityPlayer)this.riddenByEntity;
              // } else
-                  if (this.controlAircraft.storedRider != null) {
-                  player = this.controlAircraft.storedRider;
-              }
+
+              //this randomly causes a crash when going away from the uav station/uav
+              //    if (this.controlAircraft.storedRider != null) {
+              //    player = this.controlAircraft.storedRider;
+              //}
 
               if (player != null) {
                   //todo add as many methods as possible to stop the player being in the fucking UAV
