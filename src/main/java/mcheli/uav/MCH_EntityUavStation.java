@@ -3,8 +3,10 @@ package mcheli.uav;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.List;
-
-import mcheli.*;
+import mcheli.MCH_Config;
+import mcheli.MCH_Explosion;
+import mcheli.MCH_Lib;
+import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.helicopter.MCH_HeliInfo;
 import mcheli.helicopter.MCH_HeliInfoManager;
@@ -226,24 +228,63 @@ public class MCH_EntityUavStation
          }
 
              public void setDead() {
-                 if (worldObj.isRemote) {
-                     System.out.println(" WARNING: setDead() was called on CLIENT! Sending packet to SERVER...");
-                     super.setDead();
-                     // Send a packet to the server to properly destroy the UAV Station
-                     //MCH_PacketUavStationDestroy packet = new MCH_PacketUavStationDestroy(this.getEntityId());
-                    // mcheli.wrapper.W_Network.sendToServer(packet);
-                     //no more bullshit
+                 System.out.println("setDead fired in UAV Station");
 
-                     return; // Stop execution on the client
+                 // Ensure this runs on the SERVER
+                 if (worldObj.isRemote) {
+                     System.out.println("WARNING: setDead() was called on CLIENT! Aborting teleport.");
+                     return; // Don't execute anything on the client.
                  }
 
-                 // SERVER-SIDE EXECUTION
-                 System.out.println(" SERVER: setDead() fired in UAV Station");
+                 if (this.controlAircraft != null) {
+                     System.out.println("Retrieving stored player UUID from controlled UAV.");
+                     this.newUavPlayerUUID = this.controlAircraft.newUavPlayerUUID;
+                 }
 
+                 if (this.newUavPlayerUUID != null) {
+                     System.out.println("Stored player UUID: " + this.newUavPlayerUUID);
+                     for (Object obj : worldObj.playerEntities) {
+                         EntityPlayer player = (EntityPlayer) obj;
+                         if (player.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
+                             // Found the correct player
+                             System.out.println("Found matching player by UUID. Dismounting and teleporting...");
 
+                             // Check if the player is riding an aircraft
+                             if (player.ridingEntity instanceof MCH_EntityAircraft) {
+                                 MCH_EntityAircraft aircraft = (MCH_EntityAircraft) player.ridingEntity;
+                                 System.out.println("Player is currently in UAV. Calling unmountAircraft...");
+                                 aircraft.unmountAircraft(); // Call the method on the aircraft
+                             }
+
+                             // Ensure the player is dismounted before teleporting
+                             if (player.ridingEntity != null) {
+                                 System.out.println("Player still mounted, force dismounting.");
+                                 player.mountEntity(null);
+                             } else {
+                                 System.out.println("Player successfully dismounted.");
+                             }
+
+                             // Perform teleportation (Only on Server)
+                             System.out.println("Teleporting player to UAV station position...");
+                             player.setPositionAndUpdate(
+                                     MCH_EntityUavStation.storedStationX,
+                                     MCH_EntityUavStation.storedStationY,
+                                     MCH_EntityUavStation.storedStationZ
+                             );
+
+                             // Notify and add effects
+                             player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
+                             player.addPotionEffect(new PotionEffect(11, 20, 50));
+
+                             break;
+                         }
+                     }
+                 } else {
+                     System.out.println("No stored player UUID in UAV station.");
+                 }
 
                  super.setDead();
-                 System.out.println(" SERVER: UAV Station setDead() completed.");
+                 System.out.println("UAV Station setDead completed.");
              }
 
 
@@ -273,55 +314,6 @@ public class MCH_EntityUavStation
                    }
 
                 W_WorldFunc.MOD_playSoundAtEntity((Entity)this, "hit", 1.0F, 1.0F);
-
-               if (this.controlAircraft != null) {
-                   System.out.println("Retrieving stored player UUID from controlled UAV.");
-                   this.newUavPlayerUUID = this.controlAircraft.newUavPlayerUUID;
-               }
-
-               if (this.newUavPlayerUUID != null) {
-                   System.out.println("Stored player UUID: " + this.newUavPlayerUUID);
-                   for (Object obj : worldObj.playerEntities) {
-                       EntityPlayer player = (EntityPlayer) obj;
-                       if (player.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
-                           // Found the correct player
-                           System.out.println("Found matching player by UUID. Dismounting and teleporting...");
-
-                           // Check if the player is riding an aircraft
-                           if (player.ridingEntity instanceof MCH_EntityAircraft) {
-                               MCH_EntityAircraft aircraft = (MCH_EntityAircraft) player.ridingEntity;
-                               System.out.println("Player is currently in UAV. Calling unmountAircraft...");
-                               aircraft.unmountAircraft(); // Call the method on the aircraft
-                           }
-
-                           // Ensure the player is dismounted before teleporting
-                           if (player.ridingEntity != null) {
-                               System.out.println("Player still mounted, force dismounting.");
-                               player.mountEntity(null);
-                           } else {
-                               System.out.println("Player successfully dismounted.");
-                           }
-
-                           // Perform teleportation (Only on Server)
-                           System.out.println("Teleporting player to UAV station position...");
-                           player.setPositionAndUpdate(
-                                   MCH_EntityUavStation.storedStationX,
-                                   MCH_EntityUavStation.storedStationY,
-                                   MCH_EntityUavStation.storedStationZ
-                           );
-
-                           // Notify and add effects
-                           player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
-                           player.addPotionEffect(new PotionEffect(11, 20, 50));
-
-                           break;
-                       }
-                   }
-               } else {
-                   System.out.println("No stored player UUID in UAV station.");
-               }
-
-
               } else {
                 W_WorldFunc.MOD_playSoundAtEntity((Entity)this, "helidmg", 1.0F, 0.9F + this.rand.nextFloat() * 0.1F);
               }
