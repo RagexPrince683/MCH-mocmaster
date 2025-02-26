@@ -228,22 +228,36 @@ public class MCH_EntityUavStation
 
              public void setDead() {
                  System.out.println("setDead fired in UAV Station");
+
+                 if (this.controlAircraft != null) {
+                     System.out.println("Retrieving stored player UUID from controlled UAV.");
+                     this.newUavPlayerUUID = this.controlAircraft.newUavPlayerUUID;
+                 }
+
                  if (this.newUavPlayerUUID != null) {
+                     //REJOICE IT FINALLY FIRES!!!
                      System.out.println("Stored player UUID: " + this.newUavPlayerUUID);
                      for (Object obj : worldObj.playerEntities) {
                          EntityPlayer player = (EntityPlayer) obj;
                          if (player.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
+                             //finally fucking works
                              System.out.println("Found matching player by UUID. Dismounting and teleporting...");
                              player.mountEntity(null);
-                             player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed! Teleporting back to station."));
+                             player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
                              player.addPotionEffect(new PotionEffect(11, 20, 50));
-                             player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
+                             //MCH_EntityAircraft.unmountAircraft();
+                             player.setPositionAndUpdate(
+                                     MCH_EntityUavStation.storedStationX,
+                                     MCH_EntityUavStation.storedStationY,
+                                     MCH_EntityUavStation.storedStationZ
+                             );
                              break;
                          }
                      }
                  } else {
                      System.out.println("No stored player UUID in UAV station.");
                  }
+
                  super.setDead();
                  System.out.println("UAV Station setDead completed.");
              }

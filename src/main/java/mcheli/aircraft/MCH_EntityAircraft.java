@@ -320,17 +320,16 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.lastSearchLightYaw = this.lastSearchLightPitch = 0.0F;
    }
 
-   public void castuavid(EntityPlayer rider)
-
-   {
-      //should automatically be true if this method is called.
+   public void castuavid(EntityPlayer rider) {
       if (isNewUAV() && this.getUavStation() != null) {
          MCH_EntityUavStation station = this.getUavStation();
-         station.newUavPlayerUUID = player.getUniqueID().toString();
+         this.newUavPlayerUUID = rider.getUniqueID().toString(); // Store in Aircraft
+         station.newUavPlayerUUID = this.newUavPlayerUUID; // Store in UAV Station
+
          System.out.println("Client: Stored new UAV player UUID in station: " + station.newUavPlayerUUID);
 
-         // Send the packet to the server.
-         MCH_PacketUpdateUavStationUUID packet = new MCH_PacketUpdateUavStationUUID(station.getEntityId(), station.newUavPlayerUUID);
+         // Send to Server
+         MCH_PacketUpdateUavStationUUID packet = new MCH_PacketUpdateUavStationUUID(station.getEntityId(), this.newUavPlayerUUID);
          mcheli.wrapper.W_Network.sendToServer(packet);
       }
    }
@@ -2074,6 +2073,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void unmountAircraft() {
+      //if this is a newUAV go back to the fuckin station pos.
       Vec3 v = Vec3.createVectorHelper(super.posX, super.posY, super.posZ);
       if(super.ridingEntity instanceof MCH_EntitySeat) {
          MCH_EntityAircraft ac = ((MCH_EntitySeat)super.ridingEntity).getParent();
@@ -2096,6 +2096,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void unmount(Entity entity) {
+      //same here (maybe?) sir actually nvm this is parachuting unmount lololo
       if(this.getAcInfo() != null) {
          MCH_EntitySeat seat;
          Vec3 dropPos;
