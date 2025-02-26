@@ -228,35 +228,22 @@ public class MCH_EntityUavStation
 
              public void setDead() {
                  System.out.println("setDead fired in UAV Station");
-
-                 // Retrieve the stored UUID.
-                 // Either get it from the linked aircraft (if available) or from a local field set by the GUI.
-                 String targetUUID = this.newUavPlayerUUID; // Assume you added this field to the station.
-                 if (targetUUID == null) {
-                     System.out.println("No stored player UUID available.");
-                 } else {
-                     System.out.println("Stored player UUID: " + targetUUID);
-                     // Loop through the world's players to find a match.
+                 if (this.newUavPlayerUUID != null) {
+                     System.out.println("Stored player UUID: " + this.newUavPlayerUUID);
                      for (Object obj : worldObj.playerEntities) {
                          EntityPlayer player = (EntityPlayer) obj;
-                         if (player.getUniqueID().toString().equals(targetUUID)) {
+                         if (player.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
                              System.out.println("Found matching player by UUID. Dismounting and teleporting...");
-                             // Force the player to dismount.
                              player.mountEntity(null);
-                             // Optionally send a chat message or potion effect.
                              player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed! Teleporting back to station."));
                              player.addPotionEffect(new PotionEffect(11, 20, 50));
-                             // Teleport the player back to the stored station coordinates.
-                             player.setPositionAndUpdate(
-                                     MCH_EntityUavStation.storedStationX,
-                                     MCH_EntityUavStation.storedStationY,
-                                     MCH_EntityUavStation.storedStationZ
-                             );
+                             player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
                              break;
                          }
                      }
+                 } else {
+                     System.out.println("No stored player UUID in UAV station.");
                  }
-
                  super.setDead();
                  System.out.println("UAV Station setDead completed.");
              }
