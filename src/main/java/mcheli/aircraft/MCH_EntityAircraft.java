@@ -9,16 +9,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import mcheli.MCH_Achievement;
-import mcheli.MCH_Camera;
-import mcheli.MCH_Config;
-import mcheli.MCH_Explosion;
-import mcheli.MCH_Lib;
-import mcheli.MCH_LowPassFilterFloat;
-import mcheli.MCH_MOD;
-import mcheli.MCH_Math;
-import mcheli.MCH_Queue;
-import mcheli.MCH_ViewEntityDummy;
+
+import mcheli.*;
 import mcheli.aircraft.MCH_AircraftBoundingBox;
 import mcheli.aircraft.MCH_AircraftGuiContainer;
 import mcheli.aircraft.MCH_AircraftInfo;
@@ -52,17 +44,7 @@ import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.tool.MCH_ItemWrench;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.weapon.*;
-import mcheli.wrapper.W_AxisAlignedBB;
-import mcheli.wrapper.W_Block;
-import mcheli.wrapper.W_Entity;
-import mcheli.wrapper.W_EntityContainer;
-import mcheli.wrapper.W_EntityPlayer;
-import mcheli.wrapper.W_EntityRenderer;
-import mcheli.wrapper.W_Item;
-import mcheli.wrapper.W_Lib;
-import mcheli.wrapper.W_NBTTag;
-import mcheli.wrapper.W_Reflection;
-import mcheli.wrapper.W_WorldFunc;
+import mcheli.wrapper.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.crash.CrashReport;
@@ -255,6 +237,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private static final MCH_EntitySeat[] seatsDummy = new MCH_EntitySeat[0];
    public static boolean newuavvariable = false;
    public EntityPlayer storedRider;
+   public String newUavPlayerUUID;
+   //public static boolean isNewUAV = MCH_AircraftInfo.isNewUAV;
+
 
    private boolean switchSeat = false;
    //public EntityPlayerMP playerEntity = (EntityPlayerMP) getCommandSenderAsPlayer(player);
@@ -333,6 +318,44 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.isParachuting = false;
       this.prevPosition = new MCH_Queue(10, Vec3.createVectorHelper(0.0D, 0.0D, 0.0D));
       this.lastSearchLightYaw = this.lastSearchLightPitch = 0.0F;
+   }
+
+   public void castuavid(EntityPlayer rider)
+
+   {
+      //should automatically be true if this method is called.
+      if (isNewUAV() && this.getUavStation() != null) {
+         MCH_EntityUavStation station = this.getUavStation();
+         station.newUavPlayerUUID = player.getUniqueID().toString();
+         System.out.println("Client: Stored new UAV player UUID in station: " + station.newUavPlayerUUID);
+         // Send the packet from client to server
+         MCH_PacketUpdateUavStationUUID packet = new MCH_PacketUpdateUavStationUUID(station.getEntityId(), station.newUavPlayerUUID);
+         W_Network.sendToServer(packet);
+      }
+   }
+
+
+
+   public void linkedUAVstop() {
+      System.out.println("linkedUAVstop called in MCH_EntityAircraft");
+      Entity rider = this.getRiddenByEntity();
+      if (rider instanceof EntityPlayer) {
+         EntityPlayer player = (EntityPlayer) rider;
+         System.out.println("Dismounting player from UAV. Teleporting to station coords: " +
+                 MCH_EntityUavStation.storedStationX + ", " +
+                 MCH_EntityUavStation.storedStationY + ", " +
+                 MCH_EntityUavStation.storedStationZ);
+         // Force the player to dismount from the UAV.
+         player.mountEntity(null);
+         // Teleport the player back to the stored UAV station coordinates.
+         player.setPositionAndUpdate(
+                 MCH_EntityUavStation.storedStationX,
+                 MCH_EntityUavStation.storedStationY,
+                 MCH_EntityUavStation.storedStationZ
+         );
+      } else {
+         System.out.println("No valid player found on UAV for linkedUAVstop");
+      }
    }
 
 
@@ -512,6 +535,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public boolean isNewUAV() {
            return (getAcInfo() != null && (getAcInfo()).isNewUAV);
          }
+
+  // if (isNewUAV() = true) {
+  //    System.out.println("isNewUAV() is true");
+//
+  // } else {
+  //    System.out.println("isNewUAV() is false");
+  // }
 
    public boolean isSmallUAV() {
       return this.getAcInfo() != null && this.getAcInfo().isSmallUAV;

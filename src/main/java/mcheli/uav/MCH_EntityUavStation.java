@@ -61,8 +61,7 @@ public class MCH_EntityUavStation
       private boolean continuePressed = false;
       private EntityPlayer storedPlayer;
       public boolean isridingnewuav = false;
-
-
+      public String newUavPlayerUUID;
 
 
              public void setContinuePressed(boolean flag) {
@@ -228,63 +227,38 @@ public class MCH_EntityUavStation
          }
 
              public void setDead() {
-                 System.out.println("setDead fired");
+                 System.out.println("setDead fired in UAV Station");
 
-                 // Get stored station coordinates
-                 double gotox = MCH_EntityUavStation.storedStationX;
-                 double gotoy = MCH_EntityUavStation.storedStationY;
-                 double gotoz = MCH_EntityUavStation.storedStationZ;
-                 System.out.println("Stored Station Coords: " + gotox + ", " + gotoy + ", " + gotoz);
-
-                 // Attempt to get the player from various sources
-                 EntityPlayer player = null;
-                 if (this.riddenByEntity instanceof EntityPlayer) {
-                     player = (EntityPlayer) this.riddenByEntity;
-                     System.out.println("Player found in riddenByEntity: " + player);
+                 // Retrieve the stored UUID.
+                 // Either get it from the linked aircraft (if available) or from a local field set by the GUI.
+                 String targetUUID = this.newUavPlayerUUID; // Assume you added this field to the station.
+                 if (targetUUID == null) {
+                     System.out.println("No stored player UUID available.");
                  } else {
-                     System.out.println("riddenByEntity is not an EntityPlayer or is null.");
-                 }
-
-                 if (player == null && this.lastRiddenByEntity instanceof EntityPlayer) {
-                     player = (EntityPlayer) this.lastRiddenByEntity;
-                     System.out.println("Player found in lastRiddenByEntity: " + player);
-                 } else if (player == null) {
-                     System.out.println("lastRiddenByEntity is not an EntityPlayer or is null.");
-                 }
-
-                 if (player == null && this.controlAircraft != null && this.controlAircraft.storedRider instanceof EntityPlayer) {
-                     player = this.controlAircraft.storedRider;
-                     System.out.println("Player found in controlAircraft.storedRider: " + player);
-                 } else if (player == null) {
-                     System.out.println("controlAircraft.storedRider is not an EntityPlayer or is null.");
-                 }
-
-                 // Debug the new UAV flags
-                 System.out.println("MCH_EntityAircraft.newuavvariable: " + MCH_EntityAircraft.newuavvariable);
-                 System.out.println("isridingnewuav: " + isridingnewuav);
-
-                 // Teleport the player if conditions are met
-                 if (MCH_EntityAircraft.newuavvariable && isridingnewuav && player != null) {
-                     System.out.println("[NEW UAV] Conditions met. Teleporting player back to stored station position.");
-                     if (this.controlAircraft != null) {
-                         this.controlAircraft.setUavStation(null);
-                         System.out.println("Cleared UAV station reference from controlAircraft.");
-                     }
-                     setControlAircract(null);
-                     player.mountEntity(null); // Force dismount
-                     System.out.println("Player dismounted. Proceeding to teleport...");
-                     player.setPositionAndUpdate(gotox, gotoy, gotoz);
-                     System.out.println("Player teleported to: " + gotox + ", " + gotoy + ", " + gotoz);
-                 } else {
-                     if (player == null) {
-                         System.out.println("No valid player found for teleportation.");
-                     } else {
-                         System.out.println("Conditions not met for new UAV teleportation.");
+                     System.out.println("Stored player UUID: " + targetUUID);
+                     // Loop through the world's players to find a match.
+                     for (Object obj : worldObj.playerEntities) {
+                         EntityPlayer player = (EntityPlayer) obj;
+                         if (player.getUniqueID().toString().equals(targetUUID)) {
+                             System.out.println("Found matching player by UUID. Dismounting and teleporting...");
+                             // Force the player to dismount.
+                             player.mountEntity(null);
+                             // Optionally send a chat message or potion effect.
+                             player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed! Teleporting back to station."));
+                             player.addPotionEffect(new PotionEffect(11, 20, 50));
+                             // Teleport the player back to the stored station coordinates.
+                             player.setPositionAndUpdate(
+                                     MCH_EntityUavStation.storedStationX,
+                                     MCH_EntityUavStation.storedStationY,
+                                     MCH_EntityUavStation.storedStationZ
+                             );
+                             break;
+                         }
                      }
                  }
 
                  super.setDead();
-                 System.out.println("super.setDead() called. Entity marked as dead.");
+                 System.out.println("UAV Station setDead completed.");
              }
 
       public boolean attackEntityFrom(DamageSource damageSource, float damage) {
