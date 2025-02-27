@@ -732,6 +732,13 @@ public class MCH_EntityUavStation
          }
 
       public boolean interactFirst(EntityPlayer player) {
+
+          if(this.riddenByEntity instanceof EntityPlayer){
+              //EntityPlayer player = (EntityPlayer)this.riddenByEntity;
+              //SIR THIS IS ALREADY DEFINED SIR
+              this.newUavPlayerUUID = player.getUniqueID().toString();
+          }
+
            int kind = getKind();
            if (kind <= 0)
                 return false;
