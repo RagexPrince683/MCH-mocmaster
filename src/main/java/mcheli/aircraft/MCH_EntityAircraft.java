@@ -74,6 +74,7 @@ import static mcheli.hud.MCH_HudItem.player;
 //import static net.minecraft.command.CommandBase.getPlayer;
 
 public abstract class MCH_EntityAircraft extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideAircraft, IEntityAdditionalSpawnData {
+   private static MCH_EntityAircraft aircraft;
    private ForgeChunkManager.Ticket chunkTicket;
    //MCH_EntityAircraft ac = null;
    private static final int DATAWT_ID_DAMAGE = 19;
@@ -239,6 +240,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public EntityPlayer storedRider;
    public String newUavPlayerUUID;
    //public static boolean isNewUAV = MCH_AircraftInfo.isNewUAV;
+   //public static Entity rider = lastRidingEntity;
+   //MCH_EntityAircraft MCH_EntityUavStation;
 
 
    private boolean switchSeat = false;
@@ -336,9 +339,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
 
 
-   public void linkedUAVstop() {
+   public static void linkedUAVstop() {
       System.out.println("linkedUAVstop called in MCH_EntityAircraft");
-      Entity rider = this.getRiddenByEntity();
+      Entity rider = aircraft.getRiddenByEntity();
       if (rider instanceof EntityPlayer) {
          EntityPlayer player = (EntityPlayer) rider;
          System.out.println("Dismounting player from UAV. Teleporting to station coords: " +
@@ -925,6 +928,16 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public boolean attackEntityFrom(DamageSource damageSource, float org_damage) {
+
+
+
+      //if (uavStation = true) { //&& isNewUAV()
+      //   System.out.println("UAV Station attacked");
+      //   return false;
+//
+      //}
+
+
       //System.out.println("the damage source is " + damageSource.getDamageType());
       //System.out.println("org damage: " + org_damage);
       //System.out.println("damage taken: " + getDamageTaken());

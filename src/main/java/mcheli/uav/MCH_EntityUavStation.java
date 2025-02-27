@@ -161,7 +161,7 @@ public class MCH_EntityUavStation
 
       public void setControlAircract(MCH_EntityAircraft ac) {
            this.controlAircraft = ac;
-           if (ac != null && !ac.isDead) {
+           if (ac != null && !ac.isDead ) { //&& MCH_EntityUavStation != null MAKE A NEW FUCKING VARIABLE TO TEST IF THE UAV STATION IS ALIVE OR NOT
                 setLastControlAircraft(ac);
               }
          }
@@ -267,10 +267,14 @@ public class MCH_EntityUavStation
                                      MCH_EntityUavStation.storedStationY,
                                      MCH_EntityUavStation.storedStationZ
                              );
+
+                             //MCH_EntityAircraft.linkedUAVstop();
+
                              break;
                          }
                      }
                  } else {
+
                      System.out.println("No stored player UUID in UAV station.");
                  }
 
@@ -310,28 +314,32 @@ public class MCH_EntityUavStation
            setBeenAttacked();
            if (damage > 0.0F) {
                //i might want to store these at the top of the class idk tho
-               //nvm this works perfectly fine
-               double gotox = MCH_EntityUavStation.storedStationX;
-               double gotoy = MCH_EntityUavStation.storedStationY;
-               double gotoz = MCH_EntityUavStation.storedStationZ;
+               //nvm this works perfectly fine NOT THIS DOES NOTHING WHAT
+               //double gotox = MCH_EntityUavStation.storedStationX;
+               //double gotoy = MCH_EntityUavStation.storedStationY;
+               //double gotoz = MCH_EntityUavStation.storedStationZ;
                EntityPlayer player = (EntityPlayer) this.riddenByEntity;
                if (this.riddenByEntity != null) {
                    this.riddenByEntity.mountEntity((Entity) this);
                }
 
                this.dropContentsWhenDead = true;
-               if (this.riddenByEntity != null){ //!isDamegeSourcePlayer &&
+              // if (this.riddenByEntity != null){ //!isDamegeSourcePlayer && WE WANT TO CHECK IF
+               // THE MCH_ENTITY AIRCRAFT IS RIDDEN NOT THE PLAYER,
+               // THE PLAYER IS MOUNTED TO THE FUCKING UAV
+               //NOT THAT IT FUCKING MATTERS THIS SHIT JUST CRASHES ANYWAYS YAY
+               // I FUCKING LOVE MINECRAFT MODDING
                System.out.println(MCH_EntityUavStation.storedStationX + " " +
                        MCH_EntityUavStation.storedStationY + " " +
                        MCH_EntityUavStation.storedStationZ + " " + "station pos");
 
                // Teleport player
                player.setPositionAndUpdate(
-                       gotox,
-                       gotoy,
-                       gotoz
+                       MCH_EntityUavStation.storedStationX,
+                       MCH_EntityUavStation.storedStationY,
+                       MCH_EntityUavStation.storedStationZ
                );
-           }
+         //  }
                 setDead();
                 if (!isDamegeSourcePlayer) {
                      MCH_Explosion.newExplosion(this.worldObj, (Entity)null, this.riddenByEntity, this.posX, this.posY, this.posZ, 1.0F, 0.0F, true, true, false, false, 0);
@@ -564,31 +572,31 @@ public class MCH_EntityUavStation
                  /*     */   }
 
              private void onUpdate_Server() {
-                 /* 449 */     this.motionY -= 0.03D;
-                 /* 450 */     moveEntity(0.0D, this.motionY, 0.0D);
-                 /* 451 */     this.motionY *= 0.96D;
-                 /* 452 */     this.motionX = 0.0D;
-                 /* 453 */     this.motionZ = 0.0D;
-                 /* 454 */     setRotation(this.rotationYaw, this.rotationPitch);
-                 /* 455 */     if (this.riddenByEntity != null) {
-                     /* 456 */       if (this.riddenByEntity.isDead) {
-                         /* 457 */         unmountEntity(true);
-                         /* 458 */         this.riddenByEntity = null;
-                         /*     */       } else {
-                         /* 460 */         ItemStack item = getStackInSlot(0);
-                         /* 461 */         if (item != null && item.stackSize > 0) {
-                             /* 462 */           handleItem(this.riddenByEntity, item);
-                             /* 463 */           if (item.stackSize == 0) {
-                                 /* 464 */             setInventorySlotContents(0, (ItemStack)null);
-                                 /*     */           }
-                             /*     */         }
-                         /*     */       }
-                     /*     */     }
-                 /*     */
-                 /* 470 */     if (getLastControlAircraft() == null && this.ticksExisted % 40 == 0) {
-                     /* 471 */       searchLastControlAircraft();
-                     /*     */     }
-                 /*     */   }
+                      this.motionY -= 0.03D;
+                      moveEntity(0.0D, this.motionY, 0.0D);
+                      this.motionY *= 0.96D;
+                      this.motionX = 0.0D;
+                      this.motionZ = 0.0D;
+                      setRotation(this.rotationYaw, this.rotationPitch);
+                      if (this.riddenByEntity != null) {
+                            if (this.riddenByEntity.isDead) {
+                                  unmountEntity(true);
+                                  this.riddenByEntity = null;
+                                } else {
+                                  ItemStack item = getStackInSlot(0);
+                                  if (item != null && item.stackSize > 0) {
+                                        handleItem(this.riddenByEntity, item);
+                                        if (item.stackSize == 0) {
+                                              setInventorySlotContents(0, (ItemStack)null);
+                                            }
+                                      }
+                                }
+                          }
+
+                      if (getLastControlAircraft() == null && this.ticksExisted % 40 == 0) {
+                            searchLastControlAircraft();
+                          }
+                    }
 
 
       public void setPositionAndRotation2(double par1, double par3, double par5, float par7, float par8, int par9) {
@@ -635,6 +643,8 @@ public class MCH_EntityUavStation
                      }
                      W_EntityPlayer.closeScreen(user);
                  }
+                 //this will never fire but its good to have redundants I guess? The part of this that works
+                 // is in the MCH_EntityAircraft class.
                  if (this.controlAircraft.getAcInfo().isNewUAV && this.isDead) {
                      System.out.println("UAV is dead, teleporting to stored station position");
                         this.setPosition(storedStationX, storedStationY, storedStationZ);
