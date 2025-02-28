@@ -227,6 +227,7 @@ public class MCH_EntityUavStation
            setUavPosition(this.posUavX, this.posUavY, this.posUavZ);
          }
 
+             @Override
              public void setDead() {
                  System.out.println("setDead fired in UAV Station");
 
@@ -240,19 +241,20 @@ public class MCH_EntityUavStation
                      for (Object obj : worldObj.playerEntities) {
                          EntityPlayer player = (EntityPlayer) obj;
                          if (player.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
-                             // Found the correct player
                              System.out.println("Found matching player by UUID. Dismounting and teleporting...");
 
-                             // Check if the player is riding an aircraft
+                             // Ensure dismount
                              if (player.ridingEntity instanceof MCH_EntityAircraft) {
                                  MCH_EntityAircraft aircraft = (MCH_EntityAircraft) player.ridingEntity;
                                  System.out.println("Player is currently in UAV. Calling unmountAircraft...");
-                                 aircraft.unmountAircraft(); // Call the method on the aircraft
+                                 aircraft.unmountAircraft();
                              } else {
-                                 //never fires?
                                  System.out.println("Player is NOT riding a UAV, forcing dismount.");
                                  player.mountEntity(null);
-                                 player.addPotionEffect(new PotionEffect(11, 20, 50));
+                             }
+
+                             // Teleport player back safely
+                             if (!player.worldObj.isRemote) {
                                  player.setPositionAndUpdate(
                                          MCH_EntityUavStation.storedStationX,
                                          MCH_EntityUavStation.storedStationY,
@@ -260,25 +262,11 @@ public class MCH_EntityUavStation
                                  );
                              }
 
-                             // Notify and teleport
-                             //this will fire when the UAV station is unloaded & still alive making this not only not work but also redundant
                              player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
-                             player.addPotionEffect(new PotionEffect(11, 20, 50));
-                             //doesn't work right
-                             player.setPositionAndUpdate(
-                                     MCH_EntityUavStation.storedStationX,
-                                     MCH_EntityUavStation.storedStationY,
-                                     MCH_EntityUavStation.storedStationZ
-                             );
-
-                             //crashes game
-                             //MCH_EntityAircraft.linkedUAVstop();
-
                              break;
                          }
                      }
                  } else {
-
                      System.out.println("No stored player UUID in UAV station.");
                  }
 
