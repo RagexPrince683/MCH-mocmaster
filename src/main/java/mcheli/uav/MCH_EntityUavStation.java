@@ -241,7 +241,7 @@ public class MCH_EntityUavStation
                      for (Object obj : worldObj.playerEntities) {
                          EntityPlayer player = (EntityPlayer) obj;
                          if (player.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
-                             System.out.println("Found matching player by UUID. Dismounting and teleporting...");
+                             System.out.println("Found matching player by UUID. Attempting teleport...");
 
                              // Ensure dismount
                              if (player.ridingEntity instanceof MCH_EntityAircraft) {
@@ -253,14 +253,10 @@ public class MCH_EntityUavStation
                                  player.mountEntity(null);
                              }
 
-                             // Teleport player back safely
-                             if (!player.worldObj.isRemote) {
-                                 player.setPositionAndUpdate(
-                                         MCH_EntityUavStation.storedStationX,
-                                         MCH_EntityUavStation.storedStationY,
-                                         MCH_EntityUavStation.storedStationZ
-                                 );
-                             }
+                             System.out.println("Teleporting player to station at: " + storedStationX + ", " + storedStationY + ", " + storedStationZ);
+
+                             // Force teleportation
+                             player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
 
                              player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
                              break;
