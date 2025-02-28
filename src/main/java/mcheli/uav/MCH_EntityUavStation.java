@@ -59,7 +59,8 @@ public class MCH_EntityUavStation
       public static double storedStationZ;
 
       private boolean continuePressed = false;
-      private EntityPlayer storedPlayer;
+      //stored player never used
+      //private EntityPlayer storedPlayer;
       public boolean isridingnewuav = false;
       public String newUavPlayerUUID;
 
@@ -248,6 +249,7 @@ public class MCH_EntityUavStation
                                  System.out.println("Player is currently in UAV. Calling unmountAircraft...");
                                  aircraft.unmountAircraft(); // Call the method on the aircraft
                              } else {
+                                 //never fires?
                                  System.out.println("Player is NOT riding a UAV, forcing dismount.");
                                  player.mountEntity(null);
                                  player.addPotionEffect(new PotionEffect(11, 20, 50));
@@ -259,15 +261,17 @@ public class MCH_EntityUavStation
                              }
 
                              // Notify and teleport
+                             //this will fire when the UAV station is unloaded & still alive making this not only not work but also redundant
                              player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
                              player.addPotionEffect(new PotionEffect(11, 20, 50));
-
+                             //doesn't work right
                              player.setPositionAndUpdate(
                                      MCH_EntityUavStation.storedStationX,
                                      MCH_EntityUavStation.storedStationY,
                                      MCH_EntityUavStation.storedStationZ
                              );
 
+                             //crashes game
                              //MCH_EntityAircraft.linkedUAVstop();
 
                              break;
@@ -318,9 +322,37 @@ public class MCH_EntityUavStation
                //double gotox = MCH_EntityUavStation.storedStationX;
                //double gotoy = MCH_EntityUavStation.storedStationY;
                //double gotoz = MCH_EntityUavStation.storedStationZ;
-               EntityPlayer player = (EntityPlayer) this.riddenByEntity;
-               if (this.riddenByEntity != null) {
-                   this.riddenByEntity.mountEntity((Entity) this);
+               //EntityPlayer player = (EntityPlayer) this.riddenByEntity;
+               //if (this.riddenByEntity != null) {
+               //    this.riddenByEntity.mountEntity((Entity) this);
+               //}
+
+               EntityPlayer player = null;
+               // If there's a rider, capture the UUID immediately
+               if (this.riddenByEntity instanceof EntityPlayer) {
+                   player = (EntityPlayer)this.riddenByEntity;
+                   this.newUavPlayerUUID = player.getUniqueID().toString();
+               } else if (this.newUavPlayerUUID != null) {
+                   // Search for the player using the stored UUID
+                   for (Object obj : worldObj.playerEntities) {
+                       if (obj instanceof EntityPlayer) {
+                           EntityPlayer p = (EntityPlayer) obj;
+                           if (p.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
+                               player = p;
+                               break;
+                           }
+                       }
+                   }
+
+                   if (player != null) {
+                       // Force dismount
+                       player.mountEntity(null);
+                       // Optional: add potion effects or chat messages as needed
+                       player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
+                       System.out.println("Teleporting player in damage logic.");
+                   } else {
+                       System.out.println("No player found for teleportation in damage logic.");
+                   }
                }
 
                this.dropContentsWhenDead = true;
@@ -334,11 +366,12 @@ public class MCH_EntityUavStation
                        MCH_EntityUavStation.storedStationZ + " " + "station pos");
 
                // Teleport player
-               player.setPositionAndUpdate(
-                       MCH_EntityUavStation.storedStationX,
-                       MCH_EntityUavStation.storedStationY,
-                       MCH_EntityUavStation.storedStationZ
-               );
+               //player.setPositionAndUpdate(
+               //        MCH_EntityUavStation.storedStationX,
+               //        MCH_EntityUavStation.storedStationY,
+               //        MCH_EntityUavStation.storedStationZ
+               //);
+               //teleport the player? I think you meant CRASH THE FUCKING GAME
          //  }
                 setDead();
                 if (!isDamegeSourcePlayer) {
@@ -434,13 +467,16 @@ public class MCH_EntityUavStation
 
           if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
               isridingnewuav = true;
+              System.out.println("isridingnewuav is true");
               player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
               player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
               // Prevent picking up items by removing them from collision
-              List<EntityItem> items = this.worldObj.getEntitiesWithinAABB(EntityItem.class, player.boundingBox.expand(1.5, 1.5, 1.5));
-              for (EntityItem item : items) {
-                  item.delayBeforeCanPickup = 999999; // Stops item from being picked up
-              }
+              //except that this only fires when the station is in range because this is in the station class so like this will only fire when the station is loaded
+              //oh also it just doesn't even fucking work idk why I even tried this
+              //List<EntityItem> items = this.worldObj.getEntitiesWithinAABB(EntityItem.class, player.boundingBox.expand(1.5, 1.5, 1.5));
+              //for (EntityItem item : items) {
+              //    item.delayBeforeCanPickup = 999999; // Stops item from being picked up
+              //}
           }
 
 
@@ -533,6 +569,7 @@ public class MCH_EntityUavStation
 
 
       public void searchLastControlAircraft() {
+          //makes a box around the station to search for the last controlled aircraft, for regular non-new UAVs
            if (!this.loadedLastControlAircraftGuid.isEmpty()) {
                 List<MCH_EntityAircraft> list = this.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, getBoundingBox().expand(120.0D, 120.0D, 120.0D));
                 if (list != null) {
@@ -803,11 +840,13 @@ public class MCH_EntityUavStation
                      System.out.println("Teleporting player back to stored station position.");
                      player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
                  }
+                 //this infact does not work
 
                  if (player != null && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
                      System.out.println("Teleporting player back to stored station position (New UAV).");
                      player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
                  }
+                 //this either, this also doesn't work
 
                  this.riddenByEntity = null;
                  this.lastRiddenByEntity = null;
