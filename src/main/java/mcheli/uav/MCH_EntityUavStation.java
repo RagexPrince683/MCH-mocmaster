@@ -255,6 +255,9 @@ public class MCH_EntityUavStation
 
                              System.out.println("Teleporting player to station at: " + storedStationX + ", " + storedStationY + ", " + storedStationZ);
 
+                             player.isSneaking();
+                             player.mountEntity(null);
+
                              // Force teleportation
                              player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
 
