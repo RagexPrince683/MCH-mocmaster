@@ -998,7 +998,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
         } else {
             if (explosionPower > 0.0F) {
-                worldObj.setBlockToAir(x, y, z);
+                //worldObj.setBlockToAir(x, y, z);
                 newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, 1.0F, 1.0F, false);
             } else {
                 if (piercing > 0) {
