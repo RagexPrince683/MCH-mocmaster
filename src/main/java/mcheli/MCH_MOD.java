@@ -494,6 +494,15 @@ public class MCH_MOD {
 
    public static void registerItem(W_Item item, String name, MCH_CreativeTabs ct) {
       item.setUnlocalizedName("mcheli:" + name);
+
+      //todo add a way to set the texture for the new items based on different folder directory.
+      // For instance the folder directory currently used is
+      // items, it needs to be item.
+      // surely there's some other way of doing this if the textures of other things are able to do this.
+
+      // nevermind no actually we still need to actually define the icon for the new custom item
+      // if we want to separate the folders.
+
       item.setTexture(name);
       if(ct != null) {
          item.setCreativeTab(ct);
@@ -578,6 +587,7 @@ public class MCH_MOD {
       // This method can use specific checks based on the item names or types to differentiate throwable items
       // Example: Check if the item name contains "grenade" or another distinctive keyword
       return name.toLowerCase().contains("grenade");  // Modify as needed
+      //useless fucking method
    }
 
 
