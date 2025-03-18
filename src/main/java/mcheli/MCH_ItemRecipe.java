@@ -13,6 +13,8 @@ import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_AircraftInfoManager;
 import mcheli.helicopter.MCH_HeliInfo;
 import mcheli.helicopter.MCH_HeliInfoManager;
+import mcheli.item.MCH_ItemInfo;
+import mcheli.item.MCH_ItemInfoManager;
 import mcheli.lweapon.MCH_ItemLightWeaponBullet;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
@@ -154,6 +156,23 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
          }
       }
 
+      MCH_ItemInfo info5;
+      //YOU WILL REGISTER THE FUCKING RECIPE AND YOU WILL LIKE IT MOTHERFUCKER
+      for(i$ = MCH_ItemInfoManager.getKeySet().iterator(); i$.hasNext(); info5.recipeString = null) {
+         name = (String)i$.next();
+         info5 = MCH_ItemInfoManager.get(name);
+         Iterator i$1 = info5.recipeString.iterator();
+
+         while(i$1.hasNext()) {
+            String s = (String)i$1.next();
+            if(s.length() >= 3) {
+               IRecipe recipe = addRecipe(info5.item, s, info5.isShapedRecipe);
+               info5.recipe.add(recipe);
+               addRecipeList(recipe);
+            }
+         }
+      }
+
    }
 
    private static void addRecipeAndRegisterList(MCH_AircraftInfo info, Item item, MCH_AircraftInfoManager im) {
@@ -254,7 +273,8 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
 
             for(int i = 0; i < var14.recipeItems.length; ++i) {
                if(var14.recipeItems[i] != null && var14.recipeItems[i].getItem() == null) {
-                  throw new RuntimeException("Error: Invalid ShapedRecipes! " + item + " : " + data);
+                  //throw new RuntimeException("Error: Invalid ShapedRecipes! " + item + " : " + data);
+                  System.out.println("Error: Invalid ShapedRecipes! " + item + " : " + data);
                }
             }
 
@@ -319,7 +339,8 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
          for(i = 0; i < var12.recipeItems.size(); ++i) {
             ItemStack var13 = (ItemStack)var12.recipeItems.get(i);
             if(var13.getItem() == null) {
-               throw new RuntimeException("Error: Invalid ShapelessRecipes! " + item + " : " + data);
+               System.out.println("Error: Invalid ShapelessRecipes! " + item + " : " + data);
+               //throw new RuntimeException("Error: Invalid ShapelessRecipes! " + item + " : " + data);
             }
          }
 
@@ -341,7 +362,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
             arraylist.add(new ItemStack((Item)object1));
          } else {
             if(!(object1 instanceof Block)) {
-               throw new RuntimeException("Invalid shapeless recipy!");
+               throw new RuntimeException("Invalid shapeless recipe!");
             }
 
             arraylist.add(new ItemStack((Block)object1));
