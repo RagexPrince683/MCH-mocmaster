@@ -37,6 +37,8 @@ import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.helicopter.MCH_HeliInfo;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.helicopter.MCH_ItemHeli;
+import mcheli.item.MCH_Item;
+import mcheli.item.MCH_ItemInfo;
 import mcheli.lweapon.MCH_ItemLightWeaponBase;
 import mcheli.lweapon.MCH_ItemLightWeaponBullet;
 import mcheli.parachute.MCH_EntityParachute;
@@ -84,6 +86,7 @@ import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
+import mcheli.item.MCH_ItemInfoManager;
 
 import java.util.List;
 
@@ -131,6 +134,7 @@ public class MCH_MOD {
    //public static MCH_ItemSpawnGunner itemSpawnGunnerVsPlayer;
   // /*     */   public static MCH_ItemSpawnGunner itemSpawnGunnerVsMonster;
    public static MCH_CreativeTabs creativeTabs;
+   public static MCH_CreativeTabs creativeTabsItem;
    public static MCH_CreativeTabs creativeTabsHeli;
    public static MCH_CreativeTabs creativeTabsPlane;
    public static MCH_CreativeTabs creativeTabsTank;
@@ -156,11 +160,12 @@ public class MCH_MOD {
       MCH_Lib.Log("SourcePath: " + sourcePath, new Object[0]);
       MCH_Lib.Log("CurrentDirectory:" + (new File(".")).getAbsolutePath(), new Object[0]);
       proxy.init();
-      creativeTabs = new MCH_CreativeTabs("MC Heli Item");
-      creativeTabsHeli = new MCH_CreativeTabs("MC Heli Helicopters");
-      creativeTabsPlane = new MCH_CreativeTabs("MC Heli Planes");
-      creativeTabsTank = new MCH_CreativeTabs("MC Heli Tanks");
-      creativeTabsVehicle = new MCH_CreativeTabs("MC Heli Vehicles");
+      creativeTabs = new MCH_CreativeTabs("MCHeliO Item");
+      creativeTabsItem = new MCH_CreativeTabs("MCHeliO Recipe Items");
+      creativeTabsHeli = new MCH_CreativeTabs("MCHeliO Helicopters");
+      creativeTabsPlane = new MCH_CreativeTabs("MCHeliO Planes");
+      creativeTabsTank = new MCH_CreativeTabs("MCHeliO Tanks");
+      creativeTabsVehicle = new MCH_CreativeTabs("MCHeliO Vehicles");
       W_ItemList.init();
       config = proxy.loadConfig("config/mcheli.cfg");
       proxy.loadHUD(sourcePath + "/assets/" + "mcheli" + "/hud");
@@ -170,6 +175,7 @@ public class MCH_MOD {
       MCH_TankInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "tanks");
       MCH_VehicleInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "vehicles");
       MCH_ThrowableInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/throwable");
+      MCH_ItemInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/item");
       MCH_SoundsJson.update(sourcePath + "/assets/" + "mcheli" + "/");
       MCH_Lib.Log("Register item", new Object[0]);
       this.registerItemRangeFinder();
@@ -182,6 +188,7 @@ public class MCH_MOD {
       this.registerItemUavStation();
       this.registerItemInvisible();
       registerItemThrowable();
+      //registerItemCustom();
       this.registerItemLightWeaponBullet();
       this.registerItemLightWeapon();
       registerItemAircraft();
@@ -506,6 +513,28 @@ public class MCH_MOD {
          info.item.setMaxStackSize(info.stackSize);
          registerItem(info.item, name, creativeTabs);
          MCH_ItemThrowable.registerDispenseBehavior(info.item);
+         info.itemID = W_Item.getIdFromItem(info.item) - 256;
+         W_LanguageRegistry.addName(info.item, info.displayName);
+         Iterator i$1 = info.displayNameLang.keySet().iterator();
+
+         while(i$1.hasNext()) {
+            String lang = (String)i$1.next();
+            W_LanguageRegistry.addNameForObject(info.item, lang, (String)info.displayNameLang.get(lang));
+         }
+      }
+
+   }
+
+   public static void registerItemCustom() {
+      Iterator i$ = MCH_ThrowableInfoManager.getKeySet().iterator();
+
+      while(i$.hasNext()) {
+         String name = (String)i$.next();
+         MCH_ItemInfo info = MCH_ItemInfoManager.get(name);
+         info.item = new MCH_Item(info.itemID);
+         info.item.setMaxStackSize(info.stackSize);
+         registerItem(info.item, name, creativeTabsItem);
+         //MCH_Item.registerDispenseBehavior(info.item);
          info.itemID = W_Item.getIdFromItem(info.item) - 256;
          W_LanguageRegistry.addName(info.item, info.displayName);
          Iterator i$1 = info.displayNameLang.keySet().iterator();
