@@ -48,6 +48,8 @@ import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.plane.MCP_RenderPlane;
+import mcheli.ship.MCH_EntityShip;
+import mcheli.ship.MCH_RenderShip;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.tank.MCH_RenderTank;
 import mcheli.tank.MCH_TankInfo;
@@ -114,6 +116,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntitySeat.class, new MCH_RenderTest(0.0F, 0.0F, 0.0F, "seat"));
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityHeli.class, new MCH_RenderHeli());
       RenderingRegistry.registerEntityRenderingHandler(MCP_EntityPlane.class, new MCP_RenderPlane());
+      RenderingRegistry.registerEntityRenderingHandler(MCH_EntityShip.class, new MCH_RenderShip());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityTank.class, new MCH_RenderTank());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityGLTD.class, new MCH_RenderGLTD());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityChain.class, new MCH_RenderChain());

@@ -16,6 +16,9 @@ import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_ItemPlane;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
+import mcheli.ship.MCH_ItemShip;
+import mcheli.ship.MCH_ShipInfo;
+import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.tank.MCH_ItemTank;
 import mcheli.tank.MCH_TankInfo;
@@ -699,6 +702,17 @@ public class MCH_EntityUavStation
                              }
                        }
                   }
+
+               if (item instanceof MCH_ItemShip) {
+                   MCH_ShipInfo hi = MCH_ShipInfoManager.getFromItem(item);
+                   if (hi != null && (hi.isUAV || hi.isNewUAV)) {
+                       if (!hi.isSmallUAV && getKind() == 2) {
+                           ac = null;
+                       } else {
+                           ac = ((MCH_ItemShip)item).createAircraft(this.worldObj, x, y, z, itemStack);
+                       }
+                   }
+               }
 
                 if (item instanceof MCH_ItemHeli) {
                      MCH_HeliInfo hi1 = MCH_HeliInfoManager.getFromItem(item);

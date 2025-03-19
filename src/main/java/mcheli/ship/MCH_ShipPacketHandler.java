@@ -2,8 +2,6 @@ package mcheli.ship;
 
 import com.google.common.io.ByteArrayDataInput;
 import mcheli.aircraft.MCH_EntitySeat;
-import mcheli.plane.MCP_EntityPlane;
-import mcheli.plane.MCP_PlanePacketPlayerControl;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.weapon.MCH_WeaponParam;
 import net.minecraft.entity.player.EntityPlayer;

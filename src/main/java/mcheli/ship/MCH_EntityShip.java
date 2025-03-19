@@ -9,8 +9,6 @@ import mcheli.aircraft.MCH_PacketStatusRequest;
 import mcheli.aircraft.MCH_Parts;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
-import mcheli.plane.MCP_PlaneInfo;
-import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.wrapper.W_Block;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Lib;
@@ -296,7 +294,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 if(!isFly) {
                     rot = this.getAcInfo().mobilityYawOnGround;
                     if(!this.getAcInfo().canRotOnGround) {
-                        //causes the ship to get damaged, as opposed to just not rotating, also add this logic/some variation of it for movement.
+                        //in theory causes the ship to get damaged, as opposed to just not rotating, also add this logic/some variation of it for movement.
                         double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);
                         Block block = MCH_Lib.getBlockY(this, 3, -2, false);
                         if(!W_Block.isEqual(block, W_Block.getWater()) && !W_Block.isEqual(block, Blocks.air) && !W_Block.isEqual(block, Blocks.flowing_water)) {
@@ -413,7 +411,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                             }
                         }
 
-                        Vec3 var16 = ((MCP_PlaneInfo.Rotor)this.getShipInfo().rotorList.get(px)).pos;
+                        Vec3 var16 = ((MCH_ShipInfo.Rotor)this.getShipInfo().rotorList.get(px)).pos;
                         Vec3 py = MCH_Lib.RotVec3(var16, -yaw, -pitch, -roll);
                         double x = super.posX + py.xCoord;
                         double y = super.posY + py.yCoord;

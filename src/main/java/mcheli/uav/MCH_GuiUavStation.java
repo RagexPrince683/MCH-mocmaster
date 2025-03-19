@@ -3,8 +3,8 @@ package mcheli.uav;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.helicopter.MCH_ItemHeli;
-import mcheli.plane.MCP_ItemPlane;
 import mcheli.plane.MCP_PlaneInfoManager;
+import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_ItemTank;
 import mcheli.tank.MCH_TankInfoManager;
 import mcheli.uav.MCH_ContainerUavStation;
@@ -45,6 +45,10 @@ public class MCH_GuiUavStation
                 if (item != null && item.getItem() instanceof mcheli.plane.MCP_ItemPlane) {
                      info = MCP_PlaneInfoManager.getFromItem(item.getItem());
                    }
+
+               if (item != null && item.getItem() instanceof mcheli.ship.MCH_ItemShip) {
+                   info = MCH_ShipInfoManager.getFromItem(item.getItem());
+               }
 
                 if (item != null && item.getItem() instanceof mcheli.helicopter.MCH_ItemHeli) {
                      info = MCH_HeliInfoManager.getFromItem(item.getItem());

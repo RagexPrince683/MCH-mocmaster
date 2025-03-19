@@ -18,6 +18,8 @@ import mcheli.item.MCH_ItemInfoManager;
 import mcheli.lweapon.MCH_ItemLightWeaponBullet;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
+import mcheli.ship.MCH_ShipInfo;
+import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_TankInfo;
 import mcheli.tank.MCH_TankInfoManager;
 import mcheli.throwable.MCH_ThrowableInfo;
@@ -122,6 +124,14 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
          name = (String)i$.next();
          MCP_PlaneInfo info1 = (MCP_PlaneInfo)MCP_PlaneInfoManager.map.get(name);
          addRecipeAndRegisterList(info1, info1.item, MCP_PlaneInfoManager.getInstance());
+      }
+
+      i$ = MCH_ShipInfoManager.map.keySet().iterator();
+
+      while(i$.hasNext()) {
+         name = (String)i$.next();
+         MCH_ShipInfo info1 = (MCH_ShipInfo)MCH_ShipInfoManager.map.get(name);
+         addRecipeAndRegisterList(info1, info1.item, MCH_ShipInfoManager.getInstance());
       }
 
       i$ = MCH_TankInfoManager.map.keySet().iterator();

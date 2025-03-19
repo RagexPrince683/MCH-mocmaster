@@ -2,8 +2,6 @@ package mcheli.ship;
 
 import mcheli.MCH_BaseInfo;
 import mcheli.aircraft.MCH_AircraftInfoManager;
-import mcheli.plane.MCP_PlaneInfo;
-import mcheli.plane.MCP_PlaneInfoManager;
 import net.minecraft.item.Item;
 
 import java.util.HashMap;

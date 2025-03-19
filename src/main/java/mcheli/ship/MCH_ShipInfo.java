@@ -3,8 +3,6 @@ package mcheli.ship;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.plane.MCP_ItemPlane;
-import mcheli.plane.MCP_PlaneInfo;
 import net.minecraft.item.Item;
 
 import java.util.ArrayList;

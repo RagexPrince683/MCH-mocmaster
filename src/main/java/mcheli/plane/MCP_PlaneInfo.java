@@ -5,7 +5,6 @@ import java.util.List;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.plane.MCP_ItemPlane;
 import net.minecraft.item.Item;
 
 public class MCP_PlaneInfo extends MCH_AircraftInfo {

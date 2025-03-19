@@ -59,6 +59,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
    MCH_EntityAircraft ac;
    public MCH_EntityAircraft onTileClick(ItemStack itemStack, World world, float rotationYaw, int x, int y, int z) {
 
+      //todo add a wait time for the aircraft to be placed, we dont want people abusing vehicle hopping
       MCH_EntityAircraft ac = this.createAircraft(world, (double)((float)x + 0.5F), (double)((float)y + 1.0F), (double)((float)z + 0.5F), itemStack);
       if(ac == null) {
          return null;

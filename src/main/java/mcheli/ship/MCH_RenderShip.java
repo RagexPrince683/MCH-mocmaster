@@ -3,8 +3,6 @@ package mcheli.ship;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_RenderAircraft;
-import mcheli.plane.MCP_EntityPlane;
-import mcheli.plane.MCP_PlaneInfo;
 import mcheli.wrapper.W_Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
