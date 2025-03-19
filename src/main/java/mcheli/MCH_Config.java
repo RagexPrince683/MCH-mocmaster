@@ -278,7 +278,7 @@ public class MCH_Config {
       CreativeTabIcon = new MCH_ConfigPrm("CreativeTabIconItem", "fuel");
       CreativeTabIconHeli = new MCH_ConfigPrm("CreativeTabIconHeli", "ah-64");
       CreativeTabIconPlane = new MCH_ConfigPrm("CreativeTabIconPlane", "f22a");
-      CreativeTabIconShip = new MCH_ConfigPrm("CreativeTabIconPlane", "project1204");
+      CreativeTabIconShip = new MCH_ConfigPrm("CreativeTabIconShip", "project1204");
       CreativeTabIconTank = new MCH_ConfigPrm("CreativeTabIconTank", "merkava_mk4");
       CreativeTabIconVehicle = new MCH_ConfigPrm("CreativeTabIconVehicle", "mk15");
       DisableShader = new MCH_ConfigPrm("DisableShader", false);

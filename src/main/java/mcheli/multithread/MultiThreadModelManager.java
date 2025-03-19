@@ -4,6 +4,7 @@ import mcheli.MCH_ClientProxy;
 import mcheli.MCH_ModelManager;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.plane.MCP_PlaneInfoManager;
+import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_TankInfoManager;
 import mcheli.vehicle.MCH_VehicleInfoManager;
 import mcheli.weapon.MCH_DefaultBulletModels;
@@ -39,6 +40,10 @@ public class MultiThreadModelManager {
         CompletableFuture<Void> planeFuture = CompletableFuture.runAsync(() ->
                         MCP_PlaneInfoManager.map.keySet().forEach(key -> proxy.registerModelsPlane((String) key, false)), executor)
                 .thenRun(() -> completion("plane"));
+
+        CompletableFuture<Void> shipFuture = CompletableFuture.runAsync(() ->
+                        MCH_ShipInfoManager.map.keySet().forEach(key -> proxy.registerModelsShip((String) key, false)), executor)
+                .thenRun(() -> completion("ship"));
 
         CompletableFuture<Void> tankFuture = CompletableFuture.runAsync(() ->
                         MCH_TankInfoManager.map.keySet().forEach(key -> proxy.registerModelsTank((String) key, false)), executor)

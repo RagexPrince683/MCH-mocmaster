@@ -50,6 +50,8 @@ import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.plane.MCP_RenderPlane;
 import mcheli.ship.MCH_EntityShip;
 import mcheli.ship.MCH_RenderShip;
+import mcheli.ship.MCH_ShipInfo;
+import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.tank.MCH_RenderTank;
 import mcheli.tank.MCH_TankInfo;
@@ -200,6 +202,13 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
          this.registerModelsPlane(var6, false);
       }
 
+      var5 = MCH_ShipInfoManager.map.keySet().iterator();
+
+      while(var5.hasNext()) {
+         var6 = (String)var5.next();
+         this.registerModelsShip(var6, false);
+      }
+
       MCH_TankInfoManager.getInstance();
       var5 = MCH_TankInfoManager.map.keySet().iterator();
 
@@ -333,6 +342,47 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       }
 
       this.registerCommonPart("planes", info);
+      MCH_ModelManager.setForceReloadMode(false);
+   }
+
+   public void registerModelsShip(String name, boolean reload) {
+      MCH_ModelManager.setForceReloadMode(reload);
+      MCH_ShipInfo info = (MCH_ShipInfo)MCH_ShipInfoManager.map.get(name);
+      info.model = MCH_ModelManager.load("ships", info.name);
+
+      Iterator i$;
+      MCH_AircraftInfo.DrawnPart w;
+      for(i$ = info.nozzles.iterator(); i$.hasNext(); w.model = this.loadPartModel("ships", info.name, info.model, w.modelName)) {
+         w = (MCH_AircraftInfo.DrawnPart)i$.next();
+      }
+
+      i$ = info.rotorList.iterator();
+
+      Iterator i$1;
+      while(i$.hasNext()) {
+         MCH_ShipInfo.Rotor w1 = (MCH_ShipInfo.Rotor)i$.next();
+         w1.model = this.loadPartModel("ships", info.name, info.model, w1.modelName);
+
+         MCH_ShipInfo.Blade p;
+         for(i$1 = w1.blades.iterator(); i$1.hasNext(); p.model = this.loadPartModel("ships", info.name, info.model, p.modelName)) {
+            p = (MCH_ShipInfo.Blade)i$1.next();
+         }
+      }
+
+      //i$ = info.wingList.iterator();
+
+      //while(i$.hasNext()) {
+      //   MCP_PlaneInfo.Wing w2 = (MCP_PlaneInfo.Wing)i$.next();
+      //   w2.model = this.loadPartModel("planes", info.name, info.model, w2.modelName);
+      //   MCP_PlaneInfo.Pylon p1;
+      //   if(w2.pylonList != null) {
+      //      for(i$1 = w2.pylonList.iterator(); i$1.hasNext(); p1.model = this.loadPartModel("planes", info.name, info.model, p1.modelName)) {
+      //         p1 = (MCP_PlaneInfo.Pylon)i$1.next();
+      //      }
+      //   }
+      //}
+
+      this.registerCommonPart("ships", info);
       MCH_ModelManager.setForceReloadMode(false);
    }
 

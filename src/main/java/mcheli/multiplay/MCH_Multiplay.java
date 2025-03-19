@@ -13,6 +13,7 @@ import mcheli.multiplay.MCH_PacketNotifyMarkPoint;
 import mcheli.multiplay.MCH_PacketNotifySpotedEntity;
 import mcheli.multiplay.MCH_TargetType;
 import mcheli.plane.MCP_EntityPlane;
+import mcheli.ship.MCH_EntityShip;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.vehicle.MCH_EntityVehicle;
 import net.minecraft.command.server.CommandScoreboard;
@@ -36,7 +37,25 @@ public class MCH_Multiplay {
 
 
    public static boolean canSpotEntityWithFilter(int filter, Entity entity) {
-      return entity instanceof MCP_EntityPlane?(filter & 32) != 0:(entity instanceof MCH_EntityHeli?(filter & 16) != 0:(!(entity instanceof MCH_EntityVehicle) && !(entity instanceof MCH_EntityTank)?(entity instanceof EntityPlayer?(filter & 4) != 0:(entity instanceof EntityLivingBase?(isMonster(entity)?(filter & 2) != 0:(filter & 1) != 0):false)):(filter & 8) != 0));
+      if (entity instanceof MCP_EntityPlane) {
+         return (filter & 32) != 0; // Checks if plenes are included in the filter
+      } else if (entity instanceof MCH_EntityHeli) {
+         return (filter & 16) != 0; // Checks if helicopters are included in the filter
+      } else if (entity instanceof MCH_EntityShip) {
+         return (filter & 64) != 0; // Checks if helicopters are included in the filter
+      } else if (entity instanceof MCH_EntityVehicle || entity instanceof MCH_EntityTank) {
+         return (filter & 8) != 0; // Checks if vehicles or tanks are included in the filter
+      } else if (entity instanceof EntityPlayer) {
+         return (filter & 4) != 0; // Checks if players are included in the filter
+      } else if (entity instanceof EntityLivingBase) {
+         if (isMonster(entity)) {
+            return (filter & 2) != 0; // Checks if monsters are included in the filter
+         } else {
+            return (filter & 1) != 0; // Checks if passive mobs are included in the filter
+         }
+      }
+
+      return false; // If none of the conditions match, return false
    }
 
    public static boolean isMonster(Entity entity) {

@@ -47,6 +47,7 @@ import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_ItemPlane;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
+import mcheli.ship.MCH_EntityShip;
 import mcheli.ship.MCH_ItemShip;
 import mcheli.ship.MCH_ShipInfo;
 import mcheli.ship.MCH_ShipInfoManager;
@@ -177,6 +178,7 @@ public class MCH_MOD {
       MCH_WeaponInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/weapons");
       MCH_HeliInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "helicopters");
       MCP_PlaneInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "planes");
+      MCH_ShipInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "ships");
       MCH_TankInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "tanks");
       MCH_VehicleInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "vehicles");
       MCH_ThrowableInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/throwable");
@@ -295,6 +297,7 @@ public class MCH_MOD {
       EntityRegistry.registerModEntity(MCH_EntityHeli.class, "MCH.E.Heli", 101, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityGLTD.class, "MCH.E.GLTD", 102, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCP_EntityPlane.class, "MCH.E.Plane", 103, this, 200, 10, true);
+      EntityRegistry.registerModEntity(MCH_EntityShip.class, "MCH.E.Ship", 401, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityChain.class, "MCH.E.Chain", 104, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityHitBox.class, "MCH.E.PSeat", 105, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityParachute.class, "MCH.E.Parachute", 106, this, 200, 10, true);
@@ -653,6 +656,30 @@ public class MCH_MOD {
          }
       }
 
+      i$ = MCH_ShipInfoManager.map.keySet().iterator();
+
+      while(i$.hasNext()) {
+         name = (String)i$.next();
+         MCH_ShipInfo info4 = (MCH_ShipInfo) MCH_ShipInfoManager.map.get(name);
+         info4.item = new MCH_ItemShip(info4.itemID);
+         info4.item.setMaxDamage(info4.maxHp);
+         if(!info4.canRide && (info4.ammoSupplyRange > 0.0F || info4.fuelSupplyRange > 0.0F)) {
+            registerItem(info4.item, name, creativeTabs);
+         } else {
+            registerItem(info4.item, name, creativeTabsShip);
+         }
+
+         MCH_ItemAircraft.registerDispenseBehavior(info4.item);
+         info4.itemID = W_Item.getIdFromItem(info4.item) - 256;
+         W_LanguageRegistry.addName(info4.item, info4.displayName);
+         i$1 = info4.displayNameLang.keySet().iterator();
+
+         while(i$1.hasNext()) {
+            lang = (String)i$1.next();
+            W_LanguageRegistry.addNameForObject(info4.item, lang, (String)info4.displayNameLang.get(lang));
+         }
+      }
+
       i$ = MCH_TankInfoManager.map.keySet().iterator();
 
       while(i$.hasNext()) {
@@ -701,29 +728,7 @@ public class MCH_MOD {
          }
       }
 
-      i$ = MCH_ShipInfoManager.map.keySet().iterator();
 
-      while(i$.hasNext()) {
-         name = (String)i$.next();
-         MCH_ShipInfo info4 = (MCH_ShipInfo) MCH_ShipInfoManager.map.get(name);
-         info4.item = new MCH_ItemShip(info4.itemID);
-         info4.item.setMaxDamage(info4.maxHp);
-         if(!info4.canRide && (info4.ammoSupplyRange > 0.0F || info4.fuelSupplyRange > 0.0F)) {
-            registerItem(info4.item, name, creativeTabs);
-         } else {
-            registerItem(info4.item, name, creativeTabsShip);
-         }
-
-         MCH_ItemAircraft.registerDispenseBehavior(info4.item);
-         info4.itemID = W_Item.getIdFromItem(info4.item) - 256;
-         W_LanguageRegistry.addName(info4.item, info4.displayName);
-         i$1 = info4.displayNameLang.keySet().iterator();
-
-         while(i$1.hasNext()) {
-            lang = (String)i$1.next();
-            W_LanguageRegistry.addNameForObject(info4.item, lang, (String)info4.displayNameLang.get(lang));
-         }
-      }
 
 
 

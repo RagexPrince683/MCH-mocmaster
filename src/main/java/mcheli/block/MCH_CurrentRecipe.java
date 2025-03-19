@@ -56,6 +56,8 @@ public class MCH_CurrentRecipe {
                this.modelTexture = new ResourceLocation("mcheli", "textures/" + dir + "/" + name + ".png");
                ++this.descMaxPage;
                if(list instanceof MCP_PlaneInfoManager) {
+                  //idk what this does but it might be causing ships not to reg
+                  // but I think its in the drafting table so that makes 0 sense
                   this.modelRot = 0;
                } else {
                   this.modelRot = 1;
