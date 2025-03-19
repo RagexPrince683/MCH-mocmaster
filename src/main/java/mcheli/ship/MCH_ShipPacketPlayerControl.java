@@ -8,6 +8,8 @@ import java.io.IOException;
 
 public class MCH_ShipPacketPlayerControl extends MCH_PacketPlayerControlBase {
 
+    public byte switchVtol = -1;
+
 
     public int getMessageID() {
         return 536903698;
@@ -16,22 +18,22 @@ public class MCH_ShipPacketPlayerControl extends MCH_PacketPlayerControlBase {
     public void readData(ByteArrayDataInput data) {
         super.readData(data);
 
-        //try {
-        //    this.switchVtol = data.readByte();
-        //} catch (Exception var3) {
-        //    var3.printStackTrace();
-        //}
+        try {
+            this.switchVtol = data.readByte();
+        } catch (Exception var3) {
+            var3.printStackTrace();
+        }
 
     }
 
     public void writeData(DataOutputStream dos) {
         super.writeData(dos);
 
-        //try {
-        //    dos.writeByte(this.switchVtol);
-        //} catch (IOException var3) {
-        //    var3.printStackTrace();
-        //}
+        try {
+            dos.writeByte(this.switchVtol);
+        } catch (IOException var3) {
+            var3.printStackTrace();
+        }
 
     }
 
