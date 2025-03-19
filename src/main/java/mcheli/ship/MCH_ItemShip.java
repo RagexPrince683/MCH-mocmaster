@@ -21,21 +21,21 @@ public class MCH_ItemShip extends MCH_ItemAircraft {
     public MCH_EntityShip createAircraft(World world, double x, double y, double z, ItemStack itemStack) {
              MCH_ShipInfo info = MCH_ShipInfoManager.getFromItem((Item)this);
              if (info == null) {
-                   MCH_Lib.Log(world, "##### MCP_EntityPlane Plane info null %s", new Object[] { getUnlocalizedName() });
+                   MCH_Lib.Log(world, "##### MCH_EntityShip Ship info null %s", new Object[] { getUnlocalizedName() });
                    return null;
                  }
-             MCH_EntityShip plane = new MCH_EntityShip(world);
-             plane.setPosition(x, y + plane.yOffset, z);
-             plane.prevPosX = x;
-             plane.prevPosY = y;
-             plane.prevPosZ = z;
-             plane.camera.setPosition(x, y, z);
-             plane.setTypeName(info.name);
+             MCH_EntityShip ship = new MCH_EntityShip(world);
+             ship.setPosition(x, y + ship.yOffset, z);
+             ship.prevPosX = x;
+             ship.prevPosY = y;
+             ship.prevPosZ = z;
+             ship.camera.setPosition(x, y, z);
+             ship.setTypeName(info.name);
              if (!world.isRemote) {
-                   plane.setTextureName(info.getTextureName());
+                   ship.setTextureName(info.getTextureName());
                  }
 
-             return plane;
+             return ship;
            }
      }
      //todo double check this is right

@@ -52,6 +52,7 @@ public class MCH_ShipInfo extends MCH_AircraftInfo {
     public String getDefaultHudName(int seatId) {
         return seatId <= 0?"plane":(seatId == 1?"plane":"gunner");
     }
+    //todo shouldn't be an issue theoretically, field test
 
     public boolean isValidData() throws Exception {
         if(this.haveHatch() ) {

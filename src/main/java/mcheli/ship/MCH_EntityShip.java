@@ -72,7 +72,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         }
 
         if(this.shipInfo == null) {
-            MCH_Lib.Log((Entity)this, "##### MCP_EntityPlane changePlaneType() Plane info null %d, %s, %s", new Object[]{Integer.valueOf(W_Entity.getEntityId(this)), type, this.getEntityName()});
+            MCH_Lib.Log((Entity)this, "##### MCH_EntityShip changeShipType() Ship info null %d, %s, %s", new Object[]{Integer.valueOf(W_Entity.getEntityId(this)), type, this.getEntityName()});
             this.setDead();
         } else {
             this.setAcInfo(this.shipInfo);
@@ -287,6 +287,11 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             if(isFly && !this.isFreeLookMode() && !super.isGunnerMode && (!this.getAcInfo().isFloat || this.getWaterDepth() <= 0.0D)) {
                 if(isFly) {
                     MCH_Config var10000 = MCH_MOD.config;
+                    //temp debug adding this back
+                    if(!MCH_Config.MouseControlFlightSimMode.prmBool) {
+                        this.rotationByKey(partialTicks);
+                        this.setRotRoll(this.getRotRoll() + this.addkeyRotValue * 0.5F * this.getAcInfo().mobilityRoll);
+                    }
                     //this should not be happening it is a ship
                 }
             } else {
@@ -294,20 +299,31 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 if(!isFly) {
                     rot = this.getAcInfo().mobilityYawOnGround;
                     if(!this.getAcInfo().canRotOnGround) {
-                        //in theory causes the ship to get damaged, as opposed to just not rotating, also add this logic/some variation of it for movement.
-                        double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);
+
+
                         Block block = MCH_Lib.getBlockY(this, 3, -2, false);
                         if(!W_Block.isEqual(block, W_Block.getWater()) && !W_Block.isEqual(block, Blocks.air) && !W_Block.isEqual(block, Blocks.flowing_water)) {
-                            //rot = 0.0F;
-                            Entity rider = this.getRiddenByEntity();
-                            DamageSource ds = (rider instanceof EntityLivingBase)
-                                    ? DamageSource.causeMobDamage((EntityLivingBase) rider)
-                                    : DamageSource.generic;
-                            float damage = (float)(speed * 15.0D);
-                            //for (Entity e : list) {
-                            this.attackEntityFrom(ds, damage / 3.0F);
-                            //}
+                            rot = 0.0F;
                         }
+
+                        //in theory causes the ship to get damaged, as opposed to just not rotating, also add this logic/some variation of it for movement.
+                        //double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);
+                        //Block block = MCH_Lib.getBlockY(this, 3, -2, false);
+                        //if(!W_Block.isEqual(block, W_Block.getWater()) && !W_Block.isEqual(block, Blocks.air) && !W_Block.isEqual(block, Blocks.flowing_water)) {
+                        //    //rot = 0.0F;
+                        //    Entity rider = this.getRiddenByEntity();
+                        //    DamageSource ds = (rider instanceof EntityLivingBase)
+                        //            ? DamageSource.causeMobDamage((EntityLivingBase) rider)
+                        //            : DamageSource.generic;
+                        //    float damage = (float)(speed * 15.0D);
+                        //    //for (Entity e : list) {
+                        //    this.attackEntityFrom(ds, damage / 3.0F);
+                        //    //}
+                        //}
+                        //temp delete for debugging
+
+
+
                     }
                 }
 
@@ -345,10 +361,10 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
 
         super.throttleBack = (float)((double)super.throttleBack * 0.8D);
         if(this.getRiddenByEntity() != null && !this.getRiddenByEntity().isDead && this.isCanopyClose() && this.canUseFuel() && !this.isDestroyed()) {
-
+            this.onUpdate_ControlNotHovering();
         } else if(this.isTargetDrone() && this.canUseFuel() && !this.isDestroyed()) {
             super.throttleUp = true;
-            //this.onUpdate_ControlNotHovering();
+            this.onUpdate_ControlNotHovering();
         } else if(this.getCurrentThrottle() > 0.0D) {
             this.addCurrentThrottle(-0.0025D * (double)this.getAcInfo().throttleUpDown);
         } else {
@@ -372,6 +388,58 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             }
         } else {
             this.setThrottle(this.getCurrentThrottle());
+        }
+
+    }
+
+    protected void onUpdate_ControlNotHovering() {
+        if(!super.isGunnerMode) {
+            float throttleUpDown = this.getAcInfo().throttleUpDown;
+            boolean turn = super.moveLeft && !super.moveRight || !super.moveLeft && super.moveRight;
+            float pivotTurnThrottle = this.getAcInfo().pivotTurnThrottle;
+            boolean localThrottleUp = super.throttleUp;
+            if(turn && this.getCurrentThrottle() < (double)this.getAcInfo().pivotTurnThrottle && !localThrottleUp && !super.throttleDown) {
+                localThrottleUp = true;
+                throttleUpDown *= 2.0F;
+            }
+
+            if(localThrottleUp) {
+                float f = throttleUpDown;
+                if(this.getRidingEntity() != null) {
+                    double mx = this.getRidingEntity().motionX;
+                    double mz = this.getRidingEntity().motionZ;
+                    f = throttleUpDown * MathHelper.sqrt_double(mx * mx + mz * mz) * this.getAcInfo().throttleUpDownOnEntity;
+                }
+
+                if(this.getAcInfo().enableBack && super.throttleBack > 0.0F) {
+                    super.throttleBack = (float)((double)super.throttleBack - 0.01D * (double)f);
+                } else {
+                    super.throttleBack = 0.0F;
+                    if(this.getCurrentThrottle() < 1.0D) {
+                        this.addCurrentThrottle(0.01D * (double)f);
+                    } else {
+                        this.setCurrentThrottle(1.0D);
+                    }
+                }
+            } else if(super.throttleDown) {
+                if(this.getCurrentThrottle() > 0.0D) {
+                    this.addCurrentThrottle(-0.01D * (double)throttleUpDown);
+                } else {
+                    this.setCurrentThrottle(0.0D);
+                    if(this.getAcInfo().enableBack) {
+                        super.throttleBack = (float)((double)super.throttleBack + 0.0025D * (double)throttleUpDown);
+                        if(super.throttleBack > 0.6F) {
+                            super.throttleBack = 0.6F;
+                        }
+                    }
+                }
+                //todo blame plane
+            } else if(super.cs_planeAutoThrottleDown && this.getCurrentThrottle() > 0.0D) {
+                this.addCurrentThrottle(-0.005D * (double)throttleUpDown);
+                if(this.getCurrentThrottle() <= 0.0D) {
+                    this.setCurrentThrottle(0.0D);
+                }
+            }
         }
 
     }

@@ -96,6 +96,8 @@ public abstract class MCH_Packet extends W_PacketBase {
 
       try {
          dos.writeInt(this.getMessageID());
+         System.out.println("getMessageID: " + this.getMessageID());
+         //im gonna fucking kill you
       } catch (IOException var4) {
          var4.printStackTrace();
       }
