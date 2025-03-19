@@ -13,6 +13,8 @@ public class MCH_ShipInfo extends MCH_AircraftInfo {
     public MCH_ItemShip item = null;
     public List nozzles = new ArrayList();
     public List rotorList = new ArrayList();
+    public boolean isEnableVtol = false;
+    public boolean isDefaultVtol;
 
     public boolean isEnableAutoPilot = false;
 

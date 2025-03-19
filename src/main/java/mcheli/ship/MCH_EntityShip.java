@@ -66,6 +66,23 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         return this.shipInfo;
     }
 
+    public void swithVtolMode(boolean mode) {
+        if(this.partNozzle != null) {
+            if(this.shipInfo.isDefaultVtol && super.onGround && !mode) {
+                return;
+            }
+
+            if(!super.worldObj.isRemote) {
+                this.partNozzle.setStatusServer(mode);
+            }
+
+            if(this.getRiddenByEntity() != null && !this.getRiddenByEntity().isDead) {
+                this.getRiddenByEntity().rotationPitch = this.getRiddenByEntity().prevRotationPitch = 0.0F;
+            }
+        }
+
+    }
+
     public void changeType(String type) {
         if(!type.isEmpty()) {
             this.shipInfo = MCH_ShipInfoManager.get(type);
@@ -258,9 +275,9 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     private void rotationByKey(float partialTicks) {
         float rot = 0.2F;
         MCH_Config var10000 = MCH_MOD.config;
-        //if(!MCH_Config.MouseControlFlightSimMode.prmBool && this.getVtolMode() != 0) {
-        //    rot *= 0.0F;
-        //}
+        if(!MCH_Config.MouseControlFlightSimMode.prmBool && this.getVtolMode() != 0) {
+            rot *= 0.0F;
+        }
 
         if(super.moveLeft && !super.moveRight) {
             this.addkeyRotValue -= rot * partialTicks;
@@ -922,6 +939,25 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         }
 
         return nozzle;
+    }
+
+    public boolean canSwitchVtol() {
+        if(this.shipInfo != null && this.shipInfo.isEnableVtol) {
+            if(this.getModeSwitchCooldown() > 0) {
+                return false;
+            } else if(this.getVtolMode() == 1) {
+                return false;
+            } else if(MathHelper.abs(this.getRotRoll()) > 30.0F) {
+                return false;
+            } else if(super.onGround && this.shipInfo.isDefaultVtol) {
+                return false;
+            } else {
+                this.setModeSwitchCooldown(20);
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
 
 
