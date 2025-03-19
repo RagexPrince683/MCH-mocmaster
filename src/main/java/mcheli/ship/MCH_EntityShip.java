@@ -226,7 +226,6 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     public boolean canUpdateRoll(Entity player) {
         return super.canUpdateRoll(player) && !this.isHovering();
     }
-
     public float getYawFactor() {
         return super.getYawFactor() * 0.8F;
     }
@@ -253,11 +252,11 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
 
     public float getControlRotYaw(float mouseX, float mouseY, float tick) {
         MCH_Config var10000 = MCH_MOD.config;
-       // if(MCH_Config.MouseControlFlightSimMode.prmBool) {
-       //
-       // } else {
-       //     return mouseX;
-       // }
+        if(MCH_Config.MouseControlFlightSimMode.prmBool) {
+
+        } else {
+            return mouseX;
+        }
         this.rotationByKey(tick);
         return this.addkeyRotValue * 20.0F;
 
@@ -369,43 +368,51 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             }
 
         }
+
+        System.out.println("Rot Yaw: " + this.getRotYaw());
+        System.out.println("Rot Pitch: " + this.getRotPitch());
+        System.out.println("Rot Roll: " + this.getRotRoll());
     }
 
     protected void onUpdate_Control() {
-        if(super.isGunnerMode && !this.canUseFuel()) {
+        if (super.isGunnerMode && !this.canUseFuel()) {
             this.switchGunnerMode(false);
         }
 
         super.throttleBack = (float)((double)super.throttleBack * 0.8D);
-        if(this.getRiddenByEntity() != null && !this.getRiddenByEntity().isDead && this.isCanopyClose() && this.canUseFuel() && !this.isDestroyed()) {
+        if (this.getRiddenByEntity() != null && !this.getRiddenByEntity().isDead && this.isCanopyClose() && this.canUseFuel() && !this.isDestroyed()) { //this.canUseWing() &&
             this.onUpdate_ControlNotHovering();
-        } else if(this.isTargetDrone() && this.canUseFuel() && !this.isDestroyed()) {
+        } else if (this.isTargetDrone() && this.canUseFuel() && !this.isDestroyed()) {
             super.throttleUp = true;
             this.onUpdate_ControlNotHovering();
-        } else if(this.getCurrentThrottle() > 0.0D) {
+        } else if (this.getCurrentThrottle() > 0.0D) {
             this.addCurrentThrottle(-0.0025D * (double)this.getAcInfo().throttleUpDown);
         } else {
             this.setCurrentThrottle(0.0D);
         }
 
-        if(this.getCurrentThrottle() < 0.0D) {
+        if (this.getCurrentThrottle() < 0.0D) {
             this.setCurrentThrottle(0.0D);
         }
 
-        if(super.worldObj.isRemote) {
-            if(!W_Lib.isClientPlayer(this.getRiddenByEntity())) {
+        if (super.worldObj.isRemote) {
+            if (!W_Lib.isClientPlayer(this.getRiddenByEntity())) {
                 double ct = this.getThrottle();
-                if(this.getCurrentThrottle() > ct) {
+                if (this.getCurrentThrottle() > ct) {
                     this.addCurrentThrottle(-0.005D);
                 }
 
-                if(this.getCurrentThrottle() < ct) {
+                if (this.getCurrentThrottle() < ct) {
                     this.addCurrentThrottle(0.005D);
                 }
             }
         } else {
             this.setThrottle(this.getCurrentThrottle());
         }
+
+        System.out.println("Move Left: " + super.moveLeft);
+        System.out.println("Move Right: " + super.moveRight);
+        System.out.println("Add Key Rot Value: " + this.addkeyRotValue);
 
     }
 
