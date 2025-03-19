@@ -198,6 +198,7 @@ public class MCH_ClientHeliTickHandler extends MCH_AircraftClientTickHandler {
       }
 
       if(this.KeyEjectSeat.isKeyDown() && heli.canEjectSeat(player)) {
+         //kill heli
          pc.ejectSeat = true;
          send = true;
       }

@@ -131,6 +131,7 @@ public class MCP_PlanePacketHandler {
                }
 
                if(pc.isUnmount == 3) {
+                  //todo for drones fix this to UAV station pos.
                   plane.unmountAircraft();
                }
             }

@@ -47,6 +47,9 @@ import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_ItemPlane;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
+import mcheli.ship.MCH_ItemShip;
+import mcheli.ship.MCH_ShipInfo;
+import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.tank.MCH_ItemTank;
 import mcheli.tank.MCH_TankInfo;
@@ -137,6 +140,7 @@ public class MCH_MOD {
    public static MCH_CreativeTabs creativeTabsItem;
    public static MCH_CreativeTabs creativeTabsHeli;
    public static MCH_CreativeTabs creativeTabsPlane;
+   public static MCH_CreativeTabs creativeTabsShip;
    public static MCH_CreativeTabs creativeTabsTank;
    public static MCH_CreativeTabs creativeTabsVehicle;
    public static MCH_DraftingTableBlock blockDraftingTable;
@@ -164,6 +168,7 @@ public class MCH_MOD {
       creativeTabsItem = new MCH_CreativeTabs("MCHeliO Recipe Items");
       creativeTabsHeli = new MCH_CreativeTabs("MCHeliO Helicopters");
       creativeTabsPlane = new MCH_CreativeTabs("MCHeliO Planes");
+      creativeTabsShip = new MCH_CreativeTabs("MCHeliO Ships");
       creativeTabsTank = new MCH_CreativeTabs("MCHeliO Tanks");
       creativeTabsVehicle = new MCH_CreativeTabs("MCHeliO Vehicles");
       W_ItemList.init();
@@ -263,6 +268,8 @@ public class MCH_MOD {
       creativeTabsHeli.setFixedIconItem(MCH_Config.CreativeTabIconHeli.prmString);
       var10001 = config;
       creativeTabsPlane.setFixedIconItem(MCH_Config.CreativeTabIconPlane.prmString);
+      var10001 = config;
+      creativeTabsShip.setFixedIconItem(MCH_Config.CreativeTabIconShip.prmString);
       var10001 = config;
       creativeTabsTank.setFixedIconItem(MCH_Config.CreativeTabIconTank.prmString);
       var10001 = config;
@@ -693,6 +700,32 @@ public class MCH_MOD {
             W_LanguageRegistry.addNameForObject(info3.item, lang, (String)info3.displayNameLang.get(lang));
          }
       }
+
+      i$ = MCH_ShipInfoManager.map.keySet().iterator();
+
+      while(i$.hasNext()) {
+         name = (String)i$.next();
+         MCH_ShipInfo info4 = (MCH_ShipInfo) MCH_ShipInfoManager.map.get(name);
+         info4.item = new MCH_ItemShip(info4.itemID);
+         info4.item.setMaxDamage(info4.maxHp);
+         if(!info4.canRide && (info4.ammoSupplyRange > 0.0F || info4.fuelSupplyRange > 0.0F)) {
+            registerItem(info4.item, name, creativeTabs);
+         } else {
+            registerItem(info4.item, name, creativeTabsShip);
+         }
+
+         MCH_ItemAircraft.registerDispenseBehavior(info4.item);
+         info4.itemID = W_Item.getIdFromItem(info4.item) - 256;
+         W_LanguageRegistry.addName(info4.item, info4.displayName);
+         i$1 = info4.displayNameLang.keySet().iterator();
+
+         while(i$1.hasNext()) {
+            lang = (String)i$1.next();
+            W_LanguageRegistry.addNameForObject(info4.item, lang, (String)info4.displayNameLang.get(lang));
+         }
+      }
+
+
 
    }
 

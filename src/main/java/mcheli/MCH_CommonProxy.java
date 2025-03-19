@@ -29,6 +29,8 @@ public class MCH_CommonProxy {
 
    public void registerModelsPlane(String name, boolean reload) {}
 
+   public void registerModelsShip(String name, boolean reload) {}
+
    public void registerModelsVehicle(String name, boolean reload) {}
 
    public void registerModelsTank(String name, boolean reload) {}

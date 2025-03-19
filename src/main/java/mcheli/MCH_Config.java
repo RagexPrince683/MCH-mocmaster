@@ -106,6 +106,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm DismountAll;
    public static MCH_ConfigPrm MountMinecartHeli;
    public static MCH_ConfigPrm MountMinecartPlane;
+   public static MCH_ConfigPrm MountMinecartShip;
    public static MCH_ConfigPrm MountMinecartVehicle;
    public static MCH_ConfigPrm MountMinecartTank;
    public static MCH_ConfigPrm AutoThrottleDownHeli;
@@ -117,6 +118,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm CreativeTabIcon;
    public static MCH_ConfigPrm CreativeTabIconHeli;
    public static MCH_ConfigPrm CreativeTabIconPlane;
+   public static MCH_ConfigPrm CreativeTabIconShip;
    public static MCH_ConfigPrm CreativeTabIconTank;
    public static MCH_ConfigPrm CreativeTabIconVehicle;
    public static MCH_ConfigPrm DisableShader;
@@ -137,6 +139,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm MouseControlFlightSimMode;
    public static MCH_ConfigPrm SwitchWeaponWithMouseWheel;
    public static MCH_ConfigPrm AllPlaneSpeed;
+   public static MCH_ConfigPrm AllShipSpeed;
    public static MCH_ConfigPrm AllHeliSpeed;
    public static MCH_ConfigPrm AllTankSpeed;
    public static MCH_ConfigPrm HurtResistantTime;
@@ -262,6 +265,7 @@ public class MCH_Config {
       DismountAll = new MCH_ConfigPrm("DismountAll", false);
       MountMinecartHeli = new MCH_ConfigPrm("MountMinecartHeli", true);
       MountMinecartPlane = new MCH_ConfigPrm("MountMinecartPlane", true);
+      MountMinecartShip = new MCH_ConfigPrm("MountMinecartShip", false);
       MountMinecartVehicle = new MCH_ConfigPrm("MountMinecartVehicle", false);
       MountMinecartTank = new MCH_ConfigPrm("MountMinecartTank", true);
       AutoThrottleDownHeli = new MCH_ConfigPrm("AutoThrottleDownHeli", true);
@@ -274,6 +278,7 @@ public class MCH_Config {
       CreativeTabIcon = new MCH_ConfigPrm("CreativeTabIconItem", "fuel");
       CreativeTabIconHeli = new MCH_ConfigPrm("CreativeTabIconHeli", "ah-64");
       CreativeTabIconPlane = new MCH_ConfigPrm("CreativeTabIconPlane", "f22a");
+      CreativeTabIconShip = new MCH_ConfigPrm("CreativeTabIconPlane", "project1204");
       CreativeTabIconTank = new MCH_ConfigPrm("CreativeTabIconTank", "merkava_mk4");
       CreativeTabIconVehicle = new MCH_ConfigPrm("CreativeTabIconVehicle", "mk15");
       DisableShader = new MCH_ConfigPrm("DisableShader", false);
@@ -299,6 +304,7 @@ public class MCH_Config {
       SwitchWeaponWithMouseWheel = new MCH_ConfigPrm("SwitchWeaponWithMouseWheel", true);
       AllHeliSpeed = new MCH_ConfigPrm("AllHeliSpeed", 2.5D);
       AllPlaneSpeed = new MCH_ConfigPrm("AllPlaneSpeed", 1000.00D);
+      AllShipSpeed = new MCH_ConfigPrm("AllShipSpeed", 2.0D);
       AllTankSpeed = new MCH_ConfigPrm("AllTankSpeed", 1.0D);
       HurtResistantTime = new MCH_ConfigPrm("HurtResistantTime", 0.0D);
       DisplayHUDThirdPerson = new MCH_ConfigPrm("DisplayHUDThirdPerson", false);
@@ -351,7 +357,7 @@ public class MCH_Config {
       ItemID_StingerMissile = new MCH_ConfigPrm("ItemID_StingerMissile", 28901);
       BlockID_DraftingTableOFF = new MCH_ConfigPrm("BlockID_DraftingTable", 3450);
       BlockID_DraftingTableON = new MCH_ConfigPrm("BlockID_DraftingTableON", 3451);
-      General = new MCH_ConfigPrm[]{TestMode, EnableCommand, null, PlaceableOnSpongeOnly, ItemDamage, ItemFuel, AutoRepairHP, Explosion_DestroyBlock, Explosion_FlamingBlock, BulletBreakableBlock, Collision_DestroyBlock, Collision_Car_BreakableBlock, Collision_Car_BreakableMaterial, Collision_Tank_BreakableBlock, Collision_Tank_BreakableMaterial, Collision_EntityDamage, Collision_EntityTankDamage, InfinityAmmo, InfinityFuel, DismountAll, MountMinecartHeli, MountMinecartPlane, MountMinecartVehicle, MountMinecartTank, PreventingBroken, DropItemInCreativeMode, BreakableOnlyPickaxe, AllHeliSpeed, AllPlaneSpeed, AllTankSpeed, HurtResistantTime, StingerLockRange, delayrangeloader, bombletloader, wrenchdropitem, RangeFinderSpotDist, RangeFinderSpotTime, RangeFinderConsume, EnablePutRackInFlying, EnableDebugBoundingBox, null, InvertMouse, MouseSensitivity, MouseControlStickModeHeli, MouseControlStickModePlane, MouseControlFlightSimMode, AutoThrottleDownHeli, AutoThrottleDownPlane, AutoThrottleDownTank, SwitchWeaponWithMouseWheel, LWeaponAutoFire, DisableItemRender, HideKeybind, RenderDistanceWeight, MobRenderDistanceWeight, CreativeTabIcon, CreativeTabIconHeli, CreativeTabIconPlane, CreativeTabIconTank, CreativeTabIconVehicle, DisableShader, DefaultExplosionParticle, AliveTimeOfCartridge, HitMarkColor, SmoothShading, EnableModEntityRender, DisableRenderLivingSpecials, DisplayHUDThirdPerson, DisableCameraDistChange, EnableReplaceTextureManager, DisplayEntityMarker, EntityMarkerSize, BlockMarkerSize, ReplaceRenderViewEntity, null, ItemRecipe_Fuel, ItemRecipe_GLTD, ItemRecipe_Chain, ItemRecipe_Parachute, ItemRecipe_Container, ItemRecipe_UavStation[0], ItemRecipe_UavStation[1], ItemRecipe_DraftingTable, ItemRecipe_Wrench, ItemRecipe_RangeFinder, ItemRecipe_Stinger, ItemRecipe_StingerMissile, ItemRecipe_Javelin, ItemRecipe_JavelinMissile, ItemRecipe_Rpg, ItemRecipe_RpgMissile};
+      General = new MCH_ConfigPrm[]{TestMode, EnableCommand, null, PlaceableOnSpongeOnly, ItemDamage, ItemFuel, AutoRepairHP, Explosion_DestroyBlock, Explosion_FlamingBlock, BulletBreakableBlock, Collision_DestroyBlock, Collision_Car_BreakableBlock, Collision_Car_BreakableMaterial, Collision_Tank_BreakableBlock, Collision_Tank_BreakableMaterial, Collision_EntityDamage, Collision_EntityTankDamage, InfinityAmmo, InfinityFuel, DismountAll, MountMinecartHeli, MountMinecartPlane, MountMinecartShip, MountMinecartVehicle, MountMinecartTank, PreventingBroken, DropItemInCreativeMode, BreakableOnlyPickaxe, AllHeliSpeed, AllPlaneSpeed, AllTankSpeed, HurtResistantTime, StingerLockRange, delayrangeloader, bombletloader, wrenchdropitem, RangeFinderSpotDist, RangeFinderSpotTime, RangeFinderConsume, EnablePutRackInFlying, EnableDebugBoundingBox, null, InvertMouse, MouseSensitivity, MouseControlStickModeHeli, MouseControlStickModePlane, MouseControlFlightSimMode, AutoThrottleDownHeli, AutoThrottleDownPlane, AutoThrottleDownTank, SwitchWeaponWithMouseWheel, LWeaponAutoFire, DisableItemRender, HideKeybind, RenderDistanceWeight, MobRenderDistanceWeight, CreativeTabIcon, CreativeTabIconHeli, CreativeTabIconPlane, CreativeTabIconShip, CreativeTabIconTank, CreativeTabIconVehicle, DisableShader, DefaultExplosionParticle, AliveTimeOfCartridge, HitMarkColor, SmoothShading, EnableModEntityRender, DisableRenderLivingSpecials, DisplayHUDThirdPerson, DisableCameraDistChange, EnableReplaceTextureManager, DisplayEntityMarker, EntityMarkerSize, BlockMarkerSize, ReplaceRenderViewEntity, null, ItemRecipe_Fuel, ItemRecipe_GLTD, ItemRecipe_Chain, ItemRecipe_Parachute, ItemRecipe_Container, ItemRecipe_UavStation[0], ItemRecipe_UavStation[1], ItemRecipe_DraftingTable, ItemRecipe_Wrench, ItemRecipe_RangeFinder, ItemRecipe_Stinger, ItemRecipe_StingerMissile, ItemRecipe_Javelin, ItemRecipe_JavelinMissile, ItemRecipe_Rpg, ItemRecipe_RpgMissile};
       DamageVsEntity = new MCH_Config.DamageFactor("DamageVsEntity");
       DamageVsLiving = new MCH_Config.DamageFactor("DamageVsLiving");
       DamageVsPlayer = new MCH_Config.DamageFactor("DamageVsPlayer");

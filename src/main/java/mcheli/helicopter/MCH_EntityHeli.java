@@ -139,6 +139,15 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
       this.prevRotationRotor = this.rotationRotor;
    }
 
+   public int getNumEjectionSeat() {
+      if(this.getAcInfo() != null && this.getAcInfo().isEnableEjectionSeat) {
+         int n = this.getSeatNum() + 1;
+         return n <= 2?n:0;
+      } else {
+         return 0;
+      }
+   }
+
    public float getSoundVolume() {
       return this.getAcInfo() != null && this.getAcInfo().throttleUpDown <= 0.0F?0.0F:(float)this.getCurrentThrottle() * 2.0F;
    }
