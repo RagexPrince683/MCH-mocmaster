@@ -386,6 +386,11 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                var20 = MCH_Config.MouseControlStickModePlane.prmBool;
             }
 
+            //if(var19 instanceof MCH_EntityShip) {
+            //   var10000 = MCH_MOD.config;
+            //   var20 = MCH_Config.MouseControlStickModeShip.prmBool;
+            //}
+
             for(int de = 0; de < 10 && prevTick > partialTicks; ++de) {
                --prevTick;
             }

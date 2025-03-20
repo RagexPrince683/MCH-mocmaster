@@ -36,6 +36,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
    private MCH_GuiOnOffButton buttonMouseInv;
    private MCH_GuiOnOffButton buttonStickModeHeli;
    private MCH_GuiOnOffButton buttonStickModePlane;
+   //private MCH_GuiOnOffButton buttonStickModeShip;
    private MCH_GuiOnOffButton buttonHideKeyBind;
    private MCH_GuiOnOffButton buttonShowHUDTP;
    private MCH_GuiOnOffButton buttonSmoothShading;
@@ -50,6 +51,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
    private MCH_GuiOnOffButton buttonTestMode;
    private MCH_GuiOnOffButton buttonThrottleHeli;
    private MCH_GuiOnOffButton buttonThrottlePlane;
+   private MCH_GuiOnOffButton buttonThrottleShip;
    private MCH_GuiOnOffButton buttonThrottleTank;
    private MCH_GuiOnOffButton buttonFlightSimMode;
    private MCH_GuiOnOffButton buttonSwitchWeaponWheel;
@@ -109,8 +111,12 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.buttonTestMode = new MCH_GuiOnOffButton(0, x1, y + 175, 150, 20, "Test Mode : ");
       this.buttonStickModeHeli = new MCH_GuiOnOffButton(0, x2, y + 25, 150, 20, "Stick Mode Heli : ");
       this.buttonStickModePlane = new MCH_GuiOnOffButton(0, x2, y + 50, 150, 20, "Stick Mode Plane : ");
+      //this.buttonStickModeShip = new MCH_GuiOnOffButton(0, x2, y + 80, 150, 20, "Stick Mode Ship : ");
+
       this.buttonThrottleHeli = new MCH_GuiOnOffButton(0, x2, y + 75, 150, 20, "Throttle Down Heli : ");
       this.buttonThrottlePlane = new MCH_GuiOnOffButton(0, x2, y + 100, 150, 20, "Throttle Down Plane : ");
+      this.buttonThrottleShip = new MCH_GuiOnOffButton(0, x2, y + 200, 150, 20, "Throttle Down Ship : ");
+
       this.buttonThrottleTank = new MCH_GuiOnOffButton(0, x2, y + 125, 150, 20, "Throttle Down Tank : ");
       this.listControlButtons.add(this.buttonMouseInv);
       this.listControlButtons.add(this.buttonStickModeHeli);
@@ -118,6 +124,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.listControlButtons.add(this.sliderSensitivity);
       this.listControlButtons.add(this.buttonThrottleHeli);
       this.listControlButtons.add(this.buttonThrottlePlane);
+      this.listControlButtons.add(this.buttonThrottleShip);
       this.listControlButtons.add(this.buttonThrottleTank);
       this.listControlButtons.add(this.buttonTestMode);
       this.listControlButtons.add(this.buttonFlightSimMode);
@@ -296,6 +303,9 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.buttonStickModeHeli.setOnOff(config.MouseControlStickModeHeli.prmBool);
       this.buttonStickModePlane.setOnOff(config.MouseControlStickModePlane.prmBool);
 
+      //this.buttonStickModeShip.setOnOff(config.MouseControlStickModeShip.prmBool);
+      //do this for throttle my bad
+
       this.sliderSensitivity.setSliderValue((float) config.MouseSensitivity.prmDouble);
 
       this.buttonShowHUDTP.setOnOff(config.DisplayHUDThirdPerson.prmBool);
@@ -318,6 +328,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
 
       this.buttonThrottleHeli.setOnOff(config.AutoThrottleDownHeli.prmBool);
       this.buttonThrottlePlane.setOnOff(config.AutoThrottleDownPlane.prmBool);
+      this.buttonThrottleShip.setOnOff(config.AutoThrottleDownShip.prmBool);
       this.buttonThrottleTank.setOnOff(config.AutoThrottleDownTank.prmBool);
 
       this.buttonTestMode.setOnOff(config.TestMode.prmBool);
@@ -362,12 +373,14 @@ public class MCH_ConfigGui extends W_GuiContainer {
       // Set throttle parameters
       boolean b1 = config.AutoThrottleDownHeli.prmBool;
       boolean b2 = config.AutoThrottleDownPlane.prmBool;
+      boolean b3 = config.AutoThrottleDownShip.prmBool;
       config.AutoThrottleDownHeli.setPrm(buttonThrottleHeli.getOnOff());
       config.AutoThrottleDownPlane.setPrm(buttonThrottlePlane.getOnOff());
+      config.AutoThrottleDownShip.setPrm(buttonThrottleShip.getOnOff());
       config.AutoThrottleDownTank.setPrm(buttonThrottleTank.getOnOff());
 
       // Check if throttle settings have changed
-      if (b1 != config.AutoThrottleDownHeli.prmBool || b2 != config.AutoThrottleDownPlane.prmBool) {
+      if (b1 != config.AutoThrottleDownHeli.prmBool || b2 != config.AutoThrottleDownPlane.prmBool || b3 != config.AutoThrottleDownShip.prmBool) {
          sendClientSettings();
       }
 

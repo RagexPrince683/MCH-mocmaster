@@ -530,7 +530,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                         }
                     }
                 }
-            } else if(super.cs_planeAutoThrottleDown && this.getCurrentThrottle() > 0.0D) {
+            } else if(super.cs_shipAutoThrottleDown && this.getCurrentThrottle() > 0.0D) {
                 this.addCurrentThrottle(-0.005D * (double)throttleUpDown);
                 if(this.getCurrentThrottle() <= 0.0D) {
                     this.setCurrentThrottle(0.0D);

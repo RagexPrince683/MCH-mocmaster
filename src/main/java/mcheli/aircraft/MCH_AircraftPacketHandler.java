@@ -363,6 +363,7 @@ public class MCH_AircraftPacketHandler {
                ac.cs_dismountAll = pc.dismountAll;
                ac.cs_heliAutoThrottleDown = pc.heliAutoThrottleDown;
                ac.cs_planeAutoThrottleDown = pc.planeAutoThrottleDown;
+               ac.cs_shipAutoThrottleDown = pc.shipAutoThrottleDown;
                ac.cs_tankAutoThrottleDown = pc.tankAutoThrottleDown;
             }
 

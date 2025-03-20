@@ -188,6 +188,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public boolean cs_dismountAll;
    public boolean cs_heliAutoThrottleDown;
    public boolean cs_planeAutoThrottleDown;
+   public boolean cs_shipAutoThrottleDown;
    public boolean cs_tankAutoThrottleDown;
    public MCH_Parts partHatch;
    public MCH_Parts partCanopy;
@@ -271,6 +272,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.cs_dismountAll = false;
       this.cs_heliAutoThrottleDown = true;
       this.cs_planeAutoThrottleDown = false;
+      this.cs_shipAutoThrottleDown = true;
       MCH_Config var10001 = MCH_MOD.config;
       super.renderDistanceWeight = MCH_Config.RenderDistanceWeight.prmDouble;
       this.setCommonUniqueId("");
@@ -4684,6 +4686,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.cs_heliAutoThrottleDown = MCH_Config.AutoThrottleDownHeli.prmBool;
       var10001 = MCH_MOD.config;
       this.cs_planeAutoThrottleDown = MCH_Config.AutoThrottleDownPlane.prmBool;
+      var10001 = MCH_MOD.config;
+      this.cs_shipAutoThrottleDown = MCH_Config.AutoThrottleDownShip.prmBool;
       var10001 = MCH_MOD.config;
       this.cs_tankAutoThrottleDown = MCH_Config.AutoThrottleDownTank.prmBool;
       this.camera.setShaderSupport(seatId, Boolean.valueOf(W_EntityRenderer.isShaderSupport()));
