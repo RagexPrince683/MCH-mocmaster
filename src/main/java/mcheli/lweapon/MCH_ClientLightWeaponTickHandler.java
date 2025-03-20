@@ -311,7 +311,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          if(this.KeyAttack.isKeyPress()) {
             if ("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
                boolean canFire = false;
-               if (is.getItemDamage() < is.getMaxDamage() && this.KeyZoom.isKeyDown()) {//todo: check for scoped
+               if (is.getItemDamage() < is.getMaxDamage() && this.KeyZoom.isKeyDown()) {//todo: check for scoped, add accuracy debuff if not scoped in, remove lock on for RPG
                   canFire = true;
                }
                if (canFire) {

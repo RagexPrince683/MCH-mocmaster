@@ -300,7 +300,7 @@ public class MCH_EventHook extends W_EventHook {
    public void entityCanUpdate(CanUpdate event) {
       if(event.entity instanceof MCH_EntityBaseBullet) {
          MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet)event.entity;
-         //todo: maybe meddle with this to see if it can maybe preserve the bullet if unloaded and having a gravity going down
+         // todo: maybe meddle with this to see if it can maybe preserve the bullet if unloaded and having a gravity going down
          bullet.setDead();
       }
 

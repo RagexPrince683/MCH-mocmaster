@@ -77,7 +77,7 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
                   this.drawGuiFGM148(player, gs, canFire1, player.getHeldItem());
                   this.drawKeyBind(-805306369, true);
                   //DONE: add another conditional for RPG/T sight
-                  //todo: test
+                  //todone: test
                } else if("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
                   GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                   W_McClient.MOD_bindTexture("textures/gui/rpg.png");

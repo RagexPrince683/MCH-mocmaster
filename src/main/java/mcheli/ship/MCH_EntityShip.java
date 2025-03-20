@@ -160,14 +160,13 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             }
 
             //prevRotationYaw
-//todo possible deletion
-            if (this.prevRotationYaw > this.aircraftYaw || this.prevRotationYaw < this.aircraftYaw) {//if(this.aircraftYaw.isupdated)
-                if (this.getThrottle() > 0.2) {
-                    double difference = this.aircraftYaw - this.prevRotationYaw;
-                    this.currentSpeed = this.currentSpeed - difference;
-                    this.setThrottle(this.getThrottle() - 0.06);
-                }
-            }
+            //if (this.prevRotationYaw > this.aircraftYaw || this.prevRotationYaw < this.aircraftYaw) {//if(this.aircraftYaw.isupdated)
+            //    if (this.getThrottle() > 0.2) {
+            //        double difference = this.aircraftYaw - this.prevRotationYaw;
+            //        this.currentSpeed = this.currentSpeed - difference;
+            //        this.setThrottle(this.getThrottle() - 0.06);
+            //    }
+            //}
             //end
             if(super.lastRiddenByEntity == null && this.getRiddenByEntity() != null) {
                 this.initCurrentWeapon(this.getRiddenByEntity());
@@ -382,7 +381,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         if(!MCH_Config.MouseControlFlightSimMode.prmBool && this.getVtolMode() != 0) {
             rot *= 0.0F;
         }
-        //todo another one AAAAAAAAAAAAAA
+        //todo figure out why or how this is not working for the ship
         if(super.moveLeft && !super.moveRight) {
             this.addkeyRotValue -= rot * partialTicks;
         }
@@ -425,7 +424,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     }
                 }
 
-                //todo another one AAAAAAAAAAAAAA
+                //todo again figure out why the ships dont accept this
                 if(super.moveLeft && !super.moveRight) {
                     this.setRotYaw(this.getRotYaw() - 0.6F * rot * partialTicks);
                     this.currentSpeed = currentSpeed - rot;
@@ -917,7 +916,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
 
         this.moveEntity(super.motionX, super.motionY, super.motionZ);
         //super.motionY *= 0.95D;
-        //todo here aswell
+
         if(this.getAcInfo().throttleUpDown > 0.0F) {
             super.motionX *= (double) this.getAcInfo().motionFactor;
             super.motionZ *= (double) this.getAcInfo().motionFactor;

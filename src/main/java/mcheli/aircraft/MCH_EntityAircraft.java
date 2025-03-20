@@ -1539,7 +1539,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          }
       }
 
-      //TODO: idrk
+      //TODO: better damage calc?
 
       //if (isInLava()) {
       //   // Apply lava damage at regular intervals
@@ -5631,7 +5631,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             double udz = super.posZ - this.uavStation.posZ;
 
             //haha gotcha
-            //TODO: better
+            //TODO: better uav handling
             if(udx1 * udx1 + udz * udz > 15625000.0D) {
                //System.out.println("test 4");
                this.uavStation.setControlAircract((MCH_EntityAircraft)null);
@@ -5641,7 +5641,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                //this will stop this shit from working
 
                //this.attackEntityFrom(DamageSource.outOfWorld, this.getMaxHP() + 10);
-               //TODO: teleport player as invulnerable entity
+               //TODOne: teleport player as invulnerable entity
                //EntityPlayerMP
 
 

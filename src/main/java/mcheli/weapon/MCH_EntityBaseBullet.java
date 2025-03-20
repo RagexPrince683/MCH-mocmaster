@@ -287,7 +287,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             this.bomblet = false;
         }
 
-        if(this.getInfo().delay < (float)MCH_Config.delayrangeloader.prmInt) { //todo implement config setting here
+        if(this.getInfo().delay < (float)MCH_Config.delayrangeloader.prmInt) { //todone implement config setting here
             //< delayrangeloaderconfigsetting
             this.bigdelay = false;
         } else {
@@ -312,7 +312,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         }
 
     }
-    //todo add a gravity check here
+    //todone add a gravity check here
 
     public void setDead() {
         super.setDead();
@@ -1105,8 +1105,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
                         this.power *= this.weaponInfo.damageFactor.getDamageFactor(EntityPlayer.class);
                     }
-                    //todo: add piercing compat here
-                    //rip didn't work
+                    //todone: add piercing compat here
 
 
                     MCH_Config var10000 = MCH_MOD.config;

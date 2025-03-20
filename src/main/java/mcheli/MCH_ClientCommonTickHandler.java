@@ -36,6 +36,7 @@ import mcheli.ship.MCH_ClientShipTickHandler;
 
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_GuiPlane;
+import mcheli.ship.MCH_EntityShip;
 import mcheli.ship.MCH_GuiShip;
 import mcheli.tank.MCH_ClientTankTickHandler;
 import mcheli.tank.MCH_EntityTank;
@@ -362,7 +363,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             }
 
             MCH_EntityAircraft var19 = null;
-            if(!(var17.ridingEntity instanceof MCH_EntityHeli) && !(var17.ridingEntity instanceof MCP_EntityPlane) && !(var17.ridingEntity instanceof MCH_EntityTank)) {
+            if(!(var17.ridingEntity instanceof MCH_EntityHeli) && !(var17.ridingEntity instanceof MCP_EntityPlane) && !(var17.ridingEntity instanceof MCH_EntityShip) && !(var17.ridingEntity instanceof MCH_EntityTank)) {
                if(var17.ridingEntity instanceof MCH_EntityUavStation) {
                   var19 = ((MCH_EntityUavStation)var17.ridingEntity).getControlAircract();
                } else if(var17.ridingEntity instanceof MCH_EntityVehicle) {
@@ -380,7 +381,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                var20 = MCH_Config.MouseControlStickModeHeli.prmBool;
             }
 
-            if(var19 instanceof MCP_EntityPlane) {
+            if(var19 instanceof MCP_EntityPlane || var19 instanceof MCH_EntityShip) {
                var10000 = MCH_MOD.config;
                var20 = MCH_Config.MouseControlStickModePlane.prmBool;
             }

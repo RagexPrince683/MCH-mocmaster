@@ -18,7 +18,7 @@ public class MCH_WeaponTvMissile extends MCH_WeaponBase {
    protected Entity lastShotEntity = null;
    protected boolean isTVGuided = false;
 
-   //todo: add guided cluster munition type/bomblet handling
+   //todo : add guided cluster munition type/bomblet handling
 
 
    public MCH_WeaponTvMissile(World w, Vec3 v, float yaw, float pitch, String nm, MCH_WeaponInfo wi) {
