@@ -369,18 +369,18 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
          }
       }
 
-      //i$ = info.wingList.iterator();
+      i$ = info.wingList.iterator();
 
-      //while(i$.hasNext()) {
-      //   MCP_PlaneInfo.Wing w2 = (MCP_PlaneInfo.Wing)i$.next();
-      //   w2.model = this.loadPartModel("planes", info.name, info.model, w2.modelName);
-      //   MCP_PlaneInfo.Pylon p1;
-      //   if(w2.pylonList != null) {
-      //      for(i$1 = w2.pylonList.iterator(); i$1.hasNext(); p1.model = this.loadPartModel("planes", info.name, info.model, p1.modelName)) {
-      //         p1 = (MCP_PlaneInfo.Pylon)i$1.next();
-      //      }
-      //   }
-      //}
+      while(i$.hasNext()) {
+         MCH_ShipInfo.Wing w2 = (MCH_ShipInfo.Wing)i$.next();
+         w2.model = this.loadPartModel("ships", info.name, info.model, w2.modelName);
+         MCH_ShipInfo.Pylon p1;
+         if(w2.pylonList != null) {
+            for(i$1 = w2.pylonList.iterator(); i$1.hasNext(); p1.model = this.loadPartModel("ships", info.name, info.model, p1.modelName)) {
+               p1 = (MCH_ShipInfo.Pylon)i$1.next();
+            }
+         }
+      }
 
       this.registerCommonPart("ships", info);
       MCH_ModelManager.setForceReloadMode(false);

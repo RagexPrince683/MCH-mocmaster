@@ -1,17 +1,19 @@
 package mcheli.ship;
 
-import mcheli.MCH_BaseInfo;
-import mcheli.aircraft.MCH_AircraftInfoManager;
-import net.minecraft.item.Item;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import mcheli.MCH_BaseInfo;
+import mcheli.aircraft.MCH_AircraftInfoManager;
+import net.minecraft.item.Item;
 
 public class MCH_ShipInfoManager extends MCH_AircraftInfoManager {
+
     private static MCH_ShipInfoManager instance = new MCH_ShipInfoManager();
     public static HashMap map = new LinkedHashMap();
+
+
     public static MCH_ShipInfo get(String name) {
         return (MCH_ShipInfo)map.get(name);
     }
@@ -50,6 +52,5 @@ public class MCH_ShipInfoManager extends MCH_AircraftInfoManager {
             return info;
         }
     }
-
 
 }

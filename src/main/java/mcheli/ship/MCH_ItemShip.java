@@ -19,23 +19,22 @@ public class MCH_ItemShip extends MCH_ItemAircraft {
     }
 
     public MCH_EntityShip createAircraft(World world, double x, double y, double z, ItemStack itemStack) {
-             MCH_ShipInfo info = MCH_ShipInfoManager.getFromItem((Item)this);
-             if (info == null) {
-                   MCH_Lib.Log(world, "##### MCH_EntityShip Ship info null %s", new Object[] { getUnlocalizedName() });
-                   return null;
-                 }
-             MCH_EntityShip ship = new MCH_EntityShip(world);
-             ship.setPosition(x, y + ship.yOffset, z);
-             ship.prevPosX = x;
-             ship.prevPosY = y;
-             ship.prevPosZ = z;
-             ship.camera.setPosition(x, y, z);
-             ship.setTypeName(info.name);
-             if (!world.isRemote) {
-                   ship.setTextureName(info.getTextureName());
-                 }
-
-             return ship;
-           }
-     }
-     //todo double check this is right
+        /* 21 */     MCH_ShipInfo info = MCH_ShipInfoManager.getFromItem((Item)this);
+        /* 22 */     if (info == null) {
+            /* 23 */       MCH_Lib.Log(world, "##### MCH_EntityShip Ship info null %s", new Object[] { getUnlocalizedName() });
+            /* 24 */       return null;
+            /*    */     }
+        /* 26 */     MCH_EntityShip plane = new MCH_EntityShip(world);
+        /* 27 */     plane.setPosition(x, y + plane.yOffset, z);
+        /* 28 */     plane.prevPosX = x;
+        /* 29 */     plane.prevPosY = y;
+        /* 30 */     plane.prevPosZ = z;
+        /* 31 */     plane.camera.setPosition(x, y, z);
+        /* 32 */     plane.setTypeName(info.name);
+        /* 33 */     if (!world.isRemote) {
+            /* 34 */       plane.setTextureName(info.getTextureName());
+            /*    */     }
+        /*    */
+        /* 37 */     return plane;
+        /*    */   }
+    /*    */ }

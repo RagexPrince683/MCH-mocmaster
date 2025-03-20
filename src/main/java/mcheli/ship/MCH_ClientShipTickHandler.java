@@ -7,8 +7,6 @@ import mcheli.MCH_ViewEntityDummy;
 import mcheli.aircraft.MCH_AircraftClientTickHandler;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_SeatInfo;
-import mcheli.ship.MCH_EntityShip;
-import mcheli.ship.MCH_ShipPacketPlayerControl;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.wrapper.W_Network;
 import mcheli.wrapper.W_Reflection;
@@ -23,6 +21,7 @@ public class MCH_ClientShipTickHandler extends MCH_AircraftClientTickHandler {
     public MCH_Key KeyZoom;
     public MCH_Key[] Keys;
 
+
     public MCH_ClientShipTickHandler(Minecraft minecraft, MCH_Config config) {
         super(minecraft, config);
         this.updateKeybind(config);
@@ -36,23 +35,23 @@ public class MCH_ClientShipTickHandler extends MCH_AircraftClientTickHandler {
         this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, super.KeyUseWeapon, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
     }
 
-    protected void update(EntityPlayer player, MCH_EntityShip ship) {
-        if(ship.getIsGunnerMode(player)) {
-            MCH_SeatInfo seatInfo = ship.getSeatInfo(player);
+    protected void update(EntityPlayer player, MCH_EntityShip plane) {
+        if(plane.getIsGunnerMode(player)) {
+            MCH_SeatInfo seatInfo = plane.getSeatInfo(player);
             if(seatInfo != null) {
                 setRotLimitPitch(seatInfo.minPitch, seatInfo.maxPitch, player);
             }
         }
 
-        ship.updateRadar(10);
-        ship.updateCameraRotate(player.rotationYaw, player.rotationPitch);
+        plane.updateRadar(10);
+        plane.updateCameraRotate(player.rotationYaw, player.rotationPitch);
     }
 
     protected void onTick(boolean inGUI) {
         MCH_Key[] player = this.Keys;
-        int ship = player.length;
+        int plane = player.length;
 
-        for(int isPilot = 0; isPilot < ship; ++isPilot) {
+        for(int isPilot = 0; isPilot < plane; ++isPilot) {
             MCH_Key viewEntityDummy = player[isPilot];
             viewEntityDummy.update();
         }
@@ -63,17 +62,17 @@ public class MCH_ClientShipTickHandler extends MCH_AircraftClientTickHandler {
         boolean var9 = true;
         if(var7 != null) {
             if(var7.ridingEntity instanceof MCH_EntityShip) {
-                var8 = (MCH_EntityShip) var7.ridingEntity;
+                var8 = (MCH_EntityShip)var7.ridingEntity;
             } else if(var7.ridingEntity instanceof MCH_EntitySeat) {
                 MCH_EntitySeat var10 = (MCH_EntitySeat)var7.ridingEntity;
                 if(var10.getParent() instanceof MCH_EntityShip) {
                     var9 = false;
-                    var8 = (MCH_EntityShip) var10.getParent();
+                    var8 = (MCH_EntityShip)var10.getParent();
                 }
             } else if(var7.ridingEntity instanceof MCH_EntityUavStation) {
                 MCH_EntityUavStation var11 = (MCH_EntityUavStation)var7.ridingEntity;
                 if(var11.getControlAircract() instanceof MCH_EntityShip) {
-                    var8 = (MCH_EntityShip) var11.getControlAircract();
+                    var8 = (MCH_EntityShip)var11.getControlAircract();
                 }
             }
         }
@@ -119,58 +118,57 @@ public class MCH_ClientShipTickHandler extends MCH_AircraftClientTickHandler {
 
     }
 
-    protected void playerControlInGUI(EntityPlayer player, MCH_EntityShip ship, boolean isPilot) {
-        this.commonPlayerControlInGUI(player, ship, isPilot, new MCH_ShipPacketPlayerControl());
+    protected void playerControlInGUI(EntityPlayer player, MCH_EntityShip plane, boolean isPilot) {
+        this.commonPlayerControlInGUI(player, plane, isPilot, new MCH_ShipPacketPlayerControl());
     }
 
-    protected void playerControl(EntityPlayer player, MCH_EntityShip ship, boolean isPilot) {
+    protected void playerControl(EntityPlayer player, MCH_EntityShip plane, boolean isPilot) {
         MCH_ShipPacketPlayerControl pc = new MCH_ShipPacketPlayerControl();
         boolean send = false;
-        send = this.commonPlayerControl(player, ship, isPilot, pc);
+        send = this.commonPlayerControl(player, plane, isPilot, pc);
         boolean isUav;
         if(isPilot) {
             if(this.KeySwitchMode.isKeyDown()) {
-                if(ship.getIsGunnerMode(player) && ship.canSwitchCameraPos()) {
+                if(plane.getIsGunnerMode(player) && plane.canSwitchCameraPos()) {
                     pc.switchMode = 0;
-                    ship.switchGunnerMode(false);
+                    plane.switchGunnerMode(false);
                     send = true;
-                    ship.setCameraId(1);
-                } else if(ship.getCameraId() > 0) {
-                    ship.setCameraId(ship.getCameraId() + 1);
-                    if(ship.getCameraId() >= ship.getCameraPosNum()) {
-                        ship.setCameraId(0);
+                    plane.setCameraId(1);
+                } else if(plane.getCameraId() > 0) {
+                    plane.setCameraId(plane.getCameraId() + 1);
+                    if(plane.getCameraId() >= plane.getCameraPosNum()) {
+                        plane.setCameraId(0);
                     }
-                } else if(ship.canSwitchGunnerMode()) {
-                    pc.switchMode = (byte)(ship.getIsGunnerMode(player)?0:1);
-                    ship.switchGunnerMode(!ship.getIsGunnerMode(player));
+                } else if(plane.canSwitchGunnerMode()) {
+                    pc.switchMode = (byte)(plane.getIsGunnerMode(player)?0:1);
+                    plane.switchGunnerMode(!plane.getIsGunnerMode(player));
                     send = true;
-                    ship.setCameraId(0);
-                } else if(ship.canSwitchCameraPos()) {
-                    ship.setCameraId(1);
+                    plane.setCameraId(0);
+                } else if(plane.canSwitchCameraPos()) {
+                    plane.setCameraId(1);
                 } else {
                     playSoundNG();
                 }
             }
 
             if(super.KeyExtra.isKeyDown()) {
-                if(ship.canSwitchVtol()) {
-                    isUav = ship.getNozzleStat();
+                if(plane.canSwitchVtol()) {
+                    isUav = plane.getNozzleStat();
                     if(!isUav) {
                         pc.switchVtol = 1;
                     } else {
                         pc.switchVtol = 0;
                     }
-//
-                    ship.swithVtolMode(!isUav);
+
+                    plane.swithVtolMode(!isUav);
                     send = true;
                 } else {
                     playSoundNG();
-                    //todo submersible/submarine
                 }
             }
         } else if(this.KeySwitchMode.isKeyDown()) {
-            if(ship.canSwitchGunnerModeOtherSeat(player)) {
-                ship.switchGunnerModeOtherSeat(player);
+            if(plane.canSwitchGunnerModeOtherSeat(player)) {
+                plane.switchGunnerModeOtherSeat(player);
                 send = true;
             } else {
                 playSoundNG();
@@ -178,42 +176,39 @@ public class MCH_ClientShipTickHandler extends MCH_AircraftClientTickHandler {
         }
 
         if(this.KeyZoom.isKeyDown()) {
-            isUav = ship.isUAV() && !ship.getAcInfo().haveHatch() ;
-            //&& !plane.getShipInfo().haveWing()
-            if(!ship.getIsGunnerMode(player) && !isUav) {
+            isUav = plane.isUAV() && !plane.getAcInfo().haveHatch() && !plane.getShipInfo().haveWing();
+            if(!plane.getIsGunnerMode(player) && !isUav) {
                 if(isPilot) {
-                    if(ship.getAcInfo().haveHatch()) {
-                        if(ship.canFoldHatch()) {
+                    if(plane.getAcInfo().haveHatch()) {
+                        if(plane.canFoldHatch()) {
                             pc.switchHatch = 2;
                             send = true;
-                        } else if(ship.canUnfoldHatch()) {
+                        } else if(plane.canUnfoldHatch()) {
                             pc.switchHatch = 1;
                             send = true;
                         }
+                    } else if(plane.canFoldWing()) {
+                        pc.switchHatch = 2;
+                        send = true;
+                    } else if(plane.canUnfoldWing()) {
+                        pc.switchHatch = 1;
+                        send = true;
                     }
-                    //else if(plane.canFoldWing()) {
-                    //    pc.switchHatch = 2;
-                    //    send = true;
-                    //} else if(plane.canUnfoldWing()) {
-                    //    pc.switchHatch = 1;
-                    //    send = true;
-                    //}
                 }
             } else {
-                ship.zoomCamera();
+                plane.zoomCamera();
                 playSound("zoom", 0.5F, 1.0F);
             }
         }
 
-       // if(this.KeyEjectSeat.isKeyDown() && plane.canEjectSeat(player)) {
-       //     pc.ejectSeat = true;
-       //     send = true;
-       // }
+        if(this.KeyEjectSeat.isKeyDown() && plane.canEjectSeat(player)) {
+            pc.ejectSeat = true;
+            send = true;
+        }
 
         if(send) {
             W_Network.sendToServer(pc);
         }
 
     }
-
 }
