@@ -4095,10 +4095,18 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       int sid = this.getSeatIdByEntity(entity);
       if(sid >= 0 && sid <= 1) {
          if(this.getGuiInventory().haveParachute()) {
+            //System.out.println("debug parachute");
+
             if(sid == 0) {
                this.getGuiInventory().consumeParachute();
                this.unmountEntity();
                this.ejectSeatSub(entity, 0);
+
+               if(player.ridingEntity instanceof MCH_EntityHeli) {
+                  System.out.println("player is riding heli");
+                  this.attackEntityFrom(DamageSource.inWall, this.getMaxHP());
+               }
+
                entity = this.getEntityBySeatId(1);
                if(entity instanceof EntityPlayer) {
                   entity = null;
@@ -4110,11 +4118,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                //   this.attackEntityFrom(DamageSource.inWall, this.getMaxHP());
                //   // Code to execute if the kind name is "helicopters"
                //}
-               System.out.println("debug parachute");
-               if(player.ridingEntity instanceof MCH_EntityHeli) {
-                  System.out.println("player is riding heli");
-                  this.attackEntityFrom(DamageSource.inWall, this.getMaxHP());
-               }
+
                this.getGuiInventory().consumeParachute();
                this.unmountEntityFromSeat(entity);
                this.ejectSeatSub(entity, 1);
