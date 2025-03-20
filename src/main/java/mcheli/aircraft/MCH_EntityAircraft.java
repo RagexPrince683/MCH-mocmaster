@@ -37,6 +37,7 @@ import mcheli.aircraft.MCH_SoundUpdater;
 import mcheli.chain.MCH_EntityChain;
 import mcheli.command.MCH_Command;
 import mcheli.flare.MCH_Flare;
+import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.multiplay.MCH_Multiplay;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.particles.MCH_ParticleParam;
@@ -4089,6 +4090,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void ejectSeat(Entity entity) {
+
+
       int sid = this.getSeatIdByEntity(entity);
       if(sid >= 0 && sid <= 1) {
          if(this.getGuiInventory().haveParachute()) {
@@ -4103,6 +4106,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             }
 
             if(this.getGuiInventory().haveParachute() && entity != null) {
+               //if (this.getKindName().equals("helicopters")) {
+               //   this.attackEntityFrom(DamageSource.inWall, this.getMaxHP());
+               //   // Code to execute if the kind name is "helicopters"
+               //}
+               System.out.println("debug parachute");
+               if(player.ridingEntity instanceof MCH_EntityHeli) {
+                  System.out.println("player is riding heli");
+                  this.attackEntityFrom(DamageSource.inWall, this.getMaxHP());
+               }
                this.getGuiInventory().consumeParachute();
                this.unmountEntityFromSeat(entity);
                this.ejectSeatSub(entity, 1);

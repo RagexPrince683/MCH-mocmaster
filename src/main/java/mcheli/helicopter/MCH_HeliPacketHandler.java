@@ -12,6 +12,7 @@ import mcheli.uav.MCH_EntityUavStation;
 import mcheli.weapon.MCH_WeaponParam;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.DamageSource;
 
 public class MCH_HeliPacketHandler {
 
@@ -40,6 +41,9 @@ public class MCH_HeliPacketHandler {
                heli.unmountCrew();
             } else if(pc.ejectSeat) {
                   heli.ejectSeat(player);
+                  //if (heli.canEjectSeat)
+                  //heli.attackEntityFrom(DamageSource.inWall, heli.getMaxHP());
+                  //this is called before we test if we even can eject, so we can't just kill the heli here
                   //heli.killselfnow!!!
             } else {
                if(pc.switchFold == 0) {
