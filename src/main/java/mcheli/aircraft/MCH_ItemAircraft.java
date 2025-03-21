@@ -86,27 +86,26 @@ public abstract class MCH_ItemAircraft extends W_Item {
       return info != null?super.toString() + "(" + info.getDirectoryName() + ":" + info.name + ")":super.toString() + "(null)";
    }
 
-   //@Override we aren't overriding anything
+   @Override
    public ItemStack onItemRightClick(ItemStack par1ItemStack, World world, EntityPlayer player) {
       UUID playerId = player.getUniqueID();
-      long currentTime = System.currentTimeMillis(); // Get current real-world time in milliseconds
+      long currentTime = world.getTotalWorldTime();
 
-      // Check if the player has a cooldown
+      // Check if the player has a spawn delay
       if (spawnDelays.containsKey(playerId)) {
-         long timeLeft = spawnDelays.get(playerId) - currentTime;
+         long timeLeft = (spawnDelays.get(playerId) + SPAWN_DELAY_TICKS) - currentTime;
          if (timeLeft > 0) {
-            player.addChatMessage(new ChatComponentText("You must wait " + (timeLeft / 1000) + " seconds before spawning another aircraft."));
+            player.addChatMessage(new ChatComponentText("You must wait " + (timeLeft / 20) + " seconds before spawning another aircraft."));
             return par1ItemStack;
          }
       }
 
-      // Aircraft placement logic
       float f = 1.0F;
       float f1 = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * f;
       float f2 = player.prevRotationYaw + (player.rotationYaw - player.prevRotationYaw) * f;
-      double d0 = player.prevPosX + (player.posX - player.prevPosX) * f;
-      double d1 = player.prevPosY + (player.posY - player.prevPosY) * f + 1.62D - player.yOffset;
-      double d2 = player.prevPosZ + (player.posZ - player.prevPosZ) * f;
+      double d0 = player.prevPosX + (player.posX - player.prevPosX) * (double) f;
+      double d1 = player.prevPosY + (player.posY - player.prevPosY) * (double) f + 1.62D - (double) player.yOffset;
+      double d2 = player.prevPosZ + (player.posZ - player.prevPosZ) * (double) f;
       Vec3 vec3 = W_WorldFunc.getWorldVec3(world, d0, d1, d2);
       float f3 = MathHelper.cos(-f2 * 0.017453292F - 3.1415927F);
       float f4 = MathHelper.sin(-f2 * 0.017453292F - 3.1415927F);
@@ -115,7 +114,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       float f7 = f4 * f5;
       float f8 = f3 * f5;
       double d3 = 5.0D;
-      Vec3 vec31 = vec3.addVector(f7 * d3, f6 * d3, f8 * d3);
+      Vec3 vec31 = vec3.addVector((double) f7 * d3, (double) f6 * d3, (double) f8 * d3);
       MovingObjectPosition mop = W_WorldFunc.clip(world, vec3, vec31, true);
 
       if (mop == null) {
@@ -125,14 +124,12 @@ public abstract class MCH_ItemAircraft extends W_Item {
       Vec3 vec32 = player.getLook(f);
       boolean flag = false;
       float f9 = 1.0F;
-      List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(player,
-              player.boundingBox.addCoord(vec32.xCoord * d3, vec32.yCoord * d3, vec32.zCoord * d3)
-                      .expand(f9, f9, f9));
+      List<Entity> list = world.getEntitiesWithinAABBExcludingEntity(player, player.boundingBox.addCoord(vec32.xCoord * d3, vec32.yCoord * d3, vec32.zCoord * d3).expand((double) f9, (double) f9, (double) f9));
 
       for (Entity block : list) {
          if (block.canBeCollidedWith()) {
             float f10 = block.getCollisionBorderSize();
-            AxisAlignedBB axisalignedbb = block.boundingBox.expand(f10, f10, f10);
+            AxisAlignedBB axisalignedbb = block.boundingBox.expand((double) f10, (double) f10, (double) f10);
             if (axisalignedbb.isVecInside(vec3)) {
                flag = true;
             }
@@ -153,14 +150,13 @@ public abstract class MCH_ItemAircraft extends W_Item {
          }
 
          // Set the delay before allowing another spawn
-         spawnDelays.put(playerId, currentTime + (SPAWN_DELAY_TICKS * 50)); // Convert ticks to milliseconds (5 seconds)
+         spawnDelays.put(playerId, currentTime);
 
-         player.addChatMessage(new ChatComponentText("Vehicle spawned! You must wait " + (SPAWN_DELAY_TICKS / 20) + " seconds before spawning another one."));
+         this.spawnAircraft(par1ItemStack, world, player, mop.blockX, mop.blockY, mop.blockZ);
       }
 
       return par1ItemStack;
    }
-
 
    public MCH_EntityAircraft spawnAircraft(ItemStack itemStack, World world, EntityPlayer player, int x, int y, int z) {
       String playerName = player.getCommandSenderName();
