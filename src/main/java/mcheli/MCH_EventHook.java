@@ -146,30 +146,19 @@ public class MCH_EventHook extends W_EventHook {
 
 
    public void entitySpawn(EntityJoinWorldEvent event) {
-
-
-
       if(W_Lib.isEntityLivingBase(event.entity) && !W_EntityPlayer.isPlayer(event.entity)) {
          MCH_Config var10002 = MCH_MOD.config;
-         event.entity.renderDistanceWeight *= MCH_Config.MobRenderDistanceWeight.prmDouble;
+         // Increase render distance weight for living entities
+         event.entity.renderDistanceWeight *= 5.0; // Adjust this multiplier as needed
+         MCH_Lib.Log(event.entity, "Render distance weight for living entity set to: " + event.entity.renderDistanceWeight, new Object[0]);
       } else if(event.entity instanceof MCH_EntityAircraft) {
-         //reload aircraft render setting here
-         //if (event.world.isRemote) {
-//
-         //   if (event.entity instanceof MCH_EntityAircraft && acloaded == 0) {
-         //      MCH_EntityAircraft ac = (MCH_EntityAircraft) event.entity;
-//
-         //      // Safely call getAcInfo() on the instance
-         //      if (ac.getAcInfo() != null) {
-         //         ac.getAcInfo().reload();
-         //         acloaded++;
-         //      }
-         //   }
-         //}
          MCH_EntityAircraft b = (MCH_EntityAircraft)event.entity;
          if(!b.worldObj.isRemote && !b.isCreatedSeats()) {
             b.createSeats(UUID.randomUUID().toString());
          }
+         // Increase render distance weight for aircraft entities
+         event.entity.renderDistanceWeight *= 10.0; // Adjust this multiplier as needed
+         MCH_Lib.Log(event.entity, "Render distance weight for aircraft set to: " + event.entity.renderDistanceWeight, new Object[0]);
       } else if(W_EntityPlayer.isPlayer(event.entity)) {
          Entity e = event.entity;
          boolean b1 = Float.isNaN(e.rotationPitch);
@@ -197,7 +186,6 @@ public class MCH_EventHook extends W_EventHook {
             MCH_PacketNotifyServerSettings.send((EntityPlayerMP)event.entity);
          }
       }
-
    }
 
    public void livingAttackEvent(LivingAttackEvent event) {
