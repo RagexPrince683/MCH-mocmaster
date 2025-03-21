@@ -31,7 +31,6 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.culling.ClippingHelperImpl;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
@@ -49,30 +48,11 @@ public abstract class MCH_RenderAircraft extends W_Render {
    public static IModelCustom debugModel = null;
 
 
-   //renderfix1
-   @Override
-   protected ResourceLocation getEntityTexture(Entity entity) {
-      if (entity instanceof MCH_EntityAircraft) {
-         MCH_EntityAircraft aircraft = (MCH_EntityAircraft) entity;
-         return new ResourceLocation(W_MOD.DOMAIN, aircraft.getTextureName()); // Ensure correct texture
-      }
-      return super.getEntityTexture(entity);
-   }
-
-
-   //renderfix4
-   //@Override
-   //public boolean shouldRender(MCH_EntityAircraft entity, ClippingHelperImpl camera, double camX, double camY, double camZ) {
-   //   return entity.getDistanceSq(camX, camY, camZ) < 100000; // 316m render distance
-   //}
-   //no uses, method cannot over ride here
 
 
    public void doRender(Entity entity, double posX, double posY, double posZ, float par8, float tickTime) {
 
 
-      //renderfix3
-      GL11.glDisable(GL11.GL_CULL_FACE);
 
       MCH_EntityAircraft ac = (MCH_EntityAircraft)entity;
       //this will fire like constantly so yay emoji
@@ -390,8 +370,6 @@ public abstract class MCH_RenderAircraft extends W_Render {
 
       return prevRot + (rot - prevRot) * tickTime;
    }
-
-
 
    public void renderDebugHitBox(MCH_EntityAircraft e, double x, double y, double z, float yaw, float pitch) {
       MCH_Config var10000 = MCH_MOD.config;

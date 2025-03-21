@@ -59,10 +59,6 @@ extends Render {
         this.srcBlend = GL11.glGetInteger((int)3041);
         this.dstBlend = GL11.glGetInteger((int)3040);
         GL11.glBlendFunc((int)770, (int)771);
-
-        //renderfix2
-        GL11.glAlphaFunc(GL11.GL_GREATER, 0.0f); // Allow rendering at all distances
-
     }
 
     public void restoreCommonRenderParam() {

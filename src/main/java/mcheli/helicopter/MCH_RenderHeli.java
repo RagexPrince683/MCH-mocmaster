@@ -16,8 +16,6 @@ import org.lwjgl.opengl.GL11;
 @SideOnly(Side.CLIENT)
 public class MCH_RenderHeli extends MCH_RenderAircraft {
 
-
-
    public MCH_RenderHeli() {
       super.shadowSize = 2.0F;
    }

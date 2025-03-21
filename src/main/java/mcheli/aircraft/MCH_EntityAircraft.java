@@ -249,22 +249,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private boolean switchSeat = false;
    //public EntityPlayerMP playerEntity = (EntityPlayerMP) getCommandSenderAsPlayer(player);
 
-   //@Override
-   //public AxisAlignedBB getRenderBoundingBox() {
-   //   return this.boundingBox.expand(250, 250, 250); // Expands render bounding box to 250m
-   //}
-   //call in eventhook probably?
-
-   @Override
-   public boolean shouldRenderInPass(int pass) {
-      return true; // Force render in all passes
-   }
-
-   //@Override
-   //public double getMaxRenderDistanceSquared() {
-   //   return 262144; // 512 blocks (512^2 = 262144)
-   //}
-
 
    public MCH_EntityAircraft(World world) {
       super(world);
