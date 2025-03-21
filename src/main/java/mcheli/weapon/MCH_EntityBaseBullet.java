@@ -223,14 +223,15 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     }
 
     // Clear chunk loader after bullet impact or despawn to free memory
-    public void clearChunkLoader() {
-        if (!worldObj.isRemote && loaderTicket != null) {
-            for (ChunkCoordIntPair chunk : loadedChunks) {
-                ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-            }
-            loadedChunks.clear();
-        }
-    }
+    //public void clearChunkLoader() {
+    //    if (!worldObj.isRemote && loaderTicket != null) {
+    //        for (ChunkCoordIntPair chunk : loadedChunks) {
+    //            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+    //        }
+    //        loadedChunks.clear();
+    //    }
+    //}
+    //unused
 
 
 
@@ -315,6 +316,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     //todone add a gravity check here
 
     public void setDead() {
+        if (shouldLoadChunks()) {
+            //todo checkAndLoadChunks() instead
+            checkAndLoadChunks();
+            loadNeighboringChunks(getChunkX(), getChunkZ());
+            clearChunkLoaders();
+        }
         super.setDead();
         //this.clearChunkLoader();
         //if (this.piercing <= 0) {
@@ -947,6 +954,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
 
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
+
+        //todo shouldLoadChunks() check here
+        if (shouldLoadChunks()) {
+            checkAndLoadChunks();
+            loadNeighboringChunks(getChunkX(), getChunkZ());
+            System.out.println("Extra chunk loader activated.");
+        }
+
         if (!worldObj.isRemote) { // Server-side logic
             handleServerSideImpact(hit, damageFactor);
         } else if (shouldHandleTileHit(hit)) {
@@ -972,6 +987,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
 
     private void processEntityImpact(MovingObjectPosition hit, float damageFactor) {
         if (shouldLoadChunks()) {
+            checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
             System.out.println("Extra chunk loader activated.");
         }
@@ -1024,9 +1040,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         if (!super.isDead) {
             setDead();
             System.out.println("Impact detected, entity set to dead.");
-            //there should be a check to ensure that the bullet is chunk loading here. otherwise you may end up clearing a chunk loader you don't want to.
-            //actually nevermind. shouldClearChunkLoaders() should handle that.
-            clearChunkLoaders();
+            //todone do another chunk load then clear and add checks
+            if (shouldLoadChunks()) {
+                checkAndLoadChunks();
+                loadNeighboringChunks(getChunkX(), getChunkZ());
+                clearChunkLoaders();
+            }
         }
     }
 

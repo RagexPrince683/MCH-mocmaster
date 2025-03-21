@@ -304,7 +304,7 @@ public class MCH_EventHook extends W_EventHook {
          System.out.println("set dead in eventhook entitycanupdate");
          //bullet.setDead();
          //WHY ARE YOU SETTING DEAD HERE YOU DONT HAVE A REASON TO
-         //todo add a new chunk loader here
+         //todo add a new chunk loader here under the strict criteria that the bullet is still alive and has a gravity going down
          //REDFLAG: bullet.setDead();
       }
 
