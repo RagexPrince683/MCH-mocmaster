@@ -173,6 +173,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          if(!super.isRequestedSyncStatus) {
             super.isRequestedSyncStatus = true;
             if(super.worldObj.isRemote) {
+               //sends a packet to the server for tank position and tank information
                MCH_PacketStatusRequest.requestStatus(this);
             }
          }

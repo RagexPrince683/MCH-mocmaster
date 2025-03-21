@@ -6,6 +6,7 @@ import java.util.Iterator;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_RenderAircraftLOD;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.wrapper.W_Render;
@@ -14,7 +15,19 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
-public class MCP_RenderPlane extends MCH_RenderAircraft {
+public class MCP_RenderPlane extends MCH_RenderAircraftLOD {
+
+   @Override
+   protected void renderAircraftLODLow(MCH_EntityAircraft ac, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
+      // Heli specific low LOD rendering logic
+      super.renderAircraftLODLow(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+   }
+
+   @Override
+   protected void renderAircraftLODMedium(MCH_EntityAircraft ac, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
+      // Heli specific medium LOD rendering logic
+      super.renderAircraftLODMedium(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+   }
 
    public MCP_RenderPlane() {
       super.shadowSize = 2.0F;

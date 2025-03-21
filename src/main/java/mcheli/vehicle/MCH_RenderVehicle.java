@@ -7,6 +7,7 @@ import mcheli.MCH_Lib;
 import mcheli.MCH_ModelManager;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_RenderAircraftLOD;
 import mcheli.vehicle.MCH_EntityVehicle;
 import mcheli.vehicle.MCH_VehicleInfo;
 import mcheli.weapon.MCH_WeaponSet;
@@ -17,7 +18,19 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
-public class MCH_RenderVehicle extends MCH_RenderAircraft {
+public class MCH_RenderVehicle extends MCH_RenderAircraftLOD {
+
+   @Override
+   protected void renderAircraftLODLow(MCH_EntityAircraft ac, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
+      // Heli specific low LOD rendering logic
+      super.renderAircraftLODLow(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+   }
+
+   @Override
+   protected void renderAircraftLODMedium(MCH_EntityAircraft ac, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
+      // Heli specific medium LOD rendering logic
+      super.renderAircraftLODMedium(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+   }
 
    public MCH_RenderVehicle() {
       super.shadowSize = 2.0F;
