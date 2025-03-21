@@ -302,7 +302,9 @@ public class MCH_EventHook extends W_EventHook {
          MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet)event.entity;
          // todo: maybe meddle with this to see if it can maybe preserve the bullet if unloaded and having a gravity going down
          System.out.println("set dead in eventhook entitycanupdate");
-         bullet.setDead();
+         //bullet.setDead();
+         //WHY ARE YOU SETTING DEAD HERE YOU DONT HAVE A REASON TO
+         //todo add a new chunk loader here
          //REDFLAG: bullet.setDead();
       }
 
