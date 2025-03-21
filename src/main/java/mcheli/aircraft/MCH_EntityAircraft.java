@@ -249,15 +249,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private boolean switchSeat = false;
    //public EntityPlayerMP playerEntity = (EntityPlayerMP) getCommandSenderAsPlayer(player);
 
-   @Override
-   public boolean isInRangeToRenderDist(double distance) {
-      double d = this.boundingBox.getAverageEdgeLength() * 64.0 * this.renderDistanceWeight;
-      return distance < d * d;
-   }
 
    public MCH_EntityAircraft(World world) {
       super(world);
-      this.renderDistanceWeight = 2000.0;
       this.setAcInfo((MCH_AircraftInfo)null);
       this.commonStatus = 0;
       super.dropContentsWhenDead = false;

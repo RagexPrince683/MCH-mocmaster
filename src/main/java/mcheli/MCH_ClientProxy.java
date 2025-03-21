@@ -14,7 +14,12 @@ import mcheli.MCH_MOD;
 import mcheli.MCH_ModelManager;
 import mcheli.MCH_RenderNull;
 import mcheli.MCH_ViewEntityDummy;
-import mcheli.aircraft.*;
+import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityHide;
+import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_SoundUpdater;
 import mcheli.block.MCH_DraftingTableItemRender;
 import mcheli.block.MCH_DraftingTableRenderer;
 import mcheli.block.MCH_DraftingTableTileEntity;
@@ -137,8 +142,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityDispensedItem.class, new MCH_RenderNone());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityFlare.class, new MCH_RenderFlare());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityThrowable.class, new MCH_RenderThrowable());
-      // Register custom renderer for LOD
-      RenderingRegistry.registerEntityRenderingHandler(MCH_EntityAircraft.class, new MCH_RenderAircraftLOD());
       W_MinecraftForgeClient.registerItemRenderer(MCH_MOD.itemJavelin, new MCH_ItemLightWeaponRender());
       W_MinecraftForgeClient.registerItemRenderer(MCH_MOD.itemStinger, new MCH_ItemLightWeaponRender());
       W_MinecraftForgeClient.registerItemRenderer(MCH_MOD.itemRpg, new MCH_ItemLightWeaponRender());
