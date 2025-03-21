@@ -53,25 +53,36 @@ public abstract class MCH_RenderAircraft extends W_Render {
    public void doRender(Entity entity, double posX, double posY, double posZ, float par8, float tickTime) {
       MCH_EntityAircraft ac = (MCH_EntityAircraft)entity;
       MCH_AircraftInfo info = ac.getAcInfo();
-      if(info != null) {
+      if (info != null) {
          GL11.glPushMatrix();
          float yaw = this.calcRot(ac.getRotYaw(), ac.prevRotationYaw, tickTime);
          float pitch = ac.calcRotPitch(tickTime);
          float roll = this.calcRot(ac.getRotRoll(), ac.prevRotationRoll, tickTime);
          MCH_Config var10000 = MCH_MOD.config;
-         if(MCH_Config.EnableModEntityRender.prmBool) {
+         if (MCH_Config.EnableModEntityRender.prmBool) {
             this.renderRiddenEntity(ac, tickTime, yaw, pitch + info.entityPitch, roll + info.entityRoll, info.entityWidth, info.entityHeight);
          }
 
-         if(!shouldSkipRender(entity)) {
+         if (!shouldSkipRender(entity)) {
             this.setCommonRenderParam(info.smoothShading, ac.getBrightnessForRender(tickTime));
-            if(ac.isDestroyed()) {
+            if (ac.isDestroyed()) {
                GL11.glColor4f(0.15F, 0.15F, 0.15F, 1.0F);
             } else {
                GL11.glColor4f(0.75F, 0.75F, 0.75F, 1.0F);
             }
 
-            this.renderAircraft(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+            // Implementing LOD rendering
+            double distance = entity.getDistanceSqToEntity(this.renderManager.livingPlayer);
+            if (distance > 10000) {
+               // Low LOD (far distance)
+               this.renderAircraftLODLow(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+            } else if (distance > 2500) {
+               // Medium LOD (medium distance)
+               this.renderAircraftLODMedium(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+            } else {
+               // High LOD (close distance)
+               this.renderAircraft(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+            }
             this.renderCommonPart(ac, info, posX, posY, posZ, tickTime);
             renderLight(posX, posY, posZ, tickTime, ac, info);
             this.restoreCommonRenderParam();
@@ -84,16 +95,21 @@ public abstract class MCH_RenderAircraft extends W_Render {
       }
    }
 
+   protected abstract void renderAircraftLODLow(MCH_EntityAircraft ac, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime);
+
+   protected abstract void renderAircraftLODMedium(MCH_EntityAircraft ac, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime);
+
+
+   //@Override
    public static boolean shouldSkipRender(Entity entity) {
-      if(entity instanceof MCH_IEntityCanRideAircraft) {
-         MCH_IEntityCanRideAircraft e = (MCH_IEntityCanRideAircraft)entity;
-         if(e.isSkipNormalRender()) {
+      if (entity instanceof MCH_IEntityCanRideAircraft) {
+         MCH_IEntityCanRideAircraft e = (MCH_IEntityCanRideAircraft) entity;
+         if (e.isSkipNormalRender()) {
             return !renderingEntity;
          }
-      } else if((entity.getClass().toString().indexOf("flansmod.common.driveables.EntityPlane") > 0 || entity.getClass().toString().indexOf("flansmod.common.driveables.EntityVehicle") > 0) && entity.ridingEntity instanceof MCH_EntitySeat) {
+      } else if ((entity.getClass().toString().indexOf("flansmod.common.driveables.EntityPlane") > 0 || entity.getClass().toString().indexOf("flansmod.common.driveables.EntityVehicle") > 0) && entity.ridingEntity instanceof MCH_EntitySeat) {
          return !renderingEntity;
       }
-
       return false;
    }
 
