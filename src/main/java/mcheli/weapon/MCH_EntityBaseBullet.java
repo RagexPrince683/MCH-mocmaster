@@ -157,6 +157,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
         loadChunksInBulletPath(currentChunkX, currentChunkZ, motionX, motionZ);
     }
 
+
     public void loadNeighboringChunks(int chunkX, int chunkZ) {
         if (!worldObj.isRemote && loaderTicket != null) {
             // Unload previously loaded chunks to avoid memory bloat
@@ -182,7 +183,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
             // Load surrounding chunks if not already loaded
             for (ChunkCoordIntPair chunk : neighboringChunks) {
                 loadedChunks.add(chunk);  // add chunk directly without checking
-                ForgeChunkManager.forceChunk(loaderTicket, chunk);
+                ForgeChunkManager.forceChunk(this.loaderTicket, chunk);
             }
 
             System.out.println("Loaded surrounding chunks at: " + chunkX + ", " + chunkZ);
@@ -192,10 +193,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     public void loadChunksInBulletPath(int currentChunkX, int currentChunkZ, double motionX, double motionZ) {
         if (!worldObj.isRemote && loaderTicket != null) {
             // Unload previously loaded chunks to avoid memory bloat
-            for (ChunkCoordIntPair chunk : loadedChunks) {
-                ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+            for (ChunkCoordIntPair chunk : this.loadedChunks) {
+                ForgeChunkManager.unforceChunk(this.loaderTicket, chunk);
             }
-            loadedChunks.clear();
+            this.loadedChunks.clear();
 
             // Calculate the next chunk in the direction of the bullet's motion
             int nextChunkX = currentChunkX + (motionX > 0 ? 1 : (motionX < 0 ? -1 : 0));
@@ -1061,7 +1062,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity {
     // Utility methods
     private int getChunkX() { return (int) Math.floor(posX / 16.0); }
     private int getChunkZ() { return (int) Math.floor(posZ / 16.0); }
-    private boolean shouldLoadChunks() { return !bomblet && gravitydown && bigdelay && bigcheck; }
+    public boolean shouldLoadChunks() { return !bomblet && gravitydown && bigdelay && bigcheck; }
     private boolean shouldClearChunkLoaders() { return !bomblet && gravitydown && bigdelay; }
     private boolean shouldCreateFAExplosion() { return getInfo().isFAE; }
     private boolean shouldHandleTileHit(MovingObjectPosition hit) {
