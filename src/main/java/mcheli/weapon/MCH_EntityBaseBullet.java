@@ -71,6 +71,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     boolean speedAddedFromAircraft = false;
     private ForgeChunkManager.Ticket chunkLoaderTicket;
     private List<ChunkCoordIntPair> loadedChunks = new ArrayList<>();
+    public boolean shouldLoadChunks() { return !bomblet && gravitydown && bigdelay && bigcheck; }
 
     public MCH_EntityBaseBullet(World par1World) {
         super(par1World);
