@@ -695,6 +695,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 return;
             }
 
+            if(this.getInfo().timeFuse > 0 && this.getCountOnUpdate() > this.getInfo().timeFuse) {
+                this.onUpdateTimeout();
+                this.setDead();
+                return;
+            }
+
             if(this.getInfo().explosionAltitude > 0 && MCH_Lib.getBlockIdY(this, 3, -this.getInfo().explosionAltitude) != 0) {
                 MovingObjectPosition var6 = new MovingObjectPosition((int)super.posX, (int)super.posY, (int)super.posZ, 0,
                         Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
