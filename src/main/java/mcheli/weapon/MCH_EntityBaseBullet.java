@@ -91,6 +91,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     private ForgeChunkManager.Ticket chunkLoaderTicket;
     //private List<ChunkCoordIntPair> loadedChunks = new ArrayList<>();
 
+    List<ChunkCoordIntPair> bulletLoadedChunks = new ArrayList<>();
+
+
     public MCH_EntityBaseBullet(World par1World) {
         super(par1World);
         this.countOnUpdate = 0;
@@ -202,11 +205,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     // Dynamically load chunks ahead of the bullet based on its current position and motion
     public void loadChunksInBulletPath(int currentChunkX, int currentChunkZ, double motionX, double motionZ) {
         if (!worldObj.isRemote && loaderTicket != null) {
-            // Unload previously loaded chunks to avoid memory bloat
-            for (ChunkCoordIntPair chunk : this.loadedChunks) {
-                ForgeChunkManager.unforceChunk(this.loaderTicket, chunk);
+            // Unload only chunks previously loaded by the bullet
+            for (ChunkCoordIntPair chunk : bulletLoadedChunks) {
+                ForgeChunkManager.unforceChunk(loaderTicket, chunk);
             }
-            this.loadedChunks.clear();
+            bulletLoadedChunks.clear();
 
             // Calculate the next chunk in the direction of the bullet's motion
             int nextChunkX = currentChunkX + (motionX > 0 ? 1 : (motionX < 0 ? -1 : 0));
@@ -214,22 +217,18 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
             // Define the chunks to load (current, next in X, next in Z, and diagonal)
             ChunkCoordIntPair[] chunksToLoad = {
-                    new ChunkCoordIntPair(currentChunkX, currentChunkZ),      // Current chunk
-                    new ChunkCoordIntPair(nextChunkX, currentChunkZ),         // Next chunk in X direction
-                    new ChunkCoordIntPair(currentChunkX, nextChunkZ),         // Next chunk in Z direction
-                    new ChunkCoordIntPair(nextChunkX, nextChunkZ)             // Diagonal chunk
+                    new ChunkCoordIntPair(currentChunkX, currentChunkZ),
+                    new ChunkCoordIntPair(nextChunkX, currentChunkZ),
+                    new ChunkCoordIntPair(currentChunkX, nextChunkZ),
+                    new ChunkCoordIntPair(nextChunkX, nextChunkZ)
             };
 
-            // Load the chunks ahead of the bullet's path
             for (ChunkCoordIntPair chunk : chunksToLoad) {
-                if (!loadedChunks.contains(chunk)) {
-                    loadedChunks.add(chunk);
+                if (!bulletLoadedChunks.contains(chunk)) {
+                    bulletLoadedChunks.add(chunk);
                     ForgeChunkManager.forceChunk(loaderTicket, chunk);
                 }
             }
-
-            System.out.println("Loaded chunks for bullet at: " + currentChunkX + ", " + currentChunkZ +
-                    " moving to: " + nextChunkX + ", " + nextChunkZ);
         }
     }
 
@@ -331,7 +330,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             //todo checkAndLoadChunks() instead
             checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
-            clearChunkLoaders();
+            clearBulletChunks();
         }
         super.setDead();
         //this.clearChunkLoader();
@@ -1215,7 +1214,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             if (shouldLoadChunks()) {
                 checkAndLoadChunks();
                 loadNeighboringChunks(getChunkX(), getChunkZ());
-                clearChunkLoaders();
+                clearBulletChunks();
             }
         }
     }
@@ -1226,6 +1225,15 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 System.out.println("Clearing chunk loader due to impact.");
                 ForgeChunkManager.unforceChunk(loaderTicket, chunk);
             }
+        }
+    }
+
+    public void clearBulletChunks() {
+        if (!worldObj.isRemote && loaderTicket != null) {
+            for (ChunkCoordIntPair chunk : bulletLoadedChunks) {
+                ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+            }
+            bulletLoadedChunks.clear();
         }
     }
 
