@@ -50,6 +50,8 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.ForgeChunkManager;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+
+import static mcheli.hud.MCH_HudItem.player;
 //import static net.minecraft.command.CommandBase.getCommandSenderAsPlayer;
 //import static net.minecraft.command.CommandBase.getPlayer;
 
@@ -4168,7 +4170,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                this.unmountEntity();
                this.ejectSeatSub(entity, 0);
                //idk how or why this decided to neck itself but hopefully this works
-               EntityPlayer player = (EntityPlayer)entity;
 
                if(player.ridingEntity instanceof MCH_EntityHeli) {
                   System.out.println("player is riding heli");
