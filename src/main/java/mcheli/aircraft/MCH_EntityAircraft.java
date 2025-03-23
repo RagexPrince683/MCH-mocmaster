@@ -4167,6 +4167,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                this.getGuiInventory().consumeParachute();
                this.unmountEntity();
                this.ejectSeatSub(entity, 0);
+               //idk how or why this decided to neck itself but hopefully this works
+               EntityPlayer player = (EntityPlayer)entity;
 
                if(player.ridingEntity instanceof MCH_EntityHeli) {
                   System.out.println("player is riding heli");

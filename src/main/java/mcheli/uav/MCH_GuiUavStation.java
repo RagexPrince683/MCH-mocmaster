@@ -96,8 +96,8 @@ public class MCH_GuiUavStation
                          MCH_EntityAircraft aircraft = getCurrentAircraft(this.uavStation.getLastControlAircraft());
                          //MCH_EntityAircraft aircraft1 = getCurrentAircraft(aircraft);
                          if (aircraft != null) {
-                             System.out.println("found aircraft, binding");
-                             aircraft.castuavid(this.mc.thePlayer);
+                             System.out.println("found aircraft, not binding, binding was nuked");
+                             //aircraft.castuavid(this.mc.thePlayer);
                          }
                           MCH_UavPacketStatus pos = new MCH_UavPacketStatus();
                           pos.posUavX = (byte)this.uavStation.posUavX;
