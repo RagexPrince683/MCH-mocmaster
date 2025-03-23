@@ -255,6 +255,18 @@ public class MCH_ConfigGui extends W_GuiContainer {
       var10003 = new MCH_GuiListItemKeyBind(226, 326, x1, "APS", MCH_Config.KeyAPS);
       var10009 = MCH_MOD.config;
       var10000[25] = var10003;
+      //var10003 = new MCH_GuiListItemKeyBind(227, 327, x1, "Use Weapon Vehicle", MCH_Config.KeyUseWeapon);
+      //var10009 = MCH_MOD.config;
+      //var10000[26] = var10003;
+      //var10003 = new MCH_GuiListItemKeyBind(228, 328, x1, "Use Light Weapon", MCH_Config.KeyAttack);
+      //var10009 = MCH_MOD.config;
+     // var10000[26] = var10003;
+      //var10003 = new MCH_GuiListItemKeyBind(228, 328, x1, "Weapon Lock On", MCH_Config.KeyCurrentWeaponLock);
+      //var10009 = MCH_MOD.config;
+      //var10000[28] = var10003;
+      //so somehow this crashed the fucking game
+
+
       MCH_GuiListItemKeyBind[] listKeyBindItems = var10000;
       MCH_GuiListItemKeyBind[] i$ = listKeyBindItems;
       int b = listKeyBindItems.length;

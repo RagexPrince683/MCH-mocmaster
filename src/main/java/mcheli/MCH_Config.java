@@ -270,7 +270,36 @@ public class MCH_Config {
       KeyDownFromRack = new MCH_ConfigPrm("KeyDownFromRack", 22);
       KeyScoreboard = new MCH_ConfigPrm("KeyScoreboard", 38);
       KeyMultiplayManager = new MCH_ConfigPrm("KeyMultiplayManager", 50);
-      KeyConfig = new MCH_ConfigPrm[]{KeyUp, KeyDown, KeyRight, KeyLeft, KeySwitchMode, KeySwitchHovering, KeySwitchWeapon1, KeySwitchWeapon2, KeySwWeaponMode, KeyZoom, KeyCameraMode, KeyUnmount, KeyFlare, KeyExtra, KeyCameraDistUp, KeyCameraDistDown, KeyFreeLook, KeyGUI, KeyGearUpDown, KeyPutToRack, KeyDownFromRack, KeyScoreboard, KeyMultiplayManager, KeyChaff, KeyMaintenance, KeyAPS};
+      KeyConfig = new MCH_ConfigPrm[]{
+              KeyUp,
+              KeyDown,
+              KeyRight,
+              KeyLeft,
+              KeySwitchMode,
+              KeySwitchHovering,
+              KeySwitchWeapon1,
+              KeySwitchWeapon2,
+              KeySwWeaponMode,
+              KeyZoom,
+              KeyCameraMode,
+              KeyUnmount,
+              KeyFlare,
+              KeyExtra,
+              KeyCameraDistUp,
+              KeyCameraDistDown,
+              KeyFreeLook,
+              KeyGUI,
+              KeyGearUpDown,
+              KeyPutToRack,
+              KeyDownFromRack,
+              KeyScoreboard,
+              KeyMultiplayManager,
+              KeyChaff,
+              KeyMaintenance,
+              KeyAPS,
+              KeyUseWeapon,
+              KeyAttack,
+              KeyCurrentWeaponLock};
       DamageVs = new ArrayList();
       CommandPermission = new ArrayList();
       CommandPermissionList = new ArrayList();
