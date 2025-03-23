@@ -1077,8 +1077,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         //    clearChunkLoaders();
         //}
 
-       if(m.entityHit == null) {
-           spawnBlockPar(m, m.blockX, m.blockY, m.blockZ);
+       if(hit.entityHit == null) {
+           spawnBlockPar(hit, hit.blockX, hit.blockY, hit.blockZ);
        }
 
 
@@ -1089,10 +1089,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             System.out.println("Extra chunk loader activated.");
         }
 
-        if(m.entityHit instanceof MCH_EntityAircraft) {
-            MCH_EntityAircraft ac = (MCH_EntityAircraft) m.entityHit;
+        if(hit.entityHit instanceof MCH_EntityAircraft) {
+            MCH_EntityAircraft ac = (MCH_EntityAircraft) hit.entityHit;
             if(ac.ironCurtainRunningTick > 0) {
-                spawnIronCurtainParticle(m, m.blockX, m.blockY, m.blockZ);
+                spawnIronCurtainParticle(hit, hit.blockX, hit.blockY, hit.blockZ);
             }
         }
 
