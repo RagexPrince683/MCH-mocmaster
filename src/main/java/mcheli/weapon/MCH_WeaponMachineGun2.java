@@ -1,10 +1,7 @@
 package mcheli.weapon;
 
 import mcheli.MCH_Lib;
-import mcheli.weapon.MCH_EntityBullet;
-import mcheli.weapon.MCH_WeaponBase;
-import mcheli.weapon.MCH_WeaponInfo;
-import mcheli.weapon.MCH_WeaponParam;
+import mcheli.MCH_PlayerViewHandler;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -49,6 +46,7 @@ public class MCH_WeaponMachineGun2 extends MCH_WeaponBase {
          this.playSound(prm.entity);
       } else {
          super.optionParameter1 = this.getCurrentMode();
+         MCH_PlayerViewHandler.applyRecoil(getInfo().getRecoilPitch(), getInfo().getRecoilYaw(), getInfo().recoilRecoverFactor);
       }
 
       return true;

@@ -64,6 +64,7 @@ public class MCH_HeliInfo extends MCH_AircraftInfo {
          }
       }
 
+      MCH_AircraftInfo.allAircraftInfo.put(name, this);
    }
 
    public String getDirectoryName() {

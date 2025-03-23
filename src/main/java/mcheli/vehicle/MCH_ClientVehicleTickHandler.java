@@ -11,6 +11,7 @@ import mcheli.vehicle.MCH_PacketVehiclePlayerControl;
 import mcheli.vehicle.MCH_VehicleInfo;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Network;
+import mcheli.wrapper.W_Reflection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
@@ -35,7 +36,7 @@ public class MCH_ClientVehicleTickHandler extends MCH_AircraftClientTickHandler 
       this.KeySwitchHovering = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
       this.KeyZoom = new MCH_Key(MCH_Config.KeyZoom.prmInt);
       this.KeyExtra = new MCH_Key(MCH_Config.KeyExtra.prmInt);
-      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeySwitchHovering, super.KeyUseWeapon, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, this.KeyExtra, super.KeyGUI};
+      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeySwitchHovering, super.KeyUseWeapon, super.KeyCurrentWeaponLock, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyChaff, super.KeyMaintenance,super.KeyAPS, this.KeyExtra, super.KeyGUI};
    }
 
    protected void update(EntityPlayer player, MCH_EntityVehicle vehicle, MCH_VehicleInfo info) {
@@ -91,7 +92,10 @@ public class MCH_ClientVehicleTickHandler extends MCH_AircraftClientTickHandler 
          super.isRiding = false;
       }
 
-      if((super.isBeforeRiding || !super.isRiding) && super.isBeforeRiding && !super.isRiding) {
+      if (!this.isBeforeRiding && this.isRiding) {
+         W_Reflection.setThirdPersonDistance(var7.thirdPersonDist);
+      } else if (this.isBeforeRiding && !this.isRiding) {
+         W_Reflection.restoreDefaultThirdPersonDistance();
          MCH_Lib.enableFirstPersonItemRender();
          MCH_Lib.setRenderViewEntity(var6);
       }

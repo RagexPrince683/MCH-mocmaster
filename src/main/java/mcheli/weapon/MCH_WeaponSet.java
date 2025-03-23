@@ -8,6 +8,7 @@ import mcheli.weapon.MCH_WeaponBase;
 import mcheli.weapon.MCH_WeaponInfo;
 import mcheli.weapon.MCH_WeaponParam;
 import mcheli.wrapper.W_McClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
@@ -16,7 +17,7 @@ public class MCH_WeaponSet {
 
    private static Random rand = new Random();
    private final String name;
-   protected MCH_WeaponBase[] weapons;
+   public MCH_WeaponBase[] weapons;
    private int currentWeaponIndex;
    public float rotationYaw;
    public float rotationPitch;
@@ -195,10 +196,8 @@ public class MCH_WeaponSet {
    }
 
    public void onSwitchWeapon(boolean isRemote, boolean isCreative) {
-      int cntSwitch = 15;
-      if(isRemote) {
-         cntSwitch += 10;
-      }
+
+      int cntSwitch = getCurrentWeapon().getInfo().weaponSwitchCount;
 
       if(this.countWait >= -cntSwitch) {
          if(this.countWait > cntSwitch) {
@@ -348,6 +347,21 @@ public class MCH_WeaponSet {
          }
       }
 
+   }
+
+   public boolean lock(MCH_WeaponParam prm) {
+      MCH_WeaponBase crtWpn = this.getCurrentWeapon();
+      if(crtWpn != null && crtWpn.getInfo() != null) {
+         return crtWpn.lock(prm);
+      }
+      return false;
+   }
+
+   public void onUnlock(MCH_WeaponParam prm) {
+      MCH_WeaponBase crtWpn = this.getCurrentWeapon();
+      if(crtWpn != null && crtWpn.getInfo() != null) {
+         crtWpn.onUnlock(prm);
+      }
    }
 
    public boolean use(MCH_WeaponParam prm) {

@@ -3,6 +3,9 @@ package mcheli;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import mcheli.MCH_ClientCommonTickHandler;
 import mcheli.MCH_ClientTickHandlerBase;
 import mcheli.MCH_Config;
@@ -27,6 +30,7 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.MouseEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent.Specials.Post;
 import net.minecraftforge.client.event.RenderLivingEvent.Specials.Pre;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -40,6 +44,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
    private static final ResourceLocation ir_strobe = new ResourceLocation("mcheli", "textures/ir_strobe.png");
    private static boolean cancelRender = true;
 
+   public static float smoothing;
 
    public void renderLivingEventSpecialsPre(Pre event) {
       MCH_Config var10000 = MCH_MOD.config;
@@ -136,9 +141,9 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
    }
 
    public void renderLivingEventPost(net.minecraftforge.client.event.RenderLivingEvent.Post event) {
-      MCH_RenderAircraft.renderEntityMarker(event.entity);
       MCH_GuiTargetMarker.addMarkEntityPos(2, event.entity, event.x, event.y + (double)event.entity.height + 0.5D, event.z);
       MCH_ClientLightWeaponTickHandler.markEntity(event.entity, event.x, event.y + (double)(event.entity.height / 2.0F), event.z);
+      MCH_RenderAircraft.renderEntityMarker(event.entity);
    }
 
    public void renderPlayerPre(net.minecraftforge.client.event.RenderPlayerEvent.Pre event) {
@@ -167,6 +172,17 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
          MCH_ParticlesUtil.clearMarkPoint();
       }
 
+   }
+
+   @SubscribeEvent
+   public void renderTick(TickEvent.RenderTickEvent event) {
+      switch (event.phase) {
+         case START:
+            smoothing = event.renderTickTime;
+            break;
+         case END:
+            break;
+      }
    }
 
 }

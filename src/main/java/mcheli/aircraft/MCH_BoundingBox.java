@@ -17,6 +17,7 @@ public class MCH_BoundingBox {
    public Vec3 nowPos;
    public Vec3 prevPos;
    public final float damegeFactor;
+   public EnumBoundingBoxType boundingBoxType = EnumBoundingBoxType.DEFAULT;
 
 
    public MCH_BoundingBox(double x, double y, double z, float w, float h, float df) {

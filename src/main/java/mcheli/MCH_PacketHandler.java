@@ -13,7 +13,6 @@ import mcheli.lweapon.MCH_LightWeaponPacketHandler;
 import mcheli.multiplay.MCH_MultiplayPacketHandler;
 import mcheli.plane.MCP_PlanePacketHandler;
 //import mcheli.sensors.Mk1Eyeball;
-import mcheli.ship.MCH_ShipPacketHandler;
 import mcheli.tank.MCH_TankPacketHandler;
 import mcheli.tool.MCH_ToolPacketHandler;
 import mcheli.uav.MCH_UavPacketHandler;
@@ -126,11 +125,9 @@ public class MCH_PacketHandler extends W_PacketHandler {
          MCP_PlanePacketHandler.onPacket_PlayerControl(entityPlayer, data);
          break;
       case 536903698:
-         System.out.println("onpacketplayercontrol for the worst shit ever");
+         //System.out.println("onpacketplayercontrol for the worst shit ever");
          MCH_ShipPacketHandler.onPacket_PlayerControl(entityPlayer, data);
          break;
-         //oh god the schizophrenic numbers are back
-         //and not working
       case 536936464:
          MCH_LightWeaponPacketHandler.onPacket_PlayerControl(entityPlayer, data);
          break;

@@ -155,7 +155,7 @@ public class MCH_EntityA10 extends W_Entity {
       if(!super.isDead) {
          if(this.despawnCount > 70) {
             this.setDead();
-         } else if(this.despawnCount > 0 && this.shotCount < 40) {
+         } else if(this.despawnCount > 0 && this.shotCount < 100) {
             for(int i = 0; i < 2; ++i) {
                this.shotGAU8(true, this.shotCount);
                ++this.shotCount;
@@ -204,7 +204,7 @@ public class MCH_EntityA10 extends W_Entity {
       tZ = tZ * 4.0D / dist;
       MCH_EntityBullet e = new MCH_EntityBullet(super.worldObj, x, y, z, tX, tY, tZ, yaw, pitch, (double)this.acceleration);
       e.setName(this.getWeaponName());
-      e.explosionPower = this.shotCount % 4 == 0?this.explosionPower:0;
+      e.explosionPower = this.explosionPower;
       e.setPower(this.power);
       e.shootingEntity = this.shootingEntity;
       e.shootingAircraft = this.shootingAircraft;

@@ -13,7 +13,6 @@ import mcheli.multiplay.MCH_PacketNotifyMarkPoint;
 import mcheli.multiplay.MCH_PacketNotifySpotedEntity;
 import mcheli.multiplay.MCH_TargetType;
 import mcheli.plane.MCP_EntityPlane;
-import mcheli.ship.MCH_EntityShip;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.vehicle.MCH_EntityVehicle;
 import net.minecraft.command.server.CommandScoreboard;
@@ -30,6 +29,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import mcheli.ship.MCH_EntityShip;
 
 public class MCH_Multiplay {
 

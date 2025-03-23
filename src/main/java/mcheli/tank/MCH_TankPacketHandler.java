@@ -93,6 +93,18 @@ public class MCH_TankPacketHandler {
                   tank.useFlare(pc.useFlareType);
                }
 
+               if(pc.useChaff) {
+                  tank.useChaff();
+               }
+
+               if(pc.useMaintenance) {
+                  tank.useMaintenance();
+               }
+
+               if(pc.useAPS) {
+                  tank.useAPS(player);
+               }
+
                if(pc.openGui) {
                   tank.openGui(player);
                }

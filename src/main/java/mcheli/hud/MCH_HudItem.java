@@ -274,6 +274,12 @@ public abstract class MCH_HudItem extends Gui {
       updateVarMapItem("hovering", ac instanceof MCH_EntityHeli && ac.isHoveringMode()?1.0D:0.0D);
       updateVarMapItem("is_uav", ac.isUAV()?1.0D:0.0D);
       updateVarMapItem("uav_fs", getUAV_Fs(ac));
+      updateVarMapItem("can_chaff", ac.canUseChaff()?1.0D:0.0D);
+      updateVarMapItem("can_maintenance", ac.canUseMaintenance()?1.0D:0.0D);
+      updateVarMapItem("have_chaff", ac.haveChaff()?1.0D:0.0D);
+      updateVarMapItem("have_maintenance", ac.haveMaintenance()?1.0D:0.0D);
+      updateVarMapItem("have_aps", ac.haveAPS()?1.0D:0.0D);
+      updateVarMapItem("can_aps", ac.canUseAPS()?1.0D:0.0D);
    }
 
    public static void updateVarMapItem(String key, double value) {

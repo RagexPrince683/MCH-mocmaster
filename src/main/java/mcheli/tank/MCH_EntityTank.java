@@ -26,6 +26,9 @@ import mcheli.wrapper.W_Lib;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.EntityCloudFX;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -43,6 +46,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import org.lwjgl.opengl.GL11;
 
 public class MCH_EntityTank extends MCH_EntityAircraft {
 
@@ -415,6 +419,14 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    }
 
    protected void onUpdate_Control(float partialTicks) {
+
+      if(getHP() * 100 / getMaxHP() < getAcInfo().engineShutdownThreshold) {
+         setCurrentThrottle(0);
+         throttleUp = false;
+         throttleBack = 0;
+         return;
+      }
+
       if(super.isGunnerMode && !this.canUseFuel()) {
          this.switchGunnerMode(false);
       }
@@ -462,6 +474,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    }
 
    protected void onUpdate_ControlSub(float partialTicks) {
+
       if(!super.isGunnerMode) {
          float throttleUpDown = this.getAcInfo().throttleUpDown;
          if(super.throttleUp) {
@@ -496,10 +509,11 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
             } else {
                this.setCurrentThrottle(0.0D);
                if(this.getAcInfo().enableBack) {
-                  super.throttleBack = (float)((double)super.throttleBack + 0.0025D * (double)throttleUpDown);
-                  if(super.throttleBack > 0.6F) { //todo: add a new variable here for reversespeed
-                     super.throttleBack = 0.6F;
-                  }
+                 // super.throttleBack = (float)((double)super.throttleBack + 0.0025D * (double)throttleUpDown);
+                  super.throttleBack = (float)((double)super.throttleBack + 0.0025D * (double)throttleUpDown * getAcInfo().throttleDownFactor);
+//                  if(super.throttleBack > 0.6F) { //todo: add a new variable here for reversespeed
+//                     super.throttleBack = 0.6F;
+//                  }
                   float pivotTurnThrottle1 = this.getAcInfo().pivotTurnThrottle;
                   if (pivotTurnThrottle1 > 0) {
                      if (super.throttleBack > 0) {
@@ -606,6 +620,88 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
                super.isFirstDamageSmoke = false;
             }
+         }
+
+
+         if(ironCurtainRunningTick > 0) {
+            if(this.getTankInfo() != null) {
+               int bbNum = this.getTankInfo().extraBoundingBox.size();
+               double py;
+               double pz;
+               for(int b = 0; b < bbNum; ++b) {
+                  MCH_BoundingBox box = (MCH_BoundingBox)this.getTankInfo().extraBoundingBox.get(b);
+                  Vec3 pos = this.getTransformedPosition(box.offsetX, box.offsetY, box.offsetZ);
+                  py = pos.xCoord;
+                  pz = pos.yCoord;
+                  double pos1 = pos.zCoord;
+                  this.onUpdate_IronCurtainParticle(b, py, pz, pos1, 1.0F);
+               }
+            }
+         }
+
+
+      }
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void onUpdate_IronCurtainParticle(int ri, double x, double y, double z, float size) {
+      // 仅在客户端且铁幕激活时生成粒子
+      if(worldObj.isRemote && ironCurtainRunningTick > 0) {
+         // 颜色波动参数（使用插值后的实际因子）
+         float factor = 0.5f + 0.5f * (float)Math.sin(ironCurtainRunningTick * 0.15f);
+         final float DARK_RED_R = 0.5f * factor;
+         final float DARK_RED_G = 0.1f * factor;
+         final float DARK_RED_B = 0.1f * factor;
+
+         // 粒子基础参数
+         int particleCount = 2 + rand.nextInt(3); // 每个碰撞箱生成2-4个粒子
+         float baseSize = size * (0.8f + rand.nextFloat() * 0.4f); // 尺寸波动
+
+         // 生成环绕粒子群
+         for(int i = 0; i < particleCount; i++) {
+            EntityCloudFX particle = new EntityCloudFX(worldObj,
+                    x + (rand.nextGaussian() * 0.3),
+                    y + (rand.nextGaussian() * 0.2),
+                    z + (rand.nextGaussian() * 0.3),
+                    0, 0, 0) {
+
+               // 重写渲染逻辑强制应用颜色
+               @Override
+               public void renderParticle(Tessellator tess, float partialTicks,
+                                          float rotX, float rotZ, float rotYZ,
+                                          float rotXY, float rotXZ) {
+                  GL11.glColor4f(DARK_RED_R, DARK_RED_G, DARK_RED_B, this.particleAlpha);
+                  super.renderParticle(tess, partialTicks, rotX, rotZ, rotYZ, rotXY, rotXZ);
+               }
+            };
+
+            // 粒子动态参数配置
+            particle.setRBGColorF(DARK_RED_R, DARK_RED_G, DARK_RED_B);
+
+            // 运动参数（带旋转扩散）
+            float motionSpread = 0.015f * (ironCurtainRunningTick % 40 + 1);
+            particle.motionX = (rand.nextFloat() - 0.5f) * motionSpread;
+            particle.motionY = 0.01f + rand.nextFloat() * 0.02f;
+            particle.motionZ = (rand.nextFloat() - 0.5f) * motionSpread;
+
+            // 添加特效
+            Minecraft.getMinecraft().effectRenderer.addEffect(particle);
+         }
+
+         // 10%概率生成核心高亮粒子
+         if(rand.nextFloat() < 0.1f) {
+            EntityCloudFX coreParticle = new EntityCloudFX(worldObj, x, y, z, 0, 0, 0) {
+               @Override
+               public void renderParticle(Tessellator tess, float partialTicks,
+                                          float rotX, float rotZ, float rotYZ,
+                                          float rotXY, float rotXZ) {
+                  GL11.glColor4f(DARK_RED_R * 1.2f, DARK_RED_G * 0.8f, DARK_RED_B * 0.8f, this.particleAlpha);
+                  super.renderParticle(tess, partialTicks, rotX, rotZ, rotYZ, rotXY, rotXZ);
+               }
+            };
+
+            coreParticle.motionY = 0.03f;
+            Minecraft.getMinecraft().effectRenderer.addEffect(coreParticle);
          }
       }
    }
@@ -735,9 +831,9 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    }
 
    protected void onUpdate_Client() {
-      if(this.getRiddenByEntity() != null && W_Lib.isClientPlayer(this.getRiddenByEntity())) {
-         this.getRiddenByEntity().rotationPitch = this.getRiddenByEntity().prevRotationPitch;
-      }
+//      if(this.getRiddenByEntity() != null && W_Lib.isClientPlayer(this.getRiddenByEntity())) {
+//         this.getRiddenByEntity().rotationPitch = this.getRiddenByEntity().prevRotationPitch;
+//      }
 
       if(super.aircraftPosRotInc > 0) {
          this.applyServerPositionAndRotation();
@@ -770,6 +866,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    public void applyOnGroundPitch(float factor) {}
 
    private void onUpdate_Server() {
+
       //todo gear shifts here
       Entity rdnEnt = this.getRiddenByEntity();
       double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
@@ -804,6 +901,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       }
 
       float throttle = (float)(this.getCurrentThrottle() / 10.0D);
+
       Vec3 v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - 10.0F);
       if(!levelOff) {
          super.motionY += v.yCoord * (double)throttle / 8.0D;

@@ -4,6 +4,7 @@ import mcheli.MCH_ClientTickHandlerBase;
 import mcheli.MCH_Config;
 import mcheli.MCH_Key;
 import mcheli.MCH_PacketIndOpenScreen;
+import mcheli.network.packets.PacketLockTarget;
 import mcheli.wrapper.W_Network;
 import mcheli.wrapper.W_PacketBase;
 import net.minecraft.client.Minecraft;
@@ -53,6 +54,20 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
    public MCH_Key KeyDownFromRack;
 
    public MCH_Key KeyBrake;
+   public MCH_Key KeyCurrentWeaponLock;
+
+   /**
+    * 箔条按键
+    */
+   public MCH_Key KeyChaff;
+   /**
+    * 维修按键
+    */
+   public MCH_Key KeyMaintenance;
+   /**
+    * APS按键
+    */
+   public MCH_Key KeyAPS;
 
    public MCH_AircraftClientTickHandler(Minecraft minecraft, MCH_Config config) {
       super(minecraft);
@@ -79,6 +94,10 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
       this.KeyPutToRack = new MCH_Key(MCH_Config.KeyPutToRack.prmInt);
       this.KeyDownFromRack = new MCH_Key(MCH_Config.KeyDownFromRack.prmInt);
       this.KeyBrake = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
+      this.KeyCurrentWeaponLock = new MCH_Key(MCH_Config.KeyCurrentWeaponLock.prmInt);
+      this.KeyChaff = new MCH_Key(MCH_Config.KeyChaff.prmInt);
+      this.KeyMaintenance = new MCH_Key(MCH_Config.KeyMaintenance.prmInt);
+      this.KeyAPS = new MCH_Key(MCH_Config.KeyAPS.prmInt);
    }
 
    protected void commonPlayerControlInGUI(EntityPlayer player, MCH_EntityAircraft ac, boolean isPilot, MCH_PacketPlayerControlBase pc) {}
@@ -203,38 +222,79 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
             pc.moveLeft = ac.moveLeft = this.KeyLeft.isKeyPress();
          }
       }
-      if (!ac.isDestroyed() && this.KeyFlare.isKeyDown())
-         if (ac.getSeatIdByEntity((Entity)player) <= 1)
+      if (!ac.isDestroyed() && this.KeyFlare.isKeyDown()) {
+         if (ac.getSeatIdByEntity((Entity) player) <= 1)
             if (ac.canUseFlare() && ac.useFlare(ac.getCurrentFlareType())) {
-               pc.useFlareType = (byte)ac.getCurrentFlareType();
+               pc.useFlareType = (byte) ac.getCurrentFlareType();
                ac.nextFlareType();
                send = true;
             } else {
                playSoundNG();
             }
-      if (!ac.isDestroyed() && !ac.isPilotReloading())
+      }
+      if (!ac.isDestroyed() && this.KeyChaff.isKeyDown()) {
+         if (ac.getSeatIdByEntity(player) <= 1) {
+            if (ac.canUseChaff() && ac.useChaff()) {
+               pc.useChaff = true;
+               send = true;
+            } else {
+               playSoundNG();
+            }
+         }
+      }
+      if (!ac.isDestroyed() && this.KeyMaintenance.isKeyDown()) {
+         if (ac.getSeatIdByEntity(player) <= 1) {
+            if (ac.canUseMaintenance() && ac.useMaintenance()) {
+               pc.useMaintenance = true;
+               send = true;
+            } else {
+               playSoundNG();
+            }
+         }
+      }
+      if (!ac.isDestroyed() && this.KeyAPS.isKeyDown()) {
+         if (ac.getSeatIdByEntity(player) <= 1) {
+            if (ac.canUseAPS() && ac.useAPS(player)) {
+               pc.useAPS = true;
+               send = true;
+            } else {
+               playSoundNG();
+            }
+         }
+      }
+      if (!ac.isDestroyed() && !ac.isPilotReloading()) {
+
+         if (this.KeyCurrentWeaponLock.isKeyPress()) {
+            ac.currentWeaponLock(player);
+            send = true;
+         } else {
+            ac.currentWeaponUnlock(player);
+         }
+
          if (this.KeySwitchWeapon1.isKeyDown() || this.KeySwitchWeapon2.isKeyDown() || getMouseWheel() != 0) {
             if (getMouseWheel() > 0) {
-               pc.switchWeapon = (byte)ac.getNextWeaponID((Entity)player, -1);
+               pc.switchWeapon = (byte) ac.getNextWeaponID((Entity) player, -1);
             } else {
-               pc.switchWeapon = (byte)ac.getNextWeaponID((Entity)player, 1);
+               pc.switchWeapon = (byte) ac.getNextWeaponID((Entity) player, 1);
             }
             setMouseWheel(0);
-            ac.switchWeapon((Entity)player, pc.switchWeapon);
+            ac.switchWeapon((Entity) player, pc.switchWeapon);
             send = true;
          } else if (this.KeySwWeaponMode.isKeyDown()) {
-            ac.switchCurrentWeaponMode((Entity)player);
+            ac.switchCurrentWeaponMode((Entity) player);
          } else if (this.KeyUseWeapon.isKeyPress()) {
-            if (ac.useCurrentWeapon((Entity)player)) {
+            if (ac.useCurrentWeapon((Entity) player)) {
                pc.useWeapon = true;
-               pc.useWeaponOption1 = ac.getCurrentWeapon((Entity)player).getLastUsedOptionParameter1();
-               pc.useWeaponOption2 = ac.getCurrentWeapon((Entity)player).getLastUsedOptionParameter2();
+               pc.useWeaponOption1 = ac.getCurrentWeapon((Entity) player).getLastUsedOptionParameter1();
+               pc.useWeaponOption2 = ac.getCurrentWeapon((Entity) player).getLastUsedOptionParameter2();
                pc.useWeaponPosX = ac.prevPosX;
                pc.useWeaponPosY = ac.prevPosY;
                pc.useWeaponPosZ = ac.prevPosZ;
                send = true;
             }
          }
+
+      }
       return (send || player.ticksExisted % 100 == 0);
    }
 }

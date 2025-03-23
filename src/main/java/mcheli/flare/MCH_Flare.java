@@ -92,7 +92,7 @@ public class MCH_Flare {
                this.tick = FLARE_DATA[this.getFlareType()].tickWait;
                result = true;
                this.numFlare = 0;
-               W_McClient.DEF_playSoundFX("random.click", 1.0F, 1.0F);
+               W_McClient.DEF_playSoundFX("mcheli:flare_deploy", 10.0F, 1.0F);
             }
          } else {
             result = true;

@@ -1,8 +1,5 @@
 package mcheli.weapon;
 
-import mcheli.weapon.MCH_BulletModel;
-import mcheli.weapon.MCH_DefaultBulletModels;
-import mcheli.weapon.MCH_EntityBaseBullet;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -30,7 +27,7 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
       }
 
       if(this.isInWater() && this.getInfo() != null && !this.getInfo().disableSmoke) {
-         this.spawnParticle(this.getInfo().trajectoryParticleName, 3, 5.0F * this.getInfo().smokeSize * 0.5F);
+         this.spawnExplosionParticle(this.getInfo().trajectoryParticleName, 3, 5.0F * this.getInfo().smokeSize * 0.5F);
       }
 
    }

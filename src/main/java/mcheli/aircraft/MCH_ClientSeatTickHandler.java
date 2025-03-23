@@ -8,8 +8,10 @@ import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_PacketSeatPlayerControl;
 import mcheli.wrapper.W_Network;
+import mcheli.wrapper.W_Reflection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
@@ -41,25 +43,20 @@ public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
    }
 
    protected void onTick(boolean inGUI) {
-      MCH_Key[] player = this.Keys;
-      int seat = player.length;
-
-      for(int ac = 0; ac < seat; ++ac) {
-         MCH_Key k = player[ac];
+      for (MCH_Key k : this.Keys)
          k.update();
-      }
-
       this.isBeforeRiding = this.isRiding;
-      EntityClientPlayerMP var6 = super.mc.thePlayer;
-      if(var6 != null && var6.ridingEntity instanceof MCH_EntitySeat) {
-         MCH_EntitySeat var7 = (MCH_EntitySeat)var6.ridingEntity;
-         if(var7.getParent() == null || var7.getParent().getAcInfo() == null) {
+      EntityClientPlayerMP entityClientPlayerMP = super.mc.thePlayer;
+      MCH_EntityAircraft ac = null;
+      if(entityClientPlayerMP != null && entityClientPlayerMP.ridingEntity instanceof MCH_EntitySeat) {
+         MCH_EntitySeat seat = (MCH_EntitySeat)entityClientPlayerMP.ridingEntity;
+         if(seat.getParent() == null || seat.getParent().getAcInfo() == null) {
             return;
          }
 
-         MCH_EntityAircraft var8 = var7.getParent();
-         if(!inGUI && !var8.isDestroyed()) {
-            this.playerControl(var6, var7, var8);
+         ac = seat.getParent();
+         if(!inGUI && !ac.isDestroyed()) {
+            this.playerControl(entityClientPlayerMP, seat, ac);
          }
 
          this.isRiding = true;
@@ -67,10 +64,15 @@ public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
          this.isRiding = false;
       }
 
-      if(this.isBeforeRiding != this.isRiding && !this.isRiding) {
-         MCH_Lib.setRenderViewEntity(var6);
+      if (this.isBeforeRiding != this.isRiding) {
+         if (this.isRiding) {
+            W_Reflection.setThirdPersonDistance(ac.thirdPersonDist);
+         } else {
+            if (entityClientPlayerMP == null || !(entityClientPlayerMP.ridingEntity instanceof MCH_EntityAircraft))
+               W_Reflection.restoreDefaultThirdPersonDistance();
+            MCH_Lib.setRenderViewEntity(entityClientPlayerMP);
+         }
       }
-
    }
 
    private void playerControlInGUI(EntityPlayer player, MCH_EntitySeat seat, MCH_EntityAircraft ac) {}

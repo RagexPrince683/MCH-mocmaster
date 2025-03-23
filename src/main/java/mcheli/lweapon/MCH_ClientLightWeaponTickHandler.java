@@ -35,11 +35,11 @@ import org.lwjgl.util.glu.GLU;
 
 public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase {
 
-   private static FloatBuffer screenPos = BufferUtils.createFloatBuffer(3);
+   public static FloatBuffer screenPos = BufferUtils.createFloatBuffer(3);
    private static FloatBuffer screenPosBB = BufferUtils.createFloatBuffer(3);
-   private static FloatBuffer matModel = BufferUtils.createFloatBuffer(16);
-   private static FloatBuffer matProjection = BufferUtils.createFloatBuffer(16);
-   private static IntBuffer matViewport = BufferUtils.createIntBuffer(16);
+   public static FloatBuffer matModel = BufferUtils.createFloatBuffer(16);
+   public static FloatBuffer matProjection = BufferUtils.createFloatBuffer(16);
+   public static IntBuffer matViewport = BufferUtils.createIntBuffer(16);
    protected boolean isHeldItem = false;
    protected boolean isBeforeHeldItem = false;
    protected EntityPlayer prevThePlayer = null;
@@ -85,7 +85,6 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          GLU.gluProject((float)x + w, (float)y + h, (float)z + w, matModel, matProjection, matViewport, screenPosBB);
          markEntity = entity;
       }
-
    }
 
    public static Vec3 getMartEntityPos() {
@@ -311,7 +310,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          if(this.KeyAttack.isKeyPress()) {
             if ("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
                boolean canFire = false;
-               if (is.getItemDamage() < is.getMaxDamage() && this.KeyZoom.isKeyDown()) {//todo: check for scoped, add accuracy debuff if not scoped in, remove lock on for RPG
+               if (is.getItemDamage() < is.getMaxDamage() && this.KeyZoom.isKeyDown()) {//todo: check for scoped
                   canFire = true;
                }
                if (canFire) {

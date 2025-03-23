@@ -5,6 +5,7 @@ import java.util.List;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.plane.MCP_ItemPlane;
 import net.minecraft.item.Item;
 
 public class MCP_PlaneInfo extends MCH_AircraftInfo {
@@ -29,6 +30,7 @@ public class MCP_PlaneInfo extends MCH_AircraftInfo {
    public MCP_PlaneInfo(String name) {
       super(name);
       this.sweepWingSpeed = super.speed;
+      this.motionFactor = 0.975F;
    }
 
    public float getDefaultRotorSpeed() {
@@ -52,7 +54,7 @@ public class MCP_PlaneInfo extends MCH_AircraftInfo {
    }
 
    public float getMaxSpeed() {
-      return 1.8F;
+      return 4.0F;
    }
 
    public int getDefaultMaxZoom() {
@@ -139,7 +141,7 @@ public class MCP_PlaneInfo extends MCH_AircraftInfo {
             this.isEnableAutoPilot = this.toBool(data);
          }
       }
-
+      MCH_AircraftInfo.allAircraftInfo.put(name, this);
    }
 
    public String getDirectoryName() {

@@ -3,20 +3,8 @@ package mcheli;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.Iterator;
-import mcheli.MCH_ClientEventHook;
-import mcheli.MCH_ClientTickHandlerBase;
-import mcheli.MCH_Config;
-import mcheli.MCH_GuiCommon;
-import mcheli.MCH_Key;
-import mcheli.MCH_MOD;
-import mcheli.MCH_PacketIndOpenScreen;
-import mcheli.MCH_ServerSettings;
-import mcheli.MCH_ViewEntityDummy;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_ClientSeatTickHandler;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_EntitySeat;
-import mcheli.aircraft.MCH_SeatInfo;
+
+import mcheli.aircraft.*;
 import mcheli.command.MCH_GuiTitle;
 import mcheli.gltd.MCH_ClientGLTDTickHandler;
 import mcheli.gltd.MCH_EntityGLTD;
@@ -31,13 +19,8 @@ import mcheli.multiplay.MCH_GuiScoreboard;
 import mcheli.multiplay.MCH_GuiTargetMarker;
 import mcheli.multiplay.MCH_MultiplayClient;
 import mcheli.plane.MCP_ClientPlaneTickHandler;
-
-import mcheli.ship.MCH_ClientShipTickHandler;
-
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_GuiPlane;
-import mcheli.ship.MCH_EntityShip;
-import mcheli.ship.MCH_GuiShip;
 import mcheli.tank.MCH_ClientTankTickHandler;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.tank.MCH_GuiTank;
@@ -65,6 +48,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.Display;
+import mcheli.ship.MCH_ClientShipTickHandler;
+import mcheli.ship.MCH_EntityShip;
+import mcheli.ship.MCH_GuiShip;
 
 @SideOnly(Side.CLIENT)
 public class MCH_ClientCommonTickHandler extends W_TickHandler {
@@ -105,6 +91,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    private static double mouseRollDeltaY = 0.0D;
    private static boolean isRideAircraft = false;
    private static float prevTick = 0.0F;
+
 
 
    public MCH_ClientCommonTickHandler(Minecraft minecraft, MCH_Config config) {
@@ -235,7 +222,6 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       if(lockedSoundCount > 0) {
          --lockedSoundCount;
       }
-
    }
 
    public void onTickPre() {
@@ -249,7 +235,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       if(super.mc.thePlayer != null && super.mc.theWorld != null) {
          MCH_GuiTargetMarker.onClientTick();
       }
-
+      MCH_PlayerViewHandler.onUpdate();
    }
 
    public static double getCurrentStickX() {
@@ -385,11 +371,6 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                var10000 = MCH_MOD.config;
                var20 = MCH_Config.MouseControlStickModePlane.prmBool;
             }
-
-            //if(var19 instanceof MCH_EntityShip) {
-            //   var10000 = MCH_MOD.config;
-            //   var20 = MCH_Config.MouseControlStickModeShip.prmBool;
-            //}
 
             for(int de = 0; de < 10 && prevTick > partialTicks; ++de) {
                --prevTick;

@@ -1,29 +1,21 @@
 package mcheli.aircraft;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import mcheli.MCH_BaseInfo;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_BoundingBox;
-import mcheli.aircraft.MCH_MobDropOption;
-import mcheli.aircraft.MCH_SeatInfo;
-import mcheli.aircraft.MCH_SeatRackInfo;
 import mcheli.hud.MCH_Hud;
 import mcheli.hud.MCH_HudManager;
 import mcheli.weapon.MCH_WeaponInfoManager;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.model.IModelCustom;
 
+import java.util.*;
+
 public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
 
+   public static Map<String, MCH_AircraftInfo> allAircraftInfo = new HashMap<>();
 
    public final String name;
    public String displayName;
@@ -41,6 +33,9 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    public boolean isEnableEjectionSeat;
    public boolean isEnableParachuting;
    public MCH_AircraftInfo.Flare flare;
+   public MCH_AircraftInfo.Chaff chaff;
+   public MCH_AircraftInfo.Maintenance maintenance;
+   public MCH_AircraftInfo.APS aps;
    public float bodyHeight;
    public float bodyWidth;
    public boolean isFloat;
@@ -102,13 +97,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    public Vec3 turretPosition;
    public boolean defaultFreelook;
    public Vec3 unmountPosition;
+   public float thirdPersonDist;
    public float markerWidth;
    public float markerHeight;
    public float bbZmin;
    public float bbZmax;
    public float bbZ;
    public boolean alwaysCameraView;
-   public List cameraPosition;
+   public List<CameraPosition> cameraPosition;
    public float cameraRotationSpeed;
    public float speed;
    public float motionFactor;
@@ -123,7 +119,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    public boolean limitRotation;
    public float throttleUpDown;
    public float throttleUpDownOnEntity;
-   private List textureNameList;
+    private List textureNameList;
    public int textureCount;
    public float particlesScale;
    public boolean hideEntity;
@@ -150,7 +146,79 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    private int lastWeaponIndex = -1;
    private MCH_AircraftInfo.PartWeapon lastWeaponPart;
 
+   /**
+    * 雷达种类
+    */
+   public EnumRadarType radarType = EnumRadarType.EARLY_AA;
 
+   /**
+    * RWR种类
+    */
+   public EnumRWRType rwrType = EnumRWRType.DIGITAL;
+
+   /**
+    * 当前载具在现代对空雷达中显示的名字
+    */
+   public String nameOnModernAARadar = "?";
+   /**
+    * 当前载具在早期对空雷达中显示的名字
+    */
+   public String nameOnEarlyAARadar = "?";
+   /**
+    * 当前载具在现代对地雷达中显示的名字
+    */
+   public String nameOnModernASRadar = "?";
+   /**
+    * 当前载具在早期对地雷达中显示的名字
+    */
+   public String nameOnEarlyASRadar = "?";
+   /**
+    * 载具被摧毁时爆炸范围
+    */
+   public float explosionSizeByCrash = 5;
+   /**
+    * 倒车速度倍率，默认1
+    */
+   public float throttleDownFactor = 1;
+
+   /**
+    * 箔条生效时长
+    */
+   public int chaffUseTime = 100;
+
+   /**
+    * 箔条冷却时长
+    */
+   public int chaffWaitTime = 400;
+
+   /**
+    * 维修系统生效时长 （时长即为回血百分比）
+    */
+   public int maintenanceUseTime = 20;
+
+   /**
+    * 维修系统冷却时长
+    */
+   public int maintenanceWaitTime = 300;
+
+   /**
+    * 载具瘫痪阈值，血量低于此百分比将关闭载具引擎
+    */
+   public int engineShutdownThreshold = 20;
+
+   /**
+    * APS生效时长
+    */
+   public int apsUseTime = 100;
+   /**
+    * APS冷却时长
+    */
+   public int apsWaitTime = 400;
+
+   /**
+    * APS范围
+    */
+   public int apsRange = 8;
 
    public abstract Item getItem();
 
@@ -240,6 +308,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.turretPosition = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
       this.defaultFreelook = false;
       this.unmountPosition = null;
+      this.thirdPersonDist = 4.0F;
       this.cameraPosition = new ArrayList();
       this.alwaysCameraView = false;
       this.cameraRotationSpeed = 1000.0F;
@@ -530,7 +599,37 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                   this.repairOtherVehiclesValue = this.toInt(s[1], 0, 10000000);
                }
             }
-         } else if(item.compareTo("itemid") == 0) {
+         }
+
+         else if(item.equalsIgnoreCase("RadarType")) {
+            try {
+               this.radarType = EnumRadarType.valueOf(data);
+            } catch (Exception e) {
+               this.radarType = EnumRadarType.MODERN_AA;
+            }
+         }
+         else if(item.equalsIgnoreCase("RWRType")) {
+            try {
+               this.rwrType = EnumRWRType.valueOf(data);
+            } catch (Exception e) {
+               this.rwrType = EnumRWRType.DIGITAL;
+            }
+         }
+         else if(item.equalsIgnoreCase("NameOnModernAARadar")) {
+            nameOnModernAARadar = data;
+         }else if(item.equalsIgnoreCase("NameOnEarlyAARadar")) {
+            nameOnEarlyAARadar = data;
+         }else if(item.equalsIgnoreCase("NameOnModernASRadar")) {
+            nameOnModernASRadar = data;
+         }else if(item.equalsIgnoreCase("NameOnEarlyASRadar")) {
+            nameOnEarlyASRadar = data;
+         } else if(item.equalsIgnoreCase("ExplosionSizeByCrash")) {
+            explosionSizeByCrash = this.toInt(data, 0, 100);
+         } else if(item.equalsIgnoreCase("ThrottleDownFactor")) {
+            throttleDownFactor = this.toFloat(data, 0, 10);
+         }
+
+         else if(item.compareTo("itemid") == 0) {
             this.itemID = this.toInt(data, 0, '\uffff');
          } else if(item.compareTo("addtexture") == 0) {
             this.textureNameList.add(data.toLowerCase());
@@ -691,6 +790,8 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                     if(s.length >= 3) {
                                        this.unmountPosition = this.toVec3(s[0], s[1], s[2]);
                                     }
+                                 } else if (item.equalsIgnoreCase("ThirdPersonDist")) {
+                                    this.thirdPersonDist = toFloat(data, 4.0F, 100.0F);
                                  } else if(item.equalsIgnoreCase("TurretPosition")) {
                                     s = data.split("\\s*,\\s*");
                                     if(s.length >= 3) {
@@ -782,7 +883,30 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                              if(s.length >= 3) {
                                                 this.flare.pos = this.toVec3(s[0], s[1], s[2]);
                                              }
-                                          } else if(item.equalsIgnoreCase("Sound")) {
+                                          } else if(item.equalsIgnoreCase("HasChaff")) {
+                                             chaff = new MCH_AircraftInfo.Chaff();
+                                          } else if(item.equalsIgnoreCase("ChaffUseTime")) {
+                                             chaffUseTime = this.toInt(data, 0, 10000);
+                                          } else if(item.equalsIgnoreCase("ChaffWaitTime")) {
+                                             chaffWaitTime = this.toInt(data, 0, 10000);
+                                          } else if(item.equalsIgnoreCase("HasMaintenance")) {
+                                             maintenance = new MCH_AircraftInfo.Maintenance();
+                                          } else if(item.equalsIgnoreCase("MaintenanceUseTime")) {
+                                             maintenanceUseTime = this.toInt(data, 0, 100);
+                                          } else if(item.equalsIgnoreCase("MaintenanceWaitTime")) {
+                                             maintenanceWaitTime = this.toInt(data, 0, 10000);
+                                          } else if(item.equalsIgnoreCase("EngineShutdownThreshold")) {
+                                             engineShutdownThreshold = this.toInt(data, 0, 100);
+                                          } else if(item.equalsIgnoreCase("HasAPS")) {
+                                             aps = new MCH_AircraftInfo.APS();
+                                          } else if(item.equalsIgnoreCase("APSUseTime")) {
+                                             apsUseTime = this.toInt(data, 0, 10000);
+                                          } else if(item.equalsIgnoreCase("APSWaitTime")) {
+                                             apsWaitTime = this.toInt(data, 0, 10000);
+                                          } else if(item.equalsIgnoreCase("APSRange")) {
+                                             apsRange = this.toInt(data, 0, 100);
+                                          }
+                                          else if(item.equalsIgnoreCase("Sound")) {
                                              this.soundMove = data.toLowerCase();
                                           } else if(item.equalsIgnoreCase("SoundRange")) {
                                              this.soundRange = this.toFloat(data, 1.0F, 1000.0F);
@@ -1251,6 +1375,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.lastWeaponPart = null;
       this.wheels.clear();
       this.unmountPosition = null;
+
    }
 
    public static String[] getCannotReloadItem() {
@@ -1270,6 +1395,18 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       }
 
       return true;
+   }
+
+   public boolean haveChaff() {
+      return this.chaff != null;
+   }
+
+   public boolean haveMaintenance() {
+      return this.maintenance != null;
+   }
+
+   public boolean haveAPS() {
+      return this.aps != null;
    }
 
    public class RotPart extends MCH_AircraftInfo.DrawnPart {
@@ -1564,6 +1701,20 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       public int[] types = new int[0];
       public Vec3 pos = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
 
+
+   }
+
+   public class Chaff {
+
+      public Vec3 pos = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
+
+   }
+
+   public class Maintenance {
+
+   }
+
+   public class APS {
 
    }
 

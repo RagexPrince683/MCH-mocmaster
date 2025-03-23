@@ -10,6 +10,8 @@ import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public abstract class MCH_WeaponBase {
@@ -27,6 +29,7 @@ public abstract class MCH_WeaponBase {
    public float acceleration;
    public int explosionPower;
    public int explosionPowerInWater;
+   public String explosionType;
    public int nukeYield;
    public int interval;
    public int numMode;
@@ -39,8 +42,9 @@ public abstract class MCH_WeaponBase {
    public int tick;
    public int optionParameter1;
    public int optionParameter2;
-   private int currentMode;
+    private int currentMode;
    public boolean canPlaySound;
+   public List<MCH_EntityBaseBullet> shootBullets = new ArrayList<>();
 
 
    public MCH_WeaponBase(World w, Vec3 v, float yaw, float pitch, String nm, MCH_WeaponInfo wi) {
@@ -55,6 +59,7 @@ public abstract class MCH_WeaponBase {
       this.acceleration = 0.0F;
       this.explosionPower = 0;
       this.explosionPowerInWater = 0;
+      this.explosionType = wi.explosionType;
       this.nukeYield = wi.nukeYield;
       this.chemYield = wi.chemYield;
       this.interval = 1;
@@ -95,6 +100,13 @@ public abstract class MCH_WeaponBase {
 
    public abstract boolean shot(MCH_WeaponParam var1);
 
+   public boolean lock(MCH_WeaponParam prm) {
+      return false;
+   }
+
+   public void onUnlock(MCH_WeaponParam prm) {
+   }
+
    public void setLockChecker(MCH_IEntityLockChecker checker) {}
 
    public void setLockCountMax(int n) {}
@@ -131,7 +143,7 @@ public abstract class MCH_WeaponBase {
       return this.getInfo().sight;
    }
 
-   public MCH_GuidanceSystem getGuidanceSystem() {
+   public MCH_IGuidanceSystem getGuidanceSystem() {
       return null;
    }
 
@@ -216,7 +228,6 @@ public abstract class MCH_WeaponBase {
       if(e.worldObj.isRemote && this.getInfo() != null) {
          W_McClient.MOD_playSoundFX(this.getInfo().soundFileName, volume, pitch);
       }
-
    }
 
    public double getLandInDistance(MCH_WeaponParam prm) {
@@ -283,5 +294,4 @@ public abstract class MCH_WeaponBase {
          }
       }
    }
-
 }

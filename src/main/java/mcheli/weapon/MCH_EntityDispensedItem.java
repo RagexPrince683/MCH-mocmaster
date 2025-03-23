@@ -30,7 +30,7 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
    public void onUpdate() {
       super.onUpdate();
       if(this.getInfo() != null && !this.getInfo().disableSmoke) {
-         this.spawnParticle(this.getInfo().trajectoryParticleName, 3, 7.0F * this.getInfo().smokeSize);
+         this.spawnExplosionParticle(this.getInfo().trajectoryParticleName, 3, 7.0F * this.getInfo().smokeSize);
       }
 
       if(!super.worldObj.isRemote && this.getInfo() != null) {

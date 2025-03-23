@@ -1,12 +1,13 @@
 package mcheli.weapon;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_PacketNotifyTVMissileEntity;
-import mcheli.weapon.MCH_EntityTvMissile;
-import mcheli.weapon.MCH_WeaponBase;
-import mcheli.weapon.MCH_WeaponInfo;
-import mcheli.weapon.MCH_WeaponParam;
+import mcheli.network.packets.PacketLaserGuidanceTargeting;
 import mcheli.wrapper.W_Entity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
@@ -17,8 +18,9 @@ public class MCH_WeaponTvMissile extends MCH_WeaponBase {
    protected MCH_EntityTvMissile lastShotTvMissile = null;
    protected Entity lastShotEntity = null;
    protected boolean isTVGuided = false;
+   public MCH_LaserGuidanceSystem guidanceSystem;
 
-   //todo : add guided cluster munition type/bomblet handling
+   //todo: add guided cluster munition type/bomblet handling
 
 
    public MCH_WeaponTvMissile(World w, Vec3 v, float yaw, float pitch, String nm, MCH_WeaponInfo wi) {
@@ -35,6 +37,25 @@ public class MCH_WeaponTvMissile extends MCH_WeaponBase {
       this.lastShotEntity = null;
       this.lastShotTvMissile = null;
       this.isTVGuided = false;
+
+      if (getInfo().laserGuidance) {
+         this.guidanceSystem = new MCH_LaserGuidanceSystem();
+         guidanceSystem.worldObj = w;
+         guidanceSystem.hasLaserGuidancePod = wi.hasLaserGuidancePod;
+         if (w.isRemote) {
+            initGuidanceSystemClient();
+         }
+      }
+   }
+
+   @SideOnly(Side.CLIENT)
+   public void initGuidanceSystemClient() {
+      guidanceSystem.user = Minecraft.getMinecraft().thePlayer;
+   }
+
+   @Override
+   public MCH_LaserGuidanceSystem getGuidanceSystem() {
+      return this.guidanceSystem;
    }
 
    public String getName() {
@@ -52,6 +73,7 @@ public class MCH_WeaponTvMissile extends MCH_WeaponBase {
 
    public void update(int countWait) {
       super.update(countWait);
+
       if(!super.worldObj.isRemote) {
          if(this.isTVGuided && super.tick <= 9) {
             if(super.tick % 3 == 0 && this.lastShotTvMissile != null && !this.lastShotTvMissile.isDead && this.lastShotEntity != null && !this.lastShotEntity.isDead) {
@@ -82,8 +104,16 @@ public class MCH_WeaponTvMissile extends MCH_WeaponBase {
    }
 
    protected boolean shotServer(MCH_WeaponParam prm) {
-      float yaw = prm.user.rotationYaw + super.fixRotationYaw;
-      float pitch = prm.user.rotationPitch + super.fixRotationPitch;
+
+      float yaw, pitch;
+      if(getInfo().enableOffAxis) {
+         yaw = prm.user.rotationYaw + super.fixRotationYaw;
+         pitch = prm.user.rotationPitch + super.fixRotationPitch;
+      } else {
+         yaw = prm.entity.rotationYaw + super.fixRotationYaw;
+         pitch = prm.entity.rotationPitch + super.fixRotationPitch;
+      }
+
       double tX = (double)(-MathHelper.sin(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
       double tZ = (double)(MathHelper.cos(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
       double tY = (double)(-MathHelper.sin(pitch / 180.0F * 3.1415927F));
@@ -101,5 +131,31 @@ public class MCH_WeaponTvMissile extends MCH_WeaponBase {
       super.worldObj.spawnEntityInWorld(e);
       this.playSound(prm.entity);
       return true;
+   }
+
+   @Override
+   public boolean lock(MCH_WeaponParam prm) {
+      if(super.worldObj.isRemote) {
+         if(guidanceSystem != null) {
+            this.guidanceSystem.targeting = true;
+            if(super.tick % 3 == 0) {
+               MCH_MOD.getPacketHandler().sendToServer(new PacketLaserGuidanceTargeting(true));
+            }
+            this.guidanceSystem.update();
+         }
+      }
+      return false;
+   }
+
+   @Override
+   public void onUnlock(MCH_WeaponParam prm) {
+      if(super.worldObj.isRemote) {
+         if(guidanceSystem != null) {
+            this.guidanceSystem.targeting = false;
+            if(super.tick % 3 == 0) {
+               MCH_MOD.getPacketHandler().sendToServer(new PacketLaserGuidanceTargeting(false));
+            }
+         }
+      }
    }
 }

@@ -480,6 +480,14 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
    }
 
    protected void onUpdate_Control() {
+
+      if(getHP() * 100 / getMaxHP() < getAcInfo().engineShutdownThreshold) {
+         setCurrentThrottle(0);
+         throttleUp = false;
+         throttleBack = 0;
+         return;
+      }
+
       if(this.isHoveringMode() && !this.canUseFuel(true)) {
          this.switchHoveringMode(false);
       }

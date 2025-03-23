@@ -29,12 +29,12 @@ public class MCH_CommonPacketHandler {
             if(!pkt.prm.inWater) {
                MCH_Config var10000 = MCH_MOD.config;
                if(!MCH_Config.DefaultExplosionParticle.prmBool) {
-                  MCH_Explosion.effectExplosion(player.worldObj, (Entity)exploder, pkt.prm.posX, pkt.prm.posY, pkt.prm.posZ, pkt.prm.size, true);
+                  MCH_Explosion.effectExplosion(player.worldObj, (Entity)exploder, pkt.prm.posX, pkt.prm.posY, pkt.prm.posZ, pkt.prm.size, pkt.prm.isSmoking);
                } else {
-                  MCH_Explosion.DEF_effectExplosion(player.worldObj, (Entity)exploder, pkt.prm.posX, pkt.prm.posY, pkt.prm.posZ, pkt.prm.size, true);
+                  MCH_Explosion.DEF_effectExplosion(player.worldObj, (Entity)exploder, pkt.prm.posX, pkt.prm.posY, pkt.prm.posZ, pkt.prm.size, pkt.prm.isSmoking);
                }
             } else {
-               MCH_Explosion.effectExplosionInWater(player.worldObj, (Entity)exploder, pkt.prm.posX, pkt.prm.posY, pkt.prm.posZ, pkt.prm.size, true);
+               MCH_Explosion.effectExplosionInWater(player.worldObj, (Entity)exploder, pkt.prm.posX, pkt.prm.posY, pkt.prm.posZ, pkt.prm.size, pkt.prm.isSmoking);
             }
          }
 

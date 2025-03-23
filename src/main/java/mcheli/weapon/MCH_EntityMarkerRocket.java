@@ -4,10 +4,6 @@ import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
-import mcheli.weapon.MCH_BulletModel;
-import mcheli.weapon.MCH_DefaultBulletModels;
-import mcheli.weapon.MCH_EntityBaseBullet;
-import mcheli.weapon.MCH_EntityBomb;
 import mcheli.wrapper.W_MovingObjectPosition;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.init.Blocks;
@@ -62,7 +58,7 @@ public class MCH_EntityMarkerRocket extends MCH_EntityBaseBullet {
          if(this.getInfo() != null && !this.getInfo().disableSmoke && status != 0) {
             if(status == 1) {
                super.onUpdate();
-               this.spawnParticle(this.getInfo().trajectoryParticleName, 3, 5.0F * this.getInfo().smokeSize * 0.5F);
+               this.spawnExplosionParticle(this.getInfo().trajectoryParticleName, 3, 5.0F * this.getInfo().smokeSize * 0.5F);
             } else {
                float num = super.rand.nextFloat() * 0.3F;
                this.spawnParticle("explode", 5, (float)(10 + super.rand.nextInt(4)), super.rand.nextFloat() * 0.2F + 0.8F, num, num, (super.rand.nextFloat() - 0.5F) * 0.7F, 0.3F + super.rand.nextFloat() * 0.3F, (super.rand.nextFloat() - 0.5F) * 0.7F);

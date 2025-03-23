@@ -72,7 +72,7 @@ public class MCH_TankInfo extends MCH_AircraftInfo {
       } else if(item.equalsIgnoreCase("WeightedCenterZ")) {
          this.weightedCenterZ = this.toFloat(data, -1000.0F, 1000.0F);
       }
-
+      MCH_AircraftInfo.allAircraftInfo.put(name, this);
    }
 
    public String getDirectoryName() {

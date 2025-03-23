@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.Set;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
+import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.weapon.MCH_WeaponInfo;
 import mcheli.wrapper.W_Item;
 import net.minecraft.item.Item;

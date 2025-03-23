@@ -49,6 +49,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm KeyEjectHeli;
    public static MCH_ConfigPrm KeyAttack;
    public static MCH_ConfigPrm KeyUseWeapon;
+   public static MCH_ConfigPrm KeyCurrentWeaponLock;
    public static MCH_ConfigPrm KeySwitchWeapon1;
    public static MCH_ConfigPrm KeySwitchWeapon2;
    public static MCH_ConfigPrm KeySwWeaponMode;
@@ -66,6 +67,9 @@ public class MCH_Config {
    public static MCH_ConfigPrm KeyDownFromRack;
    public static MCH_ConfigPrm KeyScoreboard;
    public static MCH_ConfigPrm KeyMultiplayManager;
+   public static MCH_ConfigPrm KeyChaff;
+   public static MCH_ConfigPrm KeyMaintenance;
+   public static MCH_ConfigPrm KeyAPS;
    public static List DamageVs;
    public static List IgnoreBulletHitList;
    public static MCH_ConfigPrm IgnoreBulletHitItem;
@@ -112,6 +116,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm AutoThrottleDownHeli;
    public static MCH_ConfigPrm AutoThrottleDownPlane;
    public static MCH_ConfigPrm AutoThrottleDownShip;
+
    public static MCH_ConfigPrm AutoThrottleDownTank;
    public static MCH_ConfigPrm DisableItemRender;
    public static MCH_ConfigPrm RenderDistanceWeight;
@@ -137,7 +142,6 @@ public class MCH_Config {
    public static MCH_ConfigPrm MouseSensitivity;
    public static MCH_ConfigPrm MouseControlStickModeHeli;
    public static MCH_ConfigPrm MouseControlStickModePlane;
-   //public static MCH_ConfigPrm MouseControlStickModeShip;
    public static MCH_ConfigPrm MouseControlFlightSimMode;
    public static MCH_ConfigPrm SwitchWeaponWithMouseWheel;
    public static MCH_ConfigPrm AllPlaneSpeed;
@@ -160,6 +164,31 @@ public class MCH_Config {
    public static MCH_ConfigPrm RangeFinderConsume;
    public static MCH_ConfigPrm EnablePutRackInFlying;
    public static MCH_ConfigPrm EnableDebugBoundingBox;
+
+   //TODO mch1.0.5 -> mchr
+   public static MCH_ConfigPrm DespawnCount;
+
+   public static MCH_ConfigPrm HitBoxDelayTick;
+
+   public static MCH_ConfigPrm EnableRotationLimit;
+
+   public static MCH_ConfigPrm PitchLimitMax;
+
+   public static MCH_ConfigPrm PitchLimitMin;
+
+   public static MCH_ConfigPrm RollLimit;
+
+   public static MCH_ConfigPrm RangeOfGunner_VsMonster_Vertical;
+
+   public static MCH_ConfigPrm RangeOfGunner_VsMonster_Horizontal;
+
+   public static MCH_ConfigPrm RangeOfGunner_VsPlayer_Vertical;
+
+   public static MCH_ConfigPrm RangeOfGunner_VsPlayer_Horizontal;
+
+   public static MCH_ConfigPrm FixVehicleAtPlacedPoint;
+
+   public static MCH_ConfigPrm KillPassengersWhenDestroyed;
    public static MCH_ConfigPrm ItemID_Fuel;
    public static MCH_ConfigPrm ItemID_GLTD;
    public static MCH_ConfigPrm ItemID_Chain;
@@ -219,7 +248,8 @@ public class MCH_Config {
       KeySwitchHovering = new MCH_ConfigPrm("KeySwitchHovering", 57);
       KeyEjectHeli = new MCH_ConfigPrm("KeyEjectHeli", 54);
       KeyAttack = new MCH_ConfigPrm("KeyAttack", -100);
-      KeyUseWeapon = new MCH_ConfigPrm("KeyUseWeapon", -99);
+      KeyUseWeapon = new MCH_ConfigPrm("KeyUseWeapon", -100);
+      KeyCurrentWeaponLock = new MCH_ConfigPrm("KeyCurrentWeaponLock", -99);
       KeySwitchWeapon1 = new MCH_ConfigPrm("KeySwitchWeapon1", -98);
       KeySwitchWeapon2 = new MCH_ConfigPrm("KeySwitchWeapon2", 34);
       KeySwWeaponMode = new MCH_ConfigPrm("KeySwitchWeaponMode", 45);
@@ -227,6 +257,9 @@ public class MCH_Config {
       KeyCameraMode = new MCH_ConfigPrm("KeyCameraMode", 46);
       KeyUnmount = new MCH_ConfigPrm("KeyUnmountMob", 21);
       KeyFlare = new MCH_ConfigPrm("KeyFlare", 47);
+      KeyChaff = new MCH_ConfigPrm("KeyChaff", 47);
+      KeyMaintenance = new MCH_ConfigPrm("KeyMaintenance", 47);
+      KeyAPS = new MCH_ConfigPrm("KeyAPS", 47);
       KeyExtra = new MCH_ConfigPrm("KeyExtra", 33);
       KeyCameraDistUp = new MCH_ConfigPrm("KeyCameraDistanceUp", 201);
       KeyCameraDistDown = new MCH_ConfigPrm("KeyCameraDistanceDown", 209);
@@ -237,7 +270,7 @@ public class MCH_Config {
       KeyDownFromRack = new MCH_ConfigPrm("KeyDownFromRack", 22);
       KeyScoreboard = new MCH_ConfigPrm("KeyScoreboard", 38);
       KeyMultiplayManager = new MCH_ConfigPrm("KeyMultiplayManager", 50);
-      KeyConfig = new MCH_ConfigPrm[]{KeyUp, KeyDown, KeyRight, KeyLeft, KeySwitchMode, KeySwitchHovering, KeySwitchWeapon1, KeySwitchWeapon2, KeySwWeaponMode, KeyZoom, KeyCameraMode, KeyUnmount, KeyFlare, KeyExtra, KeyCameraDistUp, KeyCameraDistDown, KeyFreeLook, KeyGUI, KeyGearUpDown, KeyPutToRack, KeyDownFromRack, KeyScoreboard, KeyMultiplayManager};
+      KeyConfig = new MCH_ConfigPrm[]{KeyUp, KeyDown, KeyRight, KeyLeft, KeySwitchMode, KeySwitchHovering, KeySwitchWeapon1, KeySwitchWeapon2, KeySwWeaponMode, KeyZoom, KeyCameraMode, KeyUnmount, KeyFlare, KeyExtra, KeyCameraDistUp, KeyCameraDistDown, KeyFreeLook, KeyGUI, KeyGearUpDown, KeyPutToRack, KeyDownFromRack, KeyScoreboard, KeyMultiplayManager, KeyChaff, KeyMaintenance, KeyAPS};
       DamageVs = new ArrayList();
       CommandPermission = new ArrayList();
       CommandPermissionList = new ArrayList();
@@ -302,7 +335,6 @@ public class MCH_Config {
       MouseSensitivity = new MCH_ConfigPrm("MouseSensitivity", 10.0D);
       MouseControlStickModeHeli = new MCH_ConfigPrm("MouseControlStickModeHeli", false);
       MouseControlStickModePlane = new MCH_ConfigPrm("MouseControlStickModePlane", false);
-      //MouseControlStickModeShip = new MCH_ConfigPrm("MouseControlStickModeShip", false);
       MouseControlFlightSimMode = new MCH_ConfigPrm("MouseControlFlightSimMode", false);
       MouseControlFlightSimMode.desc = ";MouseControlFlightSimMode = true ( Yaw:key, Roll=mouse )";
       SwitchWeaponWithMouseWheel = new MCH_ConfigPrm("SwitchWeaponWithMouseWheel", true);
@@ -330,6 +362,18 @@ public class MCH_Config {
       RangeFinderConsume = new MCH_ConfigPrm("RangeFinderConsume", true);
       EnablePutRackInFlying = new MCH_ConfigPrm("EnablePutRackInFlying", true);
       EnableDebugBoundingBox = new MCH_ConfigPrm("EnableDebugBoundingBox", true);
+      DespawnCount = new MCH_ConfigPrm("DespawnCount", 25);
+      HitBoxDelayTick = new MCH_ConfigPrm("HitBoxDelayTick", 0);
+      EnableRotationLimit = new MCH_ConfigPrm("EnableRotationLimit", false);
+      PitchLimitMax = new MCH_ConfigPrm("PitchLimitMax", 10);
+      PitchLimitMin = new MCH_ConfigPrm("PitchLimitMin", -10);
+      RollLimit = new MCH_ConfigPrm("RollLimit", 35);
+      RangeOfGunner_VsMonster_Horizontal = new MCH_ConfigPrm("RangeOfGunner_VsMonster_Horizontal", 80);
+      RangeOfGunner_VsMonster_Vertical = new MCH_ConfigPrm("RangeOfGunner_VsMonster_Vertical", 160);
+      RangeOfGunner_VsPlayer_Horizontal = new MCH_ConfigPrm("RangeOfGunner_VsPlayer_Horizontal", 200);
+      RangeOfGunner_VsPlayer_Vertical = new MCH_ConfigPrm("RangeOfGunner_VsPlayer_Vertical", 300);
+      FixVehicleAtPlacedPoint = new MCH_ConfigPrm("FixVehicleAtPlacedPoint", true);
+      KillPassengersWhenDestroyed = new MCH_ConfigPrm("KillPassengersWhenDestroyed", false);
       hitMarkColorAlpha = 1.0F;
       hitMarkColorRGB = 16711680;
       ItemRecipe_Fuel = new MCH_ConfigPrm("ItemRecipe_Fuel", "\"ICI\", \"III\", I, iron_ingot, C, coal");
@@ -598,7 +642,15 @@ public class MCH_Config {
             }
          }
       }
-
+      if (DespawnCount.prmInt <= 0)
+         DespawnCount.prmInt = 1;
+      if (HitBoxDelayTick.prmInt < 0)
+         HitBoxDelayTick.prmInt = 0;
+      if (HitBoxDelayTick.prmInt > 50)
+         HitBoxDelayTick.prmInt = 50;
+      PitchLimitMax.prmInt = (PitchLimitMax.prmInt > 80) ? 80 : (Math.max(PitchLimitMax.prmInt, 0));
+      PitchLimitMin.prmInt = (PitchLimitMin.prmInt < -80) ? -80 : (Math.min(PitchLimitMin.prmInt, 0));
+      RollLimit.prmInt = (RollLimit.prmInt > 80) ? 80 : (Math.max(RollLimit.prmInt, 0));
       if(var10) {
          DamageVs.add(new MCH_ConfigPrm("DamageVsEntity", "3.0, flansmod"));
          DamageVs.add(new MCH_ConfigPrm("DamageMCHeliAircraftByExternal", "0.5, flansmod"));

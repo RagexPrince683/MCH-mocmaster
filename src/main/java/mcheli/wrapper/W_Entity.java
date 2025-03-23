@@ -56,9 +56,7 @@ public abstract class W_Entity
     }
 
     public static boolean isEqual(Entity e1, Entity e2) {
-        int i2;
-        int i1 = W_Entity.getEntityId(e1);
-        return i1 == (i2 = W_Entity.getEntityId(e2));
+        return W_Entity.getEntityId(e1) == W_Entity.getEntityId(e2);
     }
 
     public EntityItem dropItemWithOffset(Item item, int par2, float par3) {

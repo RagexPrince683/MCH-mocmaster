@@ -338,9 +338,9 @@ public class MCH_Explosion extends Explosion {
          return null;
       } else {
          MCH_Explosion exp = new MCH_Explosion(w, entityExploded, player, x, y, z, size);
-         exp.isSmoking = w.getGameRules().getGameRuleBooleanValue("mobGriefing");
+         exp.isSmoking = isSmoking;
          exp.isFlaming = isFlaming;
-         exp.isDestroyBlock = isDestroyBlock;
+         exp.isDestroyBlock = w.getGameRules().getGameRuleBooleanValue("mobGriefing") &&  isDestroyBlock;
          exp.explosionSizeBlock = sizeBlock;
          exp.countSetFireEntity = countSetFireEntity;
          exp.isPlaySound = playSound;
@@ -356,6 +356,7 @@ public class MCH_Explosion extends Explosion {
          param.posZ = z;
          param.size = size;
          param.inWater = false;
+         param.isSmoking = exp.isSmoking;
          MCH_PacketEffectExplosion.send(param);
          return exp.result;
       }
@@ -366,9 +367,9 @@ public class MCH_Explosion extends Explosion {
          return null;
       } else {
          MCH_Explosion exp = new MCH_Explosion(w, entityExploded, player, x, y, z, size);
-         exp.isSmoking = w.getGameRules().getGameRuleBooleanValue("mobGriefing");
+         exp.isSmoking = isSmoking;
          exp.isFlaming = isFlaming;
-         exp.isDestroyBlock = isDestroyBlock;
+         exp.isDestroyBlock = w.getGameRules().getGameRuleBooleanValue("mobGriefing") && isDestroyBlock;
          exp.explosionSizeBlock = sizeBlock;
          exp.countSetFireEntity = countSetFireEntity;
          exp.isPlaySound = playSound;
@@ -384,6 +385,7 @@ public class MCH_Explosion extends Explosion {
          param.posZ = z;
          param.size = size;
          param.inWater = true;
+         param.isSmoking = exp.isSmoking;
          MCH_PacketEffectExplosion.send(param);
          return exp.result;
       }

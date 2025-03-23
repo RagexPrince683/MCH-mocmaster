@@ -2,6 +2,7 @@ package mcheli.flare;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mcheli.aircraft.MCH_RenderAircraft;
 import mcheli.flare.MCH_ModelFlare;
 import mcheli.wrapper.W_Render;
 import net.minecraft.entity.Entity;
@@ -28,6 +29,7 @@ public class MCH_RenderFlare extends W_Render {
       this.bindTexture("textures/flare.png");
       this.model.renderModel(0.0D, 0.0D, 0.0625F);
       GL11.glPopMatrix();
+      MCH_RenderAircraft.renderEntityMarker(entity);
    }
 
    protected ResourceLocation getEntityTexture(Entity entity) {

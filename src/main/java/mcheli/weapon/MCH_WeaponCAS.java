@@ -132,13 +132,13 @@ public class MCH_WeaponCAS extends MCH_WeaponBase {
       double tY = (double)(-MathHelper.sin(pitch / 180.0F * 3.1415927F));
       double dist = (double)MathHelper.sqrt_double(tX * tX + tY * tY + tZ * tZ);
       if(super.worldObj.isRemote) {
-         tX = tX * 80.0D / dist;
-         tY = tY * 80.0D / dist;
-         tZ = tZ * 80.0D / dist;
+         tX = tX * 300.0D / dist;
+         tY = tY * 300.0D / dist;
+         tZ = tZ * 300.0D / dist;
       } else {
-         tX = tX * 150.0D / dist;
-         tY = tY * 150.0D / dist;
-         tZ = tZ * 150.0D / dist;
+         tX = tX * 300.0D / dist;
+         tY = tY * 300.0D / dist;
+         tZ = tZ * 300.0D / dist;
       }
 
       Vec3 src = W_WorldFunc.getWorldVec3(super.worldObj, prm.entity.posX, prm.entity.posY + 2.0D, prm.entity.posZ);
@@ -177,13 +177,13 @@ public class MCH_WeaponCAS extends MCH_WeaponBase {
       double tY = (double)(-MathHelper.sin(pitch / 180.0F * 3.1415927F));
       double dist = (double)MathHelper.sqrt_double(tX * tX + tY * tY + tZ * tZ);
       if(super.worldObj.isRemote) {
-         tX = tX * 80.0D / dist;
-         tY = tY * 80.0D / dist;
-         tZ = tZ * 80.0D / dist;
+         tX = tX * 300.0D / dist;
+         tY = tY * 300.0D / dist;
+         tZ = tZ * 300.0D / dist;
       } else {
-         tX = tX * 120.0D / dist;
-         tY = tY * 120.0D / dist;
-         tZ = tZ * 120.0D / dist;
+         tX = tX * 300.0D / dist;
+         tY = tY * 300.0D / dist;
+         tZ = tZ * 300.0D / dist;
       }
 
       Vec3 src = W_WorldFunc.getWorldVec3(super.worldObj, px, py, pz);

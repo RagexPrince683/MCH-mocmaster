@@ -2,6 +2,8 @@ package mcheli.plane;
 
 import com.google.common.io.ByteArrayDataInput;
 import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.plane.MCP_EntityPlane;
+import mcheli.plane.MCP_PlanePacketPlayerControl;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.weapon.MCH_WeaponParam;
 import net.minecraft.entity.player.EntityPlayer;
@@ -92,6 +94,18 @@ public class MCP_PlanePacketHandler {
                   plane.useFlare(pc.useFlareType);
                }
 
+               if(pc.useChaff) {
+                  plane.useChaff();
+               }
+
+               if(pc.useMaintenance) {
+                  plane.useMaintenance();
+               }
+
+               if(pc.useAPS) {
+                  plane.useAPS(player);
+               }
+
                if(pc.openGui) {
                   plane.openGui(player);
                }
@@ -129,7 +143,6 @@ public class MCP_PlanePacketHandler {
                }
 
                if(pc.isUnmount == 3) {
-                  //todo for drones fix this to UAV station pos.
                   plane.unmountAircraft();
                }
             }

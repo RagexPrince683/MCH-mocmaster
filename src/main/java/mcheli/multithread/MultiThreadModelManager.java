@@ -4,7 +4,6 @@ import mcheli.MCH_ClientProxy;
 import mcheli.MCH_ModelManager;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.plane.MCP_PlaneInfoManager;
-import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_TankInfoManager;
 import mcheli.vehicle.MCH_VehicleInfoManager;
 import mcheli.weapon.MCH_DefaultBulletModels;
@@ -12,6 +11,7 @@ import mcheli.weapon.MCH_DefaultBulletModels;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import mcheli.ship.MCH_ShipInfoManager;
 
 
 

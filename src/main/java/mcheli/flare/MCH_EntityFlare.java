@@ -6,15 +6,17 @@ import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
+import mcheli.weapon.MCH_IEntityLockChecker;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_WorldFunc;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnData {
+public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnData , MCH_IEntityLockChecker {
 
    public double gravity;
    public double airResistance;
@@ -24,7 +26,8 @@ public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnD
 
    public MCH_EntityFlare(World par1World) {
       super(par1World);
-      this.gravity = -0.013D;
+      //this.gravity = -0.013D;
+      this.gravity = -0.005D;
       this.airResistance = 0.992D;
       this.setSize(1.0F, 1.0F);
       super.prevRotationYaw = super.rotationYaw;
@@ -201,5 +204,10 @@ public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnD
    @SideOnly(Side.CLIENT)
    public float getShadowSize() {
       return 0.0F;
+   }
+
+   @Override
+   public boolean canLockEntity(Entity var1) {
+      return false;
    }
 }

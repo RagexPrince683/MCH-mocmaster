@@ -36,7 +36,6 @@ public class MCH_ConfigGui extends W_GuiContainer {
    private MCH_GuiOnOffButton buttonMouseInv;
    private MCH_GuiOnOffButton buttonStickModeHeli;
    private MCH_GuiOnOffButton buttonStickModePlane;
-   //private MCH_GuiOnOffButton buttonStickModeShip;
    private MCH_GuiOnOffButton buttonHideKeyBind;
    private MCH_GuiOnOffButton buttonShowHUDTP;
    private MCH_GuiOnOffButton buttonSmoothShading;
@@ -111,12 +110,9 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.buttonTestMode = new MCH_GuiOnOffButton(0, x1, y + 175, 150, 20, "Test Mode : ");
       this.buttonStickModeHeli = new MCH_GuiOnOffButton(0, x2, y + 25, 150, 20, "Stick Mode Heli : ");
       this.buttonStickModePlane = new MCH_GuiOnOffButton(0, x2, y + 50, 150, 20, "Stick Mode Plane : ");
-      //this.buttonStickModeShip = new MCH_GuiOnOffButton(0, x2, y + 80, 150, 20, "Stick Mode Ship : ");
-
       this.buttonThrottleHeli = new MCH_GuiOnOffButton(0, x2, y + 75, 150, 20, "Throttle Down Heli : ");
       this.buttonThrottlePlane = new MCH_GuiOnOffButton(0, x2, y + 100, 150, 20, "Throttle Down Plane : ");
       this.buttonThrottleShip = new MCH_GuiOnOffButton(0, x2, y + 200, 150, 20, "Throttle Down Ship : ");
-
       this.buttonThrottleTank = new MCH_GuiOnOffButton(0, x2, y + 125, 150, 20, "Throttle Down Tank : ");
       this.listControlButtons.add(this.buttonMouseInv);
       this.listControlButtons.add(this.buttonStickModeHeli);
@@ -178,7 +174,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.listKeyBindingButtons.add(new W_GuiButton(54, x1 + 90, y + 175, 60, 20, "Reset All"));
       boolean var13 = true;
       boolean var14 = true;
-      MCH_GuiListItemKeyBind[] var10000 = new MCH_GuiListItemKeyBind[23];
+      MCH_GuiListItemKeyBind[] var10000 = new MCH_GuiListItemKeyBind[26];
       MCH_GuiListItemKeyBind var10003 = new MCH_GuiListItemKeyBind(200, 300, x1, "Up", MCH_Config.KeyUp);
       MCH_Config var10009 = MCH_MOD.config;
       var10000[0] = var10003;
@@ -250,6 +246,15 @@ public class MCH_ConfigGui extends W_GuiContainer {
       var10003 = new MCH_GuiListItemKeyBind(223, 323, x1, "Eject Seat Heli", MCH_Config.KeyEjectHeli);
       var10009 = MCH_MOD.config;
       var10000[22] = var10003;
+      var10003 = new MCH_GuiListItemKeyBind(224, 324, x1, "Chaff", MCH_Config.KeyChaff);
+      var10009 = MCH_MOD.config;
+      var10000[23] = var10003;
+      var10003 = new MCH_GuiListItemKeyBind(225, 325, x1, "Maintenance", MCH_Config.KeyMaintenance);
+      var10009 = MCH_MOD.config;
+      var10000[24] = var10003;
+      var10003 = new MCH_GuiListItemKeyBind(226, 326, x1, "APS", MCH_Config.KeyAPS);
+      var10009 = MCH_MOD.config;
+      var10000[25] = var10003;
       MCH_GuiListItemKeyBind[] listKeyBindItems = var10000;
       MCH_GuiListItemKeyBind[] i$ = listKeyBindItems;
       int b = listKeyBindItems.length;
@@ -303,9 +308,6 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.buttonStickModeHeli.setOnOff(config.MouseControlStickModeHeli.prmBool);
       this.buttonStickModePlane.setOnOff(config.MouseControlStickModePlane.prmBool);
 
-      //this.buttonStickModeShip.setOnOff(config.MouseControlStickModeShip.prmBool);
-      //do this for throttle my bad
-
       this.sliderSensitivity.setSliderValue((float) config.MouseSensitivity.prmDouble);
 
       this.buttonShowHUDTP.setOnOff(config.DisplayHUDThirdPerson.prmBool);
@@ -329,6 +331,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.buttonThrottleHeli.setOnOff(config.AutoThrottleDownHeli.prmBool);
       this.buttonThrottlePlane.setOnOff(config.AutoThrottleDownPlane.prmBool);
       this.buttonThrottleShip.setOnOff(config.AutoThrottleDownShip.prmBool);
+
       this.buttonThrottleTank.setOnOff(config.AutoThrottleDownTank.prmBool);
 
       this.buttonTestMode.setOnOff(config.TestMode.prmBool);

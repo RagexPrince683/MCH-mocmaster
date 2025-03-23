@@ -29,6 +29,7 @@ import mcheli.chain.MCH_ItemChain;
 import mcheli.command.MCH_Command;
 import mcheli.container.MCH_EntityContainer;
 import mcheli.container.MCH_ItemContainer;
+import mcheli.flare.MCH_EntityChaff;
 import mcheli.flare.MCH_EntityFlare;
 import mcheli.gltd.MCH_EntityGLTD;
 import mcheli.gltd.MCH_ItemGLTD;
@@ -39,18 +40,16 @@ import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.helicopter.MCH_ItemHeli;
 import mcheli.item.MCH_Item;
 import mcheli.item.MCH_ItemInfo;
+import mcheli.item.MCH_ItemInfoManager;
 import mcheli.lweapon.MCH_ItemLightWeaponBase;
 import mcheli.lweapon.MCH_ItemLightWeaponBullet;
+import mcheli.network.PacketHandler;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.parachute.MCH_ItemParachute;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_ItemPlane;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
-import mcheli.ship.MCH_EntityShip;
-import mcheli.ship.MCH_ItemShip;
-import mcheli.ship.MCH_ShipInfo;
-import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.tank.MCH_ItemTank;
 import mcheli.tank.MCH_TankInfo;
@@ -67,18 +66,7 @@ import mcheli.vehicle.MCH_EntityVehicle;
 import mcheli.vehicle.MCH_ItemVehicle;
 import mcheli.vehicle.MCH_VehicleInfo;
 import mcheli.vehicle.MCH_VehicleInfoManager;
-import mcheli.weapon.MCH_EntityA10;
-import mcheli.weapon.MCH_EntityAAMissile;
-import mcheli.weapon.MCH_EntityASMissile;
-import mcheli.weapon.MCH_EntityATMissile;
-import mcheli.weapon.MCH_EntityBomb;
-import mcheli.weapon.MCH_EntityBullet;
-import mcheli.weapon.MCH_EntityDispensedItem;
-import mcheli.weapon.MCH_EntityMarkerRocket;
-import mcheli.weapon.MCH_EntityRocket;
-import mcheli.weapon.MCH_EntityTorpedo;
-import mcheli.weapon.MCH_EntityTvMissile;
-import mcheli.weapon.MCH_WeaponInfoManager;
+import mcheli.weapon.*;
 import mcheli.wrapper.NetworkMod;
 import mcheli.wrapper.W_Item;
 import mcheli.wrapper.W_ItemList;
@@ -90,13 +78,17 @@ import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
-import mcheli.item.MCH_ItemInfoManager;
+
+import mcheli.ship.MCH_EntityShip;
+import mcheli.ship.MCH_ItemShip;
+import mcheli.ship.MCH_ShipInfo;
+import mcheli.ship.MCH_ShipInfoManager;
 
 import java.util.List;
 
 @Mod(
    modid = "mcheli",
-   name = "Mcheli Overdrive",
+   name = "Mcheli Reforged Overdrive BETA",
    dependencies = "required-after:Forge@[10.13.2.1230,)"
 )
 @NetworkMod(
@@ -147,7 +139,12 @@ public class MCH_MOD {
    public static MCH_DraftingTableBlock blockDraftingTable;
    public static MCH_DraftingTableBlock blockDraftingTableLit;
    public static Item sampleHelmet;
+   public static final PacketHandler newPacketHandler = new PacketHandler();
+   public static final MCH_EntityInfoManager entityInfoManager = new MCH_EntityInfoManager();
 
+   public static PacketHandler getPacketHandler() {
+      return newPacketHandler;
+   }
 
    @EventHandler
    public void PreInit(FMLPreInitializationEvent evt) {
@@ -157,13 +154,17 @@ public class MCH_MOD {
      //    ZipEntry entry = zis.getNextEntry();
      // }
       //sorry but we're gonna need a loader mod to unzip this crap
+
       VER = Loader.instance().activeModContainer().getVersion();
       MCH_Lib.init();
       MCH_Lib.Log("MC Ver:1.7.10 MOD Ver:" + VER + "", new Object[0]);
       MCH_Lib.Log("Start load...", new Object[0]);
       sourcePath = Loader.instance().activeModContainer().getSource().getPath();
+      ///sourcePath = "D:\\软件\\GitHub\\MCHeli-Reforged\\src\\main\\resources";
+              //new File(evt.getModConfigurationDirectory().getParentFile(), "/mods").getPath();
       MCH_Lib.Log("SourcePath: " + sourcePath, new Object[0]);
       MCH_Lib.Log("CurrentDirectory:" + (new File(".")).getAbsolutePath(), new Object[0]);
+
       proxy.init();
       creativeTabs = new MCH_CreativeTabs("MCHeliO Item");
       creativeTabsItem = new MCH_CreativeTabs("MCHeliO Recipe Items");
@@ -181,8 +182,8 @@ public class MCH_MOD {
       MCH_ShipInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "ships");
       MCH_TankInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "tanks");
       MCH_VehicleInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "vehicles");
-      MCH_ThrowableInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/throwable");
       MCH_ItemInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/item");
+      MCH_ThrowableInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/throwable");
       MCH_SoundsJson.update(sourcePath + "/assets/" + "mcheli" + "/");
       MCH_Lib.Log("Register item", new Object[0]);
       this.registerItemRangeFinder();
@@ -233,14 +234,10 @@ public class MCH_MOD {
 
 
       try {
-         ForgeChunkManager.setForcedChunkLoadingCallback(this, new ForgeChunkManager.LoadingCallback() {
-
-            @Override
-            public void ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world) {
-               for (ForgeChunkManager.Ticket ticket : tickets) {
-                  if (ticket.getEntity() instanceof MCH_EntityBullet) {
-                     ((MCH_IChunkLoader) ticket.getEntity()).init(ticket);
-                  }
+         ForgeChunkManager.setForcedChunkLoadingCallback(this, (tickets, world) -> {
+            for (ForgeChunkManager.Ticket ticket : tickets) {
+               if (ticket.getEntity() instanceof MCH_EntityBullet) {
+                  ((MCH_IChunkLoader) ticket.getEntity()).init(ticket);
                }
             }
          });
@@ -253,17 +250,18 @@ public class MCH_MOD {
 
 
 
-      @EventHandler
+   @EventHandler
    public void init(FMLInitializationEvent evt) {
+      getPacketHandler().initialise();
       GameRegistry.registerTileEntity(MCH_DraftingTableTileEntity.class, "drafting_table");
       proxy.registerBlockRenderer();
-
    }
 
 
 
    @EventHandler
    public void postInit(FMLPostInitializationEvent evt) {
+      getPacketHandler().postInitialise();
       MCH_Config var10001 = config;
       creativeTabs.setFixedIconItem(MCH_Config.CreativeTabIcon.prmString);
       var10001 = config;
@@ -293,11 +291,10 @@ public class MCH_MOD {
 
 
       public void registerEntity() {
-      //thank you minecraft for having such a spergy ass rendering system that with enhanced mods like angelica+EntityRenderDistExtender+infiview mod this just fucking works. Thank you greg!
       EntityRegistry.registerModEntity(MCH_EntitySeat.class, "MCH.E.Seat", 100, this, 600, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityHeli.class, "MCH.E.Heli", 101, this, 600, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityGLTD.class, "MCH.E.GLTD", 102, this, 600, 10, true);
-      EntityRegistry.registerModEntity(MCP_EntityPlane.class, "MCH.E.Plane", 103, this, 600, 10, true);
+      EntityRegistry.registerModEntity(MCP_EntityPlane.class, "MCH.E.Plane", 103, this, 600, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityShip.class, "MCH.E.Ship", 401, this, 600, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityChain.class, "MCH.E.Chain", 104, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityHitBox.class, "MCH.E.PSeat", 105, this, 600, 10, true);
@@ -308,19 +305,21 @@ public class MCH_MOD {
       EntityRegistry.registerModEntity(MCH_EntityHitBox.class, "MCH.E.HitBox", 110, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityHide.class, "MCH.E.Hide", 111, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityTank.class, "MCH.E.Tank", 112, this, 600, 10, true);
-      EntityRegistry.registerModEntity(MCH_EntityRocket.class, "MCH.E.Rocket", 200, this, 530, 5, true);
-      EntityRegistry.registerModEntity(MCH_EntityTvMissile.class, "MCH.E.TvMissle", 201, this, 530, 5, true);
+      EntityRegistry.registerModEntity(MCH_EntityRocket.class, "MCH.E.Rocket", 200, this, 530, 3, true);
+      EntityRegistry.registerModEntity(MCH_EntityTvMissile.class, "MCH.E.TvMissle", 201, this, 530, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityBullet.class, "MCH.E.Bullet", 202, this, 530, 5, true);
       EntityRegistry.registerModEntity(MCH_EntityA10.class, "MCH.E.A10", 203, this, 530, 5, true);
-      EntityRegistry.registerModEntity(MCH_EntityAAMissile.class, "MCH.E.AAM", 204, this, 530, 5, true);
+      EntityRegistry.registerModEntity(MCH_EntityAAMissile.class, "MCH.E.AAM", 204, this, 530, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityASMissile.class, "MCH.E.ASM", 205, this, 530, 5, true);
       EntityRegistry.registerModEntity(MCH_EntityTorpedo.class, "MCH.E.Torpedo", 206, this, 530, 5, true);
-      EntityRegistry.registerModEntity(MCH_EntityATMissile.class, "MCH.E.ATMissle", 207, this, 530, 5, true);
+      EntityRegistry.registerModEntity(MCH_EntityATMissile.class, "MCH.E.ATMissle", 207, this, 530, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityBomb.class, "MCH.E.Bomb", 208, this, 530, 5, true);
       EntityRegistry.registerModEntity(MCH_EntityMarkerRocket.class, "MCH.E.MkRocket", 209, this, 530, 5, true);
       EntityRegistry.registerModEntity(MCH_EntityDispensedItem.class, "MCH.E.DispItem", 210, this, 530, 5, true);
       EntityRegistry.registerModEntity(MCH_EntityFlare.class, "MCH.E.Flare", 300, this, 330, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityThrowable.class, "MCH.E.Throwable", 400, this, 330, 10, true);
+      EntityRegistry.registerModEntity(MCH_EntityLockBox.class, "MCH.E.LockBox", 401, this, 32, 20, false);
+      EntityRegistry.registerModEntity(MCH_EntityChaff.class, "MCH.E.Chaff", 402, this, 330, 10, true);
    }
 
    @EventHandler
@@ -505,15 +504,6 @@ public class MCH_MOD {
 
    public static void registerItem(W_Item item, String name, MCH_CreativeTabs ct) {
       item.setUnlocalizedName("mcheli:" + name);
-
-      //todo add a way to set the texture for the new items based on different folder directory.
-      // For instance the folder directory currently used is
-      // items, it needs to be item.
-      // surely there's some other way of doing this if the textures of other things are able to do this.
-
-      // nevermind no actually we still need to actually define the icon for the new custom item
-      // if we want to separate the folders.
-
       item.setTexture(name);
       if(ct != null) {
          item.setCreativeTab(ct);
@@ -523,33 +513,28 @@ public class MCH_MOD {
       GameRegistry.registerItem(item, name);
    }
 
+
    public static void registerItemThrowable() {
-      Iterator<String> i$ = MCH_ThrowableInfoManager.getKeySet().iterator();
+      Iterator i$ = MCH_ThrowableInfoManager.getKeySet().iterator();
 
-      while (i$.hasNext()) {
-         String name = i$.next();
+      while(i$.hasNext()) {
+         String name = (String)i$.next();
          MCH_ThrowableInfo info = MCH_ThrowableInfoManager.get(name);
-
          info.item = new MCH_ItemThrowable(info.itemID);
          info.item.setMaxStackSize(info.stackSize);
-
          registerItem(info.item, name, creativeTabs);
          MCH_ItemThrowable.registerDispenseBehavior(info.item);
-
          info.itemID = W_Item.getIdFromItem(info.item) - 256;
-
-         // Register the item's display name
          W_LanguageRegistry.addName(info.item, info.displayName);
-         Iterator<String> i$1 = info.displayNameLang.keySet().iterator();
+         Iterator i$1 = info.displayNameLang.keySet().iterator();
 
-         while (i$1.hasNext()) {
-            String lang = i$1.next();
-            W_LanguageRegistry.addNameForObject((Object) info.item, lang, (String) info.displayNameLang.get(lang));
+         while(i$1.hasNext()) {
+            String lang = (String)i$1.next();
+            W_LanguageRegistry.addNameForObject(info.item, lang, (String)info.displayNameLang.get(lang));
          }
-         //fucking idiot
       }
-   }
 
+   }
 
    public static void registerItemCustom() {
       System.out.println("[mcheli.MCH_MOD:registerItemCustom] Starting custom item registration...");
@@ -600,10 +585,6 @@ public class MCH_MOD {
       return name.toLowerCase().contains("grenade");  // Modify as needed
       //useless fucking method
    }
-
-
-
-
 
    public static void registerItemAircraft() {
       Iterator i$ = MCH_HeliInfoManager.map.keySet().iterator();
@@ -728,10 +709,6 @@ public class MCH_MOD {
             W_LanguageRegistry.addNameForObject(info3.item, lang, (String)info3.displayNameLang.get(lang));
          }
       }
-
-
-
-
 
    }
 

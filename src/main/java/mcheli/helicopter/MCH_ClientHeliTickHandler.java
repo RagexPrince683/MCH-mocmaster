@@ -15,6 +15,7 @@ import mcheli.wrapper.W_Network;
 import mcheli.wrapper.W_Reflection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class MCH_ClientHeliTickHandler extends MCH_AircraftClientTickHandler {
@@ -37,7 +38,7 @@ public class MCH_ClientHeliTickHandler extends MCH_AircraftClientTickHandler {
       this.KeyEjectSeat = new MCH_Key(MCH_Config.KeyEjectHeli.prmInt);
       this.KeySwitchHovering = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
       this.KeyZoom = new MCH_Key(MCH_Config.KeyZoom.prmInt);
-      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, this.KeySwitchHovering, super.KeyUseWeapon, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
+      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, this.KeySwitchHovering, super.KeyUseWeapon, super.KeyCurrentWeaponLock, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyChaff, super.KeyMaintenance, super.KeyAPS, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
    }
 
    protected void update(EntityPlayer player, MCH_EntityHeli heli, boolean isPilot) {
@@ -113,7 +114,10 @@ public class MCH_ClientHeliTickHandler extends MCH_AircraftClientTickHandler {
          super.isRiding = false;
       }
 
-      if((super.isBeforeRiding || !super.isRiding) && super.isBeforeRiding && !super.isRiding) {
+      if (!this.isBeforeRiding && this.isRiding) {
+         W_Reflection.setThirdPersonDistance(var8.thirdPersonDist);
+      } else if (this.isBeforeRiding && !this.isRiding) {
+         W_Reflection.restoreDefaultThirdPersonDistance();
          W_Reflection.setCameraRoll(0.0F);
          MCH_Lib.enableFirstPersonItemRender();
          MCH_Lib.setRenderViewEntity(var7);
@@ -198,7 +202,6 @@ public class MCH_ClientHeliTickHandler extends MCH_AircraftClientTickHandler {
       }
 
       if(this.KeyEjectSeat.isKeyDown() && heli.canEjectSeat(player)) {
-         //kill heli
          pc.ejectSeat = true;
          send = true;
       }

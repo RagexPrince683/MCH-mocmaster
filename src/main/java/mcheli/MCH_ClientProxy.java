@@ -4,16 +4,7 @@ import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.relauncher.Side;
 import java.util.Iterator;
-import mcheli.MCH_ClientCommonTickHandler;
-import mcheli.MCH_ClientEventHook;
-import mcheli.MCH_CommonProxy;
-import mcheli.MCH_Config;
-import mcheli.MCH_InvisibleItemRender;
-import mcheli.MCH_Lib;
-import mcheli.MCH_MOD;
-import mcheli.MCH_ModelManager;
-import mcheli.MCH_RenderNull;
-import mcheli.MCH_ViewEntityDummy;
+
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntityHide;
@@ -29,7 +20,9 @@ import mcheli.command.MCH_GuiTitle;
 import mcheli.container.MCH_EntityContainer;
 import mcheli.container.MCH_RenderContainer;
 import mcheli.debug.MCH_RenderTest;
+import mcheli.flare.MCH_EntityChaff;
 import mcheli.flare.MCH_EntityFlare;
+import mcheli.flare.MCH_RenderChaff;
 import mcheli.flare.MCH_RenderFlare;
 import mcheli.gltd.MCH_EntityGLTD;
 import mcheli.gltd.MCH_ItemGLTDRender;
@@ -48,10 +41,6 @@ import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.plane.MCP_RenderPlane;
-import mcheli.ship.MCH_EntityShip;
-import mcheli.ship.MCH_RenderShip;
-import mcheli.ship.MCH_ShipInfo;
-import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.tank.MCH_RenderTank;
 import mcheli.tank.MCH_TankInfo;
@@ -68,30 +57,7 @@ import mcheli.vehicle.MCH_EntityVehicle;
 import mcheli.vehicle.MCH_RenderVehicle;
 import mcheli.vehicle.MCH_VehicleInfo;
 import mcheli.vehicle.MCH_VehicleInfoManager;
-import mcheli.weapon.MCH_BulletModel;
-import mcheli.weapon.MCH_DefaultBulletModels;
-import mcheli.weapon.MCH_EntityA10;
-import mcheli.weapon.MCH_EntityAAMissile;
-import mcheli.weapon.MCH_EntityASMissile;
-import mcheli.weapon.MCH_EntityATMissile;
-import mcheli.weapon.MCH_EntityBomb;
-import mcheli.weapon.MCH_EntityBullet;
-import mcheli.weapon.MCH_EntityCartridge;
-import mcheli.weapon.MCH_EntityDispensedItem;
-import mcheli.weapon.MCH_EntityMarkerRocket;
-import mcheli.weapon.MCH_EntityRocket;
-import mcheli.weapon.MCH_EntityTorpedo;
-import mcheli.weapon.MCH_EntityTvMissile;
-import mcheli.weapon.MCH_RenderA10;
-import mcheli.weapon.MCH_RenderAAMissile;
-import mcheli.weapon.MCH_RenderASMissile;
-import mcheli.weapon.MCH_RenderBomb;
-import mcheli.weapon.MCH_RenderBullet;
-import mcheli.weapon.MCH_RenderCartridge;
-import mcheli.weapon.MCH_RenderNone;
-import mcheli.weapon.MCH_RenderTvMissile;
-import mcheli.weapon.MCH_WeaponInfo;
-import mcheli.weapon.MCH_WeaponInfoManager;
+import mcheli.weapon.*;
 import mcheli.wrapper.W_Item;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_MinecraftForgeClient;
@@ -135,13 +101,15 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityA10.class, new MCH_RenderA10());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityAAMissile.class, new MCH_RenderAAMissile());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityASMissile.class, new MCH_RenderASMissile());
-      RenderingRegistry.registerEntityRenderingHandler(MCH_EntityATMissile.class, new MCH_RenderTvMissile());
+      RenderingRegistry.registerEntityRenderingHandler(MCH_EntityATMissile.class, new MCH_RenderATMissile());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityTorpedo.class, new MCH_RenderBullet());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityBomb.class, new MCH_RenderBomb());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityMarkerRocket.class, new MCH_RenderBullet());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityDispensedItem.class, new MCH_RenderNone());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityFlare.class, new MCH_RenderFlare());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityThrowable.class, new MCH_RenderThrowable());
+      RenderingRegistry.registerEntityRenderingHandler(MCH_EntityLockBox.class, new MCH_RenderLockBox());
+      RenderingRegistry.registerEntityRenderingHandler(MCH_EntityChaff.class, new MCH_RenderChaff());
       W_MinecraftForgeClient.registerItemRenderer(MCH_MOD.itemJavelin, new MCH_ItemLightWeaponRender());
       W_MinecraftForgeClient.registerItemRenderer(MCH_MOD.itemStinger, new MCH_ItemLightWeaponRender());
       W_MinecraftForgeClient.registerItemRenderer(MCH_MOD.itemRpg, new MCH_ItemLightWeaponRender());
@@ -549,6 +517,11 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
          W_McClient.addSound(info.soundFileName + ".ogg");
       }
 
+      while(i$.hasNext()) {
+         MCH_WeaponInfo info = (MCH_WeaponInfo)i$.next();
+         W_McClient.addSound(info.weaponSwitchSound + ".ogg");
+      }
+
       i$ = MCP_PlaneInfoManager.map.values().iterator();
 
       while(i$.hasNext()) {
@@ -618,6 +591,8 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    public void init() {
       MinecraftForge.EVENT_BUS.register(new MCH_ParticlesUtil());
       MinecraftForge.EVENT_BUS.register(new MCH_ClientEventHook());
+      MinecraftForge.EVENT_BUS.register(new MCH_RenderBVRLockBox());
+      MinecraftForge.EVENT_BUS.register(new MCH_RenderRWR());
    }
 
    public void setCreativeDigDelay(int n) {

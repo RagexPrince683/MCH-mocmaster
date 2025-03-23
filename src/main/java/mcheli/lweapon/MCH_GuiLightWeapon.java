@@ -9,8 +9,6 @@ import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.gltd.MCH_EntityGLTD;
 import mcheli.gui.MCH_Gui;
-import mcheli.lweapon.MCH_ClientLightWeaponTickHandler;
-import mcheli.lweapon.MCH_ItemLightWeaponBase;
 import mcheli.weapon.MCH_WeaponGuidanceSystem;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.client.Minecraft;
@@ -21,6 +19,7 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
+
 
 @SideOnly(Side.CLIENT)
 public class MCH_GuiLightWeapon extends MCH_Gui {
@@ -77,7 +76,7 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
                   this.drawGuiFGM148(player, gs, canFire1, player.getHeldItem());
                   this.drawKeyBind(-805306369, true);
                   //DONE: add another conditional for RPG/T sight
-                  //todone: test
+                  //todo: test
                } else if("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
                   GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                   W_McClient.MOD_bindTexture("textures/gui/rpg.png");
@@ -176,6 +175,7 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
       double right = left + (double)size;
       double bottom = top + (double)size;
       Vec3 pos = MCH_ClientLightWeaponTickHandler.getMartEntityPos();
+
       if(gs.getLockCount() > 0) {
          int x = MCH_Gui.scaleFactor > 0?MCH_Gui.scaleFactor:2;
          if(pos == null) {
@@ -189,6 +189,11 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
          double sx = MCH_Lib.RNG(cx, left + IX, right - IX);
          double sy = MCH_Lib.RNG(cy, top + IY, bottom - IY);
          if(gs.getLockCount() >= gs.getLockCountMax() / 2) {
+//            Minecraft.getMinecraft().fontRenderer.drawString(
+//                    String.format("[%.1f,%.1f]", cx, cy),
+//                    (int) (cx + 10), (int) cy,
+//                    0xFFFFFF
+//            );
             this.drawLine(new double[]{-1.0D, sy, (double)(super.width + 1), sy, sx, -1.0D, sx, (double)(super.height + 1)}, -1593835521);
          }
 
