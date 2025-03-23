@@ -1,11 +1,9 @@
 package mcheli.weapon;
 
 
-
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-
+//import cuchaz.ships.EntityShip;
 import mcheli.*;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntityHitBox;
@@ -81,17 +79,17 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public boolean bigdelay;
     private boolean bigcheck = false;
 
-    public int antiFlareTick;
-    boolean doingTopAttack = false;
-    boolean speedAddedFromAircraft = false;
-    private ForgeChunkManager.Ticket chunkLoaderTicket;
-    private List<ChunkCoordIntPair> loadedChunks = new ArrayList<>();
-
     //public int delayrangeloaderint = delayrangeloader;
 
     //public MCH_ConfigPrm delayrangeloaderconfigsetting = delayrangeloader;
 
     //private final MCH_Fuze fuze = new MCH_Fuze(this);;
+
+    public int antiFlareTick;
+    boolean doingTopAttack = false;
+    boolean speedAddedFromAircraft = false;
+    private ForgeChunkManager.Ticket chunkLoaderTicket;
+    //private List<ChunkCoordIntPair> loadedChunks = new ArrayList<>();
 
     public MCH_EntityBaseBullet(World par1World) {
         super(par1World);
@@ -144,20 +142,20 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public void init(Ticket ticket) {
         if (!worldObj.isRemote) {
             if (ticket != null) {
-                if (chunkLoaderTicket == null) {
-                    chunkLoaderTicket = ticket;
-                    chunkLoaderTicket.bindEntity(this);
-                    chunkLoaderTicket.getModData();
+                if (loaderTicket == null) {
+                    loaderTicket = ticket;
+                    loaderTicket.bindEntity(this);
+                    loaderTicket.getModData();
                 }
                 // Force load the initial chunk where the bullet is spawned
-                ForgeChunkManager.forceChunk(chunkLoaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
+                ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
             }
         }
     }
 
 
 
-    //List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
+    List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
 
     // Dynamically load chunks based on bullet's movement
     public void checkAndLoadChunks() {
@@ -174,7 +172,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         if (!worldObj.isRemote && loaderTicket != null) {
             // Unload previously loaded chunks to avoid memory bloat
             for (ChunkCoordIntPair chunk : loadedChunks) {
-                ForgeChunkManager.unforceChunk(chunkLoaderTicket, chunk);
+                ForgeChunkManager.unforceChunk(loaderTicket, chunk);
             }
 
             loadedChunks.clear();
@@ -195,7 +193,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             // Load surrounding chunks if not already loaded
             for (ChunkCoordIntPair chunk : neighboringChunks) {
                 loadedChunks.add(chunk);  // add chunk directly without checking
-                ForgeChunkManager.forceChunk(chunkLoaderTicket, chunk);
+                ForgeChunkManager.forceChunk(this.loaderTicket, chunk);
             }
 
             System.out.println("Loaded surrounding chunks at: " + chunkX + ", " + chunkZ);
@@ -203,12 +201,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
     // Dynamically load chunks ahead of the bullet based on its current position and motion
     public void loadChunksInBulletPath(int currentChunkX, int currentChunkZ, double motionX, double motionZ) {
-        if (!worldObj.isRemote && chunkLoaderTicket != null) {
+        if (!worldObj.isRemote && loaderTicket != null) {
             // Unload previously loaded chunks to avoid memory bloat
-            for (ChunkCoordIntPair chunk : loadedChunks) { //this.
-                ForgeChunkManager.unforceChunk(chunkLoaderTicket, chunk);
+            for (ChunkCoordIntPair chunk : this.loadedChunks) {
+                ForgeChunkManager.unforceChunk(this.loaderTicket, chunk);
             }
-            loadedChunks.clear(); //this.
+            this.loadedChunks.clear();
 
             // Calculate the next chunk in the direction of the bullet's motion
             int nextChunkX = currentChunkX + (motionX > 0 ? 1 : (motionX < 0 ? -1 : 0));
@@ -226,7 +224,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             for (ChunkCoordIntPair chunk : chunksToLoad) {
                 if (!loadedChunks.contains(chunk)) {
                     loadedChunks.add(chunk);
-                    ForgeChunkManager.forceChunk(chunkLoaderTicket, chunk);
+                    ForgeChunkManager.forceChunk(loaderTicket, chunk);
                 }
             }
 
@@ -246,13 +244,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     //}
     //unused
 
-    //private void clearChunkLoaders() {
-    //    for (ChunkCoordIntPair chunk : loadedChunks) {
-    //        System.out.println("Clearing chunk loader due to impact.");
-    //        ForgeChunkManager.unforceChunk(chunkLoaderTicket, chunk);
-    //    }
-    //}
-
 
 
     public void setLocationAndAngles(double par1, double par3, double par5, float par7, float par8) {
@@ -263,9 +254,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     protected void entityInit() {
-        //todo check
-        //super.entityInit();
-        //init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, Type.ENTITY));
+        super.entityInit();
+        init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, Type.ENTITY));
         this.getDataWatcher().addObject(27, Integer.valueOf(0));
         this.getDataWatcher().addObject(29, String.valueOf(""));
         this.getDataWatcher().addObject(30, String.valueOf(""));
@@ -327,13 +317,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         this.piercing = this.getInfo().piercing;
         if (this instanceof MCH_EntityBullet) {
             if (this.getInfo().acceleration > 4.0F) {
-                this.accelerationFactor = this.getInfo().acceleration / 4.0F;
+                this.accelerationFactor = (double) (this.getInfo().acceleration / 4.0F);
             }
         } else if (this instanceof MCH_EntityRocket && this.isBomblet == 0 && this.getInfo().acceleration > 4.0F) {
-            this.accelerationFactor = this.getInfo().acceleration / 4.0F;
-        }
-        if(getInfo() != null && getInfo().enableChunkLoader) {
-            init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, ForgeChunkManager.Type.ENTITY));
+            this.accelerationFactor = (double) (this.getInfo().acceleration / 4.0F);
         }
 
     }
@@ -513,12 +500,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         this.shootingEntity = user;
     }
 
-    //public void setMotion(double targetX, double targetY, double targetZ) {
-    //    double d6 = (double) MathHelper.sqrt_double(targetX * targetX + targetY * targetY + targetZ * targetZ);
-    //    super.motionX = targetX * this.acceleration / d6;
-    //    super.motionY = targetY * this.acceleration / d6;
-    //    super.motionZ = targetZ * this.acceleration / d6;
-    //}
+    public void setMotion(double targetX, double targetY, double targetZ) {
+        double d6 = (double) MathHelper.sqrt_double(targetX * targetX + targetY * targetY + targetZ * targetZ);
+        super.motionX = targetX * this.acceleration / d6;
+        super.motionY = targetY * this.acceleration / d6;
+        super.motionZ = targetZ * this.acceleration / d6;
+    }
 
     public void guidanceToTarget(double targetPosX, double targetPosY, double targetPosZ) {
         this.guidanceToTarget(targetPosX, targetPosY, targetPosZ, 1.0F);
@@ -616,6 +603,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     public void onUpdate() {
 
+        
+
         if(!worldObj.isRemote) {
             if (shootingAircraft instanceof MCH_EntityAircraft && !speedAddedFromAircraft && getInfo().speedDependsAircraft) {
                 MCH_EntityAircraft ac = (MCH_EntityAircraft) shootingAircraft;
@@ -706,10 +695,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 return;
             }
 
-            if(this.getInfo().timeFuse > 0 && this.getCountOnUpdate() > this.getInfo().timeFuse) {
-                this.onUpdateTimeout();
-            }
-
             if(this.getInfo().explosionAltitude > 0 && MCH_Lib.getBlockIdY(this, 3, -this.getInfo().explosionAltitude) != 0) {
                 MovingObjectPosition var6 = new MovingObjectPosition((int)super.posX, (int)super.posY, (int)super.posZ, 0,
                         Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
@@ -742,7 +727,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             }
             super.motionY += this.getGravity();
         } else {
-            super.motionY += this.getGravityInWater();
+            super.motionY += (double) this.getGravityInWater();
         }
 
         // Chunk loading logic based on bullet motion
@@ -1073,20 +1058,23 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
 
-        //if(getInfo() != null && getInfo().enableChunkLoader) {
-        //    clearChunkLoaders();
-        //}
-
-       if(hit.entityHit == null) {
-           spawnBlockPar(hit, hit.blockX, hit.blockY, hit.blockZ);
-       }
-
-
         //todo shouldLoadChunks() check here
         if (shouldLoadChunks()) {
             checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
             System.out.println("Extra chunk loader activated.");
+        }
+
+        if (!worldObj.isRemote) { // Server-side logic
+            handleServerSideImpact(hit, damageFactor);
+        } else if (shouldHandleTileHit(hit)) {
+            handleTileHit(hit);
+        }
+    }
+
+    private void handleServerSideImpact(MovingObjectPosition hit, float damageFactor) {
+        if (hit.entityHit != null) {
+            processEntityImpact(hit, damageFactor);
         }
 
         if(hit.entityHit instanceof MCH_EntityAircraft) {
@@ -1096,10 +1084,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             }
         }
 
-        if (!worldObj.isRemote) { // Server-side logic
-            handleServerSideImpact(hit, damageFactor);
-        } else if (shouldHandleTileHit(hit)) {
-            handleTileHit(hit);
+        float explosionPower = this.explosionPower * damageFactor;
+        float waterExplosionPower = this.explosionPowerInWater * damageFactor;
+
+        if (piercing > 0) {
+            handlePiercingHit(hit, explosionPower, waterExplosionPower, damageFactor);
+        } else {
+            handleRegularHit(hit, explosionPower, waterExplosionPower);
+            finalizeImpact();
         }
     }
 
@@ -1157,39 +1149,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             Minecraft.getMinecraft().effectRenderer.addEffect(fx);
         }
     }
-
-
-
-
-    private void handleServerSideImpact(MovingObjectPosition hit, float damageFactor) {
-        if (hit.entityHit != null) {
-            processEntityImpact(hit, damageFactor);
-        }
-
-        float explosionPower = this.explosionPower * damageFactor;
-        float waterExplosionPower = this.explosionPowerInWater * damageFactor;
-
-        if (piercing > 0) {
-            handlePiercingHit(hit, explosionPower, waterExplosionPower, damageFactor);
-        } else {
-            handleRegularHit(hit, explosionPower, waterExplosionPower);
-            finalizeImpact();
-        }
-    }
-
-    //for (int i = 0; i < getInfo().numParticlesFlak; i++)
-//
-    //{
-    //    EntityFX obj = new EntityCloudFX(worldObj,
-    //            raytraceResult.hitVec.xCoord + rand.nextGaussian(),
-    //            raytraceResult.hitVec.yCoord + rand.nextGaussian(),
-    //            raytraceResult.hitVec.zCoord + rand.nextGaussian(), 0D, 0D, 0D);
-    //    obj.motionX = rand.nextGaussian() / 200;
-    //    obj.motionY = rand.nextGaussian() / 200;
-    //    obj.motionZ = rand.nextGaussian() / 200;
-    //    obj.renderDistanceWeight = 250D;
-    //    FMLClientHandler.instance().getClient().effectRenderer.addEffect(obj);
-    //}
 
     private void processEntityImpact(MovingObjectPosition hit, float damageFactor) {
         if (shouldLoadChunks()) {
