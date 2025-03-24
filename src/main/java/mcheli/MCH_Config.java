@@ -314,6 +314,8 @@ public class MCH_Config {
       ItemDamage = new MCH_ConfigPrm("ItemDamage", true);
       ItemFuel = new MCH_ConfigPrm("ItemFuel", true);
       AutoRepairHP = new MCH_ConfigPrm("AutoRepairHP", 0.5D);
+      AutoRepairEnabled = new MCH_ConfigPrm("AutoRepairEnabled", false);
+
       Collision_DestroyBlock = new MCH_ConfigPrm("Collision_DestroyBlock", true);
       Explosion_DestroyBlock = new MCH_ConfigPrm("Explosion_DestroyBlock", true);
       Explosion_FlamingBlock = new MCH_ConfigPrm("Explosion_FlamingBlock", true);
