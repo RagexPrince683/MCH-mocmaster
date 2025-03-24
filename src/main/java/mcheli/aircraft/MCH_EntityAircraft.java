@@ -2327,6 +2327,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          if (this.timeSinceHit > 0) {
             --this.timeSinceHit;
          }
+         //this keeps missile damage working somehow, this fucking mod I swear
 
       if (MCH_Config.AutoRepairEnabled.prmBool) {
          if (this.getMaxHP() > 0) {
