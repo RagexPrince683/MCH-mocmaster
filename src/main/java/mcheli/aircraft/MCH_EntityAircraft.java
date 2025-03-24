@@ -2323,11 +2323,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       //System.out.println("  Remaining Increment: " + this.aircraftPosRotInc);
    }
    protected void autoRepair() {
-      if (MCH_Config.AutoRepairEnabled.prmBool) {
+
          if (this.timeSinceHit > 0) {
             --this.timeSinceHit;
          }
 
+      if (MCH_Config.AutoRepairEnabled.prmBool) {
          if (this.getMaxHP() > 0) {
             if (!this.isDestroyed()) {
                if (this.getDamageTaken() > this.beforeDamageTaken) {
