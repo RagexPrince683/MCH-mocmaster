@@ -1666,9 +1666,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       //MCH_Config var10001 = MCH_MOD.config;
 
-      if (MCH_Config.AutoRepairEnabled.prmBool) {
-         this.autoRepair();
-      }
+
+      this.autoRepair();
+
       var7 = this.getFlareTick();
       this.flareDv.update();
       if(this.getAcInfo() != null && this.chaff != null) {
@@ -2323,27 +2323,29 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       //System.out.println("  Remaining Increment: " + this.aircraftPosRotInc);
    }
    protected void autoRepair() {
-      if(this.timeSinceHit > 0) {
-         --this.timeSinceHit;
-      }
-
-      if(this.getMaxHP() > 0) {
-         if(!this.isDestroyed()) {
-            if(this.getDamageTaken() > this.beforeDamageTaken) {
-               this.repairCount = 600;
-            } else if(this.repairCount > 0) {
-               --this.repairCount;
-            } else {
-               this.repairCount = 40;
-               double hpp = (double)this.getHP() / (double)this.getMaxHP();
-               MCH_Config var10001 = MCH_MOD.config;
-               if(hpp >= MCH_Config.AutoRepairHP.prmDouble) {
-                  this.repair(this.getMaxHP() / 100);
-               }
-            }
+      if (MCH_Config.AutoRepairEnabled.prmBool) {
+         if (this.timeSinceHit > 0) {
+            --this.timeSinceHit;
          }
 
-         this.beforeDamageTaken = this.getDamageTaken();
+         if (this.getMaxHP() > 0) {
+            if (!this.isDestroyed()) {
+               if (this.getDamageTaken() > this.beforeDamageTaken) {
+                  this.repairCount = 600;
+               } else if (this.repairCount > 0) {
+                  --this.repairCount;
+               } else {
+                  this.repairCount = 40;
+                  double hpp = (double) this.getHP() / (double) this.getMaxHP();
+                  MCH_Config var10001 = MCH_MOD.config;
+                  if (hpp >= MCH_Config.AutoRepairHP.prmDouble) {
+                     this.repair(this.getMaxHP() / 100);
+                  }
+               }
+            }
+
+            this.beforeDamageTaken = this.getDamageTaken();
+         }
       }
    }
 
