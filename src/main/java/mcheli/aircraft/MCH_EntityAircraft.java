@@ -1663,7 +1663,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       this.updateSupplyAmmo();
-      this.autoRepair();
+
+      //MCH_Config var10001 = MCH_MOD.config;
+
+      if (MCH_Config.AutoRepairEnabled.prmBool) {
+         this.autoRepair();
+      }
       var7 = this.getFlareTick();
       this.flareDv.update();
       if(this.getAcInfo() != null && this.chaff != null) {
