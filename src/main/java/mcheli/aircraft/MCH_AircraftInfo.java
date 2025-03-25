@@ -501,7 +501,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    }
 
    public float getMaxSpeed() {
-      return 0.8F;
+      return 4.0F;
    }
 
    public float getMinRotationPitch() {
