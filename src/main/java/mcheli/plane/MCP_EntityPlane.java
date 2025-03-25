@@ -8,6 +8,8 @@ import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.*;
 import mcheli.chain.MCH_EntityChain;
+import mcheli.flare.MCH_EntityChaff;
+import mcheli.flare.MCH_EntityFlare;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.plane.MCP_PlaneInfo;
@@ -917,11 +919,11 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
                @Override
                public boolean isEntityApplicable(Entity e) {
                   // Exclude certain entity types from being affected by collision
-                  if (e != rideAc && !(e instanceof EntityItem) && !(e instanceof EntityXPOrb)
+                  if (e != rideAc && !(e instanceof EntityItem) && !(e instanceof EntityXPOrb && !(e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff || e instanceof MCH_EntityBaseBullet ) //|| e instanceof MCH_EntityBullet
                           && !(e instanceof MCH_EntityBaseBullet) && !(e instanceof MCH_EntityChain)
-                          && !(e instanceof MCH_EntitySeat)) {
+                          && !(e instanceof MCH_EntitySeat)) ) {
 
-                     // Special handling for tanks
+                     // Special handling for planes
                      if (e instanceof MCP_EntityPlane) {
                         MCP_EntityPlane plane = (MCP_EntityPlane) e;
                         //todo
@@ -992,12 +994,19 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    }
 
    private boolean shouldCollisionDamage(Entity e) {
+
+      if(e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff) {
+         return false;
+      }
+      //please stop fucking colliding with flares and chaffs you fucking retarded ass mod i swear to fuck
+
       if(this.getSeatIdByEntity(e) >= 0) {
          return false;
       } else if(super.noCollisionEntities.containsKey(e)) {
          return false;
       } else {
-         if(e instanceof MCH_EntityHitBox && ((MCH_EntityHitBox)e).parent != null) {
+         if(e instanceof MCH_EntityHitBox && ((MCH_EntityHitBox)e).parent != null ) { //|| e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff
+            //cannot cast these to aircraft because fuck you lollll!!!!
             MCH_EntityAircraft ac = ((MCH_EntityHitBox)e).parent;
             if(super.noCollisionEntities.containsKey(ac)) {
                return false;
