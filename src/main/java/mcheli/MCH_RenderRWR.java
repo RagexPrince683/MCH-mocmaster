@@ -155,6 +155,7 @@ public class MCH_RenderRWR {
             case DIGITAL: {
                 if(entity.entityClassName.contains("MCH_EntityHeli")
                 || entity.entityClassName.contains("MCP_EntityPlane")
+                || entity.entityClassName.contains("MCH_EntityShip")
                 || entity.entityClassName.contains("MCH_EntityTank")
                 || entity.entityClassName.contains("MCH_EntityVehicle")) {
                     return new MCH_RWRResult(ac.getNameOnMyRadar(entity), 0x00FF00);
