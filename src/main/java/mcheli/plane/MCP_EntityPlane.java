@@ -1,27 +1,36 @@
 package mcheli.plane;
 
 import java.util.Iterator;
+import java.util.List;
+
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_PacketStatusRequest;
-import mcheli.aircraft.MCH_Parts;
+import mcheli.aircraft.*;
+import mcheli.chain.MCH_EntityChain;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
+import mcheli.tank.MCH_EntityTank;
+import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_Block;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Lib;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
+import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -703,6 +712,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       Entity rdnEnt = this.getRiddenByEntity();
       double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       double dp = 0.0D;
+      this.updateCollisionBox();
       if(this.canFloatWater()) {
          dp = this.getWaterDepth();
       }
@@ -884,6 +894,149 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       }
 
 
+   }
+
+   private void collisionEntity(AxisAlignedBB bb) {
+      if (bb != null) {
+         // Calculate speed
+         double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);
+
+         if (speed > 0.05D) {
+            Entity rider = this.getRiddenByEntity();
+            float damage = (float)(speed * 15.0D);
+
+            // Get the aircraft entity the plane is riding on, if applicable
+            final MCH_EntityAircraft rideAc = super.ridingEntity instanceof MCH_EntityAircraft
+                    ? (MCH_EntityAircraft) super.ridingEntity
+                    : (super.ridingEntity instanceof MCH_EntitySeat
+                    ? ((MCH_EntitySeat) super.ridingEntity).getParent()
+                    : null);
+
+            // Get a list of entities within the bounding box
+            List<Entity> list = super.worldObj.getEntitiesWithinAABBExcludingEntity(this, bb.expand(0.3D, 0.3D, 0.3D), new IEntitySelector() {
+               @Override
+               public boolean isEntityApplicable(Entity e) {
+                  // Exclude certain entity types from being affected by collision
+                  if (e != rideAc && !(e instanceof EntityItem) && !(e instanceof EntityXPOrb)
+                          && !(e instanceof MCH_EntityBaseBullet) && !(e instanceof MCH_EntityChain)
+                          && !(e instanceof MCH_EntitySeat)) {
+
+                     // Special handling for tanks
+                     if (e instanceof MCP_EntityPlane) {
+                        MCP_EntityPlane plane = (MCP_EntityPlane) e;
+                        //todo
+                        //if (plane.getPlaneInfo() != null && plane.getPlaneInfo().weightType == 2) {
+                        //   return MCH_Config.Collision_EntityTankDamage.prmBool;
+                        //}
+                        //todo: fix up how this works as in collision because this is not fair to xradar perms/block protection
+                     }
+
+                     // Default collision entity damage
+                     return MCH_Config.Collision_EntityDamage.prmBool;
+                  }
+                  return false;
+               }
+            });
+
+            // Process each entity within the bounding box
+            for (Entity e : list) {
+               if (this.shouldCollisionDamage(e)) {
+                  double dx = e.posX - super.posX;
+                  double dz = e.posZ - super.posZ;
+                  double dist = Math.sqrt(dx * dx + dz * dz);
+
+                  if (dist > 5.0D) {
+                     dist = 5.0D;
+                  }
+
+                  // Adjust damage based on distance
+                  damage += (5.0D - dist);
+
+                  // Determine the damage source
+                  DamageSource ds = (rider instanceof EntityLivingBase)
+                          ? DamageSource.causeMobDamage((EntityLivingBase) rider)
+                          : DamageSource.generic;
+
+                  // Apply damage and collision effects
+                  MCH_Lib.applyEntityHurtResistantTimeConfig(e);
+                  e.attackEntityFrom(ds, damage);
+
+                  if (e instanceof MCH_EntityAircraft) {
+                     // Slight pushback for aircrafts
+                     e.motionX += super.motionX * 0.05D;
+                     e.motionZ += super.motionZ * 0.05D;
+                  } else if (e instanceof EntityArrow) {
+                     // Destroy arrows on impact
+                     e.setDead();
+                  } else {
+                     // Apply strong pushback for other entities
+                     e.motionX += super.motionX * 1.5D;
+                     e.motionZ += super.motionZ * 1.5D;
+                  }
+
+                  // Damage self based on collision with large entities
+                  if ( (e.width >= 1.0F || e.height >= 1.5D)) { //this.getPlaneInfo().weightType != 2 &&
+                     ds = (e instanceof EntityLivingBase)
+                             ? DamageSource.causeMobDamage((EntityLivingBase) e)
+                             : DamageSource.generic;
+
+                     this.attackEntityFrom(ds, damage / 3.0F);
+                  }
+
+                  // Log the collision
+                  MCH_Lib.DbgLog(super.worldObj, "MCP_EntityPlane.collisionEntity damage=%.1f %s", damage, e.toString());
+               }
+            }
+         }
+      }
+   }
+
+   private boolean shouldCollisionDamage(Entity e) {
+      if(this.getSeatIdByEntity(e) >= 0) {
+         return false;
+      } else if(super.noCollisionEntities.containsKey(e)) {
+         return false;
+      } else {
+         if(e instanceof MCH_EntityHitBox && ((MCH_EntityHitBox)e).parent != null) {
+            MCH_EntityAircraft ac = ((MCH_EntityHitBox)e).parent;
+            if(super.noCollisionEntities.containsKey(ac)) {
+               return false;
+            }
+         }
+
+         return e.ridingEntity instanceof MCH_EntityAircraft && super.noCollisionEntities.containsKey(e.ridingEntity)?false:!(e.ridingEntity instanceof MCH_EntitySeat) || ((MCH_EntitySeat)e.ridingEntity).getParent() == null || !super.noCollisionEntities.containsKey(((MCH_EntitySeat)e.ridingEntity).getParent());
+      }
+   }
+
+   public void updateCollisionBox() {
+      if(this.getAcInfo() != null) {
+         //this.WheelMng.updateBlock();
+         MCH_BoundingBox[] arr$ = super.extraBoundingBox;
+         int len$ = arr$.length;
+
+         MCH_Config var10000;
+         for(int i$ = 0; i$ < len$; ++i$) {
+            MCH_BoundingBox bb = arr$[i$];
+            if(super.rand.nextInt(3) == 0) {
+               var10000 = MCH_MOD.config;
+               //todo config
+               //if(MCH_Config.Collision_DestroyBlock.prmBool) {
+               //   Vec3 v = this.getTransformedPosition(bb.offsetX, bb.offsetY, bb.offsetZ);
+                  //this.destoryBlockRange(v, (double)bb.width, (double)bb.height);
+               //}
+
+               this.collisionEntity(bb.boundingBox);
+            }
+         }
+
+         var10000 = MCH_MOD.config;
+         //todo config
+         //if(MCH_Config.Collision_DestroyBlock.prmBool) {
+            //this.destoryBlockRange(this.getTransformedPosition(0.0D, 0.0D, 0.0D), (double)super.width * 1.5D, (double)(super.height * 2.0F));
+         //}
+
+         this.collisionEntity(this.getBoundingBox());
+      }
    }
 
    public float getMaxSpeed() {
