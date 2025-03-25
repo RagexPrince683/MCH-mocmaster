@@ -919,19 +919,19 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
                @Override
                public boolean isEntityApplicable(Entity e) {
                   // Exclude certain entity types from being affected by collision
-                  if (e != rideAc && !(e instanceof EntityItem) && !(e instanceof EntityXPOrb && !(e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff || e instanceof MCH_EntityBaseBullet ) //|| e instanceof MCH_EntityBullet
+                  if (e != rideAc && !(e instanceof EntityItem) && !(e instanceof EntityXPOrb && !(e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff )
                           && !(e instanceof MCH_EntityBaseBullet) && !(e instanceof MCH_EntityChain)
                           && !(e instanceof MCH_EntitySeat)) ) {
 
                      // Special handling for planes
-                     if (e instanceof MCP_EntityPlane) {
-                        MCP_EntityPlane plane = (MCP_EntityPlane) e;
+                     //if (e instanceof MCP_EntityPlane) {
+                     //   MCP_EntityPlane plane = (MCP_EntityPlane) e;
                         //todo
                         //if (plane.getPlaneInfo() != null && plane.getPlaneInfo().weightType == 2) {
                         //   return MCH_Config.Collision_EntityTankDamage.prmBool;
                         //}
                         //todo: fix up how this works as in collision because this is not fair to xradar perms/block protection
-                     }
+                    // }
 
                      // Default collision entity damage
                      return MCH_Config.Collision_EntityDamage.prmBool;
