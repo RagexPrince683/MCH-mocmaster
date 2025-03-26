@@ -2266,50 +2266,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             }
          }
 
-         //applies damage at crush depth/drowning depth
-         //should probably handle ships differently
          if(this.getCountOnUpdate() % 30 == 0 && (this.getAcInfo() == null || !this.getAcInfo().isFloat) && MCH_Lib.isBlockInWater(super.worldObj, (int)(super.posX + 0.5D), (int)(super.posY + 1.5D + (double)this.getAcInfo().submergedDamageHeight), (int)(super.posZ + 0.5D))) {
-            int hp1 = this.getMaxHP() / 20;
-            //todo add exponentially increasing throttle debuff
-            //todo add exponentially increasing fuel debuff
-
-            if (this.getThrottle() > 0.01) {
-               this.currentSpeed = this.currentSpeed/5;
-               this.setThrottle(this.getThrottle() * 0.6D);
-            }
-
-            if (this.currentSpeed > 0.01) {
-               this.currentSpeed = this.currentSpeed/5;
-            }
-
-            if (this.currentSpeed < 0.01) {
-               this.currentSpeed = 0.0;
-            }
-
-
-            this.setCurrentThrottle(0);
-            this.throttleUp = false;
-            this.throttleBack = 0;
-               //return;
-
-
-            this.throttleBack = 0.0F;
-
-            int fc = this.getMaxFuel() - this.getFuel();
-            if(fc > 30) {
-               fc = 30;
-            }
-
-            this.setFuel(this.getFuel() - (fc * 3));
-
-
+            int hp1 = this.getMaxHP() / 10;
             if(hp1 <= 0) {
                hp1 = 1;
             }
-
-            //if(this.throttle < -0.2D) {
-            //   this.throttle = -0.2D;
-            //}
 
             this.attackEntityFrom(DamageSource.inWall, hp1);
          }
