@@ -22,6 +22,7 @@ import mcheli.multiplay.MCH_Multiplay;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
+import mcheli.tank.MCH_EntityTank;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.weapon.*;
 import mcheli.wrapper.*;
@@ -2249,6 +2250,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public void onUpdate_CollisionGroundDamage() {
       if(!this.isDestroyed()) {
+         //this method for crash collision detection just fucking sucks but it works
          if(MCH_Lib.getBlockIdY(this, 3, -3) > 0 && !super.worldObj.isRemote) {
             float hp = MathHelper.abs(MathHelper.wrapAngleTo180_float(this.getRotRoll()));
             float pitch = MathHelper.abs(MathHelper.wrapAngleTo180_float(this.getRotPitch()));
@@ -2267,13 +2269,29 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          }
 
          if(this.getCountOnUpdate() % 30 == 0 && (this.getAcInfo() == null || !this.getAcInfo().isFloat) && MCH_Lib.isBlockInWater(super.worldObj, (int)(super.posX + 0.5D), (int)(super.posY + 1.5D + (double)this.getAcInfo().submergedDamageHeight), (int)(super.posZ + 0.5D))) {
-            int hp1 = this.getMaxHP() / 10;
+            int hp1 = this.getMaxHP() / 30;
+            //int hp1 = this.ArmorMinDamage / 10;
             if(hp1 <= 0) {
                hp1 = 1;
             }
-
             this.attackEntityFrom(DamageSource.inWall, hp1);
+            //Entity entity = damageSource.getEntity();
+            if (this instanceof MCH_EntityTank) {
+
+               MCH_AircraftInfo cmd1 = this.getAcInfo();
+
+               if(cmd1 != null) {
+
+
+                  //MCH_AircraftInfo.armorMinDamage
+                  //todo test for armor min damage
+                  this.attackEntityFrom(DamageSource.inWall, hp1 + cmd1.armorMinDamage);
+               }
+            }
+
          }
+
+
 
       }
    }
@@ -6224,24 +6242,34 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return "?";
     }
 
-    public String getNameOnMyRadar(MCH_EntityAircraft other) {
-       switch (getAcInfo().radarType) {
-          case MODERN_AA: return other.getAcInfo().nameOnModernAARadar;
-          case EARLY_AA: return other.getAcInfo().nameOnEarlyAARadar;
-          case MODERN_AS: return other.getAcInfo().nameOnModernASRadar;
-          case EARLY_AS: return other.getAcInfo().nameOnEarlyASRadar;
-       }
-       return "?";
-    }
+    //public String getNameOnMyRadar(MCH_EntityAircraft other) {
+    //   switch (getAcInfo().radarType) {
+    //      case MODERN_AA: return other.getAcInfo().nameOnModernAARadar;
+    //      case EARLY_AA: return other.getAcInfo().nameOnEarlyAARadar;
+    //      case MODERN_AS: return other.getAcInfo().nameOnModernASRadar;
+    //      case EARLY_AS: return other.getAcInfo().nameOnEarlyASRadar;
+    //   }
+    //   return "?";
+    //}
 
    public String getNameOnMyRadar(MCH_EntityInfo other) {
       MCH_AircraftInfo info = MCH_AircraftInfo.allAircraftInfo.getOrDefault(other.entityName, null);
-      switch (getAcInfo().radarType) {
-         case MODERN_AA: return info.nameOnModernAARadar;
-         case EARLY_AA: return info.nameOnEarlyAARadar;
-         case MODERN_AS: return info.nameOnModernASRadar;
-         case EARLY_AS: return info.nameOnEarlyASRadar;
+
+      try {
+         switch (getAcInfo().radarType) {
+            case MODERN_AA:
+               return info.nameOnModernAARadar;
+            case EARLY_AA:
+               return info.nameOnEarlyAARadar;
+            case MODERN_AS:
+               return info.nameOnModernASRadar;
+            case EARLY_AS:
+               return info.nameOnEarlyASRadar;
+         }
+      } catch (Exception ex) {
+         return null;
       }
+
       return "?";
    }
 
