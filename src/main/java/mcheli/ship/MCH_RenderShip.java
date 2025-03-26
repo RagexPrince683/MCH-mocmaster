@@ -33,9 +33,9 @@ public class MCH_RenderShip extends MCH_RenderAircraft {
                     this.renderNozzle(ship, shipInfo, tickTime);
                 }
 
-               // if(planeInfo.haveWing() && plane.partWing != null) {
-               //     this.renderWing(plane, planeInfo, tickTime);
-               // }
+                if(shipInfo.haveWing() && ship.partWing != null) {
+                    this.renderWing(ship, shipInfo, tickTime);
+                }
 
                 if(shipInfo.haveRotor() && ship.partNozzle != null) {
                     this.renderRotor(ship, shipInfo, tickTime);
@@ -80,6 +80,34 @@ public class MCH_RenderShip extends MCH_RenderAircraft {
             }
 
             GL11.glPopMatrix();
+        }
+
+    }
+
+    public void renderWing(MCH_EntityShip plane, MCH_ShipInfo planeInfo, float tickTime) {
+        float rot = plane.getWingRotation();
+        float prevRot = plane.getPrevWingRotation();
+
+        for(Iterator i$ = planeInfo.wingList.iterator(); i$.hasNext(); GL11.glPopMatrix()) {
+            MCH_ShipInfo.Wing w = (MCH_ShipInfo.Wing)i$.next();
+            GL11.glPushMatrix();
+            GL11.glTranslated(w.pos.xCoord, w.pos.yCoord, w.pos.zCoord);
+            GL11.glRotatef((prevRot + (rot - prevRot) * tickTime) * w.maxRotFactor, (float)w.rot.xCoord, (float)w.rot.yCoord, (float)w.rot.zCoord);
+            GL11.glTranslated(-w.pos.xCoord, -w.pos.yCoord, -w.pos.zCoord);
+            renderPart(w.model, planeInfo.model, w.modelName);
+            if(w.pylonList != null) {
+                Iterator i$1 = w.pylonList.iterator();
+
+                while(i$1.hasNext()) {
+                    MCH_ShipInfo.Pylon p = (MCH_ShipInfo.Pylon)i$1.next();
+                    GL11.glPushMatrix();
+                    GL11.glTranslated(p.pos.xCoord, p.pos.yCoord, p.pos.zCoord);
+                    GL11.glRotatef((prevRot + (rot - prevRot) * tickTime) * p.maxRotFactor, (float)p.rot.xCoord, (float)p.rot.yCoord, (float)p.rot.zCoord);
+                    GL11.glTranslated(-p.pos.xCoord, -p.pos.yCoord, -p.pos.zCoord);
+                    renderPart(p.model, planeInfo.model, p.modelName);
+                    GL11.glPopMatrix();
+                }
+            }
         }
 
     }
