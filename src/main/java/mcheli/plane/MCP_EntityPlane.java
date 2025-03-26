@@ -994,11 +994,17 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    }
 
    private boolean shouldCollisionDamage(Entity e) {
+      //Entity rdnEnt = this.getRiddenByEntity();
 
-      if(e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff) {
+      if (e == this || (e instanceof MCH_EntityHitBox && ((MCH_EntityHitBox) e).parent == this)) {
+         return false; // Prevent the aircraft from colliding with itself
+      }
+
+      if(e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff ) {
          return false;
       }
       //please stop fucking colliding with flares and chaffs you fucking retarded ass mod i swear to fuck
+      //and suddenly it starts colliding with itself when falling. Great. I really fucking love this shit.
 
       if(this.getSeatIdByEntity(e) >= 0) {
          return false;
