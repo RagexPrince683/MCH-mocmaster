@@ -390,7 +390,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         if(!MCH_Config.MouseControlFlightSimMode.prmBool && this.getVtolMode() != 0) {
             rot *= 0.0F;
         }
-        //todo figure out why or how this is not working for the ship
+        //todone figure out why or how this is not working for the ship
         if(super.moveLeft && !super.moveRight) {
             this.addkeyRotValue -= rot * partialTicks;
         }
@@ -433,7 +433,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     }
                 }
 
-                //todo again figure out why the ships dont accept this
+                //todone again figure out why the ships dont accept this
                 if(super.moveLeft && !super.moveRight) {
                     this.setRotYaw(this.getRotYaw() - 0.6F * rot * partialTicks);
                     this.currentSpeed = currentSpeed - rot;
@@ -876,6 +876,18 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             Block motion = MCH_Lib.getBlockY(this, 3, -2, false);
             if(!W_Block.isEqual(motion, W_Block.getWater()) && !W_Block.isEqual(motion, Blocks.air) && !W_Block.isEqual(motion, Blocks.flowing_water)) {
                 canMove = false;
+                //this.attackEntityFrom(, damage);
+                //should apply damage to ship if on land
+
+                if (this.getCountOnUpdate() % 50 == 0) {
+                    int hp1 = this.getMaxHP() / 30;
+                    if(hp1 <= 0) {
+                        hp1 = 1;
+                    }
+
+                    this.attackEntityFrom(DamageSource.inWall, hp1);
+                }
+                //todo apply damage
             }
         }
 
