@@ -918,10 +918,16 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             List<Entity> list = super.worldObj.getEntitiesWithinAABBExcludingEntity(this, bb.expand(0.3D, 0.3D, 0.3D), new IEntitySelector() {
                @Override
                public boolean isEntityApplicable(Entity e) {
+
+
+                  //if () {  // Ensure it ignores self e == MCP_EntityPlane.this || e == rideAc
+                  //   return false;
+                  //}
+
                   // Exclude certain entity types from being affected by collision
                   if (e != rideAc && !(e instanceof EntityItem) && !(e instanceof EntityXPOrb && !(e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff )
                           && !(e instanceof MCH_EntityBaseBullet) && !(e instanceof MCH_EntityChain)
-                          && !(e instanceof MCH_EntitySeat)) ) {
+                          && !(e instanceof MCH_EntitySeat)) && !(e == MCP_EntityPlane.this || e == rideAc) ) {
 
                      // Special handling for planes
                      //if (e instanceof MCP_EntityPlane) {
@@ -994,32 +1000,39 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    }
 
    private boolean shouldCollisionDamage(Entity e) {
-      //Entity rdnEnt = this.getRiddenByEntity();
-
+      // Prevent self-collision
       if (e == this || (e instanceof MCH_EntityHitBox && ((MCH_EntityHitBox) e).parent == this)) {
-         return false; // Prevent the aircraft from colliding with itself
-      }
-
-      if(e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff ) {
          return false;
       }
-      //please stop fucking colliding with flares and chaffs you fucking retarded ass mod i swear to fuck
-      //and suddenly it starts colliding with itself when falling. Great. I really fucking love this shit.
 
-      if(this.getSeatIdByEntity(e) >= 0) {
+      if (e == this || e == super.ridingEntity) {
          return false;
-      } else if(super.noCollisionEntities.containsKey(e)) {
+      }
+      //i hate this fucking mod
+
+
+
+      if (e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff) {
+         return false;
+      }
+
+      if (this.getSeatIdByEntity(e) >= 0) {
+         return false;
+      } else if (super.noCollisionEntities.containsKey(e)) {
          return false;
       } else {
-         if(e instanceof MCH_EntityHitBox && ((MCH_EntityHitBox)e).parent != null ) { //|| e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff
-            //cannot cast these to aircraft because fuck you lollll!!!!
-            MCH_EntityAircraft ac = ((MCH_EntityHitBox)e).parent;
-            if(super.noCollisionEntities.containsKey(ac)) {
+         if (e instanceof MCH_EntityHitBox && ((MCH_EntityHitBox) e).parent != null) {
+            MCH_EntityAircraft ac = ((MCH_EntityHitBox) e).parent;
+            if (super.noCollisionEntities.containsKey(ac)) {
                return false;
             }
          }
 
-         return e.ridingEntity instanceof MCH_EntityAircraft && super.noCollisionEntities.containsKey(e.ridingEntity)?false:!(e.ridingEntity instanceof MCH_EntitySeat) || ((MCH_EntitySeat)e.ridingEntity).getParent() == null || !super.noCollisionEntities.containsKey(((MCH_EntitySeat)e.ridingEntity).getParent());
+         return e.ridingEntity instanceof MCH_EntityAircraft && super.noCollisionEntities.containsKey(e.ridingEntity)
+                 ? false
+                 : !(e.ridingEntity instanceof MCH_EntitySeat)
+                 || ((MCH_EntitySeat)e.ridingEntity).getParent() == null
+                 || !super.noCollisionEntities.containsKey(((MCH_EntitySeat)e.ridingEntity).getParent());
       }
    }
 
