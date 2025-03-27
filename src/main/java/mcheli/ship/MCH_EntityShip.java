@@ -50,7 +50,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
 
     // Step 2: Add a method to start diving
     public void startDiving() {
-        if (!isDiving) {
+        if (!isDiving && this.isInWater()) {
             isDiving = true;
             // Additional logic to initiate diving, if needed
         }
@@ -232,12 +232,15 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 if (this.worldObj.getCollidingBoundingBoxes(this, boundingBox).isEmpty()) {
                     // Adjust the ship's vertical motion to simulate diving
                     this.motionY -= 0.05D; // Adjust the value as needed for diving speed
-                    // Adjust the ship's pitch to reflect the diving angle
-                    //this.setRotPitch(this.getRotPitch() - 1.0F); // Adjust the value as needed for diving angle
-                    //why would we do this? this is not needed
                 } else {
                     // Stop diving if a block is detected in the path
                     this.stopDiving();
+                }
+            } else {
+                // Maintain the diving level when diving is stopped
+                if (this.posY < divingLevel) {
+                    this.motionY = 0.0D; // Stop vertical motion
+                    this.posY = divingLevel; // Maintain the diving level
                 }
             }
 
@@ -375,6 +378,11 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             }
 
         }
+    }
+
+    @Override
+    public boolean canFloatWater() {
+        return !isDiving && super.canFloatWater();
     }
 
     public boolean canUpdateYaw(Entity player) {
