@@ -239,6 +239,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     //but alas this probably will crash, error, not work, or have some random fucking retarded
                     //once in a million obscure bug in it because this mod runs on tooth picks and fingernails
                     if (this.throttleUp) {
+                        
                         this.motionY -= 0.15D; // Adjust the value as needed for diving speed
                     } else if (this.throttleDown) {
                         this.motionY += 0.15D; // Adjust the value as needed for rising speed
@@ -254,9 +255,9 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 }
             } else {
                 // Maintain the diving level when diving is stopped
-                //except this doesn't actually maintain the diving level somehow because uhhhh floating
-                // or something I honestly have no idea
-                if (this.posY < divingLevel) {
+                if (Math.abs(this.posY - divingLevel) > 0.1D) {
+                    this.motionY = (divingLevel - this.posY) * 0.1D; // Smoothly adjust to the diving level
+                } else {
                     this.motionY = 0.0D; // Stop vertical motion
                     this.posY = divingLevel; // Maintain the diving level
                 }
