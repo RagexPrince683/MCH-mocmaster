@@ -232,7 +232,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 AxisAlignedBB boundingBox = this.boundingBox.expand(0.1D, 0.1D, 0.1D);
                 if (this.worldObj.getCollidingBoundingBoxes(this, boundingBox).isEmpty()) {
                     // Adjust the ship's vertical motion to simulate diving
-                    this.motionY = -0.15D; // Set the value for diving speed
+                    this.motionY -= 0.15D; // Adjust the value as needed for diving speed
                 } else {
                     // Stop diving if a block is detected in the path
                     this.stopDiving();
@@ -242,13 +242,6 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 if (this.posY < divingLevel) {
                     this.motionY = 0.0D; // Stop vertical motion
                     this.posY = divingLevel; // Maintain the diving level
-                } else {
-                    // Apply normal floating logic if not diving
-                    if (this.canFloatWater()) {
-                        this.motionY += 0.04D + (double) (this.getAcInfo().gravityInWater);
-                    } else {
-                        this.motionY += 0.04D + (double) (this.getAcInfo().gravity);
-                    }
                 }
             }
 
