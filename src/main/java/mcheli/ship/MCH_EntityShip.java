@@ -52,6 +52,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     public void startDiving() {
         if (!isDiving && this.isInWater()) {
             isDiving = true;
+            divingLevel = this.posY;
             // Additional logic to initiate diving, if needed
         }
     }
