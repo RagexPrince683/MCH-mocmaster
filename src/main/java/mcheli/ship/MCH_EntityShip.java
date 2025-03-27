@@ -855,7 +855,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         Entity rdnEnt = this.getRiddenByEntity();
         double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
         double dp = 0.0D;
-        if(this.canFloatWater()) {
+        if(this.canFloatWater() && !this.isDiving) {
             dp = this.getWaterDepth();
         }
 
