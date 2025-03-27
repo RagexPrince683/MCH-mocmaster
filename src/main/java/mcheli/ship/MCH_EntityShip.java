@@ -43,7 +43,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     public float rotationRotor;
     public float prevRotationRotor;
     public float addkeyRotValue;
-    protected boolean isDiving = false;
+    public boolean isDiving = false;
     private double divingLevel = 0.0D;
 
     public int timer = 0;
@@ -232,13 +232,30 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 AxisAlignedBB boundingBox = this.boundingBox.expand(0.1D, 0.1D, 0.1D);
                 if (this.worldObj.getCollidingBoundingBoxes(this, boundingBox).isEmpty()) {
                     // Adjust the ship's vertical motion to simulate diving
-                    this.motionY -= 0.15D; // Adjust the value as needed for diving speed
+
+                    //idk if this will work this is just me silly posting in the code
+                    //we did have it so it just went down but that's not what we want because submarines
+                    //don't just immediately fucking sink like a boolean regardless of what gpt tells you
+                    //but alas this probably will crash, error, not work, or have some random fucking retarded
+                    //once in a million obscure bug in it because this mod runs on tooth picks and fingernails
+                    if (this.throttleUp) {
+                        this.motionY -= 0.15D; // Adjust the value as needed for diving speed
+                    } else if (this.throttleDown) {
+                        this.motionY += 0.15D; // Adjust the value as needed for rising speed
+                    }
+
                 } else {
+
+                    this.motionY = 0.0D; // NO DUMBASS, Stop vertical motion
+
+                    //BAD METHOD NO DO NOT DO THIS:
                     // Stop diving if a block is detected in the path
-                    this.stopDiving();
+                    //this.stopDiving();
                 }
             } else {
                 // Maintain the diving level when diving is stopped
+                //except this doesn't actually maintain the diving level somehow because uhhhh floating
+                // or something I honestly have no idea
                 if (this.posY < divingLevel) {
                     this.motionY = 0.0D; // Stop vertical motion
                     this.posY = divingLevel; // Maintain the diving level
@@ -381,10 +398,10 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         }
     }
 
-    @Override
-    public boolean canFloatWater() {
-        return !isDiving && super.canFloatWater();
-    }
+    //@Override
+    //public boolean canFloatWater() {
+    //    return !isDiving && super.canFloatWater();
+    //}
 
     public boolean canUpdateYaw(Entity player) {
         return super.canUpdateYaw(player) && !this.isHovering();
@@ -855,7 +872,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         Entity rdnEnt = this.getRiddenByEntity();
         double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
         double dp = 0.0D;
-        if(this.canFloatWater() && !this.isDiving) {
+        if(this.canFloatWater() && !this.isDiving) { //todo maybe remove this, we kind of actually want to check the water depth.
             dp = this.getWaterDepth();
         }
 
@@ -882,7 +899,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 }
             }
 
-            if(!levelOff) {
+            if(!levelOff) { //todo additional check here for not diving
                 super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
                 super.motionY += -0.047D * (1.0D - this.getCurrentThrottle());
             } else {

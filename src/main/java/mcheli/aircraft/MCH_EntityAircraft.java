@@ -22,6 +22,7 @@ import mcheli.multiplay.MCH_Multiplay;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
+import mcheli.ship.MCH_EntityShip;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.weapon.*;
@@ -748,7 +749,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public boolean canFloatWater() {
-      return this.getAcInfo() != null && this.getAcInfo().isFloat && !this.isDestroyed();
+      //todo add check here, not in ship if still somehow fucked
+      if (this instanceof MCH_EntityShip) {
+         MCH_EntityShip ship = (MCH_EntityShip) this;
+         return !ship.isDiving && this.getAcInfo() != null && this.getAcInfo().isFloat && !this.isDestroyed();
+      } else {
+         return this.getAcInfo() != null && this.getAcInfo().isFloat && !this.isDestroyed();
+      }
    }
 
    @SideOnly(Side.CLIENT)
