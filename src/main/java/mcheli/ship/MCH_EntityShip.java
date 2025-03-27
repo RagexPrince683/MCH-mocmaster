@@ -67,6 +67,13 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         }
     }
 
+    private void updatePositionToTargetDepth() {
+        if (this.isInWater()) {
+            this.posY = targetDepth;
+            this.motionY = 0.0D; // Stop vertical motion
+        }
+    }
+
 
     public MCH_EntityShip(World world) {
         super(world);
@@ -245,16 +252,19 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     //once in a million obscure bug in it because this mod runs on tooth picks and fingernails
                     if (this.isInWater()) {
                         this.getAcInfo().gravityInWater = 0.0F; // Override gravity in water
-
-                        if (this.throttleUp) {
-                            targetDepth = this.posY - 10.0D; // Set target depth for diving
-                        } else if (this.throttleBack > 0.01) {
-                            targetDepth = this.posY + 10.0D; // Set target depth for rising
+                            //this.getCurrentThrottle() > 0.0D
+                        if (this.getCurrentThrottle() > 0.01) {
+                            targetDepth = this.posY - 1.0D; // Set target depth for diving
+                        } else if (this.getCurrentThrottle() < 0.01) {
+                            targetDepth = this.posY + 1.0D; // Set target depth for rising
                         }
 
                         // Adjust motionY to move towards the target depth smoothly
                         double depthDifference = targetDepth - this.posY;
                         this.motionY = depthDifference * 0.1D; // Adjust the value for smooth movement
+
+                        // Update position to target depth
+                        updatePositionToTargetDepth(); //this.
                     }
 
                 } else {
@@ -303,6 +313,8 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
 
             //if this.aircraftPitch <= -15
 
+
+            //todo probably not needed for ships
             if(this.getThrottle() <= 0.90 && this.isAirBorne) { //should apply a slow descent
                 this.aircraftY = this.aircraftY - (this.aircraftY*(0.2*this.getThrottle()));
             }
