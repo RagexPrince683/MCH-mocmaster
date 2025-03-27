@@ -106,7 +106,12 @@ public class MCH_GuiShip extends MCH_AircraftCommonGui {
                     if(!Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
                         int stat = plane.getVtolMode();
                         if(stat != 1) {
-                            var12 = (new StringBuilder()).append(stat == 0?"VTOL : ":"Normal : ");
+                            //give the submarine a slow gradual descent gravity for diving.
+                            //if(plane.getShipInfo().isSubmarine) {
+                            //plane.motionY -= 0.01;
+                            //plane.get
+                            //}
+                            var12 = (new StringBuilder()).append(stat == 0?"DIVING : ":"Normal : ");
                             var10001 = MCH_MOD.config;
                             msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
                             this.drawString(msg, RX, super.centerY - 60, colorActive);

@@ -20,6 +20,7 @@ public class MCH_ClientShipTickHandler extends MCH_AircraftClientTickHandler {
     public MCH_Key KeyEjectSeat;
     public MCH_Key KeyZoom;
     public MCH_Key[] Keys;
+    //public MCH_Key KeySwitchHovering;
 
 
     public MCH_ClientShipTickHandler(Minecraft minecraft, MCH_Config config) {
@@ -128,6 +129,9 @@ public class MCH_ClientShipTickHandler extends MCH_AircraftClientTickHandler {
         send = this.commonPlayerControl(player, plane, isPilot, pc);
         boolean isUav;
         if(isPilot) {
+
+
+
             if(this.KeySwitchMode.isKeyDown()) {
                 if(plane.getIsGunnerMode(player) && plane.canSwitchCameraPos()) {
                     pc.switchMode = 0;
@@ -161,8 +165,10 @@ public class MCH_ClientShipTickHandler extends MCH_AircraftClientTickHandler {
                     }
 
                     plane.swithVtolMode(!isUav);
+                    //plane.startDiving();
                     send = true;
                 } else {
+                    //if theres no 'vtol' (diving in this case)
                     playSoundNG();
                 }
             }

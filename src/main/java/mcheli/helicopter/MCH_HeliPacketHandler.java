@@ -40,7 +40,6 @@ public class MCH_HeliPacketHandler {
                heli.unmountCrew();
             } else if(pc.ejectSeat) {
                   heli.ejectSeat(player);
-                  //heli.killselfnow!!!
             } else {
                if(pc.switchFold == 0) {
                   heli.setFoldBladeStat((byte)3);

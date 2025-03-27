@@ -43,8 +43,25 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     public float rotationRotor;
     public float prevRotationRotor;
     public float addkeyRotValue;
+    protected boolean isDiving = false;
 
     public int timer = 0;
+
+    // Step 2: Add a method to start diving
+    public void startDiving() {
+        if (!isDiving) {
+            isDiving = true;
+            // Additional logic to initiate diving, if needed
+        }
+    }
+
+    // Step 3: Add a method to stop diving
+    public void stopDiving() {
+        if (isDiving) {
+            isDiving = false;
+            // Additional logic to stop diving, if needed
+        }
+    }
 
 
     public MCH_EntityShip(World world) {
@@ -154,6 +171,18 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         }
     }
 
+    //public boolean canSwitchHoveringMode() {
+    //    if(super.canSwitchHoveringMode()) {
+    //        float roll = MathHelper.abs(MathHelper.wrapAngleTo180_float(this.getRotRoll()));
+    //        float pitch = MathHelper.abs(MathHelper.wrapAngleTo180_float(this.getRotPitch()));
+    //        if(roll < 40.0F && pitch < 40.0F) {
+    //            return true;
+    //        }
+    //    }
+//
+    //    return false;
+    //}
+
     public void onUpdateAircraft() {
         if(this.planeInfo == null) {
             this.changeType(this.getTypeName());
@@ -195,6 +224,15 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 this.rotationRotor += 360.0F;
                 this.prevRotationRotor += 360.0F;
             }
+
+            if (isDiving) {
+                // Adjust the ship's vertical motion to simulate diving
+                this.motionY -= 0.15D; // Adjust the value as needed for diving speed
+                // Adjust the ship's pitch to reflect the diving angle
+                this.setRotPitch(this.getRotPitch() - 1.0F); // Adjust the value as needed for diving angle
+            }
+
+            //todo add surfacing as well
 
             //todo: use super.onGround to better check crash physics
             if(super.onGround && this.getVtolMode() == 0 && this.planeInfo.isDefaultVtol) {
@@ -889,7 +927,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                         this.attackEntityFrom(DamageSource.inWall, hp1);
                     }
                 }
-                //todo apply damage
+                //todone apply damage
             }
         }
 
@@ -1219,6 +1257,11 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     }
 
     public void swithVtolMode(boolean mode) {
+        if (mode == true) {
+            this.startDiving();
+        } else {
+            this.stopDiving();
+        }
         if(this.partNozzle != null) {
             if(this.planeInfo.isDefaultVtol && super.onGround && !mode) {
                 return;
