@@ -946,7 +946,10 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
                      // }
 
                      // Default collision entity damage
-                     return MCH_Config.Collision_EntityDamage.prmBool;
+                     if (e instanceof MCH_EntityHeli) {
+                        return MCH_Config.Collision_EntityDamage.prmBool;
+                     }
+                     //how does this singular if statement fix everything I can't with this fucking mod
                   }
                   return false;
                }

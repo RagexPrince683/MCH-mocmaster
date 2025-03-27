@@ -2282,7 +2282,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                if(cmd1 != null) {
 
-
+                  System.out.println("should be a tank");
                   //MCH_AircraftInfo.armorMinDamage
                   //todo test for armor min damage
                   this.attackEntityFrom(DamageSource.inWall, hp1 + cmd1.armorMinDamage);

@@ -878,14 +878,16 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 canMove = false;
                 //this.attackEntityFrom(, damage);
                 //should apply damage to ship if on land
+                if (this instanceof MCH_EntityShip) {
 
-                if (this.getCountOnUpdate() % 50 == 0) {
-                    int hp1 = this.getMaxHP() / 30;
-                    if(hp1 <= 0) {
-                        hp1 = 1;
+                    if (this.getCountOnUpdate() % 50 == 0) {
+                        int hp1 = this.getMaxHP() / 30;
+                        if (hp1 <= 0) {
+                            hp1 = 1;
+                        }
+
+                        this.attackEntityFrom(DamageSource.inWall, hp1);
                     }
-
-                    this.attackEntityFrom(DamageSource.inWall, hp1);
                 }
                 //todo apply damage
             }
@@ -992,7 +994,9 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                             // }
 
                             // Default collision entity damage
-                            return MCH_Config.Collision_EntityDamage.prmBool;
+                            if (e instanceof MCH_EntityShip) {
+                                return MCH_Config.Collision_EntityDamage.prmBool;
+                            }
                         }
                         return false;
                     }

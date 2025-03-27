@@ -940,7 +940,9 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
                     // }
 
                      // Default collision entity damage
-                     return MCH_Config.Collision_EntityDamage.prmBool;
+                     if (e instanceof MCP_EntityPlane) {
+                        return MCH_Config.Collision_EntityDamage.prmBool;
+                     }
                   }
                   return false;
                }
