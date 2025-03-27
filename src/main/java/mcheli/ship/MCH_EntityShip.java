@@ -45,7 +45,8 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     public float addkeyRotValue;
     public boolean isDiving = false;
     private double divingLevel = 0.0D;
-    protected float predivegravity;
+    private double targetDepth = 0.0D;
+
 
     public int timer = 0;
 
@@ -243,18 +244,17 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     //but alas this probably will crash, error, not work, or have some random fucking retarded
                     //once in a million obscure bug in it because this mod runs on tooth picks and fingernails
                     if (this.isInWater()) {
-
-                        //this.getAcInfo().gravityInWater = predivegravity;
+                        this.getAcInfo().gravityInWater = 0.0F; // Override gravity in water
 
                         if (this.throttleUp) {
-                            this.getAcInfo().gravityInWater = 0.0F;
-                            //override aircraft info.gravity in water to be 0 at this point 2
-                            this.motionY -= 0.15D; // Adjust the value as needed for diving speed
+                            targetDepth = this.posY - 10.0D; // Set target depth for diving
                         } else if (this.throttleBack > 0.01) {
-                            //override aircraft info.gravity in water to be 0 at this point 3
-                            this.getAcInfo().gravityInWater = 0.0F;
-                            this.motionY += 0.15D; // Adjust the value as needed for rising speed
+                            targetDepth = this.posY + 10.0D; // Set target depth for rising
                         }
+
+                        // Adjust motionY to move towards the target depth smoothly
+                        double depthDifference = targetDepth - this.posY;
+                        this.motionY = depthDifference * 0.1D; // Adjust the value for smooth movement
                     }
 
                 } else {
