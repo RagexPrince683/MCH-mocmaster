@@ -231,7 +231,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 AxisAlignedBB boundingBox = this.boundingBox.expand(0.1D, 0.1D, 0.1D);
                 if (this.worldObj.getCollidingBoundingBoxes(this, boundingBox).isEmpty()) {
                     // Adjust the ship's vertical motion to simulate diving
-                    this.motionY -= 0.05D; // Adjust the value as needed for diving speed
+                    this.motionY -= 0.15D; // Adjust the value as needed for diving speed
                 } else {
                     // Stop diving if a block is detected in the path
                     this.stopDiving();
