@@ -228,6 +228,9 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             }
 
             if (isDiving) {
+
+                //override aircraft info.gravity in water to be 0 at this point 1 basically just make it 0
+
                 // Check for blocks in the path to prevent diving through them
                 AxisAlignedBB boundingBox = this.boundingBox.expand(0.1D, 0.1D, 0.1D);
                 if (this.worldObj.getCollidingBoundingBoxes(this, boundingBox).isEmpty()) {
@@ -239,9 +242,11 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     //but alas this probably will crash, error, not work, or have some random fucking retarded
                     //once in a million obscure bug in it because this mod runs on tooth picks and fingernails
                     if (this.throttleUp) {
-                        
+                        //override aircraft info.gravity in water to be 0 at this point 2
                         this.motionY -= 0.15D; // Adjust the value as needed for diving speed
                     } else if (this.throttleDown) {
+                        //override aircraft info.gravity in water to be 0 at this point 3
+
                         this.motionY += 0.15D; // Adjust the value as needed for rising speed
                     }
 
@@ -255,12 +260,16 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 }
             } else {
                 // Maintain the diving level when diving is stopped
-                if (Math.abs(this.posY - divingLevel) > 0.1D) {
-                    this.motionY = (divingLevel - this.posY) * 0.1D; // Smoothly adjust to the diving level
-                } else {
+                if (this.posY < divingLevel) {
+                    //this is not smooth even remotely
+                    //this.motionY = (divingLevel - this.posY) * 0.1D; // Smoothly adjust to the diving level
                     this.motionY = 0.0D; // Stop vertical motion
                     this.posY = divingLevel; // Maintain the diving level
                 }
+                //pretty sure this will always fire like immediately upon placement
+                //else {
+
+                //}
             }
 
             //todo add surfacing as well
