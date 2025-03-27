@@ -44,6 +44,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     public float prevRotationRotor;
     public float addkeyRotValue;
     protected boolean isDiving = false;
+    private double divingLevel = 0.0D;
 
     public int timer = 0;
 
@@ -59,7 +60,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     public void stopDiving() {
         if (isDiving) {
             isDiving = false;
-            // Additional logic to stop diving, if needed
+            divingLevel = this.posY; // Store the current Y position as the diving level
         }
     }
 
