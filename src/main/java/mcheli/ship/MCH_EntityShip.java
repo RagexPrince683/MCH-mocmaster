@@ -226,10 +226,18 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             }
 
             if (isDiving) {
-                // Adjust the ship's vertical motion to simulate diving
-                this.motionY -= 0.15D; // Adjust the value as needed for diving speed
-                // Adjust the ship's pitch to reflect the diving angle
-                this.setRotPitch(this.getRotPitch() - 1.0F); // Adjust the value as needed for diving angle
+                // Check for blocks in the path to prevent diving through them
+                AxisAlignedBB boundingBox = this.boundingBox.expand(0.1D, 0.1D, 0.1D);
+                if (this.worldObj.getCollidingBoundingBoxes(this, boundingBox).isEmpty()) {
+                    // Adjust the ship's vertical motion to simulate diving
+                    this.motionY -= 0.05D; // Adjust the value as needed for diving speed
+                    // Adjust the ship's pitch to reflect the diving angle
+                    //this.setRotPitch(this.getRotPitch() - 1.0F); // Adjust the value as needed for diving angle
+                    //why would we do this? this is not needed
+                } else {
+                    // Stop diving if a block is detected in the path
+                    this.stopDiving();
+                }
             }
 
             //todo add surfacing as well
