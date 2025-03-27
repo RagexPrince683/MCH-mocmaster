@@ -252,19 +252,22 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     //once in a million obscure bug in it because this mod runs on tooth picks and fingernails
                     if (this.isInWater()) {
                         this.getAcInfo().gravityInWater = 0.0F; // Override gravity in water
-                            //this.getCurrentThrottle() > 0.0D
+
                         if (this.getCurrentThrottle() > 0.01) {
                             targetDepth = this.posY - 1.0D; // Set target depth for diving
                         } else if (this.getCurrentThrottle() < 0.01) {
                             targetDepth = this.posY + 1.0D; // Set target depth for rising
                         }
 
-                        // Adjust motionY to move towards the target depth smoothly
+                        // Step 2: Adjust motionY to move towards the target depth smoothly
                         double depthDifference = targetDepth - this.posY;
                         this.motionY = depthDifference * 0.1D; // Adjust the value for smooth movement
 
-                        // Update position to target depth
-                        updatePositionToTargetDepth(); //this.
+                        // Step 3: Update position to target depth
+                        if (Math.abs(depthDifference) < 0.1D) {
+                            this.posY = targetDepth;
+                            this.motionY = 0.0D; // Stop vertical motion
+                        }
                     }
 
                 } else {
