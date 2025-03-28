@@ -380,6 +380,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
          //logic for like rotation
          if(!isFly || this.getAcInfo().isFloat && this.getWaterDepth() > 0.0D) {
+            //todo fix tank floatation rotation, likes to randomly glitchily capsize
             float rotonground = 1.0F;
             if(!isFly) {
                rotonground = this.getAcInfo().mobilityYawOnGround;
