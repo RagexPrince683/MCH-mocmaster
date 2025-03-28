@@ -224,7 +224,6 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             this.updateWeapons();
             this.onUpdate_Seats();
             this.onUpdate_Control();
-            this.updateDiving();
             this.prevRotationRotor = this.rotationRotor;
             this.rotationRotor = (float)((double)this.rotationRotor + this.getCurrentThrottle() * (double)this.getAcInfo().rotorSpeed);
             if(this.rotationRotor > 360.0F) {
@@ -514,67 +513,6 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
 
     }
 
-    public void updateDiving() {
-        // Debug: Log diving state and current Y position
-        System.out.println("[DEBUG] updateDiving() called. isDiving = " + isDiving + ", posY = " + posY);
-
-        if (isDiving) {
-            // Check for potential collisions in the diving path
-            AxisAlignedBB checkBB = boundingBox.expand(0.1D, 0.1D, 0.1D);
-            boolean noCollision = worldObj.getCollidingBoundingBoxes(this, checkBB).isEmpty();
-            System.out.println("[DEBUG] Checking collisions. No collision? " + noCollision);
-
-            if (noCollision) {
-                // Determine the block 2 units below the ship (with an offset) to check water state
-                Block belowBlock = MCH_Lib.getBlockY(this, 3, -2, false);
-                System.out.println("[DEBUG] Block detected below ship: " + belowBlock);
-
-                // Only adjust diving if the block isn't water
-                if (!W_Block.isEqual(belowBlock, W_Block.getWater()) && !W_Block.isEqual(belowBlock, Blocks.flowing_water)) {
-                    // Override water physics while diving
-                    this.getAcInfo().gravityInWater = 0.0F;
-                    this.getAcInfo().isFloat = false;
-                    System.out.println("[DEBUG] Overriding gravity and float settings for diving.");
-
-                    // Set target depth based on throttle
-                    if (this.getCurrentThrottle() > 0.01) {
-                        this.getAcInfo().gravityInWater += 0.1F;
-                        targetDepth = posY - 1.0D;
-                        System.out.println("[DEBUG] Throttle high (" + this.getCurrentThrottle() + "). Setting targetDepth = " + targetDepth + " (diving down).");
-                    } else {
-                        this.getAcInfo().gravityInWater -= 0.1F;
-                        targetDepth = posY + 1.0D;
-                        System.out.println("[DEBUG] Throttle low (" + this.getCurrentThrottle() + "). Setting targetDepth = " + targetDepth + " (rising up).");
-                    }
-
-                    // Compute the difference between current position and target depth, then adjust vertical motion
-                    double depthDifference = targetDepth - posY;
-                    motionY = depthDifference * 0.1D;
-                    System.out.println("[DEBUG] depthDifference = " + depthDifference + ", setting motionY = " + motionY);
-
-                    // When the depth difference is negligible, snap to the target depth
-                    if (Math.abs(depthDifference) < 0.1D) {
-                        updatePositionToTargetDepth();
-                        System.out.println("[DEBUG] Depth difference minimal (< 0.1). Snapping position to target depth.");
-                    }
-                } else {
-                    System.out.println("[DEBUG] Water detected below. No diving adjustments made.");
-                }
-            } else {
-                // Collision detected—halt vertical motion to avoid clipping into blocks.
-                motionY = 0.0D;
-                System.out.println("[DEBUG] Collision detected in diving path. Halting vertical motion.");
-            }
-        } else {
-            // Not in diving mode: maintain the last known diving level
-            if (posY < divingLevel) {
-                motionY = 0.0D;
-                posY = divingLevel;
-                System.out.println("[DEBUG] Not diving. Resetting posY to stored divingLevel = " + divingLevel);
-            }
-        }
-    }
-
     public void onUpdateAngles(float partialTicks) {
         if(!this.isDestroyed()) {
             if(super.isGunnerMode) {
@@ -588,7 +526,6 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             boolean isFly = MCH_Lib.getBlockIdY(this, 3, -3) == 0;
             float rot;
             if(isFly && !this.isFreeLookMode() && !super.isGunnerMode && (!this.getAcInfo().isFloat || this.getWaterDepth() <= 0.0D)) {
-                //todo some sort of fucking logic for submarines here fuck this mod has too much shit in it this is annoying
                 if(isFly) {
                     MCH_Config var10000 = MCH_MOD.config;
                     if(!MCH_Config.MouseControlFlightSimMode.prmBool) {

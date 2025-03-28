@@ -5954,7 +5954,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             } else if(this.isLandingGearFolded() && this.partLandingGear.getFactor() >= 0.9F) {
                var8 = MCH_Lib.getBlockIdY(this, 3, -10);
                if(this.getCurrentThrottle() < (double)this.getUnfoldLandingGearThrottle() && var8 != 0) {
-                  //todo probably has some shit to do with why the subs are having a absolute fucking fit?
                   boolean var9 = true;
                   if(this.getAcInfo().isFloat) {
                      var8 = MCH_Lib.getBlockIdY(super.worldObj, super.posX, super.posY + 1.0D + (double)this.getAcInfo().floatOffset, super.posZ, 1, -150, true);
