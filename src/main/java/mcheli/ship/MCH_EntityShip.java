@@ -250,23 +250,27 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     //don't just immediately fucking sink like a boolean regardless of what gpt tells you
                     //but alas this probably will crash, error, not work, or have some random fucking retarded
                     //once in a million obscure bug in it because this mod runs on tooth picks and fingernails
-                    if (this.isInWater()) {
+                    //if (this.isInWater()) {
+                    Block block = MCH_Lib.getBlockY(this, 3, -2, false);
+                    if(!W_Block.isEqual(block, W_Block.getWater()) && !W_Block.isEqual(block, Blocks.flowing_water)) {
+                        //use different method than isinwater, not good enough
                         this.getAcInfo().gravityInWater = 0.0F; // Override gravity in water
 
                         if (this.getCurrentThrottle() > 0.01) {
+                            this.getAcInfo().gravityInWater = this.getAcInfo().gravityInWater + 0.1F;
                             targetDepth = this.posY - 1.0D; // Set target depth for diving
                         } else if (this.getCurrentThrottle() < 0.01) {
+                            this.getAcInfo().gravityInWater = this.getAcInfo().gravityInWater - 0.1F;
                             targetDepth = this.posY + 1.0D; // Set target depth for rising
                         }
 
-                        // Step 2: Adjust motionY to move towards the target depth smoothly
+                        // Adjust motionY to move towards the target depth smoothly
                         double depthDifference = targetDepth - this.posY;
                         this.motionY = depthDifference * 0.1D; // Adjust the value for smooth movement
 
                         // Step 3: Update position to target depth
                         if (Math.abs(depthDifference) < 0.1D) {
-                            this.posY = targetDepth;
-                            this.motionY = 0.0D; // Stop vertical motion
+                            updatePositionToTargetDepth();
                         }
                     }
 
@@ -931,7 +935,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 }
             }
 
-            if(!levelOff) { //todo additional check here for not diving
+            if(!levelOff && !isDiving) { //todo additional check here for not diving
                 super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
                 super.motionY += -0.047D * (1.0D - this.getCurrentThrottle());
             } else {
