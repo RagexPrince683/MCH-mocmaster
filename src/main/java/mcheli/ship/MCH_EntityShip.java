@@ -255,14 +255,11 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     if(!W_Block.isEqual(block, W_Block.getWater()) && !W_Block.isEqual(block, Blocks.flowing_water)) {
                         //use different method than isinwater, not good enough
                         this.getAcInfo().gravityInWater = 0.0F; // Override gravity in water
-                        this.getAcInfo().isFloat = false;
 
                         if (this.getCurrentThrottle() > 0.01) {
-                            this.getAcInfo().isFloat = false;
                             this.getAcInfo().gravityInWater = this.getAcInfo().gravityInWater + 0.1F;
                             targetDepth = this.posY - 1.0D; // Set target depth for diving
                         } else if (this.getCurrentThrottle() < 0.01) {
-                            this.getAcInfo().isFloat = false;
                             this.getAcInfo().gravityInWater = this.getAcInfo().gravityInWater - 0.1F;
                             targetDepth = this.posY + 1.0D; // Set target depth for rising
                         }
@@ -331,7 +328,8 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
 
 
 
-
+            //TODO: if (this.motionY >= 2.0 && this.landing) { apply damage
+            //todo: add the check for flying hurty was put in wrong place
             //this.getAlt();
             if(this.motionY <= -2.0) { // I cannot detect if the aircraft hit or touched the ground
 
@@ -349,11 +347,10 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
 
 
 
-
+                //todo: debug and ensure this works as intended
 
             }
 
-            //todo remove
             if (this.aircraftPitch >= 80 && this.isEntityAlive() && this.isAirBorne) { // Begin dive logic
                 timer++;
 
@@ -545,7 +542,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     }
                 }
 
-
+                //todone again figure out why the ships dont accept this
                 if(super.moveLeft && !super.moveRight) {
                     this.setRotYaw(this.getRotYaw() - 0.6F * rot * partialTicks);
                     this.currentSpeed = currentSpeed - rot;
@@ -938,8 +935,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 }
             }
 
-            if(!levelOff ) { //todo additional check here for not diving
-                //&& !isDiving
+            if(!levelOff && !isDiving) { //todo additional check here for not diving
                 super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
                 super.motionY += -0.047D * (1.0D - this.getCurrentThrottle());
             } else {
