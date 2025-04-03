@@ -184,6 +184,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private int modeSwitchCooldown;
    public Vec3 target = Vec3.createVectorHelper(0, 0, 0);
    public MCH_BoundingBox[] extraBoundingBox;
+   public wheelBoundingBox[] extrawheelboundingbox;
    public float lastBBDamageFactor;
    private final MCH_AircraftInventory inventory;
    private double fuelConsumption;
@@ -312,6 +313,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.prevRotationRoll = 0.0F;
       this.lowPassPartialTicks = new MCH_LowPassFilterFloat(10);
       this.extraBoundingBox = new MCH_BoundingBox[0];
+      this.extrawheelboundingbox = new wheelBoundingBox[0];
       W_Reflection.setBoundingBox(this, new MCH_AircraftBoundingBox(this));
       this.lastBBDamageFactor = 1.0F;
       this.inventory = new MCH_AircraftInventory(this);
@@ -614,6 +616,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return this.getAcInfo() != null?this.getAcInfo().maxHp:100;
    }
 
+   public int getMaxWheelDamage() {
+      return this.getAcInfo() != null?this.getAcInfo().maxWheelDMG:20;
+   }
+
+
    public int getHP() {
       return Math.max(this.getMaxHP() - this.getDamageTaken(), 0);
    }
@@ -623,6 +630,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          par1 = 0;
       }
 
+      //if(this instanceof wheelBoundingBox) {
+      //   causewheeldamage;
+      //}
+
+      //incompatible types
+
       if(par1 > this.getMaxHP()) {
          par1 = this.getMaxHP();
       }
@@ -631,6 +644,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public int getDamageTaken() {
+      return this.getDataWatcher().getWatchableObjectInt(19);
+   }
+
+   public int getWheelDamageTaken() {
       return this.getDataWatcher().getWatchableObjectInt(19);
    }
 
@@ -1036,6 +1053,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                if(!this.isDestroyed()) {
                   if(!isDamegeSourcePlayer) {
+
+                     //add wheel damage
+
+                     if(this.getDamageTaken() >= this.getMaxWheelDamage() &&) {
+                        //&& this.attackedboundingbox is a wheel boundingbox
+                     }
+
                      MCH_AircraftInfo cmd1 = this.getAcInfo();
                      if(cmd1 != null) {
                         //deranged statements below removed from above statement
@@ -5702,6 +5726,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.rotPartRotation = new float[info.partRotPart.size()];
          this.prevRotPartRotation = new float[info.partRotPart.size()];
          this.extraBoundingBox = this.createExtraBoundingBox();
+         this.extrawheelboundingbox = this.createannoyingboundingbox();
          this.partEntities = this.createParts();
          super.stepHeight = info.stepHeight;
       }
@@ -5726,6 +5751,28 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       return ar;
+   }
+
+
+   public wheelBoundingBox[] createannoyingboundingbox() {
+      // Get the list of extra bounding boxes
+      MCH_AircraftInfo acInfo = this.getAcInfo();
+      if (acInfo == null || acInfo.wheelboundingbox == null) {
+         return new wheelBoundingBox[0];
+      }
+
+      List<wheelBoundingBox> stupidboundingBoxes = acInfo.wheelboundingbox;
+
+      // Initialize the array with the size of the list
+      wheelBoundingBox[] ar2 = new wheelBoundingBox[stupidboundingBoxes.size()];
+
+      // Iterate over the list and copy each bounding box to the array
+      int i = 0;
+      for (wheelBoundingBox bb2 : stupidboundingBoxes) {
+         ar2[i++] = bb2.copy2();
+      }
+
+      return ar2;
    }
 
    public Entity[] createParts() {

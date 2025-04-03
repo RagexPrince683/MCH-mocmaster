@@ -34,8 +34,13 @@ public class MCH_BoundingBox {
       this.updatePosition(0.0D, 0.0D, 0.0D, 0.0F, 0.0F, 0.0F);
    }
 
+
    public MCH_BoundingBox copy() {
       return new MCH_BoundingBox(this.offsetX, this.offsetY, this.offsetZ, this.width, this.height, this.damegeFactor);
+   }
+
+   public wheelBoundingBox copy2() {
+      return new wheelBoundingBox(this.offsetX, this.offsetY, this.offsetZ, this.width, this.height, this.damegeFactor);
    }
 
    public void updatePosition(double posX, double posY, double posZ, float yaw, float pitch, float roll) {

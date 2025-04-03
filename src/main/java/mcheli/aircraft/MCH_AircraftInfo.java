@@ -43,6 +43,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    public float gravity;
    public float gravityInWater;
    public int maxHp;
+   public int maxWheelDMG;
    public float armorMinDamage;
    public float armorMaxDamage;
    public float armorDamageFactor;
@@ -65,6 +66,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    public float submergedDamageHeight;
    public boolean regeneration;
    public List extraBoundingBox;
+   public List wheelboundingbox;
    public List wheels;
    public int maxFuel;
    public float fuelConsumption;
@@ -995,8 +997,10 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                             s = this.splitParam(data);
                                                             if(s.length >= 3) {
                                                                //caused tracked vehicles to stop working :(
-                                                               //MCH_BoundingBox wheelBoundingBox = new MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.partTrackRoller.size(), 1); //xyz, height, damagefactor, we need a new boundingbox type for this to work correctly
-                                                               //this.extraBoundingBox.add(wheelBoundingBox);
+                                                               wheelBoundingBox wheelBoundingBox = new wheelBoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.partTrackRoller.size(), 1); //xyz, height, damagefactor, we need a new boundingbox type for this to work correctly
+                                                               this.extraBoundingBox.add(wheelBoundingBox);
+                                                               //god will declare this to NOT WORK
+
                                                                this.partTrackRoller.add(new MCH_AircraftInfo.TrackRoller(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), "track_roller" + this.partTrackRoller.size()));
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddCrawlerTrack")) {
