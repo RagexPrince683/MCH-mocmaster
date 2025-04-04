@@ -279,6 +279,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.canRotOnGround = true;
       this.cameraZoom = this.getDefaultMaxZoom();
       this.extraBoundingBox = new ArrayList();
+      this.wheelboundingbox = new ArrayList();
       this.maxFuel = 0;
       this.fuelConsumption = 1.0F;
       this.fuelSupplyRange = 0.0F;
@@ -998,8 +999,9 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                             s = this.splitParam(data);
                                                             if(s.length >= 3) {
                                                                //caused tracked vehicles to stop working :(
-                                                               wheelBoundingBox wheelBoundingBox = new wheelBoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.partTrackRoller.size(), 1); //xyz, height, damagefactor, we need a new boundingbox type for this to work correctly
-                                                               this.extraBoundingBox.add(wheelBoundingBox);
+                                                               wheelBoundingBox wheelBoundingBox = new wheelBoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), 1, 1); //xyz, height, damagefactor, we need a new boundingbox type for this to work correctly
+                                                               //this.partTrackRoller.size() is probably causing errors, removing for now
+                                                               this.wheelboundingbox.add(wheelBoundingBox);
                                                                //god will declare this to NOT WORK
 
                                                                this.partTrackRoller.add(new MCH_AircraftInfo.TrackRoller(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), "track_roller" + this.partTrackRoller.size()));
@@ -1374,6 +1376,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.exclusionSeatList.clear();
       this.entityRackList.clear();
       this.extraBoundingBox.clear();
+      this.wheelboundingbox.clear();
       this.weaponSetList.clear();
       this.lastWeaponIndex = -1;
       this.lastWeaponType = "";

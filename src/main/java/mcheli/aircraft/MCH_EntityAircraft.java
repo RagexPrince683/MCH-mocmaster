@@ -4219,39 +4219,87 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void setUnmountPosition(Entity rByEntity, Vec3 pos) {
-      if(rByEntity != null) {
-         MCH_AircraftInfo info = this.getAcInfo();
-         Vec3 v;
-         if(info != null && info.unmountPosition != null) {
-            v = this.getTransformedPosition(info.unmountPosition);
-         } else {
-            double x = pos.xCoord;
-            x = x >= 0.0D?x + 3.0D:x - 3.0D;
-            v = this.getTransformedPosition(x, 2.0D, pos.zCoord);
+
+      if (!this.isNewUAV()) {
+
+         if (rByEntity != null) {
+            MCH_AircraftInfo info = this.getAcInfo();
+            Vec3 v;
+            if (info != null && info.unmountPosition != null) {
+               v = this.getTransformedPosition(info.unmountPosition);
+            } else {
+               double x = pos.xCoord;
+               x = x >= 0.0D ? x + 3.0D : x - 3.0D;
+               v = this.getTransformedPosition(x, 2.0D, pos.zCoord);
+            }
+
+            rByEntity.setPosition(v.xCoord, v.yCoord, v.zCoord);
+            this.listUnmountReserve.add(new MCH_EntityAircraft.UnmountReserve(rByEntity, v.xCoord, v.yCoord, v.zCoord));
          }
 
-         rByEntity.setPosition(v.xCoord, v.yCoord, v.zCoord);
-         this.listUnmountReserve.add(new MCH_EntityAircraft.UnmountReserve(rByEntity, v.xCoord, v.yCoord, v.zCoord));
+      } else {
+         //new uav only
+            if (rByEntity != null) {
+                MCH_AircraftInfo info = this.getAcInfo();
+                if (info != null && info.unmountPosition != null) {
+                   rByEntity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
+                }
+
+                rByEntity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
+            }
       }
 
    }
 
    public boolean unmountEntityFromSeat(Entity entity) {
-      if(entity != null && this.seats != null && this.seats.length != 0) {
-         MCH_EntitySeat[] arr$ = this.seats;
-         int len$ = arr$.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_EntitySeat seat = arr$[i$];
-            if(seat != null && seat.riddenByEntity != null && W_Entity.isEqual(seat.riddenByEntity, entity)) {
-               entity.mountEntity((Entity)null);
+      if (!this.isNewUAV()) {
+
+         if (entity != null && this.seats != null && this.seats.length != 0) {
+            MCH_EntitySeat[] arr$ = this.seats;
+            int len$ = arr$.length;
+
+            for (int i$ = 0; i$ < len$; ++i$) {
+               MCH_EntitySeat seat = arr$[i$];
+               if (seat != null && seat.riddenByEntity != null && W_Entity.isEqual(seat.riddenByEntity, entity)) {
+                  entity.mountEntity((Entity) null);
+               }
             }
-         }
 
-         return false;
+            return false;
+         } else {
+            return false;
+         }
       } else {
-         return false;
+         if (entity != null) {
+            MCH_AircraftInfo info = this.getAcInfo();
+            if (info != null && info.unmountPosition != null) {
+               MCH_EntitySeat[] arr$ = this.seats;
+               int len$ = arr$.length;
+
+               for (int i$ = 0; i$ < len$; ++i$) {
+                  MCH_EntitySeat seat = arr$[i$];
+                  if (seat != null && seat.riddenByEntity != null && W_Entity.isEqual(seat.riddenByEntity, entity)) {
+                     entity.mountEntity((Entity) null);
+                  }
+               }
+               entity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
+               return false;
+            }
+            MCH_EntitySeat[] arr$ = this.seats;
+            int len$ = arr$.length;
+
+            for (int i$ = 0; i$ < len$; ++i$) {
+               MCH_EntitySeat seat = arr$[i$];
+               if (seat != null && seat.riddenByEntity != null && W_Entity.isEqual(seat.riddenByEntity, entity)) {
+                  entity.mountEntity((Entity) null);
+               }
+            }
+            entity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
+            return false;
+         }
       }
+      return false;
    }
 
    public void ejectSeat(Entity entity) {
