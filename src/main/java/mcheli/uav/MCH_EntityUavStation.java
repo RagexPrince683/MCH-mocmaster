@@ -660,6 +660,7 @@ public class MCH_EntityUavStation
                      // Store the current station position
                      System.out.println("stationposition" + storedStationX + " " + storedStationY + " " + storedStationZ);
                      storeStationPosition();
+                     user.setPosition(storedStationX, storedStationY, storedStationZ);
 
                      // If it's a new UAV and it's been alive long enough, mount the player to the UAV.
                      if (this.controlAircraft != null &&
