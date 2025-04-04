@@ -260,6 +260,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.gravity = -0.04F;
       this.gravityInWater = -0.04F;
       this.maxHp = 50;
+      this.maxWheelDMG = 20;
       this.damageFactor = 0.2F;
       this.submergedDamageHeight = 0.0F;
       this.inventorySize = 0;

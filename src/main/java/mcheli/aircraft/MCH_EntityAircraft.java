@@ -244,6 +244,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public float ironCurtainCurrentFactor = 0.5f;
    public int ironCurtainWaveTimer = 0;
 
+   public int UavStationPosX;
+   public int UavStationPosY;
+   public int UavStationPosZ;
+
    public MCH_EntityAircraft(World world) {
       super(world);
       this.setAcInfo(null);
@@ -544,7 +548,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public MCH_EntityUavStation getUavStation() {
+
           return (isUAV() || isNewUAV()) ? this.uavStation : null;
+          //todone store uav pos, not here! in updatecontrol.
+
+
          }
 
    public static MCH_EntityAircraft getAircraft_RiddenOrControl(Entity rider) {
@@ -1052,12 +1060,23 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                }
 
                if(!this.isDestroyed()) {
+
+
+
                   if(!isDamegeSourcePlayer) {
 
                      //add wheel damage
 
-                     if(this.getDamageTaken() >= this.getMaxWheelDamage() &&) {
+                     if(this.getWheelDamageTaken() >= this.getMaxWheelDamage()) {
+                        setCurrentThrottle(0);
+                        throttleUp = false;
+                        throttleBack = 0;
+
+                        //this.getWheelDamageTaken() += (int)damage;
+                        //todo add a slow repairing effect, togglable via config to be only after wrench repair
+
                         //&& this.attackedboundingbox is a wheel boundingbox
+                        //todo get a way to detect if the wheel boundingbox was impacted, we go from there.
                      }
 
                      MCH_AircraftInfo cmd1 = this.getAcInfo();
@@ -1832,6 +1851,14 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public void updateControl() {
       if(!super.worldObj.isRemote) {
+
+         if (this.uavStation != null) {
+            UavStationPosX = (int) this.uavStation.posX;
+            UavStationPosY = (int) this.uavStation.posY;
+            UavStationPosZ = (int) this.uavStation.posZ;
+         }
+         //grab and set uav station position
+
          this.setCommonStatus(7, this.moveLeft);
          this.setCommonStatus(8, this.moveRight);
          this.setCommonStatus(9, this.throttleUp);
@@ -3900,6 +3927,14 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void onUnmountPlayerSeat(MCH_EntitySeat seat, Entity entity) {
+
+      if (this.isNewUAV()) {
+         //teleport player to UAV station.
+            if (entity instanceof EntityPlayer) {
+                entity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
+            }
+      }
+
       MCH_Lib.DbgLog(super.worldObj, "onUnmountPlayerSeat:%d", new Object[]{Integer.valueOf(W_Entity.getEntityId(entity))});
       int sid = this.getSeatIdByEntity(entity);
       this.camera.initCamera(sid, entity);
@@ -4728,68 +4763,69 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public boolean interactFirst(EntityPlayer player) {
-      /* 4361 */     if (isDestroyed())
-         /* 4362 */       return false;
-      /* 4363 */     if (getAcInfo() == null)
-         /* 4364 */       return false;
-      /* 4365 */     if (!checkTeam(player)) {
-         /* 4366 */       return false;
-         /*      */     }
-      /* 4368 */     ItemStack itemStack = player.getCurrentEquippedItem();
-      /* 4369 */     if (itemStack != null && itemStack.getItem() instanceof mcheli.tool.MCH_ItemWrench) {
-         /* 4370 */       if (!this.worldObj.isRemote && player.isSneaking()) {
-            /* 4371 */         switchNextTextureName();
-            /*      */       }
-         /*      */
-         /* 4374 */       return false;
-         /* 4375 */     }
+        if (isDestroyed())
+             return false;
+        if (getAcInfo() == null)
+             return false;
+        if (!checkTeam(player)) {
+             return false;
+           }
+           ItemStack itemStack = player.getCurrentEquippedItem();
+           if (itemStack != null && itemStack.getItem() instanceof mcheli.tool.MCH_ItemWrench) {
+                if (!this.worldObj.isRemote && player.isSneaking()) {
+                     switchNextTextureName();
+                   }
+
+                return false;
+              }
       //if (itemStack != null && itemStack.getItem() instanceof mcheli.mob.MCH_ItemSpawnGunner)
-         /* 4376 */ //      return false;
-      /* 4377 */     if (player.isSneaking()) {
-         /* 4378 */       openInventory(player);
-         /* 4379 */       return false;
-         /* 4380 */     }  if (!(getAcInfo()).canRide)
-         /* 4381 */       return false;
-      /* 4382 */     if (this.riddenByEntity == null && !isUAV() && !isNewUAV()) {
-         /* 4383 */       if (player.ridingEntity instanceof MCH_EntitySeat)
-            /* 4384 */         return false;
-         /* 4385 */       if (!canRideSeatOrRack(0, (Entity)player)) {
-            /* 4386 */         return false;
-            /*      */       }
-         /* 4388 */       if (!this.switchSeat) {
-            /* 4389 */         if (getAcInfo().haveCanopy() && isCanopyClose()) {
-               /* 4390 */           openCanopy();
-               /* 4391 */           return false;
-               /*      */         }
-            /*      */
-            /* 4394 */         if (getModeSwitchCooldown() > 0) {
-               /* 4395 */           return false;
-               /*      */         }
-            /*      */       }
-         /*      */
-         /* 4399 */       closeCanopy();
-         /* 4400 */       this.riddenByEntity = null;
-         /* 4401 */       this.lastRiddenByEntity = null;
-         /* 4402 */       initRadar();
-         /* 4403 */       if (!this.worldObj.isRemote) {
-            /* 4404 */         player.mountEntity((Entity)this);
-            /* 4405 */         if (!this.keepOnRideRotation) {
-               /* 4406 */           mountMobToSeats();
-               /*      */         }
-            /*      */       } else {
-            /* 4409 */         updateClientSettings(0);
-            /*      */       }
-         /*      */
-         /* 4412 */       setCameraId(0);
-         /* 4413 */       initPilotWeapon();
-         /* 4414 */       this.lowPassPartialTicks.clear();
-         /*      */
-         /* 4416 */       onInteractFirst(player);
-         /* 4417 */       return true;
-         /*      */     }
-      /*      */
-      /* 4420 */     return interactFirstSeat(player);
-      /*      */   }
+          //      return false;
+           if (player.isSneaking()) {
+                openInventory(player);
+                return false;
+              }  if (!(getAcInfo()).canRide)
+                return false;
+           if (this.riddenByEntity == null && !isUAV() && !isNewUAV()) {
+              //todo uav stuff
+                if (player.ridingEntity instanceof MCH_EntitySeat)
+                     return false;
+                if (!canRideSeatOrRack(0, (Entity)player)) {
+                     return false;
+                   }
+                if (!this.switchSeat) {
+                     if (getAcInfo().haveCanopy() && isCanopyClose()) {
+                          openCanopy();
+                          return false;
+                        }
+
+                     if (getModeSwitchCooldown() > 0) {
+                          return false;
+                        }
+                   }
+
+                closeCanopy();
+                this.riddenByEntity = null;
+                this.lastRiddenByEntity = null;
+                initRadar();
+                if (!this.worldObj.isRemote) {
+                     player.mountEntity((Entity)this);
+                     if (!this.keepOnRideRotation) {
+                          mountMobToSeats();
+                        }
+                   } else {
+                     updateClientSettings(0);
+                   }
+
+                setCameraId(0);
+                initPilotWeapon();
+                this.lowPassPartialTicks.clear();
+
+                onInteractFirst(player);
+                return true;
+              }
+
+           return interactFirstSeat(player);
+         }
 
 
    public boolean canRideSeatOrRack(int seatId, Entity entity) {
