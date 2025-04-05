@@ -63,23 +63,23 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
          }
       }
 
-      wheelBoundingBox[] arr2$ = this.ac.extrawheelboundingbox;
-      int len2$ = arr2$.length;
-
-      for(int i2$ = 0; i2$ < len2$; ++i2$) {
-         wheelBoundingBox wb = arr2$[i2$];
-         //wheelBoundingBox wb = arr$[i$];
-
-         if(wb.boundingBox.intersectsWith(aabb)) {
-            double dist3 = this.getDistSq(aabb, this);
-            if(dist3 < dist) {
-               dist = dist3;
-               this.ac.lastBBDamageFactor = wb.damegeFactor;
-            }
-
-            ret = true;
-         }
-      }
+      //wheelBoundingBox[] arr2$ = this.ac.extrawheelboundingbox;
+      //int len2$ = arr2$.length;
+//
+      //for(int i2$ = 0; i2$ < len2$; ++i2$) {
+      //   wheelBoundingBox wb = arr2$[i2$];
+      //   //wheelBoundingBox wb = arr$[i$];
+//
+      //   if(wb.boundingBox.intersectsWith(aabb)) {
+      //      double dist3 = this.getDistSq(aabb, this);
+      //      if(dist3 < dist) {
+      //         dist = dist3;
+      //         this.ac.lastBBDamageFactor = wb.damegeFactor;
+      //      }
+//
+      //      ret = true;
+      //   }
+      //}
       //new collision?
 
 

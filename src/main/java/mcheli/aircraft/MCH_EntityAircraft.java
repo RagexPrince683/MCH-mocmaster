@@ -184,7 +184,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private int modeSwitchCooldown;
    public Vec3 target = Vec3.createVectorHelper(0, 0, 0);
    public MCH_BoundingBox[] extraBoundingBox;
-   public wheelBoundingBox[] extrawheelboundingbox;
+   //public wheelBoundingBox[] extrawheelboundingbox;
    public float lastBBDamageFactor;
    private final MCH_AircraftInventory inventory;
    private double fuelConsumption;
@@ -317,7 +317,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.prevRotationRoll = 0.0F;
       this.lowPassPartialTicks = new MCH_LowPassFilterFloat(10);
       this.extraBoundingBox = new MCH_BoundingBox[0];
-      this.extrawheelboundingbox = new wheelBoundingBox[0];
+      //this.extrawheelboundingbox = new wheelBoundingBox[0];
       W_Reflection.setBoundingBox(this, new MCH_AircraftBoundingBox(this));
       this.lastBBDamageFactor = 1.0F;
       this.inventory = new MCH_AircraftInventory(this);
@@ -1765,6 +1765,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       this.updateExtraBoundingBox();
+
+      //this.updateExtraWheelBoundingBox();
+
       boolean var11 = super.onGround;
       double var12 = super.motionY;
       this.onUpdateAircraft();
@@ -1911,6 +1914,17 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
    }
+
+   //public void updateExtraWheelBoundingBox() {
+   //   //wheelBoundingBox[] arr2$ = this.extrawheelboundingbox;
+   //   int len2$ = arr2$.length;
+//
+   //   for(int i2$ = 0; i2$ < len2$; ++i2$) {
+   //      wheelBoundingBox bb2 = arr2$[i2$];
+   //      bb2.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
+   //   }
+//
+   //}
 
    public void updatePartWheel() {
       if(super.worldObj.isRemote) {
@@ -2911,6 +2925,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          double deltaZ = par5;
 
          // Create a copy of the bounding box
+
+         //todo this fucking bullshit for fucking wheelboundingbox
+
          AxisAlignedBB initialBoundingBox = super.boundingBox.copy();
 
          // Get colliding bounding boxes
@@ -5810,7 +5827,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.rotPartRotation = new float[info.partRotPart.size()];
          this.prevRotPartRotation = new float[info.partRotPart.size()];
          this.extraBoundingBox = this.createExtraBoundingBox();
-         this.extrawheelboundingbox = this.createannoyingboundingbox();
+         //this.extrawheelboundingbox = this.createannoyingboundingbox();
          this.partEntities = this.createParts();
          super.stepHeight = info.stepHeight;
       }

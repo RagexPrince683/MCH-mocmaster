@@ -999,6 +999,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                             s = this.splitParam(data);
                                                             if(s.length >= 3) {
                                                                //caused tracked vehicles to stop working :(
+                                                               //todo fix
                                                                wheelBoundingBox wheelBoundingBox = new wheelBoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), 1, 1); //xyz, height, damagefactor, we need a new boundingbox type for this to work correctly
                                                                //this.partTrackRoller.size() is probably causing errors, removing for now
                                                                this.wheelboundingbox.add(wheelBoundingBox);
