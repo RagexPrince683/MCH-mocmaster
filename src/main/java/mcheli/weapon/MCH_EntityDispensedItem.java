@@ -98,40 +98,58 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
    }
 
    private void useItemToBlock(int x, int y, int z, Item item, int itemDamage, EntityPlayer dummyPlayer) {
-      dummyPlayer.posX = (double)x + 0.5D;
-      dummyPlayer.posY = (double)y + 2.5D;
-      dummyPlayer.posZ = (double)z + 0.5D;
-      dummyPlayer.rotationYaw = (float)super.rand.nextInt(360);
+      dummyPlayer.posX = x + 0.5D;
+      dummyPlayer.posY = y + 2.5D;
+      dummyPlayer.posZ = z + 0.5D;
+      dummyPlayer.rotationYaw = super.rand.nextInt(360);
+
       Block block = W_WorldFunc.getBlock(super.worldObj, x, y, z);
       Material blockMat = W_WorldFunc.getBlockMaterial(super.worldObj, x, y, z);
-      if(block != Blocks.air && blockMat != Material.air) {
-         if(item == W_Item.getItemByName("water_bucket")) {
-            MCH_Config var10000 = MCH_MOD.config;
-            if(MCH_Config.Collision_DestroyBlock.prmBool) {
-               if(blockMat == Material.fire) {
+
+      if (block != Blocks.air && blockMat != Material.air) {
+         // Handle water bucket logic
+         if (item == W_Item.getItemByName("water_bucket")) {
+            if (MCH_MOD.config != null && MCH_MOD.config.Collision_DestroyBlock.prmBool) {
+               if (blockMat == Material.fire) {
                   super.worldObj.setBlockToAir(x, y, z);
-               } else if(blockMat == Material.lava) {
+               } else if (blockMat == Material.lava) {
                   int metadata = super.worldObj.getBlockMetadata(x, y, z);
-                  if(metadata == 0) {
+                  if (metadata == 0) {
                      W_WorldFunc.setBlock(super.worldObj, x, y, z, Blocks.obsidian);
-                  } else if(metadata <= 4) {
+                  } else if (metadata <= 4) {
                      W_WorldFunc.setBlock(super.worldObj, x, y, z, Blocks.cobblestone);
                   }
                }
             }
-         }else if(item instanceof MCH_ItemThrowable){
-            MCH_ItemThrowable throwable = ((MCH_ItemThrowable)item);
+         }
+         // Handle throwable item logic
+         else if (item instanceof MCH_ItemThrowable) {
+            MCH_ItemThrowable throwable = (MCH_ItemThrowable) item;
             MCH_EntityThrowable entity = new MCH_EntityThrowable(worldObj, dummyPlayer, 0);
             MCH_ThrowableInfo info = MCH_ThrowableInfoManager.get(item);
             info.delayFuse = 0;
             entity.setInfo(info);
             worldObj.spawnEntityInWorld(entity);
-         } else if(!item.onItemUseFirst(new ItemStack(item, 1, itemDamage), dummyPlayer, super.worldObj, x, y, z, 1, (float)x, (float)y, (float)z) && !item.onItemUse(new ItemStack(item, 1, itemDamage), dummyPlayer, super.worldObj, x, y, z, 1, (float)x, (float)y, (float)z)) {
-            item.onItemRightClick(new ItemStack(item, 1, itemDamage), super.worldObj, dummyPlayer);
+         }
+         // Handle other items with extra safety
+         else {
+            ItemStack stack = new ItemStack(item, 1, itemDamage);
+            try {
+               boolean used = item.onItemUseFirst(stack, dummyPlayer, worldObj, x, y, z, 1, x, y, z);
+               if (!used) {
+                  used = item.onItemUse(stack, dummyPlayer, worldObj, x, y, z, 1, x, y, z);
+               }
+               if (!used) {
+                  item.onItemRightClick(stack, worldObj, dummyPlayer);
+               }
+            } catch (Exception e) {
+               System.err.println("[MCH] Skipped item use due to fake player crash risk: " + e.getMessage());
+               e.printStackTrace();
+            }
          }
       }
-
    }
+
 
    public void sprinkleBomblet() {
       if(!super.worldObj.isRemote) {
