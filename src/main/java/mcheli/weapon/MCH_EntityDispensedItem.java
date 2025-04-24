@@ -67,6 +67,14 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
 
             item = this.getInfo().dispenseItem;
             itemDamage = this.getInfo().dispenseDamege;
+         } else {
+            try {
+               MCH_WeaponInfoManager.reload();
+               //todo add logic for refreshing weapons here from reload all weapons, do it ONCE
+               item = this.getInfo().dispenseItem;
+            } catch (Exception e) {
+               System.out.println("info or moving object position was null");
+            }
          }
 
          if(player != null && !player.isDead && item != null) {
