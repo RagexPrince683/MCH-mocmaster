@@ -1,5 +1,6 @@
 package mcheli;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import mcheli.wrapper.W_ChunkPosition;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityExpBottle;
@@ -39,6 +41,8 @@ import net.minecraft.world.World;
 
 public class MCH_Explosion extends Explosion {
 
+   //todo make it so that explosions don't just ignore safezones or claims
+
    public final int field_77289_h = 16;
    public World world;
    private static Random explosionRNG = new Random();
@@ -51,6 +55,17 @@ public class MCH_Explosion extends Explosion {
    public EntityPlayer explodedPlayer;
    public float explosionSizeBlock;
    public MCH_DamageFactor damageFactor = null;
+
+   private static int getFPS() {
+      try {
+         Field fpsField = Minecraft.class.getDeclaredField("debugFPS");
+         fpsField.setAccessible(true);
+         return fpsField.getInt(Minecraft.getMinecraft());
+      } catch (Exception e) {
+         e.printStackTrace();
+         return -1; // Return -1 if failed
+      }
+   }
 
 
    public MCH_Explosion(World par1World, Entity exploder, Entity player, double x, double y, double z, float size) {
@@ -448,10 +463,17 @@ public class MCH_Explosion extends Explosion {
       }
 
       affectedBlockPositions.addAll(hashset);
-      if(explosionSize >= 2.0F && isSmoking) {
-         MCH_ParticlesUtil.DEF_spawnParticle("hugeexplosion", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D, 10.0F);
-      } else {
-         MCH_ParticlesUtil.DEF_spawnParticle("largeexplode", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D, 10.0F);
+
+      //todone? limit the amount of particles allowed to be made if under 60fps do not spawn anymore particles.
+
+
+
+      if (getFPS() > 60) {
+         if (explosionSize >= 2.0F && isSmoking) {
+            MCH_ParticlesUtil.DEF_spawnParticle("hugeexplosion", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D, 10.0F);
+         } else {
+            MCH_ParticlesUtil.DEF_spawnParticle("largeexplode", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D, 10.0F);
+         }
       }
 
       if(isSmoking) {

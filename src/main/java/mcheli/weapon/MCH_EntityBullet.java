@@ -1,6 +1,9 @@
 package mcheli.weapon;
 
 import java.util.List;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
@@ -51,6 +54,14 @@ public class MCH_EntityBullet extends MCH_EntityBaseBullet {
          }
       }
 
+
+
+   }
+
+   @Override
+   @SideOnly(Side.CLIENT)
+   public boolean isInRangeToRenderDist(double distance){
+      return true;
    }
 
    protected void onUpdateCollided() {

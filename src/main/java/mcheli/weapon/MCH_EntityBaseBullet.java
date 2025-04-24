@@ -91,6 +91,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     private ForgeChunkManager.Ticket chunkLoaderTicket;
     //private List<ChunkCoordIntPair> loadedChunks = new ArrayList<>();
 
+    boolean isInRangeToRenderDist2;
+
     List<ChunkCoordIntPair> bulletLoadedChunks = new ArrayList<>();
 
 
@@ -117,6 +119,13 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         }
 
     }
+
+    //@Override
+    //@SideOnly(Side.CLIENT)
+    //public boolean isInRangeToRenderDist(double distance){
+    //    return true;
+    //}
+    //already defined ln487 I dont want to mess with it given particles are already laggy as shit
 
     public MCH_EntityBaseBullet(World par1World, double px, double py, double pz, double mx, double my, double mz, float yaw, float pitch, double acceleration) {
         this(par1World);
@@ -617,9 +626,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             }
         }
 
-        if (!bomblet && gravitydown && bigdelay) {
-            checkAndLoadChunks();  // If this method handles any critical chunk loading, it stays here
-        }
+
+        //if (!isInRangeToRenderDist2) {
+            if (!bomblet && gravitydown && bigdelay) {
+                checkAndLoadChunks();  // If this method handles any critical chunk loading, it stays here
+            }
+        //}
 
         if (super.worldObj.isRemote && this.countOnUpdate == 0) {
             int f3 = this.getTargetEntityID();
