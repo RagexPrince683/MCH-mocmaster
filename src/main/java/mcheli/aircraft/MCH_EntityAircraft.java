@@ -2942,7 +2942,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
          // Check the block under the aircraft
          Block blockUnder = MCH_Lib.getBlockY(this, 3, -2, false);
-         if (BlockUtils.isSlowingBlock(blockUnder)) {
+         if (BlockUtils.isSlowingBlock(blockUnder, super.worldObj, (int)super.posX, (int)super.posY, (int)super.posZ, this)) {
             // Apply 20% speed reduction for slowing blocks
             par1 *= 0.8; // Reduce X movement by 20%
             par5 *= 0.8; // Reduce Z movement by 20%
