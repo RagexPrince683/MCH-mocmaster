@@ -301,14 +301,19 @@ public class MCH_EventHook extends W_EventHook {
       if(event.entity instanceof MCH_EntityBaseBullet) {
          MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet)event.entity;
          // todo: maybe meddle with this to see if it can maybe preserve the bullet if unloaded and having a gravity going down
-         System.out.println("set dead in eventhook entitycanupdate");
+
          //bullet.setDead();
          //WHY ARE YOU SETTING DEAD HERE YOU DONT HAVE A REASON TO
          //todo add a new chunk loader here under the strict criteria that the bullet is still alive and has a gravity going down
          if (bullet.shouldLoadChunks()) {
             bullet.checkAndLoadChunks();
          } else {
-            bullet.setDead();
+            //if the bullet is out of range and has existed for over 2 minutes it gets fucked, NO REFUNDS
+            if(bullet.ticksExisted>2400){
+               bullet.setDead();
+               System.out.println("set dead for idle bullet in eventhook entitycanupdate");
+            }
+
          }
          //REDFLAG: bullet.setDead();
       }

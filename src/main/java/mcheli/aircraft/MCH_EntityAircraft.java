@@ -2907,6 +2907,21 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return this.entityRadar.getEnemyList();
    }
 
+  // @Override
+  // public void moveEntity(double parX, double parY, double parZ) {
+  //    // Check the block under the tank
+  //    Block blockUnder = MCH_Lib.getBlockY(this, 3, -2, false);
+//
+  //    // If the block is soul sand, reduce movement speed
+  //    if (blockUnder == Blocks.soul_sand) {
+  //       parX *= 0.8; // Reduce X movement by 20%
+  //       parZ *= 0.8; // Reduce Z movement by 20%
+  //    }
+//
+  //    // Proceed with original movement logic
+  //    super.moveEntity(parX, parY, parZ);
+  // }
+
    public void moveEntity(double par1, double par3, double par5) {
       // Ensure the entity's AcInfo is not null
       if (this.getAcInfo() != null) {
@@ -4598,6 +4613,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       return false;
    }
+
+
 
    public void checkRideRack() {
       if(this.getCountOnUpdate() % 10 == 0) {
