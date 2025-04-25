@@ -2922,6 +2922,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
   //    super.moveEntity(parX, parY, parZ);
   // }
 
+   @Override
    public void moveEntity(double par1, double par3, double par5) {
       // Ensure the entity's AcInfo is not null
       if (this.getAcInfo() != null) {
@@ -2939,10 +2940,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          double deltaY = par3;
          double deltaZ = par5;
 
+         // Check the block under the aircraft
+         Block blockUnder = MCH_Lib.getBlockY(this, 3, -2, false);
+         if (blockUnder == Blocks.soul_sand) {
+            // Apply 20% speed reduction on soul sand
+            par1 *= 0.8; // Reduce X movement by 20%
+            par5 *= 0.8; // Reduce Z movement by 20%
+         }
+
          // Create a copy of the bounding box
-
-         //todo this fucking bullshit for fucking wheelboundingbox
-
          AxisAlignedBB initialBoundingBox = super.boundingBox.copy();
 
          // Get colliding bounding boxes
