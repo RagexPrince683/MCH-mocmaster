@@ -306,6 +306,7 @@ public class MCH_EventHook extends W_EventHook {
          //WHY ARE YOU SETTING DEAD HERE YOU DONT HAVE A REASON TO
          //todo add a new chunk loader here under the strict criteria that the bullet is still alive and has a gravity going down
          if (bullet.shouldLoadChunks()) {
+            System.out.println("bullet checking and loading chunks");
             bullet.checkAndLoadChunks();
          } else {
             //if the bullet is out of range and has existed for over 2 minutes it gets fucked, NO REFUNDS
