@@ -46,6 +46,8 @@ import static mcheli.MCH_Config.bombletloader;
 
 public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChunkLoader {
 
+    public long idleStartTime = -1;
+
     public static final int DATAWT_RESERVE1 = 26;
     public static final int DATAWT_TARGET_ENTITY = 27;
     public static final int DATAWT_MARKER_STAT = 28;
