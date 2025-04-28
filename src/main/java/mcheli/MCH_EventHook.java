@@ -309,8 +309,10 @@ public class MCH_EventHook extends W_EventHook {
             System.out.println("bullet checking and loading chunks");
             bullet.checkAndLoadChunks();
          } else {
+            System.out.println("bullet does not load chunks, but is kept in idle state");
             //if the bullet is out of range and has existed for over 2 minutes it gets fucked, NO REFUNDS
-            if(bullet.ticksExisted>2400){
+            if(bullet.getCountOnUpdate() > 2400){
+               //replaced tick with count on update getter hopefully it will work now.
                bullet.setDead();
                System.out.println("set dead for idle bullet in eventhook entitycanupdate");
             }
