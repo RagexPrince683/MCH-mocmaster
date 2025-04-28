@@ -58,10 +58,12 @@ public class MCH_Explosion extends Explosion {
 
    private static int getFPS() {
       try {
+         System.out.println("Got Fps");
          Field fpsField = Minecraft.class.getDeclaredField("debugFPS");
          fpsField.setAccessible(true);
          return fpsField.getInt(Minecraft.getMinecraft());
       } catch (Exception e) {
+         System.out.println("Error getting FPS: " + e.getMessage());
          e.printStackTrace();
          return -1; // Return -1 if failed
       }
@@ -469,6 +471,7 @@ public class MCH_Explosion extends Explosion {
 
 
       if (getFPS() > 60) {
+         System.out.println("FPS: " + getFPS() + " - Spawning particles");
          if (explosionSize >= 2.0F && isSmoking) {
             MCH_ParticlesUtil.DEF_spawnParticle("hugeexplosion", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D, 10.0F);
          } else {
