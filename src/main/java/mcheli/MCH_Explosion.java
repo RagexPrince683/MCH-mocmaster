@@ -42,6 +42,7 @@ import net.minecraft.world.World;
 public class MCH_Explosion extends Explosion {
 
    //todo make it so that explosions don't just ignore safezones or claims
+   //todo make it so explosions are recognized by xenofactions
 
    public final int field_77289_h = 16;
    public World world;
