@@ -6451,6 +6451,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return "?";
    }
 
+   public boolean hasalert() {
+      if (this.acInfo.hasalert) {
+         return true;
+      }
+
+      return false;
+      //temp
+   }
+
    public class WeaponBay {
 
       public float rot = 0.0F;

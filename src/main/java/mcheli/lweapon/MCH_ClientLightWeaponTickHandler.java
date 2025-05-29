@@ -174,7 +174,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
                         lockonSoundCount = 2;
                      }
 
-                     W_McClient.MOD_playSoundFX("lockon", 1.0F, 1.0F);
+                     W_McClient.MOD_playSoundFX("lockon", 5.0F, 1.0F);
                   }
                }
             } else {

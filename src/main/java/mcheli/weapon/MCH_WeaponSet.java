@@ -351,7 +351,7 @@ public class MCH_WeaponSet {
 
    public boolean lock(MCH_WeaponParam prm) {
       MCH_WeaponBase crtWpn = this.getCurrentWeapon();
-      if(crtWpn != null && crtWpn.getInfo() != null) {
+      if(crtWpn != null && crtWpn.getInfo() != null ) { //todo here?
          return crtWpn.lock(prm);
       }
       return false;

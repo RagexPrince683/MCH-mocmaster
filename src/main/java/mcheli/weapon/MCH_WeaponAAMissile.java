@@ -30,6 +30,9 @@ public class MCH_WeaponAAMissile extends MCH_WeaponEntitySeeker {
       super.update(countWait);
    }
 
+   //todo no more locking from rear/free look mode
+   //if this in free look mode, then we should not be able to lock on to targets
+
    @Override
    public boolean shot(MCH_WeaponParam prm) {
       boolean result = false;
@@ -100,9 +103,14 @@ public class MCH_WeaponAAMissile extends MCH_WeaponEntitySeeker {
 
    @Override
    public boolean lock(MCH_WeaponParam prm) {
-      if(!super.worldObj.isRemote) {
+      if(!super.worldObj.isRemote ) {
+         //|| this.aircraft.isFreeLookMode() did not work
+         //YOU WILL LOOK AT THE FUCKING TARGET LEGITIMATELY EDWARD
          // do nothing
       } else {
+
+         //if (this.aircraft.isFreeLookMode())
+
          if(getInfo().passiveRadar) {
             super.guidanceSystem.lock(prm.user);
             if(guidanceSystem.isLockComplete()) {

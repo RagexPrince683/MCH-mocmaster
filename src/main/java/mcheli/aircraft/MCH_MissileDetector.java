@@ -63,17 +63,23 @@ public class MCH_MissileDetector {
 
                         this.destroyMissile();
                     } else if (!this.ac.isUAV() && !this.world.isRemote) {
-                        if (this.alertCount == 0 && (isLocked || this.isLockedByMissile())) {
-                            this.alertCount = 20;
-                            W_WorldFunc.MOD_playSoundAtEntity(this.ac, "alert", 1.0F, 1.0F);
-                        }
-                    } else if (this.ac.isUAV() && this.world.isRemote && this.alertCount == 0 && (isLocked || this.isLockedByMissile())) {
+
+                        //if (this.hasalert())
+
+                            if (this.alertCount == 0 && (isLocked || this.isLockedByMissile()) && this.hasalert()) {
+                                this.alertCount = 20;
+                                W_WorldFunc.MOD_playSoundAtEntity(this.ac, "alert", 50.0F, 1.0F);
+                            }
+                    } else if (this.ac.isUAV() && this.world.isRemote && this.alertCount == 0 && (isLocked || this.isLockedByMissile()) && this.hasalert()) {
                         this.alertCount = 20;
                         if (W_Lib.isClientPlayer(var4)) {
-                            W_McClient.MOD_playSoundFX("alert", 1.0F, 1.0F);
+                            W_McClient.MOD_playSoundFX("alert", 50.0F, 1.0F);
                         }
                     }
+
                 }
+
+
 
             }
         }
@@ -121,4 +127,14 @@ public class MCH_MissileDetector {
 
         return false;
     }
+
+
+    public boolean hasalert() {
+        if (this.ac.hasalert()) {
+            return true;
+        }
+
+        return false;
+    }
+
 }

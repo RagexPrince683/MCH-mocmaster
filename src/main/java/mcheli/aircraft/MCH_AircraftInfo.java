@@ -21,6 +21,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    public String displayName;
    public HashMap displayNameLang;
    public int itemID;
+   public boolean hasalert = true;
    public List recipeString;
    public List recipe;
    public boolean isShapedRecipe;
