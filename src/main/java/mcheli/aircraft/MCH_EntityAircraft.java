@@ -3110,6 +3110,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public static List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+      //todo: make creative players/non survival mode players not collide with aircraft collisions
       ArrayList collidingBoundingBoxes = new ArrayList();
       collidingBoundingBoxes.clear();
       int i = MathHelper.floor_double(par2AxisAlignedBB.minX);
@@ -5314,11 +5315,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void currentWeaponLock(Entity user) {
-      if(user == null) {
+      if(user == null || this.aircraft.isFreeLookMode()) {
          return;
       }
       MCH_WeaponSet currentWs = this.getCurrentWeapon(user);
-      if(currentWs != null) {
+      if(currentWs != null || !this.aircraft.isFreeLookMode()) {
          MCH_WeaponParam prm = new MCH_WeaponParam();
          prm.setPosition(super.posX, super.posY, super.posZ);
          prm.entity = this;
@@ -5328,11 +5329,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void currentWeaponUnlock(Entity user) {
-      if(user == null) {
+      if(user == null || this.aircraft.isFreeLookMode()) {
          return;
       }
       MCH_WeaponSet currentWs = this.getCurrentWeapon(user);
-      if(currentWs != null) {
+      if(currentWs != null || !this.aircraft.isFreeLookMode()) {
          MCH_WeaponParam prm = new MCH_WeaponParam();
          prm.setPosition(super.posX, super.posY, super.posZ);
          prm.entity = this;

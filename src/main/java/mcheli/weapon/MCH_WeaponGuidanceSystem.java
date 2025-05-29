@@ -27,6 +27,9 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
    public Entity lastLockEntity;
    private Entity targetEntity;
 
+   private MCH_EntityAircraft aircraft;
+
+
 
    public MCH_WeaponGuidanceSystem() {
       this((World)null);
@@ -141,7 +144,8 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
             for(int i = 0; i < canLock.size(); ++i) {
                Entity currentEntity = (Entity)canLock.get(i);
                // 检查实体是否可以锁定
-               if(this.canLockEntity(currentEntity)) {
+               if(this.canLockEntity(currentEntity) && !this.aircraft.isFreeLookMode()) { //please fucking work
+                  //todo here I CANT FUCKING ACCESS THIS SHIT FROM HERE AAAAA //this.aircraft.isFreeLookMode()
                   dz = currentEntity.posX - user.posX;
                   double dy = currentEntity.posY - user.posY;
                   double dz1 = currentEntity.posZ - user.posZ;
@@ -163,6 +167,7 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
                   }
                }
             }
+
 
             this.targetEntity = potentialTarget;  // 将潜在目标设置为当前目标
             if(potentialTarget != null) {
