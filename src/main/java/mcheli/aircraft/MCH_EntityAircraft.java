@@ -5315,7 +5315,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void currentWeaponLock(Entity user) {
-      if(user == null || this.aircraft.isFreeLookMode()) {
+      if(user == null ) { //|| this.aircraft.isFreeLookMode()
          return;
       }
       MCH_WeaponSet currentWs = this.getCurrentWeapon(user);
@@ -5329,7 +5329,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void currentWeaponUnlock(Entity user) {
-      if(user == null || this.aircraft.isFreeLookMode()) {
+      if(user == null ) { //|| this.aircraft.isFreeLookMode()
          return;
       }
       MCH_WeaponSet currentWs = this.getCurrentWeapon(user);

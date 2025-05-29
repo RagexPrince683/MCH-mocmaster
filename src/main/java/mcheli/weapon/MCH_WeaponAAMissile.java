@@ -37,6 +37,10 @@ public class MCH_WeaponAAMissile extends MCH_WeaponEntitySeeker {
    public boolean shot(MCH_WeaponParam prm) {
       boolean result = false;
       if(!super.worldObj.isRemote) {
+
+         //if (!this.aircraft.isFreeLookMode())
+         //todo shouldnt matter but if it does uncomment
+
          if(getInfo().passiveRadar || getInfo().activeRadar) {
             this.playSound(prm.entity);
 

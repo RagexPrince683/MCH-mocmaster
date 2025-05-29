@@ -121,7 +121,10 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
    @Override
    public boolean lock(Entity user) {
       this.user = user;
-      return this.lock(user, true);
+      //if (!this.aircraft.isFreeLookMode()) {
+         return this.lock(user, true);
+      //}
+      //return this.lock(user, false);
    }
 
    public boolean lock(Entity user, boolean isLockContinue) {
@@ -144,7 +147,10 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
             for(int i = 0; i < canLock.size(); ++i) {
                Entity currentEntity = (Entity)canLock.get(i);
                // 检查实体是否可以锁定
-               if(this.canLockEntity(currentEntity) && !this.aircraft.isFreeLookMode()) { //please fucking work
+               if(this.canLockEntity(currentEntity) ) { //please fucking work
+                  //&& !this.aircraft.isFreeLookMode()
+                  //do not fucking do this here god hates this
+                  //&& !this.aircraft.isFreeLookMode()
                   //todo here I CANT FUCKING ACCESS THIS SHIT FROM HERE AAAAA //this.aircraft.isFreeLookMode()
                   dz = currentEntity.posX - user.posX;
                   double dy = currentEntity.posY - user.posY;
@@ -198,9 +204,25 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
                canLockTarget = false;
             }
 
+            //todo here
+            //if (this.aircraft.isFreeLookMode()) {
+            //   canLockTarget = false;
+            //}
+            //should work please I pray actually I should probably use the bullshit below this for that because
+            // I assigned aircraft earlier and java just fucking hates actual working logic because fuck you also
+            // fucking goddamn it has no constructor or some bullshit idk fuck this goddamn mod
+
+            //no god hates ts
+
             MCH_EntityAircraft ac = null; //玩家乘坐的实体
             if(user.ridingEntity instanceof MCH_EntityAircraft) {
                ac = (MCH_EntityAircraft)user.ridingEntity;
+
+               if (ac.isFreeLookMode() && this.canLockInAir) {
+                  canLockTarget = false;
+                  //NO MORE BITCH SHIT
+               }
+
             } else if(user.ridingEntity instanceof MCH_EntitySeat) {
                ac = ((MCH_EntitySeat)user.ridingEntity).getParent();
             } else if(user.ridingEntity instanceof MCH_EntityUavStation) {
