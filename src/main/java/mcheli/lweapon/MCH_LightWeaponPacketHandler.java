@@ -19,7 +19,7 @@ import net.minecraft.util.Vec3;
 
 public class MCH_LightWeaponPacketHandler {
 
-   
+
 
    public static void onPacket_PlayerControl(EntityPlayer player, ByteArrayDataInput data) {
 

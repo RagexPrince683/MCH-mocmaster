@@ -17,9 +17,13 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_PacketAircraftLocation;
+import mcheli.lweapon.MCH_ItemLightWeaponBase;
 import mcheli.plane.MCP_EntityPlane;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.event.CommandEvent;
@@ -41,6 +45,8 @@ public class W_EventHook {
     public void entitySpawn(EntityJoinWorldEvent event) {
 
     }
+
+
 
 
 

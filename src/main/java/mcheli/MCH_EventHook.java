@@ -54,19 +54,23 @@ public class MCH_EventHook extends W_EventHook {
    }
 
    @SubscribeEvent
-   public void onPlayerTick(TickEvent.PlayerTickEvent event) {
-      if (event.phase != TickEvent.Phase.END || event.player.worldObj.isRemote) return;
+   public void onTick(TickEvent.PlayerTickEvent event) {
+      if (event.phase != TickEvent.Phase.END) return;
 
       EntityPlayer player = event.player;
-      System.out.println("onTick() called for player: " + player.getDisplayName());
+
+      // Debug print on both sides
+      System.out.println("[TICK] " + (player.worldObj.isRemote ? "CLIENT" : "SERVER") + " | Player: " + player.getCommandSenderName());
 
       int lightWeaponCount = countLightWeapons(player);
       System.out.println("Light weapon count: " + lightWeaponCount);
 
       if (lightWeaponCount > 1) {
          int amplifier = lightWeaponCount - 1;
-         System.out.println("Applying Slowness with amplifier: " + amplifier);
+
+         // Only apply potion on server, but could sync to client if needed
          player.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 200, amplifier, true));
+         System.out.println("Applied Slowness (amplifier: " + amplifier + ")");
       }
    }
 
@@ -83,6 +87,8 @@ public class MCH_EventHook extends W_EventHook {
       }
       return count;
    }
+
+
 
    //private void drawContacts(float partialTick) {
    //   EntityPlayer player = Minecraft.getMinecraft().thePlayer;
