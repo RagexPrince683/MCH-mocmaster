@@ -17,7 +17,43 @@ import net.minecraft.util.Vec3;
 
 public class MCH_LightWeaponPacketHandler {
 
+   private int countLightWeapons(EntityPlayer player) {
+
+      //if(!player.worldObj.isRemote) {
+
+         int count = 0;
+         for (ItemStack itemStack : player.inventory.mainInventory) {
+            if (itemStack != null && itemStack.getItem() instanceof MCH_ItemLightWeaponBase) {
+               count++;
+            }
+         }
+         return count;
+      //}
+   }
+
+   //ontick
+   protected void onTick(EntityPlayer var6) {
+
+      if(!var6.worldObj.isRemote) {
+         //EntityClientPlayerMP var6 = super.mc.thePlayer;
+         int lightWeaponCount = countLightWeapons(var6);
+         if (lightWeaponCount > 1) {
+            var6.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, lightWeaponCount, true));
+         }
+         //well hopefully this works, at least it's not client side anymore.
+
+         // else {
+         //
+         // }
+      }
+   }
+
    public static void onPacket_PlayerControl(EntityPlayer player, ByteArrayDataInput data) {
+
+      //if(!player.worldObj.isRemote) {
+      //
+      //}
+
 
       if(!player.worldObj.isRemote) {
          System.out.println("Server: Handling player control packet for player: " + player.getCommandSenderName());

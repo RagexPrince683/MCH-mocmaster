@@ -2,6 +2,8 @@ package mcheli.lweapon;
 
 import mcheli.lweapon.MCH_ItemLightWeaponBullet;
 import mcheli.wrapper.W_Item;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
@@ -14,15 +16,29 @@ public class MCH_ItemLightWeaponBase extends W_Item {
 
    public final MCH_ItemLightWeaponBullet bullet;
 
-   private int countLightWeapons(EntityPlayer player) {
-      int count = 0;
-      for (ItemStack itemStack : player.inventory.mainInventory) {
-         if (itemStack != null && itemStack.getItem() instanceof MCH_ItemLightWeaponBase) {
-            count++;
-         }
-      }
-      return count;
-   }
+   //private int countLightWeapons(EntityPlayer player) {
+   //   int count = 0;
+   //   for (ItemStack itemStack : player.inventory.mainInventory) {
+   //      if (itemStack != null && itemStack.getItem() instanceof MCH_ItemLightWeaponBase) {
+   //         count++;
+   //      }
+   //   }
+   //   return count;
+   //}
+//
+   ////ontick
+   //protected void onTick(EntityPlayer var6) {
+   //   //EntityClientPlayerMP var6 = super.mc.thePlayer;
+   //   int lightWeaponCount = countLightWeapons(var6);
+   //   if (lightWeaponCount > 1) {
+   //      var6.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, lightWeaponCount, true));
+   //   }
+   //   //well hopefully this works, at least it's not client side anymore.
+//
+   //   // else {
+   //   //
+   //   // }
+   //}
 
 
    public MCH_ItemLightWeaponBase(int par1, MCH_ItemLightWeaponBullet bullet) {
@@ -46,13 +62,7 @@ public class MCH_ItemLightWeaponBase extends W_Item {
       }
    }
 
-   //ontick
-   int lightWeaponCount = countLightWeapons(var6);
-      if (lightWeaponCount > 1) {
-      var6.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, 2, true));
-   } else {
-      prevThePlayer.removePotionEffect(Potion.moveSlowdown.getId());
-   }
+
 
    public static boolean isHeld(EntityPlayer player) {
       ItemStack is = player != null?player.getHeldItem():null;
