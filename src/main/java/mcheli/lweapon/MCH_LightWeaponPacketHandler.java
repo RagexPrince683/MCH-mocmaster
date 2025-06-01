@@ -19,36 +19,7 @@ import net.minecraft.util.Vec3;
 
 public class MCH_LightWeaponPacketHandler {
 
-   @SubscribeEvent
-   public void onPlayerTick(TickEvent.PlayerTickEvent event) {
-      if (event.phase != TickEvent.Phase.END || event.player.worldObj.isRemote) return;
-
-      EntityPlayer player = event.player;
-      System.out.println("onTick() called for player: " + player.getDisplayName());
-
-      int lightWeaponCount = countLightWeapons(player);
-      System.out.println("Light weapon count: " + lightWeaponCount);
-
-      if (lightWeaponCount > 1) {
-         int amplifier = lightWeaponCount - 1;
-         System.out.println("Applying Slowness with amplifier: " + amplifier);
-         player.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 200, amplifier, true));
-      }
-   }
-
-   private int countLightWeapons(EntityPlayer player) {
-      int count = 0;
-      for (ItemStack itemStack : player.inventory.mainInventory) {
-         if (itemStack != null) {
-            System.out.println("Found item: " + itemStack.getItem().getUnlocalizedName());
-            if (itemStack.getItem() instanceof MCH_ItemLightWeaponBase) {
-               count++;
-               System.out.println("Counted light weapon");
-            }
-         }
-      }
-      return count;
-   }
+   
 
    public static void onPacket_PlayerControl(EntityPlayer player, ByteArrayDataInput data) {
 

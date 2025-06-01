@@ -18,6 +18,7 @@ import mcheli.aircraft.MCH_ItemAircraft;
 import mcheli.aircraft.MCH_PacketAircraftLocation;
 import mcheli.chain.MCH_ItemChain;
 import mcheli.command.MCH_Command;
+import mcheli.lweapon.MCH_ItemLightWeaponBase;
 import mcheli.plane.MCP_EntityPlane;
 //import mcheli.sensors.MCH_VisualContact;
 //import mcheli.sensors.Mk1Eyeball;
@@ -32,6 +33,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -48,6 +51,37 @@ public class MCH_EventHook extends W_EventHook {
 
    public void commandEvent(CommandEvent event) {
       MCH_Command.onCommandEvent(event);
+   }
+
+   @SubscribeEvent
+   public void onPlayerTick(TickEvent.PlayerTickEvent event) {
+      if (event.phase != TickEvent.Phase.END || event.player.worldObj.isRemote) return;
+
+      EntityPlayer player = event.player;
+      System.out.println("onTick() called for player: " + player.getDisplayName());
+
+      int lightWeaponCount = countLightWeapons(player);
+      System.out.println("Light weapon count: " + lightWeaponCount);
+
+      if (lightWeaponCount > 1) {
+         int amplifier = lightWeaponCount - 1;
+         System.out.println("Applying Slowness with amplifier: " + amplifier);
+         player.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 200, amplifier, true));
+      }
+   }
+
+   private int countLightWeapons(EntityPlayer player) {
+      int count = 0;
+      for (ItemStack itemStack : player.inventory.mainInventory) {
+         if (itemStack != null) {
+            System.out.println("Found item: " + itemStack.getItem().getUnlocalizedName());
+            if (itemStack.getItem() instanceof MCH_ItemLightWeaponBase) {
+               count++;
+               System.out.println("Counted light weapon");
+            }
+         }
+      }
+      return count;
    }
 
    //private void drawContacts(float partialTick) {
