@@ -1,6 +1,8 @@
 package mcheli.lweapon;
 
 import com.google.common.io.ByteArrayDataInput;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import mcheli.MCH_Lib;
 import mcheli.lweapon.MCH_ItemLightWeaponBase;
 import mcheli.lweapon.MCH_PacketLightWeaponPlayerControl;
@@ -17,35 +19,35 @@ import net.minecraft.util.Vec3;
 
 public class MCH_LightWeaponPacketHandler {
 
-   private int countLightWeapons(EntityPlayer player) {
+   @SubscribeEvent
+   public void onPlayerTick(TickEvent.PlayerTickEvent event) {
+      if (event.phase != TickEvent.Phase.END || event.player.worldObj.isRemote) return;
 
-      //if(!player.worldObj.isRemote) {
+      EntityPlayer player = event.player;
+      System.out.println("onTick() called for player: " + player.getDisplayName());
 
-         int count = 0;
-         for (ItemStack itemStack : player.inventory.mainInventory) {
-            if (itemStack != null && itemStack.getItem() instanceof MCH_ItemLightWeaponBase) {
-               count++;
-            }
-         }
-         return count;
-      //}
+      int lightWeaponCount = countLightWeapons(player);
+      System.out.println("Light weapon count: " + lightWeaponCount);
+
+      if (lightWeaponCount > 1) {
+         int amplifier = lightWeaponCount - 1;
+         System.out.println("Applying Slowness with amplifier: " + amplifier);
+         player.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 200, amplifier, true));
+      }
    }
 
-   //ontick
-   protected void onTick(EntityPlayer var6) {
-
-      if(!var6.worldObj.isRemote) {
-         //EntityClientPlayerMP var6 = super.mc.thePlayer;
-         int lightWeaponCount = countLightWeapons(var6);
-         if (lightWeaponCount > 1) {
-            var6.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, lightWeaponCount, true));
+   private int countLightWeapons(EntityPlayer player) {
+      int count = 0;
+      for (ItemStack itemStack : player.inventory.mainInventory) {
+         if (itemStack != null) {
+            System.out.println("Found item: " + itemStack.getItem().getUnlocalizedName());
+            if (itemStack.getItem() instanceof MCH_ItemLightWeaponBase) {
+               count++;
+               System.out.println("Counted light weapon");
+            }
          }
-         //well hopefully this works, at least it's not client side anymore.
-
-         // else {
-         //
-         // }
       }
+      return count;
    }
 
    public static void onPacket_PlayerControl(EntityPlayer player, ByteArrayDataInput data) {
