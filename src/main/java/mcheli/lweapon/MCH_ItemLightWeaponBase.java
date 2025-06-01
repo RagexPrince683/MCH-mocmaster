@@ -14,6 +14,16 @@ public class MCH_ItemLightWeaponBase extends W_Item {
 
    public final MCH_ItemLightWeaponBullet bullet;
 
+   private int countLightWeapons(EntityPlayer player) {
+      int count = 0;
+      for (ItemStack itemStack : player.inventory.mainInventory) {
+         if (itemStack != null && itemStack.getItem() instanceof MCH_ItemLightWeaponBase) {
+            count++;
+         }
+      }
+      return count;
+   }
+
 
    public MCH_ItemLightWeaponBase(int par1, MCH_ItemLightWeaponBullet bullet) {
       super(par1);
@@ -34,6 +44,14 @@ public class MCH_ItemLightWeaponBase extends W_Item {
       } else {
          return "";
       }
+   }
+
+   //ontick
+   int lightWeaponCount = countLightWeapons(var6);
+      if (lightWeaponCount > 1) {
+      var6.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, 2, true));
+   } else {
+      prevThePlayer.removePotionEffect(Potion.moveSlowdown.getId());
    }
 
    public static boolean isHeld(EntityPlayer player) {
