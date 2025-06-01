@@ -214,14 +214,14 @@ public class MCH_Command extends CommandBase {
                      throw new CommandException("Parameter error! : /mcheli showboundingbox true or false", new Object[0]);
                   }
 
-                  if(!parseBoolean(sender, prm[1])) {
-                     var10000 = MCH_MOD.config;
+                  if (!parseBoolean(sender, prm[1])) {
                      MCH_Config.EnableDebugBoundingBox.prmBool = false;
+                     //MCH_MOD.config.save(); // <-- Save the config file
                      MCH_PacketNotifyServerSettings.sendAll();
                      sender.addChatMessage(new ChatComponentText("Disabled bounding box"));
                   } else {
-                     var10000 = MCH_MOD.config;
                      MCH_Config.EnableDebugBoundingBox.prmBool = true;
+                     //MCH_MOD.config.save(); // <-- Save the config file
                      MCH_PacketNotifyServerSettings.sendAll();
                      sender.addChatMessage(new ChatComponentText("Enabled bounding box [F3 + b]"));
                   }

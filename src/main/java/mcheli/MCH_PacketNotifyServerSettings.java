@@ -16,7 +16,8 @@ public class MCH_PacketNotifyServerSettings extends MCH_Packet {
    public boolean enableEntityMarker = true;
    public boolean enablePVP = true;
    public double stingerLockRange = 120.0D;
-   public boolean enableDebugBoundingBox = true;
+   //todo change bullshit
+   public boolean enableDebugBoundingBox = false;
 
 
    public int getMessageID() {
@@ -53,6 +54,7 @@ public class MCH_PacketNotifyServerSettings extends MCH_Packet {
    }
 
    public static void send(EntityPlayerMP player) {
+      //todo fix enableDebugBoundingBox not updating properly on server restart, possibly other settings here too?
       MCH_PacketNotifyServerSettings s = new MCH_PacketNotifyServerSettings();
       MCH_Config var10001 = MCH_MOD.config;
       s.enableCamDistChange = !MCH_Config.DisableCameraDistChange.prmBool;

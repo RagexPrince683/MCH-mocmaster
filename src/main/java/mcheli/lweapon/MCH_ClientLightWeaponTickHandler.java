@@ -231,12 +231,19 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          }
       }
 
-      int lightWeaponCount = countLightWeapons(var6);
-      if (lightWeaponCount > 1) {
-         var6.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, 2, true));
-      } else {
-         prevThePlayer.removePotionEffect(Potion.moveSlowdown.getId());
-      }
+      //if ()
+      //check if this is on the server
+      //if (this.isRemote)
+      //int lightWeaponCount = countLightWeapons(var6);
+      //if (lightWeaponCount > 1) {
+      //   var6.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, 2, true));
+      //} else {
+      //   prevThePlayer.removePotionEffect(Potion.moveSlowdown.getId());
+      //}
+
+      //only a client update not acceptable, server doesn't get it so it's just fake
+
+      //todo fix
 
 
 
@@ -245,15 +252,16 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
 
    }
 
-   private int countLightWeapons(EntityPlayer player) {
-      int count = 0;
-      for (ItemStack itemStack : player.inventory.mainInventory) {
-         if (itemStack != null && itemStack.getItem() instanceof MCH_ItemLightWeaponBase) {
-            count++;
-         }
-      }
-      return count;
-   }
+   //private int countLightWeapons(EntityPlayer player) {
+   //   int count = 0;
+   //   for (ItemStack itemStack : player.inventory.mainInventory) {
+   //      if (itemStack != null && itemStack.getItem() instanceof MCH_ItemLightWeaponBase) {
+   //         count++;
+   //      }
+   //   }
+   //   return count;
+   //}
+   //put this on server update
 
    protected void onCompleteReload() {
       MCH_PacketLightWeaponPlayerControl pc = new MCH_PacketLightWeaponPlayerControl();

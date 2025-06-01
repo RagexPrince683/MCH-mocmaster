@@ -33,6 +33,7 @@ import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import org.lwjgl.Sys;
 
 public class MCH_Lib {
 
@@ -429,6 +430,8 @@ public class MCH_Lib {
 
    }
 
+   //todo figure out what's causing hands to go sideways in first person, but when you swap view modes it fixes itself
+
    public static void disableFirstPersonItemRender(ItemStack itemStack) {
       if(itemStack == null || !(itemStack.getItem() instanceof ItemMapBase) || W_McClient.getRenderEntity() instanceof MCH_ViewEntityDummy) {
          disableFirstPersonItemRender();
@@ -436,15 +439,19 @@ public class MCH_Lib {
    }
 
    public static void disableFirstPersonItemRender() {
+      System.out.println("disabled fp item render");
       MCH_Config var10000 = MCH_MOD.config;
       switch(MCH_Config.DisableItemRender.prmInt) {
       case 1:
+         System.out.println("disabled fp item render 1");
          W_Reflection.setItemRenderer_ItemToRender(new ItemStack(MCH_MOD.invisibleItem));
          break;
       case 2:
+            System.out.println("disabled fp item render 2");
          MCH_ItemRendererDummy.enableDummyItemRenderer();
          break;
       case 3:
+         System.out.println("disabled fp item render 3");
          W_Reflection.setCameraZoom(1.01F);
       }
 
