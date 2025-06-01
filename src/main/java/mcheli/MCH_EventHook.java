@@ -53,40 +53,42 @@ public class MCH_EventHook extends W_EventHook {
       MCH_Command.onCommandEvent(event);
    }
 
-   @SubscribeEvent
-   public void onTick(TickEvent.PlayerTickEvent event) {
-      if (event.phase != TickEvent.Phase.END) return;
+   //@SubscribeEvent
+   //public void onTick(TickEvent.PlayerTickEvent event) {
+   //   if (event.phase != TickEvent.Phase.END) return;
+//
+   //   EntityPlayer player = event.player;
+//
+   //   // Debug print on both sides
+   //   System.out.println("[TICK] " + (player.worldObj.isRemote ? "CLIENT" : "SERVER") + " | Player: " + player.getCommandSenderName());
+//
+   //   int lightWeaponCount = countLightWeapons(player);
+   //   System.out.println("Light weapon count: " + lightWeaponCount);
+//
+   //   if (lightWeaponCount > 1) {
+   //      int amplifier = lightWeaponCount - 1;
+//
+   //      // Only apply potion on server, but could sync to client if needed
+   //      player.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 200, amplifier, true));
+   //      System.out.println("Applied Slowness (amplifier: " + amplifier + ")");
+   //   }
+   //}
+//
+   //private int countLightWeapons(EntityPlayer player) {
+   //   int count = 0;
+   //   for (ItemStack itemStack : player.inventory.mainInventory) {
+   //      if (itemStack != null) {
+   //         System.out.println("Found item: " + itemStack.getItem().getUnlocalizedName());
+   //         if (itemStack.getItem() instanceof MCH_ItemLightWeaponBase) {
+   //            count++;
+   //            System.out.println("Counted light weapon");
+   //         }
+   //      }
+   //   }
+   //   return count;
+   //}
 
-      EntityPlayer player = event.player;
-
-      // Debug print on both sides
-      System.out.println("[TICK] " + (player.worldObj.isRemote ? "CLIENT" : "SERVER") + " | Player: " + player.getCommandSenderName());
-
-      int lightWeaponCount = countLightWeapons(player);
-      System.out.println("Light weapon count: " + lightWeaponCount);
-
-      if (lightWeaponCount > 1) {
-         int amplifier = lightWeaponCount - 1;
-
-         // Only apply potion on server, but could sync to client if needed
-         player.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id, 200, amplifier, true));
-         System.out.println("Applied Slowness (amplifier: " + amplifier + ")");
-      }
-   }
-
-   private int countLightWeapons(EntityPlayer player) {
-      int count = 0;
-      for (ItemStack itemStack : player.inventory.mainInventory) {
-         if (itemStack != null) {
-            System.out.println("Found item: " + itemStack.getItem().getUnlocalizedName());
-            if (itemStack.getItem() instanceof MCH_ItemLightWeaponBase) {
-               count++;
-               System.out.println("Counted light weapon");
-            }
-         }
-      }
-      return count;
-   }
+   //will never run for some fucking reason; why is it every time I try to mess with the event hooks nothing fucking works?
 
 
 
