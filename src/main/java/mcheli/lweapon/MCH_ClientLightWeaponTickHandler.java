@@ -58,7 +58,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
    public static Entity markEntity = null;
    public static Vec3 markPos = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
    public static MCH_WeaponGuidanceSystem gs = new MCH_WeaponGuidanceSystem();
-   public static double lockRange = 120.0D;
+   public static double lockRange = 4988.0D;
 
 
    public MCH_ClientLightWeaponTickHandler(Minecraft minecraft, MCH_Config config) {
@@ -68,7 +68,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
       gs.canLockOnGround = false;
       gs.canLockInWater = false;
       gs.setLockCountMax(40);
-      gs.lockRange = 120.0D;
+      gs.lockRange = 4988.0D;
       lockonSoundCount = 0;
       this.initWeaponParam((EntityPlayer)null);
    }
@@ -161,6 +161,11 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          // if("rpg7".equalsIgnoreCase(!MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
 
          // }
+
+         //todo reduce rpg-7 accuracy if not scoped
+         //done: make sure rpg-7 isn't getting it's item damage reduced even though it cannot lock, it was this:
+         //also ensure that the chinese change to how which button press for click to fire isn't affecting this.
+
          if(var7.getItemDamage() < var7.getMaxDamage()) {
             if(var6.getItemInUseDuration() > 10) {
                gs.lock(var6);
@@ -276,9 +281,11 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
       MCH_Config var10000 = MCH_MOD.config;
       if(MCH_Config.LWeaponAutoFire.prmBool && is.getItemDamage() < is.getMaxDamage() && gs.isLockComplete()) {
          autoShot = true;
+         System.out.println("autoshot true");
          //rpg stuff here
       }
       if("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
+         System.out.println("is rpg7");
          if(this.KeyAttack.isKeyDown()) {
             pc.useWeapon = true;
             pc.useWeaponPosX = player.posX;
@@ -287,6 +294,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
             send = true;
          }
       }
+      //bad logic
 
       if(this.KeySwWeaponMode.isKeyDown() && weapon.numMode > 1) {
          weaponMode = (weaponMode + 1) % weapon.numMode;

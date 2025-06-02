@@ -160,8 +160,10 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
          }
       }
 
-      this.drawCenteredString(msgLockDist, super.centerX, super.centerY + 50, color);
+      if(!"rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
+         this.drawCenteredString(msgLockDist, super.centerX, super.centerY + 50, color);
       }
+   }
    //}
 
    void drawGuiFGM148(EntityPlayer player, MCH_WeaponGuidanceSystem gs, boolean canFire, ItemStack itemStack) {
