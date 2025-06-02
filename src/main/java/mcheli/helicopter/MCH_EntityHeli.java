@@ -946,7 +946,7 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
                      // }
 
                      // Default collision entity damage
-                     if (e instanceof MCH_EntityHeli) {
+                     if (e instanceof MCH_EntityAircraft) {
                         return MCH_Config.Collision_EntityDamage.prmBool;
                      }
                      //how does this singular if statement fix everything I can't with this fucking mod

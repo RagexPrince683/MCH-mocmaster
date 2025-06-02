@@ -393,7 +393,7 @@ public class MCH_Config {
       RangeFinderSpotTime = new MCH_ConfigPrm("RangeFinderSpotTime", 15);
       RangeFinderConsume = new MCH_ConfigPrm("RangeFinderConsume", true);
       EnablePutRackInFlying = new MCH_ConfigPrm("EnablePutRackInFlying", true);
-      EnableDebugBoundingBox = new MCH_ConfigPrm("EnableDebugBoundingBox", true);
+      EnableDebugBoundingBox = new MCH_ConfigPrm("EnableDebugBoundingBox", false);
       DespawnCount = new MCH_ConfigPrm("DespawnCount", 25);
       HitBoxDelayTick = new MCH_ConfigPrm("HitBoxDelayTick", 0);
       EnableRotationLimit = new MCH_ConfigPrm("EnableRotationLimit", false);
@@ -438,6 +438,7 @@ public class MCH_Config {
       BlockID_DraftingTableOFF = new MCH_ConfigPrm("BlockID_DraftingTable", 3450);
       BlockID_DraftingTableON = new MCH_ConfigPrm("BlockID_DraftingTableON", 3451);
       General = new MCH_ConfigPrm[]{
+              //todone here
               TestMode,
               EnableCommand,
               null,

@@ -1084,7 +1084,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                             // }
 
                             // Default collision entity damage
-                            if (e instanceof MCH_EntityShip) {
+                            if (e instanceof MCH_EntityAircraft) {
                                 return MCH_Config.Collision_EntityDamage.prmBool;
                             }
                         }

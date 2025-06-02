@@ -16,6 +16,8 @@ import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_PacketStatusRequest;
 import mcheli.aircraft.MCH_Parts;
 import mcheli.chain.MCH_EntityChain;
+import mcheli.flare.MCH_EntityChaff;
+import mcheli.flare.MCH_EntityFlare;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.weapon.MCH_EntityBaseBullet;
@@ -991,7 +993,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                @Override
                public boolean isEntityApplicable(Entity e) {
                   // Exclude certain entity types from being affected by collision
-                  if (e != rideAc && !(e instanceof EntityItem) && !(e instanceof EntityXPOrb)
+                  if (e != rideAc && !(e instanceof EntityItem) && !(e instanceof EntityXPOrb) && !(e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff)
                           && !(e instanceof MCH_EntityBaseBullet) && !(e instanceof MCH_EntityChain)
                           && !(e instanceof MCH_EntitySeat)) {
 
