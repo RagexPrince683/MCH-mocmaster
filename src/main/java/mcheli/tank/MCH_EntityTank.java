@@ -929,6 +929,8 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
       double motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       float speedLimit = this.getMaxSpeed();
+      //todo maybe this is causing the 1.15 max speed hardcap?
+      // we know mcheli is capable of handling way faster speeds so why are ground vehicles limited to 1.15?
       if(motion1 > (double)speedLimit) {
          super.motionX *= (double)speedLimit / motion1;
          super.motionZ *= (double)speedLimit / motion1;
