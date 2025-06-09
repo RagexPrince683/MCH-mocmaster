@@ -17,6 +17,7 @@ import net.minecraft.block.BlockSponge;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecartEmpty;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -164,7 +165,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    @Override
    public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-      if (!isHeld || !(entity instanceof EntityPlayer) || stack.stackTagCompound == null)
+      if (!isHeld || !(entity instanceof EntityPlayerMP) || stack.stackTagCompound == null)
          return;
 
       NBTTagCompound tag = stack.stackTagCompound;
@@ -172,14 +173,15 @@ public abstract class MCH_ItemAircraft extends W_Item {
          return;
 
       if (world.getTotalWorldTime() - tag.getLong("DeployStart") >= 60) {
+         //todo replace 60 with a config value
          int x = tag.getInteger("TargetX");
          int y = tag.getInteger("TargetY");
          int z = tag.getInteger("TargetZ");
 
-         if (!world.isRemote)
-            this.spawnAircraft(stack, world, (EntityPlayer) entity, x, y, z);
-         else
-            ((EntityPlayer) entity).addChatMessage(new ChatComponentText("Vehicle deployed."));
+         EntityPlayerMP player = (EntityPlayerMP) entity;
+
+         this.spawnAircraft(stack, world, player, x, y, z);
+         player.addChatMessage(new ChatComponentText("Vehicle deployed."));
 
          tag.removeTag("DeployStart");
          tag.removeTag("TargetX");
