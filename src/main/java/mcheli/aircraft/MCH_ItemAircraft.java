@@ -165,12 +165,26 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    @Override
    public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-      if (!isHeld || !(entity instanceof EntityPlayerMP) || stack.stackTagCompound == null)
+      if ( !(entity instanceof EntityPlayerMP) || stack.stackTagCompound == null)
+         //removed !isHeld ||
          return;
 
       NBTTagCompound tag = stack.stackTagCompound;
       if (!tag.hasKey("DeployStart"))
          return;
+
+      if (!isHeld) {
+            //no fuckery
+            tag.removeTag("DeployStart");
+            tag.removeTag("TargetX");
+            tag.removeTag("TargetY");
+            tag.removeTag("TargetZ");
+            //if (world.isRemote)
+            //    ((EntityPlayerMP) entity).addChatMessage(new ChatComponentText("Vehicle deployment cancelled."));
+            EntityPlayerMP player = (EntityPlayerMP) entity;
+            player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled."));
+            return;
+      }
 
       if (isHeld && world.getTotalWorldTime() - tag.getLong("DeployStart") >= MCH_Config.placetimer.prmInt) {
          //todone replace 60 with a config value
