@@ -1262,9 +1262,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         return getInfo() != null && (getInfo().explosion == 0 || getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(hit);
     }
     private void resetEntityMotion(Entity entity) {
-        if (entity instanceof MCH_EntityAircraft) {
-            return;
-            //hopefully fixes the issue of vehicles (aircraft) dropping like flies after being impacted
+        if (entity instanceof MCH_EntityAircraft || entity instanceof MCH_EntitySeat) {
+            //hopefully fixes the issue of vehicles (mainly flying 'aircraft') dropping like flies after being impacted
         } else {
             entity.motionX = 0;
             entity.motionY = 0;

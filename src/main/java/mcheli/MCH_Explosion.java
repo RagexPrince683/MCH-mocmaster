@@ -42,6 +42,8 @@ import net.minecraft.world.World;
 public class MCH_Explosion extends Explosion {
 
    //todo make it so that explosions don't just ignore safezones or claims
+   //todo make it so explosions aren't as powerful and do not ignore blocks; specifically proximityfusedist/proximity weaponry
+   //todo also make it so that explosions are not as powerful and correspond to the actual damagefactor they were assigned
    //todo make it so explosions are recognized by xenofactions
 
    public final int field_77289_h = 16;
@@ -56,6 +58,7 @@ public class MCH_Explosion extends Explosion {
    public EntityPlayer explodedPlayer;
    public float explosionSizeBlock;
    public MCH_DamageFactor damageFactor = null;
+   //public MCH_PowerFactor powerFactor = null;
 
    private static int getFPS() {
       try {
@@ -126,7 +129,26 @@ public class MCH_Explosion extends Explosion {
                      d2 /= var39;
                      double var40 = this.getBlockDensity(vec3, entity.boundingBox);
                      double var41 = (1.0D - var38) * var40;
-                     float damage = (float)((int)((var41 * var41 + var41) / 2.0D * 8.0D * (double)super.explosionSize + 1.0D));
+                     //WTF
+                     //float damage = (float)((int)((var41 * var41 + var41) / 2.0D * 8.0D * (double)super.explosionSize + 1.0D));
+                     //todo HERE
+                     //todo get MCH_WeaponInfo.power for this
+                     //whatever this looks like complete fucking cancer (double)this.getpower
+                     //gonna just use damagefactor oh my FUCKING GOD
+                     //float damage = (float)((int)((var41 * var41 + var41) / 2.0D * 2.0D * (double)this.damageFactor ));
+                     //this shit pmo
+                     float damage = (float)((int)((var41 * var41 + var41) / 1.2D * (double)super.explosionSize));
+                     //whatever I'm just nerfing this retarded logic
+                     //damagefactor.entity isn't a thing
+
+                     //// Apply base entity damage factor from the explosion configuration
+                     //if (this.damageFactor != null) {
+                     //   damage *= this.damageFactor.entity;
+                     //}
+                     //SOMEONE FUCKING HELP ME
+
+                     //of fucking course this caused a game crash
+                     //float damage = (float)((int)((var41 * var41 + var41) / 2.0D * 2.0D * (double)(this.damageFactor != null ? this.damageFactor : 1.0F) + 1.0D));
                      if(damage > 0.0F && this.result != null && !(entity instanceof EntityItem) && !(entity instanceof EntityExpBottle) && !(entity instanceof EntityXPOrb) && !W_Entity.isEntityFallingBlock(entity)) {
                         if(entity instanceof MCH_EntityBaseBullet && super.exploder instanceof EntityPlayer) {
                            if(!W_Entity.isEqual(((MCH_EntityBaseBullet)entity).shootingEntity, super.exploder)) {
@@ -468,9 +490,7 @@ public class MCH_Explosion extends Explosion {
       affectedBlockPositions.addAll(hashset);
 
       //todone? limit the amount of particles allowed to be made if under 60fps do not spawn anymore particles.
-
-
-
+      //this did not work
       if (getFPS() > 60) {
          System.out.println("FPS: " + getFPS() + " - Spawning particles");
          if (explosionSize >= 2.0F && isSmoking) {
