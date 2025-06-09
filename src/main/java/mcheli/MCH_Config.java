@@ -226,6 +226,7 @@ public class MCH_Config {
     public static MCH_ConfigPrm bombletloader;
    public static MCH_ConfigPrm wrenchdropitem;
    public static MCH_ConfigPrm AutoRepairEnabled;
+   public static MCH_ConfigPrm placetimer;
 
 
 
@@ -387,6 +388,7 @@ public class MCH_Config {
       bombletloader = new MCH_ConfigPrm("bombletloader", 50);
       wrenchdropitem = new MCH_ConfigPrm("wrenchdropitem", false);
       AutoRepairEnabled = new MCH_ConfigPrm("AutoRepairEnabled", false);
+      placetimer = new MCH_ConfigPrm("placetimer", 60);
       StingerLockRange.validVer = "1.0.0";
       DefaultExplosionParticle = new MCH_ConfigPrm("DefaultExplosionParticle", false);
       RangeFinderSpotDist = new MCH_ConfigPrm("RangeFinderSpotDist", 400);
@@ -476,6 +478,7 @@ public class MCH_Config {
               delayrangeloader,
               bombletloader,
               wrenchdropitem,
+              placetimer,
               RangeFinderSpotDist,
               RangeFinderSpotTime,
               RangeFinderConsume,

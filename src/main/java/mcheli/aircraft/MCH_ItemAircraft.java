@@ -172,8 +172,8 @@ public abstract class MCH_ItemAircraft extends W_Item {
       if (!tag.hasKey("DeployStart"))
          return;
 
-      if (world.getTotalWorldTime() - tag.getLong("DeployStart") >= 60) {
-         //todo replace 60 with a config value
+      if (world.getTotalWorldTime() - tag.getLong("DeployStart") >= MCH_Config.placetimer.prmInt) {
+         //todone replace 60 with a config value
          int x = tag.getInteger("TargetX");
          int y = tag.getInteger("TargetY");
          int z = tag.getInteger("TargetZ");
@@ -182,6 +182,8 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
          this.spawnAircraft(stack, world, player, x, y, z);
          player.addChatMessage(new ChatComponentText("Vehicle deployed."));
+         //playsound
+         W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
 
          tag.removeTag("DeployStart");
          tag.removeTag("TargetX");
