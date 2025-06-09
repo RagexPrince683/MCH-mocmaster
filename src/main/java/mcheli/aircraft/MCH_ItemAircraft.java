@@ -84,28 +84,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    public ItemStack onItemRightClick(ItemStack par1ItemStack, World world, EntityPlayer player) {
 
-      //todo timer here
-
-      NBTTagCompound tag = par1ItemStack.getTagCompound();
-      if (tag == null) {
-         tag = new NBTTagCompound();
-         par1ItemStack.setTagCompound(tag);
-      }
-
-      long currentTime = world.getTotalWorldTime(); // server-side time
-      long lastUseTime = tag.getLong("LastUsed");
-
-      int cooldownTicks = 100; // 5 seconds (20 ticks per second * 5)
-
-      if (currentTime - lastUseTime < cooldownTicks) {
-         if (world.isRemote) {
-            player.addChatMessage(new ChatComponentText("Item is on cooldown!"));
-         }
-         return par1ItemStack;
-      }
-
-      // Save the use time
-      tag.setLong("LastUsed", currentTime);
+      //todone timer here maybe not
 
       float f = 1.0F;
       float f1 = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * f;
@@ -157,17 +136,23 @@ public abstract class MCH_ItemAircraft extends W_Item {
                //here
                //this.spawnAircraft(par1ItemStack, world, player, mop.blockX, mop.blockY, mop.blockZ);
 
+               if (par1ItemStack.stackTagCompound == null)
+                  par1ItemStack.stackTagCompound = new NBTTagCompound();
+
+               NBTTagCompound tag = par1ItemStack.stackTagCompound;
+
                if (!tag.hasKey("DeployStart")) {
-                  tag.setLong("DeployStart", world.getTotalWorldTime());
-                  tag.setInteger("TargetX", (int) player.posX);
-                  tag.setInteger("TargetY", (int) player.posY - 1);
-                  tag.setInteger("TargetZ", (int) player.posZ);
+                  //MovingObjectPosition mop = W_WorldFunc.clip(world, player, 5.0D);
+                  //not the right syntax for MOP; and it's already been defined!
+                  if (mop != null && W_MovingObjectPosition.isHitTypeTile(mop)) {
+                     tag.setLong("DeployStart", world.getTotalWorldTime());
+                     tag.setInteger("TargetX", mop.blockX);
+                     tag.setInteger("TargetY", mop.blockY);
+                     tag.setInteger("TargetZ", mop.blockZ);
 
-                  if (world.isRemote) {
-                     player.addChatMessage(new ChatComponentText("Preparing vehicle for deployment..."));
+                     if (world.isRemote)
+                        player.addChatMessage(new ChatComponentText("Preparing vehicle for deployment..."));
                   }
-
-                  return par1ItemStack;
                }
 
             }
@@ -179,34 +164,27 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    @Override
    public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-      if (!(entity instanceof EntityPlayer) || stack.stackTagCompound == null)
+      if (!isHeld || !(entity instanceof EntityPlayer) || stack.stackTagCompound == null)
          return;
 
       NBTTagCompound tag = stack.stackTagCompound;
       if (!tag.hasKey("DeployStart"))
          return;
 
-      long start = tag.getLong("DeployStart");
-      long now = world.getTotalWorldTime();
-
-      int delayTicks = 60;
-
-      if (now - start >= delayTicks) {
+      if (world.getTotalWorldTime() - tag.getLong("DeployStart") >= 60) {
          int x = tag.getInteger("TargetX");
          int y = tag.getInteger("TargetY");
          int z = tag.getInteger("TargetZ");
 
-         if (!world.isRemote) {
+         if (!world.isRemote)
             this.spawnAircraft(stack, world, (EntityPlayer) entity, x, y, z);
-         } else {
-            ((EntityPlayer) entity).addChatMessage(new ChatComponentText("Vehicle deployed!"));
-         }
+         else
+            ((EntityPlayer) entity).addChatMessage(new ChatComponentText("Vehicle deployed."));
 
-         // Clear tag to allow future deployments
-         stack.stackTagCompound.removeTag("DeployStart");
-         stack.stackTagCompound.removeTag("TargetX");
-         stack.stackTagCompound.removeTag("TargetY");
-         stack.stackTagCompound.removeTag("TargetZ");
+         tag.removeTag("DeployStart");
+         tag.removeTag("TargetX");
+         tag.removeTag("TargetY");
+         tag.removeTag("TargetZ");
       }
    }
 
