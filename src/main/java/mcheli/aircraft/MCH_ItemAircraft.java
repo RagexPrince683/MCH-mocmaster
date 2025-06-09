@@ -172,7 +172,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       if (!tag.hasKey("DeployStart"))
          return;
 
-      if (world.getTotalWorldTime() - tag.getLong("DeployStart") >= MCH_Config.placetimer.prmInt) {
+      if (isHeld && world.getTotalWorldTime() - tag.getLong("DeployStart") >= MCH_Config.placetimer.prmInt) {
          //todone replace 60 with a config value
          int x = tag.getInteger("TargetX");
          int y = tag.getInteger("TargetY");
