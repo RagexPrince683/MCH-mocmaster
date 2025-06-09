@@ -4,11 +4,8 @@ import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+
+import java.util.*;
 
 import mcheli.*;
 import mcheli.chain.MCH_EntityChain;
@@ -52,6 +49,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.ForgeChunkManager;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.oredict.OreDictionary;
 
 import static mcheli.hud.MCH_HudItem.player;
 //import static net.minecraft.command.CommandBase.getCommandSenderAsPlayer;
@@ -1174,6 +1172,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.setDead(true);
    }
 
+
+
    public EntityItem entityDropItem(ItemStack is, float par2) {
       if(is.stackSize == 0) {
          return null;
@@ -1612,16 +1612,66 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       Entity e;
       int var7;
       if (isDestroyed() && getCountOnUpdate() % 20 == 0) {
-         /* 1422 */       for (int i = 0; i < getSeatNum() + 1; i++) {
-            /* 1423 */         Entity entity = getEntityBySeatId(i);
-            /* 1424 */         if (entity != null && (i != 0 || !isUAV() || !isNewUAV())) {
-               /* 1425 */           MCH_Config var10000 = MCH_MOD.config;
-               /* 1426 */           if (MCH_Config.applyDamageVsEntity(entity, DamageSource.inFire, 1.0F) > 0.0F) {
-                  /* 1427 */             entity.setFire(5);
-                  /*      */           }
-               /*      */         }
-            /*      */       }
-         /*      */     }
+                for (int i = 0; i < getSeatNum() + 1; i++) {
+                     Entity entity = getEntityBySeatId(i);
+                     if (entity != null && (i != 0 || !isUAV() || !isNewUAV())) {
+                          MCH_Config var10000 = MCH_MOD.config;
+                          if (MCH_Config.applyDamageVsEntity(entity, DamageSource.inFire, 1.0F) > 0.0F) {
+                             //todo get and summon a random few items used in the recipe for the vehicle here
+                             //this is where vehicle dies; we want people killing things to at least return some profit
+                             //MCH_AircraftInfo.RotPart)this.getAcInfo()
+                             //MCH_AircraftInfo.
+                             entity.setFire(5);
+                             //this.getAcInfo().recipe.
+
+                             MCH_AircraftInfo info = this.getAcInfo();
+                             if (info != null && info.recipe != null && !info.recipe.isEmpty()) {
+                                Random rand = new Random();
+                                int drops = 2 + rand.nextInt(2); // Drop 2–3 items max
+                                Set<Integer> usedIndexes = new HashSet<>();
+
+                                for (int i2 = 0; i2 < drops && usedIndexes.size() < info.recipe.size(); i2++) {
+                                   int index;
+                                   do {
+                                      index = rand.nextInt(info.recipe.size());
+                                   } while (usedIndexes.contains(index));
+                                   usedIndexes.add(index);
+
+                                   Object obj = info.recipe.get(index);
+                                   ItemStack stack = null;
+
+                                   if (obj instanceof Item) {
+                                      stack = new ItemStack((Item) obj, 1);
+                                   } else if (obj instanceof Block) {
+                                      stack = new ItemStack((Block) obj, 1);
+                                   } else if (obj instanceof ItemStack) {
+                                      stack = ((ItemStack) obj).copy();
+                                      stack.stackSize = 1;
+                                   } else if (obj instanceof String) {
+                                      List<ItemStack> ores = OreDictionary.getOres((String) obj);
+                                      if (!ores.isEmpty()) {
+                                         stack = ores.get(rand.nextInt(ores.size())).copy();
+                                         stack.stackSize = 1;
+                                      }
+                                   }
+
+                                   if (stack != null && stack.getItem() != null) {
+                                      entity.worldObj.spawnEntityInWorld(new EntityItem(entity.worldObj, entity.posX, entity.posY, entity.posZ, stack));
+                                   }
+                                }
+                             }
+
+
+                             }
+                        }
+                   }
+              }
+
+
+      //if (this.isDestroyed) { //this.isExploded()
+      //
+      //   }
+
 
      // if (isDestroyed() && isNewUAV()) {
      //
@@ -1786,6 +1836,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if(!super.worldObj.isRemote && this.isDestroyed() && !this.isExploded() && !var11 && super.onGround && var12 < -0.2D) {
          this.explosionByCrash(var12);
          this.damageSinceDestroyed = this.getMaxHP();
+         //basic crash physic system
+         //todo maybe mend? change?
       }
 
       this.onUpdate_PartRotation();
