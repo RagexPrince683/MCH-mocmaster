@@ -956,6 +956,14 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public boolean attackEntityFrom(DamageSource damageSource, float org_damage) {
 
+      //if(damageSource.isProjectile()) {
+      //   float projDamage = MCH_MOD.config.applyDamageByExternal(this, damageSource, org_damage);
+      //   System.out.println("projectile impacted a MCH entity");
+      //   this.setDamageTaken(this.getDamageTaken() + (int) projDamage);
+      //   //hopefully this can fix the bug where HMG RPGs hardcap by only doing (weak) explosion damage maybe?
+      //}
+      //this did not work
+
 
 
       //if (uavStation = true) { //&& isNewUAV()
@@ -1017,6 +1025,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                } else if(this.isMountedEntity(damageSource.getEntity())) {
                   return false;
                }
+
+               //todo HMG compat
+               //if(dmt.startsWith("projectile")) {
+               //
+               //}
+               //idk what the proper thing is for just projectiles in general
 
                if(dmt.equalsIgnoreCase("onFire")) {
                   //fun TODO: maybe something here for HMG???
@@ -1124,6 +1138,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                            this.explosionByCrash(0.0D);
                            this.damageSinceDestroyed = this.getMaxHP();
                         } else {
+                           //todo this is death
                            MCH_Explosion.newExplosion(super.worldObj, (Entity)null, entity, super.posX, super.posY, super.posZ, 2.0F, 2.0F, true, true, true, true, 5);
                         }
                      } else {
@@ -1624,10 +1639,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                              entity.setFire(5);
                              //this.getAcInfo().recipe.
 
+
+                             //item drop logic
+
                              MCH_AircraftInfo info = this.getAcInfo();
                              if (info != null && info.recipe != null && !info.recipe.isEmpty()) {
+                                System.out.println("[MCH] Vehicle destroyed: attempting to drop recipe items...");
+
                                 Random rand = new Random();
-                                int drops = 2 + rand.nextInt(2); // Drop 2–3 items max
+                                int drops = 2 + rand.nextInt(2); // Drop 2–3 items
                                 Set<Integer> usedIndexes = new HashSet<>();
 
                                 for (int i2 = 0; i2 < drops && usedIndexes.size() < info.recipe.size(); i2++) {
@@ -1642,23 +1662,36 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                                    if (obj instanceof Item) {
                                       stack = new ItemStack((Item) obj, 1);
+                                      System.out.println("[MCH] Selected Item: " + ((Item) obj).getUnlocalizedName());
                                    } else if (obj instanceof Block) {
                                       stack = new ItemStack((Block) obj, 1);
+                                      System.out.println("[MCH] Selected Block: " + ((Block) obj).getUnlocalizedName());
                                    } else if (obj instanceof ItemStack) {
                                       stack = ((ItemStack) obj).copy();
                                       stack.stackSize = 1;
+                                      System.out.println("[MCH] Selected ItemStack: " + stack.getUnlocalizedName());
                                    } else if (obj instanceof String) {
                                       List<ItemStack> ores = OreDictionary.getOres((String) obj);
                                       if (!ores.isEmpty()) {
                                          stack = ores.get(rand.nextInt(ores.size())).copy();
                                          stack.stackSize = 1;
+                                         System.out.println("[MCH] Selected OreDict entry: " + obj + " → " + stack.getUnlocalizedName());
+                                      } else {
+                                         System.out.println("[MCH] OreDict entry has no matches: " + obj);
                                       }
+                                   } else {
+                                      System.out.println("[MCH] Unknown recipe object type: " + obj);
                                    }
 
                                    if (stack != null && stack.getItem() != null) {
+                                      System.out.println("[MCH] Spawning item: " + stack.getDisplayName());
                                       entity.worldObj.spawnEntityInWorld(new EntityItem(entity.worldObj, entity.posX, entity.posY, entity.posZ, stack));
+                                   } else {
+                                      System.out.println("[MCH] Failed to create ItemStack from: " + obj);
                                    }
                                 }
+                             } else {
+                                System.out.println("[MCH] No recipe found for this vehicle.");
                              }
 
 

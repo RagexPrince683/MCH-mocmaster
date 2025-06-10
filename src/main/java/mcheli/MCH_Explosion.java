@@ -138,6 +138,7 @@ public class MCH_Explosion extends Explosion {
                      //float damage = (float)((int)((var41 * var41 + var41) / 2.0D * 2.0D * (double)this.damageFactor ));
                      //this shit pmo
                      float damage = (float)((int)((var41 * var41 + var41) / 1.2D * (double)super.explosionSize));
+                     //this is the most fucking overly complex retarded shit I have ever seen and I'm definitely not helping
                      //whatever I'm just nerfing this retarded logic
                      //damagefactor.entity isn't a thing
 
