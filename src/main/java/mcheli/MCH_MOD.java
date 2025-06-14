@@ -100,7 +100,7 @@ public class MCH_MOD {
    public static final String MOD_ID = "mcheli";
    public static final String DOMAIN = "mcheli";
    public static final String MCVER = "1.7.10";
-   public static String VER = "";
+   public static String VER = "1.8";
    public static final String MOD_CH = "MCHeli_CH";
    @Instance("mcheli")
    public static MCH_MOD instance;
