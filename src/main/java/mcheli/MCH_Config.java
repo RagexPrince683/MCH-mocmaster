@@ -250,8 +250,8 @@ public class MCH_Config {
       KeySwitchHovering = new MCH_ConfigPrm("KeySwitchHovering", 57);
       KeyEjectHeli = new MCH_ConfigPrm("KeyEjectHeli", 54);
       KeyAttack = new MCH_ConfigPrm("KeyAttack", -100);
-      KeyUseWeapon = new MCH_ConfigPrm("KeyUseWeapon", -100);
-      KeyCurrentWeaponLock = new MCH_ConfigPrm("KeyCurrentWeaponLock", -99);
+      KeyUseWeapon = new MCH_ConfigPrm("KeyUseWeapon", -99);
+      KeyCurrentWeaponLock = new MCH_ConfigPrm("KeyCurrentWeaponLock", -100);
       KeySwitchWeapon1 = new MCH_ConfigPrm("KeySwitchWeapon1", -98);
       KeySwitchWeapon2 = new MCH_ConfigPrm("KeySwitchWeapon2", 34);
       KeySwWeaponMode = new MCH_ConfigPrm("KeySwitchWeaponMode", 45);
@@ -314,7 +314,7 @@ public class MCH_Config {
       HideKeybind = new MCH_ConfigPrm("HideKeybind", false);
       ItemDamage = new MCH_ConfigPrm("ItemDamage", true);
       ItemFuel = new MCH_ConfigPrm("ItemFuel", true);
-      AutoRepairHP = new MCH_ConfigPrm("AutoRepairHP", 0.5D);
+      AutoRepairHP = new MCH_ConfigPrm("AutoRepairHP", 0.0D);
       AutoRepairEnabled = new MCH_ConfigPrm("AutoRepairEnabled", false);
       Collision_DestroyBlock = new MCH_ConfigPrm("Collision_DestroyBlock", true);
       Explosion_DestroyBlock = new MCH_ConfigPrm("Explosion_DestroyBlock", true);
@@ -364,13 +364,13 @@ public class MCH_Config {
       DropItemInCreativeMode = new MCH_ConfigPrm("DropItemInCreativeMode", false);
       BreakableOnlyPickaxe = new MCH_ConfigPrm("BreakableOnlyPickaxe", false);
       InvertMouse = new MCH_ConfigPrm("InvertMouse", false);
-      MouseSensitivity = new MCH_ConfigPrm("MouseSensitivity", 10.0D);
+      MouseSensitivity = new MCH_ConfigPrm("MouseSensitivity", 30.0D);
       MouseControlStickModeHeli = new MCH_ConfigPrm("MouseControlStickModeHeli", false);
       MouseControlStickModePlane = new MCH_ConfigPrm("MouseControlStickModePlane", false);
-      MouseControlFlightSimMode = new MCH_ConfigPrm("MouseControlFlightSimMode", false);
+      MouseControlFlightSimMode = new MCH_ConfigPrm("MouseControlFlightSimMode", true);
       MouseControlFlightSimMode.desc = ";MouseControlFlightSimMode = true ( Yaw:key, Roll=mouse )";
       SwitchWeaponWithMouseWheel = new MCH_ConfigPrm("SwitchWeaponWithMouseWheel", true);
-      AllHeliSpeed = new MCH_ConfigPrm("AllHeliSpeed", 2.5D);
+      AllHeliSpeed = new MCH_ConfigPrm("AllHeliSpeed", 1.5D);
       AllPlaneSpeed = new MCH_ConfigPrm("AllPlaneSpeed", 1000.00D);
       AllShipSpeed = new MCH_ConfigPrm("AllShipSpeed", 2.0D);
       AllTankSpeed = new MCH_ConfigPrm("AllTankSpeed", 1.0D);
@@ -440,7 +440,6 @@ public class MCH_Config {
       BlockID_DraftingTableOFF = new MCH_ConfigPrm("BlockID_DraftingTable", 3450);
       BlockID_DraftingTableON = new MCH_ConfigPrm("BlockID_DraftingTableON", 3451);
       General = new MCH_ConfigPrm[]{
-              //todone here
               TestMode,
               EnableCommand,
               null,
@@ -594,6 +593,7 @@ public class MCH_Config {
       AllHeliSpeed.prmDouble = MCH_Lib.RNG(AllHeliSpeed.prmDouble, 0.0D, 1000.0D);
       AllPlaneSpeed.prmDouble = MCH_Lib.RNG(AllPlaneSpeed.prmDouble, 0.0D, 1000.0D);
       AllTankSpeed.prmDouble = MCH_Lib.RNG(AllTankSpeed.prmDouble, 0.0D, 1000.0D);
+      AllShipSpeed.prmDouble = MCH_Lib.RNG(AllShipSpeed.prmDouble, 0.0D, 1000.0D);
       this.setBlockListFromString(bulletBreakableBlocks, BulletBreakableBlock.prmString);
       this.setBlockListFromString(carBreakableBlocks, Collision_Car_BreakableBlock.prmString);
       this.setBlockListFromString(carNoBreakableBlocks, Collision_Car_NoBreakableBlock.prmString);
