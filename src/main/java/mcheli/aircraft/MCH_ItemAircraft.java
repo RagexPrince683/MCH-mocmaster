@@ -173,7 +173,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       if (!tag.hasKey("DeployStart"))
          return;
 
-      if (!isHeld) {
+      if (!isHeld && !ac.isUAV() || !ac.isNewUAV()) {
             //no fuckery
             tag.removeTag("DeployStart");
             tag.removeTag("TargetX");
@@ -186,7 +186,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
             return;
       }
 
-      if (isHeld && world.getTotalWorldTime() - tag.getLong("DeployStart") >= MCH_Config.placetimer.prmInt) {
+      if (isHeld && world.getTotalWorldTime() - tag.getLong("DeployStart") >= MCH_Config.placetimer.prmInt && !ac.isUAV() || !ac.isNewUAV()) {
          //todone replace 60 with a config value
          int x = tag.getInteger("TargetX");
          int y = tag.getInteger("TargetY");
