@@ -143,9 +143,21 @@ public abstract class MCH_ItemAircraft extends W_Item {
                NBTTagCompound tag = par1ItemStack.stackTagCompound;
 
                if (!tag.hasKey("DeployStart")) {
-                  //MovingObjectPosition mop = W_WorldFunc.clip(world, player, 5.0D);
-                  //not the right syntax for MOP; and it's already been defined!
                   if (mop != null && W_MovingObjectPosition.isHitTypeTile(mop)) {
+                     // TEMP spawn aircraft ONLY to check if it's a UAV — don't spawn into world yet
+                     MCH_EntityAircraft ac = this.onTileClick(par1ItemStack, world, player.rotationYaw, mop.blockX, mop.blockY, mop.blockZ);
+                     if (ac != null && (ac.isUAV() || ac.isNewUAV())) {
+                        if (world.isRemote) {
+                           if (ac.isSmallUAV()) {
+                              player.addChatMessage(new ChatComponentText("Please use the UAV station OR Portable Controller"));
+                           } else {
+                              player.addChatMessage(new ChatComponentText("Please use the UAV station"));
+                           }
+                        }
+                        return par1ItemStack;
+                     }
+
+                     // Proceed with delay setup
                      tag.setLong("DeployStart", world.getTotalWorldTime());
                      tag.setInteger("TargetX", mop.blockX);
                      tag.setInteger("TargetY", mop.blockY);
