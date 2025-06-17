@@ -63,6 +63,14 @@ public class MCH_EntitySeat extends W_Entity {
    }
 
    public boolean attackEntityFrom(DamageSource damageSource, float amount) {
+      Entity sourceEntity = damageSource.getEntity();
+
+      // Prevent rider from damaging their self (and fatally erroring)
+      if (sourceEntity != null && sourceEntity == this.riddenByEntity) {
+         return false;
+      }
+
+      // Pass damage to the aircraft if valid
       return getParent() != null && getParent().attackEntityFrom(damageSource, amount);
    }
 
@@ -86,21 +94,22 @@ public class MCH_EntitySeat extends W_Entity {
 
 
       // If this seat belongs to a new UAV and the player dismounts, teleport them except it does not work
-      if (this.lastRiddenByEntity instanceof EntityPlayer && this.riddenByEntity == null) {
-         System.out.println("this.lastRiddenByEntity instanceof EntityPlayer && this.riddenByEntity == null");
-         EntityPlayer player = (EntityPlayer) this.lastRiddenByEntity;
-
-         if (this.parent != null && this.parent.getAcInfo().isNewUAV) {
-            System.out.println("[NEW UAV] Player dismounted! Teleporting to UAV Station.");
-            player.setPositionAndUpdate(
-                    MCH_EntityUavStation.storedStationX,
-                    MCH_EntityUavStation.storedStationY,
-                    MCH_EntityUavStation.storedStationZ
-            );
-         }
-
-         this.lastRiddenByEntity = null; // Prevent repeat teleport
-      }
+      //if (this.lastRiddenByEntity instanceof EntityPlayer && this.riddenByEntity == null) {
+      //   System.out.println("this.lastRiddenByEntity instanceof EntityPlayer && this.riddenByEntity == null");
+      //   EntityPlayer player = (EntityPlayer) this.lastRiddenByEntity;
+//
+      //   if (this.parent != null && this.parent.getAcInfo().isNewUAV) {
+      //      System.out.println("[NEW UAV] Player dismounted! Teleporting to UAV Station.");
+      //      player.setPositionAndUpdate(
+      //              MCH_EntityUavStation.storedStationX,
+      //              MCH_EntityUavStation.storedStationY,
+      //              MCH_EntityUavStation.storedStationZ
+      //      );
+      //   }
+//
+      //   this.lastRiddenByEntity = null; // Prevent repeat teleport
+      //}
+      //well I mean it doesn't work so might as well comment it out.
 
       if (this.lastRiddenByEntity == null && this.riddenByEntity != null) {
          if (getParent() != null) {
