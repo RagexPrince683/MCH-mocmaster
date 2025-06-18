@@ -268,6 +268,14 @@ public class MCH_EventHook extends W_EventHook {
       }
    }
 
+   @SubscribeEvent
+   public void onLivingAttack(LivingAttackEvent event) {
+      if (event.source != null && event.source.getEntity() == event.entityLiving) {
+         // Player is attacking themselves — block it.
+         event.setCanceled(true);
+      }
+   }
+
    public void livingHurtEvent(LivingHurtEvent event) {
            MCH_EntityAircraft ac = getRiddenAircraft(event.entity);
            if (ac != null &&

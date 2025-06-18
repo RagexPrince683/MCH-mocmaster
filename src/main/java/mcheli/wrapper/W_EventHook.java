@@ -46,7 +46,14 @@ public class W_EventHook {
 
     }
 
+    @SubscribeEvent
+    public void onEvent_livingAttack(LivingAttackEvent event) {
+        this.onLivingAttack(event);
+    }
 
+    public void onLivingAttack(LivingAttackEvent event) {
+        this.onLivingAttack(event);
+    }
 
 
 
