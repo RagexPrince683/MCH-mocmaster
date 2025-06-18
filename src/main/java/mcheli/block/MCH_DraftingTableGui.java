@@ -82,6 +82,10 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    public static float modelPosX = 0.0F;
    public static float modelPosY = 0.0F;
 
+   // two new fields:
+   private List<IRecipe> originalRecipes;       // the un‑filtered data
+   private MCH_IRecipeList filteredRecipeList;  // what the GUI actually reads from
+
 
    public MCH_DraftingTableGui(EntityPlayer player, int posX, int posY, int posZ) {
       super(new MCH_DraftingTableGuiContainer(player, posX, posY, posZ));
@@ -423,17 +427,28 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    }
 
    protected void keyTyped(char par1, int keycode) {
-      if(keycode == 1 || keycode == W_KeyBinding.getKeyCode(Minecraft.getMinecraft().gameSettings.keyBindInventory)) {
+
+      //search bar shit
+      if (searchField.textboxKeyTyped(par1, keycode)) {
+         // Update the recipe list based on search input
+         String searchText = searchField.getText().toLowerCase();
+         MCH_IRecipeList recipeList = this.getCurrentList();
+         List<IRecipe> filteredRecipes = new ArrayList<>();
+         for (int i = 0; i < recipeList.getRecipeListSize(); i++) {
+            IRecipe recipe = recipeList.getRecipe(i);
+            if (recipe.getRecipeOutput() != null && recipe.getRecipeOutput().getDisplayName().toLowerCase().contains(searchText)) {
+               filteredRecipes.add(recipe);
+            }
+         }
+         return; // prevent default behavior when typing in search box
+      } else if(keycode == 1 || keycode == W_KeyBinding.getKeyCode(Minecraft.getMinecraft().gameSettings.keyBindInventory)) {
          if(this.getScreenId() == 0) {
             super.mc.thePlayer.closeScreen();
          } else {
             this.switchScreen(0);
          }
 
-         //search bar shit
-         if (searchField.textboxKeyTyped(par1, keycode)) {
-            return; // prevent default behavior when typing in search box
-         }
+
 
       }
 
