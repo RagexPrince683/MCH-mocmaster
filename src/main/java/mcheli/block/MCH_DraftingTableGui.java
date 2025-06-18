@@ -164,11 +164,27 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       //search stuff
       int x = this.guiLeft + 10;
       int y = this.guiTop + 5;
-      searchField = new GuiTextField(this.fontRendererObj, x, y, 100, 12);
+      //searchField = new GuiTextField(this.fontRendererObj, x, y, 100, 12);
+      //searchField.setMaxStringLength(50);
+      //searchField.setEnableBackgroundDrawing(true);
+      //searchField.setVisible(true);
+      //searchField.setFocused(false);
+
+      // existing searchField setup…
+      searchField = new GuiTextField(fontRendererObj, x, y, 100, 12);
       searchField.setMaxStringLength(50);
       searchField.setEnableBackgroundDrawing(true);
       searchField.setVisible(true);
       searchField.setFocused(false);
+
+      // 2) Whenever you switch screens/tabs, capture the master list:
+      MCH_IRecipeList base = getCurrentList();  // whatever your tabs normally return
+      originalRecipes = new ArrayList<>();
+      for (int i2 = 0; i2 < base.getRecipeListSize(); i2++) {
+         originalRecipes.add(base.getRecipe(i2));
+      }
+      // start with no filter:
+      filteredRecipeList = base;
 
       this.switchScreen(0);
       initModelTransform();
@@ -428,6 +444,11 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
    protected void keyTyped(char par1, int keycode) {
 
+      if (searchField.textboxKeyTyped(par1, keycode)) {
+         applyFilter();
+         return;
+      }
+
       //search bar shit
       if (searchField.textboxKeyTyped(par1, keycode)) {
          // Update the recipe list based on search input
@@ -470,6 +491,32 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          }
       }
 
+   }
+
+   private void applyFilter() {
+      String q = searchField.getText().trim().toLowerCase();
+      if (q.isEmpty()) {
+         // no filter → fall back to the original
+         filteredRecipeList = new MCH_IRecipeList() {
+            public int getRecipeListSize() { return originalRecipes.size(); }
+            public IRecipe getRecipe(int i)   { return originalRecipes.get(i); }
+         };
+         return;
+      }
+
+      // build a tiny list of only matching recipes
+      final List<IRecipe> matches = new ArrayList<>();
+      for (IRecipe r : originalRecipes) {
+         if (r.getRecipeOutput() != null &&
+                 r.getRecipeOutput().getDisplayName().toLowerCase().contains(q)) {
+            matches.add(r);
+         }
+      }
+      // swap in a wrapper that reads from `matches`
+      filteredRecipeList = new MCH_IRecipeList() {
+         public int getRecipeListSize() { return matches.size(); }
+         public IRecipe getRecipe(int i)   { return matches.get(i); }
+      };
    }
 
    @Override
@@ -713,6 +760,12 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
       searchField.drawTextBox();
 
+      // 4) When rendering entries, pull from `filteredRecipeList`:
+      int size = filteredRecipeList.getRecipeListSize();
+      for (int i = 0; i < size; i++) {
+         IRecipe r = filteredRecipeList.getRecipe(i);
+         // … your existing draw‑one‑recipe code …
+      }
 
 
    }
