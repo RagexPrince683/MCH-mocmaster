@@ -74,6 +74,15 @@ public class MCH_EntitySeat extends W_Entity {
       return getParent() != null && getParent().attackEntityFrom(damageSource, amount);
    }
 
+   @Override
+   public boolean hitByEntity(Entity entity) {
+      // Prevent player from hitting the seat they are riding
+      if (entity == this.riddenByEntity) {
+         return false;
+      }
+      return super.hitByEntity(entity);
+   }
+
    public boolean canBeCollidedWith() {
       return !this.isDead;
    }
