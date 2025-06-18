@@ -185,7 +185,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       } else if(MCH_TankInfoManager.getInstance().getRecipeListSize() > 0) {
          this.switchRecipeList(MCH_TankInfoManager.getInstance());
       } else if(MCH_ShipInfoManager.getInstance().getRecipeListSize() > 0) {
-
+         this.switchRecipeList(MCH_ShipInfoManager.getInstance());
       }
       else {
          this.switchRecipeList(MCH_ItemRecipe.getInstance());
