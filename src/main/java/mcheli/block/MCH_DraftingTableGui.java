@@ -14,6 +14,7 @@ import mcheli.block.MCH_DraftingTableGuiContainer;
 import mcheli.gui.MCH_GuiSliderVertical;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.plane.MCP_PlaneInfoManager;
+import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_TankInfoManager;
 import mcheli.vehicle.MCH_VehicleInfoManager;
 import mcheli.wrapper.W_GuiButton;
@@ -24,6 +25,7 @@ import mcheli.wrapper.W_ScaledResolution;
 import mcheli.wrapper.modelloader.W_ModelCustom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,10 +36,12 @@ import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 public class MCH_DraftingTableGui extends W_GuiContainer {
+   private GuiTextField searchField;
 
    private final EntityPlayer thePlayer;
    private int scaleFactor;
@@ -54,6 +58,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    public static final int RECIPE_VEHICLE = 2;
    public static final int RECIPE_TANK = 3;
    public static final int RECIPE_ITEM = 4;
+   //recipe for ships will be 5
    public MCH_IRecipeList currentList;
    public MCH_CurrentRecipe current;
    public static final int BUTTON_HELI = 10;
@@ -91,6 +96,9 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
    public void initGui() {
       super.initGui();
+
+      Keyboard.enableRepeatEvents(true);
+
       super.buttonList.clear();
       this.screenButtonList.clear();
       this.screenButtonList.add(new ArrayList());
@@ -102,16 +110,19 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       GuiButton btnVehicle = new GuiButton(12, super.guiLeft + 20, super.guiTop + 60, 90, 20, "Vehicle List");
       GuiButton btnTank = new GuiButton(13, super.guiLeft + 20, super.guiTop + 80, 90, 20, "Tank List");
       GuiButton btnItem = new GuiButton(14, super.guiLeft + 20, super.guiTop + 100, 90, 20, "Item List");
+      GuiButton btnShip = new GuiButton(15, super.guiLeft + 20, super.guiTop + 120, 90, 20, "Ship List");
       btnHeli.enabled = MCH_HeliInfoManager.getInstance().getRecipeListSize() > 0;
       btnPlane.enabled = MCP_PlaneInfoManager.getInstance().getRecipeListSize() > 0;
       btnVehicle.enabled = MCH_VehicleInfoManager.getInstance().getRecipeListSize() > 0;
       btnTank.enabled = MCH_TankInfoManager.getInstance().getRecipeListSize() > 0;
       btnItem.enabled = MCH_ItemRecipe.getInstance().getRecipeListSize() > 0;
+      btnShip.enabled = MCH_ItemRecipe.getInstance().getRecipeListSize() > 0;
       list.add(btnHeli);
       list.add(btnPlane);
       list.add(btnVehicle);
       list.add(btnTank);
       list.add(btnItem);
+      list.add(btnShip);
       this.buttonCreate = new GuiButton(30, super.guiLeft + 120, super.guiTop + 89, 50, 20, "Create");
       this.buttonPrev = new GuiButton(21, super.guiLeft + 120, super.guiTop + 111, 36, 20, "<<");
       this.buttonNext = new GuiButton(20, super.guiLeft + 155, super.guiTop + 111, 35, 20, ">>");
@@ -146,6 +157,15 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          }
       }
 
+      //search stuff
+      int x = this.guiLeft + 10;
+      int y = this.guiTop + 5;
+      searchField = new GuiTextField(this.fontRendererObj, x, y, 100, 12);
+      searchField.setMaxStringLength(50);
+      searchField.setEnableBackgroundDrawing(true);
+      searchField.setVisible(true);
+      searchField.setFocused(false);
+
       this.switchScreen(0);
       initModelTransform();
       modelRotX = 180.0F;
@@ -160,11 +180,16 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          this.switchRecipeList(MCH_VehicleInfoManager.getInstance());
       } else if(MCH_TankInfoManager.getInstance().getRecipeListSize() > 0) {
          this.switchRecipeList(MCH_TankInfoManager.getInstance());
-      } else {
+      } else if(MCH_ShipInfoManager.getInstance().getRecipeListSize() > 0) {
+
+      }
+      else {
          this.switchRecipeList(MCH_ItemRecipe.getInstance());
       }
 
    }
+
+
 
    public static void initModelTransform() {
       modelRotX = 0.0F;
@@ -313,6 +338,11 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
                this.switchRecipeList(MCH_ItemRecipe.getInstance());
                this.switchScreen(1);
             case 15:
+               initModelTransform();
+               modelRotX = 90.0F;
+               modelRotY = 180.0F;
+               this.switchRecipeList(MCH_ShipInfoManager.getInstance());
+               this.switchScreen(1);
             case 16:
             case 17:
             case 18:
@@ -399,6 +429,12 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          } else {
             this.switchScreen(0);
          }
+
+         //search bar shit
+         if (searchField.textboxKeyTyped(par1, keycode)) {
+            return; // prevent default behavior when typing in search box
+         }
+
       }
 
       if(this.getScreenId() == 0) {
@@ -419,6 +455,12 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          }
       }
 
+   }
+
+   @Override
+   protected void mouseClicked(int mouseX, int mouseY, int mouseButton) {
+      super.mouseClicked(mouseX, mouseY, mouseButton);
+      searchField.mouseClicked(mouseX, mouseY, mouseButton);
    }
 
    protected void drawGuiContainerForegroundLayer(int mx, int my) {
@@ -653,6 +695,10 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          RenderHelper.enableGUIStandardItemLighting();
          this.drawModel(partialTicks);
       }
+
+      searchField.drawTextBox();
+
+
 
    }
 
