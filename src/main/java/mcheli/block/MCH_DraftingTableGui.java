@@ -468,6 +468,8 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       if (searchField.textboxKeyTyped(par1, keycode)) {
          String searchText = searchField.getText().toLowerCase();
 
+         applyFilter(searchField.getText());
+
          // Filter recipes
          List<IRecipe> filteredRecipes = new ArrayList<>();
          if (originalRecipes != null) { // Ensure originalRecipes is initialized
@@ -502,11 +504,13 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
             this.switchRecipeList(new MCH_IRecipeList() {
                @Override
                public int getRecipeListSize() {
+                  System.out.println("No recipes found for search: " + searchText);
                   return 0; // Empty list
                }
 
                @Override
                public IRecipe getRecipe(int index) {
+                  System.out.println("No recipe at index " + index + " for search: " + searchText);
                   return null; // No recipes
                }
             });
@@ -537,6 +541,37 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          if (keycode == 208) {
             this.listSlider.scrollUp(1.0F);
          }
+      }
+   }
+
+   public void applyFilter(String searchText) {
+      searchText = searchText.toLowerCase();
+      MCH_IRecipeList fullList = currentList; // save the original list on tab click
+
+      List<IRecipe> filtered = new ArrayList<IRecipe>();
+      for (int i = 0; i < fullList.getRecipeListSize(); ++i) {
+         IRecipe r = fullList.getRecipe(i);
+         if (r.getRecipeOutput() != null && r.getRecipeOutput().getDisplayName().toLowerCase().contains(searchText)) {
+            filtered.add(r);
+         }
+      }
+
+      // Wrap filtered list with MCH_IRecipeList
+      MCH_IRecipeList filteredWrapper = new MCH_IRecipeList() {
+         public int getRecipeListSize() {
+            return filtered.size();
+         }
+
+         public IRecipe getRecipe(int index) {
+            return index >= 0 && index < filtered.size() ? filtered.get(index) : null;
+         }
+      };
+
+      // Safety check: if nothing matches, fallback to original
+      if (filtered.size() == 0) {
+         this.switchRecipeList(fullList);
+      } else {
+         this.switchRecipeList(filteredWrapper);
       }
    }
 
