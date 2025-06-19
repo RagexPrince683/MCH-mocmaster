@@ -265,10 +265,9 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
       this.current = currentRecipe;
 
-      //if(this.current == null || currentRecipe == null || !this.current.recipe.getRecipeOutput().isItemEqual(currentRecipe.recipe.getRecipeOutput())) {
-      //   this.drawFace = 0;
-      //}
-      //idk it's just crashing on this line or something so I'm commenting it out
+      if(this.current == null || currentRecipe == null || !this.current.recipe.getRecipeOutput().isItemEqual(currentRecipe.recipe.getRecipeOutput())) {
+         this.drawFace = 0;
+      }
 
       this.current = currentRecipe;
       if(this.getScreenId() == 0 && this.current != null && this.current.getDescMaxPage() > 1) {
@@ -445,15 +444,17 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    }
 
    protected void keyTyped(char par1, int keycode) {
-      // Handle search field input
+
+      //search bar shit
       if (searchField.textboxKeyTyped(par1, keycode)) {
+         // Get the search text
          String searchText = searchField.getText().toLowerCase();
 
-         // Filter recipes
+         // Filter the recipes
          List<IRecipe> filteredRecipes = new ArrayList<>();
-         if (originalRecipes != null) { // Ensure originalRecipes is initialized
+         if (originalRecipes != null) { // Ensure originalRecipes is not null
             for (IRecipe recipe : originalRecipes) {
-               if (recipe != null && recipe.getRecipeOutput() != null) { // Null checks
+               if (recipe != null && recipe.getRecipeOutput() != null) { // Null checks for recipe and its output
                   String displayName = recipe.getRecipeOutput().getDisplayName();
                   if (displayName != null && displayName.toLowerCase().contains(searchText)) {
                      filteredRecipes.add(recipe);
@@ -462,63 +463,51 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
             }
          }
 
-         // Update filteredRecipeList
-         if (!filteredRecipes.isEmpty()) {
-            filteredRecipeList = new MCH_IRecipeList() {
-               @Override
-               public int getRecipeListSize() {
-                  return filteredRecipes.size();
-               }
+         // Update the filteredRecipeList
+         filteredRecipeList = new MCH_IRecipeList() {
+            @Override
+            public int getRecipeListSize() {
+               return filteredRecipes.size();
+            }
 
-               @Override
-               public IRecipe getRecipe(int index) {
-                  return filteredRecipes.get(index);
-               }
-            };
+            @Override
+            public IRecipe getRecipe(int index) {
+               return filteredRecipes.get(index);
+            }
+         };
 
-            // Safely switch to the filtered list
-            this.switchRecipeList(filteredRecipeList);
-         } else {
-            // Handle empty search results (fallback to original list or clear current list)
-            this.switchRecipeList(new MCH_IRecipeList() {
-               @Override
-               public int getRecipeListSize() {
-                  return 0; // Empty list
-               }
-
-               @Override
-               public IRecipe getRecipe(int index) {
-                  return null; // No recipes
-               }
-            });
-         }
-         return; // Prevent default behavior
-      }
-
-      // Handle other key inputs
-      if (keycode == 1 || keycode == W_KeyBinding.getKeyCode(Minecraft.getMinecraft().gameSettings.keyBindInventory)) {
-         if (this.getScreenId() == 0) {
+         // Switch to the filtered list
+         this.switchRecipeList(filteredRecipeList);
+         return; // Prevent default behavior when typing in the search box
+      } else if(keycode == 1 || keycode == W_KeyBinding.getKeyCode(Minecraft.getMinecraft().gameSettings.keyBindInventory)) {
+         if(this.getScreenId() == 0) {
             super.mc.thePlayer.closeScreen();
          } else {
             this.switchScreen(0);
          }
+
+
+
       }
 
-      if (this.getScreenId() == 0) {
-         if (keycode == 205) {
+      if(this.getScreenId() == 0) {
+         if(keycode == 205) {
             this.actionPerformed(this.buttonNext);
          }
-         if (keycode == 203) {
+
+         if(keycode == 203) {
             this.actionPerformed(this.buttonPrev);
          }
-      } else if (this.getScreenId() == 1) {
-         if (keycode == 200) {
+      } else if(this.getScreenId() == 1) {
+         if(keycode == 200) {
             this.listSlider.scrollDown(1.0F);
          }
-         if (keycode == 208) {
+
+         if(keycode == 208) {
             this.listSlider.scrollUp(1.0F);
          }
       }
+
    }
 
    @Override
