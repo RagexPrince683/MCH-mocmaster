@@ -179,11 +179,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
       if (this.getCurrentList() != null) {
          for (int i2 = 0; i2 < this.getCurrentList().getRecipeListSize(); i2++) {
-            //i is already defined here, stop trying to put i in this for loop dumbshit
-            IRecipe recipe = this.getCurrentList().getRecipe(i2);
-            if (recipe != null && recipe.getRecipeOutput() != null) {
-               originalRecipes.add(recipe);
-            }
+            originalRecipes.add(this.getCurrentList().getRecipe(i2));
          }
       }
       // Initialize filteredRecipeList with all recipes
