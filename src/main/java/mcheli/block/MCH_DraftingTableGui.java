@@ -175,14 +175,30 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       modelRotX = 180.0F;
       modelRotY = 90.0F;
 
+      originalRecipes = new ArrayList<>();
+
       if (this.getCurrentList() != null) {
-         originalRecipes.clear();
          for (int i2 = 0; i2 < this.getCurrentList().getRecipeListSize(); i2++) {
             originalRecipes.add(this.getCurrentList().getRecipe(i2));
          }
       }
+      // Initialize filteredRecipeList with all recipes
+      filteredRecipeList = new MCH_IRecipeList() {
+         @Override
+         public int getRecipeListSize() {
+            return originalRecipes.size();
+         }
+
+         @Override
+         public IRecipe getRecipe(int index) {
+            return originalRecipes.get(index);
+         }
+      };
+      this.switchRecipeList(filteredRecipeList);
 
       if(MCH_ItemRecipe.getInstance().getRecipeListSize() > 0) {
+         //the issue is before doing these we need to check our filter
+         //then it will work right.
          this.switchRecipeList(MCH_ItemRecipe.getInstance());
       } else if(MCH_HeliInfoManager.getInstance().getRecipeListSize() > 0) {
          this.switchRecipeList(MCH_HeliInfoManager.getInstance());
@@ -263,12 +279,11 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          return;
       }
 
-      this.current = currentRecipe;
-
-      //if(this.current == null || currentRecipe == null || !this.current.recipe.getRecipeOutput().isItemEqual(currentRecipe.recipe.getRecipeOutput())) {
-      //   this.drawFace = 0;
-      //}
-      //idk it's just crashing on this line or something so I'm commenting it out
+      //this caused a crash at one point so that's great
+      if(this.current == null || currentRecipe == null || !this.current.recipe.getRecipeOutput().isItemEqual(currentRecipe.recipe.getRecipeOutput())) {
+         this.drawFace = 0;
+      }
+      //was crashing on this line or something so I commented it out
 
       this.current = currentRecipe;
       if(this.getScreenId() == 0 && this.current != null && this.current.getDescMaxPage() > 1) {
