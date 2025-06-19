@@ -443,10 +443,14 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
          // Filter the recipes
          List<IRecipe> filteredRecipes = new ArrayList<>();
-         for (IRecipe recipe : originalRecipes) {
-            if (recipe.getRecipeOutput() != null &&
-                    recipe.getRecipeOutput().getDisplayName().toLowerCase().contains(searchText)) {
-               filteredRecipes.add(recipe);
+         if (originalRecipes != null) { // Ensure originalRecipes is not null
+            for (IRecipe recipe : originalRecipes) {
+               if (recipe != null && recipe.getRecipeOutput() != null) { // Null checks for recipe and its output
+                  String displayName = recipe.getRecipeOutput().getDisplayName();
+                  if (displayName != null && displayName.toLowerCase().contains(searchText)) {
+                     filteredRecipes.add(recipe);
+                  }
+               }
             }
          }
 
