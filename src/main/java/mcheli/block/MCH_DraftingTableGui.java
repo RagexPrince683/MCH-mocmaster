@@ -438,17 +438,34 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
       //search bar shit
       if (searchField.textboxKeyTyped(par1, keycode)) {
-         // Update the recipe list based on search input
+         // Get the search text
          String searchText = searchField.getText().toLowerCase();
-         MCH_IRecipeList recipeList = this.getCurrentList();
+
+         // Filter the recipes
          List<IRecipe> filteredRecipes = new ArrayList<>();
-         for (int i = 0; i < recipeList.getRecipeListSize(); i++) {
-            IRecipe recipe = recipeList.getRecipe(i);
-            if (recipe.getRecipeOutput() != null && recipe.getRecipeOutput().getDisplayName().toLowerCase().contains(searchText)) {
+         for (IRecipe recipe : originalRecipes) {
+            if (recipe.getRecipeOutput() != null &&
+                    recipe.getRecipeOutput().getDisplayName().toLowerCase().contains(searchText)) {
                filteredRecipes.add(recipe);
             }
          }
-         return; // prevent default behavior when typing in search box
+
+         // Update the filteredRecipeList
+         filteredRecipeList = new MCH_IRecipeList() {
+            @Override
+            public int getRecipeListSize() {
+               return filteredRecipes.size();
+            }
+
+            @Override
+            public IRecipe getRecipe(int index) {
+               return filteredRecipes.get(index);
+            }
+         };
+
+         // Switch to the filtered list
+         this.switchRecipeList(filteredRecipeList);
+         return; // Prevent default behavior when typing in the search box
       } else if(keycode == 1 || keycode == W_KeyBinding.getKeyCode(Minecraft.getMinecraft().gameSettings.keyBindInventory)) {
          if(this.getScreenId() == 0) {
             super.mc.thePlayer.closeScreen();
