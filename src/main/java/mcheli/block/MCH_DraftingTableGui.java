@@ -174,6 +174,14 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       initModelTransform();
       modelRotX = 180.0F;
       modelRotY = 90.0F;
+
+      if (this.getCurrentList() != null) {
+         originalRecipes.clear();
+         for (int i2 = 0; i2 < this.getCurrentList().getRecipeListSize(); i2++) {
+            originalRecipes.add(this.getCurrentList().getRecipe(i2));
+         }
+      }
+
       if(MCH_ItemRecipe.getInstance().getRecipeListSize() > 0) {
          this.switchRecipeList(MCH_ItemRecipe.getInstance());
       } else if(MCH_HeliInfoManager.getInstance().getRecipeListSize() > 0) {
