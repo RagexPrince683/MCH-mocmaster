@@ -256,6 +256,15 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    public void setCurrentRecipe(MCH_CurrentRecipe currentRecipe) {
       modelPosX = 0.0F;
       modelPosY = 0.0F;
+
+      if (currentRecipe == null) {
+         this.current = null;
+         this.drawFace = 0; // Reset drawFace
+         return;
+      }
+
+      this.current = currentRecipe;
+
       if(this.current == null || currentRecipe == null || !this.current.recipe.getRecipeOutput().isItemEqual(currentRecipe.recipe.getRecipeOutput())) {
          this.drawFace = 0;
       }
