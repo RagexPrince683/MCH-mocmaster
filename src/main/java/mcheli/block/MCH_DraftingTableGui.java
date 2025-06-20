@@ -120,7 +120,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       btnVehicle.enabled = MCH_VehicleInfoManager.getInstance().getRecipeListSize() > 0;
       btnTank.enabled = MCH_TankInfoManager.getInstance().getRecipeListSize() > 0;
       btnItem.enabled = MCH_ItemRecipe.getInstance().getRecipeListSize() > 0;
-      btnShip.enabled = MCH_ItemRecipe.getInstance().getRecipeListSize() > 0;
+      btnShip.enabled = MCH_ShipInfoManager.getInstance().getRecipeListSize() > 0;
       list.add(btnHeli);
       list.add(btnPlane);
       list.add(btnVehicle);
@@ -182,7 +182,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          }
       }
 
-      if(MCH_ItemRecipe.getInstance().getRecipeListSize() > 0) {
+      if(MCH_ItemRecipe.getInstance().getRecipeListSize() > 0) { //we want to add && *insert contains search filter crap here
          this.switchRecipeList(MCH_ItemRecipe.getInstance());
       } else if(MCH_HeliInfoManager.getInstance().getRecipeListSize() > 0) {
          this.switchRecipeList(MCH_HeliInfoManager.getInstance());
