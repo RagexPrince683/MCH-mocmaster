@@ -81,6 +81,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    public static float modelRotY = 0.0F;
    public static float modelPosX = 0.0F;
    public static float modelPosY = 0.0F;
+   public boolean searchFieldisempty = true;
 
    // two new fields:
    private List<IRecipe> originalRecipes;       // the un‑filtered data
@@ -183,22 +184,28 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       //}
       //also crashes the game
 
-      if(MCH_ItemRecipe.getInstance().getRecipeListSize() > 0 ) { //we want to add && *insert contains search filter crap here
-         this.switchRecipeList(MCH_ItemRecipe.getInstance());
-      } else if(MCH_HeliInfoManager.getInstance().getRecipeListSize() > 0) {
-         this.switchRecipeList(MCH_HeliInfoManager.getInstance());
-      } else if(MCP_PlaneInfoManager.getInstance().getRecipeListSize() > 0) {
-         this.switchRecipeList(MCP_PlaneInfoManager.getInstance());
-      } else if(MCH_VehicleInfoManager.getInstance().getRecipeListSize() > 0) {
-         this.switchRecipeList(MCH_VehicleInfoManager.getInstance());
-      } else if(MCH_TankInfoManager.getInstance().getRecipeListSize() > 0) {
-         this.switchRecipeList(MCH_TankInfoManager.getInstance());
-      } else if(MCH_ShipInfoManager.getInstance().getRecipeListSize() > 0) {
-         this.switchRecipeList(MCH_ShipInfoManager.getInstance());
+      //default behavior
+      if (searchFieldisempty) {
+
+         if (MCH_ItemRecipe.getInstance().getRecipeListSize() > 0) { //we want to add && *insert contains search filter crap here
+            this.switchRecipeList(MCH_ItemRecipe.getInstance());
+         } else if (MCH_HeliInfoManager.getInstance().getRecipeListSize() > 0) {
+            this.switchRecipeList(MCH_HeliInfoManager.getInstance());
+         } else if (MCP_PlaneInfoManager.getInstance().getRecipeListSize() > 0) {
+            this.switchRecipeList(MCP_PlaneInfoManager.getInstance());
+         } else if (MCH_VehicleInfoManager.getInstance().getRecipeListSize() > 0) {
+            this.switchRecipeList(MCH_VehicleInfoManager.getInstance());
+         } else if (MCH_TankInfoManager.getInstance().getRecipeListSize() > 0) {
+            this.switchRecipeList(MCH_TankInfoManager.getInstance());
+         } else if (MCH_ShipInfoManager.getInstance().getRecipeListSize() > 0) {
+            this.switchRecipeList(MCH_ShipInfoManager.getInstance());
+         } else {
+            this.switchRecipeList(MCH_ItemRecipe.getInstance());
+         }
+
       }
-      else {
-         this.switchRecipeList(MCH_ItemRecipe.getInstance());
-      }
+
+
 
    }
 
@@ -461,6 +468,8 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
       //search bar shit
       if (searchField.textboxKeyTyped(par1, keycode)) {
+
+         searchFieldisempty = false;
 
          //attempt 2
             String searchText = searchField.getText();
