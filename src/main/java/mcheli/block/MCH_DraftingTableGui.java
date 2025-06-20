@@ -446,10 +446,43 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       }
    }
 
+   private boolean listContainsSearch(MCH_IRecipeList list, String searchText) {
+      searchText = searchText.toLowerCase();
+      for (int i = 0; i < list.getRecipeListSize(); i++) {
+         IRecipe r = list.getRecipe(i);
+         if (r != null && r.getRecipeOutput() != null && r.getRecipeOutput().getDisplayName().toLowerCase().contains(searchText)) {
+            return true;
+         }
+      }
+      return false;
+   }
+
    protected void keyTyped(char par1, int keycode) {
 
       //search bar shit
       if (searchField.textboxKeyTyped(par1, keycode)) {
+
+         //attempt 2
+            String searchText = searchField.getText();
+
+            // Try each recipe list to find the first that matches the filter
+            if (listContainsSearch(MCH_ItemRecipe.getInstance(), searchText)) {
+               this.switchRecipeList(MCH_ItemRecipe.getInstance());
+            } else if (listContainsSearch(MCH_HeliInfoManager.getInstance(), searchText)) {
+               this.switchRecipeList(MCH_HeliInfoManager.getInstance());
+            } else if (listContainsSearch(MCP_PlaneInfoManager.getInstance(), searchText)) {
+               this.switchRecipeList(MCP_PlaneInfoManager.getInstance());
+            } else if (listContainsSearch(MCH_VehicleInfoManager.getInstance(), searchText)) {
+               this.switchRecipeList(MCH_VehicleInfoManager.getInstance());
+            } else if (listContainsSearch(MCH_TankInfoManager.getInstance(), searchText)) {
+               this.switchRecipeList(MCH_TankInfoManager.getInstance());
+            } else if (listContainsSearch(MCH_ShipInfoManager.getInstance(), searchText)) {
+               this.switchRecipeList(MCH_ShipInfoManager.getInstance());
+            }
+
+            return; // Prevent other key logic when typing in search bar
+
+
          // Get the search text
          //String searchText = searchField.getText().toLowerCase();
 //
@@ -483,7 +516,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
          // Switch to the filtered list
          //this.switchRecipeList(filteredRecipeList);
-         return; // Prevent default behavior when typing in the search box
+         //return; // Prevent default behavior when typing in the search box
       } else if(keycode == 1 || keycode == W_KeyBinding.getKeyCode(Minecraft.getMinecraft().gameSettings.keyBindInventory)) {
          if(this.getScreenId() == 0) {
             super.mc.thePlayer.closeScreen();
