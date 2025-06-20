@@ -1,6 +1,7 @@
 package mcheli.block;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import mcheli.MCH_IRecipeList;
@@ -464,6 +465,33 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       return false;
    }
 
+   public class FilteredRecipeList implements MCH_IRecipeList {
+      private final List<IRecipe> filtered;
+
+      public FilteredRecipeList(MCH_IRecipeList base, String searchText) {
+         filtered = new ArrayList<>();
+         for (int i = 0; i < base.getRecipeListSize(); i++) {
+            IRecipe r = base.getRecipe(i);
+            if (r != null && r.getRecipeOutput() != null) {
+               String name = r.getRecipeOutput().getDisplayName();
+               if (name != null && name.toLowerCase().contains(searchText.toLowerCase())) {
+                  filtered.add(r);
+               }
+            }
+         }
+      }
+
+      @Override
+      public int getRecipeListSize() {
+         return filtered.size();
+      }
+
+      @Override
+      public IRecipe getRecipe(int index) {
+         return filtered.get(index);
+      }
+   }
+
    protected void keyTyped(char par1, int keycode) {
 
       //search bar shit
@@ -493,6 +521,22 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
             } else if (listContainsSearch(MCH_ShipInfoManager.getInstance(), searchText)) {
                this.switchRecipeList(MCH_ShipInfoManager.getInstance());
             }
+
+         // Try filtering each manager in order
+         for (MCH_IRecipeList baseList : Arrays.asList(
+                 MCH_ItemRecipe.getInstance(),
+                 MCH_HeliInfoManager.getInstance(),
+                 MCP_PlaneInfoManager.getInstance(),
+                 MCH_VehicleInfoManager.getInstance(),
+                 MCH_TankInfoManager.getInstance(),
+                 MCH_ShipInfoManager.getInstance())) {
+
+            FilteredRecipeList filtered = new FilteredRecipeList(baseList, searchText);
+            if (filtered.getRecipeListSize() > 0) {
+               this.switchRecipeList(filtered);
+               break;
+            }
+         }
 
             return; // Prevent other key logic when typing in search bar
 
