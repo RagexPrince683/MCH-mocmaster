@@ -450,36 +450,38 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       //search bar shit
       if (searchField.textboxKeyTyped(par1, keycode)) {
          // Get the search text
-         String searchText = searchField.getText().toLowerCase();
-
-         // Filter the recipes
-         List<IRecipe> filteredRecipes = new ArrayList<>();
-         if (originalRecipes != null) { // Ensure originalRecipes is not null
-            for (IRecipe recipe : originalRecipes) {
-               if (recipe != null && recipe.getRecipeOutput() != null) { // Null checks for recipe and its output
-                  String displayName = recipe.getRecipeOutput().getDisplayName();
-                  if (displayName != null && displayName.toLowerCase().contains(searchText)) {
-                     filteredRecipes.add(recipe);
-                  }
-               }
-            }
-         }
+         //String searchText = searchField.getText().toLowerCase();
+//
+         //// Filter the recipes
+         //List<IRecipe> filteredRecipes = new ArrayList<>();
+         //if (originalRecipes != null) { // Ensure originalRecipes is not null
+         //   for (IRecipe recipe : originalRecipes) {
+         //      if (recipe != null && recipe.getRecipeOutput() != null) { // Null checks for recipe and its output
+         //         String displayName = recipe.getRecipeOutput().getDisplayName();
+         //         if (displayName != null && displayName.toLowerCase().contains(searchText)) {
+         //            filteredRecipes.add(recipe);
+         //         }
+         //      }
+         //   }
+         //}
+         //currently our search bar is crashing the game so we're going to comment this stuff out for now.
 
          // Update the filteredRecipeList
-         filteredRecipeList = new MCH_IRecipeList() {
-            @Override
-            public int getRecipeListSize() {
-               return filteredRecipes.size();
-            }
-
-            @Override
-            public IRecipe getRecipe(int index) {
-               return filteredRecipes.get(index);
-            }
-         };
+         //filteredRecipeList = new MCH_IRecipeList() {
+         //   @Override
+         //   public int getRecipeListSize() {
+         //      return filteredRecipes.size();
+         //   }
+//
+         //   @Override
+         //   public IRecipe getRecipe(int index) {
+         //      return filteredRecipes.get(index);
+         //   }
+         //};
+         //crashing the game
 
          // Switch to the filtered list
-         this.switchRecipeList(filteredRecipeList);
+         //this.switchRecipeList(filteredRecipeList);
          return; // Prevent default behavior when typing in the search box
       } else if(keycode == 1 || keycode == W_KeyBinding.getKeyCode(Minecraft.getMinecraft().gameSettings.keyBindInventory)) {
          if(this.getScreenId() == 0) {
