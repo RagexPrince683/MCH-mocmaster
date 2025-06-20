@@ -358,12 +358,14 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
             case 14:
                this.switchRecipeList(MCH_ItemRecipe.getInstance());
                this.switchScreen(1);
+               break;
             case 15:
                initModelTransform();
                modelRotX = 90.0F;
                modelRotY = 180.0F;
                this.switchRecipeList(MCH_ShipInfoManager.getInstance());
                this.switchScreen(1);
+               break;
             case 16:
             case 17:
             case 18:
