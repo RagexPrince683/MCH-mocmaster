@@ -81,7 +81,6 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    public static float modelRotY = 0.0F;
    public static float modelPosX = 0.0F;
    public static float modelPosY = 0.0F;
-   public boolean searchFieldisempty = true;
 
    // two new fields:
    private List<IRecipe> originalRecipes;       // the un‑filtered data
@@ -185,9 +184,9 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       //also crashes the game
 
       //default behavior
-      if (searchFieldisempty) {
-
-         if (MCH_ItemRecipe.getInstance().getRecipeListSize() > 0) { //we want to add && *insert contains search filter crap here
+      if (searchField.getText().trim().isEmpty()) {
+         // it's empty, give our default results
+         if (MCH_ItemRecipe.getInstance().getRecipeListSize() > 0) {
             this.switchRecipeList(MCH_ItemRecipe.getInstance());
          } else if (MCH_HeliInfoManager.getInstance().getRecipeListSize() > 0) {
             this.switchRecipeList(MCH_HeliInfoManager.getInstance());
@@ -202,8 +201,9 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          } else {
             this.switchRecipeList(MCH_ItemRecipe.getInstance());
          }
-
       }
+
+
 
 
 
@@ -469,10 +469,15 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       //search bar shit
       if (searchField.textboxKeyTyped(par1, keycode)) {
 
-         searchFieldisempty = false;
+         String searchText = searchField.getText().trim();
+
+         if (searchText.isEmpty()) {
+            // Search field is empty, reset to default or ignore
+            return;
+         }
 
          //attempt 2
-            String searchText = searchField.getText();
+            //String searchText = searchField.getText();
 
             // Try each recipe list to find the first that matches the filter
             if (listContainsSearch(MCH_ItemRecipe.getInstance(), searchText)) {
