@@ -411,11 +411,11 @@ public class MCH_Config {
       hitMarkColorAlpha = 1.0F;
       hitMarkColorRGB = 16711680;
       ItemRecipe_Fuel = new MCH_ConfigPrm("ItemRecipe_Fuel", "\"ICI\", \"III\", I, iron_ingot, C, coal");
-      ItemRecipe_GLTD = new MCH_ConfigPrm("ItemRecipe_GLTD", "\" B \", \"IDI\", \"IRI\", B, iron_block, I, iron_ingot, D, diamond, R, redstone");
+      ItemRecipe_GLTD = new MCH_ConfigPrm("ItemRecipe_GLTD", "\" B \", \"IDI\", \"IRI\", B, iron_block, I, iron_ingot, D, gold_nugget, R, redstone");
       ItemRecipe_Chain = new MCH_ConfigPrm("ItemRecipe_Chain", "\"I I\", \"III\", \"I I\", I, iron_ingot");
       ItemRecipe_Parachute = new MCH_ConfigPrm("ItemRecipe_Parachute", "\"WWW\", \"S S\", \" W \", W, wool, S, string");
       ItemRecipe_Container = new MCH_ConfigPrm("ItemRecipe_Container", "\"CCI\", C, chest, I, iron_ingot");
-      ItemRecipe_UavStation = new MCH_ConfigPrm[]{new MCH_ConfigPrm("ItemRecipe_UavStation", "\"III\", \"IDI\", \"IRI\", I, iron_ingot, D, diamond, R, redstone_block"), new MCH_ConfigPrm("ItemRecipe_UavStation2", "\"IDI\", \"IRI\", I, iron_ingot, D, diamond, R, redstone")};
+      ItemRecipe_UavStation = new MCH_ConfigPrm[]{new MCH_ConfigPrm("ItemRecipe_UavStation", "\"III\", \"IDI\", \"IRI\", I, iron_ingot, D, gold_nugget, R, redstone_block"), new MCH_ConfigPrm("ItemRecipe_UavStation2", "\"IDI\", \"IRI\", I, iron_ingot, D, gold_nugget, R, redstone")};
       ItemRecipe_DraftingTable = new MCH_ConfigPrm("ItemRecipe_DraftingTable", "\"R  \", \"PCP\", \"F F\", R, redstone, C, crafting_table, P, planks, F, fence");
       ItemRecipe_Wrench = new MCH_ConfigPrm("ItemRecipe_Wrench", "\" I \", \" II\", \"I  \", I, iron_ingot");
       ItemRecipe_RangeFinder = new MCH_ConfigPrm("ItemRecipe_RangeFinder", "\"III\", \"RGR\", \"III\", I, iron_ingot, G, glass, R, redstone");
@@ -424,7 +424,7 @@ public class MCH_Config {
       ItemRecipe_Javelin = new MCH_ConfigPrm("ItemRecipe_Javelin", "\"III\", \"GR \", G, glass, I, iron_ingot, R, redstone");
       ItemRecipe_JavelinMissile = new MCH_ConfigPrm("ItemRecipe_JavelinMissile", "\" R \", \" I \", \" G \", G, gunpowder, I, iron_ingot, R, redstone");
       ItemRecipe_Rpg = new MCH_ConfigPrm("ItemRecipe_RPG", "\"III\", \"GI \", G, glass, I, iron_ingot");
-      ItemRecipe_RpgMissile = new MCH_ConfigPrm("ItemRecipe_RPGMissile", "\" R \", \" I \", \" G \", G, gunpowder, I, iron_ingot, R, tnt");
+      ItemRecipe_RpgMissile = new MCH_ConfigPrm("ItemRecipe_RPGMissile", "\" R \", \" I \", \" G \", G, gunpowder, I, iron_ingot, R, redstone");
       ItemID_GLTD = new MCH_ConfigPrm("ItemID_GLTD", 28799);
       ItemID_Chain = new MCH_ConfigPrm("ItemID_Chain", 28798);
       ItemID_Parachute = new MCH_ConfigPrm("ItemID_Parachute", 28797);

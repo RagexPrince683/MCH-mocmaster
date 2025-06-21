@@ -1085,7 +1085,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         }
 
         if (!worldObj.isRemote) { // Server-side logic
-            handleServerSideImpact(hit, damageFactor);
+            try {
+                handleServerSideImpact(hit, damageFactor);
+            } catch (Exception e) {
+                MCH_Lib.Log(this, "Error in onImpact: %s", e.getMessage());
+                e.printStackTrace();
+            }
         } else if (shouldHandleTileHit(hit)) {
             handleTileHit(hit);
         }
@@ -1212,12 +1217,17 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     private void handleRegularHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower) {
-        if (shouldCreateFAExplosion()) {
-            newFAExplosion(posX, posY, posZ, explosionPower, getInfo().explosionBlock);
-        } else if (explosionPower > 0.0F) {
-            newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, explosionPower, getInfo().explosionBlock, false);
-        } else if (explosionPower < 0.0F) {
-            playExplosionSound();
+        try {
+            if (shouldCreateFAExplosion()) {
+                newFAExplosion(posX, posY, posZ, explosionPower, getInfo().explosionBlock);
+            } else if (explosionPower > 0.0F) {
+                newExplosion(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord, explosionPower, getInfo().explosionBlock, false);
+            } else if (explosionPower < 0.0F) {
+                playExplosionSound();
+            }
+        } catch (Throwable t) {
+            MCH_Lib.Log(this, "Error creating explosion: %s", t.getMessage());
+            t.printStackTrace();
         }
     }
 

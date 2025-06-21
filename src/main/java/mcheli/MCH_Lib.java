@@ -439,21 +439,24 @@ public class MCH_Lib {
    }
 
    public static void disableFirstPersonItemRender() {
-      System.out.println("disabled fp item render");
+      //System.out.println("disabled fp item render");
       MCH_Config var10000 = MCH_MOD.config;
       switch(MCH_Config.DisableItemRender.prmInt) {
       case 1:
-         System.out.println("disabled fp item render 1");
+         //System.out.println("disabled fp item render 1");
+         //SHUT THE FUCK UP!!!
          W_Reflection.setItemRenderer_ItemToRender(new ItemStack(MCH_MOD.invisibleItem));
          break;
       case 2:
-            System.out.println("disabled fp item render 2");
+            //System.out.println("disabled fp item render 2");
          MCH_ItemRendererDummy.enableDummyItemRenderer();
          break;
       case 3:
-         System.out.println("disabled fp item render 3");
+         //System.out.println("disabled fp item render 3");
          W_Reflection.setCameraZoom(1.01F);
       }
+      //the issue with the hand thing is a vanilla bug so I'll have to do some fuckery
+      //or ask one of those angelica people to fix it
 
    }
 
