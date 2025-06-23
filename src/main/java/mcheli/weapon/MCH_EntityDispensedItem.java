@@ -85,21 +85,22 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
          }
 
          // Handle nulls and re-registration
-         if (item == null) {
-            System.out.println("[DispensedItem] Item was null, attempting re-registration...");
-            try {
-               MCH_WeaponInfoManager.reload();
-               item = this.getInfo().dispenseItem;
-               if (item == null) {
-                  System.out.println("[DispensedItem] Still null after reload!");
-               } else {
-                  System.out.println("[DispensedItem] Item re-registered successfully.");
-               }
-            } catch (Exception e) {
-               System.out.println("[DispensedItem] Exception during reload: " + e.getMessage());
-               e.printStackTrace();
-            }
-         }
+         //if (item == null) {
+         //   System.out.println("[DispensedItem] Item was null, attempting re-registration...");
+         //   try {
+         //      MCH_WeaponInfoManager.reload();
+         //      item = this.getInfo().dispenseItem;
+         //      if (item == null) {
+         //         System.out.println("[DispensedItem] Still null after reload!");
+         //      } else {
+         //         System.out.println("[DispensedItem] Item re-registered successfully.");
+         //      }
+         //   } catch (Exception e) {
+         //      System.out.println("[DispensedItem] Exception during reload: " + e.getMessage());
+         //      e.printStackTrace();
+         //   }
+         //}
+         //don't do that.
 
          if(player != null && !player.isDead && item != null) {
             System.out.println("[DispensedItem] Dispensing item to blocks");
