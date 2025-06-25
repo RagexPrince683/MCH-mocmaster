@@ -174,7 +174,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       if (!tag.hasKey("DeployStart"))
          return;
 
-      // Check if player is still aiming at the same block
+      // Check if player is still aiming at a block
       MovingObjectPosition mop = player.rayTrace(5.0D, 1.0F);
       if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
          cancelDeployment(tag, player, "Vehicle deployment cancelled (target lost).");
@@ -195,8 +195,8 @@ public abstract class MCH_ItemAircraft extends W_Item {
          int targetY = tag.getInteger("TargetY");
          int targetZ = tag.getInteger("TargetZ");
 
-         // Only cancel if target has *actually* changed
-         if (currentX != targetX || currentY != targetY || currentZ != targetZ) {
+         // Only cancel if raytrace hits a different block position
+         if (!(mop.blockX == targetX && mop.blockY == targetY && mop.blockZ == targetZ)) {
             cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
             return;
          }
