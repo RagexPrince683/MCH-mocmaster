@@ -168,42 +168,103 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    @Override
    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
-      if (player.worldObj.isRemote) return;
 
-      NBTTagCompound tag = stack.getTagCompound();
-      if (tag == null || !tag.hasKey("StartCount")) return;
+      //int held = this.getMaxItemUseDuration(stack) - count;
+      //if (held >= MCH_Config.placetimer.prmInt) {
+      //   // spawn
+      //}
+      //non spaghetti code logic above just need to figure out where and how to implement it
 
-      int start = tag.getInteger("StartCount");
-      int timeHeld = start - count;
-
-      if (timeHeld < 0) {
-         cancel(stack, player, "Deployment cancelled (bad count).");
+      if (stack.stackTagCompound == null || player.worldObj.isRemote) {
+         System.out.println("[DEBUG] Stack has no tag or is remote world.");
          return;
       }
 
-      if (timeHeld >= MCH_Config.placetimer.prmInt) {
-         int x = tag.getInteger("TargetX");
-         int y = tag.getInteger("TargetY");
-         int z = tag.getInteger("TargetZ");
+      NBTTagCompound tag = stack.stackTagCompound;
 
-         spawnAircraft(stack, player.worldObj, player, x, y, z);
+      // Validate both deploy state and click-hold continuously
+      boolean holdingClick = player.getItemInUse() == stack;
+      boolean hasDeployStart = tag.hasKey("DeployStart");
+
+      if (!holdingClick) {
+         if (hasDeployStart) {
+            System.out.println("[DEBUG] Player released right-click, cancelling.");
+            cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
+         }
+         return;
+      }
+
+      if (!hasDeployStart) {
+         System.out.println("[DEBUG] No DeployStart tag.");
+         return;
+      }
+
+      // Valid raytrace check
+      MovingObjectPosition mop = getSolidBlockLookedAt(player, 5.0D);
+      if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
+         System.out.println("[DEBUG] Raytrace failed or not a block, cancelling.");
+         cancelDeployment(tag, player, "Vehicle deployment cancelled (target lost).");
+         return;
+      }
+
+      int currentX = mop.blockX;
+      int currentY = mop.blockY;
+      int currentZ = mop.blockZ;
+      System.out.println("[DEBUG] Raytrace hit block at: " + currentX + "," + currentY + "," + currentZ);
+
+      if (!tag.hasKey("TargetX") || !tag.hasKey("TargetY") || !tag.hasKey("TargetZ")) {
+         System.out.println("[DEBUG] No saved target, setting initial target.");
+         tag.setInteger("TargetX", currentX);
+         tag.setInteger("TargetY", currentY);
+         tag.setInteger("TargetZ", currentZ);
+      } else {
+         int targetX = tag.getInteger("TargetX");
+         int targetY = tag.getInteger("TargetY");
+         int targetZ = tag.getInteger("TargetZ");
+
+         System.out.println("[DEBUG] Saved target: " + targetX + "," + targetY + "," + targetZ);
+
+         if (currentX != targetX || currentY != targetY || currentZ != targetZ) {
+            System.out.println("[DEBUG] Target changed, cancelling.");
+            cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
+            return;
+         }
+      }
+
+      long deployStart = tag.getLong("DeployStart");
+      //never used above
+      int timeHeld = this.getMaxItemUseDuration(stack) - count;
+      System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
+
+      //check that we are still holding here
+      if (!holdingClick) {
+         if (hasDeployStart) {
+            System.out.println("[DEBUG] Player released right-click, cancelling.");
+            cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
+         }
+         return;
+      }
+
+      if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick ) {
+         int targetX = tag.getInteger("TargetX");
+         int targetY = tag.getInteger("TargetY");
+         int targetZ = tag.getInteger("TargetZ");
+
+         System.out.println("[DEBUG] Deployment complete. Spawning vehicle at: " + targetX + "," + targetY + "," + targetZ);
+
+         this.spawnAircraft(stack, player.worldObj, player, targetX, targetY, targetZ);
          player.addChatMessage(new ChatComponentText("Vehicle deployed."));
          W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
-         clearTag(stack);
+         clearDeployTags(tag);
          player.stopUsingItem();
       }
-   }
-
-
-
-   private void clearTag(ItemStack stack) {
-      NBTTagCompound tag = stack.getTagCompound();
-      if (tag != null) {
-         tag.removeTag("StartCount");
-         tag.removeTag("TargetX");
-         tag.removeTag("TargetY");
-         tag.removeTag("TargetZ");
-      }
+      //else {
+      //   clearDeployTags(tag);
+      //   player.stopUsingItem();
+      //   cancelDeployment(stack.stackTagCompound, player, "Vehicle deployment cancelled (not enough time held).");
+      //   //player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled (not enough time held)."));
+      //   return;
+      //}
    }
 
    private void cancelDeployment(NBTTagCompound tag, EntityPlayer player, String message) {
@@ -221,28 +282,18 @@ public abstract class MCH_ItemAircraft extends W_Item {
       System.out.println("[DEBUG] Cleared deployment tags.");
    }
 
-
-   private MovingObjectPosition rayTraceWorld(World world, EntityPlayer player, double dist) {
-      Vec3 from = player.getPosition(1.0F).addVector(0, player.getEyeHeight(), 0);
-      Vec3 look = player.getLook(1.0F);
-      Vec3 to = from.addVector(look.xCoord * dist, look.yCoord * dist, look.zCoord * dist);
-      return world.rayTraceBlocks(from, to);
+   private MovingObjectPosition getSolidBlockLookedAt(EntityPlayer player, double distance) {
+      Vec3 eyePos = player.getPosition(1.0F).addVector(0, player.getEyeHeight(), 0);
+      Vec3 lookVec = player.getLook(1.0F);
+      Vec3 reachVec = eyePos.addVector(lookVec.xCoord * distance, lookVec.yCoord * distance, lookVec.zCoord * distance);
+      return player.worldObj.rayTraceBlocks(eyePos, reachVec);
    }
 
    @Override
    public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int timeLeft) {
-      if (world.isRemote) return;
-
-      NBTTagCompound tag = stack.getTagCompound();
-      if (tag != null && tag.hasKey("StartCount")) {
-         cancel(stack, player, "Deployment cancelled (input released).");
+      if (stack.stackTagCompound != null && stack.stackTagCompound.hasKey("DeployStart")) {
+         cancelDeployment(stack.stackTagCompound, player, "Vehicle deployment cancelled (input released).");
       }
-   }
-
-   private void cancel(ItemStack stack, EntityPlayer player, String msg) {
-      clearTag(stack);
-      player.stopUsingItem();
-      player.addChatMessage(new ChatComponentText(msg));
    }
 
 
