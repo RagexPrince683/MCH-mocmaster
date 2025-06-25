@@ -88,70 +88,63 @@ public abstract class MCH_ItemAircraft extends W_Item {
       float f = 1.0F;
       float f1 = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * f;
       float f2 = player.prevRotationYaw + (player.rotationYaw - player.prevRotationYaw) * f;
-      double d0 = player.prevPosX + (player.posX - player.prevPosX) * (double)f;
-      double d1 = player.prevPosY + (player.posY - player.prevPosY) * (double)f + 1.62D - (double)player.yOffset;
-      double d2 = player.prevPosZ + (player.posZ - player.prevPosZ) * (double)f;
+      double d0 = player.prevPosX + (player.posX - player.prevPosX) * f;
+      double d1 = player.prevPosY + (player.posY - player.prevPosY) * f + 1.62D - player.yOffset;
+      double d2 = player.prevPosZ + (player.posZ - player.prevPosZ) * f;
       Vec3 vec3 = W_WorldFunc.getWorldVec3(world, d0, d1, d2);
-      float f3 = MathHelper.cos(-f2 * 0.017453292F - 3.1415927F);
-      float f4 = MathHelper.sin(-f2 * 0.017453292F - 3.1415927F);
+      float f3 = MathHelper.cos(-f2 * 0.017453292F - (float)Math.PI);
+      float f4 = MathHelper.sin(-f2 * 0.017453292F - (float)Math.PI);
       float f5 = -MathHelper.cos(-f1 * 0.017453292F);
       float f6 = MathHelper.sin(-f1 * 0.017453292F);
       float f7 = f4 * f5;
       float f8 = f3 * f5;
       double d3 = 5.0D;
-      Vec3 vec31 = vec3.addVector((double)f7 * d3, (double)f6 * d3, (double)f8 * d3);
+      Vec3 vec31 = vec3.addVector(f7 * d3, f6 * d3, f8 * d3);
       MovingObjectPosition mop = W_WorldFunc.clip(world, vec3, vec31, true);
-      if(mop == null) {
-         return par1ItemStack;
-      } else {
-         Vec3 vec32 = player.getLook(f);
-         boolean flag = false;
-         float f9 = 1.0F;
-         List list = world.getEntitiesWithinAABBExcludingEntity(player, player.boundingBox.addCoord(vec32.xCoord * d3, vec32.yCoord * d3, vec32.zCoord * d3).expand((double)f9, (double)f9, (double)f9));
 
-         for(int i = 0; i < list.size(); ++i) {
-            Entity block = (Entity)list.get(i);
-            if(block.canBeCollidedWith()) {
-               float f10 = block.getCollisionBorderSize();
-               AxisAlignedBB axisalignedbb = block.boundingBox.expand((double)f10, (double)f10, (double)f10);
-               if(axisalignedbb.isVecInside(vec3)) {
-                  flag = true;
-               }
+      if (mop == null) return par1ItemStack;
+
+      Vec3 look = player.getLook(f);
+      boolean blockingEntity = false;
+      float expand = 1.0F;
+      List entities = world.getEntitiesWithinAABBExcludingEntity(player, player.boundingBox.addCoord(look.xCoord * d3, look.yCoord * d3, look.zCoord * d3).expand(expand, expand, expand));
+
+      for (Object o : entities) {
+         Entity ent = (Entity)o;
+         if (ent.canBeCollidedWith()) {
+            float border = ent.getCollisionBorderSize();
+            if (ent.boundingBox.expand(border, border, border).isVecInside(vec3)) {
+               blockingEntity = true;
+               break;
             }
-         }
-
-         if(flag) {
-            return par1ItemStack;
-         } else {
-            if(W_MovingObjectPosition.isHitTypeTile(mop)) {
-               MCH_Config var10000 = MCH_MOD.config;
-               if(MCH_Config.PlaceableOnSpongeOnly.prmBool) {
-                  Block var32 = world.getBlock(mop.blockX, mop.blockY, mop.blockZ);
-                  if(!(var32 instanceof BlockSponge)) {
-                     return par1ItemStack;
-                  }
-               }
-
-               if (par1ItemStack.stackTagCompound == null)
-                  par1ItemStack.stackTagCompound = new NBTTagCompound();
-
-               NBTTagCompound tag = par1ItemStack.stackTagCompound;
-
-               if (!tag.hasKey("DeployStart")) {
-                  tag.setLong("DeployStart", world.getTotalWorldTime());
-                  tag.setInteger("TargetX", mop.blockX);
-                  tag.setInteger("TargetY", mop.blockY);
-                  tag.setInteger("TargetZ", mop.blockZ);
-                  player.setItemInUse(par1ItemStack, this.getMaxItemUseDuration(par1ItemStack));
-                  if (world.isRemote)
-                     player.addChatMessage(new ChatComponentText("Hold click to deploy vehicle..."));
-               }
-
-            }
-
-            return par1ItemStack;
          }
       }
+
+      if (blockingEntity) return par1ItemStack;
+
+      if (W_MovingObjectPosition.isHitTypeTile(mop)) {
+         if (MCH_MOD.config.PlaceableOnSpongeOnly.prmBool) {
+            Block block = world.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+            if (!(block instanceof BlockSponge)) return par1ItemStack;
+         }
+
+         if (par1ItemStack.stackTagCompound == null)
+            par1ItemStack.stackTagCompound = new NBTTagCompound();
+
+         NBTTagCompound tag = par1ItemStack.stackTagCompound;
+
+         // Always reset when right-clicking again
+         tag.setLong("DeployStart", world.getTotalWorldTime());
+         tag.setInteger("TargetX", mop.blockX);
+         tag.setInteger("TargetY", mop.blockY);
+         tag.setInteger("TargetZ", mop.blockZ);
+         player.setItemInUse(par1ItemStack, this.getMaxItemUseDuration(par1ItemStack));
+
+         if (world.isRemote)
+            player.addChatMessage(new ChatComponentText("Hold click to deploy vehicle..."));
+      }
+
+      return par1ItemStack;
    }
 
    @Override
