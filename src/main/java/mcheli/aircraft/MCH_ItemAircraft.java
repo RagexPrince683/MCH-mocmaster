@@ -178,22 +178,22 @@ public abstract class MCH_ItemAircraft extends W_Item {
          return;
       }
 
-      // Check if player is still holding right-click
-      if (player.getItemInUse() != stack) {
-         System.out.println("[DEBUG] Player released right-click, cancelling.");
-         cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
+      // Combined check: player must be holding right-click and raytrace must be valid
+      MovingObjectPosition mop = getSolidBlockLookedAt(player, 5.0D);
+      boolean holdingClick = player.getItemInUse() == stack;
+
+      if (!holdingClick || mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
+         if (!holdingClick) {
+            System.out.println("[DEBUG] Player released right-click, cancelling.");
+            cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
+         } else {
+            System.out.println("[DEBUG] Raytrace failed or not a block, cancelling.");
+            cancelDeployment(tag, player, "Vehicle deployment cancelled (target lost).");
+         }
          return;
-      } else {
-         System.out.println("[DEBUG] Player is holding right-click.");
       }
 
-      // Use proper solid-block raytrace
-      MovingObjectPosition mop = getSolidBlockLookedAt(player, 5.0D);
-      if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
-         System.out.println("[DEBUG] Raytrace failed or not a block, cancelling.");
-         cancelDeployment(tag, player, "Vehicle deployment cancelled (target lost).");
-         return;
-      }
+      System.out.println("[DEBUG] Player is holding right-click.");
 
       int currentX = mop.blockX;
       int currentY = mop.blockY;
@@ -222,9 +222,8 @@ public abstract class MCH_ItemAircraft extends W_Item {
       long deployStart = tag.getLong("DeployStart");
       long timeHeld = player.worldObj.getTotalWorldTime() - deployStart;
       System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
-      //actually no before
 
-      if (timeHeld >= MCH_Config.placetimer.prmInt) {//todo check that we are still hold clicking here because this stupid shit cannot tell somehow
+      if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick) {
          int targetX = tag.getInteger("TargetX");
          int targetY = tag.getInteger("TargetY");
          int targetZ = tag.getInteger("TargetZ");
