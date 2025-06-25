@@ -173,27 +173,30 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
       NBTTagCompound tag = stack.stackTagCompound;
 
-      if (!tag.hasKey("DeployStart")) {
-         System.out.println("[DEBUG] No DeployStart tag.");
-         return;
-      }
-
-      // Combined check: player must be holding right-click and raytrace must be valid
-      MovingObjectPosition mop = getSolidBlockLookedAt(player, 5.0D);
+      // Validate both deploy state and click-hold continuously
       boolean holdingClick = player.getItemInUse() == stack;
+      boolean hasDeployStart = tag.hasKey("DeployStart");
 
-      if (!holdingClick || mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
-         if (!holdingClick) {
+      if (!holdingClick) {
+         if (hasDeployStart) {
             System.out.println("[DEBUG] Player released right-click, cancelling.");
             cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
-         } else {
-            System.out.println("[DEBUG] Raytrace failed or not a block, cancelling.");
-            cancelDeployment(tag, player, "Vehicle deployment cancelled (target lost).");
          }
          return;
       }
 
-      System.out.println("[DEBUG] Player is holding right-click.");
+      if (!hasDeployStart) {
+         System.out.println("[DEBUG] No DeployStart tag.");
+         return;
+      }
+
+      // Valid raytrace check
+      MovingObjectPosition mop = getSolidBlockLookedAt(player, 5.0D);
+      if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
+         System.out.println("[DEBUG] Raytrace failed or not a block, cancelling.");
+         cancelDeployment(tag, player, "Vehicle deployment cancelled (target lost).");
+         return;
+      }
 
       int currentX = mop.blockX;
       int currentY = mop.blockY;
@@ -223,7 +226,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       long timeHeld = player.worldObj.getTotalWorldTime() - deployStart;
       System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
 
-      if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick) {
+      if (timeHeld >= MCH_Config.placetimer.prmInt) {
          int targetX = tag.getInteger("TargetX");
          int targetY = tag.getInteger("TargetY");
          int targetZ = tag.getInteger("TargetZ");
