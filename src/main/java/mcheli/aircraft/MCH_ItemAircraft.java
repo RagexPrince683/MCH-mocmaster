@@ -136,7 +136,9 @@ public abstract class MCH_ItemAircraft extends W_Item {
          NBTTagCompound tag = par1ItemStack.stackTagCompound;
 
          if (!tag.hasKey("DeployStart")) {
-            tag.setLong("DeployStart", world.getTotalWorldTime());
+            tag.setLong("DeployStart", par1ItemStack.getMaxItemUseDuration());
+            //this.getMaxItemUseDuration(stack) - count
+            //idk idk this is beyond my mental capacity to even fucking look at rn IDK IDK IDK
             tag.setInteger("TargetX", mop.blockX);
             tag.setInteger("TargetY", mop.blockY);
             tag.setInteger("TargetZ", mop.blockZ);
@@ -145,7 +147,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
             if (world.isRemote)
                player.addChatMessage(new ChatComponentText("Hold click to deploy vehicle..."));
          }
-         //todo reset deploystart on single click but not on hold
+         //todo reset deploystart on single click but not on hold?
       }
 
       return par1ItemStack;
@@ -227,6 +229,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       }
 
       long deployStart = tag.getLong("DeployStart");
+      //never used above
       int timeHeld = this.getMaxItemUseDuration(stack) - count;
       System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
 
