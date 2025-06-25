@@ -174,6 +174,12 @@ public abstract class MCH_ItemAircraft extends W_Item {
       if (!tag.hasKey("DeployStart"))
          return;
 
+      // Check if player is still holding right-click
+      if (player.getItemInUse() != stack) {
+         cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
+         return;
+      }
+
       // Use proper solid-block raytrace
       MovingObjectPosition mop = getSolidBlockLookedAt(player, 5.0D);
       if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
