@@ -100,14 +100,15 @@ public abstract class MCH_ItemAircraft extends W_Item {
       float f8 = f3 * f5;
       double d3 = 5.0D;
       Vec3 vec31 = vec3.addVector(f7 * d3, f6 * d3, f8 * d3);
-      MovingObjectPosition mop = W_WorldFunc.clip(world, vec3, vec31, true);
+      //MovingObjectPosition mop = W_WorldFunc.clip(world, vec3, vec31, true);
+      MovingObjectPosition mop = rayTraceWorld(world, player, 5.0D);
+      //IM GONNA FUCKING KILL YOU IM GONNA FUCKING KILL YOU!!!
 
       if (mop == null) return par1ItemStack;
 
       if (world.isRemote) return par1ItemStack;
 
-      //MovingObjectPosition mop = rayTraceWorld(world, player, 5.0D);
-      //IM GONNA FUCKING KILL YOU IM GONNA FUCKING KILL YOU!!!
+
       if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) return par1ItemStack;
 
       Vec3 look = player.getLook(f);
@@ -206,20 +207,20 @@ public abstract class MCH_ItemAircraft extends W_Item {
       }
    }
 
-   private void cancelDeployment(NBTTagCompound tag, EntityPlayer player, String message) {
-      System.out.println("[DEBUG] CancelDeployment called: " + message);
-      clearDeployTags(tag);
-      player.addChatMessage(new ChatComponentText(message));
-      player.stopUsingItem();
-   }
+   //private void cancelDeployment(NBTTagCompound tag, EntityPlayer player, String message) {
+   //   System.out.println("[DEBUG] CancelDeployment called: " + message);
+   //   clearDeployTags(tag);
+   //   player.addChatMessage(new ChatComponentText(message));
+   //   player.stopUsingItem();
+   //}
 
-   private void clearDeployTags(NBTTagCompound tag) {
-      tag.removeTag("DeployStart");
-      tag.removeTag("TargetX");
-      tag.removeTag("TargetY");
-      tag.removeTag("TargetZ");
-      System.out.println("[DEBUG] Cleared deployment tags.");
-   }
+   //private void clearDeployTags(NBTTagCompound tag) {
+   //   tag.removeTag("DeployStart");
+   //   tag.removeTag("TargetX");
+   //   tag.removeTag("TargetY");
+   //   tag.removeTag("TargetZ");
+   //   System.out.println("[DEBUG] Cleared deployment tags.");
+   //}
 
 
    private MovingObjectPosition rayTraceWorld(World world, EntityPlayer player, double dist) {
@@ -228,6 +229,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       Vec3 to = from.addVector(look.xCoord * dist, look.yCoord * dist, look.zCoord * dist);
       return world.rayTraceBlocks(from, to);
    }
+
 
    @Override
    public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int timeLeft) {
