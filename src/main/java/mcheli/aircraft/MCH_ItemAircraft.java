@@ -143,6 +143,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
             if (world.isRemote)
                player.addChatMessage(new ChatComponentText("Hold click to deploy vehicle..."));
          }
+         //todo reset deploystart on single click but not on hold
       }
 
       return par1ItemStack;
@@ -219,6 +220,15 @@ public abstract class MCH_ItemAircraft extends W_Item {
       long deployStart = tag.getLong("DeployStart");
       long timeHeld = player.worldObj.getTotalWorldTime() - deployStart;
       System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
+
+      //check that we are still holding here
+      if (!holdingClick) {
+         if (hasDeployStart) {
+            System.out.println("[DEBUG] Player released right-click, cancelling.");
+            cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
+         }
+         return;
+      }
 
       if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick ) {
          int targetX = tag.getInteger("TargetX");
