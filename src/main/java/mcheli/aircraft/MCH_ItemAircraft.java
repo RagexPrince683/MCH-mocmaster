@@ -176,10 +176,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
       // Check if player is still aiming at the same block
       MovingObjectPosition mop = player.rayTrace(5.0D, 1.0F);
-      if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK ||
-              mop.blockX != tag.getInteger("TargetX") ||
-              mop.blockY != tag.getInteger("TargetY") ||
-              mop.blockZ != tag.getInteger("TargetZ")) {
+      if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
 
          tag.removeTag("DeployStart");
          tag.removeTag("TargetX");
@@ -189,6 +186,24 @@ public abstract class MCH_ItemAircraft extends W_Item {
          player.stopUsingItem();
          return;
       }
+
+      //int tx = tag.getInteger("TargetX");
+      //int ty = tag.getInteger("TargetY");
+      //int tz = tag.getInteger("TargetZ");
+      //if (mop.blockX != tx || mop.blockY != ty || mop.blockZ != tz) {
+      //   tag.removeTag("DeployStart");
+      //   tag.removeTag("TargetX");
+      //   tag.removeTag("TargetY");
+      //   tag.removeTag("TargetZ");
+      //   player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled (target changed)."));
+      //   player.stopUsingItem();
+      //   return;
+      //}
+      //this logic does not work right
+
+
+
+
 
       long deployStart = tag.getLong("DeployStart");
       if (player.worldObj.getTotalWorldTime() - deployStart >= MCH_Config.placetimer.prmInt) {
