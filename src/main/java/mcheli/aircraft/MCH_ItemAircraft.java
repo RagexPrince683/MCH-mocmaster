@@ -190,21 +190,25 @@ public abstract class MCH_ItemAircraft extends W_Item {
          tag.setInteger("TargetX", currentX);
          tag.setInteger("TargetY", currentY);
          tag.setInteger("TargetZ", currentZ);
-         return;
-      }
+      } else {
+         int targetX = tag.getInteger("TargetX");
+         int targetY = tag.getInteger("TargetY");
+         int targetZ = tag.getInteger("TargetZ");
 
-      int targetX = tag.getInteger("TargetX");
-      int targetY = tag.getInteger("TargetY");
-      int targetZ = tag.getInteger("TargetZ");
-
-      if (currentX != targetX || currentY != targetY || currentZ != targetZ) {
-         cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
-         return;
+         // Only cancel if target has *actually* changed
+         if (currentX != targetX || currentY != targetY || currentZ != targetZ) {
+            cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
+            return;
+         }
       }
 
       long deployStart = tag.getLong("DeployStart");
       if (player.worldObj.getTotalWorldTime() - deployStart >= MCH_Config.placetimer.prmInt) {
          // Complete deployment
+         int targetX = tag.getInteger("TargetX");
+         int targetY = tag.getInteger("TargetY");
+         int targetZ = tag.getInteger("TargetZ");
+
          this.spawnAircraft(stack, player.worldObj, player, targetX, targetY, targetZ);
          player.addChatMessage(new ChatComponentText("Vehicle deployed."));
          W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
