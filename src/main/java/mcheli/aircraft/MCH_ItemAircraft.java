@@ -232,11 +232,14 @@ public abstract class MCH_ItemAircraft extends W_Item {
          W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
          clearDeployTags(tag);
          player.stopUsingItem();
-      } else {
-         clearDeployTags(tag);
-         player.stopUsingItem();
-         player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled (not enough time held)."));
       }
+      //else {
+      //   clearDeployTags(tag);
+      //   player.stopUsingItem();
+      //   cancelDeployment(stack.stackTagCompound, player, "Vehicle deployment cancelled (not enough time held).");
+      //   //player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled (not enough time held)."));
+      //   return;
+      //}
    }
 
    private void cancelDeployment(NBTTagCompound tag, EntityPlayer player, String message) {
