@@ -369,6 +369,7 @@ public class MCH_EventHook extends W_EventHook {
                   bullet.setDead();
                   System.out.println("Bullet set dead after being idle for 2 minutes.");
                }
+               //todo or >25 bullets loaded start despawning them
             }
          }
          //this was so retarded to implement I hope it works
