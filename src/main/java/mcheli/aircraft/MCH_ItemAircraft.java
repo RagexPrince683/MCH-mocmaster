@@ -18,6 +18,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecartEmpty;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -137,29 +138,13 @@ public abstract class MCH_ItemAircraft extends W_Item {
                NBTTagCompound tag = par1ItemStack.stackTagCompound;
 
                if (!tag.hasKey("DeployStart")) {
-                  if (mop != null && W_MovingObjectPosition.isHitTypeTile(mop)) {
-                     // TEMP spawn aircraft ONLY to check if it's a UAV — don't spawn into world yet
-                     MCH_EntityAircraft ac = this.onTileClick(par1ItemStack, world, player.rotationYaw, mop.blockX, mop.blockY, mop.blockZ);
-                     if (ac != null && (ac.isUAV() || ac.isNewUAV())) {
-                        if (world.isRemote) {
-                           if (ac.isSmallUAV()) {
-                              player.addChatMessage(new ChatComponentText("Please use the UAV station OR Portable Controller"));
-                           } else {
-                              player.addChatMessage(new ChatComponentText("Please use the UAV station"));
-                           }
-                        }
-                        return par1ItemStack;
-                     }
-
-                     // Proceed with delay setup
-                     tag.setLong("DeployStart", world.getTotalWorldTime());
-                     tag.setInteger("TargetX", mop.blockX);
-                     tag.setInteger("TargetY", mop.blockY);
-                     tag.setInteger("TargetZ", mop.blockZ);
-
-                     if (world.isRemote)
-                        player.addChatMessage(new ChatComponentText("Preparing vehicle for deployment..."));
-                  }
+                  tag.setLong("DeployStart", world.getTotalWorldTime());
+                  tag.setInteger("TargetX", mop.blockX);
+                  tag.setInteger("TargetY", mop.blockY);
+                  tag.setInteger("TargetZ", mop.blockZ);
+                  player.setItemInUse(par1ItemStack, this.getMaxItemUseDuration(par1ItemStack));
+                  if (world.isRemote)
+                     player.addChatMessage(new ChatComponentText("Hold click to deploy vehicle..."));
                }
 
             }
@@ -170,32 +155,49 @@ public abstract class MCH_ItemAircraft extends W_Item {
    }
 
    @Override
-   public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
-      if ( !(entity instanceof EntityPlayerMP) || stack.stackTagCompound == null)
+   public int getMaxItemUseDuration(ItemStack stack) {
+      return 72000;
+   }
+
+   @Override
+   public EnumAction getItemUseAction(ItemStack stack) {
+      return EnumAction.bow;
+   }
+
+   @Override
+   public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
+      if (stack.stackTagCompound == null || player.worldObj.isRemote)
          return;
 
       NBTTagCompound tag = stack.stackTagCompound;
+
       if (!tag.hasKey("DeployStart"))
          return;
 
-      if (!isHeld) {
-            tag.removeTag("DeployStart");
-            tag.removeTag("TargetX");
-            tag.removeTag("TargetY");
-            tag.removeTag("TargetZ");
-            EntityPlayerMP player = (EntityPlayerMP) entity;
-            player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled."));
-            return;
+      // Check if player is still aiming at the same block
+      MovingObjectPosition mop = player.rayTrace(5.0D, 1.0F);
+      if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK ||
+              mop.blockX != tag.getInteger("TargetX") ||
+              mop.blockY != tag.getInteger("TargetY") ||
+              mop.blockZ != tag.getInteger("TargetZ")) {
+
+         tag.removeTag("DeployStart");
+         tag.removeTag("TargetX");
+         tag.removeTag("TargetY");
+         tag.removeTag("TargetZ");
+         player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled (target lost)."));
+         player.stopUsingItem();
+         return;
       }
 
-      if (isHeld && world.getTotalWorldTime() - tag.getLong("DeployStart") >= MCH_Config.placetimer.prmInt) {
+      long deployStart = tag.getLong("DeployStart");
+      if (player.worldObj.getTotalWorldTime() - deployStart >= MCH_Config.placetimer.prmInt) {
+         // Complete deployment
          int x = tag.getInteger("TargetX");
          int y = tag.getInteger("TargetY");
          int z = tag.getInteger("TargetZ");
 
-         EntityPlayerMP player = (EntityPlayerMP) entity;
-
-         this.spawnAircraft(stack, world, player, x, y, z);
+         this.spawnAircraft(stack, player.worldObj, player, x, y, z);
          player.addChatMessage(new ChatComponentText("Vehicle deployed."));
          W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
 
@@ -203,6 +205,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
          tag.removeTag("TargetX");
          tag.removeTag("TargetY");
          tag.removeTag("TargetZ");
+         player.stopUsingItem();
       }
    }
 
