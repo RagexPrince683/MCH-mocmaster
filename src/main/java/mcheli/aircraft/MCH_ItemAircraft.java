@@ -133,15 +133,16 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
          NBTTagCompound tag = par1ItemStack.stackTagCompound;
 
-         // Always reset when right-clicking again
-         tag.setLong("DeployStart", world.getTotalWorldTime());
-         tag.setInteger("TargetX", mop.blockX);
-         tag.setInteger("TargetY", mop.blockY);
-         tag.setInteger("TargetZ", mop.blockZ);
-         player.setItemInUse(par1ItemStack, this.getMaxItemUseDuration(par1ItemStack));
+         if (!tag.hasKey("DeployStart")) {
+            tag.setLong("DeployStart", world.getTotalWorldTime());
+            tag.setInteger("TargetX", mop.blockX);
+            tag.setInteger("TargetY", mop.blockY);
+            tag.setInteger("TargetZ", mop.blockZ);
+            player.setItemInUse(par1ItemStack, this.getMaxItemUseDuration(par1ItemStack));
 
-         if (world.isRemote)
-            player.addChatMessage(new ChatComponentText("Hold click to deploy vehicle..."));
+            if (world.isRemote)
+               player.addChatMessage(new ChatComponentText("Hold click to deploy vehicle..."));
+         }
       }
 
       return par1ItemStack;
@@ -219,7 +220,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       long timeHeld = player.worldObj.getTotalWorldTime() - deployStart;
       System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
 
-      if (timeHeld >= MCH_Config.placetimer.prmInt) {
+      if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick ) {
          int targetX = tag.getInteger("TargetX");
          int targetY = tag.getInteger("TargetY");
          int targetZ = tag.getInteger("TargetZ");
@@ -231,6 +232,10 @@ public abstract class MCH_ItemAircraft extends W_Item {
          W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
          clearDeployTags(tag);
          player.stopUsingItem();
+      } else {
+         clearDeployTags(tag);
+         player.stopUsingItem();
+         player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled (not enough time held)."));
       }
    }
 
