@@ -104,6 +104,12 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
       if (mop == null) return par1ItemStack;
 
+      if (world.isRemote) return par1ItemStack;
+
+      //MovingObjectPosition mop = rayTraceWorld(world, player, 5.0D);
+      //IM GONNA FUCKING KILL YOU IM GONNA FUCKING KILL YOU!!!
+      if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) return par1ItemStack;
+
       Vec3 look = player.getLook(f);
       boolean blockingEntity = false;
       float expand = 1.0F;
@@ -130,22 +136,19 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
          if (world.getWorldTime() < 100) return par1ItemStack;
 
-         if (par1ItemStack.stackTagCompound == null)
-            par1ItemStack.stackTagCompound = new NBTTagCompound();
+         NBTTagCompound tag = par1ItemStack.getTagCompound();
+         if (tag == null) {
+            tag = new NBTTagCompound();
+            par1ItemStack.setTagCompound(tag);
+         }
 
-         NBTTagCompound tag = par1ItemStack.stackTagCompound;
-
-         if (!tag.hasKey("DeployStart")) {
-            tag.setLong("DeployStart", par1ItemStack.getMaxItemUseDuration());
-            //this.getMaxItemUseDuration(stack) - count
-            //idk idk this is beyond my mental capacity to even fucking look at rn IDK IDK IDK
+         if (!tag.hasKey("StartCount")) {
+            tag.setInteger("StartCount", getMaxItemUseDuration(par1ItemStack));
             tag.setInteger("TargetX", mop.blockX);
             tag.setInteger("TargetY", mop.blockY);
             tag.setInteger("TargetZ", mop.blockZ);
-            player.setItemInUse(par1ItemStack, this.getMaxItemUseDuration(par1ItemStack));
-
-            if (world.isRemote)
-               player.addChatMessage(new ChatComponentText("Hold click to deploy vehicle..."));
+            player.setItemInUse(par1ItemStack, getMaxItemUseDuration(par1ItemStack));
+            player.addChatMessage(new ChatComponentText("Hold click to deploy vehicle..."));
          }
          //todo reset deploystart on single click but not on hold?
       }
