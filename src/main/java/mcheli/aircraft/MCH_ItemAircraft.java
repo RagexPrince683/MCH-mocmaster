@@ -128,6 +128,8 @@ public abstract class MCH_ItemAircraft extends W_Item {
             if (!(block instanceof BlockSponge)) return par1ItemStack;
          }
 
+         if (world.getWorldTime() < 100) return par1ItemStack;
+
          if (par1ItemStack.stackTagCompound == null)
             par1ItemStack.stackTagCompound = new NBTTagCompound();
 
@@ -161,6 +163,13 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    @Override
    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
+
+      //int held = this.getMaxItemUseDuration(stack) - count;
+      //if (held >= MCH_Config.placetimer.prmInt) {
+      //   // spawn
+      //}
+      //non spaghetti code logic above just need to figure out where and how to implement it
+
       if (stack.stackTagCompound == null || player.worldObj.isRemote) {
          System.out.println("[DEBUG] Stack has no tag or is remote world.");
          return;
@@ -218,7 +227,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       }
 
       long deployStart = tag.getLong("DeployStart");
-      long timeHeld = player.worldObj.getTotalWorldTime() - deployStart;
+      int timeHeld = this.getMaxItemUseDuration(stack) - count;
       System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
 
       //check that we are still holding here
@@ -276,8 +285,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    @Override
    public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int timeLeft) {
-      if (!world.isRemote && stack.stackTagCompound != null && stack.stackTagCompound.hasKey("DeployStart")) {
-         System.out.println("[DEBUG] Player stopped using item manually.");
+      if (stack.stackTagCompound != null && stack.stackTagCompound.hasKey("DeployStart")) {
          cancelDeployment(stack.stackTagCompound, player, "Vehicle deployment cancelled (input released).");
       }
    }
