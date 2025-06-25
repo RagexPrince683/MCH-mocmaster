@@ -84,9 +84,6 @@ public abstract class MCH_ItemAircraft extends W_Item {
    }
 
    public ItemStack onItemRightClick(ItemStack par1ItemStack, World world, EntityPlayer player) {
-
-      //todone timer here maybe not
-
       float f = 1.0F;
       float f1 = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * f;
       float f2 = player.prevRotationYaw + (player.rotationYaw - player.prevRotationYaw) * f;
@@ -134,9 +131,6 @@ public abstract class MCH_ItemAircraft extends W_Item {
                   }
                }
 
-               //here
-               //this.spawnAircraft(par1ItemStack, world, player, mop.blockX, mop.blockY, mop.blockZ);
-
                if (par1ItemStack.stackTagCompound == null)
                   par1ItemStack.stackTagCompound = new NBTTagCompound();
 
@@ -178,7 +172,6 @@ public abstract class MCH_ItemAircraft extends W_Item {
    @Override
    public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean isHeld) {
       if ( !(entity instanceof EntityPlayerMP) || stack.stackTagCompound == null)
-         //removed !isHeld ||
          return;
 
       NBTTagCompound tag = stack.stackTagCompound;
@@ -186,23 +179,16 @@ public abstract class MCH_ItemAircraft extends W_Item {
          return;
 
       if (!isHeld) {
-         //&& !ac.isUAV() || !ac.isNewUAV()
-            //no fuckery
             tag.removeTag("DeployStart");
             tag.removeTag("TargetX");
             tag.removeTag("TargetY");
             tag.removeTag("TargetZ");
-            //if (world.isRemote)
-            //    ((EntityPlayerMP) entity).addChatMessage(new ChatComponentText("Vehicle deployment cancelled."));
             EntityPlayerMP player = (EntityPlayerMP) entity;
             player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled."));
             return;
       }
 
       if (isHeld && world.getTotalWorldTime() - tag.getLong("DeployStart") >= MCH_Config.placetimer.prmInt) {
-         //&& !ac.isUAV() || !ac.isNewUAV()
-         //fucking crash moment
-         //todone replace 60 with a config value
          int x = tag.getInteger("TargetX");
          int y = tag.getInteger("TargetY");
          int z = tag.getInteger("TargetZ");
@@ -211,7 +197,6 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
          this.spawnAircraft(stack, world, player, x, y, z);
          player.addChatMessage(new ChatComponentText("Vehicle deployed."));
-         //playsound
          W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
 
          tag.removeTag("DeployStart");
@@ -240,11 +225,6 @@ public abstract class MCH_ItemAircraft extends W_Item {
             if(!world.isRemote) {
                ac.getAcDataFromItem(itemStack);
                world.spawnEntityInWorld(ac);
-               //crashes randomly?
-               //if(ac.getAcInfo() != null) {
-               //   ac.getAcInfo().reload();
-               //   //ac.onAcInfoReloaded();
-               //}
                MCH_Achievement.addStat(player, MCH_Achievement.welcome, 1);
             }
 
