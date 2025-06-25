@@ -174,8 +174,8 @@ public abstract class MCH_ItemAircraft extends W_Item {
       if (!tag.hasKey("DeployStart"))
          return;
 
-      // Check if player is still aiming at a block
-      MovingObjectPosition mop = player.rayTrace(5.0D, 1.0F);
+      // Use proper solid-block raytrace
+      MovingObjectPosition mop = getSolidBlockLookedAt(player, 5.0D);
       if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
          cancelDeployment(tag, player, "Vehicle deployment cancelled (target lost).");
          return;
@@ -196,7 +196,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
          int targetZ = tag.getInteger("TargetZ");
 
          // Only cancel if raytrace hits a different block position
-         if (!(mop.blockX == targetX && mop.blockY == targetY && mop.blockZ == targetZ)) {
+         if (currentX != targetX || currentY != targetY || currentZ != targetZ) {
             cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
             return;
          }
@@ -228,6 +228,13 @@ public abstract class MCH_ItemAircraft extends W_Item {
       tag.removeTag("TargetX");
       tag.removeTag("TargetY");
       tag.removeTag("TargetZ");
+   }
+
+   private MovingObjectPosition getSolidBlockLookedAt(EntityPlayer player, double distance) {
+      Vec3 eyePos = player.getPosition(1.0F).addVector(0, player.getEyeHeight(), 0);
+      Vec3 lookVec = player.getLook(1.0F);
+      Vec3 reachVec = eyePos.addVector(lookVec.xCoord * distance, lookVec.yCoord * distance, lookVec.zCoord * distance);
+      return player.worldObj.rayTraceBlocks(eyePos, reachVec);
    }
 
 
