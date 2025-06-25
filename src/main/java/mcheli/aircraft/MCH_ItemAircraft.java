@@ -177,52 +177,55 @@ public abstract class MCH_ItemAircraft extends W_Item {
       // Check if player is still aiming at the same block
       MovingObjectPosition mop = player.rayTrace(5.0D, 1.0F);
       if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
-
-         tag.removeTag("DeployStart");
-         tag.removeTag("TargetX");
-         tag.removeTag("TargetY");
-         tag.removeTag("TargetZ");
-         player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled (target lost)."));
-         player.stopUsingItem();
+         cancelDeployment(tag, player, "Vehicle deployment cancelled (target lost).");
          return;
       }
 
-      //int tx = tag.getInteger("TargetX");
-      //int ty = tag.getInteger("TargetY");
-      //int tz = tag.getInteger("TargetZ");
-      //if (mop.blockX != tx || mop.blockY != ty || mop.blockZ != tz) {
-      //   tag.removeTag("DeployStart");
-      //   tag.removeTag("TargetX");
-      //   tag.removeTag("TargetY");
-      //   tag.removeTag("TargetZ");
-      //   player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled (target changed)."));
-      //   player.stopUsingItem();
-      //   return;
-      //}
-      //this logic does not work right
+      int currentX = mop.blockX;
+      int currentY = mop.blockY;
+      int currentZ = mop.blockZ;
 
+      if (!tag.hasKey("TargetX") || !tag.hasKey("TargetY") || !tag.hasKey("TargetZ")) {
+         // Save target block on first valid tick
+         tag.setInteger("TargetX", currentX);
+         tag.setInteger("TargetY", currentY);
+         tag.setInteger("TargetZ", currentZ);
+         return;
+      }
 
+      int targetX = tag.getInteger("TargetX");
+      int targetY = tag.getInteger("TargetY");
+      int targetZ = tag.getInteger("TargetZ");
 
-
+      if (currentX != targetX || currentY != targetY || currentZ != targetZ) {
+         cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
+         return;
+      }
 
       long deployStart = tag.getLong("DeployStart");
       if (player.worldObj.getTotalWorldTime() - deployStart >= MCH_Config.placetimer.prmInt) {
          // Complete deployment
-         int x = tag.getInteger("TargetX");
-         int y = tag.getInteger("TargetY");
-         int z = tag.getInteger("TargetZ");
-
-         this.spawnAircraft(stack, player.worldObj, player, x, y, z);
+         this.spawnAircraft(stack, player.worldObj, player, targetX, targetY, targetZ);
          player.addChatMessage(new ChatComponentText("Vehicle deployed."));
          W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
-
-         tag.removeTag("DeployStart");
-         tag.removeTag("TargetX");
-         tag.removeTag("TargetY");
-         tag.removeTag("TargetZ");
+         clearDeployTags(tag);
          player.stopUsingItem();
       }
    }
+
+   private void cancelDeployment(NBTTagCompound tag, EntityPlayer player, String message) {
+      clearDeployTags(tag);
+      player.addChatMessage(new ChatComponentText(message));
+      player.stopUsingItem();
+   }
+
+   private void clearDeployTags(NBTTagCompound tag) {
+      tag.removeTag("DeployStart");
+      tag.removeTag("TargetX");
+      tag.removeTag("TargetY");
+      tag.removeTag("TargetZ");
+   }
+
 
    public MCH_EntityAircraft spawnAircraft(ItemStack itemStack, World world, EntityPlayer player, int x, int y, int z) {
 
