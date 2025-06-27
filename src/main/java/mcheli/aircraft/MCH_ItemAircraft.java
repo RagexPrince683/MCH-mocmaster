@@ -26,6 +26,8 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    private static boolean isRegistedDispenseBehavior = false;
 
+   public static int timeHeld = 0;
+
 
    public MCH_ItemAircraft(int i) {
       super(i);
@@ -163,7 +165,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
    @Override
    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
 
-      if (player.worldObj.isRemote) return;
+      //if (player.worldObj.isRemote) return;
 
       NBTTagCompound tag = stack.getTagCompound();
       if (tag == null || !tag.hasKey("StartCount")) return;
@@ -236,7 +238,11 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
       //long deployStart = tag.getLong("DeployStart");
       //never used above
-      int timeHeld = this.getMaxItemUseDuration(stack) - count;
+      if (holdingClick) {
+         timeHeld = this.getMaxItemUseDuration(stack) - count;
+      } else {
+         timeHeld = 0;
+      }
       //the problem here is timeHeld is being incremented despite the player not holding the click for some fucking reason
       System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
 
