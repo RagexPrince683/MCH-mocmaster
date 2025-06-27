@@ -163,22 +163,31 @@ public abstract class MCH_ItemAircraft extends W_Item {
    @Override
    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
 
+      if (player.worldObj.isRemote) return;
+
+      NBTTagCompound tag = stack.getTagCompound();
+      if (tag == null || !tag.hasKey("StartCount")) return;
+
       //int held = this.getMaxItemUseDuration(stack) - count;
       //if (held >= MCH_Config.placetimer.prmInt) {
       //   // spawn
       //}
       //non spaghetti code logic above just need to figure out where and how to implement it
 
-      if (stack.stackTagCompound == null || player.worldObj.isRemote) {
-         System.out.println("[DEBUG] Stack has no tag or is remote world.");
-         return;
-      }
+      //if (stack.stackTagCompound == null || player.worldObj.isRemote) {
+      //   System.out.println("[DEBUG] Stack has no tag or is remote world.");
+      //   return;
+      //}
 
-      NBTTagCompound tag = stack.stackTagCompound;
+      //this is hell
+
+      //NBTTagCompound tag = stack.stackTagCompound;
 
       // Validate both deploy state and click-hold continuously
       boolean holdingClick = player.getItemInUse() == stack;
       boolean hasDeployStart = tag.hasKey("DeployStart");
+
+
 
       if (!holdingClick) {
          if (hasDeployStart) {
@@ -230,7 +239,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       int timeHeld = this.getMaxItemUseDuration(stack) - count;
       //the problem here is timeHeld is being incremented despite the player not holding the click for some fucking reason
       System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
-      
+
       if (timeHeld > MCH_Config.placetimer.prmInt * 2) {
          clearDeployTags(tag);
          player.stopUsingItem();
@@ -303,12 +312,14 @@ public abstract class MCH_ItemAircraft extends W_Item {
    //}
    //idk if we will still need this but it is here
 
-   @Override
-   public boolean canContinueUsing(ItemStack oldStack, ItemStack newStack) {
-      // Return true only if StartCount tag is still present (meaning still holding)
-      NBTTagCompound tag = oldStack.getTagCompound();
-      return tag != null && tag.hasKey("StartCount");
-   }
+   //@Override
+   //public boolean canContinueUsing(ItemStack oldStack, ItemStack newStack) {
+   //   // Return true only if StartCount tag is still present (meaning still holding)
+   //   NBTTagCompound tag = oldStack.getTagCompound();
+   //   return tag != null && tag.hasKey("StartCount");
+   //}
+   //CANT FUCKING DO THAT BECAUSE THIS MOD WAS CODED BY LITERAL MONKIES!!!
+
 
 
 
