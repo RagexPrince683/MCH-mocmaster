@@ -168,7 +168,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       //if (player.worldObj.isRemote) return;
 
       NBTTagCompound tag = stack.getTagCompound();
-      if (tag == null || !tag.hasKey("StartCount")) return;
+      //if (tag == null || !tag.hasKey("StartCount")) return;
 
       //int held = this.getMaxItemUseDuration(stack) - count;
       //if (held >= MCH_Config.placetimer.prmInt) {
@@ -176,10 +176,10 @@ public abstract class MCH_ItemAircraft extends W_Item {
       //}
       //non spaghetti code logic above just need to figure out where and how to implement it
 
-      //if (stack.stackTagCompound == null || player.worldObj.isRemote) {
-      //   System.out.println("[DEBUG] Stack has no tag or is remote world.");
-      //   return;
-      //}
+      if (stack.stackTagCompound == null || player.worldObj.isRemote) {
+         System.out.println("[DEBUG] Stack has no tag or is remote world.");
+         return;
+      }
 
       //this is hell
 
@@ -246,11 +246,12 @@ public abstract class MCH_ItemAircraft extends W_Item {
       //the problem here is timeHeld is being incremented despite the player not holding the click for some fucking reason
       System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
 
-      if (timeHeld > MCH_Config.placetimer.prmInt * 2) {
-         clearDeployTags(tag);
-         player.stopUsingItem();
-         return;
-      }
+     // if (timeHeld > MCH_Config.placetimer.prmInt * 2) {
+     //    clearDeployTags(tag);
+     //    player.stopUsingItem();
+     //    return;
+     // }
+      //dont do that.
 
       //check that we are still holding here
       if (!holdingClick) {
@@ -324,7 +325,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
    //   NBTTagCompound tag = oldStack.getTagCompound();
    //   return tag != null && tag.hasKey("StartCount");
    //}
-   //CANT FUCKING DO THAT BECAUSE THIS MOD WAS CODED BY LITERAL MONKIES!!!
+   //CANT FUCKING DO THAT BECAUSE THIS MOD WAS CODED BY LITERAL MONKIES AND USES A WRAPPER!!!
 
 
 
