@@ -159,7 +159,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    @Override
    public EnumAction getItemUseAction(ItemStack stack) {
-      return EnumAction.bow;
+      return EnumAction.none;
    }
 
    @Override
@@ -262,7 +262,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
          return;
       }
 
-      if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick) {
+      if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick && ) {
          int targetX = tag.getInteger("TargetX");
          int targetY = tag.getInteger("TargetY");
          int targetZ = tag.getInteger("TargetZ");
