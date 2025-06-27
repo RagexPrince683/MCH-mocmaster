@@ -53,5 +53,7 @@ extends Item {
     }
 
     public abstract boolean canContinueUsing(ItemStack stack, World world, EntityLivingBase entity, int count);
+
+    public abstract boolean canContinueUsing(ItemStack oldStack, ItemStack newStack);
 }
 

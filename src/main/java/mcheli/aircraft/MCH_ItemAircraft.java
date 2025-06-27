@@ -230,7 +230,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       int timeHeld = this.getMaxItemUseDuration(stack) - count;
       //the problem here is timeHeld is being incremented despite the player not holding the click for some fucking reason
       System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
-
+      
       if (timeHeld > MCH_Config.placetimer.prmInt * 2) {
          clearDeployTags(tag);
          player.stopUsingItem();
@@ -246,7 +246,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
          return;
       }
 
-      if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick &&  ) {
+      if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick) {
          int targetX = tag.getInteger("TargetX");
          int targetY = tag.getInteger("TargetY");
          int targetZ = tag.getInteger("TargetZ");
@@ -297,9 +297,17 @@ public abstract class MCH_ItemAircraft extends W_Item {
       }
    }
 
+   //@Override
+   //public boolean canContinueUsing(ItemStack stack, World world, EntityLivingBase entity, int count) {
+   //   return true;
+   //}
+   //idk if we will still need this but it is here
+
    @Override
-   public boolean canContinueUsing(ItemStack stack, World world, EntityLivingBase entity, int count) {
-      return true;
+   public boolean canContinueUsing(ItemStack oldStack, ItemStack newStack) {
+      // Return true only if StartCount tag is still present (meaning still holding)
+      NBTTagCompound tag = oldStack.getTagCompound();
+      return tag != null && tag.hasKey("StartCount");
    }
 
 
