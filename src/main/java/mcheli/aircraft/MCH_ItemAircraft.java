@@ -162,40 +162,119 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    @Override
    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
+
       if (player.worldObj.isRemote) return;
+
       NBTTagCompound tag = stack.getTagCompound();
       if (tag == null || !tag.hasKey("StartCount")) return;
 
-      int startCount = tag.getInteger("StartCount");
-      int timeHeld = startCount - count;
-      int limit = MCH_Config.placetimer.prmInt;
+      //int held = this.getMaxItemUseDuration(stack) - count;
+      //if (held >= MCH_Config.placetimer.prmInt) {
+      //   // spawn
+      //}
+      //non spaghetti code logic above just need to figure out where and how to implement it
 
-      // 1️⃣ If count never decreased (stuck state) → cancel
-      if (timeHeld < 0 || count == startCount) {
+      //if (stack.stackTagCompound == null || player.worldObj.isRemote) {
+      //   System.out.println("[DEBUG] Stack has no tag or is remote world.");
+      //   return;
+      //}
+
+      //this is hell
+
+      //NBTTagCompound tag = stack.stackTagCompound;
+
+      // Validate both deploy state and click-hold continuously
+      boolean holdingClick = player.getItemInUse() == stack;
+      boolean hasDeployStart = tag.hasKey("DeployStart");
+
+
+
+      if (!holdingClick) {
+         if (hasDeployStart) {
+            System.out.println("[DEBUG] Player released right-click, cancelling.");
+            cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
+         }
+         return;
+      }
+
+      if (!hasDeployStart) {
+         System.out.println("[DEBUG] No DeployStart tag.");
+         return;
+      }
+
+      // Valid raytrace check
+      MovingObjectPosition mop = getSolidBlockLookedAt(player, 5.0D);
+      if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
+         System.out.println("[DEBUG] Raytrace failed or not a block, cancelling.");
+         cancelDeployment(tag, player, "Vehicle deployment cancelled (target lost).");
+         return;
+      }
+
+      int currentX = mop.blockX;
+      int currentY = mop.blockY;
+      int currentZ = mop.blockZ;
+      System.out.println("[DEBUG] Raytrace hit block at: " + currentX + "," + currentY + "," + currentZ);
+
+      if (!tag.hasKey("TargetX") || !tag.hasKey("TargetY") || !tag.hasKey("TargetZ")) {
+         System.out.println("[DEBUG] No saved target, setting initial target.");
+         tag.setInteger("TargetX", currentX);
+         tag.setInteger("TargetY", currentY);
+         tag.setInteger("TargetZ", currentZ);
+      } else {
+         int targetX = tag.getInteger("TargetX");
+         int targetY = tag.getInteger("TargetY");
+         int targetZ = tag.getInteger("TargetZ");
+
+         System.out.println("[DEBUG] Saved target: " + targetX + "," + targetY + "," + targetZ);
+
+         if (currentX != targetX || currentY != targetY || currentZ != targetZ) {
+            System.out.println("[DEBUG] Target changed, cancelling.");
+            cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
+            return;
+         }
+      }
+
+      //long deployStart = tag.getLong("DeployStart");
+      //never used above
+      int timeHeld = this.getMaxItemUseDuration(stack) - count;
+      //the problem here is timeHeld is being incremented despite the player not holding the click for some fucking reason
+      System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
+
+      if (timeHeld > MCH_Config.placetimer.prmInt * 2) {
          clearDeployTags(tag);
          player.stopUsingItem();
          return;
       }
 
-      // 2️⃣ Safety timeout: stop after twice the intended hold
-      if (timeHeld > limit * 2) {
-         clearDeployTags(tag);
-         player.stopUsingItem();
+      //check that we are still holding here
+      if (!holdingClick) {
+         if (hasDeployStart) {
+            System.out.println("[DEBUG] Player released right-click, cancelling.");
+            cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
+         }
          return;
       }
 
-      // 3️⃣ Once hold threshold is met, spawn
-      if (timeHeld >= limit) {
-         int x = tag.getInteger("TargetX");
-         int y = tag.getInteger("TargetY");
-         int z = tag.getInteger("TargetZ");
+      if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick) {
+         int targetX = tag.getInteger("TargetX");
+         int targetY = tag.getInteger("TargetY");
+         int targetZ = tag.getInteger("TargetZ");
 
-         this.spawnAircraft(stack, player.worldObj, player, x, y, z);
+         System.out.println("[DEBUG] Deployment complete. Spawning vehicle at: " + targetX + "," + targetY + "," + targetZ);
+
+         this.spawnAircraft(stack, player.worldObj, player, targetX, targetY, targetZ);
          player.addChatMessage(new ChatComponentText("Vehicle deployed."));
          W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
          clearDeployTags(tag);
          player.stopUsingItem();
       }
+      //else {
+      //   clearDeployTags(tag);
+      //   player.stopUsingItem();
+      //   cancelDeployment(stack.stackTagCompound, player, "Vehicle deployment cancelled (not enough time held).");
+      //   //player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled (not enough time held)."));
+      //   return;
+      //}
    }
 
    private void cancelDeployment(NBTTagCompound tag, EntityPlayer player, String message) {
