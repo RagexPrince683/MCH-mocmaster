@@ -134,6 +134,8 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
          NBTTagCompound tag = par1ItemStack.stackTagCompound;
 
+
+
          if (!tag.hasKey("DeployStart")) {
             tag.setLong("DeployStart", par1ItemStack.getMaxItemUseDuration());
             //this.getMaxItemUseDuration(stack) - count
@@ -146,6 +148,11 @@ public abstract class MCH_ItemAircraft extends W_Item {
             if (world.isRemote)
                player.addChatMessage(new ChatComponentText("Hold click to deploy vehicle..."));
          }
+
+         if (!player.isUsingItem()) {
+            player.setItemInUse(par1ItemStack, this.getMaxItemUseDuration(par1ItemStack));
+         }
+
          //todo reset deploystart on single click but not on hold?
       }
 
@@ -159,7 +166,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    @Override
    public EnumAction getItemUseAction(ItemStack stack) {
-      return EnumAction.none;
+      return EnumAction.bow;
    }
 
    @Override
