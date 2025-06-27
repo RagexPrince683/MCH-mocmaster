@@ -163,7 +163,6 @@ public abstract class MCH_ItemAircraft extends W_Item {
    @Override
    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
       if (player.worldObj.isRemote) return;
-
       NBTTagCompound tag = stack.getTagCompound();
       if (tag == null || !tag.hasKey("StartCount")) return;
 
@@ -171,23 +170,23 @@ public abstract class MCH_ItemAircraft extends W_Item {
       int timeHeld = startCount - count;
       int limit = MCH_Config.placetimer.prmInt;
 
-      // If count never decreased, client likely released → cancel
-      if (count == startCount || timeHeld < 0) {
+      // 🚫 Detect release or untracked state:
+      if (timeHeld < 0 || count == startCount) {
          clearDeployTags(tag);
          player.stopUsingItem();
-         player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled (release detected)."));
+         player.addChatMessage(new ChatComponentText("Canceled: release detected."));
          return;
       }
 
-      // Safety timeout in case the previous check misses
+      // ⏳ Timeout cleanup:
       if (timeHeld > limit * 2) {
          clearDeployTags(tag);
          player.stopUsingItem();
-         player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled (timeout)."));
+         player.addChatMessage(new ChatComponentText("Canceled: timeout."));
          return;
       }
 
-      // Only spawn when truly held enough time
+      // ✅ All good → spawn after proper hold:
       if (timeHeld >= limit) {
          int x = tag.getInteger("TargetX");
          int y = tag.getInteger("TargetY");
