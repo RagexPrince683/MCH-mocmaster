@@ -269,19 +269,19 @@ public abstract class MCH_ItemAircraft extends W_Item {
          return;
       }
 
-      if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick && ) {
-         int targetX = tag.getInteger("TargetX");
-         int targetY = tag.getInteger("TargetY");
-         int targetZ = tag.getInteger("TargetZ");
-
-         System.out.println("[DEBUG] Deployment complete. Spawning vehicle at: " + targetX + "," + targetY + "," + targetZ);
-
-         this.spawnAircraft(stack, player.worldObj, player, targetX, targetY, targetZ);
-         player.addChatMessage(new ChatComponentText("Vehicle deployed."));
-         W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
-         clearDeployTags(tag);
-         player.stopUsingItem();
-      }
+      //if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick && ) {
+      //   int targetX = tag.getInteger("TargetX");
+      //   int targetY = tag.getInteger("TargetY");
+      //   int targetZ = tag.getInteger("TargetZ");
+//
+      //   System.out.println("[DEBUG] Deployment complete. Spawning vehicle at: " + targetX + "," + targetY + "," + targetZ);
+//
+      //   this.spawnAircraft(stack, player.worldObj, player, targetX, targetY, targetZ);
+      //   player.addChatMessage(new ChatComponentText("Vehicle deployed."));
+      //   W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
+      //   clearDeployTags(tag);
+      //   player.stopUsingItem();
+      //}
       //else {
       //   clearDeployTags(tag);
       //   player.stopUsingItem();
@@ -313,11 +313,27 @@ public abstract class MCH_ItemAircraft extends W_Item {
       return player.worldObj.rayTraceBlocks(eyePos, reachVec);
    }
 
+   //@Override
+   //public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int timeLeft) {
+   //   if (stack.stackTagCompound != null && stack.stackTagCompound.hasKey("DeployStart")) {
+   //      cancelDeployment(stack.stackTagCompound, player, "Vehicle deployment cancelled (input released).");
+   //   }
+   //}
+
    @Override
    public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int timeLeft) {
-      if (stack.stackTagCompound != null && stack.stackTagCompound.hasKey("DeployStart")) {
-         cancelDeployment(stack.stackTagCompound, player, "Vehicle deployment cancelled (input released).");
+      int used = this.getMaxItemUseDuration(stack) - timeLeft;
+      if (used >= MCH_Config.placetimer.prmInt) {
+         // Successful placement
+         NBTTagCompound tag = stack.getTagCompound();
+         int x = tag.getInteger("TargetX");
+         int y = tag.getInteger("TargetY");
+         int z = tag.getInteger("TargetZ");
+         spawnAircraft(stack, world, player, x, y, z);
+         world.playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
+         clearDeployTags(tag);
       }
+      // Nothing to reset manually—Minecraft handles usage reset automatically
    }
 
    //@Override
