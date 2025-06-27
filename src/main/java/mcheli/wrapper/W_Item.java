@@ -10,10 +10,13 @@ package mcheli.wrapper;
 
 import mcheli.wrapper.W_MOD;
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.RegistryNamespaced;
+import net.minecraft.world.World;
 
-public class W_Item
+public abstract class W_Item
 extends Item {
     public W_Item(int par1) {
     }
@@ -48,5 +51,7 @@ extends Item {
     public static Item getItemFromBlock(Block block) {
         return Item.getItemFromBlock((Block)block);
     }
+
+    public abstract boolean canContinueUsing(ItemStack stack, World world, EntityLivingBase entity, int count);
 }
 

@@ -4,9 +4,6 @@ import java.util.List;
 import mcheli.MCH_Achievement;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_ItemAircraftDispenseBehavior;
 import mcheli.wrapper.W_EntityPlayer;
 import mcheli.wrapper.W_Item;
 import mcheli.wrapper.W_MovingObjectPosition;
@@ -15,9 +12,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.BlockSponge;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityMinecartEmpty;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -228,10 +225,17 @@ public abstract class MCH_ItemAircraft extends W_Item {
          }
       }
 
-      long deployStart = tag.getLong("DeployStart");
+      //long deployStart = tag.getLong("DeployStart");
       //never used above
       int timeHeld = this.getMaxItemUseDuration(stack) - count;
+      //the problem here is timeHeld is being incremented despite the player not holding the click for some fucking reason
       System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
+
+      if (timeHeld > MCH_Config.placetimer.prmInt * 2) {
+         clearDeployTags(tag);
+         player.stopUsingItem();
+         return;
+      }
 
       //check that we are still holding here
       if (!holdingClick) {
@@ -242,7 +246,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
          return;
       }
 
-      if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick ) {
+      if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick &&  ) {
          int targetX = tag.getInteger("TargetX");
          int targetY = tag.getInteger("TargetY");
          int targetZ = tag.getInteger("TargetZ");
@@ -292,6 +296,13 @@ public abstract class MCH_ItemAircraft extends W_Item {
          cancelDeployment(stack.stackTagCompound, player, "Vehicle deployment cancelled (input released).");
       }
    }
+
+   @Override
+   public boolean canContinueUsing(ItemStack stack, World world, EntityLivingBase entity, int count) {
+      return true;
+   }
+
+
 
 
    public MCH_EntityAircraft spawnAircraft(ItemStack itemStack, World world, EntityPlayer player, int x, int y, int z) {
