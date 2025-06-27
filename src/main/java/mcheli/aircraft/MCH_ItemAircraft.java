@@ -173,6 +173,19 @@ public abstract class MCH_ItemAircraft extends W_Item {
    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
 
       //if (player.worldObj.isRemote) return;
+      int dothing = 0;
+
+      //int used = this.getMaxItemUseDuration(stack) - timeLeft;
+
+      if (timeHeld == MCH_Config.placetimer.prmInt && player.worldObj.isRemote) {
+         //do ONCE
+         //do ON THE CLIENT
+         //dothing += 1;
+         //if (dothing == 1) { //idc if its not optimized it fucking works goddammit
+            player.addChatMessage(new ChatComponentText("Vehicle ready for deployment!"));
+            //wait I can just check that it equals instead of is greater than, nevermind jfc
+        // }
+      }
 
       NBTTagCompound tag = stack.getTagCompound();
       //if (tag == null || !tag.hasKey("StartCount")) return;
@@ -330,8 +343,12 @@ public abstract class MCH_ItemAircraft extends W_Item {
          int y = tag.getInteger("TargetY");
          int z = tag.getInteger("TargetZ");
          spawnAircraft(stack, world, player, x, y, z);
-         world.playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
+         W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
          clearDeployTags(tag);
+         if (world.isRemote) {
+            //System.out.println("[DEBUG] Player successfully placed vehicle.");
+            player.addChatMessage(new ChatComponentText("Vehicle deployed."));
+         }
       }
       // Nothing to reset manually—Minecraft handles usage reset automatically
    }
