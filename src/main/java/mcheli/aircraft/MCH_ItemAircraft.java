@@ -260,7 +260,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
          Material mat = block.getMaterial();
          if (currentX != targetX || currentY != targetY || currentZ != targetZ
-                 || (!mat.isSolid() || mat != Material.water)) {
+                 || (!mat.isSolid() && mat != Material.water)) {
             System.out.println("[DEBUG] Target changed, cancelling.");
             cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
             return;
