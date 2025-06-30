@@ -227,10 +227,17 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
       // Valid raytrace check
       MovingObjectPosition mop = getBlockIncludingWater(player, 5.0D);
-      Block block = player.worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
-      if (!(block.getMaterial().isSolid() || block.getMaterial() == Material.water)) {
-         System.out.println("[DEBUG] Raytrace failed or not a block, cancelling.");
+      if (mop == null) {
+         System.out.println("[DEBUG] No block targeted, cancelling.");
          cancelDeployment(tag, player, "Vehicle deployment cancelled (target lost).");
+         return;
+      }
+
+      Block block = player.worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+      if (!block.getMaterial().isSolid() && block.getMaterial() != Material.water) {
+         //apparently || is not the right operator here, it is AND //WTF???
+         System.out.println("[DEBUG] Target is not solid or water, cancelling.");
+         cancelDeployment(tag, player, "Vehicle deployment cancelled (invalid surface).");
          return;
       }
 
@@ -251,7 +258,9 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
          System.out.println("[DEBUG] Saved target: " + targetX + "," + targetY + "," + targetZ);
 
-         if (currentX != targetX || currentY != targetY || currentZ != targetZ) {
+         Material mat = block.getMaterial();
+         if (currentX != targetX || currentY != targetY || currentZ != targetZ
+                 || (!mat.isSolid() && mat != Material.water)) {
             System.out.println("[DEBUG] Target changed, cancelling.");
             cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
             return;
