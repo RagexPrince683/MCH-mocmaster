@@ -11,6 +11,7 @@ import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.BlockSponge;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityMinecartEmpty;
@@ -226,7 +227,8 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
       // Valid raytrace check
       MovingObjectPosition mop = getSolidBlockLookedAt(player, 5.0D);
-      if (mop == null || mop.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK) {
+      Block block = player.worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
+      if (!(block.getMaterial().isSolid() || block.getMaterial() == Material.water)) {
          System.out.println("[DEBUG] Raytrace failed or not a block, cancelling.");
          cancelDeployment(tag, player, "Vehicle deployment cancelled (target lost).");
          return;
