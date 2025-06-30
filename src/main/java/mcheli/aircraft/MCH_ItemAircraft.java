@@ -16,6 +16,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityMinecartEmpty;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -189,12 +190,6 @@ public abstract class MCH_ItemAircraft extends W_Item {
       }
 
       NBTTagCompound tag = stack.getTagCompound();
-      //if (tag == null || !tag.hasKey("StartCount")) return;
-
-      //int held = this.getMaxItemUseDuration(stack) - count;
-      //if (held >= MCH_Config.placetimer.prmInt) {
-      //   // spawn
-      //}
       //non spaghetti code logic above just need to figure out where and how to implement it
 
       if (stack.stackTagCompound == null || player.worldObj.isRemote) {
@@ -258,10 +253,16 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
          System.out.println("[DEBUG] Saved target: " + targetX + "," + targetY + "," + targetZ);
 
-         Material mat = block.getMaterial();
-         if (currentX != targetX || currentY != targetY || currentZ != targetZ
-                 || (!mat.isSolid() && mat != Material.water)) {
-            System.out.println("[DEBUG] Target changed, cancelling.");
+         //Material mat = block.getMaterial();
+         if (currentX != targetX || currentY != targetY || currentZ != targetZ && !block.getMaterial().isLiquid()) {
+            //get mop.isliquid here instead of checking the material
+            System.out.println("[DEBUG] Coordinates changed, cancelling.");
+            cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
+            return;
+         }
+
+         if (!block.getMaterial().isSolid() && block != Blocks.water && block != Blocks.flowing_water) {
+            System.out.println("[DEBUG] Block is neither solid nor water, cancelling.");
             cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
             return;
          }
@@ -277,13 +278,6 @@ public abstract class MCH_ItemAircraft extends W_Item {
       //the problem here is timeHeld is being incremented despite the player not holding the click for some fucking reason
       System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
 
-     // if (timeHeld > MCH_Config.placetimer.prmInt * 2) {
-     //    clearDeployTags(tag);
-     //    player.stopUsingItem();
-     //    return;
-     // }
-      //dont do that.
-
       //check that we are still holding here
       if (!holdingClick) {
          if (hasDeployStart) {
@@ -292,27 +286,6 @@ public abstract class MCH_ItemAircraft extends W_Item {
          }
          return;
       }
-
-      //if (timeHeld >= MCH_Config.placetimer.prmInt && holdingClick && ) {
-      //   int targetX = tag.getInteger("TargetX");
-      //   int targetY = tag.getInteger("TargetY");
-      //   int targetZ = tag.getInteger("TargetZ");
-//
-      //   System.out.println("[DEBUG] Deployment complete. Spawning vehicle at: " + targetX + "," + targetY + "," + targetZ);
-//
-      //   this.spawnAircraft(stack, player.worldObj, player, targetX, targetY, targetZ);
-      //   player.addChatMessage(new ChatComponentText("Vehicle deployed."));
-      //   W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
-      //   clearDeployTags(tag);
-      //   player.stopUsingItem();
-      //}
-      //else {
-      //   clearDeployTags(tag);
-      //   player.stopUsingItem();
-      //   cancelDeployment(stack.stackTagCompound, player, "Vehicle deployment cancelled (not enough time held).");
-      //   //player.addChatMessage(new ChatComponentText("Vehicle deployment cancelled (not enough time held)."));
-      //   return;
-      //}
    }
 
    private void cancelDeployment(NBTTagCompound tag, EntityPlayer player, String message) {
