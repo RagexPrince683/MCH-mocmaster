@@ -226,7 +226,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       }
 
       // Valid raytrace check
-      MovingObjectPosition mop = getSolidBlockLookedAt(player, 5.0D);
+      MovingObjectPosition mop = getBlockIncludingWater(player, 5.0D);
       Block block = player.worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
       if (!(block.getMaterial().isSolid() || block.getMaterial() == Material.water)) {
          System.out.println("[DEBUG] Raytrace failed or not a block, cancelling.");
@@ -321,11 +321,26 @@ public abstract class MCH_ItemAircraft extends W_Item {
       System.out.println("[DEBUG] Cleared deployment tags.");
    }
 
-   private MovingObjectPosition getSolidBlockLookedAt(EntityPlayer player, double distance) {
+   public MovingObjectPosition getBlockIncludingWater(EntityPlayer player, double range) {
       Vec3 eyePos = player.getPosition(1.0F).addVector(0, player.getEyeHeight(), 0);
-      Vec3 lookVec = player.getLook(1.0F);
-      Vec3 reachVec = eyePos.addVector(lookVec.xCoord * distance, lookVec.yCoord * distance, lookVec.zCoord * distance);
-      return player.worldObj.rayTraceBlocks(eyePos, reachVec);
+      Vec3 lookVec = player.getLookVec();
+      Vec3 targetPos = eyePos.addVector(lookVec.xCoord * range, lookVec.yCoord * range, lookVec.zCoord * range);
+
+      MovingObjectPosition mop = player.worldObj.rayTraceBlocks(eyePos, targetPos);
+
+      if (mop == null) {
+         // fallback: get block at position player is looking at ignoring collision
+         int checkX = (int)Math.floor(targetPos.xCoord);
+         int checkY = (int)Math.floor(targetPos.yCoord);
+         int checkZ = (int)Math.floor(targetPos.zCoord);
+
+         Block block = player.worldObj.getBlock(checkX, checkY, checkZ);
+         if (block.getMaterial() == Material.water || block.getMaterial().isSolid()) {
+            return new MovingObjectPosition(checkX, checkY, checkZ, 0, targetPos);
+         }
+      }
+
+      return mop;
    }
 
    //@Override
