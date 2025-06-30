@@ -254,15 +254,11 @@ public abstract class MCH_ItemAircraft extends W_Item {
          System.out.println("[DEBUG] Saved target: " + targetX + "," + targetY + "," + targetZ);
 
          //Material mat = block.getMaterial();
-         if (currentX != targetX || currentY != targetY || currentZ != targetZ && !block.getMaterial().isLiquid()) {
-            //get mop.isliquid here instead of checking the material
-            System.out.println("[DEBUG] Coordinates changed, cancelling.");
-            cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
-            return;
-         }
+         boolean coordsChanged = currentX != targetX || currentY != targetY || currentZ != targetZ;
+         boolean isLiquid = block.getMaterial().isLiquid();
 
-         if (!block.getMaterial().isSolid() && block != Blocks.water && block != Blocks.flowing_water) {
-            System.out.println("[DEBUG] Block is neither solid nor water, cancelling.");
+         if (coordsChanged && !isLiquid) {
+            System.out.println("[DEBUG] Coordinates changed (and not liquid), cancelling.");
             cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
             return;
          }
