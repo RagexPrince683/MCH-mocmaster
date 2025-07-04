@@ -61,6 +61,7 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
    private void onUpdateGuided() {
       double a;
       double r;
+      //as far as I can tell all this does is literally just target ground blocks for some reason
       if(!super.worldObj.isRemote && this.isInWater()) {
          if(super.acceleration < this.accelerationInWater) {
             super.acceleration += 0.1D;

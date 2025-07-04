@@ -59,6 +59,7 @@ public class MCH_WeaponTorpedo extends MCH_WeaponBase {
    protected boolean shotGuided(MCH_WeaponParam prm) {
       float yaw = prm.user.rotationYaw;
       float pitch = prm.user.rotationPitch;
+      //wtf is wrong with ts why doesn't it want to fire unless you're like looking at a block wtf
       Vec3 v = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -yaw, -pitch, -prm.rotRoll);
       double tX = v.xCoord;
       double tZ = v.zCoord;
@@ -77,7 +78,9 @@ public class MCH_WeaponTorpedo extends MCH_WeaponBase {
       Vec3 src = W_WorldFunc.getWorldVec3(super.worldObj, prm.user.posX, prm.user.posY, prm.user.posZ);
       Vec3 dst = W_WorldFunc.getWorldVec3(super.worldObj, prm.user.posX + tX, prm.user.posY + tY, prm.user.posZ + tZ);
       MovingObjectPosition m = W_WorldFunc.clip(super.worldObj, src, dst);
-      if(m != null && W_MovingObjectPosition.isHitTypeTile(m) && MCH_Lib.isBlockInWater(super.worldObj, m.blockX, m.blockY, m.blockZ)) {
+      //wont fire unless you're looking at a block which is fucking retarded, like why the fuck would I want a guided torpedo to not fire while not looking at a block wtf
+      //who's the retarded fucking crack head that wrote this shit
+      //if(m != null && W_MovingObjectPosition.isHitTypeTile(m) && MCH_Lib.isBlockInWater(super.worldObj, m.blockX, m.blockY, m.blockZ)) {
          if(!super.worldObj.isRemote) {
             double mx = (double)(-MathHelper.sin(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
             double mz = (double)(MathHelper.cos(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
@@ -101,8 +104,9 @@ public class MCH_WeaponTorpedo extends MCH_WeaponBase {
          }
 
          return true;
-      } else {
-         return false;
-      }
+      //}
+      //else {
+      //   return false;
+      //}
    }
 }

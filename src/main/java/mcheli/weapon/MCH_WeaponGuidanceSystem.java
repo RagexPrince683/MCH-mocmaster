@@ -218,7 +218,7 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
             if(user.ridingEntity instanceof MCH_EntityAircraft) {
                ac = (MCH_EntityAircraft)user.ridingEntity;
 
-               if (ac.isFreeLookMode() && this.canLockInAir) {
+               if (ac.isFreeLookMode() && this.canLockInAir && (ac instanceof MCP_EntityPlane)) {
                   canLockTarget = false;
                   //NO MORE BITCH SHIT
                }
