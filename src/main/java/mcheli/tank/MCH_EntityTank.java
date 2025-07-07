@@ -979,7 +979,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          // Calculate speed
          double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);
 
-         if (speed > 0.05D) {
+         if (speed > 0.18D) { //18mph = lethal
             Entity rider = this.getRiddenByEntity();
             float damage = (float)(speed * 15.0D);
 
@@ -1047,8 +1047,8 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                      e.setDead();
                   } else {
                      // Apply strong pushback for other entities
-                     e.motionX += super.motionX * 1.5D;
-                     e.motionZ += super.motionZ * 1.5D;
+                     e.motionX += super.motionX * 3.5D;
+                     e.motionZ += super.motionZ * 3.5D;
                   }
 
                   // Damage self based on collision with large entities
@@ -1057,7 +1057,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                              ? DamageSource.causeMobDamage((EntityLivingBase) e)
                              : DamageSource.generic;
 
-                     this.attackEntityFrom(ds, damage / 3.0F);
+                     this.attackEntityFrom(ds, damage / 10.0F);
                   }
 
                   // Log the collision

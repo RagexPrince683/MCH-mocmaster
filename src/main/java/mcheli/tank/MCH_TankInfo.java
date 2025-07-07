@@ -46,6 +46,7 @@ public class MCH_TankInfo extends MCH_AircraftInfo {
    public float getMaxSpeed() {
       return 4.0F;
       //does not affect tanks for some reason?
+      //seems to make rot speed faster in third person, absolutely nothing else changes (1.15 max speed cap)
    }
 
    public int getDefaultMaxZoom() {

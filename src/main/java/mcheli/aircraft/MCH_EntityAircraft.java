@@ -273,9 +273,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.cs_heliAutoThrottleDown = true;
       this.cs_planeAutoThrottleDown = false;
       this.cs_shipAutoThrottleDown = true;
-
       MCH_Config var10001 = MCH_MOD.config;
       super.renderDistanceWeight = MCH_Config.RenderDistanceWeight.prmDouble;
+      //todo test change this
       this.setCommonUniqueId("");
       this.seatSearchCount = 0;
       this.seatsInfo = null;
