@@ -51,15 +51,18 @@ public class MCH_HBMUtil {
 
     public static void ExplosionChaos_spawnChlorine(World world, double posX, double posY, double posZ, float chemYield) {
         try {
+            System.out.println("spawn chlorine method");
             if (explosionChaosClass != null) {
                 Method spawnChlorineMethod = explosionChaosClass.getMethod("spawnChlorine", World.class, double.class, double.class, double.class, int.class, double.class, int.class);
                 spawnChlorineMethod.invoke(null, world, posX, posY, posZ, chemYield, 1.25, 0);
+                System.out.println("Chlorine effect spawned successfully");
                 //ExplosionChaos.spawnChlorine(worldObj, posX, posY, posZ, 50, 1.5, 0);
                 //annnnnd everything seems to check out except the fact that it isn't fucking working, Great!
                 //oh nevermind a float was declared an int, amazing.
                 //you'll never guess what did NOT fix it, changing that! YAY
             }
         } catch (Exception e) {
+            System.out.println("Failed to spawn chlorine effect: " + e.getMessage());
             e.printStackTrace();
         }
     }
