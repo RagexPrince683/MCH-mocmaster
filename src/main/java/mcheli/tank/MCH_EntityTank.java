@@ -975,6 +975,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    }
 
    private void collisionEntity(AxisAlignedBB bb) {
+      //this is collision for this entity, not other entities
       if (bb != null) {
          // Calculate speed
          double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);

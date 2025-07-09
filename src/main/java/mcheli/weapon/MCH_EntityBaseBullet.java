@@ -1391,7 +1391,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         }
 
         if(this.getInfo().chemYield > 0) {
-            MCH_HBMUtil.ExplosionChaos_spawnClorine(super.worldObj, posX, posY + 0.5, posZ, this.getInfo().chemYield);
+            MCH_HBMUtil.ExplosionChaos_spawnChlorine(super.worldObj, posX, posY + 0.5, posZ, this.getInfo().chemYield);
         }
 
         if (result != null && result.hitEntity) {

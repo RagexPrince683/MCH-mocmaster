@@ -18,13 +18,13 @@ import java.util.List;
 
 public class MCH_APS {
 
-    //冷却时长 0代表冷却结束
+    // Duration of cooldown — 0 means cooldown is finished
     public int tick;
-    //生效时长 0代表使用结束
+    // Duration of active use — 0 means the usage has ended
     public int useTick;
-    //APS生效时间
+    // Total active time the APS (Active Protection System) is effective
     public int useTime;
-    //APS等待时间
+    // Waiting time before APS can activate again
     public int waitTime;
 
     public World worldObj;

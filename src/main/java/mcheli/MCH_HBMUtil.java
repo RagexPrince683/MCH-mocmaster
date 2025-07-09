@@ -20,6 +20,7 @@ public class MCH_HBMUtil {
             explosionChaosClass = Class.forName("com.hbm.explosion.ExplosionChaos");
             explosionCreatorClass = Class.forName("com.hbm.particle.helper.ExplosionCreator");
             explosionNT = Class.forName("com.hbm.explosion.ExplosionNT");
+            //YAYYYYYYYYY I LOVE IT WHEN CHLORINE SHIT FUCK STOPS WORKING!!!
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -48,11 +49,14 @@ public class MCH_HBMUtil {
         }
     }
 
-    public static void ExplosionChaos_spawnClorine(World world, double posX, double posY, double posZ, float chemYield) {
+    public static void ExplosionChaos_spawnChlorine(World world, double posX, double posY, double posZ, float chemYield) {
         try {
             if (explosionChaosClass != null) {
-                Method spawnChlorineMethod = explosionChaosClass.getMethod("spawnChlorine", World.class, double.class, double.class, double.class, float.class, double.class, int.class);
+                Method spawnChlorineMethod = explosionChaosClass.getMethod("spawnChlorine", World.class, double.class, double.class, double.class, int.class, double.class, int.class);
                 spawnChlorineMethod.invoke(null, world, posX, posY, posZ, chemYield, 1.25, 0);
+                //ExplosionChaos.spawnChlorine(worldObj, posX, posY, posZ, 50, 1.5, 0);
+                //annnnnd everything seems to check out except the fact that it isn't fucking working, Great!
+                //oh nevermind a float was declared an int, amazing.
             }
         } catch (Exception e) {
             e.printStackTrace();
