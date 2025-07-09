@@ -57,6 +57,7 @@ public class MCH_HBMUtil {
                 //ExplosionChaos.spawnChlorine(worldObj, posX, posY, posZ, 50, 1.5, 0);
                 //annnnnd everything seems to check out except the fact that it isn't fucking working, Great!
                 //oh nevermind a float was declared an int, amazing.
+                //you'll never guess what did NOT fix it, changing that! YAY
             }
         } catch (Exception e) {
             e.printStackTrace();

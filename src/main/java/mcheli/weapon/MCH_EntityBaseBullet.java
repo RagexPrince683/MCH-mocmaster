@@ -80,6 +80,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public boolean gravitydown;
     public boolean bigdelay;
     private boolean bigcheck = false;
+    public int chemYield = 0;
 
     //public int delayrangeloaderint = delayrangeloader;
 
@@ -496,6 +497,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         this.explosionPower = w.explosionPower;
         this.explosionPowerInWater = w.explosionPowerInWater;
         this.setPower(w.power);
+        this.chemYield = w.chemYield;
         this.piercing = w.piercing;
         this.shootingAircraft = entity;
         this.shootingEntity = user;
@@ -503,6 +505,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     public void setParameterFromWeapon(MCH_EntityBaseBullet b, Entity entity, Entity user) {
         this.explosionPower = b.explosionPower;
+        this.chemYield = b.chemYield;
         this.explosionPowerInWater = b.explosionPowerInWater;
         this.setPower(b.getPower());
         this.piercing = b.piercing;
