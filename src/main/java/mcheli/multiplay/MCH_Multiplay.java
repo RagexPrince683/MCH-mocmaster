@@ -225,7 +225,7 @@ public class MCH_Multiplay {
 
    }
 
-   public static boolean spotEntity(EntityPlayer player, MCH_EntityAircraft ac, double posX, double posY, double posZ, int targetFilter, float spotLength, int markTime, float angle) {
+   public static boolean spotEntity(EntityLivingBase player, MCH_EntityAircraft ac, double posX, double posY, double posZ, int targetFilter, float spotLength, int markTime, float angle) {
       boolean ret = false;
       if(!player.worldObj.isRemote) {
          float acYaw = 0.0F;
@@ -282,7 +282,7 @@ public class MCH_Multiplay {
       return ret;
    }
 
-   public static void sendSpotedEntityListToSameTeam(EntityPlayer player, int count, int[] entityId) {
+   public static void sendSpotedEntityListToSameTeam(EntityLivingBase player, int count, int[] entityId) {
       ServerConfigurationManager svCnf = MinecraftServer.getServer().getConfigurationManager();
       Iterator i$ = svCnf.playerEntityList.iterator();
 

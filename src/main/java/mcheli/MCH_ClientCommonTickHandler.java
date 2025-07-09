@@ -15,6 +15,7 @@ import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.helicopter.MCH_GuiHeli;
 import mcheli.lweapon.MCH_ClientLightWeaponTickHandler;
 import mcheli.lweapon.MCH_GuiLightWeapon;
+import mcheli.mob.MCH_GuiSpawnGunner;
 import mcheli.multiplay.MCH_GuiScoreboard;
 import mcheli.multiplay.MCH_GuiTargetMarker;
 import mcheli.multiplay.MCH_MultiplayClient;
@@ -65,6 +66,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    public MCH_Gui gui_Vehicle;
    public MCH_Gui gui_LWeapon;
    public MCH_Gui gui_Wrench;
+   public MCH_Gui gui_SwnGnr;
    public MCH_Gui gui_EMarker;
    public MCH_Gui gui_RngFndr;
    public MCH_Gui gui_Title;
@@ -105,12 +107,12 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       this.gui_Vehicle = new MCH_GuiVehicle(minecraft);
       this.gui_LWeapon = new MCH_GuiLightWeapon(minecraft);
       this.gui_Wrench = new MCH_GuiWrench(minecraft);
+      this.gui_SwnGnr = new MCH_GuiSpawnGunner(minecraft);
       this.gui_RngFndr = new MCH_GuiRangeFinder(minecraft);
       this.gui_EMarker = new MCH_GuiTargetMarker(minecraft);
       this.gui_Title = new MCH_GuiTitle(minecraft);
       this.guis = new MCH_Gui[]{this.gui_RngFndr, this.gui_LWeapon, this.gui_Heli, this.gui_Plane, this.gui_Ship, this.gui_Tank, this.gui_GLTD, this.gui_Vehicle};
-      this.guiTicks = new MCH_Gui[]{this.gui_Common, this.gui_Heli, this.gui_Plane, this.gui_Ship, this.gui_Tank, this.gui_GLTD, this.gui_Vehicle, this.gui_LWeapon, this.gui_Wrench, this.gui_RngFndr, this.gui_EMarker, this.gui_Title};
-      this.ticks = new MCH_ClientTickHandlerBase[]{new MCH_ClientHeliTickHandler(minecraft, config), new MCP_ClientPlaneTickHandler(minecraft, config), new MCH_ClientShipTickHandler(minecraft, config), new MCH_ClientTankTickHandler(minecraft, config), new MCH_ClientGLTDTickHandler(minecraft, config), new MCH_ClientVehicleTickHandler(minecraft, config), new MCH_ClientLightWeaponTickHandler(minecraft, config), new MCH_ClientSeatTickHandler(minecraft, config), new MCH_ClientToolTickHandler(minecraft, config)};
+      this.guiTicks = new MCH_Gui[]{this.gui_Common, this.gui_Heli, this.gui_Plane, this.gui_Tank, this.gui_GLTD, this.gui_Vehicle, this.gui_LWeapon, this.gui_Wrench, this.gui_SwnGnr, this.gui_RngFndr, this.gui_EMarker, this.gui_Title};      this.ticks = new MCH_ClientTickHandlerBase[]{new MCH_ClientHeliTickHandler(minecraft, config), new MCP_ClientPlaneTickHandler(minecraft, config), new MCH_ClientShipTickHandler(minecraft, config), new MCH_ClientTankTickHandler(minecraft, config), new MCH_ClientGLTDTickHandler(minecraft, config), new MCH_ClientVehicleTickHandler(minecraft, config), new MCH_ClientLightWeaponTickHandler(minecraft, config), new MCH_ClientSeatTickHandler(minecraft, config), new MCH_ClientToolTickHandler(minecraft, config)};
       this.updatekeybind(config);
    }
 
@@ -589,6 +591,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          }
          drawGui((MCH_Gui)this.gui_Common, partialTicks);
          drawGui(this.gui_Wrench, partialTicks);
+         drawGui(this.gui_SwnGnr, partialTicks);
          drawGui(this.gui_EMarker, partialTicks);
          if (isDrawScoreboard)
             MCH_GuiScoreboard.drawList(this.mc, this.mc.fontRenderer, false);

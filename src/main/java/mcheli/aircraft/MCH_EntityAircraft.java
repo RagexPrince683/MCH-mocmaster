@@ -4927,8 +4927,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       for(int i = 0; i < 1 + this.getSeatNum(); ++i) {
          Entity entity = this.getEntityBySeatId(i);
          if(entity instanceof EntityPlayer || entity instanceof MCH_EntityGunner) {
-            EntityPlayer riddenPlayer = (EntityPlayer)entity;
-            if(riddenPlayer.getTeam() != null && !riddenPlayer.isOnSameTeam(player)) {
+            EntityLivingBase riddenPlayer = (EntityLivingBase)entity;
+            if(riddenPlayer.getTeam() != null && !riddenPlayer.isOnSameTeam((EntityLivingBase)player)) {
                return false;
             }
          }
@@ -5493,7 +5493,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public int getCurrentWeaponID(Entity entity) {
-      /* 4881 */     if (!(entity instanceof EntityPlayer) ) { //&& !(entity instanceof mcheli.mob.MCH_EntityGunner)
+      /* 4881 */     if (!(entity instanceof EntityPlayer ) && !(entity instanceof MCH_EntityGunner) ) { //
          /* 4882 */       return -1;
          /*      */     }
       /* 4884 */     int id = getSeatIdByEntity(entity);
@@ -5522,7 +5522,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          /* 4908 */       if (w != null) {
             /* 4909 */         MCH_WeaponInfo wi = getWeaponInfoById(id);
             /* 4910 */         int wpsid = getWeaponSeatID(wi, w);
-            /* 4911 */         if (wpsid < getSeatNum() + 1 + 1 && (wpsid == sid || (sid == 0 && w.canUsePilot && !(getEntityBySeatId(wpsid) instanceof EntityPlayer) ))) { //&& !(getEntityBySeatId(wpsid) instanceof mcheli.mob.MCH_EntityGunner)
+            /* 4911 */         if (wpsid < getSeatNum() + 1 + 1 && (wpsid == sid || (sid == 0 && w.canUsePilot && !(getEntityBySeatId(wpsid) instanceof EntityPlayer) && !(getEntityBySeatId(wpsid) instanceof MCH_EntityGunner)))) { //
                /*      */           break;
                /*      */         }
             /*      */       }
@@ -5672,14 +5672,14 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   MCH_AircraftInfo.Weapon var17 = this.getAcInfo().getWeaponById(wid);
                   if(var17 != null && !this.isDestroyed()) {
                      Entity var19 = this.getEntityBySeatId(this.getWeaponSeatID(this.getWeaponInfoById(wid), var17));
-                     if(var17.canUsePilot && !(var19 instanceof EntityPlayer) ) { //&& !(entity instanceof mcheli.mob.MCH_EntityGunner)
+                     if(var17.canUsePilot && !(var19 instanceof EntityPlayer) && !(var19 instanceof MCH_EntityGunner) ) { //
                         var19 = this.getEntityBySeatId(0);
                      }
 
 
 
 
-                     if(var19 instanceof EntityPlayer) {
+                     if(var19 instanceof EntityPlayer || var19 instanceof MCH_EntityGunner) {
                         float var22;
                         if((int)var17.minYaw != 0 || (int)var17.maxYaw != 0) {
                            var22 = var17.turret?MathHelper.wrapAngleTo180_float(this.getLastRiderYaw()) - yaw:0.0F;
@@ -5752,11 +5752,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   MCH_AircraftInfo.Weapon wi = this.getAcInfo().getWeaponById(wid);
                   if(wi != null) {
                      Entity entity = this.getEntityBySeatId(this.getWeaponSeatID(this.getWeaponInfoById(wid), wi));
-                     if (wi.canUsePilot && !(entity instanceof EntityPlayer) ) { //&& !(entity instanceof mcheli.mob.MCH_EntityGunner)
+                     if (wi.canUsePilot && !(entity instanceof EntityPlayer) && !(entity instanceof mcheli.mob.MCH_EntityGunner)) { //
                         /* 5125 */             entity = getEntityBySeatId(0);
                         /*      */           }
 
-                     if(entity instanceof EntityPlayer) {
+                     if(entity instanceof EntityPlayer || entity instanceof MCH_EntityGunner) {
                         float ep;
                         if((int)wi.minYaw != 0 || (int)wi.maxYaw != 0) {
                            ep = wi.turret?MathHelper.wrapAngleTo180_float(this.getLastRiderYaw()) - yaw:0.0F;

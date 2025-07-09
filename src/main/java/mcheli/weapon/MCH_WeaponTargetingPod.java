@@ -5,6 +5,7 @@ import mcheli.multiplay.MCH_Multiplay;
 import mcheli.weapon.MCH_WeaponBase;
 import mcheli.weapon.MCH_WeaponInfo;
 import mcheli.weapon.MCH_WeaponParam;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -29,7 +30,7 @@ public class MCH_WeaponTargetingPod extends MCH_WeaponBase {
             } else {
                this.playSound(prm.user, "ng");
             }
-         } else if(MCH_Multiplay.spotEntity((EntityPlayer)prm.user, (MCH_EntityAircraft)prm.entity, prm.posX, prm.posY, prm.posZ, info.target, info.length, info.markTime, info.angle)) {
+         } else if(MCH_Multiplay.spotEntity((EntityLivingBase)prm.user, (MCH_EntityAircraft)prm.entity, prm.posX, prm.posY, prm.posZ, info.target, info.length, info.markTime, info.angle)) {
             this.playSound(prm.entity);
          } else {
             this.playSound(prm.entity, "ng");

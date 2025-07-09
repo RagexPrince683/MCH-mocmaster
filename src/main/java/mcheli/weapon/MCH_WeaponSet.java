@@ -2,6 +2,7 @@ package mcheli.weapon;
 
 import java.util.Random;
 import mcheli.MCH_Lib;
+import mcheli.mob.MCH_EntityGunner;
 import mcheli.vehicle.MCH_EntityVehicle;
 import mcheli.weapon.MCH_EntityCartridge;
 import mcheli.weapon.MCH_WeaponBase;
@@ -415,6 +416,8 @@ public class MCH_WeaponSet {
 
                   this.reload();
                   prm.reload = true;
+                  if (prm.user instanceof MCH_EntityGunner)
+                     this.countWait += ((this.countWait >= 0) ? 1 : -1) * crtWpn.getReloadCount();
                }
 
                prm.result = true;

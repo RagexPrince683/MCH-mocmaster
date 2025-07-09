@@ -214,6 +214,9 @@ public class MCH_EntitySeat extends W_Entity {
 
    public boolean interactFirst(EntityPlayer player) {
       if (getParent() != null && !getParent().isDestroyed()) {
+         ItemStack itemStack = player.getCurrentEquippedItem();
+         if (itemStack != null && itemStack.getItem() instanceof mcheli.mob.MCH_ItemSpawnGunner)
+            return getParent().interactFirst(player);
          if (!getParent().checkTeam(player)) return false;
          if (this.riddenByEntity != null || player.ridingEntity != null) return false;
          if (!canRideMob(player)) return false;
