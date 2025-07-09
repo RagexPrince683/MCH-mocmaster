@@ -241,20 +241,25 @@ public class MCH_ConfigGui extends W_GuiContainer {
       var10003 = new MCH_GuiListItemKeyBind(221, 321, x1, "[MP]Score board", MCH_Config.KeyScoreboard);
       var10009 = MCH_MOD.config;
       var10000[21] = var10003;
+      //so this won't fucking show up for some reason
+      //oh! it's because this is INFINITE BULLSHIT SPAGHETTI HELL AND YOU HAVE TO TYPE 3 9 0 AND THE BIT NUMBER
+      //BEFORE EVERY FUCKING KEY CODE LIKE THIS SHIT IS STILL RUNNING TEMPLE FUCKING OS ON A 1999 MACINTOSH
+      //NO I AM NOT HAVING FUN LOOKING AT THIS BULLSHIT GOD FUCKING DAMMIT
       var10003 = new MCH_GuiListItemKeyBind(222, 322, x1, "[MP][OP]Multiplay manager", MCH_Config.KeyMultiplayManager);
       var10009 = MCH_MOD.config;
+      var10000[22] = var10003;
       var10003 = new MCH_GuiListItemKeyBind(223, 323, x1, "Eject Seat Heli", MCH_Config.KeyEjectHeli);
       var10009 = MCH_MOD.config;
-      var10000[22] = var10003;
+      var10000[23] = var10003;
       var10003 = new MCH_GuiListItemKeyBind(224, 324, x1, "Chaff", MCH_Config.KeyChaff);
       var10009 = MCH_MOD.config;
-      var10000[23] = var10003;
+      var10000[24] = var10003;
       var10003 = new MCH_GuiListItemKeyBind(225, 325, x1, "Maintenance", MCH_Config.KeyMaintenance);
       var10009 = MCH_MOD.config;
-      var10000[24] = var10003;
+      var10000[25] = var10003;
       var10003 = new MCH_GuiListItemKeyBind(226, 326, x1, "APS", MCH_Config.KeyAPS);
       var10009 = MCH_MOD.config;
-      var10000[25] = var10003;
+      var10000[26] = var10003;
       //var10003 = new MCH_GuiListItemKeyBind(227, 327, x1, "Use Weapon Vehicle", MCH_Config.KeyUseWeapon);
       //var10009 = MCH_MOD.config;
       //var10000[26] = var10003;
@@ -265,6 +270,8 @@ public class MCH_ConfigGui extends W_GuiContainer {
       //var10009 = MCH_MOD.config;
       //var10000[28] = var10003;
       //so somehow this crashed the fucking game
+
+      //it starts in 0 and ends in 0. Hmm I wonder if I could get the retarded attack key shit to work now
 
 
       MCH_GuiListItemKeyBind[] listKeyBindItems = var10000;
@@ -731,7 +738,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
             this.drawString("< Development >", 170, 10, 16777215);
             this.drawString("Single player only!", 10, 30, 16711680);
             if(this.buttonReloadAircraftInfo != null && this.buttonReloadAircraftInfo.isOnMouseOver()) {
-               this.drawString("The following items are not reload.", 170, 30, 16777215);
+               this.drawString("The following things will not be reloaded until restart.", 170, 30, 16777215);
                String[] var14 = MCH_AircraftInfo.getCannotReloadItem();
                var12 = 10;
                String[] arr$ = var14;

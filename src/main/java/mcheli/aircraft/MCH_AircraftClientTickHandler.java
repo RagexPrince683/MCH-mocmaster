@@ -95,6 +95,7 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
       this.KeyDownFromRack = new MCH_Key(MCH_Config.KeyDownFromRack.prmInt);
       this.KeyBrake = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
       this.KeyCurrentWeaponLock = new MCH_Key(MCH_Config.KeyCurrentWeaponLock.prmInt);
+      //todo here
       this.KeyChaff = new MCH_Key(MCH_Config.KeyChaff.prmInt);
       this.KeyMaintenance = new MCH_Key(MCH_Config.KeyMaintenance.prmInt);
       this.KeyAPS = new MCH_Key(MCH_Config.KeyAPS.prmInt);

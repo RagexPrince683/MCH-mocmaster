@@ -162,7 +162,8 @@ public class W_Reflection {
 
 	public static void setBoundingBox(Entity entity, AxisAlignedBB bb) {
 		try {
-			ObfuscationReflectionHelper.setPrivateValue(Entity.class, entity, bb, new String[]{"boundingBox", "boundingBox"});
+			//causes things to be collidable and hurtable like by say a projectile, IDK why nukesteve changed this. for what reason I can only guess
+			ObfuscationReflectionHelper.setPrivateValue(Entity.class, entity, bb, new String[]{"field_70121_D", "boundingBox"});
 		} catch (Exception var3) {
 			var3.printStackTrace();
 		}
