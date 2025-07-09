@@ -274,6 +274,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       //it starts in 0 and ends in 0. Hmm I wonder if I could get the retarded attack key shit to work now
       //NOOOOOOOOOOOOOOOOPE FUCK YOU THAT'S WRONG GET FUCKED RETARD!!!!!!!!!!!!!!!!!!
       //HAHAAAAAAAAAAAA THE FUCKING STANDARD IS WRONG!!!
+      //schizo forgets computers recognize the number 0 as 1
 
 
       MCH_GuiListItemKeyBind[] listKeyBindItems = var10000;

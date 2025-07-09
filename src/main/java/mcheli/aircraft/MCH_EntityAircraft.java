@@ -5266,9 +5266,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.currentWeaponID[sid] = id;
       MCH_WeaponSet ws = getCurrentWeapon(entity);
       ws.onSwitchWeapon(this.worldObj.isRemote, isInfinityAmmo(entity));
-      if(ws.getCurrentWeapon().worldObj.isRemote) {
-         W_McClient.MOD_playSoundFX(ws.getInfo().weaponSwitchSound, 3F, 1.0F);
-      }
+      //if(ws.getCurrentWeapon().worldObj.isRemote) {
+      //   W_McClient.MOD_playSoundFX(ws.getInfo().weaponSwitchSound, 3F, 1.0F);
+      //}
+      //we dont do that here
       if (!this.worldObj.isRemote)
          MCH_PacketNotifyWeaponID.send((Entity)this, sid, id, ws.getAmmoNum(), ws.getRestAllAmmoNum());
    }

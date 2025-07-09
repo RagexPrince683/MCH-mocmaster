@@ -86,7 +86,7 @@ public class MCH_MissileDetector {
     }
 
     public void destroyMissile() {
-        List list = this.world.getEntitiesWithinAABB(MCH_EntityBaseBullet.class, this.ac.boundingBox.expand(150.0D, 150.0D, 150.0D));
+        List list = this.world.getEntitiesWithinAABB(MCH_EntityBaseBullet.class, this.ac.boundingBox.expand(300.0D, 300.0D, 300.0D));
         if (list == null) {
             return;
         }

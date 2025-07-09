@@ -159,6 +159,7 @@ public class MCH_MultiplayPacketHandler {
             }
 
             if(pc.imageDataIndex + pc.imageDataSize >= pc.imageDataTotalSize) {
+               //save screenshot function
                DataOutputStream dos = null;
                String dt = dateFormat.format(new Date()).toString();
                File file = new File("screenshots_op");

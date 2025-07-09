@@ -47,6 +47,7 @@ public class MCH_MultiplayClient {
    }
 
    public static void sendScreenShot(int displayWidth, int displayHeight, Framebuffer framebufferMc) {
+      //you WILL give me your screenshots and you will LIKE IT
       try {
          if(OpenGlHelper.isFramebufferEnabled()) {
             displayWidth = framebufferMc.framebufferTextureWidth;
