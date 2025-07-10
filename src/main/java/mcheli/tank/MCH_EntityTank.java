@@ -8,13 +8,7 @@ import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.MCH_Math;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_BoundingBox;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_EntityHitBox;
-import mcheli.aircraft.MCH_EntitySeat;
-import mcheli.aircraft.MCH_PacketStatusRequest;
-import mcheli.aircraft.MCH_Parts;
+import mcheli.aircraft.*;
 import mcheli.chain.MCH_EntityChain;
 import mcheli.flare.MCH_EntityChaff;
 import mcheli.flare.MCH_EntityFlare;
@@ -268,6 +262,15 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    }
 
    public void moveEntity(double parX, double parY, double parZ) {
+
+      // Check for slowing blocks under the tank, and slow the tank
+      Block blockUnder = MCH_Lib.getBlockY(this, 3, -2, false);
+      if (BlockUtils.isSlowingBlock(blockUnder, super.worldObj, (int)super.posX, (int)super.posY, (int)super.posZ, this)) {
+         // Apply 20% speed reduction for slowing blocks
+         parX *= 0.8; // Reduce X movement by 20%
+         parZ *= 0.8; // Reduce Z movement by 20%
+      }
+
       super.worldObj.theProfiler.startSection("move");
       super.ySize *= 0.4F;
       double nowPosX = super.posX;

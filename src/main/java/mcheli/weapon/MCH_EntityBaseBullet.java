@@ -10,8 +10,14 @@ import mcheli.aircraft.MCH_EntityHitBox;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_PacketNotifyHitBullet;
 import mcheli.chain.MCH_EntityChain;
+import mcheli.helicopter.MCH_EntityHeli;
+import mcheli.mob.MCH_EntityGunner;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
+import mcheli.plane.MCP_EntityPlane;
+import mcheli.ship.MCH_EntityShip;
+import mcheli.uav.MCH_EntityUavStation;
+import mcheli.vehicle.MCH_EntityVehicle;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_EntityPlayer;
 import mcheli.wrapper.W_MovingObjectPosition;
@@ -1185,7 +1191,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         }
         onImpactEntity(hit.entityHit, damageFactor);
 
-        resetEntityMotion(hit.entityHit);
+        //resetEntityMotion(hit.entityHit);
+        MCH_EntityUtils.resetMotionIfNotMCHVehicle(hit.entityHit);
     }
 
     private void handlePiercingHit(MovingObjectPosition hit, float explosionPower, float waterExplosionPower, float damageFactor) {
@@ -1274,15 +1281,17 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     private boolean shouldHandleTileHit(MovingObjectPosition hit) {
         return getInfo() != null && (getInfo().explosion == 0 || getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(hit);
     }
-    private void resetEntityMotion(Entity entity) {
-        if (entity instanceof MCH_EntityAircraft || entity instanceof MCH_EntitySeat) {
-            //hopefully fixes the issue of vehicles (mainly flying 'aircraft') dropping like flies after being impacted
-        } else {
-            entity.motionX = 0;
-            entity.motionY = 0;
-            entity.motionZ = 0;
-        }
-    }
+
+    //private void resetEntityMotion(Entity entity) {
+    //    if (entity instanceof MCH_EntityAircraft || entity instanceof MCH_EntitySeat || entity instanceof MCH_EntityVehicle || entity instanceof MCH_EntityShip || entity instanceof MCH_EntityHitBox || entity instanceof MCH_EntityBaseBullet || entity instanceof MCH_EntityGunner || entity instanceof MCH_DummyEntityPlayer || entity instanceof MCH_EntityHeli || entity instanceof MCP_EntityPlane || entity instanceof MCH_EntityUavStation) {
+    //        //hopefully fixes the issue of vehicles (mainly flying 'aircraft') dropping like flies after being impacted
+    //        //covers literally everything except tanks I can't think of a better way to do this.
+    //    } else {
+    //        entity.motionX = 0;
+    //        entity.motionY = 0;
+    //        entity.motionZ = 0;
+    //    }
+    //}
 
 
     private void handleTileHit(MovingObjectPosition hit) {

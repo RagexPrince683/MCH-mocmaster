@@ -10,6 +10,7 @@ import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_SeatInfo;
 import mcheli.weapon.*;
 import mcheli.wrapper.W_WorldFunc;
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.IMob;
@@ -19,11 +20,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.*;
 import net.minecraft.world.World;
 
 public class MCH_EntityGunner extends EntityLivingBase {
@@ -109,7 +106,7 @@ public class MCH_EntityGunner extends EntityLivingBase {
             player.addChatMessage((IChatComponent)new ChatComponentText("Creative mode only."));
             return false;
         }
-        if (getTeam() == null || isOnSameTeam((EntityLivingBase)player)) {
+        if ( isOnSameTeam((EntityLivingBase)player)) { //removed getTeam() == null ||
             removeFromAircraft(player);
             return true;
         }
@@ -149,6 +146,7 @@ public class MCH_EntityGunner extends EntityLivingBase {
             } else if (this.ridingEntity == null || this.ticksExisted > 100) {
                 setDead();
             }
+            //todo remember target here
             if (this.targetEntity == null) {
                 if (this.idleCount == 0) {
                     this.idleCount = (3 + this.rand.nextInt(5)) * 20;
@@ -178,6 +176,33 @@ public class MCH_EntityGunner extends EntityLivingBase {
             ret = gs.canLockEntity((Entity) entity);
         }
         return ret;
+    }
+
+    private boolean canEntityBeSeenOrBehindBreakableBlocks(Entity entity) {
+        // Check if the entity can be seen directly
+        if (canEntityBeSeen(entity)) {
+            // If the entity is visible and not a friendly, return true
+            if (!isOnSameTeam((EntityLivingBase) entity)) {
+                return true;
+            }
+        }
+
+        // Perform a ray trace to check for obstructions
+        Vec3 start = Vec3.createVectorHelper(this.posX, this.posY + this.getEyeHeight(), this.posZ);
+        Vec3 end = Vec3.createVectorHelper(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
+        MovingObjectPosition rayTraceResult = this.worldObj.rayTraceBlocks(start, end);
+
+        // If there is an obstruction, check if it is a breakable block
+        if (rayTraceResult != null && rayTraceResult.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+            Block block = this.worldObj.getBlock(rayTraceResult.blockX, rayTraceResult.blockY, rayTraceResult.blockZ);
+            List<Block> breakableBlocks = MCH_Config.getBreakableBlockListFromType(MCH_Config.BulletBreakableBlock.prmInt);
+
+            // Return true if the block is in the list of breakable blocks
+            return breakableBlocks.contains(block);
+        }
+
+        // Return false if the entity is not visible and no breakable block is obstructing
+        return false;
     }
 
     public void shotTarget(MCH_EntityAircraft ac) {
@@ -210,7 +235,10 @@ public class MCH_EntityGunner extends EntityLivingBase {
                 EntityLivingBase entity = list.get(i);
                 if (canAttackEntity(entity, ac, ws))
                     if (checkPitch(entity, ac, pos))
-                        if ((nextTarget == null || getDistanceToEntity((Entity)entity) < getDistanceToEntity((Entity)nextTarget)) && canEntityBeSeen((Entity)entity))
+                        if ((nextTarget == null || getDistanceToEntity((Entity)entity) < getDistanceToEntity((Entity)nextTarget)) && (canEntityBeSeenOrBehindBreakableBlocks((Entity)entity) ))
+                            //todo here is where we want to check if we are accidentally flagging friendlies, check bullet breakable blocks too
+                            //|| entity is behind MCH_Config.bulletBreakableBlocks
+                            //replaced canEntityBeSeen with canEntityBeSeenOrBehindBreakableBlocks
                             if (isInAttackable(entity, ac, ws, pos)) {
                                 nextTarget = entity;
                                 this.switchTargetCount = 60;

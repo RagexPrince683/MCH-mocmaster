@@ -37,6 +37,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.potion.Potion;
@@ -1086,17 +1087,17 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                      //add wheel damage
 
-                     if(this.getWheelDamageTaken() >= this.getMaxWheelDamage()) {
-                        setCurrentThrottle(0);
-                        throttleUp = false;
-                        throttleBack = 0;
-
-                        //this.getWheelDamageTaken() += (int)damage;
-                        //todo add a slow repairing effect, togglable via config to be only after wrench repair
-
-                        //&& this.attackedboundingbox is a wheel boundingbox
-                        //todo get a way to detect if the wheel boundingbox was impacted, we go from there.
-                     }
+                     //if(this.getWheelDamageTaken() >= this.getMaxWheelDamage()) {
+                     //   setCurrentThrottle(0);
+                     //   throttleUp = false;
+                     //   throttleBack = 0;
+//
+                     //   //this.getWheelDamageTaken() += (int)damage;
+                     //   //todo add a slow repairing effect, togglable via config to be only after wrench repair
+//
+                     //   //&& this.attackedboundingbox is a wheel boundingbox
+                     //   //todo get a way to detect if the wheel boundingbox was impacted, we go from there.
+                     //}
 
                      MCH_AircraftInfo cmd1 = this.getAcInfo();
                      if(cmd1 != null) {
@@ -1649,57 +1650,69 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                              //item drop logic
 
-                             MCH_AircraftInfo info = this.getAcInfo();
-                             if (info != null && info.recipe != null && !info.recipe.isEmpty()) {
-                                System.out.println("[MCH] Vehicle destroyed: attempting to drop recipe items...");
-
-                                Random rand = new Random();
-                                int drops = 2 + rand.nextInt(2); // Drop 2–3 items
-                                Set<Integer> usedIndexes = new HashSet<>();
-
-                                for (int i2 = 0; i2 < drops && usedIndexes.size() < info.recipe.size(); i2++) {
-                                   int index;
-                                   do {
-                                      index = rand.nextInt(info.recipe.size());
-                                   } while (usedIndexes.contains(index));
-                                   usedIndexes.add(index);
-
-                                   Object obj = info.recipe.get(index);
-                                   ItemStack stack = null;
-
-                                   if (obj instanceof Item) {
-                                      stack = new ItemStack((Item) obj, 1);
-                                      System.out.println("[MCH] Selected Item: " + ((Item) obj).getUnlocalizedName());
-                                   } else if (obj instanceof Block) {
-                                      stack = new ItemStack((Block) obj, 1);
-                                      System.out.println("[MCH] Selected Block: " + ((Block) obj).getUnlocalizedName());
-                                   } else if (obj instanceof ItemStack) {
-                                      stack = ((ItemStack) obj).copy();
-                                      stack.stackSize = 1;
-                                      System.out.println("[MCH] Selected ItemStack: " + stack.getUnlocalizedName());
-                                   } else if (obj instanceof String) {
-                                      List<ItemStack> ores = OreDictionary.getOres((String) obj);
-                                      if (!ores.isEmpty()) {
-                                         stack = ores.get(rand.nextInt(ores.size())).copy();
-                                         stack.stackSize = 1;
-                                         System.out.println("[MCH] Selected OreDict entry: " + obj + " → " + stack.getUnlocalizedName());
-                                      } else {
-                                         System.out.println("[MCH] OreDict entry has no matches: " + obj);
-                                      }
-                                   } else {
-                                      System.out.println("[MCH] Unknown recipe object type: " + obj);
-                                   }
-
-                                   if (stack != null && stack.getItem() != null) {
-                                      System.out.println("[MCH] Spawning item: " + stack.getDisplayName());
-                                      entity.worldObj.spawnEntityInWorld(new EntityItem(entity.worldObj, entity.posX, entity.posY, entity.posZ, stack));
-                                   } else {
-                                      System.out.println("[MCH] Failed to create ItemStack from: " + obj);
-                                   }
-                                }
-                             } else {
-                                System.out.println("[MCH] No recipe found for this vehicle.");
-                             }
+                             //MCH_AircraftInfo info = this.getAcInfo();
+                             //if (info != null && info.recipe != null && !info.recipe.isEmpty()) {
+                             //   System.out.println("[MCH] Vehicle destroyed: attempting to drop recipe items...");
+//
+                             //   Random rand = new Random();
+                             //   int drops = 2 + rand.nextInt(2); // Drop 2–3 items
+                             //   Set<Integer> usedIndexes = new HashSet<>();
+//
+                             //   for (int i2 = 0; i2 < drops && usedIndexes.size() < info.recipe.size(); i2++) {
+                             //      int index;
+                             //      do {
+                             //         index = rand.nextInt(info.recipe.size());
+                             //      } while (usedIndexes.contains(index));
+                             //      usedIndexes.add(index);
+//
+                             //      Object obj = info.recipe.get(index);
+                             //      ItemStack stack = null;
+//
+                             //      if (obj instanceof Item) {
+                             //         stack = new ItemStack((Item) obj, 1);
+                             //         System.out.println("[MCH] Selected Item: " + ((Item) obj).getUnlocalizedName());
+                             //      } else if (obj instanceof Block) {
+                             //         stack = new ItemStack((Block) obj, 1);
+                             //         System.out.println("[MCH] Selected Block: " + ((Block) obj).getUnlocalizedName());
+                             //      } else if (obj instanceof ItemStack) {
+                             //         stack = ((ItemStack) obj).copy();
+                             //         stack.stackSize = 1;
+                             //         System.out.println("[MCH] Selected ItemStack: " + stack.getUnlocalizedName());
+                             //      } else if (obj instanceof String) {
+                             //         List<ItemStack> ores = OreDictionary.getOres((String) obj);
+                             //         if (!ores.isEmpty()) {
+                             //            stack = ores.get(rand.nextInt(ores.size())).copy();
+                             //            stack.stackSize = 1;
+                             //            System.out.println("[MCH] Selected OreDict: " + obj + " → " + stack.getUnlocalizedName());
+                             //         } else {
+                             //            System.out.println("[MCH] OreDict empty: " + obj);
+                             //         }
+                             //      } else if (obj instanceof ShapedRecipes) {
+                             //         ItemStack[] items = ((ShapedRecipes) obj).recipeItems;
+                             //         List<ItemStack> valid = new ArrayList<ItemStack>();
+                             //         for (ItemStack is : items) if (is != null) valid.add(is);
+                             //         if (!valid.isEmpty()) {
+                             //            stack = valid.get(rand.nextInt(valid.size())).copy();
+                             //            stack.stackSize = 1;
+                             //            System.out.println("[MCH] Selected from ShapedRecipes: " + stack.getDisplayName());
+                             //         } else {
+                             //            System.out.println("[MCH] ShapedRecipes had no valid items: " + obj);
+                             //         }
+                             //      } else {
+                             //         System.out.println("[MCH] Unknown recipe object: " + obj.getClass().getName());
+                             //      }
+//
+                             //      if (stack != null && stack.getItem() != null) {
+                             //         System.out.println("[MCH] Spawning drop: " + stack.getDisplayName());
+                             //         entity.worldObj.spawnEntityInWorld(new EntityItem(entity.worldObj, entity.posX, entity.posY, entity.posZ, stack));
+                             //      } else {
+                             //         System.out.println("[MCH] Failed to create ItemStack from: " + obj);
+                             //      }
+                             //   }
+                             //} else {
+                             //   System.out.println("[MCH] No recipe found for this vehicle.");
+                             //}
+                             //doesnt work
 
 
                              }
@@ -2298,9 +2311,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.dismountedUserCtrl = true;
       }
 
-      this.setLocationAndAngles(v.xCoord, v.yCoord, v.zCoord, this.getRotYaw(), this.getRotPitch());
-      this.mountEntity((Entity)null);
-      this.setLocationAndAngles(v.xCoord, v.yCoord, v.zCoord, this.getRotYaw(), this.getRotPitch());
+      if (this.isNewUAV()) {
+         this.mountEntity((Entity) null);
+         //TODO GET UAV STATION POSITION HERE
+         //this.setLocationAndAngles(getUavStation().uav);
+      } else {
+         this.setLocationAndAngles(v.xCoord, v.yCoord, v.zCoord, this.getRotYaw(), this.getRotPitch());
+         this.mountEntity((Entity) null);
+         this.setLocationAndAngles(v.xCoord, v.yCoord, v.zCoord, this.getRotYaw(), this.getRotPitch());
+      }
    }
 
    public boolean canUnmount(Entity entity) {
@@ -3017,104 +3036,156 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    @Override
    public void moveEntity(double par1, double par3, double par5) {
-      // Ensure the entity's AcInfo is not null
-      if (this.getAcInfo() != null) {
-         // Start profiling section for movement
+      if(this.getAcInfo() != null) {
          super.worldObj.theProfiler.startSection("move");
          super.ySize *= 0.4F;
+         double d3 = super.posX;
+         double d4 = super.posY;
+         double d5 = super.posZ;
+         double d6 = par1;
+         double d7 = par3;
+         double d8 = par5;
+         AxisAlignedBB axisalignedbb = super.boundingBox.copy();
+         List list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(par1, par3, par5));
 
-         // Store initial position
-         double initialPosX = super.posX;
-         double initialPosY = super.posY;
-         double initialPosZ = super.posZ;
-
-         // Attempted movement deltas
-         double deltaX = par1;
-         double deltaY = par3;
-         double deltaZ = par5;
-
-         // Check the block under the aircraft
-         Block blockUnder = MCH_Lib.getBlockY(this, 3, -2, false);
-         if (BlockUtils.isSlowingBlock(blockUnder, super.worldObj, (int)super.posX, (int)super.posY, (int)super.posZ, this)) {
-            // Apply 20% speed reduction for slowing blocks
-            par1 *= 0.8; // Reduce X movement by 20%
-            par5 *= 0.8; // Reduce Z movement by 20%
+         for(int flag1 = 0; flag1 < list.size(); ++flag1) {
+            par3 = ((AxisAlignedBB)list.get(flag1)).calculateYOffset(super.boundingBox, par3);
          }
 
-         // Create a copy of the bounding box
-         AxisAlignedBB initialBoundingBox = super.boundingBox.copy();
-
-         // Get colliding bounding boxes
-         List<AxisAlignedBB> collisionBoxes = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(par1, par3, par5));
-
-         // Calculate Y offset based on collisions
-         for (AxisAlignedBB box : collisionBoxes) {
-            par3 = box.calculateYOffset(super.boundingBox, par3);
-         }
-
-         // Offset bounding box by calculated Y offset
          super.boundingBox.offset(0.0D, par3, 0.0D);
-
-         // Check if movement is obstructed
-         if (!super.field_70135_K && deltaY != par3) {
-            deltaX = deltaY = deltaZ = 0.0D;
+         if(!super.field_70135_K && d7 != par3) {
+            par5 = 0.0D;
+            par3 = 0.0D;
+            par1 = 0.0D;
          }
 
-         // Check if the entity is on the ground
-         boolean onGround = super.onGround || deltaY != par3 && deltaY < 0.0D;
+         boolean var34 = super.onGround || d7 != par3 && d7 < 0.0D;
 
-         // Calculate X offset based on collisions
-         for (AxisAlignedBB box : collisionBoxes) {
-            par1 = box.calculateXOffset(super.boundingBox, par1);
+         int j;
+         for(j = 0; j < list.size(); ++j) {
+            par1 = ((AxisAlignedBB)list.get(j)).calculateXOffset(super.boundingBox, par1);
          }
 
-         // Offset bounding box by calculated X offset
          super.boundingBox.offset(par1, 0.0D, 0.0D);
-
-         // Check if movement is obstructed
-         if (!super.field_70135_K && deltaX != par1) {
-            deltaX = deltaY = deltaZ = 0.0D;
+         if(!super.field_70135_K && d6 != par1) {
+            par5 = 0.0D;
+            par3 = 0.0D;
+            par1 = 0.0D;
          }
 
-         // Calculate Z offset based on collisions
-         for (AxisAlignedBB box : collisionBoxes) {
-            par5 = box.calculateZOffset(super.boundingBox, par5);
+         for(j = 0; j < list.size(); ++j) {
+            par5 = ((AxisAlignedBB)list.get(j)).calculateZOffset(super.boundingBox, par5);
          }
 
-         // Offset bounding box by calculated Z offset
          super.boundingBox.offset(0.0D, 0.0D, par5);
-
-         // Check if movement is obstructed
-         if (!super.field_70135_K && deltaZ != par5) {
-            deltaX = deltaY = deltaZ = 0.0D;
+         if(!super.field_70135_K && d8 != par5) {
+            par5 = 0.0D;
+            par3 = 0.0D;
+            par1 = 0.0D;
          }
 
-         // Handle step height logic
-         if (super.stepHeight > 0.0F && onGround && super.ySize < 0.05F && (deltaX != par1 || deltaZ != par5)) {
-            handleStepHeightMovement(par1, par3, par5, deltaX, deltaY, deltaZ, initialBoundingBox, collisionBoxes);
+         if(super.stepHeight > 0.0F && var34 && super.ySize < 0.05F && (d6 != par1 || d8 != par5)) {
+            double d12 = par1;
+            double d10 = par3;
+            double d11 = par5;
+            par1 = d6;
+            par3 = (double)super.stepHeight;
+            par5 = d8;
+            AxisAlignedBB throwable = super.boundingBox.copy();
+            super.boundingBox.setBB(axisalignedbb);
+            list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(d6, par3, d8));
+
+            int k;
+            for(k = 0; k < list.size(); ++k) {
+               par3 = ((AxisAlignedBB)list.get(k)).calculateYOffset(super.boundingBox, par3);
+            }
+
+            super.boundingBox.offset(0.0D, par3, 0.0D);
+            if(!super.field_70135_K && d7 != par3) {
+               par5 = 0.0D;
+               par3 = 0.0D;
+               par1 = 0.0D;
+            }
+
+            for(k = 0; k < list.size(); ++k) {
+               par1 = ((AxisAlignedBB)list.get(k)).calculateXOffset(super.boundingBox, par1);
+            }
+
+            super.boundingBox.offset(par1, 0.0D, 0.0D);
+            if(!super.field_70135_K && d6 != par1) {
+               par5 = 0.0D;
+               par3 = 0.0D;
+               par1 = 0.0D;
+            }
+
+            for(k = 0; k < list.size(); ++k) {
+               par5 = ((AxisAlignedBB)list.get(k)).calculateZOffset(super.boundingBox, par5);
+            }
+
+            super.boundingBox.offset(0.0D, 0.0D, par5);
+            if(!super.field_70135_K && d8 != par5) {
+               par5 = 0.0D;
+               par3 = 0.0D;
+               par1 = 0.0D;
+            }
+
+            if(!super.field_70135_K && d7 != par3) {
+               par5 = 0.0D;
+               par3 = 0.0D;
+               par1 = 0.0D;
+            } else {
+               par3 = (double)(-super.stepHeight);
+
+               for(k = 0; k < list.size(); ++k) {
+                  par3 = ((AxisAlignedBB)list.get(k)).calculateYOffset(super.boundingBox, par3);
+               }
+
+               super.boundingBox.offset(0.0D, par3, 0.0D);
+            }
+
+            if(d12 * d12 + d11 * d11 >= par1 * par1 + par5 * par5) {
+               par1 = d12;
+               par3 = d10;
+               par5 = d11;
+               super.boundingBox.setBB(throwable);
+            }
          }
 
-         // Update entity position based on bounding box
-         updateEntityPosition();
-
-         // Update collision state
-         super.isCollidedHorizontally = deltaX != par1 || deltaZ != par5;
-         super.isCollidedVertically = deltaY != par3;
-         super.onGround = deltaY != par3 && deltaY < 0.0D;
+         super.worldObj.theProfiler.endSection();
+         super.worldObj.theProfiler.startSection("rest");
+         super.posX = (super.boundingBox.minX + super.boundingBox.maxX) / 2.0D;
+         super.posY = super.boundingBox.minY + (double)super.yOffset - (double)super.ySize;
+         super.posZ = (super.boundingBox.minZ + super.boundingBox.maxZ) / 2.0D;
+         super.isCollidedHorizontally = d6 != par1 || d8 != par5;
+         super.isCollidedVertically = d7 != par3;
+         super.onGround = d7 != par3 && d7 < 0.0D;
          super.isCollided = super.isCollidedHorizontally || super.isCollidedVertically;
-
-         // Update fall state
          this.updateFallState(par3, super.onGround);
+         if(d6 != par1) {
+            super.motionX = 0.0D;
+         }
 
-         // Reset motion if obstructed
-         if (deltaX != par1) super.motionX = 0.0D;
-         if (deltaY != par3) super.motionY = 0.0D;
-         if (deltaZ != par5) super.motionZ = 0.0D;
+         if(d7 != par3) {
+            super.motionY = 0.0D;
+         }
 
-         // Handle block collisions
-         handleBlockCollisions();
+         if(d8 != par5) {
+            super.motionZ = 0.0D;
+         }
 
-         // End profiling section
+         double var10000 = super.posX - d3;
+         var10000 = super.posY - d4;
+         var10000 = super.posZ - d5;
+
+         try {
+            this.doBlockCollisions();
+         } catch (Throwable var33) {
+            CrashReport crashreport = CrashReport.makeCrashReport(var33, "Checking entity tile collision");
+            CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being checked for collision");
+            this.addEntityCrashInfo(crashreportcategory);
+            throw new ReportedException(crashreport);
+         }
+
          super.worldObj.theProfiler.endSection();
       }
    }

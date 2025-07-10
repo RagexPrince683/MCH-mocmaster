@@ -177,17 +177,22 @@ public abstract class MCH_ItemAircraft extends W_Item {
       //if (player.worldObj.isRemote) return;
       int dothing = 0;
 
-      //int used = this.getMaxItemUseDuration(stack) - timeLeft;
 
-      if (timeHeld == MCH_Config.placetimer.prmInt && player.worldObj.isRemote) {
-         //do ONCE
-         //do ON THE CLIENT
-         //dothing += 1;
-         //if (dothing == 1) { //idc if its not optimized it fucking works goddammit
-            player.addChatMessage(new ChatComponentText("Vehicle ready for deployment!"));
-            //wait I can just check that it equals instead of is greater than, nevermind jfc
-        // }
+      int used = this.getMaxItemUseDuration(stack) - count;
+
+      if (used == MCH_Config.placetimer.prmInt) {
+         player.addChatMessage(new ChatComponentText("Vehicle ready for deployment!"));
       }
+
+      //if (timeHeld == MCH_Config.placetimer.prmInt && player.worldObj.isRemote) {
+      //   //do ONCE
+      //   //do ON THE CLIENT
+      //   //dothing += 1;
+      //   //if (dothing == 1) { //idc if its not optimized it fucking works goddammit
+      //      player.addChatMessage(new ChatComponentText("Vehicle ready for deployment!"));
+      //      //wait I can just check that it equals instead of is greater than, nevermind jfc
+      //  // }
+      //}
 
       NBTTagCompound tag = stack.getTagCompound();
       //non spaghetti code logic above just need to figure out where and how to implement it
@@ -202,23 +207,25 @@ public abstract class MCH_ItemAircraft extends W_Item {
       //NBTTagCompound tag = stack.stackTagCompound;
 
       // Validate both deploy state and click-hold continuously
-      boolean holdingClick = player.getItemInUse() == stack;
-      boolean hasDeployStart = tag.hasKey("DeployStart");
+      //boolean holdingClick = player.getItemInUse() == stack;
+
+      //boolean hasDeployStart = tag.hasKey("DeployStart");
+      //causing server error
 
 
 
-      if (!holdingClick) {
-         if (hasDeployStart) {
-            System.out.println("[DEBUG] Player released right-click, cancelling.");
-            cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
-         }
-         return;
-      }
+      //if (!holdingClick) {
+         //if (hasDeployStart) {
+         //   System.out.println("[DEBUG] Player released right-click, cancelling.");
+         //   cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
+         //}
+         //return;
+     // }
 
-      if (!hasDeployStart) {
-         System.out.println("[DEBUG] No DeployStart tag.");
-         return;
-      }
+      //if (!hasDeployStart) {
+      //   System.out.println("[DEBUG] No DeployStart tag.");
+      //   return;
+      //}
 
       // Valid raytrace check
       MovingObjectPosition mop = getBlockIncludingWater(player, 5.0D);
@@ -266,22 +273,22 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
       //long deployStart = tag.getLong("DeployStart");
       //never used above
-      if (holdingClick) {
-         timeHeld = this.getMaxItemUseDuration(stack) - count;
-      } else {
-         timeHeld = 0;
-      }
+      //if (holdingClick) {
+      //   timeHeld = this.getMaxItemUseDuration(stack) - count;
+      //} else {
+      //   timeHeld = 0;
+      //}
       //the problem here is timeHeld is being incremented despite the player not holding the click for some fucking reason
       System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
 
       //check that we are still holding here
-      if (!holdingClick) {
-         if (hasDeployStart) {
-            System.out.println("[DEBUG] Player released right-click, cancelling.");
-            cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
-         }
-         return;
-      }
+      //if (!holdingClick) {
+      //   if (hasDeployStart) {
+      //      System.out.println("[DEBUG] Player released right-click, cancelling.");
+      //      cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
+      //   }
+      //   return;
+      //}
    }
 
    private void cancelDeployment(NBTTagCompound tag, EntityPlayer player, String message) {
@@ -300,7 +307,11 @@ public abstract class MCH_ItemAircraft extends W_Item {
    }
 
    public MovingObjectPosition getBlockIncludingWater(EntityPlayer player, double range) {
-      Vec3 eyePos = player.getPosition(1.0F).addVector(0, player.getEyeHeight(), 0);
+
+      //if !player.worldObj.isRemote)
+      //why does this STUPID FUCKING SHIT FATALLY ERROR THE SERVER
+
+      Vec3 eyePos = Vec3.createVectorHelper(player.posX, player.posY + player.getEyeHeight(), player.posZ);
       Vec3 lookVec = player.getLookVec();
       Vec3 targetPos = eyePos.addVector(lookVec.xCoord * range, lookVec.yCoord * range, lookVec.zCoord * range);
 
