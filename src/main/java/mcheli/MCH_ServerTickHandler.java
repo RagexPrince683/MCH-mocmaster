@@ -59,6 +59,7 @@ public class MCH_ServerTickHandler {
    void onWorldTick(TickEvent.WorldTickEvent evt) {
       System.out.println("onworldtick works");
       //inb4 this shit never fires and its more goddamn schizophrenic bullshit from this fuckass mod
+      //it doesn't.
       World worldObj = evt.world;
 
       // --- Existing MCH plane syncing logic ---
