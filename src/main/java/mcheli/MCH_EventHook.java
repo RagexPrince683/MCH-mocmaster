@@ -390,7 +390,7 @@ public class MCH_EventHook extends W_EventHook {
          //bullet.setDead();
          //WHY ARE YOU SETTING DEAD HERE YOU DONT HAVE A REASON TO
          //todo add a new chunk loader here under the strict criteria that the bullet is still alive and has a gravity going down
-         if (bullet.shouldLoadChunks() ) { //&& bullet.initialized theoretically redundant but maybe it causes this shit to go apeshit and not work
+         if (bullet.shouldLoadChunks() ) { //&& bullet.initialized theoretically redundant
             System.out.println("should load chunks1");
             bullet.idleStartTime = -1;
             //17140 ticks = ~14 minutes

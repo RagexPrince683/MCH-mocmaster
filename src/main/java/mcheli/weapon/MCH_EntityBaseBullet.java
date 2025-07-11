@@ -81,7 +81,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public double prevMotionX;
     public double prevMotionY;
     public double prevMotionZ;
-    private Ticket loaderTicket;
+    private Ticket loaderTicket = null;
+    //oh my god
     public boolean bomblet;
     public boolean gravitydown;
     public boolean bigdelay;
@@ -163,16 +164,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     // Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
 
     public void init(Ticket ticket) {
-        if (!worldObj.isRemote) {
-            if (ticket != null && shouldLoadChunks()) {
-                if (loaderTicket == null) {
-                    loaderTicket = ticket;
-                    loaderTicket.bindEntity(this);
-                    loaderTicket.getModData();
-                }
-                // Force load the initial chunk where the bullet is spawned
-                ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
+        if (!worldObj.isRemote && ticket != null && shouldLoadChunks()) {
+            if (loaderTicket == null) {
+                loaderTicket = ticket;
+                loaderTicket.bindEntity(this);
+                loaderTicket.getModData(); // optional metadata
             }
+
+            ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
         }
     }
 
@@ -193,7 +192,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
 
     public void loadNeighboringChunks(int chunkX, int chunkZ) {
-        if (!worldObj.isRemote && loaderTicket != null && shouldLoadChunks()) {
+        if (!worldObj.isRemote && loaderTicket != null) { //&& shouldLoadChunks()
             // Unload previously loaded chunks to avoid memory bloat
             for (ChunkCoordIntPair chunk : loadedChunks) {
                 ForgeChunkManager.unforceChunk(loaderTicket, chunk);
@@ -225,7 +224,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
     // Dynamically load chunks ahead of the bullet based on its current position and motion
     public void loadChunksInBulletPath(int currentChunkX, int currentChunkZ, double motionX, double motionZ) {
-        if (!worldObj.isRemote && loaderTicket != null && shouldLoadChunks()) {
+        if (!worldObj.isRemote && loaderTicket != null ) { //&& shouldLoadChunks()
             // Unload only chunks previously loaded by the bullet
             for (ChunkCoordIntPair chunk : bulletLoadedChunks) {
                 ForgeChunkManager.unforceChunk(loaderTicket, chunk);
@@ -252,18 +251,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             }
         }
     }
-
-    // Clear chunk loader after bullet impact or despawn to free memory
-    //public void clearChunkLoader() {
-    //    if (!worldObj.isRemote && loaderTicket != null) {
-    //        for (ChunkCoordIntPair chunk : loadedChunks) {
-    //            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-    //        }
-    //        loadedChunks.clear();
-    //    }
-    //}
-    //unused
-
 
 
     public void setLocationAndAngles(double par1, double par3, double par5, float par7, float par8) {
@@ -653,7 +640,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
 
         //if (!isInRangeToRenderDist2) {
-            if (shouldLoadChunks()) {
+            if (!bomblet && gravitydown && bigdelay && initialized) {
+                //was !bomblet && gravitydown && bigdelay && initialized
+                //tried swapping to shouldLoadChunks(), God hated whatever that was
+                //welcome to mcheli temple os edition FUCK YOU
                 checkAndLoadChunks();  // If this method handles any critical chunk loading, it stays here
             }
         //}
