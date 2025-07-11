@@ -11,6 +11,7 @@ import java.util.*;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_PacketAircraftLocation;
 import mcheli.plane.MCP_EntityPlane;
+import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_Reflection;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -56,19 +57,16 @@ public class MCH_ServerTickHandler {
    double visualDistance = 2500;
    @SubscribeEvent
    void onWorldTick(TickEvent.WorldTickEvent evt) {
-      //System.out.println("onworldtick");
       World worldObj = evt.world;
+
+      // --- Existing MCH plane syncing logic ---
       for (Object obj : worldObj.playerEntities) {
-         //System.out.println("for player entity obj");
          if (obj instanceof EntityPlayer) {
-            //System.out.println("if is player");
             EntityPlayer player = (EntityPlayer) obj;
             AxisAlignedBB aabb = player.boundingBox.expand(visualDistance, visualDistance, visualDistance);
             List<MCP_EntityPlane> list = new ArrayList<>();
             for (Object entityObj : worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb)) {
-               //System.out.println("get entities within box");
                if (entityObj instanceof MCP_EntityPlane) {
-                  //System.out.println("is plane");
                   MCP_EntityPlane plane = (MCP_EntityPlane) entityObj;
                   if (!plane.onGround) {
                      list.add(plane);
@@ -77,6 +75,30 @@ public class MCH_ServerTickHandler {
                }
             }
          }
+      }
+
+      // --- NEW: Bullet despawn logic ---
+      List<Entity> loaded = worldObj.loadedEntityList;
+      int bulletCount = 0;
+      List<MCH_EntityBaseBullet> excessBullets = new ArrayList<>();
+
+      for (Object obj : loaded) {
+         if (obj instanceof MCH_EntityBaseBullet) {
+            MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet) obj;
+            bulletCount++;
+
+            if (!bullet.shouldLoadChunks() && bullet.idleStartTime > 0) {
+               excessBullets.add(bullet);
+            }
+         }
+      }
+
+      if (bulletCount > 1000) {
+         int bulletsToKill = Math.min(200, excessBullets.size());
+         for (int i = 0; i < bulletsToKill; i++) {
+            excessBullets.get(i).setDead();
+         }
+         System.out.println("Bullet cleanup triggered: removed " + bulletsToKill + " bullets.");
       }
    }
 

@@ -347,39 +347,40 @@ public class MCH_EventHook extends W_EventHook {
       }
    }
 
-   @SubscribeEvent
-   public void onWorldTick(TickEvent.WorldTickEvent event) {
-      if (event.phase != TickEvent.Phase.END) return;
-
-      World world = event.world;
-      List<Entity> loaded = world.loadedEntityList;
-      int bulletCount = 0;
-      List<MCH_EntityBaseBullet> excessBullets = new ArrayList<>();
-
-      for (Object obj : loaded) {
-
-         if (obj instanceof MCH_EntityBaseBullet) {
-
-            MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet) obj;
-            bulletCount++;
-
-            // Only mark for removal if it's NOT a chunk-loading bullet and has been idle
-            if (!bullet.shouldLoadChunks() && bullet.idleStartTime > 0) {
-               System.out.println("bullet count" + bulletCount);
-               excessBullets.add(bullet);
-            }
-         }
-      }
-
-      if (bulletCount > 1000) {
-         int bulletsToKill = Math.min(200, excessBullets.size());
-         for (int i = 0; i < bulletsToKill; i++) {
-            excessBullets.get(i).setDead();
-         }
-
-         System.out.println("Bullet cleanup triggered: removed " + bulletsToKill + " non-chunkloading idle bullets.");
-      }
-   }
+   //@SubscribeEvent
+   //public void onWorldTick(TickEvent.WorldTickEvent event) {
+   //   if (event.phase != TickEvent.Phase.END) return;
+//
+   //   World world = event.world;
+   //   List<Entity> loaded = world.loadedEntityList;
+   //   int bulletCount = 0;
+   //   List<MCH_EntityBaseBullet> excessBullets = new ArrayList<>();
+//
+   //   for (Object obj : loaded) {
+//
+   //      if (obj instanceof MCH_EntityBaseBullet) {
+//
+   //         MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet) obj;
+   //         bulletCount++;
+//
+   //         // Only mark for removal if it's NOT a chunk-loading bullet and has been idle
+   //         if (!bullet.shouldLoadChunks() && bullet.idleStartTime > 0) {
+   //            System.out.println("bullet count" + bulletCount);
+   //            excessBullets.add(bullet);
+   //         }
+   //      }
+   //   }
+//
+   //   if (bulletCount > 1000) {
+   //      int bulletsToKill = Math.min(200, excessBullets.size());
+   //      for (int i = 0; i < bulletsToKill; i++) {
+   //         excessBullets.get(i).setDead();
+   //      }
+//
+   //      System.out.println("Bullet cleanup triggered: removed " + bulletsToKill + " non-chunkloading idle bullets.");
+   //   }
+   //}
+   //this fucking class makes me schizophrenic
 
    public void entityCanUpdate(CanUpdate event) {
       if(event.entity instanceof MCH_EntityBaseBullet) {

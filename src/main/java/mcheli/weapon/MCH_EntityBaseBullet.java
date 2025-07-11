@@ -180,6 +180,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     // Dynamically load chunks based on bullet's movement
     public void checkAndLoadChunks() {
+        System.out.println("check and load chunks fired");
         // Get the current chunk coordinates for the bullet
         int currentChunkX = MathHelper.floor_double(posX) >> 4;
         int currentChunkZ = MathHelper.floor_double(posZ) >> 4;
@@ -1255,14 +1256,15 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         }
     }
 
-    private void clearChunkLoaders() {
-        if (shouldClearChunkLoaders()) {
-            for (ChunkCoordIntPair chunk : loadedChunks) {
-                System.out.println("Clearing chunk loader due to impact.");
-                ForgeChunkManager.unforceChunk(loaderTicket, chunk);
-            }
-        }
-    }
+    //private void clearChunkLoaders() {
+    //    if (shouldClearChunkLoaders()) {
+    //        for (ChunkCoordIntPair chunk : loadedChunks) {
+    //            System.out.println("Clearing chunk loader due to impact.");
+    //            ForgeChunkManager.unforceChunk(loaderTicket, chunk);
+    //        }
+    //    }
+    //}
+    //unused
 
     public void clearBulletChunks() {
         if (!worldObj.isRemote && loaderTicket != null) {
