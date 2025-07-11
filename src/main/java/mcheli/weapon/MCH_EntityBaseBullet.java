@@ -651,10 +651,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
 
         //if (!isInRangeToRenderDist2) {
-            if (shouldLoadChunks()) {
-                checkAndLoadChunks();  // If this method handles any critical chunk loading, it stays here
-            }
-            //this must be the main method for chunkloading.
+            //if (!bomblet && gravitydown && bigdelay && initialized) {
+            //    checkAndLoadChunks();  // If this method handles any critical chunk loading, it stays here
+            //}
             //didn't we already do this?
         //}
 
