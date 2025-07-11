@@ -188,7 +188,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         int currentChunkZ = MathHelper.floor_double(posZ) >> 4;
 
         // Determine the direction of bullet movement and load chunks in front
-        this.loadChunksInBulletPath(currentChunkX, currentChunkZ, motionX, motionZ);
+        loadChunksInBulletPath(currentChunkX, currentChunkZ, motionX, motionZ);
     }
 
 
@@ -636,6 +636,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             }
         }
 
+        
+
         if(!worldObj.isRemote) {
             if (shootingAircraft instanceof MCH_EntityAircraft && !speedAddedFromAircraft && getInfo().speedDependsAircraft) {
                 MCH_EntityAircraft ac = (MCH_EntityAircraft) shootingAircraft;
@@ -651,10 +653,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
 
         //if (!isInRangeToRenderDist2) {
-            //if (!bomblet && gravitydown && bigdelay && initialized) {
-            //    checkAndLoadChunks();  // If this method handles any critical chunk loading, it stays here
-            //}
-            //didn't we already do this?
+            if (!bomblet && gravitydown && bigdelay && initialized) {
+                checkAndLoadChunks();  // If this method handles any critical chunk loading, it stays here
+            }
         //}
 
         if (super.worldObj.isRemote && this.countOnUpdate == 0) {
@@ -780,10 +781,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             // Check if the bullet still exists before proceeding
             if (!super.isDead) {
                 // Ensure the bullet has the specific conditions (e.g., no bomblet, gravityDown, and bigDelay)
-                if (this.shouldLoadChunks()) {
+                if (!bomblet && gravitydown && bigdelay) {
 
                     // Load the necessary chunks in front of the bullet
-                    this.loadChunksInBulletPath(chunkX, chunkZ, this.motionX, this.motionZ);
+                    loadChunksInBulletPath(chunkX, chunkZ, this.motionX, this.motionZ);
 
                     // Log that chunks are being loaded
                     //System.out.println("Bullet is loading chunks at: " + chunkX + ", " + chunkZ);
