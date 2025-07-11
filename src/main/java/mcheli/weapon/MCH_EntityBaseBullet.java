@@ -103,8 +103,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     //private List<ChunkCoordIntPair> loadedChunks = new ArrayList<>();
 
     //boolean isInRangeToRenderDist2;
-    public boolean chunkloadEligible = false;
-
 
     List<ChunkCoordIntPair> bulletLoadedChunks = new ArrayList<>();
 
@@ -127,7 +125,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         this.isBomblet = -1;
         this.weaponInfo = null;
         super.ignoreFrustumCheck = true;
-        this.chunkloadEligible = shouldLoadChunks(); // Only call ONCE
         if (par1World.isRemote) {
             this.model = null;
         }
@@ -350,7 +347,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     //todone add a gravity check here
 
     public void setDead() {
-        if (chunkloadEligible) {
+        if (shouldLoadChunks()) {
             System.out.println("should load chunks2");
             //todo checkAndLoadChunks() instead
             if (initialized) {
@@ -1105,7 +1102,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
 
         //todo shouldLoadChunks() check here
-        if (chunkloadEligible && initialized) {
+        if (shouldLoadChunks() && initialized) {
             System.out.println("should load chunks3");
             checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
@@ -1203,7 +1200,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     private void processEntityImpact(MovingObjectPosition hit, float damageFactor) {
-        if (chunkloadEligible && initialized) {
+        if (shouldLoadChunks() && initialized) {
             System.out.println("should load chunks4");
             checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
@@ -1266,7 +1263,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             setDead();
             System.out.println("Impact detected, entity set to dead.");
             //todone do another chunk load then clear and add checks
-            if (chunkloadEligible && initialized) {
+            if (shouldLoadChunks() && initialized) {
                 System.out.println("should load chunks5");
                 checkAndLoadChunks();
                 loadNeighboringChunks(getChunkX(), getChunkZ());
