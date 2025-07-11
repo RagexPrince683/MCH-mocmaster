@@ -5422,20 +5422,20 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void initCurrentWeapon(Entity entity) {
-      /* 4760 */     int sid = getSeatIdByEntity(entity);
-      /* 4761 */     MCH_Lib.DbgLog(this.worldObj, "initCurrentWeapon:" + W_Entity.getEntityId(entity) + ":%d", new Object[] { Integer.valueOf(sid) });
-      /* 4762 */     if (sid < 0 || sid >= this.currentWeaponID.length)
-         return;
-      /* 4763 */  this.currentWeaponID[sid] = -1;
-      /* 4764 */  if (entity instanceof EntityPlayer || entity instanceof MCH_EntityGunner) { //
-         /* 4765 */  this.currentWeaponID[sid] = getNextWeaponID(entity, 1);
-         /* 4766 */  switchWeapon(entity, getCurrentWeaponID(entity));
-         /* 4767 */  if (this.worldObj.isRemote) {
-            /* 4768 */   MCH_PacketIndNotifyAmmoNum.send(this, -1);
-            /*      */}
-         /*      */  }
-      /*      */
-      /*      */   }
+      int sid = this.getSeatIdByEntity(entity);
+      MCH_Lib.DbgLog(super.worldObj, "initCurrentWeapon:" + W_Entity.getEntityId(entity) + ":%d", new Object[]{Integer.valueOf(sid)});
+      if(sid >= 0 && sid < this.currentWeaponID.length) {
+         this.currentWeaponID[sid] = -1;
+         if(entity instanceof EntityPlayer || entity instanceof MCH_EntityGunner) {
+            this.currentWeaponID[sid] = this.getNextWeaponID(entity, 1);
+            this.switchWeapon(entity, this.getCurrentWeaponID(entity));
+            if(super.worldObj.isRemote) {
+               MCH_PacketIndNotifyAmmoNum.send(this, -1);
+            }
+         }
+
+      }
+   }
 
    public void initPilotWeapon() {
       this.currentWeaponID[0] = -1;
