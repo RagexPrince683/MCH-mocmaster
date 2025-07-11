@@ -346,6 +346,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     public void setDead() {
         if (shouldLoadChunks()) {
+            System.out.println("should load chunks2");
             //todo checkAndLoadChunks() instead
             checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
@@ -1090,6 +1091,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
         //todo shouldLoadChunks() check here
         if (shouldLoadChunks()) {
+            System.out.println("should load chunks3");
             checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
             System.out.println("Extra chunk loader activated.");
@@ -1187,6 +1189,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     private void processEntityImpact(MovingObjectPosition hit, float damageFactor) {
         if (shouldLoadChunks()) {
+            System.out.println("should load chunks4");
             checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
             System.out.println("Extra chunk loader activated.");
@@ -1249,6 +1252,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             System.out.println("Impact detected, entity set to dead.");
             //todone do another chunk load then clear and add checks
             if (shouldLoadChunks()) {
+                System.out.println("should load chunks5");
                 checkAndLoadChunks();
                 loadNeighboringChunks(getChunkX(), getChunkZ());
                 clearBulletChunks();

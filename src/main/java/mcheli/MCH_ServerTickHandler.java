@@ -88,6 +88,7 @@ public class MCH_ServerTickHandler {
             bulletCount++;
 
             if (!bullet.shouldLoadChunks() && bullet.idleStartTime > 0) {
+               System.out.println("NOT should load chunks");
                excessBullets.add(bullet);
             }
          }
