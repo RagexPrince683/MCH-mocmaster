@@ -391,6 +391,9 @@ public class MCH_EventHook extends W_EventHook {
          //todo add a new chunk loader here under the strict criteria that the bullet is still alive and has a gravity going down
          if (bullet.shouldLoadChunks()) {
             bullet.idleStartTime = -1;
+            //17140 ticks = ~14 minutes
+            //which is how far an apfsds bullet should be allowed to go according to my genericified math
+
             //System.out.println("bullet checking and loading chunks");
             bullet.checkAndLoadChunks();
          } else {
