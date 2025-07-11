@@ -87,7 +87,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public boolean bigdelay;
     private boolean bigcheck = false;
     public int chemYield = 0;
-    public boolean initialized = false;
+    private boolean initialized = false;
 
 
     //public int delayrangeloaderint = delayrangeloader;
@@ -164,7 +164,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     public void init(Ticket ticket) {
         if (!worldObj.isRemote) {
-            if (ticket != null && shouldLoadChunks()) {
+            if (ticket != null) {
                 if (loaderTicket == null) {
                     loaderTicket = ticket;
                     loaderTicket.bindEntity(this);
@@ -193,7 +193,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
 
     public void loadNeighboringChunks(int chunkX, int chunkZ) {
-        if (!worldObj.isRemote && loaderTicket != null && shouldLoadChunks()) {
+        if (!worldObj.isRemote && loaderTicket != null) {
             // Unload previously loaded chunks to avoid memory bloat
             for (ChunkCoordIntPair chunk : loadedChunks) {
                 ForgeChunkManager.unforceChunk(loaderTicket, chunk);
@@ -225,7 +225,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
     // Dynamically load chunks ahead of the bullet based on its current position and motion
     public void loadChunksInBulletPath(int currentChunkX, int currentChunkZ, double motionX, double motionZ) {
-        if (!worldObj.isRemote && loaderTicket != null && shouldLoadChunks()) {
+        if (!worldObj.isRemote && loaderTicket != null) {
             // Unload only chunks previously loaded by the bullet
             for (ChunkCoordIntPair chunk : bulletLoadedChunks) {
                 ForgeChunkManager.unforceChunk(loaderTicket, chunk);
@@ -653,7 +653,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
 
         //if (!isInRangeToRenderDist2) {
-            if (shouldLoadChunks()) {
+            if (!bomblet && gravitydown && bigdelay && initialized) {
                 checkAndLoadChunks();  // If this method handles any critical chunk loading, it stays here
             }
         //}

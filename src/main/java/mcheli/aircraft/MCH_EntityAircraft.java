@@ -6073,18 +6073,18 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return list;
    }
 
-   //private void forceChunkLoading() {
-   //   if (!super.worldObj.isRemote) {
-   //      // Request a chunk loading ticket
-   //      this.chunkTicket = ForgeChunkManager.requestTicket(MCH_MOD.instance, super.worldObj, ForgeChunkManager.Type.NORMAL);
-   //      if (this.chunkTicket != null) {
-   //         // Mark the chunk for loading
-   //         int chunkX = MathHelper.floor_double(super.posX) >> 4;
-   //         int chunkZ = MathHelper.floor_double(super.posZ) >> 4;
-   //         ForgeChunkManager.forceChunk(this.chunkTicket, new ChunkCoordIntPair(chunkX, chunkZ));
-   //      }
-   //   }
-   //}
+   private void forceChunkLoading() {
+      if (!super.worldObj.isRemote) {
+         // Request a chunk loading ticket
+         this.chunkTicket = ForgeChunkManager.requestTicket(MCH_MOD.instance, super.worldObj, ForgeChunkManager.Type.NORMAL);
+         if (this.chunkTicket != null) {
+            // Mark the chunk for loading
+            int chunkX = MathHelper.floor_double(super.posX) >> 4;
+            int chunkZ = MathHelper.floor_double(super.posZ) >> 4;
+            ForgeChunkManager.forceChunk(this.chunkTicket, new ChunkCoordIntPair(chunkX, chunkZ));
+         }
+      }
+   }
 
 
  //  private void fakeplayermaker() {
