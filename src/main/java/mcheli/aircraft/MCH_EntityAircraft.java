@@ -1715,7 +1715,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                                 System.out.println("[MCH] No recipe found for this vehicle.");
                              }
                              //doesnt work
-                             //no wait no it does wtf
+                             //no wait no it does wtf it just drops a LOT of items for some reason.
+                             //no wait it drops a lot of items if the vehicle is destroyed and it's a ai gunner in the seat for some reason?
+                             //this makes sense because of that one time I nuked an ai gunner and like 17 more vehicles appeared
+                             //in the same position as the 1 vehicle and you could get like 16 more of the vehicle or something..
+                             //might just be a creative mode thing idk tho
+                             //we should probably move this to the smoked out dead vehicle logic instead of the explosion logic.
 
 
                              }
@@ -2839,6 +2844,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public void supplyAmmoToOtherAircraft() {
       float range = this.getAcInfo() != null?this.getAcInfo().ammoSupplyRange:0.0F;
       if(range > 0.0F) {
+         //todo umm what the figma no fuck you no more free nukes wtf
          if(!super.worldObj.isRemote && this.getCountOnUpdate() % 40 == 0) {
             List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, this.getBoundingBox().expand((double)range, (double)range, (double)range));
 
@@ -2873,6 +2879,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public boolean canPlayerSupplyAmmo(EntityPlayer player, int weaponId) {
+      //if on rack (eg: aircraft carrier
       if(MCH_Lib.getBlockIdY(this, 1, -3) == 0) {
          return false;
       } else if(!this.canSupply()) {

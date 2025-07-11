@@ -687,7 +687,8 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                         float var18;
                         boolean var31;
                         if(item.equalsIgnoreCase("AddRack")) {
-                           //todo: fix addrack bug where it won't go up block with
+                           //parent vehicle to eat child
+                           //todo: fix addrack bug where it won't go up block with a vehicle racked or something
                            s = data.toLowerCase().split("\\s*,\\s*");
                            if(s != null && s.length >= 7) {
                               var17 = s[0].split("\\s*/\\s*");
@@ -699,6 +700,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                               this.entityRackList.add(new MCH_SeatRackInfo(var17, this.toDouble(s[1]), this.toDouble(s[2]), this.toDouble(s[3]), new MCH_AircraftInfo.CameraPosition(this.toVec3(s[4], s[5], s[6]).addVector(0.0D, 1.5D, 0.0D)), var18, ry, rz, var26, var31));
                            }
                         } else if(item.equalsIgnoreCase("RideRack")) {
+                           //child vehicle to ride parent
                            s = this.splitParam(data);
                            if(s.length >= 2) {
                               MCH_AircraftInfo.RideRack var19 = new MCH_AircraftInfo.RideRack(s[0].trim().toLowerCase(), this.toInt(s[1], 1, 10000));

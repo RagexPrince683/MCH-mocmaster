@@ -47,6 +47,8 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     private double divingLevel = 0.0D;
     private double targetDepth = 0.0D;
 
+    public boolean iscarrier = false;
+
 
     public int timer = 0;
 
@@ -84,6 +86,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         super.stepHeight = 0.6F;
         this.rotationRotor = 0.0F;
         this.prevRotationRotor = 0.0F;
+        this.iscarrier = false;
     }
 
     public String getKindName() {
@@ -104,7 +107,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         }
 
         if(this.planeInfo == null) {
-            MCH_Lib.Log((Entity)this, "##### MCH_EntityShip changePlaneType() Ship info null %d, %s, %s", new Object[]{Integer.valueOf(W_Entity.getEntityId(this)), type, this.getEntityName()});
+            MCH_Lib.Log((Entity)this, "##### MCH_EntityShip changeShipType() Ship info null %d, %s, %s", new Object[]{Integer.valueOf(W_Entity.getEntityId(this)), type, this.getEntityName()});
             this.setDead();
         } else {
             this.setAcInfo(this.planeInfo);
@@ -286,52 +289,6 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 this.swithVtolMode(true);
             }
 
-            if(this.aircraftPitch <= -25 && this.isEntityAlive() && this.isAirBorne) { //if the aircraft is 25 degrees up
-                //maybe add more checks here to ensure this is a plane although idk if this is causing the dancing vehicles bug
-
-                // double throttlereal = this.getThrottle(); //decrease throttle slowly over time if the aircraft is pitched upwards
-                // throttlereal -= 0.1;
-                // this.setThrottle(throttlereal);
-                // addCurrentThrottle(-throttlereal);
-            }
-
-            if (this.aircraftPitch <= 3 && this.isEntityAlive() && this.isAirBorne) {//and 3 degrees down is greater
-                this.motionY = (this.motionY*0.61)+this.aircraftPitch; //go up
-                this.aircraftY = this.aircraftY + (this.aircraftY*1.2);
-                this.currentSpeed *= (this.currentSpeed*2)+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY;
-            }
-
-            //if this.aircraftPitch <= -15
-
-            if(this.getThrottle() <= 0.90 && this.isAirBorne) { //should apply a slow descent
-                this.aircraftY = this.aircraftY - (this.aircraftY*(0.2*this.getThrottle()));
-            }
-
-
-
-            //TODO: if (this.motionY >= 2.0 && this.landing) { apply damage
-            //todo: add the check for flying hurty was put in wrong place
-            //this.getAlt();
-            if(this.motionY <= -2.0) { // I cannot detect if the aircraft hit or touched the ground
-
-            }
-
-            if(this.aircraftPitch >= 1.2 && this.isEntityAlive() && this.isAirBorne) { //going down save this.motionY for helicopters
-
-
-                this.currentSpeed *= (this.currentSpeed*6)+this.aircraftPitch+(this.getMaxFuel()/800)+this.motionY; //speed up
-
-
-
-                //added a timer because aircraft fell too fast, this will later be declared in the aircraft so for heavier aircraft the timer is faster to activate
-
-
-
-
-                //todo: debug and ensure this works as intended
-
-            }
-
             if (this.aircraftPitch >= 80 && this.isEntityAlive() && this.isAirBorne) { // Begin dive logic
                 timer++;
 
@@ -361,32 +318,6 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     }
                 }
             }
-
-            //if(this.motionY >= this.stallfactor) { //stall factor is 80 for now
-            //    double v1 = this.motionX - this.liftfactor; //how about stallfactor divided by 2 instead of liftfactor here? //it works ok
-            //    double v2 = this.motionZ - this.liftfactor;
-            //    this.currentSpeed = this.currentSpeed - this.stallfactor/4; //was 8
-            //    double identify = this.motionY - this.stallfactor;
-            //    if (v1 < 0) {
-            //        // Apply gradual deceleration
-            //        v1 += 0.1; // Adjust the value as needed
-            //        if (v1 > 0) {
-            //            v1 = 0; // Ensure it doesn't go past 0
-            //        }
-            //    }
-            //    if (v2 < 0) {
-            //        // Apply gradual deceleration
-            //        v2 += 0.1; // Adjust the value as needed
-            //        if (v2 > 0) {
-            //            v2 = 0; // Ensure it doesn't go past 0
-            //        }
-            //    }
-            //    //this.stallfactor;
-            //    this.motionX = v1;
-            //    this.motionZ = v2;
-            //    //sets motionY to be slowed
-            //    this.motionY = identify;
-            //}
 
             super.prevPosX = super.posX;
             super.prevPosY = super.posY;
@@ -480,7 +411,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         if(!MCH_Config.MouseControlFlightSimMode.prmBool && this.getVtolMode() != 0) {
             rot *= 0.0F;
         }
-        //todone figure out why or how this is not working for the ship
+
         if(super.moveLeft && !super.moveRight) {
             this.addkeyRotValue -= rot * partialTicks;
         }
@@ -523,7 +454,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     }
                 }
 
-                //todone again figure out why the ships dont accept this
+
                 if(super.moveLeft && !super.moveRight) {
                     this.setRotYaw(this.getRotYaw() - 0.6F * rot * partialTicks);
                     this.currentSpeed = currentSpeed - rot;
@@ -1150,15 +1081,13 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         if(e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff) {
             return false;
         }
-        //please stop fucking colliding with flares and chaffs you fucking retarded ass mod i swear to fuck
 
         if(this.getSeatIdByEntity(e) >= 0) {
             return false;
         } else if(super.noCollisionEntities.containsKey(e)) {
             return false;
         } else {
-            if(e instanceof MCH_EntityHitBox && ((MCH_EntityHitBox)e).parent != null ) { //|| e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff
-                //cannot cast these to aircraft because fuck you lollll!!!!
+            if(e instanceof MCH_EntityHitBox && ((MCH_EntityHitBox)e).parent != null ) {
                 MCH_EntityAircraft ac = ((MCH_EntityHitBox)e).parent;
                 if(super.noCollisionEntities.containsKey(ac)) {
                     return false;
@@ -1180,11 +1109,6 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 MCH_BoundingBox bb = arr$[i$];
                 if(super.rand.nextInt(3) == 0) {
                     var10000 = MCH_MOD.config;
-                    //todo config
-                    //if(MCH_Config.Collision_DestroyBlock.prmBool) {
-                    //   Vec3 v = this.getTransformedPosition(bb.offsetX, bb.offsetY, bb.offsetZ);
-                    //this.destoryBlockRange(v, (double)bb.width, (double)bb.height);
-                    //}
 
                     this.collisionEntity(bb.boundingBox);
                 }
@@ -1192,9 +1116,6 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
 
             var10000 = MCH_MOD.config;
             //todo config
-            //if(MCH_Config.Collision_DestroyBlock.prmBool) {
-            //this.destoryBlockRange(this.getTransformedPosition(0.0D, 0.0D, 0.0D), (double)super.width * 1.5D, (double)(super.height * 2.0F));
-            //}
 
             this.collisionEntity(this.getBoundingBox());
         }
