@@ -239,8 +239,7 @@ public class MCH_MOD {
       try {
          ForgeChunkManager.setForcedChunkLoadingCallback(this, (tickets, world) -> {
             for (ForgeChunkManager.Ticket ticket : tickets) {
-               if (ticket.getEntity() instanceof MCH_EntityBullet && MCH_EntityBullet.shouldLoadChunksmain) {
-                  //todo here too
+               if (ticket.getEntity() instanceof MCH_EntityBullet) {
                   ((MCH_IChunkLoader) ticket.getEntity()).init(ticket);
                }
             }
