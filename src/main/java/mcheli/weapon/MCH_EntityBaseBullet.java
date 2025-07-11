@@ -275,7 +275,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     protected void entityInit() {
         super.entityInit();
-        init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, Type.ENTITY));
+        //init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, Type.ENTITY));
+        //fuck you mother blyat cyka causing me so much pain if you did this I SWEARRRR
         this.getDataWatcher().addObject(27, Integer.valueOf(0));
         this.getDataWatcher().addObject(29, String.valueOf(""));
         this.getDataWatcher().addObject(30, String.valueOf(""));
@@ -627,6 +628,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     public void onUpdate() {
+
+        if (this.ticksExisted > 3 && loaderTicket == null && shouldLoadChunks()) {
+            System.out.println("Bullet passed runtime chunkload check — requesting ticket.");
+            init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, ForgeChunkManager.Type.ENTITY));
+        }
 
         if (!initialized) {
             if (this.ticksExisted > 2) {
