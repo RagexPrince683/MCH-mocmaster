@@ -162,29 +162,17 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     // Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
 
-    //public void init(Ticket ticket) {
-    //    if (!worldObj.isRemote) {
-    //        if (ticket != null) {
-    //            if (loaderTicket == null) {
-    //                loaderTicket = ticket;
-    //                loaderTicket.bindEntity(this);
-    //                loaderTicket.getModData();
-    //            }
-    //            // Force load the initial chunk where the bullet is spawned
-    //            ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
-    //        }
-    //    }
-    //}
-
     public void init(Ticket ticket) {
-        if (!worldObj.isRemote && ticket != null && shouldLoadChunks()) {
-            if (loaderTicket == null) {
-                loaderTicket = ticket;
-                loaderTicket.bindEntity(this);
-                loaderTicket.getModData(); // optional metadata
+        if (!worldObj.isRemote) {
+            if (ticket != null) {
+                if (loaderTicket == null) {
+                    loaderTicket = ticket;
+                    loaderTicket.bindEntity(this);
+                    loaderTicket.getModData();
+                }
+                // Force load the initial chunk where the bullet is spawned
+                ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
             }
-
-            ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
         }
     }
 
