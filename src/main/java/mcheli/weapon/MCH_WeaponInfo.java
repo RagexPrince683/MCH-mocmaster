@@ -22,7 +22,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public final String name;
     public String explosionType;
     public int nukeYield;
-    public int chemYield = 0;
+    public int chemYield;
     public boolean nukeEffectOnly;
     public String displayName;
     public String type;
@@ -337,6 +337,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         this.fixCameraPitch = false;
         this.cameraRotationSpeedPitch = 1.0F;
         this.nukeYield = 0;
+        this.chemYield = 0;
         this.explosionType = "";
     }
 
