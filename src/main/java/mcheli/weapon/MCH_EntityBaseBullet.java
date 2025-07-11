@@ -154,6 +154,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         super.prevRotationYaw = yaw;
         super.prevRotationPitch = pitch;
         super.yOffset = 0.0F;
+        //this.chunkloadEligible = shouldLoadChunks();
         if (acceleration > 3.9D) {
             acceleration = 3.9D;
         }
@@ -637,6 +638,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     public void onUpdate() {
+
+        if (ticksExisted == 1) {
+            chunkloadEligible = shouldLoadChunks();
+            if (chunkloadEligible) System.out.println("CHUNKLOADER ENABLED FOR " + getClass().getSimpleName());
+        }
 
         if (!initialized) {
             if (this.ticksExisted > 2) {
