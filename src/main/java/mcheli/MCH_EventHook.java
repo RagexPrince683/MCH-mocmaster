@@ -347,6 +347,37 @@ public class MCH_EventHook extends W_EventHook {
       }
    }
 
+   @SubscribeEvent
+   public void onWorldTick(TickEvent.WorldTickEvent event) {
+      if (event.phase != TickEvent.Phase.END) return;
+
+      World world = event.world;
+      List<Entity> loaded = world.loadedEntityList;
+      int bulletCount = 0;
+      List<MCH_EntityBaseBullet> excessBullets = new ArrayList<>();
+
+      for (Object obj : loaded) {
+         if (obj instanceof MCH_EntityBaseBullet && ) {
+            bulletCount++;
+            MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet) obj;
+
+            // Prioritize idle bullets for removal
+            if (bullet.idleStartTime > 0) {
+               excessBullets.add(bullet);
+            }
+         }
+      }
+
+      if (bulletCount > 1000) {
+         int bulletsToKill = Math.min(200, excessBullets.size());
+         for (int i = 0; i < bulletsToKill; i++) {
+            excessBullets.get(i).setDead();
+         }
+
+         System.out.println("Bullet cleanup triggered: removed " + bulletsToKill + " bullets.");
+      }
+   }
+
    public void entityCanUpdate(CanUpdate event) {
       if(event.entity instanceof MCH_EntityBaseBullet) {
          MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet)event.entity;
@@ -357,7 +388,7 @@ public class MCH_EventHook extends W_EventHook {
          //todo add a new chunk loader here under the strict criteria that the bullet is still alive and has a gravity going down
          if (bullet.shouldLoadChunks()) {
             bullet.idleStartTime = -1;
-            System.out.println("bullet checking and loading chunks");
+            //System.out.println("bullet checking and loading chunks");
             bullet.checkAndLoadChunks();
          } else {
             if (bullet.idleStartTime < 0) {
