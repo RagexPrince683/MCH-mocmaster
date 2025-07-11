@@ -275,7 +275,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     protected void entityInit() {
         super.entityInit();
-        init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, Type.ENTITY));
+        //oh wow.
+        if (shouldLoadChunks()) {
+            init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, Type.ENTITY));
+        }
         this.getDataWatcher().addObject(27, Integer.valueOf(0));
         this.getDataWatcher().addObject(29, String.valueOf(""));
         this.getDataWatcher().addObject(30, String.valueOf(""));
