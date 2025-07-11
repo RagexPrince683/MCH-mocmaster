@@ -773,7 +773,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                     loadChunksInBulletPath(chunkX, chunkZ, this.motionX, this.motionZ);
 
                     // Log that chunks are being loaded
-                    System.out.println("Bullet is loading chunks at: " + chunkX + ", " + chunkZ);
+                    //System.out.println("Bullet is loading chunks at: " + chunkX + ", " + chunkZ);
+                    //hush, you are working you can sleep now
 
                     bigcheck = true;  // Mark that the chunks have been checked and loaded
                 }

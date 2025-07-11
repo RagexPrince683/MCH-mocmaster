@@ -357,12 +357,15 @@ public class MCH_EventHook extends W_EventHook {
       List<MCH_EntityBaseBullet> excessBullets = new ArrayList<>();
 
       for (Object obj : loaded) {
+
          if (obj instanceof MCH_EntityBaseBullet) {
+
             MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet) obj;
             bulletCount++;
 
             // Only mark for removal if it's NOT a chunk-loading bullet and has been idle
             if (!bullet.shouldLoadChunks() && bullet.idleStartTime > 0) {
+               System.out.println("bullet count" + bulletCount);
                excessBullets.add(bullet);
             }
          }
@@ -396,9 +399,18 @@ public class MCH_EventHook extends W_EventHook {
                bullet.idleStartTime = bullet.worldObj.getTotalWorldTime();
             } else {
                long timePassed = bullet.worldObj.getTotalWorldTime() - bullet.idleStartTime;
-               if (timePassed > 2400) { // 2400 ticks = 2 minutes
-                  bullet.setDead();
-                  System.out.println("Bullet set dead after being idle for 2 minutes.");
+               if (!bullet.bomblet) { // 2400 ticks = 2 minutes
+                  if (timePassed > 2400) {
+                     bullet.setDead();
+                     System.out.println("Non chunk loading Bullet set dead after being idle for 2 minutes.");
+                  }
+               } else {
+                  if (timePassed > 300) { // 600 ticks = 30 seconds
+                     bullet.setDead();
+                     System.out.println("Bomblet set dead after being idle for 15 seconds.");
+                  }
+                  //despawn bomblets way faster
+
                }
                //todo or >25 bullets loaded start despawning them
             }
