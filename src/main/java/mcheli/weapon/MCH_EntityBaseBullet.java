@@ -163,7 +163,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     // Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
 
     public void init(Ticket ticket) {
-        if (!worldObj.isRemote) {
+        //todo here
+        if (!worldObj.isRemote && shouldLoadChunks()) {
             if (ticket != null) {
                 if (loaderTicket == null) {
                     loaderTicket = ticket;
@@ -350,10 +351,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         if (this.shouldLoadChunks()) {
             System.out.println("should load chunks2");
             //todo checkAndLoadChunks() instead
-            if (this.initialized) {
-                this.checkAndLoadChunks();
-                this.loadNeighboringChunks(getChunkX(), getChunkZ());
-                this.clearBulletChunks();
+            if (initialized) {
+                checkAndLoadChunks();
+                loadNeighboringChunks(getChunkX(), getChunkZ());
+                clearBulletChunks();
+                /*
+                this.
+                this.
+                this.
+                this.
+                      */
             }
         }
         super.setDead();
@@ -1102,10 +1109,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
 
         //todo shouldLoadChunks() check here
-        if (this.shouldLoadChunks() && this.initialized) {
+        if (shouldLoadChunks() && initialized) { //this. , this.
             System.out.println("should load chunks3");
-            this.checkAndLoadChunks();
-            this.loadNeighboringChunks(getChunkX(), getChunkZ());
+            checkAndLoadChunks();
+            loadNeighboringChunks(getChunkX(), getChunkZ());
+
+            /*
+            fucking kill me
+            this.
+            this.
+             */
             System.out.println("Extra chunk loader activated.");
         }
 
@@ -1200,10 +1213,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     private void processEntityImpact(MovingObjectPosition hit, float damageFactor) {
-        if (this.shouldLoadChunks() && this.initialized) {
+        if (shouldLoadChunks() && initialized) { //this. , this.
             System.out.println("should load chunks4");
-            this.checkAndLoadChunks();
-            this.loadNeighboringChunks(getChunkX(), getChunkZ());
+            checkAndLoadChunks();
+            loadNeighboringChunks(getChunkX(), getChunkZ());
+            /*
+            this.
+            this.
+             */
             System.out.println("Extra chunk loader activated.");
         }
         onImpactEntity(hit.entityHit, damageFactor);
@@ -1263,11 +1280,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             setDead();
             System.out.println("Impact detected, entity set to dead.");
             //todone do another chunk load then clear and add checks
-            if (this.shouldLoadChunks() && this.initialized) {
+            if (shouldLoadChunks() && initialized) { //this. , this.
                 System.out.println("should load chunks5");
-                this.checkAndLoadChunks();
-                this.loadNeighboringChunks(getChunkX(), getChunkZ());
-                this.clearBulletChunks();
+                checkAndLoadChunks();
+                loadNeighboringChunks(getChunkX(), getChunkZ());
+                clearBulletChunks();
+                /*
+                this.
+                this.
+                this.
+                 */
             }
         }
     }

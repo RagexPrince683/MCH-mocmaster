@@ -22,6 +22,10 @@ import net.minecraft.world.World;
 
 public class MCH_EntityBullet extends MCH_EntityBaseBullet {
 
+   MCH_EntityBaseBullet bullet = this;
+
+   public static boolean shouldLoadChunksmain;
+
    public MCH_EntityBullet(World par1World) {
       super(par1World);
    }
@@ -54,6 +58,15 @@ public class MCH_EntityBullet extends MCH_EntityBaseBullet {
          }
       }
 
+      //this.shouldLoadChunks() {
+
+
+         if (bullet.shouldLoadChunks()) {
+            this.shouldLoadChunksmain = true;
+         } else {
+            this.shouldLoadChunksmain = false;
+         }
+     // }
 
 
    }
