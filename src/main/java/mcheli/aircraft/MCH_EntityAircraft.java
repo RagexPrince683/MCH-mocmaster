@@ -738,28 +738,29 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             this.ejectSeat(var3);
          }
 
-         float dmg = MCH_Config.KillPassengersWhenDestroyed.prmBool ? 100000.0F : 0.001F;
-         DamageSource damageSource = DamageSource.generic; // 默认的伤害来源为generic
-         if (this.worldObj.difficultySetting.getDifficultyId() == 0) {
-            // 如果最后攻击这个实体的是玩家，创建一个基于玩家的伤害来源
-            if (this.lastAttackedEntity instanceof EntityPlayer) {
-               damageSource = DamageSource.causePlayerDamage((EntityPlayer) this.lastAttackedEntity);
-            }
-         } else {
-            // 如果世界难度不为和平模式，创建一个基于爆炸的伤害来源
-            damageSource = DamageSource.setExplosionSource(new Explosion(this.worldObj, this.lastAttackedEntity,
-                    this.posX, this.posY, this.posZ, 1.0F));
-         }
-         // 如果当前实体存在，应用伤害
-         if (this.riddenByEntity != null) {
-            this.riddenByEntity.attackEntityFrom(damageSource, dmg);
-         }
-         // 遍历所有座位上的实体，如果座位上有实体，应用伤害
-         for (MCH_EntitySeat seat : getSeats()) {
-            if (seat != null && seat.riddenByEntity != null) {
-               seat.riddenByEntity.attackEntityFrom(damageSource, dmg);
-            }
-         }
+         //float dmg = MCH_Config.KillPassengersWhenDestroyed.prmBool ? 100000.0F : 0.001F;
+         //DamageSource damageSource = DamageSource.generic; // 默认的伤害来源为generic
+         //if (this.worldObj.difficultySetting.getDifficultyId() == 0) {
+         //   // 如果最后攻击这个实体的是玩家，创建一个基于玩家的伤害来源
+         //   if (this.lastAttackedEntity instanceof EntityPlayer) {
+         //      damageSource = DamageSource.causePlayerDamage((EntityPlayer) this.lastAttackedEntity);
+         //   }
+         //} else {
+         //   // 如果世界难度不为和平模式，创建一个基于爆炸的伤害来源
+         //   damageSource = DamageSource.setExplosionSource(new Explosion(this.worldObj, this.lastAttackedEntity,
+         //           this.posX, this.posY, this.posZ, 1.0F));
+         //}
+         //// 如果当前实体存在，应用伤害
+         //if (this.riddenByEntity != null) {
+         //   this.riddenByEntity.attackEntityFrom(damageSource, dmg);
+         //}
+         //// 遍历所有座位上的实体，如果座位上有实体，应用伤害
+         //for (MCH_EntitySeat seat : getSeats()) {
+         //   if (seat != null && seat.riddenByEntity != null) {
+         //      seat.riddenByEntity.attackEntityFrom(damageSource, dmg);
+         //   }
+         //}
+         //nah
       }
    }
 
@@ -1635,6 +1636,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       Entity e;
       int var7;
       if (isDestroyed() && getCountOnUpdate() % 20 == 0) {
+
+         //todo wait about 15-20 seconds bc fire
                 for (int i = 0; i < getSeatNum() + 1; i++) {
                      Entity entity = getEntityBySeatId(i);
                      if (entity != null && (i != 0 || !isUAV() || !isNewUAV())) {
@@ -4143,6 +4146,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       if (this.isNewUAV()) {
          //teleport player to UAV station.
+         //doesn't working
             if (entity instanceof EntityPlayer) {
                 entity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
             }
@@ -4798,6 +4802,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
 
    public void checkRideRack() {
+      //todo carrier stuff here
       if(this.getCountOnUpdate() % 10 == 0) {
          this.canRideRackStatus = false;
          if(super.ridingEntity == null) {
@@ -5026,68 +5031,68 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public boolean interactFirst(EntityPlayer player) {
-      /* 4361 */     if (isDestroyed())
-         /* 4362 */       return false;
-      /* 4363 */     if (getAcInfo() == null)
-         /* 4364 */       return false;
-      /* 4365 */     if (!checkTeam(player)) {
-         /* 4366 */       return false;
-         /*      */     }
-      /* 4368 */     ItemStack itemStack = player.getCurrentEquippedItem();
-      /* 4369 */     if (itemStack != null && itemStack.getItem() instanceof mcheli.tool.MCH_ItemWrench) {
-         /* 4370 */       if (!this.worldObj.isRemote && player.isSneaking()) {
-            /* 4371 */         switchNextTextureName();
-            /*      */       }
-         /*      */
-         /* 4374 */       return false;
-         /* 4375 */     }
+          if (isDestroyed())
+                return false;
+           if (getAcInfo() == null)
+                return false;
+           if (!checkTeam(player)) {
+                return false;
+              }
+           ItemStack itemStack = player.getCurrentEquippedItem();
+           if (itemStack != null && itemStack.getItem() instanceof mcheli.tool.MCH_ItemWrench) {
+                if (!this.worldObj.isRemote && player.isSneaking()) {
+                     switchNextTextureName();
+                   }
+
+                return false;
+              }
       if (itemStack != null && itemStack.getItem() instanceof mcheli.mob.MCH_ItemSpawnGunner)
-         /* 4376 */       return false;
-      /* 4377 */     if (player.isSneaking()) {
-         /* 4378 */       openInventory(player);
-         /* 4379 */       return false;
-         /* 4380 */     }  if (!(getAcInfo()).canRide)
-         /* 4381 */       return false;
-      /* 4382 */     if (this.riddenByEntity == null && !isUAV() && !isNewUAV()) {
-         /* 4383 */       if (player.ridingEntity instanceof MCH_EntitySeat)
-            /* 4384 */         return false;
-         /* 4385 */       if (!canRideSeatOrRack(0, (Entity)player)) {
-            /* 4386 */         return false;
-            /*      */       }
-         /* 4388 */       if (!this.switchSeat) {
-            /* 4389 */         if (getAcInfo().haveCanopy() && isCanopyClose()) {
-               /* 4390 */           openCanopy();
-               /* 4391 */           return false;
-               /*      */         }
-            /*      */
-            /* 4394 */         if (getModeSwitchCooldown() > 0) {
-               /* 4395 */           return false;
-               /*      */         }
-            /*      */       }
-         /*      */
-         /* 4399 */       closeCanopy();
-         /* 4400 */       this.riddenByEntity = null;
-         /* 4401 */       this.lastRiddenByEntity = null;
-         /* 4402 */       initRadar();
-         /* 4403 */       if (!this.worldObj.isRemote) {
-            /* 4404 */         player.mountEntity((Entity)this);
-            /* 4405 */         if (!this.keepOnRideRotation) {
-               /* 4406 */           mountMobToSeats();
-               /*      */         }
-            /*      */       } else {
-            /* 4409 */         updateClientSettings(0);
-            /*      */       }
-         /*      */
-         /* 4412 */       setCameraId(0);
-         /* 4413 */       initPilotWeapon();
-         /* 4414 */       this.lowPassPartialTicks.clear();
-         /*      */
-         /* 4416 */       onInteractFirst(player);
-         /* 4417 */       return true;
-         /*      */     }
-      /*      */
-      /* 4420 */     return interactFirstSeat(player);
-      /*      */   }
+                return false;
+           if (player.isSneaking()) {
+                openInventory(player);
+                return false;
+              }  if (!(getAcInfo()).canRide)
+                return false;
+          if (this.riddenByEntity == null && !isUAV() && !isNewUAV()) {
+               if (player.ridingEntity instanceof MCH_EntitySeat)
+                    return false;
+               if (!canRideSeatOrRack(0, (Entity)player)) {
+                    return false;
+                  }
+                if (!this.switchSeat) {
+                     if (getAcInfo().haveCanopy() && isCanopyClose()) {
+                          openCanopy();
+                          return false;
+                        }
+
+                     if (getModeSwitchCooldown() > 0) {
+                          return false;
+                        }
+                   }
+
+                closeCanopy();
+                this.riddenByEntity = null;
+                this.lastRiddenByEntity = null;
+                initRadar();
+                if (!this.worldObj.isRemote) {
+                     player.mountEntity((Entity)this);
+                     if (!this.keepOnRideRotation) {
+                          mountMobToSeats();
+                        }
+                   } else {
+                     updateClientSettings(0);
+                   }
+
+                setCameraId(0);
+                initPilotWeapon();
+                this.lowPassPartialTicks.clear();
+
+                onInteractFirst(player);
+                return true;
+              }
+
+           return interactFirstSeat(player);
+         }
 
 
    public boolean canRideSeatOrRack(int seatId, Entity entity) {
@@ -5575,47 +5580,47 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public int getCurrentWeaponID(Entity entity) {
-      /* 4881 */     if (!(entity instanceof EntityPlayer ) && !(entity instanceof MCH_EntityGunner) ) { //
-         /* 4882 */       return -1;
-         /*      */     }
-      /* 4884 */     int id = getSeatIdByEntity(entity);
-      /* 4885 */     return (id >= 0 && id < this.currentWeaponID.length) ? this.currentWeaponID[id] : -1;
-      /*      */   }
+           if (!(entity instanceof EntityPlayer ) && !(entity instanceof MCH_EntityGunner) ) {
+                return -1;
+              }
+          int id = getSeatIdByEntity(entity);
+          return (id >= 0 && id < this.currentWeaponID.length) ? this.currentWeaponID[id] : -1;
+        }
 
    public int getNextWeaponID(Entity entity, int step) {
-      /* 4890 */     if (getAcInfo() == null) {
-         /* 4891 */       return -1;
-         /*      */     }
-      /* 4893 */     int sid = getSeatIdByEntity(entity);
-      /* 4894 */     if (sid < 0) {
-         /* 4895 */       return -1;
-         /*      */     }
-      /* 4897 */     int id = getCurrentWeaponID(entity);
-      /*      */
-      /*      */     int i;
-      /* 4900 */     for (i = 0; i < getWeaponNum(); i++) {
-         /* 4901 */       if (step >= 0) {
-            /* 4902 */         id = (id + 1) % getWeaponNum();
-            /*      */       } else {
-            /* 4904 */         id = (id > 0) ? (id - 1) : (getWeaponNum() - 1);
-            /*      */       }
-         /*      */
-         /* 4907 */       MCH_AircraftInfo.Weapon w = getAcInfo().getWeaponById(id);
-         /* 4908 */       if (w != null) {
-            /* 4909 */         MCH_WeaponInfo wi = getWeaponInfoById(id);
-            /* 4910 */         int wpsid = getWeaponSeatID(wi, w);
-            /* 4911 */         if (wpsid < getSeatNum() + 1 + 1 && (wpsid == sid || (sid == 0 && w.canUsePilot && !(getEntityBySeatId(wpsid) instanceof EntityPlayer) && !(getEntityBySeatId(wpsid) instanceof MCH_EntityGunner)))) { //
-               /*      */           break;
-               /*      */         }
-            /*      */       }
-         /*      */     }
-      /*      */
-      /* 4917 */     if (i >= getWeaponNum()) {
-         /* 4918 */       return -1;
-         /*      */     }
-      /* 4920 */     MCH_Lib.DbgLog(this.worldObj, "getNextWeaponID:%d:->%d", new Object[] { Integer.valueOf(W_Entity.getEntityId(entity)), Integer.valueOf(id) });
-      /* 4921 */     return id;
-      /*      */   }
+           if (getAcInfo() == null) {
+                return -1;
+              }
+           int sid = getSeatIdByEntity(entity);
+           if (sid < 0) {
+                return -1;
+              }
+           int id = getCurrentWeaponID(entity);
+
+           int i;
+           for (i = 0; i < getWeaponNum(); i++) {
+                if (step >= 0) {
+                     id = (id + 1) % getWeaponNum();
+                   } else {
+                     id = (id > 0) ? (id - 1) : (getWeaponNum() - 1);
+                   }
+
+                MCH_AircraftInfo.Weapon w = getAcInfo().getWeaponById(id);
+                if (w != null) {
+                     MCH_WeaponInfo wi = getWeaponInfoById(id);
+                     int wpsid = getWeaponSeatID(wi, w);
+                     if (wpsid < getSeatNum() + 1 + 1 && (wpsid == sid || (sid == 0 && w.canUsePilot && !(getEntityBySeatId(wpsid) instanceof EntityPlayer) && !(getEntityBySeatId(wpsid) instanceof MCH_EntityGunner)))) { //
+                          break;
+                        }
+                   }
+              }
+
+           if (i >= getWeaponNum()) {
+                return -1;
+              }
+           MCH_Lib.DbgLog(this.worldObj, "getNextWeaponID:%d:->%d", new Object[] { Integer.valueOf(W_Entity.getEntityId(entity)), Integer.valueOf(id) });
+           return id;
+         }
 
    public int getWeaponSeatID(MCH_WeaponInfo wi, MCH_AircraftInfo.Weapon w) {
       return wi != null && (wi.target & 195) == 0 && wi.type.isEmpty() && (MCH_MOD.proxy.isSinglePlayer() || MCH_Config.TestMode.prmBool)?1000:w.seatID;
@@ -5835,8 +5840,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   if(wi != null) {
                      Entity entity = this.getEntityBySeatId(this.getWeaponSeatID(this.getWeaponInfoById(wid), wi));
                      if (wi.canUsePilot && !(entity instanceof EntityPlayer) && !(entity instanceof mcheli.mob.MCH_EntityGunner)) { //
-                        /* 5125 */             entity = getEntityBySeatId(0);
-                        /*      */           }
+                                     entity = getEntityBySeatId(0);
+                                   }
 
                      if(entity instanceof EntityPlayer || entity instanceof MCH_EntityGunner) {
                         float ep;

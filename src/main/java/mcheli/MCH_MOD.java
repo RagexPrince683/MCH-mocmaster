@@ -294,13 +294,15 @@ public class MCH_MOD {
 
 
       public void registerEntity() {
-      EntityRegistry.registerModEntity(MCH_EntitySeat.class, "MCH.E.Seat", 100, this, 600, 10, true);
+      EntityRegistry.registerModEntity(MCH_EntitySeat.class, "MCH.E.Seat", 100, this, 200, 10, true);
+      //tracking range was 600, might be causing the invalid entity error?
       EntityRegistry.registerModEntity(MCH_EntityHeli.class, "MCH.E.Heli", 101, this, 600, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityGLTD.class, "MCH.E.GLTD", 102, this, 600, 10, true);
       EntityRegistry.registerModEntity(MCP_EntityPlane.class, "MCH.E.Plane", 103, this, 600, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityShip.class, "MCH.E.Ship", 403, this, 600, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityChain.class, "MCH.E.Chain", 104, this, 200, 10, true);
-      EntityRegistry.registerModEntity(MCH_EntityHitBox.class, "MCH.E.PSeat", 105, this, 600, 10, true);
+      EntityRegistry.registerModEntity(MCH_EntityHitBox.class, "MCH.E.PSeat", 105, this, 200, 10, true);
+      //was also 600, reduced to 200 to *hopefully prevent invalid entity error
       EntityRegistry.registerModEntity(MCH_EntityParachute.class, "MCH.E.Parachute", 106, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityContainer.class, "MCH.E.Container", 107, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityVehicle.class, "MCH.E.Vehicle", 108, this, 600, 10, true);
@@ -344,25 +346,25 @@ public class MCH_MOD {
    }
 
    private void registerItemSpawnGunner() {
-      /* 270 */     String name = "spawn_gunner_vs_monster";
-      /* 271 */     MCH_ItemSpawnGunner item = new MCH_ItemSpawnGunner();
-      /* 272 */     item.targetType = 0;
-      /* 273 */     item.primaryColor = 12632224;
-      /* 274 */     item.secondaryColor = 12582912;
-      /* 275 */     itemSpawnGunnerVsMonster = item;
-      /* 276 */     registerItem((W_Item)item, name, creativeTabs);
-      /* 277 */     W_LanguageRegistry.addName(item, "Gunner (vs Monster)");
-      /* 278 */     W_LanguageRegistry.addNameForObject(item, "ja_JP", "対モンスター 射撃手");
-      /* 279 */     name = "spawn_gunner_vs_player";
-      /* 280 */     item = new MCH_ItemSpawnGunner();
-      /* 281 */     item.targetType = 1;
-      /* 282 */     item.primaryColor = 12632224;
-      /* 283 */     item.secondaryColor = 49152;
-      /* 284 */     itemSpawnGunnerVsPlayer = item;
-      /* 285 */     registerItem((W_Item)item, name, creativeTabs);
-      /* 286 */     W_LanguageRegistry.addName(item, "Gunner (vs Player of other team)");
-      /* 287 */     W_LanguageRegistry.addNameForObject(item, "ja_JP", "対他チームプレイヤー 射撃手");
-      /*     */   }
+           String name = "spawn_gunner_vs_monster";
+           MCH_ItemSpawnGunner item = new MCH_ItemSpawnGunner();
+           item.targetType = 0;
+           item.primaryColor = 12632224;
+           item.secondaryColor = 12582912;
+           itemSpawnGunnerVsMonster = item;
+           registerItem((W_Item)item, name, creativeTabs);
+           W_LanguageRegistry.addName(item, "Gunner (vs Monster)");
+           W_LanguageRegistry.addNameForObject(item, "ja_JP", "対モンスター 射撃手");
+           name = "spawn_gunner_vs_player";
+           item = new MCH_ItemSpawnGunner();
+           item.targetType = 1;
+           item.primaryColor = 12632224;
+           item.secondaryColor = 49152;
+           itemSpawnGunnerVsPlayer = item;
+           registerItem((W_Item)item, name, creativeTabs);
+           W_LanguageRegistry.addName(item, "Gunner (vs Player of other team)");
+           W_LanguageRegistry.addNameForObject(item, "ja_JP", "対他チームプレイヤー 射撃手");
+         }
 
    private void registerItemWrench() {
       String name = "wrench";

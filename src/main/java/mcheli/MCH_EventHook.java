@@ -320,6 +320,8 @@ public class MCH_EventHook extends W_EventHook {
       }
 
       if(ac == null) {
+         //50x50x50 area to test for the parent aircraft
+         //nice, but it could be better.
          List list = entity.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, entity.boundingBox.expand(50.0D, 50.0D, 50.0D));
          if(list != null) {
             for(int i = 0; i < list.size(); ++i) {

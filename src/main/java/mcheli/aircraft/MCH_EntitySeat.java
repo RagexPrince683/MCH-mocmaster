@@ -65,10 +65,11 @@ public class MCH_EntitySeat extends W_Entity {
    public boolean attackEntityFrom(DamageSource damageSource, float amount) {
       Entity sourceEntity = damageSource.getEntity();
 
-      // Prevent rider from damaging their self (and fatally erroring)
-      if (sourceEntity != null && sourceEntity == this.riddenByEntity) {
-         return false;
-      }
+      // hopefully* Prevent rider from damaging their self (and fatally erroring)
+      //**does not work
+      //if (sourceEntity != null && sourceEntity == this.riddenByEntity) {
+      //   return false;
+      //}
 
       // Pass damage to the aircraft if valid
       return getParent() != null && getParent().attackEntityFrom(damageSource, amount);
@@ -76,10 +77,11 @@ public class MCH_EntitySeat extends W_Entity {
 
    @Override
    public boolean hitByEntity(Entity entity) {
-      // Prevent player from hitting the seat they are riding
-      if (entity == this.riddenByEntity) {
-         return false;
-      }
+      // hopefully* Prevent player from hitting the seat they are riding
+      //**also does not work
+      //if (entity == this.riddenByEntity) {
+      //   return false;
+      //}
       return super.hitByEntity(entity);
    }
 
