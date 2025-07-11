@@ -58,7 +58,7 @@ public class MCH_EntityBullet extends MCH_EntityBaseBullet {
          }
       }
 
-      if (bullet.shouldLoadChunks()) {
+      if (chunkloadEligible) {
          this.shouldLoadChunksmain = true;
       } else {
          this.shouldLoadChunksmain = false;
