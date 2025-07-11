@@ -347,13 +347,13 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     //todone add a gravity check here
 
     public void setDead() {
-        if (shouldLoadChunks()) {
+        if (this.shouldLoadChunks()) {
             System.out.println("should load chunks2");
             //todo checkAndLoadChunks() instead
-            if (initialized) {
-                checkAndLoadChunks();
-                loadNeighboringChunks(getChunkX(), getChunkZ());
-                clearBulletChunks();
+            if (this.initialized) {
+                this.checkAndLoadChunks();
+                this.loadNeighboringChunks(getChunkX(), getChunkZ());
+                this.clearBulletChunks();
             }
         }
         super.setDead();
@@ -1101,10 +1101,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
 
         //todo shouldLoadChunks() check here
-        if (shouldLoadChunks() && initialized) {
+        if (this.shouldLoadChunks() && this.initialized) {
             System.out.println("should load chunks3");
-            checkAndLoadChunks();
-            loadNeighboringChunks(getChunkX(), getChunkZ());
+            this.checkAndLoadChunks();
+            this.loadNeighboringChunks(getChunkX(), getChunkZ());
             System.out.println("Extra chunk loader activated.");
         }
 
@@ -1199,10 +1199,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     private void processEntityImpact(MovingObjectPosition hit, float damageFactor) {
-        if (shouldLoadChunks() && initialized) {
+        if (this.shouldLoadChunks() && this.initialized) {
             System.out.println("should load chunks4");
-            checkAndLoadChunks();
-            loadNeighboringChunks(getChunkX(), getChunkZ());
+            this.checkAndLoadChunks();
+            this.loadNeighboringChunks(getChunkX(), getChunkZ());
             System.out.println("Extra chunk loader activated.");
         }
         onImpactEntity(hit.entityHit, damageFactor);
@@ -1262,11 +1262,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             setDead();
             System.out.println("Impact detected, entity set to dead.");
             //todone do another chunk load then clear and add checks
-            if (shouldLoadChunks() && initialized) {
+            if (this.shouldLoadChunks() && this.initialized) {
                 System.out.println("should load chunks5");
-                checkAndLoadChunks();
-                loadNeighboringChunks(getChunkX(), getChunkZ());
-                clearBulletChunks();
+                this.checkAndLoadChunks();
+                this.loadNeighboringChunks(getChunkX(), getChunkZ());
+                this.clearBulletChunks();
             }
         }
     }
@@ -1283,7 +1283,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     public void clearBulletChunks() {
         if (!worldObj.isRemote && loaderTicket != null) {
-            for (ChunkCoordIntPair chunk : bulletLoadedChunks) {
+            for (ChunkCoordIntPair chunk : bulletLoadedChunks) {// maybe put this. here? idk im losing it.
                 ForgeChunkManager.unforceChunk(loaderTicket, chunk);
             }
             bulletLoadedChunks.clear();
