@@ -178,30 +178,28 @@ public class MCH_EntityGunner extends EntityLivingBase {
         return ret;
     }
 
-    private boolean canEntityBeSeenOrBehindBreakableBlocks(Entity entity) {
-        // Check if the entity can be seen directly
-        if (canEntityBeSeen(entity)) {
-            // If the entity is visible and not a friendly, return true
-            if (!isOnSameTeam((EntityLivingBase) entity)) {
+    public boolean canEntityBeSeenOrBehindBreakableBlocks(Entity target) {
+        Vec3 start = Vec3.createVectorHelper(this.posX, this.posY + this.getEyeHeight(), this.posZ);
+        Vec3 end = Vec3.createVectorHelper(target.posX, target.posY + target.getEyeHeight(), target.posZ);
+
+        MovingObjectPosition result = this.worldObj.rayTraceBlocks(start, end);
+
+        if (result == null) {
+            // No obstruction, clear line of sight
+            return true;
+        }
+
+        if (result.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+            Block block = this.worldObj.getBlock(result.blockX, result.blockY, result.blockZ);
+            List<Block> breakableBlocks = MCH_Config.getBreakableBlockListFromType(MCH_Config.BulletBreakableBlock.prmInt);
+
+            // Allow targeting if block is breakable
+            if (breakableBlocks.contains(block)) {
+                System.out.println("[AI] Block is breakable, allowing target through.");
                 return true;
             }
         }
 
-        // Perform a ray trace to check for obstructions
-        Vec3 start = Vec3.createVectorHelper(this.posX, this.posY + this.getEyeHeight(), this.posZ);
-        Vec3 end = Vec3.createVectorHelper(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
-        MovingObjectPosition rayTraceResult = this.worldObj.rayTraceBlocks(start, end);
-
-        // If there is an obstruction, check if it is a breakable block
-        if (rayTraceResult != null && rayTraceResult.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-            Block block = this.worldObj.getBlock(rayTraceResult.blockX, rayTraceResult.blockY, rayTraceResult.blockZ);
-            List<Block> breakableBlocks = MCH_Config.getBreakableBlockListFromType(MCH_Config.BulletBreakableBlock.prmInt);
-
-            // Return true if the block is in the list of breakable blocks
-            return breakableBlocks.contains(block);
-        }
-
-        // Return false if the entity is not visible and no breakable block is obstructing
         return false;
     }
 
