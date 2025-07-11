@@ -97,7 +97,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public int antiFlareTick;
     boolean doingTopAttack = false;
     boolean speedAddedFromAircraft = false;
-    private ForgeChunkManager.Ticket chunkLoaderTicket;
+    //private ForgeChunkManager.Ticket chunkLoaderTicket;
     //private List<ChunkCoordIntPair> loadedChunks = new ArrayList<>();
 
     boolean isInRangeToRenderDist2;
@@ -348,9 +348,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         if (shouldLoadChunks()) {
             System.out.println("should load chunks2");
             //todo checkAndLoadChunks() instead
-            checkAndLoadChunks();
-            loadNeighboringChunks(getChunkX(), getChunkZ());
-            clearBulletChunks();
+            if (this.ticksExisted > 2) {
+                checkAndLoadChunks();
+                loadNeighboringChunks(getChunkX(), getChunkZ());
+                clearBulletChunks();
+            }
         }
         super.setDead();
         //this.clearChunkLoader();
@@ -641,7 +643,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
 
         //if (!isInRangeToRenderDist2) {
-            if (!bomblet && gravitydown && bigdelay) {
+            if (!bomblet && gravitydown && bigdelay && this.ticksExisted > 2) {
                 checkAndLoadChunks();  // If this method handles any critical chunk loading, it stays here
             }
         //}
@@ -1090,7 +1092,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
 
         //todo shouldLoadChunks() check here
-        if (shouldLoadChunks()) {
+        if (shouldLoadChunks() && this.ticksExisted > 2) {
             System.out.println("should load chunks3");
             checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
@@ -1188,7 +1190,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     private void processEntityImpact(MovingObjectPosition hit, float damageFactor) {
-        if (shouldLoadChunks()) {
+        if (shouldLoadChunks() && this.ticksExisted > 2) {
             System.out.println("should load chunks4");
             checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
@@ -1251,7 +1253,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             setDead();
             System.out.println("Impact detected, entity set to dead.");
             //todone do another chunk load then clear and add checks
-            if (shouldLoadChunks()) {
+            if (shouldLoadChunks() && this.ticksExisted > 2) {
                 System.out.println("should load chunks5");
                 checkAndLoadChunks();
                 loadNeighboringChunks(getChunkX(), getChunkZ());
@@ -1286,17 +1288,18 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         if (this.bomblet) {
             // Do nothing. Never chunkload, never track
             return false;
+        } else {
+            boolean result = !bomblet && gravitydown && bigdelay && bigcheck;
+            if (result) {
+                System.out.println("[shouldLoadChunks] Chunkloading bullet allowed: " + this.getClass().getSimpleName()
+                        + " | bomblet=" + bomblet
+                        + " | gravitydown=" + gravitydown
+                        + " | bigdelay=" + bigdelay
+                        + " | bigcheck=" + bigcheck
+                        + " | pos=" + this.posX + ", " + this.posY + ", " + this.posZ);
+            }
+            return result;
         }
-        boolean result = !bomblet && gravitydown && bigdelay && bigcheck;
-        if (result) {
-            System.out.println("[shouldLoadChunks] Chunkloading bullet allowed: " + this.getClass().getSimpleName()
-                    + " | bomblet=" + bomblet
-                    + " | gravitydown=" + gravitydown
-                    + " | bigdelay=" + bigdelay
-                    + " | bigcheck=" + bigcheck
-                    + " | pos=" + this.posX + ", " + this.posY + ", " + this.posZ);
-        }
-        return result;
     }
     //private boolean shouldClearChunkLoaders() { return !bomblet && gravitydown && bigdelay; }
     private boolean shouldCreateFAExplosion() { return getInfo().isFAE; }

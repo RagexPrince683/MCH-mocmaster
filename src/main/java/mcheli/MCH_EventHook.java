@@ -397,7 +397,9 @@ public class MCH_EventHook extends W_EventHook {
             //which is how far an apfsds bullet should be allowed to go according to my genericified math
 
             //System.out.println("bullet checking and loading chunks");
-            bullet.checkAndLoadChunks();
+            if (bullet.ticksExisted > 2) {
+               bullet.checkAndLoadChunks();
+            }
          } else {
             if (bullet.idleStartTime < 0) {
                // Start the idle timer
