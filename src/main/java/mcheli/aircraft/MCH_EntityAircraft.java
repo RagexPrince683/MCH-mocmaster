@@ -5332,27 +5332,27 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void switchWeapon(Entity entity, int id) {
-      int sid = getSeatIdByEntity(entity);
-      if (!isValidSeatID(sid))
-         return;
-      int beforeWeaponID = this.currentWeaponID[sid];
-      if (getWeaponNum() <= 0 || this.currentWeaponID.length <= 0)
-         return;
-      if (id < 0)
-         this.currentWeaponID[sid] = -1;
-      if (id >= getWeaponNum())
-         id = getWeaponNum() - 1;
-      MCH_Lib.DbgLog(this.worldObj, "switchWeapon:" + W_Entity.getEntityId(entity) + " -> " + id, new Object[0]);
-      getCurrentWeapon(entity).reload();
-      this.currentWeaponID[sid] = id;
-      MCH_WeaponSet ws = getCurrentWeapon(entity);
-      ws.onSwitchWeapon(this.worldObj.isRemote, isInfinityAmmo(entity));
-      //if(ws.getCurrentWeapon().worldObj.isRemote) {
-      //   W_McClient.MOD_playSoundFX(ws.getInfo().weaponSwitchSound, 3F, 1.0F);
-      //}
-      //we dont do that here
-      if (!this.worldObj.isRemote)
-         MCH_PacketNotifyWeaponID.send((Entity)this, sid, id, ws.getAmmoNum(), ws.getRestAllAmmoNum());
+      int sid = this.getSeatIdByEntity(entity);
+      if (this.isValidSeatID(sid)) {
+         if (this.getWeaponNum() > 0 && this.currentWeaponID.length > 0) {
+            if (id < 0) {
+               id = 0; // Ensure id is not negative
+            }
+
+            if (id >= this.getWeaponNum()) {
+               id = this.getWeaponNum() - 1;
+            }
+
+            MCH_Lib.DbgLog(super.worldObj, "switchWeapon:" + W_Entity.getEntityId(entity) + " -> " + id, new Object[0]);
+            this.getCurrentWeapon(entity).reload();
+            this.currentWeaponID[sid] = id;
+            MCH_WeaponSet ws = this.getCurrentWeapon(entity);
+            ws.onSwitchWeapon(super.worldObj.isRemote, this.isInfinityAmmo(entity));
+            if (!super.worldObj.isRemote) {
+               MCH_PacketNotifyWeaponID.send(this, sid, id, ws.getAmmoNum(), ws.getRestAllAmmoNum());
+            }
+         }
+      }
    }
 
    public void updateWeaponID(int sid, int id) {
