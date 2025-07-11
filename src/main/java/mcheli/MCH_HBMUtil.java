@@ -53,8 +53,9 @@ public class MCH_HBMUtil {
         try {
             System.out.println("spawn chlorine method");
             if (explosionChaosClass != null) {
-                Method spawnChlorineMethod = explosionChaosClass.getMethod("spawnChlorine", World.class, double.class, double.class, double.class, int.class, double.class, int.class);
-                spawnChlorineMethod.invoke(null, world, posX, posY, posZ, chemYield, 1.25, 0);
+                Method spawnChlorineMethod = explosionChaosClass.getMethod("spawnChlorine",
+                        World.class, double.class, double.class, double.class, int.class, double.class, int.class);
+                spawnChlorineMethod.invoke(null, world, posX, posY, posZ, (int)chemYield, 1.25, 0);
                 System.out.println("Chlorine effect spawned successfully");
                 //ExplosionChaos.spawnChlorine(worldObj, posX, posY, posZ, 50, 1.5, 0);
                 //annnnnd everything seems to check out except the fact that it isn't fucking working, Great!
