@@ -106,12 +106,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public boolean chunkloadEligible = false;
 
 
-    //old methods
-    //List<ChunkCoordIntPair> bulletLoadedChunks = new ArrayList<>();
-    //List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
-
-    Set<ChunkCoordIntPair> loadedChunks = new HashSet<>();
-    Set<ChunkCoordIntPair> bulletLoadedChunks = new HashSet<>();
+    List<ChunkCoordIntPair> bulletLoadedChunks = new ArrayList<>();
 
 
     public MCH_EntityBaseBullet(World par1World) {
@@ -171,24 +166,22 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     // Chunk loading code courtesy of HBM's nuclear tech mod https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/
 
     public void init(Ticket ticket) {
-        if (!worldObj.isRemote && ticket != null && chunkloadEligible) {
-            if (loaderTicket == null) {
-                loaderTicket = ticket;
-                loaderTicket.bindEntity(this);
-                loaderTicket.getModData();
-            }
-
-            ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
-        } else {
-            if (!chunkloadEligible) {
-                System.out.println("Ticket received, but bullet is not eligible (bomblet=" + bomblet + ")");
+        if (!worldObj.isRemote) {
+            if (ticket != null) {
+                if (loaderTicket == null) {
+                    loaderTicket = ticket;
+                    loaderTicket.bindEntity(this);
+                    loaderTicket.getModData();
+                }
+                // Force load the initial chunk where the bullet is spawned
+                ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
             }
         }
     }
 
 
 
-
+    List<ChunkCoordIntPair> loadedChunks = new ArrayList<ChunkCoordIntPair>();
 
     // Dynamically load chunks based on bullet's movement
     public void checkAndLoadChunks() {
@@ -1313,13 +1306,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 // Do nothing. Never chunkload, never track
                 return false;
             } else {
-                System.out.println("[shouldLoadChunks] BulletClass=" + getClass().getSimpleName()
-                        + " | bomblet=" + bomblet
-                        + " | gravitydown=" + gravitydown
-                        + " | bigdelay=" + bigdelay
-                        + " | bigcheck=" + bigcheck);
-
-                return !bomblet && gravitydown && bigdelay && bigcheck;
+                boolean result = !bomblet && gravitydown && bigdelay && bigcheck;
+                if (result) {
+                    System.out.println("[shouldLoadChunks] Chunkloading bullet allowed: " + this.getClass().getSimpleName()
+                            + " | bomblet=" + bomblet
+                            + " | gravitydown=" + gravitydown
+                            + " | bigdelay=" + bigdelay
+                            + " | bigcheck=" + bigcheck
+                            + " | pos=" + this.posX + ", " + this.posY + ", " + this.posZ);
+                }
+                return result;
             }
         } catch (Exception e) {
             System.out.println("well this wasn't supposed to happen.");
