@@ -102,7 +102,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     //private ForgeChunkManager.Ticket chunkLoaderTicket;
     //private List<ChunkCoordIntPair> loadedChunks = new ArrayList<>();
 
-    boolean isInRangeToRenderDist2;
+    //boolean isInRangeToRenderDist2;
 
     List<ChunkCoordIntPair> bulletLoadedChunks = new ArrayList<>();
 
