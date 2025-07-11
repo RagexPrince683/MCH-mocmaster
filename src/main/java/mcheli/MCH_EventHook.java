@@ -357,12 +357,12 @@ public class MCH_EventHook extends W_EventHook {
       List<MCH_EntityBaseBullet> excessBullets = new ArrayList<>();
 
       for (Object obj : loaded) {
-         if (obj instanceof MCH_EntityBaseBullet && ) {
-            bulletCount++;
+         if (obj instanceof MCH_EntityBaseBullet) {
             MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet) obj;
+            bulletCount++;
 
-            // Prioritize idle bullets for removal
-            if (bullet.idleStartTime > 0) {
+            // Only mark for removal if it's NOT a chunk-loading bullet and has been idle
+            if (!bullet.shouldLoadChunks() && bullet.idleStartTime > 0) {
                excessBullets.add(bullet);
             }
          }
@@ -374,7 +374,7 @@ public class MCH_EventHook extends W_EventHook {
             excessBullets.get(i).setDead();
          }
 
-         System.out.println("Bullet cleanup triggered: removed " + bulletsToKill + " bullets.");
+         System.out.println("Bullet cleanup triggered: removed " + bulletsToKill + " non-chunkloading idle bullets.");
       }
    }
 
