@@ -237,6 +237,7 @@ public class MCH_MOD {
 
 
       try {
+         System.out.println("main loading chunks logic");
          ForgeChunkManager.setForcedChunkLoadingCallback(this, (tickets, world) -> {
             for (ForgeChunkManager.Ticket ticket : tickets) {
                if (ticket.getEntity() instanceof MCH_EntityBullet && MCH_EntityBullet.shouldLoadChunksmain) {
