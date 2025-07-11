@@ -57,6 +57,8 @@ public class MCH_ServerTickHandler {
    double visualDistance = 2500;
    @SubscribeEvent
    void onWorldTick(TickEvent.WorldTickEvent evt) {
+      System.out.println("onworldtick works");
+      //inb4 this shit never fires and its more goddamn schizophrenic bullshit from this fuckass mod
       World worldObj = evt.world;
 
       // --- Existing MCH plane syncing logic ---

@@ -1282,23 +1282,27 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     // Utility methods
     private int getChunkX() { return (int) Math.floor(posX / 16.0); }
     private int getChunkZ() { return (int) Math.floor(posZ / 16.0); }
-    public boolean shouldLoadChunks() { return !bomblet && gravitydown && bigdelay && bigcheck; }
-    private boolean shouldClearChunkLoaders() { return !bomblet && gravitydown && bigdelay; }
+    public boolean shouldLoadChunks() {
+        if (this.bomblet) {
+            // Do nothing. Never chunkload, never track
+            return false;
+        }
+        boolean result = !bomblet && gravitydown && bigdelay && bigcheck;
+        if (result) {
+            System.out.println("[shouldLoadChunks] Chunkloading bullet allowed: " + this.getClass().getSimpleName()
+                    + " | bomblet=" + bomblet
+                    + " | gravitydown=" + gravitydown
+                    + " | bigdelay=" + bigdelay
+                    + " | bigcheck=" + bigcheck
+                    + " | pos=" + this.posX + ", " + this.posY + ", " + this.posZ);
+        }
+        return result;
+    }
+    //private boolean shouldClearChunkLoaders() { return !bomblet && gravitydown && bigdelay; }
     private boolean shouldCreateFAExplosion() { return getInfo().isFAE; }
     private boolean shouldHandleTileHit(MovingObjectPosition hit) {
         return getInfo() != null && (getInfo().explosion == 0 || getInfo().modeNum >= 2) && W_MovingObjectPosition.isHitTypeTile(hit);
     }
-
-    //private void resetEntityMotion(Entity entity) {
-    //    if (entity instanceof MCH_EntityAircraft || entity instanceof MCH_EntitySeat || entity instanceof MCH_EntityVehicle || entity instanceof MCH_EntityShip || entity instanceof MCH_EntityHitBox || entity instanceof MCH_EntityBaseBullet || entity instanceof MCH_EntityGunner || entity instanceof MCH_DummyEntityPlayer || entity instanceof MCH_EntityHeli || entity instanceof MCP_EntityPlane || entity instanceof MCH_EntityUavStation) {
-    //        //hopefully fixes the issue of vehicles (mainly flying 'aircraft') dropping like flies after being impacted
-    //        //covers literally everything except tanks I can't think of a better way to do this.
-    //    } else {
-    //        entity.motionX = 0;
-    //        entity.motionY = 0;
-    //        entity.motionZ = 0;
-    //    }
-    //}
 
 
     private void handleTileHit(MovingObjectPosition hit) {
