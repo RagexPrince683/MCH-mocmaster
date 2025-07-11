@@ -80,29 +80,30 @@ public class MCH_ServerTickHandler {
       }
 
       // --- NEW: Bullet despawn logic ---
-      List<Entity> loaded = worldObj.loadedEntityList;
-      int bulletCount = 0;
-      List<MCH_EntityBaseBullet> excessBullets = new ArrayList<>();
-
-      for (Object obj : loaded) {
-         if (obj instanceof MCH_EntityBaseBullet) {
-            MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet) obj;
-            bulletCount++;
-
-            if (!bullet.shouldLoadChunks() && bullet.idleStartTime > 0) {
-               System.out.println("NOT should load chunks");
-               excessBullets.add(bullet);
-            }
-         }
-      }
-
-      if (bulletCount > 1000) {
-         int bulletsToKill = Math.min(200, excessBullets.size());
-         for (int i = 0; i < bulletsToKill; i++) {
-            excessBullets.get(i).setDead();
-         }
-         System.out.println("Bullet cleanup triggered: removed " + bulletsToKill + " bullets.");
-      }
+      //List<Entity> loaded = worldObj.loadedEntityList;
+      //int bulletCount = 0;
+      //List<MCH_EntityBaseBullet> excessBullets = new ArrayList<>();
+//
+      //for (Object obj : loaded) {
+      //   if (obj instanceof MCH_EntityBaseBullet) {
+      //      MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet) obj;
+      //      bulletCount++;
+//
+      //      if (!bullet.shouldLoadChunks() && bullet.idleStartTime > 0) {
+      //         System.out.println("NOT should load chunks");
+      //         excessBullets.add(bullet);
+      //      }
+      //   }
+      //}
+//
+      //if (bulletCount > 1000) {
+      //   int bulletsToKill = Math.min(200, excessBullets.size());
+      //   for (int i = 0; i < bulletsToKill; i++) {
+      //      excessBullets.get(i).setDead();
+      //   }
+      //   System.out.println("Bullet cleanup triggered: removed " + bulletsToKill + " bullets.");
+      //}
+      //this shit does NOT work. I FUCKING LOVE THIS MOD'S SCHIZOPHRENIA
    }
 
    private void onServerTickPre() {
