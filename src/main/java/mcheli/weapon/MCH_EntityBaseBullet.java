@@ -87,6 +87,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public boolean bigdelay;
     private boolean bigcheck = false;
     public int chemYield = 0;
+    private boolean initialized = false;
+
 
     //public int delayrangeloaderint = delayrangeloader;
 
@@ -348,7 +350,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         if (shouldLoadChunks()) {
             System.out.println("should load chunks2");
             //todo checkAndLoadChunks() instead
-            if (this.ticksExisted > 2) {
+            if (initialized) {
                 checkAndLoadChunks();
                 loadNeighboringChunks(getChunkX(), getChunkZ());
                 clearBulletChunks();
@@ -626,6 +628,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     public void onUpdate() {
 
+        if (!initialized) {
+            if (this.ticksExisted > 2) {
+                this.initialized = true;
+            } else {
+                return; // Block all chunk-related logic until init done
+            }
+        }
+
         
 
         if(!worldObj.isRemote) {
@@ -643,7 +653,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
 
         //if (!isInRangeToRenderDist2) {
-            if (!bomblet && gravitydown && bigdelay && this.ticksExisted > 2) {
+            if (!bomblet && gravitydown && bigdelay && initialized) {
                 checkAndLoadChunks();  // If this method handles any critical chunk loading, it stays here
             }
         //}
@@ -1092,7 +1102,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
 
         //todo shouldLoadChunks() check here
-        if (shouldLoadChunks() && this.ticksExisted > 2) {
+        if (shouldLoadChunks() && initialized) {
             System.out.println("should load chunks3");
             checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
@@ -1190,7 +1200,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     private void processEntityImpact(MovingObjectPosition hit, float damageFactor) {
-        if (shouldLoadChunks() && this.ticksExisted > 2) {
+        if (shouldLoadChunks() && initialized) {
             System.out.println("should load chunks4");
             checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
@@ -1253,7 +1263,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             setDead();
             System.out.println("Impact detected, entity set to dead.");
             //todone do another chunk load then clear and add checks
-            if (shouldLoadChunks() && this.ticksExisted > 2) {
+            if (shouldLoadChunks() && initialized) {
                 System.out.println("should load chunks5");
                 checkAndLoadChunks();
                 loadNeighboringChunks(getChunkX(), getChunkZ());
@@ -1285,20 +1295,28 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     private int getChunkX() { return (int) Math.floor(posX / 16.0); }
     private int getChunkZ() { return (int) Math.floor(posZ / 16.0); }
     public boolean shouldLoadChunks() {
-        if (this.bomblet) {
-            // Do nothing. Never chunkload, never track
-            return false;
-        } else {
-            boolean result = !bomblet && gravitydown && bigdelay && bigcheck;
-            if (result) {
-                System.out.println("[shouldLoadChunks] Chunkloading bullet allowed: " + this.getClass().getSimpleName()
-                        + " | bomblet=" + bomblet
-                        + " | gravitydown=" + gravitydown
-                        + " | bigdelay=" + bigdelay
-                        + " | bigcheck=" + bigcheck
-                        + " | pos=" + this.posX + ", " + this.posY + ", " + this.posZ);
+
+        if (this.ticksExisted < 3) return false;
+
+        try {
+            if (this.bomblet) {
+                // Do nothing. Never chunkload, never track
+                return false;
+            } else {
+                boolean result = !bomblet && gravitydown && bigdelay && bigcheck;
+                if (result) {
+                    System.out.println("[shouldLoadChunks] Chunkloading bullet allowed: " + this.getClass().getSimpleName()
+                            + " | bomblet=" + bomblet
+                            + " | gravitydown=" + gravitydown
+                            + " | bigdelay=" + bigdelay
+                            + " | bigcheck=" + bigcheck
+                            + " | pos=" + this.posX + ", " + this.posY + ", " + this.posZ);
+                }
+                return result;
             }
-            return result;
+        } catch (Exception e) {
+            System.out.println("well this wasn't supposed to happen.");
+            return false;
         }
     }
     //private boolean shouldClearChunkLoaders() { return !bomblet && gravitydown && bigdelay; }
@@ -1439,6 +1457,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
         //("read entity from nbt, would set dead but commented out");
         this.setDead();
+        //todo clear chunk loader here
         System.out.println("setting dead due to readentityfromnbt");
     }
 
