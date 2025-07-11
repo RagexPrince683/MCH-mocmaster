@@ -364,6 +364,17 @@ public class MCH_MOD {
            registerItem((W_Item)item, name, creativeTabs);
            W_LanguageRegistry.addName(item, "Gunner (vs Player of other team)");
            W_LanguageRegistry.addNameForObject(item, "ja_JP", "対他チームプレイヤー 射撃手");
+
+           name = "spawn_gunner_evil";
+           item = new MCH_ItemSpawnGunner();
+           item.targetType = 2;
+           item.primaryColor = 12582912;
+           item.secondaryColor = 12582912;
+           itemSpawnGunnerVsPlayer = item;
+           registerItem((W_Item)item, name, creativeTabs);
+           W_LanguageRegistry.addName(item, "Gunner (EVIL)");
+           W_LanguageRegistry.addNameForObject(item, "ja_JP", "対他チーム");
+           //idk if it will work
          }
 
    private void registerItemWrench() {

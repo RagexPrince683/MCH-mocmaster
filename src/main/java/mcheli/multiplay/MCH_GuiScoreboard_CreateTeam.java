@@ -83,9 +83,16 @@ public class MCH_GuiScoreboard_CreateTeam extends MCH_GuiScoreboard_Base {
          case 528:
             String teamName = this.editCreateTeamName.getText();
             if(teamName.length() > 0 && teamName.length() <= 16) {
-               MCH_PacketIndMultiplayCommand.send(768, "scoreboard teams add " + teamName);
-               MCH_PacketIndMultiplayCommand.send(768, "scoreboard teams option " + teamName + " color " + colorNames[this.lastTeamColor]);
-               MCH_PacketIndMultiplayCommand.send(768, "scoreboard teams option " + teamName + " friendlyfire " + friendlyFire);
+               if (!teamName.matches("EVIL")) {
+                  MCH_PacketIndMultiplayCommand.send(768, "scoreboard teams add " + teamName);
+                  //idk if the color or FF matters but I'm gonna keep it up here just incase
+                  MCH_PacketIndMultiplayCommand.send(768, "scoreboard teams option " + teamName + " color " + colorNames[this.lastTeamColor]);
+                  MCH_PacketIndMultiplayCommand.send(768, "scoreboard teams option " + teamName + " friendlyfire " + friendlyFire);
+               } else {
+                  //close gui
+                  return;
+               }
+
             }
 
             this.switchScreen(MCH_GuiScoreboard_Base.SCREEN_ID.MAIN);
