@@ -755,39 +755,40 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             this.ejectSeat(var3);
          }
 
-         if (isNewUAV()) {
-            System.out.println("New UAV detected, performing special dismount logic. IS REMOTE");
-            player.mountEntity(null);
-            player.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
-
-            System.out.println("Setting position to: " +
-                    this.UavStationPosX + ", " +
-                    this.UavStationPosY + ", " +
-                    this.UavStationPosZ);
-
-            player.setPositionAndUpdate(
-                    this.UavStationPosX,
-                    this.UavStationPosY,
-                    this.UavStationPosZ
-            );
-            System.out.println("Setting position to: " +
-                    getUavStation().getStoredStationX() + ", " +
-                    getUavStation().getStoredStationY() + ", " +
-                    getUavStation().getStoredStationZ());
-
-            getRiddenByEntity().setPosition(
-                    getUavStation().getStoredStationX(),
-                    getUavStation().getStoredStationY(),
-                    getUavStation().getStoredStationZ());
-
-            //player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed!"));
-            player.addPotionEffect(new PotionEffect(11, 20, 50));
-
-
-            //player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
-            //already applied
-            player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
-         }
+         //if (isNewUAV()) {
+         //   System.out.println("New UAV detected, performing special dismount logic. IS REMOTE");
+         //   player.mountEntity(null);
+         //   player.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
+//
+         //   System.out.println("Setting position to: " +
+         //           this.UavStationPosX + ", " +
+         //           this.UavStationPosY + ", " +
+         //           this.UavStationPosZ);
+//
+         //   player.setPositionAndUpdate(
+         //           this.UavStationPosX,
+         //           this.UavStationPosY,
+         //           this.UavStationPosZ
+         //   );
+         //   System.out.println("Setting position to: " +
+         //           getUavStation().getStoredStationX() + ", " +
+         //           getUavStation().getStoredStationY() + ", " +
+         //           getUavStation().getStoredStationZ());
+//
+         //   getRiddenByEntity().setPosition(
+         //           getUavStation().getStoredStationX(),
+         //           getUavStation().getStoredStationY(),
+         //           getUavStation().getStoredStationZ());
+//
+         //   //player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed!"));
+         //   player.addPotionEffect(new PotionEffect(11, 20, 50));
+//
+//
+         //   //player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
+         //   //already applied
+         //   player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
+         //}
+         //so basically this crashed the game or something
 
          //float dmg = MCH_Config.KillPassengersWhenDestroyed.prmBool ? 100000.0F : 0.001F;
          //DamageSource damageSource = DamageSource.generic; // 默认的伤害来源为generic
