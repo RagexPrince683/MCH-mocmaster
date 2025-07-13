@@ -700,23 +700,31 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             Entity rider = getRiddenByEntity();
             if (rider instanceof EntityPlayer) {
                EntityPlayer player = (EntityPlayer) rider;
-
+               player.mountEntity(null);
+               player.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
                player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed!"));
                player.addPotionEffect(new PotionEffect(11, 20, 50));
 
-               // Ensure the player is properly dismounted before teleporting
-               player.mountEntity(null);
 
-               System.out.println(MCH_EntityUavStation.storedStationX + " " +
-                       MCH_EntityUavStation.storedStationY + " " +
-                       MCH_EntityUavStation.storedStationZ + " " + "station pos");
+               //player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
+               //already applied
+               player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
+
+               // Ensure the player is properly dismounted
+
+
+               //we shouldn't in theory have to do all this other crap now bc we went directly for dismount logic.
+
+               //System.out.println(MCH_EntityUavStation.storedStationX + " " +
+               //        MCH_EntityUavStation.storedStationY + " " +
+               //        MCH_EntityUavStation.storedStationZ + " " + "station pos");
 
                // Teleport player
-               player.setPositionAndUpdate(
-                       MCH_EntityUavStation.storedStationX,
-                       MCH_EntityUavStation.storedStationY,
-                       MCH_EntityUavStation.storedStationZ
-               );
+               //player.setPositionAndUpdate(
+               //        MCH_EntityUavStation.storedStationX,
+               //        MCH_EntityUavStation.storedStationY,
+               //        MCH_EntityUavStation.storedStationZ
+               //);
             }
             // Teleport the player back to the stored station position.
             //if (getUavStation() != null) {

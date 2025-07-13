@@ -234,43 +234,51 @@ public class MCH_EntityUavStation
              public void setDead() {
                  System.out.println("setDead fired in UAV Station");
 
-                 if (this.controlAircraft != null) {
-                     System.out.println("Retrieving stored player UUID from controlled UAV.");
-                     this.newUavPlayerUUID = this.controlAircraft.newUavPlayerUUID;
-                 }
+                 //station no longer loaded, OR broken NOT necessarily dead that's literally just fake
+                 //also kinda clientside-ish? might be both idk
+                 //so we should start chunk loading here?
 
-                 if (this.newUavPlayerUUID != null) {
-                     System.out.println("Stored player UUID: " + this.newUavPlayerUUID);
-                     for (Object obj : worldObj.playerEntities) {
-                         EntityPlayer player = (EntityPlayer) obj;
-                         if (player.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
-                             System.out.println("Found matching player by UUID. Attempting teleport...");
 
-                             // Ensure dismount
-                             if (player.ridingEntity instanceof MCH_EntityAircraft) {
-                                 MCH_EntityAircraft aircraft = (MCH_EntityAircraft) player.ridingEntity;
-                                 System.out.println("Player is currently in UAV. Calling unmountAircraft...");
-                                 aircraft.unmountAircraft();
-                             } else {
-                                 System.out.println("Player is NOT riding a UAV, forcing dismount.");
-                                 player.mountEntity(null);
-                             }
 
-                             System.out.println("Teleporting player to station at: " + storedStationX + ", " + storedStationY + ", " + storedStationZ);
+                 //if (this.controlAircraft != null) {
+                 //    System.out.println("Retrieving stored player UUID from controlled UAV.");
+                 //    this.newUavPlayerUUID = this.controlAircraft.newUavPlayerUUID;
+                 //}
 
-                             player.isSneaking();
-                             player.mountEntity(null);
+                 //if (this.newUavPlayerUUID != null) {
+                 //    System.out.println("Stored player UUID: " + this.newUavPlayerUUID);
+                 //    for (Object obj : worldObj.playerEntities) {
+                 //        EntityPlayer player = (EntityPlayer) obj;
+                 //        if (player.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
+                 //            System.out.println("Found matching player by UUID. Attempting teleport...");
+//
+                 //            // Ensure dismount
+                 //            if (player.ridingEntity instanceof MCH_EntityAircraft) {
+                 //                MCH_EntityAircraft aircraft = (MCH_EntityAircraft) player.ridingEntity;
+                 //                System.out.println("Player is currently in UAV. Calling unmountAircraft...");
+                 //                aircraft.unmountAircraft();
+                 //            } else {
+                 //                System.out.println("Player is NOT riding a UAV, forcing dismount.");
+                 //                player.mountEntity(null);
+                 //            }
+//
+                 //            System.out.println("Teleporting player to station at: " + storedStationX + ", " + storedStationY + ", " + storedStationZ);
+//
+                 //            player.isSneaking();
+                 //            player.mountEntity(null);
+//
+                 //            // Force teleportation
+                 //            player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
+//
+                 //            player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
+                 //            break;
+                 //        }
+                 //    }
+                 //} else {
+                 //    System.out.println("No stored player UUID in UAV station.");
+                 //}
 
-                             // Force teleportation
-                             player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
-
-                             player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
-                             break;
-                         }
-                     }
-                 } else {
-                     System.out.println("No stored player UUID in UAV station.");
-                 }
+                 //will fire when player is outside of chunk for some reason
 
                  super.setDead();
                  System.out.println("UAV Station setDead completed.");
@@ -581,23 +589,23 @@ public class MCH_EntityUavStation
 
 
              protected void onUpdate_Client() {
-                 /* 430 */     if (this.aircraftPosRotInc > 0) {
-                     /* 431 */       double rpinc = this.aircraftPosRotInc;
-                     /* 432 */       double yaw = MathHelper.wrapAngleTo180_double(this.aircraftYaw - this.rotationYaw);
-                     /* 433 */       this.rotationYaw = (float)(this.rotationYaw + yaw / rpinc);
-                     /* 434 */       this.rotationPitch = (float)(this.rotationPitch + (this.aircraftPitch - this.rotationPitch) / rpinc);
-                     /* 435 */       setPosition(this.posX + (this.aircraftX - this.posX) / rpinc, this.posY + (this.aircraftY - this.posY) / rpinc, this.posZ + (this.aircraftZ - this.posZ) / rpinc);
-                     /* 436 */       setRotation(this.rotationYaw, this.rotationPitch);
-                     /* 437 */       this.aircraftPosRotInc--;
-                     /*     */     } else {
-                     /* 439 */       setPosition(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-                     /* 440 */       this.motionY *= 0.96D;
-                     /* 441 */       this.motionX = 0.0D;
-                     /* 442 */       this.motionZ = 0.0D;
-                     /*     */     }
-                 /*     */
-                 /* 445 */     updateUavPosition();
-                 /*     */   }
+                      if (this.aircraftPosRotInc > 0) {
+                            double rpinc = this.aircraftPosRotInc;
+                            double yaw = MathHelper.wrapAngleTo180_double(this.aircraftYaw - this.rotationYaw);
+                            this.rotationYaw = (float)(this.rotationYaw + yaw / rpinc);
+                            this.rotationPitch = (float)(this.rotationPitch + (this.aircraftPitch - this.rotationPitch) / rpinc);
+                            setPosition(this.posX + (this.aircraftX - this.posX) / rpinc, this.posY + (this.aircraftY - this.posY) / rpinc, this.posZ + (this.aircraftZ - this.posZ) / rpinc);
+                            setRotation(this.rotationYaw, this.rotationPitch);
+                            this.aircraftPosRotInc--;
+                          } else {
+                            setPosition(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+                            this.motionY *= 0.96D;
+                            this.motionX = 0.0D;
+                            this.motionZ = 0.0D;
+                          }
+
+                      updateUavPosition();
+                    }
 
              private void onUpdate_Server() {
                       this.motionY -= 0.03D;
@@ -640,12 +648,12 @@ public class MCH_EntityUavStation
          }
 
              public void updateRiderPosition() {
-                 /* 489 */     if (this.riddenByEntity != null) {
-                     /* 490 */       double x = -Math.sin(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
-                     /* 491 */       double z = Math.cos(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
-                     /* 492 */       this.riddenByEntity.setPosition(this.posX + x, this.posY + getMountedYOffset() + this.riddenByEntity.getYOffset(), this.posZ + z);
-                     /*     */     }
-                 /*     */   }
+                      if (this.riddenByEntity != null) {
+                            double x = -Math.sin(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
+                            double z = Math.cos(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
+                            this.riddenByEntity.setPosition(this.posX + x, this.posY + getMountedYOffset() + this.riddenByEntity.getYOffset(), this.posZ + z);
+                          }
+                    }
 
 
              public void controlLastAircraft(Entity user) {
@@ -683,6 +691,7 @@ public class MCH_EntityUavStation
 
 
      public void handleItem(Entity user, ItemStack itemStack) {
+          //right. so why in the fuck does this not store health like dispense/place behavior again?
            if (user != null && !user.isDead && itemStack != null && itemStack.stackSize == 1 &&
                      !this.worldObj.isRemote) {
                 Object ac = null;
@@ -739,6 +748,11 @@ public class MCH_EntityUavStation
                    }
 
                 if (ac != null) {
+                    if(MCH_Config.ItemDamage.prmBool) {
+                        System.out.println("applying damage fix to uav");
+                        ((MCH_EntityAircraft)ac).getAcDataFromItem(itemStack);
+                        //ac.setDamageTaken(item.getItemDamage());
+                    } //why wasn't this here already? actually im probably gonna find out after this fucking game crash nvm
                      ((Entity)ac).rotationYaw = this.rotationYaw - 180.0F;
                      ((Entity)ac).prevRotationYaw = ((Entity)ac).rotationYaw;
                      user.rotationYaw = this.rotationYaw - 180.0F;
@@ -835,20 +849,20 @@ public class MCH_EntityUavStation
                      W_EntityPlayer.closeScreen(rByEntity);
                  }
 
-                 EntityPlayer player = (EntityPlayer) this.riddenByEntity;
+                 //EntityPlayer player = (EntityPlayer) this.riddenByEntity;
 
                  // Ensure player teleports back to the UAV station when dismounting
                  //I don't know that this will ever fire considering rByEntity is null but I will trust the plan gpt
-                 if (rByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
-                     System.out.println("Teleporting player back to stored station position.");
-                     player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
-                 }
+                 //if (rByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
+                 //    System.out.println("Teleporting player back to stored station position.");
+                 //    player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
+                 //}
                  //this infact does not work
 
-                 if (player != null && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
-                     System.out.println("Teleporting player back to stored station position (New UAV).");
-                     player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
-                 }
+                 //if (player != null && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
+                 //    System.out.println("Teleporting player back to stored station position (New UAV).");
+                 //    player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
+                 //}
                  //this either, this also doesn't work
 
                  this.riddenByEntity = null;
