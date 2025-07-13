@@ -709,10 +709,16 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                        this.UavStationPosZ
                );
 
-               getRiddenByEntity().setPosition(
-                       getUavStation().getStoredStationX(),
-                       getUavStation().getStoredStationY(),
-                       getUavStation().getStoredStationZ());
+               try {
+
+                  player.setPosition(
+                          getUavStation().getStoredStationX(),
+                          getUavStation().getStoredStationY(),
+                          getUavStation().getStoredStationZ());
+               }
+               catch (Exception e) {
+                  System.out.println("Error setting position for new UAV dismount: " + e.getMessage());
+               }
 
                player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed!"));
                player.addPotionEffect(new PotionEffect(11, 20, 50));
