@@ -4383,7 +4383,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                      newuavvariable = true;
                      //here
                      rByEntity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
-                     rByEntity.mountEntity((Entity)getUavStation());
+                     rByEntity.mountEntity((Entity)null);
                    } else {
                      setUnmountPosition(rByEntity, (getSeatsInfo()[0]).pos);
                    }
