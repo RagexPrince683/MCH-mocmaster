@@ -385,6 +385,19 @@ public class MCH_EventHook extends W_EventHook {
    //this fucking class makes me schizophrenic
 
    public void entityCanUpdate(CanUpdate event) {
+      //ooh I have a new idea here
+      //todo: let's say this is cache right? ok, well guess what cache,
+      // what if I want you to render every fucking vehicle ever placed?
+      // the benefit of this is we don't have to make some new stupid fucking eventhook since this retarded mod seems
+      // to absolutely fucking hate when I do that for some reason because it bounces between two completely fucking schizophrenic
+      // classes for some reason
+      // Force all aircraft to always tick
+      if (event.entity instanceof MCH_EntityAircraft) {
+         //if this works how I hope it will we should probably add
+         //ac.getRiddenByEntity() != null so we ensure we only tick PLAYER vehicles
+         event.canUpdate = true;
+      } //I wonder if this will work
+
       if(event.entity instanceof MCH_EntityBaseBullet) {
          MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet)event.entity;
          // todo: maybe meddle with this to see if it can maybe preserve the bullet if unloaded and having a gravity going down

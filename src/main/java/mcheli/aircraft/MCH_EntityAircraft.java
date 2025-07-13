@@ -4330,6 +4330,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                    } else if (isNewUAV()) {
                      System.out.println("is new uav, mounting to uav station.");
                      newuavvariable = true;
+                     //here
+                     rByEntity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
                      rByEntity.mountEntity((Entity)getUavStation());
                    } else {
                      setUnmountPosition(rByEntity, (getSeatsInfo()[0]).pos);
