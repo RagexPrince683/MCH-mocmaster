@@ -83,10 +83,6 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    public static float modelPosX = 0.0F;
    public static float modelPosY = 0.0F;
 
-   // two new fields:
-   private List<IRecipe> originalRecipes;       // the un‑filtered data
-   private MCH_IRecipeList filteredRecipeList;  // what the GUI actually reads from
-
 
    public MCH_DraftingTableGui(EntityPlayer player, int posX, int posY, int posZ) {
       super(new MCH_DraftingTableGuiContainer(player, posX, posY, posZ));
