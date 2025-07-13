@@ -457,9 +457,10 @@ public class MCH_EntityUavStation
 
           if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
               isridingnewuav = true;
-              System.out.println("isridingnewuav is true");
-              player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
-              player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
+              //this is our first bugged state. do nothing here.
+              //System.out.println("isridingnewuav is true");
+              //player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
+              //player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
               // Prevent picking up items by removing them from collision
               //except that this only fires when the station is in range because this is in the station class so like this will only fire when the station is loaded
               //oh also it just doesn't even fucking work idk why I even tried this
