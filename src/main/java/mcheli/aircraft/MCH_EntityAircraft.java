@@ -1533,7 +1533,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return this.getAcInfo() != null && this.getAcInfo().searchLights.size() > 0;
    }
 
+   //todo improve search light stuff here
    public float getSearchLightValue(Entity entity) {
+
       if(this.haveSearchLight() && this.isSearchLightON()) {
          Iterator i$ = this.getAcInfo().searchLights.iterator();
 
