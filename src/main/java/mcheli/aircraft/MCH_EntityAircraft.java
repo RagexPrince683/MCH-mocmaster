@@ -1583,10 +1583,14 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                   // ====== RAYTRACE ADDED HERE ======
                   Vec3 vecStart = Vec3.createVectorHelper(pos.xCoord, pos.yCoord, pos.zCoord);
-                  Vec3 vecEnd = Vec3.createVectorHelper(entity.posX, entity.posY + (entity.height / 2.0F), entity.posZ);
+                  Vec3 vecEnd = Vec3.createVectorHelper(entity.posX, entity.posY + (entity.height / 2.0), entity.posZ);
                   MovingObjectPosition hit = entity.worldObj.rayTraceBlocks(vecStart, vecEnd);
-                  if (hit != null && hit.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-                     continue; // Block in the way — skip this light
+                  if (hit != null) {
+                     double blockDistSq = vecStart.distanceTo(hit.hitVec);
+                     double entityDistSq = vecStart.distanceTo(vecEnd);
+                     if (blockDistSq < entityDistSq) {
+                        continue; // Block is in the way
+                     }
                   }
                   // ==================================
 
