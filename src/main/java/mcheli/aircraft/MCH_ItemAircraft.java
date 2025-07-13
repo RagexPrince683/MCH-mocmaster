@@ -60,6 +60,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       MCH_EntityAircraft ac = createAircraft(player.worldObj, -1.0D, -1.0D, -1.0D, stack);
       if (info != null) {
          lines.add(EnumChatFormatting.YELLOW + "Category: " + info.category);
+         //lines.add(EnumChatFormatting.DARK_PURPLE + "Weapon: " + info.weaponSetList);
       }
 
       if (ac != null &&
