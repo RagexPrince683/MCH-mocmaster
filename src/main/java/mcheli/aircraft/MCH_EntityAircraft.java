@@ -702,6 +702,18 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                EntityPlayer player = (EntityPlayer) rider;
                player.mountEntity(null);
                player.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
+
+               player.setPositionAndUpdate(
+                       this.UavStationPosX,
+                       this.UavStationPosY,
+                       this.UavStationPosZ
+               );
+
+               getRiddenByEntity().setPosition(
+                       getUavStation().getStoredStationX(),
+                       getUavStation().getStoredStationY(),
+                       getUavStation().getStoredStationZ());
+
                player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed!"));
                player.addPotionEffect(new PotionEffect(11, 20, 50));
 
@@ -730,10 +742,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             //if (getUavStation() != null) {
             // Optionally mount the player on the station entity.
             //getRiddenByEntity().mountEntity((Entity)getUavStation());
-            //getRiddenByEntity().setPosition(
-            //        getUavStation().getStoredStationX(),
-            //        getUavStation().getStoredStationY(),
-            //        getUavStation().getStoredStationZ());
+
 
             //}
          }
@@ -744,6 +753,40 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          Entity var3 = this.getEntityBySeatId(1);
          if(var3 != null) {
             this.ejectSeat(var3);
+         }
+
+         if (isNewUAV()) {
+            System.out.println("New UAV detected, performing special dismount logic. IS REMOTE");
+            player.mountEntity(null);
+            player.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
+
+            System.out.println("Setting position to: " +
+                    this.UavStationPosX + ", " +
+                    this.UavStationPosY + ", " +
+                    this.UavStationPosZ);
+
+            player.setPositionAndUpdate(
+                    this.UavStationPosX,
+                    this.UavStationPosY,
+                    this.UavStationPosZ
+            );
+            System.out.println("Setting position to: " +
+                    getUavStation().getStoredStationX() + ", " +
+                    getUavStation().getStoredStationY() + ", " +
+                    getUavStation().getStoredStationZ());
+
+            getRiddenByEntity().setPosition(
+                    getUavStation().getStoredStationX(),
+                    getUavStation().getStoredStationY(),
+                    getUavStation().getStoredStationZ());
+
+            //player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed!"));
+            player.addPotionEffect(new PotionEffect(11, 20, 50));
+
+
+            //player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
+            //already applied
+            player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
          }
 
          //float dmg = MCH_Config.KillPassengersWhenDestroyed.prmBool ? 100000.0F : 0.001F;
