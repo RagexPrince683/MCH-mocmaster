@@ -490,16 +490,16 @@ public class MCH_Explosion extends Explosion {
 
       affectedBlockPositions.addAll(hashset);
 
-      //todone? limit the amount of particles allowed to be made if under 60fps do not spawn anymore particles.
+      //todo limit the amount of particles allowed to be made if under 60fps do not spawn anymore particles.
       //this did not work
-      if (getFPS() > 60) {
-         System.out.println("FPS: " + getFPS() + " - Spawning particles");
-         if (explosionSize >= 2.0F && isSmoking) {
-            MCH_ParticlesUtil.DEF_spawnParticle("hugeexplosion", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D, 10.0F);
-         } else {
-            MCH_ParticlesUtil.DEF_spawnParticle("largeexplode", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D, 10.0F);
-         }
-      }
+      //if (getFPS() > 60) {
+      //   System.out.println("FPS: " + getFPS() + " - Spawning particles");
+      //   if (explosionSize >= 2.0F && isSmoking) {
+      //      MCH_ParticlesUtil.DEF_spawnParticle("hugeexplosion", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D, 10.0F);
+      //   } else {
+      //      MCH_ParticlesUtil.DEF_spawnParticle("largeexplode", explosionX, explosionY, explosionZ, 1.0D, 0.0D, 0.0D, 10.0F);
+      //   }
+      //}
 
       if(isSmoking) {
          Iterator var50 = affectedBlockPositions.iterator();

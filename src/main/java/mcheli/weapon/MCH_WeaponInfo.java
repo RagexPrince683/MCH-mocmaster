@@ -23,6 +23,8 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public String explosionType;
     public int nukeYield;
     public int chemYield;
+    public double chemSpeed;
+    public int chemType;
     public boolean nukeEffectOnly;
     public String displayName;
     public String type;
@@ -338,6 +340,8 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         this.cameraRotationSpeedPitch = 1.0F;
         this.nukeYield = 0;
         this.chemYield = 0;
+        this.chemSpeed = 1.25;
+        this.chemType = 0;
         this.explosionType = "";
     }
 
@@ -457,6 +461,10 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
                 this.nukeYield = this.toInt(data, 0, 100000);
             } else if (item.equalsIgnoreCase("chemYield")) {
                 this.chemYield = this.toInt(data, 0, 100000);
+            } else if (item.equalsIgnoreCase("chemSpeed")) {
+                this.chemSpeed = this.toDouble(data);
+            } else if (item.equalsIgnoreCase("chemType")) {
+                this.chemType = this.toInt(data, 0, 3);
             } else if (item.equalsIgnoreCase("NukeEffectOnly")) {
                 this.nukeEffectOnly = this.toBool(data);
             } else if (item.equalsIgnoreCase("MaxDegreeOfMissile")) {

@@ -87,6 +87,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public boolean bigdelay;
     private boolean bigcheck = false;
     public int chemYield = 0;
+    public double chemSpeed = 1.25;
+    public int chemType = 0;
     private boolean initialized = false;
 
 
@@ -182,7 +184,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     // Dynamically load chunks based on bullet's movement
     public void checkAndLoadChunks() {
-        System.out.println("check and load chunks fired");
+        //System.out.println("check and load chunks fired");
         // Get the current chunk coordinates for the bullet
         int currentChunkX = MathHelper.floor_double(posX) >> 4;
         int currentChunkZ = MathHelper.floor_double(posZ) >> 4;
@@ -220,7 +222,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 ForgeChunkManager.forceChunk(this.loaderTicket, chunk);
             }
 
-            System.out.println("Loaded surrounding chunks at: " + chunkX + ", " + chunkZ);
+            //System.out.println("Loaded surrounding chunks at: " + chunkX + ", " + chunkZ);
         }
     }
     // Dynamically load chunks ahead of the bullet based on its current position and motion
@@ -349,7 +351,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     public void setDead() {
         if (shouldLoadChunks()) {
-            System.out.println("should load chunks2");
+            //System.out.println("should load chunks2");
             //todo checkAndLoadChunks() instead
             if (initialized) {
                 checkAndLoadChunks();
@@ -511,6 +513,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         this.explosionPowerInWater = w.explosionPowerInWater;
         this.setPower(w.power);
         this.chemYield = w.chemYield;
+        this.chemSpeed = w.chemSpeed;
+        this.chemType = w.chemType;
         this.piercing = w.piercing;
         this.shootingAircraft = entity;
         this.shootingEntity = user;
@@ -519,6 +523,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public void setParameterFromWeapon(MCH_EntityBaseBullet b, Entity entity, Entity user) {
         this.explosionPower = b.explosionPower;
         this.chemYield = b.chemYield;
+        this.chemSpeed = b.chemSpeed;
+        this.chemType = b.chemType;
         this.explosionPowerInWater = b.explosionPowerInWater;
         this.setPower(b.getPower());
         this.piercing = b.piercing;
@@ -630,7 +636,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public void onUpdate() {
 
         if (this.ticksExisted > 3 && loaderTicket == null && shouldLoadChunks()) {
-            System.out.println("Bullet passed runtime chunkload check — requesting ticket.");
+            //System.out.println("Bullet passed runtime chunkload check — requesting ticket.");
             init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, ForgeChunkManager.Type.ENTITY));
         }
 
@@ -1109,10 +1115,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
         //todo shouldLoadChunks() check here
         if (shouldLoadChunks() && initialized) {
-            System.out.println("should load chunks3");
+            //System.out.println("should load chunks3");
             checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
-            System.out.println("Extra chunk loader activated.");
+            //System.out.println("Extra chunk loader activated.");
         }
 
         if (!worldObj.isRemote) { // Server-side logic
@@ -1207,10 +1213,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     private void processEntityImpact(MovingObjectPosition hit, float damageFactor) {
         if (shouldLoadChunks() && initialized) {
-            System.out.println("should load chunks4");
+            //System.out.println("should load chunks4");
             checkAndLoadChunks();
             loadNeighboringChunks(getChunkX(), getChunkZ());
-            System.out.println("Extra chunk loader activated.");
+            //System.out.println("Extra chunk loader activated.");
         }
         onImpactEntity(hit.entityHit, damageFactor);
 
@@ -1270,7 +1276,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             System.out.println("Impact detected, entity set to dead.");
             //todone do another chunk load then clear and add checks
             if (shouldLoadChunks() && initialized) {
-                System.out.println("should load chunks5");
+                //System.out.println("should load chunks5");
                 checkAndLoadChunks();
                 loadNeighboringChunks(getChunkX(), getChunkZ());
                 clearBulletChunks();
@@ -1310,14 +1316,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 return false;
             } else {
                 boolean result = !bomblet && gravitydown && bigdelay && bigcheck;
-                if (result) {
-                    System.out.println("[shouldLoadChunks] Chunkloading bullet allowed: " + this.getClass().getSimpleName()
-                            + " | bomblet=" + bomblet
-                            + " | gravitydown=" + gravitydown
-                            + " | bigdelay=" + bigdelay
-                            + " | bigcheck=" + bigcheck
-                            + " | pos=" + this.posX + ", " + this.posY + ", " + this.posZ);
-                }
+                //if (result) {
+                //    System.out.println("[shouldLoadChunks] Chunkloading bullet allowed: " + this.getClass().getSimpleName()
+                //            + " | bomblet=" + bomblet
+                //            + " | gravitydown=" + gravitydown
+                //            + " | bigdelay=" + bigdelay
+                //            + " | bigcheck=" + bigcheck
+                //            + " | pos=" + this.posX + ", " + this.posY + ", " + this.posZ);
+                //} working
                 return result;
             }
         } catch (Exception e) {
@@ -1442,7 +1448,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
         if(this.getInfo().chemYield > 0) {
             System.out.println("chem yield detected");
-            MCH_HBMUtil.ExplosionChaos_spawnChlorine(super.worldObj, posX, posY + 0.5, posZ, this.getInfo().chemYield);
+            MCH_HBMUtil.ExplosionChaos_spawnChlorine(super.worldObj, posX, posY + 0.5, posZ, this.getInfo().chemYield, this.getInfo().chemSpeed, this.getInfo().chemType);
         }
 
         if (result != null && result.hitEntity) {
@@ -1452,6 +1458,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     public void playExplosionSound() {
+        //todo xradar explosion noise compatibility here
         MCH_Explosion.playExplosionSound(super.worldObj, super.posX, super.posY, super.posZ);
     }
 

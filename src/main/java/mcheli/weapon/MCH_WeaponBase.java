@@ -24,6 +24,8 @@ public abstract class MCH_WeaponBase {
    public final String name;
    public final MCH_WeaponInfo weaponInfo;
    public int chemYield;
+   public double chemSpeed;
+   public int chemType;
    public String displayName;
    public int power;
    public float acceleration;
@@ -61,7 +63,8 @@ public abstract class MCH_WeaponBase {
       this.explosionPowerInWater = 0;
       this.explosionType = wi.explosionType;
       this.nukeYield = wi.nukeYield;
-      this.chemYield = wi.chemYield;
+      //this.chemSpeed = wi.chemSpeed;
+      //this.chemType = wi.chemType;
       this.interval = 1;
       this.numMode = 0;
       this.lockTime = 0;
