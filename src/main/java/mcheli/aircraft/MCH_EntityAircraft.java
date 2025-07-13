@@ -700,12 +700,14 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             Entity rider = getRiddenByEntity();
             if (rider instanceof EntityPlayer) {
                EntityPlayer player = (EntityPlayer) rider;
-               player.mountEntity(null);
+                  System.out.println("Calling unmountEntity() for new UAV.");
+                  this.unmountEntity(); // ← this triggers the correct logic and teleport
+
                //player.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
 
                //this.updateControl(); // manually set station coords
 
-               System.out.println("Setting position to: " +
+               System.out.println("UavStationPos: " +
                        this.UavStationPosX + ", " +
                        this.UavStationPosY + ", " +
                        this.UavStationPosZ);
@@ -718,9 +720,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   //        this.UavStationPosZ
                   //);
 
-               player.setPosition(storedStationX, storedStationY, storedStationZ);
-
-               System.out.println("Setting position ACTUALLY to: " +
+               //player.setPosition(storedStationX, storedStationY, storedStationZ);
+//
+               System.out.println("storedStationPos: " +
                        storedStationX + ", " +
                        storedStationY + ", " +
                        storedStationZ);
