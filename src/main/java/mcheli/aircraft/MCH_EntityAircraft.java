@@ -696,23 +696,27 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             }
          } else if (isNewUAV()) {
             System.out.println("New UAV detected, performing special dismount logic.");
-            //we know this works... I think... actually let me not comment this out rq
             Entity rider = getRiddenByEntity();
             if (rider instanceof EntityPlayer) {
                EntityPlayer player = (EntityPlayer) rider;
                player.mountEntity(null);
-               player.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
+               //player.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
+
+               this.updateControl(); // manually set station coords
 
                System.out.println("Setting position to: " +
                        this.UavStationPosX + ", " +
                        this.UavStationPosY + ", " +
                        this.UavStationPosZ);
 
-               player.setPositionAndUpdate(
-                       this.UavStationPosX,
-                       this.UavStationPosY,
-                       this.UavStationPosZ
-               );
+               //if (this.uavStation != null) {
+               //it shouldn't be fucking null to begin with god dammit
+                  player.setPositionAndUpdate(
+                          this.UavStationPosX,
+                          this.UavStationPosY,
+                          this.UavStationPosZ
+                  );
+               //}
 
                //try {
 //
