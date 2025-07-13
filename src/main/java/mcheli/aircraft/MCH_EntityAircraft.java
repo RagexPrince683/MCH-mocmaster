@@ -550,11 +550,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public MCH_EntityUavStation getUavStation() {
-
-          return (isUAV() || isNewUAV()) ? this.uavStation : null;
-          //todone store uav pos, not here! in updatecontrol.
-
-
+      System.out.println("getUavStation() called, isUAV: " + isUAV() + ", isNewUAV: " + isNewUAV() + ", uavStation: " + this.uavStation);
+      return (isUAV() || isNewUAV()) ? this.uavStation : null;
+      //todone store uav pos, not here! in updatecontrol.
          }
 
    public static MCH_EntityAircraft getAircraft_RiddenOrControl(Entity rider) {
@@ -697,6 +695,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                rider.mountEntity(null);
             }
          } else if (isNewUAV()) {
+            System.out.println("New UAV detected, performing special dismount logic.");
+            //we know this works... I think... actually let me not comment this out rq
             Entity rider = getRiddenByEntity();
             if (rider instanceof EntityPlayer) {
                EntityPlayer player = (EntityPlayer) rider;
@@ -2346,6 +2346,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       if (this.isNewUAV()) {
+         System.out.println("unmountaircraft method working");
          this.mountEntity((Entity) null);
          //TODO GET UAV STATION POSITION HERE
          //this.setLocationAndAngles(getUavStation().uav);
@@ -4168,9 +4169,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public void onUnmountPlayerSeat(MCH_EntitySeat seat, Entity entity) {
 
       if (this.isNewUAV()) {
+         System.out.println("isNewUAV() is true, hopefully teleporting player to UAV station.");
          //teleport player to UAV station.
          //doesn't working
             if (entity instanceof EntityPlayer) {
+               System.out.println("is player");
                 entity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
             }
       }
@@ -4321,6 +4324,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                           rByEntity.mountEntity((Entity)null);
                         }
                    } else if (isNewUAV()) {
+                     System.out.println("is new uav, mounting to uav station.");
                      newuavvariable = true;
                      rByEntity.mountEntity((Entity)getUavStation());
                    } else {
@@ -4478,8 +4482,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          }
 
       } else {
+         System.out.println("isNewUAV() is true, setting position to UAV station.");
          //new uav only
             if (rByEntity != null) {
+               System.out.println("not null");
                 MCH_AircraftInfo info = this.getAcInfo();
                 if (info != null && info.unmountPosition != null) {
                    rByEntity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
@@ -4511,6 +4517,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             return false;
          }
       } else {
+         System.out.println("isNewUAV() is true, unmounting entity to UAV station.");
          if (entity != null) {
             MCH_AircraftInfo info = this.getAcInfo();
             if (info != null && info.unmountPosition != null) {
@@ -4553,7 +4560,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                //idk how or why this decided to neck itself but hopefully this works
 
                if(player.ridingEntity instanceof MCH_EntityHeli) {
-                  System.out.println("player is riding heli");
+                  //System.out.println("player is riding heli");
                   this.attackEntityFrom(DamageSource.inWall, this.getMaxHP());
                }
 
