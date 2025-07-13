@@ -695,70 +695,36 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                rider.mountEntity(null);
             }
          } else if (isNewUAV()) {
-            System.out.println("New UAV detected, performing special dismount logic.");
             Entity rider = getRiddenByEntity();
             if (rider instanceof EntityPlayer) {
                EntityPlayer player = (EntityPlayer) rider;
-               player.mountEntity(null);
-               //player.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
-
-               this.updateControl(); // manually set station coords
-
-               System.out.println("Setting position to: " +
-                       this.UavStationPosX + ", " +
-                       this.UavStationPosY + ", " +
-                       this.UavStationPosZ);
-
-               //if (this.uavStation != null) {
-               //it shouldn't be fucking null to begin with god dammit
-                  player.setPositionAndUpdate(
-                          this.UavStationPosX,
-                          this.UavStationPosY,
-                          this.UavStationPosZ
-                  );
-               //}
-
-               //try {
-//
-               //   player.setPosition(
-               //           getUavStation().getStoredStationX(),
-               //           getUavStation().getStoredStationY(),
-               //           getUavStation().getStoredStationZ());
-               //}
-               //catch (Exception e) {
-               //   System.out.println("Error setting position for new UAV dismount: " + e.getMessage());
-               //}
-               //this will be null because the UAV station is null because it isn't set properly
 
                player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed!"));
                player.addPotionEffect(new PotionEffect(11, 20, 50));
-
-
-               //player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
-               //already applied
                player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
 
-               // Ensure the player is properly dismounted
+               // Ensure the player is properly dismounted before teleporting
+               player.mountEntity(null);
 
-
-               //we shouldn't in theory have to do all this other crap now bc we went directly for dismount logic.
-
-               //System.out.println(MCH_EntityUavStation.storedStationX + " " +
-               //        MCH_EntityUavStation.storedStationY + " " +
-               //        MCH_EntityUavStation.storedStationZ + " " + "station pos");
+               System.out.println(MCH_EntityUavStation.storedStationX + " " +
+                       MCH_EntityUavStation.storedStationY + " " +
+                       MCH_EntityUavStation.storedStationZ + " " + "station pos");
 
                // Teleport player
-               //player.setPositionAndUpdate(
-               //        MCH_EntityUavStation.storedStationX,
-               //        MCH_EntityUavStation.storedStationY,
-               //        MCH_EntityUavStation.storedStationZ
-               //);
+               player.setPositionAndUpdate(
+                       MCH_EntityUavStation.storedStationX,
+                       MCH_EntityUavStation.storedStationY,
+                       MCH_EntityUavStation.storedStationZ
+               );
             }
             // Teleport the player back to the stored station position.
             //if (getUavStation() != null) {
             // Optionally mount the player on the station entity.
             //getRiddenByEntity().mountEntity((Entity)getUavStation());
-
+            //getRiddenByEntity().setPosition(
+            //        getUavStation().getStoredStationX(),
+            //        getUavStation().getStoredStationY(),
+            //        getUavStation().getStoredStationZ());
 
             //}
          }
