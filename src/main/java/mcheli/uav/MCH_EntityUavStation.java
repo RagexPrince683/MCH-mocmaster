@@ -123,7 +123,18 @@ public class MCH_EntityUavStation
            setLastControlAircraft((MCH_EntityAircraft)null);
            this.loadedLastControlAircraftGuid = "";
          }
-      protected double aircraftY; protected double aircraftZ; protected double aircraftYaw; protected double aircraftPitch; private MCH_EntityAircraft controlAircraft; private MCH_EntityAircraft lastControlAircraft; private String loadedLastControlAircraftGuid; public int posUavX; public int posUavY; public int posUavZ; public float rotCover; public float prevRotCover;
+      protected double aircraftY;
+      protected double aircraftZ;
+      protected double aircraftYaw;
+      protected double aircraftPitch;
+      private MCH_EntityAircraft controlAircraft;
+      private MCH_EntityAircraft lastControlAircraft;
+      private String loadedLastControlAircraftGuid;
+      public int posUavX;
+      public int posUavY;
+      public int posUavZ;
+      public float rotCover;
+      public float prevRotCover;
       protected void entityInit() {
            super.entityInit();
            getDataWatcher().addObject(27, Byte.valueOf((byte)0));
@@ -475,16 +486,7 @@ public class MCH_EntityUavStation
           if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
               isridingnewuav = true;
               //this is our first bugged state. do nothing here.
-              //System.out.println("isridingnewuav is true");
-              //player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
-              //player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
-              // Prevent picking up items by removing them from collision
-              //except that this only fires when the station is in range because this is in the station class so like this will only fire when the station is loaded
-              //oh also it just doesn't even fucking work idk why I even tried this
-              //List<EntityItem> items = this.worldObj.getEntitiesWithinAABB(EntityItem.class, player.boundingBox.expand(1.5, 1.5, 1.5));
-              //for (EntityItem item : items) {
-              //    item.delayBeforeCanPickup = 999999; // Stops item from being picked up
-              //}
+
           }
 
 
@@ -493,18 +495,7 @@ public class MCH_EntityUavStation
            if (this.riddenByEntity == null &&
                      this.lastRiddenByEntity != null) {
                 unmountEntity(true);
-               //if (controlAircraft.isNewUAV()) {
-               //    System.out.println(MCH_EntityUavStation.storedStationX + " " +
-               //            MCH_EntityUavStation.storedStationY + " " +
-               //            MCH_EntityUavStation.storedStationZ + " " + "station pos");
 
-               //    // Teleport player
-               //    player.setPositionAndUpdate(
-               //            MCH_EntityUavStation.storedStationX,
-               //            MCH_EntityUavStation.storedStationY,
-               //            MCH_EntityUavStation.storedStationZ
-               //    );
-               //}
               }
 
 
@@ -703,7 +694,6 @@ public class MCH_EntityUavStation
 
 
      public void handleItem(Entity user, ItemStack itemStack) {
-          //right. so why in the fuck does this not store health like dispense/place behavior again?
            if (user != null && !user.isDead && itemStack != null && itemStack.stackSize == 1 &&
                      !this.worldObj.isRemote) {
                 Object ac = null;
@@ -845,6 +835,15 @@ public class MCH_EntityUavStation
                  Entity rByEntity = null;
                  if (this.riddenByEntity != null) {
                      if (!this.worldObj.isRemote) {
+
+                         //if (MCH_EntityAircraft.isNewUAV()) {
+                         //    System.out.println("is new uav, mounting to uav station.");
+                         //    newuavvariable = true;
+                         //    //here
+                         //    rByEntity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
+                         //    rByEntity.mountEntity((Entity)null);
+                         //}
+
                          rByEntity = this.riddenByEntity;
                          this.riddenByEntity.mountEntity((Entity) null);
                      }
@@ -860,22 +859,6 @@ public class MCH_EntityUavStation
                  if (this.worldObj.isRemote) {
                      W_EntityPlayer.closeScreen(rByEntity);
                  }
-
-                 //EntityPlayer player = (EntityPlayer) this.riddenByEntity;
-
-                 // Ensure player teleports back to the UAV station when dismounting
-                 //I don't know that this will ever fire considering rByEntity is null but I will trust the plan gpt
-                 //if (rByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
-                 //    System.out.println("Teleporting player back to stored station position.");
-                 //    player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
-                 //}
-                 //this infact does not work
-
-                 //if (player != null && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
-                 //    System.out.println("Teleporting player back to stored station position (New UAV).");
-                 //    player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
-                 //}
-                 //this either, this also doesn't work
 
                  this.riddenByEntity = null;
                  this.lastRiddenByEntity = null;

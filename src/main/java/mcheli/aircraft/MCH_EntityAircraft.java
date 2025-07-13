@@ -703,75 +703,33 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   System.out.println("Calling unmountEntity() for new UAV.");
                   this.unmountEntity(); // ← this triggers the correct logic and teleport
 
-               //player.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
-
-               //this.updateControl(); // manually set station coords
-
                System.out.println("UavStationPos: " +
                        this.UavStationPosX + ", " +
                        this.UavStationPosY + ", " +
                        this.UavStationPosZ);
 
-               //if (this.uavStation != null) {
-               //it shouldn't be fucking null to begin with god dammit
-                  //player.setPositionAndUpdate(
-                  //        this.UavStationPosX,
-                  //        this.UavStationPosY,
-                  //        this.UavStationPosZ
-                  //);
-
-               //player.setPosition(storedStationX, storedStationY, storedStationZ);
-//
                System.out.println("storedStationPos: " +
                        storedStationX + ", " +
                        storedStationY + ", " +
                        storedStationZ);
 
-               //}
+               System.out.println("aircraftxyz " + aircraftX + ", " +
+                       aircraftY + ", " +
+                       aircraftZ + ", ");
 
-               //try {
-//
-               //   player.setPosition(
-               //           getUavStation().getStoredStationX(),
-               //           getUavStation().getStoredStationY(),
-               //           getUavStation().getStoredStationZ());
-               //}
-               //catch (Exception e) {
-               //   System.out.println("Error setting position for new UAV dismount: " + e.getMessage());
-               //}
-               //this will be null because the UAV station is null because it isn't set properly
+               //System.out.println("uavposxyz" + MCH_EntityUavStation.posUavX + ", " +
+               //        super.posY + ", " +
+               //        super.posZ + ", " +
+               //        "riderposxyz" + rider.posX + ", " +
+               //        rider.posY + ", " +
+               //        rider.posZ + ", ");
 
                player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed!"));
                player.addPotionEffect(new PotionEffect(11, 20, 50));
 
-
-               //player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
-               //already applied
                player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
 
-               // Ensure the player is properly dismounted
-
-
-               //we shouldn't in theory have to do all this other crap now bc we went directly for dismount logic.
-
-               //System.out.println(MCH_EntityUavStation.storedStationX + " " +
-               //        MCH_EntityUavStation.storedStationY + " " +
-               //        MCH_EntityUavStation.storedStationZ + " " + "station pos");
-
-               // Teleport player
-               //player.setPositionAndUpdate(
-               //        MCH_EntityUavStation.storedStationX,
-               //        MCH_EntityUavStation.storedStationY,
-               //        MCH_EntityUavStation.storedStationZ
-               //);
             }
-            // Teleport the player back to the stored station position.
-            //if (getUavStation() != null) {
-            // Optionally mount the player on the station entity.
-            //getRiddenByEntity().mountEntity((Entity)getUavStation());
-
-
-            //}
          }
       }
 

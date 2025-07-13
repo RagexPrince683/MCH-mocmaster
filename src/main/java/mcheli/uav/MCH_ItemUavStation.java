@@ -32,7 +32,8 @@ public class MCH_ItemUavStation extends W_Item {
       System.out.println("UavStation pos" + x + " " + y + " " + z);
 
       uavst.setPosition(x, y + (double)uavst.yOffset, z);
-      uavst.storeStationPosition();
+      //uavst.storeStationPosition();
+      //no more
       uavst.prevPosX = x;
       uavst.prevPosY = y;
       uavst.prevPosZ = z;
