@@ -83,19 +83,19 @@ public class MCH_EntityUavStation
              }
 
              //unused
-             public double getStoredStationX() {
-                 return storedStationX;
-             }
-
-             //unused
-             public double getStoredStationY() {
-                 return storedStationY;
-             }
-
-             //unused
-             public double getStoredStationZ() {
-                 return storedStationZ;
-             }
+             //public double getStoredStationX() {
+             //    return storedStationX;
+             //}
+//
+             ////unused
+             //public double getStoredStationY() {
+             //    return storedStationY;
+             //}
+//
+             ////unused
+             //public double getStoredStationZ() {
+             //    return storedStationZ;
+             //}
 
       public MCH_EntityUavStation(World world) {
            super(world);
@@ -346,11 +346,12 @@ public class MCH_EntityUavStation
                    }
 
                    if (player != null) {
+                       unmountEntity(true);
                        // Force dismount
-                       player.mountEntity(null);
+                       //player.mountEntity(null);
                        // Optional: add potion effects or chat messages as needed
-                       player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
-                       System.out.println("Teleporting player in damage logic.");
+                       //player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
+                       System.out.println("Unmount in damage logic.");
                    } else {
                        System.out.println("No player found for teleportation in damage logic.");
                    }
@@ -674,7 +675,8 @@ public class MCH_EntityUavStation
                      // Store the current station position
                      System.out.println("stationposition" + storedStationX + " " + storedStationY + " " + storedStationZ);
                      storeStationPosition();
-                     user.setPosition(storedStationX, storedStationY, storedStationZ);
+                     //user.setPosition(storedStationX, storedStationY, storedStationZ);
+                     //0,0,0 for some fuck ass reason thanks minecraft
 
                      // If it's a new UAV and it's been alive long enough, mount the player to the UAV.
                      if (this.controlAircraft != null &&
