@@ -21,6 +21,8 @@ import net.minecraft.stats.Achievement;
 public class W_LanguageRegistry {
     private static HashMap<String, ArrayList<String>> map = new HashMap();
 
+    //todo add descriptions... just not here
+
     public static void addName(Object objectToName, String name) {
         W_LanguageRegistry.addNameForObject(objectToName, "en_US", name);
     }

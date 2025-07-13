@@ -43,8 +43,25 @@ public abstract class MCH_ItemAircraft extends W_Item {
       }
    }
 
+   //@Override
+   //public void addInformation(ItemStack stack, EntityPlayer player, List lines, boolean par4) {
+   //   MCH_AircraftInfo info = MCH_AircraftInfoManager.getFromItem(stack.getItem());
+   //   if (info != null && !"zzz".equals(info.category)) {
+   //      lines.add(EnumChatFormatting.RED + "DANGER!");
+   //      lines.add(EnumChatFormatting.RED + "This vehicle is not in the default category!");
+   //      lines.add(EnumChatFormatting.RED + "May contain experimental features!");
+   //   }
+//
+   //   super.addInformation(stack, player, lines, par4);
+   //}
+
    public void addInformation(ItemStack stack, EntityPlayer player, List lines, boolean par4) {
+      MCH_AircraftInfo info = this.getAircraftInfo().category.equals("zzz") ? null : this.getAircraftInfo();
       MCH_EntityAircraft ac = createAircraft(player.worldObj, -1.0D, -1.0D, -1.0D, stack);
+      if (info != null) {
+         lines.add(EnumChatFormatting.YELLOW + "Category: " + info.category);
+      }
+
       if (ac != null &&
               ac.isNewUAV()) {
          lines.add(EnumChatFormatting.RED + "DANGER!");
