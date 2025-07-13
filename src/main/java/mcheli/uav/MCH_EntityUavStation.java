@@ -446,6 +446,11 @@ public class MCH_EntityUavStation
          }
 
       public void onUpdate() {
+
+          //System.out.println(aircraftX + " aircraftx" + aircraftY + " aircrafty" + aircraftZ + " aircraftz" + this.posUavX + " posuavx" + this.posUavY + " posuavy" + this.posUavZ + " posuavz" );
+          //aircraft = uavstation
+          //uav = uav
+
           EntityPlayer player = (EntityPlayer)this.riddenByEntity;
            super.onUpdate();
            this.prevRotCover = this.rotCover;

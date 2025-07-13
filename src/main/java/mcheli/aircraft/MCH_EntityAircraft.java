@@ -6225,6 +6225,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             int udx = this.getDataWatcher().getWatchableObjectInt(22);
             if(udx > 0) {
                if(this.uavStation == null) {
+                  //this is the bugged state when we first place newUAV, probably want to fetch xyz of station here maybe?
                   System.out.println("is null");
                   Entity uavEntity = super.worldObj.getEntityByID(udx);
                   if(uavEntity instanceof MCH_EntityUavStation) {

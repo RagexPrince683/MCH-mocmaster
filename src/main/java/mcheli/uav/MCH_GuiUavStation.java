@@ -92,11 +92,11 @@ public class MCH_GuiUavStation
                 if (btn.id == 256) {
                               this.uavStation.setContinuePressed(true);
                      if (this.uavStation != null && !this.uavStation.isDead && this.uavStation.getLastControlAircraft() != null && !(this.uavStation.getLastControlAircraft()).isDead) {
-                          System.out.println("found uav station and last control aircraft");
+                          //System.out.println("found uav station and last control aircraft");
                          MCH_EntityAircraft aircraft = getCurrentAircraft(this.uavStation.getLastControlAircraft());
                          //MCH_EntityAircraft aircraft1 = getCurrentAircraft(aircraft);
                          if (aircraft != null) {
-                             System.out.println("found aircraft, not binding, binding was nuked");
+                             //System.out.println("aircraft isnt null");
                              //aircraft.castuavid(this.mc.thePlayer);
                          }
                           MCH_UavPacketStatus pos = new MCH_UavPacketStatus();
