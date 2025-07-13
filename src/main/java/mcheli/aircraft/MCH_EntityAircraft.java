@@ -53,6 +53,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.oredict.OreDictionary;
 
 import static mcheli.hud.MCH_HudItem.player;
+import static mcheli.uav.MCH_EntityUavStation.*;
 //import static net.minecraft.command.CommandBase.getCommandSenderAsPlayer;
 //import static net.minecraft.command.CommandBase.getPlayer;
 
@@ -702,7 +703,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                player.mountEntity(null);
                //player.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
 
-               this.updateControl(); // manually set station coords
+               //this.updateControl(); // manually set station coords
 
                System.out.println("Setting position to: " +
                        this.UavStationPosX + ", " +
@@ -711,11 +712,19 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                //if (this.uavStation != null) {
                //it shouldn't be fucking null to begin with god dammit
-                  player.setPositionAndUpdate(
-                          this.UavStationPosX,
-                          this.UavStationPosY,
-                          this.UavStationPosZ
-                  );
+                  //player.setPositionAndUpdate(
+                  //        this.UavStationPosX,
+                  //        this.UavStationPosY,
+                  //        this.UavStationPosZ
+                  //);
+
+               player.setPosition(storedStationX, storedStationY, storedStationZ);
+
+               System.out.println("Setting position ACTUALLY to: " +
+                       storedStationX + ", " +
+                       storedStationY + ", " +
+                       storedStationZ);
+
                //}
 
                //try {

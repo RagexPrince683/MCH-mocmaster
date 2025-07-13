@@ -82,14 +82,17 @@ public class MCH_EntityUavStation
                  storedStationZ = this.posZ;
              }
 
+             //unused
              public double getStoredStationX() {
                  return storedStationX;
              }
 
+             //unused
              public double getStoredStationY() {
                  return storedStationY;
              }
 
+             //unused
              public double getStoredStationZ() {
                  return storedStationZ;
              }
@@ -657,8 +660,10 @@ public class MCH_EntityUavStation
 
 
              public void controlLastAircraft(Entity user) {
+
                  MCH_EntityAircraft lastAc = getLastControlAircraft();
                  if (lastAc != null && !lastAc.isDead) {
+
                      lastAc.setUavStation(this);
                      setControlAircract(lastAc);
 
@@ -682,11 +687,11 @@ public class MCH_EntityUavStation
                  }
                  //this will never fire but its good to have redundants I guess? The part of this that works
                  // is in the MCH_EntityAircraft class.
-                 if (this.controlAircraft.getAcInfo().isNewUAV && this.isDead) {
-                     System.out.println("UAV is dead, teleporting to stored station position");
-                        this.setPosition(storedStationX, storedStationY, storedStationZ);
-                        //todo probably also set the fuckin mount thing to null before setting position so minecraft doesnt tardmax
-                 }
+                 //if (this.controlAircraft.getAcInfo().isNewUAV && this.isDead) {
+                 //    System.out.println("UAV is dead, teleporting to stored station position");
+                 //       this.setPosition(storedStationX, storedStationY, storedStationZ);
+                 //       //todo probably also set the fuckin mount thing to null before setting position so minecraft doesnt tardmax
+                 //}
              }
 
 
