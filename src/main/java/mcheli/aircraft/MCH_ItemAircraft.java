@@ -193,12 +193,12 @@ public abstract class MCH_ItemAircraft extends W_Item {
    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
 
       //if (player.worldObj.isRemote) return;
-      int dothing = 0;
+      //int dothing = 0;
 
 
       int used = this.getMaxItemUseDuration(stack) - count;
 
-      if (used == MCH_Config.placetimer.prmInt) {
+      if (player.worldObj.isRemote && used == MCH_Config.placetimer.prmInt) {
          player.addChatMessage(new ChatComponentText("Vehicle ready for deployment!"));
       }
 
