@@ -62,8 +62,6 @@ public class MCH_EntityUavStation
       public static double storedStationZ;
 
       private boolean continuePressed = false;
-      //stored player never used
-      //private EntityPlayer storedPlayer;
       public boolean isridingnewuav = false;
       public String newUavPlayerUUID;
 
@@ -83,21 +81,6 @@ public class MCH_EntityUavStation
                  storedStationZ = this.posZ;
                     System.out.println("Stored station position: " + storedStationX + ", " + storedStationY + ", " + storedStationZ);
              }
-
-             //unused
-             //public double getStoredStationX() {
-             //    return storedStationX;
-             //}
-//
-             ////unused
-             //public double getStoredStationY() {
-             //    return storedStationY;
-             //}
-//
-             ////unused
-             //public double getStoredStationZ() {
-             //    return storedStationZ;
-             //}
 
       public MCH_EntityUavStation(World world) {
            super(world);
@@ -181,7 +164,7 @@ public class MCH_EntityUavStation
 
       public void setControlAircract(MCH_EntityAircraft ac) {
            this.controlAircraft = ac;
-           if (ac != null && !ac.isDead ) { //&& MCH_EntityUavStation != null MAKE A NEW FUCKING VARIABLE TO TEST IF THE UAV STATION IS ALIVE OR NOT
+           if (ac != null && !ac.isDead ) {
                 setLastControlAircraft(ac);
               }
          }
@@ -248,53 +231,19 @@ public class MCH_EntityUavStation
 
              @Override
              public void setDead() {
+                    //if setdead is fired clientside = this is no longer chunk loaded, we should init a chunk loader
+                    //if setdead is fired serverside = this was actually attacked, get the linked player and force a dismount.
+
+
                  System.out.println("setDead fired in UAV Station");
 
                  //station no longer loaded, OR broken NOT necessarily dead that's literally just fake
                  //also kinda clientside-ish? might be both idk
                  //so we should start chunk loading here?
 
-
-
-                 //if (this.controlAircraft != null) {
-                 //    System.out.println("Retrieving stored player UUID from controlled UAV.");
-                 //    this.newUavPlayerUUID = this.controlAircraft.newUavPlayerUUID;
-                 //}
-
-                 //if (this.newUavPlayerUUID != null) {
-                 //    System.out.println("Stored player UUID: " + this.newUavPlayerUUID);
-                 //    for (Object obj : worldObj.playerEntities) {
-                 //        EntityPlayer player = (EntityPlayer) obj;
-                 //        if (player.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
-                 //            System.out.println("Found matching player by UUID. Attempting teleport...");
-//
-                 //            // Ensure dismount
-                 //            if (player.ridingEntity instanceof MCH_EntityAircraft) {
-                 //                MCH_EntityAircraft aircraft = (MCH_EntityAircraft) player.ridingEntity;
-                 //                System.out.println("Player is currently in UAV. Calling unmountAircraft...");
-                 //                aircraft.unmountAircraft();
-                 //            } else {
-                 //                System.out.println("Player is NOT riding a UAV, forcing dismount.");
-                 //                player.mountEntity(null);
-                 //            }
-//
-                 //            System.out.println("Teleporting player to station at: " + storedStationX + ", " + storedStationY + ", " + storedStationZ);
-//
-                 //            player.isSneaking();
-                 //            player.mountEntity(null);
-//
-                 //            // Force teleportation
-                 //            player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
-//
-                 //            player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Station destroyed! Teleporting back to station."));
-                 //            break;
-                 //        }
-                 //    }
-                 //} else {
-                 //    System.out.println("No stored player UUID in UAV station.");
-                 //}
-
                  //will fire when player is outside of chunk for some reason
+
+                 //ive determined the thing I'm trying to do should be done in attackentity method.
 
                  super.setDead();
                  System.out.println("UAV Station setDead completed.");
@@ -331,15 +280,6 @@ public class MCH_EntityUavStation
 
            setBeenAttacked();
            if (damage > 0.0F) {
-               //i might want to store these at the top of the class idk tho
-               //nvm this works perfectly fine NOT THIS DOES NOTHING WHAT
-               //double gotox = MCH_EntityUavStation.storedStationX;
-               //double gotoy = MCH_EntityUavStation.storedStationY;
-               //double gotoz = MCH_EntityUavStation.storedStationZ;
-               //EntityPlayer player = (EntityPlayer) this.riddenByEntity;
-               //if (this.riddenByEntity != null) {
-               //    this.riddenByEntity.mountEntity((Entity) this);
-               //}
 
                EntityPlayer player = null;
                // If there's a rider, capture the UUID immediately
@@ -371,23 +311,10 @@ public class MCH_EntityUavStation
                }
 
                this.dropContentsWhenDead = true;
-              // if (this.riddenByEntity != null){ //!isDamegeSourcePlayer && WE WANT TO CHECK IF
-               // THE MCH_ENTITY AIRCRAFT IS RIDDEN NOT THE PLAYER,
-               // THE PLAYER IS MOUNTED TO THE FUCKING UAV
-               //NOT THAT IT FUCKING MATTERS THIS SHIT JUST CRASHES ANYWAYS YAY
-               // I FUCKING LOVE MINECRAFT MODDING
                System.out.println(MCH_EntityUavStation.storedStationX + " " +
                        MCH_EntityUavStation.storedStationY + " " +
                        MCH_EntityUavStation.storedStationZ + " " + "station pos");
 
-               // Teleport player
-               //player.setPositionAndUpdate(
-               //        MCH_EntityUavStation.storedStationX,
-               //        MCH_EntityUavStation.storedStationY,
-               //        MCH_EntityUavStation.storedStationZ
-               //);
-               //teleport the player? I think you meant CRASH THE FUCKING GAME
-         //  }
                 setDead();
                 if (!isDamegeSourcePlayer) {
                     System.out.println("explosion created");
@@ -461,10 +388,6 @@ public class MCH_EntityUavStation
 
       public void onUpdate() {
 
-          //System.out.println(aircraftX + " aircraftx" + aircraftY + " aircrafty" + aircraftZ + " aircraftz" + this.posUavX + " posuavx" + this.posUavY + " posuavy" + this.posUavZ + " posuavz" );
-          //aircraft = uavstation
-          //uav = uav
-
           EntityPlayer player = (EntityPlayer)this.riddenByEntity;
            super.onUpdate();
            this.prevRotCover = this.rotCover;
@@ -479,12 +402,6 @@ public class MCH_EntityUavStation
               } else {
                 this.rotCover = 0.0F;
               }
-
-           //99% sure does not work lool... I would FUCKING KNOW IF THERE WERE PRINT STATEMENTS
-          //if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
-          //    //((EntityPlayer) this.riddenByEntity).inventory.pickupSlot = -1; // Prevents item pickup for new UAVs only
-          //    ((EntityPlayer) this.riddenByEntity).inventoryContainer.detectAndSendChanges();
-          //}
 
           if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
 
@@ -682,10 +599,7 @@ public class MCH_EntityUavStation
                      // Store the current station position
                      System.out.println("stationposition" + storedStationX + " " + storedStationY + " " + storedStationZ);
                      storeStationPosition();
-                     //user.setPosition(storedStationX, storedStationY, storedStationZ);
-                     //0,0,0 for some fuck ass reason thanks minecraft
 
-                     // If it's a new UAV and it's been alive long enough, mount the player to the UAV.
                      if (this.controlAircraft != null &&
                              this.controlAircraft.getAcInfo() != null &&
                              this.controlAircraft.getAcInfo().isNewUAV &&
@@ -694,13 +608,7 @@ public class MCH_EntityUavStation
                      }
                      W_EntityPlayer.closeScreen(user);
                  }
-                 //this will never fire but its good to have redundants I guess? The part of this that works
-                 // is in the MCH_EntityAircraft class.
-                 //if (this.controlAircraft.getAcInfo().isNewUAV && this.isDead) {
-                 //    System.out.println("UAV is dead, teleporting to stored station position");
-                 //       this.setPosition(storedStationX, storedStationY, storedStationZ);
-                 //       //todo probably also set the fuckin mount thing to null before setting position so minecraft doesnt tardmax
-                 //}
+
              }
 
 
@@ -762,10 +670,9 @@ public class MCH_EntityUavStation
 
                 if (ac != null) {
                     if(MCH_Config.ItemDamage.prmBool) {
-                        //System.out.println("applying damage fix to uav");
+
                         ((MCH_EntityAircraft)ac).getAcDataFromItem(itemStack);
-                        //ac.setDamageTaken(item.getItemDamage());
-                    } //why wasn't this here already? actually im probably gonna find out after this fucking game crash nvm
+                    } //why wasn't this here already?
                      ((Entity)ac).rotationYaw = this.rotationYaw - 180.0F;
                      ((Entity)ac).prevRotationYaw = ((Entity)ac).rotationYaw;
                      user.rotationYaw = this.rotationYaw - 180.0F;
@@ -801,8 +708,6 @@ public class MCH_EntityUavStation
       public boolean interactFirst(EntityPlayer player) {
 
           if(this.riddenByEntity instanceof EntityPlayer){
-              //EntityPlayer player = (EntityPlayer)this.riddenByEntity;
-              //SIR THIS IS ALREADY DEFINED SIR
               this.newUavPlayerUUID = player.getUniqueID().toString();
           }
 
@@ -846,14 +751,6 @@ public class MCH_EntityUavStation
                  Entity rByEntity = null;
                  if (this.riddenByEntity != null) {
                      if (!this.worldObj.isRemote) {
-
-                         //if (MCH_EntityAircraft.isNewUAV()) {
-                         //    System.out.println("is new uav, mounting to uav station.");
-                         //    newuavvariable = true;
-                         //    //here
-                         //    rByEntity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
-                         //    rByEntity.mountEntity((Entity)null);
-                         //}
 
                          rByEntity = this.riddenByEntity;
                          this.riddenByEntity.mountEntity((Entity) null);
