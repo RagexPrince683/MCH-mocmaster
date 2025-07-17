@@ -268,6 +268,7 @@ public class MCH_EntityGunner extends EntityLivingBase {
                 //                list = this.worldObj.getEntitiesWithinAABB(IMob.class, this.boundingBox.expand(rh, rv, rh));
 
                 for (Entity entity : rawList) {
+                    System.out.println("Checking entity: " + entity.getClass().getName() + " for targeting.");
                     if (entity == this || entity.isDead || !entity.isEntityAlive()) continue;
                     if (!(entity instanceof EntityLivingBase)) continue;
                     if (entity instanceof net.minecraft.entity.monster.EntityEnderman) continue;

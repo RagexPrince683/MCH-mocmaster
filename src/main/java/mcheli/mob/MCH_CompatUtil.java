@@ -10,6 +10,19 @@ public class MCH_CompatUtil {
 
     private static final List<Class<?>> targetMachineClasses = new ArrayList<Class<?>>();
 
+    /**
+     * if(targetMachines) {
+     *
+     * 			if(e instanceof IRadarDetectableNT && !((IRadarDetectableNT)e).canBeSeenBy(this)) return false;
+     * 			if(e instanceof EntityMissileBaseNT) return e.motionY < 0;
+     * 			if(e instanceof EntityMissileCustom) return e.motionY < 0;
+     * 			if(e instanceof EntityMinecart) return true;
+     * 			if(e instanceof EntityRailCarBase) return true;
+     * 			if(e instanceof EntityBomber) return true;
+     * 			for(Class c : CompatExternal.turretTargetMachine) if(c.isAssignableFrom(e.getClass())) return true;
+     *                }
+     */
+
     static {
         String[] classNames = {
                 "com.hbm.entity.missile.EntityMissileBaseNT",
@@ -30,6 +43,7 @@ public class MCH_CompatUtil {
     public static boolean isTargetMachine(Entity entity) {
         for (Class<?> clazz : targetMachineClasses) {
             if (clazz.isAssignableFrom(entity.getClass())) {
+                System.out.println("MCH_CompatUtil: Detected target machine entity: " + entity.getClass().getName());
                 return true;
             }
         }
@@ -42,7 +56,9 @@ public class MCH_CompatUtil {
                     entity.getClass().getName().equals("com.hbm.entity.missile.EntityMissileCustom")) {
                 return entity.motionY < 0;
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            System.out.println("MCH_CompatUtil: Error checking if entity is missile falling: " + ignored.getMessage());
+        }
         return false;
     }
 
@@ -53,7 +69,9 @@ public class MCH_CompatUtil {
                 Method canBeSeenBy = radarDetectable.getMethod("canBeSeenBy", Entity.class);
                 return (boolean) canBeSeenBy.invoke(entity, checker);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+            System.out.println("MCH_CompatUtil: Error checking radar detectability or visibility: " + ignored.getMessage());
+        }
         return true; // assume visible if check fails
     }
 }
