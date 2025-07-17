@@ -259,6 +259,7 @@ public class MCH_EntityGunner extends EntityLivingBase {
                     if (entity instanceof net.minecraft.entity.monster.EntityEnderman) continue;
                     if (isOnSameTeam((EntityLivingBase) entity)) continue;
                     if (ac.isMountedEntity(entity)) continue;
+                    if (entity instanceof EntityPlayer) continue; //&& ((EntityPlayer) entity).capabilities.isCreativeMode
 
                     boolean isHostileMob = entity instanceof IMob;
 
@@ -286,7 +287,7 @@ public class MCH_EntityGunner extends EntityLivingBase {
                 if (canAttackEntity(entity, ac, ws))
                     if (checkPitch(entity, ac, pos))
                         if ((nextTarget == null || getDistanceToEntity(entity) < getDistanceToEntity(nextTarget) && (canEntityBeSeenOrBehindBreakableBlocks((Entity)entity))
-                                && canEntityBeSeenOrBehindBreakableBlocks(entity))
+                                && canEntityBeSeenOrBehindBreakableBlocks(entity)))
                             if (isInAttackable(entity, ac, ws, pos)) {
                                 nextTarget = entity;
                                 this.switchTargetCount = 60;
