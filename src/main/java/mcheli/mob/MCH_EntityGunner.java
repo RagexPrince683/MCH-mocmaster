@@ -174,10 +174,11 @@ public class MCH_EntityGunner extends EntityLivingBase {
                     && !entity.isDead
                     && !isOnSameTeam(entity)
                     && entity.getHealth() > 0.0F
-                    && !ac.isMountedEntity(entity)
-                    && MCH_CompatUtil.isRadarDetectableAndVisible(entity, this)
-                    && MCH_CompatUtil.isMissileFalling(entity)
-                    && MCH_CompatUtil.isTargetMachine(entity));
+                    && !ac.isMountedEntity(entity));
+                    //temp
+                    //&& MCH_CompatUtil.isRadarDetectableAndVisible(entity, this)
+                    //&& MCH_CompatUtil.isMissileFalling(entity)
+                    //&& MCH_CompatUtil.isTargetMachine(entity));
         } else {
             ret = (entity != this && !((EntityPlayer)entity).capabilities.isCreativeMode && !entity.isDead && !getTeamName().isEmpty() && !isOnSameTeam(entity) && entity.getHealth() > 0.0F && !ac.isMountedEntity((Entity)entity));
         }
