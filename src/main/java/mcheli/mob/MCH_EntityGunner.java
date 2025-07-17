@@ -239,6 +239,17 @@ public class MCH_EntityGunner extends EntityLivingBase {
                 int rh = MCH_Config.RangeOfGunner_VsMonster_Horizontal.prmInt;
                 int rv = MCH_Config.RangeOfGunner_VsMonster_Vertical.prmInt;
                 list = this.worldObj.getEntitiesWithinAABB(IMob.class, this.boundingBox.expand(rh, rv, rh));
+
+                /**
+                 * List<Entity> list;
+                 *
+                 * int rh = MCH_Config.RangeOfGunner_VsMonster_Horizontal.prmInt;
+                 * int rv = MCH_Config.RangeOfGunner_VsMonster_Vertical.prmInt;
+                 *
+                 * // Get both mobs, players, and any custom entities like missiles or machines
+                 * AxisAlignedBB box = this.boundingBox.expand(rh, rv, rh);
+                 * list = this.worldObj.getEntitiesWithinAABB(Entity.class, box);
+                 */
             } else {
                 int rh = MCH_Config.RangeOfGunner_VsPlayer_Horizontal.prmInt;
                 int rv = MCH_Config.RangeOfGunner_VsPlayer_Vertical.prmInt;
@@ -249,9 +260,8 @@ public class MCH_EntityGunner extends EntityLivingBase {
                 if (canAttackEntity(entity, ac, ws))
                     if (checkPitch(entity, ac, pos))
                         if ((nextTarget == null || getDistanceToEntity((Entity)entity) < getDistanceToEntity((Entity)nextTarget)) && (canEntityBeSeenOrBehindBreakableBlocks((Entity)entity) ))
-                            //todo here is where we want to check if we are accidentally flagging friendlies, check bullet breakable blocks too
-                            //|| entity is behind MCH_Config.bulletBreakableBlocks
-                            //replaced canEntityBeSeen with canEntityBeSeenOrBehindBreakableBlocks
+                            //todo here is where we want to check if we are accidentally flagging friendlies?
+
                             if (isInAttackable(entity, ac, ws, pos)) {
                                 nextTarget = entity;
                                 this.switchTargetCount = 60;
@@ -402,7 +412,7 @@ public class MCH_EntityGunner extends EntityLivingBase {
         if (!this.worldObj.isRemote && !this.isDead && !this.isCreative)
             if (this.targetType == 0) {
                 dropItem((Item)MCH_MOD.itemSpawnGunnerVsMonster, 1);
-            } else {
+            } else if (this.targetType == 1) {
                 dropItem((Item)MCH_MOD.itemSpawnGunnerVsPlayer, 1);
             }
         super.setDead();

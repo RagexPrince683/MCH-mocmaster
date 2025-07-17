@@ -131,6 +131,7 @@ public class MCH_MOD {
    public static MCH_ItemRangeFinder itemRangeFinder;
    public static MCH_ItemSpawnGunner itemSpawnGunnerVsPlayer;
    public static MCH_ItemSpawnGunner itemSpawnGunnerVsMonster;
+   public static MCH_ItemSpawnGunner itemSpawnGunnerEvil;
    public static MCH_CreativeTabs creativeTabs;
    public static MCH_CreativeTabs creativeTabsItem;
    public static MCH_CreativeTabs creativeTabsHeli;
@@ -370,7 +371,7 @@ public class MCH_MOD {
            item.targetType = 2;
            item.primaryColor = 12582912;
            item.secondaryColor = 12582912;
-           itemSpawnGunnerVsPlayer = item;
+           itemSpawnGunnerEvil = item;
            registerItem((W_Item)item, name, creativeTabs);
            W_LanguageRegistry.addName(item, "Gunner (EVIL)");
            W_LanguageRegistry.addNameForObject(item, "ja_JP", "対他チーム");
