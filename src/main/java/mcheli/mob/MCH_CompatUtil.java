@@ -12,11 +12,11 @@ public class MCH_CompatUtil {
 
     static {
         String[] classNames = {
-                "com.hbm.entity.missiles.EntityMissileBaseNT",
-                "com.hbm.entity.missiles.EntityMissileCustom",
-                "com.hbm.entity.vehicle.EntityRailCarBase",
-                "com.hbm.entity.vehicle.EntityBomber",
-                "net.minecraft.entity.item.EntityMinecart"
+                "com.hbm.entity.missile.EntityMissileBaseNT",
+                "com.hbm.entity.missile.EntityMissileCustom",
+                //"com.hbm.entity.vehicle.EntityRailCarBase",
+                "com.hbm.entity.logic.EntityBomber"
+                //"net.minecraft.entity.item.EntityMinecart"
         };
 
         for (String name : classNames) {
@@ -38,8 +38,8 @@ public class MCH_CompatUtil {
 
     public static boolean isMissileFalling(Entity entity) {
         try {
-            if (entity.getClass().getName().equals("com.hbm.entity.missiles.EntityMissileBaseNT") ||
-                    entity.getClass().getName().equals("com.hbm.entity.missiles.EntityMissileCustom")) {
+            if (entity.getClass().getName().equals("com.hbm.entity.missile.EntityMissileBaseNT") ||
+                    entity.getClass().getName().equals("com.hbm.entity.missile.EntityMissileCustom")) {
                 return entity.motionY < 0;
             }
         } catch (Exception ignored) {}
@@ -48,7 +48,7 @@ public class MCH_CompatUtil {
 
     public static boolean isRadarDetectableAndVisible(Entity entity, Entity checker) {
         try {
-            Class<?> radarDetectable = Class.forName("com.hbm.interfaces.IRadarDetectableNT");
+            Class<?> radarDetectable = Class.forName("api.hbm.entity.IRadarDetectableNT");
             if (radarDetectable.isAssignableFrom(entity.getClass())) {
                 Method canBeSeenBy = radarDetectable.getMethod("canBeSeenBy", Entity.class);
                 return (boolean) canBeSeenBy.invoke(entity, checker);
