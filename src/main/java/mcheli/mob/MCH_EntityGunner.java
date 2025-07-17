@@ -246,6 +246,8 @@ public class MCH_EntityGunner extends EntityLivingBase {
             EntityLivingBase nextTarget = null;
             if (this.targetType == 0) {
 
+                System.out.println(">>> GUNNER targetType 0 branch active");
+
                 // Get hostile mobs first (as originally defined)
                 int rh = MCH_Config.RangeOfGunner_VsMonster_Horizontal.prmInt;
                 int rv = MCH_Config.RangeOfGunner_VsMonster_Vertical.prmInt;
@@ -254,23 +256,24 @@ public class MCH_EntityGunner extends EntityLivingBase {
 
                 for (Entity entity : rawList) {
                     if (entity == this || entity.isDead || !entity.isEntityAlive()) continue;
-                    if (!(entity instanceof EntityLivingBase)) continue; // <- critical fix
-
+                    if (!(entity instanceof EntityLivingBase)) continue;
                     if (entity instanceof net.minecraft.entity.monster.EntityEnderman) continue;
                     if (isOnSameTeam((EntityLivingBase) entity)) continue;
                     if (ac.isMountedEntity(entity)) continue;
-                    if (entity instanceof EntityPlayer) continue; //&& ((EntityPlayer) entity).capabilities.isCreativeMode
+
+                    // SKIP ALL PLAYERS REGARDLESS OF MODE
+                    if (entity instanceof EntityPlayer) continue;
 
                     boolean isHostileMob = entity instanceof IMob;
 
                     if (!isHostileMob) {
-                        // This is probably a machine/missile, apply extra checks
+                        // ONLY allow if confirmed to be a missile/machine
                         if (!MCH_CompatUtil.isRadarDetectableAndVisible(entity, this)) continue;
                         if (!MCH_CompatUtil.isMissileFalling(entity)) continue;
                         if (!MCH_CompatUtil.isTargetMachine(entity)) continue;
                     }
 
-                    // Passed all checks, add to list
+                    // Safe to target
                     list.add((EntityLivingBase) entity);
                 }
             } else {
