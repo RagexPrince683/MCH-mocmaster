@@ -278,12 +278,15 @@ public class MCH_EntityGunner extends EntityLivingBase {
                 list = this.worldObj.getEntitiesWithinAABB(EntityPlayer.class, this.boundingBox.expand(rh, rv, rh));
             }
             for (int i = 0; i < list.size(); i++) {
-                EntityLivingBase entity = list.get(i);
+                Entity e = list.get(i);
+                if (!(e instanceof EntityLivingBase)) continue; // Skip non-living entities
+
+                EntityLivingBase entity = (EntityLivingBase) e;
+
                 if (canAttackEntity(entity, ac, ws))
                     if (checkPitch(entity, ac, pos))
-                        if ((nextTarget == null || getDistanceToEntity((Entity)entity) < getDistanceToEntity((Entity)nextTarget)) && (canEntityBeSeenOrBehindBreakableBlocks((Entity)entity) ))
-                            //todo here is where we want to check if we are accidentally flagging friendlies?
-
+                        if ((nextTarget == null || getDistanceToEntity(entity) < getDistanceToEntity(nextTarget) && (canEntityBeSeenOrBehindBreakableBlocks((Entity)entity))
+                                && canEntityBeSeenOrBehindBreakableBlocks(entity))
                             if (isInAttackable(entity, ac, ws, pos)) {
                                 nextTarget = entity;
                                 this.switchTargetCount = 60;
