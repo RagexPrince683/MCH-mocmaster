@@ -169,22 +169,15 @@ public class MCH_EntityGunner extends EntityLivingBase {
     public boolean canAttackEntity(EntityLivingBase entity, MCH_EntityAircraft ac, MCH_WeaponSet ws) {
         boolean ret = false;
         if (this.targetType == 0) {
-            //todo hbm missiles, mch rockets weapons etc here
-            ret = (entity != this && !(entity instanceof net.minecraft.entity.monster.EntityEnderman) && !entity.isDead && !isOnSameTeam(entity) && entity.getHealth() > 0.0F && !ac.isMountedEntity((Entity)entity));
-
-            // Custom dynamic checks
-            //if (this.targetMachines) {
-            //blah blah blah im lazy and the mob target thing can get this
-                // Only allow radar-visible targets
-                if (!MCH_CompatUtil.isRadarDetectableAndVisible(entity, this)) return false;
-
-                // Missiles must be falling
-                if (!MCH_CompatUtil.isMissileFalling(entity)) return false;
-
-                // Check if it's one of the registered machine entities
-                if (!MCH_CompatUtil.isTargetMachine(entity)) return false;
-            //}
-
+            ret = (entity != this
+                    && !(entity instanceof net.minecraft.entity.monster.EntityEnderman)
+                    && !entity.isDead
+                    && !isOnSameTeam(entity)
+                    && entity.getHealth() > 0.0F
+                    && !ac.isMountedEntity(entity)
+                    && MCH_CompatUtil.isRadarDetectableAndVisible(entity, this)
+                    && MCH_CompatUtil.isMissileFalling(entity)
+                    && MCH_CompatUtil.isTargetMachine(entity));
         } else {
             ret = (entity != this && !((EntityPlayer)entity).capabilities.isCreativeMode && !entity.isDead && !getTeamName().isEmpty() && !isOnSameTeam(entity) && entity.getHealth() > 0.0F && !ac.isMountedEntity((Entity)entity));
         }
