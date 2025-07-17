@@ -239,44 +239,38 @@ public class MCH_EntityGunner extends EntityLivingBase {
 
         if ((this.targetEntity == null && this.switchTargetCount <= 0) || this.switchTargetCount <= 0) {
             List<EntityLivingBase> list;
+
+            //list = new ArrayList<EntityLivingBase>();
+
             this.switchTargetCount = 20;
             EntityLivingBase nextTarget = null;
             if (this.targetType == 0) {
+
                 // Get hostile mobs first (as originally defined)
                 int rh = MCH_Config.RangeOfGunner_VsMonster_Horizontal.prmInt;
                 int rv = MCH_Config.RangeOfGunner_VsMonster_Vertical.prmInt;
                 list = this.worldObj.getEntitiesWithinAABB(Entity.class, this.boundingBox.expand(rh, rv, rh));
+                List<Entity> rawList = this.worldObj.getEntitiesWithinAABB(Entity.class, this.boundingBox.expand(rh, rv, rh));
 
-                for (Entity entity : list) {
-                    // Skip self, dead things, invalid health, etc.
+                for (Entity entity : rawList) {
                     if (entity == this || entity.isDead || !entity.isEntityAlive()) continue;
+                    if (!(entity instanceof EntityLivingBase)) continue; // <- critical fix
+
                     if (entity instanceof net.minecraft.entity.monster.EntityEnderman) continue;
-
-                    // Skip if on same team
                     if (isOnSameTeam((EntityLivingBase) entity)) continue;
-
-                    // Skip if mounted on this aircraft
                     if (ac.isMountedEntity(entity)) continue;
 
-                    // Skip if it’s not a mob AND not a targetMachine (if custom targeting is enabled)
                     boolean isHostileMob = entity instanceof IMob;
-                    //boolean isTargetableMachine = false;
 
-                    //if (this.targetMachines) {
-                    //always target machines, we do not care
+                    if (!isHostileMob) {
+                        // This is probably a machine/missile, apply extra checks
                         if (!MCH_CompatUtil.isRadarDetectableAndVisible(entity, this)) continue;
                         if (!MCH_CompatUtil.isMissileFalling(entity)) continue;
                         if (!MCH_CompatUtil.isTargetMachine(entity)) continue;
+                    }
 
-                        //isTargetableMachine = true;
-                    //}
-
-                    // Final filter: must be hostile mob or machine
-                    if (!isHostileMob ) continue; //&& !isTargetableMachine
-
-                    // Good target
-                    //ret = true;
-                    //break;
+                    // Passed all checks, add to list
+                    list.add((EntityLivingBase) entity);
                 }
             } else {
                 int rh = MCH_Config.RangeOfGunner_VsPlayer_Horizontal.prmInt;
