@@ -174,7 +174,10 @@ public class MCH_EntityGunner extends EntityLivingBase {
                     && !entity.isDead
                     && !isOnSameTeam(entity)
                     && entity.getHealth() > 0.0F
-                    && !ac.isMountedEntity(entity));
+                    && !ac.isMountedEntity(entity)
+                    );
+            //maybe we don't need this?
+            //if we do we'll have to do some fuckery with entitylivingbase because HBM shit is not livingbase obviously
                     //temp
                     //&& MCH_CompatUtil.isRadarDetectableAndVisible(entity, this)
                     //&& MCH_CompatUtil.isMissileFalling(entity)
@@ -232,25 +235,49 @@ public class MCH_EntityGunner extends EntityLivingBase {
             if (this.switchTargetCount > 20)
                 this.switchTargetCount = 20;
         Vec3 pos = getGunnerWeaponPos(ac, ws);
+
+
         if ((this.targetEntity == null && this.switchTargetCount <= 0) || this.switchTargetCount <= 0) {
             List<EntityLivingBase> list;
             this.switchTargetCount = 20;
             EntityLivingBase nextTarget = null;
             if (this.targetType == 0) {
+                // Get hostile mobs first (as originally defined)
                 int rh = MCH_Config.RangeOfGunner_VsMonster_Horizontal.prmInt;
                 int rv = MCH_Config.RangeOfGunner_VsMonster_Vertical.prmInt;
-                list = this.worldObj.getEntitiesWithinAABB(IMob.class, this.boundingBox.expand(rh, rv, rh));
+                list = this.worldObj.getEntitiesWithinAABB(Entity.class, this.boundingBox.expand(rh, rv, rh));
 
-                /**
-                 * List<Entity> list;
-                 *
-                 * int rh = MCH_Config.RangeOfGunner_VsMonster_Horizontal.prmInt;
-                 * int rv = MCH_Config.RangeOfGunner_VsMonster_Vertical.prmInt;
-                 *
-                 * // Get both mobs, players, and any custom entities like missiles or machines
-                 * AxisAlignedBB box = this.boundingBox.expand(rh, rv, rh);
-                 * list = this.worldObj.getEntitiesWithinAABB(Entity.class, box);
-                 */
+                for (Entity entity : list) {
+                    // Skip self, dead things, invalid health, etc.
+                    if (entity == this || entity.isDead || !entity.isEntityAlive()) continue;
+                    if (entity instanceof net.minecraft.entity.monster.EntityEnderman) continue;
+
+                    // Skip if on same team
+                    if (isOnSameTeam((EntityLivingBase) entity)) continue;
+
+                    // Skip if mounted on this aircraft
+                    if (ac.isMountedEntity(entity)) continue;
+
+                    // Skip if it’s not a mob AND not a targetMachine (if custom targeting is enabled)
+                    boolean isHostileMob = entity instanceof IMob;
+                    //boolean isTargetableMachine = false;
+
+                    //if (this.targetMachines) {
+                    //always target machines, we do not care
+                        if (!MCH_CompatUtil.isRadarDetectableAndVisible(entity, this)) continue;
+                        if (!MCH_CompatUtil.isMissileFalling(entity)) continue;
+                        if (!MCH_CompatUtil.isTargetMachine(entity)) continue;
+
+                        //isTargetableMachine = true;
+                    //}
+
+                    // Final filter: must be hostile mob or machine
+                    if (!isHostileMob ) continue; //&& !isTargetableMachine
+
+                    // Good target
+                    //ret = true;
+                    //break;
+                }
             } else {
                 int rh = MCH_Config.RangeOfGunner_VsPlayer_Horizontal.prmInt;
                 int rv = MCH_Config.RangeOfGunner_VsPlayer_Vertical.prmInt;
@@ -275,6 +302,8 @@ public class MCH_EntityGunner extends EntityLivingBase {
             }
             this.targetEntity = (Entity)nextTarget;
         }
+
+
         if (this.targetEntity != null) {
             float rotSpeed = 10.0F;
             if (ac.isPilot((Entity)this))
