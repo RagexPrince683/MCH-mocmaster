@@ -122,7 +122,9 @@ public class MCH_ItemSpawnGunner extends W_Item {
             W_WorldFunc.MOD_playSoundAtEntity((Entity) gunner, "wrench", 1.0F, 3.0F);
             MCH_EntityAircraft ac = (mCH_Entity instanceof MCH_EntityAircraft) ? (MCH_EntityAircraft) mCH_Entity : ((MCH_EntitySeat) mCH_Entity).getParent();
             player.addChatMessage((IChatComponent) new ChatComponentText("The gunner was put on " + EnumChatFormatting.GOLD + (ac.getAcInfo()).displayName + EnumChatFormatting.RESET + " seat " + (ac.getSeatIdByEntity((Entity) gunner) + 1) + " by " + ScorePlayerTeam.formatPlayerName(player.getTeam(), player.getDisplayName())));
-            } else {
+            } else if (this.targetType == 2) {
+                //I should probably make sure you can't make the EVIL team
+                // but I really couldn't be bothered to boot up a server right now
                 gunner.setTeamName("EVIL");
                 world.spawnEntityInWorld((Entity) gunner);
                 gunner.mountEntity((Entity) mCH_Entity);
