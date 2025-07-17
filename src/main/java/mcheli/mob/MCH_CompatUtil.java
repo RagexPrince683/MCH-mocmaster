@@ -8,6 +8,8 @@ import java.util.List;
 
 public class MCH_CompatUtil {
 
+    //this never runs for some reason
+
     private static final List<Class<?>> targetMachineClasses = new ArrayList<Class<?>>();
 
     /**
