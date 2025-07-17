@@ -390,6 +390,7 @@ public class MCH_EntityUavStation
          //  }
                 setDead();
                 if (!isDamegeSourcePlayer) {
+                    System.out.println("explosion created");
                      MCH_Explosion.newExplosion(this.worldObj, (Entity)null, this.riddenByEntity, this.posX, this.posY, this.posZ, 1.0F, 0.0F, true, true, false, false, 0);
                    }
 

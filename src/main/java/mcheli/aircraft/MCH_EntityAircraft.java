@@ -2038,6 +2038,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if(!super.worldObj.isRemote) {
 
          if (this.uavStation != null) {
+            //this fires before we have successfully binded to UAV.
             UavStationPosX = (int) this.uavStation.posX;
             UavStationPosY = (int) this.uavStation.posY;
             UavStationPosZ = (int) this.uavStation.posZ;
