@@ -20,7 +20,6 @@ public class MCH_HBMUtil {
             explosionChaosClass = Class.forName("com.hbm.explosion.ExplosionChaos");
             explosionCreatorClass = Class.forName("com.hbm.particle.helper.ExplosionCreator");
             explosionNT = Class.forName("com.hbm.explosion.ExplosionNT");
-            //YAYYYYYYYYY I LOVE IT WHEN CHLORINE SHIT FUCK STOPS WORKING!!!
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
