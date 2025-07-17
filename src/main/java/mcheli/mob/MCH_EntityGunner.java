@@ -1,6 +1,9 @@
 package mcheli.mob;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import com.hbm.lib.Library;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
@@ -110,7 +113,7 @@ public class MCH_EntityGunner extends EntityLivingBase {
             removeFromAircraft(player);
             return true;
         }
-        player.addChatMessage((IChatComponent)new ChatComponentText("You are other team."));
+        player.addChatMessage((IChatComponent)new ChatComponentText("You are on other team."));
         return false;
     }
 
@@ -127,7 +130,7 @@ public class MCH_EntityGunner extends EntityLivingBase {
             String name = "";
             if (ac != null && ac.getAcInfo() != null)
                 name = " on " + (ac.getAcInfo()).displayName + " seat " + (ac.getSeatIdByEntity((Entity)this) + 1);
-            player.addChatMessage((IChatComponent)new ChatComponentText("Remove gunner" + name + " by " + ScorePlayerTeam.formatPlayerName(player.getTeam(), player.getDisplayName()) + "."));
+            player.addChatMessage((IChatComponent)new ChatComponentText("Removed gunner" + name + " by " + ScorePlayerTeam.formatPlayerName(player.getTeam(), player.getDisplayName()) + "."));
             mountEntity(null);
         }
     }
@@ -166,6 +169,7 @@ public class MCH_EntityGunner extends EntityLivingBase {
     public boolean canAttackEntity(EntityLivingBase entity, MCH_EntityAircraft ac, MCH_WeaponSet ws) {
         boolean ret = false;
         if (this.targetType == 0) {
+            //todo hbm missiles, mch rockets weapons etc here
             ret = (entity != this && !(entity instanceof net.minecraft.entity.monster.EntityEnderman) && !entity.isDead && !isOnSameTeam(entity) && entity.getHealth() > 0.0F && !ac.isMountedEntity((Entity)entity));
         } else {
             ret = (entity != this && !((EntityPlayer)entity).capabilities.isCreativeMode && !entity.isDead && !getTeamName().isEmpty() && !isOnSameTeam(entity) && entity.getHealth() > 0.0F && !ac.isMountedEntity((Entity)entity));
@@ -190,13 +194,17 @@ public class MCH_EntityGunner extends EntityLivingBase {
         }
 
         if (result.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-            Block block = this.worldObj.getBlock(result.blockX, result.blockY, result.blockZ);
-            List<Block> breakableBlocks = MCH_Config.getBreakableBlockListFromType(MCH_Config.BulletBreakableBlock.prmInt);
+            Block hitBlock = this.worldObj.getBlock(result.blockX, result.blockY, result.blockZ);
 
-            // Allow targeting if block is breakable
-            if (breakableBlocks.contains(block)) {
-                System.out.println("[AI] Block is breakable, allowing target through.");
-                return true;
+            // Parse the config string (e.g., "glass_pane, stained_glass_pane, tallgrass, ...")
+            String[] blockNames = MCH_Config.BulletBreakableBlock.prmString.split(",");
+            for (String rawName : blockNames) {
+                String name = rawName.trim();
+                Block configBlock = Block.getBlockFromName(name);
+                if (configBlock != null && configBlock == hitBlock) {
+                    System.out.println("[AI] Block is breakable, allowing target through: " + name);
+                    return true;
+                }
             }
         }
 
