@@ -77,9 +77,11 @@ public class MCH_EntityUavStation
              }
 
              public void storeStationPosition() {
+                 System.out.println("Storing station position: " + this.posX + ", " + this.posY + ", " + this.posZ);
                  storedStationX = this.posX;
                  storedStationY = this.posY;
                  storedStationZ = this.posZ;
+                    System.out.println("Stored station position: " + storedStationX + ", " + storedStationY + ", " + storedStationZ);
              }
 
              //unused
@@ -484,7 +486,15 @@ public class MCH_EntityUavStation
           //}
 
           if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
-              isridingnewuav = true;
+
+              if(!this.worldObj.isRemote) {
+                  System.out.println("storing station position" +
+                          this.posX + " " + this.posY + " " + this.posZ +
+                          " for new UAV: " + this.controlAircraft.getAcInfo().displayName +
+                          " controlled by: " + ((EntityPlayer)this.riddenByEntity).getDisplayName());
+                  isridingnewuav = true;
+                  this.storeStationPosition();
+              }
               //this is our first bugged state. do nothing here.
 
           }
@@ -751,7 +761,7 @@ public class MCH_EntityUavStation
 
                 if (ac != null) {
                     if(MCH_Config.ItemDamage.prmBool) {
-                        System.out.println("applying damage fix to uav");
+                        //System.out.println("applying damage fix to uav");
                         ((MCH_EntityAircraft)ac).getAcDataFromItem(itemStack);
                         //ac.setDamageTaken(item.getItemDamage());
                     } //why wasn't this here already? actually im probably gonna find out after this fucking game crash nvm

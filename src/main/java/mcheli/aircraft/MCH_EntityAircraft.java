@@ -58,6 +58,7 @@ import static mcheli.uav.MCH_EntityUavStation.*;
 //import static net.minecraft.command.CommandBase.getPlayer;
 
 import mcheli.mob.MCH_EntityGunner;
+import org.lwjgl.Sys;
 
 
 public abstract class MCH_EntityAircraft extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideAircraft, IEntityAdditionalSpawnData {
@@ -690,6 +691,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       if (getRiddenByEntity() != null) {
          if (isUAV()) {
+            System.out.println("is normal UAV");
             // For normal UAVs, perform the standard dismount.
             Entity rider = getRiddenByEntity();
             if (rider != null) {
@@ -2039,7 +2041,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             UavStationPosX = (int) this.uavStation.posX;
             UavStationPosY = (int) this.uavStation.posY;
             UavStationPosZ = (int) this.uavStation.posZ;
+            System.out.println("[MCH] UAV Station Position: " + UavStationPosX + ", " + UavStationPosY + ", " + UavStationPosZ);
          }
+         //don't do that in updatecontrol, uav station might be unloaded during update control
+         //actually wait, let's see what it's printing
          //grab and set uav station position
 
          this.setCommonStatus(7, this.moveLeft);
@@ -4214,8 +4219,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          //teleport player to UAV station.
          //doesn't working
             if (entity instanceof EntityPlayer) {
-               System.out.println("is player");
-                entity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
+               System.out.println("is player" + " unmounting from UAV. Teleporting to UAV station. Position: " + this.UavStationPosX + ", " + this.UavStationPosY + ", " + this.UavStationPosZ);
+                ((EntityPlayer) entity).setPositionAndUpdate(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
+                //entity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
             }
       }
 
@@ -4368,8 +4374,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                      System.out.println("is new uav, mounting to uav station.");
                      newuavvariable = true;
                      //here
-                     rByEntity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
-                     rByEntity.mountEntity((Entity)null);
+                     if(!this.worldObj.isRemote) {
+                      System.out.println("Mounting player to UAV station. Position: " + this.UavStationPosX + ", " + this.UavStationPosY + ", " + this.UavStationPosZ);
+                      rByEntity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
+                      rByEntity.mountEntity((Entity) null);
+                     }
                    } else {
                      setUnmountPosition(rByEntity, (getSeatsInfo()[0]).pos);
                    }
@@ -4531,6 +4540,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                System.out.println("not null");
                 MCH_AircraftInfo info = this.getAcInfo();
                 if (info != null && info.unmountPosition != null) {
+                    System.out.println("info not null");
+                    rByEntity.setPosition(info.unmountPosition.xCoord, info.unmountPosition.yCoord, info.unmountPosition.zCoord);
                    rByEntity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
                 }
 
@@ -4573,6 +4584,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                      entity.mountEntity((Entity) null);
                   }
                }
+               System.out.println("Mounting entity to UAV station. Position: " + this.UavStationPosX + ", " + this.UavStationPosY + ", " + this.UavStationPosZ);
                entity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
                return false;
             }
@@ -4585,6 +4597,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   entity.mountEntity((Entity) null);
                }
             }
+            System.out.println("Mounting entity to UAV station. Position: " + this.UavStationPosX + ", " + this.UavStationPosY + ", " + this.UavStationPosZ);
             entity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
             return false;
          }
