@@ -169,13 +169,22 @@ public class MCH_EntityGunner extends EntityLivingBase {
     public boolean canAttackEntity(EntityLivingBase entity, MCH_EntityAircraft ac, MCH_WeaponSet ws) {
         boolean ret = false;
         if (this.targetType == 0) {
+            //ret = (entity != this
+            //        && !(entity instanceof net.minecraft.entity.monster.EntityEnderman)
+            //        && !entity.isDead
+            //        && !isOnSameTeam(entity)
+            //        && entity.getHealth() > 0.0F
+            //        && !ac.isMountedEntity(entity)
+            //        );
+
             ret = (entity != this
                     && !(entity instanceof net.minecraft.entity.monster.EntityEnderman)
                     && !entity.isDead
                     && !isOnSameTeam(entity)
                     && entity.getHealth() > 0.0F
-                    && !ac.isMountedEntity(entity)
-                    );
+                    && !ac.isMountedEntity((Entity)entity));
+            //ok this is the same so it's the other shit causing this
+
             //maybe we don't need this?
             //if we do we'll have to do some fuckery with entitylivingbase because HBM shit is not livingbase obviously
                     //temp
@@ -251,8 +260,12 @@ public class MCH_EntityGunner extends EntityLivingBase {
                 // Get hostile mobs first (as originally defined)
                 int rh = MCH_Config.RangeOfGunner_VsMonster_Horizontal.prmInt;
                 int rv = MCH_Config.RangeOfGunner_VsMonster_Vertical.prmInt;
-                list = this.worldObj.getEntitiesWithinAABB(Entity.class, this.boundingBox.expand(rh, rv, rh));
+                list = this.worldObj.getEntitiesWithinAABB(IMob.class, this.boundingBox.expand(rh, rv, rh));
                 List<Entity> rawList = this.worldObj.getEntitiesWithinAABB(Entity.class, this.boundingBox.expand(rh, rv, rh));
+
+                //int rh = MCH_Config.RangeOfGunner_VsMonster_Horizontal.prmInt;
+                //                int rv = MCH_Config.RangeOfGunner_VsMonster_Vertical.prmInt;
+                //                list = this.worldObj.getEntitiesWithinAABB(IMob.class, this.boundingBox.expand(rh, rv, rh));
 
                 for (Entity entity : rawList) {
                     if (entity == this || entity.isDead || !entity.isEntityAlive()) continue;
@@ -264,14 +277,15 @@ public class MCH_EntityGunner extends EntityLivingBase {
                     // SKIP ALL PLAYERS REGARDLESS OF MODE
                     if (entity instanceof EntityPlayer) continue;
 
-                    boolean isHostileMob = entity instanceof IMob;
+                    //boolean isHostileMob = entity instanceof IMob;
 
-                    if (!isHostileMob) {
+                    //if (!isHostileMob) {
                         // ONLY allow if confirmed to be a missile/machine
-                        if (!MCH_CompatUtil.isRadarDetectableAndVisible(entity, this)) continue;
-                        if (!MCH_CompatUtil.isMissileFalling(entity)) continue;
-                        if (!MCH_CompatUtil.isTargetMachine(entity)) continue;
-                    }
+                     if (!MCH_CompatUtil.isRadarDetectableAndVisible(entity, this)) continue;
+                     if (!MCH_CompatUtil.isMissileFalling(entity)) continue;
+                     if (!MCH_CompatUtil.isTargetMachine(entity)) continue;
+                    //}
+                    //redundant check
 
                     // Safe to target
                     list.add((EntityLivingBase) entity);
