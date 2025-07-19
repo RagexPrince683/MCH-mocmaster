@@ -41,6 +41,7 @@ import mcheli.helicopter.MCH_ItemHeli;
 import mcheli.item.MCH_Item;
 import mcheli.item.MCH_ItemInfo;
 import mcheli.item.MCH_ItemInfoManager;
+import mcheli.light.BlockLight;
 import mcheli.lweapon.MCH_ItemLightWeaponBase;
 import mcheli.lweapon.MCH_ItemLightWeaponBullet;
 import mcheli.network.PacketHandler;
@@ -214,6 +215,7 @@ public class MCH_MOD {
       blockDraftingTableLit = var10000;
       blockDraftingTableLit.setBlockName("lit_drafting_table");
       GameRegistry.registerBlock(blockDraftingTable, "drafting_table");
+      GameRegistry.registerBlock(new BlockLight(), "mcheli_lightblock");
       GameRegistry.registerBlock(blockDraftingTableLit, "lit_drafting_table");
       W_LanguageRegistry.addName(blockDraftingTable, "Drafting Table");
       W_LanguageRegistry.addNameForObject(blockDraftingTable, "ja_JP", "製図台");

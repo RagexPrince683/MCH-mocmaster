@@ -15,7 +15,6 @@ import mcheli.flare.MCH_Chaff;
 import mcheli.flare.MCH_Flare;
 import mcheli.flare.MCH_Maintenance;
 import mcheli.helicopter.MCH_EntityHeli;
-import mcheli.light.EntityMCH_Light;
 import mcheli.multiplay.MCH_Multiplay;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.particles.MCH_ParticleParam;
