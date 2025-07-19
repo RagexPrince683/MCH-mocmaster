@@ -1574,71 +1574,45 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    //todo improve search light stuff here
    public float getSearchLightValue(Entity entity) {
-
-      if (this.haveSearchLight() && this.isSearchLightON()) {
+      if(this.haveSearchLight() && this.isSearchLightON()) {
          Iterator i$ = this.getAcInfo().searchLights.iterator();
 
-         while (i$.hasNext()) {
-            MCH_AircraftInfo.SearchLight sl = (MCH_AircraftInfo.SearchLight) i$.next();
+         while(i$.hasNext()) {
+            MCH_AircraftInfo.SearchLight sl = (MCH_AircraftInfo.SearchLight)i$.next();
             Vec3 pos = this.getTransformedPosition(sl.pos);
             double dist = entity.getDistanceSq(pos.xCoord, pos.yCoord, pos.zCoord);
-            if (dist > 2.0D && dist < (double) (sl.height * sl.height + 20.0F)) {
+            if(dist > 2.0D && dist < (double)(sl.height * sl.height + 20.0F)) {
                double cx = entity.posX - pos.xCoord;
                double cy = entity.posY - pos.yCoord;
                double cz = entity.posZ - pos.zCoord;
                double h = 0.0D;
                double v = 0.0D;
                float angle1;
-
-               if (!sl.fixDir) {
-                  Vec3 angle = MCH_Lib.RotVec3(
-                          0.0D, 0.0D, 1.0D,
-                          -this.lastSearchLightYaw + sl.yaw,
-                          -this.lastSearchLightPitch + sl.pitch,
-                          -this.getRotRoll()
-                  );
-                  h = (double) MCH_Lib.getPosAngle(angle.xCoord, angle.zCoord, cx, cz);
-                  v = Math.atan2(cy, Math.sqrt(cx * cx + cz * cz)) * 180.0D / Math.PI;
-                  v = Math.abs(v + this.lastSearchLightPitch + sl.pitch);
+               if(!sl.fixDir) {
+                  Vec3 angle = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -this.lastSearchLightYaw + sl.yaw, -this.lastSearchLightPitch + sl.pitch, -this.getRotRoll());
+                  h = (double)MCH_Lib.getPosAngle(angle.xCoord, angle.zCoord, cx, cz);
+                  v = Math.atan2(cy, Math.sqrt(cx * cx + cz * cz)) * 180.0D / 3.141592653589793D;
+                  v = Math.abs(v + (double)this.lastSearchLightPitch + (double)sl.pitch);
                } else {
                   angle1 = 0.0F;
-                  if (sl.steering) {
+                  if(sl.steering) {
                      angle1 = this.rotYawWheel * sl.stRot;
                   }
 
-                  Vec3 value = MCH_Lib.RotVec3(
-                          0.0D, 0.0D, 1.0D,
-                          -this.getRotYaw() + sl.yaw + angle1,
-                          -this.getRotPitch() + sl.pitch,
-                          -this.getRotRoll()
-                  );
-                  h = (double) MCH_Lib.getPosAngle(value.xCoord, value.zCoord, cx, cz);
-                  v = Math.atan2(cy, Math.sqrt(cx * cx + cz * cz)) * 180.0D / Math.PI;
-                  v = Math.abs(v + this.getRotPitch() + sl.pitch);
+                  Vec3 value = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -this.getRotYaw() + sl.yaw + angle1, -this.getRotPitch() + sl.pitch, -this.getRotRoll());
+                  h = (double)MCH_Lib.getPosAngle(value.xCoord, value.zCoord, cx, cz);
+                  v = Math.atan2(cy, Math.sqrt(cx * cx + cz * cz)) * 180.0D / 3.141592653589793D;
+                  v = Math.abs(v + (double)this.getRotPitch() + (double)sl.pitch);
                }
 
                angle1 = sl.angle * 3.0F;
-               if (h < (double) angle1 && v < (double) angle1) {
-
-                  // ====== RAYTRACE ADDED HERE ======
-                  Vec3 vecStart = Vec3.createVectorHelper(pos.xCoord, pos.yCoord, pos.zCoord);
-                  Vec3 vecEnd = Vec3.createVectorHelper(entity.posX, entity.posY + (entity.height / 2.0), entity.posZ);
-                  MovingObjectPosition hit = entity.worldObj.rayTraceBlocks(vecStart, vecEnd);
-                  if (hit != null) {
-                     double blockDistSq = vecStart.distanceTo(hit.hitVec);
-                     double entityDistSq = vecStart.distanceTo(vecEnd);
-                     if (blockDistSq < entityDistSq) {
-                        continue; // Block is in the way
-                     }
-                  }
-                  // ==================================
-
+               if(h < (double)angle1 && v < (double)angle1) {
                   float value1 = 0.0F;
-                  if (h + v < (double) angle1) {
-                     value1 = (float) (1440.0D * (1.0D - (h + v) / (double) angle1));
+                  if(h + v < (double)angle1) {
+                     value1 = (float)(1440.0D * (1.0D - (h + v) / (double)angle1));
                   }
 
-                  return value1 <= 240.0F ? value1 : 240.0F;
+                  return value1 <= 240.0F?value1:240.0F;
                }
             }
          }

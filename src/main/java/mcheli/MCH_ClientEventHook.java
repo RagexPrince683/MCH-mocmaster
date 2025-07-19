@@ -118,6 +118,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
 
       while(rm.hasNext()) {
          MCH_EntityAircraft ac = (MCH_EntityAircraft)rm.next();
+         System.out.println("what the hell does this do");
          OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, ac.getSearchLightValue(event.entity), 240.0F);
       }
 
