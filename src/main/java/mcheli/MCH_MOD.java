@@ -141,6 +141,7 @@ public class MCH_MOD {
    public static MCH_CreativeTabs creativeTabsTank;
    public static MCH_CreativeTabs creativeTabsVehicle;
    public static MCH_DraftingTableBlock blockDraftingTable;
+   public static BlockLight lightBlock;
    public static MCH_DraftingTableBlock blockDraftingTableLit;
    public static Item sampleHelmet;
    public static final PacketHandler newPacketHandler = new PacketHandler();
@@ -209,13 +210,20 @@ public class MCH_MOD {
       MCH_Config var10002 = config;
       blockDraftingTable = var10000;
       blockDraftingTable.setBlockName("drafting_table");
+      lightBlock = (BlockLight) new BlockLight()
+              .setBlockName("mcheli_lightblock")       // must be called BEFORE register
+              .setBlockTextureName("mymod:lightblock"); // same path as your PNG
+
+      // Register it under the same name
+      GameRegistry.registerBlock(lightBlock, "mcheli_lightblock");
+
       blockDraftingTable.setCreativeTab(creativeTabs);
       var10000 = new MCH_DraftingTableBlock(MCH_Config.BlockID_DraftingTableON.prmInt, true);
       var10002 = config;
       blockDraftingTableLit = var10000;
       blockDraftingTableLit.setBlockName("lit_drafting_table");
       GameRegistry.registerBlock(blockDraftingTable, "drafting_table");
-      GameRegistry.registerBlock(new BlockLight(), "mcheli_lightblock");
+      //GameRegistry.registerBlock(lightBlock, "mcheli_lightblock");
       GameRegistry.registerBlock(blockDraftingTableLit, "lit_drafting_table");
       W_LanguageRegistry.addName(blockDraftingTable, "Drafting Table");
       W_LanguageRegistry.addNameForObject(blockDraftingTable, "ja_JP", "製図台");

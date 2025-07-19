@@ -49,6 +49,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.ForgeChunkManager;
 
+import mcheli.light.BlockLight;
+
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -56,6 +58,9 @@ import static mcheli.hud.MCH_HudItem.player;
 import static mcheli.uav.MCH_EntityUavStation.*;
 //import static net.minecraft.command.CommandBase.getCommandSenderAsPlayer;
 //import static net.minecraft.command.CommandBase.getPlayer;
+
+import net.minecraft.world.EnumSkyBlock;
+
 
 import mcheli.mob.MCH_EntityGunner;
 import org.lwjgl.Sys;
@@ -251,6 +256,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public int UavStationPosX;
    public int UavStationPosY;
    public int UavStationPosZ;
+
+   private final Set<ChunkCoordinates> activeLights = new HashSet<>();
 
    public MCH_EntityAircraft(World world) {
       super(world);
@@ -1579,6 +1586,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    //we aren't overriding anything
    public float getSearchLightValue(Entity entity) {
       if(this.haveSearchLight() && this.isSearchLightON()) {
+
+
+
+
          Iterator i$ = this.getAcInfo().searchLights.iterator();
 
          while(i$.hasNext()) {
@@ -1631,6 +1642,37 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if(this.getCountOnUpdate() < 2) {
          this.prevPosition.clear(Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
       }
+
+
+
+      //if (this.haveSearchLight() && this.isSearchLightON()) {
+      //   for (MCH_AircraftInfo.SearchLight sl : this.getAcInfo().searchLights) {
+      //      Vec3 pos = this.getTransformedPosition(sl.pos);
+//
+      //      int bx = (int)Math.floor(pos.xCoord);
+      //      int by = (int)Math.floor(pos.yCoord);
+      //      int bz = (int)Math.floor(pos.zCoord);
+//
+      //      Block blockAt = worldObj.getBlock(bx, by, bz);
+      //      if (!(blockAt instanceof BlockLight)) {
+      //         worldObj.setBlock(bx, by, bz, MCH_LightBlock.INSTANCE, 0, 2); // your custom light block
+      //      }
+      //   }
+      //} else {
+      //   // Light OFF: remove previously placed light blocks
+      //   for (MCH_AircraftInfo.SearchLight sl : this.getAcInfo().searchLights) {
+      //      Vec3 pos = this.getTransformedPosition(sl.pos);
+//
+      //      int bx = (int)Math.floor(pos.xCoord);
+      //      int by = (int)Math.floor(pos.yCoord);
+      //      int bz = (int)Math.floor(pos.zCoord);
+//
+      //      Block blockAt = worldObj.getBlock(bx, by, bz);
+      //      if (blockAt instanceof BlockLight) {
+      //         worldObj.setBlockToAir(bx, by, bz);
+      //      }
+      //   }
+      //}
 
       if(ironCurtainRunningTick > 0) {
          ironCurtainRunningTick--;
@@ -1814,6 +1856,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          }
       }
 
+      updateSearchlightBlocks();
+
       super.onUpdate();
       if(this.getParts() != null) {
          Entity[] var9 = this.getParts();
@@ -1964,6 +2008,53 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.lastRidingEntity = this.getRidingEntity();
       this.prevPosition.put(Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
    }
+
+   private void updateSearchlightBlocks() {
+      // Build the new set of positions we need lit
+      Set<ChunkCoordinates> newLights = new HashSet<>();
+
+      // Only do server‐side, when searchlights are on
+      if (!worldObj.isRemote && haveSearchLight() && isSearchLightON()) {
+
+         // Iterate properly over SearchLight objects
+         for (Object o : this.getAcInfo().searchLights) {
+            MCH_AircraftInfo.SearchLight sl = (MCH_AircraftInfo.SearchLight)o;
+
+            Vec3 p = getTransformedPosition(sl.pos);
+            int bx = MathHelper.floor_double(p.xCoord);
+            int by = MathHelper.floor_double(p.yCoord);
+            int bz = MathHelper.floor_double(p.zCoord);
+
+            ChunkCoordinates coord = new ChunkCoordinates(bx, by, bz);
+            newLights.add(coord);
+
+            if (worldObj.getBlock(bx, by, bz) != MCH_MOD.lightBlock) {
+               worldObj.setBlock(bx, by, bz, MCH_MOD.lightBlock, 0, 2);
+               worldObj.markBlockForUpdate(bx, by, bz);
+               // In 1.7.10 the enum is NOT FUCKING BLOCK (all‑caps) it is Block.
+               worldObj.updateLightByType(EnumSkyBlock.Block, bx, by, bz);
+            }
+         }
+      }
+
+      // Remove any blocks that were lit last tick but aren't needed now
+      for (ChunkCoordinates oldCoord : activeLights) {
+         if (!newLights.contains(oldCoord)) {
+            int x = oldCoord.posX, y = oldCoord.posY, z = oldCoord.posZ;
+            if (worldObj.getBlock(x, y, z) == MCH_MOD.lightBlock) {
+               worldObj.setBlockToAir(x, y, z);
+               worldObj.markBlockForUpdate(x, y, z);
+               worldObj.updateLightByType(EnumSkyBlock.Block, x, y, z);
+            }
+         }
+      }
+
+      // Swap sets
+      activeLights.clear();
+      activeLights.addAll(newLights);
+   }
+
+
 
    private void updateNoCollisionEntities() {
       if(!super.worldObj.isRemote) {
@@ -4275,6 +4366,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public void setDead() {
       this.setDead(false);
+      for (ChunkCoordinates coord : activeLights) {
+         int x = coord.posX, y = coord.posY, z = coord.posZ;
+         if (worldObj.getBlock(x, y, z) == MCH_MOD.lightBlock) {
+            worldObj.setBlockToAir(x, y, z);
+            worldObj.markBlockForUpdate(x, y, z);
+            worldObj.updateLightByType(EnumSkyBlock.Block, x, y, z);
+         }
+      }
+      activeLights.clear();
    }
 
    public void setDead(boolean dropItems) {
