@@ -24,7 +24,7 @@ public class BlockLight extends Block {
     private IIcon icon;
 
     public BlockLight() {
-        super(Material.circuits); // Better than air
+        super(Material.rock); // ensure tanks dont break it
         this.setLightLevel(1.0F); // Light level 15
         this.setBlockUnbreakable();
         this.setResistance(6000000F);
