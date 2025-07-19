@@ -15,6 +15,7 @@ import mcheli.flare.MCH_Chaff;
 import mcheli.flare.MCH_Flare;
 import mcheli.flare.MCH_Maintenance;
 import mcheli.helicopter.MCH_EntityHeli;
+import mcheli.light.EntityMCH_Light;
 import mcheli.multiplay.MCH_Multiplay;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.particles.MCH_ParticleParam;
@@ -1572,50 +1573,103 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return this.getAcInfo() != null && this.getAcInfo().searchLights.size() > 0;
    }
 
-   //todo improve search light stuff here
-   public float getSearchLightValue(Entity entity) {
-      if(this.haveSearchLight() && this.isSearchLightON()) {
-         Iterator i$ = this.getAcInfo().searchLights.iterator();
+   private EntityMCH_Light searchLightEntity;
 
-         while(i$.hasNext()) {
-            MCH_AircraftInfo.SearchLight sl = (MCH_AircraftInfo.SearchLight)i$.next();
+   //todo improve search light stuff here
+   //@Override
+   //we aren't overriding anything
+   public float getSearchLightValue(Entity entity) {
+      // If we have a searchlight and it's switched on
+      if (this.haveSearchLight() && this.isSearchLightON()) {
+         Iterator<MCH_AircraftInfo.SearchLight> it = this.getAcInfo().searchLights.iterator();
+
+         while (it.hasNext()) {
+            MCH_AircraftInfo.SearchLight sl = it.next();
             Vec3 pos = this.getTransformedPosition(sl.pos);
             double dist = entity.getDistanceSq(pos.xCoord, pos.yCoord, pos.zCoord);
-            if(dist > 2.0D && dist < (double)(sl.height * sl.height + 20.0F)) {
+
+            System.out.println("[SearchLight] Checking entity at distSq=" + dist);
+
+            if (dist > 2.0D && dist < (sl.height * sl.height + 20.0F)) {
+               // Vector from light pivot to entity
                double cx = entity.posX - pos.xCoord;
                double cy = entity.posY - pos.yCoord;
                double cz = entity.posZ - pos.zCoord;
-               double h = 0.0D;
-               double v = 0.0D;
-               float angle1;
-               if(!sl.fixDir) {
-                  Vec3 angle = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -this.lastSearchLightYaw + sl.yaw, -this.lastSearchLightPitch + sl.pitch, -this.getRotRoll());
-                  h = (double)MCH_Lib.getPosAngle(angle.xCoord, angle.zCoord, cx, cz);
-                  v = Math.atan2(cy, Math.sqrt(cx * cx + cz * cz)) * 180.0D / 3.141592653589793D;
-                  v = Math.abs(v + (double)this.lastSearchLightPitch + (double)sl.pitch);
-               } else {
-                  angle1 = 0.0F;
-                  if(sl.steering) {
-                     angle1 = this.rotYawWheel * sl.stRot;
-                  }
 
-                  Vec3 value = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -this.getRotYaw() + sl.yaw + angle1, -this.getRotPitch() + sl.pitch, -this.getRotRoll());
-                  h = (double)MCH_Lib.getPosAngle(value.xCoord, value.zCoord, cx, cz);
-                  v = Math.atan2(cy, Math.sqrt(cx * cx + cz * cz)) * 180.0D / 3.141592653589793D;
-                  v = Math.abs(v + (double)this.getRotPitch() + (double)sl.pitch);
+               double h, v;
+               float angle1;
+
+               if (!sl.fixDir) {
+                  Vec3 angle = MCH_Lib.RotVec3(
+                          0.0D, 0.0D, 1.0D,
+                          -this.lastSearchLightYaw + sl.yaw,
+                          -this.lastSearchLightPitch + sl.pitch,
+                          -this.getRotRoll()
+                  );
+                  h = MCH_Lib.getPosAngle(angle.xCoord, angle.zCoord, cx, cz);
+                  v = Math.atan2(cy, Math.sqrt(cx*cx + cz*cz)) * 180.0D / Math.PI;
+                  v = Math.abs(v + this.lastSearchLightPitch + sl.pitch);
+               } else {
+                  float yawAdj = sl.steering ? this.rotYawWheel * sl.stRot : 0.0F;
+                  Vec3 value = MCH_Lib.RotVec3(
+                          0.0D, 0.0D, 1.0D,
+                          -this.getRotYaw() + sl.yaw + yawAdj,
+                          -this.getRotPitch() + sl.pitch,
+                          -this.getRotRoll()
+                  );
+                  h = MCH_Lib.getPosAngle(value.xCoord, value.zCoord, cx, cz);
+                  v = Math.atan2(cy, Math.sqrt(cx*cx + cz*cz)) * 180.0D / Math.PI;
+                  v = Math.abs(v + this.getRotPitch() + sl.pitch);
                }
 
                angle1 = sl.angle * 3.0F;
-               if(h < (double)angle1 && v < (double)angle1) {
-                  float value1 = 0.0F;
-                  if(h + v < (double)angle1) {
-                     value1 = (float)(1440.0D * (1.0D - (h + v) / (double)angle1));
-                  }
+               System.out.println(String.format(
+                       "[SearchLight] Angles h=%.2f, v=%.2f, cone=%.2f",
+                       h, v, angle1
+               ));
 
-                  return value1 <= 240.0F?value1:240.0F;
+               if (h < angle1 && v < angle1) {
+                  // entity is inside the cone
+                  float value1 = 0.0F;
+                  double sum = h + v;
+                  if (sum < angle1) {
+                     value1 = (float)(1440.0D * (1.0D - sum / angle1));
+                  }
+                  if (value1 > 240.0F) value1 = 240.0F;
+
+                  System.out.println("[SearchLight] Spotlight value=" + value1);
+
+                  // --- LIGHT ENTITY INTEGRATION ---
+                  // Determine block coordinates one block in front of the entity
+                  int lx = MathHelper.floor_double(entity.posX);
+                  int ly = MathHelper.floor_double(entity.posY);
+                  int lz = MathHelper.floor_double(entity.posZ);
+
+                  // Spawn on first hit
+                  if (this.searchLightEntity == null || this.searchLightEntity.isDead) {
+                     System.out.println("[SearchLight] Spawning light entity at " + lx + ", " + ly + ", " + lz);
+                     this.searchLightEntity = new EntityMCH_Light(this.worldObj, this);
+                     this.worldObj.spawnEntityInWorld(this.searchLightEntity);
+                  }
+                  // Move it every tick
+                  this.searchLightEntity.setPosition(
+                          lx + 0.5D, ly + 0.5D, lz + 0.5D
+                  );
+                  System.out.println("[SearchLight] Updated light entity position to "
+                          + lx + "," + ly + "," + lz
+                  );
+
+                  return value1;
                }
             }
          }
+      }
+
+      // If we reach here, no entity is lit — remove any existing light entity
+      if (this.searchLightEntity != null) {
+         System.out.println("[SearchLight] Removing light entity");
+         this.searchLightEntity.setDead();
+         this.searchLightEntity = null;
       }
 
       return 0.0F;
