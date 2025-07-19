@@ -2010,17 +2010,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    private void updateSearchlightBlocks() {
-      // Build the new set of positions we need lit
       Set<ChunkCoordinates> newLights = new HashSet<>();
 
-      // Only do server‐side, when searchlights are on
       if (!worldObj.isRemote && haveSearchLight() && isSearchLightON()) {
-
-         // Iterate properly over SearchLight objects
          for (Object o : this.getAcInfo().searchLights) {
-            MCH_AircraftInfo.SearchLight sl = (MCH_AircraftInfo.SearchLight)o;
-
+            MCH_AircraftInfo.SearchLight sl = (MCH_AircraftInfo.SearchLight) o;
             Vec3 p = getTransformedPosition(sl.pos);
+
             int bx = MathHelper.floor_double(p.xCoord);
             int by = MathHelper.floor_double(p.yCoord);
             int bz = MathHelper.floor_double(p.zCoord);
@@ -2028,19 +2024,22 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             ChunkCoordinates coord = new ChunkCoordinates(bx, by, bz);
             newLights.add(coord);
 
-            if (worldObj.getBlock(bx, by, bz) != MCH_MOD.lightBlock) {
+            // Only place if the spot is pure air
+            if (worldObj.isAirBlock(bx, by, bz) && worldObj.getBlock(bx, by, bz) != MCH_MOD.lightBlock) {
+               //maybe remove worldObj.getBlock(bx, by, bz) != MCH_MOD.lightBlock? idk doesn't seem like a good idea to me.
                worldObj.setBlock(bx, by, bz, MCH_MOD.lightBlock, 0, 2);
                worldObj.markBlockForUpdate(bx, by, bz);
-               // In 1.7.10 the enum is NOT FUCKING BLOCK (all‑caps) it is Block.
                worldObj.updateLightByType(EnumSkyBlock.Block, bx, by, bz);
             }
+            // If it's already our light block, just refresh it in newLights
          }
       }
 
-      // Remove any blocks that were lit last tick but aren't needed now
+      // Remove old light blocks that are no longer needed
       for (ChunkCoordinates oldCoord : activeLights) {
          if (!newLights.contains(oldCoord)) {
             int x = oldCoord.posX, y = oldCoord.posY, z = oldCoord.posZ;
+            // Only remove if it's still our light block
             if (worldObj.getBlock(x, y, z) == MCH_MOD.lightBlock) {
                worldObj.setBlockToAir(x, y, z);
                worldObj.markBlockForUpdate(x, y, z);
@@ -2049,7 +2048,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          }
       }
 
-      // Swap sets
       activeLights.clear();
       activeLights.addAll(newLights);
    }
