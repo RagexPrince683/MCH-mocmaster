@@ -5,10 +5,14 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+
+import java.util.List;
 //import net.minecraft.world.EnumSkyBlock;
 
 
@@ -39,10 +43,10 @@ public class BlockLight extends Block {
         return false;
     }
 
-    @Override
-    public boolean canCollideCheck(int meta, boolean hitIfLiquid) {
-        return false;
-    }
+    //@Override
+    //public boolean canCollideCheck(int meta, boolean hitIfLiquid) {
+    //    return false;
+    //}
 
     @Override
     public boolean isReplaceable(IBlockAccess world, int x, int y, int z) {
@@ -52,6 +56,32 @@ public class BlockLight extends Block {
     @Override
     public boolean isAir(IBlockAccess world, int x, int y, int z) {
         return true;
+    }
+
+    @Override
+    public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int x, int y, int z) {
+        // No collision box at all
+        return null;
+    }
+
+    @Override
+    public void addCollisionBoxesToList(World world, int x, int y, int z,
+                                        AxisAlignedBB mask,
+                                        List list,
+                                        Entity entity) {
+        // Don’t add any boxes, so nothing collides
+    }
+
+    @Override
+    public boolean isCollidable() {
+        // Tells the engine “don’t even bother checking collision”
+        return false;
+    }
+
+    @Override
+    public boolean canCollideCheck(int meta, boolean fullHit) {
+        // Prevent any ray‑tracing collision checks (e.g. for clicking)
+        return false;
     }
 
     @SideOnly(Side.CLIENT)
