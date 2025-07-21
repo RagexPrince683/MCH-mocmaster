@@ -20,6 +20,7 @@ public class MCH_ShipInfo extends MCH_AircraftInfo {
     public boolean isEnableAutoPilot = false;
     public boolean isVariableSweepWing = false;
     public float sweepWingSpeed;
+    public boolean iscarrier = false;
 
 
     public Item getItem() {

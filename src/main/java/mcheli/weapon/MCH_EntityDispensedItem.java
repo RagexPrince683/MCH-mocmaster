@@ -1,6 +1,7 @@
 package mcheli.weapon;
 
 import mcheli.MCH_Config;
+import mcheli.MCH_HBMUtil;
 import mcheli.MCH_MOD;
 import mcheli.throwable.MCH_EntityThrowable;
 import mcheli.throwable.MCH_ItemThrowable;
@@ -58,10 +59,17 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
    }
 
    public void onImpact(MovingObjectPosition m, float damageFactor) {
+
       System.out.println("[DispensedItem] onImpact called");
 
       if(!super.worldObj.isRemote) {
          System.out.println("[DispensedItem] Handling impact on server");
+
+         if(this.getInfo().chemYield > 0) {
+            System.out.println("chem yield detected");
+            MCH_HBMUtil.ExplosionChaos_spawnChlorine(super.worldObj, posX, posY + 0.5, posZ, this.getInfo().chemYield, this.getInfo().chemSpeed, this.getInfo().chemType);
+         }
+
          super.boundingBox.maxY += 2000.0D;
          super.boundingBox.minY += 2000.0D;
 

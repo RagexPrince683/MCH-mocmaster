@@ -1113,6 +1113,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
 
+
+
         //todo shouldLoadChunks() check here
         if (shouldLoadChunks() && initialized) {
             //System.out.println("should load chunks3");
@@ -1124,6 +1126,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         if (!worldObj.isRemote) { // Server-side logic
             try {
                 handleServerSideImpact(hit, damageFactor);
+                if(this.getInfo().chemYield > 0) {
+                    System.out.println("chem yield detected");
+                    MCH_HBMUtil.ExplosionChaos_spawnChlorine(super.worldObj, posX, posY + 0.5, posZ, this.getInfo().chemYield, this.getInfo().chemSpeed, this.getInfo().chemType);
+                }
             } catch (Exception e) {
                 MCH_Lib.Log(this, "Error in onImpact: %s", e.getMessage());
                 e.printStackTrace();
@@ -1446,10 +1452,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             MCH_HBMUtil.EntityNukeTorex_statFac(super.worldObj, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5, (float) this.getInfo().nukeYield);
         }
 
-        if(this.getInfo().chemYield > 0) {
-            System.out.println("chem yield detected");
-            MCH_HBMUtil.ExplosionChaos_spawnChlorine(super.worldObj, posX, posY + 0.5, posZ, this.getInfo().chemYield, this.getInfo().chemSpeed, this.getInfo().chemType);
-        }
+        //moved to onimpact
+        //if(this.getInfo().chemYield > 0) {
+        //    System.out.println("chem yield detected");
+        //    MCH_HBMUtil.ExplosionChaos_spawnChlorine(super.worldObj, posX, posY + 0.5, posZ, this.getInfo().chemYield, this.getInfo().chemSpeed, this.getInfo().chemType);
+        //}
 
         if (result != null && result.hitEntity) {
             this.notifyHitBullet();
