@@ -1114,12 +1114,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
 
         if(hit.entityHit instanceof MCH_EntityAircraft) {
-            System.out.println("aps hit2");
+
             MCH_EntityAircraft ac = (MCH_EntityAircraft) hit.entityHit;
             if(ac.ironCurtainRunningTick > 0) {
+                System.out.println("aps hit2");
                 spawnIronCurtainParticle(hit, hit.blockX, hit.blockY, hit.blockZ);
             }
         }
+
 
 
 
@@ -1153,9 +1155,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         }
 
         if(hit.entityHit instanceof MCH_EntityAircraft) {
-            System.out.println("aps hit");
+
             MCH_EntityAircraft ac = (MCH_EntityAircraft) hit.entityHit;
             if(ac.ironCurtainRunningTick > 0) {
+                System.out.println("aps hit");
                 spawnIronCurtainParticle(hit, hit.blockX, hit.blockY, hit.blockZ);
             }
         }
