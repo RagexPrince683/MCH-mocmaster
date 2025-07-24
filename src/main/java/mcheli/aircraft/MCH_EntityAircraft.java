@@ -1011,22 +1011,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public boolean attackEntityFrom(DamageSource damageSource, float org_damage) {
 
-      //if(damageSource.isProjectile()) {
-      //   float projDamage = MCH_MOD.config.applyDamageByExternal(this, damageSource, org_damage);
-      //   System.out.println("projectile impacted a MCH entity");
-      //   this.setDamageTaken(this.getDamageTaken() + (int) projDamage);
-      //   //hopefully this can fix the bug where HMG RPGs hardcap by only doing (weak) explosion damage maybe?
-      //}
-      //this did not work
-
-
-
-      //if (uavStation = true) { //&& isNewUAV()
-      //   System.out.println("UAV Station attacked");
-      //   return false;
-//
-      //}
-
       if(ironCurtainRunningTick > 0) {
          return false;
       }

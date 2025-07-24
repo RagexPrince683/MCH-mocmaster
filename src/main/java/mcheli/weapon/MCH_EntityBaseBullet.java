@@ -1113,6 +1113,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
 
+        if(hit.entityHit instanceof MCH_EntityAircraft) {
+            System.out.println("aps hit2");
+            MCH_EntityAircraft ac = (MCH_EntityAircraft) hit.entityHit;
+            if(ac.ironCurtainRunningTick > 0) {
+                spawnIronCurtainParticle(hit, hit.blockX, hit.blockY, hit.blockZ);
+            }
+        }
+
 
 
         //todo shouldLoadChunks() check here
@@ -1145,6 +1153,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         }
 
         if(hit.entityHit instanceof MCH_EntityAircraft) {
+            System.out.println("aps hit");
             MCH_EntityAircraft ac = (MCH_EntityAircraft) hit.entityHit;
             if(ac.ironCurtainRunningTick > 0) {
                 spawnIronCurtainParticle(hit, hit.blockX, hit.blockY, hit.blockZ);
@@ -1366,6 +1375,20 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     private final Set<Entity> hitEntities = new HashSet<>();
 
     public void onImpactEntity(Entity entity, float damageFactor) {
+
+        // APS logic to prevent damage
+        if (entity instanceof MCH_EntityAircraft) {
+            MCH_EntityAircraft ac = (MCH_EntityAircraft) entity;
+            if (ac.ironCurtainRunningTick > 0) {
+                MovingObjectPosition fakeHit = new MovingObjectPosition(entity);
+                spawnIronCurtainParticle(fakeHit, (int)entity.posX, (int)entity.posY, (int)entity.posZ);
+                System.out.println("aps hit3");
+                spawnIronCurtainParticle(fakeHit, (int)this.posX, (int)this.posY, (int)this.posZ);
+                this.setDead(); // Optional: Destroy the bullet after interception
+                return; // Exit to prevent any further damage
+            }
+        }
+
         if (!hitEntities.contains(entity)) {
             hitEntities.add(entity);
             if (this.piercing > 0 || !entity.isDead) { //entity.isDead check to not decrease piercing for dead targets
