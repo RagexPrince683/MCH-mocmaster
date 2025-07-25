@@ -28,72 +28,71 @@ public class MCH_EntityASMissile extends MCH_EntityBaseBullet {
       return this.getBomblet() == 1?-0.03F:super.getGravityInWater();
    }
 
+   @Override
    public void onUpdate() {
       super.onUpdate();
-      if(this.getInfo() != null && !this.getInfo().disableSmoke && this.getBomblet() == 0) {
-         this.spawnExplosionParticle(this.getInfo().trajectoryParticleName, 3, 10.0F * this.getInfo().smokeSize * 0.5F);
-      }
-
       try {
+         if(this.getInfo() != null && !this.getInfo().disableSmoke && this.getBomblet() == 0) {
+            this.spawnExplosionParticle(this.getInfo().trajectoryParticleName, 3, 10.0F * this.getInfo().smokeSize * 0.5F);
+         }
+
          if (ticksExisted < getInfo().rigidityTime) {
             return;
          }
-      } catch (Exception e) {
-         System.out.println("MCH_EntityASMissile.onUpdate: Exception occurred while checking rigidity time: " + e.getMessage());
-         // Ignore exception if getInfo() is null
-      }
 
-      if(this.getInfo() != null && !super.worldObj.isRemote && super.isBomblet != 1) {
-         Block a = W_WorldFunc.getBlock(super.worldObj, (int)this.targetPosX, (int)this.targetPosY, (int)this.targetPosZ);
-         if(a != null && a.isCollidable()) {
-            double dist = this.getDistance(this.targetPosX, this.targetPosY, this.targetPosZ);
-            if(dist < (double)this.getInfo().proximityFuseDist) {
-               if(this.getInfo().bomblet > 0) {
-                  for(int x = 0; x < this.getInfo().bomblet; ++x) {
-                     this.sprinkleBomblet();
+         if(this.getInfo() != null && !super.worldObj.isRemote && super.isBomblet != 1) {
+            Block a = W_WorldFunc.getBlock(super.worldObj, (int)this.targetPosX, (int)this.targetPosY, (int)this.targetPosZ);
+            if(a != null && a.isCollidable()) {
+               double dist = this.getDistance(this.targetPosX, this.targetPosY, this.targetPosZ);
+               if(dist < (double)this.getInfo().proximityFuseDist) {
+                  if(this.getInfo().bomblet > 0) {
+                     for(int x = 0; x < this.getInfo().bomblet; ++x) {
+                        this.sprinkleBomblet();
+                     }
+                  } else {
+                     MovingObjectPosition var15 = new MovingObjectPosition(this);
+                     this.onImpact(var15, 1.0F);
                   }
-               } else {
-                  MovingObjectPosition var15 = new MovingObjectPosition(this);
-                  this.onImpact(var15, 1.0F);
-               }
 
-               this.setDead();
-            } else {
-               double var16;
-               double y;
-               double z;
-               double d;
-               if((double)this.getGravity() == 0.0D) {
-                  var16 = 0.0D;
-//                  if(this.getCountOnUpdate() < 10) {
-//                     var16 = 20.0D;
-//                  }
-
-                  y = this.targetPosX - super.posX;
-                  z = this.targetPosY + var16 - super.posY;
-                  d = this.targetPosZ - super.posZ;
-                  double d1 = (double)MathHelper.sqrt_double(y * y + z * z + d * d);
-                  super.motionX = y * super.acceleration / d1;
-                  super.motionY = z * super.acceleration / d1;
-                  super.motionZ = d * super.acceleration / d1;
+                  this.setDead();
                } else {
-                  var16 = this.targetPosX - super.posX;
-                  y = this.targetPosY - super.posY;
-                  y *= 0.3D;
-                  z = this.targetPosZ - super.posZ;
-                  d = (double)MathHelper.sqrt_double(var16 * var16 + y * y + z * z);
-                  super.motionX = var16 * super.acceleration / d;
-                  super.motionZ = z * super.acceleration / d;
+                  double var16;
+                  double y;
+                  double z;
+                  double d;
+                  if((double)this.getGravity() == 0.0D) {
+                     var16 = 0.0D;
+
+                     y = this.targetPosX - super.posX;
+                     z = this.targetPosY + var16 - super.posY;
+                     d = this.targetPosZ - super.posZ;
+                     double d1 = (double)MathHelper.sqrt_double(y * y + z * z + d * d);
+                     super.motionX = y * super.acceleration / d1;
+                     super.motionY = z * super.acceleration / d1;
+                     super.motionZ = d * super.acceleration / d1;
+                  } else {
+                     var16 = this.targetPosX - super.posX;
+                     y = this.targetPosY - super.posY;
+                     y *= 0.3D;
+                     z = this.targetPosZ - super.posZ;
+                     d = (double)MathHelper.sqrt_double(var16 * var16 + y * y + z * z);
+                     super.motionX = var16 * super.acceleration / d;
+                     super.motionZ = z * super.acceleration / d;
+                  }
                }
             }
          }
-      }
 
-      double var14 = (double)((float)Math.atan2(super.motionZ, super.motionX));
-      super.rotationYaw = (float)(var14 * 180.0D / 3.141592653589793D) - 90.0F;
-      double r = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-      super.rotationPitch = -((float)(Math.atan2(super.motionY, r) * 180.0D / 3.141592653589793D));
-      this.onUpdateBomblet();
+         double var14 = (double)((float)Math.atan2(super.motionZ, super.motionX));
+         super.rotationYaw = (float)(var14 * 180.0D / Math.PI) - 90.0F;
+         double r = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+         super.rotationPitch = -((float)(Math.atan2(super.motionY, r) * 180.0D / Math.PI));
+         this.onUpdateBomblet();
+
+      } catch (Exception e) {
+         System.err.println("Exception in MCH_EntityASMissile.onUpdate(): " + e.getMessage());
+         e.printStackTrace();
+      }
    }
 
    public void sprinkleBomblet() {
