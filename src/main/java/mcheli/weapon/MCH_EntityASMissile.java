@@ -34,8 +34,13 @@ public class MCH_EntityASMissile extends MCH_EntityBaseBullet {
          this.spawnExplosionParticle(this.getInfo().trajectoryParticleName, 3, 10.0F * this.getInfo().smokeSize * 0.5F);
       }
 
-      if(ticksExisted < getInfo().rigidityTime) {
-         return;
+      try {
+         if (ticksExisted < getInfo().rigidityTime) {
+            return;
+         }
+      } catch (Exception e) {
+         System.out.println("MCH_EntityASMissile.onUpdate: Exception occurred while checking rigidity time: " + e.getMessage());
+         // Ignore exception if getInfo() is null
       }
 
       if(this.getInfo() != null && !super.worldObj.isRemote && super.isBomblet != 1) {

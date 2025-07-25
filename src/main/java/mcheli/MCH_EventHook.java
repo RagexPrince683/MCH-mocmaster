@@ -392,11 +392,12 @@ public class MCH_EventHook extends W_EventHook {
       // to absolutely fucking hate when I do that for some reason because it bounces between two completely fucking schizophrenic
       // classes for some reason
       // Force all aircraft to always tick
-      if (event.entity instanceof MCH_EntityAircraft) {
-         //if this works how I hope it will we should probably add
-         //ac.getRiddenByEntity() != null so we ensure we only tick PLAYER vehicles
-         event.canUpdate = true;
-      } //I wonder if this will work
+      //if (event.entity instanceof MCH_EntityAircraft) {
+      //   //if this works how I hope it will we should probably add
+      //   //ac.getRiddenByEntity() != null so we ensure we only tick PLAYER vehicles
+      //   event.canUpdate = true;
+      //} //I wonder if this will work
+      //it did not work.
 
       if(event.entity instanceof MCH_EntityBaseBullet) {
          MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet)event.entity;
