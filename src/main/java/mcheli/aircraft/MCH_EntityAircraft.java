@@ -1830,7 +1830,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       this.prevRotationRoll = this.getRotRoll();
-      if(!super.worldObj.isRemote && this.isTargetDrone() && !this.isDestroyed() && this.getCountOnUpdate() > 20 && !this.canUseFuel()) {
+      if(!super.worldObj.isRemote && this.isTargetDrone() && !this.isDestroyed() && this.getCountOnUpdate() > 200 && !this.canUseFuel()) {
+         System.out.println("target uav set dead for being idle");
          this.setDamageTaken(this.getMaxHP());
          this.destroyAircraft();
          MCH_Explosion.newExplosion(super.worldObj, (Entity)null, (Entity)null, super.posX, super.posY, super.posZ, 2.0F, 2.0F, true, true, true, true, 5);
