@@ -82,10 +82,6 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet implements MCH_IEn
                   continue;
                }
 
-               //todo here?
-
-               //boolean isShooterFreeLook = (shootingEntity instanceof MCH_EntitySeat) && ((MCH_EntitySeat) shootingEntity).isFreeLook();
-
                double dx = entity.posX - super.posX;
                double dy = entity.posY - super.posY;
                double dz = entity.posZ - super.posZ;
