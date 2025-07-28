@@ -8,6 +8,7 @@ import java.util.Random;
 
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
+import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.wrapper.W_Item;
@@ -26,11 +27,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class MCH_ItemWrench extends W_Item {
+
+
 
    private float damageVsEntity;
    private final ToolMaterial toolMaterial;
@@ -43,6 +47,14 @@ public class MCH_ItemWrench extends W_Item {
       super.maxStackSize = 1;
       this.setMaxDamage(material.getMaxUses());
       this.damageVsEntity = 4.0F + material.getDamageVsEntity();
+   }
+
+   //@Override
+   //we dont need to ig? idk java is weird.
+   public void addInformation(ItemStack stack, EntityPlayer player, List lines, boolean par4) {
+      lines.add(EnumChatFormatting.YELLOW + "Shift+Right click to change vehicle skin!");
+
+      super.addInformation(stack, player, lines, par4);
    }
 
    public boolean func_150897_b(Block b) {
