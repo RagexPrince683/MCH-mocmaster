@@ -126,6 +126,7 @@ public class MCH_APS {
                     MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet) entity;
                     if(bullet.shootingEntity instanceof EntityPlayer && !((EntityPlayer) user).isOnSameTeam((EntityLivingBase) bullet.shootingEntity)) {
                         bullet.setDead();
+                        System.out.println("bullet set dead");
                         W_WorldFunc.MOD_playSoundEffect(worldObj, aircraft.posX, aircraft.posY, aircraft.posZ, "aps_shoot", 10.0F, 1.0F);
                         MCH_FMURUtil.sendAPSMarker((EntityPlayerMP) bullet.shootingEntity);
                         MCH_Explosion.newExplosion(worldObj, user, user, entity.posX, entity.posY, entity.posZ,
