@@ -60,18 +60,20 @@ public class MCH_Explosion extends Explosion {
    public MCH_DamageFactor damageFactor = null;
    //public MCH_PowerFactor powerFactor = null;
 
-   private static int getFPS() {
-      try {
-         System.out.println("Got Fps");
-         Field fpsField = Minecraft.class.getDeclaredField("debugFPS");
-         fpsField.setAccessible(true);
-         return fpsField.getInt(Minecraft.getMinecraft());
-      } catch (Exception e) {
-         System.out.println("Error getting FPS: " + e.getMessage());
-         e.printStackTrace();
-         return -1; // Return -1 if failed
-      }
-   }
+   //private static int getFPS() {
+   //   try {
+   //      System.out.println("Got Fps");
+   //      Field fpsField = Minecraft.class.getDeclaredField("debugFPS");
+   //      fpsField.setAccessible(true);
+   //      return fpsField.getInt(Minecraft.getMinecraft());
+   //   } catch (Exception e) {
+   //      System.out.println("Error getting FPS: " + e.getMessage());
+   //      e.printStackTrace();
+   //      return -1; // Return -1 if failed
+   //   }
+   //}
+
+   //doesnt work
 
 
    public MCH_Explosion(World par1World, Entity exploder, Entity player, double x, double y, double z, float size) {
