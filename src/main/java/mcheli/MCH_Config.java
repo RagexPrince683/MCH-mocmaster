@@ -165,7 +165,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm EnablePutRackInFlying;
    public static MCH_ConfigPrm EnableDebugBoundingBox;
 
-   //TODO mch1.0.5 -> mchr
+   //TODOne mch1.0.5 -> mchr?
    public static MCH_ConfigPrm DespawnCount;
 
    public static MCH_ConfigPrm HitBoxDelayTick;
@@ -411,11 +411,11 @@ public class MCH_Config {
       hitMarkColorAlpha = 1.0F;
       hitMarkColorRGB = 16711680;
       ItemRecipe_Fuel = new MCH_ConfigPrm("ItemRecipe_Fuel", "\"ICI\", \"III\", I, iron_ingot, C, coal");
-      ItemRecipe_GLTD = new MCH_ConfigPrm("ItemRecipe_GLTD", "\" B \", \"IDI\", \"IRI\", B, mcheli:item.ingot_steel, I, iron_ingot, D, gold_nugget, R, redstone");
-      ItemRecipe_Chain = new MCH_ConfigPrm("ItemRecipe_Chain", "\"I I\", \"III\", \"I I\", I, iron_ingot");
+      ItemRecipe_GLTD = new MCH_ConfigPrm("ItemRecipe_GLTD", "\" B \", \"IDI\", \"IRI\", B, mcheli:item.ingot_steel, I, iron_ingot, D, mcheli:fcs, R, redstone");
+      ItemRecipe_Chain = new MCH_ConfigPrm("ItemRecipe_Chain", "\"I I\", \"III\", \"I I\", I,  mcheli:item.ingot_steel");
       ItemRecipe_Parachute = new MCH_ConfigPrm("ItemRecipe_Parachute", "\"WWW\", \"S S\", \" W \", W, wool, S, string");
       ItemRecipe_Container = new MCH_ConfigPrm("ItemRecipe_Container", "\"CCI\", C, chest, I, iron_ingot");
-      ItemRecipe_UavStation = new MCH_ConfigPrm[]{new MCH_ConfigPrm("ItemRecipe_UavStation", "\"III\", \"IDI\", \"IRI\", I, mcheli:item.ingot_steel, D, gold_nugget, R, redstone_block"), new MCH_ConfigPrm("ItemRecipe_UavStation2", "\"IDI\", \"IRI\", I, mcheli:item.ingot_steel, D, gold_nugget, R, redstone")};
+      ItemRecipe_UavStation = new MCH_ConfigPrm[]{new MCH_ConfigPrm("ItemRecipe_UavStation", "\"III\", \"IDI\", \"IRI\", I, mcheli:item.ingot_steel, D, mcheli:fcs, R, redstone_block"), new MCH_ConfigPrm("ItemRecipe_UavStation2", "\"IDI\", \"IRI\", I, mcheli:item.ingot_steel, D, mcheli:fcs, R, redstone")};
       ItemRecipe_DraftingTable = new MCH_ConfigPrm("ItemRecipe_DraftingTable", "\"R  \", \"PCP\", \"F F\", R, redstone, C, crafting_table, P, planks, F, fence");
       ItemRecipe_Wrench = new MCH_ConfigPrm("ItemRecipe_Wrench", "\" I \", \" II\", \"I  \", I, mcheli:item.ingot_steel");
       ItemRecipe_RangeFinder = new MCH_ConfigPrm("ItemRecipe_RangeFinder", "\"III\", \"RGR\", \"III\", I, iron_ingot, G, glass, R, redstone");

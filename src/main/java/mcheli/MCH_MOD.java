@@ -91,7 +91,7 @@ import java.util.List;
 
 @Mod(
    modid = "mcheli",
-   name = "Mcheli Reforged Overdrive BETA",
+   name = "Mcheli Overdrive Reforged Plus",
    dependencies = "required-after:Forge@[10.13.2.1230,)"
 )
 @NetworkMod(
