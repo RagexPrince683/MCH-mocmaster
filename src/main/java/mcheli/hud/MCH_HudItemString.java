@@ -132,8 +132,7 @@ public class MCH_HudItemString extends MCH_HudItem {
             }
             break;
          case 22:
-            prm[i] = Float.valueOf(MCH_HudItem.MortarDist) + MCH_HudItem.mortarDistStr; //+ MCH_HudItem.mortarDistStr
-            //prm[i] = MCH_HudItem.mortarDistStr;
+            prm[i] = Float.valueOf(MCH_HudItem.MortarDist); //+ MCH_HudItem.mortarDistStr
             if(MCH_HudItem.CurrentWeapon == null) {
                return;
             }
