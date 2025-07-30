@@ -135,11 +135,9 @@ public class MCH_HudItemString extends MCH_HudItem {
             if (MCH_HudItem.CurrentWeapon == null) {
                return;
             }
-            //prm[i] = (float)MCH_HudItem.MortarDist >= 0.0F
-            //        ? MCH_HudItem.mortarDistStr
-            //        : "";
-            //possible culprit
-            prm[i] = Float.valueOf(MCH_HudItem.MortarDist);
+            prm[i] = (float)MCH_HudItem.MortarDist >= 0.0F
+                    ? MCH_HudItem.mortarDistStr
+                    : "";
             break;
          case 23:
             prm[i] = "1.7.10";
