@@ -485,7 +485,7 @@ public abstract class MCH_HudItem extends Gui {
             }
 
             MCH_WeaponInfo wi = ws.getInfo();
-            if(wi.displayMortarDistance) {
+            if(wi.displayMortarDistance && ac.getLandInDistance(player) > 0.0F && ac.getLandInDistance(player) < 18000000.0F) {
                MortarDist = (float)ac.getLandInDistance(player);
             } else {
                MortarDist = -1.0F;
