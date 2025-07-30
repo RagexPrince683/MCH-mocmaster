@@ -385,8 +385,7 @@ public abstract class MCH_HudItem extends Gui {
       updateVarMapItem("sight_type", (double)sight_type);
       updateVarMapItem("lock", lock);
       updateVarMapItem("dsp_mt_dist", (double)display_mortar_dist);
-      updateVarMapItem("mt_dist", (double)MortarDist ); //MCH_HudItem.mortarDistStr
-      //+ (String)mortarDistStr
+      updateVarMapItem("mt_dist", (double)MortarDist); //MCH_HudItem.mortarDistStr
    }
 
    public static int isLowFuel(MCH_EntityAircraft ac) {
