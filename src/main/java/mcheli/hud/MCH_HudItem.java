@@ -73,6 +73,8 @@ public abstract class MCH_HudItem extends Gui {
    protected static float partialTicks;
    private static MCH_HudItemExit dummy = new MCH_HudItemExit(0);
 
+   protected static String mortarDistStr = "";
+
 
    public MCH_HudItem(int fileLine) {
       this.fileLine = fileLine;
@@ -383,7 +385,7 @@ public abstract class MCH_HudItem extends Gui {
       updateVarMapItem("sight_type", (double)sight_type);
       updateVarMapItem("lock", lock);
       updateVarMapItem("dsp_mt_dist", (double)display_mortar_dist);
-      updateVarMapItem("mt_dist", (double)MortarDist);
+      updateVarMapItem("mt_dist", (double)MortarDist); //MCH_HudItem.mortarDistStr
    }
 
    public static int isLowFuel(MCH_EntityAircraft ac) {
@@ -471,6 +473,15 @@ public abstract class MCH_HudItem extends Gui {
 
    }
 
+   //public static String formatDistance(float dist) {
+   //   if (dist >= 1_000_000F) {
+   //      return String.format("%.2f Mm", dist / 1_000_000F);
+   //   } else if (dist >= 1_000F) {
+   //      return String.format("%.2f km", dist / 1_000F);
+   //   } else {
+   //      return String.format("%.0f m", dist);
+   //   }
+   //}
    public static void updateWeapon(MCH_EntityAircraft ac, MCH_WeaponSet ws) {
       if(ac.getWeaponNum() > 0) {
          if(ws != null) {
@@ -485,11 +496,20 @@ public abstract class MCH_HudItem extends Gui {
             }
 
             MCH_WeaponInfo wi = ws.getInfo();
-            if(wi.displayMortarDistance && ac.getLandInDistance(player) > 0.0F && ac.getLandInDistance(player) < 18000000.0F) {
-               MortarDist = (float)ac.getLandInDistance(player);
+            float rawDist = (float)ac.getLandInDistance(player);
+
+
+            if (wi.displayMortarDistance && rawDist > 0.0F && rawDist < 1000.0F) {
+               MortarDist = rawDist;          // keep meters as float
+               mortarDistStr = String.format("%.0f m", rawDist);
+            } else if (rawDist >= 1000.0F && rawDist < 1_000_000F) {
+               MortarDist = rawDist;          // still store raw for any logic you need
+               mortarDistStr = String.format("%.2f km", rawDist / 1000.0F);
             } else {
                MortarDist = -1.0F;
+               mortarDistStr = "";
             }
+            //I'll add mega meters if we need it (probably not ill leave that to james/RTM or something)
 
             if(wi.delay > wi.reloadTime) {
                ReloadSec = ws.countWait >= 0?(float)ws.countWait:(float)(-ws.countWait);
