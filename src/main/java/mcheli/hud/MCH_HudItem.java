@@ -499,12 +499,13 @@ public abstract class MCH_HudItem extends Gui {
             MCH_WeaponInfo wi = ws.getInfo();
             float rawDist = (float)ac.getLandInDistance(player);
 
+
             if (wi.displayMortarDistance && rawDist > 0.0F && rawDist < 1000.0F) {
-               MortarDist = rawDist;
-               mortarDistStr = String.format("%.0f m", (double)rawDist);
+               MortarDist = rawDist;          // keep meters as float
+               mortarDistStr = String.format("%.0f m", rawDist);
             } else if (rawDist >= 1000.0F && rawDist < 1_000_000F) {
-               MortarDist = rawDist;
-               mortarDistStr = String.format("%.2f km", (double)(rawDist / 1000.0F));
+               MortarDist = rawDist;          // still store raw for any logic you need
+               mortarDistStr = String.format("%.2f km", rawDist / 1000.0F);
             } else {
                MortarDist = -1.0F;
                mortarDistStr = "";
