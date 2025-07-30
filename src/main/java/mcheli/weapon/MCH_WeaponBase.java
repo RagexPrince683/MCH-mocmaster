@@ -233,75 +233,68 @@ public abstract class MCH_WeaponBase {
       }
    }
 
-   private int lastLandInDistanceTick = -1;
-   private double cachedLandInDistance = -1.0D;
-
    public double getLandInDistance(MCH_WeaponParam prm) {
-      int currentTick = this.tick;  // tick source
+      if(this.weaponInfo == null) {
+         return -1.0D;
+      } else if(this.weaponInfo.gravity >= 0.0F) {
+         return -1.0D;
+      } else {
+         Vec3 v = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -prm.rotYaw, -prm.rotPitch, -prm.rotRoll);
+         double s = Math.sqrt(v.xCoord * v.xCoord + v.yCoord * v.yCoord + v.zCoord * v.zCoord);
+         double acc = this.acceleration < 4.0F?(double)this.acceleration:4.0D;
+         double accFac = (double)this.acceleration / acc;
+         double my = v.yCoord * (double)this.acceleration / s;
+         if(my <= 0.0D) {
+            return -1.0D;
+         } else {
+            double mx = v.xCoord * (double)this.acceleration / s;
+            double mz = v.zCoord * (double)this.acceleration / s;
+            double ls = my / (double)this.weaponInfo.gravity;
+            double gravity = (double)this.weaponInfo.gravity * accFac;
+            double spx;
+            if(ls < -12.0D) {
+               spx = ls / -12.0D;
+               mx *= spx;
+               my *= spx;
+               mz *= spx;
+               gravity *= spx * spx * 0.95D;
+            }
 
-      // Only recalc every 5 ticks
-      if (lastLandInDistanceTick >= 0 && currentTick - lastLandInDistanceTick < 5) {
-         return cachedLandInDistance;
-      }
+            spx = prm.posX;
+            double spy = prm.posY + 3.0D;
+            double spz = prm.posZ;
+            Vec3 vs = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
+            Vec3 ve = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
 
-      lastLandInDistanceTick = currentTick;
+            for(int i = 0; i < 50; ++i) {
+               vs.xCoord = spx;
+               vs.yCoord = spy;
+               vs.zCoord = spz;
+               ve.xCoord = spx + mx;
+               ve.yCoord = spy + my;
+               ve.zCoord = spz + mz;
+               MovingObjectPosition mop = this.worldObj.rayTraceBlocks(vs, ve);
+               double dx;
+               double dz;
+               if(mop != null && mop.typeOfHit == MovingObjectType.BLOCK) {
+                  dx = (double)mop.blockX - prm.posX;
+                  dz = (double)mop.blockZ - prm.posZ;
+                  return Math.sqrt(dx * dx + dz * dz);
+               }
 
-      if (this.weaponInfo == null || this.weaponInfo.gravity >= 0.0F) {
-         cachedLandInDistance = -1.0D;
-         return cachedLandInDistance;
-      }
+               my += gravity;
+               spx += mx;
+               spy += my;
+               spz += mz;
+               if(spy < prm.posY) {
+                  dx = spx - prm.posX;
+                  dz = spz - prm.posZ;
+                  return Math.sqrt(dx * dx + dz * dz);
+               }
+            }
 
-      // ... (rest of your existing setup code)
-
-      Vec3 v = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -prm.rotYaw, -prm.rotPitch, -prm.rotRoll);
-      double s = Math.sqrt(v.xCoord * v.xCoord + v.yCoord * v.yCoord + v.zCoord * v.zCoord);
-      double acc = this.acceleration < 4.0F ? (double) this.acceleration : 4.0D;
-      double accFac = (double) this.acceleration / acc;
-      double my = v.yCoord * (double) this.acceleration / s;
-      if (my <= 0.0D) {
-         cachedLandInDistance = -1.0D;
-         return cachedLandInDistance;
-      }
-      double mx = v.xCoord * (double) this.acceleration / s;
-      double mz = v.zCoord * (double) this.acceleration / s;
-      double ls = my / (double) this.weaponInfo.gravity;
-      double gravity = (double) this.weaponInfo.gravity * accFac;
-      double spx = prm.posX;
-      double spy = prm.posY + 3.0D;
-      double spz = prm.posZ;
-      Vec3 vs = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
-      Vec3 ve = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
-
-      for (int i = 0; i < 50; ++i) {
-         vs.xCoord = spx;
-         vs.yCoord = spy;
-         vs.zCoord = spz;
-         ve.xCoord = spx + mx;
-         ve.yCoord = spy + my;
-         ve.zCoord = spz + mz;
-         MovingObjectPosition mop = this.worldObj.rayTraceBlocks(vs, ve);
-         double dx;
-         double dz;
-         if (mop != null && mop.typeOfHit == MovingObjectType.BLOCK) {
-            dx = (double) mop.blockX - prm.posX;
-            dz = (double) mop.blockZ - prm.posZ;
-            cachedLandInDistance = Math.sqrt(dx * dx + dz * dz);
-            return cachedLandInDistance;
+            return -1.0D;
          }
-
-         my += gravity;
-         spx += mx;
-         spy += my;
-         spz += mz;
-         if (spy < prm.posY) {
-            dx = spx - prm.posX;
-            dz = spz - prm.posZ;
-            cachedLandInDistance = Math.sqrt(dx * dx + dz * dz);
-            return cachedLandInDistance;
-         }
       }
-
-      cachedLandInDistance = -1.0D;
-      return cachedLandInDistance;
    }
 }
