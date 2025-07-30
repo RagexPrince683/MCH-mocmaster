@@ -138,32 +138,8 @@ public class MCH_HudItemString extends MCH_HudItem {
             //prm[i] = (float)MCH_HudItem.MortarDist >= 0.0F
             //        ? MCH_HudItem.mortarDistStr
             //        : "";
-            //culprit
-
-            //prm[i] = Float.valueOf(MCH_HudItem.MortarDist);
-            //working but in M
-            //prm[i] = String.format("%.0f", MCH_HudItem.MortarDist, MCH_HudItem.mortarDistStr);
-            //somehow also fucking crashes
-
-            //prm[i] = String.format("%.0f%s", MCH_HudItem.MortarDist, MCH_HudItem.mortarDistStr);
-            //crash
-
-            //prm[i] = String.format("%.0f%s", MCH_HudItem.MortarDist, String.valueOf(MCH_HudItem.mortarDistStr));
-            //crash 2
-            //float dist = MCH_HudItem.MortarDist;
-            //String suffix = MCH_HudItem.mortarDistStr != null ? MCH_HudItem.mortarDistStr : "";
-            //prm[i] = String.format("%.0f%s", dist, suffix);
-
-            //System.out.println("mortarDistStr: " + MCH_HudItem.mortarDistStr + " (" + (MCH_HudItem.mortarDistStr != null ? MCH_HudItem.mortarDistStr.getClass() : "null") + ")");
-            //crash 3
-
-            //String suffix = MCH_HudItem.mortarDistStr != null ? MCH_HudItem.mortarDistStr : "";
-            //prm[i] = String.format("%.0f%s", MCH_HudItem.MortarDist, suffix);
-
-            float dist = MCH_HudItem.MortarDist;
-            String suffix = MCH_HudItem.mortarDistStr;
-            prm[i] = String.format("%.0f%s", (double)dist, suffix);
-
+            //possible culprit
+            prm[i] = Float.valueOf(MCH_HudItem.MortarDist);
             break;
          case 23:
             prm[i] = "1.7.10";
