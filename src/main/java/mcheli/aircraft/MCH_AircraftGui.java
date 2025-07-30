@@ -84,7 +84,13 @@ public class MCH_AircraftGui extends W_GuiContainer {
    }
 
    public void updateScreen() {
-      super.updateScreen();
+      try {
+         super.updateScreen();
+      } catch (Exception e) {
+         //close gui so we don't get weird shit happening
+         super.mc.thePlayer.closeScreen();
+         e.printStackTrace();
+      }
       if(this.reloadWait > 0) {
          --this.reloadWait;
          if(this.reloadWait == 0) {

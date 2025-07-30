@@ -259,6 +259,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    private final Set<ChunkCoordinates> activeLights = new HashSet<>();
 
+
+
    public MCH_EntityAircraft(World world) {
       super(world);
       this.setAcInfo(null);
@@ -5613,25 +5615,39 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public int getWeaponIDBySeatID(int sid) {
+      //todo: check this as well
       if (sid < 0 || sid >= this.currentWeaponID.length)
          return -1;
       return this.currentWeaponID[sid];
    }
 
    public double getLandInDistance(Entity user) {
-      if(this.lastCalcLandInDistanceCount != (double)this.getCountOnUpdate() && this.getCountOnUpdate() % 5 == 0) {
-         this.lastCalcLandInDistanceCount = (double)this.getCountOnUpdate();
+      int currentTick = this.getCountOnUpdate();
+
+      if (this.lastCalcLandInDistanceCount != currentTick && currentTick % 5 == 0) {
+         this.lastCalcLandInDistanceCount = currentTick;
+
          MCH_WeaponParam prm = new MCH_WeaponParam();
          prm.setPosition(super.posX, super.posY, super.posZ);
          prm.entity = this;
          prm.user = user;
-         prm.isInfinity = this.isInfinityAmmo(prm.user);
-         if(prm.user != null) {
-            MCH_WeaponSet currentWs = this.getCurrentWeapon(prm.user);
-            if(currentWs != null) {
-               int sid = this.getSeatIdByEntity(prm.user);
-               if(this.getAcInfo().getWeaponSetById(sid) != null) {
-                  prm.isTurret = ((MCH_AircraftInfo.Weapon)this.getAcInfo().getWeaponSetById(sid).weapons.get(0)).turret;
+         prm.isInfinity = this.isInfinityAmmo(user);
+
+         if (user != null) {
+            MCH_WeaponSet currentWs = this.getCurrentWeapon(user);
+            if (currentWs != null) {
+               int sid = this.getSeatIdByEntity(user);
+               MCH_AircraftInfo.WeaponSet weaponSet = this.getAcInfo().getWeaponSetById(sid);
+
+               // Check if weaponSet and weapons list exist and contain at least one Weapon
+               if (weaponSet != null && weaponSet.weapons != null && !weaponSet.weapons.isEmpty()) {
+                  Object w0 = weaponSet.weapons.get(0);
+                  if (w0 instanceof MCH_AircraftInfo.Weapon) {
+                     prm.isTurret = ((MCH_AircraftInfo.Weapon) w0).turret;
+                  } else {
+                     // fallback or log: first element not a Weapon instance
+                     prm.isTurret = false; // or your default
+                  }
                }
 
                this.lastLandInDistance = currentWs.getLandInDistance(prm);
