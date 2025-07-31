@@ -510,6 +510,8 @@ public abstract class MCH_HudItem extends Gui {
                mortarDistStr = "";
             }
             //I'll add mega meters if we need it (probably not ill leave that to james/RTM or something)
+            //fun fact. this doesn't work. you gotta go through like all the other hoops of bullshit this mod has to get it to work maybe
+            
 
             if(wi.delay > wi.reloadTime) {
                ReloadSec = ws.countWait >= 0?(float)ws.countWait:(float)(-ws.countWait);
