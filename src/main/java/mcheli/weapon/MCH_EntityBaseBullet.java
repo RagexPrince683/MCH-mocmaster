@@ -1328,8 +1328,20 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
         if (this.ticksExisted < 3) return false;
 
+         if (this.sprinkleTime > 0) {
+             if (this.bomblet || this.sprinkleTime == 0) { //todone? -TEST check BombletSTime value here
+                 //if (this.sprinkleTime == 0) {
+                 // Do nothing. Never chunkload, never track
+                 return false;
+             }
+
+             //same logic
+             boolean result = !bomblet && gravitydown && bigdelay && bigcheck;
+             return result;
+         }
+
         //try {
-            if (this.bomblet || this.sprinkleTime == 0) { //todone? -TEST check BombletSTime value here
+            if (this.bomblet) { //todone? -TEST check BombletSTime value here
                 //if (this.sprinkleTime == 0) {
                 // Do nothing. Never chunkload, never track
                 return false;

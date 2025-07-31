@@ -416,6 +416,13 @@ public class MCH_EventHook extends W_EventHook {
             if (bullet.ticksExisted > 2) {
                bullet.checkAndLoadChunks();
             }
+
+            //fail safe 5hrs
+            if (bullet.ticksExisted > 36000) {
+               System.out.println("Bullet exceeded 5 hours of existence, setting dead. Report to Developer:" + bullet.getName());
+               bullet.setDead();
+            }
+
          } else {
             if (bullet.idleStartTime < 0) {
                // Start the idle timer
