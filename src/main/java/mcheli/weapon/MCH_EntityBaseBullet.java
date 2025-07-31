@@ -1328,8 +1328,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
         if (this.ticksExisted < 3) return false;
 
-        try {
-            if (this.bomblet) {
+        //try {
+            if (this.bomblet || this.sprinkleTime == 0) { //todone? -TEST check BombletSTime value here
+                //if (this.sprinkleTime == 0) {
                 // Do nothing. Never chunkload, never track
                 return false;
             } else {
@@ -1344,10 +1345,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 //} working
                 return result;
             }
-        } catch (Exception e) {
-            System.out.println("well this wasn't supposed to happen.");
-            return false;
-        }
+        //} catch (Exception e) {
+        //    System.out.println("well this wasn't supposed to happen.");
+        //    return false;
+        //}
+        //redundant
     }
     //private boolean shouldClearChunkLoaders() { return !bomblet && gravitydown && bigdelay; }
     private boolean shouldCreateFAExplosion() { return getInfo().isFAE; }

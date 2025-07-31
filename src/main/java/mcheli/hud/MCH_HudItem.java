@@ -386,6 +386,8 @@ public abstract class MCH_HudItem extends Gui {
       updateVarMapItem("lock", lock);
       updateVarMapItem("dsp_mt_dist", (double)display_mortar_dist);
       updateVarMapItem("mt_dist", (double)MortarDist); //MCH_HudItem.mortarDistStr
+      //updateVarMapItem("mt_dist_str", (double)mortarDistStr);
+      //todo later
    }
 
    public static int isLowFuel(MCH_EntityAircraft ac) {
@@ -511,7 +513,7 @@ public abstract class MCH_HudItem extends Gui {
             }
             //I'll add mega meters if we need it (probably not ill leave that to james/RTM or something)
             //fun fact. this doesn't work. you gotta go through like all the other hoops of bullshit this mod has to get it to work maybe
-            
+
 
             if(wi.delay > wi.reloadTime) {
                ReloadSec = ws.countWait >= 0?(float)ws.countWait:(float)(-ws.countWait);
