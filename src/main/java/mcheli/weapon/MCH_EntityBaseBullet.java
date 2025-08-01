@@ -316,13 +316,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             System.out.println("hey this weapon has no gravity defined, that's probably not a good thing");
         }
 
-        if(this.getInfo().bomblet >= (float)MCH_Config.bombletloader.prmInt) {
+        if(this.getInfo().bomblet >= (float)MCH_Config.bombletloader.prmInt) { //default parameter for bombletloader is 10
             this.bomblet = true;
         } else {
             this.bomblet = false;
         }
 
         if(this.getInfo().delay < (float)MCH_Config.delayrangeloader.prmInt) { //todone implement config setting here
+            //default parameter for delayrangeloader is 5
             //< delayrangeloaderconfigsetting
             this.bigdelay = false;
         } else {
@@ -354,6 +355,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             //System.out.println("should load chunks2");
             //todo checkAndLoadChunks() instead
             if (initialized) {
+                if (MCH_BulletChunkloadLimiter.activeChunkloadingBullets > 0) {
+                    MCH_BulletChunkloadLimiter.activeChunkloadingBullets--;
+                    System.out.println("activeChunkloadingBullets > 0");
+                }
                 checkAndLoadChunks();
                 loadNeighboringChunks(getChunkX(), getChunkZ());
                 clearBulletChunks();
@@ -636,6 +641,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public void onUpdate() {
 
         if (this.ticksExisted > 3 && loaderTicket == null && shouldLoadChunks()) {
+            MCH_BulletChunkloadLimiter.activeChunkloadingBullets++;
             //System.out.println("Bullet passed runtime chunkload check — requesting ticket.");
             init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, ForgeChunkManager.Type.ENTITY));
         }
@@ -808,6 +814,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
             // Handle the collision and update the bullet state
             this.onUpdateCollided();
+        } else { // if bullet is dead and there are still chunk loading bullets active
+            if (MCH_BulletChunkloadLimiter.activeChunkloadingBullets > 0) {
+                MCH_BulletChunkloadLimiter.activeChunkloadingBullets--;
+            }
         }
 
         // Apply bullet's motion
@@ -951,7 +961,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     protected void onUpdateCollided() {
-        //todo: unforce chunk here too just to prevent the biggest destroyer of computers from activating
+
+        if (shouldLoadChunks() && initialized) {
+            //System.out.println("should load chunks3");
+            checkAndLoadChunks();
+            loadNeighboringChunks(getChunkX(), getChunkZ());
+            clearBulletChunks();
+            System.out.println("clearing chunks after collision.");
+            //System.out.println("Extra chunk loader activated.");
+        }
+        //todone?: unforce chunk here too just to prevent the biggest destroyer of computers from activating
         float damageFator = 1.0F;
         double mx = super.motionX * this.accelerationFactor;
         double my = super.motionY * this.accelerationFactor;
@@ -1113,6 +1132,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
 
+        //shouldn't we clear chunks here?
+
         if(hit.entityHit instanceof MCH_EntityAircraft) {
 
             MCH_EntityAircraft ac = (MCH_EntityAircraft) hit.entityHit;
@@ -1126,12 +1147,15 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
 
         //todo shouldLoadChunks() check here
-        if (shouldLoadChunks() && initialized) {
-            //System.out.println("should load chunks3");
-            checkAndLoadChunks();
-            loadNeighboringChunks(getChunkX(), getChunkZ());
-            //System.out.println("Extra chunk loader activated.");
-        }
+        //if (shouldLoadChunks() && initialized) {
+        //    //System.out.println("should load chunks3");
+        //    checkAndLoadChunks();
+        //    loadNeighboringChunks(getChunkX(), getChunkZ());
+        //    clearBulletChunks();
+        //    System.out.println("clearing chunks after impact.");
+        //    //System.out.println("Extra chunk loader activated.");
+        //}
+        //handled already in handleserversideimpact
 
         if (!worldObj.isRemote) { // Server-side logic
             try {
@@ -1152,6 +1176,15 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     private void handleServerSideImpact(MovingObjectPosition hit, float damageFactor) {
         if (hit.entityHit != null) {
             processEntityImpact(hit, damageFactor);
+        }
+
+        if (shouldLoadChunks() && initialized) {
+            //System.out.println("should load chunks3");
+            checkAndLoadChunks();
+            loadNeighboringChunks(getChunkX(), getChunkZ());
+            clearBulletChunks();
+            System.out.println("clearing chunks after impact.");
+            //System.out.println("Extra chunk loader activated.");
         }
 
         if(hit.entityHit instanceof MCH_EntityAircraft) {
@@ -1328,8 +1361,15 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
         if (this.ticksExisted < 3) return false;
 
+        if (MCH_BulletChunkloadLimiter.activeChunkloadingBullets >= MCH_BulletChunkloadLimiter.MAX_ALLOWED) {
+            System.out.println("error over cloader limit");
+            return false;
+        }
+
          if (this.sprinkleTime > 0) {
+             System.out.println("sprinkletime > 0 bullet still 1 bullet");
              if (this.bomblet || this.sprinkleTime == 0) { //todone? -TEST check BombletSTime value here
+                 System.out.println("sprinkletime = 0 no longer loading chunks");
                  //if (this.sprinkleTime == 0) {
                  // Do nothing. Never chunkload, never track
                  return false;

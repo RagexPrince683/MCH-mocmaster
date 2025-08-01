@@ -315,7 +315,7 @@ public class MCH_Config {
       ItemDamage = new MCH_ConfigPrm("ItemDamage", true);
       ItemFuel = new MCH_ConfigPrm("ItemFuel", true);
       AutoRepairHP = new MCH_ConfigPrm("AutoRepairHP", 0.0D);
-      AutoRepairEnabled = new MCH_ConfigPrm("AutoRepairEnabled", false);
+      //AutoRepairEnabled = new MCH_ConfigPrm("AutoRepairEnabled", false);
       Collision_DestroyBlock = new MCH_ConfigPrm("Collision_DestroyBlock", true);
       Explosion_DestroyBlock = new MCH_ConfigPrm("Explosion_DestroyBlock", true);
       Explosion_FlamingBlock = new MCH_ConfigPrm("Explosion_FlamingBlock", true);
@@ -385,7 +385,7 @@ public class MCH_Config {
       ReplaceRenderViewEntity = new MCH_ConfigPrm("ReplaceRenderViewEntity", true);
       StingerLockRange = new MCH_ConfigPrm("StingerLockRange", 4988.0D);
       delayrangeloader = new MCH_ConfigPrm("delayrangeloader", 5);
-      bombletloader = new MCH_ConfigPrm("bombletloader", 50);
+      bombletloader = new MCH_ConfigPrm("bombletloader", 10);
       wrenchdropitem = new MCH_ConfigPrm("wrenchdropitem", false);
       AutoRepairEnabled = new MCH_ConfigPrm("AutoRepairEnabled", false);
       placetimer = new MCH_ConfigPrm("placetimer", 60);
@@ -535,7 +535,8 @@ public class MCH_Config {
               ItemRecipe_Javelin,
               ItemRecipe_JavelinMissile,
               ItemRecipe_Rpg,
-              ItemRecipe_RpgMissile
+              ItemRecipe_RpgMissile,
+              MultiThreadedModelLoading
       };
       DamageVsEntity = new MCH_Config.DamageFactor("DamageVsEntity");
       DamageVsLiving = new MCH_Config.DamageFactor("DamageVsLiving");
