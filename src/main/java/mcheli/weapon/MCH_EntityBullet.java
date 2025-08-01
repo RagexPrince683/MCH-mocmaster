@@ -24,7 +24,7 @@ public class MCH_EntityBullet extends MCH_EntityBaseBullet {
 
    MCH_EntityBaseBullet bullet = this;
 
-   public static boolean shouldLoadChunksmain;
+   public boolean shouldLoadChunksmain = false; // instance field
 
    public MCH_EntityBullet(World par1World) {
       super(par1World);
@@ -58,6 +58,8 @@ public class MCH_EntityBullet extends MCH_EntityBaseBullet {
          }
       }
 
+      this.shouldLoadChunksmain = this.shouldLoadChunks();
+
       if (bullet.shouldLoadChunks()) {
          this.shouldLoadChunksmain = true;
       } else {
@@ -75,6 +77,10 @@ public class MCH_EntityBullet extends MCH_EntityBaseBullet {
    }
 
    protected void onUpdateCollided() {
+
+      //todo release chunks
+
+
       double mx = super.motionX * super.accelerationFactor;
       double my = super.motionY * super.accelerationFactor;
       double mz = super.motionZ * super.accelerationFactor;
