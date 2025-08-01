@@ -250,8 +250,8 @@ public class MCH_MOD {
       try {
          ForgeChunkManager.setForcedChunkLoadingCallback(this, (tickets, world) -> {
             for (ForgeChunkManager.Ticket ticket : tickets) {
-               if (ticket.getEntity() instanceof MCH_EntityBullet) {
-                  MCH_EntityBullet bullet = (MCH_EntityBullet) ticket.getEntity();
+               if (ticket.getEntity() instanceof MCH_EntityBaseBullet) {
+                  MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet) ticket.getEntity();
                   if (bullet.shouldLoadChunksmain) {
                      ((MCH_IChunkLoader) bullet).init(ticket);
                   }

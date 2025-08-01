@@ -22,9 +22,8 @@ import net.minecraft.world.World;
 
 public class MCH_EntityBullet extends MCH_EntityBaseBullet {
 
-   MCH_EntityBaseBullet bullet = this;
+   //MCH_EntityBaseBullet bullet = this;
 
-   public boolean shouldLoadChunksmain = false; // instance field
 
    public MCH_EntityBullet(World par1World) {
       super(par1World);
@@ -58,14 +57,6 @@ public class MCH_EntityBullet extends MCH_EntityBaseBullet {
          }
       }
 
-      this.shouldLoadChunksmain = this.shouldLoadChunks();
-
-      if (bullet.shouldLoadChunks()) {
-         this.shouldLoadChunksmain = true;
-      } else {
-         this.shouldLoadChunksmain = false;
-      }
-
 
 
    }
@@ -77,9 +68,8 @@ public class MCH_EntityBullet extends MCH_EntityBaseBullet {
    }
 
    protected void onUpdateCollided() {
-
-      //todo release chunks
-
+      //todone release chunks
+      //this is bullets, not base bullets (MCH_EntityBaseBullet) which is inherited by everything projectile related.
 
       double mx = super.motionX * super.accelerationFactor;
       double my = super.motionY * super.accelerationFactor;

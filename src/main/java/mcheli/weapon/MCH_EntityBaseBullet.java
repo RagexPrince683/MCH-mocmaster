@@ -52,6 +52,9 @@ import static mcheli.MCH_Config.bombletloader;
 
 public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChunkLoader {
 
+    public boolean shouldLoadChunksmain = false; // instance field
+
+
     public long idleStartTime = -1;
 
     public static final int DATAWT_RESERVE1 = 26;
@@ -639,6 +642,14 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     public void onUpdate() {
+
+        this.shouldLoadChunksmain = this.shouldLoadChunks();
+
+        if (this.shouldLoadChunks()) {
+            this.shouldLoadChunksmain = true;
+        } else {
+            this.shouldLoadChunksmain = false;
+        }
 
         if (this.ticksExisted > 3 && loaderTicket == null && shouldLoadChunks()) {
             MCH_BulletChunkloadLimiter.activeChunkloadingBullets++;
