@@ -1575,7 +1575,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
         //("read entity from nbt, would set dead but commented out");
         this.setDead();
-        //todo clear chunk loader here
+        //MCH_BulletChunkloadLimiter.activeChunkloadingBullets--;
+        //todone clear chunk loader here //done in setdead
         System.out.println("setting dead due to readentityfromnbt");
     }
 
