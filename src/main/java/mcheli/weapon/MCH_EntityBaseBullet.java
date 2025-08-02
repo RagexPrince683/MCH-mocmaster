@@ -649,7 +649,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
         this.shouldLoadChunksmain = this.shouldLoadChunks();
 
-        if (this.shouldLoadChunks()) {
+        if (this.shouldLoadChunks() && !this.bomblet) {
             System.out.println("should load chunks");
             this.shouldLoadChunksmain = true;
         } else {
