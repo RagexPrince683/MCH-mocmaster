@@ -1380,13 +1380,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
         if (this.ticksExisted < 3) return false;
 
-        if (MCH_BulletChunkloadLimiter.activeChunkloadingBullets >= MCH_BulletChunkloadLimiter.MAX_ALLOWED) {
-            System.out.println("error over cloader limit" + MCH_BulletChunkloadLimiter.activeChunkloadingBullets + " max allowed: " + MCH_BulletChunkloadLimiter.MAX_ALLOWED);
-            return false;
-        }
-
-
-
         //try {
             if (this.bomblet) { //todone? -TEST check BombletSTime value here
                 if (this.sprinkleTime > 0) {
@@ -1399,7 +1392,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                     }
 
                     //same logic
-                    boolean result = !bomblet && gravitydown && bigdelay && bigcheck;
+                    boolean result = gravitydown && bigdelay && bigcheck; //!bomblet &&
                     return result;
                 }
                 //if (this.sprinkleTime == 0) {
@@ -1407,6 +1400,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 return false;
             } else {
                 boolean result = !bomblet && gravitydown && bigdelay && bigcheck;
+
+                if (MCH_BulletChunkloadLimiter.activeChunkloadingBullets >= MCH_BulletChunkloadLimiter.MAX_ALLOWED) {
+                    System.out.println("error over cloader limit" + MCH_BulletChunkloadLimiter.activeChunkloadingBullets + " max allowed: " + MCH_BulletChunkloadLimiter.MAX_ALLOWED);
+                    return false;
+                }
                 //if (result) {
                 //    System.out.println("[shouldLoadChunks] Chunkloading bullet allowed: " + this.getClass().getSimpleName()
                 //            + " | bomblet=" + bomblet
