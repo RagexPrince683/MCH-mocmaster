@@ -321,8 +321,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             System.out.println("hey this weapon has no gravity defined, that's probably not a good thing");
         }
 
-        if(this.getInfo().bomblet >= (float)MCH_Config.bombletloader.prmInt) { //default parameter for bombletloader is 10
+        if(this.getInfo().bomblet >= (float)MCH_Config.bombletloader.prmInt && this.sprinkleTime <= 0) { //default parameter for bombletloader is 10
             this.bomblet = true;
+            //this.getInfo().bombletSTime
         } else {
             this.bomblet = false;
         }
@@ -815,7 +816,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             // Check if the bullet still exists before proceeding
             if (!super.isDead) {
                 // Ensure the bullet has the specific conditions (e.g., no bomblet, gravityDown, and bigDelay)
-                if (!bomblet && gravitydown && bigdelay) {
+                if (!bomblet && gravitydown && bigdelay && initialized) {
 
                     // Load the necessary chunks in front of the bullet
                     loadChunksInBulletPath(chunkX, chunkZ, this.motionX, this.motionZ);
@@ -1384,22 +1385,23 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             return false;
         }
 
-         if (this.sprinkleTime > 0) {
-             System.out.println("sprinkletime > 0 bullet still 1 bullet");
-             if (this.bomblet || this.sprinkleTime == 0) { //todone? -TEST check BombletSTime value here
-                 System.out.println("sprinkletime = 0 no longer loading chunks");
-                 //if (this.sprinkleTime == 0) {
-                 // Do nothing. Never chunkload, never track
-                 return false;
-             }
 
-             //same logic
-             boolean result = !bomblet && gravitydown && bigdelay && bigcheck;
-             return result;
-         }
 
         //try {
             if (this.bomblet) { //todone? -TEST check BombletSTime value here
+                if (this.sprinkleTime > 0) {
+                    System.out.println("sprinkletime > 0 bullet still 1 bullet");
+                    if (this.bomblet || this.sprinkleTime <= 0) { //todone? -TEST check BombletSTime value here
+                        System.out.println("sprinkletime = 0 or less no longer loading chunks");
+                        //if (this.sprinkleTime == 0) {
+                        // Do nothing. Never chunkload, never track
+                        return false;
+                    }
+
+                    //same logic
+                    boolean result = !bomblet && gravitydown && bigdelay && bigcheck;
+                    return result;
+                }
                 //if (this.sprinkleTime == 0) {
                 // Do nothing. Never chunkload, never track
                 return false;
