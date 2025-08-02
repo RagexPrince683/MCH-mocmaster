@@ -412,6 +412,15 @@ public class MCH_EventHook extends W_EventHook {
             //17140 ticks = ~14 minutes
             //which is how far an apfsds bullet should be allowed to go according to my genericified math
 
+            long timePassed = bullet.worldObj.getTotalWorldTime() - bullet.idleStartTime;
+
+            if (bullet.bomblet) {
+               if (timePassed > 300) { // 600 ticks = 30 seconds
+                  bullet.setDead();
+                  System.out.println("'Chunk loading' Bomblet set dead after being idle for 15 seconds.");
+               }
+            }
+
             //System.out.println("bullet checking and loading chunks");
             if (bullet.ticksExisted > 2) {
                bullet.checkAndLoadChunks();
