@@ -176,6 +176,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                     loaderTicket.getModData();
                 }
                 // Force load the initial chunk where the bullet is spawned
+                MCH_BulletChunkloadLimiter.activeChunkloadingBullets++;
+                System.out.println("activeChunkloadingBullets++: " + MCH_BulletChunkloadLimiter.activeChunkloadingBullets);
                 ForgeChunkManager.forceChunk(loaderTicket, new ChunkCoordIntPair(chunkCoordX, chunkCoordZ));
             }
         }
@@ -365,6 +367,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 checkAndLoadChunks();
                 loadNeighboringChunks(getChunkX(), getChunkZ());
                 clearBulletChunks();
+                MCH_BulletChunkloadLimiter.activeChunkloadingBullets--;
             }
         }
         super.setDead();
@@ -646,13 +649,13 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         this.shouldLoadChunksmain = this.shouldLoadChunks();
 
         if (this.shouldLoadChunks()) {
+            System.out.println("should load chunks");
             this.shouldLoadChunksmain = true;
         } else {
             this.shouldLoadChunksmain = false;
         }
 
         if (this.ticksExisted > 3 && loaderTicket == null && shouldLoadChunks()) {
-            MCH_BulletChunkloadLimiter.activeChunkloadingBullets++;
             //System.out.println("Bullet passed runtime chunkload check — requesting ticket.");
             init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, ForgeChunkManager.Type.ENTITY));
         }
@@ -756,11 +759,13 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
             if (!this.checkValid()) {
                 this.setDead();
+                MCH_BulletChunkloadLimiter.activeChunkloadingBullets--;
                 System.out.println("entity is not valid");
                 return;
             }
 
             if(this.getInfo().timeFuse > 0 && this.getCountOnUpdate() > this.getInfo().timeFuse) {
+                MCH_BulletChunkloadLimiter.activeChunkloadingBullets--;
                 this.onUpdateTimeout();
                 this.setDead();
                 return;
@@ -973,14 +978,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     protected void onUpdateCollided() {
 
-        if (shouldLoadChunks() && initialized) {
-            //System.out.println("should load chunks3");
-            checkAndLoadChunks();
-            loadNeighboringChunks(getChunkX(), getChunkZ());
-            clearBulletChunks();
-            System.out.println("clearing chunks after collision.");
-            //System.out.println("Extra chunk loader activated.");
-        }
+        //if (shouldLoadChunks() && initialized) {
+        //    //System.out.println("should load chunks3");
+        //    checkAndLoadChunks();
+        //    loadNeighboringChunks(getChunkX(), getChunkZ());
+        //    clearBulletChunks();
+        //    System.out.println("clearing chunks after collision.");
+        //    //System.out.println("Extra chunk loader activated.");
+        //}
+        //'collision' as in it runs every tick not just colliding with something. AMAZING.
+
         //todone?: unforce chunk here too just to prevent the biggest destroyer of computers from activating
         float damageFator = 1.0F;
         double mx = super.motionX * this.accelerationFactor;
@@ -1373,7 +1380,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         if (this.ticksExisted < 3) return false;
 
         if (MCH_BulletChunkloadLimiter.activeChunkloadingBullets >= MCH_BulletChunkloadLimiter.MAX_ALLOWED) {
-            System.out.println("error over cloader limit");
+            System.out.println("error over cloader limit" + MCH_BulletChunkloadLimiter.activeChunkloadingBullets + " max allowed: " + MCH_BulletChunkloadLimiter.MAX_ALLOWED);
             return false;
         }
 
