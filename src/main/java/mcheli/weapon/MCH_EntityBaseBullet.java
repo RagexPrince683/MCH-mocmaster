@@ -649,15 +649,15 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
         //this.shouldLoadChunksmain = this.shouldLoadChunks();
 
-        if (this.shouldLoadChunks() && !this.bomblet && this.bigcheck) {
-            System.out.println("should load chunks");
-            this.shouldLoadChunksmain = true;
-        } else {
-            this.shouldLoadChunksmain = false;
-        }
+        //if (this.shouldLoadChunks() && !this.bomblet && this.bigcheck) {
+        //    System.out.println("should load chunks");
+        //    this.shouldLoadChunksmain = true;
+        //} else {
+        //    this.shouldLoadChunksmain = false;
+        //}
 
         if (this.ticksExisted > 3 && loaderTicket == null && shouldLoadChunks()) {
-            //System.out.println("Bullet passed runtime chunkload check — requesting ticket.");
+            System.out.println("Bullet passed runtime chunkload check — requesting ticket.");
             init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, ForgeChunkManager.Type.ENTITY));
         }
 
@@ -1212,6 +1212,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             if(ac.ironCurtainRunningTick > 0) {
                 System.out.println("aps hit");
                 spawnIronCurtainParticle(hit, hit.blockX, hit.blockY, hit.blockZ);
+                //set dead here
+                this.setDead();
             }
         }
 
@@ -1377,49 +1379,26 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     private int getChunkX() { return (int) Math.floor(posX / 16.0); }
     private int getChunkZ() { return (int) Math.floor(posZ / 16.0); }
     public boolean shouldLoadChunks() {
-
         if (this.ticksExisted < 3) return false;
 
-        //try {
-            if (this.bomblet) { //todone? -TEST check BombletSTime value here
-                if (this.sprinkleTime > 0) {
-                    System.out.println("sprinkletime > 0 bullet still 1 bullet");
-                    if (this.bomblet || this.sprinkleTime <= 0) { //todone? -TEST check BombletSTime value here
-                        System.out.println("sprinkletime = 0 or less no longer loading chunks");
-                        //if (this.sprinkleTime == 0) {
-                        // Do nothing. Never chunkload, never track
-                        return false;
-                    }
-
-                    //same logic
-                    boolean result = gravitydown && bigdelay && bigcheck; //!bomblet &&
-                    return result;
-                }
-                //if (this.sprinkleTime == 0) {
-                // Do nothing. Never chunkload, never track
+        if (this.bomblet) {
+            if (this.sprinkleTime <= 0) {
+                System.out.println("sprinkletime = 0 or less, not loading chunks");
                 return false;
-            } else {
-                boolean result = !bomblet && gravitydown && bigdelay && bigcheck;
-
-                if (MCH_BulletChunkloadLimiter.activeChunkloadingBullets >= MCH_BulletChunkloadLimiter.MAX_ALLOWED) {
-                    System.out.println("error over cloader limit" + MCH_BulletChunkloadLimiter.activeChunkloadingBullets + " max allowed: " + MCH_BulletChunkloadLimiter.MAX_ALLOWED);
-                    return false;
-                }
-                //if (result) {
-                //    System.out.println("[shouldLoadChunks] Chunkloading bullet allowed: " + this.getClass().getSimpleName()
-                //            + " | bomblet=" + bomblet
-                //            + " | gravitydown=" + gravitydown
-                //            + " | bigdelay=" + bigdelay
-                //            + " | bigcheck=" + bigcheck
-                //            + " | pos=" + this.posX + ", " + this.posY + ", " + this.posZ);
-                //} working
-                return result;
             }
-        //} catch (Exception e) {
-        //    System.out.println("well this wasn't supposed to happen.");
-        //    return false;
-        //}
-        //redundant
+
+            System.out.println("sprinkletime > 0, loading chunks");
+            return gravitydown && bigdelay && bigcheck;
+        }
+
+        if (MCH_BulletChunkloadLimiter.activeChunkloadingBullets >= MCH_BulletChunkloadLimiter.MAX_ALLOWED) {
+            System.out.println("error: over chunkloader limit (" + MCH_BulletChunkloadLimiter.activeChunkloadingBullets + ")");
+            this.setDead();
+            MCH_BulletChunkloadLimiter.activeChunkloadingBullets--;
+            return false;
+        }
+
+        return gravitydown && bigdelay && bigcheck;
     }
     //private boolean shouldClearChunkLoaders() { return !bomblet && gravitydown && bigdelay; }
     private boolean shouldCreateFAExplosion() { return getInfo().isFAE; }
