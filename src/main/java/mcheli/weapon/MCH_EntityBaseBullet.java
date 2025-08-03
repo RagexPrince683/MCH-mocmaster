@@ -656,7 +656,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         //    this.shouldLoadChunksmain = false;
         //}
 
-        if (this.ticksExisted > 3 && loaderTicket == null && shouldLoadChunks()) {
+        if (this.ticksExisted > 3 && loaderTicket == null && this.ticksExisted % 5 == 0 && shouldLoadChunks()) { // run every 5 ticks instead of 1
             System.out.println("Bullet passed runtime chunkload check — requesting ticket.");
             init(ForgeChunkManager.requestTicket(MCH_MOD.instance, worldObj, ForgeChunkManager.Type.ENTITY));
         }
