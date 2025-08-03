@@ -358,6 +358,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     public void setDead() {
         if (shouldLoadChunks()) {
+            if (loaderTicket != null) {
+                bulletLoadedChunks.clear();
+                loaderTicket = null;
+            }
             //System.out.println("should load chunks2");
             //todo checkAndLoadChunks() instead
             if (initialized) {
