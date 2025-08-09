@@ -29,6 +29,13 @@ public class MultiThreadModelManager {
      */
 
     public static void start(MCH_ClientProxy proxy) {
+
+        waitForData("helicopter", MCH_HeliInfoManager.map);
+        waitForData("plane", MCP_PlaneInfoManager.map);
+        waitForData("ship", MCH_ShipInfoManager.map);
+        waitForData("tank", MCH_TankInfoManager.map);
+        waitForData("vehicle", MCH_VehicleInfoManager.map);
+
         MCH_ModelManager.load("blocks", "drafting_table");
 
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -86,6 +93,21 @@ public class MultiThreadModelManager {
         MCH_DefaultBulletModels.Bomb = proxy.loadBulletModel("bomb");
         MCH_DefaultBulletModels.Rocket = proxy.loadBulletModel("rocket");
         MCH_DefaultBulletModels.Torpedo = proxy.loadBulletModel("torpedo");
+    }
+
+    private static void waitForData(String name, java.util.Map<?, ?> map) {
+        int retries = 0;
+        while (map.isEmpty() && retries < 500) { // 500 x 10ms = 5 seconds max
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ignored) {}
+            retries++;
+        }
+        if (map.isEmpty()) {
+            System.err.println("Warning: " + name + " map is still empty after waiting.");
+        } else {
+            System.out.println(name + " data ready with " + map.size() + " entries.");
+        }
     }
 
 
