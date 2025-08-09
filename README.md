@@ -36,3 +36,46 @@ then if all goes well go to build/libs and a java file will be there. If you hav
 3. Why so many branches?
 
 I am bad at coding/this project has taken my soul
+
+
+What to do if something breaks?:
+
+1. Close IntelliJ and delete the garbage cache
+   Close IntelliJ completely.
+
+In your McheliO project folder, delete:
+
+.gradle/
+build/
+out/ (if exists)
+
+2. Re-open the project as a Gradle project
+   Open IntelliJ.
+
+Do NOT use “New Project” or “Import from existing sources.”
+
+Use File → Open… → select your McheliO root folder (where build.gradle lives).
+
+When prompted, import as a Gradle project.
+
+3. Make sure SDK is Java 8
+   File → Project Structure → Project SDK → Set to Java 1.8.
+
+Also set Project language level to 8 - Lambdas, type annotations, etc.
+
+4. Force Gradle to rebuild MCP
+   Open the terminal in IntelliJ (or system terminal in the project root) and run:
+
+gradlew clean
+gradlew setupDecompWorkspace --refresh-dependencies
+gradlew genIntellijRuns
+
+5. Re-sync Gradle
+   In IntelliJ, click the little elephant icon (Gradle tool window) → “Reload All Gradle Projects.”
+
+Wait for indexing to finish (top-right progress bar).
+
+6. Check sources
+   Right-click src/main/java → Mark Directory As → Sources Root
+
+Right-click src/main/resources → Mark Directory As → Resources Root
