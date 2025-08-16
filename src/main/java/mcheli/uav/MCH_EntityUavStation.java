@@ -231,123 +231,124 @@ public class MCH_EntityUavStation
 
              @Override
              public void setDead() {
+                 if (this.worldObj.isRemote) {
+                     System.out.println("setDead fired in UAV Station (client)");
+                 } else {
+                     System.out.println("setDead fired in UAV Station (server)");
 
-                if(this.worldObj.isRemote) {
-                    System.out.println("setDead fired in UAV Station (client)");
-                } else {
-                    System.out.println("setDead fired in UAV Station (server)");
-                    // If this is a new UAV, we need to handle the dismount logic
-                    //if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
-                    //    EntityPlayer player = (EntityPlayer)this.riddenByEntity;
-                    //    if (player != null) {
-                    //        System.out.println("Unmounting player: " + player.getDisplayName());
-                    //        unmountEntity(true);
-                    //        // Force dismount
-                    //        //player.mountEntity(null);
-                    //        // Optional: add potion effects or chat messages as needed
-                    //        //player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
-                    //    }
-                    //}
-                }
-                    //if setdead is fired clientside = this is no longer chunk loaded, we should init a chunk loader
-                    //if setdead is fired serverside = this was actually attacked, get the linked player and force a dismount.
+                     // If this is a new UAV, we would handle dismount logic here
+                     // (currently commented out)
+        /*
+        if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
+            EntityPlayer player = (EntityPlayer)this.riddenByEntity;
+            if (player != null) {
+                System.out.println("Unmounting player: " + player.getDisplayName());
+                unmountEntity(true);
+                // player.mountEntity(null);
+                // player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
+            }
+        }
+        */
+                 }
 
-
-                 //System.out.println("setDead fired in UAV Station");
-
-                 //station no longer loaded, OR broken NOT necessarily dead that's literally just fake
-                 //also kinda clientside-ish? might be both idk
-                 //so we should start chunk loading here?
-
-                 //will fire when player is outside of chunk for some reason
-
-                 //ive determined the thing I'm trying to do should be done in attackentity method.
+                 // Notes:
+                 // - setDead clientside: no longer chunk loaded, should init a chunk loader
+                 // - setDead serverside: entity attacked, force dismount linked player
+                 // - This isn’t strictly “dead” — just unloaded or broken
+                 // - Current conclusion: handle actual logic in attackEntityFrom()
 
                  super.setDead();
-                 //System.out.println("UAV Station setDead completed.");
              }
 
-      public boolean attackEntityFrom(DamageSource damageSource, float damage) {
-           if (isEntityInvulnerable())
-                return false;
-           if (this.isDead)
-               return true;
-          if (this.worldObj.isRemote) {
-                return true;
-              }
-           String dmt = damageSource.getDamageType();
-           MCH_Config var10000 = MCH_MOD.config;
-           damage = MCH_Config.applyDamageByExternal((Entity)this, damageSource, damage);
-           if (!MCH_Multiplay.canAttackEntity(damageSource, (Entity)this)) {
-                return false;
-              }
-           boolean isCreative = false;
-           Entity entity = damageSource.getEntity();
-           boolean isDamegeSourcePlayer = false;
-           if (entity instanceof EntityPlayer) {
-                isCreative = ((EntityPlayer)entity).capabilities.isCreativeMode;
-                if (dmt.compareTo("player") == 0) {
-                     isDamegeSourcePlayer = true;
-                   }
 
-                W_WorldFunc.MOD_playSoundAtEntity((Entity)this, "hit", 1.0F, 1.0F);
-              } else {
-                W_WorldFunc.MOD_playSoundAtEntity((Entity)this, "helidmg", 1.0F, 0.9F + this.rand.nextFloat() * 0.1F);
-              }
+             @Override
+             public boolean attackEntityFrom(DamageSource damageSource, float damage) {
+                 if (isEntityInvulnerable()) return false;
+                 if (this.isDead) return true;
+                 if (this.worldObj.isRemote) return true;
 
-           setBeenAttacked();
-           if (damage > 0.0F) {
+                 // Apply external damage modifications
+                 String damageType = damageSource.getDamageType();
+                 damage = MCH_Config.applyDamageByExternal(this, damageSource, damage);
 
-               EntityPlayer player = null;
-               // If there's a rider, capture the UUID immediately
-               if (this.riddenByEntity instanceof EntityPlayer) {
-                   player = (EntityPlayer)this.riddenByEntity;
-                   this.newUavPlayerUUID = player.getUniqueID().toString();
-               } else if (this.newUavPlayerUUID != null) {
-                   // Search for the player using the stored UUID
-                   for (Object obj : worldObj.playerEntities) {
-                       if (obj instanceof EntityPlayer) {
-                           EntityPlayer p = (EntityPlayer) obj;
-                           if (p.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
-                               player = p;
-                               break;
-                           }
-                       }
-                   }
+                 // Disallow if not attackable
+                 if (!MCH_Multiplay.canAttackEntity(damageSource, this)) return false;
 
-                   if (player != null) {
-                       unmountEntity(true);
-                       // Force dismount
-                       //player.mountEntity(null);
-                       // Optional: add potion effects or chat messages as needed
-                       //player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
-                       System.out.println("Unmount in damage logic.");
-                   } else {
-                       System.out.println("No player found for teleportation in damage logic.");
-                   }
-               }
+                 // Attacker info
+                 Entity attacker = damageSource.getEntity();
+                 boolean isCreative = false;
+                 boolean isPlayerSource = false;
 
-               this.dropContentsWhenDead = true;
-               System.out.println(MCH_EntityUavStation.storedStationX + " " +
-                       MCH_EntityUavStation.storedStationY + " " +
-                       MCH_EntityUavStation.storedStationZ + " " + "station pos");
+                 if (attacker instanceof EntityPlayer) {
+                     EntityPlayer player = (EntityPlayer) attacker;
+                     isCreative = player.capabilities.isCreativeMode;
+                     if ("player".equals(damageType)) isPlayerSource = true;
 
-                setDead();
-                if (!isDamegeSourcePlayer) {
-                    System.out.println("explosion created");
-                     MCH_Explosion.newExplosion(this.worldObj, (Entity)null, this.riddenByEntity, this.posX, this.posY, this.posZ, 1.0F, 0.0F, true, true, false, false, 0);
-                   }
+                     W_WorldFunc.MOD_playSoundAtEntity(this, "hit", 1.0F, 1.0F);
+                 } else {
+                     W_WorldFunc.MOD_playSoundAtEntity(this, "helidmg", 1.0F, 0.9F + this.rand.nextFloat() * 0.1F);
+                 }
 
-                if (!isCreative) {
-                     int kind = getKind();
-                     if (kind > 0) {
-                          dropItemWithOffset((Item)MCH_MOD.itemUavStation[kind - 1], 1, 0.0F);
-                        }
-                   }
-              }
+                 setBeenAttacked();
 
-           return true;
-         }
+                 if (damage > 0.0F) {
+                     EntityPlayer rider = null;
+
+                     // Capture or resolve rider by UUID
+                     if (this.riddenByEntity instanceof EntityPlayer) {
+                         rider = (EntityPlayer) this.riddenByEntity;
+                         this.newUavPlayerUUID = rider.getUniqueID().toString();
+                     } else if (this.newUavPlayerUUID != null) { //assigned at top of class as public String newUavPlayerUUID
+                         for (Object obj : worldObj.playerEntities) {
+                             if (obj instanceof EntityPlayer) {
+                                 EntityPlayer p = (EntityPlayer) obj;
+                                 if (p.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
+                                     rider = p;
+                                     break;
+                                 }
+                             }
+                         }
+
+                         if (rider != null) {
+                             unmountEntity(true);
+                             System.out.println("Unmount in damage logic.");
+                         } else {
+                             System.out.println("No player found for teleportation in damage logic.");
+                         }
+                     }
+
+                     this.dropContentsWhenDead = true;
+
+                     System.out.println(
+                             MCH_EntityUavStation.storedStationX + " " +
+                                     MCH_EntityUavStation.storedStationY + " " +
+                                     MCH_EntityUavStation.storedStationZ + " station pos"
+                     );
+
+                     setDead();
+
+                     // Explosion if not caused by player
+                     if (!isPlayerSource) {
+                         System.out.println("explosion created");
+                         MCH_Explosion.newExplosion(
+                                 this.worldObj, null, this.riddenByEntity,
+                                 this.posX, this.posY, this.posZ,
+                                 1.0F, 0.0F,
+                                 true, true, false, false, 0
+                         );
+                     }
+
+                     // Drop station item if not creative
+                     if (!isCreative) {
+                         int kind = getKind();
+                         if (kind > 0) {
+                             dropItemWithOffset(MCH_MOD.itemUavStation[kind - 1], 1, 0.0F);
+                         }
+                     }
+                 }
+
+                 return true;
+             }
 
 
 
