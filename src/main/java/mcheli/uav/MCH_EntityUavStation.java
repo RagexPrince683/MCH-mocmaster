@@ -231,11 +231,29 @@ public class MCH_EntityUavStation
 
              @Override
              public void setDead() {
+
+                if(this.worldObj.isRemote) {
+                    System.out.println("setDead fired in UAV Station (client)");
+                } else {
+                    System.out.println("setDead fired in UAV Station (server)");
+                    // If this is a new UAV, we need to handle the dismount logic
+                    //if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
+                    //    EntityPlayer player = (EntityPlayer)this.riddenByEntity;
+                    //    if (player != null) {
+                    //        System.out.println("Unmounting player: " + player.getDisplayName());
+                    //        unmountEntity(true);
+                    //        // Force dismount
+                    //        //player.mountEntity(null);
+                    //        // Optional: add potion effects or chat messages as needed
+                    //        //player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
+                    //    }
+                    //}
+                }
                     //if setdead is fired clientside = this is no longer chunk loaded, we should init a chunk loader
                     //if setdead is fired serverside = this was actually attacked, get the linked player and force a dismount.
 
 
-                 System.out.println("setDead fired in UAV Station");
+                 //System.out.println("setDead fired in UAV Station");
 
                  //station no longer loaded, OR broken NOT necessarily dead that's literally just fake
                  //also kinda clientside-ish? might be both idk
@@ -246,11 +264,10 @@ public class MCH_EntityUavStation
                  //ive determined the thing I'm trying to do should be done in attackentity method.
 
                  super.setDead();
-                 System.out.println("UAV Station setDead completed.");
+                 //System.out.println("UAV Station setDead completed.");
              }
 
-
-             public boolean attackEntityFrom(DamageSource damageSource, float damage) {
+      public boolean attackEntityFrom(DamageSource damageSource, float damage) {
            if (isEntityInvulnerable())
                 return false;
            if (this.isDead)
