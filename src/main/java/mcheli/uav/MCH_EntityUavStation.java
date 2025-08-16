@@ -292,31 +292,32 @@ public class MCH_EntityUavStation
                  setBeenAttacked();
 
                  if (damage > 0.0F) {
-                     EntityPlayer rider = null;
+                     EntityPlayer assignedPlayer = null;
 
-                     // Capture or resolve rider by UUID
+                     // --- Find assigned player ---
                      if (this.riddenByEntity instanceof EntityPlayer) {
-                         rider = (EntityPlayer) this.riddenByEntity;
-                         this.newUavPlayerUUID = rider.getUniqueID().toString();
-                     } else if (this.newUavPlayerUUID != null) { //assigned at top of class as public String newUavPlayerUUID
+                         assignedPlayer = (EntityPlayer) this.riddenByEntity;
+                         this.newUavPlayerUUID = assignedPlayer.getUniqueID().toString();
+                     } else if (this.newUavPlayerUUID != null) {
                          for (Object obj : worldObj.playerEntities) {
                              if (obj instanceof EntityPlayer) {
                                  EntityPlayer p = (EntityPlayer) obj;
                                  if (p.getUniqueID().toString().equals(this.newUavPlayerUUID)) {
-                                     rider = p;
+                                     assignedPlayer = p;
                                      break;
                                  }
                              }
                          }
-
-                         if (rider != null) {
-                             unmountEntity(true);
-                             System.out.println("Unmount in damage logic.");
-                         } else {
-                             System.out.println("No player found for teleportation in damage logic.");
-                         }
                      }
 
+                     // --- Kill the UAV if assigned player is riding one ---
+                     if (assignedPlayer != null && assignedPlayer.ridingEntity instanceof MCH_EntityAircraft) {
+                         MCH_EntityAircraft uav = (MCH_EntityAircraft) assignedPlayer.ridingEntity;
+                         uav.setDead(); // kill the UAV
+                         System.out.println("Killed UAV for player: " + assignedPlayer.getCommandSenderName());
+                     }
+
+                     // Handle station death
                      this.dropContentsWhenDead = true;
 
                      System.out.println(
@@ -352,7 +353,8 @@ public class MCH_EntityUavStation
 
 
 
-      protected boolean canTriggerWalking() {
+
+             protected boolean canTriggerWalking() {
            return false;
          }
 
