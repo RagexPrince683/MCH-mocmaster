@@ -66,6 +66,9 @@ public class MCH_EntityUavStation
       public String newUavPlayerUUID;
       public MCH_EntityAircraft assignedUav = null;
 
+      public int assignedUavId = -1; // fallback tracking
+      public String assignedUavUUID = "";
+
 
 
              public void setContinuePressed(boolean flag) {
@@ -206,6 +209,11 @@ public class MCH_EntityUavStation
               }
 
            nbt.setString("LastCtrlAc", s);
+
+          if (this.assignedUav != null && !this.assignedUav.isDead) {
+              nbt.setInteger("AssignedUavId", this.assignedUav.getEntityId());
+              nbt.setString("AssignedUavUUID", this.assignedUav.getUniqueID().toString());
+          }
          }
 
       protected void readEntityFromNBT(NBTTagCompound nbt) {
@@ -218,6 +226,12 @@ public class MCH_EntityUavStation
               }
 
            this.loadedLastControlAircraftGuid = nbt.getString("LastCtrlAc");
+          if (nbt.hasKey("AssignedUavId")) {
+              this.assignedUavId = nbt.getInteger("AssignedUavId");
+          }
+          if (nbt.hasKey("AssignedUavUUID")) {
+              this.assignedUavUUID = nbt.getString("AssignedUavUUID");
+          }
          }
 
 
@@ -436,6 +450,28 @@ public class MCH_EntityUavStation
          }
 
       public void onUpdate() {
+
+          //I don't know if this should go in the EntityAircraft class or this class's onupdate method
+          // but fuck you here you go!
+          if (this.assignedUav == null && this.assignedUavId > 0 && !this.worldObj.isRemote) {
+              Entity e = this.worldObj.getEntityByID(this.assignedUavId);
+              if (e instanceof MCH_EntityAircraft) {
+                  this.assignedUav = (MCH_EntityAircraft)e;
+                  System.out.println("Re-linked UAV by ID: " + this.assignedUav.getEntityId());
+              }
+              else if (!this.assignedUavUUID.isEmpty()) {
+                  for (Object obj : this.worldObj.loadedEntityList) {
+                      if (obj instanceof MCH_EntityAircraft) {
+                          MCH_EntityAircraft ac = (MCH_EntityAircraft)obj;
+                          if (ac.getUniqueID().toString().equals(this.assignedUavUUID)) {
+                              this.assignedUav = ac;
+                              System.out.println("Re-linked UAV by UUID: " + this.assignedUavUUID);
+                              break;
+                          }
+                      }
+                  }
+              }
+          }
 
           EntityPlayer player = (EntityPlayer)this.riddenByEntity;
            super.onUpdate();
