@@ -294,7 +294,7 @@ public class MCH_EntityUavStation
                  if (damage > 0.0F) {
                      EntityPlayer assignedPlayer = null;
 
-                     // --- Find assigned player ---
+                     // --- Resolve assigned player ---
                      if (this.riddenByEntity instanceof EntityPlayer) {
                          assignedPlayer = (EntityPlayer) this.riddenByEntity;
                          this.newUavPlayerUUID = assignedPlayer.getUniqueID().toString();
@@ -310,11 +310,13 @@ public class MCH_EntityUavStation
                          }
                      }
 
-                     // --- Kill the UAV if assigned player is riding one ---
+                     // --- Kill the UAV the assigned player is riding ---
                      if (assignedPlayer != null && assignedPlayer.ridingEntity instanceof MCH_EntityAircraft) {
                          MCH_EntityAircraft uav = (MCH_EntityAircraft) assignedPlayer.ridingEntity;
-                         uav.setDead(); // kill the UAV
+                         uav.setDead(); // will automatically dismount player
                          System.out.println("Killed UAV for player: " + assignedPlayer.getCommandSenderName());
+                     } else {
+                         System.out.println("No UAV found to kill for assigned player.");
                      }
 
                      // Handle station death
@@ -350,6 +352,7 @@ public class MCH_EntityUavStation
 
                  return true;
              }
+
 
 
 
