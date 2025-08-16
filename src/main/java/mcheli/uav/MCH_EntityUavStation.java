@@ -64,6 +64,8 @@ public class MCH_EntityUavStation
       private boolean continuePressed = false;
       public boolean isridingnewuav = false;
       public String newUavPlayerUUID;
+      public MCH_EntityAircraft assignedUav = null;
+
 
 
              public void setContinuePressed(boolean flag) {
@@ -267,6 +269,8 @@ public class MCH_EntityUavStation
                  if (this.isDead) return true;
                  if (this.worldObj.isRemote) return true;
 
+
+
                  // Apply external damage modifications
                  String damageType = damageSource.getDamageType();
                  damage = MCH_Config.applyDamageByExternal(this, damageSource, damage);
@@ -294,7 +298,27 @@ public class MCH_EntityUavStation
                  if (damage > 0.0F) {
                      EntityPlayer assignedPlayer = null;
 
-                     // --- Resolve assigned player ---
+                     //kill UAV if station is fucked HOPEFULLY
+                     if (this.assignedUav != null && !this.assignedUav.isDead) {
+                         Entity rider = this.assignedUav.riddenByEntity;
+                         if (rider instanceof EntityPlayer) {
+                             EntityPlayer player = (EntityPlayer) rider;
+                             player.mountEntity(null); // force unmount
+                             player.setPositionAndUpdate(storedStationX, storedStationY, storedStationZ);
+                             System.out.println("Teleported " + player.getCommandSenderName() + " back to station.");
+                         }
+                         this.assignedUav.setDead();
+                         //todone?? now teleport the player to the station again because for some fucking reason
+                         // they dont get teleported back when the station is destroyed
+                         // I fucking hate this goddamn mod
+                         System.out.println("Killed assigned UAV: " + this.assignedUav.getEntityId());
+                     } else {
+                         System.out.println("No assigned UAV linked to this station.");
+                     }
+
+                     //WARNING: REDUNDANT BULLSHIT:
+
+                     // DOES NOT --- Resolve assigned player ---
                      if (this.riddenByEntity instanceof EntityPlayer) {
                          assignedPlayer = (EntityPlayer) this.riddenByEntity;
                          this.newUavPlayerUUID = assignedPlayer.getUniqueID().toString();
@@ -310,7 +334,7 @@ public class MCH_EntityUavStation
                          }
                      }
 
-                     // --- Kill the UAV the assigned player is riding ---
+                     // DOES NOT --- Kill the UAV the assigned player is riding ---
                      if (assignedPlayer != null && assignedPlayer.ridingEntity instanceof MCH_EntityAircraft) {
                          MCH_EntityAircraft uav = (MCH_EntityAircraft) assignedPlayer.ridingEntity;
                          uav.setDead(); // will automatically dismount player
@@ -318,6 +342,8 @@ public class MCH_EntityUavStation
                      } else {
                          System.out.println("No UAV found to kill for assigned player.");
                      }
+
+                     //WARNING: END OF REDUNDANT BULLSHIT
 
                      // Handle station death
                      this.dropContentsWhenDead = true;
@@ -435,6 +461,7 @@ public class MCH_EntityUavStation
                           " controlled by: " + ((EntityPlayer)this.riddenByEntity).getDisplayName());
                   isridingnewuav = true;
                   this.storeStationPosition();
+
               }
               //this is our first bugged state. do nothing here.
 
@@ -614,6 +641,7 @@ public class MCH_EntityUavStation
 
                      lastAc.setUavStation(this);
                      setControlAircract(lastAc);
+                     //this.assignedUav = uav;
 
                      if(this.riddenByEntity instanceof EntityPlayer) {
                          lastAc.storedRider = (EntityPlayer)this.riddenByEntity;
@@ -709,6 +737,7 @@ public class MCH_EntityUavStation
                              }
 
                           this.worldObj.spawnEntityInWorld((Entity)ac);
+                          this.assignedUav = (MCH_EntityAircraft) ac;
                           if (!((MCH_EntityAircraft)ac).isTargetDrone()) {
                                ((MCH_EntityAircraft)ac).setFuel((int)(((MCH_EntityAircraft)ac).getMaxFuel() * 0.05F));
                                W_EntityPlayer.closeScreen(user);
