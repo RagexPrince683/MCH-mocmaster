@@ -675,6 +675,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void destroyAircraft() {
+      this.spawndropitems();
       this.setSearchLight(false);
       this.switchHoveringMode(false);
       this.switchGunnerMode(false);
@@ -809,6 +810,83 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          //   }
          //}
          //nah
+      }
+   }
+
+   public void spawndropitems() {
+
+      //todo please just fucking kill me
+      MCH_AircraftInfo info = this.getAcInfo();
+
+      if (info != null && info.recipe != null && !info.recipe.isEmpty()) {
+         System.out.println("[MCH] Vehicle destroyed: attempting to drop recipe items...");
+
+         Random rand = new Random();
+         int maxTotalDrops = 3;
+         int itemsDropped = 0;
+         Set<Integer> usedIndexes = new HashSet<>();
+
+         try {
+
+            while (itemsDropped < maxTotalDrops && usedIndexes.size() < info.recipe.size()) {
+               int index;
+               do {
+                  index = rand.nextInt(info.recipe.size());
+               } while (usedIndexes.contains(index));
+               usedIndexes.add(index);
+
+               Object obj = info.recipe.get(index);
+               ItemStack stack = null;
+
+               if (obj instanceof Item) {
+                  stack = new ItemStack((Item) obj, 1);
+                  System.out.println("[MCH] Selected Item: " + ((Item) obj).getUnlocalizedName());
+               } else if (obj instanceof Block) {
+                  stack = new ItemStack((Block) obj, 1);
+                  System.out.println("[MCH] Selected Block: " + ((Block) obj).getUnlocalizedName());
+               } else if (obj instanceof ItemStack) {
+                  stack = ((ItemStack) obj).copy();
+                  stack.stackSize = 1;
+                  System.out.println("[MCH] Selected ItemStack: " + stack.getUnlocalizedName());
+               } else if (obj instanceof String) {
+                  List<ItemStack> ores = OreDictionary.getOres((String) obj);
+                  if (!ores.isEmpty()) {
+                     stack = ores.get(rand.nextInt(ores.size())).copy();
+                     stack.stackSize = 1;
+                     System.out.println("[MCH] Selected OreDict: " + obj + " → " + stack.getUnlocalizedName());
+                  } else {
+                     System.out.println("[MCH] OreDict empty: " + obj);
+                  }
+               } else if (obj instanceof ShapedRecipes) {
+                  ItemStack[] items = ((ShapedRecipes) obj).recipeItems;
+                  List<ItemStack> valid = new ArrayList<ItemStack>();
+                  for (ItemStack is : items) if (is != null) valid.add(is);
+                  if (!valid.isEmpty()) {
+                     stack = valid.get(rand.nextInt(valid.size())).copy();
+                     stack.stackSize = 1;
+                     System.out.println("[MCH] Selected from ShapedRecipes: " + stack.getDisplayName());
+                  } else {
+                     System.out.println("[MCH] ShapedRecipes had no valid items: " + obj);
+                  }
+               } else {
+                  System.out.println("[MCH] Unknown recipe object: " + obj.getClass().getName());
+               }
+
+               if (stack != null && stack.getItem() != null) {
+                  System.out.println("[MCH] Spawning drop: " + stack.getDisplayName());
+                  this.worldObj.spawnEntityInWorld(new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, stack));
+                  itemsDropped++;
+               } else {
+                  System.out.println("[MCH] Failed to create ItemStack from: " + obj);
+               }
+            }
+         } catch (Exception ex) {
+            System.out.println("[MCH] Error while dropping recipe items: " + ex.getMessage());
+            ex.printStackTrace();
+         }
+
+      } else {
+         System.out.println("[MCH] No recipe found for this vehicle.");
       }
    }
 
@@ -1725,77 +1803,78 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                              //item drop logic
 
-                             MCH_AircraftInfo info = this.getAcInfo();
-                             if (info != null && info.recipe != null && !info.recipe.isEmpty()) {
-                                System.out.println("[MCH] Vehicle destroyed: attempting to drop recipe items...");
-
-                                Random rand = new Random();
-                                int maxTotalDrops = 3;
-                                int itemsDropped = 0;
-                                Set<Integer> usedIndexes = new HashSet<>();
-
-                                try {
-
-                                   while (itemsDropped < maxTotalDrops && usedIndexes.size() < info.recipe.size()) {
-                                      int index;
-                                      do {
-                                         index = rand.nextInt(info.recipe.size());
-                                      } while (usedIndexes.contains(index));
-                                      usedIndexes.add(index);
-
-                                      Object obj = info.recipe.get(index);
-                                      ItemStack stack = null;
-
-                                      if (obj instanceof Item) {
-                                         stack = new ItemStack((Item) obj, 1);
-                                         System.out.println("[MCH] Selected Item: " + ((Item) obj).getUnlocalizedName());
-                                      } else if (obj instanceof Block) {
-                                         stack = new ItemStack((Block) obj, 1);
-                                         System.out.println("[MCH] Selected Block: " + ((Block) obj).getUnlocalizedName());
-                                      } else if (obj instanceof ItemStack) {
-                                         stack = ((ItemStack) obj).copy();
-                                         stack.stackSize = 1;
-                                         System.out.println("[MCH] Selected ItemStack: " + stack.getUnlocalizedName());
-                                      } else if (obj instanceof String) {
-                                         List<ItemStack> ores = OreDictionary.getOres((String) obj);
-                                         if (!ores.isEmpty()) {
-                                            stack = ores.get(rand.nextInt(ores.size())).copy();
-                                            stack.stackSize = 1;
-                                            System.out.println("[MCH] Selected OreDict: " + obj + " → " + stack.getUnlocalizedName());
-                                         } else {
-                                            System.out.println("[MCH] OreDict empty: " + obj);
-                                         }
-                                      } else if (obj instanceof ShapedRecipes) {
-                                         ItemStack[] items = ((ShapedRecipes) obj).recipeItems;
-                                         List<ItemStack> valid = new ArrayList<ItemStack>();
-                                         for (ItemStack is : items) if (is != null) valid.add(is);
-                                         if (!valid.isEmpty()) {
-                                            stack = valid.get(rand.nextInt(valid.size())).copy();
-                                            stack.stackSize = 1;
-                                            System.out.println("[MCH] Selected from ShapedRecipes: " + stack.getDisplayName());
-                                         } else {
-                                            System.out.println("[MCH] ShapedRecipes had no valid items: " + obj);
-                                         }
-                                      } else {
-                                         System.out.println("[MCH] Unknown recipe object: " + obj.getClass().getName());
-                                      }
-
-                                      if (stack != null && stack.getItem() != null) {
-                                         System.out.println("[MCH] Spawning drop: " + stack.getDisplayName());
-                                         entity.worldObj.spawnEntityInWorld(new EntityItem(entity.worldObj, entity.posX, entity.posY, entity.posZ, stack));
-                                         itemsDropped++;
-                                      } else {
-                                         System.out.println("[MCH] Failed to create ItemStack from: " + obj);
-                                      }
-                                   }
-                                } catch (Exception ex) {
-                                   System.out.println("[MCH] Error while dropping recipe items: " + ex.getMessage());
-                                   ex.printStackTrace();
-                                }
-
-                             } else {
-                                System.out.println("[MCH] No recipe found for this vehicle.");
-                             }
+                             //MCH_AircraftInfo info = this.getAcInfo();
+                             //if (info != null && info.recipe != null && !info.recipe.isEmpty()) {
+                             //   System.out.println("[MCH] Vehicle destroyed: attempting to drop recipe items...");
+//
+                             //   Random rand = new Random();
+                             //   int maxTotalDrops = 3;
+                             //   int itemsDropped = 0;
+                             //   Set<Integer> usedIndexes = new HashSet<>();
+//
+                             //   try {
+//
+                             //      while (itemsDropped < maxTotalDrops && usedIndexes.size() < info.recipe.size()) {
+                             //         int index;
+                             //         do {
+                             //            index = rand.nextInt(info.recipe.size());
+                             //         } while (usedIndexes.contains(index));
+                             //         usedIndexes.add(index);
+//
+                             //         Object obj = info.recipe.get(index);
+                             //         ItemStack stack = null;
+//
+                             //         if (obj instanceof Item) {
+                             //            stack = new ItemStack((Item) obj, 1);
+                             //            System.out.println("[MCH] Selected Item: " + ((Item) obj).getUnlocalizedName());
+                             //         } else if (obj instanceof Block) {
+                             //            stack = new ItemStack((Block) obj, 1);
+                             //            System.out.println("[MCH] Selected Block: " + ((Block) obj).getUnlocalizedName());
+                             //         } else if (obj instanceof ItemStack) {
+                             //            stack = ((ItemStack) obj).copy();
+                             //            stack.stackSize = 1;
+                             //            System.out.println("[MCH] Selected ItemStack: " + stack.getUnlocalizedName());
+                             //         } else if (obj instanceof String) {
+                             //            List<ItemStack> ores = OreDictionary.getOres((String) obj);
+                             //            if (!ores.isEmpty()) {
+                             //               stack = ores.get(rand.nextInt(ores.size())).copy();
+                             //               stack.stackSize = 1;
+                             //               System.out.println("[MCH] Selected OreDict: " + obj + " → " + stack.getUnlocalizedName());
+                             //            } else {
+                             //               System.out.println("[MCH] OreDict empty: " + obj);
+                             //            }
+                             //         } else if (obj instanceof ShapedRecipes) {
+                             //            ItemStack[] items = ((ShapedRecipes) obj).recipeItems;
+                             //            List<ItemStack> valid = new ArrayList<ItemStack>();
+                             //            for (ItemStack is : items) if (is != null) valid.add(is);
+                             //            if (!valid.isEmpty()) {
+                             //               stack = valid.get(rand.nextInt(valid.size())).copy();
+                             //               stack.stackSize = 1;
+                             //               System.out.println("[MCH] Selected from ShapedRecipes: " + stack.getDisplayName());
+                             //            } else {
+                             //               System.out.println("[MCH] ShapedRecipes had no valid items: " + obj);
+                             //            }
+                             //         } else {
+                             //            System.out.println("[MCH] Unknown recipe object: " + obj.getClass().getName());
+                             //         }
+//
+                             //         if (stack != null && stack.getItem() != null) {
+                             //            System.out.println("[MCH] Spawning drop: " + stack.getDisplayName());
+                             //            entity.worldObj.spawnEntityInWorld(new EntityItem(entity.worldObj, entity.posX, entity.posY, entity.posZ, stack));
+                             //            itemsDropped++;
+                             //         } else {
+                             //            System.out.println("[MCH] Failed to create ItemStack from: " + obj);
+                             //         }
+                             //      }
+                             //   } catch (Exception ex) {
+                             //      System.out.println("[MCH] Error while dropping recipe items: " + ex.getMessage());
+                             //      ex.printStackTrace();
+                             //   }
+//
+                             //} else {
+                             //   System.out.println("[MCH] No recipe found for this vehicle.");
+                             //}
+                             //todo AHHHHHHHHHHHHHHHHHHHHHHH
                              //doesnt work
                              //no wait no it does wtf it just drops a LOT of items for some reason.
                              //no wait it drops a lot of items if the vehicle is destroyed and it's a ai gunner in the seat for some reason?
