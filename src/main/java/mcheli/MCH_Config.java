@@ -471,6 +471,7 @@ public class MCH_Config {
               BreakableOnlyPickaxe,
               AllHeliSpeed,
               AllPlaneSpeed,
+              AllShipSpeed,
               AllTankSpeed,
               HurtResistantTime,
               StingerLockRange,
