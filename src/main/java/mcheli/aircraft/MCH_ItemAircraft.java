@@ -369,9 +369,13 @@ public abstract class MCH_ItemAircraft extends W_Item {
          spawnAircraft(stack, world, player, x, y, z);
          W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
          clearDeployTags(tag);
-         if (world.isRemote) {
+         if (!world.isRemote) {
             //System.out.println("[DEBUG] Player successfully placed vehicle.");
+            //tell the client
             player.addChatMessage(new ChatComponentText("Vehicle deployed."));
+         } else {
+            //inform users on the server
+            player.addChatMessage(new ChatComponentText("A player has deployed a vehicle!"));
          }
       }
       // Nothing to reset manually—Minecraft handles usage reset automatically
