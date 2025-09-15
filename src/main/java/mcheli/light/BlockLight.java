@@ -131,8 +131,7 @@ public class BlockLight extends Block {
     @SideOnly(Side.CLIENT)
     @Override
     public void registerBlockIcons(IIconRegister reg) {
-        // “mymod” here must match your mod ID!
-        this.icon = reg.registerIcon("mymod:lightblock");
+        this.icon = reg.registerIcon("mcheli:lightblock");
     }
 
     @SideOnly(Side.CLIENT)

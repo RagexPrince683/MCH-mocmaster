@@ -615,6 +615,7 @@ public class MCH_MOD {
       // Example: Check if the item name contains "grenade" or another distinctive keyword
       return name.toLowerCase().contains("grenade");  // Modify as needed
       //useless fucking method
+      //todo filepath...?
    }
 
    public static void registerItemAircraft() {

@@ -516,7 +516,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                if(this.getAcInfo().enableBack) {
                  // super.throttleBack = (float)((double)super.throttleBack + 0.0025D * (double)throttleUpDown);
                   super.throttleBack = (float)((double)super.throttleBack + 0.0025D * (double)throttleUpDown * getAcInfo().throttleDownFactor);
-//                  if(super.throttleBack > 0.6F) { //todo: add a new variable here for reversespeed
+//                  if(super.throttleBack > 0.6F) { //todno: add a new variable here for reversespeed
 //                     super.throttleBack = 0.6F;
 //                  }
                   float pivotTurnThrottle1 = this.getAcInfo().pivotTurnThrottle;
@@ -871,6 +871,8 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    public void applyOnGroundPitch(float factor) {}
 
    private void onUpdate_Server() {
+
+      //1.7.10
 
       //todo gear shifts here
       Entity rdnEnt = this.getRiddenByEntity();
