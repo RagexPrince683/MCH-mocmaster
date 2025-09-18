@@ -232,7 +232,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 this.prevRotationRotor += 360.0F;
             }
 
-            if (isDiving) {
+            if (isDiving) { // the full dive check begins here
 
                 //override aircraft info.gravity in water to be 0 at this point 1 basically just make it 0
 
@@ -298,9 +298,13 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 this.swithVtolMode(true);
             }
 
-            /***
+            ///***
             if (this.aircraftPitch >= 80 && this.isEntityAlive() && this.isAirBorne) { // Begin dive logic
                 timer++;
+                System.out.println("we are 'airborne', alive, and our pitch is greater than or equal to 80.");
+                //why would we want to increment the timer here
+                //I swear to god using ai for boiler plate has to be the worst shit ever
+                //but it's better than actually writing a single line for this fucking mod.
 
                 // Base acceleration factors
                 double baseAcceleration = 0.01; // Slower acceleration initially
@@ -314,22 +318,25 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 this.aircraftY = this.aircraftY * airResistance;
                 System.out.println("Oh dear god why base accel" + baseAcceleration + "pitch factor" + pitchFactor + "timeFactor" + timeFactor + "air resistance" + airResistance + "motiony" + this.motionY);
 
+                //I hate the magic numbers I hate the magic numbers
+
                 // Handle prolonged dives with a smoother transition
                 if (timer > 3200) {
+                    System.out.println("timer past threshold, probably just dropping like a rock");
                     double prolongedDiveFactor = 1 + ((timer - 3200) / 2400.0); // Gradually increase the effect over time
                     this.motionY += prolongedDiveFactor * baseAcceleration * pitchFactor;
 
                     // Reset the dive if pitch drops below a threshold
                     if (this.aircraftPitch <= 20.0) { //everything is inverse because mcheli hates everything and anything normal
                         timer = 0; // Reset dive mechanics
-
+                        System.out.println("timer set to 0");
                     }
                 }
             }
-             **/
+            // **/
             //todo take the old vtol method and put it here, this is a garbled mess
             // this literally just caused the sub to sink like a brick when diving mode(VTOL was enabled).
-            
+
 
             super.prevPosX = super.posX;
             super.prevPosY = super.posY;
