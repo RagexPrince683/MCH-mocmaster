@@ -298,6 +298,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 this.swithVtolMode(true);
             }
 
+            /***
             if (this.aircraftPitch >= 80 && this.isEntityAlive() && this.isAirBorne) { // Begin dive logic
                 timer++;
 
@@ -325,6 +326,8 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     }
                 }
             }
+             **/
+            //todo take the old vtol method and put it here, this is a garbled mess
 
             super.prevPosX = super.posX;
             super.prevPosY = super.posY;
