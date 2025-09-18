@@ -248,10 +248,16 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     //once in a million obscure bug in it because this mod runs on tooth picks and fingernails
                     if (this.isInWater()) {
                         this.getAcInfo().gravityInWater = 0.0F; // Override gravity in water
+                        //todo this does NOT work, add prints here
+
 
                         if (this.throttleUp) {
+                            System.out.println("gravityinwater" + this.getShipInfo().gravityInWater + "throttle up" + this.throttleUp);
+                            System.out.println("gravityinwater" + this.getShipInfo().gravityInWater + "throttle up" + this.throttleBack);
                             targetDepth = this.posY - 10.0D; // Set target depth for diving
                         } else if (this.throttleBack > 0.01) {
+                            System.out.println("gravityinwater" + this.getShipInfo().gravityInWater + "throttle up" + this.throttleUp);
+                            System.out.println("gravityinwater" + this.getShipInfo().gravityInWater + "throttle back" + this.throttleBack);
                             targetDepth = this.posY + 10.0D; // Set target depth for rising
                         }
 
@@ -274,6 +280,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     //this is not smooth even remotely
                     //this.motionY = (divingLevel - this.posY) * 0.1D; // Smoothly adjust to the diving level
                     this.motionY = 0.0D; // Stop vertical motion
+                    System.out.println("diving level" + divingLevel);
                     this.posY = divingLevel; // Maintain the diving level
                 }
                 //pretty sure this will always fire like immediately upon placement
@@ -410,6 +417,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         MCH_Config var10000 = MCH_MOD.config;
         if(!MCH_Config.MouseControlFlightSimMode.prmBool && this.getVtolMode() != 0) {
             rot *= 0.0F;
+            System.out.println("vtol mode isn't 0, ships");
         }
 
         if(super.moveLeft && !super.moveRight) {

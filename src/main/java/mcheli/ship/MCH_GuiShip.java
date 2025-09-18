@@ -111,6 +111,7 @@ public class MCH_GuiShip extends MCH_AircraftCommonGui {
                             //plane.motionY -= 0.01;
                             //plane.get
                             //}
+                            //except this is in the GUI. Do NOT do that here.
                             var12 = (new StringBuilder()).append(stat == 0?"DIVING : ":"Normal : ");
                             var10001 = MCH_MOD.config;
                             msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();

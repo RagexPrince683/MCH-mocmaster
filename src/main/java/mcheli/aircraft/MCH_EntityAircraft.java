@@ -1631,7 +1631,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public boolean isSearchLightON() {
-      //todo fix lights
+      //todone fix lights
       return this.getCommonStatus(6);
    }
 
