@@ -328,6 +328,8 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             }
              **/
             //todo take the old vtol method and put it here, this is a garbled mess
+            // this literally just caused the sub to sink like a brick when diving mode(VTOL was enabled).
+            
 
             super.prevPosX = super.posX;
             super.prevPosY = super.posY;
