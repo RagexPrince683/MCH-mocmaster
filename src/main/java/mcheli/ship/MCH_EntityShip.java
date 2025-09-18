@@ -268,6 +268,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
 
                 } else {
 
+                    System.out.println("stopping vertical motion" + motionY);
                     this.motionY = 0.0D; // NO DUMBASS, Stop vertical motion
 
                     //BAD METHOD NO DO NOT DO THIS:
@@ -275,6 +276,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     //this.stopDiving();
                 }
             } else {
+                System.out.println("diving stopped");
                 // Maintain the diving level when diving is stopped
                 if (this.posY < divingLevel) {
                     //this is not smooth even remotely
@@ -302,16 +304,14 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 // Base acceleration factors
                 double baseAcceleration = 0.01; // Slower acceleration initially
                 double pitchFactor = Math.min(this.aircraftPitch / 90.0, 1.0); // Normalize pitch to range [0, 1]
-
                 // Smooth acceleration: builds up over time
                 double timeFactor = Math.min(timer / 3200.0, 1.0); // Gradually increase until maxed out after 1200 *adjusted to be 3200 ticks
-
                 // Calculate vertical motion with air resistance
                 double airResistance = 0.97; // Resistance to motion for realism
                 this.motionY = (this.motionY * airResistance) + (baseAcceleration * pitchFactor * timeFactor);
-
                 // Apply the same logic for aircraftY if necessary
                 this.aircraftY = this.aircraftY * airResistance;
+                System.out.println("Oh dear god why base accel" + baseAcceleration + "pitch factor" + pitchFactor + "timeFactor" + timeFactor + "air resistance" + airResistance + "motiony" + this.motionY);
 
                 // Handle prolonged dives with a smoother transition
                 if (timer > 3200) {
