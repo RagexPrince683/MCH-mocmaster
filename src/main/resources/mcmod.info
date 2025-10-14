@@ -1,16 +1,16 @@
 [
-{
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
-  "url": "",
-  "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
-  "logoFile": "",
-  "screenshots": [],
-  "dependencies": []
-}
+  {
+    "modid": "Mcheli Overdrive",
+    "name": "MC Helicopter Overdrive+",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "description": "The most realistic Minecraft vehicle mod ever made — featuring helicopters, jets, tanks, drones, cars, turrets, and ships with as much realism as possible.\n\nOriginal mod created by EMB4. This project expands and overhauls the original with extensive new features, vehicles, and optimizations.\n\n---\nAsset Credits:\nEMB4\nFureniu (Fureniku)\nZealot\nRainwind\nGrzybek\nRitPennachio\nGrig\nWoyl (krftv)\nHamzah\nEdwardg2\nMoc\nHeinrich112\nTehNIck\nTheBobcat\nTV90\nDTC10E\nNuclear Steve\nAcronixUA\nW_K workshop\nNaxgeneral\nMr_Iron_Golum\nMyserFoxy234\nYAKI-IMO\nand many others. If we missed someone, please let us know.",
+    "url": "https://ragexprince.wordpress.com/",
+    "updateUrl": "https://www.curseforge.com/minecraft/mc-mods/mcheli-overdrive-loader-mod",
+    "credits": "Original code and concept by EMB4. Special thanks to Fureniku for supporting continued development. Additional assets and contributions by community artists listed in the description.",
+    "authorList": ["RagexPrince683", "Moc", "EMB4"],
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
 ]
