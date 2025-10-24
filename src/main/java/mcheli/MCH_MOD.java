@@ -212,7 +212,7 @@ public class MCH_MOD {
       blockDraftingTable.setBlockName("drafting_table");
       lightBlock = (BlockLight) new BlockLight()
               .setBlockName("mcheli_lightblock")       // must be called BEFORE register
-              .setBlockTextureName("mymod:lightblock"); // same path as your PNG
+              .setBlockTextureName("mcheli:lightblock"); // same path as your PNG
 
       // Register it under the same name
       GameRegistry.registerBlock(lightBlock, "mcheli_lightblock");

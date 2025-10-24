@@ -1277,6 +1277,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                            }
                         }
 
+                        //no more ghost light blocks
+                        if (this.haveSearchLight() && this.isSearchLightON()) {
+                           //this.isSearchLightON() = false; bit flip, not boolean. can't do this!
+                           //why is this a bit flip btw this mod is actual jank
+                           this.updateSearchlightBlocks(); // force remove
+                        }
                         this.setDead(true);
                      }
                   }
@@ -2083,6 +2089,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    private void updateSearchlightBlocks() {
+      //called in onupdate for MCH_EntityAircraft
       Set<ChunkCoordinates> newLights = new HashSet<>();
 
       if (!worldObj.isRemote && haveSearchLight() && isSearchLightON()) {
