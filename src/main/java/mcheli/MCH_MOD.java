@@ -154,21 +154,38 @@ public class MCH_MOD {
    @EventHandler
    public void PreInit(FMLPreInitializationEvent evt) {
 
-     // try {
-     //    ZipInputStream zis = new ZipInputStream(new FileInputStream("path/to/your/assets.zip"));
-     //    ZipEntry entry = zis.getNextEntry();
-     // }
-      //sorry but we're gonna need a loader mod to unzip this crap
-
       VER = Loader.instance().activeModContainer().getVersion();
       MCH_Lib.init();
       MCH_Lib.Log("MC Ver:1.7.10 MOD Ver:" + VER + "", new Object[0]);
       MCH_Lib.Log("Start load...", new Object[0]);
-      sourcePath = Loader.instance().activeModContainer().getSource().getPath();
+      //sourcePath = Loader.instance().activeModContainer().getSource().getPath();
+
+
+      // The config directory is usually ".minecraft/config"
+      File configDir = evt.getModConfigurationDirectory();
+
+      // The mod directory is usually one level up + /mods
+      File modsDir = new File(configDir.getParentFile(), "mods");
+
+      // Use this for scanning assets
+      sourcePath = modsDir.getAbsolutePath() + "/mcheli" + "/";
+
+      MCH_Lib.Log("Mods Directory: " + sourcePath, new Object[0]);
+      System.out.println("Mods Directory: " + sourcePath);
+
+
       ///sourcePath = "D:\\软件\\GitHub\\MCHeli-Reforged\\src\\main\\resources";
               //new File(evt.getModConfigurationDirectory().getParentFile(), "/mods").getPath();
       MCH_Lib.Log("SourcePath: " + sourcePath, new Object[0]);
+      System.out.println("SourcePath: " + sourcePath);
+      //MCH_Lib I have NO FUCKING CLUE HOW TO USE. I LITERALLY DO NOT THINK IT WORKS ANYMORE.
       MCH_Lib.Log("CurrentDirectory:" + (new File(".")).getAbsolutePath(), new Object[0]);
+      System.out.println("CurrentDirectory:" + (new File(".")).getAbsolutePath());
+
+      //its getting shit from the jar file because why not because it just fucking hates everything
+
+      //sourcePath = evt.getSourceFile().getPath();
+      //        sourceFile = evt.getSourceFile();
 
       proxy.init();
       creativeTabs = new MCH_CreativeTabs("MCHeliO Item");
