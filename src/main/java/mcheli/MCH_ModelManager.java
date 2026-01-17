@@ -52,7 +52,7 @@ public class MCH_ModelManager extends W_ModelBase {
          IModelCustom model = null;
 
          try {
-            //todo SOURCE PATH
+            //todo SOURCE PATH?
             String e = "/assets/mcheli/models/" + name + ".mqo";
             String filePathObj = "/assets/mcheli/models/" + name + ".obj";
             String filePathTcn = "/assets/mcheli/models/" + name + ".tcn";

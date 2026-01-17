@@ -260,8 +260,11 @@ public class MCH_MOD {
       proxy.registerModels();
       MCH_Lib.Log("Register Sounds", new Object[0]);
       proxy.registerSounds();
-      W_LanguageRegistry.updateLang(sourcePath + "/assets/" + "mcheli" + "/lang/");
+      //W_LanguageRegistry.updateLang(sourcePath + "/assets/" + "mcheli" + "/lang/");
+      W_LanguageRegistry.applyNames();
       MCH_Lib.Log("End load", new Object[0]);
+
+
 
 
       try {

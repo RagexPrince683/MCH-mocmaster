@@ -1,66 +1,50 @@
-/*
- * Decompiled with CFR 0_123.
- * 
- * Could not load the following classes:
- *  net.minecraft.block.Block
- *  net.minecraft.item.Item
- *  net.minecraft.stats.Achievement
- */
 package mcheli.wrapper;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
-import mcheli.MCH_Lib;
-import mcheli.MCH_OutputFile;
+import cpw.mods.fml.common.registry.LanguageRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.stats.Achievement;
 
-public class W_LanguageRegistry {
-    private static HashMap<String, ArrayList<String>> map = new HashMap();
+import java.util.HashMap;
+import java.util.Map;
 
-    //todo add descriptions... just not here
+public class W_LanguageRegistry {
+
+    private static Map<String, Map<String, String>> map = new HashMap<>();
 
     public static void addName(Object objectToName, String name) {
-        W_LanguageRegistry.addNameForObject(objectToName, "en_US", name);
+        addNameForObject(objectToName, "en_US", name);
     }
 
     public static void addNameForObject(Object o, String lang, String name) {
-        W_LanguageRegistry.addNameForObject(o, lang, name, "", "");
+        addNameForObject(o, lang, name, "", "");
     }
 
     public static void addNameForObject(Object o, String lang, String name, String key, String desc) {
-        if (o == null) {
-            return;
-        }
-        if (!map.containsKey(lang)) {
-            map.put(lang, new ArrayList());
-        }
+        if (o == null || lang == null || name == null) return;
+
+        map.putIfAbsent(lang, new HashMap<>());
+        Map<String, String> entries = map.get(lang);
+
         if (o instanceof Item) {
-            map.get(lang).add(((Item)o).getUnlocalizedName() + ".name=" + name);
-        }
-        if (o instanceof Block) {
-            map.get(lang).add(((Block)o).getUnlocalizedName() + ".name=" + name);
+            entries.put(((Item) o).getUnlocalizedName() + ".name", name);
+        } else if (o instanceof Block) {
+            entries.put(((Block) o).getUnlocalizedName() + ".name", name);
         } else if (o instanceof Achievement) {
-            map.get(lang).add("achievement." + key + "=" + name);
-            map.get(lang).add("achievement." + key + ".desc=" + desc);
+            entries.put("achievement." + key, name);
+            entries.put("achievement." + key + ".desc", desc);
         }
     }
 
-    public static void updateLang(String filePath) {
-        for (String key : map.keySet()) {
-            ArrayList<String> list = map.get(key);
-            MCH_OutputFile file = new MCH_OutputFile();
-            if (!file.openUTF8(filePath + key + ".lang")) continue;
-            for (String s : list) {
-                file.writeLine(s);
+    // Registers all names with Forge at runtime
+    public static void applyNames() {
+        for (String lang : map.keySet()) {
+            Map<String, String> entries = map.get(lang);
+            for (String key : entries.keySet()) {
+                String value = entries.get(key);
+                LanguageRegistry.instance().addStringLocalization(key, lang, value);
             }
-            MCH_Lib.Log("[mcheli] Update lang:" + file.file.getAbsolutePath(), new Object[0]);
-            file.close();
         }
-        map = null;
+        map.clear();
     }
 }
-
