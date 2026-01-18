@@ -1,5 +1,18 @@
 # MCH-mocmaster
 
+
+# NEW! (experimental):
+
+# How do I use this with assets?:
+
+A. Find the repo's directory build\run\mods
+B. Put your assets into the mod folder exactly how they would be in a normal instance of minecraft
+C. It *ideally* just works. Still testing.
+
+
+
+
+
 This repository is meant to enhance the mcheli minecraft mod far beyond what it is capable of. Any and all help would be resourceful. This is a derivative of the source code found [[here](https://github.com/RagexPrince683/MCH-defaultmaster)] 
 
 
