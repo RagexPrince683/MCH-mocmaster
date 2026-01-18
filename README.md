@@ -6,7 +6,9 @@
 # How do I use this with assets?:
 
 A. Find the repo's directory build\run\mods
+
 B. Put your assets into the mod folder exactly how they would be in a normal instance of minecraft
+
 C. It *ideally* just works. Still testing.
 
 
