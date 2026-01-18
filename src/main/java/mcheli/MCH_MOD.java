@@ -17,6 +17,9 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import java.io.File;
 import java.util.Iterator;
 
+
+import cpw.mods.fml.relauncher.FMLLaunchHandler;
+
 import mcheli.aircraft.MCH_EntityHide;
 import mcheli.aircraft.MCH_EntityHitBox;
 import mcheli.aircraft.MCH_EntitySeat;
@@ -76,6 +79,7 @@ import mcheli.wrapper.W_NetworkRegistry;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -151,6 +155,11 @@ public class MCH_MOD {
       return newPacketHandler;
    }
 
+   boolean isDev = Boolean.TRUE.equals(
+           Launch.blackboard.get("fml.deobfuscatedEnvironment")
+   );
+
+
    @EventHandler
    public void PreInit(FMLPreInitializationEvent evt) {
 
@@ -158,21 +167,39 @@ public class MCH_MOD {
       MCH_Lib.init();
       MCH_Lib.Log("MC Ver:1.7.10 MOD Ver:" + VER + "", new Object[0]);
       MCH_Lib.Log("Start load...", new Object[0]);
-      //sourcePath = Loader.instance().activeModContainer().getSource().getPath();
 
 
-      // The config directory is usually ".minecraft/config"
-      File configDir = evt.getModConfigurationDirectory();
 
-      // The mod directory is usually one level up + /mods
-      File modsDir = new File(configDir.getParentFile(), "mods");
 
-      // Use this for scanning assets
-      sourcePath = modsDir.getAbsolutePath() + "/mcheli" + "/";
 
-      MCH_Lib.Log("Mods Directory: " + sourcePath, new Object[0]);
-      System.out.println("Mods Directory: " + sourcePath);
 
+
+      System.out.println(
+              "[MCH] fml.deobf = " + Launch.blackboard.get("fml.deobfuscatedEnvironment")
+      );
+
+
+
+
+      if (isDev) {
+
+
+         //works in the IDE (codebase)
+         // The config directory is usually ".minecraft/config"
+         File configDir = evt.getModConfigurationDirectory();
+         // The mod directory is usually one level up + /mods
+         File modsDir = new File(configDir.getParentFile(), "mods");
+         // Use this for scanning assets
+         sourcePath = modsDir.getAbsolutePath() + "/mcheli" + "/";
+
+
+         MCH_Lib.Log("Mods Directory: " + sourcePath, new Object[0]);
+         System.out.println("Mods Directory: " + sourcePath);
+      } else {
+         //works in a live minecraft instance
+         sourcePath = Loader.instance().activeModContainer().getSource().getPath();
+         System.out.println("Mods Directory: " + sourcePath);
+      }
 
       ///sourcePath = "D:\\软件\\GitHub\\MCHeli-Reforged\\src\\main\\resources";
               //new File(evt.getModConfigurationDirectory().getParentFile(), "/mods").getPath();
