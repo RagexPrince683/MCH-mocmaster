@@ -98,6 +98,35 @@ tasks.whenTaskAdded { task ->
     }
 }
 
+//HOPEFULLY fix retarded issue with missing textures and other retarded shit in IDE
+task syncMCHeliAssets(type: Copy) {
+    def srcDir = file("$buildDir/run/mods/mcheli/assets/mcheli")
+    def dstDir = file("src/main/resources/assets/mcheli")
+
+    from(srcDir) {
+        include "hud/**"
+        include "models/**"
+        include "shaders/**"
+        include "sounds/**"
+        include "textures/**"
+        include "sounds.json"
+    }
+
+    into(dstDir)
+
+    doFirst {
+        println "[MCH] Syncing runtime assets -> resources"
+        println "  from: $srcDir"
+        println "  into: $dstDir"
+    }
+}
+
+tasks.runClient.dependsOn syncMCHeliAssets
+tasks.build.dependsOn syncMCHeliAssets
+processResources.dependsOn syncMCHeliAssets
+
+
+
 // Optional: ensure clean removes copied assets
 clean.doLast {
     delete "$buildDir/run/assets"
