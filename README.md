@@ -1,7 +1,7 @@
 # MCH-mocmaster
 
 
-# NEW! (experimental):
+NEW! (experimental):
 
 # How do I use this with assets?:
 
