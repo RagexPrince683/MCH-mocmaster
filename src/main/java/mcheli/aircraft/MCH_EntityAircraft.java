@@ -675,6 +675,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void destroyAircraft() {
+      this.clearSearchlightBlocks();
       this.spawndropitems();
       this.setSearchLight(false);
       this.switchHoveringMode(false);
@@ -1283,14 +1284,17 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                            if(isCreative) {
                               var10000 = MCH_MOD.config;
                               if(MCH_Config.DropItemInCreativeMode.prmBool && !isSneaking) {
+                                 this.clearSearchlightBlocks();
                                  this.dropItemWithOffset(this.getAcInfo().getItem(), 1, 0.0F);
                               }
 
                               var10000 = MCH_MOD.config;
                               if(!MCH_Config.DropItemInCreativeMode.prmBool && isSneaking) {
+                                 this.clearSearchlightBlocks();
                                  this.dropItemWithOffset(this.getAcInfo().getItem(), 1, 0.0F);
                               }
                            } else {
+                              this.clearSearchlightBlocks();
                               this.dropItemWithOffset(this.getAcInfo().getItem(), 1, 0.0F);
                            }
                         }
@@ -1299,12 +1303,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                         if (this.haveSearchLight() && this.isSearchLightON()) {
                            //this.isSearchLightON() = false; bit flip, not boolean. can't do this!
                            //why is this a bit flip btw this mod is actual jank
-                           this.updateSearchlightBlocks(); // force remove
+                           this.clearSearchlightBlocks();
                         }
                         this.setDead(true);
                      }
                   }
                } else if(isDamegeSourcePlayer && isCreative) {
+                  this.clearSearchlightBlocks();
                   this.setDead(true);
                }
 
@@ -2110,7 +2115,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       //called in onupdate for MCH_EntityAircraft
       Set<ChunkCoordinates> newLights = new HashSet<>();
 
-      if (!worldObj.isRemote && haveSearchLight() && isSearchLightON()) {
+      if (!worldObj.isRemote && haveSearchLight() && isSearchLightON()  ) { //&& !isDestroyed() && !isExploded() && !isDead
          for (Object o : this.getAcInfo().searchLights) {
             MCH_AircraftInfo.SearchLight sl = (MCH_AircraftInfo.SearchLight) o;
             Vec3 p = getTransformedPosition(sl.pos);
@@ -2148,6 +2153,24 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       activeLights.clear();
       activeLights.addAll(newLights);
+   }
+
+   private void clearSearchlightBlocks() {
+      if (worldObj.isRemote) return;
+
+      for (ChunkCoordinates coord : activeLights) {
+         int x = coord.posX;
+         int y = coord.posY;
+         int z = coord.posZ;
+
+         if (worldObj.getBlock(x, y, z) == MCH_MOD.lightBlock) {
+            worldObj.setBlockToAir(x, y, z);
+            worldObj.markBlockForUpdate(x, y, z);
+            worldObj.updateLightByType(EnumSkyBlock.Block, x, y, z);
+         }
+      }
+
+      activeLights.clear();
    }
 
 
