@@ -1092,6 +1092,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public boolean attackEntityFrom(DamageSource damageSource, float org_damage) {
 
       if(ironCurtainRunningTick > 0) {
+         //todo fix aps
+         System.out.println("APS is running cancelling damage");
          return false;
       }
 
@@ -1115,6 +1117,22 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          } else if(super.worldObj.isRemote) {
             return true;
          } else {
+
+            // ===============================
+            // HMG anti-tank explosion bypass
+            // ===============================
+            Entity src = damageSource.getEntity();
+            if (src != null) {
+               String cls = src.getClass().getName();
+
+               // HandmadeGuns projectile family (modular, no hard dep)
+               if (cls.startsWith("handmadeguns.entity.bullets.")) {
+                  this.setDamageTaken(this.getDamageTaken() + (int)org_damage);
+                  this.timeSinceHit = 1;
+                  return true;
+               }
+            }
+
             MCH_Config var10000 = MCH_MOD.config;
             float damage = MCH_Config.applyDamageByExternal(this, damageSource, org_damage);
             if(!MCH_Multiplay.canAttackEntity(damageSource, this)) {
