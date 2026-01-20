@@ -19,11 +19,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityMinecartEmpty;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
 import mcheli.weapon.MCH_WeaponSet;
@@ -200,71 +202,35 @@ public abstract class MCH_ItemAircraft extends W_Item {
    @Override
    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
 
-      //if (player.worldObj.isRemote) return;
-      //int dothing = 0;
-
-
       int used = this.getMaxItemUseDuration(stack) - count;
 
-      if (player.worldObj.isRemote && used == MCH_Config.placetimer.prmInt) {
-         player.addChatMessage(new ChatComponentText("Vehicle ready for deployment!"));
+      // ===== READY MESSAGE (SERVER ONLY, ONCE) =====
+      if (!player.worldObj.isRemote && stack.stackTagCompound != null) {
+         NBTTagCompound tag = stack.stackTagCompound;
+         tag.setBoolean("ReadyMsgSent", false);
+
+         if (used == MCH_Config.placetimer.prmInt && !tag.getBoolean("ReadyMsgSent")) {
+            player.addChatMessage(new ChatComponentText("Vehicle ready for deployment!"));
+            tag.setBoolean("ReadyMsgSent", true);
+         }
       }
 
-      //if (timeHeld == MCH_Config.placetimer.prmInt && player.worldObj.isRemote) {
-      //   //do ONCE
-      //   //do ON THE CLIENT
-      //   //dothing += 1;
-      //   //if (dothing == 1) { //idc if its not optimized it fucking works goddammit
-      //      player.addChatMessage(new ChatComponentText("Vehicle ready for deployment!"));
-      //      //wait I can just check that it equals instead of is greater than, nevermind jfc
-      //  // }
-      //}
-
-      NBTTagCompound tag = stack.getTagCompound();
-      //non spaghetti code logic above just need to figure out where and how to implement it
-
+      // ===== SERVER LOGIC ONLY BEYOND THIS POINT =====
       if (stack.stackTagCompound == null || player.worldObj.isRemote) {
-         System.out.println("[DEBUG] Stack has no tag or is remote world.");
          return;
       }
 
-      //this is hell
-
-      //NBTTagCompound tag = stack.stackTagCompound;
-
-      // Validate both deploy state and click-hold continuously
-      //boolean holdingClick = player.getItemInUse() == stack;
-
-      //boolean hasDeployStart = tag.hasKey("DeployStart");
-      //causing server error
-
-
-
-      //if (!holdingClick) {
-         //if (hasDeployStart) {
-         //   System.out.println("[DEBUG] Player released right-click, cancelling.");
-         //   cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
-         //}
-         //return;
-     // }
-
-      //if (!hasDeployStart) {
-      //   System.out.println("[DEBUG] No DeployStart tag.");
-      //   return;
-      //}
+      NBTTagCompound tag = stack.stackTagCompound;
 
       // Valid raytrace check
       MovingObjectPosition mop = getBlockIncludingWater(player, 5.0D);
       if (mop == null) {
-         System.out.println("[DEBUG] No block targeted, cancelling.");
          cancelDeployment(tag, player, "Vehicle deployment cancelled (target lost).");
          return;
       }
 
       Block block = player.worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
       if (!block.getMaterial().isSolid() && block.getMaterial() != Material.water) {
-         //apparently || is not the right operator here, it is AND //WTF???
-         System.out.println("[DEBUG] Target is not solid or water, cancelling.");
          cancelDeployment(tag, player, "Vehicle deployment cancelled (invalid surface).");
          return;
       }
@@ -272,10 +238,8 @@ public abstract class MCH_ItemAircraft extends W_Item {
       int currentX = mop.blockX;
       int currentY = mop.blockY;
       int currentZ = mop.blockZ;
-      System.out.println("[DEBUG] Raytrace hit block at: " + currentX + "," + currentY + "," + currentZ);
 
       if (!tag.hasKey("TargetX") || !tag.hasKey("TargetY") || !tag.hasKey("TargetZ")) {
-         System.out.println("[DEBUG] No saved target, setting initial target.");
          tag.setInteger("TargetX", currentX);
          tag.setInteger("TargetY", currentY);
          tag.setInteger("TargetZ", currentZ);
@@ -284,41 +248,19 @@ public abstract class MCH_ItemAircraft extends W_Item {
          int targetY = tag.getInteger("TargetY");
          int targetZ = tag.getInteger("TargetZ");
 
-         System.out.println("[DEBUG] Saved target: " + targetX + "," + targetY + "," + targetZ);
-
-         //Material mat = block.getMaterial();
          boolean coordsChanged = currentX != targetX || currentY != targetY || currentZ != targetZ;
          boolean isLiquid = block.getMaterial().isLiquid();
 
          if (coordsChanged && !isLiquid) {
-            System.out.println("[DEBUG] Coordinates changed (and not liquid), cancelling.");
             cancelDeployment(tag, player, "Vehicle deployment cancelled (target changed).");
             return;
          }
       }
-
-      //long deployStart = tag.getLong("DeployStart");
-      //never used above
-      //if (holdingClick) {
-      //   timeHeld = this.getMaxItemUseDuration(stack) - count;
-      //} else {
-      //   timeHeld = 0;
-      //}
-      //the problem here is timeHeld is being incremented despite the player not holding the click for some fucking reason
-      System.out.println("[DEBUG] Time held: " + timeHeld + " ticks. Required: " + MCH_Config.placetimer.prmInt);
-
-      //check that we are still holding here
-      //if (!holdingClick) {
-      //   if (hasDeployStart) {
-      //      System.out.println("[DEBUG] Player released right-click, cancelling.");
-      //      cancelDeployment(tag, player, "Vehicle deployment cancelled (input released).");
-      //   }
-      //   return;
-      //}
    }
 
+
    private void cancelDeployment(NBTTagCompound tag, EntityPlayer player, String message) {
-      System.out.println("[DEBUG] CancelDeployment called: " + message);
+      //System.out.println("[DEBUG] CancelDeployment called: " + message);
       clearDeployTags(tag);
       player.addChatMessage(new ChatComponentText(message));
       player.stopUsingItem();
@@ -329,7 +271,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
       tag.removeTag("TargetX");
       tag.removeTag("TargetY");
       tag.removeTag("TargetZ");
-      System.out.println("[DEBUG] Cleared deployment tags.");
+      //System.out.println("[DEBUG] Cleared deployment tags.");
    }
 
    public MovingObjectPosition getBlockIncludingWater(EntityPlayer player, double range) {
@@ -368,26 +310,42 @@ public abstract class MCH_ItemAircraft extends W_Item {
    @Override
    public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int timeLeft) {
       int used = this.getMaxItemUseDuration(stack) - timeLeft;
+
       if (used >= MCH_Config.placetimer.prmInt) {
          // Successful placement
          NBTTagCompound tag = stack.getTagCompound();
          int x = tag.getInteger("TargetX");
          int y = tag.getInteger("TargetY");
          int z = tag.getInteger("TargetZ");
+
          spawnAircraft(stack, world, player, x, y, z);
          W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
          clearDeployTags(tag);
+
+         // SERVER SIDE ONLY
          if (!world.isRemote) {
-            //System.out.println("[DEBUG] Player successfully placed vehicle.");
-            //tell the client
+            // Message to the deploying player
             player.addChatMessage(new ChatComponentText("Vehicle deployed."));
-         } else {
-            //inform users on the server
-            player.addChatMessage(new ChatComponentText("A player has deployed a vehicle!"));
+
+            // Message to everyone else
+            MinecraftServer server = MinecraftServer.getServer();
+            if (server != null) {
+               for (Object o : server.getConfigurationManager().playerEntityList) {
+                  EntityPlayerMP other = (EntityPlayerMP) o;
+                  if (other != player) {
+                     other.addChatMessage(
+                             new ChatComponentText( EnumChatFormatting.DARK_BLUE +
+                                     player.getCommandSenderName() + " has deployed a vehicle!"
+                             )
+                     );
+                  }
+               }
+            }
          }
       }
-      // Nothing to reset manually—Minecraft handles usage reset automatically
+      // Minecraft handles usage reset automatically
    }
+
 
    //@Override
    //public boolean canContinueUsing(ItemStack stack, World world, EntityLivingBase entity, int count) {
