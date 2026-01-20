@@ -25,6 +25,7 @@ import mcheli.uav.MCH_EntityUavStation;
 import mcheli.weapon.*;
 import mcheli.wrapper.*;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -42,6 +43,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.Explosion;
@@ -666,6 +668,84 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.getDataWatcher().updateObject(19, Integer.valueOf(par1));
    }
 
+   // TileEntitySearchlight.java
+   public class TileEntitySearchlight extends TileEntity {
+      private int ownerEntityId = -1;
+      private long lastSeen = 0L;
+      // small threshold (in ticks) - tune as needed (1-5)
+      private static final long MAX_TICK_GAP = 5L;
+
+      public void setOwner(int entityId) {
+         this.ownerEntityId = entityId;
+         this.lastSeen = worldObj.getTotalWorldTime();
+         markDirty();
+      }
+
+      public void refreshLastSeen() {
+         this.lastSeen = worldObj.getTotalWorldTime();
+         markDirty();
+      }
+
+      @Override
+      public void updateEntity() {
+         if (worldObj.isRemote) return;
+
+         long now = worldObj.getTotalWorldTime();
+
+         // If owner exists and alive, keep the block
+         if (ownerEntityId != -1) {
+            Entity owner = worldObj.getEntityByID(ownerEntityId);
+            if (owner != null && !owner.isDead) {
+               // owner alive: nothing to do
+               return;
+            }
+         }
+
+         // If owner not present or dead, remove after grace period
+         if (now - lastSeen > MAX_TICK_GAP) {
+            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+            worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+         }
+      }
+
+      @Override
+      public void readFromNBT(NBTTagCompound nbt) {
+         super.readFromNBT(nbt);
+         ownerEntityId = nbt.getInteger("OwnerId");
+         lastSeen = nbt.getLong("LastSeen");
+      }
+
+      @Override
+      public void writeToNBT(NBTTagCompound nbt) {
+         super.writeToNBT(nbt);
+         nbt.setInteger("OwnerId", ownerEntityId);
+         nbt.setLong("LastSeen", lastSeen);
+      }
+   }
+
+   // BlockSearchlight.java
+   public class BlockSearchlight extends BlockContainer {
+      public BlockSearchlight() {
+         super(Material.glass); // choose material you want
+         setTickRandomly(true);
+      }
+
+      @Override
+      public TileEntity createNewTileEntity(World world, int meta) {
+         return new TileEntitySearchlight();
+      }
+
+      @Override
+      public void breakBlock(World world, int x, int y, int z, Block oldBlock, int oldMeta) {
+         // remove TE properly
+         world.removeTileEntity(x, y, z);
+         super.breakBlock(world, x, y, z, oldBlock, oldMeta);
+      }
+   }
+
+
+
    public int getDamageTaken() {
       return this.getDataWatcher().getWatchableObjectInt(19);
    }
@@ -675,7 +755,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void destroyAircraft() {
-      this.clearSearchlightBlocks();
+      //this.clearSearchlightBlocks();
+      this.hardClearSearchlights();
       this.spawndropitems();
       this.setSearchLight(false);
       this.switchHoveringMode(false);
@@ -1259,7 +1340,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                   this.setBeenAttacked();
                   if(this.getDamageTaken() >= this.getMaxHP() || isDamegeSourcePlayer) {
+
+                     //this entire block is dedicated to death
+
                      if(!isDamegeSourcePlayer) {
+                        this.clearSearchlightBlocks();
                         this.setDamageTaken(this.getMaxHP());
                         this.destroyAircraft();
                         this.timeSinceHit = 20;
@@ -1273,10 +1358,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                         }
 
                         if(dmt.equalsIgnoreCase("inWall")) {
+                           //todone may need clearsearchlightblocks here too
+                           this.clearSearchlightBlocks();
                            this.explosionByCrash(0.0D);
                            this.damageSinceDestroyed = this.getMaxHP();
                         } else {
                            //todo this is death
+                           this.clearSearchlightBlocks();
                            MCH_Explosion.newExplosion(super.worldObj, (Entity)null, entity, super.posX, super.posY, super.posZ, 2.0F, 2.0F, true, true, true, true, 5);
                         }
                      } else {
@@ -1284,17 +1372,17 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                            if(isCreative) {
                               var10000 = MCH_MOD.config;
                               if(MCH_Config.DropItemInCreativeMode.prmBool && !isSneaking) {
-                                 this.clearSearchlightBlocks();
+                                 //this.clearSearchlightBlocks();
                                  this.dropItemWithOffset(this.getAcInfo().getItem(), 1, 0.0F);
                               }
 
                               var10000 = MCH_MOD.config;
                               if(!MCH_Config.DropItemInCreativeMode.prmBool && isSneaking) {
-                                 this.clearSearchlightBlocks();
+                                 //this.clearSearchlightBlocks();
                                  this.dropItemWithOffset(this.getAcInfo().getItem(), 1, 0.0F);
                               }
                            } else {
-                              this.clearSearchlightBlocks();
+                              //this.clearSearchlightBlocks();
                               this.dropItemWithOffset(this.getAcInfo().getItem(), 1, 0.0F);
                            }
                         }
@@ -1309,11 +1397,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                      }
                   }
                } else if(isDamegeSourcePlayer && isCreative) {
-                  this.clearSearchlightBlocks();
+                  //this.clearSearchlightBlocks();
                   this.setDead(true);
                }
 
-               if(playDamageSound) {
+               if(playDamageSound) { //90% sure this is the logic that does:
+                  // if the vehicle is occupied, we cannot pick it up
                   W_WorldFunc.MOD_playSoundAtEntity(this, "helidmg", 1.0F, 0.9F + super.rand.nextFloat() * 0.1F);
                }
 
@@ -1332,6 +1421,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.getRiddenByEntity().mountEntity((Entity)null);
       }
 
+      //this.clearSearchlightBlocks();
       this.setDead(true);
    }
 
@@ -1954,6 +2044,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if(!super.worldObj.isRemote && this.getDespawnCount() > 0) {
          this.setDespawnCount(this.getDespawnCount() - 1);
          if(this.getDespawnCount() <= 1) {
+            //this.clearSearchlightBlocks();
             this.setDead(true);
          }
       }
@@ -2112,10 +2203,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    private void updateSearchlightBlocks() {
-      //called in onupdate for MCH_EntityAircraft
-      Set<ChunkCoordinates> newLights = new HashSet<>();
+      if (worldObj.isRemote) return;
 
-      if (!worldObj.isRemote && haveSearchLight() && isSearchLightON()  ) { //&& !isDestroyed() && !isExploded() && !isDead
+      Set<ChunkCoordinates> newLights = new HashSet<ChunkCoordinates>();
+
+      // Only place / refresh lights if the searchlight is actually on
+      if (haveSearchLight() && isSearchLightON()) {
          for (Object o : this.getAcInfo().searchLights) {
             MCH_AircraftInfo.SearchLight sl = (MCH_AircraftInfo.SearchLight) o;
             Vec3 p = getTransformedPosition(sl.pos);
@@ -2127,22 +2220,33 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             ChunkCoordinates coord = new ChunkCoordinates(bx, by, bz);
             newLights.add(coord);
 
-            // Only place if the spot is pure air
-            if (worldObj.isAirBlock(bx, by, bz) && worldObj.getBlock(bx, by, bz) != MCH_MOD.lightBlock) {
-               //maybe remove worldObj.getBlock(bx, by, bz) != MCH_MOD.lightBlock? idk doesn't seem like a good idea to me.
+            // Place the light block if needed
+            if (worldObj.isAirBlock(bx, by, bz)) {
                worldObj.setBlock(bx, by, bz, MCH_MOD.lightBlock, 0, 2);
                worldObj.markBlockForUpdate(bx, by, bz);
                worldObj.updateLightByType(EnumSkyBlock.Block, bx, by, bz);
             }
-            // If it's already our light block, just refresh it in newLights
+
+            // Immediately track it (one-shot safe)
+            activeLights.add(coord);
+
+            // Assign / refresh tile entity ownership
+            TileEntity te = worldObj.getTileEntity(bx, by, bz);
+            if (te instanceof TileEntitySearchlight) {
+               TileEntitySearchlight slte = (TileEntitySearchlight) te;
+               slte.setOwner(this.getEntityId());
+               slte.refreshLastSeen();
+            }
          }
       }
 
-      // Remove old light blocks that are no longer needed
+      // Remove lights that are no longer part of this aircraft's searchlight set
       for (ChunkCoordinates oldCoord : activeLights) {
          if (!newLights.contains(oldCoord)) {
-            int x = oldCoord.posX, y = oldCoord.posY, z = oldCoord.posZ;
-            // Only remove if it's still our light block
+            int x = oldCoord.posX;
+            int y = oldCoord.posY;
+            int z = oldCoord.posZ;
+
             if (worldObj.getBlock(x, y, z) == MCH_MOD.lightBlock) {
                worldObj.setBlockToAir(x, y, z);
                worldObj.markBlockForUpdate(x, y, z);
@@ -2151,9 +2255,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          }
       }
 
+      // Replace active set only AFTER cleanup
       activeLights.clear();
       activeLights.addAll(newLights);
    }
+
 
    private void clearSearchlightBlocks() {
       if (worldObj.isRemote) return;
@@ -2171,6 +2277,27 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       activeLights.clear();
+   }
+
+   private void hardClearSearchlights() {
+      if (worldObj.isRemote) return;
+
+      int r = 12; // search radius, adjust if needed
+      int cx = MathHelper.floor_double(posX);
+      int cy = MathHelper.floor_double(posY);
+      int cz = MathHelper.floor_double(posZ);
+
+      for (int x = cx - r; x <= cx + r; x++) {
+         for (int y = cy - r; y <= cy + r; y++) {
+            for (int z = cz - r; z <= cz + r; z++) {
+               if (worldObj.getBlock(x, y, z) == MCH_MOD.lightBlock) {
+                  worldObj.setBlockToAir(x, y, z);
+                  worldObj.markBlockForUpdate(x, y, z);
+                  worldObj.updateLightByType(EnumSkyBlock.Block, x, y, z);
+               }
+            }
+         }
+      }
    }
 
 
