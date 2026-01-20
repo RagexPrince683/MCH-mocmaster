@@ -42,43 +42,52 @@ public class MCH_Lib {
    public static final int AZIMUTH_8_ANG = 360 / AZIMUTH_8.length;
 
 
+   private static void putMatSafe(String name, String field) {
+      try {
+         java.lang.reflect.Field f = net.minecraft.block.material.Material.class.getField(field);
+         Object val = f.get(null);
+         mapMaterial.put(name, val);
+      } catch (NoSuchFieldException e) {
+         System.err.println("[MCH WARN] Material field missing: " + field + " — skipping " + name);
+      } catch (Throwable t) {
+         t.printStackTrace();
+      }
+   }
    public static void init() {
       mapMaterial.clear();
-      mapMaterial.put("air", Material.air);
-      mapMaterial.put("grass", Material.grass);
-      mapMaterial.put("ground", Material.ground);
-      mapMaterial.put("wood", Material.wood);
-      mapMaterial.put("rock", Material.rock);
-      mapMaterial.put("iron", Material.iron);
-      mapMaterial.put("anvil", Material.anvil);
-      mapMaterial.put("water", Material.water);
-      mapMaterial.put("lava", Material.lava);
-      mapMaterial.put("leaves", Material.leaves);
-      mapMaterial.put("plants", Material.plants);
-      mapMaterial.put("vine", Material.vine);
-      mapMaterial.put("sponge", Material.sponge);
-      mapMaterial.put("cloth", Material.cloth);
-      mapMaterial.put("fire", Material.fire);
-      mapMaterial.put("sand", Material.sand);
-      mapMaterial.put("circuits", Material.circuits);
-      mapMaterial.put("carpet", Material.carpet);
-      mapMaterial.put("glass", Material.glass);
-      mapMaterial.put("redstoneLight", Material.redstoneLight);
-      mapMaterial.put("tnt", Material.tnt);
-      mapMaterial.put("coral", Material.coral);
-      mapMaterial.put("ice", Material.ice);
-      mapMaterial.put("packedIce", Material.packedIce);
-      mapMaterial.put("snow", Material.snow);
-      mapMaterial.put("craftedSnow", Material.craftedSnow);
-      mapMaterial.put("cactus", Material.cactus);
-      mapMaterial.put("clay", Material.clay);
-      mapMaterial.put("gourd", Material.gourd);
-      mapMaterial.put("dragonEgg", Material.dragonEgg);
-      mapMaterial.put("portal", Material.portal);
-      mapMaterial.put("cake", Material.cake);
-      mapMaterial.put("web", Material.web);
-      mapMaterial.put("piston", Material.piston);
+      putMatSafe("air","air");
+      putMatSafe("grass","grass");
+      putMatSafe("ground","ground");
+      putMatSafe("wood","wood");
+      putMatSafe("rock","rock");
+      putMatSafe("iron","iron");
+      putMatSafe("anvil","anvil");
+      putMatSafe("water","water");
+      putMatSafe("lava","lava");
+      putMatSafe("leaves","leaves");
+      putMatSafe("plants","plants");
+      putMatSafe("vine","vine");
+      putMatSafe("sponge","sponge");
+      putMatSafe("cloth","cloth");
+      putMatSafe("fire","fire");
+      putMatSafe("sand","sand");
+      putMatSafe("circuits","circuits");
+      putMatSafe("glass","glass");
+      putMatSafe("tnt","tnt");
+      putMatSafe("ice","ice");
+      putMatSafe("packedIce","packedIce"); // maybe absent on 1.7.10
+      putMatSafe("snow","snow");
+      putMatSafe("craftedSnow","craftedSnow");
+      putMatSafe("cactus","cactus");
+      putMatSafe("clay","clay");
+      putMatSafe("gourd","gourd");
+      putMatSafe("dragonEgg","dragonEgg");
+      putMatSafe("portal","portal");
+      putMatSafe("cake","cake");
+      putMatSafe("web","web");
+      putMatSafe("piston","piston");
    }
+
 
    public static Material getMaterialFromName(String name) {
       return mapMaterial.containsKey(name)?(Material)mapMaterial.get(name):null;

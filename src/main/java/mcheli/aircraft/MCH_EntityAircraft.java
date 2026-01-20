@@ -1209,6 +1209,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                // HandmadeGuns projectile family (modular, no hard dep)
                if (cls.startsWith("handmadeguns.entity.bullets.")) {
+                  System.out.println("test hmg");
                   this.setDamageTaken(this.getDamageTaken() + (int)org_damage);
                   this.timeSinceHit = 1;
                   return true;
