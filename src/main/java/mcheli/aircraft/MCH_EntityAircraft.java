@@ -188,9 +188,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public MCH_Parts partHatch;
    public MCH_Parts partCanopy;
    public MCH_Parts partLandingGear;
-   public double prevRidingEntityPosX;
-   public double prevRidingEntityPosY;
-   public double prevRidingEntityPosZ;
    public boolean canRideRackStatus;
    private int modeSwitchCooldown;
    public Vec3 target = Vec3.createVectorHelper(0, 0, 0);
@@ -520,12 +517,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
            return (getAcInfo() != null && (getAcInfo()).isNewUAV);
          }
 
-  // if (isNewUAV() = true) {
-  //    System.out.println("isNewUAV() is true");
-//
-  // } else {
-  //    System.out.println("isNewUAV() is false");
-  // }
 
    public boolean isSmallUAV() {
       return this.getAcInfo() != null && this.getAcInfo().isSmallUAV;
@@ -750,9 +741,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return this.getDataWatcher().getWatchableObjectInt(19);
    }
 
-   public int getWheelDamageTaken() {
-      return this.getDataWatcher().getWatchableObjectInt(19);
-   }
+   //public int getWheelDamageTaken() {
+   //   return this.getDataWatcher().getWatchableObjectInt(19);
+   //}
 
    public void destroyAircraft() {
       //this.clearSearchlightBlocks();
@@ -811,13 +802,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                        aircraftY + ", " +
                        aircraftZ + ", ");
 
-               //System.out.println("uavposxyz" + MCH_EntityUavStation.posUavX + ", " +
-               //        super.posY + ", " +
-               //        super.posZ + ", " +
-               //        "riderposxyz" + rider.posX + ", " +
-               //        rider.posY + ", " +
-               //        rider.posZ + ", ");
-
                player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed!"));
                player.addPotionEffect(new PotionEffect(11, 20, 50));
 
@@ -834,64 +818,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             this.ejectSeat(var3);
          }
 
-         //if (isNewUAV()) {
-         //   System.out.println("New UAV detected, performing special dismount logic. IS REMOTE");
-         //   player.mountEntity(null);
-         //   player.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
-//
-         //   System.out.println("Setting position to: " +
-         //           this.UavStationPosX + ", " +
-         //           this.UavStationPosY + ", " +
-         //           this.UavStationPosZ);
-//
-         //   player.setPositionAndUpdate(
-         //           this.UavStationPosX,
-         //           this.UavStationPosY,
-         //           this.UavStationPosZ
-         //   );
-         //   System.out.println("Setting position to: " +
-         //           getUavStation().getStoredStationX() + ", " +
-         //           getUavStation().getStoredStationY() + ", " +
-         //           getUavStation().getStoredStationZ());
-//
-         //   getRiddenByEntity().setPosition(
-         //           getUavStation().getStoredStationX(),
-         //           getUavStation().getStoredStationY(),
-         //           getUavStation().getStoredStationZ());
-//
-         //   //player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Drone destroyed!"));
-         //   player.addPotionEffect(new PotionEffect(11, 20, 50));
-//
-//
-         //   //player.addPotionEffect(new PotionEffect(11, 20, 4)); // Resistance IV
-         //   //already applied
-         //   player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
-         //}
-         //so basically this crashed the game or something
-
-         //float dmg = MCH_Config.KillPassengersWhenDestroyed.prmBool ? 100000.0F : 0.001F;
-         //DamageSource damageSource = DamageSource.generic; // 默认的伤害来源为generic
-         //if (this.worldObj.difficultySetting.getDifficultyId() == 0) {
-         //   // 如果最后攻击这个实体的是玩家，创建一个基于玩家的伤害来源
-         //   if (this.lastAttackedEntity instanceof EntityPlayer) {
-         //      damageSource = DamageSource.causePlayerDamage((EntityPlayer) this.lastAttackedEntity);
-         //   }
-         //} else {
-         //   // 如果世界难度不为和平模式，创建一个基于爆炸的伤害来源
-         //   damageSource = DamageSource.setExplosionSource(new Explosion(this.worldObj, this.lastAttackedEntity,
-         //           this.posX, this.posY, this.posZ, 1.0F));
-         //}
-         //// 如果当前实体存在，应用伤害
-         //if (this.riddenByEntity != null) {
-         //   this.riddenByEntity.attackEntityFrom(damageSource, dmg);
-         //}
-         //// 遍历所有座位上的实体，如果座位上有实体，应用伤害
-         //for (MCH_EntitySeat seat : getSeats()) {
-         //   if (seat != null && seat.riddenByEntity != null) {
-         //      seat.riddenByEntity.attackEntityFrom(damageSource, dmg);
-         //   }
-         //}
-         //nah
       }
    }
 
@@ -955,6 +881,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                }
 
                if (stack != null && stack.getItem() != null) {
+                  //todo do not drop predecessor vehicle items (we tech tree'd some recipes so this could be bad)
+                  // so if !stack.getItem().equals(MCH_itemaircraft)/tank/plane/vehicle/heli
                   System.out.println("[MCH] Spawning drop: " + stack.getDisplayName());
                   this.worldObj.spawnEntityInWorld(new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, stack));
                   itemsDropped++;
