@@ -955,6 +955,12 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       this.updateWheels();
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
 
+      if (super.onGround && super.posY < super.prevPosY) {
+         super.posY = super.prevPosY;
+         this.setPosition(super.posX, super.posY, super.posZ);
+         super.motionY = 0.0D;
+      }
+
       // vertical damping only
       super.motionY *= 0.98D;
 
