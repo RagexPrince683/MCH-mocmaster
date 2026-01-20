@@ -1173,6 +1173,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public boolean attackEntityFrom(DamageSource damageSource, float org_damage) {
 
+      Entity src = damageSource.getEntity();
+      String srcName = (src == null ? "null" : src.getClass().getName());
+      System.out.println("[DBG] attackEntityFrom: dmgType=" + damageSource.getDamageType()
+              + " src=" + srcName + " org=" + org_damage);
+
+
       if(ironCurtainRunningTick > 0) {
          //todo fix aps
          System.out.println("APS is running cancelling damage");
@@ -1203,7 +1209,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             // ===============================
             // HMG anti-tank explosion bypass
             // ===============================
-            Entity src = damageSource.getEntity();
             if (src != null) {
                String cls = src.getClass().getName();
 
@@ -1212,6 +1217,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   System.out.println("test hmg");
                   this.setDamageTaken(this.getDamageTaken() + (int)org_damage);
                   this.timeSinceHit = 1;
+                  //maybe set this to 0?
                   return true;
                }
             }
