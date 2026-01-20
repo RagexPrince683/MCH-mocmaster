@@ -71,7 +71,14 @@ public class MCH_TankInfo extends MCH_AircraftInfo {
          data = data.toLowerCase();
          this.weightType = data.equals("tank")?2:(data.equals("car")?1:0);
       } else if(item.equalsIgnoreCase("WeightedCenterZ")) {
+
+         // original parse
          this.weightedCenterZ = this.toFloat(data, -1000.0F, 1000.0F);
+
+         // HARD CLAMP – prevents pitch torque explosion
+         //I think this is just the parsing like info loading, not actual logic. Might delete this later.
+         if (this.weightedCenterZ > 2.0F)  this.weightedCenterZ = 2.0F;
+         if (this.weightedCenterZ < -2.0F) this.weightedCenterZ = -2.0F;
       }
       MCH_AircraftInfo.allAircraftInfo.put(name, this);
    }
