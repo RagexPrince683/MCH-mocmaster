@@ -106,7 +106,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          this.initPartRotation(this.getRotYaw(), this.getRotPitch());
          double comZ = this.getTankInfo().weightedCenterZ;
 
-         // scale COM → wheel offset (visual only)
+// scale COM → wheel offset (visual only)
          double wheelZ = -comZ * 0.25D;
 
          this.WheelMng.createWheels(
@@ -387,16 +387,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          }
 
          this.updateRecoil(partialTicks);
-         float target = this.WheelMng.targetPitch;
-         float current = this.getRotPitch();
-
-         float maxStep = 25.0F * partialTicks; // degrees/sec limiter
-         float delta = target - current;
-
-         if (delta >  maxStep) delta =  maxStep;
-         if (delta < -maxStep) delta = -maxStep;
-
-         this.setRotPitch(current + delta);
+         this.setRotPitch(this.getRotPitch() + (this.WheelMng.targetPitch - this.getRotPitch()) * partialTicks);
          this.setRotRoll(this.getRotRoll() + (this.WheelMng.targetRoll - this.getRotRoll()) * partialTicks);
          boolean isFly = MCH_Lib.getBlockIdY(this, 3, -3) == 0;
          //System.out.println("isfly" + isFly);
