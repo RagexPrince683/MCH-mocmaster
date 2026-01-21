@@ -46,9 +46,6 @@ import org.lwjgl.opengl.GL11;
 
 public class MCH_EntityTank extends MCH_EntityAircraft {
 
-   private float pitchVelocity = 0.0F;
-
-
    private MCH_TankInfo tankInfo = null;
    public float soundVolume;
    public float soundVolumeTarget;
@@ -381,21 +378,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          }
 
          this.updateRecoil(partialTicks);
-         float targetPitch = this.WheelMng.targetPitch;
-
-// spring-damper constants, tune for your vehicle
-         float k = 0.05F;   // stiffness
-         float d = 0.15F;   // damping
-
-// acceleration = (target - current) * k - velocity * d
-         float accel = (targetPitch - this.getRotPitch()) * k - this.pitchVelocity * d;
-
-// integrate pitch velocity
-         this.pitchVelocity += accel;
-         this.pitchVelocity *= 0.92F; // optional extra damping per tick
-
-// apply rotation
-         this.setRotPitch(this.getRotPitch() + this.pitchVelocity * partialTicks);
+         this.setRotPitch(this.getRotPitch() + (this.WheelMng.targetPitch - this.getRotPitch()) * partialTicks);
          this.setRotRoll(this.getRotRoll() + (this.WheelMng.targetRoll - this.getRotRoll()) * partialTicks);
          boolean isFly = MCH_Lib.getBlockIdY(this, 3, -3) == 0;
          //System.out.println("isfly" + isFly);
