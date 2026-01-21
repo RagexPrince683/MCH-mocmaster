@@ -47,7 +47,6 @@ import org.lwjgl.opengl.GL11;
 public class MCH_EntityTank extends MCH_EntityAircraft {
 
    private float pitchVelocity = 0.0F;
-   private double prevHorizontalSpeed = 0.0D; // for accel calc
 
 
    private MCH_TankInfo tankInfo = null;
@@ -358,7 +357,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
       super.worldObj.theProfiler.endSection();
    }
-   //help
+//help
    private void rotationByKey(float partialTicks) {
       float rot = 0.2F;
       if(super.moveLeft && !super.moveRight) {
@@ -372,80 +371,43 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    }
 
    public void onUpdateAngles(float partialTicks) {
-      if (!this.isDestroyed()) {
-         if (super.isGunnerMode) {
+      if(!this.isDestroyed()) {
+         if(super.isGunnerMode) {
             this.setRotPitch(this.getRotPitch() * 0.95F);
             this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 0.2F);
-            if (MathHelper.abs(this.getRotRoll()) > 20.0F) {
+            if(MathHelper.abs(this.getRotRoll()) > 20.0F) {
                this.setRotRoll(this.getRotRoll() * 0.95F);
             }
          }
 
          this.updateRecoil(partialTicks);
+         float targetPitch = this.WheelMng.targetPitch;
 
-         // --- compute horizontal speed and accel ---
-         double horizSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-         double accel = (horizSpeed - this.prevHorizontalSpeed) * 20.0D; // rough per-second accel estimate
-         this.prevHorizontalSpeed = horizSpeed;
+// spring-damper constants, tune for your vehicle
+         float k = 0.05F;   // stiffness
+         float d = 0.15F;   // damping
 
-         // --- wheel target pitch (source) ---
-         float wheelTargetPitch = this.WheelMng.targetPitch;
+// acceleration = (target - current) * k - velocity * d
+         float accel = (targetPitch - this.getRotPitch()) * k - this.pitchVelocity * d;
 
-         // --- acceleration-based pitch (small effect) ---
-         // COM effect scale - tweak sign if nose reacts wrong way
-         float comZ = (float) this.getTankInfo().weightedCenterZ; // forward +, adjust if needed
-         float accelPitch = (float) (-accel * comZ * 0.01D); // small contribution, tune multiplier
+// integrate pitch velocity
+         this.pitchVelocity += accel;
+         this.pitchVelocity *= 0.92F; // optional extra damping per tick
 
-         // --- combine wheel target + accel contribution ---
-         float combinedTarget = wheelTargetPitch + accelPitch;
-
-         // --- high-speed flattening ---
-         final double speedThreshold = 1.80D;    // start flattening at/above this speed
-         final double speedHardCap  = 8.0D;      // speed at which flattening is fully applied (tweak)
-         float flattenFactor = 0.0F;
-         if (horizSpeed > speedThreshold) {
-            flattenFactor = (float) ((horizSpeed - speedThreshold) / (speedHardCap - speedThreshold));
-            if (flattenFactor > 1.0F) flattenFactor = 1.0F;
-            // smooth the factor a little to avoid instant jumps when crossing threshold
-            flattenFactor = flattenFactor * flattenFactor * (3.0F - 2.0F * flattenFactor); // smoothstep
-         }
-         // final desired pitch: blend combinedTarget towards 0 (flat) based on flattenFactor
-         float desiredPitch = (1.0F - flattenFactor) * combinedTarget;
-
-         // --- spring-damper integrator for pitch (gives inertia & smoothness) ---
-         // stiffness & damping tuned conservatively
-         final float k = 0.06F;   // stiffness (how strongly pitch is pulled to target)
-         final float d = 0.18F;   // damping (dissipates pitch velocity)
-
-         // compute accel for pitch integrator
-         float pitchAccel = (desiredPitch - this.getRotPitch()) * k - this.pitchVelocity * d;
-
-         // integrate velocity
-         this.pitchVelocity += pitchAccel;
-         // global damping per tick
-         this.pitchVelocity *= 0.94F;
-
-         // --- clamp pitchVelocity to avoid runaway at extreme speeds or frame spikes ---
-         final float maxPitchVel = 60.0F; // degrees per second (tweak if needed)
-         if (this.pitchVelocity > maxPitchVel) this.pitchVelocity = maxPitchVel;
-         if (this.pitchVelocity < -maxPitchVel) this.pitchVelocity = -maxPitchVel;
-
-         // apply rotation: note we multiply by partialTicks to respect interpolation
+// apply rotation
          this.setRotPitch(this.getRotPitch() + this.pitchVelocity * partialTicks);
-
-         // --- roll handling kept simpler (you can port the integrator if needed) ---
          this.setRotRoll(this.getRotRoll() + (this.WheelMng.targetRoll - this.getRotRoll()) * partialTicks);
-
          boolean isFly = MCH_Lib.getBlockIdY(this, 3, -3) == 0;
+         //System.out.println("isfly" + isFly);
 
-         // logic for yaw / ground rotation (unchanged)
-         if (!isFly || this.getAcInfo().isFloat && this.getWaterDepth() > 0.0D) {
+         //logic for like rotation
+         if(!isFly || this.getAcInfo().isFloat && this.getWaterDepth() > 0.0D) {
             float rotonground = 1.0F;
-            if (!isFly) {
+            if(!isFly) {
                rotonground = this.getAcInfo().mobilityYawOnGround;
-               if (!this.getAcInfo().canRotOnGround) {
+               if(!this.getAcInfo().canRotOnGround) {
                   Block pivotTurnThrottle = MCH_Lib.getBlockY(this, 3, -2, false);
-                  if (!W_Block.isEqual(pivotTurnThrottle, W_Block.getWater()) && !W_Block.isEqual(pivotTurnThrottle, Blocks.air)) {
+                  if(!W_Block.isEqual(pivotTurnThrottle, W_Block.getWater()) && !W_Block.isEqual(pivotTurnThrottle, Blocks.air)) {
                      rotonground = 0.0F;
                   }
                }
@@ -456,27 +418,27 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
             double dz = super.posZ - super.prevPosZ;
             double dist = dx * dx + dz * dz;
 
-            if (pivotTurnThrottle1 <= 0.0F || this.getCurrentThrottle() >= (double) pivotTurnThrottle1 || super.throttleBack >= pivotTurnThrottle1 / 10.0F || dist > (double) super.throttleBack * 0.01D) {
-               float sf = (float) Math.sqrt(dist <= 1.0D ? dist : 1.0D);
-               if (pivotTurnThrottle1 <= 0.0F) {
+            if(pivotTurnThrottle1 <= 0.0F || this.getCurrentThrottle() >= (double)pivotTurnThrottle1 || super.throttleBack >= pivotTurnThrottle1 / 10.0F || dist > (double)super.throttleBack * 0.01D) {
+               float sf = (float)Math.sqrt(dist <= 1.0D?dist:1.0D);
+               if(pivotTurnThrottle1 <= 0.0F) {
                   sf = 1.0F;
                }
 
-               float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double) pivotTurnThrottle1 + 0.05D ? -1.0F : 1.0F;
-               if (super.moveLeft && !super.moveRight) {
+               float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D?-1.0F:1.0F;
+               if(super.moveLeft && !super.moveRight) {
                   this.setRotYaw(this.getRotYaw() - 0.6F * rotonground * partialTicks * flag * sf);
                }
 
-               if (super.moveRight && !super.moveLeft) {
+               if(super.moveRight && !super.moveLeft) {
                   this.setRotYaw(this.getRotYaw() + 0.6F * rotonground * partialTicks * flag * sf);
                }
+
             }
          }
 
-         this.addkeyRotValue = (float) ((double) this.addkeyRotValue * (1.0D - (double) (0.1F * partialTicks)));
+         this.addkeyRotValue = (float)((double)this.addkeyRotValue * (1.0D - (double)(0.1F * partialTicks)));
       }
    }
-
 
    protected void onUpdate_Control(float partialTicks) {
 
