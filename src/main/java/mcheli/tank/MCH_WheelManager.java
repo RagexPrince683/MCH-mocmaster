@@ -134,8 +134,31 @@ public class MCH_WheelManager {
             this.wheels[var28 * 2 + 1].onGround = true;
          }
 
+         // --- detect terrain bump (wheels moving up/down or uneven heights) ---
+         boolean bumpDetected = false;
+         if (this.wheels.length > 0) {
+            double minWheelY = Double.POSITIVE_INFINITY;
+            double maxWheelY = Double.NEGATIVE_INFINITY;
+            for (MCH_EntityWheel w : this.wheels) {
+               if (w == null) continue;
+               // quick bump if wheel jumps vertically or has significant motionY
+               if (Math.abs(w.posY - w.prevPosY) > 0.12D || Math.abs(w.motionY) > 0.12D) {
+                  bumpDetected = true;
+                  break;
+               }
+               if (w.posY < minWheelY) minWheelY = w.posY;
+               if (w.posY > maxWheelY) maxWheelY = w.posY;
+            }
+            // uneven terrain if wheel height spread is large
+            if (!bumpDetected && maxWheelY - minWheelY > 0.18D) {
+               bumpDetected = true;
+            }
+         }
+         //^caused the vehicle to dip into terrain when going too fast... again.
+
          // Weighted center / "center-of-mass" influence
-         if (!ac.onGround && MCH_Lib.getBlockIdY(ac, 1, -2) <= 0) { // not on the ground
+         // Only apply when airborne OR when a bump was detected (so ground traversal over bumps still bounces)
+         if ((!ac.onGround && MCH_Lib.getBlockIdY(ac, 1, -2) <= 0) || bumpDetected) {
             Vec3 var29 = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
             Vec3 var31 = ac.getTransformedPosition(this.weightedCenter);
             var31.xCoord -= ac.posX;
@@ -187,7 +210,23 @@ public class MCH_WheelManager {
                ac.setRotPitch(var35);
                ac.setRotRoll(var36);
             }
+         } else {
+            // No bump and on ground: smoothly level off targetPitch/targetRoll towards flat (0)
+            // Smaller factor -> slower smoothing
+            float smoothFactor = 0.85F; // 0.85 keeps small residual bounce; decrease to 0.7 for faster leveling
+            this.targetPitch *= smoothFactor;
+            this.targetRoll  *= smoothFactor;
+            // apply small threshold cut to avoid micro jitter
+            if (Math.abs(this.targetPitch) < 0.2F) this.targetPitch = 0.0F;
+            if (Math.abs(this.targetRoll)  < 0.2F) this.targetRoll  = 0.0F;
+
+            if(!W_Lib.isClientPlayer(ac.getRiddenByEntity())) {
+               // gently apply to actual rotation
+               ac.setRotPitch(this.targetPitch);
+               ac.setRotRoll(this.targetRoll);
+            }
          }
+
 
          if(showLog) {
             //MCH_Lib.DbgLog(ac.worldObj, "%+03d, %+03d :[%.2f, %.2f, %.2f] yaw=%.2f, pitch=%.2f, roll=%.2f", new Object[]{Integer.valueOf((int)var35), Integer.valueOf((int)var36), Double.valueOf(var29.xCoord), Double.valueOf(var29.yCoord), Double.valueOf(var29.zCoord), Float.valueOf(ac.getRotYaw()), Float.valueOf(this.targetPitch), Float.valueOf(this.targetRoll)});
