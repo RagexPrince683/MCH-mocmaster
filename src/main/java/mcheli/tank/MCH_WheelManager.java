@@ -68,7 +68,7 @@ public class MCH_WheelManager {
       MCH_EntityAircraft ac = this.parent;
       if (ac.getAcInfo() == null) return;
 
-      // --- store previous wheel positions & compute wheel motion ---
+      // --- store previous wheel positions & compute motion ---
       for (MCH_EntityWheel w : this.wheels) {
          if (w == null) continue;
          w.prevPosX = w.posX;
@@ -81,36 +81,32 @@ public class MCH_WheelManager {
          w.motionZ = worldPos.zCoord - w.posZ + z;
       }
 
-      // --- move wheels ---
+      // --- move wheels with damped vertical motion ---
       for (MCH_EntityWheel w : this.wheels) {
          if (w == null) continue;
-         w.motionY *= 0.15D; // damp vertical motion
+         w.motionY *= 0.15D; // soft vertical damping
          w.moveEntity(w.motionX, w.motionY, w.motionZ);
-         // remove fixed downward move, let physics naturally keep wheels on ground
+         // removed fixed downward movement
       }
 
       // --- detect wheel contact consistency ---
       int half = this.wheels.length / 2;
       for (int i = 0; i < half; i++) {
-         MCH_EntityWheel w1 = this.wheels[i * 2];
-         MCH_EntityWheel w2 = this.wheels[i * 2 + 1];
-         if (!w1.isPlus && (w1.onGround || w2.onGround)) {
-            w1.onGround = true;
-            w2.onGround = true;
-         }
-         if (w1.isPlus && (w1.onGround || w2.onGround)) {
+         MCH_EntityWheel w1 = this.wheels[i*2];
+         MCH_EntityWheel w2 = this.wheels[i*2 +1];
+         if ((w1.onGround || w2.onGround)) {
             w1.onGround = true;
             w2.onGround = true;
          }
       }
 
-      // --- bump detection ---
+      // --- bump detection (ignore at very low speed to prevent jitter) ---
       boolean bumpDetected = false;
       double horizSpeed = Math.sqrt(ac.motionX*ac.motionX + ac.motionZ*ac.motionZ);
-      if (this.wheels.length > 0) {
+      if (horizSpeed > 0.01D && this.wheels.length > 0) {
          double minY = Double.POSITIVE_INFINITY;
          double maxY = Double.NEGATIVE_INFINITY;
-         double threshold = Math.max(0.12D, horizSpeed*0.02D); // scale with speed
+         double threshold = Math.max(0.12D, horizSpeed*0.02D);
          for (MCH_EntityWheel w : this.wheels) {
             if (w == null) continue;
             if (Math.abs(w.posY - w.prevPosY) > threshold || Math.abs(w.motionY) > threshold) {
@@ -123,13 +119,14 @@ public class MCH_WheelManager {
          if (!bumpDetected && maxY - minY > Math.max(0.18D, horizSpeed*0.03D)) bumpDetected = true;
       }
 
-      // --- weighted center / rotation ---
-      if ((!ac.onGround && MCH_Lib.getBlockIdY(ac, 1, -2) <= 0) || bumpDetected) {
-         Vec3 var29 = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
+      // --- weighted center / rotation (soft, speed-limited) ---
+      if (bumpDetected || (!ac.onGround && MCH_Lib.getBlockIdY(ac, 1, -2) <= 0)) {
          Vec3 center = ac.getTransformedPosition(this.weightedCenter);
          center.xCoord -= ac.posX;
          center.yCoord = this.weightedCenter.yCoord;
          center.zCoord -= ac.posZ;
+
+         Vec3 influenceVec = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
 
          for (int i = 0; i < half; i++) {
             MCH_EntityWheel w1 = this.wheels[i*2];
@@ -142,35 +139,39 @@ public class MCH_WheelManager {
                     w2.posZ-(ac.posZ+center.zCoord));
             Vec3 cross = w1.pos.zCoord>=0.0D ? diff2.crossProduct(diff1) : diff1.crossProduct(diff2);
             cross = cross.normalize();
-            double influence = Math.abs(w1.pos.zCoord / this.avgZ);
-            if (!w1.onGround && !w2.onGround) influence = 0.0D;
-            var29.xCoord += cross.xCoord * influence;
-            var29.yCoord += cross.yCoord * influence;
-            var29.zCoord += cross.zCoord * influence;
+            double factor = (!w1.onGround && !w2.onGround) ? 0.0D : Math.abs(w1.pos.zCoord / this.avgZ);
+            influenceVec.xCoord += cross.xCoord * factor;
+            influenceVec.yCoord += cross.yCoord * factor;
+            influenceVec.zCoord += cross.zCoord * factor;
          }
 
-         var29 = var29.normalize();
-         var29.rotateAroundY((float)((double)ac.getRotYaw()*Math.PI/180.0D));
-         float candidatePitch = (float)(90.0D - Math.atan2(var29.yCoord, var29.zCoord)*180.0D/Math.PI);
-         float candidateRoll  = -((float)(90.0D - Math.atan2(var29.yCoord, var29.xCoord)*180.0D/Math.PI));
+         influenceVec = influenceVec.normalize();
+         influenceVec.rotateAroundY((float)(ac.getRotYaw()*Math.PI/180.0D));
 
-         // clamp per-tick change
-         float maxPitchDelta = ac.getAcInfo().onGroundPitchFactor;
-         float maxRollDelta  = ac.getAcInfo().onGroundRollFactor;
-         candidatePitch = MathHelper.clamp_float(candidatePitch, ac.getRotPitch()-maxPitchDelta, ac.getRotPitch()+maxPitchDelta);
-         candidateRoll  = MathHelper.clamp_float(candidateRoll, ac.getRotRoll()-maxRollDelta, ac.getRotRoll()+maxRollDelta);
+         // candidate rotation
+         float candPitch = (float)(90.0D - Math.atan2(influenceVec.yCoord, influenceVec.zCoord)*180.0D/Math.PI);
+         float candRoll  = -((float)(90.0D - Math.atan2(influenceVec.yCoord, influenceVec.xCoord)*180.0D/Math.PI));
 
-         // smooth rotation application
-         float smoothing = 0.6F;
-         this.targetPitch = ac.getRotPitch() + (candidatePitch - ac.getRotPitch())*smoothing;
-         this.targetRoll  = ac.getRotRoll()  + (candidateRoll  - ac.getRotRoll())*smoothing;
+         // clamp rotation delta and absolute angle to prevent flips
+         float maxDelta = 2.5F; // max change per tick
+         candPitch = MathHelper.clamp_float(candPitch, ac.getRotPitch()-maxDelta, ac.getRotPitch()+maxDelta);
+         candRoll  = MathHelper.clamp_float(candRoll,  ac.getRotRoll()-maxDelta,  ac.getRotRoll()+maxDelta);
+
+         float maxAngle = 15.0F; // absolute max pitch/roll
+         candPitch = MathHelper.clamp_float(candPitch, -maxAngle, maxAngle);
+         candRoll  = MathHelper.clamp_float(candRoll,  -maxAngle, maxAngle);
+
+         // smooth apply
+         float smooth = (float) (0.4F + 0.6F * Math.min(1.0F, 0.5F/horizSpeed)); // less effect at high speed
+         this.targetPitch = ac.getRotPitch() + (candPitch - ac.getRotPitch())*smooth;
+         this.targetRoll  = ac.getRotRoll()  + (candRoll  - ac.getRotRoll())*smooth;
 
          if (!W_Lib.isClientPlayer(ac.getRiddenByEntity())) {
             ac.setRotPitch(this.targetPitch);
             ac.setRotRoll(this.targetRoll);
          }
       } else {
-         // no bump & on ground: smooth level
+         // smooth leveling when no bump
          float smoothFactor = 0.85F;
          this.targetPitch *= smoothFactor;
          this.targetRoll  *= smoothFactor;
@@ -182,20 +183,20 @@ public class MCH_WheelManager {
          }
       }
 
-      // --- final wheel positioning ---
+      // --- final wheel positioning (clamped) ---
       for (MCH_EntityWheel w : this.wheels) {
          if (w == null) continue;
-         Vec3 v = this.getTransformedPosition(w.pos.xCoord, w.pos.yCoord, w.pos.zCoord, ac, ac.getRotYaw(), this.targetPitch, this.targetRoll);
-         double offset = w.onGround ? 0.01D : 0.0D;
+         Vec3 v = this.getTransformedPosition(w.pos.xCoord, w.pos.yCoord, w.pos.zCoord,
+                 ac, ac.getRotYaw(), this.targetPitch, this.targetRoll);
          double rangeH = 2.0D;
-         double poy = (double)(w.stepHeight / 2.0F);
-         if (w.posX > v.xCoord + rangeH) { w.posX = v.xCoord + rangeH; w.posY = v.yCoord + poy; }
-         if (w.posX < v.xCoord - rangeH) { w.posX = v.xCoord - rangeH; w.posY = v.yCoord + poy; }
-         if (w.posZ > v.zCoord + rangeH) { w.posZ = v.zCoord + rangeH; w.posY = v.yCoord + poy; }
-         if (w.posZ < v.zCoord - rangeH) { w.posZ = v.zCoord - rangeH; w.posY = v.yCoord + poy; }
+         double poy = w.stepHeight/2.0;
+         w.posX = MathHelper.clamp_double(w.posX, v.xCoord-rangeH, v.xCoord+rangeH);
+         w.posZ = MathHelper.clamp_double(w.posZ, v.zCoord-rangeH, v.zCoord+rangeH);
+         w.posY = v.yCoord + poy;
          w.setPositionAndRotation(w.posX, w.posY, w.posZ, 0.0F, 0.0F);
       }
    }
+
 
 
    public Vec3 getTransformedPosition(double x, double y, double z, MCH_EntityAircraft ac, float yaw, float pitch, float roll) {
