@@ -936,23 +936,23 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       float speedLimit = this.getMaxSpeed();
       //todo maybe this is causing the 1.15 max speed hardcap?
       // we know mcheli is capable of handling way faster speeds so why are ground vehicles limited to 1.15?
-      //if(motion1 > (double)speedLimit) {
-      //   super.motionX *= (double)speedLimit / motion1;
-      //   super.motionZ *= (double)speedLimit / motion1;
-      //   motion1 = speedLimit;
-      //}
+      if(motion1 > (double)speedLimit) {
+         super.motionX *= (double)speedLimit / motion1;
+         super.motionZ *= (double)speedLimit / motion1;
+         motion1 = speedLimit;
+      }
 
-      //if(motion1 > prevMotion && super.currentSpeed < (double)speedLimit) {
-      //   super.currentSpeed += ((double)speedLimit - super.currentSpeed) / 35.0D;
-      //   if(super.currentSpeed > (double)speedLimit) {
-      //      super.currentSpeed = (double)speedLimit;
-      //   }
-      //} else {
-      //   super.currentSpeed -= (super.currentSpeed - 0.07D) / 35.0D;
-      //   if(super.currentSpeed < 0.07D) {
-      //      super.currentSpeed = 0.07D;
-      //   }
-      //}
+      if(motion1 > prevMotion && super.currentSpeed < (double)speedLimit) {
+         super.currentSpeed += ((double)speedLimit - super.currentSpeed) / 35.0D;
+         if(super.currentSpeed > (double)speedLimit) {
+            super.currentSpeed = (double)speedLimit;
+         }
+      } else {
+         super.currentSpeed -= (super.currentSpeed - 0.07D) / 35.0D;
+         if(super.currentSpeed < 0.07D) {
+            super.currentSpeed = 0.07D;
+         }
+      }
 
       if(super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0) {
          super.motionX *= (double)this.getAcInfo().motionFactor;
