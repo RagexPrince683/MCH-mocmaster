@@ -93,35 +93,10 @@ public class MCH_WheelManager {
 
          for(wc = 0; wc < rv; ++wc) {
             pitch = zmog[wc];
-            // make wheel vertical responsiveness scale with vehicle horizontal speed
-            double horizSpeed = Math.sqrt(ac.motionX * ac.motionX + ac.motionZ * ac.motionZ);
-
-            // base responsiveness (original 0.15) plus scaling factor
-            double wheelVertResp = 0.15D + Math.min(0.85D, horizSpeed * 0.12D); // clamps to [0.15,1.0]
-            // If you're using MPH mapping where 1.8 ~ 180MPH, this will raise responsiveness above ~0.5 at very high speed
-
-            pitch.motionY *= wheelVertResp;
+            pitch.motionY *= 0.15D;
             pitch.moveEntity(pitch.motionX, pitch.motionY, pitch.motionZ);
-            // move wheel according to computed motion
-            pitch.moveEntity(pitch.motionX, pitch.motionY, pitch.motionZ);
-
-            // small soft downward bias only when wheel is not contacting ground AND speed is low
-            double softDown = 0.02D; // small bias to settle wheels when slow
-            double speedThreshold = 1.80D; // 1.8 => 180MPH in your units
-            if (!pitch.onGround) {
-               if (horizSpeed < speedThreshold) {
-                  // at low speeds we keep a small settle push
-                  pitch.moveEntity(0.0D, -softDown, 0.0D);
-               } else {
-                  // at high speed avoid extra push — it causes digging
-                  // but apply a tiny corrective downward nudge if wheel is far above expected pos
-                  // (no unconditional downward push)
-                  double diff = (ac.posY + this.weightedCenter.yCoord) - pitch.posY;
-                  if (diff > 1.0D) {
-                     pitch.moveEntity(0.0D, -0.01D, 0.0D);
-                  }
-               }
-            }
+            double var32 = 1.0D;
+            pitch.moveEntity(0.0D, -0.1D * var32, 0.0D);
          }
 
          int var28 = -1;
@@ -259,39 +234,6 @@ public class MCH_WheelManager {
             }
 
             wheel.setPositionAndRotation(wheel.posX, wheel.posY, wheel.posZ, 0.0F, 0.0F);
-
-            // ---- clamp wheel Y to terrain to avoid penetration (drop-in) ----
-            try {
-               // check a few blocks under wheel to find the topmost non-air surface
-               int wx = MathHelper.floor_double(wheel.posX + 0.5D);
-               int wz = MathHelper.floor_double(wheel.posZ + 0.5D);
-
-               // start search from expected position v.yCoord (we still have 'v' earlier in loop)
-               // fallback to wheel.posY if v is not in scope: use wheel.posY
-               int startY = MathHelper.floor_double(wheel.posY + 1.0D);
-               int groundY = Integer.MIN_VALUE;
-               // search downward up to 6 blocks for a block that's not air
-               for (int yy = startY; yy >= startY - 6; yy--) {
-                  Block bl = ac.worldObj.getBlock(wx, yy, wz);
-                  if (bl != Blocks.air && bl != W_Block.getSnowLayer()) { // treat snow layer special if needed
-                     groundY = yy;
-                     break;
-                  }
-               }
-
-               if (groundY != Integer.MIN_VALUE) {
-                  double minAllowedY = groundY + 0.5D; // lift wheels slightly above block top
-                  if (wheel.posY < minAllowedY) {
-                     wheel.posY = minAllowedY;
-                     wheel.setPositionAndRotation(wheel.posX, wheel.posY, wheel.posZ, 0.0F, 0.0F);
-                     // zero vertical motion to avoid oscillations
-                     wheel.motionY = 0.0D;
-                     wheel.prevPosY = wheel.posY;
-                  }
-               }
-            } catch (Exception e) {
-               // protective: don't crash on any unexpected NPE in world queries
-            }
          }
 
       }
