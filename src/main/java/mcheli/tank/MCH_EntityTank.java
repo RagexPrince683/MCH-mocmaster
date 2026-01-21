@@ -936,11 +936,37 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       float speedLimit = this.getMaxSpeed();
       //todo maybe this is causing the 1.15 max speed hardcap?
       // we know mcheli is capable of handling way faster speeds so why are ground vehicles limited to 1.15?
-      if(motion1 > (double)speedLimit) {
-         super.motionX *= (double)speedLimit / motion1;
-         super.motionZ *= (double)speedLimit / motion1;
-         motion1 = speedLimit;
+      boolean onGround = super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0;
+
+      if (onGround) {
+         // Reduce friction scaling at high speed to avoid terminal velocity wall
+         double speed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+
+         double baseFactor = this.getAcInfo().motionFactor;
+
+         // As speed increases, friction weakens slightly (rolling resistance model)
+         double speedScale = 1.0D;
+         if (speed > 1.0D) {
+            speedScale = 1.0D - Math.min(0.35D, (speed - 1.0D) * 0.05D);
+         }
+
+         double friction = baseFactor + (1.0D - baseFactor) * speedScale;
+
+         super.motionX *= friction;
+         super.motionZ *= friction;
+
+         if (MathHelper.abs(this.getRotPitch()) < 40.0F) {
+            this.applyOnGroundPitch(0.8F);
+         }
       }
+
+      double maxSafe = speedLimit * 4.0D;
+      if (motion1 > maxSafe) {
+         super.motionX *= maxSafe / motion1;
+         super.motionZ *= maxSafe / motion1;
+      }
+
+
 
       if(motion1 > prevMotion && super.currentSpeed < (double)speedLimit) {
          super.currentSpeed += ((double)speedLimit - super.currentSpeed) / 35.0D;
@@ -965,8 +991,8 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       this.updateWheels();
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
       super.motionY *= 0.95D;
-      super.motionX *= (double)this.getAcInfo().motionFactor;
-      super.motionZ *= (double)this.getAcInfo().motionFactor;
+      //super.motionX *= (double)this.getAcInfo().motionFactor;
+      //super.motionZ *= (double)this.getAcInfo().motionFactor;
       this.setRotation(this.getRotYaw(), this.getRotPitch());
       this.onUpdate_updateBlock();
       this.updateCollisionBox();

@@ -134,69 +134,63 @@ public class MCH_WheelManager {
             this.wheels[var28 * 2 + 1].onGround = true;
          }
 
-         Vec3 var29 = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
-         Vec3 var31 = ac.getTransformedPosition(this.weightedCenter);
-         var31.xCoord -= ac.posX;
-         var31.yCoord = this.weightedCenter.yCoord;
-         var31.zCoord -= ac.posZ;
+         // Weighted center / "center-of-mass" influence
+         if (!ac.onGround && MCH_Lib.getBlockIdY(ac, 1, -2) <= 0) { // not on the ground
+            Vec3 var29 = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
+            Vec3 var31 = ac.getTransformedPosition(this.weightedCenter);
+            var31.xCoord -= ac.posX;
+            var31.yCoord = this.weightedCenter.yCoord;
+            var31.zCoord -= ac.posZ;
 
-         for(int var33 = 0; var33 < this.wheels.length / 2; ++var33) {
-            MCH_EntityWheel var34 = this.wheels[var33 * 2 + 0];
-            MCH_EntityWheel ogpf = this.wheels[var33 * 2 + 1];
-            Vec3 ogrf = Vec3.createVectorHelper(var34.posX - (ac.posX + var31.xCoord), var34.posY - (ac.posY + var31.yCoord), var34.posZ - (ac.posZ + var31.zCoord));
-            Vec3 arr$ = Vec3.createVectorHelper(ogpf.posX - (ac.posX + var31.xCoord), ogpf.posY - (ac.posY + var31.yCoord), ogpf.posZ - (ac.posZ + var31.zCoord));
-            Vec3 len$ = var34.pos.zCoord >= 0.0D?arr$.crossProduct(ogrf):ogrf.crossProduct(arr$);
-            len$ = len$.normalize();
-            double i$ = Math.abs(var34.pos.zCoord / this.avgZ);
-            if(!var34.onGround && !ogpf.onGround) {
-               i$ = 0.0D;
+            for(int var33 = 0; var33 < this.wheels.length / 2; ++var33) {
+               MCH_EntityWheel var34 = this.wheels[var33 * 2 + 0];
+               MCH_EntityWheel ogpf = this.wheels[var33 * 2 + 1];
+               Vec3 ogrf = Vec3.createVectorHelper(var34.posX - (ac.posX + var31.xCoord),
+                       var34.posY - (ac.posY + var31.yCoord),
+                       var34.posZ - (ac.posZ + var31.zCoord));
+               Vec3 arr$ = Vec3.createVectorHelper(ogpf.posX - (ac.posX + var31.xCoord),
+                       ogpf.posY - (ac.posY + var31.yCoord),
+                       ogpf.posZ - (ac.posZ + var31.zCoord));
+               Vec3 len$ = var34.pos.zCoord >= 0.0D ? arr$.crossProduct(ogrf) : ogrf.crossProduct(arr$);
+               len$ = len$.normalize();
+               double i$ = Math.abs(var34.pos.zCoord / this.avgZ);
+               if(!var34.onGround && !ogpf.onGround) {
+                  i$ = 0.0D;
+               }
+
+               var29.xCoord += len$.xCoord * i$;
+               var29.yCoord += len$.yCoord * i$;
+               var29.zCoord += len$.zCoord * i$;
             }
 
-            var29.xCoord += len$.xCoord * i$;
-            var29.yCoord += len$.yCoord * i$;
-            var29.zCoord += len$.zCoord * i$;
-            if(showLog) {
-               len$.rotateAroundY((float)((double)ac.getRotYaw() * 3.141592653589793D / 180.0D));
-               MCH_Lib.DbgLog(ac.worldObj, "%2d : %.2f :[%+.1f, %+.1f, %+.1f][%s %d %d][%+.2f(%+.2f), %+.2f(%+.2f)][%+.1f, %+.1f, %+.1f]", new Object[]{Integer.valueOf(var33), Double.valueOf(i$), Double.valueOf(len$.xCoord), Double.valueOf(len$.yCoord), Double.valueOf(len$.zCoord), var34.isPlus?"+":"-", Integer.valueOf(var34.onGround?1:0), Integer.valueOf(ogpf.onGround?1:0), Double.valueOf(var34.posY - var34.prevPosY), Double.valueOf(var34.motionY), Double.valueOf(ogpf.posY - ogpf.prevPosY), Double.valueOf(ogpf.motionY), Double.valueOf(len$.xCoord), Double.valueOf(len$.yCoord), Double.valueOf(len$.zCoord)});
+            var29 = var29.normalize();
+            if(var29.yCoord > 0.01D && var29.yCoord < 0.7D) {
+               ac.motionX += var29.xCoord / 50.0D;
+               ac.motionZ += var29.zCoord / 50.0D;
             }
-         }
 
-         var29 = var29.normalize();
-         if(var29.yCoord > 0.01D && var29.yCoord < 0.7D) {
-            ac.motionX += var29.xCoord / 50.0D;
-            ac.motionZ += var29.zCoord / 50.0D;
-         }
+            var29.rotateAroundY((float)((double)ac.getRotYaw() * Math.PI / 180.0D));
+            float var35 = (float)(90.0D - Math.atan2(var29.yCoord, var29.zCoord) * 180.0D / Math.PI);
+            float var36 = -((float)(90.0D - Math.atan2(var29.yCoord, var29.xCoord) * 180.0D / Math.PI));
 
-         var29.rotateAroundY((float)((double)ac.getRotYaw() * 3.141592653589793D / 180.0D));
-         float var35 = (float)(90.0D - Math.atan2(var29.yCoord, var29.zCoord) * 180.0D / 3.141592653589793D);
-         float var36 = -((float)(90.0D - Math.atan2(var29.yCoord, var29.xCoord) * 180.0D / 3.141592653589793D));
-         float var37 = ac.getAcInfo().onGroundPitchFactor;
-         if(var35 - ac.getRotPitch() > var37) {
-            var35 = ac.getRotPitch() + var37;
-         }
+            float var37 = ac.getAcInfo().onGroundPitchFactor;
+            if(var35 - ac.getRotPitch() > var37) var35 = ac.getRotPitch() + var37;
+            if(var35 - ac.getRotPitch() < -var37) var35 = ac.getRotPitch() - var37;
 
-         if(var35 - ac.getRotPitch() < -var37) {
-            var35 = ac.getRotPitch() - var37;
-         }
+            float var38 = ac.getAcInfo().onGroundRollFactor;
+            if(var36 - ac.getRotRoll() > var38) var36 = ac.getRotRoll() + var38;
+            if(var36 - ac.getRotRoll() < -var38) var36 = ac.getRotRoll() - var38;
 
-         float var38 = ac.getAcInfo().onGroundRollFactor;
-         if(var36 - ac.getRotRoll() > var38) {
-            var36 = ac.getRotRoll() + var38;
-         }
-
-         if(var36 - ac.getRotRoll() < -var38) {
-            var36 = ac.getRotRoll() - var38;
-         }
-
-         this.targetPitch = var35;
-         this.targetRoll = var36;
-         if(!W_Lib.isClientPlayer(ac.getRiddenByEntity())) {
-            ac.setRotPitch(var35);
-            ac.setRotRoll(var36);
+            this.targetPitch = var35;
+            this.targetRoll = var36;
+            if(!W_Lib.isClientPlayer(ac.getRiddenByEntity())) {
+               ac.setRotPitch(var35);
+               ac.setRotRoll(var36);
+            }
          }
 
          if(showLog) {
-            MCH_Lib.DbgLog(ac.worldObj, "%+03d, %+03d :[%.2f, %.2f, %.2f] yaw=%.2f, pitch=%.2f, roll=%.2f", new Object[]{Integer.valueOf((int)var35), Integer.valueOf((int)var36), Double.valueOf(var29.xCoord), Double.valueOf(var29.yCoord), Double.valueOf(var29.zCoord), Float.valueOf(ac.getRotYaw()), Float.valueOf(this.targetPitch), Float.valueOf(this.targetRoll)});
+            //MCH_Lib.DbgLog(ac.worldObj, "%+03d, %+03d :[%.2f, %.2f, %.2f] yaw=%.2f, pitch=%.2f, roll=%.2f", new Object[]{Integer.valueOf((int)var35), Integer.valueOf((int)var36), Double.valueOf(var29.xCoord), Double.valueOf(var29.yCoord), Double.valueOf(var29.zCoord), Float.valueOf(ac.getRotYaw()), Float.valueOf(this.targetPitch), Float.valueOf(this.targetRoll)});
          }
 
          MCH_EntityWheel[] var39 = this.wheels;
