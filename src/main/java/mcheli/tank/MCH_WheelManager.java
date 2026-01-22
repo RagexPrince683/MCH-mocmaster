@@ -91,6 +91,34 @@ public class MCH_WheelManager {
       MCH_EntityAircraft ac = this.parent;
       if (ac.getAcInfo() == null) return;
 
+      boolean unevenContact = false;
+      double frontAvgY = 0.0D;
+      double rearAvgY  = 0.0D;
+      int frontCount = 0;
+      int rearCount  = 0;
+
+      for (MCH_EntityWheel w : this.wheels) {
+         if (w == null || !w.onGround) continue;
+
+         if (w.pos.zCoord >= 0.0D) {
+            frontAvgY += w.posY;
+            frontCount++;
+         } else {
+            rearAvgY += w.posY;
+            rearCount++;
+         }
+      }
+
+      if (frontCount > 0 && rearCount > 0) {
+         frontAvgY /= frontCount;
+         rearAvgY  /= rearCount;
+
+         // 1 block step ≈ 1.0, so this is conservative
+         if (Math.abs(frontAvgY - rearAvgY) > 0.08D) {
+            unevenContact = true;
+         }
+      }
+
       // store prev wheel positions & compute wheel desired motion
       for (int wi = 0; wi < this.wheels.length; ++wi) {
          MCH_EntityWheel w = this.wheels[wi];
@@ -182,7 +210,9 @@ public class MCH_WheelManager {
       boolean mostlyGrounded = groundCount >= Math.max(1, this.wheels.length / 2);
 
       // apply weighted-center influence only when airborne or legitimately bumped
-      if ((!ac.onGround && MCH_Lib.getBlockIdY(ac, 1, -2) <= 0) || bumpDetected) {
+      if ((!ac.onGround && MCH_Lib.getBlockIdY(ac, 1, -2) <= 0)
+              || bumpDetected
+              || unevenContact) {
 
          Vec3 var29 = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
          Vec3 var31 = ac.getTransformedPosition(this.weightedCenter);
@@ -215,7 +245,18 @@ public class MCH_WheelManager {
 
          // defensive normalize
          try {
-            var29 = var29.normalize();
+            double len = var29.lengthVector();
+            if (len > 0.0001D) {
+               var29.xCoord /= len;
+               var29.yCoord /= len;
+               var29.zCoord /= len;
+            }
+
+            // scale torque strength
+            double groundScale = unevenContact ? 0.65D : 1.0D;
+            var29.xCoord *= groundScale;
+            var29.yCoord *= groundScale;
+            var29.zCoord *= groundScale;
          } catch (Throwable t) {
             var29 = Vec3.createVectorHelper(0.0D, 0.0D, 1.0D);
          }
@@ -293,12 +334,16 @@ public class MCH_WheelManager {
             }
          }
       } else {
-         // stable ground, no bump: smooth level toward zero
-         float smoothFactor = 0.84F;
-         this.targetPitch *= smoothFactor;
-         this.targetRoll  *= smoothFactor;
-         if (Math.abs(this.targetPitch) < 0.25F) this.targetPitch = 0.0F;
-         if (Math.abs(this.targetRoll)  < 0.25F) this.targetRoll  = 0.0F;
+         // Only level if all wheels are basically even
+         if (!unevenContact) {
+            float smoothFactor = 0.85F;
+            this.targetPitch *= smoothFactor;
+            this.targetRoll  *= smoothFactor;
+
+            if (Math.abs(this.targetPitch) < 0.2F) this.targetPitch = 0.0F;
+            if (Math.abs(this.targetRoll)  < 0.2F) this.targetRoll  = 0.0F;
+         }
+
          if (!W_Lib.isClientPlayer(ac.getRiddenByEntity())) {
             ac.setRotPitch(this.targetPitch);
             ac.setRotRoll(this.targetRoll);
