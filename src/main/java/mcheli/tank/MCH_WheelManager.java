@@ -20,6 +20,9 @@ import net.minecraft.world.World;
 
 public class MCH_WheelManager {
 
+   //from my understanding, wheels are essentially invisible entities that track the position of the 'aircraft's'
+   // (vehicle general category) wheels behaving somewhat like suspension.
+
    public final MCH_EntityAircraft parent;
    public MCH_EntityWheel[] wheels;
    private double minZ;
@@ -31,12 +34,32 @@ public class MCH_WheelManager {
    public float prevYaw;
    private static Random rand = new Random();
 
+   // per-wheel state (persist during runtime)
+   //*unused GPT schizophrenia
+   //public double lastGroundY = Double.NEGATIVE_INFINITY; // last measured solid surface Y
+   //public double groundYFiltered = Double.NEGATIVE_INFINITY; // low-pass filter
+   //public int lastContactTick = 0; // tick when last seen on ground
+   //public double restDistance = 0.0D; // nominal wheel offset (from wheel spec)
+
+   private final java.util.Map<Integer, Double> wheelGroundFilter = new java.util.HashMap<Integer, Double>();
+
+
+
 
    public MCH_WheelManager(MCH_EntityAircraft ac) {
       this.parent = ac;
       this.wheels = new MCH_EntityWheel[0];
       this.weightedCenter = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
    }
+
+   // fast top-surface query (returns top solid/liquid block Y)
+   private double getGroundYAt(double wx, double wz) {
+      int ix = MathHelper.floor_double(wx + 0.5D);
+      int iz = MathHelper.floor_double(wz + 0.5D);
+      int top = this.parent.worldObj.getTopSolidOrLiquidBlock(ix, iz);
+      return (double)top;
+   }
+
 
    public void createWheels(World w, List list, Vec3 weightedCenter) {
       this.wheels = new MCH_EntityWheel[list.size() * 2];
@@ -68,137 +91,239 @@ public class MCH_WheelManager {
       MCH_EntityAircraft ac = this.parent;
       if (ac.getAcInfo() == null) return;
 
-      // --- store previous wheel positions & compute motion ---
-      for (MCH_EntityWheel w : this.wheels) {
+      // store prev wheel positions & compute wheel desired motion
+      for (int wi = 0; wi < this.wheels.length; ++wi) {
+         MCH_EntityWheel w = this.wheels[wi];
          if (w == null) continue;
          w.prevPosX = w.posX;
          w.prevPosY = w.posY;
          w.prevPosZ = w.posZ;
-
          Vec3 worldPos = ac.getTransformedPosition(w.pos.xCoord, w.pos.yCoord, w.pos.zCoord);
          w.motionX = worldPos.xCoord - w.posX + x;
          w.motionY = worldPos.yCoord - w.posY;
          w.motionZ = worldPos.zCoord - w.posZ + z;
       }
 
-      // --- move wheels with damped vertical motion ---
+      // move wheels (soft vertical damping)
       for (MCH_EntityWheel w : this.wheels) {
          if (w == null) continue;
-         w.motionY *= 0.15D; // soft vertical damping
+         w.motionY *= 0.15D;
          w.moveEntity(w.motionX, w.motionY, w.motionZ);
-         // removed fixed downward movement
       }
 
-      // --- detect wheel contact consistency ---
-      int half = this.wheels.length / 2;
-      for (int i = 0; i < half; i++) {
-         MCH_EntityWheel w1 = this.wheels[i*2];
-         MCH_EntityWheel w2 = this.wheels[i*2 +1];
-         if ((w1.onGround || w2.onGround)) {
-            w1.onGround = true;
-            w2.onGround = true;
+      // preserve original pairing-onGround behavior
+      int pairCount = this.wheels.length / 2;
+      for (int i = 0; i < pairCount; ++i) {
+         MCH_EntityWheel a = this.wheels[i * 2];
+         MCH_EntityWheel b = this.wheels[i * 2 + 1];
+         if (a == null || b == null) continue;
+         if ((!a.isPlus && (a.onGround || b.onGround)) || (a.isPlus && (a.onGround || b.onGround))) {
+            a.onGround = true;
+            b.onGround = true;
          }
       }
 
-      // --- bump detection (ignore at very low speed to prevent jitter) ---
+      // horizontal speed and small-stop guard (prevent jitter when stopped)
+      double horizSpeed = Math.sqrt(ac.motionX * ac.motionX + ac.motionZ * ac.motionZ);
+      boolean allowBumpCheck = horizSpeed > 0.02D;
+
+      // per-wheel ground sampling + low-pass filtering
+      int groundCount = 0;
+      int stableCount = 0;
+      double minWheelY = Double.POSITIVE_INFINITY;
+      double maxWheelY = Double.NEGATIVE_INFINITY;
+
+      for (int wi = 0; wi < this.wheels.length; ++wi) {
+         MCH_EntityWheel w = this.wheels[wi];
+         if (w == null) continue;
+         Vec3 worldPos = ac.getTransformedPosition(w.pos.xCoord, w.pos.yCoord, w.pos.zCoord);
+         double sampleGroundY = getGroundYAt(worldPos.xCoord, worldPos.zCoord);
+
+         // initialize filter if needed
+         Double prevFiltered = this.wheelGroundFilter.get(wi);
+         if (prevFiltered == null) prevFiltered = sampleGroundY;
+
+         // low-pass filter: alpha near 0.8-0.9 for inertia (strong smoothing)
+         double alpha = 0.86D;
+         double filtered = prevFiltered * alpha + sampleGroundY * (1.0D - alpha);
+         this.wheelGroundFilter.put(wi, filtered);
+
+         // contact: wheel considered on surface if within stepHeight + tolerance of ground
+         double wheelY = worldPos.yCoord;
+         double contactTolerance = 0.6D; // tolerate a bit of vertical difference
+         boolean onSurface = (wheelY - sampleGroundY) <= (w.stepHeight + contactTolerance);
+         if (onSurface) groundCount++;
+
+         // stability test: raw change vs filtered difference
+         double rawDelta = Math.abs(sampleGroundY - prevFiltered);
+         double filtDiff = Math.abs(filtered - sampleGroundY);
+
+         // thresholds scale with speed slightly, and use conservative defaults
+         double rawThreshold = Math.max(0.35D, horizSpeed * 0.02D);
+         double filtThreshold = 0.35D;
+
+         boolean wheelStable = rawDelta <= rawThreshold && filtDiff <= filtThreshold;
+         if (wheelStable) stableCount++;
+
+         // track min/max wheel world Y for spread test
+         minWheelY = Math.min(minWheelY, wheelY);
+         maxWheelY = Math.max(maxWheelY, wheelY);
+      }
+
+      // bump detection uses spread + per-wheel stability; disable when nearly stopped
       boolean bumpDetected = false;
-      double horizSpeed = Math.sqrt(ac.motionX*ac.motionX + ac.motionZ*ac.motionZ);
-      if (horizSpeed > 0.01D && this.wheels.length > 0) {
-         double minY = Double.POSITIVE_INFINITY;
-         double maxY = Double.NEGATIVE_INFINITY;
-         double threshold = Math.max(0.12D, horizSpeed*0.02D);
-         for (MCH_EntityWheel w : this.wheels) {
-            if (w == null) continue;
-            if (Math.abs(w.posY - w.prevPosY) > threshold || Math.abs(w.motionY) > threshold) {
-               bumpDetected = true;
-               break;
-            }
-            minY = Math.min(minY, w.posY);
-            maxY = Math.max(maxY, w.posY);
-         }
-         if (!bumpDetected && maxY - minY > Math.max(0.18D, horizSpeed*0.03D)) bumpDetected = true;
+      if (allowBumpCheck) {
+         if (maxWheelY - minWheelY > Math.max(0.18D, horizSpeed * 0.03D)) bumpDetected = true;
+         // if many wheels unstable, treat as bump/rough
+         if (stableCount < Math.max(1, this.wheels.length / 4)) bumpDetected = true;
       }
 
-      // --- weighted center / rotation (soft, speed-limited) ---
-      if (bumpDetected || (!ac.onGround && MCH_Lib.getBlockIdY(ac, 1, -2) <= 0)) {
-         Vec3 center = ac.getTransformedPosition(this.weightedCenter);
-         center.xCoord -= ac.posX;
-         center.yCoord = this.weightedCenter.yCoord;
-         center.zCoord -= ac.posZ;
+      // majority contact check
+      boolean mostlyGrounded = groundCount >= Math.max(1, this.wheels.length / 2);
 
-         Vec3 influenceVec = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
+      // apply weighted-center influence only when airborne or legitimately bumped
+      if ((!ac.onGround && MCH_Lib.getBlockIdY(ac, 1, -2) <= 0) || bumpDetected) {
 
-         for (int i = 0; i < half; i++) {
-            MCH_EntityWheel w1 = this.wheels[i*2];
-            MCH_EntityWheel w2 = this.wheels[i*2 +1];
-            Vec3 diff1 = Vec3.createVectorHelper(w1.posX-(ac.posX+center.xCoord),
-                    w1.posY-(ac.posY+center.yCoord),
-                    w1.posZ-(ac.posZ+center.zCoord));
-            Vec3 diff2 = Vec3.createVectorHelper(w2.posX-(ac.posX+center.xCoord),
-                    w2.posY-(ac.posY+center.yCoord),
-                    w2.posZ-(ac.posZ+center.zCoord));
-            Vec3 cross = w1.pos.zCoord>=0.0D ? diff2.crossProduct(diff1) : diff1.crossProduct(diff2);
-            cross = cross.normalize();
-            double factor = (!w1.onGround && !w2.onGround) ? 0.0D : Math.abs(w1.pos.zCoord / this.avgZ);
-            influenceVec.xCoord += cross.xCoord * factor;
-            influenceVec.yCoord += cross.yCoord * factor;
-            influenceVec.zCoord += cross.zCoord * factor;
+         Vec3 var29 = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
+         Vec3 var31 = ac.getTransformedPosition(this.weightedCenter);
+         var31.xCoord -= ac.posX;
+         var31.yCoord = this.weightedCenter.yCoord;
+         var31.zCoord -= ac.posZ;
+
+         for (int i = 0; i < pairCount; ++i) {
+            MCH_EntityWheel wL = this.wheels[i * 2];
+            MCH_EntityWheel wR = this.wheels[i * 2 + 1];
+            if (wL == null || wR == null) continue;
+
+            Vec3 ogrf = Vec3.createVectorHelper(wL.posX - (ac.posX + var31.xCoord),
+                    wL.posY - (ac.posY + var31.yCoord),
+                    wL.posZ - (ac.posZ + var31.zCoord));
+            Vec3 arr$ = Vec3.createVectorHelper(wR.posX - (ac.posX + var31.xCoord),
+                    wR.posY - (ac.posY + var31.yCoord),
+                    wR.posZ - (ac.posZ + var31.zCoord));
+            Vec3 len$ = wL.pos.zCoord >= 0.0D ? arr$.crossProduct(ogrf) : ogrf.crossProduct(arr$);
+            len$ = len$.normalize();
+            double i$ = Math.abs(wL.pos.zCoord / this.avgZ);
+            if (!wL.onGround && !wR.onGround) {
+               i$ = 0.0D;
+            }
+
+            var29.xCoord += len$.xCoord * i$;
+            var29.yCoord += len$.yCoord * i$;
+            var29.zCoord += len$.zCoord * i$;
          }
 
-         influenceVec = influenceVec.normalize();
-         influenceVec.rotateAroundY((float)(ac.getRotYaw()*Math.PI/180.0D));
+         // defensive normalize
+         try {
+            var29 = var29.normalize();
+         } catch (Throwable t) {
+            var29 = Vec3.createVectorHelper(0.0D, 0.0D, 1.0D);
+         }
 
-         // candidate rotation
-         float candPitch = (float)(90.0D - Math.atan2(influenceVec.yCoord, influenceVec.zCoord)*180.0D/Math.PI);
-         float candRoll  = -((float)(90.0D - Math.atan2(influenceVec.yCoord, influenceVec.xCoord)*180.0D/Math.PI));
+         // lateral nudge scaled by stability/speed (preserve a bit of previous behavior)
+         if (var29.yCoord > 0.01D && var29.yCoord < 0.7D) {
+            double speedScale = Math.max(0.12D, 1.0D - horizSpeed * 0.09D); // reduce at high speed
+            double stabilityScale = (double)stableCount / (double)Math.max(1, this.wheels.length); // stable fraction
+            double lateralScale = 1.0D * speedScale * stabilityScale;
+            ac.motionX += var29.xCoord / 50.0D * lateralScale;
+            ac.motionZ += var29.zCoord / 50.0D * lateralScale;
+         }
 
-         // clamp rotation delta and absolute angle to prevent flips
-         float maxDelta = 2.5F; // max change per tick
-         candPitch = MathHelper.clamp_float(candPitch, ac.getRotPitch()-maxDelta, ac.getRotPitch()+maxDelta);
-         candRoll  = MathHelper.clamp_float(candRoll,  ac.getRotRoll()-maxDelta,  ac.getRotRoll()+maxDelta);
+         var29.rotateAroundY((float)((double)ac.getRotYaw() * Math.PI / 180.0D));
+         float candidatePitch = (float)(90.0D - Math.atan2(var29.yCoord, var29.zCoord) * 180.0D / Math.PI);
+         float candidateRoll  = -((float)(90.0D - Math.atan2(var29.yCoord, var29.xCoord) * 180.0D / Math.PI));
 
-         float maxAngle = 15.0F; // absolute max pitch/roll
-         candPitch = MathHelper.clamp_float(candPitch, -maxAngle, maxAngle);
-         candRoll  = MathHelper.clamp_float(candRoll,  -maxAngle, maxAngle);
+         // clamp per-tick delta and absolute safe angle
+         float maxDelta = ac.getAcInfo().onGroundPitchFactor;
+         if (maxDelta <= 0.0001F) maxDelta = 2.5F;
+         candidatePitch = MathHelper.clamp_float(candidatePitch, ac.getRotPitch() - maxDelta, ac.getRotPitch() + maxDelta);
+         candidateRoll  = MathHelper.clamp_float(candidateRoll,  ac.getRotRoll()  - maxDelta, ac.getRotRoll()  + maxDelta);
 
-         // smooth apply
-         float smooth = (float) (0.4F + 0.6F * Math.min(1.0F, 0.5F/horizSpeed)); // less effect at high speed
-         this.targetPitch = ac.getRotPitch() + (candPitch - ac.getRotPitch())*smooth;
-         this.targetRoll  = ac.getRotRoll()  + (candRoll  - ac.getRotRoll())*smooth;
+         float maxAbs = 18.0F;
+         candidatePitch = MathHelper.clamp_float(candidatePitch, -maxAbs, maxAbs);
+         candidateRoll  = MathHelper.clamp_float(candidateRoll,  -maxAbs, maxAbs);
 
-         if (!W_Lib.isClientPlayer(ac.getRiddenByEntity())) {
-            ac.setRotPitch(this.targetPitch);
-            ac.setRotRoll(this.targetRoll);
+         // stability-based rotation influence (0..1)
+         double speedInfluence = Math.max(0.09D, 1.0D - horizSpeed * 0.12D);
+         double contactInfluence = (double)groundCount / (double)Math.max(1, this.wheels.length);
+         double stabilityInfluence = (double)stableCount / (double)Math.max(1, this.wheels.length);
+         double rotationInfluence = MathHelper.clamp_double(speedInfluence * contactInfluence * stabilityInfluence, 0.0D, 1.0D);
+
+         // PENETRATION CHECK USING FILTERED GROUND (no nudges)
+         double worstPen = 0.0D;
+         for (int wi = 0; wi < this.wheels.length; ++wi) {
+            MCH_EntityWheel w = this.wheels[wi];
+            if (w == null) continue;
+            Vec3 test = this.getTransformedPosition(w.pos.xCoord, w.pos.yCoord, w.pos.zCoord, ac, ac.getRotYaw(), candidatePitch, candidateRoll);
+            double groundY = this.wheelGroundFilter.containsKey(wi) ? this.wheelGroundFilter.get(wi) : getGroundYAt(test.xCoord, test.zCoord);
+            double pen = (groundY + 0.05D) - test.yCoord;
+            if (pen > worstPen) worstPen = pen;
+         }
+         if (worstPen > 0.04D) {
+            double penFactor = Math.max(0.04D, 1.0D - Math.min(1.0D, worstPen * 10.0D));
+            rotationInfluence *= penFactor;
+         }
+
+         // if too small, decay target slightly; otherwise apply a smooth lerp toward candidate
+         if (rotationInfluence < 0.06D) {
+            // decay to prevent micro-wobble
+            this.targetPitch *= 0.92F;
+            this.targetRoll  *= 0.92F;
+            if (Math.abs(this.targetPitch) < 0.25F) this.targetPitch = 0.0F;
+            if (Math.abs(this.targetRoll)  < 0.25F) this.targetRoll  = 0.0F;
+            if (!W_Lib.isClientPlayer(ac.getRiddenByEntity())) {
+               ac.setRotPitch(this.targetPitch);
+               ac.setRotRoll(this.targetRoll);
+            }
+         } else {
+            float smoothing = 0.42F; // how aggressively we move toward candidate
+            float apply = (float)(rotationInfluence * smoothing);
+            this.targetPitch = this.targetPitch + (candidatePitch - this.targetPitch) * apply;
+            this.targetRoll  = this.targetRoll  + (candidateRoll  - this.targetRoll)  * apply;
+
+            // small additional damping at low speed to stop jitter
+            if (horizSpeed < 0.05D) {
+               this.targetPitch *= 0.94F;
+               this.targetRoll  *= 0.94F;
+            }
+
+            if (!W_Lib.isClientPlayer(ac.getRiddenByEntity())) {
+               ac.setRotPitch(this.targetPitch);
+               ac.setRotRoll(this.targetRoll);
+            }
          }
       } else {
-         // smooth leveling when no bump
-         float smoothFactor = 0.85F;
+         // stable ground, no bump: smooth level toward zero
+         float smoothFactor = 0.84F;
          this.targetPitch *= smoothFactor;
          this.targetRoll  *= smoothFactor;
-         if (Math.abs(this.targetPitch) < 0.2F) this.targetPitch = 0.0F;
-         if (Math.abs(this.targetRoll)  < 0.2F) this.targetRoll  = 0.0F;
+         if (Math.abs(this.targetPitch) < 0.25F) this.targetPitch = 0.0F;
+         if (Math.abs(this.targetRoll)  < 0.25F) this.targetRoll  = 0.0F;
          if (!W_Lib.isClientPlayer(ac.getRiddenByEntity())) {
             ac.setRotPitch(this.targetPitch);
             ac.setRotRoll(this.targetRoll);
          }
       }
 
-      // --- final wheel positioning (clamped) ---
-      for (MCH_EntityWheel w : this.wheels) {
+      // final wheel placement clamped to transformed target
+      for (int wi = 0; wi < this.wheels.length; ++wi) {
+         MCH_EntityWheel w = this.wheels[wi];
          if (w == null) continue;
-         Vec3 v = this.getTransformedPosition(w.pos.xCoord, w.pos.yCoord, w.pos.zCoord,
-                 ac, ac.getRotYaw(), this.targetPitch, this.targetRoll);
+         Vec3 v = this.getTransformedPosition(w.pos.xCoord, w.pos.yCoord, w.pos.zCoord, ac, ac.getRotYaw(), this.targetPitch, this.targetRoll);
          double rangeH = 2.0D;
-         double poy = w.stepHeight/2.0;
-         w.posX = MathHelper.clamp_double(w.posX, v.xCoord-rangeH, v.xCoord+rangeH);
-         w.posZ = MathHelper.clamp_double(w.posZ, v.zCoord-rangeH, v.zCoord+rangeH);
-         w.posY = v.yCoord + poy;
+         double poy = (double)(w.stepHeight / 2.0F);
+         if (w.posX > v.xCoord + rangeH) { w.posX = v.xCoord + rangeH; w.posY = v.yCoord + poy; }
+         if (w.posX < v.xCoord - rangeH) { w.posX = v.xCoord - rangeH; w.posY = v.yCoord + poy; }
+         if (w.posZ > v.zCoord + rangeH) { w.posZ = v.zCoord + rangeH; w.posY = v.yCoord + poy; }
+         if (w.posZ < v.zCoord - rangeH) { w.posZ = v.zCoord - rangeH; w.posY = v.yCoord + poy; }
          w.setPositionAndRotation(w.posX, w.posY, w.posZ, 0.0F, 0.0F);
       }
    }
 
+
+
    /**
-    * original code for this annoying bugged shitfest method (note, this works with tanks and everything else
+    * original code for this annoying bugged shitfest method (note, this works with tanks and everything else)
     *
     public void move(double x, double y, double z) {
     MCH_EntityAircraft ac = this.parent;
