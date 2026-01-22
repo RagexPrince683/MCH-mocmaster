@@ -870,140 +870,140 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
    public void applyOnGroundPitch(float factor) {}
 
+   private float staticMaxSpeed = -1.0F;
+
+
    private void onUpdate_Server() {
 
-      //1.7.10
+      final boolean DEBUG = true;
 
-      //todo gear shifts here
-      Entity rdnEnt = this.getRiddenByEntity();
-      double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-      double dp = 0.0D;
-      if(this.canFloatWater()) {
-         dp = this.getWaterDepth();
+      // --------------------------------------------------
+      // LOCK MAX SPEED ONCE (THIS FIXES THE BUG)
+      // --------------------------------------------------
+      if (this.staticMaxSpeed < 0.0F) {
+         this.staticMaxSpeed = this.getMaxSpeed(); // capture once
+         System.out.println("[SPEED_INIT] staticMaxSpeed=" + this.staticMaxSpeed);
       }
 
+      // A: previous horizontal speed
+      double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      if (DEBUG) {
+         System.out.println(String.format(
+                 "DBG_A tick=%d prevMotion=%.5f motionX=%.5f motionZ=%.5f",
+                 this.ticksExisted, prevMotion, super.motionX, super.motionZ
+         ));
+      }
+
+      // --------------------------------------------------
+      // ORIGINAL VERTICAL LOGIC (UNCHANGED)
+      // --------------------------------------------------
+      double dp = this.canFloatWater() ? this.getWaterDepth() : 0.0D;
       boolean levelOff = super.isGunnerMode;
-      if(dp == 0.0D) {
-         if(!levelOff) {
-            super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
+
+      if (dp == 0.0D) {
+         if (!levelOff) {
+            super.motionY += 0.04D + (!this.isInWater()
+                    ? this.getAcInfo().gravity
+                    : this.getAcInfo().gravityInWater);
             super.motionY += -0.047D * (1.0D - this.getCurrentThrottle());
          } else {
             super.motionY *= 0.8D;
          }
       } else {
-         if(MathHelper.abs(this.getRotRoll()) < 40.0F) {
-            ;
-         }
-
-         if(dp < 1.0D) {
+         if (dp < 1.0D) {
             super.motionY -= 1.0E-4D;
             super.motionY += 0.007D * this.getCurrentThrottle();
          } else {
-            if(super.motionY < 0.0D) {
-               super.motionY /= 2.0D;
-            }
-
+            if (super.motionY < 0.0D) super.motionY *= 0.5D;
             super.motionY += 0.007D;
          }
       }
 
+      // --------------------------------------------------
+      // THRUST (ACCEL ONLY, NOT SPEED)
+      // --------------------------------------------------
       float throttle = (float)(this.getCurrentThrottle() / 10.0D);
-
       Vec3 v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - 10.0F);
-      if(!levelOff) {
-         super.motionY += v.yCoord * (double)throttle / 8.0D;
+
+      if (!levelOff) {
+         super.motionY += v.yCoord * throttle / 8.0D;
       }
 
       boolean canMove = true;
-      if(!this.getAcInfo().canMoveOnGround) {
-         Block motion = MCH_Lib.getBlockY(this, 3, -2, false);
-         if(!W_Block.isEqual(motion, W_Block.getWater()) && !W_Block.isEqual(motion, Blocks.air)) {
+      if (!this.getAcInfo().canMoveOnGround) {
+         Block b = MCH_Lib.getBlockY(this, 3, -2, false);
+         if (!W_Block.isEqual(b, W_Block.getWater()) && !W_Block.isEqual(b, Blocks.air)) {
             canMove = false;
          }
       }
 
-      if(canMove) {
-         if(this.getAcInfo().enableBack && super.throttleBack > 0.0F) {
-            super.motionX -= v.xCoord * (double)super.throttleBack;
-            super.motionZ -= v.zCoord * (double)super.throttleBack;
+      if (canMove) {
+         if (this.getAcInfo().enableBack && super.throttleBack > 0.0F) {
+            super.motionX -= v.xCoord * super.throttleBack;
+            super.motionZ -= v.zCoord * super.throttleBack;
          } else {
-            super.motionX += v.xCoord * (double)throttle;
-            super.motionZ += v.zCoord * (double)throttle;
+            super.motionX += v.xCoord * throttle;
+            super.motionZ += v.zCoord * throttle;
          }
       }
 
-      double motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-      float speedLimit = this.getMaxSpeed();
-      //todo maybe this is causing the 1.15 max speed hardcap?
-      // we know mcheli is capable of handling way faster speeds so why are ground vehicles limited to 1.15?
-      boolean onGround = super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0;
-
-      if (onGround) {
-         // Reduce friction scaling at high speed to avoid terminal velocity wall
-         double speed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-
-         double baseFactor = this.getAcInfo().motionFactor;
-
-         // As speed increases, friction weakens slightly (rolling resistance model)
-         double speedScale = 1.0D;
-         if (speed > 1.0D) {
-            speedScale = 1.0D - Math.min(0.35D, (speed - 1.0D) * 0.05D);
-         }
-
-         double friction = baseFactor + (1.0D - baseFactor) * speedScale;
-
-         super.motionX *= friction;
-         super.motionZ *= friction;
-
-         if (MathHelper.abs(this.getRotPitch()) < 40.0F) {
-            this.applyOnGroundPitch(0.8F);
-         }
+      // B: after acceleration
+      double afterAccel = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      if (DEBUG) {
+         System.out.println(String.format(
+                 "DBG_B tick=%d afterAccel=%.5f motionX=%.5f motionZ=%.5f throttle=%.3f",
+                 this.ticksExisted, afterAccel, super.motionX, super.motionZ, throttle
+         ));
       }
 
-      double maxSafe = speedLimit * 4.0D;
-      if (motion1 > maxSafe) {
-         super.motionX *= maxSafe / motion1;
-         super.motionZ *= maxSafe / motion1;
+      // --------------------------------------------------
+      // HARD SPEED CLAMP (STATIC LIMIT ONLY)
+      // --------------------------------------------------
+      if (afterAccel > this.staticMaxSpeed) {
+         double scale = this.staticMaxSpeed / afterAccel;
+         super.motionX *= scale;
+         super.motionZ *= scale;
       }
 
-
-
-      if(motion1 > prevMotion && super.currentSpeed < (double)speedLimit) {
-         super.currentSpeed += ((double)speedLimit - super.currentSpeed) / 35.0D;
-         if(super.currentSpeed > (double)speedLimit) {
-            super.currentSpeed = (double)speedLimit;
-         }
+      // --------------------------------------------------
+      // FRICTION / DRAG
+      // --------------------------------------------------
+      if (super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0) {
+         super.motionX *= this.getAcInfo().motionFactor;
+         super.motionZ *= this.getAcInfo().motionFactor;
       } else {
-         super.currentSpeed -= (super.currentSpeed - 0.07D) / 35.0D;
-         if(super.currentSpeed < 0.07D) {
-            super.currentSpeed = 0.07D;
-         }
+         super.motionX *= 0.9995D;
+         super.motionZ *= 0.9995D;
       }
 
-      if(super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0) {
-         super.motionX *= (double)this.getAcInfo().motionFactor;
-         super.motionZ *= (double)this.getAcInfo().motionFactor;
-         if(MathHelper.abs(this.getRotPitch()) < 40.0F) {
-            this.applyOnGroundPitch(0.8F);
-         }
-      }
-
+      // --------------------------------------------------
+      // MOVE
+      // --------------------------------------------------
       this.updateWheels();
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
+
+      // C: after move
+      double afterMove = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      if (DEBUG) {
+         System.out.println(String.format(
+                 "DBG_C tick=%d afterMove=%.5f motionX=%.5f motionZ=%.5f speedLimit=%.5f",
+                 this.ticksExisted, afterMove, super.motionX, super.motionZ, this.staticMaxSpeed
+         ));
+      }
+
       super.motionY *= 0.95D;
-      //super.motionX *= (double)this.getAcInfo().motionFactor;
-      //super.motionZ *= (double)this.getAcInfo().motionFactor;
+
       this.setRotation(this.getRotYaw(), this.getRotPitch());
       this.onUpdate_updateBlock();
       this.updateCollisionBox();
-      if(this.getRiddenByEntity() != null && this.getRiddenByEntity().isDead) {
+
+      if (this.getRiddenByEntity() != null && this.getRiddenByEntity().isDead) {
          this.unmountEntity();
          super.riddenByEntity = null;
       }
-
-      //if(this.) todo gear check
-
    }
+
+
 
    private void collisionEntity(AxisAlignedBB bb) {
       //this is collision for this entity, not other entities
