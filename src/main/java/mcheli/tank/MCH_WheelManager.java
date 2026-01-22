@@ -87,6 +87,9 @@ public class MCH_WheelManager {
       this.avgZ = this.maxZ - this.minZ;
    }
 
+
+   //new working shit, also has a speedcap, just higher (2.20 instead of 1.80)
+
    public void move(double x, double y, double z) {
       MCH_EntityAircraft ac = this.parent;
       if (ac.getAcInfo() == null) return;
@@ -368,7 +371,7 @@ public class MCH_WheelManager {
 
 
    /**
-    * original code for this annoying bugged shitfest method (note, this works with tanks and everything else)
+    * ORIGINAL code for this annoying bugged shitfest method (note, this works with tanks and everything else, however it has a SPEED CAP)
     *
     public void move(double x, double y, double z) {
     MCH_EntityAircraft ac = this.parent;
