@@ -46,6 +46,11 @@ import org.lwjgl.opengl.GL11;
 
 public class MCH_EntityTank extends MCH_EntityAircraft {
 
+   // Add to MCH_EntityTank (or base ground vehicle class)
+   private double prevHorizontalSpeed = 0.0D;
+   private boolean crashedIntoBlock = false;
+
+
    private MCH_TankInfo tankInfo = null;
    public float soundVolume;
    public float soundVolumeTarget;
@@ -873,6 +878,14 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
    private void onUpdate_Server() {
 
+      // Cache horizontal speed BEFORE it can be zeroed
+      this.prevHorizontalSpeed = Math.sqrt(
+              this.motionX * this.motionX +
+                      this.motionZ * this.motionZ
+      );
+      this.crashedIntoBlock = false;
+
+
       final boolean DEBUG = false;
       //gpt was right, drag coeff is nerfing my grabbed MPH logic.
 
@@ -923,12 +936,58 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       }
 
       boolean canMove = true;
+
       if (!this.getAcInfo().canMoveOnGround) {
          Block b = MCH_Lib.getBlockY(this, 3, -2, false);
+
          if (!W_Block.isEqual(b, W_Block.getWater()) && !W_Block.isEqual(b, Blocks.air)) {
             canMove = false;
+            this.crashedIntoBlock = true;
          }
       }
+
+
+      if (this.crashedIntoBlock) {
+
+         // Use cached speed, not current motion
+         double speed = this.prevHorizontalSpeed;
+
+         // 0.30 ≈ 30 mph (same scale as your entity collision logic)
+         if (speed > 0.30D && this.getTankInfo().weightType == 1) {
+
+            float damage = (float)(speed * 15.0D);
+
+            Entity rider = this.getRiddenByEntity();
+            DamageSource ds =
+                    rider instanceof EntityLivingBase
+                            ? DamageSource.causeMobDamage((EntityLivingBase) rider)
+                            : DamageSource.generic;
+
+            // Damage vehicle
+            this.attackEntityFrom(ds, damage);
+
+            // HARD stop + bounce-back so it doesn't phase into blocks
+            this.motionX *= -0.2D;
+            this.motionZ *= -0.2D;
+
+            // Optional: vertical kick for impact feel
+            this.motionY = 0.15D;
+
+            // Rider damage (scaled)
+            if (rider instanceof EntityLivingBase) {
+               rider.attackEntityFrom(ds, damage * 0.5F);
+            }
+
+            MCH_Lib.DbgLog(
+                    this.worldObj,
+                    "BLOCK CRASH speed=%.2f damage=%.1f",
+                    speed,
+                    damage
+            );
+         }
+      }
+
+
 
       if (canMove) {
          if (this.getAcInfo().enableBack && super.throttleBack > 0.0F) {
@@ -1001,6 +1060,47 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          super.riddenByEntity = null;
       }
    }
+
+   private void handleBlockCrash(double speed) {
+
+      // ---- DAMAGE SCALING ----
+      // Tuned to feel like car crashes, not aircraft
+      float damage = (float)((speed - 0.30D) * 12.0D);
+
+      if (damage < 0.5F) damage = 0.5F;
+
+      // ---- DAMAGE VEHICLE ----
+      this.attackEntityFrom(DamageSource.generic, damage);
+
+      // ---- DAMAGE RIDER ----
+      Entity rider = this.getRiddenByEntity();
+      if (rider instanceof EntityLivingBase) {
+         rider.attackEntityFrom(DamageSource.generic, damage * 0.6F);
+      }
+
+      // ---- REBOUND PHYSICS ----
+      // Push vehicle backward from impact direction
+      double back = -0.35D;
+
+      super.motionX += super.motionX * back;
+      super.motionZ += super.motionZ * back;
+
+      // Slight sideways deflection (prevents re-embedding)
+      super.motionX += (rand.nextDouble() - 0.5D) * 0.08D;
+      super.motionZ += (rand.nextDouble() - 0.5D) * 0.08D;
+
+      // ---- VERTICAL JOLT ----
+      super.motionY += 0.08D;
+
+      // ---- AUDIO / FEEDBACK HOOK ----
+      // worldObj.playSoundAtEntity(this, "mcheli:crash", 1.0F, 0.9F);
+
+      MCH_Lib.DbgLog(worldObj,
+              "CAR CRASH speed=%.2f damage=%.2f",
+              speed, damage
+      );
+   }
+
 
 
 
