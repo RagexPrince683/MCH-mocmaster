@@ -870,22 +870,15 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
    public void applyOnGroundPitch(float factor) {}
 
-   private float staticMaxSpeed = -1.0F;
-
 
    private void onUpdate_Server() {
 
-      final boolean DEBUG = true;
+      final boolean DEBUG = false;
+      //gpt was right, drag coeff is nerfing my grabbed MPH logic.
 
       // --------------------------------------------------
-      // LOCK MAX SPEED ONCE (THIS FIXES THE BUG)
-      // --------------------------------------------------
-      if (this.staticMaxSpeed < 0.0F) {
-         this.staticMaxSpeed = this.getMaxSpeed(); // capture once
-         System.out.println("[SPEED_INIT] staticMaxSpeed=" + this.staticMaxSpeed);
-      }
-
       // A: previous horizontal speed
+      // --------------------------------------------------
       double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       if (DEBUG) {
          System.out.println(String.format(
@@ -947,7 +940,9 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          }
       }
 
+      // --------------------------------------------------
       // B: after acceleration
+      // --------------------------------------------------
       double afterAccel = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       if (DEBUG) {
          System.out.println(String.format(
@@ -957,10 +952,12 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       }
 
       // --------------------------------------------------
-      // HARD SPEED CLAMP (STATIC LIMIT ONLY)
+      // HARD SPEED CLAMP (AUTHORITATIVE, NO CACHE)
       // --------------------------------------------------
-      if (afterAccel > this.staticMaxSpeed) {
-         double scale = this.staticMaxSpeed / afterAccel;
+      float maxSpeed = this.getTankInfo().speed;
+
+      if (afterAccel > maxSpeed) {
+         double scale = maxSpeed / afterAccel;
          super.motionX *= scale;
          super.motionZ *= scale;
       }
@@ -982,12 +979,14 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       this.updateWheels();
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
 
+      // --------------------------------------------------
       // C: after move
+      // --------------------------------------------------
       double afterMove = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       if (DEBUG) {
          System.out.println(String.format(
                  "DBG_C tick=%d afterMove=%.5f motionX=%.5f motionZ=%.5f speedLimit=%.5f",
-                 this.ticksExisted, afterMove, super.motionX, super.motionZ, this.staticMaxSpeed
+                 this.ticksExisted, afterMove, super.motionX, super.motionZ, maxSpeed
          ));
       }
 
@@ -1002,6 +1001,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          super.riddenByEntity = null;
       }
    }
+
 
 
 
