@@ -166,7 +166,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          //done: make sure rpg-7 isn't getting it's item damage reduced even though it cannot lock, it was this:
          //also ensure that the chinese change to how which button press for click to fire isn't affecting this.
 
-         if(var7.getItemDamage() < var7.getMaxDamage()) {
+         if(var7.getItemDamage() < var7.getMaxDamage() && !"rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(var6.getHeldItem()))) {
             if(var6.getItemInUseDuration() > 10) {
                gs.lock(var6);
                if(gs.getLockCount() > 0) {
