@@ -29,10 +29,10 @@ public class MCH_LightWeaponPacketHandler {
 
 
       if(!player.worldObj.isRemote) {
-         System.out.println("Server: Handling player control packet for player: " + player.getCommandSenderName());
+         //System.out.println("Server: Handling player control packet for player: " + player.getCommandSenderName());
          MCH_PacketLightWeaponPlayerControl pc = new MCH_PacketLightWeaponPlayerControl();
          pc.readData(data);
-         System.out.println("Server: Packet camMode: " + pc.camMode);
+         //System.out.println("Server: Packet camMode: " + pc.camMode);
          //if(pc.camMode == 1) {
          //   //player.removePotionEffect(Potion.nightVision.getId());
          //}

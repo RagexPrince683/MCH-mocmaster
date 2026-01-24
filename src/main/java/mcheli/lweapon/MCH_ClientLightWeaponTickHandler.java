@@ -285,7 +285,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          //rpg stuff here
       }
       if("rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player.getHeldItem()))) {
-         System.out.println("is rpg7");
+         //System.out.println("is rpg7");
          if(this.KeyAttack.isKeyDown()) {
             pc.useWeapon = true;
             pc.useWeaponPosX = player.posX;
