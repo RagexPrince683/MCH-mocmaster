@@ -4,6 +4,10 @@ import mcheli.MCH_BaseInfo;
 import mcheli.MCH_Color;
 import mcheli.wrapper.W_Item;
 
+import net.minecraftforge.oredict.OreDictionary;
+import net.minecraft.item.ItemStack;
+
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +23,9 @@ public class MCH_ItemInfo extends MCH_BaseInfo {
     public boolean isShapedRecipe;
     public int stackSize;
 
+    public List<String> oreDictNames = new ArrayList<String>();
+
+
     public MCH_ItemInfo(String name) {
         this.name = name;
         this.displayName = name;
@@ -32,28 +39,39 @@ public class MCH_ItemInfo extends MCH_BaseInfo {
     }
 
     public void loadItemData(String item, String data) {
-        if(item.compareTo("displayname") == 0) {
-            this.displayName = data;
-        } else {
-            String[] s;
-            if(item.compareTo("adddisplayname") == 0) {
-                s = data.split("\\s*,\\s*");
-                if(s != null && s.length == 2) {
-                    this.displayNameLang.put(s[0].trim(), s[1].trim());
-                }
-            } else if(item.compareTo("itemid") == 0) {
-                this.itemID = this.toInt(data, 0, '\uffff');
-            } else if(item.compareTo("addrecipe") != 0 && item.compareTo("addshapelessrecipe") != 0) {
-                if(item.equalsIgnoreCase("StackSize")) {
-                    this.stackSize = this.toInt(data, 1, 64);
-                }
-            } else {
-                this.isShapedRecipe = item.compareTo("addrecipe") == 0;
-                this.recipeString.add(data.toUpperCase());
-            }
-        }
 
+        if (item.equalsIgnoreCase("displayname")) {
+            this.displayName = data;
+
+        } else if (item.equalsIgnoreCase("adddisplayname")) {
+            String[] s = data.split("\\s*,\\s*");
+            if (s.length == 2) {
+                this.displayNameLang.put(s[0].trim(), s[1].trim());
+            }
+
+        } else if (item.equalsIgnoreCase("itemid")) {
+            this.itemID = this.toInt(data, 0, '\uffff');
+
+        } else if (item.equalsIgnoreCase("StackSize")) {
+            this.stackSize = this.toInt(data, 1, 64);
+
+        } else if (item.equalsIgnoreCase("oredict")) {
+            this.oreDictNames.add(data.trim());
+
+        } else if (item.equalsIgnoreCase("addoredict")) {
+            String[] s = data.split("\\s*,\\s*");
+            for (String ore : s) {
+                if (!ore.isEmpty()) {
+                    this.oreDictNames.add(ore.trim());
+                }
+            }
+
+        } else if (item.equalsIgnoreCase("addrecipe") || item.equalsIgnoreCase("addshapelessrecipe")) {
+            this.isShapedRecipe = item.equalsIgnoreCase("addrecipe");
+            this.recipeString.add(data.toUpperCase());
+        }
     }
+
 
 
 }

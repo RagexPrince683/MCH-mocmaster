@@ -79,6 +79,7 @@ import mcheli.wrapper.W_NetworkRegistry;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
+import net.minecraft.item.ItemStack;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -90,6 +91,7 @@ import mcheli.ship.MCH_ShipInfo;
 import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.mob.MCH_EntityGunner;
 import mcheli.mob.MCH_ItemSpawnGunner;
+import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.List;
 
@@ -316,6 +318,14 @@ public class MCH_MOD {
 
    @EventHandler
    public void init(FMLInitializationEvent evt) {
+
+      //public void registerOreDict(Item item) {
+      //   for (String oreName : this.oreDictNames) {
+      //      OreDictionary.registerOre(oreName, item);
+      //   }
+      //}
+      //item and oredictnames are not referencable here.
+
       getPacketHandler().initialise();
       GameRegistry.registerTileEntity(MCH_DraftingTableTileEntity.class, "drafting_table");
       proxy.registerBlockRenderer();
@@ -642,6 +652,22 @@ public class MCH_MOD {
          // Register as a normal item (non-throwable)
          info.item = new MCH_Item(info.itemID);
          info.item.setMaxStackSize(info.stackSize);
+
+         // ===== Ore Dictionary registration =====
+         if (info.oreDictNames != null && !info.oreDictNames.isEmpty()) {
+            for (String ore : info.oreDictNames) {
+               if (ore == null || ore.isEmpty()) continue;
+
+               OreDictionary.registerOre(
+                       ore,
+                       new ItemStack(info.item, 1, 0)
+               );
+
+               System.out.println("[mcheli.MCH_MOD] Registered OreDict: " + ore + " -> " + name);
+            }
+         }
+
+
          registerItem(info.item, name, creativeTabsItem);
          info.itemID = W_Item.getIdFromItem(info.item) - 256;
          W_LanguageRegistry.addName(info.item, info.displayName);
