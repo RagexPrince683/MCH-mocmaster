@@ -2,6 +2,7 @@ package mcheli;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import mcheli.MCH_Config;
@@ -204,6 +205,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
    }
 
    private static Object autoOre(Object obj) {
+
       if (!(obj instanceof ItemStack)) return obj;
 
       ItemStack stack = (ItemStack)obj;
@@ -213,6 +215,12 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
       if (oreIDs != null && oreIDs.length > 0) {
          return OreDictionary.getOreName(oreIDs[0]);
       }
+
+      System.out.println(
+              "AUTOORE CHECK: " + stack +
+                      " ORES=" + Arrays.toString(OreDictionary.getOreIDs(stack))
+      );
+
 
       return obj;
    }
