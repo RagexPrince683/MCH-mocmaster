@@ -36,7 +36,6 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
 
-import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
 
@@ -298,27 +297,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
                   } else {
                      Object obj = resolveRecipeObject(var12, r);
                      if (obj == null) return null;
-
-// AUTO OREDICT RESOLUTION
-                     if (obj instanceof ItemStack) {
-                        ItemStack stack = (ItemStack) obj;
-                        int[] oreIDs = OreDictionary.getOreIDs(stack);
-
-                        if (oreIDs != null && oreIDs.length > 0) {
-                           // use FIRST ore entry
-                           String oreName = OreDictionary.getOreName(oreIDs[0]);
-                           rcp.add(oreName);
-
-                           System.out.println("[Recipe] Auto-OreDict: "
-                                   + stack + " -> " + oreName);
-                        } else {
-                           // no oredict, use raw stack
-                           rcp.add(stack);
-                        }
-                     } else {
-                        rcp.add(obj);
-                     }
-
+                     rcp.add(obj);
 
                   }
                }
