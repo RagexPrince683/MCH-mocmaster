@@ -267,7 +267,13 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
                      return null;
                   }
 
-                  rcp.add(new ItemStack(W_Item.getItemByName(var12), 1, r));
+                  // OreDictionary support
+                  if (var12.startsWith("oredict:")) {
+                     // strip prefix and pass ore name directly
+                     rcp.add(var12.substring("oredict:".length()));
+                  } else {
+                     rcp.add(new ItemStack(W_Item.getItemByName(var12), 1, r));
+                  }
                }
 
                var11 = !var11;
