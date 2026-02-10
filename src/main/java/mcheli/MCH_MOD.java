@@ -211,6 +211,10 @@ public class MCH_MOD {
       MCH_Lib.Log("CurrentDirectory:" + (new File(".")).getAbsolutePath(), new Object[0]);
       System.out.println("CurrentDirectory:" + (new File(".")).getAbsolutePath());
 
+
+
+
+
       //its getting shit from the jar file because why not because it just fucking hates everything
 
       //sourcePath = evt.getSourceFile().getPath();
@@ -225,6 +229,10 @@ public class MCH_MOD {
       creativeTabsTank = new MCH_CreativeTabs("MCHeliO Tanks");
       creativeTabsVehicle = new MCH_CreativeTabs("MCHeliO Vehicles");
       W_ItemList.init();
+
+      //do this first so our oredict shit can work properly
+      registerItemCustom();
+
       config = proxy.loadConfig("config/mcheli.cfg");
       proxy.loadHUD(sourcePath + "/assets/" + "mcheli" + "/hud");
       MCH_WeaponInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/weapons");
@@ -248,7 +256,6 @@ public class MCH_MOD {
       this.registerItemUavStation();
       this.registerItemInvisible();
       registerItemThrowable();
-      registerItemCustom();
       this.registerItemLightWeaponBullet();
       this.registerItemLightWeapon();
       registerItemAircraft();
@@ -403,6 +410,63 @@ public class MCH_MOD {
    public void registerCommand(FMLServerStartedEvent e) {
       CommandHandler handler = (CommandHandler)FMLCommonHandler.instance().getSidedDelegate().getServer().getCommandManager();
       handler.registerCommand(new MCH_Command());
+   }
+
+   //do this first so oredict shit can work properly...?
+   public static void registerItemCustom() {
+      System.out.println("[mcheli.MCH_MOD:registerItemCustom] Starting custom item registration...");
+
+      Iterator<String> i$ = MCH_ItemInfoManager.getKeySet().iterator();
+
+      while (i$.hasNext()) {
+         String name = i$.next();
+         System.out.println("[mcheli.MCH_MOD:registerItemCustom] Processing item: " + name);
+
+         // Get the item info for the current item
+         MCH_ItemInfo info = MCH_ItemInfoManager.get(name);
+
+         // Check if item info is null
+         if (info == null) {
+            System.out.println("[mcheli.MCH_MOD:registerItemCustom] Error: Item info for " + name + " is null! Skipping...");
+            continue;
+         }
+
+         // Separate logic for throwable items (grenades)
+         if (isThrowableItem(name)) {
+            // Skip registering the throwable item in the normal item registration logic
+            System.out.println("[mcheli.MCH_MOD:registerItemCustom] Skipping throwable item: " + name);
+            continue;
+         }
+
+         // Register as a normal item (non-throwable)
+         info.item = new MCH_Item(info.itemID);
+         info.item.setMaxStackSize(info.stackSize);
+
+         // ===== Ore Dictionary registration =====
+         if (info.oreDictNames != null && !info.oreDictNames.isEmpty()) {
+            for (String ore : info.oreDictNames) {
+               if (ore == null || ore.isEmpty()) continue;
+
+               OreDictionary.registerOre(
+                       ore,
+                       new ItemStack(info.item, 1, 0)
+               );
+
+               System.out.println("[mcheli.MCH_MOD] Registered OreDict: " + ore + " -> " + name);
+            }
+         }
+
+
+         registerItem(info.item, name, creativeTabsItem);
+         info.itemID = W_Item.getIdFromItem(info.item) - 256;
+         W_LanguageRegistry.addName(info.item, info.displayName);
+
+         // Register item names in multiple languages
+         //for (String lang : info.displayNameLang.keySet()) {
+         //   W_LanguageRegistry.addNameForObject(info.item, (Object) lang, info.displayNameLang.get(lang));
+         //}
+         //let's get one thing fucking clear before I split you in two. The lang is Fucking Working.
+      }
    }
 
    private void registerItemRangeFinder() {
@@ -622,62 +686,6 @@ public class MCH_MOD {
          }
       }
 
-   }
-
-   public static void registerItemCustom() {
-      System.out.println("[mcheli.MCH_MOD:registerItemCustom] Starting custom item registration...");
-
-      Iterator<String> i$ = MCH_ItemInfoManager.getKeySet().iterator();
-
-      while (i$.hasNext()) {
-         String name = i$.next();
-         System.out.println("[mcheli.MCH_MOD:registerItemCustom] Processing item: " + name);
-
-         // Get the item info for the current item
-         MCH_ItemInfo info = MCH_ItemInfoManager.get(name);
-
-         // Check if item info is null
-         if (info == null) {
-            System.out.println("[mcheli.MCH_MOD:registerItemCustom] Error: Item info for " + name + " is null! Skipping...");
-            continue;
-         }
-
-         // Separate logic for throwable items (grenades)
-         if (isThrowableItem(name)) {
-            // Skip registering the throwable item in the normal item registration logic
-            System.out.println("[mcheli.MCH_MOD:registerItemCustom] Skipping throwable item: " + name);
-            continue;
-         }
-
-         // Register as a normal item (non-throwable)
-         info.item = new MCH_Item(info.itemID);
-         info.item.setMaxStackSize(info.stackSize);
-
-         // ===== Ore Dictionary registration =====
-         if (info.oreDictNames != null && !info.oreDictNames.isEmpty()) {
-            for (String ore : info.oreDictNames) {
-               if (ore == null || ore.isEmpty()) continue;
-
-               OreDictionary.registerOre(
-                       ore,
-                       new ItemStack(info.item, 1, 0)
-               );
-
-               System.out.println("[mcheli.MCH_MOD] Registered OreDict: " + ore + " -> " + name);
-            }
-         }
-
-
-         registerItem(info.item, name, creativeTabsItem);
-         info.itemID = W_Item.getIdFromItem(info.item) - 256;
-         W_LanguageRegistry.addName(info.item, info.displayName);
-
-         // Register item names in multiple languages
-         //for (String lang : info.displayNameLang.keySet()) {
-         //   W_LanguageRegistry.addNameForObject(info.item, (Object) lang, info.displayNameLang.get(lang));
-         //}
-         //let's get one thing fucking clear before I split you in two. The lang is Fucking Working.
-      }
    }
 
    /**
