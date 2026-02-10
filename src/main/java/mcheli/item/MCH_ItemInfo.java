@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+//this is our craft items/ammo items.
 public class MCH_ItemInfo extends MCH_BaseInfo {
     public final String name;
     public String displayName;
@@ -54,7 +55,7 @@ public class MCH_ItemInfo extends MCH_BaseInfo {
 
         } else if (item.equalsIgnoreCase("StackSize")) {
             this.stackSize = this.toInt(data, 1, 64);
-
+        //OREDICTS
         } else if (item.equalsIgnoreCase("oredict")) {
             this.oreDictNames.add(data.trim());
 

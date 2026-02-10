@@ -107,10 +107,12 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
       addRecipeList(addRecipe(var2, MCH_Config.ItemRecipe_DraftingTable.prmString));
    }
 
+   //called in postInit
    public static void registerItemRecipe() {
       registerCommonItemRecipe();
-      Iterator i$ = MCH_HeliInfoManager.map.keySet().iterator();
 
+      //HELICOPTERS
+      Iterator i$ = MCH_HeliInfoManager.map.keySet().iterator();
       String name;
       while(i$.hasNext()) {
          name = (String)i$.next();
@@ -118,38 +120,42 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
          addRecipeAndRegisterList(info, info.item, MCH_HeliInfoManager.getInstance());
       }
 
+      //PLANES
       i$ = MCP_PlaneInfoManager.map.keySet().iterator();
-
       while(i$.hasNext()) {
          name = (String)i$.next();
          MCP_PlaneInfo info1 = (MCP_PlaneInfo)MCP_PlaneInfoManager.map.get(name);
          addRecipeAndRegisterList(info1, info1.item, MCP_PlaneInfoManager.getInstance());
       }
 
-      i$ = MCH_ShipInfoManager.map.keySet().iterator();
 
+      //SHIPS
+      i$ = MCH_ShipInfoManager.map.keySet().iterator();
       while(i$.hasNext()) {
          name = (String)i$.next();
          MCH_ShipInfo info1 = (MCH_ShipInfo)MCH_ShipInfoManager.map.get(name);
          addRecipeAndRegisterList(info1, info1.item, MCH_ShipInfoManager.getInstance());
       }
 
-      i$ = MCH_TankInfoManager.map.keySet().iterator();
 
+      //TANKS
+      i$ = MCH_TankInfoManager.map.keySet().iterator();
       while(i$.hasNext()) {
          name = (String)i$.next();
          MCH_TankInfo info2 = (MCH_TankInfo)MCH_TankInfoManager.map.get(name);
          addRecipeAndRegisterList(info2, info2.item, MCH_TankInfoManager.getInstance());
       }
 
-      i$ = MCH_VehicleInfoManager.map.keySet().iterator();
 
+      //TURRETS
+      i$ = MCH_VehicleInfoManager.map.keySet().iterator();
       while(i$.hasNext()) {
          name = (String)i$.next();
          MCH_VehicleInfo info3 = (MCH_VehicleInfo)MCH_VehicleInfoManager.map.get(name);
          addRecipeAndRegisterList(info3, info3.item, MCH_VehicleInfoManager.getInstance());
       }
 
+      //THROWABLE ITEMS
       MCH_ThrowableInfo info4;
       for(i$ = MCH_ThrowableInfoManager.getKeySet().iterator(); i$.hasNext(); info4.recipeString = null) {
          name = (String)i$.next();
@@ -166,8 +172,9 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
          }
       }
 
+
+      //CRAFT ITEMS - THESE HAVE ALREADY BEEN OREDICTED!
       MCH_ItemInfo info5;
-      //YOU WILL REGISTER THE FUCKING RECIPE AND YOU WILL LIKE IT MOTHERFUCKER
       for(i$ = MCH_ItemInfoManager.getKeySet().iterator(); i$.hasNext(); info5.recipeString = null) {
          name = (String)i$.next();
          info5 = MCH_ItemInfoManager.get(name);
