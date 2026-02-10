@@ -36,6 +36,11 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
 
+import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.oredict.ShapedOreRecipe;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
+
+
 public class MCH_ItemRecipe implements MCH_IRecipeList {
 
    private static final MCH_ItemRecipe instance = new MCH_ItemRecipe();
@@ -198,6 +203,21 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
 
    }
 
+   private static Object autoOre(Object obj) {
+      if (!(obj instanceof ItemStack)) return obj;
+
+      ItemStack stack = (ItemStack)obj;
+      if (stack.getItem() == null) return obj;
+
+      int[] oreIDs = OreDictionary.getOreIDs(stack);
+      if (oreIDs != null && oreIDs.length > 0) {
+         return OreDictionary.getOreName(oreIDs[0]);
+      }
+
+      return obj;
+   }
+
+
    private static void addRecipeAndRegisterList(MCH_AircraftInfo info, Item item, MCH_AircraftInfoManager im) {
       int count = 0;
       Iterator i$ = info.recipeString.iterator();
@@ -280,7 +300,9 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
                      return null;
                   }
 
-                  rcp.add(new ItemStack(W_Item.getItemByName(var12), 1, r));
+                  ItemStack stack = new ItemStack(W_Item.getItemByName(var12), 1, r);
+                  rcp.add(autoOre(stack));
+
                }
 
                var11 = !var11;
@@ -292,16 +314,32 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
                var13[r] = rcp.get(r);
             }
 
-            ShapedRecipes var14 = (ShapedRecipes)GameRegistry.addShapedRecipe(new ItemStack(item, createNum), var13);
-
-            for(int i = 0; i < var14.recipeItems.length; ++i) {
-               if(var14.recipeItems[i] != null && var14.recipeItems[i].getItem() == null) {
-                  //throw new RuntimeException("Error: Invalid ShapedRecipes! " + item + " : " + data);
-                  System.out.println("Error: Invalid ShapedRecipes! " + item + " : " + data);
+            boolean usesOre = false;
+            for (Object o : var13) {
+               if (o instanceof String) {
+                  usesOre = true;
+                  break;
                }
             }
 
-            return var14;
+            IRecipe recipe;
+            if (usesOre) {
+               recipe = new ShapedOreRecipe(new ItemStack(item, createNum), var13);
+               GameRegistry.addRecipe(recipe);
+            } else {
+               recipe = GameRegistry.addShapedRecipe(new ItemStack(item, createNum), var13);
+            }
+
+            return recipe;
+
+            //for(int i = 0; i < var14.recipeItems.length; ++i) {
+            //   if(var14.recipeItems[i] != null && var14.recipeItems[i].getItem() == null) {
+            //      //throw new RuntimeException("Error: Invalid ShapedRecipes! " + item + " : " + data);
+            //      System.out.println("Error: Invalid ShapedRecipes! " + item + " : " + data);
+            //   }
+            //}
+
+            //return var14;
          }
       }
    }
@@ -347,7 +385,9 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
                   rcp.add(new ItemStack(W_Item.getItemById(is + 256), 1, i));
                }
             } else {
-               rcp.add(new ItemStack(W_Item.getItemByName(r), 1, i));
+               ItemStack stack = new ItemStack(W_Item.getItemByName(r), 1, i);
+               rcp.add(autoOre(stack));
+
             }
          }
 
@@ -357,18 +397,26 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
             var10[var11] = rcp.get(var11);
          }
 
-         ShapelessRecipes var12 = getShapelessRecipe(new ItemStack(item, createNum), var10);
-
-         for(i = 0; i < var12.recipeItems.size(); ++i) {
-            ItemStack var13 = (ItemStack)var12.recipeItems.get(i);
-            if(var13.getItem() == null) {
-               System.out.println("Error: Invalid ShapelessRecipes! " + item + " : " + data);
-               //throw new RuntimeException("Error: Invalid ShapelessRecipes! " + item + " : " + data);
+         boolean usesOre = false;
+         for (Object o : var10) {
+            if (o instanceof String) {
+               usesOre = true;
+               break;
             }
          }
 
-         GameRegistry.addRecipe(var12);
-         return var12;
+         IRecipe recipe;
+         if (usesOre) {
+            recipe = new ShapelessOreRecipe(new ItemStack(item, createNum), var10);
+            GameRegistry.addRecipe(recipe);
+         } else {
+            recipe = getShapelessRecipe(new ItemStack(item, createNum), var10);
+            GameRegistry.addRecipe(recipe);
+         }
+
+         return recipe;
+
+
       }
    }
 
