@@ -36,6 +36,9 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
 
+import net.minecraftforge.oredict.ShapedOreRecipe;
+
+
 public class MCH_ItemRecipe implements MCH_IRecipeList {
 
    private static final MCH_ItemRecipe instance = new MCH_ItemRecipe();
@@ -210,6 +213,26 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
       return isShaped?addShapedRecipe(item, data):addShapelessRecipe(item, data);
    }
 
+   private static Object resolveRecipeObject(String name, int meta) {
+      Item item = W_Item.getItemByName(name);
+      if (item == null) {
+         System.out.println("[MCH_ItemRecipe] Unknown item: " + name);
+         return null;
+      }
+
+      // Look up ItemInfo by item name
+      MCH_ItemInfo info = MCH_ItemInfoManager.get(name);
+
+      if (info != null && info.oreDictNames != null && !info.oreDictNames.isEmpty()) {
+         // Use FIRST oredict entry
+         return info.oreDictNames.get(0);
+      }
+
+      return new ItemStack(item, 1, meta);
+   }
+
+
+
    public static IRecipe addShapedRecipe(Item item, String data) {
       ArrayList rcp = new ArrayList();
       String[] s = data.split("\\s*,\\s*");
@@ -272,7 +295,10 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
                      // strip prefix and pass ore name directly
                      rcp.add(var12.substring("oredict:".length()));
                   } else {
-                     rcp.add(new ItemStack(W_Item.getItemByName(var12), 1, r));
+                     Object obj = resolveRecipeObject(var12, r);
+                     if (obj == null) return null;
+                     rcp.add(obj);
+
                   }
                }
 
