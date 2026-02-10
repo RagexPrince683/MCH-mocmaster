@@ -441,6 +441,16 @@ public class MCH_MOD {
          info.item.setMaxStackSize(info.stackSize);
 
          // ===== Ore Dictionary registration =====
+         // Register as a normal item (non-throwable)
+         info.item = new MCH_Item(info.itemID);
+         info.item.setMaxStackSize(info.stackSize);
+
+         // ---- REGISTER THE ITEM FIRST ----
+         registerItem(info.item, name, creativeTabsItem);
+         info.itemID = W_Item.getIdFromItem(info.item) - 256;
+         W_LanguageRegistry.addName(info.item, info.displayName);
+
+         // ---- THEN REGISTER OREDICT ----
          if (info.oreDictNames != null && !info.oreDictNames.isEmpty()) {
             for (String ore : info.oreDictNames) {
                if (ore == null || ore.isEmpty()) continue;
@@ -455,15 +465,6 @@ public class MCH_MOD {
          }
 
 
-         registerItem(info.item, name, creativeTabsItem);
-         info.itemID = W_Item.getIdFromItem(info.item) - 256;
-         W_LanguageRegistry.addName(info.item, info.displayName);
-
-         // Register item names in multiple languages
-         //for (String lang : info.displayNameLang.keySet()) {
-         //   W_LanguageRegistry.addNameForObject(info.item, (Object) lang, info.displayNameLang.get(lang));
-         //}
-         //let's get one thing fucking clear before I split you in two. The lang is Fucking Working.
       }
    }
 
