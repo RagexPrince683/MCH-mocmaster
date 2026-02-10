@@ -111,6 +111,10 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
    public static void registerItemRecipe() {
       registerCommonItemRecipe();
 
+
+      //FOCUS ON THESE 'VEHICLE ITEMS', WE NEED TO OREDICT THE COMPONENTS FOR THESE RECIPES IF THE COMPONENTS HAVE A OREDICT.
+      //THATS THE MAIN GOAL
+
       //HELICOPTERS
       Iterator i$ = MCH_HeliInfoManager.map.keySet().iterator();
       String name;
@@ -154,6 +158,8 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
          MCH_VehicleInfo info3 = (MCH_VehicleInfo)MCH_VehicleInfoManager.map.get(name);
          addRecipeAndRegisterList(info3, info3.item, MCH_VehicleInfoManager.getInstance());
       }
+
+      //END OF VEHICLE ITEMS REGISTRY
 
       //THROWABLE ITEMS
       MCH_ThrowableInfo info4;
