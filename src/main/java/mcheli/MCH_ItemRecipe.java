@@ -197,7 +197,13 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
          String s = (String)i$.next();
          ++count;
          if(s.length() >= 3) {
-            IRecipe recipe = addRecipe(item, s, info.isShapedRecipe);
+            IRecipe recipe;
+
+            if (info.isShapedRecipe) {
+               recipe = addShapedRecipe(item, s); // already OreDict-aware
+            } else {
+               recipe = addShapelessRecipe(item, s);
+            }
             info.recipe.add(recipe);
             im.addRecipe(recipe, count, info.name, s);
          }
@@ -221,16 +227,19 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
          return null;
       }
 
-      // Look up ItemInfo by item name
-      MCH_ItemInfo info = MCH_ItemInfoManager.get(name);
+      ItemStack stack = new ItemStack(item, 1, meta);
 
-      if (info != null && info.oreDictNames != null && !info.oreDictNames.isEmpty()) {
-         // Use FIRST oredict entry
-         return info.oreDictNames.get(0);
+      int[] oreIDs = OreDictionary.getOreIDs(stack);
+      if (oreIDs != null && oreIDs.length > 0) {
+         String oreName = OreDictionary.getOreName(oreIDs[0]);
+
+         System.out.println("[MCH Recipe] Using OreDict '" + oreName + "' instead of " + name);
+         return oreName;
       }
 
-      return new ItemStack(item, 1, meta);
+      return stack;
    }
+
 
 
 
@@ -299,25 +308,8 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
                      Object obj = resolveRecipeObject(var12, r);
                      if (obj == null) return null;
 
-// AUTO OREDICT RESOLUTION
-                     if (obj instanceof ItemStack) {
-                        ItemStack stack = (ItemStack) obj;
-                        int[] oreIDs = OreDictionary.getOreIDs(stack);
+                     rcp.add(obj);
 
-                        if (oreIDs != null && oreIDs.length > 0) {
-                           // use FIRST ore entry
-                           String oreName = OreDictionary.getOreName(oreIDs[0]);
-                           rcp.add(oreName);
-
-                           System.out.println("[Recipe] Auto-OreDict: "
-                                   + stack + " -> " + oreName);
-                        } else {
-                           // no oredict, use raw stack
-                           rcp.add(stack);
-                        }
-                     } else {
-                        rcp.add(obj);
-                     }
 
 
                   }
@@ -332,16 +324,34 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
                var13[r] = rcp.get(r);
             }
 
-            ShapedRecipes var14 = (ShapedRecipes)GameRegistry.addShapedRecipe(new ItemStack(item, createNum), var13);
+            boolean usesOreDict = false;
 
-            for(int i = 0; i < var14.recipeItems.length; ++i) {
-               if(var14.recipeItems[i] != null && var14.recipeItems[i].getItem() == null) {
-                  //throw new RuntimeException("Error: Invalid ShapedRecipes! " + item + " : " + data);
-                  System.out.println("Error: Invalid ShapedRecipes! " + item + " : " + data);
+            for (Object o : var13) {
+               if (o instanceof String) {
+                  usesOreDict = true;
+                  break;
                }
             }
 
-            return var14;
+            IRecipe recipe;
+
+            if (usesOreDict) {
+               recipe = new ShapedOreRecipe(new ItemStack(item, createNum), var13);
+               GameRegistry.addRecipe(recipe);
+
+               System.out.println("[MCH Recipe] ShapedOreRecipe registered: " + item);
+            } else {
+               recipe = GameRegistry.addShapedRecipe(new ItemStack(item, createNum), var13);
+
+               System.out.println("[MCH Recipe] ShapedRecipe registered: " + item);
+            }
+
+            if (recipe == null) {
+               System.out.println("[MCH Recipe ERROR] Failed to register recipe: " + item + " :: " + data);
+            }
+
+            return recipe;
+
          }
       }
    }
