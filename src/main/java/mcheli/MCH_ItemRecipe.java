@@ -233,25 +233,18 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
 
       int idx = start;
 
-      // ---- SHAPE (MCHeli-compatible) ----
-      for (int i = 0; i < 3 && idx < s.length; i++) {
+      // shape
+      for (int i = 0; i < 3; i++) {
          String row = s[idx++];
-
-         if (row.length() >= 2 && row.charAt(0) == '"' && row.charAt(row.length() - 1) == '"') {
-            rcp.add(row.substring(1, row.length() - 1));
-         } else {
-            rcp.add(row); // unquoted, accept as-is
-         }
+         rcp.add(row.substring(1, row.length() - 1));
       }
 
-      boolean isKey = true;
-
-      // ---- MAPPINGS ----
+      boolean key = true;
       while (idx < s.length) {
-         if (isKey) {
-            rcp.add(s[idx].toUpperCase().charAt(0));
+         if (key) {
+            rcp.add(s[idx].charAt(0));
          } else {
-            String name = s[idx].trim().toLowerCase();
+            String name = s[idx].toLowerCase();
             int meta = 0;
 
             if (idx + 1 < s.length && isNumber(s[idx + 1])) {
@@ -264,8 +257,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
                rcp.add(new ItemStack(W_Item.getItemByName(name), 1, meta));
             }
          }
-
-         isKey = !isKey;
+         key = !key;
          idx++;
       }
 
@@ -277,7 +269,6 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
       GameRegistry.addRecipe(recipe);
       return recipe;
    }
-
 
 
    public static IRecipe addShapelessRecipe(Item item, String data)
@@ -295,7 +286,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
       }
 
       for (int i = start; i < s.length; i++) {
-         String name = s[i].trim().toLowerCase();
+         String name = s[i].toLowerCase();
          int meta = 0;
 
          if (i + 1 < s.length && isNumber(s[i + 1])) {
@@ -317,7 +308,6 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
       GameRegistry.addRecipe(recipe);
       return recipe;
    }
-
 
 
    //public static ShapelessRecipes getShapelessRecipe(ItemStack par1ItemStack, Object ... par2ArrayOfObj) {
