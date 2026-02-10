@@ -36,6 +36,12 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
 
+
+import net.minecraftforge.oredict.ShapedOreRecipe;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
+import net.minecraftforge.oredict.OreDictionary;
+
+
 public class MCH_ItemRecipe implements MCH_IRecipeList {
 
    private static final MCH_ItemRecipe instance = new MCH_ItemRecipe();
@@ -210,177 +216,122 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
       return isShaped?addShapedRecipe(item, data):addShapelessRecipe(item, data);
    }
 
-   public static IRecipe addShapedRecipe(Item item, String data) {
-      ArrayList rcp = new ArrayList();
+   public static IRecipe addShapedRecipe(Item item, String data)
+   {
+      ArrayList<Object> rcp = new ArrayList<Object>();
       String[] s = data.split("\\s*,\\s*");
-      if(s.length < 3) {
-         return null;
-      } else {
-         byte start = 0;
-         int createNum = 1;
-         if(isNumber(s[0])) {
-            start = 1;
-            createNum = Integer.valueOf(s[0]).intValue();
-            if(createNum <= 0) {
-               createNum = 1;
-            }
-         }
+      if (s.length < 3) return null;
 
-         int idx = start;
+      int start = 0;
+      int createNum = 1;
 
-         for(int isChar = start; isChar < 3 + start; ++isChar) {
-            if(s[idx].length() > 0 && s[idx].charAt(0) == 34 && s[idx].charAt(s[idx].length() - 1) == 34) {
-               rcp.add(s[idx].subSequence(1, s[idx].length() - 1));
-               ++idx;
-            }
-         }
-
-         if(idx == 0) {
-            return null;
-         } else {
-            int r;
-            for(boolean var11 = true; idx < s.length; ++idx) {
-               if(s[idx].length() <= 0) {
-                  return null;
-               }
-
-               if(var11) {
-                  if(s[idx].length() != 1) {
-                     return null;
-                  }
-
-                  char recipe = s[idx].toUpperCase().charAt(0);
-                  if(recipe < 65 || recipe > 90) {
-                     return null;
-                  }
-
-                  rcp.add(Character.valueOf(recipe));
-               } else {
-                  String var12 = s[idx].trim().toLowerCase();
-                  r = 0;
-                  if(idx + 1 < s.length && isNumber(s[idx + 1])) {
-                     ++idx;
-                     r = Integer.parseInt(s[idx]);
-                  }
-
-                  if(isNumber(var12)) {
-                     return null;
-                  }
-
-                  rcp.add(new ItemStack(W_Item.getItemByName(var12), 1, r));
-               }
-
-               var11 = !var11;
-            }
-
-            Object[] var13 = new Object[rcp.size()];
-
-            for(r = 0; r < var13.length; ++r) {
-               var13[r] = rcp.get(r);
-            }
-
-            ShapedRecipes var14 = (ShapedRecipes)GameRegistry.addShapedRecipe(new ItemStack(item, createNum), var13);
-
-            for(int i = 0; i < var14.recipeItems.length; ++i) {
-               if(var14.recipeItems[i] != null && var14.recipeItems[i].getItem() == null) {
-                  //throw new RuntimeException("Error: Invalid ShapedRecipes! " + item + " : " + data);
-                  System.out.println("Error: Invalid ShapedRecipes! " + item + " : " + data);
-               }
-            }
-
-            return var14;
-         }
+      if (isNumber(s[0])) {
+         start = 1;
+         createNum = Integer.parseInt(s[0]);
+         if (createNum <= 0) createNum = 1;
       }
-   }
 
-   public static IRecipe addShapelessRecipe(Item item, String data) {
-      ArrayList rcp = new ArrayList();
-      String[] s = data.split("\\s*,\\s*");
-      if(s.length < 1) {
-         return null;
-      } else {
-         byte start = 0;
-         byte createNum = 1;
-         if(isNumber(s[0]) && createNum <= 0) {
-            createNum = 1;
-         }
+      int idx = start;
 
-         int i;
-         for(int recipe = start; recipe < s.length; ++recipe) {
-            if(s[recipe].length() <= 0) {
-               return null;
+      // shape
+      for (int i = 0; i < 3; i++) {
+         String row = s[idx++];
+         rcp.add(row.substring(1, row.length() - 1));
+      }
+
+      boolean key = true;
+      while (idx < s.length) {
+         if (key) {
+            rcp.add(s[idx].charAt(0));
+         } else {
+            String name = s[idx].toLowerCase();
+            int meta = 0;
+
+            if (idx + 1 < s.length && isNumber(s[idx + 1])) {
+               meta = Integer.parseInt(s[++idx]);
             }
 
-            String r = s[recipe].trim().toLowerCase();
-            i = 0;
-            if(recipe + 1 < s.length && isNumber(s[recipe + 1])) {
-               ++recipe;
-               i = Integer.parseInt(s[recipe]);
-            }
-
-            if(isNumber(r)) {
-               int is = Integer.parseInt(r);
-               if(is <= 255) {
-                  rcp.add(new ItemStack(W_Block.getBlockById(is), 1, i));
-               } else if(is <= 511) {
-                  rcp.add(new ItemStack(W_Item.getItemById(is), 1, i));
-               } else if(is <= 2255) {
-                  rcp.add(new ItemStack(W_Block.getBlockById(is), 1, i));
-               } else if(is <= 2267) {
-                  rcp.add(new ItemStack(W_Item.getItemById(is), 1, i));
-               } else if(is <= 4095) {
-                  rcp.add(new ItemStack(W_Block.getBlockById(is), 1, i));
-               } else if(is <= 31999) {
-                  rcp.add(new ItemStack(W_Item.getItemById(is + 256), 1, i));
-               }
+            if (OreDictionary.doesOreNameExist(name)) {
+               rcp.add(name);
             } else {
-               rcp.add(new ItemStack(W_Item.getItemByName(r), 1, i));
+               rcp.add(new ItemStack(W_Item.getItemByName(name), 1, meta));
             }
          }
-
-         Object[] var10 = new Object[rcp.size()];
-
-         for(int var11 = 0; var11 < var10.length; ++var11) {
-            var10[var11] = rcp.get(var11);
-         }
-
-         ShapelessRecipes var12 = getShapelessRecipe(new ItemStack(item, createNum), var10);
-
-         for(i = 0; i < var12.recipeItems.size(); ++i) {
-            ItemStack var13 = (ItemStack)var12.recipeItems.get(i);
-            if(var13.getItem() == null) {
-               System.out.println("Error: Invalid ShapelessRecipes! " + item + " : " + data);
-               //throw new RuntimeException("Error: Invalid ShapelessRecipes! " + item + " : " + data);
-            }
-         }
-
-         GameRegistry.addRecipe(var12);
-         return var12;
+         key = !key;
+         idx++;
       }
+
+      IRecipe recipe = new ShapedOreRecipe(
+              new ItemStack(item, createNum),
+              rcp.toArray()
+      );
+
+      GameRegistry.addRecipe(recipe);
+      return recipe;
    }
 
-   public static ShapelessRecipes getShapelessRecipe(ItemStack par1ItemStack, Object ... par2ArrayOfObj) {
-      ArrayList arraylist = new ArrayList();
-      Object[] aobject = par2ArrayOfObj;
-      int i = par2ArrayOfObj.length;
 
-      for(int j = 0; j < i; ++j) {
-         Object object1 = aobject[j];
-         if(object1 instanceof ItemStack) {
-            arraylist.add(((ItemStack)object1).copy());
-         } else if(object1 instanceof Item) {
-            arraylist.add(new ItemStack((Item)object1));
+   public static IRecipe addShapelessRecipe(Item item, String data)
+   {
+      ArrayList<Object> rcp = new ArrayList<Object>();
+      String[] s = data.split("\\s*,\\s*");
+
+      int createNum = 1;
+      int start = 0;
+
+      if (isNumber(s[0])) {
+         createNum = Integer.parseInt(s[0]);
+         if (createNum <= 0) createNum = 1;
+         start = 1;
+      }
+
+      for (int i = start; i < s.length; i++) {
+         String name = s[i].toLowerCase();
+         int meta = 0;
+
+         if (i + 1 < s.length && isNumber(s[i + 1])) {
+            meta = Integer.parseInt(s[++i]);
+         }
+
+         if (OreDictionary.doesOreNameExist(name)) {
+            rcp.add(name);
          } else {
-            if(!(object1 instanceof Block)) {
-               throw new RuntimeException("Invalid shapeless recipe!");
-            }
-
-            arraylist.add(new ItemStack((Block)object1));
+            rcp.add(new ItemStack(W_Item.getItemByName(name), 1, meta));
          }
       }
 
-      return new ShapelessRecipes(par1ItemStack, arraylist);
+      IRecipe recipe = new ShapelessOreRecipe(
+              new ItemStack(item, createNum),
+              rcp.toArray()
+      );
+
+      GameRegistry.addRecipe(recipe);
+      return recipe;
    }
+
+
+   //public static ShapelessRecipes getShapelessRecipe(ItemStack par1ItemStack, Object ... par2ArrayOfObj) {
+   //   ArrayList arraylist = new ArrayList();
+   //   Object[] aobject = par2ArrayOfObj;
+   //   int i = par2ArrayOfObj.length;
+//
+   //   for(int j = 0; j < i; ++j) {
+   //      Object object1 = aobject[j];
+   //      if(object1 instanceof ItemStack) {
+   //         arraylist.add(((ItemStack)object1).copy());
+   //      } else if(object1 instanceof Item) {
+   //         arraylist.add(new ItemStack((Item)object1));
+   //      } else {
+   //         if(!(object1 instanceof Block)) {
+   //            throw new RuntimeException("Invalid shapeless recipe!");
+   //         }
+//
+   //         arraylist.add(new ItemStack((Block)object1));
+   //      }
+   //   }
+//
+   //   return new ShapelessRecipes(par1ItemStack, arraylist);
+   //}
 
    public static boolean isNumber(String s) {
       if(s != null && !s.isEmpty()) {
