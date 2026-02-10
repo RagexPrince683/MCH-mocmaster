@@ -196,18 +196,137 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
       int count = 0;
       Iterator i$ = info.recipeString.iterator();
 
-      while(i$.hasNext()) {
-         String s = (String)i$.next();
+      while (i$.hasNext()) {
+         String s = (String) i$.next();
          ++count;
-         if(s.length() >= 3) {
-            IRecipe recipe = addRecipe(item, s, info.isShapedRecipe);
+         if (s.length() < 3) continue;
+
+         try {
+            // Split tokens same as addShapedRecipe does
+            String[] parts = s.split("\\s*,\\s*");
+            if (parts.length < 3) {
+               System.out.println("[MCH Recipe] Bad recipe format for " + info.name + " : " + s);
+               IRecipe recipe = addRecipe(item, s, info.isShapedRecipe);
+               info.recipe.add(recipe);
+               im.addRecipe(recipe, count, info.name, s);
+               continue;
+            }
+
+            // Detect if the first token is a number (create count)
+            int start = 0;
+            if (isNumber(parts[0])) start = 1;
+
+            // Copy shape rows (3 rows) as-is
+            int idx = start;
+            List<String> outParts = new ArrayList<String>();
+            for (int r = 0; r < 3 && idx < parts.length; r++, idx++) {
+               outParts.add(parts[idx]);
+            }
+
+            // Now process key -> ingredient pairs
+            boolean expectKey = true;
+            while (idx < parts.length) {
+               String keyToken = parts[idx++]; // should be single letter
+               outParts.add(keyToken); // keep the key
+
+               if (idx >= parts.length) break;
+
+               String nameToken = parts[idx++].trim();
+               // see if next token is a numeric metadata count
+               String metaToken = null;
+               if (idx < parts.length && isNumber(parts[idx])) {
+                  metaToken = parts[idx++];
+               }
+
+               // Normalize name (don't strip case - keep raw token for fallback)
+               String nameLookup = nameToken;
+
+               // Try to resolve to an Item or Block
+               Item lookupItem = W_Item.getItemByName(nameLookup);
+               Block lookupBlock = null;
+               if (lookupItem == null) {
+                  // try block lookup if wrapper exposes it
+                  try {
+                     // Many maps use block names rarely; fallback: try W_Block if available
+                     lookupBlock = (Block) W_Block.class.getMethod("getBlockByName", String.class).invoke(null, nameLookup);
+                  } catch (Exception ignored) {
+                     // If W_Block.getBlockByName doesn't exist, ignore — most recipe tokens are items
+                  }
+               }
+
+               String replacement = nameToken; // default: keep original token
+               int meta = 0;
+               if (metaToken != null) {
+                  try { meta = Integer.parseInt(metaToken); } catch (NumberFormatException ignored) {}
+               }
+
+               // If we found an Item or Block, check OreDictionary for it
+               ItemStack probe = null;
+               if (lookupItem != null) {
+                  probe = new ItemStack(lookupItem, 1, meta);
+               } else if (lookupBlock != null) {
+                  probe = new ItemStack(lookupBlock, 1, meta);
+               }
+
+               if (probe != null) {
+                  int[] ids = net.minecraftforge.oredict.OreDictionary.getOreIDs(probe);
+                  if (ids != null && ids.length > 0) {
+                     String oreName = net.minecraftforge.oredict.OreDictionary.getOreName(ids[0]);
+                     replacement = "oredict:" + oreName;
+                     System.out.println("[MCH Vehicle Recipe] Auto-replaced " + nameToken + " -> " + replacement + " for " + info.name);
+                  } else {
+                     // no oredict: keep as original name token
+                     replacement = nameToken;
+                  }
+               } else {
+                  // probe failed to find a registered item/block — keep original token (may be e.g. numeric or pre-existing oredict)
+                  replacement = nameToken;
+               }
+
+               // add replacement and optional meta back to outParts
+               outParts.add(replacement);
+               if (metaToken != null) outParts.add(metaToken);
+               expectKey = true;
+            }
+
+            // Rebuild the data string
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < outParts.size(); i++) {
+               if (i > 0) sb.append(", ");
+               sb.append(outParts.get(i));
+            }
+            String newData = sb.toString();
+
+            // Create recipe using the transformed string (which now contains any oredict:... where applicable)
+            IRecipe recipe = addRecipe(item, newData, info.isShapedRecipe);
+
+            // Store and register with manager
             info.recipe.add(recipe);
-            im.addRecipe(recipe, count, info.name, s);
+            im.addRecipe(recipe, count, info.name, newData);
+            // Keep a log so we can verify vehicles are oredict-ready
+            if (recipe instanceof net.minecraftforge.oredict.ShapedOreRecipe) {
+               System.out.println("[MCH Vehicle Recipe] Registered Ore-aware recipe for " + info.name + " : " + newData);
+            } else {
+               System.out.println("[MCH Vehicle Recipe] Registered vanilla recipe for " + info.name + " : " + newData);
+            }
+         } catch (Throwable t) {
+            System.out.println("[MCH Vehicle Recipe ERROR] Failed to register recipe for " + info.name + " : " + s);
+            t.printStackTrace();
+            // attempt to register original as fallback
+            try {
+               IRecipe recipe = addRecipe(item, s, info.isShapedRecipe);
+               info.recipe.add(recipe);
+               im.addRecipe(recipe, count, info.name, s);
+            } catch (Throwable tt) {
+               System.out.println("[MCH Vehicle Recipe ERROR] Fallback also failed for " + info.name + " : " + s);
+               tt.printStackTrace();
+            }
          }
       }
 
       info.recipeString = null;
    }
+
 
    public static IRecipe addRecipe(Item item, String data) {
       return addShapedRecipe(item, data);
@@ -218,87 +337,79 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
    }
 
    public static IRecipe addShapedRecipe(Item item, String data) {
-      ArrayList rcp = new ArrayList();
+      ArrayList<Object> rcp = new ArrayList<Object>();
       String[] s = data.split("\\s*,\\s*");
-      if(s.length < 3) {
-         return null;
-      } else {
-         byte start = 0;
-         int createNum = 1;
-         if(isNumber(s[0])) {
-            start = 1;
-            createNum = Integer.valueOf(s[0]).intValue();
-            if(createNum <= 0) {
-               createNum = 1;
-            }
-         }
+      if (s.length < 3) return null;
 
-         int idx = start;
+      int start = 0;
+      int createNum = 1;
+      if (isNumber(s[0])) {
+         start = 1;
+         createNum = Integer.parseInt(s[0]);
+         if (createNum <= 0) createNum = 1;
+      }
 
-         for(int isChar = start; isChar < 3 + start; ++isChar) {
-            if(s[idx].length() > 0 && s[idx].charAt(0) == 34 && s[idx].charAt(s[idx].length() - 1) == 34) {
-               rcp.add(s[idx].subSequence(1, s[idx].length() - 1));
-               ++idx;
-            }
-         }
+      int idx = start;
 
-         if(idx == 0) {
-            return null;
+      // shape
+      for (int i = 0; i < 3; i++) {
+         String row = s[idx++];
+         if (row.startsWith("\"") && row.endsWith("\"")) {
+            rcp.add(row.substring(1, row.length() - 1));
          } else {
-            int r;
-            for(boolean var11 = true; idx < s.length; ++idx) {
-               if(s[idx].length() <= 0) {
-                  return null;
-               }
-
-               if(var11) {
-                  if(s[idx].length() != 1) {
-                     return null;
-                  }
-
-                  char recipe = s[idx].toUpperCase().charAt(0);
-                  if(recipe < 65 || recipe > 90) {
-                     return null;
-                  }
-
-                  rcp.add(Character.valueOf(recipe));
-               } else {
-                  String var12 = s[idx].trim().toLowerCase();
-                  r = 0;
-                  if(idx + 1 < s.length && isNumber(s[idx + 1])) {
-                     ++idx;
-                     r = Integer.parseInt(s[idx]);
-                  }
-
-                  if(isNumber(var12)) {
-                     return null;
-                  }
-
-                  rcp.add(new ItemStack(W_Item.getItemByName(var12), 1, r));
-               }
-
-               var11 = !var11;
-            }
-
-            Object[] var13 = new Object[rcp.size()];
-
-            for(r = 0; r < var13.length; ++r) {
-               var13[r] = rcp.get(r);
-            }
-
-            ShapedRecipes var14 = (ShapedRecipes)GameRegistry.addShapedRecipe(new ItemStack(item, createNum), var13);
-
-            for(int i = 0; i < var14.recipeItems.length; ++i) {
-               if(var14.recipeItems[i] != null && var14.recipeItems[i].getItem() == null) {
-                  //throw new RuntimeException("Error: Invalid ShapedRecipes! " + item + " : " + data);
-                  System.out.println("Error: Invalid ShapedRecipes! " + item + " : " + data);
-               }
-            }
-
-            return var14;
+            return null;
          }
       }
+
+      boolean hasOreDict = false;
+
+      // key -> ingredient pairs
+      while (idx < s.length) {
+         char key = s[idx++].toUpperCase().charAt(0);
+         String name = s[idx++].trim().toLowerCase();
+
+         int meta = 0;
+         if (idx < s.length && isNumber(s[idx])) {
+            meta = Integer.parseInt(s[idx++]);
+         }
+
+         rcp.add(key);
+
+         Item resolved = W_Item.getItemByName(name);
+         if (resolved == null) {
+            //System.out.println("[MCH Recipe] Invalid item: " + name);
+            //rcp.add(ItemStack.);
+            //.EMPTY does not exist in forge 1.7.10 schizo ass ai
+            continue;
+         }
+
+         ItemStack stack = new ItemStack(resolved, 1, meta);
+         int[] oreIDs = net.minecraftforge.oredict.OreDictionary.getOreIDs(stack);
+
+         if (oreIDs.length > 0) {
+            String oreName = net.minecraftforge.oredict.OreDictionary.getOreName(oreIDs[0]);
+            rcp.add(oreName);
+            hasOreDict = true;
+         } else {
+            rcp.add(stack);
+         }
+      }
+
+      Object[] recipeArgs = rcp.toArray();
+
+      ItemStack output = new ItemStack(item, createNum);
+
+      if (hasOreDict) {
+         IRecipe recipe = new net.minecraftforge.oredict.ShapedOreRecipe(output, recipeArgs);
+         GameRegistry.addRecipe(recipe);
+         System.out.println("[MCH Recipe] Registered OREDICT recipe: " + data);
+         return recipe;
+      } else {
+         ShapedRecipes recipe = (ShapedRecipes)GameRegistry.addShapedRecipe(output, recipeArgs);
+         return recipe;
+      }
    }
+
 
    public static IRecipe addShapelessRecipe(Item item, String data) {
       ArrayList rcp = new ArrayList();
