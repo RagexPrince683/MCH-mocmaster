@@ -229,10 +229,6 @@ public class MCH_MOD {
       creativeTabsTank = new MCH_CreativeTabs("MCHeliO Tanks");
       creativeTabsVehicle = new MCH_CreativeTabs("MCHeliO Vehicles");
       W_ItemList.init();
-
-      //do this first so our oredict shit can work properly
-      registerItemCustom();
-
       config = proxy.loadConfig("config/mcheli.cfg");
       proxy.loadHUD(sourcePath + "/assets/" + "mcheli" + "/hud");
       MCH_WeaponInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/weapons");
@@ -245,6 +241,8 @@ public class MCH_MOD {
       MCH_ThrowableInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/throwable");
       MCH_SoundsJson.update(sourcePath + "/assets/" + "mcheli" + "/");
       MCH_Lib.Log("Register item", new Object[0]);
+      //do this first so our oredict shit can work properly
+      registerItemCustom();
       this.registerItemRangeFinder();
       this.registerItemSpawnGunner();
       this.registerItemWrench();
