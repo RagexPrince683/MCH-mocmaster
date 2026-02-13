@@ -105,15 +105,15 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public List listMuzzleFlashSmoke;
 
     /**
-     * 生成的方块破碎粒子数量
+     * Number of generated block breaking particles
      */
     public int flakParticlesCrack = 10;
     /**
-     * 生成的白色烟雾粒子数量
+     * Number of generated white smoke particles
      */
     public int numParticlesFlak = 3;
     /**
-     * 生成的方块破碎粒子扩散，推荐值0.1(步枪子弹) ~ 0.6(反坦克步枪)
+     * Spread of generated block breaking particles, recommended value 0.1 (rifle bullet) ~ 0.6 (anti-tank rifle)
      */
     public float flakParticlesDiff = 0.3F;
     public String hitSound;
@@ -122,145 +122,147 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public boolean hitSoundEnable = false;
     public boolean entityHitSoundEnable = false;
     /**
-     * 是否为红外弹，会受到热焰弹干扰
+     * Whether it is an infrared missile, will be affected by flares
      */
     public boolean isHeatSeekerMissile = true;
     /**
-     * 是否为雷达弹，会受到箔条干扰
+     * Whether it is a radar missile, will be affected by chaff
      */
     public boolean isRadarMissile = false;
-    //弹药导引头最大导引角度
+    // Maximum guidance angle of the missile seeker
     public int maxDegreeOfMissile = 60;
-    //脱锁延时，-1为永远锁定
+    // Lock release delay, -1 means permanently locked
     public int tickEndHoming = -1;
     /**
-     * 最大锁定距离
+     * Maximum lock-on range
      */
     public int maxLockOnRange = 300;
     /**
-     * 机载雷达最大锁定角度
+     * Maximum lock-on angle for airborne radar
      */
     public int maxLockOnAngle = 10;
     /**
-     * 速度门雷达最大角度，超过此角度将脱锁 (也可用于红外弹尾后攻击)
+     * Pulse-Doppler radar maximum angle, exceeding this angle will break lock (can also be used for rear-aspect IR attack)
      */
     public float pdHDNMaxDegree = 1000f;
     /**
-     * 速度门雷达脱锁间隔，超过最大角度后，在该tick后导弹脱锁
+     * Pulse-Doppler radar lock-out interval, after exceeding the maximum angle, the missile loses lock after this many ticks
      */
     public int pdHDNMaxDegreeLockOutCount = 10;
     /**
-     * 导弹抗干扰时长，-1为不抗干扰
+     * Missile countermeasure resistance duration, -1 means no resistance
      */
     public int antiFlareCount = -1;
     /**
-     * 雷达弹多径杂波检测高度，飞机低于这个高度将使雷达弹脱锁
+     * Radar missile multipath clutter detection height, if the aircraft is below this height the radar missile will lose lock
      */
     public int lockMinHeight = 25;
     /**
-     * 半主动雷达弹需要持续引导
+     * Semi-active radar missile requires continuous guidance
      */
     public boolean passiveRadar = false;
 
     /**
-     * 半主动雷达弹脱离引导后脱锁计时
+     * Semi-active radar missile lock-out timer after losing guidance
      */
     public int passiveRadarLockOutCount = 20;
 
     /**
-     * 对TV弹启用激光制导
+     * Enable laser guidance for TV missiles
      */
     public boolean laserGuidance = false;
 
     /**
-     * 是否有激光吊舱
+     * Whether it has a laser guidance pod
      */
     public boolean hasLaserGuidancePod = true;
 
     /**
-     * 允许离轴射击 AA弹
+     * Allow off-axis firing for AA missiles
      */
     public boolean enableOffAxis = true;
 
     /**
-     * 导弹机动参数，越小越平滑，值设为1时为原版导弹机动，推荐值为0.1
+     * Missile maneuver parameter, smaller is smoother, value 1 equals vanilla missile maneuvering, recommended value is 0.1
      */
     public double turningFactor = 0.5;
 
     /**
-     * 启用区块加载器(试验功能)
+     * Enable chunk loader (experimental feature)
      */
     public boolean enableChunkLoader = false;
 
     /**
-     * 主动雷达弹 BVR 发射后自动追踪目标
+     * Active radar missile BVR automatically tracks target after launch
      */
     public boolean activeRadar = false;
 
     /**
-     * 主动雷达弹 扫描间隔
+     * Active radar missile scan interval
      */
     public int scanInterval = 20;
 
     /**
-     * 武器切换冷却
+     * Weapon switch cooldown
      */
     public int weaponSwitchCount = 0;
 
     /**
-     * 武器切换音效
+     * Weapon switch sound effect
      */
     public String weaponSwitchSound = "";
 
     /**
-     * 武器垂直后坐力
+     * Weapon vertical recoil
      */
     public float recoilPitch = 0.0F;
     /**
-     * 武器水平后坐力（固定方向）
+     * Weapon horizontal recoil (fixed direction)
      */
     public float recoilYaw = 0.0F;
     /**
-     * 武器随机垂直后坐力 (Recoil 2 + rndRecoil 0.5 == 1.5-2.5 Recoil range)
+     * Weapon random vertical recoil (Recoil 2 + rndRecoil 0.5 == 1.5-2.5 Recoil range)
      */
     public float recoilPitchRange = 0.0F;
     /**
-     * 武器随机水平后坐力
+     * Weapon random horizontal recoil
      */
     public float recoilYawRange = 0.0F;
     /**
-     * 武器后坐力恢复速度
+     * Weapon recoil recovery speed
      */
     public float recoilRecoverFactor = 0.8F;
 
     /**
-     * 每tick速度增加数值，小于0减速，大于0加速
+     * Speed increase per tick, less than 0 decelerates, greater than 0 accelerates
      */
     public float speedFactor = 0F;
     /**
-     * 每tick的速度乘数生效时长
+     * Duration when per-tick speed multiplier starts
      */
     public int speedFactorStartTick = 0;
     /**
-     * 每tick的速度乘数结束时长
+     * Duration when per-tick speed multiplier ends
      */
     public int speedFactorEndTick = 0;
     /**
-     * 速度是否跟随载机，最终速度 = 载机速度 + 子弹速度
+     * Whether speed follows the aircraft, final speed = aircraft speed + bullet speed
      */
-    public boolean speedDependsAircraft = false;
+    public boolean speedDependsAircraft = true;
+// debug, test
     /**
-     * 是否可以锁定导弹实体
+     * Whether missile entities can be locked
      */
     public boolean canLockMissile = false;
     /**
-     * 允许超视距索敌
+     * Allow beyond-visual-range targeting
      */
     public boolean enableBVR = false;
     /**
-     * 超视距索敌功能最小启用距离
+     * Minimum activation distance for beyond-visual-range targeting
      */
     public int minRangeBVR = 300;
+
 
     public MCH_WeaponInfo(String name) {
         this.name = name;
