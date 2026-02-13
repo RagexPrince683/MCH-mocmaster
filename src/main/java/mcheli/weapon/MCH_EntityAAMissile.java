@@ -1,62 +1,118 @@
 package mcheli.weapon;
 
-import mcheli.weapon.MCH_EntityBaseBullet;
+import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.flare.MCH_EntityChaff;
+import mcheli.uav.MCH_EntityUavStation;
+import mcheli.vector.Vector3f;
+import mcheli.wrapper.W_Entity;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
-//import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
-public class MCH_EntityAAMissile extends MCH_EntityBaseBullet {
+import java.util.List;
+
+public class MCH_EntityAAMissile extends MCH_EntityBaseBullet implements MCH_IEntityLockChecker {
 
    public MCH_EntityAAMissile(World par1World) {
       super(par1World);
-      this.targetEntity = null;
+      super.targetEntity = null;
    }
 
-   public MCH_EntityAAMissile(
-           World par1World, double posX, double posY, double posZ, double targetX, double targetY,
-           double targetZ, float yaw, float pitch, double acceleration) {
+   public MCH_EntityAAMissile(World par1World, double posX, double posY, double posZ, double targetX, double targetY, double targetZ, float yaw, float pitch, double acceleration) {
       super(par1World, posX, posY, posZ, targetX, targetY, targetZ, yaw, pitch, acceleration);
    }
 
-   @Override
    public void onUpdate() {
       super.onUpdate();
-      if (this.getCountOnUpdate() > 4 && this.getInfo() != null && !this.getInfo().disableSmoke) {
+      if(this.getCountOnUpdate() > 4 && this.getInfo() != null && !this.getInfo().disableSmoke) {
          this.spawnExplosionParticle(this.getInfo().trajectoryParticleName, 3, 7.0F * this.getInfo().smokeSize * 0.5F);
       }
 
-      if (!super.worldObj.isRemote && this.getInfo() != null) {
-         if (this.shootingEntity != null && this.targetEntity != null && !this.targetEntity.isDead) {
-            double x = this.posX - this.targetEntity.posX;
-            double y = this.posY - this.targetEntity.posY;
-            double z = this.posZ - this.targetEntity.posZ;
+      if(!super.worldObj.isRemote && this.getInfo() != null) {
+         if(super.shootingEntity != null && super.targetEntity != null && !super.targetEntity.isDead) {
+            double x = super.posX - super.targetEntity.posX;
+            double y = super.posY - super.targetEntity.posY;
+            double z = super.posZ - super.targetEntity.posZ;
             double d = x * x + y * y + z * z;
-            if (d > 3422500.0) {
+            if(d > 3422500.0D) {
                this.setDead();
-            } else if (this.getCountOnUpdate() > this.getInfo().rigidityTime) {
-               //if (this.usingFlareOfTarget(this.targetEntity)) {
-               //   this.setDead();
-               //   return;
-               //}
-
-               if (this.getInfo().proximityFuseDist >= 0.1F && d < this.getInfo().proximityFuseDist) {
-                  MovingObjectPosition  mop = new MovingObjectPosition(this.targetEntity);
-                  this.posX = (this.targetEntity.posX + this.posX) / 2.0;
-                  this.posY = (this.targetEntity.posY + this.posY) / 2.0;
-                  this.posZ = (this.targetEntity.posZ + this.posZ) / 2.0;
+            } else if(this.getCountOnUpdate() > this.getInfo().rigidityTime) {
+               if(this.getInfo().proximityFuseDist >= 0.1F && d * d < (double)this.getInfo().proximityFuseDist) {
+                  MovingObjectPosition mop = new MovingObjectPosition(super.targetEntity);
+                  super.posX = (super.targetEntity.posX + super.posX) / 2.0D;
+                  super.posY = (super.targetEntity.posY + super.posY) / 2.0D;
+                  super.posZ = (super.targetEntity.posZ + super.posZ) / 2.0D;
                   this.onImpact(mop, 1.0F);
                } else {
-                  this.guidanceToTarget(this.targetEntity.posX, this.targetEntity.posY, this.targetEntity.posZ);
+                  this.guidanceToTarget(super.targetEntity.posX, super.targetEntity.posY, super.targetEntity.posZ);
                }
             }
          } else {
-            this.setDead();
+            if(getInfo().activeRadar && ticksExisted % getInfo().scanInterval == 0) {
+               scanForTargets();
+            }
+         }
+      }
+
+   }
+
+   private void scanForTargets() {
+      Vector3f missileDirection = new Vector3f((float) super.motionX, (float) super.motionY, (float) super.motionZ);
+      double range = getInfo().maxLockOnRange;
+      List<Entity> list = worldObj.getEntitiesWithinAABB(Entity.class, AxisAlignedBB.getBoundingBox(
+              posX - range, posY - range, posZ - range,
+              posX + range, posY + range, posZ + range
+      ));
+
+      if (list != null && !list.isEmpty()) {
+         double closestAngle = Double.MAX_VALUE;
+         Entity closestTarget = null;
+
+         for (Entity entity : list) {
+            if (entity instanceof MCH_EntityAircraft || entity instanceof MCH_EntityChaff) {
+
+               if (W_Entity.isEqual(entity, shootingAircraft)) {
+                  continue;
+               }
+
+               boolean isTargetOnGround = MCH_WeaponGuidanceSystem.isEntityOnGround(entity, getInfo().lockMinHeight);
+               if (isTargetOnGround) {
+                  continue;
+               }
+
+               double dx = entity.posX - super.posX;
+               double dy = entity.posY - super.posY;
+               double dz = entity.posZ - super.posZ;
+               Vector3f targetDirection = new Vector3f((float) dx, (float) dy, (float) dz);
+
+               double angle = Math.abs(Vector3f.angle(missileDirection, targetDirection));
+
+               if(angle > Math.toRadians(getInfo().maxLockOnAngle)) {
+                  continue;
+               }
+
+               if (angle < closestAngle) {
+                  closestAngle = angle;
+                  closestTarget = entity;
+               }
+            }
+         }
+
+         if (closestTarget != null) {
+            super.targetEntity = closestTarget;
          }
       }
    }
 
-   @Override
+
    public MCH_BulletModel getDefaultBulletModel() {
       return MCH_DefaultBulletModels.AAMissile;
+   }
+
+   @Override
+   public boolean canLockEntity(Entity var1) {
+      return false;
    }
 }
