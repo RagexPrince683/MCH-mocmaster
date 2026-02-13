@@ -564,38 +564,38 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             return;
         }
 
-        // 计算目标位置与当前实体位置之间的差值
-        double tx = targetPosX - super.posX;  // 目标X坐标与当前实体X坐标的差值
-        double ty = targetPosY - super.posY;  // 目标Y坐标与当前实体Y坐标的差值
-        double tz = targetPosZ - super.posZ;  // 目标Z坐标与当前实体Z坐标的差值
+        // Calculate the difference between the target position and the current entity position
+        double tx = targetPosX - super.posX;  // Difference between target X coordinate and current entity X coordinate
+        double ty = targetPosY - super.posY;  // Difference between target Y coordinate and current entity Y coordinate
+        double tz = targetPosZ - super.posZ;  // Difference between target Z coordinate and current entity Z coordinate
 
-        // 计算目标与当前实体之间的距离
+        // Calculate the distance between the target and the current entity
         double d = MathHelper.sqrt_double(tx * tx + ty * ty + tz * tz);
 
-        // 计算单位加速度在每个坐标轴上的分量
-        double mx = tx * this.acceleration / d;  // X轴加速度分量
-        double my = ty * this.acceleration / d;  // Y轴加速度分量
-        double mz = tz * this.acceleration / d;  // Z轴加速度分量
+        // Calculate the acceleration component on each axis
+        double mx = tx * this.acceleration / d;  // Acceleration component on X axis
+        double my = ty * this.acceleration / d;  // Acceleration component on Y axis
+        double mz = tz * this.acceleration / d;  // Acceleration component on Z axis
 
-        // 计算导弹的运动方向
+        // Calculate the missile's movement direction
         Vector3f missileDirection = new Vector3f((float)super.motionX, (float)super.motionY, (float)super.motionZ);
 
-        // 计算目标方向（从导弹指向目标）
+        // Calculate the target direction (from missile to target)
         Vector3f targetDirection = new Vector3f((float)tx, (float)ty, (float)tz);
 
-        // 计算导弹运动方向与目标方向之间的夹角（单位：弧度）
+        // Calculate the angle between the missile movement direction and the target direction (in radians)
         double angle = Math.abs(Vector3f.angle(missileDirection, targetDirection));
 
-        // 设置最大允许角度阈值（单位：弧度）
-        double maxAllowedAngle = Math.toRadians(getInfo().maxDegreeOfMissile);  // 可以根据需要调整这个值，10度是一个例子
+        // Set the maximum allowed angle threshold (in radians)
+        double maxAllowedAngle = Math.toRadians(getInfo().maxDegreeOfMissile);  // This value can be adjusted as needed, 10 degrees is an example
 
-        // 如果角度超过最大允许值，解除锁定
+        // If the angle exceeds the maximum allowed value, release lock
         if (angle > maxAllowedAngle && !doingTopAttack) {
             targetEntity = null;
             return;
         }
 
-        //计算目标的速度向量
+        // Calculate the target's velocity vector
         Vector3f targetVelocity = new Vector3f(targetEntity.motionX, targetEntity.motionY, targetEntity.motionZ);
         double velocityAngle = Math.abs(Vector3f.angle(missileDirection, targetVelocity));
         if (velocityAngle > getInfo().pdHDNMaxDegree) {
@@ -609,19 +609,20 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             return;
         }
 
-        // 使用平滑加权平均值来更新当前实体的运动速度
-        super.motionX = super.motionX + (mx - super.motionX) * getInfo().turningFactor;  // 平滑过渡X轴速度
-        super.motionY = super.motionY + (my - super.motionY) * getInfo().turningFactor;  // 平滑过渡Y轴速度
-        super.motionZ = super.motionZ + (mz - super.motionZ) * getInfo().turningFactor;  // 平滑过渡Z轴速度
+        // Use a smooth weighted average to update the current entity's motion speed
+        super.motionX = super.motionX + (mx - super.motionX) * getInfo().turningFactor;  // Smooth transition of X-axis velocity
+        super.motionY = super.motionY + (my - super.motionY) * getInfo().turningFactor;  // Smooth transition of Y-axis velocity
+        super.motionZ = super.motionZ + (mz - super.motionZ) * getInfo().turningFactor;  // Smooth transition of Z-axis velocity
 
-        // 计算实体朝向目标的旋转角度（Yaw方向）
-        double a = (float)Math.atan2(super.motionZ, super.motionX);  // 计算水平方向的角度（Yaw）
-        super.rotationYaw = (float)(a * 180.0D / 3.141592653589793D) - 90.0F;  // 转换为角度并设置实体的旋转Yaw
+        // Calculate the entity's rotation angle toward the target (Yaw direction)
+        double a = (float)Math.atan2(super.motionZ, super.motionX);  // Calculate horizontal angle (Yaw)
+        super.rotationYaw = (float)(a * 180.0D / 3.141592653589793D) - 90.0F;  // Convert to degrees and set entity rotation Yaw
 
-        // 计算实体的俯仰角度（Pitch方向）
-        double r = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);  // 计算水平速度的大小
-        super.rotationPitch = -((float)(Math.atan2(super.motionY, r) * 180.0D / 3.141592653589793D));  // 计算并设置Pitch角度
+        // Calculate the entity's pitch angle (Pitch direction)
+        double r = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);  // Calculate horizontal speed magnitude
+        super.rotationPitch = -((float)(Math.atan2(super.motionY, r) * 180.0D / 3.141592653589793D));  // Calculate and set Pitch angle
     }
+
 
     public boolean checkValid() {
         if (this.shootingEntity == null && this.shootingAircraft == null) {
