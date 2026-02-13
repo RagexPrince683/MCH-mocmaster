@@ -130,7 +130,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
      */
     public boolean isRadarMissile = false;
     // Maximum guidance angle of the missile seeker
-    public int maxDegreeOfMissile = 60;
+    public int maxDegreeOfMissile = 160;
     // Lock release delay, -1 means permanently locked
     public int tickEndHoming = -1;
     /**
@@ -148,7 +148,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     /**
      * Pulse-Doppler radar lock-out interval, after exceeding the maximum angle, the missile loses lock after this many ticks
      */
-    public int pdHDNMaxDegreeLockOutCount = 10;
+    public int pdHDNMaxDegreeLockOutCount = 50;
     /**
      * Missile countermeasure resistance duration, -1 means no resistance
      */
