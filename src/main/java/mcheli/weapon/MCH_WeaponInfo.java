@@ -132,7 +132,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     // Maximum guidance angle of the missile seeker
     public int maxDegreeOfMissile = 160;
     // Lock release delay, -1 means permanently locked
-    public int tickEndHoming = -1;
+    public int tickEndHoming = 50;
     /**
      * Maximum lock-on range
      */
@@ -185,7 +185,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     /**
      * Missile maneuver parameter, smaller is smoother, value 1 equals vanilla missile maneuvering, recommended value is 0.1
      */
-    public double turningFactor = 0.5;
+    public double turningFactor = 0.8;
 
     /**
      * Enable chunk loader (experimental feature)
@@ -248,8 +248,8 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     /**
      * Whether speed follows the aircraft, final speed = aircraft speed + bullet speed
      */
-    public boolean speedDependsAircraft = true;
-// debug, test
+    public boolean speedDependsAircraft = false;
+    // debug, test
     /**
      * Whether missile entities can be locked
      */
