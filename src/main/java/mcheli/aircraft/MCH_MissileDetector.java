@@ -13,6 +13,23 @@ import java.util.List;
 
 public class MCH_MissileDetector {
 
+    private static Class<?> hmgBulletClass = null;
+    private static java.lang.reflect.Field hasVTField = null;
+    private static boolean reflectionInitialized = false;
+
+    private static void initReflection() {
+        if (reflectionInitialized) return;
+        reflectionInitialized = true;
+
+        try {
+            hmgBulletClass = Class.forName("handmadeguns.entity.bullets.HMGEntityBulletBase");
+            hasVTField = hmgBulletClass.getDeclaredField("hasVT");
+            hasVTField.setAccessible(true);
+        } catch (Exception e) {
+            hmgBulletClass = null; // HMG not installed
+        }
+    }
+
     public static final int SEARCH_RANGE = 60;
     private MCH_EntityAircraft ac;
     private World world;
@@ -66,11 +83,11 @@ public class MCH_MissileDetector {
 
                         //if (this.hasalert())
 
-                            if (this.alertCount == 0 && (isLocked || this.isLockedByMissile()) && this.hasalert()) {
+                            if (this.alertCount == 0 && ((isLocked || this.isLockedByMissile() || this.isLockedByHMGVT())) && this.hasalert()) {
                                 this.alertCount = 20;
                                 W_WorldFunc.MOD_playSoundAtEntity(this.ac, "alert", 50.0F, 1.0F);
                             }
-                    } else if (this.ac.isUAV() && this.world.isRemote && this.alertCount == 0 && (isLocked || this.isLockedByMissile()) && this.hasalert()) {
+                    } else if (this.ac.isUAV() && this.world.isRemote && this.alertCount == 0 && ((isLocked || this.isLockedByMissile() || this.isLockedByHMGVT())) && this.hasalert()) {
                         this.alertCount = 20;
                         if (W_Lib.isClientPlayer(var4)) {
                             W_McClient.MOD_playSoundFX("alert", 50.0F, 1.0F);
@@ -83,6 +100,58 @@ public class MCH_MissileDetector {
 
             }
         }
+    }
+
+    public boolean isLockedByHMGVT() {
+
+        initReflection();
+
+        if (hmgBulletClass == null)
+            return false; // HMG not installed
+
+        List list = this.world.getEntitiesWithinAABB(
+                hmgBulletClass,
+                this.ac.boundingBox.expand(400.0D, 400.0D, 400.0D)
+        );
+
+        if (list == null || list.isEmpty())
+            return false;
+
+        for (Object obj : list) {
+
+            System.out.println("Checking entity: " + obj.getClass().getName() + " (ID: " + ((Entity) obj).getEntityId() + ")");
+
+            if (obj == null)
+                continue;
+
+            try {
+                Boolean hasVT = (Boolean) hasVTField.get(obj);
+                if (hasVT == null || !hasVT)
+                    continue;
+
+                Entity bullet = (Entity) obj;
+
+                if (bullet.isDead)
+                    continue;
+
+                // Optional: check if moving toward aircraft
+                double dx = this.ac.posX - bullet.posX;
+                double dy = (this.ac.posY + this.ac.height * 0.5) - bullet.posY;
+                double dz = this.ac.posZ - bullet.posZ;
+
+                double dot =
+                        (bullet.motionX * dx) +
+                                (bullet.motionY * dy) +
+                                (bullet.motionZ * dz);
+
+                if (dot > 0) {
+                    return true;
+                }
+
+            } catch (Exception ignored) {}
+        }
+
+        return false;
     }
 
     public void destroyMissile() {
