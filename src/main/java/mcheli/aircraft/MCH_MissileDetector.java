@@ -135,7 +135,7 @@ public class MCH_MissileDetector {
 
         for (Object obj : list) {
 
-            System.out.println("Checking entity: " + obj.getClass().getName() + " (ID: " + ((Entity) obj).getEntityId() + ")");
+            //System.out.println("Checking entity: " + obj.getClass().getName() + " (ID: " + ((Entity) obj).getEntityId() + ")");
 
             if (obj == null)
                 continue;
