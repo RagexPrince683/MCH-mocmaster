@@ -13,6 +13,9 @@ import java.util.List;
 
 public class MCH_MissileDetector {
 
+    private static java.lang.reflect.Field hmgHasVTField;
+    private static boolean hmgInit = false;
+
     private static Class<?> hmgBulletClass = null;
     private static java.lang.reflect.Field hasVTField = null;
     private static boolean reflectionInitialized = false;
@@ -102,6 +105,19 @@ public class MCH_MissileDetector {
         }
     }
 
+    private static void initHMG() {
+        if (hmgInit) return;
+        hmgInit = true;
+
+        try {
+            hmgBulletClass = Class.forName("handmadeguns.entity.bullets.HMGEntityBulletBase");
+            hmgHasVTField = hmgBulletClass.getDeclaredField("hasVT");
+            hmgHasVTField.setAccessible(true);
+        } catch (Exception e) {
+            hmgBulletClass = null;
+        }
+    }
+
     public boolean isLockedByHMGVT() {
 
         initReflection();
@@ -155,32 +171,91 @@ public class MCH_MissileDetector {
     }
 
     public void destroyMissile() {
-        List list = this.world.getEntitiesWithinAABB(MCH_EntityBaseBullet.class, this.ac.boundingBox.expand(300.0D, 300.0D, 300.0D));
-        if (list == null) {
-            return;
-        }
-        for (Object o : list) {
-            MCH_EntityBaseBullet msl = (MCH_EntityBaseBullet) o;
-            if (msl.targetEntity != null && (this.ac.isMountedEntity(msl.targetEntity) || msl.targetEntity.equals(this.ac))) {
-                if (msl.getInfo().isHeatSeekerMissile) {
-                    if (msl.getInfo().antiFlareCount > 0) {
-                        if (msl.antiFlareTick > msl.getInfo().antiFlareCount) {
-                            msl.targetEntity = null;
-                            msl.antiFlareTick = 0;
+
+        // ====== Handle MCH missiles (unchanged logic) ======
+        List list = this.world.getEntitiesWithinAABB(
+                MCH_EntityBaseBullet.class,
+                this.ac.boundingBox.expand(300.0D, 300.0D, 300.0D)
+        );
+
+        if (list != null) {
+            for (Object o : list) {
+                MCH_EntityBaseBullet msl = (MCH_EntityBaseBullet) o;
+
+                if (msl.targetEntity != null &&
+                        (this.ac.isMountedEntity(msl.targetEntity) || msl.targetEntity.equals(this.ac))) {
+
+                    if (msl.getInfo().isHeatSeekerMissile) {
+                        if (msl.getInfo().antiFlareCount > 0) {
+                            if (msl.antiFlareTick > msl.getInfo().antiFlareCount) {
+                                msl.targetEntity = null;
+                                msl.antiFlareTick = 0;
+                            } else {
+                                msl.antiFlareTick++;
+                            }
                         } else {
-                            msl.antiFlareTick++;
+                            msl.targetEntity = null;
                         }
-                    } else {
-                        msl.targetEntity = null;
                     }
-                    //msl.setDead();
-                } else {
-
-
                 }
             }
         }
 
+        // ====== HMG projectile deletion ======
+
+        // Only run on server
+        if (this.world.isRemote)
+            return;
+
+        // Initialize reflection once
+        if (!reflectionInitialized) {
+            reflectionInitialized = true;
+            try {
+                hmgBulletClass = Class.forName("handmadeguns.entity.bullets.HMGEntityBulletBase");
+            } catch (Exception e) {
+                hmgBulletClass = null; // HMG not installed
+            }
+        }
+
+        if (hmgBulletClass == null)
+            return;
+
+        // Search nearby HMG bullets
+        double radius = 400.0D;
+
+        List list2 = this.world.getEntitiesWithinAABB(
+                hmgBulletClass,
+                this.ac.boundingBox.expand(radius, radius, radius)
+        );
+
+        if (list2 == null || list2.isEmpty())
+            return;
+
+        for (Object obj : list2) {
+
+            if (!(obj instanceof Entity))
+                continue;
+
+            Entity bullet = (Entity) obj;
+
+            if (bullet.isDead)
+                continue;
+
+            // Optional: only remove bullets heading toward aircraft
+            double dx = this.ac.posX - bullet.posX;
+            double dy = (this.ac.posY + this.ac.height * 0.5) - bullet.posY;
+            double dz = this.ac.posZ - bullet.posZ;
+
+            double dot =
+                    (bullet.motionX * dx) +
+                            (bullet.motionY * dy) +
+                            (bullet.motionZ * dz);
+
+            // Only delete if moving toward aircraft
+            if (dot > 0) {
+                bullet.setDead();
+            }
+        }
     }
 
     public boolean isLockedByMissile() {
