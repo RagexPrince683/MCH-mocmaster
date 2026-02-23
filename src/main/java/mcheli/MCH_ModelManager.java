@@ -6,6 +6,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+
 import mcheli.MCH_MOD;
 import mcheli.wrapper.W_ModelBase;
 import mcheli.wrapper.W_ResourcePath;
@@ -17,14 +19,15 @@ import net.minecraftforge.client.model.IModelCustom;
 public class MCH_ModelManager extends W_ModelBase {
 
    private static MCH_ModelManager instance = new MCH_ModelManager();
-   private static HashMap map;
+   private static ConcurrentHashMap<String, IModelCustom> map = new ConcurrentHashMap<>();
+   //cannot be final
    private static ModelRenderer defaultModel;
    private static boolean forceReloadMode = false;
    private static Random rand = new Random();
 
 
    private MCH_ModelManager() {
-      map = new HashMap();
+      map = new ConcurrentHashMap<String, IModelCustom>();
       defaultModel = null;
       defaultModel = new ModelRenderer(this, 0, 0);
       defaultModel.addBox(-5.0F, -5.0F, -5.0F, 10, 10, 10, 0.0F);
