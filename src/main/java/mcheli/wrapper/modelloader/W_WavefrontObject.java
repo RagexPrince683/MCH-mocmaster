@@ -33,14 +33,16 @@ public class W_WavefrontObject extends W_ModelCustom {
    private static Pattern face_V_VN_Pattern = Pattern.compile("(f( \\d+//\\d+){3,4} *\\n)|(f( \\d+//\\d+){3,4} *$)");
    private static Pattern face_V_Pattern = Pattern.compile("(f( \\d+){3,4} *\\n)|(f( \\d+){3,4} *$)");
    private static Pattern groupObjectPattern = Pattern.compile("([go]( [-\\$\\w\\d]+) *\\n)|([go]( [-\\$\\w\\d]+) *$)");
-   private static Matcher vertexMatcher;
-   private static Matcher vertexNormalMatcher;
-   private static Matcher textureCoordinateMatcher;
-   private static Matcher face_V_VT_VN_Matcher;
-   private static Matcher face_V_VT_Matcher;
-   private static Matcher face_V_VN_Matcher;
-   private static Matcher face_V_Matcher;
-   private static Matcher groupObjectMatcher;
+   //DELETE
+   //private static Matcher vertexMatcher;
+   //private static Matcher vertexNormalMatcher;
+   //private static Matcher textureCoordinateMatcher;
+   //private static Matcher face_V_VT_VN_Matcher;
+  // private static Matcher face_V_VT_Matcher;
+  // private static Matcher face_V_VN_Matcher;
+  // private static Matcher face_V_Matcher;
+  // private static Matcher groupObjectMatcher;
+   //END DELETE
    public ArrayList vertices = new ArrayList();
    public ArrayList vertexNormals = new ArrayList();
    public ArrayList textureCoordinates = new ArrayList();
@@ -429,66 +431,31 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    private static boolean isValidVertexLine(String line) {
-      if(vertexMatcher != null) {
-         vertexMatcher.reset();
-      }
-
-      vertexMatcher = vertexPattern.matcher(line);
-      return vertexMatcher.matches();
+      return vertexPattern.matcher(line).matches();
    }
 
    private static boolean isValidVertexNormalLine(String line) {
-      if(vertexNormalMatcher != null) {
-         vertexNormalMatcher.reset();
-      }
-
-      vertexNormalMatcher = vertexNormalPattern.matcher(line);
-      return vertexNormalMatcher.matches();
+      return vertexNormalPattern.matcher(line).matches();
    }
 
    private static boolean isValidTextureCoordinateLine(String line) {
-      if(textureCoordinateMatcher != null) {
-         textureCoordinateMatcher.reset();
-      }
-
-      textureCoordinateMatcher = textureCoordinatePattern.matcher(line);
-      return textureCoordinateMatcher.matches();
+      return textureCoordinatePattern.matcher(line).matches();
    }
 
    private static boolean isValidFace_V_VT_VN_Line(String line) {
-      if(face_V_VT_VN_Matcher != null) {
-         face_V_VT_VN_Matcher.reset();
-      }
-
-      face_V_VT_VN_Matcher = face_V_VT_VN_Pattern.matcher(line);
-      return face_V_VT_VN_Matcher.matches();
+      return face_V_VT_VN_Pattern.matcher(line).matches();
    }
 
    private static boolean isValidFace_V_VT_Line(String line) {
-      if(face_V_VT_Matcher != null) {
-         face_V_VT_Matcher.reset();
-      }
-
-      face_V_VT_Matcher = face_V_VT_Pattern.matcher(line);
-      return face_V_VT_Matcher.matches();
+      return face_V_VT_Pattern.matcher(line).matches();
    }
 
    private static boolean isValidFace_V_VN_Line(String line) {
-      if(face_V_VN_Matcher != null) {
-         face_V_VN_Matcher.reset();
-      }
-
-      face_V_VN_Matcher = face_V_VN_Pattern.matcher(line);
-      return face_V_VN_Matcher.matches();
+      return face_V_VN_Pattern.matcher(line).matches();
    }
 
    private static boolean isValidFace_V_Line(String line) {
-      if(face_V_Matcher != null) {
-         face_V_Matcher.reset();
-      }
-
-      face_V_Matcher = face_V_Pattern.matcher(line);
-      return face_V_Matcher.matches();
+      return face_V_Pattern.matcher(line).matches();
    }
 
    private static boolean isValidFaceLine(String line) {
@@ -496,12 +463,7 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    private static boolean isValidGroupObjectLine(String line) {
-      if(groupObjectMatcher != null) {
-         groupObjectMatcher.reset();
-      }
-
-      groupObjectMatcher = groupObjectPattern.matcher(line);
-      return groupObjectMatcher.matches();
+      return groupObjectPattern.matcher(line).matches();
    }
 
    public String getType() {
