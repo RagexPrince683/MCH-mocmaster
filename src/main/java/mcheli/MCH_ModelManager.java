@@ -81,6 +81,11 @@ public class MCH_ModelManager extends W_ModelBase {
 
    public static void render(String name) {
       IModelCustom model = MAP.get(name);
+
+      if (model == null) {
+         model = load(name); // triggers load if not present
+      }
+
       if (model != null) {
          model.renderAll();
       }
@@ -99,6 +104,8 @@ public class MCH_ModelManager extends W_ModelBase {
          ((W_ModelCustom) model).renderAllLine(startLine, maxLine);
       }
    }
+
+
 
    public static void render(String path, String name, int startFace, int maxFace) {
       IModelCustom model = MAP.get(path + "/" + name);
