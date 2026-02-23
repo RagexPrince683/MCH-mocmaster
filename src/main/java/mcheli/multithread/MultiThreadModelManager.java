@@ -65,9 +65,15 @@ public class MultiThreadModelManager {
         // Vehicles
         for (Object key : MCH_VehicleInfoManager.map.keySet()) {
             String name = (String) key;
-            futures.add(EXECUTOR.submit(() ->
-                    proxy.registerModelsVehicle(name, false)
-            ));
+            futures.add(EXECUTOR.submit(() -> {
+                try {
+                    proxy.registerModelsVehicle(name, false);
+                } catch (Exception e) {
+                    System.err.println("Failed loading vehicle model: " + name);
+                    e.printStackTrace();
+                    throw e;
+                }
+            }));
         }
 
         // Wait for all to complete
@@ -78,6 +84,8 @@ public class MultiThreadModelManager {
                 e.printStackTrace();
             }
         }
+
+
 
         EXECUTOR.shutdown();
 
