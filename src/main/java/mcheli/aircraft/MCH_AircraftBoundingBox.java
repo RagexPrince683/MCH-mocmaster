@@ -56,7 +56,7 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
             double dist2 = this.getDistSq(aabb, this);
             if(dist2 < dist) {
                dist = dist2;
-               this.ac.lastBBDamageFactor = bb.damegeFactor;
+               this.ac.lastBBDamageFactor = bb.damageFactor;
             }
 
             ret = true;
@@ -182,7 +182,7 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
             if(dist2 < dist) {
                mop = mop2;
                dist = dist2;
-               this.ac.lastBBDamageFactor = bb.damegeFactor;
+               this.ac.lastBBDamageFactor = bb.damageFactor;
             }
          }
       }
