@@ -410,7 +410,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
    public void drawHitBoxDetail(MCH_BoundingBox bb) {
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       float f1 = 0.080000006F;
-      String s = String.format("%.2f", new Object[]{Float.valueOf(bb.damageFactor)});
+      String s = String.format("%.2f", new Object[]{Float.valueOf(bb.damegeFactor)});
       GL11.glPushMatrix();
       GL11.glTranslatef(0.0F, 0.5F + (float)(bb.offsetY * 0.0D + (double)bb.height), 0.0F);
       GL11.glNormal3f(0.0F, 1.0F, 0.0F);
@@ -433,7 +433,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       tessellator.draw();
       GL11.glEnable(3553);
       GL11.glDepthMask(false);
-      int color = bb.damageFactor < 1.0F?'\uffff':(bb.damageFactor > 1.0F?16711680:16777215);
+      int color = bb.damegeFactor < 1.0F?'\uffff':(bb.damegeFactor > 1.0F?16711680:16777215);
       fontrenderer.drawString(s, -fontrenderer.getStringWidth(s) / 2, 0, -1073741824 | color);
       GL11.glDepthMask(true);
       GL11.glEnable(2896);

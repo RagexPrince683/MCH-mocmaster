@@ -2413,9 +2413,14 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void updateExtraBoundingBox() {
-      for (MCH_BoundingBox bb : this.extraBoundingBox) {
-         bb.updatePosition(this.posX, this.posY, this.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
+      MCH_BoundingBox[] arr$ = this.extraBoundingBox;
+      int len$ = arr$.length;
+
+      for(int i$ = 0; i$ < len$; ++i$) {
+         MCH_BoundingBox bb = arr$[i$];
+         bb.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
       }
+
    }
 
    //public void updateExtraWheelBoundingBox() {
@@ -6487,26 +6492,26 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
 
-   //public wheelBoundingBox[] createannoyingboundingbox() {
-   //   // Get the list of extra bounding boxes
-   //   MCH_AircraftInfo acInfo = this.getAcInfo();
-   //   if (acInfo == null || acInfo.wheelboundingbox == null) {
-   //      return new wheelBoundingBox[0];
-   //   }
-//
-   //   List<wheelBoundingBox> stupidboundingBoxes = acInfo.wheelboundingbox;
-//
-   //   // Initialize the array with the size of the list
-   //   wheelBoundingBox[] ar2 = new wheelBoundingBox[stupidboundingBoxes.size()];
-//
-   //   // Iterate over the list and copy each bounding box to the array
-   //   int i = 0;
-   //   for (wheelBoundingBox bb2 : stupidboundingBoxes) {
-   //      ar2[i++] = bb2.copy2();
-   //   }
-//
-   //   return ar2;
-   //}
+   public wheelBoundingBox[] createannoyingboundingbox() {
+      // Get the list of extra bounding boxes
+      MCH_AircraftInfo acInfo = this.getAcInfo();
+      if (acInfo == null || acInfo.wheelboundingbox == null) {
+         return new wheelBoundingBox[0];
+      }
+
+      List<wheelBoundingBox> stupidboundingBoxes = acInfo.wheelboundingbox;
+
+      // Initialize the array with the size of the list
+      wheelBoundingBox[] ar2 = new wheelBoundingBox[stupidboundingBoxes.size()];
+
+      // Iterate over the list and copy each bounding box to the array
+      int i = 0;
+      for (wheelBoundingBox bb2 : stupidboundingBoxes) {
+         ar2[i++] = bb2.copy2();
+      }
+
+      return ar2;
+   }
 
    public Entity[] createParts() {
       Entity[] list = new Entity[]{this.partEntities[0]};

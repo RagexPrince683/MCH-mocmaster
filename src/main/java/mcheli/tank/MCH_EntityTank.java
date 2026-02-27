@@ -289,7 +289,6 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       for(int prevPZ = 0; prevPZ < len$; ++prevPZ) {
          MCH_BoundingBox ebb = prevPX[prevPZ];
          ebb.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
-         //uhhhh
       }
 
       parX = this.calculateXOffset(list, super.boundingBox, parX);
