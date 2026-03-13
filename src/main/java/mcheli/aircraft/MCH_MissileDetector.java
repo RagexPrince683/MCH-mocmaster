@@ -9,9 +9,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.World;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MCH_MissileDetector {
+
+    private final Map<Entity, Integer> flareDelayMap = new HashMap<Entity, Integer>();
 
     private static java.lang.reflect.Field hmgHasVTField;
     private static boolean hmgInit = false;
@@ -80,6 +84,8 @@ public class MCH_MissileDetector {
 
                 if (var4 != null) {
                     if (this.ac.isFlareUsing()) {
+
+
 
                         this.destroyMissile();
                     } else if (!this.ac.isUAV() && !this.world.isRemote) {
@@ -253,7 +259,25 @@ public class MCH_MissileDetector {
 
             // Only delete if moving toward aircraft
             if (dot > 0) {
-                bullet.setDead();
+
+                int ticks = 0;
+
+                if (flareDelayMap.containsKey(bullet)) {
+                    ticks = flareDelayMap.get(bullet);
+                }
+
+                ticks++;
+
+                // 40–60 ticks = 2–3 seconds
+                if (ticks >= 50) {
+                    bullet.setDead();
+                    flareDelayMap.remove(bullet);
+                } else {
+                    flareDelayMap.put(bullet, ticks);
+                }
+
+            } else {
+                flareDelayMap.remove(bullet);
             }
         }
     }
