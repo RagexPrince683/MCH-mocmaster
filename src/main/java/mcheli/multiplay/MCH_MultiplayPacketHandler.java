@@ -43,6 +43,7 @@ public class MCH_MultiplayPacketHandler {
 
 
    public static void onPacket_Command(EntityPlayer player, ByteArrayDataInput data) {
+      //TODO KILL
       if(!player.worldObj.isRemote) {
          MinecraftServer minecraftServer = MinecraftServer.getServer();
          if(minecraftServer != null) {

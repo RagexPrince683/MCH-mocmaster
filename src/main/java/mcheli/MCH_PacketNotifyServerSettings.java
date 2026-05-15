@@ -54,7 +54,6 @@ public class MCH_PacketNotifyServerSettings extends MCH_Packet {
    }
 
    public static void send(EntityPlayerMP player) {
-      //todo fix enableDebugBoundingBox not updating properly on server restart, possibly other settings here too?
       MCH_PacketNotifyServerSettings s = new MCH_PacketNotifyServerSettings();
       MCH_Config var10001 = MCH_MOD.config;
       s.enableCamDistChange = !MCH_Config.DisableCameraDistChange.prmBool;
