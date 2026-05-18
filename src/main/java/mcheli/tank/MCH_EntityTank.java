@@ -505,14 +505,20 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
    public boolean attackEntityFrom(DamageSource damageSource, float damage) {
       EnumBoundingBoxType hitType = this.lastHitBoundingBoxType;
-      boolean attacked = super.attackEntityFrom(damageSource, damage);
-      if(attacked && !super.worldObj.isRemote && hitType == EnumBoundingBoxType.TRACK && !this.isDestroyed()) {
+      if(!super.worldObj.isRemote && hitType == EnumBoundingBoxType.TRACK && !this.isDestroyed()) {
+         this.lastBBDamageFactor = 1.0F;
+         this.lastHitBoundingBoxType = EnumBoundingBoxType.DEFAULT;
          this.trackDamageTaken += Math.max(1, (int)damage);
          if(this.trackDamageTaken > this.getTrackMaxHP()) {
             this.trackDamageTaken = this.getTrackMaxHP();
          }
+
+         this.setBeenAttacked();
+         this.timeSinceHit = 1;
+         return true;
       }
 
+      boolean attacked = super.attackEntityFrom(damageSource, damage);
       return attacked;
    }
 
