@@ -12,6 +12,7 @@ public class MCH_VehicleInfo extends MCH_AircraftInfo {
    public MCH_ItemVehicle item = null;
    public boolean isEnableMove = false;
    public boolean isEnableRot = false;
+   public int trackMaxHP = 100;
    public List partList = new ArrayList();
 
 
