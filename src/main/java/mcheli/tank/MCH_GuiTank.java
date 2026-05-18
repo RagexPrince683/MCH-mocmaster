@@ -63,8 +63,19 @@ public class MCH_GuiTank extends MCH_AircraftCommonGui {
             }
          }
 
+         this.drawTankTrackHp(tank);
+
          this.drawHitBullet(tank, -14101432, seatID);
       }
+   }
+
+   private void drawTankTrackHp(MCH_EntityTank tank) {
+      int baseX = super.centerX - 140;
+      int baseY = super.centerY + 70;
+      int hpColor = (double)tank.getHP() / (double)Math.max(1, tank.getMaxHP()) > 0.3D?-14101432:-2161656;
+      int trackColor = (double)tank.getTrackHP() / (double)Math.max(1, tank.getTrackMaxHP()) > 0.3D?-14101432:-2161656;
+      this.drawString(String.format("HP: %d / %d", tank.getHP(), tank.getMaxHP()), baseX, baseY, hpColor);
+      this.drawString(String.format("Track HP: %d / %d", tank.getTrackHP(), tank.getTrackMaxHP()), baseX, baseY + 10, trackColor);
    }
 
    public void drawDebugtInfo(MCH_EntityTank ac) {
