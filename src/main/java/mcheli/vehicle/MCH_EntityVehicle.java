@@ -307,18 +307,6 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
 
    }
 
-   public boolean attackEntityFrom(net.minecraft.util.DamageSource damageSource, float damage) {
-      EnumBoundingBoxType hitType = this.lastHitBoundingBoxType;
-      boolean attacked = super.attackEntityFrom(damageSource, damage);
-      if(attacked && !super.worldObj.isRemote && hitType == EnumBoundingBoxType.TRACK && !this.isDestroyed()) {
-         this.trackDamageTaken += Math.max(1, (int)damage);
-         if(this.trackDamageTaken > this.getTrackMaxHP()) {
-            this.trackDamageTaken = this.getTrackMaxHP();
-         }
-      }
-
-      return attacked;
-   }
 
    protected void onUpdate_Particle() {
       double particlePosY = super.posY;
