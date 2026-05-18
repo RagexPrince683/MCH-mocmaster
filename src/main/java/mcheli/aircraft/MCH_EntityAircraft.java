@@ -197,6 +197,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public MCH_BoundingBox[] extraBoundingBox;
    //public wheelBoundingBox[] extrawheelboundingbox;
    public float lastBBDamageFactor;
+   public EnumBoundingBoxType lastHitBoundingBoxType;
    private final MCH_AircraftInventory inventory;
    private double fuelConsumption;
    private int fuelSuppliedCount;
@@ -335,6 +336,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       //this.extrawheelboundingbox = new wheelBoundingBox[0];
       W_Reflection.setBoundingBox(this, new MCH_AircraftBoundingBox(this));
       this.lastBBDamageFactor = 1.0F;
+      this.lastHitBoundingBoxType = EnumBoundingBoxType.DEFAULT;
       this.inventory = new MCH_AircraftInventory(this);
       this.fuelConsumption = 0.0D;
       this.fuelSuppliedCount = 0;
@@ -1190,6 +1192,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       //System.out.println("damage taken: " + getDamageTaken());
       float damageFactor = this.lastBBDamageFactor;
       this.lastBBDamageFactor = 1.0F;
+      this.lastHitBoundingBoxType = EnumBoundingBoxType.DEFAULT;
       if(this.isEntityInvulnerable()) {
          return false;
       } else if(super.isDead) {

@@ -54,6 +54,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    public float addkeyRotValue;
    public final MCH_WheelManager WheelMng;
    public float partialTicks;
+   private int trackDamageTaken;
 
    private int currentGear = 1;  // Starting gear
    private final int maxGear = 5;  // Number of gears
@@ -76,6 +77,19 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       this.rotationRotor = 0.0F;
       this.prevRotationRotor = 0.0F;
       this.WheelMng = new MCH_WheelManager(this);
+      this.trackDamageTaken = 0;
+   }
+
+   public int getTrackMaxHP() {
+      return this.tankInfo != null?Math.max(1, this.tankInfo.trackMaxHP):1;
+   }
+
+   public int getTrackHP() {
+      return Math.max(0, this.getTrackMaxHP() - this.trackDamageTaken);
+   }
+
+   public boolean isTrackDestroyed() {
+      return this.getTrackHP() <= 0;
    }
 
    public String getKindName() {
@@ -128,10 +142,12 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
    protected void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
       super.writeEntityToNBT(par1NBTTagCompound);
+      par1NBTTagCompound.setInteger("TrackDamage", this.trackDamageTaken);
    }
 
    protected void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
       super.readEntityFromNBT(par1NBTTagCompound);
+      this.trackDamageTaken = Math.max(0, par1NBTTagCompound.getInteger("TrackDamage"));
       if(this.tankInfo == null) {
          this.tankInfo = MCH_TankInfoManager.get(this.getTypeName());
          if(this.tankInfo == null) {
@@ -425,6 +441,15 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
    protected void onUpdate_Control(float partialTicks) {
 
+      if(this.isTrackDestroyed()) {
+         this.setCurrentThrottle(0.0D);
+         this.setThrottle(0.0D);
+         super.throttleUp = false;
+         super.throttleDown = false;
+         super.throttleBack = 0.0F;
+         return;
+      }
+
       if(getHP() * 100 / getMaxHP() < getAcInfo().engineShutdownThreshold) {
          setCurrentThrottle(0);
          throttleUp = false;
@@ -476,6 +501,25 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          this.setThrottle(this.getCurrentThrottle());
       }
 
+   }
+
+   public boolean attackEntityFrom(DamageSource damageSource, float damage) {
+      EnumBoundingBoxType hitType = this.lastHitBoundingBoxType;
+      if(!super.worldObj.isRemote && hitType == EnumBoundingBoxType.TRACK && !this.isDestroyed()) {
+         this.lastBBDamageFactor = 1.0F;
+         this.lastHitBoundingBoxType = EnumBoundingBoxType.DEFAULT;
+         this.trackDamageTaken += Math.max(1, (int)damage);
+         if(this.trackDamageTaken > this.getTrackMaxHP()) {
+            this.trackDamageTaken = this.getTrackMaxHP();
+         }
+
+         this.setBeenAttacked();
+         this.timeSinceHit = 1;
+         return true;
+      }
+
+      boolean attacked = super.attackEntityFrom(damageSource, damage);
+      return attacked;
    }
 
    protected void onUpdate_ControlSub(float partialTicks) {
