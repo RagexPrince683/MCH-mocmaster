@@ -6,6 +6,7 @@ import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.EnumBoundingBoxType;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_PacketStatusRequest;
 import mcheli.vehicle.MCH_VehicleInfo;
@@ -27,6 +28,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
    public boolean isUsedPlayer;
    public float lastRiderYaw;
    public float lastRiderPitch;
+   private int trackDamageTaken;
 
 
    public MCH_EntityVehicle(World world) {
@@ -41,7 +43,20 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
       this.isUsedPlayer = false;
       this.lastRiderYaw = 0.0F;
       this.lastRiderPitch = 0.0F;
+      this.trackDamageTaken = 0;
       super.weapons = this.createWeapon(0);
+   }
+
+   public int getTrackMaxHP() {
+      return this.vehicleInfo != null?Math.max(1, this.vehicleInfo.trackMaxHP):1;
+   }
+
+   public int getTrackHP() {
+      return Math.max(0, this.getTrackMaxHP() - this.trackDamageTaken);
+   }
+
+   public boolean isTrackDestroyed() {
+      return this.getTrackHP() <= 0;
    }
 
    public String getKindName() {
@@ -84,10 +99,12 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
 
    protected void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
       super.writeEntityToNBT(par1NBTTagCompound);
+      par1NBTTagCompound.setInteger("TrackDamage", this.trackDamageTaken);
    }
 
    protected void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
       super.readEntityFromNBT(par1NBTTagCompound);
+      this.trackDamageTaken = Math.max(0, par1NBTTagCompound.getInteger("TrackDamage"));
       if(this.vehicleInfo == null) {
          this.vehicleInfo = MCH_VehicleInfoManager.get(this.getTypeName());
          if(this.vehicleInfo == null) {
@@ -244,6 +261,13 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
 
    protected void onUpdate_ControlOnGround() {
       if(!super.worldObj.isRemote) {
+         if(this.isTrackDestroyed()) {
+            super.throttleUp = false;
+            super.throttleDown = false;
+            this.setCurrentThrottle(0.0D);
+            return;
+         }
+
          boolean move = false;
          float yaw = super.rotationYaw;
          double x = 0.0D;
@@ -281,6 +305,19 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
          }
       }
 
+   }
+
+   public boolean attackEntityFrom(net.minecraft.util.DamageSource damageSource, float damage) {
+      EnumBoundingBoxType hitType = this.lastHitBoundingBoxType;
+      boolean attacked = super.attackEntityFrom(damageSource, damage);
+      if(attacked && !super.worldObj.isRemote && hitType == EnumBoundingBoxType.TRACK && !this.isDestroyed()) {
+         this.trackDamageTaken += Math.max(1, (int)damage);
+         if(this.trackDamageTaken > this.getTrackMaxHP()) {
+            this.trackDamageTaken = this.getTrackMaxHP();
+         }
+      }
+
+      return attacked;
    }
 
    protected void onUpdate_Particle() {
