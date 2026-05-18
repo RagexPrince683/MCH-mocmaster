@@ -37,7 +37,7 @@ public class MCH_VehicleInfo extends MCH_AircraftInfo {
    }
 
    public String getDefaultHudName(int seatId) {
-      return "vehicle";
+      return "turret";
    }
 
    public void loadItemData(String item, String data) {
@@ -93,7 +93,7 @@ public class MCH_VehicleInfo extends MCH_AircraftInfo {
    }
 
    public String getKindName() {
-      return "vehicle";
+      return "turret";
    }
 
    public void preReload() {

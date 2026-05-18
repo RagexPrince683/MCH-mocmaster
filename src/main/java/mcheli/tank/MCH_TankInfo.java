@@ -14,6 +14,7 @@ public class MCH_TankInfo extends MCH_AircraftInfo {
    public MCH_ItemTank item = null;
    public int weightType = 0;
    public float weightedCenterZ = 0.0F;
+   public int trackMaxHP = 100;
 
 
    public Item getItem() {
@@ -72,6 +73,16 @@ public class MCH_TankInfo extends MCH_AircraftInfo {
          this.weightType = data.equals("tank")?2:(data.equals("car")?1:0);
       } else if(item.equalsIgnoreCase("WeightedCenterZ")) {
          this.weightedCenterZ = this.toFloat(data, -1000.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("TrackMaxHP")) {
+         this.trackMaxHP = this.toInt(data, 1, 1000000);
+      } else if(item.equalsIgnoreCase("AddTrackHitBox")) {
+         String[] s = data.split("\\s*,\\s*");
+         if(s.length >= 5) {
+            float df = s.length >= 6?this.toFloat(s[5]):1.0F;
+            MCH_BoundingBox bb = new MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), df);
+            bb.boundingBoxType = EnumBoundingBoxType.TRACK;
+            this.extraBoundingBox.add(bb);
+         }
       }
       MCH_AircraftInfo.allAircraftInfo.put(name, this);
    }

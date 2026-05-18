@@ -64,7 +64,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
    }
 
    public String getEntityType() {
-      return "Vehicle";
+      return "Turret";
    }
 
    public MCH_VehicleInfo getVehicleInfo() {
