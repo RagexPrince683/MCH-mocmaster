@@ -12,6 +12,7 @@ public class MCH_VehicleInfo extends MCH_AircraftInfo {
    public MCH_ItemVehicle item = null;
    public boolean isEnableMove = false;
    public boolean isEnableRot = false;
+   public int trackMaxHP = 100;
    public List partList = new ArrayList();
 
 
@@ -49,6 +50,16 @@ public class MCH_VehicleInfo extends MCH_AircraftInfo {
          super.loadItemData("minrotationpitch", data);
       } else if(item.compareTo("rotationpitchmax") == 0) {
          super.loadItemData("maxrotationpitch", data);
+      } else if(item.equalsIgnoreCase("trackmaxhp")) {
+         this.trackMaxHP = this.toInt(data, 1, 1000000);
+      } else if(item.equalsIgnoreCase("addtrackhitbox")) {
+         String[] s = data.split("\\s*,\\s*");
+         if(s.length >= 5) {
+            float df = s.length >= 6?this.toFloat(s[5]):1.0F;
+            mcheli.aircraft.MCH_BoundingBox bb = new mcheli.aircraft.MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), df);
+            bb.boundingBoxType = mcheli.aircraft.EnumBoundingBoxType.TRACK;
+            this.extraBoundingBox.add(bb);
+         }
       } else {
          String[] s;
          float rb;
