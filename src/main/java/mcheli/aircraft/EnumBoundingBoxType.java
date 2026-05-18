@@ -1,5 +1,5 @@
 package mcheli.aircraft;
 
 public enum EnumBoundingBoxType {
-    DEFAULT, ENGINE, TURRENT
+    DEFAULT, ENGINE, TURRENT, TRACK
 }

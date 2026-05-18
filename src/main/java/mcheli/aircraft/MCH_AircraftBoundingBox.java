@@ -40,6 +40,7 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
       boolean ret = false;
       double dist = 1.0E7D;
       this.ac.lastBBDamageFactor = 1.0F;
+      this.ac.lastHitBoundingBoxType = EnumBoundingBoxType.DEFAULT;
       if(super.intersectsWith(aabb)) {
          dist = this.getDistSq(aabb, this);
          ret = true;
@@ -57,6 +58,7 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
             if(dist2 < dist) {
                dist = dist2;
                this.ac.lastBBDamageFactor = bb.damegeFactor;
+               this.ac.lastHitBoundingBoxType = bb.boundingBoxType;
             }
 
             ret = true;
@@ -165,6 +167,7 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
 
    public MovingObjectPosition calculateIntercept(Vec3 v1, Vec3 v2) {
       this.ac.lastBBDamageFactor = 1.0F;
+      this.ac.lastHitBoundingBoxType = EnumBoundingBoxType.DEFAULT;
       MovingObjectPosition mop = super.calculateIntercept(v1, v2);
       double dist = 1.0E7D;
       if(mop != null) {
@@ -183,6 +186,7 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
                mop = mop2;
                dist = dist2;
                this.ac.lastBBDamageFactor = bb.damegeFactor;
+               this.ac.lastHitBoundingBoxType = bb.boundingBoxType;
             }
          }
       }
