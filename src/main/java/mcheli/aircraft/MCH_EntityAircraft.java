@@ -4948,50 +4948,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return fallback;
    }
 
-   private void storePendingNewUavShiftExit(Entity rider) {
-      if(!(rider instanceof EntityPlayer) || this.getItem() == null) {
-         return;
-      }
-      NBTTagCompound pending = new NBTTagCompound();
-      pending.setString("StationUUID", this.linkedUavStationUUID == null ? "" : this.linkedUavStationUUID.toString());
-      pending.setInteger("StationDim", this.linkedUavStationDimension);
-      pending.setDouble("StationX", this.linkedUavStationX);
-      pending.setDouble("StationY", this.linkedUavStationY);
-      pending.setDouble("StationZ", this.linkedUavStationZ);
-      pending.setDouble("UavX", super.posX);
-      pending.setDouble("UavY", super.posY);
-      pending.setDouble("UavZ", super.posZ);
-      ItemStack stack = new ItemStack(this.getItem(), 1, 0);
-      NBTTagCompound itemTag = new NBTTagCompound();
-      stack.writeToNBT(itemTag);
-      pending.setTag("UavItem", itemTag);
-      ((EntityPlayer)rider).getEntityData().setTag("MCH_PendingNewUavShiftExit", pending);
-   }
-
-   private void clearPendingNewUavShiftExit(Entity rider) {
-      if(rider instanceof EntityPlayer) {
-         ((EntityPlayer)rider).getEntityData().removeTag("MCH_PendingNewUavShiftExit");
-      }
-   }
-
-   private void deleteNewUavAfterShiftExit(Entity rider) {
+   private void deleteNewUavAfterShiftExit() {
       if(super.worldObj.isRemote || !this.isNewUAV()) {
          return;
-      }
-      storePendingNewUavShiftExit(rider);
-      MCH_EntityUavStation station = findLinkedUavStationForShiftExit();
-      if(station != null && !station.isDead) {
-         station.prepareNewUavShiftExit(this);
-         clearPendingNewUavShiftExit(rider);
-      } else {
-         MCH_Lib.Log((Entity)this, "Unable to find linked UAV station for new UAV %d during shift-exit; saved pending Continue state on rider", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
-      }
-      MCH_Lib.Log((Entity)this, "Deleting new UAV entity %d after player shift-exit; station Continue may relaunch it", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
-      this.deletingNewUavForShiftExit = true;
-      try {
-         this.setDead(false);
-      } finally {
-         this.deletingNewUavForShiftExit = false;
       }
       MCH_EntityUavStation station = findLinkedUavStationForShiftExit();
       if(station != null && !station.isDead) {
@@ -5050,7 +5009,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                       if(rByEntity instanceof EntityPlayerMP) {
                          MCH_UavInventory.restorePilotInventory((EntityPlayerMP)rByEntity, "uav_exit");
                       }
-                      deleteNewUavAfterShiftExit(rByEntity);
+                      deleteNewUavAfterShiftExit();
                      }
                    } else {
                      setUnmountPosition(rByEntity, (getSeatsInfo()[0]).pos);
@@ -5254,7 +5213,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   }
                }
                entity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
-               deleteNewUavAfterShiftExit(entity);
+               deleteNewUavAfterShiftExit();
                return false;
             }
             MCH_EntitySeat[] arr$ = this.seats;
@@ -5267,7 +5226,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                }
             }
             entity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
-            deleteNewUavAfterShiftExit(entity);
+            deleteNewUavAfterShiftExit();
             return false;
          }
       }
