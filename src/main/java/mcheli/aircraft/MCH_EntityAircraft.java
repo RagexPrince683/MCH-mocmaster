@@ -245,7 +245,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private int delayedUavInventoryTicks;
    private UUID uavPersistentUUID;
    private UUID uavOwnerUUID;
-   private boolean deletingNewUavForShiftExit;
    private UUID linkedUavStationUUID;
    private int linkedUavStationDimension;
    private double linkedUavStationX;
@@ -332,7 +331,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.delayedUavInventoryTicks = 0;
       this.uavPersistentUUID = null;
       this.uavOwnerUUID = null;
-      this.deletingNewUavForShiftExit = false;
       this.linkedUavStationUUID = null;
       this.linkedUavStationDimension = 0;
       this.linkedUavStationX = 0.0D;
@@ -4864,9 +4862,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public void setDead(boolean dropItems) {
       if(!super.worldObj.isRemote && this.isNewUAV()) {
-         if(!this.deletingNewUavForShiftExit && this.uavStation != null && !this.uavStation.isDead) {
-            this.uavStation.clearStoredUavAfterDestroyed(this);
-         }
          restoreStoredPilot("uav_destroyed");
       }
       MCH_UavRegistry.unregister(this);
@@ -4914,16 +4909,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private void deleteNewUavAfterShiftExit() {
       if(super.worldObj.isRemote || !this.isNewUAV()) {
          return;
-      }
-      if(this.uavStation != null && !this.uavStation.isDead) {
-         this.uavStation.prepareNewUavShiftExit(this);
-      }
-      MCH_Lib.Log((Entity)this, "Deleting new UAV entity %d after player shift-exit; station Continue may relaunch it", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
-      this.deletingNewUavForShiftExit = true;
-      try {
-         this.setDead(false);
-      } finally {
-         this.deletingNewUavForShiftExit = false;
       }
       if(this.uavStation != null && !this.uavStation.isDead) {
          this.uavStation.prepareNewUavShiftExit(this);
