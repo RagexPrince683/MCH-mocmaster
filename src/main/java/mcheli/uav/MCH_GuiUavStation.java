@@ -85,6 +85,14 @@ public class MCH_GuiUavStation
            drawTexturedModalRect(x, y, 0, 0, this.xSize, this.ySize);
          }
 
+
+      public void updateScreen() {
+           super.updateScreen();
+           if (this.buttonContinue != null) {
+                this.buttonContinue.enabled = this.uavStation != null && !this.uavStation.isDead && this.uavStation.hasContinuableUavLink();
+           }
+         }
+
       protected void actionPerformed(GuiButton btn) {
            if (btn != null && btn.enabled) {
                 if (btn.id == 256) {
