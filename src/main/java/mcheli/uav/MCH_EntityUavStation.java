@@ -74,6 +74,9 @@ public class MCH_EntityUavStation
       private UUID linkedUavEntityUUID;
       private String linkedUavCommonId = "";
       private int linkedUavDimension;
+      private double linkedUavX;
+      private double linkedUavY;
+      private double linkedUavZ;
       private boolean awaitingLoadedUav;
 
 
@@ -199,13 +202,22 @@ public class MCH_EntityUavStation
            this.assignedUavUUID = ac.getUniqueID().toString();
            this.linkedUavEntityUUID = ac.getUniqueID();
            this.linkedUavCommonId = ac.getCommonUniqueId() == null ? "" : ac.getCommonUniqueId();
-           this.linkedUavDimension = ac.dimension;
+           updateLinkedUavPosition(ac);
            ac.setUavStation(this);
            if(this.ownerUUID != null) {
                 ac.setOwnerUUID(this.ownerUUID);
            }
            this.awaitingLoadedUav = false;
            MCH_UavRegistry.register(ac);
+         }
+
+      public void updateLinkedUavPosition(MCH_EntityAircraft ac) {
+           if(ac != null) {
+                this.linkedUavDimension = ac.dimension;
+                this.linkedUavX = ac.posX;
+                this.linkedUavY = ac.posY;
+                this.linkedUavZ = ac.posZ;
+           }
          }
 
       public void unlinkInvalidUav() {
@@ -254,6 +266,9 @@ public class MCH_EntityUavStation
            nbt.setString("LinkedUavEntityUUID", this.linkedUavEntityUUID == null ? "" : this.linkedUavEntityUUID.toString());
            nbt.setString("LinkedUavCommonId", this.linkedUavCommonId == null ? "" : this.linkedUavCommonId);
            nbt.setInteger("LinkedUavDimension", this.linkedUavDimension);
+           nbt.setDouble("LinkedUavX", this.linkedUavX);
+           nbt.setDouble("LinkedUavY", this.linkedUavY);
+           nbt.setDouble("LinkedUavZ", this.linkedUavZ);
 
           if (this.assignedUav != null && !this.assignedUav.isDead) {
               nbt.setInteger("AssignedUavId", this.assignedUav.getEntityId());
@@ -281,6 +296,9 @@ public class MCH_EntityUavStation
           this.linkedUavEntityUUID = parseUUID(nbt.getString("LinkedUavEntityUUID"));
           this.linkedUavCommonId = nbt.getString("LinkedUavCommonId");
           this.linkedUavDimension = nbt.getInteger("LinkedUavDimension");
+          this.linkedUavX = nbt.getDouble("LinkedUavX");
+          this.linkedUavY = nbt.getDouble("LinkedUavY");
+          this.linkedUavZ = nbt.getDouble("LinkedUavZ");
           if(this.linkedUavEntityUUID == null) {
               this.linkedUavEntityUUID = parseUUID(this.assignedUavUUID);
           }
@@ -656,7 +674,21 @@ public class MCH_EntityUavStation
            if(this.assignedUav != null && !this.assignedUav.isDead) {
                 return this.assignedUav;
            }
-           return MCH_UavRegistry.findLinkedUav(world, this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
+           MCH_EntityAircraft ac = MCH_UavRegistry.findLinkedUav(world, this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
+           if(ac == null) {
+                forceLinkedUavChunkLoaded(world);
+                ac = MCH_UavRegistry.findLinkedUav(world, this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
+           }
+           return ac;
+         }
+
+      private void forceLinkedUavChunkLoaded(World world) {
+           if(world == null || world.isRemote || (this.linkedUavX == 0.0D && this.linkedUavY == 0.0D && this.linkedUavZ == 0.0D)) {
+                return;
+           }
+           int x = MathHelper.floor_double(this.linkedUavX);
+           int z = MathHelper.floor_double(this.linkedUavZ);
+           world.getChunkFromBlockCoords(x, z);
          }
 
       private boolean relinkUav(boolean requireLoaded) {
@@ -840,7 +872,6 @@ public class MCH_EntityUavStation
                              EntityPlayerMP player = (EntityPlayerMP)this.riddenByEntity;
                              tryTransferAmmoToUav(player);
                              notifyInitialUavState(player, lastAc);
-                             MCH_UavInventory.storePilotInventory(player, lastAc.getUniqueID().toString());
                          }
                      }
 

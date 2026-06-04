@@ -42,6 +42,28 @@ public final class MCH_UavInventory {
         MCH_Lib.DbgLog(player.worldObj, "Stored UAV pilot inventory snapshot for %s", new Object[] { player.getCommandSenderName() });
     }
 
+
+    public static void storeAndClearPilotInventory(EntityPlayerMP player, String uavUuid) {
+        if (player == null || player.worldObj == null || player.worldObj.isRemote) {
+            return;
+        }
+        NBTTagCompound tag = getTag(player);
+        if (tag.getBoolean(STORED) && tag.getBoolean(INVENTORY_CLEARED)) {
+            return;
+        }
+
+        NBTTagList list = new NBTTagList();
+        player.inventory.writeToNBT(list);
+        tag.setTag(INVENTORY, list);
+        tag.setBoolean(STORED, true);
+        tag.setString(UAV_UUID, uavUuid == null ? "" : uavUuid);
+        tag.setString(REASON, "delayed_clear");
+        tag.setBoolean(INVENTORY_CLEARED, true);
+        player.inventory.clearInventory(null, -1);
+        player.inventoryContainer.detectAndSendChanges();
+        MCH_Lib.DbgLog(player.worldObj, "Stored and cleared delayed UAV pilot inventory for %s", new Object[] { player.getCommandSenderName() });
+    }
+
     public static boolean restorePilotInventory(EntityPlayerMP player, String reason) {
         if (player == null || player.worldObj == null || player.worldObj.isRemote) {
             return false;

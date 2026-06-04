@@ -242,6 +242,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public EntityPlayer storedRider;
 
    public String newUavPlayerUUID;
+   private int delayedUavInventoryTicks;
    private UUID uavOwnerUUID;
    private UUID linkedUavStationUUID;
    private int linkedUavStationDimension;
@@ -326,6 +327,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.setDespawnCount(0);
       this.missileDetector = new MCH_MissileDetector(this, world);
       this.uavStation = null;
+      this.delayedUavInventoryTicks = 0;
       this.uavOwnerUUID = null;
       this.linkedUavStationUUID = null;
       this.linkedUavStationDimension = 0;
@@ -2406,14 +2408,34 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
    }
 
+
+   private void updateDelayedUavInventoryStore() {
+      if(super.worldObj.isRemote || !this.isNewUAV()) {
+         return;
+      }
+      Entity rider = super.riddenByEntity;
+      if(rider instanceof EntityPlayerMP) {
+         ++this.delayedUavInventoryTicks;
+         if(this.delayedUavInventoryTicks == 200) {
+            MCH_UavInventory.storeAndClearPilotInventory((EntityPlayerMP)rider, this.getUniqueID().toString());
+         }
+      } else {
+         this.delayedUavInventoryTicks = 0;
+      }
+   }
+
    public void updateControl() {
       if(!super.worldObj.isRemote) {
+         updateDelayedUavInventoryStore();
 
          if (this.uavStation != null) {
             //this fires before we have successfully binded to UAV.
             UavStationPosX = (int) this.uavStation.posX;
             UavStationPosY = (int) this.uavStation.posY;
             UavStationPosZ = (int) this.uavStation.posZ;
+            if(this.isNewUAV()) {
+               this.uavStation.updateLinkedUavPosition(this);
+            }
          }
          //don't do that in updatecontrol, uav station might be unloaded during update control
          //actually wait, let's see what it's printing

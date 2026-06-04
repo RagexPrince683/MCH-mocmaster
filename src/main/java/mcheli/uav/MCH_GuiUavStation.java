@@ -89,14 +89,7 @@ public class MCH_GuiUavStation
            if (btn != null && btn.enabled) {
                 if (btn.id == 256) {
                               this.uavStation.setContinuePressed(true);
-                     if (this.uavStation != null && !this.uavStation.isDead && this.uavStation.getAndSearchLastControlAircraft() != null && !(this.uavStation.getAndSearchLastControlAircraft()).isDead) {
-                          //System.out.println("found uav station and last control aircraft");
-                         MCH_EntityAircraft aircraft = getCurrentAircraft(this.uavStation.getAndSearchLastControlAircraft());
-                         //MCH_EntityAircraft aircraft1 = getCurrentAircraft(aircraft);
-                         if (aircraft != null) {
-                             //System.out.println("aircraft isnt null");
-                             //aircraft.castuavid(this.mc.thePlayer);
-                         }
+                     if (this.uavStation != null && !this.uavStation.isDead) {
                           MCH_UavPacketStatus pos = new MCH_UavPacketStatus();
                           pos.posUavX = (byte)this.uavStation.posUavX;
                           pos.posUavY = (byte)this.uavStation.posUavY;
@@ -151,10 +144,7 @@ public class MCH_GuiUavStation
               }
 
            this.buttonContinue = new GuiButton(256, x - 80 + 3, y + 44, 50, 20, "Continue");
-           this.buttonContinue.enabled = false;
-           if (this.uavStation != null && !this.uavStation.isDead && this.uavStation.getAndSearchLastControlAircraft() != null) {
-                this.buttonContinue.enabled = true;
-              }
+           this.buttonContinue.enabled = this.uavStation != null && !this.uavStation.isDead;
 
            this.buttonList.add(this.buttonContinue);
          }
