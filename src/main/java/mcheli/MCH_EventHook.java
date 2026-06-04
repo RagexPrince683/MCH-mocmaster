@@ -16,8 +16,6 @@ import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_ItemAircraft;
 import mcheli.aircraft.MCH_PacketAircraftLocation;
-import mcheli.uav.MCH_UavInventory;
-import mcheli.uav.MCH_UavRegistry;
 import mcheli.chain.MCH_ItemChain;
 import mcheli.command.MCH_Command;
 import mcheli.lweapon.MCH_ItemLightWeaponBase;
@@ -33,7 +31,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
@@ -188,23 +185,6 @@ public class MCH_EventHook extends W_EventHook {
  //     }
  //  }
 
-   @SubscribeEvent
-   public void onLivingDeathEvent(LivingDeathEvent event) {
-      if(event.entity instanceof EntityPlayerMP) {
-         MCH_UavInventory.restorePilotInventory((EntityPlayerMP)event.entity, "player_death");
-      }
-   }
-
-   @SubscribeEvent
-   public void onPlayerTick(TickEvent.PlayerTickEvent event) {
-      if(event.phase == TickEvent.Phase.END && event.player instanceof EntityPlayerMP && !event.player.worldObj.isRemote) {
-         if(MCH_UavInventory.hasStoredPilotInventory(event.player) && !(event.player.ridingEntity instanceof MCH_EntityAircraft)) {
-            MCH_UavInventory.restorePilotInventory((EntityPlayerMP)event.player, "not_piloting");
-         }
-      }
-   }
-
-
 
 
    public void entitySpawn(EntityJoinWorldEvent event) {
@@ -229,9 +209,6 @@ public class MCH_EventHook extends W_EventHook {
          //   }
          //}
          MCH_EntityAircraft b = (MCH_EntityAircraft)event.entity;
-         if(!event.world.isRemote && (b.isUAV() || b.isNewUAV())) {
-            MCH_UavRegistry.register(b);
-         }
          if(!b.worldObj.isRemote && !b.isCreatedSeats()) {
             b.createSeats(UUID.randomUUID().toString());
          }
@@ -260,10 +237,6 @@ public class MCH_EventHook extends W_EventHook {
          if(!e.worldObj.isRemote && event.entity instanceof EntityPlayerMP) {
             MCH_Lib.DbgLog(false, "EntityJoinWorldEvent:" + event.entity, new Object[0]);
             MCH_PacketNotifyServerSettings.send((EntityPlayerMP)event.entity);
-            MCH_UavRegistry.rebuildUavRegistry(event.entity.worldObj);
-            if(MCH_UavInventory.hasStoredPilotInventory((EntityPlayer)event.entity)) {
-               MCH_UavInventory.restorePilotInventory((EntityPlayerMP)event.entity, "player_join");
-            }
          }
       }
 
@@ -308,6 +281,7 @@ public class MCH_EventHook extends W_EventHook {
            if (ac != null &&
                      ac.getAcInfo() != null) {
                if (ac.isNewUAV()) {
+                  System.out.println("new uav in eventhook");
                      event.setCanceled(true);
                      return;
                    }
