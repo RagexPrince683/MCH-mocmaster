@@ -243,7 +243,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public String newUavPlayerUUID;
    private int delayedUavInventoryTicks;
+   private UUID uavPersistentUUID;
    private UUID uavOwnerUUID;
+   private boolean deletingNewUavForShiftExit;
    private UUID linkedUavStationUUID;
    private int linkedUavStationDimension;
    private double linkedUavStationX;
@@ -328,7 +330,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.missileDetector = new MCH_MissileDetector(this, world);
       this.uavStation = null;
       this.delayedUavInventoryTicks = 0;
+      this.uavPersistentUUID = null;
       this.uavOwnerUUID = null;
+      this.deletingNewUavForShiftExit = false;
       this.linkedUavStationUUID = null;
       this.linkedUavStationDimension = 0;
       this.linkedUavStationX = 0.0D;
@@ -579,11 +583,25 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    }
 
+   public UUID getUavPersistentUUID() {
+      return getUavPersistentUUID(true);
+   }
+
+   public UUID getUavPersistentUUID(boolean createIfMissing) {
+      if(this.uavPersistentUUID == null && createIfMissing && (this.isUAV() || this.isNewUAV())) {
+         this.uavPersistentUUID = this.getUniqueID();
+      }
+      return this.uavPersistentUUID;
+   }
+
    public UUID getOwnerUUID() {
       return this.uavOwnerUUID;
    }
 
    public void setOwnerUUID(UUID uuid) {
+      if(!super.worldObj.isRemote && this.uavOwnerUUID != null && !this.uavOwnerUUID.equals(uuid)) {
+         MCH_UavRegistry.unregister(this);
+      }
       this.uavOwnerUUID = uuid;
       if(uuid != null && !super.worldObj.isRemote) {
          MCH_UavRegistry.register(this);
@@ -1174,6 +1192,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       this.dismountedUserCtrl = nbt.getBoolean("AcDismounted");
+      this.uavPersistentUUID = parseUUID(nbt.getString("MCH_UavPersistentUUID"));
+      if(this.uavPersistentUUID == null && (this.isUAV() || this.isNewUAV())) {
+         this.uavPersistentUUID = this.getUniqueID();
+      }
       this.uavOwnerUUID = parseUUID(nbt.getString("MCH_UavOwnerUUID"));
       this.linkedUavStationUUID = parseUUID(nbt.getString("MCH_UavStationUUID"));
       this.linkedUavStationDimension = nbt.getInteger("MCH_UavStationDim");
@@ -1185,6 +1207,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.UavStationPosZ = MathHelper.floor_double(this.linkedUavStationZ);
       if(!super.worldObj.isRemote && (this.isUAV() || this.isNewUAV())) {
          MCH_UavRegistry.register(this);
+         if(this.uavStation != null && !this.uavStation.isDead) {
+            this.uavStation.linkUav(this);
+         }
       }
    }
 
@@ -1214,6 +1239,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       nbt.setTag("AcWeaponsAmmo", W_NBTTag.newTagIntArray("AcWeaponsAmmo", wa_list));
       nbt.setInteger("AcDamage", this.getDamageTaken());
       nbt.setBoolean("AcDismounted", this.dismountedUserCtrl);
+      UUID persistentId = this.getUavPersistentUUID(false);
+      if(persistentId == null && (this.isUAV() || this.isNewUAV())) {
+         persistentId = this.getUniqueID();
+         this.uavPersistentUUID = persistentId;
+      }
+      nbt.setString("MCH_UavPersistentUUID", persistentId == null ? "" : persistentId.toString());
       nbt.setString("MCH_UavOwnerUUID", this.uavOwnerUUID == null ? "" : this.uavOwnerUUID.toString());
       nbt.setString("MCH_UavStationUUID", this.linkedUavStationUUID == null ? "" : this.linkedUavStationUUID.toString());
       nbt.setInteger("MCH_UavStationDim", this.linkedUavStationDimension);
@@ -4784,7 +4815,16 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void setCommonUniqueId(String uniqId) {
+      if(!super.worldObj.isRemote && this.commonUniqueId != null && !this.commonUniqueId.equals(uniqId)) {
+         MCH_UavRegistry.unregister(this);
+      }
       this.commonUniqueId = uniqId;
+      if(!super.worldObj.isRemote && (this.isUAV() || this.isNewUAV())) {
+         MCH_UavRegistry.register(this);
+         if(this.uavStation != null && !this.uavStation.isDead) {
+            this.uavStation.linkUav(this);
+         }
+      }
    }
 
 
@@ -4824,6 +4864,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public void setDead(boolean dropItems) {
       if(!super.worldObj.isRemote && this.isNewUAV()) {
+         if(!this.deletingNewUavForShiftExit && this.uavStation != null && !this.uavStation.isDead) {
+            this.uavStation.clearStoredUavAfterDestroyed(this);
+         }
          restoreStoredPilot("uav_destroyed");
       }
       MCH_UavRegistry.unregister(this);
@@ -4868,10 +4911,87 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
 
-   private void preserveNewUavStationLink() {
-      if(!super.worldObj.isRemote && this.isNewUAV() && this.uavStation != null && !this.uavStation.isDead) {
-         this.uavStation.linkUav(this);
-         this.uavStation.setControlAircract(this);
+   private MCH_EntityUavStation findLinkedUavStationForShiftExit() {
+      if(this.uavStation != null && !this.uavStation.isDead) {
+         return this.uavStation;
+      }
+      if(super.worldObj.isRemote || this.linkedUavStationDimension != super.dimension) {
+         return null;
+      }
+
+      int sx = this.linkedUavStationX != 0.0D ? MathHelper.floor_double(this.linkedUavStationX) : this.UavStationPosX;
+      int sy = this.linkedUavStationY != 0.0D ? MathHelper.floor_double(this.linkedUavStationY) : this.UavStationPosY;
+      int sz = this.linkedUavStationZ != 0.0D ? MathHelper.floor_double(this.linkedUavStationZ) : this.UavStationPosZ;
+      super.worldObj.getChunkFromBlockCoords(sx, sz);
+
+      MCH_EntityUavStation fallback = null;
+      List list = super.worldObj.loadedEntityList;
+      for(int i = 0; i < list.size(); ++i) {
+         Object obj = list.get(i);
+         if(obj instanceof MCH_EntityUavStation) {
+            MCH_EntityUavStation station = (MCH_EntityUavStation)obj;
+            if(station.isDead) {
+               continue;
+            }
+            if(this.linkedUavStationUUID != null && this.linkedUavStationUUID.equals(station.getUniqueID())) {
+               this.uavStation = station;
+               return station;
+            }
+            if(fallback == null && station.dimension == super.dimension && station.getDistanceSq((double)sx, (double)sy, (double)sz) < 16.0D) {
+               fallback = station;
+            }
+         }
+      }
+      if(fallback != null) {
+         this.uavStation = fallback;
+      }
+      return fallback;
+   }
+
+   private void storePendingNewUavShiftExit(Entity rider) {
+      if(!(rider instanceof EntityPlayer) || this.getItem() == null) {
+         return;
+      }
+      NBTTagCompound pending = new NBTTagCompound();
+      pending.setString("StationUUID", this.linkedUavStationUUID == null ? "" : this.linkedUavStationUUID.toString());
+      pending.setInteger("StationDim", this.linkedUavStationDimension);
+      pending.setDouble("StationX", this.linkedUavStationX);
+      pending.setDouble("StationY", this.linkedUavStationY);
+      pending.setDouble("StationZ", this.linkedUavStationZ);
+      pending.setDouble("UavX", super.posX);
+      pending.setDouble("UavY", super.posY);
+      pending.setDouble("UavZ", super.posZ);
+      ItemStack stack = new ItemStack(this.getItem(), 1, 0);
+      NBTTagCompound itemTag = new NBTTagCompound();
+      stack.writeToNBT(itemTag);
+      pending.setTag("UavItem", itemTag);
+      ((EntityPlayer)rider).getEntityData().setTag("MCH_PendingNewUavShiftExit", pending);
+   }
+
+   private void clearPendingNewUavShiftExit(Entity rider) {
+      if(rider instanceof EntityPlayer) {
+         ((EntityPlayer)rider).getEntityData().removeTag("MCH_PendingNewUavShiftExit");
+      }
+   }
+
+   private void deleteNewUavAfterShiftExit(Entity rider) {
+      if(super.worldObj.isRemote || !this.isNewUAV()) {
+         return;
+      }
+      storePendingNewUavShiftExit(rider);
+      MCH_EntityUavStation station = findLinkedUavStationForShiftExit();
+      if(station != null && !station.isDead) {
+         station.prepareNewUavShiftExit(this);
+         clearPendingNewUavShiftExit(rider);
+      } else {
+         MCH_Lib.Log((Entity)this, "Unable to find linked UAV station for new UAV %d during shift-exit; saved pending Continue state on rider", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
+      }
+      MCH_Lib.Log((Entity)this, "Deleting new UAV entity %d after player shift-exit; station Continue may relaunch it", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
+      this.deletingNewUavForShiftExit = true;
+      try {
+         this.setDead(false);
+      } finally {
+         this.deletingNewUavForShiftExit = false;
       }
    }
 
@@ -4910,12 +5030,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                      newuavvariable = true;
                      //here
                      if(!this.worldObj.isRemote) {
-                      preserveNewUavStationLink();
                       rByEntity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
                       rByEntity.mountEntity((Entity) null);
                       if(rByEntity instanceof EntityPlayerMP) {
                          MCH_UavInventory.restorePilotInventory((EntityPlayerMP)rByEntity, "uav_exit");
                       }
+                      deleteNewUavAfterShiftExit(rByEntity);
                      }
                    } else {
                      setUnmountPosition(rByEntity, (getSeatsInfo()[0]).pos);
@@ -5118,8 +5238,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                      entity.mountEntity((Entity) null);
                   }
                }
-               preserveNewUavStationLink();
                entity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
+               deleteNewUavAfterShiftExit(entity);
                return false;
             }
             MCH_EntitySeat[] arr$ = this.seats;
@@ -5131,8 +5251,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   entity.mountEntity((Entity) null);
                }
             }
-            preserveNewUavStationLink();
             entity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
+            deleteNewUavAfterShiftExit(entity);
             return false;
          }
       }
