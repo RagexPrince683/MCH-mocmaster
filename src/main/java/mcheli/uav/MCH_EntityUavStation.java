@@ -816,6 +816,20 @@ public class MCH_EntityUavStation
            setLastControlAircraftEntityId(0);
          }
 
+      public void clearStoredUavAfterDestroyed(MCH_EntityAircraft ac) {
+           if(this.worldObj.isRemote) {
+                return;
+           }
+           if(ac != null) {
+                updateLinkedUavPosition(ac);
+                MCH_Lib.Log((Entity)this, "Linked new UAV %d was destroyed at %.2f, %.2f, %.2f; disabling stored Continue relaunch", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)ac)), Double.valueOf(this.linkedUavX), Double.valueOf(this.linkedUavY), Double.valueOf(this.linkedUavZ) });
+           }
+           this.lastUavItemStack = null;
+           this.hasStoredUavRespawnPosition = false;
+           this.respawnStoredUavAtSavedPosition = false;
+           unlinkInvalidUav();
+         }
+
       private boolean continueWithStoredUavItem(Entity user) {
            if(user == null || this.lastUavItemStack == null || this.worldObj.isRemote) {
                 return false;
