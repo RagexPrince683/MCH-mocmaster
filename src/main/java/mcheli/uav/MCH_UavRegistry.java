@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_EntityAircraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
 /** Runtime lookup cache only; persistent truth lives on aircraft/station/player NBT. */
 public final class MCH_UavRegistry {
+    private static final Map<String, MCH_EntityAircraft> BY_PERSISTENT_UUID = new HashMap<String, MCH_EntityAircraft>();
     private static final Map<String, MCH_EntityAircraft> BY_ENTITY_UUID = new HashMap<String, MCH_EntityAircraft>();
     private static final Map<String, MCH_EntityAircraft> BY_COMMON_ID = new HashMap<String, MCH_EntityAircraft>();
     private static final Map<String, MCH_EntityAircraft> BY_OWNER = new HashMap<String, MCH_EntityAircraft>();
@@ -20,6 +22,14 @@ public final class MCH_UavRegistry {
     public static void register(MCH_EntityAircraft ac) {
         if (!isValidUav(ac)) {
             return;
+        }
+        MCH_EntityAircraft canonical = pruneDuplicate(ac);
+        if (canonical != ac) {
+            return;
+        }
+        UUID persistentId = ac.getUavPersistentUUID();
+        if (persistentId != null) {
+            BY_PERSISTENT_UUID.put(persistentId.toString(), ac);
         }
         BY_ENTITY_UUID.put(ac.getUniqueID().toString(), ac);
         if (ac.getCommonUniqueId() != null && !ac.getCommonUniqueId().isEmpty()) {
@@ -34,18 +44,24 @@ public final class MCH_UavRegistry {
         if (ac == null) {
             return;
         }
-        BY_ENTITY_UUID.remove(ac.getUniqueID().toString());
+        removeIfSame(BY_ENTITY_UUID, ac.getUniqueID().toString(), ac);
+        UUID persistentId = ac.getUavPersistentUUID(false);
+        if (persistentId != null) {
+            removeIfSame(BY_PERSISTENT_UUID, persistentId.toString(), ac);
+        }
         if (ac.getCommonUniqueId() != null) {
-            BY_COMMON_ID.remove(ac.getCommonUniqueId());
+            removeIfSame(BY_COMMON_ID, ac.getCommonUniqueId(), ac);
         }
         if (ac.getOwnerUUID() != null) {
-            BY_OWNER.remove(ac.getOwnerUUID().toString());
+            removeIfSame(BY_OWNER, ac.getOwnerUUID().toString(), ac);
         }
     }
 
-    public static MCH_EntityAircraft findLinkedUav(World world, UUID entityUuid, String commonId, UUID owner) {
-        boolean hasStableLink = entityUuid != null || (commonId != null && !commonId.isEmpty());
-        MCH_EntityAircraft ac = getLive(BY_ENTITY_UUID.get(entityUuid == null ? "" : entityUuid.toString()), world);
+    public static MCH_EntityAircraft findLinkedUav(World world, UUID persistentUuid, String commonId, UUID owner) {
+        boolean hasStableLink = persistentUuid != null || (commonId != null && !commonId.isEmpty());
+        MCH_EntityAircraft ac = getLive(BY_PERSISTENT_UUID.get(persistentUuid == null ? "" : persistentUuid.toString()), world);
+        if (ac != null) return ac;
+        ac = getLive(BY_ENTITY_UUID.get(persistentUuid == null ? "" : persistentUuid.toString()), world);
         if (ac != null) return ac;
         ac = getLive(BY_COMMON_ID.get(commonId == null ? "" : commonId), world);
         if (ac != null) return ac;
@@ -53,7 +69,7 @@ public final class MCH_UavRegistry {
             ac = getLive(BY_OWNER.get(owner == null ? "" : owner.toString()), world);
             if (ac != null) return ac;
         }
-        return searchLoaded(world, entityUuid, commonId, hasStableLink ? null : owner);
+        return searchLoaded(world, persistentUuid, commonId, hasStableLink ? null : owner);
     }
 
     public static MCH_EntityAircraft findByOwner(World world, UUID owner) {
@@ -75,7 +91,11 @@ public final class MCH_UavRegistry {
                 MCH_EntityAircraft ac = (MCH_EntityAircraft)obj;
                 if (isValidUav(ac)) {
                     register(ac);
-                    boolean entityMatch = entityUuid != null && entityUuid.equals(ac.getUniqueID());
+                    if (ac.isDead) {
+                        continue;
+                    }
+                    UUID persistentId = ac.getUavPersistentUUID();
+                    boolean entityMatch = entityUuid != null && (entityUuid.equals(persistentId) || entityUuid.equals(ac.getUniqueID()));
                     boolean commonMatch = commonId != null && !commonId.isEmpty() && commonId.equals(ac.getCommonUniqueId());
                     boolean ownerMatch = owner != null && owner.equals(ac.getOwnerUUID());
                     if (entityUuid == null && (commonId == null || commonId.isEmpty()) && owner == null && first == null) {
@@ -95,6 +115,43 @@ public final class MCH_UavRegistry {
         }
         unregister(ac);
         return null;
+    }
+
+    private static void removeIfSame(Map<String, MCH_EntityAircraft> map, String key, MCH_EntityAircraft ac) {
+        if (key != null && map.get(key) == ac) {
+            map.remove(key);
+        }
+    }
+
+    private static MCH_EntityAircraft pruneDuplicate(MCH_EntityAircraft ac) {
+        MCH_EntityAircraft duplicate = null;
+        UUID persistentId = ac.getUavPersistentUUID();
+        if (persistentId != null) {
+            duplicate = getLive(BY_PERSISTENT_UUID.get(persistentId.toString()), ac.worldObj);
+        }
+        if (duplicate == null && ac.getCommonUniqueId() != null && !ac.getCommonUniqueId().isEmpty()) {
+            duplicate = getLive(BY_COMMON_ID.get(ac.getCommonUniqueId()), ac.worldObj);
+        }
+        if (duplicate == null || duplicate == ac) {
+            return ac;
+        }
+
+        MCH_EntityAircraft keep = chooseCanonical(duplicate, ac);
+        MCH_EntityAircraft remove = keep == ac ? duplicate : ac;
+        MCH_Lib.Log(remove, "Duplicate UAV identity detected: keeping entity %d and removing duplicate %d (persistent=%s, common=%s)", new Object[] {
+                Integer.valueOf(keep.getEntityId()), Integer.valueOf(remove.getEntityId()),
+                persistentId == null ? "" : persistentId.toString(), ac.getCommonUniqueId() == null ? "" : ac.getCommonUniqueId() });
+        unregister(remove);
+        remove.setDead(false);
+        return keep;
+    }
+
+    private static MCH_EntityAircraft chooseCanonical(MCH_EntityAircraft a, MCH_EntityAircraft b) {
+        if (b.getRiddenByEntity() != null && a.getRiddenByEntity() == null) return b;
+        if (a.getRiddenByEntity() != null && b.getRiddenByEntity() == null) return a;
+        if (b.getUavStation() != null && a.getUavStation() == null) return b;
+        if (a.getUavStation() != null && b.getUavStation() == null) return a;
+        return a.ticksExisted >= b.ticksExisted ? a : b;
     }
 
     private static boolean isValidUav(MCH_EntityAircraft ac) {
