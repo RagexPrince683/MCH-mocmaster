@@ -86,19 +86,10 @@ public class MCH_GuiUavStation
          }
 
       protected void actionPerformed(GuiButton btn) {
-                     System.out.println("actionPerformed fired");
            if (btn != null && btn.enabled) {
-                        System.out.println("btn enabled");
                 if (btn.id == 256) {
                               this.uavStation.setContinuePressed(true);
-                     if (this.uavStation != null && !this.uavStation.isDead && this.uavStation.getLastControlAircraft() != null && !(this.uavStation.getLastControlAircraft()).isDead) {
-                          //System.out.println("found uav station and last control aircraft");
-                         MCH_EntityAircraft aircraft = getCurrentAircraft(this.uavStation.getLastControlAircraft());
-                         //MCH_EntityAircraft aircraft1 = getCurrentAircraft(aircraft);
-                         if (aircraft != null) {
-                             //System.out.println("aircraft isnt null");
-                             //aircraft.castuavid(this.mc.thePlayer);
-                         }
+                     if (this.uavStation != null && !this.uavStation.isDead && this.uavStation.hasContinuableUavLink()) {
                           MCH_UavPacketStatus pos = new MCH_UavPacketStatus();
                           pos.posUavX = (byte)this.uavStation.posUavX;
                           pos.posUavY = (byte)this.uavStation.posUavY;
@@ -107,7 +98,6 @@ public class MCH_GuiUavStation
                           W_Network.sendToServer((W_PacketBase)pos);
                         }
 
-                     this.buttonContinue.enabled = false;
                    } else {
                      int[] pos1 = { this.uavStation.posUavX, this.uavStation.posUavY, this.uavStation.posUavZ };
                      int i = btn.id >> 4 & 0xF;
@@ -153,10 +143,7 @@ public class MCH_GuiUavStation
               }
 
            this.buttonContinue = new GuiButton(256, x - 80 + 3, y + 44, 50, 20, "Continue");
-           this.buttonContinue.enabled = false;
-           if (this.uavStation != null && !this.uavStation.isDead && this.uavStation.getAndSearchLastControlAircraft() != null) {
-                this.buttonContinue.enabled = true;
-              }
+           this.buttonContinue.enabled = this.uavStation != null && !this.uavStation.isDead && this.uavStation.hasContinuableUavLink();
 
            this.buttonList.add(this.buttonContinue);
          }
