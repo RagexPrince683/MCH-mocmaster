@@ -3258,6 +3258,107 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    }
 
+
+   public boolean canAcceptAmmo(ItemStack stack) {
+      return this.getAmmoSpaceRemaining(stack) > 0;
+   }
+
+   public int getAmmoSpaceRemaining(ItemStack stack) {
+      if(stack == null || stack.stackSize <= 0 || this.getWeaponNum() <= 0) {
+         return 0;
+      }
+      int space = 0;
+      for(int wid = 0; wid < this.getWeaponNum(); ++wid) {
+         MCH_WeaponSet ws = this.getWeapon(wid);
+         if(ws != null && isRoundItemForWeapon(ws, stack)) {
+            int weaponSpace = ws.getAllAmmoNum() - (ws.getRestAllAmmoNum() + ws.getAmmoNum());
+            if(weaponSpace > 0) {
+               space += weaponSpace;
+            }
+         }
+      }
+      return space;
+   }
+
+   public int trySupplyAmmoFromStack(ItemStack stack, EntityPlayer player) {
+      if(super.worldObj.isRemote || stack == null || stack.stackSize <= 0 || this.isDestroyed()) {
+         return 0;
+      }
+
+      int consumed = 0;
+      for(int wid = 0; wid < this.getWeaponNum() && stack.stackSize > 0; ++wid) {
+         MCH_WeaponSet ws = this.getWeapon(wid);
+         int used = trySupplyAmmoToWeapon(ws, stack);
+         if(used > 0) {
+            consumed += used;
+            if(ws.getAmmoNum() <= 0) {
+               ws.reloadMag();
+            }
+            MCH_PacketNotifyAmmoNum.sendAmmoNum(this, player, wid);
+         }
+      }
+
+      if(consumed > 0) {
+         MCH_PacketNotifyAmmoNum.sendAllAmmoNum(this, player);
+      }
+      return consumed;
+   }
+
+   private int trySupplyAmmoToWeapon(MCH_WeaponSet ws, ItemStack stack) {
+      if(ws == null || stack == null || ws.getInfo() == null || ws.getInfo().roundItems == null || ws.getInfo().roundItems.size() != 1) {
+         return 0;
+      }
+      int space = ws.getAllAmmoNum() - (ws.getRestAllAmmoNum() + ws.getAmmoNum());
+      if(space <= 0) {
+         return 0;
+      }
+
+      Iterator i$ = ws.getInfo().roundItems.iterator();
+      while(i$.hasNext()) {
+         MCH_WeaponInfo.RoundItem ri = (MCH_WeaponInfo.RoundItem)i$.next();
+         if(ri != null && ri.itemStack != null && stack.isItemEqual(ri.itemStack)) {
+            int itemCost = ri.num <= 0 ? 1 : ri.num;
+            int supplied = ws.getInfo().suppliedNum <= 0 ? 1 : ws.getInfo().suppliedNum;
+            int packages = stack.stackSize / itemCost;
+            if(packages <= 0) {
+               return 0;
+            }
+            int packagesNeeded = (space + supplied - 1) / supplied;
+            if(packages > packagesNeeded) {
+               packages = packagesNeeded;
+            }
+            int ammoToAdd = packages * supplied;
+            if(ammoToAdd > space) {
+               ammoToAdd = space;
+            }
+            int before = ws.getRestAllAmmoNum() + ws.getAmmoNum();
+            ws.setRestAllAmmoNum(ws.getRestAllAmmoNum() + ammoToAdd);
+            int after = ws.getRestAllAmmoNum() + ws.getAmmoNum();
+            if(after > before) {
+               int consumed = packages * itemCost;
+               stack.stackSize -= consumed;
+               return consumed;
+            }
+            return 0;
+         }
+      }
+      return 0;
+   }
+
+   private boolean isRoundItemForWeapon(MCH_WeaponSet ws, ItemStack stack) {
+      if(ws == null || stack == null || ws.getInfo() == null || ws.getInfo().roundItems == null || ws.getInfo().roundItems.size() != 1) {
+         return false;
+      }
+      Iterator i$ = ws.getInfo().roundItems.iterator();
+      while(i$.hasNext()) {
+         MCH_WeaponInfo.RoundItem ri = (MCH_WeaponInfo.RoundItem)i$.next();
+         if(ri != null && ri.itemStack != null && stack.isItemEqual(ri.itemStack)) {
+            return true;
+         }
+      }
+      return false;
+   }
+
    public void supplyAmmo(int weaponID) {
       if(super.worldObj.isRemote) {
          MCH_WeaponSet player = this.getWeapon(weaponID);

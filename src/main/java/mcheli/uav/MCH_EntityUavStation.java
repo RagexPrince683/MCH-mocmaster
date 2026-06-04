@@ -617,7 +617,7 @@ public class MCH_EntityUavStation
                      Entity entity = this.worldObj.getEntityByID(id);
                      if (entity instanceof MCH_EntityAircraft) {
                           MCH_EntityAircraft ac = (MCH_EntityAircraft)entity;
-                          if (ac.isUAV()) {
+                          if (ac.isUAV() || ac.isNewUAV()) {
                                setLastControlAircraft(ac);
                              }
                         }
@@ -630,6 +630,9 @@ public class MCH_EntityUavStation
       public void setLastControlAircraft(MCH_EntityAircraft ac) {
            MCH_Lib.DbgLog(this.worldObj, "MCH_EntityUavStation.setLastControlAircraft:" + ac, new Object[0]);
            this.lastControlAircraft = ac;
+           if(ac != null && !this.worldObj.isRemote) {
+                setLastControlAircraftEntityId(W_Entity.getEntityId((Entity)ac));
+           }
          }
 
       public Integer getLastControlAircraftEntityId() {
@@ -688,6 +691,41 @@ public class MCH_EntityUavStation
                 return false;
            }
            return ac.isUAV() || ac.isNewUAV();
+         }
+
+
+      public boolean tryTransferAmmoToUav(EntityPlayerMP player) {
+           if(this.worldObj.isRemote) {
+                return false;
+           }
+           ItemStack stack = getStackInSlot(0);
+           if(stack == null || stack.stackSize <= 0) {
+                return false;
+           }
+           MCH_EntityAircraft ac = getLinkedUav(this.worldObj);
+           if(!validateUav(ac, player)) {
+                return false;
+           }
+           int before = stack.stackSize;
+           int consumed = ac.trySupplyAmmoFromStack(stack, player);
+           if(consumed <= 0) {
+                return false;
+           }
+           if(stack.stackSize <= 0) {
+                setInventorySlotContents(0, (ItemStack)null);
+           } else if(stack.stackSize != before) {
+                setInventorySlotContents(0, stack);
+           }
+           if(player != null) {
+                player.inventoryContainer.detectAndSendChanges();
+           }
+           MCH_Lib.DbgLog(this.worldObj, "Transferred %d UAV ammo item(s) from station %d to UAV %d", new Object[] { Integer.valueOf(consumed), Integer.valueOf(W_Entity.getEntityId((Entity)this)), Integer.valueOf(W_Entity.getEntityId((Entity)ac)) });
+           return true;
+         }
+
+      public boolean canAcceptAmmo(ItemStack stack) {
+           MCH_EntityAircraft ac = getLinkedUav(this.worldObj);
+           return ac != null && ac.canAcceptAmmo(stack);
          }
 
       public void searchLastControlAircraft() {
@@ -798,6 +836,7 @@ public class MCH_EntityUavStation
                          lastAc.storedRider = (EntityPlayer)this.riddenByEntity;
                          setOwnerUUID(((EntityPlayer)this.riddenByEntity).getUniqueID());
                          if(this.riddenByEntity instanceof EntityPlayerMP) {
+                             tryTransferAmmoToUav((EntityPlayerMP)this.riddenByEntity);
                              MCH_UavInventory.storePilotInventory((EntityPlayerMP)this.riddenByEntity, lastAc.getUniqueID().toString());
                          }
                      }
