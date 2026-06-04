@@ -4906,11 +4906,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
 
-   private void preserveNewUavStationLink() {
-      if(!super.worldObj.isRemote && this.isNewUAV() && this.uavStation != null && !this.uavStation.isDead) {
-         this.uavStation.linkUav(this);
-         this.uavStation.setControlAircract(this);
+   private void deleteNewUavAfterShiftExit() {
+      if(super.worldObj.isRemote || !this.isNewUAV()) {
+         return;
       }
+      if(this.uavStation != null && !this.uavStation.isDead) {
+         this.uavStation.prepareNewUavShiftExit(this);
+      }
+      MCH_Lib.Log((Entity)this, "Deleting new UAV entity %d after player shift-exit; station Continue may relaunch it", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
+      this.setDead(false);
    }
 
    public void unmountEntity() {
@@ -4948,12 +4952,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                      newuavvariable = true;
                      //here
                      if(!this.worldObj.isRemote) {
-                      preserveNewUavStationLink();
                       rByEntity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
                       rByEntity.mountEntity((Entity) null);
                       if(rByEntity instanceof EntityPlayerMP) {
                          MCH_UavInventory.restorePilotInventory((EntityPlayerMP)rByEntity, "uav_exit");
                       }
+                      deleteNewUavAfterShiftExit();
                      }
                    } else {
                      setUnmountPosition(rByEntity, (getSeatsInfo()[0]).pos);
@@ -5156,8 +5160,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                      entity.mountEntity((Entity) null);
                   }
                }
-               preserveNewUavStationLink();
                entity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
+               deleteNewUavAfterShiftExit();
                return false;
             }
             MCH_EntitySeat[] arr$ = this.seats;
@@ -5169,8 +5173,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   entity.mountEntity((Entity) null);
                }
             }
-            preserveNewUavStationLink();
             entity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
+            deleteNewUavAfterShiftExit();
             return false;
          }
       }
