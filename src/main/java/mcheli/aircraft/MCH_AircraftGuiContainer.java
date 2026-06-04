@@ -64,7 +64,7 @@ extends Container {
         if (this.aircraft.getGuiInventory().isUseableByPlayer(player)) {
             return true;
         }
-        if ((this.aircraft.isUAV() || this.aircraft.isNewUAV()) && (us = this.aircraft.getUavStation()) != null) {
+        if (this.aircraft.isUAV() && (us = this.aircraft.getUavStation()) != null) {
             double x = us.posX + (double)us.posUavX;
             double z = us.posZ + (double)us.posUavZ;
             if (this.aircraft.posX < x + 10.0 && this.aircraft.posX > x - 10.0 && this.aircraft.posZ < z + 10.0 && this.aircraft.posZ > z - 10.0) {
