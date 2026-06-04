@@ -58,7 +58,7 @@ public class MCH_GuiUavStation
                      info = MCH_TankInfoManager.getFromItem(item.getItem());
                    }
 
-                if (item != null && (item == null || info == null || !((MCH_AircraftInfo)info).isUAV || !((MCH_AircraftInfo)info).isNewUAV)) {
+                if (item != null && (item == null || info == null || (!((MCH_AircraftInfo)info).isUAV && !((MCH_AircraftInfo)info).isNewUAV))) {
                      if (item != null) {
                           drawString("Not UAV", 8, 6, 16711680);
                         }

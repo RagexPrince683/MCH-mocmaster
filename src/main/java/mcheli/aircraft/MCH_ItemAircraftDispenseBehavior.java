@@ -18,7 +18,7 @@ public class MCH_ItemAircraftDispenseBehavior extends BehaviorDefaultDispenseIte
       double z = bs.getZ() + (double)enumfacing.getFrontOffsetZ() * 2.0D;
       if(itemStack.getItem() instanceof MCH_ItemAircraft) {
          MCH_EntityAircraft ac = ((MCH_ItemAircraft)itemStack.getItem()).onTileClick(itemStack, bs.getWorld(), 0.0F, (int)x, (int)y, (int)z);
-         if(ac != null && !ac.isUAV()) {
+         if(ac != null && !ac.isUAV() && !ac.isNewUAV()) {
             if(!bs.getWorld().isRemote) {
                ac.getAcDataFromItem(itemStack);
                bs.getWorld().spawnEntityInWorld(ac);
