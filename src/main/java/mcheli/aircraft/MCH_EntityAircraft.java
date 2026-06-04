@@ -22,6 +22,8 @@ import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.ship.MCH_EntityShip;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.uav.MCH_EntityUavStation;
+import mcheli.uav.MCH_UavInventory;
+import mcheli.uav.MCH_UavRegistry;
 import mcheli.weapon.*;
 import mcheli.wrapper.*;
 import net.minecraft.block.Block;
@@ -240,6 +242,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public EntityPlayer storedRider;
 
    public String newUavPlayerUUID;
+   private UUID uavOwnerUUID;
+   private UUID linkedUavStationUUID;
+   private int linkedUavStationDimension;
+   private double linkedUavStationX;
+   private double linkedUavStationY;
+   private double linkedUavStationZ;
    //public static boolean isNewUAV = MCH_AircraftInfo.isNewUAV;
    //public static Entity rider = lastRidingEntity;
    //MCH_EntityAircraft MCH_EntityUavStation;
@@ -318,6 +326,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.setDespawnCount(0);
       this.missileDetector = new MCH_MissileDetector(this, world);
       this.uavStation = null;
+      this.uavOwnerUUID = null;
+      this.linkedUavStationUUID = null;
+      this.linkedUavStationDimension = 0;
+      this.linkedUavStationX = 0.0D;
+      this.linkedUavStationY = 0.0D;
+      this.linkedUavStationZ = 0.0D;
       this.modeSwitchCooldown = 0;
       this.partHatch = null;
       this.partCanopy = null;
@@ -539,14 +553,47 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public void setUavStation(MCH_EntityUavStation uavSt) {
       this.uavStation = uavSt;
+      if(uavSt != null) {
+         this.linkedUavStationUUID = uavSt.getUniqueID();
+         this.linkedUavStationDimension = uavSt.dimension;
+         this.linkedUavStationX = uavSt.posX;
+         this.linkedUavStationY = uavSt.posY;
+         this.linkedUavStationZ = uavSt.posZ;
+         this.UavStationPosX = MathHelper.floor_double(uavSt.posX);
+         this.UavStationPosY = MathHelper.floor_double(uavSt.posY);
+         this.UavStationPosZ = MathHelper.floor_double(uavSt.posZ);
+         if(uavSt.getOwnerUUID() != null) {
+            this.setOwnerUUID(uavSt.getOwnerUUID());
+         }
+      }
       if(!super.worldObj.isRemote) {
          if(uavSt != null) {
             this.getDataWatcher().updateObject(22, Integer.valueOf(W_Entity.getEntityId(uavSt)));
+            MCH_UavRegistry.register(this);
          } else {
             this.getDataWatcher().updateObject(22, Integer.valueOf(0));
          }
       }
 
+   }
+
+   public UUID getOwnerUUID() {
+      return this.uavOwnerUUID;
+   }
+
+   public void setOwnerUUID(UUID uuid) {
+      this.uavOwnerUUID = uuid;
+      if(uuid != null && !super.worldObj.isRemote) {
+         MCH_UavRegistry.register(this);
+      }
+   }
+
+   public UUID getLinkedUavStationUUID() {
+      return this.linkedUavStationUUID;
+   }
+
+   public boolean isLinkedToStation(MCH_EntityUavStation station) {
+      return station != null && this.linkedUavStationUUID != null && this.linkedUavStationUUID.equals(station.getUniqueID());
    }
 
    public float getStealth() {
@@ -1143,6 +1190,18 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       this.dismountedUserCtrl = nbt.getBoolean("AcDismounted");
+      this.uavOwnerUUID = parseUUID(nbt.getString("MCH_UavOwnerUUID"));
+      this.linkedUavStationUUID = parseUUID(nbt.getString("MCH_UavStationUUID"));
+      this.linkedUavStationDimension = nbt.getInteger("MCH_UavStationDim");
+      this.linkedUavStationX = nbt.getDouble("MCH_UavStationX");
+      this.linkedUavStationY = nbt.getDouble("MCH_UavStationY");
+      this.linkedUavStationZ = nbt.getDouble("MCH_UavStationZ");
+      this.UavStationPosX = MathHelper.floor_double(this.linkedUavStationX);
+      this.UavStationPosY = MathHelper.floor_double(this.linkedUavStationY);
+      this.UavStationPosZ = MathHelper.floor_double(this.linkedUavStationZ);
+      if(!super.worldObj.isRemote && (this.isUAV() || this.isNewUAV())) {
+         MCH_UavRegistry.register(this);
+      }
    }
 
    protected void writeEntityToNBT(NBTTagCompound nbt) {
@@ -1171,6 +1230,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       nbt.setTag("AcWeaponsAmmo", W_NBTTag.newTagIntArray("AcWeaponsAmmo", wa_list));
       nbt.setInteger("AcDamage", this.getDamageTaken());
       nbt.setBoolean("AcDismounted", this.dismountedUserCtrl);
+      nbt.setString("MCH_UavOwnerUUID", this.uavOwnerUUID == null ? "" : this.uavOwnerUUID.toString());
+      nbt.setString("MCH_UavStationUUID", this.linkedUavStationUUID == null ? "" : this.linkedUavStationUUID.toString());
+      nbt.setInteger("MCH_UavStationDim", this.linkedUavStationDimension);
+      nbt.setDouble("MCH_UavStationX", this.linkedUavStationX);
+      nbt.setDouble("MCH_UavStationY", this.linkedUavStationY);
+      nbt.setDouble("MCH_UavStationZ", this.linkedUavStationZ);
    }
 
    public boolean attackEntityFrom(DamageSource damageSource, float org_damage) {
@@ -4620,6 +4685,28 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.commonUniqueId = uniqId;
    }
 
+
+   private static UUID parseUUID(String value) {
+      if(value == null || value.isEmpty()) {
+         return null;
+      }
+      try {
+         return UUID.fromString(value);
+      } catch (IllegalArgumentException e) {
+         return null;
+      }
+   }
+
+   private void restoreStoredPilot(String reason) {
+      Entity rider = super.riddenByEntity;
+      if(!(rider instanceof EntityPlayerMP) && this.lastRiddenByEntity instanceof EntityPlayerMP) {
+         rider = this.lastRiddenByEntity;
+      }
+      if(rider instanceof EntityPlayerMP) {
+         MCH_UavInventory.restorePilotInventory((EntityPlayerMP)rider, reason);
+      }
+   }
+
    public void setDead() {
       this.setDead(false);
       for (ChunkCoordinates coord : activeLights) {
@@ -4634,6 +4721,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void setDead(boolean dropItems) {
+      if(!super.worldObj.isRemote && this.isNewUAV()) {
+         restoreStoredPilot("uav_destroyed");
+      }
+      MCH_UavRegistry.unregister(this);
       super.dropContentsWhenDead = dropItems;
       super.setDead();
       if(this.getRiddenByEntity() != null) {
@@ -4713,6 +4804,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                       System.out.println("Mounting player to UAV station. Position: " + this.UavStationPosX + ", " + this.UavStationPosY + ", " + this.UavStationPosZ);
                       rByEntity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
                       rByEntity.mountEntity((Entity) null);
+                      if(rByEntity instanceof EntityPlayerMP) {
+                         MCH_UavInventory.restorePilotInventory((EntityPlayerMP)rByEntity, "uav_exit");
+                      }
                      }
                    } else {
                      setUnmountPosition(rByEntity, (getSeatsInfo()[0]).pos);
