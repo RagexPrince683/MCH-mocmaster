@@ -4925,6 +4925,21 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       } finally {
          this.deletingNewUavForShiftExit = false;
       }
+      if(this.uavStation != null && !this.uavStation.isDead) {
+         this.uavStation.prepareNewUavShiftExit(this);
+      }
+      MCH_Lib.Log((Entity)this, "Deleting new UAV entity %d after player shift-exit; station Continue may relaunch it", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
+      this.deletingNewUavForShiftExit = true;
+      try {
+         this.setDead(false);
+      } finally {
+         this.deletingNewUavForShiftExit = false;
+      }
+      if(this.uavStation != null && !this.uavStation.isDead) {
+         this.uavStation.prepareNewUavShiftExit(this);
+      }
+      MCH_Lib.Log((Entity)this, "Deleting new UAV entity %d after player shift-exit; station Continue may relaunch it", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
+      this.setDead(false);
    }
 
    public void unmountEntity() {
