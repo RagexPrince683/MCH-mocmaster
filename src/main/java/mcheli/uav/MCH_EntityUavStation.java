@@ -78,6 +78,7 @@ public class MCH_EntityUavStation
       private double linkedUavY;
       private double linkedUavZ;
       private boolean hasStoredUavLink;
+      private ItemStack lastUavItemStack;
       private boolean awaitingLoadedUav;
       private int pendingContinueTicks;
 
@@ -124,6 +125,7 @@ public class MCH_EntityUavStation
            this.loadedLastControlAircraftGuid = "";
            this.linkedUavCommonId = "";
            this.hasStoredUavLink = false;
+           this.lastUavItemStack = null;
            this.awaitingLoadedUav = false;
            this.pendingContinueTicks = 0;
          }
@@ -203,8 +205,9 @@ public class MCH_EntityUavStation
            }
            this.assignedUav = ac;
            this.assignedUavId = ac.getEntityId();
-           this.assignedUavUUID = ac.getUniqueID().toString();
-           this.linkedUavEntityUUID = ac.getUniqueID();
+           UUID persistentId = ac.getUavPersistentUUID();
+           this.assignedUavUUID = persistentId == null ? ac.getUniqueID().toString() : persistentId.toString();
+           this.linkedUavEntityUUID = persistentId == null ? ac.getUniqueID() : persistentId;
            this.linkedUavCommonId = ac.getCommonUniqueId() == null ? "" : ac.getCommonUniqueId();
            updateLinkedUavPosition(ac);
            ac.setUavStation(this);
@@ -233,7 +236,8 @@ public class MCH_EntityUavStation
                   (this.assignedUavUUID != null && !this.assignedUavUUID.isEmpty()) ||
                   this.linkedUavEntityUUID != null ||
                   (this.linkedUavCommonId != null && !this.linkedUavCommonId.isEmpty()) ||
-                  (this.loadedLastControlAircraftGuid != null && !this.loadedLastControlAircraftGuid.isEmpty());
+                  (this.loadedLastControlAircraftGuid != null && !this.loadedLastControlAircraftGuid.isEmpty()) ||
+                  this.lastUavItemStack != null;
          }
 
       public void unlinkInvalidUav() {
@@ -243,6 +247,7 @@ public class MCH_EntityUavStation
            this.linkedUavEntityUUID = null;
            this.linkedUavCommonId = "";
            this.hasStoredUavLink = false;
+           this.lastUavItemStack = null;
            this.awaitingLoadedUav = false;
            this.pendingContinueTicks = 0;
            this.controlAircraft = null;
@@ -286,6 +291,7 @@ public class MCH_EntityUavStation
 
            nbt.setString("LastCtrlAc", s);
            nbt.setString("OwnerUUID", this.ownerUUID == null ? "" : this.ownerUUID.toString());
+           nbt.setString("LinkedUavPersistentUUID", this.linkedUavEntityUUID == null ? "" : this.linkedUavEntityUUID.toString());
            nbt.setString("LinkedUavEntityUUID", this.linkedUavEntityUUID == null ? "" : this.linkedUavEntityUUID.toString());
            nbt.setString("LinkedUavCommonId", this.linkedUavCommonId == null ? "" : this.linkedUavCommonId);
            nbt.setInteger("LinkedUavDimension", this.linkedUavDimension);
@@ -293,10 +299,16 @@ public class MCH_EntityUavStation
            nbt.setDouble("LinkedUavX", this.linkedUavX);
            nbt.setDouble("LinkedUavY", this.linkedUavY);
            nbt.setDouble("LinkedUavZ", this.linkedUavZ);
+           if(this.lastUavItemStack != null) {
+                NBTTagCompound itemTag = new NBTTagCompound();
+                this.lastUavItemStack.writeToNBT(itemTag);
+                nbt.setTag("LastUavItem", itemTag);
+              }
 
           if (this.assignedUav != null && !this.assignedUav.isDead) {
               nbt.setInteger("AssignedUavId", this.assignedUav.getEntityId());
-              nbt.setString("AssignedUavUUID", this.assignedUav.getUniqueID().toString());
+              UUID persistentId = this.assignedUav.getUavPersistentUUID();
+              nbt.setString("AssignedUavUUID", persistentId == null ? this.assignedUav.getUniqueID().toString() : persistentId.toString());
           }
          }
 
@@ -317,13 +329,17 @@ public class MCH_EntityUavStation
               this.assignedUavUUID = nbt.getString("AssignedUavUUID");
           }
           this.ownerUUID = parseUavUUID(nbt.getString("OwnerUUID"));
-          this.linkedUavEntityUUID = parseUavUUID(nbt.getString("LinkedUavEntityUUID"));
+          this.linkedUavEntityUUID = parseUavUUID(nbt.getString("LinkedUavPersistentUUID"));
+          if(this.linkedUavEntityUUID == null) {
+              this.linkedUavEntityUUID = parseUavUUID(nbt.getString("LinkedUavEntityUUID"));
+          }
           this.linkedUavCommonId = nbt.getString("LinkedUavCommonId");
           this.linkedUavDimension = nbt.getInteger("LinkedUavDimension");
           this.hasStoredUavLink = nbt.getBoolean("HasStoredUavLink");
           this.linkedUavX = nbt.getDouble("LinkedUavX");
           this.linkedUavY = nbt.getDouble("LinkedUavY");
           this.linkedUavZ = nbt.getDouble("LinkedUavZ");
+          this.lastUavItemStack = nbt.hasKey("LastUavItem") ? ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("LastUavItem")) : null;
           if(this.linkedUavEntityUUID == null) {
               this.linkedUavEntityUUID = parseUavUUID(this.assignedUavUUID);
           }
@@ -331,7 +347,8 @@ public class MCH_EntityUavStation
                   (this.linkedUavCommonId != null && !this.linkedUavCommonId.isEmpty()) ||
                   this.assignedUavId > 0 ||
                   (this.assignedUavUUID != null && !this.assignedUavUUID.isEmpty()) ||
-                  (this.loadedLastControlAircraftGuid != null && !this.loadedLastControlAircraftGuid.isEmpty());
+                  (this.loadedLastControlAircraftGuid != null && !this.loadedLastControlAircraftGuid.isEmpty()) ||
+                  this.lastUavItemStack != null;
           this.awaitingLoadedUav = hasLinkedUavIdentity;
           this.hasStoredUavLink = hasLinkedUavIdentity;
           if(this.awaitingLoadedUav) {
@@ -571,7 +588,8 @@ public class MCH_EntityUavStation
                   for (Object obj : this.worldObj.loadedEntityList) {
                       if (obj instanceof MCH_EntityAircraft) {
                           MCH_EntityAircraft ac = (MCH_EntityAircraft)obj;
-                          if (ac.getUniqueID().toString().equals(this.assignedUavUUID)) {
+                          UUID persistentId = ac.getUavPersistentUUID();
+                          if (ac.getUniqueID().toString().equals(this.assignedUavUUID) || (persistentId != null && persistentId.toString().equals(this.assignedUavUUID))) {
                               linkUav(ac);
                               break;
                           }
@@ -630,11 +648,19 @@ public class MCH_EntityUavStation
            this.prevPosX = this.posX;
            this.prevPosY = this.posY;
            this.prevPosZ = this.posZ;
-           if (getControlAircract() != null && ((getControlAircract()).isDead || getControlAircract().isDestroyed())) {
+           if (getControlAircract() != null && getControlAircract().isDestroyed()) {
+                MCH_Lib.Log((Entity)this, "Linked UAV %d is destroyed; clearing station link", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)getControlAircract())) });
+                unlinkInvalidUav();
+              } else if (getControlAircract() != null && getControlAircract().isDead) {
+                markLinkedUavUnloaded();
                 setControlAircract((MCH_EntityAircraft)null);
               }
 
-           if (getLastControlAircraft() != null && ((getLastControlAircraft()).isDead || getLastControlAircraft().isDestroyed())) {
+           if (getLastControlAircraft() != null && getLastControlAircraft().isDestroyed()) {
+                MCH_Lib.Log((Entity)this, "Last linked UAV %d is destroyed; clearing station link", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)getLastControlAircraft())) });
+                unlinkInvalidUav();
+              } else if (getLastControlAircraft() != null && getLastControlAircraft().isDead) {
+                markLinkedUavUnloaded();
                 setLastControlAircraft((MCH_EntityAircraft)null);
               }
 
@@ -756,6 +782,44 @@ public class MCH_EntityUavStation
                 return false;
            }
            return ac.isUAV() || ac.isNewUAV();
+         }
+
+
+      public void prepareNewUavShiftExit(MCH_EntityAircraft ac) {
+           if(this.worldObj.isRemote || ac == null) {
+                return;
+           }
+           updateLinkedUavPosition(ac);
+           MCH_Lib.Log((Entity)this, "New UAV %d shifted out; deleting drone entity and keeping station launch state for Continue", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)ac)) });
+           this.assignedUav = null;
+           this.assignedUavId = -1;
+           this.assignedUavUUID = "";
+           this.linkedUavEntityUUID = null;
+           this.linkedUavCommonId = "";
+           this.hasStoredUavLink = false;
+           this.awaitingLoadedUav = false;
+           this.pendingContinueTicks = 0;
+           this.controlAircraft = null;
+           setLastControlAircraft((MCH_EntityAircraft)null);
+           setLastControlAircraftEntityId(0);
+         }
+
+      private boolean continueWithStoredUavItem(Entity user) {
+           if(user == null || this.lastUavItemStack == null || this.worldObj.isRemote) {
+                return false;
+           }
+           ItemStack stack = this.lastUavItemStack.copy();
+           stack.stackSize = 1;
+           MCH_Lib.Log((Entity)this, "Continue requested after shifted-out new UAV; relaunching stored UAV item %s", new Object[] { stack.getItem() == null ? "null" : stack.getItem().getUnlocalizedName() });
+           handleItem(user, stack);
+           MCH_EntityAircraft ac = getControlAircract();
+           if(ac != null && !ac.isDead) {
+                if(this.riddenByEntity != null && ac.isNewUAV()) {
+                     this.riddenByEntity.mountEntity((Entity)ac);
+                }
+                return true;
+           }
+           return false;
          }
 
 
@@ -947,6 +1011,8 @@ public class MCH_EntityUavStation
                      }
                      this.pendingContinueTicks = 0;
                      W_EntityPlayer.closeScreen(user);
+                 } else if (continueWithStoredUavItem(user)) {
+                     this.pendingContinueTicks = 0;
                  } else {
                      this.pendingContinueTicks = 60;
                      markLinkedUavUnloaded();
@@ -1015,6 +1081,15 @@ public class MCH_EntityUavStation
                    }
 
                 if (ac != null) {
+                    MCH_EntityAircraft linked = findLinkedUavEntity(this.worldObj);
+                    if(linked != null && !linked.isDead && isValidLinkedUav(linked, user instanceof EntityPlayer ? (EntityPlayer)user : null)) {
+                        MCH_Lib.Log((Entity)this, "Avoided spawning duplicate UAV from station %d; reusing linked UAV %d (%s)", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)), Integer.valueOf(W_Entity.getEntityId((Entity)linked)), linked.getUavPersistentUUID() == null ? "" : linked.getUavPersistentUUID().toString() });
+                        ((MCH_EntityAircraft)ac).setDead(false);
+                        linkUav(linked);
+                        setControlAircract(linked);
+                        W_EntityPlayer.closeScreen(user);
+                        return;
+                    }
                     if(MCH_Config.ItemDamage.prmBool) {
 
                         ((MCH_EntityAircraft)ac).getAcDataFromItem(itemStack);
@@ -1023,6 +1098,8 @@ public class MCH_EntityUavStation
                      ((Entity)ac).prevRotationYaw = ((Entity)ac).rotationYaw;
                      user.rotationYaw = this.rotationYaw - 180.0F;
                      if (this.worldObj.getCollidingBoundingBoxes((Entity)ac, ((Entity)ac).boundingBox.expand(-0.1D, -0.1D, -0.1D)).isEmpty()) {
+                          this.lastUavItemStack = itemStack.copy();
+                          this.lastUavItemStack.stackSize = 1;
                           itemStack.stackSize--;
                           MCH_Lib.DbgLog(this.worldObj, "Create UAV: %s : %s", new Object[] { item.getUnlocalizedName(), item });
                           user.rotationYaw = this.rotationYaw - 180.0F;
