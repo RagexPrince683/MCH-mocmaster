@@ -819,60 +819,6 @@ public class MCH_EntityUavStation
          }
 
 
-      private boolean applyPendingNewUavShiftExit(Entity user) {
-           if(this.worldObj.isRemote || !(user instanceof EntityPlayer)) {
-                return false;
-           }
-           NBTTagCompound entityData = ((EntityPlayer)user).getEntityData();
-           if(entityData == null || !entityData.hasKey("MCH_PendingNewUavShiftExit")) {
-                return false;
-           }
-           NBTTagCompound pending = entityData.getCompoundTag("MCH_PendingNewUavShiftExit");
-           String stationUuid = pending.getString("StationUUID");
-           double stationX = pending.getDouble("StationX");
-           double stationY = pending.getDouble("StationY");
-           double stationZ = pending.getDouble("StationZ");
-           boolean uuidMatches = stationUuid != null && !stationUuid.isEmpty() && stationUuid.equals(this.getUniqueID().toString());
-           boolean positionMatches = this.getDistanceSq(stationX, stationY, stationZ) <= 64.0D;
-           if(!uuidMatches && !positionMatches) {
-                return false;
-           }
-           if(pending.hasKey("StationDim") && pending.getInteger("StationDim") != this.dimension) {
-                return false;
-           }
-           if(!pending.hasKey("UavItem")) {
-                entityData.removeTag("MCH_PendingNewUavShiftExit");
-                return false;
-           }
-
-           ItemStack stack = ItemStack.loadItemStackFromNBT(pending.getCompoundTag("UavItem"));
-           if(stack == null || stack.getItem() == null) {
-                entityData.removeTag("MCH_PendingNewUavShiftExit");
-                return false;
-           }
-
-           this.lastUavItemStack = stack.copy();
-           this.lastUavItemStack.stackSize = 1;
-           this.storedUavRespawnX = pending.getDouble("UavX");
-           this.storedUavRespawnY = pending.getDouble("UavY");
-           this.storedUavRespawnZ = pending.getDouble("UavZ");
-           this.hasStoredUavRespawnPosition = true;
-           this.assignedUav = null;
-           this.assignedUavId = -1;
-           this.assignedUavUUID = "";
-           this.linkedUavEntityUUID = null;
-           this.linkedUavCommonId = "";
-           this.hasStoredUavLink = false;
-           this.awaitingLoadedUav = false;
-           this.pendingContinueTicks = 0;
-           this.controlAircraft = null;
-           setLastControlAircraft((MCH_EntityAircraft)null);
-           setLastControlAircraftEntityId(-1);
-           entityData.removeTag("MCH_PendingNewUavShiftExit");
-           MCH_Lib.Log((Entity)this, "Applied pending shifted-out new UAV Continue state at %.2f, %.2f, %.2f", new Object[] { Double.valueOf(this.storedUavRespawnX), Double.valueOf(this.storedUavRespawnY), Double.valueOf(this.storedUavRespawnZ) });
-           return true;
-         }
-
       private void storeUavRespawnPosition(MCH_EntityAircraft ac) {
            if(ac == null) {
                 return;
@@ -1088,7 +1034,6 @@ public class MCH_EntityUavStation
 
              private void controlLastAircraft(Entity user, boolean notify) {
 
-                 applyPendingNewUavShiftExit(user);
                  if(!hasContinuableUavLink()) {
                      if(notify && user instanceof EntityPlayer) {
                          W_EntityPlayer.addChatMessage((EntityPlayer)user, "No linked UAV is stored in this station.");
@@ -1264,7 +1209,6 @@ public class MCH_EntityUavStation
           if(player != null) {
               this.newUavPlayerUUID = player.getUniqueID().toString();
               this.setOwnerUUID(player.getUniqueID());
-              applyPendingNewUavShiftExit(player);
           }
 
            int kind = getKind();
