@@ -333,7 +333,7 @@ public class MCH_EntityUavStation
                   (this.assignedUavUUID != null && !this.assignedUavUUID.isEmpty()) ||
                   (this.loadedLastControlAircraftGuid != null && !this.loadedLastControlAircraftGuid.isEmpty());
           this.awaitingLoadedUav = hasLinkedUavIdentity;
-          this.hasStoredUavLink = hasLinkedUavIdentity;
+          this.hasStoredUavLink = this.hasStoredUavLink || hasLinkedUavIdentity;
           if(this.awaitingLoadedUav) {
               setLastControlAircraftEntityId(-1);
           }
@@ -689,8 +689,21 @@ public class MCH_EntityUavStation
               }
          }
 
+      private boolean isWaitingForLinkedUav() {
+           return this.hasStoredUavLink ||
+                  this.awaitingLoadedUav ||
+                  this.pendingContinueTicks > 0 ||
+                  (this.controlAircraft != null && !this.controlAircraft.isDead) ||
+                  (this.lastControlAircraft != null && !this.lastControlAircraft.isDead);
+         }
+
+      private boolean canCreateUavFromSlot(ItemStack item) {
+           return item != null && item.stackSize > 0 && !hasContinuableUavLink() && !isWaitingForLinkedUav();
+         }
+
       private void markLinkedUavUnloaded() {
-           if(!this.worldObj.isRemote && hasContinuableUavLink()) {
+           if(!this.worldObj.isRemote && (hasContinuableUavLink() || this.hasStoredUavLink)) {
+                this.awaitingLoadedUav = true;
                 setLastControlAircraftEntityId(-1);
            }
          }
@@ -861,7 +874,7 @@ public class MCH_EntityUavStation
                                   this.riddenByEntity = null;
                                 } else {
                                   ItemStack item = getStackInSlot(0);
-                                  if (item != null && item.stackSize > 0 && !hasContinuableUavLink()) {
+                                  if (canCreateUavFromSlot(item)) {
                                         handleItem(this.riddenByEntity, item);
                                         if (item.stackSize == 0) {
                                               setInventorySlotContents(0, (ItemStack)null);
@@ -903,7 +916,7 @@ public class MCH_EntityUavStation
 
              private void controlLastAircraft(Entity user, boolean notify) {
 
-                 if(!hasContinuableUavLink()) {
+                 if(!hasContinuableUavLink() && !this.hasStoredUavLink) {
                      if(notify && user instanceof EntityPlayer) {
                          W_EntityPlayer.addChatMessage((EntityPlayer)user, "No linked UAV is stored in this station.");
                      }
@@ -959,6 +972,9 @@ public class MCH_EntityUavStation
 
 
      public void handleItem(Entity user, ItemStack itemStack) {
+           if (isWaitingForLinkedUav()) {
+                return;
+           }
            if (user != null && !user.isDead && itemStack != null && itemStack.stackSize == 1 &&
                      !this.worldObj.isRemote) {
                 Object ac = null;
@@ -1083,6 +1099,10 @@ public class MCH_EntityUavStation
            if (!this.worldObj.isRemote) {
                 player.mountEntity((Entity)this);
                 player.openGui(MCH_MOD.instance, 0, player.worldObj, (int)this.posX, (int)this.posY, (int)this.posZ);
+                if (hasContinuableUavLink() || this.hasStoredUavLink) {
+                     this.pendingContinueTicks = 80;
+                     controlLastAircraft(player);
+                }
               }
 
            return true;
