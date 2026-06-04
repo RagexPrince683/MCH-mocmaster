@@ -15,6 +15,7 @@ public final class MCH_UavInventory {
     private static final String INVENTORY = "Inventory";
     private static final String UAV_UUID = "UavUUID";
     private static final String REASON = "Reason";
+    private static final String INVENTORY_CLEARED = "InventoryCleared";
 
     private MCH_UavInventory() {}
 
@@ -36,9 +37,9 @@ public final class MCH_UavInventory {
         tag.setBoolean(STORED, true);
         tag.setString(UAV_UUID, uavUuid == null ? "" : uavUuid);
         tag.setString(REASON, "stored");
-        player.inventory.clearInventory(null, -1);
+        tag.setBoolean(INVENTORY_CLEARED, false);
         player.inventoryContainer.detectAndSendChanges();
-        MCH_Lib.DbgLog(player.worldObj, "Stored UAV pilot inventory for %s", new Object[] { player.getCommandSenderName() });
+        MCH_Lib.DbgLog(player.worldObj, "Stored UAV pilot inventory snapshot for %s", new Object[] { player.getCommandSenderName() });
     }
 
     public static boolean restorePilotInventory(EntityPlayerMP player, String reason) {
@@ -48,6 +49,14 @@ public final class MCH_UavInventory {
         NBTTagCompound tag = getTag(player);
         if (!tag.getBoolean(STORED)) {
             return false;
+        }
+
+        boolean inventoryWasCleared = !tag.hasKey(INVENTORY_CLEARED) || tag.getBoolean(INVENTORY_CLEARED);
+        if (!inventoryWasCleared) {
+            clearStoredPilotInventory(player);
+            player.inventoryContainer.detectAndSendChanges();
+            MCH_Lib.DbgLog(player.worldObj, "Cleared UAV pilot inventory snapshot for %s (%s)", new Object[] { player.getCommandSenderName(), reason });
+            return true;
         }
 
         ItemStack[] current = copyInventory(player);

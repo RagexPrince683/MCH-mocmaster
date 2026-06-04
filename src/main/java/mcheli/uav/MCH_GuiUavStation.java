@@ -86,9 +86,7 @@ public class MCH_GuiUavStation
          }
 
       protected void actionPerformed(GuiButton btn) {
-                     System.out.println("actionPerformed fired");
            if (btn != null && btn.enabled) {
-                        System.out.println("btn enabled");
                 if (btn.id == 256) {
                               this.uavStation.setContinuePressed(true);
                      if (this.uavStation != null && !this.uavStation.isDead && this.uavStation.getAndSearchLastControlAircraft() != null && !(this.uavStation.getAndSearchLastControlAircraft()).isDead) {

@@ -87,11 +87,9 @@ public class MCH_EntityUavStation
              }
 
              public void storeStationPosition() {
-                 System.out.println("Storing station position: " + this.posX + ", " + this.posY + ", " + this.posZ);
                  storedStationX = this.posX;
                  storedStationY = this.posY;
                  storedStationZ = this.posZ;
-                    System.out.println("Stored station position: " + storedStationX + ", " + storedStationY + ", " + storedStationZ);
              }
 
       public MCH_EntityUavStation(World world) {
@@ -550,10 +548,6 @@ public class MCH_EntityUavStation
           if (this.riddenByEntity instanceof EntityPlayer && this.controlAircraft != null && this.controlAircraft.getAcInfo().isNewUAV) {
 
               if(!this.worldObj.isRemote) {
-                  System.out.println("storing station position" +
-                          this.posX + " " + this.posY + " " + this.posZ +
-                          " for new UAV: " + this.controlAircraft.getAcInfo().displayName +
-                          " controlled by: " + ((EntityPlayer)this.riddenByEntity).getDisplayName());
                   isridingnewuav = true;
                   this.storeStationPosition();
 
@@ -693,6 +687,13 @@ public class MCH_EntityUavStation
            return ac.isUAV() || ac.isNewUAV();
          }
 
+
+
+      private void notifyInitialUavState(EntityPlayerMP player, MCH_EntityAircraft ac) {
+           if(player != null && ac != null && ac.isNewUAV() && ac.ticksExisted < 40) {
+                W_EntityPlayer.addChatMessage(player, "UAV is initializing and cannot move yet. You can still reload/resupply it from the station or your inventory.");
+           }
+         }
 
       public boolean tryTransferAmmoToUav(EntityPlayerMP player) {
            if(this.worldObj.isRemote) {
@@ -836,13 +837,14 @@ public class MCH_EntityUavStation
                          lastAc.storedRider = (EntityPlayer)this.riddenByEntity;
                          setOwnerUUID(((EntityPlayer)this.riddenByEntity).getUniqueID());
                          if(this.riddenByEntity instanceof EntityPlayerMP) {
-                             tryTransferAmmoToUav((EntityPlayerMP)this.riddenByEntity);
-                             MCH_UavInventory.storePilotInventory((EntityPlayerMP)this.riddenByEntity, lastAc.getUniqueID().toString());
+                             EntityPlayerMP player = (EntityPlayerMP)this.riddenByEntity;
+                             tryTransferAmmoToUav(player);
+                             notifyInitialUavState(player, lastAc);
+                             MCH_UavInventory.storePilotInventory(player, lastAc.getUniqueID().toString());
                          }
                      }
 
                      // Store the current station position
-                     System.out.println("stationposition" + storedStationX + " " + storedStationY + " " + storedStationZ);
                      storeStationPosition();
 
                      if (this.controlAircraft != null &&
