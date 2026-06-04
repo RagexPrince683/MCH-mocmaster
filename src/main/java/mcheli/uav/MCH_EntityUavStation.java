@@ -220,6 +220,15 @@ public class MCH_EntityUavStation
            }
          }
 
+      public boolean hasContinuableUavLink() {
+           return (this.assignedUav != null && !this.assignedUav.isDead) ||
+                  this.assignedUavId > 0 ||
+                  (this.assignedUavUUID != null && !this.assignedUavUUID.isEmpty()) ||
+                  this.linkedUavEntityUUID != null ||
+                  (this.linkedUavCommonId != null && !this.linkedUavCommonId.isEmpty()) ||
+                  (this.loadedLastControlAircraftGuid != null && !this.loadedLastControlAircraftGuid.isEmpty());
+         }
+
       public void unlinkInvalidUav() {
            this.assignedUav = null;
            this.controlAircraft = null;
@@ -816,7 +825,7 @@ public class MCH_EntityUavStation
                                   this.riddenByEntity = null;
                                 } else {
                                   ItemStack item = getStackInSlot(0);
-                                  if (item != null && item.stackSize > 0) {
+                                  if (item != null && item.stackSize > 0 && !hasContinuableUavLink()) {
                                         handleItem(this.riddenByEntity, item);
                                         if (item.stackSize == 0) {
                                               setInventorySlotContents(0, (ItemStack)null);
@@ -854,6 +863,12 @@ public class MCH_EntityUavStation
 
              public void controlLastAircraft(Entity user) {
 
+                 if(!hasContinuableUavLink()) {
+                     if(user instanceof EntityPlayer) {
+                         W_EntityPlayer.addChatMessage((EntityPlayer)user, "No linked UAV is stored in this station.");
+                     }
+                     return;
+                 }
                  MCH_EntityAircraft lastAc = getAndSearchLastControlAircraft();
                  if (lastAc == null && relinkUav(false)) {
                      lastAc = getLastControlAircraft();
@@ -885,6 +900,8 @@ public class MCH_EntityUavStation
                          this.riddenByEntity.mountEntity((Entity)this.controlAircraft);
                      }
                      W_EntityPlayer.closeScreen(user);
+                 } else if(user instanceof EntityPlayer) {
+                     W_EntityPlayer.addChatMessage((EntityPlayer)user, "Linked UAV is not loaded yet; try again when its chunk finishes loading.");
                  }
 
              }

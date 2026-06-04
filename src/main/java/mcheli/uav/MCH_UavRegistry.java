@@ -44,13 +44,16 @@ public final class MCH_UavRegistry {
     }
 
     public static MCH_EntityAircraft findLinkedUav(World world, UUID entityUuid, String commonId, UUID owner) {
+        boolean hasStableLink = entityUuid != null || (commonId != null && !commonId.isEmpty());
         MCH_EntityAircraft ac = getLive(BY_ENTITY_UUID.get(entityUuid == null ? "" : entityUuid.toString()), world);
         if (ac != null) return ac;
         ac = getLive(BY_COMMON_ID.get(commonId == null ? "" : commonId), world);
         if (ac != null) return ac;
-        ac = getLive(BY_OWNER.get(owner == null ? "" : owner.toString()), world);
-        if (ac != null) return ac;
-        return searchLoaded(world, entityUuid, commonId, owner);
+        if (!hasStableLink) {
+            ac = getLive(BY_OWNER.get(owner == null ? "" : owner.toString()), world);
+            if (ac != null) return ac;
+        }
+        return searchLoaded(world, entityUuid, commonId, hasStableLink ? null : owner);
     }
 
     public static MCH_EntityAircraft findByOwner(World world, UUID owner) {
