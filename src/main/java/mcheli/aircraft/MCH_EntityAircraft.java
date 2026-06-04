@@ -4911,52 +4911,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
 
-   private MCH_EntityUavStation findLinkedUavStationForShiftExit() {
-      if(this.uavStation != null && !this.uavStation.isDead) {
-         return this.uavStation;
-      }
-      if(super.worldObj.isRemote || this.linkedUavStationDimension != super.dimension) {
-         return null;
-      }
-
-      int sx = this.linkedUavStationX != 0.0D ? MathHelper.floor_double(this.linkedUavStationX) : this.UavStationPosX;
-      int sy = this.linkedUavStationY != 0.0D ? MathHelper.floor_double(this.linkedUavStationY) : this.UavStationPosY;
-      int sz = this.linkedUavStationZ != 0.0D ? MathHelper.floor_double(this.linkedUavStationZ) : this.UavStationPosZ;
-      super.worldObj.getChunkFromBlockCoords(sx, sz);
-
-      MCH_EntityUavStation fallback = null;
-      List list = super.worldObj.loadedEntityList;
-      for(int i = 0; i < list.size(); ++i) {
-         Object obj = list.get(i);
-         if(obj instanceof MCH_EntityUavStation) {
-            MCH_EntityUavStation station = (MCH_EntityUavStation)obj;
-            if(station.isDead) {
-               continue;
-            }
-            if(this.linkedUavStationUUID != null && this.linkedUavStationUUID.equals(station.getUniqueID())) {
-               this.uavStation = station;
-               return station;
-            }
-            if(fallback == null && station.dimension == super.dimension && station.getDistanceSq((double)sx, (double)sy, (double)sz) < 16.0D) {
-               fallback = station;
-            }
-         }
-      }
-      if(fallback != null) {
-         this.uavStation = fallback;
-      }
-      return fallback;
-   }
-
    private void deleteNewUavAfterShiftExit() {
       if(super.worldObj.isRemote || !this.isNewUAV()) {
          return;
       }
-      MCH_EntityUavStation station = findLinkedUavStationForShiftExit();
-      if(station != null && !station.isDead) {
-         station.prepareNewUavShiftExit(this);
-      } else {
-         MCH_Lib.Log((Entity)this, "Unable to find linked UAV station for new UAV %d during shift-exit; Continue state may not be updated", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
+      if(this.uavStation != null && !this.uavStation.isDead) {
+         this.uavStation.prepareNewUavShiftExit(this);
       }
       MCH_Lib.Log((Entity)this, "Deleting new UAV entity %d after player shift-exit; station Continue may relaunch it", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
       this.deletingNewUavForShiftExit = true;
@@ -4964,6 +4924,19 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.setDead(false);
       } finally {
          this.deletingNewUavForShiftExit = false;
+      }
+      if(this.uavStation != null && !this.uavStation.isDead) {
+         this.uavStation.prepareNewUavShiftExit(this);
+      }
+      MCH_Lib.Log((Entity)this, "Deleting new UAV entity %d after player shift-exit; station Continue may relaunch it", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
+      this.deletingNewUavForShiftExit = true;
+      try {
+         this.setDead(false);
+      } finally {
+         this.deletingNewUavForShiftExit = false;
+      }
+      if(this.uavStation != null && !this.uavStation.isDead) {
+         this.uavStation.prepareNewUavShiftExit(this);
       }
       MCH_Lib.Log((Entity)this, "Deleting new UAV entity %d after player shift-exit; station Continue may relaunch it", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
       this.setDead(false);
