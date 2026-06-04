@@ -98,7 +98,6 @@ public class MCH_GuiUavStation
                           W_Network.sendToServer((W_PacketBase)pos);
                         }
 
-                     this.buttonContinue.enabled = false;
                    } else {
                      int[] pos1 = { this.uavStation.posUavX, this.uavStation.posUavY, this.uavStation.posUavZ };
                      int i = btn.id >> 4 & 0xF;
