@@ -784,6 +784,109 @@ public class MCH_EntityUavStation
            return ac != null && ac.canAcceptAmmo(stack);
          }
 
+
+      private UUID parseUUID(String value) {
+           if(value == null || value.isEmpty()) {
+                return null;
+           }
+           try {
+                return UUID.fromString(value);
+           } catch (IllegalArgumentException e) {
+                return null;
+           }
+         }
+
+      public MCH_EntityAircraft getLinkedUav(World world) {
+           if(this.assignedUav != null && !this.assignedUav.isDead) {
+                return this.assignedUav;
+           }
+           MCH_EntityAircraft ac = MCH_UavRegistry.findLinkedUav(world, this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
+           if(ac == null) {
+                forceLinkedUavChunkLoaded(world);
+                ac = MCH_UavRegistry.findLinkedUav(world, this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
+           }
+           return ac;
+         }
+
+      private void forceLinkedUavChunkLoaded(World world) {
+           if(world == null || world.isRemote || (this.linkedUavX == 0.0D && this.linkedUavY == 0.0D && this.linkedUavZ == 0.0D)) {
+                return;
+           }
+           int x = MathHelper.floor_double(this.linkedUavX);
+           int z = MathHelper.floor_double(this.linkedUavZ);
+           world.getChunkFromBlockCoords(x, z);
+         }
+
+      private boolean relinkUav(boolean requireLoaded) {
+           MCH_EntityAircraft ac = getLinkedUav(this.worldObj);
+           if(ac != null && !ac.isDead) {
+                linkUav(ac);
+                setLastControlAircraft(ac);
+                setLastControlAircraftEntityId(W_Entity.getEntityId((Entity)ac));
+                return true;
+           }
+           this.awaitingLoadedUav = !requireLoaded;
+           return false;
+         }
+
+      private boolean validateUav(MCH_EntityAircraft ac, EntityPlayer player) {
+           if(ac == null || ac.isDead || ac.isDestroyed()) {
+                return false;
+           }
+           if(player != null) {
+                setOwnerUUID(player.getUniqueID());
+                if(ac.getOwnerUUID() != null && !ac.getOwnerUUID().equals(player.getUniqueID())) {
+                     return false;
+                }
+           }
+           if(this.linkedUavDimension != 0 && ac.dimension != this.linkedUavDimension) {
+                return false;
+           }
+           return ac.isUAV() || ac.isNewUAV();
+         }
+
+
+
+      private void notifyInitialUavState(EntityPlayerMP player, MCH_EntityAircraft ac) {
+           if(player != null && ac != null && ac.isNewUAV() && ac.ticksExisted < 40) {
+                W_EntityPlayer.addChatMessage(player, "UAV is initializing and cannot move yet. You can still reload/resupply it from the station or your inventory.");
+           }
+         }
+
+      public boolean tryTransferAmmoToUav(EntityPlayerMP player) {
+           if(this.worldObj.isRemote) {
+                return false;
+           }
+           ItemStack stack = getStackInSlot(0);
+           if(stack == null || stack.stackSize <= 0) {
+                return false;
+           }
+           MCH_EntityAircraft ac = getLinkedUav(this.worldObj);
+           if(!validateUav(ac, player)) {
+                return false;
+           }
+           int before = stack.stackSize;
+           int consumed = ac.trySupplyAmmoFromStack(stack, player);
+           if(consumed <= 0) {
+                return false;
+           }
+           if(stack.stackSize <= 0) {
+                setInventorySlotContents(0, (ItemStack)null);
+           } else if(stack.stackSize != before) {
+                setInventorySlotContents(0, stack);
+           }
+           if(player != null) {
+                player.inventoryContainer.detectAndSendChanges();
+           }
+           MCH_Lib.DbgLog(this.worldObj, "Transferred %d UAV ammo item(s) from station %d to UAV %d", new Object[] { Integer.valueOf(consumed), Integer.valueOf(W_Entity.getEntityId((Entity)this)), Integer.valueOf(W_Entity.getEntityId((Entity)ac)) });
+           return true;
+         }
+
+      public boolean canAcceptAmmo(ItemStack stack) {
+           MCH_EntityAircraft ac = getLinkedUav(this.worldObj);
+           return ac != null && ac.canAcceptAmmo(stack);
+         }
+
       public void searchLastControlAircraft() {
           //makes a box around the station to search for the last controlled aircraft, for regular non-new UAVs
            if (!this.loadedLastControlAircraftGuid.isEmpty()) {
