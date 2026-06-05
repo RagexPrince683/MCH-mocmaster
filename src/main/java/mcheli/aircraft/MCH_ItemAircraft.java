@@ -35,6 +35,11 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    private static boolean isRegistedDispenseBehavior = false;
 
+   //TODO add force dispense behavior/a new block in the mod to dispense vehicles from as say:
+   // we want to prevent players from having dispensers but we also don't want vehicles to just be placeable anywhere
+   // also: structures! Eg: airport runways, hangars, barracks, etc. Basically multiblock structures that can be built in
+   // the world and allow vehicle spawning
+
    public static int timeHeld = 0;
 
 
