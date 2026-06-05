@@ -47,6 +47,8 @@ public class W_WavefrontObject extends W_ModelCustom {
    public ArrayList vertexNormals = new ArrayList();
    public ArrayList textureCoordinates = new ArrayList();
    public ArrayList groupObjects = new ArrayList();
+   private int vertexNum = 0;
+   private int faceNum = 0;
    private W_GroupObject currentGroupObject;
    private String fileName;
 
@@ -142,6 +144,11 @@ public class W_WavefrontObject extends W_ModelCustom {
          }
 
          this.groupObjects.add(this.currentGroupObject);
+         this.vertexNum = this.vertices.size();
+         this.faceNum = 0;
+         this.compactFaces();
+         this.groupObjects.trimToSize();
+         this.releaseLoaderScratch();
       } catch (IOException var16) {
          throw new ModelFormatException("IO Exception reading model format", var16);
       } finally {
@@ -173,6 +180,44 @@ public class W_WavefrontObject extends W_ModelCustom {
 
       this.tessellateAll(tessellator);
       tessellator.draw();
+   }
+
+   private void compactFaces() {
+      Iterator i$ = this.groupObjects.iterator();
+
+      while(i$.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)i$.next();
+         if(groupObject != null && groupObject.faces.size() > 0) {
+            Iterator i$1 = groupObject.faces.iterator();
+
+            while(i$1.hasNext()) {
+               W_Face face = (W_Face)i$1.next();
+               face.compact();
+               ++this.faceNum;
+            }
+
+            groupObject.faces.trimToSize();
+         }
+      }
+
+   }
+
+   private void releaseLoaderScratch() {
+      if(this.vertices != null) {
+         this.vertices.clear();
+         this.vertices = null;
+      }
+
+      if(this.vertexNormals != null) {
+         this.vertexNormals.clear();
+         this.vertexNormals = null;
+      }
+
+      if(this.textureCoordinates != null) {
+         this.textureCoordinates.clear();
+         this.textureCoordinates = null;
+      }
+
    }
 
    public void tessellateAll(Tessellator tessellator) {
@@ -489,31 +534,29 @@ public class W_WavefrontObject extends W_ModelCustom {
             while(i$1.hasNext()) {
                W_Face face = (W_Face)i$1.next();
 
-               for(int i = 0; i < face.vertices.length / 3; ++i) {
-                  W_Vertex v1 = face.vertices[i * 3 + 0];
-                  W_Vertex v2 = face.vertices[i * 3 + 1];
-                  W_Vertex v3 = face.vertices[i * 3 + 2];
+               for(int i = 0; i < face.getVertexCount() / 3; ++i) {
+                  int vertexOffset = i * 3;
                   ++lineCnt;
                   if(lineCnt > maxLine) {
                      return;
                   }
 
-                  tessellator.addVertex((double)v1.x, (double)v1.y, (double)v1.z);
-                  tessellator.addVertex((double)v2.x, (double)v2.y, (double)v2.z);
+                  tessellator.addVertex((double)face.getVertexX(vertexOffset), (double)face.getVertexY(vertexOffset), (double)face.getVertexZ(vertexOffset));
+                  tessellator.addVertex((double)face.getVertexX(vertexOffset + 1), (double)face.getVertexY(vertexOffset + 1), (double)face.getVertexZ(vertexOffset + 1));
                   ++lineCnt;
                   if(lineCnt > maxLine) {
                      return;
                   }
 
-                  tessellator.addVertex((double)v2.x, (double)v2.y, (double)v2.z);
-                  tessellator.addVertex((double)v3.x, (double)v3.y, (double)v3.z);
+                  tessellator.addVertex((double)face.getVertexX(vertexOffset + 1), (double)face.getVertexY(vertexOffset + 1), (double)face.getVertexZ(vertexOffset + 1));
+                  tessellator.addVertex((double)face.getVertexX(vertexOffset + 2), (double)face.getVertexY(vertexOffset + 2), (double)face.getVertexZ(vertexOffset + 2));
                   ++lineCnt;
                   if(lineCnt > maxLine) {
                      return;
                   }
 
-                  tessellator.addVertex((double)v3.x, (double)v3.y, (double)v3.z);
-                  tessellator.addVertex((double)v1.x, (double)v1.y, (double)v1.z);
+                  tessellator.addVertex((double)face.getVertexX(vertexOffset + 2), (double)face.getVertexY(vertexOffset + 2), (double)face.getVertexZ(vertexOffset + 2));
+                  tessellator.addVertex((double)face.getVertexX(vertexOffset), (double)face.getVertexY(vertexOffset), (double)face.getVertexZ(vertexOffset));
                }
             }
          }
@@ -522,11 +565,11 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public int getVertexNum() {
-      return this.vertices.size();
+      return this.vertices != null ? this.vertices.size() : this.vertexNum;
    }
 
    public int getFaceNum() {
-      return this.getVertexNum() / 3;
+      return this.faceNum;
    }
 
    public void renderAll(int startFace, int maxFace) {

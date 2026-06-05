@@ -2,10 +2,7 @@ package mcheli.wrapper.modelloader;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import mcheli.wrapper.modelloader.W_TextureCoordinate;
-import mcheli.wrapper.modelloader.W_Vertex;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.Vec3;
 
 @SideOnly(Side.CLIENT)
 public class W_Face {
@@ -16,10 +13,88 @@ public class W_Face {
    public W_Vertex faceNormal;
    public W_TextureCoordinate[] textureCoordinates;
 
+   private float[] packedData;
+   private int packedStride;
+   private int packedTextureOffset = -1;
+   private int packedNormalOffset = -1;
+   private int packedVertexCount;
+   private float faceNormalX;
+   private float faceNormalY;
+   private float faceNormalZ;
+   private boolean hasPackedFaceNormal;
 
    public W_Face copy() {
       W_Face f = new W_Face();
       return f;
+   }
+
+   /**
+    * Converts this face from object-heavy loader data into a single primitive array used by the renderer.
+    * Once this is called the original wrapper vertex/UV/normal arrays are released for GC.
+    */
+   public void compact() {
+      if(this.packedData == null && this.vertices != null) {
+         this.packedVertexCount = this.vertices.length;
+         boolean hasTextures = this.textureCoordinates != null && this.textureCoordinates.length > 0;
+         boolean hasNormals = this.vertexNormals != null && this.vertexNormals.length > 0;
+         this.packedStride = 3 + (hasTextures ? 2 : 0) + (hasNormals ? 3 : 0);
+         this.packedTextureOffset = hasTextures ? 3 : -1;
+         this.packedNormalOffset = hasNormals ? 3 + (hasTextures ? 2 : 0) : -1;
+         this.packedData = new float[this.packedVertexCount * this.packedStride];
+
+         for(int i = 0; i < this.packedVertexCount; ++i) {
+            W_Vertex v = this.vertices[i];
+            int offset = i * this.packedStride;
+            this.packedData[offset] = v.x;
+            this.packedData[offset + 1] = v.y;
+            this.packedData[offset + 2] = v.z;
+
+            if(hasTextures) {
+               W_TextureCoordinate t = this.textureCoordinates[i];
+               this.packedData[offset + this.packedTextureOffset] = t.u;
+               this.packedData[offset + this.packedTextureOffset + 1] = t.v;
+            }
+
+            if(hasNormals) {
+               W_Vertex n = this.vertexNormals[i];
+               this.packedData[offset + this.packedNormalOffset] = n.x;
+               this.packedData[offset + this.packedNormalOffset + 1] = n.y;
+               this.packedData[offset + this.packedNormalOffset + 2] = n.z;
+            }
+         }
+      }
+
+      W_Vertex normal = this.faceNormal != null ? this.faceNormal : this.calculateFaceNormal();
+      this.faceNormalX = normal.x;
+      this.faceNormalY = normal.y;
+      this.faceNormalZ = normal.z;
+      this.hasPackedFaceNormal = true;
+
+      this.verticesID = null;
+      this.vertices = null;
+      this.vertexNormals = null;
+      this.faceNormal = null;
+      this.textureCoordinates = null;
+   }
+
+   public int getVertexCount() {
+      if(this.packedData != null) {
+         return this.packedVertexCount;
+      }
+
+      return this.vertices != null ? this.vertices.length : 0;
+   }
+
+   public float getVertexX(int index) {
+      return this.packedData != null ? this.packedData[index * this.packedStride] : this.vertices[index].x;
+   }
+
+   public float getVertexY(int index) {
+      return this.packedData != null ? this.packedData[index * this.packedStride + 1] : this.vertices[index].y;
+   }
+
+   public float getVertexZ(int index) {
+      return this.packedData != null ? this.packedData[index * this.packedStride + 2] : this.vertices[index].z;
    }
 
    public void addFaceForRender(Tessellator tessellator) {
@@ -27,52 +102,109 @@ public class W_Face {
    }
 
    public void addFaceForRender(Tessellator tessellator, float textureOffset) {
-      if(this.faceNormal == null) {
-         this.faceNormal = this.calculateFaceNormal();
+      if(!this.hasPackedFaceNormal) {
+         W_Vertex normal = this.faceNormal != null ? this.faceNormal : this.calculateFaceNormal();
+         this.faceNormalX = normal.x;
+         this.faceNormalY = normal.y;
+         this.faceNormalZ = normal.z;
+         this.hasPackedFaceNormal = true;
       }
 
-      tessellator.setNormal(this.faceNormal.x, this.faceNormal.y, this.faceNormal.z);
+      tessellator.setNormal(this.faceNormalX, this.faceNormalY, this.faceNormalZ);
+      int vertexCount = this.getVertexCount();
+      int textureCount = this.getTextureCoordinateCount();
+      boolean hasTextureCoordinates = textureCount > 0;
       float averageU = 0.0F;
       float averageV = 0.0F;
-      if(this.textureCoordinates != null && this.textureCoordinates.length > 0) {
-         for(int offsetU = 0; offsetU < this.textureCoordinates.length; ++offsetU) {
-            averageU += this.textureCoordinates[offsetU].u;
-            averageV += this.textureCoordinates[offsetU].v;
+      if(hasTextureCoordinates) {
+         for(int offsetU = 0; offsetU < textureCount; ++offsetU) {
+            averageU += this.getTextureU(offsetU);
+            averageV += this.getTextureV(offsetU);
          }
 
-         averageU /= (float)this.textureCoordinates.length;
-         averageV /= (float)this.textureCoordinates.length;
+         averageU /= (float)textureCount;
+         averageV /= (float)textureCount;
       }
 
-      for(int i = 0; i < this.vertices.length; ++i) {
-         if(this.textureCoordinates != null && this.textureCoordinates.length > 0) {
-            float var8 = textureOffset;
+      for(int i = 0; i < vertexCount; ++i) {
+         if(hasTextureCoordinates) {
+            float offsetU = textureOffset;
             float offsetV = textureOffset;
-            if(this.textureCoordinates[i].u > averageU) {
-               var8 = -textureOffset;
+            float textureU = this.getTextureU(i);
+            float textureV = this.getTextureV(i);
+            if(textureU > averageU) {
+               offsetU = -textureOffset;
             }
 
-            if(this.textureCoordinates[i].v > averageV) {
+            if(textureV > averageV) {
                offsetV = -textureOffset;
             }
 
-            if(this.vertexNormals != null && i < this.vertexNormals.length) {
-               tessellator.setNormal(this.vertexNormals[i].x, this.vertexNormals[i].y, this.vertexNormals[i].z);
+            if(this.hasVertexNormal(i)) {
+               tessellator.setNormal(this.getNormalX(i), this.getNormalY(i), this.getNormalZ(i));
             }
 
-            tessellator.addVertexWithUV((double)this.vertices[i].x, (double)this.vertices[i].y, (double)this.vertices[i].z, (double)(this.textureCoordinates[i].u + var8), (double)(this.textureCoordinates[i].v + offsetV));
+            tessellator.addVertexWithUV((double)this.getVertexX(i), (double)this.getVertexY(i), (double)this.getVertexZ(i), (double)(textureU + offsetU), (double)(textureV + offsetV));
          } else {
-            tessellator.addVertex((double)this.vertices[i].x, (double)this.vertices[i].y, (double)this.vertices[i].z);
+            tessellator.addVertex((double)this.getVertexX(i), (double)this.getVertexY(i), (double)this.getVertexZ(i));
          }
       }
 
    }
 
    public W_Vertex calculateFaceNormal() {
-      Vec3 v1 = Vec3.createVectorHelper((double)(this.vertices[1].x - this.vertices[0].x), (double)(this.vertices[1].y - this.vertices[0].y), (double)(this.vertices[1].z - this.vertices[0].z));
-      Vec3 v2 = Vec3.createVectorHelper((double)(this.vertices[2].x - this.vertices[0].x), (double)(this.vertices[2].y - this.vertices[0].y), (double)(this.vertices[2].z - this.vertices[0].z));
-      Vec3 normalVector = null;
-      normalVector = v1.crossProduct(v2).normalize();
-      return new W_Vertex((float)normalVector.xCoord, (float)normalVector.yCoord, (float)normalVector.zCoord);
+      float v1x = this.getVertexX(1) - this.getVertexX(0);
+      float v1y = this.getVertexY(1) - this.getVertexY(0);
+      float v1z = this.getVertexZ(1) - this.getVertexZ(0);
+      float v2x = this.getVertexX(2) - this.getVertexX(0);
+      float v2y = this.getVertexY(2) - this.getVertexY(0);
+      float v2z = this.getVertexZ(2) - this.getVertexZ(0);
+      float normalX = v1y * v2z - v1z * v2y;
+      float normalY = v1z * v2x - v1x * v2z;
+      float normalZ = v1x * v2y - v1y * v2x;
+      float length = (float)Math.sqrt((double)(normalX * normalX + normalY * normalY + normalZ * normalZ));
+      if(length > 0.0F) {
+         normalX /= length;
+         normalY /= length;
+         normalZ /= length;
+      }
+
+      return new W_Vertex(normalX, normalY, normalZ);
+   }
+
+   private int getTextureCoordinateCount() {
+      if(this.packedData != null) {
+         return this.packedTextureOffset >= 0 ? this.packedVertexCount : 0;
+      }
+
+      return this.textureCoordinates != null ? this.textureCoordinates.length : 0;
+   }
+
+   private float getTextureU(int index) {
+      return this.packedData != null ? this.packedData[index * this.packedStride + this.packedTextureOffset] : this.textureCoordinates[index].u;
+   }
+
+   private float getTextureV(int index) {
+      return this.packedData != null ? this.packedData[index * this.packedStride + this.packedTextureOffset + 1] : this.textureCoordinates[index].v;
+   }
+
+   private boolean hasVertexNormal(int index) {
+      if(this.packedData != null) {
+         return this.packedNormalOffset >= 0 && index < this.packedVertexCount;
+      }
+
+      return this.vertexNormals != null && index < this.vertexNormals.length;
+   }
+
+   private float getNormalX(int index) {
+      return this.packedData != null ? this.packedData[index * this.packedStride + this.packedNormalOffset] : this.vertexNormals[index].x;
+   }
+
+   private float getNormalY(int index) {
+      return this.packedData != null ? this.packedData[index * this.packedStride + this.packedNormalOffset + 1] : this.vertexNormals[index].y;
+   }
+
+   private float getNormalZ(int index) {
+      return this.packedData != null ? this.packedData[index * this.packedStride + this.packedNormalOffset + 2] : this.vertexNormals[index].z;
    }
 }

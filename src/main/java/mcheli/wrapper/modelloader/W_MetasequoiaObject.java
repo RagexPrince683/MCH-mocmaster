@@ -174,6 +174,7 @@ public class W_MetasequoiaObject extends W_ModelCustom {
                         }
 
                         this.calcVerticesNormal(e, shading, facet);
+                        this.compactFaces(e);
                      }
                   }
 
@@ -188,6 +189,7 @@ public class W_MetasequoiaObject extends W_ModelCustom {
          throw new ModelFormatException("IO Exception reading model format : " + this.fileName, var28);
       } finally {
          this.checkMinMaxFinal();
+         this.groupObjects.trimToSize();
          this.vertices = null;
 
          try {
@@ -203,6 +205,18 @@ public class W_MetasequoiaObject extends W_ModelCustom {
          }
 
       }
+
+   }
+
+   private void compactFaces(W_GroupObject group) {
+      Iterator i$ = group.faces.iterator();
+
+      while(i$.hasNext()) {
+         W_Face f = (W_Face)i$.next();
+         f.compact();
+      }
+
+      group.faces.trimToSize();
 
    }
 
@@ -501,31 +515,29 @@ public class W_MetasequoiaObject extends W_ModelCustom {
             while(i$1.hasNext()) {
                W_Face face = (W_Face)i$1.next();
 
-               for(int i = 0; i < face.vertices.length / 3; ++i) {
-                  W_Vertex v1 = face.vertices[i * 3 + 0];
-                  W_Vertex v2 = face.vertices[i * 3 + 1];
-                  W_Vertex v3 = face.vertices[i * 3 + 2];
+               for(int i = 0; i < face.getVertexCount() / 3; ++i) {
+                  int vertexOffset = i * 3;
                   ++lineCnt;
                   if(lineCnt > maxLine) {
                      return;
                   }
 
-                  tessellator.addVertex((double)v1.x, (double)v1.y, (double)v1.z);
-                  tessellator.addVertex((double)v2.x, (double)v2.y, (double)v2.z);
+                  tessellator.addVertex((double)face.getVertexX(vertexOffset), (double)face.getVertexY(vertexOffset), (double)face.getVertexZ(vertexOffset));
+                  tessellator.addVertex((double)face.getVertexX(vertexOffset + 1), (double)face.getVertexY(vertexOffset + 1), (double)face.getVertexZ(vertexOffset + 1));
                   ++lineCnt;
                   if(lineCnt > maxLine) {
                      return;
                   }
 
-                  tessellator.addVertex((double)v2.x, (double)v2.y, (double)v2.z);
-                  tessellator.addVertex((double)v3.x, (double)v3.y, (double)v3.z);
+                  tessellator.addVertex((double)face.getVertexX(vertexOffset + 1), (double)face.getVertexY(vertexOffset + 1), (double)face.getVertexZ(vertexOffset + 1));
+                  tessellator.addVertex((double)face.getVertexX(vertexOffset + 2), (double)face.getVertexY(vertexOffset + 2), (double)face.getVertexZ(vertexOffset + 2));
                   ++lineCnt;
                   if(lineCnt > maxLine) {
                      return;
                   }
 
-                  tessellator.addVertex((double)v3.x, (double)v3.y, (double)v3.z);
-                  tessellator.addVertex((double)v1.x, (double)v1.y, (double)v1.z);
+                  tessellator.addVertex((double)face.getVertexX(vertexOffset + 2), (double)face.getVertexY(vertexOffset + 2), (double)face.getVertexZ(vertexOffset + 2));
+                  tessellator.addVertex((double)face.getVertexX(vertexOffset), (double)face.getVertexY(vertexOffset), (double)face.getVertexZ(vertexOffset));
                }
             }
          }
