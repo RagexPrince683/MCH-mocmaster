@@ -83,9 +83,14 @@ public abstract class MCH_RenderAircraft extends W_Render {
                GL11.glColor4f(0.8F * actualFactor, 0.4F * actualFactor, 0.4F * actualFactor, 1.0F);
             }
 
-            this.renderAircraft(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
-            this.renderCommonPart(ac, info, posX, posY, posZ, tickTime);
-            renderLight(posX, posY, posZ, tickTime, ac, info);
+            if(this.shouldRenderAircraftLOD(posX, posY, posZ)) {
+               this.renderAircraftLOD(ac, info, posX, posY, posZ, yaw, pitch, roll);
+            } else {
+               this.renderAircraft(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+               this.renderCommonPart(ac, info, posX, posY, posZ, tickTime);
+               renderLight(posX, posY, posZ, tickTime, ac, info);
+            }
+
             this.restoreCommonRenderParam();
          }
 
@@ -95,6 +100,145 @@ public abstract class MCH_RenderAircraft extends W_Render {
          renderEntityMarker(ac);
       }
 
+   }
+
+   protected boolean shouldRenderAircraftLOD(double posX, double posY, double posZ) {
+      if(MCH_Config.EnableAircraftLODRender == null || !MCH_Config.EnableAircraftLODRender.prmBool) {
+         return false;
+      }
+
+      double startDistance = MCH_Config.AircraftLODStartDistance != null?MCH_Config.AircraftLODStartDistance.prmDouble:0.0D;
+      if(startDistance <= 0.0D) {
+         return false;
+      }
+
+      return posX * posX + posY * posY + posZ * posZ >= startDistance * startDistance;
+   }
+
+   protected void renderAircraftLOD(MCH_EntityAircraft ac, MCH_AircraftInfo info, double posX, double posY, double posZ, float yaw, float pitch, float roll) {
+      float halfWidth = Math.max(1.0F, Math.max(Math.abs(info.entityWidth), Math.max(ac.width, info.markerWidth))) * 0.5F;
+      float height = Math.max(1.0F, Math.max(Math.abs(info.entityHeight), Math.max(ac.height, info.markerHeight)));
+      float length = Math.max(halfWidth * 2.0F, 2.0F);
+      String kind = ac.getKindName();
+      float colorR = 0.85F;
+      float colorG = 0.85F;
+      float colorB = 0.85F;
+
+      if(ac.isDestroyed()) {
+         colorR = 0.25F;
+         colorG = 0.25F;
+         colorB = 0.25F;
+      } else if("ships".equals(kind)) {
+         colorR = 0.35F;
+         colorG = 0.55F;
+         colorB = 0.95F;
+      } else if("tanks".equals(kind) || "vehicles".equals(kind)) {
+         colorR = 0.45F;
+         colorG = 0.75F;
+         colorB = 0.35F;
+      }
+
+      boolean texture2D = GL11.glIsEnabled(3553);
+      boolean lighting = GL11.glIsEnabled(2896);
+      boolean cullFace = GL11.glIsEnabled(2884);
+      boolean fog = GL11.glIsEnabled(2912);
+      boolean depthTest = GL11.glIsEnabled(2929);
+      boolean blend = GL11.glIsEnabled(3042);
+      boolean renderThroughFog = MCH_Config.AircraftLODRenderThroughFog == null || MCH_Config.AircraftLODRenderThroughFog.prmBool;
+
+      GL11.glDisable(3553);
+      GL11.glDisable(2896);
+      GL11.glDisable(2884);
+      GL11.glEnable(3042);
+      GL11.glBlendFunc(770, 771);
+      if(renderThroughFog) {
+         GL11.glDisable(2912);
+         GL11.glDisable(2929);
+      }
+
+      GL11.glPushMatrix();
+      GL11.glTranslated(posX, posY + (double)(height * 0.5F), posZ);
+      GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
+      GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
+      GL11.glRotatef(roll, 0.0F, 0.0F, 1.0F);
+      GL11.glLineWidth(2.0F);
+      GL11.glColor4f(colorR, colorG, colorB, 0.9F);
+
+      Tessellator tessellator = Tessellator.instance;
+      tessellator.startDrawing(1);
+      tessellator.addVertex((double)(-halfWidth), 0.0D, 0.0D);
+      tessellator.addVertex((double)halfWidth, 0.0D, 0.0D);
+      tessellator.addVertex(0.0D, (double)(-height * 0.5F), 0.0D);
+      tessellator.addVertex(0.0D, (double)(height * 0.5F), 0.0D);
+      tessellator.addVertex(0.0D, 0.0D, (double)(-length));
+      tessellator.addVertex(0.0D, 0.0D, (double)length);
+      tessellator.addVertex((double)(-halfWidth), (double)(-height * 0.5F), (double)(-length));
+      tessellator.addVertex((double)halfWidth, (double)(-height * 0.5F), (double)(-length));
+      tessellator.addVertex((double)halfWidth, (double)(-height * 0.5F), (double)(-length));
+      tessellator.addVertex((double)halfWidth, (double)(-height * 0.5F), (double)length);
+      tessellator.addVertex((double)halfWidth, (double)(-height * 0.5F), (double)length);
+      tessellator.addVertex((double)(-halfWidth), (double)(-height * 0.5F), (double)length);
+      tessellator.addVertex((double)(-halfWidth), (double)(-height * 0.5F), (double)length);
+      tessellator.addVertex((double)(-halfWidth), (double)(-height * 0.5F), (double)(-length));
+      tessellator.draw();
+      GL11.glPopMatrix();
+
+      this.renderAircraftLODContactMarker(posX, posY + (double)Math.max(height, info.markerHeight), posZ, colorR, colorG, colorB);
+
+      GL11.glLineWidth(1.0F);
+      if(texture2D) {
+         GL11.glEnable(3553);
+      }
+      if(lighting) {
+         GL11.glEnable(2896);
+      }
+      if(cullFace) {
+         GL11.glEnable(2884);
+      }
+      if(fog) {
+         GL11.glEnable(2912);
+      }
+      if(depthTest) {
+         GL11.glEnable(2929);
+      }
+      if(!blend) {
+         GL11.glDisable(3042);
+      }
+   }
+
+   protected void renderAircraftLODContactMarker(double posX, double posY, double posZ, float colorR, float colorG, float colorB) {
+      double distance = Math.sqrt(posX * posX + posY * posY + posZ * posZ);
+      double scale = MCH_Config.AircraftLODMarkerScale != null?MCH_Config.AircraftLODMarkerScale.prmDouble:1.0D;
+      double size = Math.max(4.0D, Math.min(64.0D, distance / 120.0D)) * scale;
+      double inner = size * 0.35D;
+      double outer = size;
+      Tessellator tessellator = Tessellator.instance;
+
+      GL11.glPushMatrix();
+      GL11.glTranslated(posX, posY, posZ);
+      GL11.glRotatef(-super.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
+      GL11.glRotatef(super.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
+      GL11.glLineWidth(3.0F);
+      GL11.glColor4f(colorR, colorG, colorB, 1.0F);
+      tessellator.startDrawing(1);
+      tessellator.addVertex(-outer, 0.0D, 0.0D);
+      tessellator.addVertex(-inner, 0.0D, 0.0D);
+      tessellator.addVertex(inner, 0.0D, 0.0D);
+      tessellator.addVertex(outer, 0.0D, 0.0D);
+      tessellator.addVertex(0.0D, -outer, 0.0D);
+      tessellator.addVertex(0.0D, -inner, 0.0D);
+      tessellator.addVertex(0.0D, inner, 0.0D);
+      tessellator.addVertex(0.0D, outer, 0.0D);
+      tessellator.addVertex(-inner, -inner, 0.0D);
+      tessellator.addVertex(inner, -inner, 0.0D);
+      tessellator.addVertex(inner, -inner, 0.0D);
+      tessellator.addVertex(inner, inner, 0.0D);
+      tessellator.addVertex(inner, inner, 0.0D);
+      tessellator.addVertex(-inner, inner, 0.0D);
+      tessellator.addVertex(-inner, inner, 0.0D);
+      tessellator.addVertex(-inner, -inner, 0.0D);
+      tessellator.draw();
+      GL11.glPopMatrix();
    }
 
    public static boolean shouldSkipRender(Entity entity) {

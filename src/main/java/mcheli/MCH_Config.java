@@ -120,6 +120,11 @@ public class MCH_Config {
    public static MCH_ConfigPrm AutoThrottleDownTank;
    public static MCH_ConfigPrm DisableItemRender;
    public static MCH_ConfigPrm RenderDistanceWeight;
+   public static MCH_ConfigPrm EnableAircraftLODRender;
+   public static MCH_ConfigPrm AircraftLODStartDistance;
+   public static MCH_ConfigPrm AircraftLODFarDistance;
+   public static MCH_ConfigPrm AircraftLODRenderThroughFog;
+   public static MCH_ConfigPrm AircraftLODMarkerScale;
    public static MCH_ConfigPrm MobRenderDistanceWeight;
    public static MCH_ConfigPrm CreativeTabIcon;
    public static MCH_ConfigPrm CreativeTabIconHeli;
@@ -342,6 +347,16 @@ public class MCH_Config {
       DisableItemRender = new MCH_ConfigPrm("DisableItemRender", 1);
       DisableItemRender.desc = ";DisableItemRender = 0 ~ 3 (1 = Recommended)";
       RenderDistanceWeight = new MCH_ConfigPrm("RenderDistanceWeight", 1000.0D);
+      EnableAircraftLODRender = new MCH_ConfigPrm("EnableAircraftLODRender", true);
+      EnableAircraftLODRender.desc = ";Enable simple far-distance LOD silhouettes for aircraft, tanks, turrets, and ships.";
+      AircraftLODStartDistance = new MCH_ConfigPrm("AircraftLODStartDistance", 256.0D);
+      AircraftLODStartDistance.desc = ";Distance in blocks where aircraft/tank/turret/ship rendering switches to a cheap LOD silhouette.";
+      AircraftLODFarDistance = new MCH_ConfigPrm("AircraftLODFarDistance", 4096.0D);
+      AircraftLODFarDistance.desc = ";Maximum aircraft/tank/turret/ship LOD render-test and network tracking distance in blocks. Set <= 0 to use vanilla render range checks and the existing 2000-block tracking range.";
+      AircraftLODRenderThroughFog = new MCH_ConfigPrm("AircraftLODRenderThroughFog", true);
+      AircraftLODRenderThroughFog.desc = ";Draw the far LOD contact marker with fog and depth disabled so it remains visible beyond Minecraft/Angelica fog.";
+      AircraftLODMarkerScale = new MCH_ConfigPrm("AircraftLODMarkerScale", 1.0D);
+      AircraftLODMarkerScale.desc = ";Size multiplier for the far LOD contact marker. Increase if distant contacts are still too small.";
       MobRenderDistanceWeight = new MCH_ConfigPrm("MobRenderDistanceWeight", 10.0D);
       CreativeTabIcon = new MCH_ConfigPrm("CreativeTabIconItem", "fuel");
       CreativeTabIconHeli = new MCH_ConfigPrm("CreativeTabIconHeli", "ah-64");
@@ -499,6 +514,11 @@ public class MCH_Config {
               DisableItemRender,
               HideKeybind,
               RenderDistanceWeight,
+              EnableAircraftLODRender,
+              AircraftLODStartDistance,
+              AircraftLODFarDistance,
+              AircraftLODRenderThroughFog,
+              AircraftLODMarkerScale,
               MobRenderDistanceWeight,
               CreativeTabIcon,
               CreativeTabIconHeli,
@@ -624,6 +644,20 @@ public class MCH_Config {
       } else if(MobRenderDistanceWeight.prmDouble > 100.0D) {
          //why is this here?
          MobRenderDistanceWeight.prmDouble = 100.0D;
+      }
+
+      if(AircraftLODStartDistance.prmDouble < 0.0D) {
+         AircraftLODStartDistance.prmDouble = 0.0D;
+      }
+
+      if(AircraftLODFarDistance.prmDouble > 0.0D && AircraftLODFarDistance.prmDouble < AircraftLODStartDistance.prmDouble) {
+         AircraftLODFarDistance.prmDouble = AircraftLODStartDistance.prmDouble;
+      }
+
+      if(AircraftLODMarkerScale.prmDouble < 0.1D) {
+         AircraftLODMarkerScale.prmDouble = 0.1D;
+      } else if(AircraftLODMarkerScale.prmDouble > 20.0D) {
+         AircraftLODMarkerScale.prmDouble = 20.0D;
       }
 
       Iterator isNoDamageVsSetting = CommandPermission.iterator();

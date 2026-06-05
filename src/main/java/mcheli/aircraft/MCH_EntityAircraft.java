@@ -364,6 +364,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.lastSearchLightYaw = this.lastSearchLightPitch = 0.0F;
    }
 
+   public boolean isInRangeToRenderDist(double distanceSq) {
+      double farDistance = MCH_Config.AircraftLODFarDistance != null?MCH_Config.AircraftLODFarDistance.prmDouble:0.0D;
+      if(farDistance > 0.0D) {
+         return distanceSq < farDistance * farDistance;
+      }
+
+      return super.isInRangeToRenderDist(distanceSq);
+   }
+
    protected void entityInit() {
       super.entityInit();
       this.getDataWatcher().addObject(20, "");
