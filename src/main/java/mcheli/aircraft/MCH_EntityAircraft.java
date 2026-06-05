@@ -841,6 +841,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          setDespawnCount(20 * MCH_Config.DespawnCount.prmInt);
       }
 
+      if(!super.worldObj.isRemote && this.isNewUAV()) {
+         MCH_EntityUavStation station = this.getUavStation();
+         if(station != null && !station.isDead) {
+            station.markLinkedNewUavDestroyed(this);
+         }
+      }
+
       this.rotDestroyedPitch = super.rand.nextFloat() - 0.5F;
       this.rotDestroyedRoll = (super.rand.nextFloat() - 0.5F) * 0.5F;
       this.rotDestroyedYaw = 0.0F;

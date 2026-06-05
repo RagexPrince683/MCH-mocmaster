@@ -84,6 +84,8 @@ public class MCH_EntityUavStation
       private boolean awaitingLoadedUav;
       private int pendingContinueTicks;
 
+      private boolean storedUavWasDestroyed;
+
 
 
              public void setContinuePressed(boolean flag) {
@@ -132,6 +134,7 @@ public class MCH_EntityUavStation
            this.respawnStoredUavAtSavedPosition = false;
            this.awaitingLoadedUav = false;
            this.pendingContinueTicks = 0;
+           this.storedUavWasDestroyed = false;
          }
       protected double aircraftY;
       protected double aircraftZ;
@@ -202,6 +205,8 @@ public class MCH_EntityUavStation
       public void setOwnerUUID(UUID uuid) {
            this.ownerUUID = uuid;
          }
+
+
 
       public void linkUav(MCH_EntityAircraft ac) {
            if(ac == null) {
@@ -306,6 +311,7 @@ public class MCH_EntityUavStation
            nbt.setDouble("LinkedUavX", this.linkedUavX);
            nbt.setDouble("LinkedUavY", this.linkedUavY);
            nbt.setDouble("LinkedUavZ", this.linkedUavZ);
+           nbt.setBoolean("StoredUavWasDestroyed", this.storedUavWasDestroyed);
            if(this.lastUavItemStack != null) {
                 NBTTagCompound itemTag = new NBTTagCompound();
                 this.lastUavItemStack.writeToNBT(itemTag);
@@ -347,6 +353,13 @@ public class MCH_EntityUavStation
           this.linkedUavX = nbt.getDouble("LinkedUavX");
           this.linkedUavY = nbt.getDouble("LinkedUavY");
           this.linkedUavZ = nbt.getDouble("LinkedUavZ");
+          this.storedUavWasDestroyed = nbt.getBoolean("StoredUavWasDestroyed");
+
+          if(this.storedUavWasDestroyed) {
+              this.lastUavItemStack = null;
+              this.hasStoredUavRespawnPosition = false;
+              this.respawnStoredUavAtSavedPosition = false;
+          }
           this.lastUavItemStack = nbt.hasKey("LastUavItem") ? ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("LastUavItem")) : null;
           if(this.linkedUavEntityUUID == null) {
               this.linkedUavEntityUUID = parseUavUUID(this.assignedUavUUID);
@@ -800,6 +813,7 @@ public class MCH_EntityUavStation
            if(this.worldObj.isRemote || ac == null) {
                 return;
            }
+          this.storedUavWasDestroyed = false;
            updateLinkedUavPosition(ac);
            this.hasStoredUavRespawnPosition = true;
            MCH_Lib.Log((Entity)this, "New UAV %d shifted out at %.2f, %.2f, %.2f; deleting drone entity and keeping station launch state for Continue", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)ac)), Double.valueOf(this.linkedUavX), Double.valueOf(this.linkedUavY), Double.valueOf(this.linkedUavZ) });
@@ -816,12 +830,67 @@ public class MCH_EntityUavStation
            setLastControlAircraftEntityId(0);
          }
 
+
+         public void markLinkedNewUavDestroyed(MCH_EntityAircraft ac) {
+                 if(this.worldObj.isRemote) {
+                     return;
+                 }
+
+                 if(ac != null) {
+                     MCH_Lib.Log(
+                             (Entity)this,
+                             "New UAV %d was destroyed; clearing stored Continue item/state.",
+                             new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)ac)) }
+                     );
+                 }
+
+                 this.storedUavWasDestroyed = true;
+
+                 // This is the important part: kill the fake respawn token.
+                 this.lastUavItemStack = null;
+                 this.hasStoredUavRespawnPosition = false;
+                 this.respawnStoredUavAtSavedPosition = false;
+
+                 this.assignedUav = null;
+                 this.assignedUavId = -1;
+                 this.assignedUavUUID = "";
+                 this.linkedUavEntityUUID = null;
+                 this.linkedUavCommonId = "";
+                 this.loadedLastControlAircraftGuid = "";
+                 this.hasStoredUavLink = false;
+                 this.awaitingLoadedUav = false;
+                 this.pendingContinueTicks = 0;
+
+                 this.controlAircraft = null;
+                 setLastControlAircraft((MCH_EntityAircraft)null);
+                 setLastControlAircraftEntityId(0);
+          }
+
       private boolean continueWithStoredUavItem(Entity user) {
-           if(user == null || this.lastUavItemStack == null || this.worldObj.isRemote) {
-                return false;
-           }
+           //if(user == null || this.lastUavItemStack == null || this.worldObj.isRemote) {
+           //     return false;
+           //}
+          if(user == null || this.worldObj.isRemote) {
+              return false;
+          }
+
+          if(this.storedUavWasDestroyed) {
+              if(user instanceof EntityPlayer) {
+                  W_EntityPlayer.addChatMessage(
+                          (EntityPlayer)user,
+                          EnumChatFormatting.RED + "The linked drone was destroyed. Insert a new UAV item to launch again."
+                  );
+              }
+              return false;
+          }
+
+          if(this.lastUavItemStack == null) {
+              return false;
+          }
+
            ItemStack stack = this.lastUavItemStack.copy();
            stack.stackSize = 1;
+          //problem: this still runs after the UAV has been destroyed. Allowing infinite spawning of UAVs this is not the intended behavior
            MCH_Lib.Log((Entity)this, "Continue requested after shifted-out new UAV; relaunching stored UAV item %s", new Object[] { stack.getItem() == null ? "null" : stack.getItem().getUnlocalizedName() });
            this.respawnStoredUavAtSavedPosition = true;
            try {
@@ -1028,8 +1097,16 @@ public class MCH_EntityUavStation
                      }
                      this.pendingContinueTicks = 0;
                      W_EntityPlayer.closeScreen(user);
-                 } else if (continueWithStoredUavItem(user)) {
+                 } else if (continueWithStoredUavItem(user)) { //we need to track if the drone has been destroyed here and if so do not allow continue to attempt to link until a new drone item is used again
                      this.pendingContinueTicks = 0;
+                 } else if (this.storedUavWasDestroyed) {
+                     this.pendingContinueTicks = 0;
+                     if(notify && user instanceof EntityPlayer) {
+                         W_EntityPlayer.addChatMessage(
+                                 (EntityPlayer)user,
+                                 EnumChatFormatting.RED + "The linked drone was destroyed. Insert a new UAV item to launch again."
+                         );
+                     }
                  } else {
                      this.pendingContinueTicks = 60;
                      markLinkedUavUnloaded();
@@ -1121,9 +1198,10 @@ public class MCH_EntityUavStation
                      ((Entity)ac).prevRotationYaw = ((Entity)ac).rotationYaw;
                      user.rotationYaw = this.rotationYaw - 180.0F;
                      if (this.worldObj.getCollidingBoundingBoxes((Entity)ac, ((Entity)ac).boundingBox.expand(-0.1D, -0.1D, -0.1D)).isEmpty()) {
-                          this.lastUavItemStack = itemStack.copy();
-                          this.lastUavItemStack.stackSize = 1;
-                          itemStack.stackSize--;
+                         this.storedUavWasDestroyed = false;
+                         this.lastUavItemStack = itemStack.copy();
+                         this.lastUavItemStack.stackSize = 1;
+                         itemStack.stackSize--;
                           MCH_Lib.DbgLog(this.worldObj, "Create UAV: %s : %s", new Object[] { item.getUnlocalizedName(), item });
                           user.rotationYaw = this.rotationYaw - 180.0F;
                           if (!((MCH_EntityAircraft)ac).isTargetDrone()) {
