@@ -689,7 +689,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          return normalizeWildcardForDisplay(((ItemStack)obj).copy());
       }
 
-      // ShapedOreRecipe / ShapelessOreRecipe usually stores ore dict entries as ArrayList<ItemStack>.
+      // ShapedOreRecipe / ShapelessOreRecipe usually stores ore dict entries as List<ItemStack>.
       if(obj instanceof List) {
          List list = (List)obj;
 
@@ -697,13 +697,17 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
             return null;
          }
 
-         Object first = list.get(0);
+         for(int i = 0; i < list.size(); ++i) {
+            Object entry = list.get(i);
 
-         if(first instanceof ItemStack) {
-            return normalizeWildcardForDisplay(((ItemStack)first).copy());
+            ItemStack resolved = resolveOreIngredientForDisplay(entry);
+
+            if(resolved != null && resolved.getItem() != null) {
+               return resolved;
+            }
          }
 
-         return resolveOreIngredientForDisplay(first);
+         return null;
       }
 
       // Some custom recipe systems may store the ore name string directly.
@@ -711,7 +715,13 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          ArrayList<ItemStack> ores = OreDictionary.getOres((String)obj);
 
          if(ores != null && !ores.isEmpty()) {
-            return normalizeWildcardForDisplay(ores.get(0).copy());
+            for(int i = 0; i < ores.size(); ++i) {
+               ItemStack resolved = normalizeWildcardForDisplay(ores.get(i).copy());
+
+               if(resolved != null && resolved.getItem() != null) {
+                  return resolved;
+               }
+            }
          }
       }
 
@@ -720,6 +730,12 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
    private ItemStack normalizeWildcardForDisplay(ItemStack stack) {
       if(stack == null) {
+         return null;
+      }
+
+      // Some ore dictionary / custom recipe entries can contain broken placeholder stacks.
+      // ItemStack#getItemDamage() can crash if the internal item is null.
+      if(stack.getItem() == null) {
          return null;
       }
 

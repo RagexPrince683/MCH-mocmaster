@@ -68,7 +68,10 @@ public class MCH_DraftingTableCreatePacket extends MCH_Packet {
          MCH_DraftingTableCreatePacket s = new MCH_DraftingTableCreatePacket();
          s.outputItem = recipe.getRecipeOutput() != null?recipe.getRecipeOutput().getItem():null;
          if(s.outputItem != null) {
-            s.map = MCH_Lib.getItemMapFromRecipe(recipe);
+            // Do not send recipe ingredients from the client.
+            // Ore dictionary recipes cannot be represented safely as Map<Item, Integer>.
+            // The server should resolve and validate the recipe from the output item.
+            s.map = new HashMap();
             W_Network.sendToServer(s);
          }
 
