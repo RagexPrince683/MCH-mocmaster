@@ -150,6 +150,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public float prevLastRiderYaw;
    public float lastRiderPitch;
    public float prevLastRiderPitch;
+   public boolean isRenderingLOD;
    protected MCH_WeaponSet dummyWeapon;
    protected int useWeaponStat;
    protected int hitStatus;
@@ -280,6 +281,14 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.commonStatus = 0;
       super.dropContentsWhenDead = false;
       super.ignoreFrustumCheck = true;
+      /*
+       * Vanilla's EntityTracker only starts tracking distant entities in chunks the
+       * player is already watching unless forceSpawn is true.  Aircraft LODs are
+       * explicitly intended to be visible beyond the normal chunk/render distance,
+       * so force tracking to use the mod's configured AircraftLODFarDistance range
+       * instead of silently cutting off near the server/client view-distance edge.
+       */
+      super.forceSpawn = true;
       this.flareDv = new MCH_Flare(world, this);
       this.chaff = new MCH_Chaff(world, this);
       this.maintenance = new MCH_Maintenance(world, this);
@@ -347,6 +356,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.prevLastRiderYaw = 0.0F;
       this.lastRiderPitch = 0.0F;
       this.prevLastRiderPitch = 0.0F;
+      this.isRenderingLOD = false;
       this.rotationRoll = 0.0F;
       this.prevRotationRoll = 0.0F;
       this.lowPassPartialTicks = new MCH_LowPassFilterFloat(10);
@@ -384,6 +394,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.getDataWatcher().addObject(22, new Integer(0));
       this.getDataWatcher().addObject(26, new Short((short)0));
       this.getDataWatcher().addObject(27, new String(""));
+      this.getDataWatcher().addObject(28, Integer.valueOf(0));
       this.getDataWatcher().addObject(29, new Integer(0));
       this.getDataWatcher().addObject(31, new Integer(0));
       if(!super.worldObj.isRemote) {
@@ -2254,6 +2265,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.prevLastRiderPitch = super.prevRotationPitch;
       }
 
+      this.syncLastRiderAngles();
       this.updatePartCameraRotate();
       this.updatePartWheel();
       this.updatePartCrawlerTrack();
@@ -4469,6 +4481,38 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public float getLastRiderPitch() {
       return this.lastRiderPitch;
+   }
+
+   private static int packLastRiderAngles(float yaw, float pitch) {
+      int packedYaw = (short)((int)(MathHelper.wrapAngleTo180_float(yaw) * 10.0F));
+      int packedPitch = (short)((int)(MathHelper.wrapAngleTo180_float(pitch) * 10.0F));
+      return packedYaw << 16 | packedPitch & 65535;
+   }
+
+   private static float unpackLastRiderYaw(int packedAngles) {
+      return (float)((short)(packedAngles >> 16)) * 0.1F;
+   }
+
+   private static float unpackLastRiderPitch(int packedAngles) {
+      return (float)((short)(packedAngles & 65535)) * 0.1F;
+   }
+
+   protected void syncLastRiderAngles() {
+      if(super.worldObj.isRemote) {
+         if(!W_Lib.isClientPlayer(this.getRiddenByEntity())) {
+            int packedAngles = this.getDataWatcher().getWatchableObjectInt(28);
+            this.prevLastRiderYaw = this.lastRiderYaw;
+            this.prevLastRiderPitch = this.lastRiderPitch;
+            this.lastRiderYaw = unpackLastRiderYaw(packedAngles);
+            this.lastRiderPitch = unpackLastRiderPitch(packedAngles);
+         }
+      } else {
+         int packedAngles = packLastRiderAngles(this.lastRiderYaw, this.lastRiderPitch);
+         if(this.getDataWatcher().getWatchableObjectInt(28) != packedAngles) {
+            this.getDataWatcher().updateObject(28, Integer.valueOf(packedAngles));
+         }
+      }
+
    }
 
    @SideOnly(Side.CLIENT)

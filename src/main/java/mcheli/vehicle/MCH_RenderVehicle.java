@@ -33,7 +33,7 @@ public class MCH_RenderVehicle extends MCH_RenderAircraft {
                vehicle.isUsedPlayer = true;
                vehicle.lastRiderYaw = vehicle.riddenByEntity.rotationYaw;
                vehicle.lastRiderPitch = vehicle.riddenByEntity.rotationPitch;
-            } else if(!vehicle.isUsedPlayer) {
+            } else if(!vehicle.isUsedPlayer && !vehicle.worldObj.isRemote) {
                vehicle.lastRiderYaw = vehicle.rotationYaw;
                vehicle.lastRiderPitch = vehicle.rotationPitch;
             }
@@ -73,11 +73,11 @@ public class MCH_RenderVehicle extends MCH_RenderAircraft {
       if(vp.rotPitch || vp.rotYaw || vp.type == 1) {
          GL11.glTranslated(vp.pos.xCoord, vp.pos.yCoord, vp.pos.zCoord);
          if(vp.rotYaw) {
-            GL11.glRotatef(-vehicle.lastRiderYaw + yaw, 0.0F, 1.0F, 0.0F);
+            GL11.glRotatef(-vehicle.getLastRiderYaw() + yaw, 0.0F, 1.0F, 0.0F);
          }
 
          if(vp.rotPitch) {
-            float i$ = MCH_Lib.RNG(vehicle.lastRiderPitch, info.minRotationPitch, info.maxRotationPitch);
+            float i$ = MCH_Lib.RNG(vehicle.getLastRiderPitch(), info.minRotationPitch, info.maxRotationPitch);
             GL11.glRotatef(i$ - pitch, 1.0F, 0.0F, 0.0F);
          }
 
