@@ -126,6 +126,17 @@ public abstract class MCH_RenderAircraft extends W_Render {
       GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
       GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
       GL11.glRotatef(roll, 0.0F, 0.0F, 1.0F);
+      /*
+       * Far LODs are intentionally allowed to render past the normal terrain fog line.
+       * If fog is left enabled here, Minecraft fades this simple line silhouette to the
+       * fog color right when it becomes useful, which looks exactly like the aircraft
+       * disappeared before the LOD could take over.  Keep the state local to the LOD
+       * pass so normal close-range aircraft/world rendering still uses vanilla fog.
+       */
+      GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_LINE_BIT | GL11.GL_CURRENT_BIT);
+      GL11.glDisable(GL11.GL_FOG);
+      GL11.glEnable(GL11.GL_BLEND);
+      GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       GL11.glDisable(3553);
       GL11.glDisable(2896);
       GL11.glDisable(2884);
@@ -159,10 +170,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       tessellator.addVertex((double)(-halfWidth), (double)(-height * 0.5F), (double)(-length));
       tessellator.draw();
 
-      GL11.glLineWidth(1.0F);
-      GL11.glEnable(2884);
-      GL11.glEnable(2896);
-      GL11.glEnable(3553);
+      GL11.glPopAttrib();
       GL11.glPopMatrix();
    }
 
