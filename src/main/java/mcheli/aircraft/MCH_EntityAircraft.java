@@ -280,6 +280,14 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.commonStatus = 0;
       super.dropContentsWhenDead = false;
       super.ignoreFrustumCheck = true;
+      /*
+       * Vanilla's EntityTracker only starts tracking distant entities in chunks the
+       * player is already watching unless forceSpawn is true.  Aircraft LODs are
+       * explicitly intended to be visible beyond the normal chunk/render distance,
+       * so force tracking to use the mod's configured AircraftLODFarDistance range
+       * instead of silently cutting off near the server/client view-distance edge.
+       */
+      super.forceSpawn = true;
       this.flareDv = new MCH_Flare(world, this);
       this.chaff = new MCH_Chaff(world, this);
       this.maintenance = new MCH_Maintenance(world, this);
