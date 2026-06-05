@@ -16,6 +16,8 @@ import mcheli.wrapper.modelloader.W_ModelCustom;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.ResourceLocation;
 
+import mcheli.block.MCH_DraftingTableGui.FilteredRecipeList;
+
 public class MCH_CurrentRecipe {
 
    public final IRecipe recipe;
@@ -39,14 +41,20 @@ public class MCH_CurrentRecipe {
          this.recipe = null;
       }
 
+      MCH_IRecipeList infoList = list;
+
+      if(list instanceof FilteredRecipeList) {
+         infoList = ((FilteredRecipeList)list).getBaseList();
+      } //todo if not working move down under MCH_AircraftInfo info = null;
+
       this.index = idx;
       this.displayName = this.recipe != null?this.recipe.getRecipeOutput().getDisplayName():"None";
       this.descTexture = this.getDescTexture(this.recipe);
       this.descPage = 0;
       this.descMaxPage = this.descTexture.size();
       MCH_AircraftInfo info = null;
-      if(list instanceof MCH_AircraftInfoManager) {
-         info = ((MCH_AircraftInfoManager)list).getAcInfoFromItem(this.recipe);
+      if(infoList instanceof MCH_AircraftInfoManager) {
+         info = ((MCH_AircraftInfoManager)infoList).getAcInfoFromItem(this.recipe);
          if(info != null) {
             ++this.descMaxPage;
             String dir = info.getDirectoryName();
@@ -55,7 +63,7 @@ public class MCH_CurrentRecipe {
             if(this.model != null) {
                this.modelTexture = new ResourceLocation("mcheli", "textures/" + dir + "/" + name + ".png");
                ++this.descMaxPage;
-               if(list instanceof MCP_PlaneInfoManager) {
+               if(infoList instanceof MCP_PlaneInfoManager) {
                   this.modelRot = 0;
                } else {
                   this.modelRot = 1;

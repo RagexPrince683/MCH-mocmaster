@@ -41,6 +41,10 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
+import net.minecraftforge.oredict.ShapedOreRecipe;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
+import net.minecraftforge.oredict.OreDictionary;
+
 public class MCH_DraftingTableGui extends W_GuiContainer {
    private GuiTextField searchField;
 
@@ -462,19 +466,30 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    }
 
    public class FilteredRecipeList implements MCH_IRecipeList {
+      private final MCH_IRecipeList base;
       private final List<IRecipe> filtered;
 
       public FilteredRecipeList(MCH_IRecipeList base, String searchText) {
-         filtered = new ArrayList<>();
-         for (int i = 0; i < base.getRecipeListSize(); i++) {
+         this.base = base;
+         this.filtered = new ArrayList<IRecipe>();
+
+         String filter = searchText.toLowerCase();
+
+         for(int i = 0; i < base.getRecipeListSize(); i++) {
             IRecipe r = base.getRecipe(i);
-            if (r != null && r.getRecipeOutput() != null) {
+
+            if(r != null && r.getRecipeOutput() != null) {
                String name = r.getRecipeOutput().getDisplayName();
-               if (name != null && name.toLowerCase().contains(searchText.toLowerCase())) {
+
+               if(name != null && name.toLowerCase().contains(filter)) {
                   filtered.add(r);
                }
             }
          }
+      }
+
+      public MCH_IRecipeList getBaseList() {
+         return this.base;
       }
 
       @Override
@@ -491,35 +506,17 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    protected void keyTyped(char par1, int keycode) {
 
       //search bar shit
-      if (searchField.textboxKeyTyped(par1, keycode)) {
-
+      if(searchField.textboxKeyTyped(par1, keycode)) {
          String searchText = searchField.getText().trim();
 
-         if (searchText.isEmpty()) {
-            // Search field is empty, reset to default or ignore
+         if(searchText.isEmpty()) {
+            // Reset to default list when search is cleared.
+            this.switchRecipeList(MCH_ItemRecipe.getInstance());
+            this.switchScreen(1);
             return;
          }
 
-         //attempt 2
-            //String searchText = searchField.getText();
-
-            // Try each recipe list to find the first that matches the filter
-            if (listContainsSearch(MCH_ItemRecipe.getInstance(), searchText)) {
-               this.switchRecipeList(MCH_ItemRecipe.getInstance());
-            } else if (listContainsSearch(MCH_HeliInfoManager.getInstance(), searchText)) {
-               this.switchRecipeList(MCH_HeliInfoManager.getInstance());
-            } else if (listContainsSearch(MCP_PlaneInfoManager.getInstance(), searchText)) {
-               this.switchRecipeList(MCP_PlaneInfoManager.getInstance());
-            } else if (listContainsSearch(MCH_VehicleInfoManager.getInstance(), searchText)) {
-               this.switchRecipeList(MCH_VehicleInfoManager.getInstance());
-            } else if (listContainsSearch(MCH_TankInfoManager.getInstance(), searchText)) {
-               this.switchRecipeList(MCH_TankInfoManager.getInstance());
-            } else if (listContainsSearch(MCH_ShipInfoManager.getInstance(), searchText)) {
-               this.switchRecipeList(MCH_ShipInfoManager.getInstance());
-            }
-
-         // Try filtering each manager in order
-         for (MCH_IRecipeList baseList : Arrays.asList(
+         for(MCH_IRecipeList baseList : Arrays.asList(
                  MCH_ItemRecipe.getInstance(),
                  MCH_HeliInfoManager.getInstance(),
                  MCP_PlaneInfoManager.getInstance(),
@@ -528,49 +525,16 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
                  MCH_ShipInfoManager.getInstance())) {
 
             FilteredRecipeList filtered = new FilteredRecipeList(baseList, searchText);
-            if (filtered.getRecipeListSize() > 0) {
+
+            if(filtered.getRecipeListSize() > 0) {
                this.switchRecipeList(filtered);
-               break;
+               this.switchScreen(1);
+               return;
             }
          }
 
-            return; // Prevent other key logic when typing in search bar
-
-
-         // Get the search text
-         //String searchText = searchField.getText().toLowerCase();
-//
-         //// Filter the recipes
-         //List<IRecipe> filteredRecipes = new ArrayList<>();
-         //if (originalRecipes != null) { // Ensure originalRecipes is not null
-         //   for (IRecipe recipe : originalRecipes) {
-         //      if (recipe != null && recipe.getRecipeOutput() != null) { // Null checks for recipe and its output
-         //         String displayName = recipe.getRecipeOutput().getDisplayName();
-         //         if (displayName != null && displayName.toLowerCase().contains(searchText)) {
-         //            filteredRecipes.add(recipe);
-         //         }
-         //      }
-         //   }
-         //}
-         //currently our search bar is crashing the game so we're going to comment this stuff out for now.
-
-         // Update the filteredRecipeList
-         //filteredRecipeList = new MCH_IRecipeList() {
-         //   @Override
-         //   public int getRecipeListSize() {
-         //      return filteredRecipes.size();
-         //   }
-//
-         //   @Override
-         //   public IRecipe getRecipe(int index) {
-         //      return filteredRecipes.get(index);
-         //   }
-         //};
-         //crashing the game
-
-         // Switch to the filtered list
-         //this.switchRecipeList(filteredRecipeList);
-         //return; // Prevent default behavior when typing in the search box
+         // No matches. Keep current list, or optionally switch to an empty filtered list.
+         return;
       } else if(keycode == 1 || keycode == W_KeyBinding.getKeyCode(Minecraft.getMinecraft().gameSettings.keyBindInventory)) {
          if(this.getScreenId() == 0) {
             super.mc.thePlayer.closeScreen();
@@ -716,35 +680,140 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       return this.screenId;
    }
 
-   public void drawItemRecipe(IRecipe recipe, int x, int y) {
-      if(recipe != null) {
-         if(recipe.getRecipeOutput() != null) {
-            if(recipe.getRecipeOutput().getItem() != null) {
-               int i;
-               if(recipe instanceof ShapedRecipes) {
-                  ShapedRecipes rcp = (ShapedRecipes)recipe;
-                  i = rcp.recipeHeight;
+   private ItemStack resolveOreIngredientForDisplay(Object obj) {
+      if(obj == null) {
+         return null;
+      }
 
-                  for(int h = 0; h < i; ++h) {
-                     for(int w = 0; w < rcp.recipeWidth; ++w) {
-                        int IDX = h * i + w;
-                        if(IDX < rcp.recipeItems.length) {
-                           this.drawItemStack(rcp.recipeItems[IDX], x + w * 18, y + h * 18);
-                        }
-                     }
-                  }
-               } else if(recipe instanceof ShapelessRecipes) {
-                  ShapelessRecipes var9 = (ShapelessRecipes)recipe;
+      if(obj instanceof ItemStack) {
+         return normalizeWildcardForDisplay(((ItemStack)obj).copy());
+      }
 
-                  for(i = 0; i < var9.recipeItems.size(); ++i) {
-                     this.drawItemStack((ItemStack)var9.recipeItems.get(i), x + i % 3 * 18, y + i / 3 * 18);
-                  }
-               }
+      // ShapedOreRecipe / ShapelessOreRecipe usually stores ore dict entries as ArrayList<ItemStack>.
+      if(obj instanceof List) {
+         List list = (List)obj;
 
-               this.drawItemStack(recipe.getRecipeOutput(), x + 54 + 3, y + 18);
-            }
+         if(list.isEmpty()) {
+            return null;
+         }
+
+         Object first = list.get(0);
+
+         if(first instanceof ItemStack) {
+            return normalizeWildcardForDisplay(((ItemStack)first).copy());
+         }
+
+         return resolveOreIngredientForDisplay(first);
+      }
+
+      // Some custom recipe systems may store the ore name string directly.
+      if(obj instanceof String) {
+         ArrayList<ItemStack> ores = OreDictionary.getOres((String)obj);
+
+         if(ores != null && !ores.isEmpty()) {
+            return normalizeWildcardForDisplay(ores.get(0).copy());
          }
       }
+
+      return null;
+   }
+
+   private ItemStack normalizeWildcardForDisplay(ItemStack stack) {
+      if(stack == null) {
+         return null;
+      }
+
+      // OreDictionary.WILDCARD_VALUE is 32767.
+      // Rendering meta 32767 can show missing/broken variants on some items,
+      // so use meta 0 for display only.
+      if(stack.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
+         stack.setItemDamage(0);
+      }
+
+      return stack;
+   }
+
+   private int guessOreRecipeWidth(int inputLength) {
+      // Vanilla crafting grid is max 3x3.
+      // ShapedOreRecipe#getInput() usually contains width * height entries.
+      if(inputLength <= 0) {
+         return 1;
+      }
+
+      if(inputLength == 1) {
+         return 1;
+      }
+
+      if(inputLength == 2) {
+         return 2;
+      }
+
+      if(inputLength == 3) {
+         return 3;
+      }
+
+      if(inputLength == 4) {
+         return 2; // likely 2x2
+      }
+
+      if(inputLength == 6) {
+         return 3; // likely 3x2 or 2x3; 3-wide looks better in GUI
+      }
+
+      return 3; // 3x3 fallback
+   }
+
+   public void drawItemRecipe(IRecipe recipe, int x, int y) {
+      if(recipe == null || recipe.getRecipeOutput() == null || recipe.getRecipeOutput().getItem() == null) {
+         return;
+      }
+
+      if(recipe instanceof ShapedRecipes) {
+         ShapedRecipes rcp = (ShapedRecipes)recipe;
+
+         for(int h = 0; h < rcp.recipeHeight; ++h) {
+            for(int w = 0; w < rcp.recipeWidth; ++w) {
+               // BUGFIX: this used to be h * recipeHeight + w.
+               // It must use recipeWidth, otherwise non-square recipes index wrong.
+               int idx = h * rcp.recipeWidth + w;
+
+               if(idx >= 0 && idx < rcp.recipeItems.length) {
+                  this.drawItemStack(rcp.recipeItems[idx], x + w * 18, y + h * 18);
+               }
+            }
+         }
+      } else if(recipe instanceof ShapelessRecipes) {
+         ShapelessRecipes rcp = (ShapelessRecipes)recipe;
+
+         for(int i = 0; i < rcp.recipeItems.size(); ++i) {
+            Object obj = rcp.recipeItems.get(i);
+            this.drawItemStack(resolveOreIngredientForDisplay(obj), x + i % 3 * 18, y + i / 3 * 18);
+         }
+      } else if(recipe instanceof ShapedOreRecipe) {
+         ShapedOreRecipe rcp = (ShapedOreRecipe)recipe;
+         Object[] input = rcp.getInput();
+         int width = guessOreRecipeWidth(input.length);
+         int height = input.length / width;
+
+         for(int h = 0; h < height; ++h) {
+            for(int w = 0; w < width; ++w) {
+               int idx = h * width + w;
+
+               if(idx >= 0 && idx < input.length) {
+                  this.drawItemStack(resolveOreIngredientForDisplay(input[idx]), x + w * 18, y + h * 18);
+               }
+            }
+         }
+      } else if(recipe instanceof ShapelessOreRecipe) {
+         ShapelessOreRecipe rcp = (ShapelessOreRecipe)recipe;
+         ArrayList input = rcp.getInput();
+
+         for(int i = 0; i < input.size(); ++i) {
+            this.drawItemStack(resolveOreIngredientForDisplay(input.get(i)), x + i % 3 * 18, y + i / 3 * 18);
+         }
+      }
+
+      this.drawItemStack(recipe.getRecipeOutput(), x + 54 + 3, y + 18);
    }
 
    public void handleMouseInput() {
