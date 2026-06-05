@@ -83,7 +83,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
                GL11.glColor4f(0.8F * actualFactor, 0.4F * actualFactor, 0.4F * actualFactor, 1.0F);
             }
 
-            if(this.shouldRenderAircraftLOD(posX, posY, posZ)) {
+            if(this.shouldRenderAircraftLOD(ac, posX, posY, posZ)) {
                this.renderAircraftLOD(ac, info, posX, posY, posZ, yaw, pitch, roll, tickTime);
             } else {
                this.renderAircraft(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
@@ -102,17 +102,24 @@ public abstract class MCH_RenderAircraft extends W_Render {
 
    }
 
-   protected boolean shouldRenderAircraftLOD(double posX, double posY, double posZ) {
+   protected boolean shouldRenderAircraftLOD(MCH_EntityAircraft ac, double posX, double posY, double posZ) {
       if(MCH_Config.EnableAircraftLODRender == null || !MCH_Config.EnableAircraftLODRender.prmBool) {
+         ac.isRenderingLOD = false;
          return false;
       }
 
       double startDistance = MCH_Config.AircraftLODStartDistance != null?MCH_Config.AircraftLODStartDistance.prmDouble:0.0D;
       if(startDistance <= 0.0D) {
+         ac.isRenderingLOD = false;
          return false;
       }
 
-      return posX * posX + posY * posY + posZ * posZ >= startDistance * startDistance;
+      double hysteresis = 16.0D;
+      double exitDistance = Math.max(0.0D, startDistance - hysteresis);
+      double threshold = ac.isRenderingLOD?exitDistance:startDistance;
+      boolean shouldRenderLOD = posX * posX + posY * posY + posZ * posZ >= threshold * threshold;
+      ac.isRenderingLOD = shouldRenderLOD;
+      return shouldRenderLOD;
    }
 
    protected void renderAircraftLOD(MCH_EntityAircraft ac, MCH_AircraftInfo info, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
