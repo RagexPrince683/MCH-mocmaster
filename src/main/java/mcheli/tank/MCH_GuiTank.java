@@ -63,7 +63,8 @@ public class MCH_GuiTank extends MCH_AircraftCommonGui {
             }
          }
 
-         this.drawTankTrackHp(tank);
+         //this.drawTankTrackHp(tank);
+         // debug crap, tracks did not work, only damaged the actual tank. Disabled for now.
 
          this.drawHitBullet(tank, -14101432, seatID);
       }

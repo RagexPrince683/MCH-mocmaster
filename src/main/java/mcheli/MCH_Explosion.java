@@ -1,6 +1,7 @@
 package mcheli;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,6 +39,8 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+
+import cpw.mods.fml.common.Loader;
 
 public class MCH_Explosion extends Explosion {
 
@@ -386,6 +389,47 @@ public class MCH_Explosion extends Explosion {
       return newExplosion(w, entityExploded, player, x, y, z, size, sizeBlock, playSound, isSmoking, isFlaming, isDestroyBlock, countSetFireEntity, (MCH_DamageFactor)null);
    }
 
+   private static Method hfrExplosionSoundMethod = null;
+   private static boolean hfrExplosionSoundLookupFailed = false;
+
+   private static void handleHFRExplosionSound(World world, double x, double y, double z, float size) {
+
+      if(world == null || world.isRemote) {
+         return;
+      }
+
+      if(!Loader.isModLoaded("hfr")) {
+         return;
+      }
+
+      if(hfrExplosionSoundLookupFailed) {
+         return;
+      }
+
+      try {
+         if(hfrExplosionSoundMethod == null) {
+            Class<?> clazz = Class.forName("com.hfr.handler.ExplosionSound");
+
+            hfrExplosionSoundMethod = clazz.getMethod(
+                    "handleMCHeliExplosion",
+                    World.class,
+                    double.class,
+                    double.class,
+                    double.class,
+                    float.class
+            );
+         }
+
+         hfrExplosionSoundMethod.invoke(null, world, x, y, z, size);
+
+      } catch(Throwable t) {
+         hfrExplosionSoundLookupFailed = true;
+
+         // Optional log. Use whatever logger MCHeli already uses.
+         MCH_Lib.Log("Failed to call HFR explosion sound hook: " + t);
+      }
+   }
+
    public static MCH_Explosion.ExplosionResult newExplosion(World w, Entity entityExploded, Entity player, double x, double y, double z, float size, float sizeBlock, boolean playSound, boolean isSmoking, boolean isFlaming, boolean isDestroyBlock, int countSetFireEntity, MCH_DamageFactor df) {
       if(w.isRemote) {
          return null;
@@ -402,6 +446,9 @@ public class MCH_Explosion extends Explosion {
          exp.damageFactor = df;
          exp.doExplosionA();
          exp.doExplosionB(true);
+         //TODO do ExplosionSound.handleMCHeliExplosion(w, exp); for xenofactions compat but only if modid hfr is loaded
+         handleHFRExplosionSound(w, x, y, z, size);
+
          MCH_PacketEffectExplosion.ExplosionParam param = MCH_PacketEffectExplosion.create();
          param.exploderID = W_Entity.getEntityId(entityExploded);
          param.posX = x;
@@ -443,6 +490,8 @@ public class MCH_Explosion extends Explosion {
          return exp.result;
       }
    }
+
+
 
    public static void playExplosionSound(World w, double x, double y, double z) {
       Random rand = new Random();
