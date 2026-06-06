@@ -20,7 +20,6 @@ import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_AxisAlignedBB;
 import mcheli.wrapper.W_Block;
-import mcheli.wrapper.W_ChunkPosition;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
@@ -342,9 +341,9 @@ public class MCH_Explosion extends Explosion {
 
          while(iterator.hasNext()) {
             chunkposition = (ChunkPosition)iterator.next();
-            i = W_ChunkPosition.getChunkPosX(chunkposition);
-            j = W_ChunkPosition.getChunkPosY(chunkposition);
-            k = W_ChunkPosition.getChunkPosZ(chunkposition);
+            i = chunkposition.chunkPosX;
+            j = chunkposition.chunkPosY;
+            k = chunkposition.chunkPosZ;
             l = W_WorldFunc.getBlockId(this.world, i, j, k);
             if(l > 0 && this.isDestroyBlock && this.explosionSizeBlock > 0.0F) {
                var10000 = MCH_MOD.config;
@@ -367,9 +366,9 @@ public class MCH_Explosion extends Explosion {
 
             while(iterator.hasNext()) {
                chunkposition = (ChunkPosition)iterator.next();
-               i = W_ChunkPosition.getChunkPosX(chunkposition);
-               j = W_ChunkPosition.getChunkPosY(chunkposition);
-               k = W_ChunkPosition.getChunkPosZ(chunkposition);
+               i = chunkposition.chunkPosX;
+               j = chunkposition.chunkPosY;
+               k = chunkposition.chunkPosZ;
                l = W_WorldFunc.getBlockId(this.world, i, j, k);
                b = W_WorldFunc.getBlock(this.world, i, j - 1, k);
                if(l == 0 && b != null && b.isOpaqueCube() && explosionRNG.nextInt(3) == 0) {
@@ -569,9 +568,9 @@ public class MCH_Explosion extends Explosion {
 
          while(var50.hasNext()) {
             ChunkPosition chunkposition = (ChunkPosition)var50.next();
-            i = W_ChunkPosition.getChunkPosX(chunkposition);
-            j = W_ChunkPosition.getChunkPosY(chunkposition);
-            k = W_ChunkPosition.getChunkPosZ(chunkposition);
+            i = chunkposition.chunkPosX;
+            j = chunkposition.chunkPosY;
+            k = chunkposition.chunkPosZ;
             W_WorldFunc.getBlockId(world, i, j, k);
             ++cnt;
             d0 = (double)((float)i + world.rand.nextFloat());
@@ -695,9 +694,9 @@ public class MCH_Explosion extends Explosion {
 
          while(var39.hasNext()) {
             ChunkPosition chunkposition = (ChunkPosition)var39.next();
-            i = W_ChunkPosition.getChunkPosX(chunkposition);
-            j = W_ChunkPosition.getChunkPosY(chunkposition);
-            k = W_ChunkPosition.getChunkPosZ(chunkposition);
+            i = chunkposition.chunkPosX;
+            j = chunkposition.chunkPosY;
+            k = chunkposition.chunkPosZ;
             W_WorldFunc.getBlockId(world, i, j, k);
             d0 = (double)((float)i + world.rand.nextFloat());
             d1 = (double)((float)j + world.rand.nextFloat());
