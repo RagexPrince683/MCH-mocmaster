@@ -1,5 +1,6 @@
 package mcheli.ship;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -788,6 +789,12 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     }
 
     protected void onUpdate_Client() {
+        double oldX = super.posX;
+        double oldY = super.posY;
+        double oldZ = super.posZ;
+        float oldYaw = this.getRotYaw();
+        List<Entity> deckEntities = this.getEntitiesStandingOnDeck();
+
         if(this.getRiddenByEntity() != null && W_Lib.isClientPlayer(this.getRiddenByEntity())) {
             this.getRiddenByEntity().rotationPitch = this.getRiddenByEntity().prevRotationPitch;
         }
@@ -807,6 +814,8 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 super.motionZ *= 0.99D;
             }
         }
+
+        this.finishDeckMovement(deckEntities, oldX, oldY, oldZ, oldYaw);
 
         if(this.isDestroyed()) {
             if(MCH_Lib.getBlockIdY(this, 3, -3) == 0) {
@@ -836,6 +845,11 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     }
 
     private void onUpdate_Server() {
+        double oldX = super.posX;
+        double oldY = super.posY;
+        double oldZ = super.posZ;
+        float oldYaw = this.getRotYaw();
+        List<Entity> deckEntities = this.getEntitiesStandingOnDeck();
         this.updateCollisionBox();
         Entity rdnEnt = this.getRiddenByEntity();
         double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
@@ -980,6 +994,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         }
 
         this.moveEntity(super.motionX, super.motionY, super.motionZ);
+        this.finishDeckMovement(deckEntities, oldX, oldY, oldZ, oldYaw);
         //super.motionY *= 0.95D;
 
         if(this.getAcInfo().throttleUpDown > 0.0F) {
@@ -997,6 +1012,77 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             super.riddenByEntity = null;
         }
 
+    }
+
+    private List<Entity> getEntitiesStandingOnDeck() {
+        List<Entity> standing = new ArrayList<Entity>();
+        if(this.getAcInfo() == null) {
+            return standing;
+        }
+
+        AxisAlignedBB search = this.getDeckSearchBox();
+        List entities = super.worldObj.getEntitiesWithinAABB(EntityPlayer.class, search);
+        for(Object value : entities) {
+            Entity entity = (Entity)value;
+            if(entity != this.getRiddenByEntity() && entity.ridingEntity == null && !entity.isDead
+                    && entity.motionY <= 0.05D && this.isStandingOnDeck(entity.boundingBox)) {
+                standing.add(entity);
+            }
+        }
+        return standing;
+    }
+
+    private AxisAlignedBB getDeckSearchBox() {
+        AxisAlignedBB search = AxisAlignedBB.getBoundingBox(super.boundingBox.minX, super.boundingBox.minY,
+                super.boundingBox.minZ, super.boundingBox.maxX, super.boundingBox.maxY, super.boundingBox.maxZ);
+        for(MCH_BoundingBox bb : super.extraBoundingBox) {
+            AxisAlignedBB box = bb.boundingBox;
+            search = search.func_111270_a(box);
+        }
+        return search.expand(0.25D, 0.35D, 0.25D);
+    }
+
+    private boolean isStandingOnDeck(AxisAlignedBB entityBox) {
+        if(this.isOnTopOf(entityBox, super.boundingBox)) {
+            return true;
+        }
+        for(MCH_BoundingBox bb : super.extraBoundingBox) {
+            if(this.isOnTopOf(entityBox, bb.boundingBox)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isOnTopOf(AxisAlignedBB entityBox, AxisAlignedBB deckBox) {
+        final double horizontalInset = 1.0E-4D;
+        final double verticalTolerance = 0.2D;
+        return entityBox.maxX > deckBox.minX + horizontalInset
+                && entityBox.minX < deckBox.maxX - horizontalInset
+                && entityBox.maxZ > deckBox.minZ + horizontalInset
+                && entityBox.minZ < deckBox.maxZ - horizontalInset
+                && entityBox.minY >= deckBox.maxY - verticalTolerance
+                && entityBox.minY <= deckBox.maxY + verticalTolerance;
+    }
+
+    private void finishDeckMovement(List<Entity> deckEntities, double oldX, double oldY, double oldZ, float oldYaw) {
+        double moveY = super.posY - oldY;
+        float yawChange = (float)MCH_Lib.getRotateDiff(oldYaw, this.getRotYaw());
+
+        // Extra boxes are normally updated before onUpdateAircraft. Refresh them at
+        // the final ship position so world collision never sees last tick's deck.
+        this.updateExtraBoundingBox();
+
+        for(Entity entity : deckEntities) {
+            if(!entity.isDead && entity.ridingEntity == null) {
+                double relativeX = entity.posX - oldX;
+                double relativeZ = entity.posZ - oldZ;
+                Vec3 rotated = MCH_Lib.RotVec3(relativeX, 0.0D, relativeZ, -yawChange, 0.0F);
+                entity.setPosition(super.posX + rotated.xCoord, entity.posY + moveY, super.posZ + rotated.zCoord);
+                entity.onGround = true;
+                entity.fallDistance = 0.0F;
+            }
+        }
     }
 
     private void collisionEntity(AxisAlignedBB bb) {

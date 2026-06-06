@@ -47,11 +47,11 @@ public class MCH_EntitySeat extends W_Entity {
    }
 
    public AxisAlignedBB getCollisionBox(Entity entity) {
-      return entity.boundingBox;
+      return null;
    }
 
    public AxisAlignedBB getBoundingBox() {
-      return this.boundingBox;
+      return null;
    }
 
    public boolean canBePushed() {
