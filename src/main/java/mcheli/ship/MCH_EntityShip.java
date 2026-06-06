@@ -112,6 +112,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             this.setDead();
         } else {
             this.setAcInfo(this.planeInfo);
+            this.updateWorldCollisionSearchRadius();
             this.newSeats(this.getAcInfo().getNumSeatAndRack());
             this.partNozzle = this.createNozzle(this.planeInfo);
             this.partWing = this.createWing(this.planeInfo);
@@ -119,6 +120,20 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             this.initPartRotation(this.getRotYaw(), this.getRotPitch());
         }
 
+    }
+
+
+    private void updateWorldCollisionSearchRadius() {
+        double requiredRadius = (double)super.width / 2.0D;
+        for(MCH_BoundingBox bb : super.extraBoundingBox) {
+            double offsetRadius = Math.sqrt(bb.offsetX * bb.offsetX + bb.offsetZ * bb.offsetZ);
+            requiredRadius = Math.max(requiredRadius, offsetRadius + (double)bb.width / 2.0D);
+        }
+
+        // Forge uses this value when deciding which chunk entity lists to search.
+        // Without accounting for a carrier's remote boxes, vanilla stops finding
+        // the ship once a player is roughly 50 blocks from its center.
+        World.MAX_ENTITY_RADIUS = Math.max(World.MAX_ENTITY_RADIUS, requiredRadius + 2.0D);
     }
 
     public Item getItem() {
@@ -789,11 +804,8 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     }
 
     protected void onUpdate_Client() {
-        double oldX = super.posX;
-        double oldY = super.posY;
-        double oldZ = super.posZ;
         float oldYaw = this.getRotYaw();
-        List<Entity> deckEntities = this.getEntitiesStandingOnDeck();
+        List<DeckContact> deckEntities = this.getEntitiesStandingOnDeck();
 
         if(this.getRiddenByEntity() != null && W_Lib.isClientPlayer(this.getRiddenByEntity())) {
             this.getRiddenByEntity().rotationPitch = this.getRiddenByEntity().prevRotationPitch;
@@ -815,7 +827,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             }
         }
 
-        this.finishDeckMovement(deckEntities, oldX, oldY, oldZ, oldYaw);
+        this.finishDeckMovement(deckEntities, oldYaw);
 
         if(this.isDestroyed()) {
             if(MCH_Lib.getBlockIdY(this, 3, -3) == 0) {
@@ -845,11 +857,8 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     }
 
     private void onUpdate_Server() {
-        double oldX = super.posX;
-        double oldY = super.posY;
-        double oldZ = super.posZ;
         float oldYaw = this.getRotYaw();
-        List<Entity> deckEntities = this.getEntitiesStandingOnDeck();
+        List<DeckContact> deckEntities = this.getEntitiesStandingOnDeck();
         this.updateCollisionBox();
         Entity rdnEnt = this.getRiddenByEntity();
         double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
@@ -994,7 +1003,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         }
 
         this.moveEntity(super.motionX, super.motionY, super.motionZ);
-        this.finishDeckMovement(deckEntities, oldX, oldY, oldZ, oldYaw);
+        this.finishDeckMovement(deckEntities, oldYaw);
         //super.motionY *= 0.95D;
 
         if(this.getAcInfo().throttleUpDown > 0.0F) {
@@ -1014,19 +1023,35 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
 
     }
 
-    private List<Entity> getEntitiesStandingOnDeck() {
-        List<Entity> standing = new ArrayList<Entity>();
+    private static class DeckContact {
+        public final Entity entity;
+        public final int surfaceIndex;
+        public final double surfaceCenterX;
+        public final double surfaceCenterZ;
+
+        private DeckContact(Entity entity, int surfaceIndex, AxisAlignedBB surface) {
+            this.entity = entity;
+            this.surfaceIndex = surfaceIndex;
+            this.surfaceCenterX = (surface.minX + surface.maxX) / 2.0D;
+            this.surfaceCenterZ = (surface.minZ + surface.maxZ) / 2.0D;
+        }
+    }
+
+    private List<DeckContact> getEntitiesStandingOnDeck() {
+        List<DeckContact> standing = new ArrayList<DeckContact>();
         if(this.getAcInfo() == null) {
             return standing;
         }
 
         AxisAlignedBB search = this.getDeckSearchBox();
-        List entities = super.worldObj.getEntitiesWithinAABB(EntityPlayer.class, search);
-        for(Object value : entities) {
+        for(Object value : super.worldObj.playerEntities) {
             Entity entity = (Entity)value;
             if(entity != this.getRiddenByEntity() && entity.ridingEntity == null && !entity.isDead
-                    && entity.motionY <= 0.05D && this.isStandingOnDeck(entity.boundingBox)) {
-                standing.add(entity);
+                    && entity.motionY <= 0.05D && entity.boundingBox.intersectsWith(search)) {
+                int surfaceIndex = this.getDeckSurfaceIndex(entity.boundingBox);
+                if(surfaceIndex != Integer.MIN_VALUE) {
+                    standing.add(new DeckContact(entity, surfaceIndex, this.getDeckSurface(surfaceIndex)));
+                }
             }
         }
         return standing;
@@ -1036,50 +1061,62 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         AxisAlignedBB search = AxisAlignedBB.getBoundingBox(super.boundingBox.minX, super.boundingBox.minY,
                 super.boundingBox.minZ, super.boundingBox.maxX, super.boundingBox.maxY, super.boundingBox.maxZ);
         for(MCH_BoundingBox bb : super.extraBoundingBox) {
-            AxisAlignedBB box = bb.boundingBox;
-            search = search.func_111270_a(box);
+            search = search.func_111270_a(bb.boundingBox);
         }
-        return search.expand(0.25D, 0.35D, 0.25D);
+        return search.expand(0.25D, 0.6D, 0.25D);
     }
 
-    private boolean isStandingOnDeck(AxisAlignedBB entityBox) {
-        if(this.isOnTopOf(entityBox, super.boundingBox)) {
-            return true;
-        }
-        for(MCH_BoundingBox bb : super.extraBoundingBox) {
-            if(this.isOnTopOf(entityBox, bb.boundingBox)) {
-                return true;
+    private int getDeckSurfaceIndex(AxisAlignedBB entityBox) {
+        int surfaceIndex = this.isOnTopOf(entityBox, super.boundingBox)?-1:Integer.MIN_VALUE;
+        double highestSurface = surfaceIndex == -1?super.boundingBox.maxY:-Double.MAX_VALUE;
+
+        for(int i = 0; i < super.extraBoundingBox.length; ++i) {
+            AxisAlignedBB deckBox = super.extraBoundingBox[i].boundingBox;
+            if(this.isOnTopOf(entityBox, deckBox) && deckBox.maxY > highestSurface) {
+                surfaceIndex = i;
+                highestSurface = deckBox.maxY;
             }
         }
-        return false;
+        return surfaceIndex;
     }
 
     private boolean isOnTopOf(AxisAlignedBB entityBox, AxisAlignedBB deckBox) {
         final double horizontalInset = 1.0E-4D;
-        final double verticalTolerance = 0.2D;
+        final double aboveTolerance = 0.25D;
+        final double belowTolerance = 0.5D;
         return entityBox.maxX > deckBox.minX + horizontalInset
                 && entityBox.minX < deckBox.maxX - horizontalInset
                 && entityBox.maxZ > deckBox.minZ + horizontalInset
                 && entityBox.minZ < deckBox.maxZ - horizontalInset
-                && entityBox.minY >= deckBox.maxY - verticalTolerance
-                && entityBox.minY <= deckBox.maxY + verticalTolerance;
+                && entityBox.minY >= deckBox.maxY - belowTolerance
+                && entityBox.minY <= deckBox.maxY + aboveTolerance;
     }
 
-    private void finishDeckMovement(List<Entity> deckEntities, double oldX, double oldY, double oldZ, float oldYaw) {
-        double moveY = super.posY - oldY;
+    private AxisAlignedBB getDeckSurface(int surfaceIndex) {
+        return surfaceIndex < 0?super.boundingBox:super.extraBoundingBox[surfaceIndex].boundingBox;
+    }
+
+    private void finishDeckMovement(List<DeckContact> deckEntities, float oldYaw) {
         float yawChange = (float)MCH_Lib.getRotateDiff(oldYaw, this.getRotYaw());
 
         // Extra boxes are normally updated before onUpdateAircraft. Refresh them at
-        // the final ship position so world collision never sees last tick's deck.
+        // the final ship position so support uses this tick's water-bob height.
         this.updateExtraBoundingBox();
 
-        for(Entity entity : deckEntities) {
+        for(DeckContact contact : deckEntities) {
+            Entity entity = contact.entity;
             if(!entity.isDead && entity.ridingEntity == null) {
-                double relativeX = entity.posX - oldX;
-                double relativeZ = entity.posZ - oldZ;
+                AxisAlignedBB surface = this.getDeckSurface(contact.surfaceIndex);
+                double relativeX = entity.posX - contact.surfaceCenterX;
+                double relativeZ = entity.posZ - contact.surfaceCenterZ;
                 Vec3 rotated = MCH_Lib.RotVec3(relativeX, 0.0D, relativeZ, -yawChange, 0.0F);
-                entity.setPosition(super.posX + rotated.xCoord, entity.posY + moveY, super.posZ + rotated.zCoord);
+                double surfaceCenterX = (surface.minX + surface.maxX) / 2.0D;
+                double surfaceCenterZ = (surface.minZ + surface.maxZ) / 2.0D;
+                double correctedY = entity.posY + surface.maxY - entity.boundingBox.minY;
+                entity.setPosition(surfaceCenterX + rotated.xCoord, correctedY, surfaceCenterZ + rotated.zCoord);
+                entity.motionY = 0.0D;
                 entity.onGround = true;
+                entity.isCollidedVertically = true;
                 entity.fallDistance = 0.0F;
             }
         }
