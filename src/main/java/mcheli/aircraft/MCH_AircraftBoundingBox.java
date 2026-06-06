@@ -2,6 +2,7 @@ package mcheli.aircraft;
 
 import mcheli.aircraft.MCH_BoundingBox;
 import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.ship.MCH_EntityShip;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -34,6 +35,73 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
       double dy = y1 - y2;
       double dz = z1 - z2;
       return dx * dx + dy * dy + dz * dz;
+   }
+
+   /**
+    * Aircraft hit boxes are composite for ray tracing and damage, but only ships
+    * expose those boxes as walkable world collision.  Resolving against each
+    * component independently also prevents the small primary aircraft box from
+    * blocking horizontal movement when a player is merely touching a deck box.
+    */
+   private boolean hasDeckCollision() {
+      return this.ac instanceof MCH_EntityShip;
+   }
+
+   private boolean isDeckTopContact(AxisAlignedBB deck, AxisAlignedBB other, boolean movingOnX) {
+      final double bobTolerance = 0.6D;
+      boolean overlapsPerpendicularAxis = movingOnX
+              ? other.maxZ > deck.minZ && other.minZ < deck.maxZ
+              : other.maxX > deck.minX && other.minX < deck.maxX;
+      return overlapsPerpendicularAxis
+              && other.minY >= deck.maxY - bobTolerance
+              && other.minY <= deck.maxY + bobTolerance;
+   }
+
+   @Override
+   public double calculateXOffset(AxisAlignedBB other, double offset) {
+      if(!this.hasDeckCollision()) {
+         return offset;
+      }
+
+      if(!this.isDeckTopContact(this, other, true)) {
+         offset = super.calculateXOffset(other, offset);
+      }
+      for(MCH_BoundingBox bb : this.ac.extraBoundingBox) {
+         if(!this.isDeckTopContact(bb.boundingBox, other, true)) {
+            offset = bb.boundingBox.calculateXOffset(other, offset);
+         }
+      }
+      return offset;
+   }
+
+   @Override
+   public double calculateYOffset(AxisAlignedBB other, double offset) {
+      if(!this.hasDeckCollision()) {
+         return offset;
+      }
+
+      offset = super.calculateYOffset(other, offset);
+      for(MCH_BoundingBox bb : this.ac.extraBoundingBox) {
+         offset = bb.boundingBox.calculateYOffset(other, offset);
+      }
+      return offset;
+   }
+
+   @Override
+   public double calculateZOffset(AxisAlignedBB other, double offset) {
+      if(!this.hasDeckCollision()) {
+         return offset;
+      }
+
+      if(!this.isDeckTopContact(this, other, false)) {
+         offset = super.calculateZOffset(other, offset);
+      }
+      for(MCH_BoundingBox bb : this.ac.extraBoundingBox) {
+         if(!this.isDeckTopContact(bb.boundingBox, other, false)) {
+            offset = bb.boundingBox.calculateZOffset(other, offset);
+         }
+      }
+      return offset;
    }
 
    public boolean intersectsWith(AxisAlignedBB aabb) {
