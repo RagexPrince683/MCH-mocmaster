@@ -136,6 +136,12 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         World.MAX_ENTITY_RADIUS = Math.max(World.MAX_ENTITY_RADIUS, requiredRadius + 2.0D);
     }
 
+    @Override
+    protected Vec3 getRackUnmountPosition(MCH_SeatRackInfo rackInfo) {
+        Vec3 rackPosition = this.getTransformedPosition(rackInfo.pos);
+        return rackPosition.addVector(0.0D, 10.0D, 0.0D);
+    }
+
     public Item getItem() {
         return this.getShipInfo() != null?this.getShipInfo().item:null;
     }

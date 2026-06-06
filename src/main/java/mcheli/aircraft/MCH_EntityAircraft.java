@@ -2831,12 +2831,21 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       System.out.println("unmount fired");
       //if this is a newUAV go back to the fuckin station pos.
       Vec3 v = Vec3.createVectorHelper(super.posX, super.posY, super.posZ);
+      float yaw = this.getRotYaw();
+      float pitch = this.getRotPitch();
       if(super.ridingEntity instanceof MCH_EntitySeat) {
          MCH_EntityAircraft ac = ((MCH_EntitySeat)super.ridingEntity).getParent();
          MCH_SeatInfo seatInfo = ac.getSeatInfo(this);
          if(seatInfo instanceof MCH_SeatRackInfo) {
-            v = ((MCH_SeatRackInfo)seatInfo).getEntryPos();
-            v = ac.getTransformedPosition(v);
+            MCH_SeatRackInfo rackInfo = (MCH_SeatRackInfo)seatInfo;
+            Vec3 rackUnmountPosition = ac.getRackUnmountPosition(rackInfo);
+            if(rackUnmountPosition != null) {
+               v = rackUnmountPosition;
+               yaw = ac.getRotYaw() + rackInfo.fixYaw;
+               pitch = rackInfo.fixPitch;
+            } else {
+               v = ac.getTransformedPosition(rackInfo.getEntryPos());
+            }
          }
       } else if(super.ridingEntity instanceof EntityMinecartEmpty) {
          this.dismountedUserCtrl = true;
@@ -2848,9 +2857,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          //TODO GET UAV STATION POSITION HERE
          //this.setLocationAndAngles(getUavStation().uav);
       } else {
-         this.setLocationAndAngles(v.xCoord, v.yCoord, v.zCoord, this.getRotYaw(), this.getRotPitch());
+         this.setLocationAndAngles(v.xCoord, v.yCoord, v.zCoord, yaw, pitch);
          this.mountEntity((Entity) null);
-         this.setLocationAndAngles(v.xCoord, v.yCoord, v.zCoord, this.getRotYaw(), this.getRotPitch());
+         this.setLocationAndAngles(v.xCoord, v.yCoord, v.zCoord, yaw, pitch);
       }
    }
 
@@ -4811,7 +4820,17 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       int sid = this.getSeatIdByEntity(entity);
       this.camera.initCamera(sid, entity);
       MCH_SeatInfo seatInfo = this.getSeatInfo(seat.seatID + 1);
-      if(seatInfo != null) {
+      if(seatInfo instanceof MCH_SeatRackInfo) {
+         Vec3 rackUnmountPosition = this.getRackUnmountPosition((MCH_SeatRackInfo)seatInfo);
+         if(rackUnmountPosition != null) {
+            entity.setLocationAndAngles(rackUnmountPosition.xCoord, rackUnmountPosition.yCoord, rackUnmountPosition.zCoord,
+                  this.getRotYaw() + seatInfo.fixYaw, seatInfo.fixPitch);
+            this.listUnmountReserve.add(new MCH_EntityAircraft.UnmountReserve(entity, rackUnmountPosition.xCoord,
+                  rackUnmountPosition.yCoord, rackUnmountPosition.zCoord));
+         } else {
+            this.setUnmountPosition(entity, Vec3.createVectorHelper(seatInfo.pos.xCoord, 0.0D, seatInfo.pos.zCoord));
+         }
+      } else if(seatInfo != null) {
          this.setUnmountPosition(entity, Vec3.createVectorHelper(seatInfo.pos.xCoord, 0.0D, seatInfo.pos.zCoord));
       }
 
@@ -4820,6 +4839,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.switchHoveringMode(false);
       }
 
+   }
+
+   protected Vec3 getRackUnmountPosition(MCH_SeatRackInfo rackInfo) {
+      return null;
    }
 
    public boolean isCreatedSeats() {
@@ -5420,19 +5443,28 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          if(this.getSeatInfo(sid + 1) instanceof MCH_SeatRackInfo && seat != null && seat.riddenByEntity != null) {
             MCH_SeatRackInfo info = (MCH_SeatRackInfo)this.getSeatInfo(sid + 1);
             Entity entity = seat.riddenByEntity;
-            Vec3 pos = info.getEntryPos();
-            if(entity instanceof MCH_EntityAircraft) {
-               if(pos.zCoord >= (double)this.getAcInfo().bbZ) {
-                  pos = pos.addVector(0.0D, 0.0D, 12.0D);
-               } else {
-                  pos = pos.addVector(0.0D, 0.0D, -12.0D);
+            Vec3 rackUnmountPosition = this.getRackUnmountPosition(info);
+            if(rackUnmountPosition != null) {
+               seat.posX = entity.posX = rackUnmountPosition.xCoord;
+               seat.posY = entity.posY = rackUnmountPosition.yCoord;
+               seat.posZ = entity.posZ = rackUnmountPosition.zCoord;
+               entity.rotationYaw = this.getRotYaw() + info.fixYaw;
+               entity.rotationPitch = info.fixPitch;
+            } else {
+               Vec3 pos = info.getEntryPos();
+               if(entity instanceof MCH_EntityAircraft) {
+                  if(pos.zCoord >= (double)this.getAcInfo().bbZ) {
+                     pos = pos.addVector(0.0D, 0.0D, 12.0D);
+                  } else {
+                     pos = pos.addVector(0.0D, 0.0D, -12.0D);
+                  }
                }
-            }
 
-            Vec3 v = MCH_Lib.RotVec3(pos.xCoord, pos.yCoord, pos.zCoord, -this.getRotYaw(), -this.getRotPitch(), -this.getRotRoll());
-            seat.posX = entity.posX = super.posX + v.xCoord;
-            seat.posY = entity.posY = super.posY + v.yCoord;
-            seat.posZ = entity.posZ = super.posZ + v.zCoord;
+               Vec3 v = MCH_Lib.RotVec3(pos.xCoord, pos.yCoord, pos.zCoord, -this.getRotYaw(), -this.getRotPitch(), -this.getRotRoll());
+               seat.posX = entity.posX = super.posX + v.xCoord;
+               seat.posY = entity.posY = super.posY + v.yCoord;
+               seat.posZ = entity.posZ = super.posZ + v.zCoord;
+            }
             MCH_EntityAircraft.UnmountReserve ur = new MCH_EntityAircraft.UnmountReserve(entity, entity.posX, entity.posY, entity.posZ);
             ur.cnt = 8;
             this.listUnmountReserve.add(ur);
