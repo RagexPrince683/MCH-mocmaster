@@ -1047,7 +1047,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         for(Object value : super.worldObj.playerEntities) {
             Entity entity = (Entity)value;
             if(entity != this.getRiddenByEntity() && entity.ridingEntity == null && !entity.isDead
-                    && entity.motionY <= 0.05D && entity.boundingBox.intersectsWith(search)) {
+                    && entity.motionY < 0.3D && entity.boundingBox.intersectsWith(search)) {
                 int surfaceIndex = this.getDeckSurfaceIndex(entity.boundingBox);
                 if(surfaceIndex != Integer.MIN_VALUE) {
                     standing.add(new DeckContact(entity, surfaceIndex, this.getDeckSurface(surfaceIndex)));

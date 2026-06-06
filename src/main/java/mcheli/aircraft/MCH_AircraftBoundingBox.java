@@ -47,15 +47,29 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
       return this.ac instanceof MCH_EntityShip;
    }
 
+   private boolean isDeckTopContact(AxisAlignedBB deck, AxisAlignedBB other, boolean movingOnX) {
+      final double bobTolerance = 0.6D;
+      boolean overlapsPerpendicularAxis = movingOnX
+              ? other.maxZ > deck.minZ && other.minZ < deck.maxZ
+              : other.maxX > deck.minX && other.minX < deck.maxX;
+      return overlapsPerpendicularAxis
+              && other.minY >= deck.maxY - bobTolerance
+              && other.minY <= deck.maxY + bobTolerance;
+   }
+
    @Override
    public double calculateXOffset(AxisAlignedBB other, double offset) {
       if(!this.hasDeckCollision()) {
          return offset;
       }
 
-      offset = super.calculateXOffset(other, offset);
+      if(!this.isDeckTopContact(this, other, true)) {
+         offset = super.calculateXOffset(other, offset);
+      }
       for(MCH_BoundingBox bb : this.ac.extraBoundingBox) {
-         offset = bb.boundingBox.calculateXOffset(other, offset);
+         if(!this.isDeckTopContact(bb.boundingBox, other, true)) {
+            offset = bb.boundingBox.calculateXOffset(other, offset);
+         }
       }
       return offset;
    }
@@ -79,9 +93,13 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
          return offset;
       }
 
-      offset = super.calculateZOffset(other, offset);
+      if(!this.isDeckTopContact(this, other, false)) {
+         offset = super.calculateZOffset(other, offset);
+      }
       for(MCH_BoundingBox bb : this.ac.extraBoundingBox) {
-         offset = bb.boundingBox.calculateZOffset(other, offset);
+         if(!this.isDeckTopContact(bb.boundingBox, other, false)) {
+            offset = bb.boundingBox.calculateZOffset(other, offset);
+         }
       }
       return offset;
    }
