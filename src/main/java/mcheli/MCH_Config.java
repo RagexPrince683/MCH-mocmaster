@@ -346,11 +346,11 @@ public class MCH_Config {
       DisableItemRender.desc = ";DisableItemRender = 0 ~ 3 (1 = Recommended)";
       RenderDistanceWeight = new MCH_ConfigPrm("RenderDistanceWeight", 1000.0D);
       EnableAircraftLODRender = new MCH_ConfigPrm("EnableAircraftLODRender", true);
-      EnableAircraftLODRender.desc = ";Enable simple far-distance LOD silhouettes for aircraft, tanks, turrets, and ships.";
+      EnableAircraftLODRender.desc = ";Enable client-only far-distance model displays for aircraft, tanks, turrets, and ships.";
       AircraftLODStartDistance = new MCH_ConfigPrm("AircraftLODStartDistance", 256.0D);
-      AircraftLODStartDistance.desc = ";Distance in blocks where aircraft/tank/turret/ship rendering switches to a cheap LOD silhouette.";
+      AircraftLODStartDistance.desc = ";Distance in blocks where tracked aircraft rendering switches to its cheaper model-only pass.";
       AircraftLODFarDistance = new MCH_ConfigPrm("AircraftLODFarDistance", 4096.0D);
-      AircraftLODFarDistance.desc = ";Maximum aircraft/tank/turret/ship LOD render-test distance in blocks. Entity network tracking remains aligned with child seats so chunk reloads respawn the complete vehicle.";
+      AircraftLODFarDistance.desc = ";Maximum distance for client-only vehicle LOD snapshots. Real vehicle entity tracking remains unchanged and aligned with child seats.";
       MobRenderDistanceWeight = new MCH_ConfigPrm("MobRenderDistanceWeight", 10.0D);
       CreativeTabIcon = new MCH_ConfigPrm("CreativeTabIconItem", "fuel");
       CreativeTabIconHeli = new MCH_ConfigPrm("CreativeTabIconHeli", "ah-64");

@@ -6,6 +6,8 @@ import mcheli.MCH_Lib;
 import mcheli.MCH_ServerTickHandler;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_SoundUpdater;
+import mcheli.network.packets.PacketVehicleLODSnapshot;
+import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IChatComponent;
@@ -35,6 +37,10 @@ public class MCH_CommonProxy {
    public void registerModelsTank(String name, boolean reload) {}
 
    public void registerClientTick() {}
+
+   public void updateVehicleLODSnapshots(int dimension, List<PacketVehicleLODSnapshot.Entry> entries) {}
+
+   public void clearVehicleLODSnapshots() {}
 
    public void registerServerTick() {
       FMLCommonHandler.instance().bus().register(new MCH_ServerTickHandler());
