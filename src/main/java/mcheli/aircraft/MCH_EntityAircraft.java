@@ -1237,7 +1237,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.pendingRackPosX = nbt.hasKey("MCH_RackPosX")?nbt.getDouble("MCH_RackPosX"):super.posX;
       this.pendingRackPosY = nbt.hasKey("MCH_RackPosY")?nbt.getDouble("MCH_RackPosY"):super.posY;
       this.pendingRackPosZ = nbt.hasKey("MCH_RackPosZ")?nbt.getDouble("MCH_RackPosZ"):super.posZ;
-      this.pendingRackRestoreTicks = this.pendingRackParentUniqueId.isEmpty()?0:200;
+      this.pendingRackRestoreTicks = this.pendingRackParentUniqueId.isEmpty()?0:1200;
       this.uavPersistentUUID = parseUUID(nbt.getString("MCH_UavPersistentUUID"));
       if(this.uavPersistentUUID == null && (this.isUAV() || this.isNewUAV())) {
          this.uavPersistentUUID = this.getUniqueID();
@@ -5075,16 +5075,54 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.seatSearchCount = 0;
       }
 
+      for(int i = 0; i < this.seats.length; ++i) {
+         MCH_EntitySeat seat = this.seats[i];
+         if(seat != null && (seat.isDead || seat.worldObj != super.worldObj || seat.seatID != i
+                 || (seat.parentUniqueID != null && !seat.parentUniqueID.isEmpty()
+                 && !seat.parentUniqueID.equals(this.getCommonUniqueId()))
+                 || (seat.getParent() != null && seat.getParent() != this))) {
+            if(seat.getParent() == this) {
+               seat.setParent(null);
+            }
+            this.seats[i] = null;
+            seat = null;
+         }
+
+         if(seat == null) {
+            missingSeat = true;
+         } else {
+            seat.seatID = i;
+            seat.parentUniqueID = this.getCommonUniqueId();
+            seat.setParent(this);
+            seat.fallDistance = 0.0F;
+            if(!super.worldObj.isRemote && seat.riddenByEntity != null
+                    && (seat.riddenByEntity.isDead || seat.riddenByEntity.ridingEntity != seat)) {
+               seat.riddenByEntity = null;
+            }
+         }
+      }
+      return missingSeat;
    }
 
    public void searchSeat() {
-      List list = super.worldObj.getEntitiesWithinAABB(MCH_EntitySeat.class, super.boundingBox.expand(60.0D, 60.0D, 60.0D));
+      this.repairSeatReferences();
+      if(this.seats == null || this.getCommonUniqueId().isEmpty()) {
+         return;
+      }
 
+      // Do not use an AABB around the aircraft here. Rack seats on large ships
+      // can be more than 60 blocks from the carrier entity's origin.
+      List list = super.worldObj.loadedEntityList;
       for(int i = 0; i < list.size(); ++i) {
-         MCH_EntitySeat seat = (MCH_EntitySeat)list.get(i);
-         if(!seat.isDead && seat.parentUniqueID.equals(this.getCommonUniqueId()) && seat.seatID >= 0 && seat.seatID < this.getSeatNum() && this.seats[seat.seatID] == null) {
-            this.seats[seat.seatID] = seat;
-            seat.setParent(this);
+         Object entity = list.get(i);
+         if(entity instanceof MCH_EntitySeat) {
+            MCH_EntitySeat seat = (MCH_EntitySeat)entity;
+            if(!seat.isDead && this.getCommonUniqueId().equals(seat.parentUniqueID)
+                    && seat.seatID >= 0 && seat.seatID < this.seats.length
+                    && (this.seats[seat.seatID] == null || this.seats[seat.seatID] == seat)) {
+               this.seats[seat.seatID] = seat;
+               seat.setParent(this);
+            }
          }
       }
 
