@@ -371,10 +371,10 @@ public class MCH_MOD {
 
 
       public void registerEntity() {
-      int aircraftTrackingRange = 2000;
-      if(MCH_Config.AircraftLODFarDistance != null && MCH_Config.AircraftLODFarDistance.prmDouble > 0.0D) {
-         aircraftTrackingRange = (int)Math.min(2147483647.0D, Math.max(600.0D, Math.ceil(MCH_Config.AircraftLODFarDistance.prmDouble)));
-      }
+      // Parent aircraft and their child seats must cross the tracking boundary together.
+      // A larger parent range leaves the server tracker holding a stale client entry after
+      // the client unloads the chunk, so the parent is not spawned again when the seats are.
+      int aircraftTrackingRange = 200;
 
       EntityRegistry.registerModEntity(MCH_EntitySeat.class, "MCH.E.Seat", 100, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityHeli.class, "MCH.E.Heli", 101, this, aircraftTrackingRange, 2, true);
@@ -388,7 +388,7 @@ public class MCH_MOD {
       EntityRegistry.registerModEntity(MCH_EntityContainer.class, "MCH.E.Container", 107, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityVehicle.class, "MCH.E.Vehicle", 108, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityUavStation.class, "MCH.E.UavStation", 109, this, 200, 10, true);
-      EntityRegistry.registerModEntity(MCH_EntityHitBox.class, "MCH.E.HitBox", 110, this, 200, 10, true);
+      EntityRegistry.registerModEntity(MCH_EntityHitBox.class, "MCH.E.HitBox", 110, this, aircraftTrackingRange, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityHide.class, "MCH.E.Hide", 111, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityTank.class, "MCH.E.Tank", 112, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityRocket.class, "MCH.E.Rocket", 200, this, 530, 3, true);
