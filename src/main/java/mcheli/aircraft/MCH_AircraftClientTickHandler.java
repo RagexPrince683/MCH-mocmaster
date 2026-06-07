@@ -3,6 +3,7 @@ package mcheli.aircraft;
 import mcheli.MCH_ClientTickHandlerBase;
 import mcheli.MCH_Config;
 import mcheli.MCH_Key;
+import mcheli.MCH_Lib;
 import mcheli.MCH_PacketIndOpenScreen;
 import mcheli.network.packets.PacketLockTarget;
 import mcheli.wrapper.W_Network;
@@ -158,20 +159,38 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
          }
          if (this.KeyPutToRack.isKeyDown()) {
             ac.checkRideRack();
+            ac.debugVehicleState("CLIENT-RACK-KEY", player);
+            ac.debugRackState("CLIENT-RACK-KEY");
+            MCH_Lib.DbgLog(player.worldObj,
+                    "[MCH-RACK][CLIENT-KEY] action=put_or_ride canRideRack=%s canPutToRack=%s aircraftId=%d aircraftUuid=%s",
+                    new Object[]{Boolean.valueOf(ac.canRideRack()), Boolean.valueOf(ac.canPutToRack()),
+                            Integer.valueOf(ac.getEntityId()), ac.getUniqueID()});
             if (ac.canRideRack()) {
                pc.putDownRack = 3;
                send = true;
             } else if (ac.canPutToRack()) {
                pc.putDownRack = 1;
                send = true;
+            } else {
+               // The server owns rack availability. A stale client cache must
+               // not suppress the request after carrier chunks are reloaded.
+               pc.putDownRack = 3;
+               send = true;
+               MCH_Lib.DbgLog(player.worldObj,
+                       "[MCH-RACK][CLIENT-FALLBACK] reason=no_client_rack_action sendingServerValidation=true aircraftId=%d",
+                       new Object[]{Integer.valueOf(ac.getEntityId())});
             }
          } else if (this.KeyDownFromRack.isKeyDown()) {
+            ac.debugRackState("CLIENT-DOWN-RACK-KEY");
             if (ac.ridingEntity != null) {
                pc.isUnmount = 3;
                send = true;
             } else if (ac.canDownFromRack()) {
                pc.putDownRack = 2;
                send = true;
+            } else {
+               MCH_Lib.DbgLog(player.worldObj, "[MCH-RACK][CLIENT-REJECT] reason=no_client_down_rack_action packetNotSent=true aircraftId=%d",
+                       new Object[]{Integer.valueOf(ac.getEntityId())});
             }
          }
          if (this.KeyGearUpDown.isKeyDown() && ac.getAcInfo().haveLandingGear())

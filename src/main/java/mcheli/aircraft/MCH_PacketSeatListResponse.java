@@ -3,6 +3,7 @@ package mcheli.aircraft;
 import com.google.common.io.ByteArrayDataInput;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import mcheli.MCH_Lib;
 import mcheli.MCH_Packet;
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.wrapper.W_Entity;
@@ -56,6 +57,10 @@ public class MCH_PacketSeatListResponse extends MCH_Packet {
    }
 
    public static void sendSeatList(MCH_EntityAircraft ac, EntityPlayer player) {
+      MCH_Lib.DbgLog(ac.worldObj, "[MCH-SYNC][SEAT-RESPONSE-SEND] aircraftId=%d aircraftUuid=%s player=%s playerUuid=%s seats=%d",
+              new Object[]{Integer.valueOf(W_Entity.getEntityId(ac)), ac.getUniqueID(), player.getCommandSenderName(),
+                      player.getUniqueID(), Integer.valueOf(ac.getSeats().length)});
+      ac.debugVehicleState("SEAT-RESPONSE-SEND", player);
       MCH_PacketSeatListResponse s = new MCH_PacketSeatListResponse();
       s.setParameter(ac);
       W_Network.sendToPlayer(s, player);

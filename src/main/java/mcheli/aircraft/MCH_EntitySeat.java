@@ -215,17 +215,54 @@ public class MCH_EntitySeat extends W_Entity {
    }
 
    public boolean interactFirst(EntityPlayer player) {
-      if (getParent() != null && !getParent().isDestroyed()) {
-         ItemStack itemStack = player.getCurrentEquippedItem();
-         if (itemStack != null && itemStack.getItem() instanceof mcheli.mob.MCH_ItemSpawnGunner)
-            return getParent().interactFirst(player);
-         if (!getParent().checkTeam(player)) return false;
-         if (this.riddenByEntity != null || player.ridingEntity != null) return false;
-         if (!canRideMob(player)) return false;
-         player.mountEntity(this);
-         return true;
+      MCH_Lib.DbgLog(this.worldObj,
+              "[MCH-INTERACT][SEAT-BEGIN] side=%s seatId=%d seatEntity=%d seatUuid=%s parent=%s player=%s playerUuid=%s occupant=%s playerRiding=%s",
+              new Object[]{this.worldObj.isRemote?"CLIENT":"SERVER", Integer.valueOf(this.seatID), Integer.valueOf(this.getEntityId()),
+                      this.getUniqueID(), this.parent == null?"null":this.parent.getEntityId() + "/" + this.parent.getUniqueID(),
+                      player.getCommandSenderName(), player.getUniqueID(), this.riddenByEntity, player.ridingEntity});
+      if(getParent() == null) {
+         MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=parent_null seatId=%d parentCommonId=%s",
+                 new Object[]{Integer.valueOf(this.seatID), this.parentUniqueID});
+         return false;
       }
-      return false;
+      if(getParent().isDestroyed()) {
+         MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=parent_destroyed seatId=%d", new Object[]{Integer.valueOf(this.seatID)});
+         return false;
+      }
+      ItemStack itemStack = player.getCurrentEquippedItem();
+      if(itemStack != null && itemStack.getItem() instanceof mcheli.mob.MCH_ItemSpawnGunner) {
+         return getParent().interactFirst(player);
+      }
+      if(!getParent().checkTeam(player)) {
+         MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=team_check_failed seatId=%d", new Object[]{Integer.valueOf(this.seatID)});
+         return false;
+      }
+      if(!this.worldObj.isRemote && this.riddenByEntity != null
+              && (this.riddenByEntity.isDead || this.riddenByEntity.ridingEntity != this)) {
+         MCH_Lib.DbgLog(this.worldObj,
+                 "[MCH-STATE][REPAIR] context=seat_interact reason=invalid_seat_occupant_backreference seatId=%d staleOccupantId=%d staleOccupantUuid=%s dead=%s",
+                 new Object[]{Integer.valueOf(this.seatID), Integer.valueOf(this.riddenByEntity.getEntityId()),
+                         this.riddenByEntity.getUniqueID(), Boolean.valueOf(this.riddenByEntity.isDead)});
+         this.riddenByEntity = null;
+      }
+      if(this.riddenByEntity != null) {
+         MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=occupied seatId=%d occupantId=%d occupantUuid=%s dead=%s ridingBackref=%s",
+                 new Object[]{Integer.valueOf(this.seatID), Integer.valueOf(this.riddenByEntity.getEntityId()), this.riddenByEntity.getUniqueID(),
+                         Boolean.valueOf(this.riddenByEntity.isDead), Boolean.valueOf(this.riddenByEntity.ridingEntity == this)});
+         return false;
+      }
+      if(player.ridingEntity != null) {
+         MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=player_already_riding seatId=%d riding=%s",
+                 new Object[]{Integer.valueOf(this.seatID), player.ridingEntity});
+         return false;
+      }
+      if(!canRideMob(player)) {
+         MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=seat_is_rack_or_invalid seatId=%d", new Object[]{Integer.valueOf(this.seatID)});
+         return false;
+      }
+      player.mountEntity(this);
+      MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-ACCEPT] seatId=%d player=%s", new Object[]{Integer.valueOf(this.seatID), player.getCommandSenderName()});
+      return true;
    }
 
    public MCH_EntityAircraft getParent() {

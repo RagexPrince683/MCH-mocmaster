@@ -253,6 +253,8 @@ public class MCH_AircraftPacketHandler {
          if(req.entityID_AC > 0) {
             Entity e = player.worldObj.getEntityByID(req.entityID_AC);
             if(e instanceof MCH_EntityAircraft) {
+               MCH_Lib.DbgLog(player.worldObj, "[MCH-SYNC][SEAT-REQUEST-RECEIVE] aircraftId=%d player=%s playerUuid=%s",
+                       new Object[]{Integer.valueOf(req.entityID_AC), player.getCommandSenderName(), player.getUniqueID()});
                MCH_PacketSeatListResponse.sendSeatList((MCH_EntityAircraft)e, player);
             }
 
@@ -297,17 +299,28 @@ public class MCH_AircraftPacketHandler {
             Entity e = player.worldObj.getEntityByID(seatList.entityID_AC);
             if(e instanceof MCH_EntityAircraft) {
                MCH_EntityAircraft ac = (MCH_EntityAircraft)e;
+               MCH_Lib.DbgLog(player.worldObj, "[MCH-SYNC][SEAT-RESPONSE-RECEIVE] aircraftId=%d aircraftUuid=%s packetSeats=%d localSeats=%d",
+                       new Object[]{Integer.valueOf(seatList.entityID_AC), ac.getUniqueID(), Byte.valueOf(seatList.seatNum), Integer.valueOf(ac.getSeats().length)});
                if(seatList.seatNum > 0 && seatList.seatNum == ac.getSeats().length && seatList.seatEntityID != null && seatList.seatEntityID.length == seatList.seatNum) {
                   for(int i = 0; i < seatList.seatNum; ++i) {
                      Entity entity = player.worldObj.getEntityByID(seatList.seatEntityID[i]);
                      if(entity instanceof MCH_EntitySeat) {
                         MCH_EntitySeat seat = (MCH_EntitySeat)entity;
+                        MCH_Lib.DbgLog(player.worldObj, "[MCH-SYNC][SEAT-APPLY] aircraftId=%d index=%d seatId=%d seatUuid=%s",
+                                new Object[]{Integer.valueOf(seatList.entityID_AC), Integer.valueOf(i), Integer.valueOf(seat.getEntityId()), seat.getUniqueID()});
                         seat.seatID = i;
                         seat.setParent(ac);
                         seat.parentUniqueID = ac.getCommonUniqueId();
                         ac.setSeat(i, seat);
+                     } else {
+                        MCH_Lib.DbgLog(player.worldObj, "[MCH-SYNC][SEAT-APPLY-FAIL] reason=seat_entity_missing_or_wrong_type aircraftId=%d index=%d requestedSeatId=%d resolved=%s",
+                                new Object[]{Integer.valueOf(seatList.entityID_AC), Integer.valueOf(i), Integer.valueOf(seatList.seatEntityID[i]), entity});
                      }
                   }
+                  ac.debugVehicleState("SEAT-RESPONSE-APPLIED", player);
+               } else {
+                  MCH_Lib.DbgLog(player.worldObj, "[MCH-SYNC][SEAT-APPLY-FAIL] reason=count_mismatch aircraftId=%d packetSeats=%d localSeats=%d",
+                          new Object[]{Integer.valueOf(seatList.entityID_AC), Byte.valueOf(seatList.seatNum), Integer.valueOf(ac.getSeats().length)});
                }
             }
 
