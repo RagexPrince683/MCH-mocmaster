@@ -202,6 +202,11 @@ public final class MCH_VehicleLODManager {
         }
 
         @Override
+        public void doRender(Entity entity, double x, double y, double z, float yaw, float partialTicks) {
+            // This adapter only exposes W_Render's shared render-state helpers.
+        }
+
+        @Override
         protected ResourceLocation getEntityTexture(Entity entity) {
             return TEX_DEFAULT;
         }
