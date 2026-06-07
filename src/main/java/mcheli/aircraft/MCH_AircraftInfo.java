@@ -122,6 +122,16 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    public boolean limitRotation;
    public float throttleUpDown;
    public float throttleUpDownOnEntity;
+   /** Soft altitude limit. Lift fades before this height and excess altitude adds sink. */
+   public float flightCeiling;
+   /** Vertical distance over which lift fades when approaching the flight ceiling. */
+   public float flightCeilingRange;
+   /** Fraction of configured top speed below which fixed-wing lift begins to stall. */
+   public float stallSpeedFactor;
+   /** Strength of the fixed-wing stall sink and nose-drop response. */
+   public float stallStrength;
+   /** Maximum extra horizontal speed available while a plane is diving. */
+   public float diveSpeedMultiplier;
     private List textureNameList;
    public int textureCount;
    public float particlesScale;
@@ -330,6 +340,11 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.limitRotation = false;
       this.throttleUpDown = 1.0F;
       this.throttleUpDownOnEntity = 2.0F;
+      this.flightCeiling = 220.0F;
+      this.flightCeilingRange = 40.0F;
+      this.stallSpeedFactor = 0.35F;
+      this.stallStrength = 1.0F;
+      this.diveSpeedMultiplier = 1.25F;
       this.pivotTurnThrottle = 0.0F;
       this.trackRollerRot = 30.0F;
       this.partWheelRot = 30.0F;
@@ -839,6 +854,16 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                     this.throttleUpDown = this.toFloat(data, 0.0F, 3.0F);
                                  } else if(item.equalsIgnoreCase("ThrottleUpDownOnEntity")) {
                                     this.throttleUpDownOnEntity = this.toFloat(data, 0.0F, 100000.0F);
+                                 } else if(item.equalsIgnoreCase("FlightCeiling")) {
+                                    this.flightCeiling = this.toFloat(data, 32.0F, 255.0F);
+                                 } else if(item.equalsIgnoreCase("FlightCeilingRange")) {
+                                    this.flightCeilingRange = this.toFloat(data, 1.0F, 128.0F);
+                                 } else if(item.equalsIgnoreCase("StallSpeedFactor")) {
+                                    this.stallSpeedFactor = this.toFloat(data, 0.0F, 0.95F);
+                                 } else if(item.equalsIgnoreCase("StallStrength")) {
+                                    this.stallStrength = this.toFloat(data, 0.0F, 4.0F);
+                                 } else if(item.equalsIgnoreCase("DiveSpeedMultiplier")) {
+                                    this.diveSpeedMultiplier = this.toFloat(data, 1.0F, 2.0F);
                                  } else if(item.equalsIgnoreCase("Stealth")) {
                                     this.stealth = this.toFloat(data, 0.0F, 1.0F);
                                  } else if(item.equalsIgnoreCase("EntityWidth")) {

@@ -822,7 +822,22 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
                throttle *= 0.65D;
             }
 
-            super.motionY += (y * 0.025D + 0.03D) * throttle;
+            double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+            double ceilingLift = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
+            double rotorEfficiency = ceilingLift;
+
+            // Fast forward flight gives the rotor cleaner airflow (translational lift).
+            double translationalLift = MCH_FlightModel.clamp(horizontalSpeed / Math.max(0.1D, (double)this.getAcInfo().speed), 0.0D, 1.0D) * 0.004D;
+
+            // A powered, near-vertical descent can enter a vortex-ring state. Forward
+            // motion or lowering collective lets the helicopter recover naturally.
+            boolean vortexRing = super.motionY < -0.12D && horizontalSpeed < 0.15D && throttle > 0.45D;
+            if(vortexRing) {
+               rotorEfficiency *= 0.55D;
+               super.motionY -= 0.006D;
+            }
+
+            super.motionY += ((y * 0.025D + 0.03D) * throttle + translationalLift * throttle) * rotorEfficiency;
          } else {
             if(MathHelper.abs(this.getRotPitch()) < 40.0F) {
                speedLimit = this.getRotPitch();
@@ -859,6 +874,14 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
          if(super.rand.nextInt(50) == 0) {
             super.motionZ += (super.rand.nextDouble() - 0.5D) / 30.0D;
          }
+      }
+
+      double ceilingLift = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
+      if(!super.onGround && ceilingLift < 1.0D) {
+         if(super.motionY > 0.0D) {
+            super.motionY *= 0.88D + ceilingLift * 0.12D;
+         }
+         super.motionY -= (1.0D - ceilingLift) * 0.014D;
       }
 
       motion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
