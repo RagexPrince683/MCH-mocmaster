@@ -22,6 +22,7 @@ import cpw.mods.fml.relauncher.FMLLaunchHandler;
 
 import mcheli.aircraft.MCH_EntityHide;
 import mcheli.aircraft.MCH_EntityHitBox;
+import mcheli.aircraft.MCH_EntityPSeat;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_ItemAircraft;
 import mcheli.aircraft.MCH_ItemFuel;
@@ -376,13 +377,12 @@ public class MCH_MOD {
       }
 
       EntityRegistry.registerModEntity(MCH_EntitySeat.class, "MCH.E.Seat", 100, this, 200, 10, true);
-      //tracking range was 600, might be causing the invalid entity error?
       EntityRegistry.registerModEntity(MCH_EntityHeli.class, "MCH.E.Heli", 101, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityGLTD.class, "MCH.E.GLTD", 102, this, 600, 10, true);
       EntityRegistry.registerModEntity(MCP_EntityPlane.class, "MCH.E.Plane", 103, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityShip.class, "MCH.E.Ship", 403, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityChain.class, "MCH.E.Chain", 104, this, 200, 10, true);
-      EntityRegistry.registerModEntity(MCH_EntityHitBox.class, "MCH.E.PSeat", 105, this, 200, 10, true);
+      EntityRegistry.registerModEntity(MCH_EntityPSeat.class, "MCH.E.PSeat", 105, this, 200, 10, true);
       //was also 600, reduced to 200 to *hopefully prevent invalid entity error
       EntityRegistry.registerModEntity(MCH_EntityParachute.class, "MCH.E.Parachute", 106, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityContainer.class, "MCH.E.Container", 107, this, 200, 10, true);

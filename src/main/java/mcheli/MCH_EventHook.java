@@ -1,9 +1,13 @@
 package mcheli;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.WeakHashMap;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
@@ -33,6 +37,7 @@ import mcheli.wrapper.W_Lib;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTracker;
+import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -41,6 +46,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.IntHashMap;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -51,11 +57,15 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
 public class MCH_EventHook extends W_EventHook {
 
    int acloaded = 0;
+   private final Map<EntityPlayerMP, Set<UUID>> aircraftPendingRetrack = new WeakHashMap<EntityPlayerMP, Set<UUID>>();
+   private Field trackedEntityIdsField;
+   private boolean searchedTrackedEntityIdsField;
 
 
    @SubscribeEvent
@@ -84,17 +94,116 @@ public class MCH_EventHook extends W_EventHook {
                int currentRange = field.getInt(tracker);
                if(currentRange < range) {
                   field.setInt(tracker, range);
-                  MCH_Lib.Log(world, "Expanded EntityTracker max range from %d to %d for aircraft LODs", new Object[]{Integer.valueOf(currentRange), Integer.valueOf(range)});
                }
-            } catch(Exception e) {
-               MCH_Lib.Log(world, "Failed to expand EntityTracker range for aircraft LODs: %s", new Object[]{e.toString()});
+            } catch(Exception ignored) {
             }
 
             return;
          }
       }
 
-      MCH_Lib.Log(world, "Failed to find EntityTracker max range field for aircraft LODs", new Object[0]);
+   }
+
+
+   // Aircraft use forceSpawn and a long LOD tracking range, so the server tracker can
+   // retain a player after that player stops watching the aircraft's actual chunk.
+   @SubscribeEvent
+   public void onChunkUnwatch(ChunkWatchEvent.UnWatch event) {
+      EntityPlayerMP player = event.player;
+      if(player == null || !(player.worldObj instanceof WorldServer)) {
+         return;
+      }
+
+      WorldServer world = (WorldServer)player.worldObj;
+      EntityTracker tracker = world.getEntityTracker();
+      Set<UUID> pending = null;
+      for(Object object : world.loadedEntityList) {
+         if(object instanceof MCH_EntityAircraft) {
+            MCH_EntityAircraft aircraft = (MCH_EntityAircraft)object;
+            if(!aircraft.isDead && aircraft.chunkCoordX == event.chunk.chunkXPos
+                    && aircraft.chunkCoordZ == event.chunk.chunkZPos) {
+               EntityTrackerEntry entry = this.getTrackerEntry(tracker, aircraft.getEntityId());
+               if(entry != null && entry.trackingPlayers.contains(player)) {
+                  if(pending == null) {
+                     pending = this.aircraftPendingRetrack.get(player);
+                     if(pending == null) {
+                        pending = new HashSet<UUID>();
+                        this.aircraftPendingRetrack.put(player, pending);
+                     }
+                  }
+                  pending.add(aircraft.getUniqueID());
+               }
+            }
+         }
+      }
+   }
+
+   // Forge posts Watch after vanilla has attempted to send entities in the chunk.
+   // Recreate only entries that survived the matching UnWatch; otherwise vanilla sees
+   // the player in trackingPlayers and suppresses the parent aircraft spawn packet.
+   @SubscribeEvent
+   public void onChunkWatch(ChunkWatchEvent.Watch event) {
+      EntityPlayerMP player = event.player;
+      if(player == null || !(player.worldObj instanceof WorldServer)) {
+         return;
+      }
+      Set<UUID> pending = this.aircraftPendingRetrack.get(player);
+      if(pending == null || pending.isEmpty()) {
+         return;
+      }
+
+      WorldServer world = (WorldServer)player.worldObj;
+      EntityTracker tracker = world.getEntityTracker();
+      for(Object object : world.loadedEntityList) {
+         if(object instanceof MCH_EntityAircraft) {
+            MCH_EntityAircraft aircraft = (MCH_EntityAircraft)object;
+            if(!aircraft.isDead && aircraft.chunkCoordX == event.chunk.chunkXPos
+                    && aircraft.chunkCoordZ == event.chunk.chunkZPos && pending.remove(aircraft.getUniqueID())) {
+               this.retrackEntityForPlayer(tracker, aircraft, player);
+               for(MCH_EntitySeat seat : aircraft.getSeats()) {
+                  if(seat != null && !seat.isDead) {
+                     this.retrackEntityForPlayer(tracker, seat, player);
+                  }
+               }
+            }
+         }
+      }
+
+      if(pending.isEmpty()) {
+         this.aircraftPendingRetrack.remove(player);
+      }
+   }
+
+   private void retrackEntityForPlayer(EntityTracker tracker, Entity entity, EntityPlayerMP player) {
+      EntityTrackerEntry entry = this.getTrackerEntry(tracker, entity.getEntityId());
+      if(entry != null) {
+         entry.removePlayerFromTracker(player);
+         entry.tryStartWachingThis(player);
+      }
+   }
+
+   private EntityTrackerEntry getTrackerEntry(EntityTracker tracker, int entityId) {
+      if(!this.searchedTrackedEntityIdsField) {
+         this.searchedTrackedEntityIdsField = true;
+         for(Field field : EntityTracker.class.getDeclaredFields()) {
+            if(field.getType() == IntHashMap.class) {
+               field.setAccessible(true);
+               this.trackedEntityIdsField = field;
+               break;
+            }
+         }
+      }
+
+      if(this.trackedEntityIdsField != null) {
+         try {
+            IntHashMap trackedEntityIds = (IntHashMap)this.trackedEntityIdsField.get(tracker);
+            Object entry = trackedEntityIds.lookup(entityId);
+            return entry instanceof EntityTrackerEntry?(EntityTrackerEntry)entry:null;
+         } catch(Exception ignored) {
+            this.trackedEntityIdsField = null;
+         }
+      }
+      return null;
    }
 
    public void commandEvent(CommandEvent event) {

@@ -5,6 +5,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import mcheli.*;
@@ -1169,7 +1170,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          buffer.writeFloat(this.getAcInfo().bodyHeight);
          buffer.writeFloat(this.getAcInfo().bodyWidth);
          buffer.writeFloat(this.getAcInfo().thirdPersonDist);
-         byte[] name = getTypeName().getBytes();
+         byte[] name = getTypeName().getBytes(StandardCharsets.UTF_8);
          buffer.writeShort(name.length);
          buffer.writeBytes(name);
       } else {
@@ -1179,6 +1180,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          buffer.writeShort(0);
       }
 
+      byte[] commonId = this.getCommonUniqueId().getBytes(StandardCharsets.UTF_8);
+      buffer.writeShort(commonId.length);
+      buffer.writeBytes(commonId);
    }
 
    public void readSpawnData(ByteBuf additionalData) {
@@ -1191,10 +1195,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          if (len > 0) {
             byte[] dst = new byte[len];
             additionalData.readBytes(dst);
-            changeType(new String(dst));
+            changeType(new String(dst, StandardCharsets.UTF_8));
+         }
+         int commonIdLength = additionalData.readUnsignedShort();
+         if(commonIdLength > 0) {
+            byte[] commonId = new byte[commonIdLength];
+            additionalData.readBytes(commonId);
+            this.setCommonUniqueId(new String(commonId, StandardCharsets.UTF_8));
          }
       } catch (Exception var4) {
-         MCH_Lib.Log((Entity)this, "readSpawnData error!", new Object[0]);
          var4.printStackTrace();
       }
 
@@ -5122,6 +5131,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
       this.repairSeatStateAfterLoad();
       player.playerNetServerHandler.sendPacket(new S1CPacketEntityMetadata(this.getEntityId(), this.getDataWatcher(), true));
+      MCH_PacketStatusResponse.sendStatus(this, player);
       MCH_PacketSeatListResponse.sendSeatList(this, player);
 
       if(super.ridingEntity != null) {

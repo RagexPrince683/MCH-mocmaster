@@ -1,7 +1,10 @@
 package mcheli.aircraft;
 
+import cpw.mods.fml.common.registry.IEntityAdditionalSpawnData;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import io.netty.buffer.ByteBuf;
+import java.nio.charset.StandardCharsets;
 import mcheli.MCH_Lib;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.wrapper.W_Entity;
@@ -13,9 +16,10 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
-public class MCH_EntitySeat extends W_Entity {
+public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnData {
    public String parentUniqueID;
    private MCH_EntityAircraft parent;
+   private int parentEntityID;
    public int seatID;
    public int parentSearchCount;
    protected Entity lastRiddenByEntity;
@@ -28,6 +32,7 @@ public class MCH_EntitySeat extends W_Entity {
       this.motionX = this.motionY = this.motionZ = 0.0D;
       this.seatID = -1;
       setParent(null);
+      this.parentEntityID = -1;
       this.parentSearchCount = 0;
       this.lastRiddenByEntity = null;
       this.ignoreFrustumCheck = true;
@@ -142,6 +147,7 @@ public class MCH_EntitySeat extends W_Entity {
    }
 
    private void onUpdate_Client() {
+      resolveParentEntity();
       checkDetachmentAndDelete();
    }
 
@@ -189,6 +195,55 @@ public class MCH_EntitySeat extends W_Entity {
       } else {
          this.parentSearchCount = 0;
       }
+   }
+
+
+   private void resolveParentEntity() {
+      if(this.parent != null && !this.parent.isDead) {
+         return;
+      }
+      this.parent = null;
+
+      if(this.parentEntityID > 0) {
+         Entity entity = this.worldObj.getEntityByID(this.parentEntityID);
+         if(entity instanceof MCH_EntityAircraft && !entity.isDead) {
+            setParent((MCH_EntityAircraft)entity);
+            return;
+         }
+      }
+
+      if(this.parentUniqueID != null && !this.parentUniqueID.isEmpty()) {
+         for(Object object : this.worldObj.loadedEntityList) {
+            if(object instanceof MCH_EntityAircraft
+                    && this.parentUniqueID.equals(((MCH_EntityAircraft)object).getCommonUniqueId())) {
+               setParent((MCH_EntityAircraft)object);
+               return;
+            }
+         }
+      }
+   }
+
+   public void writeSpawnData(ByteBuf buffer) {
+      buffer.writeInt(this.parent != null ? this.parent.getEntityId() : this.parentEntityID);
+      buffer.writeInt(this.seatID);
+      byte[] commonId = this.parentUniqueID == null
+              ? new byte[0] : this.parentUniqueID.getBytes(StandardCharsets.UTF_8);
+      buffer.writeShort(commonId.length);
+      buffer.writeBytes(commonId);
+   }
+
+   public void readSpawnData(ByteBuf buffer) {
+      this.parentEntityID = buffer.readInt();
+      this.seatID = buffer.readInt();
+      int commonIdLength = buffer.readUnsignedShort();
+      if(commonIdLength > 0) {
+         byte[] commonId = new byte[commonIdLength];
+         buffer.readBytes(commonId);
+         this.parentUniqueID = new String(commonId, StandardCharsets.UTF_8);
+      } else {
+         this.parentUniqueID = "";
+      }
+      resolveParentEntity();
    }
 
    protected void writeEntityToNBT(NBTTagCompound nbt) {
@@ -280,5 +335,9 @@ public class MCH_EntitySeat extends W_Entity {
 
    public void setParent(MCH_EntityAircraft parent) {
       this.parent = parent;
+      if(parent != null) {
+         this.parentEntityID = parent.getEntityId();
+         this.parentUniqueID = parent.getCommonUniqueId();
+      }
    }
 }
