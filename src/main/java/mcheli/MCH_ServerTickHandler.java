@@ -1,161 +1,105 @@
 package mcheli;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
-
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_PacketAircraftLocation;
+import mcheli.helicopter.MCH_EntityHeli;
+import mcheli.network.packets.PacketVehicleLODSnapshot;
 import mcheli.plane.MCP_EntityPlane;
-import mcheli.weapon.MCH_EntityBaseBullet;
-import mcheli.wrapper.W_Reflection;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.NetworkManager;
+import mcheli.ship.MCH_EntityShip;
+import mcheli.tank.MCH_EntityTank;
+import mcheli.vehicle.MCH_EntityVehicle;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
+/** Sends render-only vehicle snapshots without changing Forge entity tracking. */
 public class MCH_ServerTickHandler {
-
-   HashMap rcvMap = new HashMap();
-   HashMap sndMap = new HashMap();
-   int sndPacketNum = 0;
-   int rcvPacketNum = 0;
-   int tick;
-
+   private static final int UPDATE_INTERVAL_TICKS = 20;
+   private static final int MAX_ENTRIES = 512;
+   private int tick;
 
    @SubscribeEvent
    public void onServerTickEvent(ServerTickEvent event) {
-      if (event.phase != Phase.END) return;
-      //MCH_ESMHandler.getInstance().onTick();
-      MinecraftServer minecraftServer = MinecraftServer.getServer();
+      if(event.phase != Phase.END || ++this.tick < UPDATE_INTERVAL_TICKS) {
+         return;
+      }
+      this.tick = 0;
 
-      for (WorldServer server : MinecraftServer.getServer().worldServers) {
-         for (Object playerObj : server.playerEntities) {
-            EntityPlayer player = (EntityPlayer) playerObj;
-            AxisAlignedBB aabb = player.boundingBox.expand(350, 350, 350);
-            List<MCP_EntityPlane> list = new ArrayList<>();
-            List<Entity> entities = player.worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb);
-            for (Entity e : entities) {
-               if (e instanceof MCP_EntityPlane && !e.onGround) {
-                  MCP_EntityPlane plane = (MCP_EntityPlane) e;
-                  list.add(plane);
-                  //System.out.println("server tick handler");
-                  MCH_PacketAircraftLocation.send(plane, player);
-               }
+      MinecraftServer server = MinecraftServer.getServer();
+      if(server == null || server.worldServers == null) {
+         return;
+      }
+
+      double farDistance = MCH_Config.AircraftLODFarDistance != null
+         ? MCH_Config.AircraftLODFarDistance.prmDouble : 4096.0D;
+      double farDistanceSq = farDistance > 0.0D ? farDistance * farDistance : Double.MAX_VALUE;
+
+      for(WorldServer world : server.worldServers) {
+         for(Object playerObject : world.playerEntities) {
+            if(!(playerObject instanceof EntityPlayerMP)) {
+               continue;
             }
+            EntityPlayerMP player = (EntityPlayerMP)playerObject;
+            List<PacketVehicleLODSnapshot.Entry> entries = collectSnapshots(world, player, farDistanceSq);
+            MCH_MOD.getPacketHandler().sendTo(new PacketVehicleLODSnapshot(world.provider.dimensionId, entries), player);
          }
       }
    }
 
-   double visualDistance = 2500;
-   @SubscribeEvent
-   void onWorldTick(TickEvent.WorldTickEvent evt) {
-      System.out.println("onworldtick works");
-      //inb4 this shit never fires and its more goddamn schizophrenic bullshit from this fuckass mod
-      //it doesn't.
-      World worldObj = evt.world;
-
-      // --- Existing MCH plane syncing logic ---
-      for (Object obj : worldObj.playerEntities) {
-         if (obj instanceof EntityPlayer) {
-            EntityPlayer player = (EntityPlayer) obj;
-            AxisAlignedBB aabb = player.boundingBox.expand(visualDistance, visualDistance, visualDistance);
-            List<MCP_EntityPlane> list = new ArrayList<>();
-            for (Object entityObj : worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb)) {
-               if (entityObj instanceof MCP_EntityPlane) {
-                  MCP_EntityPlane plane = (MCP_EntityPlane) entityObj;
-                  if (!plane.onGround) {
-                     list.add(plane);
-                     MCH_PacketAircraftLocation.send(plane, player);
-                  }
-               }
+   private static List<PacketVehicleLODSnapshot.Entry> collectSnapshots(WorldServer world, final EntityPlayerMP player, double farDistanceSq) {
+      List<MCH_EntityAircraft> aircraft = new ArrayList<MCH_EntityAircraft>();
+      for(Object object : world.loadedEntityList) {
+         if(object instanceof MCH_EntityAircraft) {
+            MCH_EntityAircraft vehicle = (MCH_EntityAircraft)object;
+            if(!vehicle.isDead && vehicle.getAcInfo() != null && categoryOf(vehicle) >= 0
+               && vehicle.getDistanceSqToEntity(player) <= farDistanceSq) {
+               aircraft.add(vehicle);
             }
          }
       }
 
-      // --- NEW: Bullet despawn logic ---
-      //List<Entity> loaded = worldObj.loadedEntityList;
-      //int bulletCount = 0;
-      //List<MCH_EntityBaseBullet> excessBullets = new ArrayList<>();
-//
-      //for (Object obj : loaded) {
-      //   if (obj instanceof MCH_EntityBaseBullet) {
-      //      MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet) obj;
-      //      bulletCount++;
-//
-      //      if (!bullet.shouldLoadChunks() && bullet.idleStartTime > 0) {
-      //         System.out.println("NOT should load chunks");
-      //         excessBullets.add(bullet);
-      //      }
-      //   }
-      //}
-//
-      //if (bulletCount > 1000) {
-      //   int bulletsToKill = Math.min(200, excessBullets.size());
-      //   for (int i = 0; i < bulletsToKill; i++) {
-      //      excessBullets.get(i).setDead();
-      //   }
-      //   System.out.println("Bullet cleanup triggered: removed " + bulletsToKill + " bullets.");
-      //}
-      //this shit does NOT work. I FUCKING LOVE THIS MOD'S SCHIZOPHRENIA
+      Collections.sort(aircraft, new Comparator<MCH_EntityAircraft>() {
+         @Override
+         public int compare(MCH_EntityAircraft left, MCH_EntityAircraft right) {
+            return Double.compare(left.getDistanceSqToEntity(player), right.getDistanceSqToEntity(player));
+         }
+      });
+
+      int count = Math.min(aircraft.size(), MAX_ENTRIES);
+      List<PacketVehicleLODSnapshot.Entry> entries = new ArrayList<PacketVehicleLODSnapshot.Entry>(count);
+      for(int i = 0; i < count; ++i) {
+         MCH_EntityAircraft vehicle = aircraft.get(i);
+         PacketVehicleLODSnapshot.Entry entry = new PacketVehicleLODSnapshot.Entry();
+         entry.uuid = vehicle.getUniqueID();
+         entry.entityId = vehicle.getEntityId();
+         entry.category = categoryOf(vehicle);
+         entry.typeName = vehicle.getAcInfo().name;
+         entry.textureName = vehicle.getTextureName();
+         entry.x = vehicle.posX;
+         entry.y = vehicle.posY;
+         entry.z = vehicle.posZ;
+         entry.yaw = vehicle.getRotYaw();
+         entry.pitch = vehicle.getRotPitch();
+         entry.roll = vehicle.getRotRoll();
+         entry.scale = 1.0F;
+         entry.packedLight = vehicle.getBrightnessForRender(1.0F);
+         entries.add(entry);
+      }
+      return entries;
    }
 
-   private void onServerTickPre() {
-      ++this.tick;
-      List list = W_Reflection.getNetworkManagers();
-      if(list != null) {
-         for(int i = 0; i < list.size(); ++i) {
-            Queue queue = W_Reflection.getReceivedPacketsQueue((NetworkManager)list.get(i));
-            if(queue != null) {
-               this.putMap(this.rcvMap, queue.iterator());
-               this.rcvPacketNum += queue.size();
-            }
-
-            queue = W_Reflection.getSendPacketsQueue((NetworkManager)list.get(i));
-            if(queue != null) {
-               this.putMap(this.sndMap, queue.iterator());
-               this.sndPacketNum += queue.size();
-            }
-         }
-      }
-
-      if(this.tick >= 20) {
-         this.tick = 0;
-         this.rcvPacketNum = this.sndPacketNum = 0;
-         this.rcvMap.clear();
-         this.sndMap.clear();
-      }
-
+   private static byte categoryOf(MCH_EntityAircraft vehicle) {
+      if(vehicle instanceof MCH_EntityHeli) return 0;
+      if(vehicle instanceof MCP_EntityPlane) return 1;
+      if(vehicle instanceof MCH_EntityShip) return 2;
+      if(vehicle instanceof MCH_EntityTank) return 3;
+      if(vehicle instanceof MCH_EntityVehicle) return 4;
+      return -1;
    }
-
-   public void putMap(HashMap map, Iterator iterator) {
-      while(iterator.hasNext()) {
-         Object o = iterator.next();
-         String key = o.getClass().getName().toString();
-         if(key.startsWith("net.minecraft.")) {
-            key = "Minecraft";
-         } else if(o instanceof FMLProxyPacket) {
-            FMLProxyPacket p = (FMLProxyPacket)o;
-            key = p.channel();
-         } else {
-            key = "Unknown!";
-         }
-
-         if(map.containsKey(key)) {
-            map.put(key, Integer.valueOf(1 + ((Integer)map.get(key)).intValue()));
-         } else {
-            map.put(key, Integer.valueOf(1));
-         }
-      }
-
-   }
-
-   private void onServerTickPost() {}
 }
