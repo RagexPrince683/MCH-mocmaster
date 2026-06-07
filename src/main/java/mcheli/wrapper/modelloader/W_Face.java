@@ -2,6 +2,7 @@ package mcheli.wrapper.modelloader;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.nio.FloatBuffer;
 import net.minecraft.client.renderer.Tessellator;
 
 @SideOnly(Side.CLIENT)
@@ -95,6 +96,32 @@ public class W_Face {
 
    public float getVertexZ(int index) {
       return this.packedData != null ? this.packedData[index * this.packedStride + 2] : this.vertices[index].z;
+   }
+
+   /**
+    * Writes this face in the fixed-function T2F_N3F_V3F layout used by model VBOs.
+    */
+   public void appendInterleaved(FloatBuffer buffer) {
+      if(!this.hasPackedFaceNormal) {
+         W_Vertex normal = this.faceNormal != null ? this.faceNormal : this.calculateFaceNormal();
+         this.faceNormalX = normal.x;
+         this.faceNormalY = normal.y;
+         this.faceNormalZ = normal.z;
+         this.hasPackedFaceNormal = true;
+      }
+
+      int vertexCount = this.getVertexCount();
+      int textureCount = this.getTextureCoordinateCount();
+      for(int i = 0; i < vertexCount; ++i) {
+         buffer.put(textureCount > i ? this.getTextureU(i) : 0.0F);
+         buffer.put(textureCount > i ? this.getTextureV(i) : 0.0F);
+         buffer.put(this.hasVertexNormal(i) ? this.getNormalX(i) : this.faceNormalX);
+         buffer.put(this.hasVertexNormal(i) ? this.getNormalY(i) : this.faceNormalY);
+         buffer.put(this.hasVertexNormal(i) ? this.getNormalZ(i) : this.faceNormalZ);
+         buffer.put(this.getVertexX(i));
+         buffer.put(this.getVertexY(i));
+         buffer.put(this.getVertexZ(i));
+      }
    }
 
    public void addFaceForRender(Tessellator tessellator) {

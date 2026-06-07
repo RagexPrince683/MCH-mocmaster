@@ -51,6 +51,10 @@ public class MCH_EntityParticleSplash extends MCH_EntityParticleBase {
    }
 
    public void renderParticle(Tessellator par1Tessellator, float par2, float par3, float par4, float par5, float par6, float par7) {
+      if(!this.isInRenderRange(256.0D)) {
+         return;
+      }
+
       W_McClient.MOD_bindTexture("textures/particles/smoke.png");
       float f6 = (float)super.particleTextureIndexX / 8.0F;
       float f7 = f6 + 0.125F;

@@ -5,6 +5,7 @@ import java.util.List;
 import mcheli.wrapper.W_EntityFX;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
@@ -49,6 +50,18 @@ public abstract class MCH_EntityParticleBase extends W_EntityFX {
 
    public int getFXLayer() {
       return 2;
+   }
+
+   protected boolean isInRenderRange(double maxDistance) {
+      Minecraft mc = Minecraft.getMinecraft();
+      if(mc == null || mc.renderViewEntity == null) {
+         return false;
+      }
+
+      double dx = super.posX - mc.renderViewEntity.posX;
+      double dy = super.posY - mc.renderViewEntity.posY;
+      double dz = super.posZ - mc.renderViewEntity.posZ;
+      return dx * dx + dy * dy + dz * dz <= maxDistance * maxDistance;
    }
 
    public void moveEntity(double par1, double par3, double par5) {

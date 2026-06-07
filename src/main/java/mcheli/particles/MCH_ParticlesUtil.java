@@ -47,9 +47,55 @@ import net.minecraft.world.World;
 public class MCH_ParticlesUtil {
 
    public static MCH_EntityParticleMarkPoint markPoint = null;
+   private static World particleBudgetWorld;
+   private static long particleBudgetTick = Long.MIN_VALUE;
+   private static int particlesSpawnedThisTick;
 
+   private static boolean canSpawnParticle(World world, double x, double y, double z, boolean important) {
+      Minecraft mc = Minecraft.getMinecraft();
+      if(world == null || mc == null || mc.renderViewEntity == null || mc.effectRenderer == null) {
+         return false;
+      }
+
+      int particleSetting = mc.gameSettings.particleSetting;
+      if(!important) {
+         if(particleSetting >= 2 && world.rand.nextInt(4) != 0) {
+            return false;
+         }
+         if(particleSetting == 1 && world.rand.nextInt(2) != 0) {
+            return false;
+         }
+      }
+
+      double dx = mc.renderViewEntity.posX - x;
+      double dy = mc.renderViewEntity.posY - y;
+      double dz = mc.renderViewEntity.posZ - z;
+      double maxDistance = Math.max(96.0D, Math.min(256.0D, (double)(mc.gameSettings.renderDistanceChunks * 16 + 32)));
+      if(dx * dx + dy * dy + dz * dz > maxDistance * maxDistance) {
+         return false;
+      }
+
+      long tick = world.getTotalWorldTime();
+      if(world != particleBudgetWorld || tick != particleBudgetTick) {
+         particleBudgetWorld = world;
+         particleBudgetTick = tick;
+         particlesSpawnedThisTick = 0;
+      }
+
+      int budget = particleSetting >= 2 ? 64 : (particleSetting == 1 ? 192 : 384);
+      if(particlesSpawnedThisTick >= budget) {
+         return false;
+      }
+
+      ++particlesSpawnedThisTick;
+      return true;
+   }
 
    public static void spawnParticleExplode(World w, double x, double y, double z, float size, float r, float g, float b, float a, int age) {
+      if(!canSpawnParticle(w, x, y, z, true)) {
+         return;
+      }
+
       MCH_EntityParticleExplode epe = new MCH_EntityParticleExplode(w, x, y, z, (double)size, (double)age, 0.0D);
       epe.setParticleMaxAge(age);
       epe.setRBGColorF(r, g, b);
@@ -242,7 +288,7 @@ public class MCH_ParticlesUtil {
    }
 
    public static void spawnParticle(MCH_ParticleParam p) {
-      if(p.world.isRemote) {
+      if(p.world.isRemote && canSpawnParticle(p.world, p.posX, p.posY, p.posZ, false)) {
          Object entityFX = null;
          if(p.name.equalsIgnoreCase("Splash")) {
             entityFX = new MCH_EntityParticleSplash(p.world, p.posX, p.posY, p.posZ, p.motionX, p.motionY, p.motionZ);

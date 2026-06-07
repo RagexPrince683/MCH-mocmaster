@@ -18,6 +18,7 @@ public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase {
       super.particleRed = super.particleGreen = super.particleBlue = super.rand.nextFloat() * 0.3F + 0.7F;
       this.setParticleScale(super.rand.nextFloat() * 0.5F + 5.0F);
       this.setParticleMaxAge((int)(16.0D / ((double)super.rand.nextFloat() * 0.8D + 0.2D)) + 2);
+      super.noClip = true;
    }
 
    public void onUpdate() {
@@ -81,7 +82,7 @@ public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase {
    }
 
    public void effectWind() {
-      if(super.isEffectedWind) {
+      if(super.isEffectedWind && (super.particleAge & 3) == 0) {
          boolean range = true;
          List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, this.getBoundingBox().expand(15.0D, 15.0D, 15.0D));
 
@@ -114,6 +115,10 @@ public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase {
    }
 
    public void renderParticle(Tessellator par1Tessellator, float par2, float par3, float par4, float par5, float par6, float par7) {
+      if(!this.isInRenderRange(256.0D)) {
+         return;
+      }
+
       W_McClient.MOD_bindTexture("textures/particles/smoke.png");
       GL11.glEnable(3042);
       int srcBlend = GL11.glGetInteger(3041);
