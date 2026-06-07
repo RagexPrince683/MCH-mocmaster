@@ -238,7 +238,8 @@ public class MCH_EntitySeat extends W_Entity {
          return false;
       }
       if(!this.worldObj.isRemote && this.riddenByEntity != null
-              && (this.riddenByEntity.isDead || this.riddenByEntity.ridingEntity != this)) {
+              && (this.riddenByEntity.isDead || this.riddenByEntity.ridingEntity != this
+              || !this.worldObj.loadedEntityList.contains(this.riddenByEntity))) {
          MCH_Lib.DbgLog(this.worldObj,
                  "[MCH-STATE][REPAIR] context=seat_interact reason=invalid_seat_occupant_backreference seatId=%d staleOccupantId=%d staleOccupantUuid=%s dead=%s",
                  new Object[]{Integer.valueOf(this.seatID), Integer.valueOf(this.riddenByEntity.getEntityId()),

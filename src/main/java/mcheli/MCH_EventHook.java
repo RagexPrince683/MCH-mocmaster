@@ -50,6 +50,7 @@ import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
 public class MCH_EventHook extends W_EventHook {
@@ -240,6 +241,35 @@ public class MCH_EventHook extends W_EventHook {
    }
 
    @SubscribeEvent
+   public void onStartTracking(PlayerEvent.StartTracking event) {
+      if(!(event.entityPlayer instanceof EntityPlayerMP) || event.entityPlayer.worldObj.isRemote) {
+         return;
+      }
+
+      MCH_EntityAircraft aircraft = null;
+      if(event.target instanceof MCH_EntityAircraft) {
+         aircraft = (MCH_EntityAircraft)event.target;
+      } else if(event.target instanceof MCH_EntitySeat) {
+         MCH_EntitySeat seat = (MCH_EntitySeat)event.target;
+         aircraft = seat.getParent();
+         if(aircraft == null && seat.parentUniqueID != null && !seat.parentUniqueID.isEmpty()) {
+            for(Object object : event.entityPlayer.worldObj.loadedEntityList) {
+               if(object instanceof MCH_EntityAircraft
+                       && seat.parentUniqueID.equals(((MCH_EntityAircraft)object).getCommonUniqueId())) {
+                  aircraft = (MCH_EntityAircraft)object;
+                  seat.setParent(aircraft);
+                  break;
+               }
+            }
+         }
+      }
+
+      if(aircraft != null) {
+         aircraft.syncCompleteAircraftState((EntityPlayerMP)event.entityPlayer);
+      }
+   }
+
+   @SubscribeEvent
    public void onPlayerTick(TickEvent.PlayerTickEvent event) {
       if(event.phase == TickEvent.Phase.END && event.player instanceof EntityPlayerMP && !event.player.worldObj.isRemote) {
          if(MCH_UavInventory.hasStoredPilotInventory(event.player) && !(event.player.ridingEntity instanceof MCH_EntityAircraft)) {
@@ -261,6 +291,20 @@ public class MCH_EventHook extends W_EventHook {
                  "[MCH-TRACK][SEAT-JOIN] side=%s entityId=%d uuid=%s seatId=%d parentCommonId=%s parent=%s occupant=%s",
                  new Object[]{event.world.isRemote?"CLIENT":"SERVER", Integer.valueOf(joinedSeat.getEntityId()), joinedSeat.getUniqueID(),
                          Integer.valueOf(joinedSeat.seatID), joinedSeat.parentUniqueID, joinedSeat.getParent(), joinedSeat.riddenByEntity});
+         if(!event.world.isRemote && joinedSeat.parentUniqueID != null && !joinedSeat.parentUniqueID.isEmpty()) {
+            for(Object object : event.world.loadedEntityList) {
+               if(object instanceof MCH_EntityAircraft
+                       && joinedSeat.parentUniqueID.equals(((MCH_EntityAircraft)object).getCommonUniqueId())) {
+                  MCH_EntityAircraft parent = (MCH_EntityAircraft)object;
+                  joinedSeat.setParent(parent);
+                  if(joinedSeat.seatID >= 0 && joinedSeat.seatID < parent.getSeats().length) {
+                     parent.setSeat(joinedSeat.seatID, joinedSeat);
+                  }
+                  parent.repairSeatStateAfterLoad();
+                  break;
+               }
+            }
+         }
       } else if(W_Lib.isEntityLivingBase(event.entity) && !W_EntityPlayer.isPlayer(event.entity)) {
          MCH_Config var10002 = MCH_MOD.config;
          event.entity.renderDistanceWeight *= MCH_Config.MobRenderDistanceWeight.prmDouble;
@@ -291,6 +335,9 @@ public class MCH_EventHook extends W_EventHook {
          }
          if(!b.worldObj.isRemote && !b.isCreatedSeats()) {
             b.createSeats(UUID.randomUUID().toString());
+         }
+         if(!b.worldObj.isRemote) {
+            b.repairSeatStateAfterLoad();
          }
       } else if(W_EntityPlayer.isPlayer(event.entity)) {
          Entity e = event.entity;
