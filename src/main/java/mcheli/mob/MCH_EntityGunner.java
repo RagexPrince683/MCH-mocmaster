@@ -3,7 +3,6 @@ package mcheli.mob;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hbm.lib.Library;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
