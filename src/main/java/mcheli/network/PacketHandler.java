@@ -16,6 +16,7 @@ import mcheli.network.packets.PacketEntityInfoSync;
 import mcheli.network.packets.PacketIronCurtainUse;
 import mcheli.network.packets.PacketLaserGuidanceTargeting;
 import mcheli.network.packets.PacketLockTarget;
+import mcheli.network.packets.PacketVehicleLODSnapshot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -122,6 +123,7 @@ public class PacketHandler extends MessageToMessageCodec<FMLProxyPacket, PacketB
         registerPacket(PacketIronCurtainUse.class);
         registerPacket(PacketLaserGuidanceTargeting.class);
         registerPacket(PacketLockTarget.class);
+        registerPacket(PacketVehicleLODSnapshot.class);
     }
 
     /**
