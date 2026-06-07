@@ -8,6 +8,8 @@ import mcheli.aircraft.MCH_PacketPlayerControlBase;
 public class MCH_ShipPacketPlayerControl extends MCH_PacketPlayerControlBase {
 
     public byte switchVtol = -1;
+    public boolean submarineAscend = false;
+    public boolean submarineDescend = false;
 
 
     public int getMessageID() {
@@ -19,6 +21,9 @@ public class MCH_ShipPacketPlayerControl extends MCH_PacketPlayerControlBase {
 
         try {
             this.switchVtol = data.readByte();
+            byte submarineControl = data.readByte();
+            this.submarineAscend = this.getBit(submarineControl, 0);
+            this.submarineDescend = this.getBit(submarineControl, 1);
         } catch (Exception var3) {
             var3.printStackTrace();
         }
@@ -30,6 +35,10 @@ public class MCH_ShipPacketPlayerControl extends MCH_PacketPlayerControlBase {
 
         try {
             dos.writeByte(this.switchVtol);
+            byte submarineControl = 0;
+            submarineControl = this.setBit(submarineControl, 0, this.submarineAscend);
+            submarineControl = this.setBit(submarineControl, 1, this.submarineDescend);
+            dos.writeByte(submarineControl);
         } catch (IOException var3) {
             var3.printStackTrace();
         }

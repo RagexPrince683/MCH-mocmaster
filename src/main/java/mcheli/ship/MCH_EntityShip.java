@@ -45,6 +45,8 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     public float prevRotationRotor;
     public float addkeyRotValue;
     public boolean isDiving = false;
+    public boolean submarineAscend = false;
+    public boolean submarineDescend = false;
 
     public boolean iscarrier = false;
 
@@ -57,6 +59,8 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         if(!this.isDiving && this.isSubmerged()) {
             this.isDiving = true;
             super.motionY = 0.0D;
+            this.submarineAscend = false;
+            this.submarineDescend = false;
         }
     }
 
@@ -64,6 +68,8 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         if(this.isDiving) {
             this.isDiving = false;
             super.motionY *= 0.5D;
+            this.submarineAscend = false;
+            this.submarineDescend = false;
         }
     }
 
@@ -72,9 +78,9 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     }
 
     private void updateSubmarineVerticalMotion() {
-        if(super.throttleUp && !super.throttleDown) {
+        if(this.submarineDescend && !this.submarineAscend) {
             super.motionY -= SUBMARINE_VERTICAL_ACCELERATION;
-        } else if(super.throttleDown && !super.throttleUp) {
+        } else if(this.submarineAscend && !this.submarineDescend) {
             super.motionY += SUBMARINE_VERTICAL_ACCELERATION;
         } else {
             super.motionY *= SUBMARINE_VERTICAL_DRAG;

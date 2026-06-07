@@ -19,6 +19,8 @@ public class MCH_ClientShipTickHandler extends MCH_AircraftClientTickHandler {
     public MCH_Key KeySwitchMode;
     public MCH_Key KeyEjectSeat;
     public MCH_Key KeyZoom;
+    public MCH_Key KeySubmarineAscend;
+    public MCH_Key KeySubmarineDescend;
     public MCH_Key[] Keys;
     //public MCH_Key KeySwitchHovering;
 
@@ -33,7 +35,9 @@ public class MCH_ClientShipTickHandler extends MCH_AircraftClientTickHandler {
         this.KeySwitchMode = new MCH_Key(MCH_Config.KeySwitchMode.prmInt);
         this.KeyEjectSeat = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
         this.KeyZoom = new MCH_Key(MCH_Config.KeyZoom.prmInt);
-        this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, super.KeyUseWeapon, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
+        this.KeySubmarineAscend = new MCH_Key(MCH_Config.KeySubmarineAscend.prmInt);
+        this.KeySubmarineDescend = new MCH_Key(MCH_Config.KeySubmarineDescend.prmInt);
+        this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, this.KeySubmarineAscend, this.KeySubmarineDescend, super.KeyUseWeapon, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
     }
 
     protected void update(EntityPlayer player, MCH_EntityShip plane) {
@@ -129,8 +133,13 @@ public class MCH_ClientShipTickHandler extends MCH_AircraftClientTickHandler {
         send = this.commonPlayerControl(player, plane, isPilot, pc);
         boolean isUav;
         if(isPilot) {
-
-
+            boolean submarineAscend = plane.isDiving && this.KeySubmarineAscend.isKeyPress();
+            boolean submarineDescend = plane.isDiving && this.KeySubmarineDescend.isKeyPress();
+            if(submarineAscend != plane.submarineAscend || submarineDescend != plane.submarineDescend) {
+                send = true;
+            }
+            pc.submarineAscend = plane.submarineAscend = submarineAscend;
+            pc.submarineDescend = plane.submarineDescend = submarineDescend;
 
             if(this.KeySwitchMode.isKeyDown()) {
                 if(plane.getIsGunnerMode(player) && plane.canSwitchCameraPos()) {

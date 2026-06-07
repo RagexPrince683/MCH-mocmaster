@@ -41,6 +41,8 @@ public class MCH_Config {
    public static List tankBreakableMaterials;
    public static MCH_ConfigPrm KeyUp;
    public static MCH_ConfigPrm KeyDown;
+   public static MCH_ConfigPrm KeySubmarineAscend;
+   public static MCH_ConfigPrm KeySubmarineDescend;
    public static MCH_ConfigPrm KeyRight;
    public static MCH_ConfigPrm KeyLeft;
    public static MCH_ConfigPrm KeySwitchMode;
@@ -247,6 +249,8 @@ public class MCH_Config {
       tankBreakableMaterials = new ArrayList();
       KeyUp = new MCH_ConfigPrm("KeyUp", 17);
       KeyDown = new MCH_ConfigPrm("KeyDown", 31);
+      KeySubmarineAscend = new MCH_ConfigPrm("KeySubmarineAscend", 200);
+      KeySubmarineDescend = new MCH_ConfigPrm("KeySubmarineDescend", 208);
       KeyRight = new MCH_ConfigPrm("KeyRight", 32);
       KeyLeft = new MCH_ConfigPrm("KeyLeft", 30);
       KeySwitchMode = new MCH_ConfigPrm("KeySwitchGunner", 35);
@@ -278,6 +282,8 @@ public class MCH_Config {
       KeyConfig = new MCH_ConfigPrm[]{
               KeyUp,
               KeyDown,
+              KeySubmarineAscend,
+              KeySubmarineDescend,
               KeyRight,
               KeyLeft,
               KeySwitchMode,
