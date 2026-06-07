@@ -17,6 +17,7 @@ import mcheli.flare.MCH_Maintenance;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.multiplay.MCH_Multiplay;
 import mcheli.parachute.MCH_EntityParachute;
+import mcheli.plane.MCP_EntityPlane;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.ship.MCH_EntityShip;
@@ -234,6 +235,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public int brightnessHigh = 240;
    public int brightnessLow = 240;
    public final HashMap noCollisionEntities = new HashMap();
+   private MCH_EntityAircraft rackMountParent;
+   private boolean rackThrottleInput;
    private double lastCalcLandInDistanceCount;
    private double lastLandInDistance;
    public float thirdPersonDist = 4.0F;
@@ -2828,16 +2831,18 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void unmountAircraft() {
-      System.out.println("unmount fired");
-      //if this is a newUAV go back to the fuckin station pos.
+      //if this is a newUAV go back to the station pos.
       Vec3 v = Vec3.createVectorHelper(super.posX, super.posY, super.posZ);
       float yaw = this.getRotYaw();
       float pitch = this.getRotPitch();
+      MCH_EntityAircraft rackParent = null;
+      MCH_SeatRackInfo rackInfo = null;
       if(super.ridingEntity instanceof MCH_EntitySeat) {
          MCH_EntityAircraft ac = ((MCH_EntitySeat)super.ridingEntity).getParent();
-         MCH_SeatInfo seatInfo = ac.getSeatInfo(this);
+         MCH_SeatInfo seatInfo = ac != null?ac.getSeatInfo(this):null;
          if(seatInfo instanceof MCH_SeatRackInfo) {
-            MCH_SeatRackInfo rackInfo = (MCH_SeatRackInfo)seatInfo;
+            rackParent = ac;
+            rackInfo = (MCH_SeatRackInfo)seatInfo;
             Vec3 rackUnmountPosition = ac.getRackUnmountPosition(rackInfo);
             if(rackUnmountPosition != null) {
                v = rackUnmountPosition;
@@ -2860,6 +2865,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          this.setLocationAndAngles(v.xCoord, v.yCoord, v.zCoord, yaw, pitch);
          this.mountEntity((Entity) null);
          this.setLocationAndAngles(v.xCoord, v.yCoord, v.zCoord, yaw, pitch);
+         if(rackParent != null && rackInfo != null) {
+            this.applyRackLaunch(rackParent, rackInfo);
+         }
       }
    }
 
@@ -2952,12 +2960,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          if(this.getRidingEntity().isDead) {
             this.mountEntity((Entity)null);
             this.waitMountEntity = 20;
-         } else if(this.getCurrentThrottle() > 0.8D) {
-            super.motionX = this.getRidingEntity().motionX;
-            super.motionY = this.getRidingEntity().motionY;
-            super.motionZ = this.getRidingEntity().motionZ;
-            this.mountEntity((Entity)null);
-            this.waitMountEntity = 20;
+         } else if(super.ridingEntity instanceof MCH_EntitySeat) {
+            MCH_EntityAircraft parent = ((MCH_EntitySeat)super.ridingEntity).getParent();
+            if(parent != this.rackMountParent) {
+               this.rackMountParent = parent;
+               this.rackThrottleInput = false;
+            }
+            if(this.throttleUp || this.throttleDown) {
+               this.rackThrottleInput = true;
+            }
          }
 
          super.posX = var10;
@@ -2965,6 +2976,53 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          super.posZ = bkPosZ;
       }
 
+   }
+
+   private boolean isLaunchRack(MCH_EntityAircraft parent, MCH_SeatRackInfo rackInfo) {
+      return parent instanceof MCH_EntityShip || rackInfo.launchRack;
+   }
+
+   private void applyRackLaunch(MCH_EntityAircraft parent, MCH_SeatRackInfo rackInfo) {
+      if(this.throttleUp || this.throttleDown) {
+         this.rackThrottleInput = true;
+      }
+      if(!this.isLaunchRack(parent, rackInfo)) {
+         this.rackMountParent = null;
+         this.rackThrottleInput = false;
+         return;
+      }
+
+      if(!this.rackThrottleInput && this.getCurrentThrottle() < 0.9D) {
+         this.setCurrentThrottle(0.9D);
+      }
+
+      // Values in noCollisionEntities are reduced once every ten ticks.
+      // Ten gives this aircraft and only its launching parent a five-second grace period.
+      this.noCollisionEntities.put(parent, Integer.valueOf(10));
+      parent.noCollisionEntities.put(this, Integer.valueOf(10));
+
+      double throttle = MathHelper.clamp_double(this.getCurrentThrottle(), 0.0D, 1.0D);
+      double launchSpeed;
+      double verticalAssist = 0.0D;
+      if(this instanceof MCP_EntityPlane) {
+         launchSpeed = 0.9D + throttle * 1.1D;
+         verticalAssist = 0.08D + throttle * 0.04D;
+      } else if(this instanceof MCH_EntityHeli) {
+         launchSpeed = 0.35D + throttle * 0.45D;
+         verticalAssist = 0.12D + throttle * 0.08D;
+      } else {
+         launchSpeed = 0.4D + throttle * 0.4D;
+      }
+
+      float launchYaw = parent.getRotYaw() + rackInfo.fixYaw;
+      double yawRadians = Math.toRadians((double)launchYaw);
+      double forwardX = -Math.sin(yawRadians);
+      double forwardZ = Math.cos(yawRadians);
+      this.setVelocity(parent.motionX + forwardX * launchSpeed,
+              parent.motionY + verticalAssist, parent.motionZ + forwardZ * launchSpeed);
+      this.fallDistance = 0.0F;
+      this.rackMountParent = null;
+      this.rackThrottleInput = false;
    }
 
    public void explosionByCrash(double prevMotionY) {
@@ -3946,6 +4004,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       for(int var17 = 0; var17 < var16.size(); ++var17) {
          Entity entity = (Entity)var16.get(var17);
+         if(par1Entity instanceof MCH_EntityAircraft
+                 && ((MCH_EntityAircraft)par1Entity).noCollisionEntities.containsKey(entity)) {
+            continue;
+         }
          if(!W_Lib.isEntityLivingBase(entity) && !(entity instanceof MCH_EntitySeat) && !(entity instanceof MCH_EntityHitBox)) {
             AxisAlignedBB axisalignedbb1 = entity.getBoundingBox();
             if(axisalignedbb1 != null && axisalignedbb1.intersectsWith(par2AxisAlignedBB)) {
@@ -5469,7 +5531,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             ur.cnt = 8;
             this.listUnmountReserve.add(ur);
             entity.mountEntity((Entity)null);
-            if(MCH_Lib.getBlockIdY(this, 3, -20) > 0) {
+            boolean launchedAircraft = entity instanceof MCH_EntityAircraft && this.isLaunchRack(this, info);
+            if(entity instanceof MCH_EntityAircraft) {
+               ((MCH_EntityAircraft)entity).applyRackLaunch(this, info);
+            }
+            if(launchedAircraft || MCH_Lib.getBlockIdY(this, 3, -20) > 0) {
                MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.unmountEntityFromRack:%d:%s", new Object[]{Integer.valueOf(sid), entity});
             } else {
                MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.unmountEntityFromRack:%d Parachute:%s", new Object[]{Integer.valueOf(sid), entity});
