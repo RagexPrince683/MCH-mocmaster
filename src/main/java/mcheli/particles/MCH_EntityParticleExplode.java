@@ -27,6 +27,10 @@ public class MCH_EntityParticleExplode extends MCH_EntityParticleBase {
    }
 
    public void renderParticle(Tessellator tessellator, float p_70539_2_, float p_70539_3_, float p_70539_4_, float p_70539_5_, float p_70539_6_, float p_70539_7_) {
+      if(!this.isInRenderRange(256.0D)) {
+         return;
+      }
+
       int i = (int)(((float)this.nowCount + p_70539_2_) * 15.0F / (float)this.endCount);
       if(i <= 15) {
          GL11.glEnable(3042);

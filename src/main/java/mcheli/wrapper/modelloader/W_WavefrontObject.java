@@ -171,15 +171,13 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public void renderAll() {
-      Tessellator tessellator = Tessellator.instance;
-      if(this.currentGroupObject != null) {
-         tessellator.startDrawing(this.currentGroupObject.glDrawingMode);
-      } else {
-         tessellator.startDrawing(4);
+      Iterator i$ = this.groupObjects.iterator();
+      while(i$.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)i$.next();
+         if(groupObject != null) {
+            groupObject.render();
+         }
       }
-
-      this.tessellateAll(tessellator);
-      tessellator.draw();
    }
 
    private void compactFaces() {
