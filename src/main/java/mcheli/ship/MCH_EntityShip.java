@@ -1122,13 +1122,22 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 double surfaceCenterX = (surface.minX + surface.maxX) / 2.0D;
                 double surfaceCenterZ = (surface.minZ + surface.maxZ) / 2.0D;
                 double deckDeltaY = surface.maxY - contact.surfaceTopY;
+                double carriedY = entity.posY + deckDeltaY;
 
-                // Carry the entity by the deck's actual vertical delta instead of
-                // snapping its feet to the new surface. Float ships continuously
-                // cross the player's bounding box while bobbing; preserving the
-                // relative height prevents that correction from consuming the
-                // player's horizontal movement.
-                entity.setPosition(surfaceCenterX + rotated.xCoord, entity.posY + deckDeltaY,
+                // Carry by the measured deck delta, but never leave the feet
+                // intersecting a deck that moved upward. Even a tiny overlap makes
+                // the next player movement resolve sideways against the deck and
+                // causes the one-tick freeze. The clearance is deliberately small
+                // enough to remain a normal grounded contact.
+                if(deckDeltaY > 0.0D) {
+                    final double deckClearance = 1.0E-4D;
+                    double carriedMinY = entity.boundingBox.minY + deckDeltaY;
+                    if(carriedMinY < surface.maxY + deckClearance) {
+                        carriedY += surface.maxY + deckClearance - carriedMinY;
+                    }
+                }
+
+                entity.setPosition(surfaceCenterX + rotated.xCoord, carriedY,
                         surfaceCenterZ + rotated.zCoord);
                 entity.motionY = 0.0D;
                 entity.onGround = true;
