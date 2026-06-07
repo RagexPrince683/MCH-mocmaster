@@ -11,6 +11,7 @@ import java.util.UUID;
 import mcheli.MCH_Config;
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_RenderAircraft;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.network.packets.PacketVehicleLODSnapshot;
 import mcheli.plane.MCP_PlaneInfoManager;
@@ -18,6 +19,7 @@ import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_TankInfoManager;
 import mcheli.vehicle.MCH_VehicleInfoManager;
 import mcheli.wrapper.W_MOD;
+import mcheli.wrapper.W_Render;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.Entity;
@@ -35,6 +37,7 @@ import org.lwjgl.opengl.GL11;
 public final class MCH_VehicleLODManager {
     public static final MCH_VehicleLODManager INSTANCE = new MCH_VehicleLODManager();
     private static final long STALE_AFTER_MS = 5000L;
+    private static final LODRenderState RENDER_STATE = new LODRenderState();
     private final Map<UUID, Display> displays = new HashMap<UUID, Display>();
     private int dimension = Integer.MIN_VALUE;
     private World world;
@@ -139,27 +142,24 @@ public final class MCH_VehicleLODManager {
 
         float previousLightX = OpenGlHelper.lastBrightnessX;
         float previousLightY = OpenGlHelper.lastBrightnessY;
-        int lightX = display.packedLight & 65535;
-        int lightY = display.packedLight >>> 16;
-
+        RENDER_STATE.begin(info.smoothShading, display.packedLight);
         GL11.glPushMatrix();
-        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_CURRENT_BIT | GL11.GL_TEXTURE_BIT);
-        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)lightX, (float)lightY);
-        GL11.glDisable(GL11.GL_FOG);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glColor4f(0.75F, 0.75F, 0.75F, 1.0F);
-        GL11.glTranslated(x, y, z);
-        GL11.glRotatef(interpolateAngle(display.previousYaw, display.yaw, interpolation), 0.0F, -1.0F, 0.0F);
-        GL11.glRotatef(interpolateAngle(display.previousPitch, display.pitch, interpolation), 1.0F, 0.0F, 0.0F);
-        GL11.glRotatef(interpolateAngle(display.previousRoll, display.roll, interpolation), 0.0F, 0.0F, 1.0F);
-        GL11.glScalef(display.scale, display.scale, display.scale);
-        Minecraft.getMinecraft().renderEngine.bindTexture(
-            new ResourceLocation(W_MOD.DOMAIN, "textures/" + textureFolder + "/" + display.textureName + ".png"));
-        info.model.renderAll();
-        GL11.glPopAttrib();
-        GL11.glPopMatrix();
-        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, previousLightX, previousLightY);
+        try {
+            // Keep the active world shader/fog state and use the normal aircraft model setup.
+            GL11.glColor4f(0.75F, 0.75F, 0.75F, 1.0F);
+            GL11.glTranslated(x, y, z);
+            GL11.glRotatef(interpolateAngle(display.previousYaw, display.yaw, interpolation), 0.0F, -1.0F, 0.0F);
+            GL11.glRotatef(interpolateAngle(display.previousPitch, display.pitch, interpolation), 1.0F, 0.0F, 0.0F);
+            GL11.glRotatef(interpolateAngle(display.previousRoll, display.roll, interpolation), 0.0F, 0.0F, 1.0F);
+            GL11.glScalef(display.scale, display.scale, display.scale);
+            Minecraft.getMinecraft().renderEngine.bindTexture(
+                new ResourceLocation(W_MOD.DOMAIN, "textures/" + textureFolder + "/" + display.textureName + ".png"));
+            MCH_RenderAircraft.renderBody(info.model);
+        } finally {
+            GL11.glPopMatrix();
+            RENDER_STATE.end();
+            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, previousLightX, previousLightY);
+        }
     }
 
     private static float interpolateAngle(float previous, float current, float partial) {
@@ -188,6 +188,22 @@ public final class MCH_VehicleLODManager {
             case 3: return "tanks";
             case 4: return "vehicles";
             default: return null;
+        }
+    }
+
+    /** Uses the same fixed-function model render setup as normal MCHeli renderers. */
+    private static final class LODRenderState extends W_Render {
+        private void begin(boolean smoothShading, int packedLight) {
+            this.setCommonRenderParam(smoothShading, packedLight);
+        }
+
+        private void end() {
+            this.restoreCommonRenderParam();
+        }
+
+        @Override
+        protected ResourceLocation getEntityTexture(Entity entity) {
+            return TEX_DEFAULT;
         }
     }
 
