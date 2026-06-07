@@ -5041,26 +5041,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void onUpdate_Seats() {
-      boolean missingOrInvalidSeat = false;
+      boolean missingSeat = this.repairSeatReferences();
 
-      for(int i = 0; i < this.seats.length; ++i) {
-         MCH_EntitySeat seat = this.seats[i];
-         if(seat == null) {
-            missingOrInvalidSeat = true;
-         } else if(seat.isDead || seat.worldObj != super.worldObj || seat.seatID != i || seat.getParent() != this) {
-            missingOrInvalidSeat = true;
-            if(this.seatSearchCount == 0 || this.seatSearchCount > 40) {
-               MCH_Lib.DbgLog(super.worldObj,
-                       "[MCH-SYNC][SEAT-INVALID] aircraft=%s index=%d seat=%s seatId=%d parent=%s sameWorld=%s",
-                       new Object[]{this.debugEntity(this), Integer.valueOf(i), this.debugEntity(seat), Integer.valueOf(seat.seatID),
-                               this.debugEntity(seat.getParent()), Boolean.valueOf(seat.worldObj == super.worldObj)});
-            }
-         } else {
-            seat.fallDistance = 0.0F;
-         }
-      }
-
-      if(missingOrInvalidSeat) {
+      if(missingSeat) {
          if(this.seatSearchCount == 0 || this.seatSearchCount > 40) {
             this.debugVehicleState("SEAT-RESYNC-NEEDED", null);
             if(super.worldObj.isRemote) {
@@ -5074,31 +5057,24 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       } else {
          this.seatSearchCount = 0;
       }
+   }
 
+   private boolean repairSeatReferences() {
+      boolean missingSeat = false;
       for(int i = 0; i < this.seats.length; ++i) {
          MCH_EntitySeat seat = this.seats[i];
-         if(seat != null && (seat.isDead || seat.worldObj != super.worldObj || seat.seatID != i
-                 || (seat.parentUniqueID != null && !seat.parentUniqueID.isEmpty()
-                 && !seat.parentUniqueID.equals(this.getCommonUniqueId()))
-                 || (seat.getParent() != null && seat.getParent() != this))) {
-            if(seat.getParent() == this) {
-               seat.setParent(null);
-            }
-            this.seats[i] = null;
-            seat = null;
-         }
-
          if(seat == null) {
             missingSeat = true;
-         } else {
-            seat.seatID = i;
-            seat.parentUniqueID = this.getCommonUniqueId();
-            seat.setParent(this);
-            seat.fallDistance = 0.0F;
-            if(!super.worldObj.isRemote && seat.riddenByEntity != null
-                    && (seat.riddenByEntity.isDead || seat.riddenByEntity.ridingEntity != seat)) {
-               seat.riddenByEntity = null;
+         } else if(seat.isDead || seat.worldObj != super.worldObj || seat.seatID != i || seat.getParent() != this) {
+            missingSeat = true;
+            if(this.seatSearchCount == 0 || this.seatSearchCount > 40) {
+               MCH_Lib.DbgLog(super.worldObj,
+                       "[MCH-SYNC][SEAT-INVALID] aircraft=%s index=%d seat=%s seatId=%d parent=%s sameWorld=%s",
+                       new Object[]{this.debugEntity(this), Integer.valueOf(i), this.debugEntity(seat), Integer.valueOf(seat.seatID),
+                               this.debugEntity(seat.getParent()), Boolean.valueOf(seat.worldObj == super.worldObj)});
             }
+         } else {
+            seat.fallDistance = 0.0F;
          }
       }
       return missingSeat;
