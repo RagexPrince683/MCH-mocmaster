@@ -1034,12 +1034,14 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         public final Entity entity;
         public final int surfaceIndex;
         public final double surfaceCenterX;
+        public final double surfaceTopY;
         public final double surfaceCenterZ;
 
         private DeckContact(Entity entity, int surfaceIndex, AxisAlignedBB surface) {
             this.entity = entity;
             this.surfaceIndex = surfaceIndex;
             this.surfaceCenterX = (surface.minX + surface.maxX) / 2.0D;
+            this.surfaceTopY = surface.maxY;
             this.surfaceCenterZ = (surface.minZ + surface.maxZ) / 2.0D;
         }
     }
@@ -1119,8 +1121,15 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 Vec3 rotated = MCH_Lib.RotVec3(relativeX, 0.0D, relativeZ, -yawChange, 0.0F);
                 double surfaceCenterX = (surface.minX + surface.maxX) / 2.0D;
                 double surfaceCenterZ = (surface.minZ + surface.maxZ) / 2.0D;
-                double correctedY = entity.posY + surface.maxY - entity.boundingBox.minY;
-                entity.setPosition(surfaceCenterX + rotated.xCoord, correctedY, surfaceCenterZ + rotated.zCoord);
+                double deckDeltaY = surface.maxY - contact.surfaceTopY;
+
+                // Carry the entity by the deck's actual vertical delta instead of
+                // snapping its feet to the new surface. Float ships continuously
+                // cross the player's bounding box while bobbing; preserving the
+                // relative height prevents that correction from consuming the
+                // player's horizontal movement.
+                entity.setPosition(surfaceCenterX + rotated.xCoord, entity.posY + deckDeltaY,
+                        surfaceCenterZ + rotated.zCoord);
                 entity.motionY = 0.0D;
                 entity.onGround = true;
                 entity.isCollidedVertically = true;
