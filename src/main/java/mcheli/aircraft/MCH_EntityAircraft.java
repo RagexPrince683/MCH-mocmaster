@@ -116,6 +116,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private MCH_SeatInfo[] seatsInfo;
    private String commonUniqueId;
    private int seatSearchCount;
+   private int interactionDebugLoadTicks = -1;
    protected double velocityX;
    protected double velocityY;
    protected double velocityZ;
@@ -1162,6 +1163,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void writeSpawnData(ByteBuf buffer) {
+      MCH_Lib.DbgLog(super.worldObj,
+              "[MCHeliFullSyncSend] channel=SPAWN_DATA %s",
+              new Object[]{this.getInteractionDebugSnapshot(null)});
       if(this.getAcInfo() != null) {
          buffer.writeFloat(this.getAcInfo().bodyHeight);
          buffer.writeFloat(this.getAcInfo().bodyWidth);
@@ -1188,7 +1192,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          if (len > 0) {
             byte[] dst = new byte[len];
             additionalData.readBytes(dst);
-            changeType(new String(dst));
+            String receivedType = new String(dst);
+            changeType(receivedType);
+            MCH_Lib.DbgLog(super.worldObj,
+                    "[MCHeliFullSyncReceive] channel=SPAWN_DATA receivedType=%s acInfoNull=%s %s",
+                    new Object[]{receivedType, Boolean.valueOf(this.getAcInfo() == null), this.getInteractionDebugSnapshot(null)});
+         } else {
+            MCH_Lib.DbgLog(super.worldObj,
+                    "[MCHeliFullSyncReceive] channel=SPAWN_DATA reason=EMPTY_TYPE_NAME %s",
+                    new Object[]{this.getInteractionDebugSnapshot(null)});
          }
       } catch (Exception var4) {
          MCH_Lib.Log((Entity)this, "readSpawnData error!", new Object[0]);
@@ -1198,6 +1210,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    protected void readEntityFromNBT(NBTTagCompound nbt) {
+      this.interactionDebugLoadTicks = 0;
       MCH_Lib.DbgLog(super.worldObj, "[MCH-STATE][NBT-READ-BEGIN] entity=%s nbtType=%s nbtCommonId=%s rackParent=%s rackSeat=%d",
               new Object[]{this.debugEntity(this), nbt.getString("TypeName"), nbt.getString("AircraftUniqueId"),
                       nbt.getString("MCH_RackParentUniqueId"), Integer.valueOf(nbt.hasKey("MCH_RackSeatId")?nbt.getInteger("MCH_RackSeatId"):-1)});
@@ -2240,6 +2253,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       if(this.countOnUpdate == 0) {
          this.onFirstUpdate();
+      }
+
+      if(this.interactionDebugLoadTicks >= 0 && this.interactionDebugLoadTicks < 40) {
+         this.debugVehicleState("POST-NBT-LOAD-TICK-" + this.interactionDebugLoadTicks, null);
+         this.debugRackState("POST-NBT-LOAD-TICK-" + this.interactionDebugLoadTicks);
+         ++this.interactionDebugLoadTicks;
       }
 
       ++this.countOnUpdate;
@@ -5119,8 +5138,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             player.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(0, seat.riddenByEntity, seat));
          }
       }
-      MCH_Lib.DbgLog(super.worldObj, "[MCH-SYNC][FULL-STATE] aircraft=%s player=%s seats=%d riding=%s",
-              new Object[]{this.debugEntity(this), this.debugEntity(player), Integer.valueOf(this.seats.length), this.debugEntity(super.ridingEntity)});
+      MCH_Lib.DbgLog(super.worldObj, "[MCHeliFullSyncSend] channel=START_TRACKING_STATE %s",
+              new Object[]{this.getInteractionDebugSnapshot(player)});
    }
 
    public void searchSeat() {
@@ -6112,14 +6131,47 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
               Integer.valueOf(W_Entity.getEntityId(entity.riddenByEntity)));
    }
 
+   public String getInteractionDebugSnapshot(EntityPlayer player) {
+      String side = super.worldObj != null && super.worldObj.isRemote?"CLIENT":"SERVER";
+      int dimension = super.worldObj != null && super.worldObj.provider != null?super.worldObj.provider.dimensionId:Integer.MIN_VALUE;
+      MCH_AircraftInfo info = this.getAcInfo();
+      MCH_EntitySeat[] seatArray = this.getSeats();
+      int nullSeats = 0;
+      int deadSeats = 0;
+      int wrongParentSeats = 0;
+      int occupiedSeats = 0;
+      for(int i = 0; i < seatArray.length; ++i) {
+         MCH_EntitySeat seat = seatArray[i];
+         if(seat == null) {
+            ++nullSeats;
+         } else {
+            if(seat.isDead) ++deadSeats;
+            if(seat.getParent() != this || !this.getCommonUniqueId().equals(seat.parentUniqueID)) ++wrongParentSeats;
+            if(seat.riddenByEntity != null) ++occupiedSeats;
+         }
+      }
+      return String.format(Locale.ROOT,
+              "side=%s vehicle=%s class=%s name=%s type=%s id=%d uuid=%s dimension=%d pos=%.3f,%.3f,%.3f player=%s playerUuid=%s acInfoNull=%s typeLoaded=%s seatArrayExists=%s seatCount=%d nullSeats=%d deadSeats=%d wrongParentSeats=%d occupiedSeats=%d riddenByEntity=%s ridingEntity=%s isDead=%s isDestroyed=%s damage=%d/%d lockState=NOT_APPLICABLE uav=%s newUav=%s rackMounted=%s commonId=%s dataWatcherType=%s commonStatus=%d",
+              side, this.getClass().getSimpleName(), this.getClass().getName(), this.getEntityName(), this.getTypeName(),
+              Integer.valueOf(this.getEntityId()), this.getUniqueID(), Integer.valueOf(dimension),
+              Double.valueOf(super.posX), Double.valueOf(super.posY), Double.valueOf(super.posZ),
+              player == null?"null":player.getCommandSenderName(), player == null?"null":player.getUniqueID(),
+              Boolean.valueOf(info == null), Boolean.valueOf(info != null && this.getTypeName() != null && !this.getTypeName().isEmpty()),
+              Boolean.valueOf(this.seats != null), Integer.valueOf(seatArray.length), Integer.valueOf(nullSeats),
+              Integer.valueOf(deadSeats), Integer.valueOf(wrongParentSeats), Integer.valueOf(occupiedSeats),
+              this.debugEntity(super.riddenByEntity), this.debugEntity(super.ridingEntity), Boolean.valueOf(super.isDead),
+              Boolean.valueOf(this.isDestroyed()), Integer.valueOf(this.getDamageTaken()), Integer.valueOf(this.getMaxHP()),
+              Boolean.valueOf(this.isUAV()), Boolean.valueOf(this.isNewUAV()), Boolean.valueOf(this.getRackParent() != null || super.ridingEntity instanceof MCH_EntitySeat),
+              this.getCommonUniqueId(), this.getTypeName(), Integer.valueOf(this.commonStatus));
+   }
+
    public void debugVehicleState(String context, EntityPlayer player) {
       if(!MCH_Config.DebugLog) {
          return;
       }
       MCH_Lib.DbgLog(super.worldObj,
-              "[MCH-STATE][%s] vehicle=%s type=%s commonId=%s player=%s pilot=%s seatCount=%d",
-              new Object[]{context, this.debugEntity(this), this.getTypeName(), this.getCommonUniqueId(),
-                      this.debugEntity(player), this.debugEntity(super.riddenByEntity), Integer.valueOf(this.getSeats().length)});
+              "[MCH-STATE][%s] %s",
+              new Object[]{context, this.getInteractionDebugSnapshot(player)});
       for(int i = 0; i < this.getSeats().length; ++i) {
          MCH_EntitySeat seat = this.getSeats()[i];
          MCH_Lib.DbgLog(super.worldObj,
@@ -6214,15 +6266,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    private boolean rejectInteraction(EntityPlayer player, String reason) {
-      MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][REJECT] reason=%s vehicle=%s type=%s player=%s",
-              new Object[]{reason, this.debugEntity(this), this.getTypeName(), this.debugEntity(player)});
+      MCH_Lib.DbgLog(super.worldObj, "[MCHeliInteractReject] %s reason=%s",
+              new Object[]{this.getInteractionDebugSnapshot(player), reason.toUpperCase(Locale.ROOT)});
       this.debugVehicleState("INTERACT-REJECT-" + reason, player);
       return false;
    }
 
    private void acceptInteraction(EntityPlayer player, String result) {
-      MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][ACCEPT] result=%s vehicle=%s type=%s player=%s",
-              new Object[]{result, this.debugEntity(this), this.getTypeName(), this.debugEntity(player)});
+      MCH_Lib.DbgLog(super.worldObj, "[MCHeliInteractDebug] %s reason=ALLOW_INTERACT result=%s",
+              new Object[]{this.getInteractionDebugSnapshot(player), result});
    }
 
    public boolean interactFirst(EntityPlayer player, boolean ss) {
@@ -6233,8 +6285,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public boolean interactFirst(EntityPlayer player) {
-      MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][BEGIN] vehicle=%s type=%s player=%s",
-              new Object[]{this.debugEntity(this), this.getTypeName(), this.debugEntity(player)});
+      MCH_Lib.DbgLog(super.worldObj, "[MCHeliInteractDebug] %s reason=INTERACT_FIRST_ENTERED",
+              new Object[]{this.getInteractionDebugSnapshot(player)});
       this.repairInvalidOccupantsForInteraction("vehicle_interact");
       if(isDestroyed()) {
          return this.rejectInteraction(player, "destroyed");
@@ -6301,7 +6353,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if(seatResult) {
          this.acceptInteraction(player, "seat_search_requested pilotOccupied=" + this.debugEntity(this.riddenByEntity));
       } else {
-         this.rejectInteraction(player, "pilot_occupied_and_seat_array_unavailable");
+         this.rejectInteraction(player, "no_valid_seat");
       }
       return seatResult;
    }
