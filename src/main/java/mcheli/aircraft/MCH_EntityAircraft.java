@@ -44,6 +44,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
+import net.minecraft.network.play.server.S1BPacketEntityAttach;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
@@ -1280,8 +1281,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       nbt.setBoolean("AcGunnerStatus", getGunnerStatus());
       MCH_EntityAircraft rackParent = this.getRackParent();
       MCH_EntitySeat rackSeat = super.ridingEntity instanceof MCH_EntitySeat?(MCH_EntitySeat)super.ridingEntity:null;
-      if(rackParent != null && rackSeat != null) {
-         nbt.setString("MCH_RackParentUniqueId", rackParent.getCommonUniqueId() == null?"":rackParent.getCommonUniqueId());
+      String rackParentUniqueId = rackParent != null?rackParent.getCommonUniqueId():(rackSeat != null?rackSeat.parentUniqueID:"");
+      if(rackSeat != null && rackParentUniqueId != null && !rackParentUniqueId.isEmpty()) {
+         nbt.setString("MCH_RackParentUniqueId", rackParentUniqueId);
          nbt.setInteger("MCH_RackSeatId", rackSeat.seatID);
          nbt.setDouble("MCH_RackPosX", super.posX);
          nbt.setDouble("MCH_RackPosY", super.posY);
@@ -2994,6 +2996,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          if(object instanceof MCH_EntityAircraft) {
             MCH_EntityAircraft parent = (MCH_EntityAircraft)object;
             if(this.pendingRackParentUniqueId.equals(parent.getCommonUniqueId())) {
+               parent.repairInvalidOccupantsForInteraction("rack_restore");
+               parent.searchSeat();
                this.noCollisionEntities.put(parent, Integer.valueOf(10));
                parent.noCollisionEntities.put(this, Integer.valueOf(10));
                MCH_EntitySeat seat = parent.getSeat(this.pendingRackSeatId);
@@ -5065,7 +5069,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          MCH_EntitySeat seat = this.seats[i];
          if(seat == null) {
             missingSeat = true;
-         } else if(seat.isDead || seat.worldObj != super.worldObj || seat.seatID != i || seat.getParent() != this) {
+         } else if(seat.isDead || seat.worldObj != super.worldObj || seat.seatID != i) {
             missingSeat = true;
             if(this.seatSearchCount == 0 || this.seatSearchCount > 40) {
                MCH_Lib.DbgLog(super.worldObj,
@@ -5073,11 +5077,50 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                        new Object[]{this.debugEntity(this), Integer.valueOf(i), this.debugEntity(seat), Integer.valueOf(seat.seatID),
                                this.debugEntity(seat.getParent()), Boolean.valueOf(seat.worldObj == super.worldObj)});
             }
+            this.seats[i] = null;
+         } else if(seat.getParent() != this) {
+            if(this.getCommonUniqueId().equals(seat.parentUniqueID)) {
+               seat.setParent(this);
+            } else {
+               missingSeat = true;
+               this.seats[i] = null;
+            }
          } else {
             seat.fallDistance = 0.0F;
          }
       }
       return missingSeat;
+   }
+
+   public void repairSeatStateAfterLoad() {
+      if(super.worldObj.isRemote) {
+         return;
+      }
+      this.repairInvalidOccupantsForInteraction("tracking_or_chunk_load");
+      this.searchSeat();
+   }
+
+   public void syncCompleteAircraftState(EntityPlayerMP player) {
+      if(player == null || super.worldObj.isRemote || player.worldObj != super.worldObj) {
+         return;
+      }
+      this.repairSeatStateAfterLoad();
+      MCH_PacketSeatListResponse.sendSeatList(this, player);
+
+      if(super.ridingEntity != null) {
+         player.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(0, this, super.ridingEntity));
+      }
+      if(super.riddenByEntity != null && super.riddenByEntity.ridingEntity == this) {
+         player.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(0, super.riddenByEntity, this));
+      }
+      for(int i = 0; i < this.seats.length; ++i) {
+         MCH_EntitySeat seat = this.seats[i];
+         if(seat != null && seat.riddenByEntity != null && seat.riddenByEntity.ridingEntity == seat) {
+            player.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(0, seat.riddenByEntity, seat));
+         }
+      }
+      MCH_Lib.DbgLog(super.worldObj, "[MCH-SYNC][FULL-STATE] aircraft=%s player=%s seats=%d riding=%s",
+              new Object[]{this.debugEntity(this), this.debugEntity(player), Integer.valueOf(this.seats.length), this.debugEntity(super.ridingEntity)});
    }
 
    public void searchSeat() {
@@ -6150,7 +6193,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if(super.worldObj.isRemote) {
          return;
       }
-      if(super.riddenByEntity != null && (super.riddenByEntity.isDead || super.riddenByEntity.ridingEntity != this)) {
+      if(super.riddenByEntity != null && (super.riddenByEntity.isDead || super.riddenByEntity.ridingEntity != this
+              || !super.worldObj.loadedEntityList.contains(super.riddenByEntity))) {
          MCH_Lib.DbgLog(super.worldObj,
                  "[MCH-STATE][REPAIR] context=%s reason=invalid_pilot_backreference vehicle=%s stalePilot=%s",
                  new Object[]{context, this.debugEntity(this), this.debugEntity(super.riddenByEntity)});
@@ -6159,7 +6203,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       for(int i = 0; i < this.getSeats().length; ++i) {
          MCH_EntitySeat seat = this.getSeats()[i];
          if(seat != null && seat.riddenByEntity != null
-                 && (seat.riddenByEntity.isDead || seat.riddenByEntity.ridingEntity != seat)) {
+                 && (seat.riddenByEntity.isDead || seat.riddenByEntity.ridingEntity != seat
+                 || !super.worldObj.loadedEntityList.contains(seat.riddenByEntity))) {
             MCH_Lib.DbgLog(super.worldObj,
                     "[MCH-STATE][REPAIR] context=%s reason=invalid_seat_occupant_backreference vehicle=%s seat=%d staleOccupant=%s",
                     new Object[]{context, this.debugEntity(this), Integer.valueOf(i), this.debugEntity(seat.riddenByEntity)});
