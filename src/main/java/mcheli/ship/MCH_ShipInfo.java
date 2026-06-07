@@ -21,6 +21,7 @@ public class MCH_ShipInfo extends MCH_AircraftInfo {
     public boolean isVariableSweepWing = false;
     public float sweepWingSpeed;
     public boolean iscarrier = false;
+    public boolean preventWaterBobbing = false;
 
 
     public Item getItem() {
@@ -138,6 +139,8 @@ public class MCH_ShipInfo extends MCH_AircraftInfo {
                 this.vtolPitch = this.toFloat(data, 0.01F, 1.0F);
             } else if(item.compareTo("enableautopilot") == 0) {
                 this.isEnableAutoPilot = this.toBool(data);
+            } else if(item.equalsIgnoreCase("PreventWaterBobbing")) {
+                this.preventWaterBobbing = this.toBool(data);
             }
         }
 
