@@ -74,8 +74,14 @@ public abstract class MCH_ItemAircraft extends W_Item {
          lines.add(EnumChatFormatting.YELLOW + "Category: " + info.category);
          //lines.add(EnumChatFormatting.DARK_PURPLE + "Weapon: " + info.weaponSetList);
          //         tooltip.add(TextFormatting.DARK_PURPLE + "Weapons: " + Arrays.stream(ac.weapons).map(MCH_WeaponSet::getName).collect(Collectors.joining(", ")));
-         lines.add(EnumChatFormatting.DARK_PURPLE + "Weapons: " + Arrays.stream(ac.weapons).map(MCH_WeaponSet::getName).collect(Collectors.joining(", ")));
+         //lines.add(EnumChatFormatting.DARK_PURPLE + "Weapons: " + Arrays.stream(ac.weapons).map(MCH_WeaponSet::getName).collect(Collectors.joining(", ")));
          //im sure this will work
+         lines.add(EnumChatFormatting.DARK_PURPLE + "Weapons:");
+
+         Arrays.stream(ac.weapons)
+                 .map(MCH_WeaponSet::getName)
+                 .forEach(name -> lines.add(EnumChatFormatting.GRAY + " - " + name));
+         //should look cleaner
       }
 
       if (ac != null &&
