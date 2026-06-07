@@ -237,6 +237,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public final HashMap noCollisionEntities = new HashMap();
    private MCH_EntityAircraft rackMountParent;
    private boolean rackThrottleInput;
+   private String pendingRackParentUniqueId = "";
+   private int pendingRackSeatId = -1;
+   private double pendingRackPosX;
+   private double pendingRackPosY;
+   private double pendingRackPosZ;
+   private int pendingRackRestoreTicks;
+   private int rackLaunchAssistTicks;
+   private double rackLaunchVelocityX;
+   private double rackLaunchVelocityZ;
    private double lastCalcLandInDistanceCount;
    private double lastLandInDistance;
    public float thirdPersonDist = 4.0F;
@@ -1220,6 +1229,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       this.dismountedUserCtrl = nbt.getBoolean("AcDismounted");
+      this.pendingRackParentUniqueId = nbt.getString("MCH_RackParentUniqueId");
+      this.pendingRackSeatId = nbt.hasKey("MCH_RackSeatId")?nbt.getInteger("MCH_RackSeatId"):-1;
+      this.pendingRackPosX = nbt.hasKey("MCH_RackPosX")?nbt.getDouble("MCH_RackPosX"):super.posX;
+      this.pendingRackPosY = nbt.hasKey("MCH_RackPosY")?nbt.getDouble("MCH_RackPosY"):super.posY;
+      this.pendingRackPosZ = nbt.hasKey("MCH_RackPosZ")?nbt.getDouble("MCH_RackPosZ"):super.posZ;
+      this.pendingRackRestoreTicks = this.pendingRackParentUniqueId.isEmpty()?0:200;
       this.uavPersistentUUID = parseUUID(nbt.getString("MCH_UavPersistentUUID"));
       if(this.uavPersistentUUID == null && (this.isUAV() || this.isNewUAV())) {
          this.uavPersistentUUID = this.getUniqueID();
@@ -1256,6 +1271,24 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if (!nbt.hasKey("AcGunnerStatus"))
          setGunnerStatus(true);
       nbt.setBoolean("AcGunnerStatus", getGunnerStatus());
+      MCH_EntityAircraft rackParent = this.getRackParent();
+      MCH_EntitySeat rackSeat = super.ridingEntity instanceof MCH_EntitySeat?(MCH_EntitySeat)super.ridingEntity:null;
+      if(rackParent != null && rackSeat != null) {
+         nbt.setString("MCH_RackParentUniqueId", rackParent.getCommonUniqueId() == null?"":rackParent.getCommonUniqueId());
+         nbt.setInteger("MCH_RackSeatId", rackSeat.seatID);
+         nbt.setDouble("MCH_RackPosX", super.posX);
+         nbt.setDouble("MCH_RackPosY", super.posY);
+         nbt.setDouble("MCH_RackPosZ", super.posZ);
+      } else if(!this.pendingRackParentUniqueId.isEmpty() && this.pendingRackSeatId >= 0) {
+         nbt.setString("MCH_RackParentUniqueId", this.pendingRackParentUniqueId);
+         nbt.setInteger("MCH_RackSeatId", this.pendingRackSeatId);
+         nbt.setDouble("MCH_RackPosX", this.pendingRackPosX);
+         nbt.setDouble("MCH_RackPosY", this.pendingRackPosY);
+         nbt.setDouble("MCH_RackPosZ", this.pendingRackPosZ);
+      } else {
+         nbt.setString("MCH_RackParentUniqueId", "");
+         nbt.setInteger("MCH_RackSeatId", -1);
+      }
       super.writeEntityToNBT(nbt);
       this.getGuiInventory().writeEntityToNBT(nbt);
       int[] wa_list = new int[this.getWeaponNum()];
@@ -2285,6 +2318,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       boolean var11 = super.onGround;
       double var12 = super.motionY;
       this.onUpdateAircraft();
+      this.updateRackLaunchAssist();
       if(this.getAcInfo() != null) {
          this.updateParts(this.getPartStatus());
       }
@@ -2921,7 +2955,60 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return this.getAcInfo() != null && this.getAcInfo().isEnableParachuting && this.getSeatIdByEntity(entity) > 1 && MCH_Lib.getBlockIdY(this, 3, -13) == 0?(this.haveHatch() && this.getHatchRotation() > 89.0F?this.getSeatIdByEntity(entity) > 1:this.getSeatIdByEntity(entity) > 1):false;
    }
 
+   public MCH_EntityAircraft getRackParent() {
+      if(super.ridingEntity instanceof MCH_EntitySeat) {
+         MCH_EntitySeat seat = (MCH_EntitySeat)super.ridingEntity;
+         MCH_EntityAircraft parent = seat.getParent();
+         if(parent != null && parent.getSeatInfo(seat.seatID + 1) instanceof MCH_SeatRackInfo) {
+            return parent;
+         }
+      }
+      return null;
+   }
+
+   public boolean isMountedOnRack() {
+      return this.getRackParent() != null;
+   }
+
+   private void restoreRackMountAfterLoad() {
+      if(this.isMountedOnRack()) {
+         this.pendingRackParentUniqueId = "";
+         this.pendingRackSeatId = -1;
+         this.pendingRackRestoreTicks = 0;
+         return;
+      }
+      if(super.worldObj.isRemote || this.pendingRackRestoreTicks <= 0 || this.pendingRackParentUniqueId.isEmpty()) {
+         return;
+      }
+      --this.pendingRackRestoreTicks;
+      this.setPosition(this.pendingRackPosX, this.pendingRackPosY, this.pendingRackPosZ);
+      this.setVelocity(0.0D, 0.0D, 0.0D);
+      for(Object object : super.worldObj.loadedEntityList) {
+         if(object instanceof MCH_EntityAircraft) {
+            MCH_EntityAircraft parent = (MCH_EntityAircraft)object;
+            if(this.pendingRackParentUniqueId.equals(parent.getCommonUniqueId())) {
+               this.noCollisionEntities.put(parent, Integer.valueOf(10));
+               parent.noCollisionEntities.put(this, Integer.valueOf(10));
+               MCH_EntitySeat seat = parent.getSeat(this.pendingRackSeatId);
+               if(seat != null && (seat.riddenByEntity == null || seat.riddenByEntity == this)
+                       && parent.getSeatInfo(this.pendingRackSeatId + 1) instanceof MCH_SeatRackInfo) {
+                  this.mountEntity(seat);
+                  this.pendingRackParentUniqueId = "";
+                  this.pendingRackSeatId = -1;
+                  this.pendingRackRestoreTicks = 0;
+               }
+               return;
+            }
+         }
+      }
+      if(this.pendingRackRestoreTicks == 0) {
+         this.pendingRackParentUniqueId = "";
+         this.pendingRackSeatId = -1;
+      }
+   }
+
    public void onUpdate_RidingEntity() {
+      this.restoreRackMountAfterLoad();
       if(!super.worldObj.isRemote && this.waitMountEntity == 0 && this.getCountOnUpdate() > 20 && this.canMountWithNearEmptyMinecart()) {
          this.mountWithNearEmptyMinecart();
       }
@@ -3014,15 +3101,35 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          launchSpeed = 0.4D + throttle * 0.4D;
       }
 
-      float launchYaw = parent.getRotYaw() + rackInfo.fixYaw;
-      double yawRadians = Math.toRadians((double)launchYaw);
-      double forwardX = -Math.sin(yawRadians);
-      double forwardZ = Math.cos(yawRadians);
-      this.setVelocity(parent.motionX + forwardX * launchSpeed,
-              parent.motionY + verticalAssist, parent.motionZ + forwardZ * launchSpeed);
+      Vec3 forward = MCH_Lib.Rot2Vec3(parent.getRotYaw() + rackInfo.fixYaw, rackInfo.fixPitch);
+      this.rackLaunchVelocityX = forward.xCoord * launchSpeed;
+      this.rackLaunchVelocityZ = forward.zCoord * launchSpeed;
+      this.rackLaunchAssistTicks = 20;
+      this.currentSpeed = Math.max(this.currentSpeed, launchSpeed);
+      this.setVelocity(parent.motionX + this.rackLaunchVelocityX,
+              parent.motionY + verticalAssist, parent.motionZ + this.rackLaunchVelocityZ);
       this.fallDistance = 0.0F;
       this.rackMountParent = null;
       this.rackThrottleInput = false;
+   }
+
+   private void updateRackLaunchAssist() {
+      if(this.rackLaunchAssistTicks <= 0 || this.isMountedOnRack()) {
+         return;
+      }
+      --this.rackLaunchAssistTicks;
+      double assistSpeed = Math.sqrt(this.rackLaunchVelocityX * this.rackLaunchVelocityX
+              + this.rackLaunchVelocityZ * this.rackLaunchVelocityZ);
+      if(assistSpeed > 0.0D) {
+         double forwardX = this.rackLaunchVelocityX / assistSpeed;
+         double forwardZ = this.rackLaunchVelocityZ / assistSpeed;
+         double forwardSpeed = super.motionX * forwardX + super.motionZ * forwardZ;
+         if(forwardSpeed < assistSpeed) {
+            double missingSpeed = assistSpeed - forwardSpeed;
+            super.motionX += forwardX * missingSpeed;
+            super.motionZ += forwardZ * missingSpeed;
+         }
+      }
    }
 
    public void explosionByCrash(double prevMotionY) {
@@ -3032,6 +3139,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void onUpdate_CollisionGroundDamage() {
+      if(this.pendingRackRestoreTicks > 0) {
+         return;
+      }
       if(!this.isDestroyed()) {
          //this method for crash collision detection just fucking sucks but it works
          if(MCH_Lib.getBlockIdY(this, 3, -3) > 0 && !super.worldObj.isRemote) {
@@ -5527,9 +5637,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                seat.posY = entity.posY = super.posY + v.yCoord;
                seat.posZ = entity.posZ = super.posZ + v.zCoord;
             }
-            MCH_EntityAircraft.UnmountReserve ur = new MCH_EntityAircraft.UnmountReserve(entity, entity.posX, entity.posY, entity.posZ);
-            ur.cnt = 8;
-            this.listUnmountReserve.add(ur);
+            if(!(entity instanceof MCH_EntityAircraft)) {
+               MCH_EntityAircraft.UnmountReserve ur = new MCH_EntityAircraft.UnmountReserve(entity, entity.posX, entity.posY, entity.posZ);
+               ur.cnt = 8;
+               this.listUnmountReserve.add(ur);
+            }
             entity.mountEntity((Entity)null);
             boolean launchedAircraft = entity instanceof MCH_EntityAircraft && this.isLaunchRack(this, info);
             if(entity instanceof MCH_EntityAircraft) {

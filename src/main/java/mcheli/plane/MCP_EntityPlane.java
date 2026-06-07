@@ -413,10 +413,10 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             float f = throttleUpDown;
 
             // 如果骑乘的实体不为空，调整油门
-            if (this.getRidingEntity() != null) {
+            if (this.getRidingEntity() != null && !this.isMountedOnRack()) {
                double mx = this.getRidingEntity().motionX;
                double mz = this.getRidingEntity().motionZ;
-               // 基于骑乘实体的速度调整油门
+               // Non-rack carriers retain their speed-scaled throttle behavior.
                f = throttleUpDown * MathHelper.sqrt_double(mx * mx + mz * mz) * this.getAcInfo().throttleUpDownOnEntity;
             }
 
