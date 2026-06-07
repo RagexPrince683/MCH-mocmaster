@@ -45,29 +45,49 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     public float prevRotationRotor;
     public float addkeyRotValue;
     public boolean isDiving = false;
-    private double divingLevel = 0.0D;
-    private double targetDepth = 0.0D;
+    public boolean submarineAscend = false;
+    public boolean submarineDescend = false;
 
     public boolean iscarrier = false;
 
 
-    public int timer = 0;
+    private static final double SUBMARINE_VERTICAL_ACCELERATION = 0.01D;
+    private static final double SUBMARINE_MAX_VERTICAL_SPEED = 0.15D;
+    private static final double SUBMARINE_VERTICAL_DRAG = 0.8D;
 
-    // Step 2: Add a method to start diving
     public void startDiving() {
-        if (!isDiving && this.isInWater()) {
-            isDiving = true;
-            divingLevel = this.posY;
-            // Additional logic to initiate diving, if needed
+        if(!this.isDiving && this.isSubmerged()) {
+            this.isDiving = true;
+            super.motionY = 0.0D;
+            this.submarineAscend = false;
+            this.submarineDescend = false;
         }
     }
 
-    // Step 3: Add a method to stop diving
     public void stopDiving() {
-        if (isDiving) {
-            isDiving = false;
-            divingLevel = this.posY; // Store the current Y position as the diving level
+        if(this.isDiving) {
+            this.isDiving = false;
+            super.motionY *= 0.5D;
+            this.submarineAscend = false;
+            this.submarineDescend = false;
         }
+    }
+
+    private boolean isSubmerged() {
+        return this.isInWater() || this.getAcInfo() != null && this.getWaterDepth() > 0.0D;
+    }
+
+    private void updateSubmarineVerticalMotion() {
+        if(this.submarineDescend && !this.submarineAscend) {
+            super.motionY -= SUBMARINE_VERTICAL_ACCELERATION;
+        } else if(this.submarineAscend && !this.submarineDescend) {
+            super.motionY += SUBMARINE_VERTICAL_ACCELERATION;
+        } else {
+            super.motionY *= SUBMARINE_VERTICAL_DRAG;
+        }
+
+        super.motionY = Math.max(-SUBMARINE_MAX_VERTICAL_SPEED,
+                Math.min(SUBMARINE_MAX_VERTICAL_SPEED, super.motionY));
     }
 
 
@@ -254,113 +274,6 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 this.prevRotationRotor += 360.0F;
             }
 
-            if (isDiving) { // the full dive check begins here
-
-                //override aircraft info.gravity in water to be 0 at this point 1 basically just make it 0
-
-                // Check for blocks in the path to prevent diving through them
-                AxisAlignedBB boundingBox = this.boundingBox.expand(0.1D, 0.1D, 0.1D);
-                if (this.worldObj.getCollidingBoundingBoxes(this, boundingBox).isEmpty()) {
-                    // Adjust the ship's vertical motion to simulate diving
-
-                    //idk if this will work this is just me silly posting in the code
-                    //we did have it so it just went down but that's not what we want because submarines
-                    //don't just immediately fucking sink like a boolean regardless of what gpt tells you
-                    //but alas this probably will crash, error, not work, or have some random fucking retarded
-                    //once in a million obscure bug in it because this mod runs on tooth picks and fingernails
-                    if (this.isInWater()) {
-                        this.getAcInfo().gravityInWater = 0.0F; // Override gravity in water
-                        //todo this does NOT work, add prints here
-
-
-                        if (this.throttleUp) {
-                            //System.out.println("gravityinwater" + this.getShipInfo().gravityInWater + "throttle up" + this.throttleUp);
-                            //System.out.println("gravityinwater" + this.getShipInfo().gravityInWater + "throttle up" + this.throttleBack);
-                            targetDepth = this.posY - 10.0D; // Set target depth for diving
-                        } else if (this.throttleBack > 0.01) {
-                            //System.out.println("gravityinwater" + this.getShipInfo().gravityInWater + "throttle up" + this.throttleUp);
-                            //System.out.println("gravityinwater" + this.getShipInfo().gravityInWater + "throttle back" + this.throttleBack);
-                            targetDepth = this.posY + 10.0D; // Set target depth for rising
-                        }
-
-                        // Adjust motionY to move towards the target depth smoothly
-                        double depthDifference = targetDepth - this.posY;
-                        this.motionY = depthDifference * 0.1D; // Adjust the value for smooth movement
-                    }
-
-                } else {
-
-                    //System.out.println("stopping vertical motion" + motionY);
-                    this.motionY = 0.0D; // NO DUMBASS, Stop vertical motion
-
-                    //BAD METHOD NO DO NOT DO THIS:
-                    // Stop diving if a block is detected in the path
-                    //this.stopDiving();
-                }
-            } else {
-                //System.out.println("diving stopped");
-                //spammed for every ship
-                // Maintain the diving level when diving is stopped
-                if (this.posY < divingLevel) {
-                    //this is not smooth even remotely
-                    //this.motionY = (divingLevel - this.posY) * 0.1D; // Smoothly adjust to the diving level
-                    this.motionY = 0.0D; // Stop vertical motion
-                    //System.out.println("diving level" + divingLevel);
-                    this.posY = divingLevel; // Maintain the diving level
-                }
-                //pretty sure this will always fire like immediately upon placement
-                //else {
-
-                //}
-            }
-
-            //todo add surfacing as well
-
-            //todo: use super.onGround to better check crash physics
-            if(super.onGround && this.getVtolMode() == 0 && this.planeInfo.isDefaultVtol) {
-                this.swithVtolMode(true);
-            }
-
-            ///***
-            if (this.aircraftPitch >= 80 && this.isEntityAlive() && this.isAirBorne) { // Begin dive logic
-                timer++;
-                System.out.println("we are 'airborne', alive, and our pitch is greater than or equal to 80.");
-                //why would we want to increment the timer here
-                //I swear to god using ai for boiler plate has to be the worst shit ever
-                //but it's better than actually writing a single line for this fucking mod.
-
-                // Base acceleration factors
-                double baseAcceleration = 0.01; // Slower acceleration initially
-                double pitchFactor = Math.min(this.aircraftPitch / 90.0, 1.0); // Normalize pitch to range [0, 1]
-                // Smooth acceleration: builds up over time
-                double timeFactor = Math.min(timer / 3200.0, 1.0); // Gradually increase until maxed out after 1200 *adjusted to be 3200 ticks
-                // Calculate vertical motion with air resistance
-                double airResistance = 0.97; // Resistance to motion for realism
-                this.motionY = (this.motionY * airResistance) + (baseAcceleration * pitchFactor * timeFactor);
-                // Apply the same logic for aircraftY if necessary
-                this.aircraftY = this.aircraftY * airResistance;
-                System.out.println("Oh dear god why base accel" + baseAcceleration + "pitch factor" + pitchFactor + "timeFactor" + timeFactor + "air resistance" + airResistance + "motiony" + this.motionY);
-
-                //I hate the magic numbers I hate the magic numbers
-
-                // Handle prolonged dives with a smoother transition
-                if (timer > 3200) {
-                    System.out.println("timer past threshold, probably just dropping like a rock");
-                    double prolongedDiveFactor = 1 + ((timer - 3200) / 2400.0); // Gradually increase the effect over time
-                    this.motionY += prolongedDiveFactor * baseAcceleration * pitchFactor;
-
-                    // Reset the dive if pitch drops below a threshold
-                    if (this.aircraftPitch <= 20.0) { //everything is inverse because mcheli hates everything and anything normal
-                        timer = 0; // Reset dive mechanics
-                        System.out.println("timer set to 0");
-                    }
-                }
-            }
-            // **/
-            //todo take the old vtol method and put it here, this is a garbled mess
-            // this literally just caused the sub to sink like a brick when diving mode(VTOL was enabled).
-
-
             super.prevPosX = super.posX;
             super.prevPosY = super.posY;
             super.prevPosZ = super.posZ;
@@ -388,10 +301,10 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         }
     }
 
-    //@Override
-    //public boolean canFloatWater() {
-    //    return !isDiving && super.canFloatWater();
-    //}
+    @Override
+    public boolean canFloatWater() {
+        return !this.isDiving && super.canFloatWater();
+    }
 
     public boolean canUpdateYaw(Entity player) {
         return super.canUpdateYaw(player) && !this.isHovering();
@@ -869,13 +782,14 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         this.updateCollisionBox();
         Entity rdnEnt = this.getRiddenByEntity();
         double prevMotion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-        double dp = 0.0D;
-        if(this.canFloatWater() && !this.isDiving) { //todo maybe remove this, we kind of actually want to check the water depth.
-            dp = this.getWaterDepth();
-        }
+        double dp = this.canFloatWater()?this.getWaterDepth():0.0D;
+        boolean submarineInWater = this.isDiving && this.isSubmerged();
+        boolean preventWaterBobbing = dp > 0.0D && this.getShipInfo().preventWaterBobbing;
 
         boolean levelOff = super.isGunnerMode;
-        if(dp == 0.0D) {
+        if(submarineInWater) {
+            this.updateSubmarineVerticalMotion();
+        } else if(dp == 0.0D) {
             if(this.isTargetDrone() && this.canUseFuel() && !this.isDestroyed()) {
                 Block throttle = MCH_Lib.getBlockY(this, 3, -40, true);
                 if(throttle != null && !W_Block.isEqual(throttle, Blocks.air)) {
@@ -923,7 +837,9 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
 
         float throttle1 = (float)(this.getCurrentThrottle() / 10.0D);
         Vec3 v;
-        if(this.getNozzleRotation() > 0.001F) {
+        if(submarineInWater) {
+            v = MCH_Lib.Rot2Vec3(this.getRotYaw(), 0.0F);
+        } else if(this.getNozzleRotation() > 0.001F) {
             this.setRotPitch(this.getRotPitch() * 0.95F);
             v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - this.getNozzleRotation());
             if(this.getNozzleRotation() >= 90.0F) {
@@ -934,7 +850,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - 10.0F);
         }
 
-        if(!levelOff) {
+        if(!levelOff && !submarineInWater) {
             if(this.getNozzleRotation() <= 0.01F) {
                 super.motionY += v.yCoord * (double)throttle1 / 2.0D;
             } else {
@@ -1007,6 +923,10 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             if(MathHelper.abs(this.getRotPitch()) < 40.0F) {
                 this.applyOnGroundPitch(0.8F);
             }
+        }
+
+        if(preventWaterBobbing) {
+            super.motionY = 0.0D;
         }
 
         this.moveEntity(super.motionX, super.motionY, super.motionZ);
@@ -1367,6 +1287,8 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
             } else if(MathHelper.abs(this.getRotRoll()) > 30.0F) {
                 return false;
             } else if(super.onGround && this.planeInfo.isDefaultVtol) {
+                return false;
+            } else if(!this.getNozzleStat() && !this.isSubmerged()) {
                 return false;
             } else {
                 this.setModeSwitchCooldown(20);

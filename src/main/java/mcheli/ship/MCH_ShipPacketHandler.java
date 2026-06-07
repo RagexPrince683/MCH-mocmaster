@@ -85,6 +85,8 @@ public class MCH_ShipPacketHandler {
                         plane.throttleDown = pc.throttleDown;
                         plane.moveLeft = pc.moveLeft;
                         plane.moveRight = pc.moveRight;
+                        plane.submarineAscend = plane.isDiving && pc.submarineAscend;
+                        plane.submarineDescend = plane.isDiving && pc.submarineDescend;
                     }
 
                     if(pc.useFlareType > 0) {

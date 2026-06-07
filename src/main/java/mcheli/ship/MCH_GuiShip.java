@@ -116,6 +116,12 @@ public class MCH_GuiShip extends MCH_AircraftCommonGui {
                             var10001 = MCH_MOD.config;
                             msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
                             this.drawString(msg, RX, super.centerY - 60, colorActive);
+                            if(plane.isDiving) {
+                                msg = "Ascend : " + MCH_KeyName.getDescOrName(MCH_Config.KeySubmarineAscend.prmInt);
+                                this.drawString(msg, RX, super.centerY - 50, colorActive);
+                                msg = "Descend : " + MCH_KeyName.getDescOrName(MCH_Config.KeySubmarineDescend.prmInt);
+                                this.drawString(msg, RX, super.centerY - 40, colorActive);
+                            }
                         }
                     }
                 }
