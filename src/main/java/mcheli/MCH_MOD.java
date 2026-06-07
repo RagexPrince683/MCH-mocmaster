@@ -376,13 +376,13 @@ public class MCH_MOD {
       // the client unloads the chunk, so the parent is not spawned again when the seats are.
       int aircraftTrackingRange = 200;
 
-      EntityRegistry.registerModEntity(MCH_EntitySeat.class, "MCH.E.Seat", 100, this, aircraftTrackingRange, 10, true);
+      EntityRegistry.registerModEntity(MCH_EntitySeat.class, "MCH.E.Seat", 100, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityHeli.class, "MCH.E.Heli", 101, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityGLTD.class, "MCH.E.GLTD", 102, this, 600, 10, true);
       EntityRegistry.registerModEntity(MCP_EntityPlane.class, "MCH.E.Plane", 103, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityShip.class, "MCH.E.Ship", 403, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityChain.class, "MCH.E.Chain", 104, this, 200, 10, true);
-      EntityRegistry.registerModEntity(MCH_EntityPSeat.class, "MCH.E.PSeat", 105, this, aircraftTrackingRange, 10, true);
+      EntityRegistry.registerModEntity(MCH_EntityPSeat.class, "MCH.E.PSeat", 105, this, 200, 10, true);
       //was also 600, reduced to 200 to *hopefully prevent invalid entity error
       EntityRegistry.registerModEntity(MCH_EntityParachute.class, "MCH.E.Parachute", 106, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityContainer.class, "MCH.E.Container", 107, this, 200, 10, true);
