@@ -74,6 +74,14 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
       return offset;
    }
 
+   private boolean isDeckSupportContact(AxisAlignedBB deck, AxisAlignedBB other) {
+      final double supportTolerance = 0.6D;
+      return other.maxX > deck.minX && other.minX < deck.maxX
+              && other.maxZ > deck.minZ && other.minZ < deck.maxZ
+              && other.minY >= deck.maxY - supportTolerance
+              && other.minY <= deck.maxY + supportTolerance;
+   }
+
    @Override
    public double calculateYOffset(AxisAlignedBB other, double offset) {
       if(!this.hasDeckCollision()) {
@@ -82,7 +90,18 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
 
       offset = super.calculateYOffset(other, offset);
       for(MCH_BoundingBox bb : this.ac.extraBoundingBox) {
-         offset = bb.boundingBox.calculateYOffset(other, offset);
+         AxisAlignedBB deck = bb.boundingBox;
+         AxisAlignedBB previousDeck = bb.backupBoundingBox;
+         offset = deck.calculateYOffset(other, offset);
+
+         // When a floating deck rises into an entity, vanilla's Y resolver sees
+         // overlapping boxes and no longer treats the deck as floor support. Use
+         // the previous top for that one transition; finishDeckMovement then
+         // carries the entity by the matching surface delta.
+         if(this.ac.canFloatWater() && deck.maxY > previousDeck.maxY
+                 && this.isDeckSupportContact(previousDeck, other)) {
+            offset = previousDeck.calculateYOffset(other, offset);
+         }
       }
       return offset;
    }
