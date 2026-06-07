@@ -840,6 +840,16 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          }
       }
 
+      // A dive converts altitude into speed even at reduced throttle. This also makes
+      // a nose-down recovery the natural way to fly out of a stall.
+      if(dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F) {
+         double dive = MCH_FlightModel.clamp((double)this.getRotPitch() / 60.0D, 0.0D, 1.0D);
+         double yaw = Math.toRadians((double)this.getRotYaw());
+         double diveAcceleration = dive * 0.012D;
+         super.motionX += -Math.sin(yaw) * diveAcceleration;
+         super.motionZ += Math.cos(yaw) * diveAcceleration;
+      }
+
       // 对垂直速度进行衰减
       super.motionY *= 0.95D;
       // 根据飞行器的运动系数衰减水平速度
@@ -849,7 +859,8 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       // 计算当前水平速度的大小
       double motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       // 获取最大速度限制
-      float speedLimit = this.getMaxSpeed();
+      float baseSpeedLimit = this.getMaxSpeed();
+      float speedLimit = (float)MCH_FlightModel.getDiveSpeedLimit(baseSpeedLimit, this.getRotPitch(), super.motionY, this.getAcInfo().diveSpeedMultiplier);
       // 如果当前速度超过最大速度限制，按最大速度比例缩小水平速度
       if(motion1 > (double)speedLimit) {
          super.motionX *= (double)speedLimit / motion1;
@@ -871,8 +882,39 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          }
       }
 
+      // Keep ground effect for several blocks so the stall model cannot cancel
+      // normal rotation and lift immediately after the wheels leave the runway.
+      boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
+      if(!nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff) {
+         double bank = MCH_FlightModel.clamp(MathHelper.abs(this.getRotRoll()) / 90.0D, 0.0D, 1.0D);
+         float effectiveStallFactor = this.getAcInfo().stallSpeedFactor * (float)(1.0D + bank * 0.35D);
+         double stall = MCH_FlightModel.getStallSeverity(motion1, baseSpeedLimit, effectiveStallFactor);
+
+         // Full power and an established climb greatly reduce the initial sink. A
+         // low-speed aircraft can therefore take off, while power-off and turning
+         // stalls remain considerably stronger once clear of the runway.
+         double poweredLift = MCH_FlightModel.clamp(this.getCurrentThrottle(), 0.0D, 1.0D);
+         double takeoffRelief = super.motionY >= 0.0D ? poweredLift * 0.8D : poweredLift * 0.45D;
+         stall *= 1.0D - takeoffRelief;
+         if(stall > 0.0D) {
+            super.motionY -= 0.012D * stall * (double)this.getAcInfo().stallStrength;
+            if(this.getRotPitch() < 35.0F) {
+               this.setRotPitch(this.getRotPitch() + (float)(0.08D * stall * (double)this.getAcInfo().stallStrength));
+            }
+         }
+      }
+
+      // Lift fades through a band below the configured ceiling instead of hitting an invisible wall.
+      double ceilingLift = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
+      if(!nearGround && ceilingLift < 1.0D) {
+         if(super.motionY > 0.0D) {
+            super.motionY *= 0.9D + ceilingLift * 0.1D;
+         }
+         super.motionY -= (1.0D - ceilingLift) * 0.012D;
+      }
+
       // 如果飞行器在地面或距离地面较近，则缩减水平速度，应用地面俯仰角度
-      if(super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0) {
+      if(nearGround) {
          super.motionX *= this.getAcInfo().motionFactor;
          super.motionZ *= this.getAcInfo().motionFactor;
          // 如果俯仰角度小于40度，则根据地面状态调整俯仰角度
