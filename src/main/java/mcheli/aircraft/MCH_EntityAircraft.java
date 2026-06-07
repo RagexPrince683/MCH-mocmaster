@@ -1082,13 +1082,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public boolean canFloatWater() {
-      //todo add check here, not in ship if still somehow fucked
-      if (this instanceof MCH_EntityShip) {
-         MCH_EntityShip ship = (MCH_EntityShip) this;
-         return !ship.isDiving && this.getAcInfo() != null && this.getAcInfo().isFloat && !this.isDestroyed();
-      } else {
-         return this.getAcInfo() != null && this.getAcInfo().isFloat && !this.isDestroyed();
-      }
+      return this.getAcInfo() != null && this.getAcInfo().isFloat && !this.isDestroyed();
    }
 
    @SideOnly(Side.CLIENT)
