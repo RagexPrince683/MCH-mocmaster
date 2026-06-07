@@ -20,6 +20,7 @@ public class MCH_EntitySeat extends W_Entity {
    public int parentSearchCount;
    protected Entity lastRiddenByEntity;
    public static final float BB_SIZE = 1.0F;
+   private int interactionDebugLoadTicks = -1;
 
    public MCH_EntitySeat(World world) {
       super(world);
@@ -138,6 +139,12 @@ public class MCH_EntitySeat extends W_Entity {
          onUpdate_Server();
       }
 
+      if(this.interactionDebugLoadTicks >= 0 && this.interactionDebugLoadTicks < 40) {
+         MCH_Lib.DbgLog(this.worldObj, "[MCHeliSeatLoadTick] tick=%d %s",
+                 new Object[]{Integer.valueOf(this.interactionDebugLoadTicks), this.getInteractionDebugSnapshot(null)});
+         ++this.interactionDebugLoadTicks;
+      }
+
       this.lastRiddenByEntity = this.riddenByEntity;
    }
 
@@ -192,6 +199,7 @@ public class MCH_EntitySeat extends W_Entity {
    }
 
    protected void writeEntityToNBT(NBTTagCompound nbt) {
+      MCH_Lib.DbgLog(this.worldObj, "[MCHeliSeatNBTWrite] %s", new Object[]{this.getInteractionDebugSnapshot(null)});
       nbt.setInteger("SeatID", this.seatID);
       nbt.setString("ParentUniqueID", this.parentUniqueID);
    }
@@ -199,6 +207,8 @@ public class MCH_EntitySeat extends W_Entity {
    protected void readEntityFromNBT(NBTTagCompound nbt) {
       this.seatID = nbt.getInteger("SeatID");
       this.parentUniqueID = nbt.getString("ParentUniqueID");
+      this.interactionDebugLoadTicks = 0;
+      MCH_Lib.DbgLog(this.worldObj, "[MCHeliSeatNBTRead] %s", new Object[]{this.getInteractionDebugSnapshot(null)});
    }
 
    @SideOnly(Side.CLIENT)
@@ -214,7 +224,30 @@ public class MCH_EntitySeat extends W_Entity {
       return this.riddenByEntity != null && getParent() != null && getParent().getIsGunnerMode(this.riddenByEntity);
    }
 
+   public String getInteractionDebugSnapshot(EntityPlayer player) {
+      String side = this.worldObj != null && this.worldObj.isRemote?"CLIENT":"SERVER";
+      int dimension = this.worldObj != null && this.worldObj.provider != null?this.worldObj.provider.dimensionId:Integer.MIN_VALUE;
+      MCH_EntityAircraft aircraft = this.getParent();
+      return String.format(java.util.Locale.ROOT,
+              "side=%s seatId=%d id=%d uuid=%s dimension=%d pos=%.3f,%.3f,%.3f player=%s playerUuid=%s parent=%s parentCommonId=%s linkedToExpectedParent=%s occupant=%s occupantDead=%s occupantBackref=%s ridingEntity=%s isDead=%s rack=%s",
+              side, Integer.valueOf(this.seatID), Integer.valueOf(this.getEntityId()), this.getUniqueID(), Integer.valueOf(dimension),
+              Double.valueOf(this.posX), Double.valueOf(this.posY), Double.valueOf(this.posZ),
+              player == null?"null":player.getCommandSenderName(), player == null?"null":player.getUniqueID(),
+              aircraft == null?"null":aircraft.getClass().getSimpleName() + "#" + aircraft.getEntityId(), this.parentUniqueID,
+              Boolean.valueOf(aircraft != null && this.parentUniqueID != null && this.parentUniqueID.equals(aircraft.getCommonUniqueId())),
+              this.riddenByEntity, Boolean.valueOf(this.riddenByEntity != null && this.riddenByEntity.isDead),
+              Boolean.valueOf(this.riddenByEntity != null && this.riddenByEntity.ridingEntity == this), this.ridingEntity,
+              Boolean.valueOf(this.isDead), Boolean.valueOf(aircraft != null && aircraft.getSeatInfo(this.seatID + 1) instanceof MCH_SeatRackInfo));
+   }
+
+   private boolean rejectInteraction(EntityPlayer player, String reason) {
+      MCH_Lib.DbgLog(this.worldObj, "[MCHeliInteractReject] %s reason=%s",
+              new Object[]{this.getInteractionDebugSnapshot(player), reason});
+      return false;
+   }
+
    public boolean interactFirst(EntityPlayer player) {
+      MCH_Lib.DbgLog(this.worldObj, "[MCHeliInteractDebug] %s reason=SEAT_INTERACT_FIRST_ENTERED", new Object[]{this.getInteractionDebugSnapshot(player)});
       MCH_Lib.DbgLog(this.worldObj,
               "[MCH-INTERACT][SEAT-BEGIN] side=%s seatId=%d seatEntity=%d seatUuid=%s parent=%s player=%s playerUuid=%s occupant=%s playerRiding=%s",
               new Object[]{this.worldObj.isRemote?"CLIENT":"SERVER", Integer.valueOf(this.seatID), Integer.valueOf(this.getEntityId()),
@@ -223,11 +256,11 @@ public class MCH_EntitySeat extends W_Entity {
       if(getParent() == null) {
          MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=parent_null seatId=%d parentCommonId=%s",
                  new Object[]{Integer.valueOf(this.seatID), this.parentUniqueID});
-         return false;
+         return this.rejectInteraction(player, "SEAT_PARENT_NULL");
       }
       if(getParent().isDestroyed()) {
          MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=parent_destroyed seatId=%d", new Object[]{Integer.valueOf(this.seatID)});
-         return false;
+         return this.rejectInteraction(player, "PARENT_DESTROYED");
       }
       ItemStack itemStack = player.getCurrentEquippedItem();
       if(itemStack != null && itemStack.getItem() instanceof mcheli.mob.MCH_ItemSpawnGunner) {
@@ -235,7 +268,7 @@ public class MCH_EntitySeat extends W_Entity {
       }
       if(!getParent().checkTeam(player)) {
          MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=team_check_failed seatId=%d", new Object[]{Integer.valueOf(this.seatID)});
-         return false;
+         return this.rejectInteraction(player, "TEAM_CHECK_FAILED");
       }
       if(!this.worldObj.isRemote && this.riddenByEntity != null
               && (this.riddenByEntity.isDead || this.riddenByEntity.ridingEntity != this
@@ -250,19 +283,19 @@ public class MCH_EntitySeat extends W_Entity {
          MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=occupied seatId=%d occupantId=%d occupantUuid=%s dead=%s ridingBackref=%s",
                  new Object[]{Integer.valueOf(this.seatID), Integer.valueOf(this.riddenByEntity.getEntityId()), this.riddenByEntity.getUniqueID(),
                          Boolean.valueOf(this.riddenByEntity.isDead), Boolean.valueOf(this.riddenByEntity.ridingEntity == this)});
-         return false;
+         return this.rejectInteraction(player, this.riddenByEntity.isDead?"SEAT_OCCUPIED_BY_DEAD_ENTITY":"SEAT_OCCUPIED");
       }
       if(player.ridingEntity != null) {
          MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=player_already_riding seatId=%d riding=%s",
                  new Object[]{Integer.valueOf(this.seatID), player.ridingEntity});
-         return false;
+         return this.rejectInteraction(player, "PLAYER_ALREADY_RIDING");
       }
       if(!canRideMob(player)) {
          MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=seat_is_rack_or_invalid seatId=%d", new Object[]{Integer.valueOf(this.seatID)});
-         return false;
+         return this.rejectInteraction(player, "SEAT_IS_RACK_OR_INVALID");
       }
       player.mountEntity(this);
-      MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-ACCEPT] seatId=%d player=%s", new Object[]{Integer.valueOf(this.seatID), player.getCommandSenderName()});
+      MCH_Lib.DbgLog(this.worldObj, "[MCHeliInteractDebug] %s reason=ALLOW_INTERACT result=SEAT_MOUNT", new Object[]{this.getInteractionDebugSnapshot(player)});
       return true;
    }
 

@@ -322,6 +322,10 @@ public class MCH_AircraftPacketHandler {
                   MCH_Lib.DbgLog(player.worldObj, "[MCH-SYNC][SEAT-APPLY-FAIL] reason=count_mismatch aircraftId=%d packetSeats=%d localSeats=%d",
                           new Object[]{Integer.valueOf(seatList.entityID_AC), Byte.valueOf(seatList.seatNum), Integer.valueOf(ac.getSeats().length)});
                }
+            } else {
+               MCH_Lib.DbgLog(player.worldObj,
+                       "[MCHeliFullSyncReceiveReject] channel=SEAT_LIST aircraftId=%d packetSeats=%d resolvedEntity=%s reason=AIRCRAFT_ENTITY_NOT_PRESENT",
+                       new Object[]{Integer.valueOf(seatList.entityID_AC), Byte.valueOf(seatList.seatNum), e});
             }
 
          }

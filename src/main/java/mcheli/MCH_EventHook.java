@@ -265,7 +265,17 @@ public class MCH_EventHook extends W_EventHook {
       }
 
       if(aircraft != null) {
+         MCH_Lib.DbgLog(event.entityPlayer.worldObj,
+                 "[MCHeliStartTracking] targetClass=%s targetId=%d targetUuid=%s %s reason=FORCE_FULL_AIRCRAFT_STATE",
+                 new Object[]{event.target.getClass().getName(), Integer.valueOf(event.target.getEntityId()), event.target.getUniqueID(),
+                         aircraft.getInteractionDebugSnapshot(event.entityPlayer)});
          aircraft.syncCompleteAircraftState((EntityPlayerMP)event.entityPlayer);
+      } else if(event.target instanceof MCH_EntitySeat) {
+         MCH_EntitySeat seat = (MCH_EntitySeat)event.target;
+         MCH_Lib.DbgLog(event.entityPlayer.worldObj,
+                 "[MCHeliStartTrackingReject] targetClass=%s targetId=%d targetUuid=%s player=%s playerUuid=%s reason=SEAT_PARENT_NOT_RESOLVED parentCommonId=%s",
+                 new Object[]{event.target.getClass().getName(), Integer.valueOf(event.target.getEntityId()), event.target.getUniqueID(),
+                         event.entityPlayer.getCommandSenderName(), event.entityPlayer.getUniqueID(), seat.parentUniqueID});
       }
    }
 
