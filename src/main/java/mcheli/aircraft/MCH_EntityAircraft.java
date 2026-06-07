@@ -991,6 +991,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       MCH_AircraftInfo info = this.getAcInfo();
 
       if (info != null && info.recipe != null && !info.recipe.isEmpty()) {
+         //TODO I think this is broken with oredicts
+         // Unknown recipe object: net.minecraftforge.oredict.ShapedOreRecipe
          System.out.println("[MCH] Vehicle destroyed: attempting to drop recipe items...");
 
          Random rand = new Random();
@@ -1340,8 +1342,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       Entity src = damageSource.getEntity();
       String srcName = (src == null ? "null" : src.getClass().getName());
-      System.out.println("[DBG] attackEntityFrom: dmgType=" + damageSource.getDamageType()
-              + " src=" + srcName + " org=" + org_damage);
+      //System.out.println("[DBG] attackEntityFrom: dmgType=" + damageSource.getDamageType()
+      //        + " src=" + srcName + " org=" + org_damage);
 
 
       if(ironCurtainRunningTick > 0) {
