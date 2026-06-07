@@ -255,10 +255,23 @@ public class MCH_EventHook extends W_EventHook {
 
 
 
-      if(W_Lib.isEntityLivingBase(event.entity) && !W_EntityPlayer.isPlayer(event.entity)) {
+      if(event.entity instanceof MCH_EntitySeat) {
+         MCH_EntitySeat joinedSeat = (MCH_EntitySeat)event.entity;
+         MCH_Lib.DbgLog(event.world,
+                 "[MCH-TRACK][SEAT-JOIN] side=%s entityId=%d uuid=%s seatId=%d parentCommonId=%s parent=%s occupant=%s",
+                 new Object[]{event.world.isRemote?"CLIENT":"SERVER", Integer.valueOf(joinedSeat.getEntityId()), joinedSeat.getUniqueID(),
+                         Integer.valueOf(joinedSeat.seatID), joinedSeat.parentUniqueID, joinedSeat.getParent(), joinedSeat.riddenByEntity});
+      } else if(W_Lib.isEntityLivingBase(event.entity) && !W_EntityPlayer.isPlayer(event.entity)) {
          MCH_Config var10002 = MCH_MOD.config;
          event.entity.renderDistanceWeight *= MCH_Config.MobRenderDistanceWeight.prmDouble;
       } else if(event.entity instanceof MCH_EntityAircraft) {
+         MCH_EntityAircraft joinedAircraft = (MCH_EntityAircraft)event.entity;
+         MCH_Lib.DbgLog(event.world,
+                 "[MCH-TRACK][AIRCRAFT-JOIN] side=%s entityId=%d uuid=%s class=%s type=%s commonId=%s",
+                 new Object[]{event.world.isRemote?"CLIENT":"SERVER", Integer.valueOf(joinedAircraft.getEntityId()),
+                         joinedAircraft.getUniqueID(), joinedAircraft.getClass().getName(), joinedAircraft.getTypeName(), joinedAircraft.getCommonUniqueId()});
+         joinedAircraft.debugVehicleState("ENTITY-JOIN", null);
+         joinedAircraft.debugRackState("ENTITY-JOIN");
          //reload aircraft render setting here
          //if (event.world.isRemote) {
 //
@@ -407,6 +420,17 @@ public class MCH_EventHook extends W_EventHook {
    }
 
    public void entityInteractEvent(EntityInteractEvent event) {
+      if(event.target instanceof MCH_EntityAircraft || event.target instanceof MCH_EntitySeat) {
+         MCH_Lib.DbgLog(event.entityPlayer.worldObj,
+                 "[MCH-INTERACT][FORGE-EVENT] side=%s target=%s targetId=%d targetUuid=%s player=%s playerUuid=%s canceled=%s",
+                 new Object[]{event.entityPlayer.worldObj.isRemote?"CLIENT":"SERVER", event.target.getClass().getName(),
+                         Integer.valueOf(event.target.getEntityId()), event.target.getUniqueID(), event.entityPlayer.getCommandSenderName(),
+                         event.entityPlayer.getUniqueID(), Boolean.valueOf(event.isCanceled())});
+         if(event.target instanceof MCH_EntityAircraft) {
+            ((MCH_EntityAircraft)event.target).debugVehicleState("FORGE-INTERACT-EVENT", event.entityPlayer);
+            ((MCH_EntityAircraft)event.target).debugRackState("FORGE-INTERACT-EVENT");
+         }
+      }
       ItemStack item = event.entityPlayer.getHeldItem();
       if(item != null) {
          if(item.getItem() instanceof MCH_ItemChain) {
