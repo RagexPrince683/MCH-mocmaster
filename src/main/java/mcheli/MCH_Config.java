@@ -350,7 +350,7 @@ public class MCH_Config {
       AircraftLODStartDistance = new MCH_ConfigPrm("AircraftLODStartDistance", 256.0D);
       AircraftLODStartDistance.desc = ";Distance in blocks where aircraft/tank/turret/ship rendering switches to a cheap LOD silhouette.";
       AircraftLODFarDistance = new MCH_ConfigPrm("AircraftLODFarDistance", 4096.0D);
-      AircraftLODFarDistance.desc = ";Maximum aircraft/tank/turret/ship LOD render-test and network tracking distance in blocks. Set <= 0 to use vanilla render range checks and the existing 2000-block tracking range.";
+      AircraftLODFarDistance.desc = ";Maximum aircraft/tank/turret/ship LOD render-test distance in blocks. Entity network tracking remains aligned with child seats so chunk reloads respawn the complete vehicle.";
       MobRenderDistanceWeight = new MCH_ConfigPrm("MobRenderDistanceWeight", 10.0D);
       CreativeTabIcon = new MCH_ConfigPrm("CreativeTabIconItem", "fuel");
       CreativeTabIconHeli = new MCH_ConfigPrm("CreativeTabIconHeli", "ah-64");

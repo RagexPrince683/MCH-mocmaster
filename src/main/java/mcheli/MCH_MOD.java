@@ -22,6 +22,7 @@ import cpw.mods.fml.relauncher.FMLLaunchHandler;
 
 import mcheli.aircraft.MCH_EntityHide;
 import mcheli.aircraft.MCH_EntityHitBox;
+import mcheli.aircraft.MCH_EntityPSeat;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_ItemAircraft;
 import mcheli.aircraft.MCH_ItemFuel;
@@ -370,25 +371,24 @@ public class MCH_MOD {
 
 
       public void registerEntity() {
-      int aircraftTrackingRange = 2000;
-      if(MCH_Config.AircraftLODFarDistance != null && MCH_Config.AircraftLODFarDistance.prmDouble > 0.0D) {
-         aircraftTrackingRange = (int)Math.min(2147483647.0D, Math.max(600.0D, Math.ceil(MCH_Config.AircraftLODFarDistance.prmDouble)));
-      }
+      // Parent aircraft and their child seats must cross the tracking boundary together.
+      // A larger parent range leaves the server tracker holding a stale client entry after
+      // the client unloads the chunk, so the parent is not spawned again when the seats are.
+      int aircraftTrackingRange = 200;
 
-      EntityRegistry.registerModEntity(MCH_EntitySeat.class, "MCH.E.Seat", 100, this, 200, 10, true);
-      //tracking range was 600, might be causing the invalid entity error?
+      EntityRegistry.registerModEntity(MCH_EntitySeat.class, "MCH.E.Seat", 100, this, aircraftTrackingRange, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityHeli.class, "MCH.E.Heli", 101, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityGLTD.class, "MCH.E.GLTD", 102, this, 600, 10, true);
       EntityRegistry.registerModEntity(MCP_EntityPlane.class, "MCH.E.Plane", 103, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityShip.class, "MCH.E.Ship", 403, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityChain.class, "MCH.E.Chain", 104, this, 200, 10, true);
-      EntityRegistry.registerModEntity(MCH_EntityHitBox.class, "MCH.E.PSeat", 105, this, 200, 10, true);
+      EntityRegistry.registerModEntity(MCH_EntityPSeat.class, "MCH.E.PSeat", 105, this, aircraftTrackingRange, 10, true);
       //was also 600, reduced to 200 to *hopefully prevent invalid entity error
       EntityRegistry.registerModEntity(MCH_EntityParachute.class, "MCH.E.Parachute", 106, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityContainer.class, "MCH.E.Container", 107, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityVehicle.class, "MCH.E.Vehicle", 108, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityUavStation.class, "MCH.E.UavStation", 109, this, 200, 10, true);
-      EntityRegistry.registerModEntity(MCH_EntityHitBox.class, "MCH.E.HitBox", 110, this, 200, 10, true);
+      EntityRegistry.registerModEntity(MCH_EntityHitBox.class, "MCH.E.HitBox", 110, this, aircraftTrackingRange, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityHide.class, "MCH.E.Hide", 111, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityTank.class, "MCH.E.Tank", 112, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityRocket.class, "MCH.E.Rocket", 200, this, 530, 3, true);
