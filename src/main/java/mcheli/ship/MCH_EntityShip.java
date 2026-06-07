@@ -1034,12 +1034,14 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         public final Entity entity;
         public final int surfaceIndex;
         public final double surfaceCenterX;
+        public final double surfaceTopY;
         public final double surfaceCenterZ;
 
         private DeckContact(Entity entity, int surfaceIndex, AxisAlignedBB surface) {
             this.entity = entity;
             this.surfaceIndex = surfaceIndex;
             this.surfaceCenterX = (surface.minX + surface.maxX) / 2.0D;
+            this.surfaceTopY = surface.maxY;
             this.surfaceCenterZ = (surface.minZ + surface.maxZ) / 2.0D;
         }
     }
@@ -1119,8 +1121,24 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 Vec3 rotated = MCH_Lib.RotVec3(relativeX, 0.0D, relativeZ, -yawChange, 0.0F);
                 double surfaceCenterX = (surface.minX + surface.maxX) / 2.0D;
                 double surfaceCenterZ = (surface.minZ + surface.maxZ) / 2.0D;
-                double correctedY = entity.posY + surface.maxY - entity.boundingBox.minY;
-                entity.setPosition(surfaceCenterX + rotated.xCoord, correctedY, surfaceCenterZ + rotated.zCoord);
+                double deckDeltaY = surface.maxY - contact.surfaceTopY;
+                double carriedY = entity.posY + deckDeltaY;
+
+                // Carry by the measured deck delta, but never leave the feet
+                // intersecting a deck that moved upward. Even a tiny overlap makes
+                // the next player movement resolve sideways against the deck and
+                // causes the one-tick freeze. The clearance is deliberately small
+                // enough to remain a normal grounded contact.
+                if(deckDeltaY > 0.0D) {
+                    final double deckClearance = 1.0E-4D;
+                    double carriedMinY = entity.boundingBox.minY + deckDeltaY;
+                    if(carriedMinY < surface.maxY + deckClearance) {
+                        carriedY += surface.maxY + deckClearance - carriedMinY;
+                    }
+                }
+
+                entity.setPosition(surfaceCenterX + rotated.xCoord, carriedY,
+                        surfaceCenterZ + rotated.zCoord);
                 entity.motionY = 0.0D;
                 entity.onGround = true;
                 entity.isCollidedVertically = true;
