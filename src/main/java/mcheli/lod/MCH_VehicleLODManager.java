@@ -19,6 +19,7 @@ import mcheli.tank.MCH_TankInfoManager;
 import mcheli.vehicle.MCH_VehicleInfoManager;
 import mcheli.wrapper.W_MOD;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -136,8 +137,14 @@ public final class MCH_VehicleLODManager {
             return;
         }
 
+        float previousLightX = OpenGlHelper.lastBrightnessX;
+        float previousLightY = OpenGlHelper.lastBrightnessY;
+        int lightX = display.packedLight & 65535;
+        int lightY = display.packedLight >>> 16;
+
         GL11.glPushMatrix();
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_CURRENT_BIT | GL11.GL_TEXTURE_BIT);
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)lightX, (float)lightY);
         GL11.glDisable(GL11.GL_FOG);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -152,6 +159,7 @@ public final class MCH_VehicleLODManager {
         info.model.renderAll();
         GL11.glPopAttrib();
         GL11.glPopMatrix();
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, previousLightX, previousLightY);
     }
 
     private static float interpolateAngle(float previous, float current, float partial) {
@@ -202,6 +210,7 @@ public final class MCH_VehicleLODManager {
         private float pitch;
         private float roll;
         private float scale;
+        private int packedLight;
         private long previousUpdateMs;
         private long lastUpdateMs;
 
@@ -237,6 +246,7 @@ public final class MCH_VehicleLODManager {
             this.pitch = entry.pitch;
             this.roll = entry.roll;
             this.scale = entry.scale > 0.0F ? entry.scale : 1.0F;
+            this.packedLight = entry.packedLight;
         }
     }
 }

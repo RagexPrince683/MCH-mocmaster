@@ -88,6 +88,7 @@ public class MCH_ServerTickHandler {
          entry.pitch = vehicle.getRotPitch();
          entry.roll = vehicle.getRotRoll();
          entry.scale = 1.0F;
+         entry.packedLight = vehicle.getBrightnessForRender(1.0F);
          entries.add(entry);
       }
       return entries;
