@@ -697,7 +697,8 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                               rz = s.length >= 10?this.toFloat(s[9]):0.0F;
                               var26 = s.length >= 11?this.toFloat(s[10]):0.0F;
                               var31 = s.length >= 12?this.toBool(s[11]):false;
-                              this.entityRackList.add(new MCH_SeatRackInfo(var17, this.toDouble(s[1]), this.toDouble(s[2]), this.toDouble(s[3]), new MCH_AircraftInfo.CameraPosition(this.toVec3(s[4], s[5], s[6]).addVector(0.0D, 1.5D, 0.0D)), var18, ry, rz, var26, var31));
+                              boolean launchRack = s.length >= 13 && this.toBool(s[12]);
+                              this.entityRackList.add(new MCH_SeatRackInfo(var17, this.toDouble(s[1]), this.toDouble(s[2]), this.toDouble(s[3]), new MCH_AircraftInfo.CameraPosition(this.toVec3(s[4], s[5], s[6]).addVector(0.0D, 1.5D, 0.0D)), var18, ry, rz, var26, var31, launchRack));
                            }
                         } else if(item.equalsIgnoreCase("RideRack")) {
                            //child vehicle to ride parent
