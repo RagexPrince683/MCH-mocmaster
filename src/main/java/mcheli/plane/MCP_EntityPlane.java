@@ -882,15 +882,24 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          }
       }
 
-      boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0;
+      // Keep ground effect for several blocks so the stall model cannot cancel
+      // normal rotation and lift immediately after the wheels leave the runway.
+      boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
       if(!nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff) {
-         double stall = MCH_FlightModel.getStallSeverity(motion1, baseSpeedLimit, this.getAcInfo().stallSpeedFactor);
-         double bankLoss = MCH_FlightModel.clamp(MathHelper.abs(this.getRotRoll()) / 90.0D, 0.0D, 1.0D) * 0.35D;
-         stall = MCH_FlightModel.clamp(stall + bankLoss, 0.0D, 1.0D);
+         double bank = MCH_FlightModel.clamp(MathHelper.abs(this.getRotRoll()) / 90.0D, 0.0D, 1.0D);
+         float effectiveStallFactor = this.getAcInfo().stallSpeedFactor * (float)(1.0D + bank * 0.35D);
+         double stall = MCH_FlightModel.getStallSeverity(motion1, baseSpeedLimit, effectiveStallFactor);
+
+         // Full power and an established climb greatly reduce the initial sink. A
+         // low-speed aircraft can therefore take off, while power-off and turning
+         // stalls remain considerably stronger once clear of the runway.
+         double poweredLift = MCH_FlightModel.clamp(this.getCurrentThrottle(), 0.0D, 1.0D);
+         double takeoffRelief = super.motionY >= 0.0D ? poweredLift * 0.8D : poweredLift * 0.45D;
+         stall *= 1.0D - takeoffRelief;
          if(stall > 0.0D) {
-            super.motionY -= 0.028D * stall * (double)this.getAcInfo().stallStrength;
+            super.motionY -= 0.012D * stall * (double)this.getAcInfo().stallStrength;
             if(this.getRotPitch() < 35.0F) {
-               this.setRotPitch(this.getRotPitch() + (float)(0.22D * stall * (double)this.getAcInfo().stallStrength));
+               this.setRotPitch(this.getRotPitch() + (float)(0.08D * stall * (double)this.getAcInfo().stallStrength));
             }
          }
       }

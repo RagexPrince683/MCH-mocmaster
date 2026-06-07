@@ -340,10 +340,10 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.limitRotation = false;
       this.throttleUpDown = 1.0F;
       this.throttleUpDownOnEntity = 2.0F;
-      this.flightCeiling = 220.0F;
-      this.flightCeilingRange = 40.0F;
-      this.stallSpeedFactor = 0.35F;
-      this.stallStrength = 1.0F;
+      this.flightCeiling = 250.0F;
+      this.flightCeilingRange = 24.0F;
+      this.stallSpeedFactor = 0.22F;
+      this.stallStrength = 0.6F;
       this.diveSpeedMultiplier = 1.25F;
       this.pivotTurnThrottle = 0.0F;
       this.trackRollerRot = 30.0F;
