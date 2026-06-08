@@ -12,8 +12,10 @@ public class MCH_UavPacketHandler {
             MCH_UavPacketStatus status = new MCH_UavPacketStatus();
             status.readData(data);
             if(player.ridingEntity instanceof MCH_EntityUavStation) {
-                ((MCH_EntityUavStation)player.ridingEntity).handleStatusRequest(
-                        player, status.posUavX, status.posUavY, status.posUavZ, status.continueControl);
+                ((MCH_EntityUavStation)player.ridingEntity).setUavPosition(status.posUavX, status.posUavY, status.posUavZ);
+                if(status.continueControl) {
+                    ((MCH_EntityUavStation)player.ridingEntity).controlLastAircraft(player);
+                }
             }
         }
 
