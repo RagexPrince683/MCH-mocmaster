@@ -890,13 +890,17 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
 
       if (getRiddenByEntity() != null) {
-         if (isNewUAV()) {
+         if (isUAV()) {
+            // For normal UAVs, perform the standard dismount.
+            Entity rider = getRiddenByEntity();
+            if (rider != null) {
+               rider.mountEntity(null);
+            }
+         } else if (isNewUAV()) {
             Entity rider = getRiddenByEntity();
             if (rider instanceof EntityPlayer) {
                EntityPlayer player = (EntityPlayer) rider;
-               if(!super.worldObj.isRemote) {
-                  dismountNewUavPilot(rider, "uav_destroyed");
-               }
+                  this.unmountEntity(); // ← this triggers the correct logic and teleport
 
                //System.out.println("uavposxyz" + MCH_EntityUavStation.posUavX + ", " +
                //        super.posY + ", " +
@@ -910,11 +914,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                player.addPotionEffect(new PotionEffect(12, 20, 0)); // Fire Resistance
 
-            }
-         } else if (isUAV()) {
-            Entity rider = getRiddenByEntity();
-            if (rider != null) {
-               rider.mountEntity(null);
             }
          }
       }
@@ -5299,21 +5298,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
 
-   private void dismountNewUavPilot(Entity rider, String inventoryReason) {
-      if(super.worldObj.isRemote || rider == null) {
-         return;
-      }
-      if(rider instanceof EntityPlayerMP) {
-         EntityPlayerMP player = (EntityPlayerMP)rider;
-         player.mountEntity((Entity)null);
-         player.setPositionAndUpdate(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
-         MCH_UavInventory.restorePilotInventory(player, inventoryReason);
-      } else {
-         rider.mountEntity((Entity)null);
-         rider.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
-      }
-   }
-
    private void deleteNewUavAfterShiftExit() {
       if(super.worldObj.isRemote || !this.isNewUAV()) {
          return;
@@ -5352,17 +5336,21 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       setCommonStatus(1, false);
            if (rByEntity != null) {
-                if (isNewUAV()) {
-                     newuavvariable = true;
-                     //here
-                     if(!this.worldObj.isRemote) {
-                      dismountNewUavPilot(rByEntity, "uav_exit");
-                      deleteNewUavAfterShiftExit();
-                     }
-                   } else if (isUAV()) {
+                if (isUAV()) {
                      if (rByEntity.ridingEntity instanceof MCH_EntityUavStation) {
                           rByEntity.mountEntity((Entity)null);
                         }
+                   } else if (isNewUAV()) {
+                     newuavvariable = true;
+                     //here
+                     if(!this.worldObj.isRemote) {
+                      rByEntity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
+                      rByEntity.mountEntity((Entity) null);
+                      if(rByEntity instanceof EntityPlayerMP) {
+                         MCH_UavInventory.restorePilotInventory((EntityPlayerMP)rByEntity, "uav_exit");
+                      }
+                      deleteNewUavAfterShiftExit();
+                     }
                    } else {
                      setUnmountPosition(rByEntity, (getSeatsInfo()[0]).pos);
                    }
