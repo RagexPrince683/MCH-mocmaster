@@ -956,7 +956,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                           } else if (item.equalsIgnoreCase("NewUAV")) {
                                              this.isNewUAV = toBool(data);
                                              this.isSmallUAV = false;
-                                          } else if (item.equalsIgnoreCase("NewSmallUAV")) {
+                                          } else if (item.equalsIgnoreCase("NewSmallUAV") || item.equalsIgnoreCase("SmallNewUAV")) {
                                              this.isNewUAV = toBool(data);
                                              this.isSmallUAV = true;
                                           } else if(item.equalsIgnoreCase("TargetDrone")) {
