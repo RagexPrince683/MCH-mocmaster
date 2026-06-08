@@ -80,6 +80,9 @@ public class MCH_EntityUavStation
       private boolean hasStoredUavLink;
       private ItemStack lastUavItemStack;
       private boolean hasStoredUavRespawnPosition;
+      private double storedUavRespawnX;
+      private double storedUavRespawnY;
+      private double storedUavRespawnZ;
       private boolean respawnStoredUavAtSavedPosition;
       private boolean awaitingLoadedUav;
       private int pendingContinueTicks;
@@ -311,6 +314,9 @@ public class MCH_EntityUavStation
            nbt.setInteger("LinkedUavDimension", this.linkedUavDimension);
            nbt.setBoolean("HasStoredUavLink", this.hasStoredUavLink);
            nbt.setBoolean("HasStoredUavRespawnPosition", this.hasStoredUavRespawnPosition);
+           nbt.setDouble("StoredUavRespawnX", this.storedUavRespawnX);
+           nbt.setDouble("StoredUavRespawnY", this.storedUavRespawnY);
+           nbt.setDouble("StoredUavRespawnZ", this.storedUavRespawnZ);
            nbt.setDouble("LinkedUavX", this.linkedUavX);
            nbt.setDouble("LinkedUavY", this.linkedUavY);
            nbt.setDouble("LinkedUavZ", this.linkedUavZ);
@@ -356,6 +362,16 @@ public class MCH_EntityUavStation
           this.linkedUavX = nbt.getDouble("LinkedUavX");
           this.linkedUavY = nbt.getDouble("LinkedUavY");
           this.linkedUavZ = nbt.getDouble("LinkedUavZ");
+          if(nbt.hasKey("StoredUavRespawnX") || nbt.hasKey("StoredUavRespawnY") || nbt.hasKey("StoredUavRespawnZ")) {
+              this.storedUavRespawnX = nbt.getDouble("StoredUavRespawnX");
+              this.storedUavRespawnY = nbt.getDouble("StoredUavRespawnY");
+              this.storedUavRespawnZ = nbt.getDouble("StoredUavRespawnZ");
+          } else {
+              // Older saves used the live-link coordinates as the shifted-out respawn position.
+              this.storedUavRespawnX = this.linkedUavX;
+              this.storedUavRespawnY = this.linkedUavY;
+              this.storedUavRespawnZ = this.linkedUavZ;
+          }
           this.storedUavWasDestroyed = nbt.getBoolean("StoredUavWasDestroyed");
           this.lastUavItemStack = nbt.hasKey("LastUavItem") ? ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("LastUavItem")) : null;
 
@@ -823,8 +839,11 @@ public class MCH_EntityUavStation
            }
            this.storedUavWasDestroyed = false;
            updateLinkedUavPosition(ac);
+           this.storedUavRespawnX = ac.posX;
+           this.storedUavRespawnY = ac.posY;
+           this.storedUavRespawnZ = ac.posZ;
            this.hasStoredUavRespawnPosition = true;
-           MCH_Lib.Log((Entity)this, "New UAV %d shifted out at %.2f, %.2f, %.2f; deleting drone entity and keeping station launch state for Continue", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)ac)), Double.valueOf(this.linkedUavX), Double.valueOf(this.linkedUavY), Double.valueOf(this.linkedUavZ) });
+           MCH_Lib.Log((Entity)this, "New UAV %d shifted out at %.2f, %.2f, %.2f; replacing the saved Continue position", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)ac)), Double.valueOf(this.storedUavRespawnX), Double.valueOf(this.storedUavRespawnY), Double.valueOf(this.storedUavRespawnZ) });
            this.assignedUav = null;
            this.assignedUavId = -1;
            this.assignedUavUUID = "";
@@ -1133,9 +1152,9 @@ public class MCH_EntityUavStation
                 double y = this.posY + this.posUavY;
                 double z = this.posZ + this.posUavZ;
                 if(this.respawnStoredUavAtSavedPosition && this.hasStoredUavRespawnPosition) {
-                     x = this.linkedUavX;
-                     y = this.linkedUavY;
-                     z = this.linkedUavZ;
+                     x = this.storedUavRespawnX;
+                     y = this.storedUavRespawnY;
+                     z = this.storedUavRespawnZ;
                      MCH_Lib.Log((Entity)this, "Respawning shifted-out UAV at saved delete position %.2f, %.2f, %.2f", new Object[] { Double.valueOf(x), Double.valueOf(y), Double.valueOf(z) });
                    }
                 if (y <= 1.0D) {
