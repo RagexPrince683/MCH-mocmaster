@@ -267,14 +267,24 @@ public class MCH_EntityUavStation
          }
 
 
+      public void handleStatusRequest(EntityPlayer player, int x, int y, int z, boolean continueControl) {
+           if(this.worldObj.isRemote || player == null || player.isDead || this.isDead || this.riddenByEntity != player || player.ridingEntity != this) {
+                return;
+           }
+           setUavPosition(x, y, z);
+           if(continueControl) {
+                controlLastAircraft(player);
+           }
+         }
+
       public void setUavPosition(int x, int y, int z) {
            if (!this.worldObj.isRemote) {
-                this.posUavX = x;
-                this.posUavY = y;
-                this.posUavZ = z;
-                getDataWatcher().updateObject(29, Integer.valueOf(x));
-                getDataWatcher().updateObject(30, Integer.valueOf(y));
-                getDataWatcher().updateObject(31, Integer.valueOf(z));
+                this.posUavX = MathHelper.clamp_int(x, -50, 50);
+                this.posUavY = MathHelper.clamp_int(y, -50, 50);
+                this.posUavZ = MathHelper.clamp_int(z, -50, 50);
+                getDataWatcher().updateObject(29, Integer.valueOf(this.posUavX));
+                getDataWatcher().updateObject(30, Integer.valueOf(this.posUavY));
+                getDataWatcher().updateObject(31, Integer.valueOf(this.posUavZ));
               }
          }
 
@@ -1053,6 +1063,9 @@ public class MCH_EntityUavStation
 
              private void controlLastAircraft(Entity user, boolean notify) {
 
+                 if(this.worldObj.isRemote || user == null || user.isDead || this.isDead || this.riddenByEntity != user || user.ridingEntity != this) {
+                     return;
+                 }
                  if(!hasContinuableUavLink()) {
                      if(notify && user instanceof EntityPlayer) {
                          W_EntityPlayer.addChatMessage((EntityPlayer)user, "No linked UAV is stored in this station.");
@@ -1119,8 +1132,8 @@ public class MCH_EntityUavStation
 
 
      public void handleItem(Entity user, ItemStack itemStack) {
-           if (user != null && !user.isDead && itemStack != null && itemStack.stackSize == 1 &&
-                     !this.worldObj.isRemote) {
+           if (user != null && !user.isDead && user == this.riddenByEntity && user.ridingEntity == this &&
+                     itemStack != null && itemStack.stackSize == 1 && !this.worldObj.isRemote) {
                 Object ac = null;
                 double x = this.posX + this.posUavX;
                 double y = this.posY + this.posUavY;
@@ -1160,7 +1173,7 @@ public class MCH_EntityUavStation
 
                 if (item instanceof MCH_ItemHeli) {
                      MCH_HeliInfo hi1 = MCH_HeliInfoManager.getFromItem(item);
-                     if (hi1 != null && hi1.isUAV) {
+                     if (hi1 != null && (hi1.isUAV || hi1.isNewUAV)) {
                          if (!hi1.isSmallUAV && getKind() == 2) {
                                ac = null;
                              } else {
@@ -1171,7 +1184,7 @@ public class MCH_EntityUavStation
 
                 if (item instanceof MCH_ItemTank) {
                      MCH_TankInfo hi2 = MCH_TankInfoManager.getFromItem(item);
-                     if (hi2 != null && hi2.isUAV) {
+                     if (hi2 != null && (hi2.isUAV || hi2.isNewUAV)) {
                           if (!hi2.isSmallUAV && getKind() == 2) {
                                ac = null;
                              } else {
