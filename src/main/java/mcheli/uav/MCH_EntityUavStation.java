@@ -239,6 +239,9 @@ public class MCH_EntityUavStation
          }
 
       public boolean hasContinuableUavLink() {
+           if(this.storedUavWasDestroyed) {
+                return false;
+           }
            return getLastControlAircraftEntityId().intValue() != 0 ||
                   (this.assignedUav != null && !this.assignedUav.isDead) ||
                   this.assignedUavId > 0 ||
@@ -354,22 +357,23 @@ public class MCH_EntityUavStation
           this.linkedUavY = nbt.getDouble("LinkedUavY");
           this.linkedUavZ = nbt.getDouble("LinkedUavZ");
           this.storedUavWasDestroyed = nbt.getBoolean("StoredUavWasDestroyed");
+          this.lastUavItemStack = nbt.hasKey("LastUavItem") ? ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("LastUavItem")) : null;
 
           if(this.storedUavWasDestroyed) {
               this.lastUavItemStack = null;
               this.hasStoredUavRespawnPosition = false;
               this.respawnStoredUavAtSavedPosition = false;
           }
-          this.lastUavItemStack = nbt.hasKey("LastUavItem") ? ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("LastUavItem")) : null;
           if(this.linkedUavEntityUUID == null) {
               this.linkedUavEntityUUID = parseUavUUID(this.assignedUavUUID);
           }
-          boolean hasLinkedUavIdentity = this.linkedUavEntityUUID != null ||
+          boolean hasLinkedUavIdentity = !this.storedUavWasDestroyed &&
+                  (this.linkedUavEntityUUID != null ||
                   (this.linkedUavCommonId != null && !this.linkedUavCommonId.isEmpty()) ||
                   this.assignedUavId > 0 ||
                   (this.assignedUavUUID != null && !this.assignedUavUUID.isEmpty()) ||
                   (this.loadedLastControlAircraftGuid != null && !this.loadedLastControlAircraftGuid.isEmpty()) ||
-                  this.lastUavItemStack != null;
+                  this.lastUavItemStack != null);
           if(this.lastUavItemStack != null && !this.hasStoredUavRespawnPosition) {
               this.hasStoredUavRespawnPosition = this.linkedUavY != 0.0D || this.linkedUavX != 0.0D || this.linkedUavZ != 0.0D;
           }
@@ -813,7 +817,11 @@ public class MCH_EntityUavStation
            if(this.worldObj.isRemote || ac == null) {
                 return;
            }
-          this.storedUavWasDestroyed = false;
+           if(ac.isDestroyed()) {
+                markLinkedNewUavDestroyed(ac);
+                return;
+           }
+           this.storedUavWasDestroyed = false;
            updateLinkedUavPosition(ac);
            this.hasStoredUavRespawnPosition = true;
            MCH_Lib.Log((Entity)this, "New UAV %d shifted out at %.2f, %.2f, %.2f; deleting drone entity and keeping station launch state for Continue", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)ac)), Double.valueOf(this.linkedUavX), Double.valueOf(this.linkedUavY), Double.valueOf(this.linkedUavZ) });
@@ -890,7 +898,6 @@ public class MCH_EntityUavStation
 
            ItemStack stack = this.lastUavItemStack.copy();
            stack.stackSize = 1;
-          //problem: this still runs after the UAV has been destroyed. Allowing infinite spawning of UAVs this is not the intended behavior
            MCH_Lib.Log((Entity)this, "Continue requested after shifted-out new UAV; relaunching stored UAV item %s", new Object[] { stack.getItem() == null ? "null" : stack.getItem().getUnlocalizedName() });
            this.respawnStoredUavAtSavedPosition = true;
            try {
@@ -1097,7 +1104,7 @@ public class MCH_EntityUavStation
                      }
                      this.pendingContinueTicks = 0;
                      W_EntityPlayer.closeScreen(user);
-                 } else if (continueWithStoredUavItem(user)) { //we need to track if the drone has been destroyed here and if so do not allow continue to attempt to link until a new drone item is used again
+                 } else if (continueWithStoredUavItem(user)) {
                      this.pendingContinueTicks = 0;
                  } else if (this.storedUavWasDestroyed) {
                      this.pendingContinueTicks = 0;
