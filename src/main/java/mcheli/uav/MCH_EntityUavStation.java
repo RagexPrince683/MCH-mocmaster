@@ -876,26 +876,6 @@ public class MCH_EntityUavStation
                  setLastControlAircraftEntityId(0);
           }
 
-      private boolean requestNewUavPilotMount(Entity user, MCH_EntityAircraft ac, boolean notify) {
-           if(this.worldObj.isRemote || user == null || user.isDead || ac == null || ac.isDead || !ac.isNewUAV()) {
-                return false;
-           }
-           if(this.riddenByEntity != user || user.ridingEntity != this) {
-                return false;
-           }
-           if(ac.ticksExisted < 10) {
-                this.pendingContinueTicks = 60;
-                if(notify && user instanceof EntityPlayer) {
-                     W_EntityPlayer.addChatMessage((EntityPlayer)user, "UAV is initializing; control will start shortly.");
-                }
-                return false;
-           }
-           user.mountEntity((Entity)ac);
-           this.pendingContinueTicks = 0;
-           W_EntityPlayer.closeScreen(user);
-           return true;
-         }
-
       private boolean continueWithStoredUavItem(Entity user) {
            //if(user == null || this.lastUavItemStack == null || this.worldObj.isRemote) {
            //     return false;
@@ -930,8 +910,8 @@ public class MCH_EntityUavStation
            }
            MCH_EntityAircraft ac = getControlAircract();
            if(ac != null && !ac.isDead) {
-                if(ac.isNewUAV()) {
-                     requestNewUavPilotMount(this.riddenByEntity, ac, true);
+                if(this.riddenByEntity != null && ac.isNewUAV()) {
+                     this.riddenByEntity.mountEntity((Entity)ac);
                 }
                 return true;
            }
@@ -1126,7 +1106,7 @@ public class MCH_EntityUavStation
                              }
                              return;
                          }
-                         requestNewUavPilotMount(user, this.controlAircraft, notify);
+                         this.riddenByEntity.mountEntity((Entity)this.controlAircraft);
                      }
                      this.pendingContinueTicks = 0;
                      W_EntityPlayer.closeScreen(user);
@@ -1220,9 +1200,7 @@ public class MCH_EntityUavStation
                         ((MCH_EntityAircraft)ac).setDead(false);
                         linkUav(linked);
                         setControlAircract(linked);
-                        if(!requestNewUavPilotMount(user, linked, true)) {
-                             W_EntityPlayer.closeScreen(user);
-                        }
+                        W_EntityPlayer.closeScreen(user);
                         return;
                     }
                     if(MCH_Config.ItemDamage.prmBool) {
@@ -1250,9 +1228,7 @@ public class MCH_EntityUavStation
                           linkUav((MCH_EntityAircraft) ac);
                           if (!((MCH_EntityAircraft)ac).isTargetDrone()) {
                                ((MCH_EntityAircraft)ac).setFuel((int)(((MCH_EntityAircraft)ac).getMaxFuel() * 0.05F));
-                               if(!requestNewUavPilotMount(user, (MCH_EntityAircraft)ac, true)) {
-                                    W_EntityPlayer.closeScreen(user);
-                               }
+                               W_EntityPlayer.closeScreen(user);
                              } else {
                                ((MCH_EntityAircraft)ac).setFuel(((MCH_EntityAircraft)ac).getMaxFuel());
                              }
