@@ -697,7 +697,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public Entity getRiddenByEntity() {
-      return this.isUAV() && this.uavStation != null?this.uavStation.riddenByEntity:super.riddenByEntity;
+      return !this.isNewUAV() && this.isUAV() && this.uavStation != null ? this.uavStation.riddenByEntity : super.riddenByEntity;
    }
 
    public boolean getCommonStatus(int bit) {
