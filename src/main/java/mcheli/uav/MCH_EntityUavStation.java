@@ -1160,7 +1160,7 @@ public class MCH_EntityUavStation
 
                 if (item instanceof MCH_ItemHeli) {
                      MCH_HeliInfo hi1 = MCH_HeliInfoManager.getFromItem(item);
-                     if (hi1 != null && hi1.isUAV) {
+                     if (hi1 != null && (hi1.isUAV || hi1.isNewUAV)) {
                          if (!hi1.isSmallUAV && getKind() == 2) {
                                ac = null;
                              } else {
@@ -1171,7 +1171,7 @@ public class MCH_EntityUavStation
 
                 if (item instanceof MCH_ItemTank) {
                      MCH_TankInfo hi2 = MCH_TankInfoManager.getFromItem(item);
-                     if (hi2 != null && hi2.isUAV) {
+                     if (hi2 != null && (hi2.isUAV || hi2.isNewUAV)) {
                           if (!hi2.isSmallUAV && getKind() == 2) {
                                ac = null;
                              } else {
