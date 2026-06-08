@@ -1418,7 +1418,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    }
 
    public static String[] getCannotReloadItem() {
-      return new String[]{"DisplayName", "AddDisplayName", "ItemID", "AddRecipe", "AddShapelessRecipe", "InventorySize", "Sound", "UAV", "SmallUAV", "TargetDrone", "Category"};
+      return new String[]{"DisplayName", "AddDisplayName", "ItemID", "AddRecipe", "AddShapelessRecipe", "InventorySize", "Sound", "UAV", "SmallUAV", "NewUAV", "NewSmallUAV", "TargetDrone", "Category"};
    }
 
    public boolean canReloadItem(String item) {

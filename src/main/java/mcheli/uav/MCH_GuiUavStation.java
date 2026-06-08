@@ -58,10 +58,8 @@ public class MCH_GuiUavStation
                      info = MCH_TankInfoManager.getFromItem(item.getItem());
                    }
 
-                if (item != null && (item == null || info == null || !((MCH_AircraftInfo)info).isUAV || !((MCH_AircraftInfo)info).isNewUAV)) {
-                     if (item != null) {
-                          drawString("Not UAV", 8, 6, 16711680);
-                        }
+                if (item != null && (info == null || (!((MCH_AircraftInfo)info).isUAV && !((MCH_AircraftInfo)info).isNewUAV))) {
+                     drawString("Not UAV", 8, 6, 16711680);
                    } else if (this.uavStation.getKind() <= 1) {
                      drawString("UAV Station", 8, 6, 16777215);
                    } else if (item != null && !((MCH_AircraftInfo)info).isSmallUAV) {
