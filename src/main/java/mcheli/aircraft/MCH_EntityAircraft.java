@@ -5298,12 +5298,41 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
 
+   private MCH_EntityUavStation resolveUavStationForShiftExit() {
+      if(this.uavStation != null && !this.uavStation.isDead) {
+         return this.uavStation;
+      }
+      if(this.linkedUavStationUUID == null || this.linkedUavStationDimension != this.dimension) {
+         return null;
+      }
+
+      // Integrated runClient usually retains the direct object reference. A dedicated server
+      // may unload that station reference while preserving its UUID and coordinates in NBT.
+      super.worldObj.getChunkFromBlockCoords(MathHelper.floor_double(this.linkedUavStationX), MathHelper.floor_double(this.linkedUavStationZ));
+      for(Object obj : super.worldObj.loadedEntityList) {
+         if(obj instanceof MCH_EntityUavStation) {
+            MCH_EntityUavStation station = (MCH_EntityUavStation)obj;
+            if(!station.isDead && this.linkedUavStationUUID.equals(station.getUniqueID())) {
+               this.setUavStation(station);
+               return station;
+            }
+         }
+      }
+      return null;
+   }
+
    private void deleteNewUavAfterShiftExit() {
       if(super.worldObj.isRemote || !this.isNewUAV()) {
          return;
       }
-      if(this.uavStation != null && !this.uavStation.isDead) {
-         this.uavStation.prepareNewUavShiftExit(this);
+      MCH_EntityUavStation station = resolveUavStationForShiftExit();
+      if(station != null) {
+         if(!station.prepareNewUavShiftExit(this)) {
+            return;
+         }
+      } else {
+         MCH_Lib.Log((Entity)this, "Unable to resolve the New UAV station during shift-exit; preserving the aircraft instead of losing its position", new Object[0]);
+         return;
       }
       MCH_Lib.Log((Entity)this, "Deleting new UAV entity %d after player shift-exit; station Continue may relaunch it", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
       this.setDead(false);
@@ -5336,13 +5365,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       setCommonStatus(1, false);
            if (rByEntity != null) {
-                if (isUAV()) {
-                     if (rByEntity.ridingEntity instanceof MCH_EntityUavStation) {
-                          rByEntity.mountEntity((Entity)null);
-                        }
-                   } else if (isNewUAV()) {
+                // NewUAV/NewSmallUAV must use the direct-control shift exit even when a
+                // content definition also includes the legacy UAV/SmallUAV flag.
+                if (isNewUAV()) {
                      newuavvariable = true;
-                     //here
                      if(!this.worldObj.isRemote) {
                       rByEntity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
                       rByEntity.mountEntity((Entity) null);
@@ -5351,6 +5377,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                       }
                       deleteNewUavAfterShiftExit();
                      }
+                   } else if (isUAV()) {
+                     if (rByEntity.ridingEntity instanceof MCH_EntityUavStation) {
+                          rByEntity.mountEntity((Entity)null);
+                        }
                    } else {
                      setUnmountPosition(rByEntity, (getSeatsInfo()[0]).pos);
                    }
