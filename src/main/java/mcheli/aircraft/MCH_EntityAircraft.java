@@ -5336,13 +5336,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       setCommonStatus(1, false);
            if (rByEntity != null) {
-                if (isUAV()) {
-                     if (rByEntity.ridingEntity instanceof MCH_EntityUavStation) {
-                          rByEntity.mountEntity((Entity)null);
-                        }
-                   } else if (isNewUAV()) {
+                // NewUAV/NewSmallUAV must use the direct-control shift exit even when a
+                // content definition also includes the legacy UAV/SmallUAV flag.
+                if (isNewUAV()) {
                      newuavvariable = true;
-                     //here
                      if(!this.worldObj.isRemote) {
                       rByEntity.setPosition(this.UavStationPosX, this.UavStationPosY, this.UavStationPosZ);
                       rByEntity.mountEntity((Entity) null);
@@ -5351,6 +5348,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                       }
                       deleteNewUavAfterShiftExit();
                      }
+                   } else if (isUAV()) {
+                     if (rByEntity.ridingEntity instanceof MCH_EntityUavStation) {
+                          rByEntity.mountEntity((Entity)null);
+                        }
                    } else {
                      setUnmountPosition(rByEntity, (getSeatsInfo()[0]).pos);
                    }
