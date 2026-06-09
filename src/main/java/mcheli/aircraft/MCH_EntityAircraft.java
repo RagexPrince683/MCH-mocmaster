@@ -25,6 +25,7 @@ import mcheli.ship.MCH_EntityShip;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.uav.MCH_UavInventory;
+import mcheli.uav.MCH_UavJsonStore;
 import mcheli.uav.MCH_UavRegistry;
 import mcheli.weapon.*;
 import mcheli.wrapper.*;
@@ -877,6 +878,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       if(!super.worldObj.isRemote && this.isNewUAV()) {
+         if(this.linkedUavStationUUID != null) {
+            MCH_UavJsonStore.remove(super.worldObj, this.linkedUavStationDimension, this.linkedUavStationX, this.linkedUavStationY, this.linkedUavStationZ);
+         }
          MCH_EntityUavStation station = this.getUavStation();
          if(station != null && !station.isDead) {
             station.markLinkedNewUavDestroyed(this);
