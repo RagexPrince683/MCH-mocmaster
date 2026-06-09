@@ -39,6 +39,8 @@ import net.minecraft.world.World;
 
 public class MCP_EntityPlane extends MCH_EntityAircraft {
 
+   private static final float PLANE_MANEUVERABILITY_FACTOR = 1.5F;
+
    private MCP_PlaneInfo planeInfo = null;
    public float soundVolume;
    public MCH_Parts partNozzle;
@@ -244,17 +246,17 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
    public float getYawFactor() {
       float yaw = this.getVtolMode() > 0?this.getPlaneInfo().vtolYaw:super.getYawFactor();
-      return yaw * 0.8F;
+      return yaw * 0.8F * PLANE_MANEUVERABILITY_FACTOR;
    }
 
    public float getPitchFactor() {
       float pitch = this.getVtolMode() > 0?this.getPlaneInfo().vtolPitch:super.getPitchFactor();
-      return pitch * 0.8F;
+      return pitch * 0.8F * PLANE_MANEUVERABILITY_FACTOR;
    }
 
    public float getRollFactor() {
       float roll = this.getVtolMode() > 0?this.getPlaneInfo().vtolYaw:super.getRollFactor();
-      return roll * 0.8F;
+      return roll * 0.8F * PLANE_MANEUVERABILITY_FACTOR;
    }
 
    public boolean isOverridePlayerPitch() {
@@ -308,6 +310,27 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
       double severity = Math.max(this.stallSeverity, this.getInstantStallSeverity());
       return super.getControlAuthorityFactor() * (float)MCH_FlightModel.getControlAuthority(severity);
+   }
+
+
+   protected double getCompressibilitySpeed() {
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      if(info == null) {
+         return 0.0D;
+      }
+
+      float levelSpeed = info.maxLevelSpeed > 0.0F ? info.maxLevelSpeed : this.getMaxSpeed();
+      return info.compressibilitySpeed > 0.0F ? (double)info.compressibilitySpeed : (double)levelSpeed * 0.9D;
+   }
+
+   protected double getMaxSafeSpeed() {
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      if(info == null) {
+         return 0.0D;
+      }
+
+      float levelSpeed = info.maxLevelSpeed > 0.0F ? info.maxLevelSpeed : this.getMaxSpeed();
+      return info.maxSafeSpeed > 0.0F ? (double)info.maxSafeSpeed : (double)levelSpeed * 1.1D;
    }
 
    private double getInstantStallSeverity() {
@@ -372,7 +395,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
                if(!MCH_Config.MouseControlFlightSimMode.prmBool) {
                   this.rotationByKey(partialTicks);
                   this.setRotRoll(this.getRotRoll() + this.addkeyRotValue * 0.5F * this.getAcInfo().mobilityRoll
-                        * this.getControlAuthorityFactor());
+                        * PLANE_MANEUVERABILITY_FACTOR * this.getControlAuthorityFactor());
                }
             }
          } else {
