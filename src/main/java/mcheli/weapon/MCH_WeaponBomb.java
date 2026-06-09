@@ -33,9 +33,14 @@ public class MCH_WeaponBomb extends MCH_WeaponBase {
                if(!super.worldObj.isRemote) {
                   MCH_Explosion.newExplosion(super.worldObj, (Entity)null, prm.user, e1.posX, e1.posY, e1.posZ, (float)this.getInfo().explosion, (float)this.getInfo().explosionBlock, true, true, this.getInfo().flaming, true, 0);
                   this.playSound(prm.entity);
+                  //destroyAircraft
+                  //e1.destroyAircraft();
+
                }
 
-               e1.destruct();
+               e1.destroyAircraft();
+               //e1.destruct();
+
             }
          }
       } else if(!super.worldObj.isRemote) {
