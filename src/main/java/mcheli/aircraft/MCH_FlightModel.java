@@ -58,6 +58,39 @@ public final class MCH_FlightModel {
       return clamp((stallSpeed - horizontalSpeed) / stallSpeed, 0.0D, 1.0D);
    }
 
+   /**
+    * Returns the fractional horizontal speed loss for one fixed-wing tick.
+    * Inputs are normalized so content authors can tune coefficients directly.
+    */
+   public static double getEnergyDrag(double speed, double levelSpeed, double throttle, double turnLoad,
+                                      double controlLoad, float baseDrag, float inducedDrag,
+                                      float controlSurfaceDrag, float idleDrag) {
+      double referenceSpeed = Math.max(0.05D, levelSpeed);
+      double speedRatio = Math.max(0.0D, speed) / referenceSpeed;
+      double power = clamp(throttle, 0.0D, 1.0D);
+      double drag = Math.max(0.0D, (double)baseDrag) * (0.5D + 0.5D * speedRatio * speedRatio);
+      drag += Math.max(0.0D, (double)inducedDrag) * clamp(turnLoad, 0.0D, 1.0D) * clamp(turnLoad, 0.0D, 1.0D);
+      drag += Math.max(0.0D, (double)controlSurfaceDrag) * clamp(controlLoad, 0.0D, 1.0D);
+      drag += Math.max(0.0D, (double)idleDrag) * (1.0D - power);
+
+      // Full power can sustain maxLevelSpeed. Lower settings progressively reduce
+      // the sustainable speed, so a fast aircraft cannot coast forever at idle.
+      double sustainableSpeed = referenceSpeed * (0.35D + 0.65D * power);
+      if(speed > sustainableSpeed) {
+         drag += Math.max(0.0D, (double)baseDrag + (double)idleDrag)
+               * clamp((speed - sustainableSpeed) / referenceSpeed, 0.0D, 2.0D);
+      }
+      return clamp(drag, 0.0D, 0.5D);
+   }
+
+   /** Positive values gain horizontal speed in a dive; negative values lose it in a climb. */
+   public static double getVerticalEnergyChange(double verticalSpeed, float climbEnergyLoss, float diveEnergyGain) {
+      double climb = clamp(verticalSpeed / 0.35D, 0.0D, 1.0D);
+      double dive = clamp(-verticalSpeed / 0.35D, 0.0D, 1.0D);
+      return dive * Math.max(0.0D, (double)diveEnergyGain)
+            - climb * Math.max(0.0D, (double)climbEnergyLoss);
+   }
+
    /** Diving raises the speed cap gradually, rather than creating an abrupt second limit. */
    public static double getDiveSpeedLimit(float topSpeed, float pitch, double verticalSpeed, float multiplier) {
       double noseDown = clamp((double)pitch / 60.0D, 0.0D, 1.0D);

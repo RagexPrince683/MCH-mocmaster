@@ -849,27 +849,47 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          }
       }
 
-      // A dive converts altitude into speed even at reduced throttle. This also makes
-      // a nose-down recovery the natural way to fly out of a stall.
-      if(dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F) {
-         double dive = MCH_FlightModel.clamp((double)this.getRotPitch() / 60.0D, 0.0D, 1.0D);
-         double yaw = Math.toRadians((double)this.getRotYaw());
-         double diveAcceleration = dive * 0.012D;
-         super.motionX += -Math.sin(yaw) * diveAcceleration;
-         super.motionZ += Math.cos(yaw) * diveAcceleration;
-      }
-
       // 对垂直速度进行衰减
       super.motionY *= 0.95D;
       // 根据飞行器的运动系数衰减水平速度
       super.motionX *= this.getAcInfo().motionFactor;
       super.motionZ *= this.getAcInfo().motionFactor;
 
+      float baseSpeedLimit = this.getMaxSpeed();
+      float levelSpeed = this.getPlaneInfo().maxLevelSpeed > 0.0F ? this.getPlaneInfo().maxLevelSpeed : baseSpeedLimit;
+
+      // Apply a deliberately simple energy model only to conventional airborne flight.
+      // Velocity direction carries the gained/lost energy, while bank and body rates
+      // cheaply approximate induced and control-surface drag during hard manoeuvres.
+      if(dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F && !levelOff) {
+         double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+         double bankLoad = MCH_FlightModel.clamp(MathHelper.abs(this.getRotRoll()) / 75.0D, 0.0D, 1.0D);
+         double bodyRate = (MathHelper.abs(super.pitchAngularVelocity) + MathHelper.abs(super.rollAngularVelocity)
+               + MathHelper.abs(super.yawAngularVelocity)) / 6.0D;
+         double controlLoad = MCH_FlightModel.clamp(bodyRate, 0.0D, 1.0D);
+         double turnLoad = Math.max(bankLoad, controlLoad);
+         double drag = MCH_FlightModel.getEnergyDrag(horizontalSpeed, (double)levelSpeed, this.getEngineThrottle(),
+               turnLoad, controlLoad, this.getPlaneInfo().baseDrag, this.getPlaneInfo().inducedDrag,
+               this.getPlaneInfo().controlSurfaceDrag, this.getPlaneInfo().idleDrag);
+         double energyChange = MCH_FlightModel.getVerticalEnergyChange(super.motionY,
+               this.getPlaneInfo().climbEnergyLoss, this.getPlaneInfo().diveEnergyGain);
+         double targetSpeed = Math.max(0.0D, horizontalSpeed * (1.0D - drag) + energyChange);
+
+         if(horizontalSpeed > 1.0E-4D) {
+            double energyScale = targetSpeed / horizontalSpeed;
+            super.motionX *= energyScale;
+            super.motionZ *= energyScale;
+         } else if(targetSpeed > 0.0D) {
+            double yaw = Math.toRadians((double)this.getRotYaw());
+            super.motionX += -Math.sin(yaw) * targetSpeed;
+            super.motionZ += Math.cos(yaw) * targetSpeed;
+         }
+      }
+
       // 计算当前水平速度的大小
       double motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-      // 获取最大速度限制
-      float baseSpeedLimit = this.getMaxSpeed();
-      float speedLimit = (float)MCH_FlightModel.getDiveSpeedLimit(baseSpeedLimit, this.getRotPitch(), super.motionY, this.getAcInfo().diveSpeedMultiplier);
+      // Diving permits an overspeed, but level flight settles toward maxLevelSpeed.
+      float speedLimit = (float)MCH_FlightModel.getDiveSpeedLimit(levelSpeed, this.getRotPitch(), super.motionY, this.getAcInfo().diveSpeedMultiplier);
       // 如果当前速度超过最大速度限制，按最大速度比例缩小水平速度
       if(motion1 > (double)speedLimit) {
          super.motionX *= (double)speedLimit / motion1;
