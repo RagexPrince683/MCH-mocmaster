@@ -57,20 +57,13 @@ public final class MCH_FlightModel {
       double density = clamp(airDensityFactor, 0.25D, 1.1D);
       double quadraticDrag = baseDrag * density * speed * speed / (double)referenceSpeed;
 
-      // Limit the load-factor calculation to a 60-degree coordinated turn. Steeper
-      // visual banks must not make drag approach infinity as cos(bank) approaches 0.
-      double bankRadians = Math.toRadians(clamp(Math.abs((double)bankAngle), 0.0D, 60.0D));
-      double loadFactor = 1.0D / Math.max(0.5D, Math.cos(bankRadians));
-      double inducedDragPenalty = Math.min(0.24D, (loadFactor * loadFactor - 1.0D) * 0.08D);
+      double bankRadians = Math.toRadians(clamp(Math.abs((double)bankAngle), 0.0D, 75.0D));
+      double loadFactor = 1.0D / Math.max(0.25D, Math.cos(bankRadians));
+      double inducedDrag = 1.0D + (loadFactor * loadFactor - 1.0D) * 0.35D;
+      double sideslipDrag = 1.0D + clamp(Math.abs(sideslip), 0.0D, 1.0D) * 1.5D;
 
-      // Heading naturally leads the velocity vector while an aircraft starts turning.
-      // Ignore that small lag and only penalize substantial uncoordinated sideslip.
-      double sideslipExcess = clamp((Math.abs(sideslip) - 0.2D) / 0.8D, 0.0D, 1.0D);
-      double sideslipDragPenalty = sideslipExcess * 0.16D;
-      double turnDragMultiplier = 1.0D + Math.min(0.4D, inducedDragPenalty + sideslipDragPenalty);
-
-      // Keep drag gradual even for low-drag aircraft after collisions or abrupt rotations.
-      return Math.min(speed * 0.05D, quadraticDrag * turnDragMultiplier);
+      // Prevent one extreme tick from deleting momentum after a collision or teleport.
+      return Math.min(speed * 0.25D, quadraticDrag * inducedDrag * sideslipDrag);
    }
 
    /** Diving raises the speed cap gradually, rather than creating an abrupt second limit. */
