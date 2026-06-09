@@ -53,8 +53,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    /** Smoothed stall state used by lift loss, controls, and instability. */
    private double stallSeverity;
    private boolean stalling;
-   private double debugDrag;
-   private double debugControlAuthority;
 
 
    public MCP_EntityPlane(World world) {
@@ -77,8 +75,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       this.angleOfAttack = 0.0D;
       this.stallSeverity = 0.0D;
       this.stalling = false;
-      this.debugDrag = 0.0D;
-      this.debugControlAuthority = 1.0D;
    }
 
    public String getKindName() {
@@ -306,18 +302,16 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    }
 
    protected float getControlAuthorityFactor() {
-      if(this.getPlaneInfo() == null || !this.getAcInfo().enableRealisticFlightModel || this.getNozzleRotation() > 0.01F || this.onGround) {
-         this.debugControlAuthority = super.getControlAuthorityFactor();
-         return (float)this.debugControlAuthority;
+      if(this.getPlaneInfo() == null || this.getNozzleRotation() > 0.01F || this.onGround) {
+         return 1.0F;
       }
 
       double severity = Math.max(this.stallSeverity, this.getInstantStallSeverity());
-      this.debugControlAuthority = super.getControlAuthorityFactor() * MCH_FlightModel.getControlAuthority(severity);
-      return (float)this.debugControlAuthority;
+      return super.getControlAuthorityFactor() * (float)MCH_FlightModel.getControlAuthority(severity);
    }
 
    private double getInstantStallSeverity() {
-      if(this.getPlaneInfo() == null || !this.getAcInfo().enableRealisticFlightModel) {
+      if(this.getPlaneInfo() == null) {
          return 0.0D;
       }
 
@@ -332,15 +326,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    }
 
    private void updateAerodynamicState() {
-      if(this.getPlaneInfo() == null || !this.getAcInfo().enableRealisticFlightModel) {
-         this.angleOfAttack = 0.0D;
-         this.stallSeverity = 0.0D;
-         this.stalling = false;
-         this.debugDrag = 0.0D;
-         this.debugControlAuthority = 1.0D;
-         return;
-      }
-
       Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
       double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
             + super.motionZ * super.motionZ);
@@ -939,8 +924,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       // Apply a deliberately simple energy model only to conventional airborne flight.
       // Velocity direction carries the gained/lost energy, while bank and body rates
       // cheaply approximate induced and control-surface drag during hard manoeuvres.
-      this.debugDrag = 0.0D;
-      if(this.getAcInfo().enableRealisticFlightModel && dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F && !levelOff) {
+      if(dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F && !levelOff) {
          double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
          double bankLoad = MCH_FlightModel.clamp(MathHelper.abs(this.getRotRoll()) / 75.0D, 0.0D, 1.0D);
          double bodyRate = (MathHelper.abs(super.pitchAngularVelocity) + MathHelper.abs(super.rollAngularVelocity)
@@ -953,7 +937,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          drag += MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getAcInfo().criticalAoA,
                this.getPlaneInfo().baseDrag, this.getAcInfo().aoaDragMultiplier);
          drag = MCH_FlightModel.clamp(drag, 0.0D, 0.5D);
-         this.debugDrag = drag;
          double energyChange = MCH_FlightModel.getVerticalEnergyChange(super.motionY,
                this.getPlaneInfo().climbEnergyLoss, this.getPlaneInfo().diveEnergyGain);
          double targetSpeed = Math.max(0.0D, horizontalSpeed * (1.0D - drag) + energyChange);
@@ -998,7 +981,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       // the runway, low speed or excessive AoA removes lift and introduces a repeatable
       // buffet/wing drop. Lowering the nose reduces AoA and lets speed build to recovery.
       boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
-      if(this.getAcInfo().enableRealisticFlightModel && !nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
+      if(!nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
          double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)this.getAcInfo().stallLiftLoss, 0.0D, 1.0D);
          if(super.motionY > 0.0D) {
             super.motionY *= 1.0D - liftLoss * 0.12D;
@@ -1016,8 +999,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       }
 
       // Lift fades through a band below the configured ceiling instead of hitting an invisible wall.
-      double ceilingLift = this.getAcInfo().enableRealisticFlightModel
-            ? MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange) : 1.0D;
+      double ceilingLift = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
       if(!nearGround && ceilingLift < 1.0D) {
          if(super.motionY > 0.0D) {
             super.motionY *= 0.9D + ceilingLift * 0.1D;
@@ -1035,8 +1017,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          }
       }
 
-      this.logFlightModelDebug(motion1);
-
       // 更新飞行器位置
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
 
@@ -1052,22 +1032,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       }
 
 
-   }
-
-   private void logFlightModelDebug(double horizontalSpeed) {
-      if(this.getAcInfo() == null || !this.getAcInfo().enableFlightModelDebug
-            || !MCH_Config.DebugFlightModel.prmBool || super.ticksExisted % 20 != 0) {
-         return;
-      }
-
-      double airspeed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
-            + super.motionZ * super.motionZ);
-      MCH_Lib.DbgLog(super.worldObj,
-            "[MCH-FLIGHT][%s] speed=%.3f hSpeed=%.3f AoA=%.2f stall=%s stallSeverity=%.2f g=%.2f drag=%.4f controlAuthority=%.2f realistic=%s",
-            new Object[]{this.getTypeName(), Double.valueOf(airspeed), Double.valueOf(horizontalSpeed),
-                  Double.valueOf(this.angleOfAttack), Boolean.valueOf(this.stalling), Double.valueOf(this.stallSeverity),
-                  Double.valueOf(this.getCurrentGForce()), Double.valueOf(this.debugDrag),
-                  Double.valueOf(this.debugControlAuthority), Boolean.valueOf(this.getAcInfo().enableRealisticFlightModel)});
    }
 
    private void collisionEntity(AxisAlignedBB bb) {
