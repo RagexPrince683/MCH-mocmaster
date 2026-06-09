@@ -48,6 +48,11 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    public float addkeyRotValue;
    /** Smoothed engine output; commanded throttle remains unchanged for controls and networking. */
    private double engineThrottle;
+   /** Current unsigned angle between the nose and velocity vectors, in degrees. */
+   private double angleOfAttack;
+   /** Smoothed stall state used by lift loss, controls, and instability. */
+   private double stallSeverity;
+   private boolean stalling;
 
 
    public MCP_EntityPlane(World world) {
@@ -67,6 +72,9 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       this.rotationRotor = 0.0F;
       this.prevRotationRotor = 0.0F;
       this.engineThrottle = 0.0D;
+      this.angleOfAttack = 0.0D;
+      this.stallSeverity = 0.0D;
+      this.stalling = false;
    }
 
    public String getKindName() {
@@ -293,6 +301,59 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
    }
 
+   protected float getControlAuthorityFactor() {
+      if(this.getPlaneInfo() == null || this.getNozzleRotation() > 0.01F || this.onGround) {
+         return 1.0F;
+      }
+
+      double severity = Math.max(this.stallSeverity, this.getInstantStallSeverity());
+      return (float)MCH_FlightModel.getControlAuthority(severity);
+   }
+
+   private double getInstantStallSeverity() {
+      if(this.getPlaneInfo() == null) {
+         return 0.0D;
+      }
+
+      Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
+      double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
+            + super.motionZ * super.motionZ);
+      double aoa = MCH_FlightModel.getAngleOfAttackDegrees(forward.xCoord, forward.yCoord, forward.zCoord,
+            super.motionX, super.motionY, super.motionZ);
+      double stallSpeed = MCH_FlightModel.getStallSpeed(this.getAcInfo().stallSpeed, this.getMaxSpeed(),
+            this.getAcInfo().stallSpeedFactor);
+      return MCH_FlightModel.getAerodynamicStallSeverity(speed, aoa, stallSpeed, this.getAcInfo().criticalAoA);
+   }
+
+   private void updateAerodynamicState() {
+      Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
+      double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
+            + super.motionZ * super.motionZ);
+      this.angleOfAttack = MCH_FlightModel.getAngleOfAttackDegrees(forward.xCoord, forward.yCoord, forward.zCoord,
+            super.motionX, super.motionY, super.motionZ);
+
+      double stallSpeed = MCH_FlightModel.getStallSpeed(this.getAcInfo().stallSpeed, this.getMaxSpeed(),
+            this.getAcInfo().stallSpeedFactor);
+      double demand = MCH_FlightModel.getAerodynamicStallSeverity(speed, this.angleOfAttack, stallSpeed,
+            this.getAcInfo().criticalAoA);
+      double recoverySpeed = this.getAcInfo().stallRecoverySpeed > 0.0F
+            ? (double)this.getAcInfo().stallRecoverySpeed : stallSpeed * 1.2D;
+
+      if(this.stalling) {
+         if(speed >= recoverySpeed && this.angleOfAttack <= (double)this.getAcInfo().criticalAoA * 0.75D) {
+            this.stalling = false;
+         }
+      } else if(demand > 0.0D) {
+         this.stalling = true;
+      }
+
+      double targetSeverity = this.stalling ? Math.max(0.12D, demand) : 0.0D;
+      this.stallSeverity += (targetSeverity - this.stallSeverity) * (targetSeverity > this.stallSeverity ? 0.35D : 0.18D);
+      if(this.stallSeverity < 1.0E-3D) {
+         this.stallSeverity = 0.0D;
+      }
+   }
+
    public void onUpdateAngles(float partialTicks) {
       if(!this.isDestroyed()) {
          if(super.isGunnerMode) {
@@ -310,7 +371,8 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
                MCH_Config var10000 = MCH_MOD.config;
                if(!MCH_Config.MouseControlFlightSimMode.prmBool) {
                   this.rotationByKey(partialTicks);
-                  this.setRotRoll(this.getRotRoll() + this.addkeyRotValue * 0.5F * this.getAcInfo().mobilityRoll);
+                  this.setRotRoll(this.getRotRoll() + this.addkeyRotValue * 0.5F * this.getAcInfo().mobilityRoll
+                        * this.getControlAuthorityFactor());
                }
             }
          } else {
@@ -727,6 +789,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       if(this.canFloatWater()) {
          dp = this.getWaterDepth();
       }
+      this.updateAerodynamicState();
 
       boolean levelOff = super.isGunnerMode;
       if(dp == 0.0D) {
@@ -871,6 +934,9 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          double drag = MCH_FlightModel.getEnergyDrag(horizontalSpeed, (double)levelSpeed, this.getEngineThrottle(),
                turnLoad, controlLoad, this.getPlaneInfo().baseDrag, this.getPlaneInfo().inducedDrag,
                this.getPlaneInfo().controlSurfaceDrag, this.getPlaneInfo().idleDrag);
+         drag += MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getAcInfo().criticalAoA,
+               this.getPlaneInfo().baseDrag, this.getAcInfo().aoaDragMultiplier);
+         drag = MCH_FlightModel.clamp(drag, 0.0D, 0.5D);
          double energyChange = MCH_FlightModel.getVerticalEnergyChange(super.motionY,
                this.getPlaneInfo().climbEnergyLoss, this.getPlaneInfo().diveEnergyGain);
          double targetSpeed = Math.max(0.0D, horizontalSpeed * (1.0D - drag) + energyChange);
@@ -911,26 +977,25 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          }
       }
 
-      // Keep ground effect for several blocks so the stall model cannot cancel
-      // normal rotation and lift immediately after the wheels leave the runway.
+      // Keep ground effect for several blocks so takeoff remains forgiving. Away from
+      // the runway, low speed or excessive AoA removes lift and introduces a repeatable
+      // buffet/wing drop. Lowering the nose reduces AoA and lets speed build to recovery.
       boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
-      if(!nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff) {
-         double bank = MCH_FlightModel.clamp(MathHelper.abs(this.getRotRoll()) / 90.0D, 0.0D, 1.0D);
-         float effectiveStallFactor = this.getAcInfo().stallSpeedFactor * (float)(1.0D + bank * 0.35D);
-         double stall = MCH_FlightModel.getStallSeverity(motion1, baseSpeedLimit, effectiveStallFactor);
-
-         // Full power and an established climb greatly reduce the initial sink. A
-         // low-speed aircraft can therefore take off, while power-off and turning
-         // stalls remain considerably stronger once clear of the runway.
-         double poweredLift = MCH_FlightModel.clamp(this.getEngineThrottle(), 0.0D, 1.0D);
-         double takeoffRelief = super.motionY >= 0.0D ? poweredLift * 0.8D : poweredLift * 0.45D;
-         stall *= 1.0D - takeoffRelief;
-         if(stall > 0.0D) {
-            super.motionY -= 0.012D * stall * (double)this.getAcInfo().stallStrength;
-            if(this.getRotPitch() < 35.0F) {
-               this.setRotPitch(this.getRotPitch() + (float)(0.08D * stall * (double)this.getAcInfo().stallStrength));
-            }
+      if(!nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
+         double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)this.getAcInfo().stallLiftLoss, 0.0D, 1.0D);
+         if(super.motionY > 0.0D) {
+            super.motionY *= 1.0D - liftLoss * 0.12D;
          }
+         super.motionY -= 0.018D * liftLoss * (double)this.getAcInfo().stallStrength;
+
+         double phase = (double)(super.ticksExisted + this.getEntityId() * 13) * 0.37D;
+         double buffet = Math.sin(phase) * (double)this.getAcInfo().stallInstability * this.stallSeverity;
+         double wingDrop = ((this.getEntityId() & 1) == 0 ? 1.0D : -1.0D)
+               * (double)this.getAcInfo().stallInstability * this.stallSeverity;
+         this.setRotRoll(this.getRotRoll() + (float)(wingDrop * 0.08D + buffet * 0.04D));
+         this.setRotYaw(this.getRotYaw() + (float)(buffet * 0.02D));
+         this.setRotPitch(this.getRotPitch() + (float)(0.04D * (double)this.getAcInfo().stallInstability
+               * this.stallSeverity));
       }
 
       // Lift fades through a band below the configured ceiling instead of hitting an invisible wall.

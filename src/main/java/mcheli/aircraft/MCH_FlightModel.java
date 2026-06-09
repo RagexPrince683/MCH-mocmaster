@@ -52,6 +52,51 @@ public final class MCH_FlightModel {
       return clamp((ceiling - altitude) / range, 0.0D, 1.0D);
    }
 
+   /** Returns the unsigned angle, in degrees, between the aircraft nose and its velocity. */
+   public static double getAngleOfAttackDegrees(double forwardX, double forwardY, double forwardZ,
+                                                double velocityX, double velocityY, double velocityZ) {
+      double forwardLength = Math.sqrt(forwardX * forwardX + forwardY * forwardY + forwardZ * forwardZ);
+      double speed = Math.sqrt(velocityX * velocityX + velocityY * velocityY + velocityZ * velocityZ);
+      if(forwardLength < 1.0E-6D || speed < 1.0E-6D) {
+         return 0.0D;
+      }
+
+      double dot = (forwardX * velocityX + forwardY * velocityY + forwardZ * velocityZ)
+            / (forwardLength * speed);
+      return Math.toDegrees(Math.acos(clamp(dot, -1.0D, 1.0D)));
+   }
+
+   /** Resolves an absolute stall speed while retaining compatibility with StallSpeedFactor. */
+   public static double getStallSpeed(float stallSpeed, float topSpeed, float stallSpeedFactor) {
+      if(stallSpeed > 0.0F) {
+         return stallSpeed;
+      }
+      return Math.max(0.05D, (double)topSpeed * (double)stallSpeedFactor);
+   }
+
+   /** Returns the stronger of the low-speed and excessive-AoA stall demands. */
+   public static double getAerodynamicStallSeverity(double speed, double angleOfAttack,
+                                                     double stallSpeed, float criticalAoA) {
+      double speedSeverity = stallSpeed > 1.0E-6D
+            ? clamp((stallSpeed - speed) / stallSpeed, 0.0D, 1.0D) : 0.0D;
+      double critical = Math.max(1.0D, (double)criticalAoA);
+      double aoaSeverity = clamp((Math.abs(angleOfAttack) - critical) / critical, 0.0D, 1.0D);
+      return Math.max(speedSeverity, aoaSeverity);
+   }
+
+   /** Control surfaces lose authority progressively as the stall develops. */
+   public static double getControlAuthority(double stallSeverity) {
+      return clamp(1.0D - clamp(stallSeverity, 0.0D, 1.0D) * 0.75D, 0.25D, 1.0D);
+   }
+
+   /** Additional fractional drag caused by presenting the airframe to the airflow. */
+   public static double getAngleOfAttackDrag(double angleOfAttack, float criticalAoA,
+                                              float baseDrag, float aoaDragMultiplier) {
+      double normalizedAoA = Math.abs(angleOfAttack) / Math.max(1.0D, (double)criticalAoA);
+      return Math.max(0.0D, (double)baseDrag) * Math.max(0.0D, (double)aoaDragMultiplier)
+            * normalizedAoA * normalizedAoA;
+   }
+
    /** Returns a 0..1 severity value as airspeed falls below the stall threshold. */
    public static double getStallSeverity(double horizontalSpeed, float topSpeed, float stallSpeedFactor) {
       double stallSpeed = Math.max(0.05D, (double)topSpeed * (double)stallSpeedFactor);

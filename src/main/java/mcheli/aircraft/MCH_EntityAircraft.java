@@ -1768,6 +1768,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return 0.0F;
    }
 
+   /** Aircraft types can reduce all three pilot control axes under degraded airflow. */
+   protected float getControlAuthorityFactor() {
+      return 1.0F;
+   }
+
    public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
       //System.out.println("set angles");
       if(partialTicks < 0.03F) {
@@ -1835,6 +1840,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
          roll = roll * this.getRollFactor() * 0.06F;
       }
+
+      float controlAuthority = this.getControlAuthorityFactor();
+      pitch *= controlAuthority;
+      roll *= controlAuthority;
+      yaw *= controlAuthority;
 
       // The legacy controls above still define the requested angular rate.
       // Integrating that request as a damped body rate retains existing mobility
