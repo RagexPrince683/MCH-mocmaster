@@ -29,7 +29,7 @@ public class MCH_WeaponBomb extends MCH_WeaponBase {
       if(this.getInfo() != null && this.getInfo().destruct) {
          if(prm.entity instanceof MCH_EntityAircraft) {
             MCH_EntityAircraft e1 = (MCH_EntityAircraft)prm.entity;
-            if(e1.isUAV() && e1.getSeatNum() == 0) {
+            if((e1.isUAV() || e1.isNewUAV()) && e1.getSeatNum() == 0) {
                if(!super.worldObj.isRemote) {
                   MCH_Explosion.newExplosion(super.worldObj, (Entity)null, prm.user, e1.posX, e1.posY, e1.posZ, (float)this.getInfo().explosion, (float)this.getInfo().explosionBlock, true, true, this.getInfo().flaming, true, 0);
                   this.playSound(prm.entity);
