@@ -137,6 +137,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    protected float pitchAngularVelocity;
    protected float rollAngularVelocity;
    protected float yawAngularVelocity;
+   /** Latest approximate load factor, shared by controls and client feedback. */
+   protected double currentGForce = 1.0D;
+   /** Fractional overspeed damage retained between ticks. */
+   private double overspeedDamageAccumulator;
    private double currentThrottle;
    private double prevCurrentThrottle;
    public double currentSpeed;
@@ -1770,7 +1774,83 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    /** Aircraft types can reduce all three pilot control axes under degraded airflow. */
    protected float getControlAuthorityFactor() {
-      return 1.0F;
+      MCH_AircraftInfo info = this.getAcInfo();
+      return info != null ? (float)MCH_FlightModel.getHighGControlAuthority(this.currentGForce,
+            info.maxComfortableG, info.maxStructuralG, info.gControlPenalty) : 1.0F;
+   }
+
+   /** Current simplified load factor, useful to HUDs and aircraft-specific extensions. */
+   public double getCurrentGForce() {
+      return this.currentGForce;
+   }
+
+   protected double getAirspeed() {
+      return Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
+            + super.motionZ * super.motionZ);
+   }
+
+   protected double getCompressibilitySpeed() {
+      MCH_AircraftInfo info = this.getAcInfo();
+      return info == null ? 0.0D : (info.compressibilitySpeed > 0.0F
+            ? (double)info.compressibilitySpeed : (double)info.speed * 0.9D);
+   }
+
+   protected double getMaxSafeSpeed() {
+      MCH_AircraftInfo info = this.getAcInfo();
+      return info == null ? 0.0D : (info.maxSafeSpeed > 0.0F
+            ? (double)info.maxSafeSpeed : (double)info.speed * 1.1D);
+   }
+
+   /** Override to customize how an aircraft reacts above its structural load limit. */
+   protected void onStructuralOverload(double severity) {
+   }
+
+   /** Override to customize how airframe damage is applied during an overspeed. */
+   protected void applyOverspeedDamage(double severity) {
+      MCH_AircraftInfo info = this.getAcInfo();
+      if(info == null || info.overspeedDamageRate <= 0.0F || severity <= 0.0D || this.isDestroyed()) {
+         return;
+      }
+
+      this.overspeedDamageAccumulator += severity * (double)info.overspeedDamageRate;
+      int damage = (int)this.overspeedDamageAccumulator;
+      if(damage > 0) {
+         this.overspeedDamageAccumulator -= (double)damage;
+         this.setDamageTaken(this.getDamageTaken() + damage);
+      }
+   }
+
+   private void updateFlightStress() {
+      MCH_AircraftInfo info = this.getAcInfo();
+      if(info == null) {
+         this.currentGForce = 1.0D;
+         return;
+      }
+
+      double pitchRate = Math.max(Math.abs((double)this.pitchAngularVelocity),
+            Math.abs((double)MathHelper.wrapAngleTo180_float(this.getRotPitch() - this.prevRotationPitch)));
+      double yawRate = Math.max(Math.abs((double)this.yawAngularVelocity),
+            Math.abs((double)MathHelper.wrapAngleTo180_float(this.getRotYaw() - this.prevRotationYaw)));
+      double turnRate = Math.sqrt(pitchRate * pitchRate + yawRate * yawRate);
+      double speed = this.getAirspeed();
+      this.currentGForce = MCH_FlightModel.getApproximateGForce(speed, turnRate);
+
+      double structuralOverload = Math.max(0.0D, this.currentGForce / Math.max(1.0D,
+            (double)info.maxStructuralG) - 1.0D);
+      double overspeed = MCH_FlightModel.getOverspeedSeverity(speed, this.getMaxSafeSpeed());
+      if(!super.worldObj.isRemote) {
+         if(structuralOverload > 0.0D) {
+            this.onStructuralOverload(structuralOverload);
+         }
+         this.applyOverspeedDamage(overspeed);
+      } else if(info.hasalert && super.ticksExisted % 20 == 0
+            && W_Entity.isEqual(MCH_MOD.proxy.getClientPlayer(), this.getRiddenByEntity())) {
+         boolean highLoad = this.currentGForce > (double)info.maxComfortableG;
+         boolean compressing = speed > this.getCompressibilitySpeed();
+         if(highLoad || compressing || overspeed > 0.0D) {
+            W_McClient.DEF_playSoundFX("random.click", 0.8F, overspeed > 0.0D ? 0.6F : 1.4F);
+         }
+      }
    }
 
    public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
@@ -1842,7 +1922,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       float controlAuthority = this.getControlAuthorityFactor();
-      pitch *= controlAuthority;
+      double pitchAuthority = MCH_FlightModel.getCompressibilityPitchAuthority(this.getAirspeed(),
+            this.getCompressibilitySpeed(), this.getMaxSafeSpeed(), this.getAcInfo().compressibilityPitchPenalty);
+      pitch *= controlAuthority * (float)pitchAuthority;
       roll *= controlAuthority;
       yaw *= controlAuthority;
 
@@ -2077,6 +2159,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       this.prevCurrentThrottle = this.getCurrentThrottle();
       this.lastBBDamageFactor = 1.0F;
+      this.updateFlightStress();
       this.updateControl();
       this.checkServerNoMove();
       this.onUpdate_RidingEntity();

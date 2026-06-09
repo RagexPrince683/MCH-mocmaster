@@ -307,7 +307,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       }
 
       double severity = Math.max(this.stallSeverity, this.getInstantStallSeverity());
-      return (float)MCH_FlightModel.getControlAuthority(severity);
+      return super.getControlAuthorityFactor() * (float)MCH_FlightModel.getControlAuthority(severity);
    }
 
    private double getInstantStallSeverity() {

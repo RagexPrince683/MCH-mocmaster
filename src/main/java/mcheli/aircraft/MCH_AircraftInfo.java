@@ -158,6 +158,20 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    public float stallStrength;
    /** Maximum extra horizontal speed available while a plane is diving. */
    public float diveSpeedMultiplier;
+   /** Load factor where high-G control authority begins to fade. */
+   public float maxComfortableG;
+   /** Load factor treated as the structural limit. */
+   public float maxStructuralG;
+   /** Maximum fraction of control authority removed by excessive G. */
+   public float gControlPenalty;
+   /** Airspeed where pitch compressibility begins. Zero derives 90% of configured speed. */
+   public float compressibilitySpeed;
+   /** Maximum fraction of pitch authority removed by compressibility. */
+   public float compressibilityPitchPenalty;
+   /** Airspeed where overspeed warnings and damage begin. Zero derives 110% of configured speed. */
+   public float maxSafeSpeed;
+   /** Damage points per tick at 100% overspeed; zero leaves the damage hook disabled. */
+   public float overspeedDamageRate;
     private List textureNameList;
    public int textureCount;
    public float particlesScale;
@@ -388,6 +402,13 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.stallSpeedFactor = 0.22F;
       this.stallStrength = 0.6F;
       this.diveSpeedMultiplier = 1.25F;
+      this.maxComfortableG = 4.0F;
+      this.maxStructuralG = 8.0F;
+      this.gControlPenalty = 0.7F;
+      this.compressibilitySpeed = 0.0F;
+      this.compressibilityPitchPenalty = 0.65F;
+      this.maxSafeSpeed = 0.0F;
+      this.overspeedDamageRate = 0.2F;
       this.pivotTurnThrottle = 0.0F;
       this.trackRollerRot = 30.0F;
       this.partWheelRot = 30.0F;
@@ -937,6 +958,20 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                     this.stallStrength = this.toFloat(data, 0.0F, 4.0F);
                                  } else if(item.equalsIgnoreCase("DiveSpeedMultiplier")) {
                                     this.diveSpeedMultiplier = this.toFloat(data, 1.0F, 2.0F);
+                                 } else if(item.equalsIgnoreCase("MaxComfortableG")) {
+                                    this.maxComfortableG = this.toFloat(data, 1.0F, 30.0F);
+                                 } else if(item.equalsIgnoreCase("MaxStructuralG")) {
+                                    this.maxStructuralG = this.toFloat(data, 1.0F, 50.0F);
+                                 } else if(item.equalsIgnoreCase("GControlPenalty")) {
+                                    this.gControlPenalty = this.toFloat(data, 0.0F, 1.0F);
+                                 } else if(item.equalsIgnoreCase("CompressibilitySpeed")) {
+                                    this.compressibilitySpeed = this.toFloat(data, 0.0F, 10.0F);
+                                 } else if(item.equalsIgnoreCase("CompressibilityPitchPenalty")) {
+                                    this.compressibilityPitchPenalty = this.toFloat(data, 0.0F, 1.0F);
+                                 } else if(item.equalsIgnoreCase("MaxSafeSpeed")) {
+                                    this.maxSafeSpeed = this.toFloat(data, 0.0F, 10.0F);
+                                 } else if(item.equalsIgnoreCase("OverspeedDamageRate")) {
+                                    this.overspeedDamageRate = this.toFloat(data, 0.0F, 100.0F);
                                  } else if(item.equalsIgnoreCase("Stealth")) {
                                     this.stealth = this.toFloat(data, 0.0F, 1.0F);
                                  } else if(item.equalsIgnoreCase("EntityWidth")) {
