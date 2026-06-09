@@ -115,6 +115,20 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    public float mobilityPitch;
    public float mobilityRoll;
    public float mobilityYawOnGround;
+   /** Control torque applied around each local aircraft axis. */
+   public float pitchTorque;
+   public float rollTorque;
+   public float yawTorque;
+   /** Angular drag applied to each local aircraft axis. */
+   public float pitchDamping;
+   public float rollDamping;
+   public float yawDamping;
+   /** Scales resistance to angular acceleration without changing eventual control authority. */
+   public float inertiaMultiplier;
+   /** Maximum engine-output increase per tick. */
+   public float throttleAcceleration;
+   /** Maximum engine-output decrease per tick. */
+   public float engineDrag;
    public float minRotationPitch;
    public float maxRotationPitch;
    public float minRotationRoll;
@@ -333,6 +347,17 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.mobilityPitch = 1.0F;
       this.mobilityRoll = 1.0F;
       this.mobilityYawOnGround = 1.0F;
+      // Matching torque and damping preserves the old mobility values as the eventual
+      // turn rate while adding a short, weighty acceleration into that rate.
+      this.pitchTorque = 0.35F;
+      this.rollTorque = 0.35F;
+      this.yawTorque = 0.35F;
+      this.pitchDamping = 0.35F;
+      this.rollDamping = 0.35F;
+      this.yawDamping = 0.35F;
+      this.inertiaMultiplier = 1.0F;
+      this.throttleAcceleration = 0.02F;
+      this.engineDrag = 0.015F;
       this.minRotationPitch = this.getMinRotationPitch();
       this.maxRotationPitch = this.getMaxRotationPitch();
       this.minRotationRoll = this.getMinRotationPitch();
@@ -838,6 +863,24 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                     this.mobilityPitch = this.toFloat(data, 0.0F, 100.0F);
                                  } else if(item.equalsIgnoreCase("MobilityRoll")) {
                                     this.mobilityRoll = this.toFloat(data, 0.0F, 100.0F);
+                                 } else if(item.equalsIgnoreCase("PitchTorque")) {
+                                    this.pitchTorque = this.toFloat(data, 0.0F, 100.0F);
+                                 } else if(item.equalsIgnoreCase("RollTorque")) {
+                                    this.rollTorque = this.toFloat(data, 0.0F, 100.0F);
+                                 } else if(item.equalsIgnoreCase("YawTorque")) {
+                                    this.yawTorque = this.toFloat(data, 0.0F, 100.0F);
+                                 } else if(item.equalsIgnoreCase("PitchDamping")) {
+                                    this.pitchDamping = this.toFloat(data, 0.0F, 100.0F);
+                                 } else if(item.equalsIgnoreCase("RollDamping")) {
+                                    this.rollDamping = this.toFloat(data, 0.0F, 100.0F);
+                                 } else if(item.equalsIgnoreCase("YawDamping")) {
+                                    this.yawDamping = this.toFloat(data, 0.0F, 100.0F);
+                                 } else if(item.equalsIgnoreCase("Mass") || item.equalsIgnoreCase("InertiaMultiplier")) {
+                                    this.inertiaMultiplier = this.toFloat(data, 0.05F, 100.0F);
+                                 } else if(item.equalsIgnoreCase("ThrottleAcceleration")) {
+                                    this.throttleAcceleration = this.toFloat(data, 0.0F, 1.0F);
+                                 } else if(item.equalsIgnoreCase("EngineDrag")) {
+                                    this.engineDrag = this.toFloat(data, 0.0F, 1.0F);
                                  } else if(item.equalsIgnoreCase("MinRotationPitch")) {
                                     this.limitRotation = true;
                                     this.minRotationPitch = this.toFloat(data, this.getMinRotationPitch(), 0.0F);
