@@ -878,12 +878,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       if(!super.worldObj.isRemote && this.isNewUAV()) {
-         if(this.linkedUavStationUUID != null) {
-            MCH_UavJsonStore.remove(super.worldObj, this.linkedUavStationDimension, this.linkedUavStationX, this.linkedUavStationY, this.linkedUavStationZ);
-         }
-         MCH_EntityUavStation station = this.getUavStation();
-         if(station != null && !station.isDead) {
+         MCH_EntityUavStation station = resolveLinkedUavStation();
+         if(station != null) {
             station.markLinkedNewUavDestroyed(this);
+         } else if(this.linkedUavStationUUID != null) {
+            MCH_UavJsonStore.remove(super.worldObj, this.linkedUavStationDimension, this.linkedUavStationX, this.linkedUavStationY, this.linkedUavStationZ);
+            MCH_Lib.Log((Entity)this, "Destroyed New UAV could not resolve station %s at %.2f, %.2f, %.2f; removed its JSON record", new Object[] { this.linkedUavStationUUID.toString(), Double.valueOf(this.linkedUavStationX), Double.valueOf(this.linkedUavStationY), Double.valueOf(this.linkedUavStationZ) });
          }
       }
 
@@ -5302,7 +5302,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
 
-   private MCH_EntityUavStation resolveUavStationForShiftExit() {
+   private MCH_EntityUavStation resolveLinkedUavStation() {
       if(this.uavStation != null && !this.uavStation.isDead) {
          return this.uavStation;
       }
@@ -5312,7 +5312,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       // Integrated runClient usually retains the direct object reference. A dedicated server
       // may unload that station reference while preserving its UUID and coordinates in NBT.
-      super.worldObj.getChunkFromBlockCoords(MathHelper.floor_double(this.linkedUavStationX), MathHelper.floor_double(this.linkedUavStationZ));
+      int stationX = MathHelper.floor_double(this.linkedUavStationX);
+      int stationY = MathHelper.floor_double(this.linkedUavStationY);
+      int stationZ = MathHelper.floor_double(this.linkedUavStationZ);
+      super.worldObj.getChunkFromBlockCoords(stationX, stationZ);
+      MCH_EntityUavStation coordinateMatch = null;
       for(Object obj : super.worldObj.loadedEntityList) {
          if(obj instanceof MCH_EntityUavStation) {
             MCH_EntityUavStation station = (MCH_EntityUavStation)obj;
@@ -5320,7 +5324,16 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                this.setUavStation(station);
                return station;
             }
+            if(!station.isDead && MathHelper.floor_double(station.posX) == stationX &&
+               MathHelper.floor_double(station.posY) == stationY && MathHelper.floor_double(station.posZ) == stationZ) {
+               coordinateMatch = station;
+            }
          }
+      }
+      if(coordinateMatch != null) {
+         MCH_Lib.Log((Entity)this, "Recovered New UAV station by stored coordinates after UUID lookup failed", new Object[0]);
+         this.setUavStation(coordinateMatch);
+         return coordinateMatch;
       }
       return null;
    }
@@ -5329,7 +5342,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if(super.worldObj.isRemote || !this.isNewUAV()) {
          return;
       }
-      MCH_EntityUavStation station = resolveUavStationForShiftExit();
+      MCH_EntityUavStation station = resolveLinkedUavStation();
       if(station != null) {
          if(!station.prepareNewUavShiftExit(this)) {
             return;
