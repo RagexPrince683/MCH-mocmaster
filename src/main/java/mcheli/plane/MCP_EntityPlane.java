@@ -46,6 +46,8 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
    public float rotationRotor;
    public float prevRotationRotor;
    public float addkeyRotValue;
+   /** Smoothed engine output; commanded throttle remains unchanged for controls and networking. */
+   private double engineThrottle;
 
 
    public MCP_EntityPlane(World world) {
@@ -64,6 +66,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       super.stepHeight = 0.6F;
       this.rotationRotor = 0.0F;
       this.prevRotationRotor = 0.0F;
+      this.engineThrottle = 0.0D;
    }
 
    public String getKindName() {
@@ -382,6 +385,12 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          this.setThrottle(this.getCurrentThrottle());
       }
 
+      this.engineThrottle = MCH_FlightModel.approachEngineOutput(this.engineThrottle, this.getCurrentThrottle(),
+            this.getAcInfo().throttleAcceleration, this.getAcInfo().engineDrag);
+   }
+
+   protected double getEngineThrottle() {
+      return this.engineThrottle;
    }
 
    protected void onUpdate_ControlNotHovering() {
@@ -764,7 +773,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
          if(!levelOff) {
             super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
-            super.motionY += -0.047D * (1.0D - this.getCurrentThrottle());
+            super.motionY += -0.047D * (1.0D - this.getEngineThrottle());
          } else {
             super.motionY *= 0.8D;
          }
@@ -776,7 +785,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
          if(dp < 1.0D) {
             super.motionY -= 1.0E-4D;
-            super.motionY += 0.007D * this.getCurrentThrottle();
+            super.motionY += 0.007D * this.getEngineThrottle();
          } else {
             if(super.motionY < 0.0D) {
                super.motionY /= 2.0D;
@@ -787,7 +796,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
       }
 
       // 计算油门1的值，当前油门除以10
-      float throttle1 = (float)(this.getCurrentThrottle() / 10.0D);
+      float throttle1 = (float)(this.getEngineThrottle() / 10.0D);
       Vec3 v;
 
       // 如果喷嘴的旋转角度大于0.001F
@@ -893,7 +902,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          // Full power and an established climb greatly reduce the initial sink. A
          // low-speed aircraft can therefore take off, while power-off and turning
          // stalls remain considerably stronger once clear of the runway.
-         double poweredLift = MCH_FlightModel.clamp(this.getCurrentThrottle(), 0.0D, 1.0D);
+         double poweredLift = MCH_FlightModel.clamp(this.getEngineThrottle(), 0.0D, 1.0D);
          double takeoffRelief = super.motionY >= 0.0D ? poweredLift * 0.8D : poweredLift * 0.45D;
          stall *= 1.0D - takeoffRelief;
          if(stall > 0.0D) {

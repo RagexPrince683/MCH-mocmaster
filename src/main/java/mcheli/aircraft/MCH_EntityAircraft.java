@@ -133,6 +133,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public boolean aircraftRotChanged;
    public float rotationRoll;
    public float prevRotationRoll;
+   /** Local-axis body rates used to turn control input into weighted aircraft rotation. */
+   protected float pitchAngularVelocity;
+   protected float rollAngularVelocity;
+   protected float yawAngularVelocity;
    private double currentThrottle;
    private double prevCurrentThrottle;
    public double currentSpeed;
@@ -1801,7 +1805,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             yaw = (float)m_add;
          }
 
-         yaw = (float)((double)(yaw * this.getYawFactor()) * 0.06D * (double)partialTicks);
+         yaw = (float)((double)(yaw * this.getYawFactor()) * 0.06D);
       }
 
       if(this.canUpdatePitch(player)) {
@@ -1815,7 +1819,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             pitch = (float)m_add;
          }
 
-         pitch = (float)((double)(-pitch * this.getPitchFactor()) * 0.06D * (double)partialTicks);
+         pitch = (float)((double)(-pitch * this.getPitchFactor()) * 0.06D);
       }
 
       if(this.canUpdateRoll(player)) {
@@ -1829,8 +1833,22 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             roll = (float)m_add;
          }
 
-         roll = roll * this.getRollFactor() * 0.06F * partialTicks;
+         roll = roll * this.getRollFactor() * 0.06F;
       }
+
+      // The legacy controls above still define the requested angular rate.
+      // Integrating that request as a damped body rate retains existing mobility
+      // tuning while preventing the airframe from snapping to every mouse movement.
+      MCH_AircraftInfo info = this.getAcInfo();
+      this.pitchAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.pitchAngularVelocity, pitch,
+            info.pitchTorque, info.pitchDamping, info.inertiaMultiplier, partialTicks);
+      this.rollAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.rollAngularVelocity, roll,
+            info.rollTorque, info.rollDamping, info.inertiaMultiplier, partialTicks);
+      this.yawAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.yawAngularVelocity, yaw,
+            info.yawTorque, info.yawDamping, info.inertiaMultiplier, partialTicks);
+      pitch = this.pitchAngularVelocity * partialTicks;
+      roll = this.rollAngularVelocity * partialTicks;
+      yaw = this.yawAngularVelocity * partialTicks;
 
       MCH_Math.FMatrix m_add1 = MCH_Math.newMatrix();
       MCH_Math.MatTurnZ(m_add1, roll / 180.0F * 3.1415927F);
