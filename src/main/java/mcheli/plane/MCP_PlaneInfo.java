@@ -94,7 +94,24 @@ public class MCP_PlaneInfo extends MCH_AircraftInfo {
       if(this.maxLevelSpeed > 0.0F) {
          this.maxLevelSpeed = (float)((double)this.maxLevelSpeed * MCH_Config.AllPlaneSpeed.prmDouble);
       }
+      this.scaleSpeedThresholds(MCH_Config.AllPlaneSpeed.prmDouble);
       return super.isValidData();
+   }
+
+
+   private void scaleSpeedThresholds(double speedScale) {
+      if(this.stallSpeed > 0.0F) {
+         this.stallSpeed = (float)((double)this.stallSpeed * speedScale);
+      }
+      if(this.stallRecoverySpeed > 0.0F) {
+         this.stallRecoverySpeed = (float)((double)this.stallRecoverySpeed * speedScale);
+      }
+      if(this.compressibilitySpeed > 0.0F) {
+         this.compressibilitySpeed = (float)((double)this.compressibilitySpeed * speedScale);
+      }
+      if(this.maxSafeSpeed > 0.0F) {
+         this.maxSafeSpeed = (float)((double)this.maxSafeSpeed * speedScale);
+      }
    }
 
    public void loadItemData(String item, String data) {
