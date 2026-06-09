@@ -115,6 +115,10 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    public float mobilityPitch;
    public float mobilityRoll;
    public float mobilityYawOnGround;
+   /** Enables the opt-in realistic flight pass. False keeps legacy handling for old packs. */
+   public boolean enableRealisticFlightModel;
+   /** Enables per-aircraft flight-model telemetry in the debug log when global logging is enabled. */
+   public boolean enableFlightModelDebug;
    /** Control torque applied around each local aircraft axis. */
    public float pitchTorque;
    public float rollTorque;
@@ -373,6 +377,8 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.mobilityPitch = 1.0F;
       this.mobilityRoll = 1.0F;
       this.mobilityYawOnGround = 1.0F;
+      this.enableRealisticFlightModel = false;
+      this.enableFlightModelDebug = false;
       // Matching torque and damping preserves the old mobility values as the eventual
       // turn rate while adding a short, weighty acceleration into that rate.
       this.pitchTorque = 0.35F;
@@ -920,6 +926,10 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                     this.throttleAcceleration = this.toFloat(data, 0.0F, 1.0F);
                                  } else if(item.equalsIgnoreCase("EngineDrag")) {
                                     this.engineDrag = this.toFloat(data, 0.0F, 1.0F);
+                                 } else if(item.equalsIgnoreCase("EnableRealisticFlightModel")) {
+                                    this.enableRealisticFlightModel = this.toBool(data);
+                                 } else if(item.equalsIgnoreCase("EnableFlightModelDebug")) {
+                                    this.enableFlightModelDebug = this.toBool(data);
                                  } else if(item.equalsIgnoreCase("MinRotationPitch")) {
                                     this.limitRotation = true;
                                     this.minRotationPitch = this.toFloat(data, this.getMinRotationPitch(), 0.0F);

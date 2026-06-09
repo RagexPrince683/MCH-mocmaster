@@ -21,6 +21,11 @@ C. It *ideally* just works. Still testing.
 
 
 
+
+# Pack maker docs
+
+Aircraft and vehicle definition values, including the opt-in realistic flight-model compatibility pass, are documented in [`docs/aircraft_vehicle_values.md`](docs/aircraft_vehicle_values.md). Existing packs do not need to add the new realistic-flight keys unless they choose to retune an aircraft.
+
 # FAQ:
 # 1. Why is it called mocmaster if it's for mcheli overdrive?
 This repository was originally called mocmaster after Moc the guy who showed me the original mcheli backend code, since then I've broken a few repos and have resorted to this being my main Mcheli-Overdrive repository.
