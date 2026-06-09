@@ -1775,7 +1775,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    /** Aircraft types can reduce all three pilot control axes under degraded airflow. */
    protected float getControlAuthorityFactor() {
       MCH_AircraftInfo info = this.getAcInfo();
-      return info != null && info.enableRealisticFlightModel ? (float)MCH_FlightModel.getHighGControlAuthority(this.currentGForce,
+      return info != null ? (float)MCH_FlightModel.getHighGControlAuthority(this.currentGForce,
             info.maxComfortableG, info.maxStructuralG, info.gControlPenalty) : 1.0F;
    }
 
@@ -1791,13 +1791,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    protected double getCompressibilitySpeed() {
       MCH_AircraftInfo info = this.getAcInfo();
-      return info == null || !info.enableRealisticFlightModel ? 0.0D : (info.compressibilitySpeed > 0.0F
+      return info == null ? 0.0D : (info.compressibilitySpeed > 0.0F
             ? (double)info.compressibilitySpeed : (double)info.speed * 0.9D);
    }
 
    protected double getMaxSafeSpeed() {
       MCH_AircraftInfo info = this.getAcInfo();
-      return info == null || !info.enableRealisticFlightModel ? 0.0D : (info.maxSafeSpeed > 0.0F
+      return info == null ? 0.0D : (info.maxSafeSpeed > 0.0F
             ? (double)info.maxSafeSpeed : (double)info.speed * 1.1D);
    }
 
@@ -1808,7 +1808,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    /** Override to customize how airframe damage is applied during an overspeed. */
    protected void applyOverspeedDamage(double severity) {
       MCH_AircraftInfo info = this.getAcInfo();
-      if(info == null || !info.enableRealisticFlightModel || info.overspeedDamageRate <= 0.0F || severity <= 0.0D || this.isDestroyed()) {
+      if(info == null || info.overspeedDamageRate <= 0.0F || severity <= 0.0D || this.isDestroyed()) {
          return;
       }
 
@@ -1822,7 +1822,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    private void updateFlightStress() {
       MCH_AircraftInfo info = this.getAcInfo();
-      if(info == null || !info.enableRealisticFlightModel) {
+      if(info == null) {
          this.currentGForce = 1.0D;
          return;
       }
@@ -1921,32 +1921,26 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          roll = roll * this.getRollFactor() * 0.06F;
       }
 
-      MCH_AircraftInfo info = this.getAcInfo();
-      if(info != null && info.enableRealisticFlightModel) {
-         float controlAuthority = this.getControlAuthorityFactor();
-         double pitchAuthority = MCH_FlightModel.getCompressibilityPitchAuthority(this.getAirspeed(),
-               this.getCompressibilitySpeed(), this.getMaxSafeSpeed(), info.compressibilityPitchPenalty);
-         pitch *= controlAuthority * (float)pitchAuthority;
-         roll *= controlAuthority;
-         yaw *= controlAuthority;
+      float controlAuthority = this.getControlAuthorityFactor();
+      double pitchAuthority = MCH_FlightModel.getCompressibilityPitchAuthority(this.getAirspeed(),
+            this.getCompressibilitySpeed(), this.getMaxSafeSpeed(), this.getAcInfo().compressibilityPitchPenalty);
+      pitch *= controlAuthority * (float)pitchAuthority;
+      roll *= controlAuthority;
+      yaw *= controlAuthority;
 
-         // The legacy controls above still define the requested angular rate.
-         // Integrating that request as a damped body rate retains existing mobility
-         // tuning while preventing the airframe from snapping to every mouse movement.
-         this.pitchAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.pitchAngularVelocity, pitch,
-               info.pitchTorque, info.pitchDamping, info.inertiaMultiplier, partialTicks);
-         this.rollAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.rollAngularVelocity, roll,
-               info.rollTorque, info.rollDamping, info.inertiaMultiplier, partialTicks);
-         this.yawAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.yawAngularVelocity, yaw,
-               info.yawTorque, info.yawDamping, info.inertiaMultiplier, partialTicks);
-         pitch = this.pitchAngularVelocity * partialTicks;
-         roll = this.rollAngularVelocity * partialTicks;
-         yaw = this.yawAngularVelocity * partialTicks;
-      } else {
-         this.pitchAngularVelocity = pitch;
-         this.rollAngularVelocity = roll;
-         this.yawAngularVelocity = yaw;
-      }
+      // The legacy controls above still define the requested angular rate.
+      // Integrating that request as a damped body rate retains existing mobility
+      // tuning while preventing the airframe from snapping to every mouse movement.
+      MCH_AircraftInfo info = this.getAcInfo();
+      this.pitchAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.pitchAngularVelocity, pitch,
+            info.pitchTorque, info.pitchDamping, info.inertiaMultiplier, partialTicks);
+      this.rollAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.rollAngularVelocity, roll,
+            info.rollTorque, info.rollDamping, info.inertiaMultiplier, partialTicks);
+      this.yawAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.yawAngularVelocity, yaw,
+            info.yawTorque, info.yawDamping, info.inertiaMultiplier, partialTicks);
+      pitch = this.pitchAngularVelocity * partialTicks;
+      roll = this.rollAngularVelocity * partialTicks;
+      yaw = this.yawAngularVelocity * partialTicks;
 
       MCH_Math.FMatrix m_add1 = MCH_Math.newMatrix();
       MCH_Math.MatTurnZ(m_add1, roll / 180.0F * 3.1415927F);

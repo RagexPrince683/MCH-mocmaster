@@ -169,7 +169,6 @@ public class MCH_Config {
    public static MCH_ConfigPrm RangeFinderConsume;
    public static MCH_ConfigPrm EnablePutRackInFlying;
    public static MCH_ConfigPrm EnableDebugBoundingBox;
-   public static MCH_ConfigPrm DebugFlightModel;
 
    //TODOne mch1.0.5 -> mchr?
    public static MCH_ConfigPrm DespawnCount;
@@ -392,8 +391,6 @@ public class MCH_Config {
       AllTankSpeed = new MCH_ConfigPrm("AllTankSpeed", 1.0D);
       HurtResistantTime = new MCH_ConfigPrm("HurtResistantTime", 0.0D);
       DisplayHUDThirdPerson = new MCH_ConfigPrm("DisplayHUDThirdPerson", false);
-      DebugFlightModel = new MCH_ConfigPrm("DebugFlightModel", false);
-      DebugFlightModel.desc = ";DebugFlightModel = true logs speed, AoA, stall, G, drag, and control authority for aircraft with EnableFlightModelDebug=true.";
       DisableCameraDistChange = new MCH_ConfigPrm("DisableThirdPersonCameraDistChange", false);
       EnableReplaceTextureManager = new MCH_ConfigPrm("EnableReplaceTextureManager", true);
       DisplayEntityMarker = new MCH_ConfigPrm("DisplayEntityMarker", true);
@@ -502,7 +499,6 @@ public class MCH_Config {
               RangeFinderConsume,
               EnablePutRackInFlying,
               EnableDebugBoundingBox,
-              DebugFlightModel,
               null,
               InvertMouse,
               MouseSensitivity,
