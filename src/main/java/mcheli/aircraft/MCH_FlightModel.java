@@ -128,6 +128,42 @@ public final class MCH_FlightModel {
       return clamp(drag, 0.0D, 0.5D);
    }
 
+   /**
+    * Approximates felt load from airspeed and aircraft turn rate. Minecraft motion is
+    * measured per tick, so centripetal acceleration is compared with vanilla gravity.
+    */
+   public static double getApproximateGForce(double speed, double turnRateDegreesPerTick) {
+      double turnRate = Math.toRadians(Math.abs(turnRateDegreesPerTick));
+      double lateralAcceleration = Math.max(0.0D, speed) * turnRate;
+      return Math.sqrt(1.0D + lateralAcceleration * lateralAcceleration / (0.08D * 0.08D));
+   }
+
+   /** Progressive control loss between the comfortable and structural load limits. */
+   public static double getHighGControlAuthority(double gForce, float comfortableG, float structuralG,
+                                                  float controlPenalty) {
+      double comfortable = Math.max(1.0D, (double)comfortableG);
+      double structural = Math.max(comfortable + 0.01D, (double)structuralG);
+      double severity = clamp((gForce - comfortable) / (structural - comfortable), 0.0D, 1.0D);
+      return clamp(1.0D - severity * clamp((double)controlPenalty, 0.0D, 1.0D), 0.05D, 1.0D);
+   }
+
+   /** Pitch authority fades progressively above the compressibility threshold. */
+   public static double getCompressibilityPitchAuthority(double speed, double compressibilitySpeed,
+                                                           double maxSafeSpeed, float pitchPenalty) {
+      if(compressibilitySpeed <= 0.0D || speed <= compressibilitySpeed) {
+         return 1.0D;
+      }
+
+      double range = Math.max(0.05D, maxSafeSpeed - compressibilitySpeed);
+      double severity = clamp((speed - compressibilitySpeed) / range, 0.0D, 1.0D);
+      return clamp(1.0D - severity * clamp((double)pitchPenalty, 0.0D, 1.0D), 0.05D, 1.0D);
+   }
+
+   /** Relative overspeed above the safe limit; 1 means twice the safe speed. */
+   public static double getOverspeedSeverity(double speed, double maxSafeSpeed) {
+      return maxSafeSpeed > 0.0D ? Math.max(0.0D, speed / maxSafeSpeed - 1.0D) : 0.0D;
+   }
+
    /** Positive values gain horizontal speed in a dive; negative values lose it in a climb. */
    public static double getVerticalEnergyChange(double verticalSpeed, float climbEnergyLoss, float diveEnergyGain) {
       double climb = clamp(verticalSpeed / 0.35D, 0.0D, 1.0D);

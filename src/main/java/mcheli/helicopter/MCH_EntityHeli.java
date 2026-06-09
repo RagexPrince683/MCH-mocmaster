@@ -422,12 +422,13 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
          }
 
          if(MCH_Lib.getBlockIdY(this, 3, -3) == 0) {
+            float controlAuthority = this.getControlAuthorityFactor();
             if(super.moveLeft && !super.moveRight) {
-               this.setRotRoll(this.getRotRoll() - 1.2F * partialTicks);
+               this.setRotRoll(this.getRotRoll() - 1.2F * partialTicks * controlAuthority);
             }
 
             if(super.moveRight && !super.moveLeft) {
-               this.setRotRoll(this.getRotRoll() + 1.2F * partialTicks);
+               this.setRotRoll(this.getRotRoll() + 1.2F * partialTicks * controlAuthority);
             }
          } else {
             if(MathHelper.abs(this.getRotPitch()) < 40.0F) {
