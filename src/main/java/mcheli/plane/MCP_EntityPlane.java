@@ -850,16 +850,38 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          super.motionZ += Math.cos(yaw) * diveAcceleration;
       }
 
-      // 对垂直速度进行衰减
+      // Preserve the existing vertical flight damping; horizontal resistance below
+      // uses quadratic aerodynamic drag instead of a constant per-tick multiplier.
       super.motionY *= 0.95D;
-      // 根据飞行器的运动系数衰减水平速度
-      super.motionX *= this.getAcInfo().motionFactor;
-      super.motionZ *= this.getAcInfo().motionFactor;
 
-      // 计算当前水平速度的大小
+      // Calculate current horizontal speed and the configured cruise-speed reference.
       double motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-      // 获取最大速度限制
       float baseSpeedLimit = this.getMaxSpeed();
+      boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
+
+      // In free flight, drag rises with v^2. Banking increases the load factor and
+      // therefore induced drag, while sideslip exposes more airframe area during a
+      // turn. The lost energy remains lost after leveling out, so sustained or hard
+      // turns produce a noticeable reduction in speed.
+      if(!nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && motion1 > 1.0E-4D) {
+         double yaw = Math.toRadians((double)this.getRotYaw());
+         double forwardX = -Math.sin(yaw);
+         double forwardZ = Math.cos(yaw);
+         double sideslip = Math.abs(forwardX * super.motionZ - forwardZ * super.motionX) / motion1;
+         double airDensity = MCH_FlightModel.getAirDensityFactor(super.posY);
+         double dragLoss = MCH_FlightModel.getAerodynamicDragLoss(motion1, baseSpeedLimit, this.getAcInfo().motionFactor, airDensity, this.getRotRoll(), sideslip);
+         double dragScale = Math.max(0.0D, (motion1 - dragLoss) / motion1);
+         super.motionX *= dragScale;
+         super.motionZ *= dragScale;
+         motion1 -= dragLoss;
+      } else {
+         // Retain legacy damping for taxiing, water contact, and VTOL operation.
+         super.motionX *= this.getAcInfo().motionFactor;
+         super.motionZ *= this.getAcInfo().motionFactor;
+         motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      }
+
+      // 获取最大速度限制
       float speedLimit = (float)MCH_FlightModel.getDiveSpeedLimit(baseSpeedLimit, this.getRotPitch(), super.motionY, this.getAcInfo().diveSpeedMultiplier);
       // 如果当前速度超过最大速度限制，按最大速度比例缩小水平速度
       if(motion1 > (double)speedLimit) {
@@ -884,7 +906,6 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
 
       // Keep ground effect for several blocks so the stall model cannot cancel
       // normal rotation and lift immediately after the wheels leave the runway.
-      boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
       if(!nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff) {
          double bank = MCH_FlightModel.clamp(MathHelper.abs(this.getRotRoll()) / 90.0D, 0.0D, 1.0D);
          float effectiveStallFactor = this.getAcInfo().stallSpeedFactor * (float)(1.0D + bank * 0.35D);
