@@ -703,17 +703,33 @@ public class MCH_EntityUavStation
            this.prevPosX = this.posX;
            this.prevPosY = this.posY;
            this.prevPosZ = this.posZ;
+           if(!this.worldObj.isRemote && this.ticksExisted % 10 == 0 && !this.storedUavWasDestroyed &&
+              (this.hasStoredUavLink || getContinuationState() == CONTINUE_AVAILABLE) &&
+              MCH_UavJsonStore.consumeDestroyed(this.worldObj, this)) {
+                MCH_Lib.Log((Entity)this, "Consumed out-of-range New UAV destruction signal; disabling Continue", new Object[0]);
+                markLinkedNewUavDestroyed((MCH_EntityAircraft)null);
+           }
            if (getControlAircract() != null && getControlAircract().isDestroyed()) {
-                MCH_Lib.Log((Entity)this, "Linked UAV %d is destroyed; clearing station link", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)getControlAircract())) });
-                unlinkInvalidUav();
+                MCH_EntityAircraft destroyed = getControlAircract();
+                MCH_Lib.Log((Entity)this, "Linked UAV %d is destroyed; marking station Continue state destroyed", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)destroyed)) });
+                if(destroyed.isNewUAV()) {
+                     markLinkedNewUavDestroyed(destroyed);
+                } else {
+                     unlinkInvalidUav();
+                }
               } else if (getControlAircract() != null && getControlAircract().isDead) {
                 markLinkedUavUnloaded();
                 setControlAircract((MCH_EntityAircraft)null);
               }
 
            if (getLastControlAircraft() != null && getLastControlAircraft().isDestroyed()) {
-                MCH_Lib.Log((Entity)this, "Last linked UAV %d is destroyed; clearing station link", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)getLastControlAircraft())) });
-                unlinkInvalidUav();
+                MCH_EntityAircraft destroyed = getLastControlAircraft();
+                MCH_Lib.Log((Entity)this, "Last linked UAV %d is destroyed; marking station Continue state destroyed", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)destroyed)) });
+                if(destroyed.isNewUAV()) {
+                     markLinkedNewUavDestroyed(destroyed);
+                } else {
+                     unlinkInvalidUav();
+                }
               } else if (getLastControlAircraft() != null && getLastControlAircraft().isDead) {
                 markLinkedUavUnloaded();
                 setLastControlAircraft((MCH_EntityAircraft)null);
@@ -931,6 +947,7 @@ public class MCH_EntityUavStation
 
                  this.storedUavWasDestroyed = true;
                  setContinuationState(CONTINUE_DESTROYED);
+                 MCH_UavJsonStore.consumeDestroyed(this.worldObj, this);
                  MCH_UavJsonStore.remove(this.worldObj, this);
 
                  // This is the important part: kill the fake respawn token.
@@ -1159,6 +1176,9 @@ public class MCH_EntityUavStation
 
              private void controlLastAircraft(Entity user, boolean notify) {
 
+                 if(!this.worldObj.isRemote && !this.storedUavWasDestroyed && MCH_UavJsonStore.consumeDestroyed(this.worldObj, this)) {
+                     markLinkedNewUavDestroyed((MCH_EntityAircraft)null);
+                 }
                  if(wasLinkedUavDestroyed()) {
                      this.pendingContinueTicks = 0;
                      if(notify && user instanceof EntityPlayer) {

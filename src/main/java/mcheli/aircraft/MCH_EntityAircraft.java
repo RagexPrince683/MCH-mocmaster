@@ -878,12 +878,14 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       if(!super.worldObj.isRemote && this.isNewUAV()) {
+         if(this.linkedUavStationUUID != null) {
+            MCH_UavJsonStore.signalDestroyed(super.worldObj, this.linkedUavStationDimension, this.linkedUavStationX, this.linkedUavStationY, this.linkedUavStationZ);
+         }
          MCH_EntityUavStation station = resolveLinkedUavStation();
          if(station != null) {
             station.markLinkedNewUavDestroyed(this);
          } else if(this.linkedUavStationUUID != null) {
-            MCH_UavJsonStore.remove(super.worldObj, this.linkedUavStationDimension, this.linkedUavStationX, this.linkedUavStationY, this.linkedUavStationZ);
-            MCH_Lib.Log((Entity)this, "Destroyed New UAV could not resolve station %s at %.2f, %.2f, %.2f; removed its JSON record", new Object[] { this.linkedUavStationUUID.toString(), Double.valueOf(this.linkedUavStationX), Double.valueOf(this.linkedUavStationY), Double.valueOf(this.linkedUavStationZ) });
+            MCH_Lib.Log((Entity)this, "Destroyed New UAV could not resolve station %s at %.2f, %.2f, %.2f; queued station destruction state", new Object[] { this.linkedUavStationUUID.toString(), Double.valueOf(this.linkedUavStationX), Double.valueOf(this.linkedUavStationY), Double.valueOf(this.linkedUavStationZ) });
          }
       }
 
