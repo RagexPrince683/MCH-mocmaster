@@ -440,6 +440,12 @@ public abstract class MCH_RenderAircraft extends W_Render {
             MCH_BoundingBox bb = arr$[i$];
             GL11.glPushMatrix();
             GL11.glTranslated(bb.rotatedOffset.xCoord, bb.rotatedOffset.yCoord, bb.rotatedOffset.zCoord);
+            if(MCH_Config.EnableRotatingVehicleBounds.prmBool && MCH_Config.DebugRotatingVehicleBounds.prmBool) {
+               // Draw the local-space OBB in the same yaw/pitch/roll frame used by collision.
+               GL11.glRotatef(-yaw, 0.0F, 1.0F, 0.0F);
+               GL11.glRotatef(-pitch, 1.0F, 0.0F, 0.0F);
+               GL11.glRotatef(-e.getRotRoll(), 0.0F, 0.0F, 1.0F);
+            }
             GL11.glPushMatrix();
             GL11.glScalef(bb.width, bb.height, bb.width);
             this.bindTexture("textures/bounding_box.png");
@@ -447,6 +453,18 @@ public abstract class MCH_RenderAircraft extends W_Render {
             GL11.glPopMatrix();
             this.drawHitBoxDetail(bb);
             GL11.glPopMatrix();
+
+            if(MCH_Config.EnableRotatingVehicleBounds.prmBool && MCH_Config.DebugRotatingVehicleBounds.prmBool) {
+               GL11.glPushMatrix();
+               double cx = (bb.boundingBox.minX + bb.boundingBox.maxX) / 2.0D - e.posX;
+               double cy = (bb.boundingBox.minY + bb.boundingBox.maxY) / 2.0D - e.posY;
+               double cz = (bb.boundingBox.minZ + bb.boundingBox.maxZ) / 2.0D - e.posZ;
+               GL11.glTranslated(cx, cy, cz);
+               GL11.glScalef((float)(bb.boundingBox.maxX - bb.boundingBox.minX), (float)(bb.boundingBox.maxY - bb.boundingBox.minY), (float)(bb.boundingBox.maxZ - bb.boundingBox.minZ));
+               this.bindTexture("textures/hit_box.png");
+               debugModel.renderAll();
+               GL11.glPopMatrix();
+            }
          }
 
          GL11.glPopMatrix();
