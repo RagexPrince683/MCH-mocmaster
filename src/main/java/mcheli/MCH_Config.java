@@ -170,6 +170,8 @@ public class MCH_Config {
    public static MCH_ConfigPrm RangeFinderConsume;
    public static MCH_ConfigPrm EnablePutRackInFlying;
    public static MCH_ConfigPrm EnableDebugBoundingBox;
+   public static MCH_ConfigPrm EnableRotatingVehicleBounds;
+   public static MCH_ConfigPrm DebugRotatingVehicleBounds;
 
    //TODOne mch1.0.5 -> mchr?
    public static MCH_ConfigPrm DespawnCount;
@@ -412,6 +414,10 @@ public class MCH_Config {
       RangeFinderConsume = new MCH_ConfigPrm("RangeFinderConsume", true);
       EnablePutRackInFlying = new MCH_ConfigPrm("EnablePutRackInFlying", true);
       EnableDebugBoundingBox = new MCH_ConfigPrm("EnableDebugBoundingBox", false);
+      EnableRotatingVehicleBounds = new MCH_ConfigPrm("enableRotatingVehicleBounds", true);
+      EnableRotatingVehicleBounds.desc = ";Rotate MCHeli vehicle sub-bounding boxes with vehicle yaw/pitch/roll. Disable to restore legacy static AABB behavior.";
+      DebugRotatingVehicleBounds = new MCH_ConfigPrm("debugRotatingVehicleBounds", false);
+      DebugRotatingVehicleBounds.desc = ";Client debug: render local/rotated vehicle collision boxes and their Minecraft-required enclosing AABBs when TestMode debug rendering is active.";
       DespawnCount = new MCH_ConfigPrm("DespawnCount", 25);
       HitBoxDelayTick = new MCH_ConfigPrm("HitBoxDelayTick", 0);
       EnableRotationLimit = new MCH_ConfigPrm("EnableRotationLimit", false);
@@ -500,6 +506,8 @@ public class MCH_Config {
               RangeFinderConsume,
               EnablePutRackInFlying,
               EnableDebugBoundingBox,
+              EnableRotatingVehicleBounds,
+              DebugRotatingVehicleBounds,
               null,
               InvertMouse,
               MouseSensitivity,

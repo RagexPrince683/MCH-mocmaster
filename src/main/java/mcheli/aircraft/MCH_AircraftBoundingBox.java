@@ -140,8 +140,8 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
          MCH_BoundingBox bb = arr$[i$];
          //wheelBoundingBox wb = arr$[i$];
 
-         if(bb.boundingBox.intersectsWith(aabb)) {
-            double dist2 = this.getDistSq(aabb, this);
+         if(bb.intersectsRotated(aabb, this.ac.posX, this.ac.posY, this.ac.posZ, this.ac.getRotYaw(), this.ac.getRotPitch(), this.ac.getRotRoll())) {
+            double dist2 = this.getDistSq(aabb, bb.boundingBox);
             if(dist2 < dist) {
                dist = dist2;
                this.ac.lastBBDamageFactor = bb.damegeFactor;
@@ -266,7 +266,7 @@ public class MCH_AircraftBoundingBox extends AxisAlignedBB {
 
       for(int i$ = 0; i$ < len$; ++i$) {
          MCH_BoundingBox bb = arr$[i$];
-         MovingObjectPosition mop2 = bb.boundingBox.calculateIntercept(v1, v2);
+         MovingObjectPosition mop2 = bb.calculateRotatedIntercept(v1, v2, this.ac.posX, this.ac.posY, this.ac.posZ, this.ac.getRotYaw(), this.ac.getRotPitch(), this.ac.getRotRoll());
          if(mop2 != null) {
             double dist2 = v1.distanceTo(mop2.hitVec);
             if(dist2 < dist) {

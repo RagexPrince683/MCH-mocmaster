@@ -72,6 +72,10 @@ public class MCH_CommonPacketHandler {
          MCH_ServerSettings.enablePVP = pkt.enablePVP;
          MCH_ServerSettings.stingerLockRange = pkt.stingerLockRange;
          MCH_ServerSettings.enableDebugBoundingBox = pkt.enableDebugBoundingBox;
+         MCH_ServerSettings.enableRotatingVehicleBounds = pkt.enableRotatingVehicleBounds;
+         MCH_ServerSettings.debugRotatingVehicleBounds = pkt.debugRotatingVehicleBounds;
+         MCH_Config.EnableRotatingVehicleBounds.prmBool = pkt.enableRotatingVehicleBounds;
+         MCH_Config.DebugRotatingVehicleBounds.prmBool = pkt.debugRotatingVehicleBounds;
          MCH_ClientLightWeaponTickHandler.lockRange = MCH_ServerSettings.stingerLockRange;
       }
    }

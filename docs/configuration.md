@@ -67,6 +67,8 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `RangeFinderConsume` | `true` | Rangefinder consumes required item/ammo when spotting. |
 | `EnablePutRackInFlying` | `true` | Allows rack operations during flight. |
 | `EnableDebugBoundingBox` | `false` | Enables debug bounding boxes. Can be toggled in memory with `/mcheli showboundingbox`. |
+| `enableRotatingVehicleBounds` | `true` | Rotates MCHeli vehicle sub-bounding boxes with aircraft/tank/vehicle yaw, pitch, and roll while keeping Minecraft-required enclosing AABBs for broad-phase collision. Set to `false` for legacy static world-axis behavior. |
+| `debugRotatingVehicleBounds` | `false` | When debug rendering is active, renders the oriented local boxes and their enclosing AABBs for collision diagnostics. |
 | `InvertMouse` | `false` | Inverts aircraft mouse controls. |
 | `MouseSensitivity` | `30.0` | MCHeli mouse sensitivity. |
 | `MouseControlStickModeHeli` | `false` | Enables stick-style mouse mode for helicopters. |

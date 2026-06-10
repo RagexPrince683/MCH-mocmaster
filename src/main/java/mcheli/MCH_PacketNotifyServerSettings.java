@@ -18,6 +18,8 @@ public class MCH_PacketNotifyServerSettings extends MCH_Packet {
    public double stingerLockRange = 120.0D;
    //todo change bullshit
    public boolean enableDebugBoundingBox = false;
+   public boolean enableRotatingVehicleBounds = true;
+   public boolean debugRotatingVehicleBounds = false;
 
 
    public int getMessageID() {
@@ -32,6 +34,8 @@ public class MCH_PacketNotifyServerSettings extends MCH_Packet {
          this.enablePVP = this.getBit(e, 2);
          this.stingerLockRange = (double)data.readFloat();
          this.enableDebugBoundingBox = this.getBit(e, 3);
+         this.enableRotatingVehicleBounds = this.getBit(e, 4);
+         this.debugRotatingVehicleBounds = this.getBit(e, 5);
       } catch (Exception var3) {
          var3.printStackTrace();
       }
@@ -45,6 +49,8 @@ public class MCH_PacketNotifyServerSettings extends MCH_Packet {
          e1 = this.setBit(e1, 1, this.enableEntityMarker);
          e1 = this.setBit(e1, 2, this.enablePVP);
          e1 = this.setBit(e1, 3, this.enableDebugBoundingBox);
+         e1 = this.setBit(e1, 4, this.enableRotatingVehicleBounds);
+         e1 = this.setBit(e1, 5, this.debugRotatingVehicleBounds);
          dos.writeByte(e1);
          dos.writeFloat((float)this.stingerLockRange);
       } catch (IOException var3) {
@@ -64,6 +70,8 @@ public class MCH_PacketNotifyServerSettings extends MCH_Packet {
       s.stingerLockRange = MCH_Config.StingerLockRange.prmDouble;
       var10001 = MCH_MOD.config;
       s.enableDebugBoundingBox = MCH_Config.EnableDebugBoundingBox.prmBool;
+      s.enableRotatingVehicleBounds = MCH_Config.EnableRotatingVehicleBounds.prmBool;
+      s.debugRotatingVehicleBounds = MCH_Config.DebugRotatingVehicleBounds.prmBool;
       if(player != null) {
          W_Network.sendToPlayer(s, player);
       } else {
