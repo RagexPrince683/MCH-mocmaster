@@ -112,7 +112,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       list = (List)this.screenButtonList.get(0);
       GuiButton btnHeli = new GuiButton(10, super.guiLeft + 20, super.guiTop + 20, 90, 20, "Helicopter List");
       GuiButton btnPlane = new GuiButton(11, super.guiLeft + 20, super.guiTop + 40, 90, 20, "Plane List");
-      GuiButton btnVehicle = new GuiButton(12, super.guiLeft + 20, super.guiTop + 60, 90, 20, "Vehicle List");
+      GuiButton btnVehicle = new GuiButton(12, super.guiLeft + 20, super.guiTop + 60, 90, 20, "Turret List");
       GuiButton btnTank = new GuiButton(13, super.guiLeft + 20, super.guiTop + 80, 90, 20, "Tank List");
       GuiButton btnItem = new GuiButton(14, super.guiLeft + 20, super.guiTop + 100, 90, 20, "Item List");
       GuiButton btnShip = new GuiButton(15, super.guiLeft + 20, super.guiTop + 120, 90, 20, "Ship List");
