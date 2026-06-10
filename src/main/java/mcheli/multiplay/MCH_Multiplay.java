@@ -282,6 +282,82 @@ public class MCH_Multiplay {
       return ret;
    }
 
+   public static boolean spotEntityRadius(EntityLivingBase player, double posX, double posY, double posZ, int targetFilter, float spotLength, int markTime, boolean checkWater) {
+      boolean ret = false;
+
+      if(player == null || player.worldObj.isRemote) {
+         return false;
+      }
+
+      List list = player.worldObj.getEntitiesWithinAABBExcludingEntity(
+              player,
+              player.boundingBox.expand((double)spotLength, (double)spotLength, (double)spotLength)
+      );
+
+      ArrayList entityList = new ArrayList();
+      Vec3 pos = Vec3.createVectorHelper(posX, posY, posZ);
+
+      for(int i = 0; i < list.size(); ++i) {
+         Entity target = (Entity)list.get(i);
+
+         if(target == null || target.isDead) {
+            continue;
+         }
+
+         if(!canSpotEntityWithFilter(targetFilter, target)) {
+            continue;
+         }
+
+         if(checkWater && !isEntityInOrOnWater(target)) {
+            continue;
+         }
+
+         MCH_TargetType spotType = canSpotEntity(player, posX, posY, posZ, target, false);
+
+         if(spotType == MCH_TargetType.NONE || spotType == MCH_TargetType.SAME_TEAM_PLAYER) {
+            continue;
+         }
+
+         double distSq = target.getDistanceSq(pos.xCoord, pos.yCoord, pos.zCoord);
+
+         if(distSq <= 1.0D || distSq > (double)(spotLength * spotLength)) {
+            continue;
+         }
+
+         entityList.add(Integer.valueOf(target.getEntityId()));
+      }
+
+      if(entityList.size() > 0) {
+         int[] ids = new int[entityList.size()];
+
+         for(int i = 0; i < ids.length; ++i) {
+            ids[i] = ((Integer)entityList.get(i)).intValue();
+         }
+
+         sendSpotedEntityListToSameTeam(player, markTime, ids);
+         ret = true;
+      }
+
+      return ret;
+   }
+
+   private static boolean isEntityInOrOnWater(Entity e) {
+      if(e == null || e.worldObj == null) {
+         return false;
+      }
+
+      if(e.isInWater()) {
+         return true;
+      }
+
+      int x = (int)Math.floor(e.posX);
+      int y = (int)Math.floor(e.posY - 0.5D);
+      int z = (int)Math.floor(e.posZ);
+
+      return e.worldObj.getBlock(x, y, z).getMaterial() == net.minecraft.block.material.Material.water
+              || e.worldObj.getBlock(x, y + 1, z).getMaterial() == net.minecraft.block.material.Material.water;
+   }
+
    public static void sendSpotedEntityListToSameTeam(EntityLivingBase player, int count, int[] entityId) {
       ServerConfigurationManager svCnf = MinecraftServer.getServer().getConfigurationManager();
       Iterator i$ = svCnf.playerEntityList.iterator();
