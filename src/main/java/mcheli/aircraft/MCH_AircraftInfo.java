@@ -394,7 +394,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.limitRotation = false;
       this.throttleUpDown = 1.0F;
       this.throttleUpDownOnEntity = 2.0F;
-      this.flightCeiling = 250.0F;
+      this.flightCeiling = 9100.0F;
       this.flightCeilingRange = 24.0F;
       this.stallSpeed = 0.0F;
       this.criticalAoA = 18.0F;
@@ -940,7 +940,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                  } else if(item.equalsIgnoreCase("ThrottleUpDownOnEntity")) {
                                     this.throttleUpDownOnEntity = this.toFloat(data, 0.0F, 100000.0F);
                                  } else if(item.equalsIgnoreCase("FlightCeiling")) {
-                                    this.flightCeiling = this.toFloat(data, 32.0F, 255.0F);
+                                    this.flightCeiling = this.toFloat(data, 32.0F, 37650.0F);
                                  } else if(item.equalsIgnoreCase("FlightCeilingRange")) {
                                     this.flightCeilingRange = this.toFloat(data, 1.0F, 128.0F);
                                  } else if(item.equalsIgnoreCase("StallSpeed")) {
