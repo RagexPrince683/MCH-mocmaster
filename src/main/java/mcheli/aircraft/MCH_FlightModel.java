@@ -32,6 +32,29 @@ public final class MCH_FlightModel {
       return velocity + (targetVelocity - velocity) * response;
    }
 
+
+   /**
+    * Converts render-loop deltas into a bounded tick fraction for legacy client-side
+    * control prediction. Rendering may happen at 30, 60, 144, or 240+ FPS, but the
+    * sum of these fractions over one Minecraft tick remains one simulation tick.
+    */
+   public static float getBoundedTickDelta(float delta) {
+      if(Float.isNaN(delta) || Float.isInfinite(delta)) {
+         return 0.0F;
+      }
+      if(delta < 0.0F) {
+         return 0.0F;
+      }
+      return delta > 1.0F ? 1.0F : delta;
+   }
+
+   /** Exponential decay that gives the same result for one full tick regardless of render FPS. */
+   public static float decayPerTick(float value, float retainedPerTick, float deltaTicks) {
+      float retained = (float)clamp((double)retainedPerTick, 0.0D, 1.0D);
+      float delta = getBoundedTickDelta(deltaTicks);
+      return value * (float)Math.pow((double)retained, (double)delta);
+   }
+
    /** Moves engine output toward commanded throttle without an instantaneous thrust step. */
    public static double approachEngineOutput(double output, double target, float acceleration, float drag) {
       double difference = clamp(target, 0.0D, 1.0D) - clamp(output, 0.0D, 1.0D);

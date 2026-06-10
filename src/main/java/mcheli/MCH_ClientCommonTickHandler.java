@@ -271,11 +271,11 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       if(super.mc.inGameHasFocus && Display.isActive() && super.mc.currentScreen == null) {
          if(stickMode) {
             if(Math.abs(mouseRollDeltaX) < getMaxStickLength() * 0.2D) {
-               mouseRollDeltaX *= (double)(1.0F - 0.15F * partialTicks);
+               mouseRollDeltaX = (double)mcheli.aircraft.MCH_FlightModel.decayPerTick((float)mouseRollDeltaX, 0.85F, partialTicks);
             }
 
             if(Math.abs(mouseRollDeltaY) < getMaxStickLength() * 0.2D) {
-               mouseRollDeltaY *= (double)(1.0F - 0.15F * partialTicks);
+               mouseRollDeltaY = (double)mcheli.aircraft.MCH_FlightModel.decayPerTick((float)mouseRollDeltaY, 0.85F, partialTicks);
             }
          }
 
@@ -315,6 +315,28 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
    }
 
+   /** Returns elapsed render time in Minecraft ticks; visual interpolation still uses raw partialTicks. */
+   private static float getRenderSimulationDelta(float partialTicks) {
+      float base = prevTick;
+      for(int i = 0; i < 10 && base > partialTicks; ++i) {
+         --base;
+      }
+
+      return mcheli.aircraft.MCH_FlightModel.getBoundedTickDelta(partialTicks - base);
+   }
+
+   private static void debugFlightControl(MCH_EntityAircraft ac, float simDelta, float mouseX, float mouseY, float stickX, float stickY) {
+      if(!MCH_Config.DebugFlightControl.prmBool || ac == null || ac.ticksExisted % 20 != 0) {
+         return;
+      }
+
+      System.out.println(String.format("[MCHeli] flight-control fps=%d dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f)",
+            Integer.valueOf(Minecraft.debugFPS), Float.valueOf(simDelta), Float.valueOf(mouseX), Float.valueOf(mouseY),
+            Float.valueOf(stickX), Float.valueOf(stickY), Float.valueOf(ac.getPitchAngularVelocity()),
+            Float.valueOf(ac.getYawAngularVelocity()), Float.valueOf(ac.getRollAngularVelocity()),
+            Float.valueOf(ac.getRotPitch()), Float.valueOf(ac.getRotYaw()), Float.valueOf(ac.getRotRoll())));
+   }
+
    public void onRenderTickPre(float partialTicks) {
       MCH_GuiTargetMarker.clearMarkEntityPos();
       if(!MCH_ServerSettings.enableDebugBoundingBox) {
@@ -336,6 +358,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       if(!W_McClient.isGamePaused()) {
          EntityClientPlayerMP var17 = super.mc.thePlayer;
          if(var17 != null) {
+            float simDelta = getRenderSimulationDelta(partialTicks);
             ItemStack var18 = var17.getCurrentEquippedItem();
             if(var18 != null && var18.getItem() instanceof MCH_ItemWrench && var17.getItemInUseCount() > 0) {
                W_Reflection.setItemRendererProgress(1.0F);
@@ -375,10 +398,6 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                var20 = MCH_Config.MouseControlStickModePlane.prmBool;
             }
 
-            for(int de = 0; de < 10 && prevTick > partialTicks; ++de) {
-               --prevTick;
-            }
-
             float p;
             float r;
             if(var19 != null && var19.canMouseRot()) {
@@ -387,7 +406,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                }
 
                isRideAircraft = true;
-               this.updateMouseDelta(var20, partialTicks);
+               this.updateMouseDelta(var20, simDelta);
                boolean var22 = false;
                float var23 = 0.0F;
                float var25 = 0.0F;
@@ -413,14 +432,15 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                if(var19.getAcInfo() == null) {
                   var17.setAngles((float)mouseDeltaX, (float)mouseDeltaY);
                } else {
-                  var19.setAngles(var17, var22, var23, var25, (float)(mouseDeltaX + prevMouseDeltaX) / 2.0F, (float)(mouseDeltaY + prevMouseDeltaY) / 2.0F, (float)mouseRollDeltaX, (float)mouseRollDeltaY, partialTicks - prevTick);
+                  var19.setAngles(var17, var22, var23, var25, (float)(mouseDeltaX + prevMouseDeltaX) / 2.0F, (float)(mouseDeltaY + prevMouseDeltaY) / 2.0F, (float)mouseRollDeltaX, (float)mouseRollDeltaY, simDelta);
+                  debugFlightControl(var19, simDelta, (float)mouseDeltaX, (float)mouseDeltaY, (float)mouseRollDeltaX, (float)mouseRollDeltaY);
                }
 
                var19.setupAllRiderRenderPosition(partialTicks, var17);
                double var29 = (double)MathHelper.sqrt_double(mouseRollDeltaX * mouseRollDeltaX + mouseRollDeltaY * mouseRollDeltaY);
                if(!var20 || var29 < getMaxStickLength() * 0.1D) {
-                  mouseRollDeltaX *= 0.95D;
-                  mouseRollDeltaY *= 0.95D;
+                  mouseRollDeltaX = (double)mcheli.aircraft.MCH_FlightModel.decayPerTick((float)mouseRollDeltaX, 0.95F, simDelta);
+                  mouseRollDeltaY = (double)mcheli.aircraft.MCH_FlightModel.decayPerTick((float)mouseRollDeltaY, 0.95F, simDelta);
                }
 
                p = MathHelper.wrapAngleTo180_float(var19.getRotRoll());
@@ -436,7 +456,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             } else {
                MCH_EntitySeat var21 = var17.ridingEntity instanceof MCH_EntitySeat?(MCH_EntitySeat)var17.ridingEntity:null;
                if(var21 != null && var21.getParent() != null) {
-                  this.updateMouseDelta(var20, partialTicks);
+                  this.updateMouseDelta(var20, simDelta);
                   var19 = var21.getParent();
                   boolean wi = false;
                   MCH_SeatInfo seatInfo = var19.getSeatInfo(var17);
@@ -488,8 +508,8 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                   //System.out.println("yaw9");
                   var19.setRotPitch(p);
                   var19.setRotRoll(r);
-                  mouseRollDeltaX *= 0.9D;
-                  mouseRollDeltaY *= 0.9D;
+                  mouseRollDeltaX = (double)mcheli.aircraft.MCH_FlightModel.decayPerTick((float)mouseRollDeltaX, 0.9F, simDelta);
+                  mouseRollDeltaY = (double)mcheli.aircraft.MCH_FlightModel.decayPerTick((float)mouseRollDeltaY, 0.9F, simDelta);
                   float roll = MathHelper.wrapAngleTo180_float(var19.getRotRoll());
                   float yaw = MathHelper.wrapAngleTo180_float(var19.getRotYaw() - var17.rotationYaw);
                   //System.out.println("yaw10");
