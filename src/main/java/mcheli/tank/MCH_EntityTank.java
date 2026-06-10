@@ -44,6 +44,8 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
+//the cursed extension
+//refactoring would be a fucking nightmare
 public class MCH_EntityTank extends MCH_EntityAircraft {
 
    private MCH_TankInfo tankInfo = null;

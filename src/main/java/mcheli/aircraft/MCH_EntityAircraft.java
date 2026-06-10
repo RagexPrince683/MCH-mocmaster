@@ -75,6 +75,11 @@ import mcheli.mob.MCH_EntityGunner;
 import org.lwjgl.Sys;
 
 
+//MCH_EntityAircraft is the main vehicle class that ALL vehicle classes inherit from.
+//NOT to be confused with MCH_EntityVehicle, which is the main class for ALL TURRETS.
+// If this is too confusing for you, REFACTOR IT.
+
+
 public abstract class MCH_EntityAircraft extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideAircraft, IEntityAdditionalSpawnData {
    private static MCH_EntityAircraft aircraft;
     private ForgeChunkManager.Ticket chunkTicket;
@@ -1847,9 +1852,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             && W_Entity.isEqual(MCH_MOD.proxy.getClientPlayer(), this.getRiddenByEntity())) {
          boolean highLoad = this.currentGForce > (double)info.maxComfortableG;
          boolean compressing = speed > this.getCompressibilitySpeed();
-         if(highLoad || compressing || overspeed > 0.0D) {
-            W_McClient.DEF_playSoundFX("random.click", 0.8F, overspeed > 0.0D ? 0.6F : 1.4F);
-         }
+         //if(highLoad || compressing || overspeed > 0.0D) {
+         //   //TODO: FIX this plays for ground vehicles too, since everything extends MCH_EntityAircraft.
+         //   // this also is just completely bugged because it should only be while pitching down (eg gaining momentum, overspeed.
+         //   // NOT while full throttle going straight
+              // ALSO everything needs to factor in mcheli config AllPlaneSpeed because by default in MCHO AllPlaneSpeed = 1000.00
+         //   W_McClient.DEF_playSoundFX("random.click", 0.8F, overspeed > 0.0D ? 0.6F : 1.4F);
+         //}
       }
    }
 

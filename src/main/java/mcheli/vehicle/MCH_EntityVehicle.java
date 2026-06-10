@@ -22,6 +22,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
+//this is a turret. Don't ask me why. Japanese modder logic.
+//Should probably be refactored.
 public class MCH_EntityVehicle extends MCH_EntityAircraft {
 
    private MCH_VehicleInfo vehicleInfo = null;
