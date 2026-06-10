@@ -6,6 +6,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.lang.reflect.Method;
 
+//Flanslop compat TODO: remove
 public class MCH_FMURUtil {
 
     private static Class<?> FMUR_APIClass;

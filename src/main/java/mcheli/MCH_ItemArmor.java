@@ -9,6 +9,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 
+//I honestly have no idea what this is for. It has no usages.
+//Maybe we could add G-suits for pilots in the future?
 public class MCH_ItemArmor extends W_ItemArmor {
 
    public static final String HELMET_TEXTURE = "mcheli:textures/helicopters/ah-64.png";

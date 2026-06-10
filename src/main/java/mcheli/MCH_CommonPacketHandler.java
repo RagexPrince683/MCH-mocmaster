@@ -18,6 +18,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
+//explosions, server settings, lock status, open gui
 public class MCH_CommonPacketHandler {
 
    public static void onPacketEffectExplosion(EntityPlayer player, ByteArrayDataInput data) {

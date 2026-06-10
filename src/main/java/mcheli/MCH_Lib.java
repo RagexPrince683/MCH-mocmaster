@@ -7,11 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import mcheli.MCH_Config;
-import mcheli.MCH_ItemRendererDummy;
-import mcheli.MCH_MOD;
-import mcheli.MCH_Vector2;
-import mcheli.MCH_ViewEntityDummy;
+
 import mcheli.wrapper.W_Block;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_Reflection;
@@ -33,8 +29,9 @@ import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import org.lwjgl.Sys;
 
+
+//Very broken logger, and misc functions such as all vehicle speed mult, and some other stuff I still have no idea what it does.
 public class MCH_Lib {
 
    private static HashMap mapMaterial = new HashMap();

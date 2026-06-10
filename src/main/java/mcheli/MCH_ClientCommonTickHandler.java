@@ -53,6 +53,7 @@ import mcheli.ship.MCH_ClientShipTickHandler;
 import mcheli.ship.MCH_EntityShip;
 import mcheli.ship.MCH_GuiShip;
 
+//Eventhooks, clientproxy, tickhandler, guis and config just to name a few inheritors
 @SideOnly(Side.CLIENT)
 public class MCH_ClientCommonTickHandler extends W_TickHandler {
 

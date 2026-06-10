@@ -1,6 +1,6 @@
 package mcheli;
 
-
+//I'm not sure that this is even used. I wonder why it's here?
 public class MCH_CheckTime {
 
    private long startTime = 0L;

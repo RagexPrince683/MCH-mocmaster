@@ -3,6 +3,7 @@ package mcheli;
 import mcheli.aircraft.MCH_EntityAircraft;
 import net.minecraft.entity.Entity;
 
+//used in client tracking, BVR lock boxes, RWR, entity info SYNC
 public class MCH_EntityInfo {
     public int entityId;
     public String worldName;

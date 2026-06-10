@@ -3,6 +3,7 @@ package mcheli;
 import mcheli.wrapper.W_KeyBinding;
 import net.minecraft.client.settings.KeyBinding;
 
+//Key GUI display
 public class MCH_KeyName {
 
    private final int value;

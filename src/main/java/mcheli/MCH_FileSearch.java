@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TreeSet;
 
+//returns a modlist in readmodlist to detect skid cheaters or people who may have a unauthorized mod.
+// Can also be used for debugging.
 public class MCH_FileSearch {
 
    public static final int TYPE_FILE_OR_DIR = 1;
@@ -25,7 +27,8 @@ public class MCH_FileSearch {
    public File[] listFiles(String directoryPath, String fileNamePattern, int type, boolean isRecursive, int period) {
       File dir = new File(directoryPath);
       if(!dir.isDirectory()) {
-         throw new IllegalArgumentException("引数で指定されたパス[" + dir.getAbsolutePath() + "]はディレクトリではありません。");
+         //translated: "The path specified in the argument [" + dir.getAbsolutePath() + "] is not a directory."
+         throw new IllegalArgumentException("The path specified in the argument[" + dir.getAbsolutePath() + "]is not a directory.");
       } else {
          File[] files = dir.listFiles();
 

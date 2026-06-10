@@ -9,6 +9,7 @@ import mcheli.aircraft.MCH_AircraftInfo;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.util.Vec3;
 
+//Items, vehicle items (ALL VEHICLE TYPES) not just 'turret' 'vehicles', HUD for some reason, throwable items (grenades), and weapon info inherits this.
 public class MCH_BaseInfo {
 
    public String filePath;

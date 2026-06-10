@@ -22,6 +22,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 
+//everything config related
 public class MCH_Config {
 
    public static String mcPath;

@@ -1,7 +1,6 @@
 package mcheli;
 
-import mcheli.MCH_Queue;
-
+//I think this is part of the renderer for the GUI stick. Also used for movement?
 public class MCH_LowPassFilterFloat {
 
    private MCH_Queue filter;

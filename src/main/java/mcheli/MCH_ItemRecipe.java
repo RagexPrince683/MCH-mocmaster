@@ -1,15 +1,12 @@
 package mcheli;
 
 import cpw.mods.fml.common.registry.GameRegistry;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import mcheli.MCH_Config;
-import mcheli.MCH_IRecipeList;
-import mcheli.MCH_MOD;
-import mcheli.MCH_RecipeFuel;
-import mcheli.MCH_RecipeReloadRangeFinder;
+
 import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.aircraft.MCH_AircraftInfoManager;
 import mcheli.helicopter.MCH_HeliInfo;
@@ -30,11 +27,11 @@ import mcheli.vehicle.MCH_VehicleInfo;
 import mcheli.vehicle.MCH_VehicleInfoManager;
 import mcheli.wrapper.W_Block;
 import mcheli.wrapper.W_Item;
+
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
 
 import net.minecraftforge.oredict.OreDictionary;
@@ -42,6 +39,7 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 
+//Drafting table stuff and recipes for ALL vehicles/items
 public class MCH_ItemRecipe implements MCH_IRecipeList {
 
    private static final MCH_ItemRecipe instance = new MCH_ItemRecipe();

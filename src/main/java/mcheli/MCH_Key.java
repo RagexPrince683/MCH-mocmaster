@@ -5,6 +5,7 @@ import net.minecraft.client.settings.KeyBinding;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
+//Any kind of keybinding
 public class MCH_Key {
 
    public int key;
@@ -31,7 +32,6 @@ public class MCH_Key {
    }
 
    public void update() {
-      //TODO: git blame
       if(this.key != 0) {
          this.isBeforePress = this.isPress;
          if(this.key >= 0) {

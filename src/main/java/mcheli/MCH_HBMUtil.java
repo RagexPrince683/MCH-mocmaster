@@ -6,6 +6,9 @@ import net.minecraft.world.World;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+//Could literally just check for the HBM mod being installed and not do reflection.
+// But people who steal mods & copy shit coding standards don't actually care about clean coding.
+//TODO: change slop
 public class MCH_HBMUtil {
     private static Class<?> nukeExplosionMK5Class;
     private static Class<?> nukeTorexClass;

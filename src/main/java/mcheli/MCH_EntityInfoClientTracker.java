@@ -3,6 +3,7 @@ package mcheli;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+//BVR, RWR, entity info SYNC
 public class MCH_EntityInfoClientTracker {
 
     private static final Map<Integer, MCH_EntityInfo> trackedEntities = new ConcurrentHashMap<>();

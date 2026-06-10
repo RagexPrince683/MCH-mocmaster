@@ -7,6 +7,7 @@ import mcheli.MCH_BaseInfo;
 import mcheli.MCH_InputFile;
 import mcheli.MCH_Lib;
 
+//Inherited by all vehicle classes.
 public abstract class MCH_InfoManagerBase {
 
    public abstract MCH_BaseInfo newInfo(String var1);
@@ -20,6 +21,7 @@ public abstract class MCH_InfoManagerBase {
          public boolean accept(File pathname) {
             String s = pathname.getName().toLowerCase();
             return pathname.isFile() && s.length() >= 5 && s.substring(s.length() - 4).compareTo(".txt") == 0;
+            //we could add our own file format here if we want to.
          }
       });
       if(files != null && files.length > 0) {

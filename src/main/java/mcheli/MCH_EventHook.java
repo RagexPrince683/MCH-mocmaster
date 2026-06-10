@@ -1,49 +1,36 @@
 package mcheli;
 
-import java.util.ArrayList;
+
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.UUID;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import mcheli.MCH_Config;
-import mcheli.MCH_Lib;
-import mcheli.MCH_MOD;
-import mcheli.MCH_PacketNotifyServerSettings;
+
 import mcheli.aircraft.MCH_EntityAircraft;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_ItemAircraft;
-import mcheli.aircraft.MCH_PacketAircraftLocation;
 import mcheli.uav.MCH_UavInventory;
 import mcheli.uav.MCH_UavRegistry;
 import mcheli.chain.MCH_ItemChain;
 import mcheli.command.MCH_Command;
-import mcheli.lweapon.MCH_ItemLightWeaponBase;
-import mcheli.plane.MCP_EntityPlane;
 //import mcheli.sensors.MCH_VisualContact;
 //import mcheli.sensors.Mk1Eyeball;
+//I tried so hard and got so far...
 import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_EntityPlayer;
 import mcheli.wrapper.W_EventHook;
 import mcheli.wrapper.W_Lib;
-import net.minecraft.client.Minecraft;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
@@ -53,6 +40,7 @@ import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
+//schizophrenic eventhook crap
 public class MCH_EventHook extends W_EventHook {
 
    int acloaded = 0;

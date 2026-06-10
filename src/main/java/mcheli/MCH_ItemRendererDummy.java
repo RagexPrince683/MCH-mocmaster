@@ -9,6 +9,7 @@ import mcheli.wrapper.W_EntityRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
 
+//Central controller for first person item renderer when in any type of vehicle. Can be disabled via the config.
 @SideOnly(Side.CLIENT)
 public class MCH_ItemRendererDummy extends ItemRenderer {
 

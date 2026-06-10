@@ -37,10 +37,12 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.WorldEvent.Unload;
 import org.lwjgl.opengl.GL11;
 
+//used in common tick handler, clientproxy and renderaircraft
 public class MCH_ClientEventHook extends W_ClientEventHook {
 
    MCH_TextureManagerDummy dummyTextureManager = null;
    public static List haveSearchLightAircraft = new ArrayList();
+   //I think this is for search lights
    private static final ResourceLocation ir_strobe = new ResourceLocation("mcheli", "textures/ir_strobe.png");
    private static boolean cancelRender = true;
 

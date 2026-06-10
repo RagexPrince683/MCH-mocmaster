@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static mcheli.network.packets.PacketEntityInfoSync.*;
 
+//TODO translate into ENGLISH
 public class MCH_EntityInfoManager {
 
     public static final Map<Integer, MCH_EntityInfo> serverEntities = new ConcurrentHashMap<>();
