@@ -170,6 +170,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm RangeFinderConsume;
    public static MCH_ConfigPrm EnablePutRackInFlying;
    public static MCH_ConfigPrm EnableDebugBoundingBox;
+   public static MCH_ConfigPrm DebugFlightControl;
 
    //TODOne mch1.0.5 -> mchr?
    public static MCH_ConfigPrm DespawnCount;
@@ -412,6 +413,8 @@ public class MCH_Config {
       RangeFinderConsume = new MCH_ConfigPrm("RangeFinderConsume", true);
       EnablePutRackInFlying = new MCH_ConfigPrm("EnablePutRackInFlying", true);
       EnableDebugBoundingBox = new MCH_ConfigPrm("EnableDebugBoundingBox", false);
+      DebugFlightControl = new MCH_ConfigPrm("DebugFlightControl", false);
+      DebugFlightControl.desc = ";Print FPS, elapsed tick fraction, control inputs, angular velocity, and pitch/yaw/roll once per second while piloting.";
       DespawnCount = new MCH_ConfigPrm("DespawnCount", 25);
       HitBoxDelayTick = new MCH_ConfigPrm("HitBoxDelayTick", 0);
       EnableRotationLimit = new MCH_ConfigPrm("EnableRotationLimit", false);
@@ -500,6 +503,7 @@ public class MCH_Config {
               RangeFinderConsume,
               EnablePutRackInFlying,
               EnableDebugBoundingBox,
+              DebugFlightControl,
               null,
               InvertMouse,
               MouseSensitivity,

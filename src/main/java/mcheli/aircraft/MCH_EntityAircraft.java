@@ -1789,6 +1789,18 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return this.currentGForce;
    }
 
+   public float getPitchAngularVelocity() {
+      return this.pitchAngularVelocity;
+   }
+
+   public float getRollAngularVelocity() {
+      return this.rollAngularVelocity;
+   }
+
+   public float getYawAngularVelocity() {
+      return this.yawAngularVelocity;
+   }
+
    protected double getAirspeed() {
       return Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
             + super.motionZ * super.motionZ);
@@ -1863,19 +1875,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
-      //System.out.println("set angles");
-      if(partialTicks < 0.03F) {
-         partialTicks = 0.4F;
-         //System.out.println("partial ticks = 0.4");
-      }
-
-      if(partialTicks > 0.9F) {
-         partialTicks = 0.6F;
-         //System.out.println("Partial ticks = 0.6");
-      }
-
-      this.lowPassPartialTicks.put(partialTicks);
-      partialTicks = this.lowPassPartialTicks.getAvg();
+      // Render tick callbacks pass a fraction of a Minecraft tick. Treat that
+      // value only as elapsed simulation time; never clamp tiny high-FPS frames
+      // to a large fixed value or smooth it with previous render frames.
+      partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
       float ac_pitch = this.getRotPitch();
       float ac_yaw = this.getRotYaw();
       float ac_roll = this.getRotRoll();

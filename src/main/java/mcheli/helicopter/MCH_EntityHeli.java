@@ -342,7 +342,7 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
          super.prevPosY = super.posY;
          super.prevPosZ = super.posZ;
          if(!this.isDestroyed() && this.isHovering() && MathHelper.abs(this.getRotPitch()) < 70.0F) {
-            this.setRotPitch(this.getRotPitch() * 0.95F);
+            this.setRotPitch(MCH_FlightModel.decayPerTick(this.getRotPitch(), 0.95F, 1.0F));
          }
 
          if(this.isDestroyed() && this.getCurrentThrottle() > 0.0D) {
@@ -410,15 +410,15 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
    }
 
    public void onUpdateAngles(float partialTicks) {
+      partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
       if(!this.isDestroyed()) {
-         float rotRoll = !this.isHovering()?0.04F:0.07F;
-         rotRoll = 1.0F - rotRoll * partialTicks;
+         float rotRoll = !this.isHovering()?0.96F:0.93F;
          if((double)this.getRotRoll() > 0.1D && this.getRotRoll() < 65.0F) {
-            this.setRotRoll(this.getRotRoll() * rotRoll);
+            this.setRotRoll(MCH_FlightModel.decayPerTick(this.getRotRoll(), rotRoll, partialTicks));
          }
 
          if((double)this.getRotRoll() < -0.1D && this.getRotRoll() > -65.0F) {
-            this.setRotRoll(this.getRotRoll() * rotRoll);
+            this.setRotRoll(MCH_FlightModel.decayPerTick(this.getRotRoll(), rotRoll, partialTicks));
          }
 
          if(MCH_Lib.getBlockIdY(this, 3, -3) == 0) {

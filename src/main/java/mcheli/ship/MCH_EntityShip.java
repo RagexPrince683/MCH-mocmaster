@@ -379,12 +379,13 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
     }
 
     public void onUpdateAngles(float partialTicks) {
+        partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
         if(!this.isDestroyed()) {
             if(super.isGunnerMode) {
-                this.setRotPitch(this.getRotPitch() * 0.95F);
-                this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 0.2F);
+                this.setRotPitch(MCH_FlightModel.decayPerTick(this.getRotPitch(), 0.95F, partialTicks));
+                this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 0.2F * partialTicks);
                 if(MathHelper.abs(this.getRotRoll()) > 20.0F) {
-                    this.setRotRoll(this.getRotRoll() * 0.95F);
+                    this.setRotRoll(MCH_FlightModel.decayPerTick(this.getRotRoll(), 0.95F, partialTicks));
                 }
             }
 
@@ -422,16 +423,14 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 }
             }
 
-            this.addkeyRotValue = (float)((double)this.addkeyRotValue * (1.0D - (double)(0.1F * partialTicks)));
+            this.addkeyRotValue = MCH_FlightModel.decayPerTick(this.addkeyRotValue, 0.9F, partialTicks);
             if(!isFly && MathHelper.abs(this.getRotPitch()) < 40.0F) {
                 this.applyOnGroundPitch(0.97F);
             }
 
             if(this.getNozzleRotation() > 0.001F) {
-                rot = 1.0F - 0.03F * partialTicks;
-                this.setRotPitch(this.getRotPitch() * rot);
-                rot = 1.0F - 0.1F * partialTicks;
-                this.setRotRoll(this.getRotRoll() * rot);
+                this.setRotPitch(MCH_FlightModel.decayPerTick(this.getRotPitch(), 0.97F, partialTicks));
+                this.setRotRoll(MCH_FlightModel.decayPerTick(this.getRotRoll(), 0.9F, partialTicks));
             }
 
         }
@@ -802,7 +801,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                     }
                 } else {
                     this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 1.0F);
-                    this.setRotPitch(this.getRotPitch() * 0.95F);
+                    this.setRotPitch(MCH_FlightModel.decayPerTick(this.getRotPitch(), 0.95F, 1.0F));
                     if(this.canFoldLandingGear()) {
                         this.foldLandingGear();
                     }
@@ -840,7 +839,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         if(submarineInWater) {
             v = MCH_Lib.Rot2Vec3(this.getRotYaw(), 0.0F);
         } else if(this.getNozzleRotation() > 0.001F) {
-            this.setRotPitch(this.getRotPitch() * 0.95F);
+            this.setRotPitch(MCH_FlightModel.decayPerTick(this.getRotPitch(), 0.95F, 1.0F));
             v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - this.getNozzleRotation());
             if(this.getNozzleRotation() >= 90.0F) {
                 v.xCoord *= 0.800000011920929D;

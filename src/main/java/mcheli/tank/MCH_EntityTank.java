@@ -388,12 +388,13 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    }
 
    public void onUpdateAngles(float partialTicks) {
+      partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
       if(!this.isDestroyed()) {
          if(super.isGunnerMode) {
-            this.setRotPitch(this.getRotPitch() * 0.95F);
-            this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 0.2F);
+            this.setRotPitch(MCH_FlightModel.decayPerTick(this.getRotPitch(), 0.95F, partialTicks));
+            this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 0.2F * partialTicks);
             if(MathHelper.abs(this.getRotRoll()) > 20.0F) {
-               this.setRotRoll(this.getRotRoll() * 0.95F);
+               this.setRotRoll(MCH_FlightModel.decayPerTick(this.getRotRoll(), 0.95F, partialTicks));
             }
          }
 
@@ -439,7 +440,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
             }
          }
 
-         this.addkeyRotValue = (float)((double)this.addkeyRotValue * (1.0D - (double)(0.1F * partialTicks)));
+         this.addkeyRotValue = MCH_FlightModel.decayPerTick(this.addkeyRotValue, 0.9F, partialTicks);
       }
    }
 
@@ -1295,16 +1296,8 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
    //set angles is le turret (1.12.2)
    public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
-      if(partialTicks < 0.03F) {
-         partialTicks = 0.4F;
-      }
-
-      if(partialTicks > 0.9F) {
-         partialTicks = 0.6F;
-      }
-
-      super.lowPassPartialTicks.put(partialTicks);
-      partialTicks = super.lowPassPartialTicks.getAvg();
+      // Keep turret/camera limits tied to elapsed tick time instead of render FPS.
+      partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
       float ac_pitch = this.getRotPitch();
       float ac_yaw = this.getRotYaw();
       float ac_roll = this.getRotRoll();
