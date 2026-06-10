@@ -13,6 +13,9 @@ import net.minecraftforge.client.model.IModelCustom;
 
 import java.util.*;
 
+//base vehicle inheritor class. Basically anything in here can be used by ANY type of vehicle.
+// 'AIRCRAFT' just means ANYTHING because Japanese ESL heli mod/confusion
+
 public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
 
    public static Map<String, MCH_AircraftInfo> allAircraftInfo = new HashMap<>();

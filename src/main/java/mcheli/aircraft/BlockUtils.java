@@ -7,6 +7,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 
 public class BlockUtils {
+
+    //I have no idea if this is even working. I think it is, but we do not know.
     public static boolean isSlowingBlock(Block block, World world, int x, int y, int z, Entity entity) {
         // Check for blocks with specific step sound types (like dirt, grass, podzol)
         if (block.stepSound == Block.soundTypeGrass ||

@@ -7,6 +7,7 @@ import mcheli.aircraft.MCH_AircraftInfo;
 import mcheli.vehicle.MCH_ItemVehicle;
 import net.minecraft.item.Item;
 
+//TURRET info
 public class MCH_VehicleInfo extends MCH_AircraftInfo {
 
    public MCH_ItemVehicle item = null;

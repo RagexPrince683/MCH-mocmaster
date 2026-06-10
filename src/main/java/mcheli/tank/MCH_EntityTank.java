@@ -58,6 +58,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    public float partialTicks;
    private int trackDamageTaken;
 
+   //TODO
    private int currentGear = 1;  // Starting gear
    private final int maxGear = 5;  // Number of gears
    private double[] gearSpeedLimits = {5.0D, 10.0D, 20.0D, 30.0D, 40.0D};  // Speed limits for each gear
@@ -82,6 +83,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
       this.trackDamageTaken = 0;
    }
 
+   //tracks are very broken
    public int getTrackMaxHP() {
       return this.tankInfo != null?Math.max(1, this.tankInfo.trackMaxHP):1;
    }
@@ -99,7 +101,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    }
 
    public String getEntityType() {
-      return "Vehicle";
+      return "Vehicle"; //??? mental illness
    }
 
    public MCH_TankInfo getTankInfo() {

@@ -63,11 +63,11 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
 
    public String getKindName() {
       return "vehicles";
-   }
+   } //even more mental illness
 
    public String getEntityType() {
       return "Turret";
-   }
+   } //more mental illness
 
    public MCH_VehicleInfo getVehicleInfo() {
       return this.vehicleInfo;
@@ -99,6 +99,8 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
       super.entityInit();
    }
 
+   //AI schizo posting where lazy dev did not bother to state this is the turret class...
+   // and not the tank class. Probably why tracks don't work
    protected void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
       super.writeEntityToNBT(par1NBTTagCompound);
       par1NBTTagCompound.setInteger("TrackDamage", this.trackDamageTaken);
@@ -149,6 +151,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
 
    }
 
+   //??? no usages why is this here
    public void _updateCameraRotate(float yaw, float pitch) {
       super.camera.prevRotationYaw = super.camera.rotationYaw;
       super.camera.prevRotationPitch = super.camera.rotationPitch;
@@ -310,6 +313,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
    }
 
 
+   //no usages
    protected void onUpdate_Particle() {
       double particlePosY = super.posY;
       boolean b = false;
@@ -444,6 +448,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
 
    public void onUpdateAngles(float partialTicks) {}
 
+   //no usages
    public void _updateRiderPosition() {
       float yaw = super.rotationYaw;
       if(super.riddenByEntity != null) {

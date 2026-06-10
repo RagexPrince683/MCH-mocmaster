@@ -75,6 +75,7 @@ public abstract class MCH_AircraftCommonGui extends MCH_Gui {
          byte SZX = 5;
          byte SZY = 5;
          double[] ls = new double[]{(double)(cx - IVX), (double)(cy - IVY), (double)(cx - SZX), (double)(cy - SZY), (double)(cx - IVX), (double)(cy + IVY), (double)(cx - SZX), (double)(cy + SZY), (double)(cx + IVX), (double)(cy - IVY), (double)(cx + SZX), (double)(cy - SZY), (double)(cx + IVX), (double)(cy + IVY), (double)(cx + SZX), (double)(cy + SZY)};
+         //TODO clean up random magic number slop
          MCH_Config var10000 = MCH_MOD.config;
          color = MCH_Config.hitMarkColorRGB;
          int alpha = hs * (256 / hsMax);

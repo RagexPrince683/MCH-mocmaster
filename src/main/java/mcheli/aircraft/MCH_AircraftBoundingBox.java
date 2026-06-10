@@ -1,11 +1,11 @@
 package mcheli.aircraft;
 
-import mcheli.aircraft.MCH_BoundingBox;
-import mcheli.aircraft.MCH_EntityAircraft;
+
 import mcheli.ship.MCH_EntityShip;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+
 
 public class MCH_AircraftBoundingBox extends AxisAlignedBB {
 
