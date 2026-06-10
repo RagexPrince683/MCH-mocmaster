@@ -6559,6 +6559,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.cs_planeAutoThrottleDown = MCH_Config.AutoThrottleDownPlane.prmBool;
       var10001 = MCH_MOD.config;
       this.cs_tankAutoThrottleDown = MCH_Config.AutoThrottleDownTank.prmBool;
+      var10001 = MCH_MOD.config;
+      this.cs_shipAutoThrottleDown = MCH_Config.AutoThrottleDownShip.prmBool;
+
       this.camera.setShaderSupport(seatId, Boolean.valueOf(W_EntityRenderer.isShaderSupport()));
       MCH_PacketNotifyClientSetting.send();
    }
@@ -8002,6 +8005,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if(this.getAcInfo() == null) {
          return super.getInvName();
       } else {
+         //TODO usually unlocalized dogshit, needs to be fixed
          String s = this.getAcInfo().displayName;
          return s.length() <= 32?s:s.substring(0, 31);
       }

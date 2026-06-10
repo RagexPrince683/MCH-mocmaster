@@ -21,15 +21,30 @@ public class W_LanguageRegistry {
     }
 
     public static void addNameForObject(Object o, String lang, String name, String key, String desc) {
-        if (o == null || lang == null || name == null) return;
+        if (o == null || lang == null || name == null) {
+            System.out.println("[MCH] Lang skipped null: " + o + ", " + lang + ", " + name);
+            return;
+        }
 
-        map.putIfAbsent(lang, new HashMap<>());
+        String locKey = null;
+
+        if (o instanceof Item) {
+            locKey = ((Item)o).getUnlocalizedName() + ".name";
+        } else if (o instanceof Block) {
+            locKey = ((Block)o).getUnlocalizedName() + ".name";
+        } else if (o instanceof Achievement) {
+            locKey = "achievement." + key;
+        }
+
+        System.out.println("[MCH] Lang add: " + lang + " | " + locKey + " = " + name);
+
+        map.putIfAbsent(lang, new HashMap<String, String>());
         Map<String, String> entries = map.get(lang);
 
         if (o instanceof Item) {
-            entries.put(((Item) o).getUnlocalizedName() + ".name", name);
+            entries.put(locKey, name);
         } else if (o instanceof Block) {
-            entries.put(((Block) o).getUnlocalizedName() + ".name", name);
+            entries.put(locKey, name);
         } else if (o instanceof Achievement) {
             entries.put("achievement." + key, name);
             entries.put("achievement." + key + ".desc", desc);

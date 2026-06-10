@@ -785,6 +785,9 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         boolean submarineInWater = this.isDiving && this.isSubmerged();
         boolean preventWaterBobbing = dp > 0.0D && this.getShipInfo().preventWaterBobbing;
 
+        boolean submarineMode = this.isDiving || submarineInWater;
+        boolean surfaceShipMode = !submarineMode;
+
         boolean levelOff = super.isGunnerMode;
         if(submarineInWater) {
             this.updateSubmarineVerticalMotion();
@@ -810,7 +813,7 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
                 }
             }
 
-            if(!levelOff) { //todo additional check here for not diving
+            if(!levelOff) {
                 super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
                 super.motionY += -0.047D * (1.0D - this.getCurrentThrottle());
             } else {
@@ -925,7 +928,19 @@ public class MCH_EntityShip extends MCH_EntityAircraft {
         }
 
         if(preventWaterBobbing) {
-            super.motionY = 0.0D;
+            if(submarineMode) {
+                super.motionY = 0.0D;
+            } else if(surfaceShipMode) {
+                if(dp > 0.0D && dp < 1.25D) {
+                    super.motionY *= 0.25D;
+
+                    if(Math.abs(super.motionY) < 0.003D) {
+                        super.motionY = 0.0D;
+                    }
+                } else if(dp >= 1.25D && super.motionY > 0.06D) {
+                    super.motionY = 0.06D;
+                }
+            }
         }
 
         this.moveEntity(super.motionX, super.motionY, super.motionZ);
