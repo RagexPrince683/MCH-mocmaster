@@ -1,96 +1,167 @@
-# MCH-mocmaster
+# MC Helicopter Overdrive+
 
+MC Helicopter Overdrive+ is a Minecraft Forge 1.7.10 vehicle-combat mod based on the original MC Helicopter codebase. It expands MCHeli with a larger vehicle ecosystem, modernized rendering work, ships, tanks, drones/UAV support, man-portable weapons, deployable equipment, and extensive server-side configuration.
 
-NEW! (experimental):
+The mod is intended for players, modpack authors, and server administrators who want military-style vehicles and combined-arms gameplay in legacy Minecraft 1.7.10 packs.
 
-# How do I use this with assets?:
+> **Project status:** active fork/overhaul of the original MCHeli lineage. The codebase targets Minecraft **1.7.10** and Forge **10.13.4.1614** for builds, while declaring compatibility with Forge **10.13.2.1230 or newer**.
 
-A. Find the repo's directory build\run\mods
+## What the mod adds
 
-B. Put your assets into the mod folder exactly how they would be in a normal instance of minecraft
+- **Aircraft and vehicles:** helicopters, fixed-wing planes, tanks, ships, and ground vehicles loaded from MCHeli-style asset/config packs.
+- **Combat systems:** bullets, rockets, bombs, torpedoes, anti-air/anti-surface/anti-tank missiles, target markers, flares, chaff, APS/maintenance hooks, and damage multipliers.
+- **Portable equipment:** GLTD target designator, FIM-92 Stinger, FGM-148 Javelin, RPG-7, wrench, rangefinder, parachute, tow chain, containers, UAV stations, and gunner spawn items.
+- **Drafting table workflow:** a dedicated Drafting Table block for vehicle/item crafting recipes.
+- **Multiplayer tools:** team/scoreboard UI hooks, entity markers, server reconfiguration, mod-list/screenshot requests, and administrative entity utilities.
+- **Client rendering options:** long-distance vehicle LOD snapshots, shader toggle, smooth shading, render-distance weighting, configurable HUD behavior, and optional multi-threaded model loading.
+- **Server controls:** block-destruction rules, collision damage, recipe toggles, item/block IDs, command permissions, creative-tab icons, global speed multipliers, and keybind defaults.
 
-C. It *ideally* just works. Still testing.
+## Requirements and compatibility
 
+| Requirement | Details |
+| --- | --- |
+| Minecraft | 1.7.10 only |
+| Mod loader | Minecraft Forge 1.7.10; build script uses `1.7.10-10.13.4.1614-1.7.10` |
+| Java | Java 8 recommended/required for development and runtime compatibility with ForgeGradle 1.x |
+| Client | Required for players connecting to servers that use the mod |
+| Server | Install on dedicated servers that need MCHeli entities, recipes, commands, and configuration |
+| Asset pack | Required for actual vehicles/weapons/content beyond the registered core items; assets are read from `assets/mcheli/...` in the mod jar or from `mods/mcheli/` in the development run directory |
 
+The Forge metadata marks the mod as client-required and server-optional, but multiplayer worlds that spawn or simulate MCHeli vehicles should run the mod on the server and all participating clients.
 
+## Installation
 
+### Single-player or client
 
-# This repository is meant to enhance the mcheli minecraft mod far beyond what it is capable of. Any and all help would be resourceful. This is a derivative of the source code found [[here](https://github.com/RagexPrince683/MCH-defaultmaster)] 
+1. Install Minecraft Forge for Minecraft 1.7.10.
+2. Place the built MC Helicopter Overdrive+ jar in `.minecraft/mods/`.
+3. Install the matching MCHeli asset/content pack so the folder structure includes `assets/mcheli/` content such as `helicopters`, `planes`, `ships`, `tanks`, `vehicles`, `weapons`, `hud`, `models`, `textures`, `sounds`, `item`, and `throwable` where applicable.
+4. Start the game once to generate `.minecraft/config/mcheli.cfg`.
+5. Adjust configuration options as needed, then restart or use `/mcheli reconfig` for server-side config reloads.
 
+### Dedicated server
 
+1. Install Forge 1.7.10 on the server.
+2. Place the mod jar and matching asset/content pack in the server `mods/` directory.
+3. Start the server once to generate `config/mcheli.cfg`.
+4. Stop the server, edit the configuration, then restart. Some server settings can be reloaded with `/mcheli reconfig`.
+5. Ensure every joining client has the same mod and compatible content/assets.
 
+### Development builds
 
+This repository uses ForgeGradle 1.x through the Gradle wrapper.
 
-# FAQ:
-# 1. Why is it called mocmaster if it's for mcheli overdrive?
-This repository was originally called mocmaster after Moc the guy who showed me the original mcheli backend code, since then I've broken a few repos and have resorted to this being my main Mcheli-Overdrive repository.
-# 2. How to use?
-   
-I use and set this up with intellij
+```bash
+./gradlew setupDecompWorkspace
+./gradlew build
+```
 
-you need jdk-8u361-windows and if your on 64x 64x 32 for 32.
+Build output is written under `build/libs/`. The Gradle build increments `version.properties` as part of `build`, so avoid running a release build casually if you do not intend to bump the patch version.
 
-JDK 8u361
-https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8u361-linux-i586.rpm
-https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8u361-linux-i586.tar.gz
-https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8u361-linux-x64.rpm
-https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8u361-linux-x64.tar.gz
-https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8u361-macosx-x64.dmg
-https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8u361-solaris-sparcv9.tar.gz
-https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8u361-windows-i586.exe
-https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8u361-windows-i586.zip
-https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8u361-windows-x64.exe
-https://cfdownload.adobe.com/pub/adobe/coldfusion/java/java8/java8u361/jdk/jdk-8u361-windows-x64.zip
+For development asset testing, the build/run setup expects assets in `build/run/mods/mcheli/` with the same structure used by normal MCHeli installations.
 
-open gradle console you should see gradle and then a bunch of things, then you want to type
+## Basic usage
 
-build
+1. Open the MCHeli creative tabs (`MCHeliO Item`, `MCHeliO Helicopters`, `MCHeliO Planes`, `MCHeliO Ships`, `MCHeliO Tanks`, `MCHeliO Vehicles`, and `MCHeliO Recipe Items`).
+2. Place or craft a **Drafting Table** to access recipes when recipes are enabled.
+3. Use vehicle item icons to place vehicles. If `PlaceableOnSpongeOnly` is enabled, vehicles must be placed on sponge blocks.
+4. Enter vehicles, use the configured movement/weapon keys, and refuel/repair according to the content pack's vehicle definitions.
+5. Server operators can use `/mcheli list` to discover available administrative subcommands.
 
-then if all goes well go to build/libs and a java file will be there. If you have made edits to the src you want to open the jar file with a archiver tool such as winrar. You can put this compiled class code into mcheli/mcheli in a actual mcheli instance/folder/the yknow mod and test things out yourself. If you want to make sure there are no errors just copy and paste over the mcheli/mcheli with this stuff.
-   
-# 3. Why so many branches?
+See the extended documentation for step-by-step guides:
 
-I am bad at coding/this project has taken my soul
+- [Getting Started Guide](docs/getting-started.md)
+- [Configuration Reference](docs/configuration.md)
+- [Command and Permission Reference](docs/commands.md)
+- [Server Administration Guide](docs/server-administration.md)
+- [Documentation Audit Notes](docs/documentation-audit.md)
 
+## Configuration overview
 
-# What to do if something breaks?:
+The mod writes `config/mcheli.cfg` on startup. Important options include:
 
-1. Close IntelliJ and delete the garbage cache
-   Close IntelliJ completely.
+- `EnableCommand` - enables or disables `/mcheli` subcommands.
+- `PlaceableOnSpongeOnly` - restricts vehicle placement to sponge blocks.
+- `Explosion_DestroyBlock`, `Explosion_FlamingBlock`, and `Collision_DestroyBlock` - control world damage behavior.
+- `InfinityAmmo` and `InfinityFuel` - enable unlimited ammunition/fuel globally.
+- `AllHeliSpeed`, `AllPlaneSpeed`, `AllShipSpeed`, and `AllTankSpeed` - global speed multipliers/clamps.
+- `EnableAircraftLODRender`, `AircraftLODStartDistance`, and `AircraftLODFarDistance` - control long-distance vehicle model rendering.
+- `MultiThreadedModelLoading` - toggles threaded model loading on the client.
+- `CommandPermission` entries - grant specific `/mcheli` subcommands to named non-operator players.
+- `Key*` entries - default key and mouse bindings for MCHeli controls.
 
-In your McheliO project folder, delete:
+For every documented option and default value found in source, see [docs/configuration.md](docs/configuration.md).
 
-.gradle/
-build/
-out/ (if exists)
+## Commands
 
-2. Re-open the project as a Gradle project
-   Open IntelliJ.
+All commands use the `/mcheli` root command and can be disabled globally with `EnableCommand = false`.
 
-Do NOT use “New Project” or “Import from existing sources.”
+Common examples:
 
-Use File → Open… → select your McheliO root folder (where build.gradle lives).
+```text
+/mcheli list
+/mcheli reconfig
+/mcheli status entity 5
+/mcheli showboundingbox true
+/mcheli title 5 2 {"text":"Mission start"}
+```
 
-When prompted, import as a Gradle project.
+Operators can use all subcommands. Non-operators need matching `CommandPermission` entries in `mcheli.cfg`. See [docs/commands.md](docs/commands.md) for syntax, examples, and permission configuration.
 
-3. Make sure SDK is Java 8
-   File → Project Structure → Project SDK → Set to Java 1.8.
+## Troubleshooting
 
-Also set Project language level to 8 - Lambdas, type annotations, etc.
+### Vehicles, models, textures, or sounds are missing
 
-4. Force Gradle to rebuild MCP
-   Open the terminal in IntelliJ (or system terminal in the project root) and run:
+Verify that the MCHeli asset/content pack is installed with the expected `assets/mcheli/` structure. The code loads definitions from folders such as `assets/mcheli/helicopters`, `assets/mcheli/planes`, `assets/mcheli/ships`, `assets/mcheli/tanks`, `assets/mcheli/vehicles`, `assets/mcheli/weapons`, `assets/mcheli/hud`, `assets/mcheli/item`, and `assets/mcheli/throwable`.
 
-gradlew clean
-gradlew setupDecompWorkspace --refresh-dependencies
-gradlew genIntellijRuns
+### The config did not change in-game
 
-5. Re-sync Gradle
-   In IntelliJ, click the little elephant icon (Gradle tool window) → “Reload All Gradle Projects.”
+Restart the game/server after editing `mcheli.cfg`, or use `/mcheli reconfig` for server-side reloadable settings. Client keybind changes may require reopening the game or reloading the client-side config.
 
-Wait for indexing to finish (top-right progress bar).
+### Commands say I do not have permission
 
-6. Check sources
-   Right-click src/main/java → Mark Directory As → Sources Root
+Use an operator account or add `CommandPermission = commandName:PlayerName` entries to `mcheli.cfg`, then reload/restart. Permissions are per subcommand, not for the whole `/mcheli` tree.
 
-Right-click src/main/resources → Mark Directory As → Resources Root
+### A build fails in a clean environment
+
+This is an old ForgeGradle 1.x Minecraft 1.7.10 project. Use Java 8, run `./gradlew setupDecompWorkspace`, and ensure legacy dependency repositories are reachable.
+
+## Resources
+
+- CurseForge/update page from mod metadata: <https://www.curseforge.com/minecraft/mc-mods/mcheli-overdrive-loader-mod>
+- Project website from mod metadata: <https://ragexprince.wordpress.com/>
+- Original derivative source noted by the previous README: <https://github.com/RagexPrince683/MCH-defaultmaster>
+- Current repository: this checkout (`MCH-mocmaster`)
+
+If this project has an official Discord, Modrinth page, wiki, or current GitHub remote, add those URLs here once confirmed.
+
+## Screenshots
+
+Screenshots are not currently stored in this repository. Suggested placeholders for future documentation:
+
+- Vehicle selection in creative tabs
+- Drafting Table recipe screen
+- Aircraft HUD in flight
+- Server/admin command examples
+
+## FAQ
+
+### Is this the original MC Helicopter mod?
+
+No. It is a fork/overhaul derived from the MCHeli code lineage, with additional systems and compatibility work.
+
+### Does it work on modern Minecraft versions?
+
+No. The current codebase targets Minecraft 1.7.10.
+
+### Do clients need the mod on multiplayer servers?
+
+Yes. Players need the mod and compatible assets to render and control vehicles correctly. Dedicated servers should also install it to simulate entities, recipes, commands, and config behavior.
+
+### Can I disable terrain damage?
+
+Yes. Start with `Explosion_DestroyBlock = false`, `Collision_DestroyBlock = false`, and related collision/breakable-block options in `config/mcheli.cfg`.
+
+### Where are vehicles defined?
+
+Vehicle and weapon content is data-driven through MCHeli asset folders under `assets/mcheli/`. This repository contains the Java implementation; a matching asset/content pack supplies most vehicle definitions, models, textures, HUDs, and sounds.
