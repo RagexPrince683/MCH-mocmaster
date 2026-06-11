@@ -134,6 +134,13 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    public float flightCeiling;
    /** Vertical distance over which lift fades when approaching the flight ceiling. */
    public float flightCeilingRange;
+   /**
+    * Explicit opt-in for the post-legacy mobility/flight-model helpers.
+    *
+    * <p>Legacy MCHeli packs predate these keys, so absence must keep the original
+    * movement, rotation, throttle, and damping paths intact.</p>
+    */
+   public boolean useNewMobilitySystem;
     private List textureNameList;
    public int textureCount;
    public float particlesScale;
@@ -344,6 +351,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
       this.throttleUpDownOnEntity = 2.0F;
       this.flightCeiling = 9100.0F;
       this.flightCeilingRange = 24.0F;
+      this.useNewMobilitySystem = false;
       this.pivotTurnThrottle = 0.0F;
       this.trackRollerRot = 30.0F;
       this.partWheelRot = 30.0F;
@@ -857,6 +865,11 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                     this.flightCeiling = this.toFloat(data, 32.0F, 37650.0F);
                                  } else if(item.equalsIgnoreCase("FlightCeilingRange")) {
                                     this.flightCeilingRange = this.toFloat(data, 1.0F, 128.0F);
+                                 } else if(item.equalsIgnoreCase("UseNewMobilitySystem")
+                                       || item.equalsIgnoreCase("EnableNewMobilitySystem")
+                                       || item.equalsIgnoreCase("UseNewFlightModel")
+                                       || item.equalsIgnoreCase("EnableNewFlightModel")) {
+                                    this.useNewMobilitySystem = this.toBool(data);
                                  } else if(item.equalsIgnoreCase("Stealth")) {
                                     this.stealth = this.toFloat(data, 0.0F, 1.0F);
                                  } else if(item.equalsIgnoreCase("EntityWidth")) {

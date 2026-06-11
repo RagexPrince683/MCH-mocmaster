@@ -388,13 +388,15 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    }
 
    public void onUpdateAngles(float partialTicks) {
-      partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
+      if(this.useNewMobilitySystem()) {
+         partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
+      }
       if(!this.isDestroyed()) {
          if(super.isGunnerMode) {
-            this.setRotPitch(MCH_FlightModel.decayPerTick(this.getRotPitch(), 0.95F, partialTicks));
+            this.setRotPitch(this.decayMobilityValue(this.getRotPitch(), 0.95F, partialTicks));
             this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 0.2F * partialTicks);
             if(MathHelper.abs(this.getRotRoll()) > 20.0F) {
-               this.setRotRoll(MCH_FlightModel.decayPerTick(this.getRotRoll(), 0.95F, partialTicks));
+               this.setRotRoll(this.decayMobilityValue(this.getRotRoll(), 0.95F, partialTicks));
             }
          }
 
@@ -440,7 +442,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
             }
          }
 
-         this.addkeyRotValue = MCH_FlightModel.decayPerTick(this.addkeyRotValue, 0.9F, partialTicks);
+         this.addkeyRotValue = this.decayMobilityValue(this.addkeyRotValue, 0.9F, partialTicks);
       }
    }
 
@@ -1296,8 +1298,21 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    //set angles is le turret (1.12.2)
    public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
-      // Keep turret/camera limits tied to elapsed tick time instead of render FPS.
-      partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
+      // Keep turret/camera limits tied to elapsed tick time instead of render FPS only for the opt-in mobility path.
+      if(this.useNewMobilitySystem()) {
+         partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
+      } else {
+         if(partialTicks < 0.03F) {
+            partialTicks = 0.4F;
+         }
+
+         if(partialTicks > 0.9F) {
+            partialTicks = 0.6F;
+         }
+
+         this.lowPassPartialTicks.put(partialTicks);
+         partialTicks = this.lowPassPartialTicks.getAvg();
+      }
       float ac_pitch = this.getRotPitch();
       float ac_yaw = this.getRotYaw();
       float ac_roll = this.getRotRoll();

@@ -342,7 +342,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          super.prevPosY = super.posY;
          super.prevPosZ = super.posZ;
          if(!this.isDestroyed() && this.isHovering() && MathHelper.abs(this.getRotPitch()) < 70.0F) {
-            this.setRotPitch(MCH_FlightModel.decayPerTick(this.getRotPitch(), 0.95F, 1.0F));
+            this.setRotPitch(this.decayMobilityValue(this.getRotPitch(), 0.95F, 1.0F));
          }
 
          if(this.isDestroyed() && this.getCurrentThrottle() > 0.0D) {
@@ -410,15 +410,17 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    }
 
    public void onUpdateAngles(float partialTicks) {
-      partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
+      if(this.useNewMobilitySystem()) {
+         partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
+      }
       if(!this.isDestroyed()) {
          float rotRoll = !this.isHovering()?0.96F:0.93F;
          if((double)this.getRotRoll() > 0.1D && this.getRotRoll() < 65.0F) {
-            this.setRotRoll(MCH_FlightModel.decayPerTick(this.getRotRoll(), rotRoll, partialTicks));
+            this.setRotRoll(this.decayMobilityValue(this.getRotRoll(), rotRoll, partialTicks));
          }
 
          if((double)this.getRotRoll() < -0.1D && this.getRotRoll() > -65.0F) {
-            this.setRotRoll(MCH_FlightModel.decayPerTick(this.getRotRoll(), rotRoll, partialTicks));
+            this.setRotRoll(this.decayMobilityValue(this.getRotRoll(), rotRoll, partialTicks));
          }
 
          if(MCH_Lib.getBlockIdY(this, 3, -3) == 0) {
@@ -824,18 +826,21 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             }
 
             double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-            double ceilingLift = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
-            double rotorEfficiency = ceilingLift;
+            double rotorEfficiency = 1.0D;
+            double translationalLift = 0.0D;
+            if(this.useNewMobilitySystem()) {
+               rotorEfficiency = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
 
-            // Fast forward flight gives the rotor cleaner airflow (translational lift).
-            double translationalLift = MCH_FlightModel.clamp(horizontalSpeed / Math.max(0.1D, (double)this.getAcInfo().speed), 0.0D, 1.0D) * 0.004D;
+               // Fast forward flight gives the rotor cleaner airflow (translational lift).
+               translationalLift = MCH_FlightModel.clamp(horizontalSpeed / Math.max(0.1D, (double)this.getAcInfo().speed), 0.0D, 1.0D) * 0.004D;
 
-            // A powered, near-vertical descent can enter a vortex-ring state. Forward
-            // motion or lowering collective lets the helicopter recover naturally.
-            boolean vortexRing = super.motionY < -0.12D && horizontalSpeed < 0.15D && throttle > 0.45D;
-            if(vortexRing) {
-               rotorEfficiency *= 0.55D;
-               super.motionY -= 0.006D;
+               // A powered, near-vertical descent can enter a vortex-ring state. Forward
+               // motion or lowering collective lets the helicopter recover naturally.
+               boolean vortexRing = super.motionY < -0.12D && horizontalSpeed < 0.15D && throttle > 0.45D;
+               if(vortexRing) {
+                  rotorEfficiency *= 0.55D;
+                  super.motionY -= 0.006D;
+               }
             }
 
             super.motionY += ((y * 0.025D + 0.03D) * throttle + translationalLift * throttle) * rotorEfficiency;
@@ -877,12 +882,14 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          }
       }
 
-      double ceilingLift = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
-      if(!super.onGround && ceilingLift < 1.0D) {
-         if(super.motionY > 0.0D) {
-            super.motionY *= 0.88D + ceilingLift * 0.12D;
+      if(this.useNewMobilitySystem()) {
+         double ceilingLift = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
+         if(!super.onGround && ceilingLift < 1.0D) {
+            if(super.motionY > 0.0D) {
+               super.motionY *= 0.88D + ceilingLift * 0.12D;
+            }
+            super.motionY -= (1.0D - ceilingLift) * 0.014D;
          }
-         super.motionY -= (1.0D - ceilingLift) * 0.014D;
       }
 
       motion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
