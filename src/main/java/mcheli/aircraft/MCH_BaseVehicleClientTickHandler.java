@@ -13,7 +13,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.input.Keyboard;
 
-public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandlerBase {
+public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHandlerBase {
    protected boolean isRiding = false;
 
    protected boolean isBeforeRiding = false;
@@ -70,7 +70,7 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
     */
    public MCH_Key KeyAPS;
 
-   public MCH_AircraftClientTickHandler(Minecraft minecraft, MCH_Config config) {
+   public MCH_BaseVehicleClientTickHandler(Minecraft minecraft, MCH_Config config) {
       super(minecraft);
       updateKeybind(config);
    }
@@ -102,9 +102,9 @@ public abstract class MCH_AircraftClientTickHandler extends MCH_ClientTickHandle
       this.KeyAPS = new MCH_Key(MCH_Config.KeyAPS.prmInt);
    }
 
-   protected void commonPlayerControlInGUI(EntityPlayer player, MCH_EntityAircraft ac, boolean isPilot, MCH_PacketPlayerControlBase pc) {}
+   protected void commonPlayerControlInGUI(EntityPlayer player, MCH_EntityBaseVehicle ac, boolean isPilot, MCH_PacketPlayerControlBase pc) {}
 
-   public boolean commonPlayerControl(EntityPlayer player, MCH_EntityAircraft ac, boolean isPilot, MCH_PacketPlayerControlBase pc) {
+   public boolean commonPlayerControl(EntityPlayer player, MCH_EntityBaseVehicle ac, boolean isPilot, MCH_PacketPlayerControlBase pc) {
       if (Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
          if (this.KeyGUI.isKeyDown() || this.KeyExtra.isKeyDown()) {
             MCH_PacketSeatPlayerControl psc = new MCH_PacketSeatPlayerControl();

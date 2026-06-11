@@ -5,8 +5,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftCommonGui;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleCommonGui;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.gui.MCH_Gui;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_PlaneInfo;
@@ -16,18 +16,18 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
-public class MCP_GuiPlane extends MCH_AircraftCommonGui {
+public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
    public MCP_GuiPlane(Minecraft minecraft) {
       super(minecraft);
    }
 
    public boolean isDrawGui(EntityPlayer player) {
-      return MCH_EntityAircraft.getAircraft_RiddenOrControl(player) instanceof MCP_EntityPlane;
+      return MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player) instanceof MCP_EntityPlane;
    }
 
    public void drawGui(EntityPlayer player, boolean isThirdPersonView) {
-      MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(player);
+      MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
       if(ac instanceof MCP_EntityPlane && !ac.isDestroyed()) {
          MCP_EntityPlane plane = (MCP_EntityPlane)ac;
          int seatID = ac.getSeatIdByEntity(player);

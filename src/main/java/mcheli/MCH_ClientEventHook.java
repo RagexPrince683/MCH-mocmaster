@@ -13,9 +13,9 @@ import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.MCH_TextureManagerDummy;
 import mcheli.MCH_ViewEntityDummy;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
-import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.lweapon.MCH_ClientLightWeaponTickHandler;
 import mcheli.multiplay.MCH_GuiTargetMarker;
 import mcheli.particles.MCH_ParticlesUtil;
@@ -51,7 +51,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
    public void renderLivingEventSpecialsPre(Pre event) {
       MCH_Config var10000 = MCH_MOD.config;
       if(MCH_Config.DisableRenderLivingSpecials.prmBool) {
-         MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(Minecraft.getMinecraft().thePlayer);
+         MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(Minecraft.getMinecraft().thePlayer);
          if(ac != null && ac.isMountedEntity(event.entity)) {
             event.setCanceled(true);
             return;
@@ -119,14 +119,14 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
       Iterator rm = haveSearchLightAircraft.iterator();
 
       while(rm.hasNext()) {
-         MCH_EntityAircraft ac = (MCH_EntityAircraft)rm.next();
+         MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)rm.next();
          //System.out.println("what the hell does this do");
          //spam
          OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, ac.getSearchLightValue(event.entity), 240.0F);
       }
 
       MCH_Config var10000 = MCH_MOD.config;
-      if(MCH_Config.EnableModEntityRender.prmBool && cancelRender && (event.entity.ridingEntity instanceof MCH_EntityAircraft || event.entity.ridingEntity instanceof MCH_EntitySeat)) {
+      if(MCH_Config.EnableModEntityRender.prmBool && cancelRender && (event.entity.ridingEntity instanceof MCH_EntityBaseVehicle || event.entity.ridingEntity instanceof MCH_EntitySeat)) {
          event.setCanceled(true);
       } else {
          var10000 = MCH_MOD.config;
@@ -147,13 +147,13 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
    public void renderLivingEventPost(net.minecraftforge.client.event.RenderLivingEvent.Post event) {
       MCH_GuiTargetMarker.addMarkEntityPos(2, event.entity, event.x, event.y + (double)event.entity.height + 0.5D, event.z);
       MCH_ClientLightWeaponTickHandler.markEntity(event.entity, event.x, event.y + (double)(event.entity.height / 2.0F), event.z);
-      MCH_RenderAircraft.renderEntityMarker(event.entity);
+      MCH_RenderBaseVehicle.renderEntityMarker(event.entity);
    }
 
    public void renderPlayerPre(net.minecraftforge.client.event.RenderPlayerEvent.Pre event) {
       if(event.entity != null) {
-         if(event.entity.ridingEntity instanceof MCH_EntityAircraft) {
-            MCH_EntityAircraft v = (MCH_EntityAircraft)event.entity.ridingEntity;
+         if(event.entity.ridingEntity instanceof MCH_EntityBaseVehicle) {
+            MCH_EntityBaseVehicle v = (MCH_EntityBaseVehicle)event.entity.ridingEntity;
             if(v.getAcInfo() != null && v.getAcInfo().hideEntity) {
                event.setCanceled(true);
                return;

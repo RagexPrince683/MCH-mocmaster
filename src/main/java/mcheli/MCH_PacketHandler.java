@@ -3,8 +3,8 @@ package mcheli;
 import com.google.common.io.ByteArrayDataInput;
 import mcheli.MCH_CommonPacketHandler;
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_AircraftPacketHandler;
-import mcheli.aircraft.MCH_PacketAircraftLocation;
+import mcheli.aircraft.MCH_BaseVehiclePacketHandler;
+import mcheli.aircraft.MCH_PacketBaseVehicleLocation;
 import mcheli.block.MCH_DraftingTablePacketHandler;
 import mcheli.command.MCH_CommandPacketHandler;
 import mcheli.gltd.MCH_GLTDPacketHandler;
@@ -17,7 +17,7 @@ import mcheli.ship.MCH_ShipPacketHandler;
 import mcheli.tank.MCH_TankPacketHandler;
 import mcheli.tool.MCH_ToolPacketHandler;
 import mcheli.uav.MCH_UavPacketHandler;
-import mcheli.vehicle.MCH_VehiclePacketHandler;
+import mcheli.vehicle.MCH_TurretPacketHandler;
 import mcheli.wrapper.W_PacketHandler;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -51,25 +51,25 @@ public class MCH_PacketHandler extends W_PacketHandler {
          MCH_CommandPacketHandler.onPacketTitle(entityPlayer, data);
          break;
       case 268439569:
-         MCH_AircraftPacketHandler.onPacketSeatListResponse(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacketSeatListResponse(entityPlayer, data);
          break;
       case 268439600:
-         MCH_AircraftPacketHandler.onPacketNotifyTVMissileEntity(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacketNotifyTVMissileEntity(entityPlayer, data);
          break;
       case 268439601:
-         MCH_AircraftPacketHandler.onPacketNotifyWeaponID(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacketNotifyWeaponID(entityPlayer, data);
          break;
       case 268439602:
-         MCH_AircraftPacketHandler.onPacketNotifyHitBullet(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacketNotifyHitBullet(entityPlayer, data);
          break;
       case 268439604:
-         MCH_AircraftPacketHandler.onPacketNotifyAmmoNum(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacketNotifyAmmoNum(entityPlayer, data);
          break;
       case 268439632:
-         MCH_AircraftPacketHandler.onPacketOnMountEntity(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacketOnMountEntity(entityPlayer, data);
          break;
       case 268439649:
-         MCH_AircraftPacketHandler.onPacketStatusResponse(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacketStatusResponse(entityPlayer, data);
          break;
       case 536872992:
          MCH_CommonPacketHandler.onPacketIndOpenScreen(entityPlayer, data);
@@ -93,28 +93,28 @@ public class MCH_PacketHandler extends W_PacketHandler {
          MCH_CommonPacketHandler.onPacketNotifyLock(entityPlayer, data);
          break;
       case 536875024:
-         MCH_AircraftPacketHandler.onPacketSeatListRequest(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacketSeatListRequest(entityPlayer, data);
          break;
       case 536875040:
-         MCH_AircraftPacketHandler.onPacket_PlayerControl(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacket_PlayerControl(entityPlayer, data);
          break;
       case 536875059:
-         MCH_AircraftPacketHandler.onPacketIndReload(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacketIndReload(entityPlayer, data);
          break;
       case 536875061:
-         MCH_AircraftPacketHandler.onPacketIndNotifyAmmoNum(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacketIndNotifyAmmoNum(entityPlayer, data);
          break;
       case 536875062:
-         MCH_AircraftPacketHandler.onPacketIndRotation(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacketIndRotation(entityPlayer, data);
          break;
       case 536875063:
-         MCH_AircraftPacketHandler.onPacketNotifyInfoReloaded(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacketNotifyInfoReloaded(entityPlayer, data);
          break;
       case 536875072:
-         MCH_AircraftPacketHandler.onPacket_ClientSetting(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacket_ClientSetting(entityPlayer, data);
          break;
       case 536875104:
-         MCH_AircraftPacketHandler.onPacketStatusRequest(entityPlayer, data);
+         MCH_BaseVehiclePacketHandler.onPacketStatusRequest(entityPlayer, data);
          break;
       case 536879120:
          MCH_HeliPacketHandler.onPacket_PlayerControl(entityPlayer, data);
@@ -133,7 +133,7 @@ public class MCH_PacketHandler extends W_PacketHandler {
          MCH_LightWeaponPacketHandler.onPacket_PlayerControl(entityPlayer, data);
          break;
       case 537002000:
-         MCH_VehiclePacketHandler.onPacket_PlayerControl(entityPlayer, data);
+         MCH_TurretPacketHandler.onPacket_PlayerControl(entityPlayer, data);
          break;
       case 537133072:
          MCH_UavPacketHandler.onPacketUavStatus(entityPlayer, data);
@@ -146,8 +146,8 @@ public class MCH_PacketHandler extends W_PacketHandler {
          break;
       case 536875026:
          //System.out.println("pre onpacketaircraftlocation");
-         //I have developed schizophrenia
-         MCH_AircraftPacketHandler.onPacketAircraftLocation(entityPlayer, data);
+         // Base vehicle location packet
+         MCH_BaseVehiclePacketHandler.onPacketAircraftLocation(entityPlayer, data);
          //System.out.println("onpacketaircraftlocation");
          break;
 

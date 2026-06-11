@@ -13,7 +13,7 @@ import mcheli.MCH_OutputFile;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.tank.MCH_EntityTank;
-import mcheli.vehicle.MCH_EntityVehicle;
+import mcheli.vehicle.MCH_EntityTurret;
 import mcheli.wrapper.W_Block;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -739,7 +739,7 @@ public class MCH_Config {
       if(!(target instanceof MCH_EntityHeli) && !(target instanceof MCP_EntityPlane)) {
          if(target instanceof MCH_EntityTank) {
             list = DamageTankByExternal.list;
-         } else if(target instanceof MCH_EntityVehicle) {
+         } else if(target instanceof MCH_EntityTurret) {
             list = DamageVehicleByExternal.list;
          } else {
             list = DamageOtherByExternal.list;
@@ -771,7 +771,7 @@ public class MCH_Config {
          if(!(target instanceof MCH_EntityHeli) && !(target instanceof MCP_EntityPlane)) {
             if(target instanceof MCH_EntityTank) {
                list = DamageVsMCHeliTank.list;
-            } else if(target instanceof MCH_EntityVehicle) {
+            } else if(target instanceof MCH_EntityTurret) {
                list = DamageVsMCHeliVehicle.list;
             } else if(targetName.indexOf("mcheli.") > 0) {
                list = DamageVsMCHeliOther.list;

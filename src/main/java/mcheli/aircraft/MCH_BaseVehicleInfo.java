@@ -13,12 +13,17 @@ import net.minecraftforge.client.model.IModelCustom;
 
 import java.util.*;
 
-//base vehicle inheritor class. Basically anything in here can be used by ANY type of vehicle.
-// 'AIRCRAFT' just means ANYTHING because Japanese ESL heli mod/confusion
+/**
+ * Shared vehicle info/config base for helicopters, planes, ships, tanks, and turret/static weapons.
+ *
+ * <p>Historical MCHeli code called this layer "Aircraft", but the parser and state here are
+ * intentionally vehicle-generic. Keep config keys and directories backward compatible when moving
+ * logic between vehicle families.</p>
+ */
 
-public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
+public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
 
-   public static Map<String, MCH_AircraftInfo> allAircraftInfo = new HashMap<>();
+   public static Map<String, MCH_BaseVehicleInfo> allBaseVehicleInfo = new HashMap<>();
 
    public final String name;
    public String displayName;
@@ -36,10 +41,10 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    public boolean isEnableEntityRadar;
    public boolean isEnableEjectionSeat;
    public boolean isEnableParachuting;
-   public MCH_AircraftInfo.Flare flare;
-   public MCH_AircraftInfo.Chaff chaff;
-   public MCH_AircraftInfo.Maintenance maintenance;
-   public MCH_AircraftInfo.APS aps;
+   public MCH_BaseVehicleInfo.Flare flare;
+   public MCH_BaseVehicleInfo.Chaff chaff;
+   public MCH_BaseVehicleInfo.Maintenance maintenance;
+   public MCH_BaseVehicleInfo.APS aps;
    public float bodyHeight;
    public float bodyWidth;
    public boolean isFloat;
@@ -200,7 +205,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
    public List lightHatchList;
    private String lastWeaponType = "";
    private int lastWeaponIndex = -1;
-   private MCH_AircraftInfo.PartWeapon lastWeaponPart;
+   private MCH_BaseVehicleInfo.PartWeapon lastWeaponPart;
 
    /**
     * 雷达种类
@@ -286,7 +291,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
 
    public abstract String getKindName();
 
-   public MCH_AircraftInfo(String s) {
+   public MCH_BaseVehicleInfo(String s) {
       this.name = s;
       this.displayName = this.name;
       this.displayNameLang = new HashMap();
@@ -301,7 +306,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.isEnableEntityRadar = false;
       this.isEnableEjectionSeat = false;
       this.isEnableParachuting = false;
-      this.flare = new MCH_AircraftInfo.Flare();
+      this.flare = new MCH_BaseVehicleInfo.Flare();
       this.weaponSetList = new ArrayList();
       this.seatList = new ArrayList();
       this.exclusionSeatList = new ArrayList();
@@ -479,7 +484,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
 
    public boolean isValidData() throws Exception {
       if(this.cameraPosition.size() <= 0) {
-         this.cameraPosition.add(new MCH_AircraftInfo.CameraPosition());
+         this.cameraPosition.add(new MCH_BaseVehicleInfo.CameraPosition());
       }
 
       this.bbZ = (this.bbZmax + this.bbZmin) / 2.0F;
@@ -537,7 +542,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
             }
 
             for(var10 = 0; var10 < this.partWeaponBay.size(); ++var10) {
-               MCH_AircraftInfo.WeaponBay var12 = (MCH_AircraftInfo.WeaponBay)this.partWeaponBay.get(var10);
+               MCH_BaseVehicleInfo.WeaponBay var12 = (MCH_BaseVehicleInfo.WeaponBay)this.partWeaponBay.get(var10);
                String[] weaponNames = var12.weaponName.split("\\s*/\\s*");
                if(weaponNames.length <= 0) {
                   this.partWeaponBay.remove(var10);
@@ -557,7 +562,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                   if(list.size() <= 0) {
                      this.partWeaponBay.remove(var10);
                   } else {
-                     ((MCH_AircraftInfo.WeaponBay)this.partWeaponBay.get(var10)).weaponIds = (Integer[])list.toArray(new Integer[0]);
+                     ((MCH_BaseVehicleInfo.WeaponBay)this.partWeaponBay.get(var10)).weaponIds = (Integer[])list.toArray(new Integer[0]);
                   }
                }
             }
@@ -623,18 +628,18 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       return this.partThrottle.size() > 0;
    }
 
-   public MCH_AircraftInfo.WeaponSet getWeaponSetById(int id) {
-      return id >= 0 && id < this.weaponSetList.size()?(MCH_AircraftInfo.WeaponSet)this.weaponSetList.get(id):null;
+   public MCH_BaseVehicleInfo.WeaponSet getWeaponSetById(int id) {
+      return id >= 0 && id < this.weaponSetList.size()?(MCH_BaseVehicleInfo.WeaponSet)this.weaponSetList.get(id):null;
    }
 
-   public MCH_AircraftInfo.Weapon getWeaponById(int id) {
-      MCH_AircraftInfo.WeaponSet ws = this.getWeaponSetById(id);
-      return ws != null?(MCH_AircraftInfo.Weapon)ws.weapons.get(0):null;
+   public MCH_BaseVehicleInfo.Weapon getWeaponById(int id) {
+      MCH_BaseVehicleInfo.WeaponSet ws = this.getWeaponSetById(id);
+      return ws != null?(MCH_BaseVehicleInfo.Weapon)ws.weapons.get(0):null;
    }
 
    public int getWeaponIdByName(String s) {
       for(int i = 0; i < this.weaponSetList.size(); ++i) {
-         if(((MCH_AircraftInfo.WeaponSet)this.weaponSetList.get(i)).type.equalsIgnoreCase(s)) {
+         if(((MCH_BaseVehicleInfo.WeaponSet)this.weaponSetList.get(i)).type.equalsIgnoreCase(s)) {
             return i;
          }
       }
@@ -642,9 +647,9 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       return -1;
    }
 
-   public MCH_AircraftInfo.Weapon getWeaponByName(String s) {
+   public MCH_BaseVehicleInfo.Weapon getWeaponByName(String s) {
       for(int i = 0; i < this.weaponSetList.size(); ++i) {
-         if(((MCH_AircraftInfo.WeaponSet)this.weaponSetList.get(i)).type.equalsIgnoreCase(s)) {
+         if(((MCH_BaseVehicleInfo.WeaponSet)this.weaponSetList.get(i)).type.equalsIgnoreCase(s)) {
             return this.getWeaponById(i);
          }
       }
@@ -742,7 +747,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                   px = s.length >= 7?this.toInt(s[6], 1, 100000):80;
                   py = s.length >= 8?this.toFloat(s[7]):0.01F;
                   pz = s.length >= 9?this.toFloat(s[8]):0.0F;
-                  this.particleSplashs.add(new MCH_AircraftInfo.ParticleSplash(df, c, ry, rz, px, py, pz));
+                  this.particleSplashs.add(new MCH_BaseVehicleInfo.ParticleSplash(df, c, ry, rz, px, py, pz));
                }
             } else {
                float w;
@@ -754,7 +759,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                      s = this.splitParam(data);
                      if(s.length >= 6) {
                         var15 = s.length >= 7?this.toFloat(s[6], -1800.0F, 1800.0F):90.0F;
-                        this.lightHatchList.add(new MCH_AircraftInfo.Hatch(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), var15, "light_hatch" + this.lightHatchList.size(), false));
+                        this.lightHatchList.add(new MCH_BaseVehicleInfo.Hatch(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), var15, "light_hatch" + this.lightHatchList.size(), false));
                      }
                   } else {
                      int var16;
@@ -762,7 +767,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                         s = this.splitParam(data);
                         if(s != null && s.length >= 3) {
                            var16 = s.length >= 4?this.toInt(s[3], 1, 100000):10;
-                           this.repellingHooks.add(new MCH_AircraftInfo.RepellingHook(this.toVec3(s[0], s[1], s[2]), var16));
+                           this.repellingHooks.add(new MCH_BaseVehicleInfo.RepellingHook(this.toVec3(s[0], s[1], s[2]), var16));
                         }
                      } else {
                         String[] var17;
@@ -780,13 +785,13 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                               var26 = s.length >= 11?this.toFloat(s[10]):0.0F;
                               var31 = s.length >= 12?this.toBool(s[11]):false;
                               boolean launchRack = s.length >= 13 && this.toBool(s[12]);
-                              this.entityRackList.add(new MCH_SeatRackInfo(var17, this.toDouble(s[1]), this.toDouble(s[2]), this.toDouble(s[3]), new MCH_AircraftInfo.CameraPosition(this.toVec3(s[4], s[5], s[6]).addVector(0.0D, 1.5D, 0.0D)), var18, ry, rz, var26, var31, launchRack));
+                              this.entityRackList.add(new MCH_SeatRackInfo(var17, this.toDouble(s[1]), this.toDouble(s[2]), this.toDouble(s[3]), new MCH_BaseVehicleInfo.CameraPosition(this.toVec3(s[4], s[5], s[6]).addVector(0.0D, 1.5D, 0.0D)), var18, ry, rz, var26, var31, launchRack));
                            }
                         } else if(item.equalsIgnoreCase("RideRack")) {
                            //child vehicle to ride parent
                            s = this.splitParam(data);
                            if(s.length >= 2) {
-                              MCH_AircraftInfo.RideRack var19 = new MCH_AircraftInfo.RideRack(s[0].trim().toLowerCase(), this.toInt(s[1], 1, 10000));
+                              MCH_BaseVehicleInfo.RideRack var19 = new MCH_BaseVehicleInfo.RideRack(s[0].trim().toLowerCase(), this.toInt(s[1], 1, 10000));
                               this.rideRacks.add(var19);
                            }
                         } else {
@@ -803,11 +808,11 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                     this.wheels.clear();
 
                                     for(var22 = 2; var22 < s.length; ++var22) {
-                                       this.wheels.add(new MCH_AircraftInfo.Wheel(Vec3.createVectorHelper((double)var15, (double)var18, (double)this.toFloat(s[var22]))));
+                                       this.wheels.add(new MCH_BaseVehicleInfo.Wheel(Vec3.createVectorHelper((double)var15, (double)var18, (double)this.toFloat(s[var22]))));
                                     }
 
                                     Collections.sort(this.wheels, new Comparator<Wheel>(){
-                                       public int compare(MCH_AircraftInfo.Wheel arg0, MCH_AircraftInfo.Wheel arg1) {
+                                       public int compare(MCH_BaseVehicleInfo.Wheel arg0, MCH_BaseVehicleInfo.Wheel arg1) {
                                           return arg0.pos.zCoord > arg1.pos.zCoord?-1:1;
                                        }
                                     });
@@ -873,7 +878,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                        var28 = s.length >= 5;
                                        var18 = s.length >= 5?this.toFloat(s[4]):0.0F;
                                        ry = s.length >= 6?this.toFloat(s[5]):0.0F;
-                                       this.cameraPosition.add(new MCH_AircraftInfo.CameraPosition(this.toVec3(s[0], s[1], s[2]), var28, var18, ry));
+                                       this.cameraPosition.add(new MCH_BaseVehicleInfo.CameraPosition(this.toVec3(s[0], s[1], s[2]), var28, var18, ry));
                                     }
                                  } else if(item.equalsIgnoreCase("UnmountPosition")) {
                                     s = data.split("\\s*,\\s*");
@@ -997,7 +1002,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                           s = data.split("\\s*,\\s*");
                                           if(s.length >= 5 && this.lastWeaponPart != null) {
                                              var15 = s.length >= 6?this.toFloat(s[5]):0.0F;
-                                             MCH_AircraftInfo.PartWeaponChild var30 = new MCH_AircraftInfo.PartWeaponChild(this.lastWeaponPart.name, this.toBool(s[0]), this.toBool(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.lastWeaponPart.modelName + "_" + this.lastWeaponPart.child.size(), 0.0F, 0.0F, 0.0F, var15);
+                                             MCH_BaseVehicleInfo.PartWeaponChild var30 = new MCH_BaseVehicleInfo.PartWeaponChild(this.lastWeaponPart.name, this.toBool(s[0]), this.toBool(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.lastWeaponPart.modelName + "_" + this.lastWeaponPart.child.size(), 0.0F, 0.0F, 0.0F, var15);
                                              this.lastWeaponPart.child.add(var30);
                                           }
                                        } else if(item.compareTo("addrecipe") != 0 && item.compareTo("addshapelessrecipe") != 0) {
@@ -1028,13 +1033,13 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                 this.flare.pos = this.toVec3(s[0], s[1], s[2]);
                                              }
                                           } else if(item.equalsIgnoreCase("HasChaff")) {
-                                             chaff = new MCH_AircraftInfo.Chaff();
+                                             chaff = new MCH_BaseVehicleInfo.Chaff();
                                           } else if(item.equalsIgnoreCase("ChaffUseTime")) {
                                              chaffUseTime = this.toInt(data, 0, 10000);
                                           } else if(item.equalsIgnoreCase("ChaffWaitTime")) {
                                              chaffWaitTime = this.toInt(data, 0, 10000);
                                           } else if(item.equalsIgnoreCase("HasMaintenance")) {
-                                             maintenance = new MCH_AircraftInfo.Maintenance();
+                                             maintenance = new MCH_BaseVehicleInfo.Maintenance();
                                           } else if(item.equalsIgnoreCase("MaintenanceUseTime")) {
                                              maintenanceUseTime = this.toInt(data, 0, 100);
                                           } else if(item.equalsIgnoreCase("MaintenanceWaitTime")) {
@@ -1042,7 +1047,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                           } else if(item.equalsIgnoreCase("EngineShutdownThreshold")) {
                                              engineShutdownThreshold = this.toInt(data, 0, 100);
                                           } else if(item.equalsIgnoreCase("HasAPS")) {
-                                             aps = new MCH_AircraftInfo.APS();
+                                             aps = new MCH_BaseVehicleInfo.APS();
                                           } else if(item.equalsIgnoreCase("APSUseTime")) {
                                              apsUseTime = this.toInt(data, 0, 10000);
                                           } else if(item.equalsIgnoreCase("APSWaitTime")) {
@@ -1096,14 +1101,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                                var15 = s.length >= 8?this.toFloat(s[7]):0.0F;
                                                                var18 = s.length >= 9?this.toFloat(s[8]):0.0F;
                                                                ry = s.length >= 10?this.toFloat(s[9]):0.0F;
-                                                               MCH_AircraftInfo.Throttle var40 = new MCH_AircraftInfo.Throttle(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "throttle" + this.partThrottle.size(), var15, var18, ry);
+                                                               MCH_BaseVehicleInfo.Throttle var40 = new MCH_BaseVehicleInfo.Throttle(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "throttle" + this.partThrottle.size(), var15, var18, ry);
                                                                this.partThrottle.add(var40);
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddPartRotation")) {
                                                             s = data.split("\\s*,\\s*");
                                                             if(s.length >= 7) {
                                                                var28 = s.length >= 8?this.toBool(s[7]):true;
-                                                               MCH_AircraftInfo.RotPart var46 = new MCH_AircraftInfo.RotPart(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), var28, "rotpart" + this.partThrottle.size());
+                                                               MCH_BaseVehicleInfo.RotPart var46 = new MCH_BaseVehicleInfo.RotPart(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), var28, "rotpart" + this.partThrottle.size());
                                                                this.partRotPart.add(var46);
                                                             }
                                                          } else if(item.compareTo("addpartcamera") == 0) {
@@ -1111,7 +1116,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                             if(s.length >= 3) {
                                                                var28 = s.length >= 4?this.toBool(s[3]):true;
                                                                boolean var48 = s.length >= 5?this.toBool(s[4]):false;
-                                                               MCH_AircraftInfo.Camera var45 = new MCH_AircraftInfo.Camera(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), 0.0F, -1.0F, 0.0F, "camera" + this.cameraList.size(), var28, var48);
+                                                               MCH_BaseVehicleInfo.Camera var45 = new MCH_BaseVehicleInfo.Camera(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), 0.0F, -1.0F, 0.0F, "camera" + this.cameraList.size(), var28, var48);
                                                                this.cameraList.add(var45);
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddPartWheel")) {
@@ -1124,13 +1129,13 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                                var26 = s.length >= 10?this.toFloat(s[7]):this.toFloat(s[0]);
                                                                py = s.length >= 10?this.toFloat(s[8]):this.toFloat(s[1]);
                                                                pz = s.length >= 10?this.toFloat(s[9]):this.toFloat(s[2]);
-                                                               this.partWheel.add(new MCH_AircraftInfo.PartWheel(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), var18, ry, rz, var15, var26, py, pz, "wheel" + this.partWheel.size()));
+                                                               this.partWheel.add(new MCH_BaseVehicleInfo.PartWheel(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), var18, ry, rz, var15, var26, py, pz, "wheel" + this.partWheel.size()));
                                                                //TODO: define a boundingbox here
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddPartSteeringWheel")) {
                                                             s = this.splitParam(data);
                                                             if(s.length >= 7) {
-                                                               this.partSteeringWheel.add(new MCH_AircraftInfo.PartWheel(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "steering_wheel" + this.partSteeringWheel.size()));
+                                                               this.partSteeringWheel.add(new MCH_BaseVehicleInfo.PartWheel(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "steering_wheel" + this.partSteeringWheel.size()));
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddTrackRoller")) {
 
@@ -1146,7 +1151,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                                //god will declare this to NOT WORK
                                                                //FUCK THIS GODDAMN MOD EVERY THING I DO DOES NOT WORK FOR LITERALLY NO REASON
 
-                                                               this.partTrackRoller.add(new MCH_AircraftInfo.TrackRoller(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), "track_roller" + this.partTrackRoller.size()));
+                                                               this.partTrackRoller.add(new MCH_BaseVehicleInfo.TrackRoller(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), "track_roller" + this.partTrackRoller.size()));
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddCrawlerTrack")) {
                                                             this.partCrawlerTrack.add(this.createCrawlerTrack(data, "crawler_track" + this.partCrawlerTrack.size()));
@@ -1194,11 +1199,11 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                          }
                                                       } else {
                                                          s = data.split("\\s*,\\s*");
-                                                         MCH_AircraftInfo.LandingGear var42;
+                                                         MCH_BaseVehicleInfo.LandingGear var42;
                                                          if(!item.equalsIgnoreCase("AddPartSlideRotLG") && s.length >= 6) {
                                                             var15 = s.length >= 7?this.toFloat(s[6], -180.0F, 180.0F):90.0F;
                                                             var15 /= 90.0F;
-                                                            var42 = new MCH_AircraftInfo.LandingGear(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), "lg" + this.landingGear.size(), var15, item.equalsIgnoreCase("AddPartLgRev"), item.equalsIgnoreCase("AddPartLGHatch"));
+                                                            var42 = new MCH_BaseVehicleInfo.LandingGear(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), "lg" + this.landingGear.size(), var15, item.equalsIgnoreCase("AddPartLgRev"), item.equalsIgnoreCase("AddPartLGHatch"));
                                                             if(s.length >= 8) {
                                                                var42.enableRot2 = true;
                                                                var42.maxRotFactor2 = s.length >= 11?this.toFloat(s[10], -180.0F, 180.0F):90.0F;
@@ -1212,7 +1217,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                          if(item.equalsIgnoreCase("AddPartSlideRotLG") && s.length >= 9) {
                                                             var15 = s.length >= 10?this.toFloat(s[9], -180.0F, 180.0F):90.0F;
                                                             var15 /= 90.0F;
-                                                            var42 = new MCH_AircraftInfo.LandingGear(this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), this.toFloat(s[7]), this.toFloat(s[8]), "lg" + this.landingGear.size(), var15, false, false);
+                                                            var42 = new MCH_BaseVehicleInfo.LandingGear(this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), this.toFloat(s[7]), this.toFloat(s[8]), "lg" + this.landingGear.size(), var15, false, false);
                                                             var42.slide = Vec3.createVectorHelper((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]));
                                                             this.landingGear.add(var42);
                                                          }
@@ -1225,23 +1230,23 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                          --var22;
                                                       }
 
-                                                      MCH_AircraftInfo.Canopy var35;
+                                                      MCH_BaseVehicleInfo.Canopy var35;
                                                       if(var28) {
                                                          if(s.length >= 3) {
-                                                            var35 = new MCH_AircraftInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), 0.0F, 0.0F, 0.0F, 90.0F, "canopy" + var22, var28);
+                                                            var35 = new MCH_BaseVehicleInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), 0.0F, 0.0F, 0.0F, 90.0F, "canopy" + var22, var28);
                                                             this.canopyList.add(var35);
                                                             if(var22 == 0) {
-                                                               var35 = new MCH_AircraftInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), 0.0F, 0.0F, 0.0F, 90.0F, "canopy", var28);
+                                                               var35 = new MCH_BaseVehicleInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), 0.0F, 0.0F, 0.0F, 90.0F, "canopy", var28);
                                                                this.canopyList.add(var35);
                                                             }
                                                          }
                                                       } else if(s.length >= 6) {
                                                          var18 = s.length >= 7?this.toFloat(s[6], -180.0F, 180.0F):90.0F;
                                                          var18 /= 90.0F;
-                                                         var35 = new MCH_AircraftInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), var18, "canopy" + var22, var28);
+                                                         var35 = new MCH_BaseVehicleInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), var18, "canopy" + var22, var28);
                                                          this.canopyList.add(var35);
                                                          if(var22 == 0) {
-                                                            var35 = new MCH_AircraftInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), var18, "canopy", var28);
+                                                            var35 = new MCH_BaseVehicleInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), var18, "canopy", var28);
                                                             this.canopyList.add(var35);
                                                          }
                                                       }
@@ -1250,15 +1255,15 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                    var32 = item.compareTo("addpartslidehatch") == 0;
                                                    var17 = data.split("\\s*,\\s*");
                                                    var20 = null;
-                                                   MCH_AircraftInfo.Hatch var36;
+                                                   MCH_BaseVehicleInfo.Hatch var36;
                                                    if(var32) {
                                                       if(var17.length >= 3) {
-                                                         var36 = new MCH_AircraftInfo.Hatch(this.toFloat(var17[0]), this.toFloat(var17[1]), this.toFloat(var17[2]), 0.0F, 0.0F, 0.0F, 90.0F, "hatch" + this.hatchList.size(), var32);
+                                                         var36 = new MCH_BaseVehicleInfo.Hatch(this.toFloat(var17[0]), this.toFloat(var17[1]), this.toFloat(var17[2]), 0.0F, 0.0F, 0.0F, 90.0F, "hatch" + this.hatchList.size(), var32);
                                                          this.hatchList.add(var36);
                                                       }
                                                    } else if(var17.length >= 6) {
                                                       ry = var17.length >= 7?this.toFloat(var17[6], -180.0F, 180.0F):90.0F;
-                                                      var36 = new MCH_AircraftInfo.Hatch(this.toFloat(var17[0]), this.toFloat(var17[1]), this.toFloat(var17[2]), this.toFloat(var17[3]), this.toFloat(var17[4]), this.toFloat(var17[5]), ry, "hatch" + this.hatchList.size(), var32);
+                                                      var36 = new MCH_BaseVehicleInfo.Hatch(this.toFloat(var17[0]), this.toFloat(var17[1]), this.toFloat(var17[2]), this.toFloat(var17[3]), this.toFloat(var17[4]), this.toFloat(var17[5]), ry, "hatch" + this.hatchList.size(), var32);
                                                       this.hatchList.add(var36);
                                                    }
                                                 }
@@ -1266,15 +1271,15 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                                 var32 = item.equalsIgnoreCase("AddPartSlideWeaponBay");
                                                 var17 = data.split("\\s*,\\s*");
                                                 var20 = null;
-                                                MCH_AircraftInfo.WeaponBay var33;
+                                                MCH_BaseVehicleInfo.WeaponBay var33;
                                                 if(var32) {
                                                    if(var17.length >= 4) {
-                                                      var33 = new MCH_AircraftInfo.WeaponBay(var17[0].trim().toLowerCase(), this.toFloat(var17[1]), this.toFloat(var17[2]), this.toFloat(var17[3]), 0.0F, 0.0F, 0.0F, 90.0F, "wb" + this.partWeaponBay.size(), var32);
+                                                      var33 = new MCH_BaseVehicleInfo.WeaponBay(var17[0].trim().toLowerCase(), this.toFloat(var17[1]), this.toFloat(var17[2]), this.toFloat(var17[3]), 0.0F, 0.0F, 0.0F, 90.0F, "wb" + this.partWeaponBay.size(), var32);
                                                       this.partWeaponBay.add(var33);
                                                    }
                                                 } else if(var17.length >= 7) {
                                                    ry = var17.length >= 8?this.toFloat(var17[7], -180.0F, 180.0F):90.0F;
-                                                   var33 = new MCH_AircraftInfo.WeaponBay(var17[0].trim().toLowerCase(), this.toFloat(var17[1]), this.toFloat(var17[2]), this.toFloat(var17[3]), this.toFloat(var17[4]), this.toFloat(var17[5]), this.toFloat(var17[6]), ry / 90.0F, "wb" + this.partWeaponBay.size(), var32);
+                                                   var33 = new MCH_BaseVehicleInfo.WeaponBay(var17[0].trim().toLowerCase(), this.toFloat(var17[1]), this.toFloat(var17[2]), this.toFloat(var17[3]), this.toFloat(var17[4]), this.toFloat(var17[5]), this.toFloat(var17[6]), ry / 90.0F, "wb" + this.partWeaponBay.size(), var32);
                                                    this.partWeaponBay.add(var33);
                                                 }
                                              }
@@ -1301,7 +1306,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                              rz = s.length >= 8?this.toFloat(s[7]):0.0F;
                                           }
 
-                                          MCH_AircraftInfo.PartWeapon var41 = new MCH_AircraftInfo.PartWeapon(this.splitParamSlash(s[0].toLowerCase().trim()), var34, var31, this.toBool(s[1]), this.toBool(s[2]), this.toBool(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "weapon" + this.partWeapon.size(), var15, var18, ry, rz, var37);
+                                          MCH_BaseVehicleInfo.PartWeapon var41 = new MCH_BaseVehicleInfo.PartWeapon(this.splitParamSlash(s[0].toLowerCase().trim()), var34, var31, this.toBool(s[1]), this.toBool(s[2]), this.toBool(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "weapon" + this.partWeapon.size(), var15, var18, ry, rz, var37);
                                           this.lastWeaponPart = var41;
                                           this.partWeapon.add(var41);
                                        }
@@ -1324,14 +1329,14 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                        w = s.length >= 11?this.toFloat(s[10]):0.0F;
                                        float var44 = s.length >= 12?this.toFloat(s[11]):0.0F;
                                        float var47 = s.length >= 13?this.toFloat(s[12]):0.0F;
-                                       MCH_AircraftInfo.Weapon e = new MCH_AircraftInfo.Weapon(this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), var18, ry, var25, px, py, pz, w, var44, var47, item.equalsIgnoreCase("AddTurretWeapon"));
+                                       MCH_BaseVehicleInfo.Weapon e = new MCH_BaseVehicleInfo.Weapon(this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), var18, ry, var25, px, py, pz, w, var44, var47, item.equalsIgnoreCase("AddTurretWeapon"));
                                        if(var29.compareTo(this.lastWeaponType) != 0) {
-                                          this.weaponSetList.add(new MCH_AircraftInfo.WeaponSet(var29));
+                                          this.weaponSetList.add(new MCH_BaseVehicleInfo.WeaponSet(var29));
                                           ++this.lastWeaponIndex;
                                           this.lastWeaponType = var29;
                                        }
 
-                                       ((MCH_AircraftInfo.WeaponSet)this.weaponSetList.get(this.lastWeaponIndex)).weapons.add(e);
+                                       ((MCH_BaseVehicleInfo.WeaponSet)this.weaponSetList.get(this.lastWeaponIndex)).weapons.add(e);
                                     }
                                  }
                               }
@@ -1353,7 +1358,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                  this.seatList.add(var21);
                               } else {
                                  if(s.length >= 6) {
-                                    MCH_AircraftInfo.CameraPosition var24 = new MCH_AircraftInfo.CameraPosition(this.toVec3(s[3], s[4], s[5]));
+                                    MCH_BaseVehicleInfo.CameraPosition var24 = new MCH_BaseVehicleInfo.CameraPosition(this.toVec3(s[3], s[4], s[5]));
                                     var25 = s.length >= 7?this.toBool(s[6]):false;
                                     if(item.equalsIgnoreCase("AddGunnerSeat")) {
                                        if(s.length >= 9) {
@@ -1378,7 +1383,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                                        var21 = new MCH_SeatInfo(var20, true, var24, true, var25, var34, py, pz, var39);
                                     }
                                  } else {
-                                    var21 = new MCH_SeatInfo(var20, true, new MCH_AircraftInfo.CameraPosition(), false, false, false, 0.0F, 0.0F, false);
+                                    var21 = new MCH_SeatInfo(var20, true, new MCH_BaseVehicleInfo.CameraPosition(), false, false, false, 0.0F, 0.0F, false);
                                  }
 
                                  this.seatList.add(var21);
@@ -1400,7 +1405,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
                      w = s.length >= 10?this.toFloat(s[9]):0.0F;
                      boolean mnp = !item.equalsIgnoreCase("AddSearchLight");
                      boolean mxp = item.equalsIgnoreCase("AddSteeringSearchLight");
-                     this.searchLights.add(new MCH_AircraftInfo.SearchLight(df, c, var22, rz, var26, mnp, py, pz, mxp, w));
+                     this.searchLights.add(new MCH_BaseVehicleInfo.SearchLight(df, c, var22, rz, var26, mnp, py, pz, mxp, w));
                   }
                }
             }
@@ -1409,7 +1414,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
 
    }
 
-   public MCH_AircraftInfo.CrawlerTrack createCrawlerTrack(String data, String name) {
+   public MCH_BaseVehicleInfo.CrawlerTrack createCrawlerTrack(String data, String name) {
       String[] s = this.splitParam(data);
       int PC = s.length - 3;
       boolean REV = this.toBool(s[0]);
@@ -1429,7 +1434,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
          }
 
          ArrayList var21 = new ArrayList();
-         var21.add(new MCH_AircraftInfo.CrawlerTrackPrm((float)cx[0], (float)cy[0]));
+         var21.add(new MCH_BaseVehicleInfo.CrawlerTrackPrm((float)cx[0], (float)cy[0]));
          double var22 = 0.0D;
 
          int c;
@@ -1440,15 +1445,15 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
             double nr = var22;
 
             for(int nnr = 1; var22 >= (double)LEN; ++nnr) {
-               var21.add(new MCH_AircraftInfo.CrawlerTrackPrm((float)(cx[c] + pp * ((double)(LEN * (float)nnr) / nr)), (float)(cy[c] + np * ((double)(LEN * (float)nnr) / nr))));
+               var21.add(new MCH_BaseVehicleInfo.CrawlerTrackPrm((float)(cx[c] + pp * ((double)(LEN * (float)nnr) / nr)), (float)(cy[c] + np * ((double)(LEN * (float)nnr) / nr))));
                var22 -= (double)LEN;
             }
          }
 
          for(c = 0; c < var21.size(); ++c) {
-            MCH_AircraftInfo.CrawlerTrackPrm var24 = (MCH_AircraftInfo.CrawlerTrackPrm)var21.get((c + var21.size() - 1) % var21.size());
-            MCH_AircraftInfo.CrawlerTrackPrm cp = (MCH_AircraftInfo.CrawlerTrackPrm)var21.get(c);
-            MCH_AircraftInfo.CrawlerTrackPrm var25 = (MCH_AircraftInfo.CrawlerTrackPrm)var21.get((c + 1) % var21.size());
+            MCH_BaseVehicleInfo.CrawlerTrackPrm var24 = (MCH_BaseVehicleInfo.CrawlerTrackPrm)var21.get((c + var21.size() - 1) % var21.size());
+            MCH_BaseVehicleInfo.CrawlerTrackPrm cp = (MCH_BaseVehicleInfo.CrawlerTrackPrm)var21.get(c);
+            MCH_BaseVehicleInfo.CrawlerTrackPrm var25 = (MCH_BaseVehicleInfo.CrawlerTrackPrm)var21.get((c + 1) % var21.size());
             float pr = (float)(Math.atan2((double)(var24.x - cp.x), (double)(var24.y - cp.y)) * 180.0D / 3.141592653589793D);
             float var26 = (float)(Math.atan2((double)(var25.x - cp.x), (double)(var25.y - cp.y)) * 180.0D / 3.141592653589793D);
             float ppr = (pr + 360.0F) % 360.0F;
@@ -1460,7 +1465,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
             cp.r = var27;
          }
 
-         MCH_AircraftInfo.CrawlerTrack var23 = new MCH_AircraftInfo.CrawlerTrack(name);
+         MCH_BaseVehicleInfo.CrawlerTrack var23 = new MCH_BaseVehicleInfo.CrawlerTrack(name);
          var23.len = LEN;
          var23.cx = cx;
          var23.cy = cy;
@@ -1497,7 +1502,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       this.cameraList.clear();
       this.cameraPosition.clear();
       this.canopyList.clear();
-      this.flare = new MCH_AircraftInfo.Flare();
+      this.flare = new MCH_BaseVehicleInfo.Flare();
       this.hatchList.clear();
       this.hudList.clear();
       this.landingGear.clear();
@@ -1559,7 +1564,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       return this.aps != null;
    }
 
-   public class RotPart extends MCH_AircraftInfo.DrawnPart {
+   public class RotPart extends MCH_BaseVehicleInfo.DrawnPart {
 
       public final float rotSpeed;
       public final boolean rotAlways;
@@ -1572,7 +1577,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       }
    }
 
-   public class Hatch extends MCH_AircraftInfo.DrawnPart {
+   public class Hatch extends MCH_BaseVehicleInfo.DrawnPart {
 
       public final float maxRotFactor;
       public final float maxRot;
@@ -1587,7 +1592,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       }
    }
 
-   public class TrackRoller extends MCH_AircraftInfo.DrawnPart {
+   public class TrackRoller extends MCH_BaseVehicleInfo.DrawnPart {
 
       final int side;
 
@@ -1598,7 +1603,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       }
    }
 
-   public class LandingGear extends MCH_AircraftInfo.DrawnPart {
+   public class LandingGear extends MCH_BaseVehicleInfo.DrawnPart {
 
       public Vec3 slide = null;
       public final float maxRotFactor;
@@ -1620,7 +1625,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       }
    }
 
-   public class PartWeaponChild extends MCH_AircraftInfo.DrawnPart {
+   public class PartWeaponChild extends MCH_BaseVehicleInfo.DrawnPart {
 
       public final String[] name;
       public final boolean yaw;
@@ -1637,7 +1642,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       }
    }
 
-   public class Canopy extends MCH_AircraftInfo.DrawnPart {
+   public class Canopy extends MCH_BaseVehicleInfo.DrawnPart {
 
       public final float maxRotFactor;
       public final boolean isSlide;
@@ -1696,7 +1701,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       }
    }
 
-   public class Throttle extends MCH_AircraftInfo.DrawnPart {
+   public class Throttle extends MCH_BaseVehicleInfo.DrawnPart {
 
       public final Vec3 slide;
       public final float rot2;
@@ -1709,7 +1714,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       }
    }
 
-   public class PartWeapon extends MCH_AircraftInfo.DrawnPart {
+   public class PartWeapon extends MCH_BaseVehicleInfo.DrawnPart {
 
       public final String[] name;
       public final boolean rotBarrel;
@@ -1736,7 +1741,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       }
    }
 
-   public class PartWheel extends MCH_AircraftInfo.DrawnPart {
+   public class PartWheel extends MCH_BaseVehicleInfo.DrawnPart {
 
       final float rotDir;
       final Vec3 pos2;
@@ -1763,7 +1768,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
 
    }
 
-   public class Camera extends MCH_AircraftInfo.DrawnPart {
+   public class Camera extends MCH_BaseVehicleInfo.DrawnPart {
 
       public final boolean yawSync;
       public final boolean pitchSync;
@@ -1904,7 +1909,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       }
    }
 
-   public class WeaponBay extends MCH_AircraftInfo.DrawnPart {
+   public class WeaponBay extends MCH_BaseVehicleInfo.DrawnPart {
 
       public final float maxRotFactor;
       public final boolean isSlide;
@@ -1943,7 +1948,7 @@ public abstract class MCH_AircraftInfo extends MCH_BaseInfo {
       }
    }
 
-   public class CrawlerTrack extends MCH_AircraftInfo.DrawnPart {
+   public class CrawlerTrack extends MCH_BaseVehicleInfo.DrawnPart {
 
       public float len = 0.35F;
       public double[] cx;

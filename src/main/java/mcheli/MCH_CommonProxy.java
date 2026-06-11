@@ -4,7 +4,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_ServerTickHandler;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_SoundUpdater;
 import mcheli.network.packets.PacketVehicleLODSnapshot;
 import java.util.List;
@@ -54,7 +54,7 @@ public class MCH_CommonProxy {
       return "Server";
    }
 
-   public MCH_SoundUpdater CreateSoundUpdater(MCH_EntityAircraft aircraft) {
+   public MCH_SoundUpdater CreateSoundUpdater(MCH_EntityBaseVehicle aircraft) {
       return null;
    }
 

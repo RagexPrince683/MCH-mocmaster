@@ -1,7 +1,7 @@
 package mcheli.aircraft;
 
 import java.util.Random;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.parachute.MCH_ItemParachute;
 import mcheli.wrapper.W_NBTTag;
 import net.minecraft.entity.item.EntityItem;
@@ -11,7 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public class MCH_AircraftInventory implements IInventory {
+public class MCH_BaseVehicleInventory implements IInventory {
 
    public final int SLOT_FUEL0 = 0;
    public final int SLOT_FUEL1 = 1;
@@ -19,10 +19,10 @@ public class MCH_AircraftInventory implements IInventory {
    public final int SLOT_PARACHUTE0 = 3;
    public final int SLOT_PARACHUTE1 = 4;
    private ItemStack[] containerItems = new ItemStack[this.getSizeInventory()];
-   final MCH_EntityAircraft aircraft;
+   final MCH_EntityBaseVehicle aircraft;
 
 
-   public MCH_AircraftInventory(MCH_EntityAircraft ac) {
+   public MCH_BaseVehicleInventory(MCH_EntityBaseVehicle ac) {
       this.aircraft = ac;
    }
 

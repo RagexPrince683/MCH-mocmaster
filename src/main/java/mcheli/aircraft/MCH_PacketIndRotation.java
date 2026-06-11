@@ -4,7 +4,7 @@ import com.google.common.io.ByteArrayDataInput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import mcheli.MCH_Packet;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Network;
 
@@ -47,7 +47,7 @@ public class MCH_PacketIndRotation extends MCH_Packet {
 
    }
 
-   public static void send(MCH_EntityAircraft ac) {
+   public static void send(MCH_EntityBaseVehicle ac) {
       if(ac != null) {
          MCH_PacketIndRotation s = new MCH_PacketIndRotation();
          s.entityID_Ac = W_Entity.getEntityId(ac);

@@ -5,8 +5,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftCommonGui;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleCommonGui;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.gui.MCH_Gui;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.tank.MCH_TankInfo;
@@ -15,18 +15,18 @@ import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
-public class MCH_GuiTank extends MCH_AircraftCommonGui {
+public class MCH_GuiTank extends MCH_BaseVehicleCommonGui {
 
    public MCH_GuiTank(Minecraft minecraft) {
       super(minecraft);
    }
 
    public boolean isDrawGui(EntityPlayer player) {
-      return MCH_EntityAircraft.getAircraft_RiddenOrControl(player) instanceof MCH_EntityTank;
+      return MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player) instanceof MCH_EntityTank;
    }
 
    public void drawGui(EntityPlayer player, boolean isThirdPersonView) {
-      MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(player);
+      MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
       if(ac instanceof MCH_EntityTank && !ac.isDestroyed()) {
          MCH_EntityTank tank = (MCH_EntityTank)ac;
          int seatID = ac.getSeatIdByEntity(player);

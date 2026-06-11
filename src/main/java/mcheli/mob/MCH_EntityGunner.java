@@ -6,8 +6,8 @@ import java.util.List;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_SeatInfo;
 import mcheli.weapon.*;
@@ -120,9 +120,9 @@ public class MCH_EntityGunner extends EntityLivingBase {
         if (!this.worldObj.isRemote) {
             W_WorldFunc.MOD_playSoundAtEntity((Entity)player, "wrench", 1.0F, 1.0F);
             setDead();
-            MCH_EntityAircraft ac = null;
-            if (this.ridingEntity instanceof MCH_EntityAircraft) {
-                ac = (MCH_EntityAircraft)this.ridingEntity;
+            MCH_EntityBaseVehicle ac = null;
+            if (this.ridingEntity instanceof MCH_EntityBaseVehicle) {
+                ac = (MCH_EntityBaseVehicle)this.ridingEntity;
             } else if (this.ridingEntity instanceof MCH_EntitySeat) {
                 ac = ((MCH_EntitySeat)this.ridingEntity).getParent();
             }
@@ -139,8 +139,8 @@ public class MCH_EntityGunner extends EntityLivingBase {
         if (!this.worldObj.isRemote && !this.isDead) {
             if (this.ridingEntity != null && this.ridingEntity.isDead)
                 this.ridingEntity = null;
-            if (this.ridingEntity instanceof MCH_EntityAircraft) {
-                shotTarget((MCH_EntityAircraft)this.ridingEntity);
+            if (this.ridingEntity instanceof MCH_EntityBaseVehicle) {
+                shotTarget((MCH_EntityBaseVehicle)this.ridingEntity);
             } else if (this.ridingEntity instanceof MCH_EntitySeat && ((MCH_EntitySeat)this.ridingEntity).getParent() != null) {
                 shotTarget(((MCH_EntitySeat)this.ridingEntity).getParent());
             } else if (this.despawnCount < 20) {
@@ -165,7 +165,7 @@ public class MCH_EntityGunner extends EntityLivingBase {
             this.idleCount--;
     }
 
-    public boolean canAttackEntity(EntityLivingBase entity, MCH_EntityAircraft ac, MCH_WeaponSet ws) {
+    public boolean canAttackEntity(EntityLivingBase entity, MCH_EntityBaseVehicle ac, MCH_WeaponSet ws) {
         boolean ret = false;
         if (this.targetType == 0) {
             //ret = (entity != this
@@ -230,7 +230,7 @@ public class MCH_EntityGunner extends EntityLivingBase {
         return false;
     }
 
-    public void shotTarget(MCH_EntityAircraft ac) {
+    public void shotTarget(MCH_EntityBaseVehicle ac) {
         if (ac.isDestroyed())
             return;
         if (!ac.getGunnerStatus())
@@ -329,7 +329,7 @@ public class MCH_EntityGunner extends EntityLivingBase {
             double tick = 1.0D;
             if (dist >= 10.0D && (ws.getInfo()).acceleration > 1.0F)
                 tick = dist / (ws.getInfo()).acceleration;
-            if (this.targetEntity.ridingEntity instanceof MCH_EntitySeat || this.targetEntity.ridingEntity instanceof MCH_EntityAircraft)
+            if (this.targetEntity.ridingEntity instanceof MCH_EntitySeat || this.targetEntity.ridingEntity instanceof MCH_EntityBaseVehicle)
                 tick -= MCH_Config.HitBoxDelayTick.prmInt;
             double dx = (this.targetEntity.posX - this.targetPrevPosX) * tick;
             double dy = (this.targetEntity.posY - this.targetPrevPosY) * tick + this.targetEntity.height * this.rand.nextDouble();
@@ -373,15 +373,15 @@ public class MCH_EntityGunner extends EntityLivingBase {
         }
     }
 
-    private boolean checkPitch(EntityLivingBase entity, MCH_EntityAircraft ac, Vec3 pos) {
+    private boolean checkPitch(EntityLivingBase entity, MCH_EntityBaseVehicle ac, Vec3 pos) {
         try {
             double d0 = entity.posX - pos.xCoord;
             double d1 = entity.posY - pos.yCoord;
             double d2 = entity.posZ - pos.zCoord;
             double d3 = MathHelper.sqrt_double(d0 * d0 + d2 * d2);
             float pitch = (float)-(Math.atan2(d1, d3) * 180.0D / Math.PI);
-            MCH_AircraftInfo ai = ac.getAcInfo();
-            if (ac instanceof mcheli.vehicle.MCH_EntityVehicle && ac.isPilot((Entity)this))
+            MCH_BaseVehicleInfo ai = ac.getAcInfo();
+            if (ac instanceof mcheli.vehicle.MCH_EntityTurret && ac.isPilot((Entity)this))
                 if (Math.abs(ai.minRotationPitch) + Math.abs(ai.maxRotationPitch) > 0.0F) {
                     if (pitch < ai.minRotationPitch)
                         return false;
@@ -390,7 +390,7 @@ public class MCH_EntityGunner extends EntityLivingBase {
                 }
             MCH_WeaponBase cw = ac.getCurrentWeapon((Entity)this).getCurrentWeapon();
             if (!(cw instanceof mcheli.weapon.MCH_WeaponEntitySeeker)) {
-                MCH_AircraftInfo.Weapon wi = ai.getWeaponById(ac.getCurrentWeaponID((Entity)this));
+                MCH_BaseVehicleInfo.Weapon wi = ai.getWeaponById(ac.getCurrentWeaponID((Entity)this));
                 if (Math.abs(wi.minPitch) + Math.abs(wi.maxPitch) > 0.0F) {
                     if (pitch < wi.minPitch)
                         return false;
@@ -402,20 +402,20 @@ public class MCH_EntityGunner extends EntityLivingBase {
         return true;
     }
 
-    public Vec3 getGunnerWeaponPos(MCH_EntityAircraft ac, MCH_WeaponSet ws) {
+    public Vec3 getGunnerWeaponPos(MCH_EntityBaseVehicle ac, MCH_WeaponSet ws) {
         MCH_SeatInfo seatInfo = ac.getSeatInfo((Entity)this);
-        if ((seatInfo != null && seatInfo.rotSeat) || ac instanceof mcheli.vehicle.MCH_EntityVehicle)
+        if ((seatInfo != null && seatInfo.rotSeat) || ac instanceof mcheli.vehicle.MCH_EntityTurret)
             return ac.calcOnTurretPos((ws.getCurrentWeapon()).position).addVector(ac.posX, ac.posY, ac.posZ);
         return ac.getTransformedPosition((ws.getCurrentWeapon()).position);
     }
 
-    private boolean isInAttackable(EntityLivingBase entity, MCH_EntityAircraft ac, MCH_WeaponSet ws, Vec3 pos) {
-        if (ac instanceof mcheli.vehicle.MCH_EntityVehicle)
+    private boolean isInAttackable(EntityLivingBase entity, MCH_EntityBaseVehicle ac, MCH_WeaponSet ws, Vec3 pos) {
+        if (ac instanceof mcheli.vehicle.MCH_EntityTurret)
             return true;
         try {
             if (ac.getCurrentWeapon((Entity)this).getCurrentWeapon() instanceof mcheli.weapon.MCH_WeaponEntitySeeker)
                 return true;
-            MCH_AircraftInfo.Weapon wi = ac.getAcInfo().getWeaponById(ac.getCurrentWeaponID((Entity)this));
+            MCH_BaseVehicleInfo.Weapon wi = ac.getAcInfo().getWeaponById(ac.getCurrentWeaponID((Entity)this));
             Vec3 v1 = Vec3.createVectorHelper(0.0D, 0.0D, 1.0D);
             float yaw = -ac.getRotYaw() + (wi.maxYaw + wi.minYaw) / 2.0F - wi.defaultYaw;
             v1.rotateAroundY(yaw * 3.1415927F / 180.0F);
@@ -429,10 +429,10 @@ public class MCH_EntityGunner extends EntityLivingBase {
         }
     }
 
-    public MCH_EntityAircraft getAc() {
+    public MCH_EntityBaseVehicle getAc() {
         if (this.ridingEntity == null)
             return null;
-        return (this.ridingEntity instanceof MCH_EntitySeat) ? ((MCH_EntitySeat)this.ridingEntity).getParent() : ((this.ridingEntity instanceof MCH_EntityAircraft) ? (MCH_EntityAircraft)this.ridingEntity : null);
+        return (this.ridingEntity instanceof MCH_EntitySeat) ? ((MCH_EntitySeat)this.ridingEntity).getParent() : ((this.ridingEntity instanceof MCH_EntityBaseVehicle) ? (MCH_EntityBaseVehicle)this.ridingEntity : null);
     }
 
     public void writeEntityToNBT(NBTTagCompound nbt) {

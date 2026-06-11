@@ -4,7 +4,7 @@ import com.google.common.io.ByteArrayDataInput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import mcheli.MCH_Packet;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Network;
 import net.minecraft.entity.Entity;
@@ -70,7 +70,7 @@ public class MCH_PacketNotifyAmmoNum extends MCH_Packet {
 
    }
 
-   public static void sendAllAmmoNum(MCH_EntityAircraft ac, EntityPlayer target) {
+   public static void sendAllAmmoNum(MCH_EntityBaseVehicle ac, EntityPlayer target) {
       MCH_PacketNotifyAmmoNum s = new MCH_PacketNotifyAmmoNum();
       s.entityID_Ac = W_Entity.getEntityId(ac);
       s.all = true;
@@ -86,11 +86,11 @@ public class MCH_PacketNotifyAmmoNum extends MCH_Packet {
       send(s, ac, target);
    }
 
-   public static void sendAmmoNum(MCH_EntityAircraft ac, EntityPlayer target, int wid) {
+   public static void sendAmmoNum(MCH_EntityBaseVehicle ac, EntityPlayer target, int wid) {
       sendAmmoNum(ac, target, wid, ac.getWeapon(wid).getAmmoNum(), ac.getWeapon(wid).getRestAllAmmoNum());
    }
 
-   public static void sendAmmoNum(MCH_EntityAircraft ac, EntityPlayer target, int wid, int ammo, int rest_ammo) {
+   public static void sendAmmoNum(MCH_EntityBaseVehicle ac, EntityPlayer target, int wid, int ammo, int rest_ammo) {
       MCH_PacketNotifyAmmoNum s = new MCH_PacketNotifyAmmoNum();
       s.entityID_Ac = W_Entity.getEntityId(ac);
       s.all = false;
@@ -100,7 +100,7 @@ public class MCH_PacketNotifyAmmoNum extends MCH_Packet {
       send(s, ac, target);
    }
 
-   public static void send(MCH_PacketNotifyAmmoNum s, MCH_EntityAircraft ac, EntityPlayer target) {
+   public static void send(MCH_PacketNotifyAmmoNum s, MCH_EntityBaseVehicle ac, EntityPlayer target) {
       if(target == null) {
          for(int i = 0; i < ac.getSeatNum() + 1; ++i) {
             Entity e = ac.getEntityBySeatId(i);

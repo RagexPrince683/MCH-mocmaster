@@ -132,7 +132,7 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
             continue;
          }
 
-         if(!(e instanceof mcheli.ship.MCH_EntityShip) && !(e instanceof mcheli.aircraft.MCH_EntityAircraft)) {
+         if(!(e instanceof mcheli.ship.MCH_EntityShip) && !(e instanceof mcheli.aircraft.MCH_EntityBaseVehicle)) {
             continue;
          }
 

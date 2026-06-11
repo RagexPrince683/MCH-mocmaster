@@ -3,7 +3,7 @@ package mcheli.chain;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.List;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.entity.Entity;
@@ -119,12 +119,12 @@ public class MCH_EntityChain extends W_Entity {
             this.isServerTowEntitySearchCount = 0;
          }
 
-         if(towEntity instanceof MCH_EntityAircraft) {
-            ((MCH_EntityAircraft)towEntity).setTowChainEntity(this);
+         if(towEntity instanceof MCH_EntityBaseVehicle) {
+            ((MCH_EntityBaseVehicle)towEntity).setTowChainEntity(this);
          }
 
-         if(towedEntity instanceof MCH_EntityAircraft) {
-            ((MCH_EntityAircraft)towedEntity).setTowedChainEntity(this);
+         if(towedEntity instanceof MCH_EntityBaseVehicle) {
+            ((MCH_EntityBaseVehicle)towedEntity).setTowedChainEntity(this);
          }
       } else {
          this.isTowing = false;

@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_ItemBaseVehicle;
 import mcheli.wrapper.W_Item;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -74,9 +74,9 @@ public class MCH_CreativeTabs extends CreativeTabs {
       super.displayAllReleventItems(list);
       Comparator<ItemStack> cmp = new Comparator<ItemStack>(){
          public int compare(ItemStack i1, ItemStack i2) {
-            if(i1.getItem() instanceof MCH_ItemAircraft && i2.getItem() instanceof MCH_ItemAircraft) {
-               MCH_AircraftInfo info1 = ((MCH_ItemAircraft)i1.getItem()).getAircraftInfo();
-               MCH_AircraftInfo info2 = ((MCH_ItemAircraft)i2.getItem()).getAircraftInfo();
+            if(i1.getItem() instanceof MCH_ItemBaseVehicle && i2.getItem() instanceof MCH_ItemBaseVehicle) {
+               MCH_BaseVehicleInfo info1 = ((MCH_ItemBaseVehicle)i1.getItem()).getAircraftInfo();
+               MCH_BaseVehicleInfo info2 = ((MCH_ItemBaseVehicle)i2.getItem()).getAircraftInfo();
                if(info1 != null && info2 != null) {
                   String s1 = info1.category + "." + info1.name;
                   String s2 = info2.category + "." + info2.name;

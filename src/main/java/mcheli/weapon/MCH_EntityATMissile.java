@@ -1,6 +1,6 @@
 package mcheli.weapon;
 
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.vector.Vector3f;
 import mcheli.wrapper.W_Entity;
 import net.minecraft.entity.Entity;
@@ -159,7 +159,7 @@ public class MCH_EntityATMissile extends MCH_EntityBaseBullet {
             Entity closestTarget = null;
 
             for (Entity entity : list) {
-                if (entity instanceof MCH_EntityAircraft) {
+                if (entity instanceof MCH_EntityBaseVehicle) {
 
                     if (W_Entity.isEqual(entity, shootingAircraft)) {
                         continue;
@@ -190,7 +190,7 @@ public class MCH_EntityATMissile extends MCH_EntityBaseBullet {
 
             if (closestTarget != null) {
                 super.targetEntity = closestTarget;
-                System.out.println("主动AT弹锁定实体" + ((MCH_EntityAircraft)closestTarget).getAcInfo().name + " 距离" + (int)getDistanceToEntity(closestTarget));
+                System.out.println("主动AT弹锁定实体" + ((MCH_EntityBaseVehicle)closestTarget).getAcInfo().name + " 距离" + (int)getDistanceToEntity(closestTarget));
             }
         }
     }

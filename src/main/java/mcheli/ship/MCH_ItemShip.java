@@ -1,20 +1,20 @@
 package mcheli.ship;
 
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_ItemBaseVehicle;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
-public class MCH_ItemShip extends MCH_ItemAircraft {
+public class MCH_ItemShip extends MCH_ItemBaseVehicle {
 
     public MCH_ItemShip(int par1) {
         super(par1);
         super.maxStackSize = 1;
     }
 
-    public MCH_AircraftInfo getAircraftInfo() {
+    public MCH_BaseVehicleInfo getAircraftInfo() {
         return MCH_ShipInfoManager.getFromItem(this);
     }
 

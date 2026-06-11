@@ -5,49 +5,49 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import mcheli.MCH_BaseInfo;
-import mcheli.aircraft.MCH_AircraftInfoManager;
-import mcheli.vehicle.MCH_VehicleInfo;
+import mcheli.aircraft.MCH_BaseVehicleInfoManager;
+import mcheli.vehicle.MCH_TurretInfo;
 import net.minecraft.item.Item;
 
-public class MCH_VehicleInfoManager extends MCH_AircraftInfoManager {
+public class MCH_TurretInfoManager extends MCH_BaseVehicleInfoManager {
 
-   private static MCH_VehicleInfoManager instance = new MCH_VehicleInfoManager();
+   private static MCH_TurretInfoManager instance = new MCH_TurretInfoManager();
    public static HashMap map = new LinkedHashMap();
 
 
-   public static MCH_VehicleInfo get(String name) {
-      return (MCH_VehicleInfo)map.get(name);
+   public static MCH_TurretInfo get(String name) {
+      return (MCH_TurretInfo)map.get(name);
    }
 
-   public static MCH_VehicleInfoManager getInstance() {
+   public static MCH_TurretInfoManager getInstance() {
       return instance;
    }
 
    public MCH_BaseInfo newInfo(String name) {
-      return new MCH_VehicleInfo(name);
+      return new MCH_TurretInfo(name);
    }
 
    public Map getMap() {
       return map;
    }
 
-   public static MCH_VehicleInfo getFromItem(Item item) {
+   public static MCH_TurretInfo getFromItem(Item item) {
       return getInstance().getAcInfoFromItem(item);
    }
 
-   public MCH_VehicleInfo getAcInfoFromItem(Item item) {
+   public MCH_TurretInfo getAcInfoFromItem(Item item) {
       if(item == null) {
          return null;
       } else {
          Iterator i$ = map.values().iterator();
 
-         MCH_VehicleInfo info;
+         MCH_TurretInfo info;
          do {
             if(!i$.hasNext()) {
                return null;
             }
 
-            info = (MCH_VehicleInfo)i$.next();
+            info = (MCH_TurretInfo)i$.next();
          } while(info.item != item);
 
          return info;

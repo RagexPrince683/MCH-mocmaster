@@ -1,23 +1,23 @@
 package mcheli.aircraft;
 
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
+import mcheli.aircraft.MCH_ItemBaseVehicle;
 import mcheli.wrapper.W_BlockDispenser;
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 
-public class MCH_ItemAircraftDispenseBehavior extends BehaviorDefaultDispenseItem {
+public class MCH_ItemBaseVehicleDispenseBehavior extends BehaviorDefaultDispenseItem {
 
    public ItemStack dispenseStack(IBlockSource bs, ItemStack itemStack) {
       EnumFacing enumfacing = W_BlockDispenser.getFacing(bs.getBlockMetadata());
       double x = bs.getX() + (double)enumfacing.getFrontOffsetX() * 2.0D;
       double y = bs.getY() + (double)enumfacing.getFrontOffsetY() * 2.0D;
       double z = bs.getZ() + (double)enumfacing.getFrontOffsetZ() * 2.0D;
-      if(itemStack.getItem() instanceof MCH_ItemAircraft) {
-         MCH_EntityAircraft ac = ((MCH_ItemAircraft)itemStack.getItem()).onTileClick(itemStack, bs.getWorld(), 0.0F, (int)x, (int)y, (int)z);
+      if(itemStack.getItem() instanceof MCH_ItemBaseVehicle) {
+         MCH_EntityBaseVehicle ac = ((MCH_ItemBaseVehicle)itemStack.getItem()).onTileClick(itemStack, bs.getWorld(), 0.0F, (int)x, (int)y, (int)z);
          if(ac != null && !ac.isUAV()) {
             if(!bs.getWorld().isRemote) {
                ac.getAcDataFromItem(itemStack);

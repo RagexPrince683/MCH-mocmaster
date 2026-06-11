@@ -6,7 +6,7 @@ import mcheli.MCH_DamageFactor;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.tank.MCH_EntityTank;
-import mcheli.vehicle.MCH_EntityVehicle;
+import mcheli.vehicle.MCH_EntityTurret;
 import mcheli.wrapper.W_Item;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -707,7 +707,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
                                     } else if (var14.equals("tank")) {
                                         var13 = MCH_EntityTank.class;
                                     } else if (var14.equals("vehicle")) {
-                                        var13 = MCH_EntityVehicle.class;
+                                        var13 = MCH_EntityTurret.class;
                                     }
                                 } else {
                                     var13 = MCH_EntityHeli.class;

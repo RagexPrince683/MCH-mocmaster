@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import mcheli.MCH_BaseInfo;
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.hud.MCH_HudItem;
 import mcheli.hud.MCH_HudItemCall;
 import mcheli.hud.MCH_HudItemCameraRot;
@@ -157,7 +157,7 @@ public class MCH_Hud extends MCH_BaseInfo {
       }
    }
 
-   public void draw(MCH_EntityAircraft ac, EntityPlayer player, float partialTicks) {
+   public void draw(MCH_EntityBaseVehicle ac, EntityPlayer player, float partialTicks) {
       MCH_HudItem.ac = ac;
       MCH_HudItem.player = player;
       MCH_HudItem.partialTicks = partialTicks;

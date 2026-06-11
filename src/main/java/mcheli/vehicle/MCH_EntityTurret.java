@@ -5,12 +5,12 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.aircraft.EnumBoundingBoxType;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_PacketStatusRequest;
-import mcheli.vehicle.MCH_VehicleInfo;
-import mcheli.vehicle.MCH_VehicleInfoManager;
+import mcheli.vehicle.MCH_TurretInfo;
+import mcheli.vehicle.MCH_TurretInfoManager;
 import mcheli.weapon.MCH_WeaponParam;
 import mcheli.weapon.MCH_WeaponSet;
 import mcheli.wrapper.W_Entity;
@@ -22,18 +22,17 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
-//this is a turret. Don't ask me why. Japanese modder logic.
-//Should probably be refactored.
-public class MCH_EntityVehicle extends MCH_EntityAircraft {
+// Static weapon/turret entity. Runtime registration keeps the legacy MCH.E.Vehicle ID for compatibility.
+public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
 
-   private MCH_VehicleInfo vehicleInfo = null;
+   private MCH_TurretInfo turretInfo = null;
    public boolean isUsedPlayer;
    public float lastRiderYaw;
    public float lastRiderPitch;
    private int trackDamageTaken;
 
 
-   public MCH_EntityVehicle(World world) {
+   public MCH_EntityTurret(World world) {
       super(world);
       super.currentSpeed = 0.07D;
       super.preventEntitySpawning = true;
@@ -50,7 +49,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
    }
 
    public int getTrackMaxHP() {
-      return this.vehicleInfo != null?Math.max(1, this.vehicleInfo.trackMaxHP):1;
+      return this.turretInfo != null?Math.max(1, this.turretInfo.trackMaxHP):1;
    }
 
    public int getTrackHP() {
@@ -63,26 +62,26 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
 
    public String getKindName() {
       return "vehicles";
-   } //even more mental illness
+   } // Legacy config directory name kept for compatibility.
 
    public String getEntityType() {
       return "Turret";
-   } //more mental illness
+   }
 
-   public MCH_VehicleInfo getVehicleInfo() {
-      return this.vehicleInfo;
+   public MCH_TurretInfo getTurretInfo() {
+      return this.turretInfo;
    }
 
    public void changeType(String type) {
       if(!type.isEmpty()) {
-         this.vehicleInfo = MCH_VehicleInfoManager.get(type);
+         this.turretInfo = MCH_TurretInfoManager.get(type);
       }
 
-      if(this.vehicleInfo == null) {
-         MCH_Lib.Log((Entity)this, "##### MCH_EntityVehicle changeVehicleType() Vehicle info null %d, %s, %s", new Object[]{Integer.valueOf(W_Entity.getEntityId(this)), type, this.getEntityName()});
+      if(this.turretInfo == null) {
+         MCH_Lib.Log((Entity)this, "##### MCH_EntityTurret changeVehicleType() Turret info null %d, %s, %s", new Object[]{Integer.valueOf(W_Entity.getEntityId(this)), type, this.getEntityName()});
          this.setDead();
       } else {
-         this.setAcInfo(this.vehicleInfo);
+         this.setAcInfo(this.turretInfo);
          this.newSeats(this.getAcInfo().getNumSeatAndRack());
          super.weapons = this.createWeapon(1 + this.getSeatNum());
          this.initPartRotation(super.rotationYaw, super.rotationPitch);
@@ -99,8 +98,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
       super.entityInit();
    }
 
-   //AI schizo posting where lazy dev did not bother to state this is the turret class...
-   // and not the tank class. Probably why tracks don't work
+   // Turret track damage is stored separately from the shared base vehicle NBT.
    protected void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
       super.writeEntityToNBT(par1NBTTagCompound);
       par1NBTTagCompound.setInteger("TrackDamage", this.trackDamageTaken);
@@ -109,20 +107,20 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
    protected void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
       super.readEntityFromNBT(par1NBTTagCompound);
       this.trackDamageTaken = Math.max(0, par1NBTTagCompound.getInteger("TrackDamage"));
-      if(this.vehicleInfo == null) {
-         this.vehicleInfo = MCH_VehicleInfoManager.get(this.getTypeName());
-         if(this.vehicleInfo == null) {
-            MCH_Lib.Log((Entity)this, "##### MCH_EntityVehicle readEntityFromNBT() Vehicle info null %d, %s", new Object[]{Integer.valueOf(W_Entity.getEntityId(this)), this.getEntityName()});
+      if(this.turretInfo == null) {
+         this.turretInfo = MCH_TurretInfoManager.get(this.getTypeName());
+         if(this.turretInfo == null) {
+            MCH_Lib.Log((Entity)this, "##### MCH_EntityTurret readEntityFromNBT() Turret info null %d, %s", new Object[]{Integer.valueOf(W_Entity.getEntityId(this)), this.getEntityName()});
             this.setDead();
          } else {
-            this.setAcInfo(this.vehicleInfo);
+            this.setAcInfo(this.turretInfo);
          }
       }
 
    }
 
    public Item getItem() {
-      return this.getVehicleInfo() != null?this.getVehicleInfo().item:null;
+      return this.getTurretInfo() != null?this.getTurretInfo().item:null;
    }
 
    public void setDead() {
@@ -175,7 +173,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
       if(prm.user != null) {
          MCH_WeaponSet breforeUseWeaponPitch = this.getCurrentWeapon(prm.user);
          if(breforeUseWeaponPitch != null) {
-            MCH_AircraftInfo.Weapon breforeUseWeaponYaw = this.getAcInfo().getWeaponByName(breforeUseWeaponPitch.getInfo().name);
+            MCH_BaseVehicleInfo.Weapon breforeUseWeaponYaw = this.getAcInfo().getWeaponByName(breforeUseWeaponPitch.getInfo().name);
             if(breforeUseWeaponYaw != null && breforeUseWeaponYaw.maxYaw != 0.0F && breforeUseWeaponYaw.minYaw != 0.0F) {
                return super.useCurrentWeapon(prm);
             }
@@ -193,7 +191,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
    }
 
    public void onUpdateAircraft() {
-      if(this.vehicleInfo == null) {
+      if(this.turretInfo == null) {
          this.changeType(this.getTypeName());
          super.prevPosX = super.posX;
          super.prevPosY = super.posY;
@@ -234,7 +232,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
    protected void onUpdate_Control() {
       double max_y = 1.0D;
       if(super.riddenByEntity != null && !super.riddenByEntity.isDead) {
-         if(this.getVehicleInfo().isEnableMove || this.getVehicleInfo().isEnableRot) {
+         if(this.getTurretInfo().isEnableMove || this.getTurretInfo().isEnableRot) {
             this.onUpdate_ControlOnGround();
          }
       } else if(this.getCurrentThrottle() > 0.0D) {
@@ -277,7 +275,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
          float yaw = super.rotationYaw;
          double x = 0.0D;
          double z = 0.0D;
-         if(this.getVehicleInfo().isEnableMove) {
+         if(this.getTurretInfo().isEnableMove) {
             if(super.throttleUp) {
                yaw = super.rotationYaw;
                x += Math.sin((double)yaw * 3.141592653589793D / 180.0D);
@@ -293,7 +291,7 @@ public class MCH_EntityVehicle extends MCH_EntityAircraft {
             }
          }
 
-         if(this.getVehicleInfo().isEnableMove) {
+         if(this.getTurretInfo().isEnableMove) {
             if(super.moveLeft && !super.moveRight) {
                super.rotationYaw = (float)((double)super.rotationYaw - 0.5D);
             }

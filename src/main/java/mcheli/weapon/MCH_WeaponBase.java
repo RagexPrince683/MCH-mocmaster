@@ -1,7 +1,7 @@
 package mcheli.weapon;
 
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.entity.Entity;
@@ -40,7 +40,7 @@ public abstract class MCH_WeaponBase {
    public int heatCount;
    public MCH_Cartridge cartridge;
    public boolean onTurret;
-   public MCH_EntityAircraft aircraft;
+   public MCH_EntityBaseVehicle aircraft;
    public int tick;
    public int optionParameter1;
    public int optionParameter2;
@@ -204,13 +204,13 @@ public abstract class MCH_WeaponBase {
    }
 
    public Vec3 getShotPos(Entity entity) {
-      if(entity instanceof MCH_EntityAircraft && this.onTurret) {
+      if(entity instanceof MCH_EntityBaseVehicle && this.onTurret) {
          // System.out.println("On turret");
-         return ((MCH_EntityAircraft)entity).calcOnTurretPos(this.position);
+         return ((MCH_EntityBaseVehicle)entity).calcOnTurretPos(this.position);
       } else {
          // System.out.println("NOT on turret");
          Vec3 v = Vec3.createVectorHelper(this.position.xCoord, this.position.yCoord, this.position.zCoord);
-         float roll = entity instanceof MCH_EntityAircraft?((MCH_EntityAircraft)entity).getRotRoll():0.0F;
+         float roll = entity instanceof MCH_EntityBaseVehicle?((MCH_EntityBaseVehicle)entity).getRotRoll():0.0F;
          return MCH_Lib.RotVec3(v, -entity.rotationYaw, -entity.rotationPitch, -roll);
       }
    }

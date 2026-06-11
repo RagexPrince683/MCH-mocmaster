@@ -31,7 +31,7 @@ import net.minecraft.world.World;
 import mcheli.weapon.MCH_WeaponSet;
 
 
-public abstract class MCH_ItemAircraft extends W_Item {
+public abstract class MCH_ItemBaseVehicle extends W_Item {
 
    private static boolean isRegistedDispenseBehavior = false;
 
@@ -43,7 +43,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
    public static int timeHeld = 0;
 
 
-   public MCH_ItemAircraft(int i) {
+   public MCH_ItemBaseVehicle(int i) {
       super(i);
    }
 
@@ -51,13 +51,13 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
    public static void registerDispenseBehavior(Item item) {
       if(!isRegistedDispenseBehavior) {
-         BlockDispenser.dispenseBehaviorRegistry.putObject(item, new MCH_ItemAircraftDispenseBehavior());
+         BlockDispenser.dispenseBehaviorRegistry.putObject(item, new MCH_ItemBaseVehicleDispenseBehavior());
       }
    }
 
    //@Override
    //public void addInformation(ItemStack stack, EntityPlayer player, List lines, boolean par4) {
-   //   MCH_AircraftInfo info = MCH_AircraftInfoManager.getFromItem(stack.getItem());
+   //   MCH_BaseVehicleInfo info = MCH_BaseVehicleInfoManager.getFromItem(stack.getItem());
    //   if (info != null && !"zzz".equals(info.category)) {
    //      lines.add(EnumChatFormatting.RED + "DANGER!");
    //      lines.add(EnumChatFormatting.RED + "This vehicle is not in the default category!");
@@ -68,8 +68,8 @@ public abstract class MCH_ItemAircraft extends W_Item {
    //}
 
    public void addInformation(ItemStack stack, EntityPlayer player, List lines, boolean par4) {
-      MCH_AircraftInfo info = this.getAircraftInfo().category.equals("zzz") ? null : this.getAircraftInfo();
-      MCH_EntityAircraft ac = createAircraft(player.worldObj, -1.0D, -1.0D, -1.0D, stack);
+      MCH_BaseVehicleInfo info = this.getAircraftInfo().category.equals("zzz") ? null : this.getAircraftInfo();
+      MCH_EntityBaseVehicle ac = createAircraft(player.worldObj, -1.0D, -1.0D, -1.0D, stack);
       if (info != null) {
          lines.add(EnumChatFormatting.YELLOW + "Category: " + info.category);
          //lines.add(EnumChatFormatting.DARK_PURPLE + "Weapon: " + info.weaponSetList);
@@ -95,15 +95,15 @@ public abstract class MCH_ItemAircraft extends W_Item {
       super.addInformation(stack, player, lines, par4);
    }
 
-   public abstract MCH_AircraftInfo getAircraftInfo();
+   public abstract MCH_BaseVehicleInfo getAircraftInfo();
 
-   public abstract MCH_EntityAircraft createAircraft(World var1, double var2, double var4, double var6, ItemStack var8);
+   public abstract MCH_EntityBaseVehicle createAircraft(World var1, double var2, double var4, double var6, ItemStack var8);
 
-   MCH_EntityAircraft ac;
+   MCH_EntityBaseVehicle ac;
    //todo add a wait time for the aircraft to be placed, we dont want people abusing vehicle hopping
-   public MCH_EntityAircraft onTileClick(ItemStack itemStack, World world, float rotationYaw, int x, int y, int z) {
+   public MCH_EntityBaseVehicle onTileClick(ItemStack itemStack, World world, float rotationYaw, int x, int y, int z) {
 
-      MCH_EntityAircraft ac = this.createAircraft(world, (double)((float)x + 0.5F), (double)((float)y + 1.0F), (double)((float)z + 0.5F), itemStack);
+      MCH_EntityBaseVehicle ac = this.createAircraft(world, (double)((float)x + 0.5F), (double)((float)y + 1.0F), (double)((float)z + 0.5F), itemStack);
       if(ac == null) {
          return null;
       } else {
@@ -120,7 +120,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
    }
 
    public String toString() {
-      MCH_AircraftInfo info = this.getAircraftInfo();
+      MCH_BaseVehicleInfo info = this.getAircraftInfo();
       return info != null?super.toString() + "(" + info.getDirectoryName() + ":" + info.name + ")":super.toString() + "(null)";
    }
 
@@ -376,10 +376,10 @@ public abstract class MCH_ItemAircraft extends W_Item {
 
 
 
-   public MCH_EntityAircraft spawnAircraft(ItemStack itemStack, World world, EntityPlayer player, int x, int y, int z) {
+   public MCH_EntityBaseVehicle spawnAircraft(ItemStack itemStack, World world, EntityPlayer player, int x, int y, int z) {
 
 
-      MCH_EntityAircraft ac = this.onTileClick(itemStack, world, player.rotationYaw, x, y, z);
+      MCH_EntityBaseVehicle ac = this.onTileClick(itemStack, world, player.rotationYaw, x, y, z);
       if(ac != null) {
          if(ac.isUAV() || ac.isNewUAV()) {
             if(world.isRemote) {
@@ -410,7 +410,7 @@ public abstract class MCH_ItemAircraft extends W_Item {
    public void rideEntity(ItemStack item, Entity target, EntityPlayer player) {
       MCH_Config var10000 = MCH_MOD.config;
       if(!MCH_Config.PlaceableOnSpongeOnly.prmBool && target instanceof EntityMinecartEmpty && target.riddenByEntity == null) {
-         MCH_EntityAircraft ac = this.spawnAircraft(item, player.worldObj, player, (int)target.posX, (int)target.posY + 2, (int)target.posZ);
+         MCH_EntityBaseVehicle ac = this.spawnAircraft(item, player.worldObj, player, (int)target.posX, (int)target.posY + 2, (int)target.posZ);
          if(!player.worldObj.isRemote && ac != null) {
             ac.mountEntity(target);
          }

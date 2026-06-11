@@ -2,20 +2,20 @@ package mcheli.vehicle;
 
 import com.google.common.io.ByteArrayDataInput;
 import mcheli.chain.MCH_EntityChain;
-import mcheli.vehicle.MCH_EntityVehicle;
-import mcheli.vehicle.MCH_PacketVehiclePlayerControl;
+import mcheli.vehicle.MCH_EntityTurret;
+import mcheli.vehicle.MCH_PacketTurretPlayerControl;
 import mcheli.weapon.MCH_WeaponParam;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 
-public class MCH_VehiclePacketHandler {
+public class MCH_TurretPacketHandler {
 
    public static void onPacket_PlayerControl(EntityPlayer player, ByteArrayDataInput data) {
-      if(player.ridingEntity instanceof MCH_EntityVehicle) {
+      if(player.ridingEntity instanceof MCH_EntityTurret) {
          if(!player.worldObj.isRemote) {
-            MCH_PacketVehiclePlayerControl pc = new MCH_PacketVehiclePlayerControl();
+            MCH_PacketTurretPlayerControl pc = new MCH_PacketTurretPlayerControl();
             pc.readData(data);
-            MCH_EntityVehicle vehicle = (MCH_EntityVehicle)player.ridingEntity;
+            MCH_EntityTurret vehicle = (MCH_EntityTurret)player.ridingEntity;
             if(pc.isUnmount == 1) {
                vehicle.unmountEntity();
             } else if(pc.isUnmount == 2) {

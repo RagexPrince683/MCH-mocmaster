@@ -3,14 +3,14 @@ package mcheli.vehicle;
 import java.util.ArrayList;
 import java.util.List;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.vehicle.MCH_ItemVehicle;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.vehicle.MCH_ItemTurret;
 import net.minecraft.item.Item;
 
 //TURRET info
-public class MCH_VehicleInfo extends MCH_AircraftInfo {
+public class MCH_TurretInfo extends MCH_BaseVehicleInfo {
 
-   public MCH_ItemVehicle item = null;
+   public MCH_ItemTurret item = null;
    public boolean isEnableMove = false;
    public boolean isEnableRot = false;
    public int trackMaxHP = 100;
@@ -29,7 +29,7 @@ public class MCH_VehicleInfo extends MCH_AircraftInfo {
       return this.item;
    }
 
-   public MCH_VehicleInfo(String name) {
+   public MCH_TurretInfo(String name) {
       super(name);
    }
 
@@ -54,29 +54,29 @@ public class MCH_VehicleInfo extends MCH_AircraftInfo {
       } else {
          String[] s;
          float rb;
-         MCH_VehicleInfo.VPart p;
+         MCH_TurretInfo.VPart p;
          if(item.compareTo("addpart") == 0) {
             s = data.split("\\s*,\\s*");
             if(s.length >= 7) {
                rb = s.length >= 8?this.toFloat(s[7]):0.0F;
-               p = new MCH_VehicleInfo.VPart(this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "part" + this.partList.size(), this.toBool(s[0]), this.toBool(s[1]), this.toBool(s[2]), this.toInt(s[3]), rb);
+               p = new MCH_TurretInfo.VPart(this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "part" + this.partList.size(), this.toBool(s[0]), this.toBool(s[1]), this.toBool(s[2]), this.toInt(s[3]), rb);
                this.partList.add(p);
             }
          } else if(item.compareTo("addchildpart") == 0 && this.partList.size() > 0) {
             s = data.split("\\s*,\\s*");
             if(s.length >= 7) {
                rb = s.length >= 8?this.toFloat(s[7]):0.0F;
-               p = (MCH_VehicleInfo.VPart)this.partList.get(this.partList.size() - 1);
+               p = (MCH_TurretInfo.VPart)this.partList.get(this.partList.size() - 1);
                if(p.child == null) {
                   p.child = new ArrayList();
                }
 
-               MCH_VehicleInfo.VPart n = new MCH_VehicleInfo.VPart(this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), p.modelName + "_" + p.child.size(), this.toBool(s[0]), this.toBool(s[1]), this.toBool(s[2]), this.toInt(s[3]), rb);
+               MCH_TurretInfo.VPart n = new MCH_TurretInfo.VPart(this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), p.modelName + "_" + p.child.size(), this.toBool(s[0]), this.toBool(s[1]), this.toBool(s[2]), this.toInt(s[3]), rb);
                p.child.add(n);
             }
          }
       }
-      MCH_AircraftInfo.allAircraftInfo.put(name, this);
+      MCH_BaseVehicleInfo.allBaseVehicleInfo.put(name, this);
    }
 
    public String getDirectoryName() {
@@ -96,7 +96,7 @@ public class MCH_VehicleInfo extends MCH_AircraftInfo {
       MCH_MOD.proxy.registerModelsVehicle(super.name, true);
    }
 
-   public class VPart extends MCH_AircraftInfo.DrawnPart {
+   public class VPart extends MCH_BaseVehicleInfo.DrawnPart {
 
       public final boolean rotPitch;
       public final boolean rotYaw;

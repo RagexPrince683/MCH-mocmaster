@@ -1,7 +1,7 @@
 package mcheli;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.vector.Vector3f;
@@ -44,9 +44,9 @@ public class MCH_RenderBVRLockBox {
         if (mc.gameSettings.thirdPersonView != 0) return;
 
         //获取玩家机载武器
-        MCH_EntityAircraft ac = null;
-        if(player.ridingEntity instanceof MCH_EntityAircraft) {
-            ac = (MCH_EntityAircraft)player.ridingEntity;
+        MCH_EntityBaseVehicle ac = null;
+        if(player.ridingEntity instanceof MCH_EntityBaseVehicle) {
+            ac = (MCH_EntityBaseVehicle)player.ridingEntity;
         } else if(player.ridingEntity instanceof MCH_EntitySeat) {
             ac = ((MCH_EntitySeat)player.ridingEntity).getParent();
         } else if(player.ridingEntity instanceof MCH_EntityUavStation) {

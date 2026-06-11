@@ -1,8 +1,8 @@
 package mcheli.plane;
 
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_ItemBaseVehicle;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
@@ -10,14 +10,14 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
-public class MCP_ItemPlane extends MCH_ItemAircraft {
+public class MCP_ItemPlane extends MCH_ItemBaseVehicle {
 
    public MCP_ItemPlane(int par1) {
       super(par1);
       super.maxStackSize = 1;
    }
 
-   public MCH_AircraftInfo getAircraftInfo() {
+   public MCH_BaseVehicleInfo getAircraftInfo() {
       return MCP_PlaneInfoManager.getFromItem(this);
    }
 

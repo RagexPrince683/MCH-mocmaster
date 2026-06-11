@@ -4,7 +4,7 @@ package mcheli.mob;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.List;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.gui.MCH_Gui;
 import mcheli.mob.MCH_EntityGunner;
@@ -92,9 +92,9 @@ public class MCH_GuiSpawnGunner extends MCH_Gui {
                     }
         }
         if (mCH_EntitySeat == null) {
-            List<MCH_EntityAircraft>Aircraft_list = player.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, player.boundingBox.expand(5.0D, 5.0D, 5.0D));
+            List<MCH_EntityBaseVehicle>Aircraft_list = player.worldObj.getEntitiesWithinAABB(MCH_EntityBaseVehicle.class, player.boundingBox.expand(5.0D, 5.0D, 5.0D));
             for (j = 0; j < Aircraft_list.size(); j++) {
-                MCH_EntityAircraft ac = (MCH_EntityAircraft)Aircraft_list.get(j);
+                MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)Aircraft_list.get(j);
                 if (!ac.isUAV() && ac.getAcInfo() != null && ac.boundingBox.calculateIntercept(vec3, vec31) != null)
                     if (mCH_EntitySeat == null || player.getDistanceSqToEntity((Entity)ac) < player.getDistanceSqToEntity((Entity)mCH_EntitySeat))
                         if (ac.getRiddenByEntity() instanceof MCH_EntityGunner) {
@@ -132,7 +132,7 @@ public class MCH_GuiSpawnGunner extends MCH_Gui {
             String seatName = "";
             if (gunner.ridingEntity instanceof MCH_EntitySeat) {
                 seatName = "(seat " + (((MCH_EntitySeat)gunner.ridingEntity).seatID + 2) + ")";
-            } else if (gunner.ridingEntity instanceof MCH_EntityAircraft) {
+            } else if (gunner.ridingEntity instanceof MCH_EntityBaseVehicle) {
                 seatName = "(seat 1)";
             }
             drawCenteredString(gunner.getTeamName() + " Gunner " + seatName, (int)px, (int)py + 20, -8355840);
@@ -151,8 +151,8 @@ public class MCH_GuiSpawnGunner extends MCH_Gui {
                 drawLine(new double[] { px - S, py - S, px + S, py + S }, -65536);
                 drawLine(new double[] { px + S, py - S, px - S, py + S }, -65536);
             }
-        } else if (entity instanceof MCH_EntityAircraft) {
-            MCH_EntityAircraft ac = (MCH_EntityAircraft)entity;
+        } else if (entity instanceof MCH_EntityBaseVehicle) {
+            MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)entity;
             if (ac.getRiddenByEntity() == null) {
                 drawCenteredString("seat 1", (int)px, (int)py + 20, -16711681);
                 int S = 10;

@@ -4,7 +4,7 @@ import com.google.common.io.ByteArrayDataInput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import mcheli.MCH_Packet;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Network;
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,7 +36,7 @@ public class MCH_PacketNotifyHitBullet extends MCH_Packet {
 
    }
 
-   public static void send(MCH_EntityAircraft ac, EntityPlayer rider) {
+   public static void send(MCH_EntityBaseVehicle ac, EntityPlayer rider) {
       if(rider != null && !rider.isDead) {
          MCH_PacketNotifyHitBullet s = new MCH_PacketNotifyHitBullet();
          s.entityID_Ac = ac != null && !ac.isDead?W_Entity.getEntityId(ac):-1;

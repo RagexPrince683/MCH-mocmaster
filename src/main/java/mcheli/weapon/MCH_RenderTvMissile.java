@@ -2,7 +2,7 @@ package mcheli.weapon;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.weapon.MCH_EntityBaseBullet;
@@ -21,10 +21,10 @@ public class MCH_RenderTvMissile extends MCH_RenderBulletBase {
    }
 
    public void renderBullet(Entity entity, double posX, double posY, double posZ, float par8, float par9) {
-      MCH_EntityAircraft ac = null;
+      MCH_EntityBaseVehicle ac = null;
       Entity ridingEntity = Minecraft.getMinecraft().thePlayer.ridingEntity;
-      if(ridingEntity instanceof MCH_EntityAircraft) {
-         ac = (MCH_EntityAircraft)ridingEntity;
+      if(ridingEntity instanceof MCH_EntityBaseVehicle) {
+         ac = (MCH_EntityBaseVehicle)ridingEntity;
       } else if(ridingEntity instanceof MCH_EntitySeat) {
          ac = ((MCH_EntitySeat)ridingEntity).getParent();
       } else if(ridingEntity instanceof MCH_EntityUavStation) {

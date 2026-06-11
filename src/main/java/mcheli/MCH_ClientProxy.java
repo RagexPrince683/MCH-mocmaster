@@ -5,11 +5,11 @@ import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.relauncher.Side;
 import java.util.Iterator;
 
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntityHide;
 import mcheli.aircraft.MCH_EntitySeat;
-import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.aircraft.MCH_SoundUpdater;
 import mcheli.block.MCH_DraftingTableItemRender;
 import mcheli.block.MCH_DraftingTableRenderer;
@@ -59,10 +59,10 @@ import mcheli.tool.MCH_ItemRenderWrench;
 import mcheli.tool.rangefinder.MCH_ItemRenderRangeFinder;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.uav.MCH_RenderUavStation;
-import mcheli.vehicle.MCH_EntityVehicle;
-import mcheli.vehicle.MCH_RenderVehicle;
-import mcheli.vehicle.MCH_VehicleInfo;
-import mcheli.vehicle.MCH_VehicleInfoManager;
+import mcheli.vehicle.MCH_EntityTurret;
+import mcheli.vehicle.MCH_RenderTurret;
+import mcheli.vehicle.MCH_TurretInfo;
+import mcheli.vehicle.MCH_TurretInfoManager;
 import mcheli.weapon.*;
 import mcheli.wrapper.W_Item;
 import mcheli.wrapper.W_McClient;
@@ -100,7 +100,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityChain.class, new MCH_RenderChain());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityParachute.class, new MCH_RenderParachute());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityContainer.class, new MCH_RenderContainer());
-      RenderingRegistry.registerEntityRenderingHandler(MCH_EntityVehicle.class, new MCH_RenderVehicle());
+      RenderingRegistry.registerEntityRenderingHandler(MCH_EntityTurret.class, new MCH_RenderTurret());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityUavStation.class, new MCH_RenderUavStation());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityCartridge.class, new MCH_RenderCartridge());
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityHide.class, new MCH_RenderNull());
@@ -138,7 +138,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
    public void registerModels() {
       MCH_ModelManager.setForceReloadMode(true);
-      MCH_RenderAircraft.debugModel = MCH_ModelManager.load("box");
+      MCH_RenderBaseVehicle.debugModel = MCH_ModelManager.load("box");
       MCH_ModelManager.load("a-10");
       MCH_RenderGLTD.model = MCH_ModelManager.load("gltd");
       MCH_ModelManager.load("chain");
@@ -196,7 +196,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
          this.registerModelsTank(var6, false);
       }
 
-      var5 = MCH_VehicleInfoManager.map.keySet().iterator();
+      var5 = MCH_TurretInfoManager.map.keySet().iterator();
 
       while(var5.hasNext()) {
          var6 = (String)var5.next();
@@ -289,9 +289,9 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       info.model = MCH_ModelManager.load("planes", info.name);
 
       Iterator i$;
-      MCH_AircraftInfo.DrawnPart w;
+      MCH_BaseVehicleInfo.DrawnPart w;
       for(i$ = info.nozzles.iterator(); i$.hasNext(); w.model = this.loadPartModel("planes", info.name, info.model, w.modelName)) {
-         w = (MCH_AircraftInfo.DrawnPart)i$.next();
+         w = (MCH_BaseVehicleInfo.DrawnPart)i$.next();
       }
 
       i$ = info.rotorList.iterator();
@@ -330,9 +330,9 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       info.model = MCH_ModelManager.load("ships", info.name);
 
       Iterator i$;
-      MCH_AircraftInfo.DrawnPart w;
+      MCH_BaseVehicleInfo.DrawnPart w;
       for(i$ = info.nozzles.iterator(); i$.hasNext(); w.model = this.loadPartModel("ships", info.name, info.model, w.modelName)) {
-         w = (MCH_AircraftInfo.DrawnPart)i$.next();
+         w = (MCH_BaseVehicleInfo.DrawnPart)i$.next();
       }
 
       i$ = info.rotorList.iterator();
@@ -367,12 +367,12 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
    public void registerModelsVehicle(String name, boolean reload) {
       MCH_ModelManager.setForceReloadMode(reload);
-      MCH_VehicleInfo info = (MCH_VehicleInfo)MCH_VehicleInfoManager.map.get(name);
+      MCH_TurretInfo info = (MCH_TurretInfo)MCH_TurretInfoManager.map.get(name);
       info.model = MCH_ModelManager.load("vehicles", info.name);
       Iterator i$ = info.partList.iterator();
 
       while(i$.hasNext()) {
-         MCH_VehicleInfo.VPart vp = (MCH_VehicleInfo.VPart)i$.next();
+         MCH_TurretInfo.VPart vp = (MCH_TurretInfo.VPart)i$.next();
          vp.model = this.loadPartModel("vehicles", info.name, info.model, vp.modelName);
          if(vp.child != null) {
             this.registerVCPModels(info, vp);
@@ -400,81 +400,81 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       return body instanceof W_ModelCustom && ((W_ModelCustom)body).containsPart("$" + part)?null:MCH_ModelManager.load(path, name + "_" + part);
    }
 
-   private void registerCommonPart(String path, MCH_AircraftInfo info) {
+   private void registerCommonPart(String path, MCH_BaseVehicleInfo info) {
       Iterator i$;
-      MCH_AircraftInfo.Hatch c;
+      MCH_BaseVehicleInfo.Hatch c;
       for(i$ = info.hatchList.iterator(); i$.hasNext(); c.model = this.loadPartModel(path, info.name, info.model, c.modelName)) {
-         c = (MCH_AircraftInfo.Hatch)i$.next();
+         c = (MCH_BaseVehicleInfo.Hatch)i$.next();
       }
 
-      MCH_AircraftInfo.Camera c1;
+      MCH_BaseVehicleInfo.Camera c1;
       for(i$ = info.cameraList.iterator(); i$.hasNext(); c1.model = this.loadPartModel(path, info.name, info.model, c1.modelName)) {
-         c1 = (MCH_AircraftInfo.Camera)i$.next();
+         c1 = (MCH_BaseVehicleInfo.Camera)i$.next();
       }
 
-      MCH_AircraftInfo.Throttle c2;
+      MCH_BaseVehicleInfo.Throttle c2;
       for(i$ = info.partThrottle.iterator(); i$.hasNext(); c2.model = this.loadPartModel(path, info.name, info.model, c2.modelName)) {
-         c2 = (MCH_AircraftInfo.Throttle)i$.next();
+         c2 = (MCH_BaseVehicleInfo.Throttle)i$.next();
       }
 
-      MCH_AircraftInfo.RotPart c3;
+      MCH_BaseVehicleInfo.RotPart c3;
       for(i$ = info.partRotPart.iterator(); i$.hasNext(); c3.model = this.loadPartModel(path, info.name, info.model, c3.modelName)) {
-         c3 = (MCH_AircraftInfo.RotPart)i$.next();
+         c3 = (MCH_BaseVehicleInfo.RotPart)i$.next();
       }
 
       i$ = info.partWeapon.iterator();
 
       while(i$.hasNext()) {
-         MCH_AircraftInfo.PartWeapon c4 = (MCH_AircraftInfo.PartWeapon)i$.next();
+         MCH_BaseVehicleInfo.PartWeapon c4 = (MCH_BaseVehicleInfo.PartWeapon)i$.next();
          c4.model = this.loadPartModel(path, info.name, info.model, c4.modelName);
 
-         MCH_AircraftInfo.PartWeaponChild wc;
+         MCH_BaseVehicleInfo.PartWeaponChild wc;
          for(Iterator i$1 = c4.child.iterator(); i$1.hasNext(); wc.model = this.loadPartModel(path, info.name, info.model, wc.modelName)) {
-            wc = (MCH_AircraftInfo.PartWeaponChild)i$1.next();
+            wc = (MCH_BaseVehicleInfo.PartWeaponChild)i$1.next();
          }
       }
 
-      MCH_AircraftInfo.Canopy c5;
+      MCH_BaseVehicleInfo.Canopy c5;
       for(i$ = info.canopyList.iterator(); i$.hasNext(); c5.model = this.loadPartModel(path, info.name, info.model, c5.modelName)) {
-         c5 = (MCH_AircraftInfo.Canopy)i$.next();
+         c5 = (MCH_BaseVehicleInfo.Canopy)i$.next();
       }
 
-      MCH_AircraftInfo.LandingGear c6;
+      MCH_BaseVehicleInfo.LandingGear c6;
       for(i$ = info.landingGear.iterator(); i$.hasNext(); c6.model = this.loadPartModel(path, info.name, info.model, c6.modelName)) {
-         c6 = (MCH_AircraftInfo.LandingGear)i$.next();
+         c6 = (MCH_BaseVehicleInfo.LandingGear)i$.next();
       }
 
-      MCH_AircraftInfo.WeaponBay c7;
+      MCH_BaseVehicleInfo.WeaponBay c7;
       for(i$ = info.partWeaponBay.iterator(); i$.hasNext(); c7.model = this.loadPartModel(path, info.name, info.model, c7.modelName)) {
-         c7 = (MCH_AircraftInfo.WeaponBay)i$.next();
+         c7 = (MCH_BaseVehicleInfo.WeaponBay)i$.next();
       }
 
-      MCH_AircraftInfo.CrawlerTrack c8;
+      MCH_BaseVehicleInfo.CrawlerTrack c8;
       for(i$ = info.partCrawlerTrack.iterator(); i$.hasNext(); c8.model = this.loadPartModel(path, info.name, info.model, c8.modelName)) {
-         c8 = (MCH_AircraftInfo.CrawlerTrack)i$.next();
+         c8 = (MCH_BaseVehicleInfo.CrawlerTrack)i$.next();
       }
 
-      MCH_AircraftInfo.TrackRoller c9;
+      MCH_BaseVehicleInfo.TrackRoller c9;
       for(i$ = info.partTrackRoller.iterator(); i$.hasNext(); c9.model = this.loadPartModel(path, info.name, info.model, c9.modelName)) {
-         c9 = (MCH_AircraftInfo.TrackRoller)i$.next();
+         c9 = (MCH_BaseVehicleInfo.TrackRoller)i$.next();
       }
 
-      MCH_AircraftInfo.PartWheel c10;
+      MCH_BaseVehicleInfo.PartWheel c10;
       for(i$ = info.partWheel.iterator(); i$.hasNext(); c10.model = this.loadPartModel(path, info.name, info.model, c10.modelName)) {
-         c10 = (MCH_AircraftInfo.PartWheel)i$.next();
+         c10 = (MCH_BaseVehicleInfo.PartWheel)i$.next();
       }
 
       for(i$ = info.partSteeringWheel.iterator(); i$.hasNext(); c10.model = this.loadPartModel(path, info.name, info.model, c10.modelName)) {
-         c10 = (MCH_AircraftInfo.PartWheel)i$.next();
+         c10 = (MCH_BaseVehicleInfo.PartWheel)i$.next();
       }
 
    }
 
-   private void registerVCPModels(MCH_VehicleInfo info, MCH_VehicleInfo.VPart vp) {
+   private void registerVCPModels(MCH_TurretInfo info, MCH_TurretInfo.VPart vp) {
       Iterator i$ = vp.child.iterator();
 
       while(i$.hasNext()) {
-         MCH_VehicleInfo.VPart vcp = (MCH_VehicleInfo.VPart)i$.next();
+         MCH_TurretInfo.VPart vcp = (MCH_TurretInfo.VPart)i$.next();
          vcp.model = this.loadPartModel("vehicles", info.name, info.model, vcp.modelName);
          if(vcp.child != null) {
             this.registerVCPModels(info, vcp);
@@ -505,7 +505,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       return "Client";
    }
 
-   public MCH_SoundUpdater CreateSoundUpdater(MCH_EntityAircraft aircraft) {
+   public MCH_SoundUpdater CreateSoundUpdater(MCH_EntityBaseVehicle aircraft) {
       return aircraft != null && aircraft.worldObj.isRemote?new MCH_SoundUpdater(Minecraft.getMinecraft(), aircraft, Minecraft.getMinecraft().thePlayer):null;
    }
 
@@ -568,10 +568,10 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
          }
       }
 
-      i$ = MCH_VehicleInfoManager.map.values().iterator();
+      i$ = MCH_TurretInfoManager.map.values().iterator();
 
       while(i$.hasNext()) {
-         MCH_VehicleInfo info4 = (MCH_VehicleInfo)i$.next();
+         MCH_TurretInfo info4 = (MCH_TurretInfo)i$.next();
          if(!info4.soundMove.isEmpty()) {
             W_McClient.addSound(info4.soundMove + ".ogg");
          }

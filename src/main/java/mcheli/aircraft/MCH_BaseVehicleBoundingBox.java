@@ -7,18 +7,18 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 
 
-public class MCH_AircraftBoundingBox extends AxisAlignedBB {
+public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
 
-   private final MCH_EntityAircraft ac;
+   private final MCH_EntityBaseVehicle ac;
 
 
-   protected MCH_AircraftBoundingBox(MCH_EntityAircraft ac) {
+   protected MCH_BaseVehicleBoundingBox(MCH_EntityBaseVehicle ac) {
       super(ac.boundingBox.minX, ac.boundingBox.minY, ac.boundingBox.minZ, ac.boundingBox.maxX, ac.boundingBox.maxY, ac.boundingBox.maxZ);
       this.ac = ac;
    }
 
    public AxisAlignedBB NewAABB(double p_72324_1_, double p_72324_3_, double p_72324_5_, double p_72324_7_, double p_72324_9_, double p_72324_11_) {
-      return (new MCH_AircraftBoundingBox(this.ac)).setBounds(p_72324_1_, p_72324_3_, p_72324_5_, p_72324_7_, p_72324_9_, p_72324_11_);
+      return (new MCH_BaseVehicleBoundingBox(this.ac)).setBounds(p_72324_1_, p_72324_3_, p_72324_5_, p_72324_7_, p_72324_9_, p_72324_11_);
    }
 
 

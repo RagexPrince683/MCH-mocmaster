@@ -1,7 +1,7 @@
 package mcheli.weapon;
 
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.flare.MCH_EntityChaff;
 import mcheli.flare.MCH_EntityFlare;
@@ -27,7 +27,7 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
    public Entity lastLockEntity;
    private Entity targetEntity;
 
-   private MCH_EntityAircraft aircraft;
+   private MCH_EntityBaseVehicle aircraft;
 
 
 
@@ -182,7 +182,7 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
          } else if(this.targetEntity != null && !this.targetEntity.isDead) {  // 如果已经有目标并且目标未死亡
             boolean canLockTarget = true;  // 是否可以继续锁定目标
 
-            if(targetEntity instanceof MCH_EntityAircraft) {
+            if(targetEntity instanceof MCH_EntityBaseVehicle) {
                if(isRadarMissile && targetEntity.getEntityData().getBoolean("ChaffUsing")) {
                   canLockTarget = false;
                }
@@ -214,9 +214,9 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
 
             //no god hates ts
 
-            MCH_EntityAircraft ac = null; //玩家乘坐的实体
-            if(user.ridingEntity instanceof MCH_EntityAircraft) {
-               ac = (MCH_EntityAircraft)user.ridingEntity;
+            MCH_EntityBaseVehicle ac = null; //玩家乘坐的实体
+            if(user.ridingEntity instanceof MCH_EntityBaseVehicle) {
+               ac = (MCH_EntityBaseVehicle)user.ridingEntity;
 
                if (ac.isFreeLookMode() && this.canLockInAir && (ac instanceof MCP_EntityPlane)) {
                   canLockTarget = false;
@@ -330,7 +330,7 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
 
 
    public static float getEntityStealth(Entity entity) {
-      return entity instanceof MCH_EntityAircraft?((MCH_EntityAircraft)entity).getStealth():(entity != null && entity.ridingEntity instanceof MCH_EntityAircraft?((MCH_EntityAircraft)entity.ridingEntity).getStealth():0.0F);
+      return entity instanceof MCH_EntityBaseVehicle?((MCH_EntityBaseVehicle)entity).getStealth():(entity != null && entity.ridingEntity instanceof MCH_EntityBaseVehicle?((MCH_EntityBaseVehicle)entity.ridingEntity).getStealth():0.0F);
    }
 
    public void clearLock() {
@@ -381,7 +381,7 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
          }
          // 如果实体既不是生物实体，也不是飞机、车辆等特定类型，返回false
          if(!W_Lib.isEntityLivingBase(entity)
-                 && !(entity instanceof MCH_EntityAircraft)
+                 && !(entity instanceof MCH_EntityBaseVehicle)
                  && className.indexOf("EntityVehicle") < 0
                  && className.indexOf("EntityPlane") < 0
                  && className.indexOf("EntityMecha") < 0

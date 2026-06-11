@@ -3,7 +3,7 @@ package mcheli.flare;
 import mcheli.MCH_Explosion;
 import mcheli.MCH_FMURUtil;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.network.packets.PacketIronCurtainUse;
 import mcheli.weapon.*;
 import mcheli.wrapper.W_McClient;
@@ -29,13 +29,13 @@ public class MCH_APS {
 
     public World worldObj;
 
-    public MCH_EntityAircraft aircraft;
+    public MCH_EntityBaseVehicle aircraft;
 
     public int range;
 
     public Entity user;
 
-    public MCH_APS(World w, MCH_EntityAircraft ac) {
+    public MCH_APS(World w, MCH_EntityBaseVehicle ac) {
         this.worldObj = w;
         this.aircraft = ac;
     }

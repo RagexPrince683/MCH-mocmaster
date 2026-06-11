@@ -8,9 +8,9 @@ import java.util.UUID;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
-import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.aircraft.MCH_ItemBaseVehicle;
 import mcheli.uav.MCH_UavInventory;
 import mcheli.uav.MCH_UavRegistry;
 import mcheli.chain.MCH_ItemChain;
@@ -40,7 +40,7 @@ import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
-//schizophrenic eventhook crap
+// Shared event hooks for base vehicles and seats.
 public class MCH_EventHook extends W_EventHook {
 
    int acloaded = 0;
@@ -157,11 +157,11 @@ public class MCH_EventHook extends W_EventHook {
 //     for(Object O : worldObj.playerEntities){
 //        EntityPlayer player = (EntityPlayer)O;
 //        AxisAlignedBB aabb = player.boundingBox.expand(350,350,350);
-//        List<MCH_EntityAircraft> list = new ArrayList<>();
+//        List<MCH_EntityBaseVehicle> list = new ArrayList<>();
 //        for(Object e : worldObj.getEntitiesWithinAABBExcludingEntity(player,aabb)) {
-//           if (e instanceof MCH_EntityAircraft) { //&& is ridden
-//              list.add((MCH_EntityAircraft)e);
-//              MCH_PacketAircraftLocation.send((MCH_EntityAircraft)e, player);
+//           if (e instanceof MCH_EntityBaseVehicle) { //&& is ridden
+//              list.add((MCH_EntityBaseVehicle)e);
+//              MCH_PacketBaseVehicleLocation.send((MCH_EntityBaseVehicle)e, player);
 //              //System.out.println("idk testing I think this won't fire");
 //           }
 //        }
@@ -234,17 +234,17 @@ public class MCH_EventHook extends W_EventHook {
          return;
       }
 
-      MCH_EntityAircraft aircraft = null;
-      if(event.target instanceof MCH_EntityAircraft) {
-         aircraft = (MCH_EntityAircraft)event.target;
+      MCH_EntityBaseVehicle aircraft = null;
+      if(event.target instanceof MCH_EntityBaseVehicle) {
+         aircraft = (MCH_EntityBaseVehicle)event.target;
       } else if(event.target instanceof MCH_EntitySeat) {
          MCH_EntitySeat seat = (MCH_EntitySeat)event.target;
          aircraft = seat.getParent();
          if(aircraft == null && seat.parentUniqueID != null && !seat.parentUniqueID.isEmpty()) {
             for(Object object : event.entityPlayer.worldObj.loadedEntityList) {
-               if(object instanceof MCH_EntityAircraft
-                       && seat.parentUniqueID.equals(((MCH_EntityAircraft)object).getCommonUniqueId())) {
-                  aircraft = (MCH_EntityAircraft)object;
+               if(object instanceof MCH_EntityBaseVehicle
+                       && seat.parentUniqueID.equals(((MCH_EntityBaseVehicle)object).getCommonUniqueId())) {
+                  aircraft = (MCH_EntityBaseVehicle)object;
                   seat.setParent(aircraft);
                   break;
                }
@@ -260,7 +260,7 @@ public class MCH_EventHook extends W_EventHook {
    @SubscribeEvent
    public void onPlayerTick(TickEvent.PlayerTickEvent event) {
       if(event.phase == TickEvent.Phase.END && event.player instanceof EntityPlayerMP && !event.player.worldObj.isRemote) {
-         if(MCH_UavInventory.hasStoredPilotInventory(event.player) && !(event.player.ridingEntity instanceof MCH_EntityAircraft)) {
+         if(MCH_UavInventory.hasStoredPilotInventory(event.player) && !(event.player.ridingEntity instanceof MCH_EntityBaseVehicle)) {
             MCH_UavInventory.restorePilotInventory((EntityPlayerMP)event.player, "not_piloting");
          }
       }
@@ -281,9 +281,9 @@ public class MCH_EventHook extends W_EventHook {
                          Integer.valueOf(joinedSeat.seatID), joinedSeat.parentUniqueID, joinedSeat.getParent(), joinedSeat.riddenByEntity});
          if(!event.world.isRemote && joinedSeat.parentUniqueID != null && !joinedSeat.parentUniqueID.isEmpty()) {
             for(Object object : event.world.loadedEntityList) {
-               if(object instanceof MCH_EntityAircraft
-                       && joinedSeat.parentUniqueID.equals(((MCH_EntityAircraft)object).getCommonUniqueId())) {
-                  MCH_EntityAircraft parent = (MCH_EntityAircraft)object;
+               if(object instanceof MCH_EntityBaseVehicle
+                       && joinedSeat.parentUniqueID.equals(((MCH_EntityBaseVehicle)object).getCommonUniqueId())) {
+                  MCH_EntityBaseVehicle parent = (MCH_EntityBaseVehicle)object;
                   joinedSeat.setParent(parent);
                   if(joinedSeat.seatID >= 0 && joinedSeat.seatID < parent.getSeats().length) {
                      parent.setSeat(joinedSeat.seatID, joinedSeat);
@@ -296,8 +296,8 @@ public class MCH_EventHook extends W_EventHook {
       } else if(W_Lib.isEntityLivingBase(event.entity) && !W_EntityPlayer.isPlayer(event.entity)) {
          MCH_Config var10002 = MCH_MOD.config;
          event.entity.renderDistanceWeight *= MCH_Config.MobRenderDistanceWeight.prmDouble;
-      } else if(event.entity instanceof MCH_EntityAircraft) {
-         MCH_EntityAircraft joinedAircraft = (MCH_EntityAircraft)event.entity;
+      } else if(event.entity instanceof MCH_EntityBaseVehicle) {
+         MCH_EntityBaseVehicle joinedAircraft = (MCH_EntityBaseVehicle)event.entity;
          MCH_Lib.DbgLog(event.world,
                  "[MCH-TRACK][AIRCRAFT-JOIN] side=%s entityId=%d uuid=%s class=%s type=%s commonId=%s",
                  new Object[]{event.world.isRemote?"CLIENT":"SERVER", Integer.valueOf(joinedAircraft.getEntityId()),
@@ -307,8 +307,8 @@ public class MCH_EventHook extends W_EventHook {
          //reload aircraft render setting here
          //if (event.world.isRemote) {
 //
-         //   if (event.entity instanceof MCH_EntityAircraft && acloaded == 0) {
-         //      MCH_EntityAircraft ac = (MCH_EntityAircraft) event.entity;
+         //   if (event.entity instanceof MCH_EntityBaseVehicle && acloaded == 0) {
+         //      MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle) event.entity;
 //
          //      // Safely call getAcInfo() on the instance
          //      if (ac.getAcInfo() != null) {
@@ -317,7 +317,7 @@ public class MCH_EventHook extends W_EventHook {
          //      }
          //   }
          //}
-         MCH_EntityAircraft b = (MCH_EntityAircraft)event.entity;
+         MCH_EntityBaseVehicle b = (MCH_EntityBaseVehicle)event.entity;
          if(!event.world.isRemote && (b.isUAV() || b.isNewUAV())) {
             MCH_UavRegistry.register(b);
          }
@@ -362,7 +362,7 @@ public class MCH_EventHook extends W_EventHook {
    }
 
    public void livingAttackEvent(LivingAttackEvent event) {
-      MCH_EntityAircraft ac = this.getRiddenAircraft(event.entity);
+      MCH_EntityBaseVehicle ac = this.getRiddenAircraft(event.entity);
       if(ac != null) {
          if(ac.getAcInfo() != null) {
             if(!ac.isDestroyed()) {
@@ -375,7 +375,7 @@ public class MCH_EventHook extends W_EventHook {
                   } else if(ac.isMountedEntity(attackEntity)) {
                      event.setCanceled(true);
                   } else {
-                     MCH_EntityAircraft atkac = this.getRiddenAircraft(attackEntity);
+                     MCH_EntityBaseVehicle atkac = this.getRiddenAircraft(attackEntity);
                      if(W_Entity.isEqual(atkac, ac)) {
                         event.setCanceled(true);
                      }
@@ -396,7 +396,7 @@ public class MCH_EventHook extends W_EventHook {
    }
 
    public void livingHurtEvent(LivingHurtEvent event) {
-           MCH_EntityAircraft ac = getRiddenAircraft(event.entity);
+           MCH_EntityBaseVehicle ac = getRiddenAircraft(event.entity);
            if (ac != null &&
                      ac.getAcInfo() != null) {
                if (ac.isNewUAV()) {
@@ -415,7 +415,7 @@ public class MCH_EventHook extends W_EventHook {
                           event.ammount = 0.0F;
                           event.setCanceled(true);
                         } else {
-                          MCH_EntityAircraft atkac = getRiddenAircraft(attackEntity);
+                          MCH_EntityBaseVehicle atkac = getRiddenAircraft(attackEntity);
                           if (W_Entity.isEqual((Entity)atkac, (Entity)ac)) {
                                event.ammount = 0.0F;
                                event.setCanceled(true);
@@ -428,11 +428,11 @@ public class MCH_EventHook extends W_EventHook {
               }
          }
 
-   public MCH_EntityAircraft getRiddenAircraft(Entity entity) {
-      MCH_EntityAircraft ac = null;
+   public MCH_EntityBaseVehicle getRiddenAircraft(Entity entity) {
+      MCH_EntityBaseVehicle ac = null;
       Entity ridden = entity.ridingEntity;
-      if(ridden instanceof MCH_EntityAircraft) {
-         ac = (MCH_EntityAircraft)ridden;
+      if(ridden instanceof MCH_EntityBaseVehicle) {
+         ac = (MCH_EntityBaseVehicle)ridden;
       } else if(ridden instanceof MCH_EntitySeat) {
          ac = ((MCH_EntitySeat)ridden).getParent();
       }
@@ -440,10 +440,10 @@ public class MCH_EventHook extends W_EventHook {
       if(ac == null) {
          //50x50x50 area to test for the parent aircraft
          //nice, but it could be better.
-         List list = entity.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, entity.boundingBox.expand(50.0D, 50.0D, 50.0D));
+         List list = entity.worldObj.getEntitiesWithinAABB(MCH_EntityBaseVehicle.class, entity.boundingBox.expand(50.0D, 50.0D, 50.0D));
          if(list != null) {
             for(int i = 0; i < list.size(); ++i) {
-               MCH_EntityAircraft tmp = (MCH_EntityAircraft)list.get(i);
+               MCH_EntityBaseVehicle tmp = (MCH_EntityBaseVehicle)list.get(i);
                if(tmp.isMountedEntity(entity)) {
                   return tmp;
                }
@@ -455,15 +455,15 @@ public class MCH_EventHook extends W_EventHook {
    }
 
    public void entityInteractEvent(EntityInteractEvent event) {
-      if(event.target instanceof MCH_EntityAircraft || event.target instanceof MCH_EntitySeat) {
+      if(event.target instanceof MCH_EntityBaseVehicle || event.target instanceof MCH_EntitySeat) {
          MCH_Lib.DbgLog(event.entityPlayer.worldObj,
                  "[MCH-INTERACT][FORGE-EVENT] side=%s target=%s targetId=%d targetUuid=%s player=%s playerUuid=%s canceled=%s",
                  new Object[]{event.entityPlayer.worldObj.isRemote?"CLIENT":"SERVER", event.target.getClass().getName(),
                          Integer.valueOf(event.target.getEntityId()), event.target.getUniqueID(), event.entityPlayer.getCommandSenderName(),
                          event.entityPlayer.getUniqueID(), Boolean.valueOf(event.isCanceled())});
-         if(event.target instanceof MCH_EntityAircraft) {
-            ((MCH_EntityAircraft)event.target).debugVehicleState("FORGE-INTERACT-EVENT", event.entityPlayer);
-            ((MCH_EntityAircraft)event.target).debugRackState("FORGE-INTERACT-EVENT");
+         if(event.target instanceof MCH_EntityBaseVehicle) {
+            ((MCH_EntityBaseVehicle)event.target).debugVehicleState("FORGE-INTERACT-EVENT", event.entityPlayer);
+            ((MCH_EntityBaseVehicle)event.target).debugRackState("FORGE-INTERACT-EVENT");
          }
       }
       ItemStack item = event.entityPlayer.getHeldItem();
@@ -471,8 +471,8 @@ public class MCH_EventHook extends W_EventHook {
          if(item.getItem() instanceof MCH_ItemChain) {
             MCH_ItemChain.interactEntity(item, event.target, event.entityPlayer, event.entityPlayer.worldObj);
             event.setCanceled(true);
-         } else if(item.getItem() instanceof MCH_ItemAircraft) {
-            ((MCH_ItemAircraft)item.getItem()).rideEntity(item, event.target, event.entityPlayer);
+         } else if(item.getItem() instanceof MCH_ItemBaseVehicle) {
+            ((MCH_ItemBaseVehicle)item.getItem()).rideEntity(item, event.target, event.entityPlayer);
          }
 
       }
@@ -511,17 +511,17 @@ public class MCH_EventHook extends W_EventHook {
    //      System.out.println("Bullet cleanup triggered: removed " + bulletsToKill + " non-chunkloading idle bullets.");
    //   }
    //}
-   //this fucking class makes me schizophrenic
+   // Keep seat collision checks narrow to avoid false positives.
 
    public void entityCanUpdate(CanUpdate event) {
       //ooh I have a new idea here
       //todo: let's say this is cache right? ok, well guess what cache,
       // what if I want you to render every fucking vehicle ever placed?
       // the benefit of this is we don't have to make some new stupid fucking eventhook since this retarded mod seems
-      // to absolutely fucking hate when I do that for some reason because it bounces between two completely fucking schizophrenic
+      // to react poorly when mount/dismount updates bounce between two competing parent states.
       // classes for some reason
       // Force all aircraft to always tick
-      //if (event.entity instanceof MCH_EntityAircraft) {
+      //if (event.entity instanceof MCH_EntityBaseVehicle) {
       //   //if this works how I hope it will we should probably add
       //   //ac.getRiddenByEntity() != null so we ensure we only tick PLAYER vehicles
       //   event.canUpdate = true;

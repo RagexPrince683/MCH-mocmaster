@@ -3,7 +3,7 @@ package mcheli.weapon;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.vector.Vector3f;
@@ -75,7 +75,7 @@ public class MCH_EntityTvMissile extends MCH_EntityBaseBullet {
         //拖线制导
         if (!getInfo().laserGuidance) {
             if (e != null && !e.isDead) {
-                MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(e);
+                MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(e);
                 if (ac != null && ac.getTVMissile() == this) {
                     float yaw = e.rotationYaw;
                     float pitch = e.rotationPitch;
@@ -91,7 +91,7 @@ public class MCH_EntityTvMissile extends MCH_EntityBaseBullet {
         //激光制导
         else {
 
-            MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(e);
+            MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(e);
             if(ac != null && ac.getCurrentWeapon(e).getCurrentWeapon() instanceof MCH_WeaponTvMissile) {
                 MCH_WeaponTvMissile weaponTvMissile = (MCH_WeaponTvMissile) ac.getCurrentWeapon(e).getCurrentWeapon();
                 if(weaponTvMissile.guidanceSystem != null && !weaponTvMissile.guidanceSystem.targeting) {
@@ -106,9 +106,9 @@ public class MCH_EntityTvMissile extends MCH_EntityBaseBullet {
                 yaw = e.rotationYaw;  // 获取玩家的偏航角度
                 pitch = e.rotationPitch;  // 获取玩家的俯仰角度
             } else {
-//                MCH_EntityAircraft ac = null; //玩家乘坐的实体
-//                if(e.ridingEntity instanceof MCH_EntityAircraft) {
-//                    ac = (MCH_EntityAircraft)e.ridingEntity;
+//                MCH_EntityBaseVehicle ac = null; //玩家乘坐的实体
+//                if(e.ridingEntity instanceof MCH_EntityBaseVehicle) {
+//                    ac = (MCH_EntityBaseVehicle)e.ridingEntity;
 //                } else if(e.ridingEntity instanceof MCH_EntitySeat) {
 //                    ac = ((MCH_EntitySeat)e.ridingEntity).getParent();
 //                } else if(e.ridingEntity instanceof MCH_EntityUavStation) {

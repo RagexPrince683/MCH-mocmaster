@@ -7,14 +7,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.multiplay.MCH_PacketNotifyMarkPoint;
 import mcheli.multiplay.MCH_PacketNotifySpotedEntity;
 import mcheli.multiplay.MCH_TargetType;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.tank.MCH_EntityTank;
-import mcheli.vehicle.MCH_EntityVehicle;
+import mcheli.vehicle.MCH_EntityTurret;
 import net.minecraft.command.server.CommandScoreboard;
 import net.minecraft.command.server.CommandTeleport;
 import net.minecraft.entity.Entity;
@@ -43,7 +43,7 @@ public class MCH_Multiplay {
          return (filter & 16) != 0; // Checks if helicopters are included in the filter
       } else if (entity instanceof MCH_EntityShip) {
          return (filter & 64) != 0; // Checks if helicopters are included in the filter
-      } else if (entity instanceof MCH_EntityVehicle || entity instanceof MCH_EntityTank) {
+      } else if (entity instanceof MCH_EntityTurret || entity instanceof MCH_EntityTank) {
          return (filter & 8) != 0; // Checks if vehicles or tanks are included in the filter
       } else if (entity instanceof EntityPlayer) {
          return (filter & 4) != 0; // Checks if players are included in the filter
@@ -87,8 +87,8 @@ public class MCH_Multiplay {
                } else {
                   row = 5;
                }
-            } else if(target instanceof MCH_EntityAircraft) {
-               MCH_EntityAircraft ret1 = (MCH_EntityAircraft)target;
+            } else if(target instanceof MCH_EntityBaseVehicle) {
+               MCH_EntityBaseVehicle ret1 = (MCH_EntityBaseVehicle)target;
                EntityPlayer vs = ret1.getFirstMountPlayer();
                if(vs == null) {
                   row = 6;
@@ -100,7 +100,7 @@ public class MCH_Multiplay {
                   row = 9;
                }
             }
-         } else if(target instanceof EntityPlayer || target instanceof MCH_EntityAircraft) {
+         } else if(target instanceof EntityPlayer || target instanceof MCH_EntityBaseVehicle) {
             row = 0;
          }
 
@@ -136,8 +136,8 @@ public class MCH_Multiplay {
             targetPlayer = (EntityPlayer)target.riddenByEntity;
          }
 
-         if(target instanceof MCH_EntityAircraft) {
-            MCH_EntityAircraft ac = (MCH_EntityAircraft)target;
+         if(target instanceof MCH_EntityBaseVehicle) {
+            MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)target;
             if(ac.getRiddenByEntity() instanceof EntityPlayer) {
                targetPlayer = (EntityPlayer)ac.getRiddenByEntity();
             }
@@ -225,7 +225,7 @@ public class MCH_Multiplay {
 
    }
 
-   public static boolean spotEntity(EntityLivingBase player, MCH_EntityAircraft ac, double posX, double posY, double posZ, int targetFilter, float spotLength, int markTime, float angle) {
+   public static boolean spotEntity(EntityLivingBase player, MCH_EntityBaseVehicle ac, double posX, double posY, double posZ, int targetFilter, float spotLength, int markTime, float angle) {
       boolean ret = false;
       if(!player.worldObj.isRemote) {
          float acYaw = 0.0F;

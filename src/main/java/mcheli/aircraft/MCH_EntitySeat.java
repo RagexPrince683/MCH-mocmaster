@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 
 public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnData {
    public String parentUniqueID;
-   private MCH_EntityAircraft parent;
+   private MCH_EntityBaseVehicle parent;
    private int parentEntityID;
    public int seatID;
    public int parentSearchCount;
@@ -206,17 +206,17 @@ public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnDa
 
       if(this.parentEntityID > 0) {
          Entity entity = this.worldObj.getEntityByID(this.parentEntityID);
-         if(entity instanceof MCH_EntityAircraft && !entity.isDead) {
-            setParent((MCH_EntityAircraft)entity);
+         if(entity instanceof MCH_EntityBaseVehicle && !entity.isDead) {
+            setParent((MCH_EntityBaseVehicle)entity);
             return;
          }
       }
 
       if(this.parentUniqueID != null && !this.parentUniqueID.isEmpty()) {
          for(Object object : this.worldObj.loadedEntityList) {
-            if(object instanceof MCH_EntityAircraft
-                    && this.parentUniqueID.equals(((MCH_EntityAircraft)object).getCommonUniqueId())) {
-               setParent((MCH_EntityAircraft)object);
+            if(object instanceof MCH_EntityBaseVehicle
+                    && this.parentUniqueID.equals(((MCH_EntityBaseVehicle)object).getCommonUniqueId())) {
+               setParent((MCH_EntityBaseVehicle)object);
                return;
             }
          }
@@ -272,9 +272,9 @@ public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnDa
    public boolean interactFirst(EntityPlayer player) {
       if(getParent() == null && this.parentUniqueID != null && !this.parentUniqueID.isEmpty()) {
          for(Object object : this.worldObj.loadedEntityList) {
-            if(object instanceof MCH_EntityAircraft
-                    && this.parentUniqueID.equals(((MCH_EntityAircraft)object).getCommonUniqueId())) {
-               setParent((MCH_EntityAircraft)object);
+            if(object instanceof MCH_EntityBaseVehicle
+                    && this.parentUniqueID.equals(((MCH_EntityBaseVehicle)object).getCommonUniqueId())) {
+               setParent((MCH_EntityBaseVehicle)object);
                break;
             }
          }
@@ -329,11 +329,11 @@ public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnDa
       return true;
    }
 
-   public MCH_EntityAircraft getParent() {
+   public MCH_EntityBaseVehicle getParent() {
       return this.parent;
    }
 
-   public void setParent(MCH_EntityAircraft parent) {
+   public void setParent(MCH_EntityBaseVehicle parent) {
       this.parent = parent;
       if(parent != null) {
          this.parentEntityID = parent.getEntityId();

@@ -5,7 +5,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -92,7 +92,7 @@ public abstract class MCH_ClientTickHandlerBase {
             setMouseWheel(0);
             EntityClientPlayerMP entityClientPlayerMP = (Minecraft.getMinecraft()).thePlayer;
             if (entityClientPlayerMP != null) {
-               MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl((Entity)entityClientPlayerMP);
+               MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl((Entity)entityClientPlayerMP);
                if (ac != null) {
                   int cwid = ac.getWeaponIDBySeatID(ac.getSeatIdByEntity((Entity)entityClientPlayerMP));
                   int nwid = ac.getNextWeaponID((Entity)entityClientPlayerMP, 1);

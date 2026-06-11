@@ -5,10 +5,10 @@ import cpw.mods.fml.relauncher.SideOnly;
 import java.util.Iterator;
 import mcheli.MCH_Lib;
 import mcheli.MCH_ModelManager;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_RenderAircraft;
-import mcheli.vehicle.MCH_EntityVehicle;
-import mcheli.vehicle.MCH_VehicleInfo;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
+import mcheli.aircraft.MCH_RenderBaseVehicle;
+import mcheli.vehicle.MCH_EntityTurret;
+import mcheli.vehicle.MCH_TurretInfo;
 import mcheli.weapon.MCH_WeaponSet;
 import mcheli.wrapper.W_Lib;
 import mcheli.wrapper.W_Render;
@@ -17,18 +17,18 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
-public class MCH_RenderVehicle extends MCH_RenderAircraft {
+public class MCH_RenderTurret extends MCH_RenderBaseVehicle {
 
-   public MCH_RenderVehicle() {
+   public MCH_RenderTurret() {
       super.shadowSize = 2.0F;
    }
 
-   public void renderAircraft(MCH_EntityAircraft entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
-      MCH_VehicleInfo vehicleInfo = null;
-      if(entity != null && entity instanceof MCH_EntityVehicle) {
-         MCH_EntityVehicle vehicle = (MCH_EntityVehicle)entity;
-         vehicleInfo = vehicle.getVehicleInfo();
-         if(vehicleInfo != null) {
+   public void renderBaseVehicle(MCH_EntityBaseVehicle entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
+      MCH_TurretInfo turretInfo = null;
+      if(entity != null && entity instanceof MCH_EntityTurret) {
+         MCH_EntityTurret vehicle = (MCH_EntityTurret)entity;
+         turretInfo = vehicle.getTurretInfo();
+         if(turretInfo != null) {
             if(vehicle.riddenByEntity != null && !vehicle.isDestroyed()) {
                vehicle.isUsedPlayer = true;
                vehicle.lastRiderYaw = vehicle.riddenByEntity.rotationYaw;
@@ -44,25 +44,25 @@ public class MCH_RenderVehicle extends MCH_RenderAircraft {
             GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
             GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
             this.bindTexture("textures/vehicles/" + vehicle.getTextureName() + ".png", vehicle);
-            renderBody(vehicleInfo.model);
+            renderBody(turretInfo.model);
             MCH_WeaponSet ws = vehicle.getFirstSeatWeapon();
-            this.drawPart(vehicle, vehicleInfo, yaw, pitch, ws, tickTime);
+            this.drawPart(vehicle, turretInfo, yaw, pitch, ws, tickTime);
          }
       }
    }
 
-   public void drawPart(MCH_EntityVehicle vehicle, MCH_VehicleInfo info, float yaw, float pitch, MCH_WeaponSet ws, float tickTime) {
+   public void drawPart(MCH_EntityTurret vehicle, MCH_TurretInfo info, float yaw, float pitch, MCH_WeaponSet ws, float tickTime) {
       float rotBrl = ws.prevRotBarrel + (ws.rotBarrel - ws.prevRotBarrel) * tickTime;
       int index = 0;
 
-      MCH_VehicleInfo.VPart vp;
+      MCH_TurretInfo.VPart vp;
       for(Iterator i$ = info.partList.iterator(); i$.hasNext(); index = this.drawPart(vp, vehicle, info, yaw, pitch, rotBrl, tickTime, ws, index)) {
-         vp = (MCH_VehicleInfo.VPart)i$.next();
+         vp = (MCH_TurretInfo.VPart)i$.next();
       }
 
    }
 
-   int drawPart(MCH_VehicleInfo.VPart vp, MCH_EntityVehicle vehicle, MCH_VehicleInfo info, float yaw, float pitch, float rotBrl, float tickTime, MCH_WeaponSet ws, int index) {
+   int drawPart(MCH_TurretInfo.VPart vp, MCH_EntityTurret vehicle, MCH_TurretInfo info, float yaw, float pitch, float rotBrl, float tickTime, MCH_WeaponSet ws, int index) {
       GL11.glPushMatrix();
       float recoilBuf = 0.0F;
       if(index < ws.getWeaponNum()) {
@@ -96,10 +96,10 @@ public class MCH_RenderVehicle extends MCH_RenderAircraft {
          ++index;
       }
 
-      MCH_VehicleInfo.VPart vcp;
+      MCH_TurretInfo.VPart vcp;
       if(vp.child != null) {
          for(Iterator var14 = vp.child.iterator(); var14.hasNext(); index = this.drawPart(vcp, vehicle, info, yaw, pitch, rotBrl, recoilBuf, ws, index)) {
-            vcp = (MCH_VehicleInfo.VPart)var14.next();
+            vcp = (MCH_TurretInfo.VPart)var14.next();
          }
       }
 

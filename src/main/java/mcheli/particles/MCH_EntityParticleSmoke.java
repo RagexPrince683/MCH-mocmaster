@@ -3,7 +3,7 @@ package mcheli.particles;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.List;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.particles.MCH_EntityParticleBase;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.client.particle.EntityFX;
@@ -84,10 +84,10 @@ public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase {
    public void effectWind() {
       if(super.isEffectedWind && (super.particleAge & 3) == 0) {
          boolean range = true;
-         List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, this.getBoundingBox().expand(15.0D, 15.0D, 15.0D));
+         List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityBaseVehicle.class, this.getBoundingBox().expand(15.0D, 15.0D, 15.0D));
 
          for(int i = 0; i < list.size(); ++i) {
-            MCH_EntityAircraft ac = (MCH_EntityAircraft)list.get(i);
+            MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)list.get(i);
             if(ac.getThrottle() > 0.10000000149011612D) {
                float dist = this.getDistanceToEntity(ac);
                double vel = (23.0D - (double)dist) * 0.009999999776482582D * ac.getThrottle();

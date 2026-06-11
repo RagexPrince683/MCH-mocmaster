@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_PacketIndNotifyAmmoNum;
 import mcheli.aircraft.MCH_PacketIndReload;
@@ -32,7 +32,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 
-public class MCH_AircraftPacketHandler {
+public class MCH_BaseVehiclePacketHandler {
 
    public static void onPacketIndRotation(EntityPlayer player, ByteArrayDataInput data) {
       if(player != null && !player.worldObj.isRemote) {
@@ -40,8 +40,8 @@ public class MCH_AircraftPacketHandler {
          req.readData(data);
          if(req.entityID_Ac > 0) {
             Entity e = player.worldObj.getEntityByID(req.entityID_Ac);
-            if(e instanceof MCH_EntityAircraft) {
-               MCH_EntityAircraft ac = (MCH_EntityAircraft)e;
+            if(e instanceof MCH_EntityBaseVehicle) {
+               MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)e;
                ac.setRotRoll(req.roll);
                if(req.rollRev) {
                   //System.out.println("req.rollRev");
@@ -80,10 +80,10 @@ public class MCH_AircraftPacketHandler {
             if(req.entityID_rider > 0) {
                if(req.seatID >= 0) {
                   Entity e = player.worldObj.getEntityByID(req.entityID_Ac);
-                  if(e instanceof MCH_EntityAircraft) {
+                  if(e instanceof MCH_EntityBaseVehicle) {
                      MCH_Lib.DbgLog(player.worldObj, "onPacketOnMountEntity:" + W_Entity.getEntityId(player), new Object[0]);
                      player.worldObj.getEntityByID(req.entityID_rider);
-                     MCH_EntityAircraft ac = (MCH_EntityAircraft)e;
+                     MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)e;
                   }
 
                }
@@ -98,8 +98,8 @@ public class MCH_AircraftPacketHandler {
          status.readData(data);
          if(status.entityID_Ac > 0) {
             Entity e = player.worldObj.getEntityByID(status.entityID_Ac);
-            if(e instanceof MCH_EntityAircraft) {
-               MCH_EntityAircraft ac = (MCH_EntityAircraft)e;
+            if(e instanceof MCH_EntityBaseVehicle) {
+               MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)e;
                String msg = "onPacketNotifyAmmoNum:";
                msg = msg + (ac.getAcInfo() != null?ac.getAcInfo().displayName:"null") + ":";
                if(status.all) {
@@ -132,9 +132,9 @@ public class MCH_AircraftPacketHandler {
          req.readData(data);
          if(req.entityID_AC > 0) {
             Entity e = player.worldObj.getEntityByID(req.entityID_AC);
-            //System.out.println("I have schizophrenia and I am going insane, MCH_AircraftPacketHandler");
-            if(e instanceof MCH_EntityAircraft) {
-               MCH_PacketStatusResponse.sendStatus((MCH_EntityAircraft)e, player);
+
+            if(e instanceof MCH_EntityBaseVehicle) {
+               MCH_PacketStatusResponse.sendStatus((MCH_EntityBaseVehicle)e, player);
             }
 
          }
@@ -147,11 +147,11 @@ public class MCH_AircraftPacketHandler {
          req.readData(data);
          if(req.entityID_Ac > 0) {
             Entity e = player.worldObj.getEntityByID(req.entityID_Ac);
-            if(e instanceof MCH_EntityAircraft) {
+            if(e instanceof MCH_EntityBaseVehicle) {
                if(req.weaponID >= 0) {
-                  MCH_PacketNotifyAmmoNum.sendAmmoNum((MCH_EntityAircraft)e, player, req.weaponID);
+                  MCH_PacketNotifyAmmoNum.sendAmmoNum((MCH_EntityBaseVehicle)e, player, req.weaponID);
                } else {
-                  MCH_PacketNotifyAmmoNum.sendAllAmmoNum((MCH_EntityAircraft)e, player);
+                  MCH_PacketNotifyAmmoNum.sendAllAmmoNum((MCH_EntityBaseVehicle)e, player);
                }
             }
 
@@ -165,8 +165,8 @@ public class MCH_AircraftPacketHandler {
          ind.readData(data);
          if(ind.entityID_Ac > 0) {
             Entity e = player.worldObj.getEntityByID(ind.entityID_Ac);
-            if(e instanceof MCH_EntityAircraft) {
-               MCH_EntityAircraft ac = (MCH_EntityAircraft)e;
+            if(e instanceof MCH_EntityBaseVehicle) {
+               MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)e;
                MCH_Lib.DbgLog(e.worldObj, "onPacketIndReload :%s", new Object[]{ac.getAcInfo().displayName});
                ac.supplyAmmo(ind.weaponID);
             }
@@ -185,9 +185,9 @@ public class MCH_AircraftPacketHandler {
             msg = msg + "EID=" + status.entityID_AC + ":";
             Entity e = player.worldObj.getEntityByID(status.entityID_AC);
             //System.out.println("player is an object");
-            if(e instanceof MCH_EntityAircraft) {
-              // System.out.println("is player MCH_EntityAircraft, MCH_AircraftPacketHandler");
-               MCH_EntityAircraft ac = (MCH_EntityAircraft)e;
+            if(e instanceof MCH_EntityBaseVehicle) {
+              // System.out.println("is player MCH_EntityBaseVehicle, MCH_BaseVehiclePacketHandler");
+               MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)e;
                if(status.seatNum > 0 && status.weaponIDs != null && status.weaponIDs.length == status.seatNum) {
                   msg = msg + "seatNum=" + status.seatNum + ":";
 
@@ -211,8 +211,8 @@ public class MCH_AircraftPacketHandler {
          status.readData(data);
          if(status.entityID_Ac > 0) {
             Entity e = player.worldObj.getEntityByID(status.entityID_Ac);
-            if(e instanceof MCH_EntityAircraft) {
-               MCH_EntityAircraft ac = (MCH_EntityAircraft)e;
+            if(e instanceof MCH_EntityBaseVehicle) {
+               MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)e;
                if(ac.isValidSeatID(status.seatID)) {
                   ac.getWeapon(status.weaponID).setAmmoNum(status.ammo);
                   ac.getWeapon(status.weaponID).setRestAllAmmoNum(status.restAmmo);
@@ -238,8 +238,8 @@ public class MCH_AircraftPacketHandler {
             MCH_MOD.proxy.hitBullet();
          } else {
             Entity e = player.worldObj.getEntityByID(status.entityID_Ac);
-            if(e instanceof MCH_EntityAircraft) {
-               ((MCH_EntityAircraft)e).hitBullet();
+            if(e instanceof MCH_EntityBaseVehicle) {
+               ((MCH_EntityBaseVehicle)e).hitBullet();
             }
          }
 
@@ -252,10 +252,10 @@ public class MCH_AircraftPacketHandler {
          req.readData(data);
          if(req.entityID_AC > 0) {
             Entity e = player.worldObj.getEntityByID(req.entityID_AC);
-            if(e instanceof MCH_EntityAircraft) {
+            if(e instanceof MCH_EntityBaseVehicle) {
                MCH_Lib.DbgLog(player.worldObj, "[MCH-SYNC][SEAT-REQUEST-RECEIVE] aircraftId=%d player=%s playerUuid=%s",
                        new Object[]{Integer.valueOf(req.entityID_AC), player.getCommandSenderName(), player.getUniqueID()});
-               MCH_PacketSeatListResponse.sendSeatList((MCH_EntityAircraft)e, player);
+               MCH_PacketSeatListResponse.sendSeatList((MCH_EntityBaseVehicle)e, player);
             }
 
          }
@@ -275,11 +275,11 @@ public class MCH_AircraftPacketHandler {
          }
 
          Entity e = player.worldObj.getEntityByID(packet.entityID_Ac);
-         if(e == null || !(e instanceof MCH_EntityAircraft)) {
+         if(e == null || !(e instanceof MCH_EntityBaseVehicle)) {
             return;
          }
 
-         MCH_EntityAircraft ac = (MCH_EntityAircraft)e;
+         MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)e;
          e = player.worldObj.getEntityByID(packet.entityID_TVMissile);
          if(e == null || !(e instanceof MCH_EntityTvMissile)) {
             return;
@@ -297,8 +297,8 @@ public class MCH_AircraftPacketHandler {
          seatList.readData(data);
          if(seatList.entityID_AC > 0) {
             Entity e = player.worldObj.getEntityByID(seatList.entityID_AC);
-            if(e instanceof MCH_EntityAircraft) {
-               MCH_EntityAircraft ac = (MCH_EntityAircraft)e;
+            if(e instanceof MCH_EntityBaseVehicle) {
+               MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)e;
                MCH_Lib.DbgLog(player.worldObj, "[MCH-SYNC][SEAT-RESPONSE-RECEIVE] aircraftId=%d aircraftUuid=%s packetSeats=%d localSeats=%d",
                        new Object[]{Integer.valueOf(seatList.entityID_AC), ac.getUniqueID(), Byte.valueOf(seatList.seatNum), Integer.valueOf(ac.getSeats().length)});
                if(seatList.seatNum > 0 && seatList.seatNum == ac.getSeats().length && seatList.seatEntityID != null && seatList.seatEntityID.length == seatList.seatNum) {
@@ -330,12 +330,12 @@ public class MCH_AircraftPacketHandler {
 
    public static void onPacket_PlayerControl(EntityPlayer player, ByteArrayDataInput data) {
       if(!player.worldObj.isRemote) {
-         MCH_EntityAircraft ac = null;
+         MCH_EntityBaseVehicle ac = null;
          if(player.ridingEntity instanceof MCH_EntitySeat) {
             MCH_EntitySeat pc = (MCH_EntitySeat)player.ridingEntity;
             ac = pc.getParent();
          } else {
-            ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(player);
+            ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
          }
 
          if(ac != null) {
@@ -369,7 +369,7 @@ public class MCH_AircraftPacketHandler {
       if(!player.worldObj.isRemote) {
          MCH_PacketNotifyClientSetting pc = new MCH_PacketNotifyClientSetting();
          pc.readData(data);
-         MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(player);
+         MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
          if(ac != null) {
             int sid = ac.getSeatIdByEntity(player);
             if(sid == 0) {
@@ -390,11 +390,11 @@ public class MCH_AircraftPacketHandler {
       if(!player.worldObj.isRemote) {
          MCH_PacketNotifyInfoReloaded pc = new MCH_PacketNotifyInfoReloaded();
          pc.readData(data);
-         MCH_EntityAircraft ac;
+         MCH_EntityBaseVehicle ac;
          int i$;
          switch(pc.type) {
          case 0:
-            ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(player);
+            ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
             if(ac != null && ac.getAcInfo() != null) {
                String var11 = ac.getAcInfo().name;
                WorldServer[] var12 = MinecraftServer.getServer().worldServers;
@@ -405,8 +405,8 @@ public class MCH_AircraftPacketHandler {
                   List var15 = var14.loadedEntityList;
 
                   for(int i1 = 0; i1 < var15.size(); ++i1) {
-                     if(var15.get(i1) instanceof MCH_EntityAircraft) {
-                        ac = (MCH_EntityAircraft)var15.get(i1);
+                     if(var15.get(i1) instanceof MCH_EntityBaseVehicle) {
+                        ac = (MCH_EntityBaseVehicle)var15.get(i1);
                         if(ac.getAcInfo() != null && ac.getAcInfo().name.equals(var11)) {
                            ac.changeType(var11);
                            ac.createSeats(UUID.randomUUID().toString());
@@ -427,8 +427,8 @@ public class MCH_AircraftPacketHandler {
                List list = world.loadedEntityList;
 
                for(int i = 0; i < list.size(); ++i) {
-                  if(list.get(i) instanceof MCH_EntityAircraft) {
-                     ac = (MCH_EntityAircraft)list.get(i);
+                  if(list.get(i) instanceof MCH_EntityBaseVehicle) {
+                     ac = (MCH_EntityBaseVehicle)list.get(i);
                      if(ac.getAcInfo() != null) {
                         ac.changeType(ac.getAcInfo().name);
                         ac.createSeats(UUID.randomUUID().toString());
@@ -443,7 +443,7 @@ public class MCH_AircraftPacketHandler {
 
    public static void onPacketAircraftLocation(EntityPlayer entityPlayer, ByteArrayDataInput data) {
       if(entityPlayer.worldObj.isRemote) {
-         MCH_PacketAircraftLocation pc = new MCH_PacketAircraftLocation();
+         MCH_PacketBaseVehicleLocation pc = new MCH_PacketBaseVehicleLocation();
          pc.readData(data);
 
          //Mk1Eyeball.getInstance().addContact(pc);

@@ -2,7 +2,7 @@ package mcheli.tool.rangefinder;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.multiplay.MCH_PacketIndSpotEntity;
 import mcheli.wrapper.W_Item;
@@ -36,11 +36,11 @@ public class MCH_ItemRangeFinder extends W_Item {
          return false;
       } else if(!(player.getCurrentEquippedItem().getItem() instanceof MCH_ItemRangeFinder)) {
          return false;
-      } else if(player.ridingEntity instanceof MCH_EntityAircraft) {
+      } else if(player.ridingEntity instanceof MCH_EntityBaseVehicle) {
          return false;
       } else {
          if(player.ridingEntity instanceof MCH_EntitySeat) {
-            MCH_EntityAircraft ac = ((MCH_EntitySeat)player.ridingEntity).getParent();
+            MCH_EntityBaseVehicle ac = ((MCH_EntitySeat)player.ridingEntity).getParent();
             if(ac != null && (ac.getIsGunnerMode(player) || ac.getWeaponIDBySeatID(ac.getSeatIdByEntity(player)) >= 0)) {
                return false;
             }

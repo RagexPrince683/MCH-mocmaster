@@ -1,6 +1,6 @@
 package mcheli.weapon;
 
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.gui.MCH_Gui;
 import mcheli.plane.MCP_EntityPlane;
@@ -24,9 +24,9 @@ public class MCH_RenderLockBox extends W_Render {
     public static void renderGuidanceHUD() {
         EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
         if(player == null) return;
-        MCH_EntityAircraft ac = null; //玩家乘坐的实体
-        if(player.ridingEntity instanceof MCH_EntityAircraft) {
-            ac = (MCH_EntityAircraft)player.ridingEntity;
+        MCH_EntityBaseVehicle ac = null; //玩家乘坐的实体
+        if(player.ridingEntity instanceof MCH_EntityBaseVehicle) {
+            ac = (MCH_EntityBaseVehicle)player.ridingEntity;
         } else if(player.ridingEntity instanceof MCH_EntitySeat) {
             ac = ((MCH_EntitySeat)player.ridingEntity).getParent();
         } else if(player.ridingEntity instanceof MCH_EntityUavStation) {
