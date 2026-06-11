@@ -929,12 +929,15 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         }
 
         if(preventWaterBobbing) {
-            //TODO when preventwaterbobbing = true
-            // it does not allow ships that dipped into water via a air pocket then re entered water at a lower y level
-            // to go back to surface. They keep their Y level at whatever they submerged at.
-            // Should either sink the ship or force ship to surface.
+            if(dp <= 1.0D) {
+                super.motionY *= 0.25D;
 
-            super.motionY = 0.0D;
+                if(Math.abs(super.motionY) < 0.003D) {
+                    super.motionY = 0.0D;
+                }
+            } else if(super.motionY < 0.0D) {
+                super.motionY *= 0.5D;
+            }
         }
 
         this.moveEntity(super.motionX, super.motionY, super.motionZ);
