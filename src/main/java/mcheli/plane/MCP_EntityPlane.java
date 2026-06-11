@@ -51,6 +51,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    public float addkeyRotValue;
    /** Smoothed engine output; commanded throttle remains unchanged for controls and networking. */
    private double engineThrottle;
+   /** Last total drag fraction applied by the fixed-wing energy model, exposed for debug output. */
+   private double lastAerodynamicDrag;
+   /** Last stall lift-loss fraction applied to vertical motion, exposed for debug output. */
+   private double lastLiftLoss;
    /** Local-axis body rates used by fixed-wing damped control response. */
    private float pitchAngularVelocity;
    private float rollAngularVelocity;
@@ -83,6 +87,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.rotationRotor = 0.0F;
       this.prevRotationRotor = 0.0F;
       this.engineThrottle = 0.0D;
+      this.lastAerodynamicDrag = 0.0D;
+      this.lastLiftLoss = 0.0D;
       this.angleOfAttack = 0.0D;
       this.stallSeverity = 0.0D;
       this.stalling = false;
@@ -338,6 +344,26 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    public float getYawAngularVelocity() {
       return this.yawAngularVelocity;
+   }
+
+   public double getAngleOfAttackDegrees() {
+      return this.angleOfAttack;
+   }
+
+   public double getStallSeverity() {
+      return this.stallSeverity;
+   }
+
+   public double getLastAerodynamicDrag() {
+      return this.lastAerodynamicDrag;
+   }
+
+   public double getLastLiftLoss() {
+      return this.lastLiftLoss;
+   }
+
+   public float getDebugControlAuthority() {
+      return this.getControlAuthorityFactor();
    }
 
    private double getAirspeed() {
@@ -1189,6 +1215,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // Apply a deliberately simple energy model only to conventional airborne flight.
       // Velocity direction carries the gained/lost energy, while bank and body rates
       // cheaply approximate induced and control-surface drag during hard manoeuvres.
+      this.lastAerodynamicDrag = 0.0D;
       if(dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F && !levelOff) {
          double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
          double bankLoad = MCH_FlightModel.clamp(MathHelper.abs(this.getRotRoll()) / 75.0D, 0.0D, 1.0D);
@@ -1202,6 +1229,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          drag += MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getPlaneInfo().criticalAoA,
                this.getPlaneInfo().baseDrag, this.getPlaneInfo().aoaDragMultiplier);
          drag = MCH_FlightModel.clamp(drag, 0.0D, 0.5D);
+         this.lastAerodynamicDrag = drag;
          double energyChange = MCH_FlightModel.getVerticalEnergyChange(super.motionY,
                this.getPlaneInfo().climbEnergyLoss, this.getPlaneInfo().diveEnergyGain);
          double targetSpeed = Math.max(0.0D, horizontalSpeed * (1.0D - drag) + energyChange);
@@ -1246,8 +1274,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // the runway, low speed or excessive AoA removes lift and introduces a repeatable
       // buffet/wing drop. Lowering the nose reduces AoA and lets speed build to recovery.
       boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
+      this.lastLiftLoss = 0.0D;
       if(!nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
          double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)this.getPlaneInfo().stallLiftLoss, 0.0D, 1.0D);
+         this.lastLiftLoss = liftLoss;
          if(super.motionY > 0.0D) {
             super.motionY *= 1.0D - liftLoss * 0.12D;
          }

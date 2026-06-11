@@ -1,0 +1,8 @@
+displayname = Minimal Helicopter
+Category = EXAMPLE.HELI
+addtexture = minimal_heli
+AddSeat = 0.0, 1.0, 0.0
+HUD = heli
+speed = 0.85
+maxhp = 100
+addrotor = 4, 45, 0.0, 2.2, 0.0, 0.0, 0.0, 0.0

@@ -1,0 +1,7 @@
+displayname = Minimal Plane
+Category = EXAMPLE.PLANE
+addtexture = minimal_plane
+AddSeat = 0.0, 0.8, 0.0
+HUD = plane
+speed = 1.2
+maxhp = 80

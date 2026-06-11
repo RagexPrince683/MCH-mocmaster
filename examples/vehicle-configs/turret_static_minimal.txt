@@ -1,0 +1,11 @@
+displayname = Minimal Static MG
+Category = EXAMPLE.TURRET
+addtexture = minimal_static_mg
+AddSeat = 0.0, 0.6, 0.0
+HUD = turret
+maxhp = 60
+canmove = false
+canrotation = true
+rotationpitchmin = -20
+rotationpitchmax = 45
+addpart = true, true, true, 0, 0.0, 0.8, 0.0, 0.05
