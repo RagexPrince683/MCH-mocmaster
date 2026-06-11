@@ -331,7 +331,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       }
 
       System.out.println(String.format(
-              "[MCHeli] flight-control dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f)",
+              "[MCHeli] flight-control dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f) aero=(speed=%.3f,aoa=%.2f,stall=%.2f,g=%.2f,drag=%.3f,liftLoss=%.2f,authority=%.2f)",
               simDelta,
               mouseX,
               mouseY,
@@ -342,7 +342,14 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
               ac.getRollAngularVelocity(),
               ac.getRotPitch(),
               ac.getRotYaw(),
-              ac.getRotRoll()
+              ac.getRotRoll(),
+              Math.sqrt(ac.motionX * ac.motionX + ac.motionY * ac.motionY + ac.motionZ * ac.motionZ),
+              ac.getAngleOfAttackDegrees(),
+              ac.getStallSeverity(),
+              ac.getCurrentGForce(),
+              ac.getLastAerodynamicDrag(),
+              ac.getLastLiftLoss(),
+              ac.getDebugControlAuthority()
       ));
    }
 

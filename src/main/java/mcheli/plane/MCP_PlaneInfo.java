@@ -3,6 +3,7 @@ package mcheli.plane;
 import java.util.ArrayList;
 import java.util.List;
 import mcheli.MCH_Config;
+import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.plane.MCP_ItemPlane;
@@ -143,9 +144,26 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
          this.maxLevelSpeed = (float)((double)this.maxLevelSpeed * MCH_Config.AllPlaneSpeed.prmDouble);
       }
       this.scaleSpeedThresholds(MCH_Config.AllPlaneSpeed.prmDouble);
+      this.warnSuspiciousFlightModelValues();
       return super.isValidData();
    }
 
+
+
+   private void warnSuspiciousFlightModelValues() {
+      if(this.maxStructuralG < this.maxComfortableG) {
+         MCH_Lib.Log("[MCHeli][Config][Plane:%s] MaxStructuralG %.2f is below MaxComfortableG %.2f; high-G authority will begin and end at nearly the same load.",
+               new Object[]{super.name, Float.valueOf(this.maxStructuralG), Float.valueOf(this.maxComfortableG)});
+      }
+      if(this.maxSafeSpeed > 0.0F && this.compressibilitySpeed > 0.0F && this.maxSafeSpeed <= this.compressibilitySpeed) {
+         MCH_Lib.Log("[MCHeli][Config][Plane:%s] MaxSafeSpeed %.3f is not above CompressibilitySpeed %.3f; compressibility will reach full penalty immediately at overspeed.",
+               new Object[]{super.name, Float.valueOf(this.maxSafeSpeed), Float.valueOf(this.compressibilitySpeed)});
+      }
+      if(this.stallRecoverySpeed > 0.0F && this.stallSpeed > 0.0F && this.stallRecoverySpeed < this.stallSpeed) {
+         MCH_Lib.Log("[MCHeli][Config][Plane:%s] StallRecoverySpeed %.3f is below StallSpeed %.3f; stalls may clear while still below the entry threshold.",
+               new Object[]{super.name, Float.valueOf(this.stallRecoverySpeed), Float.valueOf(this.stallSpeed)});
+      }
+   }
 
    private void scaleSpeedThresholds(double speedScale) {
       if(this.stallSpeed > 0.0F) {

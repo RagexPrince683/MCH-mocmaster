@@ -1,0 +1,11 @@
+displayname = Minimal Tank
+Category = EXAMPLE.TANK
+addtexture = minimal_tank
+AddSeat = 0.0, 1.0, 0.0
+HUD = tank
+maxhp = 250
+speed = 0.35
+WeightType = tank
+TrackMaxHP = 120
+AddTrackHitBox = 1.2, 0.0, 0.0, 0.5, 0.5, 1.0
+AddTrackHitBox = -1.2, 0.0, 0.0, 0.5, 0.5, 1.0

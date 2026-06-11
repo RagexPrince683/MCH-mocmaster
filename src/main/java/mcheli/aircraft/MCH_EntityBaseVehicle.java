@@ -1788,6 +1788,31 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return 0.0F;
    }
 
+   /** Current fixed-wing angle of attack in degrees. Non-fixed-wing vehicles report zero. */
+   public double getAngleOfAttackDegrees() {
+      return 0.0D;
+   }
+
+   /** Smoothed 0..1 stall severity used by debug output. Non-fixed-wing vehicles report zero. */
+   public double getStallSeverity() {
+      return 0.0D;
+   }
+
+   /** Most recent fixed-wing drag fraction applied by the energy model. */
+   public double getLastAerodynamicDrag() {
+      return 0.0D;
+   }
+
+   /** Most recent fixed-wing lift-loss fraction from stall logic. */
+   public double getLastLiftLoss() {
+      return 0.0D;
+   }
+
+   /** Effective 0..1 control authority after stall and high-G penalties. */
+   public float getDebugControlAuthority() {
+      return this.getControlAuthorityFactor();
+   }
+
    /** Hook for vehicle-family-specific stress or aerodynamic updates. */
    protected void updateVehicleStress() {
    }
