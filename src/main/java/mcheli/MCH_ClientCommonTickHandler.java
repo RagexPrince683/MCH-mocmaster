@@ -330,11 +330,20 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          return;
       }
 
-      System.out.println(String.format("[MCHeli] flight-control fps=%d dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f)",
-            Integer.valueOf(Minecraft.debugFPS), Float.valueOf(simDelta), Float.valueOf(mouseX), Float.valueOf(mouseY),
-            Float.valueOf(stickX), Float.valueOf(stickY), Float.valueOf(ac.getPitchAngularVelocity()),
-            Float.valueOf(ac.getYawAngularVelocity()), Float.valueOf(ac.getRollAngularVelocity()),
-            Float.valueOf(ac.getRotPitch()), Float.valueOf(ac.getRotYaw()), Float.valueOf(ac.getRotRoll())));
+      System.out.println(String.format(
+              "[MCHeli] flight-control dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f)",
+              simDelta,
+              mouseX,
+              mouseY,
+              stickX,
+              stickY,
+              ac.getPitchAngularVelocity(),
+              ac.getYawAngularVelocity(),
+              ac.getRollAngularVelocity(),
+              ac.getRotPitch(),
+              ac.getRotYaw(),
+              ac.getRotRoll()
+      ));
    }
 
    public void onRenderTickPre(float partialTicks) {
