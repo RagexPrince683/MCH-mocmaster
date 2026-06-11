@@ -1355,11 +1355,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // 更新方块信息
       this.onUpdate_updateBlock();
 
-      // 如果骑乘的实体存在并且已经死亡，则解除骑乘
-      if(this.getRiddenByEntity() != null && this.getRiddenByEntity().isDead) {
-         this.unmountEntity();
-         super.riddenByEntity = null;
-      }
+      this.handleDeadPilot();
 
 
    }

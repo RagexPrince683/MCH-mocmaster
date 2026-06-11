@@ -954,10 +954,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         }
         this.setRotation(this.getRotYaw(), this.getRotPitch());
         this.onUpdate_updateBlock();
-        if(this.getRiddenByEntity() != null && this.getRiddenByEntity().isDead) {
-            this.unmountEntity();
-            super.riddenByEntity = null;
-        }
+        this.handleDeadPilot();
 
     }
 
