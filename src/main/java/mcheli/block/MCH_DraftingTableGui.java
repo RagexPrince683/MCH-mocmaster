@@ -7,8 +7,8 @@ import java.util.List;
 import mcheli.MCH_IRecipeList;
 import mcheli.MCH_ItemRecipe;
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
+import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.block.MCH_CurrentRecipe;
 import mcheli.block.MCH_DraftingTableCreatePacket;
 import mcheli.block.MCH_DraftingTableGuiContainer;
@@ -17,7 +17,7 @@ import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_TankInfoManager;
-import mcheli.vehicle.MCH_VehicleInfoManager;
+import mcheli.vehicle.MCH_TurretInfoManager;
 import mcheli.wrapper.W_GuiButton;
 import mcheli.wrapper.W_GuiContainer;
 import mcheli.wrapper.W_KeyBinding;
@@ -118,7 +118,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       GuiButton btnShip = new GuiButton(15, super.guiLeft + 20, super.guiTop + 120, 90, 20, "Ship List");
       btnHeli.enabled = MCH_HeliInfoManager.getInstance().getRecipeListSize() > 0;
       btnPlane.enabled = MCP_PlaneInfoManager.getInstance().getRecipeListSize() > 0;
-      btnVehicle.enabled = MCH_VehicleInfoManager.getInstance().getRecipeListSize() > 0;
+      btnVehicle.enabled = MCH_TurretInfoManager.getInstance().getRecipeListSize() > 0;
       btnTank.enabled = MCH_TankInfoManager.getInstance().getRecipeListSize() > 0;
       btnItem.enabled = MCH_ItemRecipe.getInstance().getRecipeListSize() > 0;
       btnShip.enabled = MCH_ShipInfoManager.getInstance().getRecipeListSize() > 0;
@@ -193,8 +193,8 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
             this.switchRecipeList(MCH_HeliInfoManager.getInstance());
          } else if (MCP_PlaneInfoManager.getInstance().getRecipeListSize() > 0) {
             this.switchRecipeList(MCP_PlaneInfoManager.getInstance());
-         } else if (MCH_VehicleInfoManager.getInstance().getRecipeListSize() > 0) {
-            this.switchRecipeList(MCH_VehicleInfoManager.getInstance());
+         } else if (MCH_TurretInfoManager.getInstance().getRecipeListSize() > 0) {
+            this.switchRecipeList(MCH_TurretInfoManager.getInstance());
          } else if (MCH_TankInfoManager.getInstance().getRecipeListSize() > 0) {
             this.switchRecipeList(MCH_TankInfoManager.getInstance());
          } else if (MCH_ShipInfoManager.getInstance().getRecipeListSize() > 0) {
@@ -354,7 +354,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
                initModelTransform();
                modelRotX = 180.0F;
                modelRotY = 90.0F;
-               this.switchRecipeList(MCH_VehicleInfoManager.getInstance());
+               this.switchRecipeList(MCH_TurretInfoManager.getInstance());
                this.switchScreen(1);
                break;
             case 13:
@@ -520,7 +520,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
                  MCH_ItemRecipe.getInstance(),
                  MCH_HeliInfoManager.getInstance(),
                  MCP_PlaneInfoManager.getInstance(),
-                 MCH_VehicleInfoManager.getInstance(),
+                 MCH_TurretInfoManager.getInstance(),
                  MCH_TankInfoManager.getInstance(),
                  MCH_ShipInfoManager.getInstance())) {
 
@@ -962,7 +962,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          float lw = GL11.glGetFloat(2849);
          GL11.glLineWidth(1.0F);
          model.renderAll(this.drawFace - faceNum, this.drawFace);
-         MCH_RenderAircraft.renderCrawlerTrack((MCH_EntityAircraft)null, this.current.getAcInfo(), partialTicks);
+         MCH_RenderBaseVehicle.renderCrawlerTrack((MCH_EntityBaseVehicle)null, this.current.getAcInfo(), partialTicks);
          GL11.glLineWidth(lw);
          GL11.glPolygonMode(1032, 6914);
          GL11.glEnable(3553);
@@ -971,7 +971,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       if(this.drawFace >= faceNum) {
          GL11.glColor4d(1.0D, 1.0D, 1.0D, 1.0D);
          model.renderAll(0, this.drawFace - faceNum);
-         MCH_RenderAircraft.renderCrawlerTrack((MCH_EntityAircraft)null, this.current.getAcInfo(), partialTicks);
+         MCH_RenderBaseVehicle.renderCrawlerTrack((MCH_EntityBaseVehicle)null, this.current.getAcInfo(), partialTicks);
       }
 
       GL11.glEnable('\u803a');

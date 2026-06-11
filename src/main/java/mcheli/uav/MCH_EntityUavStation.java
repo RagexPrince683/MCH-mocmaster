@@ -8,7 +8,7 @@ import mcheli.MCH_Config;
 import mcheli.MCH_Explosion;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.helicopter.MCH_HeliInfo;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.helicopter.MCH_ItemHeli;
@@ -70,7 +70,7 @@ public class MCH_EntityUavStation
       private boolean continuePressed = false;
       public boolean isridingnewuav = false;
       public String newUavPlayerUUID;
-      public MCH_EntityAircraft assignedUav = null;
+      public MCH_EntityBaseVehicle assignedUav = null;
 
       public int assignedUavId = -1; // fallback tracking
       public String assignedUavUUID = "";
@@ -131,8 +131,8 @@ public class MCH_EntityUavStation
            this.posUavZ = 0;
            this.rotCover = 0.0F;
            this.prevRotCover = 0.0F;
-           setControlAircract((MCH_EntityAircraft)null);
-           setLastControlAircraft((MCH_EntityAircraft)null);
+           setControlAircract((MCH_EntityBaseVehicle)null);
+           setLastControlAircraft((MCH_EntityBaseVehicle)null);
            this.loadedLastControlAircraftGuid = "";
            this.linkedUavCommonId = "";
            this.hasStoredUavLink = false;
@@ -147,8 +147,8 @@ public class MCH_EntityUavStation
       protected double aircraftZ;
       protected double aircraftYaw;
       protected double aircraftPitch;
-      private MCH_EntityAircraft controlAircraft;
-      private MCH_EntityAircraft lastControlAircraft;
+      private MCH_EntityBaseVehicle controlAircraft;
+      private MCH_EntityBaseVehicle lastControlAircraft;
       private String loadedLastControlAircraftGuid;
       public int posUavX;
       public int posUavY;
@@ -194,11 +194,11 @@ public class MCH_EntityUavStation
            setStatus((b ? 128 : 0) | getStatus() & 0x7F);
          }
 
-      public MCH_EntityAircraft getControlAircract() {
+      public MCH_EntityBaseVehicle getControlAircract() {
            return this.controlAircraft;
          }
 
-      public void setControlAircract(MCH_EntityAircraft ac) {
+      public void setControlAircract(MCH_EntityBaseVehicle ac) {
            this.controlAircraft = ac;
            if (ac != null && !ac.isDead ) {
                 linkUav(ac);
@@ -216,7 +216,7 @@ public class MCH_EntityUavStation
 
 
 
-      public void linkUav(MCH_EntityAircraft ac) {
+      public void linkUav(MCH_EntityBaseVehicle ac) {
            if(ac == null) {
                 return;
            }
@@ -238,7 +238,7 @@ public class MCH_EntityUavStation
            MCH_UavRegistry.register(ac);
          }
 
-      public void updateLinkedUavPosition(MCH_EntityAircraft ac) {
+      public void updateLinkedUavPosition(MCH_EntityBaseVehicle ac) {
            if(ac != null) {
                 this.linkedUavDimension = ac.dimension;
                 this.linkedUavX = ac.posX;
@@ -295,7 +295,7 @@ public class MCH_EntityUavStation
            this.awaitingLoadedUav = false;
            this.pendingContinueTicks = 0;
            this.controlAircraft = null;
-           setLastControlAircraft((MCH_EntityAircraft)null);
+           setLastControlAircraft((MCH_EntityBaseVehicle)null);
            setLastControlAircraftEntityId(0);
            setContinuationState(CONTINUE_NONE);
          }
@@ -526,8 +526,8 @@ public class MCH_EntityUavStation
                      }
 
                      // DOES NOT --- Kill the UAV the assigned player is riding ---
-                     if (assignedPlayer != null && assignedPlayer.ridingEntity instanceof MCH_EntityAircraft) {
-                         MCH_EntityAircraft uav = (MCH_EntityAircraft) assignedPlayer.ridingEntity;
+                     if (assignedPlayer != null && assignedPlayer.ridingEntity instanceof MCH_EntityBaseVehicle) {
+                         MCH_EntityBaseVehicle uav = (MCH_EntityBaseVehicle) assignedPlayer.ridingEntity;
                          uav.setDead(); // will automatically dismount player
                          System.out.println("Killed UAV for player: " + assignedPlayer.getCommandSenderName());
                      } else {
@@ -636,13 +636,13 @@ public class MCH_EntityUavStation
 
           if (this.assignedUav == null && this.assignedUavId > 0 && !this.worldObj.isRemote) {
               Entity e = this.worldObj.getEntityByID(this.assignedUavId);
-              if (e instanceof MCH_EntityAircraft) {
-                  linkUav((MCH_EntityAircraft)e);
+              if (e instanceof MCH_EntityBaseVehicle) {
+                  linkUav((MCH_EntityBaseVehicle)e);
               }
               else if (!this.assignedUavUUID.isEmpty()) {
                   for (Object obj : this.worldObj.loadedEntityList) {
-                      if (obj instanceof MCH_EntityAircraft) {
-                          MCH_EntityAircraft ac = (MCH_EntityAircraft)obj;
+                      if (obj instanceof MCH_EntityBaseVehicle) {
+                          MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)obj;
                           UUID persistentId = ac.getUavPersistentUUID();
                           if (ac.getUniqueID().toString().equals(this.assignedUavUUID) || (persistentId != null && persistentId.toString().equals(this.assignedUavUUID))) {
                               linkUav(ac);
@@ -707,10 +707,10 @@ public class MCH_EntityUavStation
               (this.hasStoredUavLink || getContinuationState() == CONTINUE_AVAILABLE) &&
               MCH_UavJsonStore.consumeDestroyed(this.worldObj, this)) {
                 MCH_Lib.Log((Entity)this, "Consumed out-of-range New UAV destruction signal; disabling Continue", new Object[0]);
-                markLinkedNewUavDestroyed((MCH_EntityAircraft)null);
+                markLinkedNewUavDestroyed((MCH_EntityBaseVehicle)null);
            }
            if (getControlAircract() != null && getControlAircract().isDestroyed()) {
-                MCH_EntityAircraft destroyed = getControlAircract();
+                MCH_EntityBaseVehicle destroyed = getControlAircract();
                 MCH_Lib.Log((Entity)this, "Linked UAV %d is destroyed; marking station Continue state destroyed", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)destroyed)) });
                 if(destroyed.isNewUAV()) {
                      markLinkedNewUavDestroyed(destroyed);
@@ -719,11 +719,11 @@ public class MCH_EntityUavStation
                 }
               } else if (getControlAircract() != null && getControlAircract().isDead) {
                 markLinkedUavUnloaded();
-                setControlAircract((MCH_EntityAircraft)null);
+                setControlAircract((MCH_EntityBaseVehicle)null);
               }
 
            if (getLastControlAircraft() != null && getLastControlAircraft().isDestroyed()) {
-                MCH_EntityAircraft destroyed = getLastControlAircraft();
+                MCH_EntityBaseVehicle destroyed = getLastControlAircraft();
                 MCH_Lib.Log((Entity)this, "Last linked UAV %d is destroyed; marking station Continue state destroyed", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)destroyed)) });
                 if(destroyed.isNewUAV()) {
                      markLinkedNewUavDestroyed(destroyed);
@@ -732,7 +732,7 @@ public class MCH_EntityUavStation
                 }
               } else if (getLastControlAircraft() != null && getLastControlAircraft().isDead) {
                 markLinkedUavUnloaded();
-                setLastControlAircraft((MCH_EntityAircraft)null);
+                setLastControlAircraft((MCH_EntityBaseVehicle)null);
               }
 
            if (this.worldObj.isRemote) {
@@ -744,11 +744,11 @@ public class MCH_EntityUavStation
            this.lastRiddenByEntity = this.riddenByEntity;
          }
 
-      public MCH_EntityAircraft getLastControlAircraft() {
+      public MCH_EntityBaseVehicle getLastControlAircraft() {
            return this.lastControlAircraft;
          }
 
-      public MCH_EntityAircraft getAndSearchLastControlAircraft() {
+      public MCH_EntityBaseVehicle getAndSearchLastControlAircraft() {
            if (getLastControlAircraft() == null && !this.worldObj.isRemote) {
                 relinkStoredUav(false);
               }
@@ -756,8 +756,8 @@ public class MCH_EntityUavStation
                 int id = getLastControlAircraftEntityId().intValue();
                 if (id > 0) {
                      Entity entity = this.worldObj.getEntityByID(id);
-                     if (entity instanceof MCH_EntityAircraft) {
-                          MCH_EntityAircraft ac = (MCH_EntityAircraft)entity;
+                     if (entity instanceof MCH_EntityBaseVehicle) {
+                          MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)entity;
                           if (ac.isUAV() || ac.isNewUAV()) {
                                setLastControlAircraft(ac);
                              }
@@ -768,7 +768,7 @@ public class MCH_EntityUavStation
            return getLastControlAircraft();
          }
 
-      public void setLastControlAircraft(MCH_EntityAircraft ac) {
+      public void setLastControlAircraft(MCH_EntityBaseVehicle ac) {
            MCH_Lib.DbgLog(this.worldObj, "MCH_EntityUavStation.setLastControlAircraft:" + ac, new Object[0]);
            this.lastControlAircraft = ac;
            if(ac != null && !this.worldObj.isRemote) {
@@ -805,11 +805,11 @@ public class MCH_EntityUavStation
            }
          }
 
-      public MCH_EntityAircraft findLinkedUavEntity(World world) {
+      public MCH_EntityBaseVehicle findLinkedUavEntity(World world) {
            if(this.assignedUav != null && !this.assignedUav.isDead) {
                 return this.assignedUav;
            }
-           MCH_EntityAircraft ac = MCH_UavRegistry.findLinkedUav(world, this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
+           MCH_EntityBaseVehicle ac = MCH_UavRegistry.findLinkedUav(world, this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
            if(ac == null) {
                 loadLinkedUavChunk(world);
                 ac = MCH_UavRegistry.findLinkedUav(world, this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
@@ -827,7 +827,7 @@ public class MCH_EntityUavStation
          }
 
       private boolean relinkStoredUav(boolean requireLoaded) {
-           MCH_EntityAircraft ac = findLinkedUavEntity(this.worldObj);
+           MCH_EntityBaseVehicle ac = findLinkedUavEntity(this.worldObj);
            if(ac != null && !ac.isDead) {
                 linkUav(ac);
                 setLastControlAircraft(ac);
@@ -839,7 +839,7 @@ public class MCH_EntityUavStation
            return false;
          }
 
-      private boolean isValidLinkedUav(MCH_EntityAircraft ac, EntityPlayer player) {
+      private boolean isValidLinkedUav(MCH_EntityBaseVehicle ac, EntityPlayer player) {
            if(ac == null || ac.isDead || ac.isDestroyed()) {
                 return false;
            }
@@ -863,7 +863,7 @@ public class MCH_EntityUavStation
                   (x != 0.0D || y != 0.0D || z != 0.0D);
          }
 
-      public boolean prepareNewUavShiftExit(MCH_EntityAircraft ac) {
+      public boolean prepareNewUavShiftExit(MCH_EntityBaseVehicle ac) {
            if(this.worldObj.isRemote || ac == null) {
                 return false;
            }
@@ -926,13 +926,13 @@ public class MCH_EntityUavStation
            this.awaitingLoadedUav = false;
            this.pendingContinueTicks = 0;
            this.controlAircraft = null;
-           setLastControlAircraft((MCH_EntityAircraft)null);
+           setLastControlAircraft((MCH_EntityBaseVehicle)null);
            setLastControlAircraftEntityId(0);
            return true;
          }
 
 
-         public void markLinkedNewUavDestroyed(MCH_EntityAircraft ac) {
+         public void markLinkedNewUavDestroyed(MCH_EntityBaseVehicle ac) {
                  if(this.worldObj.isRemote) {
                      return;
                  }
@@ -966,7 +966,7 @@ public class MCH_EntityUavStation
                  this.pendingContinueTicks = 0;
 
                  this.controlAircraft = null;
-                 setLastControlAircraft((MCH_EntityAircraft)null);
+                 setLastControlAircraft((MCH_EntityBaseVehicle)null);
                  setLastControlAircraftEntityId(0);
           }
 
@@ -1012,7 +1012,7 @@ public class MCH_EntityUavStation
            } finally {
                 this.respawnStoredUavAtSavedPosition = false;
            }
-           MCH_EntityAircraft ac = getControlAircract();
+           MCH_EntityBaseVehicle ac = getControlAircract();
            if(ac != null && !ac.isDead) {
                 ac.setLocationAndAngles(stored.exitX, stored.exitY, stored.exitZ, stored.exitYaw, stored.exitPitch);
                 if(this.riddenByEntity != null && ac.isNewUAV()) {
@@ -1026,14 +1026,14 @@ public class MCH_EntityUavStation
 
 
 
-      private void teleportPlayerToUav(Entity user, MCH_EntityAircraft ac) {
+      private void teleportPlayerToUav(Entity user, MCH_EntityBaseVehicle ac) {
            if(user instanceof EntityPlayerMP && ac != null) {
                 ((EntityPlayerMP)user).setPositionAndUpdate(ac.posX, ac.posY + ac.getMountedYOffset(), ac.posZ);
            }
          }
 
 
-      private void notifyInitialUavStateOnce(EntityPlayerMP player, MCH_EntityAircraft ac) {
+      private void notifyInitialUavStateOnce(EntityPlayerMP player, MCH_EntityBaseVehicle ac) {
            if(player != null && ac != null && ac.isNewUAV() && ac.ticksExisted < 40) {
                 W_EntityPlayer.addChatMessage(player, "UAV is initializing and cannot move yet. You can still reload/resupply it from the station or your inventory.");
            }
@@ -1047,7 +1047,7 @@ public class MCH_EntityUavStation
            if(stack == null || stack.stackSize <= 0) {
                 return false;
            }
-           MCH_EntityAircraft ac = findLinkedUavEntity(this.worldObj);
+           MCH_EntityBaseVehicle ac = findLinkedUavEntity(this.worldObj);
            if(!isValidLinkedUav(ac, player)) {
                 return false;
            }
@@ -1069,17 +1069,17 @@ public class MCH_EntityUavStation
          }
 
       public boolean canStationAmmoFeedLinkedUav(ItemStack stack) {
-           MCH_EntityAircraft ac = findLinkedUavEntity(this.worldObj);
+           MCH_EntityBaseVehicle ac = findLinkedUavEntity(this.worldObj);
            return ac != null && ac.canAcceptAmmo(stack);
          }
 
       public void searchLastControlAircraft() {
           //makes a box around the station to search for the last controlled aircraft, for regular non-new UAVs
            if (!this.loadedLastControlAircraftGuid.isEmpty()) {
-                List<MCH_EntityAircraft> list = this.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, getBoundingBox().expand(120.0D, 120.0D, 120.0D));
+                List<MCH_EntityBaseVehicle> list = this.worldObj.getEntitiesWithinAABB(MCH_EntityBaseVehicle.class, getBoundingBox().expand(120.0D, 120.0D, 120.0D));
                 if (list != null) {
                      for (int i = 0; i < list.size(); i++) {
-                          MCH_EntityAircraft ac = list.get(i);
+                          MCH_EntityBaseVehicle ac = list.get(i);
                           if (ac.getCommonUniqueId().equals(this.loadedLastControlAircraftGuid)) {
                                String n = (ac.getAcInfo() != null) ? (ac.getAcInfo()).displayName : ("no info : " + ac);
                                MCH_Lib.DbgLog(this.worldObj, "MCH_EntityUavStation.searchLastControlAircraft:found" + n, new Object[0]);
@@ -1177,7 +1177,7 @@ public class MCH_EntityUavStation
              private void controlLastAircraft(Entity user, boolean notify) {
 
                  if(!this.worldObj.isRemote && !this.storedUavWasDestroyed && MCH_UavJsonStore.consumeDestroyed(this.worldObj, this)) {
-                     markLinkedNewUavDestroyed((MCH_EntityAircraft)null);
+                     markLinkedNewUavDestroyed((MCH_EntityBaseVehicle)null);
                  }
                  if(wasLinkedUavDestroyed()) {
                      this.pendingContinueTicks = 0;
@@ -1192,7 +1192,7 @@ public class MCH_EntityUavStation
                      }
                      return;
                  }
-                 MCH_EntityAircraft lastAc = getAndSearchLastControlAircraft();
+                 MCH_EntityBaseVehicle lastAc = getAndSearchLastControlAircraft();
                  if (lastAc == null && relinkStoredUav(false)) {
                      lastAc = getLastControlAircraft();
                  }
@@ -1316,10 +1316,10 @@ public class MCH_EntityUavStation
                    }
 
                 if (ac != null) {
-                    MCH_EntityAircraft linked = findLinkedUavEntity(this.worldObj);
+                    MCH_EntityBaseVehicle linked = findLinkedUavEntity(this.worldObj);
                     if(linked != null && !linked.isDead && isValidLinkedUav(linked, user instanceof EntityPlayer ? (EntityPlayer)user : null)) {
                         MCH_Lib.Log((Entity)this, "Avoided spawning duplicate UAV from station %d; reusing linked UAV %d (%s)", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)), Integer.valueOf(W_Entity.getEntityId((Entity)linked)), linked.getUavPersistentUUID() == null ? "" : linked.getUavPersistentUUID().toString() });
-                        ((MCH_EntityAircraft)ac).setDead(false);
+                        ((MCH_EntityBaseVehicle)ac).setDead(false);
                         linkUav(linked);
                         setControlAircract(linked);
                         W_EntityPlayer.closeScreen(user);
@@ -1327,7 +1327,7 @@ public class MCH_EntityUavStation
                     }
                     if(MCH_Config.ItemDamage.prmBool) {
 
-                        ((MCH_EntityAircraft)ac).getAcDataFromItem(itemStack);
+                        ((MCH_EntityBaseVehicle)ac).getAcDataFromItem(itemStack);
                     } //why wasn't this here already?
                      ((Entity)ac).rotationYaw = this.rotationYaw - 180.0F;
                      ((Entity)ac).prevRotationYaw = ((Entity)ac).rotationYaw;
@@ -1339,23 +1339,23 @@ public class MCH_EntityUavStation
                          itemStack.stackSize--;
                           MCH_Lib.DbgLog(this.worldObj, "Create UAV: %s : %s", new Object[] { item.getUnlocalizedName(), item });
                           user.rotationYaw = this.rotationYaw - 180.0F;
-                          if (!((MCH_EntityAircraft)ac).isTargetDrone()) {
+                          if (!((MCH_EntityBaseVehicle)ac).isTargetDrone()) {
                                this.setOwnerUUID(user instanceof EntityPlayer ? ((EntityPlayer)user).getUniqueID() : this.ownerUUID);
-                               ((MCH_EntityAircraft)ac).setOwnerUUID(this.ownerUUID);
-                               linkUav((MCH_EntityAircraft)ac);
-                               setControlAircract((MCH_EntityAircraft)ac);
+                               ((MCH_EntityBaseVehicle)ac).setOwnerUUID(this.ownerUUID);
+                               linkUav((MCH_EntityBaseVehicle)ac);
+                               setControlAircract((MCH_EntityBaseVehicle)ac);
                              }
 
                           this.worldObj.spawnEntityInWorld((Entity)ac);
-                          linkUav((MCH_EntityAircraft) ac);
-                          if (!((MCH_EntityAircraft)ac).isTargetDrone()) {
-                               ((MCH_EntityAircraft)ac).setFuel((int)(((MCH_EntityAircraft)ac).getMaxFuel() * 0.05F));
+                          linkUav((MCH_EntityBaseVehicle) ac);
+                          if (!((MCH_EntityBaseVehicle)ac).isTargetDrone()) {
+                               ((MCH_EntityBaseVehicle)ac).setFuel((int)(((MCH_EntityBaseVehicle)ac).getMaxFuel() * 0.05F));
                                W_EntityPlayer.closeScreen(user);
                              } else {
-                               ((MCH_EntityAircraft)ac).setFuel(((MCH_EntityAircraft)ac).getMaxFuel());
+                               ((MCH_EntityBaseVehicle)ac).setFuel(((MCH_EntityBaseVehicle)ac).getMaxFuel());
                              }
                         } else {
-                          ((MCH_EntityAircraft)ac).setDead();
+                          ((MCH_EntityBaseVehicle)ac).setDead();
                         }
                    }
               }
@@ -1429,7 +1429,7 @@ public class MCH_EntityUavStation
                  }
 
                  if(getControlAircract() == null || !getControlAircract().isNewUAV()) {
-                     setControlAircract((MCH_EntityAircraft) null);
+                     setControlAircract((MCH_EntityBaseVehicle) null);
                  }
                  if (this.worldObj.isRemote) {
                      W_EntityPlayer.closeScreen(rByEntity);

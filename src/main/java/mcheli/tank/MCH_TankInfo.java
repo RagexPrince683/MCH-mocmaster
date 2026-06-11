@@ -5,13 +5,13 @@ import java.util.List;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.EnumBoundingBoxType;
-import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.aircraft.MCH_BoundingBox;
 import mcheli.tank.MCH_ItemTank;
 import net.minecraft.item.Item;
 import net.minecraft.util.Vec3;
 
-public class MCH_TankInfo extends MCH_AircraftInfo {
+public class MCH_TankInfo extends MCH_BaseVehicleInfo {
 
    public MCH_ItemTank item = null;
    public int weightType = 0;
@@ -29,8 +29,8 @@ public class MCH_TankInfo extends MCH_AircraftInfo {
 
    public List getDefaultWheelList() {
       ArrayList list = new ArrayList();
-      list.add(new MCH_AircraftInfo.Wheel(Vec3.createVectorHelper(1.5D, -0.24D, 2.0D)));
-      list.add(new MCH_AircraftInfo.Wheel(Vec3.createVectorHelper(1.5D, -0.24D, -2.0D)));
+      list.add(new MCH_BaseVehicleInfo.Wheel(Vec3.createVectorHelper(1.5D, -0.24D, 2.0D)));
+      list.add(new MCH_BaseVehicleInfo.Wheel(Vec3.createVectorHelper(1.5D, -0.24D, -2.0D)));
       return list;
    }
 
@@ -86,7 +86,7 @@ public class MCH_TankInfo extends MCH_AircraftInfo {
             this.extraBoundingBox.add(bb);
          }
       }
-      MCH_AircraftInfo.allAircraftInfo.put(name, this);
+      MCH_BaseVehicleInfo.allBaseVehicleInfo.put(name, this);
    }
 
    public String getDirectoryName() {

@@ -5,7 +5,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import java.util.Random;
 import mcheli.MCH_Lib;
 import mcheli.MCH_ModelManager;
-import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.wrapper.W_Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
@@ -22,7 +22,7 @@ public class MCH_RenderContainer extends W_Render {
    }
 
    public void doRender(Entity entity, double posX, double posY, double posZ, float par8, float tickTime) {
-      if(!MCH_RenderAircraft.shouldSkipRender(entity)) {
+      if(!MCH_RenderBaseVehicle.shouldSkipRender(entity)) {
          GL11.glPushMatrix();
          GL11.glEnable(2884);
          GL11.glTranslated(posX, posY - 0.2D, posZ);

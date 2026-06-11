@@ -5,33 +5,33 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftCommonGui;
+import mcheli.aircraft.MCH_BaseVehicleCommonGui;
 import mcheli.gui.MCH_Gui;
-import mcheli.vehicle.MCH_EntityVehicle;
-import mcheli.vehicle.MCH_VehicleInfo;
+import mcheli.vehicle.MCH_EntityTurret;
+import mcheli.vehicle.MCH_TurretInfo;
 import mcheli.weapon.MCH_WeaponSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
-public class MCH_GuiVehicle extends MCH_AircraftCommonGui {
+public class MCH_GuiTurret extends MCH_BaseVehicleCommonGui {
 
    static final int COLOR1 = -14066;
    static final int COLOR2 = -2161656;
 
 
-   public MCH_GuiVehicle(Minecraft minecraft) {
+   public MCH_GuiTurret(Minecraft minecraft) {
       super(minecraft);
    }
 
    public boolean isDrawGui(EntityPlayer player) {
-      return player.ridingEntity != null && player.ridingEntity instanceof MCH_EntityVehicle;
+      return player.ridingEntity != null && player.ridingEntity instanceof MCH_EntityTurret;
    }
 
    public void drawGui(EntityPlayer player, boolean isThirdPersonView) {
-      if(player.ridingEntity != null && player.ridingEntity instanceof MCH_EntityVehicle) {
-         MCH_EntityVehicle vehicle = (MCH_EntityVehicle)player.ridingEntity;
+      if(player.ridingEntity != null && player.ridingEntity instanceof MCH_EntityTurret) {
+         MCH_EntityTurret vehicle = (MCH_EntityTurret)player.ridingEntity;
          if(!vehicle.isDestroyed()) {
             int seatID = vehicle.getSeatIdByEntity(player);
             GL11.glLineWidth((float)MCH_Gui.scaleFactor);
@@ -61,10 +61,10 @@ public class MCH_GuiVehicle extends MCH_AircraftCommonGui {
       }
    }
 
-   public void drawKeyBind(MCH_EntityVehicle vehicle, EntityPlayer player) {
+   public void drawKeyBind(MCH_EntityTurret vehicle, EntityPlayer player) {
       MCH_Config var10000 = MCH_MOD.config;
       if(!MCH_Config.HideKeybind.prmBool) {
-         MCH_VehicleInfo info = vehicle.getVehicleInfo();
+         MCH_TurretInfo info = vehicle.getTurretInfo();
          if(info != null) {
             int colorActive = -1342177281;
             int colorInactive = -1349546097;

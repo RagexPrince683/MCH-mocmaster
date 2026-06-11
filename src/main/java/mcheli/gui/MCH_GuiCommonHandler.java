@@ -4,9 +4,9 @@ import cpw.mods.fml.common.network.IGuiHandler;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftGui;
-import mcheli.aircraft.MCH_AircraftGuiContainer;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleGui;
+import mcheli.aircraft.MCH_BaseVehicleGuiContainer;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.block.MCH_DraftingTableGui;
 import mcheli.block.MCH_DraftingTableGuiContainer;
 import mcheli.gui.MCH_ConfigGui;
@@ -39,15 +39,15 @@ public class MCH_GuiCommonHandler implements IGuiHandler {
          }
          break;
       case 1:
-         MCH_EntityAircraft ac = null;
-         if(player.ridingEntity instanceof MCH_EntityAircraft) {
-            ac = (MCH_EntityAircraft)player.ridingEntity;
+         MCH_EntityBaseVehicle ac = null;
+         if(player.ridingEntity instanceof MCH_EntityBaseVehicle) {
+            ac = (MCH_EntityBaseVehicle)player.ridingEntity;
          } else if(player.ridingEntity instanceof MCH_EntityUavStation) {
             ac = ((MCH_EntityUavStation)player.ridingEntity).getControlAircract();
          }
 
          if(ac != null) {
-            return new MCH_AircraftGuiContainer(player, ac);
+            return new MCH_BaseVehicleGuiContainer(player, ac);
          }
          break;
       case 2:
@@ -80,15 +80,15 @@ public class MCH_GuiCommonHandler implements IGuiHandler {
          }
          break;
       case 1:
-         MCH_EntityAircraft ac = null;
-         if(player.ridingEntity instanceof MCH_EntityAircraft) {
-            ac = (MCH_EntityAircraft)player.ridingEntity;
+         MCH_EntityBaseVehicle ac = null;
+         if(player.ridingEntity instanceof MCH_EntityBaseVehicle) {
+            ac = (MCH_EntityBaseVehicle)player.ridingEntity;
          } else if(player.ridingEntity instanceof MCH_EntityUavStation) {
             ac = ((MCH_EntityUavStation)player.ridingEntity).getControlAircract();
          }
 
          if(ac != null) {
-            return new MCH_AircraftGui(player, ac);
+            return new MCH_BaseVehicleGui(player, ac);
          }
          break;
       case 2:

@@ -8,8 +8,8 @@ import java.util.Random;
 
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.wrapper.W_Item;
 import mcheli.wrapper.W_WorldFunc;
@@ -119,7 +119,7 @@ public class MCH_ItemWrench extends W_Item {
    }
 
    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
-      MCH_EntityAircraft ac;
+      MCH_EntityBaseVehicle ac;
       if(player.worldObj.isRemote) {
          ac = this.getMouseOverAircraft(player);
          if(ac != null) {
@@ -155,12 +155,12 @@ public class MCH_ItemWrench extends W_Item {
 
    }
 
-   public MCH_EntityAircraft getMouseOverAircraft(EntityPlayer player) {
+   public MCH_EntityBaseVehicle getMouseOverAircraft(EntityPlayer player) {
       MovingObjectPosition m = this.getMouseOver(player, 1.0F);
-      MCH_EntityAircraft ac = null;
+      MCH_EntityBaseVehicle ac = null;
       if(m != null) {
-         if(m.entityHit instanceof MCH_EntityAircraft) {
-            ac = (MCH_EntityAircraft)m.entityHit;
+         if(m.entityHit instanceof MCH_EntityBaseVehicle) {
+            ac = (MCH_EntityBaseVehicle)m.entityHit;
          } else if(m.entityHit instanceof MCH_EntitySeat) {
             MCH_EntitySeat seat = (MCH_EntitySeat)m.entityHit;
             if(seat.getParent() != null) {

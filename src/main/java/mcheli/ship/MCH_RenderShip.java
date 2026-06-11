@@ -1,8 +1,8 @@
 package mcheli.ship;
 
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
+import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.wrapper.W_Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
@@ -10,13 +10,13 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.Iterator;
 
-public class MCH_RenderShip extends MCH_RenderAircraft {
+public class MCH_RenderShip extends MCH_RenderBaseVehicle {
 
     public MCH_RenderShip() {
         super.shadowSize = 2.0F;
     }
 
-    public void renderAircraft(MCH_EntityAircraft entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
+    public void renderBaseVehicle(MCH_EntityBaseVehicle entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
         MCH_ShipInfo shipInfo = null;
         if(entity != null && entity instanceof MCH_EntityShip) {
             MCH_EntityShip ship = (MCH_EntityShip)entity;
@@ -118,7 +118,7 @@ public class MCH_RenderShip extends MCH_RenderAircraft {
         Iterator i$ = shipInfo.nozzles.iterator();
 
         while(i$.hasNext()) {
-            MCH_AircraftInfo.DrawnPart n = (MCH_AircraftInfo.DrawnPart)i$.next();
+            MCH_BaseVehicleInfo.DrawnPart n = (MCH_BaseVehicleInfo.DrawnPart)i$.next();
             GL11.glPushMatrix();
             GL11.glTranslated(n.pos.xCoord, n.pos.yCoord, n.pos.zCoord);
             GL11.glRotatef(prevRot + (rot - prevRot) * tickTime, (float)n.rot.xCoord, (float)n.rot.yCoord, (float)n.rot.zCoord);

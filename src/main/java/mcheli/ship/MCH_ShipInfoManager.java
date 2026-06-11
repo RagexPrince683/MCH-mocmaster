@@ -5,10 +5,10 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import mcheli.MCH_BaseInfo;
-import mcheli.aircraft.MCH_AircraftInfoManager;
+import mcheli.aircraft.MCH_BaseVehicleInfoManager;
 import net.minecraft.item.Item;
 
-public class MCH_ShipInfoManager extends MCH_AircraftInfoManager {
+public class MCH_ShipInfoManager extends MCH_BaseVehicleInfoManager {
 
     private static MCH_ShipInfoManager instance = new MCH_ShipInfoManager();
     public static HashMap map = new LinkedHashMap();

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
@@ -67,7 +67,7 @@ public final class MCH_UavJsonStore {
         List<StationKey> destroyedStations = new ArrayList<StationKey>();
     }
 
-    public static synchronized boolean save(World world, MCH_EntityUavStation station, MCH_EntityAircraft aircraft, ItemStack itemStack,
+    public static synchronized boolean save(World world, MCH_EntityUavStation station, MCH_EntityBaseVehicle aircraft, ItemStack itemStack,
                                             double exitX, double exitY, double exitZ) {
         if(world == null || world.isRemote || station == null || aircraft == null || itemStack == null || itemStack.getItem() == null) {
             return false;

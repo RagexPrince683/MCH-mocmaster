@@ -4,7 +4,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.ArrayList;
 import java.util.List;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntityHitBox;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.wrapper.W_Entity;
@@ -25,7 +25,7 @@ import net.minecraft.world.World;
 
 public class MCH_EntityHide extends W_Entity {
 
-   private MCH_EntityAircraft ac;
+   private MCH_EntityBaseVehicle ac;
    private Entity user;
    private int paraPosRotInc;
    private double paraX;
@@ -63,7 +63,7 @@ public class MCH_EntityHide extends W_Entity {
       this.getDataWatcher().addObject(31, new Integer(0));
    }
 
-   public void setParent(MCH_EntityAircraft ac, Entity user, int ropeIdx) {
+   public void setParent(MCH_EntityBaseVehicle ac, Entity user, int ropeIdx) {
       this.ac = ac;
       this.setRopeIndex(ropeIdx);
       this.user = user;
@@ -162,8 +162,8 @@ public class MCH_EntityHide extends W_Entity {
          id = this.getDataWatcher().getWatchableObjectInt(31);
          if(id > 0) {
             Entity v = super.worldObj.getEntityByID(id);
-            if(v instanceof MCH_EntityAircraft) {
-               this.ac = (MCH_EntityAircraft)v;
+            if(v instanceof MCH_EntityBaseVehicle) {
+               this.ac = (MCH_EntityBaseVehicle)v;
             }
          }
       }

@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Map;
 import mcheli.MCH_IRecipeList;
 import mcheli.MCH_InfoManagerBase;
-import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.IRecipe;
 
-public abstract class MCH_AircraftInfoManager extends MCH_InfoManagerBase implements MCH_IRecipeList {
+public abstract class MCH_BaseVehicleInfoManager extends MCH_InfoManagerBase implements MCH_IRecipeList {
 
    private List listItemRecipe = new ArrayList();
 
@@ -30,9 +30,9 @@ public abstract class MCH_AircraftInfoManager extends MCH_InfoManagerBase implem
       }
    }
 
-   public abstract MCH_AircraftInfo getAcInfoFromItem(Item var1);
+   public abstract MCH_BaseVehicleInfo getAcInfoFromItem(Item var1);
 
-   public MCH_AircraftInfo getAcInfoFromItem(IRecipe recipe) {
+   public MCH_BaseVehicleInfo getAcInfoFromItem(IRecipe recipe) {
       Map map = this.getMap();
       return recipe != null?this.getAcInfoFromItem(recipe.getRecipeOutput().getItem()):null;
    }

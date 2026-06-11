@@ -10,7 +10,7 @@ import mcheli.MCH_PacketIndOpenScreen;
 import mcheli.MCH_PacketNotifyLock;
 import mcheli.MCH_PacketNotifyServerSettings;
 import mcheli.MCH_ServerSettings;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.lweapon.MCH_ClientLightWeaponTickHandler;
 import mcheli.wrapper.W_Reflection;
@@ -47,7 +47,7 @@ public class MCH_CommonPacketHandler {
          MCH_PacketIndOpenScreen pkt = new MCH_PacketIndOpenScreen();
          pkt.readData(data);
          if(pkt.guiID == 3) {
-            MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(player);
+            MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
             if(ac != null) {
                ac.openInventory(player);
             }
@@ -83,13 +83,13 @@ public class MCH_CommonPacketHandler {
          if(pkt.entityID >= 0) {
             Entity target = player.worldObj.getEntityByID(pkt.entityID);
             if(target != null) {
-               MCH_EntityAircraft ac = null;
-               if(target instanceof MCH_EntityAircraft) {
-                  ac = (MCH_EntityAircraft)target;
+               MCH_EntityBaseVehicle ac = null;
+               if(target instanceof MCH_EntityBaseVehicle) {
+                  ac = (MCH_EntityBaseVehicle)target;
                } else if(target instanceof MCH_EntitySeat) {
                   ac = ((MCH_EntitySeat)target).getParent();
                } else {
-                  ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(target);
+                  ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(target);
                }
 
                if(ac != null && ac.haveFlare() && !ac.isDestroyed()) {

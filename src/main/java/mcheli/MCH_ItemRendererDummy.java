@@ -2,7 +2,7 @@ package mcheli;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.gltd.MCH_EntityGLTD;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.wrapper.W_EntityRenderer;
@@ -26,7 +26,7 @@ public class MCH_ItemRendererDummy extends ItemRenderer {
    public void renderItemInFirstPerson(float par1) {
       if(mc.thePlayer == null) {
          super.renderItemInFirstPerson(par1);
-      } else if(!(mc.thePlayer.ridingEntity instanceof MCH_EntityAircraft) && !(mc.thePlayer.ridingEntity instanceof MCH_EntityUavStation) && !(mc.thePlayer.ridingEntity instanceof MCH_EntityGLTD)) {
+      } else if(!(mc.thePlayer.ridingEntity instanceof MCH_EntityBaseVehicle) && !(mc.thePlayer.ridingEntity instanceof MCH_EntityUavStation) && !(mc.thePlayer.ridingEntity instanceof MCH_EntityGLTD)) {
          super.renderItemInFirstPerson(par1);
       }
 

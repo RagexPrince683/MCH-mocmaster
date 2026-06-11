@@ -3,7 +3,7 @@ package mcheli.tool;
 import com.google.common.io.ByteArrayDataInput;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.multiplay.MCH_Multiplay;
 import mcheli.multiplay.MCH_PacketIndSpotEntity;
 import mcheli.tool.rangefinder.MCH_ItemRangeFinder;
@@ -43,7 +43,7 @@ public class MCH_ToolPacketHandler {
                double var10002 = player.posX;
                double var10003 = player.posY + (double)player.getEyeHeight();
                MCH_Config var10006 = MCH_MOD.config;
-               if(MCH_Multiplay.spotEntity(player, (MCH_EntityAircraft)null, var10002, var10003, player.posZ, pc.targetFilter, (float)MCH_Config.RangeFinderSpotDist.prmInt, time, 20.0F)) {
+               if(MCH_Multiplay.spotEntity(player, (MCH_EntityBaseVehicle)null, var10002, var10003, player.posZ, pc.targetFilter, (float)MCH_Config.RangeFinderSpotDist.prmInt, time, 20.0F)) {
                   W_WorldFunc.MOD_playSoundAtEntity(player, "pi", 1.0F, 1.0F);
                } else {
                   W_WorldFunc.MOD_playSoundAtEntity(player, "ng", 1.0F, 1.0F);

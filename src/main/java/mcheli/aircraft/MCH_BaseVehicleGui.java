@@ -2,8 +2,8 @@ package mcheli.aircraft;
 
 import java.util.Iterator;
 import mcheli.MCH_PacketIndOpenScreen;
-import mcheli.aircraft.MCH_AircraftGuiContainer;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleGuiContainer;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_PacketIndReload;
 import mcheli.command.MCH_PacketCommandSave;
 import mcheli.multiplay.MCH_PacketIndMultiplayCommand;
@@ -18,10 +18,10 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.opengl.GL11;
 
-public class MCH_AircraftGui extends W_GuiContainer {
+public class MCH_BaseVehicleGui extends W_GuiContainer {
 
    private final EntityPlayer thePlayer;
-   private final MCH_EntityAircraft aircraft;
+   private final MCH_EntityBaseVehicle aircraft;
    private int scaleFactor;
    private GuiButton buttonReload;
    private GuiButton buttonNext;
@@ -38,8 +38,8 @@ public class MCH_AircraftGui extends W_GuiContainer {
    public static final int BUTTON_INVENTORY = 6;
 
 
-   public MCH_AircraftGui(EntityPlayer player, MCH_EntityAircraft ac) {
-      super(new MCH_AircraftGuiContainer(player, ac));
+   public MCH_BaseVehicleGui(EntityPlayer player, MCH_EntityBaseVehicle ac) {
+      super(new MCH_BaseVehicleGuiContainer(player, ac));
       this.aircraft = ac;
       this.thePlayer = player;
       super.xSize = 210;
@@ -156,7 +156,7 @@ public class MCH_AircraftGui extends W_GuiContainer {
 
    protected void drawGuiContainerForegroundLayer(int par1, int par2) {
       super.drawGuiContainerForegroundLayer(par1, par2);
-      MCH_EntityAircraft ac = this.aircraft;
+      MCH_EntityBaseVehicle ac = this.aircraft;
       this.drawString(ac.getGuiInventory().getInventoryName(), 10, 10, 16777215);
       if(this.aircraft.getNumEjectionSeat() > 0) {
          this.drawString("Parachute", 9, 95, 16777215);

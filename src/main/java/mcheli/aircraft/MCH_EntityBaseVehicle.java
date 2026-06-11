@@ -75,15 +75,12 @@ import mcheli.mob.MCH_EntityGunner;
 import org.lwjgl.Sys;
 
 
-//MCH_EntityAircraft is the main vehicle class that ALL vehicle classes inherit from.
-//NOT to be confused with MCH_EntityVehicle, which is the main class for ALL TURRETS.
-// If this is too confusing for you, REFACTOR IT.
+/** Shared controllable vehicle entity base used by aircraft, ground vehicles, ships, and turrets. */
 
-
-public abstract class MCH_EntityAircraft extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideAircraft, IEntityAdditionalSpawnData {
-   private static MCH_EntityAircraft aircraft;
+public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideBaseVehicle, IEntityAdditionalSpawnData {
+   private static MCH_EntityBaseVehicle aircraft;
     private ForgeChunkManager.Ticket chunkTicket;
-   //MCH_EntityAircraft ac = null;
+   //MCH_EntityBaseVehicle ac = null;
    private static final int DATAWT_ID_DAMAGE = 19;
    private static final int DATAWT_ID_TYPE = 20;
    private static final int DATAWT_ID_TEXTURE_NAME = 21;
@@ -116,7 +113,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public static final byte LIMIT_GROUND_PITCH = 40;
    public static final byte LIMIT_GROUND_ROLL = 40;
    public boolean isRequestedSyncStatus = false;
-   private MCH_AircraftInfo acInfo;
+   private MCH_BaseVehicleInfo acInfo;
    private int commonStatus;
    private Entity[] partEntities;
    private MCH_EntityHitBox pilotSeat;
@@ -138,14 +135,6 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public boolean aircraftRotChanged;
    public float rotationRoll;
    public float prevRotationRoll;
-   /** Local-axis body rates used to turn control input into weighted aircraft rotation. */
-   protected float pitchAngularVelocity;
-   protected float rollAngularVelocity;
-   protected float yawAngularVelocity;
-   /** Latest approximate load factor, shared by controls and client feedback. */
-   protected double currentGForce = 1.0D;
-   /** Fractional overspeed damage retained between ticks. */
-   private double overspeedDamageAccumulator;
    private double currentThrottle;
    private double prevCurrentThrottle;
    public double currentSpeed;
@@ -219,12 +208,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    //public wheelBoundingBox[] extrawheelboundingbox;
    public float lastBBDamageFactor;
    public EnumBoundingBoxType lastHitBoundingBoxType;
-   private final MCH_AircraftInventory inventory;
+   private final MCH_BaseVehicleInventory inventory;
    private double fuelConsumption;
    private int fuelSuppliedCount;
    private int supplyAmmoWait;
    private boolean beforeSupplyAmmo;
-   public MCH_EntityAircraft.WeaponBay[] weaponBays;
+   public MCH_EntityBaseVehicle.WeaponBay[] weaponBays;
    public float[] rotPartRotation;
    public float[] prevRotPartRotation;
    public float[] rotCrawlerTrack = new float[2];
@@ -252,7 +241,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public int brightnessHigh = 240;
    public int brightnessLow = 240;
    public final HashMap noCollisionEntities = new HashMap();
-   private MCH_EntityAircraft rackMountParent;
+   private MCH_EntityBaseVehicle rackMountParent;
    private boolean rackThrottleInput;
    private String pendingRackParentUniqueId = "";
    private int pendingRackSeatId = -1;
@@ -280,9 +269,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    private double linkedUavStationX;
    private double linkedUavStationY;
    private double linkedUavStationZ;
-   //public static boolean isNewUAV = MCH_AircraftInfo.isNewUAV;
+   //public static boolean isNewUAV = MCH_BaseVehicleInfo.isNewUAV;
    //public static Entity rider = lastRidingEntity;
-   //MCH_EntityAircraft MCH_EntityUavStation;
+   //MCH_EntityBaseVehicle MCH_EntityUavStation;
 
    private boolean switchSeat = false;
    //public EntityPlayerMP playerEntity = (EntityPlayerMP) getCommandSenderAsPlayer(player);\
@@ -304,7 +293,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
 
 
-   public MCH_EntityAircraft(World world) {
+   public MCH_EntityBaseVehicle(World world) {
       super(world);
       this.setAcInfo(null);
       this.commonStatus = 0;
@@ -378,7 +367,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.partHatch = null;
       this.partCanopy = null;
       this.partLandingGear = null;
-      this.weaponBays = new MCH_EntityAircraft.WeaponBay[0];
+      this.weaponBays = new MCH_EntityBaseVehicle.WeaponBay[0];
       this.rotPartRotation = new float[0];
       this.prevRotPartRotation = new float[0];
       this.lastRiderYaw = 0.0F;
@@ -391,10 +380,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.lowPassPartialTicks = new MCH_LowPassFilterFloat(10);
       this.extraBoundingBox = new MCH_BoundingBox[0];
       //this.extrawheelboundingbox = new wheelBoundingBox[0];
-      W_Reflection.setBoundingBox(this, new MCH_AircraftBoundingBox(this));
+      W_Reflection.setBoundingBox(this, new MCH_BaseVehicleBoundingBox(this));
       this.lastBBDamageFactor = 1.0F;
       this.lastHitBoundingBoxType = EnumBoundingBoxType.DEFAULT;
-      this.inventory = new MCH_AircraftInventory(this);
+      this.inventory = new MCH_BaseVehicleInventory(this);
       this.fuelConsumption = 0.0D;
       this.fuelSuppliedCount = 0;
       this.canRideRackStatus = false;
@@ -667,7 +656,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return this.getAcInfo() != null?this.getAcInfo().stealth:0.0F;
    }
 
-   public MCH_AircraftInventory getGuiInventory() {
+   public MCH_BaseVehicleInventory getGuiInventory() {
       return this.inventory;
    }
 
@@ -683,10 +672,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       //todone store uav pos, not here! in updatecontrol.
          }
 
-   public static MCH_EntityAircraft getAircraft_RiddenOrControl(Entity rider) {
+   public static MCH_EntityBaseVehicle getAircraft_RiddenOrControl(Entity rider) {
       if(rider != null) {
-         if(rider.ridingEntity instanceof MCH_EntityAircraft) {
-            return (MCH_EntityAircraft)rider.ridingEntity;
+         if(rider.ridingEntity instanceof MCH_EntityBaseVehicle) {
+            return (MCH_EntityBaseVehicle)rider.ridingEntity;
          }
 
          if(rider.ridingEntity instanceof MCH_EntitySeat) {
@@ -1008,7 +997,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public void spawndropitems() {
 
       //todo please just fucking kill me
-      MCH_AircraftInfo info = this.getAcInfo();
+      MCH_BaseVehicleInfo info = this.getAcInfo();
 
       if (info != null && info.recipe != null && !info.recipe.isEmpty()) {
          //TODO I think this is broken with oredicts
@@ -1145,13 +1134,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
    }
 
-   public MCH_AircraftInfo.CameraPosition getCameraPosInfo() {
+   public MCH_BaseVehicleInfo.CameraPosition getCameraPosInfo() {
       if(this.getAcInfo() == null) {
          return null;
       } else {
          Entity player = MCH_Lib.getClientPlayer();
          int sid = this.getSeatIdByEntity(player);
-         return sid == 0 && this.canSwitchCameraPos() && this.getCameraId() > 0 && this.getCameraId() < this.getAcInfo().cameraPosition.size()?(MCH_AircraftInfo.CameraPosition)this.getAcInfo().cameraPosition.get(this.getCameraId()):(sid > 0 && sid < this.getSeatsInfo().length && this.getSeatsInfo()[sid].invCamPos?this.getSeatsInfo()[sid].getCamPos():(MCH_AircraftInfo.CameraPosition)this.getAcInfo().cameraPosition.get(0));
+         return sid == 0 && this.canSwitchCameraPos() && this.getCameraId() > 0 && this.getCameraId() < this.getAcInfo().cameraPosition.size()?(MCH_BaseVehicleInfo.CameraPosition)this.getAcInfo().cameraPosition.get(this.getCameraId()):(sid > 0 && sid < this.getSeatsInfo().length && this.getSeatsInfo()[sid].invCamPos?this.getSeatsInfo()[sid].getCamPos():(MCH_BaseVehicleInfo.CameraPosition)this.getAcInfo().cameraPosition.get(0));
       }
    }
 
@@ -1160,7 +1149,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public void setCameraId(int cameraId) {
-      MCH_Lib.DbgLog(true, "MCH_EntityAircraft.setCameraId %d -> %d", new Object[]{Integer.valueOf(this.cameraId), Integer.valueOf(cameraId)});
+      MCH_Lib.DbgLog(true, "MCH_EntityBaseVehicle.setCameraId %d -> %d", new Object[]{Integer.valueOf(this.cameraId), Integer.valueOf(cameraId)});
       this.cameraId = cameraId;
    }
 
@@ -1304,7 +1293,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if (!nbt.hasKey("AcGunnerStatus"))
          setGunnerStatus(true);
       nbt.setBoolean("AcGunnerStatus", getGunnerStatus());
-      MCH_EntityAircraft rackParent = this.getRackParent();
+      MCH_EntityBaseVehicle rackParent = this.getRackParent();
       MCH_EntitySeat rackSeat = super.ridingEntity instanceof MCH_EntitySeat?(MCH_EntitySeat)super.ridingEntity:null;
       String rackParentUniqueId = rackParent != null?rackParent.getCommonUniqueId():(rackSeat != null?rackSeat.parentUniqueID:"");
       if(rackSeat != null && rackParentUniqueId != null && !rackParentUniqueId.isEmpty()) {
@@ -1495,7 +1484,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                      //   //todo get a way to detect if the wheel boundingbox was impacted, we go from there.
                      //}
 
-                     MCH_AircraftInfo cmd1 = this.getAcInfo();
+                     MCH_BaseVehicleInfo cmd1 = this.getAcInfo();
                      if(cmd1 != null) {
                         //deranged statements below removed from above statement
                         //&& !dmt.equalsIgnoreCase("lava") && !dmt.equalsIgnoreCase("onFire")
@@ -1510,7 +1499,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                         damage *= cmd1.armorDamageFactor;
                         damage -= cmd1.armorMinDamage;
                         if(damage <= 0.0F) {
-                           MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.attackEntityFrom:no damage=%.1f -> %.1f(factor=%.2f):%s", new Object[]{Float.valueOf(org_damage), Float.valueOf(damage), Float.valueOf(damageFactor), dmt});
+                           MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseVehicle.attackEntityFrom:no damage=%.1f -> %.1f(factor=%.2f):%s", new Object[]{Float.valueOf(org_damage), Float.valueOf(damage), Float.valueOf(damageFactor), dmt});
                            return false;
                         }
 
@@ -1519,7 +1508,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                         }
                      }
 
-                     MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.attackEntityFrom:damage=%.1f(factor=%.2f):%s", new Object[]{Float.valueOf(damage), Float.valueOf(damageFactor), dmt});
+                     MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseVehicle.attackEntityFrom:damage=%.1f(factor=%.2f):%s", new Object[]{Float.valueOf(damage), Float.valueOf(damageFactor), dmt});
                      this.setDamageTaken(this.getDamageTaken() + (int)damage);
                   }
 
@@ -1777,101 +1766,30 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return 0.0F;
    }
 
-   /** Aircraft types can reduce all three pilot control axes under degraded airflow. */
+   /** Vehicle families can override this to reduce pilot control authority. */
    protected float getControlAuthorityFactor() {
-      MCH_AircraftInfo info = this.getAcInfo();
-      return info != null ? (float)MCH_FlightModel.getHighGControlAuthority(this.currentGForce,
-            info.maxComfortableG, info.maxStructuralG, info.gControlPenalty) : 1.0F;
+      return 1.0F;
    }
 
-   /** Current simplified load factor, useful to HUDs and aircraft-specific extensions. */
+   /** Current simplified load factor. Generic vehicles do not run fixed-wing stress simulation. */
    public double getCurrentGForce() {
-      return this.currentGForce;
+      return 1.0D;
    }
 
    public float getPitchAngularVelocity() {
-      return this.pitchAngularVelocity;
+      return 0.0F;
    }
 
    public float getRollAngularVelocity() {
-      return this.rollAngularVelocity;
+      return 0.0F;
    }
 
    public float getYawAngularVelocity() {
-      return this.yawAngularVelocity;
+      return 0.0F;
    }
 
-   protected double getAirspeed() {
-      return Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
-            + super.motionZ * super.motionZ);
-   }
-
-   protected double getCompressibilitySpeed() {
-      MCH_AircraftInfo info = this.getAcInfo();
-      return info == null ? 0.0D : (info.compressibilitySpeed > 0.0F
-            ? (double)info.compressibilitySpeed : (double)info.speed * 0.9D);
-   }
-
-   protected double getMaxSafeSpeed() {
-      MCH_AircraftInfo info = this.getAcInfo();
-      return info == null ? 0.0D : (info.maxSafeSpeed > 0.0F
-            ? (double)info.maxSafeSpeed : (double)info.speed * 1.1D);
-   }
-
-   /** Override to customize how an aircraft reacts above its structural load limit. */
-   protected void onStructuralOverload(double severity) {
-   }
-
-   /** Override to customize how airframe damage is applied during an overspeed. */
-   protected void applyOverspeedDamage(double severity) {
-      MCH_AircraftInfo info = this.getAcInfo();
-      if(info == null || info.overspeedDamageRate <= 0.0F || severity <= 0.0D || this.isDestroyed()) {
-         return;
-      }
-
-      this.overspeedDamageAccumulator += severity * (double)info.overspeedDamageRate;
-      int damage = (int)this.overspeedDamageAccumulator;
-      if(damage > 0) {
-         this.overspeedDamageAccumulator -= (double)damage;
-         this.setDamageTaken(this.getDamageTaken() + damage);
-      }
-   }
-
-   private void updateFlightStress() {
-      MCH_AircraftInfo info = this.getAcInfo();
-      if(info == null) {
-         this.currentGForce = 1.0D;
-         return;
-      }
-
-      double pitchRate = Math.max(Math.abs((double)this.pitchAngularVelocity),
-            Math.abs((double)MathHelper.wrapAngleTo180_float(this.getRotPitch() - this.prevRotationPitch)));
-      double yawRate = Math.max(Math.abs((double)this.yawAngularVelocity),
-            Math.abs((double)MathHelper.wrapAngleTo180_float(this.getRotYaw() - this.prevRotationYaw)));
-      double turnRate = Math.sqrt(pitchRate * pitchRate + yawRate * yawRate);
-      double speed = this.getAirspeed();
-      this.currentGForce = MCH_FlightModel.getApproximateGForce(speed, turnRate);
-
-      double structuralOverload = Math.max(0.0D, this.currentGForce / Math.max(1.0D,
-            (double)info.maxStructuralG) - 1.0D);
-      double overspeed = MCH_FlightModel.getOverspeedSeverity(speed, this.getMaxSafeSpeed());
-      if(!super.worldObj.isRemote) {
-         if(structuralOverload > 0.0D) {
-            this.onStructuralOverload(structuralOverload);
-         }
-         this.applyOverspeedDamage(overspeed);
-      } else if(info.hasalert && super.ticksExisted % 20 == 0
-            && W_Entity.isEqual(MCH_MOD.proxy.getClientPlayer(), this.getRiddenByEntity())) {
-         boolean highLoad = this.currentGForce > (double)info.maxComfortableG;
-         boolean compressing = speed > this.getCompressibilitySpeed();
-         //if(highLoad || compressing || overspeed > 0.0D) {
-         //   //TODO: FIX this plays for ground vehicles too, since everything extends MCH_EntityAircraft.
-         //   // this also is just completely bugged because it should only be while pitching down (eg gaining momentum, overspeed.
-         //   // NOT while full throttle going straight
-              // ALSO everything needs to factor in mcheli config AllPlaneSpeed because by default in MCHO AllPlaneSpeed = 1000.00
-         //   W_McClient.DEF_playSoundFX("random.click", 0.8F, overspeed > 0.0D ? 0.6F : 1.4F);
-         //}
-      }
+   /** Hook for vehicle-family-specific stress or aerodynamic updates. */
+   protected void updateVehicleStress() {
    }
 
    public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
@@ -1934,25 +1852,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
 
       float controlAuthority = this.getControlAuthorityFactor();
-      double pitchAuthority = MCH_FlightModel.getCompressibilityPitchAuthority(this.getAirspeed(),
-            this.getCompressibilitySpeed(), this.getMaxSafeSpeed(), this.getAcInfo().compressibilityPitchPenalty);
-      pitch *= controlAuthority * (float)pitchAuthority;
+      pitch *= controlAuthority;
       roll *= controlAuthority;
       yaw *= controlAuthority;
-
-      // The legacy controls above still define the requested angular rate.
-      // Integrating that request as a damped body rate retains existing mobility
-      // tuning while preventing the airframe from snapping to every mouse movement.
-      MCH_AircraftInfo info = this.getAcInfo();
-      this.pitchAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.pitchAngularVelocity, pitch,
-            info.pitchTorque, info.pitchDamping, info.inertiaMultiplier, partialTicks);
-      this.rollAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.rollAngularVelocity, roll,
-            info.rollTorque, info.rollDamping, info.inertiaMultiplier, partialTicks);
-      this.yawAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.yawAngularVelocity, yaw,
-            info.yawTorque, info.yawDamping, info.inertiaMultiplier, partialTicks);
-      pitch = this.pitchAngularVelocity * partialTicks;
-      roll = this.rollAngularVelocity * partialTicks;
-      yaw = this.yawAngularVelocity * partialTicks;
 
       MCH_Math.FMatrix m_add1 = MCH_Math.newMatrix();
       MCH_Math.MatTurnZ(m_add1, roll / 180.0F * 3.1415927F);
@@ -1988,7 +1890,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       float RV = 180.0F;
       if(MathHelper.abs(this.getRotPitch()) > 90.0F) {
-         MCH_Lib.DbgLog(true, "MCH_EntityAircraft.setAngles Error:Pitch=%.1f", new Object[]{Float.valueOf(this.getRotPitch())});
+         MCH_Lib.DbgLog(true, "MCH_EntityBaseVehicle.setAngles Error:Pitch=%.1f", new Object[]{Float.valueOf(this.getRotPitch())});
       }
 
       if(this.getRotRoll() > 180.0F) {
@@ -2070,7 +1972,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          Iterator i$ = this.getAcInfo().searchLights.iterator();
 
          while(i$.hasNext()) {
-            MCH_AircraftInfo.SearchLight sl = (MCH_AircraftInfo.SearchLight)i$.next();
+            MCH_BaseVehicleInfo.SearchLight sl = (MCH_BaseVehicleInfo.SearchLight)i$.next();
             Vec3 pos = this.getTransformedPosition(sl.pos);
             double dist = entity.getDistanceSq(pos.xCoord, pos.yCoord, pos.zCoord);
             if(dist > 2.0D && dist < (double)(sl.height * sl.height + 20.0F)) {
@@ -2129,7 +2031,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
 
       //if (this.haveSearchLight() && this.isSearchLightON()) {
-      //   for (MCH_AircraftInfo.SearchLight sl : this.getAcInfo().searchLights) {
+      //   for (MCH_BaseVehicleInfo.SearchLight sl : this.getAcInfo().searchLights) {
       //      Vec3 pos = this.getTransformedPosition(sl.pos);
 //
       //      int bx = (int)Math.floor(pos.xCoord);
@@ -2143,7 +2045,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       //   }
       //} else {
       //   // Light OFF: remove previously placed light blocks
-      //   for (MCH_AircraftInfo.SearchLight sl : this.getAcInfo().searchLights) {
+      //   for (MCH_BaseVehicleInfo.SearchLight sl : this.getAcInfo().searchLights) {
       //      Vec3 pos = this.getTransformedPosition(sl.pos);
 //
       //      int bx = (int)Math.floor(pos.xCoord);
@@ -2171,7 +2073,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       this.prevCurrentThrottle = this.getCurrentThrottle();
       this.lastBBDamageFactor = 1.0F;
-      this.updateFlightStress();
+      this.updateVehicleStress();
       this.updateControl();
       this.checkServerNoMove();
       this.onUpdate_RidingEntity();
@@ -2179,7 +2081,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       Iterator itr = this.listUnmountReserve.iterator();
 
       while(itr.hasNext()) {
-         MCH_EntityAircraft.UnmountReserve ft = (MCH_EntityAircraft.UnmountReserve)itr.next();
+         MCH_EntityBaseVehicle.UnmountReserve ft = (MCH_EntityBaseVehicle.UnmountReserve)itr.next();
          if(ft.entity != null && !ft.entity.isDead) {
             ft.entity.setPosition(ft.posX, ft.posY, ft.posZ);
             ft.entity.fallDistance = super.fallDistance;
@@ -2215,15 +2117,15 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                           if (MCH_Config.applyDamageVsEntity(entity, DamageSource.inFire, 1.0F) > 0.0F) {
                              //todo get and summon a random few items used in the recipe for the vehicle here
                              //this is where vehicle dies; we want people killing things to at least return some profit
-                             //MCH_AircraftInfo.RotPart)this.getAcInfo()
-                             //MCH_AircraftInfo.
+                             //MCH_BaseVehicleInfo.RotPart)this.getAcInfo()
+                             //MCH_BaseVehicleInfo.
                              entity.setFire(5);
                              //this.getAcInfo().recipe.
 
 
                              //item drop logic
 
-                             //MCH_AircraftInfo info = this.getAcInfo();
+                             //MCH_BaseVehicleInfo info = this.getAcInfo();
                              //if (info != null && info.recipe != null && !info.recipe.isEmpty()) {
                              //   System.out.println("[MCH] Vehicle destroyed: attempting to drop recipe items...");
 //
@@ -2513,7 +2415,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       // Only place / refresh lights if the searchlight is actually on
       if (haveSearchLight() && isSearchLightON()) {
          for (Object o : this.getAcInfo().searchLights) {
-            MCH_AircraftInfo.SearchLight sl = (MCH_AircraftInfo.SearchLight) o;
+            MCH_BaseVehicleInfo.SearchLight sl = (MCH_BaseVehicleInfo.SearchLight) o;
             Vec3 p = getTransformedPosition(sl.pos);
 
             int bx = MathHelper.floor_double(p.xCoord);
@@ -2625,7 +2527,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             }
 
             if(super.ridingEntity instanceof MCH_EntitySeat) {
-               MCH_EntityAircraft var3 = ((MCH_EntitySeat)super.ridingEntity).getParent();
+               MCH_EntityBaseVehicle var3 = ((MCH_EntitySeat)super.ridingEntity).getParent();
                if(var3 != null) {
                   this.noCollisionEntities.put(var3, 60);
                }
@@ -2911,8 +2813,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if(this.haveRotPart()) {
          for(int i = 0; i < this.rotPartRotation.length; ++i) {
             this.prevRotPartRotation[i] = this.rotPartRotation[i];
-            if(!this.isDestroyed() && ((MCH_AircraftInfo.RotPart)this.getAcInfo().partRotPart.get(i)).rotAlways || this.getRiddenByEntity() != null) {
-               this.rotPartRotation[i] += ((MCH_AircraftInfo.RotPart)this.getAcInfo().partRotPart.get(i)).rotSpeed;
+            if(!this.isDestroyed() && ((MCH_BaseVehicleInfo.RotPart)this.getAcInfo().partRotPart.get(i)).rotAlways || this.getRiddenByEntity() != null) {
+               this.rotPartRotation[i] += ((MCH_BaseVehicleInfo.RotPart)this.getAcInfo().partRotPart.get(i)).rotSpeed;
                if(this.rotPartRotation[i] < 0.0F) {
                   this.rotPartRotation[i] += 360.0F;
                }
@@ -2964,7 +2866,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             ++this.tickRepelling;
          } else if(!super.worldObj.isRemote) {
             for(int ropeIdx = 0; ropeIdx < this.getAcInfo().repellingHooks.size(); ++ropeIdx) {
-               MCH_AircraftInfo.RepellingHook hook = (MCH_AircraftInfo.RepellingHook)this.getAcInfo().repellingHooks.get(ropeIdx);
+               MCH_BaseVehicleInfo.RepellingHook hook = (MCH_BaseVehicleInfo.RepellingHook)this.getAcInfo().repellingHooks.get(ropeIdx);
                if(this.getCountOnUpdate() % hook.interval == 0) {
                   for(int i = 1; i < this.getSeatNum(); ++i) {
                      MCH_EntitySeat seat = this.getSeat(i);
@@ -3019,10 +2921,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       Vec3 v = Vec3.createVectorHelper(super.posX, super.posY, super.posZ);
       float yaw = this.getRotYaw();
       float pitch = this.getRotPitch();
-      MCH_EntityAircraft rackParent = null;
+      MCH_EntityBaseVehicle rackParent = null;
       MCH_SeatRackInfo rackInfo = null;
       if(super.ridingEntity instanceof MCH_EntitySeat) {
-         MCH_EntityAircraft ac = ((MCH_EntitySeat)super.ridingEntity).getParent();
+         MCH_EntityBaseVehicle ac = ((MCH_EntitySeat)super.ridingEntity).getParent();
          MCH_SeatInfo seatInfo = ac != null?ac.getSeatInfo(this):null;
          if(seatInfo instanceof MCH_SeatRackInfo) {
             rackParent = ac;
@@ -3068,7 +2970,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             seat = this.getSeatByEntity(entity);
             if(seat != null) {
                this.lastUsedRopeIndex = (this.lastUsedRopeIndex + 1) % this.getAcInfo().repellingHooks.size();
-               dropPos = this.getTransformedPosition(((MCH_AircraftInfo.RepellingHook)this.getAcInfo().repellingHooks.get(this.lastUsedRopeIndex)).pos, (Vec3)this.prevPosition.oldest());
+               dropPos = this.getTransformedPosition(((MCH_BaseVehicleInfo.RepellingHook)this.getAcInfo().repellingHooks.get(this.lastUsedRopeIndex)).pos, (Vec3)this.prevPosition.oldest());
                dropPos = dropPos.addVector(0.0D, -2.0D, 0.0D);
                seat.posX = dropPos.xCoord;
                seat.posY = dropPos.yCoord;
@@ -3079,7 +2981,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                entity.posZ = dropPos.zCoord;
                this.unmountEntityRepelling(entity, dropPos, this.lastUsedRopeIndex);
             } else {
-               MCH_Lib.Log((Entity)this, "Error:MCH_EntityAircraft.unmount seat=null : " + entity, new Object[0]);
+               MCH_Lib.Log((Entity)this, "Error:MCH_EntityBaseVehicle.unmount seat=null : " + entity, new Object[0]);
             }
          } else if(this.canUnmount(entity)) {
             seat = this.getSeatByEntity(entity);
@@ -3094,7 +2996,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                entity.posZ = dropPos.zCoord;
                this.dropEntityParachute(entity);
             } else {
-               MCH_Lib.Log((Entity)this, "Error:MCH_EntityAircraft.unmount seat=null : " + entity, new Object[0]);
+               MCH_Lib.Log((Entity)this, "Error:MCH_EntityBaseVehicle.unmount seat=null : " + entity, new Object[0]);
             }
          }
 
@@ -3105,10 +3007,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return this.getAcInfo() != null && this.getAcInfo().isEnableParachuting && this.getSeatIdByEntity(entity) > 1 && MCH_Lib.getBlockIdY(this, 3, -13) == 0?(this.haveHatch() && this.getHatchRotation() > 89.0F?this.getSeatIdByEntity(entity) > 1:this.getSeatIdByEntity(entity) > 1):false;
    }
 
-   public MCH_EntityAircraft getRackParent() {
+   public MCH_EntityBaseVehicle getRackParent() {
       if(super.ridingEntity instanceof MCH_EntitySeat) {
          MCH_EntitySeat seat = (MCH_EntitySeat)super.ridingEntity;
-         MCH_EntityAircraft parent = seat.getParent();
+         MCH_EntityBaseVehicle parent = seat.getParent();
          if(parent != null && parent.getSeatInfo(seat.seatID + 1) instanceof MCH_SeatRackInfo) {
             return parent;
          }
@@ -3134,8 +3036,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.setPosition(this.pendingRackPosX, this.pendingRackPosY, this.pendingRackPosZ);
       this.setVelocity(0.0D, 0.0D, 0.0D);
       for(Object object : super.worldObj.loadedEntityList) {
-         if(object instanceof MCH_EntityAircraft) {
-            MCH_EntityAircraft parent = (MCH_EntityAircraft)object;
+         if(object instanceof MCH_EntityBaseVehicle) {
+            MCH_EntityBaseVehicle parent = (MCH_EntityBaseVehicle)object;
             if(this.pendingRackParentUniqueId.equals(parent.getCommonUniqueId())) {
                parent.repairInvalidOccupantsForInteraction("rack_restore");
                parent.searchSeat();
@@ -3200,7 +3102,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             this.mountEntity((Entity)null);
             this.waitMountEntity = 20;
          } else if(super.ridingEntity instanceof MCH_EntitySeat) {
-            MCH_EntityAircraft parent = ((MCH_EntitySeat)super.ridingEntity).getParent();
+            MCH_EntityBaseVehicle parent = ((MCH_EntitySeat)super.ridingEntity).getParent();
             if(parent != this.rackMountParent) {
                this.rackMountParent = parent;
                this.rackThrottleInput = false;
@@ -3217,11 +3119,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    }
 
-   private boolean isLaunchRack(MCH_EntityAircraft parent, MCH_SeatRackInfo rackInfo) {
+   private boolean isLaunchRack(MCH_EntityBaseVehicle parent, MCH_SeatRackInfo rackInfo) {
       return parent instanceof MCH_EntityShip || rackInfo.launchRack;
    }
 
-   private void applyRackLaunch(MCH_EntityAircraft parent, MCH_SeatRackInfo rackInfo) {
+   private void applyRackLaunch(MCH_EntityBaseVehicle parent, MCH_SeatRackInfo rackInfo) {
       if(this.throttleUp || this.throttleDown) {
          this.rackThrottleInput = true;
       }
@@ -3323,12 +3225,12 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             //Entity entity = damageSource.getEntity();
             if (this instanceof MCH_EntityTank) {
 
-               MCH_AircraftInfo cmd1 = this.getAcInfo();
+               MCH_BaseVehicleInfo cmd1 = this.getAcInfo();
 
                if(cmd1 != null) {
 
                   System.out.println("should be a tank");
-                  //MCH_AircraftInfo.armorMinDamage
+                  //MCH_BaseVehicleInfo.armorMinDamage
                   //todo test for armor min damage
                   this.attackEntityFrom(DamageSource.inWall, hp1 + cmd1.armorMinDamage);
                }
@@ -3435,10 +3337,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       float range = this.getAcInfo() != null?this.getAcInfo().repairOtherVehiclesRange:0.0F;
       if(range > 0.0F) {
          if(!super.worldObj.isRemote && this.getCountOnUpdate() % 20 == 0) {
-            List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, this.getBoundingBox().expand((double)range, (double)range, (double)range));
+            List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityBaseVehicle.class, this.getBoundingBox().expand((double)range, (double)range, (double)range));
 
             for(int i = 0; i < list.size(); ++i) {
-               MCH_EntityAircraft ac = (MCH_EntityAircraft)list.get(i);
+               MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)list.get(i);
                if(!W_Entity.isEqual(this, ac) && ac.getHP() < ac.getMaxHP()) {
                   ac.setDamageTaken(ac.getDamageTaken() - this.getAcInfo().repairOtherVehiclesValue);
                }
@@ -3542,10 +3444,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       float range = this.getAcInfo() != null?this.getAcInfo().fuelSupplyRange:0.0F;
       if(range > 0.0F) {
          if(!super.worldObj.isRemote && this.getCountOnUpdate() % 10 == 0) {
-            List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, this.getBoundingBox().expand((double)range, (double)range, (double)range));
+            List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityBaseVehicle.class, this.getBoundingBox().expand((double)range, (double)range, (double)range));
 
             for(int i = 0; i < list.size(); ++i) {
-               MCH_EntityAircraft ac = (MCH_EntityAircraft)list.get(i);
+               MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)list.get(i);
                if(!W_Entity.isEqual(this, ac)) {
                   if((!super.onGround || ac.canSupply()) && ac.getFuel() < ac.getMaxFuel()) {
                      int fc = ac.getMaxFuel() - ac.getFuel();
@@ -3624,7 +3526,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    public void updateSupplyAmmo() {
       if(!super.worldObj.isRemote) {
          boolean isReloading = false;
-         if(this.getRiddenByEntity() instanceof EntityPlayer && !this.getRiddenByEntity().isDead && ((EntityPlayer)this.getRiddenByEntity()).openContainer instanceof MCH_AircraftGuiContainer) {
+         if(this.getRiddenByEntity() instanceof EntityPlayer && !this.getRiddenByEntity().isDead && ((EntityPlayer)this.getRiddenByEntity()).openContainer instanceof MCH_BaseVehicleGuiContainer) {
             isReloading = true;
          }
 
@@ -3800,10 +3702,10 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if(range > 0.0F) {
          //todo umm what the figma no fuck you no more free nukes wtf
          if(!super.worldObj.isRemote && this.getCountOnUpdate() % 40 == 0) {
-            List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityAircraft.class, this.getBoundingBox().expand((double)range, (double)range, (double)range));
+            List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityBaseVehicle.class, this.getBoundingBox().expand((double)range, (double)range, (double)range));
 
             for(int i = 0; i < list.size(); ++i) {
-               MCH_EntityAircraft ac = (MCH_EntityAircraft)list.get(i);
+               MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)list.get(i);
                if(!W_Entity.isEqual(this, ac) && ac.canSupply()) {
                   for(int wid = 0; wid < ac.getWeaponNum(); ++wid) {
                      MCH_WeaponSet ws = ac.getWeapon(wid);
@@ -3877,7 +3779,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
    }
 
-   public MCH_EntityAircraft setTextureName(String name) {
+   public MCH_EntityBaseVehicle setTextureName(String name) {
       if(name != null && !name.isEmpty()) {
          this.getDataWatcher().updateObject(21, String.valueOf(name));
       }
@@ -4266,8 +4168,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       for(int var17 = 0; var17 < var16.size(); ++var17) {
          Entity entity = (Entity)var16.get(var17);
-         if(par1Entity instanceof MCH_EntityAircraft
-                 && ((MCH_EntityAircraft)par1Entity).noCollisionEntities.containsKey(entity)) {
+         if(par1Entity instanceof MCH_EntityBaseVehicle
+                 && ((MCH_EntityBaseVehicle)par1Entity).noCollisionEntities.containsKey(entity)) {
             continue;
          }
          if(!W_Lib.isEntityLivingBase(entity) && !(entity instanceof MCH_EntitySeat) && !(entity instanceof MCH_EntityHitBox)) {
@@ -4618,7 +4520,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if(this.getAcInfo() == null) {
          return null;
       } else {
-         MCH_AircraftInfo.Weapon weapon = this.getAcInfo().getWeaponByName(name);
+         MCH_BaseVehicleInfo.Weapon weapon = this.getAcInfo().getWeaponByName(name);
          Entity entity = null;
          if(weapon != null) {
             entity = this.getEntityBySeatId(this.getWeaponSeatID((MCH_WeaponInfo)null, weapon));
@@ -4653,7 +4555,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public void setSeat(int idx, MCH_EntitySeat seat) {
       if(idx < this.seats.length) {
-         MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.setSeat SeatID=" + idx + " / seat[]" + (this.seats[idx] != null) + " / " + (seat.riddenByEntity != null), new Object[0]);
+         MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseVehicle.setSeat SeatID=" + idx + " / seat[]" + (this.seats[idx] != null) + " / " + (seat.riddenByEntity != null), new Object[0]);
          if(this.seats[idx] != null && this.seats[idx].riddenByEntity != null) {
             ;
          }
@@ -4872,7 +4774,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          z = var14.prevPosZ + (var14.posZ - var14.prevPosZ) * (double)tick;
          MCH_ViewEntityDummy.setCameraPosition(x, y, z);
       } else {
-         MCH_AircraftInfo.CameraPosition var13 = this.getCameraPosInfo();
+         MCH_BaseVehicleInfo.CameraPosition var13 = this.getCameraPosInfo();
          if(var13 != null && var13.pos != null) {
             MCH_SeatInfo var12 = this.getSeatInfo(player);
             Vec3 v;
@@ -4934,7 +4836,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public Vec3 getTransformedPosition(double x, double y, double z, double px, double py, double pz, boolean rotSeat) {
       if(rotSeat && this.getAcInfo() != null) {
-         MCH_AircraftInfo v = this.getAcInfo();
+         MCH_BaseVehicleInfo v = this.getAcInfo();
          Vec3 tv = MCH_Lib.RotVec3(x - v.turretPosition.xCoord, y - v.turretPosition.yCoord, z - v.turretPosition.zCoord, -this.getLastRiderYaw() + this.getRotYaw(), 0.0F, 0.0F);
          x = tv.xCoord + v.turretPosition.xCoord;
          y = tv.yCoord + v.turretPosition.xCoord;
@@ -5067,7 +4969,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
       if(pilot != null && this.getAcInfo() != null) {
          int cwid = this.getCurrentWeaponID(pilot);
-         MCH_AircraftInfo.Weapon w = this.getAcInfo().getWeaponById(cwid);
+         MCH_BaseVehicleInfo.Weapon w = this.getAcInfo().getWeaponById(cwid);
          if(w != null && this.getWeaponSeatID(this.getWeaponInfoById(cwid), w) == sid) {
             int next = this.getNextWeaponID(pilot, 1);
             MCH_Lib.DbgLog(super.worldObj, "onMountEntitySeat:%d:->%d", new Object[]{Integer.valueOf(W_Entity.getEntityId(pilot)), Integer.valueOf(next)});
@@ -5114,7 +5016,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                   if(entity.riddenByEntity == null && entity.canBePushed()) {
                      this.waitMountEntity = 20;
-                     MCH_Lib.DbgLog(super.worldObj.isRemote, "MCH_EntityAircraft.mountWithNearEmptyMinecart:" + entity, new Object[0]);
+                     MCH_Lib.DbgLog(super.worldObj.isRemote, "MCH_EntityBaseVehicle.mountWithNearEmptyMinecart:" + entity, new Object[0]);
                      this.mountEntity(entity);
                      return;
                   }
@@ -5164,7 +5066,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          if(rackUnmountPosition != null) {
             entity.setLocationAndAngles(rackUnmountPosition.xCoord, rackUnmountPosition.yCoord, rackUnmountPosition.zCoord,
                   this.getRotYaw() + seatInfo.fixYaw, seatInfo.fixPitch);
-            this.listUnmountReserve.add(new MCH_EntityAircraft.UnmountReserve(entity, rackUnmountPosition.xCoord,
+            this.listUnmountReserve.add(new MCH_EntityBaseVehicle.UnmountReserve(entity, rackUnmountPosition.xCoord,
                   rackUnmountPosition.yCoord, rackUnmountPosition.zCoord));
          } else {
             this.setUnmountPosition(entity, Vec3.createVectorHelper(seatInfo.pos.xCoord, 0.0D, seatInfo.pos.zCoord));
@@ -5584,11 +5486,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    public Vec3 getRopePos(int ropeIndex) {
-      return this.getAcInfo() != null && this.getAcInfo().haveRepellingHook() && ropeIndex < this.getAcInfo().repellingHooks.size()?this.getTransformedPosition(((MCH_AircraftInfo.RepellingHook)this.getAcInfo().repellingHooks.get(ropeIndex)).pos):Vec3.createVectorHelper(super.posX, super.posY, super.posZ);
+      return this.getAcInfo() != null && this.getAcInfo().haveRepellingHook() && ropeIndex < this.getAcInfo().repellingHooks.size()?this.getTransformedPosition(((MCH_BaseVehicleInfo.RepellingHook)this.getAcInfo().repellingHooks.get(ropeIndex)).pos):Vec3.createVectorHelper(super.posX, super.posY, super.posZ);
    }
 
    private void startRepelling() {
-      MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.startRepelling()", new Object[0]);
+      MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseVehicle.startRepelling()", new Object[0]);
       this.setRepellingStat(true);
       this.throttleUp = false;
       this.throttleDown = false;
@@ -5598,7 +5500,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
    }
 
    private void stopRepelling() {
-      MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.stopRepelling()", new Object[0]);
+      MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseVehicle.stopRepelling()", new Object[0]);
       this.setRepellingStat(false);
    }
 
@@ -5663,7 +5565,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       if (!this.isNewUAV()) {
 
          if (rByEntity != null) {
-            MCH_AircraftInfo info = this.getAcInfo();
+            MCH_BaseVehicleInfo info = this.getAcInfo();
             Vec3 v;
             if (info != null && info.unmountPosition != null) {
                v = this.getTransformedPosition(info.unmountPosition);
@@ -5674,13 +5576,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             }
 
             rByEntity.setPosition(v.xCoord, v.yCoord, v.zCoord);
-            this.listUnmountReserve.add(new MCH_EntityAircraft.UnmountReserve(rByEntity, v.xCoord, v.yCoord, v.zCoord));
+            this.listUnmountReserve.add(new MCH_EntityBaseVehicle.UnmountReserve(rByEntity, v.xCoord, v.yCoord, v.zCoord));
          }
 
       } else {
          //new uav only
             if (rByEntity != null) {
-                MCH_AircraftInfo info = this.getAcInfo();
+                MCH_BaseVehicleInfo info = this.getAcInfo();
                 if (info != null && info.unmountPosition != null) {
                     rByEntity.setPosition(info.unmountPosition.xCoord, info.unmountPosition.yCoord, info.unmountPosition.zCoord);
                    rByEntity.setPosition(UavStationPosX, UavStationPosY, UavStationPosZ);
@@ -5713,7 +5615,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          }
       } else {
          if (entity != null) {
-            MCH_AircraftInfo info = this.getAcInfo();
+            MCH_BaseVehicleInfo info = this.getAcInfo();
             if (info != null && info.unmountPosition != null) {
                MCH_EntitySeat[] arr$ = this.seats;
                int len$ = arr$.length;
@@ -5896,9 +5798,9 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             for(int i = 0; i < list.size(); ++i) {
                Entity entity = (Entity)list.get(i);
                if(this.canRideSeatOrRack(1 + sid, entity)) {
-                  if(entity instanceof MCH_IEntityCanRideAircraft) {
-                     if(((MCH_IEntityCanRideAircraft)entity).canRideAircraft(this, sid, info)) {
-                        MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.mountEntityToRack:%d:%s", new Object[]{Integer.valueOf(sid), entity});
+                  if(entity instanceof MCH_IEntityCanRideBaseVehicle) {
+                     if(((MCH_IEntityCanRideBaseVehicle)entity).canRideAircraft(this, sid, info)) {
+                        MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseVehicle.mountEntityToRack:%d:%s", new Object[]{Integer.valueOf(sid), entity});
                         entity.mountEntity(seat);
                         ++var12;
                         break;
@@ -5906,7 +5808,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   } else if(entity.ridingEntity == null) {
                      NBTTagCompound nbt = entity.getEntityData();
                      if(nbt.hasKey("CanMountEntity") && nbt.getBoolean("CanMountEntity")) {
-                        MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.mountEntityToRack:%d:%s:%s", new Object[]{Integer.valueOf(sid), entity, entity.getClass()});
+                        MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseVehicle.mountEntityToRack:%d:%s:%s", new Object[]{Integer.valueOf(sid), entity, entity.getClass()});
                         entity.mountEntity(seat);
                         ++var12;
                         break;
@@ -5944,7 +5846,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                entity.rotationPitch = info.fixPitch;
             } else {
                Vec3 pos = info.getEntryPos();
-               if(entity instanceof MCH_EntityAircraft) {
+               if(entity instanceof MCH_EntityBaseVehicle) {
                   if(pos.zCoord >= (double)this.getAcInfo().bbZ) {
                      pos = pos.addVector(0.0D, 0.0D, 12.0D);
                   } else {
@@ -5957,20 +5859,20 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                seat.posY = entity.posY = super.posY + v.yCoord;
                seat.posZ = entity.posZ = super.posZ + v.zCoord;
             }
-            if(!(entity instanceof MCH_EntityAircraft)) {
-               MCH_EntityAircraft.UnmountReserve ur = new MCH_EntityAircraft.UnmountReserve(entity, entity.posX, entity.posY, entity.posZ);
+            if(!(entity instanceof MCH_EntityBaseVehicle)) {
+               MCH_EntityBaseVehicle.UnmountReserve ur = new MCH_EntityBaseVehicle.UnmountReserve(entity, entity.posX, entity.posY, entity.posZ);
                ur.cnt = 8;
                this.listUnmountReserve.add(ur);
             }
             entity.mountEntity((Entity)null);
-            boolean launchedAircraft = entity instanceof MCH_EntityAircraft && this.isLaunchRack(this, info);
-            if(entity instanceof MCH_EntityAircraft) {
-               ((MCH_EntityAircraft)entity).applyRackLaunch(this, info);
+            boolean launchedAircraft = entity instanceof MCH_EntityBaseVehicle && this.isLaunchRack(this, info);
+            if(entity instanceof MCH_EntityBaseVehicle) {
+               ((MCH_EntityBaseVehicle)entity).applyRackLaunch(this, info);
             }
             if(launchedAircraft || MCH_Lib.getBlockIdY(this, 3, -20) > 0) {
-               MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.unmountEntityFromRack:%d:%s", new Object[]{Integer.valueOf(sid), entity});
+               MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseVehicle.unmountEntityFromRack:%d:%s", new Object[]{Integer.valueOf(sid), entity});
             } else {
-               MCH_Lib.DbgLog(super.worldObj, "MCH_EntityAircraft.unmountEntityFromRack:%d Parachute:%s", new Object[]{Integer.valueOf(sid), entity});
+               MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseVehicle.unmountEntityFromRack:%d Parachute:%s", new Object[]{Integer.valueOf(sid), entity});
                this.dropEntityParachute(entity);
             }
             break;
@@ -6009,11 +5911,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       int rackCount = 0;
       for(int i = 0; i < list.size(); ++i) {
          Entity entity = (Entity)list.get(i);
-         if(!(entity instanceof MCH_EntityAircraft)) {
+         if(!(entity instanceof MCH_EntityBaseVehicle)) {
             continue;
          }
          ++carrierCount;
-         MCH_EntityAircraft ac = (MCH_EntityAircraft)entity;
+         MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)entity;
          ac.repairInvalidOccupantsForInteraction("ride_rack_candidate");
          ac.debugRackState("RIDE-CANDIDATE");
          if(ac.getAcInfo() == null) {
@@ -6113,8 +6015,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
             for(int i = 0; i < list.size(); ++i) {
                Entity entity = (Entity)list.get(i);
-               if(entity instanceof MCH_EntityAircraft) {
-                  MCH_EntityAircraft ac = (MCH_EntityAircraft)entity;
+               if(entity instanceof MCH_EntityBaseVehicle) {
+                  MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)entity;
                   if(ac.getAcInfo() != null) {
                      for(int sid = 0; sid < ac.getSeatNum(); ++sid) {
                         MCH_SeatInfo seatInfo = ac.getSeatInfo(1 + sid);
@@ -6162,7 +6064,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return super.ridingEntity == null && this.canRideRackStatus;
    }
 
-   public boolean canRideAircraft(MCH_EntityAircraft ac, int seatID, MCH_SeatRackInfo info) {
+   public boolean canRideAircraft(MCH_EntityBaseVehicle ac, int seatID, MCH_SeatRackInfo info) {
       if(this.getAcInfo() == null) {
          return false;
       } else if(ac.ridingEntity != null) {
@@ -6188,7 +6090,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             Iterator var9 = this.getAcInfo().rideRacks.iterator();
 
             while(var9.hasNext()) {
-               MCH_AircraftInfo.RideRack var11 = (MCH_AircraftInfo.RideRack)var9.next();
+               MCH_BaseVehicleInfo.RideRack var11 = (MCH_BaseVehicleInfo.RideRack)var9.next();
                i$ = ac.getAcInfo().getNumSeat() - 1 + (var11.rackID - 1);
                if(i$ == seatID && var11.name.equalsIgnoreCase(ac.getAcInfo().name)) {
                   var12 = ac.getSeat(ac.getAcInfo().getNumSeat() - 1 + var11.rackID - 1);
@@ -6209,7 +6111,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
          for(i$ = 0; i$ < len$; ++i$) {
             var12 = var10[i$];
-            if(var12 != null && var12.riddenByEntity instanceof MCH_IEntityCanRideAircraft) {
+            if(var12 != null && var12.riddenByEntity instanceof MCH_IEntityCanRideBaseVehicle) {
                return false;
             }
          }
@@ -6693,7 +6595,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             this.TVmissile.isSpawnParticle = !this.isMissileCameraMode(this.TVmissile.shootingEntity);
          } else {
             this.setTVMissile((MCH_EntityTvMissile)null);
-            MCH_AircraftInfo.CameraPosition cpi = this.getCameraPosInfo();
+            MCH_BaseVehicleInfo.CameraPosition cpi = this.getCameraPosInfo();
             Vec3 cp = cpi != null?cpi.pos:Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
             Vec3 v = MCH_Lib.RotVec3(cp, -this.getRotYaw(), -this.getRotPitch(), -this.getRotRoll());
             this.camera.setPosition(x + v.xCoord, y + v.yCoord, z + v.zCoord);
@@ -6746,16 +6648,16 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          MCH_WeaponSet[] var7 = new MCH_WeaponSet[this.getAcInfo().weaponSetList.size()];
 
          for(int i = 0; i < this.getAcInfo().weaponSetList.size(); ++i) {
-            MCH_AircraftInfo.WeaponSet ws = (MCH_AircraftInfo.WeaponSet)this.getAcInfo().weaponSetList.get(i);
+            MCH_BaseVehicleInfo.WeaponSet ws = (MCH_BaseVehicleInfo.WeaponSet)this.getAcInfo().weaponSetList.get(i);
             MCH_WeaponBase[] wb = new MCH_WeaponBase[ws.weapons.size()];
 
             for(int defYaw = 0; defYaw < ws.weapons.size(); ++defYaw) {
-               wb[defYaw] = MCH_WeaponCreator.createWeapon(super.worldObj, ws.type, ((MCH_AircraftInfo.Weapon)ws.weapons.get(defYaw)).pos, ((MCH_AircraftInfo.Weapon)ws.weapons.get(defYaw)).yaw, ((MCH_AircraftInfo.Weapon)ws.weapons.get(defYaw)).pitch, this, ((MCH_AircraftInfo.Weapon)ws.weapons.get(defYaw)).turret);
+               wb[defYaw] = MCH_WeaponCreator.createWeapon(super.worldObj, ws.type, ((MCH_BaseVehicleInfo.Weapon)ws.weapons.get(defYaw)).pos, ((MCH_BaseVehicleInfo.Weapon)ws.weapons.get(defYaw)).yaw, ((MCH_BaseVehicleInfo.Weapon)ws.weapons.get(defYaw)).pitch, this, ((MCH_BaseVehicleInfo.Weapon)ws.weapons.get(defYaw)).turret);
                wb[defYaw].aircraft = this;
             }
 
             if(wb.length > 0 && wb[0] != null) {
-               float var8 = ((MCH_AircraftInfo.Weapon)ws.weapons.get(0)).defaultYaw;
+               float var8 = ((MCH_BaseVehicleInfo.Weapon)ws.weapons.get(0)).defaultYaw;
                var7[i] = new MCH_WeaponSet(wb);
                var7[i].prevRotationYaw = var8;
                var7[i].rotationYaw = var8;
@@ -6913,13 +6815,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             MCH_WeaponSet currentWs = this.getCurrentWeapon(user);
             if (currentWs != null) {
                int sid = this.getSeatIdByEntity(user);
-               MCH_AircraftInfo.WeaponSet weaponSet = this.getAcInfo().getWeaponSetById(sid);
+               MCH_BaseVehicleInfo.WeaponSet weaponSet = this.getAcInfo().getWeaponSetById(sid);
 
                // Check if weaponSet and weapons list exist and contain at least one Weapon
                if (weaponSet != null && weaponSet.weapons != null && !weaponSet.weapons.isEmpty()) {
                   Object w0 = weaponSet.weapons.get(0);
-                  if (w0 instanceof MCH_AircraftInfo.Weapon) {
-                     prm.isTurret = ((MCH_AircraftInfo.Weapon) w0).turret;
+                  if (w0 instanceof MCH_BaseVehicleInfo.Weapon) {
+                     prm.isTurret = ((MCH_BaseVehicleInfo.Weapon) w0).turret;
                   } else {
                      // fallback or log: first element not a Weapon instance
                      prm.isTurret = false; // or your default
@@ -6977,7 +6879,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
          if(currentWs != null && currentWs.canUse()) {
             int sid = this.getSeatIdByEntity(prm.user);
             if(this.getAcInfo().getWeaponSetById(sid) != null) {
-               prm.isTurret = ((MCH_AircraftInfo.Weapon)this.getAcInfo().getWeaponSetById(sid).weapons.get(0)).turret;
+               prm.isTurret = ((MCH_BaseVehicleInfo.Weapon)this.getAcInfo().getWeaponSetById(sid).weapons.get(0)).turret;
             }
 
             int lastUsedIndex = currentWs.getCurrentWeaponIndex();
@@ -7053,7 +6955,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                      id = (id > 0) ? (id - 1) : (getWeaponNum() - 1);
                    }
 
-                MCH_AircraftInfo.Weapon w = getAcInfo().getWeaponById(id);
+                MCH_BaseVehicleInfo.Weapon w = getAcInfo().getWeaponById(id);
                 if (w != null) {
                      MCH_WeaponInfo wi = getWeaponInfoById(id);
                      int wpsid = getWeaponSeatID(wi, w);
@@ -7070,7 +6972,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
            return id;
          }
 
-   public int getWeaponSeatID(MCH_WeaponInfo wi, MCH_AircraftInfo.Weapon w) {
+   public int getWeaponSeatID(MCH_WeaponInfo wi, MCH_BaseVehicleInfo.Weapon w) {
       return wi != null && (wi.target & 195) == 0 && wi.type.isEmpty() && (MCH_MOD.proxy.isSinglePlayer() || MCH_Config.TestMode.prmBool)?1000:w.seatID;
    }
 
@@ -7204,7 +7106,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   }
 
                   w.update(this, isSelected, var16);
-                  MCH_AircraftInfo.Weapon var17 = this.getAcInfo().getWeaponById(wid);
+                  MCH_BaseVehicleInfo.Weapon var17 = this.getAcInfo().getWeaponById(wid);
                   if(var17 != null && !this.isDestroyed()) {
                      Entity var19 = this.getEntityBySeatId(this.getWeaponSeatID(this.getWeaponInfoById(wid), var17));
                      if(var17.canUsePilot && !(var19 instanceof EntityPlayer) && !(var19 instanceof MCH_EntityGunner) ) { //
@@ -7284,7 +7186,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
                for(int wid = 0; wid < this.weapons.length; ++wid) {
                   MCH_WeaponSet w = this.weapons[wid];
-                  MCH_AircraftInfo.Weapon wi = this.getAcInfo().getWeaponById(wid);
+                  MCH_BaseVehicleInfo.Weapon wi = this.getAcInfo().getWeaponById(wid);
                   if(wi != null) {
                      Entity entity = this.getEntityBySeatId(this.getWeaponSeatID(this.getWeaponInfoById(wid), wi));
                      if (wi.canUsePilot && !(entity instanceof EntityPlayer) && !(entity instanceof mcheli.mob.MCH_EntityGunner)) { //
@@ -7384,8 +7286,8 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    private void updateWeaponBay() {
       for(int i = 0; i < this.weaponBays.length; ++i) {
-         MCH_EntityAircraft.WeaponBay wb = this.weaponBays[i];
-         MCH_AircraftInfo.WeaponBay info = (MCH_AircraftInfo.WeaponBay)this.getAcInfo().partWeaponBay.get(i);
+         MCH_EntityBaseVehicle.WeaponBay wb = this.weaponBays[i];
+         MCH_BaseVehicleInfo.WeaponBay info = (MCH_BaseVehicleInfo.WeaponBay)this.getAcInfo().partWeaponBay.get(i);
          boolean isSelected = false;
          Integer[] arr$ = info.weaponIds;
          int len$ = arr$.length;
@@ -7463,13 +7365,13 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       }
    }
 
-   public MCH_AircraftInfo getAcInfo() {
+   public MCH_BaseVehicleInfo getAcInfo() {
       return this.acInfo;
    }
 
    public abstract Item getItem();
 
-   public void setAcInfo(MCH_AircraftInfo info) {
+   public void setAcInfo(MCH_BaseVehicleInfo info) {
       this.acInfo = info;
       if(info != null) {
          this.partHatch = this.createHatch();
@@ -7487,7 +7389,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public MCH_BoundingBox[] createExtraBoundingBox() {
       // Get the list of extra bounding boxes
-      MCH_AircraftInfo acInfo = this.getAcInfo();
+      MCH_BaseVehicleInfo acInfo = this.getAcInfo();
       if (acInfo == null || acInfo.extraBoundingBox == null) {
          return new MCH_BoundingBox[0];
       }
@@ -7509,7 +7411,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
 
    public wheelBoundingBox[] createannoyingboundingbox() {
       // Get the list of extra bounding boxes
-      MCH_AircraftInfo acInfo = this.getAcInfo();
+      MCH_BaseVehicleInfo acInfo = this.getAcInfo();
       if (acInfo == null || acInfo.wheelboundingbox == null) {
          return new wheelBoundingBox[0];
       }
@@ -7565,7 +7467,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
                   }
                }
             } else if(this.uavStation != null) {
-               //this.uavStation.setControlAircract((MCH_EntityAircraft)null);
+               //this.uavStation.setControlAircract((MCH_EntityBaseVehicle)null);
                //this.uavStation = null;
                //System.out.println("null");
             }
@@ -7580,7 +7482,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
             //TODO: better uav handling
             if(udx1 * udx1 + udz * udz > 15625000.0D) {
                //System.out.println("test 4");
-               this.uavStation.setControlAircract((MCH_EntityAircraft)null);
+               this.uavStation.setControlAircract((MCH_EntityBaseVehicle)null);
                this.setUavStation((MCH_EntityUavStation)null);
                //System.out.println("null 2");
 
@@ -7806,11 +7708,11 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.modeSwitchCooldown = n;
    }
 
-   protected MCH_EntityAircraft.WeaponBay[] createWeaponBays() {
-      MCH_EntityAircraft.WeaponBay[] wbs = new MCH_EntityAircraft.WeaponBay[this.getAcInfo().partWeaponBay.size()];
+   protected MCH_EntityBaseVehicle.WeaponBay[] createWeaponBays() {
+      MCH_EntityBaseVehicle.WeaponBay[] wbs = new MCH_EntityBaseVehicle.WeaponBay[this.getAcInfo().partWeaponBay.size()];
 
       for(int i = 0; i < wbs.length; ++i) {
-         wbs[i] = new MCH_EntityAircraft.WeaponBay();
+         wbs[i] = new MCH_EntityBaseVehicle.WeaponBay();
       }
 
       return wbs;
@@ -8040,7 +7942,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       this.towedChainEntity = towedChainEntity;
    }
 
-    public String getNameOnOtherRadar(MCH_EntityAircraft other) {
+    public String getNameOnOtherRadar(MCH_EntityBaseVehicle other) {
       switch (other.getAcInfo().radarType) {
          case MODERN_AA: return getAcInfo().nameOnModernAARadar;
          case EARLY_AA: return getAcInfo().nameOnEarlyAARadar;
@@ -8050,7 +7952,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
       return "?";
     }
 
-    //public String getNameOnMyRadar(MCH_EntityAircraft other) {
+    //public String getNameOnMyRadar(MCH_EntityBaseVehicle other) {
     //   switch (getAcInfo().radarType) {
     //      case MODERN_AA: return other.getAcInfo().nameOnModernAARadar;
     //      case EARLY_AA: return other.getAcInfo().nameOnEarlyAARadar;
@@ -8061,7 +7963,7 @@ public abstract class MCH_EntityAircraft extends W_EntityContainer implements MC
     //}
 
    public String getNameOnMyRadar(MCH_EntityInfo other) {
-      MCH_AircraftInfo info = MCH_AircraftInfo.allAircraftInfo.getOrDefault(other.entityName, null);
+      MCH_BaseVehicleInfo info = MCH_BaseVehicleInfo.allBaseVehicleInfo.getOrDefault(other.entityName, null);
 
       try {
          switch (getAcInfo().radarType) {

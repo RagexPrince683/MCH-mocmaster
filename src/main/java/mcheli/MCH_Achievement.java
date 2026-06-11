@@ -7,8 +7,8 @@ import mcheli.helicopter.MCH_HeliInfo;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
-import mcheli.vehicle.MCH_VehicleInfo;
-import mcheli.vehicle.MCH_VehicleInfoManager;
+import mcheli.vehicle.MCH_TurretInfo;
+import mcheli.vehicle.MCH_TurretInfoManager;
 import mcheli.wrapper.W_Achievement;
 import mcheli.wrapper.W_Item;
 import mcheli.wrapper.W_LanguageRegistry;
@@ -74,7 +74,7 @@ public class MCH_Achievement {
          if(info1 != null && info1.getItem() != null) {
             return info1.getItem();
          } else {
-            MCH_VehicleInfo info2 = MCH_VehicleInfoManager.get(defaultIconAircraft);
+            MCH_TurretInfo info2 = MCH_TurretInfoManager.get(defaultIconAircraft);
             return info2 != null && info2.getItem() != null?info2.getItem():item;
          }
       }

@@ -4,7 +4,7 @@ import com.google.common.io.ByteArrayDataInput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import mcheli.MCH_Packet;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Network;
 import net.minecraft.entity.player.EntityPlayer;
@@ -55,13 +55,13 @@ public class MCH_PacketStatusResponse extends MCH_Packet {
 
    }
 
-   public static void sendStatus(MCH_EntityAircraft ac, EntityPlayer player) {
+   public static void sendStatus(MCH_EntityBaseVehicle ac, EntityPlayer player) {
       MCH_PacketStatusResponse s = new MCH_PacketStatusResponse();
       s.setParameter(ac);
       W_Network.sendToPlayer(s, player);
    }
 
-   protected void setParameter(MCH_EntityAircraft ac) {
+   protected void setParameter(MCH_EntityBaseVehicle ac) {
       if(ac != null) {
          this.entityID_AC = W_Entity.getEntityId(ac);
          this.seatNum = (byte)(ac.getSeatNum() + 1);

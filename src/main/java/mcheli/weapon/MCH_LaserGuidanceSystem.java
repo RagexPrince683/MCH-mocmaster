@@ -2,7 +2,7 @@ package mcheli.weapon;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.wrapper.W_WorldFunc;
@@ -58,9 +58,9 @@ public class MCH_LaserGuidanceSystem implements MCH_IGuidanceSystem {
                 yaw = user.rotationYaw;  // 获取玩家的偏航角度
                 pitch = user.rotationPitch;  // 获取玩家的俯仰角度
             } else {
-                MCH_EntityAircraft ac = null; //玩家乘坐的实体
-                if(user.ridingEntity instanceof MCH_EntityAircraft) {
-                    ac = (MCH_EntityAircraft)user.ridingEntity;
+                MCH_EntityBaseVehicle ac = null; //玩家乘坐的实体
+                if(user.ridingEntity instanceof MCH_EntityBaseVehicle) {
+                    ac = (MCH_EntityBaseVehicle)user.ridingEntity;
                 } else if(user.ridingEntity instanceof MCH_EntitySeat) {
                     ac = ((MCH_EntitySeat)user.ridingEntity).getParent();
                 } else if(user.ridingEntity instanceof MCH_EntityUavStation) {

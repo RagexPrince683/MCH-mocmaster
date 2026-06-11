@@ -7,8 +7,8 @@ import mcheli.MCH_ClientCommonTickHandler;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_PacketNotifyInfoReloaded;
 import mcheli.gui.MCH_ConfigGuiContainer;
 import mcheli.gui.MCH_GuiList;
@@ -280,7 +280,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       //it starts in 0 and ends in 0. Hmm I wonder if I could get the retarded attack key shit to work now
       //NOOOOOOOOOOOOOOOOPE FUCK YOU THAT'S WRONG GET FUCKED RETARD!!!!!!!!!!!!!!!!!!
       //HAHAAAAAAAAAAAA THE FUCKING STANDARD IS WRONG!!!
-      //schizo forgets computers recognize the number 0 as 1
+      // Convert user-facing one-based values to zero-based indexes.
 
 
       MCH_GuiListItemKeyBind[] listKeyBindItems = var10000;
@@ -506,7 +506,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
 
    public void sendClientSettings() {
       if(super.mc.thePlayer != null) {
-         MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(super.mc.thePlayer);
+         MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(super.mc.thePlayer);
          if(ac != null) {
             int seatId = ac.getSeatIdByEntity(super.mc.thePlayer);
             if(seatId == 0) {
@@ -599,7 +599,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
             return;
          }
 
-         MCH_EntityAircraft ac;
+         MCH_EntityBaseVehicle ac;
          switch(button.id) {
          case 50:
             this.switchScreen(1);
@@ -651,8 +651,8 @@ public class MCH_ConfigGui extends W_GuiContainer {
             List list = super.mc.theWorld.loadedEntityList;
 
             for(int i = 0; i < list.size(); ++i) {
-               if(list.get(i) instanceof MCH_EntityAircraft) {
-                  ac = (MCH_EntityAircraft)list.get(i);
+               if(list.get(i) instanceof MCH_EntityBaseVehicle) {
+                  ac = (MCH_EntityBaseVehicle)list.get(i);
                   if(ac.getAcInfo() != null) {
                      ac.getAcInfo().reload();
                      ac.changeType(ac.getAcInfo().name);
@@ -666,15 +666,15 @@ public class MCH_ConfigGui extends W_GuiContainer {
          case 402:
             MCH_MOD.proxy.reloadHUD();
          case 400:
-            ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(this.thePlayer);
+            ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(this.thePlayer);
             if(ac != null && ac.getAcInfo() != null) {
                String var9 = ac.getAcInfo().name;
                MCH_Lib.DbgLog(true, "MCH_BaseInfo.reload : " + var9, new Object[0]);
                List var12 = super.mc.theWorld.loadedEntityList;
 
                for(int i1 = 0; i1 < var12.size(); ++i1) {
-                  if(var12.get(i1) instanceof MCH_EntityAircraft) {
-                     ac = (MCH_EntityAircraft)var12.get(i1);
+                  if(var12.get(i1) instanceof MCH_EntityBaseVehicle) {
+                     ac = (MCH_EntityBaseVehicle)var12.get(i1);
                      if(ac.getAcInfo() != null && ac.getAcInfo().name.equals(var9)) {
                         ac.getAcInfo().reload();
                         ac.changeType(var9);
@@ -748,7 +748,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
             this.drawString("Single player only!", 10, 30, 16711680);
             if(this.buttonReloadAircraftInfo != null && this.buttonReloadAircraftInfo.isOnMouseOver()) {
                this.drawString("The following things will not be reloaded until restart.", 170, 30, 16777215);
-               String[] var14 = MCH_AircraftInfo.getCannotReloadItem();
+               String[] var14 = MCH_BaseVehicleInfo.getCannotReloadItem();
                var12 = 10;
                String[] arr$ = var14;
                int var15 = var14.length;

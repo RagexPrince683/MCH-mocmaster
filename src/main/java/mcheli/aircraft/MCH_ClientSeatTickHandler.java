@@ -4,7 +4,7 @@ import mcheli.MCH_ClientTickHandlerBase;
 import mcheli.MCH_Config;
 import mcheli.MCH_Key;
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_PacketSeatPlayerControl;
 import mcheli.wrapper.W_Network;
@@ -47,7 +47,7 @@ public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
          k.update();
       this.isBeforeRiding = this.isRiding;
       EntityClientPlayerMP entityClientPlayerMP = super.mc.thePlayer;
-      MCH_EntityAircraft ac = null;
+      MCH_EntityBaseVehicle ac = null;
       if(entityClientPlayerMP != null && entityClientPlayerMP.ridingEntity instanceof MCH_EntitySeat) {
          MCH_EntitySeat seat = (MCH_EntitySeat)entityClientPlayerMP.ridingEntity;
          if(seat.getParent() == null || seat.getParent().getAcInfo() == null) {
@@ -68,16 +68,16 @@ public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
          if (this.isRiding) {
             W_Reflection.setThirdPersonDistance(ac.thirdPersonDist);
          } else {
-            if (entityClientPlayerMP == null || !(entityClientPlayerMP.ridingEntity instanceof MCH_EntityAircraft))
+            if (entityClientPlayerMP == null || !(entityClientPlayerMP.ridingEntity instanceof MCH_EntityBaseVehicle))
                W_Reflection.restoreDefaultThirdPersonDistance();
             MCH_Lib.setRenderViewEntity(entityClientPlayerMP);
          }
       }
    }
 
-   private void playerControlInGUI(EntityPlayer player, MCH_EntitySeat seat, MCH_EntityAircraft ac) {}
+   private void playerControlInGUI(EntityPlayer player, MCH_EntitySeat seat, MCH_EntityBaseVehicle ac) {}
 
-   private void playerControl(EntityPlayer player, MCH_EntitySeat seat, MCH_EntityAircraft ac) {
+   private void playerControl(EntityPlayer player, MCH_EntitySeat seat, MCH_EntityBaseVehicle ac) {
       MCH_PacketSeatPlayerControl pc = new MCH_PacketSeatPlayerControl();
       boolean send = false;
       if(this.KeyFreeLook.isKeyDown() && ac.canSwitchGunnerFreeLook(player)) {

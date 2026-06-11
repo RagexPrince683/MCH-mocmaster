@@ -3,9 +3,9 @@ package mcheli.plane;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.Iterator;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
+import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.wrapper.W_Render;
@@ -14,13 +14,13 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
-public class MCP_RenderPlane extends MCH_RenderAircraft {
+public class MCP_RenderPlane extends MCH_RenderBaseVehicle {
 
    public MCP_RenderPlane() {
       super.shadowSize = 2.0F;
    }
 
-   public void renderAircraft(MCH_EntityAircraft entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
+   public void renderBaseVehicle(MCH_EntityBaseVehicle entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
       MCP_PlaneInfo planeInfo = null;
       if(entity != null && entity instanceof MCP_EntityPlane) {
          MCP_EntityPlane plane = (MCP_EntityPlane)entity;
@@ -122,7 +122,7 @@ public class MCP_RenderPlane extends MCH_RenderAircraft {
       Iterator i$ = planeInfo.nozzles.iterator();
 
       while(i$.hasNext()) {
-         MCH_AircraftInfo.DrawnPart n = (MCH_AircraftInfo.DrawnPart)i$.next();
+         MCH_BaseVehicleInfo.DrawnPart n = (MCH_BaseVehicleInfo.DrawnPart)i$.next();
          GL11.glPushMatrix();
          GL11.glTranslated(n.pos.xCoord, n.pos.yCoord, n.pos.zCoord);
          GL11.glRotatef(prevRot + (rot - prevRot) * tickTime, (float)n.rot.xCoord, (float)n.rot.yCoord, (float)n.rot.zCoord);

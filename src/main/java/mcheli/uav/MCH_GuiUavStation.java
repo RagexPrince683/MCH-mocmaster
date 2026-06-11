@@ -1,6 +1,6 @@
 package mcheli.uav;
 
-import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.helicopter.MCH_ItemHeli;
 import mcheli.plane.MCP_PlaneInfoManager;
@@ -10,7 +10,7 @@ import mcheli.tank.MCH_TankInfoManager;
 import mcheli.uav.MCH_ContainerUavStation;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.uav.MCH_UavPacketStatus;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_GuiContainer;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_Network;
@@ -31,7 +31,7 @@ public class MCH_GuiUavStation
       private final int BUTTON_ID_CONTINUE = 256;
       EntityPlayer EntityPlayer;
       private GuiButton buttonContinue;
-      //MCH_EntityAircraft aircraft = this; // Assuming 'this' is an instance of MCH_EntityAircraft
+      //MCH_EntityBaseVehicle aircraft = this; // Assuming 'this' is an instance of MCH_EntityBaseVehicle
 
       public MCH_GuiUavStation(InventoryPlayer inventoryPlayer, MCH_EntityUavStation uavStation) {
            super(new MCH_ContainerUavStation(inventoryPlayer, uavStation));
@@ -58,11 +58,11 @@ public class MCH_GuiUavStation
                      info = MCH_TankInfoManager.getFromItem(item.getItem());
                    }
 
-                if (item != null && (info == null || (!((MCH_AircraftInfo)info).isUAV && !((MCH_AircraftInfo)info).isNewUAV))) {
+                if (item != null && (info == null || (!((MCH_BaseVehicleInfo)info).isUAV && !((MCH_BaseVehicleInfo)info).isNewUAV))) {
                      drawString("Not UAV", 8, 6, 16711680);
                    } else if (this.uavStation.getKind() <= 1) {
                      drawString("UAV Station", 8, 6, 16777215);
-                   } else if (item != null && !((MCH_AircraftInfo)info).isSmallUAV) {
+                   } else if (item != null && !((MCH_BaseVehicleInfo)info).isSmallUAV) {
                      drawString("Small UAV only", 8, 6, 16711680);
                    } else {
                      drawString("UAV Controller", 8, 6, 16777215);
@@ -129,7 +129,7 @@ public class MCH_GuiUavStation
               }
          }
 
-             private MCH_EntityAircraft getCurrentAircraft(MCH_EntityAircraft aircraft) {
+             private MCH_EntityBaseVehicle getCurrentAircraft(MCH_EntityBaseVehicle aircraft) {
                     return aircraft;
              }
 

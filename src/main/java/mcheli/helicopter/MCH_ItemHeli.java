@@ -1,22 +1,22 @@
 package mcheli.helicopter;
 
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_ItemBaseVehicle;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.helicopter.MCH_HeliInfo;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
-public class MCH_ItemHeli extends MCH_ItemAircraft {
+public class MCH_ItemHeli extends MCH_ItemBaseVehicle {
 
    public MCH_ItemHeli(int par1) {
       super(par1);
       super.maxStackSize = 1;
    }
 
-   public MCH_AircraftInfo getAircraftInfo() {
+   public MCH_BaseVehicleInfo getAircraftInfo() {
       return MCH_HeliInfoManager.getFromItem(this);
    }
 

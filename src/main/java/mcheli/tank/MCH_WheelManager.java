@@ -5,8 +5,8 @@ import java.util.Random;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.tank.MCH_EntityWheel;
 import mcheli.wrapper.W_Block;
@@ -23,7 +23,7 @@ public class MCH_WheelManager {
    //from my understanding, wheels are essentially invisible entities that track the position of the 'aircraft's'
    // (vehicle general category) wheels behaving somewhat like suspension.
 
-   public final MCH_EntityAircraft parent;
+   public final MCH_EntityBaseVehicle parent;
    public MCH_EntityWheel[] wheels;
    private double minZ;
    private double maxZ;
@@ -35,7 +35,7 @@ public class MCH_WheelManager {
    private static Random rand = new Random();
 
    // per-wheel state (persist during runtime)
-   //*unused GPT schizophrenia
+   //*unused helper
    //public double lastGroundY = Double.NEGATIVE_INFINITY; // last measured solid surface Y
    //public double groundYFiltered = Double.NEGATIVE_INFINITY; // low-pass filter
    //public int lastContactTick = 0; // tick when last seen on ground
@@ -46,7 +46,7 @@ public class MCH_WheelManager {
 
 
 
-   public MCH_WheelManager(MCH_EntityAircraft ac) {
+   public MCH_WheelManager(MCH_EntityBaseVehicle ac) {
       this.parent = ac;
       this.wheels = new MCH_EntityWheel[0];
       this.weightedCenter = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
@@ -70,7 +70,7 @@ public class MCH_WheelManager {
       for(int i = 0; i < this.wheels.length; ++i) {
          MCH_EntityWheel wheel = new MCH_EntityWheel(w);
          wheel.setParents(this.parent);
-         Vec3 wp = ((MCH_AircraftInfo.Wheel)list.get(i / 2)).pos;
+         Vec3 wp = ((MCH_BaseVehicleInfo.Wheel)list.get(i / 2)).pos;
          wheel.setWheelPos(Vec3.createVectorHelper(i % 2 == 0?wp.xCoord:-wp.xCoord, wp.yCoord, wp.zCoord), this.weightedCenter);
          Vec3 v = this.parent.getTransformedPosition(wheel.pos.xCoord, wheel.pos.yCoord, wheel.pos.zCoord);
          wheel.setLocationAndAngles(v.xCoord, v.yCoord + 1.0D, v.zCoord, 0.0F, 0.0F);
@@ -91,7 +91,7 @@ public class MCH_WheelManager {
    //new working shit, also has a speedcap, just higher (2.20 instead of 1.80)
 
    public void move(double x, double y, double z) {
-      MCH_EntityAircraft ac = this.parent;
+      MCH_EntityBaseVehicle ac = this.parent;
       if (ac.getAcInfo() == null) return;
 
       boolean unevenContact = false;
@@ -374,7 +374,7 @@ public class MCH_WheelManager {
     * ORIGINAL code for this annoying bugged shitfest method (note, this works with tanks and everything else, however it has a SPEED CAP)
     *
     public void move(double x, double y, double z) {
-    MCH_EntityAircraft ac = this.parent;
+    MCH_EntityBaseVehicle ac = this.parent;
     if(ac.getAcInfo() != null) {
     boolean showLog = ac.ticksExisted % 1 == 1;
     if(showLog) {
@@ -551,7 +551,7 @@ public class MCH_WheelManager {
 
 
 
-   public Vec3 getTransformedPosition(double x, double y, double z, MCH_EntityAircraft ac, float yaw, float pitch, float roll) {
+   public Vec3 getTransformedPosition(double x, double y, double z, MCH_EntityBaseVehicle ac, float yaw, float pitch, float roll) {
       Vec3 v = MCH_Lib.RotVec3(x, y, z, -yaw, -pitch, -roll);
       return v.addVector(ac.posX, ac.posY, ac.posZ);
    }
@@ -559,7 +559,7 @@ public class MCH_WheelManager {
    public void updateBlock() {
       MCH_Config var10000 = MCH_MOD.config;
       if(MCH_Config.Collision_DestroyBlock.prmBool) {
-         MCH_EntityAircraft ac = this.parent;
+         MCH_EntityBaseVehicle ac = this.parent;
          MCH_EntityWheel[] arr$ = this.wheels;
          int len$ = arr$.length;
 
@@ -584,7 +584,7 @@ public class MCH_WheelManager {
 
    public void particleLandingGear() {
       if(this.wheels.length > 0) {
-         MCH_EntityAircraft ac = this.parent;
+         MCH_EntityBaseVehicle ac = this.parent;
          double d = ac.motionX * ac.motionX + ac.motionZ * ac.motionZ + (double)Math.abs(this.prevYaw - ac.getRotYaw());
          this.prevYaw = ac.getRotYaw();
          if(d > 0.001D) {

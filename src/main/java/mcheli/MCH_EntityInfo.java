@@ -1,6 +1,6 @@
 package mcheli;
 
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import net.minecraft.entity.Entity;
 
 //used in client tracking, BVR lock boxes, RWR, entity info SYNC
@@ -33,8 +33,8 @@ public class MCH_EntityInfo {
 
     public static MCH_EntityInfo createInfo(Entity e) {
         String name = e.getCommandSenderName();
-        if(e instanceof MCH_EntityAircraft) {
-            MCH_EntityAircraft ac = (MCH_EntityAircraft) e;
+        if(e instanceof MCH_EntityBaseVehicle) {
+            MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle) e;
             if(ac.getAcInfo() != null) {
                 name = ac.getAcInfo().name;
             }

@@ -1,6 +1,6 @@
 package mcheli.weapon;
 
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.multiplay.MCH_Multiplay;
 import mcheli.weapon.MCH_WeaponBase;
 import mcheli.weapon.MCH_WeaponInfo;
@@ -92,7 +92,7 @@ public class MCH_WeaponTargetingPod extends MCH_WeaponBase {
             } else {
                this.playSound(prm.user, "ng");
             }
-         } else if(MCH_Multiplay.spotEntity((EntityLivingBase)prm.user, (MCH_EntityAircraft)prm.entity, prm.posX, prm.posY, prm.posZ, info.target, info.length, info.markTime, info.angle)) {
+         } else if(MCH_Multiplay.spotEntity((EntityLivingBase)prm.user, (MCH_EntityBaseVehicle)prm.entity, prm.posX, prm.posY, prm.posZ, info.target, info.length, info.markTime, info.angle)) {
             this.playSound(prm.entity);
          } else {
             this.playSound(prm.entity, "ng");

@@ -24,7 +24,7 @@ import mcheli.aircraft.MCH_EntityHide;
 import mcheli.aircraft.MCH_EntityHitBox;
 import mcheli.aircraft.MCH_EntityPSeat;
 import mcheli.aircraft.MCH_EntitySeat;
-import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.aircraft.MCH_ItemBaseVehicle;
 import mcheli.aircraft.MCH_ItemFuel;
 import mcheli.block.MCH_DraftingTableBlock;
 import mcheli.block.MCH_DraftingTableTileEntity;
@@ -67,10 +67,10 @@ import mcheli.tool.MCH_ItemWrench;
 import mcheli.tool.rangefinder.MCH_ItemRangeFinder;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.uav.MCH_ItemUavStation;
-import mcheli.vehicle.MCH_EntityVehicle;
-import mcheli.vehicle.MCH_ItemVehicle;
-import mcheli.vehicle.MCH_VehicleInfo;
-import mcheli.vehicle.MCH_VehicleInfoManager;
+import mcheli.vehicle.MCH_EntityTurret;
+import mcheli.vehicle.MCH_ItemTurret;
+import mcheli.vehicle.MCH_TurretInfo;
+import mcheli.vehicle.MCH_TurretInfoManager;
 import mcheli.weapon.*;
 import mcheli.wrapper.NetworkMod;
 import mcheli.wrapper.W_Item;
@@ -237,7 +237,7 @@ public class MCH_MOD {
       MCP_PlaneInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "planes");
       MCH_ShipInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "ships");
       MCH_TankInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "tanks");
-      MCH_VehicleInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "vehicles");
+      MCH_TurretInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "vehicles");
       MCH_ItemInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/item");
       MCH_ThrowableInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/throwable");
       MCH_SoundsJson.update(sourcePath + "/assets/" + "mcheli" + "/");
@@ -386,7 +386,7 @@ public class MCH_MOD {
       //was also 600, reduced to 200 to *hopefully prevent invalid entity error
       EntityRegistry.registerModEntity(MCH_EntityParachute.class, "MCH.E.Parachute", 106, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityContainer.class, "MCH.E.Container", 107, this, 200, 10, true);
-      EntityRegistry.registerModEntity(MCH_EntityVehicle.class, "MCH.E.Vehicle", 108, this, aircraftTrackingRange, 2, true);
+      EntityRegistry.registerModEntity(MCH_EntityTurret.class, "MCH.E.Vehicle", 108, this, aircraftTrackingRange, 2, true);
       EntityRegistry.registerModEntity(MCH_EntityUavStation.class, "MCH.E.UavStation", 109, this, 200, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityHitBox.class, "MCH.E.HitBox", 110, this, aircraftTrackingRange, 10, true);
       EntityRegistry.registerModEntity(MCH_EntityHide.class, "MCH.E.Hide", 111, this, 200, 10, true);
@@ -720,7 +720,7 @@ public class MCH_MOD {
             registerItem(info.item, name, creativeTabsHeli);
          }
 
-         MCH_ItemAircraft.registerDispenseBehavior(info.item);
+         MCH_ItemBaseVehicle.registerDispenseBehavior(info.item);
          info.itemID = W_Item.getIdFromItem(info.item) - 256;
          W_LanguageRegistry.addName(info.item, info.displayName);
          i$1 = info.displayNameLang.keySet().iterator();
@@ -744,7 +744,7 @@ public class MCH_MOD {
             registerItem(info1.item, name, creativeTabsPlane);
          }
 
-         MCH_ItemAircraft.registerDispenseBehavior(info1.item);
+         MCH_ItemBaseVehicle.registerDispenseBehavior(info1.item);
          info1.itemID = W_Item.getIdFromItem(info1.item) - 256;
          W_LanguageRegistry.addName(info1.item, info1.displayName);
          i$1 = info1.displayNameLang.keySet().iterator();
@@ -768,7 +768,7 @@ public class MCH_MOD {
             registerItem(info4.item, name, creativeTabsShip);
          }
 
-         MCH_ItemAircraft.registerDispenseBehavior(info4.item);
+         MCH_ItemBaseVehicle.registerDispenseBehavior(info4.item);
          info4.itemID = W_Item.getIdFromItem(info4.item) - 256;
          W_LanguageRegistry.addName(info4.item, info4.displayName);
          i$1 = info4.displayNameLang.keySet().iterator();
@@ -792,7 +792,7 @@ public class MCH_MOD {
             registerItem(info2.item, name, creativeTabsTank);
          }
 
-         MCH_ItemAircraft.registerDispenseBehavior(info2.item);
+         MCH_ItemBaseVehicle.registerDispenseBehavior(info2.item);
          info2.itemID = W_Item.getIdFromItem(info2.item) - 256;
          W_LanguageRegistry.addName(info2.item, info2.displayName);
          i$1 = info2.displayNameLang.keySet().iterator();
@@ -803,12 +803,12 @@ public class MCH_MOD {
          }
       }
 
-      i$ = MCH_VehicleInfoManager.map.keySet().iterator();
+      i$ = MCH_TurretInfoManager.map.keySet().iterator();
 
       while(i$.hasNext()) {
          name = (String)i$.next();
-         MCH_VehicleInfo info3 = (MCH_VehicleInfo)MCH_VehicleInfoManager.map.get(name);
-         info3.item = new MCH_ItemVehicle(info3.itemID);
+         MCH_TurretInfo info3 = (MCH_TurretInfo)MCH_TurretInfoManager.map.get(name);
+         info3.item = new MCH_ItemTurret(info3.itemID);
          info3.item.setMaxDamage(info3.maxHp);
          if(!info3.canRide && (info3.ammoSupplyRange > 0.0F || info3.fuelSupplyRange > 0.0F)) {
             registerItem(info3.item, name, creativeTabs);
@@ -816,7 +816,7 @@ public class MCH_MOD {
             registerItem(info3.item, name, creativeTabsVehicle);
          }
 
-         MCH_ItemAircraft.registerDispenseBehavior(info3.item);
+         MCH_ItemBaseVehicle.registerDispenseBehavior(info3.item);
          info3.itemID = W_Item.getIdFromItem(info3.item) - 256;
          W_LanguageRegistry.addName(info3.item, info3.displayName);
          i$1 = info3.displayNameLang.keySet().iterator();

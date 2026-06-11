@@ -9,15 +9,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import mcheli.MCH_Config;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
+import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.network.packets.PacketVehicleLODSnapshot;
 import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_TankInfoManager;
-import mcheli.vehicle.MCH_VehicleInfoManager;
+import mcheli.vehicle.MCH_TurretInfoManager;
 import mcheli.wrapper.W_MOD;
 import mcheli.wrapper.W_Render;
 import net.minecraft.client.Minecraft;
@@ -98,7 +98,7 @@ public final class MCH_VehicleLODManager {
         Set<UUID> trackedAircraft = new HashSet<UUID>();
         Set<Integer> trackedAircraftIds = new HashSet<Integer>();
         for (Object object : mc.theWorld.loadedEntityList) {
-            if (object instanceof MCH_EntityAircraft) {
+            if (object instanceof MCH_EntityBaseVehicle) {
                 trackedAircraft.add(((Entity)object).getUniqueID());
                 trackedAircraftIds.add(((Entity)object).getEntityId());
             }
@@ -134,7 +134,7 @@ public final class MCH_VehicleLODManager {
     }
 
     private static void render(Display display, double x, double y, double z, float interpolation) {
-        MCH_AircraftInfo info = getInfo(display.category, display.typeName);
+        MCH_BaseVehicleInfo info = getInfo(display.category, display.typeName);
         String textureFolder = getTextureFolder(display.category);
         if (info == null || info.model == null || textureFolder == null) {
             return;
@@ -154,7 +154,7 @@ public final class MCH_VehicleLODManager {
             GL11.glScalef(display.scale, display.scale, display.scale);
             Minecraft.getMinecraft().renderEngine.bindTexture(
                 new ResourceLocation(W_MOD.DOMAIN, "textures/" + textureFolder + "/" + display.textureName + ".png"));
-            MCH_RenderAircraft.renderBody(info.model);
+            MCH_RenderBaseVehicle.renderBody(info.model);
         } finally {
             GL11.glPopMatrix();
             RENDER_STATE.end();
@@ -169,13 +169,13 @@ public final class MCH_VehicleLODManager {
         return previous + delta * partial;
     }
 
-    private static MCH_AircraftInfo getInfo(byte category, String typeName) {
+    private static MCH_BaseVehicleInfo getInfo(byte category, String typeName) {
         switch (category) {
             case 0: return MCH_HeliInfoManager.get(typeName);
             case 1: return MCP_PlaneInfoManager.get(typeName);
             case 2: return MCH_ShipInfoManager.get(typeName);
             case 3: return MCH_TankInfoManager.get(typeName);
-            case 4: return MCH_VehicleInfoManager.get(typeName);
+            case 4: return MCH_TurretInfoManager.get(typeName);
             default: return null;
         }
     }

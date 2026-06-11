@@ -2,8 +2,8 @@ package mcheli.aircraft;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_SoundUpdater;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -14,7 +14,7 @@ public class MCH_SoundUpdater extends W_SoundUpdater {
 
    //todo: rewrite completely or something for xradar compat
 
-   private final MCH_EntityAircraft theAircraft;
+   private final MCH_EntityBaseVehicle theAircraft;
    private final EntityPlayerSP thePlayer;
    private boolean isMoving;
    private boolean silent;
@@ -26,7 +26,7 @@ public class MCH_SoundUpdater extends W_SoundUpdater {
    private int soundDelay = 0;
 
 
-   public MCH_SoundUpdater(Minecraft mc, MCH_EntityAircraft aircraft, EntityPlayerSP entityPlayerSP) {
+   public MCH_SoundUpdater(Minecraft mc, MCH_EntityBaseVehicle aircraft, EntityPlayerSP entityPlayerSP) {
       super(mc, aircraft);
       this.theAircraft = aircraft;
       this.thePlayer = entityPlayerSP;
@@ -40,7 +40,7 @@ public class MCH_SoundUpdater extends W_SoundUpdater {
             this.initEntitySound(this.theAircraft.getSoundName());
          }
 
-         MCH_AircraftInfo info = this.theAircraft.getAcInfo();
+         MCH_BaseVehicleInfo info = this.theAircraft.getAcInfo();
          boolean isBeforeMoving = this.isMoving;
          boolean isDead = this.theAircraft.isDead;
          if(isDead || !this.silent && this.aircraftVolume == 0.0F) {

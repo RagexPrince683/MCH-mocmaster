@@ -15,8 +15,8 @@ package mcheli.wrapper;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_PacketAircraftLocation;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
+import mcheli.aircraft.MCH_PacketBaseVehicleLocation;
 import mcheli.lweapon.MCH_ItemLightWeaponBase;
 import mcheli.plane.MCP_EntityPlane;
 import net.minecraft.entity.Entity;

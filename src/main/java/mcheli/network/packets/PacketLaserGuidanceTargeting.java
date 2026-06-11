@@ -2,7 +2,7 @@ package mcheli.network.packets;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.network.PacketBase;
 import mcheli.weapon.MCH_WeaponTvMissile;
 import net.minecraft.entity.player.EntityPlayer;
@@ -31,7 +31,7 @@ public class PacketLaserGuidanceTargeting extends PacketBase {
 
     @Override
     public void handleServerSide(EntityPlayerMP playerEntity) {
-        MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(playerEntity);
+        MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(playerEntity);
         if(ac != null && ac.getCurrentWeapon(playerEntity).getCurrentWeapon() instanceof MCH_WeaponTvMissile) {
             MCH_WeaponTvMissile weaponTvMissile = (MCH_WeaponTvMissile) ac.getCurrentWeapon(playerEntity).getCurrentWeapon();
             if(weaponTvMissile.guidanceSystem != null) {

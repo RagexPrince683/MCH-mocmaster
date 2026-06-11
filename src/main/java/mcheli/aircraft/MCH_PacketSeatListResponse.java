@@ -5,7 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import mcheli.MCH_Lib;
 import mcheli.MCH_Packet;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Network;
 import net.minecraft.entity.player.EntityPlayer;
@@ -56,7 +56,7 @@ public class MCH_PacketSeatListResponse extends MCH_Packet {
 
    }
 
-   public static void sendSeatList(MCH_EntityAircraft ac, EntityPlayer player) {
+   public static void sendSeatList(MCH_EntityBaseVehicle ac, EntityPlayer player) {
       MCH_Lib.DbgLog(ac.worldObj, "[MCH-SYNC][SEAT-RESPONSE-SEND] aircraftId=%d aircraftUuid=%s player=%s playerUuid=%s seats=%d",
               new Object[]{Integer.valueOf(W_Entity.getEntityId(ac)), ac.getUniqueID(), player.getCommandSenderName(),
                       player.getUniqueID(), Integer.valueOf(ac.getSeats().length)});
@@ -66,7 +66,7 @@ public class MCH_PacketSeatListResponse extends MCH_Packet {
       W_Network.sendToPlayer(s, player);
    }
 
-   protected void setParameter(MCH_EntityAircraft ac) {
+   protected void setParameter(MCH_EntityBaseVehicle ac) {
       if(ac != null) {
          this.entityID_AC = W_Entity.getEntityId(ac);
          this.seatNum = (byte)ac.getSeats().length;

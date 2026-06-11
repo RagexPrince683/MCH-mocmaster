@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.Iterator;
 import mcheli.MCH_Lib;
 import mcheli.MCH_PacketNotifyServerSettings;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.multiplay.MCH_GuiTargetMarker;
 import mcheli.multiplay.MCH_Multiplay;
 import mcheli.multiplay.MCH_MultiplayClient;
@@ -85,8 +85,8 @@ public class MCH_MultiplayPacketHandler {
 
          while(i$.hasNext()) {
             Object e = i$.next();
-            if(e instanceof MCH_EntityAircraft) {
-               ((MCH_EntityAircraft)e).setDead();
+            if(e instanceof MCH_EntityBaseVehicle) {
+               ((MCH_EntityBaseVehicle)e).setDead();
             }
          }
       }

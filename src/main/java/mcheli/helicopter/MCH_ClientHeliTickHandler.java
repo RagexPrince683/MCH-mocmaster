@@ -4,7 +4,7 @@ import mcheli.MCH_Config;
 import mcheli.MCH_Key;
 import mcheli.MCH_Lib;
 import mcheli.MCH_ViewEntityDummy;
-import mcheli.aircraft.MCH_AircraftClientTickHandler;
+import mcheli.aircraft.MCH_BaseVehicleClientTickHandler;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_SeatInfo;
 import mcheli.helicopter.MCH_EntityHeli;
@@ -18,7 +18,7 @@ import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 
-public class MCH_ClientHeliTickHandler extends MCH_AircraftClientTickHandler {
+public class MCH_ClientHeliTickHandler extends MCH_BaseVehicleClientTickHandler {
 
    public MCH_Key KeySwitchMode;
    public MCH_Key KeySwitchHovering;
