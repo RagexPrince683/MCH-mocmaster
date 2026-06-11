@@ -934,10 +934,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       super.motionZ *= 0.99D;
       this.setRotation(this.getRotYaw(), this.getRotPitch());
       this.onUpdate_updateBlock();
-      if(this.getRiddenByEntity() != null && this.getRiddenByEntity().isDead) {
-         this.unmountEntity();
-         super.riddenByEntity = null;
-      }
+      this.handleDeadPilot();
 
    }
 

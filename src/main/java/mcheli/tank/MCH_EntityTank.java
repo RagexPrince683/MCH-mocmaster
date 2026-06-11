@@ -1048,10 +1048,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.onUpdate_updateBlock();
       this.updateCollisionBox();
 
-      if (this.getRiddenByEntity() != null && this.getRiddenByEntity().isDead) {
-         this.unmountEntity();
-         super.riddenByEntity = null;
-      }
+      this.handleDeadPilot();
    }
 
 

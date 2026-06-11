@@ -437,10 +437,7 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
       super.motionX *= 0.99D;
       super.motionZ *= 0.99D;
       this.onUpdate_updateBlock();
-      if(super.riddenByEntity != null && super.riddenByEntity.isDead) {
-         this.unmountEntity();
-         super.riddenByEntity = null;
-      }
+      this.handleDeadPilot();
 
    }
 
