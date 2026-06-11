@@ -119,7 +119,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `regeneration` | All | boolean | false | self-repair/regen flag |
 | `Stealth` | All | float | 0.0 | radar/targeting visibility modifier |
 | `RadarType` | All | enum `EARLY_AA`, `MODERN_AA`, etc. | `EARLY_AA`; invalid -> `MODERN_AA` | radar classification |
-| `RWRType` | All | enum | `DIGITAL`; invalid -> `DIGITAL` | radar-warning receiver |
+| `RWRType` | All | enum | `NONE`; invalid -> `NONE` | radar-warning receiver; set `DIGITAL` to enable the current RWR display |
 | `NameOnModernAARadar` | All | string | `?` | radar label |
 | `NameOnEarlyAARadar` | All | string | `?` | radar label |
 | `NameOnModernASRadar` | All | string | `?` | radar label |

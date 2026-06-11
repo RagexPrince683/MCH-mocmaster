@@ -169,7 +169,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    /**
     * RWR种类
     */
-   public EnumRWRType rwrType = EnumRWRType.DIGITAL;
+   public EnumRWRType rwrType = EnumRWRType.NONE;
 
    /**
     * 当前载具在现代对空雷达中显示的名字
@@ -631,7 +631,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
             try {
                this.rwrType = EnumRWRType.valueOf(data);
             } catch (Exception e) {
-               this.rwrType = EnumRWRType.DIGITAL;
+               this.rwrType = EnumRWRType.NONE;
             }
          }
          else if(item.equalsIgnoreCase("NameOnModernAARadar")) {
