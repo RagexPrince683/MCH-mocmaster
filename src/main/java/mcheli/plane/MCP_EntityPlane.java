@@ -261,17 +261,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    public float getYawFactor() {
       float yaw = this.getVtolMode() > 0?this.getPlaneInfo().vtolYaw:super.getYawFactor();
-      return yaw * 0.8F * PLANE_MANEUVERABILITY_FACTOR;
+      return yaw * 0.8F * (this.useNewMobilitySystem() ? PLANE_MANEUVERABILITY_FACTOR : 1.0F);
    }
 
    public float getPitchFactor() {
       float pitch = this.getVtolMode() > 0?this.getPlaneInfo().vtolPitch:super.getPitchFactor();
-      return pitch * 0.8F * PLANE_MANEUVERABILITY_FACTOR;
+      return pitch * 0.8F * (this.useNewMobilitySystem() ? PLANE_MANEUVERABILITY_FACTOR : 1.0F);
    }
 
    public float getRollFactor() {
       float roll = this.getVtolMode() > 0?this.getPlaneInfo().vtolYaw:super.getRollFactor();
-      return roll * 0.8F * PLANE_MANEUVERABILITY_FACTOR;
+      return roll * 0.8F * (this.useNewMobilitySystem() ? PLANE_MANEUVERABILITY_FACTOR : 1.0F);
    }
 
    public boolean isOverridePlayerPitch() {
@@ -319,6 +319,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    protected float getControlAuthorityFactor() {
+      if(!this.useNewMobilitySystem()) {
+         return 1.0F;
+      }
+
       if(this.getPlaneInfo() == null || this.getNozzleRotation() > 0.01F || this.onGround) {
          return 1.0F;
       }
@@ -408,6 +412,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
 
    public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
+      if(!this.useNewMobilitySystem()) {
+         super.setAngles(player, fixRot, fixYaw, fixPitch, deltaX, deltaY, x, y, partialTicks);
+         return;
+      }
+
       MCP_PlaneInfo planeInfo = this.getPlaneInfo();
       if(planeInfo == null) {
          super.setAngles(player, fixRot, fixYaw, fixPitch, deltaX, deltaY, x, y, partialTicks);
@@ -621,6 +630,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    protected void updateVehicleStress() {
+      if(!this.useNewMobilitySystem()) {
+         this.currentGForce = 1.0D;
+         this.overspeedDamageAccumulator = 0.0D;
+         return;
+      }
+
       MCP_PlaneInfo info = this.getPlaneInfo();
       if(info == null) {
          this.currentGForce = 1.0D;
@@ -647,13 +662,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    public void onUpdateAngles(float partialTicks) {
-      partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
+      if(this.useNewMobilitySystem()) {
+         partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
+      }
       if(!this.isDestroyed()) {
          if(super.isGunnerMode) {
-            this.setRotPitch(MCH_FlightModel.decayPerTick(this.getRotPitch(), 0.95F, partialTicks));
+            this.setRotPitch(this.decayMobilityValue(this.getRotPitch(), 0.95F, partialTicks));
             this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 0.2F * partialTicks);
             if(MathHelper.abs(this.getRotRoll()) > 20.0F) {
-               this.setRotRoll(MCH_FlightModel.decayPerTick(this.getRotRoll(), 0.95F, partialTicks));
+               this.setRotRoll(this.decayMobilityValue(this.getRotRoll(), 0.95F, partialTicks));
             }
          }
 
@@ -664,8 +681,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                MCH_Config var10000 = MCH_MOD.config;
                if(!MCH_Config.MouseControlFlightSimMode.prmBool) {
                   this.rotationByKey(partialTicks);
+                  float maneuverabilityFactor = this.useNewMobilitySystem()
+                        ? PLANE_MANEUVERABILITY_FACTOR * this.getControlAuthorityFactor() : 1.0F;
                   this.setRotRoll(this.getRotRoll() + this.addkeyRotValue * 0.5F * this.getAcInfo().mobilityRoll
-                        * PLANE_MANEUVERABILITY_FACTOR * this.getControlAuthorityFactor());
+                        * maneuverabilityFactor);
                }
             }
          } else {
@@ -689,14 +708,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             }
          }
 
-         this.addkeyRotValue = MCH_FlightModel.decayPerTick(this.addkeyRotValue, 0.9F, partialTicks);
+         this.addkeyRotValue = this.decayMobilityValue(this.addkeyRotValue, 0.9F, partialTicks);
          if(!isFly && MathHelper.abs(this.getRotPitch()) < 40.0F) {
             this.applyOnGroundPitch(0.97F);
          }
 
          if(this.getNozzleRotation() > 0.001F) {
-            this.setRotPitch(MCH_FlightModel.decayPerTick(this.getRotPitch(), 0.97F, partialTicks));
-            this.setRotRoll(MCH_FlightModel.decayPerTick(this.getRotRoll(), 0.9F, partialTicks));
+            this.setRotPitch(this.decayMobilityValue(this.getRotPitch(), 0.97F, partialTicks));
+            this.setRotRoll(this.decayMobilityValue(this.getRotRoll(), 0.9F, partialTicks));
          }
 
       }
@@ -738,12 +757,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.setThrottle(this.getCurrentThrottle());
       }
 
-      this.engineThrottle = MCH_FlightModel.approachEngineOutput(this.engineThrottle, this.getCurrentThrottle(),
-            this.getPlaneInfo().throttleAcceleration, this.getPlaneInfo().engineDrag);
+      if(this.useNewMobilitySystem()) {
+         this.engineThrottle = MCH_FlightModel.approachEngineOutput(this.engineThrottle, this.getCurrentThrottle(),
+               this.getPlaneInfo().throttleAcceleration, this.getPlaneInfo().engineDrag);
+      } else {
+         this.engineThrottle = this.getCurrentThrottle();
+      }
    }
 
    protected double getEngineThrottle() {
-      return this.engineThrottle;
+      return this.useNewMobilitySystem() ? this.engineThrottle : this.getCurrentThrottle();
    }
 
    protected void onUpdate_ControlNotHovering() {
@@ -1080,7 +1103,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       if(this.canFloatWater()) {
          dp = this.getWaterDepth();
       }
-      this.updateAerodynamicState();
+      if(this.useNewMobilitySystem()) {
+         this.updateAerodynamicState();
+      } else {
+         this.angleOfAttack = 0.0D;
+         this.stallSeverity = 0.0D;
+         this.lastAerodynamicDrag = 0.0D;
+         this.lastLiftLoss = 0.0D;
+         this.stalling = false;
+      }
 
       boolean levelOff = super.isGunnerMode;
       if(dp == 0.0D) {
@@ -1112,7 +1143,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 1.0F);
 
                // 自动调整俯仰角度，使其逐渐减小
-               this.setRotPitch(MCH_FlightModel.decayPerTick(this.getRotPitch(), 0.95F, 1.0F));
+               this.setRotPitch(this.decayMobilityValue(this.getRotPitch(), 0.95F, 1.0F));
 
                // 如果可以收起起落架，则执行收起起落架的操作
                if (this.canFoldLandingGear()) {
@@ -1156,7 +1187,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // 如果喷嘴的旋转角度大于0.001F
       if(this.getNozzleRotation() > 0.001F) {
          // 根据喷嘴旋转角度调整飞机俯仰角度
-         this.setRotPitch(MCH_FlightModel.decayPerTick(this.getRotPitch(), 0.95F, 1.0F));
+         this.setRotPitch(this.decayMobilityValue(this.getRotPitch(), 0.95F, 1.0F));
          // 根据航向角和俯仰角计算方向向量
          v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - this.getNozzleRotation());
          // 如果喷嘴旋转角度大于等于90度，缩小x和z方向的速度
@@ -1210,13 +1241,13 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       super.motionZ *= this.getAcInfo().motionFactor;
 
       float baseSpeedLimit = this.getMaxSpeed();
-      float levelSpeed = this.getPlaneInfo().maxLevelSpeed > 0.0F ? this.getPlaneInfo().maxLevelSpeed : baseSpeedLimit;
+      float levelSpeed = this.useNewMobilitySystem() && this.getPlaneInfo().maxLevelSpeed > 0.0F ? this.getPlaneInfo().maxLevelSpeed : baseSpeedLimit;
 
       // Apply a deliberately simple energy model only to conventional airborne flight.
       // Velocity direction carries the gained/lost energy, while bank and body rates
       // cheaply approximate induced and control-surface drag during hard manoeuvres.
       this.lastAerodynamicDrag = 0.0D;
-      if(dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F && !levelOff) {
+      if(this.useNewMobilitySystem() && dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F && !levelOff) {
          double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
          double bankLoad = MCH_FlightModel.clamp(MathHelper.abs(this.getRotRoll()) / 75.0D, 0.0D, 1.0D);
          double bodyRate = (MathHelper.abs(this.pitchAngularVelocity) + MathHelper.abs(this.rollAngularVelocity)
@@ -1247,8 +1278,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       // 计算当前水平速度的大小
       double motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-      // Diving permits an overspeed, but level flight settles toward maxLevelSpeed.
-      float speedLimit = (float)MCH_FlightModel.getDiveSpeedLimit(levelSpeed, this.getRotPitch(), super.motionY, this.getPlaneInfo().diveSpeedMultiplier);
+      // Diving permits an overspeed only for vehicles explicitly using the new mobility system.
+      float speedLimit = this.useNewMobilitySystem()
+            ? (float)MCH_FlightModel.getDiveSpeedLimit(levelSpeed, this.getRotPitch(), super.motionY, this.getPlaneInfo().diveSpeedMultiplier)
+            : baseSpeedLimit;
       // 如果当前速度超过最大速度限制，按最大速度比例缩小水平速度
       if(motion1 > (double)speedLimit) {
          super.motionX *= (double)speedLimit / motion1;
@@ -1275,7 +1308,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // buffet/wing drop. Lowering the nose reduces AoA and lets speed build to recovery.
       boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
       this.lastLiftLoss = 0.0D;
-      if(!nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
+      if(this.useNewMobilitySystem() && !nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
          double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)this.getPlaneInfo().stallLiftLoss, 0.0D, 1.0D);
          this.lastLiftLoss = liftLoss;
          if(super.motionY > 0.0D) {
@@ -1294,12 +1327,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
 
       // Lift fades through a band below the configured ceiling instead of hitting an invisible wall.
-      double ceilingLift = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
-      if(!nearGround && ceilingLift < 1.0D) {
-         if(super.motionY > 0.0D) {
-            super.motionY *= 0.9D + ceilingLift * 0.1D;
+      if(this.useNewMobilitySystem()) {
+         double ceilingLift = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
+         if(!nearGround && ceilingLift < 1.0D) {
+            if(super.motionY > 0.0D) {
+               super.motionY *= 0.9D + ceilingLift * 0.1D;
+            }
+            super.motionY -= (1.0D - ceilingLift) * 0.012D;
          }
-         super.motionY -= (1.0D - ceilingLift) * 0.012D;
       }
 
       // 如果飞行器在地面或距离地面较近，则缩减水平速度，应用地面俯仰角度

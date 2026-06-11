@@ -1817,7 +1817,173 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    protected void updateVehicleStress() {
    }
 
+   protected void setAnglesLegacy(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
+      //System.out.println("set angles");
+      if(partialTicks < 0.03F) {
+         partialTicks = 0.4F;
+         //System.out.println("partial ticks = 0.4");
+      }
+
+      if(partialTicks > 0.9F) {
+         partialTicks = 0.6F;
+         //System.out.println("Partial ticks = 0.6");
+      }
+
+      this.lowPassPartialTicks.put(partialTicks);
+      partialTicks = this.lowPassPartialTicks.getAvg();
+      float ac_pitch = this.getRotPitch();
+      float ac_yaw = this.getRotYaw();
+      float ac_roll = this.getRotRoll();
+      if(this.isFreeLookMode()) {
+         y = 0.0F;
+         x = 0.0F;
+      }
+
+      float yaw = 0.0F;
+      float pitch = 0.0F;
+      float roll = 0.0F;
+      double m_add;
+      if(this.canUpdateYaw(player)) {
+         m_add = this.getAddRotationYawLimit();
+         yaw = this.getControlRotYaw(x, y, partialTicks);
+         if((double)yaw < -m_add) {
+            yaw = (float)(-m_add);
+         }
+
+         if((double)yaw > m_add) {
+            yaw = (float)m_add;
+         }
+
+         yaw = (float)((double)(yaw * this.getYawFactor()) * 0.06D * (double)partialTicks);
+      }
+
+      if(this.canUpdatePitch(player)) {
+         m_add = this.getAddRotationPitchLimit();
+         pitch = this.getControlRotPitch(x, y, partialTicks);
+         if((double)pitch < -m_add) {
+            pitch = (float)(-m_add);
+         }
+
+         if((double)pitch > m_add) {
+            pitch = (float)m_add;
+         }
+
+         pitch = (float)((double)(-pitch * this.getPitchFactor()) * 0.06D * (double)partialTicks);
+      }
+
+      if(this.canUpdateRoll(player)) {
+         m_add = this.getAddRotationRollLimit();
+         roll = this.getControlRotRoll(x, y, partialTicks);
+         if((double)roll < -m_add) {
+            roll = (float)(-m_add);
+         }
+
+         if((double)roll > m_add) {
+            roll = (float)m_add;
+         }
+
+         roll = roll * this.getRollFactor() * 0.06F * partialTicks;
+      }
+
+      MCH_Math.FMatrix m_add1 = MCH_Math.newMatrix();
+      MCH_Math.MatTurnZ(m_add1, roll / 180.0F * 3.1415927F);
+      MCH_Math.MatTurnX(m_add1, pitch / 180.0F * 3.1415927F);
+      MCH_Math.MatTurnY(m_add1, yaw / 180.0F * 3.1415927F);
+      MCH_Math.MatTurnZ(m_add1, (float)((double)(this.getRotRoll() / 180.0F) * 3.141592653589793D));
+      MCH_Math.MatTurnX(m_add1, (float)((double)(this.getRotPitch() / 180.0F) * 3.141592653589793D));
+      MCH_Math.MatTurnY(m_add1, (float)((double)(this.getRotYaw() / 180.0F) * 3.141592653589793D));
+      MCH_Math.FVector3D v = MCH_Math.MatrixToEuler(m_add1);
+      if(this.getAcInfo().limitRotation) {
+         v.x = MCH_Lib.RNG(v.x, this.getAcInfo().minRotationPitch, this.getAcInfo().maxRotationPitch);
+         v.z = MCH_Lib.RNG(v.z, this.getAcInfo().minRotationRoll, this.getAcInfo().maxRotationRoll);
+      }
+
+      if(v.z > 180.0F) {
+         v.z -= 360.0F;
+      }
+
+      if(v.z < -180.0F) {
+         v.z += 360.0F;
+      }
+
+      this.setRotYaw(v.y);
+      this.setRotPitch(v.x);
+      this.setRotRoll(v.z);
+      this.onUpdateAngles(partialTicks);
+      if(this.getAcInfo().limitRotation) {
+         v.x = MCH_Lib.RNG(this.getRotPitch(), this.getAcInfo().minRotationPitch, this.getAcInfo().maxRotationPitch);
+         v.z = MCH_Lib.RNG(this.getRotRoll(), this.getAcInfo().minRotationRoll, this.getAcInfo().maxRotationRoll);
+         this.setRotPitch(v.x);
+         this.setRotRoll(v.z);
+      }
+
+      float RV = 180.0F;
+      if(MathHelper.abs(this.getRotPitch()) > 90.0F) {
+         MCH_Lib.DbgLog(true, "MCH_EntityBaseVehicle.setAngles Error:Pitch=%.1f", new Object[]{Float.valueOf(this.getRotPitch())});
+      }
+
+      if(this.getRotRoll() > 180.0F) {
+         this.setRotRoll(this.getRotRoll() - 360.0F);
+      }
+
+      if(this.getRotRoll() < -180.0F) {
+         this.setRotRoll(this.getRotRoll() + 360.0F);
+      }
+
+      this.prevRotationRoll = this.getRotRoll();
+      super.prevRotationPitch = this.getRotPitch();
+      if(this.getRidingEntity() == null) {
+         super.prevRotationYaw = this.getRotYaw();
+      }
+
+      if(!this.isOverridePlayerYaw() && !fixRot) {
+         player.setAngles(deltaX, 0.0F);
+      } else {
+         if(this.getRidingEntity() == null) {
+            player.prevRotationYaw = this.getRotYaw() + (fixRot?fixYaw:0.0F);
+         } else {
+            if(this.getRotYaw() - player.rotationYaw > 180.0F) {
+               player.prevRotationYaw += 360.0F;
+            }
+
+            if(this.getRotYaw() - player.rotationYaw < -180.0F) {
+               player.prevRotationYaw -= 360.0F;
+            }
+         }
+
+         player.rotationYaw = this.getRotYaw() + (fixRot?fixYaw:0.0F);
+      }
+
+      if(!this.isOverridePlayerPitch() && !fixRot) {
+         //System.out.println("this is when the helicopter is hovering");
+         player.setAngles(0.0F, deltaY);
+      } else {
+         //System.out.println("God's unholy retribution");
+         player.prevRotationPitch = this.getRotPitch() + (fixRot?fixPitch:0.0F);
+         player.rotationPitch = this.getRotPitch() + (fixRot?fixPitch:0.0F);
+      }
+
+      if(this.getRidingEntity() == null && ac_yaw != this.getRotYaw() || ac_pitch != this.getRotPitch() || ac_roll != this.getRotRoll()) {
+         this.aircraftRotChanged = true;
+         //System.out.println("aircraft rot changed");
+      }
+
+   }
+
+   protected boolean useNewMobilitySystem() {
+      return this.getAcInfo() != null && this.getAcInfo().useNewMobilitySystem;
+   }
+
+   protected float decayMobilityValue(float value, float factor, float partialTicks) {
+      return this.useNewMobilitySystem() ? MCH_FlightModel.decayPerTick(value, factor, partialTicks) : value * factor;
+   }
+
    public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
+      if(!this.useNewMobilitySystem()) {
+         this.setAnglesLegacy(player, fixRot, fixYaw, fixPitch, deltaX, deltaY, x, y, partialTicks);
+         return;
+      }
+
       // Render tick callbacks pass a fraction of a Minecraft tick. Treat that
       // value only as elapsed simulation time; never clamp tiny high-FPS frames
       // to a large fixed value or smooth it with previous render frames.
