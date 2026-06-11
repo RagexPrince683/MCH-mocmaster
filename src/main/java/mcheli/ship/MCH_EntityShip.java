@@ -787,8 +787,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         boolean submarineInWater = this.isDiving && this.isSubmerged();
         boolean preventWaterBobbing = dp > 0.0D && this.getShipInfo().preventWaterBobbing;
 
-        boolean submarineMode = this.isDiving || submarineInWater;
-        boolean surfaceShipMode = !submarineMode;
+
 
         boolean levelOff = super.isGunnerMode;
         if(submarineInWater) {
@@ -930,19 +929,12 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         }
 
         if(preventWaterBobbing) {
-            if(submarineMode) {
-                super.motionY = 0.0D;
-            } else if(surfaceShipMode) {
-                if(dp > 0.0D && dp < 1.25D) {
-                    super.motionY *= 0.25D;
+            //TODO when preventwaterbobbing = true
+            // it does not allow ships that dipped into water via a air pocket then re entered water at a lower y level
+            // to go back to surface. They keep their Y level at whatever they submerged at.
+            // Should either sink the ship or force ship to surface.
 
-                    if(Math.abs(super.motionY) < 0.003D) {
-                        super.motionY = 0.0D;
-                    }
-                } else if(dp >= 1.25D && super.motionY > 0.06D) {
-                    super.motionY = 0.06D;
-                }
-            }
+            super.motionY = 0.0D;
         }
 
         this.moveEntity(super.motionX, super.motionY, super.motionZ);
