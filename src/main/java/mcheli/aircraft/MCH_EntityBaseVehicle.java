@@ -135,14 +135,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public boolean aircraftRotChanged;
    public float rotationRoll;
    public float prevRotationRoll;
-   /** Local-axis body rates used to turn control input into weighted aircraft rotation. */
-   protected float pitchAngularVelocity;
-   protected float rollAngularVelocity;
-   protected float yawAngularVelocity;
-   /** Latest approximate load factor, shared by controls and client feedback. */
-   protected double currentGForce = 1.0D;
-   /** Fractional overspeed damage retained between ticks. */
-   private double overspeedDamageAccumulator;
    private double currentThrottle;
    private double prevCurrentThrottle;
    public double currentSpeed;
@@ -1774,101 +1766,30 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return 0.0F;
    }
 
-   /** Aircraft types can reduce all three pilot control axes under degraded airflow. */
+   /** Vehicle families can override this to reduce pilot control authority. */
    protected float getControlAuthorityFactor() {
-      MCH_BaseVehicleInfo info = this.getAcInfo();
-      return info != null ? (float)MCH_FlightModel.getHighGControlAuthority(this.currentGForce,
-            info.maxComfortableG, info.maxStructuralG, info.gControlPenalty) : 1.0F;
+      return 1.0F;
    }
 
-   /** Current simplified load factor, useful to HUDs and aircraft-specific extensions. */
+   /** Current simplified load factor. Generic vehicles do not run fixed-wing stress simulation. */
    public double getCurrentGForce() {
-      return this.currentGForce;
+      return 1.0D;
    }
 
    public float getPitchAngularVelocity() {
-      return this.pitchAngularVelocity;
+      return 0.0F;
    }
 
    public float getRollAngularVelocity() {
-      return this.rollAngularVelocity;
+      return 0.0F;
    }
 
    public float getYawAngularVelocity() {
-      return this.yawAngularVelocity;
+      return 0.0F;
    }
 
-   protected double getAirspeed() {
-      return Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
-            + super.motionZ * super.motionZ);
-   }
-
-   protected double getCompressibilitySpeed() {
-      MCH_BaseVehicleInfo info = this.getAcInfo();
-      return info == null ? 0.0D : (info.compressibilitySpeed > 0.0F
-            ? (double)info.compressibilitySpeed : (double)info.speed * 0.9D);
-   }
-
-   protected double getMaxSafeSpeed() {
-      MCH_BaseVehicleInfo info = this.getAcInfo();
-      return info == null ? 0.0D : (info.maxSafeSpeed > 0.0F
-            ? (double)info.maxSafeSpeed : (double)info.speed * 1.1D);
-   }
-
-   /** Override to customize how an aircraft reacts above its structural load limit. */
-   protected void onStructuralOverload(double severity) {
-   }
-
-   /** Override to customize how airframe damage is applied during an overspeed. */
-   protected void applyOverspeedDamage(double severity) {
-      MCH_BaseVehicleInfo info = this.getAcInfo();
-      if(info == null || info.overspeedDamageRate <= 0.0F || severity <= 0.0D || this.isDestroyed()) {
-         return;
-      }
-
-      this.overspeedDamageAccumulator += severity * (double)info.overspeedDamageRate;
-      int damage = (int)this.overspeedDamageAccumulator;
-      if(damage > 0) {
-         this.overspeedDamageAccumulator -= (double)damage;
-         this.setDamageTaken(this.getDamageTaken() + damage);
-      }
-   }
-
-   private void updateFlightStress() {
-      MCH_BaseVehicleInfo info = this.getAcInfo();
-      if(info == null) {
-         this.currentGForce = 1.0D;
-         return;
-      }
-
-      double pitchRate = Math.max(Math.abs((double)this.pitchAngularVelocity),
-            Math.abs((double)MathHelper.wrapAngleTo180_float(this.getRotPitch() - this.prevRotationPitch)));
-      double yawRate = Math.max(Math.abs((double)this.yawAngularVelocity),
-            Math.abs((double)MathHelper.wrapAngleTo180_float(this.getRotYaw() - this.prevRotationYaw)));
-      double turnRate = Math.sqrt(pitchRate * pitchRate + yawRate * yawRate);
-      double speed = this.getAirspeed();
-      this.currentGForce = MCH_FlightModel.getApproximateGForce(speed, turnRate);
-
-      double structuralOverload = Math.max(0.0D, this.currentGForce / Math.max(1.0D,
-            (double)info.maxStructuralG) - 1.0D);
-      double overspeed = MCH_FlightModel.getOverspeedSeverity(speed, this.getMaxSafeSpeed());
-      if(!super.worldObj.isRemote) {
-         if(structuralOverload > 0.0D) {
-            this.onStructuralOverload(structuralOverload);
-         }
-         this.applyOverspeedDamage(overspeed);
-      } else if(info.hasalert && super.ticksExisted % 20 == 0
-            && W_Entity.isEqual(MCH_MOD.proxy.getClientPlayer(), this.getRiddenByEntity())) {
-         boolean highLoad = this.currentGForce > (double)info.maxComfortableG;
-         boolean compressing = speed > this.getCompressibilitySpeed();
-         //if(highLoad || compressing || overspeed > 0.0D) {
-         //   //TODO: FIX this plays for ground vehicles too, since everything extends MCH_EntityBaseVehicle.
-         //   // this also is just completely bugged because it should only be while pitching down (eg gaining momentum, overspeed.
-         //   // NOT while full throttle going straight
-              // ALSO everything needs to factor in mcheli config AllPlaneSpeed because by default in MCHO AllPlaneSpeed = 1000.00
-         //   W_McClient.DEF_playSoundFX("random.click", 0.8F, overspeed > 0.0D ? 0.6F : 1.4F);
-         //}
-      }
+   /** Hook for vehicle-family-specific stress or aerodynamic updates. */
+   protected void updateVehicleStress() {
    }
 
    public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
@@ -1931,25 +1852,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
 
       float controlAuthority = this.getControlAuthorityFactor();
-      double pitchAuthority = MCH_FlightModel.getCompressibilityPitchAuthority(this.getAirspeed(),
-            this.getCompressibilitySpeed(), this.getMaxSafeSpeed(), this.getAcInfo().compressibilityPitchPenalty);
-      pitch *= controlAuthority * (float)pitchAuthority;
+      pitch *= controlAuthority;
       roll *= controlAuthority;
       yaw *= controlAuthority;
-
-      // The legacy controls above still define the requested angular rate.
-      // Integrating that request as a damped body rate retains existing mobility
-      // tuning while preventing the airframe from snapping to every mouse movement.
-      MCH_BaseVehicleInfo info = this.getAcInfo();
-      this.pitchAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.pitchAngularVelocity, pitch,
-            info.pitchTorque, info.pitchDamping, info.inertiaMultiplier, partialTicks);
-      this.rollAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.rollAngularVelocity, roll,
-            info.rollTorque, info.rollDamping, info.inertiaMultiplier, partialTicks);
-      this.yawAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.yawAngularVelocity, yaw,
-            info.yawTorque, info.yawDamping, info.inertiaMultiplier, partialTicks);
-      pitch = this.pitchAngularVelocity * partialTicks;
-      roll = this.rollAngularVelocity * partialTicks;
-      yaw = this.yawAngularVelocity * partialTicks;
 
       MCH_Math.FMatrix m_add1 = MCH_Math.newMatrix();
       MCH_Math.MatTurnZ(m_add1, roll / 180.0F * 3.1415927F);
@@ -2168,7 +2073,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       this.prevCurrentThrottle = this.getCurrentThrottle();
       this.lastBBDamageFactor = 1.0F;
-      this.updateFlightStress();
+      this.updateVehicleStress();
       this.updateControl();
       this.checkServerNoMove();
       this.onUpdate_RidingEntity();

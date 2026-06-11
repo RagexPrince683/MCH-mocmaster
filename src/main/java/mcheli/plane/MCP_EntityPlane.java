@@ -50,6 +50,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    public float addkeyRotValue;
    /** Smoothed engine output; commanded throttle remains unchanged for controls and networking. */
    private double engineThrottle;
+   /** Local-axis body rates used by fixed-wing damped control response. */
+   private float pitchAngularVelocity;
+   private float rollAngularVelocity;
+   private float yawAngularVelocity;
+   /** Latest approximate fixed-wing load factor. */
+   private double currentGForce = 1.0D;
+   /** Fractional overspeed damage retained between ticks. */
+   private double overspeedDamageAccumulator;
    /** Current unsigned angle between the nose and velocity vectors, in degrees. */
    private double angleOfAttack;
    /** Smoothed stall state used by lift loss, controls, and instability. */
@@ -308,10 +316,33 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          return 1.0F;
       }
 
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      double highGAuthority = MCH_FlightModel.getHighGControlAuthority(this.currentGForce,
+            info.maxComfortableG, info.maxStructuralG, info.gControlPenalty);
       double severity = Math.max(this.stallSeverity, this.getInstantStallSeverity());
-      return super.getControlAuthorityFactor() * (float)MCH_FlightModel.getControlAuthority(severity);
+      return (float)(highGAuthority * MCH_FlightModel.getControlAuthority(severity));
    }
 
+   public double getCurrentGForce() {
+      return this.currentGForce;
+   }
+
+   public float getPitchAngularVelocity() {
+      return this.pitchAngularVelocity;
+   }
+
+   public float getRollAngularVelocity() {
+      return this.rollAngularVelocity;
+   }
+
+   public float getYawAngularVelocity() {
+      return this.yawAngularVelocity;
+   }
+
+   private double getAirspeed() {
+      return Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
+            + super.motionZ * super.motionZ);
+   }
 
    protected double getCompressibilitySpeed() {
       MCP_PlaneInfo info = this.getPlaneInfo();
@@ -343,9 +374,180 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             + super.motionZ * super.motionZ);
       double aoa = MCH_FlightModel.getAngleOfAttackDegrees(forward.xCoord, forward.yCoord, forward.zCoord,
             super.motionX, super.motionY, super.motionZ);
-      double stallSpeed = MCH_FlightModel.getStallSpeed(this.getAcInfo().stallSpeed, this.getMaxSpeed(),
-            this.getAcInfo().stallSpeedFactor);
-      return MCH_FlightModel.getAerodynamicStallSeverity(speed, aoa, stallSpeed, this.getAcInfo().criticalAoA);
+      double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
+            this.getPlaneInfo().stallSpeedFactor);
+      return MCH_FlightModel.getAerodynamicStallSeverity(speed, aoa, stallSpeed, this.getPlaneInfo().criticalAoA);
+   }
+
+
+   public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
+      MCP_PlaneInfo planeInfo = this.getPlaneInfo();
+      if(planeInfo == null) {
+         super.setAngles(player, fixRot, fixYaw, fixPitch, deltaX, deltaY, x, y, partialTicks);
+         return;
+      }
+      // Render tick callbacks pass a fraction of a Minecraft tick. Treat that
+      // value only as elapsed simulation time; never clamp tiny high-FPS frames
+      // to a large fixed value or smooth it with previous render frames.
+      partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
+      float ac_pitch = this.getRotPitch();
+      float ac_yaw = this.getRotYaw();
+      float ac_roll = this.getRotRoll();
+      if(this.isFreeLookMode()) {
+         y = 0.0F;
+         x = 0.0F;
+      }
+
+      float yaw = 0.0F;
+      float pitch = 0.0F;
+      float roll = 0.0F;
+      double m_add;
+      if(this.canUpdateYaw(player)) {
+         m_add = this.getAddRotationYawLimit();
+         yaw = this.getControlRotYaw(x, y, partialTicks);
+         if((double)yaw < -m_add) {
+            yaw = (float)(-m_add);
+         }
+
+         if((double)yaw > m_add) {
+            yaw = (float)m_add;
+         }
+
+         yaw = (float)((double)(yaw * this.getYawFactor()) * 0.06D);
+      }
+
+      if(this.canUpdatePitch(player)) {
+         m_add = this.getAddRotationPitchLimit();
+         pitch = this.getControlRotPitch(x, y, partialTicks);
+         if((double)pitch < -m_add) {
+            pitch = (float)(-m_add);
+         }
+
+         if((double)pitch > m_add) {
+            pitch = (float)m_add;
+         }
+
+         pitch = (float)((double)(-pitch * this.getPitchFactor()) * 0.06D);
+      }
+
+      if(this.canUpdateRoll(player)) {
+         m_add = this.getAddRotationRollLimit();
+         roll = this.getControlRotRoll(x, y, partialTicks);
+         if((double)roll < -m_add) {
+            roll = (float)(-m_add);
+         }
+
+         if((double)roll > m_add) {
+            roll = (float)m_add;
+         }
+
+         roll = roll * this.getRollFactor() * 0.06F;
+      }
+
+      float controlAuthority = this.getControlAuthorityFactor();
+      double pitchAuthority = MCH_FlightModel.getCompressibilityPitchAuthority(this.getAirspeed(),
+            this.getCompressibilitySpeed(), this.getMaxSafeSpeed(), this.getPlaneInfo().compressibilityPitchPenalty);
+      pitch *= controlAuthority * (float)pitchAuthority;
+      roll *= controlAuthority;
+      yaw *= controlAuthority;
+
+      // The legacy controls above still define the requested angular rate.
+      // Integrating that request as a damped body rate retains existing mobility
+      // tuning while preventing the airframe from snapping to every mouse movement.
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      this.pitchAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.pitchAngularVelocity, pitch,
+            info.pitchTorque, info.pitchDamping, info.inertiaMultiplier, partialTicks);
+      this.rollAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.rollAngularVelocity, roll,
+            info.rollTorque, info.rollDamping, info.inertiaMultiplier, partialTicks);
+      this.yawAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.yawAngularVelocity, yaw,
+            info.yawTorque, info.yawDamping, info.inertiaMultiplier, partialTicks);
+      pitch = this.pitchAngularVelocity * partialTicks;
+      roll = this.rollAngularVelocity * partialTicks;
+      yaw = this.yawAngularVelocity * partialTicks;
+
+      MCH_Math.FMatrix m_add1 = MCH_Math.newMatrix();
+      MCH_Math.MatTurnZ(m_add1, roll / 180.0F * 3.1415927F);
+      MCH_Math.MatTurnX(m_add1, pitch / 180.0F * 3.1415927F);
+      MCH_Math.MatTurnY(m_add1, yaw / 180.0F * 3.1415927F);
+      MCH_Math.MatTurnZ(m_add1, (float)((double)(this.getRotRoll() / 180.0F) * 3.141592653589793D));
+      MCH_Math.MatTurnX(m_add1, (float)((double)(this.getRotPitch() / 180.0F) * 3.141592653589793D));
+      MCH_Math.MatTurnY(m_add1, (float)((double)(this.getRotYaw() / 180.0F) * 3.141592653589793D));
+      MCH_Math.FVector3D v = MCH_Math.MatrixToEuler(m_add1);
+      if(this.getAcInfo().limitRotation) {
+         v.x = MCH_Lib.RNG(v.x, this.getAcInfo().minRotationPitch, this.getAcInfo().maxRotationPitch);
+         v.z = MCH_Lib.RNG(v.z, this.getAcInfo().minRotationRoll, this.getAcInfo().maxRotationRoll);
+      }
+
+      if(v.z > 180.0F) {
+         v.z -= 360.0F;
+      }
+
+      if(v.z < -180.0F) {
+         v.z += 360.0F;
+      }
+
+      this.setRotYaw(v.y);
+      this.setRotPitch(v.x);
+      this.setRotRoll(v.z);
+      this.onUpdateAngles(partialTicks);
+      if(this.getAcInfo().limitRotation) {
+         v.x = MCH_Lib.RNG(this.getRotPitch(), this.getAcInfo().minRotationPitch, this.getAcInfo().maxRotationPitch);
+         v.z = MCH_Lib.RNG(this.getRotRoll(), this.getAcInfo().minRotationRoll, this.getAcInfo().maxRotationRoll);
+         this.setRotPitch(v.x);
+         this.setRotRoll(v.z);
+      }
+
+      float RV = 180.0F;
+      if(MathHelper.abs(this.getRotPitch()) > 90.0F) {
+         MCH_Lib.DbgLog(true, "MCH_EntityBaseVehicle.setAngles Error:Pitch=%.1f", new Object[]{Float.valueOf(this.getRotPitch())});
+      }
+
+      if(this.getRotRoll() > 180.0F) {
+         this.setRotRoll(this.getRotRoll() - 360.0F);
+      }
+
+      if(this.getRotRoll() < -180.0F) {
+         this.setRotRoll(this.getRotRoll() + 360.0F);
+      }
+
+      this.prevRotationRoll = this.getRotRoll();
+      super.prevRotationPitch = this.getRotPitch();
+      if(this.getRidingEntity() == null) {
+         super.prevRotationYaw = this.getRotYaw();
+      }
+
+      if(!this.isOverridePlayerYaw() && !fixRot) {
+         player.setAngles(deltaX, 0.0F);
+      } else {
+         if(this.getRidingEntity() == null) {
+            player.prevRotationYaw = this.getRotYaw() + (fixRot?fixYaw:0.0F);
+         } else {
+            if(this.getRotYaw() - player.rotationYaw > 180.0F) {
+               player.prevRotationYaw += 360.0F;
+            }
+
+            if(this.getRotYaw() - player.rotationYaw < -180.0F) {
+               player.prevRotationYaw -= 360.0F;
+            }
+         }
+
+         player.rotationYaw = this.getRotYaw() + (fixRot?fixYaw:0.0F);
+      }
+
+      if(!this.isOverridePlayerPitch() && !fixRot) {
+         //System.out.println("this is when the helicopter is hovering");
+         player.setAngles(0.0F, deltaY);
+      } else {
+         //System.out.println("God's unholy retribution");
+         player.prevRotationPitch = this.getRotPitch() + (fixRot?fixPitch:0.0F);
+         player.rotationPitch = this.getRotPitch() + (fixRot?fixPitch:0.0F);
+      }
+
+      if(this.getRidingEntity() == null && ac_yaw != this.getRotYaw() || ac_pitch != this.getRotPitch() || ac_roll != this.getRotRoll()) {
+         this.aircraftRotChanged = true;
+         //System.out.println("aircraft rot changed");
+      }
+
    }
 
    private void updateAerodynamicState() {
@@ -355,15 +557,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.angleOfAttack = MCH_FlightModel.getAngleOfAttackDegrees(forward.xCoord, forward.yCoord, forward.zCoord,
             super.motionX, super.motionY, super.motionZ);
 
-      double stallSpeed = MCH_FlightModel.getStallSpeed(this.getAcInfo().stallSpeed, this.getMaxSpeed(),
-            this.getAcInfo().stallSpeedFactor);
+      double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
+            this.getPlaneInfo().stallSpeedFactor);
       double demand = MCH_FlightModel.getAerodynamicStallSeverity(speed, this.angleOfAttack, stallSpeed,
-            this.getAcInfo().criticalAoA);
-      double recoverySpeed = this.getAcInfo().stallRecoverySpeed > 0.0F
-            ? (double)this.getAcInfo().stallRecoverySpeed : stallSpeed * 1.2D;
+            this.getPlaneInfo().criticalAoA);
+      double recoverySpeed = this.getPlaneInfo().stallRecoverySpeed > 0.0F
+            ? (double)this.getPlaneInfo().stallRecoverySpeed : stallSpeed * 1.2D;
 
       if(this.stalling) {
-         if(speed >= recoverySpeed && this.angleOfAttack <= (double)this.getAcInfo().criticalAoA * 0.75D) {
+         if(speed >= recoverySpeed && this.angleOfAttack <= (double)this.getPlaneInfo().criticalAoA * 0.75D) {
             this.stalling = false;
          }
       } else if(demand > 0.0D) {
@@ -374,6 +576,46 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.stallSeverity += (targetSeverity - this.stallSeverity) * (targetSeverity > this.stallSeverity ? 0.35D : 0.18D);
       if(this.stallSeverity < 1.0E-3D) {
          this.stallSeverity = 0.0D;
+      }
+   }
+
+   private void applyOverspeedDamage(double severity) {
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      if(info == null || info.overspeedDamageRate <= 0.0F || severity <= 0.0D || this.isDestroyed()) {
+         return;
+      }
+
+      this.overspeedDamageAccumulator += severity * (double)info.overspeedDamageRate;
+      int damage = (int)this.overspeedDamageAccumulator;
+      if(damage > 0) {
+         this.overspeedDamageAccumulator -= (double)damage;
+         this.setDamageTaken(this.getDamageTaken() + damage);
+      }
+   }
+
+   protected void updateVehicleStress() {
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      if(info == null) {
+         this.currentGForce = 1.0D;
+         return;
+      }
+
+      double pitchRate = Math.max(Math.abs((double)this.pitchAngularVelocity),
+            Math.abs((double)MathHelper.wrapAngleTo180_float(this.getRotPitch() - this.prevRotationPitch)));
+      double yawRate = Math.max(Math.abs((double)this.yawAngularVelocity),
+            Math.abs((double)MathHelper.wrapAngleTo180_float(this.getRotYaw() - this.prevRotationYaw)));
+      double turnRate = Math.sqrt(pitchRate * pitchRate + yawRate * yawRate);
+      double speed = this.getAirspeed();
+      this.currentGForce = MCH_FlightModel.getApproximateGForce(speed, turnRate);
+
+      double structuralOverload = Math.max(0.0D, this.currentGForce / Math.max(1.0D,
+            (double)info.maxStructuralG) - 1.0D);
+      double overspeed = MCH_FlightModel.getOverspeedSeverity(speed, this.getMaxSafeSpeed());
+      if(!super.worldObj.isRemote) {
+         if(structuralOverload > 0.0D) {
+            // Reserved for plane-specific structural failure hooks.
+         }
+         this.applyOverspeedDamage(overspeed);
       }
    }
 
@@ -470,7 +712,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
 
       this.engineThrottle = MCH_FlightModel.approachEngineOutput(this.engineThrottle, this.getCurrentThrottle(),
-            this.getAcInfo().throttleAcceleration, this.getAcInfo().engineDrag);
+            this.getPlaneInfo().throttleAcceleration, this.getPlaneInfo().engineDrag);
    }
 
    protected double getEngineThrottle() {
@@ -949,15 +1191,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       if(dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F && !levelOff) {
          double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
          double bankLoad = MCH_FlightModel.clamp(MathHelper.abs(this.getRotRoll()) / 75.0D, 0.0D, 1.0D);
-         double bodyRate = (MathHelper.abs(super.pitchAngularVelocity) + MathHelper.abs(super.rollAngularVelocity)
-               + MathHelper.abs(super.yawAngularVelocity)) / 6.0D;
+         double bodyRate = (MathHelper.abs(this.pitchAngularVelocity) + MathHelper.abs(this.rollAngularVelocity)
+               + MathHelper.abs(this.yawAngularVelocity)) / 6.0D;
          double controlLoad = MCH_FlightModel.clamp(bodyRate, 0.0D, 1.0D);
          double turnLoad = Math.max(bankLoad, controlLoad);
          double drag = MCH_FlightModel.getEnergyDrag(horizontalSpeed, (double)levelSpeed, this.getEngineThrottle(),
                turnLoad, controlLoad, this.getPlaneInfo().baseDrag, this.getPlaneInfo().inducedDrag,
                this.getPlaneInfo().controlSurfaceDrag, this.getPlaneInfo().idleDrag);
-         drag += MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getAcInfo().criticalAoA,
-               this.getPlaneInfo().baseDrag, this.getAcInfo().aoaDragMultiplier);
+         drag += MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getPlaneInfo().criticalAoA,
+               this.getPlaneInfo().baseDrag, this.getPlaneInfo().aoaDragMultiplier);
          drag = MCH_FlightModel.clamp(drag, 0.0D, 0.5D);
          double energyChange = MCH_FlightModel.getVerticalEnergyChange(super.motionY,
                this.getPlaneInfo().climbEnergyLoss, this.getPlaneInfo().diveEnergyGain);
@@ -977,7 +1219,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // 计算当前水平速度的大小
       double motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       // Diving permits an overspeed, but level flight settles toward maxLevelSpeed.
-      float speedLimit = (float)MCH_FlightModel.getDiveSpeedLimit(levelSpeed, this.getRotPitch(), super.motionY, this.getAcInfo().diveSpeedMultiplier);
+      float speedLimit = (float)MCH_FlightModel.getDiveSpeedLimit(levelSpeed, this.getRotPitch(), super.motionY, this.getPlaneInfo().diveSpeedMultiplier);
       // 如果当前速度超过最大速度限制，按最大速度比例缩小水平速度
       if(motion1 > (double)speedLimit) {
          super.motionX *= (double)speedLimit / motion1;
@@ -1004,19 +1246,19 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // buffet/wing drop. Lowering the nose reduces AoA and lets speed build to recovery.
       boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
       if(!nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
-         double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)this.getAcInfo().stallLiftLoss, 0.0D, 1.0D);
+         double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)this.getPlaneInfo().stallLiftLoss, 0.0D, 1.0D);
          if(super.motionY > 0.0D) {
             super.motionY *= 1.0D - liftLoss * 0.12D;
          }
-         super.motionY -= 0.018D * liftLoss * (double)this.getAcInfo().stallStrength;
+         super.motionY -= 0.018D * liftLoss * (double)this.getPlaneInfo().stallStrength;
 
          double phase = (double)(super.ticksExisted + this.getEntityId() * 13) * 0.37D;
-         double buffet = Math.sin(phase) * (double)this.getAcInfo().stallInstability * this.stallSeverity;
+         double buffet = Math.sin(phase) * (double)this.getPlaneInfo().stallInstability * this.stallSeverity;
          double wingDrop = ((this.getEntityId() & 1) == 0 ? 1.0D : -1.0D)
-               * (double)this.getAcInfo().stallInstability * this.stallSeverity;
+               * (double)this.getPlaneInfo().stallInstability * this.stallSeverity;
          this.setRotRoll(this.getRotRoll() + (float)(wingDrop * 0.08D + buffet * 0.04D));
          this.setRotYaw(this.getRotYaw() + (float)(buffet * 0.02D));
-         this.setRotPitch(this.getRotPitch() + (float)(0.04D * (double)this.getAcInfo().stallInstability
+         this.setRotPitch(this.getRotPitch() + (float)(0.04D * (double)this.getPlaneInfo().stallInstability
                * this.stallSeverity));
       }
 

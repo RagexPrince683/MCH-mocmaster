@@ -326,7 +326,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    private static void debugFlightControl(MCH_EntityBaseVehicle ac, float simDelta, float mouseX, float mouseY, float stickX, float stickY) {
-      if (!MCH_Config.DebugFlightControl.prmBool || ac == null || ac.ticksExisted % 20 != 0) {
+      if(!MCH_Config.DebugFlightControl.prmBool || ac == null || ac.ticksExisted % 20 != 0) {
          return;
       }
 
