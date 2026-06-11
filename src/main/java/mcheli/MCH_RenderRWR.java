@@ -1,6 +1,7 @@
 package mcheli;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import mcheli.aircraft.EnumRWRType;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.helicopter.MCH_EntityHeli;
@@ -54,6 +55,7 @@ public class MCH_RenderRWR {
             ac = ((MCH_EntityUavStation)player.ridingEntity).getControlAircract();
         }
         if(!(ac instanceof MCP_EntityPlane || ac instanceof MCH_EntityHeli)) return;
+        if(ac.getAcInfo().rwrType == null || ac.getAcInfo().rwrType == EnumRWRType.NONE) return;
 
         //开始渲染
         GL11.glPushMatrix();

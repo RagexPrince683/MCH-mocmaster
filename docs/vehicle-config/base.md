@@ -95,7 +95,7 @@ Planes use a sink of `0.012 * (1 - ceilingLift)` away from the runway; helicopte
 | Key | Type | Default | Notes |
 |---|---|---:|---|
 | `RadarType` | enum | `EARLY_AA` | Invalid values fall back to `MODERN_AA`. |
-| `RWRType` | enum | `DIGITAL` | Invalid values fall back to `DIGITAL`. |
+| `RWRType` | enum | `NONE` | Invalid values fall back to `NONE`; set `DIGITAL` to enable the current RWR display. |
 | `NameOnModernAARadar`, `NameOnEarlyAARadar`, `NameOnModernASRadar`, `NameOnEarlyASRadar` | string | `?` | Radar labels. |
 | `Stealth` | float[0..1] | 0 | Visibility modifier. |
 | `UAV`, `SmallUAV`, `NewUAV`, `NewSmallUAV`, `TargetDrone` | boolean | false | UAV/NewUAV force camera view and add a hidden seat when needed. `TargetDrone` also sets `UAV`. |
