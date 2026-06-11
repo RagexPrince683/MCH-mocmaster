@@ -3,7 +3,7 @@ package mcheli.mob;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.List;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.mob.MCH_EntityGunner;
 import mcheli.wrapper.W_Item;
@@ -41,7 +41,7 @@ public class MCH_ItemSpawnGunner extends W_Item {
         Entity mCH_Entity = null;
         MCH_EntityGunner mCH_EntityGunner = null;
         MCH_EntitySeat mCH_EntitySeat = null;
-        MCH_EntityAircraft mCH_EntityAircraft = null;
+        MCH_EntityBaseVehicle mCH_EntityAircraft = null;
         float f = 1.0F;
         float pitch = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * f;
         float yaw = player.prevRotationYaw + (player.rotationYaw - player.prevRotationYaw) * f;
@@ -82,9 +82,9 @@ public class MCH_ItemSpawnGunner extends W_Item {
             }
         }
         if (mCH_EntitySeat == null) {
-            List<MCH_EntityAircraft>Aircraft_list = world.getEntitiesWithinAABB(MCH_EntityAircraft.class, player.boundingBox.expand(5.0D, 5.0D, 5.0D));
+            List<MCH_EntityBaseVehicle>Aircraft_list = world.getEntitiesWithinAABB(MCH_EntityBaseVehicle.class, player.boundingBox.expand(5.0D, 5.0D, 5.0D));
             for (i = 0; i < Aircraft_list.size(); i++) {
-                MCH_EntityAircraft ac = (MCH_EntityAircraft)Aircraft_list.get(i);
+                MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)Aircraft_list.get(i);
                 if (!ac.isUAV() && ac.getAcInfo() != null && ac.boundingBox.calculateIntercept(vec3, vec31) != null)
                     if (mCH_EntitySeat == null || player.getDistanceSqToEntity((Entity)ac) < player.getDistanceSqToEntity((Entity)mCH_EntitySeat))
                         if (ac.getRiddenByEntity() instanceof MCH_EntityGunner) {
@@ -123,7 +123,7 @@ public class MCH_ItemSpawnGunner extends W_Item {
          *             world.spawnEntityInWorld((Entity)gunner);
          *             gunner.mountEntity((Entity)mCH_Entity);
          *             W_WorldFunc.MOD_playSoundAtEntity((Entity)gunner, "wrench", 1.0F, 3.0F);
-         *             MCH_EntityAircraft ac = (mCH_Entity instanceof MCH_EntityAircraft) ? (MCH_EntityAircraft) mCH_Entity : ((MCH_EntitySeat)mCH_Entity).getParent();
+         *             MCH_EntityBaseVehicle ac = (mCH_Entity instanceof MCH_EntityBaseVehicle) ? (MCH_EntityBaseVehicle) mCH_Entity : ((MCH_EntitySeat)mCH_Entity).getParent();
          *             player.addChatMessage((IChatComponent)new ChatComponentText("The gunner was put on " + EnumChatFormatting.GOLD + (ac.getAcInfo()).displayName + EnumChatFormatting.RESET + " seat " + (ac.getSeatIdByEntity((Entity)gunner) + 1) + " by " + ScorePlayerTeam.formatPlayerName(player.getTeam(), player.getDisplayName())));
          *         }
          */
@@ -140,7 +140,7 @@ public class MCH_ItemSpawnGunner extends W_Item {
             world.spawnEntityInWorld((Entity) gunner);
             gunner.mountEntity((Entity) mCH_Entity);
             W_WorldFunc.MOD_playSoundAtEntity((Entity) gunner, "wrench", 1.0F, 3.0F);
-            MCH_EntityAircraft ac = (mCH_Entity instanceof MCH_EntityAircraft) ? (MCH_EntityAircraft) mCH_Entity : ((MCH_EntitySeat) mCH_Entity).getParent();
+            MCH_EntityBaseVehicle ac = (mCH_Entity instanceof MCH_EntityBaseVehicle) ? (MCH_EntityBaseVehicle) mCH_Entity : ((MCH_EntitySeat) mCH_Entity).getParent();
             player.addChatMessage((IChatComponent) new ChatComponentText("The gunner was put on " + EnumChatFormatting.GOLD + (ac.getAcInfo()).displayName + EnumChatFormatting.RESET + " seat " + (ac.getSeatIdByEntity((Entity) gunner) + 1) + " by " + ScorePlayerTeam.formatPlayerName(player.getTeam(), player.getDisplayName())));
             } else if (this.targetType == 2) {
                 //I should probably make sure you can't make the EVIL team
@@ -149,7 +149,7 @@ public class MCH_ItemSpawnGunner extends W_Item {
                 world.spawnEntityInWorld((Entity) gunner);
                 gunner.mountEntity((Entity) mCH_Entity);
                 W_WorldFunc.MOD_playSoundAtEntity((Entity) gunner, "wrench", 1.0F, 3.0F);
-                MCH_EntityAircraft ac = (mCH_Entity instanceof MCH_EntityAircraft) ? (MCH_EntityAircraft) mCH_Entity : ((MCH_EntitySeat) mCH_Entity).getParent();
+                MCH_EntityBaseVehicle ac = (mCH_Entity instanceof MCH_EntityBaseVehicle) ? (MCH_EntityBaseVehicle) mCH_Entity : ((MCH_EntitySeat) mCH_Entity).getParent();
                 player.addChatMessage((IChatComponent) new ChatComponentText("Evil gunner was put on " + EnumChatFormatting.DARK_RED + (ac.getAcInfo()).displayName + EnumChatFormatting.RESET + " seat " + (ac.getSeatIdByEntity((Entity) gunner) + 1) + " by " + player.getDisplayName()));
             } else {
                 //FUCK
@@ -157,7 +157,7 @@ public class MCH_ItemSpawnGunner extends W_Item {
                 world.spawnEntityInWorld((Entity) gunner);
                 gunner.mountEntity((Entity) mCH_Entity);
                 W_WorldFunc.MOD_playSoundAtEntity((Entity) gunner, "wrench", 1.0F, 3.0F);
-                MCH_EntityAircraft ac = (mCH_Entity instanceof MCH_EntityAircraft) ? (MCH_EntityAircraft) mCH_Entity : ((MCH_EntitySeat) mCH_Entity).getParent();
+                MCH_EntityBaseVehicle ac = (mCH_Entity instanceof MCH_EntityBaseVehicle) ? (MCH_EntityBaseVehicle) mCH_Entity : ((MCH_EntitySeat) mCH_Entity).getParent();
                 player.addChatMessage((IChatComponent) new ChatComponentText("The gunner was put on " + EnumChatFormatting.GOLD + (ac.getAcInfo()).displayName + EnumChatFormatting.RESET + " seat " + (ac.getSeatIdByEntity((Entity) gunner) + 1) + " by " + player.getDisplayName()));
             }
         }

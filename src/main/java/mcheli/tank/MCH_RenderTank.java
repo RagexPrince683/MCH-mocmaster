@@ -4,8 +4,8 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
+import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.tank.MCH_EntityWheel;
 import mcheli.tank.MCH_TankInfo;
@@ -17,13 +17,13 @@ import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
-public class MCH_RenderTank extends MCH_RenderAircraft {
+public class MCH_RenderTank extends MCH_RenderBaseVehicle {
 
    public MCH_RenderTank() {
       super.shadowSize = 2.0F;
    }
 
-   public void renderAircraft(MCH_EntityAircraft entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
+   public void renderBaseVehicle(MCH_EntityBaseVehicle entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
       MCH_TankInfo tankInfo = null;
       if(entity != null && entity instanceof MCH_EntityTank) {
          MCH_EntityTank tank = (MCH_EntityTank)entity;
@@ -45,7 +45,7 @@ public class MCH_RenderTank extends MCH_RenderAircraft {
    public void renderWheel(MCH_EntityTank tank, double posX, double posY, double posZ) {
       MCH_Config var10000 = MCH_MOD.config;
       if(MCH_Config.TestMode.prmBool) {
-         if(MCH_RenderAircraft.debugModel != null) {
+         if(MCH_RenderBaseVehicle.debugModel != null) {
             GL11.glColor4f(0.75F, 0.75F, 0.75F, 0.5F);
             MCH_EntityWheel[] tessellator = tank.WheelMng.wheels;
             int wp = tessellator.length;
@@ -58,7 +58,7 @@ public class MCH_RenderTank extends MCH_RenderAircraft {
                GL11.glTranslated(w1.posX - tank.posX + posX, w1.posY - tank.posY + posY + 0.25D, w1.posZ - tank.posZ + posZ);
                GL11.glScalef(w1.width, w1.height / 2.0F, w1.width);
                this.bindTexture("textures/seat_pilot.png");
-               MCH_RenderAircraft.debugModel.renderAll();
+               MCH_RenderBaseVehicle.debugModel.renderAll();
                GL11.glPopMatrix();
             }
 

@@ -6,8 +6,8 @@ import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftCommonGui;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleCommonGui;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.gui.MCH_Gui;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.helicopter.MCH_HeliInfo;
@@ -18,18 +18,18 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
-public class MCH_GuiHeli extends MCH_AircraftCommonGui {
+public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
 
    public MCH_GuiHeli(Minecraft minecraft) {
       super(minecraft);
    }
 
    public boolean isDrawGui(EntityPlayer player) {
-      return MCH_EntityAircraft.getAircraft_RiddenOrControl(player) instanceof MCH_EntityHeli;
+      return MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player) instanceof MCH_EntityHeli;
    }
 
    public void drawGui(EntityPlayer player, boolean isThirdPersonView) {
-      MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(player);
+      MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
       if(ac instanceof MCH_EntityHeli && !ac.isDestroyed()) {
          MCH_EntityHeli heli = (MCH_EntityHeli)ac;
          int seatID = ac.getSeatIdByEntity(player);

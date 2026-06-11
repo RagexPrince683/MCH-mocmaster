@@ -1,6 +1,6 @@
 package mcheli.weapon;
 
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.flare.MCH_EntityChaff;
 import mcheli.uav.MCH_EntityUavStation;
@@ -71,7 +71,7 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet implements MCH_IEn
          Entity closestTarget = null;
 
          for (Entity entity : list) {
-            if (entity instanceof MCH_EntityAircraft || entity instanceof MCH_EntityChaff) {
+            if (entity instanceof MCH_EntityBaseVehicle || entity instanceof MCH_EntityChaff) {
 
                if (W_Entity.isEqual(entity, shootingAircraft)) {
                   continue;

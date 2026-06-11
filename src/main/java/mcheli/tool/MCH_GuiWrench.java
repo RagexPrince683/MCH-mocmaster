@@ -2,7 +2,7 @@ package mcheli.tool;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.gui.MCH_Gui;
 import mcheli.tool.MCH_ItemWrench;
 import net.minecraft.client.Minecraft;
@@ -33,7 +33,7 @@ public class MCH_GuiWrench extends MCH_Gui {
          GL11.glLineWidth((float)MCH_Gui.scaleFactor);
          if(this.isDrawGui(player)) {
             GL11.glDisable(3042);
-            MCH_EntityAircraft ac = ((MCH_ItemWrench)player.getCurrentEquippedItem().getItem()).getMouseOverAircraft(player);
+            MCH_EntityBaseVehicle ac = ((MCH_ItemWrench)player.getCurrentEquippedItem().getItem()).getMouseOverAircraft(player);
             if(ac != null && ac.getMaxHP() > 0) {
                int color = (double)ac.getHP() / (double)ac.getMaxHP() > 0.3D?-14101432:-2161656;
                this.drawHP(color, -15433180, ac.getHP(), ac.getMaxHP());

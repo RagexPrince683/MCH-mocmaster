@@ -31,7 +31,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-public class MCH_EntityHeli extends MCH_EntityAircraft {
+public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
    public static final byte FOLD_STAT_FOLDED = 0;
    public static final byte FOLD_STAT_FOLDING = 1;
@@ -944,8 +944,8 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
             float damage = (float)(speed * 15.0D);
 
             // Get the aircraft entity the plane is riding on, if applicable
-            final MCH_EntityAircraft rideAc = super.ridingEntity instanceof MCH_EntityAircraft
-                    ? (MCH_EntityAircraft) super.ridingEntity
+            final MCH_EntityBaseVehicle rideAc = super.ridingEntity instanceof MCH_EntityBaseVehicle
+                    ? (MCH_EntityBaseVehicle) super.ridingEntity
                     : (super.ridingEntity instanceof MCH_EntitySeat
                     ? ((MCH_EntitySeat) super.ridingEntity).getParent()
                     : null);
@@ -970,7 +970,7 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
                      // }
 
                      // Default collision entity damage
-                     if (e instanceof MCH_EntityAircraft) {
+                     if (e instanceof MCH_EntityBaseVehicle) {
                         return MCH_Config.Collision_EntityDamage.prmBool;
                      }
                      //how does this singular if statement fix everything I can't with this fucking mod
@@ -1002,7 +1002,7 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
                   MCH_Lib.applyEntityHurtResistantTimeConfig(e);
                   e.attackEntityFrom(ds, damage);
 
-                  if (e instanceof MCH_EntityAircraft) {
+                  if (e instanceof MCH_EntityBaseVehicle) {
                      // Slight pushback for aircrafts
                      e.motionX += super.motionX * 0.05D;
                      e.motionZ += super.motionZ * 0.05D;
@@ -1046,13 +1046,13 @@ public class MCH_EntityHeli extends MCH_EntityAircraft {
       } else {
          if(e instanceof MCH_EntityHitBox && ((MCH_EntityHitBox)e).parent != null ) { //|| e instanceof MCH_EntityFlare || e instanceof MCH_EntityChaff
             //cannot cast these to aircraft because fuck you lollll!!!!
-            MCH_EntityAircraft ac = ((MCH_EntityHitBox)e).parent;
+            MCH_EntityBaseVehicle ac = ((MCH_EntityHitBox)e).parent;
             if(super.noCollisionEntities.containsKey(ac)) {
                return false;
             }
          }
 
-         return e.ridingEntity instanceof MCH_EntityAircraft && super.noCollisionEntities.containsKey(e.ridingEntity)?false:!(e.ridingEntity instanceof MCH_EntitySeat) || ((MCH_EntitySeat)e.ridingEntity).getParent() == null || !super.noCollisionEntities.containsKey(((MCH_EntitySeat)e.ridingEntity).getParent());
+         return e.ridingEntity instanceof MCH_EntityBaseVehicle && super.noCollisionEntities.containsKey(e.ridingEntity)?false:!(e.ridingEntity instanceof MCH_EntitySeat) || ((MCH_EntitySeat)e.ridingEntity).getParent() == null || !super.noCollisionEntities.containsKey(((MCH_EntitySeat)e.ridingEntity).getParent());
       }
    }
 

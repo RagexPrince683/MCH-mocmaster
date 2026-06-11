@@ -1,8 +1,8 @@
 package mcheli.aircraft;
 
 import mcheli.MCH_ModelManager;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_ItemAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_ItemBaseVehicle;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
@@ -10,7 +10,7 @@ import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import org.lwjgl.opengl.GL11;
 
-public class MCH_ItemAircraftRender implements IItemRenderer {
+public class MCH_ItemBaseVehicleRender implements IItemRenderer {
 
    float size = 0.1F;
    float x = 0.1F;
@@ -19,8 +19,8 @@ public class MCH_ItemAircraftRender implements IItemRenderer {
 
 
    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-      if(item != null && item.getItem() instanceof MCH_ItemAircraft) {
-         MCH_AircraftInfo info = ((MCH_ItemAircraft)item.getItem()).getAircraftInfo();
+      if(item != null && item.getItem() instanceof MCH_ItemBaseVehicle) {
+         MCH_BaseVehicleInfo info = ((MCH_ItemBaseVehicle)item.getItem()).getAircraftInfo();
          if(info == null) {
             return false;
          }
@@ -42,7 +42,7 @@ public class MCH_ItemAircraftRender implements IItemRenderer {
       GL11.glPushMatrix();
       GL11.glEnable(2884);
       W_McClient.MOD_bindTexture("textures/helicopters/mh-60l_dap.png");
-      switch(MCH_ItemAircraftRender.NamelessClass956700996.$SwitchMap$net$minecraftforge$client$IItemRenderer$ItemRenderType[type.ordinal()]) {
+      switch(MCH_ItemBaseVehicleRender.NamelessClass956700996.$SwitchMap$net$minecraftforge$client$IItemRenderer$ItemRenderType[type.ordinal()]) {
       case 1:
          GL11.glEnable('\u803a');
          GL11.glEnable(2903);

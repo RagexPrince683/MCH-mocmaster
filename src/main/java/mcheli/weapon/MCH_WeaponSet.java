@@ -3,7 +3,7 @@ package mcheli.weapon;
 import java.util.Random;
 import mcheli.MCH_Lib;
 import mcheli.mob.MCH_EntityGunner;
-import mcheli.vehicle.MCH_EntityVehicle;
+import mcheli.vehicle.MCH_EntityTurret;
 import mcheli.weapon.MCH_EntityCartridge;
 import mcheli.weapon.MCH_WeaponBase;
 import mcheli.weapon.MCH_WeaponInfo;
@@ -314,7 +314,7 @@ public class MCH_WeaponSet {
          Vec3 r = crtWpn.getShotPos(shooter);
          rb = shooter.rotationYaw;
          float pitch = shooter.rotationPitch;
-         if(shooter instanceof MCH_EntityVehicle && shooter.riddenByEntity != null) {
+         if(shooter instanceof MCH_EntityTurret && shooter.riddenByEntity != null) {
             ;
          }
 

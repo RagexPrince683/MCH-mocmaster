@@ -3,8 +3,8 @@ package mcheli.helicopter;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.aircraft.MCH_Blade;
-import mcheli.aircraft.MCH_EntityAircraft;
-import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
+import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.aircraft.MCH_Rotor;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.helicopter.MCH_HeliInfo;
@@ -14,13 +14,13 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
-public class MCH_RenderHeli extends MCH_RenderAircraft {
+public class MCH_RenderHeli extends MCH_RenderBaseVehicle {
 
    public MCH_RenderHeli() {
       super.shadowSize = 2.0F;
    }
 
-   public void renderAircraft(MCH_EntityAircraft entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
+   public void renderBaseVehicle(MCH_EntityBaseVehicle entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
       MCH_HeliInfo heliInfo = null;
       if(entity != null && entity instanceof MCH_EntityHeli) {
          MCH_EntityHeli heli = (MCH_EntityHeli)entity;

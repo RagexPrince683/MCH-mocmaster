@@ -30,9 +30,9 @@ import mcheli.tool.MCH_GuiWrench;
 import mcheli.tool.MCH_ItemWrench;
 import mcheli.tool.rangefinder.MCH_GuiRangeFinder;
 import mcheli.uav.MCH_EntityUavStation;
-import mcheli.vehicle.MCH_ClientVehicleTickHandler;
-import mcheli.vehicle.MCH_EntityVehicle;
-import mcheli.vehicle.MCH_GuiVehicle;
+import mcheli.vehicle.MCH_ClientTurretTickHandler;
+import mcheli.vehicle.MCH_EntityTurret;
+import mcheli.vehicle.MCH_GuiTurret;
 import mcheli.weapon.MCH_WeaponSet;
 import mcheli.wrapper.W_Lib;
 import mcheli.wrapper.W_McClient;
@@ -80,7 +80,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    public MCH_Key KeyScoreboard;
    public MCH_Key KeyMultiplayManager;
    public static int cameraMode = 0;
-   public static MCH_EntityAircraft ridingAircraft = null;
+   public static MCH_EntityBaseVehicle ridingAircraft = null;
    public static boolean isDrawScoreboard = false;
    public static int sendLDCount = 0;
    public static boolean isLocked = false;
@@ -105,7 +105,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       this.gui_Ship = new MCH_GuiShip(minecraft);
       this.gui_Tank = new MCH_GuiTank(minecraft);
       this.gui_GLTD = new MCH_GuiGLTD(minecraft);
-      this.gui_Vehicle = new MCH_GuiVehicle(minecraft);
+      this.gui_Vehicle = new MCH_GuiTurret(minecraft);
       this.gui_LWeapon = new MCH_GuiLightWeapon(minecraft);
       this.gui_Wrench = new MCH_GuiWrench(minecraft);
       this.gui_SwnGnr = new MCH_GuiSpawnGunner(minecraft);
@@ -113,7 +113,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       this.gui_EMarker = new MCH_GuiTargetMarker(minecraft);
       this.gui_Title = new MCH_GuiTitle(minecraft);
       this.guis = new MCH_Gui[]{this.gui_RngFndr, this.gui_LWeapon, this.gui_Heli, this.gui_Plane, this.gui_Ship, this.gui_Tank, this.gui_GLTD, this.gui_Vehicle};
-      this.guiTicks = new MCH_Gui[]{this.gui_Common, this.gui_Heli, this.gui_Plane, this.gui_Tank, this.gui_GLTD, this.gui_Vehicle, this.gui_LWeapon, this.gui_Wrench, this.gui_SwnGnr, this.gui_RngFndr, this.gui_EMarker, this.gui_Title};      this.ticks = new MCH_ClientTickHandlerBase[]{new MCH_ClientHeliTickHandler(minecraft, config), new MCP_ClientPlaneTickHandler(minecraft, config), new MCH_ClientShipTickHandler(minecraft, config), new MCH_ClientTankTickHandler(minecraft, config), new MCH_ClientGLTDTickHandler(minecraft, config), new MCH_ClientVehicleTickHandler(minecraft, config), new MCH_ClientLightWeaponTickHandler(minecraft, config), new MCH_ClientSeatTickHandler(minecraft, config), new MCH_ClientToolTickHandler(minecraft, config)};
+      this.guiTicks = new MCH_Gui[]{this.gui_Common, this.gui_Heli, this.gui_Plane, this.gui_Tank, this.gui_GLTD, this.gui_Vehicle, this.gui_LWeapon, this.gui_Wrench, this.gui_SwnGnr, this.gui_RngFndr, this.gui_EMarker, this.gui_Title};      this.ticks = new MCH_ClientTickHandlerBase[]{new MCH_ClientHeliTickHandler(minecraft, config), new MCP_ClientPlaneTickHandler(minecraft, config), new MCH_ClientShipTickHandler(minecraft, config), new MCH_ClientTankTickHandler(minecraft, config), new MCH_ClientGLTDTickHandler(minecraft, config), new MCH_ClientTurretTickHandler(minecraft, config), new MCH_ClientLightWeaponTickHandler(minecraft, config), new MCH_ClientSeatTickHandler(minecraft, config), new MCH_ClientToolTickHandler(minecraft, config)};
       this.updatekeybind(config);
    }
 
@@ -210,7 +210,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          var13.onTick();
       }
 
-      MCH_EntityAircraft var11 = MCH_EntityAircraft.getAircraft_RiddenOrControl(var7);
+      MCH_EntityBaseVehicle var11 = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(var7);
       if(var7 != null && var11 != null && !var11.isDestroyed()) {
          if(isLocked && lockedSoundCount == 0) {
             isLocked = false;
@@ -325,7 +325,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       return mcheli.aircraft.MCH_FlightModel.getBoundedTickDelta(partialTicks - base);
    }
 
-   private static void debugFlightControl(MCH_EntityAircraft ac, float simDelta, float mouseX, float mouseY, float stickX, float stickY) {
+   private static void debugFlightControl(MCH_EntityBaseVehicle ac, float simDelta, float mouseX, float mouseY, float stickX, float stickY) {
       if(!MCH_Config.DebugFlightControl.prmBool || ac == null || ac.ticksExisted % 20 != 0) {
          return;
       }
@@ -349,8 +349,8 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
          while(player.hasNext()) {
             Object currentItemstack = player.next();
-            if(currentItemstack instanceof MCH_EntityAircraft && ((MCH_EntityAircraft)currentItemstack).haveSearchLight()) {
-               MCH_ClientEventHook.haveSearchLightAircraft.add((MCH_EntityAircraft)currentItemstack);
+            if(currentItemstack instanceof MCH_EntityBaseVehicle && ((MCH_EntityBaseVehicle)currentItemstack).haveSearchLight()) {
+               MCH_ClientEventHook.haveSearchLightAircraft.add((MCH_EntityBaseVehicle)currentItemstack);
             }
          }
       }
@@ -364,7 +364,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                W_Reflection.setItemRendererProgress(1.0F);
             }
 
-            ridingAircraft = MCH_EntityAircraft.getAircraft_RiddenOrControl(var17);
+            ridingAircraft = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(var17);
             if(ridingAircraft != null) {
                cameraMode = ridingAircraft.getCameraMode(var17);
             } else if(var17.ridingEntity instanceof MCH_EntityGLTD) {
@@ -374,16 +374,16 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                cameraMode = 0;
             }
 
-            MCH_EntityAircraft var19 = null;
+            MCH_EntityBaseVehicle var19 = null;
             if(!(var17.ridingEntity instanceof MCH_EntityHeli) && !(var17.ridingEntity instanceof MCP_EntityPlane) && !(var17.ridingEntity instanceof MCH_EntityShip) && !(var17.ridingEntity instanceof MCH_EntityTank)) {
                if(var17.ridingEntity instanceof MCH_EntityUavStation) {
                   var19 = ((MCH_EntityUavStation)var17.ridingEntity).getControlAircract();
-               } else if(var17.ridingEntity instanceof MCH_EntityVehicle) {
-                  MCH_EntityAircraft stickMode = (MCH_EntityAircraft)var17.ridingEntity;
+               } else if(var17.ridingEntity instanceof MCH_EntityTurret) {
+                  MCH_EntityBaseVehicle stickMode = (MCH_EntityBaseVehicle)var17.ridingEntity;
                   stickMode.setupAllRiderRenderPosition(partialTicks, var17);
                }
             } else {
-               var19 = (MCH_EntityAircraft)var17.ridingEntity;
+               var19 = (MCH_EntityBaseVehicle)var17.ridingEntity;
             }
 
             boolean var20 = false;
@@ -421,7 +421,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                   mouseDeltaX *= 0.0D;
                   mouseDeltaY *= 0.0D;
                } else if(var19.isPilot(var17)) {
-                  MCH_AircraftInfo.CameraPosition var28 = var19.getCameraPosInfo();
+                  MCH_BaseVehicleInfo.CameraPosition var28 = var19.getCameraPosInfo();
                   if(var28 != null) {
                      var23 = var28.yaw;
                      //System.out.println("yaw2");

@@ -1,7 +1,7 @@
 package mcheli.weapon;
 
 import mcheli.MCH_Explosion;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.weapon.MCH_EntityBomb;
 import mcheli.weapon.MCH_WeaponBase;
@@ -27,8 +27,8 @@ public class MCH_WeaponBomb extends MCH_WeaponBase {
 
    public boolean shot(MCH_WeaponParam prm) {
       if(this.getInfo() != null && this.getInfo().destruct) {
-         if(prm.entity instanceof MCH_EntityAircraft) {
-            MCH_EntityAircraft e1 = (MCH_EntityAircraft)prm.entity;
+         if(prm.entity instanceof MCH_EntityBaseVehicle) {
+            MCH_EntityBaseVehicle e1 = (MCH_EntityBaseVehicle)prm.entity;
             if((e1.isUAV() || e1.isNewUAV()) && e1.getSeatNum() == 0) {
                if(!super.worldObj.isRemote) {
                   MCH_Explosion.newExplosion(super.worldObj, (Entity)null, prm.user, e1.posX, e1.posY, e1.posZ, (float)this.getInfo().explosion, (float)this.getInfo().explosionBlock, true, true, this.getInfo().flaming, true, 0);

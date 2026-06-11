@@ -38,12 +38,12 @@ public class MCH_MissileDetector {
     }
 
     public static final int SEARCH_RANGE = 60;
-    private MCH_EntityAircraft ac;
+    private MCH_EntityBaseVehicle ac;
     private World world;
     private int alertCount;
 
 
-    public MCH_MissileDetector(MCH_EntityAircraft aircraft, World w) {
+    public MCH_MissileDetector(MCH_EntityBaseVehicle aircraft, World w) {
         this.world = w;
         this.ac = aircraft;
         this.alertCount = 0;

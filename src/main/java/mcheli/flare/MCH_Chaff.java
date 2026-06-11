@@ -1,6 +1,6 @@
 package mcheli.flare;
 
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.world.World;
 
@@ -17,12 +17,12 @@ public class MCH_Chaff {
     //箔条等待时间
     public int chaffWaitTime;
     public World worldObj;
-    public MCH_EntityAircraft aircraft;
+    public MCH_EntityBaseVehicle aircraft;
     //箔条使用时分批间隔
     private int spawnChaffEntityIntervalTick;
     public final Random rand = new Random();
 
-    public MCH_Chaff(World w, MCH_EntityAircraft ac) {
+    public MCH_Chaff(World w, MCH_EntityBaseVehicle ac) {
         this.worldObj = w;
         this.aircraft = ac;
     }

@@ -37,7 +37,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-public class MCP_EntityPlane extends MCH_EntityAircraft {
+public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    private static final float PLANE_MANEUVERABILITY_FACTOR = 1.5F;
 
@@ -677,7 +677,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             Iterator i$ = this.getAcInfo().particleSplashs.iterator();
 
             while(i$.hasNext()) {
-               MCH_AircraftInfo.ParticleSplash p = (MCH_AircraftInfo.ParticleSplash)i$.next();
+               MCH_BaseVehicleInfo.ParticleSplash p = (MCH_BaseVehicleInfo.ParticleSplash)i$.next();
 
                for(int i = 0; i < p.num; ++i) {
                   if(dist > 0.03D + (double)super.rand.nextFloat() * 0.1D) {
@@ -721,7 +721,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             Iterator i$ = this.planeInfo.nozzles.iterator();
 
             while(i$.hasNext()) {
-               MCH_AircraftInfo.DrawnPart nozzle = (MCH_AircraftInfo.DrawnPart)i$.next();
+               MCH_BaseVehicleInfo.DrawnPart nozzle = (MCH_BaseVehicleInfo.DrawnPart)i$.next();
                if((double)super.rand.nextFloat() <= this.getCurrentThrottle() * 1.5D) {
                   Vec3 nozzlePos = MCH_Lib.RotVec3(nozzle.pos, -yaw, -pitch, -roll);
                   double x = super.posX + nozzlePos.xCoord + nozzleRot.xCoord;
@@ -1066,8 +1066,8 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
             float damage = (float)(speed * 15.0D);
 
             // Get the aircraft entity the plane is riding on, if applicable
-            final MCH_EntityAircraft rideAc = super.ridingEntity instanceof MCH_EntityAircraft
-                    ? (MCH_EntityAircraft) super.ridingEntity
+            final MCH_EntityBaseVehicle rideAc = super.ridingEntity instanceof MCH_EntityBaseVehicle
+                    ? (MCH_EntityBaseVehicle) super.ridingEntity
                     : (super.ridingEntity instanceof MCH_EntitySeat
                     ? ((MCH_EntitySeat) super.ridingEntity).getParent()
                     : null);
@@ -1098,7 +1098,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
                     // }
 
                      // Default collision entity damage
-                     if (e instanceof MCH_EntityAircraft) {
+                     if (e instanceof MCH_EntityBaseVehicle) {
                         return MCH_Config.Collision_EntityDamage.prmBool;
                      }
                   }
@@ -1129,7 +1129,7 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
                   MCH_Lib.applyEntityHurtResistantTimeConfig(e);
                   e.attackEntityFrom(ds, damage);
 
-                  if (e instanceof MCH_EntityAircraft) {
+                  if (e instanceof MCH_EntityBaseVehicle) {
                      // Slight pushback for aircrafts
                      e.motionX += super.motionX * 0.05D;
                      e.motionZ += super.motionZ * 0.05D;
@@ -1182,13 +1182,13 @@ public class MCP_EntityPlane extends MCH_EntityAircraft {
          return false;
       } else {
          if (e instanceof MCH_EntityHitBox && ((MCH_EntityHitBox) e).parent != null) {
-            MCH_EntityAircraft ac = ((MCH_EntityHitBox) e).parent;
+            MCH_EntityBaseVehicle ac = ((MCH_EntityHitBox) e).parent;
             if (super.noCollisionEntities.containsKey(ac)) {
                return false;
             }
          }
 
-         return e.ridingEntity instanceof MCH_EntityAircraft && super.noCollisionEntities.containsKey(e.ridingEntity)
+         return e.ridingEntity instanceof MCH_EntityBaseVehicle && super.noCollisionEntities.containsKey(e.ridingEntity)
                  ? false
                  : !(e.ridingEntity instanceof MCH_EntitySeat)
                  || ((MCH_EntitySeat)e.ridingEntity).getParent() == null

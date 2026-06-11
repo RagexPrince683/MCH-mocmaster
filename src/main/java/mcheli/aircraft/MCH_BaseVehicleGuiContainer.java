@@ -2,8 +2,8 @@ package mcheli.aircraft;
 
 import java.util.List;
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_AircraftInventory;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInventory;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_ItemFuel;
 import mcheli.parachute.MCH_ItemParachute;
 import mcheli.uav.MCH_EntityUavStation;
@@ -18,15 +18,15 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
-public class MCH_AircraftGuiContainer
+public class MCH_BaseVehicleGuiContainer
 extends Container {
     public final EntityPlayer player;
-    public final MCH_EntityAircraft aircraft;
+    public final MCH_EntityBaseVehicle aircraft;
 
-    public MCH_AircraftGuiContainer(EntityPlayer player, MCH_EntityAircraft ac) {
+    public MCH_BaseVehicleGuiContainer(EntityPlayer player, MCH_EntityBaseVehicle ac) {
         this.player = player;
         this.aircraft = ac;
-        MCH_AircraftInventory iv = this.aircraft.getGuiInventory();
+        MCH_BaseVehicleInventory iv = this.aircraft.getGuiInventory();
         iv.getClass();
         this.addSlotToContainer(new Slot((IInventory)iv, 0, 10, 30));
         iv.getClass();
@@ -78,7 +78,7 @@ extends Container {
         block6 : {
             Slot slot;
             ItemStack itemStack;
-            MCH_AircraftInventory iv;
+            MCH_BaseVehicleInventory iv;
             block7 : {
                 block5 : {
                     iv = this.aircraft.getGuiInventory();
@@ -129,7 +129,7 @@ extends Container {
         if (!player.worldObj.isRemote) {
             ItemStack is;
             int i;
-            MCH_AircraftInventory iv = this.aircraft.getGuiInventory();
+            MCH_BaseVehicleInventory iv = this.aircraft.getGuiInventory();
             for (i = 0; i < 3; ++i) {
                 is = iv.getFuelSlotItemStack(i);
                 if (is == null || is.getItem() instanceof MCH_ItemFuel) continue;

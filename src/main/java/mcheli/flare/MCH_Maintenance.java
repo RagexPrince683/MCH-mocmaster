@@ -1,6 +1,6 @@
 package mcheli.flare;
 
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.world.World;
 
@@ -17,9 +17,9 @@ public class MCH_Maintenance {
 
     public World worldObj;
 
-    public MCH_EntityAircraft aircraft;
+    public MCH_EntityBaseVehicle aircraft;
 
-    public MCH_Maintenance(World w, MCH_EntityAircraft ac) {
+    public MCH_Maintenance(World w, MCH_EntityBaseVehicle ac) {
         this.worldObj = w;
         this.aircraft = ac;
     }

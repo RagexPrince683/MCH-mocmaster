@@ -2,7 +2,7 @@ package mcheli.network.packets;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.network.PacketBase;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -42,8 +42,8 @@ public class PacketIronCurtainUse extends PacketBase {
     @Override
     public void handleClientSide(EntityPlayer clientPlayer) {
         Entity e = clientPlayer.worldObj.getEntityByID(acId);
-        if(e instanceof MCH_EntityAircraft) {
-            ((MCH_EntityAircraft) e).ironCurtainRunningTick = time;
+        if(e instanceof MCH_EntityBaseVehicle) {
+            ((MCH_EntityBaseVehicle) e).ironCurtainRunningTick = time;
         }
     }
 }

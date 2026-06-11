@@ -6,9 +6,9 @@ import java.util.List;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
-import mcheli.aircraft.MCH_IEntityCanRideAircraft;
+import mcheli.aircraft.MCH_IEntityCanRideBaseVehicle;
 import mcheli.aircraft.MCH_SeatRackInfo;
 import mcheli.multiplay.MCH_Multiplay;
 import mcheli.wrapper.W_AxisAlignedBB;
@@ -25,7 +25,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
-public class MCH_EntityContainer extends W_EntityContainer implements MCH_IEntityCanRideAircraft {
+public class MCH_EntityContainer extends W_EntityContainer implements MCH_IEntityCanRideBaseVehicle {
 
    private boolean field_70279_a;
    private double speedMultiplier;
@@ -366,7 +366,7 @@ public class MCH_EntityContainer extends W_EntityContainer implements MCH_IEntit
       return super.dataWatcher.getWatchableObjectInt(18);
    }
 
-   public boolean canRideAircraft(MCH_EntityAircraft ac, int seatID, MCH_SeatRackInfo info) {
+   public boolean canRideAircraft(MCH_EntityBaseVehicle ac, int seatID, MCH_SeatRackInfo info) {
       String[] arr$ = info.names;
       int len$ = arr$.length;
 

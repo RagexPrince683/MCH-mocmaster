@@ -11,7 +11,7 @@ import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.MCH_MarkEntityPos;
 import mcheli.MCH_ServerSettings;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.gui.MCH_Gui;
 import mcheli.multiplay.MCH_Multiplay;
@@ -120,8 +120,8 @@ public class MCH_GuiTargetMarker extends MCH_Gui {
       if(isEnableEntityMarker()) {
          MCH_TargetType spotType = MCH_TargetType.NONE;
          EntityClientPlayerMP clientPlayer = s_minecraft.thePlayer;
-         if(entity instanceof MCH_EntityAircraft) {
-            MCH_EntityAircraft e = (MCH_EntityAircraft)entity;
+         if(entity instanceof MCH_EntityBaseVehicle) {
+            MCH_EntityBaseVehicle e = (MCH_EntityBaseVehicle)entity;
             if(e.isMountedEntity(clientPlayer)) {
                return;
             }
@@ -130,7 +130,7 @@ public class MCH_GuiTargetMarker extends MCH_Gui {
                spotType = MCH_TargetType.SAME_TEAM_PLAYER;
             }
          } else if(entity instanceof EntityPlayer) {
-            if(entity == clientPlayer || entity.ridingEntity instanceof MCH_EntitySeat || entity.ridingEntity instanceof MCH_EntityAircraft) {
+            if(entity == clientPlayer || entity.ridingEntity instanceof MCH_EntitySeat || entity.ridingEntity instanceof MCH_EntityBaseVehicle) {
                return;
             }
 

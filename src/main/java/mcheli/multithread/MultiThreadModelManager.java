@@ -5,7 +5,7 @@ import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_TankInfoManager;
-import mcheli.vehicle.MCH_VehicleInfoManager;
+import mcheli.vehicle.MCH_TurretInfoManager;
 import mcheli.weapon.MCH_DefaultBulletModels;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class MultiThreadModelManager {
         waitForData("plane", MCP_PlaneInfoManager.map);
         waitForData("ship", MCH_ShipInfoManager.map);
         waitForData("tank", MCH_TankInfoManager.map);
-        waitForData("vehicle", MCH_VehicleInfoManager.map);
+        waitForData("vehicle", MCH_TurretInfoManager.map);
 
         System.out.println("=== Starting Parallel Model Registration ===");
 
@@ -63,7 +63,7 @@ public class MultiThreadModelManager {
         }
 
         // Vehicles
-        for (Object key : MCH_VehicleInfoManager.map.keySet()) {
+        for (Object key : MCH_TurretInfoManager.map.keySet()) {
             String name = (String) key;
             futures.add(EXECUTOR.submit(() -> {
                 try {

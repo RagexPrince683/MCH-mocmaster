@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_AircraftInfoManager;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_BaseVehicleInfoManager;
 import mcheli.helicopter.MCH_HeliInfo;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.item.MCH_ItemInfo;
@@ -23,8 +23,8 @@ import mcheli.tank.MCH_TankInfoManager;
 import mcheli.throwable.MCH_ThrowableInfo;
 import mcheli.throwable.MCH_ThrowableInfoManager;
 import mcheli.uav.MCH_ItemUavStation;
-import mcheli.vehicle.MCH_VehicleInfo;
-import mcheli.vehicle.MCH_VehicleInfoManager;
+import mcheli.vehicle.MCH_TurretInfo;
+import mcheli.vehicle.MCH_TurretInfoManager;
 import mcheli.wrapper.W_Block;
 import mcheli.wrapper.W_Item;
 
@@ -156,11 +156,11 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
 
 
       //TURRETS
-      i$ = MCH_VehicleInfoManager.map.keySet().iterator();
+      i$ = MCH_TurretInfoManager.map.keySet().iterator();
       while(i$.hasNext()) {
          name = (String)i$.next();
-         MCH_VehicleInfo info3 = (MCH_VehicleInfo)MCH_VehicleInfoManager.map.get(name);
-         addRecipeAndRegisterList(info3, info3.item, MCH_VehicleInfoManager.getInstance());
+         MCH_TurretInfo info3 = (MCH_TurretInfo)MCH_TurretInfoManager.map.get(name);
+         addRecipeAndRegisterList(info3, info3.item, MCH_TurretInfoManager.getInstance());
       }
 
       //END OF VEHICLE ITEMS REGISTRY
@@ -224,7 +224,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
    }
 
 
-   private static void addRecipeAndRegisterList(MCH_AircraftInfo info, Item item, MCH_AircraftInfoManager im) {
+   private static void addRecipeAndRegisterList(MCH_BaseVehicleInfo info, Item item, MCH_BaseVehicleInfoManager im) {
       int count = 0;
       Iterator i$ = info.recipeString.iterator();
 

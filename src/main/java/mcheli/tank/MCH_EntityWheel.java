@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mcheli.aircraft.MCH_BoundingBox;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntityHitBox;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.wrapper.W_Entity;
@@ -22,7 +22,7 @@ import net.minecraft.world.World;
 
 public class MCH_EntityWheel extends W_Entity {
 
-   private MCH_EntityAircraft parents;
+   private MCH_EntityBaseVehicle parents;
    public Vec3 pos;
    boolean isPlus;
 
@@ -46,11 +46,11 @@ public class MCH_EntityWheel extends W_Entity {
 
    public void travelToDimension(int p_71027_1_) {}
 
-   public MCH_EntityAircraft getParents() {
+   public MCH_EntityBaseVehicle getParents() {
       return this.parents;
    }
 
-   public void setParents(MCH_EntityAircraft parents) {
+   public void setParents(MCH_EntityBaseVehicle parents) {
       this.parents = parents;
    }
 

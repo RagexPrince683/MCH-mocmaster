@@ -2,7 +2,7 @@ package mcheli.aircraft;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_Entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 
 public class MCH_EntityHitBox extends W_Entity {
 
-   public MCH_EntityAircraft parent;
+   public MCH_EntityBaseVehicle parent;
    public int debugId;
 
 
@@ -29,7 +29,7 @@ public class MCH_EntityHitBox extends W_Entity {
       super.isImmuneToFire = true;
    }
 
-   public MCH_EntityHitBox(World world, MCH_EntityAircraft ac, float w, float h) {
+   public MCH_EntityHitBox(World world, MCH_EntityBaseVehicle ac, float w, float h) {
       this(world);
       this.setPosition(ac.posX, ac.posY + 1.0D, ac.posZ);
       super.prevPosX = ac.posX;

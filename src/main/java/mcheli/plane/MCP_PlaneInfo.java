@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.plane.MCP_ItemPlane;
 import net.minecraft.item.Item;
 
-public class MCP_PlaneInfo extends MCH_AircraftInfo {
+public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
 
    public MCP_ItemPlane item = null;
    public List nozzles = new ArrayList();
@@ -156,7 +156,7 @@ public class MCP_PlaneInfo extends MCH_AircraftInfo {
          } else if(item.compareTo("addpartnozzle") == 0) {
             s = data.split("\\s*,\\s*");
             if(s.length == 6) {
-               MCH_AircraftInfo.DrawnPart n5 = new MCH_AircraftInfo.DrawnPart(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), "nozzle" + this.nozzles.size());
+               MCH_BaseVehicleInfo.DrawnPart n5 = new MCH_BaseVehicleInfo.DrawnPart(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), "nozzle" + this.nozzles.size());
                this.nozzles.add(n5);
             }
          } else if(item.compareTo("variablesweepwing") == 0) {
@@ -189,7 +189,7 @@ public class MCP_PlaneInfo extends MCH_AircraftInfo {
             this.idleDrag = this.toFloat(data, 0.0F, 0.25F);
          }
       }
-      MCH_AircraftInfo.allAircraftInfo.put(name, this);
+      MCH_BaseVehicleInfo.allBaseVehicleInfo.put(name, this);
    }
 
    public String getDirectoryName() {
@@ -211,7 +211,7 @@ public class MCP_PlaneInfo extends MCH_AircraftInfo {
       MCH_MOD.proxy.registerModelsPlane(super.name, true);
    }
 
-   public class Rotor extends MCH_AircraftInfo.DrawnPart {
+   public class Rotor extends MCH_BaseVehicleInfo.DrawnPart {
 
       public List blades = new ArrayList();
       public final float maxRotFactor;
@@ -223,7 +223,7 @@ public class MCP_PlaneInfo extends MCH_AircraftInfo {
       }
    }
 
-   public class Pylon extends MCH_AircraftInfo.DrawnPart {
+   public class Pylon extends MCH_BaseVehicleInfo.DrawnPart {
 
       public final float maxRotFactor;
       public final float maxRot;
@@ -236,7 +236,7 @@ public class MCP_PlaneInfo extends MCH_AircraftInfo {
       }
    }
 
-   public class Blade extends MCH_AircraftInfo.DrawnPart {
+   public class Blade extends MCH_BaseVehicleInfo.DrawnPart {
 
       public final int numBlade;
       public final int rotBlade;
@@ -249,7 +249,7 @@ public class MCP_PlaneInfo extends MCH_AircraftInfo {
       }
    }
 
-   public class Wing extends MCH_AircraftInfo.DrawnPart {
+   public class Wing extends MCH_BaseVehicleInfo.DrawnPart {
 
       public final float maxRotFactor;
       public final float maxRot;

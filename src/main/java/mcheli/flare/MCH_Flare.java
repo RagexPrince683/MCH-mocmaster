@@ -2,7 +2,7 @@ package mcheli.flare;
 
 import java.util.Random;
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.flare.MCH_EntityFlare;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
@@ -15,7 +15,7 @@ import net.minecraft.world.World;
 public class MCH_Flare {
 
    public final World worldObj;
-   public final MCH_EntityAircraft aircraft;
+   public final MCH_EntityBaseVehicle aircraft;
    public final Random rand;
    public int numFlare;
    public int tick;
@@ -23,7 +23,7 @@ public class MCH_Flare {
    private static MCH_Flare.FlareParam[] FLARE_DATA = null;
 
 
-   public MCH_Flare(World w, MCH_EntityAircraft ac) {
+   public MCH_Flare(World w, MCH_EntityBaseVehicle ac) {
       this.worldObj = w;
       this.aircraft = ac;
       this.rand = new Random();

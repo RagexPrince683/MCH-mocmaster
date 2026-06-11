@@ -5,7 +5,7 @@ public class MCH_ServerSettings {
 
    //wtaf is this code, just no why would you set defaults like this
 
-   //server setting defaults, do not dynamically update because emb4 was a schizophrenic
+   // Server setting defaults; do not dynamically update during runtime.
 
    public static boolean enableCamDistChange = true;
    public static boolean enableEntityMarker = true;

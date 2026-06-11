@@ -5,7 +5,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 //import cuchaz.ships.EntityShip;
 import mcheli.*;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntityHitBox;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_PacketNotifyHitBullet;
@@ -17,7 +17,7 @@ import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.ship.MCH_EntityShip;
 import mcheli.uav.MCH_EntityUavStation;
-import mcheli.vehicle.MCH_EntityVehicle;
+import mcheli.vehicle.MCH_EntityTurret;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_EntityPlayer;
 import mcheli.wrapper.W_MovingObjectPosition;
@@ -677,8 +677,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         
 
         if(!worldObj.isRemote) {
-            if (shootingAircraft instanceof MCH_EntityAircraft && !speedAddedFromAircraft && getInfo().speedDependsAircraft) {
-                MCH_EntityAircraft ac = (MCH_EntityAircraft) shootingAircraft;
+            if (shootingAircraft instanceof MCH_EntityBaseVehicle && !speedAddedFromAircraft && getInfo().speedDependsAircraft) {
+                MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle) shootingAircraft;
                 double s = Math.sqrt(ac.motionX * ac.motionX + ac.motionY * ac.motionY + ac.motionZ * ac.motionZ);
                 acceleration += s;
                 double d = MathHelper.sqrt_double(motionX * motionX + motionY * motionY + motionZ * motionZ);
@@ -1115,12 +1115,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             } else if (W_Entity.isEqual(entity, this.shootingEntity)) {
                 return false;
             } else {
-                if (this.shootingAircraft instanceof MCH_EntityAircraft) {
+                if (this.shootingAircraft instanceof MCH_EntityBaseVehicle) {
                     if (W_Entity.isEqual(entity, this.shootingAircraft)) {
                         return false;
                     }
 
-                    if (((MCH_EntityAircraft) this.shootingAircraft).isMountedEntity(entity)) {
+                    if (((MCH_EntityBaseVehicle) this.shootingAircraft).isMountedEntity(entity)) {
                         return false;
                     }
                 }
@@ -1143,12 +1143,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     public void notifyHitBullet() {
-        if (this.shootingAircraft instanceof MCH_EntityAircraft && W_EntityPlayer.isPlayer(this.shootingEntity)) {
-            MCH_PacketNotifyHitBullet.send((MCH_EntityAircraft) this.shootingAircraft, (EntityPlayer) this.shootingEntity);
+        if (this.shootingAircraft instanceof MCH_EntityBaseVehicle && W_EntityPlayer.isPlayer(this.shootingEntity)) {
+            MCH_PacketNotifyHitBullet.send((MCH_EntityBaseVehicle) this.shootingAircraft, (EntityPlayer) this.shootingEntity);
         }
 
         if (W_EntityPlayer.isPlayer(this.shootingEntity)) {
-            MCH_PacketNotifyHitBullet.send((MCH_EntityAircraft) null, (EntityPlayer) this.shootingEntity);
+            MCH_PacketNotifyHitBullet.send((MCH_EntityBaseVehicle) null, (EntityPlayer) this.shootingEntity);
         }
 
     }
@@ -1158,9 +1158,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
         //shouldn't we clear chunks here?
 
-        if(hit.entityHit instanceof MCH_EntityAircraft) {
+        if(hit.entityHit instanceof MCH_EntityBaseVehicle) {
 
-            MCH_EntityAircraft ac = (MCH_EntityAircraft) hit.entityHit;
+            MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle) hit.entityHit;
             if(ac.ironCurtainRunningTick > 0) {
                 System.out.println("aps hit2");
                 spawnIronCurtainParticle(hit, hit.blockX, hit.blockY, hit.blockZ);
@@ -1211,9 +1211,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             //System.out.println("Extra chunk loader activated.");
         }
 
-        if(hit.entityHit instanceof MCH_EntityAircraft) {
+        if(hit.entityHit instanceof MCH_EntityBaseVehicle) {
 
-            MCH_EntityAircraft ac = (MCH_EntityAircraft) hit.entityHit;
+            MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle) hit.entityHit;
             if(ac.ironCurtainRunningTick > 0) {
                 System.out.println("aps hit");
                 spawnIronCurtainParticle(hit, hit.blockX, hit.blockY, hit.blockZ);
@@ -1436,8 +1436,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public void onImpactEntity(Entity entity, float damageFactor) {
 
         // APS logic to prevent damage
-        if (entity instanceof MCH_EntityAircraft) {
-            MCH_EntityAircraft ac = (MCH_EntityAircraft) entity;
+        if (entity instanceof MCH_EntityBaseVehicle) {
+            MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle) entity;
             if (ac.ironCurtainRunningTick > 0) {
                 MovingObjectPosition fakeHit = new MovingObjectPosition(entity);
                 spawnIronCurtainParticle(fakeHit, (int)entity.posX, (int)entity.posY, (int)entity.posZ);

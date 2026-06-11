@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.helicopter.MCH_ItemHeli;
 import net.minecraft.item.Item;
 
-public class MCH_HeliInfo extends MCH_AircraftInfo {
+public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
 
    public MCH_ItemHeli item = null;
    public boolean isEnableFoldBlade;
@@ -64,7 +64,7 @@ public class MCH_HeliInfo extends MCH_AircraftInfo {
          }
       }
 
-      MCH_AircraftInfo.allAircraftInfo.put(name, this);
+      MCH_BaseVehicleInfo.allBaseVehicleInfo.put(name, this);
    }
 
    public String getDirectoryName() {
@@ -84,7 +84,7 @@ public class MCH_HeliInfo extends MCH_AircraftInfo {
       MCH_MOD.proxy.registerModelsHeli(super.name, true);
    }
 
-   public class Rotor extends MCH_AircraftInfo.DrawnPart {
+   public class Rotor extends MCH_BaseVehicleInfo.DrawnPart {
 
       public final int bladeNum;
       public final int bladeRot;

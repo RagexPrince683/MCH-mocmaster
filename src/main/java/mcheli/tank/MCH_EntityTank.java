@@ -46,7 +46,7 @@ import org.lwjgl.opengl.GL11;
 
 //the cursed extension
 //refactoring would be a fucking nightmare
-public class MCH_EntityTank extends MCH_EntityAircraft {
+public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    private MCH_TankInfo tankInfo = null;
    public float soundVolume;
@@ -101,7 +101,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
    }
 
    public String getEntityType() {
-      return "Vehicle"; //??? mental illness
+      return "Vehicle"; // Legacy display type for tanks.
    }
 
    public MCH_TankInfo getTankInfo() {
@@ -832,7 +832,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
             Iterator i$ = this.getAcInfo().particleSplashs.iterator();
 
             while(i$.hasNext()) {
-               MCH_AircraftInfo.ParticleSplash p = (MCH_AircraftInfo.ParticleSplash)i$.next();
+               MCH_BaseVehicleInfo.ParticleSplash p = (MCH_BaseVehicleInfo.ParticleSplash)i$.next();
 
                for(int i = 0; i < p.num; ++i) {
                   if(dist > 0.03D + (double)super.rand.nextFloat() * 0.1D) {
@@ -1066,8 +1066,8 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
             float damage = (float)(speed * 15.0D);
 
             // Get the aircraft entity the tank is riding on, if applicable
-            final MCH_EntityAircraft rideAc = super.ridingEntity instanceof MCH_EntityAircraft
-                    ? (MCH_EntityAircraft) super.ridingEntity
+            final MCH_EntityBaseVehicle rideAc = super.ridingEntity instanceof MCH_EntityBaseVehicle
+                    ? (MCH_EntityBaseVehicle) super.ridingEntity
                     : (super.ridingEntity instanceof MCH_EntitySeat
                     ? ((MCH_EntitySeat) super.ridingEntity).getParent()
                     : null);
@@ -1120,7 +1120,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
                   MCH_Lib.applyEntityHurtResistantTimeConfig(e);
                   e.attackEntityFrom(ds, damage);
 
-                  if (e instanceof MCH_EntityAircraft) {
+                  if (e instanceof MCH_EntityBaseVehicle) {
                      // Slight pushback for aircrafts
                      e.motionX += super.motionX * 0.05D;
                      e.motionZ += super.motionZ * 0.05D;
@@ -1157,13 +1157,13 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
          return false;
       } else {
          if(e instanceof MCH_EntityHitBox && ((MCH_EntityHitBox)e).parent != null) {
-            MCH_EntityAircraft ac = ((MCH_EntityHitBox)e).parent;
+            MCH_EntityBaseVehicle ac = ((MCH_EntityHitBox)e).parent;
             if(super.noCollisionEntities.containsKey(ac)) {
                return false;
             }
          }
 
-         return e.ridingEntity instanceof MCH_EntityAircraft && super.noCollisionEntities.containsKey(e.ridingEntity)?false:!(e.ridingEntity instanceof MCH_EntitySeat) || ((MCH_EntitySeat)e.ridingEntity).getParent() == null || !super.noCollisionEntities.containsKey(((MCH_EntitySeat)e.ridingEntity).getParent());
+         return e.ridingEntity instanceof MCH_EntityBaseVehicle && super.noCollisionEntities.containsKey(e.ridingEntity)?false:!(e.ridingEntity instanceof MCH_EntitySeat) || ((MCH_EntitySeat)e.ridingEntity).getParent() == null || !super.noCollisionEntities.containsKey(((MCH_EntitySeat)e.ridingEntity).getParent());
       }
    }
 
@@ -1340,7 +1340,7 @@ public class MCH_EntityTank extends MCH_EntityAircraft {
 
       float RV = 180.0F;
       if(MathHelper.abs(this.getRotPitch()) > 90.0F) {
-         MCH_Lib.DbgLog(true, "MCH_EntityAircraft.setAngles Error:Pitch=%.1f", new Object[]{Float.valueOf(this.getRotPitch())});
+         MCH_Lib.DbgLog(true, "MCH_EntityBaseVehicle.setAngles Error:Pitch=%.1f", new Object[]{Float.valueOf(this.getRotPitch())});
          this.setRotPitch(0.0F);
       }
 

@@ -6,6 +6,6 @@ public class wheelBoundingBox extends MCH_BoundingBox {
         super(x, y, z, w, h, df);
     }
 
-    //if (this.MCH_EntityAircraft df)
+    //if (this.MCH_EntityBaseVehicle df)
 
 }

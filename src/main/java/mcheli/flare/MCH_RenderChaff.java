@@ -2,7 +2,7 @@ package mcheli.flare;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import mcheli.aircraft.MCH_RenderAircraft;
+import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.wrapper.W_Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
@@ -27,7 +27,7 @@ public class MCH_RenderChaff extends W_Render {
         this.bindTexture("textures/chaff.png");
         this.model.renderModel(0.0D, 0.0D, 0.0625F);
         GL11.glPopMatrix();
-        MCH_RenderAircraft.renderEntityMarker(entity);
+        MCH_RenderBaseVehicle.renderEntityMarker(entity);
     }
 
     protected ResourceLocation getEntityTexture(Entity entity) {

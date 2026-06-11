@@ -11,7 +11,7 @@ import net.minecraft.util.Vec3;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public class MCH_PacketAircraftLocation extends MCH_Packet {
+public class MCH_PacketBaseVehicleLocation extends MCH_Packet {
     public double x,y,z;
     public double rotX, rotY, rotZ;
     public String model;
@@ -59,10 +59,10 @@ public class MCH_PacketAircraftLocation extends MCH_Packet {
         }
     }
 
-    public static void send(MCH_EntityAircraft ac, EntityPlayer target) {
+    public static void send(MCH_EntityBaseVehicle ac, EntityPlayer target) {
         if(target != null && ac != null) {
             if(!(ac instanceof MCP_EntityPlane)){return;}
-            MCH_PacketAircraftLocation s = new MCH_PacketAircraftLocation();
+            MCH_PacketBaseVehicleLocation s = new MCH_PacketBaseVehicleLocation();
 
             s.x = ac.posX;
             s.y = ac.posY;

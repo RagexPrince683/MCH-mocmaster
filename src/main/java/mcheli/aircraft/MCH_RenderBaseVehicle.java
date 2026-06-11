@@ -38,7 +38,7 @@ import net.minecraft.util.*;
 import net.minecraftforge.client.model.IModelCustom;
 import org.lwjgl.opengl.GL11;
 
-public abstract class MCH_RenderAircraft extends W_Render {
+public abstract class MCH_RenderBaseVehicle extends W_Render {
 
    public static boolean renderingEntity = false;
    public static IModelCustom debugModel = null;
@@ -50,14 +50,14 @@ public abstract class MCH_RenderAircraft extends W_Render {
 
 
 
-      MCH_EntityAircraft ac = (MCH_EntityAircraft)entity;
+      MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)entity;
       //this will fire like constantly so yay emoji
       //if(ac.getAcInfo() != null) {
       //   ac.getAcInfo().reload();
       //   ac.changeType(ac.getAcInfo().name);
       //   ac.onAcInfoReloaded();
       //}
-      MCH_AircraftInfo info = ac.getAcInfo();
+      MCH_BaseVehicleInfo info = ac.getAcInfo();
       if(info != null) {
          GL11.glPushMatrix();
          float yaw = this.calcRot(ac.getRotYaw(), ac.prevRotationYaw, tickTime);
@@ -86,7 +86,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
             if(this.shouldRenderAircraftLOD(ac, posX, posY, posZ)) {
                this.renderAircraftLOD(ac, info, posX, posY, posZ, yaw, pitch, roll, tickTime);
             } else {
-               this.renderAircraft(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+               this.renderBaseVehicle(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
                this.renderCommonPart(ac, info, posX, posY, posZ, tickTime);
                renderLight(posX, posY, posZ, tickTime, ac, info);
             }
@@ -102,7 +102,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
 
    }
 
-   protected boolean shouldRenderAircraftLOD(MCH_EntityAircraft ac, double posX, double posY, double posZ) {
+   protected boolean shouldRenderAircraftLOD(MCH_EntityBaseVehicle ac, double posX, double posY, double posZ) {
       if(MCH_Config.EnableAircraftLODRender == null || !MCH_Config.EnableAircraftLODRender.prmBool) {
          ac.isRenderingLOD = false;
          return false;
@@ -122,7 +122,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       return shouldRenderLOD;
    }
 
-   protected void renderAircraftLOD(MCH_EntityAircraft ac, MCH_AircraftInfo info, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
+   protected void renderAircraftLOD(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
       /*
        * This used to draw a tiny debug-like line silhouette (a plus sign with a box).
        * That proved hard to see and made distant vehicles look like placeholders, so
@@ -139,14 +139,14 @@ public abstract class MCH_RenderAircraft extends W_Render {
       GL11.glDisable(GL11.GL_FOG);
       GL11.glEnable(GL11.GL_BLEND);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-      this.renderAircraft(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+      this.renderBaseVehicle(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
       GL11.glPopAttrib();
       GL11.glPopMatrix();
    }
 
    public static boolean shouldSkipRender(Entity entity) {
-      if(entity instanceof MCH_IEntityCanRideAircraft) {
-         MCH_IEntityCanRideAircraft e = (MCH_IEntityCanRideAircraft)entity;
+      if(entity instanceof MCH_IEntityCanRideBaseVehicle) {
+         MCH_IEntityCanRideBaseVehicle e = (MCH_IEntityCanRideBaseVehicle)entity;
          if(e.isSkipNormalRender()) {
             return !renderingEntity;
          }
@@ -213,7 +213,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       GL11.glEnable(2896);
    }
 
-   public static void renderLight(double x, double y, double z, float tickTime, MCH_EntityAircraft ac, MCH_AircraftInfo info) {
+   public static void renderLight(double x, double y, double z, float tickTime, MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info) {
       if(ac.haveSearchLight()) {
          if(ac.isSearchLightON()) {
             Entity entity = ac.getEntityBySeatId(1);
@@ -242,7 +242,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
             Iterator i$ = info.searchLights.iterator();
 
             while(i$.hasNext()) {
-               MCH_AircraftInfo.SearchLight sl = (MCH_AircraftInfo.SearchLight)i$.next();
+               MCH_BaseVehicleInfo.SearchLight sl = (MCH_BaseVehicleInfo.SearchLight)i$.next();
                GL11.glPushMatrix();
                GL11.glTranslated(sl.pos.xCoord, sl.pos.yCoord, sl.pos.zCoord);
                float height;
@@ -287,7 +287,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       }
    }
 
-   protected void bindTexture(String path, MCH_EntityAircraft ac) {
+   protected void bindTexture(String path, MCH_EntityBaseVehicle ac) {
       // if(ac == MCH_ClientCommonTickHandler.ridingAircraft) {
       //    int bk = MCH_ClientCommonTickHandler.cameraMode;
       //    MCH_ClientCommonTickHandler.cameraMode = 0;
@@ -303,7 +303,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       }
    }
 
-   public void renderRiddenEntity(MCH_EntityAircraft ac, float tickTime, float yaw, float pitch, float roll, float width, float height) {
+   public void renderRiddenEntity(MCH_EntityBaseVehicle ac, float tickTime, float yaw, float pitch, float roll, float width, float height) {
       MCH_ClientEventHook.setCancelRender(false);
       GL11.glPushMatrix();
       this.renderEntitySimple(ac, ac.riddenByEntity, tickTime, yaw, pitch, roll, width, height);
@@ -321,7 +321,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       MCH_ClientEventHook.setCancelRender(true);
    }
 
-   public void renderEntitySimple(MCH_EntityAircraft ac, Entity entity, float tickTime, float yaw, float pitch, float roll, float width, float height) {
+   public void renderEntitySimple(MCH_EntityBaseVehicle ac, Entity entity, float tickTime, float yaw, float pitch, float roll, float width, float height) {
       if(entity != null) {
          boolean isPilot = ac.isPilot(entity);
          boolean isClientPlayer = W_Lib.isClientPlayer(entity);
@@ -362,7 +362,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
             boolean bk = renderingEntity;
             renderingEntity = true;
             Entity ridingEntity = entity.ridingEntity;
-            if(!W_Lib.isEntityLivingBase(entity) && !(entity instanceof MCH_IEntityCanRideAircraft)) {
+            if(!W_Lib.isEntityLivingBase(entity) && !(entity instanceof MCH_IEntityCanRideBaseVehicle)) {
                entity.ridingEntity = null;
             }
 
@@ -408,7 +408,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       GL11.glLight(16385, light, setColorBuffer(a, b, c, 1.0F));
    }
 
-   public abstract void renderAircraft(MCH_EntityAircraft var1, double var2, double var4, double var6, float var8, float var9, float var10, float var11);
+   public abstract void renderBaseVehicle(MCH_EntityBaseVehicle var1, double var2, double var4, double var6, float var8, float var9, float var10, float var11);
 
    public float calcRot(float rot, float prevRot, float tickTime) {
       rot = MathHelper.wrapAngleTo180_float(rot);
@@ -422,7 +422,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       return prevRot + (rot - prevRot) * tickTime;
    }
 
-   public void renderDebugHitBox(MCH_EntityAircraft e, double x, double y, double z, float yaw, float pitch) {
+   public void renderDebugHitBox(MCH_EntityBaseVehicle e, double x, double y, double z, float yaw, float pitch) {
       MCH_Config var10000 = MCH_MOD.config;
       if(MCH_Config.TestMode.prmBool && debugModel != null) {
          GL11.glPushMatrix();
@@ -488,7 +488,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       GL11.glPopMatrix();
    }
 
-   public void renderDebugPilotSeat(MCH_EntityAircraft e, double x, double y, double z, float yaw, float pitch, float roll) {
+   public void renderDebugPilotSeat(MCH_EntityBaseVehicle e, double x, double y, double z, float yaw, float pitch, float roll) {
       MCH_Config var10000 = MCH_MOD.config;
       if(MCH_Config.TestMode.prmBool && debugModel != null) {
          GL11.glPushMatrix();
@@ -530,7 +530,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
 
    }
 
-   public void renderCommonPart(MCH_EntityAircraft ac, MCH_AircraftInfo info, double x, double y, double z, float tickTime) {
+   public void renderCommonPart(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, double x, double y, double z, float tickTime) {
       renderRope(ac, info, x, y, z, tickTime);
       renderWeapon(ac, info, tickTime);
       renderRotPart(ac, info, tickTime);
@@ -547,13 +547,13 @@ public abstract class MCH_RenderAircraft extends W_Render {
       renderCanopy(ac, info, tickTime);
    }
 
-   public static void renderLightHatch(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
+   public static void renderLightHatch(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if(info.lightHatchList.size() > 0) {
          float rot = ac.prevRotLightHatch + (ac.rotLightHatch - ac.prevRotLightHatch) * tickTime;
          Iterator i$ = info.lightHatchList.iterator();
 
          while(i$.hasNext()) {
-            MCH_AircraftInfo.Hatch t = (MCH_AircraftInfo.Hatch)i$.next();
+            MCH_BaseVehicleInfo.Hatch t = (MCH_BaseVehicleInfo.Hatch)i$.next();
             GL11.glPushMatrix();
             GL11.glTranslated(t.pos.xCoord, t.pos.yCoord, t.pos.zCoord);
             GL11.glRotated((double)(rot * t.maxRot), t.rot.xCoord, t.rot.yCoord, t.rot.zCoord);
@@ -565,13 +565,13 @@ public abstract class MCH_RenderAircraft extends W_Render {
       }
    }
 
-   public static void renderSteeringWheel(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
+   public static void renderSteeringWheel(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if(info.partSteeringWheel.size() > 0) {
          float rot = ac.prevRotYawWheel + (ac.rotYawWheel - ac.prevRotYawWheel) * tickTime;
          Iterator i$ = info.partSteeringWheel.iterator();
 
          while(i$.hasNext()) {
-            MCH_AircraftInfo.PartWheel t = (MCH_AircraftInfo.PartWheel)i$.next();
+            MCH_BaseVehicleInfo.PartWheel t = (MCH_BaseVehicleInfo.PartWheel)i$.next();
             GL11.glPushMatrix();
             GL11.glTranslated(t.pos.xCoord, t.pos.yCoord, t.pos.zCoord);
             GL11.glRotated((double)(rot * t.rotDir), t.rot.xCoord, t.rot.yCoord, t.rot.zCoord);
@@ -583,13 +583,13 @@ public abstract class MCH_RenderAircraft extends W_Render {
       }
    }
 
-   public static void renderWheel(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
+   public static void renderWheel(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if(info.partWheel.size() > 0) {
          float yaw = ac.prevRotYawWheel + (ac.rotYawWheel - ac.prevRotYawWheel) * tickTime;
          Iterator i$ = info.partWheel.iterator();
 
          while(i$.hasNext()) {
-            MCH_AircraftInfo.PartWheel t = (MCH_AircraftInfo.PartWheel)i$.next();
+            MCH_BaseVehicleInfo.PartWheel t = (MCH_BaseVehicleInfo.PartWheel)i$.next();
             GL11.glPushMatrix();
             GL11.glTranslated(t.pos2.xCoord, t.pos2.yCoord, t.pos2.zCoord);
             GL11.glRotated((double)(yaw * t.rotDir), t.rot.xCoord, t.rot.yCoord, t.rot.zCoord);
@@ -604,7 +604,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       }
    }
 
-   public static void renderRotPart(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
+   public static void renderRotPart(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if(ac.haveRotPart()) {
          for(int i = 0; i < ac.rotPartRotation.length; ++i) {
             float rot = ac.rotPartRotation[i];
@@ -614,7 +614,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
             }
 
             rot = MCH_Lib.smooth(rot, prevRot, tickTime);
-            MCH_AircraftInfo.RotPart h = (MCH_AircraftInfo.RotPart)info.partRotPart.get(i);
+            MCH_BaseVehicleInfo.RotPart h = (MCH_BaseVehicleInfo.RotPart)info.partRotPart.get(i);
             GL11.glPushMatrix();
             GL11.glTranslated(h.pos.xCoord, h.pos.yCoord, h.pos.zCoord);
             GL11.glRotatef(rot, (float)h.rot.xCoord, (float)h.rot.yCoord, (float)h.rot.zCoord);
@@ -626,7 +626,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       }
    }
 
-   public static void renderWeapon(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
+   public static void renderWeapon(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       MCH_WeaponSet beforeWs = null;
       Entity e = ac.getRiddenByEntity();
       int weaponIndex = 0;
@@ -634,7 +634,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       Iterator i$ = info.partWeapon.iterator();
 
       while(i$.hasNext()) {
-         MCH_AircraftInfo.PartWeapon w = (MCH_AircraftInfo.PartWeapon)i$.next();
+         MCH_BaseVehicleInfo.PartWeapon w = (MCH_BaseVehicleInfo.PartWeapon)i$.next();
          MCH_WeaponSet ws = ac.getWeaponByName(w.name[0]);
          boolean var10000;
          if(ws != null && ws.getFirstWeapon().onTurret) {
@@ -774,7 +774,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
             Iterator var27 = w.child.iterator();
 
             while(var27.hasNext()) {
-               MCH_AircraftInfo.PartWeaponChild var28 = (MCH_AircraftInfo.PartWeaponChild)var27.next();
+               MCH_BaseVehicleInfo.PartWeaponChild var28 = (MCH_BaseVehicleInfo.PartWeaponChild)var27.next();
                GL11.glPushMatrix();
                renderWeaponChild(ac, info, var28, ws, e, tickTime);
                GL11.glPopMatrix();
@@ -788,7 +788,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
 
    }
 
-   public static void renderWeaponChild(MCH_EntityAircraft ac, MCH_AircraftInfo info, MCH_AircraftInfo.PartWeaponChild w, MCH_WeaponSet ws, Entity e, float tickTime) {
+   public static void renderWeaponChild(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, MCH_BaseVehicleInfo.PartWeaponChild w, MCH_WeaponSet ws, Entity e, float tickTime) {
       float rotYaw = 0.0F;
       float prevYaw = 0.0F;
       float rotPitch = 0.0F;
@@ -869,14 +869,14 @@ public abstract class MCH_RenderAircraft extends W_Render {
       renderPart(w.model, info.model, w.modelName);
    }
 
-   public static void renderTrackRoller(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
+   public static void renderTrackRoller(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if(info.partTrackRoller.size() > 0) {
          float[] rot = ac.rotTrackRoller;
          float[] prevRot = ac.prevRotTrackRoller;
          Iterator i$ = info.partTrackRoller.iterator();
 
          while(i$.hasNext()) {
-            MCH_AircraftInfo.TrackRoller t = (MCH_AircraftInfo.TrackRoller)i$.next();
+            MCH_BaseVehicleInfo.TrackRoller t = (MCH_BaseVehicleInfo.TrackRoller)i$.next();
             GL11.glPushMatrix();
             GL11.glTranslated(t.pos.xCoord, t.pos.yCoord, t.pos.zCoord);
             GL11.glRotatef(prevRot[t.side] + (rot[t.side] - prevRot[t.side]) * tickTime, 1.0F, 0.0F, 0.0F);
@@ -888,14 +888,14 @@ public abstract class MCH_RenderAircraft extends W_Render {
       }
    }
 
-   public static void renderCrawlerTrack(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
+   public static void renderCrawlerTrack(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if(info.partCrawlerTrack.size() > 0) {
          int prevWidth = GL11.glGetInteger(2833);
          Tessellator tessellator = Tessellator.instance;
          Iterator i$ = info.partCrawlerTrack.iterator();
 
          while(i$.hasNext()) {
-            MCH_AircraftInfo.CrawlerTrack c = (MCH_AircraftInfo.CrawlerTrack)i$.next();
+            MCH_BaseVehicleInfo.CrawlerTrack c = (MCH_BaseVehicleInfo.CrawlerTrack)i$.next();
             GL11.glPointSize(c.len * 20.0F);
             MCH_Config var10000 = MCH_MOD.config;
             int L;
@@ -919,8 +919,8 @@ public abstract class MCH_RenderAircraft extends W_Render {
             double pc = ac != null?(double)ac.prevRotCrawlerTrack[c.side]:0.0D;
 
             for(int i = 0; i < L; ++i) {
-               MCH_AircraftInfo.CrawlerTrackPrm cp = (MCH_AircraftInfo.CrawlerTrackPrm)c.lp.get(i);
-               MCH_AircraftInfo.CrawlerTrackPrm np = (MCH_AircraftInfo.CrawlerTrackPrm)c.lp.get((i + 1) % L);
+               MCH_BaseVehicleInfo.CrawlerTrackPrm cp = (MCH_BaseVehicleInfo.CrawlerTrackPrm)c.lp.get(i);
+               MCH_BaseVehicleInfo.CrawlerTrackPrm np = (MCH_BaseVehicleInfo.CrawlerTrackPrm)c.lp.get((i + 1) % L);
                double x1 = (double)cp.x;
                double x2 = (double)np.x;
                double r1 = (double)cp.r;
@@ -957,14 +957,14 @@ public abstract class MCH_RenderAircraft extends W_Render {
       }
    }
 
-   public static void renderHatch(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
+   public static void renderHatch(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if(info.haveHatch() && ac.partHatch != null) {
          float rot = ac.getHatchRotation();
          float prevRot = ac.getPrevHatchRotation();
          Iterator i$ = info.hatchList.iterator();
 
          while(i$.hasNext()) {
-            MCH_AircraftInfo.Hatch h = (MCH_AircraftInfo.Hatch)i$.next();
+            MCH_BaseVehicleInfo.Hatch h = (MCH_BaseVehicleInfo.Hatch)i$.next();
             GL11.glPushMatrix();
             if(h.isSlide) {
                float r = ac.partHatch.rotation / ac.partHatch.rotationMax;
@@ -984,13 +984,13 @@ public abstract class MCH_RenderAircraft extends W_Render {
       }
    }
 
-   public static void renderThrottle(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
+   public static void renderThrottle(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if(info.havePartThrottle()) {
          float throttle = MCH_Lib.smooth((float)ac.getCurrentThrottle(), (float)ac.getPrevCurrentThrottle(), tickTime);
          Iterator i$ = info.partThrottle.iterator();
 
          while(i$.hasNext()) {
-            MCH_AircraftInfo.Throttle h = (MCH_AircraftInfo.Throttle)i$.next();
+            MCH_BaseVehicleInfo.Throttle h = (MCH_BaseVehicleInfo.Throttle)i$.next();
             GL11.glPushMatrix();
             GL11.glTranslated(h.pos.xCoord, h.pos.yCoord, h.pos.zCoord);
             GL11.glRotatef(throttle * h.rot2, (float)h.rot.xCoord, (float)h.rot.yCoord, (float)h.rot.zCoord);
@@ -1003,10 +1003,10 @@ public abstract class MCH_RenderAircraft extends W_Render {
       }
    }
 
-   public static void renderWeaponBay(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
+   public static void renderWeaponBay(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       for(int i = 0; i < info.partWeaponBay.size(); ++i) {
-         MCH_AircraftInfo.WeaponBay w = (MCH_AircraftInfo.WeaponBay)info.partWeaponBay.get(i);
-         MCH_EntityAircraft.WeaponBay ws = ac.weaponBays[i];
+         MCH_BaseVehicleInfo.WeaponBay w = (MCH_BaseVehicleInfo.WeaponBay)info.partWeaponBay.get(i);
+         MCH_EntityBaseVehicle.WeaponBay ws = ac.weaponBays[i];
          GL11.glPushMatrix();
          if(w.isSlide) {
             float r = ws.rot / 90.0F;
@@ -1025,7 +1025,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
 
    }
 
-   public static void renderCamera(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
+   public static void renderCamera(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if(info.havePartCamera()) {
          float rotYaw = ac.camera.partRotationYaw;
          float prevRotYaw = ac.camera.prevPartRotationYaw;
@@ -1036,7 +1036,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
          Iterator i$ = info.cameraList.iterator();
 
          while(i$.hasNext()) {
-            MCH_AircraftInfo.Camera c = (MCH_AircraftInfo.Camera)i$.next();
+            MCH_BaseVehicleInfo.Camera c = (MCH_BaseVehicleInfo.Camera)i$.next();
             GL11.glPushMatrix();
             GL11.glTranslated(c.pos.xCoord, c.pos.yCoord, c.pos.zCoord);
             if(c.yawSync) {
@@ -1055,14 +1055,14 @@ public abstract class MCH_RenderAircraft extends W_Render {
       }
    }
 
-   public static void renderCanopy(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
+   public static void renderCanopy(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if(info.haveCanopy() && ac.partCanopy != null) {
          float rot = ac.getCanopyRotation();
          float prevRot = ac.getPrevCanopyRotation();
          Iterator i$ = info.canopyList.iterator();
 
          while(i$.hasNext()) {
-            MCH_AircraftInfo.Canopy c = (MCH_AircraftInfo.Canopy)i$.next();
+            MCH_BaseVehicleInfo.Canopy c = (MCH_BaseVehicleInfo.Canopy)i$.next();
             GL11.glPushMatrix();
             if(c.isSlide) {
                float r = ac.partCanopy.rotation / ac.partCanopy.rotationMax;
@@ -1082,7 +1082,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
 
    }
 
-   public static void renderLandingGear(MCH_EntityAircraft ac, MCH_AircraftInfo info, float tickTime) {
+   public static void renderLandingGear(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if (info.haveLandingGear() && ac.partLandingGear != null) {
          float rot = ac.getLandingGearRotation();
          float prevRot = ac.getPrevLandingGearRotation();
@@ -1098,7 +1098,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
          Iterator i$ = info.landingGear.iterator();
 
          while (i$.hasNext()) {
-            MCH_AircraftInfo.LandingGear n = (MCH_AircraftInfo.LandingGear) i$.next();
+            MCH_BaseVehicleInfo.LandingGear n = (MCH_BaseVehicleInfo.LandingGear) i$.next();
             GL11.glPushMatrix();
             GL11.glTranslated(n.pos.xCoord, n.pos.yCoord, n.pos.zCoord);
             if (!n.reverse) {
@@ -1140,9 +1140,9 @@ public abstract class MCH_RenderAircraft extends W_Render {
       EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
       if(player != null) {
          if(!W_Entity.isEqual(player, entity)) {
-            MCH_EntityAircraft ac = null; //玩家乘坐的实体
-            if(player.ridingEntity instanceof MCH_EntityAircraft) {
-               ac = (MCH_EntityAircraft)player.ridingEntity;
+            MCH_EntityBaseVehicle ac = null; //玩家乘坐的实体
+            if(player.ridingEntity instanceof MCH_EntityBaseVehicle) {
+               ac = (MCH_EntityBaseVehicle)player.ridingEntity;
             } else if(player.ridingEntity instanceof MCH_EntitySeat) {
                ac = ((MCH_EntitySeat)player.ridingEntity).getParent();
             } else if(player.ridingEntity instanceof MCH_EntityUavStation) {
@@ -1211,7 +1211,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
                            int prevWidth = GL11.glGetInteger(2849);
                            // 设置目标实体大小（根据实体的宽度和高度进行调整）
                            float size1 = Math.max(entity.width, entity.height) * 20.0F;
-                           if(entity instanceof MCH_EntityAircraft
+                           if(entity instanceof MCH_EntityBaseVehicle
                                    || entity instanceof MCH_EntityFlare
                                    || entity instanceof MCH_EntityChaff) {
                               size1 *= 2.0F; // 飞机类型实体大小加倍
@@ -1291,8 +1291,8 @@ public abstract class MCH_RenderAircraft extends W_Render {
                               if (gs.isHeatSeekerMissile) {
                                  text = "HEAT";
                               } else if (gs.isRadarMissile) {
-                                 if (entity instanceof MCH_EntityAircraft) {
-                                    MCH_EntityAircraft entityAircraft = (MCH_EntityAircraft) entity;
+                                 if (entity instanceof MCH_EntityBaseVehicle) {
+                                    MCH_EntityBaseVehicle entityAircraft = (MCH_EntityBaseVehicle) entity;
                                     text = entityAircraft.getNameOnOtherRadar(ac);
                                  } else {
                                     text = "?";
@@ -1349,7 +1349,7 @@ public abstract class MCH_RenderAircraft extends W_Render {
       }
    }
 
-   public static void renderRope(MCH_EntityAircraft ac, MCH_AircraftInfo info, double x, double y, double z, float tickTime) {
+   public static void renderRope(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, double x, double y, double z, float tickTime) {
       GL11.glPushMatrix();
       Tessellator tessellator = Tessellator.instance;
       if(ac.isRepelling()) {
@@ -1359,8 +1359,8 @@ public abstract class MCH_RenderAircraft extends W_Render {
          for(int i = 0; i < info.repellingHooks.size(); ++i) {
             tessellator.startDrawing(3);
             tessellator.setColorOpaque_I(0);
-            tessellator.addVertex(((MCH_AircraftInfo.RepellingHook)info.repellingHooks.get(i)).pos.xCoord, ((MCH_AircraftInfo.RepellingHook)info.repellingHooks.get(i)).pos.yCoord, ((MCH_AircraftInfo.RepellingHook)info.repellingHooks.get(i)).pos.zCoord);
-            tessellator.addVertex(((MCH_AircraftInfo.RepellingHook)info.repellingHooks.get(i)).pos.xCoord, ((MCH_AircraftInfo.RepellingHook)info.repellingHooks.get(i)).pos.yCoord + (double)ac.ropesLength, ((MCH_AircraftInfo.RepellingHook)info.repellingHooks.get(i)).pos.zCoord);
+            tessellator.addVertex(((MCH_BaseVehicleInfo.RepellingHook)info.repellingHooks.get(i)).pos.xCoord, ((MCH_BaseVehicleInfo.RepellingHook)info.repellingHooks.get(i)).pos.yCoord, ((MCH_BaseVehicleInfo.RepellingHook)info.repellingHooks.get(i)).pos.zCoord);
+            tessellator.addVertex(((MCH_BaseVehicleInfo.RepellingHook)info.repellingHooks.get(i)).pos.xCoord, ((MCH_BaseVehicleInfo.RepellingHook)info.repellingHooks.get(i)).pos.yCoord + (double)ac.ropesLength, ((MCH_BaseVehicleInfo.RepellingHook)info.repellingHooks.get(i)).pos.zCoord);
             tessellator.draw();
          }
 

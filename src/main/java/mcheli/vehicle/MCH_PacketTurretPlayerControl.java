@@ -5,7 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import mcheli.aircraft.MCH_PacketPlayerControlBase;
 
-public class MCH_PacketVehiclePlayerControl extends MCH_PacketPlayerControlBase {
+public class MCH_PacketTurretPlayerControl extends MCH_PacketPlayerControlBase {
 
    public byte switchFold = -1;
    public int unhitchChainId = -1;

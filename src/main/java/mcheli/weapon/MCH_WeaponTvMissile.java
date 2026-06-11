@@ -3,7 +3,7 @@ package mcheli.weapon;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_PacketNotifyTVMissileEntity;
 import mcheli.network.packets.PacketLaserGuidanceTargeting;
 import mcheli.wrapper.W_Entity;
@@ -86,8 +86,8 @@ public class MCH_WeaponTvMissile extends MCH_WeaponBase {
             }
          }
 
-         if(super.tick <= 2 && this.lastShotEntity instanceof MCH_EntityAircraft) {
-            ((MCH_EntityAircraft)this.lastShotEntity).setTVMissile(this.lastShotTvMissile);
+         if(super.tick <= 2 && this.lastShotEntity instanceof MCH_EntityBaseVehicle) {
+            ((MCH_EntityBaseVehicle)this.lastShotEntity).setTVMissile(this.lastShotTvMissile);
          }
       }
 

@@ -4,11 +4,11 @@ import mcheli.MCH_Config;
 import mcheli.MCH_Key;
 import mcheli.MCH_Lib;
 import mcheli.MCH_ViewEntityDummy;
-import mcheli.aircraft.MCH_AircraftClientTickHandler;
+import mcheli.aircraft.MCH_BaseVehicleClientTickHandler;
 import mcheli.aircraft.MCH_EntitySeat;
-import mcheli.vehicle.MCH_EntityVehicle;
-import mcheli.vehicle.MCH_PacketVehiclePlayerControl;
-import mcheli.vehicle.MCH_VehicleInfo;
+import mcheli.vehicle.MCH_EntityTurret;
+import mcheli.vehicle.MCH_PacketTurretPlayerControl;
+import mcheli.vehicle.MCH_TurretInfo;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Network;
 import mcheli.wrapper.W_Reflection;
@@ -16,7 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
 
-public class MCH_ClientVehicleTickHandler extends MCH_AircraftClientTickHandler {
+public class MCH_ClientTurretTickHandler extends MCH_BaseVehicleClientTickHandler {
 
    public MCH_Key KeySwitchMode;
    public MCH_Key KeySwitchHovering;
@@ -25,7 +25,7 @@ public class MCH_ClientVehicleTickHandler extends MCH_AircraftClientTickHandler 
    public MCH_Key[] Keys;
 
 
-   public MCH_ClientVehicleTickHandler(Minecraft minecraft, MCH_Config config) {
+   public MCH_ClientTurretTickHandler(Minecraft minecraft, MCH_Config config) {
       super(minecraft, config);
       this.updateKeybind(config);
    }
@@ -39,7 +39,7 @@ public class MCH_ClientVehicleTickHandler extends MCH_AircraftClientTickHandler 
       this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeySwitchHovering, super.KeyUseWeapon, super.KeyCurrentWeaponLock, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyChaff, super.KeyMaintenance,super.KeyAPS, this.KeyExtra, super.KeyGUI};
    }
 
-   protected void update(EntityPlayer player, MCH_EntityVehicle vehicle, MCH_VehicleInfo info) {
+   protected void update(EntityPlayer player, MCH_EntityTurret vehicle, MCH_TurretInfo info) {
       if(info != null) {
          setRotLimitPitch(info.minRotationPitch, info.maxRotationPitch, player);
       }
@@ -59,23 +59,23 @@ public class MCH_ClientVehicleTickHandler extends MCH_AircraftClientTickHandler 
 
       super.isBeforeRiding = super.isRiding;
       EntityClientPlayerMP var6 = super.mc.thePlayer;
-      MCH_EntityVehicle var7 = null;
+      MCH_EntityTurret var7 = null;
       boolean var8 = true;
       if(var6 != null) {
-         if(var6.ridingEntity instanceof MCH_EntityVehicle) {
-            var7 = (MCH_EntityVehicle)var6.ridingEntity;
+         if(var6.ridingEntity instanceof MCH_EntityTurret) {
+            var7 = (MCH_EntityTurret)var6.ridingEntity;
          } else if(var6.ridingEntity instanceof MCH_EntitySeat) {
             MCH_EntitySeat var9 = (MCH_EntitySeat)var6.ridingEntity;
-            if(var9.getParent() instanceof MCH_EntityVehicle) {
+            if(var9.getParent() instanceof MCH_EntityTurret) {
                var8 = false;
-               var7 = (MCH_EntityVehicle)var9.getParent();
+               var7 = (MCH_EntityTurret)var9.getParent();
             }
          }
       }
 
       if(var7 != null && var7.getAcInfo() != null) {
          MCH_Lib.disableFirstPersonItemRender(var6.getCurrentEquippedItem());
-         this.update(var6, var7, var7.getVehicleInfo());
+         this.update(var6, var7, var7.getTurretInfo());
          MCH_ViewEntityDummy var10 = MCH_ViewEntityDummy.getInstance(super.mc.theWorld);
          var10.update(var7.camera);
          if(!inGUI) {
@@ -102,12 +102,12 @@ public class MCH_ClientVehicleTickHandler extends MCH_AircraftClientTickHandler 
 
    }
 
-   protected void playerControlInGUI(EntityPlayer player, MCH_EntityVehicle vehicle, boolean isPilot) {
-      this.commonPlayerControlInGUI(player, vehicle, isPilot, new MCH_PacketVehiclePlayerControl());
+   protected void playerControlInGUI(EntityPlayer player, MCH_EntityTurret vehicle, boolean isPilot) {
+      this.commonPlayerControlInGUI(player, vehicle, isPilot, new MCH_PacketTurretPlayerControl());
    }
 
-   protected void playerControl(EntityPlayer player, MCH_EntityVehicle vehicle, boolean isPilot) {
-      MCH_PacketVehiclePlayerControl pc = new MCH_PacketVehiclePlayerControl();
+   protected void playerControl(EntityPlayer player, MCH_EntityTurret vehicle, boolean isPilot) {
+      MCH_PacketTurretPlayerControl pc = new MCH_PacketTurretPlayerControl();
       boolean send = false;
       send = this.commonPlayerControl(player, vehicle, isPilot, pc);
       if(this.KeyExtra.isKeyDown()) {

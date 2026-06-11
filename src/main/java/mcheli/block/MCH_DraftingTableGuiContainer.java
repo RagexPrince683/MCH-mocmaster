@@ -12,7 +12,7 @@ import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.ship.MCH_ShipInfoManager;
 import mcheli.tank.MCH_TankInfoManager;
-import mcheli.vehicle.MCH_VehicleInfoManager;
+import mcheli.vehicle.MCH_TurretInfoManager;
 import mcheli.wrapper.W_Block;
 import mcheli.wrapper.W_EntityPlayer;
 import mcheli.wrapper.W_WorldFunc;
@@ -113,7 +113,7 @@ public class MCH_DraftingTableGuiContainer extends Container {
               MCH_ItemRecipe.getInstance(),
               MCH_HeliInfoManager.getInstance(),
               MCP_PlaneInfoManager.getInstance(),
-              MCH_VehicleInfoManager.getInstance(),
+              MCH_TurretInfoManager.getInstance(),
               MCH_TankInfoManager.getInstance(),
               MCH_ShipInfoManager.getInstance()
       };

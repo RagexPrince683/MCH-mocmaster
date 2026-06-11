@@ -2,14 +2,14 @@ package mcheli;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import mcheli.aircraft.MCH_AircraftCommonGui;
+import mcheli.aircraft.MCH_BaseVehicleCommonGui;
 import mcheli.gui.MCH_Gui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
-public class MCH_GuiCommon extends MCH_AircraftCommonGui {
+public class MCH_GuiCommon extends MCH_BaseVehicleCommonGui {
 
    public int hitCount = 0;
 

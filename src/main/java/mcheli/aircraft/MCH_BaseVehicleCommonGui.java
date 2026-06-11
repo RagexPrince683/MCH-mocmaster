@@ -6,8 +6,8 @@ import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.gui.MCH_Gui;
 import mcheli.hud.MCH_Hud;
 import mcheli.weapon.MCH_EntityTvMissile;
@@ -19,14 +19,14 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
-public abstract class MCH_AircraftCommonGui extends MCH_Gui {
+public abstract class MCH_BaseVehicleCommonGui extends MCH_Gui {
 
-   public MCH_AircraftCommonGui(Minecraft minecraft) {
+   public MCH_BaseVehicleCommonGui(Minecraft minecraft) {
       super(minecraft);
    }
 
-   public void drawHud(MCH_EntityAircraft ac, EntityPlayer player, int seatId) {
-      MCH_AircraftInfo info = ac.getAcInfo();
+   public void drawHud(MCH_EntityBaseVehicle ac, EntityPlayer player, int seatId) {
+      MCH_BaseVehicleInfo info = ac.getAcInfo();
       if(info != null) {
          if(ac.isMissileCameraMode(player) && ac.getTVMissile() != null && info.hudTvMissile != null) {
             info.hudTvMissile.draw(ac, player, super.smoothCamPartialTicks);
@@ -46,7 +46,7 @@ public abstract class MCH_AircraftCommonGui extends MCH_Gui {
       }
    }
 
-   public void drawDebugtInfo(MCH_EntityAircraft ac) {
+   public void drawDebugtInfo(MCH_EntityBaseVehicle ac) {
       MCH_Config var10000 = MCH_MOD.config;
       if(MCH_Config.DebugLog) {
          int LX = super.centerX - 100;
@@ -86,11 +86,11 @@ public abstract class MCH_AircraftCommonGui extends MCH_Gui {
 
    }
 
-   public void drawHitBullet(MCH_EntityAircraft ac, int color, int seatID) {
+   public void drawHitBullet(MCH_EntityBaseVehicle ac, int color, int seatID) {
       this.drawHitBullet(ac.getHitStatus(), ac.getMaxHitStatus(), color);
    }
 
-   protected void drawTvMissileNoise(MCH_EntityAircraft ac, MCH_EntityTvMissile tvmissile) {
+   protected void drawTvMissileNoise(MCH_EntityBaseVehicle ac, MCH_EntityTvMissile tvmissile) {
       GL11.glEnable(3042);
       GL11.glColor4f(0.5F, 0.5F, 0.5F, 0.4F);
       int srcBlend = GL11.glGetInteger(3041);
@@ -102,7 +102,7 @@ public abstract class MCH_AircraftCommonGui extends MCH_Gui {
       GL11.glDisable(3042);
    }
 
-   public void drawKeyBind(MCH_EntityAircraft ac, MCH_AircraftInfo info, EntityPlayer player, int seatID, int RX, int LX, int colorActive, int colorInactive) {
+   public void drawKeyBind(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, EntityPlayer player, int seatID, int RX, int LX, int colorActive, int colorInactive) {
       String msg = "";
       boolean c = false;
       StringBuilder var10000;

@@ -10,7 +10,7 @@ import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_LowPassFilterFloat;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.eval.eval.ExpRuleFactory;
 import mcheli.eval.eval.Expression;
 import mcheli.eval.eval.var.MapVariable;
@@ -38,7 +38,7 @@ public abstract class MCH_HudItem extends Gui {
    public final int fileLine;
    public static Minecraft mc;
    public static EntityPlayer player;
-   public static MCH_EntityAircraft ac;
+   public static MCH_EntityBaseVehicle ac;
    protected static double centerX = 0.0D;
    protected static double centerY = 0.0D;
    public static double width;
@@ -226,7 +226,7 @@ public abstract class MCH_HudItem extends Gui {
       GL11.glPointSize((float)prevWidth);
    }
 
-   public static void updateVarMap(MCH_EntityAircraft ac, MCH_WeaponSet ws) {
+   public static void updateVarMap(MCH_EntityBaseVehicle ac, MCH_WeaponSet ws) {
       if(varMap == null) {
          varMap = new LinkedHashMap();
       }
@@ -313,7 +313,7 @@ public abstract class MCH_HudItem extends Gui {
 
    }
 
-   private static double getUAV_Fs(MCH_EntityAircraft ac) {
+   private static double getUAV_Fs(MCH_EntityBaseVehicle ac) {
       double uav_fs = 0.0D;
       if(ac.isUAV() && ac.getUavStation() != null) {
          double dx = ac.posX - ac.getUavStation().posX;
@@ -390,7 +390,7 @@ public abstract class MCH_HudItem extends Gui {
       //todo later
    }
 
-   public static int isLowFuel(MCH_EntityAircraft ac) {
+   public static int isLowFuel(MCH_EntityBaseVehicle ac) {
       byte is_low_fuel = 0;
       if(countFuelWarn <= 0) {
          countFuelWarn = 280;
@@ -404,12 +404,12 @@ public abstract class MCH_HudItem extends Gui {
       return is_low_fuel;
    }
 
-   public static double getSeaAltitude(MCH_EntityAircraft ac) {
+   public static double getSeaAltitude(MCH_EntityBaseVehicle ac) {
       double a = ac.posY - ac.worldObj.getHorizon();
       return a >= 0.0D?a:0.0D;
    }
 
-   public static float getRadarRot(MCH_EntityAircraft ac) {
+   public static float getRadarRot(MCH_EntityBaseVehicle ac) {
       float rot = (float)ac.getRadarRotate();
       float prevRot = prevRadarRot;
       if(rot < prevRot) {
@@ -420,15 +420,15 @@ public abstract class MCH_HudItem extends Gui {
       return MCH_Lib.smooth(rot, prevRot, partialTicks);
    }
 
-   public static int getVtolStat(MCH_EntityAircraft ac) {
+   public static int getVtolStat(MCH_EntityBaseVehicle ac) {
       return ac instanceof MCP_EntityPlane?((MCP_EntityPlane)ac).getVtolMode():0;
    }
 
-   public static int getFreeLook(MCH_EntityAircraft ac, EntityPlayer player) {
+   public static int getFreeLook(MCH_EntityBaseVehicle ac, EntityPlayer player) {
       return ac.isPilot(player) && ac.canSwitchFreeLook() && ac.isFreeLookMode()?1:0;
    }
 
-   public static int getAutoPilot(MCH_EntityAircraft ac, EntityPlayer player) {
+   public static int getAutoPilot(MCH_EntityBaseVehicle ac, EntityPlayer player) {
       return ac instanceof MCP_EntityPlane && ac.isPilot(player) && ac.getIsGunnerMode(player)?1:0;
    }
 
@@ -445,12 +445,12 @@ public abstract class MCH_HudItem extends Gui {
       StickY = (double)StickY_LPF.getAvg();
    }
 
-   private static void updateRadar(MCH_EntityAircraft ac) {
+   private static void updateRadar(MCH_EntityBaseVehicle ac) {
       EntityList = ac.getRadarEntityList();
       EnemyList = ac.getRadarEnemyList();
    }
 
-   private static void updateAltitude(MCH_EntityAircraft ac) {
+   private static void updateAltitude(MCH_EntityBaseVehicle ac) {
       if(altitudeUpdateCount <= 0) {
          int heliY = (int)ac.posY;
          if(heliY > 256) {
@@ -484,7 +484,7 @@ public abstract class MCH_HudItem extends Gui {
    //      return String.format("%.0f m", dist);
    //   }
    //}
-   public static void updateWeapon(MCH_EntityAircraft ac, MCH_WeaponSet ws) {
+   public static void updateWeapon(MCH_EntityBaseVehicle ac, MCH_WeaponSet ws) {
       if(ac.getWeaponNum() > 0) {
          if(ws != null) {
             CurrentWeapon = ws;
@@ -536,7 +536,7 @@ public abstract class MCH_HudItem extends Gui {
       }
    }
 
-   public static void updateUAV(MCH_EntityAircraft ac) {
+   public static void updateUAV(MCH_EntityBaseVehicle ac) {
       if(ac.isUAV() && ac.getUavStation() != null) {
          double dx = ac.posX - ac.getUavStation().posX;
          double dz = ac.posZ - ac.getUavStation().posZ;
@@ -547,7 +547,7 @@ public abstract class MCH_HudItem extends Gui {
 
    }
 
-   private static void updateTvMissile(MCH_EntityAircraft ac) {
+   private static void updateTvMissile(MCH_EntityBaseVehicle ac) {
       MCH_EntityTvMissile tvmissile = ac.getTVMissile();
       if(tvmissile != null) {
          TVM_PosX = tvmissile.posX;

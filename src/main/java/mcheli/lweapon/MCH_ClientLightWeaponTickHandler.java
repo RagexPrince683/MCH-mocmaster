@@ -7,8 +7,8 @@ import mcheli.MCH_Config;
 import mcheli.MCH_Key;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.gltd.MCH_EntityGLTD;
 import mcheli.lweapon.MCH_ItemLightWeaponBase;
 import mcheli.lweapon.MCH_PacketLightWeaponPlayerControl;
@@ -79,7 +79,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          GL11.glGetFloat(2983, matProjection);
          GL11.glGetInteger(2978, matViewport);
          GLU.gluProject((float)x, (float)y, (float)z, matModel, matProjection, matViewport, screenPos);
-         MCH_AircraftInfo i = entity instanceof MCH_EntityAircraft?((MCH_EntityAircraft)entity).getAcInfo():null;
+         MCH_BaseVehicleInfo i = entity instanceof MCH_EntityBaseVehicle?((MCH_EntityBaseVehicle)entity).getAcInfo():null;
          float w = i != null?i.markerWidth:(entity.width > entity.height?entity.width:entity.height);
          float h = i != null?i.markerHeight:entity.height;
          GLU.gluProject((float)x + w, (float)y + h, (float)z + w, matModel, matProjection, matViewport, screenPosBB);
@@ -127,7 +127,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
       }
 
       ItemStack var7 = var6 != null?var6.getHeldItem():null;
-      if(var6 == null || var6.ridingEntity instanceof MCH_EntityGLTD || var6.ridingEntity instanceof MCH_EntityAircraft) {
+      if(var6 == null || var6.ridingEntity instanceof MCH_EntityGLTD || var6.ridingEntity instanceof MCH_EntityBaseVehicle) {
          var7 = null;
       }
 

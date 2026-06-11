@@ -6,8 +6,8 @@ import java.util.List;
 import mcheli.MCH_IRecipeList;
 import mcheli.MCH_MOD;
 import mcheli.MCH_ModelManager;
-import mcheli.aircraft.MCH_AircraftInfo;
-import mcheli.aircraft.MCH_AircraftInfoManager;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_BaseVehicleInfoManager;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.weapon.MCH_WeaponInfo;
@@ -24,7 +24,7 @@ public class MCH_CurrentRecipe {
    public final int index;
    public final String displayName;
    public final List descTexture;
-   private final MCH_AircraftInfo acInfo;
+   private final MCH_BaseVehicleInfo acInfo;
    public List infoItem;
    public List infoData;
    private int descMaxPage;
@@ -45,16 +45,16 @@ public class MCH_CurrentRecipe {
 
       if(list instanceof FilteredRecipeList) {
          infoList = ((FilteredRecipeList)list).getBaseList();
-      } //todo if not working move down under MCH_AircraftInfo info = null;
+      } //todo if not working move down under MCH_BaseVehicleInfo info = null;
 
       this.index = idx;
       this.displayName = this.recipe != null?this.recipe.getRecipeOutput().getDisplayName():"None";
       this.descTexture = this.getDescTexture(this.recipe);
       this.descPage = 0;
       this.descMaxPage = this.descTexture.size();
-      MCH_AircraftInfo info = null;
-      if(infoList instanceof MCH_AircraftInfoManager) {
-         info = ((MCH_AircraftInfoManager)infoList).getAcInfoFromItem(this.recipe);
+      MCH_BaseVehicleInfo info = null;
+      if(infoList instanceof MCH_BaseVehicleInfoManager) {
+         info = ((MCH_BaseVehicleInfoManager)infoList).getAcInfoFromItem(this.recipe);
          if(info != null) {
             ++this.descMaxPage;
             String dir = info.getDirectoryName();
@@ -76,7 +76,7 @@ public class MCH_CurrentRecipe {
       this.acInfo = info;
    }
 
-   private void getAcInfoText(MCH_AircraftInfo info) {
+   private void getAcInfoText(MCH_BaseVehicleInfo info) {
       this.infoItem = new ArrayList();
       this.infoData = new ArrayList();
       if(info != null) {
@@ -168,7 +168,7 @@ public class MCH_CurrentRecipe {
       return this.modelTexture;
    }
 
-   public MCH_AircraftInfo getAcInfo() {
+   public MCH_BaseVehicleInfo getAcInfo() {
       return this.acInfo;
    }
 

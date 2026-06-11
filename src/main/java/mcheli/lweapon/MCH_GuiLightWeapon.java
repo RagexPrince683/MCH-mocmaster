@@ -6,7 +6,7 @@ import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.gltd.MCH_EntityGLTD;
 import mcheli.gui.MCH_Gui;
 import mcheli.weapon.MCH_WeaponGuidanceSystem;
@@ -39,7 +39,7 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
    public boolean isDrawGui(EntityPlayer player) {
       if(MCH_ItemLightWeaponBase.isHeld(player)) {
          Entity re = player.ridingEntity;
-         if(!(re instanceof MCH_EntityAircraft) && !(re instanceof MCH_EntityGLTD)) {
+         if(!(re instanceof MCH_EntityBaseVehicle) && !(re instanceof MCH_EntityGLTD)) {
             return true;
          }
       }

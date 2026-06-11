@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import mcheli.aircraft.MCH_EntityAircraft;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.network.packets.PacketVehicleLODSnapshot;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.ship.MCH_EntityShip;
 import mcheli.tank.MCH_EntityTank;
-import mcheli.vehicle.MCH_EntityVehicle;
+import mcheli.vehicle.MCH_EntityTurret;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
@@ -53,10 +53,10 @@ public class MCH_ServerTickHandler {
    }
 
    private static List<PacketVehicleLODSnapshot.Entry> collectSnapshots(WorldServer world, final EntityPlayerMP player, double farDistanceSq) {
-      List<MCH_EntityAircraft> aircraft = new ArrayList<MCH_EntityAircraft>();
+      List<MCH_EntityBaseVehicle> aircraft = new ArrayList<MCH_EntityBaseVehicle>();
       for(Object object : world.loadedEntityList) {
-         if(object instanceof MCH_EntityAircraft) {
-            MCH_EntityAircraft vehicle = (MCH_EntityAircraft)object;
+         if(object instanceof MCH_EntityBaseVehicle) {
+            MCH_EntityBaseVehicle vehicle = (MCH_EntityBaseVehicle)object;
             if(!vehicle.isDead && vehicle.getAcInfo() != null && categoryOf(vehicle) >= 0
                && vehicle.getDistanceSqToEntity(player) <= farDistanceSq) {
                aircraft.add(vehicle);
@@ -64,9 +64,9 @@ public class MCH_ServerTickHandler {
          }
       }
 
-      Collections.sort(aircraft, new Comparator<MCH_EntityAircraft>() {
+      Collections.sort(aircraft, new Comparator<MCH_EntityBaseVehicle>() {
          @Override
-         public int compare(MCH_EntityAircraft left, MCH_EntityAircraft right) {
+         public int compare(MCH_EntityBaseVehicle left, MCH_EntityBaseVehicle right) {
             return Double.compare(left.getDistanceSqToEntity(player), right.getDistanceSqToEntity(player));
          }
       });
@@ -74,7 +74,7 @@ public class MCH_ServerTickHandler {
       int count = Math.min(aircraft.size(), MAX_ENTRIES);
       List<PacketVehicleLODSnapshot.Entry> entries = new ArrayList<PacketVehicleLODSnapshot.Entry>(count);
       for(int i = 0; i < count; ++i) {
-         MCH_EntityAircraft vehicle = aircraft.get(i);
+         MCH_EntityBaseVehicle vehicle = aircraft.get(i);
          PacketVehicleLODSnapshot.Entry entry = new PacketVehicleLODSnapshot.Entry();
          entry.uuid = vehicle.getUniqueID();
          entry.entityId = vehicle.getEntityId();
@@ -94,12 +94,12 @@ public class MCH_ServerTickHandler {
       return entries;
    }
 
-   private static byte categoryOf(MCH_EntityAircraft vehicle) {
+   private static byte categoryOf(MCH_EntityBaseVehicle vehicle) {
       if(vehicle instanceof MCH_EntityHeli) return 0;
       if(vehicle instanceof MCP_EntityPlane) return 1;
       if(vehicle instanceof MCH_EntityShip) return 2;
       if(vehicle instanceof MCH_EntityTank) return 3;
-      if(vehicle instanceof MCH_EntityVehicle) return 4;
+      if(vehicle instanceof MCH_EntityTurret) return 4;
       return -1;
    }
 }
