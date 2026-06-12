@@ -5,6 +5,7 @@ import mcheli.MCH_Color;
 import mcheli.MCH_DamageFactor;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.plane.MCP_EntityPlane;
+import mcheli.ship.MCH_EntityShip;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.vehicle.MCH_EntityTurret;
 import mcheli.wrapper.W_Item;
@@ -689,6 +690,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
                                 this.target |= data.indexOf("players") >= 0 ? 4 : 0;
                                 this.target |= data.indexOf("monsters") >= 0 ? 2 : 0;
                                 this.target |= data.indexOf("others") >= 0 ? 1 : 0;
+                                this.target |= data.indexOf("ships") >= 0 ? 128 : 0;
                             }
                         } else if (item.equalsIgnoreCase("MarkTime")) {
                             this.markTime = this.toInt(data, 1, 30000) + 1;
@@ -708,6 +710,8 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
                                         var13 = MCH_EntityTank.class;
                                     } else if (var14.equals("vehicle")) {
                                         var13 = MCH_EntityTurret.class;
+                                    } else if (var14.equals("ship")) {
+                                        var13 = MCH_EntityShip.class;
                                     }
                                 } else {
                                     var13 = MCH_EntityHeli.class;

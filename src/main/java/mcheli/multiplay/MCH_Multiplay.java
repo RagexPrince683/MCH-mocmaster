@@ -42,7 +42,7 @@ public class MCH_Multiplay {
       } else if (entity instanceof MCH_EntityHeli) {
          return (filter & 16) != 0; // Checks if helicopters are included in the filter
       } else if (entity instanceof MCH_EntityShip) {
-         return (filter & 64) != 0; // Checks if helicopters are included in the filter
+         return (filter & 128) != 0; // Checks if ships are included in the filter
       } else if (entity instanceof MCH_EntityTurret || entity instanceof MCH_EntityTank) {
          return (filter & 8) != 0; // Checks if vehicles or tanks are included in the filter
       } else if (entity instanceof EntityPlayer) {
