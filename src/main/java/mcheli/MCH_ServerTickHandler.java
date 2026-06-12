@@ -17,7 +17,9 @@ import mcheli.vehicle.MCH_EntityTurret;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 
 /** Sends render-only vehicle snapshots without changing Forge entity tracking. */
 public class MCH_ServerTickHandler {
@@ -96,9 +98,9 @@ public class MCH_ServerTickHandler {
    }
 
    /**
-    * Samples the vehicle's actual world light without calling the client-only
-    * Entity#getBrightnessForRender override. Dedicated servers strip that
-    * override, and its gradual sky-light smoothing is inappropriate for the
+    * Samples the vehicle's actual world light without client-only combined
+    * brightness helpers. Dedicated servers strip those helpers, and the
+    * aircraft override's gradual sky-light smoothing is inappropriate for the
     * once-per-second LOD snapshots.
     */
    private static int getPackedLight(WorldServer world, MCH_EntityBaseVehicle vehicle) {
@@ -119,9 +121,12 @@ public class MCH_ServerTickHandler {
          flotationOffset = Math.abs(vehicle.getAcInfo().floatOffset) + 1.0F;
       }
 
-      int y = MathHelper.floor_double(vehicle.posY + (double)flotationOffset
-         - (double)vehicle.yOffset + sampleOffset);
-      return world.getLightBrightnessForSkyBlocks(x, y, z, 0);
+      int y = MathHelper.clamp_int(MathHelper.floor_double(vehicle.posY + (double)flotationOffset
+         - (double)vehicle.yOffset + sampleOffset), 0, 255);
+      Chunk chunk = world.getChunkFromBlockCoords(x, z);
+      int skyLight = chunk.getSavedLightValue(EnumSkyBlock.Sky, x & 15, y, z & 15);
+      int blockLight = chunk.getSavedLightValue(EnumSkyBlock.Block, x & 15, y, z & 15);
+      return skyLight << 20 | blockLight << 4;
    }
 
    private static byte categoryOf(MCH_EntityBaseVehicle vehicle) {
