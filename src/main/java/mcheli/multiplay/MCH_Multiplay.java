@@ -312,9 +312,7 @@ public class MCH_Multiplay {
             continue;
          }
 
-         MCH_TargetType spotType = canSpotEntity(player, posX, posY, posZ, target, false);
-
-         if(spotType == MCH_TargetType.NONE || spotType == MCH_TargetType.SAME_TEAM_PLAYER) {
+         if(isSameTeamContact(player, target)) {
             continue;
          }
 
@@ -339,6 +337,28 @@ public class MCH_Multiplay {
       }
 
       return ret;
+   }
+
+   private static boolean isSameTeamContact(EntityLivingBase spotter, Entity target) {
+      if(spotter == null || target == null) {
+         return false;
+      }
+
+      if(target instanceof EntityPlayer) {
+         EntityPlayer player = (EntityPlayer)target;
+         return spotter.isOnSameTeam(player);
+      }
+
+      if(target instanceof MCH_EntityBaseVehicle) {
+         MCH_EntityBaseVehicle vehicle = (MCH_EntityBaseVehicle)target;
+         EntityPlayer rider = vehicle.getFirstMountPlayer();
+
+         if(rider != null) {
+            return spotter.isOnSameTeam(rider);
+         }
+      }
+
+      return false;
    }
 
    private static boolean isEntityInOrOnWater(Entity e) {
