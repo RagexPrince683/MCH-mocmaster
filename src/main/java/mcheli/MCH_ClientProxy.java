@@ -33,8 +33,6 @@ import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.helicopter.MCH_RenderHeli;
 import mcheli.hud.MCH_HudManager;
 import mcheli.lweapon.MCH_ItemLightWeaponRender;
-import mcheli.lod.MCH_VehicleLODManager;
-import mcheli.network.packets.PacketVehicleLODSnapshot;
 import mcheli.multiplay.MCH_MultiplayClient;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.parachute.MCH_RenderParachute;
@@ -90,7 +88,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    }
 
    public void registerRenderer() {
-      MinecraftForge.EVENT_BUS.register(MCH_VehicleLODManager.INSTANCE);
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntitySeat.class, new MCH_RenderTest(0.0F, 0.0F, 0.0F, "seat"));
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntityHeli.class, new MCH_RenderHeli());
       RenderingRegistry.registerEntityRenderingHandler(MCP_EntityPlane.class, new MCP_RenderPlane());
@@ -487,14 +484,6 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       Minecraft mc = Minecraft.getMinecraft();
       MCH_ClientCommonTickHandler.instance = new MCH_ClientCommonTickHandler(mc, MCH_MOD.config);
       W_TickRegistry.registerTickHandler(MCH_ClientCommonTickHandler.instance, Side.CLIENT);
-   }
-
-   public void updateVehicleLODSnapshots(int dimension, java.util.List<PacketVehicleLODSnapshot.Entry> entries) {
-      MCH_VehicleLODManager.INSTANCE.update(dimension, entries);
-   }
-
-   public void clearVehicleLODSnapshots() {
-      MCH_VehicleLODManager.INSTANCE.clear();
    }
 
    public boolean isRemote() {
