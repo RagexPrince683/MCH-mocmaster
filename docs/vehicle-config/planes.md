@@ -36,8 +36,21 @@ All values are optional. Speed-like values (`Speed`, `MaxLevelSpeed`, `StallSpee
 | `PitchDamping`, `RollDamping`, `YawDamping` | float[0..100] | 0.35 | Angular damping. Higher values lower steady body rate for the same torque. |
 | `InertiaMultiplier` | float[0.05..100] | 1 | Resistance to angular acceleration. Higher values make controls feel heavier. |
 | `Mass` | float[0.05..100] | alias of `InertiaMultiplier` | Legacy/compatibility alias; no separate weight simulation exists. |
-| `ThrottleAcceleration` | float[0..1] | 0.02 | Max engine-output increase per tick toward pilot throttle. |
-| `EngineDrag` | float[0..1] | 0.015 | Max engine-output decrease per tick. |
+| `ThrottleAcceleration` | float[0..1] | 0.02 | Legacy engine-output spool-up. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateUp`. |
+| `EngineDrag` | float[0..1] | 0.015 | Legacy engine-output spool-down. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateDown`. |
+| `NewFlightThrottleResponse` | float[0.1..4] | 1.0 | **New flight model only.** Curves smoothed engine output before thrust. `1` is linear, `<1` gives more low-throttle thrust, `>1` softens the low end. |
+| `NewFlightThrottleChangeRateUp` | float[0..0.1] | 0.006 | **New flight model only.** Pilot-commanded throttle increase per tick. Full idle-to-max travel is about `1 / value` ticks. |
+| `NewFlightThrottleChangeRateDown` | float[0..0.1] | 0.008 | **New flight model only.** Pilot-commanded throttle decrease per tick. Usually slightly faster than increase for approach and dogfight energy control. |
+| `NewFlightIdleThrottle` | float[0..0.35] | 0.08 | **New flight model only.** Minimum effective engine power at 0% commanded throttle; keeps idle physically plausible without making idle accelerate like cruise. |
+| `NewFlightEngineBrakeDrag` | float[0..0.25] | 0.0035 | **New flight model only.** Closed-throttle/low-power drag used by the energy model. Replaces `IdleDrag` for opted-in planes. |
+| `NewFlightLowThrottleLiftRetention` | float[0..1] | 0.82 | **New flight model only.** Retains this fraction of the legacy throttle-coupled vertical support at idle so lift does not vanish immediately when throttle is chopped. Stall is still driven by airspeed/AoA. |
+| `NewFlightThrottleControlAuthorityScale` | float[0..1] | 0.18 | **New flight model only.** Maximum control-authority penalty at idle. Keep low so glide/landing controls remain useful. |
+| `NewFlightThrottleHudDisplay` | boolean | true | **New flight model only.** Shows pilot HUD text like `THR 85%`. Legacy HUDs are unchanged for planes that do not opt in. |
+| `NewFlightCombatFlaps` | boolean | false | **New flight model only.** Enables the combat-flap toggle on the Extra key. Inactive on legacy planes even if present. |
+| `NewFlightCombatFlapLift` | float[0..1] | 0.16 | **New flight model only.** Added low-speed lift/support and induced-load contribution while combat flaps are deployed. |
+| `NewFlightCombatFlapDrag` | float[0..0.25] | 0.009 | **New flight model only.** Extra drag while combat flaps are deployed. |
+| `NewFlightCombatFlapControl` | float[0..1] | 0.14 | **New flight model only.** Control-authority boost while combat flaps are deployed. |
+| `NewFlightCombatFlapOverspeed` | float[0.1..1] | 0.82 | **New flight model only.** Multiplier applied to `MaxSafeSpeed` while flaps are deployed; lower values punish high-speed flap use earlier. |
 | `StallSpeed` | float[0..10] | 0 | Absolute stall threshold; if 0, uses `max(0.05, topSpeed * StallSpeedFactor)`. |
 | `CriticalAoA` | float[1..90] | 18 | AoA in degrees where stall demand begins. |
 | `StallLiftLoss` | float[0..1] | 0.65 | Fraction of lift removed at full stall. |
@@ -59,7 +72,17 @@ All values are optional. Speed-like values (`Speed`, `MaxLevelSpeed`, `StallSpee
 
 ### Engine output and throttle
 
-Pilot throttle still changes through shared `throttleupdown`. Planes then smooth engine output:
+Legacy planes still change pilot throttle through shared `throttleupdown` and keep the old HUD behavior. Planes with `useNewMobilitySystem = true` use a normalized pilot throttle (`0.0` to `1.0`) for input and display it to the pilot as `THR 0%` through `THR 100%` when `NewFlightThrottleHudDisplay = true`.
+
+New-flight pilot input rates are independent of legacy `throttleupdown`:
+
+```text
+if throttle-up key:   currentThrottle += NewFlightThrottleChangeRateUp
+if throttle-down key: currentThrottle -= NewFlightThrottleChangeRateDown
+currentThrottle = clamp(currentThrottle, 0, 1)
+```
+
+Planes then smooth engine output:
 
 ```text
 engineThrottle = approach(engineThrottle, currentThrottle,
@@ -67,7 +90,21 @@ engineThrottle = approach(engineThrottle, currentThrottle,
                          EngineDrag when decreasing)
 ```
 
-`engineThrottle`, not raw pilot throttle, drives idle drag and sustainable speed.
+New-flight thrust uses an additional curve and idle floor:
+
+```text
+effectiveThrottle = NewFlightIdleThrottle
+                  + (1 - NewFlightIdleThrottle)
+                  * pow(engineThrottle, NewFlightThrottleResponse)
+```
+
+`effectiveThrottle`, not raw pilot throttle, drives new-flight thrust and sustainable speed. This makes 30-70% useful for cruise/formation/approach instead of forcing pilots to live near 100%. Cutting throttle reduces acceleration and adds engine-brake drag; it no longer directly deletes lift.
+
+Recommended starting ranges:
+
+- WW2 props / dogfighters: response `0.85-1.2`, up `0.004-0.008`, down `0.006-0.012`, idle `0.06-0.12`, brake drag `0.003-0.008`, lift retention `0.78-0.9`, authority scale `0.10-0.25`.
+- Jets: response `1.1-1.6`, up `0.003-0.006`, down `0.004-0.008`, idle `0.08-0.15`, brake drag `0.002-0.006`, lift retention `0.82-0.94`, authority scale `0.05-0.18`.
+- Heavy aircraft: response `1.0-1.4`, up `0.002-0.005`, down `0.003-0.007`, idle `0.08-0.16`, brake drag `0.002-0.005`, lift retention `0.85-0.95`, authority scale `0.05-0.15`.
 
 ### Angular response and input smoothing
 
@@ -228,3 +265,11 @@ FlightCeilingRange = 48
 ## Safe-to-omit legacy notes
 
 Old plane packs can omit every new aerodynamic key. Defaults are applied and `StallSpeedFactor` preserves derived low-speed stall behavior. Use `Mass` only for compatibility with packs that already chose that name; prefer `InertiaMultiplier` for new configs.
+
+### Combat flaps and throttle interaction
+
+Combat flaps are intentionally gated by `useNewMobilitySystem = true`; legacy packs are unaffected unless they opt in. With `NewFlightCombatFlaps = true`, the pilot toggles flaps with the Extra key, the HUD appends `FLP`, and the new flight model applies lift/control help plus extra drag and a lower safe overspeed threshold.
+
+Use flaps with low or moderate throttle for landing and low-speed control. High throttle with flaps can improve a short turn, but the extra drag and reduced `MaxSafeSpeed * NewFlightCombatFlapOverspeed` should punish extended high-speed use. Throttle chopping plus flaps helps manage speed but should not be tuned into an instant brake; raise `NewFlightCombatFlapDrag` gradually and keep `NewFlightEngineBrakeDrag` modest.
+
+Debug flight logging (`DebugFlightControl`) includes throttle percent, flap state, airspeed, AoA, lift loss, drag, control authority, stall, and overspeed state for new-flight tuning.

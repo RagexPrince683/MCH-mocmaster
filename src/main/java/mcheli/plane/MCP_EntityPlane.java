@@ -68,6 +68,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    /** Smoothed stall state used by lift loss, controls, and instability. */
    private double stallSeverity;
    private boolean stalling;
+   private boolean combatFlapsDeployed;
 
 
    public MCP_EntityPlane(World world) {
@@ -92,6 +93,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.angleOfAttack = 0.0D;
       this.stallSeverity = 0.0D;
       this.stalling = false;
+      this.combatFlapsDeployed = false;
    }
 
    public String getKindName() {
@@ -331,7 +333,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double highGAuthority = MCH_FlightModel.getHighGControlAuthority(this.currentGForce,
             info.maxComfortableG, info.maxStructuralG, info.gControlPenalty);
       double severity = Math.max(this.stallSeverity, this.getInstantStallSeverity());
-      return (float)(highGAuthority * MCH_FlightModel.getControlAuthority(severity));
+      double throttleAuthority = 1.0D - (1.0D - this.getEffectiveEngineThrottle())
+            * (double)info.newFlightThrottleControlAuthorityScale;
+      double flapAuthority = this.isCombatFlapsDeployed() ? 1.0D + (double)info.newFlightCombatFlapControl : 1.0D;
+      return (float)MCH_FlightModel.clamp(highGAuthority * MCH_FlightModel.getControlAuthority(severity)
+            * throttleAuthority * flapAuthority, 0.05D, 1.35D);
    }
 
    public double getCurrentGForce() {
@@ -370,9 +376,42 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       return this.getControlAuthorityFactor();
    }
 
-   private double getAirspeed() {
+   public double getAirspeed() {
       return Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
             + super.motionZ * super.motionZ);
+   }
+
+   public boolean isNewFlightModelEnabled() {
+      return this.useNewMobilitySystem();
+   }
+
+   public double getNormalizedThrottle() {
+      return MCH_FlightModel.clamp(this.getCurrentThrottle(), 0.0D, 1.0D);
+   }
+
+   public int getThrottlePercent() {
+      return (int)Math.round(this.getNormalizedThrottle() * 100.0D);
+   }
+
+   public boolean canUseCombatFlaps() {
+      return this.useNewMobilitySystem() && this.getPlaneInfo() != null && this.getPlaneInfo().newFlightCombatFlaps
+            && this.getNozzleRotation() <= 0.01F;
+   }
+
+   public boolean isCombatFlapsDeployed() {
+      return this.canUseCombatFlaps() && this.combatFlapsDeployed;
+   }
+
+   public void setCombatFlapsDeployed(boolean deployed) {
+      this.combatFlapsDeployed = deployed && this.canUseCombatFlaps();
+   }
+
+   public void toggleCombatFlaps() {
+      this.setCombatFlapsDeployed(!this.combatFlapsDeployed);
+   }
+
+   public boolean isOverspeeding() {
+      return this.useNewMobilitySystem() && MCH_FlightModel.getOverspeedSeverity(this.getAirspeed(), this.getMaxSafeSpeed()) > 0.0D;
    }
 
    protected double getCompressibilitySpeed() {
@@ -392,7 +431,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
 
       float levelSpeed = info.maxLevelSpeed > 0.0F ? info.maxLevelSpeed : this.getMaxSpeed();
-      return info.maxSafeSpeed > 0.0F ? (double)info.maxSafeSpeed : (double)levelSpeed * 1.1D;
+      double safeSpeed = info.maxSafeSpeed > 0.0F ? (double)info.maxSafeSpeed : (double)levelSpeed * 1.1D;
+      if(this.isCombatFlapsDeployed()) {
+         safeSpeed *= (double)info.newFlightCombatFlapOverspeed;
+      }
+      return safeSpeed;
    }
 
    private double getInstantStallSeverity() {
@@ -742,6 +785,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.setCurrentThrottle(0.0D);
       }
 
+      if(this.useNewMobilitySystem() && this.getCurrentThrottle() > 1.0D) {
+         this.setCurrentThrottle(1.0D);
+      }
+
       if(super.worldObj.isRemote) {
          if(!W_Lib.isClientPlayer(this.getRiddenByEntity())) {
             double ct = this.getThrottle();
@@ -763,10 +810,27 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       } else {
          this.engineThrottle = this.getCurrentThrottle();
       }
+
+      if(!this.canUseCombatFlaps()) {
+         this.combatFlapsDeployed = false;
+      }
    }
 
    protected double getEngineThrottle() {
       return this.useNewMobilitySystem() ? this.engineThrottle : this.getCurrentThrottle();
+   }
+
+   protected double getEffectiveEngineThrottle() {
+      if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null) {
+         return this.getEngineThrottle();
+      }
+
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      double smoothed = MCH_FlightModel.clamp(this.getEngineThrottle(), 0.0D, 1.0D);
+      double response = Math.max(0.1D, (double)info.newFlightThrottleResponse);
+      double curved = Math.pow(smoothed, response);
+      return MCH_FlightModel.clamp((double)info.newFlightIdleThrottle
+            + (1.0D - (double)info.newFlightIdleThrottle) * curved, 0.0D, 1.0D);
    }
 
    protected void onUpdate_ControlNotHovering() {
@@ -774,6 +838,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       if (!super.isGunnerMode) {
          // 获取油门上下状态
          float throttleUpDown = this.getAcInfo().throttleUpDown;
+         double throttleRateUp = 0.01D * (double)throttleUpDown;
+         double throttleRateDown = 0.01D * (double)throttleUpDown;
+         if(this.useNewMobilitySystem() && this.getPlaneInfo() != null) {
+            throttleRateUp = (double)this.getPlaneInfo().newFlightThrottleChangeRateUp;
+            throttleRateDown = (double)this.getPlaneInfo().newFlightThrottleChangeRateDown;
+         }
 
          // 判断是否是转向状态（只左转或只右转）
          boolean turn = super.moveLeft && !super.moveRight || !super.moveLeft && super.moveRight;
@@ -813,7 +883,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                super.throttleBack = 0.0F;
                // 如果当前油门小于1，则增加油门
                if (this.getCurrentThrottle() < 1.0D) {
-                  this.addCurrentThrottle(0.01D * (double) f);
+                  this.addCurrentThrottle(this.useNewMobilitySystem() && this.getPlaneInfo() != null ? throttleRateUp : 0.01D * (double) f);
                } else {
                   // 否则，设置油门为最大值1
                   this.setCurrentThrottle(1.0D);
@@ -824,7 +894,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          else if (super.throttleDown) {
             // 如果当前油门大于0，则递减油门
             if (this.getCurrentThrottle() > 0.0D) {
-               this.addCurrentThrottle(-0.01D * (double) throttleUpDown);
+               this.addCurrentThrottle(-throttleRateDown);
             } else {
                // 否则，设置油门为0
                this.setCurrentThrottle(0.0D);
@@ -840,7 +910,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          }
          // 如果启用了自动油门降低，并且当前油门大于0，则逐步降低油门
          else if (super.cs_planeAutoThrottleDown && this.getCurrentThrottle() > 0.0D) {
-            this.addCurrentThrottle(-0.005D * (double) throttleUpDown);
+            this.addCurrentThrottle(-(this.useNewMobilitySystem() && this.getPlaneInfo() != null ? throttleRateDown * 0.5D : 0.005D * (double) throttleUpDown));
             // 如果油门低于0，则设置为0
             if (this.getCurrentThrottle() <= 0.0D) {
                this.setCurrentThrottle(0.0D);
@@ -1158,7 +1228,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
          if(!levelOff) {
             super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
-            super.motionY += -0.047D * (1.0D - this.getEngineThrottle());
+            if(this.useNewMobilitySystem() && this.getPlaneInfo() != null) {
+               double liftPower = (double)this.getPlaneInfo().newFlightLowThrottleLiftRetention
+                     + (1.0D - (double)this.getPlaneInfo().newFlightLowThrottleLiftRetention) * this.getEffectiveEngineThrottle();
+               if(this.isCombatFlapsDeployed()) {
+                  liftPower += (double)this.getPlaneInfo().newFlightCombatFlapLift;
+               }
+               super.motionY += -0.047D * (1.0D - MCH_FlightModel.clamp(liftPower, 0.0D, 1.0D));
+            } else {
+               super.motionY += -0.047D * (1.0D - this.getEngineThrottle());
+            }
          } else {
             super.motionY *= 0.8D;
          }
@@ -1181,7 +1260,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
 
       // 计算油门1的值，当前油门除以10
-      float throttle1 = (float)(this.getEngineThrottle() / 10.0D);
+      float throttle1 = (float)((this.useNewMobilitySystem() ? this.getEffectiveEngineThrottle() : this.getEngineThrottle()) / 10.0D);
       Vec3 v;
 
       // 如果喷嘴的旋转角度大于0.001F
@@ -1254,9 +1333,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                + MathHelper.abs(this.yawAngularVelocity)) / 6.0D;
          double controlLoad = MCH_FlightModel.clamp(bodyRate, 0.0D, 1.0D);
          double turnLoad = Math.max(bankLoad, controlLoad);
-         double drag = MCH_FlightModel.getEnergyDrag(horizontalSpeed, (double)levelSpeed, this.getEngineThrottle(),
+         double engineBrakeDrag = this.getPlaneInfo().newFlightEngineBrakeDrag;
+         if(this.isCombatFlapsDeployed()) {
+            engineBrakeDrag += this.getPlaneInfo().newFlightCombatFlapDrag;
+            turnLoad = MCH_FlightModel.clamp(turnLoad + (double)this.getPlaneInfo().newFlightCombatFlapLift, 0.0D, 1.0D);
+         }
+         double drag = MCH_FlightModel.getEnergyDrag(horizontalSpeed, (double)levelSpeed, this.getEffectiveEngineThrottle(),
                turnLoad, controlLoad, this.getPlaneInfo().baseDrag, this.getPlaneInfo().inducedDrag,
-               this.getPlaneInfo().controlSurfaceDrag, this.getPlaneInfo().idleDrag);
+               this.getPlaneInfo().controlSurfaceDrag, (float)engineBrakeDrag);
          drag += MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getPlaneInfo().criticalAoA,
                this.getPlaneInfo().baseDrag, this.getPlaneInfo().aoaDragMultiplier);
          drag = MCH_FlightModel.clamp(drag, 0.0D, 0.5D);

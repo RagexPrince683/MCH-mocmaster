@@ -45,6 +45,14 @@ public class MCP_PlanePacketHandler {
                   plane.swithVtolMode(true);
                }
 
+               if(pc.switchCombatFlaps == 0) {
+                  plane.setCombatFlapsDeployed(false);
+               }
+
+               if(pc.switchCombatFlaps == 1) {
+                  plane.setCombatFlapsDeployed(true);
+               }
+
                if(pc.switchMode == 0) {
                   plane.switchGunnerMode(false);
                }

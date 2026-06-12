@@ -48,10 +48,31 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float yawDamping = 0.35F;
    /** Scales resistance to angular acceleration without changing eventual control authority. */
    public float inertiaMultiplier = 1.0F;
-   /** Maximum engine-output increase per tick. */
+   /** Legacy maximum engine-output increase per tick. */
    public float throttleAcceleration = 0.02F;
-   /** Maximum engine-output decrease per tick. */
+   /** Legacy maximum engine-output decrease per tick. */
    public float engineDrag = 0.015F;
+   /** Non-linear pilot-throttle to thrust curve used by the new flight model. */
+   public float newFlightThrottleResponse = 1.0F;
+   /** Pilot throttle increase/decrease rates used only by the new flight model. */
+   public float newFlightThrottleChangeRateUp = 0.006F;
+   public float newFlightThrottleChangeRateDown = 0.008F;
+   /** Minimum effective engine power at zero commanded throttle. */
+   public float newFlightIdleThrottle = 0.08F;
+   /** Closed-throttle aerodynamic braking used by the new flight model. */
+   public float newFlightEngineBrakeDrag = 0.0035F;
+   /** Fraction of legacy throttle-coupled lift retained at idle. */
+   public float newFlightLowThrottleLiftRetention = 0.82F;
+   /** Maximum fraction of control authority lost at idle throttle. */
+   public float newFlightThrottleControlAuthorityScale = 0.18F;
+   /** Show the normalized 0-100% throttle readout to pilots using the new flight model. */
+   public boolean newFlightThrottleHudDisplay = true;
+   /** Enables the new-flight-only combat-flap toggle. */
+   public boolean newFlightCombatFlaps = false;
+   public float newFlightCombatFlapLift = 0.16F;
+   public float newFlightCombatFlapDrag = 0.009F;
+   public float newFlightCombatFlapControl = 0.14F;
+   public float newFlightCombatFlapOverspeed = 0.82F;
    /** Absolute airspeed below which a fixed-wing plane can enter a stall. Zero derives it from StallSpeedFactor. */
    public float stallSpeed = 0.0F;
    /** Angle between the plane forward vector and velocity vector at which airflow separates. */
@@ -271,6 +292,32 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.throttleAcceleration = this.toFloat(data, 0.0F, 1.0F);
          } else if(item.equalsIgnoreCase("EngineDrag")) {
             this.engineDrag = this.toFloat(data, 0.0F, 1.0F);
+         } else if(item.equalsIgnoreCase("NewFlightThrottleResponse")) {
+            this.newFlightThrottleResponse = this.toFloat(data, 0.1F, 4.0F);
+         } else if(item.equalsIgnoreCase("NewFlightThrottleChangeRateUp")) {
+            this.newFlightThrottleChangeRateUp = this.toFloat(data, 0.0F, 0.1F);
+         } else if(item.equalsIgnoreCase("NewFlightThrottleChangeRateDown")) {
+            this.newFlightThrottleChangeRateDown = this.toFloat(data, 0.0F, 0.1F);
+         } else if(item.equalsIgnoreCase("NewFlightIdleThrottle")) {
+            this.newFlightIdleThrottle = this.toFloat(data, 0.0F, 0.35F);
+         } else if(item.equalsIgnoreCase("NewFlightEngineBrakeDrag")) {
+            this.newFlightEngineBrakeDrag = this.toFloat(data, 0.0F, 0.25F);
+         } else if(item.equalsIgnoreCase("NewFlightLowThrottleLiftRetention")) {
+            this.newFlightLowThrottleLiftRetention = this.toFloat(data, 0.0F, 1.0F);
+         } else if(item.equalsIgnoreCase("NewFlightThrottleControlAuthorityScale")) {
+            this.newFlightThrottleControlAuthorityScale = this.toFloat(data, 0.0F, 1.0F);
+         } else if(item.equalsIgnoreCase("NewFlightThrottleHudDisplay")) {
+            this.newFlightThrottleHudDisplay = this.toBool(data);
+         } else if(item.equalsIgnoreCase("NewFlightCombatFlaps")) {
+            this.newFlightCombatFlaps = this.toBool(data);
+         } else if(item.equalsIgnoreCase("NewFlightCombatFlapLift")) {
+            this.newFlightCombatFlapLift = this.toFloat(data, 0.0F, 1.0F);
+         } else if(item.equalsIgnoreCase("NewFlightCombatFlapDrag")) {
+            this.newFlightCombatFlapDrag = this.toFloat(data, 0.0F, 0.25F);
+         } else if(item.equalsIgnoreCase("NewFlightCombatFlapControl")) {
+            this.newFlightCombatFlapControl = this.toFloat(data, 0.0F, 1.0F);
+         } else if(item.equalsIgnoreCase("NewFlightCombatFlapOverspeed")) {
+            this.newFlightCombatFlapOverspeed = this.toFloat(data, 0.1F, 1.0F);
          } else if(item.equalsIgnoreCase("StallSpeed")) {
             this.stallSpeed = this.toFloat(data, 0.0F, 10.0F);
          } else if(item.equalsIgnoreCase("CriticalAoA")) {

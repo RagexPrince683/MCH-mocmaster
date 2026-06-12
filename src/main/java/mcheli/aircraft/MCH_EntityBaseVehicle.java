@@ -1764,6 +1764,21 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return this.getControlAuthorityFactor();
    }
 
+   /** Normalized pilot throttle for debug/HUD text. */
+   public double getNormalizedThrottle() {
+      return this.getCurrentThrottle();
+   }
+
+   /** New-flight combat flap state for debug/HUD text. */
+   public boolean isCombatFlapsDeployed() {
+      return false;
+   }
+
+   /** True when the vehicle is currently beyond its new-flight safe speed. */
+   public boolean isOverspeeding() {
+      return false;
+   }
+
    /** Hook for vehicle-family-specific stress or aerodynamic updates. */
    protected void updateVehicleStress() {
    }
