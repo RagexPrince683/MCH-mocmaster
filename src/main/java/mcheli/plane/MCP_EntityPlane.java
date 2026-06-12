@@ -59,7 +59,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastGravityForce;
    /** Last aerodynamic lift compensation applied against gravity. */
    private double lastLiftForce;
-   /** Last stall nose-down recovery pitch force. */
+   /** Last 0..1 lift factor used by the explicit gravity/lift model. */
+   private double lastLiftFactor;
+   /** Last new-flight takeoff/rotation decision used by lift and ground-clamp logic. */
+   private boolean lastValidTakeoff;
+   /** True when the latest ground-clamp pass limited positive vertical velocity. */
+   private boolean lastGroundClampApplied;
+   /** True when the latest ground-bounce pass damped positive vertical velocity. */
+   private boolean lastBounceDampingApplied;
+   /** Last stall nose-down pitch recovery force. */
    private double lastStallNoseDownForce;
    /** Local-axis body rates used by fixed-wing damped control response. */
    private float pitchAngularVelocity;
@@ -98,6 +106,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftLoss = 0.0D;
       this.lastGravityForce = 0.0D;
       this.lastLiftForce = 0.0D;
+      this.lastLiftFactor = 0.0D;
+      this.lastValidTakeoff = false;
+      this.lastGroundClampApplied = false;
+      this.lastBounceDampingApplied = false;
       this.lastStallNoseDownForce = 0.0D;
       this.angleOfAttack = 0.0D;
       this.stallSeverity = 0.0D;
@@ -389,6 +401,34 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       return this.lastLiftForce;
    }
 
+   public double getLastLiftFactor() {
+      return this.lastLiftFactor;
+   }
+
+   public double getDebugEngineThrottle() {
+      return MCH_FlightModel.clamp(this.getEngineThrottle(), 0.0D, 1.0D);
+   }
+
+   public double getDebugEffectiveThrottle() {
+      return MCH_FlightModel.clamp(this.getEffectiveEngineThrottle(), 0.0D, 1.0D);
+   }
+
+   public boolean isDebugValidTakeoff() {
+      return this.lastValidTakeoff;
+   }
+
+   public boolean wasDebugGroundClampApplied() {
+      return this.lastGroundClampApplied;
+   }
+
+   public boolean wasDebugBounceDampingApplied() {
+      return this.lastBounceDampingApplied;
+   }
+
+   public boolean isDebugNearGround() {
+      return this.useNewMobilitySystem() && (super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0);
+   }
+
    public double getLastStallNoseDownForce() {
       return this.lastStallNoseDownForce;
    }
@@ -673,6 +713,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
 
       double targetSeverity = this.stalling ? Math.max(0.12D, demand) : 0.0D;
+      boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
+      if(nearGround) {
+         double groundStallBlend = MCH_FlightModel.clamp((speed - stallSpeed * 0.55D) / (stallSpeed * 0.45D), 0.0D, 1.0D);
+         targetSeverity *= groundStallBlend;
+         if(super.onGround && targetSeverity <= 0.0D) {
+            this.stalling = false;
+         }
+      }
       this.stallSeverity += (targetSeverity - this.stallSeverity) * (targetSeverity > this.stallSeverity ? 0.35D : 0.18D);
       if(this.stallSeverity < 1.0E-3D) {
          this.stallSeverity = 0.0D;
@@ -713,46 +761,91 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       MCP_PlaneInfo info = this.getPlaneInfo();
       this.lastGravityForce = 0.0D;
       this.lastLiftForce = 0.0D;
+      this.lastLiftFactor = 0.0D;
+      this.lastValidTakeoff = false;
+      this.lastGroundClampApplied = false;
+      this.lastBounceDampingApplied = false;
       if(!this.useNewMobilitySystem() || info == null || waterDepth != 0.0D || this.getNozzleRotation() > 0.01F) {
          return;
       }
 
       boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
-      if(super.onGround) {
-         return;
-      }
-
       double gravity = Math.max(0.0D, (double)info.gravityStrength);
       double liftFactor = this.getLiftGravityFactor();
       if(levelOff) {
          liftFactor = Math.min(liftFactor, 0.85D);
       }
-      double lift = gravity * Math.max(0.0D, (double)info.liftGravityCompensation) * liftFactor;
-      if(this.stallSeverity > 0.0D) {
-         lift *= 1.0D - MCH_FlightModel.clamp(this.stallSeverity * (double)info.stallLiftLoss, 0.0D, 1.0D);
+
+      this.lastLiftFactor = liftFactor;
+      boolean validTakeoff = this.hasValidNewFlightTakeoffReason(nearGround, liftFactor);
+      boolean validClimb = validTakeoff || this.hasValidNewFlightClimbReason(liftFactor);
+      this.lastValidTakeoff = validTakeoff;
+
+      if(super.onGround && !validTakeoff) {
+         return;
+      }
+
+      double compensation = Math.max(0.0D, (double)info.liftGravityCompensation);
+      double lift = gravity * compensation * liftFactor;
+      if(validTakeoff && compensation > 1.0D) {
+         lift = Math.max(lift, gravity * Math.min(compensation, 1.02D));
+      }
+      if(!validClimb || levelOff) {
+         lift = Math.min(lift, gravity);
+      } else {
+         lift = Math.min(lift, gravity * compensation);
       }
 
       this.lastGravityForce = gravity;
-      this.lastLiftForce = Math.min(lift, gravity);
+      this.lastLiftForce = lift;
       super.motionY += this.lastLiftForce - gravity;
 
-      if(nearGround && super.motionY > (double)info.groundVerticalVelocityClamp && !this.hasValidNewFlightClimbReason()) {
+      if(nearGround && super.motionY > (double)info.groundVerticalVelocityClamp && !validTakeoff) {
          super.motionY = (double)info.groundVerticalVelocityClamp
                + (super.motionY - (double)info.groundVerticalVelocityClamp) * (double)info.groundBounceDamping;
+         this.lastGroundClampApplied = true;
+         this.lastBounceDampingApplied = true;
       }
    }
 
-   private boolean hasValidNewFlightClimbReason() {
+   private boolean hasNewFlightRotationAttitude() {
+      return this.getRotPitch() <= 5.0F || this.pitchAngularVelocity < -0.02F || super.motionY > 0.0D;
+   }
+
+   private boolean hasValidNewFlightTakeoffReason(boolean nearGround, double liftFactor) {
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      if(info == null || !nearGround || this.getRiddenByEntity() == null) {
+         return false;
+      }
+
+      double stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
+      return this.getNormalizedThrottle() >= 0.55D
+            && this.getEffectiveEngineThrottle() >= 0.50D
+            && this.getAirspeed() >= stallSpeed * 0.85D
+            && liftFactor >= 0.45D
+            && this.stallSeverity < 0.85D
+            && this.hasNewFlightRotationAttitude();
+   }
+
+   private boolean hasValidNewFlightClimbReason(double liftFactor) {
       MCP_PlaneInfo info = this.getPlaneInfo();
       if(info == null) {
          return false;
       }
 
       double stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
-      return this.getEffectiveEngineThrottle() > 0.35D
-            && this.getAirspeed() > stallSpeed * 1.15D
-            && this.getLiftGravityFactor() > 0.65D
-            && this.stallSeverity < 0.45D;
+      boolean hasPilot = this.getRiddenByEntity() != null;
+      return hasPilot
+            && this.getNormalizedThrottle() >= 0.45D
+            && this.getEffectiveEngineThrottle() >= 0.40D
+            && this.getAirspeed() >= stallSpeed * 1.05D
+            && liftFactor >= 0.55D
+            && this.stallSeverity < 0.60D
+            && this.hasNewFlightRotationAttitude();
+   }
+
+   private boolean hasValidNewFlightClimbReason() {
+      return this.hasValidNewFlightClimbReason(this.getLiftGravityFactor());
    }
 
    private void dampNewFlightGroundBounce(boolean nearGround) {
@@ -761,9 +854,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          return;
       }
 
-      if(!this.hasValidNewFlightClimbReason()) {
+      double liftFactor = this.getLiftGravityFactor();
+      boolean validTakeoff = this.hasValidNewFlightTakeoffReason(nearGround, liftFactor);
+      this.lastLiftFactor = liftFactor;
+      this.lastValidTakeoff = validTakeoff;
+      if(!validTakeoff) {
          super.motionY = Math.min(super.motionY * (double)info.groundBounceDamping,
                (double)info.groundVerticalVelocityClamp);
+         this.lastGroundClampApplied = true;
+         this.lastBounceDampingApplied = true;
       }
    }
 
@@ -1291,6 +1390,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastLiftLoss = 0.0D;
          this.lastGravityForce = 0.0D;
          this.lastLiftForce = 0.0D;
+         this.lastLiftFactor = 0.0D;
+         this.lastValidTakeoff = false;
+         this.lastGroundClampApplied = false;
+         this.lastBounceDampingApplied = false;
          this.lastStallNoseDownForce = 0.0D;
          this.stalling = false;
       }

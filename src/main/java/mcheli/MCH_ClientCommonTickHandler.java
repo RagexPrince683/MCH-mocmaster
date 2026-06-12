@@ -331,7 +331,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       }
 
       System.out.println(String.format(
-              "[MCHeli] flight-control dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f) aero=(throttle=%.0f%%,flaps=%s,speed=%.3f,vertical=%.4f,aoa=%.2f,stall=%.2f,overspeed=%s,g=%.2f,drag=%.3f,gravity=%.4f,lift=%.4f,liftLoss=%.2f,noseDown=%.3f,authority=%.2f)",
+              "[MCHeli] flight-control dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f) aero=(onGround=%s,nearGround=%s,throttlePercent=%.0f%%,engineThrottle=%.2f,effectiveThrottle=%.2f,flaps=%s,airspeed=%.3f,vertical=%.4f,aoa=%.2f,stall=%.2f,overspeed=%s,g=%.2f,drag=%.3f,gravity=%.4f,lift=%.4f,liftFactor=%.2f,liftLoss=%.2f,noseDown=%.3f,validTakeoff=%s,groundClamp=%s,bounceDamping=%s,authority=%.2f)",
               simDelta,
               mouseX,
               mouseY,
@@ -343,7 +343,11 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
               ac.getRotPitch(),
               ac.getRotYaw(),
               ac.getRotRoll(),
+              Boolean.valueOf(ac.onGround),
+              Boolean.valueOf(ac.isDebugNearGround()),
               Double.valueOf(ac.getNormalizedThrottle() * 100.0D),
+              ac.getDebugEngineThrottle(),
+              ac.getDebugEffectiveThrottle(),
               Boolean.valueOf(ac.isCombatFlapsDeployed()),
               Math.sqrt(ac.motionX * ac.motionX + ac.motionY * ac.motionY + ac.motionZ * ac.motionZ),
               ac.motionY,
@@ -354,8 +358,12 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
               ac.getLastAerodynamicDrag(),
               ac.getLastGravityForce(),
               ac.getLastLiftForce(),
+              ac.getLastLiftFactor(),
               ac.getLastLiftLoss(),
               ac.getLastStallNoseDownForce(),
+              Boolean.valueOf(ac.isDebugValidTakeoff()),
+              Boolean.valueOf(ac.wasDebugGroundClampApplied()),
+              Boolean.valueOf(ac.wasDebugBounceDampingApplied()),
               ac.getDebugControlAuthority()
       ));
    }

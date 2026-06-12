@@ -1769,6 +1769,41 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return 0.0D;
    }
 
+   /** Most recent 0..1 lift factor used by the fixed-wing gravity/lift model. */
+   public double getLastLiftFactor() {
+      return 0.0D;
+   }
+
+   /** Smoothed engine output before new-flight response/idle curves. */
+   public double getDebugEngineThrottle() {
+      return this.getNormalizedThrottle();
+   }
+
+   /** Effective engine output after new-flight response/idle curves. */
+   public double getDebugEffectiveThrottle() {
+      return this.getNormalizedThrottle();
+   }
+
+   /** True when the new fixed-wing model currently sees a takeoff/climb reason near ground. */
+   public boolean isDebugValidTakeoff() {
+      return false;
+   }
+
+   /** True when the latest new-flight ground vertical clamp changed upward velocity. */
+   public boolean wasDebugGroundClampApplied() {
+      return false;
+   }
+
+   /** True when the latest new-flight ground bounce damping changed upward velocity. */
+   public boolean wasDebugBounceDampingApplied() {
+      return false;
+   }
+
+   /** True when the vehicle is on or within a few blocks of ground for flight-model purposes. */
+   public boolean isDebugNearGround() {
+      return super.onGround;
+   }
+
    /** Most recent stall nose-down pitch recovery force. */
    public double getLastStallNoseDownForce() {
       return 0.0D;
