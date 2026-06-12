@@ -43,7 +43,11 @@ All values are optional. Speed-like values (`Speed`, `MaxLevelSpeed`, `StallSpee
 | `NewFlightThrottleChangeRateDown` | float[0..0.1] | 0.008 | **New flight model only.** Pilot-commanded throttle decrease per tick. Usually slightly faster than increase for approach and dogfight energy control. |
 | `NewFlightIdleThrottle` | float[0..0.35] | 0.08 | **New flight model only.** Minimum effective engine power at 0% commanded throttle; keeps idle physically plausible without making idle accelerate like cruise. |
 | `NewFlightEngineBrakeDrag` | float[0..0.25] | 0.0035 | **New flight model only.** Closed-throttle/low-power drag used by the energy model. Replaces `IdleDrag` for opted-in planes. |
-| `NewFlightLowThrottleLiftRetention` | float[0..1] | 0.82 | **New flight model only.** Retains this fraction of the legacy throttle-coupled vertical support at idle so lift does not vanish immediately when throttle is chopped. Stall is still driven by airspeed/AoA. |
+| `NewFlightLowThrottleLiftRetention` | float[0..1] | 0.82 | Compatibility tuning for older new-flight configs; explicit gravity/lift now governs altitude retention for opted-in planes. |
+| `GravityStrength` | float[0..0.25] | 0.032 | **New flight model only.** Downward acceleration applied continuously in conventional fixed-wing flight. Lift and stall state decide how much is countered. |
+| `LiftGravityCompensation` | float[0..2] | 1.05 | **New flight model only.** Maximum share of `GravityStrength` that healthy airspeed and sane AoA can offset. Values over 1 provide tuning headroom before the applied lift is capped to gravity. |
+| `GroundBounceDamping` | float[0..1] | 0.25 | **New flight model only.** Multiplier applied to upward vertical bounce near/on ground when there is not enough speed/lift/thrust for takeoff. |
+| `GroundVerticalVelocityClamp` | float[0..0.25] | 0.015 | **New flight model only.** Upward velocity cap near/on ground without a valid aerodynamic climb reason. |
 | `NewFlightThrottleControlAuthorityScale` | float[0..1] | 0.18 | **New flight model only.** Maximum control-authority penalty at idle. Keep low so glide/landing controls remain useful. |
 | `NewFlightThrottleHudDisplay` | boolean | true | **New flight model only.** Shows pilot HUD text like `THR 85%`. Legacy HUDs are unchanged for planes that do not opt in. |
 | `NewFlightCombatFlaps` | boolean | false | **New flight model only.** Enables the combat-flap toggle on the Extra key. Inactive on legacy planes even if present. |
@@ -59,6 +63,8 @@ All values are optional. Speed-like values (`Speed`, `MaxLevelSpeed`, `StallSpee
 | `StallRecoverySpeed` | float[0..10] | 0 = `StallSpeed*1.2` | Speed required, with low AoA, to exit a stall. |
 | `StallSpeedFactor` | float[0..0.95] | 0.22 | Legacy derived stall threshold when `StallSpeed` is omitted. |
 | `StallStrength` | float[0..4] | 0.6 | Legacy sink strength multiplier during stall. |
+| `StallNoseDownForce` | float[0..5] | 0.12 | **New flight model only.** Gentle nose-down pitch recovery applied during stalls so aircraft can rebuild energy. |
+| `StallNoseDownMinSpeed` | float[0..10] | 0.08 | **New flight model only.** Airspeed where stall nose-down recovery starts gaining authority; below this the tendency fades out. |
 | `DiveSpeedMultiplier` | float[1..2] | 1.25 | Maximum speed cap multiplier in a dive. |
 | `MaxComfortableG` | float[1..30] | 4 | G where high-G control fade starts. |
 | `MaxStructuralG` | float[1..50] | 8 | G where high-G fade reaches the configured penalty and structural hook begins. Warns if below `MaxComfortableG`. |
@@ -150,7 +156,21 @@ targetHorizontalSpeed = horizontalSpeed * (1 - drag)
                       - climb * ClimbEnergyLoss
 ```
 
-### Stall, AoA, lift loss, and recovery
+### Gravity, lift, stall, AoA, and recovery
+
+For planes with `useNewMobilitySystem = true`, conventional fixed-wing flight applies explicit gravity after thrust and damping. Legacy planes keep the previous vertical-motion path.
+
+```text
+speedLift = clamp((airspeed - stallSpeed * 0.55) / (stallSpeed * 1.25), 0, 1)
+aoaLift = 1 - clamp((abs(AoA) - CriticalAoA * 0.65) / (CriticalAoA * 0.85), 0, 1)
+stallLiftLoss = clamp(stallSeverity * StallLiftLoss, 0, 1)
+liftFactor = speedLift * aoaLift * (1 - stallLiftLoss)
+lift = min(GravityStrength * LiftGravityCompensation * liftFactor, GravityStrength)
+motionY += lift - GravityStrength
+```
+
+This means throttle by itself does not hold altitude: an aircraft must have enough airspeed and acceptable AoA to create lift. Cutting power increases drag and eventually reduces airspeed, so lift decays and the plane naturally descends. Near/on ground, upward bounce is damped unless throttle, airspeed, lift factor, and stall state indicate a real takeoff/climb.
+
 
 ```text
 AoA = degrees_between(nose_forward_vector, velocity_vector)
@@ -175,9 +195,12 @@ stallSeverity += (target - stallSeverity) * (0.35 if target is rising else 0.18)
 liftLoss = clamp(stallSeverity * StallLiftLoss, 0, 1)
 if motionY > 0: motionY *= 1 - liftLoss * 0.12
 motionY -= 0.018 * liftLoss * StallStrength
+noseDown = StallNoseDownForce * stallSeverity
+         * clamp((airspeed - StallNoseDownMinSpeed)
+                 / (stallSpeed - StallNoseDownMinSpeed), 0, 1)
 ```
 
-Stall instability adds repeatable roll/yaw/pitch buffet using `StallInstability * stallSeverity`.
+Stall instability adds repeatable roll/yaw/pitch buffet using `StallInstability * stallSeverity`. `noseDown` is added as a gradual positive-pitch recovery tendency and a small body-rate nudge, so pilot input remains partially effective instead of being overridden by a forced dive.
 
 ### G-force, speed scaling, and compressibility
 
@@ -272,4 +295,4 @@ Combat flaps are intentionally gated by `useNewMobilitySystem = true`; legacy pa
 
 Use flaps with low or moderate throttle for landing and low-speed control. High throttle with flaps can improve a short turn, but the extra drag and reduced `MaxSafeSpeed * NewFlightCombatFlapOverspeed` should punish extended high-speed use. Throttle chopping plus flaps helps manage speed but should not be tuned into an instant brake; raise `NewFlightCombatFlapDrag` gradually and keep `NewFlightEngineBrakeDrag` modest.
 
-Debug flight logging (`DebugFlightControl`) includes throttle percent, flap state, airspeed, AoA, lift loss, drag, control authority, stall, and overspeed state for new-flight tuning.
+Debug flight logging (`DebugFlightControl`) includes throttle percent, flap state, airspeed, vertical speed, AoA, explicit gravity, lift compensation, lift loss, stall nose-down recovery force, drag, control authority, stall, and overspeed state for new-flight tuning.

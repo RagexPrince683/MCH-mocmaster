@@ -414,7 +414,7 @@ public class MCH_Config {
       EnablePutRackInFlying = new MCH_ConfigPrm("EnablePutRackInFlying", true);
       EnableDebugBoundingBox = new MCH_ConfigPrm("EnableDebugBoundingBox", false);
       DebugFlightControl = new MCH_ConfigPrm("DebugFlightControl", false);
-      DebugFlightControl.desc = ";Print FPS, elapsed tick fraction, control inputs, angular velocity, and pitch/yaw/roll once per second while piloting.";
+      DebugFlightControl.desc = ";Print FPS, elapsed tick fraction, controls, angular velocity, attitude, and new-flight aero values (vertical speed, lift, gravity, stall, nose-down recovery) once per second while piloting.";
       DespawnCount = new MCH_ConfigPrm("DespawnCount", 25);
       HitBoxDelayTick = new MCH_ConfigPrm("HitBoxDelayTick", 0);
       EnableRotationLimit = new MCH_ConfigPrm("EnableRotationLimit", false);
