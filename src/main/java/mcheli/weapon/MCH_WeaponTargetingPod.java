@@ -74,14 +74,19 @@ public class MCH_WeaponTargetingPod extends MCH_WeaponBase {
          // Active sonar mode:
          // If this TargetingPod has Power > 0, treat it as a radial sonar ping
          // instead of normal optical/radar spotting.
-         if(super.power > 0 && (info.target & 64) != 0) {
+         if(super.power > 0 && (info.target & 128) != 0) {
             boolean found = this.shotSonar(prm, info);
 
-            if(found) {
-               this.playSound(prm.entity);
-            } else {
-               this.playSound(prm.entity, "ng");
-            }
+            // Active sonar always emits a ping.
+            // No contacts is not a failure.
+            this.playSound(prm.entity);
+
+            // Optional debug while testing.
+            // if(!found) {
+            //     System.out.println("[MCH] Sonar ping: no contacts");
+            // } else {
+            //     System.out.println("[MCH] Sonar ping: contact found");
+            // }
 
             return true;
          }
