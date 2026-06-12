@@ -45,7 +45,7 @@ All values are optional. Speed-like values (`Speed`, `MaxLevelSpeed`, `StallSpee
 | `NewFlightEngineBrakeDrag` | float[0..0.25] | 0.0035 | **New flight model only.** Closed-throttle/low-power drag used by the energy model. Replaces `IdleDrag` for opted-in planes. |
 | `NewFlightLowThrottleLiftRetention` | float[0..1] | 0.82 | Compatibility tuning for older new-flight configs; explicit gravity/lift now governs altitude retention for opted-in planes. |
 | `GravityStrength` | float[0..0.25] | 0.032 | **New flight model only.** Downward acceleration applied continuously in conventional fixed-wing flight. Lift and stall state decide how much is countered. |
-| `LiftGravityCompensation` | float[0..2] | 1.05 | **New flight model only.** Maximum share of `GravityStrength` that healthy airspeed and sane AoA can offset. Values over 1 provide tuning headroom before the applied lift is capped to gravity. |
+| `LiftGravityCompensation` | float[0..2] | 1.05 | **New flight model only.** Maximum share of `GravityStrength` that healthy airspeed and sane AoA can offset. Values over 1 provide takeoff/climb headroom when throttle, airspeed, lift factor, and rotation attitude indicate a real climb; non-climb cases are capped to gravity for stable level flight. |
 | `GroundBounceDamping` | float[0..1] | 0.25 | **New flight model only.** Multiplier applied to upward vertical bounce near/on ground when there is not enough speed/lift/thrust for takeoff. |
 | `GroundVerticalVelocityClamp` | float[0..0.25] | 0.015 | **New flight model only.** Upward velocity cap near/on ground without a valid aerodynamic climb reason. |
 | `NewFlightThrottleControlAuthorityScale` | float[0..1] | 0.18 | **New flight model only.** Maximum control-authority penalty at idle. Keep low so glide/landing controls remain useful. |
@@ -138,10 +138,11 @@ speedRatio = horizontalSpeed / max(0.05, MaxLevelSpeed or Speed)
 drag = BaseDrag * (0.5 + 0.5 * speedRatio^2)
 drag += InducedDrag * turnLoad^2
 drag += ControlSurfaceDrag * controlLoad
-drag += IdleDrag * (1 - engineThrottle)
-sustainableSpeed = levelSpeed * (0.35 + 0.65 * engineThrottle)
+lowPowerDrag = NewFlightEngineBrakeDrag  # replaces IdleDrag for opted-in new-flight planes
+drag += lowPowerDrag * (1 - effectiveThrottle)
+sustainableSpeed = levelSpeed * (0.35 + 0.65 * effectiveThrottle)
 if horizontalSpeed > sustainableSpeed:
-    drag += (BaseDrag + IdleDrag) * clamp((horizontalSpeed - sustainableSpeed) / levelSpeed, 0, 2)
+    drag += (BaseDrag + lowPowerDrag) * clamp((horizontalSpeed - sustainableSpeed) / levelSpeed, 0, 2)
 drag += BaseDrag * AoADragMultiplier * (abs(AoA) / max(1, CriticalAoA))^2
 drag = clamp(drag, 0, 0.5)
 ```
@@ -165,11 +166,34 @@ speedLift = clamp((airspeed - stallSpeed * 0.55) / (stallSpeed * 1.25), 0, 1)
 aoaLift = 1 - clamp((abs(AoA) - CriticalAoA * 0.65) / (CriticalAoA * 0.85), 0, 1)
 stallLiftLoss = clamp(stallSeverity * StallLiftLoss, 0, 1)
 liftFactor = speedLift * aoaLift * (1 - stallLiftLoss)
-lift = min(GravityStrength * LiftGravityCompensation * liftFactor, GravityStrength)
+rawLift = GravityStrength * LiftGravityCompensation * liftFactor
+validTakeoff = nearGround
+            && pilotPresent
+            && throttlePercent >= 55
+            && effectiveThrottle >= 0.50
+            && airspeed >= stallSpeed * 0.85
+            && liftFactor >= 0.45
+            && stallSeverity < 0.85
+            && rotationAttitude
+validClimb = validTakeoff
+          || (pilotPresent
+              && throttlePercent >= 45
+              && effectiveThrottle >= 0.40
+              && airspeed >= stallSpeed * 1.05
+              && liftFactor >= 0.55
+              && stallSeverity < 0.60
+              && rotationAttitude)
+
+if validTakeoff:
+    rawLift = max(rawLift, GravityStrength * min(LiftGravityCompensation, 1.02))
+if validClimb:
+    lift = min(rawLift, GravityStrength * LiftGravityCompensation)
+else:
+    lift = min(rawLift, GravityStrength)
 motionY += lift - GravityStrength
 ```
 
-This means throttle by itself does not hold altitude: an aircraft must have enough airspeed and acceptable AoA to create lift. Cutting power increases drag and eventually reduces airspeed, so lift decays and the plane naturally descends. Near/on ground, upward bounce is damped unless throttle, airspeed, lift factor, and stall state indicate a real takeoff/climb.
+This means throttle by itself does not hold altitude: an aircraft must have enough airspeed, acceptable AoA, effective engine output, and takeoff/climb attitude to create lift greater than gravity. Cutting power increases drag and eventually reduces airspeed, so lift decays and the plane naturally descends. Near/on ground, upward bounce is damped unless throttle, airspeed, lift factor, stall state, and rotation attitude indicate a real takeoff/climb. Ground roll no longer applies full airborne stall sink/recovery behavior; stall severity is blended in near the ground and the heavy stall sink/nose-down recovery remains an airborne behavior.
 
 
 ```text
