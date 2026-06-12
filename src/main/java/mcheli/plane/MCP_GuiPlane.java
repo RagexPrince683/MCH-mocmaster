@@ -61,6 +61,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
                }
             }
 
+            if(seatID == 0) {
+               this.drawNewFlightThrottleHud(plane);
+            }
+
             if(plane.getTVMissile() != null && (plane.getIsGunnerMode(player) || plane.isUAV())) {
                this.drawTvMissileNoise(plane, plane.getTVMissile());
             } else {
@@ -70,6 +74,18 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
          this.drawHitBullet(plane, -14101432, seatID);
       }
+   }
+
+   private void drawNewFlightThrottleHud(MCP_EntityPlane plane) {
+      MCP_PlaneInfo info = plane.getPlaneInfo();
+      if(info == null || !plane.isNewFlightModelEnabled() || !info.newFlightThrottleHudDisplay) {
+         return;
+      }
+
+      int color = plane.isOverspeeding() ? -65536 : -1;
+      String flap = plane.canUseCombatFlaps() ? (plane.isCombatFlapsDeployed() ? " FLP" : "") : "";
+      this.drawString(String.format("THR %3d%%%s", new Object[]{Integer.valueOf(plane.getThrottlePercent()), flap}),
+            super.centerX - 35, super.centerY + 42, color);
    }
 
    public void drawKeybind(MCP_EntityPlane plane, EntityPlayer player, int seatID) {
@@ -101,6 +117,16 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
                var10001 = MCH_MOD.config;
                msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchMode.prmInt)).toString();
                this.drawString(msg, RX, super.centerY - 40, colorActive);
+            }
+
+            if(seatID == 0 && plane.canUseCombatFlaps() && !info.isEnableVtol) {
+               var10000 = MCH_MOD.config;
+               if(!Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
+                  var12 = (new StringBuilder()).append(plane.isCombatFlapsDeployed()?"Flaps Up : ":"Combat Flaps : ");
+                  var10001 = MCH_MOD.config;
+                  msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
+                  this.drawString(msg, RX, super.centerY - 60, colorActive);
+               }
             }
 
             if(seatID == 0 && info.isEnableVtol) {

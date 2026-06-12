@@ -223,6 +223,19 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `InertiaMultiplier` | Plane | float[0.05..100] | 1.0 | angular inertia |
 | `ThrottleAcceleration` | Plane | float[0..1] | 0.02 | engine-output spool-up/tick |
 | `EngineDrag` | Plane | float[0..1] | 0.015 | engine-output spool-down/tick |
+| `NewFlightThrottleResponse` | Plane | float[0.1..4] | 1.0 | new-flight-only throttle curve |
+| `NewFlightThrottleChangeRateUp` | Plane | float[0..0.1] | 0.006 | new-flight-only pilot throttle-up rate/tick |
+| `NewFlightThrottleChangeRateDown` | Plane | float[0..0.1] | 0.008 | new-flight-only pilot throttle-down rate/tick |
+| `NewFlightIdleThrottle` | Plane | float[0..0.35] | 0.08 | new-flight-only effective idle power |
+| `NewFlightEngineBrakeDrag` | Plane | float[0..0.25] | 0.0035 | new-flight-only low-power drag |
+| `NewFlightLowThrottleLiftRetention` | Plane | float[0..1] | 0.82 | new-flight-only lift/support retained at idle |
+| `NewFlightThrottleControlAuthorityScale` | Plane | float[0..1] | 0.18 | new-flight-only idle control-authority penalty |
+| `NewFlightThrottleHudDisplay` | Plane | boolean | true | show `THR 0-100%` for new-flight pilots |
+| `NewFlightCombatFlaps` | Plane | boolean | false | enables new-flight-only combat flaps |
+| `NewFlightCombatFlapLift` | Plane | float[0..1] | 0.16 | flap lift/support contribution |
+| `NewFlightCombatFlapDrag` | Plane | float[0..0.25] | 0.009 | flap drag penalty |
+| `NewFlightCombatFlapControl` | Plane | float[0..1] | 0.14 | flap control-authority boost |
+| `NewFlightCombatFlapOverspeed` | Plane | float[0.1..1] | 0.82 | flap safe-speed multiplier |
 | `StallSpeed` | Plane | float[0..10] | 0 = derive from `Speed*StallSpeedFactor` | fixed-wing stall entry |
 | `CriticalAoA` | Plane | float[1..90] | 18 | stall/AoA threshold degrees |
 | `StallLiftLoss` | Plane | float[0..1] | 0.65 | lift removed at full stall |

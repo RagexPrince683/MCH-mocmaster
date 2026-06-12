@@ -166,6 +166,10 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
 
                plane.swithVtolMode(!isUav);
                send = true;
+            } else if(plane.canUseCombatFlaps()) {
+               plane.toggleCombatFlaps();
+               pc.switchCombatFlaps = (byte)(plane.isCombatFlapsDeployed()?1:0);
+               send = true;
             } else {
                playSoundNG();
             }
