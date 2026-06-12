@@ -120,29 +120,6 @@ public final class MCH_FlightModel {
             * normalizedAoA * normalizedAoA;
    }
 
-   /**
-    * Returns how much fixed-wing lift is available to counter gravity. Healthy
-    * airspeed and modest AoA approach 1; low speed, excessive AoA, and stalls
-    * progressively remove lift without making aircraft fall like rocks.
-    */
-   public static double getLiftGravityFactor(double airspeed, double angleOfAttack, double stallSpeed,
-                                             float criticalAoA, double stallSeverity, float stallLiftLoss) {
-      double stall = Math.max(0.05D, stallSpeed);
-      double speedLift = clamp((Math.max(0.0D, airspeed) - stall * 0.55D) / (stall * 1.25D), 0.0D, 1.0D);
-      double critical = Math.max(1.0D, (double)criticalAoA);
-      double aoaLift = 1.0D - clamp((Math.abs(angleOfAttack) - critical * 0.65D) / (critical * 0.85D), 0.0D, 1.0D);
-      double liftLoss = clamp(clamp(stallSeverity, 0.0D, 1.0D) * clamp((double)stallLiftLoss, 0.0D, 1.0D), 0.0D, 1.0D);
-      return clamp(speedLift * aoaLift * (1.0D - liftLoss), 0.0D, 1.0D);
-   }
-
-   /** Stall recovery pitch authority ramps in with airspeed so it is a tendency, not a forced snap. */
-   public static double getStallNoseDownRecovery(double airspeed, double stallSpeed, double minSpeed,
-                                                  double stallSeverity, float noseDownForce) {
-      double usableRange = Math.max(0.05D, stallSpeed - minSpeed);
-      double speedAuthority = clamp((airspeed - minSpeed) / usableRange, 0.0D, 1.0D);
-      return Math.max(0.0D, (double)noseDownForce) * clamp(stallSeverity, 0.0D, 1.0D) * speedAuthority;
-   }
-
    /** Returns a 0..1 severity value as airspeed falls below the stall threshold. */
    public static double getStallSeverity(double horizontalSpeed, float topSpeed, float stallSpeedFactor) {
       double stallSpeed = Math.max(0.05D, (double)topSpeed * (double)stallSpeedFactor);

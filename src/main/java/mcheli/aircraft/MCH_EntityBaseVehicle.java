@@ -1759,21 +1759,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return 0.0D;
    }
 
-   /** Most recent explicit fixed-wing gravity acceleration. */
-   public double getLastGravityForce() {
-      return 0.0D;
-   }
-
-   /** Most recent fixed-wing lift compensation against gravity. */
-   public double getLastLiftForce() {
-      return 0.0D;
-   }
-
-   /** Most recent stall nose-down pitch recovery force. */
-   public double getLastStallNoseDownForce() {
-      return 0.0D;
-   }
-
    /** Effective 0..1 control authority after stall and high-G penalties. */
    public float getDebugControlAuthority() {
       return this.getControlAuthorityFactor();

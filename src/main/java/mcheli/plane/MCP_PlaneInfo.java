@@ -63,18 +63,6 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float newFlightEngineBrakeDrag = 0.0035F;
    /** Fraction of legacy throttle-coupled lift retained at idle. */
    public float newFlightLowThrottleLiftRetention = 0.82F;
-   /** Explicit new-flight gravity applied to conventional fixed-wing flight. */
-   public float gravityStrength = 0.032F;
-   /** Maximum fraction of gravity that aerodynamic lift can counter at healthy speed/AoA. */
-   public float liftGravityCompensation = 1.05F;
-   /** Nose-down pitch recovery force applied during developed stalls. */
-   public float stallNoseDownForce = 0.12F;
-   /** Minimum airspeed where stall nose-down recovery starts to gain authority. */
-   public float stallNoseDownMinSpeed = 0.08F;
-   /** Upward vertical velocity damping after ground contact. */
-   public float groundBounceDamping = 0.25F;
-   /** Maximum upward vertical velocity allowed near ground without valid lift/thrust. */
-   public float groundVerticalVelocityClamp = 0.015F;
    /** Maximum fraction of control authority lost at idle throttle. */
    public float newFlightThrottleControlAuthorityScale = 0.18F;
    /** Show the normalized 0-100% throttle readout to pilots using the new flight model. */
@@ -316,18 +304,6 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.newFlightEngineBrakeDrag = this.toFloat(data, 0.0F, 0.25F);
          } else if(item.equalsIgnoreCase("NewFlightLowThrottleLiftRetention")) {
             this.newFlightLowThrottleLiftRetention = this.toFloat(data, 0.0F, 1.0F);
-         } else if(item.equalsIgnoreCase("GravityStrength")) {
-            this.gravityStrength = this.toFloat(data, 0.0F, 0.25F);
-         } else if(item.equalsIgnoreCase("LiftGravityCompensation")) {
-            this.liftGravityCompensation = this.toFloat(data, 0.0F, 2.0F);
-         } else if(item.equalsIgnoreCase("StallNoseDownForce")) {
-            this.stallNoseDownForce = this.toFloat(data, 0.0F, 5.0F);
-         } else if(item.equalsIgnoreCase("StallNoseDownMinSpeed")) {
-            this.stallNoseDownMinSpeed = this.toFloat(data, 0.0F, 10.0F);
-         } else if(item.equalsIgnoreCase("GroundBounceDamping")) {
-            this.groundBounceDamping = this.toFloat(data, 0.0F, 1.0F);
-         } else if(item.equalsIgnoreCase("GroundVerticalVelocityClamp")) {
-            this.groundVerticalVelocityClamp = this.toFloat(data, 0.0F, 0.25F);
          } else if(item.equalsIgnoreCase("NewFlightThrottleControlAuthorityScale")) {
             this.newFlightThrottleControlAuthorityScale = this.toFloat(data, 0.0F, 1.0F);
          } else if(item.equalsIgnoreCase("NewFlightThrottleHudDisplay")) {

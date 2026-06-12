@@ -55,12 +55,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastAerodynamicDrag;
    /** Last stall lift-loss fraction applied to vertical motion, exposed for debug output. */
    private double lastLiftLoss;
-   /** Last explicit gravity acceleration applied by the new fixed-wing model. */
-   private double lastGravityForce;
-   /** Last aerodynamic lift compensation applied against gravity. */
-   private double lastLiftForce;
-   /** Last stall nose-down recovery pitch force. */
-   private double lastStallNoseDownForce;
    /** Local-axis body rates used by fixed-wing damped control response. */
    private float pitchAngularVelocity;
    private float rollAngularVelocity;
@@ -96,9 +90,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.engineThrottle = 0.0D;
       this.lastAerodynamicDrag = 0.0D;
       this.lastLiftLoss = 0.0D;
-      this.lastGravityForce = 0.0D;
-      this.lastLiftForce = 0.0D;
-      this.lastStallNoseDownForce = 0.0D;
       this.angleOfAttack = 0.0D;
       this.stallSeverity = 0.0D;
       this.stalling = false;
@@ -379,18 +370,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    public double getLastLiftLoss() {
       return this.lastLiftLoss;
-   }
-
-   public double getLastGravityForce() {
-      return this.lastGravityForce;
-   }
-
-   public double getLastLiftForce() {
-      return this.lastLiftForce;
-   }
-
-   public double getLastStallNoseDownForce() {
-      return this.lastStallNoseDownForce;
    }
 
    public float getDebugControlAuthority() {
@@ -693,80 +672,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
    }
 
-   private double getLiftGravityFactor() {
-      MCP_PlaneInfo info = this.getPlaneInfo();
-      if(info == null) {
-         return 0.0D;
-      }
-
-      double airspeed = this.getAirspeed();
-      double stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
-      double lift = MCH_FlightModel.getLiftGravityFactor(airspeed, this.angleOfAttack, stallSpeed,
-            info.criticalAoA, this.stallSeverity, info.stallLiftLoss);
-      if(this.isCombatFlapsDeployed()) {
-         lift = MCH_FlightModel.clamp(lift + (double)info.newFlightCombatFlapLift * 0.35D, 0.0D, 1.0D);
-      }
-      return lift;
-   }
-
-   private void applyNewFlightGravityAndLift(boolean levelOff, double waterDepth) {
-      MCP_PlaneInfo info = this.getPlaneInfo();
-      this.lastGravityForce = 0.0D;
-      this.lastLiftForce = 0.0D;
-      if(!this.useNewMobilitySystem() || info == null || waterDepth != 0.0D || this.getNozzleRotation() > 0.01F) {
-         return;
-      }
-
-      boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
-      if(super.onGround) {
-         return;
-      }
-
-      double gravity = Math.max(0.0D, (double)info.gravityStrength);
-      double liftFactor = this.getLiftGravityFactor();
-      if(levelOff) {
-         liftFactor = Math.min(liftFactor, 0.85D);
-      }
-      double lift = gravity * Math.max(0.0D, (double)info.liftGravityCompensation) * liftFactor;
-      if(this.stallSeverity > 0.0D) {
-         lift *= 1.0D - MCH_FlightModel.clamp(this.stallSeverity * (double)info.stallLiftLoss, 0.0D, 1.0D);
-      }
-
-      this.lastGravityForce = gravity;
-      this.lastLiftForce = Math.min(lift, gravity);
-      super.motionY += this.lastLiftForce - gravity;
-
-      if(nearGround && super.motionY > (double)info.groundVerticalVelocityClamp && !this.hasValidNewFlightClimbReason()) {
-         super.motionY = (double)info.groundVerticalVelocityClamp
-               + (super.motionY - (double)info.groundVerticalVelocityClamp) * (double)info.groundBounceDamping;
-      }
-   }
-
-   private boolean hasValidNewFlightClimbReason() {
-      MCP_PlaneInfo info = this.getPlaneInfo();
-      if(info == null) {
-         return false;
-      }
-
-      double stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
-      return this.getEffectiveEngineThrottle() > 0.35D
-            && this.getAirspeed() > stallSpeed * 1.15D
-            && this.getLiftGravityFactor() > 0.65D
-            && this.stallSeverity < 0.45D;
-   }
-
-   private void dampNewFlightGroundBounce(boolean nearGround) {
-      MCP_PlaneInfo info = this.getPlaneInfo();
-      if(!this.useNewMobilitySystem() || info == null || !nearGround || super.motionY <= 0.0D) {
-         return;
-      }
-
-      if(!this.hasValidNewFlightClimbReason()) {
-         super.motionY = Math.min(super.motionY * (double)info.groundBounceDamping,
-               (double)info.groundVerticalVelocityClamp);
-      }
-   }
-
    protected void updateVehicleStress() {
       if(!this.useNewMobilitySystem()) {
          this.currentGForce = 1.0D;
@@ -871,11 +776,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          super.throttleUp = true;
          this.onUpdate_ControlNotHovering();
       } else if(this.getCurrentThrottle() > 0.0D) {
-         double throttleDecay = 0.0025D * (double)this.getAcInfo().throttleUpDown;
-         if(this.useNewMobilitySystem() && this.getPlaneInfo() != null) {
-            throttleDecay = Math.max(throttleDecay, (double)this.getPlaneInfo().newFlightThrottleChangeRateDown);
-         }
-         this.addCurrentThrottle(-throttleDecay);
+         this.addCurrentThrottle(-0.0025D * (double)this.getAcInfo().throttleUpDown);
       } else {
          this.setCurrentThrottle(0.0D);
       }
@@ -912,16 +813,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       if(!this.canUseCombatFlaps()) {
          this.combatFlapsDeployed = false;
-      }
-
-      if(this.useNewMobilitySystem() && this.getRiddenByEntity() == null) {
-         this.pitchAngularVelocity *= 0.75F;
-         this.rollAngularVelocity *= 0.75F;
-         this.yawAngularVelocity *= 0.75F;
-         if(super.onGround || MCH_Lib.getBlockIdY(this, 3, -3) > 0) {
-            this.combatFlapsDeployed = false;
-            this.dampNewFlightGroundBounce(true);
-         }
       }
    }
 
@@ -1289,9 +1180,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.stallSeverity = 0.0D;
          this.lastAerodynamicDrag = 0.0D;
          this.lastLiftLoss = 0.0D;
-         this.lastGravityForce = 0.0D;
-         this.lastLiftForce = 0.0D;
-         this.lastStallNoseDownForce = 0.0D;
          this.stalling = false;
       }
 
@@ -1339,12 +1227,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
 
          if(!levelOff) {
+            super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
             if(this.useNewMobilitySystem() && this.getPlaneInfo() != null) {
-               // New fixed-wing gravity/lift is applied after thrust and damping, where
-               // current airspeed/AoA are known. Do not run the legacy throttle-lift
-               // shortcut for opted-in planes because it can let idle throttle hover.
+               double liftPower = (double)this.getPlaneInfo().newFlightLowThrottleLiftRetention
+                     + (1.0D - (double)this.getPlaneInfo().newFlightLowThrottleLiftRetention) * this.getEffectiveEngineThrottle();
+               if(this.isCombatFlapsDeployed()) {
+                  liftPower += (double)this.getPlaneInfo().newFlightCombatFlapLift;
+               }
+               super.motionY += -0.047D * (1.0D - MCH_FlightModel.clamp(liftPower, 0.0D, 1.0D));
             } else {
-               super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
                super.motionY += -0.047D * (1.0D - this.getEngineThrottle());
             }
          } else {
@@ -1424,7 +1315,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       // 对垂直速度进行衰减
       super.motionY *= 0.95D;
-      this.applyNewFlightGravityAndLift(levelOff, dp);
       // 根据飞行器的运动系数衰减水平速度
       super.motionX *= this.getAcInfo().motionFactor;
       super.motionZ *= this.getAcInfo().motionFactor;
@@ -1502,7 +1392,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // buffet/wing drop. Lowering the nose reduces AoA and lets speed build to recovery.
       boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
       this.lastLiftLoss = 0.0D;
-      this.lastStallNoseDownForce = 0.0D;
       if(this.useNewMobilitySystem() && !nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
          double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)this.getPlaneInfo().stallLiftLoss, 0.0D, 1.0D);
          this.lastLiftLoss = liftLoss;
@@ -1517,15 +1406,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                * (double)this.getPlaneInfo().stallInstability * this.stallSeverity;
          this.setRotRoll(this.getRotRoll() + (float)(wingDrop * 0.08D + buffet * 0.04D));
          this.setRotYaw(this.getRotYaw() + (float)(buffet * 0.02D));
-         double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
-               this.getPlaneInfo().stallSpeedFactor);
-         double recoveryForce = MCH_FlightModel.getStallNoseDownRecovery(this.getAirspeed(), stallSpeed,
-               (double)this.getPlaneInfo().stallNoseDownMinSpeed, this.stallSeverity,
-               this.getPlaneInfo().stallNoseDownForce);
-         this.lastStallNoseDownForce = recoveryForce;
-         this.pitchAngularVelocity += (float)(recoveryForce * 0.35D);
          this.setRotPitch(this.getRotPitch() + (float)(0.04D * (double)this.getPlaneInfo().stallInstability
-               * this.stallSeverity + recoveryForce));
+               * this.stallSeverity));
       }
 
       // Lift fades through a band below the configured ceiling instead of hitting an invisible wall.
@@ -1541,7 +1423,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       // 如果飞行器在地面或距离地面较近，则缩减水平速度，应用地面俯仰角度
       if(nearGround) {
-         this.dampNewFlightGroundBounce(nearGround);
          super.motionX *= this.getAcInfo().motionFactor;
          super.motionZ *= this.getAcInfo().motionFactor;
          // 如果俯仰角度小于40度，则根据地面状态调整俯仰角度

@@ -331,7 +331,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       }
 
       System.out.println(String.format(
-              "[MCHeli] flight-control dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f) aero=(throttle=%.0f%%,flaps=%s,speed=%.3f,vertical=%.4f,aoa=%.2f,stall=%.2f,overspeed=%s,g=%.2f,drag=%.3f,gravity=%.4f,lift=%.4f,liftLoss=%.2f,noseDown=%.3f,authority=%.2f)",
+              "[MCHeli] flight-control dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f) aero=(throttle=%.0f%%,flaps=%s,speed=%.3f,aoa=%.2f,stall=%.2f,overspeed=%s,g=%.2f,drag=%.3f,liftLoss=%.2f,authority=%.2f)",
               simDelta,
               mouseX,
               mouseY,
@@ -346,16 +346,12 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
               Double.valueOf(ac.getNormalizedThrottle() * 100.0D),
               Boolean.valueOf(ac.isCombatFlapsDeployed()),
               Math.sqrt(ac.motionX * ac.motionX + ac.motionY * ac.motionY + ac.motionZ * ac.motionZ),
-              ac.motionY,
               ac.getAngleOfAttackDegrees(),
               ac.getStallSeverity(),
               Boolean.valueOf(ac.isOverspeeding()),
               ac.getCurrentGForce(),
               ac.getLastAerodynamicDrag(),
-              ac.getLastGravityForce(),
-              ac.getLastLiftForce(),
               ac.getLastLiftLoss(),
-              ac.getLastStallNoseDownForce(),
               ac.getDebugControlAuthority()
       ));
    }
