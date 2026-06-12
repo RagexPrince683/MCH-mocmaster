@@ -16,7 +16,10 @@ import mcheli.tank.MCH_EntityTank;
 import mcheli.vehicle.MCH_EntityTurret;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 
 /** Sends render-only vehicle snapshots without changing Forge entity tracking. */
 public class MCH_ServerTickHandler {
@@ -88,10 +91,42 @@ public class MCH_ServerTickHandler {
          entry.pitch = vehicle.getRotPitch();
          entry.roll = vehicle.getRotRoll();
          entry.scale = 1.0F;
-         entry.packedLight = vehicle.getBrightnessForRender(1.0F);
+         entry.packedLight = getPackedLight(world, vehicle);
          entries.add(entry);
       }
       return entries;
+   }
+
+   /**
+    * Samples the vehicle's actual world light without client-only combined
+    * brightness helpers. Dedicated servers strip those helpers, and the
+    * aircraft override's gradual sky-light smoothing is inappropriate for the
+    * once-per-second LOD snapshots.
+    */
+   private static int getPackedLight(WorldServer world, MCH_EntityBaseVehicle vehicle) {
+      if(vehicle.haveSearchLight() && vehicle.isSearchLightON()) {
+         return 15728880;
+      }
+
+      int x = MathHelper.floor_double(vehicle.posX);
+      int z = MathHelper.floor_double(vehicle.posZ);
+      if(!world.blockExists(x, 0, z)) {
+         return 0;
+      }
+
+      double sampleOffset = (vehicle.boundingBox.maxY - vehicle.boundingBox.minY) * 0.66D;
+      float flotationOffset = vehicle.getAcInfo() != null
+         ? vehicle.getAcInfo().submergedDamageHeight : 0.0F;
+      if(vehicle.canFloatWater()) {
+         flotationOffset = Math.abs(vehicle.getAcInfo().floatOffset) + 1.0F;
+      }
+
+      int y = MathHelper.clamp_int(MathHelper.floor_double(vehicle.posY + (double)flotationOffset
+         - (double)vehicle.yOffset + sampleOffset), 0, 255);
+      Chunk chunk = world.getChunkFromBlockCoords(x, z);
+      int skyLight = chunk.getSavedLightValue(EnumSkyBlock.Sky, x & 15, y, z & 15);
+      int blockLight = chunk.getSavedLightValue(EnumSkyBlock.Block, x & 15, y, z & 15);
+      return skyLight << 20 | blockLight << 4;
    }
 
    private static byte categoryOf(MCH_EntityBaseVehicle vehicle) {
