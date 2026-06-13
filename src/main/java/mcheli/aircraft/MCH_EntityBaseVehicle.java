@@ -5544,6 +5544,18 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       MCH_Lib.DbgLog(super.worldObj, "setDead:" + (this.getAcInfo() != null?this.getAcInfo().name:"null"), new Object[0]);
    }
 
+   public void discardDuplicateUav() {
+      if(super.worldObj.isRemote || this.isDead) {
+         return;
+      }
+      this.newUavShiftExitInProgress = true;
+      try {
+         this.setDead(false);
+      } finally {
+         this.newUavShiftExitInProgress = false;
+      }
+   }
+
 
    private MCH_EntityUavStation resolveLinkedUavStation() {
       if(this.uavStation != null && !this.uavStation.isDead) {
