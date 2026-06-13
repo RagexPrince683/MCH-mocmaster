@@ -25,7 +25,7 @@ public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
       try {
          this.entityID_Ac = data.readInt();
          this.entityID_rider = data.readInt();
-         this.seatID = data.readByte();
+         this.seatID = data.readShort();
       } catch (Exception var3) {
          var3.printStackTrace();
       }
@@ -36,7 +36,7 @@ public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
       try {
          dos.writeInt(this.entityID_Ac);
          dos.writeInt(this.entityID_rider);
-         dos.writeByte(this.seatID);
+         dos.writeShort(this.seatID);
       } catch (IOException var3) {
          var3.printStackTrace();
       }

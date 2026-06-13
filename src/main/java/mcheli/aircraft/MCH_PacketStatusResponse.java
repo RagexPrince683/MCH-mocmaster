@@ -12,7 +12,7 @@ import net.minecraft.entity.player.EntityPlayer;
 public class MCH_PacketStatusResponse extends MCH_Packet {
 
    public int entityID_AC = -1;
-   public byte seatNum = -1;
+   public int seatNum = -1;
    public byte[] weaponIDs = new byte[]{(byte)-1};
 
 
@@ -23,7 +23,7 @@ public class MCH_PacketStatusResponse extends MCH_Packet {
    public void readData(ByteArrayDataInput data) {
       try {
          this.entityID_AC = data.readInt();
-         this.seatNum = data.readByte();
+         this.seatNum = data.readShort();
          if(this.seatNum > 0) {
             this.weaponIDs = new byte[this.seatNum];
 
@@ -41,13 +41,13 @@ public class MCH_PacketStatusResponse extends MCH_Packet {
       try {
          dos.writeInt(this.entityID_AC);
          if(this.seatNum > 0 && this.weaponIDs != null && this.weaponIDs.length == this.seatNum) {
-            dos.writeByte(this.seatNum);
+            dos.writeShort(this.seatNum);
 
             for(int e = 0; e < this.seatNum; ++e) {
                dos.writeByte(this.weaponIDs[e]);
             }
          } else {
-            dos.writeByte(-1);
+            dos.writeShort(-1);
          }
       } catch (IOException var3) {
          var3.printStackTrace();
@@ -64,7 +64,7 @@ public class MCH_PacketStatusResponse extends MCH_Packet {
    protected void setParameter(MCH_EntityBaseVehicle ac) {
       if(ac != null) {
          this.entityID_AC = W_Entity.getEntityId(ac);
-         this.seatNum = (byte)(ac.getSeatNum() + 1);
+         this.seatNum = ac.getSeatNum() + 1;
          if(this.seatNum > 0) {
             this.weaponIDs = new byte[this.seatNum];
 

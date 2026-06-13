@@ -508,7 +508,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    }
 
    public int getInfo_MaxSeatNum() {
-      return 30;
+      return 500;
    }
 
    public int getNumSeatAndRack() {
@@ -711,6 +711,10 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                         if(item.equalsIgnoreCase("AddRack")) {
                            //parent vehicle to eat child
                            //todo: fix addrack bug where it won't go up block with a vehicle racked or something
+                           if(this.seatList.size() + this.entityRackList.size() >= this.getInfo_MaxSeatNum()) {
+                              return;
+                           }
+
                            s = data.toLowerCase().split("\\s*,\\s*");
                            if(s != null && s.length >= 7) {
                               var17 = s[0].split("\\s*/\\s*");
@@ -1231,7 +1235,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                  }
                               }
                            } else {
-                              if(this.seatList.size() >= this.getInfo_MaxSeatNum()) {
+                              if(this.seatList.size() + this.entityRackList.size() >= this.getInfo_MaxSeatNum()) {
                                  return;
                               }
 
