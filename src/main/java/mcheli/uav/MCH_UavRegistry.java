@@ -141,8 +141,9 @@ public final class MCH_UavRegistry {
         MCH_Lib.Log(remove, "Duplicate UAV identity detected: keeping entity %d and removing duplicate %d (persistent=%s, common=%s)", new Object[] {
                 Integer.valueOf(keep.getEntityId()), Integer.valueOf(remove.getEntityId()),
                 persistentId == null ? "" : persistentId.toString(), ac.getCommonUniqueId() == null ? "" : ac.getCommonUniqueId() });
+        // Do not delete a duplicate while either copy may still be restoring its station or
+        // pilot after a restart. Leaving it unregistered is recoverable; setDead is not.
         unregister(remove);
-        remove.setDead(false);
         return keep;
     }
 
