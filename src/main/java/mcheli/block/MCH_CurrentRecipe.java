@@ -61,7 +61,13 @@ public class MCH_CurrentRecipe {
             String name = info.name;
             this.model = MCH_ModelManager.get(dir, name);
             if(this.model != null) {
-               this.modelTexture = new ResourceLocation("mcheli", "textures/" + dir + "/" + name + ".png");
+               try {
+                  this.modelTexture = new ResourceLocation("mcheli",
+                                                           "textures/" + dir + "/" + name + ".png");
+               } catch (Exception var9) {
+                  System.out.println("Texture not found : " + name);
+                  this.modelTexture = new ResourceLocation("textures/blocks/planks_oak.png");
+               }
                ++this.descMaxPage;
                if(infoList instanceof MCP_PlaneInfoManager) {
                   this.modelRot = 0;

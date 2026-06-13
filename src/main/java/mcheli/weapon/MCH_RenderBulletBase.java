@@ -45,7 +45,12 @@ public abstract class MCH_RenderBulletBase extends W_Render {
    public void renderModel(MCH_EntityBaseBullet e) {
       MCH_BulletModel model = e.getBulletModel();
       if(model != null) {
-         this.bindTexture("textures/bullets/" + model.name + ".png");
+         try {
+            this.bindTexture("textures/bullets/" + model.name + ".png");
+         } catch (Exception var4) {
+            System.out.println("Texture not found : " + model.name);
+
+         }
          model.model.renderAll();
       }
 

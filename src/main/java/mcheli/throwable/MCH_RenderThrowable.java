@@ -26,7 +26,12 @@ public class MCH_RenderThrowable extends W_Render {
          GL11.glRotatef(entity.rotationPitch, 1.0F, 0.0F, 0.0F);
          this.setCommonRenderParam(true, entity.getBrightnessForRender(tickTime));
          if(info.model != null) {
+            try {
             this.bindTexture("textures/throwable/" + info.name + ".png");
+                } catch (Exception var11) {
+                     System.out.println("Texture not found : " + info.name);
+                     this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
+                }
             info.model.renderAll();
          }
 

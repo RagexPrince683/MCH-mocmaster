@@ -33,7 +33,12 @@ public class MCH_RenderCartridge extends W_Render {
          float pitch = cartridge.prevRotationPitch + (cartridge.rotationPitch - cartridge.prevRotationPitch) * tickTime;
          GL11.glRotatef(yaw, 0.0F, 1.0F, 0.0F);
          GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
+         try {
          this.bindTexture("textures/bullets/" + cartridge.texture_name + ".png");
+            } catch (Exception var11) {
+                System.out.println("Texture not found : " + cartridge.texture_name);
+                this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
+            }
          cartridge.model.renderAll();
          GL11.glPopMatrix();
       }
