@@ -24,7 +24,7 @@ Applies to planes, helicopters, tanks, turret/static weapons, ships, and any oth
 
 | Key | Type | Default | Notes |
 |---|---|---:|---|
-| `AddSeat` | `x,y,z[,rotYaw,rotPitch,...]` | none | Adds a normal seat. At least one seat is required unless a UAV flag creates one. |
+| `AddSeat` | `x,y,z[,rotYaw,rotPitch,...]` | none | Adds a normal seat. At least one seat is required unless a UAV flag creates one. A vehicle can define up to 126 combined seats and racks. |
 | `AddGunnerSeat` | list | none | Adds a gunner seat. |
 | `AddFixRotSeat` | list | none | Adds a fixed-rotation seat. |
 | `ExclusionSeat` | seat ids | none | One-based seat ids; parser stores zero-based exclusions. |
