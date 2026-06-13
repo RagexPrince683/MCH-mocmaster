@@ -1,23 +1,8 @@
-/*
- * Decompiled with CFR 0_123.
- * 
- * Could not load the following classes:
- *  net.minecraft.client.Minecraft
- *  net.minecraft.client.audio.ISound
- *  net.minecraft.client.audio.SoundHandler
- *  net.minecraft.client.renderer.texture.TextureManager
- *  net.minecraft.entity.Entity
- *  net.minecraft.entity.EntityLivingBase
- *  net.minecraft.util.ResourceLocation
- */
+
 package mcheli.wrapper;
 
-import mcheli.wrapper.W_MOD;
-import mcheli.wrapper.W_Sound;
+
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.client.audio.SoundHandler;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
@@ -42,7 +27,13 @@ public class W_McClient {
     }
 
     public static void MOD_bindTexture(String tex) {
+        try {
         Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(W_MOD.DOMAIN, tex));
+        }
+        catch (Exception e) {
+            System.out.println("Texture not found : " + tex);
+            Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(W_MOD.DOMAIN, "textures/default.png"));
+        }
     }
 
     public static boolean isGamePaused() {

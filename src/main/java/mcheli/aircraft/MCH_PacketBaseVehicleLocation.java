@@ -73,7 +73,12 @@ public class MCH_PacketBaseVehicleLocation extends MCH_Packet {
             s.rotZ = ac.rotationYaw;
 
             s.model = ac.getAcInfo().name;
-            s.texture = "textures/planes/" + ac.getTextureName() + ".png";
+            try {
+                s.texture = "textures/planes/" + ac.getTextureName() + ".png";
+            } catch (Exception var15) {
+                System.out.println("Texture not found : " + ac.getTextureName());
+                s.texture = "textures/blocks/planks_oak.png";
+            }
 
             s.entityId = ac.getEntityId();
 

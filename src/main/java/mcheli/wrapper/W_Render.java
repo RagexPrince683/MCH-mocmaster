@@ -31,7 +31,15 @@ extends Render {
     public int dstBlend;
 
     protected void bindTexture(String path) {
+        try {
         super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, path));
+
+
+        }
+        catch (Exception e) {
+            System.out.println("Texture not found : " + path);
+            super.bindTexture(TEX_DEFAULT);
+        }
     }
 
     protected ResourceLocation getEntityTexture(Entity entity) {

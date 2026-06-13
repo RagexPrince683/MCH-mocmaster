@@ -39,9 +39,19 @@ public class MCH_RenderUavStation extends W_Render {
             GL11.glBlendFunc(770, 771);
             if(kind == 0) {
                if(uavSt.getControlAircract() != null && uavSt.riddenByEntity != null) {
-                  this.bindTexture("textures/" + TEX_NAME_ON[kind] + ".png");
+                  try {
+                     this.bindTexture("textures/" + TEX_NAME_ON[kind] + ".png");
+                  } catch (Exception var10) {
+                     System.out.println("Texture not found : " + TEX_NAME_ON[kind]);
+                     this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
+                  }
                } else {
-                  this.bindTexture("textures/" + TEX_NAME_OFF[kind] + ".png");
+                  try {
+                     this.bindTexture("textures/" + TEX_NAME_OFF[kind] + ".png");
+                  } catch (Exception var11) {
+                     System.out.println("Texture not found : " + TEX_NAME_OFF[kind]);
+                     this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
+                  }
                }
 
                MCH_ModelManager.render(MODEL_NAME[kind]);
