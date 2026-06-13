@@ -924,20 +924,33 @@ public class MCH_EntityUavStation
            if(ac != null && !ac.isDead) {
                 ac.setLocationAndAngles(stored.exitX, stored.exitY, stored.exitZ, stored.exitYaw, stored.exitPitch);
                 if(this.riddenByEntity != null && ac.isNewUAV()) {
-                     teleportPlayerToUav(this.riddenByEntity, ac);
-                     this.riddenByEntity.mountEntity((Entity)ac);
+                     if(!startNewUavControl(this.riddenByEntity, ac)) {
+                          this.pendingContinueTicks = 60;
+                          return false;
+                     }
                 }
                 return true;
            }
            return false;
          }
 
-
-
-      private void teleportPlayerToUav(Entity user, MCH_EntityBaseVehicle ac) {
-           if(user instanceof EntityPlayerMP && ac != null) {
-                ((EntityPlayerMP)user).setPositionAndUpdate(ac.posX, ac.posY + ac.getMountedYOffset(), ac.posZ);
+      private boolean startNewUavControl(Entity user, MCH_EntityBaseVehicle ac) {
+           if(!(user instanceof EntityPlayerMP) || ac == null || !ac.isNewUAV()
+                 || this.riddenByEntity != user || user.ridingEntity != this) {
+                return false;
            }
+           EntityPlayerMP player = (EntityPlayerMP)user;
+           linkUav(ac);
+           setControlAircract(ac);
+           if(!ac.mountNewUavPilot(player, this)) {
+                MCH_Lib.Log((Entity)this, "New UAV control handoff for player %s is not ready; keeping the player at station %d", new Object[] {
+                      player.getCommandSenderName(), Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
+                return false;
+           }
+           this.pendingContinueTicks = 0;
+           this.lastRiddenByEntity = null;
+           W_EntityPlayer.closeScreen(player);
+           return true;
          }
 
 
@@ -1130,8 +1143,13 @@ public class MCH_EntityUavStation
                              }
                              return;
                          }
-                         teleportPlayerToUav(this.riddenByEntity, this.controlAircraft);
-                         this.riddenByEntity.mountEntity((Entity)this.controlAircraft);
+                         if(!startNewUavControl(user, this.controlAircraft)) {
+                             this.pendingContinueTicks = 60;
+                             if(notify && user instanceof EntityPlayer) {
+                                 W_EntityPlayer.addChatMessage((EntityPlayer)user, "UAV control is synchronizing; continue will retry.");
+                             }
+                             return;
+                         }
                      }
                      this.pendingContinueTicks = 0;
                      W_EntityPlayer.closeScreen(user);
