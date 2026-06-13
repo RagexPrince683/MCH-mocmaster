@@ -144,15 +144,20 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
 
     private void updateWorldCollisionSearchRadius() {
-        double requiredRadius = (double)super.width / 2.0D;
+        double requiredRadius = Math.sqrt((double)super.width * (double)super.width / 2.0D
+                + (double)super.height * (double)super.height / 4.0D);
         for(MCH_BoundingBox bb : super.extraBoundingBox) {
-            double offsetRadius = Math.sqrt(bb.offsetX * bb.offsetX + bb.offsetZ * bb.offsetZ);
-            requiredRadius = Math.max(requiredRadius, offsetRadius + (double)bb.width / 2.0D);
+            double offsetRadius = Math.sqrt(bb.offsetX * bb.offsetX + bb.offsetY * bb.offsetY
+                    + bb.offsetZ * bb.offsetZ);
+            double halfDiagonal = Math.sqrt((double)bb.width * (double)bb.width / 2.0D
+                    + (double)bb.height * (double)bb.height / 4.0D);
+            requiredRadius = Math.max(requiredRadius, offsetRadius + halfDiagonal);
         }
 
-        // Forge uses this value when deciding which chunk entity lists to search.
-        // Without accounting for a carrier's remote boxes, vanilla stops finding
-        // the ship once a player is roughly 50 blocks from its center.
+        // Forge expands chunk entity-list searches by this radius. The ship remains
+        // indexed in its origin chunk, so the radius must contain every corner of
+        // every rotated extra box or world collision/ray queries near a remote box
+        // never discover the ship entity whose composite AABB owns that box.
         World.MAX_ENTITY_RADIUS = Math.max(World.MAX_ENTITY_RADIUS, requiredRadius + 2.0D);
     }
 
@@ -188,6 +193,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
                 this.setDead();
             } else {
                 this.setAcInfo(this.planeInfo);
+                this.updateWorldCollisionSearchRadius();
             }
         }
 

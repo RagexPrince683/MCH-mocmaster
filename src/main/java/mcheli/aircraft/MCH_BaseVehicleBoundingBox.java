@@ -141,7 +141,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          //wheelBoundingBox wb = arr$[i$];
 
          if(bb.boundingBox.intersectsWith(aabb)) {
-            double dist2 = this.getDistSq(aabb, this);
+            double dist2 = this.getDistSq(aabb, bb.boundingBox);
             if(dist2 < dist) {
                dist = dist2;
                this.ac.lastBBDamageFactor = bb.damegeFactor;
