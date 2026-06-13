@@ -1,12 +1,19 @@
 package mcheli.uav;
 
+import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.Map;
+import java.util.WeakHashMap;
 import mcheli.MCH_Lib;
 import mcheli.MCH_ModelManager;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.wrapper.W_Render;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
@@ -17,6 +24,8 @@ public class MCH_RenderUavStation extends W_Render {
    public static final String[] TEX_NAME_ON = new String[]{"uav_station_on", "uav_portable_controller_on"};
    public static final String[] TEX_NAME_OFF = new String[]{"uav_station", "uav_portable_controller"};
 
+   private final Map<MCH_EntityUavStation, EntityOtherPlayerMP> stationPilots =
+         new WeakHashMap<MCH_EntityUavStation, EntityOtherPlayerMP>();
 
    public MCH_RenderUavStation() {
       super.shadowSize = 1.0F;
@@ -68,8 +77,46 @@ public class MCH_RenderUavStation extends W_Render {
             GL11.glBlendFunc(srcBlend, dstBlend);
             GL11.glDisable(3042);
             GL11.glPopMatrix();
+            this.renderNewUavStationPilot(uavSt, posX, posY, posZ, tickTime);
          }
       }
+   }
+
+   private void renderNewUavStationPilot(MCH_EntityUavStation station, double posX, double posY,
+         double posZ, float partialTicks) {
+      MCH_EntityBaseVehicle aircraft = station.getControlAircract();
+      Entity operator = aircraft != null && aircraft.isNewUAV() ? aircraft.getRiddenByEntity() : null;
+      if(!(operator instanceof EntityPlayer) || operator.isDead || operator.ridingEntity != aircraft) {
+         this.stationPilots.remove(station);
+         return;
+      }
+
+      EntityPlayer player = (EntityPlayer)operator;
+      EntityOtherPlayerMP fakePlayer = this.stationPilots.get(station);
+      GameProfile profile = player.getGameProfile();
+      if(fakePlayer == null || !fakePlayer.getGameProfile().equals(profile)) {
+         fakePlayer = new EntityOtherPlayerMP(station.worldObj, profile);
+         this.stationPilots.put(station, fakePlayer);
+      }
+
+      fakePlayer.inventory.copyInventory(player.inventory);
+      fakePlayer.ridingEntity = station;
+      fakePlayer.rotationYaw = station.rotationYaw;
+      fakePlayer.prevRotationYaw = station.prevRotationYaw;
+      fakePlayer.rotationYawHead = station.rotationYaw;
+      fakePlayer.prevRotationYawHead = station.prevRotationYaw;
+      fakePlayer.renderYawOffset = station.rotationYaw;
+      fakePlayer.prevRenderYawOffset = station.prevRotationYaw;
+      fakePlayer.rotationPitch = 0.0F;
+      fakePlayer.prevRotationPitch = 0.0F;
+
+      double yaw = station.rotationYaw * Math.PI / 180.0D;
+      double offsetX = -Math.sin(yaw) * 0.9D;
+      double offsetZ = Math.cos(yaw) * 0.9D;
+      double offsetY = station.getMountedYOffset() + fakePlayer.getYOffset();
+      fakePlayer.setPosition(station.posX + offsetX, station.posY + offsetY, station.posZ + offsetZ);
+      RenderManager.instance.renderEntityWithPosYaw(fakePlayer, posX + offsetX, posY + offsetY,
+            posZ + offsetZ, fakePlayer.rotationYaw, partialTicks);
    }
 
    public void renderPortableController(MCH_EntityUavStation uavSt, String name, float tickTime) {
