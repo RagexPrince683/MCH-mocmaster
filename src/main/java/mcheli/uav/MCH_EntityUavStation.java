@@ -187,11 +187,12 @@ public class MCH_EntityUavStation
          }
 
       public void setControlAircract(MCH_EntityBaseVehicle ac) {
-           this.controlAircraft = ac;
-           if (ac != null && !ac.isDead ) {
-                linkUav(ac);
+           if (ac == null) {
+                this.controlAircraft = null;
+           } else if (!ac.isDead && linkUav(ac)) {
+                this.controlAircraft = ac;
                 setLastControlAircraft(ac);
-              }
+           }
          }
 
       public UUID getOwnerUUID() {
@@ -204,13 +205,25 @@ public class MCH_EntityUavStation
 
 
 
-      public void linkUav(MCH_EntityBaseVehicle ac) {
+      public boolean linkUav(MCH_EntityBaseVehicle ac) {
            if(ac == null) {
-                return;
+                return false;
+           }
+           UUID persistentId = ac.getUavPersistentUUID();
+           if(this.hasStoredUavLink && this.linkedUavEntityUUID != null
+                 && !this.linkedUavEntityUUID.equals(persistentId)
+                 && !this.linkedUavEntityUUID.equals(ac.getUniqueID())) {
+                MCH_Lib.Log((Entity)this, "Rejected UAV %d because station %d is locked to persistent UUID %s", new Object[] {
+                      Integer.valueOf(W_Entity.getEntityId((Entity)ac)), Integer.valueOf(W_Entity.getEntityId((Entity)this)),
+                      this.linkedUavEntityUUID.toString() });
+                return false;
+           }
+           MCH_UavRegistry.register(ac);
+           if(ac.isDead) {
+                return false;
            }
            this.assignedUav = ac;
            this.assignedUavId = ac.getEntityId();
-           UUID persistentId = ac.getUavPersistentUUID();
            this.assignedUavUUID = persistentId == null ? ac.getUniqueID().toString() : persistentId.toString();
            this.linkedUavEntityUUID = persistentId == null ? ac.getUniqueID() : persistentId;
            this.linkedUavCommonId = ac.getCommonUniqueId() == null ? "" : ac.getCommonUniqueId();
@@ -223,7 +236,7 @@ public class MCH_EntityUavStation
            this.awaitingLoadedUav = false;
            setContinuationState(CONTINUE_AVAILABLE);
            setLastControlAircraftEntityId(W_Entity.getEntityId((Entity)ac));
-           MCH_UavRegistry.register(ac);
+           return true;
          }
 
       public void updateLinkedUavPosition(MCH_EntityBaseVehicle ac) {
@@ -736,8 +749,7 @@ public class MCH_EntityUavStation
 
       private boolean relinkStoredUav(boolean requireLoaded) {
            MCH_EntityBaseVehicle ac = findLinkedUavEntity(this.worldObj);
-           if(ac != null && !ac.isDead) {
-                linkUav(ac);
+           if(ac != null && !ac.isDead && linkUav(ac)) {
                 setLastControlAircraft(ac);
                 setLastControlAircraftEntityId(W_Entity.getEntityId((Entity)ac));
                 return true;
@@ -895,6 +907,16 @@ public class MCH_EntityUavStation
               }
               return false;
           }
+          if(this.linkedUavEntityUUID != null
+                || (this.linkedUavCommonId != null && !this.linkedUavCommonId.isEmpty())
+                || (this.assignedUavUUID != null && !this.assignedUavUUID.isEmpty())) {
+              // A persisted identity means a real entity is authoritative even if its chunk
+              // has not finished loading. Spawning from the legacy JSON token here creates a
+              // second live UAV and lets registration order decide which one the station uses.
+              this.awaitingLoadedUav = true;
+              markLinkedUavUnloaded();
+              return false;
+          }
 
           MCH_UavJsonStore.StoredUav stored = MCH_UavJsonStore.load(this.worldObj, this);
           if(stored == null) {
@@ -924,20 +946,38 @@ public class MCH_EntityUavStation
            if(ac != null && !ac.isDead) {
                 ac.setLocationAndAngles(stored.exitX, stored.exitY, stored.exitZ, stored.exitYaw, stored.exitPitch);
                 if(this.riddenByEntity != null && ac.isNewUAV()) {
-                     teleportPlayerToUav(this.riddenByEntity, ac);
-                     this.riddenByEntity.mountEntity((Entity)ac);
+                     if(!startNewUavControl(this.riddenByEntity, ac)) {
+                          this.pendingContinueTicks = 60;
+                          return false;
+                     }
                 }
                 return true;
            }
            return false;
          }
 
-
-
-      private void teleportPlayerToUav(Entity user, MCH_EntityBaseVehicle ac) {
-           if(user instanceof EntityPlayerMP && ac != null) {
-                ((EntityPlayerMP)user).setPositionAndUpdate(ac.posX, ac.posY + ac.getMountedYOffset(), ac.posZ);
+      private boolean startNewUavControl(Entity user, MCH_EntityBaseVehicle ac) {
+           if(!(user instanceof EntityPlayerMP) || ac == null || !ac.isNewUAV()
+                 || this.riddenByEntity != user || user.ridingEntity != this) {
+                return false;
            }
+           EntityPlayerMP player = (EntityPlayerMP)user;
+           if(!linkUav(ac)) {
+                return false;
+           }
+           setControlAircract(ac);
+           if(this.controlAircraft != ac) {
+                return false;
+           }
+           if(!ac.mountNewUavPilot(player, this)) {
+                MCH_Lib.Log((Entity)this, "New UAV control handoff for player %s is not ready; keeping the player at station %d", new Object[] {
+                      player.getCommandSenderName(), Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
+                return false;
+           }
+           this.pendingContinueTicks = 0;
+           this.lastRiddenByEntity = null;
+           W_EntityPlayer.closeScreen(player);
+           return true;
          }
 
 
@@ -1107,8 +1147,15 @@ public class MCH_EntityUavStation
                  if (lastAc != null && !lastAc.isDead) {
 
                      if(!isValidLinkedUav(lastAc, user instanceof EntityPlayer ? (EntityPlayer)user : null)) { return; }
-                     linkUav(lastAc);
+                     if(!linkUav(lastAc)) {
+                         this.pendingContinueTicks = 60;
+                         return;
+                     }
                      setControlAircract(lastAc);
+                     if(this.controlAircraft != lastAc) {
+                         this.pendingContinueTicks = 60;
+                         return;
+                     }
                      //this.assignedUav = uav;
 
                      if(this.riddenByEntity instanceof EntityPlayer) {
@@ -1130,8 +1177,13 @@ public class MCH_EntityUavStation
                              }
                              return;
                          }
-                         teleportPlayerToUav(this.riddenByEntity, this.controlAircraft);
-                         this.riddenByEntity.mountEntity((Entity)this.controlAircraft);
+                         if(!startNewUavControl(user, this.controlAircraft)) {
+                             this.pendingContinueTicks = 60;
+                             if(notify && user instanceof EntityPlayer) {
+                                 W_EntityPlayer.addChatMessage((EntityPlayer)user, "UAV control is synchronizing; continue will retry.");
+                             }
+                             return;
+                         }
                      }
                      this.pendingContinueTicks = 0;
                      W_EntityPlayer.closeScreen(user);

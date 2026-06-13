@@ -85,6 +85,7 @@ public final class MCH_UavRegistry {
         if (world == null) return null;
         List list = world.loadedEntityList;
         MCH_EntityBaseVehicle first = null;
+        MCH_EntityBaseVehicle match = null;
         for (int i = 0; i < list.size(); ++i) {
             Object obj = list.get(i);
             if (obj instanceof MCH_EntityBaseVehicle) {
@@ -101,12 +102,16 @@ public final class MCH_UavRegistry {
                     if (entityUuid == null && (commonId == null || commonId.isEmpty()) && owner == null && first == null) {
                         first = ac;
                     } else if (entityMatch || commonMatch || ownerMatch) {
-                        return ac;
+                        match = match == null || match.isDead ? ac : chooseCanonical(match, ac);
                     }
                 }
             }
         }
-        return first;
+        if (match != null) {
+            register(match);
+            return getLive(match, world);
+        }
+        return first == null ? null : getLive(first, world);
     }
 
     private static MCH_EntityBaseVehicle getLive(MCH_EntityBaseVehicle ac, World world) {
@@ -142,16 +147,23 @@ public final class MCH_UavRegistry {
                 Integer.valueOf(keep.getEntityId()), Integer.valueOf(remove.getEntityId()),
                 persistentId == null ? "" : persistentId.toString(), ac.getCommonUniqueId() == null ? "" : ac.getCommonUniqueId() });
         unregister(remove);
-        remove.setDead(false);
+        remove.discardDuplicateUav();
         return keep;
     }
 
     private static MCH_EntityBaseVehicle chooseCanonical(MCH_EntityBaseVehicle a, MCH_EntityBaseVehicle b) {
         if (b.getRiddenByEntity() != null && a.getRiddenByEntity() == null) return b;
         if (a.getRiddenByEntity() != null && b.getRiddenByEntity() == null) return a;
+        UUID aPersistent = a.getUavPersistentUUID(false);
+        UUID bPersistent = b.getUavPersistentUUID(false);
+        boolean aOriginal = aPersistent != null && aPersistent.equals(a.getUniqueID());
+        boolean bOriginal = bPersistent != null && bPersistent.equals(b.getUniqueID());
+        if (aOriginal != bOriginal) return aOriginal ? a : b;
         if (b.getUavStation() != null && a.getUavStation() == null) return b;
         if (a.getUavStation() != null && b.getUavStation() == null) return a;
-        return a.ticksExisted >= b.ticksExisted ? a : b;
+        int uuidOrder = a.getUniqueID().toString().compareTo(b.getUniqueID().toString());
+        if (uuidOrder != 0) return uuidOrder < 0 ? a : b;
+        return a.getEntityId() <= b.getEntityId() ? a : b;
     }
 
     private static boolean isValidUav(MCH_EntityBaseVehicle ac) {
