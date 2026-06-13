@@ -36,7 +36,12 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
             GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
             GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
             GL11.glRotatef(roll, 0.0F, 0.0F, 1.0F);
+            try {
             this.bindTexture("textures/tanks/" + tank.getTextureName() + ".png", tank);
+            } catch (Exception var15) {
+               System.out.println("Texture not found : " + tank.getTextureName());
+               this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
+            }
             renderBody(tankInfo.model);
          }
       }

@@ -299,7 +299,13 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       if(MCH_ClientCommonTickHandler.cameraMode == 2) {
          super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, "textures/test.png"));
       }else {
-         super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, path));
+         try {
+            super.bindTexture(new ResourceLocation(W_MOD.DOMAIN,
+                                                   path));
+         } catch (Exception var4) {
+            System.out.println("Error loading texture: " + path + " (" + var4.getMessage() + ")"); //why the fuck is this happening
+            super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, "textures/test.png"));
+         }
       }
    }
 

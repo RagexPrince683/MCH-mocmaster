@@ -28,7 +28,13 @@ public class MCH_RenderShip extends MCH_RenderBaseVehicle {
                 GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
                 GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
                 GL11.glRotatef(roll, 0.0F, 0.0F, 1.0F);
-                this.bindTexture("textures/ships/" + ship.getTextureName() + ".png", ship);
+                try {
+                    this.bindTexture("textures/ships/" + ship.getTextureName() + ".png",
+                                     ship);
+                } catch (Exception var15) {
+                    System.out.println("Texture not found : " + ship.getTextureName());
+                    this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
+                }
                 if(shipInfo.haveNozzle() && ship.partNozzle != null) {
                     this.renderNozzle(ship, shipInfo, tickTime);
                 }

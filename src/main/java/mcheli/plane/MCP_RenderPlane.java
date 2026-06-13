@@ -32,7 +32,12 @@ public class MCP_RenderPlane extends MCH_RenderBaseVehicle {
             GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
             GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
             GL11.glRotatef(roll, 0.0F, 0.0F, 1.0F);
+            try {
             this.bindTexture("textures/planes/" + plane.getTextureName() + ".png", plane);
+            } catch (Exception var15) {
+               System.out.println("Texture not found : " + plane.getTextureName());
+               this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
+            }
             if(planeInfo.haveNozzle() && plane.partNozzle != null) {
                this.renderNozzle(plane, planeInfo, tickTime);
             }
