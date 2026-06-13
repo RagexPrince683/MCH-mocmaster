@@ -5517,7 +5517,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    private boolean hasNewUavReturnPosition() {
-      return this.hasLinkedUavStationPosition && this.linkedUavStationDimension == this.dimension;
+      return this.linkedUavStationUUID != null && this.hasLinkedUavStationPosition
+            && this.linkedUavStationDimension == this.dimension
+            && !Double.isNaN(this.linkedUavStationX) && !Double.isInfinite(this.linkedUavStationX)
+            && !Double.isNaN(this.linkedUavStationY) && !Double.isInfinite(this.linkedUavStationY)
+            && !Double.isNaN(this.linkedUavStationZ) && !Double.isInfinite(this.linkedUavStationZ);
    }
 
    private void updateNewUavReturnPositionFromStation() {
@@ -5538,7 +5542,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       updateNewUavReturnPositionFromStation();
       if(!hasNewUavReturnPosition()) {
-         MCH_Lib.Log((Entity)this, "Unable to return New UAV pilot: no saved station position", new Object[0]);
+         MCH_Lib.Log((Entity)this, "Unable to return New UAV pilot: station link is missing or still restoring; preserving UAV control", new Object[0]);
          return false;
       }
 
@@ -5572,28 +5576,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       super.riddenByEntity = null;
    }
 
-   private void deleteNewUavAfterShiftExit() {
-      if(super.worldObj.isRemote || !this.isNewUAV()) {
-         return;
-      }
-      MCH_EntityUavStation station = resolveLinkedUavStation();
-      if(station != null) {
-         if(!station.prepareNewUavShiftExit(this)) {
-            return;
-         }
-      } else {
-         MCH_Lib.Log((Entity)this, "Unable to resolve the New UAV station during shift-exit; preserving the aircraft instead of losing its position", new Object[0]);
-         return;
-      }
-      MCH_Lib.Log((Entity)this, "Deleting new UAV entity %d after player shift-exit; station Continue may relaunch it", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
-      this.newUavShiftExitInProgress = true;
-      try {
-         this.setDead(false);
-      } finally {
-         this.newUavShiftExitInProgress = false;
-      }
-   }
-
    public void unmountEntity() {
       if(!this.isRidePlayer()) {
          this.switchHoveringMode(false);
@@ -5604,13 +5586,21 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(super.riddenByEntity != null) {
          rByEntity = super.riddenByEntity;
          this.camera.initCamera(0, rByEntity);
-         if(!super.worldObj.isRemote) {
+         if(!super.worldObj.isRemote && this.isNewUAV()) {
+            if(!this.returnNewUavPilotToStation(rByEntity, "uav_exit")) {
+               return;
+            }
+         } else if(!super.worldObj.isRemote) {
             super.riddenByEntity.mountEntity((Entity)null);
          }
       } else if(this.lastRiddenByEntity != null) {
          rByEntity = this.lastRiddenByEntity;
          if(rByEntity instanceof EntityPlayer) {
             this.camera.initCamera(0, rByEntity);
+         }
+         if(!super.worldObj.isRemote && this.isNewUAV()
+               && !this.returnNewUavPilotToStation(rByEntity, "uav_exit")) {
+            return;
          }
       }
 
@@ -5623,9 +5613,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(rByEntity != null) {
          // NewUAV takes precedence over the legacy UAV flag used by some content packs.
          if(this.isNewUAV()) {
-            if(!super.worldObj.isRemote && this.returnNewUavPilotToStation(rByEntity, "uav_exit")) {
-               deleteNewUavAfterShiftExit();
-            }
+            // The server already detached and returned the pilot above. Keep the live UAV
+            // linked so Continue/relog can deterministically reacquire the same entity.
          } else if(this.isUAV()) {
             if(rByEntity.ridingEntity instanceof MCH_EntityUavStation) {
                rByEntity.mountEntity((Entity)null);
@@ -5795,16 +5784,15 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          return false;
       }
 
+      if(this.isNewUAV() && !super.worldObj.isRemote) {
+         return this.returnNewUavPilotToStation(entity, "uav_seat_exit");
+      }
+
       for(MCH_EntitySeat seat : this.seats) {
          if(seat != null && W_Entity.isEqual(seat.riddenByEntity, entity)) {
             entity.mountEntity((Entity)null);
             break;
          }
-      }
-
-      if(this.isNewUAV() && !super.worldObj.isRemote
-              && this.returnNewUavPilotToStation(entity, "uav_seat_exit")) {
-         deleteNewUavAfterShiftExit();
       }
       return false;
    }
