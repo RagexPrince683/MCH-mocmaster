@@ -281,6 +281,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public int ironCurtainWaveTimer = 0;
 
    private boolean hasLinkedUavStationPosition;
+   private int newUavMountSyncTicks;
    private boolean newUavShiftExitInProgress;
 
    private final Set<ChunkCoordinates> activeLights = new HashSet<>();
@@ -358,6 +359,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.linkedUavStationY = 0.0D;
       this.linkedUavStationZ = 0.0D;
       this.hasLinkedUavStationPosition = false;
+      this.newUavMountSyncTicks = 0;
       this.newUavShiftExitInProgress = false;
       this.modeSwitchCooldown = 0;
       this.partHatch = null;
@@ -691,7 +693,42 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public Entity getRiddenByEntity() {
-      return this.isUAV() && this.uavStation != null?this.uavStation.riddenByEntity:super.riddenByEntity;
+      // NewUAVs are directly ridden. Many content definitions also retain the legacy UAV
+      // flag, so NewUAV must take precedence or the direct rider is hidden as soon as the
+      // player leaves the station and the normal update loop treats that as a dismount.
+      if(this.isNewUAV()) {
+         return super.riddenByEntity;
+      }
+      return this.isUAV() && this.uavStation != null ? this.uavStation.riddenByEntity : super.riddenByEntity;
+   }
+
+   public boolean mountNewUavPilot(EntityPlayerMP player, MCH_EntityUavStation station) {
+      if(super.worldObj.isRemote || player == null || station == null || !this.isNewUAV()
+            || this.isDead || this.isDestroyed() || station.isDead
+            || player.ridingEntity != station || !this.isLinkedToStation(station)) {
+         return false;
+      }
+      if(super.riddenByEntity != null && super.riddenByEntity != player) {
+         return false;
+      }
+
+      this.setUavStation(station);
+      this.lastRiddenByEntity = null;
+      player.mountEntity(this);
+      if(player.ridingEntity == this && super.riddenByEntity == player) {
+         this.lastRiddenByEntity = player;
+         this.newUavMountSyncTicks = 40;
+         player.fallDistance = 0.0F;
+         this.syncCompleteAircraftState(player);
+         return true;
+      }
+
+      // A failed cross-chunk handoff must leave the operator at the station rather than
+      // detached at the aircraft. The station can retry after entity synchronization.
+      if(player.ridingEntity != station) {
+         player.mountEntity(station);
+      }
+      return false;
    }
 
    public boolean getCommonStatus(int bit) {
@@ -2730,6 +2767,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public void updateControl() {
       if(!super.worldObj.isRemote) {
          updateDelayedUavInventoryStore();
+         updateNewUavMountSynchronization();
 
          if(this.uavStation != null && !this.uavStation.isDead) {
             this.saveUavStationPosition(this.uavStation);
@@ -2749,6 +2787,33 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.throttleDown = this.getCommonStatus(10);
       }
 
+   }
+
+   private void updateNewUavMountSynchronization() {
+      if(!this.isNewUAV()) {
+         return;
+      }
+      Entity rider = super.riddenByEntity;
+      if(this.newUavMountSyncTicks <= 0 && rider instanceof EntityPlayerMP
+            && rider.ridingEntity == this && this.lastRiddenByEntity != rider) {
+         // Rider relationships are restored separately from entity NBT. Start the same
+         // synchronization window when a relog/restart restores the direct NewUAV rider.
+         this.newUavMountSyncTicks = 40;
+      }
+      if(this.newUavMountSyncTicks <= 0) {
+         return;
+      }
+      if(!(rider instanceof EntityPlayerMP) || rider.ridingEntity != this) {
+         this.newUavMountSyncTicks = 0;
+         return;
+      }
+      if(this.newUavMountSyncTicks % 5 == 0) {
+         // The player starts at a distant station, so the first attach packet can arrive
+         // before the client has begun tracking this aircraft. Repeat the authoritative
+         // state after tracking catches up instead of teleporting the player ahead of mount.
+         this.syncCompleteAircraftState((EntityPlayerMP)rider);
+      }
+      --this.newUavMountSyncTicks;
    }
 
    public void updateRecoil(float partialTicks) {
