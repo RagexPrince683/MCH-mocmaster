@@ -929,7 +929,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         }
 
         if(preventWaterBobbing) {
-            if(dp <= 1.0D) {
+            if(dp < 1.0D) {
                 super.motionY *= 0.25D;
 
                 if(Math.abs(super.motionY) < 0.003D) {
