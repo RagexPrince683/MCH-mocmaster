@@ -49,6 +49,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     public boolean submarineDescend = false;
 
     public boolean iscarrier = false;
+    private MCH_EntityHitBox[] extraBoundingBoxEntities = new MCH_EntityHitBox[0];
 
 
     private static final double SUBMARINE_VERTICAL_ACCELERATION = 0.01D;
@@ -194,7 +195,41 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     }
 
     public void setDead() {
+        for(MCH_EntityHitBox hitBox : this.extraBoundingBoxEntities) {
+            if(hitBox != null) {
+                hitBox.setDead();
+            }
+        }
+        this.extraBoundingBoxEntities = new MCH_EntityHitBox[0];
         super.setDead();
+    }
+
+    private void updateExtraBoundingBoxEntities() {
+        if(super.worldObj.isRemote || this.getAcInfo() == null) {
+            return;
+        }
+
+        if(this.extraBoundingBoxEntities.length != super.extraBoundingBox.length) {
+            for(MCH_EntityHitBox hitBox : this.extraBoundingBoxEntities) {
+                if(hitBox != null) {
+                    hitBox.setDead();
+                }
+            }
+
+            this.extraBoundingBoxEntities = new MCH_EntityHitBox[super.extraBoundingBox.length];
+            for(int i = 0; i < super.extraBoundingBox.length; ++i) {
+                MCH_EntityHitBox hitBox = new MCH_EntityHitBox(super.worldObj, this,
+                        super.extraBoundingBox[i], i);
+                this.extraBoundingBoxEntities[i] = hitBox;
+                super.worldObj.spawnEntityInWorld(hitBox);
+            }
+        }
+
+        for(MCH_EntityHitBox hitBox : this.extraBoundingBoxEntities) {
+            if(hitBox != null && !hitBox.isDead) {
+                hitBox.updatePhysicalPosition();
+            }
+        }
     }
 
     public int getNumEjectionSeat() {
@@ -1039,6 +1074,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         // Extra boxes are normally updated before onUpdateAircraft. Refresh them at
         // the final ship position so support uses this tick's water-bob height.
         this.updateExtraBoundingBox();
+        this.updateExtraBoundingBoxEntities();
 
         for(DeckContact contact : deckEntities) {
             Entity entity = contact.entity;
