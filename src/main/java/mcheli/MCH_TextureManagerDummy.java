@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.ITickableTextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -20,13 +21,30 @@ public class MCH_TextureManagerDummy extends TextureManager {
       this.tm = t;
    }
 
-   public void bindTexture(ResourceLocation resouce) {
-      if(MCH_ClientCommonTickHandler.cameraMode == 2) {
-         this.tm.bindTexture(R);
-      } else {
-         this.tm.bindTexture(resouce);
+   public void bindTexture(ResourceLocation resource) {
+      ResourceLocation texture = MCH_ClientCommonTickHandler.cameraMode == 2 ? R : resource;
+
+      try {
+         this.tm.bindTexture(texture);
+      } catch(RuntimeException e) {
+         if(!isCausedByNullPointerException(e)) {
+            throw e;
+         }
+
+         MCH_Lib.Log("Failed to decode texture %s; using Minecraft's missing-texture image instead.", texture);
+         this.tm.loadTexture(texture, TextureUtil.missingTexture);
+         this.tm.bindTexture(texture);
+      }
+   }
+
+   private static boolean isCausedByNullPointerException(Throwable error) {
+      for(Throwable cause = error; cause != null; cause = cause.getCause()) {
+         if(cause instanceof NullPointerException) {
+            return true;
+         }
       }
 
+      return false;
    }
 
    public ResourceLocation getResourceLocation(int p_130087_1_) {
