@@ -86,20 +86,21 @@ public class MCH_RenderUavStation extends W_Render {
          double posZ, float partialTicks) {
       MCH_EntityBaseVehicle aircraft = station.getControlAircract();
       Entity operator = aircraft != null && aircraft.isNewUAV() ? aircraft.getRiddenByEntity() : null;
-      if(!(operator instanceof EntityPlayer) || operator.isDead || operator.ridingEntity != aircraft) {
+      GameProfile profile = station.getNewUavPilotProfile();
+      if(profile == null) {
          this.stationPilots.remove(station);
          return;
       }
 
-      EntityPlayer player = (EntityPlayer)operator;
       EntityOtherPlayerMP fakePlayer = this.stationPilots.get(station);
-      GameProfile profile = player.getGameProfile();
       if(fakePlayer == null || !fakePlayer.getGameProfile().equals(profile)) {
          fakePlayer = new EntityOtherPlayerMP(station.worldObj, profile);
          this.stationPilots.put(station, fakePlayer);
       }
 
-      fakePlayer.inventory.copyInventory(player.inventory);
+      if(operator instanceof EntityPlayer && !operator.isDead && operator.ridingEntity == aircraft) {
+         fakePlayer.inventory.copyInventory(((EntityPlayer)operator).inventory);
+      }
       fakePlayer.ridingEntity = station;
       fakePlayer.rotationYaw = station.rotationYaw;
       fakePlayer.prevRotationYaw = station.prevRotationYaw;
@@ -113,7 +114,7 @@ public class MCH_RenderUavStation extends W_Render {
       double yaw = station.rotationYaw * Math.PI / 180.0D;
       double offsetX = -Math.sin(yaw) * 0.9D;
       double offsetZ = Math.cos(yaw) * 0.9D;
-      double offsetY = station.getMountedYOffset() + fakePlayer.getYOffset();
+      double offsetY = station.getMountedYOffsetForVisualPilot() + fakePlayer.getYOffset();
       fakePlayer.setPosition(station.posX + offsetX, station.posY + offsetY, station.posZ + offsetZ);
       RenderManager.instance.renderEntityWithPosYaw(fakePlayer, posX + offsetX, posY + offsetY,
             posZ + offsetZ, fakePlayer.rotationYaw, partialTicks);

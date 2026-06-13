@@ -1,5 +1,6 @@
 package mcheli.uav;
 
+import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.List;
@@ -43,6 +44,7 @@ import net.minecraft.world.World;
 public class MCH_EntityUavStation
            extends W_EntityContainer
          {
+      protected static final int DATAWT_ID_NEW_UAV_PILOT = 25;
       protected static final int DATAWT_ID_CONTINUE_STATE = 26;
       protected static final int DATAWT_ID_KIND = 27;
       private static final byte CONTINUE_NONE = 0;
@@ -145,6 +147,7 @@ public class MCH_EntityUavStation
       public float prevRotCover;
       protected void entityInit() {
            super.entityInit();
+           getDataWatcher().addObject(DATAWT_ID_NEW_UAV_PILOT, "");
            getDataWatcher().addObject(DATAWT_ID_CONTINUE_STATE, Byte.valueOf(CONTINUE_NONE));
            getDataWatcher().addObject(27, Byte.valueOf((byte)0));
            getDataWatcher().addObject(28, Integer.valueOf(0));
@@ -519,7 +522,16 @@ public class MCH_EntityUavStation
          }
 
       public double getMountedYOffset() {
-           if (getKind() == 2 && this.riddenByEntity != null) {
+           return getMountedYOffset(this.riddenByEntity != null);
+         }
+
+      @SideOnly(Side.CLIENT)
+      public double getMountedYOffsetForVisualPilot() {
+           return getMountedYOffset(true);
+         }
+
+      private double getMountedYOffset(boolean occupied) {
+           if (getKind() == 2 && occupied) {
                 double px = -Math.sin(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
                 double pz = Math.cos(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
                 int x = (int)(this.posX + px);
@@ -599,6 +611,9 @@ public class MCH_EntityUavStation
           if(!this.worldObj.isRemote && this.riddenByEntity instanceof EntityPlayer
                   && this.controlAircraft != null && this.controlAircraft.isNewUAV()) {
               this.controlAircraft.setUavStation(this);
+          }
+          if(!this.worldObj.isRemote) {
+              updateNewUavPilotProfile();
           }
 
 
@@ -976,8 +991,42 @@ public class MCH_EntityUavStation
            }
            this.pendingContinueTicks = 0;
            this.lastRiddenByEntity = null;
+           setNewUavPilotProfile(player);
            W_EntityPlayer.closeScreen(player);
            return true;
+         }
+
+      private void updateNewUavPilotProfile() {
+           Entity pilot = this.controlAircraft != null && this.controlAircraft.isNewUAV()
+                 ? this.controlAircraft.getRiddenByEntity() : null;
+           setNewUavPilotProfile(pilot instanceof EntityPlayer ? (EntityPlayer)pilot : null);
+         }
+
+      private void setNewUavPilotProfile(EntityPlayer player) {
+           String value = "";
+           if(player != null && !player.isDead) {
+                GameProfile profile = player.getGameProfile();
+                String uuid = profile.getId() == null ? "" : profile.getId().toString();
+                value = uuid + "|" + profile.getName();
+              }
+           if(!value.equals(getDataWatcher().getWatchableObjectString(DATAWT_ID_NEW_UAV_PILOT))) {
+                getDataWatcher().updateObject(DATAWT_ID_NEW_UAV_PILOT, value);
+              }
+         }
+
+      @SideOnly(Side.CLIENT)
+      public GameProfile getNewUavPilotProfile() {
+           String value = getDataWatcher().getWatchableObjectString(DATAWT_ID_NEW_UAV_PILOT);
+           if(value == null || value.isEmpty()) {
+                return null;
+              }
+           int separator = value.indexOf('|');
+           String uuid = separator >= 0 ? value.substring(0, separator) : "";
+           String name = separator >= 0 ? value.substring(separator + 1) : value;
+           if(name.isEmpty()) {
+                return null;
+              }
+           return new GameProfile(parseUavUUID(uuid), name);
          }
 
 
@@ -1278,7 +1327,13 @@ public class MCH_EntityUavStation
                         ((MCH_EntityBaseVehicle)ac).setDead(false);
                         linkUav(linked);
                         setControlAircract(linked);
-                        W_EntityPlayer.closeScreen(user);
+                        if(linked.isNewUAV()) {
+                             if(!startNewUavControl(user, linked)) {
+                                  this.pendingContinueTicks = 60;
+                                }
+                          } else {
+                             W_EntityPlayer.closeScreen(user);
+                          }
                         return;
                     }
                     if(MCH_Config.ItemDamage.prmBool) {
@@ -1306,7 +1361,13 @@ public class MCH_EntityUavStation
                           linkUav((MCH_EntityBaseVehicle) ac);
                           if (!((MCH_EntityBaseVehicle)ac).isTargetDrone()) {
                                ((MCH_EntityBaseVehicle)ac).setFuel((int)(((MCH_EntityBaseVehicle)ac).getMaxFuel() * 0.05F));
-                               W_EntityPlayer.closeScreen(user);
+                               if(((MCH_EntityBaseVehicle)ac).isNewUAV()) {
+                                    if(!startNewUavControl(user, (MCH_EntityBaseVehicle)ac)) {
+                                         this.pendingContinueTicks = 60;
+                                       }
+                                 } else {
+                                    W_EntityPlayer.closeScreen(user);
+                                 }
                              } else {
                                ((MCH_EntityBaseVehicle)ac).setFuel(((MCH_EntityBaseVehicle)ac).getMaxFuel());
                              }
