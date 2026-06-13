@@ -300,7 +300,7 @@ public class MCH_BaseVehiclePacketHandler {
             if(e instanceof MCH_EntityBaseVehicle) {
                MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)e;
                MCH_Lib.DbgLog(player.worldObj, "[MCH-SYNC][SEAT-RESPONSE-RECEIVE] aircraftId=%d aircraftUuid=%s packetSeats=%d localSeats=%d",
-                       new Object[]{Integer.valueOf(seatList.entityID_AC), ac.getUniqueID(), Byte.valueOf(seatList.seatNum), Integer.valueOf(ac.getSeats().length)});
+                       new Object[]{Integer.valueOf(seatList.entityID_AC), ac.getUniqueID(), Integer.valueOf(seatList.seatNum), Integer.valueOf(ac.getSeats().length)});
                if(seatList.seatNum > 0 && seatList.seatNum == ac.getSeats().length && seatList.seatEntityID != null && seatList.seatEntityID.length == seatList.seatNum) {
                   for(int i = 0; i < seatList.seatNum; ++i) {
                      Entity entity = player.worldObj.getEntityByID(seatList.seatEntityID[i]);
@@ -320,7 +320,7 @@ public class MCH_BaseVehiclePacketHandler {
                   ac.debugVehicleState("SEAT-RESPONSE-APPLIED", player);
                } else {
                   MCH_Lib.DbgLog(player.worldObj, "[MCH-SYNC][SEAT-APPLY-FAIL] reason=count_mismatch aircraftId=%d packetSeats=%d localSeats=%d",
-                          new Object[]{Integer.valueOf(seatList.entityID_AC), Byte.valueOf(seatList.seatNum), Integer.valueOf(ac.getSeats().length)});
+                          new Object[]{Integer.valueOf(seatList.entityID_AC), Integer.valueOf(seatList.seatNum), Integer.valueOf(ac.getSeats().length)});
                }
             }
 

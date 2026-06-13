@@ -56,7 +56,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `addrecipe` | All | recipe | none | shaped recipe |
 | `addshapelessrecipe` | All | recipe | none | shapeless recipe |
 | `CanRide` | All | boolean | true | player mounting |
-| `AddSeat` | All | list | none; at least one seat required | passenger/pilot seat; vehicles support up to 126 combined seats and racks |
+| `AddSeat` | All | list | none; at least one seat required | passenger/pilot seat; vehicles support up to 500 combined seats and racks |
 | `AddGunnerSeat` | All | list | none | seat with gunner controls |
 | `AddFixRotSeat` | All | list | none | seat with fixed look rotation |
 | `ExclusionSeat` | All | list of seat ids | none | seats that cannot be occupied together |
@@ -158,7 +158,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `AddPartWeaponMissile` | All | part pose/list | none | missile visual part |
 | `AddPartWeaponBay` | All | part pose/list | none | weapon bay visual part |
 | `AddPartSlideWeaponBay` | All | list | none | sliding weapon bay visual part |
-| `AddRack` | All | list | none | entity/vehicle rack seat; counts toward the 126 combined seat/rack limit |
+| `AddRack` | All | list | none | entity/vehicle rack seat; counts toward the 500 combined seat/rack limit |
 | `RideRack` | All | list | none | ride-rack attachment point |
 | `MobDropOption` | All | list | default disabled option | mob drops from seats/racks |
 | `AddRepellingHook` | All | vec/list | none | fast-rope/repelling point |

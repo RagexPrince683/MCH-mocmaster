@@ -508,8 +508,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    }
 
    public int getInfo_MaxSeatNum() {
-      // Seat-count packets add the pilot and store the result in a signed byte.
-      return 126;
+      return 500;
    }
 
    public int getNumSeatAndRack() {

@@ -24,7 +24,7 @@ public class MCH_PacketNotifyWeaponID extends MCH_Packet {
    public void readData(ByteArrayDataInput data) {
       try {
          this.entityID_Ac = data.readInt();
-         this.seatID = data.readByte();
+         this.seatID = data.readShort();
          this.weaponID = data.readByte();
          this.ammo = data.readShort();
          this.restAmmo = data.readShort();
@@ -37,7 +37,7 @@ public class MCH_PacketNotifyWeaponID extends MCH_Packet {
    public void writeData(DataOutputStream dos) {
       try {
          dos.writeInt(this.entityID_Ac);
-         dos.writeByte(this.seatID);
+         dos.writeShort(this.seatID);
          dos.writeByte(this.weaponID);
          dos.writeShort(this.ammo);
          dos.writeShort(this.restAmmo);
