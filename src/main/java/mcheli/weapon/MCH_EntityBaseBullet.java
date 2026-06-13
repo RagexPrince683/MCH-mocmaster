@@ -1110,7 +1110,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             //}
             if (entity instanceof MCH_EntitySeat) {
                 return false;
-            } else if (entity instanceof MCH_EntityHitBox && !((MCH_EntityHitBox)entity).isPhysical()) {
+            } else if (entity instanceof MCH_EntityHitBox) {
                 return false;
             } else if (W_Entity.isEqual(entity, this.shootingEntity)) {
                 return false;
