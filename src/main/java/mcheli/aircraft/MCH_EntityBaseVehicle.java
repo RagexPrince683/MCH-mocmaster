@@ -5487,7 +5487,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void setDead(boolean dropItems) {
-      if(!super.worldObj.isRemote && this.isNewUAV() && !this.newUavShiftExitInProgress) {
+      if(!super.worldObj.isRemote && this.isNewUAV() && this.isDestroyed() && !this.newUavShiftExitInProgress) {
          notifyLinkedStationNewUavRemoved();
          Entity pilot = super.riddenByEntity != null ? super.riddenByEntity : this.lastRiddenByEntity;
          if(pilot != null) {
