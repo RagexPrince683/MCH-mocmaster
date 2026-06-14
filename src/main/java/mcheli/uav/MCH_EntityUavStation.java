@@ -276,6 +276,26 @@ public class MCH_EntityUavStation
            return this.storedUavWasDestroyed || getContinuationState() == CONTINUE_DESTROYED;
          }
 
+      private boolean consumeConfirmedNewUavDestructionSignal() {
+           if(!MCH_UavJsonStore.consumeDestroyed(this.worldObj, this)) {
+                return false;
+           }
+
+           MCH_EntityBaseVehicle linked = getAndSearchLastControlAircraft();
+           if(linked == null) {
+                linked = findLinkedUavEntity(this.worldObj);
+           }
+           if(linked != null && !linked.isDead && !linked.isDestroyed()) {
+                MCH_Lib.Log((Entity)this, "Ignored stale New UAV destruction signal because linked UAV %d is still alive", new Object[] {
+                      Integer.valueOf(W_Entity.getEntityId((Entity)linked))
+                });
+                linkUav(linked);
+                setControlAircract(linked);
+                return false;
+           }
+           return true;
+         }
+
       private byte getContinuationState() {
            return getDataWatcher().getWatchableObjectByte(DATAWT_ID_CONTINUE_STATE);
          }
@@ -639,6 +659,12 @@ public class MCH_EntityUavStation
            this.prevPosX = this.posX;
            this.prevPosY = this.posY;
            this.prevPosZ = this.posZ;
+           if(!this.worldObj.isRemote && this.ticksExisted % 10 == 0 && !this.storedUavWasDestroyed &&
+              (this.hasStoredUavLink || getContinuationState() == CONTINUE_AVAILABLE) &&
+              consumeConfirmedNewUavDestructionSignal()) {
+                MCH_Lib.Log((Entity)this, "Consumed confirmed out-of-range New UAV destruction signal; disabling Continue", new Object[0]);
+                markLinkedNewUavDestroyed((MCH_EntityBaseVehicle)null);
+           }
            if (getControlAircract() != null && getControlAircract().isDestroyed()) {
                 MCH_EntityBaseVehicle destroyed = getControlAircract();
                 MCH_Lib.Log((Entity)this, "Linked UAV %d is destroyed; marking station Continue state destroyed", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)destroyed)) });
@@ -846,12 +872,12 @@ public class MCH_EntityUavStation
                 MCH_Lib.Log((Entity)this, "New UAV %d shifted out with an invalid server position; cancelling deletion so Continue cannot use stale coordinates", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)ac)) });
                 return false;
            }
-           // Shift-exit removes the runtime entity, not the station's logical link. Keep the
-           // stable identity and last authoritative location so Continue remains the sole
-           // authority that restores/reconnects this UAV.
            this.assignedUav = null;
            this.assignedUavId = -1;
-           this.hasStoredUavLink = true;
+           this.assignedUavUUID = "";
+           this.linkedUavEntityUUID = null;
+           this.linkedUavCommonId = "";
+           this.hasStoredUavLink = false;
            this.awaitingLoadedUav = false;
            this.pendingContinueTicks = 0;
            this.controlAircraft = null;
@@ -908,6 +934,22 @@ public class MCH_EntityUavStation
           }
 
           if(this.storedUavWasDestroyed) {
+              if(user instanceof EntityPlayer) {
+                  W_EntityPlayer.addChatMessage(
+                          (EntityPlayer)user,
+                          EnumChatFormatting.RED + "The linked drone was destroyed. Insert a new UAV item to launch again."
+                  );
+              }
+              return false;
+          }
+          if(this.linkedUavEntityUUID != null
+                || (this.linkedUavCommonId != null && !this.linkedUavCommonId.isEmpty())
+                || (this.assignedUavUUID != null && !this.assignedUavUUID.isEmpty())) {
+              // A persisted identity means a real entity is authoritative even if its chunk
+              // has not finished loading. Spawning from the legacy JSON token here creates a
+              // second live UAV and lets registration order decide which one the station uses.
+              this.awaitingLoadedUav = true;
+              markLinkedUavUnloaded();
               return false;
           }
 
@@ -1151,8 +1193,14 @@ public class MCH_EntityUavStation
 
              private void controlLastAircraft(Entity user, boolean notify) {
 
+                 if(!this.worldObj.isRemote && !this.storedUavWasDestroyed && consumeConfirmedNewUavDestructionSignal()) {
+                     markLinkedNewUavDestroyed((MCH_EntityBaseVehicle)null);
+                 }
                  if(wasLinkedUavDestroyed()) {
                      this.pendingContinueTicks = 0;
+                     if(notify && user instanceof EntityPlayer) {
+                         W_EntityPlayer.addChatMessage((EntityPlayer)user, EnumChatFormatting.RED + "The linked drone was destroyed. Insert a new UAV item to launch again.");
+                     }
                      return;
                  }
                  if(!hasContinuableUavLink()) {
@@ -1212,6 +1260,12 @@ public class MCH_EntityUavStation
                      this.pendingContinueTicks = 0;
                  } else if (this.storedUavWasDestroyed) {
                      this.pendingContinueTicks = 0;
+                     if(notify && user instanceof EntityPlayer) {
+                         W_EntityPlayer.addChatMessage(
+                                 (EntityPlayer)user,
+                                 EnumChatFormatting.RED + "The linked drone was destroyed. Insert a new UAV item to launch again."
+                         );
+                     }
                  } else {
                      this.pendingContinueTicks = 60;
                      markLinkedUavUnloaded();
@@ -1287,9 +1341,6 @@ public class MCH_EntityUavStation
                    }
 
                 if (ac != null) {
-                    if(this.respawnStoredUavAtSavedPosition && this.linkedUavEntityUUID != null) {
-                        ((MCH_EntityBaseVehicle)ac).setUavPersistentUUID(this.linkedUavEntityUUID);
-                    }
                     MCH_EntityBaseVehicle linked = findLinkedUavEntity(this.worldObj);
                     if(linked != null && !linked.isDead && isValidLinkedUav(linked, user instanceof EntityPlayer ? (EntityPlayer)user : null)) {
                         MCH_Lib.Log((Entity)this, "Avoided spawning duplicate UAV from station %d; reusing linked UAV %d (%s)", new Object[] { Integer.valueOf(W_Entity.getEntityId((Entity)this)), Integer.valueOf(W_Entity.getEntityId((Entity)linked)), linked.getUavPersistentUUID() == null ? "" : linked.getUavPersistentUUID().toString() });
