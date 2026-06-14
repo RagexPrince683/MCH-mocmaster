@@ -729,13 +729,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       player.playerNetServerHandler.setPlayerLocation(
             this.posX, this.posY + this.getMountedYOffset(), this.posZ,
             this.rotationYaw, this.rotationPitch);
-      // setPlayerLocation changes the player's coordinates immediately, but the normal
-      // PlayerManager/EntityTracker passes do not run until later in the server tick. Run
-      // them now so the client receives this aircraft's spawn packet before its attach
-      // packet; otherwise the attach targets an unknown entity and creates a phantom seat.
-      WorldServer serverWorld = (WorldServer)super.worldObj;
-      serverWorld.getPlayerManager().updateMountedMovingPlayer(player);
-      serverWorld.getEntityTracker().updateTrackedEntities();
       player.mountEntity(this);
       if(player.ridingEntity == this && super.riddenByEntity == player) {
          this.lastRiddenByEntity = player;
