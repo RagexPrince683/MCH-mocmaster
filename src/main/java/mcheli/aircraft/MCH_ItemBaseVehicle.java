@@ -86,9 +86,9 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
       if (ac != null &&
               ac.isNewUAV()) {
-         lines.add(EnumChatFormatting.RED + "DANGER!");
-         lines.add(EnumChatFormatting.RED + "This drone has a new UAV mechanic!");
-         lines.add(EnumChatFormatting.RED + "It may contain a lot of bugs!");
+         lines.add(EnumChatFormatting.RED + "WARNING!");
+         lines.add(EnumChatFormatting.RED + "This drone has a new drone mechanic!");
+         lines.add(EnumChatFormatting.RED + "It may contain bugs, issues or edgecases!");
          lines.add(EnumChatFormatting.RED + "Clear your inventory before use!");
       }
 //
