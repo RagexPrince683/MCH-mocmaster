@@ -714,6 +714,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       this.setUavStation(station);
       this.lastRiddenByEntity = null;
+      if(!station.detachRiderForNewUavControl(player)) {
+         return false;
+      }
       player.mountEntity(this);
       if(player.ridingEntity == this && super.riddenByEntity == player) {
          this.lastRiddenByEntity = player;
@@ -725,7 +728,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       // A failed cross-chunk handoff must leave the operator at the station rather than
       // detached at the aircraft. The station can retry after entity synchronization.
-      if(player.ridingEntity != station) {
+      if(player.ridingEntity == null) {
          player.mountEntity(station);
       }
       return false;
