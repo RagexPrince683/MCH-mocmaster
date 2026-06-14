@@ -1156,6 +1156,24 @@ public class MCH_EntityUavStation
            return true;
          }
 
+      public void clearNewUavReturnState(EntityPlayerMP player) {
+           if(this.worldObj.isRemote) {
+                return;
+           }
+           if(this.riddenByEntity == player) {
+                this.riddenByEntity = null;
+           }
+           if(this.lastRiddenByEntity == player) {
+                this.lastRiddenByEntity = null;
+           }
+           this.controlAircraft = null;
+           setLastControlAircraft((MCH_EntityBaseVehicle)null);
+           setLastControlAircraftEntityId(0);
+           setNewUavPilotProfile((EntityPlayer)null);
+           this.pendingContinueTicks = 0;
+           releaseReconnectChunks("new-uav-return");
+      }
+
       private void updateNewUavPilotProfile() {
            Entity pilot = this.controlAircraft != null && this.controlAircraft.isNewUAV()
                  ? this.controlAircraft.getRiddenByEntity() : null;

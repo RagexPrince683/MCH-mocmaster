@@ -260,6 +260,7 @@ public class MCH_EventHook extends W_EventHook {
    @SubscribeEvent
    public void onPlayerTick(TickEvent.PlayerTickEvent event) {
       if(event.phase == TickEvent.Phase.END && event.player instanceof EntityPlayerMP && !event.player.worldObj.isRemote) {
+         MCH_EntityBaseVehicle.updateNewUavSafeReturn((EntityPlayerMP)event.player);
          if(MCH_UavInventory.hasStoredPilotInventory(event.player) && !(event.player.ridingEntity instanceof MCH_EntityBaseVehicle)) {
             MCH_UavInventory.restorePilotInventory((EntityPlayerMP)event.player, "not_piloting");
          }
