@@ -115,7 +115,7 @@ public final class MCH_UavRegistry {
     }
 
     private static MCH_EntityBaseVehicle getLive(MCH_EntityBaseVehicle ac, World world) {
-        if (isValidUav(ac) && (world == null || (ac.worldObj == world && world.loadedEntityList.contains(ac)))) {
+        if (isValidUav(ac) && (world == null || ac.worldObj == world)) {
             return ac;
         }
         unregister(ac);

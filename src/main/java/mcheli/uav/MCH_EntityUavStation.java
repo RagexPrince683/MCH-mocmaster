@@ -742,25 +742,15 @@ public class MCH_EntityUavStation
          }
 
       public MCH_EntityBaseVehicle findLinkedUavEntity(World world) {
-           return findLinkedUavEntity(world, true);
-         }
-
-      private MCH_EntityBaseVehicle findLinkedUavEntity(World world, boolean loadChunk) {
-           if(isLoadedInWorld(world, this.assignedUav)) {
+           if(this.assignedUav != null && !this.assignedUav.isDead) {
                 return this.assignedUav;
            }
-           // Entity instances remain alive while their chunk is unloaded, so the runtime
-           // references and registry can still point at an object that cannot be tracked or
-           // mounted. Load the saved chunk before resolving the link again.
-           if(loadChunk) {
-                loadLinkedUavChunk(world);
-           }
            MCH_EntityBaseVehicle ac = MCH_UavRegistry.findLinkedUav(world, this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
+           if(ac == null) {
+                loadLinkedUavChunk(world);
+                ac = MCH_UavRegistry.findLinkedUav(world, this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
+           }
            return ac;
-         }
-
-      private boolean isLoadedInWorld(World world, MCH_EntityBaseVehicle ac) {
-           return world != null && ac != null && !ac.isDead && ac.worldObj == world && world.loadedEntityList.contains(ac);
          }
 
       private void loadLinkedUavChunk(World world) {
@@ -773,7 +763,7 @@ public class MCH_EntityUavStation
          }
 
       private boolean relinkStoredUav(boolean requireLoaded) {
-           MCH_EntityBaseVehicle ac = findLinkedUavEntity(this.worldObj, requireLoaded);
+           MCH_EntityBaseVehicle ac = findLinkedUavEntity(this.worldObj);
            if(ac != null && !ac.isDead && linkUav(ac)) {
                 setLastControlAircraft(ac);
                 setLastControlAircraftEntityId(W_Entity.getEntityId((Entity)ac));
@@ -1200,7 +1190,7 @@ public class MCH_EntityUavStation
                      return;
                  }
                  MCH_EntityBaseVehicle lastAc = getAndSearchLastControlAircraft();
-                 if (lastAc == null && relinkStoredUav(true)) {
+                 if (lastAc == null && relinkStoredUav(false)) {
                      lastAc = getLastControlAircraft();
                  }
                  if (lastAc != null && !lastAc.isDead) {
