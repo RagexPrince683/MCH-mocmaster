@@ -747,9 +747,11 @@ public class MCH_EntityUavStation
          }
 
       public MCH_EntityBaseVehicle findLinkedUavEntity(World world) {
-           if(this.assignedUav != null && !this.assignedUav.isDead) {
+           if(this.assignedUav != null && !this.assignedUav.isDead
+                 && MCH_UavRegistry.isPresentInLoadedEntityList(world, this.assignedUav)) {
                 return this.assignedUav;
            }
+           this.assignedUav = null;
            MCH_EntityBaseVehicle ac = MCH_UavRegistry.findLinkedUav(world, this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
            if(ac == null) {
                 loadLinkedUavChunk(world);
@@ -765,7 +767,11 @@ public class MCH_EntityUavStation
                 return false;
            }
 
-           releaseReconnectChunks("replace");
+           if(this.reconnectChunkTicket != null && this.reconnectUavChunk != null) {
+                this.worldObj.getChunkFromChunkCoords(this.reconnectUavChunk.chunkXPos, this.reconnectUavChunk.chunkZPos);
+                logReconnect("chunks-already-pinned", player, null);
+                return true;
+           }
            this.reconnectChunkTicket = ForgeChunkManager.requestTicket(MCH_MOD.instance, this.worldObj, ForgeChunkManager.Type.NORMAL);
            if(this.reconnectChunkTicket == null) {
                 logReconnect("ticket-unavailable", player, null);
@@ -807,7 +813,7 @@ public class MCH_EntityUavStation
       private void logReconnect(String step, EntityPlayerMP player, MCH_EntityBaseVehicle resolved) {
            Entity riding = player == null ? null : player.ridingEntity;
            MCH_Lib.Log((Entity)this,
-                 "[UAV-RECONNECT] step=%s station=(%.2f,%.2f,%.2f) uavUuid=%s uavDim=%d uavChunk=(%d,%d) stationLoaded=%s uavLoaded=%s riding=%s resolved=%s playerPos=%s finalMount=%s stationControl=%s",
+                 "[UAV-RECONNECT] step=%s station=(%.2f,%.2f,%.2f) uavUuid=%s uavDim=%d uavChunk=(%d,%d) stationLoaded=%s uavLoaded=%s loadedEntityList=%s riding=%s resolved=%s playerPos=%s finalMount=%s stationControl=%s",
                  new Object[] {
                        step, Double.valueOf(this.posX), Double.valueOf(this.posY), Double.valueOf(this.posZ),
                        this.linkedUavEntityUUID == null ? this.assignedUavUUID : this.linkedUavEntityUUID.toString(),
@@ -816,6 +822,7 @@ public class MCH_EntityUavStation
                        Integer.valueOf(MathHelper.floor_double(this.linkedUavZ) >> 4),
                        Boolean.valueOf(isChunkLoaded(this.reconnectStationChunk)),
                        Boolean.valueOf(isChunkLoaded(this.reconnectUavChunk)),
+                       Boolean.valueOf(MCH_UavRegistry.isPresentInLoadedEntityList(this.worldObj, resolved)),
                        riding == null ? "null" : riding.getClass().getSimpleName() + "#" + riding.getEntityId(),
                        resolved == null ? "null" : resolved.getClass().getSimpleName() + "#" + resolved.getEntityId() + "/dead=" + resolved.isDead,
                        player == null ? "null" : String.format("(%.2f,%.2f,%.2f)", player.posX, player.posY, player.posZ),
@@ -1076,14 +1083,21 @@ public class MCH_EntityUavStation
                 return false;
            }
            boolean attached = false;
+           boolean releaseTicket = false;
            try {
                 // Resolve only after both temporary tickets are active and both chunks have
                 // been synchronously requested from the server chunk provider.
-                MCH_EntityBaseVehicle resolved = MCH_UavRegistry.findLinkedUav(this.worldObj,
-                      this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
+                MCH_EntityBaseVehicle resolved = MCH_UavRegistry.findLoadedByUuid(this.worldObj,
+                      this.linkedUavEntityUUID);
                 logReconnect("resolved", player, resolved);
                 if(resolved == null || resolved.isDead || resolved.isDestroyed()
-                      || !isValidLinkedUav(resolved, player) || !linkUav(resolved)) {
+                      || resolved.ticksExisted < 10
+                      || !MCH_UavRegistry.isPresentInLoadedEntityList(this.worldObj, resolved)) {
+                     logReconnect("resolve-pending", player, resolved);
+                     return false;
+                }
+                if(!isValidLinkedUav(resolved, player) || !linkUav(resolved)) {
+                     releaseTicket = true;
                      restorePlayerAtStation(player, ac, "invalid-uav");
                      return false;
                 }
@@ -1113,9 +1127,12 @@ public class MCH_EntityUavStation
                 setNewUavPilotProfile(player);
                 W_EntityPlayer.closeScreen(player);
                 logReconnect("complete", player, resolved);
+                releaseTicket = true;
                 return true;
            } finally {
-                releaseReconnectChunks(attached ? "transfer-complete" : "transfer-failed");
+                if(releaseTicket || attached) {
+                     releaseReconnectChunks(attached ? "transfer-complete" : "transfer-rejected");
+                }
            }
       }
 
@@ -1271,6 +1288,7 @@ public class MCH_EntityUavStation
                                       }
                                 }
                             if (this.riddenByEntity.isDead) {
+                                  releaseReconnectChunks("rider-dead");
                                   unmountEntity(true);
                                   this.riddenByEntity = null;
                                 } else {
@@ -1282,6 +1300,10 @@ public class MCH_EntityUavStation
                                             }
                                       }
                                 }
+                          }
+                      else if(this.reconnectChunkTicket != null) {
+                            this.pendingContinueTicks = 0;
+                            releaseReconnectChunks("rider-left-station");
                           }
 
                       if (getLastControlAircraft() == null && this.ticksExisted % 40 == 0) {
@@ -1334,6 +1356,17 @@ public class MCH_EntityUavStation
                      return;
                  }
                  MCH_EntityBaseVehicle lastAc = getAndSearchLastControlAircraft();
+                 if(lastAc == null && user instanceof EntityPlayerMP && this.linkedUavEntityUUID != null) {
+                     EntityPlayerMP player = (EntityPlayerMP)user;
+                     logReconnect("continue-resolve-begin", player, null);
+                     if(pinReconnectChunks(player)) {
+                         lastAc = MCH_UavRegistry.findLoadedByUuid(this.worldObj, this.linkedUavEntityUUID);
+                         logReconnect("continue-resolve-result", player, lastAc);
+                         if(lastAc != null && linkUav(lastAc)) {
+                             setLastControlAircraft(lastAc);
+                         }
+                     }
+                 }
                  if (lastAc == null && relinkStoredUav(false)) {
                      lastAc = getLastControlAircraft();
                  }
