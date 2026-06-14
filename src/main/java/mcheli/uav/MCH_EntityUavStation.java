@@ -1281,20 +1281,27 @@ public class MCH_EntityUavStation
                       this.motionZ = 0.0D;
                       setRotation(this.rotationYaw, this.rotationPitch);
                       if (this.riddenByEntity != null) {
+                            Entity stationRider = this.riddenByEntity;
                             if (this.pendingContinueTicks > 0) {
                                   --this.pendingContinueTicks;
                                   if(this.pendingContinueTicks % 10 == 0) {
-                                        controlLastAircraft(this.riddenByEntity, false);
+                                        controlLastAircraft(stationRider, false);
                                       }
                                 }
-                            if (this.riddenByEntity.isDead) {
+                            // Continue can transfer stationRider to the UAV and clear
+                            // riddenByEntity inside controlLastAircraft. Do not process the
+                            // transferred player as though they were still on the station.
+                            if(this.riddenByEntity != stationRider) {
+                                  return;
+                                }
+                            if (stationRider.isDead) {
                                   releaseReconnectChunks("rider-dead");
                                   unmountEntity(true);
                                   this.riddenByEntity = null;
                                 } else {
                                   ItemStack item = getStackInSlot(0);
                                   if (item != null && item.stackSize > 0 && !hasContinuableUavLink()) {
-                                        handleItem(this.riddenByEntity, item);
+                                        handleItem(stationRider, item);
                                         if (item.stackSize == 0) {
                                               setInventorySlotContents(0, (ItemStack)null);
                                             }
