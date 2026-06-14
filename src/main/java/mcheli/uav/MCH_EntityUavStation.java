@@ -39,7 +39,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.*;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeChunkManager;
 
 public class MCH_EntityUavStation
            extends W_EntityContainer
@@ -86,6 +88,9 @@ public class MCH_EntityUavStation
       private boolean respawnStoredUavAtSavedPosition;
       private boolean awaitingLoadedUav;
       private int pendingContinueTicks;
+      private ForgeChunkManager.Ticket reconnectChunkTicket;
+      private ChunkCoordIntPair reconnectStationChunk;
+      private ChunkCoordIntPair reconnectUavChunk;
 
       private boolean storedUavWasDestroyed;
 
@@ -753,6 +758,95 @@ public class MCH_EntityUavStation
            return ac;
          }
 
+      private boolean pinReconnectChunks(EntityPlayerMP player) {
+           if(this.worldObj == null || this.worldObj.isRemote || this.linkedUavDimension != this.dimension
+                 || !isUsableUavPosition(this.linkedUavX, this.linkedUavY, this.linkedUavZ)) {
+                logReconnect("pin-rejected", player, null);
+                return false;
+           }
+
+           releaseReconnectChunks("replace");
+           this.reconnectChunkTicket = ForgeChunkManager.requestTicket(MCH_MOD.instance, this.worldObj, ForgeChunkManager.Type.NORMAL);
+           if(this.reconnectChunkTicket == null) {
+                logReconnect("ticket-unavailable", player, null);
+                return false;
+           }
+
+           this.reconnectStationChunk = new ChunkCoordIntPair(MathHelper.floor_double(this.posX) >> 4,
+                 MathHelper.floor_double(this.posZ) >> 4);
+           this.reconnectUavChunk = new ChunkCoordIntPair(MathHelper.floor_double(this.linkedUavX) >> 4,
+                 MathHelper.floor_double(this.linkedUavZ) >> 4);
+           ForgeChunkManager.forceChunk(this.reconnectChunkTicket, this.reconnectStationChunk);
+           ForgeChunkManager.forceChunk(this.reconnectChunkTicket, this.reconnectUavChunk);
+           this.worldObj.getChunkFromChunkCoords(this.reconnectStationChunk.chunkXPos, this.reconnectStationChunk.chunkZPos);
+           this.worldObj.getChunkFromChunkCoords(this.reconnectUavChunk.chunkXPos, this.reconnectUavChunk.chunkZPos);
+           logReconnect("chunks-pinned", player, null);
+           return true;
+      }
+
+      private void releaseReconnectChunks(String reason) {
+           if(this.reconnectChunkTicket != null) {
+                if(this.reconnectStationChunk != null) {
+                     ForgeChunkManager.unforceChunk(this.reconnectChunkTicket, this.reconnectStationChunk);
+                }
+                if(this.reconnectUavChunk != null && !this.reconnectUavChunk.equals(this.reconnectStationChunk)) {
+                     ForgeChunkManager.unforceChunk(this.reconnectChunkTicket, this.reconnectUavChunk);
+                }
+                ForgeChunkManager.releaseTicket(this.reconnectChunkTicket);
+                MCH_Lib.Log((Entity)this, "[UAV-RECONNECT] step=chunks-released reason=%s", new Object[] { reason });
+           }
+           this.reconnectChunkTicket = null;
+           this.reconnectStationChunk = null;
+           this.reconnectUavChunk = null;
+      }
+
+      private boolean isChunkLoaded(ChunkCoordIntPair chunk) {
+           return chunk != null && this.worldObj.getChunkProvider().chunkExists(chunk.chunkXPos, chunk.chunkZPos);
+      }
+
+      private void logReconnect(String step, EntityPlayerMP player, MCH_EntityBaseVehicle resolved) {
+           Entity riding = player == null ? null : player.ridingEntity;
+           MCH_Lib.Log((Entity)this,
+                 "[UAV-RECONNECT] step=%s station=(%.2f,%.2f,%.2f) uavUuid=%s uavDim=%d uavChunk=(%d,%d) stationLoaded=%s uavLoaded=%s riding=%s resolved=%s playerPos=%s finalMount=%s stationControl=%s",
+                 new Object[] {
+                       step, Double.valueOf(this.posX), Double.valueOf(this.posY), Double.valueOf(this.posZ),
+                       this.linkedUavEntityUUID == null ? this.assignedUavUUID : this.linkedUavEntityUUID.toString(),
+                       Integer.valueOf(this.linkedUavDimension),
+                       Integer.valueOf(MathHelper.floor_double(this.linkedUavX) >> 4),
+                       Integer.valueOf(MathHelper.floor_double(this.linkedUavZ) >> 4),
+                       Boolean.valueOf(isChunkLoaded(this.reconnectStationChunk)),
+                       Boolean.valueOf(isChunkLoaded(this.reconnectUavChunk)),
+                       riding == null ? "null" : riding.getClass().getSimpleName() + "#" + riding.getEntityId(),
+                       resolved == null ? "null" : resolved.getClass().getSimpleName() + "#" + resolved.getEntityId() + "/dead=" + resolved.isDead,
+                       player == null ? "null" : String.format("(%.2f,%.2f,%.2f)", player.posX, player.posY, player.posZ),
+                       Boolean.valueOf(player != null && resolved != null && player.ridingEntity == resolved
+                             && resolved.getRiddenByEntity() == player),
+                       this.controlAircraft == null ? "null" : this.controlAircraft.getClass().getSimpleName() + "#" + this.controlAircraft.getEntityId()
+                 });
+      }
+
+      private void restorePlayerAtStation(EntityPlayerMP player, MCH_EntityBaseVehicle ac, String reason) {
+           if(player == null) {
+                return;
+           }
+           if(player.ridingEntity != null && player.ridingEntity != this) {
+                player.mountEntity((Entity)null);
+           }
+           this.riddenByEntity = null;
+           this.lastRiddenByEntity = null;
+           double x = this.posX - Math.sin(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
+           double z = this.posZ + Math.cos(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
+           player.setPositionAndUpdate(x, this.posY + getMountedYOffset() + player.getYOffset(), z);
+           player.mountEntity(this);
+           if(player.ridingEntity == this) {
+                this.riddenByEntity = player;
+                this.lastRiddenByEntity = player;
+                setControlAircract(ac);
+           }
+           player.fallDistance = 0.0F;
+           logReconnect("rollback-" + reason, player, ac);
+      }
+
       private void loadLinkedUavChunk(World world) {
            if(world == null || world.isRemote || (this.linkedUavX == 0.0D && this.linkedUavY == 0.0D && this.linkedUavZ == 0.0D)) {
                 return;
@@ -977,24 +1071,53 @@ public class MCH_EntityUavStation
                 return false;
            }
            EntityPlayerMP player = (EntityPlayerMP)user;
-           if(!linkUav(ac)) {
+           logReconnect("begin", player, null);
+           if(!pinReconnectChunks(player)) {
                 return false;
            }
-           setControlAircract(ac);
-           if(this.controlAircraft != ac) {
-                return false;
+           boolean attached = false;
+           try {
+                // Resolve only after both temporary tickets are active and both chunks have
+                // been synchronously requested from the server chunk provider.
+                MCH_EntityBaseVehicle resolved = MCH_UavRegistry.findLinkedUav(this.worldObj,
+                      this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
+                logReconnect("resolved", player, resolved);
+                if(resolved == null || resolved.isDead || resolved.isDestroyed()
+                      || !isValidLinkedUav(resolved, player) || !linkUav(resolved)) {
+                     restorePlayerAtStation(player, ac, "invalid-uav");
+                     return false;
+                }
+
+                // Clear every station-side control/rider cache before direct NewUAV control
+                // is applied. The station link itself remains persisted for future returns.
+                this.controlAircraft = null;
+                setLastControlAircraft((MCH_EntityBaseVehicle)null);
+                setLastControlAircraftEntityId(-1);
+                setNewUavPilotProfile((EntityPlayer)null);
+                logReconnect("station-state-cleared", player, resolved);
+
+                if(!resolved.mountNewUavPilot(player, this)) {
+                     restorePlayerAtStation(player, resolved, "mount-failed");
+                     return false;
+                }
+                attached = player.ridingEntity == resolved && resolved.getRiddenByEntity() == player
+                      && this.riddenByEntity == null;
+                logReconnect("mount-applied", player, resolved);
+                if(!attached) {
+                     restorePlayerAtStation(player, resolved, "mount-not-confirmed");
+                     return false;
+                }
+
+                this.pendingContinueTicks = 0;
+                this.lastRiddenByEntity = null;
+                setNewUavPilotProfile(player);
+                W_EntityPlayer.closeScreen(player);
+                logReconnect("complete", player, resolved);
+                return true;
+           } finally {
+                releaseReconnectChunks(attached ? "transfer-complete" : "transfer-failed");
            }
-           if(!ac.mountNewUavPilot(player, this)) {
-                MCH_Lib.Log((Entity)this, "New UAV control handoff for player %s is not ready; keeping the player at station %d", new Object[] {
-                      player.getCommandSenderName(), Integer.valueOf(W_Entity.getEntityId((Entity)this)) });
-                return false;
-           }
-           this.pendingContinueTicks = 0;
-           this.lastRiddenByEntity = null;
-           setNewUavPilotProfile(player);
-           W_EntityPlayer.closeScreen(player);
-           return true;
-         }
+      }
 
       public boolean detachRiderForNewUavControl(EntityPlayerMP player) {
            if(this.worldObj.isRemote || player == null || this.riddenByEntity != player
