@@ -76,6 +76,29 @@ public final class MCH_UavRegistry {
         return findLinkedUav(world, null, null, owner);
     }
 
+    public static MCH_EntityBaseVehicle findLoadedByUuid(World world, UUID uuid) {
+        if (world == null || uuid == null) {
+            return null;
+        }
+        List list = world.loadedEntityList;
+        for (int i = 0; i < list.size(); ++i) {
+            Object obj = list.get(i);
+            if (obj instanceof MCH_EntityBaseVehicle) {
+                MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)obj;
+                UUID persistentId = ac.getUavPersistentUUID(false);
+                if (isValidUav(ac) && (uuid.equals(ac.getUniqueID()) || uuid.equals(persistentId))) {
+                    register(ac);
+                    return ac;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static boolean isPresentInLoadedEntityList(World world, Entity entity) {
+        return world != null && entity != null && world.loadedEntityList.contains(entity);
+    }
+
     public static void rebuildUavRegistry(World world) {
         if (world == null) return;
         searchLoaded(world, null, null, null);
@@ -115,7 +138,8 @@ public final class MCH_UavRegistry {
     }
 
     private static MCH_EntityBaseVehicle getLive(MCH_EntityBaseVehicle ac, World world) {
-        if (isValidUav(ac) && (world == null || ac.worldObj == world)) {
+        if (isValidUav(ac) && (world == null || ac.worldObj == world)
+                && (world == null || isPresentInLoadedEntityList(world, ac))) {
             return ac;
         }
         unregister(ac);
