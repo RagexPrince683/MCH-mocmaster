@@ -717,6 +717,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(!station.detachRiderForNewUavControl(player)) {
          return false;
       }
+      // Move the server-authoritative player into the pinned UAV chunk before applying
+      // the direct mount. This prevents UAV controls from becoming active while the
+      // player's physical position and chunk tracking are still at the station.
+      player.setPositionAndUpdate(this.posX, this.posY + this.getMountedYOffset(), this.posZ);
       player.mountEntity(this);
       if(player.ridingEntity == this && super.riddenByEntity == player) {
          this.lastRiddenByEntity = player;
