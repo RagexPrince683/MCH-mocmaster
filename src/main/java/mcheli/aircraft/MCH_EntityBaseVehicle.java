@@ -714,21 +714,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       this.setUavStation(station);
       this.lastRiddenByEntity = null;
-      double stationX = station.posX;
-      double stationY = station.posY + station.getMountedYOffset() + player.getYOffset();
-      double stationZ = station.posZ;
-      float stationYaw = player.rotationYaw;
-      float stationPitch = player.rotationPitch;
-
-      // Move the server-side player into the UAV's loaded chunk before attaching it. A
-      // cross-chunk mount by itself does not update PlayerManager/tracking soon enough, so
-      // the client can remain at the station until the next login even though the server has
-      // linked the rider. Detaching and teleporting first makes the aircraft trackable before
-      // the mount packet is sent, while all steps still occur in this Continue request.
-      player.mountEntity((Entity)null);
-      player.playerNetServerHandler.setPlayerLocation(
-            this.posX, this.posY + this.getMountedYOffset(), this.posZ,
-            this.rotationYaw, this.rotationPitch);
       player.mountEntity(this);
       if(player.ridingEntity == this && super.riddenByEntity == player) {
          this.lastRiddenByEntity = player;
@@ -738,11 +723,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          return true;
       }
 
-      // Roll back the entire transfer if attachment fails; never leave the player detached
-      // in either chunk while the station retries the Continue request.
-      player.mountEntity((Entity)null);
-      player.playerNetServerHandler.setPlayerLocation(stationX, stationY, stationZ, stationYaw, stationPitch);
-      player.mountEntity(station);
+      // A failed cross-chunk handoff must leave the operator at the station rather than
+      // detached at the aircraft. The station can retry after entity synchronization.
+      if(player.ridingEntity != station) {
+         player.mountEntity(station);
+      }
       return false;
    }
 
