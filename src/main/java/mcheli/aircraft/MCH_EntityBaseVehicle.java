@@ -908,15 +908,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
 
       if(!super.worldObj.isRemote && this.isNewUAV()) {
-         if(this.linkedUavStationUUID != null) {
-            MCH_UavJsonStore.signalDestroyed(super.worldObj, this.linkedUavStationDimension, this.linkedUavStationX, this.linkedUavStationY, this.linkedUavStationZ);
-         }
-         MCH_EntityUavStation station = resolveLinkedUavStation();
-         if(station != null) {
-            station.markLinkedNewUavDestroyed(this);
-         } else if(this.linkedUavStationUUID != null) {
-            MCH_Lib.Log((Entity)this, "Destroyed New UAV could not resolve station %s at %.2f, %.2f, %.2f; queued station destruction state", new Object[] { this.linkedUavStationUUID.toString(), Double.valueOf(this.linkedUavStationX), Double.valueOf(this.linkedUavStationY), Double.valueOf(this.linkedUavStationZ) });
-         }
+         notifyLinkedStationNewUavRemoved();
       }
 
       this.rotDestroyedPitch = super.rand.nextFloat() - 0.5F;
@@ -5496,6 +5488,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public void setDead(boolean dropItems) {
       if(!super.worldObj.isRemote && this.isNewUAV() && !this.newUavShiftExitInProgress) {
+         notifyLinkedStationNewUavRemoved();
          Entity pilot = super.riddenByEntity != null ? super.riddenByEntity : this.lastRiddenByEntity;
          if(pilot != null) {
             this.returnNewUavPilotToStation(pilot, "uav_destroyed");
@@ -5542,6 +5535,18 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
 
       MCH_Lib.DbgLog(super.worldObj, "setDead:" + (this.getAcInfo() != null?this.getAcInfo().name:"null"), new Object[0]);
+   }
+
+   private void notifyLinkedStationNewUavRemoved() {
+      if(this.linkedUavStationUUID != null) {
+         MCH_UavJsonStore.signalDestroyed(super.worldObj, this.linkedUavStationDimension, this.linkedUavStationX, this.linkedUavStationY, this.linkedUavStationZ);
+      }
+      MCH_EntityUavStation station = resolveLinkedUavStation();
+      if(station != null) {
+         station.markLinkedNewUavDestroyed(this);
+      } else if(this.linkedUavStationUUID != null) {
+         MCH_Lib.Log((Entity)this, "Removed New UAV could not resolve station %s at %.2f, %.2f, %.2f; queued station destruction state", new Object[] { this.linkedUavStationUUID.toString(), Double.valueOf(this.linkedUavStationX), Double.valueOf(this.linkedUavStationY), Double.valueOf(this.linkedUavStationZ) });
+      }
    }
 
    public void discardDuplicateUav() {
