@@ -276,26 +276,6 @@ public class MCH_EntityUavStation
            return this.storedUavWasDestroyed || getContinuationState() == CONTINUE_DESTROYED;
          }
 
-      private boolean consumeConfirmedNewUavDestructionSignal() {
-           if(!MCH_UavJsonStore.consumeDestroyed(this.worldObj, this)) {
-                return false;
-           }
-
-           MCH_EntityBaseVehicle linked = getAndSearchLastControlAircraft();
-           if(linked == null) {
-                linked = findLinkedUavEntity(this.worldObj);
-           }
-           if(linked != null && !linked.isDead && !linked.isDestroyed()) {
-                MCH_Lib.Log((Entity)this, "Ignored stale New UAV destruction signal because linked UAV %d is still alive", new Object[] {
-                      Integer.valueOf(W_Entity.getEntityId((Entity)linked))
-                });
-                linkUav(linked);
-                setControlAircract(linked);
-                return false;
-           }
-           return true;
-         }
-
       private byte getContinuationState() {
            return getDataWatcher().getWatchableObjectByte(DATAWT_ID_CONTINUE_STATE);
          }
@@ -661,8 +641,8 @@ public class MCH_EntityUavStation
            this.prevPosZ = this.posZ;
            if(!this.worldObj.isRemote && this.ticksExisted % 10 == 0 && !this.storedUavWasDestroyed &&
               (this.hasStoredUavLink || getContinuationState() == CONTINUE_AVAILABLE) &&
-              consumeConfirmedNewUavDestructionSignal()) {
-                MCH_Lib.Log((Entity)this, "Consumed confirmed out-of-range New UAV destruction signal; disabling Continue", new Object[0]);
+              MCH_UavJsonStore.consumeDestroyed(this.worldObj, this)) {
+                MCH_Lib.Log((Entity)this, "Consumed out-of-range New UAV destruction signal; disabling Continue", new Object[0]);
                 markLinkedNewUavDestroyed((MCH_EntityBaseVehicle)null);
            }
            if (getControlAircract() != null && getControlAircract().isDestroyed()) {
@@ -1193,7 +1173,7 @@ public class MCH_EntityUavStation
 
              private void controlLastAircraft(Entity user, boolean notify) {
 
-                 if(!this.worldObj.isRemote && !this.storedUavWasDestroyed && consumeConfirmedNewUavDestructionSignal()) {
+                 if(!this.worldObj.isRemote && !this.storedUavWasDestroyed && MCH_UavJsonStore.consumeDestroyed(this.worldObj, this)) {
                      markLinkedNewUavDestroyed((MCH_EntityBaseVehicle)null);
                  }
                  if(wasLinkedUavDestroyed()) {
