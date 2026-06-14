@@ -1091,7 +1091,6 @@ public class MCH_EntityUavStation
                       this.linkedUavEntityUUID);
                 logReconnect("resolved", player, resolved);
                 if(resolved == null || resolved.isDead || resolved.isDestroyed()
-                      || resolved.ticksExisted < 10
                       || !MCH_UavRegistry.isPresentInLoadedEntityList(this.worldObj, resolved)) {
                      logReconnect("resolve-pending", player, resolved);
                      return false;
@@ -1188,13 +1187,6 @@ public class MCH_EntityUavStation
                 return null;
               }
            return new GameProfile(parseUavUUID(uuid), name);
-         }
-
-
-      private void notifyInitialUavStateOnce(EntityPlayerMP player, MCH_EntityBaseVehicle ac) {
-           if(player != null && ac != null && ac.isNewUAV() && ac.ticksExisted < 40) {
-                W_EntityPlayer.addChatMessage(player, "UAV is initializing and cannot move yet. You can still reload/resupply it from the station or your inventory.");
-           }
          }
 
       public boolean transferAmmoToLinkedUav(EntityPlayerMP player) {
@@ -1396,25 +1388,14 @@ public class MCH_EntityUavStation
                          if(this.riddenByEntity instanceof EntityPlayerMP) {
                              EntityPlayerMP player = (EntityPlayerMP)this.riddenByEntity;
                              transferAmmoToLinkedUav(player);
-                             notifyInitialUavStateOnce(player, lastAc);
                          }
                      }
 
                      if (this.controlAircraft != null &&
                              this.controlAircraft.getAcInfo() != null &&
                              this.controlAircraft.getAcInfo().isNewUAV) {
-                         if(this.controlAircraft.ticksExisted < 10) {
-                             this.pendingContinueTicks = 60;
-                             if(notify && user instanceof EntityPlayer) {
-                                 W_EntityPlayer.addChatMessage((EntityPlayer)user, "Linked UAV loaded; waiting for entity initialization before taking control.");
-                             }
-                             return;
-                         }
                          if(!startNewUavControl(user, this.controlAircraft)) {
                              this.pendingContinueTicks = 60;
-                             if(notify && user instanceof EntityPlayer) {
-                                 W_EntityPlayer.addChatMessage((EntityPlayer)user, "UAV control is synchronizing; continue will retry.");
-                             }
                              return;
                          }
                      }
@@ -1433,9 +1414,6 @@ public class MCH_EntityUavStation
                  } else {
                      this.pendingContinueTicks = 60;
                      markLinkedUavUnloaded();
-                     if(notify && user instanceof EntityPlayer) {
-                         W_EntityPlayer.addChatMessage((EntityPlayer)user, "Linked UAV chunk is loading; continue will retry shortly.");
-                     }
                  }
 
              }
