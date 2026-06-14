@@ -282,6 +282,14 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    private boolean hasLinkedUavStationPosition;
    private int newUavMountSyncTicks;
+   private EntityPlayerMP pendingNewUavPilot;
+   private MCH_EntityUavStation pendingNewUavStation;
+   private int pendingNewUavMountTicks;
+   private double pendingNewUavReturnX;
+   private double pendingNewUavReturnY;
+   private double pendingNewUavReturnZ;
+   private float pendingNewUavReturnYaw;
+   private float pendingNewUavReturnPitch;
    private boolean newUavShiftExitInProgress;
 
    private final Set<ChunkCoordinates> activeLights = new HashSet<>();
@@ -714,43 +722,54 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       this.setUavStation(station);
       this.lastRiddenByEntity = null;
-      double stationX = station.posX;
-      double stationY = station.posY + station.getMountedYOffset() + player.getYOffset();
-      double stationZ = station.posZ;
-      float stationYaw = player.rotationYaw;
-      float stationPitch = player.rotationPitch;
+      this.pendingNewUavPilot = player;
+      this.pendingNewUavStation = station;
+      this.pendingNewUavMountTicks = 1;
+      this.pendingNewUavReturnX = station.posX;
+      this.pendingNewUavReturnY = station.posY + station.getMountedYOffset() + player.getYOffset();
+      this.pendingNewUavReturnZ = station.posZ;
+      this.pendingNewUavReturnYaw = player.rotationYaw;
+      this.pendingNewUavReturnPitch = player.rotationPitch;
 
-      // Move the server-side player into the UAV's loaded chunk before attaching it. A
-      // cross-chunk mount by itself does not update PlayerManager/tracking soon enough, so
-      // the client can remain at the station until the next login even though the server has
-      // linked the rider. Detaching and teleporting first makes the aircraft trackable before
-      // the mount packet is sent, while all steps still occur in this Continue request.
+      // Move first, then let the normal server tick update chunk watches and spawn the UAV
+      // client-side before sending the mount relationship on the aircraft's next update.
       player.mountEntity((Entity)null);
       player.playerNetServerHandler.setPlayerLocation(
             this.posX, this.posY + this.getMountedYOffset(), this.posZ,
             this.rotationYaw, this.rotationPitch);
-      // setPlayerLocation changes the player's coordinates immediately, but the normal
-      // PlayerManager/EntityTracker passes do not run until later in the server tick. Run
-      // them now so the client receives this aircraft's spawn packet before its attach
-      // packet; otherwise the attach targets an unknown entity and creates a phantom seat.
-      WorldServer serverWorld = (WorldServer)super.worldObj;
-      serverWorld.getPlayerManager().updateMountedMovingPlayer(player);
-      serverWorld.getEntityTracker().updateTrackedEntities();
-      player.mountEntity(this);
-      if(player.ridingEntity == this && super.riddenByEntity == player) {
-         this.lastRiddenByEntity = player;
-         this.newUavMountSyncTicks = 40;
-         player.fallDistance = 0.0F;
-         this.syncCompleteAircraftState(player);
-         return true;
+      return true;
+   }
+
+   private void updatePendingNewUavMount() {
+      if(super.worldObj.isRemote || this.pendingNewUavPilot == null) {
+         return;
+      }
+      if(this.pendingNewUavMountTicks-- > 0) {
+         return;
+      }
+      EntityPlayerMP player = this.pendingNewUavPilot;
+      MCH_EntityUavStation station = this.pendingNewUavStation;
+      this.pendingNewUavPilot = null;
+      this.pendingNewUavStation = null;
+      if(!player.isDead && !this.isDead && !this.isDestroyed() && station != null
+            && !station.isDead && this.isLinkedToStation(station)) {
+         player.mountEntity(this);
+         if(player.ridingEntity == this && super.riddenByEntity == player) {
+            this.lastRiddenByEntity = player;
+            this.newUavMountSyncTicks = 40;
+            player.fallDistance = 0.0F;
+            this.syncCompleteAircraftState(player);
+            return;
+         }
       }
 
-      // Roll back the entire transfer if attachment fails; never leave the player detached
-      // in either chunk while the station retries the Continue request.
       player.mountEntity((Entity)null);
-      player.playerNetServerHandler.setPlayerLocation(stationX, stationY, stationZ, stationYaw, stationPitch);
-      player.mountEntity(station);
-      return false;
+      player.playerNetServerHandler.setPlayerLocation(
+            this.pendingNewUavReturnX, this.pendingNewUavReturnY, this.pendingNewUavReturnZ,
+            this.pendingNewUavReturnYaw, this.pendingNewUavReturnPitch);
+      if(station != null && !station.isDead) {
+         player.mountEntity(station);
+      }
    }
 
    public boolean getCommonStatus(int bit) {
@@ -2226,6 +2245,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public abstract void onUpdateAircraft();
 
    public void onUpdate() {
+      updatePendingNewUavMount();
       if(super.worldObj.isRemote && this.getAcInfo() == null) {
          String typeName = this.getTypeName();
          if(typeName != null && !typeName.isEmpty()) {
