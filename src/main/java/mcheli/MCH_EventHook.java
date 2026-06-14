@@ -11,6 +11,7 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_ItemBaseVehicle;
+import mcheli.uav.MCH_EntityUavStation;
 import mcheli.uav.MCH_UavInventory;
 import mcheli.uav.MCH_UavRegistry;
 import mcheli.chain.MCH_ItemChain;
@@ -37,7 +38,9 @@ import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
 // Shared event hooks for base vehicles and seats.
@@ -264,6 +267,62 @@ public class MCH_EventHook extends W_EventHook {
          if(MCH_UavInventory.hasStoredPilotInventory(event.player) && !(event.player.ridingEntity instanceof MCH_EntityBaseVehicle)) {
             MCH_UavInventory.restorePilotInventory((EntityPlayerMP)event.player, "not_piloting");
          }
+      }
+   }
+
+   public static boolean isPlayerControllingNewUav(EntityPlayer player) {
+      if(player == null) {
+         return false;
+      }
+
+      Entity ridden = player.ridingEntity;
+      if(ridden instanceof MCH_EntityBaseVehicle) {
+         return ((MCH_EntityBaseVehicle)ridden).isNewUAV();
+      }
+      if(ridden instanceof MCH_EntitySeat) {
+         MCH_EntityBaseVehicle parent = ((MCH_EntitySeat)ridden).getParent();
+         return parent != null && parent.isNewUAV();
+      }
+      if(ridden instanceof MCH_EntityUavStation) {
+         MCH_EntityBaseVehicle controlled = ((MCH_EntityUavStation)ridden).getControlAircract();
+         return controlled != null && controlled.isNewUAV();
+      }
+
+      return false;
+   }
+
+   private static boolean shouldBlockNewUavBlockAction(EntityPlayer player) {
+      return player != null && player.worldObj != null && !player.worldObj.isRemote
+            && isPlayerControllingNewUav(player);
+   }
+
+   @SubscribeEvent
+   public void onPlayerInteractBlock(PlayerInteractEvent event) {
+      if((event.action == PlayerInteractEvent.Action.LEFT_CLICK_BLOCK
+            || event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)
+            && shouldBlockNewUavBlockAction(event.entityPlayer)) {
+         event.setCanceled(true);
+      }
+   }
+
+   @SubscribeEvent
+   public void onBlockBreak(BlockEvent.BreakEvent event) {
+      if(shouldBlockNewUavBlockAction(event.getPlayer())) {
+         event.setCanceled(true);
+      }
+   }
+
+   @SubscribeEvent
+   public void onBlockPlace(BlockEvent.PlaceEvent event) {
+      if(shouldBlockNewUavBlockAction(event.player)) {
+         event.setCanceled(true);
+      }
+   }
+
+   @SubscribeEvent
+   public void onBlockMultiPlace(BlockEvent.MultiPlaceEvent event) {
+      if(shouldBlockNewUavBlockAction(event.player)) {
+         event.setCanceled(true);
       }
    }
 
