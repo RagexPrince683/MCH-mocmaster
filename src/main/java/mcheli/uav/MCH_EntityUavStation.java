@@ -304,12 +304,6 @@ public class MCH_EntityUavStation
            setContinuationState(CONTINUE_NONE);
          }
 
-      private void clearDestroyedStateForNewUavItem() {
-           this.storedUavWasDestroyed = false;
-           MCH_UavJsonStore.consumeDestroyed(this.worldObj, this);
-           setContinuationState(CONTINUE_NONE);
-         }
-
 
       public void setUavPosition(int x, int y, int z) {
            if (!this.worldObj.isRemote) {
@@ -1350,11 +1344,7 @@ public class MCH_EntityUavStation
                      ((Entity)ac).prevRotationYaw = ((Entity)ac).rotationYaw;
                      user.rotationYaw = this.rotationYaw - 180.0F;
                      if (this.worldObj.getCollidingBoundingBoxes((Entity)ac, ((Entity)ac).boundingBox.expand(-0.1D, -0.1D, -0.1D)).isEmpty()) {
-                         // A newly inserted item starts a new UAV lifecycle. Clear both the
-                         // in-memory destruction flag and any queued out-of-range tombstone
-                         // before linking it, otherwise the next Continue press can consume
-                         // the stale tombstone and incorrectly mark this replacement destroyed.
-                         clearDestroyedStateForNewUavItem();
+                         this.storedUavWasDestroyed = false;
                          this.lastUavItemStack = itemStack.copy();
                          this.lastUavItemStack.stackSize = 1;
                          itemStack.stackSize--;
