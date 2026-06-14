@@ -996,6 +996,27 @@ public class MCH_EntityUavStation
            return true;
          }
 
+      public boolean detachRiderForNewUavControl(EntityPlayerMP player) {
+           if(this.worldObj.isRemote || player == null || this.riddenByEntity != player
+                 || player.ridingEntity != this) {
+                return false;
+           }
+
+           W_EntityPlayer.closeScreen(player);
+           player.mountEntity((Entity)null);
+           if(player.ridingEntity != null) {
+                return false;
+           }
+
+           // Do not leave the station's remote-control rider cache alive while the same
+           // player is attached directly to a New UAV. A stale station rider makes client
+           // camera/chunk tracking continue from the station until the player reconnects.
+           this.riddenByEntity = null;
+           this.lastRiddenByEntity = null;
+           player.fallDistance = 0.0F;
+           return true;
+         }
+
       private void updateNewUavPilotProfile() {
            Entity pilot = this.controlAircraft != null && this.controlAircraft.isNewUAV()
                  ? this.controlAircraft.getRiddenByEntity() : null;
