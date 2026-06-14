@@ -77,6 +77,8 @@ import org.lwjgl.Sys;
 /** Shared controllable vehicle entity base used by aircraft, ground vehicles, ships, and turrets. */
 
 public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideBaseVehicle, IEntityAdditionalSpawnData {
+   private static final Map<UUID, NewUavSafeReturn> NEW_UAV_SAFE_RETURNS = new HashMap<UUID, NewUavSafeReturn>();
+   private static final int NEW_UAV_SAFE_RETURN_MIN_TICKS = 20;
    private static MCH_EntityBaseVehicle aircraft;
     private ForgeChunkManager.Ticket chunkTicket;
    //MCH_EntityBaseVehicle ac = null;
@@ -5638,17 +5640,79 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(pilot.ridingEntity != null) {
          pilot.mountEntity((Entity)null);
       }
+      this.moveLeft = false;
+      this.moveRight = false;
+      this.throttleDown = false;
+      this.throttleUp = false;
+      this.switchGunnerMode(false);
+      this.setCommonStatus(CMN_ID_FREE_LOOK, false);
+      this.setCameraId(0);
+      this.camera.initCamera(0, pilot);
+      super.riddenByEntity = null;
+      this.lastRiddenByEntity = null;
+      this.lastRidingEntity = null;
       pilot.motionX = 0.0D;
       pilot.motionY = 0.0D;
       pilot.motionZ = 0.0D;
       pilot.fallDistance = 0.0F;
+      double safeY = this.linkedUavStationY + 2.0D;
       if(pilot instanceof EntityPlayerMP) {
-         ((EntityPlayerMP)pilot).setPositionAndUpdate(this.linkedUavStationX, this.linkedUavStationY, this.linkedUavStationZ);
-         MCH_UavInventory.restorePilotInventory((EntityPlayerMP)pilot, inventoryReason);
+         EntityPlayerMP player = (EntityPlayerMP)pilot;
+         player.setPositionAndUpdate(this.linkedUavStationX, safeY, this.linkedUavStationZ);
+         NEW_UAV_SAFE_RETURNS.put(player.getUniqueID(), new NewUavSafeReturn(
+               this.linkedUavStationDimension, this.linkedUavStationX, safeY, this.linkedUavStationZ));
+         MCH_EntityUavStation station = resolveLinkedUavStation();
+         if(station != null) {
+            station.clearNewUavReturnState(player);
+         }
+         MCH_UavInventory.restorePilotInventory(player, inventoryReason);
       } else {
-         pilot.setPosition(this.linkedUavStationX, this.linkedUavStationY, this.linkedUavStationZ);
+         pilot.setPosition(this.linkedUavStationX, safeY, this.linkedUavStationZ);
       }
       return true;
+   }
+
+   public static void updateNewUavSafeReturn(EntityPlayerMP player) {
+      if(player == null) {
+         return;
+      }
+      NewUavSafeReturn pending = NEW_UAV_SAFE_RETURNS.get(player.getUniqueID());
+      if(pending == null) {
+         return;
+      }
+      if(player.dimension != pending.dimension || player.isDead) {
+         NEW_UAV_SAFE_RETURNS.remove(player.getUniqueID());
+         return;
+      }
+
+      int blockX = MathHelper.floor_double(pending.x);
+      int blockY = MathHelper.floor_double(pending.y);
+      int blockZ = MathHelper.floor_double(pending.z);
+      boolean stationChunkLoaded = player.worldObj.blockExists(blockX, blockY, blockZ);
+      if(pending.ticks++ < NEW_UAV_SAFE_RETURN_MIN_TICKS || !stationChunkLoaded) {
+         player.motionX = 0.0D;
+         player.motionY = 0.0D;
+         player.motionZ = 0.0D;
+         player.fallDistance = 0.0F;
+         player.setPositionAndUpdate(pending.x, pending.y, pending.z);
+      } else {
+         NEW_UAV_SAFE_RETURNS.remove(player.getUniqueID());
+      }
+   }
+
+   private static final class NewUavSafeReturn {
+      private final int dimension;
+      private final double x;
+      private final double y;
+      private final double z;
+      private int ticks;
+
+      private NewUavSafeReturn(int dimension, double x, double y, double z) {
+         this.dimension = dimension;
+         this.x = x;
+         this.y = y;
+         this.z = z;
+      }
    }
 
    /** Called by every concrete vehicle subclass when its pilot entity dies. */
