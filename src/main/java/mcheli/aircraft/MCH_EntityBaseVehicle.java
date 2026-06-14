@@ -5641,16 +5641,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       } else {
          pilot.setPosition(this.linkedUavStationX, this.linkedUavStationY, this.linkedUavStationZ);
       }
-
-      // Put the operator back in the station as part of the same server-side handoff.
-      // Merely teleporting them beside it leaves the client with a stale NewUAV mount
-      // until its entity state is refreshed (commonly by relogging), so Continue cannot
-      // immediately satisfy its requirement that the requesting player rides this station.
-      MCH_EntityUavStation station = resolveLinkedUavStation();
-      if(station != null && !station.isDead
-            && (station.riddenByEntity == null || station.riddenByEntity == pilot)) {
-         pilot.mountEntity(station);
-      }
       return true;
    }
 
