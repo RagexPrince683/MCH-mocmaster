@@ -623,14 +623,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return this.uavPersistentUUID;
    }
 
-   public void setUavPersistentUUID(UUID uuid) {
-      if(super.worldObj.isRemote || uuid == null || uuid.equals(this.uavPersistentUUID)) {
-         return;
-      }
-      MCH_UavRegistry.unregister(this);
-      this.uavPersistentUUID = uuid;
-   }
-
    public UUID getOwnerUUID() {
       return this.uavOwnerUUID;
    }
