@@ -34,54 +34,54 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 
 | Key | Type/range | Default | What it changes |
 |---|---:|---:|---|
-| `BaseDrag` | float[0..0.25] | 0.0015 | Baseline drag. Scales with speed ratio squared and also participates in AoA drag. |
-| `InducedDrag` | float[0..0.25] | 0.006 | Extra drag from bank angle and body-rate load. |
-| `ControlSurfaceDrag` | float[0..0.25] | 0.0025 | Extra drag while pitch/roll/yaw angular rates are high. |
-| `ClimbEnergyLoss` | float[0..0.25] | 0.006 | Horizontal speed removed while climbing. |
-| `DiveEnergyGain` | float[0..0.25] | 0.008 | Horizontal speed added while descending. |
+| `BaseDrag` | float[0..0.25] | 0.0023 | Baseline drag. Scales with speed ratio squared and also participates in AoA drag. |
+| `InducedDrag` | float[0..0.25] | 0.015 | Extra drag from bank angle and body-rate load. |
+| `ControlSurfaceDrag` | float[0..0.25] | 0.003 | Extra drag while pitch/roll/yaw angular rates are high. |
+| `ClimbEnergyLoss` | float[0..0.25] | 0.017 | Horizontal speed removed while climbing. |
+| `DiveEnergyGain` | float[0..0.25] | 0.0122 | Horizontal speed added while descending. |
 | `MaxLevelSpeed` | float[0..4] | 0 = use `Speed` | Sustainable full-power speed in level flight. |
-| `IdleDrag` | float[0..0.25] | 0.004 | Extra drag as engine output approaches zero. |
-| `PitchTorque`, `RollTorque`, `YawTorque` | float[0..100] | 0.35 | Local-axis torque applied to requested angular rates. Higher values respond faster. |
-| `PitchDamping`, `RollDamping`, `YawDamping` | float[0..100] | 0.35 | Angular damping. Higher values lower steady body rate for the same torque. |
-| `InertiaMultiplier` | float[0.05..100] | 1 | Resistance to angular acceleration. Higher values make controls feel heavier. |
+| `IdleDrag` | float[0..0.25] | 0.0034 | Extra drag as engine output approaches zero. |
+| `PitchTorque`, `RollTorque`, `YawTorque` | float[0..100] | 0.380 / 0.420 / 0.320 | Local-axis torque applied to requested angular rates. Higher values respond faster. |
+| `PitchDamping`, `RollDamping`, `YawDamping` | float[0..100] | 0.410 / 0.405 / 0.475 | Angular damping. Higher values lower steady body rate for the same torque. |
+| `InertiaMultiplier` | float[0.05..100] | 1.550 | Resistance to angular acceleration. Higher values make controls feel heavier. |
 | `Mass` | float[0.05..100] | alias of `InertiaMultiplier` | Legacy/compatibility alias for angular inertia only; does not set physical weight. |
-| `PhysicalMass` | float[0.05..100] | 1.0 | **New flight model only.** Translational mass used for thrust acceleration, drag response, lift-to-weight, weight, climb, and takeoff behavior. |
+| `PhysicalMass` | float[0.05..100] | 1.750 | **New flight model only.** Translational mass used for thrust acceleration, drag response, lift-to-weight, weight, climb, and takeoff behavior. |
 | `EngineThrust` | float[0..100] | derived from speed | **New flight model only.** Engine force used as `thrust / PhysicalMass`; affects acceleration, climb, and energy recovery without being a top-speed cap. |
 | `TakeoffDistanceMultiplier` | float[0.25..4] | 1.0 | **New flight model only.** Scales the effective takeoff threshold during ground roll/rotation. Lower values shorten takeoff distance; higher values lengthen it. |
-| `ThrottleAcceleration` | float[0..1] | 0.02 | Legacy engine-output spool-up. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateUp`. |
-| `EngineDrag` | float[0..1] | 0.015 | Legacy engine-output spool-down. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateDown`. |
-| `NewFlightThrottleResponse` | float[0.1..4] | 1.0 | **New flight model only.** Curves smoothed engine output before thrust. `1` is linear, `<1` gives more low-throttle thrust, `>1` softens the low end. |
-| `NewFlightThrottleChangeRateUp` | float[0..0.1] | 0.006 | **New flight model only.** Pilot-commanded throttle increase per tick. Full idle-to-max travel is about `1 / value` ticks. |
-| `NewFlightThrottleChangeRateDown` | float[0..0.1] | 0.008 | **New flight model only.** Pilot-commanded throttle decrease per tick. Usually slightly faster than increase for approach and dogfight energy control. |
-| `NewFlightIdleThrottle` | float[0..0.35] | 0.08 | **New flight model only.** Minimum effective engine power at 0% commanded throttle; keeps idle physically plausible without making idle accelerate like cruise. |
-| `NewFlightEngineBrakeDrag` | float[0..0.25] | 0.0035 | **New flight model only.** Closed-throttle/low-power drag used by the energy model. Replaces `IdleDrag` for opted-in planes. |
-| `NewFlightLowThrottleLiftRetention` | float[0..1] | 0.82 | **New flight model only.** Retains this fraction of the legacy throttle-coupled vertical support at idle so lift does not vanish immediately when throttle is chopped. Stall is still driven by airspeed/AoA. |
-| `NewFlightThrottleControlAuthorityScale` | float[0..1] | 0.18 | **New flight model only.** Maximum control-authority penalty at idle. Keep low so glide/landing controls remain useful. |
+| `ThrottleAcceleration` | float[0..1] | 0.026 | Legacy engine-output spool-up. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateUp`. |
+| `EngineDrag` | float[0..1] | 0.011 | Legacy engine-output spool-down. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateDown`. |
+| `NewFlightThrottleResponse` | float[0.1..4] | 1.18 | **New flight model only.** Curves smoothed engine output before thrust. `1` is linear, `<1` gives more low-throttle thrust, `>1` softens the low end. |
+| `NewFlightThrottleChangeRateUp` | float[0..0.1] | 0.0055 | **New flight model only.** Pilot-commanded throttle increase per tick. Full idle-to-max travel is about `1 / value` ticks. |
+| `NewFlightThrottleChangeRateDown` | float[0..0.1] | 0.0075 | **New flight model only.** Pilot-commanded throttle decrease per tick. Usually slightly faster than increase for approach and dogfight energy control. |
+| `NewFlightIdleThrottle` | float[0..0.35] | 0.095 | **New flight model only.** Minimum effective engine power at 0% commanded throttle; keeps idle physically plausible without making idle accelerate like cruise. |
+| `NewFlightEngineBrakeDrag` | float[0..0.25] | 0.0030 | **New flight model only.** Closed-throttle/low-power drag used by the energy model. Replaces `IdleDrag` for opted-in planes. |
+| `NewFlightLowThrottleLiftRetention` | float[0..1] | 0.700 | **New flight model only.** Retains this fraction of the legacy throttle-coupled vertical support at idle so lift does not vanish immediately when throttle is chopped. Stall is still driven by airspeed/AoA. |
+| `NewFlightThrottleControlAuthorityScale` | float[0..1] | 0.10 | **New flight model only.** Maximum control-authority penalty at idle. Keep low so glide/landing controls remain useful. |
 | `NewFlightThrottleHudDisplay` | boolean | true | **New flight model only.** Shows pilot HUD text like `THR 85%`. Legacy HUDs are unchanged for planes that do not opt in. |
-| `NewFlightCombatFlaps` | boolean | false | **New flight model only.** Enables the combat-flap toggle on the Extra key. Inactive on legacy planes even if present. |
-| `NewFlightCombatFlapLift` | float[0..1] | 0.16 | **New flight model only.** Added low-speed lift/support and induced-load contribution while combat flaps are deployed. |
-| `NewFlightCombatFlapDrag` | float[0..0.25] | 0.009 | **New flight model only.** Extra drag while combat flaps are deployed. |
-| `NewFlightCombatFlapControl` | float[0..1] | 0.14 | **New flight model only.** Control-authority boost while combat flaps are deployed. |
-| `NewFlightCombatFlapOverspeed` | float[0.1..1] | 0.82 | **New flight model only.** Multiplier applied to `MaxSafeSpeed` while flaps are deployed; lower values punish high-speed flap use earlier. |
+| `NewFlightCombatFlaps` | boolean | true | **New flight model only.** Enables the combat-flap toggle on the Extra key. Inactive on legacy planes even if present. |
+| `NewFlightCombatFlapLift` | float[0..1] | 0.120 | **New flight model only.** Added low-speed lift/support and induced-load contribution while combat flaps are deployed. |
+| `NewFlightCombatFlapDrag` | float[0..0.25] | 0.012 | **New flight model only.** Extra drag while combat flaps are deployed. |
+| `NewFlightCombatFlapControl` | float[0..1] | 0.12 | **New flight model only.** Control-authority boost while combat flaps are deployed. |
+| `NewFlightCombatFlapOverspeed` | float[0.1..1] | 0.78 | **New flight model only.** Multiplier applied to `MaxSafeSpeed` while flaps are deployed; lower values punish high-speed flap use earlier. |
 | `StallSpeed` | float[0..10] | 0 | Absolute stall threshold; if 0, uses `max(0.05, topSpeed * StallSpeedFactor)`. |
-| `CriticalAoA` | float[1..90] | 18 | AoA in degrees where stall demand begins. |
-| `StallLiftLoss` | float[0..1] | 0.65 | Fraction of lift removed at full stall. |
-| `AoADragMultiplier` | float[0..10] | 1.5 | Scales quadratic AoA drag. |
-| `StallInstability` | float[0..5] | 0.35 | Buffet, yaw shake, and deterministic wing-drop strength. |
+| `CriticalAoA` | float[1..90] | 14.00 | AoA in degrees where stall demand begins. |
+| `StallLiftLoss` | float[0..1] | 0.820 | Fraction of lift removed at full stall. |
+| `AoADragMultiplier` | float[0..10] | 2.550 | Scales quadratic AoA drag. |
+| `StallInstability` | float[0..5] | 0.560 | Buffet, yaw shake, and deterministic wing-drop strength. |
 | `StallRecoverySpeed` | float[0..10] | 0 = `StallSpeed*1.2` | Speed required, with low AoA, to exit a stall. |
-| `StallSpeedFactor` | float[0..0.95] | 0.22 | Legacy derived stall threshold when `StallSpeed` is omitted. |
-| `StallStrength` | float[0..4] | 0.6 | Legacy stall response scale retained for older packs. |
+| `StallSpeedFactor` | float[0..0.95] | 0.18 | Legacy derived stall threshold when `StallSpeed` is omitted. |
+| `StallStrength` | float[0..4] | 1.080 | Legacy stall response scale retained for older packs. |
 | `StallPitchRecoveryStrength` | float[0..5] | 0.55 | Nose-down angular-velocity moment applied during stalls. Higher values make light fighters break/recover more aggressively. |
 | `StallBreakStrength` | float[0..5] | 0.65 | Extra nonlinear nose-down impulse for deep stalls. Lower values suit transports or stable aircraft. |
 | `StallRecoveryRate` | float[0.01..1] | 0.18 | Blend rate used as stall severity fades after the aircraft unloads and meets recovery conditions. |
-| `DiveSpeedMultiplier` | float[1..2] | 1.25 | Maximum speed cap multiplier in a dive. |
-| `MaxComfortableG` | float[1..30] | 4 | G where high-G control fade starts. |
-| `MaxStructuralG` | float[1..50] | 8 | G where high-G fade reaches the configured penalty and structural hook begins. Warns if below `MaxComfortableG`. |
-| `GControlPenalty` | float[0..1] | 0.7 | Max fraction of authority removed by high G. |
+| `DiveSpeedMultiplier` | float[1..2] | 1.28 | Maximum speed cap multiplier in a dive. |
+| `MaxComfortableG` | float[1..30] | 7.5 | G where high-G control fade starts. |
+| `MaxStructuralG` | float[1..50] | 8.5 | G where high-G fade reaches the configured penalty and structural hook begins. Warns if below `MaxComfortableG`. |
+| `GControlPenalty` | float[0..1] | 0.680 | Max fraction of authority removed by high G. |
 | `CompressibilitySpeed` | float[0..10] | 0 = 90% of level speed | Speed where pitch authority starts fading. |
-| `CompressibilityPitchPenalty` | float[0..1] | 0.65 | Max pitch-authority loss by `MaxSafeSpeed`. |
+| `CompressibilityPitchPenalty` | float[0..1] | 0.5 | Max pitch-authority loss by `MaxSafeSpeed`. |
 | `MaxSafeSpeed` | float[0..10] | 0 = 110% of level speed | Overspeed threshold. Warns if not above `CompressibilitySpeed`. |
-| `OverspeedDamageRate` | float[0..100] | 0.2 | Damage per tick at 100% overspeed. Set 0 to disable damage. |
+| `OverspeedDamageRate` | float[0..100] | 0.14 | Damage per tick at 100% overspeed. Set 0 to disable damage. |
 
 ## Formulas and interactions
 
@@ -287,39 +287,39 @@ HUD = plane
 maxhp = 120
 speed = 1.55
 MaxLevelSpeed = 1.45
-MotionFactor = 0.975
-BaseDrag = 0.0020
-InducedDrag = 0.0080
+MotionFactor = 0.97
+BaseDrag = 0.0023
+InducedDrag = 0.015
 ControlSurfaceDrag = 0.0030
-IdleDrag = 0.0060
+IdleDrag = 0.0034
 ClimbEnergyLoss = 0.0080
 DiveEnergyGain = 0.0100
-PitchTorque = 0.42
-RollTorque = 0.55
-YawTorque = 0.22
-PitchDamping = 0.40
-RollDamping = 0.42
-YawDamping = 0.35
-InertiaMultiplier = 1.35
-ThrottleAcceleration = 0.018
-EngineDrag = 0.014
+PitchTorque = 0.380
+RollTorque = 0.420
+YawTorque = 0.320
+PitchDamping = 0.410
+RollDamping = 0.405
+YawDamping = 0.475
+InertiaMultiplier = 1.550
+ThrottleAcceleration = 0.026
+EngineDrag = 0.011
 StallSpeed = 0.36
 CriticalAoA = 16.0
-StallLiftLoss = 0.70
-AoADragMultiplier = 1.8
-StallInstability = 0.45
+StallLiftLoss = 0.820
+AoADragMultiplier = 2.550
+StallInstability = 0.560
 StallRecoverySpeed = 0.46
 StallPitchRecoveryStrength = 0.75
 StallBreakStrength = 0.90
 StallRecoveryRate = 0.22
-DiveSpeedMultiplier = 1.22
-MaxComfortableG = 4.5
+DiveSpeedMultiplier = 1.28
+MaxComfortableG = 7.5
 MaxStructuralG = 8.5
-GControlPenalty = 0.65
+GControlPenalty = 0.680
 CompressibilitySpeed = 1.75
-CompressibilityPitchPenalty = 0.50
+CompressibilityPitchPenalty = 0.5
 MaxSafeSpeed = 2.05
-OverspeedDamageRate = 0.10
+OverspeedDamageRate = 0.14
 FlightCeiling = 260
 FlightCeilingRange = 48
 ```

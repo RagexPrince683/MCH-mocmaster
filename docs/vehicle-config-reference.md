@@ -92,7 +92,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `FlightCeilingRange` | Aircraft/heli/plane/shared | float | 24.0 | lift fade band below ceiling; new flight model |
 | `NewFlightGravity` / `FlightGravity` / `GravityOverride` | Aircraft/plane/shared | float[0..1] | global `NewFlightGravity` | optional per-vehicle new-flight gravity override |
 | `speed` | All | float | 0.1 | top horizontal speed before family global multiplier |
-| `MotionFactor` | All | float | 0.96; plane constructor 0.975 | per-tick horizontal damping |
+| `MotionFactor` | All | float | 0.96; plane constructor 0.97 | per-tick horizontal damping |
 | `MobilityYaw` | All | float | 1.0 | yaw control multiplier |
 | `MobilityPitch` | All | float | 1.0 | pitch control multiplier |
 | `MobilityRoll` | All | float | 1.0 | roll control multiplier |
@@ -207,58 +207,58 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `vtolyaw` | Plane, Ship | float[0..1] | 0.3 | VTOL yaw/roll factor |
 | `vtolpitch` | Plane, Ship | float[0.01..1] | 0.2 | VTOL pitch factor |
 | `enableautopilot` | Plane, Ship | boolean | false | legacy autopilot flag |
-| `BaseDrag` | Plane | float[0..0.25] | 0.0015 | new fixed-wing energy drag |
-| `InducedDrag` | Plane | float[0..0.25] | 0.006 | new bank/high-load drag |
-| `ControlSurfaceDrag` | Plane | float[0..0.25] | 0.0025 | new maneuvering drag |
-| `ClimbEnergyLoss` | Plane | float[0..0.25] | 0.006 | climb energy model |
-| `DiveEnergyGain` | Plane | float[0..0.25] | 0.008 | dive energy model |
+| `BaseDrag` | Plane | float[0..0.25] | 0.0023 | new fixed-wing energy drag |
+| `InducedDrag` | Plane | float[0..0.25] | 0.015 | new bank/high-load drag |
+| `ControlSurfaceDrag` | Plane | float[0..0.25] | 0.003 | new maneuvering drag |
+| `ClimbEnergyLoss` | Plane | float[0..0.25] | 0.017 | climb energy model |
+| `DiveEnergyGain` | Plane | float[0..0.25] | 0.0122 | dive energy model |
 | `MaxLevelSpeed` | Plane | float[0..4] | 0 = use `Speed` | full-power level speed |
-| `IdleDrag` | Plane | float[0..0.25] | 0.004 | closed-throttle drag |
-| `PitchTorque` | Plane | float[0..100] | 0.35 | angular response |
-| `RollTorque` | Plane | float[0..100] | 0.35 | angular response |
-| `YawTorque` | Plane | float[0..100] | 0.35 | angular response |
-| `PitchDamping` | Plane | float[0..100] | 0.35 | angular damping |
-| `RollDamping` | Plane | float[0..100] | 0.35 | angular damping |
-| `YawDamping` | Plane | float[0..100] | 0.35 | angular damping |
-| `Mass` | Plane | float[0.05..100] | 1.0 | alias for `InertiaMultiplier`; angular-inertia compatibility key |
-| `PhysicalMass` | Plane | float[0.05..100] | 1.0 | new-flight translational mass for weight and linear inertia |
+| `IdleDrag` | Plane | float[0..0.25] | 0.0034 | closed-throttle drag |
+| `PitchTorque` | Plane | float[0..100] | 0.380 | angular response |
+| `RollTorque` | Plane | float[0..100] | 0.420 | angular response |
+| `YawTorque` | Plane | float[0..100] | 0.320 | angular response |
+| `PitchDamping` | Plane | float[0..100] | 0.410 | angular damping |
+| `RollDamping` | Plane | float[0..100] | 0.405 | angular damping |
+| `YawDamping` | Plane | float[0..100] | 0.475 | angular damping |
+| `Mass` | Plane | float[0.05..100] | 1.550 | alias for `InertiaMultiplier`; angular-inertia compatibility key |
+| `PhysicalMass` | Plane | float[0.05..100] | 1.750 | new-flight translational mass for weight and linear inertia |
 | `EngineThrust` | Plane | float[0..100] | derived from speed | new-flight engine force for thrust-to-weight acceleration |
 | `TakeoffDistanceMultiplier` | Plane | float[0.25..4] | 1.0 | new-flight ground-roll/rotation takeoff threshold scaler |
-| `InertiaMultiplier` | Plane | float[0.05..100] | 1.0 | angular inertia |
-| `ThrottleAcceleration` | Plane | float[0..1] | 0.02 | engine-output spool-up/tick |
-| `EngineDrag` | Plane | float[0..1] | 0.015 | engine-output spool-down/tick |
-| `NewFlightThrottleResponse` | Plane | float[0.1..4] | 1.0 | new-flight-only throttle curve |
-| `NewFlightThrottleChangeRateUp` | Plane | float[0..0.1] | 0.006 | new-flight-only pilot throttle-up rate/tick |
-| `NewFlightThrottleChangeRateDown` | Plane | float[0..0.1] | 0.008 | new-flight-only pilot throttle-down rate/tick |
-| `NewFlightIdleThrottle` | Plane | float[0..0.35] | 0.08 | new-flight-only effective idle power |
-| `NewFlightEngineBrakeDrag` | Plane | float[0..0.25] | 0.0035 | new-flight-only low-power drag |
-| `NewFlightLowThrottleLiftRetention` | Plane | float[0..1] | 0.82 | new-flight-only lift/support retained at idle |
-| `NewFlightThrottleControlAuthorityScale` | Plane | float[0..1] | 0.18 | new-flight-only idle control-authority penalty |
+| `InertiaMultiplier` | Plane | float[0.05..100] | 1.550 | angular inertia |
+| `ThrottleAcceleration` | Plane | float[0..1] | 0.026 | engine-output spool-up/tick |
+| `EngineDrag` | Plane | float[0..1] | 0.011 | engine-output spool-down/tick |
+| `NewFlightThrottleResponse` | Plane | float[0.1..4] | 1.18 | new-flight-only throttle curve |
+| `NewFlightThrottleChangeRateUp` | Plane | float[0..0.1] | 0.0055 | new-flight-only pilot throttle-up rate/tick |
+| `NewFlightThrottleChangeRateDown` | Plane | float[0..0.1] | 0.0075 | new-flight-only pilot throttle-down rate/tick |
+| `NewFlightIdleThrottle` | Plane | float[0..0.35] | 0.095 | new-flight-only effective idle power |
+| `NewFlightEngineBrakeDrag` | Plane | float[0..0.25] | 0.0030 | new-flight-only low-power drag |
+| `NewFlightLowThrottleLiftRetention` | Plane | float[0..1] | 0.700 | new-flight-only lift/support retained at idle |
+| `NewFlightThrottleControlAuthorityScale` | Plane | float[0..1] | 0.10 | new-flight-only idle control-authority penalty |
 | `NewFlightThrottleHudDisplay` | Plane | boolean | true | show `THR 0-100%` for new-flight pilots |
-| `NewFlightCombatFlaps` | Plane | boolean | false | enables new-flight-only combat flaps |
-| `NewFlightCombatFlapLift` | Plane | float[0..1] | 0.16 | flap lift/support contribution |
-| `NewFlightCombatFlapDrag` | Plane | float[0..0.25] | 0.009 | flap drag penalty |
-| `NewFlightCombatFlapControl` | Plane | float[0..1] | 0.14 | flap control-authority boost |
-| `NewFlightCombatFlapOverspeed` | Plane | float[0.1..1] | 0.82 | flap safe-speed multiplier |
+| `NewFlightCombatFlaps` | Plane | boolean | true | enables new-flight-only combat flaps |
+| `NewFlightCombatFlapLift` | Plane | float[0..1] | 0.120 | flap lift/support contribution |
+| `NewFlightCombatFlapDrag` | Plane | float[0..0.25] | 0.012 | flap drag penalty |
+| `NewFlightCombatFlapControl` | Plane | float[0..1] | 0.12 | flap control-authority boost |
+| `NewFlightCombatFlapOverspeed` | Plane | float[0.1..1] | 0.78 | flap safe-speed multiplier |
 | `StallSpeed` | Plane | float[0..10] | 0 = derive from `Speed*StallSpeedFactor` | fixed-wing stall entry |
-| `CriticalAoA` | Plane | float[1..90] | 18 | stall/AoA threshold degrees |
-| `StallLiftLoss` | Plane | float[0..1] | 0.65 | lift removed at full stall |
-| `AoADragMultiplier` | Plane | float[0..10] | 1.5 | AoA drag scale |
-| `StallInstability` | Plane | float[0..5] | 0.35 | buffet/wing-drop strength |
+| `CriticalAoA` | Plane | float[1..90] | 14.00 | stall/AoA threshold degrees |
+| `StallLiftLoss` | Plane | float[0..1] | 0.820 | lift removed at full stall |
+| `AoADragMultiplier` | Plane | float[0..10] | 2.550 | AoA drag scale |
+| `StallInstability` | Plane | float[0..5] | 0.560 | buffet/wing-drop strength |
 | `StallRecoverySpeed` | Plane | float[0..10] | 0 = `StallSpeed*1.2` | stall recovery speed |
-| `StallSpeedFactor` | Plane | float[0..0.95] | 0.22 | legacy derived stall speed factor |
-| `StallStrength` | Plane | float[0..4] | 0.6 | legacy stall response scale |
+| `StallSpeedFactor` | Plane | float[0..0.95] | 0.18 | legacy derived stall speed factor |
+| `StallStrength` | Plane | float[0..4] | 1.080 | legacy stall response scale |
 | `StallPitchRecoveryStrength` | Plane | float[0..5] | 0.55 | nose-down stall recovery moment |
 | `StallBreakStrength` | Plane | float[0..5] | 0.65 | nonlinear deep-stall pitch-break impulse |
 | `StallRecoveryRate` | Plane | float[0.01..1] | 0.18 | stall severity fade-out/recovery blend rate |
-| `DiveSpeedMultiplier` | Plane | float[1..2] | 1.25 | max dive overspeed cap |
-| `MaxComfortableG` | Plane | float[1..30] | 4.0 | high-G authority fade starts |
-| `MaxStructuralG` | Plane | float[1..50] | 8.0 | high-G authority fade ends/damage hook threshold |
-| `GControlPenalty` | Plane | float[0..1] | 0.7 | max high-G authority loss |
+| `DiveSpeedMultiplier` | Plane | float[1..2] | 1.28 | max dive overspeed cap |
+| `MaxComfortableG` | Plane | float[1..30] | 7.5 | high-G authority fade starts |
+| `MaxStructuralG` | Plane | float[1..50] | 8.5 | high-G authority fade ends/damage hook threshold |
+| `GControlPenalty` | Plane | float[0..1] | 0.680 | max high-G authority loss |
 | `CompressibilitySpeed` | Plane | float[0..10] | 0 = 90% of level speed | pitch authority fade starts |
-| `CompressibilityPitchPenalty` | Plane | float[0..1] | 0.65 | max pitch loss at high speed |
+| `CompressibilityPitchPenalty` | Plane | float[0..1] | 0.5 | max pitch loss at high speed |
 | `MaxSafeSpeed` | Plane | float[0..10] | 0 = 110% of level speed | overspeed warning/damage threshold |
-| `OverspeedDamageRate` | Plane | float[0..100] | 0.2 | damage/tick at 100% overspeed; 0 disables |
+| `OverspeedDamageRate` | Plane | float[0..100] | 0.14 | damage/tick at 100% overspeed; 0 disables |
 | `enablefoldblade` | Helicopter | boolean | false | blade folding support |
 | `addrotor` | Helicopter | `bladeNum,bladeRot,x,y,z,rx,ry,rz[,fold]` | none | rotor render/animation |
 | `addrotorold` | Helicopter | same as `addrotor` | none | legacy rotor renderer |
