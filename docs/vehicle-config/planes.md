@@ -192,25 +192,20 @@ target = stalling ? max(0.12, demand) : 0
 stallSeverity += (target - stallSeverity) * (0.35 if target is rising else 0.18)
 ```
 
-Airborne wing lift is then filtered by airspeed, AoA, energy-gated throttle/flap lift power, and stall lift loss. Low-throttle lift retention is only available when airspeed, AoA, and stall state already indicate valid wing lift; it cannot hold up a below-stall aircraft by itself:
+Airborne wing lift is then filtered by airspeed, AoA, throttle/flap lift power, and stall lift loss:
 
 ```text
 airspeedLift = clamp((airspeed - stallSpeed * 0.45) / max(0.05, stallSpeed * 1.35), 0, 1.25)
 aoaLift = clamp(1 - max(0, abs(AoA) - CriticalAoA) / max(1, CriticalAoA), 0, 1)
 liftLoss = clamp(stallSeverity * StallLiftLoss, 0, 1)
 stallLift = 1 - liftLoss
-validLiftEnergy = clamp((airspeed - stallSpeed) / max(0.05, stallSpeed * 0.5), 0, 1)
-                  * aoaLift * stallLift
-liftPower = effectiveThrottle
-          + NewFlightLowThrottleLiftRetention * (1 - effectiveThrottle) * validLiftEnergy
-          + combatFlapLift * validLiftEnergy
 liftBeforeStallLoss = gravity * clamp(liftPower, 0, 2.5) * airspeedLift * aoaLift
 liftForce = liftBeforeStallLoss * stallLift
 ```
 
-`StallLiftLoss` is applied after throttle lift retention, combat flap lift, takeoff lift, and other lift bonuses are resolved. Low-throttle retention and combat-flap bonuses are themselves gated by `validLiftEnergy`, so they cannot bypass the airspeed/AoA/stall filters. Stalled or below-stall aircraft suppress takeoff/climb lift headroom until recovery, so `validTakeoff` or `validClimb` cannot bypass stall penalties.
+`StallLiftLoss` is applied after throttle lift retention, combat flap lift, takeoff lift, and other lift bonuses are resolved. Stalled aircraft suppress takeoff/climb lift headroom until recovery, so `validTakeoff` or `validClimb` cannot bypass stall penalties.
 
-This means pointing the nose near vertical does not create maximum lift unless the velocity vector, airspeed, lift-to-weight, and thrust-to-weight are still within valid flying conditions. Conventional fixed-wing thrust is also limited during unsupported vertical climbs: upward powered climb is scaled by thrust-to-weight, speed headroom, remaining unstalled authority, and AoA stall state. High nose-up climbs add extra AoA/energy drag and bleed vertical energy unless the aircraft is truly tuned with enough thrust and speed to support them. Lowering throttle while holding a nose-up attitude now also adds a nose-down pitch moment, so the aircraft cannot keep the same climb angle without enough effective thrust/lift.
+This means pointing the nose near vertical does not create maximum lift unless the velocity vector, airspeed, lift-to-weight, and thrust-to-weight are still within valid flying conditions. Conventional fixed-wing thrust is also limited during unsupported vertical climbs: if thrust-to-weight is below 1.0, upward powered climb is scaled by speed headroom and remaining unstalled authority. High nose-up climbs add extra AoA/energy drag and bleed vertical energy unless the aircraft is truly tuned with enough thrust and speed to support them. Lowering throttle while holding a nose-up attitude now also adds a nose-down pitch moment, so the aircraft cannot keep the same climb angle without enough effective thrust/lift.
 
 Developed stalls remove lift through the normal lift model and apply a deterministic nose-down pitch moment:
 
