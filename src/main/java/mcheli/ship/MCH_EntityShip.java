@@ -1003,7 +1003,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     private AxisAlignedBB getDeckSearchBox() {
         AxisAlignedBB search = AxisAlignedBB.getBoundingBox(super.boundingBox.minX, super.boundingBox.minY,
                 super.boundingBox.minZ, super.boundingBox.maxX, super.boundingBox.maxY, super.boundingBox.maxZ);
-        for(MCH_BoundingBox bb : super.extraBoundingBox) {
+        for(MCH_BoundingBox bb : this.getCalculatedExtraBoundingBoxes()) {
             search = search.func_111270_a(bb.boundingBox);
         }
         return search.expand(0.25D, 0.6D, 0.25D);
@@ -1013,8 +1013,9 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         int surfaceIndex = this.isOnTopOf(entityBox, super.boundingBox)?-1:Integer.MIN_VALUE;
         double highestSurface = surfaceIndex == -1?super.boundingBox.maxY:-Double.MAX_VALUE;
 
-        for(int i = 0; i < super.extraBoundingBox.length; ++i) {
-            AxisAlignedBB deckBox = super.extraBoundingBox[i].boundingBox;
+        MCH_BoundingBox[] deckBoxes = this.getCalculatedExtraBoundingBoxes();
+        for(int i = 0; i < deckBoxes.length; ++i) {
+            AxisAlignedBB deckBox = deckBoxes[i].boundingBox;
             if(this.isOnTopOf(entityBox, deckBox) && deckBox.maxY > highestSurface) {
                 surfaceIndex = i;
                 highestSurface = deckBox.maxY;
@@ -1036,7 +1037,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     }
 
     private AxisAlignedBB getDeckSurface(int surfaceIndex) {
-        return surfaceIndex < 0?super.boundingBox:super.extraBoundingBox[surfaceIndex].boundingBox;
+        return surfaceIndex < 0?super.boundingBox:this.getCalculatedExtraBoundingBoxes()[surfaceIndex].boundingBox;
     }
 
     private void finishDeckMovement(List<DeckContact> deckEntities, float oldYaw) {
@@ -1044,7 +1045,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
         // Extra boxes are normally updated before onUpdateAircraft. Refresh them at
         // the final ship position so support uses this tick's water-bob height.
-        this.updateExtraBoundingBox();
+        this.getCalculatedExtraBoundingBoxes();
 
         for(DeckContact contact : deckEntities) {
             Entity entity = contact.entity;
@@ -1203,7 +1204,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     public void updateCollisionBox() {
         if(this.getAcInfo() != null) {
             //this.WheelMng.updateBlock();
-            MCH_BoundingBox[] arr$ = super.extraBoundingBox;
+            MCH_BoundingBox[] arr$ = this.getCalculatedExtraBoundingBoxes();
             int len$ = arr$.length;
 
             MCH_Config var10000;

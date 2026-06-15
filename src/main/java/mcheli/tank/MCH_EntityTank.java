@@ -1169,7 +1169,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    public void updateCollisionBox() {
       if(this.getAcInfo() != null) {
          this.WheelMng.updateBlock();
-         MCH_BoundingBox[] arr$ = super.extraBoundingBox;
+         MCH_BoundingBox[] arr$ = this.getCalculatedExtraBoundingBoxes();
          int len$ = arr$.length;
 
          MCH_Config var10000;

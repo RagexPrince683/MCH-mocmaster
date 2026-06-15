@@ -78,6 +78,7 @@ import org.lwjgl.Sys;
 
 public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideBaseVehicle, IEntityAdditionalSpawnData {
    private static final Map<UUID, NewUavSafeReturn> NEW_UAV_SAFE_RETURNS = new HashMap<UUID, NewUavSafeReturn>();
+   private final MCH_VehicleBoxCache vehicleBoxCache = new MCH_VehicleBoxCache();
    private static final int NEW_UAV_SAFE_RETURN_MIN_TICKS = 20;
    private static MCH_EntityBaseVehicle aircraft;
     private ForgeChunkManager.Ticket chunkTicket;
@@ -2558,7 +2559,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.unmountEntity();
       }
 
-      this.updateExtraBoundingBox();
+      this.getCalculatedExtraBoundingBoxes();
 
       //this.updateExtraWheelBoundingBox();
 
@@ -2847,14 +2848,24 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void updateExtraBoundingBox() {
-      MCH_BoundingBox[] arr$ = this.extraBoundingBox;
-      int len$ = arr$.length;
+      this.markVehicleBoxCacheDirty("legacy updateExtraBoundingBox request");
+      this.getCalculatedExtraBoundingBoxes();
+   }
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_BoundingBox bb = arr$[i$];
-         bb.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
-      }
+   /**
+    * Returns the current calculated extra collision / hit boxes for this vehicle.
+    *
+    * This method intentionally still produces the same AxisAlignedBB-backed MCH_BoundingBox
+    * data as the legacy path.  It centralizes the transform calculation and caches stationary
+    * vehicles so future yaw/pitch/roll oriented box math can be added in one place without
+    * making every collision, damage, and debug-render caller rebuild box geometry independently.
+    */
+   public MCH_BoundingBox[] getCalculatedExtraBoundingBoxes() {
+      return this.vehicleBoxCache.getBoxes(this);
+   }
 
+   public void markVehicleBoxCacheDirty(String reason) {
+      this.vehicleBoxCache.markDirty(reason);
    }
 
    //public void updateExtraWheelBoundingBox() {
@@ -7684,6 +7695,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.rotPartRotation = new float[info.partRotPart.size()];
          this.prevRotPartRotation = new float[info.partRotPart.size()];
          this.extraBoundingBox = this.createExtraBoundingBox();
+         this.markVehicleBoxCacheDirty("vehicle config changed");
          //this.extrawheelboundingbox = this.createannoyingboundingbox();
          this.partEntities = this.createParts();
          super.stepHeight = info.stepHeight;
