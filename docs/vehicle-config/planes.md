@@ -38,6 +38,7 @@ All values are optional. Speed-like values (`Speed`, `MaxLevelSpeed`, `StallSpee
 | `Mass` | float[0.05..100] | alias of `InertiaMultiplier` | Legacy/compatibility alias for angular inertia only; does not set physical weight. |
 | `PhysicalMass` | float[0.05..100] | 1.0 | **New flight model only.** Translational mass used for thrust acceleration, drag response, lift-to-weight, weight, climb, and takeoff behavior. |
 | `EngineThrust` | float[0..100] | derived from speed | **New flight model only.** Engine force used as `thrust / PhysicalMass`; affects acceleration, climb, and energy recovery without being a top-speed cap. |
+| `TakeoffDistanceMultiplier` | float[0.25..4] | 1.0 | **New flight model only.** Scales the effective takeoff threshold during ground roll/rotation. Lower values shorten takeoff distance; higher values lengthen it. |
 | `ThrottleAcceleration` | float[0..1] | 0.02 | Legacy engine-output spool-up. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateUp`. |
 | `EngineDrag` | float[0..1] | 0.015 | Legacy engine-output spool-down. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateDown`. |
 | `NewFlightThrottleResponse` | float[0.1..4] | 1.0 | **New flight model only.** Curves smoothed engine output before thrust. `1` is linear, `<1` gives more low-throttle thrust, `>1` softens the low end. |
@@ -284,6 +285,33 @@ Recommended mass/thrust starting ranges:
 | Strategic bombers | 2.40 - 5.50 | 1.80 - 4.00 |
 | Cargo aircraft | 2.00 - 5.00 | 1.50 - 3.50 |
 
+### Takeoff distance multiplier
+
+`TakeoffDistanceMultiplier` is a runway/takeoff correction for new-flight-model fixed-wing aircraft. It does not rewrite the aircraft's airborne `StallSpeed`, stall recovery, AoA behavior, drag, or climb model. Instead, it scales the effective ground-roll/rotation threshold used while the plane is on or very near the runway:
+
+```text
+effectiveTakeoffSpeed = requiredTakeoffSpeed * TakeoffDistanceMultiplier
+```
+
+Minecraft runways are short and there is no single perfect block-distance formula, but the practical relationship is approximately:
+
+```text
+takeoffDistance ∝ requiredTakeoffSpeed² / forwardAcceleration
+forwardAcceleration ≈ EngineThrust / PhysicalMass - drag
+takeoffDistance ∝ requiredTakeoffSpeed² / (EngineThrust / PhysicalMass - drag)
+```
+
+With the multiplier applied:
+
+```text
+takeoffDistance ∝ (requiredTakeoffSpeed * TakeoffDistanceMultiplier)²
+                / (EngineThrust / PhysicalMass - drag)
+```
+
+That means lowering `TakeoffDistanceMultiplier` reduces takeoff distance strongly, and raising it increases takeoff distance strongly, because required speed enters the approximation quadratically. `EngineThrust`, `PhysicalMass`, drag, gravity, `StallSpeed`/`StallSpeedFactor`, throttle response, and combat flaps still matter. Combat flaps add their configured low-speed lift while the takeoff threshold is being evaluated, so they remain useful for short-field takeoff tuning.
+
+Use this key only as a takeoff/runway correction after the aircraft's mass, thrust, drag, and stall tuning are broadly correct. If a plane lifts off too early with a low multiplier, normal airborne stall and climb behavior still applies: it may mush, sink, or stall if it lacks speed or power.
+
 ## Safe-to-omit legacy notes
 
 Old plane packs can omit every new aerodynamic key. Defaults are applied and `StallSpeedFactor` preserves derived low-speed stall behavior. Use `Mass` only for compatibility with packs that already chose that name; prefer `InertiaMultiplier` for new configs.
@@ -294,4 +322,4 @@ Combat flaps are intentionally gated by `useNewMobilitySystem = true`; legacy pa
 
 Use flaps with low or moderate throttle for landing and low-speed control. High throttle with flaps can improve a short turn, but the extra drag and reduced `MaxSafeSpeed * NewFlightCombatFlapOverspeed` should punish extended high-speed use. Throttle chopping plus flaps helps manage speed but should not be tuned into an instant brake; raise `NewFlightCombatFlapDrag` gradually and keep `NewFlightEngineBrakeDrag` modest.
 
-Debug flight logging (`DebugFlightControl`) includes throttle percent, flap state, airspeed, vertical velocity, physical mass, weight force, engine thrust force, lift force, lift-to-weight ratio, thrust-to-weight ratio, net forward acceleration, applied gravity acceleration, resolved global/override gravity, placement motion-lock state, current motion/cached velocity, lift acceleration, net vertical acceleration, airborne state, AoA, lift loss, drag, control authority, stall, and overspeed state for new-flight tuning.
+Debug flight logging (`DebugFlightControl`) includes throttle percent, flap state, airspeed, vertical velocity, physical mass, weight force, engine thrust force, lift force, lift-to-weight ratio, thrust-to-weight ratio, net forward acceleration, `TakeoffDistanceMultiplier`, base/effective takeoff thresholds, whether takeoff threshold scaling is active, applied gravity acceleration, resolved global/override gravity, placement motion-lock state, current motion/cached velocity, lift acceleration, net vertical acceleration, airborne state, AoA, lift loss, drag, control authority, stall, and overspeed state for new-flight tuning.

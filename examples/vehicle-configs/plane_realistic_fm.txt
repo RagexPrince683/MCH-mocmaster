@@ -22,6 +22,7 @@ YawDamping = 0.35
 InertiaMultiplier = 1.35
 PhysicalMass = 1.0
 EngineThrust = 1.0
+TakeoffDistanceMultiplier = 1.0
 ThrottleAcceleration = 0.018
 EngineDrag = 0.014
 StallSpeed = 0.36

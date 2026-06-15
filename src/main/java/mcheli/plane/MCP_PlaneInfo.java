@@ -53,6 +53,8 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float physicalMass = 1.0F;
    /** New-flight engine force. Combined with mass to produce forward acceleration. */
    public float engineThrust = 0.0F;
+   /** New-flight takeoff speed threshold scaler used only during ground roll/rotation. */
+   public float takeoffDistanceMultiplier = 1.0F;
    /** Legacy maximum engine-output increase per tick. */
    public float throttleAcceleration = 0.02F;
    /** Legacy maximum engine-output decrease per tick. */
@@ -304,6 +306,8 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.physicalMass = this.toFloat(data, 0.05F, 100.0F);
          } else if(item.equalsIgnoreCase("EngineThrust")) {
             this.engineThrust = this.toFloat(data, 0.0F, 100.0F);
+         } else if(item.equalsIgnoreCase("TakeoffDistanceMultiplier")) {
+            this.takeoffDistanceMultiplier = this.toFloat(data, 0.25F, 4.0F);
          } else if(item.equalsIgnoreCase("ThrottleAcceleration")) {
             this.throttleAcceleration = this.toFloat(data, 0.0F, 1.0F);
          } else if(item.equalsIgnoreCase("EngineDrag")) {
