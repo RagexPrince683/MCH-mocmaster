@@ -70,29 +70,66 @@ compileJava {
 }
 
 // ------------------ RESOURCE PROCESSING ------------------
-sourceSets {
-    main {
-        resources {
-            srcDir 'src/main/resources'
-            exclude 'assets/**'
-        }
-    }
-}
-
 processResources {
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
 
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
-        exclude 'assets/**'
         expand 'version': project.version, 'mcversion': project.minecraft.version
     }
 
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
-        exclude 'assets/**'
     }
+}
+
+// ------------------ ASSETS COPY TASK ------------------
+// Copies 'assets/' from project root to the run directory for IDE dev environment
+task copyAssetsToRun(type: Copy) {
+    from 'assets' // <-- your root assets folder
+    into "$buildDir/run/assets" // copied to run folder
+}
+
+// Make runClient depend on assets copy
+tasks.whenTaskAdded { task ->
+    if (task.name == 'runClient') {
+        task.dependsOn copyAssetsToRun
+    }
+}
+
+//HOPEFULLY fix retarded issue with missing textures and other retarded shit in IDE
+task syncMCHeliAssets(type: Copy) {
+    def srcDir = file("$buildDir/run/mods/mcheli/assets/mcheli")
+    def dstDir = file("src/main/resources/assets/mcheli")
+
+    from(srcDir) {
+        include "hud/**"
+        include "models/**"
+        include "shaders/**"
+        include "sounds/**"
+        include "textures/**"
+        include "sounds.json"
+    }
+
+    into(dstDir)
+
+    doFirst {
+        println "[MCH] Syncing runtime assets -> resources"
+        println "  from: $srcDir"
+        println "  into: $dstDir"
+    }
+}
+
+tasks.runClient.dependsOn syncMCHeliAssets
+tasks.build.dependsOn syncMCHeliAssets
+processResources.dependsOn syncMCHeliAssets
+
+
+
+// Optional: ensure clean removes copied assets
+clean.doLast {
+    delete "$buildDir/run/assets"
 }
 
 // ------------------ CODE-ONLY PACKAGING ------------------
@@ -124,84 +161,3 @@ task buildCode(dependsOn: buildcode) {
     description = 'Alias for buildcode.'
 }
 
-// ------------------ ASSETS COPY TASK ------------------
-// Copies 'assets/' from project root to the run directory for IDE dev environment
-task copyAssetsToRun(type: Copy) {
-    from 'assets' // <-- your root assets folder
-    into "$buildDir/run/assets" // copied to run folder
-}
-
-tasks.matching { it.name == 'reobfJar' }.all {
-    if (it.metaClass.respondsTo(it, 'exclude', Object[])) {
-        it.exclude 'assets'
-        it.exclude 'assets/**'
-    }
-}
-
-// ------------------ RUNCLIENT-ONLY ASSET SETUP ------------------
-// Keep the IDE/dev runtime asset setup, but do not wire these tasks into
-// processResources, jar, reobfJar, build, or any release packaging path.
-task copyAssetsToRun(type: Copy) {
-    onlyIf {
-        file('assets').isDirectory()
-    }
-
-    from 'assets'
-    into "$buildDir/run/assets"
-
-    doFirst {
-        println "[MCH] Copying root assets to run directory for runClient only"
-        println "  from: ${file('assets')}"
-        println "  into: ${file("$buildDir/run/assets")}"
-    }
-}
-
-task syncMCHeliAssets(type: Copy) {
-    def srcDir = file("$buildDir/run/mods/mcheli/assets/mcheli")
-    def dstDir = file("${sourceSets.main.output.resourcesDir}/assets/mcheli")
-
-    onlyIf {
-        srcDir.isDirectory()
-    }
-
-    dependsOn processResources
-    mustRunAfter processResources
-
-    from(srcDir) {
-        include "hud/**"
-        include "models/**"
-        include "shaders/**"
-        include "sounds/**"
-        include "textures/**"
-        include "sounds.json"
-    }
-
-    dependsOn processResources
-    mustRunAfter processResources
-
-    from 'assets'
-    into "${sourceSets.main.output.resourcesDir}/assets"
-
-    doFirst {
-        println "[MCH] Syncing runtime assets -> runClient resources"
-        println "  from: $srcDir"
-        println "  into: $dstDir"
-    }
-}
-
-def configureRunClientAssets = { task ->
-    task.dependsOn copyAssetsToRun
-    task.dependsOn syncMCHeliAssets
-}
-
-tasks.matching { it.name == 'runClient' }.all configureRunClientAssets
-tasks.whenTaskAdded { task ->
-    if (task.name == 'runClient') {
-        configureRunClientAssets(task)
-    }
-}
-
-clean.doLast {
-    delete "$buildDir/run/assets"
-    delete "${sourceSets.main.output.resourcesDir}/assets"
-}
