@@ -1876,6 +1876,14 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return false;
    }
 
+   public boolean isLastIdleUnsupportedClimb() {
+      return false;
+   }
+
+   public String getLastIdleThrottleWarning() {
+      return "";
+   }
+
    public double getLastPitchAuthority() {
       return 1.0D;
    }
