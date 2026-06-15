@@ -177,7 +177,7 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
 
 
-         if (!tag.hasKey("DeployStart")) {
+         if (!tag.hasKey("DeployStart") ) { //&& !this.ac.isUAV() crashed the game
             tag.setLong("DeployStart", par1ItemStack.getMaxItemUseDuration());
             //this.getMaxItemUseDuration(stack) - count
             //idk idk this is beyond my mental capacity to even fucking look at rn IDK IDK IDK
@@ -189,6 +189,20 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
             if (world.isRemote)
                player.addChatMessage(new ChatComponentText("Hold click to deploy vehicle..."));
          }
+         //else {
+         //   if(ac.isUAV() || ac.isNewUAV()) {
+         //      if(world.isRemote) {
+         //         if(ac.isSmallUAV()) {
+         //            W_EntityPlayer.addChatMessage(player, "Please use the UAV station OR Portable Controller");
+         //         } else {
+         //            W_EntityPlayer.addChatMessage(player, "Please use the UAV station");
+         //         }
+         //      }
+//
+         //      ac = null;
+         //   }
+         //}
+         //part of the crashed the game awards
 
          if (!player.isUsingItem()) {
             player.setItemInUse(par1ItemStack, this.getMaxItemUseDuration(par1ItemStack));
@@ -212,6 +226,9 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
    @Override
    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
+
+      //TODO if !(ac.isNewUAV()) or regular UAV and if it is tell the player to use a UAV station.
+      // Since our other code for telling the player this info does not work since adding this.
 
       int used = this.getMaxItemUseDuration(stack) - count;
 
