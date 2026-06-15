@@ -175,7 +175,7 @@ aoaSeverity = clamp((abs(AoA) - CriticalAoA) / CriticalAoA, 0, 1)
 demand = max(speedSeverity, aoaSeverity)
 ```
 
-`AoA` is the angle between where the aircraft nose points and where the aircraft is actually moving. It is not the pitch angle by itself. Near-zero airspeed reports `AoA = 0` so parked or nearly stationary aircraft do not feed invalid vectors into stall math.
+`AoA` is the angle between where the aircraft nose points and where the aircraft is actually moving. It is not the pitch angle by itself. At extremely low airspeed, the velocity vector is blended with nose-vs-horizontal attitude so a nose-high aircraft with collapsed airspeed remains aerodynamically stalled instead of appearing clean.
 
 If not already stalling, demand above the small entry hysteresis band starts a stall. While stalling, one good frame is not enough to recover unless both recovery conditions are true in the same tick:
 
@@ -247,6 +247,8 @@ highGAuthority = clamp(1 - highGSeverity * GControlPenalty, 0.05, 1)
 stallAuthority = clamp(1 - stallSeverity * 0.75, 0.25, 1)
 controlAuthority = highGAuthority * stallAuthority
 ```
+
+Throttle does not directly scale this control authority; cutting power reduces thrust-to-weight, lift-to-weight, and energy state, which then increases stall/unsupported-climb suppression and pitch-break recovery.
 
 Pitch also loses authority above compressibility speed:
 
