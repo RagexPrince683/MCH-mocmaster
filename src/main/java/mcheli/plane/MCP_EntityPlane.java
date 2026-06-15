@@ -1737,8 +1737,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                * (0.12D + 0.18D * Math.max(this.speedStallSeverity, this.aoaStallSeverity));
          if(pitchBreak > 1.0E-4D) {
             this.pitchBreakActive = true;
-            double noseUp = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 45.0D, 0.0D, 1.0D);
-            this.setRotPitch(this.getRotPitch() + (float)(pitchBreak * (0.35D + noseUp)));
+            // MCHeli/Minecraft pitch is inverted from aerodynamic sign: nose-up attitude is
+            // negative rotation pitch, and nose-down attitude is positive rotation pitch.
+            double noseUpAttitude = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 45.0D, 0.0D, 1.0D);
+            double noseDownPitchDelta = pitchBreak * (0.35D + noseUpAttitude);
+            this.setRotPitch(this.getRotPitch() + (float)noseDownPitchDelta);
             if(this.pitchAngularVelocity < 0.0F) {
                this.pitchAngularVelocity *= (float)(1.0D - MCH_FlightModel.clamp(this.stallSeverity * 0.35D, 0.0D, 0.35D));
             }

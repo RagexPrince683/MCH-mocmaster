@@ -70,7 +70,7 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `StallInstability` | float[0..5] | 0.35 | Buffet, yaw shake, and deterministic wing-drop strength. |
 | `StallRecoverySpeed` | float[0..10] | 0 = `StallSpeed*1.2` | Speed required, with low AoA, to exit a stall. |
 | `StallSpeedFactor` | float[0..0.95] | 0.22 | Legacy derived stall threshold when `StallSpeed` is omitted. |
-| `StallStrength` | float[0..4] | 0.6 | Legacy sink strength multiplier during stall. |
+| `StallStrength` | float[0..4] | 0.6 | Stall sink and deterministic pitch-break strength. |
 | `DiveSpeedMultiplier` | float[1..2] | 1.25 | Maximum speed cap multiplier in a dive. |
 | `MaxComfortableG` | float[1..30] | 4 | G where high-G control fade starts. |
 | `MaxStructuralG` | float[1..50] | 8 | G where high-G fade reaches the configured penalty and structural hook begins. Warns if below `MaxComfortableG`. |
@@ -208,7 +208,7 @@ motionY -= 0.018 * liftLoss * StallStrength
 pitchBreak = stallSeverity * StallStrength * (0.12 + 0.18 * max(speedSeverity, aoaSeverity))
 ```
 
-`pitchBreak` is applied as a nose-down pitch moment and damps excessive nose-up pitch angular velocity. It is separate from `StallInstability`: `StallInstability` still adds repeatable roll/yaw buffet and wing drop, while `StallStrength` controls the predictable unloading/sink force that helps a stalled aircraft lower the nose, regain airspeed, and recover only after both speed and AoA meet the recovery limits.
+`pitchBreak` is applied as a nose-down pitch moment and damps excessive nose-up pitch angular velocity. MCHeli/Minecraft rotation pitch uses inverted sign convention: nose-up attitude is negative numeric pitch, and nose-down attitude is positive numeric pitch. The pitch-break code therefore adds a positive rotation-pitch delta to lower the nose. It is separate from `StallInstability`: `StallInstability` still adds repeatable roll/yaw buffet and wing drop, while `StallStrength` controls the predictable unloading/sink force that helps a stalled aircraft lower the nose, regain airspeed, and recover only after both speed and AoA meet the recovery limits.
 
 ### G-force, speed scaling, and compressibility
 
