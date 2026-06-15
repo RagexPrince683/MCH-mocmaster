@@ -1070,10 +1070,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    protected double getPropulsiveEngineThrottle() {
       // Idle power keeps an airborne engine and its lift response alive, but it
       // must not make a parked plane taxi merely because a pilot entered it.
-      if(super.onGround && this.getCurrentThrottle() <= 0.0D) {
+      if(this.isGroundedForPropulsion() && this.getCurrentThrottle() <= 0.0D) {
          return 0.0D;
       }
       return this.getEffectiveEngineThrottle();
+   }
+
+   private boolean isGroundedForPropulsion() {
+      return super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0;
    }
 
    protected void onUpdate_ControlNotHovering() {
@@ -1624,6 +1628,19 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       // 计算当前水平速度的大小
       double motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      if(this.isGroundedForPropulsion() && this.getCurrentThrottle() <= 0.0D
+            && super.throttleBack <= 0.0F && motion1 > prevMotion) {
+         if(prevMotion > 1.0E-6D) {
+            double groundSpeedScale = prevMotion / motion1;
+            super.motionX *= groundSpeedScale;
+            super.motionZ *= groundSpeedScale;
+         } else {
+            super.motionX = 0.0D;
+            super.motionZ = 0.0D;
+         }
+         motion1 = prevMotion;
+         this.lastNetForwardAcceleration = Math.min(0.0D, this.lastNetForwardAcceleration);
+      }
       // Diving permits an overspeed only for vehicles explicitly using the new mobility system.
       float speedLimit = this.useNewMobilitySystem()
             ? (float)MCH_FlightModel.getDiveSpeedLimit(levelSpeed, this.getRotPitch(), super.motionY, this.getPlaneInfo().diveSpeedMultiplier)
