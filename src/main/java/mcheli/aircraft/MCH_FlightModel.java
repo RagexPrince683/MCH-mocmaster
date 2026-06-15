@@ -80,13 +80,29 @@ public final class MCH_FlightModel {
                                                 double velocityX, double velocityY, double velocityZ) {
       double forwardLength = Math.sqrt(forwardX * forwardX + forwardY * forwardY + forwardZ * forwardZ);
       double speed = Math.sqrt(velocityX * velocityX + velocityY * velocityY + velocityZ * velocityZ);
-      if(forwardLength < 1.0E-6D || speed < 1.0E-6D) {
+      if(forwardLength < 1.0E-6D) {
          return 0.0D;
+      }
+
+      // At very low airspeed the velocity vector becomes numerically unstable, but
+      // a nose-high fixed-wing aircraft should not look aerodynamically clean. Blend
+      // toward the nose-vs-horizontal attitude so stalled, nearly suspended aircraft
+      // continue to accumulate AoA/stall demand instead of escaping recovery logic.
+      double horizontalForward = Math.sqrt(forwardX * forwardX + forwardZ * forwardZ);
+      double attitudeAoA = Math.toDegrees(Math.atan2(Math.abs(forwardY), horizontalForward));
+      if(speed < 1.0E-6D) {
+         return attitudeAoA;
       }
 
       double dot = (forwardX * velocityX + forwardY * velocityY + forwardZ * velocityZ)
             / (forwardLength * speed);
-      return Math.toDegrees(Math.acos(clamp(dot, -1.0D, 1.0D)));
+      double velocityAoA = Math.toDegrees(Math.acos(clamp(dot, -1.0D, 1.0D)));
+      if(speed >= 0.08D) {
+         return velocityAoA;
+      }
+
+      double velocityBlend = clamp(speed / 0.08D, 0.0D, 1.0D);
+      return attitudeAoA * (1.0D - velocityBlend) + velocityAoA * velocityBlend;
    }
 
    /** Resolves an absolute stall speed while retaining compatibility with StallSpeedFactor. */
