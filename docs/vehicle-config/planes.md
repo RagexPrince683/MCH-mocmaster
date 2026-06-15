@@ -70,7 +70,7 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `StallInstability` | float[0..5] | 0.35 | Buffet, yaw shake, and deterministic wing-drop strength. |
 | `StallRecoverySpeed` | float[0..10] | 0 = `StallSpeed*1.2` | Speed required, with low AoA, to exit a stall. |
 | `StallSpeedFactor` | float[0..0.95] | 0.22 | Legacy derived stall threshold when `StallSpeed` is omitted. |
-| `StallStrength` | float[0..4] | 0.6 | Legacy sink strength multiplier during stall. |
+| `StallStrength` | float[0..4] | 0.6 | Stall sink and deterministic pitch-break strength. |
 | `DiveSpeedMultiplier` | float[1..2] | 1.25 | Maximum speed cap multiplier in a dive. |
 | `MaxComfortableG` | float[1..30] | 4 | G where high-G control fade starts. |
 | `MaxStructuralG` | float[1..50] | 8 | G where high-G fade reaches the configured penalty and structural hook begins. Warns if below `MaxComfortableG`. |
@@ -172,11 +172,13 @@ aoaSeverity = clamp((abs(AoA) - CriticalAoA) / CriticalAoA, 0, 1)
 demand = max(speedSeverity, aoaSeverity)
 ```
 
+`AoA` is the angle between where the aircraft nose points and where the aircraft is actually moving. It is not the pitch angle by itself. Near-zero airspeed reports `AoA = 0` so parked or nearly stationary aircraft do not feed invalid vectors into stall math.
+
 If not already stalling, any positive demand starts a stall. While stalling, recovery requires both:
 
 ```text
 airspeed >= (StallRecoverySpeed if >0 else stallSpeed * 1.2)
-AoA <= CriticalAoA * 0.75
+abs(AoA) <= CriticalAoA * 0.75
 ```
 
 Smoothed stall severity approaches demand quickly when entering and decays more slowly when leaving:
@@ -184,12 +186,31 @@ Smoothed stall severity approaches demand quickly when entering and decays more 
 ```text
 target = stalling ? max(0.12, demand) : 0
 stallSeverity += (target - stallSeverity) * (0.35 if target is rising else 0.18)
-liftLoss = clamp(stallSeverity * StallLiftLoss, 0, 1)
-if motionY > 0: motionY *= 1 - liftLoss * 0.12
-motionY -= 0.018 * liftLoss * StallStrength
 ```
 
-Stall instability adds repeatable roll/yaw/pitch buffet using `StallInstability * stallSeverity`.
+Airborne wing lift is then filtered by airspeed, AoA, throttle/flap lift power, and stall lift loss:
+
+```text
+airspeedLift = clamp((airspeed - stallSpeed * 0.45) / max(0.05, stallSpeed * 1.35), 0, 1.25)
+aoaLift = clamp(1 - max(0, AoA - CriticalAoA) / max(1, CriticalAoA), 0, 1)
+liftLoss = clamp(stallSeverity * StallLiftLoss, 0, 1)
+stallLift = 1 - liftLoss
+liftForce = gravity * clamp(liftPower, 0, 2.5) * airspeedLift * aoaLift * stallLift
+```
+
+This means pointing the nose near vertical does not create maximum lift unless the velocity vector, airspeed, and AoA are still within valid flying conditions. Combat flaps and low-throttle lift retention preserve takeoff/climb headroom, but they are still multiplied by AoA and stall lift loss.
+
+Developed stalls also apply sink and a deterministic pitch break:
+
+```text
+if motionY > 0: motionY *= 1 - liftLoss * 0.12
+motionY -= 0.018 * liftLoss * StallStrength
+pitchBreak = stallSeverity * StallStrength * (0.12 + 0.18 * max(speedSeverity, aoaSeverity))
+```
+
+`pitchBreak` is applied as a nose-down pitch moment and damps excessive nose-up pitch angular velocity. MCHeli/Minecraft rotation pitch uses inverted sign convention: nose-up attitude is negative numeric pitch, and nose-down attitude is positive numeric pitch. The pitch-break code therefore adds a positive rotation-pitch delta to lower the nose. It is separate from `StallInstability`: `StallInstability` still adds repeatable roll/yaw buffet and wing drop, while `StallStrength` controls the predictable unloading/sink force that helps a stalled aircraft lower the nose, regain airspeed, and recover only after both speed and AoA meet the recovery limits.
+
+If stalling feels too weak for a specific aircraft, tune the asset first. Lower `CriticalAoA` to make excessive-AoA stalls begin earlier, raise `StallLiftLoss` to remove more lift at full stall, raise `StallStrength` to increase sink and pitch-break unloading, and raise `StallInstability` only when you want more buffet/wing drop. Change code only when the same weakness appears across many correctly tuned `useNewMobilitySystem = true` planes or when the documented formulas no longer match observed behavior.
 
 ### G-force, speed scaling, and compressibility
 
@@ -344,4 +365,4 @@ Combat flaps are intentionally gated by `useNewMobilitySystem = true`; legacy pa
 
 Use flaps with low or moderate throttle for landing and low-speed control. High throttle with flaps can improve a short turn, but the extra drag and reduced `MaxSafeSpeed * NewFlightCombatFlapOverspeed` should punish extended high-speed use. Throttle chopping plus flaps helps manage speed but should not be tuned into an instant brake; raise `NewFlightCombatFlapDrag` gradually and keep `NewFlightEngineBrakeDrag` modest.
 
-Debug flight logging (`DebugFlightControl`) includes throttle percent, flap state, airspeed, vertical velocity, physical mass, weight force, engine thrust force, lift force, lift-to-weight ratio, thrust-to-weight ratio, net forward acceleration, `TakeoffDistanceMultiplier`, base/effective takeoff thresholds, whether takeoff threshold scaling is active, applied gravity acceleration, resolved global/override gravity, placement motion-lock state, current motion/cached velocity, lift acceleration, net vertical acceleration, airborne state, AoA, lift loss, drag, control authority, stall, and overspeed state for new-flight tuning.
+Debug flight logging (`DebugFlightControl`) includes throttle percent, flap state, airspeed, vertical velocity, physical mass, weight force, engine thrust force, lift force, lift-to-weight ratio, thrust-to-weight ratio, net forward acceleration, `TakeoffDistanceMultiplier`, base/effective takeoff thresholds, whether takeoff threshold scaling is active, applied gravity acceleration, resolved global/override gravity, placement motion-lock state, current motion/cached velocity, lift acceleration, net vertical acceleration, airborne state, velocity-derived `aoaFromVelocity`, `criticalAoA`, `stallDemand`, `speedSeverity`, `aoaSeverity`, smoothed stall severity, lift loss, drag, control authority, pitch-break state, and overspeed state for new-flight tuning.
