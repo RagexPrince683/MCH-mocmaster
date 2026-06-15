@@ -1067,6 +1067,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             + (1.0D - (double)info.newFlightIdleThrottle) * curved, 0.0D, 1.0D);
    }
 
+   protected double getPropulsiveEngineThrottle() {
+      // Idle power keeps an airborne engine and its lift response alive, but it
+      // must not make a parked plane taxi merely because a pilot entered it.
+      if(super.onGround && this.getCurrentThrottle() <= 0.0D) {
+         return 0.0D;
+      }
+      return this.getEffectiveEngineThrottle();
+   }
+
    protected void onUpdate_ControlNotHovering() {
       // 判断是否不处于炮手模式
       if (!super.isGunnerMode) {
@@ -1497,10 +1506,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
 
       // 计算油门1的值，当前油门除以10
-      float throttle1 = (float)((this.useNewMobilitySystem() ? this.getEffectiveEngineThrottle() : this.getEngineThrottle()) / 10.0D);
+      double propulsiveThrottle = this.useNewMobilitySystem()
+            ? this.getPropulsiveEngineThrottle() : this.getEngineThrottle();
+      float throttle1 = (float)(propulsiveThrottle / 10.0D);
       if(this.useNewMobilitySystem() && this.getPlaneInfo() != null) {
          double mass = this.getPhysicalMass();
-         double thrustForce = (double)this.getPlaneInfo().engineThrust * this.getEffectiveEngineThrottle();
+         double thrustForce = (double)this.getPlaneInfo().engineThrust * propulsiveThrottle;
          throttle1 = (float)(thrustForce / mass / 10.0D);
          this.lastEngineThrustForce = thrustForce;
       } else {
