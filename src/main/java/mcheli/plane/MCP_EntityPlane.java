@@ -948,17 +948,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double airspeed = this.getAirspeed();
       double airspeedLift = MCH_FlightModel.clamp((airspeed - stallSpeed * 0.45D) / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.25D);
       double aoaLift = MCH_FlightModel.clamp(1.0D - Math.max(0.0D, Math.abs(this.angleOfAttack) - (double)info.criticalAoA) / Math.max(1.0D, (double)info.criticalAoA), 0.0D, 1.0D);
+      double liftPower = (double)info.newFlightLowThrottleLiftRetention
+            + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * this.getEffectiveEngineThrottle();
+      if(this.isCombatFlapsDeployed()) {
+         liftPower += (double)info.newFlightCombatFlapLift;
+      }
       double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)info.stallLiftLoss, 0.0D, 1.0D);
       this.lastLiftLoss = liftLoss;
       double stallLift = 1.0D - liftLoss;
-      double validLiftEnergy = MCH_FlightModel.clamp((airspeed - stallSpeed) / Math.max(0.05D, stallSpeed * 0.5D), 0.0D, 1.0D)
-            * aoaLift * stallLift;
-      double retainedLowThrottleLift = (double)info.newFlightLowThrottleLiftRetention
-            * (1.0D - this.getEffectiveEngineThrottle()) * validLiftEnergy;
-      double liftPower = this.getEffectiveEngineThrottle() + retainedLowThrottleLift;
-      if(this.isCombatFlapsDeployed()) {
-         liftPower += (double)info.newFlightCombatFlapLift * validLiftEnergy;
-      }
       this.lastLiftCoefficient = aoaLift * stallLift;
       double mass = this.getPhysicalMass();
       double weightForce = gravityAccel * mass;
@@ -975,11 +972,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftForceBeforeStallLoss = liftBeforeStallLoss;
       this.lastLiftForceAfterStallLoss = liftForce;
       this.lastNetVerticalAcceleration = netAccel;
-      boolean validWingLift = liftForce > weightForce && this.speedStallSeverity < 0.25D
-            && this.stallSeverity < 0.15D && this.aoaStallSeverity < 0.25D;
-      boolean validPoweredClimb = this.getThrustToWeightRatio() >= 1.0D && this.speedStallSeverity < 0.35D
-            && this.stallSeverity < 0.25D;
-      this.lastValidClimb = validWingLift || validPoweredClimb;
+      this.lastValidClimb = liftForce > weightForce || this.getThrustToWeightRatio() >= 1.0D;
    }
 
    private void applyNewFlightTakeoffAssist(boolean levelOff, double waterDepth) {
@@ -1005,8 +998,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastEffectiveTakeoffSpeed = effectiveTakeoffSpeed;
       boolean multiplierAdjusted = Math.abs(multiplier - 1.0D) > 1.0E-4D;
       this.lastTakeoffMultiplierActive = multiplierAdjusted && horizontalSpeed < baseTakeoffSpeed * 1.15D;
-      this.lastValidTakeoff = horizontalSpeed >= effectiveTakeoffSpeed && this.stallSeverity < 0.15D
-            && this.speedStallSeverity < 0.35D && this.aoaStallSeverity < 0.25D;
+      this.lastValidTakeoff = horizontalSpeed >= effectiveTakeoffSpeed && this.stallSeverity < 0.15D;
       if(!multiplierAdjusted) {
          return;
       }
@@ -1785,9 +1777,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
                      this.getPlaneInfo().stallSpeedFactor);
                double speedHeadroom = MCH_FlightModel.clamp(this.getAirspeed() / Math.max(0.05D, stallSpeed * 1.2D), 0.0D, 1.0D);
-               double unstalledEnergy = speedHeadroom * (1.0D - this.stallSeverity)
-                     * (1.0D - MCH_FlightModel.clamp(this.aoaStallSeverity, 0.0D, 1.0D));
-               double supportedVerticalThrust = MCH_FlightModel.clamp(thrustToWeight * unstalledEnergy, 0.0D, 1.0D);
+               double supportedVerticalThrust = thrustToWeight >= 1.0D ? 1.0D
+                     : MCH_FlightModel.clamp(thrustToWeight * speedHeadroom * (1.0D - this.stallSeverity), 0.0D, 1.0D);
                verticalThrust *= supportedVerticalThrust;
                if(supportedVerticalThrust < 1.0D) {
                   this.lastStallSuppressedLiftHeadroom = true;
