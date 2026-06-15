@@ -97,14 +97,21 @@ public final class MCH_FlightModel {
       return Math.max(0.05D, (double)topSpeed * (double)stallSpeedFactor);
    }
 
+   /** Returns the low-speed portion of stall demand. */
+   public static double getSpeedStallSeverity(double speed, double stallSpeed) {
+      return stallSpeed > 1.0E-6D ? clamp((stallSpeed - speed) / stallSpeed, 0.0D, 1.0D) : 0.0D;
+   }
+
+   /** Returns the excessive-AoA portion of stall demand. */
+   public static double getAoAStallSeverity(double angleOfAttack, float criticalAoA) {
+      double critical = Math.max(1.0D, (double)criticalAoA);
+      return clamp((Math.abs(angleOfAttack) - critical) / critical, 0.0D, 1.0D);
+   }
+
    /** Returns the stronger of the low-speed and excessive-AoA stall demands. */
    public static double getAerodynamicStallSeverity(double speed, double angleOfAttack,
                                                      double stallSpeed, float criticalAoA) {
-      double speedSeverity = stallSpeed > 1.0E-6D
-            ? clamp((stallSpeed - speed) / stallSpeed, 0.0D, 1.0D) : 0.0D;
-      double critical = Math.max(1.0D, (double)criticalAoA);
-      double aoaSeverity = clamp((Math.abs(angleOfAttack) - critical) / critical, 0.0D, 1.0D);
-      return Math.max(speedSeverity, aoaSeverity);
+      return Math.max(getSpeedStallSeverity(speed, stallSpeed), getAoAStallSeverity(angleOfAttack, criticalAoA));
    }
 
    /** Control surfaces lose authority progressively as the stall develops. */
