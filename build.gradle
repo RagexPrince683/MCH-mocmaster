@@ -70,64 +70,75 @@ compileJava {
 }
 
 // ------------------ RESOURCE PROCESSING ------------------
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/main/resources'
+            exclude 'assets/**'
+        }
+    }
+}
+
 processResources {
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
 
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
+        exclude 'assets/**'
         expand 'version': project.version, 'mcversion': project.minecraft.version
     }
 
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
+        exclude 'assets/**'
     }
 }
 
-// ------------------ ASSETS COPY TASK ------------------
-// Copies 'assets/' from project root to the run directory for IDE dev environment
+tasks.withType(Jar) {
+    exclude 'assets'
+    exclude 'assets/**'
+}
+
+tasks.matching { it.name == 'reobfJar' }.all {
+    if (it.metaClass.respondsTo(it, 'exclude', Object[])) {
+        it.exclude 'assets'
+        it.exclude 'assets/**'
+    }
+}
+
+// ------------------ RUNCLIENT-ONLY ASSET SETUP ------------------
+// Keep the IDE/dev runtime asset setup, but do not wire these tasks into
+// processResources, jar, reobfJar, build, or any release packaging path.
 task copyAssetsToRun(type: Copy) {
-    from 'assets' // <-- your root assets folder
-    into "$buildDir/run/assets" // copied to run folder
-}
-
-// Make runClient depend on assets copy
-tasks.whenTaskAdded { task ->
-    if (task.name == 'runClient') {
-        task.dependsOn copyAssetsToRun
-    }
-}
-
-//HOPEFULLY fix retarded issue with missing textures and other retarded shit in IDE
-task syncMCHeliAssets(type: Copy) {
-    def srcDir = file("$buildDir/run/mods/mcheli/assets/mcheli")
-    def dstDir = file("src/main/resources/assets/mcheli")
-
-    from(srcDir) {
-        include "hud/**"
-        include "models/**"
-        include "shaders/**"
-        include "sounds/**"
-        include "textures/**"
-        include "sounds.json"
+    onlyIf {
+        file('assets').isDirectory()
     }
 
-    into(dstDir)
+    dependsOn processResources
+    mustRunAfter processResources
+
+    from 'assets'
+    into "${sourceSets.main.output.resourcesDir}/assets"
 
     doFirst {
-        println "[MCH] Syncing runtime assets -> resources"
-        println "  from: $srcDir"
-        println "  into: $dstDir"
+        println "[MCH] Copying root assets for runClient only"
+        println "  from: ${file('assets')}"
+        println "  into: ${sourceSets.main.output.resourcesDir}/assets"
     }
 }
 
-tasks.runClient.dependsOn syncMCHeliAssets
-tasks.build.dependsOn syncMCHeliAssets
-processResources.dependsOn syncMCHeliAssets
+def configureRunClientAssets = { task ->
+    task.dependsOn copyAssetsToRun
+}
 
+tasks.matching { it.name == 'runClient' }.all configureRunClientAssets
+tasks.whenTaskAdded { task ->
+    if (task.name == 'runClient') {
+        configureRunClientAssets(task)
+    }
+}
 
-
-// Optional: ensure clean removes copied assets
 clean.doLast {
-    delete "$buildDir/run/assets"
+    delete "${sourceSets.main.output.resourcesDir}/assets"
 }
