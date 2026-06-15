@@ -726,6 +726,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       // the direct mount. This prevents UAV controls from becoming active while the
       // player's physical position and chunk tracking are still at the station.
       player.setPositionAndUpdate(this.posX, this.posY + this.getMountedYOffset(), this.posZ);
+      this.clearPlacementMotionLock();
       player.mountEntity(this);
       if(player.ridingEntity == this && super.riddenByEntity == player) {
          this.lastRiddenByEntity = player;
@@ -2290,6 +2291,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(this.getCountOnUpdate() < 2) {
          this.prevPosition.clear(Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
       }
+      if(this.placementMotionLocked && this.getRiddenByEntity() != null) {
+         this.clearPlacementMotionLock();
+      }
       if(this.placementMotionLocked && !super.worldObj.isRemote) {
          this.clearPlacementMotionState();
       }
@@ -2639,6 +2643,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       double lockedPosY = super.posY;
       double lockedPosZ = super.posZ;
       this.onUpdateAircraft();
+      if(this.placementMotionLocked && this.getRiddenByEntity() != null) {
+         this.clearPlacementMotionLock();
+      }
       if(this.placementMotionLocked && !super.worldObj.isRemote) {
          this.setPosition(lockedPosX, lockedPosY, lockedPosZ);
          this.clearPlacementMotionState();
@@ -6794,6 +6801,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.lastRiddenByEntity = null;
          initRadar();
          if(!this.worldObj.isRemote) {
+            this.clearPlacementMotionLock();
             player.mountEntity(this);
             if(!this.keepOnRideRotation) {
                mountMobToSeats();

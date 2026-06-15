@@ -325,6 +325,9 @@ public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnDa
          MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=seat_is_rack_or_invalid seatId=%d", new Object[]{Integer.valueOf(this.seatID)});
          return false;
       }
+      if(!this.worldObj.isRemote) {
+         getParent().clearPlacementMotionLock();
+      }
       player.mountEntity(this);
       return true;
    }
