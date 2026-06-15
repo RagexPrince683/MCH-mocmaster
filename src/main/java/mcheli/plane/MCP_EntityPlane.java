@@ -88,6 +88,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastPitchBreakAngularVelocity;
    /** Last total nose-down stall pitch moment applied for debug output. */
    private double lastStallPitchMoment;
+   /** Last throttle-deficit nose-down pitch moment applied for debug output. */
+   private double lastThrustPitchDownMoment;
    /** Last lift coefficient multiplier after AoA and stall lift loss. */
    private double lastLiftCoefficient;
    /** True when current stall state is blending back toward normal flight. */
@@ -160,6 +162,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastValidClimb = false;
       this.lastPitchBreakAngularVelocity = 0.0D;
       this.lastStallPitchMoment = 0.0D;
+      this.lastThrustPitchDownMoment = 0.0D;
       this.lastLiftCoefficient = 0.0D;
       this.stallRecovering = false;
       this.lastNoseUpPitchSuppression = 0.0D;
@@ -568,6 +571,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    public double getLastStallPitchMoment() {
       return this.lastStallPitchMoment;
+   }
+
+   public double getLastThrustPitchDownMoment() {
+      return this.lastThrustPitchDownMoment;
    }
 
    public double getLastLiftCoefficient() {
@@ -1025,6 +1032,39 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftAcceleration = Math.max(this.lastLiftAcceleration, liftAccel);
    }
 
+
+   private void applyThrottleDeficitPitchDown(boolean nearGround, double waterDepth, boolean levelOff) {
+      this.lastThrustPitchDownMoment = 0.0D;
+      if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null || nearGround || waterDepth != 0.0D
+            || this.getNozzleRotation() > 0.01F || levelOff) {
+         return;
+      }
+
+      double noseUpAttitude = MCH_FlightModel.clamp((double)(-this.getRotPitch() - 8.0F) / 42.0D, 0.0D, 1.0D);
+      if(noseUpAttitude <= 0.0D) {
+         return;
+      }
+
+      double throttleDeficit = MCH_FlightModel.clamp(1.0D - this.getEffectiveEngineThrottle(), 0.0D, 1.0D);
+      double thrustDeficit = MCH_FlightModel.clamp(1.0D - this.getThrustToWeightRatio(), 0.0D, 1.0D);
+      double climbDemand = super.motionY > 0.0D ? MCH_FlightModel.clamp(super.motionY / 0.18D, 0.0D, 1.0D) : 0.35D;
+      double liftDeficit = MCH_FlightModel.clamp(1.0D - this.getLiftToWeightRatio(), 0.0D, 1.0D);
+      double energyDeficit = Math.max(throttleDeficit * thrustDeficit, liftDeficit * 0.6D);
+      double legacyStrengthScale = MCH_FlightModel.clamp((double)this.getPlaneInfo().stallStrength / 0.6D, 0.0D, 4.0D);
+      double pitchMoment = energyDeficit * noseUpAttitude * (0.35D + 0.65D * climbDemand)
+            * (double)this.getPlaneInfo().stallPitchRecoveryStrength * legacyStrengthScale * 0.45D;
+      if(pitchMoment <= 1.0E-4D) {
+         return;
+      }
+
+      double appliedPitchDownVelocity = MCH_FlightModel.clamp(pitchMoment, 0.0D, 0.65D);
+      this.pitchAngularVelocity += (float)appliedPitchDownVelocity;
+      if(this.pitchAngularVelocity < 0.0F) {
+         this.pitchAngularVelocity *= (float)(1.0D - MCH_FlightModel.clamp(energyDeficit * noseUpAttitude * 0.45D, 0.0D, 0.45D));
+      }
+      this.lastThrustPitchDownMoment = appliedPitchDownVelocity;
+   }
+
    public void resetNewFlightPlacementMotion() {
       if(this.getPlaneInfo() == null || !this.getPlaneInfo().useNewMobilitySystem) {
          return;
@@ -1055,6 +1095,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastValidClimb = false;
       this.lastPitchBreakAngularVelocity = 0.0D;
       this.lastStallPitchMoment = 0.0D;
+      this.lastThrustPitchDownMoment = 0.0D;
       this.lastLiftCoefficient = 0.0D;
       this.stallRecovering = false;
       this.lastNoseUpPitchSuppression = 0.0D;
@@ -1215,6 +1256,18 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    protected double getEngineThrottle() {
       return this.useNewMobilitySystem() ? this.engineThrottle : this.getCurrentThrottle();
+   }
+
+   public double getDebugEngineThrottle() {
+      return this.getEngineThrottle();
+   }
+
+   public double getDebugEffectiveEngineThrottle() {
+      return this.getEffectiveEngineThrottle();
+   }
+
+   public double getDebugPropulsiveEngineThrottle() {
+      return this.getPropulsiveEngineThrottle();
    }
 
    protected double getEffectiveEngineThrottle() {
@@ -1692,6 +1745,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastStallSuppressedLiftHeadroom = false;
       this.lastPitchBreakAngularVelocity = 0.0D;
       this.lastStallPitchMoment = 0.0D;
+      this.lastThrustPitchDownMoment = 0.0D;
 
       // 如果喷嘴的旋转角度大于0.001F
       if(this.getNozzleRotation() > 0.001F) {
@@ -1867,6 +1921,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastLiftLoss = 0.0D;
       }
       this.pitchBreakActive = false;
+      this.applyThrottleDeficitPitchDown(nearGround, dp, levelOff);
       if(this.useNewMobilitySystem() && !nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
          double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)this.getPlaneInfo().stallLiftLoss, 0.0D, 1.0D);
          this.lastLiftLoss = liftLoss;
