@@ -439,7 +439,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          GL11.glPopMatrix();
          GL11.glPushMatrix();
          GL11.glTranslated(x, y, z);
-         MCH_BoundingBox[] arr$ = e.extraBoundingBox;
+         MCH_BoundingBox[] arr$ = e.getCalculatedExtraBoundingBoxes();
          int len$ = arr$.length;
 
          for(int i$ = 0; i$ < len$; ++i$) {

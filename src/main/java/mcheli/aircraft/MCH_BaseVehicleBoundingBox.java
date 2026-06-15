@@ -66,7 +66,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
       if(!this.isDeckTopContact(this, other, true)) {
          offset = super.calculateXOffset(other, offset);
       }
-      for(MCH_BoundingBox bb : this.ac.extraBoundingBox) {
+      for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
          if(!this.isDeckTopContact(bb.boundingBox, other, true)) {
             offset = bb.boundingBox.calculateXOffset(other, offset);
          }
@@ -89,7 +89,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
       }
 
       offset = super.calculateYOffset(other, offset);
-      for(MCH_BoundingBox bb : this.ac.extraBoundingBox) {
+      for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
          AxisAlignedBB deck = bb.boundingBox;
          AxisAlignedBB previousDeck = bb.backupBoundingBox;
          offset = deck.calculateYOffset(other, offset);
@@ -115,7 +115,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
       if(!this.isDeckTopContact(this, other, false)) {
          offset = super.calculateZOffset(other, offset);
       }
-      for(MCH_BoundingBox bb : this.ac.extraBoundingBox) {
+      for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
          if(!this.isDeckTopContact(bb.boundingBox, other, false)) {
             offset = bb.boundingBox.calculateZOffset(other, offset);
          }
@@ -133,7 +133,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          ret = true;
       }
 
-      MCH_BoundingBox[] arr$ = this.ac.extraBoundingBox;
+      MCH_BoundingBox[] arr$ = this.ac.getCalculatedExtraBoundingBoxes();
       int len$ = arr$.length;
 
       for(int i$ = 0; i$ < len$; ++i$) {
@@ -261,7 +261,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          dist = v1.distanceTo(mop.hitVec);
       }
 
-      MCH_BoundingBox[] arr$ = this.ac.extraBoundingBox;
+      MCH_BoundingBox[] arr$ = this.ac.getCalculatedExtraBoundingBoxes();
       int len$ = arr$.length;
 
       for(int i$ = 0; i$ < len$; ++i$) {

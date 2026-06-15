@@ -718,9 +718,10 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
                            prm.size = ((float)super.rand.nextInt(5) + 5.0F) * 1.0F;
                            prm.setColor(0.7F + super.rand.nextFloat() * 0.1F, c, c, c);
                            MCH_ParticlesUtil.spawnParticle(prm);
-                           int ebi = super.rand.nextInt(1 + super.extraBoundingBox.length);
+                           MCH_BoundingBox[] boxes = this.getCalculatedExtraBoundingBoxes();
+                           int ebi = super.rand.nextInt(1 + boxes.length);
                            if(p < 0.3D && ebi > 0) {
-                              AxisAlignedBB bb = super.extraBoundingBox[ebi - 1].boundingBox;
+                              AxisAlignedBB bb = boxes[ebi - 1].boundingBox;
                               double bx = (bb.maxX + bb.minX) / 2.0D;
                               double by = (bb.maxY + bb.minY) / 2.0D;
                               double bz = (bb.maxZ + bb.minZ) / 2.0D;
@@ -1063,7 +1064,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    public void updateCollisionBox() {
       if(this.getAcInfo() != null) {
          //this.WheelMng.updateBlock();
-         MCH_BoundingBox[] arr$ = super.extraBoundingBox;
+         MCH_BoundingBox[] arr$ = this.getCalculatedExtraBoundingBoxes();
          int len$ = arr$.length;
 
          MCH_Config var10000;
