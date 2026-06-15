@@ -96,6 +96,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private boolean stallRecovering;
    /** Fraction of pilot nose-up pitch input currently suppressed by energy/stall state. */
    private double lastNoseUpPitchSuppression;
+   /** Last calculated unsupported-climb severity used by energy and pitch protection. */
+   private double lastUnsupportedClimbSeverity;
+   /** True when the idle-throttle sanity guard detected a low-energy nose-high climb. */
+   private boolean lastIdleUnsupportedClimb;
+   /** Last idle-throttle warning reason emitted through debug output. */
+   private String lastIdleThrottleWarning;
+   /** Last compressibility-limited pitch authority multiplier. */
+   private double lastPitchAuthority;
+   /** Last full control authority multiplier applied before pitch-axis modifiers. */
+   private double lastControlAuthority;
    /** Last airborne state used by the new fixed-wing force model. */
    private boolean lastAirborne;
    /** Local-axis body rates used by fixed-wing damped control response. */
@@ -160,12 +170,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastStallSuppressedLiftHeadroom = false;
       this.lastValidTakeoff = false;
       this.lastValidClimb = false;
+      this.lastIdleUnsupportedClimb = false;
+      this.lastIdleThrottleWarning = "";
       this.lastPitchBreakAngularVelocity = 0.0D;
       this.lastStallPitchMoment = 0.0D;
       this.lastThrustPitchDownMoment = 0.0D;
       this.lastLiftCoefficient = 0.0D;
       this.stallRecovering = false;
       this.lastNoseUpPitchSuppression = 0.0D;
+      this.lastUnsupportedClimbSeverity = 0.0D;
+      this.lastPitchAuthority = 1.0D;
+      this.lastControlAuthority = 1.0D;
       this.lastAirborne = false;
       this.angleOfAttack = 0.0D;
       this.stallSeverity = 0.0D;
@@ -415,6 +430,44 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             * flapAuthority, 0.05D, 1.35D);
    }
 
+   private double getUnsupportedClimbSeverity() {
+      if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null || this.getNozzleRotation() > 0.01F || this.onGround) {
+         return 0.0D;
+      }
+
+      double noseUpAttitude = MCH_FlightModel.clamp((double)(-this.getRotPitch() - 8.0F) / 42.0D, 0.0D, 1.0D);
+      if(noseUpAttitude <= 0.0D || super.motionY <= 0.0D) {
+         return 0.0D;
+      }
+
+      double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
+            this.getPlaneInfo().stallSpeedFactor);
+      double climbSpeedDeficit = MCH_FlightModel.clamp((stallSpeed * 1.2D - this.getAirspeed())
+            / Math.max(0.05D, stallSpeed * 1.2D), 0.0D, 1.0D);
+      double liftDeficit = this.lastWeightForce > 1.0E-6D
+            ? MCH_FlightModel.clamp(1.0D - this.getLiftToWeightRatio(), 0.0D, 1.0D) : 0.0D;
+      double thrustDeficit = MCH_FlightModel.clamp(1.0D - this.getThrustToWeightRatio(), 0.0D, 1.0D);
+      double climbDemand = MCH_FlightModel.clamp(super.motionY / 0.18D, 0.0D, 1.0D);
+      double supportDeficit = Math.max(Math.max(thrustDeficit, liftDeficit),
+            Math.max(climbSpeedDeficit, Math.max(this.stallSeverity, Math.max(this.speedStallSeverity, this.aoaStallSeverity))));
+      double unsupportedClimb = noseUpAttitude * climbDemand * supportDeficit;
+      if(this.isIdleUnsupportedClimb(noseUpAttitude, stallSpeed)) {
+         unsupportedClimb = Math.max(unsupportedClimb, 0.35D + 0.65D * noseUpAttitude);
+      }
+      return MCH_FlightModel.clamp(unsupportedClimb, 0.0D, 1.0D);
+   }
+
+
+   private boolean isIdleUnsupportedClimb(double noseUpAttitude, double stallSpeed) {
+      if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null || this.getNozzleRotation() > 0.01F || this.onGround) {
+         return false;
+      }
+
+      double recoverySpeed = this.getPlaneInfo().stallRecoverySpeed > 0.0F
+            ? (double)this.getPlaneInfo().stallRecoverySpeed : stallSpeed * 1.2D;
+      return this.getPropulsiveEngineThrottle() <= 0.01D && noseUpAttitude > 0.05D && this.getAirspeed() < recoverySpeed;
+   }
+
    private double getNoseUpPitchSuppression() {
       if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null || this.getNozzleRotation() > 0.01F || this.onGround) {
          return 0.0D;
@@ -423,16 +476,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double liftDeficit = this.lastWeightForce > 1.0E-6D
             ? MCH_FlightModel.clamp(1.0D - this.getLiftToWeightRatio(), 0.0D, 1.0D) : 0.0D;
       double noseUpAttitude = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 45.0D, 0.0D, 1.0D);
-      double lowEnergyNoseHigh = Math.max(super.motionY > 0.0D ? MCH_FlightModel.clamp(super.motionY / 0.18D, 0.0D, 1.0D) : 0.0D,
-            this.speedStallSeverity);
-      double unsupportedClimb = this.getRotPitch() < -15.0F
-            ? MCH_FlightModel.clamp((-this.getRotPitch() - 15.0D) / 45.0D, 0.0D, 1.0D)
-                  * MCH_FlightModel.clamp(1.0D - this.getThrustToWeightRatio(), 0.0D, 1.0D)
-                  * lowEnergyNoseHigh
-            : 0.0D;
       double aerodynamicDeficit = Math.max(Math.max(this.stallSeverity, this.aoaStallSeverity),
             Math.max(this.speedStallSeverity, liftDeficit));
-      double energyDeficit = Math.max(aerodynamicDeficit, unsupportedClimb);
+      double energyDeficit = Math.max(aerodynamicDeficit, this.getUnsupportedClimbSeverity());
       return MCH_FlightModel.clamp(energyDeficit * (0.35D + 0.65D * noseUpAttitude), 0.0D, 1.0D);
    }
 
@@ -530,7 +576,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    public double getThrustToWeightRatio() {
-      return this.lastWeightForce > 1.0E-6D ? this.lastEngineThrustForce / this.lastWeightForce : 0.0D;
+      return this.lastEngineThrustForce / Math.max(this.lastWeightForce, 1.0E-6D);
    }
 
    public double getLastNetForwardAcceleration() {
@@ -589,6 +635,31 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    public double getLastNoseUpPitchSuppression() {
       return this.lastNoseUpPitchSuppression;
    }
+
+   public double getLastUnsupportedClimbSeverity() {
+      return this.lastUnsupportedClimbSeverity;
+   }
+
+   public boolean isLastIdleUnsupportedClimb() {
+      return this.lastIdleUnsupportedClimb;
+   }
+
+   public String getLastIdleThrottleWarning() {
+      return this.lastIdleThrottleWarning;
+   }
+
+   public boolean isUnsupportedClimb() {
+      return this.lastUnsupportedClimbSeverity > 1.0E-3D;
+   }
+
+   public double getLastPitchAuthority() {
+      return this.lastPitchAuthority;
+   }
+
+   public double getLastControlAuthority() {
+      return this.lastControlAuthority;
+   }
+
 
    public boolean isLastAirborne() {
       return this.lastAirborne;
@@ -756,6 +827,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       float controlAuthority = this.getControlAuthorityFactor();
       double pitchAuthority = MCH_FlightModel.getCompressibilityPitchAuthority(this.getAirspeed(),
             this.getCompressibilitySpeed(), this.getMaxSafeSpeed(), this.getPlaneInfo().compressibilityPitchPenalty);
+      this.lastControlAuthority = controlAuthority;
+      this.lastPitchAuthority = pitchAuthority;
       pitch *= controlAuthority * (float)pitchAuthority;
       this.lastNoseUpPitchSuppression = this.getNoseUpPitchSuppression();
       if(pitch < 0.0F && this.lastNoseUpPitchSuppression > 0.0D) {
@@ -925,6 +998,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       return 0.008D;
    }
 
+
+   private void updateNewFlightThrustForce() {
+      if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null) {
+         this.lastEngineThrustForce = 0.0D;
+         return;
+      }
+      double propulsiveThrottle = MCH_FlightModel.clamp(this.getPropulsiveEngineThrottle(), 0.0D, 1.0D);
+      this.lastEngineThrustForce = Math.max(0.0D, (double)this.getPlaneInfo().engineThrust * propulsiveThrottle);
+   }
+
    private void applyNewFlightVerticalForces() {
       MCP_PlaneInfo info = this.getPlaneInfo();
       boolean airborne = !super.onGround && MCH_Lib.getBlockIdY(this, 1, -2) == 0;
@@ -972,7 +1055,19 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftForceBeforeStallLoss = liftBeforeStallLoss;
       this.lastLiftForceAfterStallLoss = liftForce;
       this.lastNetVerticalAcceleration = netAccel;
-      this.lastValidClimb = liftForce > weightForce || this.getThrustToWeightRatio() >= 1.0D;
+      double propulsiveThrottle = this.getPropulsiveEngineThrottle();
+      double thrustForce = Math.max(0.0D, (double)info.engineThrust * propulsiveThrottle);
+      double thrustToWeight = thrustForce / Math.max(weightForce, 1.0E-6D);
+      double liftToWeight = liftForce / Math.max(weightForce, 1.0E-6D);
+      double climbSustainSpeed = stallSpeed * 1.2D;
+      boolean aeroClimbValid = liftToWeight > 1.0D && this.speedStallSeverity < 0.15D
+            && this.stallSeverity < 0.15D && this.aoaStallSeverity < 0.15D;
+      boolean poweredClimbValid = propulsiveThrottle > 0.01D && thrustToWeight > 0.75D
+            && airspeed > climbSustainSpeed && this.stallSeverity < 0.15D && this.aoaStallSeverity < 0.15D;
+      this.lastValidClimb = aeroClimbValid || poweredClimbValid;
+      if(this.isIdleUnsupportedClimb(MCH_FlightModel.clamp((double)(-this.getRotPitch() - 8.0F) / 42.0D, 0.0D, 1.0D), stallSpeed)) {
+         this.lastValidClimb = false;
+      }
    }
 
    private void applyNewFlightTakeoffAssist(boolean levelOff, double waterDepth) {
@@ -1095,12 +1190,19 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastStallSuppressedLiftHeadroom = false;
       this.lastValidTakeoff = false;
       this.lastValidClimb = false;
+      this.lastIdleUnsupportedClimb = false;
+      this.lastIdleThrottleWarning = "";
       this.lastPitchBreakAngularVelocity = 0.0D;
       this.lastStallPitchMoment = 0.0D;
       this.lastThrustPitchDownMoment = 0.0D;
       this.lastLiftCoefficient = 0.0D;
       this.stallRecovering = false;
       this.lastNoseUpPitchSuppression = 0.0D;
+      this.lastUnsupportedClimbSeverity = 0.0D;
+      this.lastIdleUnsupportedClimb = false;
+      this.lastIdleThrottleWarning = "";
+      this.lastPitchAuthority = 1.0D;
+      this.lastControlAuthority = 1.0D;
       this.lastAirborne = false;
       this.pitchAngularVelocity = this.rollAngularVelocity = this.yawAngularVelocity = 0.0F;
       this.currentGForce = 1.0D;
@@ -1245,10 +1347,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
 
       if(this.useNewMobilitySystem()) {
-         this.engineThrottle = MCH_FlightModel.approachEngineOutput(this.engineThrottle, this.getCurrentThrottle(),
-               this.getPlaneInfo().throttleAcceleration, this.getPlaneInfo().engineDrag);
+         this.engineThrottle = MCH_FlightModel.clamp(MCH_FlightModel.approachEngineOutput(this.engineThrottle,
+               MCH_FlightModel.clamp(this.getCurrentThrottle(), 0.0D, 1.0D),
+               this.getPlaneInfo().throttleAcceleration, this.getPlaneInfo().engineDrag), 0.0D, 1.0D);
       } else {
-         this.engineThrottle = this.getCurrentThrottle();
+         this.engineThrottle = MCH_FlightModel.clamp(this.getCurrentThrottle(), 0.0D, 1.0D);
       }
 
       if(!this.canUseCombatFlaps()) {
@@ -1257,7 +1360,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    protected double getEngineThrottle() {
-      return this.useNewMobilitySystem() ? this.engineThrottle : this.getCurrentThrottle();
+      return MCH_FlightModel.clamp(this.useNewMobilitySystem() ? this.engineThrottle : this.getCurrentThrottle(), 0.0D, 1.0D);
    }
 
    public double getDebugEngineThrottle() {
@@ -1274,7 +1377,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    protected double getEffectiveEngineThrottle() {
       if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null) {
-         return this.getEngineThrottle();
+         return MCH_FlightModel.clamp(this.getEngineThrottle(), 0.0D, 1.0D);
       }
 
       MCP_PlaneInfo info = this.getPlaneInfo();
@@ -1286,12 +1389,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    protected double getPropulsiveEngineThrottle() {
-      // Idle power keeps an airborne engine and its lift response alive, but it
-      // must not make a parked plane taxi merely because a pilot entered it.
-      if(this.isGroundedForPropulsion() && this.getCurrentThrottle() <= 0.0D) {
+      // Zero commanded throttle means zero propulsive thrust. Keep aerodynamic
+      // evaluation active; do not turn idle into a powered-climb fallback.
+      if(this.getCurrentThrottle() <= 0.01D || this.isGroundedForPropulsion() && this.getCurrentThrottle() <= 0.01D) {
          return 0.0D;
       }
-      return this.getEffectiveEngineThrottle();
+      return MCH_FlightModel.clamp(this.getEffectiveEngineThrottle(), 0.0D, 1.0D);
    }
 
    private boolean isGroundedForPropulsion() {
@@ -1640,6 +1743,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
       if(this.useNewMobilitySystem()) {
          this.updateAerodynamicState();
+         this.updateNewFlightThrustForce();
       } else {
          this.angleOfAttack = 0.0D;
          this.stallSeverity = 0.0D;
@@ -1654,6 +1758,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.stallDemand = 0.0D;
          this.pitchBreakActive = false;
          this.stalling = false;
+         this.lastEngineThrustForce = 0.0D;
+         this.lastValidClimb = false;
+         this.lastUnsupportedClimbSeverity = 0.0D;
+         this.lastIdleUnsupportedClimb = false;
+         this.lastIdleThrottleWarning = "";
       }
 
       boolean levelOff = super.isGunnerMode;
@@ -1734,10 +1843,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // 计算油门1的值，当前油门除以10
       double propulsiveThrottle = this.useNewMobilitySystem()
             ? this.getPropulsiveEngineThrottle() : this.getEngineThrottle();
+      propulsiveThrottle = MCH_FlightModel.clamp(propulsiveThrottle, 0.0D, 1.0D);
       float throttle1 = (float)(propulsiveThrottle / 10.0D);
       if(this.useNewMobilitySystem() && this.getPlaneInfo() != null) {
          double mass = this.getPhysicalMass();
-         double thrustForce = (double)this.getPlaneInfo().engineThrust * propulsiveThrottle;
+         double thrustForce = Math.max(0.0D, (double)this.getPlaneInfo().engineThrust * propulsiveThrottle);
          throttle1 = (float)(thrustForce / mass / 10.0D);
          this.lastEngineThrustForce = thrustForce;
       } else {
@@ -1847,13 +1957,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                this.getPlaneInfo().controlSurfaceDrag, (float)engineBrakeDrag) / mass;
          drag += MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getPlaneInfo().criticalAoA,
                this.getPlaneInfo().baseDrag, this.getPlaneInfo().aoaDragMultiplier) / mass;
-         if(super.motionY > 0.0D && this.getRotPitch() < -35.0F) {
-            double unsupportedClimb = MCH_FlightModel.clamp((-this.getRotPitch() - 35.0D) / 55.0D, 0.0D, 1.0D)
-                  * MCH_FlightModel.clamp(1.0D - this.getThrustToWeightRatio(), 0.0D, 1.0D);
-            drag += unsupportedClimb * (0.08D + 0.22D * Math.max(this.stallSeverity, this.aoaStallSeverity));
-            if(unsupportedClimb > 0.0D) {
-               this.lastStallSuppressedLiftHeadroom = true;
-            }
+         double stallSpeedForIdleDrag = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
+               this.getPlaneInfo().stallSpeedFactor);
+         this.lastIdleUnsupportedClimb = this.isIdleUnsupportedClimb(
+               MCH_FlightModel.clamp((double)(-this.getRotPitch() - 8.0F) / 42.0D, 0.0D, 1.0D), stallSpeedForIdleDrag);
+         this.lastUnsupportedClimbSeverity = this.getUnsupportedClimbSeverity();
+         if(this.lastUnsupportedClimbSeverity > 0.0D) {
+            double idleDragBoost = this.lastIdleUnsupportedClimb ? 0.12D : 0.0D;
+            drag += this.lastUnsupportedClimbSeverity * (0.08D + idleDragBoost + 0.22D * Math.max(this.stallSeverity, this.aoaStallSeverity));
+            this.lastStallSuppressedLiftHeadroom = true;
          }
          drag = MCH_FlightModel.clamp(drag, 0.0D, 0.5D);
          this.lastAerodynamicDrag = drag;
@@ -1923,6 +2035,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastLiftLoss = 0.0D;
       }
       this.pitchBreakActive = false;
+      this.lastUnsupportedClimbSeverity = this.getUnsupportedClimbSeverity();
+      double stallSpeedForIdle = this.getPlaneInfo() != null
+            ? MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(), this.getPlaneInfo().stallSpeedFactor) : 0.0D;
+      this.lastIdleUnsupportedClimb = this.isIdleUnsupportedClimb(
+            MCH_FlightModel.clamp((double)(-this.getRotPitch() - 8.0F) / 42.0D, 0.0D, 1.0D), stallSpeedForIdle);
+      this.updateIdleThrottleWarning();
       this.applyThrottleDeficitPitchDown(nearGround, dp, levelOff);
       if(this.useNewMobilitySystem() && !nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
          double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)this.getPlaneInfo().stallLiftLoss, 0.0D, 1.0D);
@@ -1994,6 +2112,42 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.handleDeadPilot();
 
 
+   }
+
+
+   private void updateIdleThrottleWarning() {
+      this.lastIdleThrottleWarning = "";
+      if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null || !this.lastAirborne) {
+         return;
+      }
+
+      double propulsiveThrottle = this.getPropulsiveEngineThrottle();
+      double liftToWeight = this.getLiftToWeightRatio();
+      double thrustToWeight = this.getThrustToWeightRatio();
+      double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
+            this.getPlaneInfo().stallSpeedFactor);
+      double recoverySpeed = this.getPlaneInfo().stallRecoverySpeed > 0.0F
+            ? (double)this.getPlaneInfo().stallRecoverySpeed : stallSpeed * 1.2D;
+      double noseUpDegrees = Math.max(0.0D, (double)-this.getRotPitch());
+      boolean finite = Double.isNaN(propulsiveThrottle) || Double.isInfinite(propulsiveThrottle)
+            || Double.isNaN(thrustToWeight) || Double.isInfinite(thrustToWeight)
+            || Double.isNaN(liftToWeight) || Double.isInfinite(liftToWeight)
+            || Double.isNaN(this.lastUnsupportedClimbSeverity) || Double.isInfinite(this.lastUnsupportedClimbSeverity)
+            || Double.isNaN((double)this.lastControlAuthority) || Double.isInfinite((double)this.lastControlAuthority)
+            || Double.isNaN(this.lastPitchAuthority) || Double.isInfinite(this.lastPitchAuthority)
+            || Double.isNaN(this.stallSeverity) || Double.isInfinite(this.stallSeverity);
+      if(finite) {
+         this.lastIdleThrottleWarning = "nonFinite";
+      } else if(propulsiveThrottle <= 0.01D && thrustToWeight > 0.05D) {
+         this.lastIdleThrottleWarning = "idleHasThrust";
+      } else if(propulsiveThrottle <= 0.01D && this.lastValidClimb && liftToWeight < 1.0D) {
+         this.lastIdleThrottleWarning = "idleValidClimbWithoutLift";
+      } else if(propulsiveThrottle <= 0.01D && this.lastUnsupportedClimbSeverity < 0.1D
+            && this.getAirspeed() < recoverySpeed && noseUpDegrees > 10.0D) {
+         this.lastIdleThrottleWarning = "idleUnsupportedTooLow";
+      } else if(propulsiveThrottle <= 0.01D && this.lastNetVerticalAcceleration >= 0.0D && liftToWeight < 1.0D) {
+         this.lastIdleThrottleWarning = "idleNetClimbWithoutLift";
+      }
    }
 
    private void collisionEntity(AxisAlignedBB bb) {

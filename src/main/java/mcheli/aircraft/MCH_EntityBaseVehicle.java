@@ -1868,6 +1868,30 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return 0.0D;
    }
 
+   public double getLastUnsupportedClimbSeverity() {
+      return 0.0D;
+   }
+
+   public boolean isUnsupportedClimb() {
+      return false;
+   }
+
+   public boolean isLastIdleUnsupportedClimb() {
+      return false;
+   }
+
+   public String getLastIdleThrottleWarning() {
+      return "";
+   }
+
+   public double getLastPitchAuthority() {
+      return 1.0D;
+   }
+
+   public double getLastControlAuthority() {
+      return this.getDebugControlAuthority();
+   }
+
    /** Most recent fixed-wing drag fraction applied by the energy model. */
    public double getLastAerodynamicDrag() {
       return 0.0D;
