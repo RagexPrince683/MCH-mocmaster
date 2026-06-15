@@ -308,6 +308,19 @@ takeoffDistance ∝ (requiredTakeoffSpeed * TakeoffDistanceMultiplier)²
                 / (EngineThrust / PhysicalMass - drag)
 ```
 
+For a rough runway estimate in Minecraft blocks, treat speed as blocks/tick and forward acceleration as blocks/tick². The constant-acceleration estimate is:
+
+```text
+takeoffDistanceBlocks ≈ (requiredTakeoffSpeed * TakeoffDistanceMultiplier)²
+                        / (2 * max(EngineThrust / PhysicalMass - drag, 0.001))
+```
+
+The `max(..., 0.001)` guard is only for estimation so the formula does not divide by zero when an aircraft has too little excess thrust to accelerate. In game, use the debug `netForward` value as the practical acceleration term when validating runway length:
+
+```text
+takeoffDistanceBlocks ≈ effectiveTakeoffSpeed² / (2 * max(netForward, 0.001))
+```
+
 That means lowering `TakeoffDistanceMultiplier` reduces takeoff distance strongly, and raising it increases takeoff distance strongly, because required speed enters the approximation quadratically. `EngineThrust`, `PhysicalMass`, drag, gravity, `StallSpeed`/`StallSpeedFactor`, throttle response, and combat flaps still matter. Combat flaps add their configured low-speed lift while the takeoff threshold is being evaluated, so they remain useful for short-field takeoff tuning.
 
 Use this key only as a takeoff/runway correction after the aircraft's mass, thrust, drag, and stall tuning are broadly correct. If a plane lifts off too early with a low multiplier, normal airborne stall and climb behavior still applies: it may mush, sink, or stall if it lacks speed or power.
