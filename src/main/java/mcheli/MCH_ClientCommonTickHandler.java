@@ -339,7 +339,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             : 0.0D;
 
       System.out.println(String.format(
-              "[MCHeli] flight-control dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f) aero=(throttle=%.0f%%,flaps=%s,airspeed=%.3f,forwardSpeed=%.3f,verticalSpeed=%.4f,pitch=%.2f,mass=%.2f,weightForce=%.4f,engineThrust=%.4f,liftForce=%.4f,liftBeforeStall=%.4f,liftAfterStall=%.4f,liftCoeff=%.2f,liftToWeight=%.2f,thrustToWeight=%.2f,netForward=%.4f,takeoffMult=%.2f,takeoffBase=%.3f,takeoffEffective=%.3f,takeoffActive=%s,validTakeoff=%s,validClimb=%s,stallSuppressedHeadroom=%s,gravity=%.4f,resolvedGravity=%.4f,gravityOverride=%s,liftAccel=%.4f,netY=%.4f,airborne=%s,placementLock=%s,motion=(%.4f,%.4f,%.4f),cachedVelocity=(%.4f,%.4f,%.4f),aoaFromVelocity=%.2f,criticalAoA=%.2f,stallDemand=%.2f,speedSeverity=%.2f,aoaSeverity=%.2f,stallSeverity=%.2f,stallPitchMoment=%.4f,stallState=%s,recovery=%s,overspeed=%s,g=%.2f,drag=%.3f,liftLoss=%.2f,authority=%.2f,noseUpSuppress=%.2f,pitchBreak=%s,pitchBreakAngularVelocity=%.4f)",
+              "[MCHeli] flight-control dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f) aero=(throttle=%.0f%%,engineOutput=%.0f%%,effectiveThrottle=%.0f%%,propulsiveThrottle=%.0f%%,flaps=%s,airspeed=%.3f,forwardSpeed=%.3f,verticalSpeed=%.4f,pitch=%.2f,mass=%.2f,weightForce=%.4f,engineThrust=%.4f,liftForce=%.4f,liftBeforeStall=%.4f,liftAfterStall=%.4f,liftCoeff=%.2f,liftToWeight=%.2f,thrustToWeight=%.2f,netForward=%.4f,takeoffMult=%.2f,takeoffBase=%.3f,takeoffEffective=%.3f,takeoffActive=%s,validTakeoff=%s,validClimb=%s,stallSuppressedHeadroom=%s,gravity=%.4f,resolvedGravity=%.4f,gravityOverride=%s,liftAccel=%.4f,netY=%.4f,airborne=%s,placementLock=%s,motion=(%.4f,%.4f,%.4f),cachedVelocity=(%.4f,%.4f,%.4f),aoaFromVelocity=%.2f,criticalAoA=%.2f,stallDemand=%.2f,speedSeverity=%.2f,aoaSeverity=%.2f,stallSeverity=%.2f,stallPitchMoment=%.4f,throttlePitchDown=%.4f,stallState=%s,recovery=%s,overspeed=%s,g=%.2f,drag=%.3f,liftLoss=%.2f,authority=%.2f,noseUpSuppress=%.2f,pitchBreak=%s,pitchBreakAngularVelocity=%.4f)",
               simDelta,
               mouseX,
               mouseY,
@@ -352,6 +352,9 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
               ac.getRotYaw(),
               ac.getRotRoll(),
               Double.valueOf(ac.getNormalizedThrottle() * 100.0D),
+              Double.valueOf(plane != null ? plane.getDebugEngineThrottle() * 100.0D : ac.getNormalizedThrottle() * 100.0D),
+              Double.valueOf(plane != null ? plane.getDebugEffectiveEngineThrottle() * 100.0D : ac.getNormalizedThrottle() * 100.0D),
+              Double.valueOf(plane != null ? plane.getDebugPropulsiveEngineThrottle() * 100.0D : ac.getNormalizedThrottle() * 100.0D),
               Boolean.valueOf(ac.isCombatFlapsDeployed()),
               Math.sqrt(ac.motionX * ac.motionX + ac.motionY * ac.motionY + ac.motionZ * ac.motionZ),
               forwardSpeed,
@@ -394,6 +397,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
               ac.getAoAStallSeverity(),
               ac.getStallSeverity(),
               ac.getLastStallPitchMoment(),
+              plane != null ? plane.getLastThrustPitchDownMoment() : 0.0D,
               Boolean.valueOf(ac.getStallSeverity() > 0.0D),
               Boolean.valueOf(ac.isStallRecovering()),
               Boolean.valueOf(ac.isOverspeeding()),
