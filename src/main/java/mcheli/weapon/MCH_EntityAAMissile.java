@@ -1,9 +1,8 @@
 package mcheli.weapon;
 
+import mcheli.MCH_Config;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
-import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.flare.MCH_EntityChaff;
-import mcheli.uav.MCH_EntityUavStation;
 import mcheli.vector.Vector3f;
 import mcheli.wrapper.W_Entity;
 import net.minecraft.entity.Entity;
@@ -15,6 +14,9 @@ import java.util.List;
 
 public class MCH_EntityAAMissile extends MCH_EntityBaseBullet implements MCH_IEntityLockChecker {
 
+   private static final double PLANE_SPEED_CONFIG_BASELINE = 1000.0D;
+   private static final double MPH_TO_PLANE_SPEED_FACTOR = 1.74D;
+
    public MCH_EntityAAMissile(World par1World) {
       super(par1World);
       super.targetEntity = null;
@@ -22,6 +24,12 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet implements MCH_IEn
 
    public MCH_EntityAAMissile(World par1World, double posX, double posY, double posZ, double targetX, double targetY, double targetZ, float yaw, float pitch, double acceleration) {
       super(par1World, posX, posY, posZ, targetX, targetY, targetZ, yaw, pitch, acceleration);
+      this.acceleration = acceleration * getPlaneSpeedScale();
+      this.setMotion(targetX, targetY, targetZ);
+   }
+
+   private static double getPlaneSpeedScale() {
+      return MCH_Config.AllPlaneSpeed.prmDouble / PLANE_SPEED_CONFIG_BASELINE * MPH_TO_PLANE_SPEED_FACTOR;
    }
 
    public void onUpdate() {
@@ -109,6 +117,11 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet implements MCH_IEn
 
    public MCH_BulletModel getDefaultBulletModel() {
       return MCH_DefaultBulletModels.AAMissile;
+   }
+
+   @Override
+   protected boolean isHomingExpired() {
+      return false;
    }
 
    @Override

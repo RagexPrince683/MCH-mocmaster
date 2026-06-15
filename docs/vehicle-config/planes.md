@@ -23,6 +23,15 @@ Planes inherit every shared key from `base.md` and add visual VTOL/sweep-wing ke
 
 All values are optional. Speed-like values (`Speed`, `MaxLevelSpeed`, `StallSpeed`, `StallRecoverySpeed`, `CompressibilitySpeed`, `MaxSafeSpeed`, `sweepwingspeed`) are multiplied by the global `AllPlaneSpeed` config during validation.
 
+To author a plane speed from miles per hour, use:
+
+```text
+plane config speed = (mph / 1000) * 1.74
+validated speed = plane config speed * AllPlaneSpeed
+```
+
+With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0.87` before global scaling. AA-missile launch speed follows the same normalized `AllPlaneSpeed / 1000 * 1.74` scale; at the default, an AA missile travels at 1.74 times its configured `Acceleration`. AA missiles also keep homing for their full lifetime rather than stopping at the generic `TickEndHoming` cutoff.
+
 | Key | Type/range | Default | What it changes |
 |---|---:|---:|---|
 | `BaseDrag` | float[0..0.25] | 0.0015 | Baseline drag. Scales with speed ratio squared and also participates in AoA drag. |

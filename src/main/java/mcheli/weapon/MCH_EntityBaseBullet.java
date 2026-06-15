@@ -560,7 +560,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     public void guidanceToTarget(double targetPosX, double targetPosY, double targetPosZ, float accelerationFactor) {
-        if(getInfo().tickEndHoming > 0 && ticksExisted > getInfo().tickEndHoming) {
+        if (isHomingExpired()) {
             return;
         }
 
@@ -623,6 +623,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         super.rotationPitch = -((float)(Math.atan2(super.motionY, r) * 180.0D / 3.141592653589793D));  // Calculate and set Pitch angle
     }
 
+    protected boolean isHomingExpired() {
+        return getInfo().tickEndHoming > 0 && ticksExisted > getInfo().tickEndHoming;
+    }
 
     public boolean checkValid() {
         if (this.shootingEntity == null && this.shootingAircraft == null) {
