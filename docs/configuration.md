@@ -54,6 +54,7 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `BreakableOnlyPickaxe` | `false` | Restricts breakability to pickaxe behavior where implemented. |
 | `AllHeliSpeed` | `1.5` | Global helicopter speed scalar; clamped between 0 and 1000. |
 | `AllPlaneSpeed` | `1000.0` | Global plane speed scalar/clamp value; clamped between 0 and 1000. |
+| `NewFlightGravity` | `0.026` | Global per-tick downward acceleration for new-flight-model aircraft; individual vehicle configs can override with `NewFlightGravity`, `FlightGravity`, or `GravityOverride`. |
 | `AllShipSpeed` | `2.0` | Global ship speed scalar; clamped between 0 and 1000. |
 | `AllTankSpeed` | `1.0` | Global tank speed scalar; clamped between 0 and 1000. |
 | `HurtResistantTime` | `0.0` | Hurt resistance timing; clamped from 0 to 10000. |

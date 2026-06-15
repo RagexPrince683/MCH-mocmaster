@@ -400,6 +400,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       return this.lastAirborne;
    }
 
+   public double getResolvedNewFlightGravity() {
+      return this.resolveNewFlightGravity();
+   }
+
+   public boolean isUsingNewFlightGravityOverride() {
+      return this.getPlaneInfo() != null && !Float.isNaN(this.getPlaneInfo().newFlightGravity);
+   }
+
    public float getDebugControlAuthority() {
       return this.getControlAuthorityFactor();
    }
@@ -700,6 +708,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
    }
 
+   private double resolveNewFlightGravity() {
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      if(info != null && !Float.isNaN(info.newFlightGravity)) {
+         return Math.max(0.0D, (double)info.newFlightGravity);
+      }
+      if(MCH_Config.NewFlightGravity != null && MCH_Config.NewFlightGravity.prmDouble > 0.0D) {
+         return MCH_Config.NewFlightGravity.prmDouble;
+      }
+      return 0.026D;
+   }
+
    private void applyNewFlightVerticalForces() {
       MCP_PlaneInfo info = this.getPlaneInfo();
       boolean airborne = !super.onGround && MCH_Lib.getBlockIdY(this, 1, -2) == 0;
@@ -711,10 +730,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          return;
       }
 
-      double configuredGravity = !this.isInWater() ? (double)this.getAcInfo().gravity : (double)this.getAcInfo().gravityInWater;
-      double gravityAccel = Math.max(0.0D, -configuredGravity);
-      if(gravityAccel <= 1.0E-6D) {
-         gravityAccel = 0.04D;
+      double gravityAccel = this.resolveNewFlightGravity();
+      if(this.isInWater()) {
+         gravityAccel = Math.max(0.0D, Math.min(gravityAccel, -(double)this.getAcInfo().gravityInWater));
       }
 
       double stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
@@ -756,6 +774,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.stallSeverity = 0.0D;
       this.stalling = false;
       this.aircraftPosRotInc = 0;
+      this.clearPlacementMotionState();
    }
 
    protected void updateVehicleStress() {

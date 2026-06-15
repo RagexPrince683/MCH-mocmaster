@@ -233,6 +233,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    private int tickRepelling;
    private int lastUsedRopeIndex;
    private boolean dismountedUserCtrl;
+   private boolean placementMotionLocked;
    public float lastSearchLightYaw;
    public float lastSearchLightPitch;
    public float rotLightHatch = 0.0F;
@@ -389,6 +390,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.fuelSuppliedCount = 0;
       this.canRideRackStatus = false;
       this.isParachuting = false;
+      this.placementMotionLocked = false;
       this.prevPosition = new MCH_Queue(10, Vec3.createVectorHelper(0.0D, 0.0D, 0.0D));
       this.lastSearchLightYaw = this.lastSearchLightPitch = 0.0F;
    }
@@ -1326,6 +1328,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public boolean attackEntityFrom(DamageSource damageSource, float org_damage) {
 
+      this.clearPlacementMotionLock();
       Entity src = damageSource.getEntity();
       String srcName = (src == null ? "null" : src.getClass().getName());
       //System.out.println("[DBG] attackEntityFrom: dmgType=" + damageSource.getDamageType()
@@ -1640,14 +1643,54 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return this.isUAV()?super.isUseableByPlayer(player):(!super.isDead?(this.getSeatIdByEntity(player) >= 0?player.getDistanceSqToEntity(this) <= 4096.0D:player.getDistanceSqToEntity(this) <= 64.0D):false);
    }
 
-   public void applyEntityCollision(Entity par1Entity) {}
+   public void applyEntityCollision(Entity par1Entity) {
+      this.clearPlacementMotionLock();
+   }
 
-   public void addVelocity(double par1, double par3, double par5) {}
+   public void addVelocity(double par1, double par3, double par5) {
+      this.clearPlacementMotionLock();
+   }
 
    public void setVelocity(double par1, double par3, double par5) {
+      if(this.placementMotionLocked) {
+         this.clearPlacementMotionState();
+         return;
+      }
       this.velocityX = super.motionX = par1;
       this.velocityY = super.motionY = par3;
       this.velocityZ = super.motionZ = par5;
+   }
+
+   public void markFreshlyPlaced() {
+      this.placementMotionLocked = true;
+      this.clearPlacementMotionState();
+   }
+
+   public void clearPlacementMotionLock() {
+      this.placementMotionLocked = false;
+   }
+
+   public boolean isPlacementMotionLocked() {
+      return this.placementMotionLocked;
+   }
+
+   protected void clearPlacementMotionState() {
+      super.motionX = super.motionY = super.motionZ = 0.0D;
+      this.velocityX = this.velocityY = this.velocityZ = 0.0D;
+      this.aircraftPosRotInc = 0;
+      this.prevPosition.clear(Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
+   }
+
+   public double getCachedVelocityX() {
+      return this.velocityX;
+   }
+
+   public double getCachedVelocityY() {
+      return this.velocityY;
+   }
+
+   public double getCachedVelocityZ() {
+      return this.velocityZ;
    }
 
    public void onFirstUpdate() {
@@ -1812,6 +1855,14 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public boolean isLastAirborne() {
       return !super.onGround;
+   }
+
+   public double getResolvedNewFlightGravity() {
+      return 0.0D;
+   }
+
+   public boolean isUsingNewFlightGravityOverride() {
+      return false;
    }
 
    /** Effective 0..1 control authority after stall and high-G penalties. */
@@ -2239,6 +2290,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(this.getCountOnUpdate() < 2) {
          this.prevPosition.clear(Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
       }
+      if(this.placementMotionLocked && !super.worldObj.isRemote) {
+         this.clearPlacementMotionState();
+      }
 
 
 
@@ -2581,7 +2635,14 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       boolean var11 = super.onGround;
       double var12 = super.motionY;
+      double lockedPosX = super.posX;
+      double lockedPosY = super.posY;
+      double lockedPosZ = super.posZ;
       this.onUpdateAircraft();
+      if(this.placementMotionLocked && !super.worldObj.isRemote) {
+         this.setPosition(lockedPosX, lockedPosY, lockedPosZ);
+         this.clearPlacementMotionState();
+      }
       this.updateRackLaunchAssist();
       if(this.getAcInfo() != null) {
          this.updateParts(this.getPartStatus());
@@ -5180,6 +5241,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                     new Object[]{this.debugEntity(this), Integer.valueOf(i)});
          } else {
             if(!super.worldObj.isRemote) {
+               this.clearPlacementMotionLock();
                player.mountEntity(seat);
             }
             MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][SEAT-ACCEPT] vehicle=%s seat=%d player=%s",
@@ -5199,6 +5261,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.switchGunnerFreeLookMode(false);
       }
 
+      this.clearPlacementMotionLock();
       this.initCurrentWeapon(entity);
       MCH_Lib.DbgLog(super.worldObj, "onMountEntitySeat:%d", new Object[]{Integer.valueOf(W_Entity.getEntityId(entity))});
       Entity pilot = this.getRiddenByEntity();
