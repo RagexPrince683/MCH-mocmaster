@@ -410,11 +410,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double highGAuthority = MCH_FlightModel.getHighGControlAuthority(this.currentGForce,
             info.maxComfortableG, info.maxStructuralG, info.gControlPenalty);
       double severity = Math.max(this.stallSeverity, this.getInstantStallSeverity());
-      double throttleAuthority = 1.0D - (1.0D - this.getEffectiveEngineThrottle())
-            * (double)info.newFlightThrottleControlAuthorityScale;
       double flapAuthority = this.isCombatFlapsDeployed() ? 1.0D + (double)info.newFlightCombatFlapControl : 1.0D;
       return (float)MCH_FlightModel.clamp(highGAuthority * MCH_FlightModel.getControlAuthority(severity)
-            * throttleAuthority * flapAuthority, 0.05D, 1.35D);
+            * flapAuthority, 0.05D, 1.35D);
    }
 
    private double getNoseUpPitchSuppression() {
@@ -425,9 +423,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double liftDeficit = this.lastWeightForce > 1.0E-6D
             ? MCH_FlightModel.clamp(1.0D - this.getLiftToWeightRatio(), 0.0D, 1.0D) : 0.0D;
       double noseUpAttitude = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 45.0D, 0.0D, 1.0D);
-      double unsupportedClimb = super.motionY > 0.0D && this.getRotPitch() < -15.0F
+      double lowEnergyNoseHigh = Math.max(super.motionY > 0.0D ? MCH_FlightModel.clamp(super.motionY / 0.18D, 0.0D, 1.0D) : 0.0D,
+            this.speedStallSeverity);
+      double unsupportedClimb = this.getRotPitch() < -15.0F
             ? MCH_FlightModel.clamp((-this.getRotPitch() - 15.0D) / 45.0D, 0.0D, 1.0D)
                   * MCH_FlightModel.clamp(1.0D - this.getThrustToWeightRatio(), 0.0D, 1.0D)
+                  * lowEnergyNoseHigh
             : 0.0D;
       double aerodynamicDeficit = Math.max(Math.max(this.stallSeverity, this.aoaStallSeverity),
             Math.max(this.speedStallSeverity, liftDeficit));
@@ -947,14 +948,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double airspeed = this.getAirspeed();
       double airspeedLift = MCH_FlightModel.clamp((airspeed - stallSpeed * 0.45D) / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.25D);
       double aoaLift = MCH_FlightModel.clamp(1.0D - Math.max(0.0D, Math.abs(this.angleOfAttack) - (double)info.criticalAoA) / Math.max(1.0D, (double)info.criticalAoA), 0.0D, 1.0D);
-      double liftPower = (double)info.newFlightLowThrottleLiftRetention
-            + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * this.getEffectiveEngineThrottle();
-      if(this.isCombatFlapsDeployed()) {
-         liftPower += (double)info.newFlightCombatFlapLift;
-      }
       double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)info.stallLiftLoss, 0.0D, 1.0D);
       this.lastLiftLoss = liftLoss;
       double stallLift = 1.0D - liftLoss;
+      double validLiftEnergy = MCH_FlightModel.clamp((airspeed - stallSpeed) / Math.max(0.05D, stallSpeed * 0.5D), 0.0D, 1.0D)
+            * aoaLift * stallLift;
+      double retainedLowThrottleLift = (double)info.newFlightLowThrottleLiftRetention
+            * (1.0D - this.getEffectiveEngineThrottle()) * validLiftEnergy;
+      double liftPower = this.getEffectiveEngineThrottle() + retainedLowThrottleLift;
+      if(this.isCombatFlapsDeployed()) {
+         liftPower += (double)info.newFlightCombatFlapLift * validLiftEnergy;
+      }
       this.lastLiftCoefficient = aoaLift * stallLift;
       double mass = this.getPhysicalMass();
       double weightForce = gravityAccel * mass;
@@ -971,7 +975,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftForceBeforeStallLoss = liftBeforeStallLoss;
       this.lastLiftForceAfterStallLoss = liftForce;
       this.lastNetVerticalAcceleration = netAccel;
-      this.lastValidClimb = liftForce > weightForce || this.getThrustToWeightRatio() >= 1.0D;
+      boolean validWingLift = liftForce > weightForce && this.speedStallSeverity < 0.25D
+            && this.stallSeverity < 0.15D && this.aoaStallSeverity < 0.25D;
+      boolean validPoweredClimb = this.getThrustToWeightRatio() >= 1.0D && this.speedStallSeverity < 0.35D
+            && this.stallSeverity < 0.25D;
+      this.lastValidClimb = validWingLift || validPoweredClimb;
    }
 
    private void applyNewFlightTakeoffAssist(boolean levelOff, double waterDepth) {
@@ -997,7 +1005,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastEffectiveTakeoffSpeed = effectiveTakeoffSpeed;
       boolean multiplierAdjusted = Math.abs(multiplier - 1.0D) > 1.0E-4D;
       this.lastTakeoffMultiplierActive = multiplierAdjusted && horizontalSpeed < baseTakeoffSpeed * 1.15D;
-      this.lastValidTakeoff = horizontalSpeed >= effectiveTakeoffSpeed && this.stallSeverity < 0.15D;
+      this.lastValidTakeoff = horizontalSpeed >= effectiveTakeoffSpeed && this.stallSeverity < 0.15D
+            && this.speedStallSeverity < 0.35D && this.aoaStallSeverity < 0.25D;
       if(!multiplierAdjusted) {
          return;
       }
@@ -1045,11 +1054,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          return;
       }
 
-      double throttleDeficit = MCH_FlightModel.clamp(1.0D - this.getEffectiveEngineThrottle(), 0.0D, 1.0D);
       double thrustDeficit = MCH_FlightModel.clamp(1.0D - this.getThrustToWeightRatio(), 0.0D, 1.0D);
-      double climbDemand = super.motionY > 0.0D ? MCH_FlightModel.clamp(super.motionY / 0.18D, 0.0D, 1.0D) : 0.35D;
+      double climbDemand = Math.max(super.motionY > 0.0D ? MCH_FlightModel.clamp(super.motionY / 0.18D, 0.0D, 1.0D) : 0.35D,
+            this.speedStallSeverity);
       double liftDeficit = MCH_FlightModel.clamp(1.0D - this.getLiftToWeightRatio(), 0.0D, 1.0D);
-      double energyDeficit = Math.max(throttleDeficit * thrustDeficit, liftDeficit * 0.6D);
+      double energyDeficit = Math.max(Math.max(this.stallSeverity, Math.max(this.aoaStallSeverity, this.speedStallSeverity)),
+            Math.max(thrustDeficit * climbDemand, liftDeficit));
       double legacyStrengthScale = MCH_FlightModel.clamp((double)this.getPlaneInfo().stallStrength / 0.6D, 0.0D, 4.0D);
       double pitchMoment = energyDeficit * noseUpAttitude * (0.35D + 0.65D * climbDemand)
             * (double)this.getPlaneInfo().stallPitchRecoveryStrength * legacyStrengthScale * 0.45D;
@@ -1775,8 +1785,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
                      this.getPlaneInfo().stallSpeedFactor);
                double speedHeadroom = MCH_FlightModel.clamp(this.getAirspeed() / Math.max(0.05D, stallSpeed * 1.2D), 0.0D, 1.0D);
-               double supportedVerticalThrust = thrustToWeight >= 1.0D ? 1.0D
-                     : MCH_FlightModel.clamp(thrustToWeight * speedHeadroom * (1.0D - this.stallSeverity), 0.0D, 1.0D);
+               double unstalledEnergy = speedHeadroom * (1.0D - this.stallSeverity)
+                     * (1.0D - MCH_FlightModel.clamp(this.aoaStallSeverity, 0.0D, 1.0D));
+               double supportedVerticalThrust = MCH_FlightModel.clamp(thrustToWeight * unstalledEnergy, 0.0D, 1.0D);
                verticalThrust *= supportedVerticalThrust;
                if(supportedVerticalThrust < 1.0D) {
                   this.lastStallSuppressedLiftHeadroom = true;
