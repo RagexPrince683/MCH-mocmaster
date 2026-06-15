@@ -35,7 +35,9 @@ All values are optional. Speed-like values (`Speed`, `MaxLevelSpeed`, `StallSpee
 | `PitchTorque`, `RollTorque`, `YawTorque` | float[0..100] | 0.35 | Local-axis torque applied to requested angular rates. Higher values respond faster. |
 | `PitchDamping`, `RollDamping`, `YawDamping` | float[0..100] | 0.35 | Angular damping. Higher values lower steady body rate for the same torque. |
 | `InertiaMultiplier` | float[0.05..100] | 1 | Resistance to angular acceleration. Higher values make controls feel heavier. |
-| `Mass` | float[0.05..100] | alias of `InertiaMultiplier` | Legacy/compatibility alias; no separate weight simulation exists. |
+| `Mass` | float[0.05..100] | alias of `InertiaMultiplier` | Legacy/compatibility alias for angular inertia only; does not set physical weight. |
+| `PhysicalMass` | float[0.05..100] | 1.0 | **New flight model only.** Translational mass used for thrust acceleration, drag response, lift-to-weight, weight, climb, and takeoff behavior. |
+| `EngineThrust` | float[0..100] | derived from speed | **New flight model only.** Engine force used as `thrust / PhysicalMass`; affects acceleration, climb, and energy recovery without being a top-speed cap. |
 | `ThrottleAcceleration` | float[0..1] | 0.02 | Legacy engine-output spool-up. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateUp`. |
 | `EngineDrag` | float[0..1] | 0.015 | Legacy engine-output spool-down. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateDown`. |
 | `NewFlightThrottleResponse` | float[0.1..4] | 1.0 | **New flight model only.** Curves smoothed engine output before thrust. `1` is linear, `<1` gives more low-throttle thrust, `>1` softens the low end. |
@@ -262,6 +264,26 @@ FlightCeiling = 260
 FlightCeilingRange = 48
 ```
 
+### Physical mass and thrust
+
+`PhysicalMass` is the new-flight-model translational mass. It is separate from `InertiaMultiplier`: `InertiaMultiplier` and the legacy `Mass` alias still control angular response only, while `PhysicalMass` controls linear acceleration, weight, drag response, lift-to-weight behavior, climb, and takeoff roll. Legacy aircraft and aircraft not using `useNewMobilitySystem = true` are unchanged.
+
+`EngineThrust` is a force value, not a top-speed value. The new flight model applies forward acceleration from `EngineThrust / PhysicalMass` after throttle response and engine spool are resolved. Higher thrust-to-weight improves acceleration, takeoff roll, climb, and post-maneuver energy recovery. If omitted, a conservative default is derived from existing speed tuning so older new-flight configs remain flyable.
+
+The model treats weight as `NewFlightGravity * PhysicalMass`. Lift is evaluated as a force and compared against that weight, so heavy aircraft need more airspeed, throttle, flap lift, or gentler AoA to hold altitude. Drag and climb/dive energy exchange are divided through mass, so heavy aircraft lose and gain speed more gradually while light aircraft respond quickly. Takeoff speed remains emergent from stall speed, lift, thrust, drag, and mass; do not add a separate takeoff-speed key.
+
+Recommended mass/thrust starting ranges:
+
+| Aircraft class | PhysicalMass | EngineThrust |
+| --- | ---: | ---: |
+| WW2 fighters | 0.75 - 1.15 | 0.85 - 1.25 |
+| Heavy fighters | 1.10 - 1.55 | 1.00 - 1.45 |
+| Early jets | 1.00 - 1.45 | 1.20 - 1.90 |
+| Modern fighters | 1.10 - 1.70 | 1.80 - 3.20 |
+| Attack aircraft | 1.35 - 2.10 | 1.30 - 2.30 |
+| Strategic bombers | 2.40 - 5.50 | 1.80 - 4.00 |
+| Cargo aircraft | 2.00 - 5.00 | 1.50 - 3.50 |
+
 ## Safe-to-omit legacy notes
 
 Old plane packs can omit every new aerodynamic key. Defaults are applied and `StallSpeedFactor` preserves derived low-speed stall behavior. Use `Mass` only for compatibility with packs that already chose that name; prefer `InertiaMultiplier` for new configs.
@@ -272,4 +294,4 @@ Combat flaps are intentionally gated by `useNewMobilitySystem = true`; legacy pa
 
 Use flaps with low or moderate throttle for landing and low-speed control. High throttle with flaps can improve a short turn, but the extra drag and reduced `MaxSafeSpeed * NewFlightCombatFlapOverspeed` should punish extended high-speed use. Throttle chopping plus flaps helps manage speed but should not be tuned into an instant brake; raise `NewFlightCombatFlapDrag` gradually and keep `NewFlightEngineBrakeDrag` modest.
 
-Debug flight logging (`DebugFlightControl`) includes throttle percent, flap state, airspeed, vertical velocity, applied gravity acceleration, resolved global/override gravity, placement motion-lock state, current motion/cached velocity, lift acceleration, net vertical acceleration, airborne state, AoA, lift loss, drag, control authority, stall, and overspeed state for new-flight tuning.
+Debug flight logging (`DebugFlightControl`) includes throttle percent, flap state, airspeed, vertical velocity, physical mass, weight force, engine thrust force, lift force, lift-to-weight ratio, thrust-to-weight ratio, net forward acceleration, applied gravity acceleration, resolved global/override gravity, placement motion-lock state, current motion/cached velocity, lift acceleration, net vertical acceleration, airborne state, AoA, lift loss, drag, control authority, stall, and overspeed state for new-flight tuning.

@@ -6,6 +6,7 @@ import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_FlightModel;
 import mcheli.plane.MCP_ItemPlane;
 import net.minecraft.item.Item;
 
@@ -48,6 +49,10 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float yawDamping = 0.35F;
    /** Scales resistance to angular acceleration without changing eventual control authority. */
    public float inertiaMultiplier = 1.0F;
+   /** New-flight translational mass used for thrust, drag, lift, and weight calculations. */
+   public float physicalMass = 1.0F;
+   /** New-flight engine force. Combined with mass to produce forward acceleration. */
+   public float engineThrust = 0.0F;
    /** Legacy maximum engine-output increase per tick. */
    public float throttleAcceleration = 0.02F;
    /** Legacy maximum engine-output decrease per tick. */
@@ -165,11 +170,18 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
          this.maxLevelSpeed = (float)((double)this.maxLevelSpeed * MCH_Config.AllPlaneSpeed.prmDouble);
       }
       this.scaleSpeedThresholds(MCH_Config.AllPlaneSpeed.prmDouble);
+      this.derivePhysicalFlightDefaults();
       this.warnSuspiciousFlightModelValues();
       return super.isValidData();
    }
 
 
+   private void derivePhysicalFlightDefaults() {
+      if(this.engineThrust <= 0.0F) {
+         float levelSpeed = this.maxLevelSpeed > 0.0F ? this.maxLevelSpeed : super.speed;
+         this.engineThrust = (float)MCH_FlightModel.clamp((double)levelSpeed / 4.0D, 0.2D, 3.0D);
+      }
+   }
 
    private void warnSuspiciousFlightModelValues() {
       if(this.maxStructuralG < this.maxComfortableG) {
@@ -288,6 +300,10 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.yawDamping = this.toFloat(data, 0.0F, 100.0F);
          } else if(item.equalsIgnoreCase("Mass") || item.equalsIgnoreCase("InertiaMultiplier")) {
             this.inertiaMultiplier = this.toFloat(data, 0.05F, 100.0F);
+         } else if(item.equalsIgnoreCase("PhysicalMass")) {
+            this.physicalMass = this.toFloat(data, 0.05F, 100.0F);
+         } else if(item.equalsIgnoreCase("EngineThrust")) {
+            this.engineThrust = this.toFloat(data, 0.0F, 100.0F);
          } else if(item.equalsIgnoreCase("ThrottleAcceleration")) {
             this.throttleAcceleration = this.toFloat(data, 0.0F, 1.0F);
          } else if(item.equalsIgnoreCase("EngineDrag")) {

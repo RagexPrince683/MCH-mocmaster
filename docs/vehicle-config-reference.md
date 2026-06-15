@@ -220,7 +220,9 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `PitchDamping` | Plane | float[0..100] | 0.35 | angular damping |
 | `RollDamping` | Plane | float[0..100] | 0.35 | angular damping |
 | `YawDamping` | Plane | float[0..100] | 0.35 | angular damping |
-| `Mass` | Plane | float[0.05..100] | 1.0 | alias for `InertiaMultiplier`; compatibility key |
+| `Mass` | Plane | float[0.05..100] | 1.0 | alias for `InertiaMultiplier`; angular-inertia compatibility key |
+| `PhysicalMass` | Plane | float[0.05..100] | 1.0 | new-flight translational mass for weight and linear inertia |
+| `EngineThrust` | Plane | float[0..100] | derived from speed | new-flight engine force for thrust-to-weight acceleration |
 | `InertiaMultiplier` | Plane | float[0.05..100] | 1.0 | angular inertia |
 | `ThrottleAcceleration` | Plane | float[0..1] | 0.02 | engine-output spool-up/tick |
 | `EngineDrag` | Plane | float[0..1] | 0.015 | engine-output spool-down/tick |

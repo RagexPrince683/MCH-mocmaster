@@ -331,7 +331,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       }
 
       System.out.println(String.format(
-              "[MCHeli] flight-control dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f) aero=(throttle=%.0f%%,flaps=%s,speed=%.3f,vy=%.4f,gravity=%.4f,resolvedGravity=%.4f,gravityOverride=%s,lift=%.4f,netY=%.4f,airborne=%s,placementLock=%s,motion=(%.4f,%.4f,%.4f),cachedVelocity=(%.4f,%.4f,%.4f),aoa=%.2f,stall=%.2f,overspeed=%s,g=%.2f,drag=%.3f,liftLoss=%.2f,authority=%.2f)",
+              "[MCHeli] flight-control dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f) aero=(throttle=%.0f%%,flaps=%s,speed=%.3f,vy=%.4f,mass=%.2f,weightForce=%.4f,engineThrust=%.4f,liftForce=%.4f,liftToWeight=%.2f,thrustToWeight=%.2f,netForward=%.4f,gravity=%.4f,resolvedGravity=%.4f,gravityOverride=%s,liftAccel=%.4f,netY=%.4f,airborne=%s,placementLock=%s,motion=(%.4f,%.4f,%.4f),cachedVelocity=(%.4f,%.4f,%.4f),aoa=%.2f,stall=%.2f,overspeed=%s,g=%.2f,drag=%.3f,liftLoss=%.2f,authority=%.2f)",
               simDelta,
               mouseX,
               mouseY,
@@ -347,6 +347,13 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
               Boolean.valueOf(ac.isCombatFlapsDeployed()),
               Math.sqrt(ac.motionX * ac.motionX + ac.motionY * ac.motionY + ac.motionZ * ac.motionZ),
               ac.motionY,
+              ac.getPhysicalMass(),
+              ac.getLastWeightForce(),
+              ac.getLastEngineThrustForce(),
+              ac.getLastLiftForce(),
+              ac.getLiftToWeightRatio(),
+              ac.getThrustToWeightRatio(),
+              ac.getLastNetForwardAcceleration(),
               ac.getLastGravityAcceleration(),
               ac.getResolvedNewFlightGravity(),
               Boolean.valueOf(ac.isUsingNewFlightGravityOverride()),
