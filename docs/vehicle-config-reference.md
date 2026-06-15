@@ -247,7 +247,10 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `StallInstability` | Plane | float[0..5] | 0.35 | buffet/wing-drop strength |
 | `StallRecoverySpeed` | Plane | float[0..10] | 0 = `StallSpeed*1.2` | stall recovery speed |
 | `StallSpeedFactor` | Plane | float[0..0.95] | 0.22 | legacy derived stall speed factor |
-| `StallStrength` | Plane | float[0..4] | 0.6 | legacy sink strength during stall |
+| `StallStrength` | Plane | float[0..4] | 0.6 | legacy stall response scale |
+| `StallPitchRecoveryStrength` | Plane | float[0..5] | 0.55 | nose-down stall recovery moment |
+| `StallBreakStrength` | Plane | float[0..5] | 0.65 | nonlinear deep-stall pitch-break impulse |
+| `StallRecoveryRate` | Plane | float[0.01..1] | 0.18 | stall severity fade-out/recovery blend rate |
 | `DiveSpeedMultiplier` | Plane | float[1..2] | 1.25 | max dive overspeed cap |
 | `MaxComfortableG` | Plane | float[1..30] | 4.0 | high-G authority fade starts |
 | `MaxStructuralG` | Plane | float[1..50] | 8.0 | high-G authority fade ends/damage hook threshold |
@@ -270,4 +273,3 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `addpart` | Turret/static | `drawFP,rotYaw,rotPitch,type,x,y,z[,recoilBuf]` | none | turret part |
 | `addchildpart` | Turret/static | same as `addpart` | none | child part of last turret part |
 | `PreventWaterBobbing` | Ship | boolean | false | ship water motion option |
-
