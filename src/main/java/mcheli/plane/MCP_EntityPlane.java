@@ -61,6 +61,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastLiftAcceleration;
    /** Last net fixed-wing vertical acceleration before velocity damping. */
    private double lastNetVerticalAcceleration;
+   /** Last calculated physical weight force for new-flight debug output. */
+   private double lastWeightForce;
+   /** Last calculated lift force for new-flight debug output. */
+   private double lastLiftForce;
+   /** Last calculated engine thrust force for new-flight debug output. */
+   private double lastEngineThrustForce;
+   /** Last net forward acceleration after thrust and energy effects. */
+   private double lastNetForwardAcceleration;
    /** Last airborne state used by the new fixed-wing force model. */
    private boolean lastAirborne;
    /** Local-axis body rates used by fixed-wing damped control response. */
@@ -101,6 +109,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastGravityAcceleration = 0.0D;
       this.lastLiftAcceleration = 0.0D;
       this.lastNetVerticalAcceleration = 0.0D;
+      this.lastWeightForce = 0.0D;
+      this.lastLiftForce = 0.0D;
+      this.lastEngineThrustForce = 0.0D;
+      this.lastNetForwardAcceleration = 0.0D;
       this.lastAirborne = false;
       this.angleOfAttack = 0.0D;
       this.stallSeverity = 0.0D;
@@ -394,6 +406,35 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    public double getLastNetVerticalAcceleration() {
       return this.lastNetVerticalAcceleration;
+   }
+
+   public double getPhysicalMass() {
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      return info != null ? Math.max(0.05D, (double)info.physicalMass) : 1.0D;
+   }
+
+   public double getLastWeightForce() {
+      return this.lastWeightForce;
+   }
+
+   public double getLastLiftForce() {
+      return this.lastLiftForce;
+   }
+
+   public double getLastEngineThrustForce() {
+      return this.lastEngineThrustForce;
+   }
+
+   public double getLiftToWeightRatio() {
+      return this.lastWeightForce > 1.0E-6D ? this.lastLiftForce / this.lastWeightForce : 0.0D;
+   }
+
+   public double getThrustToWeightRatio() {
+      return this.lastWeightForce > 1.0E-6D ? this.lastEngineThrustForce / this.lastWeightForce : 0.0D;
+   }
+
+   public double getLastNetForwardAcceleration() {
+      return this.lastNetForwardAcceleration;
    }
 
    public boolean isLastAirborne() {
@@ -727,6 +768,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastGravityAcceleration = 0.0D;
          this.lastLiftAcceleration = 0.0D;
          this.lastNetVerticalAcceleration = 0.0D;
+         this.lastWeightForce = 0.0D;
+         this.lastLiftForce = 0.0D;
          return;
       }
 
@@ -745,12 +788,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          liftPower += (double)info.newFlightCombatFlapLift;
       }
       double stallLift = 1.0D - MCH_FlightModel.clamp(this.stallSeverity * (double)info.stallLiftLoss, 0.0D, 1.0D);
-      double liftAccel = gravityAccel * MCH_FlightModel.clamp(liftPower, 0.0D, 1.2D) * airspeedLift * aoaLift * stallLift;
-      double netAccel = liftAccel - gravityAccel;
+      double mass = this.getPhysicalMass();
+      double weightForce = gravityAccel * mass;
+      double liftForce = gravityAccel * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D) * airspeedLift * aoaLift * stallLift;
+      double liftAccel = liftForce / mass;
+      double netAccel = (liftForce - weightForce) / mass;
 
       super.motionY += netAccel;
       this.lastGravityAcceleration = gravityAccel;
       this.lastLiftAcceleration = liftAccel;
+      this.lastWeightForce = weightForce;
+      this.lastLiftForce = liftForce;
       this.lastNetVerticalAcceleration = netAccel;
    }
 
@@ -766,6 +814,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastGravityAcceleration = 0.0D;
       this.lastLiftAcceleration = 0.0D;
       this.lastNetVerticalAcceleration = 0.0D;
+      this.lastWeightForce = 0.0D;
+      this.lastLiftForce = 0.0D;
+      this.lastEngineThrustForce = 0.0D;
+      this.lastNetForwardAcceleration = 0.0D;
       this.lastAirborne = false;
       this.pitchAngularVelocity = this.rollAngularVelocity = this.yawAngularVelocity = 0.0F;
       this.currentGForce = 1.0D;
@@ -1369,6 +1421,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       // 计算油门1的值，当前油门除以10
       float throttle1 = (float)((this.useNewMobilitySystem() ? this.getEffectiveEngineThrottle() : this.getEngineThrottle()) / 10.0D);
+      if(this.useNewMobilitySystem() && this.getPlaneInfo() != null) {
+         double mass = this.getPhysicalMass();
+         double thrustForce = (double)this.getPlaneInfo().engineThrust * this.getEffectiveEngineThrottle();
+         throttle1 = (float)(thrustForce / mass / 10.0D);
+         this.lastEngineThrustForce = thrustForce;
+      } else {
+         this.lastEngineThrustForce = 0.0D;
+      }
       Vec3 v;
 
       // 如果喷嘴的旋转角度大于0.001F
@@ -1408,6 +1468,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          }
       }
 
+      double forwardSpeedBefore = super.motionX * v.xCoord + super.motionZ * v.zCoord;
+
       // 如果可以移动，则更新水平速度
       if(canMove) {
          // 如果启用了倒车功能，并且油门向后，则根据油门倒退
@@ -1446,15 +1508,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             engineBrakeDrag += this.getPlaneInfo().newFlightCombatFlapDrag;
             turnLoad = MCH_FlightModel.clamp(turnLoad + (double)this.getPlaneInfo().newFlightCombatFlapLift, 0.0D, 1.0D);
          }
+         double mass = this.getPhysicalMass();
          double drag = MCH_FlightModel.getEnergyDrag(horizontalSpeed, (double)levelSpeed, this.getEffectiveEngineThrottle(),
                turnLoad, controlLoad, this.getPlaneInfo().baseDrag, this.getPlaneInfo().inducedDrag,
-               this.getPlaneInfo().controlSurfaceDrag, (float)engineBrakeDrag);
+               this.getPlaneInfo().controlSurfaceDrag, (float)engineBrakeDrag) / mass;
          drag += MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getPlaneInfo().criticalAoA,
-               this.getPlaneInfo().baseDrag, this.getPlaneInfo().aoaDragMultiplier);
+               this.getPlaneInfo().baseDrag, this.getPlaneInfo().aoaDragMultiplier) / mass;
          drag = MCH_FlightModel.clamp(drag, 0.0D, 0.5D);
          this.lastAerodynamicDrag = drag;
          double energyChange = MCH_FlightModel.getVerticalEnergyChange(super.motionY,
-               this.getPlaneInfo().climbEnergyLoss, this.getPlaneInfo().diveEnergyGain);
+               this.getPlaneInfo().climbEnergyLoss, this.getPlaneInfo().diveEnergyGain) / mass;
          double targetSpeed = Math.max(0.0D, horizontalSpeed * (1.0D - drag) + energyChange);
 
          if(horizontalSpeed > 1.0E-4D) {
@@ -1467,6 +1530,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             super.motionZ += Math.cos(yaw) * targetSpeed;
          }
       }
+
+      this.lastNetForwardAcceleration = super.motionX * v.xCoord + super.motionZ * v.zCoord - forwardSpeedBefore;
 
       // 计算当前水平速度的大小
       double motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
