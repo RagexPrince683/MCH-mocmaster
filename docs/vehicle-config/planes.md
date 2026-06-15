@@ -210,6 +210,8 @@ pitchBreak = stallSeverity * StallStrength * (0.12 + 0.18 * max(speedSeverity, a
 
 `pitchBreak` is applied as a nose-down pitch moment and damps excessive nose-up pitch angular velocity. MCHeli/Minecraft rotation pitch uses inverted sign convention: nose-up attitude is negative numeric pitch, and nose-down attitude is positive numeric pitch. The pitch-break code therefore adds a positive rotation-pitch delta to lower the nose. It is separate from `StallInstability`: `StallInstability` still adds repeatable roll/yaw buffet and wing drop, while `StallStrength` controls the predictable unloading/sink force that helps a stalled aircraft lower the nose, regain airspeed, and recover only after both speed and AoA meet the recovery limits.
 
+If stalling feels too weak for a specific aircraft, tune the asset first. Lower `CriticalAoA` to make excessive-AoA stalls begin earlier, raise `StallLiftLoss` to remove more lift at full stall, raise `StallStrength` to increase sink and pitch-break unloading, and raise `StallInstability` only when you want more buffet/wing drop. Change code only when the same weakness appears across many correctly tuned `useNewMobilitySystem = true` planes or when the documented formulas no longer match observed behavior.
+
 ### G-force, speed scaling, and compressibility
 
 ```text
