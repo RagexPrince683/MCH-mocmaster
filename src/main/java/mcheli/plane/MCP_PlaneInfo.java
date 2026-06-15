@@ -96,6 +96,12 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float stallSpeedFactor = 0.22F;
    /** Legacy stall response strength, retained for plane packs that already tune it. */
    public float stallStrength = 0.6F;
+   /** Nose-down angular velocity added during stalls; higher values recover AoA more aggressively. */
+   public float stallPitchRecoveryStrength = 0.55F;
+   /** Additional nonlinear pitch-break impulse for deep stalls. */
+   public float stallBreakStrength = 0.65F;
+   /** Blend rate used when stall severity and pitch recovery fade out after unloading. */
+   public float stallRecoveryRate = 0.18F;
    /** Maximum extra horizontal speed available while a plane is diving. */
    public float diveSpeedMultiplier = 1.25F;
    /** Load factor where high-G control authority begins to fade. */
@@ -354,6 +360,12 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.stallSpeedFactor = this.toFloat(data, 0.0F, 0.95F);
          } else if(item.equalsIgnoreCase("StallStrength")) {
             this.stallStrength = this.toFloat(data, 0.0F, 4.0F);
+         } else if(item.equalsIgnoreCase("StallPitchRecoveryStrength")) {
+            this.stallPitchRecoveryStrength = this.toFloat(data, 0.0F, 5.0F);
+         } else if(item.equalsIgnoreCase("StallBreakStrength")) {
+            this.stallBreakStrength = this.toFloat(data, 0.0F, 5.0F);
+         } else if(item.equalsIgnoreCase("StallRecoveryRate")) {
+            this.stallRecoveryRate = this.toFloat(data, 0.01F, 1.0F);
          } else if(item.equalsIgnoreCase("DiveSpeedMultiplier")) {
             this.diveSpeedMultiplier = this.toFloat(data, 1.0F, 2.0F);
          } else if(item.equalsIgnoreCase("MaxComfortableG")) {

@@ -1852,6 +1852,22 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return false;
    }
 
+   public double getLastStallPitchMoment() {
+      return 0.0D;
+   }
+
+   public double getLastLiftCoefficient() {
+      return 0.0D;
+   }
+
+   public boolean isStallRecovering() {
+      return false;
+   }
+
+   public double getLastNoseUpPitchSuppression() {
+      return 0.0D;
+   }
+
    /** Most recent fixed-wing drag fraction applied by the energy model. */
    public double getLastAerodynamicDrag() {
       return 0.0D;

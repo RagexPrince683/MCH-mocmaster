@@ -70,7 +70,10 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `StallInstability` | float[0..5] | 0.35 | Buffet, yaw shake, and deterministic wing-drop strength. |
 | `StallRecoverySpeed` | float[0..10] | 0 = `StallSpeed*1.2` | Speed required, with low AoA, to exit a stall. |
 | `StallSpeedFactor` | float[0..0.95] | 0.22 | Legacy derived stall threshold when `StallSpeed` is omitted. |
-| `StallStrength` | float[0..4] | 0.6 | Stall sink and deterministic pitch-break strength. |
+| `StallStrength` | float[0..4] | 0.6 | Legacy stall response scale retained for older packs. |
+| `StallPitchRecoveryStrength` | float[0..5] | 0.55 | Nose-down angular-velocity moment applied during stalls. Higher values make light fighters break/recover more aggressively. |
+| `StallBreakStrength` | float[0..5] | 0.65 | Extra nonlinear nose-down impulse for deep stalls. Lower values suit transports or stable aircraft. |
+| `StallRecoveryRate` | float[0.01..1] | 0.18 | Blend rate used as stall severity fades after the aircraft unloads and meets recovery conditions. |
 | `DiveSpeedMultiplier` | float[1..2] | 1.25 | Maximum speed cap multiplier in a dive. |
 | `MaxComfortableG` | float[1..30] | 4 | G where high-G control fade starts. |
 | `MaxStructuralG` | float[1..50] | 8 | G where high-G fade reaches the configured penalty and structural hook begins. Warns if below `MaxComfortableG`. |
@@ -204,20 +207,36 @@ liftForce = liftBeforeStallLoss * stallLift
 
 This means pointing the nose near vertical does not create maximum lift unless the velocity vector, airspeed, lift-to-weight, and thrust-to-weight are still within valid flying conditions. Conventional fixed-wing thrust is also limited during unsupported vertical climbs: if thrust-to-weight is below 1.0, upward powered climb is scaled by speed headroom and remaining unstalled authority. High nose-up climbs add extra AoA/energy drag and bleed vertical energy unless the aircraft is truly tuned with enough thrust and speed to support them.
 
-Developed stalls also apply sink and a deterministic pitch break:
+Developed stalls remove lift through the normal lift model and apply a deterministic nose-down pitch moment:
 
 ```text
-if motionY > 0: motionY *= 1 - liftLoss * 0.12
-motionY -= 0.018 * liftLoss * StallStrength
-pitchBreak = stallSeverity * StallStrength * (0.12 + 0.18 * max(speedSeverity, aoaSeverity))
-pitchAngularVelocity += clamp(pitchBreak * noseDownScale * 0.45, 0, 1.2)
+aerodynamicDemand = max(stallDemand, speedSeverity, aoaSeverity)
+liftDeficit = clamp(1 - liftToWeight, 0, 1)
+authorityLoss = clamp(1 - controlAuthority, 0, 1)
+legacyStrengthScale = clamp(StallStrength / 0.6, 0, 4)
+pitchRecovery = stallSeverity * StallPitchRecoveryStrength * legacyStrengthScale
+              * (0.25 + 0.75 * aerodynamicDemand)
+              * (0.55 + 0.45 * max(noseUpAttitude, liftDeficit))
+deepStallBreak = stallSeverity^2 * StallBreakStrength * legacyStrengthScale
+               * (0.35 + 0.65 * max(aoaSeverity, authorityLoss))
+pitchAngularVelocity += clamp((pitchRecovery + deepStallBreak) * 0.45, 0, 1.8)
 ```
 
-Pitch break uses the same pitch/angular velocity path as visible fixed-wing rotation. The moment is deterministic, scales with `stallSeverity`, `StallStrength`, and stall demand, and adds bounded nose-down pitch rather than only applying vertical sink.
+Pitch break uses the same pitch/angular velocity path as visible fixed-wing rotation. The moment is deterministic, scales with `stallSeverity`, the existing aerodynamic state, and the configured recovery/break strengths, then adds bounded nose-down angular velocity instead of directly injecting stall-only downward Y velocity.
 
-`pitchBreak` is applied as a nose-down pitch moment and damps excessive nose-up pitch angular velocity. MCHeli/Minecraft rotation pitch uses inverted sign convention: nose-up attitude is negative numeric pitch, and nose-down attitude is positive numeric pitch. The pitch-break code therefore adds a positive rotation-pitch delta to lower the nose. It is separate from `StallInstability`: `StallInstability` still adds repeatable roll/yaw buffet and wing drop, while `StallStrength` controls the predictable unloading/sink force that helps a stalled aircraft lower the nose, regain airspeed, and recover only after both speed and AoA meet the recovery limits.
+Pilot nose-up input is also suppressed when the aircraft lacks energy or lift to support a climb:
 
-If stalling feels too weak for a specific aircraft, tune the asset first. Lower `CriticalAoA` to make excessive-AoA stalls begin earlier, raise `StallLiftLoss` to remove more lift at full stall, raise `StallStrength` to increase sink and pitch-break unloading, and raise `StallInstability` only when you want more buffet/wing drop. Change code only when the same weakness appears across many correctly tuned `useNewMobilitySystem = true` planes or when the documented formulas no longer match observed behavior.
+```text
+unsupportedClimb = nose-up attitude while climbing * max(0, 1 - thrustToWeight)
+energyDeficit = max(stallSeverity, aoaSeverity, speedSeverity, liftDeficit, unsupportedClimb)
+noseUpPitchInput *= 1 - clamp(energyDeficit * (0.35 + 0.65 * noseUpAttitude), 0, 1)
+```
+
+This does not block nose-down unloading input. It only prevents the pilot from continuing to command more nose-up pitch when the aircraft is already stalled, lift-deficient, too slow, or trying to climb without enough thrust/energy.
+
+`pitchBreak` is applied as a nose-down pitch moment and damps excessive nose-up pitch angular velocity. MCHeli/Minecraft rotation pitch uses inverted sign convention: nose-up attitude is negative numeric pitch, and nose-down attitude is positive numeric pitch. The pitch-break code therefore adds positive pitch angular velocity to lower the nose. It is separate from `StallInstability`: `StallInstability` still adds repeatable roll/yaw buffet and wing drop, while `StallPitchRecoveryStrength` and `StallBreakStrength` control how strongly a stalled aircraft lowers the nose, regains airspeed, and recovers only after both speed and AoA meet the recovery limits. `StallStrength` remains a legacy multiplier over both pitch moments so older aircraft packs keep their relative stall-break tuning. `StallRecoveryRate` controls how smoothly the smoothed stall severity fades out after recovery begins.
+
+If stalling feels too weak for a specific aircraft, tune the asset first. Lower `CriticalAoA` to make excessive-AoA stalls begin earlier, raise `StallLiftLoss` to remove more lift at full stall, raise `StallPitchRecoveryStrength` for stronger normal stall unloading, raise `StallBreakStrength` for more aggressive deep-stall nose drops, and raise `StallInstability` only when you want more buffet/wing drop. Change code only when the same weakness appears across many correctly tuned `useNewMobilitySystem = true` planes or when the documented formulas no longer match observed behavior.
 
 ### G-force, speed scaling, and compressibility
 
@@ -290,6 +309,9 @@ StallLiftLoss = 0.70
 AoADragMultiplier = 1.8
 StallInstability = 0.45
 StallRecoverySpeed = 0.46
+StallPitchRecoveryStrength = 0.75
+StallBreakStrength = 0.90
+StallRecoveryRate = 0.22
 DiveSpeedMultiplier = 1.22
 MaxComfortableG = 4.5
 MaxStructuralG = 8.5
