@@ -73,6 +73,8 @@ if ceilingLift < 1:
 
 Planes use a sink of `0.012 * (1 - ceilingLift)` away from the runway; helicopters use `0.014 * (1 - ceilingLift)`.
 
+For fixed-wing planes using `useNewMobilitySystem = true`, this gravity value is the weight side of the lift/weight calculation documented in `planes.md`; valid wing lift is still limited by airspeed, velocity-derived AoA, stall lift loss, and pitch-break stall behavior rather than by pitch attitude alone. Legacy planes and non-fixed-wing vehicles continue to use their family-specific gravity behavior.
+
 ## Health, damage, resources, support
 
 | Key | Type/range | Default | Notes |

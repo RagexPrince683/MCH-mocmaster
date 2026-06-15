@@ -87,6 +87,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double overspeedDamageAccumulator;
    /** Current unsigned angle between the nose and velocity vectors, in degrees. */
    private double angleOfAttack;
+   /** Latest speed-derived stall demand before smoothing. */
+   private double speedStallSeverity;
+   /** Latest AoA-derived stall demand before smoothing. */
+   private double aoaStallSeverity;
+   /** Latest max(speed, AoA) stall demand before smoothing. */
+   private double stallDemand;
+   /** True when deterministic stall pitch break was applied this tick. */
+   private boolean pitchBreakActive;
    /** Smoothed stall state used by lift loss, controls, and instability. */
    private double stallSeverity;
    private boolean stalling;
@@ -118,6 +126,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastWeightForce = 0.0D;
       this.lastLiftForce = 0.0D;
       this.lastEngineThrustForce = 0.0D;
+      this.speedStallSeverity = 0.0D;
+      this.aoaStallSeverity = 0.0D;
+      this.stallDemand = 0.0D;
+      this.pitchBreakActive = false;
       this.lastNetForwardAcceleration = 0.0D;
       this.lastBaseTakeoffSpeed = 0.0D;
       this.lastEffectiveTakeoffSpeed = 0.0D;
@@ -395,6 +407,26 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    public double getStallSeverity() {
       return this.stallSeverity;
+   }
+
+   public double getSpeedStallSeverity() {
+      return this.speedStallSeverity;
+   }
+
+   public double getAoAStallSeverity() {
+      return this.aoaStallSeverity;
+   }
+
+   public double getStallDemand() {
+      return this.stallDemand;
+   }
+
+   public double getCriticalAoA() {
+      return this.getPlaneInfo() != null ? (double)this.getPlaneInfo().criticalAoA : 0.0D;
+   }
+
+   public boolean isPitchBreakActive() {
+      return this.pitchBreakActive;
    }
 
    public double getLastAerodynamicDrag() {
@@ -741,13 +773,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
             this.getPlaneInfo().stallSpeedFactor);
-      double demand = MCH_FlightModel.getAerodynamicStallSeverity(speed, this.angleOfAttack, stallSpeed,
-            this.getPlaneInfo().criticalAoA);
+      this.speedStallSeverity = MCH_FlightModel.getSpeedStallSeverity(speed, stallSpeed);
+      this.aoaStallSeverity = MCH_FlightModel.getAoAStallSeverity(this.angleOfAttack, this.getPlaneInfo().criticalAoA);
+      double demand = Math.max(this.speedStallSeverity, this.aoaStallSeverity);
+      this.stallDemand = demand;
       double recoverySpeed = this.getPlaneInfo().stallRecoverySpeed > 0.0F
             ? (double)this.getPlaneInfo().stallRecoverySpeed : stallSpeed * 1.2D;
 
       if(this.stalling) {
-         if(speed >= recoverySpeed && this.angleOfAttack <= (double)this.getPlaneInfo().criticalAoA * 0.75D) {
+         if(speed >= recoverySpeed && Math.abs(this.angleOfAttack) <= (double)this.getPlaneInfo().criticalAoA * 0.75D) {
             this.stalling = false;
          }
       } else if(demand > 0.0D) {
@@ -813,7 +847,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       if(this.isCombatFlapsDeployed()) {
          liftPower += (double)info.newFlightCombatFlapLift;
       }
-      double stallLift = 1.0D - MCH_FlightModel.clamp(this.stallSeverity * (double)info.stallLiftLoss, 0.0D, 1.0D);
+      double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)info.stallLiftLoss, 0.0D, 1.0D);
+      this.lastLiftLoss = liftLoss;
+      double stallLift = 1.0D - liftLoss;
       double mass = this.getPhysicalMass();
       double weightForce = gravityAccel * mass;
       double liftForce = gravityAccel * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D) * airspeedLift * aoaLift * stallLift;
@@ -891,6 +927,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastWeightForce = 0.0D;
       this.lastLiftForce = 0.0D;
       this.lastEngineThrustForce = 0.0D;
+      this.speedStallSeverity = 0.0D;
+      this.aoaStallSeverity = 0.0D;
+      this.stallDemand = 0.0D;
+      this.pitchBreakActive = false;
       this.lastNetForwardAcceleration = 0.0D;
       this.lastBaseTakeoffSpeed = 0.0D;
       this.lastEffectiveTakeoffSpeed = 0.0D;
@@ -1431,6 +1471,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastLiftAcceleration = 0.0D;
          this.lastNetVerticalAcceleration = 0.0D;
          this.lastAirborne = false;
+         this.speedStallSeverity = 0.0D;
+         this.aoaStallSeverity = 0.0D;
+         this.stallDemand = 0.0D;
+         this.pitchBreakActive = false;
          this.stalling = false;
       }
 
@@ -1670,7 +1714,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // the runway, low speed or excessive AoA removes lift and introduces a repeatable
       // buffet/wing drop. Lowering the nose reduces AoA and lets speed build to recovery.
       boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
-      this.lastLiftLoss = 0.0D;
+      if(!this.useNewMobilitySystem()) {
+         this.lastLiftLoss = 0.0D;
+      }
+      this.pitchBreakActive = false;
       if(this.useNewMobilitySystem() && !nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
          double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)this.getPlaneInfo().stallLiftLoss, 0.0D, 1.0D);
          this.lastLiftLoss = liftLoss;
@@ -1685,8 +1732,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                * (double)this.getPlaneInfo().stallInstability * this.stallSeverity;
          this.setRotRoll(this.getRotRoll() + (float)(wingDrop * 0.08D + buffet * 0.04D));
          this.setRotYaw(this.getRotYaw() + (float)(buffet * 0.02D));
-         this.setRotPitch(this.getRotPitch() + (float)(0.04D * (double)this.getPlaneInfo().stallInstability
-               * this.stallSeverity));
+
+         double pitchBreak = this.stallSeverity * (double)this.getPlaneInfo().stallStrength
+               * (0.12D + 0.18D * Math.max(this.speedStallSeverity, this.aoaStallSeverity));
+         if(pitchBreak > 1.0E-4D) {
+            this.pitchBreakActive = true;
+            double noseUp = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 45.0D, 0.0D, 1.0D);
+            this.setRotPitch(this.getRotPitch() + (float)(pitchBreak * (0.35D + noseUp)));
+            if(this.pitchAngularVelocity < 0.0F) {
+               this.pitchAngularVelocity *= (float)(1.0D - MCH_FlightModel.clamp(this.stallSeverity * 0.35D, 0.0D, 0.35D));
+            }
+         }
       }
 
       // Lift fades through a band below the configured ceiling instead of hitting an invisible wall.
