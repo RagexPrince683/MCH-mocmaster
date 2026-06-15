@@ -41,7 +41,7 @@ Applies to planes, helicopters, tanks, turret/static weapons, ships, and any oth
 | Key | Type/range | Default | Practical tuning notes |
 |---|---:|---:|---|
 | `speed` | float[0..family max] | 0.1 | Family global multipliers are applied during validation. Plane/tank max is 4, ship max is 1.8. |
-| `MotionFactor` | float[0..1] | 0.96; plane constructor 0.975 | Per-tick horizontal damping after acceleration. Higher values retain more speed. |
+| `MotionFactor` | float[0..1] | 0.96; plane constructor 0.97 | Per-tick horizontal damping after acceleration. Higher values retain more speed. |
 | `gravity` | float[-50..50] | -0.04 | Vertical acceleration in air. |
 | `gravityinwater` | float[-50..50] | -0.04 | Vertical acceleration while in water. |
 | `NewFlightGravity` / `FlightGravity` / `GravityOverride` | float[0..1] | global `NewFlightGravity` | Per-vehicle downward acceleration override for new-flight-model aircraft only. Omit to use the global config default. |
