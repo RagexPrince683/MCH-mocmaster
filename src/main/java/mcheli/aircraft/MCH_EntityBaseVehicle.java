@@ -1798,6 +1798,22 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return 0.0D;
    }
 
+   public double getLastGravityAcceleration() {
+      return 0.0D;
+   }
+
+   public double getLastLiftAcceleration() {
+      return 0.0D;
+   }
+
+   public double getLastNetVerticalAcceleration() {
+      return 0.0D;
+   }
+
+   public boolean isLastAirborne() {
+      return !super.onGround;
+   }
+
    /** Effective 0..1 control authority after stall and high-G penalties. */
    public float getDebugControlAuthority() {
       return this.getControlAuthorityFactor();

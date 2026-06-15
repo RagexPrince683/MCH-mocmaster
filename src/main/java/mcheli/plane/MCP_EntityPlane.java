@@ -55,6 +55,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastAerodynamicDrag;
    /** Last stall lift-loss fraction applied to vertical motion, exposed for debug output. */
    private double lastLiftLoss;
+   /** Last downward gravity acceleration applied by the new fixed-wing model. */
+   private double lastGravityAcceleration;
+   /** Last upward lift acceleration applied by the new fixed-wing model. */
+   private double lastLiftAcceleration;
+   /** Last net fixed-wing vertical acceleration before velocity damping. */
+   private double lastNetVerticalAcceleration;
+   /** Last airborne state used by the new fixed-wing force model. */
+   private boolean lastAirborne;
    /** Local-axis body rates used by fixed-wing damped control response. */
    private float pitchAngularVelocity;
    private float rollAngularVelocity;
@@ -90,6 +98,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.engineThrottle = 0.0D;
       this.lastAerodynamicDrag = 0.0D;
       this.lastLiftLoss = 0.0D;
+      this.lastGravityAcceleration = 0.0D;
+      this.lastLiftAcceleration = 0.0D;
+      this.lastNetVerticalAcceleration = 0.0D;
+      this.lastAirborne = false;
       this.angleOfAttack = 0.0D;
       this.stallSeverity = 0.0D;
       this.stalling = false;
@@ -370,6 +382,22 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    public double getLastLiftLoss() {
       return this.lastLiftLoss;
+   }
+
+   public double getLastGravityAcceleration() {
+      return this.lastGravityAcceleration;
+   }
+
+   public double getLastLiftAcceleration() {
+      return this.lastLiftAcceleration;
+   }
+
+   public double getLastNetVerticalAcceleration() {
+      return this.lastNetVerticalAcceleration;
+   }
+
+   public boolean isLastAirborne() {
+      return this.lastAirborne;
    }
 
    public float getDebugControlAuthority() {
@@ -670,6 +698,64 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.overspeedDamageAccumulator -= (double)damage;
          this.setDamageTaken(this.getDamageTaken() + damage);
       }
+   }
+
+   private void applyNewFlightVerticalForces() {
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      boolean airborne = !super.onGround && MCH_Lib.getBlockIdY(this, 1, -2) == 0;
+      this.lastAirborne = airborne;
+      if(!airborne) {
+         this.lastGravityAcceleration = 0.0D;
+         this.lastLiftAcceleration = 0.0D;
+         this.lastNetVerticalAcceleration = 0.0D;
+         return;
+      }
+
+      double configuredGravity = !this.isInWater() ? (double)this.getAcInfo().gravity : (double)this.getAcInfo().gravityInWater;
+      double gravityAccel = Math.max(0.0D, -configuredGravity);
+      if(gravityAccel <= 1.0E-6D) {
+         gravityAccel = 0.04D;
+      }
+
+      double stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
+      double airspeed = this.getAirspeed();
+      double airspeedLift = MCH_FlightModel.clamp((airspeed - stallSpeed * 0.45D) / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.25D);
+      double aoaLift = MCH_FlightModel.clamp(1.0D - Math.max(0.0D, this.angleOfAttack - (double)info.criticalAoA) / Math.max(1.0D, (double)info.criticalAoA), 0.0D, 1.0D);
+      double liftPower = (double)info.newFlightLowThrottleLiftRetention
+            + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * this.getEffectiveEngineThrottle();
+      if(this.isCombatFlapsDeployed()) {
+         liftPower += (double)info.newFlightCombatFlapLift;
+      }
+      double stallLift = 1.0D - MCH_FlightModel.clamp(this.stallSeverity * (double)info.stallLiftLoss, 0.0D, 1.0D);
+      double liftAccel = gravityAccel * MCH_FlightModel.clamp(liftPower, 0.0D, 1.2D) * airspeedLift * aoaLift * stallLift;
+      double netAccel = liftAccel - gravityAccel;
+
+      super.motionY += netAccel;
+      this.lastGravityAcceleration = gravityAccel;
+      this.lastLiftAcceleration = liftAccel;
+      this.lastNetVerticalAcceleration = netAccel;
+   }
+
+   public void resetNewFlightPlacementMotion() {
+      if(this.getPlaneInfo() == null || !this.getPlaneInfo().useNewMobilitySystem) {
+         return;
+      }
+      super.motionX = super.motionY = super.motionZ = 0.0D;
+      this.velocityX = this.velocityY = this.velocityZ = 0.0D;
+      this.engineThrottle = 0.0D;
+      this.lastAerodynamicDrag = 0.0D;
+      this.lastLiftLoss = 0.0D;
+      this.lastGravityAcceleration = 0.0D;
+      this.lastLiftAcceleration = 0.0D;
+      this.lastNetVerticalAcceleration = 0.0D;
+      this.lastAirborne = false;
+      this.pitchAngularVelocity = this.rollAngularVelocity = this.yawAngularVelocity = 0.0F;
+      this.currentGForce = 1.0D;
+      this.overspeedDamageAccumulator = 0.0D;
+      this.angleOfAttack = 0.0D;
+      this.stallSeverity = 0.0D;
+      this.stalling = false;
+      this.aircraftPosRotInc = 0;
    }
 
    protected void updateVehicleStress() {
@@ -1180,6 +1266,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.stallSeverity = 0.0D;
          this.lastAerodynamicDrag = 0.0D;
          this.lastLiftLoss = 0.0D;
+         this.lastGravityAcceleration = 0.0D;
+         this.lastLiftAcceleration = 0.0D;
+         this.lastNetVerticalAcceleration = 0.0D;
+         this.lastAirborne = false;
          this.stalling = false;
       }
 
@@ -1227,19 +1317,18 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
 
          if(!levelOff) {
-            super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
             if(this.useNewMobilitySystem() && this.getPlaneInfo() != null) {
-               double liftPower = (double)this.getPlaneInfo().newFlightLowThrottleLiftRetention
-                     + (1.0D - (double)this.getPlaneInfo().newFlightLowThrottleLiftRetention) * this.getEffectiveEngineThrottle();
-               if(this.isCombatFlapsDeployed()) {
-                  liftPower += (double)this.getPlaneInfo().newFlightCombatFlapLift;
-               }
-               super.motionY += -0.047D * (1.0D - MCH_FlightModel.clamp(liftPower, 0.0D, 1.0D));
+               this.applyNewFlightVerticalForces();
             } else {
+               super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
                super.motionY += -0.047D * (1.0D - this.getEngineThrottle());
             }
          } else {
             super.motionY *= 0.8D;
+            this.lastGravityAcceleration = 0.0D;
+            this.lastLiftAcceleration = 0.0D;
+            this.lastNetVerticalAcceleration = 0.0D;
+            this.lastAirborne = false;
          }
       } else {
          this.setRotPitch(this.getRotPitch() * 0.8F, "getWaterDepth != 0");
