@@ -96,11 +96,13 @@ processResources {
 }
 
 tasks.withType(Jar) {
+    exclude 'assets'
     exclude 'assets/**'
 }
 
 tasks.matching { it.name == 'reobfJar' }.all {
     if (it.metaClass.respondsTo(it, 'exclude', Object[])) {
+        it.exclude 'assets'
         it.exclude 'assets/**'
     }
 }
@@ -113,39 +115,21 @@ task copyAssetsToRun(type: Copy) {
         file('assets').isDirectory()
     }
 
+    dependsOn processResources
+    mustRunAfter processResources
+
     from 'assets'
-    into "$buildDir/run/assets"
-}
-
-task syncMCHeliAssets(type: Copy) {
-    def srcDir = file("$buildDir/run/mods/mcheli/assets/mcheli")
-    def dstDir = file("src/main/resources/assets/mcheli")
-
-    onlyIf {
-        srcDir.isDirectory()
-    }
-
-    from(srcDir) {
-        include "hud/**"
-        include "models/**"
-        include "shaders/**"
-        include "sounds/**"
-        include "textures/**"
-        include "sounds.json"
-    }
-
-    into(dstDir)
+    into "${sourceSets.main.output.resourcesDir}/assets"
 
     doFirst {
-        println "[MCH] Syncing runtime assets -> resources"
-        println "  from: $srcDir"
-        println "  into: $dstDir"
+        println "[MCH] Copying root assets for runClient only"
+        println "  from: ${file('assets')}"
+        println "  into: ${sourceSets.main.output.resourcesDir}/assets"
     }
 }
 
 def configureRunClientAssets = { task ->
     task.dependsOn copyAssetsToRun
-    task.dependsOn syncMCHeliAssets
 }
 
 tasks.matching { it.name == 'runClient' }.all configureRunClientAssets
@@ -156,5 +140,5 @@ tasks.whenTaskAdded { task ->
 }
 
 clean.doLast {
-    delete "$buildDir/run/assets"
+    delete "${sourceSets.main.output.resourcesDir}/assets"
 }
