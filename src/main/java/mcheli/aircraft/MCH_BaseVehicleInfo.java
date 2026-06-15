@@ -141,6 +141,8 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
     * movement, rotation, throttle, and damping paths intact.</p>
     */
    public boolean useNewMobilitySystem;
+   /** Optional per-vehicle override for new-flight gravity. NaN falls back to global config. */
+   public float newFlightGravity;
     private List textureNameList;
    public int textureCount;
    public float particlesScale;
@@ -352,6 +354,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
       this.flightCeiling = 9100.0F;
       this.flightCeilingRange = 24.0F;
       this.useNewMobilitySystem = false;
+      this.newFlightGravity = Float.NaN;
       this.pivotTurnThrottle = 0.0F;
       this.trackRollerRot = 30.0F;
       this.partWheelRot = 30.0F;
@@ -874,6 +877,10 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                        || item.equalsIgnoreCase("UseNewFlightModel")
                                        || item.equalsIgnoreCase("EnableNewFlightModel")) {
                                     this.useNewMobilitySystem = this.toBool(data);
+                                 } else if(item.equalsIgnoreCase("NewFlightGravity")
+                                       || item.equalsIgnoreCase("FlightGravity")
+                                       || item.equalsIgnoreCase("GravityOverride")) {
+                                    this.newFlightGravity = this.toFloat(data, 0.0F, 1.0F);
                                  } else if(item.equalsIgnoreCase("Stealth")) {
                                     this.stealth = this.toFloat(data, 0.0F, 1.0F);
                                  } else if(item.equalsIgnoreCase("EntityWidth")) {

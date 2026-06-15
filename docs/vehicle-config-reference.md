@@ -90,6 +90,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `gravityinwater` | All | float | -0.04 | water gravity per tick |
 | `FlightCeiling` | Aircraft/heli/plane/shared | float | 9100.0 | soft altitude limit; new flight model |
 | `FlightCeilingRange` | Aircraft/heli/plane/shared | float | 24.0 | lift fade band below ceiling; new flight model |
+| `NewFlightGravity` / `FlightGravity` / `GravityOverride` | Aircraft/plane/shared | float[0..1] | global `NewFlightGravity` | optional per-vehicle new-flight gravity override |
 | `speed` | All | float | 0.1 | top horizontal speed before family global multiplier |
 | `MotionFactor` | All | float | 0.96; plane constructor 0.975 | per-tick horizontal damping |
 | `MobilityYaw` | All | float | 1.0 | yaw control multiplier |
