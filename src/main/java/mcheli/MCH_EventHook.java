@@ -326,6 +326,18 @@ public class MCH_EventHook extends W_EventHook {
       }
    }
 
+   //stop throwing action
+    @SubscribeEvent
+        public void onPlayerInteract(PlayerInteractEvent event) {
+            if (event.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR || event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
+            EntityPlayer player = event.entityPlayer;
+            if (player != null && player.worldObj != null && !player.worldObj.isRemote
+                    && isPlayerControllingNewUav(player)) {
+                event.setCanceled(true);
+            }
+            }
+        }
+
 
 
 
