@@ -145,7 +145,11 @@ task syncMCHeliAssets(type: Copy) {
         include "sounds.json"
     }
 
-    into(dstDir)
+    dependsOn processResources
+    mustRunAfter processResources
+
+    from 'assets'
+    into "${sourceSets.main.output.resourcesDir}/assets"
 
     doFirst {
         println "[MCH] Syncing runtime assets -> runClient resources"
