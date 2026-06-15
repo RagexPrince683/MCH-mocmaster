@@ -34,6 +34,8 @@ public class MCP_ItemPlane extends MCH_ItemBaseVehicle {
       /* 30 */     plane.prevPosZ = z;
       /* 31 */     plane.camera.setPosition(x, y, z);
       /* 32 */     plane.setTypeName(info.name);
+      /*    */     plane.changeType(info.name);
+      /*    */     plane.resetNewFlightPlacementMotion();
       /* 33 */     if (!world.isRemote) {
          /* 34 */       plane.setTextureName(info.getTextureName());
          /*    */     }

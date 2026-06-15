@@ -394,6 +394,7 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
          } else {
             if(!world.isRemote) {
                ac.getAcDataFromItem(itemStack);
+               ac.markFreshlyPlaced();
                world.spawnEntityInWorld(ac);
                MCH_Achievement.addStat(player, MCH_Achievement.welcome, 1);
             }

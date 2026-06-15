@@ -151,6 +151,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm MouseControlFlightSimMode;
    public static MCH_ConfigPrm SwitchWeaponWithMouseWheel;
    public static MCH_ConfigPrm AllPlaneSpeed;
+   public static MCH_ConfigPrm NewFlightGravity;
    public static MCH_ConfigPrm AllShipSpeed;
    public static MCH_ConfigPrm AllHeliSpeed;
    public static MCH_ConfigPrm AllTankSpeed;
@@ -390,6 +391,8 @@ public class MCH_Config {
       SwitchWeaponWithMouseWheel = new MCH_ConfigPrm("SwitchWeaponWithMouseWheel", true);
       AllHeliSpeed = new MCH_ConfigPrm("AllHeliSpeed", 1.5D);
       AllPlaneSpeed = new MCH_ConfigPrm("AllPlaneSpeed", 1000.00D);
+      NewFlightGravity = new MCH_ConfigPrm("NewFlightGravity", 0.008D);
+      NewFlightGravity.desc = ";Default per-tick downward acceleration for new-flight-model aircraft. Vehicle configs can override with NewFlightGravity, FlightGravity, or GravityOverride.";
       AllShipSpeed = new MCH_ConfigPrm("AllShipSpeed", 2.0D);
       AllTankSpeed = new MCH_ConfigPrm("AllTankSpeed", 1.0D);
       HurtResistantTime = new MCH_ConfigPrm("HurtResistantTime", 0.0D);
@@ -417,7 +420,7 @@ public class MCH_Config {
       DebugVehicleBoxCache = new MCH_ConfigPrm("DebugVehicleBoxCache", false);
       DebugVehicleBoxCache.desc = ";Print vehicle collision/hit box cache hits, rebuilds, invalidation reasons, and generated box counts.";
       DebugFlightControl = new MCH_ConfigPrm("DebugFlightControl", false);
-      DebugFlightControl.desc = ";Print FPS, elapsed tick fraction, control inputs, angular velocity, and pitch/yaw/roll once per second while piloting.";
+      DebugFlightControl.desc = ";Print FPS, elapsed tick fraction, control inputs, angular velocity, pitch/yaw/roll, new-flight gravity/lift, and placement motion-lock state once per second while piloting.";
       DespawnCount = new MCH_ConfigPrm("DespawnCount", 25);
       HitBoxDelayTick = new MCH_ConfigPrm("HitBoxDelayTick", 0);
       EnableRotationLimit = new MCH_ConfigPrm("EnableRotationLimit", false);
@@ -493,6 +496,7 @@ public class MCH_Config {
               BreakableOnlyPickaxe,
               AllHeliSpeed,
               AllPlaneSpeed,
+              NewFlightGravity,
               AllShipSpeed,
               AllTankSpeed,
               HurtResistantTime,
@@ -621,6 +625,7 @@ public class MCH_Config {
 
       AllHeliSpeed.prmDouble = MCH_Lib.RNG(AllHeliSpeed.prmDouble, 0.0D, 1000.0D);
       AllPlaneSpeed.prmDouble = MCH_Lib.RNG(AllPlaneSpeed.prmDouble, 0.0D, 1000.0D);
+      NewFlightGravity.prmDouble = MCH_Lib.RNG(NewFlightGravity.prmDouble, 0.001D, 0.2D);
       AllTankSpeed.prmDouble = MCH_Lib.RNG(AllTankSpeed.prmDouble, 0.0D, 1000.0D);
       AllShipSpeed.prmDouble = MCH_Lib.RNG(AllShipSpeed.prmDouble, 0.0D, 1000.0D);
       this.setBlockListFromString(bulletBreakableBlocks, BulletBreakableBlock.prmString);

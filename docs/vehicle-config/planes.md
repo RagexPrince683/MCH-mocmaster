@@ -98,7 +98,7 @@ effectiveThrottle = NewFlightIdleThrottle
                   * pow(engineThrottle, NewFlightThrottleResponse)
 ```
 
-`effectiveThrottle`, not raw pilot throttle, drives new-flight thrust and sustainable speed. This makes 30-70% useful for cruise/formation/approach instead of forcing pilots to live near 100%. Cutting throttle reduces acceleration and adds engine-brake drag; it no longer directly deletes lift.
+`effectiveThrottle`, not raw pilot throttle, drives new-flight thrust and sustainable speed. This makes 30-70% useful for cruise/formation/approach instead of forcing pilots to live near 100%. Cutting throttle reduces acceleration and adds engine-brake drag; it no longer directly deletes lift. New-flight planes also always integrate configurable downward acceleration while airborne; valid wing lift is added upward against that gravity instead of replacing it, so low-speed or stalled aircraft descend naturally. The global `NewFlightGravity` config defaults to `0.008` per tick, and individual vehicles can set `NewFlightGravity`, `FlightGravity`, or `GravityOverride` to tune heavy bombers, light fighters, jets, props, and experimental aircraft independently.
 
 Recommended starting ranges:
 
@@ -272,4 +272,4 @@ Combat flaps are intentionally gated by `useNewMobilitySystem = true`; legacy pa
 
 Use flaps with low or moderate throttle for landing and low-speed control. High throttle with flaps can improve a short turn, but the extra drag and reduced `MaxSafeSpeed * NewFlightCombatFlapOverspeed` should punish extended high-speed use. Throttle chopping plus flaps helps manage speed but should not be tuned into an instant brake; raise `NewFlightCombatFlapDrag` gradually and keep `NewFlightEngineBrakeDrag` modest.
 
-Debug flight logging (`DebugFlightControl`) includes throttle percent, flap state, airspeed, AoA, lift loss, drag, control authority, stall, and overspeed state for new-flight tuning.
+Debug flight logging (`DebugFlightControl`) includes throttle percent, flap state, airspeed, vertical velocity, applied gravity acceleration, resolved global/override gravity, placement motion-lock state, current motion/cached velocity, lift acceleration, net vertical acceleration, airborne state, AoA, lift loss, drag, control authority, stall, and overspeed state for new-flight tuning.

@@ -21,6 +21,7 @@ public class MCH_ItemBaseVehicleDispenseBehavior extends BehaviorDefaultDispense
          if(ac != null && !ac.isUAV()) {
             if(!bs.getWorld().isRemote) {
                ac.getAcDataFromItem(itemStack);
+               ac.markFreshlyPlaced();
                bs.getWorld().spawnEntityInWorld(ac);
             }
 
