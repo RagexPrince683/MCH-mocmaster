@@ -391,7 +391,7 @@ public class MCH_Config {
       SwitchWeaponWithMouseWheel = new MCH_ConfigPrm("SwitchWeaponWithMouseWheel", true);
       AllHeliSpeed = new MCH_ConfigPrm("AllHeliSpeed", 1.5D);
       AllPlaneSpeed = new MCH_ConfigPrm("AllPlaneSpeed", 1000.00D);
-      NewFlightGravity = new MCH_ConfigPrm("NewFlightGravity", 0.026D);
+      NewFlightGravity = new MCH_ConfigPrm("NewFlightGravity", 0.008D);
       NewFlightGravity.desc = ";Default per-tick downward acceleration for new-flight-model aircraft. Vehicle configs can override with NewFlightGravity, FlightGravity, or GravityOverride.";
       AllShipSpeed = new MCH_ConfigPrm("AllShipSpeed", 2.0D);
       AllTankSpeed = new MCH_ConfigPrm("AllTankSpeed", 1.0D);

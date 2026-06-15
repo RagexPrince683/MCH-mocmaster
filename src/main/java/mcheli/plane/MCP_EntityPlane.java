@@ -716,7 +716,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       if(MCH_Config.NewFlightGravity != null && MCH_Config.NewFlightGravity.prmDouble > 0.0D) {
          return MCH_Config.NewFlightGravity.prmDouble;
       }
-      return 0.026D;
+      return 0.008D;
    }
 
    private void applyNewFlightVerticalForces() {
