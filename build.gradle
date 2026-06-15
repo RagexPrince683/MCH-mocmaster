@@ -84,6 +84,35 @@ processResources {
     }
 }
 
+// ------------------ CODE-ONLY PACKAGING ------------------
+// Use this task for release/code artifacts. It depends only on Java
+// compilation and packages compiled class files without processing, scanning,
+// copying, or including the root assets folder or any resource assets.
+task buildcode(type: Jar, dependsOn: compileJava) {
+    group = 'build'
+    description = 'Builds a code-only jar from compiled classes without packaging assets or resources.'
+
+    baseName = archivesBaseName
+    version = project.version
+    classifier = 'code'
+
+    if (sourceSets.main.output.hasProperty('classesDirs')) {
+        from sourceSets.main.output.classesDirs
+    } else {
+        from sourceSets.main.output.classesDir
+    }
+
+    include '**/*.class'
+    exclude 'assets'
+    exclude 'assets/**'
+}
+
+// Camel-case alias for users who naturally type Gradle task names this way.
+task buildCode(dependsOn: buildcode) {
+    group = 'build'
+    description = 'Alias for buildcode.'
+}
+
 // ------------------ ASSETS COPY TASK ------------------
 // Copies 'assets/' from project root to the run directory for IDE dev environment
 task copyAssetsToRun(type: Copy) {
