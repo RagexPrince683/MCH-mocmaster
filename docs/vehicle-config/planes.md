@@ -174,9 +174,10 @@ demand = max(speedSeverity, aoaSeverity)
 
 `AoA` is the angle between where the aircraft nose points and where the aircraft is actually moving. It is not the pitch angle by itself. Near-zero airspeed reports `AoA = 0` so parked or nearly stationary aircraft do not feed invalid vectors into stall math.
 
-If not already stalling, any positive demand starts a stall. While stalling, recovery requires both:
+If not already stalling, demand above the small entry hysteresis band starts a stall. While stalling, one good frame is not enough to recover unless both recovery conditions are true in the same tick:
 
 ```text
+demand > 0.03 starts a stall when not already stalling
 airspeed >= (StallRecoverySpeed if >0 else stallSpeed * 1.2)
 abs(AoA) <= CriticalAoA * 0.75
 ```
@@ -192,13 +193,16 @@ Airborne wing lift is then filtered by airspeed, AoA, throttle/flap lift power, 
 
 ```text
 airspeedLift = clamp((airspeed - stallSpeed * 0.45) / max(0.05, stallSpeed * 1.35), 0, 1.25)
-aoaLift = clamp(1 - max(0, AoA - CriticalAoA) / max(1, CriticalAoA), 0, 1)
+aoaLift = clamp(1 - max(0, abs(AoA) - CriticalAoA) / max(1, CriticalAoA), 0, 1)
 liftLoss = clamp(stallSeverity * StallLiftLoss, 0, 1)
 stallLift = 1 - liftLoss
-liftForce = gravity * clamp(liftPower, 0, 2.5) * airspeedLift * aoaLift * stallLift
+liftBeforeStallLoss = gravity * clamp(liftPower, 0, 2.5) * airspeedLift * aoaLift
+liftForce = liftBeforeStallLoss * stallLift
 ```
 
-This means pointing the nose near vertical does not create maximum lift unless the velocity vector, airspeed, and AoA are still within valid flying conditions. Combat flaps and low-throttle lift retention preserve takeoff/climb headroom, but they are still multiplied by AoA and stall lift loss.
+`StallLiftLoss` is applied after throttle lift retention, combat flap lift, takeoff lift, and other lift bonuses are resolved. Stalled aircraft suppress takeoff/climb lift headroom until recovery, so `validTakeoff` or `validClimb` cannot bypass stall penalties.
+
+This means pointing the nose near vertical does not create maximum lift unless the velocity vector, airspeed, lift-to-weight, and thrust-to-weight are still within valid flying conditions. Conventional fixed-wing thrust is also limited during unsupported vertical climbs: if thrust-to-weight is below 1.0, upward powered climb is scaled by speed headroom and remaining unstalled authority. High nose-up climbs add extra AoA/energy drag and bleed vertical energy unless the aircraft is truly tuned with enough thrust and speed to support them.
 
 Developed stalls also apply sink and a deterministic pitch break:
 
@@ -206,7 +210,10 @@ Developed stalls also apply sink and a deterministic pitch break:
 if motionY > 0: motionY *= 1 - liftLoss * 0.12
 motionY -= 0.018 * liftLoss * StallStrength
 pitchBreak = stallSeverity * StallStrength * (0.12 + 0.18 * max(speedSeverity, aoaSeverity))
+pitchAngularVelocity += clamp(pitchBreak * noseDownScale * 0.45, 0, 1.2)
 ```
+
+Pitch break uses the same pitch/angular velocity path as visible fixed-wing rotation. The moment is deterministic, scales with `stallSeverity`, `StallStrength`, and stall demand, and adds bounded nose-down pitch rather than only applying vertical sink.
 
 `pitchBreak` is applied as a nose-down pitch moment and damps excessive nose-up pitch angular velocity. MCHeli/Minecraft rotation pitch uses inverted sign convention: nose-up attitude is negative numeric pitch, and nose-down attitude is positive numeric pitch. The pitch-break code therefore adds a positive rotation-pitch delta to lower the nose. It is separate from `StallInstability`: `StallInstability` still adds repeatable roll/yaw buffet and wing drop, while `StallStrength` controls the predictable unloading/sink force that helps a stalled aircraft lower the nose, regain airspeed, and recover only after both speed and AoA meet the recovery limits.
 
@@ -365,4 +372,4 @@ Combat flaps are intentionally gated by `useNewMobilitySystem = true`; legacy pa
 
 Use flaps with low or moderate throttle for landing and low-speed control. High throttle with flaps can improve a short turn, but the extra drag and reduced `MaxSafeSpeed * NewFlightCombatFlapOverspeed` should punish extended high-speed use. Throttle chopping plus flaps helps manage speed but should not be tuned into an instant brake; raise `NewFlightCombatFlapDrag` gradually and keep `NewFlightEngineBrakeDrag` modest.
 
-Debug flight logging (`DebugFlightControl`) includes throttle percent, flap state, airspeed, vertical velocity, physical mass, weight force, engine thrust force, lift force, lift-to-weight ratio, thrust-to-weight ratio, net forward acceleration, `TakeoffDistanceMultiplier`, base/effective takeoff thresholds, whether takeoff threshold scaling is active, applied gravity acceleration, resolved global/override gravity, placement motion-lock state, current motion/cached velocity, lift acceleration, net vertical acceleration, airborne state, velocity-derived `aoaFromVelocity`, `criticalAoA`, `stallDemand`, `speedSeverity`, `aoaSeverity`, smoothed stall severity, lift loss, drag, control authority, pitch-break state, and overspeed state for new-flight tuning.
+Debug flight logging (`DebugFlightControl`) includes throttle percent, flap state, pitch, airspeed, forward speed, vertical speed, physical mass, weight force, engine thrust force, lift force, lift before stall loss, lift after stall loss, lift-to-weight ratio, thrust-to-weight ratio, net forward acceleration, `TakeoffDistanceMultiplier`, base/effective takeoff thresholds, whether takeoff threshold scaling is active, `validTakeoff`, `validClimb`, whether stall suppressed takeoff/climb headroom, applied gravity acceleration, resolved global/override gravity, placement motion-lock state, current motion/cached velocity, lift acceleration, net vertical acceleration, airborne state, velocity-derived `aoaFromVelocity`, `criticalAoA`, `stallDemand`, `speedSeverity`, `aoaSeverity`, smoothed stall severity, stall state, lift loss, drag, control authority, pitch-break state, applied pitch-break angular velocity, and overspeed state for new-flight tuning.
