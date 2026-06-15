@@ -1,0 +1,135 @@
+DisplayName = MiG-3-15
+AddDisplayName = en_US, Mikoyan-Gurevich MiG-3-15
+AddDisplayName = ru_RU, MiG-3-15
+ItemID = 30020
+MaxHp = 100
+Speed = 1.114
+
+;398
+
+Float = false
+Sound = prop_fighter
+onGroundPitch = 15
+ThrottleUpDown = 0.3
+MaxFuel         = 1852
+FuelConsumption = 2.259
+ThirdPersonDist = 12
+DamageFactor = 0.8
+
+RotorSpeed = 2000.0
+
+; W = WWII.  F = Fighter(戦闘機)
+Category = FA/IA
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 0.950
+EngineThrust = 0.997
+NewFlightGravity = 0.0080
+NewFlightThrottleResponse = 0.95
+NewFlightThrottleChangeRateUp = 0.0065
+NewFlightThrottleChangeRateDown = 0.0090
+NewFlightIdleThrottle = 0.085
+NewFlightEngineBrakeDrag = 0.0055
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.16
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = true
+NewFlightCombatFlapLift = 0.130
+NewFlightCombatFlapDrag = 0.014
+NewFlightCombatFlapControl = 0.18
+NewFlightCombatFlapOverspeed = 0.7
+FlightCeiling = 11000
+FlightCeilingRange = 56
+StallSpeed = 0.257
+CriticalAoA = 15.50
+StallLiftLoss = 0.780
+AoADragMultiplier = 2.450
+StallInstability = 0.460
+StallRecoverySpeed = 0.347
+StallSpeedFactor = 0.24
+StallStrength = 0.980
+DiveSpeedMultiplier = 1.2
+MaxComfortableG = 5
+MaxStructuralG = 8.5
+GControlPenalty = 0.680
+CompressibilitySpeed = 1.136
+CompressibilityPitchPenalty = 0.45
+MaxSafeSpeed = 1.359
+OverspeedDamageRate = 0.12
+BaseDrag = 0.0023
+InducedDrag = 0.011
+ControlSurfaceDrag = 0.004
+ClimbEnergyLoss = 0.013
+DiveEnergyGain = 0.0090
+MaxLevelSpeed = 1.069
+IdleDrag = 0.0055
+
+PitchTorque = 0.460
+RollTorque = 0.550
+YawTorque = 0.320
+PitchDamping = 0.355
+RollDamping = 0.320
+YawDamping = 0.390
+InertiaMultiplier = 0.960
+ThrottleAcceleration = 0.024
+EngineDrag = 0.012
+
+MobilityYaw = 1.12
+MobilityPitch = 1.36
+MobilityRoll = 1.82
+
+HUD = plane_wwii
+
+AddSeat = 0.0,  1.65, -1.17
+unmountposition = 0.0,  1.95, -1.17
+enableback = true
+
+AddPartSlideCanopy = 0, 0.00, -0.8
+
+AddPartLG =    2.01, 1.15,  1.29,  0,0,-1, 88
+AddPartLG =   -2.01, 1.15,  1.29,  0,0, 1, 88
+AddPartLG =    0.00, 1.85, -5.33,  1,0,0, 90
+
+AddPartRotor =    0.00,  1.99, 4.51,   1,0, 0
+AddBlade = 1, 0,  0.00,  1.99, 4.51,   0,0,-1
+
+AddWeapon = mig3shkas,  0.23, 2.69, 2.94,  0.0, -3.0
+AddWeapon = mig3shkas, -0.23, 2.69, 2.94,  0.0, -3.0
+
+AddWeapon = mig3ubs,  0.00, 2.7, 4.41,   0.0, 2.0
+
+;;AddWeapon = rs82,  -2.32, 1.22, 2.08,   0.2, 0.0
+;;AddWeapon = rs82,   2.32, 1.22, 2.08,  -0.2, 0.0
+;find someone who cares enough to model ts
+
+AddWeapon = ,   0.00, 1.52, 4.41,  0.0, 0.0
+
+;basic ww2 prop plane, AOW3 style
+AddRecipe = "ABC", "DE ", "   ", A, mcheli:airframe, B, mcheli:basicmechanicparts, C, mcheli:engine1, D, mcheli:wheelair, E, mcheli:cannon2
+BoundingBox =  0.00,  1.99,  0.00,  1.2, 1.2
+BoundingBox =  0.00,  1.99,  1.13,  1.2, 1.2
+BoundingBox =  0.00,  1.99,  2.13,  1.2, 1.2
+BoundingBox =  0.00,  1.99,  3.13,  1.2, 1.2
+BoundingBox =  0.00,  1.99,  4.13,  1.0, 1.0, 1.5
+BoundingBox =  0.00,  1.99, -2.66,  1.2, 1.2
+BoundingBox =  0.00,  1.99, -3.86,  1.2, 1.2
+
+BoundingBox =  2.39,  1.39,  0.47,  2.8, 0.3
+BoundingBox = -2.39,  1.39,  0.47,  2.8, 0.3
+BoundingBox =  4.91,  1.72,  0.59,  2.5, 0.2
+BoundingBox = -4.91,  1.72,  0.59,  2.5, 0.2
+
+BoundingBox =  1.17,  2.11, -5.22,  1.5, 0.2
+BoundingBox = -1.17,  2.11, -5.22,  1.5, 0.2
+
+BoundingBox =  0.00,  2.95, -5.86,  0.5, 2.2
+BoundingBox =  0.00,  2.85, -6.36,  0.5, 1.8
+BoundingBox =  0.00,  2.85, -5.36,  0.5, 1.8
+BoundingBox =  0.00,  2.65, -4.86,  0.5, 1.8
+BoundingBox =  0.00,  2.35, -4.36,  0.5, 1.8
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; Mikoyan-Gurevich MiG-3-15.
+; HandlingBalancePass = prop-maneuverability-2026-06-11; role=energy_fighter

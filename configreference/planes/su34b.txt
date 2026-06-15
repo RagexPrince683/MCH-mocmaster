@@ -1,0 +1,197 @@
+DisplayName = Su-34 (Bombs)
+AddDisplayName = ja_JP, Su-34 (Bombs)
+MaxHp = 250
+EnableNightVision = true
+EnableEntityRadar = true
+EnableEjectionSeat = true
+EnableGunnerMode = true
+ConcurrentGunnerMode = true
+Speed = 3.306
+FlareType = 4
+ParticlesScale = 0.7
+EnableSeaSurfaceParticle = true
+MaxFuel         = 48400
+FuelConsumption = 12.1
+ThirdPersonDist = 20
+;MotionFactor = 0.97
+AutoPilotRot = 0.0
+ThrottleUpDown = 0.3
+Sound = sutwentyseven
+
+DamageFactor = 0.8
+
+; M = Military(軍用機).  F = Fighter(戦闘機)
+Category = FB
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 1.650
+EngineThrust = 2.842
+NewFlightGravity = 0.0080
+NewFlightThrottleResponse = 1.18
+NewFlightThrottleChangeRateUp = 0.0055
+NewFlightThrottleChangeRateDown = 0.0075
+NewFlightIdleThrottle = 0.095
+NewFlightEngineBrakeDrag = 0.0030
+NewFlightLowThrottleLiftRetention = 0.720
+NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = true
+NewFlightCombatFlapLift = 0.120
+NewFlightCombatFlapDrag = 0.012
+NewFlightCombatFlapControl = 0.12
+NewFlightCombatFlapOverspeed = 0.78
+FlightCeiling = 16500
+FlightCeilingRange = 72
+StallSpeed = 0.628
+CriticalAoA = 16.50
+StallLiftLoss = 0.800
+AoADragMultiplier = 2.300
+StallInstability = 0.470
+StallRecoverySpeed = 0.829
+StallSpeedFactor = 0.18
+StallStrength = 0.980
+DiveSpeedMultiplier = 1.28
+MaxComfortableG = 7.5
+MaxStructuralG = 10.0
+GControlPenalty = 0.680
+CompressibilitySpeed = 3.174
+CompressibilityPitchPenalty = 0.5
+MaxSafeSpeed = 4.033
+OverspeedDamageRate = 0.14
+BaseDrag = 0.0015
+InducedDrag = 0.007
+ControlSurfaceDrag = 0.003
+ClimbEnergyLoss = 0.008
+DiveEnergyGain = 0.0120
+MaxLevelSpeed = 3.306
+IdleDrag = 0.0034
+
+PitchTorque = 0.430
+RollTorque = 0.490
+YawTorque = 0.320
+PitchDamping = 0.410
+RollDamping = 0.365
+YawDamping = 0.450
+InertiaMultiplier = 1.300
+ThrottleAcceleration = 0.037
+EngineDrag = 0.01
+
+HUD = plane
+AddTexture = su34_1
+AddTexture = su34_2
+
+AddSeat = 0.394,  2.528,  7.67
+AddGunnerSeat = -0.394,  2.528,  7.67
+
+unmountposition = 0.394,  2.128,  7.67
+
+enableback = true
+
+MobilityYaw = 1.272
+MobilityRoll = 1.728
+MobilityPitch = 1.498
+
+AddPartLG =  0.00,  2.47,  6.68,  -1,0,0, 80
+AddPartLG = 1.956,  2.35, -0.53, -1,-1,0, 100,  0,-1,0,  90
+AddPartLG =  -1.956,  2.35, -0.53, -1,1,0, 100,  0,-1,0,  -90
+
+AddPartWeaponMissile = r-73,    false,  false,  false,    6.208, 1.808, -3.97
+AddPartWeaponMissile = r-73,    false,  false,  false,   -6.208, 1.808, -3.97
+
+AddPartWeaponMissile = su34fab250,    false,  false,  false,   5.1242, 1.9323, -1.6
+AddPartWeaponMissile = su34fab250,    false,  false,  false,   4.8344, 1.8039, -1.6
+AddPartWeaponMissile = su34fab250,    false,  false,  false,   4.5378, 1.9323, -1.6
+
+AddPartWeaponMissile = su34fab250,    false,  false,  false,   3.7772, 1.9323, -1.6
+AddPartWeaponMissile = su34fab250,    false,  false,  false,   3.5022, 1.7990, -1.6
+AddPartWeaponMissile = su34fab250,    false,  false,  false,   3.2122, 1.9323, -1.6
+
+AddPartWeaponMissile = su34fab250,    false,  false,  false,   -5.1242, 1.9323, -1.6
+AddPartWeaponMissile = su34fab250,    false,  false,  false,   -4.8344, 1.8039, -1.6
+AddPartWeaponMissile = su34fab250,    false,  false,  false,   -4.5378, 1.9323, -1.6
+
+AddPartWeaponMissile = su34fab250,    false,  false,  false,   -3.7772, 1.9323, -1.6
+AddPartWeaponMissile = su34fab250,    false,  false,  false,   -3.5022, 1.7990, -1.6
+AddPartWeaponMissile = su34fab250,    false,  false,  false,   -3.2122, 1.9323, -1.6
+
+;180rnd
+AddWeapon = su34gsh-30-1, -1.15,  2.11,  5.77,  -0.5, -1.0
+
+;2
+AddWeapon = su34r-73,  6.208, 1.808, -3.97,   2.0, -3.0
+AddWeapon = su34r-73, -6.208, 1.808, -3.97,   2.0, -3.0
+
+;12
+
+;L
+AddWeapon = su34fab250, 5.1242, 1.9323, -1.6,   0.0, -0.0
+AddWeapon = su34fab250, 4.8344, 1.8039, -1.6,   0.0, -0.0
+AddWeapon = su34fab250, 4.5378, 1.9323, -1.6,   0.0, -0.0
+
+AddWeapon = su34fab250, 3.7772, 1.9323, -1.6,   0.0, -0.0
+AddWeapon = su34fab250, 3.5022, 1.7990, -1.6,   0.0, -0.0
+AddWeapon = su34fab250, 3.2122, 1.9323, -1.6,   0.0, -0.0
+
+;R
+AddWeapon = su34fab250, -5.1242, 1.9323, -1.6,   0.0, -0.0
+AddWeapon = su34fab250, -4.8344, 1.8039, -1.6,   0.0, -0.0
+AddWeapon = su34fab250, -4.5378, 1.9323, -1.6,   0.0, -0.0
+
+AddWeapon = su34fab250, -3.7772, 1.9323, -1.6,   0.0, -0.0
+AddWeapon = su34fab250, -3.5022, 1.7990, -1.6,   0.0, -0.0
+AddWeapon = su34fab250, -3.2122, 1.9323, -1.6,   0.0, -0.0
+
+AddWeapon = targeting_pod_ph50s,   0.0, 3.1, 7.2,    0.0, 0.0
+AddWeapon = uhf_radar,  0.00, 3.0, 0.0,    0.0, 0.0, true, 2
+
+;modern light plane (late jet), AOW3 style (fcs)
+AddRecipe = "ABC", "DEF", "GHG", A, mcheli:airframe3, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:cannon1, F, mcheli:fcs3, G, mcheli:electronics, H, mcheli:basicmechanicparts
+
+AddRecipe = "AB ", "   ", "   ", A, mcheli:su34, B, mcheli:basicmechanicparts
+
+BoundingBox =  0.00, 2.40, 9.80,  1.5, 1.5
+
+BoundingBox =  0.00, 2.90,  8.10,  2.0, 2.3
+
+BoundingBox =  0.00, 2.85,  6.20,  2.0, 2.0
+
+BoundingBox =  0.00, 2.80,  4.21,  2.0, 1.8
+
+BoundingBox =  0.00, 2.40,  1.70,  3.0, 2.5
+
+BoundingBox =  0.00, 2.10, -1.49,  3.4, 1.2
+
+BoundingBox =  0.00, 1.80, -4.70,  3.4, 1.0
+
+BoundingBox =  2.5, 2.35, 0.95,  2.1, 0.3,  0.8
+BoundingBox = -2.50, 2.35, 0.95,  2.1, 0.3,  0.8
+
+BoundingBox =  3.00, 2.35, -1.35,  3.0, 0.3,  0.8
+BoundingBox = -3.00, 2.35, -1.35,  3.0, 0.3,  0.8
+
+BoundingBox =  5.50, 2.35, -2.75,  2.0, 0.3,  0.8
+BoundingBox = -5.50, 2.35, -2.75,  2.0, 0.3,  0.8
+
+BoundingBox =  2.77, 1.88, -5.73,  1.8, 0.3,  0.7
+BoundingBox = -2.77, 1.88, -5.73,  1.8, 0.3,  0.7
+
+BoundingBox =  3.47, 1.88, -6.29,  1.8, 0.3,  0.7
+BoundingBox = -3.47, 1.88, -6.29,  1.8, 0.3,  0.7
+
+BoundingBox = 2.20, 3.00, -2.50, 0.5, 1.5
+BoundingBox = -2.20, 3.00, -2.50, 0.5, 1.5
+BoundingBox = 2.20, 3.30, -3.0, 0.5, 1.8
+BoundingBox = -2.20, 3.30, -3.0, 0.5, 1.8
+BoundingBox = 2.20, 3.40, -3.5, 0.5, 2.0
+BoundingBox = -2.20, 3.40, -3.5, 0.5, 2.0
+BoundingBox = 2.20, 3.65, -4.0, 0.5, 2.5
+BoundingBox = -2.20, 3.65, -4.0, 0.5, 2.5
+BoundingBox = 2.20, 3.95, -4.5, 0.5, 3.2
+BoundingBox = -2.20, 3.95, -4.5, 0.5, 3.2
+BoundingBox = 2.20, 4.2, -5, 0.5, 3.5
+BoundingBox = -2.20, 4.2, -5, 0.5, 3.5
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; Su-34 bomb loadout.

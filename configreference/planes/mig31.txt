@@ -1,0 +1,167 @@
+DisplayName = MiG-31 Foxhound
+MaxHp = 100
+; Realism pass: MiG-31 high-speed interceptor, ~1,860 mph / Mach 2.8 class, ceiling ~20.6 km.
+Speed = 4.00
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 2.300
+EngineThrust = 3.105
+NewFlightGravity = 0.0080
+NewFlightThrottleResponse = 1.18
+NewFlightThrottleChangeRateUp = 0.0055
+NewFlightThrottleChangeRateDown = 0.0075
+NewFlightIdleThrottle = 0.095
+NewFlightEngineBrakeDrag = 0.0030
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = false
+FlightCeiling = 20600
+FlightCeilingRange = 96
+StallSpeed = 1.040
+CriticalAoA = 14.00
+StallLiftLoss = 0.820
+AoADragMultiplier = 2.550
+StallInstability = 0.500
+StallRecoverySpeed = 1.435
+StallSpeedFactor = 0.18
+StallStrength = 1.080
+DiveSpeedMultiplier = 1.28
+MaxComfortableG = 7.5
+MaxStructuralG = 10.0
+GControlPenalty = 0.720
+CompressibilitySpeed = 3.84
+CompressibilityPitchPenalty = 0.5
+MaxSafeSpeed = 4.88
+OverspeedDamageRate = 0.14
+BaseDrag = 0.0014
+InducedDrag = 0.006
+ControlSurfaceDrag = 0.003
+ClimbEnergyLoss = 0.007
+DiveEnergyGain = 0.0160
+MaxLevelSpeed = 4
+IdleDrag = 0.0034
+
+PitchTorque = 0.230
+RollTorque = 0.260
+YawTorque = 0.170
+PitchDamping = 0.560
+RollDamping = 0.500
+YawDamping = 0.600
+InertiaMultiplier = 2.100
+ThrottleAcceleration = 0.033
+EngineDrag = 0.009
+
+MobilityYaw = 0.371
+MobilityPitch = 0.482
+MobilityRoll = 0.378
+EnableNightVision = false
+EnableEntityRadar = true
+EnableEjectionSeat = true
+ThrottleUpDown = 0.3
+FlareType = 4
+ParticlesScale = 0.7
+EnableSeaSurfaceParticle = true
+MaxFuel         = 65200
+FuelConsumption = 18.5
+Category = IA/SF
+HideEntity = false
+
+sound = migthirtyone
+
+DamageFactor = 0.8
+
+CameraZoom = 4
+
+AddSeat = 0.0, 1.8, 0.45
+
+unmountposition = 0.00,  2.18,  0.45
+
+enableback = true
+
+AddGunnerSeat = 0.0, 1.8, -0.92, 0, 1.7691, 5.7365, true
+
+AddPartCanopy = 0.00,3.1086,-0.53, -1,0,0, 60
+AddPartCanopy = 0.00,3.0259,-1.7768, -1,0,0, 60
+
+AddPartLG = -0.24, 1.177, -1.33,  0,0, 1,  90
+AddPartLG =  0.24, 1.177, -1.915,  0,0,-1,  90
+AddPartLG = 0, 1.2076, -0.24,  1,0, 0,  95
+AddPartLG = -1.1154, 1.141, -3.9193,  1,0, 0,  45
+AddPartLG = 1.1154, 1.141, -3.9193,  1,0, 0,  45
+AddPartLG = -1.4192, 1.5798, -5.2628,  0,0, 1,  64
+AddPartLG = 1.4192, 1.5798, -5.2628,  0,0, -1,  64
+AddPartLG = -1.2689, 1.1539, -6.3945,  0,0, 1,  100
+AddPartLG = 1.2689, 1.1539, -6.3945,  0,0, -1,  100
+AddPartLG = 1.2689, 1.2152, -6.7289, 0,0, -1,  115
+AddPartLG = -1.2689, 1.2152, -6.7289, 0,0, 1,  115
+
+AddPartWeaponMissile = mig31r-73,  false, false, false,   -4.39, 1.36, -8.0864
+AddPartWeaponMissile = mig31r-77,  false, false, false,  -2.8183, 1.35, -5.9578
+AddPartWeaponMissile = mig31r-77,  false, false, false,   2.8183, 1.35, -5.9578
+AddPartWeaponMissile = mig31r-73,  false, false, false,  4.39, 1.36, -8.0864
+
+AddWeapon = mig31gsh-6-23m,  0.0, 1.4, 0,   0.0, -1.0, false, 1
+AddWeapon = mig31r-73,     -4.39, 1.36, -8.0864,   0.0, -1.0, true, 2
+AddWeapon = mig31r-73,     4.39, 1.36, -8.0864,   0.0, -1.0, true, 2
+AddWeapon = mig31r-77,    -2.8183, 1.35, -5.9578,   0.0, -1.0, true, 2
+AddWeapon = mig31r-77,    2.8183, 1.35, -5.9578,   0.0, -1.0, true, 2
+
+AddWeapon = targeting_pod_ph50s,   0.0, 3.1,-0.6,   0.0, 0.0, true, 2
+AddWeapon = uhf_radar,  0.00, 3.0, 0.0,    0.0, 0.0
+
+;modern medium light plane (jet), AOW3 style
+AddRecipe = "ABC", "DE ", "GG ", A, mcheli:airframe2, B, mcheli:basicmechanicparts, C, mcheli:engine2, D, mcheli:wheelair, E, mcheli:cannon1, G, mcheli:electronics
+
+EntityWidth  = 0.75
+EntityHeight = 0.75
+
+BoundingBox = 0.0, 1.8, 0.0, 1.0, 1.0
+BoundingBox = 0.0, 1.8, 1.0, 1.0, 1.0
+BoundingBox = 0.0, 1.8, 1.8, 0.8, 0.8
+
+BoundingBox = 0.0, 1.8, -1.8, 2.8, 1.3
+BoundingBox = 0.0, 1.8, -4.6, 2.8, 1.3
+BoundingBox = 0.0, 1.8, -7.4, 2.8, 1.3
+BoundingBox = 0.0, 1.8, -10.2, 2.8, 1.3
+BoundingBox = 0.0, 1.8, -12.0, 2.7, 1.15, 1.5
+
+BoundingBox = -2.82, 2.2, -8.55, 2.8, 0.3
+BoundingBox = 2.82, 2.2, -8.55, 2.8, 0.3
+
+BoundingBox = -1.82, 2.2, -6.25, 1.8, 0.3
+BoundingBox = 1.82, 2.2, -6.25, 1.8, 0.3
+
+BoundingBox = -1.07, 1.7, -11.38, 1.5, 0.3
+BoundingBox = 1.07, 1.7, -11.38, 1.5, 0.3
+
+BoundingBox = -2.17, 1.7, -12.38, 1.5, 0.3
+BoundingBox = 2.17, 1.7, -12.38, 1.5, 0.3
+
+BoundingBox = -1.31, 2.38, -9.15, 0.5, 1.4
+BoundingBox = 1.31, 2.38,  -9.15, 0.5, 1.4
+
+BoundingBox = -1.31, 2.65, -9.65, 0.5, 1.4
+BoundingBox = 1.31, 2.65,  -9.65, 0.5, 1.4
+
+BoundingBox = -1.31, 2.85, -10.15, 0.5, 1.4
+BoundingBox = 1.31, 2.85, -10.15, 0.5, 1.4
+
+BoundingBox = -1.31, 3.05, -10.65, 0.5, 1.4
+BoundingBox = 1.31, 3.05, -10.65, 0.5, 1.4
+
+BoundingBox = -1.31, 3.15, -11.15, 0.5, 1.4
+BoundingBox = 1.31, 3.15, -11.15, 0.5, 1.4
+
+BoundingBox = -1.31, 3.35, -11.65, 0.5, 1.8
+BoundingBox = 1.31, 3.35, -11.65, 0.5, 1.8
+
+BoundingBox = -1.31, 3.55, -12.15, 0.5, 2.0
+BoundingBox = 1.31, 3.55, -12.15, 0.5, 2.0
+
+BoundingBox = -1.31, 3.65, -12.65, 0.5, 2.5
+BoundingBox = 1.31, 3.65, -12.65, 0.5, 2.5
+
+DamageFactor = 0.8

@@ -1,0 +1,85 @@
+DisplayName = MQM-170 Outlaw (Target drone)
+AddDisplayName = ja_JP, MQM-170アウトロー (標的機)
+ItemID = 28735
+MaxHp = 100
+Speed = 0.322
+
+;144mph
+
+Sound = prop
+onGroundPitch = 0
+UAV = true
+TargetDrone = true
+AutoPilotRot = -0.60
+ThrottleUpDown = 1.2
+MaxFuel         = 200
+FuelConsumption = 0.111
+
+; M = Military(軍用機).  Q = Drone(無人航空機)
+Category = UAV/TD
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 0.350
+EngineThrust = 0.280
+NewFlightGravity = 0.0076
+NewFlightThrottleResponse = 1.15
+NewFlightThrottleChangeRateUp = 0.0038
+NewFlightThrottleChangeRateDown = 0.0055
+NewFlightIdleThrottle = 0.10
+NewFlightEngineBrakeDrag = 0.0028
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = false
+FlightCeiling = 8000
+FlightCeilingRange = 56
+StallSpeed = 0.120
+CriticalAoA = 14.80
+StallLiftLoss = 0.820
+AoADragMultiplier = 2.650
+StallInstability = 0.520
+StallRecoverySpeed = 0.168
+StallSpeedFactor = 0.22
+StallStrength = 1.080
+DiveSpeedMultiplier = 1.18
+MaxComfortableG = 4.5
+MaxStructuralG = 7.5
+GControlPenalty = 0.740
+CompressibilitySpeed = 0.338
+CompressibilityPitchPenalty = 0.55
+MaxSafeSpeed = 0.37
+OverspeedDamageRate = 0.12
+BaseDrag = 0.0026
+InducedDrag = 0.012
+ControlSurfaceDrag = 0.005
+ClimbEnergyLoss = 0.011
+DiveEnergyGain = 0.0080
+MaxLevelSpeed = 0.322
+IdleDrag = 0.0032
+
+PitchTorque = 0.300
+RollTorque = 0.340
+YawTorque = 0.220
+PitchDamping = 0.360
+RollDamping = 0.330
+YawDamping = 0.390
+InertiaMultiplier = 0.700
+ThrottleAcceleration = 0.018
+EngineDrag = 0.013
+
+MobilityYaw = 0.75
+MobilityPitch = 0.82
+MobilityRoll = 0.72
+
+AddPartRotor =        0.00,  0.775, -1.62,   1,0, 0
+AddBlade     = 1, 0,  0.00,  0.775, -1.62,   0,0,-1
+
+;basic target drone
+AddRecipe = "ABC", " E ", "   ", A, mcheli:airframe, B, mcheli:basicmechanicparts, C, mcheli:engine1, E, mcheli:electronics
+
+BoundingBox =  0.0, 1.2, 0.0,  5.0, 2.5
+
+; RealismSource = MCHO plane scripted pass; Target drone class.
+; HandlingBalancePass = prop-maneuverability-2026-06-11; role=uav_prop

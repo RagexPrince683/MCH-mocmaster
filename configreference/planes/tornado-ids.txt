@@ -1,0 +1,170 @@
+DisplayName = Panavia Tornado IDS
+AddDisplayName = en_US, Panavia Tornado IDS
+AddDisplayName = ja_JP, パナヴィア トーネード IDS
+ItemID = 28720
+MaxHp = 100
+ThrottleUpDown = 0.3
+sound = tornado
+EnableNightVision = true
+EnableEntityRadar = true
+EnableEjectionSeat = true
+Speed = 4.0
+
+;1452mph
+
+FlareType = 4
+ParticlesScale = 0.7
+EnableSeaSurfaceParticle = true
+VariableSweepWing = true
+SweepWingSpeed = 1.2
+MaxFuel         = 18652
+FuelConsumption = 13.419
+
+; M = Military(軍用機).  A = Attacker(攻撃機)
+Category = MA/SA
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 1.650
+EngineThrust = 2.842
+NewFlightGravity = 0.0080
+NewFlightThrottleResponse = 1.18
+NewFlightThrottleChangeRateUp = 0.0055
+NewFlightThrottleChangeRateDown = 0.0075
+NewFlightIdleThrottle = 0.095
+NewFlightEngineBrakeDrag = 0.0030
+NewFlightLowThrottleLiftRetention = 0.720
+NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = true
+NewFlightCombatFlapLift = 0.120
+NewFlightCombatFlapDrag = 0.012
+NewFlightCombatFlapControl = 0.12
+NewFlightCombatFlapOverspeed = 0.78
+FlightCeiling = 16500
+FlightCeilingRange = 72
+StallSpeed = 0.760
+CriticalAoA = 16.50
+StallLiftLoss = 0.800
+AoADragMultiplier = 2.300
+StallInstability = 0.470
+StallRecoverySpeed = 1.003
+StallSpeedFactor = 0.18
+StallStrength = 0.980
+DiveSpeedMultiplier = 1.28
+MaxComfortableG = 7.5
+MaxStructuralG = 10.0
+GControlPenalty = 0.680
+CompressibilitySpeed = 3.84
+CompressibilityPitchPenalty = 0.5
+MaxSafeSpeed = 4.88
+OverspeedDamageRate = 0.14
+BaseDrag = 0.0015
+InducedDrag = 0.007
+ControlSurfaceDrag = 0.003
+ClimbEnergyLoss = 0.008
+DiveEnergyGain = 0.0120
+MaxLevelSpeed = 4
+IdleDrag = 0.0034
+
+MobilityYaw = 1.272
+MobilityPitch = 1.498
+MobilityRoll = 1.728
+PitchTorque = 0.430
+RollTorque = 0.490
+YawTorque = 0.320
+PitchDamping = 0.410
+RollDamping = 0.365
+YawDamping = 0.450
+InertiaMultiplier = 1.300
+ThrottleAcceleration = 0.037
+EngineDrag = 0.01
+
+HUD = planenvg, plane_gnrnvg
+
+AddSeat = 0.00, 1.65,  0.34
+AddSeat = 0.00, 1.90, -1.59
+
+AddTexture = tornado-ids_germany1
+AddTexture = tornado-ids_germany2
+AddTexture = tornado-ids_italy
+AddTexture = tornado-ids_italy2
+
+AddPartCanopy = 0, 3.22, -2.66, -1,0,0,  70
+
+AddPartLG =  0.00, 1.21,  0.20,  1,0,0, 100
+AddPartLG = -1.46, 1.98, -5.99,  1,0,0, 90,  0,0,1, 30
+AddPartLG =  1.46, 1.98, -5.99,  1,0,0, 90,  0,0,-1, 30
+
+;Left
+AddPartWing  =  1.50, 2.50, -4.57,  0, 1,0, 35
+AddPartPylon =  6.69, 2.50, -7.18,  0,-1,0, 35
+AddPartPylon =  3.92, 2.50, -6.34,  0,-1,0, 35
+;Right
+AddPartWing  = -1.50, 2.50, -4.57,  0,-1,0, 35
+AddPartPylon = -6.69, 2.50, -7.18,  0, 1,0, 35
+AddPartPylon = -3.92, 2.50, -6.34,  0, 1,0, 35
+
+AddWeapon = bk27tornado2, -0.59, 1.23,  1.78, 0.0, 0.0
+AddWeapon = bk27tornado2,  0.59, 1.23,  1.78, 0.0, 0.0
+
+AddWeapon = tormw-1,  0.00, 0.70, -4.12, 0.0, 0.0 , true, 2
+AddWeapon = tormw-1,  0.00, 0.70, -4.5, 0.0, 0.0 , true, 2
+AddWeapon = tormw-1,  0.00, 0.70, -5.12, 0.0, 0.0 , true, 2
+AddWeapon = tormw-1,  0.00, 0.70, -6.12, 0.0, 0.0 , true, 2
+AddWeapon = iris-ttornado,  6.69, 1.76, -5.06, 0.0, 0.0
+AddWeapon = iris-ttornado, -6.69, 1.76, -5.06, 0.0, 0.0
+AddWeapon = toregbu24,  3.93, 1.43, -3.48, 0.0, 0.0
+AddWeapon = toregbu24, -3.93, 1.43, -3.48, 0.0, 0.0
+
+AddPartWeaponMissile = toregbu24, false, false, false,  3.93, 1.43, -3.48
+AddPartWeaponMissile = toregbu24, false, false, false,  -3.93, 1.43, -3.48
+
+AddPartWeaponMissile = iris-ttornado, false, false, false,  6.69, 1.76, -5.06
+AddPartWeaponMissile = iris-ttornado, false, false, false,  -6.69, 1.76, -5.06
+
+AddWeapon = targeting_pod_block, 0.0, 0.9, 0.0,  0.0, 0.0
+
+;modern light plane (late jet), AOW3 style (fcs)
+AddRecipe = "ABC", "DEF", "G  ", A, mcheli:airframe2, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:cannon1, F, mcheli:fcs, G, mcheli:fcs 
+
+BoundingBox =  0.0, 2.2, -3.8,  2.5, 1.8
+BoundingBox =  0.0, 1.8, -4.5,  3.0, 2.5
+BoundingBox =  0.0, 1.8, -7.0,  3.0, 2.0
+
+BoundingBox = -1.8, 2.35, -4.0,  1.8, 0.3
+BoundingBox =  1.8, 2.35, -4.0,  1.8, 0.3
+
+BoundingBox = -2.9, 2.35, -6.0,  2.5, 0.3
+BoundingBox =  2.9, 2.35, -6.0,  2.5, 0.3
+BoundingBox = -4.9, 2.35, -7.0,  2.5, 0.3
+BoundingBox =  4.9, 2.35, -7.0,  2.5, 0.3
+
+BoundingBox = -6.4, 2.35, -7.5,  1.8, 0.3
+BoundingBox =  6.4, 2.35, -7.5,  1.8, 0.3
+
+BoundingBox =  0.0, 2.0, -10.0,  3.0, 1.6
+
+BoundingBox =  2.17, 1.75, -11.27,  3.0, 0.3
+BoundingBox =  -2.17, 1.75, -11.27,  3.0, 0.3
+
+BoundingBox =  0.0, 5.625, -14,  1.0, 1.25
+
+BoundingBox =  0.0, 4.8, -13,  1.0, 2.4
+
+BoundingBox =  0.0, 4.2, -12,  1.0, 3.0
+
+BoundingBox =  0.0, 3.75, -11,  1.0, 3.2
+BoundingBox =  0.0, 3.3, -10,  1.0, 3.2
+BoundingBox =  0.0, 2.9, -9,  1.0, 3.0
+BoundingBox =  0.0, 2.7, -8,  1.0, 2.6
+BoundingBox =  0.0, 2.2, -7,  1.0, 2.0
+
+unmountposition = 0.00, 1.55,  0.34
+
+enableback = true
+
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; Tornado IDS.

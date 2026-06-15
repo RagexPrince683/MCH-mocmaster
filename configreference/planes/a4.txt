@@ -1,0 +1,176 @@
+DisplayName = A-4E Skyhawk Early
+AddDisplayName = ja_JP, A-4E Skyhawk Early
+ItemID = 28740
+MaxHp = 100
+;onGroundPitch = 2
+Sound = asix
+
+EnableNightVision = false
+EnableEntityRadar = true
+EnableEjectionSeat = true
+Speed = 1.884
+FlareType = 3
+ParticlesScale = 0.7
+EnableSeaSurfaceParticle = true
+MaxFuel         = 12112
+FuelConsumption = 3.761
+ThirdPersonDist = 20
+ThrottleUpDown = 0.3
+
+DamageFactor = 0.8
+
+enableback = true
+
+; M = Military(軍用機).  A = Attacker(攻撃機)
+Category = AA/FA/AGA
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 1.750
+EngineThrust = 1.850
+NewFlightGravity = 0.0082
+NewFlightThrottleResponse = 1.25
+NewFlightThrottleChangeRateUp = 0.0048
+NewFlightThrottleChangeRateDown = 0.0068
+NewFlightIdleThrottle = 0.10
+NewFlightEngineBrakeDrag = 0.0038
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.13
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = true
+NewFlightCombatFlapLift = 0.100
+NewFlightCombatFlapDrag = 0.013
+NewFlightCombatFlapControl = 0.14
+NewFlightCombatFlapOverspeed = 0.74
+FlightCeiling = 12500
+FlightCeilingRange = 60
+StallSpeed = 0.443
+CriticalAoA = 14.00
+StallLiftLoss = 0.820
+AoADragMultiplier = 2.550
+StallInstability = 0.500
+StallRecoverySpeed = 0.611
+StallSpeedFactor = 0.21
+StallStrength = 1.080
+DiveSpeedMultiplier = 1.24
+MaxComfortableG = 5.8
+MaxStructuralG = 8.5
+GControlPenalty = 0.720
+CompressibilitySpeed = 1.752
+CompressibilityPitchPenalty = 0.62
+MaxSafeSpeed = 2.223
+OverspeedDamageRate = 0.16
+BaseDrag = 0.0023
+InducedDrag = 0.013
+ControlSurfaceDrag = 0.005
+ClimbEnergyLoss = 0.015
+DiveEnergyGain = 0.0122
+MaxLevelSpeed = 1.846
+IdleDrag = 0.0043
+
+MobilityYaw = 0.954
+MobilityPitch = 1.07
+MobilityRoll = 1.188
+PitchTorque = 0.380
+RollTorque = 0.420
+YawTorque = 0.290
+PitchDamping = 0.440
+RollDamping = 0.405
+YawDamping = 0.475
+InertiaMultiplier = 1.550
+ThrottleAcceleration = 0.033
+EngineDrag = 0.011
+
+HUD = planesu24, plane_gnrsu24
+
+AddSeat       = -0.0,  1.6,  0.2
+;;AddSeat       = 0.528,  2.794,  -0.9981
+
+;;AddPartWing  = -4.504, 3.23, -5.878,  0, 0, 1,  -170
+
+;;AddPartWing  = 4.504, 3.23, -5.878,  0, 0, 1,  160
+
+;Front
+AddPartLG    =  0.00, 1.74, 0.3636,  1,0,0, 105
+
+;Left
+AddPartLG    =  1.692, 1.13, -3.13,      1,0,0, 90,   0,1,0, -100
+;Right
+AddPartLG    = -1.692, 1.13, -3.13,      1,0,0, 90,   0,1,0,  100
+
+; 使用直後は非表示
+AddPartWeaponMissile = aim9a4,    false,  false,  false,   -2.4000, 0.80, -4.0
+AddPartWeaponMissile = aim9a4,    false,  false,  false,    2.4000, 0.80, -4.0
+
+;;AddPartWeaponMissile = aim9a4,    false,  false,  false,   -2.814, 1.966, -4.623
+;;AddPartWeaponMissile = aim9a4,    false,  false,  false,    2.814, 1.966, -4.623
+
+;;AddPartWeaponMissile = gbu-12a6,    false,  false,  false,    0.0, 1.9, -4.0
+
+AddWeapon = a4main, -0.748, 1.3, -0.8
+AddWeapon = a4main, 0.748, 1.3, -0.8
+
+AddWeapon = aim9a4,    2.4000, 0.80, -4.0,   0.0, 0.0
+AddWeapon = aim9a4,     -2.4000, 0.80, -4.0,   0.0, 0.0
+
+;;AddWeapon = gbu-12a6, 0.0, 1.9, -4.0, 0.0, 0.0
+
+AddWeapon = targeting_pod_ph50s,   0.0, 3.4, 0.0,    0.0, 0.0, true,  1
+
+AddRecipe = "ABC", "DGF", "   ", A, mcheli:airframe2, B, mcheli:basicmechanicparts, C, mcheli:engine2, D, mcheli:wheelair, F, mcheli:rocket2, G, mcheli:electronics 
+
+BoundingBox = 0.0, 1.5, -1.0, 1, 1
+BoundingBox = 0.0, 1.5, -2.0, 1, 1
+BoundingBox = 0.0, 1.5, -3.0, 1, 1
+BoundingBox = 0.0, 1.5, -4.0, 1, 1
+BoundingBox = 0.0, 1.5, -5.0, 1, 1
+BoundingBox = 0.0, 1.8, -6.0, 1, 1
+BoundingBox = 0.0, 2.0, -7.0, 1, 1
+;eng
+BoundingBox = 0.0, 2.2, -8.0, 1, 1, 1.5
+BoundingBox = 0.0, 2.2, -7.0, 1, 1, 1.5
+BoundingBox = 0.0, 2.2, -8.5, 1, 1, 1.5
+
+BoundingBox = 0.0, 1.5, 0.0, 1, 1
+BoundingBox = 0.0, 1.5, 1.0, 1, 1
+BoundingBox = 0.0, 1.5, 2.0, 1, 1
+
+;main body
+BoundingBox = 0.0, 2.2, -6.0, 1.8, 1
+
+BoundingBox = 0.0, 2.2, -4.2, 1.8, 1
+
+BoundingBox = 0.0, 2.2, -2.4, 1.8, 1
+;inlet
+BoundingBox = 0.0, 2.2, -2.0, 2.0, 1, 1.2
+
+;wings
+BoundingBox = 2.0, 1.3, -4, 3.0, 0.3
+BoundingBox = -2.0, 1.3, -4, 3.0, 0.3
+
+;rear control
+BoundingBox = 0.0, 3.0, -6.0, 0.2, 1, 1
+BoundingBox = 0.0, 3.1, -6.2, 0.2, 1.2, 1
+BoundingBox = 0.0, 3.1, -6.4, 0.2, 1.4, 1
+BoundingBox = 0.0, 3.2, -6.6, 0.2, 1.6, 1
+BoundingBox = 0.0, 3.3, -6.8, 0.2, 1.8, 1
+BoundingBox = 0.0, 3.3, -7, 0.2, 2, 1
+BoundingBox = 0.0, 3.4, -7.2, 0.2, 2.2, 1
+BoundingBox = 0.0, 3.5, -7.4, 0.2, 2.4, 1
+BoundingBox = 0.0, 3.5, -7.6, 0.2, 2.6, 1
+BoundingBox = 0.0, 3.6, -7.8, 0.2, 2.8, 1
+BoundingBox = 0.0, 3.7, -8, 0.2, 3, 1
+BoundingBox = 0.0, 3.7, -8.2, 0.2, 3.2, 1
+BoundingBox = 0.0, 3.8, -8.4, 0.2, 3.4, 1
+BoundingBox = 0.0, 3.9, -8.6, 0.2, 3.6, 1
+BoundingBox = 0.0, 3.9, -8.8, 0.2, 3.6, 1
+
+;back control
+BoundingBox = 0.7, 3.05, -8.6, 1.3, 0.25
+BoundingBox = -0.7, 3.05, -8.6, 1.3, 0.25
+
+Unmountposition = -0.0,  1.6,  0.2
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; A-4E Skyhawk Early.

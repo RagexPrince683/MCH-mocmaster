@@ -1,0 +1,150 @@
+DisplayName = Bf.109
+AddDisplayName = en_US, Bf-109 G-6
+;/R6
+AddDisplayName = ru_RU, Bf.109
+ItemID = 30063
+MaxHp = 100
+Speed = 1.114
+
+;;RWRType = ALL_WAY_EARLY
+;why no RWRType = Disabled???
+
+;426 
+
+Sound = prop_fighter
+onGroundPitch = 16
+ThrottleUpDown = 0.3
+
+RotorSpeed = 2000.0
+
+MaxFuel         = 1600
+FuelConsumption = 1.882
+ThrottleUpDownOnEntity = 2.0
+
+DamageFactor = 0.8
+
+; W = WWII.  F = Fighter(戦闘機)
+Category = F
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 0.950
+EngineThrust = 0.997
+NewFlightGravity = 0.0080
+NewFlightThrottleResponse = 0.95
+NewFlightThrottleChangeRateUp = 0.0065
+NewFlightThrottleChangeRateDown = 0.0090
+NewFlightIdleThrottle = 0.085
+NewFlightEngineBrakeDrag = 0.0055
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.16
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = true
+NewFlightCombatFlapLift = 0.130
+NewFlightCombatFlapDrag = 0.014
+NewFlightCombatFlapControl = 0.18
+NewFlightCombatFlapOverspeed = 0.7
+FlightCeiling = 11000
+FlightCeilingRange = 56
+StallSpeed = 0.257
+CriticalAoA = 15.50
+StallLiftLoss = 0.780
+AoADragMultiplier = 2.450
+StallInstability = 0.460
+StallRecoverySpeed = 0.347
+StallSpeedFactor = 0.24
+StallStrength = 0.980
+DiveSpeedMultiplier = 1.2
+MaxComfortableG = 5
+MaxStructuralG = 8.5
+GControlPenalty = 0.680
+CompressibilitySpeed = 1.136
+CompressibilityPitchPenalty = 0.45
+MaxSafeSpeed = 1.359
+OverspeedDamageRate = 0.12
+BaseDrag = 0.0023
+InducedDrag = 0.011
+ControlSurfaceDrag = 0.004
+ClimbEnergyLoss = 0.013
+DiveEnergyGain = 0.0090
+MaxLevelSpeed = 1.069
+IdleDrag = 0.0055
+
+PitchTorque = 0.460
+RollTorque = 0.550
+YawTorque = 0.320
+PitchDamping = 0.355
+RollDamping = 0.320
+YawDamping = 0.390
+InertiaMultiplier = 0.960
+ThrottleAcceleration = 0.024
+EngineDrag = 0.012
+
+MobilityYaw = 1.12
+MobilityPitch = 1.36
+MobilityRoll = 1.82
+
+HUD = plane_wwii
+
+;AddSeat =  X, Y, Z
+AddSeat = 0.0,  1.90, -1.87
+
+unmountposition = 0.0,  1.90, -1.87
+
+enableback = true
+
+AddPartCanopy = -0.49, 2.77, -1.66, 0,0,1,75
+
+;Right
+AddPartLG =  0.70, 1.53, -0.28,  0,0, 1, 78, 1,0,0, 35,
+AddPartLG = -0.70, 1.53, -0.28,  0,0,-1, 78, 1,0,0, 35,
+
+AddPartRotor =    0.00,  2.14, 3.03,   1,0, 0
+AddBlade = 1, 0,  0.00,  2.14, 3.03,   0,0,-1
+
+AddWeapon = bfmg13_2mm,  0.18, 2.88, 0.09,   1.0, -0.0
+AddWeapon = bfmg13_2mm, -0.18, 2.88, 0.09,  -1.0, -0.0
+
+AddWeapon = bfmg151_20, 2.54, 1.55, 0.56,  -0.0, 0.0
+AddWeapon = bfmg151_20,-2.54, 1.55, 0.56,   0.0, 0.0
+
+AddWeapon = bfmg151_20, 0.00,  2.14, 3.03
+
+BoundingBox =  0.00, 2.10, 1.63,  1.0, 1.0, 1.5
+BoundingBox =  0.00, 2.15, 0.63,  1.0, 1.2
+BoundingBox =  0.00, 2.15, -0.30,  1.0, 1.2
+BoundingBox =  0.00, 2.25, -0.70,  1.0, 1.2
+
+BoundingBox = -2.92, 1.78, -1.23,  2.0, 0.6
+BoundingBox =  2.92, 1.78, -1.23,  2.0, 0.6
+
+BoundingBox = -4.92, 2.0, -1.23,  2.0, 0.6
+BoundingBox =  4.92, 2.0, -1.23,  2.0, 0.6
+
+BoundingBox = -1.12, 1.78, -1.23,  2.0, 0.6
+
+BoundingBox =  1.12, 1.78, -1.23,  2.0, 0.6
+
+BoundingBox =  0.00, 2.10, -2.83,  1.4, 1.4
+BoundingBox =  0.00, 2.50, -4.13,  1.4, 1.4
+BoundingBox =  0.00, 2.50, -5.33,  1.0, 1.0
+BoundingBox =  0.00, 2.60, -6.33,  1.0, 1.0
+BoundingBox =  0.00, 2.70, -7.33,  1.0, 1.0
+BoundingBox =  0.00, 2.90, -8.33,  1.0, 1.0
+BoundingBox =  0.00, 3.20, -8.8,  0.5, 1.5
+BoundingBox =  0.00, 3.20, -8.4,  0.5, 1.5
+BoundingBox =  0.00, 3.20, -7.9,  0.5, 1.5
+
+BoundingBox =  0.80, 3.20, -8.2,  0.8, 0.15
+BoundingBox =  -0.80, 3.20, -8.2,  0.8, 0.15
+
+BoundingBox =  1.20, 3.20, -8.2,  0.8, 0.15
+BoundingBox =  -1.20, 3.20, -8.2,  0.8, 0.15
+
+;basic ww2 prop plane, AOW3 style
+AddRecipe = "ABC", "DE ", "   ", A, mcheli:airframe, B, mcheli:basicmechanicparts, C, mcheli:engine1, D, mcheli:wheelair, E, mcheli:cannon3
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; Bf 109 late-war class.
+; HandlingBalancePass = prop-maneuverability-2026-06-11; role=energy_fighter

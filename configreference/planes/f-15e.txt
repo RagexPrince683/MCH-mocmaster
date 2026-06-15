@@ -1,0 +1,206 @@
+DisplayName = F-15E Strike Eagle
+AddDisplayName = en_US, F-15E Strike Eagle
+AddDisplayName = ja_JP, F-15E ストライクイーグル
+ItemID = 28740
+MaxHp = 100
+EnableNightVision = true
+EnableEntityRadar = true
+EnableEjectionSeat = true
+;Speed = 40.68
+;sad
+;divide by 30 aircraft
+
+;new formula
+;1.8k
+;owie no work
+
+DamageFactor = 0.8
+
+; Realism pass: F-15E max speed ~1,650 mph, service ceiling ~18.2 km, internal fuel ~13,455 kg.
+; High-speed aircraft use mph/1000 style speed tuning from MCH2 notes.
+Speed = 4.0
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 1.750
+EngineThrust = 2.363
+NewFlightGravity = 0.0080
+NewFlightThrottleResponse = 1.18
+NewFlightThrottleChangeRateUp = 0.0055
+NewFlightThrottleChangeRateDown = 0.0075
+NewFlightIdleThrottle = 0.095
+NewFlightEngineBrakeDrag = 0.0030
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = true
+NewFlightCombatFlapLift = 0.100
+NewFlightCombatFlapDrag = 0.013
+NewFlightCombatFlapControl = 0.12
+NewFlightCombatFlapOverspeed = 0.78
+FlightCeiling = 18200
+FlightCeilingRange = 72
+StallSpeed = 0.760
+CriticalAoA = 14.00
+StallLiftLoss = 0.820
+AoADragMultiplier = 2.550
+StallInstability = 0.500
+StallRecoverySpeed = 1.049
+StallSpeedFactor = 0.18
+StallStrength = 1.080
+DiveSpeedMultiplier = 1.28
+MaxComfortableG = 7.5
+MaxStructuralG = 10.0
+GControlPenalty = 0.720
+CompressibilitySpeed = 3.84
+CompressibilityPitchPenalty = 0.5
+MaxSafeSpeed = 4.88
+OverspeedDamageRate = 0.14
+BaseDrag = 0.0015
+InducedDrag = 0.008
+ControlSurfaceDrag = 0.003
+ClimbEnergyLoss = 0.009
+DiveEnergyGain = 0.0120
+MaxLevelSpeed = 4
+IdleDrag = 0.0034
+
+PitchTorque = 0.430
+RollTorque = 0.490
+YawTorque = 0.320
+PitchDamping = 0.410
+RollDamping = 0.365
+YawDamping = 0.450
+InertiaMultiplier = 1.300
+ThrottleAcceleration = 0.037
+EngineDrag = 0.01
+
+MobilityYaw = 1.272
+MobilityPitch = 1.498
+MobilityRoll = 1.728
+FlareType = 3
+ParticlesScale = 0.7
+EnableSeaSurfaceParticle = true
+MaxFuel         = 24400
+FuelConsumption = 6.256
+CameraPosition = 0.0, 0.70, 1.6
+EnableGunnerMode = true
+AutoPilotRot = 0
+ThrottleUpDown = 0.3
+
+Sound = ffifteen
+
+; M = Military(軍用機).  A = Attacker(攻撃機)
+Category = MSF
+
+AddTexture = f-15e_il
+
+HUD = plane, plane_gnr
+
+AddSeat       = 0.00,  2.43,  0.00
+
+unmountposition = 0.00,  2.73,  0.00
+
+AddGunnerSeat = 0.00,  2.51, -1.76, 0.0, 0.70, 1.6, true
+
+AddPartCanopy =  0.00, 3.57, -2.87,  -1,0,0,  50
+
+;AddPartNozzle =  0.73, 2.06, -13.29, -1,0,0
+;AddPartNozzle = -0.73, 2.06, -13.29, -1,0,0
+
+AddPartThrottle = 0.00, 2.93, -3.08,  1,0,0, -15
+
+;Front
+AddPartLG    =  0.00, 1.66, -1.80,  -1,0,0,  101
+;Right
+AddPartLG    = -1.24, 1.87, -8.09,      1,0,0, -70,   0,1,0,  95
+;Left
+AddPartLG    =  1.24, 1.87, -8.09,      1,0,0, -70,   0,1,0, -95
+
+;前席がAIM-9、ガンポッド（M61 20mmバルカン）
+
+; 使用直後は非表示
+
+;4
+AddPartWeaponMissile = f15eaim9_m,    false,  false,  false,    3.49, 2.16, -4.95
+AddPartWeaponMissile = f15eaim9_m,    false,  false,  false,   -3.49, 2.16, -4.95
+AddPartWeaponMissile = f15eaim9_m,    false,  false,  false,    2.86, 2.16, -4.95
+AddPartWeaponMissile = f15eaim9_m,    false,  false,  false,   -2.86, 2.16, -4.95
+
+;6
+AddPartWeaponMissile = f15eblu10b,  false,  false,  false,    2.53, 1.43, -6.84
+AddPartWeaponMissile = f15eblu10b,  false,  false,  false,   -2.53, 1.43, -6.84
+AddPartWeaponMissile = f15eblu10b,  false,  false,  false,    2.53, 1.43, -9.64
+AddPartWeaponMissile = f15eblu10b,  false,  false,  false,   -2.53, 1.43, -9.64
+AddPartWeaponMissile = f15eblu10b,  false,  false,  false,    2.53, 1.43,-12.41
+AddPartWeaponMissile = f15eblu10b,  false,  false,  false,   -2.53, 1.43,-12.41
+
+;4
+AddPartWeaponMissile = f15ecbu-87,  false,  false,  false,    2.18, 0.87, -3.56
+AddPartWeaponMissile = f15ecbu-87,  false,  false,  false,   -2.18, 0.87, -3.56
+AddPartWeaponMissile = f15ecbu-87,  false,  false,  false,    2.18, 0.87, -6.36
+AddPartWeaponMissile = f15ecbu-87,  false,  false,  false,   -2.18, 0.87, -6.36
+
+;2
+AddPartWeaponMissile = f15eagm130,  false,  false,  false,    3.18, 1.66, -5.04
+AddPartWeaponMissile = f15eagm130,  false,  false,  false,   -3.18, 1.66, -5.04
+
+;1
+AddPartWeaponMissile = f15egbu28_e, false,  false,  false,    0.00, 1.18, -9.85
+
+AddWeapon = m61f15, -2.07, 2.70, -3.00,   0.0, 0.0
+AddWeapon = f15eaim9_m,     3.49, 2.16, -4.95,   0.0, 0.0
+AddWeapon = f15eaim9_m,    -3.49, 2.16, -4.95,   0.0, 0.0
+AddWeapon = f15eaim9_m,     2.86, 2.16, -4.95,   0.0, 0.0
+AddWeapon = f15eaim9_m,    -2.86, 2.16, -4.95,   0.0, 0.0
+
+AddWeapon = f15eblu10b,   2.53, 1.43, -6.84,   0.0, 0.0
+AddWeapon = f15eblu10b,  -2.53, 1.43, -6.84,   0.0, 0.0
+AddWeapon = f15eblu10b,   2.53, 1.43, -9.64,   0.0, 0.0
+AddWeapon = f15eblu10b,  -2.53, 1.43, -9.64,   0.0, 0.0
+AddWeapon = f15eblu10b,   2.53, 1.43,-12.41,   0.0, 0.0
+AddWeapon = f15eblu10b,  -2.53, 1.43,-12.41,   0.0, 0.0
+
+AddWeapon = f15ecbu-87,   2.18, 0.87, -3.56,   0.0, 0.0 , true, 2
+AddWeapon = f15ecbu-87,  -2.18, 0.87, -3.56,   0.0, 0.0 , true, 2
+AddWeapon = f15ecbu-87,   2.18, 0.87, -6.36,   0.0, 0.0 , true, 2
+AddWeapon = f15ecbu-87,  -2.18, 0.87, -6.36,   0.0, 0.0 , true, 2
+
+AddWeapon = f15eagm130,   3.18, 1.66, -5.04,   0.0, 0.0 , true,  2
+AddWeapon = f15eagm130,  -3.18, 1.66, -5.04,   0.0, 0.0 , true,  2
+
+AddWeapon = f15egbu28_e,  0.00, 1.18, -9.85,   0.0, 0.0 , true,  2
+
+AddWeapon = targeting_pod_block, 0.0, 0.9, 0.0,  0.0, 0.0, false, 2
+
+AddWeapon = targeting_pod_ph50s,   0.0, 3.4, 0.0,    0.0, 0.0, true,  2
+AddWeapon = uhf_radar,  0.00, 3.0, 0.0,    0.0, 0.0, true, 2
+
+AddPartHatch =   0.0,  3.20,  -4.86,  1,0, 0, 45
+AddPartHatch =   0.0,  3.00,  -7.05, -1,0, 0, 45
+SweepWingSpeed = 0.8
+VariableSweepWing = true
+
+;modern light plane (late jet), AOW3 style (fcs)
+AddRecipe = "ABC", "DEF", "G  ", A, mcheli:airframe2, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:cannon1, F, mcheli:fcs3, G, mcheli:electronics
+
+BoundingBox =  0.00, 1.90, -2.80,  3.0, 2.0
+BoundingBox =  0.00, 1.90, -7.60,  5.0, 2.0
+BoundingBox = -4.52, 2.20, -9.60,  4.0, 1.0
+BoundingBox =  4.52, 2.20, -9.60,  4.0, 1.0
+BoundingBox =  0.00, 1.80, -11.8,  3.0, 1.5
+BoundingBox =  0.00, 1.80, -13.8,  3.0, 1.5, 1.5
+
+BoundingBox = 3.05, 2.46, -14.59, 3.0, 0.5
+BoundingBox = -3.05, 2.46, -14.59, 3.0, 0.5
+BoundingBox = 1.99, 3.73, -13.91, 1.0, 3.0
+BoundingBox = -1.99, 3.73, -13.91, 1.0, 3.0
+BoundingBox = 1.99, 4.18, -14.91, 1.0, 3.3
+BoundingBox = -1.99, 4.18, -14.91, 1.0, 3.3
+BoundingBox = 1.99, 3.15, -12.91, 1.0, 2.62
+BoundingBox = -1.99, 3.15, -12.91, 1.0, 2.62
+
+enableback = true
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; F-15E Strike Eagle.

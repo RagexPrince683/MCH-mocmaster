@@ -1,0 +1,126 @@
+DisplayName = A6M2-N Rufe
+AddDisplayName = en_US, A6M2-N
+AddDisplayName = ru_RU, A6M2-N Rufe
+ItemID = 30005
+MaxHp = 100
+Speed = 0.76
+Float = true
+Sound = zero
+ThrottleUpDown = 0.3
+MaxFuel         = 2072
+FuelConsumption = 1.164
+
+RotorSpeed = 2000.0
+
+EnableBack = true
+
+UnmountPosition = 0.0,  2.4, 0.0
+
+EntityWidth  = 0.8
+EntityHeight = 0.8
+
+; W = WWII.  F = Fighter(戦闘機)
+Category = IF/FBFP
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 0.950
+EngineThrust = 1.050
+NewFlightGravity = 0.0080
+NewFlightThrottleResponse = 0.95
+NewFlightThrottleChangeRateUp = 0.0065
+NewFlightThrottleChangeRateDown = 0.0090
+NewFlightIdleThrottle = 0.085
+NewFlightEngineBrakeDrag = 0.0055
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.16
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = true
+NewFlightCombatFlapLift = 0.100
+NewFlightCombatFlapDrag = 0.014
+NewFlightCombatFlapControl = 0.18
+NewFlightCombatFlapOverspeed = 0.7
+FlightCeiling = 11000
+FlightCeilingRange = 56
+StallSpeed = 0.175
+CriticalAoA = 14.00
+StallLiftLoss = 0.820
+AoADragMultiplier = 2.550
+StallInstability = 0.500
+StallRecoverySpeed = 0.241
+StallSpeedFactor = 0.24
+StallStrength = 1.080
+DiveSpeedMultiplier = 1.2
+MaxComfortableG = 5
+MaxStructuralG = 8.5
+GControlPenalty = 0.720
+CompressibilitySpeed = 0.775
+CompressibilityPitchPenalty = 0.45
+MaxSafeSpeed = 0.927
+OverspeedDamageRate = 0.12
+BaseDrag = 0.0023
+InducedDrag = 0.012
+ControlSurfaceDrag = 0.004
+ClimbEnergyLoss = 0.014
+DiveEnergyGain = 0.0090
+MaxLevelSpeed = 0.73
+IdleDrag = 0.0055
+
+PitchTorque = 0.460
+RollTorque = 0.550
+YawTorque = 0.320
+PitchDamping = 0.355
+RollDamping = 0.320
+YawDamping = 0.390
+InertiaMultiplier = 0.960
+ThrottleAcceleration = 0.022
+EngineDrag = 0.014
+
+MobilityYaw = 1.22
+MobilityPitch = 1.45
+MobilityRoll = 1.3
+
+HUD = plane_wwii
+
+;AddSeat =  X, Y, Z
+AddSeat = 0.0,  2.4, 0.0
+
+AddPartSlideCanopy = 0, 0.00, -0.6
+
+AddPartRotor =    0.00,  2.55, 2.83,   1,0, 0
+AddBlade = 1, 0,  0.00,  2.55, 2.83,   0,0,-1
+
+AddWeapon = mg7_7mma6,  0.19, 2.18, 1.62,  0.0, -3.0
+AddWeapon = mg7_7mma6, -0.19, 2.18, 1.62,  0.0, -3.0
+
+AddWeapon = mg20mma6,  2.00, 1.41, 1.69,   2.0, -5.0
+AddWeapon = mg20mma6, -2.00, 1.41, 1.69,  -2.0, -5.0
+
+;basic ww2 prop plane, AOW3 style
+AddRecipe = "ABC", "DED", "   ", A, mcheli:airframe, B, mcheli:basicmechanicparts, C, mcheli:engine1, D, mcheli:wheelair, E, mcheli:cannon2
+
+BoundingBox = 0.0, 2.50, 2.20, 1.1, 1.1
+BoundingBox = -1.32, 2.20,  0.30,  2.0, 0.6
+BoundingBox =  1.32, 2.20,  0.30,  2.0, 0.6
+BoundingBox = -3.30, 2.30,  0.30,  2.0, 0.6
+BoundingBox =  3.30, 2.30,  0.30,  2.0, 0.6
+
+BoundingBox = 0.0, 2.40, -1.03, 1.3, 1.3
+BoundingBox = 0.0, 2.40, -1.93, 1.3, 1.3
+BoundingBox = 0.0, 2.40, -2.93, 1.3, 1.3
+BoundingBox = 0.0, 2.40, -3.93, 1.3, 1.3
+BoundingBox = 0.0, 2.40, -4.93, 1.3, 1.3
+
+BoundingBox = 1.5, 2.70, -4.93, 1.3, 0.3
+BoundingBox = -1.5, 2.70, -4.93, 1.3, 0.3
+
+BoundingBox = 0.0, 3.10, -4.93, 0.5, 2.3
+BoundingBox = 0.0, 3.15, -5.33, 0.5, 2.3
+BoundingBox = 0.0, 3.10, -5.73, 0.5, 2.3
+
+DamageFactor = 0.8
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; A6M2-N Rufe float fighter.
+; HandlingBalancePass = prop-maneuverability-2026-06-11; role=light_float_fighter
