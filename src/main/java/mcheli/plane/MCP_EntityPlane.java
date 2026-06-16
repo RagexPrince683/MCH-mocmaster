@@ -102,6 +102,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private boolean lastIdleUnsupportedClimb;
    /** Last idle-throttle warning reason emitted through debug output. */
    private String lastIdleThrottleWarning;
+   /** Last combined horizontal speed used by low-speed stall diagnostics. */
+   private double lastHorizontalSpeed;
+   /** Last low-horizontal-speed warning reason emitted through debug output. */
+   private String lastLowHorizontalSpeedWarning;
    /** Last compressibility-limited pitch authority multiplier. */
    private double lastPitchAuthority;
    /** Last full control authority multiplier applied before pitch-axis modifiers. */
@@ -172,6 +176,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastValidClimb = false;
       this.lastIdleUnsupportedClimb = false;
       this.lastIdleThrottleWarning = "";
+      this.lastHorizontalSpeed = 0.0D;
+      this.lastLowHorizontalSpeedWarning = "";
       this.lastPitchBreakAngularVelocity = 0.0D;
       this.lastStallPitchMoment = 0.0D;
       this.lastThrustPitchDownMoment = 0.0D;
@@ -648,6 +654,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       return this.lastIdleThrottleWarning;
    }
 
+   public double getLastHorizontalSpeed() {
+      return this.lastHorizontalSpeed;
+   }
+
+   public String getLastLowHorizontalSpeedWarning() {
+      return this.lastLowHorizontalSpeedWarning;
+   }
+
    public boolean isUnsupportedClimb() {
       return this.lastUnsupportedClimbSeverity > 1.0E-3D;
    }
@@ -745,13 +759,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
 
       Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
-      double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
-            + super.motionZ * super.motionZ);
+      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      double speed = Math.sqrt(horizontalSpeed * horizontalSpeed + super.motionY * super.motionY);
       double aoa = MCH_FlightModel.getAngleOfAttackDegrees(forward.xCoord, forward.yCoord, forward.zCoord,
             super.motionX, super.motionY, super.motionZ);
       double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
             this.getPlaneInfo().stallSpeedFactor);
-      return MCH_FlightModel.getAerodynamicStallSeverity(speed, aoa, stallSpeed, this.getPlaneInfo().criticalAoA);
+      double speedSeverity = Math.max(MCH_FlightModel.getSpeedStallSeverity(speed, stallSpeed),
+            MCH_FlightModel.getSpeedStallSeverity(horizontalSpeed, stallSpeed));
+      return Math.max(speedSeverity, MCH_FlightModel.getAoAStallSeverity(aoa, this.getPlaneInfo().criticalAoA));
    }
 
 
@@ -938,14 +954,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    private void updateAerodynamicState() {
       Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
-      double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
-            + super.motionZ * super.motionZ);
+      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      this.lastHorizontalSpeed = horizontalSpeed;
+      double speed = Math.sqrt(horizontalSpeed * horizontalSpeed + super.motionY * super.motionY);
       this.angleOfAttack = MCH_FlightModel.getAngleOfAttackDegrees(forward.xCoord, forward.yCoord, forward.zCoord,
             super.motionX, super.motionY, super.motionZ);
 
       double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
             this.getPlaneInfo().stallSpeedFactor);
-      this.speedStallSeverity = MCH_FlightModel.getSpeedStallSeverity(speed, stallSpeed);
+      this.speedStallSeverity = Math.max(MCH_FlightModel.getSpeedStallSeverity(speed, stallSpeed),
+            MCH_FlightModel.getSpeedStallSeverity(horizontalSpeed, stallSpeed));
       this.aoaStallSeverity = MCH_FlightModel.getAoAStallSeverity(this.angleOfAttack, this.getPlaneInfo().criticalAoA);
       double demand = Math.max(this.speedStallSeverity, this.aoaStallSeverity);
       this.stallDemand = demand;
@@ -1019,6 +1037,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastWeightForce = 0.0D;
          this.lastLiftForce = 0.0D;
          this.lastLiftCoefficient = 0.0D;
+         this.lastValidClimb = false;
          return;
       }
 
@@ -1029,7 +1048,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       double stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
       double airspeed = this.getAirspeed();
-      double airspeedLift = MCH_FlightModel.clamp((airspeed - stallSpeed * 0.45D) / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.25D);
+      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      this.lastHorizontalSpeed = horizontalSpeed;
+      double airspeedLift = MCH_FlightModel.clamp((horizontalSpeed - stallSpeed * 0.45D) / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.25D);
       double aoaLift = MCH_FlightModel.clamp(1.0D - Math.max(0.0D, Math.abs(this.angleOfAttack) - (double)info.criticalAoA) / Math.max(1.0D, (double)info.criticalAoA), 0.0D, 1.0D);
       double liftPower = (double)info.newFlightLowThrottleLiftRetention
             + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * this.getEffectiveEngineThrottle();
@@ -1763,6 +1784,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastUnsupportedClimbSeverity = 0.0D;
          this.lastIdleUnsupportedClimb = false;
          this.lastIdleThrottleWarning = "";
+         this.lastHorizontalSpeed = 0.0D;
+         this.lastLowHorizontalSpeedWarning = "";
       }
 
       boolean levelOff = super.isGunnerMode;
@@ -2041,6 +2064,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastIdleUnsupportedClimb = this.isIdleUnsupportedClimb(
             MCH_FlightModel.clamp((double)(-this.getRotPitch() - 8.0F) / 42.0D, 0.0D, 1.0D), stallSpeedForIdle);
       this.updateIdleThrottleWarning();
+      this.updateLowHorizontalSpeedWarning();
       this.applyThrottleDeficitPitchDown(nearGround, dp, levelOff);
       if(this.useNewMobilitySystem() && !nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
          double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)this.getPlaneInfo().stallLiftLoss, 0.0D, 1.0D);
@@ -2114,6 +2138,33 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    }
 
+
+
+   private void updateLowHorizontalSpeedWarning() {
+      this.lastLowHorizontalSpeedWarning = "";
+      if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null || !this.lastAirborne || this.getNozzleRotation() > 0.01F) {
+         return;
+      }
+
+      double noseUpDegrees = Math.max(0.0D, (double)-this.getRotPitch());
+      if(this.lastHorizontalSpeed >= 0.12D) {
+         return;
+      }
+
+      if(this.speedStallSeverity < 0.8D) {
+         this.lastLowHorizontalSpeedWarning = "lowHorizontalSpeedSeverity";
+      } else if(this.stallDemand < 0.8D) {
+         this.lastLowHorizontalSpeedWarning = "lowHorizontalStallDemand";
+      } else if(this.lastValidClimb) {
+         this.lastLowHorizontalSpeedWarning = "lowHorizontalValidClimb";
+      } else if(this.getLiftToWeightRatio() >= 1.0D) {
+         this.lastLowHorizontalSpeedWarning = "lowHorizontalLiftSupport";
+      } else if(this.lastUnsupportedClimbSeverity < 0.2D && noseUpDegrees > 10.0D) {
+         this.lastLowHorizontalSpeedWarning = "lowHorizontalUnsupportedTooLow";
+      } else if(this.lastNetVerticalAcceleration >= 0.0D) {
+         this.lastLowHorizontalSpeedWarning = "lowHorizontalNetClimb";
+      }
+   }
 
    private void updateIdleThrottleWarning() {
       this.lastIdleThrottleWarning = "";

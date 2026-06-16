@@ -1884,6 +1884,14 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return "";
    }
 
+   public double getLastHorizontalSpeed() {
+      return 0.0D;
+   }
+
+   public String getLastLowHorizontalSpeedWarning() {
+      return "";
+   }
+
    public double getLastPitchAuthority() {
       return 1.0D;
    }
