@@ -1063,7 +1063,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftCoefficient = aoaLift * stallLift;
       double mass = this.getPhysicalMass();
       double weightForce = gravityAccel * mass;
-      double liftBeforeStallLoss = gravityAccel * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D) * airspeedLift * aoaLift;
+      double liftBeforeStallLoss = weightForce * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D) * airspeedLift * aoaLift;
       double liftForce = liftBeforeStallLoss * stallLift;
       double liftAccel = liftForce / mass;
       double netAccel = (liftForce - weightForce) / mass;
@@ -1139,7 +1139,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
       double gravityAccel = this.resolveNewFlightGravity();
       double mass = this.getPhysicalMass();
-      double liftForce = gravityAccel * MCH_FlightModel.clamp(throttleLift, 0.0D, 1.5D) * runwayReadiness;
+      double liftForce = gravityAccel * mass * MCH_FlightModel.clamp(throttleLift, 0.0D, 1.5D) * runwayReadiness;
       double liftAccel = liftForce / mass;
 
       super.motionY += liftAccel * 0.55D;
