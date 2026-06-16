@@ -153,6 +153,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double aoaSeverity;
       double stallDemand;
       double stallSeverity;
+      double instantStallSeverity;
 
       double gravityForce;
       double weightForce;
@@ -165,6 +166,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double climbSustainSpeed;
       double climbEnergyDeficit;
       double unsupportedNoseUpSeverity;
+
+      double controlAuthority;
+      double pitchAuthority;
+      double noseUpPitchSuppression;
 
       boolean validTakeoff;
       boolean validClimb;
@@ -468,10 +473,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       MCP_PlaneInfo info = this.getPlaneInfo();
       double highGAuthority = MCH_FlightModel.getHighGControlAuthority(this.currentGForce,
             info.maxComfortableG, info.maxStructuralG, info.gControlPenalty);
-      double severity = this.aeroState != null ? this.aeroState.stallSeverity : this.stallSeverity;
+      double instantSeverity = this.getInstantStallSeverity();
+      double severity = Math.max(this.aeroState != null ? this.aeroState.stallSeverity : this.stallSeverity, instantSeverity);
       double flapAuthority = this.isCombatFlapsDeployed() ? 1.0D + (double)info.newFlightCombatFlapControl : 1.0D;
-      return (float)MCH_FlightModel.clamp(highGAuthority * MCH_FlightModel.getControlAuthority(severity)
+      float authority = (float)MCH_FlightModel.clamp(highGAuthority * MCH_FlightModel.getControlAuthority(severity)
             * flapAuthority, 0.05D, 1.35D);
+      if(this.aeroState != null) {
+         this.aeroState.instantStallSeverity = instantSeverity;
+         this.aeroState.controlAuthority = authority;
+      }
+      return authority;
    }
 
    private double getUnsupportedClimbSeverity() {
@@ -850,8 +861,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             this.getCompressibilitySpeed(), this.getMaxSafeSpeed(), this.getPlaneInfo().compressibilityPitchPenalty);
       this.lastControlAuthority = controlAuthority;
       this.lastPitchAuthority = pitchAuthority;
+      if(this.aeroState != null) {
+         this.aeroState.controlAuthority = controlAuthority;
+         this.aeroState.pitchAuthority = pitchAuthority;
+      }
       pitch *= controlAuthority * (float)pitchAuthority;
       this.lastNoseUpPitchSuppression = this.getNoseUpPitchSuppression();
+      if(this.aeroState != null) {
+         this.aeroState.noseUpPitchSuppression = this.lastNoseUpPitchSuppression;
+      }
       if(pitch < 0.0F && this.lastNoseUpPitchSuppression > 0.0D) {
          pitch *= (float)(1.0D - this.lastNoseUpPitchSuppression);
       }
@@ -999,6 +1017,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             this.stallRecovering = false;
          }
          state.stallSeverity = this.stallSeverity;
+         state.instantStallSeverity = state.stallDemand;
 
          double gravityAccel = this.resolveNewFlightGravity();
          if(this.isInWater()) {
@@ -1032,7 +1051,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          double aoaLift = MCH_FlightModel.clamp(1.0D - Math.max(0.0D, Math.abs(state.aoaDeg) - (double)info.criticalAoA)
                / Math.max(1.0D, (double)info.criticalAoA), 0.0D, 1.0D);
          double liftLoss = MCH_FlightModel.clamp(state.stallSeverity * (double)info.stallLiftLoss, 0.0D, 1.0D);
-         double liftBeforeStallLoss = gravityAccel * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D) * airspeedLift * aoaLift;
+         double liftBeforeStallLoss = state.weightForce * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D) * airspeedLift * aoaLift;
          state.liftForce = liftBeforeStallLoss * (1.0D - liftLoss);
          state.liftToWeight = state.liftForce / Math.max(state.weightForce, 1.0E-6D);
          state.thrustForce = Math.max(0.0D, (double)info.engineThrust * MCH_FlightModel.clamp(this.getPropulsiveEngineThrottle(), 0.0D, 1.0D));

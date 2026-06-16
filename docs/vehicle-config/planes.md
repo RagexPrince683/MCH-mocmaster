@@ -199,11 +199,12 @@ airspeedLift = clamp((airspeed - stallSpeed * 0.45) / max(0.05, stallSpeed * 1.3
 aoaLift = clamp(1 - max(0, abs(AoA) - CriticalAoA) / max(1, CriticalAoA), 0, 1)
 liftLoss = clamp(stallSeverity * StallLiftLoss, 0, 1)
 stallLift = 1 - liftLoss
-liftBeforeStallLoss = gravity * clamp(liftPower, 0, 2.5) * airspeedLift * aoaLift
+weightForce = gravity * PhysicalMass
+liftBeforeStallLoss = weightForce * clamp(liftPower, 0, 2.5) * airspeedLift * aoaLift
 liftForce = liftBeforeStallLoss * stallLift
 ```
 
-`StallLiftLoss` is applied after throttle lift retention, combat flap lift, takeoff lift, and other lift bonuses are resolved. Stalled aircraft suppress takeoff/climb lift headroom until recovery, so `validTakeoff` or `validClimb` cannot bypass stall penalties.
+`StallLiftLoss` is applied after throttle lift retention, combat flap lift, takeoff readiness, and other lift-power bonuses are resolved. Stalled aircraft suppress takeoff/climb lift headroom until recovery, so `validTakeoff` or `validClimb` cannot bypass stall penalties.
 
 This means pointing the nose near vertical does not create maximum lift unless the velocity vector, airspeed, lift-to-weight, and thrust-to-weight are still within valid flying conditions. Conventional fixed-wing thrust is also limited during unsupported vertical climbs: if thrust-to-weight is below 1.0, upward powered climb is scaled by speed headroom and remaining unstalled authority. High nose-up climbs add extra AoA/energy drag and bleed vertical energy unless the aircraft is truly tuned with enough thrust and speed to support them. Lowering throttle while holding a nose-up attitude now also adds a nose-down pitch moment, so the aircraft cannot keep the same climb angle without enough effective thrust/lift.
 
@@ -332,7 +333,7 @@ FlightCeilingRange = 48
 
 `EngineThrust` is a force value, not a top-speed value. The new flight model applies forward acceleration from `EngineThrust / PhysicalMass` after throttle response and engine spool are resolved. Higher thrust-to-weight improves acceleration, takeoff roll, climb, and post-maneuver energy recovery. If omitted, a conservative default is derived from existing speed tuning so older new-flight configs remain flyable.
 
-The model treats weight as `NewFlightGravity * PhysicalMass`. Lift is evaluated as a force and compared against that weight, so heavy aircraft need more airspeed, throttle, flap lift, or gentler AoA to hold altitude. Drag and climb/dive energy exchange are divided through mass, so heavy aircraft lose and gain speed more gradually while light aircraft respond quickly. Takeoff speed remains emergent from stall speed, lift, thrust, drag, and mass; do not add a separate takeoff-speed key.
+The model treats weight as `NewFlightGravity * PhysicalMass`. Lift is evaluated as a force against that weight (`weightForce * liftPower * airspeedLift * aoaLift * stallLift`), so existing `PhysicalMass`, `EngineThrust`, `NewFlightLowThrottleLiftRetention`, combat flaps, stall, and drag tuning continue to work without asset-side retuning. Drag and climb/dive energy exchange are divided through mass, so heavy aircraft lose and gain speed more gradually while light aircraft respond quickly. Takeoff speed remains emergent from stall speed, lift, thrust, drag, and mass; do not add a separate takeoff-speed key.
 
 Recommended mass/thrust starting ranges:
 
