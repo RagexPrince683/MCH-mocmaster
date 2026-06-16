@@ -1135,7 +1135,24 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    private void applyNewFlightVerticalForces() {
       AeroState state = this.aeroState;
-      if(state == null || !state.airborne) {
+      if(state == null) {
+         this.lastGravityAcceleration = 0.0D;
+         this.lastLiftAcceleration = 0.0D;
+         this.lastNetVerticalAcceleration = 0.0D;
+         this.lastWeightForce = 0.0D;
+         this.lastLiftForce = 0.0D;
+         this.lastLiftCoefficient = 0.0D;
+         this.lastValidClimb = false;
+         return;
+      }
+
+      // A plane starts its takeoff roll with onGround still true, so waiting for
+      // state.airborne before applying lift creates a deadlock: the aircraft cannot
+      // leave the runway because no positive Y motion is ever generated. Once the
+      // takeoff gate is valid, apply the same force balance that airborne flight uses
+      // so rotation can produce the first upward tick. Keep grounded, invalid
+      // takeoff states from adding weight/lift forces that would pin the plane down.
+      if(!state.airborne && !state.validTakeoff) {
          this.lastGravityAcceleration = 0.0D;
          this.lastLiftAcceleration = 0.0D;
          this.lastNetVerticalAcceleration = 0.0D;
@@ -1148,6 +1165,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       double mass = this.getPhysicalMass();
       double netAccel = (state.liftForce - state.weightForce) / mass;
+      if(!state.airborne) {
+         netAccel = Math.max(0.0D, netAccel);
+      }
       super.motionY += netAccel;
       this.lastGravityAcceleration = state.gravityForce;
       this.lastLiftAcceleration = state.liftForce / mass;
