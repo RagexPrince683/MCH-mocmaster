@@ -1934,18 +1934,36 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          }
       }
 
-      double forwardSpeedBefore = super.motionX * v.xCoord + super.motionZ * v.zCoord;
+      double horizontalThrustX = v.xCoord;
+      double horizontalThrustZ = v.zCoord;
+      if(this.useNewMobilitySystem() && this.getNozzleRotation() <= 0.01F) {
+         double pitchProjection = Math.sqrt(horizontalThrustX * horizontalThrustX + horizontalThrustZ * horizontalThrustZ);
+         if(pitchProjection > 1.0E-4D) {
+            // A propeller/jet still accelerates the aircraft along the runway/airflow direction when
+            // the nose is high.  Using the full 3D look vector here made steep nose-up flight turn
+            // almost all engine output into motionY, so the aircraft could hang like a balloon while
+            // horizontal speed vanished. Keep some horizontal propulsion and let stall/energy drag
+            // decide whether that climb is sustainable.
+            double minimumHorizontalThrust = 0.45D;
+            double horizontalThrustScale = minimumHorizontalThrust
+                  + (1.0D - minimumHorizontalThrust) * pitchProjection;
+            horizontalThrustX = horizontalThrustX / pitchProjection * horizontalThrustScale;
+            horizontalThrustZ = horizontalThrustZ / pitchProjection * horizontalThrustScale;
+         }
+      }
+
+      double forwardSpeedBefore = super.motionX * horizontalThrustX + super.motionZ * horizontalThrustZ;
 
       // 如果可以移动，则更新水平速度
       if(canMove) {
          // 如果启用了倒车功能，并且油门向后，则根据油门倒退
          if (this.getAcInfo().enableBack && super.throttleBack > 0.0F) {
-            super.motionX -= v.xCoord * (double) super.throttleBack;
-            super.motionZ -= v.zCoord * (double) super.throttleBack;
+            super.motionX -= horizontalThrustX * (double) super.throttleBack;
+            super.motionZ -= horizontalThrustZ * (double) super.throttleBack;
          } else {
             // 否则，根据油门前进
-            super.motionX += v.xCoord * (double) throttle1;
-            super.motionZ += v.zCoord * (double) throttle1;
+            super.motionX += horizontalThrustX * (double) throttle1;
+            super.motionZ += horizontalThrustZ * (double) throttle1;
          }
       }
 
@@ -2007,7 +2025,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          }
       }
 
-      this.lastNetForwardAcceleration = super.motionX * v.xCoord + super.motionZ * v.zCoord - forwardSpeedBefore;
+      this.lastNetForwardAcceleration = super.motionX * horizontalThrustX + super.motionZ * horizontalThrustZ - forwardSpeedBefore;
       this.applyNewFlightTakeoffAssist(levelOff, dp);
 
       // 计算当前水平速度的大小
