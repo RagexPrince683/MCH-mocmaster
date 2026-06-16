@@ -339,7 +339,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             : 0.0D;
 
       System.out.println(String.format(
-              "[MCHeli] flight-control dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f) aero=(throttle=%.0f%%,engineOutput=%.0f%%,effectiveThrottle=%.0f%%,propulsiveThrottle=%.0f%%,flaps=%s,airspeed=%.3f,forwardSpeed=%.3f,verticalSpeed=%.4f,pitch=%.2f,mass=%.2f,weightForce=%.4f,engineThrust=%.4f,liftForce=%.4f,liftBeforeStall=%.4f,liftAfterStall=%.4f,liftCoeff=%.2f,liftToWeight=%.2f,thrustToWeight=%.2f,netForward=%.4f,takeoffMult=%.2f,takeoffBase=%.3f,takeoffEffective=%.3f,takeoffActive=%s,validTakeoff=%s,validClimb=%s,stallSuppressedHeadroom=%s,gravity=%.4f,resolvedGravity=%.4f,gravityOverride=%s,liftAccel=%.4f,netY=%.4f,airborne=%s,placementLock=%s,motion=(%.4f,%.4f,%.4f),cachedVelocity=(%.4f,%.4f,%.4f),aoaFromVelocity=%.2f,criticalAoA=%.2f,stallDemand=%.2f,speedSeverity=%.2f,aoaSeverity=%.2f,stallSeverity=%.2f,stallPitchMoment=%.4f,throttlePitchDown=%.4f,stallState=%s,recovery=%s,overspeed=%s,g=%.2f,drag=%.3f,liftLoss=%.2f,authority=%.2f,noseUpSuppress=%.2f,pitchBreak=%s,pitchBreakAngularVelocity=%.4f)",
+              "[MCHeli] flight-control dt=%.3f inputMouse=(%.3f,%.3f) inputStick=(%.3f,%.3f) angularVelocity=(pitch=%.4f,yaw=%.4f,roll=%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f) aero=(throttle=%.0f%%,engineOutput=%.0f%%,effectiveThrottle=%.0f%%,propulsiveThrottle=%.0f%%,flaps=%s,airspeed=%.3f,horizontalSpeed=%.3f,forwardSpeed=%.3f,verticalSpeed=%.4f,pitch=%.2f,mass=%.2f,weightForce=%.4f,engineThrust=%.4f,liftForce=%.4f,liftBeforeStall=%.4f,liftAfterStall=%.4f,liftCoeff=%.2f,liftToWeight=%.2f,thrustToWeight=%.2f,netForward=%.4f,takeoffMult=%.2f,takeoffBase=%.3f,takeoffEffective=%.3f,takeoffActive=%s,validTakeoff=%s,validClimb=%s,stallSuppressedHeadroom=%s,gravity=%.4f,resolvedGravity=%.4f,gravityOverride=%s,liftAccel=%.4f,netY=%.4f,airborne=%s,placementLock=%s,motion=(%.4f,%.4f,%.4f),cachedVelocity=(%.4f,%.4f,%.4f),aoaFromVelocity=%.2f,criticalAoA=%.2f,stallDemand=%.2f,speedSeverity=%.2f,aoaSeverity=%.2f,stallSeverity=%.2f,stallPitchMoment=%.4f,throttlePitchDown=%.4f,stallState=%s,recovery=%s,overspeed=%s,g=%.2f,drag=%.3f,liftLoss=%.2f,controlAuthority=%.2f,pitchAuthority=%.2f,noseUpSuppress=%.2f,unsupportedClimb=%s,unsupportedSeverity=%.2f,idleUnsupported=%s,idleWarning=%s,lowHorizontalWarning=%s,pitchBreak=%s,pitchBreakAngularVelocity=%.4f)",
               simDelta,
               mouseX,
               mouseY,
@@ -357,6 +357,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
               Double.valueOf(plane != null ? plane.getDebugPropulsiveEngineThrottle() * 100.0D : ac.getNormalizedThrottle() * 100.0D),
               Boolean.valueOf(ac.isCombatFlapsDeployed()),
               Math.sqrt(ac.motionX * ac.motionX + ac.motionY * ac.motionY + ac.motionZ * ac.motionZ),
+              ac.getLastHorizontalSpeed(),
               forwardSpeed,
               ac.motionY,
               ac.getRotPitch(),
@@ -404,11 +405,56 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
               ac.getCurrentGForce(),
               ac.getLastAerodynamicDrag(),
               ac.getLastLiftLoss(),
-              ac.getDebugControlAuthority(),
+              ac.getLastControlAuthority(),
+              ac.getLastPitchAuthority(),
               ac.getLastNoseUpPitchSuppression(),
+              Boolean.valueOf(ac.isUnsupportedClimb()),
+              ac.getLastUnsupportedClimbSeverity(),
+              Boolean.valueOf(ac.isLastIdleUnsupportedClimb()),
+              ac.getLastIdleThrottleWarning(),
+              ac.getLastLowHorizontalSpeedWarning(),
               Boolean.valueOf(ac.isPitchBreakActive()),
               plane != null ? plane.getLastPitchBreakAngularVelocity() : 0.0D
       ));
+
+      if(plane != null && plane.getLastLowHorizontalSpeedWarning().length() > 0) {
+         System.out.println(String.format(
+               "[MCHeli][WARN] low-horizontal-speed flight sanity: reason=%s motionX=%.4f motionZ=%.4f horizontalSpeed=%.3f airspeed=%.3f aoa=%.2f stallSpeed=%.3f speedSeverity=%.2f aoaSeverity=%.2f stallDemand=%.2f stallSeverity=%.2f liftToWeight=%.3f thrustToWeight=%.3f validClimb=%s validTakeoff=%s controlAuthority=%.2f pitchAuthority=%.2f unsupportedClimb=%.3f netY=%.4f",
+               plane.getLastLowHorizontalSpeedWarning(),
+               plane.motionX,
+               plane.motionZ,
+               plane.getLastHorizontalSpeed(),
+               plane.getAirspeed(),
+               plane.getAngleOfAttackDegrees(),
+               plane.getPlaneInfo() != null ? MCH_FlightModel.getStallSpeed(plane.getPlaneInfo().stallSpeed, plane.getMaxSpeed(), plane.getPlaneInfo().stallSpeedFactor) : 0.0D,
+               plane.getSpeedStallSeverity(),
+               plane.getAoAStallSeverity(),
+               plane.getStallDemand(),
+               plane.getStallSeverity(),
+               plane.getLiftToWeightRatio(),
+               plane.getThrustToWeightRatio(),
+               Boolean.valueOf(plane.isLastValidClimb()),
+               Boolean.valueOf(plane.isLastValidTakeoff()),
+               plane.getLastControlAuthority(),
+               plane.getLastPitchAuthority(),
+               plane.getLastUnsupportedClimbSeverity(),
+               plane.getLastNetVerticalAcceleration()));
+      }
+
+      if(plane != null && plane.getLastIdleThrottleWarning().length() > 0) {
+         System.out.println(String.format(
+               "[MCHeli][WARN] idle-throttle flight sanity: reason=%s throttle=%.3f propulsiveThrottle=%.3f thrustToWeight=%.3f liftToWeight=%.3f validClimb=%s unsupportedClimb=%.3f airspeed=%.3f netY=%.4f pitch=%.2f",
+               plane.getLastIdleThrottleWarning(),
+               plane.getNormalizedThrottle(),
+               plane.getDebugPropulsiveEngineThrottle(),
+               plane.getThrustToWeightRatio(),
+               plane.getLiftToWeightRatio(),
+               Boolean.valueOf(plane.isLastValidClimb()),
+               plane.getLastUnsupportedClimbSeverity(),
+               plane.getAirspeed(),
+               plane.getLastNetVerticalAcceleration(),
+               plane.getRotPitch()));
+      }
    }
 
    public void onRenderTickPre(float partialTicks) {
