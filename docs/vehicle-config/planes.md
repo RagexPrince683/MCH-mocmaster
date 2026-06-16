@@ -199,7 +199,8 @@ airspeedLift = clamp((airspeed - stallSpeed * 0.45) / max(0.05, stallSpeed * 1.3
 aoaLift = clamp(1 - max(0, abs(AoA) - CriticalAoA) / max(1, CriticalAoA), 0, 1)
 liftLoss = clamp(stallSeverity * StallLiftLoss, 0, 1)
 stallLift = 1 - liftLoss
-liftBeforeStallLoss = gravity * clamp(liftPower, 0, 2.5) * airspeedLift * aoaLift
+weightForce = gravity * PhysicalMass
+liftBeforeStallLoss = weightForce * clamp(liftPower, 0, 2.5) * airspeedLift * aoaLift
 liftForce = liftBeforeStallLoss * stallLift
 ```
 
@@ -332,7 +333,7 @@ FlightCeilingRange = 48
 
 `EngineThrust` is a force value, not a top-speed value. The new flight model applies forward acceleration from `EngineThrust / PhysicalMass` after throttle response and engine spool are resolved. Higher thrust-to-weight improves acceleration, takeoff roll, climb, and post-maneuver energy recovery. If omitted, a conservative default is derived from existing speed tuning so older new-flight configs remain flyable.
 
-The model treats weight as `NewFlightGravity * PhysicalMass`. Lift is evaluated as a force and compared against that weight, so heavy aircraft need more airspeed, throttle, flap lift, or gentler AoA to hold altitude. Drag and climb/dive energy exchange are divided through mass, so heavy aircraft lose and gain speed more gradually while light aircraft respond quickly. Takeoff speed remains emergent from stall speed, lift, thrust, drag, and mass; do not add a separate takeoff-speed key.
+The model treats weight as `NewFlightGravity * PhysicalMass`. Lift is evaluated as a force against that weight, so correctly tuned heavy aircraft can still rotate and climb once they reach the required airspeed while still needing enough thrust, throttle, flap lift, and gentle AoA to sustain flight. Drag and climb/dive energy exchange are divided through mass, so heavy aircraft lose and gain speed more gradually while light aircraft respond quickly. Takeoff speed remains emergent from stall speed, lift, thrust, drag, and mass; do not add a separate takeoff-speed key.
 
 Recommended mass/thrust starting ranges:
 
