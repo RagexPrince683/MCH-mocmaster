@@ -146,7 +146,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double pitchDeg;
       double noseUpAttitude;
       double aoaDeg;
-      double signedAoADeg;
 
       double stallSpeed;
       double stallRecoverySpeed;
@@ -990,8 +989,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       state.forwardSpeed = super.motionX * forward.xCoord + super.motionY * forward.yCoord + super.motionZ * forward.zCoord;
       state.aoaDeg = MCH_FlightModel.getAngleOfAttackDegrees(forward.xCoord, forward.yCoord, forward.zCoord,
             super.motionX, super.motionY, super.motionZ);
-      state.signedAoADeg = MCH_FlightModel.getSignedPitchAoADegrees(forward.xCoord, forward.yCoord, forward.zCoord,
-            super.motionX, super.motionY, super.motionZ);
 
       if(info != null) {
          state.stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
@@ -1049,15 +1046,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             liftPower += 0.35D * runwayReadiness;
          }
 
-         // Fixed-wing lift is a product of dynamic pressure and wing AoA. Pitch
-         // alone no longer creates upward momentum: low airspeed, negative AoA, or
-         // separated flow cannot support the aircraft even if the nose is high.
-         double dynamicPressureLift = MCH_FlightModel.clamp((state.airspeed * state.airspeed)
-               / Math.max(0.0025D, state.stallRecoverySpeed * state.stallRecoverySpeed), 0.0D, 1.45D);
-         double aoaLift = MCH_FlightModel.getLiftCurveCoefficient(state.signedAoADeg, info.criticalAoA, state.stallSeverity);
+         double airspeedLift = MCH_FlightModel.clamp((state.airspeed - state.stallSpeed * 0.45D)
+               / Math.max(0.05D, state.stallSpeed * 1.35D), 0.0D, 1.25D);
+         double aoaLift = MCH_FlightModel.clamp(1.0D - Math.max(0.0D, Math.abs(state.aoaDeg) - (double)info.criticalAoA)
+               / Math.max(1.0D, (double)info.criticalAoA), 0.0D, 1.0D);
          double liftLoss = MCH_FlightModel.clamp(state.stallSeverity * (double)info.stallLiftLoss, 0.0D, 1.0D);
-         double liftBeforeStallLoss = state.weightForce * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D)
-               * dynamicPressureLift * aoaLift;
+         double liftBeforeStallLoss = state.weightForce * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D) * airspeedLift * aoaLift;
          state.liftForce = liftBeforeStallLoss * (1.0D - liftLoss);
          state.liftToWeight = state.liftForce / Math.max(state.weightForce, 1.0E-6D);
          state.thrustForce = Math.max(0.0D, (double)info.engineThrust * MCH_FlightModel.clamp(this.getPropulsiveEngineThrottle(), 0.0D, 1.0D));
@@ -1807,42 +1801,42 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       boolean levelOff = super.isGunnerMode;
       if(dp == 0.0D) {
-         // Target drones with fuel and no fatal damage run simple terrain-following autopilot.
+         // 如果是目标无人机，并且有足够的燃料且没有被摧毁，则执行以下代码
          if (this.isTargetDrone() && this.canUseFuel() && !this.isDestroyed()) {
 
-            // Check for terrain well ahead and below the drone.
+            // 获取无人机当前位置3个单位向下、40个单位向前的方块
             Block throttle = MCH_Lib.getBlockY(this, 3, -100, true);
 
-            // If terrain is detected ahead, look closer before pitching up.
+            // 如果方块不为空且不是空气方块（即存在某个物体）
             if (throttle != null && !W_Block.isEqual(throttle, Blocks.air)) {
 
-               // Re-check closer terrain after the long-range hit.
+               // 如果没有找到目标方块，或者目标方块是空气方块，则执行下面的代码
                throttle = MCH_Lib.getBlockY(this, 3, -5, true);
 
-               // If the closer path is clear, turn and climb gently.
+               // 如果目标方块为空或是空气方块，进行自动驾驶的旋转和俯仰调整
                if (throttle == null || W_Block.isEqual(throttle, Blocks.air)) {
 
-                  // Apply autopilot yaw.
+                  // 根据自动驾驶旋转量调整航向（Yaw）
                   this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 2.0F);
 
-                  // Negative pitch is nose-up in this codebase; climb toward -20 degrees.
+                  // 如果俯仰角度大于-20度，则逐渐减小俯仰角度
                   if (this.getRotPitch() > -20.0F) {
                      this.setRotPitch(this.getRotPitch() - 0.5F);
                   }
                }
             } else {
-               // With no terrain ahead, continue the normal autopilot turn.
+               // 如果没有遇到障碍物，则按照自动驾驶的旋转量调整航向（Yaw）
                this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 1.0F);
 
-               // Ease pitch back toward level flight.
+               // 自动调整俯仰角度，使其逐渐减小
                this.setRotPitch(this.decayMobilityValue(this.getRotPitch(), 0.95F, 1.0F));
 
-               // Retract landing gear when available.
+               // 如果可以收起起落架，则执行收起起落架的操作
                if (this.canFoldLandingGear()) {
                   this.foldLandingGear();
                }
 
-               // Treat this as level-off/autopilot flight for the vertical model.
+               // 标记为平稳飞行状态
                levelOff = true;
             }
          }
@@ -1880,7 +1874,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          }
       }
 
-      // Convert throttle into per-tick acceleration.
+      // 计算油门1的值，当前油门除以10
       double propulsiveThrottle = this.useNewMobilitySystem()
             ? this.getPropulsiveEngineThrottle() : this.getEngineThrottle();
       propulsiveThrottle = MCH_FlightModel.clamp(propulsiveThrottle, 0.0D, 1.0D);
@@ -1899,30 +1893,37 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastStallPitchMoment = 0.0D;
       this.lastThrustPitchDownMoment = 0.0D;
 
-      // If the nozzle is rotated, use VTOL-style thrust vectoring.
+      // 如果喷嘴的旋转角度大于0.001F
       if(this.getNozzleRotation() > 0.001F) {
-         // Ease aircraft pitch while the nozzles are rotating.
+         // 根据喷嘴旋转角度调整飞机俯仰角度
          this.setRotPitch(this.decayMobilityValue(this.getRotPitch(), 0.95F, 1.0F));
-         // Build a thrust direction from yaw and pitch plus nozzle deflection.
+         // 根据航向角和俯仰角计算方向向量
          v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - this.getNozzleRotation());
-         // A fully downward nozzle keeps some horizontal authority but less than normal flight.
+         // 如果喷嘴旋转角度大于等于90度，缩小x和z方向的速度
          if(this.getNozzleRotation() >= 90.0F) {
             v.xCoord *= 0.800000011920929D;
             v.zCoord *= 0.800000011920929D;
          }
       } else {
-         // Conventional flight uses pitch for attitude and AoA, not direct vertical thrust.
+         // 否则，计算默认的方向向量，俯仰角度减去10度
          v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - 10.0F);
       }
 
-      // Apply thrust. In the new fixed-wing model, conventional forward thrust
-      // should not convert pitch directly into balloon-like vertical velocity;
-      // climb comes from airspeed/AoA lift and is limited by stall/drag.
+      // 如果没有达到平稳飞行状态
       if(!levelOff) {
+         // 如果喷嘴旋转角度小于等于0.01F，根据油门调整垂直方向上的速度
          if(this.getNozzleRotation() <= 0.01F) {
             double verticalThrust = v.yCoord * (double)throttle1 / 2.0D;
-            if(this.useNewMobilitySystem() && this.getPlaneInfo() != null) {
-               verticalThrust = Math.min(0.0D, verticalThrust * 0.15D);
+            if(this.useNewMobilitySystem() && this.getPlaneInfo() != null && verticalThrust > 0.0D) {
+               AeroState state = this.aeroState;
+               double speedHeadroom = state != null ? MCH_FlightModel.clamp(state.airspeed / Math.max(0.05D, state.climbSustainSpeed), 0.0D, 1.0D) : 0.0D;
+               double supportedVerticalThrust = state != null && state.thrustToWeight >= 1.0D ? 1.0D
+                     : MCH_FlightModel.clamp((state != null ? state.thrustToWeight : 0.0D) * speedHeadroom
+                           * (1.0D - (state != null ? state.stallSeverity : 1.0D)), 0.0D, 1.0D);
+               verticalThrust *= supportedVerticalThrust;
+               if(supportedVerticalThrust < 1.0D) {
+                  this.lastStallSuppressedLiftHeadroom = true;
+               }
             }
             super.motionY += verticalThrust;
          } else {
@@ -1930,12 +1931,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          }
       }
 
-      // Check whether this vehicle is allowed to move on the ground.
+      // 判断是否可以在地面移动
       boolean canMove = true;
       if(!this.getAcInfo().canMoveOnGround) {
-         // Inspect the block below before ground movement.
+         // 获取地面方块信息，判断是否可以移动
          Block motion = MCH_Lib.getBlockY(this, 3, -2, false);
-         // Solid non-water blocks prevent ground movement for aircraft that disallow it.
+         // 如果方块不是水或者空气方块，设置canMove为false，表示不能移动
          if(!W_Block.isEqual(motion, W_Block.getWater()) && !W_Block.isEqual(motion, Blocks.air) && !W_Block.isEqual(motion, Blocks.flowing_water)) {
             canMove = false;
          }
@@ -1943,22 +1944,22 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       double forwardSpeedBefore = super.motionX * v.xCoord + super.motionZ * v.zCoord;
 
-      // Apply horizontal propulsion when movement is allowed.
+      // 如果可以移动，则更新水平速度
       if(canMove) {
-         // Reverse when the vehicle supports backing up and reverse throttle is active.
+         // 如果启用了倒车功能，并且油门向后，则根据油门倒退
          if (this.getAcInfo().enableBack && super.throttleBack > 0.0F) {
             super.motionX -= v.xCoord * (double) super.throttleBack;
             super.motionZ -= v.zCoord * (double) super.throttleBack;
          } else {
-            // Otherwise accelerate forward.
+            // 否则，根据油门前进
             super.motionX += v.xCoord * (double) throttle1;
             super.motionZ += v.zCoord * (double) throttle1;
          }
       }
 
-      // Dampen vertical velocity after forces are applied.
+      // 对垂直速度进行衰减
       super.motionY *= 0.95D;
-      // Dampen horizontal velocity by the aircraft motion factor.
+      // 根据飞行器的运动系数衰减水平速度
       super.motionX *= this.getAcInfo().motionFactor;
       super.motionZ *= this.getAcInfo().motionFactor;
 
@@ -1987,8 +1988,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                this.getPlaneInfo().controlSurfaceDrag, (float)engineBrakeDrag) / mass;
          drag += MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getPlaneInfo().criticalAoA,
                this.getPlaneInfo().baseDrag, this.getPlaneInfo().aoaDragMultiplier) / mass;
-         drag += this.stallSeverity * (0.035D + 0.12D * MCH_FlightModel.clamp(Math.abs(this.angleOfAttack)
-               / Math.max(1.0D, (double)this.getPlaneInfo().criticalAoA), 0.0D, 2.0D));
          double stallSpeedForIdleDrag = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
                this.getPlaneInfo().stallSpeedFactor);
          this.lastIdleUnsupportedClimb = this.isIdleUnsupportedClimb(
@@ -2019,7 +2018,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastNetForwardAcceleration = super.motionX * v.xCoord + super.motionZ * v.zCoord - forwardSpeedBefore;
       this.applyNewFlightTakeoffAssist(levelOff, dp);
 
-      // Calculate current horizontal speed.
+      // 计算当前水平速度的大小
       double motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       if(this.isGroundedForPropulsion() && this.getCurrentThrottle() <= 0.0D
             && super.throttleBack <= 0.0F && motion1 > prevMotion) {
@@ -2038,21 +2037,21 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       float speedLimit = this.useNewMobilitySystem()
             ? (float)MCH_FlightModel.getDiveSpeedLimit(levelSpeed, this.getRotPitch(), super.motionY, this.getPlaneInfo().diveSpeedMultiplier)
             : baseSpeedLimit;
-      // Clamp horizontal speed to the current speed limit.
+      // 如果当前速度超过最大速度限制，按最大速度比例缩小水平速度
       if(motion1 > (double)speedLimit) {
          super.motionX *= (double)speedLimit / motion1;
          super.motionZ *= (double)speedLimit / motion1;
          motion1 = speedLimit;
       }
 
-      // Increase displayed/current speed gradually while accelerating below the limit.
+      // 如果当前速度大于上一帧的速度，并且当前速度小于最大速度限制，逐步增加速度
       if(motion1 > prevMotion && super.currentSpeed < (double)speedLimit) {
          super.currentSpeed += ((double)speedLimit - super.currentSpeed) / 35.0D;
          if(super.currentSpeed > (double)speedLimit) {
             super.currentSpeed = (double)speedLimit;
          }
       } else {
-         // Otherwise decay displayed/current speed toward the minimum idle value.
+         // 否则逐步减少速度，保持最低速度0.07
          super.currentSpeed -= (super.currentSpeed - 0.07D) / 35.0D;
          if(super.currentSpeed < 0.07D) {
             super.currentSpeed = 0.07D;
@@ -2124,30 +2123,22 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          }
       }
 
-      if(this.useNewMobilitySystem() && MCH_Config.DebugLog && super.ticksExisted % 20 == 0) {
-         MCH_Lib.DbgLog(super.worldObj,
-               "PlaneAero[%s] pitch=%.2f speed=%.3f hSpeed=%.3f vSpeed=%.3f aoa=%.2f lift=%.4f drag=%.4f stall=%.3f ctrl=%.3f pitchAuth=%.3f",
-               new Object[]{this.getEntityName(), Float.valueOf(this.getRotPitch()), Double.valueOf(this.getAirspeed()),
-                     Double.valueOf(this.lastHorizontalSpeed), Double.valueOf(super.motionY), Double.valueOf(this.angleOfAttack),
-                     Double.valueOf(this.lastLiftForce), Double.valueOf(this.lastAerodynamicDrag), Double.valueOf(this.stallSeverity),
-                     Double.valueOf(this.lastControlAuthority), Double.valueOf(this.lastPitchAuthority)});
-      }
-
-      // If the aircraft is on or near the ground, damp horizontal speed and apply ground pitch.
+      // 如果飞行器在地面或距离地面较近，则缩减水平速度，应用地面俯仰角度
       if(nearGround) {
          super.motionX *= this.getAcInfo().motionFactor;
          super.motionZ *= this.getAcInfo().motionFactor;
-         // Blend the resting pitch only when the aircraft is not steeply rotated.
+         // 如果俯仰角度小于40度，则根据地面状态调整俯仰角度
          if(MathHelper.abs(this.getRotPitch()) < 40.0F) {
             this.applyOnGroundPitch(0.8F);
          }
       }
 
-      // Update aircraft position.
+      // 更新飞行器位置
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
 
-      // Update rotation and block interactions.
+      // 更新旋转角度
       this.setRotation(this.getRotYaw(), this.getRotPitch());
+      // 更新方块信息
       this.onUpdate_updateBlock();
 
       this.handleDeadPilot();

@@ -105,24 +105,6 @@ public final class MCH_FlightModel {
       return attitudeAoA * (1.0D - velocityBlend) + velocityAoA * velocityBlend;
    }
 
-   /**
-    * Returns signed pitch-plane angle of attack in degrees. Positive means the
-    * nose is above the flight path. In MCHeli pitch convention that usually
-    * corresponds to negative rotation pitch, because negative pitch is nose-up.
-    */
-   public static double getSignedPitchAoADegrees(double forwardX, double forwardY, double forwardZ,
-                                                 double velocityX, double velocityY, double velocityZ) {
-      double horizontalForward = Math.sqrt(forwardX * forwardX + forwardZ * forwardZ);
-      double horizontalSpeed = Math.sqrt(velocityX * velocityX + velocityZ * velocityZ);
-      double noseAngle = Math.toDegrees(Math.atan2(forwardY, horizontalForward));
-      if(horizontalSpeed < 1.0E-6D && Math.abs(velocityY) < 1.0E-6D) {
-         return noseAngle;
-      }
-
-      double pathAngle = Math.toDegrees(Math.atan2(velocityY, horizontalSpeed));
-      return noseAngle - pathAngle;
-   }
-
    /** Resolves an absolute stall speed while retaining compatibility with StallSpeedFactor. */
    public static double getStallSpeed(float stallSpeed, float topSpeed, float stallSpeedFactor) {
       if(stallSpeed > 0.0F) {
@@ -140,19 +122,6 @@ public final class MCH_FlightModel {
    public static double getAoAStallSeverity(double angleOfAttack, float criticalAoA) {
       double critical = Math.max(1.0D, (double)criticalAoA);
       return clamp((Math.abs(angleOfAttack) - critical) / critical, 0.0D, 1.0D);
-   }
-
-   /**
-    * Simple fixed-wing lift curve. Lift rises roughly linearly with positive AoA
-    * until critical AoA, retains a small amount at zero/negative AoA for game
-    * playability, then drops sharply as stall severity grows.
-    */
-   public static double getLiftCurveCoefficient(double signedAoA, float criticalAoA, double stallSeverity) {
-      double critical = Math.max(1.0D, (double)criticalAoA);
-      double normalized = signedAoA / critical;
-      double preStall = clamp(0.30D + 0.95D * normalized, 0.0D, 1.25D);
-      double separatedFlow = clamp(1.0D - clamp(stallSeverity, 0.0D, 1.0D) * 0.85D, 0.12D, 1.0D);
-      return preStall * separatedFlow;
    }
 
    /** Returns the stronger of the low-speed and excessive-AoA stall demands. */
