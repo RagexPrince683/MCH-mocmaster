@@ -13,7 +13,6 @@ UseNewMobilitySystem = true
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.250
 EngineThrust = 2.272
-TakeoffDistanceMultiplier = 0.70
 NewFlightGravity = 0.0080
 NewFlightThrottleResponse = 1.160
 NewFlightThrottleChangeRateUp = 0.0052
@@ -30,12 +29,6 @@ NewFlightCombatFlapControl = 0.130
 NewFlightCombatFlapOverspeed = 0.780
 
 # New-flight internal energy model tuning
-EnergyRetentionMultiplier = 1.05
-ClimbEnergyCostMultiplier = 1.00
-PitchEnergyCostMultiplier = 1.00
-VerticalClimbEnergyCostMultiplier = 1.15
-StallRecoveryEnergyThreshold = 1.00
-SustainedClimbEnergyRequirement = 1.00
 FlightCeiling = 16000
 FlightCeilingRange = 72
 StallSpeed = 0.657
@@ -57,8 +50,6 @@ OverspeedDamageRate = 0.14
 BaseDrag = 0.0014
 InducedDrag = 0.0075
 ControlSurfaceDrag = 0.0035
-ClimbEnergyLoss = 0.0085
-DiveEnergyGain = 0.012
 MaxLevelSpeed = 3.65
 IdleDrag = 0.0034
 
