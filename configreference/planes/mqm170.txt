@@ -21,17 +21,10 @@ EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
 
 # New-flight internal energy model tuning
-EnergyRetentionMultiplier = 1.05
-ClimbEnergyCostMultiplier = 1.00
-PitchEnergyCostMultiplier = 1.00
-VerticalClimbEnergyCostMultiplier = 1.15
-StallRecoveryEnergyThreshold = 1.00
-SustainedClimbEnergyRequirement = 1.00
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 0.350
 EngineThrust = 0.319
-TakeoffDistanceMultiplier = 0.82
 NewFlightGravity = 0.0076
 NewFlightThrottleResponse = 1.200
 NewFlightThrottleChangeRateUp = 0.0045
@@ -63,8 +56,6 @@ OverspeedDamageRate = 0.12
 BaseDrag = 0.0026
 InducedDrag = 0.010
 ControlSurfaceDrag = 0.0040
-ClimbEnergyLoss = 0.011
-DiveEnergyGain = 0.014
 MaxLevelSpeed = 0.322
 IdleDrag = 0.0032
 

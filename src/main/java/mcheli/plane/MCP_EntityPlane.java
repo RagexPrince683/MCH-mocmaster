@@ -87,7 +87,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastNetForwardAcceleration;
    /** Base stall/takeoff speed before runway-distance scaling. */
    private double lastBaseTakeoffSpeed;
-   /** Effective takeoff speed after TakeoffDistanceMultiplier. */
+   /** Effective takeoff speed after derived ground-roll threshold scaling. */
    private double lastEffectiveTakeoffSpeed;
    /** True when takeoff threshold scaling is actively gating/assisting rotation. */
    private boolean lastTakeoffMultiplierActive;
@@ -500,11 +500,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          return 90.0D;
       }
 
-      double configuredLimit = MCH_FlightModel.clamp((double)this.getPlaneInfo().newFlightIdleNoseUpLimit, 5.0D, 89.0D);
       double recoverySpeed = this.getPlaneInfo().stallRecoverySpeed > 0.0F
             ? (double)this.getPlaneInfo().stallRecoverySpeed : stallSpeed * 1.2D;
       double speedDeficit = MCH_FlightModel.clamp((recoverySpeed - this.getAirspeed()) / Math.max(0.05D, recoverySpeed), 0.0D, 1.0D);
-      return configuredLimit + (90.0D - configuredLimit) * (1.0D - speedDeficit);
+      double derivedLimit = MCH_FlightModel.clamp(18.0D + this.getThrustToWeightRatio() * 20.0D, 20.0D, 55.0D);
+      return derivedLimit + (90.0D - derivedLimit) * (1.0D - speedDeficit);
    }
 
    private boolean isIdleUnsupportedClimb(double noseUpAttitude, double stallSpeed) {
@@ -647,8 +647,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    public double getTakeoffDistanceMultiplier() {
-      MCP_PlaneInfo info = this.getPlaneInfo();
-      return info != null ? MCH_FlightModel.clamp((double)info.takeoffDistanceMultiplier, 0.25D, 4.0D) : 1.0D;
+      return 1.0D;
    }
 
    public double getLastBaseTakeoffSpeed() {
@@ -1287,19 +1286,18 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double recoverySpeed = info.stallRecoverySpeed > 0.0F ? (double)info.stallRecoverySpeed : stallSpeed * 1.2D;
       double climbSustainSpeed = Math.max(recoverySpeed, stallSpeed * 1.35D);
       double noseUp = MCH_FlightModel.clamp((double)(-this.getRotPitch() - 8.0F) / 72.0D, 0.0D, 1.0D);
-      double climbDemand = Math.max(0.0D, super.motionY) * mass * gravityAccel * info.climbEnergyCostMultiplier;
+      double climbDemand = Math.max(0.0D, super.motionY) * mass * gravityAccel;
       double pitchDemand = noseUp * (0.5D * mass * climbSustainSpeed * climbSustainSpeed)
-            * (Math.max(this.aoaStallSeverity, this.speedStallSeverity) + 0.35D * MCH_FlightModel.clamp(Math.abs(this.pitchAngularVelocity) / 2.0D, 0.0D, 1.0D))
-            * info.pitchEnergyCostMultiplier;
+            * (Math.max(this.aoaStallSeverity, this.speedStallSeverity) + 0.35D * MCH_FlightModel.clamp(Math.abs(this.pitchAngularVelocity) / 2.0D, 0.0D, 1.0D));
       double verticalDemand = noseUp * noseUp * Math.max(0.0D, super.motionY) * mass * gravityAccel
-            * info.verticalClimbEnergyCostMultiplier;
+            * (1.0D + MCH_FlightModel.clamp(1.0D - this.getThrustToWeightRatio(), 0.0D, 1.0D));
       this.lastClimbEnergyDemand = climbDemand + verticalDemand;
       this.lastPitchEnergyDemand = pitchDemand;
 
-      double retainedEnergy = this.lastKineticEnergy * info.energyRetentionMultiplier;
+      double retainedEnergy = this.lastKineticEnergy;
       double thrustEnergy = Math.max(0.0D, this.lastEngineThrustForce * Math.max(0.0D, horizontalSpeed + Math.max(0.0D, super.motionY)));
-      double requiredSpecificEnergy = 0.5D * climbSustainSpeed * climbSustainSpeed * info.sustainedClimbEnergyRequirement;
-      double recoverySpecificEnergy = 0.5D * recoverySpeed * recoverySpeed * info.stallRecoveryEnergyThreshold;
+      double requiredSpecificEnergy = 0.5D * climbSustainSpeed * climbSustainSpeed;
+      double recoverySpecificEnergy = 0.5D * recoverySpeed * recoverySpeed;
       double energyShortfall = (this.lastClimbEnergyDemand + this.lastPitchEnergyDemand) - (retainedEnergy + thrustEnergy + Math.max(0.0D, this.lastEnergyDelta));
       double demandScale = Math.max(1.0E-6D, this.lastClimbEnergyDemand + this.lastPitchEnergyDemand);
       double maneuverDeficit = MCH_FlightModel.clamp(energyShortfall / demandScale, 0.0D, 1.0D);
@@ -2174,8 +2172,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          }
          drag = MCH_FlightModel.clamp(drag, 0.0D, 0.5D);
          this.lastAerodynamicDrag = drag;
+         double derivedClimbLoss = (float)MCH_FlightModel.clamp(gravityAccel * 0.30D + this.getPlaneInfo().baseDrag * 2.0D, 0.0D, 0.25D);
+         double derivedDiveGain = (float)MCH_FlightModel.clamp(gravityAccel * 0.22D + this.getPlaneInfo().baseDrag, 0.0D, 0.25D);
          double energyChange = MCH_FlightModel.getVerticalEnergyChange(super.motionY,
-               this.getPlaneInfo().climbEnergyLoss, this.getPlaneInfo().diveEnergyGain) / mass;
+               (float)derivedClimbLoss, (float)derivedDiveGain) / mass;
          double targetSpeed = Math.max(0.0D, horizontalSpeed * (1.0D - drag) + energyChange);
 
          if(horizontalSpeed > 1.0E-4D) {
