@@ -68,7 +68,7 @@ public abstract class MCH_WeaponEntitySeeker extends MCH_WeaponBase {
             if(o != null) {
                MCH_EntityBaseBullet msl = (MCH_EntityBaseBullet) o;
                if(!msl.isDead && msl.getInfo() != null && msl.getInfo().passiveRadar) {
-                  //System.out.println("检测到雷达弹"); //TODO shootingEntity always null in client side
+                  //System.out.println("Detected radar missile"); //TODO shootingEntity always null in client side
                   result.add(msl);
                }
             }

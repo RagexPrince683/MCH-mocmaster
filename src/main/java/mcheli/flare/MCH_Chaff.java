@@ -8,17 +8,17 @@ import java.util.Random;
 
 public class MCH_Chaff {
 
-    //冷却时长 0代表冷却结束
+    //Cooldown duration 0means cooldown ended
     public int tick;
-    //生效时长 0代表使用结束
+    //Active duration 0means use ended
     public int useTick;
-    //箔条使用时间
+    //Chaff use time
     public int chaffUseTime;
-    //箔条等待时间
+    //Chaff wait time
     public int chaffWaitTime;
     public World worldObj;
     public MCH_EntityBaseVehicle aircraft;
-    //箔条使用时分批间隔
+    //Batch interval while using chaff
     private int spawnChaffEntityIntervalTick;
     public final Random rand = new Random();
 
@@ -81,17 +81,17 @@ public class MCH_Chaff {
     }
 
     private void spawnChaffEntity() {
-        // 获取飞机的最后位置
+        // Gets the aircraft last position
         double x = this.aircraft.lastTickPosX;
         double y = this.aircraft.lastTickPosY;
         double z = this.aircraft.lastTickPosZ;
 
-        // 获取飞机的运动速度
+        // Gets the aircraft motion speed
         double motionX = this.aircraft.motionX;
         double motionY = this.aircraft.motionY;
         double motionZ = this.aircraft.motionZ;
 
-        // 创建干扰箔条实体
+        // Creates the chaff countermeasure entity
         double offsetX = -motionX * 20D;
         double offsetY = -motionY * 20D;
         double offsetZ = -motionZ * 20D;
@@ -100,7 +100,7 @@ public class MCH_Chaff {
                 x + offsetX, y + offsetY, z + offsetZ,
                 motionX * 0.5, motionY * 0.5, motionZ * 0.5);
 
-        // 将干扰箔条实体加入到世界中
+        // Adds the chaff countermeasure entity to the world
         this.worldObj.spawnEntityInWorld(e);
     }
 

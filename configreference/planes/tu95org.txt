@@ -1,7 +1,7 @@
 DisplayName = TU-95 Bear
 AddDisplayName = en_US, TU-95 Bear
 AddDisplayName = ja_JP, TU-95 Bear
-AddDisplayName = zh_CN, 图95 Bear
+AddDisplayName = zh_CN, Tu-95 Bear
 ;ItemID = 19112
 MaxHp = 250
 EnableNightVision = false

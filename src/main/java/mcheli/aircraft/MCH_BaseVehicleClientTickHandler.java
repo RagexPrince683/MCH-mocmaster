@@ -58,15 +58,15 @@ public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHan
    public MCH_Key KeyCurrentWeaponLock;
 
    /**
-    * 箔条按键
+    * Chaff key
     */
    public MCH_Key KeyChaff;
    /**
-    * 维修按键
+    * Maintenance key
     */
    public MCH_Key KeyMaintenance;
    /**
-    * APS按键
+    * APSkey
     */
    public MCH_Key KeyAPS;
 

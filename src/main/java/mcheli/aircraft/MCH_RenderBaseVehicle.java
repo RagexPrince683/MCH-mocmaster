@@ -1146,7 +1146,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
       if(player != null) {
          if(!W_Entity.isEqual(player, entity)) {
-            MCH_EntityBaseVehicle ac = null; //玩家乘坐的实体
+            MCH_EntityBaseVehicle ac = null; //Entity ridden by the player
             if(player.ridingEntity instanceof MCH_EntityBaseVehicle) {
                ac = (MCH_EntityBaseVehicle)player.ridingEntity;
             } else if(player.ridingEntity instanceof MCH_EntitySeat) {
@@ -1165,10 +1165,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
 
                   if (guidanceSystem instanceof MCH_EntityGuidanceSystem) {
                      MCH_EntityGuidanceSystem gs = (MCH_EntityGuidanceSystem) guidanceSystem;
-                     // 检查当前武器是否有引导系统，并且该引导系统是否能锁定目标实体
+                     // Checks whether the current weapon has a guidance system and whether it can lock the target entity
                      if(gs.canLockEntity(entity)) {
                         RenderManager rm = RenderManager.instance;
-                        // 计算目标实体与玩家之间的平方距离
+                        // Calculates squared distance between target entity and player
                         double dist = entity.getDistanceSqToEntity(rm.livingPlayer);
                         double distance = Math.sqrt(dist);
                         if(wi != null && wi.enableBVR && distance > wi.minRangeBVR) {
@@ -1176,11 +1176,11 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
                         }
 //                     if(entity instanceof MCH_EntityFlare) {
 //                        long worldTime = Minecraft.getMinecraft().theWorld.getTotalWorldTime();
-//                        float blinkBaseFrequency = 1.0F; // 基本闪烁频率（每秒闪烁一次）
-//                        float randomFrequencyFactor = 0.5F + rand.nextFloat() * 0.5F; // 随机频率范围 [0.5, 1.0]
+//                        float blinkBaseFrequency = 1.0F; // Base blink frequency (blinks once per second)
+//                        float randomFrequencyFactor = 0.5F + rand.nextFloat() * 0.5F; // Random frequency range [0.5, 1.0]
 //                        float blinkFrequency = blinkBaseFrequency * randomFrequencyFactor;
-//                        float sinValue = (float) Math.sin(worldTime * blinkFrequency * Math.PI * 2.0F); // 正弦波函数
-//                        boolean isFlareVisible = sinValue > 0.0F; // 通过正弦波的值来决定是否显示框
+//                        float sinValue = (float) Math.sin(worldTime * blinkFrequency * Math.PI * 2.0F); // Sine wave function
+//                        boolean isFlareVisible = sinValue > 0.0F; // Determines whether to show the box from the sine value
 //                        if(!isFlareVisible) return;
 //                     }
                         Vec3 src = Vec3.createVectorHelper(RenderManager.renderPosX, RenderManager.renderPosY, RenderManager.renderPosZ);
@@ -1190,71 +1190,71 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
                            return;
                         }
 
-                        // 计算实体相对于玩家的坐标偏移
+                        // Calculates coordinate offset of the entity relative to the player
                         double x = entity.posX - RenderManager.renderPosX;
                         double y = entity.posY - RenderManager.renderPosY;
                         double z = entity.posZ - RenderManager.renderPosZ;
 
-                        // 如果目标实体与玩家的距离小于1000，则进行渲染
+                        // Renders if target entity is within 1000 units of the player
                         if(dist < 1000000.0D) {
-                           float scl = 0.02666667F; // 缩放因子
+                           float scl = 0.02666667F; // Scale factor
                            GL11.glPushMatrix();
-                           // 进行位置变换，将目标实体渲染到玩家视角中
+                           // Transforms position to render target entity in the player view
                            GL11.glTranslatef((float)x, (float)y + entity.height + 2F, (float)z);
                            GL11.glNormal3f(0.0F, 1.0F, 0.0F);
                            GL11.glRotatef(-rm.playerViewY, 0.0F, 1.0F, 0.0F);
                            GL11.glRotatef(rm.playerViewX, 1.0F, 0.0F, 0.0F);
                            GL11.glScalef(-0.02666667F, -0.02666667F, 0.02666667F);
-                           GL11.glDisable(2896); // 禁用深度测试
-                           GL11.glTranslatef(0.0F, 9.374999F, 0.0F); // 上移一些偏移量
-                           GL11.glDepthMask(false); // 禁用深度写入
-                           GL11.glEnable(3042); // 启用混合
-                           GL11.glBlendFunc(770, 771); // 设置混合模式
-                           GL11.glDisable(3553); // 禁用纹理
+                           GL11.glDisable(2896); // Disables depth testing
+                           GL11.glTranslatef(0.0F, 9.374999F, 0.0F); // Moves up by an offset
+                           GL11.glDepthMask(false); // Disables depth writes
+                           GL11.glEnable(3042); // Enables blending
+                           GL11.glBlendFunc(770, 771); // Sets blend mode
+                           GL11.glDisable(3553); // Disables textures
                            GL11.glDisable(2929 /* GL_DEPTH_TEST */);
 
-                           // 获取绘制前的屏幕宽度
+                           // Gets screen width before drawing
                            int prevWidth = GL11.glGetInteger(2849);
-                           // 设置目标实体大小（根据实体的宽度和高度进行调整）
+                           // Sets target entity size (adjusted based on entity width and height)
                            float size1 = Math.max(entity.width, entity.height) * 20.0F;
                            if(entity instanceof MCH_EntityBaseVehicle
                                    || entity instanceof MCH_EntityFlare
                                    || entity instanceof MCH_EntityChaff) {
-                              size1 *= 2.0F; // 飞机类型实体大小加倍
+                              size1 *= 2.0F; // Doubles size for aircraft-type entities
                            }
                            float size = size1 + (float)((distance - 10.0D) / (300.0D - 10.0D)) * (300.0F - size1);
-                           // 确保字体大小在size1和100之间
+                           // Ensures font size is between size1 and 100
                            size = Math.max(size1, Math.min(300.0F, size));
 
-                           // 创建Tessellator对象，用于绘制图形
+                           // Creates a Tessellator object for drawing graphics
                            Tessellator tessellator = Tessellator.instance;
-                           tessellator.startDrawing(2); // 开始绘制线条
-                           tessellator.setBrightness(240); // 设置亮度
+                           tessellator.startDrawing(2); // Starts drawing lines
+                           tessellator.setBrightness(240); // Sets brightness
 
-                           Vector3f playerVelocity = new Vector3f(ac.motionX, ac.motionY, ac.motionZ);  // 玩家机体的速度向量
-                           Vector3f targetVelocity = new Vector3f(entity.motionX, entity.motionY, entity.motionZ);  // 目标机体的速度向量
+                           Vector3f playerVelocity = new Vector3f(ac.motionX, ac.motionY, ac.motionZ);  // Velocity vector of the player aircraft
+                           Vector3f targetVelocity = new Vector3f(entity.motionX, entity.motionY, entity.motionZ);  // Velocity vector of the target aircraft
                            float angleInDegrees = 0;
                            if(playerVelocity.length() > 0.001 && targetVelocity.length() > 0.001) {
-                              // 计算两个向量的点积
+                              // Calculates the dot product of the two vectors
                               float dotProduct = Vector3f.dot(playerVelocity, targetVelocity);
-                              // 计算两个向量的长度
+                              // Calculates lengths of the two vectors
                               float playerSpeed = playerVelocity.length();
                               float targetSpeed = targetVelocity.length();
-                              // 计算夹角的余弦值
+                              // Calculates the cosine of the angle
                               float cosAngle = dotProduct / (playerSpeed * targetSpeed);
-                              // 确保夹角余弦值在合法范围内 [-1, 1]，避免浮动导致的异常值
+                              // Ensures the angle cosine is within the valid range [-1, 1],avoids abnormal values caused by floating-point error
                               cosAngle = Math.max(-1.0f, Math.min(1.0f, cosAngle));
-                              // 计算夹角（弧度）
+                              // Calculates the angle (radians)
                               float angle = (float) Math.acos(cosAngle);
-                              // 如果夹角大于90度，将其转换为锐角（90度以内）
+                              // If the angle is greater than 90 degrees, converts it to an acute angle (within 90 degrees)
                               if (angle > Math.PI / 2) {
-                                 angle = (float) (Math.PI - angle);  // 转换为锐角
+                                 angle = (float) (Math.PI - angle);  // Converts to an acute angle
                               }
-                              // 将角度转化为度数（可选）
+                              // Converts angle to degrees (optional)
                               angleInDegrees = (float) Math.toDegrees(angle);
                            }
 
-                           // 检查当前是否锁定了目标实体
+                           // Checks whether the target entity is currently locked
                            boolean isLockEntity = gs.isLockingEntity(entity);
                            float alpha = 1.0F;
                            if (angleInDegrees > ac.getCurrentWeapon(player).getCurrentWeapon().getInfo().pdHDNMaxDegree) {
@@ -1266,33 +1266,33 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
                            }
 
                            if(isLockEntity) {
-                              GL11.glLineWidth((float)MCH_Gui.scaleFactor * 2.5F); // 设置线宽
-                              tessellator.setColorRGBA_F(1.0F, 0.0F, 0.0F, alpha); // 锁定状态下显示红色
+                              GL11.glLineWidth((float)MCH_Gui.scaleFactor * 2.5F); // Sets line width
+                              tessellator.setColorRGBA_F(1.0F, 0.0F, 0.0F, alpha); // Shows red while locked
                            } else {
-                              GL11.glLineWidth((float)MCH_Gui.scaleFactor * 1.5F); // 设置线宽
-                              tessellator.setColorRGBA_F(0.0F, 1.0F, 0.0F, alpha); // 绿色
+                              GL11.glLineWidth((float)MCH_Gui.scaleFactor * 1.5F); // Sets line width
+                              tessellator.setColorRGBA_F(0.0F, 1.0F, 0.0F, alpha); // Green
                            }
 
-                           // 绘制矩形框，表示锁定范围
+                           // Draws a rectangle representing the lock range
                            tessellator.addVertex(-size - 1.0F, 0.0D, 0.0D);
                            tessellator.addVertex(-size - 1.0F, size * 2.0F, 0.0D);
                            tessellator.addVertex(size + 1.0F, size * 2.0F, 0.0D);
                            tessellator.addVertex(size + 1.0F, 0.0D, 0.0D);
-                           tessellator.draw(); // 绘制线条
+                           tessellator.draw(); // Draws lines
 
-                           // 获取距离并绘制文字
-                           String distanceText = String.format("%.1f", distance); // 格式化为一位小数
+                           // Gets distance and draws text
+                           String distanceText = String.format("%.1f", distance); // Formats with one decimal place
 
-                           // 获取 FontRenderer 对象并设置颜色为绿色
+                           // Gets the FontRenderer object and sets the color to green
                            FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
                            {
                               GL11.glPushMatrix();
-                              GL11.glTranslatef(0.0F, size * 2.0F + 1.0F, 0.0F); // 将文本放置在矩形框的下方
+                              GL11.glTranslatef(0.0F, size * 2.0F + 1.0F, 0.0F); // Places text below the rectangle
                               float fontSize = 5.0F + (float)((distance - 10.0D) / (300.0D - 10.0D)) * (40.0F - 5.0F);
-                              // 确保字体大小在5和40之间
+                              // Ensures font size is between 5 and 40
                               fontSize = Math.max(5.0F, Math.min(40.0F, fontSize));
                               GL11.glScalef(fontSize, fontSize, fontSize);
-                              // 绘制绿色文字，显示与目标的距离
+                              // Draws green text showing distance to target
                               String text = "";
                               if (gs.isHeatSeekerMissile) {
                                  text = "HEAT";
@@ -1307,8 +1307,8 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
                               text += " " + distanceText;
 
                               if(ac instanceof MCP_EntityPlane && entity instanceof MCP_EntityPlane && angleInDegrees != 0) {
-                                 // 将角度值作为文本输出
-                                 String angleText = String.format("%.1f", angleInDegrees);  // 保留一位小数
+                                 // Outputs the angle value as text
+                                 String angleText = String.format("%.1f", angleInDegrees);  // Keeps one decimal place
                                  text += " " + angleText;
                               }
 
@@ -1321,28 +1321,28 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
 
 
 
-                           // 如果实体是无人机且当前视角是第一人称视角，并且目标实体被锁定，则绘制连接线
+                           // Draws a connecting line if the entity is a UAV, current view is first person, and target entity is locked
                            if(!ac.isUAV() && isLockEntity && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0) {
                               GL11.glPushMatrix();
-                              tessellator.startDrawing(1); // 绘制点到点的连线
+                              tessellator.startDrawing(1); // Draws a point-to-point line
                               GL11.glLineWidth(1.0F);
-                              tessellator.setColorRGBA_F(1.0F, 0.0F, 0.0F, 1.0F); // 设置颜色为红色
-                              // 连接线从实体的中心到飞机的上一个位置
+                              tessellator.setColorRGBA_F(1.0F, 0.0F, 0.0F, 1.0F); // Sets color to red
+                              // Connecting line goes from entity center to aircraft previous position
                               tessellator.addVertex(x, y + (double)(entity.height / 2.0F), z);
                               tessellator.addVertex(ac.lastTickPosX - RenderManager.renderPosX, ac.lastTickPosY - RenderManager.renderPosY - 1.0D, ac.lastTickPosZ - RenderManager.renderPosZ);
-                              tessellator.setBrightness(240); // 设置亮度
-                              tessellator.draw(); // 绘制线条
-                              GL11.glPopMatrix(); // 恢复矩阵状态
+                              tessellator.setBrightness(240); // Sets brightness
+                              tessellator.draw(); // Draws lines
+                              GL11.glPopMatrix(); // Restores matrix state
                            }
 
-                           // 恢复之前的线宽，启用纹理，恢复深度写入和深度测试
+                           // Restores previous line width, enables textures, restores depth writes and depth testing
                            GL11.glLineWidth((float)prevWidth);
                            GL11.glEnable(3553);
                            GL11.glDepthMask(true);
                            GL11.glEnable(2896);
                            GL11.glDisable(3042);
                            GL11.glEnable(2929 /* GL_DEPTH_TEST */);
-                           GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F); // 恢复默认颜色
+                           GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F); // Restores default color
                         }
                      }
                   }

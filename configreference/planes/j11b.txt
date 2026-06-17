@@ -1,6 +1,6 @@
 DisplayName = J-11B
 AddDisplayName = en_US, J-11B
-AddDisplayName = zh_CN, 歼11B
+AddDisplayName = zh_CN, J-11B
 ItemID = 6855
 MaxHp = 100
 EnableNightVision = true
@@ -20,7 +20,7 @@ VariableSweepWing = true
 SweepWingSpeed = 0.8
 
 ;modern light plane (late jet), AOW3 style (fcs)
-AddRecipe = "ABC", "DEF", "GGG", A, mcheli:airframe2, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:cannon1, F, mcheli:fcs3, G, mcheli:electronics 
+AddRecipe = "ABC", "DEF", "GGG", A, mcheli:airframe2, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:cannon1, F, mcheli:fcs3, G, mcheli:electronics
 
 Category = ASF
 EnableRealisticFlightModel = true

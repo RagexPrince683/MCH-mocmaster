@@ -204,7 +204,7 @@ public class MCH_MOD {
          System.out.println("Mods Directory: " + sourcePath);
       }
 
-      ///sourcePath = "D:\\软件\\GitHub\\MCHeli-Reforged\\src\\main\\resources";
+      ///sourcePath = "D:\\Software\\GitHub\\MCHeli-Reforged\\src\\main\\resources";
               //new File(evt.getModConfigurationDirectory().getParentFile(), "/mods").getPath();
       MCH_Lib.Log("SourcePath: " + sourcePath, new Object[0]);
       System.out.println("SourcePath: " + sourcePath);

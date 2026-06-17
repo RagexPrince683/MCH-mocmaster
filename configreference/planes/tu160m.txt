@@ -1,6 +1,6 @@
 DisplayName = Tu-160M Super Blackjack Conventional Bombs
 AddDisplayName = en_US, Tu-160M Super Blackjack Conventional Bombs
-AddDisplayName =  zh_CN, 图-160M 超级海盗旗 Conventional Bombs
+AddDisplayName =  zh_CN, Tu-160M Blackjack Conventional Bombs
 ItemID = 30714
 MaxHp = 250
 EnableNightVision = true
@@ -135,7 +135,7 @@ AddWeapon = odab9000, 0.0, 4.0, -7.0, 0.0, 0.0, true, 2
 ;1
 
 AddWeapon = tu160rbk500umpk16, 0.0, 4.0, -30.0, 0.0, 0.0, true, 2, 0,-90,90, -5,90
-;8 
+;8
 AddWeapon = tu160fab3000umpk4, 0.0, 4.0, -30.0, 0.0, 0.0, true, 2, 0,-90,90, -5,90
 ;2
 

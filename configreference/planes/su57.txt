@@ -1,6 +1,6 @@
 DisplayName = Su-57
 AddDisplayName = en_US, Su-57
-AddDisplayName = zh_CN, 老毛子的苏-57
+AddDisplayName = zh_CN, Russian Su-57
 ItemID = 7788
 MaxHp = 100
 ThrottleUpDown = 0.3

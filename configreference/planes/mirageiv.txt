@@ -1,5 +1,5 @@
 DisplayName = Mirage IVP
-AddDisplayName = zh_CN, 幻影IVP战略轰炸机
+AddDisplayName = zh_CN, Mirage IVP Strategic Bomber
 
 MaxHp = 100
 Speed = 4.0

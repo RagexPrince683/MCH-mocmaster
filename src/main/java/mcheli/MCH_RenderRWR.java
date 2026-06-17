@@ -31,21 +31,21 @@ public class MCH_RenderRWR {
     private static final int RWR_CENTER_Y = 280;
     private static final double SCREEN_HEIGHT_ADAPT_CONSTANT = 520;
 
-    private static final double MIN_DISTANCE = 50.0;  // 最小显示距离（米）
-    private static final double MAX_DISTANCE = 1000.0; // 最大显示距离（米）
-    private static final int MIN_RADIUS = 30;          // 最小显示半径（像素
+    private static final double MIN_DISTANCE = 50.0;  // Minimum display distance (meters)
+    private static final double MAX_DISTANCE = 1000.0; // Maximum display distance (meters)
+    private static final int MIN_RADIUS = 30;          // Minimum display radius (pixels
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
         if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        //获取基本信息
+        //Gets basic information
         Minecraft mc = Minecraft.getMinecraft();
         EntityPlayer player = mc.thePlayer;
         World world = mc.theWorld;
         ScaledResolution sc = new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
         if (player == null || world == null) return;
 
-        //获取玩家机载武器
+        //Gets the player aircraft weapon
         MCH_EntityBaseVehicle ac = null;
         if(player.ridingEntity instanceof MCH_EntityBaseVehicle) {
             ac = (MCH_EntityBaseVehicle)player.ridingEntity;
@@ -57,24 +57,24 @@ public class MCH_RenderRWR {
         if(!(ac instanceof MCP_EntityPlane || ac instanceof MCH_EntityHeli)) return;
         if(ac.getAcInfo().rwrType == null || ac.getAcInfo().rwrType == EnumRWRType.NONE) return;
 
-        //开始渲染
+        //Starts rendering
         GL11.glPushMatrix();
         {
             double sx = sc.getScaledHeight() * (RWR_CENTER_X / SCREEN_HEIGHT_ADAPT_CONSTANT);
             double sy = sc.getScaledHeight() * (RWR_CENTER_Y / SCREEN_HEIGHT_ADAPT_CONSTANT);
             drawRWRCircle(sx, sy, sc);
 
-            // 新增实体渲染逻辑
+            // New entity rendering logic
             double circleRadius = sc.getScaledHeight() * (RWR_SIZE / SCREEN_HEIGHT_ADAPT_CONSTANT) / 2.0;
             for(MCH_EntityInfo entity : getServerLoadedEntity()) {
                 if(!isValidEntity(entity, player)) continue;
 
-                // 计算插值位置
+                // Calculates interpolated position
                 double xPos = interpolate(entity.posX, entity.lastTickPosX, event.partialTicks);
                 double yPos = interpolate(entity.posY, entity.lastTickPosY, event.partialTicks);
                 double zPos = interpolate(entity.posZ, entity.lastTickPosZ, event.partialTicks);
 
-                // 计算相对向量
+                // Calculates relative vector
                 Vec3 delta = Vec3.createVectorHelper(
                         xPos - (player.posX + (player.posX - player.lastTickPosX) * event.partialTicks),
                         yPos - (player.posY + (player.posY - player.lastTickPosY) * event.partialTicks),
@@ -89,17 +89,17 @@ public class MCH_RenderRWR {
                 double angle = Math.toDegrees(Math.acos(Math.max(-1, Math.min(1, dot))));
                 if(lookHorizontal.crossProduct(deltaHorizontal).yCoord < 0) angle = -angle;
 
-                // 计算距离相关参数
+                // Calculates distance-related parameters
                 double distance = Math.sqrt(delta.xCoord*delta.xCoord + delta.yCoord*delta.yCoord + delta.zCoord*delta.zCoord);
-                double radiusRatio = Math.min(Math.max((distance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE), 0), 1); // 100-1000米映射到0-1
-                double renderRadius = MIN_RADIUS + (circleRadius - MIN_RADIUS) * radiusRatio; // 20像素到最大半径
+                double radiusRatio = Math.min(Math.max((distance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE), 0), 1); // 100-1000metersmaps to0-1
+                double renderRadius = MIN_RADIUS + (circleRadius - MIN_RADIUS) * radiusRatio; // 20pixelsto maximum radius
 
-                // 计算屏幕坐标
+                // Calculates screen coordinates
                 double radian = Math.toRadians(angle);
                 double markerX = sx + renderRadius * Math.sin(-radian);
                 double markerY = sy - renderRadius * Math.cos(radian);
 
-                // 绘制文字
+                // Draws text
                 MCH_RWRResult rwrResult = getTargetTypeOnRadar(entity, ac);
                 String text = rwrResult.name;
                 int color = rwrResult.color;
@@ -140,7 +140,7 @@ public class MCH_RenderRWR {
     }
 
 
-    // 新增实体校验方法
+    // New entity validation method
     private boolean isValidEntity(MCH_EntityInfo entity, EntityPlayer player) {
         if (entity.entityClassName.contains("MCH_EntityChaff") || entity.entityClassName.contains("MCH_EntityFlare")
                 || entity.entityClassName.contains("EntityPlayer")) {

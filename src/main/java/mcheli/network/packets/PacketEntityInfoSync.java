@@ -31,7 +31,7 @@ public class PacketEntityInfoSync extends PacketBase {
         buf.writeByte(operation);
         buf.writeInt(entities.size());
         for (MCH_EntityInfo info : entities) {
-            // 编码实体信息
+            // Encodes entity information
             buf.writeInt(info.entityId);
             writeUTF(buf, info.worldName);
             writeUTF(buf, info.entityName);
@@ -71,7 +71,7 @@ public class PacketEntityInfoSync extends PacketBase {
 
     }
 
-    // 客户端处理
+    // Client-side handling
     @Override
     public void handleClientSide(EntityPlayer player) {
         switch (operation) {

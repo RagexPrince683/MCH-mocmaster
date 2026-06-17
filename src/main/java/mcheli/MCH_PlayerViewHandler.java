@@ -7,12 +7,12 @@ import java.util.Random;
 public class MCH_PlayerViewHandler {
 
     /**
-     * 通过射击作用于玩家视野的后坐力
+     * Recoil applied to the player view by shooting
      */
     public static float playerRecoilPitch;
     public static float playerRecoilYaw;
     /**
-     * 为使后坐力恢复正常，对后坐力施加的补偿量
+     * Compensation applied to restore recoil to normal
      */
     public static float antiRecoilPitch;
     public static float antiRecoilYaw;
@@ -28,7 +28,7 @@ public class MCH_PlayerViewHandler {
     }
 
     /**
-     * 每帧更新视角抖动效果
+     * Updates the view shake effect every frame
      */
     public static void onUpdate() {
 

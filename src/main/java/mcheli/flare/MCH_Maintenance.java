@@ -6,13 +6,13 @@ import net.minecraft.world.World;
 
 public class MCH_Maintenance {
 
-    //冷却时长 0代表冷却结束
+    //Cooldown duration 0means cooldown ended
     public int tick;
-    //生效时长 0代表使用结束
+    //Active duration 0means use ended
     public int useTick;
-    //维修系统生效时间
+    //Maintenance system active time
     public int useTime;
-    //维修系统等待时间
+    //Maintenance system wait time
     public int waitTime;
 
     public World worldObj;

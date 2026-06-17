@@ -35,7 +35,7 @@ public class MCH_RenderBVRLockBox {
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
         if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
 
-        //获取基本信息
+        //Gets basic information
         Minecraft mc = Minecraft.getMinecraft();
         EntityPlayer player = mc.thePlayer;
         World world = mc.theWorld;
@@ -43,7 +43,7 @@ public class MCH_RenderBVRLockBox {
         if (player == null || world == null) return;
         if (mc.gameSettings.thirdPersonView != 0) return;
 
-        //获取玩家机载武器
+        //Gets the player aircraft weapon
         MCH_EntityBaseVehicle ac = null;
         if(player.ridingEntity instanceof MCH_EntityBaseVehicle) {
             ac = (MCH_EntityBaseVehicle)player.ridingEntity;
@@ -56,7 +56,7 @@ public class MCH_RenderBVRLockBox {
         MCH_WeaponInfo wi = ac.getCurrentWeapon(player).getCurrentWeapon().getInfo();
         if(wi == null || !wi.enableBVR) return;
 
-        //开始渲染
+        //Starts rendering
         GL11.glPushMatrix();
         {
             List<MCH_EntityInfo> entities = new ArrayList<>(getServerLoadedEntity());
@@ -150,11 +150,11 @@ public class MCH_RenderBVRLockBox {
         if(Math.toDegrees(Vector3f.angle(rPos, lookVec)) > 45) {
             return new double[] {-1, -1, -1, -1};
         }
-        // 计算相机坐标系
+        // Calculates the camera coordinate system
         Vector3f worldUp = new Vector3f(0, 1, 0);
         Vector3f R = new Vector3f();
         Vector3f.cross(lookVec, worldUp, R);
-        // 处理叉积为零的情况（如直视上方/下方）
+        // Handles the case where the cross product is zero (such as looking straight up/down)
         if (R.lengthSquared() < 1e-5) {
             float yawRad = (float) Math.toRadians(player.rotationYaw + 90);
             R.set((float) Math.cos(yawRad), 0, (float) -Math.sin(yawRad));
@@ -163,20 +163,20 @@ public class MCH_RenderBVRLockBox {
         Vector3f U = new Vector3f();
         Vector3f.cross(R, lookVec, U);
         U.normalise();
-        // 分解相对坐标到相机轴
+        // Decomposes relative coordinates onto the camera axes
         float dx = Vector3f.dot(rPos, R);
         float dy = Vector3f.dot(rPos, U);
         float dz = Vector3f.dot(rPos, lookVec);
         if (dz <= 0) return new double[]{-1, -1, -1, -1};
-        // 获取显示参数
+        // Gets display parameters
         ScaledResolution sc = new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
         float fov = Minecraft.getMinecraft().gameSettings.fovSetting;
         double tanHalfFov = Math.tan(Math.toRadians(fov) * 0.5);
         double aspect = (double) sc.getScaledWidth() / sc.getScaledHeight();
-        // 透视投影计算
+        // Perspective projection calculation
         double xProj = (dx / dz) / (aspect * tanHalfFov);
         double yProj = (dy / dz) / tanHalfFov;
-        // 转换为屏幕坐标
+        // Converts to screen coordinates
         double screenX = sc.getScaledWidth() / 2.0 + xProj * (sc.getScaledWidth() / 2.0);
         double screenY = sc.getScaledHeight() / 2.0 - yProj * (sc.getScaledHeight() / 2.0);
         return new double[]{screenX, screenY, screenX - sc.getScaledWidth() / 2.0, screenY - sc.getScaledHeight() / 2.0};
@@ -214,7 +214,7 @@ public class MCH_RenderBVRLockBox {
         return old + (now - old) * partialTicks;
     }
 
-    // 修改后的渲染状态设置
+    // Modified render state setup
     private void prepareRenderState(boolean lock, float alpha) {
         GL11.glEnable(3042);
         if(lock) {
@@ -247,11 +247,11 @@ public class MCH_RenderBVRLockBox {
 //        if (buffer.capacity() < 16) {
 //            throw new IllegalArgumentException("FloatBuffer must have at least 16 elements.");
 //        }
-//        int originalPosition = buffer.position(); // 保存原始位置
-//        buffer.position(0); // 重置到起始位置
+//        int originalPosition = buffer.position(); // Saves the original position
+//        buffer.position(0); // Resets to the start position
 //        float[] array = new float[16];
-//        buffer.get(array); // 读取16个元素
-//        buffer.position(originalPosition); // 恢复原始位置
+//        buffer.get(array); // Reads 16 elements
+//        buffer.position(originalPosition); // Restores the original position
 //        return array;
 //    }
 //
