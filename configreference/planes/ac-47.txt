@@ -23,6 +23,14 @@ EnableParachuting = false
 Category = GAA/CASG
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
+
+# New-flight internal energy model tuning
+EnergyRetentionMultiplier = 0.82
+ClimbEnergyCostMultiplier = 1.35
+PitchEnergyCostMultiplier = 1.25
+VerticalClimbEnergyCostMultiplier = 1.70
+StallRecoveryEnergyThreshold = 1.20
+SustainedClimbEnergyRequirement = 1.35
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.350

@@ -44,6 +44,14 @@ NewFlightCombatFlapLift = 0.105
 NewFlightCombatFlapDrag = 0.014
 NewFlightCombatFlapControl = 0.140
 NewFlightCombatFlapOverspeed = 0.720
+
+# New-flight internal energy model tuning
+EnergyRetentionMultiplier = 1.05
+ClimbEnergyCostMultiplier = 1.00
+PitchEnergyCostMultiplier = 1.00
+VerticalClimbEnergyCostMultiplier = 1.15
+StallRecoveryEnergyThreshold = 1.00
+SustainedClimbEnergyRequirement = 1.00
 FlightCeiling = 12500
 FlightCeilingRange = 60
 StallSpeed = 0.495

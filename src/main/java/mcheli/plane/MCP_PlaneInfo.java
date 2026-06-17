@@ -85,6 +85,18 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float newFlightCombatFlapDrag = 0.012F;
    public float newFlightCombatFlapControl = 0.12F;
    public float newFlightCombatFlapOverspeed = 0.78F;
+   /** Multiplies usable stored energy retained for unsupported climb/pitch manoeuvres. */
+   public float energyRetentionMultiplier = 1.0F;
+   /** Multiplies energy demand from positive climb rate. */
+   public float climbEnergyCostMultiplier = 1.0F;
+   /** Multiplies energy demand from nose-up/high-AoA pitch manoeuvres. */
+   public float pitchEnergyCostMultiplier = 1.0F;
+   /** Multiplies energy demand from near-vertical nose-up climb attempts. */
+   public float verticalClimbEnergyCostMultiplier = 1.0F;
+   /** Specific-energy fraction of stall recovery speed required before forced recovery fades. */
+   public float stallRecoveryEnergyThreshold = 1.0F;
+   /** Specific-energy fraction of climb sustain speed required for supported climbs. */
+   public float sustainedClimbEnergyRequirement = 1.0F;
    /** Absolute airspeed below which a fixed-wing plane can enter a stall. Zero derives it from StallSpeedFactor. */
    public float stallSpeed = 0.0F;
    /** Angle between the plane forward vector and velocity vector at which airflow separates. */
@@ -376,6 +388,18 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.newFlightCombatFlapControl = this.toFloat(data, 0.0F, 1.0F);
          } else if(item.equalsIgnoreCase("NewFlightCombatFlapOverspeed")) {
             this.newFlightCombatFlapOverspeed = this.toFloat(data, 0.1F, 1.0F);
+         } else if(item.equalsIgnoreCase("EnergyRetentionMultiplier")) {
+            this.energyRetentionMultiplier = this.toFloat(data, 0.1F, 3.0F);
+         } else if(item.equalsIgnoreCase("ClimbEnergyCostMultiplier")) {
+            this.climbEnergyCostMultiplier = this.toFloat(data, 0.1F, 5.0F);
+         } else if(item.equalsIgnoreCase("PitchEnergyCostMultiplier")) {
+            this.pitchEnergyCostMultiplier = this.toFloat(data, 0.1F, 5.0F);
+         } else if(item.equalsIgnoreCase("VerticalClimbEnergyCostMultiplier")) {
+            this.verticalClimbEnergyCostMultiplier = this.toFloat(data, 0.1F, 8.0F);
+         } else if(item.equalsIgnoreCase("StallRecoveryEnergyThreshold")) {
+            this.stallRecoveryEnergyThreshold = this.toFloat(data, 0.1F, 3.0F);
+         } else if(item.equalsIgnoreCase("SustainedClimbEnergyRequirement")) {
+            this.sustainedClimbEnergyRequirement = this.toFloat(data, 0.1F, 3.0F);
          } else if(item.equalsIgnoreCase("StallSpeedKmh")) {
             this.stallSpeed = this.toInternalSpeedFromKmh(data, 0.0F, 720.0F);
          } else if(item.equalsIgnoreCase("StallSpeed")) {
