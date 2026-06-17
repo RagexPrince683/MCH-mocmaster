@@ -12,6 +12,9 @@ import net.minecraft.item.Item;
 
 public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
 
+   public static final float INTERNAL_SPEED_TO_KMH = 72.0F;
+   public static final float INTERNAL_ACCEL_TO_METERS_PER_SECOND_SQUARED = 400.0F;
+
    public MCP_ItemPlane item = null;
    public List nozzles = new ArrayList();
    public List rotorList = new ArrayList();
@@ -186,6 +189,18 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    }
 
 
+   private float toInternalSpeedFromKmh(String data, float minKmh, float maxKmh) {
+      return this.toFloat(data, minKmh, maxKmh) / INTERNAL_SPEED_TO_KMH;
+   }
+
+   private float toInternalMassFromKg(String data) {
+      return this.toFloat(data, 1.0F, 500000.0F) / 10000.0F;
+   }
+
+   private float toInternalForceFromNewtons(String data) {
+      return this.toFloat(data, 0.0F, 10000000.0F) / 4000000.0F;
+   }
+
    private void derivePhysicalFlightDefaults() {
       if(this.engineThrust <= 0.0F) {
          float levelSpeed = this.maxLevelSpeed > 0.0F ? this.maxLevelSpeed : super.speed;
@@ -292,6 +307,8 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.climbEnergyLoss = this.toFloat(data, 0.0F, 0.25F);
          } else if(item.equalsIgnoreCase("DiveEnergyGain")) {
             this.diveEnergyGain = this.toFloat(data, 0.0F, 0.25F);
+         } else if(item.equalsIgnoreCase("MaximumLevelSpeed") || item.equalsIgnoreCase("MaxLevelSpeedKmh")) {
+            this.maxLevelSpeed = this.toInternalSpeedFromKmh(data, 0.0F, this.getMaxSpeed() * INTERNAL_SPEED_TO_KMH);
          } else if(item.equalsIgnoreCase("MaxLevelSpeed")) {
             this.maxLevelSpeed = this.toFloat(data, 0.0F, this.getMaxSpeed());
          } else if(item.equalsIgnoreCase("IdleDrag")) {
@@ -308,10 +325,21 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.rollDamping = this.toFloat(data, 0.0F, 100.0F);
          } else if(item.equalsIgnoreCase("YawDamping")) {
             this.yawDamping = this.toFloat(data, 0.0F, 100.0F);
-         } else if(item.equalsIgnoreCase("Mass") || item.equalsIgnoreCase("InertiaMultiplier")) {
+         } else if(item.equalsIgnoreCase("InertiaMultiplier")) {
             this.inertiaMultiplier = this.toFloat(data, 0.05F, 100.0F);
+         } else if(item.equalsIgnoreCase("Mass")) {
+            float massValue = this.toFloat(data, 0.05F, 500000.0F);
+            if(massValue <= 100.0F) {
+               this.inertiaMultiplier = massValue;
+            } else {
+               this.physicalMass = massValue / 10000.0F;
+            }
+         } else if(item.equalsIgnoreCase("MassKg") || item.equalsIgnoreCase("PhysicalMassKg")) {
+            this.physicalMass = this.toInternalMassFromKg(data);
          } else if(item.equalsIgnoreCase("PhysicalMass")) {
             this.physicalMass = this.toFloat(data, 0.05F, 100.0F);
+         } else if(item.equalsIgnoreCase("EngineThrustN")) {
+            this.engineThrust = this.toInternalForceFromNewtons(data);
          } else if(item.equalsIgnoreCase("EngineThrust")) {
             this.engineThrust = this.toFloat(data, 0.0F, 100.0F);
          } else if(item.equalsIgnoreCase("TakeoffDistanceMultiplier")) {
@@ -348,6 +376,8 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.newFlightCombatFlapControl = this.toFloat(data, 0.0F, 1.0F);
          } else if(item.equalsIgnoreCase("NewFlightCombatFlapOverspeed")) {
             this.newFlightCombatFlapOverspeed = this.toFloat(data, 0.1F, 1.0F);
+         } else if(item.equalsIgnoreCase("StallSpeedKmh")) {
+            this.stallSpeed = this.toInternalSpeedFromKmh(data, 0.0F, 720.0F);
          } else if(item.equalsIgnoreCase("StallSpeed")) {
             this.stallSpeed = this.toFloat(data, 0.0F, 10.0F);
          } else if(item.equalsIgnoreCase("CriticalAoA")) {
@@ -358,6 +388,8 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.aoaDragMultiplier = this.toFloat(data, 0.0F, 10.0F);
          } else if(item.equalsIgnoreCase("StallInstability")) {
             this.stallInstability = this.toFloat(data, 0.0F, 5.0F);
+         } else if(item.equalsIgnoreCase("StallRecoverySpeedKmh")) {
+            this.stallRecoverySpeed = this.toInternalSpeedFromKmh(data, 0.0F, 720.0F);
          } else if(item.equalsIgnoreCase("StallRecoverySpeed")) {
             this.stallRecoverySpeed = this.toFloat(data, 0.0F, 10.0F);
          } else if(item.equalsIgnoreCase("StallSpeedFactor")) {
@@ -378,10 +410,14 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.maxStructuralG = this.toFloat(data, 1.0F, 50.0F);
          } else if(item.equalsIgnoreCase("GControlPenalty")) {
             this.gControlPenalty = this.toFloat(data, 0.0F, 1.0F);
+         } else if(item.equalsIgnoreCase("CompressibilitySpeedKmh")) {
+            this.compressibilitySpeed = this.toInternalSpeedFromKmh(data, 0.0F, 1200.0F);
          } else if(item.equalsIgnoreCase("CompressibilitySpeed")) {
             this.compressibilitySpeed = this.toFloat(data, 0.0F, 10.0F);
          } else if(item.equalsIgnoreCase("CompressibilityPitchPenalty")) {
             this.compressibilityPitchPenalty = this.toFloat(data, 0.0F, 1.0F);
+         } else if(item.equalsIgnoreCase("NeverExceedSpeed") || item.equalsIgnoreCase("VNEKmh") || item.equalsIgnoreCase("MaxSafeSpeedKmh")) {
+            this.maxSafeSpeed = this.toInternalSpeedFromKmh(data, 0.0F, 1400.0F);
          } else if(item.equalsIgnoreCase("MaxSafeSpeed")) {
             this.maxSafeSpeed = this.toFloat(data, 0.0F, 10.0F);
          } else if(item.equalsIgnoreCase("OverspeedDamageRate")) {
