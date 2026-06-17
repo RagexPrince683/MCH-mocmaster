@@ -72,6 +72,8 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float newFlightLowThrottleLiftRetention = 0.700F;
    /** Maximum fraction of control authority lost at idle throttle. */
    public float newFlightThrottleControlAuthorityScale = 0.10F;
+   /** Nose-up pitch limit while airborne at closed throttle and below recovery speed. */
+   public float newFlightIdleNoseUpLimit = 38.0F;
    /** Show the normalized 0-100% throttle readout to pilots using the new flight model. */
    public boolean newFlightThrottleHudDisplay = true;
    /** Enables the new-flight-only combat-flap toggle. */
@@ -332,6 +334,8 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.newFlightLowThrottleLiftRetention = this.toFloat(data, 0.0F, 1.0F);
          } else if(item.equalsIgnoreCase("NewFlightThrottleControlAuthorityScale")) {
             this.newFlightThrottleControlAuthorityScale = this.toFloat(data, 0.0F, 1.0F);
+         } else if(item.equalsIgnoreCase("NewFlightIdleNoseUpLimit")) {
+            this.newFlightIdleNoseUpLimit = this.toFloat(data, 5.0F, 89.0F);
          } else if(item.equalsIgnoreCase("NewFlightThrottleHudDisplay")) {
             this.newFlightThrottleHudDisplay = this.toBool(data);
          } else if(item.equalsIgnoreCase("NewFlightCombatFlaps")) {

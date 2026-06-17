@@ -108,6 +108,10 @@ Common examples:
 
 Operators can use all subcommands. Non-operators need matching `CommandPermission` entries in `mcheli.cfg`. See [docs/commands.md](docs/commands.md) for syntax, examples, and permission configuration.
 
+## Fixed-wing flight-model tuning
+
+Realistic fixed-wing aircraft use data-driven stall, speed, throttle, and pitch-protection values. See [docs/flight-model.md](docs/flight-model.md) for the idle-throttle nose-up limiter (`NewFlightIdleNoseUpLimit`) and related tuning guidance for preventing zero-throttle vertical pitch exploits.
+
 ## Troubleshooting
 
 ### Vehicles, models, textures, or sounds are missing
