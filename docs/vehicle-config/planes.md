@@ -63,6 +63,12 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `NewFlightCombatFlapDrag` | float[0..0.25] | 0.012 | **New flight model only.** Extra drag while combat flaps are deployed. |
 | `NewFlightCombatFlapControl` | float[0..1] | 0.12 | **New flight model only.** Control-authority boost while combat flaps are deployed. |
 | `NewFlightCombatFlapOverspeed` | float[0.1..1] | 0.78 | **New flight model only.** Multiplier applied to `MaxSafeSpeed` while flaps are deployed; lower values punish high-speed flap use earlier. |
+| `EnergyRetentionMultiplier` | float[0.1..3] | 1.0 | **New flight model only.** Scales how much stored kinetic energy is usable for brief zoom climbs and high-pitch manoeuvres. |
+| `ClimbEnergyCostMultiplier` | float[0.1..5] | 1.0 | **New flight model only.** Scales energy demand from positive vertical speed. |
+| `PitchEnergyCostMultiplier` | float[0.1..5] | 1.0 | **New flight model only.** Scales energy demand from nose-up/high-AoA pitch manoeuvres. |
+| `VerticalClimbEnergyCostMultiplier` | float[0.1..8] | 1.0 | **New flight model only.** Scales extra demand for steep nose-up climb attempts. Raise this to prevent hover-climb behavior. |
+| `StallRecoveryEnergyThreshold` | float[0.1..3] | 1.0 | **New flight model only.** Specific-energy fraction of stall recovery speed required before forced energy recovery fades. |
+| `SustainedClimbEnergyRequirement` | float[0.1..3] | 1.0 | **New flight model only.** Specific-energy fraction of climb sustain speed required for supported sustained climb. |
 | `StallSpeed` | float[0..10] | 0 | Absolute stall threshold; if 0, uses `max(0.05, topSpeed * StallSpeedFactor)`. |
 | `CriticalAoA` | float[1..90] | 14.00 | AoA in degrees where stall demand begins. |
 | `StallLiftLoss` | float[0..1] | 0.820 | Fraction of lift removed at full stall. |
@@ -165,6 +171,40 @@ targetHorizontalSpeed = horizontalSpeed * (1 - drag)
                       - climb * ClimbEnergyLoss
 ```
 
+
+### Internal energy model for new-flight fixed-wing planes
+
+Planes with `useNewMobilitySystem = true` now run an internal per-tick energy check in addition to lift, AoA, drag, and stall logic. Legacy planes do not use these calculations. The model records kinetic energy from `PhysicalMass` and full 3D velocity, potential energy from `PhysicalMass`, resolved new-flight gravity, and altitude, total energy, specific energy, tick-to-tick energy delta, and an approximate excess-power value. It then compares usable retained kinetic energy plus current thrust contribution against climb and pitch demands.
+
+```text
+kineticEnergy = 0.5 * PhysicalMass * (motionX^2 + motionY^2 + motionZ^2)
+potentialEnergy = PhysicalMass * resolvedGravity * max(0, altitude)
+totalEnergy = kineticEnergy + potentialEnergy
+specificEnergy = totalEnergy / PhysicalMass
+energyDelta = totalEnergy - previousTotalEnergy
+excessPower ~= energyDelta per tick
+
+climbEnergyDemand = positiveVerticalSpeed * PhysicalMass * resolvedGravity
+                  * ClimbEnergyCostMultiplier
+                + steepNoseUpVerticalDemand * VerticalClimbEnergyCostMultiplier
+pitchEnergyDemand = noseUpDemand * stall/aoa/body-rate demand
+                  * PitchEnergyCostMultiplier
+usableEnergy = kineticEnergy * EnergyRetentionMultiplier + thrustEnergy + positiveEnergyDelta
+energyDeficitSeverity = clamp(shortfall and specific-energy deficit, 0, 1)
+```
+
+`energyDeficitSeverity` is not a Y-motion clamp. When it rises, the aircraft loses nose-up pitch authority, receives extra energy/induced drag, can trigger pitch-break recovery, and biases the nose downward through the normal angular-velocity path. This preserves brief zoom climbs when the aircraft enters with enough airspeed/energy, but a low-speed or low-throttle aircraft at 80-90 degrees nose-up will bleed energy, stall, and rotate down instead of hovering upward. Low horizontal speed is handled by using full 3D airspeed and the existing low-speed/AoA stall state, so a plane cannot avoid the energy check just because `motionX`/`motionZ` are near zero.
+
+Tuning guidance:
+
+* Light fighters: keep `EnergyRetentionMultiplier` near or slightly above `1.0`, moderate `ClimbEnergyCostMultiplier`, and avoid excessive `VerticalClimbEnergyCostMultiplier` so they can dogfight and zoom climb without hovering.
+* Heavy fighters: use similar retention but slightly higher pitch/climb costs so mass and pitch demand matter.
+* Jets: may use slightly better retention or lower sustained-climb requirement only when `EngineThrust`, drag, mass, and gravity already justify strong climb performance.
+* Bombers/transports: lower retention and raise climb, pitch, recovery, and vertical-climb requirements so they recover poorly from steep nose-up flight.
+* Poor-energy aircraft, UAVs, and utility planes: use the bomber-style direction with even higher vertical-climb costs.
+
+Do not use these keys to fake impossible vertical performance. First tune real inputs (`PhysicalMass`, `EngineThrust`, gravity override, `BaseDrag`, `InducedDrag`, `ClimbEnergyLoss`, `StallSpeed`, `CriticalAoA`, and `StallRecoverySpeed`); use the energy multipliers only to shape how that physical/tuned energy is retained or spent.
+
 ### Stall, AoA, lift loss, and recovery
 
 ```text
@@ -229,7 +269,7 @@ Pilot nose-up input is also suppressed when the aircraft lacks energy or lift to
 
 ```text
 unsupportedClimb = nose-up attitude while climbing * max(0, 1 - thrustToWeight)
-energyDeficit = max(stallSeverity, aoaSeverity, speedSeverity, liftDeficit, unsupportedClimb)
+energyDeficit = max(stallSeverity, aoaSeverity, speedSeverity, liftDeficit, unsupportedClimb, energyDeficitSeverity)
 noseUpPitchInput *= 1 - clamp(energyDeficit * (0.35 + 0.65 * noseUpAttitude), 0, 1)
 ```
 
@@ -399,4 +439,4 @@ Combat flaps are intentionally gated by `useNewMobilitySystem = true`; legacy pa
 
 Use flaps with low or moderate throttle for landing and low-speed control. High throttle with flaps can improve a short turn, but the extra drag and reduced `MaxSafeSpeed * NewFlightCombatFlapOverspeed` should punish extended high-speed use. Throttle chopping plus flaps helps manage speed but should not be tuned into an instant brake; raise `NewFlightCombatFlapDrag` gradually and keep `NewFlightEngineBrakeDrag` modest.
 
-Debug flight logging (`DebugFlightControl`) includes commanded throttle percent, smoothed engine output percent, effective curved/idle throttle percent, propulsive throttle percent, flap state, pitch, airspeed, forward speed, vertical speed, physical mass, weight force, engine thrust force (`EngineThrust * propulsiveThrottle`, with idle propulsion suppressed while parked at 0% commanded throttle), lift force, lift before stall loss, lift after stall loss, lift-to-weight ratio, thrust-to-weight ratio, net forward acceleration, `TakeoffDistanceMultiplier`, base/effective takeoff thresholds, whether takeoff threshold scaling is active, `validTakeoff`, `validClimb`, whether stall suppressed takeoff/climb headroom, applied gravity acceleration, resolved global/override gravity, placement motion-lock state, current motion/cached velocity, lift acceleration, net vertical acceleration, airborne state, velocity-derived `aoaFromVelocity`, `criticalAoA`, `stallDemand`, `speedSeverity`, `aoaSeverity`, smoothed stall severity, stall state, throttle-deficit pitch-down moment, lift loss, drag, control authority, pitch-break state, applied pitch-break angular velocity, and overspeed state for new-flight tuning.
+Debug flight logging (`DebugFlightControl`) includes energy telemetry (`kineticEnergy`, `potentialEnergy`, `totalEnergy`, `specificEnergy`, `energyDelta`, `excessPower`, `energyDeficitSeverity`, `climbEnergyDemand`, `pitchEnergyDemand`, `energyUnsupportedClimb`, and `energyForcedRecovery`) plus commanded throttle percent, smoothed engine output percent, effective curved/idle throttle percent, propulsive throttle percent, flap state, pitch, airspeed, forward speed, vertical speed, physical mass, weight force, engine thrust force (`EngineThrust * propulsiveThrottle`, with idle propulsion suppressed while parked at 0% commanded throttle), lift force, lift before stall loss, lift after stall loss, lift-to-weight ratio, thrust-to-weight ratio, net forward acceleration, `TakeoffDistanceMultiplier`, base/effective takeoff thresholds, whether takeoff threshold scaling is active, `validTakeoff`, `validClimb`, whether stall suppressed takeoff/climb headroom, applied gravity acceleration, resolved global/override gravity, placement motion-lock state, current motion/cached velocity, lift acceleration, net vertical acceleration, airborne state, velocity-derived `aoaFromVelocity`, `criticalAoA`, `stallDemand`, `speedSeverity`, `aoaSeverity`, smoothed stall severity, stall state, throttle-deficit pitch-down moment, lift loss, drag, control authority, pitch-break state, applied pitch-break angular velocity, and overspeed state for new-flight tuning.

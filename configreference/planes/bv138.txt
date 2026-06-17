@@ -25,6 +25,14 @@ MobilityYawOnGround = 1.5
 Category = MP/LRR
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
+
+# New-flight internal energy model tuning
+EnergyRetentionMultiplier = 1.08
+ClimbEnergyCostMultiplier = 1.05
+PitchEnergyCostMultiplier = 1.00
+VerticalClimbEnergyCostMultiplier = 1.25
+StallRecoveryEnergyThreshold = 1.00
+SustainedClimbEnergyRequirement = 1.05
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.350

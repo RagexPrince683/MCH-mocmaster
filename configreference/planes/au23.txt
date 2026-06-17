@@ -32,6 +32,14 @@ MobilityRoll = 1.103
 Category = AG/CI/UT
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
+
+# New-flight internal energy model tuning
+EnergyRetentionMultiplier = 1.05
+ClimbEnergyCostMultiplier = 1.00
+PitchEnergyCostMultiplier = 1.00
+VerticalClimbEnergyCostMultiplier = 1.15
+StallRecoveryEnergyThreshold = 1.00
+SustainedClimbEnergyRequirement = 1.00
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.200
