@@ -1,34 +1,105 @@
-# Fixed-wing realistic flight model notes
+# Fixed-wing new flight model configuration
 
-The 1.7.10 fixed-wing `EnableRealisticFlightModel` path treats closed throttle as an aerodynamic energy state, not as a free thrust-vectoring mode. A plane that is airborne, not in VTOL/nozzle mode, at zero propulsive throttle, nose-high, and below stall-recovery speed is now considered an **idle unsupported climb**.
+This document is the audit and user-facing reference for the fixed-wing `EnableRealisticFlightModel` configuration fields. The current simulation is still the existing MCHeli/Minecraft flight model; this refactor only makes values easier to read by adding real-world-unit aliases where the existing value already represents a real quantity. It does **not** add new aerodynamic systems such as wing area, wingspan, aspect ratio, Oswald efficiency, or lift/drag coefficient lookup tables.
 
-## Idle unsupported climb protection
+## Unit conventions
 
-Minecraft/MCHeli pitch is inverted: negative pitch is nose-up, positive pitch is nose-down. When an idle unsupported climb is detected:
+- Minecraft distance is treated as meters for config conversion: `1 block = 1 m`.
+- The fixed simulation tick is `20 ticks/s`.
+- Legacy speed fields are internal blocks/tick. Real-world speed aliases use `km/h`; conversion is `internal = km/h / 72`.
+- Legacy force/mass fields are internal gameplay values. Real-world aliases convert so `EngineThrustN / MassKg` produces an acceleration in `m/s²`, then into per-tick velocity change.
+- Angles are degrees. G limits are multiples of standard gravity.
 
-- nose-up control input is fully suppressed as energy runs out;
-- accumulated nose-up pitch rate is cancelled when the limit is reached; and
-- aircraft pitch is clamped to `-NewFlightIdleNoseUpLimit` until airspeed recovers.
+## Complete audit of existing new-flight-model values
 
-This prevents the exploit where a pilot chops throttle to 0%, pulls to a near-vertical attitude, then throttles back up for an unrealistic space-shuttle climb. The stall and throttle-deficit pitch-down forces still handle normal recovery; this clamp only stops the zero-throttle, below-recovery-speed vertical setup.
+| Old config name | Purpose | Current internal usage | Proposed real-world unit / standard key |
+| --- | --- | --- | --- |
+| `BaseDrag` | Baseline airborne energy loss | Fractional horizontal speed loss in `getEnergyDrag` | Unitless gameplay tuning; documented as drag-energy fraction/tick |
+| `InducedDrag` | Extra turn/high-load energy loss | Added from bank/control load in `getEnergyDrag` | Unitless gameplay tuning; documented |
+| `ControlSurfaceDrag` | Drag while controls move | Added from body-rate control load | Unitless gameplay tuning; documented |
+| `ClimbEnergyLoss` | Speed loss while climbing | Used by vertical-energy helper | Unitless gameplay tuning; documented |
+| `DiveEnergyGain` | Speed recovered in dives | Used by vertical-energy helper | Unitless gameplay tuning; documented |
+| `MaxLevelSpeed` | Sustainable full-power level speed | Internal speed cap, scaled by global plane speed | `MaximumLevelSpeed` in km/h; legacy remains supported |
+| `IdleDrag` | Extra closed-throttle drag | Added when throttle is low | Unitless gameplay tuning; documented |
+| `PitchTorque` | Pitch control authority | Angular acceleration input to `updateAngularVelocity` | Prefer `MaximumPitchRate` conceptually, but current value is internal torque; documented |
+| `RollTorque` | Roll control authority | Angular acceleration input | Internal torque tuning; documented |
+| `YawTorque` | Yaw control authority | Angular acceleration input | Internal torque tuning; documented |
+| `PitchDamping` | Pitch angular damping | Angular drag in `updateAngularVelocity` | Internal damping/tick; documented |
+| `RollDamping` | Roll angular damping | Angular drag | Internal damping/tick; documented |
+| `YawDamping` | Yaw angular damping | Angular drag | Internal damping/tick; documented |
+| `Mass` | Legacy alias that previously meant rotational inertia | Compatibility heuristic: values <=100 keep the old angular-inertia meaning; larger values are treated as kg | `MassKg` in kilograms; `Mass` supports kg only for values >100 to preserve old packs |
+| `InertiaMultiplier` | Resistance to angular acceleration | Divides torque response only | Unitless gameplay tuning; documented |
+| `PhysicalMass` | Translational mass | Divides thrust, lift, drag, weight forces | `MassKg`/`PhysicalMassKg` in kg; legacy remains supported |
+| `EngineThrust` | Engine force | Multiplied by throttle before mass division | `EngineThrustN` in newtons; legacy remains supported |
+| `TakeoffDistanceMultiplier` | Ground-roll rotation helper | Scales takeoff-assist threshold | Unitless gameplay tuning; documented |
+| `ThrottleAcceleration` | Engine spool-up rate | Max engine output increase/tick | Unitless fraction/tick; documented |
+| `EngineDrag` | Engine spool-down rate | Max engine output decrease/tick | Unitless fraction/tick; documented |
+| `NewFlightThrottleResponse` | Nonlinear throttle curve | Raises commanded throttle by exponent | Unitless curve exponent; documented |
+| `NewFlightThrottleChangeRateUp` | Pilot throttle increase rate | Fraction/tick | Percent/s equivalent is value × 2000; legacy unitless remains |
+| `NewFlightThrottleChangeRateDown` | Pilot throttle decrease rate | Fraction/tick | Percent/s equivalent is value × 2000; legacy unitless remains |
+| `NewFlightIdleThrottle` | Minimum effective engine power | Fraction at zero commanded throttle | Throttle percent can be read as value × 100 |
+| `NewFlightEngineBrakeDrag` | Closed-throttle braking | Added to energy drag | Unitless gameplay tuning; documented |
+| `NewFlightLowThrottleLiftRetention` | Lift retained at idle | Fraction blended into lift power | Percent/fraction; documented |
+| `NewFlightThrottleControlAuthorityScale` | Control loss at idle | Fraction of authority removed | Percent/fraction; documented |
+| `NewFlightIdleNoseUpLimit` | Idle climb pitch guard | Clamps nose-up pitch below recovery speed | degrees |
+| `NewFlightThrottleHudDisplay` | HUD behavior | Shows normalized throttle | boolean |
+| `NewFlightCombatFlaps` | Enables combat flap toggle | Gates flap lift/drag/control effects | boolean |
+| `NewFlightCombatFlapLift` | Added low-speed lift when flaps deployed | Adds to lift power and takeoff helper | Unitless gameplay tuning; documented |
+| `NewFlightCombatFlapDrag` | Added flap drag | Adds to engine-brake drag | Unitless gameplay tuning; documented |
+| `NewFlightCombatFlapControl` | Added control authority with flaps | Multiplies control authority | Fraction |
+| `NewFlightCombatFlapOverspeed` | Flap safe-speed fraction | Multiplies overspeed threshold when flaps deployed | Fraction of VNE |
+| `StallSpeed` | Stall entry speed | Internal speed threshold | `StallSpeedKmh` in km/h; legacy remains supported |
+| `CriticalAoA` | Stall angle threshold | AoA stall severity and AoA drag | degrees |
+| `StallLiftLoss` | Lift loss in full stall | Multiplies stall severity into lift reduction | Fraction |
+| `AoADragMultiplier` | Drag from angle of attack | Multiplies base drag by normalized AoA² | Unitless gameplay tuning; documented |
+| `StallInstability` | Stall buffet/wing drop | Adds deterministic stall motion | Unitless gameplay tuning; documented |
+| `StallRecoverySpeed` | Speed required to clear stall | Recovery gate with AoA reduction | `StallRecoverySpeedKmh` in km/h; legacy remains supported |
+| `StallSpeedFactor` | Legacy derived stall speed | `Speed * factor` if no stall speed set | Legacy unitless compatibility only |
+| `StallStrength` | Stall response strength | Scales stall effects | Unitless gameplay tuning; documented |
+| `StallPitchRecoveryStrength` | Nose-down stall recovery | Adds pitch-down angular velocity | Internal angular impulse/tick; documented |
+| `StallBreakStrength` | Deep-stall pitch break | Adds nonlinear pitch-break impulse | Internal angular impulse/tick; documented |
+| `StallRecoveryRate` | Stall fade-out blend rate | Decays stall severity after unloading | Fraction/tick |
+| `DiveSpeedMultiplier` | Dive speed headroom | Multiplies top speed while diving | Unitless speed multiplier |
+| `MaxComfortableG` | High-G control fade starts | Start of G authority penalty | `PositiveGLimit` concept, in G; legacy key remains |
+| `MaxStructuralG` | Structural/control limit | End of G authority penalty | `StructuralFailureG` concept, in G; legacy key remains |
+| `GControlPenalty` | Authority removed at high G | Fractional control penalty | Fraction |
+| `CompressibilitySpeed` | Pitch compressibility threshold | Pitch authority fades above it | `CompressibilitySpeedKmh` in km/h; legacy remains supported |
+| `CompressibilityPitchPenalty` | Pitch authority lost near VNE | Fractional pitch penalty | Fraction |
+| `MaxSafeSpeed` | Overspeed/damage threshold | Warning/damage threshold | `NeverExceedSpeed`/`MaxSafeSpeedKmh` in km/h; legacy remains supported |
+| `OverspeedDamageRate` | Overspeed damage | Damage/tick at 100% overspeed | Damage points/tick |
 
-## Config key
+## Documented standard keys for real-world values
 
-`NewFlightIdleNoseUpLimit` controls the maximum nose-up pitch, in degrees, while airborne at zero propulsive throttle and below stall-recovery speed.
+Use these keys for new packs where practical:
 
-- Default: `38.0`
-- Valid range: `5.0` to `89.0`
-- Applies only to fixed-wing realistic flight (`EnableRealisticFlightModel = true`)
-- Ignored while on/near the ground or in VTOL/nozzle mode
-- Blends out as airspeed returns to `StallRecoverySpeed` (or `StallSpeed * 1.2` when no explicit recovery speed is configured)
+```ini
+EnableRealisticFlightModel = true
+MassKg = 11000
+EngineThrustN = 80000
+MaximumLevelSpeed = 706
+StallSpeedKmh = 220
+StallRecoverySpeedKmh = 265
+CompressibilitySpeedKmh = 635
+NeverExceedSpeed = 780
+CriticalAoA = 14
+MaxComfortableG = 7.5
+MaxStructuralG = 8.5
+NewFlightIdleNoseUpLimit = 38
+```
 
-Recommended starting points:
+Legacy aliases (`PhysicalMass`, `EngineThrust`, `MaxLevelSpeed`, `StallSpeed`, `StallRecoverySpeed`, `CompressibilitySpeed`, `MaxSafeSpeed`) still load to preserve existing packs.
 
-| Aircraft class | Suggested value | Notes |
-| --- | ---: | --- |
-| WW2 props / trainers | `34`-`42` | Lower values make idle stalls break earlier. |
-| Modern fighters | `38`-`48` | High thrust only helps after throttle is restored and speed recovers. |
-| Heavy bombers / transports | `28`-`38` | Heavier aircraft should not hold steep idle pitch. |
-| VTOL aircraft | `38` default | Protection is bypassed in nozzle/VTOL mode. |
+## Validation guidance
 
-Keep `StallSpeed`, `StallRecoverySpeed`, `CriticalAoA`, `StallPitchRecoveryStrength`, and `StallBreakStrength` tuned from real-world class data where possible, then use `NewFlightIdleNoseUpLimit` as the final guard against idle vertical pitch exploits.
+The parser warns for internally contradictory values such as structural G below comfortable G, VNE at/below compressibility speed, or stall recovery speed below stall speed. Typical realistic ranges:
+
+- `MassKg`: 300-250000 kg depending on aircraft class.
+- `EngineThrustN`: prop aircraft can use equivalent static thrust; jets range from tens to hundreds of kN.
+- `StallSpeedKmh`: 55-350 km/h.
+- `MaximumLevelSpeed`: 120-4000 km/h.
+- `CriticalAoA`: 10-20 degrees for most aircraft.
+- `MaxComfortableG`/`MaxStructuralG`: 2.5-12 G depending on class.
+
+## Remaining unitless gameplay tuning
+
+The current model still contains tuning values that are not direct real-world aerodynamic properties. Do not replace them with invented `WingArea`, `DragCoefficient`, `LiftCoefficient`, `AspectRatio`, or control-surface deflection fields unless a future task redesigns the flight model. The documented unitless values are retained because they control the existing energy, stall, damping, and input-response approximations directly.

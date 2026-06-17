@@ -329,23 +329,25 @@ FlightCeilingRange = 48
 
 ### Physical mass and thrust
 
-`PhysicalMass` is the new-flight-model translational mass. It is separate from `InertiaMultiplier`: `InertiaMultiplier` and the legacy `Mass` alias still control angular response only, while `PhysicalMass` controls linear acceleration, weight, drag response, lift-to-weight behavior, climb, and takeoff roll. Legacy aircraft and aircraft not using `useNewMobilitySystem = true` are unchanged.
+Use `MassKg` and `EngineThrustN` for new fixed-wing packs. These are real-world aliases for the existing translational mass and engine-force values; they are converted to the internal Minecraft/tick model during loading. Legacy `PhysicalMass` and `EngineThrust` still load for old packs.
 
-`EngineThrust` is a force value, not a top-speed value. The new flight model applies forward acceleration from `EngineThrust / PhysicalMass` after throttle response and engine spool are resolved. Higher thrust-to-weight improves acceleration, takeoff roll, climb, and post-maneuver energy recovery. If omitted, a conservative default is derived from existing speed tuning so older new-flight configs remain flyable.
+```text
+internalMass = MassKg / 10000
+internalThrust = EngineThrustN / 4000000
+forwardAccelerationPerTick = internalThrust / internalMass
+```
 
-The model treats weight as `NewFlightGravity * PhysicalMass`. Lift is evaluated as a force against that weight, so correctly tuned heavy aircraft can still rotate and climb once they reach the required airspeed while still needing enough thrust, throttle, flap lift, and gentle AoA to sustain flight. Drag and climb/dive energy exchange are divided through mass, so heavy aircraft lose and gain speed more gradually while light aircraft respond quickly. Takeoff speed remains emergent from stall speed, lift, thrust, drag, and mass; do not add a separate takeoff-speed key.
+`InertiaMultiplier` remains the separate unitless angular-inertia tuning value. Do not use it as aircraft mass.
 
-Recommended mass/thrust starting ranges:
+Recommended real-world starting ranges:
 
-| Aircraft class | PhysicalMass | EngineThrust |
+| Aircraft class | MassKg | EngineThrustN / equivalent static thrust |
 | --- | ---: | ---: |
-| WW2 fighters | 0.75 - 1.15 | 0.85 - 1.25 |
-| Heavy fighters | 1.10 - 1.55 | 1.00 - 1.45 |
-| Early jets | 1.00 - 1.45 | 1.20 - 1.90 |
-| Modern fighters | 1.10 - 1.70 | 1.80 - 3.20 |
-| Attack aircraft | 1.35 - 2.10 | 1.30 - 2.30 |
-| Strategic bombers | 2.40 - 5.50 | 1.80 - 4.00 |
-| Cargo aircraft | 2.00 - 5.00 | 1.50 - 3.50 |
+| WW2 fighters | 2500 - 6000 | 12000 - 45000 |
+| Early jets | 4000 - 12000 | 15000 - 60000 |
+| Modern fighters | 9000 - 35000 | 50000 - 250000 |
+| Attack aircraft | 7000 - 25000 | 30000 - 150000 |
+| Strategic bombers/cargo | 50000 - 250000 | 150000 - 1000000+ |
 
 ### Takeoff distance multiplier
 
@@ -359,22 +361,22 @@ Minecraft runways are short and there is no single perfect block-distance formul
 
 ```text
 takeoffDistance ∝ requiredTakeoffSpeed² / forwardAcceleration
-forwardAcceleration ≈ EngineThrust / PhysicalMass - drag
-takeoffDistance ∝ requiredTakeoffSpeed² / (EngineThrust / PhysicalMass - drag)
+forwardAcceleration ≈ EngineThrustN / MassKg - drag
+takeoffDistance ∝ requiredTakeoffSpeed² / (EngineThrustN / MassKg - drag)
 ```
 
 With the multiplier applied:
 
 ```text
 takeoffDistance ∝ (requiredTakeoffSpeed * TakeoffDistanceMultiplier)²
-                / (EngineThrust / PhysicalMass - drag)
+                / (EngineThrustN / MassKg - drag)
 ```
 
 For a rough runway estimate in Minecraft blocks, treat speed as blocks/tick and forward acceleration as blocks/tick². The constant-acceleration estimate is:
 
 ```text
 takeoffDistanceBlocks ≈ (requiredTakeoffSpeed * TakeoffDistanceMultiplier)²
-                        / (2 * max(EngineThrust / PhysicalMass - drag, 0.001))
+                        / (2 * max(EngineThrustN / MassKg - drag, 0.001))
 ```
 
 The `max(..., 0.001)` guard is only for estimation so the formula does not divide by zero when an aircraft has too little excess thrust to accelerate. In game, use the debug `netForward` value as the practical acceleration term when validating runway length:
@@ -383,13 +385,13 @@ The `max(..., 0.001)` guard is only for estimation so the formula does not divid
 takeoffDistanceBlocks ≈ effectiveTakeoffSpeed² / (2 * max(netForward, 0.001))
 ```
 
-That means lowering `TakeoffDistanceMultiplier` reduces takeoff distance strongly, and raising it increases takeoff distance strongly, because required speed enters the approximation quadratically. `EngineThrust`, `PhysicalMass`, drag, gravity, `StallSpeed`/`StallSpeedFactor`, throttle response, and combat flaps still matter. Combat flaps add their configured low-speed lift while the takeoff threshold is being evaluated, so they remain useful for short-field takeoff tuning.
+That means lowering `TakeoffDistanceMultiplier` reduces takeoff distance strongly, and raising it increases takeoff distance strongly, because required speed enters the approximation quadratically. `EngineThrustN`, `MassKg`, drag, gravity, `StallSpeedKmh`/`StallSpeedFactor`, throttle response, and combat flaps still matter. Combat flaps add their configured low-speed lift while the takeoff threshold is being evaluated, so they remain useful for short-field takeoff tuning.
 
 Use this key only as a takeoff/runway correction after the aircraft's mass, thrust, drag, and stall tuning are broadly correct. If a plane lifts off too early with a low multiplier, normal airborne stall and climb behavior still applies: it may mush, sink, or stall if it lacks speed or power.
 
 ## Safe-to-omit legacy notes
 
-Old plane packs can omit every new aerodynamic key. Defaults are applied and `StallSpeedFactor` preserves derived low-speed stall behavior. Use `Mass` only for compatibility with packs that already chose that name; prefer `InertiaMultiplier` for new configs.
+Old plane packs can omit every new aerodynamic key. Defaults are applied and `StallSpeedFactor` preserves derived low-speed stall behavior. New packs should use `MassKg`, `EngineThrustN`, `MaximumLevelSpeed`, `StallSpeedKmh`, `StallRecoverySpeedKmh`, `CompressibilitySpeedKmh`, and `NeverExceedSpeed` where those real aircraft specifications are known. Legacy internal-speed keys remain supported but are no longer the documented standard.
 
 ### Combat flaps and throttle interaction
 

@@ -212,7 +212,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `ControlSurfaceDrag` | Plane | float[0..0.25] | 0.003 | new maneuvering drag |
 | `ClimbEnergyLoss` | Plane | float[0..0.25] | 0.017 | climb energy model |
 | `DiveEnergyGain` | Plane | float[0..0.25] | 0.0122 | dive energy model |
-| `MaxLevelSpeed` | Plane | float[0..4] | 0 = use `Speed` | full-power level speed |
+| `MaximumLevelSpeed` (`MaxLevelSpeed` legacy) | Plane | km/h (legacy internal speed) | 0 = use `Speed` | full-power level speed; standard key uses km/h |
 | `IdleDrag` | Plane | float[0..0.25] | 0.0034 | closed-throttle drag |
 | `PitchTorque` | Plane | float[0..100] | 0.380 | angular response |
 | `RollTorque` | Plane | float[0..100] | 0.420 | angular response |
@@ -220,9 +220,8 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `PitchDamping` | Plane | float[0..100] | 0.410 | angular damping |
 | `RollDamping` | Plane | float[0..100] | 0.405 | angular damping |
 | `YawDamping` | Plane | float[0..100] | 0.475 | angular damping |
-| `Mass` | Plane | float[0.05..100] | 1.550 | alias for `InertiaMultiplier`; angular-inertia compatibility key |
-| `PhysicalMass` | Plane | float[0.05..100] | 1.750 | new-flight translational mass for weight and linear inertia |
-| `EngineThrust` | Plane | float[0..100] | derived from speed | new-flight engine force for thrust-to-weight acceleration |
+| `MassKg` / `Mass` (`PhysicalMass` legacy) | Plane | kg (legacy internal mass) | 17500 kg equivalent | new-flight translational mass for weight and linear inertia; use `InertiaMultiplier` for angular inertia |
+| `EngineThrustN` (`EngineThrust` legacy) | Plane | N (legacy internal force) | derived from speed | new-flight engine force for thrust-to-weight acceleration |
 | `TakeoffDistanceMultiplier` | Plane | float[0.25..4] | 1.0 | new-flight ground-roll/rotation takeoff threshold scaler |
 | `InertiaMultiplier` | Plane | float[0.05..100] | 1.550 | angular inertia |
 | `ThrottleAcceleration` | Plane | float[0..1] | 0.026 | engine-output spool-up/tick |
@@ -240,12 +239,12 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `NewFlightCombatFlapDrag` | Plane | float[0..0.25] | 0.012 | flap drag penalty |
 | `NewFlightCombatFlapControl` | Plane | float[0..1] | 0.12 | flap control-authority boost |
 | `NewFlightCombatFlapOverspeed` | Plane | float[0.1..1] | 0.78 | flap safe-speed multiplier |
-| `StallSpeed` | Plane | float[0..10] | 0 = derive from `Speed*StallSpeedFactor` | fixed-wing stall entry |
+| `StallSpeedKmh` (`StallSpeed` legacy) | Plane | km/h (legacy internal speed) | 0 = derive from `Speed*StallSpeedFactor` | fixed-wing stall entry |
 | `CriticalAoA` | Plane | float[1..90] | 14.00 | stall/AoA threshold degrees |
 | `StallLiftLoss` | Plane | float[0..1] | 0.820 | lift removed at full stall |
 | `AoADragMultiplier` | Plane | float[0..10] | 2.550 | AoA drag scale |
 | `StallInstability` | Plane | float[0..5] | 0.560 | buffet/wing-drop strength |
-| `StallRecoverySpeed` | Plane | float[0..10] | 0 = `StallSpeed*1.2` | stall recovery speed |
+| `StallRecoverySpeedKmh` (`StallRecoverySpeed` legacy) | Plane | km/h (legacy internal speed) | 0 = `StallSpeed*1.2` | stall recovery speed |
 | `StallSpeedFactor` | Plane | float[0..0.95] | 0.18 | legacy derived stall speed factor |
 | `StallStrength` | Plane | float[0..4] | 1.080 | legacy stall response scale |
 | `StallPitchRecoveryStrength` | Plane | float[0..5] | 0.55 | nose-down stall recovery moment |
@@ -255,9 +254,9 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `MaxComfortableG` | Plane | float[1..30] | 7.5 | high-G authority fade starts |
 | `MaxStructuralG` | Plane | float[1..50] | 8.5 | high-G authority fade ends/damage hook threshold |
 | `GControlPenalty` | Plane | float[0..1] | 0.680 | max high-G authority loss |
-| `CompressibilitySpeed` | Plane | float[0..10] | 0 = 90% of level speed | pitch authority fade starts |
+| `CompressibilitySpeedKmh` (`CompressibilitySpeed` legacy) | Plane | km/h (legacy internal speed) | 0 = 90% of level speed | pitch authority fade starts |
 | `CompressibilityPitchPenalty` | Plane | float[0..1] | 0.5 | max pitch loss at high speed |
-| `MaxSafeSpeed` | Plane | float[0..10] | 0 = 110% of level speed | overspeed warning/damage threshold |
+| `NeverExceedSpeed` / `MaxSafeSpeedKmh` (`MaxSafeSpeed` legacy) | Plane | km/h (legacy internal speed) | 0 = 110% of level speed | overspeed warning/damage threshold |
 | `OverspeedDamageRate` | Plane | float[0..100] | 0.14 | damage/tick at 100% overspeed; 0 disables |
 | `enablefoldblade` | Helicopter | boolean | false | blade folding support |
 | `addrotor` | Helicopter | `bladeNum,bladeRot,x,y,z,rx,ry,rz[,fold]` | none | rotor render/animation |
