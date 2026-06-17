@@ -39,7 +39,7 @@ public class MCH_EntityInfoManager {
 
     public void serverTick() {
 
-        //更新实体到集合
+        //Updates entities into the collection
         for (WorldServer world : MinecraftServer.getServer().worldServers) {
             for (Entity entity : (List<Entity>) world.loadedEntityList) {
                 if (shouldTrack(world, entity)) {
@@ -49,7 +49,7 @@ public class MCH_EntityInfoManager {
         }
 
         if(tickCounter % 10 == 0) {
-            //删除过期实体
+            //Deletes expired entities
             Iterator<Map.Entry<Integer, MCH_EntityInfo>> it = serverEntities.entrySet().iterator();
             List<MCH_EntityInfo> removed = new ArrayList<>();
             while (it.hasNext()) {
@@ -61,16 +61,16 @@ public class MCH_EntityInfoManager {
                     it.remove();
                 }
             }
-            //发送移除包
+            //Sends removal packets
             if (!removed.isEmpty()) {
-//                System.out.println("向客户端移除了" + removed.size() + "个实体信息");
+//                System.out.println("Removed from client: " + removed.size() + " entity info entries");
                 sendEntityPacket(removed, OPERATION_REMOVE);
             }
         }
 
-        //发送实体数据包
+        //Sends entity data packets
         List<MCH_EntityInfo> list = new ArrayList<>(serverEntities.values());
-//        System.out.println("向客户端发送了" + list.size() + "个实体信息");
+//        System.out.println("Sent to client: " + list.size() + " entity info entries");
         sendEntityPacket(list, OPERATION_UPDATE);
     }
 

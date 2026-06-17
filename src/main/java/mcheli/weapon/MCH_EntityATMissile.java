@@ -103,10 +103,10 @@ public class MCH_EntityATMissile extends MCH_EntityBaseBullet {
                     this.setDead();
                 } else if (this.getCountOnUpdate() > this.getInfo().rigidityTime) {
 
-                    //攻顶导弹逻辑
+                    //Top-attack missile logic
                     if (this.guidanceType == 1) {
                         float af = this.getCountOnUpdate() < getInfo().rigidityTime + getInfo().trajectoryParticleStartTick ? 0.5F : 1.0F;
-                        //攻顶向上运动
+                        //Top-attack upward movement
                         if (this.getCountOnUpdate() <= getInfo().rigidityTime + 20) {
                             doingTopAttack = true;
                             this.guidanceToTarget(super.targetEntity.posX, super.shootingEntity.posY + 100.0D, super.targetEntity.posZ, af);
@@ -124,7 +124,7 @@ public class MCH_EntityATMissile extends MCH_EntityBaseBullet {
                         }
                     }
 
-                    //非攻顶
+                    //Non-top-attack
                     else {
                         if (this.getInfo().proximityFuseDist >= 0.1F && d < (double) this.getInfo().proximityFuseDist) {
                             MovingObjectPosition mop = new MovingObjectPosition(super.targetEntity);
@@ -190,7 +190,7 @@ public class MCH_EntityATMissile extends MCH_EntityBaseBullet {
 
             if (closestTarget != null) {
                 super.targetEntity = closestTarget;
-                System.out.println("主动AT弹锁定实体" + ((MCH_EntityBaseVehicle)closestTarget).getAcInfo().name + " 距离" + (int)getDistanceToEntity(closestTarget));
+                System.out.println("Active AT missile locked entity " + ((MCH_EntityBaseVehicle)closestTarget).getAcInfo().name + "  distance " + (int)getDistanceToEntity(closestTarget));
             }
         }
     }

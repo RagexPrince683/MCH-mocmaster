@@ -8,19 +8,19 @@ import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
-/** MCH里所有包的父类 */
+/** Base class for all MCH packets */
 public abstract class PacketBase 
 {
-	/**把包编码为ByteBuf . Advanced data handlers can be found at @link{cpw.mods.fml.common.network.ByteBufUtils} */
+	/** Encodes the packet into ByteBuf. Advanced data handlers can be found at @link{cpw.mods.fml.common.network.ByteBufUtils} */
 	public abstract void encodeInto(ChannelHandlerContext ctx, ByteBuf data);
 
 	/** Decode the packet from a ByteBuf stream. Advanced data handlers can be found at @link{cpw.mods.fml.common.network.ByteBufUtils} */
 	public abstract void decodeInto(ChannelHandlerContext ctx, ByteBuf data);
 
-	/** 在服务器端处理数据包 */
+	/** Handles packets on the server side */
 	public abstract void handleServerSide(EntityPlayerMP playerEntity);
 
-	/** 在客户端处理数据包 */
+	/** Handles packets on the client side */
 	@SideOnly(Side.CLIENT)
 	public abstract void handleClientSide(EntityPlayer clientPlayer);
 	

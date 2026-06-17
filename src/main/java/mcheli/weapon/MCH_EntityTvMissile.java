@@ -72,7 +72,7 @@ public class MCH_EntityTvMissile extends MCH_EntityBaseBullet {
     public void onUpdateMotion() {
         Entity e = super.shootingEntity;
 
-        //拖线制导
+        //Wire guidance
         if (!getInfo().laserGuidance) {
             if (e != null && !e.isDead) {
                 MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(e);
@@ -88,7 +88,7 @@ public class MCH_EntityTvMissile extends MCH_EntityBaseBullet {
             }
         }
 
-        //激光制导
+        //Laser guidance
         else {
 
             MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(e);
@@ -103,10 +103,10 @@ public class MCH_EntityTvMissile extends MCH_EntityBaseBullet {
             float pitch;
 
             if (getInfo().hasLaserGuidancePod) {
-                yaw = e.rotationYaw;  // 获取玩家的偏航角度
-                pitch = e.rotationPitch;  // 获取玩家的俯仰角度
+                yaw = e.rotationYaw;  // Gets player yaw angle
+                pitch = e.rotationPitch;  // Gets player pitch angle
             } else {
-//                MCH_EntityBaseVehicle ac = null; //玩家乘坐的实体
+//                MCH_EntityBaseVehicle ac = null; //Entity ridden by the player
 //                if(e.ridingEntity instanceof MCH_EntityBaseVehicle) {
 //                    ac = (MCH_EntityBaseVehicle)e.ridingEntity;
 //                } else if(e.ridingEntity instanceof MCH_EntitySeat) {
@@ -119,18 +119,18 @@ public class MCH_EntityTvMissile extends MCH_EntityBaseBullet {
                 pitch = shootingAircraft.rotationPitch;
             }
 
-            // 计算目标方向的三维坐标变化量
+            // Calculates 3D coordinate deltas toward target direction
             double targetX = -MathHelper.sin(yaw / 180.0F * (float) Math.PI) * MathHelper.cos(pitch / 180.0F * (float) Math.PI);
             double targetZ = MathHelper.cos(yaw / 180.0F * (float) Math.PI) * MathHelper.cos(pitch / 180.0F * (float) Math.PI);
             double targetY = -MathHelper.sin(pitch / 180.0F * (float) Math.PI);
 
-            // 计算方向的距离
+            // Calculates direction distance
             double dist = MathHelper.sqrt_double(targetX * targetX + targetY * targetY + targetZ * targetZ);
             double maxDist = 1500.0;
-            double segmentLength = 100.0;  // 每段的长度
-            int numSegments = (int) (maxDist / segmentLength);  // 计算需要的段数
+            double segmentLength = 100.0;  // Length of each segment
+            int numSegments = (int) (maxDist / segmentLength);  // Calculates required number of segments
 
-            // 在客户端和服务器端都将目标方向进行归一化处理
+            // Normalizes target direction on both client and server
             targetX = targetX * maxDist / dist;
             targetY = targetY * maxDist / dist;
             targetZ = targetZ * maxDist / dist;
@@ -149,39 +149,39 @@ public class MCH_EntityTvMissile extends MCH_EntityBaseBullet {
                 posZ = clientTarget().zCoord;
             }
 
-            // 计算发射源
+            // Calculates launch source
             Vec3 src = W_WorldFunc.getWorldVec3(this.worldObj, posX, posY, posZ);
 
-            // 射线检测
+            // Raycast
             MovingObjectPosition hitResult = null;
 
             for (int i = 1; i <= numSegments; i++) {
-                // 计算当前分段的目标点，确保每段都从上一个段的终点开始
+                // Calculates target point of current segment, ensuring each segment starts from previous endpoint
                 Vec3 currentDst = W_WorldFunc.getWorldVec3(this.worldObj,
                         posX + targetX * i / numSegments,
                         posY + targetY * i / numSegments,
                         posZ + targetZ * i / numSegments);
 
-                // 执行射线检测
+                // Performs raycast
                 List<MovingObjectPosition> hitResults = rayTraceAllBlocks(this.worldObj, src, currentDst, false, true, true);
 
                 if (hitResults != null && !hitResults.isEmpty()) {
                     hitResult = hitResults.get(0);
-                    break;  // 找到碰撞结果后，退出循环
+                    break;  // Exits loop after finding collision result
                 }
 
-                // 更新src为当前检测的dst
-                src = currentDst;  // 当前段的dst成为下一段的src
+                // Updates src to the current checked dst
+                src = currentDst;  // Current segment dst becomes next segment src
             }
 
-            // 如果没有检测到碰撞，则返回默认的目标位置
+            // If no collision is detected, returns default target position
             if (hitResult == null) {
-                hitResult = new MovingObjectPosition(null, src.addVector(targetX, targetY, targetZ));  // 使用目标点作为默认值
+                hitResult = new MovingObjectPosition(null, src.addVector(targetX, targetY, targetZ));  // Uses target point as default value
             }
 
-            // 如果射线击中有效方块并且不是水中方块
+            // If raycast hits a valid block and it is not underwater
             if (!this.worldObj.isRemote) {
-                // 设置导弹的目标位置
+                // Sets missile target position
                 targetPosX = hitResult.hitVec.xCoord;
                 targetPosY = hitResult.hitVec.yCoord;
                 targetPosZ = hitResult.hitVec.zCoord;
@@ -198,40 +198,40 @@ public class MCH_EntityTvMissile extends MCH_EntityBaseBullet {
 
     public void onLaserGuide() {
 
-        // 获取当前导弹目标位置的方块
+        // Gets block at current missile target position
         Block targetBlock = W_WorldFunc.getBlock(super.worldObj, (int) this.targetPosX, (int) this.targetPosY, (int) this.targetPosZ);
 
-        // 如果目标位置有方块且该方块是可碰撞的
+        // If target position has a block and the block is collidable
         if (targetBlock != null && targetBlock.isCollidable()) {
             double heightOffset = 0.0D;
             double deltaX, deltaY, deltaZ, distance;
 
-            // 如果导弹的重力为 0，则执行以下逻辑
+            // If missile gravity is 0, executes the following logic
             if ((double) this.getGravity() == 0.0D) {
-                // 在更新次数少于10次时，给定一个高度偏移量
+                // Applies a height offset while update count is less than 10
                 if (this.getCountOnUpdate() < 10) {
                     //heightOffset = 20.0D;
                     heightOffset = 0.0D;
                 }
 
-                // 计算目标与当前导弹位置的差距
+                // Calculates difference between target and current missile position
                 deltaX = this.targetPosX - super.posX;
                 deltaY = this.targetPosY + heightOffset - super.posY;
                 deltaZ = this.targetPosZ - super.posZ;
 
-                // 计算导弹到目标的距离
+                // Calculates distance from missile to target
                 distance = MathHelper.sqrt_double(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
 
                 double targetMotionX = deltaX * super.acceleration / distance;
                 double targetMotionY = deltaY * super.acceleration / distance;
                 double targetMotionZ = deltaZ * super.acceleration / distance;
-                // 计算导弹的速度分量
+                // Calculates missile velocity components
                 super.motionX += (targetMotionX - super.motionX) * getInfo().turningFactor;
                 super.motionY += (targetMotionY - super.motionY) * getInfo().turningFactor;
                 super.motionZ += (targetMotionZ - super.motionZ) * getInfo().turningFactor;
 
-                // 限制速度上限，防止导弹速度过快
-                double maxSpeed = getInfo().acceleration; // 最大速度值
+                // Limits max speed to prevent missile from moving too fast
+                double maxSpeed = getInfo().acceleration; // Maximum speed value
                 double currentSpeed = Math.sqrt(motionX * motionX + motionY * motionY + motionZ * motionZ);
                 if (currentSpeed > maxSpeed) {
                     double scale = maxSpeed / currentSpeed;
@@ -241,26 +241,26 @@ public class MCH_EntityTvMissile extends MCH_EntityBaseBullet {
                 }
 
             } else {
-                // 如果导弹有重力，则按以下逻辑处理
+                // If missile has gravity, handles with the following logic
                 deltaX = this.targetPosX - super.posX;
                 deltaY = this.targetPosY - super.posY;
-                deltaY *= 0.3D;  // 对垂直方向进行适当的缩放
+                deltaY *= 0.3D;  // Appropriately scales vertical direction
                 deltaZ = this.targetPosZ - super.posZ;
 
-                // 计算导弹与目标的距离
+                // Calculates distance between missile and target
                 distance = MathHelper.sqrt_double(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
 
-                // 计算导弹的速度分量，确保不超过加速度的最大值
+                // Calculates missile velocity components, ensuring they do not exceed max acceleration
                 super.motionX = deltaX * super.acceleration / distance;
                 super.motionZ = deltaZ * super.acceleration / distance;
             }
         }
 
-        // 计算导弹的朝向（水平旋转角度）
+        // Calculates missile orientation (horizontal rotation angle)
         double yawAngle = (float) Math.atan2(super.motionZ, super.motionX);
         super.rotationYaw = (float) (yawAngle * 180.0D / 3.141592653589793D) - 90.0F;
 
-        // 计算导弹的朝向（垂直旋转角度）
+        // Calculates missile orientation (vertical rotation angle)
         double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
         super.rotationPitch = -((float) (Math.atan2(super.motionY, horizontalSpeed) * 180.0D / 3.141592653589793D));
     }

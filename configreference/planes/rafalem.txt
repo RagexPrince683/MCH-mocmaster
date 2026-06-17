@@ -1,6 +1,6 @@
 DisplayName = Dassault Rafale M
 AddDisplayName = en_US, Dassault Rafale M
-AddDisplayName = zh_CN, Dassault 阵风M舰载战斗机
+AddDisplayName = zh_CN, Dassault Rafale M Carrier-Based Fighter
 MaxHp = 100
 Speed = 3.327
 Sound = rafale

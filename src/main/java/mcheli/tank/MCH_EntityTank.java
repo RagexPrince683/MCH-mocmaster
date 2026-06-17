@@ -702,19 +702,19 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    @SideOnly(Side.CLIENT)
    public void onUpdate_IronCurtainParticle(int ri, double x, double y, double z, float size) {
-      // 仅在客户端且铁幕激活时生成粒子
+      // Generates particles only on the client while Iron Curtain is active
       if(worldObj.isRemote && ironCurtainRunningTick > 0) {
-         // 颜色波动参数（使用插值后的实际因子）
+         // Color fluctuation parameters (uses the interpolated actual factor)
          float factor = 0.5f + 0.5f * (float)Math.sin(ironCurtainRunningTick * 0.15f);
          final float DARK_RED_R = 0.5f * factor;
          final float DARK_RED_G = 0.1f * factor;
          final float DARK_RED_B = 0.1f * factor;
 
-         // 粒子基础参数
-         int particleCount = 2 + rand.nextInt(3); // 每个碰撞箱生成2-4个粒子
-         float baseSize = size * (0.8f + rand.nextFloat() * 0.4f); // 尺寸波动
+         // Base particle parameters
+         int particleCount = 2 + rand.nextInt(3); // Generates 2-4 particles per collision box
+         float baseSize = size * (0.8f + rand.nextFloat() * 0.4f); // Size fluctuation
 
-         // 生成环绕粒子群
+         // Generates surrounding particle groups
          for(int i = 0; i < particleCount; i++) {
             EntityCloudFX particle = new EntityCloudFX(worldObj,
                     x + (rand.nextGaussian() * 0.3),
@@ -722,7 +722,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
                     z + (rand.nextGaussian() * 0.3),
                     0, 0, 0) {
 
-               // 重写渲染逻辑强制应用颜色
+               // Overrides render logic to force color application
                @Override
                public void renderParticle(Tessellator tess, float partialTicks,
                                           float rotX, float rotZ, float rotYZ,
@@ -732,20 +732,20 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
                }
             };
 
-            // 粒子动态参数配置
+            // Particle dynamic parameter configuration
             particle.setRBGColorF(DARK_RED_R, DARK_RED_G, DARK_RED_B);
 
-            // 运动参数（带旋转扩散）
+            // Motion parameters (with rotational spread)
             float motionSpread = 0.015f * (ironCurtainRunningTick % 40 + 1);
             particle.motionX = (rand.nextFloat() - 0.5f) * motionSpread;
             particle.motionY = 0.01f + rand.nextFloat() * 0.02f;
             particle.motionZ = (rand.nextFloat() - 0.5f) * motionSpread;
 
-            // 添加特效
+            // Adds special effects
             Minecraft.getMinecraft().effectRenderer.addEffect(particle);
          }
 
-         // 10%概率生成核心高亮粒子
+         // 10%chance to generate core highlight particles
          if(rand.nextFloat() < 0.1f) {
             EntityCloudFX coreParticle = new EntityCloudFX(worldObj, x, y, z, 0, 0, 0) {
                @Override

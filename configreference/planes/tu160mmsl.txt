@@ -1,6 +1,6 @@
 DisplayName = Tu-160M Super Blackjack with Rotary Launchers
 AddDisplayName = en_US, Tu-160M Super Blackjack with Rotary Launchers
-AddDisplayName =  zh_CN, 图-160M 超级海盗旗 Rotary Launchers
+AddDisplayName =  zh_CN, Tu-160M Blackjack Rotary Launchers
 ;ItemID = 30714
 MaxHp = 250
 EnableNightVision = true

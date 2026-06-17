@@ -677,7 +677,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             }
         }
 
-        
+
 
         if(!worldObj.isRemote) {
             if (shootingAircraft instanceof MCH_EntityBaseVehicle && !speedAddedFromAircraft && getInfo().speedDependsAircraft) {
@@ -790,20 +790,20 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         // Apply gravity effects based on whether it's in water
         if(!this.isInWater()) {
             if(ticksExisted > getInfo().speedFactorStartTick && ticksExisted < getInfo().speedFactorEndTick) {
-                // 计算当前总速度
+                // Calculates current total speed
                 double currentSpeed = Math.sqrt(
                         motionX * motionX +
                                 motionY * motionY +
                                 motionZ * motionZ
                 );
 
-                if(currentSpeed > 0) { // 避免除以零
-                    // 获取速度方向单位向量
+                if(currentSpeed > 0) { // Avoids division by zero
+                    // Gets unit vector in velocity direction
                     double dirX = motionX / currentSpeed;
                     double dirY = motionY / currentSpeed;
                     double dirZ = motionZ / currentSpeed;
 
-                    // 沿速度方向叠加固定增量
+                    // Adds fixed increment along velocity direction
                     motionX += dirX * getInfo().speedFactor;
                     motionY += dirY * getInfo().speedFactor;
                     motionZ += dirZ * getInfo().speedFactor;
@@ -1238,7 +1238,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
     @SideOnly(Side.CLIENT)
     public void spawnIronCurtainParticle(MovingObjectPosition raytraceResult, int xTile, int yTile, int zTile) {
-        // 定义暗红色参数（RGB：0.5, 0.1, 0.1）
+        // Defines dark red parameters (RGB：0.5, 0.1, 0.1)
         final float DARK_RED_R = 0.5f;
         final float DARK_RED_G = 0.1f;
         final float DARK_RED_B = 0.1f;
@@ -1256,11 +1256,11 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                     this.worldObj.getBlockMetadata(xTile, yTile, zTile)
             );
 
-            // 覆盖原有颜色设置
-            fx.setRBGColorF(DARK_RED_R, DARK_RED_G, DARK_RED_B); // 强制设置为暗红色
-            fx.multipleParticleScaleBy(scale * 0.8f); // 适当缩小粒子尺寸
+            // Overrides original color setting
+            fx.setRBGColorF(DARK_RED_R, DARK_RED_G, DARK_RED_B); // Forces color to dark red
+            fx.multipleParticleScaleBy(scale * 0.8f); // Appropriately reduces particle size
 
-            // 调整运动参数
+            // Adjusts motion parameters
             fx.motionX += getInfo().flakParticlesDiff * (rand.nextGaussian() * 0.5);
             fx.motionZ += getInfo().flakParticlesDiff * (rand.nextGaussian() * 0.5);
             fx.motionY += getInfo().flakParticlesDiff * Math.abs(rand.nextGaussian());

@@ -1,5 +1,5 @@
 DisplayName = Xi'an H-6K "God Of War"
-AddDisplayName = zh_CN, 轰6K“战神”
+AddDisplayName = zh_CN, H-6K "God of War"
 AddDisplayName = en_US, Xi'an H-6K "God of War"
 ItemID = 45600
 MaxHp = 250

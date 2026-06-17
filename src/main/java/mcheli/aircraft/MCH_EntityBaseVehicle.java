@@ -958,22 +958,22 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
 
          //float dmg = MCH_Config.KillPassengersWhenDestroyed.prmBool ? 100000.0F : 0.001F;
-         //DamageSource damageSource = DamageSource.generic; // 默认的伤害来源为generic
+         //DamageSource damageSource = DamageSource.generic; // Default damage source isgeneric
          //if (this.worldObj.difficultySetting.getDifficultyId() == 0) {
-         //   // 如果最后攻击这个实体的是玩家，创建一个基于玩家的伤害来源
+         //   // If the last attacker of this entity is a player, creates a player-based damage source
          //   if (this.lastAttackedEntity instanceof EntityPlayer) {
          //      damageSource = DamageSource.causePlayerDamage((EntityPlayer) this.lastAttackedEntity);
          //   }
          //} else {
-         //   // 如果世界难度不为和平模式，创建一个基于爆炸的伤害来源
+         //   // If world difficulty is not Peaceful, creates an explosion-based damage source
          //   damageSource = DamageSource.setExplosionSource(new Explosion(this.worldObj, this.lastAttackedEntity,
          //           this.posX, this.posY, this.posZ, 1.0F));
          //}
-         //// 如果当前实体存在，应用伤害
+         //// If the current entity exists, applies damage
          //if (this.riddenByEntity != null) {
          //   this.riddenByEntity.attackEntityFrom(damageSource, dmg);
          //}
-         //// 遍历所有座位上的实体，如果座位上有实体，应用伤害
+         //// Iterates all seat entities and applies damage if a seat is occupied
          //for (MCH_EntitySeat seat : getSeats()) {
          //   if (seat != null && seat.riddenByEntity != null) {
          //      seat.riddenByEntity.attackEntityFrom(damageSource, dmg);
@@ -2400,7 +2400,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(ironCurtainRunningTick > 0) {
          ironCurtainRunningTick--;
          ironCurtainWaveTimer++;
-         ironCurtainLastFactor = ironCurtainCurrentFactor;//基于计时器生成波动曲线（0.5~1.0）
+         ironCurtainLastFactor = ironCurtainCurrentFactor;//Generates a fluctuation curve based on timer (0.5~1.0)
          float waveSpeed = 0.25f;
          ironCurtainCurrentFactor = 0.75f + 0.25f * (float) Math.sin(ironCurtainWaveTimer * waveSpeed);
       } else {

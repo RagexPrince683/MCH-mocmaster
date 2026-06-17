@@ -107,7 +107,7 @@ public class MCH_WeaponAAMissile extends MCH_WeaponEntitySeeker {
             super.guidanceSystem.lock(prm.user);
             if(guidanceSystem.isLockComplete()) {
                Entity target = guidanceSystem.lastLockEntity;
-               //获取玩家射击的AA弹
+               //Gets AA missile fired by player
                for (MCH_EntityBaseBullet bullet : getShootBullets(worldObj, prm.user, getInfo().maxLockOnRange)) {
                   bullet.clientSetTargetEntity(target);
                   super.optionParameter1 = W_Entity.getEntityId(target);
