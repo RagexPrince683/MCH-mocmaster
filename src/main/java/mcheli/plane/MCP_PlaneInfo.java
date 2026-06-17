@@ -32,10 +32,6 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float inducedDrag = 0.015F;
    /** Extra drag generated while the aircraft controls are moving. */
    public float controlSurfaceDrag = 0.003F;
-   /** Horizontal speed traded away while climbing. */
-   public float climbEnergyLoss = 0.017F;
-   /** Horizontal speed recovered while descending. */
-   public float diveEnergyGain = 0.0122F;
    /** Sustainable full-power speed in level flight; zero uses Speed. */
    public float maxLevelSpeed = 0.0F;
    /** Additional drag at closed throttle. */
@@ -56,8 +52,6 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float physicalMass = 1.750F;
    /** New-flight engine force. Combined with mass to produce forward acceleration. */
    public float engineThrust = 0.0F;
-   /** New-flight takeoff speed threshold scaler used only during ground roll/rotation. */
-   public float takeoffDistanceMultiplier = 1.0F;
    /** Legacy maximum engine-output increase per tick. */
    public float throttleAcceleration = 0.026F;
    /** Legacy maximum engine-output decrease per tick. */
@@ -75,8 +69,6 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float newFlightLowThrottleLiftRetention = 0.700F;
    /** Maximum fraction of control authority lost at idle throttle. */
    public float newFlightThrottleControlAuthorityScale = 0.10F;
-   /** Nose-up pitch limit while airborne at closed throttle and below recovery speed. */
-   public float newFlightIdleNoseUpLimit = 38.0F;
    /** Show the normalized 0-100% throttle readout to pilots using the new flight model. */
    public boolean newFlightThrottleHudDisplay = true;
    /** Enables the new-flight-only combat-flap toggle. */
@@ -85,18 +77,6 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float newFlightCombatFlapDrag = 0.012F;
    public float newFlightCombatFlapControl = 0.12F;
    public float newFlightCombatFlapOverspeed = 0.78F;
-   /** Multiplies usable stored energy retained for unsupported climb/pitch manoeuvres. */
-   public float energyRetentionMultiplier = 1.0F;
-   /** Multiplies energy demand from positive climb rate. */
-   public float climbEnergyCostMultiplier = 1.0F;
-   /** Multiplies energy demand from nose-up/high-AoA pitch manoeuvres. */
-   public float pitchEnergyCostMultiplier = 1.0F;
-   /** Multiplies energy demand from near-vertical nose-up climb attempts. */
-   public float verticalClimbEnergyCostMultiplier = 1.0F;
-   /** Specific-energy fraction of stall recovery speed required before forced recovery fades. */
-   public float stallRecoveryEnergyThreshold = 1.0F;
-   /** Specific-energy fraction of climb sustain speed required for supported climbs. */
-   public float sustainedClimbEnergyRequirement = 1.0F;
    /** Absolute airspeed below which a fixed-wing plane can enter a stall. Zero derives it from StallSpeedFactor. */
    public float stallSpeed = 0.0F;
    /** Angle between the plane forward vector and velocity vector at which airflow separates. */
@@ -315,12 +295,6 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.inducedDrag = this.toFloat(data, 0.0F, 0.25F);
          } else if(item.equalsIgnoreCase("ControlSurfaceDrag")) {
             this.controlSurfaceDrag = this.toFloat(data, 0.0F, 0.25F);
-         } else if(item.equalsIgnoreCase("ClimbEnergyLoss")) {
-            this.climbEnergyLoss = this.toFloat(data, 0.0F, 0.25F);
-         } else if(item.equalsIgnoreCase("DiveEnergyGain")) {
-            this.diveEnergyGain = this.toFloat(data, 0.0F, 0.25F);
-         } else if(item.equalsIgnoreCase("MaximumLevelSpeed") || item.equalsIgnoreCase("MaxLevelSpeedKmh")) {
-            this.maxLevelSpeed = this.toInternalSpeedFromKmh(data, 0.0F, this.getMaxSpeed() * INTERNAL_SPEED_TO_KMH);
          } else if(item.equalsIgnoreCase("MaxLevelSpeed")) {
             this.maxLevelSpeed = this.toFloat(data, 0.0F, this.getMaxSpeed());
          } else if(item.equalsIgnoreCase("IdleDrag")) {
@@ -346,16 +320,10 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             } else {
                this.physicalMass = massValue / 10000.0F;
             }
-         } else if(item.equalsIgnoreCase("MassKg") || item.equalsIgnoreCase("PhysicalMassKg")) {
-            this.physicalMass = this.toInternalMassFromKg(data);
          } else if(item.equalsIgnoreCase("PhysicalMass")) {
             this.physicalMass = this.toFloat(data, 0.05F, 100.0F);
-         } else if(item.equalsIgnoreCase("EngineThrustN")) {
-            this.engineThrust = this.toInternalForceFromNewtons(data);
          } else if(item.equalsIgnoreCase("EngineThrust")) {
             this.engineThrust = this.toFloat(data, 0.0F, 100.0F);
-         } else if(item.equalsIgnoreCase("TakeoffDistanceMultiplier")) {
-            this.takeoffDistanceMultiplier = this.toFloat(data, 0.25F, 4.0F);
          } else if(item.equalsIgnoreCase("ThrottleAcceleration")) {
             this.throttleAcceleration = this.toFloat(data, 0.0F, 1.0F);
          } else if(item.equalsIgnoreCase("EngineDrag")) {
@@ -374,8 +342,6 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.newFlightLowThrottleLiftRetention = this.toFloat(data, 0.0F, 1.0F);
          } else if(item.equalsIgnoreCase("NewFlightThrottleControlAuthorityScale")) {
             this.newFlightThrottleControlAuthorityScale = this.toFloat(data, 0.0F, 1.0F);
-         } else if(item.equalsIgnoreCase("NewFlightIdleNoseUpLimit")) {
-            this.newFlightIdleNoseUpLimit = this.toFloat(data, 5.0F, 89.0F);
          } else if(item.equalsIgnoreCase("NewFlightThrottleHudDisplay")) {
             this.newFlightThrottleHudDisplay = this.toBool(data);
          } else if(item.equalsIgnoreCase("NewFlightCombatFlaps")) {
@@ -388,20 +354,6 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.newFlightCombatFlapControl = this.toFloat(data, 0.0F, 1.0F);
          } else if(item.equalsIgnoreCase("NewFlightCombatFlapOverspeed")) {
             this.newFlightCombatFlapOverspeed = this.toFloat(data, 0.1F, 1.0F);
-         } else if(item.equalsIgnoreCase("EnergyRetentionMultiplier")) {
-            this.energyRetentionMultiplier = this.toFloat(data, 0.1F, 3.0F);
-         } else if(item.equalsIgnoreCase("ClimbEnergyCostMultiplier")) {
-            this.climbEnergyCostMultiplier = this.toFloat(data, 0.1F, 5.0F);
-         } else if(item.equalsIgnoreCase("PitchEnergyCostMultiplier")) {
-            this.pitchEnergyCostMultiplier = this.toFloat(data, 0.1F, 5.0F);
-         } else if(item.equalsIgnoreCase("VerticalClimbEnergyCostMultiplier")) {
-            this.verticalClimbEnergyCostMultiplier = this.toFloat(data, 0.1F, 8.0F);
-         } else if(item.equalsIgnoreCase("StallRecoveryEnergyThreshold")) {
-            this.stallRecoveryEnergyThreshold = this.toFloat(data, 0.1F, 3.0F);
-         } else if(item.equalsIgnoreCase("SustainedClimbEnergyRequirement")) {
-            this.sustainedClimbEnergyRequirement = this.toFloat(data, 0.1F, 3.0F);
-         } else if(item.equalsIgnoreCase("StallSpeedKmh")) {
-            this.stallSpeed = this.toInternalSpeedFromKmh(data, 0.0F, 720.0F);
          } else if(item.equalsIgnoreCase("StallSpeed")) {
             this.stallSpeed = this.toFloat(data, 0.0F, 10.0F);
          } else if(item.equalsIgnoreCase("CriticalAoA")) {
@@ -412,8 +364,6 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.aoaDragMultiplier = this.toFloat(data, 0.0F, 10.0F);
          } else if(item.equalsIgnoreCase("StallInstability")) {
             this.stallInstability = this.toFloat(data, 0.0F, 5.0F);
-         } else if(item.equalsIgnoreCase("StallRecoverySpeedKmh")) {
-            this.stallRecoverySpeed = this.toInternalSpeedFromKmh(data, 0.0F, 720.0F);
          } else if(item.equalsIgnoreCase("StallRecoverySpeed")) {
             this.stallRecoverySpeed = this.toFloat(data, 0.0F, 10.0F);
          } else if(item.equalsIgnoreCase("StallSpeedFactor")) {
@@ -434,14 +384,10 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.maxStructuralG = this.toFloat(data, 1.0F, 50.0F);
          } else if(item.equalsIgnoreCase("GControlPenalty")) {
             this.gControlPenalty = this.toFloat(data, 0.0F, 1.0F);
-         } else if(item.equalsIgnoreCase("CompressibilitySpeedKmh")) {
-            this.compressibilitySpeed = this.toInternalSpeedFromKmh(data, 0.0F, 1200.0F);
          } else if(item.equalsIgnoreCase("CompressibilitySpeed")) {
             this.compressibilitySpeed = this.toFloat(data, 0.0F, 10.0F);
          } else if(item.equalsIgnoreCase("CompressibilityPitchPenalty")) {
             this.compressibilityPitchPenalty = this.toFloat(data, 0.0F, 1.0F);
-         } else if(item.equalsIgnoreCase("NeverExceedSpeed") || item.equalsIgnoreCase("VNEKmh") || item.equalsIgnoreCase("MaxSafeSpeedKmh")) {
-            this.maxSafeSpeed = this.toInternalSpeedFromKmh(data, 0.0F, 1400.0F);
          } else if(item.equalsIgnoreCase("MaxSafeSpeed")) {
             this.maxSafeSpeed = this.toFloat(data, 0.0F, 10.0F);
          } else if(item.equalsIgnoreCase("OverspeedDamageRate")) {

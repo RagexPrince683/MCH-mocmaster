@@ -37,8 +37,6 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `BaseDrag` | float[0..0.25] | 0.0023 | Baseline drag. Scales with speed ratio squared and also participates in AoA drag. |
 | `InducedDrag` | float[0..0.25] | 0.015 | Extra drag from bank angle and body-rate load. |
 | `ControlSurfaceDrag` | float[0..0.25] | 0.003 | Extra drag while pitch/roll/yaw angular rates are high. |
-| `ClimbEnergyLoss` | float[0..0.25] | 0.017 | Horizontal speed removed while climbing. |
-| `DiveEnergyGain` | float[0..0.25] | 0.0122 | Horizontal speed added while descending. |
 | `MaxLevelSpeed` | float[0..4] | 0 = use `Speed` | Sustainable full-power speed in level flight. |
 | `IdleDrag` | float[0..0.25] | 0.0034 | Extra drag as engine output approaches zero. |
 | `PitchTorque`, `RollTorque`, `YawTorque` | float[0..100] | 0.380 / 0.420 / 0.320 | Local-axis torque applied to requested angular rates. Higher values respond faster. |
@@ -47,7 +45,6 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `Mass` | float[0.05..100] | alias of `InertiaMultiplier` | Legacy/compatibility alias for angular inertia only; does not set physical weight. |
 | `PhysicalMass` | float[0.05..100] | 1.750 | **New flight model only.** Translational mass used for thrust acceleration, drag response, lift-to-weight, weight, climb, and takeoff behavior. |
 | `EngineThrust` | float[0..100] | derived from speed | **New flight model only.** Engine force used as `thrust / PhysicalMass`; affects acceleration, climb, and energy recovery without being a top-speed cap. |
-| `TakeoffDistanceMultiplier` | float[0.25..4] | 1.0 | **New flight model only.** Scales the effective takeoff threshold during ground roll/rotation. Lower values shorten takeoff distance; higher values lengthen it. |
 | `ThrottleAcceleration` | float[0..1] | 0.026 | Legacy engine-output spool-up. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateUp`. |
 | `EngineDrag` | float[0..1] | 0.011 | Legacy engine-output spool-down. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateDown`. |
 | `NewFlightThrottleResponse` | float[0.1..4] | 1.18 | **New flight model only.** Curves smoothed engine output before thrust. `1` is linear, `<1` gives more low-throttle thrust, `>1` softens the low end. |
@@ -63,12 +60,6 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `NewFlightCombatFlapDrag` | float[0..0.25] | 0.012 | **New flight model only.** Extra drag while combat flaps are deployed. |
 | `NewFlightCombatFlapControl` | float[0..1] | 0.12 | **New flight model only.** Control-authority boost while combat flaps are deployed. |
 | `NewFlightCombatFlapOverspeed` | float[0.1..1] | 0.78 | **New flight model only.** Multiplier applied to `MaxSafeSpeed` while flaps are deployed; lower values punish high-speed flap use earlier. |
-| `EnergyRetentionMultiplier` | float[0.1..3] | 1.0 | **New flight model only.** Scales how much stored kinetic energy is usable for brief zoom climbs and high-pitch manoeuvres. |
-| `ClimbEnergyCostMultiplier` | float[0.1..5] | 1.0 | **New flight model only.** Scales energy demand from positive vertical speed. |
-| `PitchEnergyCostMultiplier` | float[0.1..5] | 1.0 | **New flight model only.** Scales energy demand from nose-up/high-AoA pitch manoeuvres. |
-| `VerticalClimbEnergyCostMultiplier` | float[0.1..8] | 1.0 | **New flight model only.** Scales extra demand for steep nose-up climb attempts. Raise this to prevent hover-climb behavior. |
-| `StallRecoveryEnergyThreshold` | float[0.1..3] | 1.0 | **New flight model only.** Specific-energy fraction of stall recovery speed required before forced energy recovery fades. |
-| `SustainedClimbEnergyRequirement` | float[0.1..3] | 1.0 | **New flight model only.** Specific-energy fraction of climb sustain speed required for supported sustained climb. |
 | `StallSpeed` | float[0..10] | 0 | Absolute stall threshold; if 0, uses `max(0.05, topSpeed * StallSpeedFactor)`. |
 | `CriticalAoA` | float[1..90] | 14.00 | AoA in degrees where stall demand begins. |
 | `StallLiftLoss` | float[0..1] | 0.820 | Fraction of lift removed at full stall. |
@@ -88,6 +79,12 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `CompressibilityPitchPenalty` | float[0..1] | 0.5 | Max pitch-authority loss by `MaxSafeSpeed`. |
 | `MaxSafeSpeed` | float[0..10] | 0 = 110% of level speed | Overspeed threshold. Warns if not above `CompressibilitySpeed`. |
 | `OverspeedDamageRate` | float[0..100] | 0.14 | Damage per tick at 100% overspeed. Set 0 to disable damage. |
+
+## Derived behavior
+
+The new fixed-wing model intentionally keeps climb sustain, unsupported vertical climb, energy deficit, stall recovery pressure, and takeoff rotation as internal calculations instead of pack-maker knobs. These behaviors are derived from `PhysicalMass`, `EngineThrust`, drag (`BaseDrag`, `InducedDrag`, `ControlSurfaceDrag`, AoA drag), lift/stall values (`StallSpeed`, `CriticalAoA`, `StallLiftLoss`), gravity, airspeed, pitch/AoA, throttle, and altitude. Debug flight logging still reports the calculated energy and climb values so aircraft can be audited without exposing every intermediate calculation as config.
+
+Removed unreleased new-flight-model keys are treated as invalid cleanup targets, not compatibility aliases: `ClimbEnergyLoss`, `DiveEnergyGain`, `TakeoffDistanceMultiplier`, `NewFlightIdleNoseUpLimit`, `EnergyRetentionMultiplier`, `ClimbEnergyCostMultiplier`, `PitchEnergyCostMultiplier`, `VerticalClimbEnergyCostMultiplier`, `StallRecoveryEnergyThreshold`, and `SustainedClimbEnergyRequirement`. Use the core physical and aerodynamic values above instead.
 
 ## Formulas and interactions
 
@@ -167,8 +164,6 @@ Vertical energy exchange:
 climb = clamp(motionY / 0.35, 0, 1)
 dive  = clamp(-motionY / 0.35, 0, 1)
 targetHorizontalSpeed = horizontalSpeed * (1 - drag)
-                      + dive * DiveEnergyGain
-                      - climb * ClimbEnergyLoss
 ```
 
 
@@ -185,11 +180,7 @@ energyDelta = totalEnergy - previousTotalEnergy
 excessPower ~= energyDelta per tick
 
 climbEnergyDemand = positiveVerticalSpeed * PhysicalMass * resolvedGravity
-                  * ClimbEnergyCostMultiplier
-                + steepNoseUpVerticalDemand * VerticalClimbEnergyCostMultiplier
 pitchEnergyDemand = noseUpDemand * stall/aoa/body-rate demand
-                  * PitchEnergyCostMultiplier
-usableEnergy = kineticEnergy * EnergyRetentionMultiplier + thrustEnergy + positiveEnergyDelta
 energyDeficitSeverity = clamp(shortfall and specific-energy deficit, 0, 1)
 ```
 
@@ -197,13 +188,11 @@ energyDeficitSeverity = clamp(shortfall and specific-energy deficit, 0, 1)
 
 Tuning guidance:
 
-* Light fighters: keep `EnergyRetentionMultiplier` near or slightly above `1.0`, moderate `ClimbEnergyCostMultiplier`, and avoid excessive `VerticalClimbEnergyCostMultiplier` so they can dogfight and zoom climb without hovering.
 * Heavy fighters: use similar retention but slightly higher pitch/climb costs so mass and pitch demand matter.
 * Jets: may use slightly better retention or lower sustained-climb requirement only when `EngineThrust`, drag, mass, and gravity already justify strong climb performance.
 * Bombers/transports: lower retention and raise climb, pitch, recovery, and vertical-climb requirements so they recover poorly from steep nose-up flight.
 * Poor-energy aircraft, UAVs, and utility planes: use the bomber-style direction with even higher vertical-climb costs.
 
-Do not use these keys to fake impossible vertical performance. First tune real inputs (`PhysicalMass`, `EngineThrust`, gravity override, `BaseDrag`, `InducedDrag`, `ClimbEnergyLoss`, `StallSpeed`, `CriticalAoA`, and `StallRecoverySpeed`); use the energy multipliers only to shape how that physical/tuned energy is retained or spent.
 
 ### Stall, AoA, lift loss, and recovery
 
@@ -335,8 +324,6 @@ BaseDrag = 0.0023
 InducedDrag = 0.015
 ControlSurfaceDrag = 0.0030
 IdleDrag = 0.0034
-ClimbEnergyLoss = 0.0080
-DiveEnergyGain = 0.0100
 PitchTorque = 0.380
 RollTorque = 0.420
 YawTorque = 0.320
@@ -369,11 +356,8 @@ FlightCeilingRange = 48
 
 ### Physical mass and thrust
 
-Use `MassKg` and `EngineThrustN` for new fixed-wing packs. These are real-world aliases for the existing translational mass and engine-force values; they are converted to the internal Minecraft/tick model during loading. Legacy `PhysicalMass` and `EngineThrust` still load for old packs.
 
 ```text
-internalMass = MassKg / 10000
-internalThrust = EngineThrustN / 4000000
 forwardAccelerationPerTick = internalThrust / internalMass
 ```
 
@@ -381,7 +365,6 @@ forwardAccelerationPerTick = internalThrust / internalMass
 
 Recommended real-world starting ranges:
 
-| Aircraft class | MassKg | EngineThrustN / equivalent static thrust |
 | --- | ---: | ---: |
 | WW2 fighters | 2500 - 6000 | 12000 - 45000 |
 | Early jets | 4000 - 12000 | 15000 - 60000 |
@@ -391,32 +374,24 @@ Recommended real-world starting ranges:
 
 ### Takeoff distance multiplier
 
-`TakeoffDistanceMultiplier` is a runway/takeoff correction for new-flight-model fixed-wing aircraft. It does not rewrite the aircraft's airborne `StallSpeed`, stall recovery, AoA behavior, drag, or climb model. Instead, it scales the effective ground-roll/rotation threshold used while the plane is on or very near the runway:
 
 ```text
-effectiveTakeoffSpeed = requiredTakeoffSpeed * TakeoffDistanceMultiplier
 ```
 
 Minecraft runways are short and there is no single perfect block-distance formula, but the practical relationship is approximately:
 
 ```text
 takeoffDistance ∝ requiredTakeoffSpeed² / forwardAcceleration
-forwardAcceleration ≈ EngineThrustN / MassKg - drag
-takeoffDistance ∝ requiredTakeoffSpeed² / (EngineThrustN / MassKg - drag)
 ```
 
 With the multiplier applied:
 
 ```text
-takeoffDistance ∝ (requiredTakeoffSpeed * TakeoffDistanceMultiplier)²
-                / (EngineThrustN / MassKg - drag)
 ```
 
 For a rough runway estimate in Minecraft blocks, treat speed as blocks/tick and forward acceleration as blocks/tick². The constant-acceleration estimate is:
 
 ```text
-takeoffDistanceBlocks ≈ (requiredTakeoffSpeed * TakeoffDistanceMultiplier)²
-                        / (2 * max(EngineThrustN / MassKg - drag, 0.001))
 ```
 
 The `max(..., 0.001)` guard is only for estimation so the formula does not divide by zero when an aircraft has too little excess thrust to accelerate. In game, use the debug `netForward` value as the practical acceleration term when validating runway length:
@@ -425,18 +400,14 @@ The `max(..., 0.001)` guard is only for estimation so the formula does not divid
 takeoffDistanceBlocks ≈ effectiveTakeoffSpeed² / (2 * max(netForward, 0.001))
 ```
 
-That means lowering `TakeoffDistanceMultiplier` reduces takeoff distance strongly, and raising it increases takeoff distance strongly, because required speed enters the approximation quadratically. `EngineThrustN`, `MassKg`, drag, gravity, `StallSpeedKmh`/`StallSpeedFactor`, throttle response, and combat flaps still matter. Combat flaps add their configured low-speed lift while the takeoff threshold is being evaluated, so they remain useful for short-field takeoff tuning.
 
 Use this key only as a takeoff/runway correction after the aircraft's mass, thrust, drag, and stall tuning are broadly correct. If a plane lifts off too early with a low multiplier, normal airborne stall and climb behavior still applies: it may mush, sink, or stall if it lacks speed or power.
 
 ## Safe-to-omit legacy notes
 
-Old plane packs can omit every new aerodynamic key. Defaults are applied and `StallSpeedFactor` preserves derived low-speed stall behavior. New packs should use `MassKg`, `EngineThrustN`, `MaximumLevelSpeed`, `StallSpeedKmh`, `StallRecoverySpeedKmh`, `CompressibilitySpeedKmh`, and `NeverExceedSpeed` where those real aircraft specifications are known. Legacy internal-speed keys remain supported but are no longer the documented standard.
 
 ### Combat flaps and throttle interaction
 
 Combat flaps are intentionally gated by `useNewMobilitySystem = true`; legacy packs are unaffected unless they opt in. With `NewFlightCombatFlaps = true`, the pilot toggles flaps with the Extra key, the HUD appends `FLP`, and the new flight model applies lift/control help plus extra drag and a lower safe overspeed threshold.
 
 Use flaps with low or moderate throttle for landing and low-speed control. High throttle with flaps can improve a short turn, but the extra drag and reduced `MaxSafeSpeed * NewFlightCombatFlapOverspeed` should punish extended high-speed use. Throttle chopping plus flaps helps manage speed but should not be tuned into an instant brake; raise `NewFlightCombatFlapDrag` gradually and keep `NewFlightEngineBrakeDrag` modest.
-
-Debug flight logging (`DebugFlightControl`) includes energy telemetry (`kineticEnergy`, `potentialEnergy`, `totalEnergy`, `specificEnergy`, `energyDelta`, `excessPower`, `energyDeficitSeverity`, `climbEnergyDemand`, `pitchEnergyDemand`, `energyUnsupportedClimb`, and `energyForcedRecovery`) plus commanded throttle percent, smoothed engine output percent, effective curved/idle throttle percent, propulsive throttle percent, flap state, pitch, airspeed, forward speed, vertical speed, physical mass, weight force, engine thrust force (`EngineThrust * propulsiveThrottle`, with idle propulsion suppressed while parked at 0% commanded throttle), lift force, lift before stall loss, lift after stall loss, lift-to-weight ratio, thrust-to-weight ratio, net forward acceleration, `TakeoffDistanceMultiplier`, base/effective takeoff thresholds, whether takeoff threshold scaling is active, `validTakeoff`, `validClimb`, whether stall suppressed takeoff/climb headroom, applied gravity acceleration, resolved global/override gravity, placement motion-lock state, current motion/cached velocity, lift acceleration, net vertical acceleration, airborne state, velocity-derived `aoaFromVelocity`, `criticalAoA`, `stallDemand`, `speedSeverity`, `aoaSeverity`, smoothed stall severity, stall state, throttle-deficit pitch-down moment, lift loss, drag, control authority, pitch-break state, applied pitch-break angular velocity, and overspeed state for new-flight tuning.
