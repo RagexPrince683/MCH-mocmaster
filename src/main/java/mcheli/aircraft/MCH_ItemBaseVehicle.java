@@ -125,6 +125,7 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
    }
 
    public ItemStack onItemRightClick(ItemStack par1ItemStack, World world, EntityPlayer player) {
+      //TODO fix UAV place bug, UAVs are only placeable via a station so the deploy logic should not apply to them and the player should be informed.
       float f = 1.0F;
       float f1 = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * f;
       float f2 = player.prevRotationYaw + (player.rotationYaw - player.prevRotationYaw) * f;
