@@ -184,10 +184,12 @@ targetHorizontalSpeed = horizontalSpeed * (1 - drag)
 
 ### Internal energy model for new-flight fixed-wing planes
 
-Planes with `useNewMobilitySystem = true` now run an internal per-tick energy check in addition to lift, AoA, drag, and stall logic. Legacy planes do not use these calculations. The model records kinetic energy from `PhysicalMass` and full 3D velocity, potential energy from `PhysicalMass`, resolved new-flight gravity, and altitude, total energy, specific energy, tick-to-tick energy delta, and an approximate excess-power value. It then compares usable retained kinetic energy plus current thrust contribution against climb and pitch demands.
+Planes with `useNewMobilitySystem = true` now run an internal per-tick energy check in addition to lift, AoA, drag, and stall logic. Legacy planes do not use these calculations. The model records debug kinetic energy from `PhysicalMass` and full 3D velocity, potential energy from `PhysicalMass`, resolved new-flight gravity, and altitude, total energy, specific energy, tick-to-tick energy delta, and an approximate excess-power value. For climb and pitch authority, however, it compares usable retained kinetic energy from positive horizontal forward airspeed plus current thrust contribution against climb and pitch demands. Vertical motion is energy-state evidence, not lift-producing forward airflow.
 
 ```text
-kineticEnergy = 0.5 * PhysicalMass * (motionX^2 + motionY^2 + motionZ^2)
+kineticEnergy = 0.5 * PhysicalMass * (motionX^2 + motionY^2 + motionZ^2)  // debug total
+forwardAirspeed = max(0, horizontal velocity dot horizontal nose heading)
+usableRetainedEnergy = 0.5 * PhysicalMass * forwardAirspeed^2
 potentialEnergy = PhysicalMass * resolvedGravity * max(0, altitude)
 totalEnergy = kineticEnergy + potentialEnergy
 specificEnergy = totalEnergy / PhysicalMass
@@ -199,7 +201,7 @@ pitchEnergyDemand = noseUpDemand * stall/aoa/body-rate demand
 energyDeficitSeverity = clamp(shortfall and specific-energy deficit, 0, 1)
 ```
 
-`energyDeficitSeverity` is not a Y-motion clamp. When it rises, the aircraft loses nose-up pitch authority, receives extra energy/induced drag, can trigger pitch-break recovery, and biases the nose downward through the normal angular-velocity path. This preserves brief zoom climbs when the aircraft enters with enough airspeed/energy, but a low-speed or low-throttle aircraft at 80-90 degrees nose-up will bleed energy, stall, and rotate down instead of hovering upward. Low horizontal speed is handled by using full 3D airspeed and the existing low-speed/AoA stall state, so a plane cannot avoid the energy check just because `motionX`/`motionZ` are near zero.
+`energyDeficitSeverity` is not a Y-motion clamp. When it rises, the aircraft loses nose-up pitch authority, receives extra energy/induced drag, can trigger pitch-break recovery, and biases the nose downward through the normal angular-velocity path. This preserves brief zoom climbs when the aircraft enters with enough usable forward airspeed/energy, but a low-speed or low-throttle aircraft at 80-90 degrees nose-up will bleed energy, stall, and rotate down instead of hovering upward. Low horizontal speed is handled by using positive horizontal forward airspeed for stall recovery, climb validation, pitch authority, and energy-deficit checks, so vertical climbing/falling speed cannot masquerade as lift-producing airflow when `motionX`/`motionZ` are near zero.
 
 Tuning guidance:
 
@@ -214,7 +216,9 @@ Tuning guidance:
 ```text
 AoA = degrees_between(nose_forward_vector, velocity_vector)
 stallSpeed = StallSpeed if >0 else max(0.05, topSpeed * StallSpeedFactor)
-speedSeverity = clamp((stallSpeed - airspeed) / stallSpeed, 0, 1)
+forwardAirspeed = max(0, horizontal velocity dot horizontal nose heading)
+speedSeverity = max(clamp((stallSpeed - forwardAirspeed) / stallSpeed, 0, 1),
+                    clamp((stallSpeed - horizontalSpeed) / stallSpeed, 0, 1))
 aoaSeverity = clamp((abs(AoA) - CriticalAoA) / CriticalAoA, 0, 1)
 demand = max(speedSeverity, aoaSeverity)
 ```
@@ -225,7 +229,7 @@ If not already stalling, demand above the small entry hysteresis band starts a s
 
 ```text
 demand > 0.03 starts a stall when not already stalling
-airspeed >= (StallRecoverySpeed if >0 else stallSpeed * 1.2)
+forwardAirspeed >= (StallRecoverySpeed if >0 else stallSpeed * 1.2)
 abs(AoA) <= CriticalAoA * 0.75
 ```
 
@@ -250,7 +254,7 @@ liftForce = liftBeforeStallLoss * stallLift
 
 `StallLiftLoss` is applied after throttle lift retention, combat flap lift, takeoff lift, and other lift bonuses are resolved. Stalled aircraft suppress takeoff/climb lift headroom until recovery, so `validTakeoff` or `validClimb` cannot bypass stall penalties.
 
-This means pointing the nose near vertical does not create maximum lift unless the velocity vector, airspeed, lift-to-weight, and thrust-to-weight are still within valid flying conditions. Conventional fixed-wing thrust is also limited during unsupported vertical climbs: if thrust-to-weight is below 1.0, upward powered climb is scaled by speed headroom and remaining unstalled authority. High nose-up climbs add extra AoA/energy drag and bleed vertical energy unless the aircraft is truly tuned with enough thrust and speed to support them. Lowering throttle while holding a nose-up attitude now also adds a nose-down pitch moment, so the aircraft cannot keep the same climb angle without enough effective thrust/lift.
+This means pointing the nose near vertical does not create maximum lift unless the velocity vector, positive horizontal forward airspeed, lift-to-weight, and thrust-to-weight are still within valid flying conditions. Conventional fixed-wing thrust is also limited during unsupported vertical climbs: if thrust-to-weight is below 1.0, upward powered climb is scaled by speed headroom and remaining unstalled authority. High nose-up climbs add extra AoA/energy drag and bleed vertical energy unless the aircraft is truly tuned with enough thrust and speed to support them. Lowering throttle while holding a nose-up attitude now also adds a nose-down pitch moment, so the aircraft cannot keep the same climb angle without enough effective thrust/lift.
 
 Developed stalls remove lift through the normal lift model and apply a deterministic nose-down pitch moment:
 
