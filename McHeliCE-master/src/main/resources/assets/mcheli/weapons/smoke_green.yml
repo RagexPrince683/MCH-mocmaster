@@ -1,0 +1,18 @@
+DisplayName: Smoke Green
+Type: smoke
+Ballistics:
+  Acceleration: 1.0
+  AccelerationInWater: 1.0
+  Gravity: 0.0
+  GravityInWater: 0.0
+  VelocityInWater: 0.999
+Sound:
+  Locations:
+    Fire: mcheli:smoke_green_snd
+Explosion:
+  DestructionPower: 0
+Render:
+  Smoke:
+    SmokeMaxAge: 500
+    BulletColorInWater: '#FFFFFFFF'
+    BulletColor: '#E61EB41E'

@@ -1,0 +1,52 @@
+package com.norwood.mcheli.sound;
+
+import com.norwood.mcheli.Tags;
+import com.norwood.mcheli.helper.MCH_Logger;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.world.World;
+import net.minecraftforge.event.RegistryEvent.Register;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.relauncher.Side;
+import org.jetbrains.annotations.NotNull;
+
+@EventBusSubscriber(
+                    modid = "mcheli")
+public class MCH_SoundEvents {
+
+
+    @SubscribeEvent
+    static void onSoundEventRegisterEvent(Register<SoundEvent> event) {
+        for (ResourceLocation soundLocation : SoundRegistry.INSTANCE.soundSet) {
+            event.getRegistry().register(new SoundEvent(soundLocation).setRegistryName(soundLocation));
+        }
+    }
+
+    public static void playSound(World w, double x, double y, double z, ResourceLocation name, float volume, float pitch) {
+        SoundEvent sound = getSound(name);
+        w.playSound(null, x, y, z, sound, SoundCategory.MASTER, volume, pitch);
+    }
+    public static void playSound(World w, double x, double y, double z, String name, float volume, float pitch) {
+        playSound(w,x,y,z,new ResourceLocation(Tags.MODID,name), volume,pitch);
+    }
+
+    @NotNull
+    public static SoundEvent getSound(ResourceLocation location) {
+        SoundEvent sound = ForgeRegistries.SOUND_EVENTS.getValue(location);
+        if (sound == null) {
+            MCH_Logger.log("[WARNING] Sound event does not found. event name= " + location);
+            return SoundEvents.BLOCK_STONE_BREAK;
+        }
+        if (FMLCommonHandler.instance().getSide() == Side.CLIENT && sound.getSoundName() == null) {
+            MCH_Logger.log("[WARNING] Sound event is empty. event name= " + location);
+            return SoundEvents.BLOCK_STONE_BREAK;
+        }
+
+        return sound;
+    }
+}

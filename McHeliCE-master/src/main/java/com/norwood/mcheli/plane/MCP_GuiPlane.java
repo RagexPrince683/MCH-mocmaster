@@ -1,0 +1,111 @@
+package com.norwood.mcheli.plane;
+
+import com.norwood.mcheli.MCH_Config;
+import com.norwood.mcheli.MCH_KeyName;
+import com.norwood.mcheli.aircraft.MCH_AircraftCommonGui;
+import com.norwood.mcheli.aircraft.MCH_EntityAircraft;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
+
+@SideOnly(Side.CLIENT)
+public class MCP_GuiPlane extends MCH_AircraftCommonGui {
+
+    public MCP_GuiPlane(Minecraft minecraft) {
+        super(minecraft);
+    }
+
+    @Override
+    public boolean isDrawGui(EntityPlayer player) {
+        return MCH_EntityAircraft.getAircraft_RiddenOrControl(player) instanceof MCH_EntityPlane;
+    }
+
+    @Override
+    public void drawGui(EntityPlayer player, boolean isThirdPersonView) {
+        MCH_EntityAircraft ac = MCH_EntityAircraft.getAircraft_RiddenOrControl(player);
+        if (ac instanceof MCH_EntityPlane plane && !ac.isDestroyed()) {
+            int seatID = ac.getSeatIdByEntity(player);
+            GL11.glLineWidth(scaleFactor);
+            if (plane.getCameraMode(player) == 1) {
+                this.drawNightVisionNoise();
+            }
+
+            if (!isThirdPersonView || MCH_Config.DisplayHUDThirdPerson.prmBool) {
+                if (seatID == 0 && plane.getIsGunnerMode(player)) {
+                    this.drawHud(ac, player, 1);
+                } else {
+                    this.drawHud(ac, player, seatID);
+                }
+
+                this.drawTurretBallistics(plane, player);
+            }
+
+            if (!isThirdPersonView || MCH_Config.DisplayHUDThirdPerson.prmBool) {
+                if (plane.getTVMissile() == null || !plane.getIsGunnerMode(player) && !plane.isUAV()) {
+                    this.drawKeybind(plane, player, seatID);
+                } else {
+                    this.drawTvMissileNoise(plane, plane.getTVMissile());
+                }
+            }
+
+            this.drawHitMarker(plane, -14101432, seatID);
+        }
+    }
+
+    public void drawKeybind(MCH_EntityPlane plane, EntityPlayer player, int seatID) {
+        var info = plane.getPlaneInfo();
+        if (MCH_Config.HideKeybind.prmBool || info == null) return;
+
+        var colorActive = -1342177281;
+        var colorInactive = -1349546097;
+
+        var screenWidth = this.centerX * 2;
+        var leftX = Math.max(10, (int) (screenWidth * 0.05));
+        var rightX = Math.min(screenWidth - 100, (int) (screenWidth * 0.80));
+
+        this.currentLeftY = this.centerY - 80;
+        this.currentRightY = this.centerY - 80;
+
+        var theme = new LayoutTheme(leftX, rightX, colorActive, colorInactive);
+
+        drawAircraftKeyBinds(plane, info, player, seatID, theme);
+
+        var freeLookPressed = Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt);
+
+        if (seatID == 0 && info.isEnableGunnerMode && !freeLookPressed) {
+            var color = plane.isHoveringMode() ? theme.inactive() : theme.active();
+            var mode = plane.getIsGunnerMode(player) ? "Normal" : "Gunner";
+            drawRightKey(mode, MCH_Config.KeySwitchMode.prmInt, theme.rightX(), color);
+        }
+
+        if (seatID > 0 && plane.canSwitchGunnerModeOtherSeat(player)) {
+            var mode = plane.getIsGunnerMode(player) ? "Normal" : "Camera";
+            drawRightKey(mode, MCH_Config.KeySwitchMode.prmInt, theme.rightX(), theme.active());
+        }
+
+        if (seatID == 0 && info.isEnableVtol && !freeLookPressed) {
+            var stat = plane.getVtolMode();
+            if (stat != 1) {
+                var prefix = stat == 0 ? "VTOL" : "Normal";
+                drawRightKey(prefix, MCH_Config.KeyExtra.prmInt, theme.rightX(), theme.active());
+            }
+        }
+
+        if (plane.canEjectSeat(player)) {
+            drawRightKey("Eject seat", MCH_Config.KeySwitchHovering.prmInt, theme.rightX(), theme.active());
+        }
+
+        if (plane.getIsGunnerMode(player) && info.cameraZoom > 1) {
+            drawLeftKey("Zoom", MCH_Config.KeyZoom.prmInt, theme.leftX(), theme.active());
+        } else if (seatID == 0) {
+            if (plane.canFoldWing() || plane.canUnfoldWing()) {
+                drawLeftKey("FoldWing", MCH_Config.KeyZoom.prmInt, theme.leftX(), theme.active());
+            } else if (plane.canUnfoldHatch() || plane.canFoldHatch()) {
+                drawLeftKey("OpenHatch", MCH_Config.KeyZoom.prmInt, theme.leftX(), theme.active());
+            }
+        }
+    }
+}

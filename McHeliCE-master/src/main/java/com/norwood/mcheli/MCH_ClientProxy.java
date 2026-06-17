@@ -1,0 +1,903 @@
+package com.norwood.mcheli;
+
+import com.norwood.mcheli.aircraft.*;
+import com.norwood.mcheli.block.MCH_DraftingTableRenderer;
+import com.norwood.mcheli.block.MCH_DraftingTableTileEntity;
+import com.norwood.mcheli.chain.MCH_EntityChain;
+import com.norwood.mcheli.chain.MCH_RenderChain;
+import com.norwood.mcheli.command.MCH_GuiTitle;
+import com.norwood.mcheli.container.MCH_EntityContainer;
+import com.norwood.mcheli.container.MCH_RenderContainer;
+import com.norwood.mcheli.event.CameraHandler;
+import com.norwood.mcheli.event.ClientCommonTickHandler;
+import com.norwood.mcheli.flare.MCH_EntityChaff;
+import com.norwood.mcheli.flare.MCH_EntityFlare;
+import com.norwood.mcheli.flare.MCH_RenderChaff;
+import com.norwood.mcheli.flare.MCH_RenderFlare;
+import com.norwood.mcheli.gltd.MCH_EntityGLTD;
+import com.norwood.mcheli.gltd.MCH_RenderGLTD;
+import com.norwood.mcheli.helicopter.MCH_EntityHeli;
+import com.norwood.mcheli.helicopter.MCH_HeliInfo;
+import com.norwood.mcheli.helicopter.MCH_RenderHeli;
+import com.norwood.mcheli.helper.MCH_Logger;
+import com.norwood.mcheli.helper.MCH_Utils;
+import com.norwood.mcheli.helper.addon.AddonManager;
+import com.norwood.mcheli.helper.addon.AddonPack;
+import com.norwood.mcheli.helper.client.MCH_CameraManager;
+import com.norwood.mcheli.helper.client.MCH_ItemModelRenderers;
+import com.norwood.mcheli.helper.client.IModelCustom;
+import com.norwood.mcheli.helper.client.model.LegacyModelLoader;
+import com.norwood.mcheli.helper.client.renderer.item.*;
+import com.norwood.mcheli.helper.debug.MCH_RenderTest;
+import com.norwood.mcheli.helper.info.ContentRegistries;
+import com.norwood.mcheli.helper.info.ShaderRegistry;
+import com.norwood.mcheli.hud.direct_drawable.HudGPS;
+import com.norwood.mcheli.hud.direct_drawable.HudMortarRadar;
+import com.norwood.mcheli.hud.direct_drawable.HudRWR;
+import com.norwood.mcheli.mob.MCH_EntityGunner;
+import com.norwood.mcheli.mob.MCH_RenderGunner;
+import com.norwood.mcheli.multiplay.MCH_MultiplayClient;
+import com.norwood.mcheli.parachute.MCH_EntityParachute;
+import com.norwood.mcheli.parachute.MCH_RenderParachute;
+import com.norwood.mcheli.particles.MCH_EntityParticleExplode;
+import com.norwood.mcheli.plane.MCH_EntityPlane;
+import com.norwood.mcheli.plane.MCH_PlaneInfo;
+import com.norwood.mcheli.plane.MCP_RenderPlane;
+import com.norwood.mcheli.ship.MCH_EntityShip;
+import com.norwood.mcheli.ship.MCH_RenderShip;
+import com.norwood.mcheli.ship.MCH_ShipInfo;
+import com.norwood.mcheli.sound.ClientSoundRegistry;
+import com.norwood.mcheli.tank.MCH_EntityTank;
+import com.norwood.mcheli.tank.MCH_RenderTank;
+import com.norwood.mcheli.tank.MCH_TankInfo;
+import com.norwood.mcheli.throwable.MCH_EntityThrowable;
+import com.norwood.mcheli.throwable.MCH_RenderThrowable;
+import com.norwood.mcheli.throwable.MCH_ThrowableInfo;
+import com.norwood.mcheli.uav.MCH_EntityUavStation;
+import com.norwood.mcheli.uav.MCH_RenderUavStation;
+import com.norwood.mcheli.vehicle.MCH_EntityVehicle;
+import com.norwood.mcheli.vehicle.MCH_RenderVehicle;
+import com.norwood.mcheli.vehicle.MCH_VehicleInfo;
+import com.norwood.mcheli.weapon.*;
+import com.norwood.mcheli.wrapper.*;
+import com.norwood.mcheli.wrapper.modelloader.W_ModelCustom;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.resources.IReloadableResourceManager;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.SplashProgress;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.relauncher.Side;
+
+import java.io.File;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class MCH_ClientProxy extends MCH_CommonProxy {
+
+    private static final MethodHandle splashThreadGetter;
+    private static final MethodHandle splashEnabledGetter;
+    private static final MethodHandle splashPauseHandle;
+    private static final MethodHandle splashResumeHandle;
+
+    //Prevents crashes when the splash thread is not running
+    static {
+        Class<?> splash;
+        if (Loader.isModLoaded("modernsplash")) {
+            try {
+                splash = Class.forName("gkappa.modernsplash.CustomSplash");
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("ModernSplash loaded but failed to find gkappa.modernsplash.CustomSplash", e);
+            }
+        } else {
+            splash = SplashProgress.class;
+        }
+        try {
+            MethodHandles.Lookup lookup = MethodHandles.lookup();
+            Field splashThread = splash.getDeclaredField("thread");
+            Field splashEnabled = splash.getDeclaredField("enabled");
+            splashThread.setAccessible(true);
+            splashEnabled.setAccessible(true);
+            splashThreadGetter = lookup.unreflectGetter(splashThread);
+            splashEnabledGetter = lookup.unreflectGetter(splashEnabled);
+            splashPauseHandle = lookup.findStatic(splash, "pause", MethodType.methodType(void.class));
+            splashResumeHandle = lookup.findStatic(splash, "resume", MethodType.methodType(void.class));
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void registerModels_Bullet() {
+        for (MCH_WeaponInfo wi : ContentRegistries.weapon().values()) {
+            IModelCustom m;
+            if (!wi.bulletModelName.isEmpty()) {
+                m = MCH_ModelManager.load("bullets", wi.bulletModelName);
+                if (m != null) {
+                    wi.bulletModel = new MCH_BulletModel(wi.bulletModelName, m);
+                }
+            }
+
+            if (!wi.bombletModelName.isEmpty()) {
+                m = MCH_ModelManager.load("bullets", wi.bombletModelName);
+                if (m != null) {
+                    wi.bombletModel = new MCH_BulletModel(wi.bombletModelName, m);
+                }
+            }
+
+            if (wi.cartridge != null && !wi.cartridge.name.isEmpty()) {
+                wi.cartridge.model = MCH_ModelManager.load("bullets", wi.cartridge.name);
+                if (wi.cartridge.model == null) {
+                    wi.cartridge = null;
+                }
+            }
+        }
+    }
+
+    private static void uploadModel(MCH_AircraftInfo info, String path) {
+        info.model = MCH_ModelManager.load(path, info.name);
+        CompletableFuture<Void> done = new CompletableFuture<>();
+        Minecraft.getMinecraft().addScheduledTask(() -> {
+            try {
+                info.model = info.model.toVBO();
+                done.complete(null);
+            }catch (NullPointerException e) {
+                // Expected: model has no split parts, fallback to single model
+                // Suppresses the spam
+                if (MCH_Config.DebugLog) {
+                    MCH_Logger.debug(
+                            "Model upload skipped (no separate model present): {}", e.getMessage()
+                    );
+                }
+            } catch (Exception e) {
+                MCH_Logger.error("Unexpected error during model upload", e);
+            }
+        });
+    }
+
+    private static void pauseSplash() {
+        if (splashNotTerminated()) {
+            try {
+                splashPauseHandle.invokeExact();
+                MCH_Utils.logger().debug("[MCH_ClientProxy] successfully paused Splashscreen");
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
+            }
+        }
+    }
+
+    private static void resumeSplash() {
+        if (splashNotTerminated()) {
+            try {
+                splashResumeHandle.invokeExact();
+                MCH_Utils.logger().debug("[MCH_ClientProxy] successfully resumed Splashscreen");
+            } catch (Throwable t) {
+                throw new RuntimeException(t);
+            }
+        }
+    }
+
+    private static boolean splashNotTerminated() {
+        try {
+            boolean enabled = (boolean) splashEnabledGetter.invokeExact();
+            if (!enabled) {
+                MCH_Utils.logger().debug("[MCH_ClientProxy] Splashscreen is currently disabled");
+                return false;
+            }
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
+        Thread splashThread;
+        try {
+            splashThread = (Thread) splashThreadGetter.invokeExact();
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
+        return splashThread.getState() != Thread.State.TERMINATED;
+    }
+
+    @Override
+    public void postInit(FMLPostInitializationEvent postEvent) {
+        IReloadableResourceManager rm = (IReloadableResourceManager)
+                Minecraft.getMinecraft().getResourceManager();
+
+        rm.registerReloadListener(resourceManager -> {
+            ClientSoundRegistry.INSTANCE.commitChanges(Minecraft.getMinecraft().getSoundHandler());
+        });
+
+    }
+
+    @Override
+    public String getDataDir() {
+        return Minecraft.getMinecraft().gameDir.getPath();
+    }
+
+    @Override
+    public void registerRenderer() {
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntitySeat.class, MCH_RenderTest.factory(0.0F, 0.3125F, 0.0F, "seat"));
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityHeli.class, MCH_RenderHeli.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityPlane.class, MCP_RenderPlane.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityShip.class, MCH_RenderShip.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityTank.class, MCH_RenderTank.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityGLTD.class, MCH_RenderGLTD.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityChain.class, MCH_RenderChain.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityParachute.class, MCH_RenderParachute.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityContainer.class, MCH_RenderContainer.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityVehicle.class, MCH_RenderVehicle.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityUavStation.class, MCH_RenderUavStation.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityCartridge.class, MCH_RenderCartridge.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityHide.class, MCH_RenderNull.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_ViewEntityDummy.class, MCH_RenderNull.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityRocket.class, MCH_RenderBullet.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityTvMissile.class, MCH_RenderTvMissile.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityBullet.class, MCH_RenderBullet.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityA10.class, MCH_RenderA10.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityAAMissile.class, MCH_RenderAAMissile.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityASMissile.class, MCH_RenderASMissile.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityATMissile.class, MCH_RenderTvMissile.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityTorpedo.class, MCH_RenderBullet.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityBomb.class, MCH_RenderBomb.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityMarkerRocket.class, MCH_RenderBullet.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityFlare.class, MCH_RenderFlare.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityThrowable.class, MCH_RenderThrowable.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityGunner.class, MCH_RenderGunner.FACTORY);
+        RenderingRegistry.registerEntityRenderingHandler(MCH_EntityChaff.class, MCH_RenderChaff.FACTORY);
+        MCH_ItemModelRenderers.registerRenderer(MCH_MOD.itemJavelin, new BuiltInLightWeaponItemRenderer());
+        MCH_ItemModelRenderers.registerRenderer(MCH_MOD.itemStinger, new BuiltInLightWeaponItemRenderer());
+        MCH_ItemModelRenderers.registerRenderer(MCH_MOD.invisibleItem, new BuiltInInvisibleItemRenderer());
+        MCH_ItemModelRenderers.registerRenderer(MCH_MOD.itemGLTD, new BuiltInGLTDItemRenderer());
+        MCH_ItemModelRenderers.registerRenderer(MCH_MOD.itemWrench, new BuiltInWrenchItemRenderer());
+        MCH_ItemModelRenderers.registerRenderer(MCH_MOD.itemRangeFinder, new BuiltInRangeFinderItemRenderer());
+        ModelLoaderRegistry.registerLoader(LegacyModelLoader.INSTANCE);
+    }
+
+    @Override
+    public void registerBlockRenderer() {
+        ClientRegistry.bindTileEntitySpecialRenderer(MCH_DraftingTableTileEntity.class, new MCH_DraftingTableRenderer());
+        MCH_ItemModelRenderers.registerRenderer(W_Item.getItemFromBlock(MCH_MOD.blockDraftingTable), new BuiltInDraftingTableItemRenderer());
+    }
+
+    @Override
+    public void registerModels() {
+        if (MCH_OnDemandModels.isEnabled()) {
+            registerModelsOnDemand();
+            return;
+        }
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        MCH_ModelManager.setForceReloadMode(true);
+
+        CompletableFuture<Void> miscFuture = CompletableFuture.runAsync(() -> {
+            long start = System.nanoTime();
+            MCH_RenderAircraft.debugModel = MCH_ModelManager.load("box");
+            MCH_ModelManager.load("a-10");
+            MCH_RenderGLTD.model = MCH_ModelManager.load("gltd");
+            MCH_ModelManager.load("chain");
+            MCH_ModelManager.load("container");
+            MCH_ModelManager.load("parachute1");
+            MCH_ModelManager.load("parachute2");
+            MCH_ModelManager.load("wrench");
+            MCH_ModelManager.load("rangefinder");
+            MCH_ModelManager.load("lweapons", "fim92");
+            MCH_ModelManager.load("lweapons", "fgm148");
+            long end = System.nanoTime();
+            System.out.println("[MCH-LOADER][MISC] Loaded in " + ((end - start) / 1_000_000) + " ms");
+        });
+        CompletableFuture<Void> bulletFuture = CompletableFuture.runAsync(() -> {
+            long start = System.nanoTime();
+            MCH_DefaultBulletModels.Bullet = this.loadBulletModel("bullet");
+            MCH_DefaultBulletModels.AAMissile = this.loadBulletModel("aamissile");
+            MCH_DefaultBulletModels.ATMissile = this.loadBulletModel("asmissile");
+            MCH_DefaultBulletModels.ASMissile = this.loadBulletModel("asmissile");
+            MCH_DefaultBulletModels.Bomb = this.loadBulletModel("bomb");
+            MCH_DefaultBulletModels.Rocket = this.loadBulletModel("rocket");
+            MCH_DefaultBulletModels.Torpedo = this.loadBulletModel("torpedo");
+            registerModels_Bullet();
+            long end = System.nanoTime();
+            System.out.println("[BULLETS] Loaded in " + ((end - start) / 1_000_000) + " ms");
+        });
+
+        CompletableFuture<Void> uavFuture = CompletableFuture.runAsync(() -> {
+            long start = System.nanoTime();
+            for (String s : MCH_RenderUavStation.MODELS) {
+                MCH_ModelManager.load(s);
+
+            }
+            long end = System.nanoTime();
+            System.out.println("[MCH-LOADER][UAV] Loaded in " + ((end - start) / 1_000_000) + " ms");
+        });
+
+        CompletableFuture<Void> heliFuture = CompletableFuture.runAsync(() -> {
+            long start = System.nanoTime();
+            ContentRegistries.heli().forEachValueParallel(info -> {
+                this.registerModelsHeli(info, false);
+            });
+            long end = System.nanoTime();
+            System.out.println("[MCH-LOADER][HELI] Loaded in " + ((end - start) / 1_000_000) + " ms");
+        });
+
+        CompletableFuture<Void> planeFuture = CompletableFuture.runAsync(() -> {
+            long start = System.nanoTime();
+            ContentRegistries.plane().forEachValueParallel(info -> {
+                this.registerModelsPlane(info, false);
+            });
+            long end = System.nanoTime();
+            System.out.println("[MCH-LOADER][PLANE] Loaded in " + ((end - start) / 1_000_000) + " ms");
+        });
+
+        CompletableFuture<Void> shipFuture = CompletableFuture.runAsync(() -> {
+            long start = System.nanoTime();
+            ContentRegistries.ship().forEachValueParallel(info -> {
+                this.registerModelsShip(info, false);
+            });
+            long end = System.nanoTime();
+            System.out.println("[MCH-LOADER][SHIP] Loaded in " + ((end - start) / 1_000_000) + " ms");
+        });
+
+        CompletableFuture<Void> tankFuture = CompletableFuture.runAsync(() -> {
+            long start = System.nanoTime();
+            ContentRegistries.tank().forEachValueParallel(info -> {
+                this.registerModelsTank(info, false);
+            });
+            long end = System.nanoTime();
+            System.out.println("[MCH-LOADER][TANK] Loaded in " + ((end - start) / 1_000_000) + " ms");
+        });
+
+        CompletableFuture<Void> vehicleFuture = CompletableFuture.runAsync(() -> {
+            long start = System.nanoTime();
+            ContentRegistries.vehicle().forEachValueParallel(info -> {
+                this.registerModelsVehicle(info, false);
+            });
+            long end = System.nanoTime();
+            System.out.println("[MCH-LOADER][VEHICLE] Loaded in " + ((end - start) / 1_000_000) + " ms");
+        });
+
+        CompletableFuture<Void> throwableFuture = CompletableFuture.runAsync(() -> {
+            long start = System.nanoTime();
+            for (MCH_ThrowableInfo wi : ContentRegistries.throwable().values()) {
+                wi.model = MCH_ModelManager.load("throwable", wi.name);
+            }
+            long end = System.nanoTime();
+            System.out.println("[MCH-LOADER][THROWABLES] Loaded in " + ((end - start) / 1_000_000) + " ms");
+        });
+
+        CompletableFuture<Void> allTasks = CompletableFuture.allOf(heliFuture, planeFuture, shipFuture, tankFuture, vehicleFuture, bulletFuture, throwableFuture, uavFuture, miscFuture);
+
+        MCH_ModelManager.load("blocks", "drafting_table");
+
+        allTasks.thenRun(() -> {
+            executor.shutdown();
+            System.out.println("All model rendering tasks completed successfully.");
+        }).exceptionally(ex -> {
+            System.err.println("Error during model rendering: " + ex.getMessage());
+            ex.printStackTrace();
+            executor.shutdown();
+            return null;
+        });
+
+        allTasks.join();
+
+        pauseSplash();
+        MCH_ModelManager.makeVBO();
+        resumeSplash();
+    }
+
+
+    private void registerModelsOnDemand() {
+        MCH_ModelManager.setForceReloadMode(true);
+
+        MCH_RenderAircraft.debugModel = MCH_ModelManager.load("box");
+        MCH_ModelManager.load("a-10");
+        MCH_RenderGLTD.model = MCH_ModelManager.load("gltd");
+        MCH_ModelManager.load("chain");
+        MCH_ModelManager.load("container");
+        MCH_ModelManager.load("parachute1");
+        MCH_ModelManager.load("parachute2");
+        MCH_ModelManager.load("wrench");
+        MCH_ModelManager.load("rangefinder");
+        MCH_ModelManager.load("lweapons", "fim92");
+        MCH_ModelManager.load("lweapons", "fgm148");
+
+        MCH_DefaultBulletModels.Bullet = this.loadBulletModel("bullet");
+        MCH_DefaultBulletModels.AAMissile = this.loadBulletModel("aamissile");
+        MCH_DefaultBulletModels.ATMissile = this.loadBulletModel("asmissile");
+        MCH_DefaultBulletModels.ASMissile = this.loadBulletModel("asmissile");
+        MCH_DefaultBulletModels.Bomb = this.loadBulletModel("bomb");
+        MCH_DefaultBulletModels.Rocket = this.loadBulletModel("rocket");
+        MCH_DefaultBulletModels.Torpedo = this.loadBulletModel("torpedo");
+        registerModels_Bullet();
+
+        for (String s : MCH_RenderUavStation.MODELS) {
+            MCH_ModelManager.load(s);
+        }
+        for (MCH_ThrowableInfo wi : ContentRegistries.throwable().values()) {
+            wi.model = MCH_ModelManager.load("throwable", wi.name);
+        }
+        MCH_ModelManager.load("blocks", "drafting_table");
+
+        MCH_ModelManager.setForceReloadMode(false);
+
+        installLazyVehicleModels();
+
+        pauseSplash();
+        MCH_ModelManager.makeVBO(); // upload only the eager small models loaded above
+        resumeSplash();
+        System.out.println("[MCH-LOADER] On-demand model loading enabled — vehicle models load when first rendered.");
+    }
+
+    /**
+     * Install (or re-install, on reload) a lazy placeholder for every vehicle model. The placeholder's
+     * loader is the existing type-specific register method, run on the on-demand background worker.
+     */
+    public void installLazyVehicleModels() {
+        ContentRegistries.heli().forEachValue(info ->
+                MCH_OnDemandModels.install(info, "helicopters/" + info.name, r -> this.registerModelsHeli(info, r)));
+        ContentRegistries.plane().forEachValue(info ->
+                MCH_OnDemandModels.install(info, "planes/" + info.name, r -> this.registerModelsPlane(info, r)));
+        ContentRegistries.ship().forEachValue(info ->
+                MCH_OnDemandModels.install(info, "ships/" + info.name, r -> this.registerModelsShip(info, r)));
+        ContentRegistries.tank().forEachValue(info ->
+                MCH_OnDemandModels.install(info, "tanks/" + info.name, r -> this.registerModelsTank(info, r)));
+        ContentRegistries.vehicle().forEachValue(info ->
+                MCH_OnDemandModels.install(info, "vehicles/" + info.name, r -> this.registerModelsVehicle(info, r)));
+    }
+
+    @Override
+    public void registerModelsHeli(MCH_HeliInfo info, boolean reload) {
+        MCH_ModelManager.setForceReloadMode(reload);
+        uploadModel(info, "helicopters");
+
+        for (MCH_HeliInfo.Rotor rotor : info.rotorList) {
+            rotor.model = this.loadPartModel("helicopters", info.name, info.model, rotor.modelName);
+        }
+
+        this.registerCommonPart("helicopters", info);
+        MCH_ModelManager.setForceReloadMode(false);
+    }
+
+    private boolean resourceExists(String texturePath) {
+        try {
+            ResourceLocation resource = new ResourceLocation(MCH_MOD.MOD_ID, texturePath);
+            Minecraft.getMinecraft().getResourceManager().getResource(resource);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public void registerModelsPlane(MCH_PlaneInfo info, boolean reload) {
+        MCH_ModelManager.setForceReloadMode(reload);
+        uploadModel(info, "planes");
+
+        for (MCH_PlaneInfo.ExhaustFlame exhaustFlame : info.exhaustFlames) {
+            MCH_ModelManager.load("exhaustflames", exhaustFlame.modelName);
+            if (!MCH_PlaneInfo.exhaustFlameTextureMap.containsKey(exhaustFlame.texturePrefix)) {
+                String texturePrefix = exhaustFlame.texturePrefix;
+                int count = 0;
+                try {
+                    for (int i = 0; i < 100; i++) {
+                        String texturePath = "textures/exhaustflames/" + texturePrefix + i + ".png";
+                        if (resourceExists(texturePath)) {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                MCH_PlaneInfo.exhaustFlameTextureMap.put(texturePrefix, count);
+            }
+        }
+
+        for (MCH_AircraftInfo.DrawnPart n : info.nozzles) {
+            n.model = this.loadPartModel("planes", info.name, info.model, n.modelName);
+        }
+
+        for (MCH_PlaneInfo.Rotor r : info.rotorList) {
+            r.model = this.loadPartModel("planes", info.name, info.model, r.modelName);
+
+            for (MCH_PlaneInfo.Blade b : r.blades) {
+                b.model = this.loadPartModel("planes", info.name, info.model, b.modelName);
+            }
+        }
+
+        for (MCH_PlaneInfo.Wing w : info.wingList) {
+            w.model = this.loadPartModel("planes", info.name, info.model, w.modelName);
+            if (w.pylonList != null) {
+                for (MCH_PlaneInfo.Pylon p : w.pylonList) {
+                    p.model = this.loadPartModel("planes", info.name, info.model, p.modelName);
+                }
+            }
+        }
+
+        this.registerCommonPart("planes", info);
+        MCH_ModelManager.setForceReloadMode(false);
+    }
+
+    @Override
+    public void registerModelsShip(MCH_ShipInfo info, boolean reload) {
+        MCH_ModelManager.setForceReloadMode(reload);
+        uploadModel(info, "ships");
+
+        for (MCH_AircraftInfo.DrawnPart n : info.nozzles) {
+            n.model = this.loadPartModel("ships", info.name, info.model, n.modelName);
+        }
+
+        for (MCH_ShipInfo.Rotor r : info.rotorList) {
+            r.model = this.loadPartModel("ships", info.name, info.model, r.modelName);
+
+            for (MCH_ShipInfo.Blade b : r.blades) {
+                b.model = this.loadPartModel("ships", info.name, info.model, b.modelName);
+            }
+        }
+
+        for (MCH_ShipInfo.Wing w : info.wingList) {
+            w.model = this.loadPartModel("ships", info.name, info.model, w.modelName);
+            if (w.pylonList != null) {
+                for (MCH_ShipInfo.Pylon p : w.pylonList) {
+                    p.model = this.loadPartModel("ships", info.name, info.model, p.modelName);
+                }
+            }
+        }
+
+        this.registerCommonPart("ships", info);
+        MCH_ModelManager.setForceReloadMode(false);
+    }
+
+    @Override
+    public void registerModelsVehicle(MCH_VehicleInfo info, boolean reload) {
+        MCH_ModelManager.setForceReloadMode(reload);
+        uploadModel(info, "vehicles");
+        for (MCH_VehicleInfo.VPart vp : info.partList) {
+            vp.model = this.loadPartModel("vehicles", info.name, info.model, vp.modelName);
+            if (vp.child != null) {
+                this.registerVCPModels(info, vp);
+            }
+        }
+
+        this.registerCommonPart("vehicles", info);
+        MCH_ModelManager.setForceReloadMode(false);
+    }
+
+    @Override
+    public void registerModelsTank(MCH_TankInfo info, boolean reload) {
+        MCH_ModelManager.setForceReloadMode(reload);
+        uploadModel(info, "tanks");
+        this.registerCommonPart("tanks", info);
+        MCH_ModelManager.setForceReloadMode(false);
+    }
+
+    private MCH_BulletModel loadBulletModel(String name) {
+        IModelCustom m = MCH_ModelManager.load("bullets", name);
+        return m != null ? new MCH_BulletModel(name, m) : null;
+    }
+
+    private IModelCustom loadPartModel(String path, String name, IModelCustom body, String part) {
+        return body instanceof W_ModelCustom && ((W_ModelCustom) body).containsPart("$" + part) ? null : MCH_ModelManager.load(path, name + "_" + part, true);
+    }
+
+    private void registerCommonPart(String path, MCH_AircraftInfo info) {
+        info.hatchList.parallelStream().forEach(h -> h.model = this.loadPartModel(path, info.name, info.model, h.modelName));
+
+        info.cameraList.parallelStream().forEach(c -> c.model = this.loadPartModel(path, info.name, info.model, c.modelName));
+
+        info.partThrottle.parallelStream().forEach(c -> c.model = this.loadPartModel(path, info.name, info.model, c.modelName));
+
+        info.partRotPart.parallelStream().forEach(c -> c.model = this.loadPartModel(path, info.name, info.model, c.modelName));
+
+        info.partWeapon.parallelStream().forEach(p -> {
+            p.model = this.loadPartModel(path, info.name, info.model, p.modelName);
+            p.child.parallelStream().forEach(wc -> wc.model = this.loadPartModel(path, info.name, info.model, wc.modelName));
+        });
+
+        info.canopyList.parallelStream().forEach(c -> c.model = this.loadPartModel(path, info.name, info.model, c.modelName));
+
+        info.landingGear.parallelStream().forEach(n -> n.model = this.loadPartModel(path, info.name, info.model, n.modelName));
+
+        info.partWeaponBay.parallelStream().forEach(w -> w.model = this.loadPartModel(path, info.name, info.model, w.modelName));
+
+        info.partCrawlerTrack.parallelStream().forEach(c -> c.model = this.loadPartModel(path, info.name, info.model, c.modelName));
+
+        info.partTrackRoller.parallelStream().forEach(c -> c.model = this.loadPartModel(path, info.name, info.model, c.modelName));
+
+        info.partWheel.parallelStream().forEach(c -> c.model = this.loadPartModel(path, info.name, info.model, c.modelName));
+
+        info.partSteeringWheel.parallelStream().forEach(c -> c.model = this.loadPartModel(path, info.name, info.model, c.modelName));
+    }
+
+    private void registerVCPModels(MCH_VehicleInfo info, MCH_VehicleInfo.VPart vp) {
+        for (MCH_VehicleInfo.VPart vcp : vp.child) {
+            vcp.model = this.loadPartModel("vehicles", info.name, info.model, vcp.modelName);
+            if (vcp.child != null) {
+                this.registerVCPModels(info, vcp);
+            }
+        }
+    }
+
+    @Override
+    public void registerClientTick() {
+        Minecraft mc = Minecraft.getMinecraft();
+        ClientCommonTickHandler.instance = new ClientCommonTickHandler(mc, MCH_MOD.config);
+        W_TickRegistry.registerTickHandler(ClientCommonTickHandler.instance, Side.CLIENT);
+    }
+
+    @Override
+    public boolean isRemote() {
+        return true;
+    }
+
+    @Override
+    public String side() {
+        return "Client";
+    }
+
+    @Override
+    public MCH_SoundUpdater CreateSoundUpdater(MCH_EntityAircraft aircraft) {
+        return aircraft != null && aircraft.world.isRemote ? new MCH_SoundUpdater(Minecraft.getMinecraft(), aircraft, Minecraft.getMinecraft().player) : null;
+    }
+
+    @Override
+    public void registerSounds() {
+        super.registerSounds();
+    }
+
+    @Override
+    public void loadConfig(String fileName) {
+        this.lastConfigFileName = fileName;
+        this.config = new MCH_Config(Minecraft.getMinecraft().gameDir.getPath(), "/" + fileName);
+        this.config.load();
+        this.config.write();
+    }
+
+    @Override
+    public void reconfig() {
+        MCH_Logger.debugLog(false, "MCH_ClientProxy.reconfig()");
+        this.loadConfig(this.lastConfigFileName);
+        ClientCommonTickHandler.instance.kbInput.updateKeybind(this.config);
+    }
+
+    @Override
+    public void reloadHUD() {
+        ContentRegistries.hud().reloadAll();
+    }
+
+    @Override
+    public Entity getClientPlayer() {
+        return Minecraft.getMinecraft().player;
+    }
+
+    @Override
+    public void init() {
+        MinecraftForge.EVENT_BUS.register(new MCH_CameraManager());
+        MinecraftForge.EVENT_BUS.register(new MCH_ClientEventHook());
+        MinecraftForge.EVENT_BUS.register(new com.norwood.mcheli.event.MCH_DetachedViewRefresh());
+        MinecraftForge.EVENT_BUS.register(new com.norwood.mcheli.weapon.MCH_RenderLaser());
+        MinecraftForge.EVENT_BUS.register(new com.norwood.mcheli.weapon.MCH_RenderCCIP());
+        MinecraftForge.EVENT_BUS.register(new MCH_OnDemandModels()); // experimental on-demand model eviction sweep
+        super.init();
+    }
+
+    @Override
+    public void setCreativeDigDelay(int n) {
+        W_Reflection.setCreativeDigSpeed(n);
+    }
+
+    @Override
+    public boolean isFirstPerson() {
+        return Minecraft.getMinecraft().gameSettings.thirdPersonView == 0;
+    }
+
+    @Override
+    public boolean isSinglePlayer() {
+        return Minecraft.getMinecraft().isSingleplayer();
+    }
+
+    @Override
+    public void readClientModList() {
+        try {
+            Minecraft mc = Minecraft.getMinecraft();
+            MCH_MultiplayClient.readModList(mc.getSession().getPlayerID(), mc.getSession().getUsername());
+        } catch (Exception var2) {
+            var2.printStackTrace();
+        }
+    }
+
+    @Override
+    public void printChatMessage(ITextComponent chat, int showTime, int pos) {
+        ((MCH_GuiTitle) ClientCommonTickHandler.instance.guiTickHandler.gui_Title).setupTitle(chat, showTime, pos);
+    }
+
+    @Override
+    public void hitBullet() {
+        ClientCommonTickHandler.instance.guiTickHandler.gui_Common.hitBullet();
+    }
+
+    @Override
+    public void clientLocked() {
+        CameraHandler.isLocked = true;
+    }
+
+    @Override
+    public void setRenderEntityDistanceWeight(double renderDistWeight) {
+        Entity.setRenderDistanceWeight(renderDistWeight);
+    }
+
+
+    @Override
+    public List<AddonPack> loadAddonPacks(File addonDir) {
+        return AddonManager.loadAddonsAndAddResources(addonDir);
+    }
+
+    @Override
+    public boolean canLoadContentDirName(String dir) {
+        return "hud".equals(dir) || super.canLoadContentDirName(dir);
+    }
+
+    @Override
+    public void updateGeneratedLanguage() {
+        W_LanguageRegistry.updateGeneratedLang();
+    }
+
+
+    @Deprecated
+    @Override
+    public void updateSoundsJson() {
+    }
+
+    @Override
+    public void registerParticleTextures(TextureStitchEvent.Pre event) {
+        var m = event.getMap();
+        m.registerSprite(MCH_EntityParticleExplode.FLASH);
+        m.registerSprite(HudGPS.GPS_POS);
+        m.registerSprite(HudRWR.RWR);
+        m.registerSprite(HudRWR.RWR_FAC);
+        m.registerSprite(HudRWR.RWR_HELI);
+        m.registerSprite(HudRWR.RWR_TANK);
+        m.registerSprite(HudMortarRadar.CROSS);
+        m.registerSprite(HudMortarRadar.RADAR);
+        m.registerSprite(HudMortarRadar.TARGET);
+        m.registerSprite(WidgetGauge.GAUGE);
+        GLStateManagerExt.pollSize(); //Should be fine...?
+    }
+
+    public void registerShaders(TextureStitchEvent.Post event) {
+        ShaderRegistry.init();
+    }
+
+    public void onLoadComplete(FMLLoadCompleteEvent evt) {
+        super.onLoadComplete(evt);
+
+    }
+    public String deduceVehicleName(MCH_AircraftInfo info){
+        return I18n.hasKey("item.mcheli:" + info.name + ".name") ?
+                I18n.format("item.mcheli:" + info.name + ".name") : info.displayName;
+
+    }
+    public static MCH_EntityAircraft getMouseOverAircraft(EntityLivingBase entity) {
+        RayTraceResult result = getMouseOver(entity, 1.0F);
+        if (result == null || result.entityHit == null) {
+            return null;
+        }
+
+        if (result.entityHit instanceof MCH_EntityAircraft) {
+            return (MCH_EntityAircraft) result.entityHit;
+        }
+
+        if (result.entityHit instanceof MCH_EntitySeat seat) {
+            return seat.getParent();
+        }
+
+        return null;
+    }
+
+    public static W_Entity getMouseOverMCHEntity(EntityLivingBase entity) {
+        RayTraceResult result = getMouseOver(entity, 1.0F);
+        if (result == null || result.entityHit == null) {
+            return null;
+        }
+
+        if (result.entityHit instanceof W_Entity) {
+            return (W_Entity) result.entityHit;
+        }
+        return null;
+    }
+
+
+
+    private static RayTraceResult getMouseOver(EntityLivingBase user, float partialTicks) {
+        double maxDistance = 4.0;
+        RayTraceResult blockTrace = rayTrace(user, maxDistance, partialTicks);
+        double closestDistance = maxDistance;
+
+        Vec3d eyePos = new Vec3d(user.posX, user.posY + user.getEyeHeight(), user.posZ);
+        if (blockTrace != null) {
+            closestDistance = blockTrace.hitVec.distanceTo(eyePos);
+        }
+
+        Vec3d lookVec = user.getLook(partialTicks);
+        Vec3d traceEnd = eyePos.add(lookVec.x * maxDistance, lookVec.y * maxDistance, lookVec.z * maxDistance);
+
+        AxisAlignedBB searchBox = user.getEntityBoundingBox()
+                .expand(lookVec.x * maxDistance, lookVec.y * maxDistance, lookVec.z * maxDistance)
+                .grow(1.0, 1.0, 1.0);
+
+        List<Entity> targets = user.world.getEntitiesWithinAABBExcludingEntity(user, searchBox);
+
+        Entity pointedEntity = null;
+        Vec3d hitVector = null;
+        double currentMinDist = closestDistance;
+
+        for (Entity entity : targets) {
+            if (!entity.canBeCollidedWith()) {
+                continue;
+            }
+
+            float borderSize = entity.getCollisionBorderSize();
+            AxisAlignedBB entityBox = entity.getEntityBoundingBox().grow(borderSize, borderSize, borderSize);
+            RayTraceResult intercept = entityBox.calculateIntercept(eyePos, traceEnd);
+
+            if (entityBox.contains(eyePos)) {
+                pointedEntity = entity;
+                hitVector = (intercept == null) ? eyePos : intercept.hitVec;
+                currentMinDist = 0.0;
+                continue;
+            }
+
+            if (intercept == null) {
+                continue;
+            }
+
+            double distanceToHit = eyePos.distanceTo(intercept.hitVec);
+            if (distanceToHit >= currentMinDist && currentMinDist != 0.0) {
+                continue;
+            }
+
+            if (entity == user.getRidingEntity() && !entity.canRiderInteract()) {
+                if (currentMinDist == 0.0) {
+                    pointedEntity = entity;
+                    hitVector = intercept.hitVec;
+                }
+                continue;
+            }
+
+            pointedEntity = entity;
+            hitVector = intercept.hitVec;
+            currentMinDist = distanceToHit;
+        }
+
+        if (pointedEntity != null && (currentMinDist < closestDistance || blockTrace == null)) {
+            return new RayTraceResult(pointedEntity, hitVector);
+        }
+
+        return blockTrace;
+    }
+
+    private static RayTraceResult rayTrace(EntityLivingBase entity, double dist, float tick) {
+        Vec3d vec3 = new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
+        Vec3d vec31 = entity.getLook(tick);
+        Vec3d vec32 = vec3.add(vec31.x * dist, vec31.y * dist, vec31.z * dist);
+        return entity.world.rayTraceBlocks(vec3, vec32, false, false, true);
+    }
+
+}
+
+

@@ -1,0 +1,19 @@
+DisplayName: Spot Heli/Plane 100s
+Type: targetingpod
+Ballistics:
+  Acceleration: 1.0
+  AccelerationInWater: 1.0
+  Gravity: 0.0
+  GravityInWater: 0.0
+  VelocityInWater: 0.999
+Sound:
+  Locations:
+    Fire: mcheli:lockon
+Explosion:
+  DestructionPower: 0
+FireCooldown: 60
+Target: Planes,Helicopters
+Render:
+  Smoke:
+    BulletColorInWater: '#FFFFFFFF'
+    BulletColor: '#FFFFFFFF'
