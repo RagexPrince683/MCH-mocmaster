@@ -87,7 +87,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastNetForwardAcceleration;
    /** Base stall/takeoff speed before runway-distance scaling. */
    private double lastBaseTakeoffSpeed;
-   /** Effective takeoff speed after TakeoffDistanceMultiplier. */
+   /** Effective takeoff speed after derived ground-roll threshold scaling. */
    private double lastEffectiveTakeoffSpeed;
    /** True when takeoff threshold scaling is actively gating/assisting rotation. */
    private boolean lastTakeoffMultiplierActive;

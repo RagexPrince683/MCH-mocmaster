@@ -19,6 +19,15 @@ Planes inherit every shared key from `base.md` and add visual VTOL/sweep-wing ke
 | `vtolpitch` | float[0.01..1] | 0.2 | VTOL pitch factor. |
 | `enableautopilot` | boolean | false | Legacy autopilot flag. |
 
+
+## Config scale rules
+
+* Normalized fractions, authority values, penalties, retention values, and severities use `0.0` to `1.0` unless a row explicitly lists a narrower asset-grounded range.
+* Percent values exposed as percentages should use `0` to `100`; the fixed-wing flight-model keys in this table are stored as fractions rather than percent text.
+* Angles use degrees. G-limit values use G. Altitude keys such as `FlightCeiling` and `FlightCeilingRange` are Minecraft blocks/meters.
+* Speed keys in this legacy parser remain MCHeli internal speed units and are scaled by `AllPlaneSpeed`; avoid adding new speed keys unless they can be converted explicitly at parse time.
+* Physical/derived internals such as climb sustain, energy deficit, and unsupported vertical-climb pressure should stay calculated from mass, thrust, drag, lift, speed, gravity, AoA, and altitude instead of becoming config keys.
+
 ## Fixed-wing flight-model keys
 
 All values are optional. Speed-like values (`Speed`, `MaxLevelSpeed`, `StallSpeed`, `StallRecoverySpeed`, `CompressibilitySpeed`, `MaxSafeSpeed`, `sweepwingspeed`) are multiplied by the global `AllPlaneSpeed` config during validation.
@@ -34,51 +43,57 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 
 | Key | Type/range | Default | What it changes |
 |---|---:|---:|---|
-| `BaseDrag` | float[0..0.25] | 0.0023 | Baseline drag. Scales with speed ratio squared and also participates in AoA drag. |
-| `InducedDrag` | float[0..0.25] | 0.015 | Extra drag from bank angle and body-rate load. |
-| `ControlSurfaceDrag` | float[0..0.25] | 0.003 | Extra drag while pitch/roll/yaw angular rates are high. |
-| `MaxLevelSpeed` | float[0..4] | 0 = use `Speed` | Sustainable full-power speed in level flight. |
-| `IdleDrag` | float[0..0.25] | 0.0034 | Extra drag as engine output approaches zero. |
-| `PitchTorque`, `RollTorque`, `YawTorque` | float[0..100] | 0.380 / 0.420 / 0.320 | Local-axis torque applied to requested angular rates. Higher values respond faster. |
-| `PitchDamping`, `RollDamping`, `YawDamping` | float[0..100] | 0.410 / 0.405 / 0.475 | Angular damping. Higher values lower steady body rate for the same torque. |
-| `InertiaMultiplier` | float[0.05..100] | 1.550 | Resistance to angular acceleration. Higher values make controls feel heavier. |
-| `Mass` | float[0.05..100] | alias of `InertiaMultiplier` | Legacy/compatibility alias for angular inertia only; does not set physical weight. |
-| `PhysicalMass` | float[0.05..100] | 1.750 | **New flight model only.** Translational mass used for thrust acceleration, drag response, lift-to-weight, weight, climb, and takeoff behavior. |
-| `EngineThrust` | float[0..100] | derived from speed | **New flight model only.** Engine force used as `thrust / PhysicalMass`; affects acceleration, climb, and energy recovery without being a top-speed cap. |
+| `BaseDrag` | normalized drag coefficient [0..0.01] | 0.0023 | Baseline drag. Scales with speed ratio squared and also participates in AoA drag. |
+| `InducedDrag` | normalized drag coefficient [0..0.04] | 0.015 | Extra drag from bank angle and body-rate load. |
+| `ControlSurfaceDrag` | normalized drag coefficient [0..0.02] | 0.0048 | Extra drag while pitch/roll/yaw angular rates are high. |
+| `MaxLevelSpeed` | internal speed [0..6] | 0 = use `Speed` | Sustainable full-power speed in level flight. |
+| `IdleDrag` | normalized drag coefficient [0..0.02] | 0.0034 | Extra drag as engine output approaches zero. |
+| `PitchTorque`, `RollTorque`, `YawTorque` | normalized authority [0..1] | 0.380 / 0.420 / 0.320 | Local-axis torque applied to requested angular rates. Higher values respond faster. |
+| `PitchDamping`, `RollDamping`, `YawDamping` | normalized damping [0..1] | 0.430 / 0.390 / 0.460 | Angular damping. Higher values lower steady body rate for the same torque. |
+| `InertiaMultiplier` | multiplier [0.1..5] | 1.350 | Resistance to angular acceleration. Higher values make controls feel heavier. |
+| `Mass` | legacy float | alias of `InertiaMultiplier` | Legacy/compatibility alias for angular inertia only; does not set physical weight. |
+| `PhysicalMass` | internal mass [0.1..10] | 1.650 | **New flight model only.** Translational mass used for thrust acceleration, drag response, lift-to-weight, weight, climb, and takeoff behavior. |
+| `EngineThrust` | internal force [0..10] | derived from speed | **New flight model only.** Engine force used as `thrust / PhysicalMass`; affects acceleration, climb, and energy recovery without being a top-speed cap. |
 | `ThrottleAcceleration` | float[0..1] | 0.026 | Legacy engine-output spool-up. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateUp`. |
 | `EngineDrag` | float[0..1] | 0.011 | Legacy engine-output spool-down. New-flight planes still use it only to smooth commanded throttle into engine output; pilot input rate is controlled by `NewFlightThrottleChangeRateDown`. |
-| `NewFlightThrottleResponse` | float[0.1..4] | 1.18 | **New flight model only.** Curves smoothed engine output before thrust. `1` is linear, `<1` gives more low-throttle thrust, `>1` softens the low end. |
-| `NewFlightThrottleChangeRateUp` | float[0..0.1] | 0.0055 | **New flight model only.** Pilot-commanded throttle increase per tick. Full idle-to-max travel is about `1 / value` ticks. |
-| `NewFlightThrottleChangeRateDown` | float[0..0.1] | 0.0075 | **New flight model only.** Pilot-commanded throttle decrease per tick. Usually slightly faster than increase for approach and dogfight energy control. |
-| `NewFlightIdleThrottle` | float[0..0.35] | 0.095 | **New flight model only.** Minimum effective engine power at 0% commanded throttle; keeps idle physically plausible without making idle accelerate like cruise. |
-| `NewFlightEngineBrakeDrag` | float[0..0.25] | 0.0030 | **New flight model only.** Closed-throttle/low-power drag used by the energy model. Replaces `IdleDrag` for opted-in planes. |
+| `NewFlightThrottleResponse` | multiplier [0.5..2] | 1.15 | **New flight model only.** Curves smoothed engine output before thrust. `1` is linear, `<1` gives more low-throttle thrust, `>1` softens the low end. |
+| `NewFlightThrottleChangeRateUp` | throttle fraction/tick [0.001..0.02] | 0.0045 | **New flight model only.** Pilot-commanded throttle increase per tick. Full idle-to-max travel is about `1 / value` ticks. |
+| `NewFlightThrottleChangeRateDown` | throttle fraction/tick [0.001..0.02] | 0.0065 | **New flight model only.** Pilot-commanded throttle decrease per tick. Usually slightly faster than increase for approach and dogfight energy control. |
+| `NewFlightIdleThrottle` | normalized fraction [0..0.20] | 0.090 | **New flight model only.** Minimum effective engine power at 0% commanded throttle; keeps idle physically plausible without making idle accelerate like cruise. |
+| `NewFlightEngineBrakeDrag` | normalized drag coefficient [0..0.02] | 0.0034 | **New flight model only.** Closed-throttle/low-power drag used by the energy model. Replaces `IdleDrag` for opted-in planes. |
 | `NewFlightLowThrottleLiftRetention` | float[0..1] | 0.700 | **New flight model only.** Retains this fraction of the legacy throttle-coupled vertical support at idle so lift does not vanish immediately when throttle is chopped. Stall is still driven by airspeed/AoA. |
 | `NewFlightThrottleControlAuthorityScale` | float[0..1] | 0.10 | **New flight model only.** Maximum control-authority penalty at idle. Keep low so glide/landing controls remain useful. |
 | `NewFlightThrottleHudDisplay` | boolean | true | **New flight model only.** Shows pilot HUD text like `THR 85%`. Legacy HUDs are unchanged for planes that do not opt in. |
 | `NewFlightCombatFlaps` | boolean | true | **New flight model only.** Enables the combat-flap toggle on the Extra key. Inactive on legacy planes even if present. |
-| `NewFlightCombatFlapLift` | float[0..1] | 0.120 | **New flight model only.** Added low-speed lift/support and induced-load contribution while combat flaps are deployed. |
-| `NewFlightCombatFlapDrag` | float[0..0.25] | 0.012 | **New flight model only.** Extra drag while combat flaps are deployed. |
-| `NewFlightCombatFlapControl` | float[0..1] | 0.12 | **New flight model only.** Control-authority boost while combat flaps are deployed. |
-| `NewFlightCombatFlapOverspeed` | float[0.1..1] | 0.78 | **New flight model only.** Multiplier applied to `MaxSafeSpeed` while flaps are deployed; lower values punish high-speed flap use earlier. |
-| `StallSpeed` | float[0..10] | 0 | Absolute stall threshold; if 0, uses `max(0.05, topSpeed * StallSpeedFactor)`. |
-| `CriticalAoA` | float[1..90] | 14.00 | AoA in degrees where stall demand begins. |
+| `NewFlightCombatFlapLift` | normalized lift bonus [0..0.30] | 0.120 | **New flight model only.** Added low-speed lift/support and induced-load contribution while combat flaps are deployed. |
+| `NewFlightCombatFlapDrag` | normalized drag coefficient [0..0.05] | 0.014 | **New flight model only.** Extra drag while combat flaps are deployed. |
+| `NewFlightCombatFlapControl` | normalized authority bonus [0..0.40] | 0.14 | **New flight model only.** Control-authority boost while combat flaps are deployed. |
+| `NewFlightCombatFlapOverspeed` | normalized multiplier [0.50..1] | 0.72 | **New flight model only.** Multiplier applied to `MaxSafeSpeed` while flaps are deployed; lower values punish high-speed flap use earlier. |
+| `StallSpeed` | internal speed [0..2] | 0 | Absolute stall threshold; if 0, uses `max(0.05, topSpeed * StallSpeedFactor)`. |
+| `CriticalAoA` | degrees [5..30] | 14.40 | AoA in degrees where stall demand begins. |
 | `StallLiftLoss` | float[0..1] | 0.820 | Fraction of lift removed at full stall. |
-| `AoADragMultiplier` | float[0..10] | 2.550 | Scales quadratic AoA drag. |
-| `StallInstability` | float[0..5] | 0.560 | Buffet, yaw shake, and deterministic wing-drop strength. |
-| `StallRecoverySpeed` | float[0..10] | 0 = `StallSpeed*1.2` | Speed required, with low AoA, to exit a stall. |
-| `StallSpeedFactor` | float[0..0.95] | 0.18 | Legacy derived stall threshold when `StallSpeed` is omitted. |
-| `StallStrength` | float[0..4] | 1.080 | Legacy stall response scale retained for older packs. |
-| `StallPitchRecoveryStrength` | float[0..5] | 0.55 | Nose-down angular-velocity moment applied during stalls. Higher values make light fighters break/recover more aggressively. |
-| `StallBreakStrength` | float[0..5] | 0.65 | Extra nonlinear nose-down impulse for deep stalls. Lower values suit transports or stable aircraft. |
+| `AoADragMultiplier` | multiplier [0..5] | 2.550 | Scales quadratic AoA drag. |
+| `StallInstability` | normalized severity [0..1] | 0.440 | Buffet, yaw shake, and deterministic wing-drop strength. |
+| `StallRecoverySpeed` | internal speed [0..2.5] | 0 = `StallSpeed*1.2` | Speed required, with low AoA, to exit a stall. |
+| `StallSpeedFactor` | multiplier [0..0.5] | 0.18 | Legacy derived stall threshold when `StallSpeed` is omitted. |
+| `StallStrength` | multiplier [0..2] | 1.150 | Legacy stall response scale retained for older packs. |
+| `StallPitchRecoveryStrength` | multiplier [0..2] | 0.55 | Nose-down angular-velocity moment applied during stalls. Higher values make light fighters break/recover more aggressively. |
+| `StallBreakStrength` | multiplier [0..2] | 0.65 | Extra nonlinear nose-down impulse for deep stalls. Lower values suit transports or stable aircraft. |
 | `StallRecoveryRate` | float[0.01..1] | 0.18 | Blend rate used as stall severity fades after the aircraft unloads and meets recovery conditions. |
-| `DiveSpeedMultiplier` | float[1..2] | 1.28 | Maximum speed cap multiplier in a dive. |
-| `MaxComfortableG` | float[1..30] | 7.5 | G where high-G control fade starts. |
-| `MaxStructuralG` | float[1..50] | 8.5 | G where high-G fade reaches the configured penalty and structural hook begins. Warns if below `MaxComfortableG`. |
-| `GControlPenalty` | float[0..1] | 0.680 | Max fraction of authority removed by high G. |
-| `CompressibilitySpeed` | float[0..10] | 0 = 90% of level speed | Speed where pitch authority starts fading. |
+| `DiveSpeedMultiplier` | multiplier [1..1.6] | 1.24 | Maximum speed cap multiplier in a dive. |
+| `MaxComfortableG` | G [1..12] | 5.8 | G where high-G control fade starts. |
+| `MaxStructuralG` | G [1..16] | 8.5 | G where high-G fade reaches the configured penalty and structural hook begins. Warns if below `MaxComfortableG`. |
+| `GControlPenalty` | normalized fraction [0..1] | 0.720 | Max fraction of authority removed by high G. |
+| `CompressibilitySpeed` | internal speed [0..6] | 0 = 90% of level speed | Speed where pitch authority starts fading. |
 | `CompressibilityPitchPenalty` | float[0..1] | 0.5 | Max pitch-authority loss by `MaxSafeSpeed`. |
-| `MaxSafeSpeed` | float[0..10] | 0 = 110% of level speed | Overspeed threshold. Warns if not above `CompressibilitySpeed`. |
-| `OverspeedDamageRate` | float[0..100] | 0.14 | Damage per tick at 100% overspeed. Set 0 to disable damage. |
+| `MaxSafeSpeed` | internal speed [0..7] | 0 = 110% of level speed | Overspeed threshold. Warns if not above `CompressibilitySpeed`. |
+| `OverspeedDamageRate` | damage/tick [0..1] | 0.14 | Damage per tick at 100% overspeed. Set 0 to disable damage. |
+
+## Derived behavior
+
+The new fixed-wing model intentionally keeps climb sustain, unsupported vertical climb, energy deficit, stall recovery pressure, and takeoff rotation as internal calculations instead of pack-maker knobs. These behaviors are derived from `PhysicalMass`, `EngineThrust`, drag (`BaseDrag`, `InducedDrag`, `ControlSurfaceDrag`, AoA drag), lift/stall values (`StallSpeed`, `CriticalAoA`, `StallLiftLoss`), gravity, airspeed, pitch/AoA, throttle, and altitude. Debug flight logging still reports the calculated energy and climb values so aircraft can be audited without exposing every intermediate calculation as config.
+
+Removed unreleased new-flight-model keys are treated as invalid cleanup targets, not compatibility aliases: `ClimbEnergyLoss`, `DiveEnergyGain`, `TakeoffDistanceMultiplier`, `NewFlightIdleNoseUpLimit`, `EnergyRetentionMultiplier`, `ClimbEnergyCostMultiplier`, `PitchEnergyCostMultiplier`, `VerticalClimbEnergyCostMultiplier`, `StallRecoveryEnergyThreshold`, and `SustainedClimbEnergyRequirement`. Use the core physical and aerodynamic values above instead.
 
 ## Derived behavior
 

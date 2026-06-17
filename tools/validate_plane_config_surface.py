@@ -17,6 +17,25 @@ CORE = {"PhysicalMass", "EngineThrust", "BaseDrag", "InducedDrag", "StallSpeed",
 REDUNDANT = [
     {"PhysicalMass", "Mass"},
 ]
+RANGES = {
+    "BaseDrag": (0.0, 0.01), "InducedDrag": (0.0, 0.04), "ControlSurfaceDrag": (0.0, 0.02),
+    "MaxLevelSpeed": (0.0, 6.0), "IdleDrag": (0.0, 0.02),
+    "PitchTorque": (0.0, 1.0), "RollTorque": (0.0, 1.0), "YawTorque": (0.0, 1.0),
+    "PitchDamping": (0.0, 1.0), "RollDamping": (0.0, 1.0), "YawDamping": (0.0, 1.0),
+    "InertiaMultiplier": (0.1, 5.0), "PhysicalMass": (0.1, 10.0), "EngineThrust": (0.0, 10.0),
+    "NewFlightThrottleResponse": (0.5, 2.0), "NewFlightThrottleChangeRateUp": (0.001, 0.02),
+    "NewFlightThrottleChangeRateDown": (0.001, 0.02), "NewFlightIdleThrottle": (0.0, 0.20),
+    "NewFlightEngineBrakeDrag": (0.0, 0.02), "NewFlightLowThrottleLiftRetention": (0.0, 1.0),
+    "NewFlightThrottleControlAuthorityScale": (0.0, 1.0), "NewFlightCombatFlapLift": (0.0, 0.30),
+    "NewFlightCombatFlapDrag": (0.0, 0.05), "NewFlightCombatFlapControl": (0.0, 0.40),
+    "NewFlightCombatFlapOverspeed": (0.50, 1.0), "StallSpeed": (0.0, 2.0), "CriticalAoA": (5.0, 30.0),
+    "StallLiftLoss": (0.0, 1.0), "AoADragMultiplier": (0.0, 5.0), "StallInstability": (0.0, 1.0),
+    "StallRecoverySpeed": (0.0, 2.5), "StallSpeedFactor": (0.0, 0.5), "StallStrength": (0.0, 2.0),
+    "StallPitchRecoveryStrength": (0.0, 2.0), "StallBreakStrength": (0.0, 2.0), "StallRecoveryRate": (0.01, 1.0),
+    "DiveSpeedMultiplier": (1.0, 1.6), "MaxComfortableG": (1.0, 12.0), "MaxStructuralG": (1.0, 16.0),
+    "GControlPenalty": (0.0, 1.0), "CompressibilitySpeed": (0.0, 6.0), "CompressibilityPitchPenalty": (0.0, 1.0),
+    "MaxSafeSpeed": (0.0, 7.0), "OverspeedDamageRate": (0.0, 1.0),
+}
 PARSER = ROOT / "src/main/java/mcheli/plane/MCP_PlaneInfo.java"
 DOC = ROOT / "docs/vehicle-config/planes.md"
 CONFIG_DIR = ROOT / "configreference/planes"
@@ -53,6 +72,14 @@ def main():
             both = sorted(keys & group)
             if len(both) > 1:
                 errors.append(f"{p.relative_to(ROOT)} contains mutually redundant keys: {', '.join(both)}")
+        values = {}
+        for line in p.read_text(errors="ignore").splitlines():
+            m = re.match(r"\s*([A-Za-z][A-Za-z0-9_]*)\s*=\s*([-+0-9.]+)", line)
+            if m:
+                values[m.group(1)] = float(m.group(2))
+        for key, (lo, hi) in RANGES.items():
+            if key in values and not (lo <= values[key] <= hi):
+                errors.append(f"{p.relative_to(ROOT)} {key}={values[key]} is outside documented range {lo}..{hi}")
 
     cleanup_note = re.search(r"Removed unreleased new-flight-model keys.*", doc_text)
     docs_without_note = doc_text.replace(cleanup_note.group(0), "") if cleanup_note else doc_text
@@ -66,6 +93,12 @@ def main():
     undocumented = sorted(k for k in parsed_plane_keys - table_keys if k[:1].isupper() and k not in REMOVED)
     if undocumented:
         errors.append("parsed but undocumented in the plane key table: " + ", ".join(undocumented))
+
+    for key in RANGES:
+        if key not in doc_text:
+            errors.append(f"range-controlled key is missing from docs: {key}")
+        if key not in parser_text:
+            errors.append(f"range-controlled key is missing from parser: {key}")
 
     if errors:
         print("Plane config surface validation failed:")
