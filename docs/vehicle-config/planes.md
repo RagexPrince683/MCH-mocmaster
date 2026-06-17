@@ -95,6 +95,12 @@ The new fixed-wing model intentionally keeps climb sustain, unsupported vertical
 
 Removed unreleased new-flight-model keys are treated as invalid cleanup targets, not compatibility aliases: `ClimbEnergyLoss`, `DiveEnergyGain`, `TakeoffDistanceMultiplier`, `NewFlightIdleNoseUpLimit`, `EnergyRetentionMultiplier`, `ClimbEnergyCostMultiplier`, `PitchEnergyCostMultiplier`, `VerticalClimbEnergyCostMultiplier`, `StallRecoveryEnergyThreshold`, and `SustainedClimbEnergyRequirement`. Use the core physical and aerodynamic values above instead.
 
+## Derived behavior
+
+The new fixed-wing model intentionally keeps climb sustain, unsupported vertical climb, energy deficit, stall recovery pressure, and takeoff rotation as internal calculations instead of pack-maker knobs. These behaviors are derived from `PhysicalMass`, `EngineThrust`, drag (`BaseDrag`, `InducedDrag`, `ControlSurfaceDrag`, AoA drag), lift/stall values (`StallSpeed`, `CriticalAoA`, `StallLiftLoss`), gravity, airspeed, pitch/AoA, throttle, and altitude. Debug flight logging still reports the calculated energy and climb values so aircraft can be audited without exposing every intermediate calculation as config.
+
+Removed unreleased new-flight-model keys are treated as invalid cleanup targets, not compatibility aliases: `ClimbEnergyLoss`, `DiveEnergyGain`, `TakeoffDistanceMultiplier`, `NewFlightIdleNoseUpLimit`, `EnergyRetentionMultiplier`, `ClimbEnergyCostMultiplier`, `PitchEnergyCostMultiplier`, `VerticalClimbEnergyCostMultiplier`, `StallRecoveryEnergyThreshold`, and `SustainedClimbEnergyRequirement`. Use the core physical and aerodynamic values above instead.
+
 ## Formulas and interactions
 
 ### Engine output and throttle
