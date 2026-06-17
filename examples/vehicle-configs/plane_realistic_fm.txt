@@ -25,6 +25,7 @@ EngineThrust = 1.0
 TakeoffDistanceMultiplier = 1.0
 ThrottleAcceleration = 0.026
 EngineDrag = 0.011
+NewFlightIdleNoseUpLimit = 38.0
 StallSpeed = 0.36
 CriticalAoA = 16.0
 StallLiftLoss = 0.820

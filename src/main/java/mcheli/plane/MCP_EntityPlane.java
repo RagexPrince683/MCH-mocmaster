@@ -464,6 +464,18 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
 
+   private double getIdleNoseUpPitchLimit(double stallSpeed) {
+      if(this.getPlaneInfo() == null) {
+         return 90.0D;
+      }
+
+      double configuredLimit = MCH_FlightModel.clamp((double)this.getPlaneInfo().newFlightIdleNoseUpLimit, 5.0D, 89.0D);
+      double recoverySpeed = this.getPlaneInfo().stallRecoverySpeed > 0.0F
+            ? (double)this.getPlaneInfo().stallRecoverySpeed : stallSpeed * 1.2D;
+      double speedDeficit = MCH_FlightModel.clamp((recoverySpeed - this.getAirspeed()) / Math.max(0.05D, recoverySpeed), 0.0D, 1.0D);
+      return configuredLimit + (90.0D - configuredLimit) * (1.0D - speedDeficit);
+   }
+
    private boolean isIdleUnsupportedClimb(double noseUpAttitude, double stallSpeed) {
       if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null || this.getNozzleRotation() > 0.01F || this.onGround) {
          return false;
@@ -472,6 +484,20 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double recoverySpeed = this.getPlaneInfo().stallRecoverySpeed > 0.0F
             ? (double)this.getPlaneInfo().stallRecoverySpeed : stallSpeed * 1.2D;
       return this.getPropulsiveEngineThrottle() <= 0.01D && noseUpAttitude > 0.05D && this.getAirspeed() < recoverySpeed;
+   }
+
+   private float clampIdleUnsupportedNoseUpPitch(float pitch, double stallSpeed) {
+      if(!this.isIdleUnsupportedClimb(MCH_FlightModel.clamp((double)(-pitch - 8.0F) / 42.0D, 0.0D, 1.0D), stallSpeed)) {
+         return pitch;
+      }
+
+      double pitchLimit = this.getIdleNoseUpPitchLimit(stallSpeed);
+      if((double)pitch < -pitchLimit) {
+         this.pitchAngularVelocity = Math.max(0.0F, this.pitchAngularVelocity);
+         this.lastNoseUpPitchSuppression = 1.0D;
+         return (float)(-pitchLimit);
+      }
+      return pitch;
    }
 
    private double getNoseUpPitchSuppression() {
@@ -880,6 +906,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          v.z = MCH_Lib.RNG(v.z, this.getAcInfo().minRotationRoll, this.getAcInfo().maxRotationRoll);
       }
 
+      double stallSpeed = MCH_FlightModel.getStallSpeed(planeInfo.stallSpeed, this.getMaxSpeed(), planeInfo.stallSpeedFactor);
+      v.x = this.clampIdleUnsupportedNoseUpPitch(v.x, stallSpeed);
+
       if(v.z > 180.0F) {
          v.z -= 360.0F;
       }
@@ -894,6 +923,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.onUpdateAngles(partialTicks);
       if(this.getAcInfo().limitRotation) {
          v.x = MCH_Lib.RNG(this.getRotPitch(), this.getAcInfo().minRotationPitch, this.getAcInfo().maxRotationPitch);
+         v.x = this.clampIdleUnsupportedNoseUpPitch(v.x, stallSpeed);
          v.z = MCH_Lib.RNG(this.getRotRoll(), this.getAcInfo().minRotationRoll, this.getAcInfo().maxRotationRoll);
          this.setRotPitch(v.x);
          this.setRotRoll(v.z);
