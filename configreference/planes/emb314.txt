@@ -26,13 +26,14 @@ UseNewMobilitySystem = true
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.200
-EngineThrust = 1.050
+EngineThrust = 1.040
+TakeoffDistanceMultiplier = 0.82
 NewFlightGravity = 0.0081
-NewFlightThrottleResponse = 0.95
-NewFlightThrottleChangeRateUp = 0.0065
-NewFlightThrottleChangeRateDown = 0.0090
-NewFlightIdleThrottle = 0.085
-NewFlightEngineBrakeDrag = 0.0055
+NewFlightThrottleResponse = 0.900
+NewFlightThrottleChangeRateUp = 0.0070
+NewFlightThrottleChangeRateDown = 0.0095
+NewFlightIdleThrottle = 0.075
+NewFlightEngineBrakeDrag = 0.0054
 NewFlightLowThrottleLiftRetention = 0.700
 NewFlightThrottleControlAuthorityScale = 0.16
 NewFlightThrottleHudDisplay = true
@@ -40,13 +41,13 @@ NewFlightCombatFlaps = false
 FlightCeiling = 8500
 FlightCeilingRange = 54
 StallSpeed = 0.256
-CriticalAoA = 14.80
-StallLiftLoss = 0.820
+CriticalAoA = 15.00
+StallLiftLoss = 0.760
 AoADragMultiplier = 2.650
-StallInstability = 0.520
+StallInstability = 0.420
 StallRecoverySpeed = 0.358
 StallSpeedFactor = 0.24
-StallStrength = 1.080
+StallStrength = 1.05
 DiveSpeedMultiplier = 1.2
 MaxComfortableG = 5
 MaxStructuralG = 8.5
@@ -57,9 +58,9 @@ MaxSafeSpeed = 1.253
 OverspeedDamageRate = 0.12
 BaseDrag = 0.0028
 InducedDrag = 0.015
-ControlSurfaceDrag = 0.006
+ControlSurfaceDrag = 0.0060
 ClimbEnergyLoss = 0.017
-DiveEnergyGain = 0.0095
+DiveEnergyGain = 0.0090
 MaxLevelSpeed = 0.986
 IdleDrag = 0.0055
 
@@ -73,9 +74,9 @@ InertiaMultiplier = 1.250
 ThrottleAcceleration = 0.024
 EngineDrag = 0.014
 
-MobilityYaw = 1.02
-MobilityPitch = 1.24
-MobilityRoll = 1.42
+MobilityYaw = 1.051
+MobilityPitch = 1.290
+MobilityRoll = 1.491
 
 HUD = planenvg, plane_gnr
 

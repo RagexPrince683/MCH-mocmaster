@@ -22,31 +22,32 @@ UseNewMobilitySystem = true
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.650
-EngineThrust = 2.842
+EngineThrust = 2.867
+TakeoffDistanceMultiplier = 0.70
 NewFlightGravity = 0.0080
-NewFlightThrottleResponse = 1.18
-NewFlightThrottleChangeRateUp = 0.0055
-NewFlightThrottleChangeRateDown = 0.0075
-NewFlightIdleThrottle = 0.095
-NewFlightEngineBrakeDrag = 0.0030
+NewFlightThrottleResponse = 1.160
+NewFlightThrottleChangeRateUp = 0.0052
+NewFlightThrottleChangeRateDown = 0.0072
+NewFlightIdleThrottle = 0.085
+NewFlightEngineBrakeDrag = 0.0029
 NewFlightLowThrottleLiftRetention = 0.720
 NewFlightThrottleControlAuthorityScale = 0.10
 NewFlightThrottleHudDisplay = true
 NewFlightCombatFlaps = true
 NewFlightCombatFlapLift = 0.120
-NewFlightCombatFlapDrag = 0.012
-NewFlightCombatFlapControl = 0.12
-NewFlightCombatFlapOverspeed = 0.78
+NewFlightCombatFlapDrag = 0.013
+NewFlightCombatFlapControl = 0.130
+NewFlightCombatFlapOverspeed = 0.780
 FlightCeiling = 16500
 FlightCeilingRange = 72
 StallSpeed = 0.760
-CriticalAoA = 16.50
-StallLiftLoss = 0.800
+CriticalAoA = 16.80
+StallLiftLoss = 0.820
 AoADragMultiplier = 2.300
-StallInstability = 0.470
+StallInstability = 0.440
 StallRecoverySpeed = 1.003
 StallSpeedFactor = 0.18
-StallStrength = 0.980
+StallStrength = 1.15
 DiveSpeedMultiplier = 1.28
 MaxComfortableG = 7.5
 MaxStructuralG = 10.0
@@ -56,10 +57,10 @@ CompressibilityPitchPenalty = 0.5
 MaxSafeSpeed = 4.88
 OverspeedDamageRate = 0.14
 BaseDrag = 0.0015
-InducedDrag = 0.007
-ControlSurfaceDrag = 0.003
-ClimbEnergyLoss = 0.008
-DiveEnergyGain = 0.0120
+InducedDrag = 0.0075
+ControlSurfaceDrag = 0.0035
+ClimbEnergyLoss = 0.0085
+DiveEnergyGain = 0.012
 MaxLevelSpeed = 4
 IdleDrag = 0.0034
 
@@ -79,9 +80,9 @@ AddSeat = 0.00, 3.24, 0.00
 
 AddTexture = j15_1
 
-MobilityYaw = 1.272
-MobilityRoll = 1.728
-MobilityPitch = 1.498
+MobilityYaw = 1.323
+MobilityRoll = 1.866
+MobilityPitch = 1.603
 
 AddPartCanopy = 0.00, 4.5607, -1.4737, -1,0,0,  60
 
