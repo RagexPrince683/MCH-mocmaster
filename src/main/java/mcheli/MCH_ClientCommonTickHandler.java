@@ -578,6 +578,14 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                   }
                }
 
+               if(var19 instanceof MCP_EntityPlane && MCP_PlaneChaseCamera.shouldConsumeFreelookMouse((MCP_EntityPlane)var19, var17)) {
+                  MCP_PlaneChaseCamera.addFreelookMouseDelta((mouseDeltaX + prevMouseDeltaX) / 2.0D, (mouseDeltaY + prevMouseDeltaY) / 2.0D);
+                  mouseDeltaX = 0.0D;
+                  mouseDeltaY = 0.0D;
+                  prevMouseDeltaX = 0.0D;
+                  prevMouseDeltaY = 0.0D;
+               }
+
                if(var19.getAcInfo() == null) {
                   var17.setAngles((float)mouseDeltaX, (float)mouseDeltaY);
                } else {

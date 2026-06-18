@@ -85,7 +85,8 @@ The config stores key codes rather than names. Common defaults:
 | Dismount mob/seat action | `KeyUnmountMob` | Y |
 | Flares/chaff/maintenance/APS | `KeyFlare`, `KeyChaff`, `KeyMaintenance`, `KeyAPS` | V |
 | Extra function | `KeyExtra` | F |
-| Free look | `KeyFreeLook` | Left Control |
+| Hold free look | `KeyFreeLook` | Left Control |
+| Plane look ahead | `KeyPlaneLookAhead` | Left Alt |
 | Open MCHeli GUI | `KeyGUI` | R |
 | Gear | `KeyGearUpDown` | B |
 | Rack up/down | `KeyPutToRack`, `KeyDownFromRack` | J / U |

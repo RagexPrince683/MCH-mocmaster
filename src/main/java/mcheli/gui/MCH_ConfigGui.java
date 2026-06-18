@@ -174,7 +174,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.listKeyBindingButtons.add(new W_GuiButton(54, x1 + 90, y + 175, 60, 20, "Reset All"));
       boolean var13 = true;
       boolean var14 = true;
-      MCH_GuiListItemKeyBind[] var10000 = new MCH_GuiListItemKeyBind[29];
+      MCH_GuiListItemKeyBind[] var10000 = new MCH_GuiListItemKeyBind[30];
       MCH_GuiListItemKeyBind var10003 = new MCH_GuiListItemKeyBind(200, 300, x1, "Up", MCH_Config.KeyUp);
       MCH_Config var10009 = MCH_MOD.config;
       var10000[0] = var10003;
@@ -266,6 +266,9 @@ public class MCH_ConfigGui extends W_GuiContainer {
       var10003 = new MCH_GuiListItemKeyBind(228, 328, x1, "Submarine Descend", MCH_Config.KeySubmarineDescend);
       var10009 = MCH_MOD.config;
       var10000[28] = var10003;
+      var10003 = new MCH_GuiListItemKeyBind(229, 329, x1, "Plane Look Ahead", MCH_Config.KeyPlaneLookAhead);
+      var10009 = MCH_MOD.config;
+      var10000[29] = var10003;
       //var10003 = new MCH_GuiListItemKeyBind(227, 327, x1, "Use Weapon Vehicle", MCH_Config.KeyUseWeapon);
       //var10009 = MCH_MOD.config;
       //var10000[26] = var10003;
