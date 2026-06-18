@@ -157,6 +157,22 @@ IgnoreBulletHit = flansmod.common.guns.EntityBullet
 IgnoreBulletHit = flansmod.common.guns.EntityGrenade
 ```
 
+
+### New-flight plane third-person chase camera
+
+These options are client-side visual/readability settings for pilots flying planes that use the new flight/new mobility system. They do not change flight physics, stall behavior, pitch authority, throttle behavior, weapons, targeting, HUD rendering, or aircraft balance. Legacy aircraft, helicopters, tanks, turrets, ships, passengers, and gunners keep the existing camera path unless the gated plane conditions are met.
+
+| Config key | Default | Purpose |
+| --- | ---: | --- |
+| `EnableNewPlaneThirdPersonCamera` | `true` | Enables the smooth chase camera only for third-person pilot view in new-flight planes. |
+| `NewPlaneCameraDistance` | `9.0` | Camera distance in blocks behind the plane. |
+| `NewPlaneCameraHeight` | `2.4` | Vertical offset in blocks above the plane. |
+| `NewPlaneCameraSideOffset` | `0.0` | Optional left/right offset in blocks for off-center chase views. |
+| `NewPlaneCameraPositionSmoothing` | `0.22` | How quickly the camera position catches up to the desired chase point; higher values are snappier. |
+| `NewPlaneCameraRotationSmoothing` | `0.16` | How quickly camera yaw and pitch recenter behind the aircraft; higher values are snappier. |
+| `NewPlaneCameraRollInfluence` | `0.15` | How much aircraft roll is applied to the camera horizon, from `0.0` stable horizon to `1.0` full roll coupling. |
+| `NewPlaneCameraCollision` | `true` | Shortens/moves the chase camera when a block is between the aircraft and desired camera point. |
+
 ## Key config defaults
 
 | Option | Default code | Default input |

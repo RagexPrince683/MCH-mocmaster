@@ -22,6 +22,8 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
    public MCH_Key KeyEjectSeat;
    public MCH_Key KeyZoom;
    public MCH_Key[] Keys;
+   private final MCP_PlaneChaseCamera chaseCamera = new MCP_PlaneChaseCamera();
+   private boolean wasUsingChaseCamera = false;
 
 
    public MCP_ClientPlaneTickHandler(Minecraft minecraft, MCH_Config config) {
@@ -92,7 +94,17 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
          }
 
          boolean hideHand = true;
-         if((!var9 || !var8.isAlwaysCameraView()) && !var8.getIsGunnerMode(var7) && var8.getCameraId() <= 0) {
+         boolean useChaseCamera = this.chaseCamera.shouldUse(super.mc, var7, var8, var9);
+         if(useChaseCamera) {
+            this.chaseCamera.update(super.mc, var7, var8);
+            var12.update(var8.camera);
+            W_Reflection.setThirdPersonDistance(0.1F);
+            MCH_Lib.setRenderViewEntity(var12);
+         } else if((!var9 || !var8.isAlwaysCameraView()) && !var8.getIsGunnerMode(var7) && var8.getCameraId() <= 0) {
+            if(this.wasUsingChaseCamera) {
+               this.chaseCamera.reset();
+               W_Reflection.setThirdPersonDistance(var8.thirdPersonDist);
+            }
             MCH_Lib.setRenderViewEntity(var7);
             if(!var9 && var8.getCurrentWeaponID(var7) < 0) {
                hideHand = false;
@@ -105,8 +117,13 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
             MCH_Lib.disableFirstPersonItemRender(var7.getCurrentEquippedItem());
          }
 
+         this.wasUsingChaseCamera = useChaseCamera;
          super.isRiding = true;
       } else {
+         if(this.wasUsingChaseCamera) {
+            this.chaseCamera.reset();
+            this.wasUsingChaseCamera = false;
+         }
          super.isRiding = false;
       }
 
@@ -118,6 +135,8 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
          MCH_Lib.enableFirstPersonItemRender();
          MCH_Lib.setRenderViewEntity(var7);
          W_Reflection.setCameraRoll(0.0F);
+         this.chaseCamera.reset();
+         this.wasUsingChaseCamera = false;
       }
 
    }
