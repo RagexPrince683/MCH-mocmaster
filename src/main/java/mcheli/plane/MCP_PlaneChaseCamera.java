@@ -16,6 +16,14 @@ public class MCP_PlaneChaseCamera {
    private static MCP_PlaneChaseCamera activeCamera;
    private static MCP_EntityPlane activeRenderPlane;
    private static boolean consumedByRenderHook;
+   private static String currentOwner = "NONE";
+   private static String lastWriterMethod = "NONE";
+   private static int dummyTransformWrites;
+   private static boolean allowNextChaseDummyWrite;
+   private static double desiredX;
+   private static double desiredY;
+   private static double desiredZ;
+   private static MCH_ViewEntityDummy activeDummy;
    private long nextDebugTime;
 
    private MCP_EntityPlane activePlane;
@@ -41,6 +49,7 @@ public class MCP_PlaneChaseCamera {
       if(activeCamera == this) {
          activeCamera = null;
          activeRenderPlane = null;
+         activeDummy = null;
          consumedByRenderHook = false;
       }
    }
@@ -57,7 +66,11 @@ public class MCP_PlaneChaseCamera {
       }
       activeCamera = this;
       activeRenderPlane = plane;
-      this.debugCamera(mc, plane, focus, desired, true);
+      desiredX = desired.xCoord;
+      desiredY = desired.yCoord;
+      desiredZ = desired.zCoord;
+      currentOwner = "CHASE";
+      dummyTransformWrites = 0;
       consumedByRenderHook = false;
 
       float targetYaw = plane.getRotYaw();
@@ -75,6 +88,7 @@ public class MCP_PlaneChaseCamera {
       plane.camera.rotationYaw = this.yaw;
       plane.camera.rotationPitch = this.pitch;
       plane.camera.setPosition(this.posX, this.posY, this.posZ);
+      this.debugCamera(mc, plane, focus, desired, true);
       W_Reflection.setCameraRoll(plane.getRotRoll() * (float)MCH_Config.NewPlaneCameraRollInfluence.prmDouble);
    }
 
@@ -109,11 +123,22 @@ public class MCP_PlaneChaseCamera {
       if(MCH_Config.DebugFlightControl.prmBool && MCH_Config.NewPlaneCameraDebugDistance.prmDouble > 0.0D) {
          return MCH_Config.NewPlaneCameraDebugDistance.prmDouble;
       }
-      return MCH_Config.NewPlaneCameraDistance.prmDouble;
+      return MCH_Lib.RNG(MCH_Config.NewPlaneCameraDistance.prmDouble, MCH_Config.NewPlaneCameraMinDistance.prmDouble, MCH_Config.NewPlaneCameraMaxDistance.prmDouble);
+   }
+
+   private double getCameraDistance(MCP_EntityPlane plane) {
+      if(MCH_Config.DebugFlightControl.prmBool && MCH_Config.NewPlaneCameraDebugDistance.prmDouble > 0.0D) {
+         return MCH_Config.NewPlaneCameraDebugDistance.prmDouble;
+      }
+      double dx = plane.posX - plane.prevPosX;
+      double dy = plane.posY - plane.prevPosY;
+      double dz = plane.posZ - plane.prevPosZ;
+      double speed = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      return MCH_Lib.RNG(MCH_Config.NewPlaneCameraDistance.prmDouble + speed * MCH_Config.NewPlaneCameraSpeedDistanceScale.prmDouble, MCH_Config.NewPlaneCameraMinDistance.prmDouble, MCH_Config.NewPlaneCameraMaxDistance.prmDouble);
    }
 
    private Vec3 computeDesiredCameraPosition(MCP_EntityPlane plane, Vec3 focus) {
-      double distance = this.getCameraDistance();
+      double distance = this.getCameraDistance(plane);
       double height = MCH_Config.NewPlaneCameraHeight.prmDouble;
       double side = MCH_Config.NewPlaneCameraSideOffset.prmDouble;
       Vec3 forward = MCH_Lib.Rot2Vec3(plane.getRotYaw(), 0.0F);
@@ -147,7 +172,7 @@ public class MCP_PlaneChaseCamera {
    }
 
    private Vec3 enforceMinimumDistance(Vec3 focus, Vec3 desired, Vec3 camera) {
-      double minDistance = Math.min(5.0D, Math.max(3.0D, this.getCameraDistance() * 0.35D));
+      double minDistance = MCH_Config.NewPlaneCameraMinDistance.prmDouble;
       if(this.distance(focus, camera) >= minDistance) {
          return camera;
       }
@@ -165,24 +190,15 @@ public class MCP_PlaneChaseCamera {
    private void debugCamera(Minecraft mc, MCP_EntityPlane plane, Vec3 focus, Vec3 desired, boolean shouldUse) {
       if(MCH_Config.DebugFlightControl.prmBool && System.currentTimeMillis() >= this.nextDebugTime) {
          this.nextDebugTime = System.currentTimeMillis() + 1000L;
-         MCP_PlaneInfo info = plane.getPlaneInfo();
-         Entity view = mc.renderViewEntity;
-         float ox = info != null?info.newPlaneCameraFocusOffsetX:0.0F;
-         float oy = info != null?info.newPlaneCameraFocusOffsetY:1.0F;
-         float oz = info != null?info.newPlaneCameraFocusOffsetZ:0.0F;
-         MCH_Lib.Log("[MCHeli][PlaneChaseCamera] desired=(%.3f, %.3f, %.3f) planeCamera=(%.3f, %.3f, %.3f yaw=%.2f pitch=%.2f) view=(%s %.3f, %.3f, %.3f) thirdPerson=%d cameraId=%d shouldUse=%s consumedLastFrame=%s config(distance=%.2f debugDistance=%.2f effectiveDistance=%.2f height=%.2f side=%.2f posSmooth=%.2f rotSmooth=%.2f collision=%s) entity=(%.3f, %.3f, %.3f) focus=(%.3f, %.3f, %.3f) offset=(%.3f, %.3f, %.3f)",
-               new Object[]{Double.valueOf(desired.xCoord), Double.valueOf(desired.yCoord), Double.valueOf(desired.zCoord),
-                     Double.valueOf(plane.camera.posX), Double.valueOf(plane.camera.posY), Double.valueOf(plane.camera.posZ),
-                     Float.valueOf(plane.camera.rotationYaw), Float.valueOf(plane.camera.rotationPitch),
-                     view != null?view.getClass().getSimpleName():"null",
-                     Double.valueOf(view != null?view.posX:0.0D), Double.valueOf(view != null?view.posY:0.0D), Double.valueOf(view != null?view.posZ:0.0D),
-                     Integer.valueOf(mc.gameSettings.thirdPersonView), Integer.valueOf(plane.getCameraId()), Boolean.valueOf(shouldUse), Boolean.valueOf(consumedByRenderHook),
-                     Double.valueOf(MCH_Config.NewPlaneCameraDistance.prmDouble), Double.valueOf(MCH_Config.NewPlaneCameraDebugDistance.prmDouble), Double.valueOf(this.getCameraDistance()),
-                     Double.valueOf(MCH_Config.NewPlaneCameraHeight.prmDouble), Double.valueOf(MCH_Config.NewPlaneCameraSideOffset.prmDouble),
-                     Double.valueOf(MCH_Config.NewPlaneCameraPositionSmoothing.prmDouble), Double.valueOf(MCH_Config.NewPlaneCameraRotationSmoothing.prmDouble), Boolean.valueOf(MCH_Config.NewPlaneCameraCollision.prmBool),
-                     Double.valueOf(plane.posX), Double.valueOf(plane.posY), Double.valueOf(plane.posZ),
-                     Double.valueOf(focus.xCoord), Double.valueOf(focus.yCoord), Double.valueOf(focus.zCoord),
-                     Float.valueOf(ox), Float.valueOf(oy), Float.valueOf(oz)});
+         MCH_ViewEntityDummy dummy = mc != null && mc.theWorld != null?MCH_ViewEntityDummy.getInstance(mc.theWorld):null;
+         double dist = dummy != null?this.distance(Vec3.createVectorHelper(dummy.posX, dummy.posY, dummy.posZ), desired):0.0D;
+         MCH_Lib.Log("[MCHeli][PlaneChaseCamera] owner=%s lastWriter=%s writes=%d dummy=(%.3f, %.3f, %.3f) prev=(%.3f, %.3f, %.3f) lastTick=(%.3f, %.3f, %.3f) desired=(%.3f, %.3f, %.3f) distanceToDesired=%.3f thirdPerson=%d collision=%s",
+               new Object[]{currentOwner, lastWriterMethod, Integer.valueOf(dummyTransformWrites),
+                     Double.valueOf(dummy != null?dummy.posX:0.0D), Double.valueOf(dummy != null?dummy.posY:0.0D), Double.valueOf(dummy != null?dummy.posZ:0.0D),
+                     Double.valueOf(dummy != null?dummy.prevPosX:0.0D), Double.valueOf(dummy != null?dummy.prevPosY:0.0D), Double.valueOf(dummy != null?dummy.prevPosZ:0.0D),
+                     Double.valueOf(dummy != null?dummy.lastTickPosX:0.0D), Double.valueOf(dummy != null?dummy.lastTickPosY:0.0D), Double.valueOf(dummy != null?dummy.lastTickPosZ:0.0D),
+                     Double.valueOf(desired.xCoord), Double.valueOf(desired.yCoord), Double.valueOf(desired.zCoord), Double.valueOf(dist),
+                     Integer.valueOf(mc.gameSettings.thirdPersonView), Boolean.valueOf(MCH_Config.NewPlaneCameraCollision.prmBool)});
       }
    }
 
@@ -194,11 +210,16 @@ public class MCP_PlaneChaseCamera {
       if(dummy == null) {
          return false;
       }
+      activeDummy = dummy;
+      allowNextChaseDummyWrite = true;
       dummy.update(activeRenderPlane.camera);
       W_Reflection.setThirdPersonDistance(0.1F);
+      mc.setRenderViewEntity(dummy);
       MCH_Lib.setRenderViewEntity(dummy);
       W_Reflection.setCameraRoll(activeRenderPlane.getRotRoll() * (float)MCH_Config.NewPlaneCameraRollInfluence.prmDouble);
       consumedByRenderHook = true;
+      logRenderViewEntityState(mc, dummy, "applyActiveRenderCamera");
+      checkRenderViewEntityOwnership(mc, dummy);
       return true;
    }
 
@@ -210,9 +231,92 @@ public class MCP_PlaneChaseCamera {
       if(dummy == null) {
          return false;
       }
+      activeDummy = dummy;
+      allowNextChaseDummyWrite = true;
       dummy.update(plane.camera);
       consumedByRenderHook = true;
       return true;
+   }
+
+   public static boolean isAnyRenderCameraActive() {
+      return activeCamera != null && activeRenderPlane != null && activeDummy != null;
+   }
+
+   public static boolean ownsRenderEntity(Entity entity) {
+      return activeDummy != null && entity == activeDummy;
+   }
+
+   public static void warnSkippedRenderViewRestore(Entity entity, String methodName) {
+      if(activeCamera != null && !ownsRenderEntity(entity)) {
+         MCH_Lib.Log("[MCHeli] WARNING: blocked non-chase renderViewEntity restore in %s to %s", new Object[]{methodName, entity != null?entity.getClass().getName():"null"});
+      }
+   }
+
+   public static boolean enforceActiveRenderCameraOwnership(Minecraft mc, String stage) {
+      if(activeCamera == null || activeRenderPlane == null || mc == null || mc.theWorld == null || activeRenderPlane.isDead) {
+         return false;
+      }
+      MCH_ViewEntityDummy dummy = activeDummy != null?activeDummy:MCH_ViewEntityDummy.getInstance(mc.theWorld);
+      if(dummy == null) {
+         return false;
+      }
+      activeDummy = dummy;
+      if(mc.renderViewEntity != dummy) {
+         MCH_Lib.Log("[MCHeli] WARNING: chase camera lost renderViewEntity ownership to %s", new Object[]{mc.renderViewEntity != null?mc.renderViewEntity.getClass().getName():"null"});
+      }
+      mc.setRenderViewEntity(dummy);
+      MCH_Lib.setRenderViewEntity(dummy);
+      logRenderViewEntityState(mc, dummy, stage);
+      checkRenderViewEntityOwnership(mc, dummy);
+      return true;
+   }
+
+   private static void checkRenderViewEntityOwnership(Minecraft mc, MCH_ViewEntityDummy dummy) {
+      if(mc.renderViewEntity != dummy) {
+         MCH_Lib.Log("[MCHeli] WARNING: chase camera lost renderViewEntity ownership to %s", new Object[]{mc.renderViewEntity != null?mc.renderViewEntity.getClass().getName():"null"});
+      }
+   }
+
+   private static void logRenderViewEntityState(Minecraft mc, MCH_ViewEntityDummy dummy, String stage) {
+      if(!MCH_Config.DebugFlightControl.prmBool || mc == null) {
+         return;
+      }
+      Entity view = mc.renderViewEntity;
+      Entity player = mc.thePlayer;
+      MCH_Lib.Log("[MCHeli][PlaneChaseCamera][%s] renderView=%s id=%d isDummy=%s equalsChaseDummy=%s pos=(%.3f, %.3f, %.3f) prev=(%.3f, %.3f, %.3f) lastTick=(%.3f, %.3f, %.3f) yaw=%.2f pitch=%.2f chaseDummy=(%.3f, %.3f, %.3f) player=(%.3f, %.3f, %.3f) planeCamera=(%.3f, %.3f, %.3f) desired=(%.3f, %.3f, %.3f)",
+            new Object[]{stage, view != null?view.getClass().getName():"null", Integer.valueOf(view != null?view.getEntityId():-1), Boolean.valueOf(view instanceof MCH_ViewEntityDummy), Boolean.valueOf(view == dummy),
+                  Double.valueOf(view != null?view.posX:0.0D), Double.valueOf(view != null?view.posY:0.0D), Double.valueOf(view != null?view.posZ:0.0D),
+                  Double.valueOf(view != null?view.prevPosX:0.0D), Double.valueOf(view != null?view.prevPosY:0.0D), Double.valueOf(view != null?view.prevPosZ:0.0D),
+                  Double.valueOf(view != null?view.lastTickPosX:0.0D), Double.valueOf(view != null?view.lastTickPosY:0.0D), Double.valueOf(view != null?view.lastTickPosZ:0.0D),
+                  Float.valueOf(view != null?view.rotationYaw:0.0F), Float.valueOf(view != null?view.rotationPitch:0.0F),
+                  Double.valueOf(dummy != null?dummy.posX:0.0D), Double.valueOf(dummy != null?dummy.posY:0.0D), Double.valueOf(dummy != null?dummy.posZ:0.0D),
+                  Double.valueOf(player != null?player.posX:0.0D), Double.valueOf(player != null?player.posY:0.0D), Double.valueOf(player != null?player.posZ:0.0D),
+                  Double.valueOf(activeRenderPlane != null?activeRenderPlane.camera.posX:0.0D), Double.valueOf(activeRenderPlane != null?activeRenderPlane.camera.posY:0.0D), Double.valueOf(activeRenderPlane != null?activeRenderPlane.camera.posZ:0.0D),
+                  Double.valueOf(desiredX), Double.valueOf(desiredY), Double.valueOf(desiredZ)});
+   }
+
+
+   public static boolean isRenderCameraActiveFor(MCP_EntityPlane plane, EntityPlayer player) {
+      return activeCamera != null && activeRenderPlane != null && activeRenderPlane == plane && player != null;
+   }
+
+   public static void recordDummyTransformWrite(String methodName, boolean chaseWriter) {
+      if(allowNextChaseDummyWrite) {
+         allowNextChaseDummyWrite = false;
+         chaseWriter = true;
+         methodName = methodName + "[CHASE]";
+      }
+      lastWriterMethod = methodName;
+      ++dummyTransformWrites;
+      if(chaseWriter) {
+         currentOwner = "CHASE";
+      }
+      if(activeCamera != null && !chaseWriter) {
+         currentOwner = methodName.indexOf("Gunner") >= 0?"GUNNER":"LEGACY_SEAT";
+         if(MCH_Config.DebugFlightControl.prmBool) {
+            MCH_Lib.Log("[MCHeli] WARNING: non-chase camera writer while chase camera active: %s", new Object[]{methodName});
+         }
+      }
    }
 
    private float smoothAngle(float current, float target, float smoothing) {

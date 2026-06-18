@@ -5148,7 +5148,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
       }
 
-      if(this instanceof MCP_EntityPlane && MCP_PlaneChaseCamera.applyActiveRiderCamera((MCP_EntityPlane)this)) {
+      if(this instanceof MCP_EntityPlane && MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)this, player)) {
          return;
       }
 

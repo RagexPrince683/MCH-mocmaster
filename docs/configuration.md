@@ -165,10 +165,13 @@ These options are client-side visual/readability settings for pilots flying plan
 | Config key | Default | Purpose |
 | --- | ---: | --- |
 | `EnableNewPlaneThirdPersonCamera` | `true` | Enables the smooth chase camera only for third-person pilot view in new-flight planes. |
-| `NewPlaneCameraDistance` | `9.0` | Camera distance in blocks behind the plane. |
+| `NewPlaneCameraDistance` | `16.0` | Camera distance in blocks behind the plane. |
+| `NewPlaneCameraMinDistance` | `8.0` | Minimum camera distance from the plane focus. |
+| `NewPlaneCameraMaxDistance` | `24.0` | Maximum camera distance from the plane focus. |
 | `NewPlaneCameraDebugDistance` | `0.0` | `DebugFlightControl`-only distance override; set to `20`-`30` to prove the render path is consuming the custom camera, or `0` to disable. |
-| `NewPlaneCameraHeight` | `2.4` | Vertical offset in blocks above the plane. |
+| `NewPlaneCameraHeight` | `4.0` | Vertical offset in blocks above the plane. |
 | `NewPlaneCameraSideOffset` | `0.0` | Optional left/right offset in blocks for off-center chase views. |
+| `NewPlaneCameraSpeedDistanceScale` | `0.08` | Extra chase distance per block/tick of aircraft speed. |
 | `NewPlaneCameraPositionSmoothing` | `0.22` | How quickly the camera position catches up to the desired chase point; higher values are snappier. |
 | `NewPlaneCameraRotationSmoothing` | `0.16` | How quickly camera yaw and pitch recenter behind the aircraft; higher values are snappier. |
 | `NewPlaneCameraRollInfluence` | `0.15` | How much aircraft roll is applied to the camera horizon, from `0.0` stable horizon to `1.0` full roll coupling. |

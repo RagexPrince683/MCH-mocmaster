@@ -83,8 +83,15 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
 
       if(var8 != null && var8.getAcInfo() != null) {
          this.update(var7, var8);
+         boolean useChaseCamera = this.chaseCamera.shouldUse(super.mc, var7, var8, var9);
+         if(!useChaseCamera && this.wasUsingChaseCamera) {
+            this.chaseCamera.reset();
+            W_Reflection.setThirdPersonDistance(var8.thirdPersonDist);
+         }
          MCH_ViewEntityDummy var12 = MCH_ViewEntityDummy.getInstance(super.mc.theWorld);
-         var12.update(var8.camera);
+         if(!useChaseCamera) {
+            var12.update(var8.camera);
+         }
          if(!inGUI) {
             if(!var8.isDestroyed()) {
                this.playerControl(var7, var8, var9);
@@ -94,17 +101,11 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
          }
 
          boolean hideHand = true;
-         boolean useChaseCamera = this.chaseCamera.shouldUse(super.mc, var7, var8, var9);
          if(useChaseCamera) {
             this.chaseCamera.update(super.mc, var7, var8);
-            var12.update(var8.camera);
             W_Reflection.setThirdPersonDistance(0.1F);
             MCH_Lib.setRenderViewEntity(var12);
          } else if((!var9 || !var8.isAlwaysCameraView()) && !var8.getIsGunnerMode(var7) && var8.getCameraId() <= 0) {
-            if(this.wasUsingChaseCamera) {
-               this.chaseCamera.reset();
-               W_Reflection.setThirdPersonDistance(var8.thirdPersonDist);
-            }
             MCH_Lib.setRenderViewEntity(var7);
             if(!var9 && var8.getCurrentWeaponID(var7) < 0) {
                hideHand = false;
