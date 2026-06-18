@@ -203,6 +203,8 @@ energyDeficitSeverity = clamp(shortfall and specific-energy deficit, 0, 1)
 
 `energyDeficitSeverity` is not a Y-motion clamp. When it rises, the aircraft loses nose-up pitch authority, receives extra energy/induced drag, can trigger pitch-break recovery, and biases the nose downward through the normal angular-velocity path. This preserves brief zoom climbs when the aircraft enters with enough usable forward airspeed/energy, but a low-speed or low-throttle aircraft at 80-90 degrees nose-up will bleed energy, stall, and rotate down instead of hovering upward. Low horizontal speed is handled by using positive horizontal forward airspeed for stall recovery, climb validation, pitch authority, and energy-deficit checks, so vertical climbing/falling speed cannot masquerade as lift-producing airflow when `motionX`/`motionZ` are near zero.
 
+Forced nose-down recovery is applied after normal pilot pitch input has been scaled by control authority, low-speed/stall nose-up suppression, and body-rate damping. Severe stall or energy-deficit moments are queued as positive nose-down pitch velocity, then applied as a bounded post-control pitch delta in the same physics tick. This prevents pilot input or the next damping pass from being the first place where recovery affects aircraft attitude.
+
 Tuning guidance:
 
 * Heavy fighters: use similar retention but slightly higher pitch/climb costs so mass and pitch demand matter.
