@@ -2,6 +2,7 @@
 package mcheli.wrapper;
 
 
+import mcheli.plane.MCP_PlaneChaseCamera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -47,6 +48,7 @@ public class W_McClient {
 
     public static void setRenderEntity(EntityLivingBase entity) {
         Minecraft.getMinecraft().renderViewEntity = entity;
+        MCP_PlaneChaseCamera.logCameraWrite("W_McClient.setRenderEntity", entity != null?entity.getClass().getName():"null");
     }
 }
 

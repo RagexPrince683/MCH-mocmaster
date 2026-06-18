@@ -103,8 +103,6 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
          boolean hideHand = true;
          if(useChaseCamera) {
             this.chaseCamera.update(super.mc, var7, var8);
-            W_Reflection.setThirdPersonDistance(0.1F);
-            MCH_Lib.setRenderViewEntity(var12);
          } else if((!var9 || !var8.isAlwaysCameraView()) && !var8.getIsGunnerMode(var7) && var8.getCameraId() <= 0) {
             MCH_Lib.setRenderViewEntity(var7);
             if(!var9 && var8.getCurrentWeaponID(var7) < 0) {

@@ -19,6 +19,7 @@ import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.lweapon.MCH_ClientLightWeaponTickHandler;
 import mcheli.multiplay.MCH_GuiTargetMarker;
 import mcheli.particles.MCH_ParticlesUtil;
+import mcheli.plane.MCP_PlaneChaseCamera;
 import mcheli.tool.rangefinder.MCH_ItemRangeFinder;
 import mcheli.wrapper.W_ClientEventHook;
 import mcheli.wrapper.W_Reflection;
@@ -183,8 +184,11 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
       switch (event.phase) {
          case START:
             smoothing = event.renderTickTime;
+            MCP_PlaneChaseCamera.applyRenderStartCamera(Minecraft.getMinecraft());
+            MCP_PlaneChaseCamera.beginOrientCameraBypass(Minecraft.getMinecraft(), event.renderTickTime);
             break;
          case END:
+            MCP_PlaneChaseCamera.endOrientCameraBypass(Minecraft.getMinecraft());
             break;
       }
    }

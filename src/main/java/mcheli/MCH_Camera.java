@@ -1,5 +1,6 @@
 package mcheli;
 
+import mcheli.plane.MCP_PlaneChaseCamera;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_EntityRenderer;
 import mcheli.wrapper.W_Lib;
@@ -131,6 +132,7 @@ public class MCH_Camera {
       this.posX = x;
       this.posY = y;
       this.posZ = z;
+      MCP_PlaneChaseCamera.logCameraWrite("MCH_Camera.setPosition", String.format("pos=(%.3f,%.3f,%.3f)", Double.valueOf(x), Double.valueOf(y), Double.valueOf(z)));
    }
 
    public void setCameraZoom(float z) {
