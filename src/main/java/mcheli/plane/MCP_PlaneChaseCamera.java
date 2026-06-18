@@ -66,7 +66,6 @@ public class MCP_PlaneChaseCamera {
       this.activePlane = null;
       this.activeView = -1;
       this.initialized = false;
-      this.hardProofFrame = 0;
       W_Reflection.setCameraRoll(0.0F);
       if(activeCamera == this) {
          activeCamera = null;
