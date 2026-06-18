@@ -65,6 +65,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm KeyCameraDistDown;
    public static MCH_ConfigPrm KeyFreeLook;
    public static MCH_ConfigPrm KeyPlaneLookAhead;
+   public static MCH_ConfigPrm KeyPlaneMouseAim;
    public static MCH_ConfigPrm KeyGUI;
    public static MCH_ConfigPrm KeyGearUpDown;
    public static MCH_ConfigPrm KeyPutToRack;
@@ -150,6 +151,17 @@ public class MCH_Config {
    public static MCH_ConfigPrm MouseControlStickModeHeli;
    public static MCH_ConfigPrm MouseControlStickModePlane;
    public static MCH_ConfigPrm MouseControlFlightSimMode;
+   public static MCH_ConfigPrm EnableMouseAimControls;
+   public static MCH_ConfigPrm MouseAimSensitivity;
+   public static MCH_ConfigPrm MouseAimSmoothing;
+   public static MCH_ConfigPrm MouseAimMaxPitchUp;
+   public static MCH_ConfigPrm MouseAimMaxPitchDown;
+   public static MCH_ConfigPrm MouseAimYawResponse;
+   public static MCH_ConfigPrm MouseAimPitchResponse;
+   public static MCH_ConfigPrm MouseAimAutoBankStrength;
+   public static MCH_ConfigPrm MouseAimAutoBankMaxRoll;
+   public static MCH_ConfigPrm MouseAimCenteringStrength;
+   public static MCH_ConfigPrm MouseAimDebug;
    public static MCH_ConfigPrm SwitchWeaponWithMouseWheel;
    public static MCH_ConfigPrm AllPlaneSpeed;
    public static MCH_ConfigPrm NewFlightGravity;
@@ -321,6 +333,7 @@ public class MCH_Config {
       KeyCameraDistDown = new MCH_ConfigPrm("KeyCameraDistanceDown", 209);
       KeyFreeLook = new MCH_ConfigPrm("KeyFreeLook", 29);
       KeyPlaneLookAhead = new MCH_ConfigPrm("KeyPlaneLookAhead", 56);
+      KeyPlaneMouseAim = new MCH_ConfigPrm("KeyPlaneMouseAim", 49);
       KeyGUI = new MCH_ConfigPrm("KeyGUI", 19);
       KeyGearUpDown = new MCH_ConfigPrm("KeyGearUpDown", 48);
       KeyPutToRack = new MCH_ConfigPrm("KeyPutToRack", 36);
@@ -348,6 +361,7 @@ public class MCH_Config {
               KeyCameraDistDown,
               KeyFreeLook,
               KeyPlaneLookAhead,
+              KeyPlaneMouseAim,
               KeyGUI,
               KeyGearUpDown,
               KeyPutToRack,
@@ -433,6 +447,18 @@ public class MCH_Config {
       MouseControlStickModePlane = new MCH_ConfigPrm("MouseControlStickModePlane", false);
       MouseControlFlightSimMode = new MCH_ConfigPrm("MouseControlFlightSimMode", true);
       MouseControlFlightSimMode.desc = ";MouseControlFlightSimMode = true ( Yaw:key, Roll=mouse )";
+      EnableMouseAimControls = new MCH_ConfigPrm("EnableMouseAimControls", false);
+      EnableMouseAimControls.desc = ";Experimental client-side mouse-follow controls for new-flight-model planes only. KeyPlaneMouseAim toggles this mode while riding a qualifying plane.";
+      MouseAimSensitivity = new MCH_ConfigPrm("MouseAimSensitivity", 0.18D);
+      MouseAimSmoothing = new MCH_ConfigPrm("MouseAimSmoothing", 0.30D);
+      MouseAimMaxPitchUp = new MCH_ConfigPrm("MouseAimMaxPitchUp", 70.0D);
+      MouseAimMaxPitchDown = new MCH_ConfigPrm("MouseAimMaxPitchDown", 55.0D);
+      MouseAimYawResponse = new MCH_ConfigPrm("MouseAimYawResponse", 0.85D);
+      MouseAimPitchResponse = new MCH_ConfigPrm("MouseAimPitchResponse", 0.85D);
+      MouseAimAutoBankStrength = new MCH_ConfigPrm("MouseAimAutoBankStrength", 1.10D);
+      MouseAimAutoBankMaxRoll = new MCH_ConfigPrm("MouseAimAutoBankMaxRoll", 65.0D);
+      MouseAimCenteringStrength = new MCH_ConfigPrm("MouseAimCenteringStrength", 0.18D);
+      MouseAimDebug = new MCH_ConfigPrm("MouseAimDebug", false);
       SwitchWeaponWithMouseWheel = new MCH_ConfigPrm("SwitchWeaponWithMouseWheel", true);
       AllHeliSpeed = new MCH_ConfigPrm("AllHeliSpeed", 1.5D);
       AllPlaneSpeed = new MCH_ConfigPrm("AllPlaneSpeed", 1000.00D);
@@ -638,6 +664,17 @@ public class MCH_Config {
               MouseControlStickModeHeli,
               MouseControlStickModePlane,
               MouseControlFlightSimMode,
+              EnableMouseAimControls,
+              MouseAimSensitivity,
+              MouseAimSmoothing,
+              MouseAimMaxPitchUp,
+              MouseAimMaxPitchDown,
+              MouseAimYawResponse,
+              MouseAimPitchResponse,
+              MouseAimAutoBankStrength,
+              MouseAimAutoBankMaxRoll,
+              MouseAimCenteringStrength,
+              MouseAimDebug,
               AutoThrottleDownHeli,
               AutoThrottleDownPlane,
               AutoThrottleDownShip,

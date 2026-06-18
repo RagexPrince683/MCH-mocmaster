@@ -433,3 +433,11 @@ Use this key only as a takeoff/runway correction after the aircraft's mass, thru
 Combat flaps are intentionally gated by `useNewMobilitySystem = true`; legacy packs are unaffected unless they opt in. With `NewFlightCombatFlaps = true`, the pilot toggles flaps with the Extra key, the HUD appends `FLP`, and the new flight model applies lift/control help plus extra drag and a lower safe overspeed threshold.
 
 Use flaps with low or moderate throttle for landing and low-speed control. High throttle with flaps can improve a short turn, but the extra drag and reduced `MaxSafeSpeed * NewFlightCombatFlapOverspeed` should punish extended high-speed use. Throttle chopping plus flaps helps manage speed but should not be tuned into an instant brake; raise `NewFlightCombatFlapDrag` gradually and keep `NewFlightEngineBrakeDrag` modest.
+
+## Experimental mouse-aim control foundation
+
+New-flight-model planes can opt into an experimental client-side mouse-follow control foundation through the global MCHeli config. This is currently not a per-plane parser feature: `EnableMouseAimControls` must be enabled globally, then pilots toggle the mode with `KeyPlaneMouseAim` while flying a plane with `UseNewMobilitySystem = true`.
+
+The mode keeps a separate desired aim yaw/pitch derived from smoothed mouse movement, clamps pitch to `MouseAimMaxPitchUp`/`MouseAimMaxPitchDown`, converts aim error into pitch/yaw commands, and adds coordinated auto-bank governed by `MouseAimAutoBankStrength`, `MouseAimAutoBankMaxRoll`, and `MouseAimCenteringStrength`. Those commands still flow through the existing new-flight control authority, stall, energy, unsupported climb, compressibility, and angular-velocity integration code. It does not directly set aircraft rotation and does not change legacy aircraft.
+
+This pass intentionally does not add HUD or reticle polish; it only provides the control foundation and debug telemetry (`MouseAimDebug` or `DebugFlightControl`).

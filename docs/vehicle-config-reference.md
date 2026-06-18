@@ -235,6 +235,15 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `NewFlightLowThrottleLiftRetention` | Plane | float[0..1] | 0.700 | new-flight-only lift/support retained at idle |
 | `NewFlightThrottleControlAuthorityScale` | Plane | float[0..1] | 0.10 | new-flight-only idle control-authority penalty |
 | `NewFlightThrottleHudDisplay` | Plane | boolean | true | show `THR 0-100%` for new-flight pilots |
+| `EnableMouseAimControls` | Global/client | boolean | false | experimental mouse-follow controls for new-flight planes only; not currently per-plane |
+| `MouseAimSensitivity` | Global/client | float | 0.18 | raw mouse movement to desired aim yaw/pitch scale |
+| `MouseAimSmoothing` | Global/client | float | 0.30 | desired aim smoothing to avoid jitter |
+| `MouseAimMaxPitchUp` / `MouseAimMaxPitchDown` | Global/client | degrees | 70 / 55 | desired aim pitch clamps |
+| `MouseAimYawResponse` / `MouseAimPitchResponse` | Global/client | float | 0.85 / 0.85 | aim error to existing control command response |
+| `MouseAimAutoBankStrength` | Global/client | float | 1.10 | coordinated bank demand from lateral aim error |
+| `MouseAimAutoBankMaxRoll` | Global/client | degrees | 65 | auto-bank target roll clamp |
+| `MouseAimCenteringStrength` | Global/client | float | 0.18 | roll damping/level-out strength near center aim |
+| `MouseAimDebug` | Global/client | boolean | false | includes mouse-aim telemetry in flight-control debug output |
 | `NewFlightCombatFlaps` | Plane | boolean | true | enables new-flight-only combat flaps |
 | `NewFlightCombatFlapLift` | Plane | float[0..1] | 0.120 | flap lift/support contribution |
 | `NewFlightCombatFlapDrag` | Plane | float[0..0.25] | 0.012 | flap drag penalty |
