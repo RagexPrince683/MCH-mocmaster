@@ -21,6 +21,7 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
    public MCH_Key KeySwitchMode;
    public MCH_Key KeyEjectSeat;
    public MCH_Key KeyZoom;
+   public MCH_Key KeyMouseAim;
    public MCH_Key[] Keys;
    private final MCP_PlaneChaseCamera chaseCamera = new MCP_PlaneChaseCamera();
    private boolean wasUsingChaseCamera = false;
@@ -36,7 +37,8 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
       this.KeySwitchMode = new MCH_Key(MCH_Config.KeySwitchMode.prmInt);
       this.KeyEjectSeat = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
       this.KeyZoom = new MCH_Key(MCH_Config.KeyZoom.prmInt);
-      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, super.KeyUseWeapon,super.KeyCurrentWeaponLock, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyChaff,super.KeyAPS, super.KeyMaintenance, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
+      this.KeyMouseAim = new MCH_Key(MCH_Config.KeyPlaneMouseAim.prmInt);
+      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, super.KeyUseWeapon,super.KeyCurrentWeaponLock, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, this.KeyMouseAim, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyChaff,super.KeyAPS, super.KeyMaintenance, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
    }
 
    protected void update(EntityPlayer player, MCP_EntityPlane plane) {
@@ -231,6 +233,16 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
          } else {
             plane.zoomCamera();
             playSound("zoom", 0.5F, 1.0F);
+         }
+      }
+
+      if(isPilot && this.KeyMouseAim.isKeyDown()) {
+         if(plane.isNewFlightModelEnabled() && MCH_Config.EnableMouseAimControls.prmBool) {
+            plane.toggleMouseAimControls();
+            send = true;
+            playSoundOK();
+         } else {
+            playSoundNG();
          }
       }
 

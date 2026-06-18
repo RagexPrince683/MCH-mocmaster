@@ -49,6 +49,20 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    public float rotationRotor;
    public float prevRotationRotor;
    public float addkeyRotValue;
+   private boolean mouseAimControlsEnabled;
+   private boolean mouseAimInitialized;
+   private float mouseAimDesiredYaw;
+   private float mouseAimDesiredPitch;
+   private float mouseAimSmoothedYaw;
+   private float mouseAimSmoothedPitch;
+   private float mouseAimYawError;
+   private float mouseAimPitchError;
+   private float mouseAimGeneratedYawCommand;
+   private float mouseAimGeneratedPitchCommand;
+   private float mouseAimGeneratedRollCommand;
+   private float mouseAimAutoBankTargetRoll;
+   private boolean mouseAimManualRollActive;
+   private boolean mouseAimVanillaCrosshairSuppressed;
    /** Smoothed engine output; commanded throttle remains unchanged for controls and networking. */
    private double engineThrottle;
    /** Last total drag fraction applied by the fixed-wing energy model, exposed for debug output. */
@@ -610,6 +624,130 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       return this.pitchBreakActive;
    }
 
+   public void toggleMouseAimControls() {
+      if(!this.isNewFlightModelEnabled() || !MCH_Config.EnableMouseAimControls.prmBool) {
+         this.mouseAimControlsEnabled = false;
+         this.mouseAimInitialized = false;
+         return;
+      }
+
+      this.mouseAimControlsEnabled = !this.mouseAimControlsEnabled;
+      this.initializeMouseAimFromAircraft();
+   }
+
+   private void initializeMouseAimFromAircraft() {
+      this.mouseAimDesiredYaw = this.getRotYaw();
+      this.mouseAimSmoothedYaw = this.mouseAimDesiredYaw;
+      this.mouseAimDesiredPitch = this.clampMouseAimPitch(this.getRotPitch());
+      this.mouseAimSmoothedPitch = this.mouseAimDesiredPitch;
+      this.mouseAimYawError = 0.0F;
+      this.mouseAimPitchError = 0.0F;
+      this.mouseAimGeneratedYawCommand = 0.0F;
+      this.mouseAimGeneratedPitchCommand = 0.0F;
+      this.mouseAimGeneratedRollCommand = 0.0F;
+      this.mouseAimAutoBankTargetRoll = 0.0F;
+      this.mouseAimManualRollActive = false;
+      this.mouseAimInitialized = true;
+   }
+
+   private boolean shouldUseMouseAimControls(Entity player) {
+      return player != null && this.isPilot(player) && this.isNewFlightModelEnabled() && MCH_Config.EnableMouseAimControls.prmBool
+            && this.mouseAimControlsEnabled && !this.isFreeLookMode() && !super.isGunnerMode;
+   }
+
+   public boolean isMouseAimControlsEnabled() {
+      return this.isNewFlightModelEnabled() && MCH_Config.EnableMouseAimControls.prmBool && this.mouseAimControlsEnabled;
+   }
+
+   public boolean shouldDrawMouseAimReticle(Entity player) {
+      return this.shouldUseMouseAimControls(player) && MCH_Config.EnablePlaneMouseAimReticle.prmBool;
+   }
+
+   public boolean shouldSuppressVanillaCrosshair(Entity player) {
+      boolean suppress = this.shouldDrawMouseAimReticle(player) && MCH_Config.HideVanillaCrosshairInPlaneMouseAim.prmBool;
+      this.mouseAimVanillaCrosshairSuppressed = suppress;
+      return suppress;
+   }
+
+   public float getMouseAimDesiredYaw() {
+      return this.mouseAimSmoothedYaw;
+   }
+
+   public float getMouseAimDesiredPitch() {
+      return this.mouseAimSmoothedPitch;
+   }
+
+   public float getMouseAimYawError() {
+      return this.mouseAimYawError;
+   }
+
+   public float getMouseAimPitchError() {
+      return this.mouseAimPitchError;
+   }
+
+   public boolean wasMouseAimVanillaCrosshairSuppressed() {
+      return this.mouseAimVanillaCrosshairSuppressed;
+   }
+
+   private float clampMouseAimPitch(float pitch) {
+      float maxUp = (float)MCH_FlightModel.clamp(MCH_Config.MouseAimMaxPitchUp.prmDouble, 0.0D, 89.0D);
+      float maxDown = (float)MCH_FlightModel.clamp(MCH_Config.MouseAimMaxPitchDown.prmDouble, 0.0D, 89.0D);
+      return MCH_Lib.RNG(pitch, -maxUp, maxDown);
+   }
+
+   private float smoothMouseAimAngle(float current, float target, float smoothing, float partialTicks) {
+      float alpha = (float)MCH_FlightModel.clamp(1.0D - Math.pow(1.0D - (double)smoothing, (double)partialTicks), 0.0D, 1.0D);
+      return current + MathHelper.wrapAngleTo180_float(target - current) * alpha;
+   }
+
+   private void updateMouseAimState(float deltaX, float deltaY, float partialTicks) {
+      if(!this.mouseAimInitialized) {
+         this.initializeMouseAimFromAircraft();
+      }
+
+      float sensitivity = (float)MCH_FlightModel.clamp(MCH_Config.MouseAimSensitivity.prmDouble, 0.01D, 5.0D);
+      this.mouseAimDesiredYaw = MathHelper.wrapAngleTo180_float(this.mouseAimDesiredYaw + deltaX * sensitivity);
+      this.mouseAimDesiredPitch = this.clampMouseAimPitch(this.mouseAimDesiredPitch + deltaY * sensitivity);
+
+      float smoothing = (float)MCH_FlightModel.clamp(MCH_Config.MouseAimSmoothing.prmDouble, 0.0D, 1.0D);
+      this.mouseAimSmoothedYaw = MathHelper.wrapAngleTo180_float(this.smoothMouseAimAngle(this.mouseAimSmoothedYaw, this.mouseAimDesiredYaw, smoothing, partialTicks));
+      this.mouseAimSmoothedPitch = this.smoothMouseAimAngle(this.mouseAimSmoothedPitch, this.mouseAimDesiredPitch, smoothing, partialTicks);
+
+      this.mouseAimYawError = MathHelper.wrapAngleTo180_float(this.mouseAimSmoothedYaw - this.getRotYaw());
+      this.mouseAimPitchError = MathHelper.wrapAngleTo180_float(this.mouseAimSmoothedPitch - this.getRotPitch());
+   }
+
+   private float getMouseAimYawCommand(double limit) {
+      float response = (float)MCH_FlightModel.clamp(MCH_Config.MouseAimYawResponse.prmDouble, 0.0D, 5.0D);
+      this.mouseAimGeneratedYawCommand = (float)MCH_FlightModel.clamp((double)(this.mouseAimYawError * response), -limit, limit);
+      return this.mouseAimGeneratedYawCommand;
+   }
+
+   private float getMouseAimPitchCommand(double limit) {
+      float response = (float)MCH_FlightModel.clamp(MCH_Config.MouseAimPitchResponse.prmDouble, 0.0D, 5.0D);
+      this.mouseAimGeneratedPitchCommand = (float)MCH_FlightModel.clamp((double)(-this.mouseAimPitchError * response), -limit, limit);
+      return this.mouseAimGeneratedPitchCommand;
+   }
+
+   private float getMouseAimRollCommand(float manualRoll, double limit) {
+      this.mouseAimAutoBankTargetRoll = (float)MCH_FlightModel.clamp((double)(this.mouseAimYawError * MCH_Config.MouseAimAutoBankStrength.prmDouble),
+            -MCH_Config.MouseAimAutoBankMaxRoll.prmDouble, MCH_Config.MouseAimAutoBankMaxRoll.prmDouble);
+      float centering = (float)MCH_FlightModel.clamp(MCH_Config.MouseAimCenteringStrength.prmDouble, 0.0D, 5.0D);
+      float autoBank = (this.mouseAimAutoBankTargetRoll - this.getRotRoll()) * centering;
+      this.mouseAimManualRollActive = MathHelper.abs(manualRoll) > 0.001F;
+      this.mouseAimGeneratedRollCommand = (float)MCH_FlightModel.clamp((double)(autoBank + manualRoll), -limit, limit);
+      return this.mouseAimGeneratedRollCommand;
+   }
+
+   public String getMouseAimDebugString() {
+      return String.format("mouseAim=(enabled=%s,desiredYaw=%.2f,desiredPitch=%.2f,yawError=%.2f,pitchError=%.2f,pitchCmd=%.4f,yawCmd=%.4f,rollCmd=%.4f,autoBankTargetRoll=%.2f,manualRoll=%s,crosshairSuppressed=%s)",
+            Boolean.valueOf(this.mouseAimControlsEnabled), Float.valueOf(this.mouseAimSmoothedYaw), Float.valueOf(this.mouseAimSmoothedPitch),
+            Float.valueOf(this.mouseAimYawError), Float.valueOf(this.mouseAimPitchError), Float.valueOf(this.mouseAimGeneratedPitchCommand),
+            Float.valueOf(this.mouseAimGeneratedYawCommand), Float.valueOf(this.mouseAimGeneratedRollCommand),
+            Float.valueOf(this.mouseAimAutoBankTargetRoll), Boolean.valueOf(this.mouseAimManualRollActive),
+            Boolean.valueOf(this.mouseAimVanillaCrosshairSuppressed));
+   }
+
    public double getLastAerodynamicDrag() {
       return this.lastAerodynamicDrag;
    }
@@ -928,13 +1066,23 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          x = 0.0F;
       }
 
+      boolean useMouseAim = this.shouldUseMouseAimControls(player);
+      if(useMouseAim) {
+         this.updateMouseAimState(deltaX, deltaY, partialTicks);
+         x = 0.0F;
+         y = 0.0F;
+      } else if(this.mouseAimControlsEnabled && (!this.isNewFlightModelEnabled() || !MCH_Config.EnableMouseAimControls.prmBool)) {
+         this.mouseAimControlsEnabled = false;
+         this.mouseAimInitialized = false;
+      }
+
       float yaw = 0.0F;
       float pitch = 0.0F;
       float roll = 0.0F;
       double m_add;
       if(this.canUpdateYaw(player)) {
          m_add = this.getAddRotationYawLimit();
-         yaw = this.getControlRotYaw(x, y, partialTicks);
+         yaw = useMouseAim ? this.getMouseAimYawCommand(m_add) : this.getControlRotYaw(x, y, partialTicks);
          if((double)yaw < -m_add) {
             yaw = (float)(-m_add);
          }
@@ -948,7 +1096,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       if(this.canUpdatePitch(player)) {
          m_add = this.getAddRotationPitchLimit();
-         pitch = this.getControlRotPitch(x, y, partialTicks);
+         pitch = useMouseAim ? this.getMouseAimPitchCommand(m_add) : this.getControlRotPitch(x, y, partialTicks);
          if((double)pitch < -m_add) {
             pitch = (float)(-m_add);
          }
@@ -963,6 +1111,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       if(this.canUpdateRoll(player)) {
          m_add = this.getAddRotationRollLimit();
          roll = this.getControlRotRoll(x, y, partialTicks);
+         if(useMouseAim) {
+            roll = this.getMouseAimRollCommand(roll, m_add);
+         }
          if((double)roll < -m_add) {
             roll = (float)(-m_add);
          }

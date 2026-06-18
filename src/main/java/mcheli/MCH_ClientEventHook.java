@@ -20,11 +20,13 @@ import mcheli.lweapon.MCH_ClientLightWeaponTickHandler;
 import mcheli.multiplay.MCH_GuiTargetMarker;
 import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.plane.MCP_PlaneChaseCamera;
+import mcheli.plane.MCP_EntityPlane;
 import mcheli.tool.rangefinder.MCH_ItemRangeFinder;
 import mcheli.wrapper.W_ClientEventHook;
 import mcheli.wrapper.W_Reflection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -49,6 +51,9 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
    private static boolean cancelRender = true;
 
    public static float smoothing;
+   private static long nextPlaneMouseAimReticleDebugTime;
+   private static final ResourceLocation PLANE_MOUSE_AIM_RETICLE_TEXTURE =
+         new ResourceLocation("mcheli", "textures/gui/plane_crosshair.png");
 
    public void renderLivingEventSpecialsPre(Pre event) {
       MCH_Config var10000 = MCH_MOD.config;
@@ -178,6 +183,198 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
          MCH_ParticlesUtil.clearMarkPoint();
       }
 
+   }
+
+   @SubscribeEvent
+   public void onRenderOverlayPre(RenderGameOverlayEvent.Pre event) {
+      if(event == null || event.type != RenderGameOverlayEvent.ElementType.CROSSHAIRS) {
+         return;
+      }
+
+      EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+      if(player == null) {
+         return;
+      }
+      MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
+      if(ac instanceof MCP_EntityPlane && ((MCP_EntityPlane)ac).shouldSuppressVanillaCrosshair(player)) {
+         event.setCanceled(true);
+      }
+   }
+
+   @SubscribeEvent
+   public void onRenderOverlayPost(RenderGameOverlayEvent.Post event) {
+      if(event == null || event.type != RenderGameOverlayEvent.ElementType.ALL) {
+         return;
+      }
+
+      Minecraft mc = Minecraft.getMinecraft();
+      EntityClientPlayerMP player = mc.thePlayer;
+      ReticleState state = this.getPlaneMouseAimReticleState(mc, player);
+      boolean debug = MCH_Config.DebugFlightControl.prmBool || MCH_Config.PlaneMouseAimReticleDebug.prmBool;
+      if(!state.shouldDraw) {
+         if(debug) {
+            this.logPlaneMouseAimReticleDebug(mc, state, false);
+         }
+         return;
+      }
+
+      ScaledResolution scaled = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
+      int width = scaled.getScaledWidth();
+      int height = scaled.getScaledHeight();
+      double centerX = (double)width / 2.0D;
+      double centerY = (double)height / 2.0D;
+      double safeRadius = Math.max(12.0D, Math.min((double)Math.min(width, height) * MCH_Config.PlaneMouseAimMaxScreenRadius.prmDouble,
+            (double)Math.min(width, height) * 0.50D));
+      double yawRange = Math.max(1.0D, MCH_Config.PlaneMouseAimYawVisualRange.prmDouble);
+      double pitchRange = Math.max(1.0D, Math.max(MCH_Config.MouseAimMaxPitchUp.prmDouble, MCH_Config.MouseAimMaxPitchDown.prmDouble));
+      double aimX = centerX + (double)state.plane.getMouseAimYawError() / yawRange * safeRadius;
+      double aimY = centerY - (double)state.plane.getMouseAimPitchError() / pitchRange * safeRadius;
+      double dx = aimX - centerX;
+      double dy = aimY - centerY;
+      double dist = Math.sqrt(dx * dx + dy * dy);
+      if(dist > safeRadius && dist > 1.0E-4D) {
+         aimX = centerX + dx / dist * safeRadius;
+         aimY = centerY + dy / dist * safeRadius;
+      }
+
+      this.drawPlaneMouseAimOverlay(mc, aimX, aimY, centerX, centerY);
+      state.mouseX = aimX;
+      state.mouseY = aimY;
+      state.noseX = centerX;
+      state.noseY = centerY;
+      if(debug) {
+         String text = this.getPlaneMouseAimReticleDebugText(state, true);
+         mc.fontRenderer.drawStringWithShadow(text, 6, height / 2 + 64, 0x55FF66);
+      }
+      this.logPlaneMouseAimReticleDebug(mc, state, true);
+   }
+
+   private ReticleState getPlaneMouseAimReticleState(Minecraft mc, EntityClientPlayerMP player) {
+      ReticleState state = new ReticleState();
+      if(mc != null && mc.gameSettings != null && mc.gameSettings.hideGUI) {
+         state.reason = "hud_hidden";
+         return state;
+      }
+      if(player == null) {
+         state.reason = "no_player";
+         return state;
+      }
+
+      MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
+      if(!(ac instanceof MCP_EntityPlane)) {
+         state.reason = "not_plane";
+         return state;
+      }
+
+      MCP_EntityPlane plane = (MCP_EntityPlane)ac;
+      state.plane = plane;
+      if(!plane.isPilot(player)) {
+         state.reason = "not_pilot";
+      } else if(!plane.isNewFlightModelEnabled()) {
+         state.reason = "not_new_flight";
+      } else if(!plane.isMouseAimControlsEnabled()) {
+         state.reason = "mouse_aim_disabled";
+      } else if(!MCH_Config.EnablePlaneMouseAimReticle.prmBool) {
+         state.reason = "reticle_config_disabled";
+      } else {
+         state.reason = "draw";
+         state.shouldDraw = true;
+      }
+      return state;
+   }
+
+   private void drawPlaneMouseAimOverlay(Minecraft mc, double mouseX, double mouseY, double noseX, double noseY) {
+      GL11.glPushMatrix();
+      GL11.glDisable(2929);
+      GL11.glEnable(3042);
+      GL11.glBlendFunc(770, 771);
+      GL11.glEnable(3553);
+      GL11.glColor4f(0.25F, 1.0F, 0.35F, (float)Math.max(0.0D, Math.min(1.0D, MCH_Config.PlaneMouseAimReticleOpacity.prmDouble)));
+      mc.renderEngine.bindTexture(getPlaneMouseAimReticleTexture());
+      double mouseSize = 96.0D * Math.max(0.25D, Math.min(4.0D, MCH_Config.PlaneMouseAimReticleScale.prmDouble));
+      this.drawTexturedOverlayQuad(mouseX - mouseSize / 2.0D, mouseY - mouseSize / 2.0D, mouseSize, mouseSize, 1024.0D, 1024.0D);
+      GL11.glDisable(3553);
+      this.drawOverlayLineReticle(mouseX, mouseY, mouseSize * 0.35D, 0xEE55FF66);
+      double noseSize = 10.0D * Math.max(0.25D, Math.min(4.0D, MCH_Config.PlaneNoseReticleScale.prmDouble));
+      int noseAlpha = ((int)(Math.max(0.0D, Math.min(1.0D, MCH_Config.PlaneNoseReticleOpacity.prmDouble)) * 255.0D) & 255) << 24;
+      this.drawOverlayLineReticle(noseX, noseY, noseSize, noseAlpha | 0x00FFFFFF);
+      GL11.glEnable(3553);
+      GL11.glDisable(3042);
+      GL11.glEnable(2929);
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GL11.glPopMatrix();
+   }
+
+   private static ResourceLocation getPlaneMouseAimReticleTexture() {
+      String path = MCH_Config.PlaneMouseAimReticleTexture != null ? MCH_Config.PlaneMouseAimReticleTexture.prmString : "";
+      if(path == null || path.trim().length() <= 0) {
+         return PLANE_MOUSE_AIM_RETICLE_TEXTURE;
+      }
+      path = path.trim();
+      int domainSep = path.indexOf(':');
+      if(domainSep >= 0) {
+         return new ResourceLocation(path.substring(0, domainSep), path.substring(domainSep + 1));
+      }
+      if(path.startsWith("assets/mcheli/")) {
+         path = path.substring("assets/mcheli/".length());
+      }
+      return new ResourceLocation("mcheli", path);
+   }
+
+   private void drawTexturedOverlayQuad(double x, double y, double width, double height, double texWidth, double texHeight) {
+      Tessellator tess = Tessellator.instance;
+      tess.startDrawingQuads();
+      tess.addVertexWithUV(x, y + height, -90.0D, 0.0D, texHeight / texHeight);
+      tess.addVertexWithUV(x + width, y + height, -90.0D, texWidth / texWidth, texHeight / texHeight);
+      tess.addVertexWithUV(x + width, y, -90.0D, texWidth / texWidth, 0.0D);
+      tess.addVertexWithUV(x, y, -90.0D, 0.0D, 0.0D);
+      tess.draw();
+   }
+
+   private void drawOverlayLineReticle(double x, double y, double radius, int color) {
+      GL11.glColor4ub((byte)(color >> 16 & 255), (byte)(color >> 8 & 255), (byte)(color & 255), (byte)(color >> 24 & 255));
+      Tessellator tess = Tessellator.instance;
+      tess.startDrawing(1);
+      tess.addVertex(x - radius, y, -89.0D);
+      tess.addVertex(x - radius * 0.35D, y, -89.0D);
+      tess.addVertex(x + radius * 0.35D, y, -89.0D);
+      tess.addVertex(x + radius, y, -89.0D);
+      tess.addVertex(x, y - radius, -89.0D);
+      tess.addVertex(x, y - radius * 0.35D, -89.0D);
+      tess.addVertex(x, y + radius * 0.35D, -89.0D);
+      tess.addVertex(x, y + radius, -89.0D);
+      tess.draw();
+   }
+
+   private void logPlaneMouseAimReticleDebug(Minecraft mc, ReticleState state, boolean rendered) {
+      if(System.currentTimeMillis() < nextPlaneMouseAimReticleDebugTime) {
+         return;
+      }
+      nextPlaneMouseAimReticleDebugTime = System.currentTimeMillis() + 1000L;
+      String text = this.getPlaneMouseAimReticleDebugText(state, rendered);
+      MCH_Lib.Log("[MCHeli][PlaneMouseAimReticle] %s", new Object[]{text});
+   }
+
+   private String getPlaneMouseAimReticleDebugText(ReticleState state, boolean rendered) {
+      MCP_EntityPlane plane = state.plane;
+      return String.format("rendered=%s reason=%s mouse=(%.1f,%.1f) nose=(%.1f,%.1f) desired=(%.2f,%.2f) error=(%.2f,%.2f) crosshairSuppressed=%s",
+            Boolean.valueOf(rendered), state.reason, Double.valueOf(state.mouseX), Double.valueOf(state.mouseY),
+            Double.valueOf(state.noseX), Double.valueOf(state.noseY),
+            Float.valueOf(plane != null ? plane.getMouseAimDesiredYaw() : 0.0F),
+            Float.valueOf(plane != null ? plane.getMouseAimDesiredPitch() : 0.0F),
+            Float.valueOf(plane != null ? plane.getMouseAimYawError() : 0.0F),
+            Float.valueOf(plane != null ? plane.getMouseAimPitchError() : 0.0F),
+            Boolean.valueOf(plane != null && plane.wasMouseAimVanillaCrosshairSuppressed()));
+   }
+
+   private static class ReticleState {
+      MCP_EntityPlane plane;
+      boolean shouldDraw;
+      String reason = "unknown";
+      double mouseX;
+      double mouseY;
+      double noseX;
+      double noseY;
    }
 
    @SubscribeEvent
