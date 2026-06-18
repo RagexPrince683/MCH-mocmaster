@@ -3,10 +3,12 @@ package mcheli.plane;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_ViewEntityDummy;
+import mcheli.aircraft.MCH_BoundingBox;
 import mcheli.wrapper.W_Reflection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -37,6 +39,8 @@ public class MCP_PlaneChaseCamera {
    private float yaw;
    private float pitch;
    private boolean initialized;
+   private boolean lastCollisionAdjusted;
+   private String lastCollisionHit = "none";
 
    public boolean shouldUse(Minecraft mc, EntityPlayer player, MCP_EntityPlane plane, boolean isPilot) {
       return mc != null && mc.gameSettings != null && mc.gameSettings.thirdPersonView > 0 && player != null && plane != null
@@ -64,8 +68,15 @@ public class MCP_PlaneChaseCamera {
 
       Vec3 focus = this.getCameraFocusPoint(plane);
       Vec3 desired = this.computeDesiredCameraPosition(plane, focus);
-      if(MCH_Config.NewPlaneCameraCollision.prmBool) {
-         desired = this.adjustForCollision(plane, focus, desired);
+      if(MCH_Config.DebugFlightControl.prmBool && MCH_Config.NewPlaneCameraDebugAbovePlane.prmBool) {
+         desired = Vec3.createVectorHelper(plane.posX, plane.posY + 20.0D, plane.posZ);
+         this.lastCollisionAdjusted = false;
+         this.lastCollisionHit = "debugAbovePlane";
+      } else {
+         if(MCH_Config.NewPlaneCameraCollision.prmBool) {
+            desired = this.adjustForCollision(plane, focus, desired);
+         }
+         desired = this.escapeAircraftCollision(plane, focus, desired);
       }
       activeCamera = this;
       activeRenderPlane = plane;
@@ -91,6 +102,14 @@ public class MCP_PlaneChaseCamera {
       plane.camera.rotationYaw = this.yaw;
       plane.camera.rotationPitch = this.pitch;
       plane.camera.setPosition(this.posX, this.posY, this.posZ);
+      if(mc != null && mc.theWorld != null) {
+         MCH_ViewEntityDummy dummy = MCH_ViewEntityDummy.getInstance(mc.theWorld);
+         if(dummy != null) {
+            activeDummy = dummy;
+            allowNextChaseDummyWrite = true;
+            dummy.update(plane.camera);
+         }
+      }
       this.debugCamera(mc, plane, focus, desired, true);
       W_Reflection.setCameraRoll(plane.getRotRoll() * (float)MCH_Config.NewPlaneCameraRollInfluence.prmDouble);
    }
@@ -155,15 +174,80 @@ public class MCP_PlaneChaseCamera {
    private Vec3 adjustForCollision(MCP_EntityPlane plane, Vec3 focus, Vec3 desired) {
       Vec3 start = focus.addVector(0.0D, 0.5D, 0.0D);
       MovingObjectPosition hit = plane.worldObj.rayTraceBlocks(start, desired, false);
+      this.lastCollisionAdjusted = false;
+      this.lastCollisionHit = "none";
       if(hit != null && hit.hitVec != null) {
          double hitDistance = this.distance(start, hit.hitVec);
          if(hitDistance > 1.0D) {
             Vec3 away = Vec3.createVectorHelper(start.xCoord - hit.hitVec.xCoord, start.yCoord - hit.hitVec.yCoord, start.zCoord - hit.hitVec.zCoord).normalize();
             Vec3 adjusted = hit.hitVec.addVector(away.xCoord * 0.35D, away.yCoord * 0.35D, away.zCoord * 0.35D);
+            this.lastCollisionAdjusted = true;
+            this.lastCollisionHit = "block@" + hit.blockX + "," + hit.blockY + "," + hit.blockZ;
             return this.enforceMinimumDistance(focus, desired, adjusted);
          }
       }
       return this.enforceMinimumDistance(focus, desired, desired);
+   }
+
+   private Vec3 escapeAircraftCollision(MCP_EntityPlane plane, Vec3 focus, Vec3 desired) {
+      Vec3 escaped = desired;
+      String hit = this.getAircraftCollisionHit(plane, escaped);
+      if(hit.equals("none")) {
+         return escaped;
+      }
+      Vec3 chaseDirection = Vec3.createVectorHelper(desired.xCoord - focus.xCoord, desired.yCoord - focus.yCoord, desired.zCoord - focus.zCoord);
+      if(chaseDirection.lengthVector() < 1.0E-4D) {
+         chaseDirection = MCH_Lib.Rot2Vec3(plane.getRotYaw(), 0.0F);
+      } else {
+         chaseDirection = chaseDirection.normalize();
+      }
+      for(int i = 0; i < 64 && !hit.equals("none"); ++i) {
+         escaped = escaped.addVector(chaseDirection.xCoord, chaseDirection.yCoord, chaseDirection.zCoord);
+         hit = this.getAircraftCollisionHit(plane, escaped);
+      }
+      this.lastCollisionAdjusted = true;
+      this.lastCollisionHit = hit.equals("none")?"aircraftEscape":hit;
+      return this.enforceMinimumDistance(focus, desired, escaped);
+   }
+
+   private String getAircraftCollisionHit(MCP_EntityPlane plane, Vec3 point) {
+      if(this.isPointInsideAabb(point, plane.boundingBox)) {
+         return "planeBB";
+      }
+      MCH_BoundingBox[] boxes = plane.getCalculatedExtraBoundingBoxes();
+      for(int i = 0; i < boxes.length; ++i) {
+         MCH_BoundingBox box = boxes[i];
+         if(box != null && this.isPointInsideAabb(point, box.boundingBox)) {
+            return "partBB#" + i;
+         }
+      }
+      return "none";
+   }
+
+   private boolean isPointInsideAabb(Vec3 point, AxisAlignedBB bb) {
+      return bb != null && point.xCoord >= bb.minX && point.xCoord <= bb.maxX && point.yCoord >= bb.minY && point.yCoord <= bb.maxY && point.zCoord >= bb.minZ && point.zCoord <= bb.maxZ;
+   }
+
+   private double distanceToAabb(Vec3 point, AxisAlignedBB bb) {
+      if(bb == null) {
+         return Double.MAX_VALUE;
+      }
+      double dx = point.xCoord < bb.minX?bb.minX - point.xCoord:(point.xCoord > bb.maxX?point.xCoord - bb.maxX:0.0D);
+      double dy = point.yCoord < bb.minY?bb.minY - point.yCoord:(point.yCoord > bb.maxY?point.yCoord - bb.maxY:0.0D);
+      double dz = point.zCoord < bb.minZ?bb.minZ - point.zCoord:(point.zCoord > bb.maxZ?point.zCoord - bb.maxZ:0.0D);
+      return Math.sqrt(dx * dx + dy * dy + dz * dz);
+   }
+
+   private double nearestAircraftBoxDistance(MCP_EntityPlane plane, Vec3 point) {
+      double nearest = this.distanceToAabb(point, plane.boundingBox);
+      MCH_BoundingBox[] boxes = plane.getCalculatedExtraBoundingBoxes();
+      for(int i = 0; i < boxes.length; ++i) {
+         MCH_BoundingBox box = boxes[i];
+         if(box != null) {
+            nearest = Math.min(nearest, this.distanceToAabb(point, box.boundingBox));
+         }
+      }
+      return nearest;
    }
 
    private float computeLookPitch(Vec3 camera, Vec3 focus) {
@@ -195,13 +279,20 @@ public class MCP_PlaneChaseCamera {
          this.nextDebugTime = System.currentTimeMillis() + 1000L;
          MCH_ViewEntityDummy dummy = mc != null && mc.theWorld != null?MCH_ViewEntityDummy.getInstance(mc.theWorld):null;
          double dist = dummy != null?this.distance(Vec3.createVectorHelper(dummy.posX, dummy.posY, dummy.posZ), desired):0.0D;
-         MCH_Lib.Log("[MCHeli][PlaneChaseCamera] owner=%s lastWriter=%s writes=%d dummy=(%.3f, %.3f, %.3f) prev=(%.3f, %.3f, %.3f) lastTick=(%.3f, %.3f, %.3f) desired=(%.3f, %.3f, %.3f) distanceToDesired=%.3f thirdPerson=%d collision=%s",
-               new Object[]{currentOwner, lastWriterMethod, Integer.valueOf(dummyTransformWrites),
+         boolean dummyInsidePlaneBB = dummy != null && this.isPointInsideAabb(Vec3.createVectorHelper(dummy.posX, dummy.posY, dummy.posZ), plane.boundingBox);
+         boolean dummyInsidePartBB = dummy != null && !this.getAircraftCollisionHit(plane, Vec3.createVectorHelper(dummy.posX, dummy.posY, dummy.posZ)).equals("none") && !dummyInsidePlaneBB;
+         double nearestBoxDistance = this.nearestAircraftBoxDistance(plane, desired);
+         MCH_Lib.Log("CHASE_CAM: focus=(%.3f, %.3f, %.3f) desired=(%.3f, %.3f, %.3f) finalDummy=(%.3f, %.3f, %.3f) renderView=(%.3f, %.3f, %.3f) planeBB=(%.3f, %.3f, %.3f -> %.3f, %.3f, %.3f) dummyBB=(%.3f, %.3f, %.3f -> %.3f, %.3f, %.3f) dummyInsidePlaneBB=%s dummyInsidePartBB=%s collisionAdjusted=%s collisionHit=%s nearestAircraftBoxDistance=%.3f thirdPersonViewMasked=%s distanceToFocus=%.3f owner=%s lastWriter=%s writes=%d thirdPerson=%d",
+               new Object[]{Double.valueOf(focus.xCoord), Double.valueOf(focus.yCoord), Double.valueOf(focus.zCoord),
+                     Double.valueOf(desired.xCoord), Double.valueOf(desired.yCoord), Double.valueOf(desired.zCoord),
                      Double.valueOf(dummy != null?dummy.posX:0.0D), Double.valueOf(dummy != null?dummy.posY:0.0D), Double.valueOf(dummy != null?dummy.posZ:0.0D),
-                     Double.valueOf(dummy != null?dummy.prevPosX:0.0D), Double.valueOf(dummy != null?dummy.prevPosY:0.0D), Double.valueOf(dummy != null?dummy.prevPosZ:0.0D),
-                     Double.valueOf(dummy != null?dummy.lastTickPosX:0.0D), Double.valueOf(dummy != null?dummy.lastTickPosY:0.0D), Double.valueOf(dummy != null?dummy.lastTickPosZ:0.0D),
-                     Double.valueOf(desired.xCoord), Double.valueOf(desired.yCoord), Double.valueOf(desired.zCoord), Double.valueOf(dist),
-                     Integer.valueOf(mc.gameSettings.thirdPersonView), Boolean.valueOf(MCH_Config.NewPlaneCameraCollision.prmBool)});
+                     Double.valueOf(mc.renderViewEntity != null?mc.renderViewEntity.posX:0.0D), Double.valueOf(mc.renderViewEntity != null?mc.renderViewEntity.posY:0.0D), Double.valueOf(mc.renderViewEntity != null?mc.renderViewEntity.posZ:0.0D),
+                     Double.valueOf(plane.boundingBox != null?plane.boundingBox.minX:0.0D), Double.valueOf(plane.boundingBox != null?plane.boundingBox.minY:0.0D), Double.valueOf(plane.boundingBox != null?plane.boundingBox.minZ:0.0D),
+                     Double.valueOf(plane.boundingBox != null?plane.boundingBox.maxX:0.0D), Double.valueOf(plane.boundingBox != null?plane.boundingBox.maxY:0.0D), Double.valueOf(plane.boundingBox != null?plane.boundingBox.maxZ:0.0D),
+                     Double.valueOf(dummy != null && dummy.boundingBox != null?dummy.boundingBox.minX:0.0D), Double.valueOf(dummy != null && dummy.boundingBox != null?dummy.boundingBox.minY:0.0D), Double.valueOf(dummy != null && dummy.boundingBox != null?dummy.boundingBox.minZ:0.0D),
+                     Double.valueOf(dummy != null && dummy.boundingBox != null?dummy.boundingBox.maxX:0.0D), Double.valueOf(dummy != null && dummy.boundingBox != null?dummy.boundingBox.maxY:0.0D), Double.valueOf(dummy != null && dummy.boundingBox != null?dummy.boundingBox.maxZ:0.0D),
+                     Boolean.valueOf(dummyInsidePlaneBB), Boolean.valueOf(dummyInsidePartBB), Boolean.valueOf(this.lastCollisionAdjusted), this.lastCollisionHit, Double.valueOf(nearestBoxDistance), Boolean.valueOf(renderTickBypassActive), Double.valueOf(this.distance(focus, desired)),
+                     currentOwner, lastWriterMethod, Integer.valueOf(dummyTransformWrites), Integer.valueOf(mc.gameSettings.thirdPersonView)});
       }
    }
 

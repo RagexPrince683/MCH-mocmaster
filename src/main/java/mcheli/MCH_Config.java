@@ -162,6 +162,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm NewPlaneCameraMinDistance;
    public static MCH_ConfigPrm NewPlaneCameraMaxDistance;
    public static MCH_ConfigPrm NewPlaneCameraDebugDistance;
+   public static MCH_ConfigPrm NewPlaneCameraDebugAbovePlane;
    public static MCH_ConfigPrm NewPlaneCameraHeight;
    public static MCH_ConfigPrm NewPlaneCameraSideOffset;
    public static MCH_ConfigPrm NewPlaneCameraSpeedDistanceScale;
@@ -411,14 +412,16 @@ public class MCH_Config {
       DisplayHUDThirdPerson = new MCH_ConfigPrm("DisplayHUDThirdPerson", false);
       EnableNewPlaneThirdPersonCamera = new MCH_ConfigPrm("EnableNewPlaneThirdPersonCamera", true);
       EnableNewPlaneThirdPersonCamera.desc = ";Client-only visual chase camera for third-person new-flight planes. Does not change flight physics, weapons, or HUD rendering.";
-      NewPlaneCameraDistance = new MCH_ConfigPrm("NewPlaneCameraDistance", 16.0D);
+      NewPlaneCameraDistance = new MCH_ConfigPrm("NewPlaneCameraDistance", 18.0D);
       NewPlaneCameraDistance.desc = ";Blocks behind the aircraft for the new third-person plane chase camera.";
-      NewPlaneCameraMinDistance = new MCH_ConfigPrm("NewPlaneCameraMinDistance", 8.0D);
+      NewPlaneCameraMinDistance = new MCH_ConfigPrm("NewPlaneCameraMinDistance", 12.0D);
       NewPlaneCameraMinDistance.desc = ";Minimum blocks behind the aircraft for the new third-person plane chase camera.";
-      NewPlaneCameraMaxDistance = new MCH_ConfigPrm("NewPlaneCameraMaxDistance", 24.0D);
+      NewPlaneCameraMaxDistance = new MCH_ConfigPrm("NewPlaneCameraMaxDistance", 35.0D);
       NewPlaneCameraMaxDistance.desc = ";Maximum blocks behind the aircraft for the new third-person plane chase camera.";
-      NewPlaneCameraDebugDistance = new MCH_ConfigPrm("NewPlaneCameraDebugDistance", 0.0D);
-      NewPlaneCameraDebugDistance.desc = ";DebugFlightControl-only chase camera distance override. Set 20-30 to verify the render path consumes the custom camera; 0 disables.";
+      NewPlaneCameraDebugDistance = new MCH_ConfigPrm("NewPlaneCameraDebugDistance", 40.0D);
+      NewPlaneCameraDebugDistance.desc = ";DebugFlightControl-only chase camera distance override. Set 40 to verify the render path consumes the custom camera; 0 disables.";
+      NewPlaneCameraDebugAbovePlane = new MCH_ConfigPrm("NewPlaneCameraDebugAbovePlane", false);
+      NewPlaneCameraDebugAbovePlane.desc = ";DebugFlightControl-only hard test: places the chase dummy at plane.posY + 20 with third-person distance zeroed.";
       NewPlaneCameraHeight = new MCH_ConfigPrm("NewPlaneCameraHeight", 4.0D);
       NewPlaneCameraHeight.desc = ";Blocks above the aircraft for the new third-person plane chase camera.";
       NewPlaneCameraSideOffset = new MCH_ConfigPrm("NewPlaneCameraSideOffset", 0.0D);
@@ -586,6 +589,7 @@ public class MCH_Config {
               NewPlaneCameraMinDistance,
               NewPlaneCameraMaxDistance,
               NewPlaneCameraDebugDistance,
+              NewPlaneCameraDebugAbovePlane,
               NewPlaneCameraHeight,
               NewPlaneCameraSideOffset,
               NewPlaneCameraSpeedDistanceScale,
