@@ -14,11 +14,14 @@ import mcheli.wrapper.W_McClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 @SideOnly(Side.CLIENT)
 public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
+
+   private static final ResourceLocation PLANE_MOUSE_AIM_RETICLE_TEXTURE = new ResourceLocation("mcheli", "textures/gui/plane_crosshair.png");
 
    public MCP_GuiPlane(Minecraft minecraft) {
       super(minecraft);
@@ -101,10 +104,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
       double safeRadius = Math.max(8.0D, Math.min((double)Math.min(super.centerX, super.centerY),
             (double)Math.min(super.width, super.height) * MCH_Config.PlaneMouseAimMaxScreenRadius.prmDouble));
-      double yawRange = Math.max(1.0D, MCH_Config.MouseAimMaxPitchUp.prmDouble);
+      double yawRange = Math.max(1.0D, MCH_Config.PlaneMouseAimYawVisualRange.prmDouble);
       double pitchRange = Math.max(1.0D, Math.max(MCH_Config.MouseAimMaxPitchUp.prmDouble, MCH_Config.MouseAimMaxPitchDown.prmDouble));
       double aimX = (double)super.centerX + (double)plane.getMouseAimYawError() / yawRange * safeRadius;
-      double aimY = (double)super.centerY + (double)plane.getMouseAimPitchError() / pitchRange * safeRadius;
+      double aimY = (double)super.centerY - (double)plane.getMouseAimPitchError() / pitchRange * safeRadius;
       double dx = aimX - (double)super.centerX;
       double dy = aimY - (double)super.centerY;
       double distance = Math.sqrt(dx * dx + dy * dy);
@@ -138,13 +141,29 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       GL11.glEnable(3042);
       GL11.glBlendFunc(770, 771);
       GL11.glColor4f(0.25F, 1.0F, 0.35F, opacity);
-      W_McClient.MOD_bindTexture(MCH_Config.PlaneMouseAimReticleTexture.prmString);
-      this.drawTexturedRect(x - size / 2.0D, y - size / 2.0D, size, size, 0.0D, 0.0D, 256.0D, 256.0D, 256.0D, 256.0D);
+      super.mc.renderEngine.bindTexture(getPlaneMouseAimReticleTexture());
+      this.drawTexturedRect(x - size / 2.0D, y - size / 2.0D, size, size, 0.0D, 0.0D, 1024.0D, 1024.0D, 1024.0D, 1024.0D);
       GL11.glDisable(3553);
       this.drawLine(new double[]{x - size * 0.65D, y, x - size * 0.25D, y, x + size * 0.25D, y, x + size * 0.65D, y,
             x, y - size * 0.65D, x, y - size * 0.25D, x, y + size * 0.25D, x, y + size * 0.65D}, 0xCC55FF66);
       GL11.glEnable(3553);
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+   }
+
+   private static ResourceLocation getPlaneMouseAimReticleTexture() {
+      String path = MCH_Config.PlaneMouseAimReticleTexture != null ? MCH_Config.PlaneMouseAimReticleTexture.prmString : "";
+      if(path == null || path.trim().length() <= 0) {
+         return PLANE_MOUSE_AIM_RETICLE_TEXTURE;
+      }
+      path = path.trim();
+      int domainSep = path.indexOf(':');
+      if(domainSep >= 0) {
+         return new ResourceLocation(path.substring(0, domainSep), path.substring(domainSep + 1));
+      }
+      if(path.startsWith("assets/mcheli/")) {
+         path = path.substring("assets/mcheli/".length());
+      }
+      return new ResourceLocation("mcheli", path);
    }
 
    private void drawNoseReticle(double x, double y) {

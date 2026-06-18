@@ -170,6 +170,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm PlaneNoseReticleScale;
    public static MCH_ConfigPrm PlaneNoseReticleOpacity;
    public static MCH_ConfigPrm PlaneMouseAimMaxScreenRadius;
+   public static MCH_ConfigPrm PlaneMouseAimYawVisualRange;
    public static MCH_ConfigPrm PlaneMouseAimReticleDebug;
    public static MCH_ConfigPrm SwitchWeaponWithMouseWheel;
    public static MCH_ConfigPrm AllPlaneSpeed;
@@ -478,6 +479,7 @@ public class MCH_Config {
       PlaneNoseReticleScale = new MCH_ConfigPrm("PlaneNoseReticleScale", 0.85D);
       PlaneNoseReticleOpacity = new MCH_ConfigPrm("PlaneNoseReticleOpacity", 0.70D);
       PlaneMouseAimMaxScreenRadius = new MCH_ConfigPrm("PlaneMouseAimMaxScreenRadius", 0.42D);
+      PlaneMouseAimYawVisualRange = new MCH_ConfigPrm("PlaneMouseAimYawVisualRange", 45.0D);
       PlaneMouseAimReticleDebug = new MCH_ConfigPrm("PlaneMouseAimReticleDebug", false);
       SwitchWeaponWithMouseWheel = new MCH_ConfigPrm("SwitchWeaponWithMouseWheel", true);
       AllHeliSpeed = new MCH_ConfigPrm("AllHeliSpeed", 1.5D);
@@ -703,6 +705,7 @@ public class MCH_Config {
               PlaneNoseReticleScale,
               PlaneNoseReticleOpacity,
               PlaneMouseAimMaxScreenRadius,
+              PlaneMouseAimYawVisualRange,
               PlaneMouseAimReticleDebug,
               AutoThrottleDownHeli,
               AutoThrottleDownPlane,

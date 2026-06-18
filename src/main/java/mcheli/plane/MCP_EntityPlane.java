@@ -651,7 +651,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    private boolean shouldUseMouseAimControls(Entity player) {
-      return player != null && this.isNewFlightModelEnabled() && MCH_Config.EnableMouseAimControls.prmBool
+      return player != null && this.isPilot(player) && this.isNewFlightModelEnabled() && MCH_Config.EnableMouseAimControls.prmBool
             && this.mouseAimControlsEnabled && !this.isFreeLookMode() && !super.isGunnerMode;
    }
 

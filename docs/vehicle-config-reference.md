@@ -250,6 +250,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `PlaneMouseAimReticleScale` / `PlaneMouseAimReticleOpacity` | Global/client | float | 1.0 / 0.90 | mouse aim cursor size and alpha |
 | `PlaneNoseReticleScale` / `PlaneNoseReticleOpacity` | Global/client | float | 0.85 / 0.70 | center nose reticle size and alpha |
 | `PlaneMouseAimMaxScreenRadius` | Global/client | float | 0.42 | clamps cursor inside a safe screen radius |
+| `PlaneMouseAimYawVisualRange` | Global/client | degrees | 45.0 | yaw error mapped to the safe screen radius |
 | `PlaneMouseAimReticleDebug` | Global/client | boolean | false | draws/logs reticle screen positions and crosshair suppression state |
 | `NewFlightCombatFlaps` | Plane | boolean | true | enables new-flight-only combat flaps |
 | `NewFlightCombatFlapLift` | Plane | float[0..1] | 0.120 | flap lift/support contribution |

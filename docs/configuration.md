@@ -251,6 +251,7 @@ This first implementation uses global client config keys. Per-plane mouse-aim ov
 | `PlaneNoseReticleScale` | `0.85` | Scales the plane/nose reticle drawn at screen center for the initial aligned-camera implementation. |
 | `PlaneNoseReticleOpacity` | `0.70` | Plane/nose reticle opacity. |
 | `PlaneMouseAimMaxScreenRadius` | `0.42` | Safe screen radius, as a fraction of the smaller screen dimension, that clamps the cursor on screen. |
+| `PlaneMouseAimYawVisualRange` | `45.0` | Yaw error in degrees that maps to the configured safe screen radius. |
 | `PlaneMouseAimReticleDebug` | `false` | Draws/logs reticle screen positions, aim angles/errors, and vanilla-crosshair suppression state. |
 
 The custom cursor is required because the vanilla Minecraft crosshair is locked to screen center and would otherwise represent the plane/nose reticle, not the desired mouse-follow aim point. Mouse aim never directly sets aircraft rotation. It only generates pitch/yaw/roll commands that continue through the same new-flight control-authority, compressibility, unsupported-climb, stall, and angular-velocity integration code as other plane controls, so slow, stalled, damaged, or authority-limited aircraft may lag or fail to follow the cursor. Manual roll input is added to auto-bank in a predictable way, so roll keys remain available for corrections.
