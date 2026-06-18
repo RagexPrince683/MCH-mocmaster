@@ -52,14 +52,31 @@ public class W_Reflection {
 	   }
 
 	   public static void setThirdPersonDistance(float dist) {
-	      if((double)dist >= 0.1D) {
-	         try {
-	            Minecraft e = Minecraft.getMinecraft();
-	            ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, e.entityRenderer, Float.valueOf(dist), new String[]{"field_78490_B", "thirdPersonDistance"});
-	         } catch (Exception var2) {
-	            var2.printStackTrace();
-	         }
+	      try {
+	         Minecraft e = Minecraft.getMinecraft();
+	         ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, e.entityRenderer, Float.valueOf(dist), new String[]{"field_78490_B", "thirdPersonDistance"});
+	      } catch (Exception var2) {
+	         var2.printStackTrace();
+	      }
+	   }
 
+
+	   public static void setThirdPersonDistanceTemp(float dist) {
+	      try {
+	         Minecraft e = Minecraft.getMinecraft();
+	         ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, e.entityRenderer, Float.valueOf(dist), new String[]{"field_78491_C", "thirdPersonDistanceTemp"});
+	      } catch (Exception var2) {
+	         var2.printStackTrace();
+	      }
+	   }
+
+	   public static float getThirdPersonDistanceTemp() {
+	      try {
+	         Minecraft e = Minecraft.getMinecraft();
+	         return ((Float)ObfuscationReflectionHelper.getPrivateValue(EntityRenderer.class, e.entityRenderer, new String[]{"field_78491_C", "thirdPersonDistanceTemp"})).floatValue();
+	      } catch (Exception var1) {
+	         var1.printStackTrace();
+	         return getThirdPersonDistance();
 	      }
 	   }
 

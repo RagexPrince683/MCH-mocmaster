@@ -5,6 +5,8 @@ import mcheli.plane.MCP_PlaneChaseCamera;
 import mcheli.wrapper.W_Session;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
 public class MCH_ViewEntityDummy extends EntityPlayerSP {
@@ -61,6 +63,7 @@ public class MCH_ViewEntityDummy extends EntityPlayerSP {
          super.posX = camera.posX;
          super.posY = camera.posY;
          super.posZ = camera.posZ;
+         this.configureNoCollisionChaseDummy();
       }
    }
 
@@ -76,7 +79,32 @@ public class MCH_ViewEntityDummy extends EntityPlayerSP {
          instance.posX = x;
          instance.posY = y;
          instance.posZ = z;
+         instance.configureNoCollisionChaseDummy();
       }
+   }
+
+   public void configureNoCollisionChaseDummy() {
+      super.noClip = true;
+      super.ridingEntity = null;
+      super.riddenByEntity = null;
+      this.setSize(0.01F, 0.01F);
+      super.boundingBox.setBounds(super.posX - 0.005D, super.posY - 0.005D, super.posZ - 0.005D, super.posX + 0.005D, super.posY + 0.005D, super.posZ + 0.005D);
+   }
+
+   public AxisAlignedBB getCollisionBox(Entity entity) {
+      return null;
+   }
+
+   public AxisAlignedBB getBoundingBox() {
+      return super.boundingBox;
+   }
+
+   public boolean canBePushed() {
+      return false;
+   }
+
+   public boolean canBeCollidedWith() {
+      return false;
    }
 
    public float getFOVMultiplier() {
