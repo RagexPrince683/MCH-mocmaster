@@ -30,6 +30,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent.Specials.Post;
@@ -177,6 +178,13 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
          MCH_ParticlesUtil.clearMarkPoint();
       }
 
+   }
+
+   @SubscribeEvent
+   public void onFovUpdate(FOVUpdateEvent event) {
+      if(event != null && MCP_PlaneChaseCamera.isFovOverrideActive()) {
+         event.newfov = MCP_PlaneChaseCamera.applyFovOverride(event.newfov);
+      }
    }
 
    @SubscribeEvent

@@ -173,19 +173,24 @@ Recommended bindings: keep **Free Look** on a comfortable hold key such as Left 
 | Config key | Default | Purpose | Practical range |
 | --- | ---: | --- | --- |
 | `EnableNewPlaneThirdPersonCamera` | `true` | Enables the smooth chase camera only for third-person pilot view in new-flight planes. | `true`/`false` |
-| `EnableNewPlaneCameraSpeedDistance` | `true` | Allows aircraft speed to pull the camera farther back without shifting focus direction. | `true`/`false` |
+| `EnableSpeedBasedCameraDistance` | `false` | Optional speed distance scaling. Disabled by default to prevent zoom breathing with throttle/speed changes. | keep `false`; use only for small capped effects |
 | `EnableNewPlaneCameraCollision` | `true` | Allows block ray tracing to shorten the camera when terrain/buildings/trees/hangars obstruct the view. | `true`/`false` |
 | `EnablePlaneLookAhead` | `true` | Enables held Plane Look Ahead. This is player-initiated only, never automatic velocity/turn prediction. | `true`/`false` |
 | `EnableHoldFreelook` | `true` | Makes new-chase-camera freelook hold-to-use and suppresses toggle freelook state for this path. | `true`/`false` |
 | `EnableNewPlaneCameraRollInfluence` | `true` | Allows limited aircraft roll to affect the camera horizon. | `true`/`false` |
-| `NewPlaneCameraDistance` | `45.0` | Base chase distance in blocks before speed and size scaling. The default is now 45 blocks; 16 blocks is cockpit-range close for many aircraft and should not be used as the new chase default. | fighters `38`-`55`, bombers `50`-`85`, jets `45`-`75`, slow props `32`-`48` |
-| `NewPlaneCameraMinDistance` | `24.0` | Minimum camera distance from the smoothed focus after collision/scale handling. | `10`-`30` |
-| `NewPlaneCameraMaxDistance` | `90.0` | Maximum camera distance after speed/size scaling. | `45`-`100+` |
-| `NewPlaneCameraDebugDistance` | `40.0` | `DebugFlightControl`-only distance override for proof testing; `0` disables. Keep normal tuning in the non-debug keys. | `0` or `30`-`80` |
+| `PlaneChaseBaseDistance` | `45.0` | Stable base chase distance in blocks before aircraft-size bonus and optional speed bonus. | default `45`; tune with wider FOV before large distance swings |
+| `PlaneChaseMinDistance` | `40.0` | Minimum camera distance from the smoothed focus after scale handling, high enough to keep tails framed during slowdown. | `40`+ for normal chase |
+| `PlaneChaseMaxDistance` | `55.0` | Maximum normal camera distance after scale and optional speed bonus. The full range is not used unless speed scaling is enabled. | `55`+ if very large aircraft need it |
+| `NewPlaneCameraDebugDistance` | `0.0` | `DebugFlightControl`-only distance override for proof testing; `0` disables. Keep normal tuning in the non-debug keys. | `0` or `30`-`80` |
 | `NewPlaneCameraDebugAbovePlane` | `false` | `DebugFlightControl`-only hard proof mode that places the dummy above the plane. | debug only |
 | `NewPlaneCameraHeight` | `4.0` | Vertical camera offset above the combat focus. | `2`-`8`; large aircraft may prefer `6`-`12` |
 | `NewPlaneCameraSideOffset` | `0.0` | Optional left/right offset for off-center chase views. | `-4`-`4` |
-| `NewPlaneCameraSpeedDistanceScale` | `10.0` | Extra chase distance per block/tick of aircraft speed when speed scaling is enabled. | slow props `4`-`10`, fighters `8`-`16`, jets `12`-`28` |
+| `PlaneChaseSpeedDistanceScale` | `2.0` | Extra chase distance per block/tick of aircraft speed when speed scaling is explicitly enabled. | keep low; pair with `PlaneChaseSpeedDistanceMaxBonus` |
+| `PlaneChaseSpeedDistanceMaxBonus` | `3.0` | Caps optional speed-based extra distance so acceleration cannot cause aggressive zoom. | `2`-`5` |
+| `EnablePlaneChaseFOVOverride` | `true` | Enables the new chase-camera-only FOV override. | `true` |
+| `PlaneChaseFOV` | `95.0` | Target FOV for new-flight third-person plane chase. | `85`-`105` |
+| `PlaneChaseFreelookFOV` | `95.0` | Optional FOV while hold-freelook orbit is active. | usually match `PlaneChaseFOV` |
+| `PlaneChaseFOVSmoothing` | `0.25` | Smoothly blends FOV entering/exiting chase and freelook. | `0.15`-`0.35` |
 | `NewPlaneCameraSizeDistanceScale` | `1.25` | Extra chase distance per block of aircraft bounding-box size so larger aircraft frame comfortably. | fighters `0.5`-`1.5`, bombers `1.5`-`3.0` |
 | `PlaneChaseFocusVerticalOffset` | `2.5` | Raises the chase focus above the aircraft so the aircraft sits below screen center and forward airspace remains visible. | `1`-`5` fighters/props, `3`-`8` large aircraft |
 | `PlaneChaseScreenVerticalBias` | `4.0` | Raises the aim/framing point above the focus, keeping the crosshair/screen center out of the plane model. | `2`-`7`; reduce if the camera feels detached |
@@ -193,20 +198,27 @@ Recommended bindings: keep **Free Look** on a comfortable hold key such as Left 
 | `PlaneLookAheadSmoothing` | `0.35` | How quickly held Plane Look Ahead blends forward. | `0.20`-`0.55` |
 | `PlaneLookAheadReturnSmoothing` | `0.25` | How quickly focus returns to centered chase framing after look-ahead release. | `0.15`-`0.45` |
 | `FreelookReturnSmoothing` | `0.28` | How quickly released hold-freelook orbit offsets return to rear chase view. | `0.18`-`0.45` |
-| `PlaneFreelookOrbitSensitivity` | `0.15` | Mouse sensitivity multiplier for hold-freelook orbit yaw/pitch around the aircraft. | `0.08`-`0.30` |
+| `PlaneFreelookOrbitSensitivity` | `0.15` | Mouse sensitivity multiplier for hold-freelook target orbit yaw/pitch around the aircraft. | `0.08`-`0.30` |
+| `PlaneFreelookYawSmoothing` | `0.28` | Smooths rendered freelook yaw separately from raw mouse target yaw. | `0.25`-`0.35` |
+| `PlaneFreelookPitchSmoothing` | `0.28` | Smooths rendered freelook pitch separately from raw mouse target pitch. | `0.25`-`0.35` |
+| `PlaneFreelookReturnSmoothing` | `0.18` | Smoothly blends raw and rendered orbit offsets back to rear chase after release. | `0.15`-`0.25` |
+| `PlaneFreelookMaxPitchUp` | `75.0` | Clamps upward orbit pitch to prevent flips. | `60`-`80` |
+| `PlaneFreelookMaxPitchDown` | `65.0` | Clamps downward orbit pitch to prevent flips. | `50`-`75` |
 | `NewPlaneCameraPositionSmoothing` | `0.34` | How quickly camera position follows the desired chase point; higher values are snappier. | dogfight `0.28`-`0.50` |
 | `NewPlaneCameraYawSmoothing` | `0.42` | How quickly normal chase yaw follows the aircraft-centered focus when freelook is not active. | `0.30`-`0.60` |
 | `NewPlaneCameraPitchSmoothing` | `0.34` | How quickly normal chase pitch follows climbs/dives. | `0.24`-`0.50` |
 | `NewPlaneCameraDistanceSmoothing` | `0.25` | How quickly speed/size/collision distance changes are restored or shortened. | `0.18`-`0.40` |
 | `NewPlaneCameraFocusSmoothing` | `0.38` | How quickly the focus moves when held Plane Look Ahead is pressed/released. | `0.25`-`0.55` |
 | `NewPlaneCameraPitchInfluenceSmoothing` | `0.30` | Smooths pitch influence so steep climbs/dives are readable without snapping above/below the aircraft. | `0.20`-`0.45` |
-| `NewPlaneCameraRollInfluence` | `0.12` | Conservative camera roll coupling; `0.0` keeps horizon stable and `1.0` fully rolls with the plane. | `0.05`-`0.25` for combat readability |
+| `PlaneChasePitchInfluence` | `0.25` | Conservative pitch inheritance so the horizon feels more stable than the aircraft. | `0.15`-`0.35` |
+| `NewPlaneCameraRollInfluence` | `0.12` | Conservative camera roll coupling; `0.0` keeps horizon stable and `1.0` fully rolls with the plane. | `0.0`-`0.15` for stable horizon |
+| `PlaneChaseHorizonStabilization` | `true` | Documents/enables the stabilized chase-camera attitude profile. | `true` |
 | `NewPlaneCameraCollision` | `true` | Deprecated compatibility alias for collision; leave `true` with `EnableNewPlaneCameraCollision=true`. | `true`/`false` |
 
 Tuning guidance:
 
-* **Fighters:** start around `NewPlaneCameraDistance=40`-`55`, `PlaneChaseFocusVerticalOffset=2`-`4`, `PlaneChaseScreenVerticalBias=3`-`5`, `NewPlaneCameraSpeedDistanceScale=8`-`16`, `PlaneLookAheadDistance=10`-`16`, and keep roll influence near `0.10`-`0.18`.
-* **Bombers / large aircraft:** use `NewPlaneCameraDistance=55`-`85`, higher `NewPlaneCameraSizeDistanceScale`, a taller `NewPlaneCameraHeight`, and `PlaneChaseFocusVerticalOffset=4`-`8` so the full aircraft fits below center.
+* **Fighters:** start around `PlaneChaseBaseDistance=40`-`55`, `PlaneChaseFocusVerticalOffset=2`-`4`, `PlaneChaseScreenVerticalBias=3`-`5`, `PlaneChaseSpeedDistanceScale=8`-`16`, `PlaneLookAheadDistance=10`-`16`, and keep roll influence near `0.10`-`0.18`.
+* **Bombers / large aircraft:** use `PlaneChaseBaseDistance=55`-`85`, higher `NewPlaneCameraSizeDistanceScale`, a taller `NewPlaneCameraHeight`, and `PlaneChaseFocusVerticalOffset=4`-`8` so the full aircraft fits below center.
 * **Jets:** use a higher max distance (`90`-`130+`), default-or-higher follow distance (`45`-`75`), and moderate held look-ahead (`12`-`24`) for target tracking without automatic drift.
 * **Slow props:** keep distance lower (`32`-`48`), use modest screen bias (`2`-`4`), and keep speed scaling modest so the camera remains responsive while still framing the aircraft.
 
@@ -252,3 +264,11 @@ Tuning guidance:
 ## Item and block IDs
 
 The source still initializes legacy numeric IDs for core items/blocks, including fuel, GLTD, chain, parachute, container, UAV stations, drafting table, wrench, rangefinder, Stinger/Javelin/RPG shared IDs, and Drafting Table block IDs. In modern Forge 1.7.10 modpacks, prefer resolving conflicts through generated config and registry names rather than hand-editing unless you know your pack's ID map.
+
+## New plane third-person chase camera defaults
+
+The new-flight-model plane chase camera is tuned around a stable follow distance instead of aggressive speed zoom. Its default base distance is 45 blocks, with the normal distance range held near 40-55 blocks before aircraft-size and collision handling. Speed-based distance scaling is disabled by default (`EnableSpeedBasedCameraDistance = false`); if enabled, keep `PlaneChaseSpeedDistanceScale` low and cap `PlaneChaseSpeedDistanceMaxBonus` around 2-5 blocks.
+
+For awareness, prefer stable distance plus a wider FOV rather than large dynamic distance swings. `EnablePlaneChaseFOVOverride` is enabled by default for the new-flight third-person plane chase camera only, with `PlaneChaseFOV = 95`. Recommended chase FOV values are 85-105. `PlaneChaseFreelookFOV` defaults to the same value, and `PlaneChaseFOVSmoothing` blends the override when entering, freelooking, or leaving the camera.
+
+Hold-freelook is hold-to-orbit: mouse input changes raw orbit yaw/pitch targets, while `PlaneFreelookYawSmoothing` and `PlaneFreelookPitchSmoothing` smooth the rendered orbit. `PlaneFreelookReturnSmoothing` controls the blend back to rear chase after release. Recommended starting values are sensitivity 0.15, yaw/pitch smoothing around 0.25-0.35, return smoothing around 0.15-0.25, max pitch up around 75 degrees, and max pitch down around 65 degrees. Freelook should feel smooth and camera-like, not raw or jittery.
