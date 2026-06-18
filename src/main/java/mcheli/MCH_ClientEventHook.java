@@ -184,6 +184,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
       switch (event.phase) {
          case START:
             smoothing = event.renderTickTime;
+            MCP_PlaneChaseCamera.applyRenderStartCamera(Minecraft.getMinecraft());
             MCP_PlaneChaseCamera.beginOrientCameraBypass(Minecraft.getMinecraft(), event.renderTickTime);
             break;
          case END:
