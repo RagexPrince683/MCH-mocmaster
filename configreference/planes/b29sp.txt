@@ -26,7 +26,9 @@ UnmountPosition = 3.0, 2.0, -4.0
 Category = SB/HB/NB
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-
+NewPlaneCameraFocusOffsetX = -0.550
+NewPlaneCameraFocusOffsetY = 2.750
+NewPlaneCameraFocusOffsetZ = -0.280
 # New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.

@@ -41,7 +41,9 @@ MaxRotationPitch =  60
 Category = SSHB/HB
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-
+NewPlaneCameraFocusOffsetX = 0.800
+NewPlaneCameraFocusOffsetY = 3.450
+NewPlaneCameraFocusOffsetZ = 0.280
 # New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.

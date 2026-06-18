@@ -27,7 +27,9 @@ AddSeat = 0.0, 0.0, -3
 Category = UCAV
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-
+NewPlaneCameraFocusOffsetX = 0.000
+NewPlaneCameraFocusOffsetY = 0.250
+NewPlaneCameraFocusOffsetZ = -3.000
 # New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.

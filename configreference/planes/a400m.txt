@@ -35,7 +35,9 @@ AddTexture = a400m_3
 Category = STA/AR/TA
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-
+NewPlaneCameraFocusOffsetX = 0.580
+NewPlaneCameraFocusOffsetY = 4.840
+NewPlaneCameraFocusOffsetZ = 1.750
 # New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.

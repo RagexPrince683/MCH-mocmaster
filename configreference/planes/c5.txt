@@ -26,7 +26,9 @@ StepHeight = -1.0
 Category = SA/TA
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-
+NewPlaneCameraFocusOffsetX = 0.620
+NewPlaneCameraFocusOffsetY = 7.050
+NewPlaneCameraFocusOffsetZ = 2.400
 # New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.

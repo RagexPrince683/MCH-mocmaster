@@ -26,6 +26,9 @@ enableback = true
 Category = AWTB/ID
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
+NewPlaneCameraFocusOffsetX = 0.310
+NewPlaneCameraFocusOffsetY = 3.250
+NewPlaneCameraFocusOffsetZ = 7.370
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.750

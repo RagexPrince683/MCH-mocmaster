@@ -22,7 +22,9 @@ MobDropOption  = 0.97, 1.52, -6.48, 2
 Category = MTA
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-
+NewPlaneCameraFocusOffsetX = 0.680
+NewPlaneCameraFocusOffsetY = 5.250
+NewPlaneCameraFocusOffsetZ = 1.780
 # New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.

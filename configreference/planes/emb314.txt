@@ -23,7 +23,9 @@ UnmountPosition = 3.0, 2.0, -5.0
 Category = LA/COINA
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-
+NewPlaneCameraFocusOffsetX = 0.000
+NewPlaneCameraFocusOffsetY = 1.570
+NewPlaneCameraFocusOffsetZ = -1.700
 # New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.

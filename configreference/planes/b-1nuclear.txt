@@ -29,7 +29,9 @@ Stealth = 0.2
 Category = SSHB/SB
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-
+NewPlaneCameraFocusOffsetX = 0.950
+NewPlaneCameraFocusOffsetY = 7.410
+NewPlaneCameraFocusOffsetZ = 3.700
 # New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
