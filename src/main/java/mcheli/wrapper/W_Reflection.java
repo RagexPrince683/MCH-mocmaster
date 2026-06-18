@@ -21,6 +21,7 @@ package mcheli.wrapper;
 
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import java.util.List;
+import mcheli.plane.MCP_PlaneChaseCamera;
 import java.util.Queue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
@@ -55,6 +56,7 @@ public class W_Reflection {
 	      try {
 	         Minecraft e = Minecraft.getMinecraft();
 	         ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, e.entityRenderer, Float.valueOf(dist), new String[]{"field_78490_B", "thirdPersonDistance"});
+	         MCP_PlaneChaseCamera.logCameraWrite("W_Reflection.setThirdPersonDistance", "dist=" + dist);
 	      } catch (Exception var2) {
 	         var2.printStackTrace();
 	      }
@@ -65,6 +67,7 @@ public class W_Reflection {
 	      try {
 	         Minecraft e = Minecraft.getMinecraft();
 	         ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, e.entityRenderer, Float.valueOf(dist), new String[]{"field_78491_C", "thirdPersonDistanceTemp"});
+	         MCP_PlaneChaseCamera.logCameraWrite("W_Reflection.setThirdPersonDistanceTemp", "dist=" + dist);
 	      } catch (Exception var2) {
 	         var2.printStackTrace();
 	      }

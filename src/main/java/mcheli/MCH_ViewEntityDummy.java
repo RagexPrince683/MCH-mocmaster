@@ -47,6 +47,9 @@ public class MCH_ViewEntityDummy extends EntityPlayerSP {
    public void onUpdate() {}
 
    public void update(MCH_Camera camera) {
+      if(MCP_PlaneChaseCamera.shouldBlockNonChaseDummyWrite("MCH_ViewEntityDummy.update")) {
+         return;
+      }
       if(camera != null) {
          this.zoom = camera.getCameraZoom();
          super.prevRotationYaw = super.rotationYaw;
@@ -64,10 +67,14 @@ public class MCH_ViewEntityDummy extends EntityPlayerSP {
          super.posY = camera.posY;
          super.posZ = camera.posZ;
          this.configureNoCollisionChaseDummy();
+         MCP_PlaneChaseCamera.logCameraWrite("MCH_ViewEntityDummy.update", String.format("pos=(%.3f,%.3f,%.3f)", Double.valueOf(super.posX), Double.valueOf(super.posY), Double.valueOf(super.posZ)));
       }
    }
 
    public static void setCameraPosition(double x, double y, double z) {
+      if(MCP_PlaneChaseCamera.shouldBlockNonChaseDummyWrite("MCH_ViewEntityDummy.setCameraPosition")) {
+         return;
+      }
       if(instance != null) {
          MCP_PlaneChaseCamera.recordDummyTransformWrite("MCH_ViewEntityDummy.setCameraPosition", false);
          instance.prevPosX = x;
@@ -80,7 +87,41 @@ public class MCH_ViewEntityDummy extends EntityPlayerSP {
          instance.posY = y;
          instance.posZ = z;
          instance.configureNoCollisionChaseDummy();
+         MCP_PlaneChaseCamera.logCameraWrite("MCH_ViewEntityDummy.setCameraPosition", String.format("pos=(%.3f,%.3f,%.3f)", Double.valueOf(x), Double.valueOf(y), Double.valueOf(z)));
       }
+   }
+
+   public void setPosition(double x, double y, double z) {
+      if(MCP_PlaneChaseCamera.shouldBlockNonChaseDummyWrite("MCH_ViewEntityDummy.setPosition")) {
+         return;
+      }
+      super.setPosition(x, y, z);
+      this.configureNoCollisionChaseDummy();
+      MCP_PlaneChaseCamera.logCameraWrite("MCH_ViewEntityDummy.setPosition", String.format("pos=(%.3f,%.3f,%.3f)", Double.valueOf(x), Double.valueOf(y), Double.valueOf(z)));
+   }
+
+   public void configureNoCollisionChaseDummy() {
+      super.noClip = true;
+      super.ridingEntity = null;
+      super.riddenByEntity = null;
+      this.setSize(0.01F, 0.01F);
+      super.boundingBox.setBounds(super.posX - 0.005D, super.posY - 0.005D, super.posZ - 0.005D, super.posX + 0.005D, super.posY + 0.005D, super.posZ + 0.005D);
+   }
+
+   public AxisAlignedBB getCollisionBox(Entity entity) {
+      return null;
+   }
+
+   public AxisAlignedBB getBoundingBox() {
+      return super.boundingBox;
+   }
+
+   public boolean canBePushed() {
+      return false;
+   }
+
+   public boolean canBeCollidedWith() {
+      return false;
    }
 
    public void configureNoCollisionChaseDummy() {

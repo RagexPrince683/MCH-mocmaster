@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -29,6 +30,10 @@ public class MCP_PlaneChaseCamera {
    private static double desiredY;
    private static double desiredZ;
    private static MCH_ViewEntityDummy activeDummy;
+   private static long nextProofLogTime;
+   private static boolean updateProofChatSent;
+   private static boolean applyProofChatSent;
+   private static boolean enforceProofChatSent;
    private long nextDebugTime;
 
    private MCP_EntityPlane activePlane;
@@ -39,19 +44,29 @@ public class MCP_PlaneChaseCamera {
    private float yaw;
    private float pitch;
    private boolean initialized;
+   private int hardProofFrame;
    private boolean lastCollisionAdjusted;
    private String lastCollisionHit = "none";
 
    public boolean shouldUse(Minecraft mc, EntityPlayer player, MCP_EntityPlane plane, boolean isPilot) {
-      return mc != null && mc.gameSettings != null && mc.gameSettings.thirdPersonView > 0 && player != null && plane != null
-            && isPilot && MCH_Config.EnableNewPlaneThirdPersonCamera.prmBool && plane.isNewFlightModelEnabled()
-            && !plane.getIsGunnerMode(player) && plane.getCameraId() <= 0 && !plane.isDestroyed();
+      boolean thirdPerson = mc != null && mc.gameSettings != null && mc.gameSettings.thirdPersonView > 0;
+      boolean hasPlayer = player != null;
+      boolean hasPlane = plane != null;
+      boolean enabled = MCH_Config.EnableNewPlaneThirdPersonCamera.prmBool;
+      boolean newFlight = hasPlane && plane.isNewFlightModelEnabled();
+      boolean notGunner = hasPlane && hasPlayer && !plane.getIsGunnerMode(player);
+      boolean cameraOk = hasPlane && plane.getCameraId() <= 0;
+      boolean notDestroyed = hasPlane && !plane.isDestroyed();
+      boolean result = thirdPerson && hasPlayer && hasPlane && isPilot && enabled && newFlight && notGunner && cameraOk && notDestroyed;
+      logShouldUseProof(mc, plane, result, thirdPerson, hasPlayer, hasPlane, isPilot, enabled, newFlight, notGunner, cameraOk, notDestroyed);
+      return result;
    }
 
    public void reset() {
       this.activePlane = null;
       this.activeView = -1;
       this.initialized = false;
+      this.hardProofFrame = 0;
       W_Reflection.setCameraRoll(0.0F);
       if(activeCamera == this) {
          activeCamera = null;
@@ -68,16 +83,11 @@ public class MCP_PlaneChaseCamera {
 
       Vec3 focus = this.getCameraFocusPoint(plane);
       Vec3 desired = this.computeDesiredCameraPosition(plane, focus);
-      if(MCH_Config.DebugFlightControl.prmBool && MCH_Config.NewPlaneCameraDebugAbovePlane.prmBool) {
-         desired = Vec3.createVectorHelper(plane.posX, plane.posY + 20.0D, plane.posZ);
-         this.lastCollisionAdjusted = false;
-         this.lastCollisionHit = "debugAbovePlane";
-      } else {
-         if(MCH_Config.NewPlaneCameraCollision.prmBool) {
-            desired = this.adjustForCollision(plane, focus, desired);
-         }
-         desired = this.escapeAircraftCollision(plane, focus, desired);
-      }
+      boolean hardProofNuke = this.hardProofFrame == 0;
+      desired = hardProofNuke?Vec3.createVectorHelper(plane.posX + 100.0D, plane.posY + 80.0D, plane.posZ + 100.0D):Vec3.createVectorHelper(plane.posX, plane.posY + 20.0D, plane.posZ);
+      this.lastCollisionAdjusted = false;
+      this.lastCollisionHit = hardProofNuke?"hardProofNuke":"hardProofAbovePlane";
+      ++this.hardProofFrame;
       activeCamera = this;
       activeRenderPlane = plane;
       desiredX = desired.xCoord;
@@ -87,15 +97,11 @@ public class MCP_PlaneChaseCamera {
       dummyTransformWrites = 0;
       consumedByRenderHook = false;
 
-      float targetYaw = plane.getRotYaw();
-      float targetPitch = this.computeLookPitch(desired, focus);
-      this.yaw = this.smoothAngle(this.yaw, targetYaw, (float)MCH_Config.NewPlaneCameraRotationSmoothing.prmDouble);
-      this.pitch = this.smoothAngle(this.pitch, targetPitch, (float)MCH_Config.NewPlaneCameraRotationSmoothing.prmDouble);
-
-      double posSmoothing = MCH_Config.NewPlaneCameraPositionSmoothing.prmDouble;
-      this.posX = this.smooth(this.posX, desired.xCoord, posSmoothing);
-      this.posY = this.smooth(this.posY, desired.yCoord, posSmoothing);
-      this.posZ = this.smooth(this.posZ, desired.zCoord, posSmoothing);
+      this.yaw = plane.getRotYaw();
+      this.pitch = 45.0F;
+      this.posX = desired.xCoord;
+      this.posY = desired.yCoord;
+      this.posZ = desired.zCoord;
 
       plane.camera.prevRotationYaw = plane.camera.rotationYaw;
       plane.camera.prevRotationPitch = plane.camera.rotationPitch;
@@ -108,10 +114,44 @@ public class MCP_PlaneChaseCamera {
             activeDummy = dummy;
             allowNextChaseDummyWrite = true;
             dummy.update(plane.camera);
+            W_Reflection.setThirdPersonDistance(0.0F);
+            W_Reflection.setThirdPersonDistanceTemp(0.0F);
+            mc.renderViewEntity = dummy;
          }
       }
+      logStageProof(mc, "CHASE UPDATE HIT", plane, true, updateProofChatSent);
+      updateProofChatSent = true;
       this.debugCamera(mc, plane, focus, desired, true);
       W_Reflection.setCameraRoll(plane.getRotRoll() * (float)MCH_Config.NewPlaneCameraRollInfluence.prmDouble);
+   }
+
+   private static void logShouldUseProof(Minecraft mc, MCP_EntityPlane plane, boolean result, boolean thirdPerson, boolean hasPlayer, boolean hasPlane, boolean isPilot, boolean enabled, boolean newFlight, boolean notGunner, boolean cameraOk, boolean notDestroyed) {
+      if(System.currentTimeMillis() < nextProofLogTime) {
+         return;
+      }
+      nextProofLogTime = System.currentTimeMillis() + 1000L;
+      String renderView = mc != null && mc.renderViewEntity != null?mc.renderViewEntity.getClass().getName():"null";
+      MCH_Lib.Log("[MCHeli][PlaneChaseCamera][PROOF] shouldUse=%s DebugFlightControl=%s NewPlaneCameraDebugAbovePlane=%s planeId=%d renderView=%s conditions thirdPersonView>0=%s player!=null=%s plane!=null=%s isPilot=%s EnableNewPlaneThirdPersonCamera=%s newFlight=%s notGunner=%s cameraId<=0=%s notDestroyed=%s",
+            new Object[]{Boolean.valueOf(result), Boolean.valueOf(MCH_Config.DebugFlightControl.prmBool), Boolean.valueOf(MCH_Config.NewPlaneCameraDebugAbovePlane.prmBool), Integer.valueOf(plane != null?plane.getEntityId():-1), renderView,
+                  Boolean.valueOf(thirdPerson), Boolean.valueOf(hasPlayer), Boolean.valueOf(hasPlane), Boolean.valueOf(isPilot), Boolean.valueOf(enabled), Boolean.valueOf(newFlight), Boolean.valueOf(notGunner), Boolean.valueOf(cameraOk), Boolean.valueOf(notDestroyed)});
+   }
+
+   private static void logStageProof(Minecraft mc, String label, MCP_EntityPlane plane, boolean shouldUse, boolean chatAlreadySent) {
+      String renderView = mc != null && mc.renderViewEntity != null?mc.renderViewEntity.getClass().getName():"null";
+      String message = String.format("%s DebugFlightControl=%s NewPlaneCameraDebugAbovePlane=%s shouldUse=%s planeId=%d renderView=%s", label, Boolean.valueOf(MCH_Config.DebugFlightControl.prmBool), Boolean.valueOf(MCH_Config.NewPlaneCameraDebugAbovePlane.prmBool), Boolean.valueOf(shouldUse), Integer.valueOf(plane != null?plane.getEntityId():-1), renderView);
+      MCH_Lib.Log("[MCHeli][PlaneChaseCamera][PROOF] %s", new Object[]{message});
+      if(!chatAlreadySent && mc != null && mc.thePlayer != null) {
+         mc.thePlayer.addChatMessage(new ChatComponentText(message));
+      }
+   }
+
+   public static void logCameraWrite(String methodName, String stage) {
+      Minecraft mc = Minecraft.getMinecraft();
+      if(activeCamera != null || (MCH_Config.DebugFlightControl != null && MCH_Config.DebugFlightControl.prmBool)) {
+         String renderView = mc != null && mc.renderViewEntity != null?mc.renderViewEntity.getClass().getName():"null";
+         MCH_Lib.Log("[MCHeli][PlaneChaseCamera][WRITE] method=%s stage=%s active=%s renderView=%s thirdPersonDistance=%.3f thirdPersonDistanceTemp=%.3f",
+               new Object[]{methodName, stage, Boolean.valueOf(activeCamera != null), renderView, Float.valueOf(W_Reflection.getThirdPersonDistance()), Float.valueOf(W_Reflection.getThirdPersonDistanceTemp())});
+      }
    }
 
    private void initialize(MCP_EntityPlane plane) {
@@ -312,6 +352,8 @@ public class MCP_PlaneChaseCamera {
       mc.renderViewEntity = dummy;
       MCH_Lib.setRenderViewEntity(dummy);
       W_Reflection.setCameraRoll(activeRenderPlane.getRotRoll() * (float)MCH_Config.NewPlaneCameraRollInfluence.prmDouble);
+      logStageProof(mc, "CHASE APPLY HIT", activeRenderPlane, true, applyProofChatSent);
+      applyProofChatSent = true;
       consumedByRenderHook = true;
       logRenderViewEntityState(mc, dummy, "applyActiveRenderCamera");
       checkRenderViewEntityOwnership(mc, dummy);
@@ -363,6 +405,8 @@ public class MCP_PlaneChaseCamera {
       W_Reflection.setThirdPersonDistanceTemp(0.0F);
       mc.renderViewEntity = dummy;
       MCH_Lib.setRenderViewEntity(dummy);
+      logStageProof(mc, "CHASE ENFORCE HIT", activeRenderPlane, true, enforceProofChatSent);
+      enforceProofChatSent = true;
       logRenderViewEntityState(mc, dummy, stage);
       checkRenderViewEntityOwnership(mc, dummy);
       return true;
@@ -434,6 +478,14 @@ public class MCP_PlaneChaseCamera {
 
    public static boolean isRenderCameraActiveFor(MCP_EntityPlane plane, EntityPlayer player) {
       return activeCamera != null && activeRenderPlane != null && activeRenderPlane == plane && player != null;
+   }
+
+   public static boolean shouldBlockNonChaseDummyWrite(String methodName) {
+      if(activeCamera != null && !allowNextChaseDummyWrite) {
+         MCH_Lib.Log("[MCHeli][PlaneChaseCamera][PROOF] blocked non-chase dummy writer %s while chase active", new Object[]{methodName});
+         return true;
+      }
+      return false;
    }
 
    public static void recordDummyTransformWrite(String methodName, boolean chaseWriter) {
