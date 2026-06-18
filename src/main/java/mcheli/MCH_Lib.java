@@ -477,6 +477,7 @@ public class MCH_Lib {
          MCP_PlaneChaseCamera.warnSkippedRenderViewRestore(entity, "MCH_Lib.setRenderViewEntity");
          return;
       }
+      MCP_PlaneChaseCamera.logCameraWrite("MCH_Lib.setRenderViewEntity", entity != null?entity.getClass().getName():"null");
       if(MCH_Config.ReplaceRenderViewEntity.prmBool) {
          W_McClient.setRenderEntity(entity);
       }

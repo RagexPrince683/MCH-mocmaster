@@ -21,6 +21,7 @@ package mcheli.wrapper;
 
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import java.util.List;
+import mcheli.plane.MCP_PlaneChaseCamera;
 import java.util.Queue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
@@ -52,14 +53,33 @@ public class W_Reflection {
 	   }
 
 	   public static void setThirdPersonDistance(float dist) {
-	      if((double)dist >= 0.1D) {
-	         try {
-	            Minecraft e = Minecraft.getMinecraft();
-	            ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, e.entityRenderer, Float.valueOf(dist), new String[]{"field_78490_B", "thirdPersonDistance"});
-	         } catch (Exception var2) {
-	            var2.printStackTrace();
-	         }
+	      try {
+	         Minecraft e = Minecraft.getMinecraft();
+	         ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, e.entityRenderer, Float.valueOf(dist), new String[]{"field_78490_B", "thirdPersonDistance"});
+	         MCP_PlaneChaseCamera.logCameraWrite("W_Reflection.setThirdPersonDistance", "dist=" + dist);
+	      } catch (Exception var2) {
+	         var2.printStackTrace();
+	      }
+	   }
 
+
+	   public static void setThirdPersonDistanceTemp(float dist) {
+	      try {
+	         Minecraft e = Minecraft.getMinecraft();
+	         ObfuscationReflectionHelper.setPrivateValue(EntityRenderer.class, e.entityRenderer, Float.valueOf(dist), new String[]{"field_78491_C", "thirdPersonDistanceTemp"});
+	         MCP_PlaneChaseCamera.logCameraWrite("W_Reflection.setThirdPersonDistanceTemp", "dist=" + dist);
+	      } catch (Exception var2) {
+	         var2.printStackTrace();
+	      }
+	   }
+
+	   public static float getThirdPersonDistanceTemp() {
+	      try {
+	         Minecraft e = Minecraft.getMinecraft();
+	         return ((Float)ObfuscationReflectionHelper.getPrivateValue(EntityRenderer.class, e.entityRenderer, new String[]{"field_78491_C", "thirdPersonDistanceTemp"})).floatValue();
+	      } catch (Exception var1) {
+	         var1.printStackTrace();
+	         return getThirdPersonDistance();
 	      }
 	   }
 
