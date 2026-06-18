@@ -166,7 +166,12 @@ public class MCH_Config {
    public static MCH_ConfigPrm NewPlaneCameraDebugAbovePlane;
    public static MCH_ConfigPrm NewPlaneCameraHeight;
    public static MCH_ConfigPrm NewPlaneCameraSideOffset;
-   public static MCH_ConfigPrm NewPlaneCameraSpeedDistanceScale;
+   public static MCH_ConfigPrm PlaneChaseSpeedDistanceScale;
+   public static MCH_ConfigPrm PlaneChaseSpeedDistanceMaxBonus;
+   public static MCH_ConfigPrm EnablePlaneChaseFOVOverride;
+   public static MCH_ConfigPrm PlaneChaseFOV;
+   public static MCH_ConfigPrm PlaneChaseFreelookFOV;
+   public static MCH_ConfigPrm PlaneChaseFOVSmoothing;
    public static MCH_ConfigPrm NewPlaneCameraSizeDistanceScale;
    public static MCH_ConfigPrm PlaneChaseFocusVerticalOffset;
    public static MCH_ConfigPrm PlaneChaseScreenVerticalBias;
@@ -175,13 +180,20 @@ public class MCH_Config {
    public static MCH_ConfigPrm PlaneLookAheadReturnSmoothing;
    public static MCH_ConfigPrm FreelookReturnSmoothing;
    public static MCH_ConfigPrm PlaneFreelookOrbitSensitivity;
+   public static MCH_ConfigPrm PlaneFreelookYawSmoothing;
+   public static MCH_ConfigPrm PlaneFreelookPitchSmoothing;
+   public static MCH_ConfigPrm PlaneFreelookReturnSmoothing;
+   public static MCH_ConfigPrm PlaneFreelookMaxPitchUp;
+   public static MCH_ConfigPrm PlaneFreelookMaxPitchDown;
    public static MCH_ConfigPrm NewPlaneCameraPositionSmoothing;
    public static MCH_ConfigPrm NewPlaneCameraYawSmoothing;
    public static MCH_ConfigPrm NewPlaneCameraPitchSmoothing;
    public static MCH_ConfigPrm NewPlaneCameraDistanceSmoothing;
    public static MCH_ConfigPrm NewPlaneCameraFocusSmoothing;
    public static MCH_ConfigPrm NewPlaneCameraPitchInfluenceSmoothing;
+   public static MCH_ConfigPrm PlaneChasePitchInfluence;
    public static MCH_ConfigPrm NewPlaneCameraRollInfluence;
+   public static MCH_ConfigPrm PlaneChaseHorizonStabilization;
    public static MCH_ConfigPrm EnableNewPlaneCameraSpeedDistance;
    public static MCH_ConfigPrm EnableNewPlaneCameraCollision;
    public static MCH_ConfigPrm EnablePlaneLookAhead;
@@ -432,13 +444,13 @@ public class MCH_Config {
       DisplayHUDThirdPerson = new MCH_ConfigPrm("DisplayHUDThirdPerson", false);
       EnableNewPlaneThirdPersonCamera = new MCH_ConfigPrm("EnableNewPlaneThirdPersonCamera", true);
       EnableNewPlaneThirdPersonCamera.desc = ";Client-only visual chase camera for third-person new-flight planes. Does not change flight physics, weapons, or HUD rendering.";
-      NewPlaneCameraDistance = new MCH_ConfigPrm("NewPlaneCameraDistance", 45.0D);
-      NewPlaneCameraDistance.desc = ";Base chase distance in blocks for new-flight third-person planes. default is 45; 16 is often too close and 45-80+ can be reasonable by scale/speed.";
-      NewPlaneCameraMinDistance = new MCH_ConfigPrm("NewPlaneCameraMinDistance", 24.0D);
-      NewPlaneCameraMinDistance.desc = ";Minimum chase distance in blocks after speed/size/collision tuning.";
-      NewPlaneCameraMaxDistance = new MCH_ConfigPrm("NewPlaneCameraMaxDistance", 90.0D);
-      NewPlaneCameraMaxDistance.desc = ";Maximum chase distance in blocks after speed/size tuning.";
-      NewPlaneCameraDebugDistance = new MCH_ConfigPrm("NewPlaneCameraDebugDistance", 40.0D);
+      NewPlaneCameraDistance = new MCH_ConfigPrm("PlaneChaseBaseDistance", 15.0D);
+      NewPlaneCameraDistance.desc = ";Base chase distance in blocks for new-flight third-person planes. default is 15; 16 is often too close and 45-80+ can be reasonable by scale/speed.";
+      NewPlaneCameraMinDistance = new MCH_ConfigPrm("PlaneChaseMinDistance", 13.0D);
+      NewPlaneCameraMinDistance.desc = ";Minimum chase distance in blocks after size and optional speed tuning; default 13 keeps aircraft framed when slowing down.";
+      NewPlaneCameraMaxDistance = new MCH_ConfigPrm("PlaneChaseMaxDistance", 21.0D);
+      NewPlaneCameraMaxDistance.desc = ";Maximum chase distance in blocks after size and optional speed tuning; default 21 avoids aggressive zoom breathing.";
+      NewPlaneCameraDebugDistance = new MCH_ConfigPrm("NewPlaneCameraDebugDistance", 0.0D);
       NewPlaneCameraDebugDistance.desc = ";DebugFlightControl-only chase camera distance override. Set 40 to verify the render path consumes the custom camera; 0 disables.";
       NewPlaneCameraDebugAbovePlane = new MCH_ConfigPrm("NewPlaneCameraDebugAbovePlane", false);
       NewPlaneCameraDebugAbovePlane.desc = ";DebugFlightControl-only hard test: places the chase dummy at plane.posY + 20 with third-person distance zeroed.";
@@ -446,8 +458,18 @@ public class MCH_Config {
       NewPlaneCameraHeight.desc = ";Blocks above the aircraft for the new third-person plane chase camera.";
       NewPlaneCameraSideOffset = new MCH_ConfigPrm("NewPlaneCameraSideOffset", 0.0D);
       NewPlaneCameraSideOffset.desc = ";Optional horizontal side offset for the new third-person plane chase camera.";
-      NewPlaneCameraSpeedDistanceScale = new MCH_ConfigPrm("NewPlaneCameraSpeedDistanceScale", 10.0D);
-      NewPlaneCameraSpeedDistanceScale.desc = ";Extra chase distance per block/tick of aircraft speed when speed-based distance is enabled.";
+      PlaneChaseSpeedDistanceScale = new MCH_ConfigPrm("PlaneChaseSpeedDistanceScale", 2.0D);
+      PlaneChaseSpeedDistanceScale.desc = ";Extra chase distance per block/tick of aircraft speed when speed-based distance is explicitly enabled; kept low to avoid zoom breathing.";
+      PlaneChaseSpeedDistanceMaxBonus = new MCH_ConfigPrm("PlaneChaseSpeedDistanceMaxBonus", 3.0D);
+      PlaneChaseSpeedDistanceMaxBonus.desc = ";Maximum extra blocks optional speed-based distance may add; default small for stable framing.";
+      EnablePlaneChaseFOVOverride = new MCH_ConfigPrm("EnablePlaneChaseFOVOverride", true);
+      EnablePlaneChaseFOVOverride.desc = ";Overrides FOV only for the new-flight third-person plane chase camera; does not affect first person, legacy aircraft cameras, or normal Minecraft third person.";
+      PlaneChaseFOV = new MCH_ConfigPrm("PlaneChaseFOV", 95.0D);
+      PlaneChaseFOV.desc = ";Target new plane chase camera FOV. Recommended range is 85-105; wider FOV improves awareness without excessive camera distance.";
+      PlaneChaseFreelookFOV = new MCH_ConfigPrm("PlaneChaseFreelookFOV", 95.0D);
+      PlaneChaseFreelookFOV.desc = ";Optional FOV while hold-freelook orbit is active; defaults to match PlaneChaseFOV.";
+      PlaneChaseFOVSmoothing = new MCH_ConfigPrm("PlaneChaseFOVSmoothing", 0.25D);
+      PlaneChaseFOVSmoothing.desc = ";How quickly the chase FOV override blends in, changes for freelook, and restores when leaving chase camera.";
       NewPlaneCameraSizeDistanceScale = new MCH_ConfigPrm("NewPlaneCameraSizeDistanceScale", 1.25D);
       NewPlaneCameraSizeDistanceScale.desc = ";Extra chase distance per block of aircraft bounding-box size; helps bombers and large planes frame comfortably.";
       PlaneChaseFocusVerticalOffset = new MCH_ConfigPrm("PlaneChaseFocusVerticalOffset", 2.5D);
@@ -463,22 +485,32 @@ public class MCH_Config {
       FreelookReturnSmoothing = new MCH_ConfigPrm("FreelookReturnSmoothing", 0.28D);
       FreelookReturnSmoothing.desc = ";How quickly hold-freelook returns to normal chase-camera orientation after release.";
       PlaneFreelookOrbitSensitivity = new MCH_ConfigPrm("PlaneFreelookOrbitSensitivity", 0.15D);
-      PlaneFreelookOrbitSensitivity.desc = ";Mouse sensitivity multiplier for new chase-camera hold freelook orbit yaw/pitch.";
-      NewPlaneCameraPositionSmoothing = new MCH_ConfigPrm("NewPlaneCameraPositionSmoothing", 0.34D);
+      PlaneFreelookOrbitSensitivity.desc = ";Mouse sensitivity multiplier for new chase-camera hold freelook target orbit yaw/pitch.";
+      PlaneFreelookYawSmoothing = new MCH_ConfigPrm("PlaneFreelookYawSmoothing", 0.20D);
+      PlaneFreelookPitchSmoothing = new MCH_ConfigPrm("PlaneFreelookPitchSmoothing", 0.20D);
+      PlaneFreelookReturnSmoothing = new MCH_ConfigPrm("PlaneFreelookReturnSmoothing", 0.14D);
+      PlaneFreelookMaxPitchUp = new MCH_ConfigPrm("PlaneFreelookMaxPitchUp", 75.0D);
+      PlaneFreelookMaxPitchDown = new MCH_ConfigPrm("PlaneFreelookMaxPitchDown", 65.0D);
+      NewPlaneCameraPositionSmoothing = new MCH_ConfigPrm("NewPlaneCameraPositionSmoothing", 0.22D);
       NewPlaneCameraPositionSmoothing.desc = ";How quickly camera position follows the desired point. Higher is snappier.";
-      NewPlaneCameraYawSmoothing = new MCH_ConfigPrm("NewPlaneCameraYawSmoothing", 0.42D);
+      NewPlaneCameraYawSmoothing = new MCH_ConfigPrm("NewPlaneCameraYawSmoothing", 0.26D);
       NewPlaneCameraYawSmoothing.desc = ";How quickly normal chase camera yaw follows the raised aim focus.";
-      NewPlaneCameraPitchSmoothing = new MCH_ConfigPrm("NewPlaneCameraPitchSmoothing", 0.34D);
+      NewPlaneCameraPitchSmoothing = new MCH_ConfigPrm("NewPlaneCameraPitchSmoothing", 0.22D);
       NewPlaneCameraPitchSmoothing.desc = ";How quickly chase camera pitch follows climbs/dives.";
-      NewPlaneCameraDistanceSmoothing = new MCH_ConfigPrm("NewPlaneCameraDistanceSmoothing", 0.25D);
+      NewPlaneCameraDistanceSmoothing = new MCH_ConfigPrm("NewPlaneCameraDistanceSmoothing", 0.16D);
       NewPlaneCameraDistanceSmoothing.desc = ";How quickly speed/size/collision distance changes are applied.";
-      NewPlaneCameraFocusSmoothing = new MCH_ConfigPrm("NewPlaneCameraFocusSmoothing", 0.38D);
+      NewPlaneCameraFocusSmoothing = new MCH_ConfigPrm("NewPlaneCameraFocusSmoothing", 0.24D);
       NewPlaneCameraFocusSmoothing.desc = ";How quickly the chase focus moves when held look-ahead or framing offsets change.";
       NewPlaneCameraPitchInfluenceSmoothing = new MCH_ConfigPrm("NewPlaneCameraPitchInfluenceSmoothing", 0.30D);
       NewPlaneCameraPitchInfluenceSmoothing.desc = ";Smoothing for plane pitch influence so steep climbs/dives read without snapping.";
+      PlaneChasePitchInfluence = new MCH_ConfigPrm("PlaneChasePitchInfluence", 0.25D);
+      PlaneChasePitchInfluence.desc = ";How much aircraft pitch affects the new chase camera direction; conservative defaults keep the camera observational instead of glued to the plane.";
       NewPlaneCameraRollInfluence = new MCH_ConfigPrm("NewPlaneCameraRollInfluence", 0.12D);
       NewPlaneCameraRollInfluence.desc = ";0.0 keeps the horizon stable; 1.0 fully rolls the chase camera with the aircraft. Conservative defaults avoid nausea.";
-      EnableNewPlaneCameraSpeedDistance = new MCH_ConfigPrm("EnableNewPlaneCameraSpeedDistance", true);
+      PlaneChaseHorizonStabilization = new MCH_ConfigPrm("PlaneChaseHorizonStabilization", true);
+      PlaneChaseHorizonStabilization.desc = ";Keeps the new chase camera horizon more stable than the aircraft by applying conservative roll and pitch inheritance.";
+      EnableNewPlaneCameraSpeedDistance = new MCH_ConfigPrm("EnableSpeedBasedCameraDistance", false);
+      EnableNewPlaneCameraSpeedDistance.desc = ";Disabled by default so the new plane chase camera stays near its stable base distance instead of breathing with throttle/speed.";
       EnableNewPlaneCameraCollision = new MCH_ConfigPrm("EnableNewPlaneCameraCollision", true);
       EnablePlaneLookAhead = new MCH_ConfigPrm("EnablePlaneLookAhead", true);
       EnableHoldFreelook = new MCH_ConfigPrm("EnableHoldFreelook", true);
@@ -641,7 +673,12 @@ public class MCH_Config {
               NewPlaneCameraDebugAbovePlane,
               NewPlaneCameraHeight,
               NewPlaneCameraSideOffset,
-              NewPlaneCameraSpeedDistanceScale,
+              PlaneChaseSpeedDistanceScale,
+              PlaneChaseSpeedDistanceMaxBonus,
+              EnablePlaneChaseFOVOverride,
+              PlaneChaseFOV,
+              PlaneChaseFreelookFOV,
+              PlaneChaseFOVSmoothing,
               NewPlaneCameraSizeDistanceScale,
               PlaneChaseFocusVerticalOffset,
               PlaneChaseScreenVerticalBias,
@@ -650,13 +687,20 @@ public class MCH_Config {
               PlaneLookAheadReturnSmoothing,
               FreelookReturnSmoothing,
               PlaneFreelookOrbitSensitivity,
+              PlaneFreelookYawSmoothing,
+              PlaneFreelookPitchSmoothing,
+              PlaneFreelookReturnSmoothing,
+              PlaneFreelookMaxPitchUp,
+              PlaneFreelookMaxPitchDown,
               NewPlaneCameraPositionSmoothing,
               NewPlaneCameraYawSmoothing,
               NewPlaneCameraPitchSmoothing,
               NewPlaneCameraDistanceSmoothing,
               NewPlaneCameraFocusSmoothing,
               NewPlaneCameraPitchInfluenceSmoothing,
+              PlaneChasePitchInfluence,
               NewPlaneCameraRollInfluence,
+              PlaneChaseHorizonStabilization,
               EnableNewPlaneCameraSpeedDistance,
               EnableNewPlaneCameraCollision,
               EnablePlaneLookAhead,
@@ -744,14 +788,14 @@ public class MCH_Config {
       AllHeliSpeed.prmDouble = MCH_Lib.RNG(AllHeliSpeed.prmDouble, 0.0D, 1000.0D);
       AllPlaneSpeed.prmDouble = MCH_Lib.RNG(AllPlaneSpeed.prmDouble, 0.0D, 1000.0D);
       NewFlightGravity.prmDouble = MCH_Lib.RNG(NewFlightGravity.prmDouble, 0.001D, 0.2D);
-      if(Math.abs(NewPlaneCameraDistance.prmDouble - 36.0D) < 0.001D) {
-         NewPlaneCameraDistance.prmDouble = 45.0D;
+      if(Math.abs(NewPlaneCameraDistance.prmDouble - 36.0D) < 0.001D || Math.abs(NewPlaneCameraDistance.prmDouble - 45.0D) < 0.001D || Math.abs(NewPlaneCameraDistance.prmDouble - 30.0D) < 0.001D) {
+         NewPlaneCameraDistance.prmDouble = 15.0D;
       }
-      if(Math.abs(NewPlaneCameraMinDistance.prmDouble - 18.0D) < 0.001D) {
-         NewPlaneCameraMinDistance.prmDouble = 24.0D;
+      if(Math.abs(NewPlaneCameraMinDistance.prmDouble - 18.0D) < 0.001D || Math.abs(NewPlaneCameraMinDistance.prmDouble - 24.0D) < 0.001D || Math.abs(NewPlaneCameraMinDistance.prmDouble - 40.0D) < 0.001D || Math.abs(NewPlaneCameraMinDistance.prmDouble - 26.0D) < 0.001D) {
+         NewPlaneCameraMinDistance.prmDouble = 13.0D;
       }
-      if(Math.abs(NewPlaneCameraMaxDistance.prmDouble - 70.0D) < 0.001D) {
-         NewPlaneCameraMaxDistance.prmDouble = 90.0D;
+      if(Math.abs(NewPlaneCameraMaxDistance.prmDouble - 70.0D) < 0.001D || Math.abs(NewPlaneCameraMaxDistance.prmDouble - 90.0D) < 0.001D || Math.abs(NewPlaneCameraMaxDistance.prmDouble - 55.0D) < 0.001D || Math.abs(NewPlaneCameraMaxDistance.prmDouble - 42.0D) < 0.001D) {
+         NewPlaneCameraMaxDistance.prmDouble = 21.0D;
       }
       NewPlaneCameraDistance.prmDouble = MCH_Lib.RNG(NewPlaneCameraDistance.prmDouble, 8.0D, 120.0D);
       NewPlaneCameraMinDistance.prmDouble = MCH_Lib.RNG(NewPlaneCameraMinDistance.prmDouble, 4.0D, NewPlaneCameraDistance.prmDouble);
@@ -759,7 +803,7 @@ public class MCH_Config {
       NewPlaneCameraDebugDistance.prmDouble = MCH_Lib.RNG(NewPlaneCameraDebugDistance.prmDouble, 0.0D, 120.0D);
       NewPlaneCameraHeight.prmDouble = MCH_Lib.RNG(NewPlaneCameraHeight.prmDouble, -4.0D, 30.0D);
       NewPlaneCameraSideOffset.prmDouble = MCH_Lib.RNG(NewPlaneCameraSideOffset.prmDouble, -20.0D, 20.0D);
-      NewPlaneCameraSpeedDistanceScale.prmDouble = MCH_Lib.RNG(NewPlaneCameraSpeedDistanceScale.prmDouble, 0.0D, 80.0D);
+      PlaneChaseSpeedDistanceScale.prmDouble = MCH_Lib.RNG(PlaneChaseSpeedDistanceScale.prmDouble, 0.0D, 80.0D);
       NewPlaneCameraSizeDistanceScale.prmDouble = MCH_Lib.RNG(NewPlaneCameraSizeDistanceScale.prmDouble, 0.0D, 5.0D);
       PlaneChaseFocusVerticalOffset.prmDouble = MCH_Lib.RNG(PlaneChaseFocusVerticalOffset.prmDouble, -10.0D, 30.0D);
       PlaneChaseScreenVerticalBias.prmDouble = MCH_Lib.RNG(PlaneChaseScreenVerticalBias.prmDouble, -10.0D, 30.0D);
@@ -774,6 +818,16 @@ public class MCH_Config {
       NewPlaneCameraDistanceSmoothing.prmDouble = MCH_Lib.RNG(NewPlaneCameraDistanceSmoothing.prmDouble, 0.01D, 1.0D);
       NewPlaneCameraFocusSmoothing.prmDouble = MCH_Lib.RNG(NewPlaneCameraFocusSmoothing.prmDouble, 0.01D, 1.0D);
       NewPlaneCameraPitchInfluenceSmoothing.prmDouble = MCH_Lib.RNG(NewPlaneCameraPitchInfluenceSmoothing.prmDouble, 0.01D, 1.0D);
+      PlaneChasePitchInfluence.prmDouble = MCH_Lib.RNG(PlaneChasePitchInfluence.prmDouble, 0.0D, 1.0D);
+      PlaneChaseSpeedDistanceMaxBonus.prmDouble = MCH_Lib.RNG(PlaneChaseSpeedDistanceMaxBonus.prmDouble, 0.0D, 20.0D);
+      PlaneChaseFOV.prmDouble = MCH_Lib.RNG(PlaneChaseFOV.prmDouble, 30.0D, 120.0D);
+      PlaneChaseFreelookFOV.prmDouble = MCH_Lib.RNG(PlaneChaseFreelookFOV.prmDouble, 30.0D, 120.0D);
+      PlaneChaseFOVSmoothing.prmDouble = MCH_Lib.RNG(PlaneChaseFOVSmoothing.prmDouble, 0.01D, 1.0D);
+      PlaneFreelookYawSmoothing.prmDouble = MCH_Lib.RNG(PlaneFreelookYawSmoothing.prmDouble, 0.01D, 1.0D);
+      PlaneFreelookPitchSmoothing.prmDouble = MCH_Lib.RNG(PlaneFreelookPitchSmoothing.prmDouble, 0.01D, 1.0D);
+      PlaneFreelookReturnSmoothing.prmDouble = MCH_Lib.RNG(PlaneFreelookReturnSmoothing.prmDouble, 0.01D, 1.0D);
+      PlaneFreelookMaxPitchUp.prmDouble = MCH_Lib.RNG(PlaneFreelookMaxPitchUp.prmDouble, 0.0D, 89.0D);
+      PlaneFreelookMaxPitchDown.prmDouble = MCH_Lib.RNG(PlaneFreelookMaxPitchDown.prmDouble, 0.0D, 89.0D);
       NewPlaneCameraRollInfluence.prmDouble = MCH_Lib.RNG(NewPlaneCameraRollInfluence.prmDouble, 0.0D, 1.0D);
       AllTankSpeed.prmDouble = MCH_Lib.RNG(AllTankSpeed.prmDouble, 0.0D, 1000.0D);
       AllShipSpeed.prmDouble = MCH_Lib.RNG(AllShipSpeed.prmDouble, 0.0D, 1000.0D);

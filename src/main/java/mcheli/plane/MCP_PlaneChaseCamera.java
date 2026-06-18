@@ -60,10 +60,19 @@ public class MCP_PlaneChaseCamera {
    private boolean wasFreelookActive;
    private float orbitYawOffset;
    private float orbitPitchOffset;
+   private float smoothedOrbitYawOffset;
+   private float smoothedOrbitPitchOffset;
    private double orbitDirX;
    private double orbitDirY;
    private double orbitDirZ;
    private double lastFinalChaseDistance;
+   private double lastBaseChaseDistance;
+   private double lastSizeDistanceBonus;
+   private double lastSpeedDistanceBonus;
+   private double lastDesiredDistance;
+   private double lastCollisionAdjustedDistance;
+   private float smoothedFov = -1.0F;
+   private float lastFovTarget;
    private double lastDesiredX;
    private double lastDesiredY;
    private double lastDesiredZ;
@@ -103,6 +112,8 @@ public class MCP_PlaneChaseCamera {
       this.wasFreelookActive = false;
       this.orbitYawOffset = 0.0F;
       this.orbitPitchOffset = 0.0F;
+      this.smoothedOrbitYawOffset = 0.0F;
+      this.smoothedOrbitPitchOffset = 0.0F;
       W_Reflection.setCameraRoll(0.0F);
       if(activeCamera == this) {
          activeCamera = null;
@@ -150,6 +161,7 @@ public class MCP_PlaneChaseCamera {
          desired = this.escapeAircraftCollision(plane, focus, desired);
       }
       this.lastDistanceAfterCollision = this.distance(focus, desired);
+      this.lastCollisionAdjustedDistance = this.lastDistanceAfterCollision;
       this.lastFinalChaseDistance = this.lastDistanceAfterCollision;
       this.lastDesiredX = desired.xCoord;
       this.lastDesiredY = desired.yCoord;
@@ -282,10 +294,15 @@ public class MCP_PlaneChaseCamera {
       double dy = plane.posY - plane.prevPosY;
       double dz = plane.posZ - plane.prevPosZ;
       double speed = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      double target = MCH_Config.NewPlaneCameraDistance.prmDouble + this.getAircraftSize(plane) * MCH_Config.NewPlaneCameraSizeDistanceScale.prmDouble;
+      this.lastBaseChaseDistance = MCH_Config.NewPlaneCameraDistance.prmDouble;
+      this.lastSizeDistanceBonus = this.getAircraftSize(plane) * MCH_Config.NewPlaneCameraSizeDistanceScale.prmDouble;
+      this.lastSpeedDistanceBonus = 0.0D;
+      double target = this.lastBaseChaseDistance + this.lastSizeDistanceBonus;
       if(MCH_Config.EnableNewPlaneCameraSpeedDistance.prmBool) {
-         target += speed * MCH_Config.NewPlaneCameraSpeedDistanceScale.prmDouble;
+         this.lastSpeedDistanceBonus = Math.min(speed * MCH_Config.PlaneChaseSpeedDistanceScale.prmDouble, MCH_Config.PlaneChaseSpeedDistanceMaxBonus.prmDouble);
+         target += this.lastSpeedDistanceBonus;
       }
+      this.lastDesiredDistance = target;
       target = MCH_Lib.RNG(target, MCH_Config.NewPlaneCameraMinDistance.prmDouble, MCH_Config.NewPlaneCameraMaxDistance.prmDouble);
       if(this.smoothedDistance <= 0.0D) {
          this.smoothedDistance = target;
@@ -313,8 +330,9 @@ public class MCP_PlaneChaseCamera {
    }
 
    private Vec3 getOrbitDirection(MCP_EntityPlane plane) {
-      float yaw = plane.getRotYaw() + this.orbitYawOffset;
-      float pitch = this.smoothedPitchInfluence * 0.35F + this.orbitPitchOffset;
+      float yaw = plane.getRotYaw() + this.smoothedOrbitYawOffset;
+      float pitchInfluence = this.freelookActive || Math.abs(this.smoothedOrbitYawOffset) > 0.01F || Math.abs(this.smoothedOrbitPitchOffset) > 0.01F?0.0F:this.smoothedPitchInfluence * (float)MCH_Config.PlaneChasePitchInfluence.prmDouble;
+      float pitch = pitchInfluence + this.smoothedOrbitPitchOffset;
       Vec3 dir = MCH_Lib.Rot2Vec3(yaw, pitch);
       this.orbitDirX = dir.xCoord;
       this.orbitDirY = dir.yCoord;
@@ -327,12 +345,12 @@ public class MCP_PlaneChaseCamera {
          double sensitivity = MCH_Config.PlaneFreelookOrbitSensitivity.prmDouble;
          this.orbitYawOffset += (float)(pendingFreelookMouseX * sensitivity);
          this.orbitPitchOffset += (float)(pendingFreelookMouseY * sensitivity);
-         this.orbitPitchOffset = MathHelper.clamp_float(this.orbitPitchOffset, -80.0F, 80.0F);
+         this.orbitPitchOffset = MathHelper.clamp_float(this.orbitPitchOffset, -(float)MCH_Config.PlaneFreelookMaxPitchDown.prmDouble, (float)MCH_Config.PlaneFreelookMaxPitchUp.prmDouble);
          pendingFreelookMouseX = 0.0D;
          pendingFreelookMouseY = 0.0D;
       } else {
-         this.orbitYawOffset = this.smoothAngle(this.orbitYawOffset, 0.0F, MCH_Config.FreelookReturnSmoothing.prmDouble);
-         this.orbitPitchOffset = this.smoothAngle(this.orbitPitchOffset, 0.0F, MCH_Config.FreelookReturnSmoothing.prmDouble);
+         this.orbitYawOffset = this.smoothAngle(this.orbitYawOffset, 0.0F, MCH_Config.PlaneFreelookReturnSmoothing.prmDouble);
+         this.orbitPitchOffset = this.smoothAngle(this.orbitPitchOffset, 0.0F, MCH_Config.PlaneFreelookReturnSmoothing.prmDouble);
          if(Math.abs(this.orbitYawOffset) < 0.01F) {
             this.orbitYawOffset = 0.0F;
          }
@@ -340,6 +358,10 @@ public class MCP_PlaneChaseCamera {
             this.orbitPitchOffset = 0.0F;
          }
       }
+      double yawSmoothing = this.freelookActive?MCH_Config.PlaneFreelookYawSmoothing.prmDouble:MCH_Config.PlaneFreelookReturnSmoothing.prmDouble;
+      double pitchSmoothing = this.freelookActive?MCH_Config.PlaneFreelookPitchSmoothing.prmDouble:MCH_Config.PlaneFreelookReturnSmoothing.prmDouble;
+      this.smoothedOrbitYawOffset = this.smoothAngle(this.smoothedOrbitYawOffset, this.orbitYawOffset, yawSmoothing);
+      this.smoothedOrbitPitchOffset = this.smoothAngle(this.smoothedOrbitPitchOffset, this.orbitPitchOffset, pitchSmoothing);
    }
 
    private Vec3 computeHeldLookAheadFocus(MCP_EntityPlane plane, Vec3 anchor) {
@@ -514,10 +536,10 @@ public class MCP_PlaneChaseCamera {
          boolean dummyInsidePlaneBB = dummy != null && this.isPointInsideAabb(Vec3.createVectorHelper(dummy.posX, dummy.posY, dummy.posZ), plane.boundingBox);
          boolean dummyInsidePartBB = dummy != null && !this.getAircraftCollisionHit(plane, Vec3.createVectorHelper(dummy.posX, dummy.posY, dummy.posZ)).equals("none") && !dummyInsidePlaneBB;
          double nearestBoxDistance = this.nearestAircraftBoxDistance(plane, desired);
-         MCH_Lib.Log("CHASE_CAM: phase=CLIENT_TICK focus=(%.3f, %.3f, %.3f) desired=(%.3f, %.3f, %.3f) smoothed=(%.3f, %.3f, %.3f) distBeforeCollision=%.3f distAfterCollision=%.3f yaw=%.2f pitch=%.2f rollInfluence=%.2f lookAheadBlend=%.2f freelook=%s baseDistance=%.2f finalDistance=%.2f focusYOffset=%.2f screenBias=%.2f orbitYawOffset=%.2f orbitPitchOffset=%.2f orbitDir=(%.3f,%.3f,%.3f) finalDummy=(%.3f, %.3f, %.3f) renderView=(%.3f, %.3f, %.3f) planeBB=(%.3f, %.3f, %.3f -> %.3f, %.3f, %.3f) dummyBB=(%.3f, %.3f, %.3f -> %.3f, %.3f, %.3f) dummyInsidePlaneBB=%s dummyInsidePartBB=%s collisionAdjusted=%s collisionHit=%s nearestAircraftBoxDistance=%.3f thirdPersonViewMasked=%s distanceToFocus=%.3f owner=%s lastWriter=%s writes=%d thirdPerson=%d",
-               new Object[]{Double.valueOf(focus.xCoord), Double.valueOf(focus.yCoord), Double.valueOf(focus.zCoord),
+         MCH_Lib.Log("CHASE_CAM: phase=CLIENT_TICK fovOverride=%s fovTarget=%.2f smoothedFov=%.2f baseDistance=%.2f sizeBonus=%.2f speedBonus=%.2f desiredDistance=%.2f smoothedDistance=%.2f collisionAdjustedDistance=%.2f freelook=%s freelookRaw=(%.2f,%.2f) freelookSmoothed=(%.2f,%.2f) freelookReturning=%s rollInfluence=%.2f pitchInfluence=%.2f focus=(%.3f, %.3f, %.3f) desired=(%.3f, %.3f, %.3f) smoothed=(%.3f, %.3f, %.3f) distBeforeCollision=%.3f distAfterCollision=%.3f yaw=%.2f pitch=%.2f lookAheadBlend=%.2f focusYOffset=%.2f screenBias=%.2f orbitDir=(%.3f,%.3f,%.3f) finalDummy=(%.3f, %.3f, %.3f) renderView=(%.3f, %.3f, %.3f) planeBB=(%.3f, %.3f, %.3f -> %.3f, %.3f, %.3f) dummyBB=(%.3f, %.3f, %.3f -> %.3f, %.3f, %.3f) dummyInsidePlaneBB=%s dummyInsidePartBB=%s collisionAdjusted=%s collisionHit=%s nearestAircraftBoxDistance=%.3f thirdPersonViewMasked=%s distanceToFocus=%.3f owner=%s lastWriter=%s writes=%d thirdPerson=%d",
+               new Object[]{Boolean.valueOf(isFovOverrideActive()), Float.valueOf(this.lastFovTarget), Float.valueOf(this.smoothedFov), Double.valueOf(this.lastBaseChaseDistance), Double.valueOf(this.lastSizeDistanceBonus), Double.valueOf(this.lastSpeedDistanceBonus), Double.valueOf(this.lastDesiredDistance), Double.valueOf(this.smoothedDistance), Double.valueOf(this.lastCollisionAdjustedDistance), Boolean.valueOf(this.freelookActive), Float.valueOf(this.orbitYawOffset), Float.valueOf(this.orbitPitchOffset), Float.valueOf(this.smoothedOrbitYawOffset), Float.valueOf(this.smoothedOrbitPitchOffset), Boolean.valueOf(!this.freelookActive && (Math.abs(this.orbitYawOffset) > 0.01F || Math.abs(this.orbitPitchOffset) > 0.01F)), Float.valueOf(this.getRollInfluence(plane)), Float.valueOf(this.smoothedPitchInfluence * (float)MCH_Config.PlaneChasePitchInfluence.prmDouble), Double.valueOf(focus.xCoord), Double.valueOf(focus.yCoord), Double.valueOf(focus.zCoord),
                      Double.valueOf(this.lastDesiredX), Double.valueOf(this.lastDesiredY), Double.valueOf(this.lastDesiredZ),
-                     Double.valueOf(this.posX), Double.valueOf(this.posY), Double.valueOf(this.posZ), Double.valueOf(this.lastDistanceBeforeCollision), Double.valueOf(this.lastDistanceAfterCollision), Float.valueOf(this.yaw), Float.valueOf(this.pitch), Float.valueOf(this.getRollInfluence(plane)), Double.valueOf(this.lookAheadBlend), Boolean.valueOf(this.freelookActive), Double.valueOf(MCH_Config.NewPlaneCameraDistance.prmDouble), Double.valueOf(this.lastFinalChaseDistance), Double.valueOf(MCH_Config.PlaneChaseFocusVerticalOffset.prmDouble), Double.valueOf(MCH_Config.PlaneChaseScreenVerticalBias.prmDouble), Float.valueOf(this.orbitYawOffset), Float.valueOf(this.orbitPitchOffset), Double.valueOf(this.orbitDirX), Double.valueOf(this.orbitDirY), Double.valueOf(this.orbitDirZ),
+                     Double.valueOf(this.posX), Double.valueOf(this.posY), Double.valueOf(this.posZ), Double.valueOf(this.lastDistanceBeforeCollision), Double.valueOf(this.lastDistanceAfterCollision), Float.valueOf(this.yaw), Float.valueOf(this.pitch), Double.valueOf(this.lookAheadBlend), Double.valueOf(MCH_Config.PlaneChaseFocusVerticalOffset.prmDouble), Double.valueOf(MCH_Config.PlaneChaseScreenVerticalBias.prmDouble), Double.valueOf(this.orbitDirX), Double.valueOf(this.orbitDirY), Double.valueOf(this.orbitDirZ),
                      Double.valueOf(dummy != null?dummy.posX:0.0D), Double.valueOf(dummy != null?dummy.posY:0.0D), Double.valueOf(dummy != null?dummy.posZ:0.0D),
                      Double.valueOf(mc.renderViewEntity != null?mc.renderViewEntity.posX:0.0D), Double.valueOf(mc.renderViewEntity != null?mc.renderViewEntity.posY:0.0D), Double.valueOf(mc.renderViewEntity != null?mc.renderViewEntity.posZ:0.0D),
                      Double.valueOf(plane.boundingBox != null?plane.boundingBox.minX:0.0D), Double.valueOf(plane.boundingBox != null?plane.boundingBox.minY:0.0D), Double.valueOf(plane.boundingBox != null?plane.boundingBox.minZ:0.0D),
@@ -529,11 +551,38 @@ public class MCP_PlaneChaseCamera {
       }
    }
 
+   public static boolean isFovOverrideActive() {
+      return activeCamera != null && activeRenderPlane != null && MCH_Config.EnablePlaneChaseFOVOverride.prmBool;
+   }
+
+   public static float applyFovOverride(float currentFov) {
+      if(!isFovOverrideActive()) {
+         return currentFov;
+      }
+      return activeCamera.updateFov(currentFov);
+   }
+
+   private float updateFov(float currentFov) {
+      float target = (float)(this.freelookActive?MCH_Config.PlaneChaseFreelookFOV.prmDouble:MCH_Config.PlaneChaseFOV.prmDouble);
+      this.lastFovTarget = target;
+      if(this.smoothedFov < 0.0F) {
+         this.smoothedFov = currentFov;
+      }
+      this.smoothedFov += (target - this.smoothedFov) * (float)MCH_Config.PlaneChaseFOVSmoothing.prmDouble;
+      return this.smoothedFov;
+   }
+
    public static boolean shouldConsumeFreelookMouse(MCP_EntityPlane plane, EntityPlayer player) {
       return activeCamera != null && activeRenderPlane == plane && player != null && activeCamera.isHoldFreelookActive();
    }
 
    public static void addFreelookMouseDelta(double deltaX, double deltaY) {
+      if(Math.abs(deltaX) < 0.01D) {
+         deltaX = 0.0D;
+      }
+      if(Math.abs(deltaY) < 0.01D) {
+         deltaY = 0.0D;
+      }
       pendingFreelookMouseX += deltaX;
       pendingFreelookMouseY += deltaY;
    }
