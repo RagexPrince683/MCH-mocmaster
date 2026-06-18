@@ -160,22 +160,42 @@ IgnoreBulletHit = flansmod.common.guns.EntityGrenade
 
 ### New-flight plane third-person chase camera
 
-These options are client-side visual/readability settings for pilots flying planes that use the new flight/new mobility system. They do not change flight physics, stall behavior, pitch authority, throttle behavior, weapons, targeting, HUD rendering, or aircraft balance. Legacy aircraft, helicopters, tanks, turrets, ships, passengers, and gunners keep the existing camera path unless the gated plane conditions are met.
+These options are client-side visual/readability settings for pilots flying planes that use the new flight/new mobility system. They do not change flight physics, stall behavior, pitch authority, throttle behavior, weapons, targeting, HUD rendering, or aircraft balance. Legacy aircraft, first-person view, helicopters, tanks, turrets, ships, passengers, and gunners keep the existing camera path unless the gated new-plane third-person pilot conditions are met.
 
-| Config key | Default | Purpose |
-| --- | ---: | --- |
-| `EnableNewPlaneThirdPersonCamera` | `true` | Enables the smooth chase camera only for third-person pilot view in new-flight planes. |
-| `NewPlaneCameraDistance` | `16.0` | Camera distance in blocks behind the plane. |
-| `NewPlaneCameraMinDistance` | `8.0` | Minimum camera distance from the plane focus. |
-| `NewPlaneCameraMaxDistance` | `24.0` | Maximum camera distance from the plane focus. |
-| `NewPlaneCameraDebugDistance` | `0.0` | `DebugFlightControl`-only distance override; set to `20`-`30` to prove the render path is consuming the custom camera, or `0` to disable. |
-| `NewPlaneCameraHeight` | `4.0` | Vertical offset in blocks above the plane. |
-| `NewPlaneCameraSideOffset` | `0.0` | Optional left/right offset in blocks for off-center chase views. |
-| `NewPlaneCameraSpeedDistanceScale` | `0.08` | Extra chase distance per block/tick of aircraft speed. |
-| `NewPlaneCameraPositionSmoothing` | `0.22` | How quickly the camera position catches up to the desired chase point; higher values are snappier. |
-| `NewPlaneCameraRotationSmoothing` | `0.16` | How quickly camera yaw and pitch recenter behind the aircraft; higher values are snappier. |
-| `NewPlaneCameraRollInfluence` | `0.15` | How much aircraft roll is applied to the camera horizon, from `0.0` stable horizon to `1.0` full roll coupling. |
-| `NewPlaneCameraCollision` | `true` | Shortens/moves the chase camera when a block is between the aircraft and desired camera point. |
+| Config key | Default | Purpose | Practical range |
+| --- | ---: | --- | --- |
+| `EnableNewPlaneThirdPersonCamera` | `true` | Enables the smooth chase camera only for third-person pilot view in new-flight planes. | `true`/`false` |
+| `EnableNewPlaneCameraSpeedDistance` | `true` | Allows aircraft speed to pull the camera farther back. | `true`/`false` |
+| `EnableNewPlaneCameraCollision` | `true` | Allows block ray tracing to shorten the camera when terrain/buildings/trees/hangars obstruct the view. | `true`/`false` |
+| `EnableNewPlaneCameraLookAhead` | `true` | Makes the camera look toward forward/velocity/turn-biased combat focus instead of only the model center. | `true`/`false` |
+| `EnableNewPlaneCameraRollInfluence` | `true` | Allows limited aircraft roll to affect the camera horizon. | `true`/`false` |
+| `NewPlaneCameraDistance` | `36.0` | Base chase distance in blocks before speed and size scaling. 16 blocks may be too close; 30–50+ blocks can be reasonable depending on aircraft scale and speed. | fighters `28`-`42`, bombers `40`-`70`, jets `38`-`60`, slow props `24`-`38` |
+| `NewPlaneCameraMinDistance` | `18.0` | Minimum camera distance from the smoothed focus after collision/scale handling. | `10`-`30` |
+| `NewPlaneCameraMaxDistance` | `70.0` | Maximum camera distance after speed/size scaling. | `45`-`100+` |
+| `NewPlaneCameraDebugDistance` | `40.0` | `DebugFlightControl`-only distance override for proof testing; `0` disables. Keep normal tuning in the non-debug keys. | `0` or `30`-`80` |
+| `NewPlaneCameraDebugAbovePlane` | `false` | `DebugFlightControl`-only hard proof mode that places the dummy above the plane. | debug only |
+| `NewPlaneCameraHeight` | `4.0` | Vertical camera offset above the combat focus. | `2`-`8`; large aircraft may prefer `6`-`12` |
+| `NewPlaneCameraSideOffset` | `0.0` | Optional left/right offset for off-center chase views. | `-4`-`4` |
+| `NewPlaneCameraSpeedDistanceScale` | `10.0` | Extra chase distance per block/tick of aircraft speed when speed scaling is enabled. | slow props `4`-`10`, fighters `8`-`16`, jets `12`-`28` |
+| `NewPlaneCameraSizeDistanceScale` | `1.25` | Extra chase distance per block of aircraft bounding-box size so larger aircraft frame comfortably. | fighters `0.5`-`1.5`, bombers `1.5`-`3.0` |
+| `NewPlaneCameraForwardLookOffset` | `10.0` | Blocks forward from the aircraft focus that the camera looks toward. | `6`-`18` |
+| `NewPlaneCameraVelocityLookAhead` | `18.0` | Velocity-aligned look-ahead contribution for seeing where the aircraft is going. | props `8`-`18`, jets `16`-`35` |
+| `NewPlaneCameraTurnLookAhead` | `4.0` | Outside/forward focus bias during turns for situational awareness without disconnecting aim. | `2`-`8` |
+| `NewPlaneCameraPositionSmoothing` | `0.34` | How quickly camera position follows the desired chase point; higher values are snappier. | dogfight `0.28`-`0.50` |
+| `NewPlaneCameraYawSmoothing` | `0.42` | How quickly yaw follows the look-ahead focus. | `0.30`-`0.60` |
+| `NewPlaneCameraPitchSmoothing` | `0.34` | How quickly pitch follows climbs/dives. | `0.24`-`0.50` |
+| `NewPlaneCameraDistanceSmoothing` | `0.25` | How quickly speed/size/collision distance changes are restored or shortened. | `0.18`-`0.40` |
+| `NewPlaneCameraFocusSmoothing` | `0.38` | How quickly the combat look-ahead focus moves. | `0.25`-`0.55` |
+| `NewPlaneCameraPitchInfluenceSmoothing` | `0.30` | Smooths pitch influence so steep climbs/dives are readable without snapping above/below the aircraft. | `0.20`-`0.45` |
+| `NewPlaneCameraRollInfluence` | `0.12` | Conservative camera roll coupling; `0.0` keeps horizon stable and `1.0` fully rolls with the plane. | `0.05`-`0.25` for combat readability |
+| `NewPlaneCameraCollision` | `true` | Deprecated compatibility alias for collision; leave `true` with `EnableNewPlaneCameraCollision=true`. | `true`/`false` |
+
+Tuning guidance:
+
+* **Fighters:** start around `NewPlaneCameraDistance=32`-`40`, `NewPlaneCameraSpeedDistanceScale=8`-`16`, and keep roll influence near `0.10`-`0.18`.
+* **Bombers / large aircraft:** use `NewPlaneCameraDistance=45`-`70`, higher `NewPlaneCameraSizeDistanceScale`, and a taller `NewPlaneCameraHeight` so the full aircraft fits on screen.
+* **Jets:** use a higher max distance (`70`-`100+`) and more velocity look-ahead (`20`-`35`) so high speed does not put the camera on the tail.
+* **Slow props:** keep distance lower (`24`-`38`) and speed scaling modest so the camera remains responsive while still framing the aircraft.
 
 ## Key config defaults
 

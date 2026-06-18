@@ -47,6 +47,11 @@ public class MCP_PlaneChaseCamera {
    private boolean initialized;
    private boolean lastCollisionAdjusted;
    private String lastCollisionHit = "none";
+   private Vec3 smoothedFocus;
+   private double smoothedDistance;
+   private double lastDistanceBeforeCollision;
+   private double lastDistanceAfterCollision;
+   private float smoothedPitchInfluence;
    private double renderPosX;
    private double renderPosY;
    private double renderPosZ;
@@ -99,18 +104,29 @@ public class MCP_PlaneChaseCamera {
       }
       lastClientTickComputed = clientTick;
 
-      Vec3 focus = this.getCameraFocusPoint(plane);
+      Vec3 anchor = this.getCameraFocusPoint(plane);
+      Vec3 focus = this.computeLookAheadFocus(plane, anchor);
+      this.smoothedFocus = this.smoothVec(this.smoothedFocus, focus, MCH_Config.NewPlaneCameraFocusSmoothing.prmDouble);
+      if(this.smoothedFocus != null) {
+         focus = this.smoothedFocus;
+      }
       Vec3 desired = this.computeDesiredCameraPosition(plane, focus);
+      this.lastDistanceBeforeCollision = this.distance(focus, desired);
       if(MCH_Config.DebugFlightControl.prmBool && MCH_Config.NewPlaneCameraDebugAbovePlane.prmBool) {
          desired = Vec3.createVectorHelper(plane.posX, plane.posY + 20.0D, plane.posZ);
          this.lastCollisionAdjusted = false;
          this.lastCollisionHit = "debugAbovePlane";
       } else {
-         if(MCH_Config.NewPlaneCameraCollision.prmBool) {
+         if(MCH_Config.EnableNewPlaneCameraCollision.prmBool && MCH_Config.NewPlaneCameraCollision.prmBool) {
             desired = this.adjustForCollision(plane, focus, desired);
+         } else {
+            this.lastCollisionAdjusted = false;
+            this.lastCollisionHit = "disabled";
          }
          desired = this.escapeAircraftCollision(plane, focus, desired);
       }
+      this.lastDistanceAfterCollision = this.distance(focus, desired);
+      desired = this.smoothVec(Vec3.createVectorHelper(this.posX, this.posY, this.posZ), desired, MCH_Config.NewPlaneCameraPositionSmoothing.prmDouble);
       activeCamera = this;
       activeRenderPlane = plane;
       desiredX = desired.xCoord;
@@ -120,8 +136,10 @@ public class MCP_PlaneChaseCamera {
       dummyTransformWrites = 0;
       consumedByRenderHook = false;
 
-      this.yaw = plane.getRotYaw();
-      this.pitch = 45.0F;
+      float targetYaw = this.computeLookYaw(desired, focus);
+      float targetPitch = this.computeLookPitch(desired, focus);
+      this.yaw = this.smoothAngle(this.yaw, targetYaw, MCH_Config.NewPlaneCameraYawSmoothing.prmDouble);
+      this.pitch = this.smoothAngle(this.pitch, targetPitch, MCH_Config.NewPlaneCameraPitchSmoothing.prmDouble);
       this.posX = desired.xCoord;
       this.posY = desired.yCoord;
       this.posZ = desired.zCoord;
@@ -130,11 +148,11 @@ public class MCP_PlaneChaseCamera {
       this.mirrorRenderTransformToPlaneCamera(plane);
       logPhase("CLIENT_TICK", mc, activeDummy, false, false);
       this.debugCamera(mc, plane, focus, desired, true);
-      W_Reflection.setCameraRoll(plane.getRotRoll() * (float)MCH_Config.NewPlaneCameraRollInfluence.prmDouble);
+      W_Reflection.setCameraRoll(this.getRollInfluence(plane));
    }
 
    private static void logShouldUseProof(Minecraft mc, MCP_EntityPlane plane, boolean result, boolean thirdPerson, boolean hasPlayer, boolean hasPlane, boolean isPilot, boolean enabled, boolean newFlight, boolean notGunner, boolean cameraOk, boolean notDestroyed) {
-      if(System.currentTimeMillis() < nextProofLogTime) {
+      if(!MCH_Config.DebugFlightControl.prmBool || System.currentTimeMillis() < nextProofLogTime) {
          return;
       }
       nextProofLogTime = System.currentTimeMillis() + 1000L;
@@ -145,7 +163,7 @@ public class MCP_PlaneChaseCamera {
    }
 
    private static void logStageProof(Minecraft mc, String label, MCP_EntityPlane plane, boolean shouldUse) {
-      if(System.currentTimeMillis() < nextStageProofLogTime) {
+      if(!MCH_Config.DebugFlightControl.prmBool || System.currentTimeMillis() < nextStageProofLogTime) {
          return;
       }
       nextStageProofLogTime = System.currentTimeMillis() + 1000L;
@@ -156,7 +174,7 @@ public class MCP_PlaneChaseCamera {
 
    public static void logCameraWrite(String methodName, String stage) {
       Minecraft mc = Minecraft.getMinecraft();
-      if((activeCamera != null || (MCH_Config.DebugFlightControl != null && MCH_Config.DebugFlightControl.prmBool)) && System.currentTimeMillis() >= nextWriteLogTime) {
+      if(MCH_Config.DebugFlightControl != null && MCH_Config.DebugFlightControl.prmBool && System.currentTimeMillis() >= nextWriteLogTime) {
          nextWriteLogTime = System.currentTimeMillis() + 1000L;
          String renderView = mc != null && mc.renderViewEntity != null?mc.renderViewEntity.getClass().getName():"null";
          MCH_Lib.Log("[MCHeli][PlaneChaseCamera][WRITE] method=%s stage=%s active=%s renderView=%s thirdPersonDistance=%.3f thirdPersonDistanceTemp=%.3f",
@@ -172,6 +190,9 @@ public class MCP_PlaneChaseCamera {
       this.posZ = desired.zCoord;
       this.yaw = plane.getRotYaw();
       this.pitch = this.computeLookPitch(desired, focus);
+      this.smoothedFocus = focus;
+      this.smoothedDistance = this.distance(focus, desired);
+      this.smoothedPitchInfluence = plane.getRotPitch();
       this.activePlane = plane;
       this.activeView = Minecraft.getMinecraft().gameSettings.thirdPersonView;
       this.initialized = true;
@@ -192,7 +213,7 @@ public class MCP_PlaneChaseCamera {
       this.renderPosZ = this.posZ;
       this.renderYaw = this.yaw;
       this.renderPitch = this.pitch;
-      this.renderRoll = plane != null?plane.getRotRoll() * (float)MCH_Config.NewPlaneCameraRollInfluence.prmDouble:0.0F;
+      this.renderRoll = plane != null?this.getRollInfluence(plane):0.0F;
       this.renderZoom = plane != null && plane.camera != null?plane.camera.getCameraZoom():1.0F;
       this.hasRenderTransform = true;
    }
@@ -223,13 +244,6 @@ public class MCP_PlaneChaseCamera {
       return Vec3.createVectorHelper(worldX, worldY, worldZ);
    }
 
-   private double getCameraDistance() {
-      if(MCH_Config.DebugFlightControl.prmBool && MCH_Config.NewPlaneCameraDebugDistance.prmDouble > 0.0D) {
-         return MCH_Config.NewPlaneCameraDebugDistance.prmDouble;
-      }
-      return MCH_Lib.RNG(MCH_Config.NewPlaneCameraDistance.prmDouble, MCH_Config.NewPlaneCameraMinDistance.prmDouble, MCH_Config.NewPlaneCameraMaxDistance.prmDouble);
-   }
-
    private double getCameraDistance(MCP_EntityPlane plane) {
       if(MCH_Config.DebugFlightControl.prmBool && MCH_Config.NewPlaneCameraDebugDistance.prmDouble > 0.0D) {
          return MCH_Config.NewPlaneCameraDebugDistance.prmDouble;
@@ -238,19 +252,50 @@ public class MCP_PlaneChaseCamera {
       double dy = plane.posY - plane.prevPosY;
       double dz = plane.posZ - plane.prevPosZ;
       double speed = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      return MCH_Lib.RNG(MCH_Config.NewPlaneCameraDistance.prmDouble + speed * MCH_Config.NewPlaneCameraSpeedDistanceScale.prmDouble, MCH_Config.NewPlaneCameraMinDistance.prmDouble, MCH_Config.NewPlaneCameraMaxDistance.prmDouble);
+      double target = MCH_Config.NewPlaneCameraDistance.prmDouble + this.getAircraftSize(plane) * MCH_Config.NewPlaneCameraSizeDistanceScale.prmDouble;
+      if(MCH_Config.EnableNewPlaneCameraSpeedDistance.prmBool) {
+         target += speed * MCH_Config.NewPlaneCameraSpeedDistanceScale.prmDouble;
+      }
+      target = MCH_Lib.RNG(target, MCH_Config.NewPlaneCameraMinDistance.prmDouble, MCH_Config.NewPlaneCameraMaxDistance.prmDouble);
+      if(this.smoothedDistance <= 0.0D) {
+         this.smoothedDistance = target;
+      } else {
+         this.smoothedDistance += (target - this.smoothedDistance) * MCH_Config.NewPlaneCameraDistanceSmoothing.prmDouble;
+      }
+      return this.smoothedDistance;
    }
 
    private Vec3 computeDesiredCameraPosition(MCP_EntityPlane plane, Vec3 focus) {
       double distance = this.getCameraDistance(plane);
       double height = MCH_Config.NewPlaneCameraHeight.prmDouble;
       double side = MCH_Config.NewPlaneCameraSideOffset.prmDouble;
-      Vec3 forward = MCH_Lib.Rot2Vec3(plane.getRotYaw(), 0.0F);
+      this.smoothedPitchInfluence += (plane.getRotPitch() - this.smoothedPitchInfluence) * (float)MCH_Config.NewPlaneCameraPitchInfluenceSmoothing.prmDouble;
+      Vec3 forward = MCH_Lib.Rot2Vec3(plane.getRotYaw(), this.smoothedPitchInfluence * 0.35F);
       Vec3 right = MCH_Lib.Rot2Vec3(plane.getRotYaw() + 90.0F, 0.0F);
       double x = focus.xCoord - forward.xCoord * distance + right.xCoord * side;
       double y = focus.yCoord + height;
       double z = focus.zCoord - forward.zCoord * distance + right.zCoord * side;
       return Vec3.createVectorHelper(x, y, z);
+   }
+
+   private Vec3 computeLookAheadFocus(MCP_EntityPlane plane, Vec3 anchor) {
+      if(!MCH_Config.EnableNewPlaneCameraLookAhead.prmBool) {
+         return anchor;
+      }
+      Vec3 forward = MCH_Lib.Rot2Vec3(plane.getRotYaw(), plane.getRotPitch() * 0.35F);
+      double vx = plane.posX - plane.prevPosX;
+      double vy = plane.posY - plane.prevPosY;
+      double vz = plane.posZ - plane.prevPosZ;
+      Vec3 velocity = Vec3.createVectorHelper(vx, vy, vz);
+      if(velocity.lengthVector() > 1.0E-4D) {
+         velocity = velocity.normalize();
+      }
+      double yawDelta = MathHelper.wrapAngleTo180_float(plane.getRotYaw() - plane.prevRotationYaw);
+      Vec3 outside = MCH_Lib.Rot2Vec3(plane.getRotYaw() + (yawDelta >= 0.0D?90.0F:-90.0F), 0.0F);
+      double turn = Math.min(1.0D, Math.abs(yawDelta) / 12.0D);
+      return anchor.addVector(forward.xCoord * MCH_Config.NewPlaneCameraForwardLookOffset.prmDouble + velocity.xCoord * MCH_Config.NewPlaneCameraVelocityLookAhead.prmDouble + outside.xCoord * MCH_Config.NewPlaneCameraTurnLookAhead.prmDouble * turn,
+            forward.yCoord * MCH_Config.NewPlaneCameraForwardLookOffset.prmDouble + velocity.yCoord * MCH_Config.NewPlaneCameraVelocityLookAhead.prmDouble,
+            forward.zCoord * MCH_Config.NewPlaneCameraForwardLookOffset.prmDouble + velocity.zCoord * MCH_Config.NewPlaneCameraVelocityLookAhead.prmDouble + outside.zCoord * MCH_Config.NewPlaneCameraTurnLookAhead.prmDouble * turn);
    }
 
    private Vec3 adjustForCollision(MCP_EntityPlane plane, Vec3 focus, Vec3 desired) {
@@ -332,6 +377,32 @@ public class MCP_PlaneChaseCamera {
       return nearest;
    }
 
+   private double getAircraftSize(MCP_EntityPlane plane) {
+      AxisAlignedBB bb = plane.boundingBox;
+      if(bb == null) {
+         return 0.0D;
+      }
+      double sx = bb.maxX - bb.minX;
+      double sy = bb.maxY - bb.minY;
+      double sz = bb.maxZ - bb.minZ;
+      MCH_BoundingBox[] boxes = plane.getCalculatedExtraBoundingBoxes();
+      for(int i = 0; i < boxes.length; ++i) {
+         if(boxes[i] != null && boxes[i].boundingBox != null) {
+            AxisAlignedBB b = boxes[i].boundingBox;
+            sx = Math.max(sx, b.maxX - b.minX);
+            sy = Math.max(sy, b.maxY - b.minY);
+            sz = Math.max(sz, b.maxZ - b.minZ);
+         }
+      }
+      return Math.max(sx, Math.max(sy, sz));
+   }
+
+   private float computeLookYaw(Vec3 camera, Vec3 focus) {
+      double dx = focus.xCoord - camera.xCoord;
+      double dz = focus.zCoord - camera.zCoord;
+      return (float)(Math.atan2(dz, dx) * 57.29577951308232D) - 90.0F;
+   }
+
    private float computeLookPitch(Vec3 camera, Vec3 focus) {
       double dx = focus.xCoord - camera.xCoord;
       double dy = focus.yCoord - camera.yCoord;
@@ -349,6 +420,23 @@ public class MCP_PlaneChaseCamera {
       return focus.addVector(direction.xCoord * minDistance, direction.yCoord * minDistance, direction.zCoord * minDistance);
    }
 
+   private Vec3 smoothVec(Vec3 from, Vec3 to, double amount) {
+      if(from == null || to == null) {
+         return to;
+      }
+      amount = MCH_Lib.RNG(amount, 0.01D, 1.0D);
+      return Vec3.createVectorHelper(from.xCoord + (to.xCoord - from.xCoord) * amount, from.yCoord + (to.yCoord - from.yCoord) * amount, from.zCoord + (to.zCoord - from.zCoord) * amount);
+   }
+
+   private float smoothAngle(float from, float to, double amount) {
+      amount = MCH_Lib.RNG(amount, 0.01D, 1.0D);
+      return from + MathHelper.wrapAngleTo180_float(to - from) * (float)amount;
+   }
+
+   private float getRollInfluence(MCP_EntityPlane plane) {
+      return MCH_Config.EnableNewPlaneCameraRollInfluence.prmBool?plane.getRotRoll() * (float)MCH_Config.NewPlaneCameraRollInfluence.prmDouble:0.0F;
+   }
+
    private double distance(Vec3 a, Vec3 b) {
       double dx = a.xCoord - b.xCoord;
       double dy = a.yCoord - b.yCoord;
@@ -364,9 +452,10 @@ public class MCP_PlaneChaseCamera {
          boolean dummyInsidePlaneBB = dummy != null && this.isPointInsideAabb(Vec3.createVectorHelper(dummy.posX, dummy.posY, dummy.posZ), plane.boundingBox);
          boolean dummyInsidePartBB = dummy != null && !this.getAircraftCollisionHit(plane, Vec3.createVectorHelper(dummy.posX, dummy.posY, dummy.posZ)).equals("none") && !dummyInsidePlaneBB;
          double nearestBoxDistance = this.nearestAircraftBoxDistance(plane, desired);
-         MCH_Lib.Log("CHASE_CAM: focus=(%.3f, %.3f, %.3f) desired=(%.3f, %.3f, %.3f) finalDummy=(%.3f, %.3f, %.3f) renderView=(%.3f, %.3f, %.3f) planeBB=(%.3f, %.3f, %.3f -> %.3f, %.3f, %.3f) dummyBB=(%.3f, %.3f, %.3f -> %.3f, %.3f, %.3f) dummyInsidePlaneBB=%s dummyInsidePartBB=%s collisionAdjusted=%s collisionHit=%s nearestAircraftBoxDistance=%.3f thirdPersonViewMasked=%s distanceToFocus=%.3f owner=%s lastWriter=%s writes=%d thirdPerson=%d",
+         MCH_Lib.Log("CHASE_CAM: phase=CLIENT_TICK focus=(%.3f, %.3f, %.3f) desired=(%.3f, %.3f, %.3f) smoothed=(%.3f, %.3f, %.3f) distBeforeCollision=%.3f distAfterCollision=%.3f yaw=%.2f pitch=%.2f rollInfluence=%.2f finalDummy=(%.3f, %.3f, %.3f) renderView=(%.3f, %.3f, %.3f) planeBB=(%.3f, %.3f, %.3f -> %.3f, %.3f, %.3f) dummyBB=(%.3f, %.3f, %.3f -> %.3f, %.3f, %.3f) dummyInsidePlaneBB=%s dummyInsidePartBB=%s collisionAdjusted=%s collisionHit=%s nearestAircraftBoxDistance=%.3f thirdPersonViewMasked=%s distanceToFocus=%.3f owner=%s lastWriter=%s writes=%d thirdPerson=%d",
                new Object[]{Double.valueOf(focus.xCoord), Double.valueOf(focus.yCoord), Double.valueOf(focus.zCoord),
                      Double.valueOf(desired.xCoord), Double.valueOf(desired.yCoord), Double.valueOf(desired.zCoord),
+                     Double.valueOf(this.posX), Double.valueOf(this.posY), Double.valueOf(this.posZ), Double.valueOf(this.lastDistanceBeforeCollision), Double.valueOf(this.lastDistanceAfterCollision), Float.valueOf(this.yaw), Float.valueOf(this.pitch), Float.valueOf(this.getRollInfluence(plane)),
                      Double.valueOf(dummy != null?dummy.posX:0.0D), Double.valueOf(dummy != null?dummy.posY:0.0D), Double.valueOf(dummy != null?dummy.posZ:0.0D),
                      Double.valueOf(mc.renderViewEntity != null?mc.renderViewEntity.posX:0.0D), Double.valueOf(mc.renderViewEntity != null?mc.renderViewEntity.posY:0.0D), Double.valueOf(mc.renderViewEntity != null?mc.renderViewEntity.posZ:0.0D),
                      Double.valueOf(plane.boundingBox != null?plane.boundingBox.minX:0.0D), Double.valueOf(plane.boundingBox != null?plane.boundingBox.minY:0.0D), Double.valueOf(plane.boundingBox != null?plane.boundingBox.minZ:0.0D),
@@ -394,7 +483,7 @@ public class MCP_PlaneChaseCamera {
    }
 
    public static void logPhase(String phase, Minecraft mc, MCH_ViewEntityDummy dummy, boolean transformApplied, boolean beforeOrientCamera) {
-      if(System.currentTimeMillis() < nextPhaseLogTime) {
+      if(!MCH_Config.DebugFlightControl.prmBool || System.currentTimeMillis() < nextPhaseLogTime) {
          return;
       }
       nextPhaseLogTime = System.currentTimeMillis() + 1000L;
