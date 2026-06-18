@@ -166,6 +166,7 @@ These options are client-side visual/readability settings for pilots flying plan
 | --- | ---: | --- |
 | `EnableNewPlaneThirdPersonCamera` | `true` | Enables the smooth chase camera only for third-person pilot view in new-flight planes. |
 | `NewPlaneCameraDistance` | `9.0` | Camera distance in blocks behind the plane. |
+| `NewPlaneCameraDebugDistance` | `0.0` | `DebugFlightControl`-only distance override; set to `20`-`30` to prove the render path is consuming the custom camera, or `0` to disable. |
 | `NewPlaneCameraHeight` | `2.4` | Vertical offset in blocks above the plane. |
 | `NewPlaneCameraSideOffset` | `0.0` | Optional left/right offset in blocks for off-center chase views. |
 | `NewPlaneCameraPositionSmoothing` | `0.22` | How quickly the camera position catches up to the desired chase point; higher values are snappier. |

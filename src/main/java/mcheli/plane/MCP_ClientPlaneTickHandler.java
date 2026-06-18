@@ -127,7 +127,7 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
          super.isRiding = false;
       }
 
-      if(!super.isBeforeRiding && super.isRiding && var8 != null) {
+      if(!super.isBeforeRiding && super.isRiding && var8 != null && !this.wasUsingChaseCamera) {
          W_Reflection.setThirdPersonDistance(var8.thirdPersonDist);
          MCH_ViewEntityDummy.getInstance(super.mc.theWorld).setPosition(var8.posX, var8.posY + 0.5D, var8.posZ);
       } else if(super.isBeforeRiding && !super.isRiding) {
