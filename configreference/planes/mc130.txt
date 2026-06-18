@@ -24,7 +24,9 @@ ThirdPersonDist = 28
 Category = STOL/SOMTA/TA
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-
+NewPlaneCameraFocusOffsetX = 0.650
+NewPlaneCameraFocusOffsetY = 2.680
+NewPlaneCameraFocusOffsetZ = 2.000
 # New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.

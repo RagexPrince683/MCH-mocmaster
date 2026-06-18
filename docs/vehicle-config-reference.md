@@ -66,6 +66,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `CameraRotationSpeed` | All | float | 1000.0 | camera part rotation speed |
 | `DefaultFreelook` | All | boolean | false | default pilot freelook |
 | `ThirdPersonDist` | All | float | 4.0 | third-person distance |
+| `NewPlaneCameraFocusOffsetX/Y/Z` | Plane | local blocks | `0,1,0` | new-flight third-person chase-camera focus anchor; visual/client readability only |
 | `UnmountPosition` | All | vec3 | normal unmount | custom dismount point |
 | `Width` | All | float | 2.0 | collision/body width |
 | `Height` | All | float | 0.7 | collision/body height |

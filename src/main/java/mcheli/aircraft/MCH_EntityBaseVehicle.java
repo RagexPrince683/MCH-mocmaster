@@ -18,9 +18,10 @@ import mcheli.flare.MCH_Maintenance;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.multiplay.MCH_Multiplay;
 import mcheli.parachute.MCH_EntityParachute;
-import mcheli.plane.MCP_EntityPlane;
 import mcheli.particles.MCH_ParticleParam;
 import mcheli.particles.MCH_ParticlesUtil;
+import mcheli.plane.MCP_EntityPlane;
+import mcheli.plane.MCP_PlaneChaseCamera;
 import mcheli.ship.MCH_EntityShip;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.uav.MCH_EntityUavStation;
@@ -5145,6 +5146,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             seatInfo.lastTickPosY = seatInfo.posY;
             seatInfo.lastTickPosZ = seatInfo.posZ;
          }
+      }
+
+      if(this instanceof MCP_EntityPlane && MCP_PlaneChaseCamera.applyActiveRiderCamera((MCP_EntityPlane)this)) {
+         return;
       }
 
       if(this.getTVMissile() != null && W_Lib.isClientPlayer(this.getTVMissile().shootingEntity)) {

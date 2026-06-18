@@ -20,7 +20,9 @@ ThirdPersonDist = 16
 Category = IA
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-
+NewPlaneCameraFocusOffsetX = 0.000
+NewPlaneCameraFocusOffsetY = 3.830
+NewPlaneCameraFocusOffsetZ = 0.000
 # New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.

@@ -42,7 +42,9 @@ enableback = true
 Category = SSHB
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-
+NewPlaneCameraFocusOffsetX = 0.660
+NewPlaneCameraFocusOffsetY = 5.650
+NewPlaneCameraFocusOffsetZ = 5.760
 # New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.

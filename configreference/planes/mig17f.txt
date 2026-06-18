@@ -23,6 +23,9 @@ ThrottleUpDown = 0.3
 Category = FA
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
+NewPlaneCameraFocusOffsetX = 0.000
+NewPlaneCameraFocusOffsetY = 1.700
+NewPlaneCameraFocusOffsetZ = -0.154
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.250

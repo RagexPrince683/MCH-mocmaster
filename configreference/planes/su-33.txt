@@ -20,6 +20,9 @@ Sound = sutwentyseven
 Category = CBASF/MF
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
+NewPlaneCameraFocusOffsetX = 0.000
+NewPlaneCameraFocusOffsetY = 2.360
+NewPlaneCameraFocusOffsetZ = 7.210
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.650

@@ -9,6 +9,9 @@ EnableEjectionSeat = true
 Speed = 3.65
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
+NewPlaneCameraFocusOffsetX = 0.000
+NewPlaneCameraFocusOffsetY = 2.200
+NewPlaneCameraFocusOffsetZ = 2.200
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.250

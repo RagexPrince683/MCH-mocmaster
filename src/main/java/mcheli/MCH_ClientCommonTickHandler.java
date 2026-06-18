@@ -36,6 +36,7 @@ import mcheli.vehicle.MCH_GuiTurret;
 import mcheli.weapon.MCH_WeaponSet;
 import mcheli.wrapper.W_Lib;
 import mcheli.wrapper.W_McClient;
+import mcheli.plane.MCP_PlaneChaseCamera;
 import mcheli.wrapper.W_Reflection;
 import mcheli.wrapper.W_TickHandler;
 import mcheli.wrapper.W_Vec3;
@@ -752,6 +753,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             ((Entity)mCH_ViewEntityDummy).prevRotationPitch = this.mc.thePlayer.prevRotationPitch;
             ((Entity)mCH_ViewEntityDummy).prevRotationYaw = this.mc.thePlayer.prevRotationYaw;
          }
+         MCP_PlaneChaseCamera.applyActiveRenderCamera(this.mc);
       }
       if (this.mc.currentScreen == null || this.mc.currentScreen instanceof GuiChat || this.mc.currentScreen.getClass().toString().indexOf("GuiDriveableController") >= 0) {
          for (MCH_Gui gui : this.guis) {
