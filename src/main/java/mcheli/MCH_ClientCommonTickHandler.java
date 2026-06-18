@@ -777,6 +777,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             MCH_GuiScoreboard.drawList(this.mc, this.mc.fontRenderer, false);
          drawGui(this.gui_Title, partialTicks);
       }
+      MCP_PlaneChaseCamera.enforceActiveRenderCameraOwnership(this.mc, "MCH_ClientCommonTickHandler.onRenderTickPost.final");
    }
 
    public boolean drawGui(MCH_Gui gui, float partialTicks) {

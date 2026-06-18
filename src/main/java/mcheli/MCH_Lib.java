@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import mcheli.plane.MCP_PlaneChaseCamera;
 import mcheli.wrapper.W_Block;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_Reflection;
@@ -472,6 +473,10 @@ public class MCH_Lib {
 
    public static void setRenderViewEntity(EntityLivingBase entity) {
       MCH_Config var10000 = MCH_MOD.config;
+      if(MCP_PlaneChaseCamera.isAnyRenderCameraActive() && !MCP_PlaneChaseCamera.ownsRenderEntity(entity)) {
+         MCP_PlaneChaseCamera.warnSkippedRenderViewRestore(entity, "MCH_Lib.setRenderViewEntity");
+         return;
+      }
       if(MCH_Config.ReplaceRenderViewEntity.prmBool) {
          W_McClient.setRenderEntity(entity);
       }
