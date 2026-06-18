@@ -18,6 +18,9 @@ public class MCP_PlaneChaseCamera {
    private static boolean consumedByRenderHook;
    private static String currentOwner = "NONE";
    private static String lastWriterMethod = "NONE";
+   private static long nextOrientDebugTime;
+   private static int savedThirdPersonView;
+   private static boolean renderTickBypassActive;
    private static int dummyTransformWrites;
    private static boolean allowNextChaseDummyWrite;
    private static double desiredX;
@@ -213,8 +216,9 @@ public class MCP_PlaneChaseCamera {
       activeDummy = dummy;
       allowNextChaseDummyWrite = true;
       dummy.update(activeRenderPlane.camera);
-      W_Reflection.setThirdPersonDistance(0.1F);
-      mc.setRenderViewEntity(dummy);
+      W_Reflection.setThirdPersonDistance(0.0F);
+      W_Reflection.setThirdPersonDistanceTemp(0.0F);
+      mc.renderViewEntity = dummy;
       MCH_Lib.setRenderViewEntity(dummy);
       W_Reflection.setCameraRoll(activeRenderPlane.getRotRoll() * (float)MCH_Config.NewPlaneCameraRollInfluence.prmDouble);
       consumedByRenderHook = true;
@@ -264,7 +268,9 @@ public class MCP_PlaneChaseCamera {
       if(mc.renderViewEntity != dummy) {
          MCH_Lib.Log("[MCHeli] WARNING: chase camera lost renderViewEntity ownership to %s", new Object[]{mc.renderViewEntity != null?mc.renderViewEntity.getClass().getName():"null"});
       }
-      mc.setRenderViewEntity(dummy);
+      W_Reflection.setThirdPersonDistance(0.0F);
+      W_Reflection.setThirdPersonDistanceTemp(0.0F);
+      mc.renderViewEntity = dummy;
       MCH_Lib.setRenderViewEntity(dummy);
       logRenderViewEntityState(mc, dummy, stage);
       checkRenderViewEntityOwnership(mc, dummy);
@@ -295,6 +301,45 @@ public class MCP_PlaneChaseCamera {
                   Double.valueOf(desiredX), Double.valueOf(desiredY), Double.valueOf(desiredZ)});
    }
 
+
+   public static void beginOrientCameraBypass(Minecraft mc, float partialTicks) {
+      if(activeCamera == null || activeRenderPlane == null || activeDummy == null || mc == null || mc.gameSettings == null) {
+         return;
+      }
+      float beforeDistance = W_Reflection.getThirdPersonDistance();
+      float beforeDistanceTemp = W_Reflection.getThirdPersonDistanceTemp();
+      savedThirdPersonView = mc.gameSettings.thirdPersonView;
+      W_Reflection.setThirdPersonDistance(0.0F);
+      W_Reflection.setThirdPersonDistanceTemp(0.0F);
+      mc.gameSettings.thirdPersonView = 0;
+      renderTickBypassActive = true;
+      logOrientCameraBypass(mc, partialTicks, beforeDistance, beforeDistanceTemp, W_Reflection.getThirdPersonDistance(), W_Reflection.getThirdPersonDistanceTemp(), true);
+   }
+
+   public static void endOrientCameraBypass(Minecraft mc) {
+      if(!renderTickBypassActive || mc == null || mc.gameSettings == null) {
+         return;
+      }
+      mc.gameSettings.thirdPersonView = savedThirdPersonView;
+      W_Reflection.setThirdPersonDistance(0.0F);
+      W_Reflection.setThirdPersonDistanceTemp(0.0F);
+      renderTickBypassActive = false;
+   }
+
+   private static void logOrientCameraBypass(Minecraft mc, float partialTicks, float beforeDistance, float beforeDistanceTemp, float afterDistance, float afterDistanceTemp, boolean bypassApplied) {
+      if(!MCH_Config.DebugFlightControl.prmBool || System.currentTimeMillis() < nextOrientDebugTime) {
+         return;
+      }
+      nextOrientDebugTime = System.currentTimeMillis() + 1000L;
+      Entity view = mc.renderViewEntity;
+      double camX = view != null?view.prevPosX + (view.posX - view.prevPosX) * (double)partialTicks:0.0D;
+      double camY = view != null?view.prevPosY + (view.posY - view.prevPosY) * (double)partialTicks:0.0D;
+      double camZ = view != null?view.prevPosZ + (view.posZ - view.prevPosZ) * (double)partialTicks:0.0D;
+      MCH_Lib.Log("[MCHeli][PlaneChaseCamera][orientCamera] entered=true thirdPersonView=%d thirdPersonDistanceBefore=%.3f thirdPersonDistanceTempBefore=%.3f thirdPersonDistanceAfter=%.3f thirdPersonDistanceTempAfter=%.3f renderView=%s pos=(%.3f, %.3f, %.3f) cameraWorld=(%.3f, %.3f, %.3f) bypassApplied=%s",
+            new Object[]{Integer.valueOf(savedThirdPersonView), Float.valueOf(beforeDistance), Float.valueOf(beforeDistanceTemp), Float.valueOf(afterDistance), Float.valueOf(afterDistanceTemp),
+                  view != null?view.getClass().getName():"null", Double.valueOf(view != null?view.posX:0.0D), Double.valueOf(view != null?view.posY:0.0D), Double.valueOf(view != null?view.posZ:0.0D),
+                  Double.valueOf(camX), Double.valueOf(camY), Double.valueOf(camZ), Boolean.valueOf(bypassApplied)});
+   }
 
    public static boolean isRenderCameraActiveFor(MCP_EntityPlane plane, EntityPlayer player) {
       return activeCamera != null && activeRenderPlane != null && activeRenderPlane == plane && player != null;
