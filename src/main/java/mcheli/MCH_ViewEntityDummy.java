@@ -1,6 +1,7 @@
 package mcheli;
 
 import mcheli.MCH_Camera;
+import mcheli.plane.MCP_PlaneChaseCamera;
 import mcheli.wrapper.W_Session;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -50,9 +51,13 @@ public class MCH_ViewEntityDummy extends EntityPlayerSP {
          super.prevRotationPitch = super.rotationPitch;
          super.rotationYaw = camera.rotationYaw;
          super.rotationPitch = camera.rotationPitch;
+         MCP_PlaneChaseCamera.recordDummyTransformWrite("MCH_ViewEntityDummy.update", false);
          super.prevPosX = camera.posX;
          super.prevPosY = camera.posY;
          super.prevPosZ = camera.posZ;
+         super.lastTickPosX = camera.posX;
+         super.lastTickPosY = camera.posY;
+         super.lastTickPosZ = camera.posZ;
          super.posX = camera.posX;
          super.posY = camera.posY;
          super.posZ = camera.posZ;
@@ -61,6 +66,7 @@ public class MCH_ViewEntityDummy extends EntityPlayerSP {
 
    public static void setCameraPosition(double x, double y, double z) {
       if(instance != null) {
+         MCP_PlaneChaseCamera.recordDummyTransformWrite("MCH_ViewEntityDummy.setCameraPosition", false);
          instance.prevPosX = x;
          instance.prevPosY = y;
          instance.prevPosZ = z;

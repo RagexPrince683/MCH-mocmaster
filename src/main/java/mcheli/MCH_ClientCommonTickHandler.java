@@ -585,7 +585,9 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                   debugFlightControl(var19, simDelta, (float)mouseDeltaX, (float)mouseDeltaY, (float)mouseRollDeltaX, (float)mouseRollDeltaY);
                }
 
-               var19.setupAllRiderRenderPosition(partialTicks, var17);
+               if(!(var19 instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)var19, var17)) {
+                  var19.setupAllRiderRenderPosition(partialTicks, var17);
+               }
                double var29 = (double)MathHelper.sqrt_double(mouseRollDeltaX * mouseRollDeltaX + mouseRollDeltaY * mouseRollDeltaY);
                if(!var20 || var29 < getMaxStickLength() * 0.1D) {
                   mouseRollDeltaX = (double)mcheli.aircraft.MCH_FlightModel.decayPerTick((float)mouseRollDeltaX, 0.95F, simDelta);
@@ -601,7 +603,9 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                }
 
                W_Reflection.setCameraRoll(p);
-               this.correctViewEntityDummy(var17);
+               if(!(var19 instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)var19, var17)) {
+                  this.correctViewEntityDummy(var17);
+               }
             } else {
                MCH_EntitySeat var21 = var17.ridingEntity instanceof MCH_EntitySeat?(MCH_EntitySeat)var17.ridingEntity:null;
                if(var21 != null && var21.getParent() != null) {
@@ -652,7 +656,9 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                      }
                   }
 
-                  var19.setupAllRiderRenderPosition(partialTicks, var17);
+                  if(!(var19 instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)var19, var17)) {
+                     var19.setupAllRiderRenderPosition(partialTicks, var17);
+                  }
                   var19.setRotYaw(y);
                   //System.out.println("yaw9");
                   var19.setRotPitch(p);
@@ -669,7 +675,9 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                   }
 
                   W_Reflection.setCameraRoll(roll + revRoll);
-                  this.correctViewEntityDummy(var17);
+                  if(!(var19 instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)var19, var17)) {
+                     this.correctViewEntityDummy(var17);
+                  }
                } else {
                   if(isRideAircraft) {
                      W_Reflection.setCameraRoll(0.0F);
@@ -695,7 +703,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             }
 
             MCH_ViewEntityDummy var24 = MCH_ViewEntityDummy.getInstance(var17.worldObj);
-            if(var24 != null) {
+            if(var24 != null && (!(var19 instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)var19, var17))) {
                var24.rotationYaw = var17.rotationYaw;
                //System.out.println("yaw14");
                var24.prevRotationYaw = var17.prevRotationYaw;
@@ -747,7 +755,8 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       if (this.mc.thePlayer != null) {
          MCH_ClientTickHandlerBase.applyRotLimit((Entity)this.mc.thePlayer);
          MCH_ViewEntityDummy mCH_ViewEntityDummy = MCH_ViewEntityDummy.getInstance(this.mc.thePlayer.worldObj);
-         if (mCH_ViewEntityDummy != null) {
+         MCP_EntityPlane activePlane = this.mc.thePlayer.ridingEntity instanceof MCP_EntityPlane?(MCP_EntityPlane)this.mc.thePlayer.ridingEntity:null;
+         if (mCH_ViewEntityDummy != null && (activePlane == null || !MCP_PlaneChaseCamera.isRenderCameraActiveFor(activePlane, this.mc.thePlayer))) {
             ((Entity)mCH_ViewEntityDummy).rotationPitch = this.mc.thePlayer.rotationPitch;
             ((Entity)mCH_ViewEntityDummy).rotationYaw = this.mc.thePlayer.rotationYaw;
             ((Entity)mCH_ViewEntityDummy).prevRotationPitch = this.mc.thePlayer.prevRotationPitch;
