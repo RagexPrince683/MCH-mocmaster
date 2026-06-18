@@ -124,6 +124,63 @@ public class MCH_ViewEntityDummy extends EntityPlayerSP {
       return false;
    }
 
+   public void setPosition(double x, double y, double z) {
+      if(MCP_PlaneChaseCamera.shouldBlockNonChaseDummyWrite("MCH_ViewEntityDummy.setPosition")) {
+         return;
+      }
+      super.setPosition(x, y, z);
+      this.configureNoCollisionChaseDummy();
+      MCP_PlaneChaseCamera.logCameraWrite("MCH_ViewEntityDummy.setPosition", String.format("pos=(%.3f,%.3f,%.3f)", Double.valueOf(x), Double.valueOf(y), Double.valueOf(z)));
+   }
+
+   public void configureNoCollisionChaseDummy() {
+      super.noClip = true;
+      super.ridingEntity = null;
+      super.riddenByEntity = null;
+      this.setSize(0.01F, 0.01F);
+      super.boundingBox.setBounds(super.posX - 0.005D, super.posY - 0.005D, super.posZ - 0.005D, super.posX + 0.005D, super.posY + 0.005D, super.posZ + 0.005D);
+   }
+
+   public AxisAlignedBB getCollisionBox(Entity entity) {
+      return null;
+   }
+
+   public AxisAlignedBB getBoundingBox() {
+      return super.boundingBox;
+   }
+
+   public boolean canBePushed() {
+      return false;
+   }
+
+   public boolean canBeCollidedWith() {
+      return false;
+   }
+
+   public void configureNoCollisionChaseDummy() {
+      super.noClip = true;
+      super.ridingEntity = null;
+      super.riddenByEntity = null;
+      this.setSize(0.01F, 0.01F);
+      super.boundingBox.setBounds(super.posX - 0.005D, super.posY - 0.005D, super.posZ - 0.005D, super.posX + 0.005D, super.posY + 0.005D, super.posZ + 0.005D);
+   }
+
+   public AxisAlignedBB getCollisionBox(Entity entity) {
+      return null;
+   }
+
+   public AxisAlignedBB getBoundingBox() {
+      return super.boundingBox;
+   }
+
+   public boolean canBePushed() {
+      return false;
+   }
+
+   public boolean canBeCollidedWith() {
+      return false;
+   }
+
    public float getFOVMultiplier() {
       return super.getFOVMultiplier() * (1.0F / this.zoom);
    }

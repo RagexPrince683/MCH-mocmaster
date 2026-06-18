@@ -66,6 +66,7 @@ public class MCP_PlaneChaseCamera {
       this.activePlane = null;
       this.activeView = -1;
       this.initialized = false;
+      this.hardProofFrame = 0;
       W_Reflection.setCameraRoll(0.0F);
       if(activeCamera == this) {
          activeCamera = null;
@@ -108,15 +109,11 @@ public class MCP_PlaneChaseCamera {
       dummyTransformWrites = 0;
       consumedByRenderHook = false;
 
-      float targetYaw = plane.getRotYaw();
-      float targetPitch = this.computeLookPitch(desired, focus);
-      this.yaw = this.smoothAngle(this.yaw, targetYaw, (float)MCH_Config.NewPlaneCameraRotationSmoothing.prmDouble);
-      this.pitch = this.smoothAngle(this.pitch, targetPitch, (float)MCH_Config.NewPlaneCameraRotationSmoothing.prmDouble);
-
-      double posSmoothing = MCH_Config.NewPlaneCameraPositionSmoothing.prmDouble;
-      this.posX = this.smooth(this.posX, desired.xCoord, posSmoothing);
-      this.posY = this.smooth(this.posY, desired.yCoord, posSmoothing);
-      this.posZ = this.smooth(this.posZ, desired.zCoord, posSmoothing);
+      this.yaw = plane.getRotYaw();
+      this.pitch = 45.0F;
+      this.posX = desired.xCoord;
+      this.posY = desired.yCoord;
+      this.posZ = desired.zCoord;
 
       plane.camera.prevRotationYaw = plane.camera.rotationYaw;
       plane.camera.prevRotationPitch = plane.camera.rotationPitch;
