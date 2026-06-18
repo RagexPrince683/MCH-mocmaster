@@ -243,7 +243,7 @@ This first implementation uses global client config keys. Per-plane mouse-aim ov
 | `MouseAimAutoBankMaxRoll` | `65.0` | Maximum target roll angle for auto-bank. |
 | `MouseAimCenteringStrength` | `0.18` | Roll damping/leveling strength as the aim point returns toward center. |
 | `MouseAimDebug` | `false` | Emits mouse-aim telemetry in the existing flight-control debug line even when `DebugFlightControl` is off. |
-| `EnablePlaneMouseAimReticle` | `true` | Draws the custom mouse-aim cursor and distinct plane/nose reticle while mouse aim is active. |
+| `EnablePlaneMouseAimReticle` | `true` | Dedicated Forge overlay renderer draws the custom mouse-aim cursor and distinct plane/nose reticle while mouse aim is active. |
 | `HideVanillaCrosshairInPlaneMouseAim` | `true` | Hides the vanilla Minecraft screen-center crosshair only in qualifying plane mouse-aim mode. |
 | `PlaneMouseAimReticleTexture` | `textures/gui/plane_crosshair.png` | Texture path for the mouse aim cursor; the simple line fallback remains visible over it. |
 | `PlaneMouseAimReticleScale` | `1.0` | Scales the mouse aim cursor. |

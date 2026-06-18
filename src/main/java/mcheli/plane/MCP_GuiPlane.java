@@ -77,9 +77,6 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             }
          }
 
-         if(seatID == 0) {
-            this.drawMouseAimReticles(plane, player);
-         }
 
          this.drawHitBullet(plane, -14101432, seatID);
       }

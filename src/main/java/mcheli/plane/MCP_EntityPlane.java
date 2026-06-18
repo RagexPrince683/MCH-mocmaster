@@ -659,6 +659,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       return this.isNewFlightModelEnabled() && MCH_Config.EnableMouseAimControls.prmBool && this.mouseAimControlsEnabled;
    }
 
+   public boolean isMouseAimControlsActive() {
+      return this.isMouseAimControlsEnabled();
+   }
+
    public boolean shouldDrawMouseAimReticle(Entity player) {
       return this.shouldUseMouseAimControls(player) && MCH_Config.EnablePlaneMouseAimReticle.prmBool;
    }
@@ -687,6 +691,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    public boolean wasMouseAimVanillaCrosshairSuppressed() {
       return this.mouseAimVanillaCrosshairSuppressed;
+   }
+
+   public void setMouseAimVanillaCrosshairSuppressed(boolean suppressed) {
+      this.mouseAimVanillaCrosshairSuppressed = suppressed;
    }
 
    private float clampMouseAimPitch(float pitch) {
