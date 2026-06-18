@@ -43,6 +43,7 @@ import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.plane.MCP_RenderPlane;
+import mcheli.plane.client.MCP_NewPlaneOverlayRenderer;
 import mcheli.ship.MCH_EntityShip;
 import mcheli.ship.MCH_RenderShip;
 import mcheli.ship.MCH_ShipInfo;
@@ -610,6 +611,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    public void init() {
       MinecraftForge.EVENT_BUS.register(new MCH_ParticlesUtil());
       MinecraftForge.EVENT_BUS.register(new MCH_ClientEventHook());
+      MinecraftForge.EVENT_BUS.register(new MCP_NewPlaneOverlayRenderer());
       MinecraftForge.EVENT_BUS.register(new MCH_RenderBVRLockBox());
       MinecraftForge.EVENT_BUS.register(new MCH_RenderRWR());
    }

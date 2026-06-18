@@ -72,6 +72,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             }
          }
 
+
          this.drawHitBullet(plane, -14101432, seatID);
       }
    }
