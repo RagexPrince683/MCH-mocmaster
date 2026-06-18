@@ -47,6 +47,17 @@ public class MCP_PlaneChaseCamera {
    private boolean initialized;
    private boolean lastCollisionAdjusted;
    private String lastCollisionHit = "none";
+   private double renderPosX;
+   private double renderPosY;
+   private double renderPosZ;
+   private double renderPrevPosX;
+   private double renderPrevPosY;
+   private double renderPrevPosZ;
+   private float renderYaw;
+   private float renderPitch;
+   private float renderRoll;
+   private float renderZoom = 1.0F;
+   private boolean hasRenderTransform;
 
    public boolean shouldUse(Minecraft mc, EntityPlayer player, MCP_EntityPlane plane, boolean isPilot) {
       boolean thirdPerson = mc != null && mc.gameSettings != null && mc.gameSettings.thirdPersonView > 0;
@@ -66,6 +77,7 @@ public class MCP_PlaneChaseCamera {
       this.activePlane = null;
       this.activeView = -1;
       this.initialized = false;
+      this.hasRenderTransform = false;
       W_Reflection.setCameraRoll(0.0F);
       if(activeCamera == this) {
          activeCamera = null;
@@ -114,11 +126,8 @@ public class MCP_PlaneChaseCamera {
       this.posY = desired.yCoord;
       this.posZ = desired.zCoord;
 
-      plane.camera.prevRotationYaw = plane.camera.rotationYaw;
-      plane.camera.prevRotationPitch = plane.camera.rotationPitch;
-      plane.camera.rotationYaw = this.yaw;
-      plane.camera.rotationPitch = this.pitch;
-      plane.camera.setPosition(this.posX, this.posY, this.posZ);
+      this.storeRenderTransform(plane);
+      this.mirrorRenderTransformToPlaneCamera(plane);
       logPhase("CLIENT_TICK", mc, activeDummy, false, false);
       this.debugCamera(mc, plane, focus, desired, true);
       W_Reflection.setCameraRoll(plane.getRotRoll() * (float)MCH_Config.NewPlaneCameraRollInfluence.prmDouble);
@@ -166,6 +175,38 @@ public class MCP_PlaneChaseCamera {
       this.activePlane = plane;
       this.activeView = Minecraft.getMinecraft().gameSettings.thirdPersonView;
       this.initialized = true;
+   }
+
+   private void storeRenderTransform(MCP_EntityPlane plane) {
+      if(this.hasRenderTransform) {
+         this.renderPrevPosX = this.renderPosX;
+         this.renderPrevPosY = this.renderPosY;
+         this.renderPrevPosZ = this.renderPosZ;
+      } else {
+         this.renderPrevPosX = this.posX;
+         this.renderPrevPosY = this.posY;
+         this.renderPrevPosZ = this.posZ;
+      }
+      this.renderPosX = this.posX;
+      this.renderPosY = this.posY;
+      this.renderPosZ = this.posZ;
+      this.renderYaw = this.yaw;
+      this.renderPitch = this.pitch;
+      this.renderRoll = plane != null?plane.getRotRoll() * (float)MCH_Config.NewPlaneCameraRollInfluence.prmDouble:0.0F;
+      this.renderZoom = plane != null && plane.camera != null?plane.camera.getCameraZoom():1.0F;
+      this.hasRenderTransform = true;
+   }
+
+   private void mirrorRenderTransformToPlaneCamera(MCP_EntityPlane plane) {
+      if(plane == null || plane.camera == null || !this.hasRenderTransform) {
+         return;
+      }
+      plane.camera.prevRotationYaw = plane.camera.rotationYaw;
+      plane.camera.prevRotationPitch = plane.camera.rotationPitch;
+      plane.camera.rotationYaw = this.renderYaw;
+      plane.camera.rotationPitch = this.renderPitch;
+      plane.camera.setCameraZoom(this.renderZoom);
+      plane.camera.setPosition(this.renderPosX, this.renderPosY, this.renderPosZ);
    }
 
    private Vec3 getCameraFocusPoint(MCP_EntityPlane plane) {
@@ -374,12 +415,12 @@ public class MCP_PlaneChaseCamera {
       }
       activeDummy = dummy;
       allowNextChaseDummyWrite = true;
-      dummy.update(activeRenderPlane.camera);
+      activeCamera.applyTransformToDummy(dummy);
       W_Reflection.setThirdPersonDistance(0.0F);
       W_Reflection.setThirdPersonDistanceTemp(0.0F);
       mc.renderViewEntity = dummy;
       MCH_Lib.setRenderViewEntity(dummy);
-      W_Reflection.setCameraRoll(activeRenderPlane.getRotRoll() * (float)MCH_Config.NewPlaneCameraRollInfluence.prmDouble);
+      W_Reflection.setCameraRoll(activeCamera.renderRoll);
       logStageProof(mc, "CHASE APPLY HIT", activeRenderPlane, true);
       consumedByRenderHook = true;
       logRenderViewEntityState(mc, dummy, "applyActiveRenderCamera");
@@ -397,9 +438,31 @@ public class MCP_PlaneChaseCamera {
       }
       activeDummy = dummy;
       allowNextChaseDummyWrite = true;
-      dummy.update(plane.camera);
+      activeCamera.applyTransformToDummy(dummy);
       consumedByRenderHook = true;
       return true;
+   }
+
+   public void applyTransformToDummy(MCH_ViewEntityDummy dummy) {
+      if(dummy == null || !this.hasRenderTransform) {
+         return;
+      }
+      dummy.prevPosX = this.renderPrevPosX;
+      dummy.prevPosY = this.renderPrevPosY;
+      dummy.prevPosZ = this.renderPrevPosZ;
+      dummy.lastTickPosX = this.renderPrevPosX;
+      dummy.lastTickPosY = this.renderPrevPosY;
+      dummy.lastTickPosZ = this.renderPrevPosZ;
+      dummy.posX = this.renderPosX;
+      dummy.posY = this.renderPosY;
+      dummy.posZ = this.renderPosZ;
+      dummy.prevRotationYaw = this.renderYaw;
+      dummy.prevRotationPitch = this.renderPitch;
+      dummy.rotationYaw = this.renderYaw;
+      dummy.rotationPitch = this.renderPitch;
+      dummy.configureNoCollisionChaseDummy();
+      recordDummyTransformWrite("MCP_PlaneChaseCamera.applyTransformToDummy", true);
+      logCameraWrite("MCP_PlaneChaseCamera.applyTransformToDummy", String.format("chaseStored=(%.3f,%.3f,%.3f)", Double.valueOf(this.renderPosX), Double.valueOf(this.renderPosY), Double.valueOf(this.renderPosZ)));
    }
 
    public static boolean isAnyRenderCameraActive() {
@@ -450,12 +513,13 @@ public class MCP_PlaneChaseCamera {
       }
       Entity view = mc.renderViewEntity;
       Entity player = mc.thePlayer;
-      MCH_Lib.Log("[MCHeli][PlaneChaseCamera][%s] renderView=%s id=%d isDummy=%s equalsChaseDummy=%s pos=(%.3f, %.3f, %.3f) prev=(%.3f, %.3f, %.3f) lastTick=(%.3f, %.3f, %.3f) yaw=%.2f pitch=%.2f chaseDummy=(%.3f, %.3f, %.3f) player=(%.3f, %.3f, %.3f) planeCamera=(%.3f, %.3f, %.3f) desired=(%.3f, %.3f, %.3f)",
+      MCH_Lib.Log("[MCHeli][PlaneChaseCamera][%s] renderView=%s id=%d isDummy=%s equalsChaseDummy=%s pos=(%.3f, %.3f, %.3f) prev=(%.3f, %.3f, %.3f) lastTick=(%.3f, %.3f, %.3f) yaw=%.2f pitch=%.2f chaseStored=(%.3f, %.3f, %.3f) dummy=(%.3f, %.3f, %.3f) player=(%.3f, %.3f, %.3f) plane.camera=(%.3f, %.3f, %.3f) desired=(%.3f, %.3f, %.3f)",
             new Object[]{stage, view != null?view.getClass().getName():"null", Integer.valueOf(view != null?view.getEntityId():-1), Boolean.valueOf(view instanceof MCH_ViewEntityDummy), Boolean.valueOf(view == dummy),
                   Double.valueOf(view != null?view.posX:0.0D), Double.valueOf(view != null?view.posY:0.0D), Double.valueOf(view != null?view.posZ:0.0D),
                   Double.valueOf(view != null?view.prevPosX:0.0D), Double.valueOf(view != null?view.prevPosY:0.0D), Double.valueOf(view != null?view.prevPosZ:0.0D),
                   Double.valueOf(view != null?view.lastTickPosX:0.0D), Double.valueOf(view != null?view.lastTickPosY:0.0D), Double.valueOf(view != null?view.lastTickPosZ:0.0D),
                   Float.valueOf(view != null?view.rotationYaw:0.0F), Float.valueOf(view != null?view.rotationPitch:0.0F),
+                  Double.valueOf(activeCamera != null && activeCamera.hasRenderTransform?activeCamera.renderPosX:0.0D), Double.valueOf(activeCamera != null && activeCamera.hasRenderTransform?activeCamera.renderPosY:0.0D), Double.valueOf(activeCamera != null && activeCamera.hasRenderTransform?activeCamera.renderPosZ:0.0D),
                   Double.valueOf(dummy != null?dummy.posX:0.0D), Double.valueOf(dummy != null?dummy.posY:0.0D), Double.valueOf(dummy != null?dummy.posZ:0.0D),
                   Double.valueOf(player != null?player.posX:0.0D), Double.valueOf(player != null?player.posY:0.0D), Double.valueOf(player != null?player.posZ:0.0D),
                   Double.valueOf(activeRenderPlane != null?activeRenderPlane.camera.posX:0.0D), Double.valueOf(activeRenderPlane != null?activeRenderPlane.camera.posY:0.0D), Double.valueOf(activeRenderPlane != null?activeRenderPlane.camera.posZ:0.0D),
