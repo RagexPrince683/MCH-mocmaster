@@ -444,12 +444,12 @@ public class MCH_Config {
       DisplayHUDThirdPerson = new MCH_ConfigPrm("DisplayHUDThirdPerson", false);
       EnableNewPlaneThirdPersonCamera = new MCH_ConfigPrm("EnableNewPlaneThirdPersonCamera", true);
       EnableNewPlaneThirdPersonCamera.desc = ";Client-only visual chase camera for third-person new-flight planes. Does not change flight physics, weapons, or HUD rendering.";
-      NewPlaneCameraDistance = new MCH_ConfigPrm("PlaneChaseBaseDistance", 45.0D);
-      NewPlaneCameraDistance.desc = ";Base chase distance in blocks for new-flight third-person planes. default is 45; 16 is often too close and 45-80+ can be reasonable by scale/speed.";
-      NewPlaneCameraMinDistance = new MCH_ConfigPrm("PlaneChaseMinDistance", 40.0D);
-      NewPlaneCameraMinDistance.desc = ";Minimum chase distance in blocks after size and optional speed tuning; default 40 keeps aircraft framed when slowing down.";
-      NewPlaneCameraMaxDistance = new MCH_ConfigPrm("PlaneChaseMaxDistance", 55.0D);
-      NewPlaneCameraMaxDistance.desc = ";Maximum chase distance in blocks after size and optional speed tuning; default 55 avoids aggressive zoom breathing.";
+      NewPlaneCameraDistance = new MCH_ConfigPrm("PlaneChaseBaseDistance", 30.0D);
+      NewPlaneCameraDistance.desc = ";Base chase distance in blocks for new-flight third-person planes. default is 30; 16 is often too close and 45-80+ can be reasonable by scale/speed.";
+      NewPlaneCameraMinDistance = new MCH_ConfigPrm("PlaneChaseMinDistance", 26.0D);
+      NewPlaneCameraMinDistance.desc = ";Minimum chase distance in blocks after size and optional speed tuning; default 26 keeps aircraft framed when slowing down.";
+      NewPlaneCameraMaxDistance = new MCH_ConfigPrm("PlaneChaseMaxDistance", 42.0D);
+      NewPlaneCameraMaxDistance.desc = ";Maximum chase distance in blocks after size and optional speed tuning; default 42 avoids aggressive zoom breathing.";
       NewPlaneCameraDebugDistance = new MCH_ConfigPrm("NewPlaneCameraDebugDistance", 0.0D);
       NewPlaneCameraDebugDistance.desc = ";DebugFlightControl-only chase camera distance override. Set 40 to verify the render path consumes the custom camera; 0 disables.";
       NewPlaneCameraDebugAbovePlane = new MCH_ConfigPrm("NewPlaneCameraDebugAbovePlane", false);
@@ -788,14 +788,14 @@ public class MCH_Config {
       AllHeliSpeed.prmDouble = MCH_Lib.RNG(AllHeliSpeed.prmDouble, 0.0D, 1000.0D);
       AllPlaneSpeed.prmDouble = MCH_Lib.RNG(AllPlaneSpeed.prmDouble, 0.0D, 1000.0D);
       NewFlightGravity.prmDouble = MCH_Lib.RNG(NewFlightGravity.prmDouble, 0.001D, 0.2D);
-      if(Math.abs(NewPlaneCameraDistance.prmDouble - 36.0D) < 0.001D) {
-         NewPlaneCameraDistance.prmDouble = 45.0D;
+      if(Math.abs(NewPlaneCameraDistance.prmDouble - 36.0D) < 0.001D || Math.abs(NewPlaneCameraDistance.prmDouble - 45.0D) < 0.001D) {
+         NewPlaneCameraDistance.prmDouble = 30.0D;
       }
-      if(Math.abs(NewPlaneCameraMinDistance.prmDouble - 18.0D) < 0.001D) {
-         NewPlaneCameraMinDistance.prmDouble = 24.0D;
+      if(Math.abs(NewPlaneCameraMinDistance.prmDouble - 18.0D) < 0.001D || Math.abs(NewPlaneCameraMinDistance.prmDouble - 24.0D) < 0.001D || Math.abs(NewPlaneCameraMinDistance.prmDouble - 40.0D) < 0.001D) {
+         NewPlaneCameraMinDistance.prmDouble = 26.0D;
       }
-      if(Math.abs(NewPlaneCameraMaxDistance.prmDouble - 70.0D) < 0.001D) {
-         NewPlaneCameraMaxDistance.prmDouble = 90.0D;
+      if(Math.abs(NewPlaneCameraMaxDistance.prmDouble - 70.0D) < 0.001D || Math.abs(NewPlaneCameraMaxDistance.prmDouble - 90.0D) < 0.001D || Math.abs(NewPlaneCameraMaxDistance.prmDouble - 55.0D) < 0.001D) {
+         NewPlaneCameraMaxDistance.prmDouble = 42.0D;
       }
       NewPlaneCameraDistance.prmDouble = MCH_Lib.RNG(NewPlaneCameraDistance.prmDouble, 8.0D, 120.0D);
       NewPlaneCameraMinDistance.prmDouble = MCH_Lib.RNG(NewPlaneCameraMinDistance.prmDouble, 4.0D, NewPlaneCameraDistance.prmDouble);
