@@ -24,6 +24,9 @@ DamageFactor = 0.8
 Category = FB
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
+NewPlaneCameraFocusOffsetX = 0.394
+NewPlaneCameraFocusOffsetY = 2.778
+NewPlaneCameraFocusOffsetZ = 7.670
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.650

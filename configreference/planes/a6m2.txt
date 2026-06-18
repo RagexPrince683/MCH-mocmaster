@@ -22,6 +22,9 @@ UnmountPosition = 3.0, 1.0, -2.0
 Category = CCFA/FA
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
+NewPlaneCameraFocusOffsetX = 0.000
+NewPlaneCameraFocusOffsetY = 1.710
+NewPlaneCameraFocusOffsetZ = 0.400
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 0.950

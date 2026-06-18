@@ -23,7 +23,9 @@ EntityHeight = 0.86
 Category = C/UA
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-
+NewPlaneCameraFocusOffsetX = 0.000
+NewPlaneCameraFocusOffsetY = 2.720
+NewPlaneCameraFocusOffsetZ = -2.950
 # New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.

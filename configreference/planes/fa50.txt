@@ -20,6 +20,9 @@ Sound = faeighteen
 Category = LCA
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
+NewPlaneCameraFocusOffsetX = 0.000
+NewPlaneCameraFocusOffsetY = 2.094
+NewPlaneCameraFocusOffsetZ = 2.570
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.250

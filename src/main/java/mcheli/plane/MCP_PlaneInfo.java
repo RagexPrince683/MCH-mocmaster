@@ -77,6 +77,10 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float newFlightCombatFlapDrag = 0.014F;
    public float newFlightCombatFlapControl = 0.14F;
    public float newFlightCombatFlapOverspeed = 0.72F;
+   /** Local-space focus point for the new third-person chase camera; yaw-rotated on the client. */
+   public float newPlaneCameraFocusOffsetX = 0.0F;
+   public float newPlaneCameraFocusOffsetY = 1.0F;
+   public float newPlaneCameraFocusOffsetZ = 0.0F;
    /** Absolute airspeed below which a fixed-wing plane can enter a stall. Zero derives it from StallSpeedFactor. */
    public float stallSpeed = 0.0F;
    /** Angle between the plane forward vector and velocity vector at which airflow separates. */
@@ -363,6 +367,12 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.newFlightCombatFlapControl = this.parseNewFlightFloat("NewFlightCombatFlapControl", data, 0.0F, 0.40F);
          } else if(item.equalsIgnoreCase("NewFlightCombatFlapOverspeed")) {
             this.newFlightCombatFlapOverspeed = this.parseNewFlightFloat("NewFlightCombatFlapOverspeed", data, 0.50F, 1.0F);
+         } else if(item.equalsIgnoreCase("NewPlaneCameraFocusOffsetX")) {
+            this.newPlaneCameraFocusOffsetX = this.parseNewFlightFloat("NewPlaneCameraFocusOffsetX", data, -50.0F, 50.0F);
+         } else if(item.equalsIgnoreCase("NewPlaneCameraFocusOffsetY")) {
+            this.newPlaneCameraFocusOffsetY = this.parseNewFlightFloat("NewPlaneCameraFocusOffsetY", data, -10.0F, 30.0F);
+         } else if(item.equalsIgnoreCase("NewPlaneCameraFocusOffsetZ")) {
+            this.newPlaneCameraFocusOffsetZ = this.parseNewFlightFloat("NewPlaneCameraFocusOffsetZ", data, -80.0F, 80.0F);
          } else if(item.equalsIgnoreCase("StallSpeed")) {
             this.stallSpeed = this.parseNewFlightFloat("StallSpeed", data, 0.0F, 2.0F);
          } else if(item.equalsIgnoreCase("CriticalAoA")) {
