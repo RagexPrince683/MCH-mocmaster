@@ -159,9 +159,12 @@ public class MCH_Config {
    public static MCH_ConfigPrm DisplayHUDThirdPerson;
    public static MCH_ConfigPrm EnableNewPlaneThirdPersonCamera;
    public static MCH_ConfigPrm NewPlaneCameraDistance;
+   public static MCH_ConfigPrm NewPlaneCameraMinDistance;
+   public static MCH_ConfigPrm NewPlaneCameraMaxDistance;
    public static MCH_ConfigPrm NewPlaneCameraDebugDistance;
    public static MCH_ConfigPrm NewPlaneCameraHeight;
    public static MCH_ConfigPrm NewPlaneCameraSideOffset;
+   public static MCH_ConfigPrm NewPlaneCameraSpeedDistanceScale;
    public static MCH_ConfigPrm NewPlaneCameraPositionSmoothing;
    public static MCH_ConfigPrm NewPlaneCameraRotationSmoothing;
    public static MCH_ConfigPrm NewPlaneCameraRollInfluence;
@@ -408,14 +411,20 @@ public class MCH_Config {
       DisplayHUDThirdPerson = new MCH_ConfigPrm("DisplayHUDThirdPerson", false);
       EnableNewPlaneThirdPersonCamera = new MCH_ConfigPrm("EnableNewPlaneThirdPersonCamera", true);
       EnableNewPlaneThirdPersonCamera.desc = ";Client-only visual chase camera for third-person new-flight planes. Does not change flight physics, weapons, or HUD rendering.";
-      NewPlaneCameraDistance = new MCH_ConfigPrm("NewPlaneCameraDistance", 9.0D);
+      NewPlaneCameraDistance = new MCH_ConfigPrm("NewPlaneCameraDistance", 16.0D);
       NewPlaneCameraDistance.desc = ";Blocks behind the aircraft for the new third-person plane chase camera.";
+      NewPlaneCameraMinDistance = new MCH_ConfigPrm("NewPlaneCameraMinDistance", 8.0D);
+      NewPlaneCameraMinDistance.desc = ";Minimum blocks behind the aircraft for the new third-person plane chase camera.";
+      NewPlaneCameraMaxDistance = new MCH_ConfigPrm("NewPlaneCameraMaxDistance", 24.0D);
+      NewPlaneCameraMaxDistance.desc = ";Maximum blocks behind the aircraft for the new third-person plane chase camera.";
       NewPlaneCameraDebugDistance = new MCH_ConfigPrm("NewPlaneCameraDebugDistance", 0.0D);
       NewPlaneCameraDebugDistance.desc = ";DebugFlightControl-only chase camera distance override. Set 20-30 to verify the render path consumes the custom camera; 0 disables.";
-      NewPlaneCameraHeight = new MCH_ConfigPrm("NewPlaneCameraHeight", 2.4D);
+      NewPlaneCameraHeight = new MCH_ConfigPrm("NewPlaneCameraHeight", 4.0D);
       NewPlaneCameraHeight.desc = ";Blocks above the aircraft for the new third-person plane chase camera.";
       NewPlaneCameraSideOffset = new MCH_ConfigPrm("NewPlaneCameraSideOffset", 0.0D);
       NewPlaneCameraSideOffset.desc = ";Optional horizontal side offset for the new third-person plane chase camera.";
+      NewPlaneCameraSpeedDistanceScale = new MCH_ConfigPrm("NewPlaneCameraSpeedDistanceScale", 0.08D);
+      NewPlaneCameraSpeedDistanceScale.desc = ";Additional chase camera distance per block/tick of plane speed.";
       NewPlaneCameraPositionSmoothing = new MCH_ConfigPrm("NewPlaneCameraPositionSmoothing", 0.22D);
       NewPlaneCameraPositionSmoothing.desc = ";How quickly the new plane chase camera position follows the desired point. Higher is snappier.";
       NewPlaneCameraRotationSmoothing = new MCH_ConfigPrm("NewPlaneCameraRotationSmoothing", 0.16D);
@@ -574,9 +583,12 @@ public class MCH_Config {
               DisplayHUDThirdPerson,
               EnableNewPlaneThirdPersonCamera,
               NewPlaneCameraDistance,
+              NewPlaneCameraMinDistance,
+              NewPlaneCameraMaxDistance,
               NewPlaneCameraDebugDistance,
               NewPlaneCameraHeight,
               NewPlaneCameraSideOffset,
+              NewPlaneCameraSpeedDistanceScale,
               NewPlaneCameraPositionSmoothing,
               NewPlaneCameraRotationSmoothing,
               NewPlaneCameraRollInfluence,
@@ -663,9 +675,12 @@ public class MCH_Config {
       AllPlaneSpeed.prmDouble = MCH_Lib.RNG(AllPlaneSpeed.prmDouble, 0.0D, 1000.0D);
       NewFlightGravity.prmDouble = MCH_Lib.RNG(NewFlightGravity.prmDouble, 0.001D, 0.2D);
       NewPlaneCameraDistance.prmDouble = MCH_Lib.RNG(NewPlaneCameraDistance.prmDouble, 2.0D, 40.0D);
+      NewPlaneCameraMinDistance.prmDouble = MCH_Lib.RNG(NewPlaneCameraMinDistance.prmDouble, 1.0D, NewPlaneCameraDistance.prmDouble);
+      NewPlaneCameraMaxDistance.prmDouble = MCH_Lib.RNG(NewPlaneCameraMaxDistance.prmDouble, NewPlaneCameraMinDistance.prmDouble, 40.0D);
       NewPlaneCameraDebugDistance.prmDouble = MCH_Lib.RNG(NewPlaneCameraDebugDistance.prmDouble, 0.0D, 40.0D);
       NewPlaneCameraHeight.prmDouble = MCH_Lib.RNG(NewPlaneCameraHeight.prmDouble, -2.0D, 15.0D);
       NewPlaneCameraSideOffset.prmDouble = MCH_Lib.RNG(NewPlaneCameraSideOffset.prmDouble, -10.0D, 10.0D);
+      NewPlaneCameraSpeedDistanceScale.prmDouble = MCH_Lib.RNG(NewPlaneCameraSpeedDistanceScale.prmDouble, 0.0D, 1.0D);
       NewPlaneCameraPositionSmoothing.prmDouble = MCH_Lib.RNG(NewPlaneCameraPositionSmoothing.prmDouble, 0.01D, 1.0D);
       NewPlaneCameraRotationSmoothing.prmDouble = MCH_Lib.RNG(NewPlaneCameraRotationSmoothing.prmDouble, 0.01D, 1.0D);
       NewPlaneCameraRollInfluence.prmDouble = MCH_Lib.RNG(NewPlaneCameraRollInfluence.prmDouble, 0.0D, 1.0D);
