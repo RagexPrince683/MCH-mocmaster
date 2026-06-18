@@ -162,6 +162,15 @@ public class MCH_Config {
    public static MCH_ConfigPrm MouseAimAutoBankMaxRoll;
    public static MCH_ConfigPrm MouseAimCenteringStrength;
    public static MCH_ConfigPrm MouseAimDebug;
+   public static MCH_ConfigPrm EnablePlaneMouseAimReticle;
+   public static MCH_ConfigPrm HideVanillaCrosshairInPlaneMouseAim;
+   public static MCH_ConfigPrm PlaneMouseAimReticleTexture;
+   public static MCH_ConfigPrm PlaneMouseAimReticleScale;
+   public static MCH_ConfigPrm PlaneMouseAimReticleOpacity;
+   public static MCH_ConfigPrm PlaneNoseReticleScale;
+   public static MCH_ConfigPrm PlaneNoseReticleOpacity;
+   public static MCH_ConfigPrm PlaneMouseAimMaxScreenRadius;
+   public static MCH_ConfigPrm PlaneMouseAimReticleDebug;
    public static MCH_ConfigPrm SwitchWeaponWithMouseWheel;
    public static MCH_ConfigPrm AllPlaneSpeed;
    public static MCH_ConfigPrm NewFlightGravity;
@@ -459,6 +468,17 @@ public class MCH_Config {
       MouseAimAutoBankMaxRoll = new MCH_ConfigPrm("MouseAimAutoBankMaxRoll", 65.0D);
       MouseAimCenteringStrength = new MCH_ConfigPrm("MouseAimCenteringStrength", 0.18D);
       MouseAimDebug = new MCH_ConfigPrm("MouseAimDebug", false);
+      EnablePlaneMouseAimReticle = new MCH_ConfigPrm("EnablePlaneMouseAimReticle", true);
+      EnablePlaneMouseAimReticle.desc = ";Draws the custom mouse-aim and nose reticles for new-flight planes while mouse aim is active.";
+      HideVanillaCrosshairInPlaneMouseAim = new MCH_ConfigPrm("HideVanillaCrosshairInPlaneMouseAim", true);
+      HideVanillaCrosshairInPlaneMouseAim.desc = ";Suppresses the vanilla screen-center Minecraft crosshair only while the new-flight plane mouse-aim reticle is active.";
+      PlaneMouseAimReticleTexture = new MCH_ConfigPrm("PlaneMouseAimReticleTexture", "textures/gui/plane_crosshair.png");
+      PlaneMouseAimReticleScale = new MCH_ConfigPrm("PlaneMouseAimReticleScale", 1.0D);
+      PlaneMouseAimReticleOpacity = new MCH_ConfigPrm("PlaneMouseAimReticleOpacity", 0.90D);
+      PlaneNoseReticleScale = new MCH_ConfigPrm("PlaneNoseReticleScale", 0.85D);
+      PlaneNoseReticleOpacity = new MCH_ConfigPrm("PlaneNoseReticleOpacity", 0.70D);
+      PlaneMouseAimMaxScreenRadius = new MCH_ConfigPrm("PlaneMouseAimMaxScreenRadius", 0.42D);
+      PlaneMouseAimReticleDebug = new MCH_ConfigPrm("PlaneMouseAimReticleDebug", false);
       SwitchWeaponWithMouseWheel = new MCH_ConfigPrm("SwitchWeaponWithMouseWheel", true);
       AllHeliSpeed = new MCH_ConfigPrm("AllHeliSpeed", 1.5D);
       AllPlaneSpeed = new MCH_ConfigPrm("AllPlaneSpeed", 1000.00D);
@@ -675,6 +695,15 @@ public class MCH_Config {
               MouseAimAutoBankMaxRoll,
               MouseAimCenteringStrength,
               MouseAimDebug,
+              EnablePlaneMouseAimReticle,
+              HideVanillaCrosshairInPlaneMouseAim,
+              PlaneMouseAimReticleTexture,
+              PlaneMouseAimReticleScale,
+              PlaneMouseAimReticleOpacity,
+              PlaneNoseReticleScale,
+              PlaneNoseReticleOpacity,
+              PlaneMouseAimMaxScreenRadius,
+              PlaneMouseAimReticleDebug,
               AutoThrottleDownHeli,
               AutoThrottleDownPlane,
               AutoThrottleDownShip,

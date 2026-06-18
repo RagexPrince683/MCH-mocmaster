@@ -20,6 +20,7 @@ import mcheli.lweapon.MCH_ClientLightWeaponTickHandler;
 import mcheli.multiplay.MCH_GuiTargetMarker;
 import mcheli.particles.MCH_ParticlesUtil;
 import mcheli.plane.MCP_PlaneChaseCamera;
+import mcheli.plane.MCP_EntityPlane;
 import mcheli.tool.rangefinder.MCH_ItemRangeFinder;
 import mcheli.wrapper.W_ClientEventHook;
 import mcheli.wrapper.W_Reflection;
@@ -178,6 +179,22 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
          MCH_ParticlesUtil.clearMarkPoint();
       }
 
+   }
+
+   @SubscribeEvent
+   public void onRenderOverlayPre(RenderGameOverlayEvent.Pre event) {
+      if(event == null || event.type != RenderGameOverlayEvent.ElementType.CROSSHAIRS) {
+         return;
+      }
+
+      EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+      if(player == null) {
+         return;
+      }
+      MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
+      if(ac instanceof MCP_EntityPlane && ((MCP_EntityPlane)ac).shouldSuppressVanillaCrosshair(player)) {
+         event.setCanceled(true);
+      }
    }
 
    @SubscribeEvent

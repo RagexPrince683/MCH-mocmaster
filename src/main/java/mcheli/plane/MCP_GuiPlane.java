@@ -10,8 +10,10 @@ import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.gui.MCH_Gui;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_PlaneInfo;
+import mcheli.wrapper.W_McClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.MathHelper;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -72,6 +74,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             }
          }
 
+         if(seatID == 0) {
+            this.drawMouseAimReticles(plane, player);
+         }
+
          this.drawHitBullet(plane, -14101432, seatID);
       }
    }
@@ -86,6 +92,72 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       String flap = plane.canUseCombatFlaps() ? (plane.isCombatFlapsDeployed() ? " FLP" : "") : "";
       this.drawString(String.format("THR %3d%%%s", new Object[]{Integer.valueOf(plane.getThrottlePercent()), flap}),
             super.centerX - 35, super.centerY + 42, color);
+   }
+
+   private void drawMouseAimReticles(MCP_EntityPlane plane, EntityPlayer player) {
+      if(!plane.shouldDrawMouseAimReticle(player)) {
+         return;
+      }
+
+      double safeRadius = Math.max(8.0D, Math.min((double)Math.min(super.centerX, super.centerY),
+            (double)Math.min(super.width, super.height) * MCH_Config.PlaneMouseAimMaxScreenRadius.prmDouble));
+      double yawRange = Math.max(1.0D, MCH_Config.MouseAimMaxPitchUp.prmDouble);
+      double pitchRange = Math.max(1.0D, Math.max(MCH_Config.MouseAimMaxPitchUp.prmDouble, MCH_Config.MouseAimMaxPitchDown.prmDouble));
+      double aimX = (double)super.centerX + (double)plane.getMouseAimYawError() / yawRange * safeRadius;
+      double aimY = (double)super.centerY + (double)plane.getMouseAimPitchError() / pitchRange * safeRadius;
+      double dx = aimX - (double)super.centerX;
+      double dy = aimY - (double)super.centerY;
+      double distance = Math.sqrt(dx * dx + dy * dy);
+      if(distance > safeRadius && distance > 1.0E-4D) {
+         aimX = (double)super.centerX + dx / distance * safeRadius;
+         aimY = (double)super.centerY + dy / distance * safeRadius;
+      }
+
+      double noseX = (double)super.centerX;
+      double noseY = (double)super.centerY;
+      this.drawNoseReticle(noseX, noseY);
+      this.drawMouseAimReticle(aimX, aimY);
+
+      if(MCH_Config.PlaneMouseAimReticleDebug.prmBool || MCH_Config.DebugFlightControl.prmBool) {
+         String debug = String.format("MAIM x=%.1f y=%.1f nose=%.1f,%.1f yaw=%.1f pitch=%.1f err=%.1f,%.1f xhair=%s",
+               Double.valueOf(aimX), Double.valueOf(aimY), Double.valueOf(noseX), Double.valueOf(noseY),
+               Float.valueOf(plane.getMouseAimDesiredYaw()), Float.valueOf(plane.getMouseAimDesiredPitch()),
+               Float.valueOf(plane.getMouseAimYawError()), Float.valueOf(plane.getMouseAimPitchError()),
+               Boolean.valueOf(plane.wasMouseAimVanillaCrosshairSuppressed()));
+         this.drawString(debug, super.centerX - 120, super.centerY + 58, -16711936);
+         if(plane.ticksExisted % 20 == 0) {
+            System.out.println("[MCHeli][PlaneMouseAimReticle] " + debug);
+         }
+      }
+   }
+
+   private void drawMouseAimReticle(double x, double y) {
+      double scale = MathHelper.clamp_double(MCH_Config.PlaneMouseAimReticleScale.prmDouble, 0.25D, 4.0D);
+      float opacity = (float)MathHelper.clamp_double(MCH_Config.PlaneMouseAimReticleOpacity.prmDouble, 0.0D, 1.0D);
+      double size = 32.0D * scale;
+      GL11.glEnable(3042);
+      GL11.glBlendFunc(770, 771);
+      GL11.glColor4f(0.25F, 1.0F, 0.35F, opacity);
+      W_McClient.MOD_bindTexture(MCH_Config.PlaneMouseAimReticleTexture.prmString);
+      this.drawTexturedRect(x - size / 2.0D, y - size / 2.0D, size, size, 0.0D, 0.0D, 256.0D, 256.0D, 256.0D, 256.0D);
+      GL11.glDisable(3553);
+      this.drawLine(new double[]{x - size * 0.65D, y, x - size * 0.25D, y, x + size * 0.25D, y, x + size * 0.65D, y,
+            x, y - size * 0.65D, x, y - size * 0.25D, x, y + size * 0.25D, x, y + size * 0.65D}, 0xCC55FF66);
+      GL11.glEnable(3553);
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+   }
+
+   private void drawNoseReticle(double x, double y) {
+      double scale = MathHelper.clamp_double(MCH_Config.PlaneNoseReticleScale.prmDouble, 0.25D, 4.0D);
+      float opacity = (float)MathHelper.clamp_double(MCH_Config.PlaneNoseReticleOpacity.prmDouble, 0.0D, 1.0D);
+      int alpha = (int)(opacity * 255.0F) << 24;
+      int color = alpha | 0x00FFFFFF;
+      double r = 8.0D * scale;
+      GL11.glEnable(3042);
+      this.drawLine(new double[]{x - r, y, x - r * 0.35D, y, x + r * 0.35D, y, x + r, y,
+            x, y - r, x, y - r * 0.35D, x, y + r * 0.35D, x, y + r}, color);
+      this.drawLine(new double[]{x - r * 0.55D, y - r * 0.55D, x + r * 0.55D, y - r * 0.55D,
+            x + r * 0.55D, y + r * 0.55D, x - r * 0.55D, y + r * 0.55D}, color, 2);
    }
 
    public void drawKeybind(MCP_EntityPlane plane, EntityPlayer player, int seatID) {

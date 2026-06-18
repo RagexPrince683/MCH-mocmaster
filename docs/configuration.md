@@ -225,7 +225,7 @@ Tuning guidance:
 
 ## Experimental new-flight plane mouse aim controls
 
-Mouse aim is an experimental control foundation for fixed-wing planes using `UseNewMobilitySystem = true` only. It is disabled by default and does not affect legacy aircraft. When enabled globally, pilots can toggle it in a qualifying new-flight plane with `KeyPlaneMouseAim`; the mouse moves a separate desired aim yaw/pitch and the aircraft nose chases that aim through the existing new-flight authority, stall, energy, pitch-suppression, damping, and rotation-limit path. HUD and reticle support are intentionally left for a later pass.
+Mouse aim is an experimental control foundation for fixed-wing planes using `UseNewMobilitySystem = true` only. It is disabled by default and does not affect legacy aircraft. When enabled globally, pilots can toggle it in a qualifying new-flight plane with `KeyPlaneMouseAim`; the mouse moves a separate desired aim yaw/pitch and the aircraft nose chases that aim through the existing new-flight authority, stall, energy, pitch-suppression, damping, and rotation-limit path. Advanced lead/CCIP HUD polish is intentionally left for a later pass.
 
 This first implementation uses global client config keys. Per-plane mouse-aim overrides are not wired yet, so pack authors should tune conservatively.
 
@@ -243,8 +243,17 @@ This first implementation uses global client config keys. Per-plane mouse-aim ov
 | `MouseAimAutoBankMaxRoll` | `65.0` | Maximum target roll angle for auto-bank. |
 | `MouseAimCenteringStrength` | `0.18` | Roll damping/leveling strength as the aim point returns toward center. |
 | `MouseAimDebug` | `false` | Emits mouse-aim telemetry in the existing flight-control debug line even when `DebugFlightControl` is off. |
+| `EnablePlaneMouseAimReticle` | `true` | Draws the custom mouse-aim cursor and distinct plane/nose reticle while mouse aim is active. |
+| `HideVanillaCrosshairInPlaneMouseAim` | `true` | Hides the vanilla Minecraft screen-center crosshair only in qualifying plane mouse-aim mode. |
+| `PlaneMouseAimReticleTexture` | `textures/gui/plane_crosshair.png` | Texture path for the mouse aim cursor; the simple line fallback remains visible over it. |
+| `PlaneMouseAimReticleScale` | `1.0` | Scales the mouse aim cursor. |
+| `PlaneMouseAimReticleOpacity` | `0.90` | Mouse aim cursor opacity. |
+| `PlaneNoseReticleScale` | `0.85` | Scales the plane/nose reticle drawn at screen center for the initial aligned-camera implementation. |
+| `PlaneNoseReticleOpacity` | `0.70` | Plane/nose reticle opacity. |
+| `PlaneMouseAimMaxScreenRadius` | `0.42` | Safe screen radius, as a fraction of the smaller screen dimension, that clamps the cursor on screen. |
+| `PlaneMouseAimReticleDebug` | `false` | Draws/logs reticle screen positions, aim angles/errors, and vanilla-crosshair suppression state. |
 
-Mouse aim never directly sets aircraft rotation. It only generates pitch/yaw/roll commands that continue through the same new-flight control-authority, compressibility, unsupported-climb, stall, and angular-velocity integration code as other plane controls, so slow, stalled, damaged, or authority-limited aircraft may lag or fail to follow the cursor. Manual roll input is added to auto-bank in a predictable way, so roll keys remain available for corrections.
+The custom cursor is required because the vanilla Minecraft crosshair is locked to screen center and would otherwise represent the plane/nose reticle, not the desired mouse-follow aim point. Mouse aim never directly sets aircraft rotation. It only generates pitch/yaw/roll commands that continue through the same new-flight control-authority, compressibility, unsupported-climb, stall, and angular-velocity integration code as other plane controls, so slow, stalled, damaged, or authority-limited aircraft may lag or fail to follow the cursor. Manual roll input is added to auto-bank in a predictable way, so roll keys remain available for corrections.
 
 ## Key config defaults
 

@@ -62,6 +62,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private float mouseAimGeneratedRollCommand;
    private float mouseAimAutoBankTargetRoll;
    private boolean mouseAimManualRollActive;
+   private boolean mouseAimVanillaCrosshairSuppressed;
    /** Smoothed engine output; commanded throttle remains unchanged for controls and networking. */
    private double engineThrottle;
    /** Last total drag fraction applied by the fixed-wing energy model, exposed for debug output. */
@@ -654,6 +655,40 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             && this.mouseAimControlsEnabled && !this.isFreeLookMode() && !super.isGunnerMode;
    }
 
+   public boolean isMouseAimControlsEnabled() {
+      return this.isNewFlightModelEnabled() && MCH_Config.EnableMouseAimControls.prmBool && this.mouseAimControlsEnabled;
+   }
+
+   public boolean shouldDrawMouseAimReticle(Entity player) {
+      return this.shouldUseMouseAimControls(player) && MCH_Config.EnablePlaneMouseAimReticle.prmBool;
+   }
+
+   public boolean shouldSuppressVanillaCrosshair(Entity player) {
+      boolean suppress = this.shouldDrawMouseAimReticle(player) && MCH_Config.HideVanillaCrosshairInPlaneMouseAim.prmBool;
+      this.mouseAimVanillaCrosshairSuppressed = suppress;
+      return suppress;
+   }
+
+   public float getMouseAimDesiredYaw() {
+      return this.mouseAimSmoothedYaw;
+   }
+
+   public float getMouseAimDesiredPitch() {
+      return this.mouseAimSmoothedPitch;
+   }
+
+   public float getMouseAimYawError() {
+      return this.mouseAimYawError;
+   }
+
+   public float getMouseAimPitchError() {
+      return this.mouseAimPitchError;
+   }
+
+   public boolean wasMouseAimVanillaCrosshairSuppressed() {
+      return this.mouseAimVanillaCrosshairSuppressed;
+   }
+
    private float clampMouseAimPitch(float pitch) {
       float maxUp = (float)MCH_FlightModel.clamp(MCH_Config.MouseAimMaxPitchUp.prmDouble, 0.0D, 89.0D);
       float maxDown = (float)MCH_FlightModel.clamp(MCH_Config.MouseAimMaxPitchDown.prmDouble, 0.0D, 89.0D);
@@ -705,11 +740,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    public String getMouseAimDebugString() {
-      return String.format("mouseAim=(enabled=%s,desiredYaw=%.2f,desiredPitch=%.2f,yawError=%.2f,pitchError=%.2f,pitchCmd=%.4f,yawCmd=%.4f,rollCmd=%.4f,autoBankTargetRoll=%.2f,manualRoll=%s)",
+      return String.format("mouseAim=(enabled=%s,desiredYaw=%.2f,desiredPitch=%.2f,yawError=%.2f,pitchError=%.2f,pitchCmd=%.4f,yawCmd=%.4f,rollCmd=%.4f,autoBankTargetRoll=%.2f,manualRoll=%s,crosshairSuppressed=%s)",
             Boolean.valueOf(this.mouseAimControlsEnabled), Float.valueOf(this.mouseAimSmoothedYaw), Float.valueOf(this.mouseAimSmoothedPitch),
             Float.valueOf(this.mouseAimYawError), Float.valueOf(this.mouseAimPitchError), Float.valueOf(this.mouseAimGeneratedPitchCommand),
             Float.valueOf(this.mouseAimGeneratedYawCommand), Float.valueOf(this.mouseAimGeneratedRollCommand),
-            Float.valueOf(this.mouseAimAutoBankTargetRoll), Boolean.valueOf(this.mouseAimManualRollActive));
+            Float.valueOf(this.mouseAimAutoBankTargetRoll), Boolean.valueOf(this.mouseAimManualRollActive),
+            Boolean.valueOf(this.mouseAimVanillaCrosshairSuppressed));
    }
 
    public double getLastAerodynamicDrag() {

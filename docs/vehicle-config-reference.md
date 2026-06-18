@@ -244,6 +244,13 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `MouseAimAutoBankMaxRoll` | Global/client | degrees | 65 | auto-bank target roll clamp |
 | `MouseAimCenteringStrength` | Global/client | float | 0.18 | roll damping/level-out strength near center aim |
 | `MouseAimDebug` | Global/client | boolean | false | includes mouse-aim telemetry in flight-control debug output |
+| `EnablePlaneMouseAimReticle` | Global/client | boolean | true | draws custom cursor/nose reticles for active new-flight plane mouse aim |
+| `HideVanillaCrosshairInPlaneMouseAim` | Global/client | boolean | true | suppresses vanilla crosshair only in qualifying plane mouse-aim reticle mode |
+| `PlaneMouseAimReticleTexture` | Global/client | path | textures/gui/plane_crosshair.png | mouse aim cursor texture path |
+| `PlaneMouseAimReticleScale` / `PlaneMouseAimReticleOpacity` | Global/client | float | 1.0 / 0.90 | mouse aim cursor size and alpha |
+| `PlaneNoseReticleScale` / `PlaneNoseReticleOpacity` | Global/client | float | 0.85 / 0.70 | center nose reticle size and alpha |
+| `PlaneMouseAimMaxScreenRadius` | Global/client | float | 0.42 | clamps cursor inside a safe screen radius |
+| `PlaneMouseAimReticleDebug` | Global/client | boolean | false | draws/logs reticle screen positions and crosshair suppression state |
 | `NewFlightCombatFlaps` | Plane | boolean | true | enables new-flight-only combat flaps |
 | `NewFlightCombatFlapLift` | Plane | float[0..1] | 0.120 | flap lift/support contribution |
 | `NewFlightCombatFlapDrag` | Plane | float[0..0.25] | 0.012 | flap drag penalty |
