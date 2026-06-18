@@ -577,6 +577,12 @@ public class MCP_PlaneChaseCamera {
    }
 
    public static void addFreelookMouseDelta(double deltaX, double deltaY) {
+      if(Math.abs(deltaX) < 0.01D) {
+         deltaX = 0.0D;
+      }
+      if(Math.abs(deltaY) < 0.01D) {
+         deltaY = 0.0D;
+      }
       pendingFreelookMouseX += deltaX;
       pendingFreelookMouseY += deltaY;
    }

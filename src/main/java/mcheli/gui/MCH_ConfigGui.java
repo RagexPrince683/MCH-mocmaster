@@ -108,8 +108,8 @@ public class MCH_ConfigGui extends W_GuiContainer {
    public MCH_ConfigGui(EntityPlayer player) {
       super(new MCH_ConfigGuiContainer(player));
       this.thePlayer = player;
-      super.xSize = 330;
-      super.ySize = 240;
+      super.xSize = 480;
+      super.ySize = 250;
    }
 
    public void initGui() {
@@ -117,6 +117,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       super.buttonList.clear();
       int x1 = super.guiLeft + 10;
       int x2 = super.guiLeft + 10 + 150 + 10;
+      int x3 = x2 + 150 + 10;
       int y = super.guiTop;
       boolean DY = true;
       this.listControlButtons = new ArrayList();
@@ -188,13 +189,13 @@ public class MCH_ConfigGui extends W_GuiContainer {
 
       this.listPlaneCameraButtons = new ArrayList<W_GuiButton>();
       this.buttonPlaneChaseCamera = new MCH_GuiOnOffButton(0, x1, y + 25, 150, 20, "New Chase Cam : ");
-      this.sliderPlaneChaseBaseDistance = new MCH_GuiSlider(0, x1, y + 50, 150, 20, "Base Dist:%.0f", 30.0F, 16.0F, 80.0F, 1.0F);
-      this.sliderPlaneChaseMinDistance = new MCH_GuiSlider(0, x1, y + 75, 150, 20, "Min Dist:%.0f", 26.0F, 12.0F, 80.0F, 1.0F);
-      this.sliderPlaneChaseMaxDistance = new MCH_GuiSlider(0, x1, y + 100, 150, 20, "Max Dist:%.0f", 42.0F, 16.0F, 120.0F, 1.0F);
+      this.sliderPlaneChaseBaseDistance = new MCH_GuiSlider(0, x1, y + 50, 150, 20, "Base Dist:%.0f", 15.0F, 8.0F, 80.0F, 1.0F);
+      this.sliderPlaneChaseMinDistance = new MCH_GuiSlider(0, x1, y + 75, 150, 20, "Min Dist:%.0f", 13.0F, 6.0F, 80.0F, 1.0F);
+      this.sliderPlaneChaseMaxDistance = new MCH_GuiSlider(0, x1, y + 100, 150, 20, "Max Dist:%.0f", 21.0F, 8.0F, 120.0F, 1.0F);
       this.buttonPlaneChaseSpeedDistance = new MCH_GuiOnOffButton(0, x1, y + 125, 150, 20, "Speed Distance : ");
       this.sliderPlaneChaseSpeedScale = new MCH_GuiSlider(0, x1, y + 150, 150, 20, "Speed Scale:%.1f", 2.0F, 0.0F, 20.0F, 0.5F);
       this.sliderPlaneChaseSpeedMaxBonus = new MCH_GuiSlider(0, x1, y + 175, 150, 20, "Speed Bonus:%.0f", 3.0F, 0.0F, 20.0F, 1.0F);
-      this.sliderPlaneChasePitchInfluence = new MCH_GuiSlider(0, x1, y + 200, 150, 20, "Pitch Inf:%.2f", 0.25F, 0.0F, 1.0F, 0.05F);
+      this.sliderPlaneChasePitchInfluence = new MCH_GuiSlider(0, x3, y + 25, 150, 20, "Pitch Inf:%.2f", 0.25F, 0.0F, 1.0F, 0.05F);
       this.buttonPlaneChaseFovOverride = new MCH_GuiOnOffButton(0, x2, y + 25, 150, 20, "Chase FOV : ");
       this.sliderPlaneChaseFov = new MCH_GuiSlider(0, x2, y + 50, 150, 20, "FOV:%.0f", 95.0F, 60.0F, 120.0F, 1.0F);
       this.sliderPlaneChaseFreelookFov = new MCH_GuiSlider(0, x2, y + 75, 150, 20, "Free FOV:%.0f", 95.0F, 60.0F, 120.0F, 1.0F);
@@ -202,7 +203,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.sliderPlaneFreelookYawSmoothing = new MCH_GuiSlider(0, x2, y + 125, 150, 20, "Free Yaw:%.2f", 0.28F, 0.01F, 1.0F, 0.01F);
       this.sliderPlaneFreelookPitchSmoothing = new MCH_GuiSlider(0, x2, y + 150, 150, 20, "Free Pitch:%.2f", 0.28F, 0.01F, 1.0F, 0.01F);
       this.sliderPlaneFreelookReturnSmoothing = new MCH_GuiSlider(0, x2, y + 175, 150, 20, "Free Return:%.2f", 0.18F, 0.01F, 1.0F, 0.01F);
-      this.sliderPlaneChaseRollInfluence = new MCH_GuiSlider(0, x2, y + 200, 150, 20, "Roll Inf:%.2f", 0.12F, 0.0F, 1.0F, 0.05F);
+      this.sliderPlaneChaseRollInfluence = new MCH_GuiSlider(0, x3, y + 50, 150, 20, "Roll Inf:%.2f", 0.12F, 0.0F, 1.0F, 0.05F);
       this.listPlaneCameraButtons.add(this.buttonPlaneChaseCamera);
       this.listPlaneCameraButtons.add(this.sliderPlaneChaseBaseDistance);
       this.listPlaneCameraButtons.add(this.sliderPlaneChaseMinDistance);
@@ -232,8 +233,8 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.waitKeyAcceptCount = 0;
       this.keyBindingList = new MCH_GuiList(53, 7, x1, y + 25 - 2, 310, 150, "");
       this.listKeyBindingButtons.add(this.keyBindingList);
-      this.listKeyBindingButtons.add(new W_GuiButton(52, x1, y + 215, 90, 20, "Controls <<"));
-      this.listKeyBindingButtons.add(new W_GuiButton(54, x1 + 90, y + 215, 60, 20, "Reset All"));
+      this.listKeyBindingButtons.add(new W_GuiButton(52, x1, y + 220, 90, 20, "Controls <<"));
+      this.listKeyBindingButtons.add(new W_GuiButton(54, x1 + 90, y + 220, 60, 20, "Reset All"));
       boolean var13 = true;
       boolean var14 = true;
       MCH_GuiListItemKeyBind[] var10000 = new MCH_GuiListItemKeyBind[30];
@@ -375,7 +376,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
          this.listDevelopButtons.add(this.buttonReloadAllHUD);
       }
 
-      this.listDevelopButtons.add(new W_GuiButton(52, x1, y + 215, 90, 20, "Controls <<"));
+      this.listDevelopButtons.add(new W_GuiButton(52, x1, y + 220, 90, 20, "Controls <<"));
       var15 = this.listDevelopButtons.iterator();
 
       while(var15.hasNext()) {
@@ -383,9 +384,9 @@ public class MCH_ConfigGui extends W_GuiContainer {
          super.buttonList.add(var16);
       }
 
-      super.buttonList.add(new GuiButton(102, x2, y + 195, 80, 20, "Apply"));
-      super.buttonList.add(new GuiButton(100, x2, y + 215, 80, 20, "Save & Close"));
-      super.buttonList.add(new GuiButton(101, x2 + 90, y + 215, 60, 20, "Cancel"));
+      super.buttonList.add(new GuiButton(102, x2, y + 220, 80, 20, "Apply"));
+      super.buttonList.add(new GuiButton(100, x2 + 90, y + 220, 80, 20, "Save & Close"));
+      super.buttonList.add(new GuiButton(101, x2 + 180, y + 220, 60, 20, "Cancel"));
       this.switchScreen(0);
       this.applySwitchScreen();
       this.getAllStatusFromConfig();
@@ -862,7 +863,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
          int var12;
          if(this.currentScreenId == 4) {
             this.drawString("< Plane Camera >", 170, 10, 16777215);
-            this.drawString("Stable distance + FOV; Apply works in-flight", 10, 232, 16777215);
+            this.drawString("Stable distance + FOV; Apply works in-flight", 10, 212, 16777215);
          } else if(this.currentScreenId == 2) {
             this.drawString("< Key Binding >", 170, 10, 16777215);
             if(this.waitKeyButtonId != 0) {
