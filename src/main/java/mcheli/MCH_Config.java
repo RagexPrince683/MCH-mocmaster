@@ -561,7 +561,8 @@ public class MCH_Config {
       EnableNewPlaneCameraSpeedDistance.desc = ";Disabled by default so the new plane chase camera stays near its stable base distance instead of breathing with throttle/speed.";
       EnableNewPlaneCameraCollision = new MCH_ConfigPrm("EnableNewPlaneCameraCollision", true);
       EnablePlaneLookAhead = new MCH_ConfigPrm("EnablePlaneLookAhead", true);
-      EnableHoldFreelook = new MCH_ConfigPrm("EnableHoldFreelook", true);
+      EnableHoldFreelook = new MCH_ConfigPrm("EnableHoldFreelook", false);
+      EnableHoldFreelook.desc = ";When enabled, the Free Look key must be held; when disabled, Free Look toggles on/off with each key press.";
       EnableNewPlaneCameraRollInfluence = new MCH_ConfigPrm("EnableNewPlaneCameraRollInfluence", true);
       NewPlaneCameraCollision = new MCH_ConfigPrm("NewPlaneCameraCollision", true);
       NewPlaneCameraCollision.desc = ";Deprecated alias for EnableNewPlaneCameraCollision; moves the chase camera in front of solid blocks when line-of-sight collision is detected.";

@@ -69,6 +69,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
    private MCH_GuiOnOffButton buttonThrottleShip;
    private MCH_GuiOnOffButton buttonThrottleTank;
    private MCH_GuiOnOffButton buttonFlightSimMode;
+   private MCH_GuiOnOffButton buttonHoldFreelook;
    private MCH_GuiOnOffButton buttonSwitchWeaponWheel;
    private W_GuiButton buttonReloadAircraftInfo;
    private W_GuiButton buttonReloadWeaponInfo;
@@ -124,11 +125,12 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.buttonMouseInv = new MCH_GuiOnOffButton(0, x1, y + 25, 150, 20, "Invert Mouse : ");
       this.sliderSensitivity = new MCH_GuiSlider(0, x1, y + 50, 150, 20, "Sensitivity : %.1f", 0.0F, 0.0F, 30.0F, 0.1F);
       this.buttonFlightSimMode = new MCH_GuiOnOffButton(0, x1, y + 75, 150, 20, "Mouse Flight Sim Mode : ");
-      this.buttonSwitchWeaponWheel = new MCH_GuiOnOffButton(0, x1, y + 100, 150, 20, "Switch Weapon Wheel : ");
-      this.listControlButtons.add(new W_GuiButton(50, x1, y + 125, 150, 20, "Render Settings >>"));
-      this.listControlButtons.add(new W_GuiButton(51, x1, y + 150, 150, 20, "Key Binding >>"));
+      this.buttonHoldFreelook = new MCH_GuiOnOffButton(0, x1, y + 100, 150, 20, "Hold Free Look : ");
+      this.buttonSwitchWeaponWheel = new MCH_GuiOnOffButton(0, x1, y + 125, 150, 20, "Switch Weapon Wheel : ");
+      this.listControlButtons.add(new W_GuiButton(50, x1, y + 150, 150, 20, "Render Settings >>"));
+      this.listControlButtons.add(new W_GuiButton(51, x1, y + 175, 150, 20, "Key Binding >>"));
       this.listControlButtons.add(new W_GuiButton(55, x2, y + 150, 150, 20, "Development >>"));
-      this.buttonTestMode = new MCH_GuiOnOffButton(0, x1, y + 175, 150, 20, "Test Mode : ");
+      this.buttonTestMode = new MCH_GuiOnOffButton(0, x2, y + 175, 150, 20, "Test Mode : ");
       this.buttonStickModeHeli = new MCH_GuiOnOffButton(0, x2, y + 25, 150, 20, "Stick Mode Heli : ");
       this.buttonStickModePlane = new MCH_GuiOnOffButton(0, x2, y + 50, 150, 20, "Stick Mode Plane : ");
       this.buttonThrottleHeli = new MCH_GuiOnOffButton(0, x2, y + 75, 150, 20, "Throttle Down Heli : ");
@@ -145,6 +147,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.listControlButtons.add(this.buttonThrottleTank);
       this.listControlButtons.add(this.buttonTestMode);
       this.listControlButtons.add(this.buttonFlightSimMode);
+      this.listControlButtons.add(this.buttonHoldFreelook);
       this.listControlButtons.add(this.buttonSwitchWeaponWheel);
       Iterator id = this.listControlButtons.iterator();
 
@@ -431,6 +434,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
 
       this.buttonTestMode.setOnOff(config.TestMode.prmBool);
       this.buttonFlightSimMode.setOnOff(config.MouseControlFlightSimMode.prmBool);
+      this.buttonHoldFreelook.setOnOff(config.EnableHoldFreelook.prmBool);
       this.buttonSwitchWeaponWheel.setOnOff(config.SwitchWeaponWithMouseWheel.prmBool);
 
       this.buttonPlaneChaseCamera.setOnOff(config.EnableNewPlaneThirdPersonCamera.prmBool);
@@ -459,6 +463,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       config.MouseControlStickModeHeli.setPrm(buttonStickModeHeli.getOnOff());
       config.MouseControlStickModePlane.setPrm(buttonStickModePlane.getOnOff());
       config.MouseControlFlightSimMode.setPrm(buttonFlightSimMode.getOnOff());
+      config.EnableHoldFreelook.setPrm(buttonHoldFreelook.getOnOff());
       config.SwitchWeaponWithMouseWheel.setPrm(buttonSwitchWeaponWheel.getOnOff());
 
       config.MouseSensitivity.setPrm(sliderSensitivity.getSliderValueInt(1));
