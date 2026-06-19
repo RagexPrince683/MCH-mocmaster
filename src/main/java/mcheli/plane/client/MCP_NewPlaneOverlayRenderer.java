@@ -9,9 +9,12 @@ import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.plane.MCP_EntityPlane;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.entity.Entity;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import org.lwjgl.opengl.GL11;
 
@@ -20,6 +23,8 @@ public class MCP_NewPlaneOverlayRenderer {
 
    private static final ResourceLocation PLANE_MOUSE_AIM_RETICLE_TEXTURE = new ResourceLocation("mcheli", "textures/gui/plane_crosshair.png");
    private static long nextDebugLogTime;
+   private static boolean reticleTextureChecked;
+   private static boolean reticleTextureAvailable = true;
    private boolean registeredLogged;
 
    public MCP_NewPlaneOverlayRenderer() {
@@ -59,19 +64,22 @@ public class MCP_NewPlaneOverlayRenderer {
       ScaledResolution scaled = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
       state.width = scaled.getScaledWidth();
       state.height = scaled.getScaledHeight();
-      state.noseX = (double)state.width / 2.0D;
-      state.noseY = (double)state.height / 2.0D;
-      this.drawProofOverlay(mc, state);
+      state.centerX = (double)state.width / 2.0D;
+      state.centerY = (double)state.height / 2.0D;
+      state.noseX = state.centerX;
+      state.noseY = state.centerY;
 
       if(state.shouldDrawReticle()) {
-         this.updateAimScreenPosition(state);
+         this.updateAimScreenPosition(mc, state);
          this.drawMouseAimReticles(mc, state);
       } else {
-         state.mouseX = state.noseX;
-         state.mouseY = state.noseY;
+         state.mouseX = state.centerX;
+         state.mouseY = state.centerY;
       }
 
       if(MCH_Config.PlaneMouseAimReticleDebug.prmBool || MCH_Config.DebugFlightControl.prmBool) {
+         this.drawProofOverlay(mc, state);
+
          this.drawDebugText(mc, state);
       }
       if(state.shouldDrawReticle()) {
@@ -119,19 +127,53 @@ public class MCP_NewPlaneOverlayRenderer {
       return state;
    }
 
-   private void updateAimScreenPosition(OverlayState state) {
+   private void updateAimScreenPosition(Minecraft mc, OverlayState state) {
+      Entity camera = mc.renderViewEntity != null?mc.renderViewEntity:state.player;
+      state.cameraYaw = camera != null?camera.rotationYaw:state.player.rotationYaw;
+      state.cameraPitch = camera != null?camera.rotationPitch:state.player.rotationPitch;
+      state.desiredAimYaw = state.plane.getMouseAimDesiredYaw();
+      state.desiredAimPitch = state.plane.getMouseAimDesiredPitch();
+      state.cursorYawDelta = MathHelper.wrapAngleTo180_float((float)(state.desiredAimYaw - state.cameraYaw));
+      state.cursorPitchDelta = MathHelper.wrapAngleTo180_float((float)(state.desiredAimPitch - state.cameraPitch));
       double safeRadius = Math.max(12.0D, Math.min((double)Math.min(state.width, state.height) * MCH_Config.PlaneMouseAimMaxScreenRadius.prmDouble,
             (double)Math.min(state.width, state.height) * 0.50D));
       double yawRange = Math.max(1.0D, MCH_Config.PlaneMouseAimYawVisualRange.prmDouble);
       double pitchRange = Math.max(1.0D, Math.max(MCH_Config.MouseAimMaxPitchUp.prmDouble, MCH_Config.MouseAimMaxPitchDown.prmDouble));
-      state.mouseX = state.noseX + (double)state.plane.getMouseAimYawError() / yawRange * safeRadius;
-      state.mouseY = state.noseY - (double)state.plane.getMouseAimPitchError() / pitchRange * safeRadius;
-      double dx = state.mouseX - state.noseX;
-      double dy = state.mouseY - state.noseY;
+      state.mouseX = state.centerX + state.cursorYawDelta / yawRange * safeRadius;
+      state.mouseY = state.centerY + state.cursorPitchDelta / pitchRange * safeRadius;
+      this.clampToSafeRadius(state, true, safeRadius);
+
+      Vec3 noseForward = MCH_Lib.Rot2Vec3(state.plane.getRotYaw(), state.plane.getRotPitch());
+      double noseYaw = Math.atan2(-noseForward.xCoord, noseForward.zCoord) * 180.0D / Math.PI;
+      double nosePitch = Math.asin(-noseForward.yCoord) * 180.0D / Math.PI;
+      state.noseYawDelta = MathHelper.wrapAngleTo180_float((float)(noseYaw - state.cameraYaw));
+      state.nosePitchDelta = MathHelper.wrapAngleTo180_float((float)(nosePitch - state.cameraPitch));
+      state.noseX = state.centerX + state.noseYawDelta / yawRange * safeRadius;
+      state.noseY = state.centerY + state.nosePitchDelta / pitchRange * safeRadius;
+      this.clampToSafeRadius(state, false, safeRadius);
+   }
+
+   private void clampToSafeRadius(OverlayState state, boolean mouse, double safeRadius) {
+      double x = mouse?state.mouseX:state.noseX;
+      double y = mouse?state.mouseY:state.noseY;
+      double dx = x - state.centerX;
+      double dy = y - state.centerY;
       double dist = Math.sqrt(dx * dx + dy * dy);
       if(dist > safeRadius && dist > 1.0E-4D) {
-         state.mouseX = state.noseX + dx / dist * safeRadius;
-         state.mouseY = state.noseY + dy / dist * safeRadius;
+         x = state.centerX + dx / dist * safeRadius;
+         y = state.centerY + dy / dist * safeRadius;
+         if(mouse) {
+            state.mouseClamped = true;
+         } else {
+            state.noseClamped = true;
+         }
+      }
+      if(mouse) {
+         state.mouseX = x;
+         state.mouseY = y;
+      } else {
+         state.noseX = x;
+         state.noseY = y;
       }
    }
 
@@ -157,13 +199,17 @@ public class MCP_NewPlaneOverlayRenderer {
       GL11.glBlendFunc(770, 771);
       GL11.glEnable(3553);
       GL11.glColor4f(0.25F, 1.0F, 0.35F, (float)this.clamp(MCH_Config.PlaneMouseAimReticleOpacity.prmDouble, 0.0D, 1.0D));
-      mc.renderEngine.bindTexture(PLANE_MOUSE_AIM_RETICLE_TEXTURE);
-      double mouseSize = 96.0D * this.clamp(MCH_Config.PlaneMouseAimReticleScale.prmDouble, 0.25D, 4.0D);
-      this.drawTexturedQuad(state.mouseX - mouseSize / 2.0D, state.mouseY - mouseSize / 2.0D, mouseSize, mouseSize);
+      double mouseSize = 128.0D * this.clamp(MCH_Config.PlaneMouseAimReticleScale.prmDouble, 0.25D, 4.0D);
+      if(this.bindPlaneMouseAimReticleTexture(mc)) {
+         this.drawTexturedQuad(state.mouseX - mouseSize / 2.0D, state.mouseY - mouseSize / 2.0D, mouseSize, mouseSize);
+      }
       GL11.glDisable(3553);
-      this.drawLineCross(state.mouseX, state.mouseY, mouseSize * 0.35D, 0xEE55FF66);
+      if(!reticleTextureAvailable || MCH_Config.PlaneMouseAimReticleDebug.prmBool || MCH_Config.DebugFlightControl.prmBool) {
+         this.drawLineCross(state.mouseX, state.mouseY, mouseSize * 0.35D, 0xEE55FF66);
+      }
       double noseSize = 11.0D * this.clamp(MCH_Config.PlaneNoseReticleScale.prmDouble, 0.25D, 4.0D);
-      int noseAlpha = ((int)(this.clamp(MCH_Config.PlaneNoseReticleOpacity.prmDouble, 0.0D, 1.0D) * 255.0D) & 255) << 24;
+      double noseOpacity = this.clamp(MCH_Config.PlaneNoseReticleOpacity.prmDouble, 0.0D, 1.0D) * (state.noseClamped?0.45D:1.0D);
+      int noseAlpha = ((int)(noseOpacity * 255.0D) & 255) << 24;
       this.drawLineCross(state.noseX, state.noseY, noseSize, noseAlpha | 0x00FFFFFF);
       this.drawLineBox(state.noseX, state.noseY, noseSize * 0.65D, noseAlpha | 0x00FFFFFF);
       GL11.glEnable(3553);
@@ -171,6 +217,23 @@ public class MCP_NewPlaneOverlayRenderer {
       GL11.glDisable(3042);
       GL11.glEnable(2929);
       GL11.glPopMatrix();
+   }
+
+   private boolean bindPlaneMouseAimReticleTexture(Minecraft mc) {
+      if(!reticleTextureChecked) {
+         reticleTextureChecked = true;
+         try {
+            mc.getResourceManager().getResource(PLANE_MOUSE_AIM_RETICLE_TEXTURE);
+            reticleTextureAvailable = true;
+         } catch(Exception e) {
+            reticleTextureAvailable = false;
+            MCH_Lib.Log("[MCHeli][NewPlaneOverlay] failed to find reticle texture: %s", new Object[]{PLANE_MOUSE_AIM_RETICLE_TEXTURE});
+         }
+      }
+      if(reticleTextureAvailable) {
+         mc.getTextureManager().bindTexture(PLANE_MOUSE_AIM_RETICLE_TEXTURE);
+      }
+      return reticleTextureAvailable;
    }
 
    private void drawTexturedQuad(double x, double y, double width, double height) {
@@ -224,14 +287,13 @@ public class MCP_NewPlaneOverlayRenderer {
    }
 
    private String formatDebug(OverlayState state) {
-      MCP_EntityPlane plane = state.plane;
-      return String.format("registered=%s reason=%s crosshairSuppressed=%s aim=(%.1f,%.1f) nose=(%.1f,%.1f) desired=(%.2f,%.2f) error=(%.2f,%.2f)",
+      return String.format("registered=%s reason=%s crosshairSuppressed=%s desiredAimYaw/Pitch=(%.2f,%.2f) cameraYaw/Pitch=(%.2f,%.2f) cursorYawDelta/PitchDelta=(%.2f,%.2f) screenX/Y=(%.1f,%.1f) nose=(%.1f,%.1f) noseDelta=(%.2f,%.2f) texture=%s",
             Boolean.valueOf(state.rendererRegistered), state.skipReason, Boolean.valueOf(state.crosshairSuppressed),
+            Double.valueOf(state.desiredAimYaw), Double.valueOf(state.desiredAimPitch),
+            Double.valueOf(state.cameraYaw), Double.valueOf(state.cameraPitch),
+            Double.valueOf(state.cursorYawDelta), Double.valueOf(state.cursorPitchDelta),
             Double.valueOf(state.mouseX), Double.valueOf(state.mouseY), Double.valueOf(state.noseX), Double.valueOf(state.noseY),
-            Float.valueOf(plane != null ? plane.getMouseAimDesiredYaw() : 0.0F),
-            Float.valueOf(plane != null ? plane.getMouseAimDesiredPitch() : 0.0F),
-            Float.valueOf(plane != null ? plane.getMouseAimYawError() : 0.0F),
-            Float.valueOf(plane != null ? plane.getMouseAimPitchError() : 0.0F));
+            Double.valueOf(state.noseYawDelta), Double.valueOf(state.nosePitchDelta), Boolean.valueOf(reticleTextureAvailable));
    }
 
    private double clamp(double value, double min, double max) {
@@ -252,6 +314,18 @@ public class MCP_NewPlaneOverlayRenderer {
       double mouseY;
       double noseX;
       double noseY;
+      double centerX;
+      double centerY;
+      double desiredAimYaw;
+      double desiredAimPitch;
+      double cameraYaw;
+      double cameraPitch;
+      double cursorYawDelta;
+      double cursorPitchDelta;
+      double noseYawDelta;
+      double nosePitchDelta;
+      boolean mouseClamped;
+      boolean noseClamped;
 
       boolean shouldDrawReticle() {
          return this.qualifies;
