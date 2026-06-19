@@ -9,6 +9,7 @@ import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.plane.MCP_EntityPlane;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.entity.Entity;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.Entity;
