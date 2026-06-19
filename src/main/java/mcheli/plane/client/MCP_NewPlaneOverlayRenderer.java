@@ -9,6 +9,7 @@ import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.plane.MCP_EntityPlane;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.entity.Entity;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.Entity;
@@ -316,6 +317,23 @@ public class MCP_NewPlaneOverlayRenderer {
             reticleTextureAvailable = false;
             MCH_Lib.Log("[MCHeli][NewPlaneOverlay] failed to bind reticle texture: %s", new Object[]{PLANE_MOUSE_AIM_RETICLE_TEXTURE});
          }
+      }
+      return reticleTextureAvailable;
+   }
+
+   private boolean bindPlaneMouseAimReticleTexture(Minecraft mc) {
+      if(!reticleTextureChecked) {
+         reticleTextureChecked = true;
+         try {
+            mc.getResourceManager().getResource(PLANE_MOUSE_AIM_RETICLE_TEXTURE);
+            reticleTextureAvailable = true;
+         } catch(Exception e) {
+            reticleTextureAvailable = false;
+            MCH_Lib.Log("[MCHeli][NewPlaneOverlay] failed to find reticle texture: %s", new Object[]{PLANE_MOUSE_AIM_RETICLE_TEXTURE});
+         }
+      }
+      if(reticleTextureAvailable) {
+         mc.getTextureManager().bindTexture(PLANE_MOUSE_AIM_RETICLE_TEXTURE);
       }
       return reticleTextureAvailable;
    }
