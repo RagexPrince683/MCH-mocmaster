@@ -31,7 +31,7 @@ public class MCP_NewPlaneOverlayRenderer {
    private boolean postEnteredLogged;
 
    public MCP_NewPlaneOverlayRenderer() {
-      MCH_Lib.Log("[MCHeli][NewPlaneOverlay] registered renderer instance", new Object[0]);
+      MCH_Lib.Log("[MCHeli][NewPlaneOverlay] created renderer helper driven by MCH_ClientEventHook", new Object[0]);
    }
 
    @SubscribeEvent
@@ -317,23 +317,6 @@ public class MCP_NewPlaneOverlayRenderer {
             reticleTextureAvailable = false;
             MCH_Lib.Log("[MCHeli][NewPlaneOverlay] failed to bind reticle texture: %s", new Object[]{PLANE_MOUSE_AIM_RETICLE_TEXTURE});
          }
-      }
-      return reticleTextureAvailable;
-   }
-
-   private boolean bindPlaneMouseAimReticleTexture(Minecraft mc) {
-      if(!reticleTextureChecked) {
-         reticleTextureChecked = true;
-         try {
-            mc.getResourceManager().getResource(PLANE_MOUSE_AIM_RETICLE_TEXTURE);
-            reticleTextureAvailable = true;
-         } catch(Exception e) {
-            reticleTextureAvailable = false;
-            MCH_Lib.Log("[MCHeli][NewPlaneOverlay] failed to find reticle texture: %s", new Object[]{PLANE_MOUSE_AIM_RETICLE_TEXTURE});
-         }
-      }
-      if(reticleTextureAvailable) {
-         mc.getTextureManager().bindTexture(PLANE_MOUSE_AIM_RETICLE_TEXTURE);
       }
       return reticleTextureAvailable;
    }
