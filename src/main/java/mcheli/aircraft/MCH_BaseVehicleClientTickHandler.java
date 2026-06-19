@@ -201,11 +201,20 @@ public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHan
                pc.switchGear = 2;
                send = true;
             }
-         if (this.KeyFreeLook.isKeyDown())
-            if (ac.canSwitchFreeLook()) {
+         if (ac.canSwitchFreeLook()) {
+            if (MCH_Config.EnableHoldFreelook.prmBool) {
+               if (this.KeyFreeLook.isKeyDown() && !ac.isFreeLookMode()) {
+                  pc.switchFreeLook = 1;
+                  send = true;
+               } else if (this.KeyFreeLook.isKeyUp() && ac.isFreeLookMode()) {
+                  pc.switchFreeLook = 2;
+                  send = true;
+               }
+            } else if (this.KeyFreeLook.isKeyDown()) {
                pc.switchFreeLook = (byte)(ac.isFreeLookMode() ? 2 : 1);
                send = true;
             }
+         }
          if (this.KeyGUI.isKeyDown()) {
             pc.openGui = true;
             send = true;

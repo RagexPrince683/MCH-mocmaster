@@ -162,13 +162,13 @@ IgnoreBulletHit = flansmod.common.guns.EntityGrenade
 
 These options are client-side visual/readability settings for pilots flying planes that use the new flight/new mobility system. They do not change flight physics, stall behavior, pitch authority, throttle behavior, weapons, targeting, HUD rendering, or aircraft balance. Legacy aircraft, first-person view, helicopters, tanks, turrets, ships, passengers, and gunners keep the existing camera path unless the gated new-plane third-person pilot conditions are met.
 
-The standard chase camera is intentionally stable: it stays behind the aircraft with configurable distance, aircraft-size scaling, speed distance scaling, collision avoidance, pitch readability, aircraft-below-center framing, and conservative roll influence. It does **not** automatically move focus based on throttle, steering input, turn rate, sideslip, or velocity direction. Situational camera movement comes from two held player actions:
+The standard chase camera is intentionally stable: it stays behind the aircraft with configurable distance, aircraft-size scaling, speed distance scaling, collision avoidance, pitch readability, aircraft-below-center framing, and conservative roll influence. It does **not** automatically move focus based on throttle, steering input, turn rate, sideslip, or velocity direction. Situational camera movement comes from held player actions only when the matching control option is enabled:
 
-* **Hold freelook** (`KeyFreeLook`, default Left Control): while held, mouse movement orbits the third-person camera around the aircraft/focus point, allowing rear, side, front, high, and low views. Aircraft controls continue normally and do not inherit the orbit camera orientation. Releasing the key smoothly returns orbit yaw/pitch offsets to rear chase view.
+* **Free Look** (`KeyFreeLook`, default Left Control): by default this remains the original toggle action, including in regular third person, so the view does not snap back when the key is released. Enabling **Hold Free Look** in the controls menu changes it to a held action that turns off on key release.
 * **Hold Plane Look Ahead** (`KeyPlaneLookAhead`, default Left Alt): while held, the camera focus blends forward along the aircraft facing direction while the camera remains behind the aircraft at normal chase distance. Releasing the key smoothly returns to centered framing.
-* **Interaction:** freelook takes priority over camera rotation. Holding both keeps freelook orbit in control while look-ahead only changes the smoothed focus point; neither key alters aircraft controls.
+* **Interaction:** the new third-person chase camera no longer consumes freelook mouse movement for a custom orbit path, so freelook uses the shared aircraft freelook state instead of injecting camera-orbit deltas into flight controls.
 
-Recommended bindings: keep **Free Look** on a comfortable hold key such as Left Control, and bind **Plane Look Ahead** to Left Alt, a thumb mouse button, or another hold key that can be pressed briefly during target tracking.
+Recommended bindings: keep **Free Look** on a comfortable key such as Left Control, enable **Hold Free Look** only if you prefer hold-to-use behavior, and bind **Plane Look Ahead** to Left Alt, a thumb mouse button, or another hold key that can be pressed briefly during target tracking.
 
 | Config key | Default | Purpose | Practical range |
 | --- | ---: | --- | --- |
@@ -176,7 +176,7 @@ Recommended bindings: keep **Free Look** on a comfortable hold key such as Left 
 | `EnableSpeedBasedCameraDistance` | `false` | Optional speed distance scaling. Disabled by default to prevent zoom breathing with throttle/speed changes. | keep `false`; use only for small capped effects |
 | `EnableNewPlaneCameraCollision` | `true` | Allows block ray tracing to shorten the camera when terrain/buildings/trees/hangars obstruct the view. | `true`/`false` |
 | `EnablePlaneLookAhead` | `true` | Enables held Plane Look Ahead. This is player-initiated only, never automatic velocity/turn prediction. | `true`/`false` |
-| `EnableHoldFreelook` | `true` | Makes new-chase-camera freelook hold-to-use and suppresses toggle freelook state for this path. | `true`/`false` |
+| `EnableHoldFreelook` | `false` | Enables hold-to-use Free Look globally; disabled preserves the original toggle behavior. | `true`/`false` |
 | `EnableNewPlaneCameraRollInfluence` | `true` | Allows limited aircraft roll to affect the camera horizon. | `true`/`false` |
 | `PlaneChaseBaseDistance` | `15.0` | Stable base chase distance in blocks before aircraft-size bonus and optional speed bonus. | default `15`; tune with wider FOV before large distance swings |
 | `PlaneChaseMinDistance` | `13.0` | Minimum camera distance from the smoothed focus after scale handling, high enough to keep tails framed during slowdown. | `12`-`18` for normal chase |
