@@ -136,7 +136,7 @@ public class MCP_PlaneChaseCamera {
       lastClientTickComputed = clientTick;
 
       this.wasFreelookActive = this.freelookActive;
-      this.freelookActive = this.isHoldFreelookActive();
+      this.freelookActive = false;
       this.updateFreelookOrbit();
       Vec3 anchor = this.getCameraFocusPoint(plane);
       Vec3 focus = this.computeHeldLookAheadFocus(plane, anchor);
@@ -573,7 +573,7 @@ public class MCP_PlaneChaseCamera {
    }
 
    public static boolean shouldConsumeFreelookMouse(MCP_EntityPlane plane, EntityPlayer player) {
-      return activeCamera != null && activeRenderPlane == plane && player != null && activeCamera.isHoldFreelookActive();
+      return false;
    }
 
    public static void addFreelookMouseDelta(double deltaX, double deltaY) {

@@ -146,17 +146,10 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
       this.commonPlayerControlInGUI(player, plane, isPilot, new MCP_PlanePacketPlayerControl());
    }
 
-   private boolean isNewChaseHoldFreelookPath(MCP_EntityPlane plane, boolean isPilot) {
-      return isPilot && MCH_Config.EnableHoldFreelook.prmBool && plane != null && plane.isNewFlightModelEnabled() && MCH_Config.EnableNewPlaneThirdPersonCamera.prmBool && super.mc != null && super.mc.gameSettings != null && super.mc.gameSettings.thirdPersonView > 0;
-   }
-
    protected void playerControl(EntityPlayer player, MCP_EntityPlane plane, boolean isPilot) {
       MCP_PlanePacketPlayerControl pc = new MCP_PlanePacketPlayerControl();
       boolean send = false;
       send = this.commonPlayerControl(player, plane, isPilot, pc);
-      if(this.isNewChaseHoldFreelookPath(plane, isPilot)) {
-         pc.switchFreeLook = 0;
-      }
       boolean isUav;
       if(isPilot) {
          if(this.KeySwitchMode.isKeyDown()) {
