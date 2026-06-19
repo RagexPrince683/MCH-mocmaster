@@ -1391,16 +1391,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
         if (this.bomblet) {
             if (this.sprinkleTime <= 0) {
-                System.out.println("sprinkletime = 0 or less, not loading chunks");
+                //System.out.println("sprinkletime = 0 or less, not loading chunks");
                 return false;
             }
 
-            System.out.println("sprinkletime > 0, loading chunks");
+            //System.out.println("sprinkletime > 0, loading chunks");
             return gravitydown && bigdelay && bigcheck;
         }
 
         if (MCH_BulletChunkloadLimiter.activeChunkloadingBullets >= MCH_BulletChunkloadLimiter.MAX_ALLOWED) {
-            System.out.println("error: over chunkloader limit (" + MCH_BulletChunkloadLimiter.activeChunkloadingBullets + ")");
+            //System.out.println("error: over chunkloader limit (" + MCH_BulletChunkloadLimiter.activeChunkloadingBullets + ")");
             this.setDead();
             MCH_BulletChunkloadLimiter.activeChunkloadingBullets--;
             return false;
