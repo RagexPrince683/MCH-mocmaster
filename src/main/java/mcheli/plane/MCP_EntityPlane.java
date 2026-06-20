@@ -1417,7 +1417,13 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       this.lastHorizontalSpeed = horizontalSpeed;
       this.lastForwardAirspeed = forwardAirspeed;
-      double airspeedLift = MCH_FlightModel.clamp((horizontalSpeed - stallSpeed * 0.45D) / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.25D);
+      double usableForwardAirspeed = Math.max(0.0D, forwardAirspeed);
+      double liftAirspeed = Math.min(usableForwardAirspeed, horizontalSpeed);
+      double recoverySpeed = info.stallRecoverySpeed > 0.0F ? (double)info.stallRecoverySpeed : stallSpeed * 1.2D;
+      double airspeedLift = MCH_FlightModel.clamp((liftAirspeed - stallSpeed * 0.45D) / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.25D);
+      if(liftAirspeed < stallSpeed) {
+         airspeedLift *= MCH_FlightModel.clamp(liftAirspeed / Math.max(0.05D, stallSpeed), 0.0D, 1.0D);
+      }
       double aoaExcess = Math.max(0.0D, Math.abs(this.angleOfAttack) - (double)info.criticalAoA);
       double preStallAoALift = MCH_FlightModel.clamp(1.0D - aoaExcess / Math.max(1.0D, (double)info.criticalAoA * 2.5D), 0.35D, 1.0D);
       double aoaLift = preStallAoALift * (1.0D - this.deepStallSeverity * 0.85D);
@@ -1432,12 +1438,21 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftCoefficient = aoaLift * stallLift;
       double mass = this.getPhysicalMass();
       double weightForce = gravityAccel * mass;
-      double liftBeforeStallLoss = weightForce * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D) * airspeedLift * aoaLift;
+      double lowSpeedLiftLoss = MCH_FlightModel.clamp(1.0D - liftAirspeed / Math.max(0.05D, recoverySpeed), 0.0D, 1.0D);
+      double positiveLiftAvailability = 1.0D - MCH_FlightModel.clamp(Math.max(lowSpeedLiftLoss, this.speedStallSeverity)
+            * Math.max(0.45D, this.stallSeverity), 0.0D, 0.95D);
+      double liftBeforeStallLoss = weightForce * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D) * airspeedLift * aoaLift
+            * positiveLiftAvailability;
       double liftForce = liftBeforeStallLoss * stallLift;
       double liftAccel = liftForce / mass;
       double netAccel = (liftForce - weightForce) / mass;
 
       super.motionY += netAccel;
+      if(super.motionY > 0.0D && (liftAirspeed < stallSpeed || this.stallSeverity > 0.35D || this.deepStallSeverity > 0.35D)) {
+         double climbDamping = Math.max(MCH_FlightModel.clamp((stallSpeed - liftAirspeed) / Math.max(0.05D, stallSpeed), 0.0D, 1.0D),
+               Math.max(this.stallSeverity, this.deepStallSeverity) * 0.75D);
+         super.motionY *= 1.0D - MCH_FlightModel.clamp(climbDamping * 0.42D, 0.0D, 0.85D);
+      }
       this.lastGravityAcceleration = gravityAccel;
       this.lastLiftAcceleration = liftAccel;
       this.lastWeightForce = weightForce;
@@ -2379,18 +2394,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          if(this.getNozzleRotation() <= 0.01F) {
             double verticalThrust = v.yCoord * (double)throttle1 / 2.0D;
             if(this.useNewMobilitySystem() && this.getPlaneInfo() != null && verticalThrust > 0.0D) {
-               double mass = this.getPhysicalMass();
-               double gravityAccel = Math.max(1.0E-6D, this.resolveNewFlightGravity());
-               double thrustToWeight = ((double)this.getPlaneInfo().engineThrust * propulsiveThrottle) / (gravityAccel * mass);
-               double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
-                     this.getPlaneInfo().stallSpeedFactor);
-               double speedHeadroom = MCH_FlightModel.clamp(this.getForwardAirspeed() / Math.max(0.05D, stallSpeed * 1.2D), 0.0D, 1.0D);
-               double supportedVerticalThrust = thrustToWeight >= 1.0D ? 1.0D
-                     : MCH_FlightModel.clamp(thrustToWeight * speedHeadroom * (1.0D - this.stallSeverity), 0.0D, 1.0D);
-               verticalThrust *= supportedVerticalThrust;
-               if(supportedVerticalThrust < 1.0D) {
-                  this.lastStallSuppressedLiftHeadroom = true;
-               }
+               // Conventional fixed-wing thrust must not become helicopter lift just because
+               // the nose is high. VTOL/nozzle aircraft still use the nozzle path below.
+               verticalThrust = 0.0D;
+               this.lastStallSuppressedLiftHeadroom = true;
             }
             super.motionY += verticalThrust;
          } else {
@@ -2528,6 +2535,22 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             double yaw = Math.toRadians((double)this.getRotYaw());
             super.motionX += -Math.sin(yaw) * targetSpeed;
             super.motionZ += Math.cos(yaw) * targetSpeed;
+         }
+         double postEnergyHorizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+         double usableForwardEnergySpeed = Math.min(Math.max(0.0D, this.getForwardAirspeed()), postEnergyHorizontalSpeed);
+         double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
+               this.getPlaneInfo().stallSpeedFactor);
+         if(super.motionY > 0.0D) {
+            double lowEnergyClimb = Math.max(MCH_FlightModel.clamp((stallSpeed - usableForwardEnergySpeed) / Math.max(0.05D, stallSpeed), 0.0D, 1.0D),
+                  Math.max(this.lastEnergyDeficitSeverity, this.speedStallSeverity));
+            if(lowEnergyClimb > 0.0D) {
+               double climbBleed = MCH_FlightModel.clamp(lowEnergyClimb * (0.28D + 0.42D * noseHighPitch), 0.0D, 0.90D);
+               super.motionY *= 1.0D - climbBleed;
+               if(lowEnergyClimb > 0.65D && noseHighPitch > 0.25D) {
+                  super.motionY -= gravityAccel * lowEnergyClimb * 0.65D;
+                  this.lastEnergyForcedRecovery = true;
+               }
+            }
          }
       }
 
