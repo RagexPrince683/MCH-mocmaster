@@ -6,6 +6,8 @@ import mcheli.MCH_Key;
 import mcheli.MCH_Lib;
 import mcheli.MCH_PacketIndOpenScreen;
 import mcheli.network.packets.PacketLockTarget;
+import mcheli.plane.MCP_EntityPlane;
+import mcheli.plane.MCP_PlaneChaseCamera;
 import mcheli.wrapper.W_Network;
 import mcheli.wrapper.W_PacketBase;
 import net.minecraft.client.Minecraft;
@@ -203,10 +205,17 @@ public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHan
             }
          if (ac.canSwitchFreeLook()) {
             if (MCH_Config.EnableHoldFreelook.prmBool) {
-               if (this.KeyFreeLook.isKeyDown() && !ac.isFreeLookMode()) {
-                  pc.switchFreeLook = 1;
-                  send = true;
-               } else if (this.KeyFreeLook.isKeyUp() && ac.isFreeLookMode()) {
+               boolean cameraOnlyPlaneFreelook = ac instanceof MCP_EntityPlane
+                     && MCP_PlaneChaseCamera.shouldUseHoldFreelookAsCameraOnly((MCP_EntityPlane)ac, player);
+               if(!cameraOnlyPlaneFreelook) {
+                  if (this.KeyFreeLook.isKeyDown() && !ac.isFreeLookMode()) {
+                     pc.switchFreeLook = 1;
+                     send = true;
+                  } else if (this.KeyFreeLook.isKeyUp() && ac.isFreeLookMode()) {
+                     pc.switchFreeLook = 2;
+                     send = true;
+                  }
+               } else if(ac.isFreeLookMode()) {
                   pc.switchFreeLook = 2;
                   send = true;
                }
