@@ -150,8 +150,22 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private String lastLowHorizontalSpeedWarning;
    /** Last compressibility-limited pitch authority multiplier before low-speed suppression. */
    private double lastPitchAuthority;
+   /** Last raw forward airspeed / stall speed ratio before shaping control airflow authority. */
+   private double lastAirflowAuthorityRaw;
    /** Last low-speed usable airflow authority multiplier for pitch controls. */
    private double lastAirflowAuthority;
+   /** Last stall/high-G/flap authority multiplier shared by pilot controls. */
+   private double lastStallAuthority;
+   /** Last pitch-up limiter from energy-specific suppression; excludes shared control authority. */
+   private double lastPitchUpAuthority;
+   /** Last pitch-down authority multiplier, kept higher for recovery. */
+   private double lastPitchDownAuthority;
+   /** Last roll authority multiplier. */
+   private double lastRollAuthority;
+   /** Last yaw authority multiplier. */
+   private double lastYawAuthority;
+   /** Last pilot pitch angular velocity before aerodynamic pitch moments are added. */
+   private double lastPilotPitchAngularVelocity;
    /** Last final pitch authority after stall, airflow, compressibility, and nose-up suppression. */
    private double lastFinalPitchAuthority;
    /** Last effective nose-up pitch authority after low-speed/stall suppression. */
@@ -537,15 +551,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             * flapAuthority, 0.05D, 1.35D);
    }
 
-   private double getLowSpeedAirflowAuthority(double forwardAirspeed, double stallSpeed) {
+   private double getForwardAirspeedStallSpeedRatio(double forwardAirspeed, double stallSpeed) {
       if(stallSpeed <= 1.0E-5D) {
+         this.lastAirflowAuthorityRaw = 1.0D;
          return 1.0D;
       }
 
       double speedRatio = MCH_FlightModel.clamp(forwardAirspeed / stallSpeed, 0.0D, 1.4D);
-      double shapedAuthority = speedRatio * speedRatio;
-      double emergencyAuthority = 0.04D + 0.06D * MCH_FlightModel.clamp(this.getThrustToWeightRatio(), 0.0D, 1.0D);
-      return MCH_FlightModel.clamp(Math.max(shapedAuthority, emergencyAuthority), 0.04D, 1.0D);
+      this.lastAirflowAuthorityRaw = speedRatio;
+      return speedRatio;
    }
 
    private double getUnsupportedClimbSeverity() {
@@ -661,6 +675,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    public double getStallSeverity() {
       return this.stallSeverity;
+   }
+
+   public double getDeepStallSeverity() {
+      return this.deepStallSeverity;
    }
 
    public double getSpeedStallSeverity() {
@@ -984,9 +1002,20 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       return this.lastPitchAuthority;
    }
 
+   public double getLastAirflowAuthorityRaw() {
+      return this.lastAirflowAuthorityRaw;
+   }
+
    public double getLastAirflowAuthority() {
       return this.lastAirflowAuthority;
    }
+
+   public double getLastStallAuthority() { return this.lastStallAuthority; }
+   public double getLastPitchUpAuthority() { return this.lastPitchUpAuthority; }
+   public double getLastPitchDownAuthority() { return this.lastPitchDownAuthority; }
+   public double getLastRollAuthority() { return this.lastRollAuthority; }
+   public double getLastYawAuthority() { return this.lastYawAuthority; }
+   public double getLastPilotPitchAngularVelocity() { return this.lastPilotPitchAngularVelocity; }
 
    public double getLastFinalPitchAuthority() {
       return this.lastFinalPitchAuthority;
@@ -1286,27 +1315,38 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double pitchAuthority = MCH_FlightModel.getCompressibilityPitchAuthority(pitchAuthoritySpeed,
             this.getCompressibilitySpeed(), this.getMaxSafeSpeed(), this.getPlaneInfo().compressibilityPitchPenalty);
       double stallSpeedForAuthority = MCH_FlightModel.getStallSpeed(planeInfo.stallSpeed, this.getMaxSpeed(), planeInfo.stallSpeedFactor);
-      double airflowAuthority = this.getLowSpeedAirflowAuthority(this.getForwardAirspeed(), stallSpeedForAuthority);
-      double noseDownAirflowAuthority = MCH_FlightModel.clamp(airflowAuthority + (1.0D - airflowAuthority) * 0.45D, 0.0D, 1.0D);
-      double pitchAirflowAuthority = pitch > 0.0F ? noseDownAirflowAuthority : airflowAuthority;
-      double finalPitchAuthority = (double)controlAuthority * pitchAuthority * pitchAirflowAuthority;
+      double speedRatio = this.getForwardAirspeedStallSpeedRatio(this.getForwardAirspeed(), stallSpeedForAuthority);
+      double severeStall = MCH_FlightModel.clamp(Math.max(this.stallSeverity, this.getInstantStallSeverity()), 0.0D, 1.0D);
+      double deepControlLoss = MCH_FlightModel.clamp(this.deepStallSeverity, 0.0D, 1.0D);
+      double softStallAuthority = MCH_FlightModel.clamp(1.0D - severeStall * 0.25D - deepControlLoss * 0.20D,
+            deepControlLoss > 0.75D ? 0.35D : 0.65D, 1.0D);
+      double pilotControlAuthority = planeInfo.newFlightDisableForwardAirspeedControlScaling
+            ? (double)controlAuthority
+            : (double)controlAuthority * softStallAuthority;
+      double finalPitchAuthority = pilotControlAuthority * pitchAuthority;
       this.lastControlAuthority = controlAuthority;
       this.lastPitchAuthority = pitchAuthority;
-      this.lastAirflowAuthority = airflowAuthority;
+      this.lastAirflowAuthority = pilotControlAuthority;
+      this.lastStallAuthority = softStallAuthority;
       this.lastRequestedPitchInput = pitch;
       this.lastNoseUpPitchSuppression = this.getNoseUpPitchSuppression();
+      double pitchUpLimiter = MCH_FlightModel.clamp(1.0D - this.lastNoseUpPitchSuppression * (0.35D + 0.25D * deepControlLoss),
+            deepControlLoss > 0.75D ? 0.35D : 0.55D, 1.0D);
       this.lastPitchAuthorityAfterSuppression = finalPitchAuthority;
       if(pitch < 0.0F && this.lastNoseUpPitchSuppression > 0.0D) {
-         finalPitchAuthority *= (1.0D - this.lastNoseUpPitchSuppression);
+         finalPitchAuthority *= pitchUpLimiter;
          this.lastPitchAuthorityAfterSuppression = finalPitchAuthority;
       }
       this.lastFinalPitchAuthority = finalPitchAuthority;
+      this.lastPitchUpAuthority = pitchUpLimiter;
+      this.lastPitchDownAuthority = (double)controlAuthority * pitchAuthority;
       pitch *= (float)finalPitchAuthority;
       this.lastPitchInputAfterAuthority = pitch;
-      double rollAirflowAuthority = 0.35D + 0.65D * airflowAuthority;
-      double yawAirflowAuthority = 0.45D + 0.55D * airflowAuthority;
-      roll *= controlAuthority * (float)rollAirflowAuthority;
-      yaw *= controlAuthority * (float)yawAirflowAuthority;
+      double deepAxisLimiter = MCH_FlightModel.clamp(1.0D - deepControlLoss * 0.25D, 0.70D, 1.0D);
+      this.lastRollAuthority = controlAuthority * deepAxisLimiter;
+      this.lastYawAuthority = controlAuthority * MCH_FlightModel.clamp(1.0D - deepControlLoss * 0.18D, 0.75D, 1.0D);
+      roll *= (float)this.lastRollAuthority;
+      yaw *= (float)this.lastYawAuthority;
 
       // The legacy controls above still define the requested angular rate.
       // Integrating that request as a damped body rate retains existing mobility
@@ -1318,6 +1358,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             info.rollTorque, info.rollDamping, info.inertiaMultiplier, partialTicks);
       this.yawAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.yawAngularVelocity, yaw,
             info.yawTorque, info.yawDamping, info.inertiaMultiplier, partialTicks);
+      this.lastPilotPitchAngularVelocity = this.pitchAngularVelocity;
       this.applyAerodynamicAngularMoments(partialTicks);
       this.lastFinalPitchAngularVelocity = this.pitchAngularVelocity;
       pitch = this.pitchAngularVelocity * partialTicks;
@@ -1698,11 +1739,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double criticalAoA = Math.max(1.0D, (double)info.criticalAoA);
       double excessAoA = MCH_FlightModel.clamp((aoa - criticalAoA * 0.55D) / criticalAoA, 0.0D, 2.0D);
       double lowSpeedAoADemand = lowEnergyNoseHigh * MCH_FlightModel.clamp(1.0D - forwardAirspeed / Math.max(0.05D, stallSpeed), 0.0D, 1.0D);
-      double aoaMoment = Math.max(excessAoA, lowSpeedAoADemand * 0.55D)
-            * (0.45D + 0.90D * Math.max(this.aoaStallSeverity, this.stallSeverity));
-      double stabilityMoment = noseUpAttitude * (0.18D + 0.42D * lowEnergyNoseHigh + 0.50D * this.deepStallSeverity);
+      boolean strongRecovery = aoa > criticalAoA || lowEnergyNoseHigh > 0.35D;
+      double aoaMoment = Math.max(excessAoA, strongRecovery ? lowSpeedAoADemand * 0.55D : lowSpeedAoADemand * 0.18D)
+            * (0.35D + 0.75D * Math.max(this.aoaStallSeverity, this.stallSeverity));
+      double stabilityMoment = noseUpAttitude * (strongRecovery
+            ? (0.14D + 0.34D * lowEnergyNoseHigh + 0.42D * this.deepStallSeverity)
+            : (0.04D + 0.10D * lowEnergyNoseHigh));
+      aoaMoment = MCH_FlightModel.clamp(aoaMoment, 0.0D, strongRecovery ? 1.35D : 0.32D);
+      stabilityMoment = MCH_FlightModel.clamp(stabilityMoment, 0.0D, strongRecovery ? 0.95D : 0.18D);
       double pitchMoment = (aoaMoment + stabilityMoment) * airflowScale * (0.35D + (double)info.stallPitchRecoveryStrength);
-      double contribution = MCH_FlightModel.clamp(pitchMoment * partialTicks * 0.28D, 0.0D, 1.25D);
+      double contribution = MCH_FlightModel.clamp(pitchMoment * partialTicks * 0.18D, 0.0D, strongRecovery ? 0.55D : 0.16D);
       if(contribution <= 1.0E-5D) {
          return;
       }

@@ -71,6 +71,8 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float newFlightThrottleControlAuthorityScale = 0.10F;
    /** Show the normalized 0-100% throttle readout to pilots using the new flight model. */
    public boolean newFlightThrottleHudDisplay = true;
+   /** Compatibility default: speed ratio remains telemetry/stall input, not a direct pilot-control multiplier. */
+   public boolean newFlightDisableForwardAirspeedControlScaling = true;
    /** Enables the new-flight-only combat-flap toggle. */
    public boolean newFlightCombatFlaps = true;
    public float newFlightCombatFlapLift = 0.120F;
@@ -361,6 +363,8 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.newFlightThrottleControlAuthorityScale = this.parseNewFlightFloat("NewFlightThrottleControlAuthorityScale", data, 0.0F, 1.0F);
          } else if(item.equalsIgnoreCase("NewFlightThrottleHudDisplay")) {
             this.newFlightThrottleHudDisplay = this.toBool(data);
+         } else if(item.equalsIgnoreCase("NewFlightDisableForwardAirspeedControlScaling")) {
+            this.newFlightDisableForwardAirspeedControlScaling = this.toBool(data);
          } else if(item.equalsIgnoreCase("NewFlightCombatFlaps")) {
             this.newFlightCombatFlaps = this.toBool(data);
          } else if(item.equalsIgnoreCase("NewFlightCombatFlapLift")) {
