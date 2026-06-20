@@ -1079,9 +1079,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.mouseAimGeneratedYawCommand = 0.0F;
          this.mouseAimGeneratedPitchCommand = 0.0F;
          this.mouseAimGeneratedRollCommand = 0.0F;
-         this.pitchAngularVelocity = 0.0D;
-         this.rollAngularVelocity = 0.0D;
-         this.yawAngularVelocity = 0.0D;
+         this.pitchAngularVelocity = 0.0F;
+         this.rollAngularVelocity = 0.0F;
+         this.yawAngularVelocity = 0.0F;
          this.lastFinalPitchAngularVelocity = 0.0D;
          this.lastRequestedPitchInput = 0.0F;
          this.lastPitchInputAfterAuthority = 0.0F;
