@@ -119,6 +119,7 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
          ac.initRotationYaw((float)(((MathHelper.floor_double((double)(rotationYaw * 4.0F / 360.0F) + 0.5D) & 3) - 1) * 90));
          AxisAlignedBB placementBox = ac.boundingBox.expand(-0.1D, -0.1D, -0.1D);
          List collisionBoxes = world.getCollidingBoundingBoxes(ac, placementBox);
+         removePlacementSupportCollisions(collisionBoxes, (double)y + 1.0D);
          if(!collisionBoxes.isEmpty()) {
             logPlacementDebug(world, "onTileClick blocked by collision: item=%s info=%s entity=%s pos=(%.3f,%.3f,%.3f) target=(%d,%d,%d) size=(%.3f,%.3f) bb=%s collisions=%s", getItemDebugName(itemStack), getInfoDebugName(), ac.getEntityName(), Double.valueOf(ac.posX), Double.valueOf(ac.posY), Double.valueOf(ac.posZ), Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z), Float.valueOf(ac.width), Float.valueOf(ac.height), formatAabb(placementBox), describeCollisionBoxes(collisionBoxes));
             return null;
@@ -487,6 +488,15 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
    private static String formatAabb(AxisAlignedBB bb) {
       return bb == null ? "null" : String.format("[%.3f,%.3f,%.3f -> %.3f,%.3f,%.3f]", new Object[]{Double.valueOf(bb.minX), Double.valueOf(bb.minY), Double.valueOf(bb.minZ), Double.valueOf(bb.maxX), Double.valueOf(bb.maxY), Double.valueOf(bb.maxZ)});
+   }
+
+   private static void removePlacementSupportCollisions(List boxes, double supportTopY) {
+      for(java.util.Iterator it = boxes.iterator(); it.hasNext();) {
+         AxisAlignedBB bb = (AxisAlignedBB)it.next();
+         if(bb.maxY <= supportTopY + 1.0E-4D) {
+            it.remove();
+         }
+      }
    }
 
    private static String describeCollisionBoxes(List boxes) {
