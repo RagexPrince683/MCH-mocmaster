@@ -69,8 +69,12 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `NewFlightCombatFlapDrag` | normalized drag coefficient [0..0.05] | 0.014 | **New flight model only.** Extra drag while combat flaps are deployed. |
 | `NewFlightCombatFlapControl` | normalized authority bonus [0..0.40] | 0.14 | **New flight model only.** Control-authority boost while combat flaps are deployed. |
 | `NewFlightCombatFlapOverspeed` | normalized multiplier [0.50..1] | 0.72 | **New flight model only.** Multiplier applied to `MaxSafeSpeed` while flaps are deployed; lower values punish high-speed flap use earlier. |
-| `NewPlaneCameraFocusOffsetX`, `NewPlaneCameraFocusOffsetY`, `NewPlaneCameraFocusOffsetZ` | local blocks | `0, 1, 0` | **New third-person camera/new flight model only.** Local-space visual focus point for the smooth chase camera, yaw-rotated from the aircraft entity origin so the camera follows the cockpit/center-of-mass area instead of model pivots such as propellers, noses, or tails. These values are visual only and do not change physics or balance. |
+| `NewPlaneCameraFocusOffsetX` | local blocks | 0 | **New third-person camera/new flight model only.** Local-space visual focus X coordinate for the smooth chase camera. Visual only; no physics effect. |
+| `NewPlaneCameraFocusOffsetY` | local blocks | 1 | **New third-person camera/new flight model only.** Local-space visual focus Y coordinate for the smooth chase camera. Visual only; no physics effect. |
+| `NewPlaneCameraFocusOffsetZ` | local blocks | 0 | **New third-person camera/new flight model only.** Local-space visual focus Z coordinate for the smooth chase camera. Visual only; no physics effect. |
 | `StallSpeed` | internal speed [0..2] | 0 | Absolute stall threshold; if 0, uses `max(0.05, topSpeed * StallSpeedFactor)`. |
+| `TimeUntilStallPastCriticalAoA` | seconds [0..8] | 1.20 | **New flight model only.** Seconds allowed at/past critical AoA before major AoA stall energy loss ramps fully. |
+| `TimeAfterStallUntilPitchDown` | seconds [0..8] | 1.00 | **New flight model only.** Seconds after a low-forward-energy stall before forced nose-down/falling recovery starts. |
 | `CriticalAoA` | degrees [5..30] | 14.40 | AoA in degrees where stall demand begins. |
 | `StallLiftLoss` | float[0..1] | 0.820 | Fraction of lift removed at full stall. |
 | `AoADragMultiplier` | multiplier [0..5] | 2.550 | Scales quadratic AoA drag. |
