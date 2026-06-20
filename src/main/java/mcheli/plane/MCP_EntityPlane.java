@@ -1303,7 +1303,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             MCH_FlightModel.getSpeedStallSeverity(horizontalSpeed, stallSpeed));
       this.aoaStallSeverity = MCH_FlightModel.getAoAStallSeverity(this.angleOfAttack, this.getPlaneInfo().criticalAoA);
       double noseUpAttitude = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 60.0D, 0.0D, 1.0D);
-      if(this.aoaStallSeverity > 0.0D) {
+      boolean airborneForStall = !super.onGround && MCH_Lib.getBlockIdY(this, 3, -5) == 0;
+      if(airborneForStall && this.aoaStallSeverity > 0.0D) {
          this.timePastCriticalAoA = MCH_FlightModel.clamp(this.timePastCriticalAoA + 0.05D, 0.0D, 30.0D);
       } else {
          this.timePastCriticalAoA = Math.max(0.0D, this.timePastCriticalAoA - 0.10D);
@@ -1315,14 +1316,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double speedHeadroom = MCH_FlightModel.clamp(forwardAirspeed / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.0D);
       double exposureGain = this.aoaStallSeverity * aoADelayFactor * (0.018D + 0.052D * noseUpAttitude)
             * (1.20D - 0.55D * thrustSupport) * (1.10D - 0.35D * speedHeadroom);
-      exposureGain += this.speedStallSeverity * Math.max(noseUpAttitude, 0.35D) * 0.030D;
-      double exposureDecay = this.aoaStallSeverity <= 0.0D && this.speedStallSeverity < 0.25D ? 0.070D : 0.018D * thrustSupport;
+      if(!airborneForStall || this.aoaStallSeverity <= 0.0D) {
+         exposureGain = 0.0D;
+      }
+      double exposureDecay = !airborneForStall || this.aoaStallSeverity <= 0.0D ? 0.070D : 0.018D * thrustSupport;
       this.highAoAStallExposure = MCH_FlightModel.clamp(this.highAoAStallExposure + exposureGain - exposureDecay, 0.0D, 2.0D);
       double exposureThreshold = 0.32D + 0.62D * thrustSupport + 0.28D * speedHeadroom;
       this.deepStallSeverity = MCH_FlightModel.clamp((this.highAoAStallExposure - exposureThreshold) / 0.65D, 0.0D, 1.0D);
       double delayedAoASeverity = this.aoaStallSeverity * aoADelayFactor
-            * Math.max(this.deepStallSeverity, this.speedStallSeverity * 0.55D);
-      double demand = Math.max(this.speedStallSeverity, delayedAoASeverity);
+            * Math.max(this.deepStallSeverity, 0.35D);
+      double demand = airborneForStall ? delayedAoASeverity : 0.0D;
       this.stallDemand = demand;
       double recoverySpeed = this.getPlaneInfo().stallRecoverySpeed > 0.0F
             ? (double)this.getPlaneInfo().stallRecoverySpeed : stallSpeed * 1.2D;
@@ -1338,8 +1341,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
 
       double lowEnergyThreshold = recoverySpeed * 0.75D;
-      boolean lowEnergyStall = this.stalling && forwardAirspeed < lowEnergyThreshold
-            && (this.stallSeverity > 0.45D || this.speedStallSeverity > 0.45D || this.deepStallSeverity > 0.35D);
+      boolean lowEnergyStall = airborneForStall && this.stalling && forwardAirspeed < lowEnergyThreshold
+            && (this.stallSeverity > 0.45D || this.aoaStallSeverity > 0.45D || this.deepStallSeverity > 0.35D);
       if(lowEnergyStall) {
          this.timeAfterLowEnergyStall = MCH_FlightModel.clamp(this.timeAfterLowEnergyStall + 0.05D, 0.0D, 30.0D);
       } else {
@@ -1421,9 +1424,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double liftAirspeed = Math.min(usableForwardAirspeed, horizontalSpeed);
       double recoverySpeed = info.stallRecoverySpeed > 0.0F ? (double)info.stallRecoverySpeed : stallSpeed * 1.2D;
       double airspeedLift = MCH_FlightModel.clamp((liftAirspeed - stallSpeed * 0.45D) / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.25D);
-      if(liftAirspeed < stallSpeed) {
-         airspeedLift *= MCH_FlightModel.clamp(liftAirspeed / Math.max(0.05D, stallSpeed), 0.0D, 1.0D);
-      }
       double aoaExcess = Math.max(0.0D, Math.abs(this.angleOfAttack) - (double)info.criticalAoA);
       double preStallAoALift = MCH_FlightModel.clamp(1.0D - aoaExcess / Math.max(1.0D, (double)info.criticalAoA * 2.5D), 0.35D, 1.0D);
       double aoaLift = preStallAoALift * (1.0D - this.deepStallSeverity * 0.85D);
@@ -1438,8 +1438,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftCoefficient = aoaLift * stallLift;
       double mass = this.getPhysicalMass();
       double weightForce = gravityAccel * mass;
-      double lowSpeedLiftLoss = MCH_FlightModel.clamp(1.0D - liftAirspeed / Math.max(0.05D, recoverySpeed), 0.0D, 1.0D);
-      double positiveLiftAvailability = 1.0D - MCH_FlightModel.clamp(Math.max(lowSpeedLiftLoss, this.speedStallSeverity)
+      boolean isDeepStalled = this.stalling && (this.deepStallSeverity > 0.35D || this.timeAfterLowEnergyStall > 0.0D);
+      double lowSpeedLiftLoss = isDeepStalled
+            ? MCH_FlightModel.clamp(1.0D - liftAirspeed / Math.max(0.05D, recoverySpeed), 0.0D, 1.0D) : 0.0D;
+      double positiveLiftAvailability = 1.0D - MCH_FlightModel.clamp(lowSpeedLiftLoss
             * Math.max(0.45D, this.stallSeverity), 0.0D, 0.95D);
       double liftBeforeStallLoss = weightForce * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D) * airspeedLift * aoaLift
             * positiveLiftAvailability;
@@ -1448,7 +1450,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double netAccel = (liftForce - weightForce) / mass;
 
       super.motionY += netAccel;
-      if(super.motionY > 0.0D && (liftAirspeed < stallSpeed || this.stallSeverity > 0.35D || this.deepStallSeverity > 0.35D)) {
+      if(super.motionY > 0.0D && isDeepStalled) {
          double climbDamping = Math.max(MCH_FlightModel.clamp((stallSpeed - liftAirspeed) / Math.max(0.05D, stallSpeed), 0.0D, 1.0D),
                Math.max(this.stallSeverity, this.deepStallSeverity) * 0.75D);
          super.motionY *= 1.0D - MCH_FlightModel.clamp(climbDamping * 0.42D, 0.0D, 0.85D);
@@ -1635,8 +1637,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastEnergyDeficitSeverity = MCH_FlightModel.clamp(Math.max(maneuverDeficit, Math.max(specificDeficit, powerDeficit))
             * Math.max(noseUp, MCH_FlightModel.clamp(super.motionY / 0.18D, 0.0D, 1.0D)), 0.0D, 1.0D);
       this.lastEnergyUnsupportedClimb = this.lastEnergyDeficitSeverity > 0.15D && (noseUp > 0.10D || super.motionY > 0.02D);
-      this.lastEnergyForcedRecovery = this.lastEnergyDeficitSeverity > 0.65D
-            || (noseUp > 0.35D && 0.5D * usableSpeedSq < recoverySpecificEnergy && this.getPropulsiveEngineThrottle() < 0.25D);
+      boolean isDeepStalled = this.stalling && (this.deepStallSeverity > 0.35D || this.timeAfterLowEnergyStall > 0.0D);
+      this.lastEnergyForcedRecovery = isDeepStalled && (this.lastEnergyDeficitSeverity > 0.65D
+            || (noseUp > 0.35D && 0.5D * usableSpeedSq < recoverySpecificEnergy && this.getPropulsiveEngineThrottle() < 0.25D));
       return MCH_FlightModel.clamp(drag + this.lastEnergyDeficitSeverity * (0.045D + 0.10D * noseUp), 0.0D, 0.5D);
    }
 
@@ -2540,9 +2543,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          double usableForwardEnergySpeed = Math.min(Math.max(0.0D, this.getForwardAirspeed()), postEnergyHorizontalSpeed);
          double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
                this.getPlaneInfo().stallSpeedFactor);
-         if(super.motionY > 0.0D) {
+         boolean isDeepStalled = this.stalling && (this.deepStallSeverity > 0.35D || this.timeAfterLowEnergyStall > 0.0D);
+         if(super.motionY > 0.0D && isDeepStalled) {
             double lowEnergyClimb = Math.max(MCH_FlightModel.clamp((stallSpeed - usableForwardEnergySpeed) / Math.max(0.05D, stallSpeed), 0.0D, 1.0D),
-                  Math.max(this.lastEnergyDeficitSeverity, this.speedStallSeverity));
+                  Math.max(this.lastEnergyDeficitSeverity, this.deepStallSeverity));
             if(lowEnergyClimb > 0.0D) {
                double climbBleed = MCH_FlightModel.clamp(lowEnergyClimb * (0.28D + 0.42D * noseHighPitch), 0.0D, 0.90D);
                super.motionY *= 1.0D - climbBleed;
