@@ -1076,8 +1076,28 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       float ac_yaw = this.getRotYaw();
       float ac_roll = this.getRotRoll();
       if(this.isFreeLookMode()) {
-         y = 0.0F;
-         x = 0.0F;
+         this.mouseAimGeneratedYawCommand = 0.0F;
+         this.mouseAimGeneratedPitchCommand = 0.0F;
+         this.mouseAimGeneratedRollCommand = 0.0F;
+         this.pitchAngularVelocity = 0.0D;
+         this.rollAngularVelocity = 0.0D;
+         this.yawAngularVelocity = 0.0D;
+         this.lastFinalPitchAngularVelocity = 0.0D;
+         this.lastRequestedPitchInput = 0.0F;
+         this.lastPitchInputAfterAuthority = 0.0F;
+         this.lastControlAuthority = this.getControlAuthorityFactor();
+         this.lastPitchAuthority = 1.0D;
+         this.lastPitchAuthorityAfterSuppression = 1.0D;
+         this.lastNoseUpPitchSuppression = 0.0D;
+         this.addkeyRotValue = 0.0F;
+         this.prevRotationRoll = this.getRotRoll();
+         super.prevRotationPitch = this.getRotPitch();
+         if(this.getRidingEntity() == null) {
+            super.prevRotationYaw = this.getRotYaw();
+         }
+
+         player.setAngles(deltaX, deltaY);
+         return;
       }
 
       boolean useMouseAim = this.shouldUseMouseAimControls(player);
@@ -1742,11 +1762,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                }
             }
 
-            if(super.moveLeft && !super.moveRight) {
+            if(!this.isFreeLookMode() && super.moveLeft && !super.moveRight) {
                this.setRotYaw(this.getRotYaw() - 0.6F * rot * partialTicks);
             }
 
-            if(super.moveRight && !super.moveLeft) {
+            if(!this.isFreeLookMode() && super.moveRight && !super.moveLeft) {
                this.setRotYaw(this.getRotYaw() + 0.6F * rot * partialTicks);
             }
          }
