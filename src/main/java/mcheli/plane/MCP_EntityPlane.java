@@ -1265,7 +1265,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             info.rollTorque, info.rollDamping, info.inertiaMultiplier, partialTicks);
       this.yawAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.yawAngularVelocity, yaw,
             info.yawTorque, info.yawDamping, info.inertiaMultiplier, partialTicks);
-      this.applyContinuousPitchStabilityMoment(partialTicks);
+      this.applyAerodynamicAngularMoments(partialTicks);
       this.lastFinalPitchAngularVelocity = this.pitchAngularVelocity;
       pitch = this.pitchAngularVelocity * partialTicks;
       roll = this.rollAngularVelocity * partialTicks;
@@ -1590,6 +1590,29 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftAcceleration = Math.max(this.lastLiftAcceleration, liftAccel);
    }
 
+
+   private void applyAerodynamicAngularMoments(float partialTicks) {
+      this.applyContinuousPitchStabilityMoment(partialTicks);
+      this.applyStallInstabilityAngularMoment(partialTicks);
+   }
+
+   private void applyStallInstabilityAngularMoment(float partialTicks) {
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      if(!this.useNewMobilitySystem() || info == null || this.getNozzleRotation() > 0.01F
+            || super.onGround || this.stallSeverity <= 0.0D) {
+         return;
+      }
+
+      double phase = (double)(super.ticksExisted + this.getEntityId() * 13) * 0.37D;
+      double buffet = Math.sin(phase) * (double)info.stallInstability * this.stallSeverity;
+      double wingDrop = ((this.getEntityId() & 1) == 0 ? 1.0D : -1.0D)
+            * (double)info.stallInstability * this.stallSeverity;
+      double instabilityScale = MCH_FlightModel.clamp(Math.max(this.stallSeverity, this.aoaStallSeverity), 0.0D, 1.0D);
+
+      // Stall buffet/wing-drop is an aerodynamic moment, not a direct attitude snap.
+      this.rollAngularVelocity += (float)((wingDrop * 0.08D + buffet * 0.04D) * instabilityScale * partialTicks);
+      this.yawAngularVelocity += (float)(buffet * 0.02D * instabilityScale * partialTicks);
+   }
 
    private void applyContinuousPitchStabilityMoment(float partialTicks) {
       this.lastPitchMoment = 0.0D;
@@ -2727,12 +2750,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)this.getPlaneInfo().stallLiftLoss, 0.0D, 1.0D);
          this.lastLiftLoss = liftLoss;
 
-         double phase = (double)(super.ticksExisted + this.getEntityId() * 13) * 0.37D;
-         double buffet = Math.sin(phase) * (double)this.getPlaneInfo().stallInstability * this.stallSeverity;
-         double wingDrop = ((this.getEntityId() & 1) == 0 ? 1.0D : -1.0D)
-               * (double)this.getPlaneInfo().stallInstability * this.stallSeverity;
-         this.setRotRoll(this.getRotRoll() + (float)(wingDrop * 0.08D + buffet * 0.04D));
-         this.setRotYaw(this.getRotYaw() + (float)(buffet * 0.02D));
+         // Stall buffet and wing-drop are applied in the attitude update as angular moments
+         // so pilot input and aerodynamic instability fight through the same body-rate path.
 
          double aerodynamicDemand = Math.max(this.stallDemand, Math.max(this.speedStallSeverity, this.aoaStallSeverity));
          double noseUpAttitude = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 45.0D, 0.0D, 1.0D);
