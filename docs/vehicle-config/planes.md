@@ -64,6 +64,7 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `NewFlightLowThrottleLiftRetention` | float[0..1] | 0.700 | **New flight model only.** Retains this fraction of the legacy throttle-coupled vertical support at idle so lift does not vanish immediately when throttle is chopped. Stall is still driven by airspeed/AoA. |
 | `NewFlightThrottleControlAuthorityScale` | float[0..1] | 0.10 | **New flight model only.** Maximum control-authority penalty at idle. Keep low so glide/landing controls remain useful. |
 | `NewFlightThrottleHudDisplay` | boolean | true | **New flight model only.** Shows pilot HUD text like `THR 85%`. Legacy HUDs are unchanged for planes that do not opt in. |
+| `NewFlightDisableForwardAirspeedControlScaling` | boolean | true | **New flight model only.** Compatibility switch that keeps `forwardAirspeed / StallSpeed` as stall/energy telemetry instead of a direct pilot-control multiplier. Leave true unless intentionally testing experimental control scaling. |
 | `NewFlightCombatFlaps` | boolean | true | **New flight model only.** Enables the combat-flap toggle on the Extra key. Inactive on legacy planes even if present. |
 | `NewFlightCombatFlapLift` | normalized lift bonus [0..0.30] | 0.120 | **New flight model only.** Added low-speed lift/support and induced-load contribution while combat flaps are deployed. |
 | `NewFlightCombatFlapDrag` | normalized drag coefficient [0..0.05] | 0.014 | **New flight model only.** Extra drag while combat flaps are deployed. |

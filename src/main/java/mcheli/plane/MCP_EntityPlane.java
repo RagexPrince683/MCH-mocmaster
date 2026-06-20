@@ -156,7 +156,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastAirflowAuthority;
    /** Last stall/high-G/flap authority multiplier shared by pilot controls. */
    private double lastStallAuthority;
-   /** Last pitch-up authority multiplier after energy-specific suppression. */
+   /** Last pitch-up limiter from energy-specific suppression; excludes shared control authority. */
    private double lastPitchUpAuthority;
    /** Last pitch-down authority multiplier, kept higher for recovery. */
    private double lastPitchDownAuthority;
@@ -551,28 +551,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             * flapAuthority, 0.05D, 1.35D);
    }
 
-   private double getLowSpeedAirflowAuthority(double forwardAirspeed, double stallSpeed) {
+   private double getForwardAirspeedStallSpeedRatio(double forwardAirspeed, double stallSpeed) {
       if(stallSpeed <= 1.0E-5D) {
+         this.lastAirflowAuthorityRaw = 1.0D;
          return 1.0D;
       }
 
       double speedRatio = MCH_FlightModel.clamp(forwardAirspeed / stallSpeed, 0.0D, 1.4D);
       this.lastAirflowAuthorityRaw = speedRatio;
-      double authority;
-      if(speedRatio >= 1.0D) {
-         authority = 0.92D + 0.08D * MCH_FlightModel.clamp((speedRatio - 1.0D) / 0.4D, 0.0D, 1.0D);
-      } else if(speedRatio >= 0.7D) {
-         double t = (speedRatio - 0.7D) / 0.3D;
-         authority = 0.62D + 0.30D * t;
-      } else if(speedRatio >= 0.4D) {
-         double t = (speedRatio - 0.4D) / 0.3D;
-         authority = 0.28D + 0.34D * t;
-      } else {
-         double t = speedRatio / 0.4D;
-         authority = 0.18D + 0.10D * t;
-      }
-      double emergencyAuthority = 0.08D + 0.10D * MCH_FlightModel.clamp(this.getThrustToWeightRatio(), 0.0D, 1.0D);
-      return MCH_FlightModel.clamp(Math.max(authority, emergencyAuthority), 0.08D, 1.0D);
+      return speedRatio;
    }
 
    private double getUnsupportedClimbSeverity() {
@@ -688,6 +675,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    public double getStallSeverity() {
       return this.stallSeverity;
+   }
+
+   public double getDeepStallSeverity() {
+      return this.deepStallSeverity;
    }
 
    public double getSpeedStallSeverity() {
@@ -1324,30 +1315,36 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double pitchAuthority = MCH_FlightModel.getCompressibilityPitchAuthority(pitchAuthoritySpeed,
             this.getCompressibilitySpeed(), this.getMaxSafeSpeed(), this.getPlaneInfo().compressibilityPitchPenalty);
       double stallSpeedForAuthority = MCH_FlightModel.getStallSpeed(planeInfo.stallSpeed, this.getMaxSpeed(), planeInfo.stallSpeedFactor);
-      double airflowAuthority = this.getLowSpeedAirflowAuthority(this.getForwardAirspeed(), stallSpeedForAuthority);
-      double noseDownAirflowAuthority = MCH_FlightModel.clamp(airflowAuthority + (1.0D - airflowAuthority) * 0.65D, 0.0D, 1.0D);
-      double pitchAirflowAuthority = pitch > 0.0F ? noseDownAirflowAuthority : airflowAuthority;
-      double finalPitchAuthority = (double)controlAuthority * pitchAuthority * pitchAirflowAuthority;
+      double speedRatio = this.getForwardAirspeedStallSpeedRatio(this.getForwardAirspeed(), stallSpeedForAuthority);
+      double severeStall = MCH_FlightModel.clamp(Math.max(this.stallSeverity, this.getInstantStallSeverity()), 0.0D, 1.0D);
+      double deepControlLoss = MCH_FlightModel.clamp(this.deepStallSeverity, 0.0D, 1.0D);
+      double softStallAuthority = MCH_FlightModel.clamp(1.0D - severeStall * 0.25D - deepControlLoss * 0.20D,
+            deepControlLoss > 0.75D ? 0.35D : 0.65D, 1.0D);
+      double pilotControlAuthority = planeInfo.newFlightDisableForwardAirspeedControlScaling
+            ? (double)controlAuthority
+            : (double)controlAuthority * softStallAuthority;
+      double finalPitchAuthority = pilotControlAuthority * pitchAuthority;
       this.lastControlAuthority = controlAuthority;
       this.lastPitchAuthority = pitchAuthority;
-      this.lastAirflowAuthority = airflowAuthority;
-      this.lastStallAuthority = controlAuthority;
+      this.lastAirflowAuthority = pilotControlAuthority;
+      this.lastStallAuthority = softStallAuthority;
       this.lastRequestedPitchInput = pitch;
       this.lastNoseUpPitchSuppression = this.getNoseUpPitchSuppression();
+      double pitchUpLimiter = MCH_FlightModel.clamp(1.0D - this.lastNoseUpPitchSuppression * (0.35D + 0.25D * deepControlLoss),
+            deepControlLoss > 0.75D ? 0.35D : 0.55D, 1.0D);
       this.lastPitchAuthorityAfterSuppression = finalPitchAuthority;
       if(pitch < 0.0F && this.lastNoseUpPitchSuppression > 0.0D) {
-         finalPitchAuthority *= (1.0D - this.lastNoseUpPitchSuppression);
+         finalPitchAuthority *= pitchUpLimiter;
          this.lastPitchAuthorityAfterSuppression = finalPitchAuthority;
       }
       this.lastFinalPitchAuthority = finalPitchAuthority;
-      this.lastPitchUpAuthority = pitch < 0.0F ? finalPitchAuthority : (double)controlAuthority * pitchAuthority * airflowAuthority;
-      this.lastPitchDownAuthority = pitch > 0.0F ? finalPitchAuthority : (double)controlAuthority * pitchAuthority * noseDownAirflowAuthority;
+      this.lastPitchUpAuthority = pitchUpLimiter;
+      this.lastPitchDownAuthority = (double)controlAuthority * pitchAuthority;
       pitch *= (float)finalPitchAuthority;
       this.lastPitchInputAfterAuthority = pitch;
-      double rollAirflowAuthority = 0.55D + 0.45D * airflowAuthority;
-      double yawAirflowAuthority = 0.60D + 0.40D * airflowAuthority;
-      this.lastRollAuthority = controlAuthority * rollAirflowAuthority;
-      this.lastYawAuthority = controlAuthority * yawAirflowAuthority;
+      double deepAxisLimiter = MCH_FlightModel.clamp(1.0D - deepControlLoss * 0.25D, 0.70D, 1.0D);
+      this.lastRollAuthority = controlAuthority * deepAxisLimiter;
+      this.lastYawAuthority = controlAuthority * MCH_FlightModel.clamp(1.0D - deepControlLoss * 0.18D, 0.75D, 1.0D);
       roll *= (float)this.lastRollAuthority;
       yaw *= (float)this.lastYawAuthority;
 

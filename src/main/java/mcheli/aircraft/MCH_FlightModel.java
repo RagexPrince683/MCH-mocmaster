@@ -133,18 +133,7 @@ public final class MCH_FlightModel {
    /** Control surfaces lose authority progressively as the stall develops. */
    public static double getControlAuthority(double stallSeverity) {
       double severity = clamp(stallSeverity, 0.0D, 1.0D);
-      double normalFloor = 0.28D;
-      double stallFloor = 0.18D;
-      double deepStallFloor = 0.08D;
-      if(severity < 0.65D) {
-         return clamp(1.0D - severity * 0.72D, normalFloor, 1.0D);
-      }
-      if(severity < 0.9D) {
-         double t = (severity - 0.65D) / 0.25D;
-         return clamp(normalFloor + (stallFloor - normalFloor) * t, stallFloor, normalFloor);
-      }
-      double t = (severity - 0.9D) / 0.1D;
-      return clamp(stallFloor + (deepStallFloor - stallFloor) * t, deepStallFloor, stallFloor);
+      return clamp(1.0D - severity * 0.75D, 0.25D, 1.0D);
    }
 
    /** Additional fractional drag caused by presenting the airframe to the airflow. */
