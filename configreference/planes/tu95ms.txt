@@ -38,14 +38,14 @@ NewFlightThrottleHudDisplay = true
 NewFlightCombatFlaps = false
 FlightCeiling = 12000
 FlightCeilingRange = 72
-StallSpeed = 0.444
+StallSpeed = 0.330
 CriticalAoA = 13.20
 TimeUntilStallPastCriticalAoA = 1.55
 TimeAfterStallUntilPitchDown = 1.30
 StallLiftLoss = 0.740
 AoADragMultiplier = 2.850
 StallInstability = 0.340
-StallRecoverySpeed = 0.657
+StallRecoverySpeed = 0.468
 StallSpeedFactor = 0.19
 StallStrength = 0.95
 DiveSpeedMultiplier = 1.14
@@ -87,9 +87,9 @@ HUD = planesu24, plane_gnrsu24
 
 AddPartCanopy   =  0.000, 0.000, 0.000,  0,0,0, 0
 
-MobilityYaw = 0.294
-MobilityPitch = 0.331
-MobilityRoll = 0.216
+MobilityYaw = 0.338
+MobilityPitch = 0.381
+MobilityRoll = 0.248
 
 AddSeat = 0.4,  4.1094,  1.2
 

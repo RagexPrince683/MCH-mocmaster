@@ -15,7 +15,7 @@ UseNewMobilitySystem = true
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 2.100
-EngineThrust = 1.820
+EngineThrust = 2.310
 NewFlightGravity = 0.0082
 NewFlightThrottleResponse = 1.100
 NewFlightThrottleChangeRateUp = 0.0056
@@ -32,14 +32,14 @@ NewFlightCombatFlapControl = 0.150
 NewFlightCombatFlapOverspeed = 0.720
 FlightCeiling = 13700
 FlightCeilingRange = 60
-StallSpeed = 0.348
+StallSpeed = 0.297
 CriticalAoA = 14.60
 TimeUntilStallPastCriticalAoA = 1.25
 TimeAfterStallUntilPitchDown = 1.05
 StallLiftLoss = 0.820
 AoADragMultiplier = 2.650
 StallInstability = 0.480
-StallRecoverySpeed = 0.487
+StallRecoverySpeed = 0.422
 StallSpeedFactor = 0.18
 StallStrength = 1.12
 DiveSpeedMultiplier = 1.28

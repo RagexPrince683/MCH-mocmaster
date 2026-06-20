@@ -23,14 +23,14 @@ NewFlightThrottleHudDisplay = true
 NewFlightCombatFlaps = false
 FlightCeiling = 15000
 FlightCeilingRange = 72
-StallSpeed = 0.761
+StallSpeed = 0.611
 CriticalAoA = 14.20
 TimeUntilStallPastCriticalAoA = 0.90
 TimeAfterStallUntilPitchDown = 0.85
 StallLiftLoss = 0.840
 AoADragMultiplier = 2.550
 StallInstability = 0.500
-StallRecoverySpeed = 1.058
+StallRecoverySpeed = 0.867
 StallSpeedFactor = 0.21
 StallStrength = 1.18
 DiveSpeedMultiplier = 1.24
@@ -96,9 +96,9 @@ HUD = plane
 ;early modern light plane (late jet), AOW3 style (only AA)
 AddRecipe = "ABC", "DEG", "   ", A, mcheli:airframe, B, mcheli:basicmechanicparts, C, mcheli:engine1, D, mcheli:wheelair, E, mcheli:cannon1, G, mcheli:electronics 
 
-MobilityYaw = 1.002
-MobilityPitch = 1.271
-MobilityRoll = 1.544
+MobilityYaw = 1.082
+MobilityPitch = 1.373
+MobilityRoll = 1.668
 
 AddTexture = f-104-2
 ;AddTexture = f-104-de

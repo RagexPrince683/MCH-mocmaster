@@ -52,14 +52,14 @@ NewFlightCombatFlapControl = 0.130
 NewFlightCombatFlapOverspeed = 0.780
 FlightCeiling = 20000
 FlightCeilingRange = 76
-StallSpeed = 0.720
+StallSpeed = 0.660
 CriticalAoA = 16.80
 TimeUntilStallPastCriticalAoA = 0.90
 TimeAfterStallUntilPitchDown = 0.85
 StallLiftLoss = 0.820
 AoADragMultiplier = 2.400
 StallInstability = 0.440
-StallRecoverySpeed = 0.950
+StallRecoverySpeed = 0.937
 StallSpeedFactor = 0.18
 StallStrength = 1.15
 DiveSpeedMultiplier = 1.28
@@ -76,7 +76,7 @@ ControlSurfaceDrag = 0.0035
 MaxLevelSpeed = 4
 IdleDrag = 0.0034
 
-MobilityYaw = 1.543
+MobilityYaw = 1.666
 PitchTorque = 0.500
 RollTorque = 0.580
 YawTorque = 0.360
@@ -87,8 +87,8 @@ InertiaMultiplier = 1.080
 ThrottleAcceleration = 0.042
 EngineDrag = 0.009
 
-MobilityRoll = 2.333
-MobilityPitch = 1.946
+MobilityRoll = 2.520
+MobilityPitch = 2.102
 
 HUD = plane
 
