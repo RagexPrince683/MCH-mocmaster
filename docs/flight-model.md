@@ -41,7 +41,6 @@ This document is the audit and user-facing reference for the fixed-wing `EnableR
 | `NewFlightEngineBrakeDrag` | Closed-throttle braking | Added to energy drag | Unitless gameplay tuning; documented |
 | `NewFlightLowThrottleLiftRetention` | Lift retained at idle | Fraction blended into lift power | Percent/fraction; documented |
 | `NewFlightThrottleControlAuthorityScale` | Control loss at idle | Fraction of authority removed | Percent/fraction; documented |
-| `NewFlightIdleNoseUpLimit` | Idle climb pitch guard | Clamps nose-up pitch below recovery speed | degrees |
 | `NewFlightThrottleHudDisplay` | HUD behavior | Shows normalized throttle | boolean |
 | `NewFlightCombatFlaps` | Enables combat flap toggle | Gates flap lift/drag/control effects | boolean |
 | `NewFlightCombatFlapLift` | Added low-speed lift when flaps deployed | Adds to lift power and takeoff helper | Unitless gameplay tuning; documented |
@@ -88,7 +87,6 @@ TimeUntilStallPastCriticalAoA = 1.2
 TimeAfterStallUntilPitchDown = 1.0
 MaxComfortableG = 7.5
 MaxStructuralG = 8.5
-NewFlightIdleNoseUpLimit = 38
 ```
 
 Legacy aliases (`PhysicalMass`, `EngineThrust`, `MaxLevelSpeed`, `StallSpeed`, `StallRecoverySpeed`, `CompressibilitySpeed`, `MaxSafeSpeed`) still load to preserve existing packs.
