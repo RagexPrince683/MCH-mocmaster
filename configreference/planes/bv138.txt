@@ -25,14 +25,11 @@ MobilityYawOnGround = 1.5
 Category = MP/LRR
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-NewPlaneCameraFocusOffsetX = -0.540
-NewPlaneCameraFocusOffsetY = 0.850
-NewPlaneCameraFocusOffsetZ = 2.450
-# New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.350
 EngineThrust = 1.002
+TakeoffDistanceMultiplier = 0.78
 NewFlightGravity = 0.0082
 NewFlightThrottleResponse = 1.150
 NewFlightThrottleChangeRateUp = 0.0038
@@ -64,6 +61,8 @@ OverspeedDamageRate = 0.12
 BaseDrag = 0.0027
 InducedDrag = 0.017
 ControlSurfaceDrag = 0.0065
+ClimbEnergyLoss = 0.018
+DiveEnergyGain = 0.012
 MaxLevelSpeed = 0.476
 IdleDrag = 0.0055
 

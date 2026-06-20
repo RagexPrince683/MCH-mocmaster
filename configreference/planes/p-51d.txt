@@ -6,13 +6,11 @@ MaxHp = 100
 Speed = 1.08
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-NewPlaneCameraFocusOffsetX = 0.000
-NewPlaneCameraFocusOffsetY = 2.250
-NewPlaneCameraFocusOffsetZ = -1.820
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 0.950
 EngineThrust = 1.034
+TakeoffDistanceMultiplier = 0.88
 NewFlightGravity = 0.0080
 NewFlightThrottleResponse = 0.920
 NewFlightThrottleChangeRateUp = 0.0072
@@ -27,8 +25,6 @@ NewFlightCombatFlapLift = 0.145
 NewFlightCombatFlapDrag = 0.016
 NewFlightCombatFlapControl = 0.190
 NewFlightCombatFlapOverspeed = 0.680
-
-# New-flight internal energy model tuning
 FlightCeiling = 12800
 FlightCeilingRange = 56
 StallSpeed = 0.249
@@ -50,6 +46,8 @@ OverspeedDamageRate = 0.12
 BaseDrag = 0.0023
 InducedDrag = 0.013
 ControlSurfaceDrag = 0.0045
+ClimbEnergyLoss = 0.014
+DiveEnergyGain = 0.0095
 MaxLevelSpeed = 1.037
 IdleDrag = 0.0055
 

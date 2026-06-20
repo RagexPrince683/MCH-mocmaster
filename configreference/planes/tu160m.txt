@@ -1,6 +1,6 @@
 DisplayName = Tu-160M Super Blackjack Conventional Bombs
 AddDisplayName = en_US, Tu-160M Super Blackjack Conventional Bombs
-AddDisplayName =  zh_CN, Tu-160M Blackjack Conventional Bombs
+AddDisplayName =  zh_CN, 图-160M 超级海盗旗 Conventional Bombs
 ItemID = 30714
 MaxHp = 250
 EnableNightVision = true
@@ -42,14 +42,11 @@ enableback = true
 Category = SSHB
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-NewPlaneCameraFocusOffsetX = 0.660
-NewPlaneCameraFocusOffsetY = 5.650
-NewPlaneCameraFocusOffsetZ = 5.760
-# New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 5.200
 EngineThrust = 6.14
+TakeoffDistanceMultiplier = 0.78
 NewFlightGravity = 0.0086
 NewFlightThrottleResponse = 1.150
 NewFlightThrottleChangeRateUp = 0.0038
@@ -81,6 +78,8 @@ OverspeedDamageRate = 0.18
 BaseDrag = 0.0022
 InducedDrag = 0.017
 ControlSurfaceDrag = 0.0065
+ClimbEnergyLoss = 0.018
+DiveEnergyGain = 0.012
 MaxLevelSpeed = 3.554
 IdleDrag = 0.0040
 
@@ -136,7 +135,7 @@ AddWeapon = odab9000, 0.0, 4.0, -7.0, 0.0, 0.0, true, 2
 ;1
 
 AddWeapon = tu160rbk500umpk16, 0.0, 4.0, -30.0, 0.0, 0.0, true, 2, 0,-90,90, -5,90
-;8
+;8 
 AddWeapon = tu160fab3000umpk4, 0.0, 4.0, -30.0, 0.0, 0.0, true, 2, 0,-90,90, -5,90
 ;2
 

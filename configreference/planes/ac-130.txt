@@ -30,14 +30,11 @@ RotorSpeed = 500.0
 Category = GAA/CASG
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-NewPlaneCameraFocusOffsetX = 0.650
-NewPlaneCameraFocusOffsetY = 2.680
-NewPlaneCameraFocusOffsetZ = 2.000
-# New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 4.200
 EngineThrust = 4.62
+TakeoffDistanceMultiplier = 0.76
 NewFlightGravity = 0.0088
 NewFlightThrottleResponse = 1.120
 NewFlightThrottleChangeRateUp = 0.0038
@@ -69,6 +66,8 @@ OverspeedDamageRate = 0.18
 BaseDrag = 0.0030
 InducedDrag = 0.016
 ControlSurfaceDrag = 0.0065
+ClimbEnergyLoss = 0.018
+DiveEnergyGain = 0.013
 MaxLevelSpeed = 0.948
 IdleDrag = 0.0040
 

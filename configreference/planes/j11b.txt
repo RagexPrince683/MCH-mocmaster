@@ -1,6 +1,6 @@
 DisplayName = J-11B
 AddDisplayName = en_US, J-11B
-AddDisplayName = zh_CN, J-11B
+AddDisplayName = zh_CN, 歼11B
 ItemID = 6855
 MaxHp = 100
 EnableNightVision = true
@@ -20,18 +20,16 @@ VariableSweepWing = true
 SweepWingSpeed = 0.8
 
 ;modern light plane (late jet), AOW3 style (fcs)
-AddRecipe = "ABC", "DEF", "GGG", A, mcheli:airframe2, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:cannon1, F, mcheli:fcs3, G, mcheli:electronics
+AddRecipe = "ABC", "DEF", "GGG", A, mcheli:airframe2, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:cannon1, F, mcheli:fcs3, G, mcheli:electronics 
 
 Category = ASF
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-NewPlaneCameraFocusOffsetX = 0.000
-NewPlaneCameraFocusOffsetY = 3.490
-NewPlaneCameraFocusOffsetZ = 0.000
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.650
 EngineThrust = 2.867
+TakeoffDistanceMultiplier = 0.70
 NewFlightGravity = 0.0080
 NewFlightThrottleResponse = 1.160
 NewFlightThrottleChangeRateUp = 0.0052
@@ -46,8 +44,6 @@ NewFlightCombatFlapLift = 0.120
 NewFlightCombatFlapDrag = 0.013
 NewFlightCombatFlapControl = 0.130
 NewFlightCombatFlapOverspeed = 0.780
-
-# New-flight internal energy model tuning
 FlightCeiling = 16500
 FlightCeilingRange = 72
 StallSpeed = 0.760
@@ -69,6 +65,8 @@ OverspeedDamageRate = 0.14
 BaseDrag = 0.0015
 InducedDrag = 0.0075
 ControlSurfaceDrag = 0.0035
+ClimbEnergyLoss = 0.0085
+DiveEnergyGain = 0.012
 MaxLevelSpeed = 4
 IdleDrag = 0.0034
 

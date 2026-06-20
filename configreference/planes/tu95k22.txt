@@ -23,14 +23,11 @@ AutoPilotRot = 0
 Category = SHNB/SB
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-NewPlaneCameraFocusOffsetX = 0.400
-NewPlaneCameraFocusOffsetY = 4.359
-NewPlaneCameraFocusOffsetZ = 1.200
-# New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 4.950
 EngineThrust = 5.35
+TakeoffDistanceMultiplier = 0.78
 NewFlightGravity = 0.0088
 NewFlightThrottleResponse = 1.150
 NewFlightThrottleChangeRateUp = 0.0038
@@ -62,6 +59,8 @@ OverspeedDamageRate = 0.18
 BaseDrag = 0.0030
 InducedDrag = 0.017
 ControlSurfaceDrag = 0.0065
+ClimbEnergyLoss = 0.018
+DiveEnergyGain = 0.012
 MaxLevelSpeed = 1.473
 IdleDrag = 0.0040
 

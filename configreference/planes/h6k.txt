@@ -1,5 +1,5 @@
 DisplayName = Xi'an H-6K "God Of War"
-AddDisplayName = zh_CN, H-6K "God of War"
+AddDisplayName = zh_CN, 轰6K“战神”
 AddDisplayName = en_US, Xi'an H-6K "God of War"
 ItemID = 45600
 MaxHp = 250
@@ -21,14 +21,11 @@ CameraPosition  = 0.0, 2.00, 4.78
 Category = SB
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-NewPlaneCameraFocusOffsetX = 0.500
-NewPlaneCameraFocusOffsetY = 3.250
-NewPlaneCameraFocusOffsetZ = 3.550
-# New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 4.800
 EngineThrust = 5.09
+TakeoffDistanceMultiplier = 0.78
 NewFlightGravity = 0.0087
 NewFlightThrottleResponse = 1.150
 NewFlightThrottleChangeRateUp = 0.0038
@@ -60,6 +57,8 @@ OverspeedDamageRate = 0.12
 BaseDrag = 0.0025
 InducedDrag = 0.017
 ControlSurfaceDrag = 0.0065
+ClimbEnergyLoss = 0.018
+DiveEnergyGain = 0.012
 MaxLevelSpeed = 1.392
 IdleDrag = 0.0055
 

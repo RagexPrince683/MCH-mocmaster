@@ -1,6 +1,6 @@
 DisplayName = J-15 Fly Shark
 AddDisplayName = en_US, J-15 Fly Shark
-AddDisplayName = zh_CN, J-15 Flying Shark
+AddDisplayName = zh_CN, 歼15 飞鲨
 ItemID = 6655
 MaxHp = 100
 EnableNightVision = true
@@ -19,13 +19,11 @@ Sound = sutwentyseven
 Category = CBMF/MF
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-NewPlaneCameraFocusOffsetX = 0.000
-NewPlaneCameraFocusOffsetY = 3.490
-NewPlaneCameraFocusOffsetZ = 0.000
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.650
 EngineThrust = 2.867
+TakeoffDistanceMultiplier = 0.70
 NewFlightGravity = 0.0080
 NewFlightThrottleResponse = 1.160
 NewFlightThrottleChangeRateUp = 0.0052
@@ -40,8 +38,6 @@ NewFlightCombatFlapLift = 0.120
 NewFlightCombatFlapDrag = 0.013
 NewFlightCombatFlapControl = 0.130
 NewFlightCombatFlapOverspeed = 0.780
-
-# New-flight internal energy model tuning
 FlightCeiling = 16500
 FlightCeilingRange = 72
 StallSpeed = 0.760
@@ -63,6 +59,8 @@ OverspeedDamageRate = 0.14
 BaseDrag = 0.0015
 InducedDrag = 0.0075
 ControlSurfaceDrag = 0.0035
+ClimbEnergyLoss = 0.0085
+DiveEnergyGain = 0.012
 MaxLevelSpeed = 4
 IdleDrag = 0.0034
 
@@ -135,7 +133,7 @@ AddPartWeaponBay = targeting_pod_ph50s/ none,   0.00, 3.5784, -6.8482,  1,0,0, -
 AddPartWeaponBay = targeting_pod_ph50s/ none,   0.00, 3.9204, -3.927,  1,0,0, 40
 
 ;modern light plane (late jet), AOW3 style (fcs)
-AddRecipe = "ABC", "DEF", "GG ", A, mcheli:airframe2, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:cannon1, F, mcheli:fcs3, G, mcheli:electronics
+AddRecipe = "ABC", "DEF", "GG ", A, mcheli:airframe2, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:cannon1, F, mcheli:fcs3, G, mcheli:electronics 
 
 BoundingBox =  0.00, 2.8, 3.5,  1.5, 1.5,0.5
 BoundingBox =  0.00, 3.3,  -5.0,  3.5, 2.0,1

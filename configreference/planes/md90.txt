@@ -17,14 +17,11 @@ InventorySize = 64
 Category = C/NBJA
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
-NewPlaneCameraFocusOffsetX = 0.800
-NewPlaneCameraFocusOffsetY = 3.350
-NewPlaneCameraFocusOffsetZ = 0.000
-# New-flight internal energy model tuning
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 3.100
 EngineThrust = 3.26
+TakeoffDistanceMultiplier = 0.76
 NewFlightGravity = 0.0087
 NewFlightThrottleResponse = 1.120
 NewFlightThrottleChangeRateUp = 0.0038
@@ -56,6 +53,8 @@ OverspeedDamageRate = 0.18
 BaseDrag = 0.0025
 InducedDrag = 0.016
 ControlSurfaceDrag = 0.0065
+ClimbEnergyLoss = 0.018
+DiveEnergyGain = 0.013
 MaxLevelSpeed = 1.48
 IdleDrag = 0.0040
 
