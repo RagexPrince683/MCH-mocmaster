@@ -136,7 +136,7 @@ public class MCP_PlaneChaseCamera {
       lastClientTickComputed = clientTick;
 
       this.wasFreelookActive = this.freelookActive;
-      this.freelookActive = false;
+      this.freelookActive = shouldUseHoldFreelookAsCameraOnly(plane, player);
       this.updateFreelookOrbit();
       Vec3 anchor = this.getCameraFocusPoint(plane);
       Vec3 focus = this.computeHeldLookAheadFocus(plane, anchor);
@@ -573,7 +573,24 @@ public class MCP_PlaneChaseCamera {
    }
 
    public static boolean shouldConsumeFreelookMouse(MCP_EntityPlane plane, EntityPlayer player) {
-      return false;
+      return shouldUseHoldFreelookAsCameraOnly(plane, player);
+   }
+
+   public static boolean shouldUseHoldFreelookAsCameraOnly(MCP_EntityPlane plane, EntityPlayer player) {
+      if(plane == null || player == null) {
+         return false;
+      }
+      Minecraft mc = Minecraft.getMinecraft();
+      return MCH_Config.EnableHoldFreelook.prmBool
+            && MCH_Config.EnableNewPlaneThirdPersonCamera.prmBool
+            && plane.isNewFlightModelEnabled()
+            && plane.isPilot(player)
+            && mc != null
+            && mc.gameSettings != null
+            && mc.gameSettings.thirdPersonView > 0
+            && plane.getCameraId() <= 0
+            && !plane.getIsGunnerMode(player)
+            && MCH_Key.isKeyDown(MCH_Config.KeyFreeLook.prmInt);
    }
 
    public static void addFreelookMouseDelta(double deltaX, double deltaY) {
