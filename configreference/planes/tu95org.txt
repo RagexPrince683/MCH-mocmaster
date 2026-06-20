@@ -38,14 +38,14 @@ NewFlightThrottleHudDisplay = true
 NewFlightCombatFlaps = false
 FlightCeiling = 11800
 FlightCeilingRange = 72
-StallSpeed = 0.442
+StallSpeed = 0.328
 CriticalAoA = 13.20
 TimeUntilStallPastCriticalAoA = 1.55
 TimeAfterStallUntilPitchDown = 1.30
 StallLiftLoss = 0.740
 AoADragMultiplier = 2.850
 StallInstability = 0.340
-StallRecoverySpeed = 0.654
+StallRecoverySpeed = 0.466
 StallSpeedFactor = 0.19
 StallStrength = 0.95
 DiveSpeedMultiplier = 1.14
@@ -85,9 +85,9 @@ EnableBack = true
 
 AddPartCanopy   =  0.000, 0.000, 0.000,  0,0,0, 0
 
-MobilityYaw = 0.294
-MobilityPitch = 0.331
-MobilityRoll = 0.216
+MobilityYaw = 0.338
+MobilityPitch = 0.381
+MobilityRoll = 0.248
 
 AddSeat = 0.4,  4.1094,  1.2
 

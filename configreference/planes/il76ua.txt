@@ -32,14 +32,14 @@ NewFlightThrottleHudDisplay = true
 NewFlightCombatFlaps = false
 FlightCeiling = 12000
 FlightCeilingRange = 72
-StallSpeed = 0.389
+StallSpeed = 0.321
 CriticalAoA = 13.60
 TimeUntilStallPastCriticalAoA = 1.25
 TimeAfterStallUntilPitchDown = 1.05
 StallLiftLoss = 0.720
 AoADragMultiplier = 2.850
 StallInstability = 0.320
-StallRecoverySpeed = 0.568
+StallRecoverySpeed = 0.456
 StallSpeedFactor = 0.19
 StallStrength = 0.90
 DiveSpeedMultiplier = 1.14
@@ -70,9 +70,9 @@ HUD = planenvg,planenvg, none, none, none, none, none, none, none, none, none, n
 
 AddTexture = il76
 
-MobilityRoll = 0.437
-MobilityYaw = 0.439
-MobilityPitch = 0.492
+MobilityRoll = 0.503
+MobilityYaw = 0.505
+MobilityPitch = 0.566
 ;MinRotationRoll =-30
 ;MaxRotationRoll =30
 

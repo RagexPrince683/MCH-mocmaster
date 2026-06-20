@@ -39,14 +39,14 @@ NewFlightCombatFlapControl = 0.130
 NewFlightCombatFlapOverspeed = 0.780
 FlightCeiling = 16500
 FlightCeilingRange = 72
-StallSpeed = 0.760
+StallSpeed = 0.660
 CriticalAoA = 16.80
 TimeUntilStallPastCriticalAoA = 0.90
 TimeAfterStallUntilPitchDown = 0.85
 StallLiftLoss = 0.820
 AoADragMultiplier = 2.300
 StallInstability = 0.440
-StallRecoverySpeed = 1.003
+StallRecoverySpeed = 0.937
 StallSpeedFactor = 0.18
 StallStrength = 1.15
 DiveSpeedMultiplier = 1.28
@@ -79,9 +79,9 @@ AddSeat = 0.00, 3.24, 0.00
 
 AddTexture = j15_1
 
-MobilityYaw = 1.323
-MobilityRoll = 1.866
-MobilityPitch = 1.603
+MobilityYaw = 1.429
+MobilityRoll = 2.015
+MobilityPitch = 1.731
 
 AddPartCanopy = 0.00, 4.5607, -1.4737, -1,0,0,  60
 
