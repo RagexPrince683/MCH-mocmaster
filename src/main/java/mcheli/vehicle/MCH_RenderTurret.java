@@ -44,7 +44,7 @@ public class MCH_RenderTurret extends MCH_RenderBaseVehicle {
             GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
             GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
             try {
-            this.bindTexture("textures/vehicles/" + vehicle.getTextureName() + ".png", vehicle);
+            this.bindTexture("textures/" + turretInfo.getDirectoryName() + "/" + vehicle.getTextureName() + ".png", vehicle);
             } catch (Exception var15) {
                System.out.println("Texture not found : " + vehicle.getTextureName());
                this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
@@ -110,7 +110,7 @@ public class MCH_RenderTurret extends MCH_RenderBaseVehicle {
 
       if((vp.drawFP || !W_Lib.isClientPlayer(vehicle.riddenByEntity) || !W_Lib.isFirstPerson()) && (vp.type != 3 || !vehicle.isWeaponNotCooldown(ws, index))) {
          renderPart(vp.model, info.model, vp.modelName);
-         MCH_ModelManager.render("vehicles", vp.modelName);
+         MCH_ModelManager.render(info.getDirectoryName(), vp.modelName);
       }
 
       GL11.glPopMatrix();

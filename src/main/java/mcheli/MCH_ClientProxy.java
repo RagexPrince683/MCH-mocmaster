@@ -368,18 +368,19 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    public void registerModelsVehicle(String name, boolean reload) {
       MCH_ModelManager.setForceReloadMode(reload);
       MCH_TurretInfo info = (MCH_TurretInfo)MCH_TurretInfoManager.map.get(name);
-      info.model = MCH_ModelManager.load("vehicles", info.name);
+      String turretDirectory = info.getDirectoryName();
+      info.model = MCH_ModelManager.load(turretDirectory, info.name);
       Iterator i$ = info.partList.iterator();
 
       while(i$.hasNext()) {
          MCH_TurretInfo.VPart vp = (MCH_TurretInfo.VPart)i$.next();
-         vp.model = this.loadPartModel("vehicles", info.name, info.model, vp.modelName);
+         vp.model = this.loadPartModel(turretDirectory, info.name, info.model, vp.modelName);
          if(vp.child != null) {
             this.registerVCPModels(info, vp);
          }
       }
 
-      this.registerCommonPart("vehicles", info);
+      this.registerCommonPart(turretDirectory, info);
       MCH_ModelManager.setForceReloadMode(false);
    }
 
@@ -475,7 +476,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
       while(i$.hasNext()) {
          MCH_TurretInfo.VPart vcp = (MCH_TurretInfo.VPart)i$.next();
-         vcp.model = this.loadPartModel("vehicles", info.name, info.model, vcp.modelName);
+         vcp.model = this.loadPartModel(info.getDirectoryName(), info.name, info.model, vcp.modelName);
          if(vcp.child != null) {
             this.registerVCPModels(info, vcp);
          }
