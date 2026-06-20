@@ -156,11 +156,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private float pitchAngularVelocity;
    private float rollAngularVelocity;
    private float yawAngularVelocity;
-   /** Holds the airframe attitude stable while pilot mouse input is being used for freelook. */
-   private boolean freelookAttitudeLocked;
-   private float freelookLockedPitch;
-   private float freelookLockedYaw;
-   private float freelookLockedRoll;
    /** Latest approximate fixed-wing load factor. */
    private double currentGForce = 1.0D;
    /** Fractional overspeed damage retained between ticks. */
@@ -206,10 +201,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.rotationRotor = 0.0F;
       this.prevRotationRotor = 0.0F;
       this.engineThrottle = 0.0D;
-      this.freelookAttitudeLocked = false;
-      this.freelookLockedPitch = 0.0F;
-      this.freelookLockedYaw = 0.0F;
-      this.freelookLockedRoll = 0.0F;
       this.lastAerodynamicDrag = 0.0D;
       this.lastKineticEnergy = 0.0D;
       this.lastPotentialEnergy = 0.0D;
@@ -1085,15 +1076,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       float ac_yaw = this.getRotYaw();
       float ac_roll = this.getRotRoll();
       if(this.isFreeLookMode()) {
-         if(!this.freelookAttitudeLocked) {
-            this.freelookAttitudeLocked = true;
-            this.freelookLockedPitch = ac_pitch;
-            this.freelookLockedYaw = ac_yaw;
-            this.freelookLockedRoll = ac_roll;
-         }
-         this.setRotPitch(this.freelookLockedPitch);
-         this.setRotYaw(this.freelookLockedYaw);
-         this.setRotRoll(this.freelookLockedRoll);
          this.mouseAimGeneratedYawCommand = 0.0F;
          this.mouseAimGeneratedPitchCommand = 0.0F;
          this.mouseAimGeneratedRollCommand = 0.0F;
@@ -1118,7 +1100,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          return;
       }
 
-      this.freelookAttitudeLocked = false;
       boolean useMouseAim = this.shouldUseMouseAimControls(player);
       if(useMouseAim) {
          this.updateMouseAimState(deltaX, deltaY, partialTicks);
