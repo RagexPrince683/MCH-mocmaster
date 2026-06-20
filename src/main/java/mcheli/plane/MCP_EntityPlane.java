@@ -174,8 +174,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double currentGForce = 1.0D;
    /** Fractional overspeed damage retained between ticks. */
    private double overspeedDamageAccumulator;
-   /** Current unsigned angle between the nose and velocity vectors, in degrees. */
+   /** Selected effective AoA used by lift, drag, stall, and pitch moments. */
    private double angleOfAttack;
+   /** Unsigned full 3D nose-vs-velocity angle retained for debug comparison. */
+   private double oldAngleOfAttack;
+   /** Wing-relative pitch-plane AoA used as the primary new-flight AoA signal. */
+   private double pitchPlaneAngleOfAttack;
+   /** Horizontal sideslip angle separated from pitch-plane AoA, in degrees. */
+   private double sideslipAngle;
    /** Latest speed-derived stall demand before smoothing. */
    private double speedStallSeverity;
    /** Latest AoA-derived stall demand before smoothing. */
@@ -281,6 +287,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastFinalPitchAngularVelocity = 0.0D;
       this.lastAirborne = false;
       this.angleOfAttack = 0.0D;
+      this.oldAngleOfAttack = 0.0D;
+      this.pitchPlaneAngleOfAttack = 0.0D;
+      this.sideslipAngle = 0.0D;
       this.stallSeverity = 0.0D;
       this.stalling = false;
       this.combatFlapsDeployed = false;
@@ -636,6 +645,18 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    public double getAngleOfAttackDegrees() {
       return this.angleOfAttack;
+   }
+
+   public double getOldAngleOfAttackDegrees() {
+      return this.oldAngleOfAttack;
+   }
+
+   public double getPitchPlaneAngleOfAttackDegrees() {
+      return this.pitchPlaneAngleOfAttack;
+   }
+
+   public double getSideslipAngleDegrees() {
+      return this.sideslipAngle;
    }
 
    public double getStallSeverity() {
@@ -1097,6 +1118,38 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
       return safeSpeed;
    }
+   private void updateAngleOfAttackMetrics(Vec3 forward) {
+      this.oldAngleOfAttack = MCH_FlightModel.getAngleOfAttackDegrees(forward.xCoord, forward.yCoord, forward.zCoord,
+            super.motionX, super.motionY, super.motionZ);
+      this.pitchPlaneAngleOfAttack = this.calculatePitchPlaneAngleOfAttack();
+      this.sideslipAngle = this.calculateSideslipAngle();
+      double sideslipPenalty = Math.max(0.0D, Math.abs(this.sideslipAngle) - 8.0D) * 0.20D;
+      this.angleOfAttack = MCH_FlightModel.clamp(this.pitchPlaneAngleOfAttack + sideslipPenalty, 0.0D, this.oldAngleOfAttack);
+   }
+
+   private double calculatePitchPlaneAngleOfAttack() {
+      double forwardAirspeed = this.getForwardAirspeed();
+      double flightPathPitch = -Math.toDegrees(Math.atan2(super.motionY, Math.max(1.0E-5D, forwardAirspeed)));
+      double pitchPlaneAoA = Math.abs((double)this.getRotPitch() - flightPathPitch);
+      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      if(horizontalSpeed < 1.0E-5D && Math.abs(super.motionY) < 1.0E-5D) {
+         return Math.max(0.0D, (double)-this.getRotPitch());
+      }
+      return MCH_FlightModel.clamp(pitchPlaneAoA, 0.0D, 180.0D);
+   }
+
+   private double calculateSideslipAngle() {
+      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      if(horizontalSpeed < 1.0E-5D) {
+         return 0.0D;
+      }
+
+      Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), 0.0F);
+      Vec3 right = MCH_Lib.Rot2Vec3(this.getRotYaw() + 90.0F, 0.0F);
+      double forwardComponent = super.motionX * forward.xCoord + super.motionZ * forward.zCoord;
+      double lateralComponent = super.motionX * right.xCoord + super.motionZ * right.zCoord;
+      return Math.toDegrees(Math.atan2(lateralComponent, Math.max(1.0E-5D, Math.abs(forwardComponent))));
+   }
 
    private double getInstantStallSeverity() {
       if(this.getPlaneInfo() == null) {
@@ -1107,8 +1160,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       double forwardAirspeed = this.getForwardAirspeed();
       this.lastForwardAirspeed = forwardAirspeed;
-      double aoa = MCH_FlightModel.getAngleOfAttackDegrees(forward.xCoord, forward.yCoord, forward.zCoord,
-            super.motionX, super.motionY, super.motionZ);
+      this.updateAngleOfAttackMetrics(forward);
+      double aoa = this.angleOfAttack;
       double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
             this.getPlaneInfo().stallSpeedFactor);
       double speedSeverity = Math.max(MCH_FlightModel.getSpeedStallSeverity(forwardAirspeed, stallSpeed),
@@ -1366,8 +1419,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastHorizontalSpeed = horizontalSpeed;
       double forwardAirspeed = this.getForwardAirspeed();
       this.lastForwardAirspeed = forwardAirspeed;
-      this.angleOfAttack = MCH_FlightModel.getAngleOfAttackDegrees(forward.xCoord, forward.yCoord, forward.zCoord,
-            super.motionX, super.motionY, super.motionZ);
+      this.updateAngleOfAttackMetrics(forward);
 
       double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
             this.getPlaneInfo().stallSpeedFactor);
@@ -1629,9 +1681,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double forwardAirspeed = this.getForwardAirspeed();
       this.lastForwardAirspeed = forwardAirspeed;
       Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
-      double aoa = MCH_FlightModel.getAngleOfAttackDegrees(forward.xCoord, forward.yCoord, forward.zCoord,
-            super.motionX, super.motionY, super.motionZ);
-      this.angleOfAttack = aoa;
+      this.updateAngleOfAttackMetrics(forward);
+      double aoa = this.angleOfAttack;
 
       double qScale = MCH_FlightModel.clamp(forwardAirspeed / Math.max(0.05D, stallSpeed * 1.25D), 0.0D, 1.6D);
       qScale *= qScale;
@@ -1856,6 +1907,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.currentGForce = 1.0D;
       this.overspeedDamageAccumulator = 0.0D;
       this.angleOfAttack = 0.0D;
+      this.oldAngleOfAttack = 0.0D;
+      this.pitchPlaneAngleOfAttack = 0.0D;
+      this.sideslipAngle = 0.0D;
       this.stallSeverity = 0.0D;
       this.stalling = false;
       this.aircraftPosRotInc = 0;
@@ -2398,6 +2452,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.updateNewFlightThrustForce();
       } else {
          this.angleOfAttack = 0.0D;
+         this.oldAngleOfAttack = 0.0D;
+         this.pitchPlaneAngleOfAttack = 0.0D;
+         this.sideslipAngle = 0.0D;
          this.stallSeverity = 0.0D;
          this.lastAerodynamicDrag = 0.0D;
          this.lastLiftLoss = 0.0D;
