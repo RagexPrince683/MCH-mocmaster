@@ -26,6 +26,7 @@ public class MCH_ItemTurret extends MCH_ItemBaseVehicle {
          MCH_Lib.Log(world, "##### MCH_ItemTurret Turret info null %s", new Object[]{this.getUnlocalizedName()});
          return null;
       } else {
+         MCH_Lib.Log(world, "[VehiclePlacement] turret factory selected: item=%s info=%s category=%s dir=%s entityClass=%s", new Object[]{this.getUnlocalizedName(), info.name, info.category, info.getDirectoryName(), MCH_EntityTurret.class.getName()});
          MCH_EntityTurret vehicle = new MCH_EntityTurret(world);
          vehicle.setPosition(x, y + (double)vehicle.yOffset, z);
          vehicle.prevPosX = x;

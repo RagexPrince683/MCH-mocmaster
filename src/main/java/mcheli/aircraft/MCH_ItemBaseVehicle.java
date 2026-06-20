@@ -473,7 +473,7 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
    private String getInfoDebugName() {
       MCH_BaseVehicleInfo info = this.getAircraftInfo();
-      return info != null ? info.getKindName() + "/" + info.name : "null";
+      return info != null ? info.getKindName() + "/" + info.name + " category=" + info.category + " dir=" + info.getDirectoryName() : "null";
    }
 
    private static String getItemDebugName(ItemStack stack) {

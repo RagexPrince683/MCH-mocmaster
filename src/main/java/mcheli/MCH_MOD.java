@@ -238,6 +238,7 @@ public class MCH_MOD {
       MCH_ShipInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "ships");
       MCH_TankInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "tanks");
       MCH_TurretInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "vehicles");
+      MCH_TurretInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "turrets");
       MCH_ItemInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/item");
       MCH_ThrowableInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/throwable");
       MCH_SoundsJson.update(sourcePath + "/assets/" + "mcheli" + "/");

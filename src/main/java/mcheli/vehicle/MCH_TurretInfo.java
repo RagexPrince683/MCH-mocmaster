@@ -80,7 +80,31 @@ public class MCH_TurretInfo extends MCH_BaseVehicleInfo {
    }
 
    public String getDirectoryName() {
-      return "vehicles";
+      return this.isTurretAssetDirectory() ? "turrets" : "vehicles";
+   }
+
+   public boolean isTurretCategory(String category) {
+      if(category == null) {
+         return false;
+      }
+
+      String normalized = category.trim().toLowerCase();
+      return normalized.equals("turret") || normalized.equals("turrets") || normalized.endsWith(".turret") || normalized.endsWith(".turrets");
+   }
+
+   /**
+    * Turrets historically lived under assets/mcheli/vehicles.  New packs may
+    * place the same turret info files under assets/mcheli/turrets after the
+    * vehicle-to-turret reclassification.  Keep both locations valid without
+    * changing legacy registry/type names.
+    */
+   public boolean isTurretAssetDirectory() {
+      if(super.filePath == null) {
+         return isTurretCategory(super.category);
+      }
+
+      String path = super.filePath.replace('\\', '/').toLowerCase();
+      return path.indexOf("/turrets/") >= 0;
    }
 
    public String getKindName() {
