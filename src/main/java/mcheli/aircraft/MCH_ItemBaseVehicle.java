@@ -2,10 +2,10 @@ package mcheli.aircraft;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import mcheli.MCH_Achievement;
 import mcheli.MCH_Config;
+import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.wrapper.W_EntityPlayer;
 import mcheli.wrapper.W_Item;
@@ -105,6 +105,7 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
       MCH_EntityBaseVehicle ac = this.createAircraft(world, (double)((float)x + 0.5F), (double)((float)y + 1.0F), (double)((float)z + 0.5F), itemStack);
       if(ac == null) {
+         logPlacementDebug(world, "onTileClick createAircraft returned null: item=%s target=(%d,%d,%d) yaw=%.2f info=%s", getItemDebugName(itemStack), Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z), Float.valueOf(rotationYaw), getInfoDebugName());
          return null;
       } else {
          //hopefully reloads the 'aircraft' (vehicle)'s textures when placed.
@@ -114,8 +115,17 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
          //   ac.onAcInfoReloaded();
          //}
          //causes a crash when the fucking model is not loaded
+         ac.onAcInfoReloaded();
          ac.initRotationYaw((float)(((MathHelper.floor_double((double)(rotationYaw * 4.0F / 360.0F) + 0.5D) & 3) - 1) * 90));
-         return !world.getCollidingBoundingBoxes(ac, ac.boundingBox.expand(-0.1D, -0.1D, -0.1D)).isEmpty()?null:ac;
+         AxisAlignedBB placementBox = ac.boundingBox.expand(-0.1D, -0.1D, -0.1D);
+         List collisionBoxes = world.getCollidingBoundingBoxes(ac, placementBox);
+         if(!collisionBoxes.isEmpty()) {
+            logPlacementDebug(world, "onTileClick blocked by collision: item=%s info=%s entity=%s pos=(%.3f,%.3f,%.3f) target=(%d,%d,%d) size=(%.3f,%.3f) bb=%s collisions=%s", getItemDebugName(itemStack), getInfoDebugName(), ac.getEntityName(), Double.valueOf(ac.posX), Double.valueOf(ac.posY), Double.valueOf(ac.posZ), Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z), Float.valueOf(ac.width), Float.valueOf(ac.height), formatAabb(placementBox), describeCollisionBoxes(collisionBoxes));
+            return null;
+         }
+
+         logPlacementDebug(world, "onTileClick placement clear: item=%s info=%s entity=%s target=(%d,%d,%d) size=(%.3f,%.3f) bb=%s", getItemDebugName(itemStack), getInfoDebugName(), ac.getEntityName(), Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z), Float.valueOf(ac.width), Float.valueOf(ac.height), formatAabb(placementBox));
+         return ac;
       }
    }
 
@@ -143,7 +153,10 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
       Vec3 vec31 = vec3.addVector(f7 * d3, f6 * d3, f8 * d3);
       MovingObjectPosition mop = W_WorldFunc.clip(world, vec3, vec31, true);
 
-      if (mop == null) return par1ItemStack;
+      if (mop == null) {
+         logPlacementDebug(world, "rightClick ignored: no raytrace hit item=%s player=%s pos=(%.3f,%.3f,%.3f) pitch=%.2f yaw=%.2f", getItemDebugName(par1ItemStack), player.getCommandSenderName(), Double.valueOf(player.posX), Double.valueOf(player.posY), Double.valueOf(player.posZ), Float.valueOf(player.rotationPitch), Float.valueOf(player.rotationYaw));
+         return par1ItemStack;
+      }
 
       Vec3 look = player.getLook(f);
       boolean blockingEntity = false;
@@ -161,15 +174,24 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
          }
       }
 
-      if (blockingEntity) return par1ItemStack;
+      if (blockingEntity) {
+         logPlacementDebug(world, "rightClick ignored: blocking entity at eye ray item=%s player=%s", getItemDebugName(par1ItemStack), player.getCommandSenderName());
+         return par1ItemStack;
+      }
 
       if (W_MovingObjectPosition.isHitTypeTile(mop)) {
          if (MCH_MOD.config.PlaceableOnSpongeOnly.prmBool) {
             Block block = world.getBlock(mop.blockX, mop.blockY, mop.blockZ);
-            if (!(block instanceof BlockSponge)) return par1ItemStack;
+            if (!(block instanceof BlockSponge)) {
+               logPlacementDebug(world, "rightClick ignored: PlaceableOnSpongeOnly target block=%s at (%d,%d,%d) item=%s", Block.blockRegistry.getNameForObject(block), Integer.valueOf(mop.blockX), Integer.valueOf(mop.blockY), Integer.valueOf(mop.blockZ), getItemDebugName(par1ItemStack));
+               return par1ItemStack;
+            }
          }
 
-         if (world.getWorldTime() < 100) return par1ItemStack;
+         if (world.getWorldTime() < 100) {
+            logPlacementDebug(world, "rightClick ignored: world too new time=%d item=%s", Long.valueOf(world.getWorldTime()), getItemDebugName(par1ItemStack));
+            return par1ItemStack;
+         }
 
          if (par1ItemStack.stackTagCompound == null)
             par1ItemStack.stackTagCompound = new NBTTagCompound();
@@ -341,15 +363,27 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
       int used = this.getMaxItemUseDuration(stack) - timeLeft;
 
       if (used >= MCH_Config.placetimer.prmInt) {
-         // Successful placement
          NBTTagCompound tag = stack.getTagCompound();
+         if(tag == null || !tag.hasKey("TargetX") || !tag.hasKey("TargetY") || !tag.hasKey("TargetZ")) {
+            logPlacementDebug(world, "stopUsing ignored: missing deploy target item=%s player=%s used=%d tagPresent=%s", getItemDebugName(stack), player.getCommandSenderName(), Integer.valueOf(used), Boolean.valueOf(tag != null));
+            return;
+         }
+
          int x = tag.getInteger("TargetX");
          int y = tag.getInteger("TargetY");
          int z = tag.getInteger("TargetZ");
 
-         spawnAircraft(stack, world, player, x, y, z);
-         W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
+         logPlacementDebug(world, "stopUsing placement attempt: item=%s player=%s used=%d target=(%d,%d,%d)", getItemDebugName(stack), player.getCommandSenderName(), Integer.valueOf(used), Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z));
+         MCH_EntityBaseVehicle placed = spawnAircraft(stack, world, player, x, y, z);
          clearDeployTags(tag);
+         if(placed == null) {
+            if(!world.isRemote) {
+               player.addChatMessage(new ChatComponentText("Vehicle deployment failed. Check server log for [VehiclePlacement] details."));
+            }
+            return;
+         }
+
+         W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
 
          // SERVER SIDE ONLY
          if (!world.isRemote) {
@@ -399,6 +433,7 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
       MCH_EntityBaseVehicle ac = this.onTileClick(itemStack, world, player.rotationYaw, x, y, z);
       if(ac != null) {
+         logPlacementDebug(world, "spawnAircraft candidate: item=%s info=%s entity=%s type=%s remote=%s pos=(%.3f,%.3f,%.3f)", getItemDebugName(itemStack), getInfoDebugName(), ac.getEntityName(), ac.getTypeName(), Boolean.valueOf(world.isRemote), Double.valueOf(ac.posX), Double.valueOf(ac.posY), Double.valueOf(ac.posZ));
          if(ac.isUAV() || ac.isNewUAV()) {
             if(world.isRemote) {
                if(ac.isSmallUAV()) {
@@ -408,12 +443,14 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
                }
             }
 
+            logPlacementDebug(world, "spawnAircraft rejected UAV item=%s type=%s small=%s new=%s", getItemDebugName(itemStack), ac.getTypeName(), Boolean.valueOf(ac.isSmallUAV()), Boolean.valueOf(ac.isNewUAV()));
             ac = null;
          } else {
             if(!world.isRemote) {
                ac.getAcDataFromItem(itemStack);
                ac.markFreshlyPlaced();
-               world.spawnEntityInWorld(ac);
+               boolean spawned = world.spawnEntityInWorld(ac);
+               logPlacementDebug(world, "spawnAircraft world.spawnEntityInWorld result=%s item=%s type=%s entityId=%d dim=%d", Boolean.valueOf(spawned), getItemDebugName(itemStack), ac.getTypeName(), Integer.valueOf(ac.getEntityId()), Integer.valueOf(world.provider.dimensionId));
                MCH_Achievement.addStat(player, MCH_Achievement.welcome, 1);
             }
 
@@ -423,7 +460,46 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
          }
       }
 
+      if(ac == null) {
+         logPlacementDebug(world, "spawnAircraft failed: item=%s info=%s target=(%d,%d,%d) remote=%s", getItemDebugName(itemStack), getInfoDebugName(), Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z), Boolean.valueOf(world.isRemote));
+      }
+
       return ac;
+   }
+
+   private static void logPlacementDebug(World world, String format, Object... args) {
+      MCH_Lib.Log(world, "[VehiclePlacement] " + format, args);
+   }
+
+   private String getInfoDebugName() {
+      MCH_BaseVehicleInfo info = this.getAircraftInfo();
+      return info != null ? info.getKindName() + "/" + info.name : "null";
+   }
+
+   private static String getItemDebugName(ItemStack stack) {
+      if(stack == null || stack.getItem() == null) {
+         return "null";
+      }
+
+      Object name = Item.itemRegistry.getNameForObject(stack.getItem());
+      return String.valueOf(name) + "@" + stack.getItemDamage() + "x" + stack.stackSize;
+   }
+
+   private static String formatAabb(AxisAlignedBB bb) {
+      return bb == null ? "null" : String.format("[%.3f,%.3f,%.3f -> %.3f,%.3f,%.3f]", new Object[]{Double.valueOf(bb.minX), Double.valueOf(bb.minY), Double.valueOf(bb.minZ), Double.valueOf(bb.maxX), Double.valueOf(bb.maxY), Double.valueOf(bb.maxZ)});
+   }
+
+   private static String describeCollisionBoxes(List boxes) {
+      StringBuilder sb = new StringBuilder();
+      sb.append("count=").append(boxes.size());
+      int max = Math.min(boxes.size(), 5);
+      for(int i = 0; i < max; ++i) {
+         sb.append(" #").append(i).append('=').append(formatAabb((AxisAlignedBB)boxes.get(i)));
+      }
+      if(boxes.size() > max) {
+         sb.append(" ...");
+      }
+      return sb.toString();
    }
 
    public void rideEntity(ItemStack item, Entity target, EntityPlayer player) {
