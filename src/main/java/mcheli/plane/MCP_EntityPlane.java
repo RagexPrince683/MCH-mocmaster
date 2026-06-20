@@ -1640,11 +1640,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double noseUpAttitude = MCH_FlightModel.clamp((double)(-this.getRotPitch() - 3.0F) / 50.0D, 0.0D, 1.0D);
       double lowEnergyNoseHigh = noseUpAttitude * MCH_FlightModel.clamp(1.0D - forwardAirspeed / Math.max(0.05D, stallSpeed), 0.0D, 1.0D);
       double deepStallBoost = Math.max(this.deepStallSeverity, Math.max(this.stallSeverity, this.aoaStallSeverity));
-      double airflowScale = MCH_FlightModel.clamp(qScale + residualFlow + deepStallBoost * lowEnergyNoseHigh * 0.75D, 0.0D, 2.6D);
+      double lowEnergyPitchFlow = lowEnergyNoseHigh * (0.22D + 0.38D * Math.max(this.speedStallSeverity, deepStallBoost));
+      double airflowScale = MCH_FlightModel.clamp(qScale + residualFlow + lowEnergyPitchFlow
+            + deepStallBoost * lowEnergyNoseHigh * 0.75D, 0.0D, 2.6D);
 
       double criticalAoA = Math.max(1.0D, (double)info.criticalAoA);
       double excessAoA = MCH_FlightModel.clamp((aoa - criticalAoA * 0.55D) / criticalAoA, 0.0D, 2.0D);
-      double aoaMoment = excessAoA * (0.45D + 0.90D * Math.max(this.aoaStallSeverity, this.stallSeverity));
+      double lowSpeedAoADemand = lowEnergyNoseHigh * MCH_FlightModel.clamp(1.0D - forwardAirspeed / Math.max(0.05D, stallSpeed), 0.0D, 1.0D);
+      double aoaMoment = Math.max(excessAoA, lowSpeedAoADemand * 0.55D)
+            * (0.45D + 0.90D * Math.max(this.aoaStallSeverity, this.stallSeverity));
       double stabilityMoment = noseUpAttitude * (0.18D + 0.42D * lowEnergyNoseHigh + 0.50D * this.deepStallSeverity);
       double pitchMoment = (aoaMoment + stabilityMoment) * airflowScale * (0.35D + (double)info.stallPitchRecoveryStrength);
       double contribution = MCH_FlightModel.clamp(pitchMoment * partialTicks * 0.28D, 0.0D, 1.25D);
@@ -1689,11 +1693,18 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          return;
       }
 
-      double appliedPitchDownVelocity = MCH_FlightModel.clamp(pitchMoment, 0.0D, 0.65D);
+      this.lastThrustPitchDownMoment = pitchMoment;
+      double fallbackDelay = Math.max(0.5D, (double)this.getPlaneInfo().timeAfterStallUntilPitchDown) * 1.5D;
+      boolean unrecoverableLowEnergy = this.timeAfterLowEnergyStall >= fallbackDelay
+            && energyDeficit > 0.85D && noseUpAttitude > 0.55D;
+      if(!unrecoverableLowEnergy) {
+         return;
+      }
+
+      double appliedPitchDownVelocity = MCH_FlightModel.clamp(pitchMoment * 0.35D, 0.0D, 0.35D);
       this.queueNoseDownRecovery(appliedPitchDownVelocity,
             MCH_FlightModel.clamp(energyDeficit * noseUpAttitude, 0.0D, 1.0D),
-            MCH_FlightModel.clamp(energyDeficit * noseUpAttitude * 0.45D, 0.0D, 0.45D));
-      this.lastThrustPitchDownMoment = appliedPitchDownVelocity;
+            MCH_FlightModel.clamp(energyDeficit * noseUpAttitude * 0.30D, 0.0D, 0.30D));
    }
 
    private void queueNoseDownRecovery(double pitchDownVelocity, double severity, double noseUpDamping) {
@@ -2650,12 +2661,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          drag = this.updateNewFlightEnergyState(mass, gravityAccel, horizontalSpeed, drag);
          double pitchDownDelay = Math.max(0.0D, (double)this.getPlaneInfo().timeAfterStallUntilPitchDown);
          boolean stallPitchDownExpired = this.timeAfterLowEnergyStall >= pitchDownDelay;
-         if(this.lastEnergyForcedRecovery && stallPitchDownExpired) {
+         boolean unrecoverableEnergyFallback = this.lastEnergyForcedRecovery && stallPitchDownExpired
+               && this.lastEnergyDeficitSeverity > 0.90D && noseHighPitch > 0.55D;
+         if(unrecoverableEnergyFallback) {
             this.pitchBreakActive = true;
-            double energyPitchBreak = MCH_FlightModel.clamp(this.lastEnergyDeficitSeverity * noseHighPitch * 0.55D, 0.0D, 0.75D);
+            double energyPitchBreak = MCH_FlightModel.clamp(this.lastEnergyDeficitSeverity * noseHighPitch * 0.25D, 0.0D, 0.35D);
             this.queueNoseDownRecovery(energyPitchBreak,
                   MCH_FlightModel.clamp(this.lastEnergyDeficitSeverity * Math.max(noseHighPitch, 0.35D), 0.0D, 1.0D),
-                  MCH_FlightModel.clamp(this.lastEnergyDeficitSeverity * 0.55D, 0.0D, 0.55D));
+                  MCH_FlightModel.clamp(this.lastEnergyDeficitSeverity * 0.25D, 0.0D, 0.25D));
             this.lastPitchBreakAngularVelocity = Math.max(this.lastPitchBreakAngularVelocity, energyPitchBreak);
          }
          drag = MCH_FlightModel.clamp(drag, 0.0D, 0.5D);
@@ -2760,7 +2773,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          double legacyStrengthScale = MCH_FlightModel.clamp((double)this.getPlaneInfo().stallStrength / 0.6D, 0.0D, 4.0D);
          double pitchDownDelay = Math.max(0.0D, (double)this.getPlaneInfo().timeAfterStallUntilPitchDown);
          boolean stallPitchDownExpired = this.timeAfterLowEnergyStall >= pitchDownDelay;
-         double delayedBreak = stallPitchDownExpired ? Math.max(this.deepStallSeverity, this.speedStallSeverity) : 0.0D;
+         boolean unrecoverableStallFallback = stallPitchDownExpired && noseUpAttitude > 0.45D
+               && Math.max(this.deepStallSeverity, Math.max(this.speedStallSeverity, this.lastEnergyDeficitSeverity)) > 0.85D;
+         double delayedBreak = unrecoverableStallFallback ? Math.max(this.deepStallSeverity, this.speedStallSeverity) : 0.0D;
          double pitchRecovery = this.stallSeverity * delayedBreak * (double)this.getPlaneInfo().stallPitchRecoveryStrength
                * legacyStrengthScale
                * (0.25D + 0.75D * aerodynamicDemand)
@@ -2773,10 +2788,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             this.pitchBreakActive = true;
             // MCHeli/Minecraft pitch is inverted from aerodynamic sign: nose-up attitude is
             // negative rotation pitch, and nose-down attitude is positive rotation pitch.
-            double appliedPitchBreakVelocity = MCH_FlightModel.clamp(stallPitchMoment * 0.45D, 0.0D, 1.8D);
+            double appliedPitchBreakVelocity = MCH_FlightModel.clamp(stallPitchMoment * 0.18D, 0.0D, 0.45D);
             this.queueNoseDownRecovery(appliedPitchBreakVelocity,
                   MCH_FlightModel.clamp(Math.max(this.stallSeverity, aerodynamicDemand) * Math.max(noseUpAttitude, 0.35D), 0.0D, 1.0D),
-                  MCH_FlightModel.clamp(this.stallSeverity * 0.35D, 0.0D, 0.35D));
+                  MCH_FlightModel.clamp(this.stallSeverity * 0.20D, 0.0D, 0.20D));
             this.lastPitchBreakAngularVelocity = appliedPitchBreakVelocity;
             this.lastStallPitchMoment = stallPitchMoment;
          }
