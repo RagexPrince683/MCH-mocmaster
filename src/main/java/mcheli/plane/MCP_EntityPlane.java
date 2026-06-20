@@ -1096,6 +1096,13 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             super.prevRotationYaw = this.getRotYaw();
          }
 
+         // Free look intentionally decouples the pilot camera from the airframe, but the
+         // server-side new flight model still derives AoA/stall state from the last
+         // aircraft rotation packet it received. Keep the server synchronized with the
+         // client airframe attitude while the mouse is being consumed by free look;
+         // otherwise the server can continue simulating an old nose-high attitude and
+         // report a stall only while free look is active.
+         this.aircraftRotChanged = true;
          player.setAngles(deltaX, deltaY);
          return;
       }
