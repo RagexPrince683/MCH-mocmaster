@@ -519,12 +519,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
             this.getPlaneInfo().stallSpeedFactor);
-      if(this.isIdleUnsupportedClimb(noseUpAttitude, stallSpeed)) {
-         return MCH_FlightModel.clamp(0.35D + 0.65D * noseUpAttitude, 0.0D, 1.0D);
-      }
-      if(!this.stalling && this.deepStallSeverity <= 0.0D && this.aoaStallSeverity <= 0.0D) {
-         return 0.0D;
-      }
       double climbSpeedDeficit = MCH_FlightModel.clamp((stallSpeed * 1.2D - this.getForwardAirspeed())
             / Math.max(0.05D, stallSpeed * 1.2D), 0.0D, 1.0D);
       double liftDeficit = this.lastWeightForce > 1.0E-6D
@@ -532,9 +526,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double thrustDeficit = MCH_FlightModel.clamp(1.0D - this.getThrustToWeightRatio(), 0.0D, 1.0D);
       double climbDemand = MCH_FlightModel.clamp(super.motionY / 0.18D, 0.0D, 1.0D);
       double supportDeficit = Math.max(Math.max(thrustDeficit, liftDeficit),
-            Math.max(climbSpeedDeficit, Math.max(this.stallSeverity, Math.max(this.deepStallSeverity, this.aoaStallSeverity))));
+            Math.max(climbSpeedDeficit, Math.max(this.stallSeverity, Math.max(this.speedStallSeverity, this.aoaStallSeverity))));
       supportDeficit = Math.max(supportDeficit, this.lastEnergyDeficitSeverity);
       double unsupportedClimb = noseUpAttitude * climbDemand * supportDeficit;
+      if(this.isIdleUnsupportedClimb(noseUpAttitude, stallSpeed)) {
+         unsupportedClimb = Math.max(unsupportedClimb, 0.35D + 0.65D * noseUpAttitude);
+      }
       return MCH_FlightModel.clamp(unsupportedClimb, 0.0D, 1.0D);
    }
 
@@ -2400,22 +2397,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          if(this.getNozzleRotation() <= 0.01F) {
             double verticalThrust = v.yCoord * (double)throttle1 / 2.0D;
             if(this.useNewMobilitySystem() && this.getPlaneInfo() != null && verticalThrust > 0.0D) {
-               double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
-                     this.getPlaneInfo().stallSpeedFactor);
-               double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-               double liftAirspeed = Math.min(Math.max(0.0D, this.getForwardAirspeed()), horizontalSpeed);
-               double climbReadiness = MCH_FlightModel.clamp((liftAirspeed - stallSpeed * 0.65D)
-                     / Math.max(0.05D, stallSpeed * 0.55D), 0.0D, 1.0D);
-               if(this.stalling || this.deepStallSeverity > 0.0D || this.aoaStallSeverity > 0.0D) {
-                  climbReadiness *= 1.0D - MCH_FlightModel.clamp(Math.max(this.stallSeverity,
-                        Math.max(this.deepStallSeverity, this.aoaStallSeverity)), 0.0D, 1.0D);
-               }
-               // Conventional fixed-wing thrust may contribute a small climb component once
-               // the wing has usable airflow, but it must not act like VTOL lift at low speed.
-               verticalThrust *= climbReadiness * 0.35D;
-               if(climbReadiness < 1.0D) {
-                  this.lastStallSuppressedLiftHeadroom = true;
-               }
+               // Conventional fixed-wing thrust must not become helicopter lift just because
+               // the nose is high. VTOL/nozzle aircraft still use the nozzle path below.
+               verticalThrust = 0.0D;
+               this.lastStallSuppressedLiftHeadroom = true;
             }
             super.motionY += verticalThrust;
          } else {
