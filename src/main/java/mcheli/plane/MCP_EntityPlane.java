@@ -186,6 +186,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastNoseDownRecoveryTorque;
    /** Final pitch/elevator command after envelope limiting and authority shaping. */
    private double lastFinalElevatorInput;
+   private double lastCommandPitchExcess;
+   private double lastPhysicalPitchExcess;
+   private boolean lastCommandLimiterActive;
+   private boolean lastPhysicalRecoveryActive;
    private boolean lastEnvelopeRecoveryActive;
    private boolean lastRecoveryDueToLowEnergy;
    private boolean lastRecoveryDueToAoA;
@@ -318,6 +322,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastPitchEnvelopeEnergyRatio = 1.0D;
       this.lastNoseDownRecoveryTorque = 0.0D;
       this.lastFinalElevatorInput = 0.0D;
+      this.lastCommandPitchExcess = 0.0D;
+      this.lastPhysicalPitchExcess = 0.0D;
+      this.lastCommandLimiterActive = false;
+      this.lastPhysicalRecoveryActive = false;
       this.lastEnvelopeRecoveryActive = false;
       this.lastRecoveryDueToLowEnergy = false;
       this.lastRecoveryDueToAoA = false;
@@ -646,6 +654,15 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
 
+   private double getNoseUpPitchDegrees() {
+      return Math.max(0.0D, (double)-this.getRotPitch());
+   }
+
+   private double getDesiredNoseUpPitchDegrees(double desiredPitchInput) {
+      double currentNoseUp = this.getNoseUpPitchDegrees();
+      return desiredPitchInput < 0.0D ? Math.min(90.0D, currentNoseUp + (double)(-desiredPitchInput) * 28.0D) : currentNoseUp;
+   }
+
    private double smooth01(double value) {
       value = MCH_FlightModel.clamp(value, 0.0D, 1.0D);
       return value * value * (3.0D - 2.0D * value);
@@ -653,6 +670,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    private double updatePitchEnvelope(double desiredPitchInput) {
       MCP_PlaneInfo info = this.getPlaneInfo();
+      this.lastCommandLimiterActive = false;
+      this.lastPhysicalRecoveryActive = false;
       this.lastEnvelopeRecoveryActive = false;
       this.lastRecoveryDueToLowEnergy = false;
       this.lastRecoveryDueToAoA = false;
@@ -661,6 +680,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       if(!this.useNewMobilitySystem() || info == null || this.getNozzleRotation() > 0.01F || this.onGround) {
          this.lastSustainableNoseUpPitch = 90.0D;
          this.lastPitchEnvelopeExcess = 0.0D;
+         this.lastCommandPitchExcess = 0.0D;
+         this.lastPhysicalPitchExcess = 0.0D;
          this.lastPitchEnvelopeEnergyRatio = 1.0D;
          this.lastNoseDownRecoveryTorque = 0.0D;
          return 1.0D;
@@ -692,40 +713,46 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       sustainable -= climbPenalty * (16.0D + 24.0D * lowEnergyGate);
       sustainable = MCH_FlightModel.clamp(sustainable, -12.0D, 82.0D);
 
-      double currentNoseUp = Math.max(0.0D, (double)-this.getRotPitch());
-      double commandedNoseUp = desiredPitchInput < 0.0D ? Math.min(90.0D, currentNoseUp + (double)(-desiredPitchInput) * 28.0D) : currentNoseUp;
-      double demandedNoseUp = Math.max(currentNoseUp, commandedNoseUp);
-      double pitchExcess = Math.max(0.0D, demandedNoseUp - sustainable);
+      double currentNoseUp = this.getNoseUpPitchDegrees();
+      double desiredNoseUp = this.getDesiredNoseUpPitchDegrees(desiredPitchInput);
+      double commandPitchExcess = Math.max(0.0D, desiredNoseUp - sustainable);
+      double physicalPitchExcess = Math.max(0.0D, currentNoseUp - sustainable);
 
       boolean safelyInsideEnvelope = energyRatio >= 1.35D && aoaSeverity <= 0.05D && liftMargin >= 0.90D;
-      boolean absurdHighEnergyOverpull = demandedNoseUp > 78.0D && pitchExcess > 12.0D;
-      this.lastRecoveryDueToLowEnergy = energyRatio < 1.20D;
+      boolean absurdPhysicalOverpitch = currentNoseUp > 78.0D && physicalPitchExcess > 12.0D;
+      this.lastRecoveryDueToLowEnergy = energyRatio < 1.20D && currentNoseUp > 8.0D && rawClimbPenalty > 0.10D;
       this.lastRecoveryDueToAoA = aoaSeverity > 0.05D;
-      this.lastRecoveryDueToLiftDeficit = liftDeficit > 0.15D;
-      this.lastRecoveryDueToUnsupportedClimb = rawClimbPenalty > 0.35D && (energyRatio < 1.25D || liftDeficit > 0.20D || this.lastUnsupportedClimbSeverity > 0.25D);
+      this.lastRecoveryDueToLiftDeficit = liftDeficit > 0.15D && (currentNoseUp > 5.0D || rawClimbPenalty > 0.20D);
+      this.lastRecoveryDueToUnsupportedClimb = rawClimbPenalty > 0.35D && currentNoseUp > 8.0D
+            && (energyRatio < 1.25D || liftDeficit > 0.20D || this.lastUnsupportedClimbSeverity > 0.25D);
       boolean recoveryGate = this.lastRecoveryDueToLowEnergy || this.lastRecoveryDueToAoA
-            || this.lastRecoveryDueToLiftDeficit || this.lastRecoveryDueToUnsupportedClimb || absurdHighEnergyOverpull;
-      if(safelyInsideEnvelope && !absurdHighEnergyOverpull) {
+            || this.lastRecoveryDueToLiftDeficit || this.lastRecoveryDueToUnsupportedClimb || absurdPhysicalOverpitch;
+      if(safelyInsideEnvelope && !absurdPhysicalOverpitch) {
          recoveryGate = false;
-         pitchExcess = 0.0D;
+         physicalPitchExcess = 0.0D;
       }
 
-      double severity = this.smooth01(MCH_FlightModel.clamp(pitchExcess / 42.0D, 0.0D, 1.0D));
+      double commandSeverity = this.smooth01(MCH_FlightModel.clamp(commandPitchExcess / 36.0D, 0.0D, 1.0D));
+      double physicalSeverity = this.smooth01(MCH_FlightModel.clamp(physicalPitchExcess / 42.0D, 0.0D, 1.0D));
       double recoveryScale = Math.max(lowEnergyGate, Math.max(aoaSeverity, liftDeficit));
-      if(absurdHighEnergyOverpull) {
+      if(absurdPhysicalOverpitch) {
          recoveryScale = Math.max(recoveryScale, 0.35D);
       }
-      double recoveryTorque = recoveryGate && severity > 1.0E-5D
-            ? severity * recoveryScale * (0.10D + 0.30D * Math.max(this.stallSeverity, this.deepStallSeverity))
+      double recoveryTorque = recoveryGate && physicalSeverity > 1.0E-5D
+            ? physicalSeverity * recoveryScale * (0.10D + 0.30D * Math.max(this.stallSeverity, this.deepStallSeverity))
                   * (0.55D + (double)info.stallPitchRecoveryStrength)
             : 0.0D;
 
       this.lastSustainableNoseUpPitch = sustainable;
-      this.lastPitchEnvelopeExcess = pitchExcess;
+      this.lastCommandPitchExcess = commandPitchExcess;
+      this.lastPhysicalPitchExcess = physicalPitchExcess;
+      this.lastPitchEnvelopeExcess = physicalPitchExcess;
       this.lastPitchEnvelopeEnergyRatio = energyRatio;
       this.lastNoseDownRecoveryTorque = recoveryTorque;
-      this.lastEnvelopeRecoveryActive = recoveryTorque > 1.0E-5D;
-      return MCH_FlightModel.clamp(1.0D - severity * (0.78D + 0.22D * Math.max(aoaSeverity, lowEnergyGate)), 0.0D, 1.0D);
+      this.lastCommandLimiterActive = commandSeverity > 1.0E-5D;
+      this.lastPhysicalRecoveryActive = recoveryTorque > 1.0E-5D;
+      this.lastEnvelopeRecoveryActive = this.lastPhysicalRecoveryActive;
+      return MCH_FlightModel.clamp(1.0D - commandSeverity * (0.78D + 0.22D * Math.max(aoaSeverity, lowEnergyGate)), 0.0D, 1.0D);
    }
 
    private double getNoseUpPitchSuppression() {
@@ -1139,6 +1166,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    public double getLastPitchEnvelopeEnergyRatio() { return this.lastPitchEnvelopeEnergyRatio; }
    public double getLastNoseDownRecoveryTorque() { return this.lastNoseDownRecoveryTorque; }
    public double getLastFinalElevatorInput() { return this.lastFinalElevatorInput; }
+   public double getLastCommandPitchExcess() { return this.lastCommandPitchExcess; }
+   public double getLastPhysicalPitchExcess() { return this.lastPhysicalPitchExcess; }
+   public boolean isLastCommandLimiterActive() { return this.lastCommandLimiterActive; }
+   public boolean isLastPhysicalRecoveryActive() { return this.lastPhysicalRecoveryActive; }
    public boolean isLastEnvelopeRecoveryActive() { return this.lastEnvelopeRecoveryActive; }
    public boolean isLastRecoveryDueToLowEnergy() { return this.lastRecoveryDueToLowEnergy; }
    public boolean isLastRecoveryDueToAoA() { return this.lastRecoveryDueToAoA; }
@@ -2078,6 +2109,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastPitchEnvelopeEnergyRatio = 1.0D;
       this.lastNoseDownRecoveryTorque = 0.0D;
       this.lastFinalElevatorInput = 0.0D;
+      this.lastCommandPitchExcess = 0.0D;
+      this.lastPhysicalPitchExcess = 0.0D;
+      this.lastCommandLimiterActive = false;
+      this.lastPhysicalRecoveryActive = false;
       this.lastEnvelopeRecoveryActive = false;
       this.lastRecoveryDueToLowEnergy = false;
       this.lastRecoveryDueToAoA = false;
