@@ -177,7 +177,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    /** Last pitch command after control authority and low-speed/stall suppression. */
    private double lastPitchInputAfterAuthority;
    /** Fresh per-tick sustainable nose-up pitch envelope in degrees. */
-   private double lastSustainableNoseUpPitch;
+   private double lastPitchEnvelopeReference;
    /** Current nose-up pitch demand above the sustainable envelope in degrees. */
    private double lastPitchEnvelopeExcess;
    /** Energy ratio used by the pitch-envelope limiter (forward airspeed / stall speed). */
@@ -317,7 +317,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastControlAuthority = 1.0D;
       this.lastRequestedPitchInput = 0.0D;
       this.lastPitchInputAfterAuthority = 0.0D;
-      this.lastSustainableNoseUpPitch = 90.0D;
+      this.lastPitchEnvelopeReference = 90.0D;
       this.lastPitchEnvelopeExcess = 0.0D;
       this.lastPitchEnvelopeEnergyRatio = 1.0D;
       this.lastNoseDownRecoveryTorque = 0.0D;
@@ -654,21 +654,13 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
 
-   private double getNoseUpPitchDegrees() {
-      return Math.max(0.0D, (double)-this.getRotPitch());
-   }
-
-   private double getDesiredNoseUpPitchDegrees(double desiredPitchInput) {
-      double currentNoseUp = this.getNoseUpPitchDegrees();
-      return desiredPitchInput < 0.0D ? Math.min(90.0D, currentNoseUp + (double)(-desiredPitchInput) * 28.0D) : currentNoseUp;
-   }
 
    private double smooth01(double value) {
       value = MCH_FlightModel.clamp(value, 0.0D, 1.0D);
       return value * value * (3.0D - 2.0D * value);
    }
 
-   private double updatePitchEnvelope(double desiredPitchInput) {
+   private double updatePitchEnvelope() {
       MCP_PlaneInfo info = this.getPlaneInfo();
       this.lastCommandLimiterActive = false;
       this.lastPhysicalRecoveryActive = false;
@@ -677,82 +669,56 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastRecoveryDueToAoA = false;
       this.lastRecoveryDueToLiftDeficit = false;
       this.lastRecoveryDueToUnsupportedClimb = false;
+      this.lastCommandPitchExcess = 0.0D;
+      this.lastPhysicalPitchExcess = 0.0D;
+      this.lastPitchEnvelopeExcess = 0.0D;
+      this.lastNoseDownRecoveryTorque = 0.0D;
+      this.lastPitchEnvelopeReference = 90.0D;
       if(!this.useNewMobilitySystem() || info == null || this.getNozzleRotation() > 0.01F || this.onGround) {
-         this.lastSustainableNoseUpPitch = 90.0D;
-         this.lastPitchEnvelopeExcess = 0.0D;
-         this.lastCommandPitchExcess = 0.0D;
-         this.lastPhysicalPitchExcess = 0.0D;
          this.lastPitchEnvelopeEnergyRatio = 1.0D;
-         this.lastNoseDownRecoveryTorque = 0.0D;
          return 1.0D;
       }
 
       double stallSpeed = Math.max(0.05D, MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor));
       double forwardAirspeed = Math.max(0.0D, this.getForwardAirspeed());
       double energyRatio = forwardAirspeed / stallSpeed;
-      double energyCurve = this.smooth01(MCH_FlightModel.clamp((energyRatio - 0.65D) / 1.05D, 0.0D, 1.0D));
       double liftMargin = this.lastWeightForce > 1.0E-6D
             ? MCH_FlightModel.clamp(this.getLiftToWeightRatio(), 0.0D, 1.8D) : 1.0D;
       double thrustMargin = this.lastWeightForce > 1.0E-6D
             ? MCH_FlightModel.clamp(this.getThrustToWeightRatio(), 0.0D, 1.6D) : 0.0D;
       double criticalAoA = Math.max(5.0D, (double)info.criticalAoA);
-      double aoaSeverity = this.smooth01(MCH_FlightModel.clamp((this.angleOfAttack - criticalAoA) / Math.max(1.0D, criticalAoA * 1.35D), 0.0D, 1.0D));
+      double aoaSeverity = this.smooth01(MCH_FlightModel.clamp((this.angleOfAttack - criticalAoA) / Math.max(1.0D, criticalAoA), 0.0D, 1.0D));
+      double speedDeficit = this.smooth01(MCH_FlightModel.clamp((1.0D - energyRatio) / 0.55D, 0.0D, 1.0D));
       double liftDeficit = MCH_FlightModel.clamp((0.92D - liftMargin) / 0.42D, 0.0D, 1.0D);
-      double lowEnergyGate = this.smooth01(MCH_FlightModel.clamp((1.35D - energyRatio) / 0.70D, 0.0D, 1.0D));
-      double climbGate = Math.max(lowEnergyGate, liftDeficit);
-      double rawClimbPenalty = this.smooth01(MCH_FlightModel.clamp(super.motionY / Math.max(0.10D, stallSpeed * 0.65D), 0.0D, 1.0D));
-      double climbPenalty = rawClimbPenalty * climbGate;
-      double liftCurve = this.smooth01(MCH_FlightModel.clamp(liftMargin / 1.05D, 0.0D, 1.0D));
-      double thrustCurve = this.smooth01(MCH_FlightModel.clamp(thrustMargin / 0.85D, 0.0D, 1.0D));
-      double support = MCH_FlightModel.clamp(0.62D * energyCurve + 0.25D * liftCurve + 0.13D * thrustCurve, 0.0D, 1.25D);
-      double sustainable = 4.0D + 76.0D * support;
-      if(energyRatio >= 1.35D && aoaSeverity <= 0.05D && liftMargin >= 0.90D) {
-         sustainable = Math.max(sustainable, 68.0D);
-      }
-      sustainable -= aoaSeverity * (30.0D + 24.0D * (1.0D - energyCurve));
-      sustainable -= climbPenalty * (16.0D + 24.0D * lowEnergyGate);
-      sustainable = MCH_FlightModel.clamp(sustainable, -12.0D, 82.0D);
+      double thrustDeficit = MCH_FlightModel.clamp(1.0D - thrustMargin, 0.0D, 1.0D);
+      double climbDemand = MCH_FlightModel.clamp(super.motionY / Math.max(0.10D, stallSpeed * 0.65D), 0.0D, 1.0D);
+      double unsupportedClimb = Math.max(this.lastUnsupportedClimbSeverity,
+            climbDemand * Math.max(Math.max(speedDeficit, liftDeficit), thrustDeficit));
+      double noseUpAttitude = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 90.0D, 0.0D, 1.0D);
+      double aerodynamicDeficit = Math.max(Math.max(this.stallSeverity, this.aoaStallSeverity),
+            Math.max(speedDeficit, liftDeficit));
+      double recoveryDemand = Math.max(Math.max(aerodynamicDeficit, this.lastEnergyDeficitSeverity), unsupportedClimb);
 
-      double currentNoseUp = this.getNoseUpPitchDegrees();
-      double desiredNoseUp = this.getDesiredNoseUpPitchDegrees(desiredPitchInput);
-      double commandPitchExcess = Math.max(0.0D, desiredNoseUp - sustainable);
-      double physicalPitchExcess = Math.max(0.0D, currentNoseUp - sustainable);
+      this.lastRecoveryDueToLowEnergy = speedDeficit > 0.20D || this.lastEnergyDeficitSeverity > 0.20D;
+      this.lastRecoveryDueToAoA = aoaSeverity > 0.05D || this.aoaStallSeverity > 0.05D;
+      this.lastRecoveryDueToLiftDeficit = liftDeficit > 0.15D;
+      this.lastRecoveryDueToUnsupportedClimb = unsupportedClimb > 0.25D;
 
-      boolean safelyInsideEnvelope = energyRatio >= 1.35D && aoaSeverity <= 0.05D && liftMargin >= 0.90D;
-      boolean absurdPhysicalOverpitch = currentNoseUp > 78.0D && physicalPitchExcess > 12.0D;
-      this.lastRecoveryDueToLowEnergy = energyRatio < 1.20D && currentNoseUp > 8.0D && rawClimbPenalty > 0.10D;
-      this.lastRecoveryDueToAoA = aoaSeverity > 0.05D;
-      this.lastRecoveryDueToLiftDeficit = liftDeficit > 0.15D && (currentNoseUp > 5.0D || rawClimbPenalty > 0.20D);
-      this.lastRecoveryDueToUnsupportedClimb = rawClimbPenalty > 0.35D && currentNoseUp > 8.0D
-            && (energyRatio < 1.25D || liftDeficit > 0.20D || this.lastUnsupportedClimbSeverity > 0.25D);
-      boolean recoveryGate = this.lastRecoveryDueToLowEnergy || this.lastRecoveryDueToAoA
-            || this.lastRecoveryDueToLiftDeficit || this.lastRecoveryDueToUnsupportedClimb || absurdPhysicalOverpitch;
-      if(safelyInsideEnvelope && !absurdPhysicalOverpitch) {
-         recoveryGate = false;
-         physicalPitchExcess = 0.0D;
+      if(recoveryDemand > 0.20D && noseUpAttitude > 0.05D) {
+         double recoveryScale = this.smooth01(MCH_FlightModel.clamp((recoveryDemand - 0.20D) / 0.80D, 0.0D, 1.0D));
+         this.lastNoseDownRecoveryTorque = recoveryScale * noseUpAttitude
+               * (0.08D + 0.32D * Math.max(this.stallSeverity, this.deepStallSeverity))
+               * (0.55D + (double)info.stallPitchRecoveryStrength);
+         this.lastPhysicalRecoveryActive = this.lastNoseDownRecoveryTorque > 1.0E-5D;
+         this.lastEnvelopeRecoveryActive = this.lastPhysicalRecoveryActive;
+         this.lastPitchEnvelopeExcess = recoveryDemand;
       }
 
-      double commandSeverity = this.smooth01(MCH_FlightModel.clamp(commandPitchExcess / 36.0D, 0.0D, 1.0D));
-      double physicalSeverity = this.smooth01(MCH_FlightModel.clamp(physicalPitchExcess / 42.0D, 0.0D, 1.0D));
-      double recoveryScale = Math.max(lowEnergyGate, Math.max(aoaSeverity, liftDeficit));
-      if(absurdPhysicalOverpitch) {
-         recoveryScale = Math.max(recoveryScale, 0.35D);
-      }
-      double recoveryTorque = recoveryGate && physicalSeverity > 1.0E-5D
-            ? physicalSeverity * recoveryScale * (0.10D + 0.30D * Math.max(this.stallSeverity, this.deepStallSeverity))
-                  * (0.55D + (double)info.stallPitchRecoveryStrength)
-            : 0.0D;
-
-      this.lastSustainableNoseUpPitch = sustainable;
-      this.lastCommandPitchExcess = commandPitchExcess;
-      this.lastPhysicalPitchExcess = physicalPitchExcess;
-      this.lastPitchEnvelopeExcess = physicalPitchExcess;
       this.lastPitchEnvelopeEnergyRatio = energyRatio;
-      this.lastNoseDownRecoveryTorque = recoveryTorque;
-      this.lastCommandLimiterActive = commandSeverity > 1.0E-5D;
-      this.lastPhysicalRecoveryActive = recoveryTorque > 1.0E-5D;
-      this.lastEnvelopeRecoveryActive = this.lastPhysicalRecoveryActive;
-      return MCH_FlightModel.clamp(1.0D - commandSeverity * (0.78D + 0.22D * Math.max(aoaSeverity, lowEnergyGate)), 0.0D, 1.0D);
+      // Do not clamp commanded nose-up input against a derived pitch angle.  The
+      // airframe may be pointed at any attitude; AoA, airflow, lift/energy margin,
+      // and control authority decide whether that attitude can be sustained.
+      return 1.0D;
    }
 
    private double getNoseUpPitchSuppression() {
@@ -1161,7 +1127,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       return this.lastPitchInputAfterAuthority;
    }
 
-   public double getLastSustainableNoseUpPitch() { return this.lastSustainableNoseUpPitch; }
+   public double getLastPitchEnvelopeReference() { return this.lastPitchEnvelopeReference; }
    public double getLastPitchEnvelopeExcess() { return this.lastPitchEnvelopeExcess; }
    public double getLastPitchEnvelopeEnergyRatio() { return this.lastPitchEnvelopeEnergyRatio; }
    public double getLastNoseDownRecoveryTorque() { return this.lastNoseDownRecoveryTorque; }
@@ -1370,7 +1336,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastFinalPitchAngularVelocity = 0.0D;
          this.lastRequestedPitchInput = 0.0F;
          this.lastPitchInputAfterAuthority = 0.0F;
-         this.lastSustainableNoseUpPitch = 90.0D;
+         this.lastPitchEnvelopeReference = 90.0D;
          this.lastPitchEnvelopeExcess = 0.0D;
          this.lastPitchEnvelopeEnergyRatio = 1.0D;
          this.lastNoseDownRecoveryTorque = 0.0D;
@@ -1471,7 +1437,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double pilotControlAuthority = planeInfo.newFlightDisableForwardAirspeedControlScaling
             ? (double)controlAuthority
             : (double)controlAuthority * softStallAuthority;
-      double envelopeNoseUpAuthority = this.updatePitchEnvelope(pitch);
+      double envelopeNoseUpAuthority = this.updatePitchEnvelope();
       double finalPitchAuthority = pilotControlAuthority * pitchAuthority;
       if(pitch < 0.0F) {
          finalPitchAuthority *= envelopeNoseUpAuthority;
@@ -2104,7 +2070,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastControlAuthority = 1.0D;
       this.lastRequestedPitchInput = 0.0D;
       this.lastPitchInputAfterAuthority = 0.0D;
-      this.lastSustainableNoseUpPitch = 90.0D;
+      this.lastPitchEnvelopeReference = 90.0D;
       this.lastPitchEnvelopeExcess = 0.0D;
       this.lastPitchEnvelopeEnergyRatio = 1.0D;
       this.lastNoseDownRecoveryTorque = 0.0D;
