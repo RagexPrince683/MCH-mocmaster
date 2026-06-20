@@ -528,6 +528,11 @@ public class MouseInputHandler {
                 aircraft.prevLastRiderYaw = aircraft.getPrevDetachedWeaponAimYaw();
                 aircraft.lastRiderPitch = aircraft.getDetachedWeaponAimPitch();
                 aircraft.prevLastRiderPitch = aircraft.getPrevDetachedWeaponAimPitch();
+            } else if (aircraft.canSwitchFreeLook() && aircraft.isFreeLookMode() && aircraft.isPilot(player)) {
+                aircraft.lastRiderYaw = aircraft.getYaw();
+                aircraft.prevLastRiderYaw = aircraft.prevRotationYaw;
+                aircraft.lastRiderPitch = aircraft.getPitch();
+                aircraft.prevLastRiderPitch = aircraft.prevRotationPitch;
             } else {
                 aircraft.lastRiderYaw = player.rotationYaw;
                 aircraft.prevLastRiderYaw = player.prevRotationYaw;
