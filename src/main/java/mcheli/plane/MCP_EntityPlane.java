@@ -176,7 +176,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastRequestedPitchInput;
    /** Last pitch command after control authority and low-speed/stall suppression. */
    private double lastPitchInputAfterAuthority;
-   /** Final pitch body-rate after post-control stall/energy recovery is applied. */
+   /** Fresh per-tick sustainable nose-up pitch envelope in degrees. */
+   private double lastSustainableNoseUpPitch;
+   /** Current nose-up pitch demand above the sustainable envelope in degrees. */
+   private double lastPitchEnvelopeExcess;
+   /** Energy ratio used by the pitch-envelope limiter (forward airspeed / stall speed). */
+   private double lastPitchEnvelopeEnergyRatio;
+   /** Final nose-down angular-velocity torque requested by pitch-envelope recovery. */
+   private double lastNoseDownRecoveryTorque;
+   /** Final pitch/elevator command after envelope limiting and authority shaping. */
+   private double lastFinalElevatorInput;
+   /** Final body-rate after post-control stall/energy recovery is applied. */
    private double lastFinalPitchAngularVelocity;
    /** Last airborne state used by the new fixed-wing force model. */
    private boolean lastAirborne;
@@ -298,6 +308,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastControlAuthority = 1.0D;
       this.lastRequestedPitchInput = 0.0D;
       this.lastPitchInputAfterAuthority = 0.0D;
+      this.lastSustainableNoseUpPitch = 90.0D;
+      this.lastPitchEnvelopeExcess = 0.0D;
+      this.lastPitchEnvelopeEnergyRatio = 1.0D;
+      this.lastNoseDownRecoveryTorque = 0.0D;
+      this.lastFinalElevatorInput = 0.0D;
       this.lastFinalPitchAngularVelocity = 0.0D;
       this.lastAirborne = false;
       this.angleOfAttack = 0.0D;
@@ -614,17 +629,57 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    private float clampIdleUnsupportedNoseUpPitch(float pitch, double stallSpeed) {
-      if(!this.isIdleUnsupportedClimb(MCH_FlightModel.clamp((double)(-pitch - 8.0F) / 42.0D, 0.0D, 1.0D), stallSpeed)) {
-         return pitch;
+      // New-flight pitch recovery must not snap or clamp the airframe to a magic angle.
+      // The continuous energy envelope limits pilot nose-up input and applies recovery
+      // through pitchAngularVelocity instead.
+      return pitch;
+   }
+
+
+   private double smooth01(double value) {
+      value = MCH_FlightModel.clamp(value, 0.0D, 1.0D);
+      return value * value * (3.0D - 2.0D * value);
+   }
+
+   private double updatePitchEnvelope(double desiredPitchInput) {
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      if(!this.useNewMobilitySystem() || info == null || this.getNozzleRotation() > 0.01F || this.onGround) {
+         this.lastSustainableNoseUpPitch = 90.0D;
+         this.lastPitchEnvelopeExcess = 0.0D;
+         this.lastPitchEnvelopeEnergyRatio = 1.0D;
+         this.lastNoseDownRecoveryTorque = 0.0D;
+         return 1.0D;
       }
 
-      double pitchLimit = this.getIdleNoseUpPitchLimit(stallSpeed);
-      if((double)pitch < -pitchLimit) {
-         this.pitchAngularVelocity = Math.max(0.0F, this.pitchAngularVelocity);
-         this.lastNoseUpPitchSuppression = 1.0D;
-         return (float)(-pitchLimit);
-      }
-      return pitch;
+      double stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
+      double forwardAirspeed = this.getForwardAirspeed();
+      double energyRatio = forwardAirspeed / Math.max(0.05D, stallSpeed);
+      double energyCurve = this.smooth01(MCH_FlightModel.clamp((energyRatio - 0.55D) / 1.15D, 0.0D, 1.0D));
+      double liftMargin = MCH_FlightModel.clamp(this.getLiftToWeightRatio(), 0.0D, 1.8D);
+      double thrustMargin = MCH_FlightModel.clamp(this.getThrustToWeightRatio(), 0.0D, 1.6D);
+      double criticalAoA = Math.max(1.0D, (double)info.criticalAoA);
+      double aoaSeverity = this.smooth01(MCH_FlightModel.clamp((this.angleOfAttack - criticalAoA) / Math.max(1.0D, criticalAoA * 1.35D), 0.0D, 1.0D));
+      double climbPenalty = this.smooth01(MCH_FlightModel.clamp(super.motionY / Math.max(0.08D, stallSpeed * 0.45D), 0.0D, 1.0D));
+      double liftCurve = this.smooth01(MCH_FlightModel.clamp(liftMargin / 1.15D, 0.0D, 1.0D));
+      double thrustCurve = this.smooth01(MCH_FlightModel.clamp(thrustMargin / 1.0D, 0.0D, 1.0D));
+      double support = MCH_FlightModel.clamp(0.58D * energyCurve + 0.27D * liftCurve + 0.15D * thrustCurve, 0.0D, 1.25D);
+      double sustainable = -8.0D + 72.0D * support;
+      sustainable -= aoaSeverity * (30.0D + 26.0D * (1.0D - energyCurve));
+      sustainable -= climbPenalty * (18.0D + 20.0D * (1.0D - energyCurve));
+      sustainable = MCH_FlightModel.clamp(sustainable, -18.0D, 72.0D);
+
+      double currentNoseUp = Math.max(0.0D, (double)-this.getRotPitch());
+      double commandedNoseUp = desiredPitchInput < 0.0D ? Math.min(90.0D, currentNoseUp + (double)(-desiredPitchInput) * 28.0D) : currentNoseUp;
+      double pitchExcess = Math.max(currentNoseUp, commandedNoseUp) - sustainable;
+      double severity = this.smooth01(MCH_FlightModel.clamp(pitchExcess / 42.0D, 0.0D, 1.0D));
+      double recoveryTorque = severity * (0.08D + 0.32D * Math.max(aoaSeverity, Math.max(this.stallSeverity, this.deepStallSeverity)))
+            * (0.55D + (double)info.stallPitchRecoveryStrength);
+
+      this.lastSustainableNoseUpPitch = sustainable;
+      this.lastPitchEnvelopeExcess = Math.max(0.0D, pitchExcess);
+      this.lastPitchEnvelopeEnergyRatio = energyRatio;
+      this.lastNoseDownRecoveryTorque = recoveryTorque;
+      return MCH_FlightModel.clamp(1.0D - severity * (0.80D + 0.20D * aoaSeverity), 0.0D, 1.0D);
    }
 
    private double getNoseUpPitchSuppression() {
@@ -1033,6 +1088,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       return this.lastPitchInputAfterAuthority;
    }
 
+   public double getLastSustainableNoseUpPitch() { return this.lastSustainableNoseUpPitch; }
+   public double getLastPitchEnvelopeExcess() { return this.lastPitchEnvelopeExcess; }
+   public double getLastPitchEnvelopeEnergyRatio() { return this.lastPitchEnvelopeEnergyRatio; }
+   public double getLastNoseDownRecoveryTorque() { return this.lastNoseDownRecoveryTorque; }
+   public double getLastFinalElevatorInput() { return this.lastFinalElevatorInput; }
+
    public double getLastFinalPitchAngularVelocity() {
       return this.lastFinalPitchAngularVelocity;
    }
@@ -1227,6 +1288,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastFinalPitchAngularVelocity = 0.0D;
          this.lastRequestedPitchInput = 0.0F;
          this.lastPitchInputAfterAuthority = 0.0F;
+         this.lastSustainableNoseUpPitch = 90.0D;
+         this.lastPitchEnvelopeExcess = 0.0D;
+         this.lastPitchEnvelopeEnergyRatio = 1.0D;
+         this.lastNoseDownRecoveryTorque = 0.0D;
+         this.lastFinalElevatorInput = 0.0D;
          this.lastControlAuthority = this.getControlAuthorityFactor();
          this.lastPitchAuthority = 1.0D;
          this.lastAirflowAuthority = 1.0D;
@@ -1323,7 +1389,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double pilotControlAuthority = planeInfo.newFlightDisableForwardAirspeedControlScaling
             ? (double)controlAuthority
             : (double)controlAuthority * softStallAuthority;
+      double envelopeNoseUpAuthority = this.updatePitchEnvelope(pitch);
       double finalPitchAuthority = pilotControlAuthority * pitchAuthority;
+      if(pitch < 0.0F) {
+         finalPitchAuthority *= envelopeNoseUpAuthority;
+      }
       this.lastControlAuthority = controlAuthority;
       this.lastPitchAuthority = pitchAuthority;
       this.lastAirflowAuthority = pilotControlAuthority;
@@ -1338,10 +1408,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastPitchAuthorityAfterSuppression = finalPitchAuthority;
       }
       this.lastFinalPitchAuthority = finalPitchAuthority;
-      this.lastPitchUpAuthority = pitchUpLimiter;
+      this.lastPitchUpAuthority = pitchUpLimiter * envelopeNoseUpAuthority;
       this.lastPitchDownAuthority = (double)controlAuthority * pitchAuthority;
       pitch *= (float)finalPitchAuthority;
       this.lastPitchInputAfterAuthority = pitch;
+      this.lastFinalElevatorInput = pitch;
       double deepAxisLimiter = MCH_FlightModel.clamp(1.0D - deepControlLoss * 0.25D, 0.70D, 1.0D);
       this.lastRollAuthority = controlAuthority * deepAxisLimiter;
       this.lastYawAuthority = controlAuthority * MCH_FlightModel.clamp(1.0D - deepControlLoss * 0.18D, 0.75D, 1.0D);
@@ -1359,6 +1430,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.yawAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.yawAngularVelocity, yaw,
             info.yawTorque, info.yawDamping, info.inertiaMultiplier, partialTicks);
       this.lastPilotPitchAngularVelocity = this.pitchAngularVelocity;
+      if(this.lastNoseDownRecoveryTorque > 1.0E-5D) {
+         double envelopeSeverity = MCH_FlightModel.clamp(this.lastPitchEnvelopeExcess / 42.0D, 0.0D, 1.0D);
+         this.queueNoseDownRecovery(this.lastNoseDownRecoveryTorque, envelopeSeverity,
+               MCH_FlightModel.clamp(envelopeSeverity * 0.35D, 0.0D, 0.55D));
+      }
       this.applyAerodynamicAngularMoments(partialTicks);
       this.lastFinalPitchAngularVelocity = this.pitchAngularVelocity;
       pitch = this.pitchAngularVelocity * partialTicks;
@@ -1826,9 +1902,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          return;
       }
 
-      double appliedPitchDelta = MCH_FlightModel.clamp(this.lastForcedNoseDownPitchDelta, 0.0D, 2.5D);
-      this.setRotPitch(this.getRotPitch() + (float)appliedPitchDelta);
-      this.lastForcedNoseDownPitchDelta = appliedPitchDelta;
+      // Recovery is already queued into pitchAngularVelocity; do not directly assign or clamp rotation.
+      this.lastForcedNoseDownPitchDelta = MCH_FlightModel.clamp(this.lastForcedNoseDownPitchDelta, 0.0D, 2.5D);
       this.lastFinalPitchAngularVelocity = this.pitchAngularVelocity;
    }
 
@@ -1947,6 +2022,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastControlAuthority = 1.0D;
       this.lastRequestedPitchInput = 0.0D;
       this.lastPitchInputAfterAuthority = 0.0D;
+      this.lastSustainableNoseUpPitch = 90.0D;
+      this.lastPitchEnvelopeExcess = 0.0D;
+      this.lastPitchEnvelopeEnergyRatio = 1.0D;
+      this.lastNoseDownRecoveryTorque = 0.0D;
+      this.lastFinalElevatorInput = 0.0D;
       this.lastFinalPitchAngularVelocity = 0.0D;
       this.lastAirborne = false;
       this.pitchAngularVelocity = this.rollAngularVelocity = this.yawAngularVelocity = 0.0F;
