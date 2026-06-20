@@ -7,8 +7,8 @@ EnableNightVision = true
 EnableEntityRadar = true
 EnableEjectionSeat = true
 Speed = 3.20
-MobilityYaw = 1.323
-MobilityPitch = 1.603
+MobilityYaw = 1.429
+MobilityPitch = 1.731
 
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
@@ -32,14 +32,14 @@ NewFlightCombatFlapControl = 0.130
 NewFlightCombatFlapOverspeed = 0.780
 FlightCeiling = 16000
 FlightCeilingRange = 72
-StallSpeed = 0.576
+StallSpeed = 0.528
 CriticalAoA = 16.80
 TimeUntilStallPastCriticalAoA = 1.25
 TimeAfterStallUntilPitchDown = 1.05
 StallLiftLoss = 0.820
 AoADragMultiplier = 2.300
 StallInstability = 0.440
-StallRecoverySpeed = 0.760
+StallRecoverySpeed = 0.750
 StallSpeedFactor = 0.18
 StallStrength = 1.15
 DiveSpeedMultiplier = 1.28
@@ -90,7 +90,7 @@ ThirdPersonDist = 16
 
 Sound = faeighteen
 
-MobilityRoll = 1.866
+MobilityRoll = 2.015
 
 ; M = Military(軍用機).  F = Fighter(戦闗機)
 Category = MF

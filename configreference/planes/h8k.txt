@@ -21,7 +21,7 @@ UseNewMobilitySystem = true
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
 PhysicalMass = 1.350
-EngineThrust = 1.002
+EngineThrust = 1.458
 NewFlightGravity = 0.0082
 NewFlightThrottleResponse = 1.150
 NewFlightThrottleChangeRateUp = 0.0038
@@ -34,14 +34,14 @@ NewFlightThrottleHudDisplay = true
 NewFlightCombatFlaps = false
 FlightCeiling = 9000
 FlightCeilingRange = 56
-StallSpeed = 0.210
+StallSpeed = 0.174
 CriticalAoA = 13.20
 TimeUntilStallPastCriticalAoA = 1.55
 TimeAfterStallUntilPitchDown = 1.30
 StallLiftLoss = 0.740
 AoADragMultiplier = 2.850
 StallInstability = 0.340
-StallRecoverySpeed = 0.311
+StallRecoverySpeed = 0.247
 StallSpeedFactor = 0.24
 StallStrength = 0.95
 DiveSpeedMultiplier = 1.2
@@ -75,9 +75,9 @@ CameraZoom = 2
 
 HUD = plane_wwii, plane_wwii, gunner, gunner, gunner, gunner, gunner
 
-MobilityYaw   = 0.386
-MobilityPitch = 0.442
-MobilityRoll  = 0.342
+MobilityYaw   = 0.444
+MobilityPitch = 0.508
+MobilityRoll  = 0.393
 ;MinRotationPitch = -60
 ;MaxRotationPitch =  60
 ;MinRotationRoll  = -60
