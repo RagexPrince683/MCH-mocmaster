@@ -50,6 +50,8 @@ This document is the audit and user-facing reference for the fixed-wing `EnableR
 | `NewFlightCombatFlapOverspeed` | Flap safe-speed fraction | Multiplies overspeed threshold when flaps deployed | Fraction of VNE |
 | `StallSpeed` | Stall entry speed | Internal speed threshold | `StallSpeedKmh` in km/h; legacy remains supported |
 | `CriticalAoA` | Stall angle threshold | AoA stall severity and AoA drag | degrees |
+| `TimeUntilStallPastCriticalAoA` | Delay before high-AoA flight develops major energy/stall loss | Seconds above critical AoA gate deep-stall/AoA energy bleed | seconds |
+| `TimeAfterStallUntilPitchDown` | Delay before low-energy stall forces nose-down recovery | Seconds after stalled low-forward-energy state before pitch-break recovery | seconds |
 | `StallLiftLoss` | Lift loss in full stall | Multiplies stall severity into lift reduction | Fraction |
 | `AoADragMultiplier` | Drag from angle of attack | Multiplies base drag by normalized AoA² | Unitless gameplay tuning; documented |
 | `StallInstability` | Stall buffet/wing drop | Adds deterministic stall motion | Unitless gameplay tuning; documented |
@@ -82,6 +84,8 @@ StallRecoverySpeedKmh = 265
 CompressibilitySpeedKmh = 635
 NeverExceedSpeed = 780
 CriticalAoA = 14
+TimeUntilStallPastCriticalAoA = 1.2
+TimeAfterStallUntilPitchDown = 1.0
 MaxComfortableG = 7.5
 MaxStructuralG = 8.5
 NewFlightIdleNoseUpLimit = 38
@@ -98,8 +102,16 @@ The parser warns for internally contradictory values such as structural G below 
 - `StallSpeedKmh`: 55-350 km/h.
 - `MaximumLevelSpeed`: 120-4000 km/h.
 - `CriticalAoA`: 10-20 degrees for most aircraft.
+- `TimeUntilStallPastCriticalAoA`: 0.8-1.8 seconds for most fixed-wing aircraft; aerobatic/fighters are usually shorter, heavy aircraft longer.
+- `TimeAfterStallUntilPitchDown`: 0.7-1.5 seconds, long enough to feel a stall develop but short enough to prevent indefinite vertical climbs.
 - `MaxComfortableG`/`MaxStructuralG`: 2.5-12 G depending on class.
 
 ## Remaining unitless gameplay tuning
 
 The current model still contains tuning values that are not direct real-world aerodynamic properties. Do not replace them with invented `WingArea`, `DragCoefficient`, `LiftCoefficient`, `AspectRatio`, or control-surface deflection fields unless a future task redesigns the flight model. The documented unitless values are retained because they control the existing energy, stall, damping, and input-response approximations directly.
+
+## Stall and idle-throttle behavior
+
+`TimeUntilStallPastCriticalAoA` prevents instant balloon-like momentum loss when the nose briefly exceeds critical AoA. The AoA timer begins at or above `CriticalAoA`; before it expires, AoA drag and stall demand ramp in instead of instantly removing usable energy. `TimeAfterStallUntilPitchDown` begins only after the aircraft is already stalled and has lost most usable forward airspeed. When that second timer expires, the recovery system forces a nose-down pitch break so the aircraft falls, unloads the wing, and can regain airspeed.
+
+At zero commanded throttle, airborne aircraft with a pilot keep gliding and bleeding speed through drag/energy loss instead of having horizontal motion zeroed. The old throttle-zero stop remains active on the ground and within five blocks of the surface so newly placed aircraft do not run away.
