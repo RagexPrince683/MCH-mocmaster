@@ -150,6 +150,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private String lastLowHorizontalSpeedWarning;
    /** Last compressibility-limited pitch authority multiplier before low-speed suppression. */
    private double lastPitchAuthority;
+   /** Last low-speed usable airflow authority multiplier for pitch controls. */
+   private double lastAirflowAuthority;
+   /** Last final pitch authority after stall, airflow, compressibility, and nose-up suppression. */
+   private double lastFinalPitchAuthority;
    /** Last effective nose-up pitch authority after low-speed/stall suppression. */
    private double lastPitchAuthorityAfterSuppression;
    /** Last full control authority multiplier applied before pitch-axis modifiers. */
@@ -268,6 +272,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastNoseUpPitchSuppression = 0.0D;
       this.lastUnsupportedClimbSeverity = 0.0D;
       this.lastPitchAuthority = 1.0D;
+      this.lastAirflowAuthority = 1.0D;
+      this.lastFinalPitchAuthority = 1.0D;
       this.lastPitchAuthorityAfterSuppression = 1.0D;
       this.lastControlAuthority = 1.0D;
       this.lastRequestedPitchInput = 0.0D;
@@ -520,6 +526,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double flapAuthority = this.isCombatFlapsDeployed() ? 1.0D + (double)info.newFlightCombatFlapControl : 1.0D;
       return (float)MCH_FlightModel.clamp(highGAuthority * MCH_FlightModel.getControlAuthority(severity)
             * flapAuthority, 0.05D, 1.35D);
+   }
+
+   private double getLowSpeedAirflowAuthority(double forwardAirspeed, double stallSpeed) {
+      if(stallSpeed <= 1.0E-5D) {
+         return 1.0D;
+      }
+
+      double speedRatio = MCH_FlightModel.clamp(forwardAirspeed / stallSpeed, 0.0D, 1.4D);
+      double shapedAuthority = speedRatio * speedRatio;
+      double emergencyAuthority = 0.04D + 0.06D * MCH_FlightModel.clamp(this.getThrustToWeightRatio(), 0.0D, 1.0D);
+      return MCH_FlightModel.clamp(Math.max(shapedAuthority, emergencyAuthority), 0.04D, 1.0D);
    }
 
    private double getUnsupportedClimbSeverity() {
@@ -946,6 +963,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       return this.lastPitchAuthority;
    }
 
+   public double getLastAirflowAuthority() {
+      return this.lastAirflowAuthority;
+   }
+
+   public double getLastFinalPitchAuthority() {
+      return this.lastFinalPitchAuthority;
+   }
+
    public double getLastPitchAuthorityAfterSuppression() {
       return this.lastPitchAuthorityAfterSuppression;
    }
@@ -1122,7 +1147,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastPitchInputAfterAuthority = 0.0F;
          this.lastControlAuthority = this.getControlAuthorityFactor();
          this.lastPitchAuthority = 1.0D;
-         this.lastPitchAuthorityAfterSuppression = 1.0D;
+         this.lastAirflowAuthority = 1.0D;
+         this.lastFinalPitchAuthority = this.lastControlAuthority;
+         this.lastPitchAuthorityAfterSuppression = this.lastFinalPitchAuthority;
          this.lastNoseUpPitchSuppression = 0.0D;
          this.addkeyRotValue = 0.0F;
          this.prevRotationRoll = this.getRotRoll();
@@ -1205,19 +1232,28 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double pitchAuthoritySpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       double pitchAuthority = MCH_FlightModel.getCompressibilityPitchAuthority(pitchAuthoritySpeed,
             this.getCompressibilitySpeed(), this.getMaxSafeSpeed(), this.getPlaneInfo().compressibilityPitchPenalty);
+      double stallSpeedForAuthority = MCH_FlightModel.getStallSpeed(planeInfo.stallSpeed, this.getMaxSpeed(), planeInfo.stallSpeedFactor);
+      double airflowAuthority = this.getLowSpeedAirflowAuthority(this.getForwardAirspeed(), stallSpeedForAuthority);
+      double noseDownAirflowAuthority = MCH_FlightModel.clamp(airflowAuthority + (1.0D - airflowAuthority) * 0.45D, 0.0D, 1.0D);
+      double pitchAirflowAuthority = pitch > 0.0F ? noseDownAirflowAuthority : airflowAuthority;
+      double finalPitchAuthority = (double)controlAuthority * pitchAuthority * pitchAirflowAuthority;
       this.lastControlAuthority = controlAuthority;
       this.lastPitchAuthority = pitchAuthority;
+      this.lastAirflowAuthority = airflowAuthority;
       this.lastRequestedPitchInput = pitch;
-      pitch *= controlAuthority * (float)pitchAuthority;
       this.lastNoseUpPitchSuppression = this.getNoseUpPitchSuppression();
-      this.lastPitchAuthorityAfterSuppression = pitchAuthority;
+      this.lastPitchAuthorityAfterSuppression = finalPitchAuthority;
       if(pitch < 0.0F && this.lastNoseUpPitchSuppression > 0.0D) {
-         this.lastPitchAuthorityAfterSuppression = pitchAuthority * (1.0D - this.lastNoseUpPitchSuppression);
-         pitch *= (float)(1.0D - this.lastNoseUpPitchSuppression);
+         finalPitchAuthority *= (1.0D - this.lastNoseUpPitchSuppression);
+         this.lastPitchAuthorityAfterSuppression = finalPitchAuthority;
       }
+      this.lastFinalPitchAuthority = finalPitchAuthority;
+      pitch *= (float)finalPitchAuthority;
       this.lastPitchInputAfterAuthority = pitch;
-      roll *= controlAuthority;
-      yaw *= controlAuthority;
+      double rollAirflowAuthority = 0.35D + 0.65D * airflowAuthority;
+      double yawAirflowAuthority = 0.45D + 0.55D * airflowAuthority;
+      roll *= controlAuthority * (float)rollAirflowAuthority;
+      yaw *= controlAuthority * (float)yawAirflowAuthority;
 
       // The legacy controls above still define the requested angular rate.
       // Integrating that request as a damped body rate retains existing mobility
@@ -1774,6 +1810,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastIdleUnsupportedClimb = false;
       this.lastIdleThrottleWarning = "";
       this.lastPitchAuthority = 1.0D;
+      this.lastAirflowAuthority = 1.0D;
+      this.lastFinalPitchAuthority = 1.0D;
       this.lastPitchAuthorityAfterSuppression = 1.0D;
       this.lastControlAuthority = 1.0D;
       this.lastRequestedPitchInput = 0.0D;
@@ -2813,6 +2851,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             || Double.isNaN(this.lastUnsupportedClimbSeverity) || Double.isInfinite(this.lastUnsupportedClimbSeverity)
             || Double.isNaN((double)this.lastControlAuthority) || Double.isInfinite((double)this.lastControlAuthority)
             || Double.isNaN(this.lastPitchAuthority) || Double.isInfinite(this.lastPitchAuthority)
+            || Double.isNaN(this.lastAirflowAuthority) || Double.isInfinite(this.lastAirflowAuthority)
+            || Double.isNaN(this.lastFinalPitchAuthority) || Double.isInfinite(this.lastFinalPitchAuthority)
             || Double.isNaN(this.stallSeverity) || Double.isInfinite(this.stallSeverity);
       if(finite) {
          this.lastIdleThrottleWarning = "nonFinite";
