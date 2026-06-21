@@ -73,6 +73,12 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private float horizontalAccelerationZ;
    private float parasiteDragAppliedX;
    private float parasiteDragAppliedZ;
+   private float forwardVelocityComponent;
+   private float lateralVelocityComponent;
+   private float appliedLateralThrustMultiplier;
+   private boolean lateralSpeedCapped;
+   private boolean backwardThrustScaled;
+   private boolean backwardSpeedCapped;
    private float finalMotionX;
    private float finalMotionZ;
    private float hoverAssistStrength;
@@ -203,6 +209,12 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.horizontalAccelerationZ = 0.0F;
       this.parasiteDragAppliedX = 0.0F;
       this.parasiteDragAppliedZ = 0.0F;
+      this.forwardVelocityComponent = 0.0F;
+      this.lateralVelocityComponent = 0.0F;
+      this.appliedLateralThrustMultiplier = 0.0F;
+      this.lateralSpeedCapped = false;
+      this.backwardThrustScaled = false;
+      this.backwardSpeedCapped = false;
       this.finalMotionX = 0.0F;
       this.finalMotionZ = 0.0F;
       this.hoverAssistStrength = 0.0F;
@@ -343,6 +355,30 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
    public float getParasiteDragAppliedZ() {
       return this.parasiteDragAppliedZ;
+   }
+
+   public float getForwardVelocityComponent() {
+      return this.forwardVelocityComponent;
+   }
+
+   public float getLateralVelocityComponent() {
+      return this.lateralVelocityComponent;
+   }
+
+   public float getAppliedLateralThrustMultiplier() {
+      return this.appliedLateralThrustMultiplier;
+   }
+
+   public boolean isLateralSpeedCapped() {
+      return this.lateralSpeedCapped;
+   }
+
+   public boolean isBackwardThrustScaled() {
+      return this.backwardThrustScaled;
+   }
+
+   public boolean isBackwardSpeedCapped() {
+      return this.backwardSpeedCapped;
    }
 
    public float getFinalMotionX() {
@@ -1334,36 +1370,59 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float rightZ = -MathHelper.sin(yawRadians);
 
       float horizontalThrustScale = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.horizontalRotorThrustScale, 0.0F, 1000.0F):0.35F;
+      float lateralThrustScale = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.helicopterLateralThrustScale, 0.0F, 1000.0F):0.45F;
+      float backwardThrustScale = this.heliInfo != null && this.isFinite(this.heliInfo.helicopterBackwardThrustScale)?MathHelper.clamp_float(this.heliInfo.helicopterBackwardThrustScale, 0.0F, 1000.0F):1.0F;
       float attitudeTiltForward = MathHelper.clamp_float(MathHelper.sin(this.getRotPitch() / 180.0F * 3.1415927F), -0.75F, 0.75F);
       float attitudeTiltRight = MathHelper.clamp_float(-MathHelper.sin(this.getRotRoll() / 180.0F * 3.1415927F), -0.75F, 0.75F);
-      float effectiveTiltForward = this.rotorTiltForward + attitudeTiltForward;
-      float effectiveTiltRight = this.rotorTiltRight + attitudeTiltRight;
-      float effectiveTiltMagnitudeSq = effectiveTiltForward * effectiveTiltForward + effectiveTiltRight * effectiveTiltRight;
-      if(effectiveTiltMagnitudeSq > 1.0F) {
-         float invMagnitude = 1.0F / MathHelper.sqrt_float(effectiveTiltMagnitudeSq);
-         effectiveTiltForward *= invMagnitude;
-         effectiveTiltRight *= invMagnitude;
-      }
-      this.rotorHorizontalThrustX = this.rotorThrust * horizontalThrustScale * (effectiveTiltForward * forwardX + effectiveTiltRight * rightX);
-      this.rotorHorizontalThrustZ = this.rotorThrust * horizontalThrustScale * (effectiveTiltForward * forwardZ + effectiveTiltRight * rightZ);
+      float effectiveTiltForward = MathHelper.clamp_float(this.rotorTiltForward + attitudeTiltForward, -1.0F, 1.0F);
+      float effectiveTiltRight = MathHelper.clamp_float(this.rotorTiltRight + attitudeTiltRight, -1.0F, 1.0F);
+      float forwardThrustScale = effectiveTiltForward < 0.0F?backwardThrustScale:1.0F;
+      this.backwardThrustScaled = effectiveTiltForward < 0.0F && MathHelper.abs(backwardThrustScale - 1.0F) > 0.0001F;
+      this.appliedLateralThrustMultiplier = lateralThrustScale;
+
+      float forwardThrust = this.rotorThrust * horizontalThrustScale * effectiveTiltForward * forwardThrustScale;
+      float lateralThrust = this.rotorThrust * horizontalThrustScale * effectiveTiltRight * lateralThrustScale;
+      this.rotorHorizontalThrustX = forwardThrust * forwardX + lateralThrust * rightX;
+      this.rotorHorizontalThrustZ = forwardThrust * forwardZ + lateralThrust * rightZ;
       this.horizontalAccelerationX = this.rotorHorizontalThrustX / mass;
       this.horizontalAccelerationZ = this.rotorHorizontalThrustZ / mass;
       super.motionX += (double)(this.horizontalAccelerationX * tickDelta);
       super.motionZ += (double)(this.horizontalAccelerationZ * tickDelta);
 
-      float drag = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.parasiteDrag, 0.0F, 1.0F / Math.max(tickDelta, 0.001F)):0.0F;
-      this.parasiteDragAppliedX = (float)(-super.motionX * (double)drag * (double)tickDelta);
-      this.parasiteDragAppliedZ = (float)(-super.motionZ * (double)drag * (double)tickDelta);
-      super.motionX += (double)this.parasiteDragAppliedX;
-      super.motionZ += (double)this.parasiteDragAppliedZ;
+      float forwardDrag = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.parasiteDrag, 0.0F, 1.0F / Math.max(tickDelta, 0.001F)):0.0F;
+      float lateralDrag = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.helicopterLateralDrag, 0.0F, 1.0F / Math.max(tickDelta, 0.001F)):forwardDrag;
+      float forwardVelocity = (float)(super.motionX * (double)forwardX + super.motionZ * (double)forwardZ);
+      float lateralVelocity = (float)(super.motionX * (double)rightX + super.motionZ * (double)rightZ);
+      float dampedForwardVelocity = forwardVelocity * (1.0F - forwardDrag * tickDelta);
+      float dampedLateralVelocity = lateralVelocity * (1.0F - lateralDrag * tickDelta);
+      this.parasiteDragAppliedX = (dampedForwardVelocity - forwardVelocity) * forwardX + (dampedLateralVelocity - lateralVelocity) * rightX;
+      this.parasiteDragAppliedZ = (dampedForwardVelocity - forwardVelocity) * forwardZ + (dampedLateralVelocity - lateralVelocity) * rightZ;
+      forwardVelocity = dampedForwardVelocity;
+      lateralVelocity = dampedLateralVelocity;
 
-      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       double safetyLimit = Math.max((double)this.getAcInfo().speed * 4.0D, 4.0D);
+      float lateralLimit = (float)(safetyLimit * (double)(this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.helicopterMaxLateralSpeedScale, 0.0F, 1000.0F):0.45F));
+      this.lateralSpeedCapped = lateralLimit > 0.0F && MathHelper.abs(lateralVelocity) > lateralLimit;
+      if(this.lateralSpeedCapped) {
+         lateralVelocity = MathHelper.clamp_float(lateralVelocity, -lateralLimit, lateralLimit);
+      }
+      float backwardLimitScale = this.heliInfo != null && this.isFinite(this.heliInfo.helicopterMaxBackwardSpeedScale)?MathHelper.clamp_float(this.heliInfo.helicopterMaxBackwardSpeedScale, 0.0F, 1000.0F):1.0F;
+      float backwardLimit = (float)(safetyLimit * (double)backwardLimitScale);
+      this.backwardSpeedCapped = forwardVelocity < -backwardLimit && MathHelper.abs(backwardLimitScale - 1.0F) > 0.0001F;
+      if(this.backwardSpeedCapped) {
+         forwardVelocity = -backwardLimit;
+      }
+
+      super.motionX = (double)(forwardVelocity * forwardX + lateralVelocity * rightX);
+      super.motionZ = (double)(forwardVelocity * forwardZ + lateralVelocity * rightZ);
+      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       if(horizontalSpeed > safetyLimit) {
          super.motionX *= safetyLimit / horizontalSpeed;
          super.motionZ *= safetyLimit / horizontalSpeed;
       }
 
+      this.forwardVelocityComponent = (float)(super.motionX * (double)forwardX + super.motionZ * (double)forwardZ);
+      this.lateralVelocityComponent = (float)(super.motionX * (double)rightX + super.motionZ * (double)rightZ);
       this.finalMotionX = (float)super.motionX;
       this.finalMotionZ = (float)super.motionZ;
    }

@@ -6,3 +6,29 @@ HUD = heli
 speed = 0.85
 maxhp = 100
 addrotor = 4, 45, 0.0, 2.2, 0.0, 0.0, 0.0, 0.0
+
+; New helicopter model example: pitch attitude drives forward flight, roll attitude drives sideways movement.
+; Lateral and backward translation are intentionally less efficient than forward flight; tune these
+; physics values instead of reducing cyclic/roll authority or pilot input responsiveness.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.0
+MainRotorMaxThrust = 0.13
+RotorInertia = 1.0
+RotorSpoolUpRate = 0.024
+RotorSpoolDownRate = 0.032
+CollectiveResponse = 0.08
+CyclicAuthority = 1.0
+TailRotorAuthority = 1.0
+YawDamping = 0.20
+AngularInertia = 1.0
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.026
+MaxClimbRate = 0.16
+ParasiteDrag = 0.035
+HorizontalRotorThrustScale = 0.35
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.055
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.35
+HelicopterMaxBackwardSpeedScale = 0.35
+HoverAssistStrength = 0.75

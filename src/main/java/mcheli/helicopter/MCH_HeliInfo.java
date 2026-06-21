@@ -42,8 +42,18 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
    public float maxClimbRate;
    /** Horizontal air-drag coefficient for future speed damping. */
    public float parasiteDrag;
-   /** Minecraft-scale multiplier for cyclic rotor thrust converted into horizontal acceleration. */
+   /** Minecraft-scale multiplier for pitch-derived rotor thrust converted into forward/backward acceleration. */
    public float horizontalRotorThrustScale;
+   /** Additional multiplier applied only to roll-derived lateral rotor thrust. */
+   public float helicopterLateralThrustScale;
+   /** Lateral velocity drag coefficient applied independently from forward parasite drag. */
+   public float helicopterLateralDrag;
+   /** Maximum lateral speed as a scale of the new-heli horizontal safety speed. */
+   public float helicopterMaxLateralSpeedScale;
+   /** Optional backward thrust scale; NaN inherits forward thrust behavior for compatibility. */
+   public float helicopterBackwardThrustScale;
+   /** Optional backward speed scale; NaN inherits forward speed behavior for compatibility. */
+   public float helicopterMaxBackwardSpeedScale;
    /** Strength of new-model hover assistance; 0 disables assist, 1 is full configured assist. */
    public float hoverAssistStrength;
    /** Show compact collective/RPM readouts to pilots using the new helicopter flight model. */
@@ -71,6 +81,11 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
       this.maxClimbRate = 0.16F;
       this.parasiteDrag = 0.01F;
       this.horizontalRotorThrustScale = 0.35F;
+      this.helicopterLateralThrustScale = 0.45F;
+      this.helicopterLateralDrag = 0.055F;
+      this.helicopterMaxLateralSpeedScale = 0.45F;
+      this.helicopterBackwardThrustScale = Float.NaN;
+      this.helicopterMaxBackwardSpeedScale = Float.NaN;
       this.hoverAssistStrength = 0.75F;
       this.newHeliControlHudDisplay = true;
       this.rotorList = new ArrayList();
@@ -141,6 +156,16 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
          this.parasiteDrag = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("HorizontalRotorThrustScale") || item.equalsIgnoreCase("HelicopterHorizontalThrustScale")) {
          this.horizontalRotorThrustScale = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("HelicopterLateralThrustScale")) {
+         this.helicopterLateralThrustScale = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("HelicopterLateralDrag")) {
+         this.helicopterLateralDrag = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("HelicopterMaxLateralSpeedScale")) {
+         this.helicopterMaxLateralSpeedScale = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("HelicopterBackwardThrustScale")) {
+         this.helicopterBackwardThrustScale = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("HelicopterMaxBackwardSpeedScale")) {
+         this.helicopterMaxBackwardSpeedScale = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("HoverAssistStrength")) {
          this.hoverAssistStrength = this.toFloat(data, 0.0F, 1.0F);
       } else if(item.equalsIgnoreCase("NewHeliControlHudDisplay") || item.equalsIgnoreCase("NewHelicopterControlHudDisplay")) {
