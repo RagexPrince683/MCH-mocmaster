@@ -44,6 +44,22 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    public byte lastFoldBladeStat;
    public int foldBladesCooldown;
    public float prevRollFactor = 0.0F;
+   private boolean newHeliFlightModelEnabled;
+   private float physicalMass = 1.0F;
+   private float normalizedRotorRPM;
+   private float targetRotorRPM;
+   private float rotorEnergy;
+   private float enginePowerOutput;
+   private float lastRotorRPM;
+   private float rotorSpoolDelta;
+   private boolean rotorReadyForLift;
+   private float collectiveInput;
+   private float rotorThrust;
+   private float verticalForce;
+   private float cyclicPitchInput;
+   private float cyclicRollInput;
+   private float tailRotorInput;
+   private boolean hoverAssistActive;
 
 
    public MCH_EntityHeli(World world) {
@@ -86,12 +102,102 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          this.setDead(true);
       } else {
          this.setAcInfo(this.heliInfo);
+         this.updateNewHelicopterFlightTelemetryConfig();
          this.newSeats(this.getAcInfo().getNumSeatAndRack());
          this.createRotors();
          super.weapons = this.createWeapon(1 + this.getSeatNum());
          this.initPartRotation(this.getRotYaw(), this.getRotPitch());
       }
 
+   }
+
+   private void updateNewHelicopterFlightTelemetryConfig() {
+      this.newHeliFlightModelEnabled = this.heliInfo != null && this.heliInfo.useNewHelicopterFlightModel;
+      this.physicalMass = this.newHeliFlightModelEnabled?this.heliInfo.physicalMass:1.0F;
+      if(!this.newHeliFlightModelEnabled) {
+         this.normalizedRotorRPM = 0.0F;
+         this.targetRotorRPM = 0.0F;
+         this.rotorEnergy = 0.0F;
+         this.enginePowerOutput = 0.0F;
+         this.lastRotorRPM = 0.0F;
+         this.rotorSpoolDelta = 0.0F;
+         this.rotorReadyForLift = false;
+         this.collectiveInput = 0.0F;
+         this.rotorThrust = 0.0F;
+         this.verticalForce = 0.0F;
+         this.cyclicPitchInput = 0.0F;
+         this.cyclicRollInput = 0.0F;
+         this.tailRotorInput = 0.0F;
+         this.hoverAssistActive = false;
+      }
+   }
+
+   public boolean isNewHeliFlightModelEnabled() {
+      return this.newHeliFlightModelEnabled;
+   }
+
+   public float getPhysicalMass() {
+      return this.physicalMass;
+   }
+
+   public float getNormalizedRotorRPM() {
+      return this.normalizedRotorRPM;
+   }
+
+   public float getRotorRPM() {
+      return this.normalizedRotorRPM;
+   }
+
+   public float getTargetRotorRPM() {
+      return this.targetRotorRPM;
+   }
+
+   public float getRotorEnergy() {
+      return this.rotorEnergy;
+   }
+
+   public float getEnginePowerOutput() {
+      return this.enginePowerOutput;
+   }
+
+   public float getLastRotorRPM() {
+      return this.lastRotorRPM;
+   }
+
+   public float getRotorSpoolDelta() {
+      return this.rotorSpoolDelta;
+   }
+
+   public boolean isRotorReadyForLift() {
+      return this.rotorReadyForLift;
+   }
+
+   public float getCollectiveInput() {
+      return this.collectiveInput;
+   }
+
+   public float getRotorThrust() {
+      return this.rotorThrust;
+   }
+
+   public float getVerticalForce() {
+      return this.verticalForce;
+   }
+
+   public float getCyclicPitchInput() {
+      return this.cyclicPitchInput;
+   }
+
+   public float getCyclicRollInput() {
+      return this.cyclicRollInput;
+   }
+
+   public float getTailRotorInput() {
+      return this.tailRotorInput;
+   }
+
+   public boolean isHoverAssistActive() {
+      return this.hoverAssistActive;
    }
 
    public Item getItem() {
@@ -113,6 +219,10 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       par1NBTTagCompound.setDouble("RotorSpeed", this.getCurrentThrottle());
       par1NBTTagCompound.setDouble("rotetionRotor", this.rotationRotor);
       par1NBTTagCompound.setBoolean("FoldBlade", this.getFoldBladeStat() == 0);
+      par1NBTTagCompound.setFloat("NewHeliRotorRPM", this.normalizedRotorRPM);
+      par1NBTTagCompound.setFloat("NewHeliTargetRotorRPM", this.targetRotorRPM);
+      par1NBTTagCompound.setFloat("NewHeliRotorEnergy", this.rotorEnergy);
+      par1NBTTagCompound.setFloat("NewHeliEnginePower", this.enginePowerOutput);
    }
 
    protected void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
@@ -130,6 +240,18 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
       this.setCurrentThrottle(par1NBTTagCompound.getDouble("RotorSpeed"));
       this.rotationRotor = par1NBTTagCompound.getDouble("rotetionRotor");
+      if(par1NBTTagCompound.hasKey("NewHeliRotorRPM")) {
+         this.normalizedRotorRPM = MathHelper.clamp_float(par1NBTTagCompound.getFloat("NewHeliRotorRPM"), 0.0F, 1.0F);
+      }
+      if(par1NBTTagCompound.hasKey("NewHeliTargetRotorRPM")) {
+         this.targetRotorRPM = MathHelper.clamp_float(par1NBTTagCompound.getFloat("NewHeliTargetRotorRPM"), 0.0F, 1.0F);
+      }
+      if(par1NBTTagCompound.hasKey("NewHeliRotorEnergy")) {
+         this.rotorEnergy = Math.max(par1NBTTagCompound.getFloat("NewHeliRotorEnergy"), 0.0F);
+      }
+      if(par1NBTTagCompound.hasKey("NewHeliEnginePower")) {
+         this.enginePowerOutput = MathHelper.clamp_float(par1NBTTagCompound.getFloat("NewHeliEnginePower"), 0.0F, 1.0F);
+      }
       this.setFoldBladeStat((byte)(par1NBTTagCompound.getBoolean("FoldBlade")?0:2));
       if(this.heliInfo == null) {
          this.heliInfo = MCH_HeliInfoManager.get(this.getTypeName());
@@ -138,6 +260,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             this.setDead(true);
          } else {
             this.setAcInfo(this.heliInfo);
+            this.updateNewHelicopterFlightTelemetryConfig();
          }
       }
 
@@ -334,6 +457,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             this.initCurrentWeapon(this.getRiddenByEntity());
          }
 
+         this.updateNewHelicopterFlightTelemetryConfig();
          this.updateWeapons();
          this.onUpdate_Seats();
          this.onUpdate_Control();
@@ -545,9 +669,40 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       }
 
       this.prevRotationRotor = this.rotationRotor;
-      float rp1 = (float)(1.0D - this.getCurrentThrottle());
-      this.rotationRotor += (double)((1.0F - rp1 * rp1 * rp1) * this.getAcInfo().rotorSpeed);
+      if(this.newHeliFlightModelEnabled) {
+         this.updateNewHelicopterRotorSpool();
+         this.rotationRotor += (double)(this.normalizedRotorRPM * this.getAcInfo().rotorSpeed);
+      } else {
+         float rp1 = (float)(1.0D - this.getCurrentThrottle());
+         this.rotationRotor += (double)((1.0F - rp1 * rp1 * rp1) * this.getAcInfo().rotorSpeed);
+      }
+
       this.rotationRotor %= 360.0D;
+   }
+
+   private void updateNewHelicopterRotorSpool() {
+      boolean bladesUsable = this.canUseBlades() && !this.isFoldBlades();
+      boolean enginePowered = !this.isDestroyed() && bladesUsable && this.isCanopyClose() && this.canUseFuel(true);
+      this.lastRotorRPM = this.normalizedRotorRPM;
+      this.enginePowerOutput = enginePowered?MathHelper.clamp_float((float)this.getCurrentThrottle(), 0.0F, 1.0F):0.0F;
+      this.targetRotorRPM = this.enginePowerOutput;
+
+      float delta = this.targetRotorRPM - this.normalizedRotorRPM;
+      float configuredRate = delta >= 0.0F?this.heliInfo.rotorSpoolUpRate:this.heliInfo.rotorSpoolDownRate;
+      float inertia = Math.max(this.heliInfo.rotorInertia, 0.01F);
+      float maxStep = configuredRate / inertia;
+      if(MathHelper.abs(delta) <= maxStep) {
+         this.normalizedRotorRPM = this.targetRotorRPM;
+      } else if(delta > 0.0F) {
+         this.normalizedRotorRPM += maxStep;
+      } else {
+         this.normalizedRotorRPM -= maxStep;
+      }
+
+      this.normalizedRotorRPM = MathHelper.clamp_float(this.normalizedRotorRPM, 0.0F, 1.0F);
+      this.rotorSpoolDelta = this.normalizedRotorRPM - this.lastRotorRPM;
+      this.rotorEnergy = this.normalizedRotorRPM * this.normalizedRotorRPM * inertia;
+      this.rotorReadyForLift = bladesUsable && this.normalizedRotorRPM >= 0.85F;
    }
 
    protected void onUpdate_ControlNotHovering() {
