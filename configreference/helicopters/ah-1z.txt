@@ -30,7 +30,12 @@ TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.026
 ParasiteDrag = 0.032
 HorizontalRotorThrustScale = 0.75
-HoverAssistStrength = 0.2
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.04
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.55
+HelicopterMaxBackwardSpeedScale = 0.45
+HoverAssistStrength = 0.75
 
 
 Sound = r44_heli

@@ -33,7 +33,12 @@ TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.026
 ParasiteDrag = 0.034
 HorizontalRotorThrustScale = 0.66
-HoverAssistStrength = 0.19
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.04
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.55
+HelicopterMaxBackwardSpeedScale = 0.45
+HoverAssistStrength = 0.75
 
 
 ; M = Military(軍用機).  M = Multi-Mission(多目的機)

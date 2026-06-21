@@ -38,11 +38,23 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
    public float translationalLiftCoefficient;
    /** Vertical drag coefficient for future climb/descent damping. */
    public float verticalDrag;
+   /** Maximum upward speed for new-model helicopters, in blocks per tick. */
+   public float maxClimbRate;
    /** Horizontal air-drag coefficient for future speed damping. */
    public float parasiteDrag;
    /** Minecraft-scale multiplier for cyclic rotor thrust converted into horizontal acceleration. */
    public float horizontalRotorThrustScale;
-   /** Strength of future hover assistance; 0 disables assist, 1 is full configured assist. */
+   /** Multiplier for roll/right-axis translational thrust relative to pitch/forward thrust. */
+   public float helicopterLateralThrustScale;
+   /** Additional lateral velocity damping for new-model helicopters. */
+   public float helicopterLateralDrag;
+   /** Maximum lateral speed as a fraction of the normal horizontal safety limit. */
+   public float helicopterMaxLateralSpeedScale;
+   /** Multiplier for backward translational thrust relative to forward thrust. */
+   public float helicopterBackwardThrustScale;
+   /** Maximum backward speed as a fraction of the normal horizontal safety limit. */
+   public float helicopterMaxBackwardSpeedScale;
+   /** Strength of new-model hover assistance; 0 disables assist, 1 is full configured assist. */
    public float hoverAssistStrength;
    /** Show compact collective/RPM readouts to pilots using the new helicopter flight model. */
    public boolean newHeliControlHudDisplay;
@@ -66,9 +78,15 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
       this.angularInertia = 1.0F;
       this.translationalLiftCoefficient = 0.004F;
       this.verticalDrag = 0.02F;
+      this.maxClimbRate = 0.16F;
       this.parasiteDrag = 0.01F;
       this.horizontalRotorThrustScale = 0.35F;
-      this.hoverAssistStrength = 0.0F;
+      this.helicopterLateralThrustScale = 0.45F;
+      this.helicopterLateralDrag = 0.04F;
+      this.helicopterMaxLateralSpeedScale = 0.45F;
+      this.helicopterBackwardThrustScale = 0.55F;
+      this.helicopterMaxBackwardSpeedScale = 0.45F;
+      this.hoverAssistStrength = 0.75F;
       this.newHeliControlHudDisplay = true;
       this.rotorList = new ArrayList();
       super.minRotationPitch = -20.0F;
@@ -132,10 +150,22 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
          this.translationalLiftCoefficient = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("VerticalDrag")) {
          this.verticalDrag = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("MaxClimbRate") || item.equalsIgnoreCase("HelicopterMaxClimbRate") || item.equalsIgnoreCase("NewHelicopterMaxClimbRate")) {
+         this.maxClimbRate = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("ParasiteDrag")) {
          this.parasiteDrag = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("HorizontalRotorThrustScale") || item.equalsIgnoreCase("HelicopterHorizontalThrustScale")) {
          this.horizontalRotorThrustScale = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("HelicopterLateralThrustScale")) {
+         this.helicopterLateralThrustScale = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("HelicopterLateralDrag")) {
+         this.helicopterLateralDrag = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("HelicopterMaxLateralSpeedScale")) {
+         this.helicopterMaxLateralSpeedScale = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("HelicopterBackwardThrustScale")) {
+         this.helicopterBackwardThrustScale = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("HelicopterMaxBackwardSpeedScale")) {
+         this.helicopterMaxBackwardSpeedScale = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("HoverAssistStrength")) {
          this.hoverAssistStrength = this.toFloat(data, 0.0F, 1.0F);
       } else if(item.equalsIgnoreCase("NewHeliControlHudDisplay") || item.equalsIgnoreCase("NewHelicopterControlHudDisplay")) {

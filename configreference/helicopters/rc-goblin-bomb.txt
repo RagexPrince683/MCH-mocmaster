@@ -32,9 +32,15 @@ YawDamping = 0.22
 AngularInertia = 0.5
 TranslationalLiftCoefficient = 0.005
 VerticalDrag = 0.021
+MaxClimbRate = 0.13
 ParasiteDrag = 0.021
 HorizontalRotorThrustScale = 0.86
-HoverAssistStrength = 0.25
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.04
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.55
+HelicopterMaxBackwardSpeedScale = 0.45
+HoverAssistStrength = 0.75
 
 Category = sUAS
 

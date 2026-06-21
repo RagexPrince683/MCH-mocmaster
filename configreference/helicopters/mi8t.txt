@@ -25,7 +25,12 @@ TranslationalLiftCoefficient = 0.003
 VerticalDrag = 0.03
 ParasiteDrag = 0.042
 HorizontalRotorThrustScale = 0.62
-HoverAssistStrength = 0.15
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.04
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.55
+HelicopterMaxBackwardSpeedScale = 0.45
+HoverAssistStrength = 0.75
 
 
 sound = hind

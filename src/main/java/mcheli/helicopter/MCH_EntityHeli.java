@@ -73,6 +73,11 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private float horizontalAccelerationZ;
    private float parasiteDragAppliedX;
    private float parasiteDragAppliedZ;
+   private float forwardVelocityComponent;
+   private float lateralVelocityComponent;
+   private float appliedLateralThrustScale;
+   private boolean lateralSpeedCapActive;
+   private boolean backwardFlightScalingActive;
    private float finalMotionX;
    private float finalMotionZ;
    private float hoverAssistStrength;
@@ -203,6 +208,11 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.horizontalAccelerationZ = 0.0F;
       this.parasiteDragAppliedX = 0.0F;
       this.parasiteDragAppliedZ = 0.0F;
+      this.forwardVelocityComponent = 0.0F;
+      this.lateralVelocityComponent = 0.0F;
+      this.appliedLateralThrustScale = 0.0F;
+      this.lateralSpeedCapActive = false;
+      this.backwardFlightScalingActive = false;
       this.finalMotionX = 0.0F;
       this.finalMotionZ = 0.0F;
       this.hoverAssistStrength = 0.0F;
@@ -343,6 +353,27 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
    public float getParasiteDragAppliedZ() {
       return this.parasiteDragAppliedZ;
+   }
+
+
+   public float getForwardVelocityComponent() {
+      return this.forwardVelocityComponent;
+   }
+
+   public float getLateralVelocityComponent() {
+      return this.lateralVelocityComponent;
+   }
+
+   public float getAppliedLateralThrustScale() {
+      return this.appliedLateralThrustScale;
+   }
+
+   public boolean isLateralSpeedCapActive() {
+      return this.lateralSpeedCapActive;
+   }
+
+   public boolean isBackwardFlightScalingActive() {
+      return this.backwardFlightScalingActive;
    }
 
    public float getFinalMotionX() {
@@ -1219,7 +1250,9 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       }
 
       this.rotorEfficiency = this.sanitizeClamped((float)efficiency, 0.0F, 2.0F, 0.0F);
-      this.rotorThrust = Math.max(this.heliInfo.mainRotorMaxThrust, 0.0F) * this.normalizedRotorRPM * this.collectiveInput * this.rotorEfficiency;
+      float liftSpool = MathHelper.clamp_float((this.normalizedRotorRPM - 0.35F) / 0.65F, 0.0F, 1.0F);
+      liftSpool *= liftSpool;
+      this.rotorThrust = Math.max(this.heliInfo.mainRotorMaxThrust, 0.0F) * liftSpool * this.collectiveInput * this.rotorEfficiency;
 
       float pitchComponent = MathHelper.cos(this.getRotPitch() / 180.0F * 3.1415927F);
       float rollComponent = MathHelper.cos(this.getRotRoll() / 180.0F * 3.1415927F);
@@ -1236,18 +1269,21 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float verticalDrag = MathHelper.clamp_float(this.heliInfo.verticalDrag, 0.0F, 1.0F / Math.max(tickDelta, 0.001F));
       this.verticalDragApplied = (float)(-super.motionY * (double)verticalDrag * (double)tickDelta);
       super.motionY += (double)this.verticalDragApplied;
+      float maxClimbRate = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.maxClimbRate, 0.0F, 1000.0F):0.16F;
+      if(maxClimbRate > 0.0F && super.motionY > (double)maxClimbRate) {
+         super.motionY = (double)maxClimbRate;
+      }
       this.finalMotionY = (float)super.motionY;
    }
 
    private void updateNewHelicopterCyclicInput() {
       float pitchInput = 0.0F;
       float rollInput = 0.0F;
-      if(super.throttleUp && !super.throttleDown) {
-         pitchInput = 1.0F;
-      } else if(super.throttleDown && !super.throttleUp) {
-         pitchInput = -1.0F;
-      }
 
+      // In the new helicopter model W/S are collective controls only.
+      // Do not feed them into cyclic pitch, otherwise S creates raw
+      // backward acceleration and gunner/hover paths can manufacture
+      // forward speed from view/control-mode changes.
       if(super.moveRight && !super.moveLeft) {
          rollInput = 1.0F;
       } else if(super.moveLeft && !super.moveRight) {
@@ -1284,7 +1320,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.localDriftRight = 0.0F;
       this.hoverAssistActive = false;
 
-      if(!this.newHeliFlightModelEnabled || !this.isHovering() || this.heliInfo == null) {
+      if(!this.newHeliFlightModelEnabled || !this.isHoveringMode() || this.heliInfo == null) {
          return;
       }
 
@@ -1305,7 +1341,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
       this.targetVerticalSpeed = 0.0F;
       this.targetHorizontalSpeed = 0.0F;
-      this.hoverCollectiveCorrection = MathHelper.clamp_float((this.targetVerticalSpeed - (float)super.motionY) * 0.35F, -0.18F, 0.18F) * assistBlend;
+      this.hoverCollectiveCorrection = MathHelper.clamp_float((this.targetVerticalSpeed - (float)super.motionY) * 0.75F, -0.32F, 0.32F) * assistBlend;
 
       float yawRadians = this.getRotYaw() / 180.0F * 3.1415927F;
       float forwardX = -MathHelper.sin(yawRadians);
@@ -1314,8 +1350,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float rightZ = -MathHelper.sin(yawRadians);
       this.localDriftForward = (float)(super.motionX * (double)forwardX + super.motionZ * (double)forwardZ);
       this.localDriftRight = (float)(super.motionX * (double)rightX + super.motionZ * (double)rightZ);
-      this.hoverCyclicPitchCorrection = MathHelper.clamp_float(-this.localDriftForward * 1.8F, -0.35F, 0.35F) * assistBlend;
-      this.hoverCyclicRollCorrection = MathHelper.clamp_float(-this.localDriftRight * 1.8F, -0.35F, 0.35F) * assistBlend;
+      this.hoverCyclicPitchCorrection = MathHelper.clamp_float(-this.localDriftForward * 3.0F, -0.60F, 0.60F) * assistBlend;
+      this.hoverCyclicRollCorrection = MathHelper.clamp_float(-this.localDriftRight * 3.0F, -0.60F, 0.60F) * assistBlend;
    }
 
    private void applyNewHelicopterCyclicThrust(float tickDelta) {
@@ -1329,25 +1365,90 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float rightZ = -MathHelper.sin(yawRadians);
 
       float horizontalThrustScale = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.horizontalRotorThrustScale, 0.0F, 1000.0F):0.35F;
-      this.rotorHorizontalThrustX = this.rotorThrust * horizontalThrustScale * (this.rotorTiltForward * forwardX + this.rotorTiltRight * rightX);
-      this.rotorHorizontalThrustZ = this.rotorThrust * horizontalThrustScale * (this.rotorTiltForward * forwardZ + this.rotorTiltRight * rightZ);
+      float lateralThrustScale = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.helicopterLateralThrustScale, 0.0F, 1000.0F):0.45F;
+      float backwardThrustScale = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.helicopterBackwardThrustScale, 0.0F, 1000.0F):0.55F;
+      float attitudeTiltForward = MathHelper.clamp_float(MathHelper.sin(this.getRotPitch() / 180.0F * 3.1415927F), -0.75F, 0.75F);
+      float attitudeTiltRight = MathHelper.clamp_float(-MathHelper.sin(this.getRotRoll() / 180.0F * 3.1415927F), -0.75F, 0.75F);
+      float effectiveTiltForward = this.rotorTiltForward + attitudeTiltForward;
+      float effectiveTiltRight = this.rotorTiltRight + attitudeTiltRight;
+      float effectiveTiltMagnitudeSq = effectiveTiltForward * effectiveTiltForward + effectiveTiltRight * effectiveTiltRight;
+      if(effectiveTiltMagnitudeSq > 1.0F) {
+         float invMagnitude = 1.0F / MathHelper.sqrt_float(effectiveTiltMagnitudeSq);
+         effectiveTiltForward *= invMagnitude;
+         effectiveTiltRight *= invMagnitude;
+      }
+      if(this.isHoveringMode()) {
+         this.appliedLateralThrustScale = 1.0F;
+         this.lateralSpeedCapActive = false;
+         this.backwardFlightScalingActive = false;
+         this.rotorHorizontalThrustX = this.rotorThrust * horizontalThrustScale * (effectiveTiltForward * forwardX + effectiveTiltRight * rightX);
+         this.rotorHorizontalThrustZ = this.rotorThrust * horizontalThrustScale * (effectiveTiltForward * forwardZ + effectiveTiltRight * rightZ);
+         this.horizontalAccelerationX = this.rotorHorizontalThrustX / mass;
+         this.horizontalAccelerationZ = this.rotorHorizontalThrustZ / mass;
+         super.motionX += (double)(this.horizontalAccelerationX * tickDelta);
+         super.motionZ += (double)(this.horizontalAccelerationZ * tickDelta);
+         float drag = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.parasiteDrag, 0.0F, 1.0F / Math.max(tickDelta, 0.001F)):0.0F;
+         this.parasiteDragAppliedX = (float)(-super.motionX * (double)drag * (double)tickDelta);
+         this.parasiteDragAppliedZ = (float)(-super.motionZ * (double)drag * (double)tickDelta);
+         super.motionX += (double)this.parasiteDragAppliedX;
+         super.motionZ += (double)this.parasiteDragAppliedZ;
+         this.forwardVelocityComponent = (float)(super.motionX * (double)forwardX + super.motionZ * (double)forwardZ);
+         this.lateralVelocityComponent = (float)(super.motionX * (double)rightX + super.motionZ * (double)rightZ);
+         double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+         double safetyLimit = Math.max((double)this.getAcInfo().speed * 4.0D, 4.0D);
+         if(horizontalSpeed > safetyLimit) {
+            super.motionX *= safetyLimit / horizontalSpeed;
+            super.motionZ *= safetyLimit / horizontalSpeed;
+         }
+         this.finalMotionX = (float)super.motionX;
+         this.finalMotionZ = (float)super.motionZ;
+         return;
+      }
+      float forwardThrustScale = effectiveTiltForward < 0.0F?backwardThrustScale:1.0F;
+      this.appliedLateralThrustScale = lateralThrustScale;
+      this.backwardFlightScalingActive = effectiveTiltForward < -0.001F && backwardThrustScale < 0.999F;
+      float forwardThrust = this.rotorThrust * horizontalThrustScale * effectiveTiltForward * forwardThrustScale;
+      float lateralThrust = this.rotorThrust * horizontalThrustScale * effectiveTiltRight * lateralThrustScale;
+      this.rotorHorizontalThrustX = forwardThrust * forwardX + lateralThrust * rightX;
+      this.rotorHorizontalThrustZ = forwardThrust * forwardZ + lateralThrust * rightZ;
       this.horizontalAccelerationX = this.rotorHorizontalThrustX / mass;
       this.horizontalAccelerationZ = this.rotorHorizontalThrustZ / mass;
       super.motionX += (double)(this.horizontalAccelerationX * tickDelta);
       super.motionZ += (double)(this.horizontalAccelerationZ * tickDelta);
 
+      float forwardVelocity = (float)(super.motionX * (double)forwardX + super.motionZ * (double)forwardZ);
+      float lateralVelocity = (float)(super.motionX * (double)rightX + super.motionZ * (double)rightZ);
       float drag = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.parasiteDrag, 0.0F, 1.0F / Math.max(tickDelta, 0.001F)):0.0F;
-      this.parasiteDragAppliedX = (float)(-super.motionX * (double)drag * (double)tickDelta);
-      this.parasiteDragAppliedZ = (float)(-super.motionZ * (double)drag * (double)tickDelta);
-      super.motionX += (double)this.parasiteDragAppliedX;
-      super.motionZ += (double)this.parasiteDragAppliedZ;
+      float lateralDrag = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.helicopterLateralDrag, 0.0F, 1.0F / Math.max(tickDelta, 0.001F)):0.04F;
+      float forwardAfterDrag = forwardVelocity + -forwardVelocity * drag * tickDelta;
+      float lateralAfterDrag = lateralVelocity + -lateralVelocity * MathHelper.clamp_float(drag + lateralDrag, 0.0F, 1.0F / Math.max(tickDelta, 0.001F)) * tickDelta;
 
-      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       double safetyLimit = Math.max((double)this.getAcInfo().speed * 4.0D, 4.0D);
-      if(horizontalSpeed > safetyLimit) {
-         super.motionX *= safetyLimit / horizontalSpeed;
-         super.motionZ *= safetyLimit / horizontalSpeed;
+      float lateralLimitScale = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.helicopterMaxLateralSpeedScale, 0.0F, 1000.0F):0.45F;
+      float backwardLimitScale = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.helicopterMaxBackwardSpeedScale, 0.0F, 1000.0F):0.45F;
+      if(forwardAfterDrag > (float)safetyLimit) {
+         forwardAfterDrag = (float)safetyLimit;
       }
+      float maxLateralSpeed = (float)(safetyLimit * (double)lateralLimitScale);
+      this.lateralSpeedCapActive = maxLateralSpeed > 0.0F && MathHelper.abs(lateralAfterDrag) > maxLateralSpeed;
+      if(this.lateralSpeedCapActive) {
+         lateralAfterDrag = MathHelper.clamp_float(lateralAfterDrag, -maxLateralSpeed, maxLateralSpeed);
+      }
+      float maxBackwardSpeed = (float)(safetyLimit * (double)backwardLimitScale);
+      boolean backwardSpeedCapActive = maxBackwardSpeed > 0.0F && forwardAfterDrag < -maxBackwardSpeed;
+      if(backwardSpeedCapActive) {
+         forwardAfterDrag = -maxBackwardSpeed;
+      }
+      this.backwardFlightScalingActive = this.backwardFlightScalingActive || backwardSpeedCapActive;
+      this.forwardVelocityComponent = forwardAfterDrag;
+      this.lateralVelocityComponent = lateralAfterDrag;
+
+      double oldMotionX = super.motionX;
+      double oldMotionZ = super.motionZ;
+      super.motionX = (double)forwardAfterDrag * (double)forwardX + (double)lateralAfterDrag * (double)rightX;
+      super.motionZ = (double)forwardAfterDrag * (double)forwardZ + (double)lateralAfterDrag * (double)rightZ;
+      this.parasiteDragAppliedX = (float)(super.motionX - oldMotionX);
+      this.parasiteDragAppliedZ = (float)(super.motionZ - oldMotionZ);
 
       this.finalMotionX = (float)super.motionX;
       this.finalMotionZ = (float)super.motionZ;
@@ -1454,7 +1555,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       double motion;
       float speedLimit;
       float pitch;
-      if(!this.isHovering()) {
+      boolean applyNewHeliFreeFlight = this.newHeliFlightModelEnabled && super.isGunnerMode && !this.isHoveringMode();
+      if(!this.isHovering() || applyNewHeliFreeFlight) {
          motion = 0.0D;
          if(this.canFloatWater()) {
             motion = this.getWaterDepth();

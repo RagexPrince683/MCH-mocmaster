@@ -25,9 +25,15 @@ YawDamping = 0.18
 AngularInertia = 0.85
 TranslationalLiftCoefficient = 0.0045
 VerticalDrag = 0.024
+MaxClimbRate = 0.13
 ParasiteDrag = 0.025
 HorizontalRotorThrustScale = 0.90
-HoverAssistStrength = 0.22
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.04
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.55
+HelicopterMaxBackwardSpeedScale = 0.45
+HoverAssistStrength = 0.75
 
 ; M = Military(軍用機).  A = Attacker(攻撃機)
 Category = LA/MM

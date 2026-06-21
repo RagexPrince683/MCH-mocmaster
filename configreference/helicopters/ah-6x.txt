@@ -25,9 +25,15 @@ YawDamping = 0.18
 AngularInertia = 0.88
 TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.025
+MaxClimbRate = 0.13
 ParasiteDrag = 0.026
 HorizontalRotorThrustScale = 0.88
-HoverAssistStrength = 0.22
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.04
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.55
+HelicopterMaxBackwardSpeedScale = 0.45
+HoverAssistStrength = 0.75
 
 
 Sound = littlebird
