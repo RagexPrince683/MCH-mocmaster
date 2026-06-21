@@ -105,11 +105,15 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       int collective = this.toPercent(heli.getCollectiveInput());
       int rpm = this.toPercent(heli.getNormalizedRotorRPM());
       int engine = this.toPercent(heli.getEnginePowerOutput());
-      String sas = heli.isHoverAssistActive()?" SAS":"";
-      int color = rpm < 85 && collective > 10?-65536:-1;
-      this.drawString(String.format("COL %3d%%  RPM %3d%%  ENG %3d%%%s",
-            new Object[]{Integer.valueOf(collective), Integer.valueOf(rpm), Integer.valueOf(engine), sas}),
-            super.centerX - 92, super.centerY + 42, color);
+      int color = -16711936;
+      int x = super.centerX - 145;
+      int y = super.centerY + 30;
+      this.drawString(String.format("COL: %3d%%", new Object[]{Integer.valueOf(collective)}), x, y, color);
+      this.drawString(String.format("RPM: %3d%%", new Object[]{Integer.valueOf(rpm)}), x, y + 10, color);
+      this.drawString(String.format("ENG: %3d%%", new Object[]{Integer.valueOf(engine)}), x, y + 20, color);
+      if(heli.isHoverAssistActive()) {
+         this.drawString("SAS: ON", x, y + 30, color);
+      }
    }
 
    private int toPercent(float value) {

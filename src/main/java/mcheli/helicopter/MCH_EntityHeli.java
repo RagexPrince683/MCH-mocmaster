@@ -1242,12 +1242,11 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private void updateNewHelicopterCyclicInput() {
       float pitchInput = 0.0F;
       float rollInput = 0.0F;
-      if(super.throttleUp && !super.throttleDown) {
-         pitchInput = 1.0F;
-      } else if(super.throttleDown && !super.throttleUp) {
-         pitchInput = -1.0F;
-      }
 
+      // In the new helicopter model W/S are collective controls only.
+      // Do not feed them into cyclic pitch, otherwise S creates raw
+      // backward acceleration and gunner/hover paths can manufacture
+      // forward speed from view/control-mode changes.
       if(super.moveRight && !super.moveLeft) {
          rollInput = 1.0F;
       } else if(super.moveLeft && !super.moveRight) {
@@ -1284,7 +1283,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.localDriftRight = 0.0F;
       this.hoverAssistActive = false;
 
-      if(!this.newHeliFlightModelEnabled || !this.isHovering() || this.heliInfo == null) {
+      if(!this.newHeliFlightModelEnabled || !this.isHoveringMode() || this.heliInfo == null) {
          return;
       }
 
@@ -1305,7 +1304,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
       this.targetVerticalSpeed = 0.0F;
       this.targetHorizontalSpeed = 0.0F;
-      this.hoverCollectiveCorrection = MathHelper.clamp_float((this.targetVerticalSpeed - (float)super.motionY) * 0.35F, -0.18F, 0.18F) * assistBlend;
+      this.hoverCollectiveCorrection = MathHelper.clamp_float((this.targetVerticalSpeed - (float)super.motionY) * 0.75F, -0.32F, 0.32F) * assistBlend;
 
       float yawRadians = this.getRotYaw() / 180.0F * 3.1415927F;
       float forwardX = -MathHelper.sin(yawRadians);
@@ -1314,8 +1313,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float rightZ = -MathHelper.sin(yawRadians);
       this.localDriftForward = (float)(super.motionX * (double)forwardX + super.motionZ * (double)forwardZ);
       this.localDriftRight = (float)(super.motionX * (double)rightX + super.motionZ * (double)rightZ);
-      this.hoverCyclicPitchCorrection = MathHelper.clamp_float(-this.localDriftForward * 1.8F, -0.35F, 0.35F) * assistBlend;
-      this.hoverCyclicRollCorrection = MathHelper.clamp_float(-this.localDriftRight * 1.8F, -0.35F, 0.35F) * assistBlend;
+      this.hoverCyclicPitchCorrection = MathHelper.clamp_float(-this.localDriftForward * 3.0F, -0.60F, 0.60F) * assistBlend;
+      this.hoverCyclicRollCorrection = MathHelper.clamp_float(-this.localDriftRight * 3.0F, -0.60F, 0.60F) * assistBlend;
    }
 
    private void applyNewHelicopterCyclicThrust(float tickDelta) {
@@ -1454,7 +1453,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       double motion;
       float speedLimit;
       float pitch;
-      if(!this.isHovering()) {
+      boolean applyNewHeliFreeFlight = this.newHeliFlightModelEnabled && super.isGunnerMode && !this.isHoveringMode();
+      if(!this.isHovering() || applyNewHeliFreeFlight) {
          motion = 0.0D;
          if(this.canFloatWater()) {
             motion = this.getWaterDepth();

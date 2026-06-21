@@ -33,7 +33,7 @@ TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.029
 ParasiteDrag = 0.041
 HorizontalRotorThrustScale = 0.58
-HoverAssistStrength = 0.16
+HoverAssistStrength = 0.75
 
 
 sound = apache

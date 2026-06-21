@@ -22,7 +22,7 @@ TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.026
 ParasiteDrag = 0.033
 HorizontalRotorThrustScale = 0.76
-HoverAssistStrength = 0.2
+HoverAssistStrength = 0.75
 
 
 ; M = Military(軍用機).  A = Attacker(攻撃機)

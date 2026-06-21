@@ -42,7 +42,7 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
    public float parasiteDrag;
    /** Minecraft-scale multiplier for cyclic rotor thrust converted into horizontal acceleration. */
    public float horizontalRotorThrustScale;
-   /** Strength of future hover assistance; 0 disables assist, 1 is full configured assist. */
+   /** Strength of new-model hover assistance; 0 disables assist, 1 is full configured assist. */
    public float hoverAssistStrength;
    /** Show compact collective/RPM readouts to pilots using the new helicopter flight model. */
    public boolean newHeliControlHudDisplay;
@@ -68,7 +68,7 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
       this.verticalDrag = 0.02F;
       this.parasiteDrag = 0.01F;
       this.horizontalRotorThrustScale = 0.35F;
-      this.hoverAssistStrength = 0.0F;
+      this.hoverAssistStrength = 0.75F;
       this.newHeliControlHudDisplay = true;
       this.rotorList = new ArrayList();
       super.minRotationPitch = -20.0F;

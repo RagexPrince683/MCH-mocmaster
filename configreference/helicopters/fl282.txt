@@ -28,7 +28,7 @@ TranslationalLiftCoefficient = 0.005
 VerticalDrag = 0.023
 ParasiteDrag = 0.024
 HorizontalRotorThrustScale = 0.84
-HoverAssistStrength = 0.24
+HoverAssistStrength = 0.75
 
 unmountposition = 0.0,  1.45,  0.25
 ; W = WWII.  R = Reconnaissance(偵察機)
