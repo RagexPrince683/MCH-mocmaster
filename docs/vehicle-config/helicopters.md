@@ -40,6 +40,8 @@ The new keys above are inert unless `UseNewHelicopterFlightModel = true`. Existi
 
 The first controlled asset opt-in pass is intentionally small and conservative. `ah-6`, `uh-60ja`, and `ach47a` provide light, medium utility, and heavy armed-transport test coverage without globally changing the helicopter folder. Their values are initial flyability probes, not final realism or balance targets.
 
+Early in-game tuning should check the effective thrust-to-weight relationship before increasing cyclic, yaw, or hover assistance. At full spool (`normalizedRotorRPM` near `1.0`) and full collective, compare `MainRotorMaxThrust * rotorEfficiency` against `PhysicalMass * gravity`, then account for `VerticalDrag`, `ParasiteDrag`, and modest translational-lift/hover-assist modifiers. If an opted-in helicopter cannot lift off, prefer small `MainRotorMaxThrust` increases first, use `PhysicalMass` reductions sparingly, and avoid using extreme `TranslationalLiftCoefficient` or control-authority values as takeoff crutches.
+
 
 ### Rotor RPM foundation
 
