@@ -88,6 +88,8 @@ AddWeapon = uhf_radar,  0.00, 3.0, 0.0,    0.0
 
 FlareType = 3
 EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AS
 EnableNightVision = true
 EnableGunnerMode = true
 

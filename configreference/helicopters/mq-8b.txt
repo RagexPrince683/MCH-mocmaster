@@ -5,6 +5,7 @@ MaxHp = 100
 EnableGunnerMode = true
 EnableNightVision = true
 EnableEntityRadar = true
+RadarType = MODERN_AS
 EnableFoldBlade = true
 Speed = 1.84
 ThrottleUpDown = 0.8

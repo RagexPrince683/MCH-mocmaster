@@ -4,6 +4,8 @@ ItemID = 28714
 MaxHp = 100
 EnableNightVision = true
 EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AA
 EnableEjectionSeat = true
 Speed = 4.0
 

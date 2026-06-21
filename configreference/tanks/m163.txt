@@ -11,6 +11,7 @@ DamageFactor = 0.8
 CameraZoom = 6
 EnableNightVision = true
 EnableEntityRadar = true
+RadarType = EARLY_AA
 Sound = moneonethreeapc
 ;HUD = mbt_hud, 
 HUD = mbt_hudtherm

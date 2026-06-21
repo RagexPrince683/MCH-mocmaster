@@ -5,6 +5,8 @@ ItemID = 28720
 MaxHp = 250
 EnableNightVision = true
 EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AS
 EnableEjectionSeat = true
 Speed = 1.697
 ;606mph

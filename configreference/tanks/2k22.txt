@@ -18,6 +18,7 @@ CameraZoom = 8
 EnableNightVision = true
 CameraRotationSpeed = 48
 EnableEntityRadar = true
+RadarType = MODERN_AA
 MaxFuel         = 1800
 FuelConsumption = 2.4
 StepHeight = 1.8

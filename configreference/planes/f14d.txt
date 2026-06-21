@@ -8,6 +8,8 @@ ItemID = 28714
 MaxHp = 100
 EnableNightVision = true
 EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AA
 EnableEjectionSeat = true
 ; Realism pass: F-14D top speed ~1,240 mph / 1,996 km/h, service ceiling ~16.15 km,
 ; internal fuel ~2,400 US gal / 9,085 L. MCH speed uses high-speed aircraft mph/1000 tuning.

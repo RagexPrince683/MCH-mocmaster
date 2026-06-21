@@ -110,6 +110,8 @@ AddWeapon = 9K38_ka52,    -3.6743, 1.43, 0.00, -1, 0,  true,2
 AddWeapon = uhf_radar,  0.00, 3.0, 0.0,    0.0, 0, true, 2
 FlareType = 3
 EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AS
 EnableNightVision = true
 EnableGunnerMode = true
 

@@ -11,6 +11,7 @@ InventorySize = 64
 FlareType = 2
 EnableNightVision = true
 EnableEntityRadar = true
+RadarType = MODERN_AA
 ThirdPersonDist = 68
 
 Category = SA/TA

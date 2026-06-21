@@ -86,6 +86,8 @@ EnableSeaSurfaceParticle = true
 ParticlesScale = 0.7
 ThirdPersonDist = 20
 EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AA
 enableback = true
 
 DamageFactor = 0.8

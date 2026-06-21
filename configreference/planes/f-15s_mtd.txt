@@ -6,6 +6,8 @@ MaxHp = 100
 EnableNightVision = false
 ;oh wtf
 EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AA
 EnableEjectionSeat = true
 Speed = 4.0
 FlareType = 3

@@ -4,6 +4,7 @@ ItemID = 28630
 MaxHp = 100
 EnableNightVision = true
 EnableEntityRadar = true
+RadarType = MODERN_AA
 HideEntity = true
 MinRotationPitch = -88
 MaxRotationPitch =  12
@@ -16,7 +17,7 @@ CameraRotationSpeed = 70
 Gravity = -9.81
 GravityInWater = -1.0
 
-; M = Military,  A = AAGun(�΋�C)
+; M = Military,  A = AAGun(‘Î‹ó–C)
 Category = CIWS/RC
 
 HUD = vehicle
@@ -26,7 +27,7 @@ AddSeat = 0.00,  0, 0.00
 unmountposition = 0.0, 1.5, 0.0
 
 ; AddPart = DrawFirstPerson[T/F], RotationYaw[T/F], RotationPitch[T/F], PartType[0~], PoxX, PoxY, PoxZ
-;�r
+;‹r
 AddPart	     = true, true, false, 0,   0, 0.20, -0.009
 AddChildPart = true,false, true,  0,   0, 0.099, 0.083
 AddChildPart = true, false,true, 1,   0, 0.167, 0.0
