@@ -376,7 +376,19 @@ public class MCP_NewPlaneOverlayRenderer {
    }
 
    private String formatDebug(OverlayState state) {
-      return String.format("eventEntered=true stage=%s type=%s player=%s riding=%s planeQualifies=%s reason=%s renderView=%s mouseAim=%s debugReticle=%s debugFlight=%s size=%dx%d texture=%s proof=%s(%s) cursor=%s(%s) nose=%s(%s) crosshairSuppressed=%s desiredAimYaw/Pitch=(%.2f,%.2f) cameraYaw/Pitch=(%.2f,%.2f) cursorYawDelta/PitchDelta=(%.2f,%.2f) screenX/Y=(%.1f,%.1f) noseXY=(%.1f,%.1f) noseDelta=(%.2f,%.2f)",
+      String forceTelemetry = state.plane != null
+            ? String.format(" thrustAccelX/Y/Z=(%.5f,%.5f,%.5f) gravityAccelY=%.5f liftAccelX/Y/Z=(%.5f,%.5f,%.5f) dragAccelX/Y/Z=(%.5f,%.5f,%.5f) netAccelX/Y/Z=(%.5f,%.5f,%.5f) velocityBeforeIntegration=(%s) velocityAfterIntegration=(%s) forwardVectorX/Y/Z=(%.4f,%.4f,%.4f) forwardAirspeed=%.5f verticalSpeed=%.5f glideEnergyGain=%.5f diveAccelerationFactor=%.5f",
+                  Double.valueOf(state.plane.getLastThrustAccelX()), Double.valueOf(state.plane.getLastThrustAccelY()), Double.valueOf(state.plane.getLastThrustAccelZ()),
+                  Double.valueOf(state.plane.getLastGravityAccelY()),
+                  Double.valueOf(state.plane.getLastLiftAccelX()), Double.valueOf(state.plane.getLastLiftAccelY()), Double.valueOf(state.plane.getLastLiftAccelZ()),
+                  Double.valueOf(state.plane.getLastDragAccelX()), Double.valueOf(state.plane.getLastDragAccelY()), Double.valueOf(state.plane.getLastDragAccelZ()),
+                  Double.valueOf(state.plane.getLastNetAccelX()), Double.valueOf(state.plane.getLastNetAccelY()), Double.valueOf(state.plane.getLastNetAccelZ()),
+                  state.plane.getLastVelocityBeforeIntegration(), state.plane.getLastVelocityAfterIntegration(),
+                  Double.valueOf(state.plane.getLastForwardVectorX()), Double.valueOf(state.plane.getLastForwardVectorY()), Double.valueOf(state.plane.getLastForwardVectorZ()),
+                  Double.valueOf(state.plane.getLastForwardAirspeed()), Double.valueOf(state.plane.getLastVerticalSpeed()),
+                  Double.valueOf(state.plane.getLastGlideEnergyGain()), Double.valueOf(state.plane.getLastDiveAccelerationFactor()))
+            : "";
+      return String.format("eventEntered=true stage=%s type=%s player=%s riding=%s planeQualifies=%s reason=%s renderView=%s mouseAim=%s debugReticle=%s debugFlight=%s size=%dx%d texture=%s proof=%s(%s) cursor=%s(%s) nose=%s(%s) crosshairSuppressed=%s desiredAimYaw/Pitch=(%.2f,%.2f) cameraYaw/Pitch=(%.2f,%.2f) cursorYawDelta/PitchDelta=(%.2f,%.2f) screenX/Y=(%.1f,%.1f) noseXY=(%.1f,%.1f) noseDelta=(%.2f,%.2f)%s",
             state.eventStage, state.eventType, state.playerEntityClass, state.ridingEntityClass, Boolean.valueOf(state.qualifies), state.skipReason,
             state.renderViewEntityClass, Boolean.valueOf(state.mouseAimEnabled), Boolean.valueOf(MCH_Config.PlaneMouseAimReticleDebug.prmBool), Boolean.valueOf(MCH_Config.DebugFlightControl.prmBool),
             Integer.valueOf(state.width), Integer.valueOf(state.height), Boolean.valueOf(reticleTextureAvailable), Boolean.valueOf(state.proofDrawn), state.proofSkipReason,
@@ -384,7 +396,7 @@ public class MCP_NewPlaneOverlayRenderer {
             Boolean.valueOf(state.crosshairSuppressed), Double.valueOf(state.desiredAimYaw), Double.valueOf(state.desiredAimPitch),
             Double.valueOf(state.cameraYaw), Double.valueOf(state.cameraPitch), Double.valueOf(state.cursorYawDelta), Double.valueOf(state.cursorPitchDelta),
             Double.valueOf(state.mouseX), Double.valueOf(state.mouseY), Double.valueOf(state.noseX), Double.valueOf(state.noseY),
-            Double.valueOf(state.noseYawDelta), Double.valueOf(state.nosePitchDelta));
+            Double.valueOf(state.noseYawDelta), Double.valueOf(state.nosePitchDelta), forceTelemetry);
    }
 
    private boolean isDebugEnabled() {
