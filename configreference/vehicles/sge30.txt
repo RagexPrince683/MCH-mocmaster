@@ -7,6 +7,7 @@ Gravity = -9.81
 GravityInWater = -1.0
 EnableNightVision = true
 EnableEntityRadar = true
+RadarType = MODERN_AA
 HideEntity = false
 MinRotationPitch = -85
 MaxRotationPitch =  25

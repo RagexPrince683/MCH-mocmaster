@@ -10,6 +10,7 @@ Speed = 0.240
 Sound = turboprop
 EnableNightVision = true
 EnableEntityRadar = true
+RadarType = MODERN_AA
 EnableGunnerMode = true
 NewUAV = true
 HideEntity = true

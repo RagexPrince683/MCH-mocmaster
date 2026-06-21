@@ -33,6 +33,7 @@ Category = SPAAG
 
 SubmergedDamageHeight = 2
 EnableEntityRadar = true
+RadarType = MODERN_AA
 
 
 

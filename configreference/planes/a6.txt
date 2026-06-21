@@ -7,6 +7,8 @@ Sound = asix
 
 EnableNightVision = true
 EnableEntityRadar = true
+RWRType = ALL_WAY_EARLY
+RadarType = EARLY_AA
 EnableEjectionSeat = true
 Speed = 1.81
 FlareType = 3

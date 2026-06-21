@@ -5,6 +5,7 @@ MaxHp = 20
 Speed = 0.12
 EnableNightVision = true
 EnableEntityRadar = true
+RadarType = MODERN_AA
 EnableGunnerMode = true
 AutoPilotRot = -0.04
 CameraPosition = 0.0, 0.40, 0.34

@@ -6,6 +6,8 @@ MaxHp = 100
 EnableGunnerMode = true
 EnableNightVision = true
 EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AS
 Speed = 1.86
 FlareType = 3
 

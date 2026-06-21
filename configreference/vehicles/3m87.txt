@@ -5,6 +5,7 @@ ItemID = 28700
 MaxHp = 100
 EnableNightVision = true
 EnableEntityRadar = true
+RadarType = MODERN_AA
 HideEntity = true
 MinRotationPitch = -88
 MaxRotationPitch =  12

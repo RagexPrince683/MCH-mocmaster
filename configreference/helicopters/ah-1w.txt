@@ -104,6 +104,8 @@ AddWeapon = targeting_pod_mob,     0.0, 1.179, 2.89,   0.0, 0.0,  true, 2
 AddWeapon = targeting_pod_pv10s,   0.0, 1.179, 2.89,   0.0, 0.0,  false,2
 
 EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AS
 
 
 

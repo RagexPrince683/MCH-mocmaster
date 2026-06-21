@@ -27,6 +27,7 @@ FlareType = 10
 ;EnableGunnerMode = true
 SubmergedDamageHeight = 2
 EnableEntityRadar = true
+RadarType = MODERN_AS
 HideEntity = true
 
 ExplosionSizeByCrash = 30

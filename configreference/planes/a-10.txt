@@ -6,6 +6,8 @@ MaxHp = 250
 Sound = aten
 EnableNightVision = true
 EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AA
 EnableEjectionSeat = true
 Speed = 1.45
 ;420

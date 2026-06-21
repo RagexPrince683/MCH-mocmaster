@@ -14,6 +14,7 @@ Sound = turboprop
 FlareType = 4
 EnableNightVision = true
 EnableEntityRadar = true
+RadarType = MODERN_AA
 EnableGunnerMode = true
 NewUAV = true
 ;;soon

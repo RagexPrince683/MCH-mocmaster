@@ -4,6 +4,8 @@ MaxHp = 100
 ;OnGroundPitch = 3
 EnableNightVision = true
 EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AA
 EnableEjectionSeat = true
 
 AutoPilotRot = 0.00
