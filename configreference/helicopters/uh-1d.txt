@@ -22,7 +22,7 @@ TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.025
 ParasiteDrag = 0.032
 HorizontalRotorThrustScale = 0.69
-HoverAssistStrength = 0.2
+HoverAssistStrength = 0.75
 
 
 

@@ -33,7 +33,7 @@ TranslationalLiftCoefficient = 0.003
 VerticalDrag = 0.034
 ParasiteDrag = 0.05
 HorizontalRotorThrustScale = 0.57
-HoverAssistStrength = 0.13
+HoverAssistStrength = 0.75
 
 
 sound = stallion
