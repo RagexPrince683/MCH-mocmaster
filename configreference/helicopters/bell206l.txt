@@ -1,0 +1,67 @@
+DisplayName = Bell 206L Long Ranger
+AddDisplayName = ja_JP, Bell 206L ロングレンジャー
+ItemID = 28806
+MaxHp = 100
+MaxFuel         = 1200
+FuelConsumption = 1.0
+ThirdPersonDist = 20
+
+; C = Civilian(民間機)
+;multipurpose
+Category = MUUH
+
+Sound = littlebird 
+Soundvolume = 15
+
+HUD = civilian_aircraft, none, none, none, none, none
+
+AddTexture = bell206l_bw
+AddTexture = bell206l_go
+AddTexture = bell206l_rw
+AddTexture = bell206l_wb
+AddTexture = bell206l_wr
+AddTexture = bell206l_t
+AddTexture = bell206l_mp
+
+Speed = 1.4
+
+AddRotor= 1, 0,  0.00,  3.80,  -0.91,  0.0, 1.0, 0.0
+AddRotor= 1, 0,  0.17,  3.00, -11.55,  1.0, 0.0, 0.0
+
+AddSeat =-0.44,  1.06,  1.49
+AddSeat = 0.44,  1.06,  1.49
+AddSeat =-0.44,  1.20,  0.05
+AddSeat = 0.44,  1.20,  0.05
+AddSeat =-0.44,  1.20, -0.89
+AddSeat = 0.44,  1.20, -0.89
+
+;basic unarmed small modern helicopter NO WHEEL, AOW3 style
+AddRecipe = "ABC", " E ", "   ", A, mcheli:airframe, B, mcheli:heliblade, C, mcheli:engine1, E, mcheli:electronics
+
+
+InventorySize = 27
+
+
+;BoundingBox =  0.0, 1.7, 1.5,  2.4, 2.5
+BoundingBox = 0.0, 4.27, -0.932, 1.0, 1.5, 1.5
+
+BoundingBox =  0.0, 2.1, -2.5,  2.4, 3.3
+BoundingBox =  0.0, 3.2, -11.5,  1.0, 2.4
+
+
+BoundingBox = 0.0, 2.70, -2.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -3.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -4.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -5.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -6.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -7.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -8.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -9.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -10.80, 1.0, 1.0, 1.25
+
+Unmountposition = -0.44,  1.50,  1.49
+
+DamageFactor = 0.8
+
+ThrottleUpDown = 0.5
+DamageFactor = 0.8
