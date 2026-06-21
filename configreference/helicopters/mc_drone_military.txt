@@ -11,8 +11,8 @@ CameraPosition = -0.02, -0.06, 0.77
 Sound = radicon_heli
 ThrottleUpDown = 5.0
 ParticlesScale = 0.2
-MaxFuel         = 500
-FuelConsumption = 0.5
+MaxFuel         = 18
+FuelConsumption = 0.015
 
 
 

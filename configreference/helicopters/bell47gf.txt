@@ -6,8 +6,8 @@ MaxHp = 100
 Float  = true
 Speed = 1
 FlareType = 3
-MaxFuel         = 600
-FuelConsumption = 0.6
+MaxFuel         = 258
+FuelConsumption = 0.096
 ThirdPersonDist = 20
 
 

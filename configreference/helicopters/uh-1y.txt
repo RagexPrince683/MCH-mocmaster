@@ -11,8 +11,8 @@ Sound = r44_heli
 ThrottleUpDown = 0.8
 FlareType = 3
 CameraPosition = 0.0, 0.7, 3.5
-MaxFuel         = 1500
-FuelConsumption = 1.0
+MaxFuel         = 2150
+FuelConsumption = 0.597
 ThirdPersonDist = 20
 
 ; M = Military(軍用機).  M = Multi-Mission(多目的機)

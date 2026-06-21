@@ -10,8 +10,8 @@ ThrottleUpDown = 0.8
 FlareType = 3
 CameraPosition = 0.0, 0.6, 2.0
 EnableEntityRadar = true
-MaxFuel         = 1200
-FuelConsumption = 1.0
+MaxFuel         = 6500
+FuelConsumption = 1.505
 Sound = heli_k
 ThirdPersonDist = 20
 

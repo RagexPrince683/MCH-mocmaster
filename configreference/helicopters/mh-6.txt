@@ -7,8 +7,8 @@ EnableNightVision = true
 Speed = 1.75
 ThrottleUpDown = 1.2
 FlareType = 3
-MaxFuel         = 1200
-FuelConsumption = 1.0
+MaxFuel         = 410
+FuelConsumption = 0.228
 ThirdPersonDist = 20
 
 ; M = Military(軍用機).  M = Multi-Mission(多目的機)

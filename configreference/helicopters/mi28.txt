@@ -9,8 +9,8 @@ Speed = 1.86
 FlareType = 3
 CameraPosition = 0.0, 0.8, 4.0
 onGroundPitch = 4.5
-MaxFuel         = 1200
-FuelConsumption = 1.0
+MaxFuel         = 3800
+FuelConsumption = 1.056
 ThirdPersonDist = 20
 
 

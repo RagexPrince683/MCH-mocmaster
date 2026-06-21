@@ -3,8 +3,8 @@ AddDisplayName = ja_JP, 川崎/ユーロコプター BK 117 B-2 警察仕様
 MaxHp = 100
 EnableNightVision = true
 Speed = 1.55
-MaxFuel         = 1200
-FuelConsumption = 1.0
+MaxFuel         = 1140
+FuelConsumption = 0.317
 onGroundPitch = 2.09
 EnableGunnerMode = true
 ThirdPersonDist = 20
@@ -85,8 +85,8 @@ AddRecipe = "AB ", "   ", "   ", A, mcheli:bk117, B, mcheli:electronics
 EntityWidth  = 0.9
 EntityHeight = 0.9
 
-MaxFuel         = 1000
-FuelConsumption = 1.0
+MaxFuel         = 1140
+FuelConsumption = 0.317
 
 DamageFactor = 0.8
 

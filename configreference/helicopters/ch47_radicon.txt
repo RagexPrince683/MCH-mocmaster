@@ -11,8 +11,8 @@ SmallUAV = true
 Sound = radiconheli
 ThrottleUpDown = 2.0
 ParticlesScale = 0.1
-MaxFuel         = 60
-FuelConsumption = 0.1
+MaxFuel         = 18
+FuelConsumption = 0.010
 
 ; C = Civilian(民間機)
 Category = sUAS

@@ -10,8 +10,8 @@ ThrottleUpDown = 1.1
 FlareType = 3
 CameraPosition = 0.0, 0.6, 4.8
 CameraZoom = 6
-MaxFuel         = 1100
-FuelConsumption = 1.0
+MaxFuel         = 2410
+FuelConsumption = 0.803
 Stealth = 0.5
 
 sound = eurocoptertiger

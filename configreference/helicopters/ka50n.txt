@@ -15,8 +15,8 @@ Category = AH/SH
 
 HUD = helinvg
 
-MaxFuel         = 1200
-FuelConsumption = 1.0
+MaxFuel         = 3260
+FuelConsumption = 1.087
 
 Sound = heli_k
 soundvolume = 15

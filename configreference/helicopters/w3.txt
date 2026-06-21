@@ -20,9 +20,9 @@ HUD = helinvg, heli_gnrnvg
 
 ;飛行可能時間[秒] = 燃料搭載可能量 / 1秒間に消費する燃料
 ; 燃料搭載可能量
-MaxFuel         = 1200
+MaxFuel         = 2640
 ; 1秒間に消費する燃料
-FuelConsumption = 0.8
+FuelConsumption = 0.733
 
 ;AddPartCamera = 座標X,Y,Z, Yaw連動, Pitch連動
 AddPartCamera = 0.00, 2.65, 1.91, true, false

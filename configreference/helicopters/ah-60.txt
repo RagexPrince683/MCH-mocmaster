@@ -12,8 +12,8 @@ ThrottleUpDown = 0.8
 FlareType = 3
 CameraZoom = 2
 CameraPosition = 0.0, 0.15, 0.8
-MaxFuel         = 1500
-FuelConsumption = 1.0
+MaxFuel         = 2450
+FuelConsumption = 0.681
 Stealth = 0.8
 ThirdPersonDist = 20
 

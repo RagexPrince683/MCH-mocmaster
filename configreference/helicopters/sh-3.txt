@@ -11,8 +11,8 @@ Speed = 1.66
 ThrottleUpDown = 0.7
 FlareType = 3
 CameraPosition = 0.0, 0.7, 3.5
-MaxFuel         = 2000
-FuelConsumption = 1.0
+MaxFuel         = 4300
+FuelConsumption = 0.995
 ThirdPersonDist = 20
 
 sound = apache

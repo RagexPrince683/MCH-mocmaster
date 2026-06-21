@@ -3,8 +3,8 @@ AddDisplayName = en_US, Sikorsky S-76 VIP
 AddDisplayName = ja_JP, シコルスキー S-76 V.I.P仕様
 ItemID = 30046
 MaxHp = 100
-MaxFuel         = 1200
-FuelConsumption = 1.0
+MaxFuel         = 1900
+FuelConsumption = 0.528
 Regeneration = false
 ThirdPersonDist = 20
 

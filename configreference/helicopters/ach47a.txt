@@ -8,8 +8,8 @@ Float = true
 Speed = 1.7
 
 FlareType = 1
-MaxFuel         = 2400
-FuelConsumption = 1.0
+MaxFuel         = 3900
+FuelConsumption = 0.813
 onGroundPitch = 2.5
 Float = true
 FloatOffset = -0.9
@@ -43,6 +43,7 @@ TranslationalLiftCoefficient = 0.0034
 VerticalDrag = 0.032
 ParasiteDrag = 0.018
 HoverAssistStrength = 0.32
+
 AddPartWeapon    = achm3m_l,    false, true, true,   -0.7,    1.4433,   -4.7
 
 AddPartWeapon    = achm134_l50,  false, true,  false,  -1.2859,  1.7843,  4.9367

@@ -4,8 +4,8 @@ AddDisplayName = en_US, Mi-8 T
 ItemID = 28831
 MaxHp = 100
 Speed = 1.45
-MaxFuel = 2400
-FuelConsumption = 1.0
+MaxFuel         = 4110
+FuelConsumption = 0.951
 onGroundPitch = 4.56
 ThirdPersonDist = 20
 

@@ -5,9 +5,9 @@ CameraPosition = 0.00, -0.2, 0.4
 Sound = fpvdrone
 ThrottleUpDown = 2.0
 ParticlesScale = 0.1
-MaxFuel         = 3500
+MaxFuel         = 12
 ExplosionBlock = 0
-FuelConsumption = 0.1
+FuelConsumption = 0.040
 Stealth = 0.4
 
 
@@ -18,7 +18,7 @@ HideEntity = true
 
 HUD = heli
 
-; C = Civilian(���ԋ@)
+; C = Civilian(–¯ŠÔ‹@)
 Category = sUAS
 
 MobilityYaw = 10.0

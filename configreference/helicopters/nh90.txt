@@ -67,8 +67,8 @@ AddRotor= 1, 0, -0.63,  3.63, -8.63,  1.0, 0.0, 0.0
 
 InventorySize = 54
 
-MaxFuel         = 1200
-FuelConsumption = 0.4
+MaxFuel         = 4500
+FuelConsumption = 1.042
 
 
 ;basic unarmed small modern helicopter, AOW3 style

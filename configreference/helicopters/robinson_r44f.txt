@@ -5,8 +5,8 @@ MaxHp = 100
 Speed = 1.37
 Float = true
 Sound = r44_heli
-MaxFuel         = 1200
-FuelConsumption = 1.0
+MaxFuel         = 300
+FuelConsumption = 0.104
 ThirdPersonDist = 20
 
 Soundpitch = 1.65

@@ -2,8 +2,8 @@ DisplayName = Bell 206L Long Ranger
 AddDisplayName = ja_JP, Bell 206L ロングレンジャー
 ItemID = 28806
 MaxHp = 100
-MaxFuel         = 1200
-FuelConsumption = 1.0
+MaxFuel         = 625
+FuelConsumption = 0.174
 ThirdPersonDist = 20
 
 ; C = Civilian(民間機)

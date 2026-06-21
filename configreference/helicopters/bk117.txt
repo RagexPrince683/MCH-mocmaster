@@ -3,8 +3,8 @@ AddDisplayName = ja_JP, 川崎/ユーロコプター BK 117 B-2
 MaxHp = 100
 EnableNightVision = true
 Speed = 1.55
-MaxFuel         = 1200
-FuelConsumption = 1.0
+MaxFuel         = 1140
+FuelConsumption = 0.317
 onGroundPitch = 2.09
 ThirdPersonDist = 20
 
@@ -68,8 +68,8 @@ BoundingBox = 0.0, 2.02, -6.19, 1.0, 1.0
 EntityWidth  = 0.9
 EntityHeight = 0.9
 
-MaxFuel         = 1000
-FuelConsumption = 1.0
+MaxFuel         = 1140
+FuelConsumption = 0.317
 
 
 ;basic unarmed modern helicopter, AOW3 style

@@ -8,13 +8,13 @@ SmallUAV = true
 Sound = radicon_heli
 ThrottleUpDown = 5.0
 ParticlesScale = 0.2
-MaxFuel         = 60
-FuelConsumption = 0.1
+MaxFuel         = 18
+FuelConsumption = 0.010
 Stealth = 0.4
 
 HUD = heli
 
-; C = Civilian(���ԋ@)
+; C = Civilian(–¯ŠÔ‹@)
 Category = sUAS
 
 AddSeat =  0.0, 0.0, 0.0

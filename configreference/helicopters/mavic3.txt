@@ -8,13 +8,13 @@ HideEntity = true
 Sound = radicon_heli
 ThrottleUpDown = 2.0
 ParticlesScale = 0.1
-MaxFuel         = 60
-FuelConsumption = 0.1
+MaxFuel         = 9
+FuelConsumption = 0.003
 Stealth = 0.4
 
 HUD = heli
 
-; C = Civilian(���ԋ@)
+; C = Civilian(–¯ŠÔ‹@)
 Category = sUAS
 
 AddSeat =  0.0, 1.0, 0.0

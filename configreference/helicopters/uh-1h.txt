@@ -12,8 +12,8 @@ Speed = 1.35
 ThrottleUpDown = 0.8
 FlareType = 3
 ;CameraPosition = 0.0, 0.7, 3.0
-MaxFuel         = 1350
-FuelConsumption = 1.0
+MaxFuel         = 1390
+FuelConsumption = 0.386
 ConcurrentGunnerMode = true
 
 Sound = r44_heli

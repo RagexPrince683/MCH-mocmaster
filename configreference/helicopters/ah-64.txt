@@ -25,9 +25,9 @@ HUD = heli, heli_gnr
 
 ;飛行可能時間[秒] = 燃料搭載可能量 / 1秒間に消費する燃料
 ; 燃料搭載可能量
-MaxFuel         = 1200
+MaxFuel         = 2500
 ; 1秒間に消費する燃料
-FuelConsumption = 1.0
+FuelConsumption = 0.794
 
 AddTexture = ah-64-il
 AddTexture = ah-64-us-1

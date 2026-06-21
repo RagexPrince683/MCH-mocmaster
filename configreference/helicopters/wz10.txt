@@ -35,8 +35,8 @@ Category = AH
 
 HUD = heli, heli_gnr
 
-MaxFuel         = 1000
-FuelConsumption = 0.5
+MaxFuel         = 2600
+FuelConsumption = 0.722
 
 AddPartCamera = 0.0, 1.4311, 5.8707, true, false
 AddPartCamera = 0.0, 1.4311, 5.8707, true, true

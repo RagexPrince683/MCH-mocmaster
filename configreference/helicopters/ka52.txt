@@ -13,8 +13,8 @@ EnableEjectionSeat = true
 
 HUD = heli, heli_gnr
 
-MaxFuel         = 1200
-FuelConsumption = 1.5
+MaxFuel         = 3260
+FuelConsumption = 1.087
 
 Sound = heli_k
 soundvolume = 15

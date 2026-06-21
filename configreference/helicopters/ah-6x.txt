@@ -7,8 +7,8 @@ EnableNightVision = true
 Speed = 1.75
 ThrottleUpDown = 1.0
 FlareType = 3
-MaxFuel         = 600
-FuelConsumption = 1.0
+MaxFuel         = 410
+FuelConsumption = 0.228
 ThirdPersonDist = 20
 
 Sound = littlebird

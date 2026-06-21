@@ -6,9 +6,10 @@ EnableNightVision = true
 Speed = 1.7
 ThrottleUpDown = 1.2
 FlareType = 3
-MaxFuel         = 1200
-FuelConsumption = 1.0
+MaxFuel         = 410
+FuelConsumption = 0.228
 ThirdPersonDist = 20
+
 
 ; Initial new helicopter flight-model test opt-in: light attack scout.
 UseNewHelicopterFlightModel = true

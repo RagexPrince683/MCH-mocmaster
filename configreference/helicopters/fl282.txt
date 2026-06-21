@@ -8,8 +8,8 @@ ThrottleUpDown = 1.0
 DamageFactor = 1.0
 ;Stealth = 0.5
 Speed = 0.2
-MaxFuel         = 600
-FuelConsumption = 0.6
+MaxFuel         = 95
+FuelConsumption = 0.088
 ThirdPersonDist = 12
 unmountposition = 0.0,  1.45,  0.25
 ; W = WWII.  R = Reconnaissance(偵察機)

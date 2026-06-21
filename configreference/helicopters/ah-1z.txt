@@ -8,8 +8,8 @@ EnableEntityRadar = true
 Speed = 1.8
 ThrottleUpDown = 0.8
 FlareType = 3
-MaxFuel         = 1200
-FuelConsumption = 1.0
+MaxFuel         = 1270
+FuelConsumption = 0.529
 ThirdPersonDist = 20
 
 Sound = r44_heli

@@ -11,15 +11,15 @@ ThrottleUpDown = 0.6
 FlareType = 3
 Stealth = 0.8
 CameraPosition = 0.0, 0.7, 3.5
-MaxFuel         = 1500
-FuelConsumption = 1.0
+MaxFuel         = 2450
+FuelConsumption = 0.681
 ThirdPersonDist = 20
 
 sound = apache
 soundpitch = 1.3
 soundvolume = 10
 
-; M = Military(ŒR—p‹@).  M = Multi-Mission(‘½–Ú“I‹@)
+; M = Military(Å’Râ€”pâ€¹@).  M = Multi-Mission(â€˜Â½â€“Ãšâ€œIâ€¹@)
 Category = UH/CAS/DAE/SGH
 
 HUD = heli, heli_gnr, gunner, gunner
