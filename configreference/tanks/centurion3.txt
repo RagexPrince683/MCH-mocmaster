@@ -1,0 +1,203 @@
+DisplayName = Centurion Mk 3
+AddDisplayName = ja_JP, Centurion Mk 3
+AddDisplayName = en_US, Centurion Mk 3
+;ItemID = 30997
+MaxHp = 162
+Speed = 0.22
+Sound = mtwentysixeng
+;todo change
+ThrottleUpDown = 1.0
+MobilityYawOnGround = 2.3
+MobilityRoll = 0
+Gravity = -0.61
+GravityInWater = -1.0
+DamageFactor = 0.0
+CameraZoom = 8
+CameraPosition = 0.00,  3.6, 0.4602, true
+CameraRotationSpeed = 14
+MinRotationPitch = -20
+MaxRotationPitch = 10
+DefaultFreelook = true
+
+ExplosionSizeByCrash = 12
+
+HideEntity = false
+
+HUD = ww2tank_hud, gunner, 
+
+OnGroundPitchFactor = 2.0
+OnGroundRollFactor  = 0.8
+
+; Tank or Car or Unknown
+WeightType = Tank
+
+MotionFactor = 0.9
+
+Category = MED
+
+
+;-3.93
+
+
+; 指定した高さまでの水に触れてもダメージを受けない
+; 2であれば2ブロックまでダメージ無し
+SubmergedDamageHeight = 2
+
+AddGunnerSeat = 0.00,  0.80, 0.4602
+
+;AddGunnerSeat = -0.824, 0.4, 1.9, -0.8008, 1.7900, 2.6592
+
+;AddGunnerSeat = -0.6303, 4.8, 0.8444, -0.6303, 4.2, 0.0902, false, -90, 90, true
+
+;AddGunnerSeat = -0.55,  1.00, -0.96,   -0.846, 3.60,  0.373, false, -90, 90, true
+
+; 地面の滑りやすさ、小さいほど摩擦が大きくなり動きにくくなる
+MotionFactor = 0.95
+
+;ArmorMinDamage 最小ダメージ、これより小さいダメージは無効化される
+
+;ArmorMaxDamage 最大ダメージ、これより大きいダメージは最大ダメージに丸められる
+;ArmorMaxDamage = 500
+;ArmorDamageFactor ダメージ係数上記のMin/Max範囲チェック後のダメージの係数 1で100%, 0.5で50%
+ArmorDamageFactor = 1.00
+;後退可能にする(暫定処置で今後削除される可能性有り)
+EnableBack = true
+
+;PivotTurnThrottle を0より大きい値にすると超信地旋回ができなくなる。デフォルトは0
+PivotTurnThrottle = 0.0
+;AddCrawlerTrack = 1つの履帯の間隔, 履帯のXの位置, 履帯の回転ポイントY/Z, 履帯の回転ポイントY/Z, 履帯の回転ポイントY/Z, ...
+;転輪がなくても動作する
+AddCrawlerTrack = false, 0.26,  1.767,  1.306/1.915, 1.241/3.417, 0.9937/3.741, 0.6643/3.762, 0.4045/3.608, -0.2242/2.671, -0.229/-2.543, 0.1896/-3.745, 0.4516/-3.952, 0.7844/-3.945, 1.042/-3.719, 1.363/-2.027
+AddCrawlerTrack = false, 0.26,  1.767,  1.306/1.915, 1.241/3.417, 0.9937/3.741, 0.6643/3.762, 0.4045/3.608, -0.2242/2.671, -0.229/-2.543, 0.1896/-3.745, 0.4516/-3.952, 0.7844/-3.945, 1.042/-3.719, 1.363/-2.027
+
+;転輪を追加する、設定は座標だけで、X軸が負の値だと右側、正の値だと左側の転輪となる
+;履帯と同じ動きをするが、履帯がなくても設定可能
+
+SetWheelPos =  1.11, -0.24, 2.17, 1.3, 0.26, -0.62, -1.5, -2.38
+
+AddTrackRoller =  -1.12,  0.5944,  3.1002
+
+AddTrackRoller =  1.12,  0.5944,  3.1002
+
+AddTrackRoller = -1.52,  0.184,  2.17
+
+AddTrackRoller = 1.52,  0.184,  2.17
+
+AddTrackRoller = -1.52,  0.184,  1.30
+
+AddTrackRoller = 1.52,  0.184,  1.30
+
+AddTrackRoller = -1.52,  0.184,  0.2602
+
+AddTrackRoller = 1.52,  0.184,  0.2602
+
+AddTrackRoller = -1.52,  0.184,  -0.62
+
+AddTrackRoller = 1.52,  0.184,  -0.62
+
+AddTrackRoller = -1.52,  0.184,  -1.5
+
+AddTrackRoller = 1.52,  0.184,  -1.5
+
+AddTrackRoller = -1.52,  0.184,  -2.38
+
+AddTrackRoller = 1.52,  0.184,  -2.38
+
+AddTrackRoller = -1.52,  0.594,  -3.32
+
+AddTrackRoller = 1.52,  0.594,  -3.32
+
+
+;AddTrackRoller =  0.0,  0.3501,  1.7002
+;AddTrackRoller = 0.0,  0.3501,  0.6602
+;AddTrackRoller =  0.0,  0.3501,  1.520
+;AddTrackRoller = 0.0,  0.3501,  1.520
+;AddTrackRoller =  0.0,  0.3501,  0.5353
+;AddTrackRoller = 0.0,  0.2341,  0.5353
+
+
+
+
+
+
+
+AddTurretWeapon = cent3ap1,   0.00, 1.7787, 0.4602,   0.0, 0.0, true, 1,0,-360,360, -20,10
+AddTurretWeapon = cent3ap2,   0.00, 1.7787, 0.4602,   0.0, 0.0, true, 1,0,-360,360, -20,10
+AddTurretWeapon = cent3he,    0.00, 1.7787, 0.4602,   0.0, 0.0, true, 1,0,-360,360, -20,10
+AddTurretWeapon = centbesa,   0.36, 1.7787, 0.4602,   0.0, 0.0, true, 1,0,-360,360, -20,10
+
+AddPartWeapon    = cent3ap1 / cent3ap2 / cent3he,      false, true, false,  0.00,  1.70, 0.4602
+AddPartWeaponChild = false, true, 0.00, 1.83, 1.23,
+AddPartWeaponChild = false, true, 0.00, 1.83, 1.23, 0.5
+
+;;z21.00, Y-22.75
+
+;;AddPartWeapon    = m26browninghull,      false, true, true,  -0.796, 0.9525, 3.49, 0
+
+;;AddWeapon = m26browninghull,   -0.8008, 0.9625, 4.0692,   0.0, 0.0, false, 2,0,-5,5, -5,5
+
+
+;;AddPartTurretWeapon    =m47m22,   false, true, true,   -0.580, 3.44, 0.7770
+;;AddTurretWeapon = m47m22,    -0.580, 3.54, 0.575,   0.0, 0.0, false, 1, 0, -360,360, -30,10
+
+;AddPartTurretWeapon = m41mg12_7mm_l, false, true, false, -0.6307, 2.4051,  0.1268
+;AddPartWeaponChild = false, true, 0.0,    2.5498,  0.1268, 0.0
+
+
+TurretPosition = 0.00, 1.7, 0.4602
+
+;;AddWeapon = targeting_pod_block,     0.0, 0.6, 4.8,   0.0, 0.0,  true, 2
+;;AddWeapon = targeting_pod_tank,   0.0, 0.6, 4.8,   0.0, 0.0,  true, 2
+
+;BoundingBox =  1.15,  0.87,  2.25,  2.2,  2.0, 0.9
+;BoundingBox = -1.15,  0.87,  2.25,  2.2,  2.0, 0.9
+;BoundingBox =  0.00,  0.87, -1.45,  4.5,  2.0, 1.0
+
+;BoundingBox =  0.00,  2.36,  0.70,  2.2,  1.5, 1.0
+
+;BoundingBox =  0.00,  0.87, -2.04,  3.8,  1.7, 1.1
+
+ArmorMinDamage = 22
+
+;turret 283
+
+BoundingBox = 0.0, 2.25, 0.4602, 2.2, 1.25, 0.07
+
+
+;back 
+BoundingBox = 0.0, 1.0, -2.51, 2.79, 1.0, 0.43
+
+; side
+BoundingBox = 0.0, 1.0, 0.0, 2.8, 1.4, 0.28
+BoundingBox = 0.0, 1.0, -2.0, 2.8, 1.4, 0.28
+BoundingBox = 0.0, 1.0, -2.5, 2.8, 1.0, 0.43
+;start front
+BoundingBox = 0.0, 1.0, 1.4, 2.79, 1.4, 0.16
+
+;staircase
+BoundingBox = 0.0, 0.99, 1.5, 2.79, 1.0, 0.15
+
+BoundingBox = 0.0, 0.99, 1.5, 2.79, 1.0, 0.16
+BoundingBox = 0.0, 0.98, 1.6, 2.79, 0.9, 0.16
+BoundingBox = 0.0, 0.97, 1.7, 2.79, 0.8, 0.16
+BoundingBox = 0.0, 0.96, 1.8, 2.79, 0.7, 0.16
+BoundingBox = 0.0, 0.95, 1.9, 2.79, 0.6, 0.16
+BoundingBox = 0.0, 0.94, 2.0, 2.79, 0.5, 0.16
+
+BoundingBox = 0.0, 0.85, 2.3, 2.79, 0.1, 0.21
+
+BoundingBox = -0.8, 1.00, 3.5, 0.25, 0.25, 0.55
+
+
+MaxFuel         = 2400
+FuelConsumption = 3.2
+;idk man I just work here
+
+StepHeight = 1.5
+
+unmountposition = 0.00,  1.50, 0.00
+
+;medium tracked tank ww2 less EARLY
+;;AddRecipe = "ABC", "DEB", "E  ", A, mcheli:mediumchassis, B, mcheli:cannon2, C, mcheli:engine3, D, mcheli:tanktracks, E, mcheli:electronics
+
+;;AddRecipe = "ABC", "D  ", "   ", A, mcheli:m46, B, mcheli:electronics, C, mcheli:cannon2, D, mcheli:wrench

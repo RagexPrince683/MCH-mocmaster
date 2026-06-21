@@ -1,0 +1,43 @@
+DisplayName = Torpedo Tube Mount Type 92 Modification 4 Torpedo Launcher
+
+;https://web.archive.org/web/20141022175245/http://www.fischer-tropsch.org/primary_documents/gvt_reports/USNAVY/USNTMJ%20Reports/USNTMJ-200D-0530-0549%20Report%200-01-3.pdf
+
+AddDisplayName = ja_JP, 九三式魚雷
+ItemID = 28609
+MaxHp = 100
+Gravity = -9.81
+GravityInWater = -1.0
+HideEntity = true
+MinRotationPitch = -15
+MaxRotationPitch = 15
+DamageFactor = 1.0
+CameraZoom = 3
+CameraPosition = 0.0, 4.0, 0.0
+
+
+unmountposition = 0.00, 1.5, -0.0
+
+
+
+; M = Military,  T = Torpedo(魚雷)
+Category = TL
+
+HUD = vehicle_wwii
+
+AddSeat = 0.00,  3.0, 0.00
+
+; AddPart = DrawFirstPerson[T/F], RotationYaw[T/F], RotationPitch[T/F], PartType[0~], PoxX, PoxY, PoxZ
+AddPart	= true, true, false, 0,   0.00, 0.00, 0.00
+
+AddWeapon = type93torpedo,  2.40, 0.71, 0.52,   0.0, 0.0
+AddWeapon = type93torpedo,  0.89, 0.71, 0.52,   0.0, 0.0
+AddWeapon = type93torpedo, -0.89, 0.71, 0.52,   0.0, 0.0
+AddWeapon = type93torpedo, -2.40, 0.71, 0.52,   0.0, 0.0
+
+;torp launchr 4 turret
+AddRecipe = "BBB", "BCD", "   ", B, mcheli:lap, C, mcheli:electronics, D, mcheli:map
+
+
+BoundingBox =  0.0, 1.5, 0.0,  6.0, 3.0
+
+ArmorMinDamage = 10

@@ -1,0 +1,106 @@
+DisplayName = Growler ITV
+AddDisplayName = en_US, Growler ITV
+AddDisplayName = ja_JP, グラウラーITV
+ItemID = 28766
+MaxHp = 230
+ThrottleUpDown = 0.81
+Speed = 0.85
+MobilityYawOnGround = 7.5
+StepHeight = 1.5
+Sound = rattletrap
+;MinRotationPitch = -90
+;MaxRotationPitch = 90
+MobilityRoll     = 4
+Gravity = -0.61
+GravityInWater = -1.0
+DamageFactor   = 1.0
+EnableNightVision = false
+MaxFuel           = 900
+FuelConsumption   = 1.1
+
+ExplosionSizeByCrash = 3
+
+OnGroundPitchFactor = 18.0
+OnGroundRollFactor  = 4.8
+
+WeightedCenterZ = 0.5
+
+MotionFactor = 0.90
+
+AddTexture = growler_1
+AddTexture = growler_2
+AddTexture = growler_3
+
+;後退可能にする
+EnableBack = true
+; C = Civilian(民間機)
+Category = LUV
+
+; Tank or Car or Unknown
+WeightType = Car
+
+;SetWheelPos =  X座標, Y座標,  Z座標1, Z座標2, Z座標3 ...
+; X座標のマイナス側は必要なし
+SetWheelPos =  0.35,  -0.24,  1.20, -1.10
+
+HUD = bnr32_hud, none
+
+AddSeat =  0.41, 0.40, -0.27
+AddSeat = -0.41, 0.40, -0.27
+
+;PivotTurnThrottle を0より大きい値にすると超信地旋回ができなくなる。デフォルトは0
+PivotTurnThrottle = 0.1
+
+; タイヤの回転スピード
+PartWheelRot = 40
+; タイヤを追加 X座標, Y座標, Z座標, 舵角(旋回時のタイヤのY軸の最大角度)
+AddPartWheel     = -0.68,  0.19,  1.20, 30
+AddPartWheel     =  0.68,  0.19,  1.20, 30
+AddPartWheel     = -0.68,  0.19, -1.10
+AddPartWheel     =  0.68,  0.19, -1.10
+
+InventorySize = 9
+
+;basic civ car offroad
+AddRecipe = "ABC", "D  ", "   ", A, mcheli:lightchassis, B, mcheli:wheel4, C, mcheli:engine1, D, mcheli:basicmechanicparts
+
+;ヘッドライト
+AddFixedSearchLight =  -0.605, 0.894, 1.77,   0x50FFFFFF,   0x00FFFFC0,    0.05, 0.5,  -5,  0
+AddFixedSearchLight = 0.605, 0.894, 1.77,   0x50FFFFFF,   0x00FFFFC0,    0.05, 0.5,   5,  0
+
+AddFixedSearchLight =  -0.385, 0.894, 1.77,   0x50FFFFFF,   0x00FFFFC0,    0.05, 0.5,  -5,  0
+AddFixedSearchLight = 0.385, 0.894, 1.77,   0x50FFFFFF,   0x00FFFFC0,    0.05, 0.5,   5,  0
+
+
+;テールランプ
+AddFixedSearchLight =  0.373, 0.37,-1.62,   0xFFFF0000,   0x10FF0000,    0.05, 0.20,  6.0,  0
+AddFixedSearchLight = -0.373, 0.37,-1.62,   0xFFFF0000,   0x10FF0000,    0.05, 0.20, -6.0,  0
+
+EntityWidth  = 0.9
+EntityHeight = 0.9
+
+RideRack = c5, 1
+RideRack = c5, 2
+RideRack = mv-22, 1
+RideRack = mh-53e, 1
+RideRack = mh-53e, 2
+
+AddRack = container, 0.00, 1.20, -1.06,  0.0, 0.0, 0.0, 5.0
+
+;AddPartSteeringWheel =   0.4098,  0.9609,  0.1915,   0, 0, 0,   130
+
+AddPartSteeringWheel =  0.4098,  0.9609,  0.1915,  0, 1.0802,-1,  130
+
+
+
+BoundingBox = 0.0, 0.62, 1.05, 1.40, 0.7
+BoundingBox = 0.0, 0.26, 1.05, 1.65, 0.2
+BoundingBox = 0.0, 0.20, 0.0, 1.65, 0.2
+BoundingBox = 0.0, 0.20, -0.75, 1.65, 0.2
+
+Regeneration = false
+ArmorDamageFactor = 1.0
+
+unmountposition = 0.41, 2.25, -0.27
+
+ArmorMinDamage = 2

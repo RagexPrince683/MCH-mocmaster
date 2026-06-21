@@ -1,0 +1,66 @@
+DisplayName = NSW 11-meter RHIB with with M240 Mount
+AddDisplayName = en_US, NSW 11-meter RHIB with M240 Mount
+AddDisplayName = ja_JP, NSW 11-meter RHIB with M240
+MaxFuel         = 250
+FuelConsumption = 0.009
+ItemID = 49998
+MaxHp = 130
+Speed = 0.58
+Float = true
+FloatOffset = 0.00
+Sound = boat
+DamageFactor = 1.0
+MobilityPitch = 0.01
+MobilityYaw = 2.60
+MobilityYawOnGround = 2.5
+
+Category = RHIB/RIB
+
+PivotTurnThrottle = 0.2
+
+enableback = true
+
+MinRotationPitch = 3.00
+MaxRotationPitch = -3.00
+Gravity = -0.3
+
+AddSeat = 0.38,  0.50,  0.00
+
+UnmountPosition = 0.38,  2.50,  0.00
+
+AddSeat = -0.38,  0.50,  0.00
+AddSeat = 0.50,  0.50,  -0.80
+AddSeat = 0.00,  0.50,  -0.80
+AddSeat = -0.50,  0.50,  -0.80
+AddSeat = 0.50,  0.50,  -1.80
+AddSeat = 0.00,  0.50,  -1.80
+AddSeat = -0.50,  0.50,  -1.80
+AddSeat = 0.00,  0.80,  3.24
+
+CanMoveOnGround = false
+CanRotOnGround  = false
+
+onGroundPitch = 4
+
+sound = rhib
+
+;small light transport rubber
+AddRecipe = "ACB", "BCD", "   ", A, mcheli:shiphull1, C, mcheli:engine1, B, mcheli:cannon1, D, mcheli:rubber
+
+AddPartRotor =    0.44,  -0.58, -3.69,   1,0, 0
+AddBlade = 1, 0,  0.44,  -0.57, -3.69,   0,0,-1
+
+AddPartRotor =    -0.44,  -0.58, -3.69,   1,0, 0
+AddBlade = 1, 0,  -0.44,  -0.57, -3.69,   0,0,-1
+
+AddPartWeapon    = rhib_hmg,       false, true, true,  0.00,  1.38,  4.27
+AddWeapon = rhib_hmg,  0.00, 1.38, 4.27,   0.0, 0.0, false, 9, 0,-120,120, -15,10
+
+;eng
+BoundingBox = 0.5, 0.55, -2.8, 1.0, 1.4, 1.5
+BoundingBox = -0.5, 0.55, -2.8, 1.0, 1.4, 1.5
+
+BoundingBox = 0.0, 0.0, -1.8, 3.0, 0.3
+BoundingBox = 0.0, 0.0, 0, 3.0, 0.3
+BoundingBox = 0.0, 0.0, 3, 3.0, 0.3
+BoundingBox = 0.0, 0.0, 5, 2.0, 0.3
