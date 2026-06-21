@@ -94,6 +94,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private float yawAngularAcceleration;
    private float finalRotYaw;
    private boolean hoverAssistActive;
+   private static final float NEW_HELI_MIN_MASS = 0.01F;
+   private static final float NEW_HELI_MIN_INERTIA = 0.01F;
 
 
    public MCH_EntityHeli(World world) {
@@ -147,56 +149,80 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
    private void updateNewHelicopterFlightTelemetryConfig() {
       this.newHeliFlightModelEnabled = this.heliInfo != null && this.heliInfo.useNewHelicopterFlightModel;
-      this.physicalMass = this.newHeliFlightModelEnabled?this.heliInfo.physicalMass:1.0F;
+      this.physicalMass = this.newHeliFlightModelEnabled?this.sanitizePositive(this.heliInfo.physicalMass, 1.0F, NEW_HELI_MIN_MASS):1.0F;
       if(!this.newHeliFlightModelEnabled) {
-         this.normalizedRotorRPM = 0.0F;
-         this.targetRotorRPM = 0.0F;
-         this.rotorEnergy = 0.0F;
-         this.enginePowerOutput = 0.0F;
-         this.lastRotorRPM = 0.0F;
-         this.rotorSpoolDelta = 0.0F;
-         this.rotorReadyForLift = false;
-         this.collectiveInput = 0.0F;
-         this.rotorThrust = 0.0F;
-         this.rotorEfficiency = 0.0F;
-         this.rotorVerticalThrust = 0.0F;
-         this.weightForce = 0.0F;
-         this.netVerticalForce = 0.0F;
-         this.verticalAcceleration = 0.0F;
-         this.verticalDragApplied = 0.0F;
-         this.finalMotionY = 0.0F;
-         this.verticalForce = 0.0F;
-         this.cyclicPitchInput = 0.0F;
-         this.cyclicRollInput = 0.0F;
-         this.rotorTiltForward = 0.0F;
-         this.rotorTiltRight = 0.0F;
-         this.rotorHorizontalThrustX = 0.0F;
-         this.rotorHorizontalThrustZ = 0.0F;
-         this.horizontalAccelerationX = 0.0F;
-         this.horizontalAccelerationZ = 0.0F;
-         this.parasiteDragAppliedX = 0.0F;
-         this.parasiteDragAppliedZ = 0.0F;
-         this.finalMotionX = 0.0F;
-         this.finalMotionZ = 0.0F;
-         this.hoverAssistStrength = 0.0F;
-         this.hoverCollectiveCorrection = 0.0F;
-         this.hoverCyclicPitchCorrection = 0.0F;
-         this.hoverCyclicRollCorrection = 0.0F;
-         this.manualInputOverrideFactor = 0.0F;
-         this.targetVerticalSpeed = 0.0F;
-         this.targetHorizontalSpeed = 0.0F;
-         this.localDriftForward = 0.0F;
-         this.localDriftRight = 0.0F;
-         this.tailRotorInput = 0.0F;
-         this.heliYawAngularVelocity = 0.0F;
-         this.heliYawTorque = 0.0F;
-         this.tailRotorTorque = 0.0F;
-         this.mainRotorTorqueReaction = 0.0F;
-         this.yawDampingApplied = 0.0F;
-         this.yawAngularAcceleration = 0.0F;
-         this.finalRotYaw = this.getRotYaw();
-         this.hoverAssistActive = false;
+         this.resetNewHelicopterFlightTelemetry();
       }
+   }
+
+   private boolean isFinite(double value) {
+      return !Double.isNaN(value) && !Double.isInfinite(value);
+   }
+
+   private boolean isFinite(float value) {
+      return !Float.isNaN(value) && !Float.isInfinite(value);
+   }
+
+   private float sanitizePositive(float value, float fallback, float minValue) {
+      return this.isFinite(value) && value >= minValue?value:Math.max(fallback, minValue);
+   }
+
+   private float sanitizeClamped(float value, float minValue, float maxValue, float fallback) {
+      return this.isFinite(value)?MathHelper.clamp_float(value, minValue, maxValue):MathHelper.clamp_float(fallback, minValue, maxValue);
+   }
+
+   private float getSafeTickDelta(float tickDelta) {
+      return this.sanitizeClamped(tickDelta, 0.0F, 1.0F, 1.0F);
+   }
+
+   private void resetNewHelicopterFlightTelemetry() {
+      this.normalizedRotorRPM = 0.0F;
+      this.targetRotorRPM = 0.0F;
+      this.rotorEnergy = 0.0F;
+      this.enginePowerOutput = 0.0F;
+      this.lastRotorRPM = 0.0F;
+      this.rotorSpoolDelta = 0.0F;
+      this.rotorReadyForLift = false;
+      this.collectiveInput = 0.0F;
+      this.rotorThrust = 0.0F;
+      this.rotorEfficiency = 0.0F;
+      this.rotorVerticalThrust = 0.0F;
+      this.weightForce = 0.0F;
+      this.netVerticalForce = 0.0F;
+      this.verticalAcceleration = 0.0F;
+      this.verticalDragApplied = 0.0F;
+      this.finalMotionY = 0.0F;
+      this.verticalForce = 0.0F;
+      this.cyclicPitchInput = 0.0F;
+      this.cyclicRollInput = 0.0F;
+      this.rotorTiltForward = 0.0F;
+      this.rotorTiltRight = 0.0F;
+      this.rotorHorizontalThrustX = 0.0F;
+      this.rotorHorizontalThrustZ = 0.0F;
+      this.horizontalAccelerationX = 0.0F;
+      this.horizontalAccelerationZ = 0.0F;
+      this.parasiteDragAppliedX = 0.0F;
+      this.parasiteDragAppliedZ = 0.0F;
+      this.finalMotionX = 0.0F;
+      this.finalMotionZ = 0.0F;
+      this.hoverAssistStrength = 0.0F;
+      this.hoverCollectiveCorrection = 0.0F;
+      this.hoverCyclicPitchCorrection = 0.0F;
+      this.hoverCyclicRollCorrection = 0.0F;
+      this.manualInputOverrideFactor = 0.0F;
+      this.targetVerticalSpeed = 0.0F;
+      this.targetHorizontalSpeed = 0.0F;
+      this.localDriftForward = 0.0F;
+      this.localDriftRight = 0.0F;
+      this.tailRotorInput = 0.0F;
+      this.heliYawAngularVelocity = 0.0F;
+      this.heliYawTorque = 0.0F;
+      this.tailRotorTorque = 0.0F;
+      this.mainRotorTorqueReaction = 0.0F;
+      this.yawDampingApplied = 0.0F;
+      this.yawAngularAcceleration = 0.0F;
+      this.finalRotYaw = this.getRotYaw();
+      this.hoverAssistActive = false;
    }
 
    public boolean isNewHeliFlightModelEnabled() {
@@ -442,19 +468,19 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.setCurrentThrottle(par1NBTTagCompound.getDouble("RotorSpeed"));
       this.rotationRotor = par1NBTTagCompound.getDouble("rotetionRotor");
       if(par1NBTTagCompound.hasKey("NewHeliRotorRPM")) {
-         this.normalizedRotorRPM = MathHelper.clamp_float(par1NBTTagCompound.getFloat("NewHeliRotorRPM"), 0.0F, 1.0F);
+         this.normalizedRotorRPM = this.sanitizeClamped(par1NBTTagCompound.getFloat("NewHeliRotorRPM"), 0.0F, 1.0F, 0.0F);
       }
       if(par1NBTTagCompound.hasKey("NewHeliTargetRotorRPM")) {
-         this.targetRotorRPM = MathHelper.clamp_float(par1NBTTagCompound.getFloat("NewHeliTargetRotorRPM"), 0.0F, 1.0F);
+         this.targetRotorRPM = this.sanitizeClamped(par1NBTTagCompound.getFloat("NewHeliTargetRotorRPM"), 0.0F, 1.0F, 0.0F);
       }
       if(par1NBTTagCompound.hasKey("NewHeliRotorEnergy")) {
-         this.rotorEnergy = Math.max(par1NBTTagCompound.getFloat("NewHeliRotorEnergy"), 0.0F);
+         this.rotorEnergy = Math.max(this.sanitizeClamped(par1NBTTagCompound.getFloat("NewHeliRotorEnergy"), 0.0F, 100000.0F, 0.0F), 0.0F);
       }
       if(par1NBTTagCompound.hasKey("NewHeliEnginePower")) {
-         this.enginePowerOutput = MathHelper.clamp_float(par1NBTTagCompound.getFloat("NewHeliEnginePower"), 0.0F, 1.0F);
+         this.enginePowerOutput = this.sanitizeClamped(par1NBTTagCompound.getFloat("NewHeliEnginePower"), 0.0F, 1.0F, 0.0F);
       }
       if(par1NBTTagCompound.hasKey("NewHeliYawAngularVelocity")) {
-         this.heliYawAngularVelocity = par1NBTTagCompound.getFloat("NewHeliYawAngularVelocity");
+         this.heliYawAngularVelocity = this.sanitizeClamped(par1NBTTagCompound.getFloat("NewHeliYawAngularVelocity"), -8.0F, 8.0F, 0.0F);
       }
       this.setFoldBladeStat((byte)(par1NBTTagCompound.getBoolean("FoldBlade")?0:2));
       if(this.heliInfo == null) {
@@ -466,6 +492,9 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             this.setAcInfo(this.heliInfo);
             this.updateNewHelicopterFlightTelemetryConfig();
          }
+      }
+      if(!this.newHeliFlightModelEnabled) {
+         this.resetNewHelicopterFlightTelemetry();
       }
 
       if(!beforeFoldBlade && this.getFoldBladeStat() == 0) {
@@ -560,6 +589,10 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       } else {
          return false;
       }
+   }
+
+   public boolean isNewHelicopterBladesUsable() {
+      return this.canUseBlades();
    }
 
    protected void foldBlades() {
@@ -662,6 +695,9 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          }
 
          this.updateNewHelicopterFlightTelemetryConfig();
+         if(this.newHeliFlightModelEnabled && (this.isDestroyed() || !this.canUseBlades() || this.isFoldBlades())) {
+            this.resetNewHelicopterFlightTelemetry();
+         }
          this.updateWeapons();
          this.onUpdate_Seats();
          this.onUpdate_Control();
@@ -792,25 +828,28 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       if(this.heliInfo == null) {
          return;
       }
+      tickDelta = this.getSafeTickDelta(tickDelta);
 
       boolean bladesUsable = this.canUseBlades() && !this.isFoldBlades();
       boolean engineUsable = !this.isDestroyed() && bladesUsable && this.isCanopyClose() && this.canUseFuel(true);
-      float rpmAuthority = engineUsable?MathHelper.clamp_float(this.normalizedRotorRPM, 0.0F, 1.0F):0.0F;
+      this.normalizedRotorRPM = this.sanitizeClamped(this.normalizedRotorRPM, 0.0F, 1.0F, 0.0F);
+      float rpmAuthority = engineUsable?this.normalizedRotorRPM:0.0F;
       float damageAuthority = MathHelper.clamp_float((float)this.getHP() / Math.max(1.0F, (float)this.getMaxHP()), 0.25F, 1.0F);
       if(this.isDestroyed()) {
          damageAuthority = 0.0F;
       }
 
-      float collective = MathHelper.clamp_float(this.collectiveInput, 0.0F, 1.0F);
-      float rotorLoad = Math.max(this.rotorThrust, this.heliInfo.mainRotorMaxThrust * collective * this.enginePowerOutput);
+      float collective = this.sanitizeClamped(this.collectiveInput, 0.0F, 1.0F, 0.0F);
+      float maxThrust = Math.max(this.sanitizePositive(this.heliInfo.mainRotorMaxThrust, 0.0F, 0.0F), 0.0F);
+      float rotorLoad = Math.max(Math.max(this.rotorThrust, 0.0F), maxThrust * collective * this.sanitizeClamped(this.enginePowerOutput, 0.0F, 1.0F, 0.0F));
       // Positive reaction is the fuselage yawing right from main-rotor drag; tail-rotor torque subtracts from it.
       this.mainRotorTorqueReaction = engineUsable?rotorLoad * rpmAuthority:0.0F;
 
       float tailAuthority = Math.max(this.heliInfo.tailRotorAuthority, 0.0F) * rpmAuthority * damageAuthority;
-      this.tailRotorTorque = this.tailRotorInput * tailAuthority * Math.max(this.heliInfo.mainRotorMaxThrust, 0.01F);
+      this.tailRotorTorque = this.tailRotorInput * tailAuthority * Math.max(maxThrust, 0.01F);
       this.heliYawTorque = this.tailRotorTorque - this.mainRotorTorqueReaction;
 
-      float inertia = Math.max(this.heliInfo.angularInertia, 0.01F);
+      float inertia = this.sanitizePositive(this.heliInfo.angularInertia, 1.0F, NEW_HELI_MIN_INERTIA);
       this.yawAngularAcceleration = this.heliYawTorque / inertia;
       this.heliYawAngularVelocity += this.yawAngularAcceleration * tickDelta;
 
@@ -930,14 +969,15 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private void updateNewHelicopterRotorSpool() {
       boolean bladesUsable = this.canUseBlades() && !this.isFoldBlades();
       boolean enginePowered = !this.isDestroyed() && bladesUsable && this.isCanopyClose() && this.canUseFuel(true);
+      this.normalizedRotorRPM = this.sanitizeClamped(this.normalizedRotorRPM, 0.0F, 1.0F, 0.0F);
       this.lastRotorRPM = this.normalizedRotorRPM;
       this.enginePowerOutput = enginePowered?MathHelper.clamp_float((float)this.getCurrentThrottle(), 0.0F, 1.0F):0.0F;
       this.targetRotorRPM = this.enginePowerOutput;
 
       float delta = this.targetRotorRPM - this.normalizedRotorRPM;
-      float configuredRate = delta >= 0.0F?this.heliInfo.rotorSpoolUpRate:this.heliInfo.rotorSpoolDownRate;
-      float inertia = Math.max(this.heliInfo.rotorInertia, 0.01F);
-      float maxStep = configuredRate / inertia;
+      float configuredRate = Math.max(delta >= 0.0F?this.heliInfo.rotorSpoolUpRate:this.heliInfo.rotorSpoolDownRate, 0.0F);
+      float inertia = this.sanitizePositive(this.heliInfo.rotorInertia, 1.0F, NEW_HELI_MIN_INERTIA);
+      float maxStep = MathHelper.clamp_float(configuredRate / inertia, 0.0F, 1.0F);
       if(MathHelper.abs(delta) <= maxStep) {
          this.normalizedRotorRPM = this.targetRotorRPM;
       } else if(delta > 0.0F) {
@@ -1153,10 +1193,13 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    }
 
    private void applyNewHelicopterCollectiveLift(double attitudeEfficiency, double throttle, double horizontalSpeed, float tickDelta) {
-      float mass = Math.max(this.heliInfo.physicalMass, 0.01F);
+      tickDelta = this.getSafeTickDelta(tickDelta);
+      float mass = this.sanitizePositive(this.physicalMass, 1.0F, NEW_HELI_MIN_MASS);
+      this.physicalMass = mass;
       float gravity = MathHelper.abs(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
       boolean bladesUsable = this.canUseBlades() && !this.isFoldBlades();
-      this.collectiveInput = MathHelper.clamp_float((float)throttle, 0.0F, 1.0F);
+      this.normalizedRotorRPM = this.sanitizeClamped(this.normalizedRotorRPM, 0.0F, 1.0F, 0.0F);
+      this.collectiveInput = this.sanitizeClamped((float)throttle, 0.0F, 1.0F, 0.0F);
 
       double efficiency = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
       efficiency *= MCH_FlightModel.clamp(attitudeEfficiency, 0.0D, 1.0D);
@@ -1175,8 +1218,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          efficiency = 0.0D;
       }
 
-      this.rotorEfficiency = MathHelper.clamp_float((float)efficiency, 0.0F, 2.0F);
-      this.rotorThrust = this.heliInfo.mainRotorMaxThrust * this.normalizedRotorRPM * this.collectiveInput * this.rotorEfficiency;
+      this.rotorEfficiency = this.sanitizeClamped((float)efficiency, 0.0F, 2.0F, 0.0F);
+      this.rotorThrust = Math.max(this.heliInfo.mainRotorMaxThrust, 0.0F) * this.normalizedRotorRPM * this.collectiveInput * this.rotorEfficiency;
 
       float pitchComponent = MathHelper.cos(this.getRotPitch() / 180.0F * 3.1415927F);
       float rollComponent = MathHelper.cos(this.getRotRoll() / 180.0F * 3.1415927F);
@@ -1190,7 +1233,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.verticalAcceleration = this.netVerticalForce / mass;
       super.motionY += (double)(this.verticalAcceleration * tickDelta);
 
-      this.verticalDragApplied = (float)(-super.motionY * (double)this.heliInfo.verticalDrag * (double)tickDelta);
+      float verticalDrag = MathHelper.clamp_float(this.heliInfo.verticalDrag, 0.0F, 1.0F / Math.max(tickDelta, 0.001F));
+      this.verticalDragApplied = (float)(-super.motionY * (double)verticalDrag * (double)tickDelta);
       super.motionY += (double)this.verticalDragApplied;
       this.finalMotionY = (float)super.motionY;
    }
@@ -1214,9 +1258,9 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       pitchInput += this.hoverCyclicPitchCorrection;
       rollInput += this.hoverCyclicRollCorrection;
 
-      this.cyclicPitchInput = MathHelper.clamp_float(pitchInput, -1.0F, 1.0F);
-      this.cyclicRollInput = MathHelper.clamp_float(rollInput, -1.0F, 1.0F);
-      float authority = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.cyclicAuthority, 0.0F, 1.0F):0.0F;
+      this.cyclicPitchInput = this.sanitizeClamped(pitchInput, -1.0F, 1.0F, 0.0F);
+      this.cyclicRollInput = this.sanitizeClamped(rollInput, -1.0F, 1.0F, 0.0F);
+      float authority = this.heliInfo != null?this.sanitizeClamped(this.heliInfo.cyclicAuthority, 0.0F, 1.0F, 0.0F):0.0F;
       this.rotorTiltForward = MathHelper.clamp_float(this.cyclicPitchInput * authority, -1.0F, 1.0F);
       this.rotorTiltRight = MathHelper.clamp_float(this.cyclicRollInput * authority, -1.0F, 1.0F);
 
@@ -1275,7 +1319,9 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    }
 
    private void applyNewHelicopterCyclicThrust(float tickDelta) {
-      float mass = Math.max(this.heliInfo.physicalMass, 0.01F);
+      tickDelta = this.getSafeTickDelta(tickDelta);
+      float mass = this.sanitizePositive(this.physicalMass, 1.0F, NEW_HELI_MIN_MASS);
+      this.physicalMass = mass;
       float yawRadians = this.getRotYaw() / 180.0F * 3.1415927F;
       float forwardX = -MathHelper.sin(yawRadians);
       float forwardZ = MathHelper.cos(yawRadians);
@@ -1289,7 +1335,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       super.motionX += (double)(this.horizontalAccelerationX * tickDelta);
       super.motionZ += (double)(this.horizontalAccelerationZ * tickDelta);
 
-      float drag = this.heliInfo != null?Math.max(this.heliInfo.parasiteDrag, 0.0F):0.0F;
+      float drag = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.parasiteDrag, 0.0F, 1.0F / Math.max(tickDelta, 0.001F)):0.0F;
       this.parasiteDragAppliedX = (float)(-super.motionX * (double)drag * (double)tickDelta);
       this.parasiteDragAppliedZ = (float)(-super.motionZ * (double)drag * (double)tickDelta);
       super.motionX += (double)this.parasiteDragAppliedX;
@@ -1304,6 +1350,55 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
       this.finalMotionX = (float)super.motionX;
       this.finalMotionZ = (float)super.motionZ;
+   }
+
+   private void guardNewHelicopterPhysicsState() {
+      if(!this.newHeliFlightModelEnabled) {
+         return;
+      }
+
+      boolean invalid = false;
+      invalid |= !this.isFinite(super.motionX);
+      invalid |= !this.isFinite(super.motionY);
+      invalid |= !this.isFinite(super.motionZ);
+      invalid |= !this.isFinite(this.getRotYaw());
+      invalid |= !this.isFinite(this.getRotPitch());
+      invalid |= !this.isFinite(this.getRotRoll());
+      invalid |= !this.isFinite(this.heliYawAngularVelocity);
+      invalid |= !this.isFinite(this.getPitchAngularVelocity());
+      invalid |= !this.isFinite(this.getRollAngularVelocity());
+      if(!invalid) {
+         return;
+      }
+
+      String typeName = this.getTypeName();
+      MCH_Lib.Log((Entity)this, "[MCHeli][NewHeliFlightModel][WARN] Invalid physics state reset for type=%s config=%s motion=(%s,%s,%s) rot=(%s,%s,%s) angular=(pitch=%s,yaw=%s,roll=%s)",
+            new Object[]{typeName, this.heliInfo != null?this.heliInfo.name:"null", Double.valueOf(super.motionX), Double.valueOf(super.motionY), Double.valueOf(super.motionZ), Float.valueOf(this.getRotPitch()), Float.valueOf(this.getRotYaw()), Float.valueOf(this.getRotRoll()), Float.valueOf(this.getPitchAngularVelocity()), Float.valueOf(this.heliYawAngularVelocity), Float.valueOf(this.getRollAngularVelocity())});
+      if(!this.isFinite(super.motionX)) {
+         super.motionX = 0.0D;
+      }
+      if(!this.isFinite(super.motionY)) {
+         super.motionY = 0.0D;
+      }
+      if(!this.isFinite(super.motionZ)) {
+         super.motionZ = 0.0D;
+      }
+      if(!this.isFinite(this.getRotYaw())) {
+         this.setRotYaw(0.0F);
+      }
+      if(!this.isFinite(this.getRotPitch())) {
+         this.setRotPitch(0.0F);
+      }
+      if(!this.isFinite(this.getRotRoll())) {
+         this.setRotRoll(0.0F);
+      }
+      if(!this.isFinite(this.heliYawAngularVelocity)) {
+         this.heliYawAngularVelocity = 0.0F;
+      }
+      this.finalMotionX = (float)super.motionX;
+      this.finalMotionY = (float)super.motionY;
+      this.finalMotionZ = (float)super.motionZ;
+      this.finalRotYaw = this.getRotYaw();
    }
 
    protected void onUpdate_Client() {
@@ -1393,7 +1488,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             }
 
             double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-            if(this.newHeliFlightModelEnabled) {
+            if(this.newHeliFlightModelEnabled && !this.isDestroyed() && this.canUseBlades() && !this.isFoldBlades()) {
                this.updateNewHelicopterCyclicInput();
                this.applyNewHelicopterCollectiveLift(y, throttle + (double)this.hoverCollectiveCorrection, horizontalSpeed, 1.0F);
                this.applyNewHelicopterCyclicThrust(1.0F);
@@ -1442,12 +1537,14 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             }
          }
       } else {
-         if(this.newHeliFlightModelEnabled) {
+         if(this.newHeliFlightModelEnabled && !this.isDestroyed() && this.canUseBlades() && !this.isFoldBlades()) {
             double throttle = this.isDestroyed()?this.getCurrentThrottle() * 0.65D:this.getCurrentThrottle();
             double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
             this.updateNewHelicopterCyclicInput();
             this.applyNewHelicopterCollectiveLift(1.0D, throttle + (double)this.hoverCollectiveCorrection, horizontalSpeed, 1.0F);
             this.applyNewHelicopterCyclicThrust(1.0F);
+         } else if(this.newHeliFlightModelEnabled) {
+            this.resetNewHelicopterFlightTelemetry();
          }
 
          if(!this.newHeliFlightModelEnabled && super.rand.nextInt(50) == 0) {
@@ -1509,10 +1606,12 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          }
       }
 
+      this.guardNewHelicopterPhysicsState();
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
       super.motionY *= 0.95D;
       super.motionX *= 0.99D;
       super.motionZ *= 0.99D;
+      this.guardNewHelicopterPhysicsState();
       this.setRotation(this.getRotYaw(), this.getRotPitch());
       this.onUpdate_updateBlock();
       this.handleDeadPilot();

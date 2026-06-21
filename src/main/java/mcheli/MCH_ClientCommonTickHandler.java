@@ -334,17 +334,21 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       MCP_EntityPlane plane = ac instanceof MCP_EntityPlane ? (MCP_EntityPlane)ac : null;
       MCH_EntityHeli heli = ac instanceof MCH_EntityHeli ? (MCH_EntityHeli)ac : null;
       if(heli != null && heli.isNewHeliFlightModelEnabled()) {
-         System.out.println(String.format(
-               "[MCHeli] heli-yaw dt=%.3f yawInput=%.4f mainRotorTorqueReaction=%.4f tailRotorTorque=%.4f netYawTorque=%.4f yawAngularAcceleration=%.4f heliYawAngularVelocity=%.4f yawDampingApplied=%.4f finalRotYaw=%.2f",
-               simDelta,
-               heli.getTailRotorInput(),
-               heli.getMainRotorTorqueReaction(),
-               heli.getTailRotorTorque(),
-               heli.getHeliYawTorque(),
-               heli.getYawAngularAcceleration(),
-               heli.getYawAngularVelocity(),
-               heli.getYawDampingApplied(),
-               heli.getFinalRotYaw()));
+         System.out.println(String.format("[MCHeli][NewHeli][opt-in/config] dt=%.3f type=%s enabled=%s mass=%.3f destroyed=%s bladesUsable=%s folded=%s",
+               simDelta, heli.getTypeName(), Boolean.valueOf(heli.isNewHeliFlightModelEnabled()), Float.valueOf(heli.getPhysicalMass()), Boolean.valueOf(heli.isDestroyed()), Boolean.valueOf(heli.isNewHelicopterBladesUsable()), Boolean.valueOf(heli.isFoldBlades())));
+         System.out.println(String.format("[MCHeli][NewHeli][rotor RPM] current=%.4f target=%.4f last=%.4f delta=%.4f energy=%.4f engineOutput=%.4f ready=%s",
+               Float.valueOf(heli.getNormalizedRotorRPM()), Float.valueOf(heli.getTargetRotorRPM()), Float.valueOf(heli.getLastRotorRPM()), Float.valueOf(heli.getRotorSpoolDelta()), Float.valueOf(heli.getRotorEnergy()), Float.valueOf(heli.getEnginePowerOutput()), Boolean.valueOf(heli.isRotorReadyForLift())));
+         System.out.println(String.format("[MCHeli][NewHeli][collective/lift] collective=%.4f thrust=%.4f efficiency=%.4f verticalThrust=%.4f weight=%.4f netY=%.4f accelY=%.4f dragY=%.4f finalY=%.4f",
+               Float.valueOf(heli.getCollectiveInput()), Float.valueOf(heli.getRotorThrust()), Float.valueOf(heli.getRotorEfficiency()), Float.valueOf(heli.getRotorVerticalThrust()), Float.valueOf(heli.getWeightForce()), Float.valueOf(heli.getNetVerticalForce()), Float.valueOf(heli.getVerticalAcceleration()), Float.valueOf(heli.getVerticalDragApplied()), Float.valueOf(heli.getFinalMotionY())));
+         System.out.println(String.format("[MCHeli][NewHeli][cyclic/horizontal] input=(pitch=%.4f,roll=%.4f) tilt=(forward=%.4f,right=%.4f) thrust=(x=%.4f,z=%.4f) accel=(x=%.4f,z=%.4f) drag=(x=%.4f,z=%.4f)",
+               Float.valueOf(heli.getCyclicPitchInput()), Float.valueOf(heli.getCyclicRollInput()), Float.valueOf(heli.getRotorTiltForward()), Float.valueOf(heli.getRotorTiltRight()), Float.valueOf(heli.getRotorHorizontalThrustX()), Float.valueOf(heli.getRotorHorizontalThrustZ()), Float.valueOf(heli.getHorizontalAccelerationX()), Float.valueOf(heli.getHorizontalAccelerationZ()), Float.valueOf(heli.getParasiteDragAppliedX()), Float.valueOf(heli.getParasiteDragAppliedZ())));
+         System.out.println(String.format("[MCHeli][NewHeli][hover assist] active=%s strength=%.4f manualOverride=%.4f collectiveCorrection=%.4f cyclicCorrection=(pitch=%.4f,roll=%.4f) targetSpeed=(vertical=%.4f,horizontal=%.4f) drift=(forward=%.4f,right=%.4f)",
+               Boolean.valueOf(heli.isHoverAssistActive()), Float.valueOf(heli.getHoverAssistStrength()), Float.valueOf(heli.getManualInputOverrideFactor()), Float.valueOf(heli.getHoverCollectiveCorrection()), Float.valueOf(heli.getHoverCyclicPitchCorrection()), Float.valueOf(heli.getHoverCyclicRollCorrection()), Float.valueOf(heli.getTargetVerticalSpeed()), Float.valueOf(heli.getTargetHorizontalSpeed()), Float.valueOf(heli.getLocalDriftForward()), Float.valueOf(heli.getLocalDriftRight())));
+         System.out.println(String.format("[MCHeli][NewHeli][yaw/tail rotor] yawInput=%.4f mainReaction=%.4f tailTorque=%.4f netTorque=%.4f yawAccel=%.4f yawVelocity=%.4f damping=%.4f finalYaw=%.2f",
+               Float.valueOf(heli.getTailRotorInput()), Float.valueOf(heli.getMainRotorTorqueReaction()), Float.valueOf(heli.getTailRotorTorque()), Float.valueOf(heli.getHeliYawTorque()), Float.valueOf(heli.getYawAngularAcceleration()), Float.valueOf(heli.getYawAngularVelocity()), Float.valueOf(heli.getYawDampingApplied()), Float.valueOf(heli.getFinalRotYaw())));
+         System.out.println(String.format("[MCHeli][NewHeli][final motion] motion=(%.4f,%.4f,%.4f) cachedFinal=(%.4f,%.4f,%.4f) rot=(pitch=%.2f,yaw=%.2f,roll=%.2f)",
+               Double.valueOf(ac.motionX), Double.valueOf(ac.motionY), Double.valueOf(ac.motionZ), Float.valueOf(heli.getFinalMotionX()), Float.valueOf(heli.getFinalMotionY()), Float.valueOf(heli.getFinalMotionZ()), Float.valueOf(heli.getRotPitch()), Float.valueOf(heli.getRotYaw()), Float.valueOf(heli.getRotRoll())));
+         return;
       }
 
       double forwardSpeed = plane != null
