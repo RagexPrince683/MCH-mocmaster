@@ -38,6 +38,11 @@ Helicopters inherit all shared keys from `base.md`. Helicopter-only parser keys 
 
 The new keys above only expose configuration and telemetry for a future helicopter-specific model. They do not change runtime helicopter physics unless `UseNewHelicopterFlightModel = true`, and the current implementation still leaves actual flight forces on the legacy path. Existing helicopter asset files do not need to define any of the new values.
 
+
+### Rotor RPM foundation
+
+When `UseNewHelicopterFlightModel = true`, helicopters now maintain a normalized runtime rotor state for future lift and yaw work. `targetRotorRPM` is derived from current throttle only while the engine can run, fuel is available, the canopy is closed, and blades are usable/unfolded. `normalizedRotorRPM` then moves toward that target using `RotorSpoolUpRate` while increasing, `RotorSpoolDownRate` while decreasing, and `RotorInertia` as resistance. This rotor state drives visual rotor rotation for opted-in helicopters only; legacy helicopters keep the original throttle-driven animation and lift behavior. Vertical lift, cyclic, hover mode, and yaw physics still use the legacy systems in this phase.
+
 ## Rotorcraft lift formulas
 
 When not floating in water, helicopter vertical motion uses shared gravity and throttle-dependent lift:
