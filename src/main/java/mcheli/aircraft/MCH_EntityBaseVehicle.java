@@ -1923,6 +1923,29 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return 0.0D;
    }
 
+   public double getLastThrustAccelX() { return 0.0D; }
+   public double getLastThrustAccelY() { return 0.0D; }
+   public double getLastThrustAccelZ() { return 0.0D; }
+   public double getLastGravityAccelY() { return 0.0D; }
+   public double getLastLiftAccelX() { return 0.0D; }
+   public double getLastLiftAccelY() { return 0.0D; }
+   public double getLastLiftAccelZ() { return 0.0D; }
+   public double getLastDragAccelX() { return 0.0D; }
+   public double getLastDragAccelY() { return 0.0D; }
+   public double getLastDragAccelZ() { return 0.0D; }
+   public double getLastNetAccelX() { return 0.0D; }
+   public double getLastNetAccelY() { return 0.0D; }
+   public double getLastNetAccelZ() { return 0.0D; }
+   public String getLastVelocityBeforeIntegration() { return "0.00000,0.00000,0.00000"; }
+   public String getLastVelocityAfterIntegration() { return "0.00000,0.00000,0.00000"; }
+   public double getLastForwardVectorX() { return 0.0D; }
+   public double getLastForwardVectorY() { return 0.0D; }
+   public double getLastForwardVectorZ() { return 0.0D; }
+   public double getLastForwardAirspeed() { return 0.0D; }
+   public double getLastVerticalSpeed() { return 0.0D; }
+   public double getLastGlideEnergyGain() { return 0.0D; }
+   public double getLastDiveAccelerationFactor() { return 0.0D; }
+
    public boolean isLastAirborne() {
       return !super.onGround;
    }
