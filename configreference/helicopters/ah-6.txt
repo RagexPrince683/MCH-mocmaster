@@ -25,8 +25,8 @@ YawDamping = 0.18
 AngularInertia = 0.85
 TranslationalLiftCoefficient = 0.0045
 VerticalDrag = 0.024
-ParasiteDrag = 0.045
-HorizontalRotorThrustScale = 0.24
+ParasiteDrag = 0.025
+HorizontalRotorThrustScale = 0.95
 HoverAssistStrength = 0.22
 
 ; M = Military(軍用機).  A = Attacker(攻撃機)

@@ -19,7 +19,7 @@ ThirdPersonDist = 20
 ; Initial new helicopter flight-model test opt-in; tune thrust-to-weight before control authority: medium utility helicopter.
 UseNewHelicopterFlightModel = true
 PhysicalMass = 1.20
-MainRotorMaxThrust = 0.300
+MainRotorMaxThrust = 0.280
 RotorInertia = 1.25
 RotorSpoolUpRate = 0.022
 RotorSpoolDownRate = 0.030
@@ -30,8 +30,8 @@ YawDamping = 0.22
 AngularInertia = 1.25
 TranslationalLiftCoefficient = 0.0040
 VerticalDrag = 0.026
-ParasiteDrag = 0.055
-HorizontalRotorThrustScale = 0.18
+ParasiteDrag = 0.035
+HorizontalRotorThrustScale = 0.65
 HoverAssistStrength = 0.28
 
 sound = apache
