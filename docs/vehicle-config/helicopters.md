@@ -24,7 +24,7 @@ Helicopters inherit all shared keys from `base.md`. Helicopter-only parser keys 
 | `VerticalDrag` | float >= 0 | 0.02 | Future vertical climb/descent damping coefficient. |
 | `ParasiteDrag` | float >= 0 | 0.01 | Future horizontal air-drag coefficient. Increase this to damp horizontal speed and make larger helicopters feel heavier. |
 | `HorizontalRotorThrustScale` / `HelicopterHorizontalThrustScale` | float >= 0 | 0.35 | New-model-only Minecraft-scale multiplier for converting cyclic rotor thrust into horizontal acceleration. This is the primary Minecraft-scale horizontal acceleration knob; lower values preserve hover/climb tuning while reducing map-scale horizontal acceleration. |
-| `HoverAssistStrength` | 0.0-1.0 | 0.0 | Future hover assistance strength. `0.0` keeps assist disabled by default. |
+| `HoverAssistStrength` | 0.0-1.0 | 0.75 | New-model hover assistance strength. `0.0` disables assist; the default now provides strong altitude and horizontal-drift stabilization when hover mode is active and the pilot is not commanding collective/cyclic input. |
 
 ## Helicopter defaults that differ from base
 
@@ -46,7 +46,7 @@ Early in-game tuning should check the effective thrust-to-weight relationship be
 
 ### Rotor RPM foundation
 
-When `UseNewHelicopterFlightModel = true`, helicopters now maintain a normalized runtime rotor state for future lift and yaw work. `targetRotorRPM` is derived from current throttle only while the engine can run, fuel is available, the canopy is closed, and blades are usable/unfolded. `normalizedRotorRPM` then moves toward that target using `RotorSpoolUpRate` while increasing, `RotorSpoolDownRate` while decreasing, and `RotorInertia` as resistance. This rotor state drives visual rotor rotation for opted-in helicopters only; legacy helicopters keep the original throttle-driven animation and lift behavior. Opted-in vertical lift now uses mass, rotor thrust, configured gravity, ceiling/vortex efficiency, and `VerticalDrag`; cyclic, hover mode, yaw, and horizontal motion still use the legacy systems in this phase.
+When `UseNewHelicopterFlightModel = true`, helicopters now maintain a normalized runtime rotor state for future lift and yaw work. `targetRotorRPM` is derived from current throttle only while the engine can run, fuel is available, the canopy is closed, and blades are usable/unfolded. `normalizedRotorRPM` then moves toward that target using `RotorSpoolUpRate` while increasing, `RotorSpoolDownRate` while decreasing, and `RotorInertia` as resistance. This rotor state drives visual rotor rotation for opted-in helicopters only; legacy helicopters keep the original throttle-driven animation and lift behavior. Opted-in vertical lift now uses mass, rotor thrust, configured gravity, ceiling/vortex efficiency, and `VerticalDrag`. W/S are treated as collective-only controls in the new helicopter model; they do not directly request forward/backward horizontal thrust. New-model hover assist uses `HoverAssistStrength` to add bounded collective and cyclic corrections that resist altitude changes and drift without overriding active pilot input.
 
 ## Rotorcraft lift formulas
 
@@ -106,7 +106,7 @@ TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.026
 ParasiteDrag = 0.035
 HorizontalRotorThrustScale = 0.35
-HoverAssistStrength = 0.25
+HoverAssistStrength = 0.75
 ```
 
 ## Legacy compatibility

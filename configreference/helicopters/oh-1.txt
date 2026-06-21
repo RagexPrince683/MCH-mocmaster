@@ -30,7 +30,7 @@ TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.025
 ParasiteDrag = 0.027
 HorizontalRotorThrustScale = 0.86
-HoverAssistStrength = 0.22
+HoverAssistStrength = 0.75
 
 
 Sound = littlebird

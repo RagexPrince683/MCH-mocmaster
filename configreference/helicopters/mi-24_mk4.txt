@@ -28,7 +28,7 @@ TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.028
 ParasiteDrag = 0.039
 HorizontalRotorThrustScale = 0.6
-HoverAssistStrength = 0.17
+HoverAssistStrength = 0.75
 
 
 sound = hind

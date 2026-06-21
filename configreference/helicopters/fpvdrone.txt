@@ -36,7 +36,7 @@ TranslationalLiftCoefficient = 0.005
 VerticalDrag = 0.018
 ParasiteDrag = 0.018
 HorizontalRotorThrustScale = 0.92
-HoverAssistStrength = 0.28
+HoverAssistStrength = 0.75
 
 Category = sUAS
 

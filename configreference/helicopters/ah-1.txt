@@ -31,7 +31,7 @@ TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.026
 ParasiteDrag = 0.03
 HorizontalRotorThrustScale = 0.78
-HoverAssistStrength = 0.2
+HoverAssistStrength = 0.75
 
 
 AddTexture = AH-1_1
