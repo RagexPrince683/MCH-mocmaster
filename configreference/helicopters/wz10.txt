@@ -1,6 +1,6 @@
-﻿DisplayName = Changhe Z-10
+DisplayName = Changhe Z-10
 AddDisplayName = en_US, Changhe Z-10
-AddDisplayName = ja_JP, WZ  10 
+AddDisplayName = ja_JP, WZ  10
 ItemID = 8994
 MaxHp = 100
 EnableGunnerMode = true
@@ -10,6 +10,25 @@ Speed = 1.86
 FlareType = 3
 
 ThirdPersonDist = 20
+
+; New helicopter flight model: light scout/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.98
+MainRotorMaxThrust = 0.262
+RotorInertia = 1.06
+RotorSpoolUpRate = 0.026
+RotorSpoolDownRate = 0.034
+CollectiveResponse = 0.09
+CyclicAuthority = 0.82
+TailRotorAuthority = 1.01
+YawDamping = 0.18
+AngularInertia = 1.08
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.026
+ParasiteDrag = 0.031
+HorizontalRotorThrustScale = 0.78
+HoverAssistStrength = 0.2
+
 
 
 sound = littlebird
@@ -68,7 +87,7 @@ AddPartWeaponMissile = ty90, false,  false,  false,    2.4589,  1.3057, -3.5398
 
 AddRotor= 1, 0,   0.00,  5.8782,  -1.4331,     0.0, 1.0, 0.0
 AddRotor= 1, 0,   0.00,  5.0426, -13.5825,     1.0, 0.0, 0.0
- 
+
 
 
 AddWeapon = targeting_pod1,  0.00, 0.38, 0.90,  0,-1, true,2, 0,-360,360, -25,80

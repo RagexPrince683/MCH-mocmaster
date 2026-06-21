@@ -6,6 +6,25 @@ EnableGunnerMode = true
 EnableNightVision = true
 ThirdPersonDist = 20
 
+; New helicopter flight model: medium utility/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.96
+MainRotorMaxThrust = 0.252
+RotorInertia = 1.02
+RotorSpoolUpRate = 0.026
+RotorSpoolDownRate = 0.034
+CollectiveResponse = 0.09
+CyclicAuthority = 0.8
+TailRotorAuthority = 1.01
+YawDamping = 0.2
+AngularInertia = 1.02
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.025
+ParasiteDrag = 0.031
+HorizontalRotorThrustScale = 0.7
+HoverAssistStrength = 0.2
+
+
 Speed = 1.35
 ThrottleUpDown = 0.8
 FlareType = 3

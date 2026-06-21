@@ -33,6 +33,25 @@ AddPartCamera =  -0.03, 0.015, 0.281, true, false
 
 
 ; M = Military(???).  M = Multi-Mission(????)
+
+; New helicopter flight model: special case / unusual rotorcraft baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.44
+MainRotorMaxThrust = 0.158
+RotorInertia = 0.54
+RotorSpoolUpRate = 0.036
+RotorSpoolDownRate = 0.046
+CollectiveResponse = 0.12
+CyclicAuthority = 0.87
+TailRotorAuthority = 1.08
+YawDamping = 0.22
+AngularInertia = 0.5
+TranslationalLiftCoefficient = 0.005
+VerticalDrag = 0.021
+ParasiteDrag = 0.022
+HorizontalRotorThrustScale = 0.84
+HoverAssistStrength = 0.25
+
 Category = UAS
 
 

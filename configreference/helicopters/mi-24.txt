@@ -17,6 +17,25 @@ soundvolume = 15
 HUD = helinvg, heli_gnrnvg, none, none, none, none, none, none
 
 ; M = Military(軍用機).  A = Attacker(攻撃機)
+
+; New helicopter flight model: medium utility/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.38
+MainRotorMaxThrust = 0.302
+RotorInertia = 1.42
+RotorSpoolUpRate = 0.023
+RotorSpoolDownRate = 0.031
+CollectiveResponse = 0.08
+CyclicAuthority = 0.74
+TailRotorAuthority = 0.98
+YawDamping = 0.21
+AngularInertia = 1.46
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.028
+ParasiteDrag = 0.039
+HorizontalRotorThrustScale = 0.6
+HoverAssistStrength = 0.17
+
 Category = AH/TH/HG
 
 AddTexture = mi-24_close

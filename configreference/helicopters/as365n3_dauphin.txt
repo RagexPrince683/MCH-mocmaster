@@ -1,4 +1,4 @@
-﻿DisplayName = Eurocopter AS365 Dauphin
+DisplayName = Eurocopter AS365 Dauphin
 AddDisplayName = en_US, Eurocopter AS365 Dauphin
 AddDisplayName = ja_JP, AS365N3 ドーファン
 
@@ -18,6 +18,25 @@ RotorSpeed = 90
 EnableParachuting = true
 MobDropOption  =  -1.75,  0.72,  -2.67,  10
 ThirdPersonDist = 20
+
+; New helicopter flight model: medium utility/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.2
+MainRotorMaxThrust = 0.28
+RotorInertia = 1.25
+RotorSpoolUpRate = 0.024
+RotorSpoolDownRate = 0.032
+CollectiveResponse = 0.085
+CyclicAuthority = 0.78
+TailRotorAuthority = 1.02
+YawDamping = 0.2
+AngularInertia = 1.25
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.026
+ParasiteDrag = 0.035
+HorizontalRotorThrustScale = 0.65
+HoverAssistStrength = 0.18
+
 
 sound = chinesedauphin
 soundvolume = 15
@@ -76,8 +95,8 @@ AddSearchLight    = 0.53,  0.39,  -0.06,   0x50FFFFFF,   0x10FFFFC0,    50.0, 30
 AddSearchLight    = -0.53,  0.39,  -0.06,   0x50FFFFFF,   0x10FFFFC0,    50.0, 30.0,   0,  30
 
 
-AddPartThrottle =  0.244, 2.116, 1.006, 0, 0, 1, 310 
-AddPartThrottle =  -0.369, 2.116, 1.006, 0, 0, 1, 310 
+AddPartThrottle =  0.244, 2.116, 1.006, 0, 0, 1, 310
+AddPartThrottle =  -0.369, 2.116, 1.006, 0, 0, 1, 310
 
 
 AddPartCamera = 0.00, 0.88, 1.88, true, false

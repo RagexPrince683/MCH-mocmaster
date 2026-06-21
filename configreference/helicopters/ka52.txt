@@ -6,6 +6,25 @@ Speed = 1.86
 ThrottleUpDown = 0.7
 ThirdPersonDist = 20
 
+; New helicopter flight model: light scout/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.04
+MainRotorMaxThrust = 0.276
+RotorInertia = 1.14
+RotorSpoolUpRate = 0.026
+RotorSpoolDownRate = 0.034
+CollectiveResponse = 0.09
+CyclicAuthority = 0.81
+TailRotorAuthority = 1.08
+YawDamping = 0.18
+AngularInertia = 1.16
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.026
+ParasiteDrag = 0.033
+HorizontalRotorThrustScale = 0.76
+HoverAssistStrength = 0.2
+
+
 ; M = Military(軍用機).  A = Attacker(攻撃機)
 Category = AH/SH
 

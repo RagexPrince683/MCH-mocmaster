@@ -19,6 +19,25 @@ HideEntity = true
 HUD = heli
 
 ; C = Civilian(–¯ŠÔ‹@)
+
+; New helicopter flight model: special case / unusual rotorcraft baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.24
+MainRotorMaxThrust = 0.105
+RotorInertia = 0.34
+RotorSpoolUpRate = 0.045
+RotorSpoolDownRate = 0.055
+CollectiveResponse = 0.16
+CyclicAuthority = 0.96
+TailRotorAuthority = 1.15
+YawDamping = 0.24
+AngularInertia = 0.3
+TranslationalLiftCoefficient = 0.005
+VerticalDrag = 0.018
+ParasiteDrag = 0.018
+HorizontalRotorThrustScale = 0.92
+HoverAssistStrength = 0.28
+
 Category = sUAS
 
 MobilityYaw = 10.0

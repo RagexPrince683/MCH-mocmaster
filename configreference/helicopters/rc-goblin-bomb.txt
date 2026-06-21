@@ -17,6 +17,25 @@ explosionSizeByCrash = 4
 HUD = heli
 
 ; C = Civilian(–¯ŠÔ‹@)
+
+; New helicopter flight model: special case / unusual rotorcraft baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.46
+MainRotorMaxThrust = 0.165
+RotorInertia = 0.54
+RotorSpoolUpRate = 0.035
+RotorSpoolDownRate = 0.043
+CollectiveResponse = 0.12
+CyclicAuthority = 0.88
+TailRotorAuthority = 1.08
+YawDamping = 0.22
+AngularInertia = 0.5
+TranslationalLiftCoefficient = 0.005
+VerticalDrag = 0.021
+ParasiteDrag = 0.021
+HorizontalRotorThrustScale = 0.86
+HoverAssistStrength = 0.25
+
 Category = sUAS
 
 AddSeat =  0.0, 0.0, 0.0

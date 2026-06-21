@@ -15,6 +15,25 @@ MaxFuel         = 4300
 FuelConsumption = 0.995
 ThirdPersonDist = 20
 
+; New helicopter flight model: medium utility/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.48
+MainRotorMaxThrust = 0.32
+RotorInertia = 1.52
+RotorSpoolUpRate = 0.022
+RotorSpoolDownRate = 0.03
+CollectiveResponse = 0.08
+CyclicAuthority = 0.72
+TailRotorAuthority = 0.96
+YawDamping = 0.22
+AngularInertia = 1.56
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.029
+ParasiteDrag = 0.041
+HorizontalRotorThrustScale = 0.58
+HoverAssistStrength = 0.16
+
+
 sound = apache
 soundpitch = 1.0
 soundvolume = 15
@@ -86,7 +105,7 @@ BoundingBox = 0.0, 3.5, -3.75, 2.0, 1.5
 BoundingBox = 0.0, 3.5, -2.75, 2.0, 1.5
 BoundingBox = 0.0, 3.5, -4.75, 2.0, 1.5
 
-;BoundingBox = 0.0, 
+;BoundingBox = 0.0,
 
 unmountposition = -0.5,   1.55,  0.00
 

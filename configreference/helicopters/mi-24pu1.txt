@@ -13,6 +13,25 @@ FuelConsumption = 1.250
 onGroundPitch = 4.56
 ThirdPersonDist = 20
 
+; New helicopter flight model: medium utility/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.4
+MainRotorMaxThrust = 0.306
+RotorInertia = 1.44
+RotorSpoolUpRate = 0.023
+RotorSpoolDownRate = 0.031
+CollectiveResponse = 0.08
+CyclicAuthority = 0.74
+TailRotorAuthority = 0.98
+YawDamping = 0.21
+AngularInertia = 1.48
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.028
+ParasiteDrag = 0.039
+HorizontalRotorThrustScale = 0.6
+HoverAssistStrength = 0.17
+
+
 sound = hind
 soundvolume = 15
 

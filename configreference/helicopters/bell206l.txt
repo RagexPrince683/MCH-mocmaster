@@ -6,11 +6,30 @@ MaxFuel         = 625
 FuelConsumption = 0.174
 ThirdPersonDist = 20
 
+; New helicopter flight model: light scout/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.76
+MainRotorMaxThrust = 0.222
+RotorInertia = 0.86
+RotorSpoolUpRate = 0.028
+RotorSpoolDownRate = 0.036
+CollectiveResponse = 0.1
+CyclicAuthority = 0.84
+TailRotorAuthority = 1.01
+YawDamping = 0.19
+AngularInertia = 0.86
+TranslationalLiftCoefficient = 0.005
+VerticalDrag = 0.024
+ParasiteDrag = 0.026
+HorizontalRotorThrustScale = 0.84
+HoverAssistStrength = 0.22
+
+
 ; C = Civilian(民間機)
 ;multipurpose
 Category = MUUH
 
-Sound = littlebird 
+Sound = littlebird
 Soundvolume = 15
 
 HUD = civilian_aircraft, none, none, none, none, none

@@ -1,4 +1,4 @@
-﻿DisplayName = Up Armed Boeing ACH-47A "Guns A Go-Go" Chinook
+DisplayName = Up Armed Boeing ACH-47A "Guns A Go-Go" Chinook
 AddDisplayName = en_US, Up Armed Boeing ACH-47A "Guns A Go-Go" Chinook
 AddDisplayName = ja_JP, ACH47a アームド チヌーク
 ItemID = 28811
@@ -19,17 +19,10 @@ soundpitch = 1.0
 soundvolume = 15
 
 ; M = Military(軍用機).  S = Multi-Mission(多目的機)
-Category = TH/GH
 
-HUD = helinvg, heli_gnrnvg, gunner, gunner, gunner, gunner,
-
-MobilityYaw = 0.7
-MobilityPitch = 0.7
-MobilityRoll = 0.7
-
-; Initial new helicopter flight-model test opt-in; tune thrust-to-weight before control authority: heavy armed transport.
+; New helicopter flight model: heavy transport/attack baseline tuning.
 UseNewHelicopterFlightModel = true
-PhysicalMass = 1.90
+PhysicalMass = 1.9
 MainRotorMaxThrust = 0.235
 RotorInertia = 1.85
 RotorSpoolUpRate = 0.016
@@ -38,12 +31,21 @@ CollectiveResponse = 0.060
 CyclicAuthority = 0.62
 TailRotorAuthority = 0.88
 YawDamping = 0.32
-AngularInertia = 1.90
+AngularInertia = 1.9
 TranslationalLiftCoefficient = 0.0034
 VerticalDrag = 0.032
 ParasiteDrag = 0.045
-HorizontalRotorThrustScale = 0.55
+HorizontalRotorThrustScale = 0.6
 HoverAssistStrength = 0.32
+
+Category = TH/GH
+
+HUD = helinvg, heli_gnrnvg, gunner, gunner, gunner, gunner,
+
+MobilityYaw = 0.7
+MobilityPitch = 0.7
+MobilityRoll = 0.7
+
 
 AddPartWeapon    = achm3m_l,    false, true, true,   -0.7,    1.4433,   -4.7
 
