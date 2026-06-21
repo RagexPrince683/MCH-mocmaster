@@ -79,6 +79,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastPitchEnergyDemand;
    private boolean lastEnergyUnsupportedClimb;
    private boolean lastEnergyForcedRecovery;
+   private double lastDiveAssistNoseDownDegrees;
+   private double lastDiveAssistFalling01;
+   private double lastDiveAssistNoseDown01;
+   private double lastDiveAssistGain;
+   private boolean lastDiveAssistActive;
    /** Last stall lift-loss fraction applied to vertical motion, exposed for debug output. */
    private double lastLiftLoss;
    /** Last downward gravity acceleration applied by the new fixed-wing model. */
@@ -267,6 +272,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastPitchEnergyDemand = 0.0D;
       this.lastEnergyUnsupportedClimb = false;
       this.lastEnergyForcedRecovery = false;
+      this.lastDiveAssistNoseDownDegrees = 0.0D;
+      this.lastDiveAssistFalling01 = 0.0D;
+      this.lastDiveAssistNoseDown01 = 0.0D;
+      this.lastDiveAssistGain = 0.0D;
+      this.lastDiveAssistActive = false;
       this.lastLiftLoss = 0.0D;
       this.lastGravityAcceleration = 0.0D;
       this.lastLiftAcceleration = 0.0D;
@@ -1161,6 +1171,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    public double getLastPitchEnergyDemand() { return this.lastPitchEnergyDemand; }
    public boolean isLastEnergyUnsupportedClimb() { return this.lastEnergyUnsupportedClimb; }
    public boolean isLastEnergyForcedRecovery() { return this.lastEnergyForcedRecovery; }
+   public double getLastDiveAssistNoseDownDegrees() { return this.lastDiveAssistNoseDownDegrees; }
+   public double getLastDiveAssistFalling01() { return this.lastDiveAssistFalling01; }
+   public double getLastDiveAssistNoseDown01() { return this.lastDiveAssistNoseDown01; }
+   public double getLastDiveAssistGain() { return this.lastDiveAssistGain; }
+   public boolean isLastDiveAssistActive() { return this.lastDiveAssistActive; }
 
 
    public boolean isLastAirborne() {
@@ -1807,6 +1822,48 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftAcceleration = Math.max(this.lastLiftAcceleration, liftAccel);
    }
 
+   private void resetNewFlightDiveAssistDebug() {
+      this.lastDiveAssistNoseDownDegrees = Math.max(0.0D, (double)this.getRotPitch());
+      this.lastDiveAssistFalling01 = 0.0D;
+      this.lastDiveAssistNoseDown01 = 0.0D;
+      this.lastDiveAssistGain = 0.0D;
+      this.lastDiveAssistActive = false;
+   }
+
+   private void applyNewFlightDiveAssist(double gravityAccel) {
+      this.resetNewFlightDiveAssistDebug();
+      if(MCH_Config.NewFlightDiveAssistEnabled == null || !MCH_Config.NewFlightDiveAssistEnabled.prmBool) {
+         return;
+      }
+      boolean airborne = !super.onGround && MCH_Lib.getBlockIdY(this, 1, -2) == 0;
+      if(!airborne || super.motionY >= 0.0D) {
+         return;
+      }
+      double noseDownDegrees = Math.max(0.0D, (double)this.getRotPitch());
+      if(noseDownDegrees <= 0.0D) {
+         return;
+      }
+      double noseDown01 = MCH_FlightModel.clamp(noseDownDegrees / 45.0D, 0.0D, 1.0D);
+      double falling01 = MCH_FlightModel.clamp(-super.motionY / 0.8D, 0.0D, 1.0D);
+      double multiplier = MCH_Config.NewFlightDiveAccelerationMultiplier != null
+            ? MCH_FlightModel.clamp(MCH_Config.NewFlightDiveAccelerationMultiplier.prmDouble, 0.15D, 0.35D) : 0.25D;
+      double diveGain = Math.max(0.0D, gravityAccel) * multiplier * noseDown01 * falling01;
+      if(diveGain <= 0.0D) {
+         this.lastDiveAssistNoseDownDegrees = noseDownDegrees;
+         this.lastDiveAssistFalling01 = falling01;
+         this.lastDiveAssistNoseDown01 = noseDown01;
+         return;
+      }
+
+      double yaw = Math.toRadians((double)this.getRotYaw());
+      super.motionX += -Math.sin(yaw) * diveGain;
+      super.motionZ += Math.cos(yaw) * diveGain;
+      this.lastDiveAssistNoseDownDegrees = noseDownDegrees;
+      this.lastDiveAssistFalling01 = falling01;
+      this.lastDiveAssistNoseDown01 = noseDown01;
+      this.lastDiveAssistGain = diveGain;
+      this.lastDiveAssistActive = true;
+   }
 
    private void applyAerodynamicAngularMoments(float partialTicks) {
       this.applyContinuousPitchStabilityMoment(partialTicks);
@@ -2021,6 +2078,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastPitchEnergyDemand = 0.0D;
       this.lastEnergyUnsupportedClimb = false;
       this.lastEnergyForcedRecovery = false;
+      this.lastDiveAssistNoseDownDegrees = 0.0D;
+      this.lastDiveAssistFalling01 = 0.0D;
+      this.lastDiveAssistNoseDown01 = 0.0D;
+      this.lastDiveAssistGain = 0.0D;
+      this.lastDiveAssistActive = false;
       this.lastLiftLoss = 0.0D;
       this.lastGravityAcceleration = 0.0D;
       this.lastLiftAcceleration = 0.0D;
@@ -2939,6 +3001,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             super.motionX += -Math.sin(yaw) * targetSpeed;
             super.motionZ += Math.cos(yaw) * targetSpeed;
          }
+         this.applyNewFlightDiveAssist(gravityAccel);
+      } else {
+         this.resetNewFlightDiveAssistDebug();
       }
 
       this.lastNetForwardAcceleration = super.motionX * horizontalThrustX + super.motionZ * horizontalThrustZ - forwardSpeedBefore;
