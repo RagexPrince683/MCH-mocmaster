@@ -22,7 +22,8 @@ Helicopters inherit all shared keys from `base.md`. Helicopter-only parser keys 
 | `AngularInertia` | float >= 0.01 | 1.0 | Relative rotational inertia for future angular acceleration. |
 | `TranslationalLiftCoefficient` | float >= 0 | 0.004 | Future forward-speed lift bonus coefficient; default mirrors the current translational-lift cap scale. |
 | `VerticalDrag` | float >= 0 | 0.02 | Future vertical climb/descent damping coefficient. |
-| `ParasiteDrag` | float >= 0 | 0.01 | Future horizontal air-drag coefficient. |
+| `ParasiteDrag` | float >= 0 | 0.01 | Future horizontal air-drag coefficient. Increase this to damp horizontal speed and make larger helicopters feel heavier. |
+| `HorizontalRotorThrustScale` / `HelicopterHorizontalThrustScale` | float >= 0 | 0.35 | New-model-only Minecraft-scale multiplier for converting cyclic rotor thrust into horizontal acceleration. This is the primary Minecraft-scale horizontal acceleration knob; lower values preserve hover/climb tuning while reducing map-scale horizontal acceleration. |
 | `HoverAssistStrength` | 0.0-1.0 | 0.0 | Future hover assistance strength. `0.0` keeps assist disabled by default. |
 
 ## Helicopter defaults that differ from base
@@ -39,6 +40,8 @@ Helicopters inherit all shared keys from `base.md`. Helicopter-only parser keys 
 The new keys above are inert unless `UseNewHelicopterFlightModel = true`. Existing helicopter asset files do not need to define any of the new values, and helicopters that leave the opt-in disabled keep the legacy flight path.
 
 The first controlled asset opt-in pass is intentionally small and conservative. `ah-6`, `uh-60ja`, and `ach47a` provide light, medium utility, and heavy armed-transport test coverage without globally changing the helicopter folder. Their values are initial flyability probes, not final realism or balance targets.
+
+Early in-game tuning should check the effective thrust-to-weight relationship before increasing cyclic, yaw, or hover assistance. At full spool (`normalizedRotorRPM` near `1.0`) and full collective, `MainRotorMaxThrust` is the primary hover/climb power knob: compare `MainRotorMaxThrust * rotorEfficiency` against `PhysicalMass * gravity`, then account for `VerticalDrag`, `ParasiteDrag`, and modest translational-lift/hover-assist modifiers. If an opted-in helicopter cannot lift off, prefer small `MainRotorMaxThrust` increases first, use `PhysicalMass` reductions sparingly, and do not use cyclic authority or extreme `TranslationalLiftCoefficient` as takeoff crutches. After lift is correct, tune Minecraft-scale horizontal feel primarily with `HorizontalRotorThrustScale`, then use `ParasiteDrag` as speed damping and `CyclicAuthority` for role-based responsiveness; heavier helicopters should generally use lower cyclic/scale and higher drag than light helicopters. Avoid stacking very low `HorizontalRotorThrustScale` with very high `ParasiteDrag`, because that makes cyclic input feel stuck instead of merely controlled.
 
 
 ### Rotor RPM foundation
@@ -101,7 +104,8 @@ YawDamping = 0.20
 AngularInertia = 1.0
 TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.026
-ParasiteDrag = 0.014
+ParasiteDrag = 0.035
+HorizontalRotorThrustScale = 0.35
 HoverAssistStrength = 0.25
 ```
 

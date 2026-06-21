@@ -1328,8 +1328,9 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float rightX = -MathHelper.cos(yawRadians);
       float rightZ = -MathHelper.sin(yawRadians);
 
-      this.rotorHorizontalThrustX = this.rotorThrust * (this.rotorTiltForward * forwardX + this.rotorTiltRight * rightX);
-      this.rotorHorizontalThrustZ = this.rotorThrust * (this.rotorTiltForward * forwardZ + this.rotorTiltRight * rightZ);
+      float horizontalThrustScale = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.horizontalRotorThrustScale, 0.0F, 1000.0F):0.35F;
+      this.rotorHorizontalThrustX = this.rotorThrust * horizontalThrustScale * (this.rotorTiltForward * forwardX + this.rotorTiltRight * rightX);
+      this.rotorHorizontalThrustZ = this.rotorThrust * horizontalThrustScale * (this.rotorTiltForward * forwardZ + this.rotorTiltRight * rightZ);
       this.horizontalAccelerationX = this.rotorHorizontalThrustX / mass;
       this.horizontalAccelerationZ = this.rotorHorizontalThrustZ / mass;
       super.motionX += (double)(this.horizontalAccelerationX * tickDelta);
