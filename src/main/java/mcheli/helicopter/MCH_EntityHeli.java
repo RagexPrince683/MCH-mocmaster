@@ -44,6 +44,16 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    public byte lastFoldBladeStat;
    public int foldBladesCooldown;
    public float prevRollFactor = 0.0F;
+   private boolean newHeliFlightModelEnabled;
+   private float physicalMass = 1.0F;
+   private float normalizedRotorRPM;
+   private float collectiveInput;
+   private float rotorThrust;
+   private float verticalForce;
+   private float cyclicPitchInput;
+   private float cyclicRollInput;
+   private float tailRotorInput;
+   private boolean hoverAssistActive;
 
 
    public MCH_EntityHeli(World world) {
@@ -86,12 +96,72 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          this.setDead(true);
       } else {
          this.setAcInfo(this.heliInfo);
+         this.updateNewHelicopterFlightTelemetryConfig();
          this.newSeats(this.getAcInfo().getNumSeatAndRack());
          this.createRotors();
          super.weapons = this.createWeapon(1 + this.getSeatNum());
          this.initPartRotation(this.getRotYaw(), this.getRotPitch());
       }
 
+   }
+
+   private void updateNewHelicopterFlightTelemetryConfig() {
+      this.newHeliFlightModelEnabled = this.heliInfo != null && this.heliInfo.useNewHelicopterFlightModel;
+      this.physicalMass = this.newHeliFlightModelEnabled?this.heliInfo.physicalMass:1.0F;
+      if(!this.newHeliFlightModelEnabled) {
+         this.normalizedRotorRPM = 0.0F;
+         this.collectiveInput = 0.0F;
+         this.rotorThrust = 0.0F;
+         this.verticalForce = 0.0F;
+         this.cyclicPitchInput = 0.0F;
+         this.cyclicRollInput = 0.0F;
+         this.tailRotorInput = 0.0F;
+         this.hoverAssistActive = false;
+      }
+   }
+
+   public boolean isNewHeliFlightModelEnabled() {
+      return this.newHeliFlightModelEnabled;
+   }
+
+   public float getPhysicalMass() {
+      return this.physicalMass;
+   }
+
+   public float getNormalizedRotorRPM() {
+      return this.normalizedRotorRPM;
+   }
+
+   public float getRotorRPM() {
+      return this.normalizedRotorRPM;
+   }
+
+   public float getCollectiveInput() {
+      return this.collectiveInput;
+   }
+
+   public float getRotorThrust() {
+      return this.rotorThrust;
+   }
+
+   public float getVerticalForce() {
+      return this.verticalForce;
+   }
+
+   public float getCyclicPitchInput() {
+      return this.cyclicPitchInput;
+   }
+
+   public float getCyclicRollInput() {
+      return this.cyclicRollInput;
+   }
+
+   public float getTailRotorInput() {
+      return this.tailRotorInput;
+   }
+
+   public boolean isHoverAssistActive() {
+      return this.hoverAssistActive;
    }
 
    public Item getItem() {
@@ -138,6 +208,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             this.setDead(true);
          } else {
             this.setAcInfo(this.heliInfo);
+            this.updateNewHelicopterFlightTelemetryConfig();
          }
       }
 
@@ -334,6 +405,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             this.initCurrentWeapon(this.getRiddenByEntity());
          }
 
+         this.updateNewHelicopterFlightTelemetryConfig();
          this.updateWeapons();
          this.onUpdate_Seats();
          this.onUpdate_Control();
