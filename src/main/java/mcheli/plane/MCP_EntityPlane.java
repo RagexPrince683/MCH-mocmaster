@@ -2231,10 +2231,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.setThrottle(this.getCurrentThrottle());
       }
 
-      if(this.useNewMobilitySystem()) {
+      MCP_PlaneInfo throttleInfo = this.getPlaneInfo();
+      if(this.useNewMobilitySystem() && throttleInfo != null) {
          this.engineThrottle = MCH_FlightModel.clamp(MCH_FlightModel.approachEngineOutput(this.engineThrottle,
                MCH_FlightModel.clamp(this.getCurrentThrottle(), 0.0D, 1.0D),
-               this.getPlaneInfo().throttleAcceleration, this.getPlaneInfo().engineDrag), 0.0D, 1.0D);
+               throttleInfo.throttleAcceleration, throttleInfo.engineDrag), 0.0D, 1.0D);
       } else {
          this.engineThrottle = MCH_FlightModel.clamp(this.getCurrentThrottle(), 0.0D, 1.0D);
       }
@@ -2664,6 +2665,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
 
       boolean levelOff = super.isGunnerMode;
+      MCP_PlaneInfo serverPlaneInfo = this.getPlaneInfo();
+      boolean hasNewFlightPlaneInfo = this.useNewMobilitySystem() && serverPlaneInfo != null;
       if(dp == 0.0D) {
          // If this is a target UAV with enough fuel and not destroyed, executes the following code
          if (this.isTargetDrone() && this.canUseFuel() && !this.isDestroyed()) {
@@ -2707,7 +2710,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
 
          if(!levelOff) {
-            if(this.useNewMobilitySystem() && this.getPlaneInfo() != null) {
+            if(hasNewFlightPlaneInfo) {
                this.applyNewFlightVerticalForces();
             } else {
                super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
@@ -2743,9 +2746,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             ? this.getPropulsiveEngineThrottle() : this.getEngineThrottle();
       propulsiveThrottle = MCH_FlightModel.clamp(propulsiveThrottle, 0.0D, 1.0D);
       float throttle1 = (float)(propulsiveThrottle / 10.0D);
-      if(this.useNewMobilitySystem() && this.getPlaneInfo() != null) {
+      if(hasNewFlightPlaneInfo) {
          double mass = this.getPhysicalMass();
-         double thrustForce = Math.max(0.0D, (double)this.getPlaneInfo().engineThrust * propulsiveThrottle);
+         double thrustForce = Math.max(0.0D, (double)serverPlaneInfo.engineThrust * propulsiveThrottle);
          throttle1 = (float)(thrustForce / mass / 10.0D);
          this.lastEngineThrustForce = thrustForce;
       } else {
@@ -2786,12 +2789,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          // If nozzle rotation angle is <= 0.01F, adjusts vertical speed based on throttle
          if(this.getNozzleRotation() <= 0.01F) {
             double verticalThrust = v.yCoord * (double)throttle1 / 2.0D;
-            if(this.useNewMobilitySystem() && this.getPlaneInfo() != null && verticalThrust > 0.0D) {
+            if(hasNewFlightPlaneInfo && verticalThrust > 0.0D) {
                double mass = this.getPhysicalMass();
                double gravityAccel = Math.max(1.0E-6D, this.resolveNewFlightGravity());
-               double thrustToWeight = ((double)this.getPlaneInfo().engineThrust * propulsiveThrottle) / (gravityAccel * mass);
-               double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
-                     this.getPlaneInfo().stallSpeedFactor);
+               double thrustToWeight = ((double)serverPlaneInfo.engineThrust * propulsiveThrottle) / (gravityAccel * mass);
+               double stallSpeed = MCH_FlightModel.getStallSpeed(serverPlaneInfo.stallSpeed, this.getMaxSpeed(),
+                     serverPlaneInfo.stallSpeedFactor);
                double speedHeadroom = MCH_FlightModel.clamp(this.getForwardAirspeed() / Math.max(0.05D, stallSpeed * 1.2D), 0.0D, 1.0D);
                double supportedVerticalThrust = thrustToWeight >= 1.0D ? 1.0D
                      : MCH_FlightModel.clamp(thrustToWeight * speedHeadroom * (1.0D - this.stallSeverity), 0.0D, 1.0D);
@@ -2857,13 +2860,13 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       super.motionZ *= this.getAcInfo().motionFactor;
 
       float baseSpeedLimit = this.getMaxSpeed();
-      float levelSpeed = this.useNewMobilitySystem() && this.getPlaneInfo().maxLevelSpeed > 0.0F ? this.getPlaneInfo().maxLevelSpeed : baseSpeedLimit;
+      float levelSpeed = hasNewFlightPlaneInfo && serverPlaneInfo.maxLevelSpeed > 0.0F ? serverPlaneInfo.maxLevelSpeed : baseSpeedLimit;
 
       // Apply a deliberately simple energy model only to conventional airborne flight.
       // Velocity direction carries the gained/lost energy, while bank and body rates
       // cheaply approximate induced and control-surface drag during hard manoeuvres.
       this.lastAerodynamicDrag = 0.0D;
-      if(this.useNewMobilitySystem() && dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F && !levelOff) {
+      if(hasNewFlightPlaneInfo && dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F && !levelOff) {
          double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
          double bankLoad = MCH_FlightModel.clamp(MathHelper.abs(this.getRotRoll()) / 75.0D, 0.0D, 1.0D);
          double bodyRate = (MathHelper.abs(this.pitchAngularVelocity) + MathHelper.abs(this.rollAngularVelocity)
@@ -2917,6 +2920,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          double derivedDiveGain = (float)MCH_FlightModel.clamp(gravityAccel * 0.22D + this.getPlaneInfo().baseDrag, 0.0D, 0.25D);
          double energyChange = MCH_FlightModel.getVerticalEnergyChange(super.motionY,
                (float)derivedClimbLoss, (float)derivedDiveGain) / mass;
+         Vec3 noseForward = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
+         double diveGravityProjection = MCH_FlightModel.clamp(-noseForward.yCoord, 0.0D, 1.0D)
+               * MCH_FlightModel.clamp(-super.motionY / 0.35D, 0.0D, 1.0D);
+         energyChange += gravityAccel * 0.12D * diveGravityProjection
+               * MCH_FlightModel.clamp(1.0D - this.stallSeverity * 0.65D, 0.25D, 1.0D);
          double targetSpeed = Math.max(0.0D, horizontalSpeed * (1.0D - drag) + energyChange);
 
          if(horizontalSpeed > 1.0E-4D) {
@@ -2960,8 +2968,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastNetForwardAcceleration = Math.min(0.0D, this.lastNetForwardAcceleration);
       }
       // Diving permits an overspeed only for vehicles explicitly using the new mobility system.
-      float speedLimit = this.useNewMobilitySystem()
-            ? (float)MCH_FlightModel.getDiveSpeedLimit(levelSpeed, this.getRotPitch(), super.motionY, this.getPlaneInfo().diveSpeedMultiplier)
+      float speedLimit = hasNewFlightPlaneInfo
+            ? (float)MCH_FlightModel.getDiveSpeedLimit(levelSpeed, this.getRotPitch(), super.motionY, serverPlaneInfo.diveSpeedMultiplier)
             : baseSpeedLimit;
       // If current speed exceeds max speed limit, scales horizontal speed down by max speed ratio
       if(motion1 > (double)speedLimit) {
@@ -2999,7 +3007,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.updateIdleThrottleWarning();
       this.updateLowHorizontalSpeedWarning();
       this.applyThrottleDeficitPitchDown(nearGround, dp, levelOff);
-      if(this.useNewMobilitySystem() && !nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
+      if(hasNewFlightPlaneInfo && !nearGround && dp == 0.0D && this.getNozzleRotation() <= 0.01F && !levelOff && this.stallSeverity > 0.0D) {
          double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)this.getPlaneInfo().stallLiftLoss, 0.0D, 1.0D);
          this.lastLiftLoss = liftLoss;
 
