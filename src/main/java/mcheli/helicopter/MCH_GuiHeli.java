@@ -102,17 +102,13 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
          return;
       }
 
-      int collective = this.toPercent(heli.getCollectiveInput());
-      int rpm = this.toPercent(heli.getNormalizedRotorRPM());
-      int engine = this.toPercent(heli.getEnginePowerOutput());
+      int power = this.toPercent(heli.getCollectiveInput());
       int color = -14101432; // 0xFF28D448: existing heli HUD green.
       int x = super.centerX + 120;
       int y = super.centerY + 55;
-      this.drawString(String.format("COL: %3d%%", new Object[]{Integer.valueOf(collective)}), x, y, color);
-      this.drawString(String.format("RPM: %3d%%", new Object[]{Integer.valueOf(rpm)}), x, y + 10, color);
-      this.drawString(String.format("ENG: %3d%%", new Object[]{Integer.valueOf(engine)}), x, y + 20, color);
+      this.drawString(String.format("PWR: %3d%%", new Object[]{Integer.valueOf(power)}), x, y, color);
       if(heli.isHoverAssistActive()) {
-         this.drawString("SAS: ON", x, y + 30, color);
+         this.drawString("SAS: ON", x, y + 10, color);
       }
    }
 

@@ -20,6 +20,7 @@ YawDamping = 0.2
 AngularInertia = 1.02
 TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.025
+MaxClimbRate = 0.14
 ParasiteDrag = 0.031
 HorizontalRotorThrustScale = 0.7
 HelicopterLateralThrustScale = 0.45
