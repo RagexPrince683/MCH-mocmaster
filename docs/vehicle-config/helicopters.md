@@ -9,6 +9,21 @@ Helicopters inherit all shared keys from `base.md`. Helicopter-only parser keys 
 | `enablefoldblade` | boolean | false | Enables blade-folding support. |
 | `addrotor` | `bladeNum,bladeRot,x,y,z,rx,ry,rz[,fold]` | none | Adds a rotor using the current renderer. Field 9 controls whether this rotor has fold functionality. |
 | `addrotorold` | same as `addrotor` | none | Legacy rotor renderer. Compatibility-only. |
+| `UseNewHelicopterFlightModel` / `EnableNewHelicopterFlightModel` | boolean | false | Helicopter-specific opt-in gate for the future rewritten helicopter model. This is intentionally separate from `UseNewMobilitySystem`; when false, all new helicopter physical tuning values are inert and legacy helicopter flight remains unchanged. |
+| `PhysicalMass` | float >= 0.01 | 1.0 | Relative mass for future force calculations. `1.0` is the legacy-scale baseline rather than real kilograms. |
+| `MainRotorMaxThrust` | float >= 0 | 0.06 | Future maximum main-rotor upward force in legacy motion units per tick at full collective. Default is near the current hover/lift scale. |
+| `RotorInertia` | float >= 0.01 | 1.0 | Future rotor RPM acceleration resistance; larger values should make RPM change more slowly. |
+| `RotorSpoolUpRate` | 0.0-1.0 | 0.02 | Future normalized rotor RPM gain per tick while spooling up. |
+| `RotorSpoolDownRate` | 0.0-1.0 | 0.03 | Future normalized rotor RPM loss per tick while spooling down. |
+| `CollectiveResponse` | 0.0-1.0 | 0.08 | Future smoothing rate for collective/lift input changes. |
+| `CyclicAuthority` | float >= 0 | 1.0 | Future pitch/roll cyclic authority multiplier. |
+| `TailRotorAuthority` | float >= 0 | 1.0 | Future yaw/tail-rotor authority multiplier. |
+| `YawDamping` | float >= 0 | 0.15 | Future yaw stabilization/damping multiplier. |
+| `AngularInertia` | float >= 0.01 | 1.0 | Relative rotational inertia for future angular acceleration. |
+| `TranslationalLiftCoefficient` | float >= 0 | 0.004 | Future forward-speed lift bonus coefficient; default mirrors the current translational-lift cap scale. |
+| `VerticalDrag` | float >= 0 | 0.02 | Future vertical climb/descent damping coefficient. |
+| `ParasiteDrag` | float >= 0 | 0.01 | Future horizontal air-drag coefficient. |
+| `HoverAssistStrength` | 0.0-1.0 | 0.0 | Future hover assistance strength. `0.0` keeps assist disabled by default. |
 
 ## Helicopter defaults that differ from base
 
@@ -18,6 +33,10 @@ Helicopters inherit all shared keys from `base.md`. Helicopter-only parser keys 
 - Default `camerazoom = 8`.
 - HUD defaults are `heli`, `heli_gnr`, then `gunner`.
 - `speed` is multiplied by global `AllHeliSpeed` during validation.
+
+## Future helicopter flight-model foundation
+
+The new keys above only expose configuration and telemetry for a future helicopter-specific model. They do not change runtime helicopter physics unless `UseNewHelicopterFlightModel = true`, and the current implementation still leaves actual flight forces on the legacy path. Existing helicopter asset files do not need to define any of the new values.
 
 ## Rotorcraft lift formulas
 
