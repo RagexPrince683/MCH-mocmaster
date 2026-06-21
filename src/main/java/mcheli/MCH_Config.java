@@ -177,6 +177,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm NewFlightGravity;
    public static MCH_ConfigPrm NewFlightDiveAssistEnabled;
    public static MCH_ConfigPrm NewFlightDiveAccelerationMultiplier;
+   public static MCH_ConfigPrm NewFlightMaxDiveSpeedMultiplier;
    public static MCH_ConfigPrm AllShipSpeed;
    public static MCH_ConfigPrm AllHeliSpeed;
    public static MCH_ConfigPrm AllTankSpeed;
@@ -492,6 +493,8 @@ public class MCH_Config {
       NewFlightDiveAssistEnabled.desc = ";Allows airborne nose-down new-flight planes to convert a small amount of falling speed into forward horizontal speed without changing vertical motion.";
       NewFlightDiveAccelerationMultiplier = new MCH_ConfigPrm("NewFlightDiveAccelerationMultiplier", 0.25D);
       NewFlightDiveAccelerationMultiplier.desc = ";Scales the small horizontal speed boost applied while an airborne new-flight plane is nose-down and descending. Suggested range 0.15..0.35.";
+      NewFlightMaxDiveSpeedMultiplier = new MCH_ConfigPrm("NewFlightMaxDiveSpeedMultiplier", 1.25D);
+      NewFlightMaxDiveSpeedMultiplier.desc = ";Soft cap for horizontal speed added by new-flight dive assist, expressed as a multiplier of the plane max speed.";
       AllShipSpeed = new MCH_ConfigPrm("AllShipSpeed", 2.0D);
       AllTankSpeed = new MCH_ConfigPrm("AllTankSpeed", 1.0D);
       HurtResistantTime = new MCH_ConfigPrm("HurtResistantTime", 0.0D);
@@ -674,6 +677,7 @@ public class MCH_Config {
               NewFlightGravity,
               NewFlightDiveAssistEnabled,
               NewFlightDiveAccelerationMultiplier,
+              NewFlightMaxDiveSpeedMultiplier,
               AllShipSpeed,
               AllTankSpeed,
               HurtResistantTime,
@@ -867,6 +871,7 @@ public class MCH_Config {
       AllPlaneSpeed.prmDouble = MCH_Lib.RNG(AllPlaneSpeed.prmDouble, 0.0D, 1000.0D);
       NewFlightGravity.prmDouble = MCH_Lib.RNG(NewFlightGravity.prmDouble, 0.001D, 0.2D);
       NewFlightDiveAccelerationMultiplier.prmDouble = MCH_Lib.RNG(NewFlightDiveAccelerationMultiplier.prmDouble, 0.15D, 0.35D);
+      NewFlightMaxDiveSpeedMultiplier.prmDouble = MCH_Lib.RNG(NewFlightMaxDiveSpeedMultiplier.prmDouble, 1.0D, 2.0D);
       if(Math.abs(NewPlaneCameraDistance.prmDouble - 36.0D) < 0.001D || Math.abs(NewPlaneCameraDistance.prmDouble - 45.0D) < 0.001D || Math.abs(NewPlaneCameraDistance.prmDouble - 30.0D) < 0.001D) {
          NewPlaneCameraDistance.prmDouble = 15.0D;
       }
