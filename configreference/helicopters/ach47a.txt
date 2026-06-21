@@ -26,6 +26,23 @@ HUD = helinvg, heli_gnrnvg, gunner, gunner, gunner, gunner,
 MobilityYaw = 0.7
 MobilityPitch = 0.7
 MobilityRoll = 0.7
+
+; Initial new helicopter flight-model test opt-in: heavy armed transport.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.90
+MainRotorMaxThrust = 0.235
+RotorInertia = 1.85
+RotorSpoolUpRate = 0.016
+RotorSpoolDownRate = 0.024
+CollectiveResponse = 0.060
+CyclicAuthority = 0.78
+TailRotorAuthority = 0.88
+YawDamping = 0.32
+AngularInertia = 1.90
+TranslationalLiftCoefficient = 0.0034
+VerticalDrag = 0.032
+ParasiteDrag = 0.018
+HoverAssistStrength = 0.32
 AddPartWeapon    = achm3m_l,    false, true, true,   -0.7,    1.4433,   -4.7
 
 AddPartWeapon    = achm134_l50,  false, true,  false,  -1.2859,  1.7843,  4.9367

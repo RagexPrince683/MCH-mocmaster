@@ -38,6 +38,8 @@ Helicopters inherit all shared keys from `base.md`. Helicopter-only parser keys 
 
 The new keys above are inert unless `UseNewHelicopterFlightModel = true`. Existing helicopter asset files do not need to define any of the new values, and helicopters that leave the opt-in disabled keep the legacy flight path.
 
+The first controlled asset opt-in pass is intentionally small and conservative. `ah-6`, `uh-60ja`, and `ach47a` provide light, medium utility, and heavy armed-transport test coverage without globally changing the helicopter folder. Their values are initial flyability probes, not final realism or balance targets.
+
 
 ### Rotor RPM foundation
 
@@ -84,6 +86,23 @@ HUD = heli
 speed = 0.85
 maxhp = 100
 addrotor = 4, 45, 0.0, 2.2, 0.0, 0.0, 0.0, 0.0
+
+; Optional initial-test new-model values. Tune per aircraft role/size.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.0
+MainRotorMaxThrust = 0.13
+RotorInertia = 1.0
+RotorSpoolUpRate = 0.024
+RotorSpoolDownRate = 0.032
+CollectiveResponse = 0.08
+CyclicAuthority = 1.0
+TailRotorAuthority = 1.0
+YawDamping = 0.20
+AngularInertia = 1.0
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.026
+ParasiteDrag = 0.014
+HoverAssistStrength = 0.25
 ```
 
 ## Legacy compatibility
