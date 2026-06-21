@@ -384,7 +384,7 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
          } else if(item.equalsIgnoreCase("StallSpeed")) {
             this.stallSpeed = this.parseNewFlightFloat("StallSpeed", data, 0.0F, 2.0F);
          } else if(item.equalsIgnoreCase("CriticalAoA")) {
-            this.criticalAoA = this.parseNewFlightFloat("CriticalAoA", data, 5.0F, 30.0F);
+            this.criticalAoA = this.parseNewFlightFloat("CriticalAoA", data, 5.0F, 32.0F);
          } else if(item.equalsIgnoreCase("TimeUntilStallPastCriticalAoA")) {
             this.timeUntilStallPastCriticalAoA = this.parseNewFlightFloat("TimeUntilStallPastCriticalAoA", data, 0.0F, 8.0F);
          } else if(item.equalsIgnoreCase("TimeAfterStallUntilPitchDown")) {
