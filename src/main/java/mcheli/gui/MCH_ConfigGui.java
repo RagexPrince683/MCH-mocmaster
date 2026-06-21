@@ -70,6 +70,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
    private MCH_GuiOnOffButton buttonThrottleTank;
    private MCH_GuiOnOffButton buttonFlightSimMode;
    private MCH_GuiOnOffButton buttonHoldFreelook;
+   private MCH_GuiOnOffButton buttonPlaneMouseAim;
    private MCH_GuiOnOffButton buttonSwitchWeaponWheel;
    private W_GuiButton buttonReloadAircraftInfo;
    private W_GuiButton buttonReloadWeaponInfo;
@@ -192,6 +193,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
 
       this.listPlaneCameraButtons = new ArrayList<W_GuiButton>();
       this.buttonPlaneChaseCamera = new MCH_GuiOnOffButton(0, x1, y + 25, 150, 20, "New Chase Cam : ");
+      this.buttonPlaneMouseAim = new MCH_GuiOnOffButton(0, x3, y + 75, 150, 20, "Use Plane Mouse Aim : ");
       this.sliderPlaneChaseBaseDistance = new MCH_GuiSlider(0, x1, y + 50, 150, 20, "Base Dist:%.0f", 15.0F, 8.0F, 80.0F, 1.0F);
       this.sliderPlaneChaseMinDistance = new MCH_GuiSlider(0, x1, y + 75, 150, 20, "Min Dist:%.0f", 13.0F, 6.0F, 80.0F, 1.0F);
       this.sliderPlaneChaseMaxDistance = new MCH_GuiSlider(0, x1, y + 100, 150, 20, "Max Dist:%.0f", 21.0F, 8.0F, 120.0F, 1.0F);
@@ -223,6 +225,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.listPlaneCameraButtons.add(this.sliderPlaneFreelookPitchSmoothing);
       this.listPlaneCameraButtons.add(this.sliderPlaneFreelookReturnSmoothing);
       this.listPlaneCameraButtons.add(this.sliderPlaneChaseRollInfluence);
+      this.listPlaneCameraButtons.add(this.buttonPlaneMouseAim);
       this.listPlaneCameraButtons.add(new W_GuiButton(50, x1, y + 220, 90, 20, "Render <<"));
       id = this.listPlaneCameraButtons.iterator();
 
@@ -440,6 +443,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.buttonPlaneChaseCamera.setOnOff(config.EnableNewPlaneThirdPersonCamera.prmBool);
       this.buttonPlaneChaseSpeedDistance.setOnOff(config.EnableNewPlaneCameraSpeedDistance.prmBool);
       this.buttonPlaneChaseFovOverride.setOnOff(config.EnablePlaneChaseFOVOverride.prmBool);
+      this.buttonPlaneMouseAim.setOnOff(config.EnableMouseAimControls.prmBool);
       this.sliderPlaneChaseBaseDistance.setSliderValue((float)config.NewPlaneCameraDistance.prmDouble);
       this.sliderPlaneChaseMinDistance.setSliderValue((float)config.NewPlaneCameraMinDistance.prmDouble);
       this.sliderPlaneChaseMaxDistance.setSliderValue((float)config.NewPlaneCameraMaxDistance.prmDouble);
@@ -507,6 +511,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       config.EnableNewPlaneThirdPersonCamera.setPrm(buttonPlaneChaseCamera.getOnOff());
       config.EnableNewPlaneCameraSpeedDistance.setPrm(buttonPlaneChaseSpeedDistance.getOnOff());
       config.EnablePlaneChaseFOVOverride.setPrm(buttonPlaneChaseFovOverride.getOnOff());
+      config.EnableMouseAimControls.setPrm(buttonPlaneMouseAim.getOnOff());
       float chaseBaseDistance = sliderPlaneChaseBaseDistance.getSliderValueInt(1);
       float chaseMinDistance = Math.min(sliderPlaneChaseMinDistance.getSliderValueInt(1), chaseBaseDistance);
       float chaseMaxDistance = Math.max(sliderPlaneChaseMaxDistance.getSliderValueInt(1), chaseMinDistance);
