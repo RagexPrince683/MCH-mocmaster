@@ -472,9 +472,9 @@ public class MCH_Config {
       MouseAimAutoBankMaxRoll = new MCH_ConfigPrm("MouseAimAutoBankMaxRoll", 65.0D);
       MouseAimCenteringStrength = new MCH_ConfigPrm("MouseAimCenteringStrength", 0.18D);
       MouseAimDebug = new MCH_ConfigPrm("MouseAimDebug", false);
-      EnablePlaneMouseAimReticle = new MCH_ConfigPrm("EnablePlaneMouseAimReticle", true);
+      EnablePlaneMouseAimReticle = new MCH_ConfigPrm("EnablePlaneMouseAimReticle", false);
       EnablePlaneMouseAimReticle.desc = ";Draws the custom mouse-aim and nose reticles for new-flight planes while mouse aim is active.";
-      HideVanillaCrosshairInPlaneMouseAim = new MCH_ConfigPrm("HideVanillaCrosshairInPlaneMouseAim", true);
+      HideVanillaCrosshairInPlaneMouseAim = new MCH_ConfigPrm("HideVanillaCrosshairInPlaneMouseAim", false);
       HideVanillaCrosshairInPlaneMouseAim.desc = ";Suppresses the vanilla screen-center Minecraft crosshair only while the new-flight plane mouse-aim reticle is active.";
       PlaneMouseAimReticleTexture = new MCH_ConfigPrm("PlaneMouseAimReticleTexture", "textures/gui/plane_crosshair.png");
       PlaneMouseAimReticleScale = new MCH_ConfigPrm("PlaneMouseAimReticleScale", 1.0D);
@@ -499,7 +499,7 @@ public class MCH_Config {
       AllTankSpeed = new MCH_ConfigPrm("AllTankSpeed", 1.0D);
       HurtResistantTime = new MCH_ConfigPrm("HurtResistantTime", 0.0D);
       DisplayHUDThirdPerson = new MCH_ConfigPrm("DisplayHUDThirdPerson", false);
-      EnableNewPlaneThirdPersonCamera = new MCH_ConfigPrm("EnableNewPlaneThirdPersonCamera", true);
+      EnableNewPlaneThirdPersonCamera = new MCH_ConfigPrm("EnableNewPlaneThirdPersonCamera", false);
       EnableNewPlaneThirdPersonCamera.desc = ";Client-only visual chase camera for third-person new-flight planes. Does not change flight physics, weapons, or HUD rendering.";
       NewPlaneCameraDistance = new MCH_ConfigPrm("PlaneChaseBaseDistance", 15.0D);
       NewPlaneCameraDistance.desc = ";Base chase distance in blocks for new-flight third-person planes. default is 15; 16 is often too close and 45-80+ can be reasonable by scale/speed.";
@@ -519,7 +519,7 @@ public class MCH_Config {
       PlaneChaseSpeedDistanceScale.desc = ";Extra chase distance per block/tick of aircraft speed when speed-based distance is explicitly enabled; kept low to avoid zoom breathing.";
       PlaneChaseSpeedDistanceMaxBonus = new MCH_ConfigPrm("PlaneChaseSpeedDistanceMaxBonus", 3.0D);
       PlaneChaseSpeedDistanceMaxBonus.desc = ";Maximum extra blocks optional speed-based distance may add; default small for stable framing.";
-      EnablePlaneChaseFOVOverride = new MCH_ConfigPrm("EnablePlaneChaseFOVOverride", true);
+      EnablePlaneChaseFOVOverride = new MCH_ConfigPrm("EnablePlaneChaseFOVOverride", false);
       EnablePlaneChaseFOVOverride.desc = ";Overrides FOV only for the new-flight third-person plane chase camera; does not affect first person, legacy aircraft cameras, or normal Minecraft third person.";
       PlaneChaseFOV = new MCH_ConfigPrm("PlaneChaseFOV", 95.0D);
       PlaneChaseFOV.desc = ";Target new plane chase camera FOV. Recommended range is 85-105; wider FOV improves awareness without excessive camera distance.";
@@ -568,12 +568,12 @@ public class MCH_Config {
       PlaneChaseHorizonStabilization.desc = ";Keeps the new chase camera horizon more stable than the aircraft by applying conservative roll and pitch inheritance.";
       EnableNewPlaneCameraSpeedDistance = new MCH_ConfigPrm("EnableSpeedBasedCameraDistance", false);
       EnableNewPlaneCameraSpeedDistance.desc = ";Disabled by default so the new plane chase camera stays near its stable base distance instead of breathing with throttle/speed.";
-      EnableNewPlaneCameraCollision = new MCH_ConfigPrm("EnableNewPlaneCameraCollision", true);
-      EnablePlaneLookAhead = new MCH_ConfigPrm("EnablePlaneLookAhead", true);
+      EnableNewPlaneCameraCollision = new MCH_ConfigPrm("EnableNewPlaneCameraCollision", false);
+      EnablePlaneLookAhead = new MCH_ConfigPrm("EnablePlaneLookAhead", false);
       EnableHoldFreelook = new MCH_ConfigPrm("EnableHoldFreelook", false);
       EnableHoldFreelook.desc = ";When enabled, the Free Look key must be held; when disabled, Free Look toggles on/off with each key press.";
-      EnableNewPlaneCameraRollInfluence = new MCH_ConfigPrm("EnableNewPlaneCameraRollInfluence", true);
-      NewPlaneCameraCollision = new MCH_ConfigPrm("NewPlaneCameraCollision", true);
+      EnableNewPlaneCameraRollInfluence = new MCH_ConfigPrm("EnableNewPlaneCameraRollInfluence", false);
+      NewPlaneCameraCollision = new MCH_ConfigPrm("NewPlaneCameraCollision", false);
       NewPlaneCameraCollision.desc = ";Deprecated alias for EnableNewPlaneCameraCollision; moves the chase camera in front of solid blocks when line-of-sight collision is detected.";
       DisableCameraDistChange = new MCH_ConfigPrm("DisableThirdPersonCameraDistChange", false);
       EnableReplaceTextureManager = new MCH_ConfigPrm("EnableReplaceTextureManager", true);

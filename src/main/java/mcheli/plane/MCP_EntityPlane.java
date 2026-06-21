@@ -67,6 +67,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double engineThrottle;
    /** Last total drag fraction applied by the fixed-wing energy model, exposed for debug output. */
    private double lastAerodynamicDrag;
+   private double lastClimbEnergyDrag;
+   private double lastPitchClimbDragFactor;
+   private double lastAoADragFactor;
+   private double lastHorizontalSpeedBeforeEnergyDrag;
+   private double lastHorizontalSpeedAfterEnergyDrag;
    private double lastKineticEnergy;
    private double lastPotentialEnergy;
    private double lastTotalEnergy;
@@ -266,6 +271,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.prevRotationRotor = 0.0F;
       this.engineThrottle = 0.0D;
       this.lastAerodynamicDrag = 0.0D;
+      this.lastClimbEnergyDrag = 0.0D;
+      this.lastPitchClimbDragFactor = 0.0D;
+      this.lastAoADragFactor = 0.0D;
+      this.lastHorizontalSpeedBeforeEnergyDrag = 0.0D;
+      this.lastHorizontalSpeedAfterEnergyDrag = 0.0D;
       this.lastKineticEnergy = 0.0D;
       this.lastPotentialEnergy = 0.0D;
       this.lastTotalEnergy = 0.0D;
@@ -951,6 +961,26 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    public double getLastAerodynamicDrag() {
       return this.lastAerodynamicDrag;
+   }
+
+   public double getLastClimbEnergyDrag() {
+      return this.lastClimbEnergyDrag;
+   }
+
+   public double getLastPitchClimbDragFactor() {
+      return this.lastPitchClimbDragFactor;
+   }
+
+   public double getLastAoADragFactor() {
+      return this.lastAoADragFactor;
+   }
+
+   public double getLastHorizontalSpeedBeforeEnergyDrag() {
+      return this.lastHorizontalSpeedBeforeEnergyDrag;
+   }
+
+   public double getLastHorizontalSpeedAfterEnergyDrag() {
+      return this.lastHorizontalSpeedAfterEnergyDrag;
    }
 
    public double getLastLiftLoss() {
@@ -2971,8 +3001,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // Velocity direction carries the gained/lost energy, while bank and body rates
       // cheaply approximate induced and control-surface drag during hard manoeuvres.
       this.lastAerodynamicDrag = 0.0D;
+      this.lastClimbEnergyDrag = 0.0D;
+      this.lastPitchClimbDragFactor = 0.0D;
+      this.lastAoADragFactor = 0.0D;
+      this.lastHorizontalSpeedBeforeEnergyDrag = 0.0D;
+      this.lastHorizontalSpeedAfterEnergyDrag = 0.0D;
       if(this.useNewMobilitySystem() && dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F && !levelOff) {
          double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+         this.lastHorizontalSpeedBeforeEnergyDrag = horizontalSpeed;
          double bankLoad = MCH_FlightModel.clamp(MathHelper.abs(this.getRotRoll()) / 75.0D, 0.0D, 1.0D);
          double bodyRate = (MathHelper.abs(this.pitchAngularVelocity) + MathHelper.abs(this.rollAngularVelocity)
                + MathHelper.abs(this.yawAngularVelocity)) / 6.0D;
@@ -2987,12 +3023,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          double drag = MCH_FlightModel.getEnergyDrag(horizontalSpeed, (double)levelSpeed, this.getEffectiveEngineThrottle(),
                turnLoad, controlLoad, this.getPlaneInfo().baseDrag, this.getPlaneInfo().inducedDrag,
                this.getPlaneInfo().controlSurfaceDrag, (float)engineBrakeDrag) / mass;
-         drag += MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getPlaneInfo().criticalAoA,
+         double aoaDrag = MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getPlaneInfo().criticalAoA,
                this.getPlaneInfo().baseDrag, this.getPlaneInfo().aoaDragMultiplier) / mass;
+         this.lastAoADragFactor = aoaDrag;
+         drag += aoaDrag;
          double noseHighPitch = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 60.0D, 0.0D, 1.0D);
-         if(this.aoaStallSeverity > 0.0D || noseHighPitch > 0.0D) {
+         double airflowSeverity = Math.max(this.stallSeverity, Math.max(this.aoaStallSeverity, this.speedStallSeverity));
+         double pitchClimbDragFactor = noseHighPitch * MCH_FlightModel.clamp(airflowSeverity, 0.0D, 1.0D);
+         this.lastPitchClimbDragFactor = pitchClimbDragFactor;
+         if(this.aoaStallSeverity > 0.0D || this.deepStallSeverity > 0.0D || pitchClimbDragFactor > 0.0D) {
             double thrustRelief = MCH_FlightModel.clamp(this.getThrustToWeightRatio() / 1.25D, 0.0D, 1.0D);
-            drag += (this.aoaStallSeverity * (0.018D + 0.045D * noseHighPitch)
+            drag += (this.aoaStallSeverity * (0.018D + 0.030D * pitchClimbDragFactor)
                   + this.deepStallSeverity * 0.11D) * (1.15D - 0.55D * thrustRelief);
          }
          double stallSpeedForIdleDrag = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
@@ -3002,7 +3043,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastUnsupportedClimbSeverity = this.getUnsupportedClimbSeverity();
          if(this.lastUnsupportedClimbSeverity > 0.0D) {
             double idleDragBoost = this.lastIdleUnsupportedClimb ? 0.12D : 0.0D;
-            drag += this.lastUnsupportedClimbSeverity * (0.08D + idleDragBoost + 0.22D * Math.max(this.stallSeverity, this.aoaStallSeverity));
+            double unsupportedDrag = this.lastUnsupportedClimbSeverity * (0.025D + idleDragBoost
+                  + 0.18D * Math.max(this.stallSeverity, this.aoaStallSeverity));
+            drag += unsupportedDrag;
+            this.lastPitchClimbDragFactor = Math.max(this.lastPitchClimbDragFactor, this.lastUnsupportedClimbSeverity);
             this.lastStallSuppressedLiftHeadroom = true;
          }
          double gravityAccel = Math.max(1.0E-6D, this.resolveNewFlightGravity());
@@ -3025,6 +3069,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          double derivedDiveGain = (float)MCH_FlightModel.clamp(gravityAccel * 0.22D + this.getPlaneInfo().baseDrag, 0.0D, 0.25D);
          double energyChange = MCH_FlightModel.getVerticalEnergyChange(super.motionY,
                (float)derivedClimbLoss, (float)derivedDiveGain) / mass;
+         this.lastClimbEnergyDrag = Math.max(0.0D, -energyChange);
          double targetSpeed = Math.max(0.0D, horizontalSpeed * (1.0D - drag) + energyChange);
 
          if(horizontalSpeed > 1.0E-4D) {
@@ -3047,6 +3092,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             super.motionX += -Math.sin(yaw) * targetSpeed;
             super.motionZ += Math.cos(yaw) * targetSpeed;
          }
+         this.lastHorizontalSpeedAfterEnergyDrag = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
          this.applyNewFlightDiveAssist(gravityAccel);
       } else {
          this.resetNewFlightDiveAssistDebug();

@@ -244,8 +244,8 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `MouseAimAutoBankMaxRoll` | Global/client | degrees | 65 | auto-bank target roll clamp |
 | `MouseAimCenteringStrength` | Global/client | float | 0.18 | roll damping/level-out strength near center aim |
 | `MouseAimDebug` | Global/client | boolean | false | includes mouse-aim telemetry in flight-control debug output |
-| `EnablePlaneMouseAimReticle` | Global/client | boolean | true | draws custom cursor/nose reticles for active new-flight plane mouse aim |
-| `HideVanillaCrosshairInPlaneMouseAim` | Global/client | boolean | true | suppresses vanilla crosshair only in qualifying plane mouse-aim reticle mode |
+| `EnablePlaneMouseAimReticle` | Global/client | boolean | false | draws custom cursor/nose reticles for active new-flight plane mouse aim |
+| `HideVanillaCrosshairInPlaneMouseAim` | Global/client | boolean | false | suppresses vanilla crosshair only in qualifying plane mouse-aim reticle mode |
 | `PlaneMouseAimReticleTexture` | Global/client | path | textures/gui/plane_crosshair.png | mouse aim cursor texture path |
 | `PlaneMouseAimReticleScale` / `PlaneMouseAimReticleOpacity` | Global/client | float | 1.0 / 0.90 | mouse aim cursor size and alpha |
 | `PlaneNoseReticleScale` / `PlaneNoseReticleOpacity` | Global/client | float | 0.85 / 0.70 | center nose reticle size and alpha |
