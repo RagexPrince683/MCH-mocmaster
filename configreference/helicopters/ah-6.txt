@@ -11,21 +11,22 @@ FuelConsumption = 0.228
 ThirdPersonDist = 20
 
 
-; Initial new helicopter flight-model test opt-in: light attack scout.
+; Initial new helicopter flight-model test opt-in; tune thrust-to-weight before control authority: light attack scout.
 UseNewHelicopterFlightModel = true
 PhysicalMass = 0.75
-MainRotorMaxThrust = 0.105
+MainRotorMaxThrust = 0.225
 RotorInertia = 0.85
 RotorSpoolUpRate = 0.028
 RotorSpoolDownRate = 0.035
 CollectiveResponse = 0.10
-CyclicAuthority = 1.08
+CyclicAuthority = 0.92
 TailRotorAuthority = 1.05
 YawDamping = 0.18
 AngularInertia = 0.85
 TranslationalLiftCoefficient = 0.0045
 VerticalDrag = 0.024
-ParasiteDrag = 0.012
+ParasiteDrag = 0.045
+HorizontalRotorThrustScale = 0.24
 HoverAssistStrength = 0.22
 
 ; M = Military(軍用機).  A = Attacker(攻撃機)

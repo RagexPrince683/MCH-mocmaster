@@ -40,6 +40,8 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
    public float verticalDrag;
    /** Horizontal air-drag coefficient for future speed damping. */
    public float parasiteDrag;
+   /** Minecraft-scale multiplier for cyclic rotor thrust converted into horizontal acceleration. */
+   public float horizontalRotorThrustScale;
    /** Strength of future hover assistance; 0 disables assist, 1 is full configured assist. */
    public float hoverAssistStrength;
    public List rotorList;
@@ -63,6 +65,7 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
       this.translationalLiftCoefficient = 0.004F;
       this.verticalDrag = 0.02F;
       this.parasiteDrag = 0.01F;
+      this.horizontalRotorThrustScale = 0.35F;
       this.hoverAssistStrength = 0.0F;
       this.rotorList = new ArrayList();
       super.minRotationPitch = -20.0F;
@@ -128,6 +131,8 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
          this.verticalDrag = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("ParasiteDrag")) {
          this.parasiteDrag = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("HorizontalRotorThrustScale") || item.equalsIgnoreCase("HelicopterHorizontalThrustScale")) {
+         this.horizontalRotorThrustScale = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("HoverAssistStrength")) {
          this.hoverAssistStrength = this.toFloat(data, 0.0F, 1.0F);
       } else if(item.compareTo("addrotor") == 0 || item.compareTo("addrotorold") == 0) {
