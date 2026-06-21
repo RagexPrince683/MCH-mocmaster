@@ -76,7 +76,7 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `StallSpeed` | internal speed [0..2] | 0 | Absolute stall threshold; if 0, uses `max(0.05, topSpeed * StallSpeedFactor)`. |
 | `TimeUntilStallPastCriticalAoA` | seconds [0..8] | 1.20 | **New flight model only.** Seconds allowed at/past critical AoA before major AoA stall energy loss ramps fully. |
 | `TimeAfterStallUntilPitchDown` | seconds [0..8] | 1.00 | **New flight model only.** Seconds after a low-forward-energy stall before forced nose-down/falling recovery starts. |
-| `CriticalAoA` | degrees [5..30] | 14.40 | AoA in degrees where stall demand begins. |
+| `CriticalAoA` | degrees [5..32] | 14.40 | AoA in degrees where stall demand begins. |
 | `StallLiftLoss` | float[0..1] | 0.820 | Fraction of lift removed at full stall. |
 | `AoADragMultiplier` | multiplier [0..5] | 2.550 | Scales quadratic AoA drag. |
 | `StallInstability` | normalized severity [0..1] | 0.440 | Buffet, yaw shake, and deterministic wing-drop strength. |

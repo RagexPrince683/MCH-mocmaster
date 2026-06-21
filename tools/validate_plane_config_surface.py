@@ -28,7 +28,7 @@ RANGES = {
     "NewFlightEngineBrakeDrag": (0.0, 0.02), "NewFlightLowThrottleLiftRetention": (0.0, 1.0),
     "NewFlightThrottleControlAuthorityScale": (0.0, 1.0), "NewFlightCombatFlapLift": (0.0, 0.30),
     "NewFlightCombatFlapDrag": (0.0, 0.05), "NewFlightCombatFlapControl": (0.0, 0.40),
-    "NewFlightCombatFlapOverspeed": (0.50, 1.0), "StallSpeed": (0.0, 2.0), "CriticalAoA": (5.0, 30.0),
+    "NewFlightCombatFlapOverspeed": (0.50, 1.0), "StallSpeed": (0.0, 2.0), "CriticalAoA": (5.0, 32.0),
     "TimeUntilStallPastCriticalAoA": (0.0, 8.0), "TimeAfterStallUntilPitchDown": (0.0, 8.0),
     "StallLiftLoss": (0.0, 1.0), "AoADragMultiplier": (0.0, 5.0), "StallInstability": (0.0, 1.0),
     "StallRecoverySpeed": (0.0, 2.5), "StallSpeedFactor": (0.0, 0.5), "StallStrength": (0.0, 2.0),
