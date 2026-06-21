@@ -102,7 +102,7 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
          return;
       }
 
-      int power = this.toPercent(heli.getCollectiveInput());
+      int power = this.toPercent(heli.getEnginePowerOutput());
       int color = -14101432; // 0xFF28D448: existing heli HUD green.
       int x = super.centerX + 120;
       int y = super.centerY + 55;
