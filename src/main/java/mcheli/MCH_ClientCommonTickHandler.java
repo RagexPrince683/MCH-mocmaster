@@ -332,6 +332,20 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       }
 
       MCP_EntityPlane plane = ac instanceof MCP_EntityPlane ? (MCP_EntityPlane)ac : null;
+      MCH_EntityHeli heli = ac instanceof MCH_EntityHeli ? (MCH_EntityHeli)ac : null;
+      if(heli != null && heli.isNewHeliFlightModelEnabled()) {
+         System.out.println(String.format(
+               "[MCHeli] heli-yaw dt=%.3f yawInput=%.4f mainRotorTorqueReaction=%.4f tailRotorTorque=%.4f netYawTorque=%.4f yawAngularAcceleration=%.4f heliYawAngularVelocity=%.4f yawDampingApplied=%.4f finalRotYaw=%.2f",
+               simDelta,
+               heli.getTailRotorInput(),
+               heli.getMainRotorTorqueReaction(),
+               heli.getTailRotorTorque(),
+               heli.getHeliYawTorque(),
+               heli.getYawAngularAcceleration(),
+               heli.getYawAngularVelocity(),
+               heli.getYawDampingApplied(),
+               heli.getFinalRotYaw()));
+      }
 
       double forwardSpeed = plane != null
             ? ac.motionX * MCH_Lib.Rot2Vec3(ac.getRotYaw(), ac.getRotPitch()).xCoord
