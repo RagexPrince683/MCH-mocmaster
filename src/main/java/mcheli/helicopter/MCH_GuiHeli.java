@@ -105,9 +105,9 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       int collective = this.toPercent(heli.getCollectiveInput());
       int rpm = this.toPercent(heli.getNormalizedRotorRPM());
       int engine = this.toPercent(heli.getEnginePowerOutput());
-      int color = -16711936;
-      int x = super.centerX - 145;
-      int y = super.centerY + 30;
+      int color = -14101432; // 0xFF28D448: existing heli HUD green.
+      int x = super.centerX + 120;
+      int y = super.centerY + 55;
       this.drawString(String.format("COL: %3d%%", new Object[]{Integer.valueOf(collective)}), x, y, color);
       this.drawString(String.format("RPM: %3d%%", new Object[]{Integer.valueOf(rpm)}), x, y + 10, color);
       this.drawString(String.format("ENG: %3d%%", new Object[]{Integer.valueOf(engine)}), x, y + 20, color);
