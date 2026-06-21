@@ -23,6 +23,7 @@ YawDamping = 0.20
 AngularInertia = 1.0
 TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.026
+; Keep normal sustained climb at or below 0.22 blocks/tick.
 MaxClimbRate = 0.16
 ParasiteDrag = 0.035
 HorizontalRotorThrustScale = 0.35

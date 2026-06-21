@@ -38,7 +38,7 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
    public float translationalLiftCoefficient;
    /** Vertical drag coefficient for future climb/descent damping. */
    public float verticalDrag;
-   /** Maximum upward speed for new-model helicopters, in blocks per tick. */
+   /** Maximum sustained upward speed for new-model helicopters, in blocks per tick; parser caps normal configs at 0.22. */
    public float maxClimbRate;
    /** Horizontal air-drag coefficient for future speed damping. */
    public float parasiteDrag;
@@ -56,7 +56,7 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
    public float helicopterMaxBackwardSpeedScale;
    /** Strength of new-model hover assistance; 0 disables assist, 1 is full configured assist. */
    public float hoverAssistStrength;
-   /** Show compact collective/RPM readouts to pilots using the new helicopter flight model. */
+   /** Show compact player-power readout to pilots using the new helicopter flight model. */
    public boolean newHeliControlHudDisplay;
    public List rotorList;
 
@@ -151,7 +151,7 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
       } else if(item.equalsIgnoreCase("VerticalDrag")) {
          this.verticalDrag = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("MaxClimbRate") || item.equalsIgnoreCase("HelicopterMaxClimbRate") || item.equalsIgnoreCase("NewHelicopterMaxClimbRate")) {
-         this.maxClimbRate = this.toFloat(data, 0.0F, 1000.0F);
+         this.maxClimbRate = this.toFloat(data, 0.0F, 0.22F);
       } else if(item.equalsIgnoreCase("ParasiteDrag")) {
          this.parasiteDrag = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("HorizontalRotorThrustScale") || item.equalsIgnoreCase("HelicopterHorizontalThrustScale")) {

@@ -1335,7 +1335,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          return;
       }
 
-      float manualCollectiveInput = (super.throttleUp != super.throttleDown)?1.0F:0.0F;
+      float manualCollectiveInput = super.throttleDown?1.0F:(super.throttleUp?0.55F:0.0F);
       float manualCyclicInput = Math.max(MathHelper.abs(manualPitchInput), MathHelper.abs(manualRollInput));
       this.manualInputOverrideFactor = MathHelper.clamp_float(Math.max(manualCollectiveInput, manualCyclicInput), 0.0F, 1.0F);
       float assistBlend = configuredStrength * (1.0F - this.manualInputOverrideFactor);
@@ -1346,7 +1346,16 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
       this.targetVerticalSpeed = 0.0F;
       this.targetHorizontalSpeed = 0.0F;
-      this.hoverCollectiveCorrection = MathHelper.clamp_float((this.targetVerticalSpeed - (float)super.motionY) * 0.75F, -0.32F, 0.32F) * assistBlend;
+      float mass = this.sanitizePositive(this.physicalMass, 1.0F, NEW_HELI_MIN_MASS);
+      float gravity = MathHelper.abs(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
+      float liftSpool = MathHelper.clamp_float((this.normalizedRotorRPM - 0.35F) / 0.65F, 0.0F, 1.0F);
+      liftSpool *= liftSpool;
+      float availableLift = Math.max(this.heliInfo.mainRotorMaxThrust * liftSpool, 0.001F);
+      float hoverCollective = MathHelper.clamp_float(mass * gravity / availableLift, 0.0F, 1.0F);
+      float currentCollective = MathHelper.clamp_float((float)this.getCurrentThrottle(), 0.0F, 1.0F);
+      float descentRecovery = MathHelper.clamp_float((this.targetVerticalSpeed - (float)super.motionY) * 2.0F, 0.0F, 0.22F);
+      float altitudeHoldDemand = MathHelper.clamp_float(hoverCollective + descentRecovery - currentCollective, 0.0F, 0.55F);
+      this.hoverCollectiveCorrection = altitudeHoldDemand * assistBlend;
 
       float yawRadians = this.getRotYaw() / 180.0F * 3.1415927F;
       float forwardX = -MathHelper.sin(yawRadians);
