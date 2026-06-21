@@ -11,7 +11,7 @@ Helicopters inherit all shared keys from `base.md`. Helicopter-only parser keys 
 | `addrotorold` | same as `addrotor` | none | Legacy rotor renderer. Compatibility-only. |
 | `UseNewHelicopterFlightModel` / `EnableNewHelicopterFlightModel` | boolean | false | Helicopter-specific opt-in gate for the future rewritten helicopter model. This is intentionally separate from `UseNewMobilitySystem`; when false, all new helicopter physical tuning values are inert and legacy helicopter flight remains unchanged. |
 | `PhysicalMass` | float >= 0.01 | 1.0 | Relative mass for future force calculations. `1.0` is the legacy-scale baseline rather than real kilograms. |
-| `MainRotorMaxThrust` | float >= 0 | 0.06 | Future maximum main-rotor upward force in legacy motion units per tick at full collective. Default is near the current hover/lift scale. |
+| `MainRotorMaxThrust` | float >= 0 | 0.12 | Maximum main-rotor thrust in legacy force units per tick at full RPM and full collective. Default is conservative but allows hover/climb once RPM has spooled. |
 | `RotorInertia` | float >= 0.01 | 1.0 | Future rotor RPM acceleration resistance; larger values should make RPM change more slowly. |
 | `RotorSpoolUpRate` | 0.0-1.0 | 0.02 | Future normalized rotor RPM gain per tick while spooling up. |
 | `RotorSpoolDownRate` | 0.0-1.0 | 0.03 | Future normalized rotor RPM loss per tick while spooling down. |
@@ -36,12 +36,12 @@ Helicopters inherit all shared keys from `base.md`. Helicopter-only parser keys 
 
 ## Future helicopter flight-model foundation
 
-The new keys above only expose configuration and telemetry for a future helicopter-specific model. They do not change runtime helicopter physics unless `UseNewHelicopterFlightModel = true`, and the current implementation still leaves actual flight forces on the legacy path. Existing helicopter asset files do not need to define any of the new values.
+The new keys above are inert unless `UseNewHelicopterFlightModel = true`. Existing helicopter asset files do not need to define any of the new values, and helicopters that leave the opt-in disabled keep the legacy flight path.
 
 
 ### Rotor RPM foundation
 
-When `UseNewHelicopterFlightModel = true`, helicopters now maintain a normalized runtime rotor state for future lift and yaw work. `targetRotorRPM` is derived from current throttle only while the engine can run, fuel is available, the canopy is closed, and blades are usable/unfolded. `normalizedRotorRPM` then moves toward that target using `RotorSpoolUpRate` while increasing, `RotorSpoolDownRate` while decreasing, and `RotorInertia` as resistance. This rotor state drives visual rotor rotation for opted-in helicopters only; legacy helicopters keep the original throttle-driven animation and lift behavior. Vertical lift, cyclic, hover mode, and yaw physics still use the legacy systems in this phase.
+When `UseNewHelicopterFlightModel = true`, helicopters now maintain a normalized runtime rotor state for future lift and yaw work. `targetRotorRPM` is derived from current throttle only while the engine can run, fuel is available, the canopy is closed, and blades are usable/unfolded. `normalizedRotorRPM` then moves toward that target using `RotorSpoolUpRate` while increasing, `RotorSpoolDownRate` while decreasing, and `RotorInertia` as resistance. This rotor state drives visual rotor rotation for opted-in helicopters only; legacy helicopters keep the original throttle-driven animation and lift behavior. Opted-in vertical lift now uses mass, rotor thrust, configured gravity, ceiling/vortex efficiency, and `VerticalDrag`; cyclic, hover mode, yaw, and horizontal motion still use the legacy systems in this phase.
 
 ## Rotorcraft lift formulas
 

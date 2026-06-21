@@ -55,6 +55,13 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private boolean rotorReadyForLift;
    private float collectiveInput;
    private float rotorThrust;
+   private float rotorEfficiency;
+   private float rotorVerticalThrust;
+   private float weightForce;
+   private float netVerticalForce;
+   private float verticalAcceleration;
+   private float verticalDragApplied;
+   private float finalMotionY;
    private float verticalForce;
    private float cyclicPitchInput;
    private float cyclicRollInput;
@@ -124,6 +131,13 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          this.rotorReadyForLift = false;
          this.collectiveInput = 0.0F;
          this.rotorThrust = 0.0F;
+         this.rotorEfficiency = 0.0F;
+         this.rotorVerticalThrust = 0.0F;
+         this.weightForce = 0.0F;
+         this.netVerticalForce = 0.0F;
+         this.verticalAcceleration = 0.0F;
+         this.verticalDragApplied = 0.0F;
+         this.finalMotionY = 0.0F;
          this.verticalForce = 0.0F;
          this.cyclicPitchInput = 0.0F;
          this.cyclicRollInput = 0.0F;
@@ -178,6 +192,34 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
    public float getRotorThrust() {
       return this.rotorThrust;
+   }
+
+   public float getRotorEfficiency() {
+      return this.rotorEfficiency;
+   }
+
+   public float getRotorVerticalThrust() {
+      return this.rotorVerticalThrust;
+   }
+
+   public float getWeightForce() {
+      return this.weightForce;
+   }
+
+   public float getNetVerticalForce() {
+      return this.netVerticalForce;
+   }
+
+   public float getVerticalAcceleration() {
+      return this.verticalAcceleration;
+   }
+
+   public float getVerticalDragApplied() {
+      return this.verticalDragApplied;
+   }
+
+   public float getFinalMotionY() {
+      return this.finalMotionY;
    }
 
    public float getVerticalForce() {
@@ -900,6 +942,47 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       }
    }
 
+   private void applyNewHelicopterCollectiveLift(double attitudeEfficiency, double throttle, double horizontalSpeed, float tickDelta) {
+      float mass = Math.max(this.heliInfo.physicalMass, 0.01F);
+      float gravity = MathHelper.abs(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
+      boolean bladesUsable = this.canUseBlades() && !this.isFoldBlades();
+      this.collectiveInput = MathHelper.clamp_float((float)throttle, 0.0F, 1.0F);
+
+      double efficiency = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
+      efficiency *= MCH_FlightModel.clamp(attitudeEfficiency, 0.0D, 1.0D);
+      efficiency += MCH_FlightModel.clamp(horizontalSpeed / Math.max(0.1D, (double)this.getAcInfo().speed), 0.0D, 1.0D) * (double)this.heliInfo.translationalLiftCoefficient;
+
+      boolean vortexRing = super.motionY < -0.12D && horizontalSpeed < 0.15D && this.collectiveInput > 0.45F;
+      if(vortexRing) {
+         efficiency *= 0.55D;
+      }
+
+      if(this.isDestroyed()) {
+         efficiency *= 0.65D;
+      }
+
+      if(!this.canUseFuel(true) || !bladesUsable) {
+         efficiency = 0.0D;
+      }
+
+      this.rotorEfficiency = MathHelper.clamp_float((float)efficiency, 0.0F, 2.0F);
+      this.rotorThrust = this.heliInfo.mainRotorMaxThrust * this.normalizedRotorRPM * this.collectiveInput * this.rotorEfficiency;
+
+      float pitchComponent = MathHelper.cos(this.getRotPitch() / 180.0F * 3.1415927F);
+      float rollComponent = MathHelper.cos(this.getRotRoll() / 180.0F * 3.1415927F);
+      float verticalComponent = MathHelper.clamp_float(pitchComponent * rollComponent, 0.0F, 1.0F);
+      this.rotorVerticalThrust = this.rotorThrust * verticalComponent;
+      this.weightForce = mass * gravity;
+      this.netVerticalForce = this.rotorVerticalThrust - this.weightForce;
+      this.verticalForce = this.netVerticalForce;
+      this.verticalAcceleration = this.netVerticalForce / mass;
+      super.motionY += (double)(this.verticalAcceleration * tickDelta);
+
+      this.verticalDragApplied = (float)(-super.motionY * (double)this.heliInfo.verticalDrag * (double)tickDelta);
+      super.motionY += (double)this.verticalDragApplied;
+      this.finalMotionY = (float)super.motionY;
+   }
+
    protected void onUpdate_Client() {
       if(this.getRiddenByEntity() != null && W_Lib.isClientPlayer(this.getRiddenByEntity())) {
          this.getRiddenByEntity().rotationPitch = this.getRiddenByEntity().prevRotationPitch;
@@ -959,7 +1042,10 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          }
 
          if(motion == 0.0D) {
-            super.motionY += !this.isInWater()?(double)this.getAcInfo().gravity:(double)this.getAcInfo().gravityInWater;
+            if(!this.newHeliFlightModelEnabled) {
+               super.motionY += !this.isInWater()?(double)this.getAcInfo().gravity:(double)this.getAcInfo().gravityInWater;
+            }
+
             speedLimit = this.getRotYaw() / 180.0F * 3.1415927F;
             pitch = this.getRotPitch();
             if(MCH_Lib.getBlockIdY(this, 3, -3) > 0) {
@@ -982,24 +1068,28 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             }
 
             double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-            double rotorEfficiency = 1.0D;
-            double translationalLift = 0.0D;
-            if(this.useNewMobilitySystem()) {
-               rotorEfficiency = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
+            if(this.newHeliFlightModelEnabled) {
+               this.applyNewHelicopterCollectiveLift(y, throttle, horizontalSpeed, 1.0F);
+            } else {
+               double rotorEfficiency = 1.0D;
+               double translationalLift = 0.0D;
+               if(this.useNewMobilitySystem()) {
+                  rotorEfficiency = MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
 
-               // Fast forward flight gives the rotor cleaner airflow (translational lift).
-               translationalLift = MCH_FlightModel.clamp(horizontalSpeed / Math.max(0.1D, (double)this.getAcInfo().speed), 0.0D, 1.0D) * 0.004D;
+                  // Fast forward flight gives the rotor cleaner airflow (translational lift).
+                  translationalLift = MCH_FlightModel.clamp(horizontalSpeed / Math.max(0.1D, (double)this.getAcInfo().speed), 0.0D, 1.0D) * 0.004D;
 
-               // A powered, near-vertical descent can enter a vortex-ring state. Forward
-               // motion or lowering collective lets the helicopter recover naturally.
-               boolean vortexRing = super.motionY < -0.12D && horizontalSpeed < 0.15D && throttle > 0.45D;
-               if(vortexRing) {
-                  rotorEfficiency *= 0.55D;
-                  super.motionY -= 0.006D;
+                  // A powered, near-vertical descent can enter a vortex-ring state. Forward
+                  // motion or lowering collective lets the helicopter recover naturally.
+                  boolean vortexRing = super.motionY < -0.12D && horizontalSpeed < 0.15D && throttle > 0.45D;
+                  if(vortexRing) {
+                     rotorEfficiency *= 0.55D;
+                     super.motionY -= 0.006D;
+                  }
                }
-            }
 
-            super.motionY += ((y * 0.025D + 0.03D) * throttle + translationalLift * throttle) * rotorEfficiency;
+               super.motionY += ((y * 0.025D + 0.03D) * throttle + translationalLift * throttle) * rotorEfficiency;
+            }
          } else {
             if(MathHelper.abs(this.getRotPitch()) < 40.0F) {
                speedLimit = this.getRotPitch();

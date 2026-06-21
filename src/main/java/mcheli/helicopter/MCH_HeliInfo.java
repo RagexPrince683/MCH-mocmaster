@@ -51,7 +51,7 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
       this.isEnableFoldBlade = false;
       this.useNewHelicopterFlightModel = false;
       this.physicalMass = 1.0F;
-      this.mainRotorMaxThrust = 0.06F;
+      this.mainRotorMaxThrust = 0.12F;
       this.rotorInertia = 1.0F;
       this.rotorSpoolUpRate = 0.02F;
       this.rotorSpoolDownRate = 0.03F;
