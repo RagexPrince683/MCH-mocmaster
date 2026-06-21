@@ -11,10 +11,10 @@ FuelConsumption = 0.228
 ThirdPersonDist = 20
 
 
-; Initial new helicopter flight-model test opt-in: light attack scout.
+; Initial new helicopter flight-model test opt-in; tune thrust-to-weight before control authority: light attack scout.
 UseNewHelicopterFlightModel = true
 PhysicalMass = 0.75
-MainRotorMaxThrust = 0.105
+MainRotorMaxThrust = 0.145
 RotorInertia = 0.85
 RotorSpoolUpRate = 0.028
 RotorSpoolDownRate = 0.035

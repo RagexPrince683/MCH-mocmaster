@@ -16,10 +16,10 @@ FuelConsumption = 0.681
 Stealth = 0.2
 ThirdPersonDist = 20
 
-; Initial new helicopter flight-model test opt-in: medium utility helicopter.
+; Initial new helicopter flight-model test opt-in; tune thrust-to-weight before control authority: medium utility helicopter.
 UseNewHelicopterFlightModel = true
 PhysicalMass = 1.20
-MainRotorMaxThrust = 0.155
+MainRotorMaxThrust = 0.215
 RotorInertia = 1.25
 RotorSpoolUpRate = 0.022
 RotorSpoolDownRate = 0.030
