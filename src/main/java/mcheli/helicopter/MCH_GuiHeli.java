@@ -14,6 +14,7 @@ import mcheli.helicopter.MCH_HeliInfo;
 import mcheli.weapon.MCH_EntityTvMissile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.MathHelper;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -64,6 +65,10 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
                   }
                }
 
+               if(seatID == 0) {
+                  this.drawNewHeliControlHud(heli);
+               }
+
                this.drawKeyBind(heli, player, seatID);
             }
 
@@ -89,6 +94,26 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
          }
 
       }
+   }
+
+   private void drawNewHeliControlHud(MCH_EntityHeli heli) {
+      MCH_HeliInfo info = heli.getHeliInfo();
+      if(info == null || !heli.isNewHeliFlightModelEnabled() || !info.newHeliControlHudDisplay) {
+         return;
+      }
+
+      int collective = this.toPercent(heli.getCollectiveInput());
+      int rpm = this.toPercent(heli.getNormalizedRotorRPM());
+      int engine = this.toPercent(heli.getEnginePowerOutput());
+      String sas = heli.isHoverAssistActive()?" SAS":"";
+      int color = rpm < 85 && collective > 10?-65536:-1;
+      this.drawString(String.format("COL %3d%%  RPM %3d%%  ENG %3d%%%s",
+            new Object[]{Integer.valueOf(collective), Integer.valueOf(rpm), Integer.valueOf(engine), sas}),
+            super.centerX - 92, super.centerY + 42, color);
+   }
+
+   private int toPercent(float value) {
+      return Math.round(MathHelper.clamp_float(value, 0.0F, 1.0F) * 100.0F);
    }
 
    public void drawKeyBind(MCH_EntityHeli heli, EntityPlayer player, int seatID) {
