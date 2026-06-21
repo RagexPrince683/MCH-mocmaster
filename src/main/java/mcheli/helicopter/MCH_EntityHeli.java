@@ -85,6 +85,14 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private float localDriftForward;
    private float localDriftRight;
    private float tailRotorInput;
+   /** Positive main-rotor torque reaction yaws the fuselage right unless countered by tail rotor thrust. */
+   private float heliYawAngularVelocity;
+   private float heliYawTorque;
+   private float tailRotorTorque;
+   private float mainRotorTorqueReaction;
+   private float yawDampingApplied;
+   private float yawAngularAcceleration;
+   private float finalRotYaw;
    private boolean hoverAssistActive;
 
 
@@ -180,6 +188,13 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          this.localDriftForward = 0.0F;
          this.localDriftRight = 0.0F;
          this.tailRotorInput = 0.0F;
+         this.heliYawAngularVelocity = 0.0F;
+         this.heliYawTorque = 0.0F;
+         this.tailRotorTorque = 0.0F;
+         this.mainRotorTorqueReaction = 0.0F;
+         this.yawDampingApplied = 0.0F;
+         this.yawAngularAcceleration = 0.0F;
+         this.finalRotYaw = this.getRotYaw();
          this.hoverAssistActive = false;
       }
    }
@@ -352,6 +367,35 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       return this.tailRotorInput;
    }
 
+   @Override
+   public float getYawAngularVelocity() {
+      return this.newHeliFlightModelEnabled?this.heliYawAngularVelocity:super.getYawAngularVelocity();
+   }
+
+   public float getHeliYawTorque() {
+      return this.heliYawTorque;
+   }
+
+   public float getTailRotorTorque() {
+      return this.tailRotorTorque;
+   }
+
+   public float getMainRotorTorqueReaction() {
+      return this.mainRotorTorqueReaction;
+   }
+
+   public float getYawDampingApplied() {
+      return this.yawDampingApplied;
+   }
+
+   public float getYawAngularAcceleration() {
+      return this.yawAngularAcceleration;
+   }
+
+   public float getFinalRotYaw() {
+      return this.finalRotYaw;
+   }
+
    public boolean isHoverAssistActive() {
       return this.hoverAssistActive;
    }
@@ -379,6 +423,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       par1NBTTagCompound.setFloat("NewHeliTargetRotorRPM", this.targetRotorRPM);
       par1NBTTagCompound.setFloat("NewHeliRotorEnergy", this.rotorEnergy);
       par1NBTTagCompound.setFloat("NewHeliEnginePower", this.enginePowerOutput);
+      par1NBTTagCompound.setFloat("NewHeliYawAngularVelocity", this.heliYawAngularVelocity);
    }
 
    protected void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
@@ -407,6 +452,9 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       }
       if(par1NBTTagCompound.hasKey("NewHeliEnginePower")) {
          this.enginePowerOutput = MathHelper.clamp_float(par1NBTTagCompound.getFloat("NewHeliEnginePower"), 0.0F, 1.0F);
+      }
+      if(par1NBTTagCompound.hasKey("NewHeliYawAngularVelocity")) {
+         this.heliYawAngularVelocity = par1NBTTagCompound.getFloat("NewHeliYawAngularVelocity");
       }
       this.setFoldBladeStat((byte)(par1NBTTagCompound.getBoolean("FoldBlade")?0:2));
       if(this.heliInfo == null) {
@@ -678,6 +726,12 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    }
 
    public float getControlRotYaw(float mouseX, float mouseY, float tick) {
+      if(this.newHeliFlightModelEnabled) {
+         float yawLimit = (float)Math.max(this.getAddRotationYawLimit(), 1.0D);
+         this.tailRotorInput = MathHelper.clamp_float(mouseX / yawLimit, -1.0F, 1.0F);
+         return 0.0F;
+      }
+
       return mouseX;
    }
 
@@ -717,7 +771,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
                this.applyOnGroundPitch(0.97F);
             }
 
-            if(this.heliInfo.isEnableFoldBlade && this.rotors.length > 0 && this.getFoldBladeStat() == 0 && !this.isDestroyed()) {
+            if(!this.newHeliFlightModelEnabled && this.heliInfo.isEnableFoldBlade && this.rotors.length > 0 && this.getFoldBladeStat() == 0 && !this.isDestroyed()) {
                if(super.moveLeft && !super.moveRight) {
                   this.setRotYaw(this.getRotYaw() - 0.5F * partialTicks);
                }
@@ -728,7 +782,44 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             }
          }
 
+         if(this.newHeliFlightModelEnabled) {
+            this.applyNewHelicopterYawModel(partialTicks);
+         }
       }
+   }
+
+   private void applyNewHelicopterYawModel(float tickDelta) {
+      if(this.heliInfo == null) {
+         return;
+      }
+
+      boolean bladesUsable = this.canUseBlades() && !this.isFoldBlades();
+      boolean engineUsable = !this.isDestroyed() && bladesUsable && this.isCanopyClose() && this.canUseFuel(true);
+      float rpmAuthority = engineUsable?MathHelper.clamp_float(this.normalizedRotorRPM, 0.0F, 1.0F):0.0F;
+      float damageAuthority = MathHelper.clamp_float((float)this.getHP() / Math.max(1.0F, (float)this.getMaxHP()), 0.25F, 1.0F);
+      if(this.isDestroyed()) {
+         damageAuthority = 0.0F;
+      }
+
+      float collective = MathHelper.clamp_float(this.collectiveInput, 0.0F, 1.0F);
+      float rotorLoad = Math.max(this.rotorThrust, this.heliInfo.mainRotorMaxThrust * collective * this.enginePowerOutput);
+      // Positive reaction is the fuselage yawing right from main-rotor drag; tail-rotor torque subtracts from it.
+      this.mainRotorTorqueReaction = engineUsable?rotorLoad * rpmAuthority:0.0F;
+
+      float tailAuthority = Math.max(this.heliInfo.tailRotorAuthority, 0.0F) * rpmAuthority * damageAuthority;
+      this.tailRotorTorque = this.tailRotorInput * tailAuthority * Math.max(this.heliInfo.mainRotorMaxThrust, 0.01F);
+      this.heliYawTorque = this.tailRotorTorque - this.mainRotorTorqueReaction;
+
+      float inertia = Math.max(this.heliInfo.angularInertia, 0.01F);
+      this.yawAngularAcceleration = this.heliYawTorque / inertia;
+      this.heliYawAngularVelocity += this.yawAngularAcceleration * tickDelta;
+
+      this.yawDampingApplied = -this.heliYawAngularVelocity * Math.max(this.heliInfo.yawDamping, 0.0F) * tickDelta;
+      this.heliYawAngularVelocity += this.yawDampingApplied;
+      this.heliYawAngularVelocity = MathHelper.clamp_float(this.heliYawAngularVelocity, -8.0F, 8.0F);
+
+      this.finalRotYaw = this.getRotYaw() + this.heliYawAngularVelocity * tickDelta;
+      this.setRotYaw(this.finalRotYaw);
    }
 
    protected void onUpdate_Rotor() {
