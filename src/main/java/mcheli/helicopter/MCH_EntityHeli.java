@@ -1219,7 +1219,9 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       }
 
       this.rotorEfficiency = this.sanitizeClamped((float)efficiency, 0.0F, 2.0F, 0.0F);
-      this.rotorThrust = Math.max(this.heliInfo.mainRotorMaxThrust, 0.0F) * this.normalizedRotorRPM * this.collectiveInput * this.rotorEfficiency;
+      float liftSpool = MathHelper.clamp_float((this.normalizedRotorRPM - 0.35F) / 0.65F, 0.0F, 1.0F);
+      liftSpool *= liftSpool;
+      this.rotorThrust = Math.max(this.heliInfo.mainRotorMaxThrust, 0.0F) * liftSpool * this.collectiveInput * this.rotorEfficiency;
 
       float pitchComponent = MathHelper.cos(this.getRotPitch() / 180.0F * 3.1415927F);
       float rollComponent = MathHelper.cos(this.getRotRoll() / 180.0F * 3.1415927F);
@@ -1236,6 +1238,10 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float verticalDrag = MathHelper.clamp_float(this.heliInfo.verticalDrag, 0.0F, 1.0F / Math.max(tickDelta, 0.001F));
       this.verticalDragApplied = (float)(-super.motionY * (double)verticalDrag * (double)tickDelta);
       super.motionY += (double)this.verticalDragApplied;
+      float maxClimbRate = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.maxClimbRate, 0.0F, 1000.0F):0.16F;
+      if(maxClimbRate > 0.0F && super.motionY > (double)maxClimbRate) {
+         super.motionY = (double)maxClimbRate;
+      }
       this.finalMotionY = (float)super.motionY;
    }
 
@@ -1328,8 +1334,18 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float rightZ = -MathHelper.sin(yawRadians);
 
       float horizontalThrustScale = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.horizontalRotorThrustScale, 0.0F, 1000.0F):0.35F;
-      this.rotorHorizontalThrustX = this.rotorThrust * horizontalThrustScale * (this.rotorTiltForward * forwardX + this.rotorTiltRight * rightX);
-      this.rotorHorizontalThrustZ = this.rotorThrust * horizontalThrustScale * (this.rotorTiltForward * forwardZ + this.rotorTiltRight * rightZ);
+      float attitudeTiltForward = MathHelper.clamp_float(MathHelper.sin(this.getRotPitch() / 180.0F * 3.1415927F), -0.75F, 0.75F);
+      float attitudeTiltRight = MathHelper.clamp_float(-MathHelper.sin(this.getRotRoll() / 180.0F * 3.1415927F), -0.75F, 0.75F);
+      float effectiveTiltForward = this.rotorTiltForward + attitudeTiltForward;
+      float effectiveTiltRight = this.rotorTiltRight + attitudeTiltRight;
+      float effectiveTiltMagnitudeSq = effectiveTiltForward * effectiveTiltForward + effectiveTiltRight * effectiveTiltRight;
+      if(effectiveTiltMagnitudeSq > 1.0F) {
+         float invMagnitude = 1.0F / MathHelper.sqrt_float(effectiveTiltMagnitudeSq);
+         effectiveTiltForward *= invMagnitude;
+         effectiveTiltRight *= invMagnitude;
+      }
+      this.rotorHorizontalThrustX = this.rotorThrust * horizontalThrustScale * (effectiveTiltForward * forwardX + effectiveTiltRight * rightX);
+      this.rotorHorizontalThrustZ = this.rotorThrust * horizontalThrustScale * (effectiveTiltForward * forwardZ + effectiveTiltRight * rightZ);
       this.horizontalAccelerationX = this.rotorHorizontalThrustX / mass;
       this.horizontalAccelerationZ = this.rotorHorizontalThrustZ / mass;
       super.motionX += (double)(this.horizontalAccelerationX * tickDelta);

@@ -22,6 +22,7 @@ YawDamping = 0.2
 AngularInertia = 0.74
 TranslationalLiftCoefficient = 0.005
 VerticalDrag = 0.023
+MaxClimbRate = 0.13
 ParasiteDrag = 0.024
 HorizontalRotorThrustScale = 0.82
 HoverAssistStrength = 0.75

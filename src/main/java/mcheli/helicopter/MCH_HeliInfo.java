@@ -38,6 +38,8 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
    public float translationalLiftCoefficient;
    /** Vertical drag coefficient for future climb/descent damping. */
    public float verticalDrag;
+   /** Maximum upward speed for new-model helicopters, in blocks per tick. */
+   public float maxClimbRate;
    /** Horizontal air-drag coefficient for future speed damping. */
    public float parasiteDrag;
    /** Minecraft-scale multiplier for cyclic rotor thrust converted into horizontal acceleration. */
@@ -66,6 +68,7 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
       this.angularInertia = 1.0F;
       this.translationalLiftCoefficient = 0.004F;
       this.verticalDrag = 0.02F;
+      this.maxClimbRate = 0.16F;
       this.parasiteDrag = 0.01F;
       this.horizontalRotorThrustScale = 0.35F;
       this.hoverAssistStrength = 0.75F;
@@ -132,6 +135,8 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
          this.translationalLiftCoefficient = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("VerticalDrag")) {
          this.verticalDrag = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("MaxClimbRate") || item.equalsIgnoreCase("HelicopterMaxClimbRate") || item.equalsIgnoreCase("NewHelicopterMaxClimbRate")) {
+         this.maxClimbRate = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("ParasiteDrag")) {
          this.parasiteDrag = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("HorizontalRotorThrustScale") || item.equalsIgnoreCase("HelicopterHorizontalThrustScale")) {
