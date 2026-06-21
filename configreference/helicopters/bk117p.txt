@@ -25,7 +25,7 @@ TranslationalLiftCoefficient = 0.004
 VerticalDrag = 0.026
 ParasiteDrag = 0.035
 HorizontalRotorThrustScale = 0.65
-HoverAssistStrength = 0.18
+HoverAssistStrength = 0.75
 
 
 sound = eurocopter

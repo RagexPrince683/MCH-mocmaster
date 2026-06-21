@@ -1219,7 +1219,9 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       }
 
       this.rotorEfficiency = this.sanitizeClamped((float)efficiency, 0.0F, 2.0F, 0.0F);
-      this.rotorThrust = Math.max(this.heliInfo.mainRotorMaxThrust, 0.0F) * this.normalizedRotorRPM * this.collectiveInput * this.rotorEfficiency;
+      float liftSpool = MathHelper.clamp_float((this.normalizedRotorRPM - 0.35F) / 0.65F, 0.0F, 1.0F);
+      liftSpool *= liftSpool;
+      this.rotorThrust = Math.max(this.heliInfo.mainRotorMaxThrust, 0.0F) * liftSpool * this.collectiveInput * this.rotorEfficiency;
 
       float pitchComponent = MathHelper.cos(this.getRotPitch() / 180.0F * 3.1415927F);
       float rollComponent = MathHelper.cos(this.getRotRoll() / 180.0F * 3.1415927F);
@@ -1236,18 +1238,21 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float verticalDrag = MathHelper.clamp_float(this.heliInfo.verticalDrag, 0.0F, 1.0F / Math.max(tickDelta, 0.001F));
       this.verticalDragApplied = (float)(-super.motionY * (double)verticalDrag * (double)tickDelta);
       super.motionY += (double)this.verticalDragApplied;
+      float maxClimbRate = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.maxClimbRate, 0.0F, 1000.0F):0.16F;
+      if(maxClimbRate > 0.0F && super.motionY > (double)maxClimbRate) {
+         super.motionY = (double)maxClimbRate;
+      }
       this.finalMotionY = (float)super.motionY;
    }
 
    private void updateNewHelicopterCyclicInput() {
       float pitchInput = 0.0F;
       float rollInput = 0.0F;
-      if(super.throttleUp && !super.throttleDown) {
-         pitchInput = 1.0F;
-      } else if(super.throttleDown && !super.throttleUp) {
-         pitchInput = -1.0F;
-      }
 
+      // In the new helicopter model W/S are collective controls only.
+      // Do not feed them into cyclic pitch, otherwise S creates raw
+      // backward acceleration and gunner/hover paths can manufacture
+      // forward speed from view/control-mode changes.
       if(super.moveRight && !super.moveLeft) {
          rollInput = 1.0F;
       } else if(super.moveLeft && !super.moveRight) {
@@ -1284,7 +1289,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.localDriftRight = 0.0F;
       this.hoverAssistActive = false;
 
-      if(!this.newHeliFlightModelEnabled || !this.isHovering() || this.heliInfo == null) {
+      if(!this.newHeliFlightModelEnabled || !this.isHoveringMode() || this.heliInfo == null) {
          return;
       }
 
@@ -1305,7 +1310,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
       this.targetVerticalSpeed = 0.0F;
       this.targetHorizontalSpeed = 0.0F;
-      this.hoverCollectiveCorrection = MathHelper.clamp_float((this.targetVerticalSpeed - (float)super.motionY) * 0.35F, -0.18F, 0.18F) * assistBlend;
+      this.hoverCollectiveCorrection = MathHelper.clamp_float((this.targetVerticalSpeed - (float)super.motionY) * 0.75F, -0.32F, 0.32F) * assistBlend;
 
       float yawRadians = this.getRotYaw() / 180.0F * 3.1415927F;
       float forwardX = -MathHelper.sin(yawRadians);
@@ -1314,8 +1319,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float rightZ = -MathHelper.sin(yawRadians);
       this.localDriftForward = (float)(super.motionX * (double)forwardX + super.motionZ * (double)forwardZ);
       this.localDriftRight = (float)(super.motionX * (double)rightX + super.motionZ * (double)rightZ);
-      this.hoverCyclicPitchCorrection = MathHelper.clamp_float(-this.localDriftForward * 1.8F, -0.35F, 0.35F) * assistBlend;
-      this.hoverCyclicRollCorrection = MathHelper.clamp_float(-this.localDriftRight * 1.8F, -0.35F, 0.35F) * assistBlend;
+      this.hoverCyclicPitchCorrection = MathHelper.clamp_float(-this.localDriftForward * 3.0F, -0.60F, 0.60F) * assistBlend;
+      this.hoverCyclicRollCorrection = MathHelper.clamp_float(-this.localDriftRight * 3.0F, -0.60F, 0.60F) * assistBlend;
    }
 
    private void applyNewHelicopterCyclicThrust(float tickDelta) {
@@ -1329,8 +1334,18 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float rightZ = -MathHelper.sin(yawRadians);
 
       float horizontalThrustScale = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.horizontalRotorThrustScale, 0.0F, 1000.0F):0.35F;
-      this.rotorHorizontalThrustX = this.rotorThrust * horizontalThrustScale * (this.rotorTiltForward * forwardX + this.rotorTiltRight * rightX);
-      this.rotorHorizontalThrustZ = this.rotorThrust * horizontalThrustScale * (this.rotorTiltForward * forwardZ + this.rotorTiltRight * rightZ);
+      float attitudeTiltForward = MathHelper.clamp_float(MathHelper.sin(this.getRotPitch() / 180.0F * 3.1415927F), -0.75F, 0.75F);
+      float attitudeTiltRight = MathHelper.clamp_float(-MathHelper.sin(this.getRotRoll() / 180.0F * 3.1415927F), -0.75F, 0.75F);
+      float effectiveTiltForward = this.rotorTiltForward + attitudeTiltForward;
+      float effectiveTiltRight = this.rotorTiltRight + attitudeTiltRight;
+      float effectiveTiltMagnitudeSq = effectiveTiltForward * effectiveTiltForward + effectiveTiltRight * effectiveTiltRight;
+      if(effectiveTiltMagnitudeSq > 1.0F) {
+         float invMagnitude = 1.0F / MathHelper.sqrt_float(effectiveTiltMagnitudeSq);
+         effectiveTiltForward *= invMagnitude;
+         effectiveTiltRight *= invMagnitude;
+      }
+      this.rotorHorizontalThrustX = this.rotorThrust * horizontalThrustScale * (effectiveTiltForward * forwardX + effectiveTiltRight * rightX);
+      this.rotorHorizontalThrustZ = this.rotorThrust * horizontalThrustScale * (effectiveTiltForward * forwardZ + effectiveTiltRight * rightZ);
       this.horizontalAccelerationX = this.rotorHorizontalThrustX / mass;
       this.horizontalAccelerationZ = this.rotorHorizontalThrustZ / mass;
       super.motionX += (double)(this.horizontalAccelerationX * tickDelta);
@@ -1454,7 +1469,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       double motion;
       float speedLimit;
       float pitch;
-      if(!this.isHovering()) {
+      boolean applyNewHeliFreeFlight = this.newHeliFlightModelEnabled && super.isGunnerMode && !this.isHoveringMode();
+      if(!this.isHovering() || applyNewHeliFreeFlight) {
          motion = 0.0D;
          if(this.canFloatWater()) {
             motion = this.getWaterDepth();

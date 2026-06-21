@@ -32,9 +32,10 @@ YawDamping = 0.22
 AngularInertia = 0.5
 TranslationalLiftCoefficient = 0.005
 VerticalDrag = 0.021
+MaxClimbRate = 0.13
 ParasiteDrag = 0.021
 HorizontalRotorThrustScale = 0.86
-HoverAssistStrength = 0.25
+HoverAssistStrength = 0.75
 
 Category = sUAS
 
