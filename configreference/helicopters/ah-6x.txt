@@ -28,6 +28,11 @@ VerticalDrag = 0.025
 MaxClimbRate = 0.13
 ParasiteDrag = 0.026
 HorizontalRotorThrustScale = 0.88
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.055
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.35
+HelicopterMaxBackwardSpeedScale = 0.35
 HoverAssistStrength = 0.75
 
 

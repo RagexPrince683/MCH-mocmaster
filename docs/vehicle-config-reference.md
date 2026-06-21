@@ -279,6 +279,11 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `enablefoldblade` | Helicopter | boolean | false | blade folding support |
 | `addrotor` | Helicopter | `bladeNum,bladeRot,x,y,z,rx,ry,rz[,fold]` | none | rotor render/animation |
 | `addrotorold` | Helicopter | same as `addrotor` | none | legacy rotor renderer |
+| `HelicopterLateralThrustScale` | Helicopter | float >= 0 | 0.45 | new-heli-only roll-generated lateral acceleration multiplier |
+| `HelicopterLateralDrag` | Helicopter | float >= 0 | 0.055 | new-heli-only drag on right/left velocity component |
+| `HelicopterMaxLateralSpeedScale` | Helicopter | float >= 0 | 0.45 | new-heli-only cap for lateral speed component |
+| `HelicopterBackwardThrustScale` | Helicopter | float >= 0 | omitted = 1.0 | optional new-heli-only backward thrust scale; omitted preserves prior symmetry |
+| `HelicopterMaxBackwardSpeedScale` | Helicopter | float >= 0 | omitted = 1.0 | optional new-heli-only backward speed cap scale; omitted preserves prior symmetry |
 | `WeightType` | Tank | enum `normal`, `car`, `tank` | `normal`/0 | ground physics weight behavior |
 | `WeightedCenterZ` | Tank | float[-1000..1000] | 0.0 | fore/aft center of weight |
 | `TrackMaxHP` | Tank | int[1..1000000] | 100 | track durability |
