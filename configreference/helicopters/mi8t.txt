@@ -1,6 +1,6 @@
-﻿DisplayName = Mil Mi-8 T Armed
+DisplayName = Mil Mi-8 T Armed
 AddDisplayName = ja_JP, Mil Mi-8 T Armed
-AddDisplayName = en_US, Mi-8 T 
+AddDisplayName = en_US, Mi-8 T
 ItemID = 28831
 MaxHp = 100
 Speed = 1.45
@@ -8,6 +8,25 @@ MaxFuel         = 4110
 FuelConsumption = 0.951
 onGroundPitch = 4.56
 ThirdPersonDist = 20
+
+; New helicopter flight model: heavy transport/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.62
+MainRotorMaxThrust = 0.225
+RotorInertia = 1.64
+RotorSpoolUpRate = 0.021
+RotorSpoolDownRate = 0.029
+CollectiveResponse = 0.075
+CyclicAuthority = 0.65
+TailRotorAuthority = 0.92
+YawDamping = 0.23
+AngularInertia = 1.64
+TranslationalLiftCoefficient = 0.003
+VerticalDrag = 0.03
+ParasiteDrag = 0.042
+HorizontalRotorThrustScale = 0.62
+HoverAssistStrength = 0.15
+
 
 sound = hind
 soundvolume = 15

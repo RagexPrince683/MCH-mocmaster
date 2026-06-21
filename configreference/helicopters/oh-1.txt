@@ -14,7 +14,26 @@ ThrottleUpDown = 1.4
 
 ThirdPersonDist = 20
 
-Sound = littlebird 
+; New helicopter flight model: light scout/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.82
+MainRotorMaxThrust = 0.236
+RotorInertia = 0.92
+RotorSpoolUpRate = 0.027
+RotorSpoolDownRate = 0.035
+CollectiveResponse = 0.1
+CyclicAuthority = 0.86
+TailRotorAuthority = 1.03
+YawDamping = 0.18
+AngularInertia = 0.94
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.025
+ParasiteDrag = 0.027
+HorizontalRotorThrustScale = 0.86
+HoverAssistStrength = 0.22
+
+
+Sound = littlebird
 Soundvolume = 15
 
 ; M = Military(軍用機).  R = Reconnaissance(偵察機)

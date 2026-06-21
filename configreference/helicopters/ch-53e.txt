@@ -17,6 +17,25 @@ FuelConsumption = 3.542
 CameraPosition = 1.52, 0.46, 1.55
 ThirdPersonDist = 20
 
+; New helicopter flight model: heavy transport/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 2.2
+MainRotorMaxThrust = 0.262
+RotorInertia = 2.1
+RotorSpoolUpRate = 0.019
+RotorSpoolDownRate = 0.027
+CollectiveResponse = 0.07
+CyclicAuthority = 0.58
+TailRotorAuthority = 0.84
+YawDamping = 0.25
+AngularInertia = 2.2
+TranslationalLiftCoefficient = 0.003
+VerticalDrag = 0.034
+ParasiteDrag = 0.05
+HorizontalRotorThrustScale = 0.57
+HoverAssistStrength = 0.13
+
+
 sound = stallion
 soundvolume = 15
 

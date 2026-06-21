@@ -1,4 +1,4 @@
-﻿DisplayName = Boeing Vertol CH-46
+DisplayName = Boeing Vertol CH-46
 AddDisplayName = en_US, Boeing Vertol CH-46
 AddDisplayName = ja_JP, ボーイング・バートル CH-46
 ItemID = 28811
@@ -15,6 +15,25 @@ Float = true
 FloatOffset = -0.93
 EnableFoldBlade = true
 ThirdPersonDist = 20
+
+; New helicopter flight model: heavy transport/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.58
+MainRotorMaxThrust = 0.22
+RotorInertia = 1.62
+RotorSpoolUpRate = 0.021
+RotorSpoolDownRate = 0.029
+CollectiveResponse = 0.075
+CyclicAuthority = 0.66
+TailRotorAuthority = 0.92
+YawDamping = 0.23
+AngularInertia = 1.62
+TranslationalLiftCoefficient = 0.003
+VerticalDrag = 0.03
+ParasiteDrag = 0.042
+HorizontalRotorThrustScale = 0.62
+HoverAssistStrength = 0.15
+
 
 ; M = Military(軍用機).  M = Multi-Mission(多目的機)
 Category = TH
@@ -36,7 +55,7 @@ MobilityRoll = 0.7
 
 
 
-AddPartHatch = 0.00, 0.53, -5.79, -1.0, 0.0, 0.0, 50 
+AddPartHatch = 0.00, 0.53, -5.79, -1.0, 0.0, 0.0, 50
 AddPartHatch = 0.00, 2.84, -8.93, 1, 0,0, -10
 
 AddRotor = 3, 120, 0.0,  3.77, 4.38,  0.0, 1.0, 0.0, true

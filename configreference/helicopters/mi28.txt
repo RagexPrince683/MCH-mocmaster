@@ -13,6 +13,25 @@ MaxFuel         = 3800
 FuelConsumption = 1.056
 ThirdPersonDist = 20
 
+; New helicopter flight model: medium utility/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.3
+MainRotorMaxThrust = 0.292
+RotorInertia = 1.34
+RotorSpoolUpRate = 0.024
+RotorSpoolDownRate = 0.032
+CollectiveResponse = 0.08
+CyclicAuthority = 0.76
+TailRotorAuthority = 1
+YawDamping = 0.2
+AngularInertia = 1.36
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.027
+ParasiteDrag = 0.037
+HorizontalRotorThrustScale = 0.62
+HoverAssistStrength = 0.18
+
+
 
 HUD = heli, heli_gnr
 

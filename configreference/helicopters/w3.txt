@@ -9,6 +9,25 @@ FlareType = 3
 CameraPosition = 0.0, 1.1, 4.8
 ThirdPersonDist = 16
 
+; New helicopter flight model: medium utility/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.2
+MainRotorMaxThrust = 0.28
+RotorInertia = 1.25
+RotorSpoolUpRate = 0.024
+RotorSpoolDownRate = 0.032
+CollectiveResponse = 0.085
+CyclicAuthority = 0.78
+TailRotorAuthority = 1.02
+YawDamping = 0.2
+AngularInertia = 1.25
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.026
+ParasiteDrag = 0.035
+HorizontalRotorThrustScale = 0.65
+HoverAssistStrength = 0.18
+
+
 
 sound = pzl
 soundvolume = 15

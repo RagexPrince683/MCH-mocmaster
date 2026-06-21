@@ -18,6 +18,25 @@ sound = eurocoptertiger
 soundvolume = 15
 
 ; M = Military(軍用機).  A = Attacker(攻撃機)
+
+; New helicopter flight model: light scout/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.98
+MainRotorMaxThrust = 0.262
+RotorInertia = 1.06
+RotorSpoolUpRate = 0.026
+RotorSpoolDownRate = 0.034
+CollectiveResponse = 0.09
+CyclicAuthority = 0.82
+TailRotorAuthority = 1.01
+YawDamping = 0.18
+AngularInertia = 1.08
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.026
+ParasiteDrag = 0.031
+HorizontalRotorThrustScale = 0.78
+HoverAssistStrength = 0.2
+
 Category = AH/ATH
 
 HUD = heli, heli_gnr

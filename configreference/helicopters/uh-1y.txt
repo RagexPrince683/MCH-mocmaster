@@ -15,6 +15,25 @@ MaxFuel         = 2150
 FuelConsumption = 0.597
 ThirdPersonDist = 20
 
+; New helicopter flight model: medium utility/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.12
+MainRotorMaxThrust = 0.272
+RotorInertia = 1.18
+RotorSpoolUpRate = 0.025
+RotorSpoolDownRate = 0.033
+CollectiveResponse = 0.085
+CyclicAuthority = 0.78
+TailRotorAuthority = 1.02
+YawDamping = 0.2
+AngularInertia = 1.18
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.026
+ParasiteDrag = 0.034
+HorizontalRotorThrustScale = 0.66
+HoverAssistStrength = 0.19
+
+
 ; M = Military(軍用機).  M = Multi-Mission(多目的機)
 Category = UH
 

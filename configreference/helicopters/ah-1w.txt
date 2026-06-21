@@ -1,4 +1,4 @@
-﻿DisplayName = AH-1W Super Cobra
+DisplayName = AH-1W Super Cobra
 AddDisplayName = en_US, AH-1W Super Cobra
 AddDisplayName = ja_JP, AH-1W スーパーコブラ
 ItemID = 28824
@@ -14,6 +14,25 @@ Sound = r44_heli
 soundpitch = 1.45
 soundvolume = 15
 ThirdPersonDist = 20
+
+; New helicopter flight model: light scout/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.98
+MainRotorMaxThrust = 0.258
+RotorInertia = 1.06
+RotorSpoolUpRate = 0.026
+RotorSpoolDownRate = 0.034
+CollectiveResponse = 0.09
+CyclicAuthority = 0.81
+TailRotorAuthority = 1
+YawDamping = 0.19
+AngularInertia = 1.08
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.026
+ParasiteDrag = 0.031
+HorizontalRotorThrustScale = 0.76
+HoverAssistStrength = 0.2
+
 
 
 ; M = Military(軍用機).  A = Attacker(攻撃機)

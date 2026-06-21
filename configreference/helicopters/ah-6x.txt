@@ -11,6 +11,25 @@ MaxFuel         = 410
 FuelConsumption = 0.228
 ThirdPersonDist = 20
 
+; New helicopter flight model: light scout/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.78
+MainRotorMaxThrust = 0.23
+RotorInertia = 0.88
+RotorSpoolUpRate = 0.027
+RotorSpoolDownRate = 0.034
+CollectiveResponse = 0.1
+CyclicAuthority = 0.87
+TailRotorAuthority = 1.04
+YawDamping = 0.18
+AngularInertia = 0.88
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.025
+ParasiteDrag = 0.026
+HorizontalRotorThrustScale = 0.88
+HoverAssistStrength = 0.22
+
+
 Sound = littlebird
 Soundvolume = 15
 
@@ -61,7 +80,7 @@ BoundingBox =  0.0, 1.7, -0.5,  2.4, 2.5
 
 BoundingBox =  0.0, 1.7, -1.5,  2.0, 2.0
 
-BoundingBox = 0.0, 2.8, 0.0, 1.0, 1.5, 1.5 
+BoundingBox = 0.0, 2.8, 0.0, 1.0, 1.5, 1.5
 
 BoundingBox = 0.0, 1.96, -2.83, 1.0, 1.0
 BoundingBox = 0.0, 1.96, -3.83, 1.0, 1.0

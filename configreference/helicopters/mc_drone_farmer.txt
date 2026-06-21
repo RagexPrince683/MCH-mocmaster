@@ -1,4 +1,4 @@
-﻿DisplayName = DJI Phantom Farming UAV
+DisplayName = DJI Phantom Farming UAV
 AddDisplayName = en_US, DJI Phantom Farming UAV
 AddDisplayName = ja_JP, 農業用RCドローンUAV
 
@@ -24,6 +24,25 @@ MobilityRoll = 1.4
 HUD = heli
 
 ; C = Civilian(民間機)
+
+; New helicopter flight model: special case / unusual rotorcraft baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.38
+MainRotorMaxThrust = 0.142
+RotorInertia = 0.48
+RotorSpoolUpRate = 0.038
+RotorSpoolDownRate = 0.048
+CollectiveResponse = 0.13
+CyclicAuthority = 0.88
+TailRotorAuthority = 1.08
+YawDamping = 0.23
+AngularInertia = 0.44
+TranslationalLiftCoefficient = 0.005
+VerticalDrag = 0.02
+ParasiteDrag = 0.021
+HorizontalRotorThrustScale = 0.84
+HoverAssistStrength = 0.26
+
 Category = UAS
 
 

@@ -12,6 +12,25 @@ MaxFuel         = 1270
 FuelConsumption = 0.529
 ThirdPersonDist = 20
 
+; New helicopter flight model: light scout/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 1.02
+MainRotorMaxThrust = 0.266
+RotorInertia = 1.1
+RotorSpoolUpRate = 0.026
+RotorSpoolDownRate = 0.034
+CollectiveResponse = 0.09
+CyclicAuthority = 0.8
+TailRotorAuthority = 1
+YawDamping = 0.19
+AngularInertia = 1.12
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.026
+ParasiteDrag = 0.032
+HorizontalRotorThrustScale = 0.75
+HoverAssistStrength = 0.2
+
+
 Sound = r44_heli
 soundpitch = 1.45
 soundvolume = 15
