@@ -2853,9 +2853,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       boolean levelOff = super.isGunnerMode;
       MCP_PlaneInfo serverPlaneInfo = this.getPlaneInfo();
       boolean hasNewFlightPlaneInfo = this.useNewMobilitySystem() && serverPlaneInfo != null;
-      boolean useIntegratedNewFlightForces = hasNewFlightPlaneInfo
-            && this.getNozzleRotation() <= 0.01F;
-      boolean integratedNewFlightForcesApplied = false;
       if(dp == 0.0D) {
          // If this is a target UAV with enough fuel and not destroyed, executes the following code
          if (this.isTargetDrone() && this.canUseFuel() && !this.isDestroyed()) {
@@ -2899,10 +2896,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
 
          if(!levelOff) {
-            if(useIntegratedNewFlightForces) {
-               this.applyNewFlightIntegratedForces(levelOff, dp);
-               integratedNewFlightForcesApplied = true;
-            } else if(hasNewFlightPlaneInfo) {
+            if(hasNewFlightPlaneInfo) {
                this.applyNewFlightVerticalForces();
             } else {
                super.motionY += 0.04D + (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
@@ -3061,10 +3055,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // Apply a deliberately simple energy model only to conventional airborne flight.
       // Velocity direction carries the gained/lost energy, while bank and body rates
       // cheaply approximate induced and control-surface drag during hard manoeuvres.
-      if(!integratedNewFlightForcesApplied) {
-         this.lastAerodynamicDrag = 0.0D;
-      }
-      if(hasNewFlightPlaneInfo && !integratedNewFlightForcesApplied && dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F && !levelOff) {
+      this.lastAerodynamicDrag = 0.0D;
+      if(hasNewFlightPlaneInfo && dp == 0.0D && !super.onGround && this.getNozzleRotation() <= 0.01F && !levelOff) {
          double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
          double bankLoad = MCH_FlightModel.clamp(MathHelper.abs(this.getRotRoll()) / 75.0D, 0.0D, 1.0D);
          double bodyRate = (MathHelper.abs(this.pitchAngularVelocity) + MathHelper.abs(this.rollAngularVelocity)
@@ -3118,6 +3110,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          double derivedDiveGain = (float)MCH_FlightModel.clamp(gravityAccel * 0.22D + this.getPlaneInfo().baseDrag, 0.0D, 0.25D);
          double energyChange = MCH_FlightModel.getVerticalEnergyChange(super.motionY,
                (float)derivedClimbLoss, (float)derivedDiveGain) / mass;
+         Vec3 noseForward = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
+         double diveGravityProjection = MCH_FlightModel.clamp(-noseForward.yCoord, 0.0D, 1.0D)
+               * MCH_FlightModel.clamp(-super.motionY / 0.35D, 0.0D, 1.0D);
+         energyChange += gravityAccel * 0.12D * diveGravityProjection
+               * MCH_FlightModel.clamp(1.0D - this.stallSeverity * 0.65D, 0.25D, 1.0D);
          double targetSpeed = Math.max(0.0D, horizontalSpeed * (1.0D - drag) + energyChange);
 
          if(horizontalSpeed > 1.0E-4D) {
