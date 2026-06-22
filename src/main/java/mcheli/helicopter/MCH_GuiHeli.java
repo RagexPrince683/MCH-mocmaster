@@ -14,8 +14,6 @@ import mcheli.aircraft.MCH_BaseVehicleCommonGui;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_HudShared;
 import mcheli.gui.MCH_Gui;
-import mcheli.helicopter.MCH_EntityHeli;
-import mcheli.helicopter.MCH_HeliInfo;
 import mcheli.weapon.MCH_EntityTvMissile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -71,8 +69,7 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
                }
 
                if(seatID == 0) {
-                  this.drawNewHeliSharedHud(heli, player);
-                  this.drawNewHeliControlHud(heli);
+                  this.drawNewHeliSharedHud(heli);
                   this.drawNewHeliHealthHud(heli);
                   this.drawNewHeliRadarHud(heli);
                   this.drawNewHeliWeaponHud(heli, player);
@@ -105,30 +102,20 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       }
    }
 
-   private void drawNewHeliControlHud(MCH_EntityHeli heli) {
-      MCH_HeliInfo info = heli.getHeliInfo();
-      if(info == null || !heli.isNewHeliFlightModelEnabled() || !info.newHeliControlHudDisplay) {
-         return;
-      }
-
-      int color = -14101432; // 0xFF28D448: existing heli HUD green.
-      int x = super.centerX - 205;
-      int y = super.centerY + 70;
-      if(heli.isHoverAssistActive()) {
-         this.drawString("SAS   ON", x, y, color);
-      }
-   }
-
-   private void drawNewHeliSharedHud(MCH_EntityHeli heli, EntityPlayer player) {
+   private void drawNewHeliSharedHud(MCH_EntityHeli heli) {
       if(!this.shouldDrawNewHeliHudAdditions(heli) || !MCH_Config.EnableNewHeliHudSharedReadouts.prmBool) {
          return;
       }
 
+      MCH_HeliInfo info = heli.getHeliInfo();
       List lines = new ArrayList();
       lines.add(MCH_HudShared.formatSpeedKmh(heli));
       lines.add(MCH_HudShared.formatAltitude(heli));
       lines.add(MCH_HudShared.formatVerticalSpeed(heli));
       lines.add(String.format("PWR   %3d%%", new Object[]{Integer.valueOf(this.toPercent(heli.getEnginePowerOutput()))}));
+      if(info != null && info.newHeliControlHudDisplay && heli.isHoverAssistActive()) {
+         lines.add("SAS   ON");
+      }
       lines.add(MCH_HudShared.formatFuelMinutes(heli));
       int color = -14101432;
       int x = super.centerX - 205;
@@ -189,56 +176,6 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
          }
       }
       this.drawPoints(drawPoints, color, MCH_Gui.scaleFactor * 2);
-   }
-
-   private void drawNewHeliWeaponHud(MCH_EntityHeli heli, EntityPlayer player) {
-      if(!this.shouldDrawNewHeliHudAdditions(heli) || !MCH_Config.EnableNewHeliWeaponHud.prmBool) {
-         return;
-      }
-      int x = super.centerX + 120;
-      int y = super.centerY - 15;
-      int maxTextWidth = Math.max(90, super.width - x - 8);
-      List lines = MCH_HudShared.collectWeaponAmmoLines(heli, super.mc, maxTextWidth, true, heli.getCurrentWeaponID(player));
-      if(lines.isEmpty()) {
-         return;
-      }
-      for(int i = 0; i < lines.size(); ++i) {
-         this.drawNewHeliHudText((String)lines.get(i), x, y + i * 10, -14101432, 0x5528D448);
-      }
-   }
-
-   private boolean shouldDrawNewHeliHudAdditions(MCH_EntityHeli heli) {
-      MCH_HeliInfo info = heli.getHeliInfo();
-      return info != null && heli.isNewHeliFlightModelEnabled() && !heli.isDestroyed();
-   }
-
-   private void drawNewHeliHudText(String text, int x, int y, int color, int glowColor) {
-      if(this.isVehicleHudGlowEnabled()) {
-         this.drawString(text, x + 1, y + 1, glowColor);
-      }
-      this.drawString(text, x, y, color);
-   }
-
-   private boolean isVehicleHudGlowEnabled() {
-      return MCH_Config.EnableNewVehicleHudGlow != null ? MCH_Config.EnableNewVehicleHudGlow.prmBool : MCH_Config.EnableNewPlaneHudGlow.prmBool;
-   }
-
-   private void drawNewHeliSharedHud(MCH_EntityHeli heli, EntityPlayer player) {
-      if(!this.shouldDrawNewHeliHudAdditions(heli) || !MCH_Config.EnableNewHeliHudSharedReadouts.prmBool) {
-         return;
-      }
-
-      List lines = new ArrayList();
-      lines.add(MCH_HudShared.formatSpeedKmh(heli));
-      lines.add(MCH_HudShared.formatAltitude(heli));
-      lines.add(MCH_HudShared.formatVerticalSpeed(heli));
-      lines.add(MCH_HudShared.formatFuelMinutes(heli));
-      int color = -14101432;
-      int x = super.centerX - 200;
-      int y = super.centerY + 55;
-      for(int i = 0; i < lines.size(); ++i) {
-         this.drawNewHeliHudText((String)lines.get(i), x, y + i * 10, color, 0x5528D448);
-      }
    }
 
    private void drawNewHeliWeaponHud(MCH_EntityHeli heli, EntityPlayer player) {
