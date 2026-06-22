@@ -9,6 +9,7 @@ import mcheli.MCH_KeyName;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_BaseVehicleCommonGui;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
+import mcheli.aircraft.MCH_HudShared;
 import mcheli.gui.MCH_Gui;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_PlaneInfo;
@@ -99,12 +100,12 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
    private void drawNewPlaneSimpleHud(MCP_EntityPlane plane) {
       List lines = new ArrayList();
-      lines.add(this.formatSimpleHudThrottle(plane));
-      lines.add(this.formatSimpleHudSpeed(plane));
-      lines.add(this.formatSimpleHudAltitude(plane));
-      lines.add(this.formatSimpleHudVerticalSpeed(plane));
-      lines.add(this.formatSimpleHudFuel(plane));
-      lines.add(this.formatSimpleHudDamage(plane));
+      lines.add(MCH_HudShared.formatThrottleOrCollective("THR  ", plane));
+      lines.add(MCH_HudShared.formatSpeedKmh(plane));
+      lines.add(MCH_HudShared.formatAltitude(plane));
+      lines.add(MCH_HudShared.formatVerticalSpeed(plane));
+      lines.add(MCH_HudShared.formatFuelMinutes(plane));
+      lines.add(MCH_HudShared.formatDamagePercent(plane));
       lines.add(this.formatSimpleHudGLoad(plane));
       lines.add(this.formatSimpleHudAoA(plane));
 
@@ -127,18 +128,13 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    }
 
 
-   private String formatSimpleHudSpeed(MCP_EntityPlane plane) {
-      double speedKmh = Math.sqrt(plane.motionX * plane.motionX + plane.motionY * plane.motionY + plane.motionZ * plane.motionZ) * 72.0D;
-      return String.format("SPD   %d km/h", new Object[]{Integer.valueOf(Math.max(0, (int)Math.round(speedKmh)))});
-   }
-
    private String formatSimpleHudVerticalSpeed(MCP_EntityPlane plane) {
       double vs = plane.motionY * 20.0D;
       return String.format("VS    %+d m/s", new Object[]{Integer.valueOf((int)Math.round(vs))});
    }
 
    private String formatSimpleHudDamage(MCP_EntityPlane plane) {
-      return String.format("DMG   %d%%", new Object[]{Integer.valueOf(this.getDamagePercent(plane))});
+      return String.format("DMG   %d%%", new Object[]{Integer.valueOf(MCH_HudShared.getDamagePercent(plane))});
    }
 
    private String formatSimpleHudGLoad(MCP_EntityPlane plane) {
@@ -172,7 +168,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       if(plane.getMaxFuel() > 0 && plane.getFuelP() < 0.10F && !plane.isInfinityFuel(plane.getRiddenByEntity(), true)) {
          warnings.add("LOW FUEL");
       }
-      int dmg = this.getDamagePercent(plane);
+      int dmg = MCH_HudShared.getDamagePercent(plane);
       if(dmg < 25) {
          warnings.add("CRITICAL DAMAGE");
       } else if(dmg < 50) {
@@ -220,7 +216,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       int leftMargin = 12;
       int rightMargin = Math.max(24, MCH_Config.NewPlaneWeaponHudRightMargin.prmInt);
       int maxTextWidth = Math.max(80, super.width - leftMargin - rightMargin - 8);
-      List lines = this.collectWeaponAmmoLines(plane, maxTextWidth);
+      List lines = MCH_HudShared.collectWeaponAmmoLines(plane, super.mc, maxTextWidth, false, -1);
       if(lines.isEmpty()) {
          return;
       }
@@ -287,14 +283,14 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    }
 
    private void drawHudText(String text, int x, int y, int color, int glowColor) {
-      if(MCH_Config.EnableNewPlaneHudGlow.prmBool) {
+      if(this.isVehicleHudGlowEnabled()) {
          this.drawString(text, x + 1, y + 1, glowColor);
       }
       this.drawString(text, x, y, color);
    }
 
    private void drawHudPanel(int x, int y, int width, int height) {
-      if(MCH_Config.EnableNewPlaneHudGlow.prmBool) {
+      if(this.isVehicleHudGlowEnabled()) {
          GL11.glPushMatrix();
          boolean blend = GL11.glIsEnabled(3042);
          int srcBlend = GL11.glGetInteger(3041);
@@ -308,6 +304,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          }
          GL11.glPopMatrix();
       }
+   }
+
+   private boolean isVehicleHudGlowEnabled() {
+      return MCH_Config.EnableNewVehicleHudGlow != null ? MCH_Config.EnableNewVehicleHudGlow.prmBool : MCH_Config.EnableNewPlaneHudGlow.prmBool;
    }
 
    private void drawNewFlightThrottleHud(MCP_EntityPlane plane) {
