@@ -6,15 +6,58 @@ The mod is intended for players, modpack authors, and server administrators who 
 
 > **Project status:** active fork/overhaul of the original MCHeli lineage. The codebase targets Minecraft **1.7.10** and Forge **10.13.4.1614** for builds, while declaring compatibility with Forge **10.13.2.1230 or newer**.
 
-## What the mod adds
+## What MCHeli Overdrive provides today
 
-- **Aircraft and vehicles:** helicopters, fixed-wing planes, tanks, ships, and ground vehicles loaded from MCHeli-style asset/config packs.
-- **Combat systems:** bullets, rockets, bombs, torpedoes, anti-air/anti-surface/anti-tank missiles, target markers, flares, chaff, APS/maintenance hooks, and damage multipliers.
-- **Portable equipment:** GLTD target designator, FIM-92 Stinger, FGM-148 Javelin, RPG-7, wrench, rangefinder, parachute, tow chain, containers, UAV stations, and gunner spawn items.
-- **Drafting table workflow:** a dedicated Drafting Table block for vehicle/item crafting recipes.
-- **Multiplayer tools:** team/scoreboard UI hooks, entity markers, server reconfiguration, mod-list/screenshot requests, and administrative entity utilities.
-- **Client rendering options:** long-distance vehicle LOD snapshots, shader toggle, smooth shading, render-distance weighting, configurable HUD behavior, and optional multi-threaded model loading.
-- **Server controls:** block-destruction rules, collision damage, recipe toggles, item/block IDs, command permissions, creative-tab icons, global speed multipliers, and keybind defaults.
+MCHeli Overdrive+ is a combined-arms vehicle, weapon, and warfare framework for Minecraft 1.7.10. It is not just a repackaged original MCHeli fork: it adds a much larger content/configuration surface, new opt-in physics systems, naval and submarine gameplay, large-scale rendering support, survival-oriented crafting hooks, HBM Nuclear Tech integration points, and server-owner controls for faction and warfare modpacks.
+
+### Content expansion
+
+- **Expanded vehicle roster:** the repository's `configreference/` set alone contains hundreds of vehicle definitions across planes, helicopters, ships, tanks, and ground/static vehicles, and the loader remains compatible with larger external MCHeli-style content packs.
+- **More vehicle roles:** Overdrive supports modern and legacy fixed-wing aircraft, helicopters, drones/UAVs, gunships, bombers, transports, naval vessels, submarines, armored vehicles, civilian/support vehicles, turrets, carriers, and logistics platforms.
+- **Expanded pack-maker framework:** content authors can mix legacy MCHeli behavior with new Overdrive systems per vehicle rather than converting a whole pack at once.
+
+### Weapons and combat
+
+- **Large weapon-definition support:** Overdrive keeps MCHeli's data-driven weapon model for large content packs, including weapon libraries that can scale to hundreds or thousands of definitions, and expands combat roles for anti-air, anti-armor, anti-ship, close-air-support, torpedo, guided-weapon, bomb, rocket, cannon, dispenser, chemical/nuclear-compatible, and support-equipment loadouts.
+- **Missile and warning systems:** radar/RWR identity fields, lock-on warning logic, missile guidance behavior, multipath/lock tuning, lockable entity synchronization, and vehicle naming fields support richer air-combat and radar gameplay.
+- **Countermeasures and protection:** flares and chaff are distinct systems, while active protection system (APS), maintenance, collision damage, damage factors, and armor configuration expand vehicle survivability and defensive roles.
+
+### Naval warfare
+
+- **Walkable moving ships:** large ships can use their collision/extra bounding boxes as moving deck surfaces, letting players stand on and move with ships.
+- **Aircraft carrier operations:** carrier-style rack slots, `RideRack` compatibility, aircraft attachment/parking, launch assistance, and temporary launch no-collision grace support deck operations.
+- **Submarine behavior:** ship-based submarine mode supports diving, underwater ascend/descend controls, bounded vertical acceleration, depth-control HUD prompts, and normal ship behavior when diving is off.
+
+### Nuclear warfare and HBM integration
+
+- **HBM Nuclear Tech compatibility hooks:** Overdrive contains reflection-based integration for HBM nuclear explosions, mushroom-cloud effects, HBM `ExplosionNT`, and chemical cloud effects when supported content and HBM classes are present.
+- **Strategic delivery support:** nuclear-capable weapon configs and vehicle references support strategic bombers, missile launchers, artillery-style nuclear payloads, and server-scale warfare scenarios in HBM-focused packs.
+- **Optional integration:** HBM support is compatibility-oriented; non-HBM packs can still use normal MCHeli/Overdrive weapon behavior.
+
+### Vehicle physics
+
+- **New aircraft systems:** fixed-wing aircraft can opt into the new flight model with stall and angle-of-attack simulation, control-authority modeling, aircraft mass and thrust simulation, configurable gravity, energy retention, drag, overspeed damage, dive behavior, flight ceilings, and combat flaps.
+- **New helicopter system:** helicopters can opt into the new helicopter flight model with collective controls, rotor thrust and RPM modeling, cyclic/tail-rotor authority, configurable climb performance, lateral/backward thrust tuning, hover assist, and explicit hover-mode stabilization.
+- **Legacy compatibility:** vehicles that do not opt into new mobility systems continue using legacy MCHeli behavior.
+
+### Rendering, performance, and multiplayer scale
+
+- **Vehicle LOD system:** server-to-client vehicle snapshots allow long-distance model-only rendering for aircraft, ships, tanks, and turrets without spawning fake client entities.
+- **Rendering improvements:** distance-based model optimization, shader/smooth-shading toggles, render-distance weighting, third-person HUD controls, and optional multi-threaded model loading improve large-pack and large-battlefield usability.
+- **Synchronization improvements:** entity-info sync, NewUAV persistence/duplicate protection, rack/seat repair paths, and server-side configuration packets improve multiplayer reliability.
+
+### Progression, crafting, and compatibility
+
+- **Expanded crafting framework:** the Drafting Table supports shaped and shapeless recipes, OreDictionary recipes, server-side recipe validation, and recipe display fixes for ore recipes.
+- **Industrialized pack support:** item definitions can register OreDictionary names, and vehicle/weapon recipes can consume ore alternatives, allowing integration with survival, industrial, faction, and warfare progression systems.
+- **Server-owner flexibility:** placement restrictions, terrain damage, collision damage, recipes, command permissions, creative-tab icons, speed multipliers, infinite ammo/fuel, and compatibility lists are exposed through configuration.
+
+### Camera, controls, HUD, and interface
+
+- **Pilot usability:** new-flight planes can use a modern third-person chase camera, improved freelook behavior, held look-ahead, new rack controls, submarine depth controls, and updated mouse/flight-sim control options. Aircraft follow-camera improvements and mouse-aim controls are currently in development and under active refinement; they are configurable, disabled by default where appropriate, and documented with their current limitations.
+- **New HUD systems:** opted-in aircraft expose compact pilot telemetry, throttle/engine indicators, altitude/speed readouts, flight-state warnings, hover-assist state, damage readouts, and weapon/ammunition displays while preserving legacy HUD definitions for existing content.
+
+For a detailed project-wide audit of Overdrive-only systems, see [Overdrive Feature Overview](docs/overdrive-features.md).
 
 ## Requirements and compatibility
 
@@ -71,6 +114,7 @@ For development asset testing, the build/run setup expects assets in `build/run/
 See the extended documentation for step-by-step guides:
 
 - [Getting Started Guide](docs/getting-started.md)
+- [Overdrive Feature Overview](docs/overdrive-features.md)
 - [Configuration Reference](docs/configuration.md)
 - [Command and Permission Reference](docs/commands.md)
 - [Server Administration Guide](docs/server-administration.md)
@@ -141,7 +185,7 @@ If this project has an official Discord, Modrinth page, wiki, or current GitHub 
 
 ## Screenshots
 
-Screenshots are not currently stored in this repository. Suggested placeholders for future documentation:
+Screenshots are not currently stored in this repository. Suggested screenshot topics for later documentation updates:
 
 - Vehicle selection in creative tabs
 - Drafting Table recipe screen

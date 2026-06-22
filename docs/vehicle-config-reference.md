@@ -235,7 +235,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `NewFlightLowThrottleLiftRetention` | Plane | float[0..1] | 0.700 | new-flight-only lift/support retained at idle |
 | `NewFlightThrottleControlAuthorityScale` | Plane | float[0..1] | 0.10 | new-flight-only idle control-authority penalty |
 | `NewFlightThrottleHudDisplay` | Plane | boolean | true | show `THR 0-100%` for new-flight pilots |
-| `EnableMouseAimControls` | Global/client | boolean | false | experimental mouse-follow controls for new-flight planes only; not currently per-plane |
+| `EnableMouseAimControls` | Global/client | boolean | false | currently in-development mouse-follow controls for new-flight planes only; not currently per-plane |
 | `MouseAimSensitivity` | Global/client | float | 0.18 | raw mouse movement to desired aim yaw/pitch scale |
 | `MouseAimSmoothing` | Global/client | float | 0.30 | desired aim smoothing to avoid jitter |
 | `MouseAimMaxPitchUp` / `MouseAimMaxPitchDown` | Global/client | degrees | 70 / 55 | desired aim pitch clamps |
