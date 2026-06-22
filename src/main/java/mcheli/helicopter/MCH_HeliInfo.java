@@ -66,6 +66,8 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
    public float hoverThrottleBiasLimit;
    /** Ticks to wait after each hover throttle adjustment before applying another. */
    public int hoverVerticalAdjustmentInterval;
+   /** Minimum throttle held by new-heli hover mode to prevent unrecoverable sink. */
+   public float hoverMinimumThrottle;
    /** Show compact player-power readout to pilots using the new helicopter flight model. */
    public boolean newHeliControlHudDisplay;
    public List rotorList;
@@ -101,7 +103,8 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
       this.hoverVerticalStabilizerStrength = 0.08F;
       this.hoverVerticalCorrectionLimit = 0.0025F;
       this.hoverThrottleBiasLimit = 0.08F;
-      this.hoverVerticalAdjustmentInterval = 6;
+      this.hoverVerticalAdjustmentInterval = 40;
+      this.hoverMinimumThrottle = 0.65F;
       this.newHeliControlHudDisplay = true;
       this.rotorList = new ArrayList();
       super.minRotationPitch = -20.0F;
@@ -193,6 +196,8 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
          this.hoverThrottleBiasLimit = this.toFloat(data, 0.0F, 1.0F);
       } else if(item.equalsIgnoreCase("HoverVerticalAdjustmentInterval")) {
          this.hoverVerticalAdjustmentInterval = this.toInt(data, 0, 200);
+      } else if(item.equalsIgnoreCase("HoverMinimumThrottle")) {
+         this.hoverMinimumThrottle = this.toFloat(data, 0.0F, 1.0F);
       } else if(item.equalsIgnoreCase("NewHeliControlHudDisplay") || item.equalsIgnoreCase("NewHelicopterControlHudDisplay")) {
          this.newHeliControlHudDisplay = this.toBool(data);
       } else if(item.compareTo("addrotor") == 0 || item.compareTo("addrotorold") == 0) {
