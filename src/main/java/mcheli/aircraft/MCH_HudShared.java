@@ -38,8 +38,12 @@ public final class MCH_HudShared {
       return String.format("ALT   %d m", new Object[]{Integer.valueOf(Math.max(0, (int)Math.round(ac.posY)))});
    }
 
+   public static double getVerticalSpeedMotionY(MCH_EntityBaseVehicle ac) {
+      return ac != null?ac.motionY:0.0D;
+   }
+
    public static String formatVerticalSpeed(MCH_EntityBaseVehicle ac) {
-      return String.format("VS    %+d m/s", new Object[]{Integer.valueOf((int)Math.round(ac.motionY * 20.0D))});
+      return String.format("VS    %+d m/s", new Object[]{Integer.valueOf((int)Math.round(getVerticalSpeedMotionY(ac) * 20.0D))});
    }
 
    public static String formatFuelMinutes(MCH_EntityBaseVehicle ac) {

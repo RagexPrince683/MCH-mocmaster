@@ -240,22 +240,6 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       return MCH_Config.EnableNewVehicleHudGlow != null ? MCH_Config.EnableNewVehicleHudGlow.prmBool : MCH_Config.EnableNewPlaneHudGlow.prmBool;
    }
 
-   private boolean shouldDrawNewHeliHudAdditions(MCH_EntityHeli heli) {
-      MCH_HeliInfo info = heli.getHeliInfo();
-      return info != null && heli.isNewHeliFlightModelEnabled() && !heli.isDestroyed();
-   }
-
-   private void drawNewHeliHudText(String text, int x, int y, int color, int glowColor) {
-      if(this.isVehicleHudGlowEnabled()) {
-         this.drawString(text, x + 1, y + 1, glowColor);
-      }
-      this.drawString(text, x, y, color);
-   }
-
-   private boolean isVehicleHudGlowEnabled() {
-      return MCH_Config.EnableNewVehicleHudGlow != null ? MCH_Config.EnableNewVehicleHudGlow.prmBool : MCH_Config.EnableNewPlaneHudGlow.prmBool;
-   }
-
    private int toPercent(float value) {
       return Math.round(MathHelper.clamp_float(value, 0.0F, 1.0F) * 100.0F);
    }
