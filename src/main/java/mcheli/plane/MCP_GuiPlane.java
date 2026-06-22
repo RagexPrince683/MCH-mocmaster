@@ -50,10 +50,12 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
                }
             }
 
-            if(seatID == 0 && plane.getIsGunnerMode(player)) {
-               this.drawHud(ac, player, 1);
-            } else {
-               this.drawHud(ac, player, seatID);
+            if(!this.shouldDrawNewPlaneSimpleHud(plane, seatID)) {
+               if(seatID == 0 && plane.getIsGunnerMode(player)) {
+                  this.drawHud(ac, player, 1);
+               } else {
+                  this.drawHud(ac, player, seatID);
+               }
             }
          }
 
@@ -67,7 +69,11 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             }
 
             if(seatID == 0) {
-               this.drawNewFlightThrottleHud(plane);
+               if(this.shouldDrawNewPlaneSimpleHud(plane, seatID)) {
+                  this.drawNewPlaneSimpleHud(plane);
+               } else {
+                  this.drawNewFlightThrottleHud(plane);
+               }
             }
 
             if(plane.getTVMissile() != null && (plane.getIsGunnerMode(player) || plane.isUAV())) {
@@ -80,6 +86,56 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
          this.drawHitBullet(plane, -14101432, seatID);
       }
+   }
+
+   private boolean shouldDrawNewPlaneSimpleHud(MCP_EntityPlane plane, int seatID) {
+      return seatID == 0 && MCH_Config.EnableNewPlaneSimpleHud.prmBool && plane != null && !plane.isDestroyed()
+            && plane.isNewFlightModelEnabled();
+   }
+
+   private void drawNewPlaneSimpleHud(MCP_EntityPlane plane) {
+      int x = MathHelper.clamp_int(MCH_Config.NewPlaneSimpleHudX.prmInt, 4, Math.max(4, super.width - 80));
+      int y = MathHelper.clamp_int(MCH_Config.NewPlaneSimpleHudY.prmInt, 4, Math.max(4, super.height - 36));
+      int color = 0xFFE8E8E8;
+      this.drawString(this.formatSimpleHudThrottle(plane), x, y, color);
+      this.drawString(this.formatSimpleHudFuel(plane), x, y + 10, color);
+      this.drawString(this.formatSimpleHudAltitude(plane), x, y + 20, color);
+   }
+
+   private String formatSimpleHudThrottle(MCP_EntityPlane plane) {
+      int throttle = MathHelper.clamp_int(plane.getThrottlePercent(), 0, 100);
+      return String.format("THR %d%%", new Object[]{Integer.valueOf(throttle)});
+   }
+
+   private String formatSimpleHudFuel(MCP_EntityPlane plane) {
+      int minutes = this.getEstimatedFuelMinutes(plane);
+      return minutes < 0 ? "FUEL -- min" : String.format("FUEL %d min", new Object[]{Integer.valueOf(minutes)});
+   }
+
+   private int getEstimatedFuelMinutes(MCP_EntityPlane plane) {
+      if(plane.getMaxFuel() <= 0 || plane.getFuel() <= 0 || plane.isInfinityFuel(plane.getRiddenByEntity(), true)) {
+         return -1;
+      }
+
+      if(plane.getAcInfo() == null || plane.getAcInfo().fuelConsumption <= 0.0F) {
+         return -1;
+      }
+
+      double burnPerSecond = Math.min(plane.getNormalizedThrottle() * 1.4D, 1.0D)
+            * (double)plane.getAcInfo().fuelConsumption * (double)plane.getFuelConsumptionFactor();
+      if(burnPerSecond <= 0.01D) {
+         return -1;
+      }
+
+      return Math.max(0, (int)Math.round((double)plane.getFuel() / burnPerSecond / 60.0D));
+   }
+
+   private String formatSimpleHudAltitude(MCP_EntityPlane plane) {
+      return String.format("ALT %d m", new Object[]{Integer.valueOf(this.getSimpleHudAltitudeMeters(plane))});
+   }
+
+   private int getSimpleHudAltitudeMeters(MCP_EntityPlane plane) {
+      return Math.max(0, (int)Math.round(plane.posY));
    }
 
    private void drawNewFlightThrottleHud(MCP_EntityPlane plane) {
