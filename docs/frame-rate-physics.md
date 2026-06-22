@@ -18,4 +18,4 @@ The following systems intentionally remain frame-interpolated because they affec
 - GUI/drafting-table preview rendering, particles, camera roll display, and rider render-position setup.
 - Network position interpolation fields such as `aircraftPosRotInc` and vanilla entity previous/current position interpolation.
 
-If a future change uses render interpolation to mutate authoritative rotation, control inputs, angular velocity, recoil, or stabilization, move that calculation back to fixed-tick code or feed it only a bounded elapsed tick fraction.
+If a later change uses render interpolation to mutate authoritative rotation, control inputs, angular velocity, recoil, or stabilization, move that calculation back to fixed-tick code or feed it only a bounded elapsed tick fraction.

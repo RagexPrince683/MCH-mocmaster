@@ -64,15 +64,15 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `NewFlightLowThrottleLiftRetention` | float[0..1] | 0.700 | **New flight model only.** Retains this fraction of the legacy throttle-coupled vertical support at idle so lift does not vanish immediately when throttle is chopped. Stall is still driven by airspeed/AoA. |
 | `NewFlightThrottleControlAuthorityScale` | float[0..1] | 0.10 | **New flight model only.** Maximum control-authority penalty at idle. Keep low so glide/landing controls remain useful. |
 | `NewFlightThrottleHudDisplay` | boolean | true | **New flight model only.** Shows pilot HUD text like `THR 85%`. Legacy HUDs are unchanged for planes that do not opt in. |
-| `NewFlightDisableForwardAirspeedControlScaling` | boolean | true | **New flight model only.** Compatibility switch that keeps `forwardAirspeed / StallSpeed` as stall/energy telemetry instead of a direct pilot-control multiplier. Leave true unless intentionally testing experimental control scaling. |
+| `NewFlightDisableForwardAirspeedControlScaling` | boolean | true | **New flight model only.** Compatibility switch that keeps `forwardAirspeed / StallSpeed` as stall/energy telemetry instead of a direct pilot-control multiplier. Leave true unless intentionally testing active-development control scaling. |
 | `NewFlightCombatFlaps` | boolean | true | **New flight model only.** Enables the combat-flap toggle on the Extra key. Inactive on legacy planes even if present. |
 | `NewFlightCombatFlapLift` | normalized lift bonus [0..0.30] | 0.120 | **New flight model only.** Added low-speed lift/support and induced-load contribution while combat flaps are deployed. |
 | `NewFlightCombatFlapDrag` | normalized drag coefficient [0..0.05] | 0.014 | **New flight model only.** Extra drag while combat flaps are deployed. |
 | `NewFlightCombatFlapControl` | normalized authority bonus [0..0.40] | 0.14 | **New flight model only.** Control-authority boost while combat flaps are deployed. |
 | `NewFlightCombatFlapOverspeed` | normalized multiplier [0.50..1] | 0.72 | **New flight model only.** Multiplier applied to `MaxSafeSpeed` while flaps are deployed; lower values punish high-speed flap use earlier. |
-| `NewPlaneCameraFocusOffsetX` | local blocks | 0 | **New third-person camera/new flight model only.** Local-space visual focus X coordinate for the smooth chase camera. Visual only; no physics effect. |
-| `NewPlaneCameraFocusOffsetY` | local blocks | 1 | **New third-person camera/new flight model only.** Local-space visual focus Y coordinate for the smooth chase camera. Visual only; no physics effect. |
-| `NewPlaneCameraFocusOffsetZ` | local blocks | 0 | **New third-person camera/new flight model only.** Local-space visual focus Z coordinate for the smooth chase camera. Visual only; no physics effect. |
+| `NewPlaneCameraFocusOffsetX` | local blocks | 0 | **New flight model chase-camera only.** Local-space visual focus X coordinate for the smooth chase camera. Visual only; no physics effect. |
+| `NewPlaneCameraFocusOffsetY` | local blocks | 1 | **New flight model chase-camera only.** Local-space visual focus Y coordinate for the smooth chase camera. Visual only; no physics effect. |
+| `NewPlaneCameraFocusOffsetZ` | local blocks | 0 | **New flight model chase-camera only.** Local-space visual focus Z coordinate for the smooth chase camera. Visual only; no physics effect. |
 | `StallSpeed` | internal speed [0..2] | 0 | Absolute stall threshold; if 0, uses `max(0.05, topSpeed * StallSpeedFactor)`. |
 | `TimeUntilStallPastCriticalAoA` | seconds [0..8] | 1.20 | **New flight model only.** Seconds allowed at/past critical AoA before major AoA stall energy loss ramps fully. |
 | `TimeAfterStallUntilPitchDown` | seconds [0..8] | 1.00 | **New flight model only.** Seconds after a low-forward-energy stall before forced nose-down/falling recovery starts. |
@@ -94,12 +94,6 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `CompressibilityPitchPenalty` | float[0..1] | 0.5 | Max pitch-authority loss by `MaxSafeSpeed`. |
 | `MaxSafeSpeed` | internal speed [0..7] | 0 = 110% of level speed | Overspeed threshold. Warns if not above `CompressibilitySpeed`. |
 | `OverspeedDamageRate` | damage/tick [0..1] | 0.14 | Damage per tick at 100% overspeed. Set 0 to disable damage. |
-
-## Derived behavior
-
-The new fixed-wing model intentionally keeps climb sustain, unsupported vertical climb, energy deficit, stall recovery pressure, and takeoff rotation as internal calculations instead of pack-maker knobs. These behaviors are derived from `PhysicalMass`, `EngineThrust`, drag (`BaseDrag`, `InducedDrag`, `ControlSurfaceDrag`, AoA drag), lift/stall values (`StallSpeed`, `CriticalAoA`, `StallLiftLoss`), gravity, airspeed, pitch/AoA, throttle, and altitude. Debug flight logging still reports the calculated energy and climb values so aircraft can be audited without exposing every intermediate calculation as config.
-
-Removed unreleased new-flight-model keys are treated as invalid cleanup targets, not compatibility aliases: `ClimbEnergyLoss`, `DiveEnergyGain`, `TakeoffDistanceMultiplier`, `NewFlightIdleNoseUpLimit`, `EnergyRetentionMultiplier`, `ClimbEnergyCostMultiplier`, `PitchEnergyCostMultiplier`, `VerticalClimbEnergyCostMultiplier`, `StallRecoveryEnergyThreshold`, and `SustainedClimbEnergyRequirement`. Use the core physical and aerodynamic values above instead.
 
 ## Derived behavior
 
@@ -137,7 +131,7 @@ effectiveThrottle = NewFlightIdleThrottle
                   * pow(engineThrottle, NewFlightThrottleResponse)
 ```
 
-`effectiveThrottle`, not raw pilot throttle, drives new-flight thrust and sustainable speed. This makes 30-70% useful for cruise/formation/approach instead of forcing pilots to live near 100%. Cutting throttle reduces acceleration and adds engine-brake drag; it no longer directly deletes lift. New-flight planes also always integrate configurable downward acceleration while airborne; valid wing lift is added upward against that gravity instead of replacing it, so low-speed or stalled aircraft descend naturally. The global `NewFlightGravity` config defaults to `0.008` per tick, and individual vehicles can set `NewFlightGravity`, `FlightGravity`, or `GravityOverride` to tune heavy bombers, light fighters, jets, props, and experimental aircraft independently.
+`effectiveThrottle`, not raw pilot throttle, drives new-flight thrust and sustainable speed. This makes 30-70% useful for cruise/formation/approach instead of forcing pilots to live near 100%. Cutting throttle reduces acceleration and adds engine-brake drag; it no longer directly deletes lift. New-flight planes also always integrate configurable downward acceleration while airborne; valid wing lift is added upward against that gravity instead of replacing it, so low-speed or stalled aircraft descend naturally. The global `NewFlightGravity` config defaults to `0.008` per tick, and individual vehicles can set `NewFlightGravity`, `FlightGravity`, or `GravityOverride` to tune heavy bombers, light fighters, jets, props, and prototype or unusual aircraft independently.
 
 Recommended starting ranges:
 
@@ -438,13 +432,3 @@ Use this key only as a takeoff/runway correction after the aircraft's mass, thru
 Combat flaps are intentionally gated by `useNewMobilitySystem = true`; legacy packs are unaffected unless they opt in. With `NewFlightCombatFlaps = true`, the pilot toggles flaps with the Extra key, the HUD appends `FLP`, and the new flight model applies lift/control help plus extra drag and a lower safe overspeed threshold.
 
 Use flaps with low or moderate throttle for landing and low-speed control. High throttle with flaps can improve a short turn, but the extra drag and reduced `MaxSafeSpeed * NewFlightCombatFlapOverspeed` should punish extended high-speed use. Throttle chopping plus flaps helps manage speed but should not be tuned into an instant brake; raise `NewFlightCombatFlapDrag` gradually and keep `NewFlightEngineBrakeDrag` modest.
-
-## Experimental mouse-aim control foundation
-
-New-flight-model planes can opt into an experimental client-side mouse-follow control foundation through the global MCHeli config. This is currently not a per-plane parser feature: `EnableMouseAimControls` must be enabled globally, then pilots toggle the mode with `KeyPlaneMouseAim` while flying a plane with `UseNewMobilitySystem = true`.
-
-The mode keeps a separate desired aim yaw/pitch derived from smoothed mouse movement, clamps pitch to `MouseAimMaxPitchUp`/`MouseAimMaxPitchDown`, converts aim error into pitch/yaw commands, and adds coordinated auto-bank governed by `MouseAimAutoBankStrength`, `MouseAimAutoBankMaxRoll`, and `MouseAimCenteringStrength`. Those commands still flow through the existing new-flight control authority, stall, energy, unsupported climb, compressibility, and angular-velocity integration code. It does not directly set aircraft rotation and does not change legacy aircraft.
-
-Mouse-aim mode uses a custom cursor because the vanilla Minecraft crosshair is locked at screen center. `EnablePlaneMouseAimReticle` uses the dedicated `MCP_NewPlaneOverlayRenderer` Forge overlay path to draw a proof overlay for any plane and a textured mouse cursor (default `textures/gui/plane_crosshair.png`) at the smoothed desired aim point and a visually distinct nose reticle at screen center for the current aligned-camera implementation. `HideVanillaCrosshairInPlaneMouseAim` suppresses the vanilla crosshair only while the custom new-flight plane mouse-aim reticle is active. `PlaneMouseAimMaxScreenRadius` keeps the cursor inside a safe on-screen radius, `PlaneMouseAimYawVisualRange` controls yaw-to-screen mapping, and `PlaneMouseAimReticleDebug` draws/logs cursor position, nose position, aim angles/errors, and crosshair suppression state.
-
-This pass intentionally does not add advanced HUD/reticle polish such as lead indicators or CCIP; it adds the basic mouse-aim cursor/nose-reticle foundation and debug telemetry (`MouseAimDebug`, `PlaneMouseAimReticleDebug`, or `DebugFlightControl`).
