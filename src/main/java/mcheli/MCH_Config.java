@@ -172,6 +172,13 @@ public class MCH_Config {
    public static MCH_ConfigPrm PlaneMouseAimMaxScreenRadius;
    public static MCH_ConfigPrm PlaneMouseAimYawVisualRange;
    public static MCH_ConfigPrm PlaneMouseAimReticleDebug;
+   public static MCH_ConfigPrm EnableNewPlaneSimpleHud;
+   public static MCH_ConfigPrm EnableNewPlaneWeaponHud;
+   public static MCH_ConfigPrm EnableNewPlaneHudGlow;
+   public static MCH_ConfigPrm NewPlaneSimpleHudX;
+   public static MCH_ConfigPrm NewPlaneSimpleHudY;
+   public static MCH_ConfigPrm NewPlaneWeaponHudRightMargin;
+   public static MCH_ConfigPrm NewPlaneWeaponHudY;
    public static MCH_ConfigPrm SwitchWeaponWithMouseWheel;
    public static MCH_ConfigPrm AllPlaneSpeed;
    public static MCH_ConfigPrm NewFlightGravity;
@@ -484,6 +491,20 @@ public class MCH_Config {
       PlaneMouseAimMaxScreenRadius = new MCH_ConfigPrm("PlaneMouseAimMaxScreenRadius", 0.42D);
       PlaneMouseAimYawVisualRange = new MCH_ConfigPrm("PlaneMouseAimYawVisualRange", 45.0D);
       PlaneMouseAimReticleDebug = new MCH_ConfigPrm("PlaneMouseAimReticleDebug", false);
+      EnableNewPlaneSimpleHud = new MCH_ConfigPrm("EnableNewPlaneSimpleHud", true);
+      EnableNewPlaneSimpleHud.desc = ";Render the compact top-left HUD for new-flight-model planes only.";
+      EnableNewPlaneWeaponHud = new MCH_ConfigPrm("EnableNewPlaneWeaponHud", true);
+      EnableNewPlaneWeaponHud.desc = ";Render the compact right-side weapon/ammo HUD for new-flight-model planes only.";
+      EnableNewPlaneHudGlow = new MCH_ConfigPrm("EnableNewPlaneHudGlow", true);
+      EnableNewPlaneHudGlow.desc = ";Draw subtle background panels and one-pixel glow text for the new-flight plane HUD.";
+      NewPlaneSimpleHudX = new MCH_ConfigPrm("NewPlaneSimpleHudX", 12);
+      NewPlaneSimpleHudX.desc = ";Top-left new-plane simple HUD X offset in scaled GUI pixels.";
+      NewPlaneSimpleHudY = new MCH_ConfigPrm("NewPlaneSimpleHudY", 12);
+      NewPlaneSimpleHudY.desc = ";Top-left new-plane simple HUD Y offset in scaled GUI pixels.";
+      NewPlaneWeaponHudRightMargin = new MCH_ConfigPrm("NewPlaneWeaponHudRightMargin", 14);
+      NewPlaneWeaponHudRightMargin.desc = ";Right-side new-plane weapon HUD margin in scaled GUI pixels.";
+      NewPlaneWeaponHudY = new MCH_ConfigPrm("NewPlaneWeaponHudY", 34);
+      NewPlaneWeaponHudY.desc = ";Right-side new-plane weapon HUD Y offset in scaled GUI pixels.";
       SwitchWeaponWithMouseWheel = new MCH_ConfigPrm("SwitchWeaponWithMouseWheel", true);
       AllHeliSpeed = new MCH_ConfigPrm("AllHeliSpeed", 1.5D);
       AllPlaneSpeed = new MCH_ConfigPrm("AllPlaneSpeed", 1000.00D);
@@ -720,6 +741,13 @@ public class MCH_Config {
               PlaneMouseAimMaxScreenRadius,
               PlaneMouseAimYawVisualRange,
               PlaneMouseAimReticleDebug,
+              EnableNewPlaneSimpleHud,
+              EnableNewPlaneWeaponHud,
+              EnableNewPlaneHudGlow,
+              NewPlaneSimpleHudX,
+              NewPlaneSimpleHudY,
+              NewPlaneWeaponHudRightMargin,
+              NewPlaneWeaponHudY,
               AutoThrottleDownHeli,
               AutoThrottleDownPlane,
               AutoThrottleDownShip,
