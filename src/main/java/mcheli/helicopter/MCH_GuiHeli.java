@@ -72,7 +72,7 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
                if(seatID == 0) {
                   this.drawNewHeliSharedHud(heli);
                   this.drawNewHeliHealthHud(heli);
-                  this.drawNewHeliPitchReadout(player);
+                  this.drawNewHeliPitchReadout(heli, player);
                   this.drawNewHeliRadarHud(heli);
                   this.drawNewHeliWeaponHud(heli, player);
                }
@@ -143,10 +143,26 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
    }
 
 
-   private void drawNewHeliPitchReadout(EntityPlayer player) {
+   private void drawNewHeliPitchReadout(MCH_EntityHeli heli, EntityPlayer player) {
+      if(!this.shouldDrawNewHeliHudAdditions(heli)) {
+         return;
+      }
       int x = super.centerX + 90;
       int y = super.centerY - 4;
+      this.clearLegacyPitchReadoutBox();
+      this.drawPitchReadoutBox(x, super.centerY);
       this.drawNewHeliHudText(String.format("%.0f", new Object[]{Float.valueOf(-player.rotationPitch)}), x, y, -14101432, 0x5528D448);
+   }
+
+   private void clearLegacyPitchReadoutBox() {
+      drawRect(super.centerX + 116, super.centerY - 8, super.centerX + 154, super.centerY + 9, 0xAA000000);
+   }
+
+   private void drawPitchReadoutBox(int readoutX, int centerY) {
+      int left = readoutX - 20;
+      this.drawLine(new double[]{(double)left, (double)centerY, (double)(left + 5), (double)(centerY - 5),
+            (double)(left + 30), (double)(centerY - 5), (double)(left + 30), (double)(centerY + 5),
+            (double)(left + 5), (double)(centerY + 5), (double)left, (double)centerY}, -14101432, 1);
    }
 
    private void drawNewHeliRadarHud(MCH_EntityHeli heli) {
@@ -222,22 +238,6 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       for(int i = 0; i < lines.size(); ++i) {
          this.drawNewHeliHudText((String)lines.get(i), x, y + i * 10, -14101432, 0x5528D448);
       }
-   }
-
-   private boolean shouldDrawNewHeliHudAdditions(MCH_EntityHeli heli) {
-      MCH_HeliInfo info = heli.getHeliInfo();
-      return info != null && heli.isNewHeliFlightModelEnabled() && !heli.isDestroyed();
-   }
-
-   private void drawNewHeliHudText(String text, int x, int y, int color, int glowColor) {
-      if(this.isVehicleHudGlowEnabled()) {
-         this.drawString(text, x + 1, y + 1, glowColor);
-      }
-      this.drawString(text, x, y, color);
-   }
-
-   private boolean isVehicleHudGlowEnabled() {
-      return MCH_Config.EnableNewVehicleHudGlow != null ? MCH_Config.EnableNewVehicleHudGlow.prmBool : MCH_Config.EnableNewPlaneHudGlow.prmBool;
    }
 
    private boolean shouldDrawNewHeliHudAdditions(MCH_EntityHeli heli) {

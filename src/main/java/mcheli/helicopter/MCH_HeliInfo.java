@@ -56,6 +56,18 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
    public float helicopterMaxBackwardSpeedScale;
    /** Strength of new-model hover assistance; 0 disables assist, 1 is full configured assist. */
    public float hoverAssistStrength;
+   /** Vertical-speed deadzone for new-heli hover hold, in motionY blocks per tick. */
+   public float hoverVerticalSpeedDeadzone;
+   /** Proportional strength for new-heli hover vertical-speed hold. */
+   public float hoverVerticalStabilizerStrength;
+   /** Maximum per-tick hover throttle bias change. */
+   public float hoverVerticalCorrectionLimit;
+   /** Maximum total hover throttle/collective bias. */
+   public float hoverThrottleBiasLimit;
+   /** Ticks to wait after each hover throttle adjustment before applying another. */
+   public int hoverVerticalAdjustmentInterval;
+   /** Minimum throttle held by new-heli hover mode to prevent unrecoverable sink. */
+   public float hoverMinimumThrottle;
    /** Show compact player-power readout to pilots using the new helicopter flight model. */
    public boolean newHeliControlHudDisplay;
    public List rotorList;
@@ -87,6 +99,12 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
       this.helicopterBackwardThrustScale = Float.NaN;
       this.helicopterMaxBackwardSpeedScale = Float.NaN;
       this.hoverAssistStrength = 0.75F;
+      this.hoverVerticalSpeedDeadzone = 0.01F;
+      this.hoverVerticalStabilizerStrength = 0.08F;
+      this.hoverVerticalCorrectionLimit = 0.0025F;
+      this.hoverThrottleBiasLimit = 0.08F;
+      this.hoverVerticalAdjustmentInterval = 40;
+      this.hoverMinimumThrottle = 0.65F;
       this.newHeliControlHudDisplay = true;
       this.rotorList = new ArrayList();
       super.minRotationPitch = -20.0F;
@@ -168,6 +186,18 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
          this.helicopterMaxBackwardSpeedScale = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("HoverAssistStrength")) {
          this.hoverAssistStrength = this.toFloat(data, 0.0F, 1.0F);
+      } else if(item.equalsIgnoreCase("HoverVerticalSpeedDeadzone")) {
+         this.hoverVerticalSpeedDeadzone = this.toFloat(data, 0.0F, 1.0F);
+      } else if(item.equalsIgnoreCase("HoverVerticalStabilizerStrength")) {
+         this.hoverVerticalStabilizerStrength = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("HoverVerticalCorrectionLimit")) {
+         this.hoverVerticalCorrectionLimit = this.toFloat(data, 0.0F, 1.0F);
+      } else if(item.equalsIgnoreCase("HoverThrottleBiasLimit")) {
+         this.hoverThrottleBiasLimit = this.toFloat(data, 0.0F, 1.0F);
+      } else if(item.equalsIgnoreCase("HoverVerticalAdjustmentInterval")) {
+         this.hoverVerticalAdjustmentInterval = this.toInt(data, 0, 200);
+      } else if(item.equalsIgnoreCase("HoverMinimumThrottle")) {
+         this.hoverMinimumThrottle = this.toFloat(data, 0.0F, 1.0F);
       } else if(item.equalsIgnoreCase("NewHeliControlHudDisplay") || item.equalsIgnoreCase("NewHelicopterControlHudDisplay")) {
          this.newHeliControlHudDisplay = this.toBool(data);
       } else if(item.compareTo("addrotor") == 0 || item.compareTo("addrotorold") == 0) {
