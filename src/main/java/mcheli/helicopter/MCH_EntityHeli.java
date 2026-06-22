@@ -83,6 +83,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private float finalMotionZ;
    private float hoverAssistStrength;
    private float hoverCollectiveCorrection;
+   private float hoverThrottleBias;
    private float hoverCyclicPitchCorrection;
    private float hoverCyclicRollCorrection;
    private float manualInputOverrideFactor;
@@ -219,6 +220,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.finalMotionZ = 0.0F;
       this.hoverAssistStrength = 0.0F;
       this.hoverCollectiveCorrection = 0.0F;
+      this.hoverThrottleBias = 0.0F;
       this.hoverCyclicPitchCorrection = 0.0F;
       this.hoverCyclicRollCorrection = 0.0F;
       this.manualInputOverrideFactor = 0.0F;
@@ -1326,12 +1328,14 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.hoverAssistActive = false;
 
       if(!this.newHeliFlightModelEnabled || !this.isHoveringMode() || this.heliInfo == null) {
+         this.hoverThrottleBias = 0.0F;
          return;
       }
 
       float configuredStrength = MathHelper.clamp_float(this.heliInfo.hoverAssistStrength, 0.0F, 1.0F);
       this.hoverAssistStrength = configuredStrength;
       if(configuredStrength <= 0.0F) {
+         this.hoverThrottleBias = 0.0F;
          return;
       }
 
@@ -1341,21 +1345,32 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float assistBlend = configuredStrength * (1.0F - this.manualInputOverrideFactor);
       this.hoverAssistActive = assistBlend > 0.001F;
       if(!this.hoverAssistActive) {
+         this.hoverThrottleBias *= 0.90F;
+         this.hoverCollectiveCorrection = this.hoverThrottleBias;
          return;
       }
 
       this.targetVerticalSpeed = 0.0F;
       this.targetHorizontalSpeed = 0.0F;
-      float mass = this.sanitizePositive(this.physicalMass, 1.0F, NEW_HELI_MIN_MASS);
-      float gravity = MathHelper.abs(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
-      float liftSpool = MathHelper.clamp_float((this.normalizedRotorRPM - 0.35F) / 0.65F, 0.0F, 1.0F);
-      liftSpool *= liftSpool;
-      float availableLift = Math.max(this.heliInfo.mainRotorMaxThrust * liftSpool, 0.001F);
-      float hoverCollective = MathHelper.clamp_float(mass * gravity / availableLift, 0.0F, 1.0F);
-      float currentCollective = MathHelper.clamp_float((float)this.getCurrentThrottle(), 0.0F, 1.0F);
-      float descentRecovery = MathHelper.clamp_float((this.targetVerticalSpeed - (float)super.motionY) * 2.0F, 0.0F, 0.22F);
-      float altitudeHoldDemand = MathHelper.clamp_float(hoverCollective + descentRecovery - currentCollective, 0.0F, 0.55F);
-      this.hoverCollectiveCorrection = altitudeHoldDemand * assistBlend;
+      float verticalSpeed = (float)MCH_HudShared.getVerticalSpeedMotionY(this);
+      float deadzone = MathHelper.clamp_float(this.heliInfo.hoverVerticalSpeedDeadzone, 0.0F, 1.0F);
+      float correctionLimit = MathHelper.clamp_float(this.heliInfo.hoverVerticalCorrectionLimit, 0.0F, 1.0F);
+      float biasLimit = MathHelper.clamp_float(this.heliInfo.hoverThrottleBiasLimit, 0.0F, 1.0F);
+      float verticalError = this.targetVerticalSpeed - verticalSpeed;
+      if(MathHelper.abs(verticalError) <= deadzone) {
+         if(this.hoverThrottleBias > correctionLimit) {
+            this.hoverThrottleBias -= correctionLimit;
+         } else if(this.hoverThrottleBias < -correctionLimit) {
+            this.hoverThrottleBias += correctionLimit;
+         } else {
+            this.hoverThrottleBias = 0.0F;
+         }
+      } else {
+         float strength = Math.max(this.heliInfo.hoverVerticalStabilizerStrength, 0.0F);
+         float correctionStep = MathHelper.clamp_float(verticalError * strength, -correctionLimit, correctionLimit) * assistBlend;
+         this.hoverThrottleBias = MathHelper.clamp_float(this.hoverThrottleBias + correctionStep, -biasLimit, biasLimit);
+      }
+      this.hoverCollectiveCorrection = this.hoverThrottleBias;
 
       float yawRadians = this.getRotYaw() / 180.0F * 3.1415927F;
       float forwardX = -MathHelper.sin(yawRadians);
