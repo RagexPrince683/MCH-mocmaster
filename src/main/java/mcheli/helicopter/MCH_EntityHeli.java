@@ -1102,9 +1102,15 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float deadzone = MathHelper.clamp_float(this.heliInfo.hoverVerticalSpeedDeadzone, 0.0F, 1.0F);
       float correctionLimit = MathHelper.clamp_float(this.heliInfo.hoverVerticalCorrectionLimit, 0.0F, 1.0F);
       float biasLimit = MathHelper.clamp_float(this.heliInfo.hoverThrottleBiasLimit, 0.0F, 1.0F);
-      float previousBias = this.hoverThrottleBias;
       float verticalError = this.targetVerticalSpeed - verticalSpeed;
-      if(MathHelper.abs(verticalError) <= deadzone) {
+      boolean correctingVerticalSpeed = MathHelper.abs(verticalError) > deadzone;
+      if(correctingVerticalSpeed) {
+         float strength = Math.max(this.heliInfo.hoverVerticalStabilizerStrength, 0.0F);
+         float correctionStep = MathHelper.clamp_float(verticalError * strength * configuredStrength, -correctionLimit, correctionLimit);
+         this.hoverThrottleBias = MathHelper.clamp_float(this.hoverThrottleBias + correctionStep, -biasLimit, biasLimit);
+         this.addCurrentThrottle((double)(this.hoverThrottleBias * Math.max(throttleUpDown, 0.0F)));
+         this.setCurrentThrottle(MathHelper.clamp_double(this.getCurrentThrottle(), 0.0D, 1.0D));
+      } else {
          if(this.hoverThrottleBias > correctionLimit) {
             this.hoverThrottleBias -= correctionLimit;
          } else if(this.hoverThrottleBias < -correctionLimit) {
@@ -1112,16 +1118,6 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          } else {
             this.hoverThrottleBias = 0.0F;
          }
-      } else {
-         float strength = Math.max(this.heliInfo.hoverVerticalStabilizerStrength, 0.0F);
-         float correctionStep = MathHelper.clamp_float(verticalError * strength * configuredStrength, -correctionLimit, correctionLimit);
-         this.hoverThrottleBias = MathHelper.clamp_float(this.hoverThrottleBias + correctionStep, -biasLimit, biasLimit);
-      }
-
-      float throttleDelta = this.hoverThrottleBias - previousBias;
-      if(MathHelper.abs(throttleDelta) > 0.0F) {
-         this.addCurrentThrottle((double)(throttleDelta * Math.max(throttleUpDown, 0.0F)));
-         this.setCurrentThrottle(MathHelper.clamp_double(this.getCurrentThrottle(), 0.0D, 1.0D));
       }
       this.hoverCollectiveCorrection = this.hoverThrottleBias;
    }
