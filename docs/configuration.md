@@ -223,15 +223,15 @@ Tuning guidance:
 * **Slow props:** keep distance lower (`12`-`22`), use modest screen bias (`2`-`4`), and keep speed scaling modest so the camera remains responsive while still framing the aircraft.
 
 
-## Experimental new-flight plane mouse aim controls
+## New-flight plane mouse aim controls (currently in development)
 
-Mouse aim is an experimental control foundation for fixed-wing planes using `UseNewMobilitySystem = true` only. It is disabled by default and does not affect legacy aircraft. When enabled globally, pilots can toggle it in a qualifying new-flight plane with `KeyPlaneMouseAim`; the mouse moves a separate desired aim yaw/pitch and the aircraft nose chases that aim through the existing new-flight authority, stall, energy, pitch-suppression, damping, and rotation-limit path. Advanced lead/CCIP HUD polish is intentionally left for a later pass.
+Mouse aim is currently in development as a control foundation for fixed-wing planes using `UseNewMobilitySystem = true` only. It is disabled by default and does not affect legacy aircraft. When enabled globally, pilots can toggle it in a qualifying new-flight plane with `KeyPlaneMouseAim`; the mouse moves a separate desired aim yaw/pitch and the aircraft nose chases that aim through the existing new-flight authority, stall, energy, pitch-suppression, damping, and rotation-limit path. Advanced lead/CCIP HUD polish is intentionally left for a later pass.
 
 This first implementation uses global client config keys. Per-plane mouse-aim overrides are not wired yet, so pack authors should tune conservatively.
 
 | Key | Default | Notes |
 | --- | --- | --- |
-| `EnableMouseAimControls` | `false` | Master enable for the experimental mode; new-flight-model planes only. |
+| `EnableMouseAimControls` | `false` | Master enable for the active-development mode; new-flight-model planes only. |
 | `KeyPlaneMouseAim` | `49` | Toggle key while piloting a qualifying new-flight plane (N by default). |
 | `MouseAimSensitivity` | `0.18` | Scales raw mouse movement into desired aim yaw/pitch changes. |
 | `MouseAimSmoothing` | `0.30` | Smooths desired aim motion to reduce jitter without snapping. |

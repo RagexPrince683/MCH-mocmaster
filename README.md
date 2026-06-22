@@ -8,13 +8,25 @@ The mod is intended for players, modpack authors, and server administrators who 
 
 ## What the mod adds
 
-- **Aircraft and vehicles:** helicopters, fixed-wing planes, tanks, ships, and ground vehicles loaded from MCHeli-style asset/config packs.
-- **Combat systems:** bullets, rockets, bombs, torpedoes, anti-air/anti-surface/anti-tank missiles, target markers, flares, chaff, APS/maintenance hooks, and damage multipliers.
-- **Portable equipment:** GLTD target designator, FIM-92 Stinger, FGM-148 Javelin, RPG-7, wrench, rangefinder, parachute, tow chain, containers, UAV stations, and gunner spawn items.
-- **Drafting table workflow:** a dedicated Drafting Table block for vehicle/item crafting recipes.
-- **Multiplayer tools:** team/scoreboard UI hooks, entity markers, server reconfiguration, mod-list/screenshot requests, and administrative entity utilities.
-- **Client rendering options:** long-distance vehicle LOD snapshots, shader toggle, smooth shading, render-distance weighting, configurable HUD behavior, and optional multi-threaded model loading.
-- **Server controls:** block-destruction rules, collision damage, recipe toggles, item/block IDs, command permissions, creative-tab icons, global speed multipliers, and keybind defaults.
+MCHeli Overdrive+ is a modernization and expansion of the original MCHeli project. It keeps MCHeli's data-driven content format, but the fork is built around new vehicle physics, carrier/naval gameplay, submarine behavior, long-range rendering, persistence, HUD/camera work, and server-management systems.
+
+### Overdrive-specific systems
+
+- **New aircraft systems:** fixed-wing aircraft can opt into the new flight model with stall and angle-of-attack simulation, control-authority modeling, aircraft mass and thrust simulation, configurable gravity, energy retention, drag, overspeed damage, dive behavior, flight ceilings, and combat flaps.
+- **New helicopter system:** helicopters can opt into the new helicopter flight model with collective controls, rotor thrust and RPM modeling, cyclic/tail-rotor authority, configurable climb performance, lateral/backward thrust tuning, hover assist, and explicit hover-mode stabilization.
+- **Naval and carrier gameplay:** ships support moving walkable deck behavior, ship-deck interaction fixes, carrier-style vehicle racks, plane attachment/parking, launch assistance, and vehicle-on-vehicle transport/interaction improvements.
+- **Submarine behavior:** ship-based submarine mode supports diving, underwater ascend/descend controls, bounded vertical acceleration, vertical speed limits, water-depth behavior, and HUD prompts for submarine navigation.
+- **Rendering and performance:** client-side vehicle LOD snapshots, long-range model-only rendering, distance-based model optimization, shader/smooth-shading toggles, render-distance weighting, and optional multi-threaded model loading improve large-pack and large-server usability.
+- **Vehicle interaction and persistence:** rack/carrier compatibility checks, vehicle launch grace periods, improved seat/rack repair paths, NewUAV JSON persistence, UAV duplicate protection, and entity-info synchronization improve multiplayer reliability.
+- **Camera and controls:** new aircraft systems include a modernized third-person chase camera, improved freelook behavior, held look-ahead, rack operation controls, submarine depth controls, and pilot usability refinements. Aircraft follow-camera improvements and mouse-aim controls are currently in development and under active refinement; they are configurable, disabled by default where appropriate, and documented with their current limitations.
+- **New HUD systems:** opted-in aircraft expose compact pilot telemetry, throttle/engine indicators, altitude/speed readouts, flight-state warnings, hover-assist state, damage readouts, and weapon/ammunition displays while preserving legacy HUD definitions for existing content.
+- **Framework and compatibility:** expanded vehicle configuration keys, legacy/new mobility-system opt-in support, backwards-compatible aliases, shared vehicle documentation, and server configuration references let old content continue to run while new packs adopt Overdrive systems incrementally.
+
+### Legacy content retained
+
+Existing MCHeli-style helicopters, fixed-wing planes, tanks, ships, ground vehicles, weapons, HUDs, models, textures, sounds, recipes, UAV equipment, portable weapons, deployable items, and Drafting Table workflows remain supported. Vehicles that do not opt into new systems continue to use legacy behavior.
+
+For a detailed project-wide audit of Overdrive-only systems, see [Overdrive Feature Overview](docs/overdrive-features.md).
 
 ## Requirements and compatibility
 
@@ -71,6 +83,7 @@ For development asset testing, the build/run setup expects assets in `build/run/
 See the extended documentation for step-by-step guides:
 
 - [Getting Started Guide](docs/getting-started.md)
+- [Overdrive Feature Overview](docs/overdrive-features.md)
 - [Configuration Reference](docs/configuration.md)
 - [Command and Permission Reference](docs/commands.md)
 - [Server Administration Guide](docs/server-administration.md)
@@ -141,7 +154,7 @@ If this project has an official Discord, Modrinth page, wiki, or current GitHub 
 
 ## Screenshots
 
-Screenshots are not currently stored in this repository. Suggested placeholders for future documentation:
+Screenshots are not currently stored in this repository. Suggested screenshot topics for later documentation updates:
 
 - Vehicle selection in creative tabs
 - Drafting Table recipe screen
