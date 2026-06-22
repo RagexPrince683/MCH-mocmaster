@@ -1,6 +1,13 @@
 DisplayName = Kurganets-25 IFV with DUBM-30 Epoch or 'Bumerang-BM' RWS
 AddDisplayName = en_US, Kurganets-25 IFV
 AddDisplayName = ja_JP, Kurganets-25 歩兵戦闘車
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = Kurganets-25 IFV with DUBM-30 Epoch or 'Bumerang-BM' RWS
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = Kurganets-25 IFV with DUBM-30 Epoch or 'Bumerang-BM' RWS
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 250
 Speed = 0.55
 Sound = kurg

@@ -1,6 +1,13 @@
 DisplayName = A6M2-N Rufe
 AddDisplayName = en_US, A6M2-N
 AddDisplayName = ru_RU, A6M2-N Rufe
+NameOnEarlyASRadar = Prop Aircraft
+NameOnModernASRadar = A6M2-N Rufe
+NameOnEarlyAARadar = Prop Aircraft
+NameOnModernAARadar = A6M2-N Rufe
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 30005
 MaxHp = 100
 Speed = 0.76

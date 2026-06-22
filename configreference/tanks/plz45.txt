@@ -1,6 +1,13 @@
 ﻿DisplayName = PLZ-45
 AddDisplayName = ja_JP, PLZ-45
 AddDisplayName = en_US, PLZ-45
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = PLZ-45
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = PLZ-45
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 8997
 MaxHp = 200
 Speed = 0.34

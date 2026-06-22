@@ -4,6 +4,13 @@ AddDisplayName = en_US, F-14D Tomcat (alt)
 ;but for now enjoy the wall of shit when hovering over item
 ;oh wait the 'super' tomcat doesn't exist
 AddDisplayName = ja_JP, F-14D スーパートムキャット
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F-14D Tomcat (alt)
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F-14D Tomcat (alt)
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28714
 MaxHp = 100
 EnableNightVision = true

@@ -1,6 +1,13 @@
 DisplayName = A-10 Thunderbolt II
 AddDisplayName = en_US, A-10 Thunderbolt II
 AddDisplayName = ja_JP, A-10 サンダーボルトⅡ
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = A-10 Thunderbolt II
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = A-10 Thunderbolt II
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28705
 MaxHp = 250
 Sound = aten

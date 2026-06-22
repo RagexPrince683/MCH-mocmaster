@@ -1,6 +1,13 @@
 DisplayName = M2A1 Bradley IFV
 AddDisplayName = en_US, M2A1 Bradley IFV
 AddDisplayName = ru_RU, M2A1 Брэдли
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = M2A1 Bradley IFV
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = M2A1 Bradley IFV
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 Speed = 0.41
 Sound = bradeng

@@ -1,5 +1,12 @@
 DisplayName = Il-28Sh
 AddDisplayName = ja_JP, Il-28Sh
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Il-28Sh
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Il-28Sh
+ChaffWaitTime = 500
+ChaffUseTime = 160
+ThrottleDownFactor = 0.20
 MaxHp = 150
 Speed = 1.569
 

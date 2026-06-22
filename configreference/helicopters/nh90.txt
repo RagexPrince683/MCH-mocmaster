@@ -1,5 +1,12 @@
 DisplayName = NH Industries NH-90 TTH
 AddDisplayName = ja_JP, NHインダストリーズ NH90-TTH
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = NH Industries NH-90 TTH
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = NH Industries NH-90 TTH
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28997
 MaxHp = 100
 EnableNightVision = true

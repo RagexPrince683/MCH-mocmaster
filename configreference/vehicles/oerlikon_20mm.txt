@@ -1,6 +1,13 @@
 ﻿DisplayName = Oerlikon 20mm Cannon
 AddDisplayName = en_US, Oerlikon 20mm Cannon
 AddDisplayName = ja_JP, エリコン 20mm機関砲
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Oerlikon 20mm Cannon
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Oerlikon 20mm Cannon
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28601
 MaxHp = 100
 Gravity = -9.81

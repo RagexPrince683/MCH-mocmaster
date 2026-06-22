@@ -2,6 +2,13 @@ DisplayName = Tiger II (H)
 AddDisplayName = Tiger II (H)
 ;this is a comment, I like using comments
 AddDisplayName = en_US, Tiger II (H)
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Tiger II (H)
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Tiger II (H)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 32357
 ;215mm sloped/2
 MaxHp = 185

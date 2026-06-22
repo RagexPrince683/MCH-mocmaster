@@ -1,6 +1,13 @@
 ﻿DisplayName = BGM-71 TOW
 AddDisplayName = en_US, BGM-71 TOW
 AddDisplayName = ja_JP, BGM-71 TOW
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = BGM-71 TOW
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = BGM-71 TOW
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30035
 MaxHp = 100
 Gravity = -9.81

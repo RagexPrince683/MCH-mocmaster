@@ -1,5 +1,12 @@
 DisplayName = M60A1 Patton
 AddDisplayName = zh_CN,M60A1 巴顿 主战坦克
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M60A1 Patton
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M60A1 Patton
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 280
 Speed = 0.45

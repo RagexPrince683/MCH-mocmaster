@@ -1,5 +1,12 @@
 DisplayName = Type 89 IFV
 AddDisplayName = ja_JP, Type 89 IFV
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = Type 89 IFV
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = Type 89 IFV
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 250
 Speed = 0.43

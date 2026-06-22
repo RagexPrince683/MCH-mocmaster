@@ -1,5 +1,12 @@
 DisplayName = M8 Greyhound
 AddDisplayName = ru_RU, M8 Greyhound
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M8 Greyhound
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M8 Greyhound
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30997
 MaxHp = 100
 Speed = 0.55

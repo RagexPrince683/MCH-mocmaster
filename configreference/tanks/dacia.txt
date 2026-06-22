@@ -1,5 +1,12 @@
 ﻿﻿DisplayName = Dacia Sandero (2009)
 AddDisplayName = en_US, Dacia Sandero (2009)
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Dacia Sandero (2009)
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Dacia Sandero (2009)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 
 ExplosionSizeByCrash = 3
  

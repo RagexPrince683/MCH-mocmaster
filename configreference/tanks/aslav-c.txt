@@ -1,4 +1,11 @@
 DisplayName = ASLAV-C Type II
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = ASLAV-C Type II
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = ASLAV-C Type II
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.50
 MaxHp = 200
 Speed = 0.62
 Sound = moneonethreeapc

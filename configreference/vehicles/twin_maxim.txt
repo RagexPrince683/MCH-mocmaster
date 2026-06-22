@@ -1,6 +1,13 @@
 ﻿DisplayName = Twin Mounted Maxim Machine Gun
 AddDisplayName = en_US, Twin Mounted Maxim Machine Gun
 AddDisplayName = ja_JP, マキシム機関銃(二挺結合)
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = Twin Mounted Maxim Machine Gun
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = Twin Mounted Maxim Machine Gun
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30068
 MaxHp = 100
 Gravity = -9.81

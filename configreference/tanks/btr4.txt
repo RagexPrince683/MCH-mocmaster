@@ -1,4 +1,11 @@
 DisplayName = BTR-4-E Bucefal
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = BTR-4-E Bucefal
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = BTR-4-E Bucefal
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.50
 ;AddDisplayName = ua_UA, BTR-4 E Bucefal
 ;AddDisplayName = en_EN, BTR-4 E Bucefal
 ;at least translate it???

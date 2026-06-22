@@ -1,6 +1,13 @@
 ﻿DisplayName = BT-2
 AddDisplayName = ja_JP, BT-2
 AddDisplayName = en_US, BT-2
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = BT-2
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = BT-2
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 91012
 MaxHp = 100
 Speed = 0.62

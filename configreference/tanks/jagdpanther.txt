@@ -1,5 +1,12 @@
 DisplayName = Jagdpanther G1
 AddDisplayName = ja_JP, JagdPanther G1
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Jagdpanther G1
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Jagdpanther G1
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 30191
 MaxHp = 175
 Speed = 0.29

@@ -1,6 +1,13 @@
 ﻿DisplayName = HTF5980 Strategic DF-41 ICBM TEL
 AddDisplayName = ja_JP, DF-41D
 AddDisplayName = en_US, HTF5980 Strategic DF-41 ICBM TEL
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = HTF5980 Strategic DF-41 ICBM TEL
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = HTF5980 Strategic DF-41 ICBM TEL
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 Speed = 0.4
 Sound = chinesecrap

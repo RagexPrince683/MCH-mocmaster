@@ -1,6 +1,13 @@
 ﻿DisplayName = M18 GMC 'Hellcat'
 AddDisplayName = en_US, M18 GMC 'Hellcat'
 AddDisplayName = ja_JP, M18 GMC ヘルキャット
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M18 GMC 'Hellcat'
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M18 GMC 'Hellcat'
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30184
 MaxHp = 250
 Speed = 0.55

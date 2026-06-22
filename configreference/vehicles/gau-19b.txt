@@ -1,6 +1,13 @@
 ﻿DisplayName = GAU-19/B Rotary Heavy Machine Gun
 AddDisplayName = en_US, GAU-19/B Rotary Heavy Machine Gun
 AddDisplayName = ja_JP, GAU-19/b 12.7mmガトリング
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = GAU-19/B Rotary Heavy Machine Gun
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = GAU-19/B Rotary Heavy Machine Gun
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30032
 MaxHp = 100
 EnableNightVision = false

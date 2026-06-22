@@ -1,6 +1,13 @@
 DisplayName = MIG-17 F
 AddDisplayName = en_US, MIG-17 F
 AddDisplayName = ja_JP, MIG-17 F
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = MIG-17 F
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = MIG-17 F
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28731
 MaxHp = 100
 EnableNightVision = false

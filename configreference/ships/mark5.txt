@@ -1,6 +1,13 @@
 DisplayName = Mk.5 Special Operations Craft
 AddDisplayName = en_US, Mk.5 Special Operations Craft
 AddDisplayName = ja_JP, Mk.5 特殊任務艇
+NameOnEarlyASRadar = Surface Ship
+NameOnModernASRadar = Mk.5 Special Operations Craft
+NameOnEarlyAARadar = Surface Ship
+NameOnModernAARadar = Mk.5 Special Operations Craft
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.30
 ItemID = 28742
 MaxHp = 1600
 Speed = 0.58

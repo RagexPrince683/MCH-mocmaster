@@ -1,6 +1,13 @@
 ﻿DisplayName = 12.8 cm Flak 40 Anti-Aircraft Gun
 AddDisplayName = en_US, 12.8 cm Flak 40 Anti-Aircraft Gun
 AddDisplayName = ja_JP, 一七式十五糎高角砲
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = 12.8 cm Flak 40 Anti-Aircraft Gun
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = 12.8 cm Flak 40 Anti-Aircraft Gun
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28615
 MaxHp = 100
 HideEntity = false

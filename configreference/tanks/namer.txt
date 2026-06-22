@@ -1,5 +1,12 @@
 DisplayName = Namer 'Leopard' APC
 AddDisplayName = ja_JP, Namer 'Leopard' APC
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = Namer 'Leopard' APC
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = Namer 'Leopard' APC
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30075
 MaxHp = 600
 Speed = 0.5

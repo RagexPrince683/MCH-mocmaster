@@ -1,5 +1,12 @@
 DisplayName = AK-630M CIWS
 AddDisplayName = ja_JP, AK-630M CIWS
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = AK-630M CIWS
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = AK-630M CIWS
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28630
 MaxHp = 100
 EnableNightVision = true

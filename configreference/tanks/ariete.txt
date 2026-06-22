@@ -1,6 +1,13 @@
 DisplayName = C1 Ariete PSO
 AddDisplayName = en_US, C1 Ariete PSO
 AddDisplayName = zh_CN,C1“公羊”主战坦克[城市战套件]
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = C1 Ariete PSO
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = C1 Ariete PSO
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 550
 Speed = 0.4

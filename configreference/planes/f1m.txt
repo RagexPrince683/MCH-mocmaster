@@ -1,6 +1,13 @@
 DisplayName = Mitsubishi F1M "Pete"
 AddDisplayName = en_US, Mitsubishi F1M "Pete"
 AddDisplayName = ja_JP, 三菱 零式水上観測機
+NameOnEarlyASRadar = Prop Aircraft
+NameOnModernASRadar = Mitsubishi F1M "Pete"
+NameOnEarlyAARadar = Prop Aircraft
+NameOnModernAARadar = Mitsubishi F1M "Pete"
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.20
 ItemID = 28709
 MaxHp = 100
 Speed = 0.644

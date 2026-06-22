@@ -1,6 +1,13 @@
 DisplayName = Bofors 40 mm L/60 Automatic Cannon
 AddDisplayName = en_US, Bofors 40 mm L/60 Automatic Cannon
 AddDisplayName = ja_JP, ボフォース 40 mm/l60
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Bofors 40 mm L/60 Automatic Cannon
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Bofors 40 mm L/60 Automatic Cannon
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28610
 MaxHp = 100
 HideEntity = false

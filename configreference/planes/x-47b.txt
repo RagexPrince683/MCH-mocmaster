@@ -1,5 +1,12 @@
 DisplayName = X-47B Pegasus
 AddDisplayName = ja_JP, X-47B ペガサス
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = X-47B Pegasus
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = X-47B Pegasus
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28728
 MaxHp = 100
 Speed = 1.20

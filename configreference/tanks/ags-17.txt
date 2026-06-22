@@ -1,6 +1,13 @@
 ;make the fucking pain stop
 DisplayName = 30mm AGS-17 Plamya Automatic Grenade Launcher
 AddDisplayName = ru_RU, 30mm АГС-17 "Пламя"
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = 30mm AGS-17 Plamya Automatic Grenade Launcher
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = 30mm AGS-17 Plamya Automatic Grenade Launcher
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 
 MaxHp = 100
 Speed = 0.001

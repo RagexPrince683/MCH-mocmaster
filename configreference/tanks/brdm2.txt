@@ -1,6 +1,13 @@
 ﻿DisplayName = BRDM-2 ARV
 AddDisplayName = ru_RU, BRDM-2 ARV
 AddDisplayName = en_US, BRDM-2 ARV
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = BRDM-2 ARV
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = BRDM-2 ARV
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.50
 ItemID = 30102
 MaxHp = 200
 Speed = 0.62

@@ -1,6 +1,13 @@
 DisplayName = F8F-1B Bearcat
 AddDisplayName = en_US, F8F-1B Bearcat
 AddDisplayName = ko_KR, F8F-1B 베어캣
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F8F-1B Bearcat
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F8F-1B Bearcat
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 40006
 MaxHp = 100
 Speed = 1.18

@@ -1,6 +1,13 @@
 DisplayName = Sikorsky S-76 VIP
 AddDisplayName = en_US, Sikorsky S-76 VIP
 AddDisplayName = ja_JP, シコルスキー S-76 V.I.P仕様
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Sikorsky S-76 VIP
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Sikorsky S-76 VIP
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 30046
 MaxHp = 100
 MaxFuel         = 1900

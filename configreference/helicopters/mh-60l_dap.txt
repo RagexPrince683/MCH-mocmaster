@@ -1,5 +1,12 @@
 DisplayName = MH-60L DAP
 AddDisplayName = ja_JP, MH-60L DAP
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = MH-60L DAP
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = MH-60L DAP
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28815
 MaxHp = 100
 EnableGunnerMode  = true

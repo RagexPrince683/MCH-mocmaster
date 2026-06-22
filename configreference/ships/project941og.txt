@@ -1,6 +1,13 @@
 DisplayName = Project 941 Akula Submarine
 AddDisplayName = en_US, Project 941 Akula Submarine
 AddDisplayName = zh_CN, 台风级战略核潜艇
+NameOnEarlyASRadar = Surface Ship
+NameOnModernASRadar = Project 941 Akula Submarine
+NameOnEarlyAARadar = Surface Ship
+NameOnModernAARadar = Project 941 Akula Submarine
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.30
 ItemID = 21992
 MaxHp = 23200
 EnableNightVision = true

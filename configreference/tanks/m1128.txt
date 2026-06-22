@@ -1,6 +1,13 @@
 DisplayName = M1128 Stryker Mobile Gun System
 AddDisplayName = en_US, M1128 Stryker Mobile Gun System
 AddDisplayName = ja_JP, M1128ストライカー
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = M1128 Stryker Mobile Gun System
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = M1128 Stryker Mobile Gun System
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.50
 MaxHp = 200
 Speed = 0.6
 Sound = stryker

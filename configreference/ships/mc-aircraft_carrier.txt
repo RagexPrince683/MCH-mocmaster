@@ -1,6 +1,13 @@
 DisplayName = CVN-68 USS Nimitz Aircraft Carrier
 AddDisplayName = en_US, CVN-68 USS Nimitz Aircraft Carrier
 AddDisplayName = ja_JP, CVN-68 Aircraft Carrier
+NameOnEarlyASRadar = Large Ship
+NameOnModernASRadar = CVN-68 USS Nimitz Aircraft Carrier
+NameOnEarlyAARadar = Large Ship
+NameOnModernAARadar = CVN-68 USS Nimitz Aircraft Carrier
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.30
 
 PivotTurnThrottle = 0.2
 

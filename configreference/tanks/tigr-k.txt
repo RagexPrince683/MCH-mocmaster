@@ -1,5 +1,12 @@
 ;общая инфа о технике
 DisplayName = "Gaz" Tigr with Kornet-EM
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = "Gaz" Tigr with Kornet-EM
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = "Gaz" Tigr with Kornet-EM
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 150
 Speed = 0.87
 Sound = diesel

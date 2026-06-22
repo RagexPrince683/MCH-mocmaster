@@ -1,4 +1,11 @@
 DisplayName = Ford Mondeo (NYPD)
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Ford Mondeo (NYPD)
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Ford Mondeo (NYPD)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ;(ru_RU)Слив от Мастерской W&K (Лучшая военная техника и не только) - https://vk.com/wk_workshop 
 ;(en_EN)made in the Workshop of W&K (the Best military equipment and not only) - https://vk.com/wk_workshop
 ;cool, nice 4,500kb model, now let's fix some problems I found with it

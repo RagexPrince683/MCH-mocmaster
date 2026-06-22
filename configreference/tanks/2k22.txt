@@ -1,6 +1,13 @@
 DisplayName = 2K22 2S6 Tunguska SPAAG
 AddDisplayName = en_US, 2K22 2S6 Tunguska SPAAG
 AddDisplayName = ja_JP, 2K22 ツングーツカ
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = 2K22 2S6 Tunguska SPAAG
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = 2K22 2S6 Tunguska SPAAG
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 250
 Speed = 0.4

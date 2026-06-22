@@ -1,6 +1,13 @@
 ﻿DisplayName = 5"/54 Caliber Mark 45 Mod1 Naval Cannon
 AddDisplayName = en_US, 5"/54 Caliber Mark 45 Mod1 Naval Cannon
 AddDisplayName = ja_JP, Mk45 5インチ砲
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = 5"/54 Caliber Mark 45 Mod1 Naval Cannon
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = 5"/54 Caliber Mark 45 Mod1 Naval Cannon
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28601
 MaxHp = 110
 Gravity = -9.81

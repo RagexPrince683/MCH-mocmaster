@@ -1,6 +1,13 @@
 DisplayName = Growler ITV
 AddDisplayName = en_US, Growler ITV
 AddDisplayName = ja_JP, グラウラーITV
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Growler ITV
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Growler ITV
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28766
 MaxHp = 230
 ThrottleUpDown = 0.81

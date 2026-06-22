@@ -1,4 +1,11 @@
 DisplayName = LAV III (Light Armoured Vehicle 3)
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = LAV III (Light Armoured Vehicle 3)
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = LAV III (Light Armoured Vehicle 3)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.50
 MaxHp = 200
 Speed = 0.62
 Sound = stryker

@@ -1,5 +1,12 @@
 ﻿DisplayName = Jagdpanzer VI Jagdtiger
 AddDisplayName = en_US, Jagdpanzer VI Jagdtiger
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Jagdpanzer VI Jagdtiger
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Jagdpanzer VI Jagdtiger
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 MaxHp = 210
 Speed = 0.21
 Sound = V12TIGER

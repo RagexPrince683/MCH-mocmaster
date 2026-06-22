@@ -1,6 +1,13 @@
 DisplayName = LCAC
 AddDisplayName = en_US, Landing Craft Air Cushion (LCAC)
 AddDisplayName = ja_JP, LCACエアクッション艇
+NameOnEarlyASRadar = Surface Ship
+NameOnModernASRadar = LCAC
+NameOnEarlyAARadar = Surface Ship
+NameOnModernAARadar = LCAC
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.30
 ItemID = 30112
 MaxHp = 182
 Speed = 0.46

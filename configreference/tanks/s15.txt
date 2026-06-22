@@ -1,6 +1,13 @@
 DisplayName = Nissan Silvia S15
 AddDisplayName = en_US, Nissan Silvia S15
 AddDisplayName = ja_JP, Nissan Silvia S15
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Nissan Silvia S15
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Nissan Silvia S15
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 33406
 MaxHp = 200
 Speed = 1.55

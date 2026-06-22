@@ -1,5 +1,12 @@
 DisplayName = AH-6 Little Bird 'Killer Egg'
 AddDisplayName = ja_JP, AH-6 Little Bird 'キラ－エッグ'
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = AH-6 Little Bird 'Killer Egg'
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = AH-6 Little Bird 'Killer Egg'
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28801
 MaxHp = 100
 EnableNightVision = true

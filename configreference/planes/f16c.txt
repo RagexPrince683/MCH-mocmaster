@@ -1,6 +1,13 @@
 DisplayName = F-16C 
 AddDisplayName = en_US, F-16C 
 AddDisplayName = ja_JP, F-16C
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F-16C
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F-16C
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28740
 MaxHp = 100
 EnableNightVision = true

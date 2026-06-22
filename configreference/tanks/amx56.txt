@@ -1,6 +1,13 @@
 DisplayName = AMX56 Leclerc MBT
 AddDisplayName = zh_CN,AMX56 勒克莱尔主战坦克
 AddDisplayName = en_US, AMX56 Leclerc MBT
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = AMX56 Leclerc MBT
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = AMX56 Leclerc MBT
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 
 ItemID = 91128
 MaxHp = 550

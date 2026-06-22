@@ -1,4 +1,11 @@
 DisplayName = VDV Buggy/Fast Attack Vehicle/Ukrainian Attack Buggy
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = VDV Buggy/Fast Attack Vehicle/Ukrainian Attack Buggy
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = VDV Buggy/Fast Attack Vehicle/Ukrainian Attack Buggy
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ;(22nd SPGSPB)
 ;https://en.wikipedia.org/wiki/22nd_Separate_Guards_Special_Purpose_Brigade 
 ;https://www.youtube.com/watch?v=o4OYCrBAy_s

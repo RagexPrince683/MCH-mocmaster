@@ -1,6 +1,13 @@
 DisplayName = A6M5 Zero Type 21
 AddDisplayName = en_US, A6M5 Zero Type 21
 AddDisplayName = ja_JP, 零式艦上戦闘機21型
+NameOnEarlyASRadar = Prop Aircraft
+NameOnModernASRadar = A6M5 Zero Type 21
+NameOnEarlyAARadar = Prop Aircraft
+NameOnModernAARadar = A6M5 Zero Type 21
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28708
 MaxHp = 100
 Speed = 0.927

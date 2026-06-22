@@ -1,5 +1,12 @@
 DisplayName = M983 HEMTT Heavy Expanded Mobility Tactical Truck
 AddDisplayName = ja_JP, M983 HEMTT Heavy Expanded Mobility Tactical Truck
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = M983 HEMTT Heavy Expanded Mobility Tactical Truck
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = M983 HEMTT Heavy Expanded Mobility Tactical Truck
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 250
 Speed = 0.62
 Sound = hemtt

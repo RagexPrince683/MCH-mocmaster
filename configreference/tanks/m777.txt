@@ -1,6 +1,13 @@
 DisplayName = 155mm M777 Lightweight Towed Howitzer
 AddDisplayName = ru_RU, 155mm M777 Lightweight Towed Howitzer
 AddDisplayName = en_US, 155mm M777 Lightweight Towed Howitzer
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = 155mm M777 Lightweight Towed Howitzer
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = 155mm M777 Lightweight Towed Howitzer
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 100
 Speed = 0.00
 ThrottleUpDown = 1.0

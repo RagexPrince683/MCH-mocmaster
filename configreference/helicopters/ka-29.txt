@@ -1,5 +1,12 @@
 DisplayName = Ka-29 Helix B
 AddDisplayName = ja_JP, Ka-29 ヘリックスB
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Ka-29 Helix B
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Ka-29 Helix B
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28826
 MaxHp = 100
 EnableGunnerMode = true

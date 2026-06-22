@@ -1,5 +1,12 @@
 DisplayName = Merkava Mk.1
 AddDisplayName = ja_JP, Merkava Mk.1
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Merkava Mk.1
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Merkava Mk.1
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30075
 MaxHp = 600
 Speed = 0.40

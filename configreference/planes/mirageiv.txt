@@ -1,5 +1,12 @@
 DisplayName = Mirage IVP
 AddDisplayName = zh_CN, 幻影IVP战略轰炸机
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Mirage IVP
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Mirage IVP
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 
 MaxHp = 100
 Speed = 4.0

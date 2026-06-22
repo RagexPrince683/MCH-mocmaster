@@ -1,6 +1,13 @@
 ﻿DisplayName = Flugabwehrkanonenpanzer Gepard 'Cheetah'
 AddDisplayName = en_US, Flugabwehrkanonenpanzer Gepard 'Cheetah'
 AddDisplayName = ja_JP, ゲパルト自走対空砲
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = Flugabwehrkanonenpanzer Gepard 'Cheetah'
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = Flugabwehrkanonenpanzer Gepard 'Cheetah'
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.40
 ItemID = 30000
 MaxHp = 200
 Speed = 0.4

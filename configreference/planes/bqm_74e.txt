@@ -1,5 +1,12 @@
 DisplayName = BQM-74E CHUKAR III (Target Drone)
 AddDisplayName = ja_JP, BQM-74E CHUKAR III (標的機)
+NameOnEarlyASRadar = Small UAV
+NameOnModernASRadar = BQM-74E CHUKAR III (Target Drone)
+NameOnEarlyAARadar = Small UAV
+NameOnModernAARadar = BQM-74E CHUKAR III (Target Drone)
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28736
 MaxHp = 100
 Speed = 1.55

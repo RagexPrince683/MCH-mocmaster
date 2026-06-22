@@ -1,5 +1,12 @@
 DisplayName = Mi-24 Super Hind Mk. IV
 AddDisplayName = ja_JP, Mi-24IV ハインド
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Mi-24 Super Hind Mk. IV
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Mi-24 Super Hind Mk. IV
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 288091
 MaxHp = 100
 EnableGunnerMode = true

@@ -1,5 +1,12 @@
 DisplayName = T-26 mod. 1939
 AddDisplayName = Т-26 (образец 1939 г.)
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = T-26 mod. 1939
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = T-26 mod. 1939
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 100
 Speed = 0.193
 Sound = prop_tank

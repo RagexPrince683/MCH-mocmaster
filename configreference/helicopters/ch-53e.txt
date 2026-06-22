@@ -1,5 +1,12 @@
 DisplayName = CH-53E Super Stallion
 AddDisplayName = ja_JP, CH-53E スーパースタリオン
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = CH-53E Super Stallion
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = CH-53E Super Stallion
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 30047
 MaxHp = 200
 EnableGunnerMode = true

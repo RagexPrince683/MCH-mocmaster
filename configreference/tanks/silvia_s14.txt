@@ -1,5 +1,12 @@
 ﻿DisplayName = Nissan Silvia S14
 AddDisplayName = en_US, Nissan Silvia S14
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Nissan Silvia S14
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Nissan Silvia S14
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 ThrottleUpDown = 0.84
 ;6.4s

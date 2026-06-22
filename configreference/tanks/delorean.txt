@@ -1,6 +1,13 @@
 DisplayName = DMC-12 DeLorean
 AddDisplayName = en_US, DMC-12 DeLorean
 AddDisplayName = ja_JP, デロリアン
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = DMC-12 DeLorean
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = DMC-12 DeLorean
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 ItemID = 30026
 MaxHp = 200
 Speed = 1.3

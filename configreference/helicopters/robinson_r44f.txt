@@ -1,5 +1,12 @@
 DisplayName = Robinson R44 Float
 AddDisplayName = ja_JP, ロビンソン R44 フロート
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Robinson R44 Float
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Robinson R44 Float
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28823
 MaxHp = 100
 Speed = 1.37

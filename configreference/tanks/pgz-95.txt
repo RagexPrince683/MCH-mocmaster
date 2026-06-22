@@ -4,6 +4,13 @@ AddDisplayName = en_US, PGZ04A Type 95 SPAAA
 ExplosionSizeByCrash = 12
 
 AddDisplayName = ja_JP, PGZ04A Type 95 SPAAA
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = PGZ04A Type 95 SPAAA
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = PGZ04A Type 95 SPAAA
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 9997
 MaxHp = 200
 Speed = 0.33

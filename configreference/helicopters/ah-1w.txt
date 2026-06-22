@@ -1,6 +1,13 @@
 DisplayName = AH-1W Super Cobra
 AddDisplayName = en_US, AH-1W Super Cobra
 AddDisplayName = ja_JP, AH-1W スーパーコブラ
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = AH-1W Super Cobra
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = AH-1W Super Cobra
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28824
 MaxHp = 100
 EnableGunnerMode = true

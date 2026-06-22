@@ -1,6 +1,13 @@
 DisplayName = Yakovlev Yak-38 with Kh-23M
 AddDisplayName = en_US, Yakovlev Yak-38 with Kh-23M
 AddDisplayName = ru_RU, ЯК-38 (2 Ракеты Х-23)
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Yakovlev Yak-38 with Kh-23M
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Yakovlev Yak-38 with Kh-23M
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 MaxHp = 100
 EnableNightVision = false
 EnableEntityRadar = false

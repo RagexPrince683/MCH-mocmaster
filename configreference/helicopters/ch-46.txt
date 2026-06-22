@@ -1,6 +1,13 @@
 DisplayName = Boeing Vertol CH-46
 AddDisplayName = en_US, Boeing Vertol CH-46
 AddDisplayName = ja_JP, ボーイング・バートル CH-46
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Boeing Vertol CH-46
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Boeing Vertol CH-46
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28811
 MaxHp = 100
 EnableNightVision = true

@@ -1,6 +1,13 @@
 ﻿DisplayName = M150 APC (M113 TOW)
 AddDisplayName = en_US, M150 APC (M113 TOW)
 AddDisplayName = ja_JP, M150 APC (M113 TOW)
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = M150 APC (M113 TOW)
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = M150 APC (M113 TOW)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30191
 MaxHp = 200
 Speed = 0.42

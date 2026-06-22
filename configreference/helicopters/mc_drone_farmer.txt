@@ -1,6 +1,13 @@
 DisplayName = DJI Phantom Farming UAV
 AddDisplayName = en_US, DJI Phantom Farming UAV
 AddDisplayName = ja_JP, 農業用RCドローンUAV
+NameOnEarlyASRadar = Small UAV
+NameOnModernASRadar = DJI Phantom Farming UAV
+NameOnEarlyAARadar = Small UAV
+NameOnModernAARadar = DJI Phantom Farming UAV
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 
 NewSmallUAV = true
 HideEntity = true

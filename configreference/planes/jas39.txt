@@ -1,6 +1,13 @@
 ﻿DisplayName = SAAB JAS39 Gripen
 AddDisplayName = en_US, SAAB JAS39 Gripen
 AddDisplayName = ja_JP, SAAB JAS39 グリペン
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = SAAB JAS39 Gripen
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = SAAB JAS39 Gripen
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28727
 MaxHp = 100
 EnableNightVision = true

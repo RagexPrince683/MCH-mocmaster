@@ -1,6 +1,13 @@
 ﻿DisplayName = Subaru Impreza
 AddDisplayName = en_US, Subaru Impreza
 AddDisplayName = ja_JP, インプレッサ
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Subaru Impreza
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Subaru Impreza
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 ItemID = 30555
 MaxHp = 200
 ThrottleUpDown = 0.925

@@ -1,6 +1,13 @@
 DisplayName = Changhe Z-10
 AddDisplayName = en_US, Changhe Z-10
 AddDisplayName = ja_JP, WZ  10
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Changhe Z-10
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Changhe Z-10
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 8994
 MaxHp = 100
 EnableGunnerMode = true

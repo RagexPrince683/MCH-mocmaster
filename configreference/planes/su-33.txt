@@ -1,6 +1,13 @@
 DisplayName = Su-33 Flanker-D
 AddDisplayName = en_US, Su-33 Flanker-D
 AddDisplayName = ja_JP, Su-33 フランカーD
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Su-33 Flanker-D
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Su-33 Flanker-D
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28716
 MaxHp = 100
 ThrottleUpDown = 0.3

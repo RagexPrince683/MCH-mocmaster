@@ -1,5 +1,12 @@
 DisplayName = M48A1 Patton
 AddDisplayName = zh_CN,M48A1 巴顿 主战坦克
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M48A1 Patton
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M48A1 Patton
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 30100
 MaxHp = 265
 Speed = 0.3

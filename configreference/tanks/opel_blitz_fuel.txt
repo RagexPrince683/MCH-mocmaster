@@ -1,4 +1,11 @@
 DisplayName = Opel Blitz 1.5T Truck - Inventory
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Opel Blitz 1.5T Truck - Inventory
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Opel Blitz 1.5T Truck - Inventory
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 230
 ThrottleUpDown = 0.81
 Speed = 0.55

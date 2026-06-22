@@ -1,6 +1,13 @@
 ﻿DisplayName = Leopard 1A4
 AddDisplayName = en_US, Leopard 1A4
 AddDisplayName = ja_JP, レオパルト1A4
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Leopard 1A4
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Leopard 1A4
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30059
 MaxHp = 200
 Speed = 0.4

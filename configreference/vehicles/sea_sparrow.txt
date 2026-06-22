@@ -1,6 +1,13 @@
 DisplayName = Mk29 Sea Sparrow (RIM-7)
 AddDisplayName = en_US, Mk29 Sea Sparrow (RIM-7)
 AddDisplayName = ja_JP, Mk29 艦対空個艦防衛ミサイル
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = Mk29 Sea Sparrow (RIM-7)
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = Mk29 Sea Sparrow (RIM-7)
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.40
 ItemID = 28615
 MaxHP = 100
 Gravity = -9.81

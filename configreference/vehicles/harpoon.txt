@@ -1,6 +1,13 @@
 ﻿DisplayName = RGM-84 Harpoon Missile Launching Platform/Canister Launcher
 AddDisplayName = en_US, RGM-84 Harpoon Missile Launching Platform/Canister Launcher
 AddDisplayName = ja_JP, ハープーン
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = RGM-84 Harpoon Missile Launching Platform/Canister Launcher
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = RGM-84 Harpoon Missile Launching Platform/Canister Launcher
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28698
 AddTexture = harpoon
 CameraPosition = 0.0, 4.50, 0.0

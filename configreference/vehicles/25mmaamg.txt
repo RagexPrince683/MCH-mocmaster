@@ -1,6 +1,13 @@
 DisplayName =  Type 96 25mm Tri-mounted Anti-Aircraft Gun 
 AddDisplayName = en_US, Type 96 25mm Tri-mounted Anti-Aircraft Gun
 AddDisplayName = ja_JP, 25mm三連装機銃
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = Type 96 25mm Tri-mounted Anti-Aircraft Gun
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = Type 96 25mm Tri-mounted Anti-Aircraft Gun
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28608
 MaxHp = 100
 HideEntity = false

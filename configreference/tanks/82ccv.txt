@@ -1,6 +1,13 @@
 ﻿DisplayName = Type 82 CCV
 AddDisplayName = en_US, Type 82 CCV
 AddDisplayName = ja_JP, 82式指揮通信車
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Type 82 CCV
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Type 82 CCV
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30102
 MaxHp = 200
 Speed = 0.65

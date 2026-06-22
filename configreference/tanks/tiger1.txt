@@ -1,6 +1,13 @@
 DisplayName = Tiger H1
 AddDisplayName = ja_JP, タイガー H1
 AddDisplayName = en_US, Tiger H1
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Tiger H1
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Tiger H1
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 90129
 ;;estimated max armor thickness is 102mm thus divided by two equals 51
 MaxHp = 150

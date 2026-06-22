@@ -1,6 +1,13 @@
 DisplayName = Improvised DJI Phantom Weaponized UAV
 AddDisplayName = en_US, Improvised DJI Phantom Weaponized UAV
 AddDisplayName = ja_JP, ??RC????UAV
+NameOnEarlyASRadar = Small UAV
+NameOnModernASRadar = Improvised DJI Phantom Weaponized UAV
+NameOnEarlyAARadar = Small UAV
+NameOnModernAARadar = Improvised DJI Phantom Weaponized UAV
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 
 NewSmallUAV = true
 HideEntity = true

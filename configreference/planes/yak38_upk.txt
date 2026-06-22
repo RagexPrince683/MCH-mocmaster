@@ -1,6 +1,13 @@
 DisplayName = Yakovlev Yak-38 with GSh-23
 AddDisplayName = en_US, Yakovlev Yak-38 with GSh-23
 AddDisplayName = ru_RU, ЯК-38 (4 УПК-23-250)
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Yakovlev Yak-38 with GSh-23
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Yakovlev Yak-38 with GSh-23
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 MaxHp = 100
 EnableNightVision = false
 EnableEntityRadar = false

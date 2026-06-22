@@ -1,6 +1,13 @@
 DisplayName = F-14D Tomcat
 AddDisplayName = en_US, F-14D Tomcat
 AddDisplayName = ja_JP, F-14D トムキャット
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F-14D Tomcat
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F-14D Tomcat
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 30000
 MaxHp = 100
 EnableNightVision = true

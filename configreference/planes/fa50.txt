@@ -1,6 +1,13 @@
 DisplayName = FA-50
 AddDisplayName = en_US, FA-50
 AddDisplayName = ko_KR, FA-50 공격기
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = FA-50
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = FA-50
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 MaxHp = 100
 EnableNightVision = true
 EnableEntityRadar = true

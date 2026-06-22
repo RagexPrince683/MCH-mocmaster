@@ -1,6 +1,13 @@
 DisplayName = MV-22 Osprey
 AddDisplayName = en_US, MV-22 Osprey
 AddDisplayName = ja_JP, MV-22 オスプレイ
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = MV-22 Osprey
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = MV-22 Osprey
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28701
 MaxHp = 100
 EnableNightVision = true

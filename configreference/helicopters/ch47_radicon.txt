@@ -2,6 +2,13 @@ DisplayName = CH47 chnuke radicon
 ;i might remove this...
 AddDisplayName = en_US, CH47 CHnuke RC
 AddDisplayName = ja_JP, CH-47 チヌーク ラジコンヘリ
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = CH47 chnuke radicon
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = CH47 chnuke radicon
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 30024
 MaxHp = 20
 Speed = 0.3

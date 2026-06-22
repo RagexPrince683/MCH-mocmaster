@@ -1,5 +1,12 @@
 DisplayName = MH-53E Sea Dragon
 AddDisplayName = ja_JP, MH-53E シードラゴン
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = MH-53E Sea Dragon
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = MH-53E Sea Dragon
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28828
 MaxHp = 200
 Float = true

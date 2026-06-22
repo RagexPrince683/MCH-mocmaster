@@ -1,5 +1,12 @@
 DisplayName = M1A2 Abrams SEPv3
 AddDisplayName = ja_JP, M1A2 エイブラムス SEPv3
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M1A2 Abrams SEPv3
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M1A2 Abrams SEPv3
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 800
 Speed = 0.42

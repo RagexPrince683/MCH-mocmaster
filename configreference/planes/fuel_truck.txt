@@ -1,5 +1,12 @@
 DisplayName = Fuel Truck
 AddDisplayName = ja_JP, 燃料補給車
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Fuel Truck
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Fuel Truck
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28722
 MaxHp = 100
 Speed = 0

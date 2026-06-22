@@ -1,6 +1,13 @@
 DisplayName = Mig-21 F-13
 AddDisplayName = en_US, Mig-21 F-13
 AddDisplayName = ja_JP, Mig-21 F-13
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Mig-21 F-13
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Mig-21 F-13
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28720
 MaxHp = 100
 EnableNightVision = false

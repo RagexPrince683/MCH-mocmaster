@@ -1,6 +1,13 @@
 DisplayName = B-1B Lancer (Nuclear Payload)
 AddDisplayName = en_US, B-1B Lancer (Nuclear Payload)
 AddDisplayName = ja_JP, B-1B ランサー (Nuclear Payload)
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = B-1B Lancer (Nuclear Payload)
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = B-1B Lancer (Nuclear Payload)
+ChaffWaitTime = 500
+ChaffUseTime = 160
+ThrottleDownFactor = 0.20
 ItemID = 28747
 MaxHp = 250
 Speed = 2.323

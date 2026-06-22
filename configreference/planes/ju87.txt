@@ -1,5 +1,12 @@
 DisplayName = Ju-87D-3 Stuka
 AddDisplayName = ru_RU, Ju-87D-3 Stuka
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Ju-87D-3 Stuka
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Ju-87D-3 Stuka
+ChaffWaitTime = 500
+ChaffUseTime = 160
+ThrottleDownFactor = 0.20
 ItemID = 30005
 MaxHp = 150
 Speed = 0.679

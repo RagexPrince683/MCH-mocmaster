@@ -1,4 +1,11 @@
 DisplayName = BM-27 Uragan MLRS
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = BM-27 Uragan MLRS
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = BM-27 Uragan MLRS
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 250
 Speed = 0.4
 Sound = dieselman

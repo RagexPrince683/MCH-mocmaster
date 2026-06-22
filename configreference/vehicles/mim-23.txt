@@ -1,5 +1,12 @@
 DisplayName = MIM-23 HAWK
 AddDisplayName = ja_JP, MIM-23 ホーク
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = MIM-23 HAWK
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = MIM-23 HAWK
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.40
 ItemID = 28613
 MaxHP = 100
 CameraPosition = 0.0, 4.50, 0.0

@@ -1,6 +1,13 @@
 ﻿DisplayName = 12.8 cm Flak 40 Anti-Aircraft Gun with quadripod mount
 AddDisplayName = en_US, 12.8 cm Flak 40 Anti-Aircraft Gun with quadripod mount
 AddDisplayName = ja_JP, 一七式十五糎高角砲 支脚有リ
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = 12.8 cm Flak 40 Anti-Aircraft Gun with quadripod mount
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = 12.8 cm Flak 40 Anti-Aircraft Gun with quadripod mount
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28616
 MaxHp = 120
 HideEntity = false

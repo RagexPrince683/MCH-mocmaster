@@ -1,6 +1,13 @@
 DisplayName = BMPT Terminator
 AddDisplayName = en_US, BMPT Terminator
 AddDisplayName = ja_JP, BMP-T
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = BMPT Terminator
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = BMPT Terminator
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 191919
 MaxHp = 200
 Speed = 0.37

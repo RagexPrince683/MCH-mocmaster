@@ -1,6 +1,13 @@
 ﻿DisplayName = Humvee with Wagon Back
 AddDisplayName = ja_JP, Humvee with Wagon Back
 AddDisplayName = en_US, Humvee with Wagon Back
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Humvee with Wagon Back
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Humvee with Wagon Back
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30032
 MaxHp = 230
 ThrottleUpDown = 0.81

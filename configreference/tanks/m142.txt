@@ -1,6 +1,13 @@
 ﻿DisplayName = M142 HIMARS MLRS (M1140 Truck)
 AddDisplayName = en_US, M142 HIMARS MLRS (M1140 Truck)
 AddDisplayName = ru_RU, M142 HIMARS MLRS (M1140 Truck)
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = M142 HIMARS MLRS (M1140 Truck)
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = M142 HIMARS MLRS (M1140 Truck)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30153
 MaxHp = 200
 Speed = 0.53

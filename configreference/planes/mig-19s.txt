@@ -1,6 +1,13 @@
 DisplayName = MiG-19S Farmer
 AddDisplayName = en_US, MiG-19S Farmer
 AddDisplayName = ko_KR, 미그-19S 파머
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = MiG-19S Farmer
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = MiG-19S Farmer
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 40014
 MaxHp = 100
 Speed = 2.53

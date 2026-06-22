@@ -1,5 +1,12 @@
 DisplayName = Kawasaki OH-1
 AddDisplayName = ja_JP, 川崎 OH-1
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Kawasaki OH-1
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Kawasaki OH-1
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28827
 MaxHp = 100
 EnableGunnerMode = true

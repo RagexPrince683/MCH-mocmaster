@@ -1,6 +1,13 @@
 ﻿DisplayName = Type 62
 AddDisplayName = ja_JP, Type 62
 AddDisplayName = en_US, Type 62 
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Type 62
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Type 62
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 110
 Speed = 0.37
 

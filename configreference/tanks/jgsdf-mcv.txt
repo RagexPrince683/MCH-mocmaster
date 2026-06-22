@@ -1,6 +1,13 @@
 ﻿DisplayName = Type 16 Maneuver Combat Vehicle
 AddDisplayName = en_US, Type 16 Maneuver Combat Vehicle
 AddDisplayName = ja_JP, 陸上自衛隊 機動戦闘車
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = Type 16 Maneuver Combat Vehicle
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = Type 16 Maneuver Combat Vehicle
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.50
 ItemID = 30070
 MaxHp = 200
 Speed = 0.62

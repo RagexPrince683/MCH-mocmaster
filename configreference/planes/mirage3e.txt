@@ -1,6 +1,13 @@
 DisplayName = Dassault Mirage IIIE
 AddDisplayName = en_US, Dassault Mirage IIIE
 AddDisplayName = ko_KR, 미라주 3E
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Dassault Mirage IIIE
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Dassault Mirage IIIE
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 40012
 MaxHp = 100
 Speed = 4.0

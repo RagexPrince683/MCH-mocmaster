@@ -1,4 +1,11 @@
 DisplayName = 2S1 SAU-122 Gvozdika 
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = 2S1 SAU-122 Gvozdika
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = 2S1 SAU-122 Gvozdika
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 Speed = 0.37
 Sound = twosone

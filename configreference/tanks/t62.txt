@@ -1,9 +1,15 @@
 DisplayName = T-62
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = T-62
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = T-62
+ChaffWaitTime = 0
+ChaffUseTime = 0
 MaxHp = 265
 Speed = 0.31
 Sound = bmpone
 ThrottleUpDown = 1.4
-throttleDownFactor = 0.4
+ThrottleDownFactor = 0.40
 MobilityRoll = 0
 Gravity = -0.61
 GravityInWater = -1.0

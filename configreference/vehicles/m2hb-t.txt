@@ -1,6 +1,13 @@
 ﻿DisplayName = M2 Browning Twin Quadruple Mount
 AddDisplayName = en_US, M2 Browning Twin Quadruple Mount
 AddDisplayName = ja_JP, M2HB 二艇結合
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M2 Browning Twin Quadruple Mount
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M2 Browning Twin Quadruple Mount
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30033
 MaxHp = 100
 HideEntity = false

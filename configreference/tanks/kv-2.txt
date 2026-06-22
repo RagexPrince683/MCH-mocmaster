@@ -1,6 +1,13 @@
 DisplayName = KV-2 'Gigant' (1940)
 AddDisplayName = en_US, KV-2 'Gigant' (1940)
 AddDisplayName = ja_JP, KV-2 ギガント (1940)
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = KV-2 'Gigant' (1940)
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = KV-2 'Gigant' (1940)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 MaxHp = 150
 Speed = 0.17
 Sound = kvtwo

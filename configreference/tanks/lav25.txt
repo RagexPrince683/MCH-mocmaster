@@ -1,4 +1,11 @@
 DisplayName = LAV-25
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = LAV-25
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = LAV-25
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.50
 MaxHp = 200
 Speed = 0.62
 Sound = stryker

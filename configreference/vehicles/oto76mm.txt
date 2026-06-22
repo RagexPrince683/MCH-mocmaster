@@ -1,5 +1,12 @@
 DisplayName = Oto Melara 76mm Naval Automatic Cannon
 AddDisplayName = ja_JP, オート・メラーラ76mm砲
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Oto Melara 76mm Naval Automatic Cannon
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Oto Melara 76mm Naval Automatic Cannon
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28601
 MaxHp = 100
 Gravity = -9.81

@@ -1,6 +1,13 @@
 DisplayName = Project1204 Shmel Partol-Boat
 AddDisplayName = en_US, Project 1204 Shmel Patrol-Boat
 AddDisplayName = ja_JP, プロジェクト1204 Shmel国境警備艇
+NameOnEarlyASRadar = Small Boat
+NameOnModernASRadar = Project1204 Shmel Partol-Boat
+NameOnEarlyAARadar = Small Boat
+NameOnModernAARadar = Project1204 Shmel Partol-Boat
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.30
 ItemID = 28748
 MaxHp = 1850
 Speed = 0.28

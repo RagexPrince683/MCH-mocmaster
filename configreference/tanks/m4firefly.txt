@@ -1,6 +1,13 @@
 ﻿DisplayName = Sherman VC Firefly
 AddDisplayName = en_US, Sherman VC Firefly
 AddDisplayName = ja_JP, シャーマン VC Firefly
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Sherman VC Firefly
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Sherman VC Firefly
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 30181
 MaxHp = 110
 Speed = 0.25

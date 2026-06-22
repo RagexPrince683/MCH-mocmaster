@@ -1,6 +1,13 @@
 DisplayName = OTR-21 Tochka 9P129 TEL/SS-21 Scarab
 AddDisplayName = en_US, OTR-21 Tochka 9P129 TEL/SS-21 Scarab
 AddDisplayName = ua_UA, OTR-21 Tochka 9P129 TEL/SS-21 Scarab
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = OTR-21 Tochka 9P129 TEL/SS-21 Scarab
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = OTR-21 Tochka 9P129 TEL/SS-21 Scarab
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 ItemID = 197714
 MaxHp = 200
 Speed = 0.37

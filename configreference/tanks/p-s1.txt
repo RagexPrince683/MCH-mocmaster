@@ -1,6 +1,13 @@
 DisplayName = Pantsir SA-22 Greyhound Air Defense System
 AddDisplayName = en_US, KAMAZ-6560 with Pantsir SA-22 Greyhound Air Defense System
 AddDisplayName = ja_JP, Pantsir 自走式近距離防空システム
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = Pantsir SA-22 Greyhound Air Defense System
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = Pantsir SA-22 Greyhound Air Defense System
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 150
 Speed = 0.43
 Sound = kamaz

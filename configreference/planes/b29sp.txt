@@ -1,6 +1,13 @@
 DisplayName = B-29 Superfortress (Silverplate Program)
 AddDisplayName = en_US, B-29 Superfortress (Silverplate Program)
 AddDisplayName = ja_JP, B-29 スーパーフォートレス (Silverplate Program)
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = B-29 Superfortress (Silverplate Program)
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = B-29 Superfortress (Silverplate Program)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.20
 MaxHp = 250
 Speed = 0.999
 

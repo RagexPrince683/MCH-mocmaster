@@ -1,4 +1,11 @@
 DisplayName = 15T MAN KAT 1 8x8 Truck with Roland SAM System 'FlaRakRad'
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = 15T MAN KAT 1 8x8 Truck with Roland SAM System 'FlaRakRad'
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = 15T MAN KAT 1 8x8 Truck with Roland SAM System 'FlaRakRad'
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.45
 MaxHp = 200
 Speed = 0.62
 Sound = flarakrad

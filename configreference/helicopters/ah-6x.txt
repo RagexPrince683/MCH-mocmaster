@@ -1,5 +1,12 @@
 DisplayName = Boeing AH-6 ULB
 AddDisplayName = ja_JP, ボーイング AH-6
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Boeing AH-6 ULB
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Boeing AH-6 ULB
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28810
 MaxHp = 100
 EnableGunnerMode = true

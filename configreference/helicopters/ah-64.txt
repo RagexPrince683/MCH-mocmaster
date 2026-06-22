@@ -1,5 +1,12 @@
 DisplayName = AH-64D Apache Longbow
 AddDisplayName = ja_JP, AH-64D アパッチ・ロングボウ
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = AH-64D Apache Longbow
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = AH-64D Apache Longbow
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28800
 MaxHp = 100
 EnableGunnerMode = true

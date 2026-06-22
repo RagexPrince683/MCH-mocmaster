@@ -2,6 +2,13 @@ DisplayName = Bf.109
 AddDisplayName = en_US, Bf-109 G-6
 ;/R6
 AddDisplayName = ru_RU, Bf.109
+NameOnEarlyASRadar = Prop Aircraft
+NameOnModernASRadar = Bf.109
+NameOnEarlyAARadar = Prop Aircraft
+NameOnModernAARadar = Bf.109
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 30063
 MaxHp = 100
 Speed = 1.114

@@ -1,6 +1,13 @@
 DisplayName = BV-138 C-1
 AddDisplayName = en_US, BV-138 C-1
 AddDisplayName = ja_JP, BV-138 C-1
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = BV-138 C-1
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = BV-138 C-1
+ChaffWaitTime = 500
+ChaffUseTime = 160
+ThrottleDownFactor = 0.20
 ItemID = 28711
 MaxHp = 150
 Speed = 0.496

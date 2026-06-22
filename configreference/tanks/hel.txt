@@ -1,6 +1,13 @@
 ﻿DisplayName = Humvee with Fast Back
 AddDisplayName = ja_JP, Humvee with Fast Back
 AddDisplayName = en_US, Humvee with Fast Back
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Humvee with Fast Back
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Humvee with Fast Back
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ;hola pidor!!!
 ItemID = 30032
 MaxHp = 230

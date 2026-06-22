@@ -1,5 +1,12 @@
 DisplayName = M1A1SA Abrams TUSK II
 AddDisplayName = ja_JP, M1A1SA エイブラムス TUSK II
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M1A1SA Abrams TUSK II
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M1A1SA Abrams TUSK II
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30107
 MaxHp = 800
 Speed = 0.43

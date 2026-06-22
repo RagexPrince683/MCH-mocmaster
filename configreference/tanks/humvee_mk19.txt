@@ -1,6 +1,13 @@
 ﻿DisplayName = Fast Back Humvee with Mark 19 Grenade Launcher
 AddDisplayName = ja_JP, Fast Back Humvee with Mark 19 Grenade Launcher
 AddDisplayName = en_US, Fast Back Humvee with Mark 19 Grenade Launcher
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Fast Back Humvee with Mark 19 Grenade Launcher
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Fast Back Humvee with Mark 19 Grenade Launcher
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 ItemID = 30032
 MaxHp = 230
 ThrottleUpDown = 0.81

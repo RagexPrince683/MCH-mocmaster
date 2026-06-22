@@ -1,6 +1,13 @@
 DisplayName = DDG-1000 Zumwalt Destroyer
 AddDisplayName = en_US, DDG-1000 Zumwalt Destroyer
 AddDisplayName = ja_JP, DDG-1000 ズムウォルト駆逐艦
+NameOnEarlyASRadar = Surface Ship
+NameOnModernASRadar = DDG-1000 Zumwalt Destroyer
+NameOnEarlyAARadar = Surface Ship
+NameOnModernAARadar = DDG-1000 Zumwalt Destroyer
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.30
 
 PivotTurnThrottle = 0.2
 PreventWaterBobbing = true

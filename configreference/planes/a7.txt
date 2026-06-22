@@ -1,5 +1,12 @@
 DisplayName = A-7 Corsair
 AddDisplayName = ja_JP, A-7 corsair
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = A-7 Corsair
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = A-7 Corsair
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28740
 MaxHp = 100
 Sound = asev

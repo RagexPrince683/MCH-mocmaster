@@ -1,6 +1,13 @@
 DisplayName = GAZ-66 "shishiga"
 ;with 23mm ZU-23-2 Anti-Aircraft Twin Auto Cannon
 AddDisplayName = ru_RU, ГАЗ-66
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = GAZ-66 "shishiga"
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = GAZ-66 "shishiga"
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ;и ЗУ-23-2 (Для Ильи)
 MaxHp = 150
 ThrottleUpDown = 0.81

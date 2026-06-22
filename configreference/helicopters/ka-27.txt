@@ -1,5 +1,12 @@
 DisplayName = Ka-27 Helix
 AddDisplayName = ja_JP, Ka-27 ヘリックス
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Ka-27 Helix
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Ka-27 Helix
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28804
 MaxHp = 100
 EnableGunnerMode = true

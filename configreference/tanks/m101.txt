@@ -1,5 +1,12 @@
 DisplayName = 105mm M119 Howitzer
 AddDisplayName = ru_RU, 105mm M119 Howitzer
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = 105mm M119 Howitzer
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = 105mm M119 Howitzer
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30151
 MaxHp = 100
 Sound = none

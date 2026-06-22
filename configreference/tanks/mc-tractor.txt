@@ -1,5 +1,12 @@
 DisplayName = Generic Tractor
 AddDisplayName = ja_JP, Generic トラクター
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Generic Tractor
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Generic Tractor
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 
 ExplosionSizeByCrash = 2
 

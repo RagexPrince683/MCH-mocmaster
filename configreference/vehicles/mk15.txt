@@ -1,5 +1,12 @@
 DisplayName = Mk.15 Phalanx CIWS
 AddDisplayName = ja_JP, Mk.15 ファランクス
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Mk.15 Phalanx CIWS
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Mk.15 Phalanx CIWS
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28600
 MaxHp = 100
 Gravity = -9.81

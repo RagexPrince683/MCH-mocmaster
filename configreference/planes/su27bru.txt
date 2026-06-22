@@ -1,4 +1,11 @@
 DisplayName = Su-27 Flanker-B
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Su-27 Flanker-B
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Su-27 Flanker-B
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 MaxHp = 100
 Speed = 4.0
 EnableNightVision = false

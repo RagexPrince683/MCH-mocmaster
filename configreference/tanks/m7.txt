@@ -1,5 +1,12 @@
 DisplayName = M7 Priest
 AddDisplayName = ru_RU, M7 Priest
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M7 Priest
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M7 Priest
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 309916
 MaxHp = 100
 Speed = 0.24

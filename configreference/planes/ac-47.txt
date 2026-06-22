@@ -1,6 +1,13 @@
 DisplayName = Douglas AC-47 Spooky "Puff, the Magic Dragon"
 AddDisplayName = en_US, Douglas AC-47 Spooky "Puff, the Magic Dragon"
 AddDisplayName = ja_JP, AC-47 Spooky "Puff, the Magic Dragon"
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = Douglas AC-47 Spooky "Puff, the Magic Dragon"
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = Douglas AC-47 Spooky "Puff, the Magic Dragon"
+ChaffWaitTime = 500
+ChaffUseTime = 160
+ThrottleDownFactor = 0.20
 HUD = plane_wwiinotherm, plane_wwiinotherm
 EnableEntityRadar = false
 Speed = 0.626

@@ -1,5 +1,12 @@
 DisplayName = K2 Black Panther
 AddDisplayName = ja_JP, K2 黒豹
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = K2 Black Panther
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = K2 Black Panther
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 30150
 MaxHp = 850
 Speed = 0.43

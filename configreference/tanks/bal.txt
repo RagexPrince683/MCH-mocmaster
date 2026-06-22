@@ -1,5 +1,12 @@
 DisplayName = MZKT-7930 heavy high mobility chassis with Bal-e Kh-35 Coastal Defense System
 AddDisplayName = en_US, MZKT-7930 heavy high mobility chassis with Bal-e Kh-35 Coastal Defense System
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = MZKT-7930 heavy high mobility chassis with Bal-e Kh-35 Coastal Defense System
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = MZKT-7930 heavy high mobility chassis with Bal-e Kh-35 Coastal Defense System
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 230
 Speed = 0.8
 Sound = dieselman

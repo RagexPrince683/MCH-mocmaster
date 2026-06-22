@@ -1,6 +1,13 @@
 DisplayName = Mazda RX-7FC
 AddDisplayName = en_US, Mazda RX-7FC
 AddDisplayName = ja_JP, マツダ RX-7FC
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Mazda RX-7FC
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Mazda RX-7FC
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28745
 MaxHp = 200
 ExplosionSizeByCrash = 3

@@ -1,5 +1,12 @@
 DisplayName = Lightweight Laser Designator Rangefinder AN/PED-1 [Advanced 'JTAC' System]
 AddDisplayName = en_US, Lightweight Laser Designator Rangefinder AN/PED-1 [Advanced 'JTAC' System]
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Lightweight Laser Designator Rangefinder AN/PED-1 [Advanced 'JTAC' System]
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Lightweight Laser Designator Rangefinder AN/PED-1 [Advanced 'JTAC' System]
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 
 MaxHP = 50
 Speed = 0

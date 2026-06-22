@@ -1,5 +1,12 @@
 DisplayName = Mk.32 Torpedo Tube
 AddDisplayName = ja_JP, Mk 32 短魚雷発射管
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Mk.32 Torpedo Tube
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Mk.32 Torpedo Tube
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28605
 MaxHp = 80
 Gravity = -9.81

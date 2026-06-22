@@ -1,6 +1,13 @@
 DisplayName = Tu-160M Super Blackjack with Rotary Launchers
 AddDisplayName = en_US, Tu-160M Super Blackjack with Rotary Launchers
 AddDisplayName =  zh_CN, 图-160M 超级海盗旗 Rotary Launchers
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Tu-160M Super Blackjack with Rotary Launchers
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Tu-160M Super Blackjack with Rotary Launchers
+ChaffWaitTime = 500
+ChaffUseTime = 160
+ThrottleDownFactor = 0.20
 ;ItemID = 30714
 MaxHp = 250
 EnableNightVision = true

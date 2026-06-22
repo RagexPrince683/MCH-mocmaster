@@ -1,5 +1,12 @@
 DisplayName = Small Zodiac Boat
 AddDisplayName = ja_JP, Small ゴムボート
+NameOnEarlyASRadar = Small Boat
+NameOnModernASRadar = Small Zodiac Boat
+NameOnEarlyAARadar = Small Boat
+NameOnModernAARadar = Small Zodiac Boat
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.30
 ItemID = 28743
 MaxHp = 55
 Speed = 0.4

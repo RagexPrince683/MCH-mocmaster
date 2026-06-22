@@ -1,6 +1,13 @@
 DisplayName = Sukhoi Su-35
 AddDisplayName = en_US, Sukhoi Su-35
 AddDisplayName = ja_JP, Su-35 ティルミナートル
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Sukhoi Su-35
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Sukhoi Su-35
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28731
 MaxHp = 100
 ThrottleUpDown = 0.3

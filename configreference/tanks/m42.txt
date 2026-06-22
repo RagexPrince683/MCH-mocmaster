@@ -1,5 +1,12 @@
 DisplayName = M42 Duster
 AddDisplayName = zh_CN, M42“除尘者”自行防空炮
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = M42 Duster
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = M42 Duster
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 MaxHp = 200
 Speed = 0.45
 Sound = bulldog

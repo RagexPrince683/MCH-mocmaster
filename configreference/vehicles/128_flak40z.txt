@@ -1,5 +1,12 @@
 ﻿DisplayName = 12.8cm Flakzwilling 40
 AddDisplayName = en_US, 12.8cm Flakzwilling 40
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = 12.8cm Flakzwilling 40
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = 12.8cm Flakzwilling 40
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28622
 MaxHp = 100
 HideEntity = false

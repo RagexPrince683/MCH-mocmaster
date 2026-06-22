@@ -2,6 +2,13 @@
 AddDisplayName = en_US, Generic ATV
 
 AddDisplayName = ja_JP, 民間ATV
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Generic ATV
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Generic ATV
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 
 ExplosionSizeByCrash = 2
 

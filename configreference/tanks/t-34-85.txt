@@ -1,6 +1,13 @@
 ﻿DisplayName = T-34-85
 AddDisplayName = en_US, T-34-85
 AddDisplayName = ru_RU, T-34-85
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = T-34-85
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = T-34-85
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 191992
 MaxHp = 350
 Speed = 0.34

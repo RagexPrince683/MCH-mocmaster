@@ -1,6 +1,13 @@
 ﻿DisplayName = Type 87 RCV
 AddDisplayName = en_US, Type 87 RCV
 AddDisplayName = ja_JP, 87式偵察警戒車
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Type 87 RCV
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Type 87 RCV
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.50
 ItemID = 30102
 MaxHp = 200
 Speed = 0.62

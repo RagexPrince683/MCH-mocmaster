@@ -1,4 +1,11 @@
 DisplayName = KamAZ-6350 8x8 Truck
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = KamAZ-6350 8x8 Truck
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = KamAZ-6350 8x8 Truck
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 200
 Speed = 0.6
 Sound = kamaz

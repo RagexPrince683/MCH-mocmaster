@@ -1,6 +1,13 @@
 ﻿DisplayName = 36cm 41st Year Type Naval Gun
 AddDisplayName = en_US, 36cm 41st Year Type Naval Gun
 AddDisplayName = ja_JP, 45口径35.6cm連装砲
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = 36cm 41st Year Type Naval Gun
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = 36cm 41st Year Type Naval Gun
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30031
 MaxHp = 1525
 HideEntity = true

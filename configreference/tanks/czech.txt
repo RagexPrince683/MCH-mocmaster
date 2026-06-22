@@ -1,5 +1,12 @@
 DisplayName = Pz.38(t) A
 AddDisplayName = Pz.38(t) A
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Pz.38(t) A
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Pz.38(t) A
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 165
 Speed = 0.28
 Sound = prop_tank

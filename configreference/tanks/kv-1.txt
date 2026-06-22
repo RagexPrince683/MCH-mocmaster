@@ -1,6 +1,13 @@
 DisplayName = KV-1 Model 1939 (L-11)
 AddDisplayName = en_US, KV-1 Model 1939 (L-11)
 AddDisplayName = ja_JP, KV-1 Model 1939 (L-11)
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = KV-1 Model 1939 (L-11)
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = KV-1 Model 1939 (L-11)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 MaxHp = 150
 Speed = 0.23
 Sound = kvtwo

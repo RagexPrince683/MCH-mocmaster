@@ -1,4 +1,11 @@
 DisplayName = Ground Drone UGV
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Ground Drone UGV
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Ground Drone UGV
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 
 ExplosionSizeByCrash = 20
 

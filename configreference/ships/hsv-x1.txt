@@ -1,6 +1,13 @@
 DisplayName = HSV-X1 Joint Venture
 AddDisplayName = en_US, HSV-X1 Joint Venture
 AddDisplayName = ja_JP, HSV-X1 軍用フェリー
+NameOnEarlyASRadar = Surface Ship
+NameOnModernASRadar = HSV-X1 Joint Venture
+NameOnEarlyAARadar = Surface Ship
+NameOnModernAARadar = HSV-X1 Joint Venture
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.30
 
 PivotTurnThrottle = 0.2
 PreventWaterBobbing = true

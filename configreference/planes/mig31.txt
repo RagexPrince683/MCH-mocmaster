@@ -1,4 +1,11 @@
 DisplayName = MiG-31 Foxhound
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = MiG-31 Foxhound
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = MiG-31 Foxhound
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 MaxHp = 100
 ; Realism pass: MiG-31 high-speed interceptor, ~1,860 mph / Mach 2.8 class, ceiling ~20.6 km.
 Speed = 4.00

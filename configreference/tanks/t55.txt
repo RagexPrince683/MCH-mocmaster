@@ -1,6 +1,13 @@
 ﻿DisplayName = T-55
 AddDisplayName = ja_JP, T-55
 AddDisplayName = en_US, T-55
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = T-55
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = T-55
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 205
 Speed = 0.32

@@ -1,5 +1,12 @@
 DisplayName = VAZ 2105 "Tsar Zhiga" (Fresh Auto Team, Drift Car)
 AddDisplayName = ru_RU, ВАЗ 2105 "Царь Жига" (Fresh Auto Team)
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = VAZ 2105 "Tsar Zhiga" (Fresh Auto Team, Drift Car)
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = VAZ 2105 "Tsar Zhiga" (Fresh Auto Team, Drift Car)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 200
 Speed = 0.95
 Sound = lada

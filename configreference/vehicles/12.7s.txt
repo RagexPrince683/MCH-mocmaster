@@ -1,6 +1,13 @@
 DisplayName = 12.7 cm/40 Type 89 Naval Gun Shield Variant
 AddDisplayName = en_US, 12.7 cm/40 Type 89 Naval Gun Shield Variant
 AddDisplayName = ja_JP, 12.7cm連装高角砲シールド付き
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = 12.7 cm/40 Type 89 Naval Gun Shield Variant
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = 12.7 cm/40 Type 89 Naval Gun Shield Variant
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28606
 MaxHp = 140
 HideEntity = false

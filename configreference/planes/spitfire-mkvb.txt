@@ -1,6 +1,13 @@
 DisplayName = SuperMarine Spitfire Mk.Vb
 AddDisplayName = en_US, Supermarine Spitfire Mk.Vb
 AddDisplayName = ru_RU, SuperMarine Spitfire Mk.Vb
+NameOnEarlyASRadar = Prop Aircraft
+NameOnModernASRadar = SuperMarine Spitfire Mk.Vb
+NameOnEarlyAARadar = Prop Aircraft
+NameOnModernAARadar = SuperMarine Spitfire Mk.Vb
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 30061
 MaxHp = 100
 Speed = 1.034

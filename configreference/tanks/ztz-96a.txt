@@ -1,6 +1,13 @@
 ﻿DisplayName = ZTZ-96A (Type 96A)
 AddDisplayName = en_US, ZTZ-96A (Type 96A)
 AddDisplayName = ja_JP, ZTZ-96A
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = ZTZ-96A (Type 96A)
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = ZTZ-96A (Type 96A)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 33404
 MaxHp = 530
 Speed = 0.40

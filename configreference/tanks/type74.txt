@@ -1,6 +1,13 @@
 ﻿DisplayName = Type 74 C
 AddDisplayName = en_US, Type 74 C
 AddDisplayName = ja_JP, 74式戦車 C型
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Type 74 C
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Type 74 C
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 91129
 MaxHp = 260
 Speed = 0.33

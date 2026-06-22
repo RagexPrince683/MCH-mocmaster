@@ -1,6 +1,13 @@
 ﻿DisplayName = MAZ-543 with 9K72 Elbrus SS-1C Scud B Missile
 AddDisplayName = ru_RU, MAZ-543 with 9K72 Elbrus SS-1C Scud B Missile
 AddDisplayName = en_US, MAZ-543 with 9K72 Elbrus SS-1C Scud B Missile
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = MAZ-543 with 9K72 Elbrus SS-1C Scud B Missile
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = MAZ-543 with 9K72 Elbrus SS-1C Scud B Missile
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 33121
 MaxHp = 200
 Speed = 0.37

@@ -1,6 +1,13 @@
 DisplayName = F-15 S/MTD
 AddDisplayName = en_US, F-15 S/MTD
 AddDisplayName = ja_JP, F-15 S/MTD
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F-15 S/MTD
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F-15 S/MTD
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28734
 MaxHp = 100
 EnableNightVision = false

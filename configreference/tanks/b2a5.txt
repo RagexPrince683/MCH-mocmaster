@@ -1,6 +1,13 @@
 ﻿DisplayName = Leopard 2A5
 AddDisplayName = en_US, Leopard 2A5
 AddDisplayName = zh_CN, 豹 2A5
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Leopard 2A5
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Leopard 2A5
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 37775
 MaxHp = 650
 Speed = 0.6

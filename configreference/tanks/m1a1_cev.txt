@@ -1,5 +1,12 @@
 DisplayName = M1150 Assault Breacher Vehicle (ABV)
 AddDisplayName = ja_JP, M1150 Assault Breacher Vehicle (ABV)
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M1150 Assault Breacher Vehicle (ABV)
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M1150 Assault Breacher Vehicle (ABV)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 800
 Speed = 0.45

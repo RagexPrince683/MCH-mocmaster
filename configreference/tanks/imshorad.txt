@@ -1,6 +1,13 @@
 DisplayName = M-SHORAD Stryker 'Sergeant Stout'
 AddDisplayName = en_US, M-SHORAD Stryker 'Sergeant Stout'
 AddDisplayName = ja_JP, M-SHORAD Stryker
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = M-SHORAD Stryker 'Sergeant Stout'
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = M-SHORAD Stryker 'Sergeant Stout'
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.50
 MaxHp = 200
 Speed = 0.62
 Sound = stryker

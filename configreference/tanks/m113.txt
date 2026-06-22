@@ -1,6 +1,13 @@
 ﻿DisplayName = M113A3 APC with M2 Browning Cupola Turret
 AddDisplayName = en_US, M113A3 APC with M2 Browning Cupola Turret
 AddDisplayName = ja_JP, M113A3 APC with M2 Browning Cupola Turret
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = M113A3 APC with M2 Browning Cupola Turret
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = M113A3 APC with M2 Browning Cupola Turret
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30191
 MaxHp = 230
 Speed = 0.42

@@ -1,6 +1,13 @@
 DisplayName = M1126 Stryker Infantry Carrier Vehicle with M2 Browning Protector RWS
 AddDisplayName = en_US, M1126 Stryker Infantry Carrier Vehicle with M2 Browning Protector RWS
 AddDisplayName = ja_JP, M1126 M2 RWS
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = M1126 Stryker Infantry Carrier Vehicle with M2 Browning Protector RWS
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = M1126 Stryker Infantry Carrier Vehicle with M2 Browning Protector RWS
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 200
 Speed = 0.62
 Sound = stryker

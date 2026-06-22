@@ -1,5 +1,12 @@
 DisplayName = EC665 Tiger UHT
 AddDisplayName = ja_JP, EC665 ティーガー UHT型
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = EC665 Tiger UHT
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = EC665 Tiger UHT
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28802
 MaxHp = 100
 EnableGunnerMode = true

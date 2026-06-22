@@ -1,6 +1,13 @@
 DisplayName = Baykar Bayraktar TB2
 AddDisplayName = en_US, Baykar Bayraktar TB2
 AddDisplayName = ja_JP, Bayraktar Tb 2 リーパー
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Baykar Bayraktar TB2
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Baykar Bayraktar TB2
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28707
 MaxHp = 100
 ;;Speed = 0.001

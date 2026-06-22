@@ -1,5 +1,12 @@
 DisplayName = C5M Super Galaxy
 AddDisplayName = en_US, C5M Super Galaxy
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = C5M Super Galaxy
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = C5M Super Galaxy
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 MaxHp = 250
 Speed = 1.489
 

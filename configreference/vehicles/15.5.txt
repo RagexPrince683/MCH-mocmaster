@@ -1,6 +1,13 @@
 DisplayName = 15.5 cm/60 3rd Year Type Naval Gun
 AddDisplayName = en_US, 15.5 cm/60 3rd Year Type Naval Gun
 AddDisplayName = ja_JP, 15.5cm3連装砲
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = 15.5 cm/60 3rd Year Type Naval Gun
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = 15.5 cm/60 3rd Year Type Naval Gun
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28604
 MaxHp = 105
 HideEntity = true

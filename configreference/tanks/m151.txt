@@ -1,6 +1,13 @@
 ﻿DisplayName = M151 Kennedy Jeep
 AddDisplayName = en_US, M151 Kennedy Jeep
 AddDisplayName = ja_JP, M151 ケネディジープ
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = M151 Kennedy Jeep
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = M151 Kennedy Jeep
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28766
 MaxHp = 200
 ThrottleUpDown = 0.81

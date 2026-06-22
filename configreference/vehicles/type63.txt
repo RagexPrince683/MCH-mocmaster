@@ -1,5 +1,12 @@
 DisplayName = Type-63 MLRS
 AddDisplayName = ja_JP, ボフォース Type-63 MLRS
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = Type-63 MLRS
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = Type-63 MLRS
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28611
 MaxHp = 100
 HideEntity = false

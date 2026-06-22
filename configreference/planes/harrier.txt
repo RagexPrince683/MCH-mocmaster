@@ -1,6 +1,13 @@
 DisplayName = AV-8B Harrier II
 AddDisplayName = en_US, AV-8B Harrier II
 AddDisplayName = ja_JP, AV-8B ハリアーII
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = AV-8B Harrier II
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = AV-8B Harrier II
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28700
 MaxHp = 100
 EnableNightVision = true

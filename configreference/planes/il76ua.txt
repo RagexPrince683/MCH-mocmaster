@@ -1,6 +1,13 @@
 DisplayName = Il-76MD-90A
 AddDisplayName = en_US, Il-76MD-90A
 AddDisplayName = ru_RU, Ил-76MD-90A
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = Il-76MD-90A
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = Il-76MD-90A
+ChaffWaitTime = 500
+ChaffUseTime = 160
+ThrottleDownFactor = 0.20
 MaxHp = 250
 Speed = 1.566
 

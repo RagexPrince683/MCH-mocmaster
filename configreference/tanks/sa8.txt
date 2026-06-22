@@ -1,6 +1,13 @@
 DisplayName = 9K33 Osa SA-8
 AddDisplayName = en_US, 9K33 Osa SA-8
 AddDisplayName = ja_JP, 9K33 Osa SA-8
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = 9K33 Osa SA-8
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = 9K33 Osa SA-8
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.40
 ItemID = 36432
 MaxHp = 200
 ThrottleUpDown = 2.0

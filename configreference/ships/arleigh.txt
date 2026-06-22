@@ -1,5 +1,12 @@
 DisplayName = DDG-51 USS Arleigh Burke Destroyer
 AddDisplayName = ru_RU, DDG-51 USS Arleigh Burke Destroyer
+NameOnEarlyASRadar = Surface Ship
+NameOnModernASRadar = DDG-51 USS Arleigh Burke Destroyer
+NameOnEarlyAARadar = Surface Ship
+NameOnModernAARadar = DDG-51 USS Arleigh Burke Destroyer
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.30
 ItemID = 28748
 MaxHp = 8900
 ;theres no replacement for displacement bitches
