@@ -84,6 +84,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private float hoverAssistStrength;
    private float hoverCollectiveCorrection;
    private float hoverThrottleBias;
+   private int hoverVerticalAdjustmentCooldown;
    private float hoverCyclicPitchCorrection;
    private float hoverCyclicRollCorrection;
    private float manualInputOverrideFactor;
@@ -221,6 +222,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.hoverAssistStrength = 0.0F;
       this.hoverCollectiveCorrection = 0.0F;
       this.hoverThrottleBias = 0.0F;
+      this.hoverVerticalAdjustmentCooldown = 0;
       this.hoverCyclicPitchCorrection = 0.0F;
       this.hoverCyclicRollCorrection = 0.0F;
       this.manualInputOverrideFactor = 0.0F;
@@ -1086,6 +1088,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private void updateNewHelicopterHoverThrottleController(float throttleUpDown) {
       if(!this.newHeliFlightModelEnabled || !this.isHoveringMode() || this.heliInfo == null) {
          this.hoverThrottleBias = 0.0F;
+         this.hoverVerticalAdjustmentCooldown = 0;
          this.hoverCollectiveCorrection = 0.0F;
          return;
       }
@@ -1093,6 +1096,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float configuredStrength = MathHelper.clamp_float(this.heliInfo.hoverAssistStrength, 0.0F, 1.0F);
       if(configuredStrength <= 0.0F || super.throttleUp || super.throttleDown) {
          this.hoverThrottleBias *= 0.90F;
+         this.hoverVerticalAdjustmentCooldown = 0;
          this.hoverCollectiveCorrection = this.hoverThrottleBias;
          return;
       }
@@ -1105,12 +1109,18 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float verticalError = this.targetVerticalSpeed - verticalSpeed;
       boolean correctingVerticalSpeed = MathHelper.abs(verticalError) > deadzone;
       if(correctingVerticalSpeed) {
-         float strength = Math.max(this.heliInfo.hoverVerticalStabilizerStrength, 0.0F);
-         float correctionStep = MathHelper.clamp_float(verticalError * strength * configuredStrength, -correctionLimit, correctionLimit);
-         this.hoverThrottleBias = MathHelper.clamp_float(this.hoverThrottleBias + correctionStep, -biasLimit, biasLimit);
-         this.addCurrentThrottle((double)(this.hoverThrottleBias * Math.max(throttleUpDown, 0.0F)));
-         this.setCurrentThrottle(MathHelper.clamp_double(this.getCurrentThrottle(), 0.0D, 1.0D));
+         if(this.hoverVerticalAdjustmentCooldown > 0) {
+            --this.hoverVerticalAdjustmentCooldown;
+         } else {
+            float strength = Math.max(this.heliInfo.hoverVerticalStabilizerStrength, 0.0F);
+            float correctionStep = MathHelper.clamp_float(verticalError * strength * configuredStrength, -correctionLimit, correctionLimit);
+            this.hoverThrottleBias = MathHelper.clamp_float(this.hoverThrottleBias + correctionStep, -biasLimit, biasLimit);
+            this.addCurrentThrottle((double)(this.hoverThrottleBias * Math.max(throttleUpDown, 0.0F)));
+            this.setCurrentThrottle(MathHelper.clamp_double(this.getCurrentThrottle(), 0.0D, 1.0D));
+            this.hoverVerticalAdjustmentCooldown = this.heliInfo != null?MathHelper.clamp_int(this.heliInfo.hoverVerticalAdjustmentInterval, 0, 200):0;
+         }
       } else {
+         this.hoverVerticalAdjustmentCooldown = 0;
          if(this.hoverThrottleBias > correctionLimit) {
             this.hoverThrottleBias -= correctionLimit;
          } else if(this.hoverThrottleBias < -correctionLimit) {
