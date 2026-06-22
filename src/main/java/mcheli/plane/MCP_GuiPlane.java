@@ -217,14 +217,17 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       if(!MCH_Config.EnableNewPlaneWeaponHud.prmBool) {
          return;
       }
-      List lines = this.collectWeaponAmmoLines(plane);
+      int leftMargin = 12;
+      int rightMargin = Math.max(24, MCH_Config.NewPlaneWeaponHudRightMargin.prmInt);
+      int maxTextWidth = Math.max(80, super.width - leftMargin - rightMargin - 8);
+      List lines = this.collectWeaponAmmoLines(plane, maxTextWidth);
       if(lines.isEmpty()) {
          return;
       }
 
-      int width = 132;
-      int x = MathHelper.clamp_int(super.width - width - MCH_Config.NewPlaneWeaponHudRightMargin.prmInt, 4, Math.max(4, super.width - width - 4));
-      int y = MathHelper.clamp_int(MCH_Config.NewPlaneWeaponHudY.prmInt, 4, Math.max(4, super.height - (lines.size() * 10 + 8)));
+      int width = Math.min(maxTextWidth + 8, Math.max(148, this.getMaxHudLineWidth(lines) + 8));
+      int x = MathHelper.clamp_int(super.width - width - rightMargin, leftMargin, Math.max(leftMargin, super.width - width - rightMargin));
+      int y = MathHelper.clamp_int(MCH_Config.NewPlaneWeaponHudY.prmInt, 12, Math.max(12, super.height - (lines.size() * 10 + 16)));
       int selected = plane.getCurrentWeaponID(player);
       this.drawHudPanel(x - 4, y - 4, width, lines.size() * 10 + 8);
       for(int i = 0; i < lines.size(); ++i) {
@@ -234,7 +237,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       }
    }
 
-   private List collectWeaponAmmoLines(MCP_EntityPlane plane) {
+   private List collectWeaponAmmoLines(MCP_EntityPlane plane, int maxTextWidth) {
       List lines = new ArrayList();
       if(plane.weapons == null) {
          return lines;
@@ -242,10 +245,21 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       for(int i = 0; i < plane.weapons.length; ++i) {
          MCH_WeaponSet ws = plane.weapons[i];
          if(ws != null) {
-            lines.add(String.format("%-15s %4s", new Object[]{this.getWeaponHudName(ws), this.getWeaponHudAmmo(ws)}));
+            lines.add(this.formatWeaponAmmoLine(ws, maxTextWidth));
          }
       }
       return lines;
+   }
+
+   private String formatWeaponAmmoLine(MCH_WeaponSet ws, int maxTextWidth) {
+      String ammo = this.getWeaponHudAmmo(ws);
+      String name = this.getWeaponHudName(ws);
+      String line = String.format("%-18s %5s", new Object[]{name, ammo});
+      while(super.mc.fontRenderer.getStringWidth(line) > maxTextWidth && name.length() > 4) {
+         name = name.substring(0, name.length() - 2) + "~";
+         line = String.format("%-18s %5s", new Object[]{name, ammo});
+      }
+      return line;
    }
 
    private String getWeaponHudName(MCH_WeaponSet ws) {
@@ -256,6 +270,14 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    private String getWeaponHudAmmo(MCH_WeaponSet ws) {
       int ammo = ws.getAmmoNum() + ws.getRestAllAmmoNum();
       return ammo >= 0 ? String.valueOf(ammo) : "--";
+   }
+
+   private int getMaxHudLineWidth(List lines) {
+      int width = 0;
+      for(int i = 0; i < lines.size(); ++i) {
+         width = Math.max(width, super.mc.fontRenderer.getStringWidth((String)lines.get(i)));
+      }
+      return width;
    }
 
    private void drawHudLines(List lines, int x, int y, int color, int glowColor) {

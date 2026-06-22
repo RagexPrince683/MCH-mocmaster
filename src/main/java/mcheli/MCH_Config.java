@@ -501,9 +501,9 @@ public class MCH_Config {
       NewPlaneSimpleHudX.desc = ";Top-left new-plane simple HUD X offset in scaled GUI pixels.";
       NewPlaneSimpleHudY = new MCH_ConfigPrm("NewPlaneSimpleHudY", 12);
       NewPlaneSimpleHudY.desc = ";Top-left new-plane simple HUD Y offset in scaled GUI pixels.";
-      NewPlaneWeaponHudRightMargin = new MCH_ConfigPrm("NewPlaneWeaponHudRightMargin", 14);
+      NewPlaneWeaponHudRightMargin = new MCH_ConfigPrm("NewPlaneWeaponHudRightMargin", 28);
       NewPlaneWeaponHudRightMargin.desc = ";Right-side new-plane weapon HUD margin in scaled GUI pixels.";
-      NewPlaneWeaponHudY = new MCH_ConfigPrm("NewPlaneWeaponHudY", 34);
+      NewPlaneWeaponHudY = new MCH_ConfigPrm("NewPlaneWeaponHudY", 42);
       NewPlaneWeaponHudY.desc = ";Right-side new-plane weapon HUD Y offset in scaled GUI pixels.";
       SwitchWeaponWithMouseWheel = new MCH_ConfigPrm("SwitchWeaponWithMouseWheel", true);
       AllHeliSpeed = new MCH_ConfigPrm("AllHeliSpeed", 1.5D);
