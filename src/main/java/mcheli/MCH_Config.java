@@ -175,6 +175,9 @@ public class MCH_Config {
    public static MCH_ConfigPrm EnableNewPlaneSimpleHud;
    public static MCH_ConfigPrm EnableNewPlaneWeaponHud;
    public static MCH_ConfigPrm EnableNewPlaneHudGlow;
+   public static MCH_ConfigPrm EnableNewHeliHudSharedReadouts;
+   public static MCH_ConfigPrm EnableNewHeliWeaponHud;
+   public static MCH_ConfigPrm EnableNewVehicleHudGlow;
    public static MCH_ConfigPrm NewPlaneSimpleHudX;
    public static MCH_ConfigPrm NewPlaneSimpleHudY;
    public static MCH_ConfigPrm NewPlaneWeaponHudRightMargin;
@@ -496,7 +499,13 @@ public class MCH_Config {
       EnableNewPlaneWeaponHud = new MCH_ConfigPrm("EnableNewPlaneWeaponHud", true);
       EnableNewPlaneWeaponHud.desc = ";Render the compact right-side weapon/ammo HUD for new-flight-model planes only.";
       EnableNewPlaneHudGlow = new MCH_ConfigPrm("EnableNewPlaneHudGlow", true);
-      EnableNewPlaneHudGlow.desc = ";Draw subtle background panels and one-pixel glow text for the new-flight plane HUD.";
+      EnableNewPlaneHudGlow.desc = ";Deprecated plane-specific glow toggle; EnableNewVehicleHudGlow controls shared new vehicle HUD glow.";
+      EnableNewHeliHudSharedReadouts = new MCH_ConfigPrm("EnableNewHeliHudSharedReadouts", true);
+      EnableNewHeliHudSharedReadouts.desc = ";Render ALT/VS/FUEL readouts inside the existing helicopter HUD for new-flight helicopters only.";
+      EnableNewHeliWeaponHud = new MCH_ConfigPrm("EnableNewHeliWeaponHud", true);
+      EnableNewHeliWeaponHud.desc = ";Render the existing-style helicopter weapon/ammo list for new-flight helicopters only.";
+      EnableNewVehicleHudGlow = new MCH_ConfigPrm("EnableNewVehicleHudGlow", true);
+      EnableNewVehicleHudGlow.desc = ";Draw subtle background panels and one-pixel glow text for shared new vehicle HUD additions.";
       NewPlaneSimpleHudX = new MCH_ConfigPrm("NewPlaneSimpleHudX", 12);
       NewPlaneSimpleHudX.desc = ";Top-left new-plane simple HUD X offset in scaled GUI pixels.";
       NewPlaneSimpleHudY = new MCH_ConfigPrm("NewPlaneSimpleHudY", 12);
@@ -744,6 +753,9 @@ public class MCH_Config {
               EnableNewPlaneSimpleHud,
               EnableNewPlaneWeaponHud,
               EnableNewPlaneHudGlow,
+              EnableNewHeliHudSharedReadouts,
+              EnableNewHeliWeaponHud,
+              EnableNewVehicleHudGlow,
               NewPlaneSimpleHudX,
               NewPlaneSimpleHudY,
               NewPlaneWeaponHudRightMargin,

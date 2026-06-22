@@ -1,6 +1,8 @@
 # Fixed-wing new flight model configuration
 
-This document is the audit and user-facing reference for the fixed-wing `EnableRealisticFlightModel` configuration fields. The current simulation is still the existing MCHeli/Minecraft flight model; this refactor only makes values easier to read by adding real-world-unit aliases where the existing value already represents a real quantity. It does **not** add new aerodynamic systems such as wing area, wingspan, aspect ratio, Oswald efficiency, or lift/drag coefficient lookup tables.
+This document is the audit and user-facing reference for fixed-wing aircraft that opt into the new flight model through `UseNewMobilitySystem`, `UseNewFlightModel`, `EnableNewFlightModel`, or the older `EnableRealisticFlightModel` alias. The implemented model adds data-driven mass/thrust simulation, configurable gravity, lift and energy management, AoA/stall behavior, control-authority penalties, combat flaps, flight ceilings, dive assist, and overspeed handling while preserving legacy behavior for aircraft that do not opt in.
+
+The parser also accepts several real-world-unit aliases for new packs. Those aliases convert into the same internal gameplay values used by the current simulation; they do not introduce unfinished aerodynamic tables such as wing area, wingspan, aspect ratio, Oswald efficiency, or lift/drag coefficient lookup tables.
 
 ## Unit conventions
 
@@ -106,7 +108,7 @@ The parser warns for internally contradictory values such as structural G below 
 
 ## Remaining unitless gameplay tuning
 
-The current model still contains tuning values that are not direct real-world aerodynamic properties. Do not replace them with invented `WingArea`, `DragCoefficient`, `LiftCoefficient`, `AspectRatio`, or control-surface deflection fields unless a future task redesigns the flight model. The documented unitless values are retained because they control the existing energy, stall, damping, and input-response approximations directly.
+The current model still contains tuning values that are not direct real-world aerodynamic properties. Do not replace them with invented `WingArea`, `DragCoefficient`, `LiftCoefficient`, `AspectRatio`, or control-surface deflection fields unless a later physics redesign adds those systems. The documented unitless values are retained because they control the existing energy, stall, damping, and input-response approximations directly.
 
 ## Stall and idle-throttle behavior
 
