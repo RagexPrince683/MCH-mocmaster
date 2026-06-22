@@ -2,6 +2,52 @@
 
 This page summarizes the major project-wide systems that distinguish MCHeli Overdrive from the original MCHeli codebase. It is written for players, server owners, and pack makers who need to understand what this fork adds, why each system exists, and which configuration surfaces control it.
 
+## Content expansion
+
+### Expanded vehicle roster and roles
+
+**What it does:** Overdrive supports a much larger combined-arms roster than original MCHeli. The repository's `configreference/` tree contains hundreds of reference vehicle configs across fixed-wing aircraft, helicopters, ships, tanks, and other vehicles, and the loader continues to support larger external MCHeli-style asset packs.
+
+**Why it exists:** Overdrive is intended for warfare, faction, and survival packs that need more than a small aircraft set. A pack can include strategic bombers, UAVs, gunships, transports, naval vessels, submarines, armored vehicles, civilian vehicles, logistics vehicles, turrets, carriers, and support platforms.
+
+**How it differs from original MCHeli:** Original MCHeli focused primarily on aircraft and a smaller content set. Overdrive treats multiple vehicle categories and battlefield roles as first-class content targets while preserving the MCHeli text-config format.
+
+**Configuration:** Vehicle definitions remain data-driven under `assets/mcheli/` or compatible external content packs. Pack makers use the shared `MCH_BaseVehicleInfo` keys plus type-specific guides in `docs/vehicle-config/` for planes, helicopters, ships, tanks, turrets, and base vehicle behavior.
+
+## Weapons and combat systems
+
+### Expanded weapon roles and guidance systems
+
+**What it does:** Overdrive keeps MCHeli's weapon-definition format and expands battlefield roles for anti-air, anti-armor, anti-ship, close-air-support, torpedo, guided-weapon, bomb, rocket, cannon, dispenser, chemical/nuclear-compatible, and support-equipment loadouts. The framework is designed for very large weapon catalogs in external content packs, including packs that scale to hundreds or thousands of weapon definitions.
+
+**Why it exists:** Combined-arms packs need more than generic rockets and guns. Vehicles need role-specific payloads, lock behavior, radar identity, countermeasures, naval weapons, support dispensers, and strategic payloads.
+
+**How it differs from original MCHeli:** Overdrive adds or documents richer missile guidance behavior, torpedo/dispenser paths, lockable entity synchronization, RWR/radar identity, flares/chaff separation, active protection support, and HBM-compatible explosion hooks.
+
+**Configuration:** Pack makers configure weapon stations with `AddWeapon`, `AddTurretWeapon`, and weapon-part keys, and tune weapon definitions through MCHeli-style weapon files. Vehicle combat/support keys include `RadarType`, `RWRType`, `Stealth`, `FlareType`, `FlareOption`, `HasChaff`, `ChaffUseTime`, `ChaffWaitTime`, `HasAPS`, `APSUseTime`, `APSWaitTime`, `APSRange`, `AmmoSupplyRange`, and `RepairOtherVehicles`.
+
+### Warnings, countermeasures, and protection
+
+**What it does:** Vehicles can expose radar-warning identity, lock warnings, flare countermeasures, chaff countermeasures, maintenance, and active protection systems. Flares and chaff are separate systems so IR-style and radar-style threats can be handled differently by content and tuning.
+
+**Why it exists:** Overdrive's air and ground combat needs survivability tools and target-identification data for missiles, radars, and battlefield awareness rather than relying only on vehicle HP.
+
+**How it differs from original MCHeli:** The fork adds a stronger framework around warning/sensor identity and defensive subsystems while retaining existing MCHeli weapon and HUD compatibility.
+
+**Configuration:** Users/server owners can globally tune collision and damage rules; pack makers tune each vehicle's radar/RWR names, stealth, countermeasure timing, APS range/timing, armor damage clamps, and weapon loadouts.
+
+## Nuclear warfare and HBM integration
+
+### HBM Nuclear Tech compatibility
+
+**What it does:** Overdrive includes reflection-based compatibility hooks for HBM Nuclear Tech classes. Supported weapon configs can invoke HBM nuclear explosion entities, mushroom-cloud effects, `ExplosionNT`, and chemical cloud effects when HBM is present.
+
+**Why it exists:** Many 1.7.10 warfare packs combine MCHeli-style vehicles with HBM Nuclear Tech. Overdrive provides strategic delivery paths for bombers, missiles, artillery, and nuclear-capable vehicle configs without hard-requiring HBM in every pack.
+
+**How it differs from original MCHeli:** Original MCHeli did not provide this server-scale nuclear warfare bridge. Overdrive can connect vehicle-delivered payloads to HBM effects when matching content and HBM classes are available.
+
+**Configuration:** Weapon configs use HBM-aware fields such as `explosionType`, `nukeYield`, and chemical effect fields where supported by the weapon code. Content packs can pair those weapons with strategic bombers, missile launchers, naval platforms, or artillery vehicles. Non-HBM packs continue using normal MCHeli explosion behavior.
+
 ## Vehicle physics and aircraft systems
 
 ### New fixed-wing flight model
@@ -131,6 +177,28 @@ This page summarizes the major project-wide systems that distinguish MCHeli Over
 **How it differs from original MCHeli:** Legacy HUD files still load through the existing `HUD` config system. Overdrive adds gated new HUD overlays and extra telemetry for opted-in systems without forcing existing content packs to rewrite HUD definitions.
 
 **Configuration:** Users can toggle and position new-plane HUD pieces with `EnableNewPlaneSimpleHud`, `EnableNewPlaneWeaponHud`, `EnableNewPlaneHudGlow`, `NewPlaneSimpleHudX`, `NewPlaneSimpleHudY`, `NewPlaneWeaponHudRightMargin`, and `NewPlaneWeaponHudY`. Pack makers use `NewFlightThrottleHudDisplay` and `NewHeliControlHudDisplay` / `NewHelicopterControlHudDisplay` plus normal `HUD` assignments.
+
+## Progression, crafting, and interoperability
+
+### Drafting Table and OreDictionary recipes
+
+**What it does:** Overdrive's Drafting Table supports shaped, shapeless, shaped OreDictionary, and shapeless OreDictionary recipes. Recipe creation is validated server-side by output item, and the GUI can render ore recipes correctly. Item definitions can register OreDictionary names for use by other mods and by Overdrive recipes.
+
+**Why it exists:** Survival and faction servers need vehicle production to fit industrial modpacks instead of relying only on creative tabs. OreDictionary support allows steel, electronics, plates, engines, ammunition components, and other modded ingredients to be interchangeable where recipes allow it.
+
+**How it differs from original MCHeli:** The fork improves the Drafting Table's mod-interoperability path and recipe validation/display behavior so it can support industrialized vehicle and ammunition production chains in large modpacks.
+
+**Configuration:** Pack makers use `AddRecipe`, `AddShapelessRecipe`, item `OreDict` / `AddOreDict`, and standard Forge ore names in recipe definitions. Server owners can control recipe availability with `DisableItemRecipe`, Drafting Table IDs/config, and normal modpack recipe policy.
+
+### Survival and faction progression support
+
+**What it does:** Overdrive documentation and config surfaces support vehicle component systems, ammunition/support items, supply vehicles, ammo/fuel supply ranges, and equipment progression built by content packs.
+
+**Why it exists:** The project is meant to fit survival, faction, and warfare-focused servers where vehicles are produced, supplied, repaired, armed, and countered through server economies rather than spawned as isolated creative items.
+
+**How it differs from original MCHeli:** Original MCHeli's Drafting Table remains, but Overdrive expands the compatibility and configuration surface needed for larger production chains and industrial mod integration.
+
+**Configuration:** Pack makers combine recipes, OreDictionary entries, item definitions, `AmmoSupplyRange`, `FuelSupplyRange`, `RepairOtherVehicles`, weapon/ammo items, and vehicle support roles. Server owners can pair these with external recipe mods and permission rules.
 
 ## Framework and asset-configuration improvements
 

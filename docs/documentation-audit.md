@@ -75,6 +75,11 @@ This file records features/configuration discovered during the documentation pas
 - New camera, freelook, held look-ahead, active-development follow-camera, active-development mouse-aim, and new HUD overlay configuration.
 - Expanded cross-category vehicle config framework with legacy/new-system opt-in behavior.
 
+- Expanded vehicle/content roster and category coverage across aircraft, helicopters, drones/UAVs, ships, submarines, armor, civilian/support vehicles, and turrets.
+- Expanded weapon/combat framework covering guided missiles, torpedoes, bombs, rockets, cannons, dispensers, radar/RWR identity, flares, chaff, and APS support.
+- HBM Nuclear Tech compatibility hooks for nuclear/chemical effects and strategic weapon delivery when supported content and HBM classes are present.
+- Drafting Table and OreDictionary recipe support for survival/faction progression and industrialized vehicle/ammunition production chains.
+
 ### New documentation added
 
 - Added `docs/overdrive-features.md`, a project-wide feature overview explaining what each major Overdrive system does, why it exists, how it differs from original MCHeli, and the user-facing or pack-maker-facing configuration where applicable.
