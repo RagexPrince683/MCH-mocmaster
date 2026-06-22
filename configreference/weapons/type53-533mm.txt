@@ -1,0 +1,28 @@
+DisplayName = 533mm Type 53 Torpedo
+Type = torpedo
+Power = 6500
+Explosion = 6
+ExplosionInWater = 14
+ModelBullet = ugst
+Acceleration = 1.1
+Accelerationinwater = 12
+ProximityFuseDist = 3
+Flaming = false
+Sight = None
+Delay = 2
+GuidedTorpedo = false
+;;todo fix guided torpedos
+Gravity = -0.04
+GravityInWater = 0
+ReloadTime = 4000
+
+Sound = bomb_snd
+
+MaxAmmo = 16
+SuppliedNum = 1
+Round = 6
+Item =  6, iron_ingot
+Item =  4, gunpowder
+Item =  2, redstone
+
+

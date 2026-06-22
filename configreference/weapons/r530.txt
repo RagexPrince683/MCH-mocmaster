@@ -1,0 +1,39 @@
+DisplayName = R.530 [AAM]
+Type = AAMissile
+Power = 27
+Acceleration = 4.59
+Explosion = 8
+Flaming = false
+Sight = MissileSight
+Delay = 5
+ReloadTime = 1000
+Round = 1
+LockTime = 24
+ProximityFuseDist = 2
+RigidityTime = 1
+TurningFactor = 0.1
+MaxLockOnRange = 450
+AntiFlareCount = 8
+ActiveRadar = false
+ScanInterval = 5
+CanLockMissile = false
+EnableBVR = true
+IsHeatSeekerMissile = false
+IsRadarMissile = true
+TickEndHoming = 1000
+MaxDegreeOfMissile = 45
+SpeedDependsAircraft = true
+ModelBullet = aim9h
+Sound = missile_1_snd
+DamageFactor = tank, 1.5
+DamageFactor = plane, 3.0
+DamageFactor = vehicle 2.0
+DamageFactor = heli, 3.0
+
+
+
+MaxAmmo = 1
+SuppliedNum = 1
+Item =  1, iron_ingot
+Item =  1, gunpowder
+Item =  1, redstone

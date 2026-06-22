@@ -1,0 +1,29 @@
+DisplayName = 533mm Type 53 UGST/Fizik Torpedo
+Type = torpedo
+Power = 7500
+Explosion = 8
+ExplosionInWater = 16
+ModelBullet = ugst
+Acceleration = 1.1
+Accelerationinwater = 12
+ProximityFuseDist = 3
+Flaming = false
+Sight = None
+Delay = 2
+GuidedTorpedo = false
+;;todo fix guided torpedos
+Gravity = -0.04
+GravityInWater = 0
+ReloadTime = 4000
+Round = 2
+
+Sound = bomb_snd
+
+MaxAmmo = 22 
+SuppliedNum = 1
+Round = 6
+Item =  6, iron_ingot
+Item =  4, gunpowder
+Item =  2, redstone
+
+

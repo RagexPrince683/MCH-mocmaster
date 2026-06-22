@@ -1,0 +1,34 @@
+DisplayName = MBDA Meteor [AAM]
+Type = AAMissile
+Power = 100
+Acceleration = 10
+Explosion = 7
+Flaming = false
+Sight = MissileSight
+Delay = 5
+LockTime = 15
+ProximityFuseDist = 1
+RigidityTime = 3
+TurningFactor = 0.16
+MaxLockOnRange = 1050
+AntiFlareCount = 28
+ActiveRadar = true
+ScanInterval = 2
+CanLockMissile = false
+EnableBVR = true
+IsHeatSeekerMissile = false
+IsRadarMissile = true
+TickEndHoming = 1800
+MaxDegreeOfMissile = 65
+SpeedDependsAircraft = true
+ModelBullet = Meteor
+ReloadTime = 1000
+Sound = missile_1_snd
+
+Round = 8
+
+MaxAmmo = 8
+SuppliedNum = 2
+Item =  2, iron_ingot
+Item =  4, gunpowder
+Item =  4, redstone

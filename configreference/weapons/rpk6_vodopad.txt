@@ -1,0 +1,41 @@
+DisplayName = RPK-6 Vodopad ASW Missile-Torpedo
+Type = torpedo
+
+; This represents the delivered ASW torpedo/depth weapon, not a full ship-killing torpedo.
+Power = 2200
+Explosion = 8
+ExplosionInWater = 12
+
+ModelBullet = LWT
+Acceleration = 1.2
+AccelerationInWater = 8.0
+
+ProximityFuseDist = 4
+Flaming = false
+Sight = MoveSight
+Delay = 10
+Sound = missile_1_snd
+
+; Keep false until guided torpedoes are fixed.
+GuidedTorpedo = false
+
+Gravity = -0.04
+GravityInWater = 0.01
+TrajectoryParticle = cloud
+
+ReloadTime = 5000
+Round = 1
+
+DamageFactor = tank, 2.0
+DamageFactor = plane, 4.5
+DamageFactor = vehicle, 4.5
+DamageFactor = heli, 4.5
+DamageFactor = player, 10.0
+
+; Split loadout: 16 Type 53 + 6 Vodopad = 22 total. -1 for nuclear depth charge
+MaxAmmo = 5
+SuppliedNum = 1
+
+Item =  6, iron_ingot
+Item =  6, gunpowder
+Item =  4, redstone
