@@ -84,6 +84,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private float hoverAssistStrength;
    private float hoverCollectiveCorrection;
    private float hoverThrottleBias;
+   private float hoverVerticalSpeedAverage;
    private int hoverVerticalNextAdjustmentTick;
    private float hoverCyclicPitchCorrection;
    private float hoverCyclicRollCorrection;
@@ -222,6 +223,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.hoverAssistStrength = 0.0F;
       this.hoverCollectiveCorrection = 0.0F;
       this.hoverThrottleBias = 0.0F;
+      this.hoverVerticalSpeedAverage = 0.0F;
       this.hoverVerticalNextAdjustmentTick = 0;
       this.hoverCyclicPitchCorrection = 0.0F;
       this.hoverCyclicRollCorrection = 0.0F;
@@ -1085,9 +1087,41 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
    }
 
+   private float getNewHelicopterCalculatedHoverThrottle() {
+      if(this.heliInfo == null) {
+         return 0.0F;
+      }
+
+      float mass = this.sanitizePositive(this.physicalMass, 1.0F, NEW_HELI_MIN_MASS);
+      float gravity = MathHelper.abs(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
+      float maxThrust = Math.max(this.heliInfo.mainRotorMaxThrust, 0.0F);
+      float attitudeEfficiency = MathHelper.cos(this.getRotPitch() / 180.0F * 3.1415927F) * MathHelper.cos(this.getRotRoll() / 180.0F * 3.1415927F);
+      float ceilingEfficiency = (float)MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
+      float efficiency = MathHelper.clamp_float(attitudeEfficiency * ceilingEfficiency, 0.05F, 2.0F);
+      float requiredLiftRatio = maxThrust > 0.0F?(mass * gravity) / (maxThrust * efficiency):1.0F;
+
+      // At steady hover, rotor RPM follows throttle.  The new lift model applies
+      // a squared spool curve, so solve:
+      // throttle * ((throttle - 0.35) / 0.65)^2 = weight / available rotor thrust.
+      float low = 0.35F;
+      float high = 1.0F;
+      for(int i = 0; i < 16; ++i) {
+         float mid = (low + high) * 0.5F;
+         float liftSpool = MathHelper.clamp_float((mid - 0.35F) / 0.65F, 0.0F, 1.0F);
+         float producedLiftRatio = mid * liftSpool * liftSpool;
+         if(producedLiftRatio < requiredLiftRatio) {
+            low = mid;
+         } else {
+            high = mid;
+         }
+      }
+
+      return MathHelper.clamp_float((low + high) * 0.5F, 0.0F, 1.0F);
+   }
+
    private void enforceNewHelicopterHoverMinimumThrottle() {
       if(this.newHeliFlightModelEnabled && this.isHoveringMode() && this.heliInfo != null) {
-         float minimumThrottle = MathHelper.clamp_float(this.heliInfo.hoverMinimumThrottle, 0.0F, 1.0F);
+         float minimumThrottle = Math.max(MathHelper.clamp_float(this.heliInfo.hoverMinimumThrottle, 0.0F, 1.0F), this.getNewHelicopterCalculatedHoverThrottle());
          if(this.getCurrentThrottle() < (double)minimumThrottle) {
             this.setCurrentThrottle((double)minimumThrottle);
          }
@@ -1097,6 +1131,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private void updateNewHelicopterHoverThrottleController(float throttleUpDown) {
       if(!this.newHeliFlightModelEnabled || !this.isHoveringMode() || this.heliInfo == null) {
          this.hoverThrottleBias = 0.0F;
+         this.hoverVerticalSpeedAverage = 0.0F;
          this.hoverVerticalNextAdjustmentTick = 0;
          this.hoverCollectiveCorrection = 0.0F;
          return;
@@ -1113,11 +1148,19 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       }
 
       this.targetVerticalSpeed = 0.0F;
+      float calculatedHoverThrottle = this.getNewHelicopterCalculatedHoverThrottle();
+      float throttleError = calculatedHoverThrottle - (float)this.getCurrentThrottle();
+      float feedForwardLimit = MathHelper.clamp_float(this.heliInfo.hoverVerticalCorrectionLimit, 0.0F, 1.0F) * Math.max(throttleUpDown, 0.0F) * 2.0F;
+      if(feedForwardLimit > 0.0F && MathHelper.abs(throttleError) > 0.001F) {
+         this.addCurrentThrottle((double)MathHelper.clamp_float(throttleError, -feedForwardLimit, feedForwardLimit));
+         this.setCurrentThrottle(MathHelper.clamp_double(this.getCurrentThrottle(), 0.0D, 1.0D));
+      }
       float verticalSpeed = (float)MCH_HudShared.getVerticalSpeedMotionY(this);
+      this.hoverVerticalSpeedAverage += (verticalSpeed - this.hoverVerticalSpeedAverage) * 0.20F;
       float deadzone = MathHelper.clamp_float(this.heliInfo.hoverVerticalSpeedDeadzone, 0.0F, 1.0F);
       float correctionLimit = MathHelper.clamp_float(this.heliInfo.hoverVerticalCorrectionLimit, 0.0F, 1.0F);
       float biasLimit = MathHelper.clamp_float(this.heliInfo.hoverThrottleBiasLimit, 0.0F, 1.0F);
-      float verticalError = this.targetVerticalSpeed - verticalSpeed;
+      float verticalError = this.targetVerticalSpeed - this.hoverVerticalSpeedAverage;
       boolean correctingVerticalSpeed = MathHelper.abs(verticalError) > deadzone;
       if(correctingVerticalSpeed) {
          if(this.ticksExisted >= this.hoverVerticalNextAdjustmentTick) {
