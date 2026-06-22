@@ -27,6 +27,7 @@ ConcurrentGunnerMode = true
 VariableSweepWing = true
 SweepWingSpeed = 2.0
 FlareType = 2
+HasChaff = true
 AutoPilotRot = 0
 MaxFuel         = 480000
 FuelConsumption = 51.064

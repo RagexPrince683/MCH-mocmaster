@@ -92,6 +92,7 @@ MobilityYaw = 0.505
 MobilityPitch = 0.566
 MobilityRoll = 0.503
 FlareType = 2
+HasChaff = true
 ;MinRotationPitch = -40
 ;MaxRotationPitch =  40
 AddSeat       =  0.5, 3.0,3.55

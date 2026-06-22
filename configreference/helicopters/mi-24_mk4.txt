@@ -109,6 +109,7 @@ AddWeapon = targeting_pod_pv10s,   0.00,  0.30, 5.94,   0.0, 0.0,  true,2
 EnableEntityRadar = true
 RWRType = DIGITAL
 RadarType = MODERN_AS
+HasChaff = true
 
 
 ;advanced modern helicopter armed, AOW3 style

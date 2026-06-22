@@ -19,6 +19,7 @@ RadarType = EARLY_AA
 EnableEjectionSeat = true
 Speed = 1.81
 FlareType = 3
+HasChaff = true
 ParticlesScale = 0.7
 EnableSeaSurfaceParticle = true
 MaxFuel         = 27760

@@ -1,5 +1,10 @@
 DisplayName = 155mm M284 Cannon [M795E2 - HE-BB]
 Type = MachineGun1
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
 Power = 500
 ModelBullet = bullet105mm
 Explosion = 5

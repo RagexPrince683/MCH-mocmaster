@@ -1,5 +1,10 @@
 DisplayName = 75mm KwK42 L/70 Cannon [Sprgr. 42 - HE]
 Type = MachineGun2
+RecoilPitch = 0.50F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.17F
+RecoilYawRange = 0.12F
+RecoilRecoverFactor = 0.8F
 Power = 10
 Acceleration = 5.0
 ModelBullet = bullet76mm

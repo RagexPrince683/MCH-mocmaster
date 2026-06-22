@@ -1,5 +1,10 @@
 DisplayName = 155mm M126 Cannon [W48 Nuclear Artillery Shell - 0.1KT]
 Type = MachineGun1
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
 Power = 1000
 ModelBullet = bullet105mm
 Explosion = 25

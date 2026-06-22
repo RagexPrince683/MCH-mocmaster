@@ -1,5 +1,10 @@
 DisplayName = 20mm Rh202 Automatic Cannon [DM43 - HVAP-T]
 Type = MachineGun2
+RecoilPitch = 2.85F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.00F
+RecoilYawRange = 0.71F
+RecoilRecoverFactor = 0.8F
 Power = 57
 Flaming = false
 Sight = MoveSight

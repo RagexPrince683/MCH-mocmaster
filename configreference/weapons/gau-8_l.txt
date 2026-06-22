@@ -1,5 +1,11 @@
 DisplayName = 30mm GAU-8 Avenger
 Type = MachineGun1
+RecoilPitch = 2.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.70F
+RecoilYawRange = 0.50F
+RecoilRecoverFactor = 0.8F
+SpeedDependsAircraft = true
 Power = 40
 Acceleration = 6.0
 Explosion = 1

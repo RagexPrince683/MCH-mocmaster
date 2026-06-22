@@ -1,6 +1,11 @@
 DisplayName = 25mm 2M-3M
 AddDisplayName = en_US, 25mm 2M-3M
 Type = MachineGun2
+RecoilPitch = 0.90F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.32F
+RecoilYawRange = 0.23F
+RecoilRecoverFactor = 0.8F
 Power = 18
 Acceleration = 9.0
 Flaming = false

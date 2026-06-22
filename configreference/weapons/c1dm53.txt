@@ -1,5 +1,10 @@
 DisplayName = 120mm OTO Breda 120/L44 Cannon [DM53 - APFSDS]
 Type = MachineGun1
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
 Power = 623
 ModelBullet = apfsds1
 Acceleration = 7

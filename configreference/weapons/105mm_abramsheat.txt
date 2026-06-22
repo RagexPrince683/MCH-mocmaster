@@ -1,5 +1,10 @@
 DisplayName = 105mm M68A1 Cannon [M456A2 - HEAT-FS]
 Type = MachineGun2
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
 Power = 400
 ModelBullet = 3bk18m
 Acceleration = 6.5

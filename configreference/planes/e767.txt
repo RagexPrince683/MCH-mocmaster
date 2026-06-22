@@ -25,6 +25,7 @@ RadarType = MODERN_AA
 EnableGunnerMode = true
 ConcurrentGunnerMode = true
 FlareType = 2
+HasChaff = true
 InventorySize = 45
 MaxFuel         = 363080
 FuelConsumption = 35.013

@@ -17,6 +17,7 @@ EnableFoldBlade = true
 Speed = 1.84
 ThrottleUpDown = 0.8
 FlareType = 3
+HasChaff = true
 InventorySize = 9
 ;;UAV = true
 MaxFuel         = 420

@@ -94,6 +94,7 @@ InertiaMultiplier = 1.050
 ; Deprecated/invalid legacy FM key retained for audit context: FallOfEffectSpeed = 0.6
 
 FlareType = 4
+HasChaff = true
 MaxFuel         = 4200
 FuelConsumption = 1.0
 MotionFactor = 0.968

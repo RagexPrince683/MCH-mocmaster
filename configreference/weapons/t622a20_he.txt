@@ -1,5 +1,10 @@
 DisplayName = 115mm U-5TS Cannon [3OF11 - HE]
 Type = MachineGun2
+RecoilPitch = 1.55F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.54F
+RecoilYawRange = 0.39F
+RecoilRecoverFactor = 0.8F
 Power = 31
 ModelBullet = bullet
 Acceleration = 5.0

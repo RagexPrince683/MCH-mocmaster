@@ -1,5 +1,10 @@
 DisplayName = 20mm M197 Cannon [M940 - MPT-SD]
 Type = MachineGun2
+RecoilPitch = 0.80F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.28F
+RecoilYawRange = 0.20F
+RecoilRecoverFactor = 0.8F
 Power = 16
 Acceleration = 7.0
 Explosion = 1

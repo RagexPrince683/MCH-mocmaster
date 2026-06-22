@@ -23,6 +23,14 @@ IsRadarMissile = true
 TickEndHoming = 1800
 MaxDegreeOfMissile = 65
 SpeedDependsAircraft = true
+MaxLockOnAngle = 10
+PdHDNMaxDegree = 60.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 25
+PassiveRadar = false
+PassiveRadarLockOutCount = 20
+LaserGuidance = false
+HasLaserGuidancePod = false
 ModelBullet = agm65e
 Sound = aimnine
 

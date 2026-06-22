@@ -1,5 +1,10 @@
 DisplayName = 155mm M777 Howitzer [M795 Shell - HE]
 Type = MachineGun1
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
 Power = 700
 ModelBullet = 155mm
 Explosion = 5

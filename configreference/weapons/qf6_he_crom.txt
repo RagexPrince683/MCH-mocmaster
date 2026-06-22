@@ -1,5 +1,10 @@
 DisplayName = 75mm OQF Mk.V Cannon [M48 - HE]
 Type = MachineGun2
+RecoilPitch = 0.50F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.17F
+RecoilYawRange = 0.12F
+RecoilRecoverFactor = 0.8F
 Power = 10
 ModelBullet = bullet76mm
 ;Acceleration = 3.0

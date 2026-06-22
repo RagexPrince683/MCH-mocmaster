@@ -1,5 +1,11 @@
 DisplayName = 30mm GSh-30-2 Machine Gun
 Type = MachineGun1
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
+SpeedDependsAircraft = true
 Power = 60
 Explosion = 1
 Flaming = false

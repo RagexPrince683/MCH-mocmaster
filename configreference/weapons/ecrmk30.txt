@@ -1,5 +1,10 @@
 DisplayName = 30mm GIAT Cannon
 Type = MachineGun2
+RecoilPitch = 1.35F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.47F
+RecoilYawRange = 0.34F
+RecoilRecoverFactor = 0.8F
 Power = 27
 Acceleration = 6.0
 Explosion = 1

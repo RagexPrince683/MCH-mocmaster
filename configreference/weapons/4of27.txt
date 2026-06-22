@@ -1,5 +1,11 @@
 DisplayName = 152mm howitzer 2A65 [OF-45 - HE]
 Type = MachineGun1
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
+SpeedDependsAircraft = true
 Power = 700
 ModelBullet = bullet105mm
 Explosion = 4

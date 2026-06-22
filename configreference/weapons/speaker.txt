@@ -1,5 +1,10 @@
 DisplayName = Police Speaker
 Type = MachineGun1
+RecoilPitch = 0.05F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.02F
+RecoilYawRange = 0.01F
+RecoilRecoverFactor = 0.8F
 Power = 0
 ModelBullet = 0_none
 Acceleration = 1.0

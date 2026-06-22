@@ -1,5 +1,10 @@
 DisplayName = 125mm 2A46M Cannon [3OF26 EDKV - HE-TF]
 Type = MachineGun2
+RecoilPitch = 2.10F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.73F
+RecoilYawRange = 0.53F
+RecoilRecoverFactor = 0.8F
 Power = 42
 
 

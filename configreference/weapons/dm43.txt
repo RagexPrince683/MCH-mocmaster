@@ -1,5 +1,10 @@
 DisplayName = DM43 20mm [APDS]
 Type = MachineGun2
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
 Power = 66
 Acceleration = 5.0
 Flaming = false

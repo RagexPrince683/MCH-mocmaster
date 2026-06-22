@@ -1,5 +1,10 @@
 DisplayName = 40.6cm SK C/34 "Adolf Cannon" [L/4.8 KZ m Hb - HE]
 Type = MachineGun1
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
 ModelBullet = 91ap_46
 Power = 80
 Acceleration = 8
@@ -21,7 +26,7 @@ DamageFactor = tank,       8.0
 
 DisplayMortarDistance = true
 
-; RecoilBufCount = ’“‘ŞƒJƒEƒ“ƒg, Œã‘Ş’†‚ÌƒJƒEƒ“ƒg”{—¦
+; RecoilBufCount = é§é€€ã‚«ã‚¦ãƒ³ãƒˆ, å¾Œé€€ä¸­ã®ã‚«ã‚¦ãƒ³ãƒˆå€ç‡
 RecoilBufCount = 40, 5
 
 MaxAmmo = 30

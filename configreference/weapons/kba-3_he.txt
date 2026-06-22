@@ -1,5 +1,11 @@
 DisplayName = 125mm KBA-3 Cannon [3OF26 - HE]
 Type = MachineGun2
+RecoilPitch = 2.10F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.73F
+RecoilYawRange = 0.53F
+RecoilRecoverFactor = 0.8F
+SpeedDependsAircraft = true
 Power = 42
 Explosion = 3
 

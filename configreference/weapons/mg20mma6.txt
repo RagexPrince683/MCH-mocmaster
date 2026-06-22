@@ -1,5 +1,10 @@
 DisplayName = 20mm Type 99 Model 2 Automatic Cannon
 Type = MachineGun1
+RecoilPitch = 1.30F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.45F
+RecoilYawRange = 0.33F
+RecoilRecoverFactor = 0.8F
 Power = 26
 Accuracy = 1.5
 Flaming = false

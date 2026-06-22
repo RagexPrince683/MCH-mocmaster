@@ -1,5 +1,10 @@
 DisplayName = Horn
 Type = MachineGun2
+RecoilPitch = 0.05F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.02F
+RecoilYawRange = 0.01F
+RecoilRecoverFactor = 0.8F
 Power = 0
 Acceleration = 0.0
 Explosion = 0

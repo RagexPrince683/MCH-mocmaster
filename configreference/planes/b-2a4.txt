@@ -22,6 +22,7 @@ Speed = 1.757
 Sound = bone
 SoundPitch = 0.8
 FlareType = 2
+HasChaff = true
 ParticlesScale = 0.7
 EnableSeaSurfaceParticle = true
 MaxFuel         = 303000

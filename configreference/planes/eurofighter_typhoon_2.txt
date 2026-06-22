@@ -17,6 +17,7 @@ EnableEjectionSeat = true
 Speed = 4.0
 EnableGunnerMode = true
 FlareType = 4
+HasChaff = true
 MaxFuel         = 20000
 FuelConsumption = 6.897
 ParticlesScale = 0.7

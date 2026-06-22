@@ -20,6 +20,7 @@ Speed = 1.83
 Stealth = 0.8
 ThrottleUpDown = 0.8
 FlareType = 3
+HasChaff = true
 CameraPosition = 0.0, 0.7, 3.5
 MaxFuel         = 2450
 FuelConsumption = 0.681

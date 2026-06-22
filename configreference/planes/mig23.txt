@@ -19,6 +19,7 @@ Sound = migtwentythree
 Speed = 4.0
 
 FlareType = 4
+HasChaff = true
 ParticlesScale = 0.7
 EnableSeaSurfaceParticle = true
 VariableSweepWing = true

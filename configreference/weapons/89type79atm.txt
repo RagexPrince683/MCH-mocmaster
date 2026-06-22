@@ -1,5 +1,18 @@
 ﻿DisplayName = Type 79 Jyu-MAT Anti-Tank Guided Missile
 Type = TVMissile
+IsHeatSeekerMissile = true
+IsRadarMissile = false
+MaxLockOnAngle = 25
+PdHDNMaxDegree = 180.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 0
+PassiveRadar = false
+PassiveRadarLockOutCount = 0
+LaserGuidance = false
+HasLaserGuidancePod = false
+ActiveRadar = false
+ScanInterval = 1
+SpeedDependsAircraft = false
 Power = 700
 ;something about this file seems to be bugged???
 DisplayName = Type 79 Jyu-MAT Anti-Tank Guided Missile

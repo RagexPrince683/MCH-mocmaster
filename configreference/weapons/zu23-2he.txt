@@ -1,5 +1,10 @@
 DisplayName = 23x152mm Anti-Aircraft Twin-Barreled Automatic Cannon [OFZ - HE]
 Type = MachineGun2
+RecoilPitch = 0.30F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.10F
+RecoilYawRange = 0.07F
+RecoilRecoverFactor = 0.8F
 Power = 6
 Acceleration = 7
 Explosion = 1

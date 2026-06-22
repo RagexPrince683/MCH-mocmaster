@@ -17,6 +17,7 @@ EnableGunnerMode = true
 ConcurrentGunnerMode = true
 Speed = 3.306
 FlareType = 4
+HasChaff = true
 ParticlesScale = 0.7
 EnableSeaSurfaceParticle = true
 MaxFuel         = 48400

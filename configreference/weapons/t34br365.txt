@@ -1,5 +1,10 @@
 DisplayName = 85mm ZIS-S-53 [BR-365A - APHEBC]
 Type = MachineGun2
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
 Power = 135
 Acceleration = 7
 Explosion = 2

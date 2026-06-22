@@ -1,5 +1,10 @@
 DisplayName = 30mm Machine gun
 Type = MachineGun1
+RecoilPitch = 0.95F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.33F
+RecoilYawRange = 0.24F
+RecoilRecoverFactor = 0.8F
 Power = 19
 Acceleration = 4.0
 Explosion = 0

@@ -22,6 +22,7 @@ VtolYaw = 0.3
 VtolPitch = 0.22
 Speed = 2.046
 FlareType = 3
+HasChaff = true
 ParticlesScale = 0.7
 EnableSeaSurfaceParticle = true
 MaxFuel         = 14000

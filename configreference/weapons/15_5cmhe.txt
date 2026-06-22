@@ -1,5 +1,10 @@
 DisplayName = 15.5 cm/60 3rd Year Type Naval Gun [Type 0 HE - HE]
 Type = MachineGun1
+RecoilPitch = 1.80F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.63F
+RecoilYawRange = 0.45F
+RecoilRecoverFactor = 0.8F
 ModelBullet = 91ap_15_5
 Power = 36
 Acceleration = 5.7

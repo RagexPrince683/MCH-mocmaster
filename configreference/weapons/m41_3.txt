@@ -1,5 +1,10 @@
 DisplayName = 76mm M32A1 Cannon [M352 Shell - HE]
 Type = MachineGun2
+RecoilPitch = 0.75F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.26F
+RecoilYawRange = 0.19F
+RecoilRecoverFactor = 0.8F
 Power = 15
 ModelBullet = bullet105mm
 Acceleration = 5.5

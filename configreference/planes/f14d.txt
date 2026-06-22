@@ -85,6 +85,7 @@ MobilityPitch = 1.731
 MobilityRoll = 2.015
 sound = tomcat
 FlareType = 4
+HasChaff = true
 VariableSweepWing = true
 SweepWingSpeed = 0.96
 MaxFuel         = 36340

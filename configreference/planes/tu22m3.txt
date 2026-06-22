@@ -17,6 +17,7 @@ RadarType = MODERN_AS
 EnableEjectionSeat = true
 Speed = 3.48
 FlareType = 2
+HasChaff = true
 ParticlesScale = 0.7
 EnableSeaSurfaceParticle = true
 MaxFuel         = 214200

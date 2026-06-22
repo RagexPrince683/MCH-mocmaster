@@ -104,6 +104,7 @@ EnableNightVision = false
 EnableEntityRadar = true
 RWRType = DIGITAL
 RadarType = MODERN_AA
+HasChaff = true
 EnableEjectionSeat = true
 EnableSeaSurfaceParticle = true
 ParticlesScale = 0.7

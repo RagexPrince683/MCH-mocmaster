@@ -1,5 +1,10 @@
 DisplayName = 12.7x108mm Machine Gun
 Type = MachineGun1
+RecoilPitch = 1.15F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.40F
+RecoilYawRange = 0.29F
+RecoilRecoverFactor = 0.8F
 Power = 23
 Acceleration = 9.0
 Flaming = false

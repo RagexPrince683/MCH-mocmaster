@@ -1,5 +1,10 @@
 DisplayName = 46cm Type 91 Naval Cannon [HE] 
 Type = MachineGun1
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
 ModelBullet = 91ap_46
 Power = 100
 Acceleration = 6
@@ -37,7 +42,7 @@ DamageFactor = player, 20.0
 AddDisplayName = en_US, 46cm Type91 [AP] 
 SoundVolume = 15
 
-; RecoilBufCount = ’“‘ŞƒJƒEƒ“ƒg, Œã‘Ş’†‚ÌƒJƒEƒ“ƒg”{—¦
+; RecoilBufCount = é§é€€ã‚«ã‚¦ãƒ³ãƒˆ, å¾Œé€€ä¸­ã®ã‚«ã‚¦ãƒ³ãƒˆå€ç‡
 RecoilBufCount = 40, 5
 
 MaxAmmo = 15

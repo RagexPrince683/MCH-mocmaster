@@ -1,5 +1,11 @@
 DisplayName = 23mm NS-23 Automatic Cannon
 Type = MachineGun1
+RecoilPitch = 1.60F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.56F
+RecoilYawRange = 0.40F
+RecoilRecoverFactor = 0.8F
+SpeedDependsAircraft = true
 Power = 32
 Acceleration = 5.5
 Explosion = 0

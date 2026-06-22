@@ -1,5 +1,10 @@
 DisplayName = 50mm KwK.39/1 Cannon [Sprgr. 38 - HE]
 Type = MachineGun2
+RecoilPitch = 0.75F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.26F
+RecoilYawRange = 0.19F
+RecoilRecoverFactor = 0.8F
 Power = 15
 Acceleration = 7
 ModelBullet = bullet76mm

@@ -1,5 +1,10 @@
 DisplayName = 37mm Model 30 B-3 Anti-Tank Gun [M-160 - APHE]
 Type = MachineGun2
+RecoilPitch = 2.45F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.86F
+RecoilYawRange = 0.61F
+RecoilRecoverFactor = 0.8F
 Power = 49
 Acceleration = 6.5
 ModelBullet = bullet76mm

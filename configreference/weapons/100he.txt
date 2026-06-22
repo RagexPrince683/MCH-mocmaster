@@ -1,5 +1,10 @@
 DisplayName = 100mm Cannon [HE]
 Type = MachineGun2
+RecoilPitch = 2.75F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.96F
+RecoilYawRange = 0.69F
+RecoilRecoverFactor = 0.8F
 Power = 55
 ModelBullet = bullet105mm
 Acceleration = 5.0

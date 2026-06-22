@@ -1,5 +1,10 @@
 DisplayName = 125mm 2A46M-1 Smoothbore Cannon [3OF26 - HE]
 Type = MachineGun2
+RecoilPitch = 2.10F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.73F
+RecoilYawRange = 0.53F
+RecoilRecoverFactor = 0.8F
 Power = 42
 ModelBullet = 3of26
 Acceleration = 4.0

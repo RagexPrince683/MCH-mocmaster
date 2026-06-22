@@ -1,5 +1,10 @@
 DisplayName = 75mm SA50 L/57 Cannon [OE Mle 1951 - HE]
 Type = MachineGun2
+RecoilPitch = 0.75F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.26F
+RecoilYawRange = 0.19F
+RecoilRecoverFactor = 0.8F
 Power = 15
 ModelBullet = bullet76mm
 Acceleration = 5.0

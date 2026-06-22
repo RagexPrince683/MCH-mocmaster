@@ -1,5 +1,10 @@
 DisplayName = 88mm KwK43 Cannon [PzGr 40/43 - APCR]
 Type = MachineGun1
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
 ModelBullet = shortapfsds
 Power = 279
 Acceleration = 7.0

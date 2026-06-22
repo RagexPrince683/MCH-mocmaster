@@ -1,5 +1,10 @@
 DisplayName = 73mm 2A28 Grom Smoothbore Cannon [OG-15V/OG-9 - HE-Frag]
 Type = MachineGun2
+RecoilPitch = 0.55F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.19F
+RecoilYawRange = 0.14F
+RecoilRecoverFactor = 0.8F
 Power = 11
 ModelBullet = bullet105mm
 

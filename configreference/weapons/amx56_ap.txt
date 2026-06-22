@@ -1,5 +1,10 @@
 DisplayName = 120mm GIAT CN120-26/52 Cannon [OFL-120-F1 - APFSDS]
 Type = MachineGun1
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
 Power = 576
 ModelBullet =tank_ap
 Acceleration = 7

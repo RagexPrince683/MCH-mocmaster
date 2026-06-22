@@ -1,5 +1,10 @@
 DisplayName = 125mm ZPT-98 Cannon [DTB-125 - HE]
 Type = MachineGun2
+RecoilPitch = 2.25F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.79F
+RecoilYawRange = 0.56F
+RecoilRecoverFactor = 0.8F
 Power = 45
 ModelBullet = bullet105mm
 

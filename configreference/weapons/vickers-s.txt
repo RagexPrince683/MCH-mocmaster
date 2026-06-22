@@ -1,5 +1,10 @@
 DisplayName = 40mm Vickers S
 Type = MachineGun1
+RecoilPitch = 1.60F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.56F
+RecoilYawRange = 0.40F
+RecoilRecoverFactor = 0.8F
 Power = 32
 Acceleration = 5.8
 Explosion = 1
