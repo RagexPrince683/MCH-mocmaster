@@ -1,5 +1,10 @@
 DisplayName = Type 1 37mm Tank Gun [APHE]
 Type = MachineGun2
+RecoilPitch = 1.50F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.52F
+RecoilYawRange = 0.38F
+RecoilRecoverFactor = 0.8F
 Power = 30
 Acceleration = 6.5
 ModelBullet = bullet76mm

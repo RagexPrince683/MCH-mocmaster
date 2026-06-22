@@ -20,6 +20,7 @@ Speed = 2.05
 Sound = faeighteen
 
 FlareType = 3
+HasChaff = true
 ParticlesScale = 0.7
 EnableSeaSurfaceParticle = true
 MaxFuel         = 33020

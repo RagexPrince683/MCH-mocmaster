@@ -1,5 +1,10 @@
 DisplayName = 20mm Mk.38 Cannon
 Type = MachineGun2
+RecoilPitch = 1.60F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.56F
+RecoilYawRange = 0.40F
+RecoilRecoverFactor = 0.8F
 Power = 32
 Acceleration = 7.0
 Flaming = false

@@ -1,5 +1,10 @@
 DisplayName = 127mm Mark 45 Mod 4 Naval Cannon [HE-PD]
 Type = MachineGun2
+RecoilPitch = 2.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.70F
+RecoilYawRange = 0.50F
+RecoilRecoverFactor = 0.8F
 Power = 40
 ModelBullet = bullet76mm
 Acceleration = 7.0
@@ -14,7 +19,7 @@ MaxHeatCount = 120
 SetCartridge = cartridge, 0.4,  0, 0, 7.60, -0.02, 0.70
 Sound = markfourtyfive
 ;ProximityFuseDist = 3
-; RecoilBufCount = ’“‘ŞƒJƒEƒ“ƒg, Œã‘Ş’†‚ÌƒJƒEƒ“ƒg”{—¦
+; RecoilBufCount = é§é€€ã‚«ã‚¦ãƒ³ãƒˆ, å¾Œé€€ä¸­ã®ã‚«ã‚¦ãƒ³ãƒˆå€ç‡
 RecoilBufCount = 18, 6
 
 Gravity = -0.005

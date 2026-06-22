@@ -1,5 +1,10 @@
 DisplayName = 30mm GSh-6-23 [API-T]
 Type = MachineGun1
+RecoilPitch = 0.80F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.28F
+RecoilYawRange = 0.20F
+RecoilRecoverFactor = 0.8F
 Power = 16
 Acceleration = 8.0
 Explosion = 1

@@ -23,6 +23,7 @@ EnableNightVision = false
 EnableEntityRadar = true
 RWRType = ALL_WAY_EARLY
 RadarType = EARLY_AA
+HasChaff = true
 EnableEjectionSeat = true
 EnableSeaSurfaceParticle = true
 ParticlesScale = 0.7

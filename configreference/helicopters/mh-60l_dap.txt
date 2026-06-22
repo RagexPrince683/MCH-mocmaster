@@ -18,6 +18,7 @@ RadarType = MODERN_AS
 Speed = 1.84
 ThrottleUpDown = 0.6
 FlareType = 3
+HasChaff = true
 Stealth = 0.8
 CameraPosition = 0.0, 0.7, 3.5
 MaxFuel         = 2450

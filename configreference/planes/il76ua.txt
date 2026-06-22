@@ -19,6 +19,7 @@ FlareType = 2
 EnableNightVision = true
 EnableEntityRadar = true
 RadarType = MODERN_AA
+HasChaff = true
 ThirdPersonDist = 68
 
 Category = SA/TA

@@ -81,6 +81,7 @@ MobilityPitch = 2.102
 MobilityRoll = 2.520
 DamageFactor = 0.8
 FlareType = 4
+HasChaff = true
 ParticlesScale = 0.7
 EnableSeaSurfaceParticle = true
 MaxFuel         = 10000

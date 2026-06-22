@@ -1,5 +1,18 @@
 DisplayName = 127mm Mk45 MS-SGP Gun
 Type = TVMissile
+IsHeatSeekerMissile = true
+IsRadarMissile = false
+MaxLockOnAngle = 25
+PdHDNMaxDegree = 180.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 0
+PassiveRadar = false
+PassiveRadarLockOutCount = 0
+LaserGuidance = false
+HasLaserGuidancePod = false
+ActiveRadar = false
+ScanInterval = 1
+SpeedDependsAircraft = false
 Power = 127
 ModelBullet = bullet76mm
 Acceleration = 8.5
@@ -14,7 +27,7 @@ ModeNum = 2
 SetCartridge = cartridge, 0.4,  0, 0, 7.60, -0.02, 0.70
 Sound = mk45_snd
 DisableSmoke = true
-; RecoilBufCount = ’“‘ŞƒJƒEƒ“ƒg, Œã‘Ş’†‚ÌƒJƒEƒ“ƒg”{—¦
+; RecoilBufCount = é§é€€ã‚«ã‚¦ãƒ³ãƒˆ, å¾Œé€€ä¸­ã®ã‚«ã‚¦ãƒ³ãƒˆå€ç‡
 RecoilBufCount = 18, 6
 
 DamageFactor = vehicle,    2.0

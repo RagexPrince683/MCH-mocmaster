@@ -1,5 +1,10 @@
 DisplayName = 23mm NR-23 Automatic Cannon
 Type = MachineGun2
+RecoilPitch = 1.60F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.56F
+RecoilYawRange = 0.40F
+RecoilRecoverFactor = 0.8F
 Power = 32
 Explosion = 1
 ExplosionBlock = 0

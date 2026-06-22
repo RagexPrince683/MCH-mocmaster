@@ -22,6 +22,7 @@ Speed = 4.0
 ;1452mph
 
 FlareType = 4
+HasChaff = true
 ParticlesScale = 0.7
 EnableSeaSurfaceParticle = true
 VariableSweepWing = true

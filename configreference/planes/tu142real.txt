@@ -18,6 +18,7 @@ RadarType = MODERN_AS
 EnableGunnerMode = true
 Speed = 1.609
 FlareType = 3
+HasChaff = true
 Sound = twinprop
 ThrottleUpDown = 0.10
 CameraPosition = -0.3021, 0.3021, 0.3021

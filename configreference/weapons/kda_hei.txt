@@ -1,5 +1,10 @@
 DisplayName = Oerlikon KDA 35mm [HEI]
 Type = MachineGun2
+RecoilPitch = 0.55F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.19F
+RecoilYawRange = 0.14F
+RecoilRecoverFactor = 0.8F
 Power = 11
 Acceleration = 5.0
 Explosion = 2

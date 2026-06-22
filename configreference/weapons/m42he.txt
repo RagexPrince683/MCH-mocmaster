@@ -1,5 +1,10 @@
 DisplayName = 40mm M2A1 Twin Anti-Aircraft Gun [Mk.II - FI-T]
 Type = MachineGun2
+RecoilPitch = 0.45F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.16F
+RecoilYawRange = 0.11F
+RecoilRecoverFactor = 0.8F
 Power = 9
 ModelBullet = bullet76mm
 Acceleration = 7.0

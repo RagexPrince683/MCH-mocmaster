@@ -1,5 +1,11 @@
 DisplayName = 30mm MK108 Automatic Cannon
 Type = MachineGun1
+RecoilPitch = 1.25F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.44F
+RecoilYawRange = 0.31F
+RecoilRecoverFactor = 0.8F
+SpeedDependsAircraft = true
 Power = 25
 Acceleration = 4.5
 Explosion = 1

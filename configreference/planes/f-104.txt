@@ -95,6 +95,7 @@ ThirdPersonDist = 20
 EnableEntityRadar = true
 RWRType = DIGITAL
 RadarType = MODERN_AA
+HasChaff = true
 enableback = true
 
 DamageFactor = 0.8

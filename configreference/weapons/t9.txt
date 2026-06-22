@@ -1,5 +1,10 @@
 DisplayName = 37mm T9 Cannon
 Type = Machinegun2
+RecoilPitch = 1.25F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.44F
+RecoilYawRange = 0.31F
+RecoilRecoverFactor = 0.8F
 Power = 25
 Acceleration = 6.5
 Explosion = 1

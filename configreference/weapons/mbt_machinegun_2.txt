@@ -1,5 +1,10 @@
 DisplayName = Machinegun [2]
 Type = MachineGun1
+RecoilPitch = 0.10F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.03F
+RecoilYawRange = 0.03F
+RecoilRecoverFactor = 0.8F
 Power = 2
 Acceleration = 8.0
 Flaming = false

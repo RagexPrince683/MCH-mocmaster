@@ -1,6 +1,11 @@
 DisplayName = 13.2mm Automatkanon
 
 Type = MachineGun1
+RecoilPitch = 0.60F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.21F
+RecoilYawRange = 0.15F
+RecoilRecoverFactor = 0.8F
 
 Power = 12
 

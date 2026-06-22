@@ -17,6 +17,7 @@ RWRType = DIGITAL
 RadarType = MODERN_AS
 Speed = 1.86
 FlareType = 3
+HasChaff = true
 
 ThirdPersonDist = 20
 

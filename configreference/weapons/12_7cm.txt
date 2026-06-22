@@ -1,5 +1,10 @@
 DisplayName = 12.7cm 5 inch/40 Type 89 Gun [127mm HE - HE]
 Type = MachineGun2
+RecoilPitch = 1.25F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.44F
+RecoilYawRange = 0.31F
+RecoilRecoverFactor = 0.8F
 Power = 25
 ModelBullet = bullet76mm
 Acceleration = 6.0

@@ -1,5 +1,10 @@
 DisplayName = D-102TC Rifled gun [HE]
 Type = MachineGun2
+RecoilPitch = 2.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.70F
+RecoilYawRange = 0.50F
+RecoilRecoverFactor = 0.8F
 Power = 40
 ModelBullet = bullet105mm
 Acceleration = 4.0

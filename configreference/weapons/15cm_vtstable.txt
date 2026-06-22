@@ -1,5 +1,10 @@
 DisplayName =  128mm Flak 40 Cannon [VT]
 Type = MachineGun2
+RecoilPitch = 1.90F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.66F
+RecoilYawRange = 0.47F
+RecoilRecoverFactor = 0.8F
 Power = 38
 ModelBullet = bullet76mm
 Acceleration = 7.0

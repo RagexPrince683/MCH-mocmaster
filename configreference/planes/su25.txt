@@ -19,6 +19,7 @@ Speed = 1.697
 ;606mph
 
 FlareType = 4
+HasChaff = true
 ParticlesScale = 0.7
 EnableSeaSurfaceParticle = true
 MaxFuel= 14640

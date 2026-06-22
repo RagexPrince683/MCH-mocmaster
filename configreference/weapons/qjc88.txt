@@ -1,5 +1,10 @@
 DisplayName = 12.7mm QJC88 HMG
 Type = MachineGun2
+RecoilPitch = 1.45F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.51F
+RecoilYawRange = 0.36F
+RecoilRecoverFactor = 0.8F
 Power = 29
 Acceleration = 7.0
 Flaming = false

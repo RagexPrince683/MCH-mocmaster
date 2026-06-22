@@ -1,5 +1,10 @@
 DisplayName = 23mm GSh-6-23M Cannon [API-T]
 Type = MachineGun2
+RecoilPitch = 0.90F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.32F
+RecoilYawRange = 0.23F
+RecoilRecoverFactor = 0.8F
 Power = 18
 Acceleration = 8.0
 Explosion = 1

@@ -1,5 +1,10 @@
 DisplayName = 88mm Flak 36 Cannon [Pzgr - APCBC]
 Type = MachineGun1
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
 ModelBullet = 88mm
 Power = 132
 Acceleration = 5.0

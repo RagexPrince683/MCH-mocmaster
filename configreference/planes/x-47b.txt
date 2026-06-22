@@ -20,6 +20,7 @@ EnableNightVision = true
 EnableEntityRadar = true
 RWRType = DIGITAL
 RadarType = MODERN_AA
+HasChaff = true
 EnableGunnerMode = true
 NewUAV = true
 HideEntity = true

@@ -1,5 +1,10 @@
 DisplayName = 37mm N-37 Automatic Cannon
 Type = MachineGun1
+RecoilPitch = 2.45F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.86F
+RecoilYawRange = 0.61F
+RecoilRecoverFactor = 0.8F
 Power = 49
 Acceleration = 5.0
 Explosion = 1

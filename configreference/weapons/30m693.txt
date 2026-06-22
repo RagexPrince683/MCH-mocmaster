@@ -1,5 +1,10 @@
 DisplayName = 20mm 20F2 GIAT M693 Automatic Cannon
 Type = MachineGun1
+RecoilPitch = 2.85F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.00F
+RecoilYawRange = 0.71F
+RecoilRecoverFactor = 0.8F
 Power = 57
 Acceleration = 8.0
 Explosion = 1

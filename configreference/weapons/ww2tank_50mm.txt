@@ -1,5 +1,10 @@
 DisplayName = 50mm Main Gun
 Type = MachineGun2
+RecoilPitch = 1.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.35F
+RecoilYawRange = 0.25F
+RecoilRecoverFactor = 0.8F
 Power = 20
 Acceleration = 6.5
 Sight = None

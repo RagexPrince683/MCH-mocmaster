@@ -25,6 +25,14 @@ IsRadarMissile = true
 TickEndHoming = 1400
 MaxDegreeOfMissile = 48
 SpeedDependsAircraft = true
+MaxLockOnAngle = 10
+PdHDNMaxDegree = 60.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 25
+PassiveRadar = true
+PassiveRadarLockOutCount = 20
+LaserGuidance = false
+HasLaserGuidancePod = false
 ModelBullet = mim23missile
 
 DamageFactor = tank, 1.5

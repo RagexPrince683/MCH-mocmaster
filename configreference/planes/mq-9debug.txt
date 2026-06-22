@@ -22,6 +22,7 @@ FlareType = 4
 EnableNightVision = true
 EnableEntityRadar = true
 RadarType = MODERN_AA
+HasChaff = true
 EnableGunnerMode = true
 NewUAV = true
 ;;soon

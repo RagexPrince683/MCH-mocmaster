@@ -1,5 +1,10 @@
 DisplayName = 75mm Type 3 Tank Gun [Type 94 - HE]
 Type = MachineGun2
+RecoilPitch = 0.60F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.21F
+RecoilYawRange = 0.15F
+RecoilRecoverFactor = 0.8F
 Power = 12
 Acceleration = 5.0
 ModelBullet = bullet76mm

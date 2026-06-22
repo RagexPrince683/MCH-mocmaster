@@ -24,6 +24,7 @@ Speed = 2.046
 
 Sound = harrier
 FlareType = 3
+HasChaff = true
 ParticlesScale = 0.7
 EnableSeaSurfaceParticle = true
 MaxFuel         = 14000

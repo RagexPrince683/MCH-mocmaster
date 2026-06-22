@@ -1,5 +1,10 @@
 DisplayName = 30mm 2A42 Twin Automatic Cannon [3UOR6 - HE-T]
 Type = MachineGun2
+RecoilPitch = 0.45F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.16F
+RecoilYawRange = 0.11F
+RecoilRecoverFactor = 0.8F
 Power = 9
 Explosion = 1
 ExplosionBlock = 1

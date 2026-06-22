@@ -103,6 +103,7 @@ FlareType = 3
 EnableEntityRadar = true
 RWRType = DIGITAL
 RadarType = MODERN_AS
+HasChaff = true
 EnableNightVision = true
 EnableGunnerMode = true
 

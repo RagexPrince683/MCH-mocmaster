@@ -1,5 +1,10 @@
 DisplayName = 100mm 2A70 Rifled Cannon [3OF32 - HE-frag]
 Type = MachineGun2
+RecoilPitch = 1.80F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.63F
+RecoilYawRange = 0.45F
+RecoilRecoverFactor = 0.8F
 Power = 36
 ModelBullet = bullet105mm
 

@@ -1,5 +1,11 @@
 DisplayName = 30mm GSh-30-1 Automatic Cannon
 Type = MachineGun1
+RecoilPitch = 2.75F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.96F
+RecoilYawRange = 0.69F
+RecoilRecoverFactor = 0.8F
+SpeedDependsAircraft = true
 ModelBullet = bullet
 Power = 55
 Acceleration = 6.0

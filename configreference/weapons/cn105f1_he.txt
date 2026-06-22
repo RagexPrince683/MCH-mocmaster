@@ -1,5 +1,10 @@
 DisplayName = CN-105-F1 Rifled Gun [OE 105 F1 Mle.60 - HE]
 Type = MachineGun1
+RecoilPitch = 1.25F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.44F
+RecoilYawRange = 0.31F
+RecoilRecoverFactor = 0.8F
 Power = 25
 ModelBullet = bullet105mm
 Explosion = 3

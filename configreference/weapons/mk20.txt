@@ -1,5 +1,10 @@
 DisplayName = Mk20 DM5 Rh202 
 Type = MachineGun2
+RecoilPitch = 0.70F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.24F
+RecoilYawRange = 0.17F
+RecoilRecoverFactor = 0.8F
 Power = 14
 Acceleration = 8.0
 Explosion = 1

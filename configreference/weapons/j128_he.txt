@@ -1,5 +1,10 @@
 DisplayName = 128mm PaK44 Cannon [Sprgr. L/5 - HE]
 Type = MachineGun1
+RecoilPitch = 1.85F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.65F
+RecoilYawRange = 0.46F
+RecoilRecoverFactor = 0.8F
 ModelBullet = 128mm
 Power = 37
 Acceleration = 7

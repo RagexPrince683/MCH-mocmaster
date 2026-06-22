@@ -1,5 +1,11 @@
 DisplayName = 30mm 2A38M Cannon [HEF-T]
 Type = MachineGun2
+RecoilPitch = 0.45F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.16F
+RecoilYawRange = 0.11F
+RecoilRecoverFactor = 0.8F
+SpeedDependsAircraft = true
 Power = 9
 ModelBullet = bullet
 
@@ -53,4 +59,4 @@ DamageFactor = vehicle, 1.5
 DamageFactor = heli, 1.5
 DamageFactor = player, 20.0
 SoundVolume = 15
-AddDisplayName = en_US, 2A38M 30mm CannonÅ HEIÅ
+AddDisplayName = en_US, 2A38M 30mm Cannon¬Å HEI¬Å

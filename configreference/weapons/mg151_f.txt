@@ -1,5 +1,10 @@
 DisplayName = 20mm MG151 Automatic Cannon [Front]
 Type = MachineGun1
+RecoilPitch = 1.05F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.37F
+RecoilYawRange = 0.26F
+RecoilRecoverFactor = 0.8F
 Power = 21
 Acceleration = 5.0
 Flaming = false

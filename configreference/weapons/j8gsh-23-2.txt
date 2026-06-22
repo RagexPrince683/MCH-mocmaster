@@ -1,5 +1,10 @@
 DisplayName = 23mm Type 23-3 (GSh-23-2) Automatic Cannon
 Type = MachineGun2
+RecoilPitch = 0.80F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.28F
+RecoilYawRange = 0.20F
+RecoilRecoverFactor = 0.8F
 Power = 16
 Explosion = 1
 ExplosionBlock = 0

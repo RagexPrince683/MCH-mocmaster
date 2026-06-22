@@ -23,6 +23,14 @@ IsRadarMissile = true
 TickEndHoming = 2600
 MaxDegreeOfMissile = 28
 SpeedDependsAircraft = true
+MaxLockOnAngle = 10
+PdHDNMaxDegree = 60.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 25
+PassiveRadar = false
+PassiveRadarLockOutCount = 20
+LaserGuidance = false
+HasLaserGuidancePod = false
 ModelBullet = 77h6h
 Sound = missile_3_snd
 

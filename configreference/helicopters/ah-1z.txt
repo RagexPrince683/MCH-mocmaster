@@ -17,6 +17,7 @@ RadarType = MODERN_AS
 Speed = 1.8
 ThrottleUpDown = 0.8
 FlareType = 3
+HasChaff = true
 MaxFuel         = 1270
 FuelConsumption = 0.529
 ThirdPersonDist = 20

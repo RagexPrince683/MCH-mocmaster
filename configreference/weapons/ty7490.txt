@@ -1,5 +1,10 @@
 DisplayName = 7.62x51mm Type 74 Machine Gun
 Type = MachineGun2
+RecoilPitch = 0.75F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.26F
+RecoilYawRange = 0.19F
+RecoilRecoverFactor = 0.8F
 Power = 15
 Acceleration = 7.5
 Flaming = false

@@ -19,6 +19,7 @@ CameraPosition = 0.0, 0.0, 3.1
 EnableEntityRadar = true
 RWRType = DIGITAL
 RadarType = MODERN_AS
+HasChaff = true
 MaxFuel         = 6500
 FuelConsumption = 1.505
 ThirdPersonDist = 20

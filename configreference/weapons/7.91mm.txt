@@ -1,5 +1,10 @@
 DisplayName = 7.91mm MG34
 Type = MachineGun1
+RecoilPitch = 0.40F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.14F
+RecoilYawRange = 0.10F
+RecoilRecoverFactor = 0.8F
 ModelBullet = 7.91mm
 Power = 8
 Acceleration = 7.0

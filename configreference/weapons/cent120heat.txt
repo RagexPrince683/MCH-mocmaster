@@ -1,5 +1,10 @@
 DisplayName = 120mm OTO Melara 120/45 [DM12A1 - HEAT-FS]
 Type = MachineGun2
+RecoilPitch = 3.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 1.05F
+RecoilYawRange = 0.75F
+RecoilRecoverFactor = 0.8F
 Power = 480
 ModelBullet = bullet105mm
 Acceleration = 8.0

@@ -1,5 +1,10 @@
 DisplayName = 35mm Oerlikon GDF Automatic Cannon [DM11A1 - HEI-T]
 Type = MachineGun2
+RecoilPitch = 0.55F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.19F
+RecoilYawRange = 0.14F
+RecoilRecoverFactor = 0.8F
 Power = 11
 Explosion = 1
 ExplosionBlock = 1

@@ -15,6 +15,7 @@ RWRType = ALL_WAY_EARLY
 RadarType = EARLY_AS
 Speed = 1.62
 FlareType = 3
+HasChaff = true
 CameraPosition = 0.0, 1.1, 4.8
 ThirdPersonDist = 16
 

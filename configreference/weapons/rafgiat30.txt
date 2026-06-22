@@ -1,5 +1,10 @@
 DisplayName = 30mm GIAT 30M 791 Automatic Cannon 
 Type = MachineGun1
+RecoilPitch = 2.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.70F
+RecoilYawRange = 0.50F
+RecoilRecoverFactor = 0.8F
 Power = 40
 Explosion = 1
 ExplosionBlock = 0
