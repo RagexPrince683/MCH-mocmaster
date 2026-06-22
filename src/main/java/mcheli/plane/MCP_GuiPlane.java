@@ -9,6 +9,7 @@ import mcheli.MCH_KeyName;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_BaseVehicleCommonGui;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
+import mcheli.aircraft.MCH_FlightModel;
 import mcheli.aircraft.MCH_HudShared;
 import mcheli.gui.MCH_Gui;
 import mcheli.plane.MCP_EntityPlane;
@@ -76,6 +77,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
                if(this.shouldDrawNewPlaneSimpleHud(plane, seatID)) {
                   this.drawNewPlaneSimpleHud(plane);
                   this.drawNewPlaneWeaponHud(plane, player);
+                  this.drawNewPlaneDebugHud(plane);
                } else {
                   this.drawNewFlightThrottleHud(plane);
                }
@@ -120,6 +122,48 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          this.drawHudPanel(x - 4, wy - 2, 116, warnings.size() * 10 + 4);
          this.drawHudLines(warnings, x, wy, 0xFFFFD65A, 0x66FFAA00);
       }
+   }
+
+
+   private void drawNewPlaneDebugHud(MCP_EntityPlane plane) {
+      if(!MCH_Config.DebugFlightControl.prmBool && !MCH_Config.TestMode.prmBool && !MCH_Config.MouseAimDebug.prmBool) {
+         return;
+      }
+
+      MCP_PlaneInfo info = plane.getPlaneInfo();
+      if(info == null) {
+         return;
+      }
+
+      double stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, plane.getMaxSpeed(), info.stallSpeedFactor);
+      List lines = new ArrayList();
+      lines.add(String.format("NF DBG  stall=%s recover=%s flap=%s", new Object[]{
+            Boolean.valueOf(plane.getStallSeverity() > 0.0D), Boolean.valueOf(plane.isStallRecovering()),
+            Boolean.valueOf(plane.isCombatFlapsDeployed())}));
+      lines.add(String.format("spd fwd=%.3f hor=%.3f stall=%.3f", new Object[]{
+            Double.valueOf(plane.getLastForwardAirspeed()), Double.valueOf(plane.getLastHorizontalSpeed()), Double.valueOf(stallSpeed)}));
+      lines.add(String.format("aoa=%.1f demand=%.2f sev=%.2f/%.2f/%.2f", new Object[]{
+            Double.valueOf(plane.getAngleOfAttackDegrees()), Double.valueOf(plane.getStallDemand()),
+            Double.valueOf(plane.getSpeedStallSeverity()), Double.valueOf(plane.getAoAStallSeverity()),
+            Double.valueOf(plane.getDeepStallSeverity())}));
+      lines.add(String.format("auth ctrl=%.2f pitch=%.2f up=%.2f down=%.2f", new Object[]{
+            Double.valueOf(plane.getLastControlAuthority()), Double.valueOf(plane.getLastFinalPitchAuthority()),
+            Double.valueOf(plane.getLastPitchUpAuthority()), Double.valueOf(plane.getLastPitchDownAuthority())}));
+      lines.add(String.format("mom stall=%.4f forced=%.4f finalAV=%.4f", new Object[]{
+            Double.valueOf(plane.getLastStallPitchMoment()), Double.valueOf(plane.getLastForcedNoseDownPitchDelta()),
+            Double.valueOf(plane.getLastFinalPitchAngularVelocity())}));
+      lines.add(String.format("lift L/W=%.2f T/W=%.2f loss=%.2f validClimb=%s", new Object[]{
+            Double.valueOf(plane.getLiftToWeightRatio()), Double.valueOf(plane.getThrustToWeightRatio()),
+            Double.valueOf(plane.getLastLiftLoss()), Boolean.valueOf(plane.isLastValidClimb())}));
+      lines.add(String.format("energy ratio=%.2f deficit=%.2f dE=%.4f", new Object[]{
+            Double.valueOf(plane.getLastPitchEnvelopeEnergyRatio()), Double.valueOf(plane.getLastEnergyDeficitSeverity()),
+            Double.valueOf(plane.getLastEnergyDelta())}));
+
+      int width = Math.min(super.width - 16, Math.max(260, this.getMaxHudLineWidth(lines) + 8));
+      int x = MathHelper.clamp_int(super.width - width - 8, 4, Math.max(4, super.width - width - 8));
+      int y = MathHelper.clamp_int(8, 4, Math.max(4, super.height - (lines.size() * 10 + 12)));
+      this.drawHudPanel(x - 4, y - 4, width, lines.size() * 10 + 8);
+      this.drawHudLines(lines, x, y, 0xFF66FF66, 0x66005500);
    }
 
    private String formatSimpleHudThrottle(MCP_EntityPlane plane) {

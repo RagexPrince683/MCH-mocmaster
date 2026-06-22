@@ -1393,37 +1393,25 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.mouseAimGeneratedYawCommand = 0.0F;
          this.mouseAimGeneratedPitchCommand = 0.0F;
          this.mouseAimGeneratedRollCommand = 0.0F;
-         this.pitchAngularVelocity = 0.0F;
-         this.rollAngularVelocity = 0.0F;
-         this.yawAngularVelocity = 0.0F;
-         this.lastFinalPitchAngularVelocity = 0.0D;
          this.lastRequestedPitchInput = 0.0F;
          this.lastPitchInputAfterAuthority = 0.0F;
-         this.lastPitchEnvelopeReference = 90.0D;
-         this.lastPitchEnvelopeExcess = 0.0D;
-         this.lastPitchEnvelopeEnergyRatio = 1.0D;
-         this.lastNoseDownRecoveryTorque = 0.0D;
          this.lastFinalElevatorInput = 0.0D;
-         this.lastControlAuthority = this.getControlAuthorityFactor();
-         this.lastPitchAuthority = 1.0D;
-         this.lastAirflowAuthority = 1.0D;
-         this.lastFinalPitchAuthority = this.lastControlAuthority;
-         this.lastPitchAuthorityAfterSuppression = this.lastFinalPitchAuthority;
-         this.lastNoseUpPitchSuppression = 0.0D;
          this.addkeyRotValue = 0.0F;
+
+         // Free look decouples pilot camera input from the airframe, but it must not
+         // freeze aerodynamic body rates. Stall buffet, pitch-break recovery, and other
+         // new-flight moments are integrated in onUpdateAngles(), so keep that path
+         // active with zero pilot input while the mouse is consumed by the camera.
+         this.onUpdateAngles(partialTicks);
+
          this.prevRotationRoll = this.getRotRoll();
          super.prevRotationPitch = this.getRotPitch();
          if(this.getRidingEntity() == null) {
             super.prevRotationYaw = this.getRotYaw();
          }
-
-         // Free look intentionally decouples the pilot camera from the airframe, but the
-         // server-side new flight model still derives AoA/stall state from the last
-         // aircraft rotation packet it received. Keep the server synchronized with the
-         // client airframe attitude while the mouse is being consumed by free look;
-         // otherwise the server can continue simulating an old nose-high attitude and
-         // report a stall only while free look is active.
-         this.aircraftRotChanged = true;
+         if(this.getRidingEntity() == null && ac_yaw != this.getRotYaw() || ac_pitch != this.getRotPitch() || ac_roll != this.getRotRoll()) {
+            this.aircraftRotChanged = true;
+         }
          player.setAngles(deltaX, deltaY);
          return;
       }
