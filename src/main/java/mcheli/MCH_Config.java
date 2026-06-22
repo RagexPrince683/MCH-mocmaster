@@ -172,6 +172,9 @@ public class MCH_Config {
    public static MCH_ConfigPrm PlaneMouseAimMaxScreenRadius;
    public static MCH_ConfigPrm PlaneMouseAimYawVisualRange;
    public static MCH_ConfigPrm PlaneMouseAimReticleDebug;
+   public static MCH_ConfigPrm EnableNewPlaneSimpleHud;
+   public static MCH_ConfigPrm NewPlaneSimpleHudX;
+   public static MCH_ConfigPrm NewPlaneSimpleHudY;
    public static MCH_ConfigPrm SwitchWeaponWithMouseWheel;
    public static MCH_ConfigPrm AllPlaneSpeed;
    public static MCH_ConfigPrm NewFlightGravity;
@@ -484,6 +487,12 @@ public class MCH_Config {
       PlaneMouseAimMaxScreenRadius = new MCH_ConfigPrm("PlaneMouseAimMaxScreenRadius", 0.42D);
       PlaneMouseAimYawVisualRange = new MCH_ConfigPrm("PlaneMouseAimYawVisualRange", 45.0D);
       PlaneMouseAimReticleDebug = new MCH_ConfigPrm("PlaneMouseAimReticleDebug", false);
+      EnableNewPlaneSimpleHud = new MCH_ConfigPrm("EnableNewPlaneSimpleHud", true);
+      EnableNewPlaneSimpleHud.desc = ";Render the compact top-left HUD for new-flight-model planes only.";
+      NewPlaneSimpleHudX = new MCH_ConfigPrm("NewPlaneSimpleHudX", 12);
+      NewPlaneSimpleHudX.desc = ";Top-left new-plane simple HUD X offset in scaled GUI pixels.";
+      NewPlaneSimpleHudY = new MCH_ConfigPrm("NewPlaneSimpleHudY", 12);
+      NewPlaneSimpleHudY.desc = ";Top-left new-plane simple HUD Y offset in scaled GUI pixels.";
       SwitchWeaponWithMouseWheel = new MCH_ConfigPrm("SwitchWeaponWithMouseWheel", true);
       AllHeliSpeed = new MCH_ConfigPrm("AllHeliSpeed", 1.5D);
       AllPlaneSpeed = new MCH_ConfigPrm("AllPlaneSpeed", 1000.00D);
@@ -720,6 +729,9 @@ public class MCH_Config {
               PlaneMouseAimMaxScreenRadius,
               PlaneMouseAimYawVisualRange,
               PlaneMouseAimReticleDebug,
+              EnableNewPlaneSimpleHud,
+              NewPlaneSimpleHudX,
+              NewPlaneSimpleHudY,
               AutoThrottleDownHeli,
               AutoThrottleDownPlane,
               AutoThrottleDownShip,
