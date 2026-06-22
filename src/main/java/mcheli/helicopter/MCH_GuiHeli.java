@@ -223,6 +223,56 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       return MCH_Config.EnableNewVehicleHudGlow != null ? MCH_Config.EnableNewVehicleHudGlow.prmBool : MCH_Config.EnableNewPlaneHudGlow.prmBool;
    }
 
+   private void drawNewHeliSharedHud(MCH_EntityHeli heli, EntityPlayer player) {
+      if(!this.shouldDrawNewHeliHudAdditions(heli) || !MCH_Config.EnableNewHeliHudSharedReadouts.prmBool) {
+         return;
+      }
+
+      List lines = new ArrayList();
+      lines.add(MCH_HudShared.formatSpeedKmh(heli));
+      lines.add(MCH_HudShared.formatAltitude(heli));
+      lines.add(MCH_HudShared.formatVerticalSpeed(heli));
+      lines.add(MCH_HudShared.formatFuelMinutes(heli));
+      int color = -14101432;
+      int x = super.centerX - 200;
+      int y = super.centerY + 55;
+      for(int i = 0; i < lines.size(); ++i) {
+         this.drawNewHeliHudText((String)lines.get(i), x, y + i * 10, color, 0x5528D448);
+      }
+   }
+
+   private void drawNewHeliWeaponHud(MCH_EntityHeli heli, EntityPlayer player) {
+      if(!this.shouldDrawNewHeliHudAdditions(heli) || !MCH_Config.EnableNewHeliWeaponHud.prmBool) {
+         return;
+      }
+      int x = super.centerX + 120;
+      int y = super.centerY - 15;
+      int maxTextWidth = Math.max(90, super.width - x - 8);
+      List lines = MCH_HudShared.collectWeaponAmmoLines(heli, super.mc, maxTextWidth, true, heli.getCurrentWeaponID(player));
+      if(lines.isEmpty()) {
+         return;
+      }
+      for(int i = 0; i < lines.size(); ++i) {
+         this.drawNewHeliHudText((String)lines.get(i), x, y + i * 10, -14101432, 0x5528D448);
+      }
+   }
+
+   private boolean shouldDrawNewHeliHudAdditions(MCH_EntityHeli heli) {
+      MCH_HeliInfo info = heli.getHeliInfo();
+      return info != null && heli.isNewHeliFlightModelEnabled() && !heli.isDestroyed();
+   }
+
+   private void drawNewHeliHudText(String text, int x, int y, int color, int glowColor) {
+      if(this.isVehicleHudGlowEnabled()) {
+         this.drawString(text, x + 1, y + 1, glowColor);
+      }
+      this.drawString(text, x, y, color);
+   }
+
+   private boolean isVehicleHudGlowEnabled() {
+      return MCH_Config.EnableNewVehicleHudGlow != null ? MCH_Config.EnableNewVehicleHudGlow.prmBool : MCH_Config.EnableNewPlaneHudGlow.prmBool;
+   }
+
    private int toPercent(float value) {
       return Math.round(MathHelper.clamp_float(value, 0.0F, 1.0F) * 100.0F);
    }
