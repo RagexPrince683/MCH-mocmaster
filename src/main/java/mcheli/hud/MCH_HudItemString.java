@@ -5,6 +5,7 @@ import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
+import mcheli.aircraft.MCH_HudShared;
 import mcheli.hud.MCH_HudItem;
 import mcheli.hud.MCH_HudItemStringArgs;
 import net.minecraft.client.Minecraft;
@@ -35,6 +36,9 @@ public class MCH_HudItemString extends MCH_HudItem {
    }
 
    public void execute() {
+      if(this.shouldSuppressForNewHeliHud()) {
+         return;
+      }
       int x = (int)(MCH_HudItem.centerX + calc(this.posX));
       int y = (int)(MCH_HudItem.centerY + calc(this.posY));
       long dateCount = Minecraft.getMinecraft().thePlayer.worldObj.getTotalWorldTime();
@@ -441,4 +445,20 @@ public class MCH_HudItemString extends MCH_HudItem {
 
       }
    }
+   private boolean shouldSuppressForNewHeliHud() {
+      if(!MCH_HudShared.isNewHeliPilotHudActive(MCH_HudItem.ac, MCH_HudItem.player)) {
+         return false;
+      }
+      for(int i = 0; i < this.args.length; ++i) {
+         MCH_HudItemStringArgs arg = this.args[i];
+         if(arg == MCH_HudItemStringArgs.POS_X || arg == MCH_HudItemStringArgs.POS_Y || arg == MCH_HudItemStringArgs.POS_Z
+               || arg == MCH_HudItemStringArgs.MOTION_X || arg == MCH_HudItemStringArgs.MOTION_Y || arg == MCH_HudItemStringArgs.MOTION_Z
+               || arg == MCH_HudItemStringArgs.WPN_NAME || arg == MCH_HudItemStringArgs.WPN_AMMO || arg == MCH_HudItemStringArgs.WPN_RM_AMMO
+               || arg == MCH_HudItemStringArgs.HP_PER) {
+            return true;
+         }
+      }
+      return false;
+   }
+
 }
