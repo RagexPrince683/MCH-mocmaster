@@ -1044,13 +1044,15 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          } else {
             this.setCurrentThrottle(0.0D);
          }
-      } else if((!super.worldObj.isRemote || W_Lib.isClientPlayer(this.getRiddenByEntity())) && super.cs_heliAutoThrottleDown) {
+      } else if((!super.worldObj.isRemote || W_Lib.isClientPlayer(this.getRiddenByEntity())) && super.cs_heliAutoThrottleDown && (!this.newHeliFlightModelEnabled || !this.isHoveringMode())) {
          if(this.getCurrentThrottle() > 0.52D) {
             this.addCurrentThrottle(-0.01D * (double)throttleUpDown);
          } else if(this.getCurrentThrottle() < 0.48D) {
             this.addCurrentThrottle(0.01D * (double)throttleUpDown);
          }
       }
+
+      this.updateNewHelicopterHoverThrottleController(throttleUpDown);
 
       if(!super.worldObj.isRemote && !this.newHeliFlightModelEnabled) {
          boolean move = false;
@@ -1079,6 +1081,49 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          }
       }
 
+   }
+
+   private void updateNewHelicopterHoverThrottleController(float throttleUpDown) {
+      if(!this.newHeliFlightModelEnabled || !this.isHoveringMode() || this.heliInfo == null) {
+         this.hoverThrottleBias = 0.0F;
+         this.hoverCollectiveCorrection = 0.0F;
+         return;
+      }
+
+      float configuredStrength = MathHelper.clamp_float(this.heliInfo.hoverAssistStrength, 0.0F, 1.0F);
+      if(configuredStrength <= 0.0F || super.throttleUp || super.throttleDown) {
+         this.hoverThrottleBias *= 0.90F;
+         this.hoverCollectiveCorrection = this.hoverThrottleBias;
+         return;
+      }
+
+      this.targetVerticalSpeed = 0.0F;
+      float verticalSpeed = (float)MCH_HudShared.getVerticalSpeedMotionY(this);
+      float deadzone = MathHelper.clamp_float(this.heliInfo.hoverVerticalSpeedDeadzone, 0.0F, 1.0F);
+      float correctionLimit = MathHelper.clamp_float(this.heliInfo.hoverVerticalCorrectionLimit, 0.0F, 1.0F);
+      float biasLimit = MathHelper.clamp_float(this.heliInfo.hoverThrottleBiasLimit, 0.0F, 1.0F);
+      float previousBias = this.hoverThrottleBias;
+      float verticalError = this.targetVerticalSpeed - verticalSpeed;
+      if(MathHelper.abs(verticalError) <= deadzone) {
+         if(this.hoverThrottleBias > correctionLimit) {
+            this.hoverThrottleBias -= correctionLimit;
+         } else if(this.hoverThrottleBias < -correctionLimit) {
+            this.hoverThrottleBias += correctionLimit;
+         } else {
+            this.hoverThrottleBias = 0.0F;
+         }
+      } else {
+         float strength = Math.max(this.heliInfo.hoverVerticalStabilizerStrength, 0.0F);
+         float correctionStep = MathHelper.clamp_float(verticalError * strength * configuredStrength, -correctionLimit, correctionLimit);
+         this.hoverThrottleBias = MathHelper.clamp_float(this.hoverThrottleBias + correctionStep, -biasLimit, biasLimit);
+      }
+
+      float throttleDelta = this.hoverThrottleBias - previousBias;
+      if(MathHelper.abs(throttleDelta) > 0.0F) {
+         this.addCurrentThrottle((double)(throttleDelta * Math.max(throttleUpDown, 0.0F)));
+         this.setCurrentThrottle(MathHelper.clamp_double(this.getCurrentThrottle(), 0.0D, 1.0D));
+      }
+      this.hoverCollectiveCorrection = this.hoverThrottleBias;
    }
 
    protected void onUpdate_ControlHovering() {
@@ -1352,24 +1397,6 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
       this.targetVerticalSpeed = 0.0F;
       this.targetHorizontalSpeed = 0.0F;
-      float verticalSpeed = (float)MCH_HudShared.getVerticalSpeedMotionY(this);
-      float deadzone = MathHelper.clamp_float(this.heliInfo.hoverVerticalSpeedDeadzone, 0.0F, 1.0F);
-      float correctionLimit = MathHelper.clamp_float(this.heliInfo.hoverVerticalCorrectionLimit, 0.0F, 1.0F);
-      float biasLimit = MathHelper.clamp_float(this.heliInfo.hoverThrottleBiasLimit, 0.0F, 1.0F);
-      float verticalError = this.targetVerticalSpeed - verticalSpeed;
-      if(MathHelper.abs(verticalError) <= deadzone) {
-         if(this.hoverThrottleBias > correctionLimit) {
-            this.hoverThrottleBias -= correctionLimit;
-         } else if(this.hoverThrottleBias < -correctionLimit) {
-            this.hoverThrottleBias += correctionLimit;
-         } else {
-            this.hoverThrottleBias = 0.0F;
-         }
-      } else {
-         float strength = Math.max(this.heliInfo.hoverVerticalStabilizerStrength, 0.0F);
-         float correctionStep = MathHelper.clamp_float(verticalError * strength, -correctionLimit, correctionLimit) * assistBlend;
-         this.hoverThrottleBias = MathHelper.clamp_float(this.hoverThrottleBias + correctionStep, -biasLimit, biasLimit);
-      }
       this.hoverCollectiveCorrection = this.hoverThrottleBias;
 
       float yawRadians = this.getRotYaw() / 180.0F * 3.1415927F;
@@ -1590,7 +1617,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
             if(this.newHeliFlightModelEnabled && !this.isDestroyed() && this.canUseBlades() && !this.isFoldBlades()) {
                this.updateNewHelicopterCyclicInput();
-               this.applyNewHelicopterCollectiveLift(y, throttle + (double)this.hoverCollectiveCorrection, horizontalSpeed, 1.0F);
+               this.applyNewHelicopterCollectiveLift(y, throttle, horizontalSpeed, 1.0F);
                this.applyNewHelicopterCyclicThrust(1.0F);
             } else {
                double rotorEfficiency = 1.0D;
@@ -1641,7 +1668,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             double throttle = this.isDestroyed()?this.getCurrentThrottle() * 0.65D:this.getCurrentThrottle();
             double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
             this.updateNewHelicopterCyclicInput();
-            this.applyNewHelicopterCollectiveLift(1.0D, throttle + (double)this.hoverCollectiveCorrection, horizontalSpeed, 1.0F);
+            this.applyNewHelicopterCollectiveLift(1.0D, throttle, horizontalSpeed, 1.0F);
             this.applyNewHelicopterCyclicThrust(1.0F);
          } else if(this.newHeliFlightModelEnabled) {
             this.resetNewHelicopterFlightTelemetry();
