@@ -15,6 +15,7 @@ import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_HudShared;
 import mcheli.gui.MCH_Gui;
 import mcheli.weapon.MCH_EntityTvMissile;
+import mcheli.wrapper.W_McClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
@@ -71,6 +72,7 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
                if(seatID == 0) {
                   this.drawNewHeliSharedHud(heli);
                   this.drawNewHeliHealthHud(heli);
+                  this.drawNewHeliPitchReadout(player);
                   this.drawNewHeliRadarHud(heli);
                   this.drawNewHeliWeaponHud(heli, player);
                }
@@ -140,18 +142,46 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       drawRect(x, y + 10, x + barWidth, y + 13, color);
    }
 
+
+   private void drawNewHeliPitchReadout(EntityPlayer player) {
+      int x = super.centerX + 90;
+      int y = super.centerY - 4;
+      this.drawNewHeliHudText(String.format("%.0f", new Object[]{Float.valueOf(-player.rotationPitch)}), x, y, -14101432, 0x5528D448);
+   }
+
    private void drawNewHeliRadarHud(MCH_EntityHeli heli) {
       if(!this.shouldDrawNewHeliHudAdditions(heli) || !heli.isEntityRadarMounted()) {
          return;
       }
       int x = super.centerX + 144;
-      int y = super.centerY + 55;
+      int y = super.centerY + 65;
       int size = 64;
       int color = -14101432;
+      this.drawNewHeliRadarTexture(heli, x, y, size);
       this.drawLine(new double[]{(double)x, (double)(y + size / 2), (double)(x + size), (double)(y + size / 2),
             (double)(x + size / 2), (double)y, (double)(x + size / 2), (double)(y + size)}, 0x80FFFFFF, 1);
       this.drawRadarPoints(heli.getRadarEntityList(), heli, x, y, size, color);
       this.drawRadarPoints(heli.getRadarEnemyList(), heli, x, y, size, 0xFFDF0408);
+   }
+
+
+   private void drawNewHeliRadarTexture(MCH_EntityHeli heli, int x, int y, int size) {
+      GL11.glPushMatrix();
+      boolean blend = GL11.glIsEnabled(3042);
+      int srcBlend = GL11.glGetInteger(3041);
+      int dstBlend = GL11.glGetInteger(3040);
+      GL11.glEnable(3042);
+      GL11.glBlendFunc(770, 771);
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      W_McClient.MOD_bindTexture("textures/gui/heli_hud.png");
+      this.drawTexturedModalRectRotate((double)x, (double)y, (double)size, (double)size, 0.0D, 0.0D, 128.0D, 128.0D, 0.0F);
+      this.drawTexturedModalRectRotate((double)(x + 16), (double)y, 32.0D, (double)size, 128.0D, 0.0D, 64.0D, 128.0D, (float)((heli.ticksExisted * 4) % 360));
+      GL11.glBlendFunc(srcBlend, dstBlend);
+      if(!blend) {
+         GL11.glDisable(3042);
+      }
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GL11.glPopMatrix();
    }
 
    private void drawRadarPoints(ArrayList src, MCH_EntityHeli heli, int left, int top, int size, int color) {
@@ -192,6 +222,22 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       for(int i = 0; i < lines.size(); ++i) {
          this.drawNewHeliHudText((String)lines.get(i), x, y + i * 10, -14101432, 0x5528D448);
       }
+   }
+
+   private boolean shouldDrawNewHeliHudAdditions(MCH_EntityHeli heli) {
+      MCH_HeliInfo info = heli.getHeliInfo();
+      return info != null && heli.isNewHeliFlightModelEnabled() && !heli.isDestroyed();
+   }
+
+   private void drawNewHeliHudText(String text, int x, int y, int color, int glowColor) {
+      if(this.isVehicleHudGlowEnabled()) {
+         this.drawString(text, x + 1, y + 1, glowColor);
+      }
+      this.drawString(text, x, y, color);
+   }
+
+   private boolean isVehicleHudGlowEnabled() {
+      return MCH_Config.EnableNewVehicleHudGlow != null ? MCH_Config.EnableNewVehicleHudGlow.prmBool : MCH_Config.EnableNewPlaneHudGlow.prmBool;
    }
 
    private boolean shouldDrawNewHeliHudAdditions(MCH_EntityHeli heli) {

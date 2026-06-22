@@ -449,6 +449,13 @@ public class MCH_HudItemString extends MCH_HudItem {
       if(!MCH_HudShared.isNewHeliPilotHudActive(MCH_HudItem.ac, MCH_HudItem.player)) {
          return false;
       }
+      if(this.posX.equals("140") && this.posY.equals("-4")) {
+         for(int i = 0; i < this.args.length; ++i) {
+            if(this.args[i] == MCH_HudItemStringArgs.PLYR_PITCH) {
+               return true;
+            }
+         }
+      }
       for(int i = 0; i < this.args.length; ++i) {
          MCH_HudItemStringArgs arg = this.args[i];
          if(arg == MCH_HudItemStringArgs.POS_X || arg == MCH_HudItemStringArgs.POS_Y || arg == MCH_HudItemStringArgs.POS_Z
