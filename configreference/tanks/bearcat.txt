@@ -1,6 +1,13 @@
 ﻿DisplayName = Lenco Bearcat F-550
 AddDisplayName = en_US, Lenco Bearcat F-550
 AddDisplayName = ja_JP, レンコ ベアキャット
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Lenco Bearcat F-550
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Lenco Bearcat F-550
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 33410
 MaxHp = 230
 Speed = 0.75

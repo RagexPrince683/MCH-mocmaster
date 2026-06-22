@@ -1,6 +1,13 @@
 ﻿DisplayName = M4 Sherman Calliope
 AddDisplayName = en_US, M4 Sherman Calliope
 AddDisplayName = ja_JP, シャーマン・カリオペ
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M4 Sherman Calliope
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M4 Sherman Calliope
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 30182
 MaxHp = 100
 Speed = 0.24

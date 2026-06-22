@@ -1,5 +1,12 @@
 DisplayName = Mi-28N Havoc
 AddDisplayName = ja_JP, Mi-28N ハボック
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Mi-28N Havoc
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Mi-28N Havoc
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28817
 MaxHp = 100
 EnableGunnerMode = true

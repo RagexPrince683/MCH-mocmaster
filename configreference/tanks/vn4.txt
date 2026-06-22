@@ -1,6 +1,13 @@
 ﻿DisplayName = VN-4 'Rhinoceros'
 AddDisplayName = en_US, VN-4 'Rhinoceros'
 AddDisplayName = zh_CN, VN4型4×4轮式装甲车
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = VN-4 'Rhinoceros'
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = VN-4 'Rhinoceros'
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30188
 MaxHp = 200
 Speed = 0.71

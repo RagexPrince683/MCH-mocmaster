@@ -1,6 +1,13 @@
 DisplayName = Tu-22M3
 AddDisplayName = en_US, Tu-22M3
 AddDisplayName = ja_JP, Tu-22M3
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Tu-22M3
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Tu-22M3
+ChaffWaitTime = 500
+ChaffUseTime = 160
+ThrottleDownFactor = 0.20
 ItemID = 28738
 MaxHp  = 250
 EnableNightVision  = false

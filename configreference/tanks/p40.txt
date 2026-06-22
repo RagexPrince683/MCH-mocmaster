@@ -1,5 +1,12 @@
 DisplayName = P26/40 Tank
 AddDisplayName = ja_JP, P40型 重戦車 
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = P26/40 Tank
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = P26/40 Tank
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 191991
 MaxHp = 100
 Speed = 0.25

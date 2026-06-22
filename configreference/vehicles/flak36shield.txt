@@ -1,6 +1,13 @@
 ﻿DisplayName = 88mm AA-Gun Flak 18 With Shield
 AddDisplayName = en_US, 88mm AA-Gun Flak 18 With Shield
 AddDisplayName = de_DE, 88mm Flak 18 mit Schild
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = 88mm AA-Gun Flak 18 With Shield
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = 88mm AA-Gun Flak 18 With Shield
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 100
 HideEntity = false
 MinRotationPitch = -85

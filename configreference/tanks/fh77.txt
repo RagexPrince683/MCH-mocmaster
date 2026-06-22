@@ -2,6 +2,13 @@ DisplayName = 155mm Haubits BW L/52 FH-77
 ;155 mm haubits 77 BW L/52
 AddDisplayName = ru_RU, 155mm Haubits BW L/52 FH-77
 AddDisplayName = en_US, 155mm Haubits BW L/52 FH-77
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = 155mm Haubits BW L/52 FH-77
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = 155mm Haubits BW L/52 FH-77
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 100
 Speed = 0.037
 ThrottleUpDown = 0.81

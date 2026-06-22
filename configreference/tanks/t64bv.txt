@@ -1,6 +1,12 @@
 ﻿DisplayName = T-64BV Model 2017
 AddDisplayName = en_US, T-64BV Model 2017
 AddDisplayName = ja_JP, T-64BV Model 2017
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = T-64BV Model 2017
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = T-64BV Model 2017
+ChaffWaitTime = 0
+ChaffUseTime = 0
 
 ExplosionSizeByCrash = 25
 
@@ -10,7 +16,7 @@ ItemID = 31400
 MaxHp = 400
 Speed = 0.43
 ThrottleUpDown = 1.2
-throttleDownFactor = 0.4
+ThrottleDownFactor = 0.40
 MobilityYawOnGround = 1.8
 MinRotationPitch = -14
 MaxRotationPitch = 6

@@ -1,6 +1,13 @@
 ﻿DisplayName = M4A1 Sherman
 AddDisplayName = en_US, M4A1 Sherman
 AddDisplayName = ja_JP, M4A1 シャーマン
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M4A1 Sherman
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M4A1 Sherman
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 30181
 MaxHp = 120
 Speed = 0.24

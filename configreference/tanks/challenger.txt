@@ -1,6 +1,13 @@
 DisplayName = Dodge Challenger R/T
 AddDisplayName = en_US, Dodge Challenger R/T
 AddDisplayName = ja_JP, Dodge Challenger R/T
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Dodge Challenger R/T
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Dodge Challenger R/T
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 33406
 MaxHp = 200
 Speed = 1.55

@@ -1,6 +1,13 @@
 DisplayName = F-5E Tiger II
 AddDisplayName = en_US, F-5E Tiger II
 AddDisplayName = ko_KR, F-5E 타이거
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F-5E Tiger II
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F-5E Tiger II
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 40013
 MaxHp = 100
 Speed = 3.40

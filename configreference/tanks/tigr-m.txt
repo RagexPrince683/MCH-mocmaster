@@ -1,5 +1,12 @@
 ;общая инфа о технике
 DisplayName = "Gaz" Tigr with 7.62mm PKM Machine Gun
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = "Gaz" Tigr with 7.62mm PKM Machine Gun
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = "Gaz" Tigr with 7.62mm PKM Machine Gun
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 150
 Speed = 0.87
 Sound = diesel

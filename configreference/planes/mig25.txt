@@ -1,6 +1,13 @@
 DisplayName = Mikoyan-Gurevich MiG-25
 AddDisplayName = en_US, Mikoyan-Gurevich MiG-25
 AddDisplayName = ja_JP, Mikoyan-Gurevich MiG-25
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = Mikoyan-Gurevich MiG-25
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = Mikoyan-Gurevich MiG-25
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28720
 MaxHp = 100
 EnableNightVision = false

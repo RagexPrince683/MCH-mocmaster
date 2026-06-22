@@ -1,6 +1,13 @@
 DisplayName = M47 Patton
 AddDisplayName = ja_JP, M47 Patton
 AddDisplayName = en_US, M47 Patton
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M47 Patton
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M47 Patton
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ;ItemID = 30997
 MaxHp = 162
 Speed = 0.3

@@ -1,6 +1,13 @@
 ﻿DisplayName = Goalkeeper CIWS
 AddDisplayName = en_US, Goalkeeper CIWS
 AddDisplayName = ja_JP, SGE-30 ゴールキーパー
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Goalkeeper CIWS
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Goalkeeper CIWS
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28601
 MaxHp = 100
 Gravity = -9.81

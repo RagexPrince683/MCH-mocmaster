@@ -1,5 +1,12 @@
 DisplayName = SH-3 Sea King
 AddDisplayName = ja_JP, SH-3 シーキング
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = SH-3 Sea King
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = SH-3 Sea King
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28820
 MaxHp = 100
 EnableFoldBlade = true

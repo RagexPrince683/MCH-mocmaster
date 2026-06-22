@@ -1,6 +1,13 @@
 DisplayName = Ural-4320
 AddDisplayName = en_US, Ural-4320
 AddDisplayName = ru_RU, УРАЛ-4320
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Ural-4320
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Ural-4320
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 ItemID = 28722
 MaxHp = 230
 Speed = 0.51

@@ -1,5 +1,12 @@
 DisplayName = Porsche Carrera GT
 AddDisplayName = en_US, Porsche Carrera GT
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Porsche Carrera GT
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Porsche Carrera GT
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 200
 Speed = 2.05
 Sound = porsche_meighty

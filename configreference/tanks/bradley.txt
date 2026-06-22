@@ -1,6 +1,13 @@
 DisplayName = M3A3 Bradley IFV
 AddDisplayName = en_US, M3A3 Bradley IFV
 AddDisplayName = ru_RU, M3 Брэдли
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = M3A3 Bradley IFV
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = M3A3 Bradley IFV
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 Speed = 0.41
 Sound = bradeng

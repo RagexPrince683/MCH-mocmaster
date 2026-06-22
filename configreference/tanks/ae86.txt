@@ -1,6 +1,13 @@
 ﻿AddDisplayName = en_US, Toyota Corolla AE86
 DisplayName = Toyota Corolla AE86
 AddDisplayName = ja_JP, Toyota Corolla AE86
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Toyota Corolla AE86
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Toyota Corolla AE86
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 ItemID = 28745
 MaxHp = 200
 ThrottleUpDown = 0.815

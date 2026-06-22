@@ -1,6 +1,13 @@
 DisplayName = P-51D Mustang
 AddDisplayName = en_US, P-51D Mustang
 AddDisplayName = ja_JP, P-51D マスタング
+NameOnEarlyASRadar = Prop Aircraft
+NameOnModernASRadar = P-51D Mustang
+NameOnEarlyAARadar = Prop Aircraft
+NameOnModernAARadar = P-51D Mustang
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 30202
 MaxHp = 100
 Speed = 1.08

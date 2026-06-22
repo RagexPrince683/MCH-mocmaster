@@ -1,6 +1,13 @@
 DisplayName = PZL M-18 Dromader
 AddDisplayName = en_US, PZL M-18 Dromader
 AddDisplayName = ja_JP, PZL M-18 ドロマーデル
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = PZL M-18 Dromader
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = PZL M-18 Dromader
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28733
 MaxHp = 100
 Speed = 0.435

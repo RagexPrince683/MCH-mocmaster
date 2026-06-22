@@ -1,6 +1,13 @@
 DisplayName = Centurion Mk 3
 AddDisplayName = ja_JP, Centurion Mk 3
 AddDisplayName = en_US, Centurion Mk 3
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Centurion Mk 3
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Centurion Mk 3
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ;ItemID = 30997
 MaxHp = 162
 Speed = 0.22

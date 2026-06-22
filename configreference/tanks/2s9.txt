@@ -1,4 +1,11 @@
 DisplayName = 2S9 Nona Self-Propelled Mortar
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = 2S9 Nona Self-Propelled Mortar
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = 2S9 Nona Self-Propelled Mortar
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 200
 Speed = 0.37
 Sound = tseventytwopass

@@ -1,6 +1,13 @@
 ﻿DisplayName = Skyline GT-R BNR34
 AddDisplayName = en_US, Skyline GT-R R34
 AddDisplayName = ja_JP, スカイラインGT-R BNR34
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Skyline GT-R BNR34
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Skyline GT-R BNR34
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30034
 MaxHp = 200
 ThrottleUpDown = 0.93

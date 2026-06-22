@@ -1,9 +1,15 @@
 DisplayName = TOS-1A Buratino
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = TOS-1A Buratino
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = TOS-1A Buratino
+ChaffWaitTime = 0
+ChaffUseTime = 0
 MaxHp = 250
 Speed = 0.37
 Sound = tninety
 ThrottleUpDown = 3.0
-throttleDownFactor = 0.4
+ThrottleDownFactor = 0.40
 MobilityRoll = 0
 Gravity = -0.61
 GravityInWater = -1.0

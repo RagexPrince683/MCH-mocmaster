@@ -1,5 +1,12 @@
 DisplayName = Bicycle
 AddDisplayName = ja_JP, 自転車
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Bicycle
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Bicycle
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ;until i fix how mcheli applies damage to entites this is staying uncraftable
 
 MaxHp = 20

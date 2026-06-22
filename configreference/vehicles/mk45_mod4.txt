@@ -1,6 +1,13 @@
 ﻿DisplayName = 127mm Mark 45 Mod4 Naval Cannon
 AddDisplayName = ja_JP, Mk45 Mod4 5インチ砲
 AddDisplayName = en_US, 5"/54 Caliber Mark 45 Mod4 Naval Cannon
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = 127mm Mark 45 Mod4 Naval Cannon
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = 127mm Mark 45 Mod4 Naval Cannon
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28601
 MaxHp = 123
 HideEntity = true

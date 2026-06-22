@@ -1,6 +1,13 @@
 ﻿DisplayName = BTR-82 APC
 AddDisplayName = ru_RU, BTR-82 APC
 AddDisplayName = en_US, BTR-82 APC
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = BTR-82 APC
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = BTR-82 APC
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.50
 ItemID = 30102
 MaxHp = 200
 Speed = 0.62

@@ -1,6 +1,13 @@
 DisplayName = CB90 Combat Boat with 30mm Saab Trackfire RWS
 AddDisplayName = en_US, CB90 Combat Boat with 30mm Saab Trackfire RWS
 AddDisplayName = ja_JP, CB90 戦闘艇
+NameOnEarlyASRadar = Small Boat
+NameOnModernASRadar = CB90 Combat Boat with 30mm Saab Trackfire RWS
+NameOnEarlyAARadar = Small Boat
+NameOnModernAARadar = CB90 Combat Boat with 30mm Saab Trackfire RWS
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.30
 ItemID = 30518
 MaxHp = 1800
 ;shift by 102.88 on z axis or +1.0288

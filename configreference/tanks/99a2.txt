@@ -1,6 +1,13 @@
 ﻿DisplayName = ZTZ99 Stage 2
 AddDisplayName = en_US, ZTZ99 Stage 2
 AddDisplayName = ja_JP, ZTZ99
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = ZTZ99 Stage 2
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = ZTZ99 Stage 2
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 8897
 MaxHp = 700
 Speed = 0.47

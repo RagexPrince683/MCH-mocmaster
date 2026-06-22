@@ -1,6 +1,13 @@
 ﻿DisplayName = Sd.Kfz. 234/2 "Puma"
 AddDisplayName = en_US, Sd.Kfz. 234/2 "Puma"
 AddDisplayName = ja_JP, Sd Kfz 234/2 "Puma"
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Sd.Kfz. 234/2 "Puma"
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Sd.Kfz. 234/2 "Puma"
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 91011
 MaxHp = 200
 Speed = 0.56

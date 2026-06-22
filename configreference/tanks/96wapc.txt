@@ -1,6 +1,13 @@
 ﻿DisplayName = Type 96 Armored Personnel Carrier
 AddDisplayName = en_US, Type 96 Armored Personnel Carrier
 AddDisplayName = ja_JP, 96式装輪装甲車 A型
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = Type 96 Armored Personnel Carrier
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = Type 96 Armored Personnel Carrier
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30102
 MaxHp = 200
 Speed = 0.62

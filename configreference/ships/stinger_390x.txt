@@ -1,6 +1,13 @@
 DisplayName = Chris Craft Stinger 390x
 AddDisplayName = en_US, Chris Craft Stinger 390x
 AddDisplayName = ja_JP, スティンガー 390X
+NameOnEarlyASRadar = Surface Ship
+NameOnModernASRadar = Chris Craft Stinger 390x
+NameOnEarlyAARadar = Surface Ship
+NameOnModernAARadar = Chris Craft Stinger 390x
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.30
 ItemID = 28744
 MaxHp = 100
 Speed = 0.7

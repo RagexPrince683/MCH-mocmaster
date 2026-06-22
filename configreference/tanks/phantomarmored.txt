@@ -1,6 +1,13 @@
 ﻿DisplayName = phantom
 AddDisplayName = en_US, Rolls-Royce Phantom Armored
 AddDisplayName = ja_JP, ロールスロイス ファントム
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = phantom
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = phantom
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30111
 MaxHp = 200
 ExplosionSizeByCrash = 3

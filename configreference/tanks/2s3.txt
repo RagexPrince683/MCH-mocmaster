@@ -1,4 +1,11 @@
 DisplayName = 2S3M SO-152 Akatsiya
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = 2S3M SO-152 Akatsiya
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = 2S3M SO-152 Akatsiya
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 Speed = 0.39
 Sound = tseventytwopass

@@ -1,6 +1,13 @@
 DisplayName = BAZ-69096 with S-500 Prometheus Missile System
 AddDisplayName = en_US, BAZ-69096 with S-500 Prometheus Missile System
 AddDisplayName = ja_JP, S-500
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = BAZ-69096 with S-500 Prometheus Missile System
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = BAZ-69096 with S-500 Prometheus Missile System
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.40
 ItemID = 35403
 MaxHp = 200
 Speed = 0.43

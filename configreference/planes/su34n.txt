@@ -1,5 +1,12 @@
 DisplayName = Su-34 (Rocket)
 AddDisplayName = ja_JP, Su-34 (Rocket)
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Su-34 (Rocket)
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Su-34 (Rocket)
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 MaxHp = 250
 EnableNightVision = true
 EnableEntityRadar = true

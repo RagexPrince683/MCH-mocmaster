@@ -1,6 +1,13 @@
 DisplayName = Type 1 Chi-He
 AddDisplayName = ja_JP, 一式中戦車 チへ
 AddDisplayName = en_US, Type 1 Chi-He
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Type 1 Chi-He
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Type 1 Chi-He
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 91011
 MaxHp = 100
 Speed = 0.27

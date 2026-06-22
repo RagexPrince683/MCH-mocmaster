@@ -1,6 +1,13 @@
 DisplayName = Douglas C-47 Skytrain
 AddDisplayName = en_US, Douglas C-47 Skytrain
 AddDisplayName = ja_JP, C-47 スカイトレイン
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = Douglas C-47 Skytrain
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = Douglas C-47 Skytrain
+ChaffWaitTime = 500
+ChaffUseTime = 160
+ThrottleDownFactor = 0.20
 HUD = plane_wwii, plane_wwii, none, none, none, none, none, none, none, none, none, none, none, none
 EnableEntityRadar = false
 Speed = 0.626

@@ -1,6 +1,13 @@
 DisplayName = J-15 Fly Shark
 AddDisplayName = en_US, J-15 Fly Shark
 AddDisplayName = zh_CN, 歼15 飞鲨
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = J-15 Fly Shark
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = J-15 Fly Shark
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 6655
 MaxHp = 100
 EnableNightVision = true

@@ -1,6 +1,13 @@
 ﻿DisplayName = TOYOTA COROLLA 2014 
 AddDisplayName = ja_JP, TOYOTA COROLLA 2014 
 AddDisplayName = en_US, Toyota Corolla (Altis) 2014 
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = TOYOTA COROLLA 2014
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = TOYOTA COROLLA 2014
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28745
 MaxHp = 200
 ThrottleUpDown = 0.81

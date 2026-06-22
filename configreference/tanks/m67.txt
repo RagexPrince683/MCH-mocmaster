@@ -1,5 +1,12 @@
 DisplayName = M67 Flame Thrower Tank 'Zippo'
 AddDisplayName = zh_CN,M67 Zippo
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M67 Flame Thrower Tank 'Zippo'
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M67 Flame Thrower Tank 'Zippo'
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ;ItemID = 30100
 MaxHp = 265
 Speed = 0.3

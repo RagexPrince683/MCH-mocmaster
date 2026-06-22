@@ -1,6 +1,13 @@
 DisplayName = Handley Page Victor B.2
 AddDisplayName = en_US, HP.80 Victor B.2
 AddDisplayName = ja_JP, Handley Page Victor B.2
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Handley Page Victor B.2
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Handley Page Victor B.2
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28738
 MaxHp  = 250
 EnableNightVision  = false

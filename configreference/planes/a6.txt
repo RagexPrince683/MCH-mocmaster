@@ -1,5 +1,12 @@
 DisplayName = A-6 Intruder
 AddDisplayName = ja_JP, A-6 Intruder
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = A-6 Intruder
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = A-6 Intruder
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28740
 MaxHp = 150
 onGroundPitch = 5

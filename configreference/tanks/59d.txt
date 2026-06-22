@@ -1,6 +1,13 @@
 ﻿DisplayName = ZTZ59D/Type 59D
 AddDisplayName = en_US, ZTZ59D/Type 59D
 AddDisplayName = zh_CN,  59D型坦克
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = ZTZ59D/Type 59D
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = ZTZ59D/Type 59D
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 8894
 MaxHp = 205
 Speed = 0.31

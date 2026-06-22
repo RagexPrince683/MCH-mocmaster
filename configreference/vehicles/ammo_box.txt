@@ -1,5 +1,12 @@
 DisplayName = AmmoBox
 AddDisplayName = ja_JP, 弾薬
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = AmmoBox
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = AmmoBox
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28611
 MaxHp = 1500
 HideEntity = true

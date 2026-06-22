@@ -1,6 +1,13 @@
 DisplayName = Type 3 Chi-Nu
 AddDisplayName = ja_JP, 三式中戦車 チヌ
 AddDisplayName = en_US, Type 3 Chi-Nu
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Type 3 Chi-Nu
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Type 3 Chi-Nu
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 91012
 MaxHp = 100
 Speed = 0.24

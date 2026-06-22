@@ -1,5 +1,12 @@
 DisplayName = VAZ-2102
 AddDisplayName = ru_RU, ВАЗ 2102
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = VAZ-2102
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = VAZ-2102
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 Speed = 0.85
 Sound = lada

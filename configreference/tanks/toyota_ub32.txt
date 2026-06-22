@@ -1,6 +1,13 @@
 DisplayName = Toyota Hilux with UB-32
 AddDisplayName = en_US, Toyota Hilux with UB-32
 AddDisplayName = ru_RU, Тойота с УБ-32
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Toyota Hilux with UB-32
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Toyota Hilux with UB-32
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 200
 ThrottleUpDown = 0.81
 Speed = 0.81

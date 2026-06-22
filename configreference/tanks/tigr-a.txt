@@ -1,5 +1,12 @@
 ;общая инфа о технике
 DisplayName = "Gaz" Tigr with Arbalet RWS
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = "Gaz" Tigr with Arbalet RWS
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = "Gaz" Tigr with Arbalet RWS
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 150
 Speed = 0.87
 Sound = diesel

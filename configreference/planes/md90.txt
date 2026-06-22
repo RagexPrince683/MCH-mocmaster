@@ -1,6 +1,13 @@
 DisplayName = MD-90-30
 AddDisplayName = en_US, MD-90-30
 AddDisplayName = ja_JP,MD-90-30
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = MD-90-30
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = MD-90-30
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28727
 MaxHp = 250
 Speed = 1.609

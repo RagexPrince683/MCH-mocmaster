@@ -1,5 +1,12 @@
 DisplayName = MiG-29 Fulcrum
 AddDisplayName = ja_JP, MiG-29 フルクラム
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = MiG-29 Fulcrum
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = MiG-29 Fulcrum
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28717
 MaxHp = 100
 Speed = 4.0

@@ -1,6 +1,13 @@
 ﻿DisplayName = BT-5
 AddDisplayName = ja_JP, BT-5
 AddDisplayName = en_US, BT-5
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = BT-5
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = BT-5
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 91012
 MaxHp = 100
 Speed = 0.45

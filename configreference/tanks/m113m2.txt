@@ -1,6 +1,13 @@
 ﻿DisplayName = M113 APC with M2 Browning
 AddDisplayName = en_US, M113 APC with M2 Browning
 AddDisplayName = ja_JP, M113 APC with M2 Browning
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = M113 APC with M2 Browning
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = M113 APC with M2 Browning
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30191
 MaxHp = 200
 Speed = 0.42

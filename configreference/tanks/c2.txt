@@ -1,6 +1,13 @@
 DisplayName = Challenger 2 MBT
 AddDisplayName = en_US, Challenger 2 MBT
 AddDisplayName = ja_JP, チャレンジャー2
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Challenger 2 MBT
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Challenger 2 MBT
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 400
 Speed = 0.37

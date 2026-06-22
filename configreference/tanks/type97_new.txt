@@ -1,6 +1,13 @@
 ﻿DisplayName = Type 97 Chi-Ha Kai
 AddDisplayName = en_US, Type 97 Chi-Ha Kai
 AddDisplayName = ru_RU, Type 97 Chi-Ha Kai
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Type 97 Chi-Ha Kai
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Type 97 Chi-Ha Kai
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 191993
 MaxHp = 100
 Speed = 0.24

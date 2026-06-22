@@ -1,5 +1,12 @@
 DisplayName = Mk.15 mod.31 Sea RAM
 AddDisplayName = ja_JP, Mk.15 mod.31 SeaRAM
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = Mk.15 mod.31 Sea RAM
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = Mk.15 mod.31 Sea RAM
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.40
 ItemID = 28602
 MaxHp = 100
 Gravity = -9.81

@@ -1,6 +1,13 @@
 DisplayName = Panavia Tornado GR.4
 AddDisplayName = en_US, Panavia Tornado GR.4
 AddDisplayName = ja_JP, パナヴィア トーネード GR.4
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Panavia Tornado GR.4
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Panavia Tornado GR.4
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28721
 MaxHp = 100
 ThrottleUpDown = 0.3

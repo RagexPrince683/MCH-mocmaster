@@ -1,4 +1,11 @@
 DisplayName = Volkswagen Iltis
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Volkswagen Iltis
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Volkswagen Iltis
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 230
 ThrottleUpDown = 0.82
 Speed = 0.758

@@ -1,5 +1,12 @@
 DisplayName = 155mm M40 Gun Motor Carriage
 AddDisplayName = zh_CN,M40“长脚汤姆”自行火炮
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = 155mm M40 Gun Motor Carriage
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = 155mm M40 Gun Motor Carriage
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 100
 Speed = 0.24
 Sound = shermaneng

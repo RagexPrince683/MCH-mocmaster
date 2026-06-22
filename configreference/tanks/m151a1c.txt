@@ -1,6 +1,13 @@
 ﻿DisplayName = M151A1C 106mm RCL Rifle 
 AddDisplayName = en_US, M151A1C Kennedy Jeep with 106mm RCL Rifle 
 AddDisplayName = ja_JP, M151A1C 106mm 無反動砲搭載型
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = M151A1C 106mm RCL Rifle
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = M151A1C 106mm RCL Rifle
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28766
 MaxHp = 200
 ThrottleUpDown = 0.81

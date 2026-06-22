@@ -1,6 +1,13 @@
 DisplayName = 12.7 cm/40 Type 89 Naval Gun
 AddDisplayName = en_US, 12.7 cm/40 Type 89 Naval Gun
 AddDisplayName = ja_JP, 12.7cm連装高角砲
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = 12.7 cm/40 Type 89 Naval Gun
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = 12.7 cm/40 Type 89 Naval Gun
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28607
 MaxHp = 95
 HideEntity = false

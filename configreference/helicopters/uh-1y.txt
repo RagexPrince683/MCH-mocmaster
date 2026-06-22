@@ -1,5 +1,12 @@
 DisplayName = UH-1Y Venom
 AddDisplayName = ja_JP, UH-1Y ペイヴホーク
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = UH-1Y Venom
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = UH-1Y Venom
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 288166
 MaxHp = 100
 EnableGunnerMode = false

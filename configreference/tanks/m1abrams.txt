@@ -1,5 +1,12 @@
 DisplayName = M1 Abrams (105mm)
 AddDisplayName = ja_JP, M1 エイブラムス
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M1 Abrams (105mm)
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M1 Abrams (105mm)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 600
 Speed = 0.45

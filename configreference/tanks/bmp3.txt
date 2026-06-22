@@ -1,6 +1,13 @@
 ﻿DisplayName = BMP-3 IFV
 AddDisplayName = en_US, BMP-3 IFV
 AddDisplayName = ja_JP, BMP-3 歩兵戦闘車
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = BMP-3 IFV
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = BMP-3 IFV
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 Speed = 0.45
 Sound = bmpthreeeng

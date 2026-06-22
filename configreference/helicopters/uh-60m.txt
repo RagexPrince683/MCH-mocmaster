@@ -1,6 +1,13 @@
 DisplayName = UH60M Black Hawk
 AddDisplayName = en_US, UH60M Black Hawk
 AddDisplayName = ja_JP, UH60M ブラックホーク
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = UH60M Black Hawk
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = UH60M Black Hawk
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28835
 MaxHp = 100
 EnableGunnerMode = false

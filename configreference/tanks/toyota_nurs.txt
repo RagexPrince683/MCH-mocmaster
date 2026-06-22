@@ -1,6 +1,13 @@
 DisplayName = Toyota Hilux with B-8V20A
 AddDisplayName = en_US, Toyota Hilux with B-8V20A
 AddDisplayName = ru_RU, Тойота с Б-8В20А
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Toyota Hilux with B-8V20A
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Toyota Hilux with B-8V20A
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 200
 ThrottleUpDown = 0.81
 Speed = 0.81

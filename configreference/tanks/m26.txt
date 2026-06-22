@@ -1,6 +1,13 @@
 DisplayName = M26 Pershing
 AddDisplayName = ja_JP, M26 パーシング
 AddDisplayName = en_US, M26 Pershing
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M26 Pershing
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M26 Pershing
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30997
 MaxHp = 162
 Speed = 0.3

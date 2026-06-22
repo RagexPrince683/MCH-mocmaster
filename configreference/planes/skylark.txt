@@ -1,5 +1,12 @@
 DisplayName = Elbit Skylark
 AddDisplayName = ja_JP, エルビット スカイラーク
+NameOnEarlyASRadar = Small UAV
+NameOnModernASRadar = Elbit Skylark
+NameOnEarlyAARadar = Small UAV
+NameOnModernAARadar = Elbit Skylark
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28745
 MaxHp = 20
 Speed = 0.12

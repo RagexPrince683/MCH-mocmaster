@@ -1,6 +1,13 @@
 DisplayName = KF-21 Boramae
 AddDisplayName = en_US, KF-21 Boramae
 AddDisplayName = ko_KR, KF-21 보라매
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = KF-21 Boramae
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = KF-21 Boramae
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 40009
 MaxHp = 100
 Speed = 3.828

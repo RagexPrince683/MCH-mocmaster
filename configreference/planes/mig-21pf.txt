@@ -1,6 +1,13 @@
 DisplayName = MiG-21PF Fishbed
 AddDisplayName = en_US, MiG-21PF Fishbed
 AddDisplayName = ko_KR, 미그-21PF 피쉬베드
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = MiG-21PF Fishbed
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = MiG-21PF Fishbed
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 40012
 MaxHp = 100
 Speed = 3.784

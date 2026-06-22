@@ -1,5 +1,12 @@
 DisplayName = AH-1Z Viper
 AddDisplayName = ja_JP, AH-1Z ヴァイパー
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = AH-1Z Viper
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = AH-1Z Viper
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28824
 MaxHp = 100
 EnableGunnerMode = true

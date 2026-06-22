@@ -1,6 +1,13 @@
 ﻿;DisplayName = unfunctional, M65 280mm Atomic Cannon
 AddDisplayName = ja_JP, M65 280mm カノン砲
 AddDisplayName = en_US, M65 280mm Atomic 'Annie'
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M65 280Mm
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M65 280Mm
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28601
 MaxHp = 100
 HideEntity = false

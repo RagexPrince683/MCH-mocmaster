@@ -1,5 +1,12 @@
 DisplayName = T-14 Armata
 AddDisplayName = en_US, T-14 Armata
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = T-14 Armata
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = T-14 Armata
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 950
 Speed = 0.50
 Sound = armataeng

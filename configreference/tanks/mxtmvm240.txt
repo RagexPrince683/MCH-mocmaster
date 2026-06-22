@@ -1,6 +1,13 @@
 DisplayName = MXT-MV Husky TSV with M240 Machine Gun
 AddDisplayName = en_US, MXT-MV Husky TSV with M240 Machine Gun
 AddDisplayName = ja_JP, MXT-MV ハスキーTSV with M240 Machine Gun
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = MXT-MV Husky TSV with M240 Machine Gun
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = MXT-MV Husky TSV with M240 Machine Gun
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 280
 ThrottleUpDown = 0.81
 Speed = 0.7

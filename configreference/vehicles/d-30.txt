@@ -1,6 +1,13 @@
 ﻿DisplayName = 122mm Howitzer 2A18 D-30
 AddDisplayName = ja_JP, 122mm D-30
 AddDisplayName = en_US, 122mm Howitzer 2A18 D-30
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = 122mm Howitzer 2A18 D-30
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = 122mm Howitzer 2A18 D-30
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28602
 MaxHp = 100
 HideEntity = false

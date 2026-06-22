@@ -1,6 +1,13 @@
 DisplayName = Mil Mi-8 T Armed
 AddDisplayName = ja_JP, Mil Mi-8 T Armed
 AddDisplayName = en_US, Mi-8 T
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Mil Mi-8 T Armed
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Mil Mi-8 T Armed
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28831
 MaxHp = 100
 Speed = 1.45

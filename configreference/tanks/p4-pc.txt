@@ -1,4 +1,11 @@
 DisplayName = Peugeot P4
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Peugeot P4
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Peugeot P4
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 230
 ThrottleUpDown = 0.81
 Speed = 0.73

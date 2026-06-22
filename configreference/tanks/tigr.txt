@@ -1,6 +1,13 @@
 ;общая инфа о технике
 ;your 'technique' is shit
 DisplayName = "Gaz" Tigr
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = "Gaz" Tigr
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = "Gaz" Tigr
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 150
 Speed = 0.87
 Sound = diesel

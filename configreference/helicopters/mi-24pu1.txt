@@ -1,6 +1,13 @@
 DisplayName = Mi-24P Hind
 AddDisplayName = en_US, Mi-24P Hind
 AddDisplayName = ja_JP, Mi-24VP ハインド
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Mi-24P Hind
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Mi-24P Hind
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28809
 MaxHp = 100
 EnableGunnerMode = true

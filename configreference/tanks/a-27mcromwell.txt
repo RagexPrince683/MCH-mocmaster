@@ -1,6 +1,13 @@
 ﻿DisplayName = A-27M Cromwell V
 AddDisplayName = en_US, A-27M Cromwell V
 AddDisplayName = ru_RU, A-27M Cromwell V
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = A-27M Cromwell V
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = A-27M Cromwell V
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 64
 Speed = 0.38
 Sound = crom

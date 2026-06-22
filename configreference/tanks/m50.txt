@@ -1,6 +1,13 @@
 DisplayName = M50 Ontos 'thing'
 AddDisplayName = ja_JP, M50 Ontos 'thing'
 AddDisplayName = en_US, M50 Ontos 'thing'
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = M50 Ontos 'thing'
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = M50 Ontos 'thing'
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 100
 Speed = 0.30

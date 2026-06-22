@@ -1,5 +1,12 @@
 ﻿DisplayName = 88mm AA-Gun Flak 36 with Shield
 AddDisplayName = en_US, 88mm AA-Gun Flak 36 with Shield
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = 88mm AA-Gun Flak 36 with Shield
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = 88mm AA-Gun Flak 36 with Shield
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 100
 HideEntity = false
 MinRotationPitch = -85

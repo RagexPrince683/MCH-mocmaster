@@ -1,6 +1,13 @@
 DisplayName = J-11B
 AddDisplayName = en_US, J-11B
 AddDisplayName = zh_CN, 歼11B
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = J-11B
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = J-11B
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 6855
 MaxHp = 100
 EnableNightVision = true

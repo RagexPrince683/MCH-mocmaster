@@ -1,5 +1,12 @@
 DisplayName = S-75 Dvina/Desna SAM
 AddDisplayName = ja_JP, S-75 地対空ミサイル
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = S-75 Dvina/Desna SAM
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = S-75 Dvina/Desna SAM
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.40
 ItemID = 28612
 MaxHP = 100
 AddTexture = s-75_tan

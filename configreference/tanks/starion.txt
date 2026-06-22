@@ -1,6 +1,13 @@
 DisplayName = Mitsubishi Starion ESI-R
 AddDisplayName = en_US, Mitsubishi Starion ESI-R
 AddDisplayName = ja_JP, 三菱 スタリオン
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Mitsubishi Starion ESI-R
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Mitsubishi Starion ESI-R
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28745
 MaxHp = 100
 ThrottleUpDown = 0.825

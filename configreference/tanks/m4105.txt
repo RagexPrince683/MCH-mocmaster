@@ -1,6 +1,13 @@
 ﻿DisplayName = M4 Sherman (105mm)
 AddDisplayName = en_US, M4 Sherman (105mm)
 AddDisplayName = ja_JP, M4 シャーマン (105mm)
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M4 Sherman (105mm)
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M4 Sherman (105mm)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 30181
 MaxHp = 100
 Speed = 0.24

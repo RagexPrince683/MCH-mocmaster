@@ -1,6 +1,13 @@
 DisplayName = 23mm ZU-23-2 Anti-Aircraft Twin Auto Cannon
 ;with 23mm ZU-23-2 Anti-Aircraft Twin Auto Cannon
 AddDisplayName = ru_RU, ЗУ-23-2
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = 23mm ZU-23-2 Anti-Aircraft Twin Auto Cannon
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = 23mm ZU-23-2 Anti-Aircraft Twin Auto Cannon
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ;и 
 MaxHp = 100
 ThrottleUpDown = 0.81

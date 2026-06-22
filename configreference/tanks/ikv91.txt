@@ -1,4 +1,11 @@
 DisplayName = Ikv 91 (Infanterikanonvagn 91)
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Ikv 91 (Infanterikanonvagn 91)
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Ikv 91 (Infanterikanonvagn 91)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 MaxHp = 200
 Speed = 0.40
 Sound = mcv

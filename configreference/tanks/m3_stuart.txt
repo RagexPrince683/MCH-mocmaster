@@ -1,6 +1,13 @@
 ﻿DisplayName = M3 Stuart
 AddDisplayName = ja_JP, M3 スチュアート
 AddDisplayName = en_US, M3 Stuart
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M3 Stuart
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M3 Stuart
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 91021
 MaxHp = 100
 Speed = 0.36

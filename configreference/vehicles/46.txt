@@ -1,6 +1,13 @@
 DisplayName = 46 cm/45 Type 94 Naval Gun
 AddDisplayName = en_US, 46 cm/45 Type 94 Naval Gun
 AddDisplayName = ja_JP, 46cm3連装砲
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = 46 cm/45 Type 94 Naval Gun
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = 46 cm/45 Type 94 Naval Gun
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28603
 MaxHp = 1690
 HideEntity = true

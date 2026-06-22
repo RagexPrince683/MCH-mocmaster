@@ -1,5 +1,12 @@
 DisplayName =  MIM-104A Patriot Trailer Mobile Surface-to-Air Missile System TEL
 AddDisplayName = ja_JP, MIM-104A Patriot Trailer Mobile Surface-to-Air Missile System TEL
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = MIM-104A Patriot Trailer Mobile Surface-to-Air Missile System TEL
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = MIM-104A Patriot Trailer Mobile Surface-to-Air Missile System TEL
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.40
 MaxHP = 100
 Speed = 0
 MaxFuel         = 2200

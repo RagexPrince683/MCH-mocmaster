@@ -1,6 +1,13 @@
 ﻿DisplayName = SPG-9
 AddDisplayName = en_US, SPG-9
 AddDisplayName = ja_JP, SPG-9
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = SPG-9
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = SPG-9
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28602
 MaxHp = 100
 Gravity = -0.61

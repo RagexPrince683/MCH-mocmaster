@@ -1,6 +1,13 @@
 DisplayName = F-4A Phantom II
 AddDisplayName = en_US, F-4A Phantom II
 AddDisplayName = ja_JP, F-4A ファントムⅡ
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F-4A Phantom II
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F-4A Phantom II
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28734
 MaxHp = 100
 EnableNightVision = false

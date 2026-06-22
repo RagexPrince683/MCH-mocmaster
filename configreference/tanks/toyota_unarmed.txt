@@ -1,6 +1,13 @@
 DisplayName = Toyota Hilux (1989)
 AddDisplayName = en_US, Toyota Hilux (1989)
 AddDisplayName = ru_RU, Тойота Hilux (1989)
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Toyota Hilux (1989)
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Toyota Hilux (1989)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 200
 ThrottleUpDown = 0.81
 Speed = 0.81

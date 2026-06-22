@@ -1,4 +1,11 @@
     DisplayName = AMX-30B
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = AMX-30B
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = AMX-30B
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 250
 Speed = 0.40
 Sound = amxthirty

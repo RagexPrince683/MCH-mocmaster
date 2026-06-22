@@ -1,6 +1,13 @@
 DisplayName = MXT-MV Husky TSV with Protector RWS
 AddDisplayName = en_US, MXT-MV Husky TSV with Protector RWS
 AddDisplayName = ja_JP, MXT-MV ハスキーTSV with Protector RWS
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = MXT-MV Husky TSV with Protector RWS
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = MXT-MV Husky TSV with Protector RWS
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 280
 ThrottleUpDown = 0.81
 Speed = 0.7

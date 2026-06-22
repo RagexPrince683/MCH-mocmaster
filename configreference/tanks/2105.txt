@@ -1,6 +1,13 @@
 ﻿DisplayName = 2105 Lada
 AddDisplayName = en_US, 2105 Lada
 AddDisplayName = ja_JP, スカイラインLada 2105
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = 2105 Lada
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = 2105 Lada
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 300341
 MaxHp = 200
 ThrottleUpDown = 0.81

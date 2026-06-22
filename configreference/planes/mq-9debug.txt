@@ -1,5 +1,12 @@
 DisplayName = MQ-9 Reaper
 AddDisplayName = ja_JP, MQ-9 リーパー
+NameOnEarlyASRadar = Small UAV
+NameOnModernASRadar = MQ-9 Reaper
+NameOnEarlyAARadar = Small UAV
+NameOnModernAARadar = MQ-9 Reaper
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28707
 MaxHp = 100
 Speed = 0.522

@@ -1,6 +1,13 @@
 DisplayName = Kawanishi H8K "Emily"
 AddDisplayName = en_US, Kawanishi H8K "Emily"
 AddDisplayName = ja_JP, 二式飛行艇
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Kawanishi H8K "Emily"
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Kawanishi H8K "Emily"
+ChaffWaitTime = 500
+ChaffUseTime = 160
+ThrottleDownFactor = 0.20
 ItemID = 28719
 MaxHp = 250
 Speed = 0.809

@@ -1,6 +1,13 @@
 ﻿DisplayName = M-37/BM37
 AddDisplayName = ja_JP, M-37/BM-37
 AddDisplayName = en_US, M-37/82-BM-37
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M-37/BM37
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M-37/BM37
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30095
 MaxHp = 100
 CameraZoom = 2

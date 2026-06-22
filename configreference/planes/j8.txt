@@ -1,6 +1,13 @@
 DisplayName = Shenyang J-8 II
 AddDisplayName = en_US, Shenyang J-8 II
 AddDisplayName = ja_JP, J-8 II
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Shenyang J-8 II
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Shenyang J-8 II
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 25547
 MaxHp = 100
 Speed = 4.0

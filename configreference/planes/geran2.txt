@@ -1,6 +1,13 @@
 DisplayName = Geran 2
 AddDisplayName = en_US, Geran 2
 AddDisplayName = ja_JP, Geran 2
+NameOnEarlyASRadar = Small UAV
+NameOnModernASRadar = Geran 2
+NameOnEarlyAARadar = Small UAV
+NameOnModernAARadar = Geran 2
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 MaxHp = 10
 ;;Speed = 0.006 for a specific server config
 Speed = 0.115

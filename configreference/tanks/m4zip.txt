@@ -1,6 +1,13 @@
 ﻿DisplayName = M4 Zippo Flame Tank POA-CWS-H1
 AddDisplayName = en_US, M4 Zippo Flame Tank POA-CWS-H1
 AddDisplayName = ja_JP, M4 Zippo Flame Tank POA-CWS-H1
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M4 Zippo Flame Tank POA-CWS-H1
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M4 Zippo Flame Tank POA-CWS-H1
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 30181
 MaxHp = 200
 Speed = 0.22

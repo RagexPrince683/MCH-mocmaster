@@ -1,6 +1,13 @@
 ﻿DisplayName = M142 HIMARS (M1140 Truck) [MGM-104 ATACMS]
 AddDisplayName = en_US, M142 HIMARS (M1140 Truck) [MGM-104 ATACMS]
 AddDisplayName = ru_RU, M142 HIMARS (M1140 Truck) [MGM-104 ATACMS]
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = M142 HIMARS (M1140 Truck) [MGM-104 ATACMS]
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = M142 HIMARS (M1140 Truck) [MGM-104 ATACMS]
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30157
 MaxHp = 200
 Speed = 0.53

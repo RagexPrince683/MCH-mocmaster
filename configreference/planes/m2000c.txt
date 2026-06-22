@@ -1,6 +1,13 @@
 DisplayName = Mirage 2000C
 AddDisplayName = en_US, Mirage 2000C
 AddDisplayName = ja_JP, Mirage 2000C
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Mirage 2000C
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Mirage 2000C
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 MaxHp = 200
 Speed = 4.0
 Sound = miragetwothousand

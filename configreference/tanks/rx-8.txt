@@ -1,4 +1,11 @@
 DisplayName = Mazda RX-8
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Mazda RX-8
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Mazda RX-8
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 ThrottleUpDown = 0.86
 ;5.9s

@@ -1,6 +1,13 @@
 DisplayName = Fairchild AU-23A Peacemaker
 AddDisplayName = en_US, Fairchild AU-23A Peacemaker
 AddDisplayName = ja_JP, フェアチャイルド AU-23A ピースメーカー
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Fairchild AU-23A Peacemaker
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Fairchild AU-23A Peacemaker
+ChaffWaitTime = 500
+ChaffUseTime = 160
+ThrottleDownFactor = 0.20
 ItemID = 28750
 MaxHp = 150
 Speed = 0.475

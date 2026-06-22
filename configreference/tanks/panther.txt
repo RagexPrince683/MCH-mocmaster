@@ -1,5 +1,12 @@
 DisplayName = Panther G
 AddDisplayName = Panther G
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Panther G
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Panther G
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 32359
 
 MaxHp = 155

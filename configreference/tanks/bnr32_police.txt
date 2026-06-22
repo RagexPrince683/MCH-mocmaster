@@ -1,6 +1,13 @@
 DisplayName = Nissan Skyline GT-R R32 Police
 AddDisplayName = en_US, Nissan Skyline GT-R R32 Police
 AddDisplayName = ja_JP, スカイラインGT-R 警察仕様
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Nissan Skyline GT-R R32 Police
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Nissan Skyline GT-R R32 Police
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30132
 MaxHp = 230
 ThrottleUpDown = 0.918

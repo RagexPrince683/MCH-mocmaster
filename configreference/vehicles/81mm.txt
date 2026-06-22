@@ -1,5 +1,12 @@
 DisplayName = 81mm M252 Mortar
 AddDisplayName = ja_JP, 迫撃砲
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = 81mm M252 Mortar
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = 81mm M252 Mortar
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28607
 MaxHp = 100
 HideEntity = false

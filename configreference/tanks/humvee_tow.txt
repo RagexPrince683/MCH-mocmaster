@@ -1,6 +1,13 @@
 ﻿DisplayName = Fast Back Humvee with BGM-71 TOW Missile Launcher
 AddDisplayName = ja_JP, Fast Back Humvee with BGM-71 TOW Missile Launcher
 AddDisplayName = en_US, Fast Back Humvee with BGM-71 TOW Missile Launcher
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Fast Back Humvee with BGM-71 TOW Missile Launcher
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Fast Back Humvee with BGM-71 TOW Missile Launcher
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 ItemID = 30032
 MaxHp = 230
 ThrottleUpDown = 0.81

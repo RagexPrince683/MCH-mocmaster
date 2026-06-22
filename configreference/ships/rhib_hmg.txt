@@ -1,6 +1,13 @@
 DisplayName = NSW 11-meter RHIB with with M240 Mount
 AddDisplayName = en_US, NSW 11-meter RHIB with M240 Mount
 AddDisplayName = ja_JP, NSW 11-meter RHIB with M240
+NameOnEarlyASRadar = Surface Ship
+NameOnModernASRadar = NSW 11-meter RHIB with with M240 Mount
+NameOnEarlyAARadar = Surface Ship
+NameOnModernAARadar = NSW 11-meter RHIB with with M240 Mount
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.30
 MaxFuel         = 250
 FuelConsumption = 0.009
 ItemID = 49998

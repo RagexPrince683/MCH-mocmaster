@@ -1,5 +1,12 @@
 DisplayName = 7.62mm M60 Machine Gun Tripod Mount
 AddDisplayName = ja_JP, M60 汎用機関銃
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = 7.62mm M60 Machine Gun Tripod Mount
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = 7.62mm M60 Machine Gun Tripod Mount
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 100
 HideEntity = false
 RotationPitchMin = -5

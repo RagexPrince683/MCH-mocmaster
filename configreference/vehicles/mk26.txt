@@ -1,5 +1,12 @@
 DisplayName = Mark 26 Guided Missile Launching System
 AddDisplayName = ja_JP, Mk 26 (ミサイル発射機)
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = Mark 26 Guided Missile Launching System
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = Mark 26 Guided Missile Launching System
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.40
 ItemID = 28613
 MaxHP = 100
 CameraPosition = 0.0, 4.50, -0.4220

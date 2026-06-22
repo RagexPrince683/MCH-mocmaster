@@ -1,5 +1,12 @@
 DisplayName = Magach 5
 AddDisplayName = zh_CN,Magach 5 巴顿 主战坦克
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Magach 5
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Magach 5
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 265
 Speed = 0.3

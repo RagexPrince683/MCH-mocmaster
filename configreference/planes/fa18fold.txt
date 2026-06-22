@@ -1,6 +1,13 @@
 DisplayName = F/A-18F Super Hornet
 AddDisplayName = en_US, F/A-18F Super Hornet
 AddDisplayName = ja_JP, F/A-18Fスーパーホーネット
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F/A-18F Super Hornet
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F/A-18F Super Hornet
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28715
 MaxHp = 100
 EnableNightVision = true

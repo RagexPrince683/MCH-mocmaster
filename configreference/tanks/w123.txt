@@ -1,4 +1,11 @@
 DisplayName = Mercedes-Benz W123 240D
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Mercedes-Benz W123 240D
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Mercedes-Benz W123 240D
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 ThrottleUpDown = 0.81
 Speed = 0.89

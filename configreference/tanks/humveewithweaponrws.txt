@@ -1,6 +1,13 @@
 ﻿DisplayName = Fast Back Humvee with M2 Browning RWS
 AddDisplayName = ja_JP, Fast Back Humvee with M2 Browning RWS
 AddDisplayName = en_US, Fast Back Humvee with M2 Browning RWS
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Fast Back Humvee with M2 Browning RWS
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Fast Back Humvee with M2 Browning RWS
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 ;sigma sigma on the wall who is the most lonely of them all
 ;smd atom
 ItemID = 30032

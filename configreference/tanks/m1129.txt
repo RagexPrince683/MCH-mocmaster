@@ -1,6 +1,13 @@
 DisplayName = M1129 Self-Propelled Mortar
 AddDisplayName = en_US, M1129 Self-Propelled Mortar
 AddDisplayName = ja_JP, M1129 自走迫撃砲
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = M1129 Self-Propelled Mortar
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = M1129 Self-Propelled Mortar
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 200
 Speed = 0.62
 Sound = stryker

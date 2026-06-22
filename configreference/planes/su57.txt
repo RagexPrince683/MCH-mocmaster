@@ -1,6 +1,13 @@
 DisplayName = Su-57
 AddDisplayName = en_US, Su-57
 AddDisplayName = zh_CN, 老毛子的苏-57
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Su-57
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Su-57
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 7788
 MaxHp = 100
 ThrottleUpDown = 0.3

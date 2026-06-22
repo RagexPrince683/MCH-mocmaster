@@ -1,4 +1,11 @@
 DisplayName = Mercedes G250 Wolf
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Mercedes G250 Wolf
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Mercedes G250 Wolf
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 230
 ThrottleUpDown = 0.81
 Speed = 0.85

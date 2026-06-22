@@ -1,5 +1,12 @@
 DisplayName = SH-60 Seahawk (Lamps III)
 AddDisplayName = ja_JP, SH-60 シーホーク (Lamps III)
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = SH-60 Seahawk (Lamps III)
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = SH-60 Seahawk (Lamps III)
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28803
 MaxHp = 100
 EnableGunnerMode = true

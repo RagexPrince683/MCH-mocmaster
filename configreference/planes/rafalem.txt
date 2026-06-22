@@ -1,6 +1,13 @@
 DisplayName = Dassault Rafale M
 AddDisplayName = en_US, Dassault Rafale M
 AddDisplayName = zh_CN, Dassault 阵风M舰载战斗机
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Dassault Rafale M
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Dassault Rafale M
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 MaxHp = 100
 Speed = 3.327
 Sound = rafale

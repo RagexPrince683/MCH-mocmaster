@@ -1,4 +1,11 @@
 DisplayName = 2K12 "Kub"
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = 2K12 "Kub"
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = 2K12 "Kub"
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.40
 ;same as 2k22 tungi
 MaxHp = 200
 Speed = 0.4

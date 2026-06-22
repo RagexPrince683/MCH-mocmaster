@@ -1,6 +1,13 @@
 DisplayName = Toyota Hilux with DSHK
 AddDisplayName = en_US, Toyota Hilux with DSHK
 AddDisplayName = ru_RU, Тойота с ДШК
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Toyota Hilux with DSHK
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Toyota Hilux with DSHK
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 200
 ThrottleUpDown = 0.81
 Speed = 0.81

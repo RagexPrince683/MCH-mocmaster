@@ -1,6 +1,13 @@
 ﻿DisplayName = M-29 Davy Crockett
 AddDisplayName = en_US, M-29 Davy Crockett
 AddDisplayName = ja_JP, M-29 Davy Crockett
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M-29 Davy Crockett
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M-29 Davy Crockett
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28602
 MaxHp = 100
 Gravity = -0.61

@@ -1,6 +1,13 @@
 ﻿DisplayName = Rolls-Royce Phantom
 AddDisplayName = en_US, Rolls-Royce Phantom
 AddDisplayName = ja_JP, ロールスロイス ファントム
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Rolls-Royce Phantom
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Rolls-Royce Phantom
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30111
 MaxHp = 200
 ThrottleUpDown = 0.9

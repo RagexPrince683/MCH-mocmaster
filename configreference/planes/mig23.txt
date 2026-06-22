@@ -1,6 +1,13 @@
 DisplayName = MIG-23MLD
 AddDisplayName = en_US, Mig-23MLD
 AddDisplayName = ja_JP, Mig-23MLD
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = MIG-23MLD
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = MIG-23MLD
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28720
 MaxHp = 100
 EnableNightVision = false

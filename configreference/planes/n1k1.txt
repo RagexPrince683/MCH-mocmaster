@@ -1,6 +1,13 @@
 DisplayName = Kawanishi N1K
 AddDisplayName = en_US, Kawanishi N1K
 AddDisplayName = ja_JP, 強風
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Kawanishi N1K
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Kawanishi N1K
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28704
 MaxHp = 100
 Speed = 1.016

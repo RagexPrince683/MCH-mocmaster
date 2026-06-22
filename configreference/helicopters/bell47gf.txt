@@ -1,6 +1,13 @@
 DisplayName = Bell 47G Float with MiniGun
 AddDisplayName = en_US, Bell 47G Float with MiniGun
 AddDisplayName = ja_JP, Bell47G フロート
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Bell 47G Float with MiniGun
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Bell 47G Float with MiniGun
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28808
 MaxHp = 100
 Float  = true

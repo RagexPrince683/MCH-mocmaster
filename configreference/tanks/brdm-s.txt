@@ -1,4 +1,11 @@
 DisplayName = BRDM-2 9P148 Konkurs "BRDM-3"
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = BRDM-2 9P148 Konkurs "BRDM-3"
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = BRDM-2 9P148 Konkurs "BRDM-3"
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.50
 MaxHp = 200
 Speed = 0.62
 Sound = apc_run

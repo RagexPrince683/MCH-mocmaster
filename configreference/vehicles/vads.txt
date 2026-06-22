@@ -1,5 +1,12 @@
 DisplayName = M167 VADS
 AddDisplayName = ja_JP,対空機関砲 M167 VADS
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = M167 VADS
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = M167 VADS
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28614
 MaxHP = 100
 Gravity = -9.81

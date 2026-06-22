@@ -1,5 +1,12 @@
 DisplayName = Bugatti Chiron
 AddDisplayName = ja_JP, Bugatti Chiron
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Bugatti Chiron
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Bugatti Chiron
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 ItemID = 99901
 MaxHp = 200
 Speed = 2.61

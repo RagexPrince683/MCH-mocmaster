@@ -1,6 +1,13 @@
 ﻿DisplayName = Type 90 MBT
 AddDisplayName = en_US, Type 90 MBT
 AddDisplayName = ja_JP, 90式戦車
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Type 90 MBT
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Type 90 MBT
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 585
 Speed = 0.43

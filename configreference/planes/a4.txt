@@ -1,5 +1,12 @@
 DisplayName = A-4E Skyhawk Early
 AddDisplayName = ja_JP, A-4E Skyhawk Early
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = A-4E Skyhawk Early
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = A-4E Skyhawk Early
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28740
 MaxHp = 100
 ;onGroundPitch = 2

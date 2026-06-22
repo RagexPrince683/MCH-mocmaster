@@ -1,6 +1,13 @@
 ﻿DisplayName = M113 APC with Mk19 Grenade Launcher
 AddDisplayName = en_US, M113 APC with Mk19 Grenade Launcher
 AddDisplayName = ja_JP, M113 APC with Mk19 Grenade Launcher
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = M113 APC with Mk19 Grenade Launcher
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = M113 APC with Mk19 Grenade Launcher
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30191
 MaxHp = 200
 Speed = 0.42

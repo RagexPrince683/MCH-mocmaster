@@ -1,6 +1,13 @@
 DisplayName = 8cm Granatwerfer 34 Mortar
 AddDisplayName = en_US, 8 cm Granatwerfer 34 Mortar
 AddDisplayName = ru_RU, s.Gr.W.34 Mortar
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = 8cm Granatwerfer 34 Mortar
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = 8cm Granatwerfer 34 Mortar
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28607
 MaxHp = 100
 Gravity = -9.81

@@ -1,6 +1,13 @@
 ﻿DisplayName = SPz Marder 1A3 IFV
 AddDisplayName = en_US, SPz Marder 1A3 IFV
 AddDisplayName = ja_JP, マルダー1A3 歩兵戦闘車
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = SPz Marder 1A3 IFV
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = SPz Marder 1A3 IFV
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 Speed = 0.4
 Sound = mardereng

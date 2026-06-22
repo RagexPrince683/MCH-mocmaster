@@ -1,5 +1,12 @@
 ﻿DisplayName = Shahed Trailer/Launcher
 AddDisplayName = en_US, Shahed Trailer/Launcher
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Shahed Trailer/Launcher
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Shahed Trailer/Launcher
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 50
 Gravity = -9.81
 GravityInWater = -1.0

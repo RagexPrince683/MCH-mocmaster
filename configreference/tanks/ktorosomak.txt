@@ -1,4 +1,11 @@
 DisplayName = KTO Rosomak 'Wolverine' with Oto Melara Hitfist
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = KTO Rosomak 'Wolverine' with Oto Melara Hitfist
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = KTO Rosomak 'Wolverine' with Oto Melara Hitfist
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 Speed = 0.62
 Sound = mcv

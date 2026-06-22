@@ -1,4 +1,11 @@
 DisplayName = Strf 9040B
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = Strf 9040B
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = Strf 9040B
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 Speed = 0.43
 Sound = cvenglonger

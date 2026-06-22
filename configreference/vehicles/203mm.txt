@@ -1,5 +1,12 @@
 DisplayName = 20.3cm Twin Naval Cannon
 AddDisplayName = ja_JP, 20.3cm連装砲
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = 20.3cm Twin Naval Cannon
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = 20.3cm Twin Naval Cannon
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28601
 MaxHp = 335
 HideEntity = true

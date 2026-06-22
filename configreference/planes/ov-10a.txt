@@ -1,6 +1,13 @@
 DisplayName = OV-10A Bronco
 AddDisplayName = en_US, OV-10A Bronco
 AddDisplayName = ja_JP, OV-10A ブロンコ
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = OV-10A Bronco
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = OV-10A Bronco
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28760
 MaxHp = 100
 Speed = 0.786

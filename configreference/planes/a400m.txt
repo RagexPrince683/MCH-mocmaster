@@ -1,6 +1,13 @@
 DisplayName = Airbus A400M Atlas
 AddDisplayName = en_US, Airbus A400M Atlas
 AddDisplayName = ja_JP, エアバス A400M アトラス
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Airbus A400M Atlas
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Airbus A400M Atlas
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 30048
 EnableNightVision = true
 EnableEntityRadar = false

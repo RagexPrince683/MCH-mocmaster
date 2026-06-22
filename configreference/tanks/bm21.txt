@@ -1,6 +1,13 @@
 ﻿DisplayName = BM-21 Grad MLRS "Ural" Truck
 AddDisplayName = ja_JP, BM-21 Grad MLRS "Ural" Truck
 AddDisplayName = en_US, BM-21 Grad MLRS "Ural" Truck
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = BM-21 Grad MLRS "Ural" Truck
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = BM-21 Grad MLRS "Ural" Truck
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 200
 Speed = 0.47

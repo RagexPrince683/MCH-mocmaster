@@ -1,6 +1,13 @@
 DisplayName = C5A galaxy
 AddDisplayName = en_US, C5A galaxy
 AddDisplayName = ja_JP, C5A ギャラクシー
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = C5A galaxy
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = C5A galaxy
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28739
 MaxHp = 250
 Speed = 1.489

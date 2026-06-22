@@ -1,5 +1,12 @@
 DisplayName = Mark 13 Guided Missile Launching System
 AddDisplayName = ja_JP, ミサイル発射機 Mk13
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = Mark 13 Guided Missile Launching System
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = Mark 13 Guided Missile Launching System
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.40
 ItemID = 28612
 MaxHP = 100
 CameraPosition = 0.0, 5.5, 1.52

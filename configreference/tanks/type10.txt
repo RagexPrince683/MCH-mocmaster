@@ -1,5 +1,12 @@
 DisplayName = Type 10 MBT
 AddDisplayName = ja_JP, 10式戦車
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Type 10 MBT
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Type 10 MBT
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 565
 Speed = 0.43

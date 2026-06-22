@@ -1,6 +1,13 @@
 ﻿DisplayName = QF 5.25-inch Mark I Naval Gun
 AddDisplayName = en_US, QF 5.25-inch Mark I Naval Gun
 AddDisplayName = ja_JP, QF 5.25インチ砲 マークI
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = QF 5.25-inch Mark I Naval Gun
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = QF 5.25-inch Mark I Naval Gun
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30067
 MaxHp = 201
 Gravity = -9.81

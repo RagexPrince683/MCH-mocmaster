@@ -1,6 +1,13 @@
 ﻿DisplayName = Type 95 Ha-Go
 AddDisplayName = en_US, Type 95 Ha-Go
 AddDisplayName = ru_RU, Type 95 Ro-Go
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Type 95 Ha-Go
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Type 95 Ha-Go
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 191990
 MaxHp = 100
 Speed = 0.28

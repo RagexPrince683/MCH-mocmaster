@@ -1,4 +1,11 @@
 DisplayName = 2S25 Sprut-SD
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = 2S25 Sprut-SD
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = 2S25 Sprut-SD
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 Speed = 0.43
 Sound = bmpthreeeng

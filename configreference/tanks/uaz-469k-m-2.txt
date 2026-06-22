@@ -1,6 +1,13 @@
 DisplayName = UAZ-469
 AddDisplayName = ru_RU, УАЗ-469
 AddDisplayName = en_US, UAZ-469
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = UAZ-469
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = UAZ-469
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 MaxHp = 230
 ThrottleUpDown = 0.81
 Speed = 0.62

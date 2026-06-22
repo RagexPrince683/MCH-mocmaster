@@ -1,5 +1,12 @@
 DisplayName = Jagdpanzer 38(t) 'Hetzer'
 AddDisplayName = ja_JP, Jagdpanzer 38(t) 'Hetzer'
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Jagdpanzer 38(t) 'Hetzer'
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Jagdpanzer 38(t) 'Hetzer'
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 ItemID = 30191
 MaxHp = 180
 Speed = 0.26

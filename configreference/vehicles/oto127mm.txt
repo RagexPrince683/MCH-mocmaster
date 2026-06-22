@@ -1,5 +1,12 @@
 DisplayName = Otobreda 127/64 Naval Gun
 AddDisplayName = ja_JP, オート・メラーラ127mm砲
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Otobreda 127/64 Naval Gun
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Otobreda 127/64 Naval Gun
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30110
 MaxHp = 300
 HideEntity = true

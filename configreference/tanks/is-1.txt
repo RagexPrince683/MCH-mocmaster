@@ -1,6 +1,12 @@
 ﻿DisplayName = IS-1
 AddDisplayName = ja_JP, IS-1
 AddDisplayName = en_US, IS-1
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = IS-1
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = IS-1
+ChaffWaitTime = 0
+ChaffUseTime = 0
 ItemID = 30180
 
 MaxHp = 180
@@ -13,7 +19,7 @@ ExplosionSizeByCrash = 18
 
 Sound = istwo
 ThrottleUpDown = 1.3
-throttleDownFactor = 0.65
+ThrottleDownFactor = 0.40
 MobilityYawOnGround = 2.0
 MinRotationPitch = -25
 MaxRotationPitch = 5

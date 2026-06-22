@@ -1,6 +1,13 @@
 ﻿DisplayName = AAVP-7A1 "Amtrac"
 AddDisplayName = en_US, AAVP-7A1 "Amtrac"
 AddDisplayName = ja_JP, AAVP-7A1 アムトラック
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = AAVP-7A1 "Amtrac"
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = AAVP-7A1 "Amtrac"
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 200
 Speed = 0.45
 Sound = amtrak

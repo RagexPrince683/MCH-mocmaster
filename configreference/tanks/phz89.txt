@@ -1,6 +1,13 @@
 ﻿DisplayName = PHZ-89
 AddDisplayName = en_US, PHZ-89
 AddDisplayName = zh_CN, 89式火箭炮
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = PHZ-89
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = PHZ-89
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 38875
 MaxHp = 200
 Speed = 0.34

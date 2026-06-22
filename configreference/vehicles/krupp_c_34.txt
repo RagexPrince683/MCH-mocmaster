@@ -1,6 +1,13 @@
 DisplayName = Krupp C/34 40.6cm Coastal-Artillery "Adolfkanone"
 AddDisplayName = en_US, Krupp C/34 40.6cm Coastal-Artillery "Adolfkanone"
 AddDisplayName = ja_JP, クルップ C/34 沿岸砲
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = Krupp C/34 40.6cm Coastal-Artillery "Adolfkanone"
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = Krupp C/34 40.6cm Coastal-Artillery "Adolfkanone"
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 28601
 MaxHp = 1500
 ;MaxFuel         = 100000000

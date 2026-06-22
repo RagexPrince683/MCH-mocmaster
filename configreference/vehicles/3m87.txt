@@ -1,6 +1,13 @@
 ﻿DisplayName = Kashtan CIWS
 AddDisplayName = ja_JP, コールチク CIWS
 AddDisplayName = en_US, Kashtan CIWS
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = Kashtan CIWS
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = Kashtan CIWS
+ChaffWaitTime = 420
+ChaffUseTime = 80
+ThrottleDownFactor = 0.40
 ItemID = 28700
 MaxHp = 100
 EnableNightVision = true

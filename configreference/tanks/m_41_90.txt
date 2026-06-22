@@ -1,4 +1,11 @@
 DisplayName = leKPz M41 Walker Bulldog
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = leKPz M41 Walker Bulldog
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = leKPz M41 Walker Bulldog
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.60
 MaxHp = 300
 Speed = 0.6
 Sound = bulldog

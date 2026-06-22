@@ -1,6 +1,13 @@
 ﻿DisplayName = F-104C Starfighter
 AddDisplayName = en_US, F-104C Starfighter
 AddDisplayName = ko_KR, F-104C 스타파이터
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F-104C Starfighter
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F-104C Starfighter
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 40005
 MaxHp = 100
 Speed = 3.70

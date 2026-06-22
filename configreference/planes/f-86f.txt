@@ -1,6 +1,13 @@
 DisplayName = F-86F Sabre
 AddDisplayName = en_US, F-86F Sabre
 AddDisplayName = ko_KR, F-86F 세이버
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F-86F Sabre
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F-86F Sabre
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 40011
 MaxHp = 100
 Speed = 1.55

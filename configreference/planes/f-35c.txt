@@ -1,6 +1,13 @@
 DisplayName = F-35C Lightning II
 AddDisplayName = en_US, F-35C Lightning II
 AddDisplayName = ja_JP, F-35C ライトニング II
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F-35C Lightning II
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F-35C Lightning II
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28724
 MaxHp = 100
 EnableNightVision = true

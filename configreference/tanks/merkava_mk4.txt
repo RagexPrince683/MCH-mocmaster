@@ -1,5 +1,12 @@
 DisplayName = Merkava Mk.4 Baz
 AddDisplayName = ja_JP, Merkava Mk.4 Baz
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Merkava Mk.4 Baz
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Merkava Mk.4 Baz
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30075
 MaxHp = 600
 Speed = 0.40

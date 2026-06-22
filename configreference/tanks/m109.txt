@@ -1,6 +1,13 @@
 ﻿DisplayName = M109A6 Paladin 155mm Self Propelled Howitzer
 AddDisplayName = ja_JP, M109A6 Paladin 155mm Self Propelled Howitzer
 AddDisplayName = en_US, M109A6 Paladin 155mm Self Propelled Howitzer
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadar = M109A6 Paladin 155mm Self Propelled Howitzer
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadar = M109A6 Paladin 155mm Self Propelled Howitzer
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 200
 Speed = 0.38

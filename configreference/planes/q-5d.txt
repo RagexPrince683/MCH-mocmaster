@@ -1,6 +1,13 @@
 DisplayName = Nanchang Q-5D
 AddDisplayName = en_US, Nanchang Q-5D
 AddDisplayName = ko_KR, Q-5D 판탄
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Nanchang Q-5D
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Nanchang Q-5D
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 40016
 MaxHp = 100
 Speed = 2.105

@@ -1,6 +1,13 @@
 ﻿DisplayName = Nissan Skyline GT-R BCNR33
 AddDisplayName = en_US, Nissan Skyline GT-R R33
 AddDisplayName = ja_JP, スカイラインGT-R BCNR33
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Nissan Skyline GT-R BCNR33
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Nissan Skyline GT-R BCNR33
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30033
 MaxHp = 200
 ThrottleUpDown = 0.95

@@ -1,6 +1,13 @@
 DisplayName = Strv.103B
 AddDisplayName = en_US, Strv.103B
 AddDisplayName = ja_JP, Strv.103B
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Strv.103B
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Strv.103B
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30077
 MaxHp = 220
 Speed = 0.37

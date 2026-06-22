@@ -1,6 +1,13 @@
 ﻿DisplayName = 15cm Pz.W.42 Panzerwerfer (Sd.Kfz. 4/1)
 AddDisplayName = en_US, 15cm Pz.W.42 Panzerwerfer (Sd.Kfz. 4/1)
 AddDisplayName = ja_JP, Panzerwerfer (Sd.Kfz. 4/1)
+NameOnEarlyASRadar = Artillery Vehicle
+NameOnModernASRadarcm Pz.W.42 Panzerwerfer (Sd.Kfz. 4/1)
+NameOnEarlyAARadar = Artillery Vehicle
+NameOnModernAARadarcm Pz.W.42 Panzerwerfer (Sd.Kfz. 4/1)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 19478
 MaxHp = 100
 Speed = 0.24

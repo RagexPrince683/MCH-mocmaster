@@ -1,6 +1,13 @@
 ﻿DisplayName = BTR-80 APC
 AddDisplayName = ja_JP, BTR-80 装輪装甲車
 AddDisplayName = en_US, BTR-80 APC
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = BTR-80 APC
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = BTR-80 APC
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.50
 ItemID = 30102
 MaxHp = 200
 Speed = 0.55

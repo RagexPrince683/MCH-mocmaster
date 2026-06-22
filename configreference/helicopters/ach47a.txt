@@ -1,6 +1,13 @@
 DisplayName = Up Armed Boeing ACH-47A "Guns A Go-Go" Chinook
 AddDisplayName = en_US, Up Armed Boeing ACH-47A "Guns A Go-Go" Chinook
 AddDisplayName = ja_JP, ACH47a アームド チヌーク
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Up Armed Boeing ACH-47A "Guns A Go-Go" Chinook
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Up Armed Boeing ACH-47A "Guns A Go-Go" Chinook
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28811
 MaxHp = 100
 EnableNightVision = true

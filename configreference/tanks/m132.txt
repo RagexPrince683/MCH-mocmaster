@@ -1,6 +1,13 @@
 ﻿DisplayName = M132 Armored Flamethrower 'Zippo' (M113)
 AddDisplayName = en_US, M132 Armored Flamethrower 'Zippo' (M113)
 AddDisplayName = ja_JP, M132 Armored Flamethrower 'Zippo' (M113)
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = M132 Armored Flamethrower 'Zippo' (M113)
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = M132 Armored Flamethrower 'Zippo' (M113)
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30191
 MaxHp = 200
 Speed = 0.42

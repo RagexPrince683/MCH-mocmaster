@@ -1,6 +1,13 @@
 DisplayName = ZSU-23-4
 AddDisplayName = en_US, ZSU-23-4 Shilka
 AddDisplayName = ja_JP, ZSU-23-4
+NameOnEarlyASRadar = Air Defense Vehicle
+NameOnModernASRadar = ZSU-23-4
+NameOnEarlyAARadar = Air Defense Vehicle
+NameOnModernAARadar = ZSU-23-4
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 ItemID = 30100
 MaxHp = 200
 Speed = 0.31

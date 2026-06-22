@@ -1,5 +1,12 @@
 DisplayName = MH-6 Little Bird
 AddDisplayName = ja_JP, MH-6 リトルバード
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = MH-6 Little Bird
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = MH-6 Little Bird
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28805
 MaxHp = 100
 EnableGunnerMode = false

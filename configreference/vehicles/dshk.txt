@@ -1,6 +1,13 @@
 DisplayName = DSHK
 AddDisplayName = en_US, DSHK
 AddDisplayName = ru_RU, DSHK
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = DSHK
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = DSHK
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 100
 ThrottleUpDown = 9.9
 Speed = 0.005

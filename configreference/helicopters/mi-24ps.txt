@@ -1,6 +1,13 @@
 DisplayName = Mi-24PS Hind (Unarmed)
 AddDisplayName = en_US, Mi-24PS Hind (Unarmed)
 AddDisplayName = ja_JP, Mi-24PS ハインド警察仕様
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Mi-24PS Hind (Unarmed)
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Mi-24PS Hind (Unarmed)
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
 ItemID = 28831
 MaxHp = 100
 EnableGunnerMode = true

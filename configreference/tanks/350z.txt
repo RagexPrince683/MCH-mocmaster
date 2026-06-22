@@ -1,5 +1,12 @@
 ﻿﻿DisplayName = Nissan 350Z
 AddDisplayName = en_US, Nissan 350Z
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Nissan 350Z
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Nissan 350Z
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 
 ItemID = 28745
 MaxHp = 200

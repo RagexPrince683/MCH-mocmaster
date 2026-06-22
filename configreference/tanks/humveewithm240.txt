@@ -1,6 +1,13 @@
 ﻿DisplayName = Fast Back Humvee with M240B
 AddDisplayName = ja_JP, Fast Back Humvee with M240B
 AddDisplayName = en_US, Fast Back Humvee with M240B
+NameOnEarlyASRadar = Light Vehicle
+NameOnModernASRadar = Fast Back Humvee with M240B
+NameOnEarlyAARadar = Light Vehicle
+NameOnModernAARadar = Fast Back Humvee with M240B
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.45
 ItemID = 30032
 MaxHp = 230
 ThrottleUpDown = 0.81

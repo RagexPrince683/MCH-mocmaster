@@ -1,6 +1,13 @@
 DisplayName = MXT-MV Husky TSV
 AddDisplayName = en_US, MXT-MV Husky TSV
 AddDisplayName = ja_JP, MXT-MV ハスキーTSV
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = MXT-MV Husky TSV
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = MXT-MV Husky TSV
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 MaxHp = 280
 ThrottleUpDown = 0.81
 Speed = 0.7

@@ -1,6 +1,13 @@
 DisplayName = Schützenpanzer (SPz) Puma S1
 AddDisplayName = zh_CN,美洲狮重型步兵战车 S1
 AddDisplayName = en_US, Schützenpanzer (SPz) Puma S1
+NameOnEarlyASRadar = Armored Vehicle
+NameOnModernASRadar = Schützenpanzer (SPz) Puma S1
+NameOnEarlyAARadar = Armored Vehicle
+NameOnModernAARadar = Schützenpanzer (SPz) Puma S1
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
 
 ExplosionSizeByCrash = 3
 

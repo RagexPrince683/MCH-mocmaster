@@ -1,6 +1,13 @@
 DisplayName = F-117 Nighthawk (GBU-27 Paveway III)
 AddDisplayName = en_US, F-117 Nighthawk (GBU-27 Paveway III)
 AddDisplayName = ja_JP, F-117 (GBU-27 Paveway III)
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F-117 Nighthawk (GBU-27 Paveway III)
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F-117 Nighthawk (GBU-27 Paveway III)
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
 ItemID = 28740
 MaxHp = 100
 EnableNightVision = true
