@@ -2,13 +2,27 @@ package mcheli.aircraft;
 
 import java.util.ArrayList;
 import java.util.List;
+import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.weapon.MCH_WeaponSet;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
 
 public final class MCH_HudShared {
 
    private MCH_HudShared() {
+   }
+
+   public static boolean isNewHeliPilotHudActive(MCH_EntityBaseVehicle ac) {
+      return isNewHeliPilotHudActive(ac, ac != null ? ac.getRiddenByEntity() : null);
+   }
+
+   public static boolean isNewHeliPilotHudActive(MCH_EntityBaseVehicle ac, Entity player) {
+      if(!(ac instanceof MCH_EntityHeli) || player == null || ac.getSeatIdByEntity(player) != 0) {
+         return false;
+      }
+      MCH_EntityHeli heli = (MCH_EntityHeli)ac;
+      return heli.isNewHeliFlightModelEnabled() && !heli.isDestroyed();
    }
 
    public static String formatThrottleOrCollective(String label, MCH_EntityBaseVehicle ac) {

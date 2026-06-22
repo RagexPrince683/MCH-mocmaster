@@ -3,6 +3,7 @@ package mcheli.hud;
 import java.util.ArrayList;
 import java.util.Iterator;
 import mcheli.MCH_Lib;
+import mcheli.aircraft.MCH_HudShared;
 import mcheli.MCH_Vector2;
 import mcheli.hud.MCH_HudItem;
 
@@ -27,6 +28,9 @@ public class MCH_HudItemRadar extends MCH_HudItem {
    }
 
    public void execute() {
+      if(MCH_HudShared.isNewHeliPilotHudActive(MCH_HudItem.ac, MCH_HudItem.player) && this.left.equals("144") && this.top.equals("21")) {
+         return;
+      }
       if(this.isEntityRadar) {
          if(MCH_HudItem.EntityList != null && MCH_HudItem.EntityList.size() > 0) {
             this.drawEntityList(MCH_HudItem.EntityList, (float)calc(this.rot), MCH_HudItem.centerX + calc(this.left), MCH_HudItem.centerY + calc(this.top), calc(this.width), calc(this.height));
