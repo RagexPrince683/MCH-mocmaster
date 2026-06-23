@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mcheli.MCH_ClientCommonTickHandler;
 import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_MOD;
@@ -106,6 +107,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       lines.add(MCH_HudShared.formatSpeedKmh(plane));
       lines.add(MCH_HudShared.formatAltitude(plane));
       lines.add(MCH_HudShared.formatVerticalSpeed(plane));
+      lines.add(String.format("PITCH %+.0f\u00B0", new Object[]{Float.valueOf(plane.getRotPitch())}));
       lines.add(MCH_HudShared.formatFuelMinutes(plane));
       lines.add(MCH_HudShared.formatDamagePercent(plane));
       lines.add(this.formatSimpleHudGLoad(plane));
@@ -113,9 +115,11 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
       List warnings = this.collectSimpleHudWarnings(plane);
       int x = MathHelper.clamp_int(MCH_Config.NewPlaneSimpleHudX.prmInt, 4, Math.max(4, super.width - 118));
-      int y = MathHelper.clamp_int(MCH_Config.NewPlaneSimpleHudY.prmInt, 4, Math.max(4, super.height - 92));
+      int y = MathHelper.clamp_int(MCH_Config.NewPlaneSimpleHudY.prmInt, 4, Math.max(4, super.height - 102));
       this.drawHudPanel(x - 4, y - 4, 116, lines.size() * 10 + 8);
       this.drawHudLines(lines, x, y, 0xFFE8E8E8, 0x66303030);
+
+      this.drawStickInputGauge(x + 126, y + 12);
 
       if(!warnings.isEmpty()) {
          int wy = y + lines.size() * 10 + 5;
@@ -124,6 +128,21 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       }
    }
 
+
+
+   private void drawStickInputGauge(int x, int y) {
+      if(!MCH_Config.EnableNewVehicleStickInputGauge.prmBool) {
+         return;
+      }
+      int size = 34;
+      int half = size / 2;
+      double max = Math.max(1.0D, MCH_ClientCommonTickHandler.getMaxStickLength());
+      int sx = x + half + (int)Math.round(MathHelper.clamp_double(MCH_ClientCommonTickHandler.getCurrentStickX() / max, -1.0D, 1.0D) * (double)(half - 3));
+      int sy = y + half - (int)Math.round(MathHelper.clamp_double(MCH_ClientCommonTickHandler.getCurrentStickY() / max, -1.0D, 1.0D) * (double)(half - 3));
+      this.drawHudPanel(x - 2, y - 2, size + 4, size + 4);
+      this.drawLine(new double[]{(double)x, (double)(y + half), (double)(x + size), (double)(y + half), (double)(x + half), (double)y, (double)(x + half), (double)(y + size)}, 0x8855FF66, 1);
+      drawRect(sx - 2, sy - 2, sx + 3, sy + 3, 0xFF55FF66);
+   }
 
    private void drawNewPlaneDebugHud(MCP_EntityPlane plane) {
       if(!MCH_Config.DebugFlightControl.prmBool && !MCH_Config.TestMode.prmBool && !MCH_Config.MouseAimDebug.prmBool) {
@@ -270,10 +289,32 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       int y = MathHelper.clamp_int(MCH_Config.NewPlaneWeaponHudY.prmInt, 12, Math.max(12, super.height - (lines.size() * 10 + 16)));
       int selected = plane.getCurrentWeaponID(player);
       this.drawHudPanel(x - 4, y - 4, width, lines.size() * 10 + 8);
+      this.drawWeaponOverheatBars(plane, x, y + lines.size() * 10 + 2, width - 8);
       for(int i = 0; i < lines.size(); ++i) {
          int color = i == selected ? 0xFFFFFFFF : 0xFF9A9A9A;
          int glow = i == selected ? 0x66555555 : 0x55202020;
          this.drawHudText((String)lines.get(i), x, y + i * 10, color, glow);
+      }
+   }
+
+
+   private void drawWeaponOverheatBars(MCH_EntityBaseVehicle ac, int x, int y, int width) {
+      if(ac == null || ac.weapons == null) {
+         return;
+      }
+      int row = 0;
+      for(int i = 0; i < ac.weapons.length; ++i) {
+         MCH_WeaponSet ws = ac.weapons[i];
+         if(ws != null && ws.getCurrentWeapon() != null && ws.getCurrentWeapon().getInfo() != null) {
+            int maxHeat = ws.getCurrentWeapon().getInfo().maxHeatCount;
+            if(maxHeat > 0) {
+               int by = y + row * 5;
+               int fill = MathHelper.clamp_int((int)Math.round((double)Math.max(0, ws.currentHeat) * (double)width / (double)maxHeat), 0, width);
+               drawRect(x, by, x + width, by + 3, 0x66303030);
+               drawRect(x, by, x + fill, by + 3, ws.currentHeat >= maxHeat ? 0xFFFF3030 : 0xFFFFAA30);
+               ++row;
+            }
+         }
       }
    }
 

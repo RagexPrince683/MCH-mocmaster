@@ -5,6 +5,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import mcheli.MCH_ClientCommonTickHandler;
 import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_Lib;
@@ -94,6 +95,7 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
                if(seatID == 0) {
                   this.drawNewHeliSharedHud(heli, player);
                   this.drawNewHeliHealthHud(heli, player);
+                  this.drawNewHeliPitchReadout(heli, player);
                   this.drawNewHeliWeaponHud(heli, player);
                }
 
@@ -131,8 +133,23 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       for(int i = 0; i < lines.size(); ++i) {
          this.drawNewHeliHudText((String)lines.get(i), x, y + i * 10, color, 0x5528D448, !heli.getIsGunnerMode(player));
       }
+      this.drawStickInputGauge(x + 88, y + 6, color);
    }
 
+
+
+   private void drawStickInputGauge(int x, int y, int color) {
+      if(!MCH_Config.EnableNewVehicleStickInputGauge.prmBool) {
+         return;
+      }
+      int size = 30;
+      int half = size / 2;
+      double max = Math.max(1.0D, MCH_ClientCommonTickHandler.getMaxStickLength());
+      int sx = x + half + (int)Math.round(MathHelper.clamp_double(MCH_ClientCommonTickHandler.getCurrentStickX() / max, -1.0D, 1.0D) * (double)(half - 3));
+      int sy = y + half - (int)Math.round(MathHelper.clamp_double(MCH_ClientCommonTickHandler.getCurrentStickY() / max, -1.0D, 1.0D) * (double)(half - 3));
+      this.drawLine(new double[]{(double)x, (double)(y + half), (double)(x + size), (double)(y + half), (double)(x + half), (double)y, (double)(x + half), (double)(y + size)}, color, 1);
+      drawRect(sx - 2, sy - 2, sx + 3, sy + 3, color);
+   }
 
    private void drawNewHeliHealthHud(MCH_EntityHeli heli, EntityPlayer player) {
       if(!this.shouldDrawNewHeliHudAdditions(heli)) {
@@ -157,7 +174,7 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       int y = super.centerY - 4;
       this.clearLegacyPitchReadoutBox();
       this.drawPitchReadoutBox(x, super.centerY);
-      this.drawNewHeliHudText(String.format("%.0f", new Object[]{Float.valueOf(-player.rotationPitch)}), x, y, -14101432, 0x5528D448);
+      this.drawNewHeliHudText(String.format("%.0f", new Object[]{Float.valueOf(heli.getRotPitch())}), x, y, -14101432, 0x5528D448);
    }
 
    private void clearLegacyPitchReadoutBox() {
@@ -243,6 +260,28 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       }
       for(int i = 0; i < lines.size(); ++i) {
          this.drawNewHeliHudText((String)lines.get(i), x, y + i * 10, this.getNewHeliHudColor(heli, player), 0x5528D448, !heli.getIsGunnerMode(player));
+      }
+      this.drawWeaponOverheatBars(heli, x, y + lines.size() * 10 + 2, 72);
+   }
+
+
+   private void drawWeaponOverheatBars(MCH_EntityBaseVehicle ac, int x, int y, int width) {
+      if(ac == null || ac.weapons == null) {
+         return;
+      }
+      int row = 0;
+      for(int i = 0; i < ac.weapons.length; ++i) {
+         mcheli.weapon.MCH_WeaponSet ws = ac.weapons[i];
+         if(ws != null && ws.getCurrentWeapon() != null && ws.getCurrentWeapon().getInfo() != null) {
+            int maxHeat = ws.getCurrentWeapon().getInfo().maxHeatCount;
+            if(maxHeat > 0) {
+               int by = y + row * 5;
+               int fill = MathHelper.clamp_int((int)Math.round((double)Math.max(0, ws.currentHeat) * (double)width / (double)maxHeat), 0, width);
+               drawRect(x, by, x + width, by + 3, 0x66303030);
+               drawRect(x, by, x + fill, by + 3, ws.currentHeat >= maxHeat ? 0xFFFF3030 : 0xFFFFAA30);
+               ++row;
+            }
+         }
       }
    }
 
