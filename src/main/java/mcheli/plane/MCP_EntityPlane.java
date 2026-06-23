@@ -1763,14 +1763,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double aoaLift = preStallAoALift * (1.0D - this.deepStallSeverity * 0.85D);
       double effectiveThrottle = this.getEffectiveEngineThrottle();
       double propulsiveThrottle = this.getPropulsiveEngineThrottle();
+      boolean hardIdle = this.getCurrentThrottle() <= 0.05D;
       double liftPower = (double)info.newFlightLowThrottleLiftRetention
             + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * effectiveThrottle;
-      if(propulsiveThrottle <= 0.01D) {
-         // At a hard idle/cut throttle the wing can still glide, but it must not be able to
-         // hold a near-level sink on retained engine smoothing alone.  Keep some dead-stick
-         // lift so landing approaches remain possible, while forcing a real sink when the
-         // player pulls the throttle all the way to zero.
-         liftPower *= 0.45D;
+      if(hardIdle) {
+         // A commanded zero throttle must be true dead-stick flight. Engine smoothing and
+         // configured low-throttle lift retention are useful for normal low-power handling,
+         // but at idle they let planes bleed horizontal speed, stop in mid-air, and settle
+         // almost level. Keep only enough lift for a glide path; below flying speed the
+         // explicit sink term below makes the aircraft drop instead of hovering.
+         liftPower *= 0.20D;
       }
       if(this.isCombatFlapsDeployed()) {
          liftPower += (double)info.newFlightCombatFlapLift;
@@ -1785,6 +1787,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double liftForce = liftBeforeStallLoss * stallLift;
       double liftAccel = liftForce / mass;
       double netAccel = (liftForce - weightForce) / mass;
+      if(hardIdle) {
+         double idleSpeedDeficit = MCH_FlightModel.clamp((stallSpeed - forwardAirspeed) / Math.max(0.05D, stallSpeed), 0.0D, 1.0D);
+         netAccel -= gravityAccel * (0.75D + idleSpeedDeficit * 1.75D);
+      }
 
       super.motionY += netAccel;
       this.lastGravityAcceleration = gravityAccel;
