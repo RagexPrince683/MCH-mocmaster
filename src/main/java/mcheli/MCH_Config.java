@@ -178,6 +178,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm EnableNewHeliHudSharedReadouts;
    public static MCH_ConfigPrm EnableNewHeliWeaponHud;
    public static MCH_ConfigPrm EnableNewVehicleHudGlow;
+   public static MCH_ConfigPrm EnableNewVehicleStickInputGauge;
    public static MCH_ConfigPrm NewPlaneSimpleHudX;
    public static MCH_ConfigPrm NewPlaneSimpleHudY;
    public static MCH_ConfigPrm NewPlaneWeaponHudRightMargin;
@@ -506,6 +507,8 @@ public class MCH_Config {
       EnableNewHeliWeaponHud.desc = ";Render the existing-style helicopter weapon/ammo list for new-flight helicopters only.";
       EnableNewVehicleHudGlow = new MCH_ConfigPrm("EnableNewVehicleHudGlow", true);
       EnableNewVehicleHudGlow.desc = ";Draw subtle background panels and one-pixel glow text for shared new vehicle HUD additions.";
+      EnableNewVehicleStickInputGauge = new MCH_ConfigPrm("EnableNewVehicleStickInputGauge", true);
+      EnableNewVehicleStickInputGauge.desc = ";Draw the stick/mouse input gauge beside new plane and helicopter HUD readouts.";
       NewPlaneSimpleHudX = new MCH_ConfigPrm("NewPlaneSimpleHudX", 12);
       NewPlaneSimpleHudX.desc = ";Top-left new-plane simple HUD X offset in scaled GUI pixels.";
       NewPlaneSimpleHudY = new MCH_ConfigPrm("NewPlaneSimpleHudY", 12);
@@ -756,6 +759,7 @@ public class MCH_Config {
               EnableNewHeliHudSharedReadouts,
               EnableNewHeliWeaponHud,
               EnableNewVehicleHudGlow,
+              EnableNewVehicleStickInputGauge,
               NewPlaneSimpleHudX,
               NewPlaneSimpleHudY,
               NewPlaneWeaponHudRightMargin,
