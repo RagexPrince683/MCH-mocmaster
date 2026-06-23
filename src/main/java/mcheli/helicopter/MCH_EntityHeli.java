@@ -111,6 +111,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private static final float NEW_HELI_MIN_INERTIA = 0.01F;
    private static final float NEW_HELI_GROUNDED_YAW_INPUT_DEADZONE = 0.04F;
    private static final float NEW_HELI_GROUNDED_YAW_DAMPING = 0.35F;
+   private static final double LEGACY_HELI_REGULAR_FORWARD_ACCEL = 0.24D;
+   private static final double LEGACY_HELI_HOVER_TRANSLATION_ACCEL = 0.0035D;
 
 
    public MCH_EntityHeli(World world) {
@@ -1322,8 +1324,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
          if(move) {
             double d = Math.sqrt(x * x + z * z);
-            super.motionX -= x / d * 0.009999999776482582D * (double)this.getAcInfo().speed;
-            super.motionZ += z / d * 0.009999999776482582D * (double)this.getAcInfo().speed;
+            super.motionX -= x / d * LEGACY_HELI_HOVER_TRANSLATION_ACCEL * (double)this.getAcInfo().speed;
+            super.motionZ += z / d * LEGACY_HELI_HOVER_TRANSLATION_ACCEL * (double)this.getAcInfo().speed;
          }
       }
 
@@ -1747,8 +1749,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             }
 
             if(!this.newHeliFlightModelEnabled) {
-               super.motionX += 0.1D * (double)MathHelper.sin(speedLimit) * super.currentSpeed * (double)(-(pitch * pitch * pitch / 30000.0F)) * this.getCurrentThrottle();
-               super.motionZ += 0.1D * (double)MathHelper.cos(speedLimit) * super.currentSpeed * (double)(pitch * pitch * pitch / 30000.0F) * this.getCurrentThrottle();
+               super.motionX += LEGACY_HELI_REGULAR_FORWARD_ACCEL * (double)MathHelper.sin(speedLimit) * super.currentSpeed * (double)(-(pitch * pitch * pitch / 30000.0F)) * this.getCurrentThrottle();
+               super.motionZ += LEGACY_HELI_REGULAR_FORWARD_ACCEL * (double)MathHelper.cos(speedLimit) * super.currentSpeed * (double)(pitch * pitch * pitch / 30000.0F) * this.getCurrentThrottle();
             }
             double y = (double)(MathHelper.abs(this.getRotPitch()) + MathHelper.abs(this.getRotRoll()));
             y *= 0.6000000238418579D;
