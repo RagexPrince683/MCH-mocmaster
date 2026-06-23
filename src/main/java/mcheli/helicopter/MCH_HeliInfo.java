@@ -60,6 +60,8 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
    public float hoverVerticalSpeedDeadzone;
    /** Proportional strength for new-heli hover vertical-speed hold. */
    public float hoverVerticalStabilizerStrength;
+   /** Proportional strength for new-heli hover attitude leveling. */
+   public float hoverPitchStabilizerStrength;
    /** Maximum per-tick hover throttle bias change. */
    public float hoverVerticalCorrectionLimit;
    /** Maximum total hover throttle/collective bias. */
@@ -101,6 +103,7 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
       this.hoverAssistStrength = 0.75F;
       this.hoverVerticalSpeedDeadzone = 0.01F;
       this.hoverVerticalStabilizerStrength = 0.08F;
+      this.hoverPitchStabilizerStrength = 0.045F;
       this.hoverVerticalCorrectionLimit = 0.0025F;
       this.hoverThrottleBiasLimit = 0.08F;
       this.hoverVerticalAdjustmentInterval = 40;
@@ -190,6 +193,8 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
          this.hoverVerticalSpeedDeadzone = this.toFloat(data, 0.0F, 1.0F);
       } else if(item.equalsIgnoreCase("HoverVerticalStabilizerStrength")) {
          this.hoverVerticalStabilizerStrength = this.toFloat(data, 0.0F, 1000.0F);
+      } else if(item.equalsIgnoreCase("HoverPitchStabilizerStrength") || item.equalsIgnoreCase("HoverAttitudeStabilizerStrength")) {
+         this.hoverPitchStabilizerStrength = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("HoverVerticalCorrectionLimit")) {
          this.hoverVerticalCorrectionLimit = this.toFloat(data, 0.0F, 1.0F);
       } else if(item.equalsIgnoreCase("HoverThrottleBiasLimit")) {
