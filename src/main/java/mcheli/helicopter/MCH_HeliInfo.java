@@ -158,7 +158,7 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
          this.collectiveResponse = this.toFloat(data, 0.0F, 1.0F);
       } else if(item.equalsIgnoreCase("CyclicAuthority")) {
          this.cyclicAuthority = this.toFloat(data, 0.0F, 1000.0F);
-      } else if(item.equalsIgnoreCase("TailRotorAuthority")) {
+      } else if(item.equalsIgnoreCase("TailRotorAuthority") || item.equalsIgnoreCase("YawAuthority")) {
          this.tailRotorAuthority = this.toFloat(data, 0.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("YawDamping")) {
          this.yawDamping = this.toFloat(data, 0.0F, 1000.0F);

@@ -70,8 +70,8 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
                }
 
                if(seatID == 0) {
-                  this.drawNewHeliSharedHud(heli);
-                  this.drawNewHeliHealthHud(heli);
+                  this.drawNewHeliSharedHud(heli, player);
+                  this.drawNewHeliHealthHud(heli, player);
                   this.drawNewHeliPitchReadout(heli, player);
                   this.drawNewHeliRadarHud(heli);
                   this.drawNewHeliWeaponHud(heli, player);
@@ -91,6 +91,12 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
                }
 
                MCH_EntityTvMissile tvmissile = heli.getTVMissile();
+               if(seatID == 0) {
+                  this.drawNewHeliSharedHud(heli, player);
+                  this.drawNewHeliHealthHud(heli, player);
+                  this.drawNewHeliWeaponHud(heli, player);
+               }
+
                if(!heli.isMissileCameraMode(player)) {
                   this.drawKeyBind(heli, player, seatID);
                } else if(tvmissile != null) {
@@ -104,7 +110,7 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       }
    }
 
-   private void drawNewHeliSharedHud(MCH_EntityHeli heli) {
+   private void drawNewHeliSharedHud(MCH_EntityHeli heli, EntityPlayer player) {
       if(!this.shouldDrawNewHeliHudAdditions(heli) || !MCH_Config.EnableNewHeliHudSharedReadouts.prmBool) {
          return;
       }
@@ -116,27 +122,27 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       lines.add(MCH_HudShared.formatVerticalSpeed(heli));
       lines.add(String.format("PWR   %3d%%", new Object[]{Integer.valueOf(this.toPercent(heli.getEnginePowerOutput()))}));
       if(info != null && info.newHeliControlHudDisplay && heli.isHoverAssistActive()) {
-         lines.add("SAS   ON");
+         lines.add((heli.getIsGunnerMode(player)?"GNR":"SAS") + "   ON");
       }
       lines.add(MCH_HudShared.formatFuelMinutes(heli));
-      int color = -14101432;
+      int color = this.getNewHeliHudColor(heli, player);
       int x = super.centerX - 205;
       int y = super.centerY + 20;
       for(int i = 0; i < lines.size(); ++i) {
-         this.drawNewHeliHudText((String)lines.get(i), x, y + i * 10, color, 0x5528D448);
+         this.drawNewHeliHudText((String)lines.get(i), x, y + i * 10, color, 0x5528D448, !heli.getIsGunnerMode(player));
       }
    }
 
 
-   private void drawNewHeliHealthHud(MCH_EntityHeli heli) {
+   private void drawNewHeliHealthHud(MCH_EntityHeli heli, EntityPlayer player) {
       if(!this.shouldDrawNewHeliHudAdditions(heli)) {
          return;
       }
       int hp = MCH_HudShared.getDamagePercent(heli);
-      int color = hp > 20 ? -14101432 : -2162680;
+      int color = heli.getIsGunnerMode(player) ? 0xFFFFFFFF : (hp > 20 ? -14101432 : -2162680);
       int x = super.centerX - 205;
       int y = super.centerY + 83;
-      this.drawNewHeliHudText(String.format("HP    %3d%%", new Object[]{Integer.valueOf(hp)}), x, y, color, 0x5528D448);
+      this.drawNewHeliHudText(String.format("HP    %3d%%", new Object[]{Integer.valueOf(hp)}), x, y, color, 0x5528D448, !heli.getIsGunnerMode(player));
       int barWidth = MathHelper.clamp_int(hp * 60 / 100, 0, 60);
       drawRect(x, y + 10, x + 60, y + 13, 0x66188428);
       drawRect(x, y + 10, x + barWidth, y + 13, color);
@@ -236,7 +242,7 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
          return;
       }
       for(int i = 0; i < lines.size(); ++i) {
-         this.drawNewHeliHudText((String)lines.get(i), x, y + i * 10, -14101432, 0x5528D448);
+         this.drawNewHeliHudText((String)lines.get(i), x, y + i * 10, this.getNewHeliHudColor(heli, player), 0x5528D448, !heli.getIsGunnerMode(player));
       }
    }
 
@@ -246,10 +252,18 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
    }
 
    private void drawNewHeliHudText(String text, int x, int y, int color, int glowColor) {
-      if(this.isVehicleHudGlowEnabled()) {
+      this.drawNewHeliHudText(text, x, y, color, glowColor, true);
+   }
+
+   private void drawNewHeliHudText(String text, int x, int y, int color, int glowColor, boolean allowGlow) {
+      if(allowGlow && this.isVehicleHudGlowEnabled()) {
          this.drawString(text, x + 1, y + 1, glowColor);
       }
       this.drawString(text, x, y, color);
+   }
+
+   private int getNewHeliHudColor(MCH_EntityHeli heli, EntityPlayer player) {
+      return heli.getIsGunnerMode(player)?0xFFFFFFFF:-14101432;
    }
 
    private boolean isVehicleHudGlowEnabled() {
