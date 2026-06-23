@@ -576,6 +576,21 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.prevRotationRotor = this.rotationRotor;
    }
 
+   private void updateUnpilotedThrottleDecay() {
+      this.hoverThrottleBias = 0.0F;
+      this.hoverCollectiveCorrection = 0.0F;
+      this.hoverVerticalSpeedAverage = 0.0F;
+      this.hoverVerticalNextAdjustmentTick = 0;
+      this.targetVerticalSpeed = 0.0F;
+      if(this.getCurrentThrottle() > 0.0D) {
+         float throttleUpDown = this.getAcInfo() != null?this.getAcInfo().throttleUpDown:1.0F;
+         double decay = Math.max(0.02D * (double)Math.max(throttleUpDown, 0.0F), 0.005D);
+         this.addCurrentThrottle(-decay);
+      } else {
+         this.setCurrentThrottle(0.0D);
+      }
+   }
+
    public int getNumEjectionSeat() {
       if(this.getAcInfo() != null && this.getAcInfo().isEnableEjectionSeat) {
          int n = this.getSeatNum() + 1;
@@ -1054,7 +1069,9 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          this.switchGunnerMode(false);
       }
 
-      if(!this.isDestroyed() && (this.getRiddenByEntity() != null || this.isHoveringMode()) && this.canUseBlades() && this.isCanopyClose() && this.canUseFuel(true)) {
+      if(!this.isDestroyed() && this.getRiddenByEntity() == null && this.canUseBlades() && this.isCanopyClose() && this.canUseFuel(true)) {
+         this.updateUnpilotedThrottleDecay();
+      } else if(!this.isDestroyed() && (this.getRiddenByEntity() != null || this.isHoveringMode()) && this.canUseBlades() && this.isCanopyClose() && this.canUseFuel(true)) {
          if(!this.isHovering()) {
             this.onUpdate_ControlNotHovering();
          } else {
@@ -1137,15 +1154,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    protected void onUpdate_ControlNotHovering() {
       float throttleUpDown = this.getAcInfo().throttleUpDown;
       if(this.getRiddenByEntity() == null) {
-         this.hoverThrottleBias = 0.0F;
-         this.hoverCollectiveCorrection = 0.0F;
-         this.hoverVerticalNextAdjustmentTick = 0;
-         if(this.getCurrentThrottle() > 0.0D) {
-            double decay = Math.max(0.02D * (double)Math.max(throttleUpDown, 0.0F), 0.005D);
-            this.addCurrentThrottle(-decay);
-         } else {
-            this.setCurrentThrottle(0.0D);
-         }
+         this.updateUnpilotedThrottleDecay();
          return;
       }
 

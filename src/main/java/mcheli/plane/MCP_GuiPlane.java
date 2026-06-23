@@ -107,7 +107,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       lines.add(MCH_HudShared.formatSpeedKmh(plane));
       lines.add(MCH_HudShared.formatAltitude(plane));
       lines.add(MCH_HudShared.formatVerticalSpeed(plane));
-      lines.add(String.format("PITCH %+.0f\u00B0", new Object[]{Float.valueOf(plane.getRotPitch())}));
+      lines.add(String.format("PITCH %+.0f\u00B0", new Object[]{Float.valueOf(this.getDisplayPitchDegrees(plane))}));
       lines.add(MCH_HudShared.formatFuelMinutes(plane));
       lines.add(MCH_HudShared.formatDamagePercent(plane));
       lines.add(this.formatSimpleHudGLoad(plane));
@@ -129,6 +129,13 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    }
 
 
+
+   private float getDisplayPitchDegrees(MCP_EntityPlane plane) {
+      // Minecraft aircraft pitch is inverted for pilot-facing attitude readouts:
+      // negative rotation pitch is nose-up and positive rotation pitch is nose-down.
+      // Invert only the displayed HUD value; do not feed this back into physics/control.
+      return plane != null?-plane.getRotPitch():0.0F;
+   }
 
    private void drawStickInputGauge(int x, int y) {
       if(!MCH_Config.EnableNewVehicleStickInputGauge.prmBool) {
