@@ -1,9 +1,9 @@
 DisplayName = Coaxial Machinegun
 Type = MachineGun1
-RecoilPitch = 0.45F
+RecoilPitch = 0.08F
 RecoilYaw = 0.0F
-RecoilPitchRange = 0.16F
-RecoilYawRange = 0.11F
+RecoilPitchRange = 0.03F
+RecoilYawRange = 0.02F
 RecoilRecoverFactor = 0.8F
 Power = 9
 Acceleration = 10.0
