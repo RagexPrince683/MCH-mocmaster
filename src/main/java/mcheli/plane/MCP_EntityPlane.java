@@ -1761,8 +1761,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double aoaExcess = Math.max(0.0D, Math.abs(this.angleOfAttack) - (double)info.criticalAoA);
       double preStallAoALift = MCH_FlightModel.clamp(1.0D - aoaExcess / Math.max(1.0D, (double)info.criticalAoA * 2.5D), 0.35D, 1.0D);
       double aoaLift = preStallAoALift * (1.0D - this.deepStallSeverity * 0.85D);
+      double effectiveThrottle = this.getEffectiveEngineThrottle();
+      double propulsiveThrottle = this.getPropulsiveEngineThrottle();
+      boolean hardIdle = this.getCurrentThrottle() <= 0.05D;
       double liftPower = (double)info.newFlightLowThrottleLiftRetention
-            + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * this.getEffectiveEngineThrottle();
+            + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * effectiveThrottle;
+      if(hardIdle) {
+         // A commanded zero throttle must be dead-stick flight, not a powered hover.
+         // Keep enough retained wing lift for a real glide so the plane carries forward
+         // speed, but remove the near-level float caused by smoothed idle engine output.
+         liftPower *= 0.55D;
+      }
       if(this.isCombatFlapsDeployed()) {
          liftPower += (double)info.newFlightCombatFlapLift;
       }
@@ -1776,6 +1785,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double liftForce = liftBeforeStallLoss * stallLift;
       double liftAccel = liftForce / mass;
       double netAccel = (liftForce - weightForce) / mass;
+      if(hardIdle) {
+         double idleSpeedDeficit = MCH_FlightModel.clamp((stallSpeed * 0.65D - forwardAirspeed)
+               / Math.max(0.05D, stallSpeed * 0.65D), 0.0D, 1.0D);
+         netAccel -= gravityAccel * idleSpeedDeficit * 0.80D;
+      }
 
       super.motionY += netAccel;
       this.lastGravityAcceleration = gravityAccel;
@@ -1785,7 +1799,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftForceBeforeStallLoss = liftBeforeStallLoss;
       this.lastLiftForceAfterStallLoss = liftForce;
       this.lastNetVerticalAcceleration = netAccel;
-      double propulsiveThrottle = this.getPropulsiveEngineThrottle();
       double thrustForce = Math.max(0.0D, (double)info.engineThrust * propulsiveThrottle);
       double thrustToWeight = thrustForce / Math.max(weightForce, 1.0E-6D);
       double liftToWeight = liftForce / Math.max(weightForce, 1.0E-6D);
