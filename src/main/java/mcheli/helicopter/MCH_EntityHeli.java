@@ -103,6 +103,10 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private float yawAngularAcceleration;
    private float finalRotYaw;
    private boolean hoverAssistActive;
+   private boolean mouseFlightInputLocked;
+   private float debugYawInput;
+   private float debugYawAuthority;
+   private float debugFinalYawRate;
    private static final float NEW_HELI_MIN_MASS = 0.01F;
    private static final float NEW_HELI_MIN_INERTIA = 0.01F;
 
@@ -241,6 +245,10 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.yawAngularAcceleration = 0.0F;
       this.finalRotYaw = this.getRotYaw();
       this.hoverAssistActive = false;
+      this.mouseFlightInputLocked = false;
+      this.debugYawInput = 0.0F;
+      this.debugYawAuthority = 0.0F;
+      this.debugFinalYawRate = 0.0F;
    }
 
    public boolean isNewHeliFlightModelEnabled() {
@@ -466,6 +474,22 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
    public boolean isHoverAssistActive() {
       return this.hoverAssistActive;
+   }
+
+   public boolean isMouseFlightInputLocked() {
+      return this.mouseFlightInputLocked;
+   }
+
+   public float getDebugYawInput() {
+      return this.debugYawInput;
+   }
+
+   public float getDebugYawAuthority() {
+      return this.debugYawAuthority;
+   }
+
+   public float getDebugFinalYawRate() {
+      return this.debugFinalYawRate;
    }
 
    public Item getItem() {
@@ -772,7 +796,11 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    }
 
    public boolean canMouseRot() {
-      return super.canMouseRot();
+      return super.canMouseRot() && !this.isMouseFlightInputLocked();
+   }
+
+   public boolean canSwitchFreeLook() {
+      return !super.isGunnerMode && super.canSwitchFreeLook();
    }
 
    public boolean canUpdatePitch(Entity player) {
@@ -804,9 +832,16 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    }
 
    public float getControlRotYaw(float mouseX, float mouseY, float tick) {
+      this.mouseFlightInputLocked = this.newHeliFlightModelEnabled && super.isGunnerMode;
       if(this.newHeliFlightModelEnabled) {
+         if(this.mouseFlightInputLocked) {
+            this.tailRotorInput = 0.0F;
+            this.debugYawInput = 0.0F;
+            return 0.0F;
+         }
          float yawLimit = (float)Math.max(this.getAddRotationYawLimit(), 1.0D);
          this.tailRotorInput = MathHelper.clamp_float(mouseX / yawLimit, -1.0F, 1.0F);
+         this.debugYawInput = this.tailRotorInput;
          return 0.0F;
       }
 
@@ -887,7 +922,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       // Positive reaction is the fuselage yawing right from main-rotor drag; tail-rotor torque subtracts from it.
       this.mainRotorTorqueReaction = engineUsable?rotorLoad * rpmAuthority:0.0F;
 
-      float tailAuthority = Math.max(this.heliInfo.tailRotorAuthority, 0.0F) * rpmAuthority * damageAuthority;
+      float tailAuthority = Math.max(this.heliInfo.tailRotorAuthority, 0.0F) * this.getNewHelicopterYawAuthorityBoost() * rpmAuthority * damageAuthority;
+      this.debugYawAuthority = tailAuthority;
       this.tailRotorTorque = this.tailRotorInput * tailAuthority * Math.max(maxThrust, 0.01F);
       this.heliYawTorque = this.tailRotorTorque - this.mainRotorTorqueReaction;
 
@@ -898,9 +934,29 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.yawDampingApplied = -this.heliYawAngularVelocity * Math.max(this.heliInfo.yawDamping, 0.0F) * tickDelta;
       this.heliYawAngularVelocity += this.yawDampingApplied;
       this.heliYawAngularVelocity = MathHelper.clamp_float(this.heliYawAngularVelocity, -8.0F, 8.0F);
+      this.debugFinalYawRate = this.heliYawAngularVelocity;
+      this.logNewHelicopterControlDebug();
 
       this.finalRotYaw = this.getRotYaw() + this.heliYawAngularVelocity * tickDelta;
       this.setRotYaw(this.finalRotYaw);
+   }
+
+   private float getNewHelicopterYawAuthorityBoost() {
+      // Yaw authority is tuned per helicopter asset via TailRotorAuthority/YawAuthority.
+      // Keep this runtime multiplier neutral so config buffs stay explicit and bounded.
+      return 1.0F;
+   }
+
+   private boolean isNewHelicopterHoverAssistMode() {
+      return this.isHoveringMode() || super.isGunnerMode;
+   }
+
+   private void logNewHelicopterControlDebug() {
+      if(MCH_Config.DebugFlightControl == null || !MCH_Config.DebugFlightControl.prmBool || this.ticksExisted % 20 != 0) {
+         return;
+      }
+      MCH_Lib.Log((Entity)this, "[MCHeli][NewHeliControl] gunnerModeActive=%s hoverAssistActive=%s mouseFlightInputLocked=%s yawInput=%.3f yawAuthority=%.3f finalYawRate=%.3f",
+            new Object[]{Boolean.valueOf(super.isGunnerMode), Boolean.valueOf(this.hoverAssistActive), Boolean.valueOf(this.mouseFlightInputLocked), Float.valueOf(this.debugYawInput), Float.valueOf(this.debugYawAuthority), Float.valueOf(this.debugFinalYawRate)});
    }
 
    protected void onUpdate_Rotor() {
@@ -944,6 +1000,10 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    }
 
    protected void onUpdate_Control() {
+      this.mouseFlightInputLocked = super.isGunnerMode;
+      if(super.isGunnerMode && this.isFreeLookMode()) {
+         this.switchFreeLookMode(false);
+      }
 
       //if(getHP() * 100 / getMaxHP() < getAcInfo().engineShutdownThreshold) {
       //   setCurrentThrottle(0);
@@ -1120,7 +1180,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    }
 
    private void enforceNewHelicopterHoverMinimumThrottle() {
-      if(this.newHeliFlightModelEnabled && this.isHoveringMode() && this.heliInfo != null) {
+      if(this.newHeliFlightModelEnabled && this.isNewHelicopterHoverAssistMode() && this.heliInfo != null) {
          float minimumThrottle = Math.max(MathHelper.clamp_float(this.heliInfo.hoverMinimumThrottle, 0.0F, 1.0F), this.getNewHelicopterCalculatedHoverThrottle());
          if(this.getCurrentThrottle() < (double)minimumThrottle) {
             this.setCurrentThrottle((double)minimumThrottle);
@@ -1129,7 +1189,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    }
 
    private void updateNewHelicopterHoverThrottleController(float throttleUpDown) {
-      if(!this.newHeliFlightModelEnabled || !this.isHoveringMode() || this.heliInfo == null) {
+      if(!this.newHeliFlightModelEnabled || !this.isNewHelicopterHoverAssistMode() || this.heliInfo == null) {
          this.hoverThrottleBias = 0.0F;
          this.hoverVerticalSpeedAverage = 0.0F;
          this.hoverVerticalNextAdjustmentTick = 0;
@@ -1432,7 +1492,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.localDriftRight = 0.0F;
       this.hoverAssistActive = false;
 
-      if(!this.newHeliFlightModelEnabled || !this.isHoveringMode() || this.heliInfo == null) {
+      if(!this.newHeliFlightModelEnabled || !this.isNewHelicopterHoverAssistMode() || this.heliInfo == null) {
          this.hoverThrottleBias = 0.0F;
          return;
       }

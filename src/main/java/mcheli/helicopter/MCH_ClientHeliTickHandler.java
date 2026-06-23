@@ -156,7 +156,9 @@ public class MCH_ClientHeliTickHandler extends MCH_BaseVehicleClientTickHandler 
          }
 
          if(this.KeySwitchHovering.isKeyDown()) {
-            if(heli.canSwitchHoveringMode()) {
+            if(heli.getIsGunnerMode(player)) {
+               playSoundNG();
+            } else if(heli.canSwitchHoveringMode()) {
                pc.switchMode = (byte)(heli.isHoveringMode()?2:3);
                heli.switchHoveringMode(!heli.isHoveringMode());
                send = true;
