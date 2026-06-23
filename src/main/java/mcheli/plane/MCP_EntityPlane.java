@@ -1768,9 +1768,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * effectiveThrottle;
       if(hardIdle) {
          // A commanded zero throttle must be dead-stick flight, not a powered hover.
-         // Keep enough retained wing lift for a real glide so the plane carries forward
-         // speed, but remove the near-level float caused by smoothed idle engine output.
-         liftPower *= 0.55D;
+         // Keep most speed-based wing lift for a real glide; throttle should remove
+         // thrust, not make the wings forget the aircraft is still moving forward.
+         liftPower *= 0.90D;
       }
       if(this.isCombatFlapsDeployed()) {
          liftPower += (double)info.newFlightCombatFlapLift;
@@ -2991,9 +2991,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       // Dampens vertical speed
       super.motionY *= 0.95D;
-      // Dampens horizontal speed based on aircraft motion factor
-      super.motionX *= this.getAcInfo().motionFactor;
-      super.motionZ *= this.getAcInfo().motionFactor;
+      // Dampens horizontal speed based on aircraft motion factor. New-flight planes in
+      // dead-stick airborne flight should glide on retained momentum instead of losing
+      // horizontal speed just because commanded throttle is zero; aerodynamic drag below
+      // still bleeds energy and the speed cap is applied after all acceleration.
+      double horizontalMotionFactor = (double)this.getAcInfo().motionFactor;
+      if(this.useNewMobilitySystem() && this.getPlaneInfo() != null && dp == 0.0D && !super.onGround
+            && this.getNozzleRotation() <= 0.01F && !levelOff && this.getCurrentThrottle() <= 0.05D) {
+         horizontalMotionFactor = Math.max(horizontalMotionFactor, 0.995D);
+      }
+      super.motionX *= horizontalMotionFactor;
+      super.motionZ *= horizontalMotionFactor;
 
       float baseSpeedLimit = this.getMaxSpeed();
       float levelSpeed = this.useNewMobilitySystem() && this.getPlaneInfo().maxLevelSpeed > 0.0F ? this.getPlaneInfo().maxLevelSpeed : baseSpeedLimit;
@@ -3043,9 +3051,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                MCH_FlightModel.clamp((double)(-this.getRotPitch() - 8.0F) / 42.0D, 0.0D, 1.0D), stallSpeedForIdleDrag);
          this.lastUnsupportedClimbSeverity = this.getUnsupportedClimbSeverity();
          if(this.lastUnsupportedClimbSeverity > 0.0D) {
-            double idleDragBoost = this.lastIdleUnsupportedClimb ? 0.12D : 0.0D;
-            double unsupportedDrag = this.lastUnsupportedClimbSeverity * (0.025D + idleDragBoost
-                  + 0.18D * Math.max(this.stallSeverity, this.aoaStallSeverity));
+            double idleDragBoost = this.lastIdleUnsupportedClimb ? 0.025D : 0.0D;
+            double unsupportedDrag = this.lastUnsupportedClimbSeverity * (0.018D + idleDragBoost
+                  + 0.12D * Math.max(this.stallSeverity, this.aoaStallSeverity));
             drag += unsupportedDrag;
             this.lastPitchClimbDragFactor = Math.max(this.lastPitchClimbDragFactor, this.lastUnsupportedClimbSeverity);
             this.lastStallSuppressedLiftHeadroom = true;
