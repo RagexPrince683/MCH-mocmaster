@@ -10,7 +10,8 @@ import net.minecraft.util.MathHelper;
 
 public final class MCH_HudShared {
 
-   public static final double HUD_SPEED_DISPLAY_MULTIPLIER = 5.0D;
+   public static final double HUD_HELI_SPEED_MULTIPLIER = 3.5D;
+   public static final double HUD_PLANE_SPEED_MULTIPLIER = 2.0D;
 
    private MCH_HudShared() {
    }
@@ -31,8 +32,27 @@ public final class MCH_HudShared {
       return String.format("%s %5.1f%%", new Object[]{label, Double.valueOf(MathHelper.clamp_double(ac.getNormalizedThrottle() * 100.0D, 0.0D, 100.0D))});
    }
 
+   public static double getRawSpeedKmh(MCH_EntityBaseVehicle ac) {
+      if(ac == null) {
+         return 0.0D;
+      }
+      return Math.sqrt(ac.motionX * ac.motionX + ac.motionY * ac.motionY + ac.motionZ * ac.motionZ) * 72.0D;
+   }
+
+   public static double getDisplaySpeedHeli(MCH_EntityBaseVehicle ac) {
+      return getRawSpeedKmh(ac) * HUD_HELI_SPEED_MULTIPLIER;
+   }
+
+   public static double getDisplaySpeedPlane(MCH_EntityBaseVehicle ac) {
+      return getRawSpeedKmh(ac) * HUD_PLANE_SPEED_MULTIPLIER;
+   }
+
+   public static double getDisplaySpeedKmh(MCH_EntityBaseVehicle ac) {
+      return ac instanceof MCH_EntityHeli ? getDisplaySpeedHeli(ac) : getDisplaySpeedPlane(ac);
+   }
+
    public static String formatSpeedKmh(MCH_EntityBaseVehicle ac) {
-      double speedKmh = Math.sqrt(ac.motionX * ac.motionX + ac.motionY * ac.motionY + ac.motionZ * ac.motionZ) * 72.0D * HUD_SPEED_DISPLAY_MULTIPLIER;
+      double speedKmh = getDisplaySpeedKmh(ac);
       return String.format("SPD   %d km/h", new Object[]{Integer.valueOf(Math.max(0, (int)Math.round(speedKmh)))});
    }
 
@@ -45,7 +65,7 @@ public final class MCH_HudShared {
    }
 
    public static String formatVerticalSpeed(MCH_EntityBaseVehicle ac) {
-      return String.format("VS    %+d m/s", new Object[]{Integer.valueOf((int)Math.round(getVerticalSpeedMotionY(ac) * 20.0D * HUD_SPEED_DISPLAY_MULTIPLIER))});
+      return String.format("VS    %+d m/s", new Object[]{Integer.valueOf((int)Math.round(getVerticalSpeedMotionY(ac) * 20.0D))});
    }
 
    public static String formatFuelMinutes(MCH_EntityBaseVehicle ac) {
