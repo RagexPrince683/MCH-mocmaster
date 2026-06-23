@@ -145,7 +145,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    }
 
    private void drawNewPlaneDebugHud(MCP_EntityPlane plane) {
-      if(!MCH_Config.DebugFlightControl.prmBool && !MCH_Config.TestMode.prmBool && !MCH_Config.MouseAimDebug.prmBool) {
+      if(!MCH_Config.DebugFlightControl.prmBool && !MCH_Config.TestMode.prmBool) {
          return;
       }
 
@@ -159,8 +159,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       lines.add(String.format("NF DBG  stall=%s recover=%s flap=%s", new Object[]{
             Boolean.valueOf(plane.getStallSeverity() > 0.0D), Boolean.valueOf(plane.isStallRecovering()),
             Boolean.valueOf(plane.isCombatFlapsDeployed())}));
-      lines.add(String.format("spd fwd=%.3f hor=%.3f stall=%.3f", new Object[]{
-            Double.valueOf(plane.getLastForwardAirspeed()), Double.valueOf(plane.getLastHorizontalSpeed()), Double.valueOf(stallSpeed)}));
+      lines.add(String.format("spd raw=%.0f disp=%.0f km/h stall=%.3f", new Object[]{
+            Double.valueOf(MCH_HudShared.getRawSpeedKmh(plane)), Double.valueOf(MCH_HudShared.getDisplaySpeedPlane(plane)), Double.valueOf(stallSpeed)}));
+      lines.add(String.format("phys fwd=%.3f hor=%.3f", new Object[]{
+            Double.valueOf(plane.getLastForwardAirspeed()), Double.valueOf(plane.getLastHorizontalSpeed())}));
       lines.add(String.format("aoa=%.1f demand=%.2f sev=%.2f/%.2f/%.2f", new Object[]{
             Double.valueOf(plane.getAngleOfAttackDegrees()), Double.valueOf(plane.getStallDemand()),
             Double.valueOf(plane.getSpeedStallSeverity()), Double.valueOf(plane.getAoAStallSeverity()),
@@ -178,9 +180,9 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             Double.valueOf(plane.getLastPitchEnvelopeEnergyRatio()), Double.valueOf(plane.getLastEnergyDeficitSeverity()),
             Double.valueOf(plane.getLastEnergyDelta())}));
 
-      int width = Math.min(super.width - 16, Math.max(260, this.getMaxHudLineWidth(lines) + 8));
-      int x = MathHelper.clamp_int(super.width - width - 8, 4, Math.max(4, super.width - width - 8));
-      int y = MathHelper.clamp_int(8, 4, Math.max(4, super.height - (lines.size() * 10 + 12)));
+      int width = Math.min(super.width - 16, Math.max(220, this.getMaxHudLineWidth(lines) + 8));
+      int x = MathHelper.clamp_int(MCH_Config.NewPlaneSimpleHudX.prmInt, 4, Math.max(4, super.width - width - 8));
+      int y = MathHelper.clamp_int(MCH_Config.NewPlaneSimpleHudY.prmInt + 125, 4, Math.max(4, super.height - (lines.size() * 10 + 12)));
       this.drawHudPanel(x - 4, y - 4, width, lines.size() * 10 + 8);
       this.drawHudLines(lines, x, y, 0xFF66FF66, 0x66005500);
    }

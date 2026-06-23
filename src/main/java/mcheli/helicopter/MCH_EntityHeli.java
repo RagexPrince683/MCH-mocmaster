@@ -1129,6 +1129,19 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
    protected void onUpdate_ControlNotHovering() {
       float throttleUpDown = this.getAcInfo().throttleUpDown;
+      if(this.getRiddenByEntity() == null) {
+         this.hoverThrottleBias = 0.0F;
+         this.hoverCollectiveCorrection = 0.0F;
+         this.hoverVerticalNextAdjustmentTick = 0;
+         if(this.getCurrentThrottle() > 0.0D) {
+            double decay = Math.max(0.02D * (double)Math.max(throttleUpDown, 0.0F), 0.005D);
+            this.addCurrentThrottle(-decay);
+         } else {
+            this.setCurrentThrottle(0.0D);
+         }
+         return;
+      }
+
       if(super.throttleUp) {
          if(this.getCurrentThrottle() < 1.0D) {
             this.addCurrentThrottle(0.02D * (double)throttleUpDown);
@@ -1277,9 +1290,14 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       if(correctingVerticalSpeed) {
          if(this.ticksExisted >= this.hoverVerticalNextAdjustmentTick) {
             float strength = Math.max(this.heliInfo.hoverVerticalStabilizerStrength, 0.0F);
-            float correctionStep = MathHelper.clamp_float(verticalError * strength * configuredStrength, -correctionLimit, correctionLimit);
+            float normalizedError = MathHelper.clamp_float(MathHelper.abs(verticalError) / Math.max(deadzone, 0.01F), 0.0F, 6.0F);
+            float responseCurve = 1.0F + normalizedError * normalizedError * 0.35F;
+            float dynamicLimit = MathHelper.clamp_float(correctionLimit * responseCurve, correctionLimit, Math.min(biasLimit, correctionLimit * 4.0F));
+            float correctionStep = MathHelper.clamp_float(verticalError * strength * configuredStrength * responseCurve, -dynamicLimit, dynamicLimit);
             this.hoverThrottleBias = MathHelper.clamp_float(this.hoverThrottleBias + correctionStep, -biasLimit, biasLimit);
-            this.addCurrentThrottle((double)(this.hoverThrottleBias * Math.max(throttleUpDown, 0.0F)));
+            float throttleStepLimit = MathHelper.clamp_float(correctionLimit * (1.0F + normalizedError * 0.75F), correctionLimit, Math.min(biasLimit, correctionLimit * 5.0F));
+            float throttleStep = MathHelper.clamp_float(this.hoverThrottleBias * Math.max(throttleUpDown, 0.0F), -throttleStepLimit, throttleStepLimit);
+            this.addCurrentThrottle((double)throttleStep);
             this.setCurrentThrottle(MathHelper.clamp_double(this.getCurrentThrottle(), 0.0D, 1.0D));
             this.enforceNewHelicopterHoverMinimumThrottle();
             int adjustmentInterval = this.heliInfo != null?MathHelper.clamp_int(this.heliInfo.hoverVerticalAdjustmentInterval, 0, 200):0;
