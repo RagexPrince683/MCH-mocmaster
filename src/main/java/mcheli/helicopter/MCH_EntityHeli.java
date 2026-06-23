@@ -1102,8 +1102,15 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       boolean enginePowered = !this.isDestroyed() && bladesUsable && this.isCanopyClose() && this.canUseFuel(true);
       this.normalizedRotorRPM = this.sanitizeClamped(this.normalizedRotorRPM, 0.0F, 1.0F, 0.0F);
       this.lastRotorRPM = this.normalizedRotorRPM;
-      this.enginePowerOutput = enginePowered?MathHelper.clamp_float((float)this.getCurrentThrottle(), 0.0F, 1.0F):0.0F;
-      this.targetRotorRPM = this.enginePowerOutput;
+
+      // Keep visual rotor RPM coupled to the aircraft throttle while the blades are
+      // still usable.  Player dismount intentionally leaves currentThrottle to be
+      // reduced by the existing auto-throttle-down path; forcing engine output to
+      // zero just because there is no active pilot makes the new flight model stop
+      // the rendered blades immediately while sound and particles continue to idle.
+      float throttleRotorCommand = MathHelper.clamp_float((float)this.getCurrentThrottle(), 0.0F, 1.0F);
+      this.enginePowerOutput = enginePowered?throttleRotorCommand:0.0F;
+      this.targetRotorRPM = (!this.isDestroyed() && bladesUsable && this.isCanopyClose())?throttleRotorCommand:this.enginePowerOutput;
 
       float delta = this.targetRotorRPM - this.normalizedRotorRPM;
       float configuredRate = Math.max(delta >= 0.0F?this.heliInfo.rotorSpoolUpRate:this.heliInfo.rotorSpoolDownRate, 0.0F);
