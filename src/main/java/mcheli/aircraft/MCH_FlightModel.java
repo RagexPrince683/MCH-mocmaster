@@ -219,6 +219,19 @@ public final class MCH_FlightModel {
             - climb * Math.max(0.0D, (double)climbEnergyLoss);
    }
 
+   /**
+    * Gravity component converted into forward acceleration during a dive/glide.
+    * Inputs are normalized 0..1 except gravity, and output is blocks/tick^2.
+    */
+   public static double getGravityDiveAcceleration(double gravityAccel, double noseDown01, double descending01,
+                                                   double descendingFlightPath01) {
+      double nose = clamp(noseDown01, 0.0D, 1.0D);
+      double falling = clamp(descending01, 0.0D, 1.0D);
+      double path = clamp(descendingFlightPath01, 0.0D, 1.0D);
+      double diveAuthority = Math.max(nose, path * 0.75D);
+      return Math.max(0.0D, gravityAccel) * (0.30D * nose + 0.35D * falling + 0.55D * diveAuthority * Math.max(0.25D, falling));
+   }
+
    /** Diving raises the speed cap gradually, rather than creating an abrupt second limit. */
    public static double getDiveSpeedLimit(float topSpeed, float pitch, double verticalSpeed, float multiplier) {
       double noseDown = clamp((double)pitch / 60.0D, 0.0D, 1.0D);
