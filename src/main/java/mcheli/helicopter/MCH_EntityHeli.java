@@ -109,6 +109,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private float debugFinalYawRate;
    private static final float NEW_HELI_MIN_MASS = 0.01F;
    private static final float NEW_HELI_MIN_INERTIA = 0.01F;
+   private static final float NEW_HELI_GROUNDED_YAW_INPUT_DEADZONE = 0.04F;
+   private static final float NEW_HELI_GROUNDED_YAW_DAMPING = 0.35F;
 
 
    public MCH_EntityHeli(World world) {
@@ -922,6 +924,25 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       // Positive reaction is the fuselage yawing right from main-rotor drag; tail-rotor torque subtracts from it.
       this.mainRotorTorqueReaction = engineUsable?rotorLoad * rpmAuthority:0.0F;
 
+      if(this.isNewHelicopterGroundedForYaw()) {
+         float groundedDamping = MathHelper.clamp_float(NEW_HELI_GROUNDED_YAW_DAMPING * tickDelta, 0.0F, 1.0F);
+         this.heliYawAngularVelocity *= 1.0F - groundedDamping;
+         if(MathHelper.abs(this.tailRotorInput) <= NEW_HELI_GROUNDED_YAW_INPUT_DEADZONE || MathHelper.abs(this.heliYawAngularVelocity) < 0.01F) {
+            this.heliYawAngularVelocity = 0.0F;
+         }
+
+         this.mainRotorTorqueReaction = 0.0F;
+         this.tailRotorTorque = 0.0F;
+         this.heliYawTorque = 0.0F;
+         this.yawAngularAcceleration = 0.0F;
+         this.yawDampingApplied = 0.0F;
+         this.debugFinalYawRate = this.heliYawAngularVelocity;
+         this.finalRotYaw = this.getRotYaw() + this.heliYawAngularVelocity * tickDelta;
+         this.setRotYaw(this.finalRotYaw);
+         this.logNewHelicopterControlDebug();
+         return;
+      }
+
       float tailAuthority = Math.max(this.heliInfo.tailRotorAuthority, 0.0F) * this.getNewHelicopterYawAuthorityBoost() * rpmAuthority * damageAuthority;
       this.debugYawAuthority = tailAuthority;
       this.tailRotorTorque = this.tailRotorInput * tailAuthority * Math.max(maxThrust, 0.01F);
@@ -939,6 +960,14 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
       this.finalRotYaw = this.getRotYaw() + this.heliYawAngularVelocity * tickDelta;
       this.setRotYaw(this.finalRotYaw);
+   }
+
+   private boolean isNewHelicopterGroundedForYaw() {
+      if(this.isDestroyed()) {
+         return false;
+      }
+
+      return super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0;
    }
 
    private float getNewHelicopterYawAuthorityBoost() {
