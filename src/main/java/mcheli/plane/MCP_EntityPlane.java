@@ -2413,7 +2413,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    private boolean isGroundedForThrottleStop() {
-      return super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
+      return super.onGround;
    }
 
    protected void onUpdate_ControlNotHovering() {
