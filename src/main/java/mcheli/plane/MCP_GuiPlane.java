@@ -168,8 +168,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             Boolean.valueOf(plane.isCombatFlapsDeployed())}));
       lines.add(String.format("spd raw=%.0f disp=%.0f km/h stall=%.3f", new Object[]{
             Double.valueOf(MCH_HudShared.getRawSpeedKmh(plane)), Double.valueOf(MCH_HudShared.getDisplaySpeedPlane(plane)), Double.valueOf(stallSpeed)}));
-      lines.add(String.format("phys fwd=%.3f hor=%.3f", new Object[]{
-            Double.valueOf(plane.getLastForwardAirspeed()), Double.valueOf(plane.getLastHorizontalSpeed())}));
+      double hudHorizontalSpeed = Math.sqrt(plane.motionX * plane.motionX + plane.motionZ * plane.motionZ);
+      lines.add(String.format("phys fwd=%.3f hor=%.3f vs=%.3f air=%.3f", new Object[]{
+            Double.valueOf(plane.getForwardAirspeed()), Double.valueOf(hudHorizontalSpeed),
+            Double.valueOf(plane.motionY), Double.valueOf(plane.getAirspeed())}));
       lines.add(String.format("aoa=%.1f demand=%.2f sev=%.2f/%.2f/%.2f", new Object[]{
             Double.valueOf(plane.getAngleOfAttackDegrees()), Double.valueOf(plane.getStallDemand()),
             Double.valueOf(plane.getSpeedStallSeverity()), Double.valueOf(plane.getAoAStallSeverity()),
@@ -180,7 +182,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       lines.add(String.format("mom stall=%.4f forced=%.4f finalAV=%.4f", new Object[]{
             Double.valueOf(plane.getLastStallPitchMoment()), Double.valueOf(plane.getLastForcedNoseDownPitchDelta()),
             Double.valueOf(plane.getLastFinalPitchAngularVelocity())}));
-      lines.add(String.format("lift L/W=%.2f T/W=%.2f loss=%.2f validClimb=%s", new Object[]{
+      lines.add(String.format("force L=%.4f W=%.4f T=%.4f q=%.2f", new Object[]{
+            Double.valueOf(plane.getDebugLiftForce()), Double.valueOf(plane.getDebugWeightForce()),
+            Double.valueOf(plane.getDebugEngineThrustForce()), Double.valueOf(plane.getLastAirflowAuthorityRaw())}));
+      lines.add(String.format("ratio L/W=%.2f T/W=%.2f loss=%.2f validClimb=%s", new Object[]{
             Double.valueOf(plane.getLiftToWeightRatio()), Double.valueOf(plane.getThrustToWeightRatio()),
             Double.valueOf(plane.getLastLiftLoss()), Boolean.valueOf(plane.isLastValidClimb())}));
       lines.add(String.format("energy ratio=%.2f deficit=%.2f dE=%.4f", new Object[]{
