@@ -132,8 +132,10 @@ public class MCH_HeliPacketHandler {
                   heli.foldHatch(pc.switchHatch == 2);
                }
 
-               if(pc.switchFreeLook > 0) {
+               if(pc.switchFreeLook > 0 && !heli.getIsGunnerMode(player)) {
                   heli.switchFreeLookMode(pc.switchFreeLook == 1);
+               } else if(heli.getIsGunnerMode(player) && heli.isFreeLookMode()) {
+                  heli.switchFreeLookMode(false);
                }
 
                if(pc.switchGear == 1) {
