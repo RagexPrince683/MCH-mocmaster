@@ -1,9 +1,9 @@
 DisplayName = M242 Bushmaster 25mm Chain Gun [M919 - APFSDS-T]
 Type = MachineGun2
-RecoilPitch = 3.00F
+RecoilPitch = 0.30F
 RecoilYaw = 0.0F
-RecoilPitchRange = 1.05F
-RecoilYawRange = 0.75F
+RecoilPitchRange = 0.10F
+RecoilYawRange = 0.07F
 RecoilRecoverFactor = 0.8F
 Power = 101
 Acceleration = 8.0

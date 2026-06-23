@@ -1,9 +1,9 @@
 DisplayName = 85mm Type 63 Cannon [Type 56 HVAP - APCR]
 Type = MachineGun2
-RecoilPitch = 3.00F
+RecoilPitch = 1.20F
 RecoilYaw = 0.0F
-RecoilPitchRange = 1.05F
-RecoilYawRange = 0.75F
+RecoilPitchRange = 0.42F
+RecoilYawRange = 0.30F
 RecoilRecoverFactor = 0.8F
 Power = 208
 ModelBullet = shortapfsds
