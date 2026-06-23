@@ -1,9 +1,9 @@
 DisplayName = 7.62mm Machine Gun
 Type = MachineGun1
-RecoilPitch = 0.75F
+RecoilPitch = 0.08F
 RecoilYaw = 0.0F
-RecoilPitchRange = 0.26F
-RecoilYawRange = 0.19F
+RecoilPitchRange = 0.03F
+RecoilYawRange = 0.02F
 RecoilRecoverFactor = 0.8F
 Power = 15
 Flaming = false

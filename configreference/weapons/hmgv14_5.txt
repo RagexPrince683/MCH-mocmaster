@@ -1,9 +1,9 @@
 DisplayName = 14.5mm Vladimirov MG
 Type = MachineGun1
-RecoilPitch = 1.95F
+RecoilPitch = 0.18F
 RecoilYaw = 0.0F
-RecoilPitchRange = 0.68F
-RecoilYawRange = 0.49F
+RecoilPitchRange = 0.06F
+RecoilYawRange = 0.04F
 RecoilRecoverFactor = 0.8F
 Power = 39
 Acceleration = 8.0
