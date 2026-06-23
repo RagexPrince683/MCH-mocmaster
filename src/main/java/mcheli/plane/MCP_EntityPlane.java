@@ -1761,8 +1761,19 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double aoaExcess = Math.max(0.0D, Math.abs(this.angleOfAttack) - (double)info.criticalAoA);
       double preStallAoALift = MCH_FlightModel.clamp(1.0D - aoaExcess / Math.max(1.0D, (double)info.criticalAoA * 2.5D), 0.35D, 1.0D);
       double aoaLift = preStallAoALift * (1.0D - this.deepStallSeverity * 0.85D);
+      double effectiveThrottle = this.getEffectiveEngineThrottle();
+      double propulsiveThrottle = this.getPropulsiveEngineThrottle();
+      boolean hardIdle = this.getCurrentThrottle() <= 0.05D;
       double liftPower = (double)info.newFlightLowThrottleLiftRetention
-            + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * this.getEffectiveEngineThrottle();
+            + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * effectiveThrottle;
+      if(hardIdle) {
+         // A commanded zero throttle must be true dead-stick flight. Engine smoothing and
+         // configured low-throttle lift retention are useful for normal low-power handling,
+         // but at idle they let planes bleed horizontal speed, stop in mid-air, and settle
+         // almost level. Keep only enough lift for a glide path; below flying speed the
+         // explicit sink term below makes the aircraft drop instead of hovering.
+         liftPower *= 0.20D;
+      }
       if(this.isCombatFlapsDeployed()) {
          liftPower += (double)info.newFlightCombatFlapLift;
       }
@@ -1776,6 +1787,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double liftForce = liftBeforeStallLoss * stallLift;
       double liftAccel = liftForce / mass;
       double netAccel = (liftForce - weightForce) / mass;
+      if(hardIdle) {
+         double idleSpeedDeficit = MCH_FlightModel.clamp((stallSpeed - forwardAirspeed) / Math.max(0.05D, stallSpeed), 0.0D, 1.0D);
+         netAccel -= gravityAccel * (0.75D + idleSpeedDeficit * 1.75D);
+      }
 
       super.motionY += netAccel;
       this.lastGravityAcceleration = gravityAccel;
@@ -1785,7 +1800,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftForceBeforeStallLoss = liftBeforeStallLoss;
       this.lastLiftForceAfterStallLoss = liftForce;
       this.lastNetVerticalAcceleration = netAccel;
-      double propulsiveThrottle = this.getPropulsiveEngineThrottle();
       double thrustForce = Math.max(0.0D, (double)info.engineThrust * propulsiveThrottle);
       double thrustToWeight = thrustForce / Math.max(weightForce, 1.0E-6D);
       double liftToWeight = liftForce / Math.max(weightForce, 1.0E-6D);
