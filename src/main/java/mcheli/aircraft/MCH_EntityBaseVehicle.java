@@ -771,11 +771,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public double getThrottle() {
-      return 0.05D * (double)this.getDataWatcher().getWatchableObjectInt(29);
+      return 0.005D * (double)this.getDataWatcher().getWatchableObjectInt(29);
    }
 
    public void setThrottle(double t) {
-      int n = (int)(t * 20.0D);
+      int n = (int)Math.round(t * 200.0D);
       if(n == 0 && t > 0.0D) {
          n = 1;
       }
@@ -1728,7 +1728,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void setCurrentThrottle(double throttle) {
-      this.currentThrottle = throttle;
+      this.currentThrottle = MathHelper.clamp_double(Math.round(throttle * 200.0D) / 200.0D, 0.0D, 1.0D);
    }
 
    public void addCurrentThrottle(double throttle) {
@@ -1938,6 +1938,27 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    /** Effective 0..1 control authority after stall and high-G penalties. */
    public float getDebugControlAuthority() {
       return this.getControlAuthorityFactor();
+   }
+
+
+   public int getFuelRemainingTicks() {
+      if(this.getMaxFuel() <= 0 || this.getFuel() <= 0 || this.isInfinityFuel(this.getRiddenByEntity(), true)) {
+         return -1;
+      }
+      if(this.getAcInfo() == null || this.getAcInfo().fuelConsumption <= 0.0F) {
+         return -1;
+      }
+      double throttle = MathHelper.clamp_double(this.getNormalizedThrottle(), 0.0D, 1.0D);
+      double burnPerSecond = Math.min(throttle * 1.4D, 1.0D) * (double)this.getAcInfo().fuelConsumption * (double)this.getFuelConsumptionFactor();
+      if(burnPerSecond <= 0.01D || Double.isNaN(burnPerSecond) || Double.isInfinite(burnPerSecond)) {
+         return -1;
+      }
+      return Math.max(0, (int)Math.round((double)this.getFuel() / burnPerSecond * 20.0D));
+   }
+
+   public int getFuelRemainingSeconds() {
+      int ticks = this.getFuelRemainingTicks();
+      return ticks < 0 ? -1 : Math.max(0, (int)Math.round((double)ticks / 20.0D));
    }
 
    /** Normalized pilot throttle for debug/HUD text. */

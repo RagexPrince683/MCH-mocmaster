@@ -10,6 +10,8 @@ import net.minecraft.util.MathHelper;
 
 public final class MCH_HudShared {
 
+   public static final double HUD_SPEED_DISPLAY_MULTIPLIER = 5.0D;
+
    private MCH_HudShared() {
    }
 
@@ -26,11 +28,11 @@ public final class MCH_HudShared {
    }
 
    public static String formatThrottleOrCollective(String label, MCH_EntityBaseVehicle ac) {
-      return String.format("%s %3d%%", new Object[]{label, Integer.valueOf(MathHelper.clamp_int((int)Math.round(ac.getNormalizedThrottle() * 100.0D), 0, 100))});
+      return String.format("%s %5.1f%%", new Object[]{label, Double.valueOf(MathHelper.clamp_double(ac.getNormalizedThrottle() * 100.0D, 0.0D, 100.0D))});
    }
 
    public static String formatSpeedKmh(MCH_EntityBaseVehicle ac) {
-      double speedKmh = Math.sqrt(ac.motionX * ac.motionX + ac.motionY * ac.motionY + ac.motionZ * ac.motionZ) * 72.0D;
+      double speedKmh = Math.sqrt(ac.motionX * ac.motionX + ac.motionY * ac.motionY + ac.motionZ * ac.motionZ) * 72.0D * HUD_SPEED_DISPLAY_MULTIPLIER;
       return String.format("SPD   %d km/h", new Object[]{Integer.valueOf(Math.max(0, (int)Math.round(speedKmh)))});
    }
 
@@ -43,12 +45,16 @@ public final class MCH_HudShared {
    }
 
    public static String formatVerticalSpeed(MCH_EntityBaseVehicle ac) {
-      return String.format("VS    %+d m/s", new Object[]{Integer.valueOf((int)Math.round(getVerticalSpeedMotionY(ac) * 20.0D))});
+      return String.format("VS    %+d m/s", new Object[]{Integer.valueOf((int)Math.round(getVerticalSpeedMotionY(ac) * 20.0D * HUD_SPEED_DISPLAY_MULTIPLIER))});
    }
 
    public static String formatFuelMinutes(MCH_EntityBaseVehicle ac) {
-      int minutes = estimateFuelMinutes(ac);
-      return minutes < 0 ? "FUEL  -- min" : String.format("FUEL  %d min", new Object[]{Integer.valueOf(minutes)});
+      int seconds = ac != null ? ac.getFuelRemainingSeconds() : -1;
+      if(seconds < 0) {
+         return "FUEL  -- min";
+      }
+      int minutes = Math.max(0, (int)Math.round((double)seconds / 60.0D));
+      return String.format("FUEL  %d min", new Object[]{Integer.valueOf(minutes)});
    }
 
    public static String formatDamagePercent(MCH_EntityBaseVehicle ac) {
