@@ -942,18 +942,9 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    }
 
    private float getNewHelicopterYawAuthorityBoost() {
-      if(!this.newHeliFlightModelEnabled || this.heliInfo == null) {
-         return 1.0F;
-      }
-
-      float mass = this.sanitizePositive(this.heliInfo.physicalMass, 1.0F, NEW_HELI_MIN_MASS);
-      float size = Math.max(super.width, super.height);
-      if(mass <= 1.25F && size <= 2.5F) {
-         return 2.35F;
-      } else if(mass <= 3.0F && size <= 4.5F) {
-         return 1.75F;
-      }
-      return 1.30F;
+      // Yaw authority is tuned per helicopter asset via TailRotorAuthority/YawAuthority.
+      // Keep this runtime multiplier neutral so config buffs stay explicit and bounded.
+      return 1.0F;
    }
 
    private boolean isNewHelicopterHoverAssistMode() {
