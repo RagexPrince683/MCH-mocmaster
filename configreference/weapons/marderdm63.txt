@@ -1,9 +1,9 @@
 DisplayName = 20mm Rh202 Automatic Cannon [DM63 - APDS]
 Type = MachineGun2
-RecoilPitch = 3.00F
+RecoilPitch = 0.65F
 RecoilYaw = 0.0F
-RecoilPitchRange = 1.05F
-RecoilYawRange = 0.75F
+RecoilPitchRange = 0.23F
+RecoilYawRange = 0.16F
 RecoilRecoverFactor = 0.8F
 Power = 66
 Flaming = false
