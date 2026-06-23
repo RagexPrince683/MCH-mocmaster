@@ -763,7 +763,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          }
 
          this.updateNewHelicopterFlightTelemetryConfig();
-         if(this.newHeliFlightModelEnabled && (this.isDestroyed() || !this.canUseBlades() || this.isFoldBlades())) {
+         if(this.newHeliFlightModelEnabled && (!this.canUseBlades() || this.isFoldBlades())) {
             this.resetNewHelicopterFlightTelemetry();
          }
          this.updateWeapons();
@@ -1822,6 +1822,11 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             this.updateNewHelicopterCyclicInput();
             this.applyNewHelicopterCollectiveLift(1.0D, throttle, horizontalSpeed, 1.0F);
             this.applyNewHelicopterCyclicThrust(1.0F);
+         } else if(this.newHeliFlightModelEnabled && this.isDestroyed()) {
+            // Destroyed new-flight helicopters can still be in hover mode. Do not reset
+            // rotor telemetry here; let rotor RPM spool down naturally while applying
+            // gravity so the aircraft falls instead of hanging or climbing.
+            super.motionY += !this.isInWater()?(double)this.getAcInfo().gravity:(double)this.getAcInfo().gravityInWater;
          } else if(this.newHeliFlightModelEnabled) {
             this.resetNewHelicopterFlightTelemetry();
          }
@@ -1837,6 +1842,10 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          if(!this.newHeliFlightModelEnabled && super.rand.nextInt(50) == 0) {
             super.motionZ += (super.rand.nextDouble() - 0.5D) / 30.0D;
          }
+      }
+
+      if(this.isDestroyed() && super.motionY > 0.0D) {
+         super.motionY *= 0.25D;
       }
 
       if(this.useNewMobilitySystem()) {
