@@ -1025,48 +1025,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    public double getLiftToWeightRatio() {
-      return this.getDebugWeightForce() > 1.0E-6D ? this.getDebugLiftForce() / this.getDebugWeightForce() : 0.0D;
+      return this.lastWeightForce > 1.0E-6D ? this.lastLiftForce / this.lastWeightForce : 0.0D;
    }
 
    public double getThrustToWeightRatio() {
-      return this.getDebugEngineThrustForce() / Math.max(this.getDebugWeightForce(), 1.0E-6D);
-   }
-
-   public double getDebugWeightForce() {
-      return this.lastWeightForce > 1.0E-6D ? this.lastWeightForce : this.resolveNewFlightGravity() * this.getPhysicalMass();
-   }
-
-   public double getDebugLiftForce() {
-      if(this.lastLiftForce > 1.0E-6D) {
-         return this.lastLiftForce;
-      }
-      MCP_PlaneInfo info = this.getPlaneInfo();
-      if(info == null) {
-         return 0.0D;
-      }
-      double weightForce = this.getDebugWeightForce();
-      double stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
-      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-      double airspeedLift = MCH_FlightModel.clamp((horizontalSpeed - stallSpeed * 0.45D) / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.25D);
-      double aoaExcess = Math.max(0.0D, this.angleOfAttack - (double)info.criticalAoA);
-      double severeAoA = MCH_FlightModel.clamp((this.angleOfAttack - 70.0D) / 40.0D, 0.0D, 1.0D);
-      double aoaLift = MCH_FlightModel.clamp(1.0D - aoaExcess / Math.max(1.0D, (double)info.criticalAoA * 1.6D), 0.12D, 1.0D)
-            * (1.0D - this.deepStallSeverity * 0.85D) * (1.0D - severeAoA * 0.70D);
-      double liftPower = (double)info.newFlightLowThrottleLiftRetention
-            + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * this.getEffectiveEngineThrottle();
-      if(this.isCombatFlapsDeployed()) {
-         liftPower += (double)info.newFlightCombatFlapLift;
-      }
-      double stallLift = 1.0D - MCH_FlightModel.clamp(this.stallSeverity * (double)info.stallLiftLoss, 0.0D, 1.0D);
-      return weightForce * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D) * airspeedLift * aoaLift * stallLift;
-   }
-
-   public double getDebugEngineThrustForce() {
-      if(this.lastEngineThrustForce > 1.0E-6D) {
-         return this.lastEngineThrustForce;
-      }
-      MCP_PlaneInfo info = this.getPlaneInfo();
-      return info != null ? Math.max(0.0D, (double)info.engineThrust * this.getPropulsiveEngineThrottle()) : 0.0D;
+      return this.lastEngineThrustForce / Math.max(this.lastWeightForce, 1.0E-6D);
    }
 
    public double getLastNetForwardAcceleration() {
@@ -1362,22 +1325,18 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.pitchPlaneAngleOfAttack = this.calculatePitchPlaneAngleOfAttack();
       this.sideslipAngle = this.calculateSideslipAngle();
       double sideslipPenalty = Math.max(0.0D, Math.abs(this.sideslipAngle) - 8.0D) * 0.20D;
-      // MCHeli pitch is inverted: negative rotation pitch is nose-up, positive is nose-down.
-      // Keep AoA signed so nose-down dives do not receive the same stall penalty as nose-up flight.
-      this.angleOfAttack = MCH_FlightModel.clamp(this.pitchPlaneAngleOfAttack + sideslipPenalty, -90.0D, 180.0D);
+      this.angleOfAttack = MCH_FlightModel.clamp(this.pitchPlaneAngleOfAttack + sideslipPenalty, 0.0D, this.oldAngleOfAttack);
    }
 
    private double calculatePitchPlaneAngleOfAttack() {
       double forwardAirspeed = this.getForwardAirspeed();
       double flightPathPitch = -Math.toDegrees(Math.atan2(super.motionY, Math.max(1.0E-5D, forwardAirspeed)));
-      // Positive result means the nose is above the flight path.  A matching nose-down
-      // attitude and descending flight path stays near zero instead of becoming a fake stall.
-      double pitchPlaneAoA = flightPathPitch - (double)this.getRotPitch();
+      double pitchPlaneAoA = Math.abs((double)this.getRotPitch() - flightPathPitch);
       double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       if(horizontalSpeed < 1.0E-5D && Math.abs(super.motionY) < 1.0E-5D) {
-         return (double)-this.getRotPitch();
+         return Math.max(0.0D, (double)-this.getRotPitch());
       }
-      return MCH_FlightModel.clamp(pitchPlaneAoA, -90.0D, 180.0D);
+      return MCH_FlightModel.clamp(pitchPlaneAoA, 0.0D, 180.0D);
    }
 
    private double calculateSideslipAngle() {
@@ -1391,11 +1350,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double forwardComponent = super.motionX * forward.xCoord + super.motionZ * forward.zCoord;
       double lateralComponent = super.motionX * right.xCoord + super.motionZ * right.zCoord;
       return Math.toDegrees(Math.atan2(lateralComponent, Math.max(1.0E-5D, Math.abs(forwardComponent))));
-   }
-
-   private double getPositiveAoAStallSeverity(double angleOfAttack, float criticalAoA) {
-      double critical = Math.max(1.0D, (double)criticalAoA);
-      return MCH_FlightModel.clamp((angleOfAttack - critical) / critical, 0.0D, 1.0D);
    }
 
    private double getInstantStallSeverity() {
@@ -1413,7 +1367,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             this.getPlaneInfo().stallSpeedFactor);
       double speedSeverity = Math.max(MCH_FlightModel.getSpeedStallSeverity(forwardAirspeed, stallSpeed),
             MCH_FlightModel.getSpeedStallSeverity(horizontalSpeed, stallSpeed));
-      return Math.max(speedSeverity, this.getPositiveAoAStallSeverity(aoa, this.getPlaneInfo().criticalAoA));
+      return Math.max(speedSeverity, MCH_FlightModel.getAoAStallSeverity(aoa, this.getPlaneInfo().criticalAoA));
    }
 
 
@@ -1687,7 +1641,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             this.getPlaneInfo().stallSpeedFactor);
       this.speedStallSeverity = Math.max(MCH_FlightModel.getSpeedStallSeverity(forwardAirspeed, stallSpeed),
             MCH_FlightModel.getSpeedStallSeverity(horizontalSpeed, stallSpeed));
-      this.aoaStallSeverity = this.getPositiveAoAStallSeverity(this.angleOfAttack, this.getPlaneInfo().criticalAoA);
+      this.aoaStallSeverity = MCH_FlightModel.getAoAStallSeverity(this.angleOfAttack, this.getPlaneInfo().criticalAoA);
       double noseUpAttitude = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 60.0D, 0.0D, 1.0D);
       if(this.aoaStallSeverity > 0.0D) {
          this.timePastCriticalAoA = MCH_FlightModel.clamp(this.timePastCriticalAoA + 0.05D, 0.0D, 30.0D);
@@ -1701,14 +1655,14 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double speedHeadroom = MCH_FlightModel.clamp(forwardAirspeed / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.0D);
       double exposureGain = this.aoaStallSeverity * aoADelayFactor * (0.018D + 0.052D * noseUpAttitude)
             * (1.20D - 0.55D * thrustSupport) * (1.10D - 0.35D * speedHeadroom);
-      exposureGain += this.speedStallSeverity * noseUpAttitude * 0.030D;
+      exposureGain += this.speedStallSeverity * Math.max(noseUpAttitude, 0.35D) * 0.030D;
       double exposureDecay = this.aoaStallSeverity <= 0.0D && this.speedStallSeverity < 0.25D ? 0.070D : 0.018D * thrustSupport;
       this.highAoAStallExposure = MCH_FlightModel.clamp(this.highAoAStallExposure + exposureGain - exposureDecay, 0.0D, 2.0D);
       double exposureThreshold = 0.32D + 0.62D * thrustSupport + 0.28D * speedHeadroom;
       this.deepStallSeverity = MCH_FlightModel.clamp((this.highAoAStallExposure - exposureThreshold) / 0.65D, 0.0D, 1.0D);
       double delayedAoASeverity = this.aoaStallSeverity * aoADelayFactor
             * Math.max(this.deepStallSeverity, this.speedStallSeverity * 0.55D);
-      double demand = Math.max(this.speedStallSeverity * noseUpAttitude, delayedAoASeverity);
+      double demand = Math.max(this.speedStallSeverity, delayedAoASeverity);
       this.stallDemand = demand;
       double recoverySpeed = this.getPlaneInfo().stallRecoverySpeed > 0.0F
             ? (double)this.getPlaneInfo().stallRecoverySpeed : stallSpeed * 1.2D;
@@ -1719,7 +1673,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          if(safeRecoverySpeed && safeRecoveryAoA) {
             this.stalling = false;
          }
-      } else if(!super.onGround && this.getNozzleRotation() <= 0.01F && demand > 0.03D) {
+      } else if(demand > 0.03D) {
          this.stalling = true;
       }
 
@@ -1804,10 +1758,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastHorizontalSpeed = horizontalSpeed;
       this.lastForwardAirspeed = forwardAirspeed;
       double airspeedLift = MCH_FlightModel.clamp((horizontalSpeed - stallSpeed * 0.45D) / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.25D);
-      double aoaExcess = Math.max(0.0D, this.angleOfAttack - (double)info.criticalAoA);
-      double severeAoA = MCH_FlightModel.clamp((this.angleOfAttack - 70.0D) / 40.0D, 0.0D, 1.0D);
-      double preStallAoALift = MCH_FlightModel.clamp(1.0D - aoaExcess / Math.max(1.0D, (double)info.criticalAoA * 1.6D), 0.12D, 1.0D);
-      double aoaLift = preStallAoALift * (1.0D - this.deepStallSeverity * 0.85D) * (1.0D - severeAoA * 0.70D);
+      double aoaExcess = Math.max(0.0D, Math.abs(this.angleOfAttack) - (double)info.criticalAoA);
+      double preStallAoALift = MCH_FlightModel.clamp(1.0D - aoaExcess / Math.max(1.0D, (double)info.criticalAoA * 2.5D), 0.35D, 1.0D);
+      double aoaLift = preStallAoALift * (1.0D - this.deepStallSeverity * 0.85D);
       double liftPower = (double)info.newFlightLowThrottleLiftRetention
             + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * this.getEffectiveEngineThrottle();
       if(this.isCombatFlapsDeployed()) {
@@ -3058,11 +3011,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          double drag = MCH_FlightModel.getEnergyDrag(horizontalSpeed, (double)levelSpeed, this.getEffectiveEngineThrottle(),
                turnLoad, controlLoad, this.getPlaneInfo().baseDrag, this.getPlaneInfo().inducedDrag,
                this.getPlaneInfo().controlSurfaceDrag, (float)engineBrakeDrag) / mass;
-         double aoaDrag = MCH_FlightModel.getAngleOfAttackDrag(Math.max(0.0D, this.angleOfAttack), this.getPlaneInfo().criticalAoA,
+         double aoaDrag = MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getPlaneInfo().criticalAoA,
                this.getPlaneInfo().baseDrag, this.getPlaneInfo().aoaDragMultiplier) / mass;
-         if(this.angleOfAttack >= 70.0D) {
-            aoaDrag += MCH_FlightModel.clamp((this.angleOfAttack - 70.0D) / 40.0D, 0.0D, 1.0D) * 0.18D;
-         }
          this.lastAoADragFactor = aoaDrag;
          drag += aoaDrag;
          double noseHighPitch = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 60.0D, 0.0D, 1.0D);
