@@ -1736,7 +1736,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          }
 
          if(motion == 0.0D) {
-            if(!this.newHeliFlightModelEnabled) {
+            if(!this.newHeliFlightModelEnabled || this.isDestroyed()) {
                super.motionY += !this.isInWater()?(double)this.getAcInfo().gravity:(double)this.getAcInfo().gravityInWater;
             }
 
@@ -1760,7 +1760,10 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
             double throttle = this.getCurrentThrottle();
             if(this.isDestroyed()) {
-               throttle *= 0.65D;
+               // A destroyed helicopter should autorotate/fall instead of feeding residual
+               // throttle into lift. Keeping visual rotor throttle separate prevents the
+               // death spin from turning into an upward spiral while the engine winds down.
+               throttle = 0.0D;
             }
 
             double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
