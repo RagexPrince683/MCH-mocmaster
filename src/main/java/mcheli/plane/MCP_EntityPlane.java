@@ -1767,12 +1767,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double liftPower = (double)info.newFlightLowThrottleLiftRetention
             + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * effectiveThrottle;
       if(hardIdle) {
-         // A commanded zero throttle must be true dead-stick flight. Engine smoothing and
-         // configured low-throttle lift retention are useful for normal low-power handling,
-         // but at idle they let planes bleed horizontal speed, stop in mid-air, and settle
-         // almost level. Keep only enough lift for a glide path; below flying speed the
-         // explicit sink term below makes the aircraft drop instead of hovering.
-         liftPower *= 0.20D;
+         // A commanded zero throttle must be dead-stick flight, not a powered hover.
+         // Keep enough retained wing lift for a real glide so the plane carries forward
+         // speed, but remove the near-level float caused by smoothed idle engine output.
+         liftPower *= 0.55D;
       }
       if(this.isCombatFlapsDeployed()) {
          liftPower += (double)info.newFlightCombatFlapLift;
@@ -1788,8 +1786,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double liftAccel = liftForce / mass;
       double netAccel = (liftForce - weightForce) / mass;
       if(hardIdle) {
-         double idleSpeedDeficit = MCH_FlightModel.clamp((stallSpeed - forwardAirspeed) / Math.max(0.05D, stallSpeed), 0.0D, 1.0D);
-         netAccel -= gravityAccel * (0.75D + idleSpeedDeficit * 1.75D);
+         double idleSpeedDeficit = MCH_FlightModel.clamp((stallSpeed * 0.65D - forwardAirspeed)
+               / Math.max(0.05D, stallSpeed * 0.65D), 0.0D, 1.0D);
+         netAccel -= gravityAccel * idleSpeedDeficit * 0.80D;
       }
 
       super.motionY += netAccel;
