@@ -1764,13 +1764,21 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double effectiveThrottle = this.getEffectiveEngineThrottle();
       double propulsiveThrottle = this.getPropulsiveEngineThrottle();
       boolean hardIdle = this.getCurrentThrottle() <= 0.05D;
-      double liftPower = (double)info.newFlightLowThrottleLiftRetention
+      // Wing lift comes from airspeed and attitude, not directly from engine power.
+      // Keep throttle-driven lift retention as a powered-assist floor for legacy tuning,
+      // but never let a closed throttle erase speed-based lift while airborne; a plane
+      // with enough airspeed should glide and bleed energy through drag instead of
+      // being forced into a slow vertical sink just because commanded throttle is zero.
+      double poweredLiftFloor = (double)info.newFlightLowThrottleLiftRetention
             + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * effectiveThrottle;
-      if(hardIdle) {
-         // A commanded zero throttle must be dead-stick flight, not a powered hover.
-         // Keep most speed-based wing lift for a real glide; throttle should remove
-         // thrust, not make the wings forget the aircraft is still moving forward.
-         liftPower *= 0.90D;
+      double liftPower = Math.max(1.0D, poweredLiftFloor);
+      if(hardIdle && forwardAirspeed < stallSpeed * 0.65D) {
+         // Dead-stick flight still cannot prop-hang below flying speed.  Only apply
+         // the closed-throttle penalty once the wing is already running out of usable
+         // airflow, leaving normal glide lift controlled by airspeed, AoA, and drag.
+         double lowAirspeed = MCH_FlightModel.clamp((stallSpeed * 0.65D - forwardAirspeed)
+               / Math.max(0.05D, stallSpeed * 0.65D), 0.0D, 1.0D);
+         liftPower *= 1.0D - lowAirspeed * 0.10D;
       }
       if(this.isCombatFlapsDeployed()) {
          liftPower += (double)info.newFlightCombatFlapLift;
@@ -3029,7 +3037,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             turnLoad = MCH_FlightModel.clamp(turnLoad + (double)this.getPlaneInfo().newFlightCombatFlapLift, 0.0D, 1.0D);
          }
          double mass = this.getPhysicalMass();
-         double drag = MCH_FlightModel.getEnergyDrag(horizontalSpeed, (double)levelSpeed, this.getEffectiveEngineThrottle(),
+         // Drag/sustainable-speed calculations use propulsive throttle, not idle/engine
+         // spool state, so closed-throttle airborne flight coasts as a true glide.
+         double energyThrottle = this.getPropulsiveEngineThrottle();
+         double drag = MCH_FlightModel.getEnergyDrag(horizontalSpeed, (double)levelSpeed, energyThrottle,
                turnLoad, controlLoad, this.getPlaneInfo().baseDrag, this.getPlaneInfo().inducedDrag,
                this.getPlaneInfo().controlSurfaceDrag, (float)engineBrakeDrag) / mass;
          double aoaDrag = MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getPlaneInfo().criticalAoA,
