@@ -8006,22 +8006,24 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public void switchGunnerMode(boolean mode) {
       boolean debug_bk_mode = this.isGunnerMode;
+      double debugThrottleBefore = this.getCurrentThrottle();
+      float debugPitchBefore = this.getRotPitch();
+      float debugYawBefore = this.getRotYaw();
+      float debugRollBefore = this.getRotRoll();
       Entity pilot = this.getEntityBySeatId(0);
       if(!mode || this.canSwitchGunnerMode()) {
          if(this.isGunnerMode && !mode) {
-            this.setCurrentThrottle(this.beforeHoverThrottle);
             this.isGunnerMode = false;
             this.camera.setCameraZoom(1.0F);
             this.getCurrentWeapon(pilot).onSwitchWeapon(super.worldObj.isRemote, this.isInfinityAmmo(pilot));
          } else if(!this.isGunnerMode && mode) {
-            this.beforeHoverThrottle = this.getCurrentThrottle();
             this.isGunnerMode = true;
             this.camera.setCameraZoom(1.0F);
             this.getCurrentWeapon(pilot).onSwitchWeapon(super.worldObj.isRemote, this.isInfinityAmmo(pilot));
          }
       }
 
-      MCH_Lib.DbgLog(super.worldObj, "switchGunnerMode %s->%s", new Object[]{debug_bk_mode?"ON":"OFF", mode?"ON":"OFF"});
+      MCH_Lib.DbgLog(super.worldObj, "switchGunnerMode %s->%s throttle %.4f->%.4f rot %.2f/%.2f/%.2f->%.2f/%.2f/%.2f", new Object[]{debug_bk_mode?"ON":"OFF", this.isGunnerMode?"ON":"OFF", Double.valueOf(debugThrottleBefore), Double.valueOf(this.getCurrentThrottle()), Float.valueOf(debugPitchBefore), Float.valueOf(debugYawBefore), Float.valueOf(debugRollBefore), Float.valueOf(this.getRotPitch()), Float.valueOf(this.getRotYaw()), Float.valueOf(this.getRotRoll())});
    }
 
    public boolean canSwitchGunnerMode() {
@@ -8049,20 +8051,17 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void switchHoveringMode(boolean mode) {
+      boolean debug_bk_mode = this.isHoveringMode;
+      double debugThrottleBefore = this.getCurrentThrottle();
+      float debugPitchBefore = this.getRotPitch();
+      float debugYawBefore = this.getRotYaw();
+      float debugRollBefore = this.getRotRoll();
       this.stopRepelling();
       if(this.canSwitchHoveringMode() && this.isHoveringMode() != mode) {
-         if(mode) {
-            this.beforeHoverThrottle = this.getCurrentThrottle();
-         } else {
-            this.setCurrentThrottle(this.beforeHoverThrottle);
-         }
-
          this.isHoveringMode = mode;
-         if(super.riddenByEntity != null) {
-            super.riddenByEntity.rotationPitch = 0.0F;
-            super.riddenByEntity.prevRotationPitch = 0.0F;
-         }
       }
+
+      MCH_Lib.DbgLog(super.worldObj, "switchHoveringMode %s->%s throttle %.4f->%.4f rot %.2f/%.2f/%.2f->%.2f/%.2f/%.2f", new Object[]{debug_bk_mode?"ON":"OFF", this.isHoveringMode?"ON":"OFF", Double.valueOf(debugThrottleBefore), Double.valueOf(this.getCurrentThrottle()), Float.valueOf(debugPitchBefore), Float.valueOf(debugYawBefore), Float.valueOf(debugRollBefore), Float.valueOf(this.getRotPitch()), Float.valueOf(this.getRotYaw()), Float.valueOf(this.getRotRoll())});
 
    }
 

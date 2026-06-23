@@ -1186,20 +1186,39 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float mass = this.sanitizePositive(this.physicalMass, 1.0F, NEW_HELI_MIN_MASS);
       float gravity = MathHelper.abs(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
       float maxThrust = Math.max(this.heliInfo.mainRotorMaxThrust, 0.0F);
-      float attitudeEfficiency = MathHelper.cos(this.getRotPitch() / 180.0F * 3.1415927F) * MathHelper.cos(this.getRotRoll() / 180.0F * 3.1415927F);
+      float pitchComponent = MathHelper.cos(this.getRotPitch() / 180.0F * 3.1415927F);
+      float rollComponent = MathHelper.cos(this.getRotRoll() / 180.0F * 3.1415927F);
+      float cyclicTiltMagnitudeSq = this.rotorTiltForward * this.rotorTiltForward + this.rotorTiltRight * this.rotorTiltRight;
+      float diskVerticalComponent = MathHelper.sqrt_float(Math.max(0.0F, 1.0F - cyclicTiltMagnitudeSq));
+      float verticalComponent = MathHelper.clamp_float(pitchComponent * rollComponent * diskVerticalComponent, 0.05F, 1.0F);
       float ceilingEfficiency = (float)MCH_FlightModel.getCeilingLiftFactor(super.posY, this.getAcInfo().flightCeiling, this.getAcInfo().flightCeilingRange);
-      float efficiency = MathHelper.clamp_float(attitudeEfficiency * ceilingEfficiency, 0.05F, 2.0F);
-      float requiredLiftRatio = maxThrust > 0.0F?(mass * gravity) / (maxThrust * efficiency):1.0F;
+      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      float translationalLift = MathHelper.clamp_float((float)(horizontalSpeed / Math.max(0.1D, (double)this.getAcInfo().speed)), 0.0F, 1.0F) * Math.max(this.heliInfo.translationalLiftCoefficient, 0.0F);
+      float efficiency = MathHelper.clamp_float(ceilingEfficiency * verticalComponent + translationalLift, 0.05F, 2.0F);
+      if(super.motionY < -0.12D && horizontalSpeed < 0.15D && this.getCurrentThrottle() > 0.45D) {
+         efficiency *= 0.55F;
+      }
+      if(this.isDestroyed() || !this.canUseFuel(true) || !this.canUseBlades() || this.isFoldBlades()) {
+         efficiency = 0.0F;
+      }
+      float liftSpool = MathHelper.clamp_float((this.normalizedRotorRPM - 0.35F) / 0.65F, 0.0F, 1.0F);
+      liftSpool *= liftSpool;
+      float availableVerticalThrust = maxThrust * liftSpool * efficiency * verticalComponent;
+      if(availableVerticalThrust > 0.0F) {
+         float verticalDrag = MathHelper.clamp_float(this.heliInfo.verticalDrag, 0.0F, 1000.0F);
+         float dragAssist = (float)super.motionY * verticalDrag * mass;
+         return MathHelper.clamp_float((mass * gravity + dragAssist) / availableVerticalThrust, 0.0F, 1.0F);
+      }
 
-      // At steady hover, rotor RPM follows throttle.  The new lift model applies
-      // a squared spool curve, so solve:
-      // throttle * ((throttle - 0.35) / 0.65)^2 = weight / available rotor thrust.
+      // If RPM is still spooling, fall back to the steady-state throttle/RPM
+      // relationship, but keep the same attitude-compensated vertical component.
+      float requiredLiftRatio = maxThrust > 0.0F?(mass * gravity) / (maxThrust * efficiency * verticalComponent):1.0F;
       float low = 0.35F;
       float high = 1.0F;
       for(int i = 0; i < 16; ++i) {
          float mid = (low + high) * 0.5F;
-         float liftSpool = MathHelper.clamp_float((mid - 0.35F) / 0.65F, 0.0F, 1.0F);
-         float producedLiftRatio = mid * liftSpool * liftSpool;
+         float midSpool = MathHelper.clamp_float((mid - 0.35F) / 0.65F, 0.0F, 1.0F);
+         float producedLiftRatio = mid * midSpool * midSpool;
          if(producedLiftRatio < requiredLiftRatio) {
             low = mid;
          } else {
@@ -1557,8 +1576,11 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float rightZ = -MathHelper.sin(yawRadians);
       this.localDriftForward = (float)(super.motionX * (double)forwardX + super.motionZ * (double)forwardZ);
       this.localDriftRight = (float)(super.motionX * (double)rightX + super.motionZ * (double)rightZ);
-      this.hoverCyclicPitchCorrection = MathHelper.clamp_float(-this.localDriftForward * 3.0F, -0.60F, 0.60F) * assistBlend;
-      this.hoverCyclicRollCorrection = MathHelper.clamp_float(-this.localDriftRight * 3.0F, -0.60F, 0.60F) * assistBlend;
+      float attitudeStrength = this.heliInfo != null?Math.max(this.heliInfo.hoverPitchStabilizerStrength, 0.0F):0.0F;
+      float levelPitchCorrection = MathHelper.clamp_float(-this.getRotPitch() * attitudeStrength, -0.45F, 0.45F);
+      float levelRollCorrection = MathHelper.clamp_float(-this.getRotRoll() * attitudeStrength, -0.45F, 0.45F);
+      this.hoverCyclicPitchCorrection = MathHelper.clamp_float(-this.localDriftForward * 3.0F + levelPitchCorrection, -0.75F, 0.75F) * assistBlend;
+      this.hoverCyclicRollCorrection = MathHelper.clamp_float(-this.localDriftRight * 3.0F + levelRollCorrection, -0.75F, 0.75F) * assistBlend;
    }
 
    private void applyNewHelicopterCyclicThrust(float tickDelta) {
@@ -1822,7 +1844,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             double throttle = this.isDestroyed()?this.getCurrentThrottle() * 0.65D:this.getCurrentThrottle();
             double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
             this.updateNewHelicopterCyclicInput();
-            this.applyNewHelicopterCollectiveLift(1.0D, throttle, horizontalSpeed, 1.0F);
+            double hoverAttitudeEfficiency = (double)(MathHelper.cos(this.getRotPitch() / 180.0F * 3.1415927F) * MathHelper.cos(this.getRotRoll() / 180.0F * 3.1415927F));
+            this.applyNewHelicopterCollectiveLift(hoverAttitudeEfficiency, throttle, horizontalSpeed, 1.0F);
             this.applyNewHelicopterCyclicThrust(1.0F);
          } else if(this.newHeliFlightModelEnabled && this.isDestroyed()) {
             // Destroyed new-flight helicopters can still be in hover mode. Do not reset
