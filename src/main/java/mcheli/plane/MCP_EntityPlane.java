@@ -1761,8 +1761,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double aoaExcess = Math.max(0.0D, Math.abs(this.angleOfAttack) - (double)info.criticalAoA);
       double preStallAoALift = MCH_FlightModel.clamp(1.0D - aoaExcess / Math.max(1.0D, (double)info.criticalAoA * 2.5D), 0.35D, 1.0D);
       double aoaLift = preStallAoALift * (1.0D - this.deepStallSeverity * 0.85D);
+      double effectiveThrottle = this.getEffectiveEngineThrottle();
+      double propulsiveThrottle = this.getPropulsiveEngineThrottle();
       double liftPower = (double)info.newFlightLowThrottleLiftRetention
-            + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * this.getEffectiveEngineThrottle();
+            + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * effectiveThrottle;
+      if(propulsiveThrottle <= 0.01D) {
+         // At a hard idle/cut throttle the wing can still glide, but it must not be able to
+         // hold a near-level sink on retained engine smoothing alone.  Keep some dead-stick
+         // lift so landing approaches remain possible, while forcing a real sink when the
+         // player pulls the throttle all the way to zero.
+         liftPower *= 0.45D;
+      }
       if(this.isCombatFlapsDeployed()) {
          liftPower += (double)info.newFlightCombatFlapLift;
       }
@@ -1785,7 +1794,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftForceBeforeStallLoss = liftBeforeStallLoss;
       this.lastLiftForceAfterStallLoss = liftForce;
       this.lastNetVerticalAcceleration = netAccel;
-      double propulsiveThrottle = this.getPropulsiveEngineThrottle();
       double thrustForce = Math.max(0.0D, (double)info.engineThrust * propulsiveThrottle);
       double thrustToWeight = thrustForce / Math.max(weightForce, 1.0E-6D);
       double liftToWeight = liftForce / Math.max(weightForce, 1.0E-6D);
