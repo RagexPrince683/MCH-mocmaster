@@ -1319,24 +1319,48 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
       return safeSpeed;
    }
+   private double getSideslipAoAPenalty() {
+      return Math.max(0.0D, Math.abs(this.sideslipAngle) - 8.0D) * 0.20D;
+   }
+
+   private double getPositiveNormalAoAForStall() {
+      double sideslipPenalty = Math.max(0.0D, Math.abs(this.sideslipAngle) - 8.0D) * 0.20D;
+      return Math.max(0.0D, this.angleOfAttack) + sideslipPenalty;
+   }
+
+   private double getAbsoluteAoAForDrag() {
+      return Math.abs(this.angleOfAttack) + this.getSideslipAoAPenalty();
+   }
+
    private void updateAngleOfAttackMetrics(Vec3 forward) {
-      this.oldAngleOfAttack = MCH_FlightModel.getAngleOfAttackDegrees(forward.xCoord, forward.yCoord, forward.zCoord,
-            super.motionX, super.motionY, super.motionZ);
+      this.oldAngleOfAttack = MCH_FlightModel.getAngleOfAttackDegrees(
+              forward.xCoord, forward.yCoord, forward.zCoord,
+              super.motionX, super.motionY, super.motionZ);
+
       this.pitchPlaneAngleOfAttack = this.calculatePitchPlaneAngleOfAttack();
       this.sideslipAngle = this.calculateSideslipAngle();
-      double sideslipPenalty = Math.max(0.0D, Math.abs(this.sideslipAngle) - 8.0D) * 0.20D;
-      this.angleOfAttack = MCH_FlightModel.clamp(this.pitchPlaneAngleOfAttack + sideslipPenalty, 0.0D, this.oldAngleOfAttack);
+
+      // Signed AoA. Positive means normal nose-up AoA.
+      this.angleOfAttack = this.pitchPlaneAngleOfAttack;
    }
 
    private double calculatePitchPlaneAngleOfAttack() {
       double forwardAirspeed = this.getForwardAirspeed();
-      double flightPathPitch = -Math.toDegrees(Math.atan2(super.motionY, Math.max(1.0E-5D, forwardAirspeed)));
-      double pitchPlaneAoA = Math.abs((double)this.getRotPitch() - flightPathPitch);
       double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+
       if(horizontalSpeed < 1.0E-5D && Math.abs(super.motionY) < 1.0E-5D) {
-         return Math.max(0.0D, (double)-this.getRotPitch());
+         return -this.getRotPitch(); // positive = nose-up AoA in MCHeli pitch convention
       }
-      return MCH_FlightModel.clamp(pitchPlaneAoA, 0.0D, 180.0D);
+
+      double flightPathPitch = -Math.toDegrees(Math.atan2(super.motionY, Math.max(1.0E-5D, forwardAirspeed)));
+      return MCH_FlightModel.clamp(this.wrapDegrees(flightPathPitch - (double)this.getRotPitch()), -180.0D, 180.0D);
+   }
+
+   private double wrapDegrees(double angle) {
+      angle %= 360.0D;
+      if(angle >= 180.0D) angle -= 360.0D;
+      if(angle < -180.0D) angle += 360.0D;
+      return angle;
    }
 
    private double calculateSideslipAngle() {
@@ -1631,44 +1655,138 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    private void updateAerodynamicState() {
       Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
+
       double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       this.lastHorizontalSpeed = horizontalSpeed;
+
       double forwardAirspeed = this.getForwardAirspeed();
       this.lastForwardAirspeed = forwardAirspeed;
+
       this.updateAngleOfAttackMetrics(forward);
 
-      double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
-            this.getPlaneInfo().stallSpeedFactor);
-      this.speedStallSeverity = Math.max(MCH_FlightModel.getSpeedStallSeverity(forwardAirspeed, stallSpeed),
-            MCH_FlightModel.getSpeedStallSeverity(horizontalSpeed, stallSpeed));
-      this.aoaStallSeverity = MCH_FlightModel.getAoAStallSeverity(this.angleOfAttack, this.getPlaneInfo().criticalAoA);
+      double stallSpeed = MCH_FlightModel.getStallSpeed(
+              this.getPlaneInfo().stallSpeed,
+              this.getMaxSpeed(),
+              this.getPlaneInfo().stallSpeedFactor);
+
+      /*
+       * Low speed is still tracked because it matters for lift, control authority,
+       * energy state, and recovery.
+       *
+       * But low speed alone should NOT create stallDemand. A stall is primarily
+       * excessive positive AoA. Low speed only makes an AoA stall worse once the
+       * aircraft is already AoA-limited / energy-limited.
+       */
+      this.speedStallSeverity = Math.max(
+              MCH_FlightModel.getSpeedStallSeverity(forwardAirspeed, stallSpeed),
+              MCH_FlightModel.getSpeedStallSeverity(horizontalSpeed, stallSpeed));
+
+      /*
+       * Requires the signed-AoA helper from the previous patch:
+       *
+       * private double getPositiveNormalAoAForStall() {
+       *    return Math.max(0.0D, this.angleOfAttack)
+       *          + Math.max(0.0D, Math.abs(this.sideslipAngle) - 8.0D) * 0.20D;
+       * }
+       *
+       * This prevents nose-down / recovery AoA from being treated like normal
+       * nose-up stall AoA.
+       */
+      this.aoaStallSeverity = MCH_FlightModel.getAoAStallSeverity(
+              this.getPositiveNormalAoAForStall(),
+              this.getPlaneInfo().criticalAoA);
+
       double noseUpAttitude = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 60.0D, 0.0D, 1.0D);
+
       if(this.aoaStallSeverity > 0.0D) {
          this.timePastCriticalAoA = MCH_FlightModel.clamp(this.timePastCriticalAoA + 0.05D, 0.0D, 30.0D);
       } else {
          this.timePastCriticalAoA = Math.max(0.0D, this.timePastCriticalAoA - 0.10D);
       }
+
       double configuredAoADelay = Math.max(0.0D, (double)this.getPlaneInfo().timeUntilStallPastCriticalAoA);
-      double aoADelayFactor = configuredAoADelay <= 1.0E-4D ? 1.0D
-            : MCH_FlightModel.clamp(this.timePastCriticalAoA / configuredAoADelay, 0.0D, 1.0D);
+      double aoADelayFactor = configuredAoADelay <= 1.0E-4D
+              ? 1.0D
+              : MCH_FlightModel.clamp(this.timePastCriticalAoA / configuredAoADelay, 0.0D, 1.0D);
+
       double thrustSupport = MCH_FlightModel.clamp(this.getThrustToWeightRatio() / 1.15D, 0.0D, 1.0D);
-      double speedHeadroom = MCH_FlightModel.clamp(forwardAirspeed / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.0D);
-      double exposureGain = this.aoaStallSeverity * aoADelayFactor * (0.018D + 0.052D * noseUpAttitude)
-            * (1.20D - 0.55D * thrustSupport) * (1.10D - 0.35D * speedHeadroom);
-      exposureGain += this.speedStallSeverity * Math.max(noseUpAttitude, 0.35D) * 0.030D;
-      double exposureDecay = this.aoaStallSeverity <= 0.0D && this.speedStallSeverity < 0.25D ? 0.070D : 0.018D * thrustSupport;
-      this.highAoAStallExposure = MCH_FlightModel.clamp(this.highAoAStallExposure + exposureGain - exposureDecay, 0.0D, 2.0D);
+      double speedHeadroom = MCH_FlightModel.clamp(
+              forwardAirspeed / Math.max(0.05D, stallSpeed * 1.35D),
+              0.0D,
+              1.0D);
+
+      /*
+       * Deep-stall exposure should be AoA-led.
+       * Low speed may worsen exposure, but it should not create full stall exposure
+       * by itself while the aircraft is aerodynamically clean.
+       */
+      double exposureGain = this.aoaStallSeverity
+              * aoADelayFactor
+              * (0.018D + 0.052D * noseUpAttitude)
+              * (1.20D - 0.55D * thrustSupport)
+              * (1.10D - 0.35D * speedHeadroom);
+
+      double lowSpeedHighAoAExposure = this.speedStallSeverity
+              * Math.max(this.aoaStallSeverity, noseUpAttitude * 0.35D)
+              * 0.030D;
+
+      exposureGain += lowSpeedHighAoAExposure;
+
+      double exposureDecay =
+              this.aoaStallSeverity <= 0.0D && (this.speedStallSeverity < 0.25D || noseUpAttitude < 0.10D)
+                      ? 0.070D
+                      : 0.018D * thrustSupport;
+
+      this.highAoAStallExposure = MCH_FlightModel.clamp(
+              this.highAoAStallExposure + exposureGain - exposureDecay,
+              0.0D,
+              2.0D);
+
       double exposureThreshold = 0.32D + 0.62D * thrustSupport + 0.28D * speedHeadroom;
-      this.deepStallSeverity = MCH_FlightModel.clamp((this.highAoAStallExposure - exposureThreshold) / 0.65D, 0.0D, 1.0D);
-      double delayedAoASeverity = this.aoaStallSeverity * aoADelayFactor
-            * Math.max(this.deepStallSeverity, this.speedStallSeverity * 0.55D);
-      double demand = Math.max(this.speedStallSeverity, delayedAoASeverity);
+
+      this.deepStallSeverity = MCH_FlightModel.clamp(
+              (this.highAoAStallExposure - exposureThreshold) / 0.65D,
+              0.0D,
+              1.0D);
+
+      /*
+       * Actual stall demand:
+       *
+       * - delayedAoASeverity is the normal critical-AoA stall entry.
+       * - lowEnergyDeparture makes a high-AoA stall worse when speed/energy is gone.
+       * - deepStallDemand keeps an already-developed stall from instantly vanishing.
+       *
+       * Important: speedStallSeverity is NOT directly maxed into demand anymore.
+       */
+      double delayedAoASeverity = this.aoaStallSeverity * aoADelayFactor;
+
+      double lowEnergyDeparture = delayedAoASeverity
+              * Math.max(this.speedStallSeverity, this.lastEnergyDeficitSeverity)
+              * Math.max(noseUpAttitude, 0.25D);
+
+      double deepStallDemand = this.deepStallSeverity
+              * Math.max(delayedAoASeverity, this.aoaStallSeverity * 0.60D);
+
+      double demand = Math.max(delayedAoASeverity, Math.max(lowEnergyDeparture, deepStallDemand));
       this.stallDemand = demand;
+
+      /*
+       * recoverySpeed was not supposed to be deleted.
+       * It is still needed for stall exit and low-energy stall timing.
+       */
       double recoverySpeed = this.getPlaneInfo().stallRecoverySpeed > 0.0F
-            ? (double)this.getPlaneInfo().stallRecoverySpeed : stallSpeed * 1.2D;
+              ? (double)this.getPlaneInfo().stallRecoverySpeed
+              : stallSpeed * 1.2D;
 
       boolean safeRecoverySpeed = forwardAirspeed >= recoverySpeed;
-      boolean safeRecoveryAoA = Math.abs(this.angleOfAttack) <= (double)this.getPlaneInfo().criticalAoA * 0.75D;
+
+      /*
+       * Since angleOfAttack is now signed, do NOT use Math.abs(angleOfAttack) here.
+       * Recovery should care about normal positive AoA being reduced below critical.
+       */
+      boolean safeRecoveryAoA = this.getPositiveNormalAoAForStall()
+              <= (double)this.getPlaneInfo().criticalAoA * 0.75D;
+
       if(this.stalling) {
          if(safeRecoverySpeed && safeRecoveryAoA) {
             this.stalling = false;
@@ -1677,20 +1795,42 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.stalling = true;
       }
 
+      /*
+       * Low-energy stall timing only advances after an actual AoA stall has begun.
+       * This preserves low-speed diagnostics/recovery without making low speed alone
+       * become a stall trigger.
+       */
       double lowEnergyThreshold = recoverySpeed * 0.75D;
-      boolean lowEnergyStall = this.stalling && forwardAirspeed < lowEnergyThreshold
-            && (this.stallSeverity > 0.45D || this.speedStallSeverity > 0.45D || this.deepStallSeverity > 0.35D);
+      boolean lowEnergyStall = this.stalling
+              && forwardAirspeed < lowEnergyThreshold
+              && (this.stallSeverity > 0.45D
+              || demand > 0.45D
+              || this.speedStallSeverity > 0.45D
+              || this.deepStallSeverity > 0.35D);
+
       if(lowEnergyStall) {
-         this.timeAfterLowEnergyStall = MCH_FlightModel.clamp(this.timeAfterLowEnergyStall + 0.05D, 0.0D, 30.0D);
+         this.timeAfterLowEnergyStall = MCH_FlightModel.clamp(
+                 this.timeAfterLowEnergyStall + 0.05D,
+                 0.0D,
+                 30.0D);
       } else {
          this.timeAfterLowEnergyStall = 0.0D;
       }
 
-      double targetSeverity = this.stalling ? Math.max(0.12D, demand) : 0.0D;
-      double recoveryRate = MCH_FlightModel.clamp((double)this.getPlaneInfo().stallRecoveryRate, 0.01D, 1.0D);
+      double targetSeverity = this.stalling
+              ? Math.max(0.12D, Math.max(demand, this.deepStallSeverity * 0.50D))
+              : 0.0D;
+
+      double recoveryRate = MCH_FlightModel.clamp(
+              (double)this.getPlaneInfo().stallRecoveryRate,
+              0.01D,
+              1.0D);
+
       this.stallSeverity += (targetSeverity - this.stallSeverity)
-            * (targetSeverity > this.stallSeverity ? 0.35D : recoveryRate);
+              * (targetSeverity > this.stallSeverity ? 0.35D : recoveryRate);
+
       this.stallRecovering = !this.stalling && this.stallSeverity > 0.0D;
+
       if(!this.stalling && this.stallSeverity < 1.0E-3D) {
          this.stallSeverity = 0.0D;
          this.stallRecovering = false;
@@ -3097,8 +3237,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          double drag = MCH_FlightModel.getEnergyDrag(horizontalSpeed, (double)levelSpeed, energyThrottle,
                turnLoad, controlLoad, this.getPlaneInfo().baseDrag, this.getPlaneInfo().inducedDrag,
                this.getPlaneInfo().controlSurfaceDrag, (float)engineBrakeDrag) / mass;
-         double aoaDrag = MCH_FlightModel.getAngleOfAttackDrag(this.angleOfAttack, this.getPlaneInfo().criticalAoA,
-               this.getPlaneInfo().baseDrag, this.getPlaneInfo().aoaDragMultiplier) / mass;
+         double aoaDrag = MCH_FlightModel.getAngleOfAttackDrag(
+                 this.getAbsoluteAoAForDrag(),
+                 this.getPlaneInfo().criticalAoA,
+                 this.getPlaneInfo().baseDrag,
+                 this.getPlaneInfo().aoaDragMultiplier) / mass;
          this.lastAoADragFactor = aoaDrag;
          drag += aoaDrag;
          double noseHighPitch = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 60.0D, 0.0D, 1.0D);
