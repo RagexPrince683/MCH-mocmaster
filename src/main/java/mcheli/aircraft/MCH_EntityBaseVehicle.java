@@ -2433,7 +2433,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       this.prevCurrentThrottle = this.getCurrentThrottle();
       this.lastBBDamageFactor = 1.0F;
-      this.updateVehicleStress();
+      //this.updateVehicleStress();
+      //no? only planes or helis right? unless we want to add like bridge collapse for maus or some shit/mud
+      // but that's AFTER planes are fully fixed
       this.updateControl();
       this.checkServerNoMove();
       this.onUpdate_RidingEntity();

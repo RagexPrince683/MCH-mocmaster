@@ -14,6 +14,29 @@ public final class MCH_FlightModel {
    }
 
    /**
+    * Maximum pitch/yaw turn rate allowed by a load-factor limit.
+    * This intentionally limits pitch/yaw turning, not roll rate.
+    *
+    * Minecraft units:
+    * speed = blocks/tick
+    * gravity = blocks/tick^2
+    * result = degrees/tick
+    */
+   public static double getTurnRateLimitDegreesPerTick(double speed, double gravity, double maxG) {
+      double v = Math.max(0.01D, speed);
+      double g = Math.max(1.0E-6D, gravity);
+      double n = Math.max(1.0D, maxG);
+
+      if(n <= 1.0001D) {
+         return 0.0D;
+      }
+
+      double lateralAcceleration = g * Math.sqrt(n * n - 1.0D);
+      double turnRateRadians = lateralAcceleration / v;
+      return Math.toDegrees(turnRateRadians);
+   }
+
+   /**
     * Integrates one local-axis body rate. Torque and damping are divided by inertia,
     * so heavier aircraft take longer to reach the same configured control authority.
     */

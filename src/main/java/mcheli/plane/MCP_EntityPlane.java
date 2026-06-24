@@ -463,6 +463,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
    }
 
+
+
    public void onUpdateAircraft() {
       if(this.planeInfo == null) {
          this.changeType(this.getTypeName());
@@ -1515,6 +1517,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          roll = roll * this.getRollFactor() * 0.06F;
       }
 
+      this.updateVehicleStress();
+
       float controlAuthority = this.getControlAuthorityFactor();
       double pitchAuthoritySpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       double pitchAuthority = MCH_FlightModel.getCompressibilityPitchAuthority(pitchAuthoritySpeed,
@@ -1572,6 +1576,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             info.rollTorque, info.rollDamping, info.inertiaMultiplier, partialTicks);
       this.yawAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.yawAngularVelocity, yaw,
             info.yawTorque, info.yawDamping, info.inertiaMultiplier, partialTicks);
+      this.limitPitchYawRateByStructuralG(info);
       this.lastPilotPitchAngularVelocity = this.pitchAngularVelocity;
       if(this.lastNoseDownRecoveryTorque > 1.0E-5D) {
          double envelopeSeverity = MCH_FlightModel.clamp(this.lastPitchEnvelopeExcess / 42.0D, 0.0D, 1.0D);
@@ -3518,6 +3523,39 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.handleDeadPilot();
 
 
+   }
+
+   private void limitPitchYawRateByStructuralG(MCP_PlaneInfo info) {
+      if(info == null || !this.useNewMobilitySystem() || this.getNozzleRotation() > 0.01F || super.onGround) {
+         return;
+      }
+
+      /*
+       * Roll rate is NOT included here.
+       * A pure aileron roll does not equal a high-G turn.
+       * Pitch/yaw turning changes the velocity vector and is what needs G limiting.
+       */
+      double speed = this.getAirspeed();
+      double gravity = this.resolveNewFlightGravity();
+
+      /*
+       * Keep a margin below structural G so the aircraft does not casually sit at the
+       * redline forever. Comfortable G should start reducing authority before this.
+       */
+      double maxUsableG = Math.max(1.1D, (double)info.maxStructuralG * 0.92D);
+      double maxRate = MCH_FlightModel.getTurnRateLimitDegreesPerTick(speed, gravity, maxUsableG);
+
+      double pitchYawRate = Math.sqrt(
+              (double)this.pitchAngularVelocity * (double)this.pitchAngularVelocity
+                      + (double)this.yawAngularVelocity * (double)this.yawAngularVelocity);
+
+      if(pitchYawRate <= maxRate || pitchYawRate <= 1.0E-5D) {
+         return;
+      }
+
+      double scale = maxRate / pitchYawRate;
+      this.pitchAngularVelocity *= (float)scale;
+      this.yawAngularVelocity *= (float)scale;
    }
 
 
