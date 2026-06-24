@@ -1757,7 +1757,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       this.lastHorizontalSpeed = horizontalSpeed;
       this.lastForwardAirspeed = forwardAirspeed;
-      double airspeedLift = MCH_FlightModel.clamp((horizontalSpeed - stallSpeed * 0.45D) / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.25D);
+      double noseDownForLift = MCH_FlightModel.clamp((double)this.getRotPitch() / 45.0D, 0.0D, 1.0D);
+      double noseHighForLift = MCH_FlightModel.clamp((double)(-this.getRotPitch() - 8.0F) / 42.0D, 0.0D, 1.0D);
+      double descentAirflow = Math.max(0.0D, -super.motionY) * (0.45D + 1.35D * noseDownForLift)
+            * (1.0D - 0.70D * noseHighForLift);
+      double effectiveLiftSpeed = Math.max(Math.max(horizontalSpeed, forwardAirspeed), descentAirflow);
+      double airspeedLift = MCH_FlightModel.clamp((effectiveLiftSpeed - stallSpeed * 0.45D) / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.25D);
       double aoaExcess = Math.max(0.0D, Math.abs(this.angleOfAttack) - (double)info.criticalAoA);
       double preStallAoALift = MCH_FlightModel.clamp(1.0D - aoaExcess / Math.max(1.0D, (double)info.criticalAoA * 2.5D), 0.35D, 1.0D);
       double aoaLift = preStallAoALift * (1.0D - this.deepStallSeverity * 0.85D);
@@ -1881,7 +1886,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    private void applyNewFlightIdleGlideAssist(double gravityAccel) {
       if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null || this.getNozzleRotation() > 0.01F
-            || super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0 || this.getCurrentThrottle() > 0.01D
+            || super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0 || this.getPropulsiveEngineThrottle() > 0.01D
             || super.motionY >= 0.0D) {
          return;
       }
@@ -1889,15 +1894,28 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
             this.getPlaneInfo().stallSpeedFactor);
-      double targetGlideSpeed = Math.min((double)this.getMaxSpeed() * 0.45D, Math.max(stallSpeed * 0.85D, 0.05D));
+      double recoverySpeed = this.getPlaneInfo().stallRecoverySpeed > 0.0F
+            ? (double)this.getPlaneInfo().stallRecoverySpeed : stallSpeed * 1.2D;
+      double targetGlideSpeed = Math.min((double)this.getMaxSpeed() * 0.70D,
+            Math.max(Math.max(recoverySpeed, stallSpeed * 1.35D), 0.05D));
       if(horizontalSpeed >= targetGlideSpeed) {
          return;
       }
 
-      double descent01 = MCH_FlightModel.clamp(-super.motionY / 0.35D, 0.0D, 1.0D);
+      double noseDown01 = MCH_FlightModel.clamp((double)this.getRotPitch() / 55.0D, 0.0D, 1.0D);
+      double noseHigh01 = MCH_FlightModel.clamp((double)(-this.getRotPitch() - 6.0F) / 46.0D, 0.0D, 1.0D);
+      double descent01 = MCH_FlightModel.clamp(-super.motionY / 0.45D, 0.0D, 1.0D);
       double speedDeficit01 = MCH_FlightModel.clamp((targetGlideSpeed - horizontalSpeed)
             / Math.max(0.05D, targetGlideSpeed), 0.0D, 1.0D);
-      double glideGain = Math.max(0.0D, gravityAccel) * 0.45D * descent01 * speedDeficit01;
+      double airflowRecovery = MCH_FlightModel.clamp(this.getForwardAirspeed() / Math.max(0.05D, stallSpeed), 0.0D, 1.0D);
+      double stalledNoseHighPenalty = Math.max(this.stallSeverity, Math.max(this.aoaStallSeverity, this.speedStallSeverity))
+            * noseHigh01;
+      double attitudeFactor = MCH_FlightModel.clamp(0.30D + 0.95D * noseDown01 + 0.30D * airflowRecovery
+            - 0.50D * noseHigh01 - 0.45D * stalledNoseHighPenalty, 0.08D, 1.35D);
+      double descentEnergyGain = -super.motionY * (0.26D + 0.24D * noseDown01);
+      double gravityGain = Math.max(0.0D, gravityAccel) * (1.8D + 1.2D * noseDown01);
+      double glideGain = (descentEnergyGain + gravityGain) * descent01 * speedDeficit01 * attitudeFactor;
+      glideGain = Math.min(glideGain, Math.max(0.0D, targetGlideSpeed - horizontalSpeed));
       if(glideGain <= 0.0D) {
          return;
       }
@@ -3025,8 +3043,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          }
       }
 
-      // Dampens vertical speed
-      super.motionY *= 0.95D;
+      // Dampens vertical speed.  New-flight dead-stick glides keep most descent
+      // energy available for the aerodynamic model below instead of leaking it
+      // before gravity can be traded for forward airspeed.
+      double verticalMotionFactor = 0.95D;
+      if(this.useNewMobilitySystem() && this.getPlaneInfo() != null && dp == 0.0D && !super.onGround
+            && this.getNozzleRotation() <= 0.01F && !levelOff && this.getPropulsiveEngineThrottle() <= 0.01D) {
+         double noseHighDamping = MCH_FlightModel.clamp((double)(-this.getRotPitch() - 8.0F) / 52.0D, 0.0D, 1.0D);
+         verticalMotionFactor = 0.985D - 0.020D * noseHighDamping;
+      }
+      super.motionY *= verticalMotionFactor;
       // Dampens horizontal speed based on aircraft motion factor. New-flight planes in
       // dead-stick airborne flight should glide on retained momentum instead of losing
       // horizontal speed just because commanded throttle is zero; aerodynamic drag below
