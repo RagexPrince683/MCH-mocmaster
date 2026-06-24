@@ -1887,17 +1887,19 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
 
       double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      double sinkSpeed = Math.max(0.0D, -super.motionY);
       double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
             this.getPlaneInfo().stallSpeedFactor);
-      double targetGlideSpeed = Math.min((double)this.getMaxSpeed() * 0.45D, Math.max(stallSpeed * 0.85D, 0.05D));
-      if(horizontalSpeed >= targetGlideSpeed) {
+      double targetGlideSpeed = Math.min((double)this.getMaxSpeed() * 0.60D,
+            Math.max(Math.max(stallSpeed * 1.05D, sinkSpeed * 1.40D), 0.08D));
+      double speedDeficit = targetGlideSpeed - horizontalSpeed;
+      if(speedDeficit <= 0.0D) {
          return;
       }
 
-      double descent01 = MCH_FlightModel.clamp(-super.motionY / 0.35D, 0.0D, 1.0D);
-      double speedDeficit01 = MCH_FlightModel.clamp((targetGlideSpeed - horizontalSpeed)
-            / Math.max(0.05D, targetGlideSpeed), 0.0D, 1.0D);
-      double glideGain = Math.max(0.0D, gravityAccel) * 0.45D * descent01 * speedDeficit01;
+      double descent01 = MCH_FlightModel.clamp(sinkSpeed / 0.35D, 0.0D, 1.0D);
+      double speedDeficit01 = MCH_FlightModel.clamp(speedDeficit / Math.max(0.05D, targetGlideSpeed), 0.0D, 1.0D);
+      double glideGain = Math.min(speedDeficit, Math.max(0.0D, gravityAccel) * 2.50D * descent01 * speedDeficit01);
       if(glideGain <= 0.0D) {
          return;
       }
@@ -1905,6 +1907,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double yaw = Math.toRadians((double)this.getRotYaw());
       super.motionX += -Math.sin(yaw) * glideGain;
       super.motionZ += Math.cos(yaw) * glideGain;
+
+      double horizontalAfter = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      double maxGlideSink = Math.max(0.035D, horizontalAfter * 0.65D);
+      if(-super.motionY > maxGlideSink) {
+         super.motionY = -maxGlideSink;
+      }
    }
 
    private void resetNewFlightDiveAssistDebug() {
