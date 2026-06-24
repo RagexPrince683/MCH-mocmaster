@@ -3022,7 +3022,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       float horizontalThrottle = throttle1;
       if(this.useNewMobilitySystem() && this.getPlaneInfo() != null && dp == 0.0D && !super.onGround
             && this.getNozzleRotation() <= 0.01F && !levelOff && this.getCurrentThrottle() <= 0.01D) {
-         horizontalThrottle = Math.max(horizontalThrottle, 0.005F);
+         double idleGlideThrottle = Math.max(0.0D, (double)this.getPlaneInfo().engineThrust * 0.05D)
+               / this.getPhysicalMass() / 10.0D;
+         horizontalThrottle = (float)Math.max((double)horizontalThrottle, idleGlideThrottle);
       }
 
       // If movement is possible, updates horizontal speed
