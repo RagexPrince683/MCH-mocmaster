@@ -3019,11 +3019,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
 
       double forwardSpeedBefore = super.motionX * horizontalThrustX + super.motionZ * horizontalThrustZ;
-      float horizontalThrottle = throttle1;
-      if(this.useNewMobilitySystem() && this.getPlaneInfo() != null && dp == 0.0D && !super.onGround
-            && this.getNozzleRotation() <= 0.01F && !levelOff && this.getCurrentThrottle() <= 0.01D) {
-         horizontalThrottle = Math.max(horizontalThrottle, 0.005F);
-      }
 
       // If movement is possible, updates horizontal speed
       if(canMove) {
@@ -3033,8 +3028,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             super.motionZ -= horizontalThrustZ * (double) super.throttleBack;
          } else {
             // Otherwise moves forward based on throttle
-            super.motionX += horizontalThrustX * (double) horizontalThrottle;
-            super.motionZ += horizontalThrustZ * (double) horizontalThrottle;
+            super.motionX += horizontalThrustX * (double) throttle1;
+            super.motionZ += horizontalThrustZ * (double) throttle1;
          }
       }
 
