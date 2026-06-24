@@ -1879,6 +1879,34 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastLiftAcceleration = Math.max(this.lastLiftAcceleration, liftAccel);
    }
 
+   private void applyNewFlightIdleGlideAssist(double gravityAccel) {
+      if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null || this.getNozzleRotation() > 0.01F
+            || super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0 || this.getCurrentThrottle() > 0.01D
+            || super.motionY >= 0.0D) {
+         return;
+      }
+
+      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      double stallSpeed = MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(),
+            this.getPlaneInfo().stallSpeedFactor);
+      double targetGlideSpeed = Math.min((double)this.getMaxSpeed() * 0.45D, Math.max(stallSpeed * 0.85D, 0.05D));
+      if(horizontalSpeed >= targetGlideSpeed) {
+         return;
+      }
+
+      double descent01 = MCH_FlightModel.clamp(-super.motionY / 0.35D, 0.0D, 1.0D);
+      double speedDeficit01 = MCH_FlightModel.clamp((targetGlideSpeed - horizontalSpeed)
+            / Math.max(0.05D, targetGlideSpeed), 0.0D, 1.0D);
+      double glideGain = Math.max(0.0D, gravityAccel) * 0.45D * descent01 * speedDeficit01;
+      if(glideGain <= 0.0D) {
+         return;
+      }
+
+      double yaw = Math.toRadians((double)this.getRotYaw());
+      super.motionX += -Math.sin(yaw) * glideGain;
+      super.motionZ += Math.cos(yaw) * glideGain;
+   }
+
    private void resetNewFlightDiveAssistDebug() {
       this.lastDiveAssistNoseDownDegrees = Math.max(0.0D, (double)this.getRotPitch());
       this.lastDiveAssistFalling01 = 0.0D;
@@ -3112,6 +3140,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             super.motionX += -Math.sin(yaw) * targetSpeed;
             super.motionZ += Math.cos(yaw) * targetSpeed;
          }
+         this.applyNewFlightIdleGlideAssist(gravityAccel);
          this.lastHorizontalSpeedAfterEnergyDrag = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
          this.applyNewFlightDiveAssist(gravityAccel);
       } else {
