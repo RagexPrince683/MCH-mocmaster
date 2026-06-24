@@ -952,13 +952,41 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    private float getMouseAimRollCommand(float manualRoll, double limit) {
-      this.mouseAimAutoBankTargetRoll = (float)MCH_FlightModel.clamp((double)(this.mouseAimYawError * MCH_Config.MouseAimAutoBankStrength.prmDouble),
-            -MCH_Config.MouseAimAutoBankMaxRoll.prmDouble, MCH_Config.MouseAimAutoBankMaxRoll.prmDouble);
+      this.mouseAimManualRollActive = MathHelper.abs(manualRoll) > 0.001F;
+
+      /*
+       * Manual roll must override mouse-aim auto-bank.
+       * Otherwise mouse aim can never command a true aileron roll/barrel roll.
+       */
+      if(this.mouseAimManualRollActive) {
+         this.mouseAimGeneratedRollCommand = (float)MCH_FlightModel.clamp((double)manualRoll, -limit, limit);
+         return this.mouseAimGeneratedRollCommand;
+      }
+
+      this.mouseAimAutoBankTargetRoll = (float)MCH_FlightModel.clamp(
+              (double)(this.mouseAimYawError * MCH_Config.MouseAimAutoBankStrength.prmDouble),
+              -MCH_Config.MouseAimAutoBankMaxRoll.prmDouble,
+              MCH_Config.MouseAimAutoBankMaxRoll.prmDouble);
+
       float centering = (float)MCH_FlightModel.clamp(MCH_Config.MouseAimCenteringStrength.prmDouble, 0.0D, 5.0D);
       float autoBank = (this.mouseAimAutoBankTargetRoll - this.getRotRoll()) * centering;
-      this.mouseAimManualRollActive = MathHelper.abs(manualRoll) > 0.001F;
-      this.mouseAimGeneratedRollCommand = (float)MCH_FlightModel.clamp((double)(autoBank + manualRoll), -limit, limit);
+
+      this.mouseAimGeneratedRollCommand = (float)MCH_FlightModel.clamp((double)autoBank, -limit, limit);
       return this.mouseAimGeneratedRollCommand;
+   }
+
+   private float getManualRollKeyCommand(double limit) {
+      float cmd = 0.0F;
+
+      if(super.moveLeft && !super.moveRight) {
+         cmd -= (float)limit;
+      }
+
+      if(super.moveRight && !super.moveLeft) {
+         cmd += (float)limit;
+      }
+
+      return cmd;
    }
 
    public String getMouseAimDebugString() {
@@ -1502,7 +1530,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       if(this.canUpdateRoll(player)) {
          m_add = this.getAddRotationRollLimit();
-         roll = this.getControlRotRoll(x, y, partialTicks);
+         roll = useMouseAim ? this.getManualRollKeyCommand(m_add) : this.getControlRotRoll(x, y, partialTicks);
+
          if(useMouseAim) {
             roll = this.getMouseAimRollCommand(roll, m_add);
          }
@@ -2531,7 +2560,25 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double overspeed = MCH_FlightModel.getOverspeedSeverity(speed, this.getMaxSafeSpeed());
       if(!super.worldObj.isRemote) {
          if(structuralOverload > 0.0D) {
-            // Reserved for plane-specific structural failure hooks.
+            /*
+             * Structural overload should punish abuse.
+             * This is not instant death at 10.01G, but repeatedly exceeding the
+             * configured structural limit should damage the aircraft and bleed authority.
+             */
+            double overloadDamage = structuralOverload * structuralOverload * 3.0D;
+            this.overspeedDamageAccumulator += overloadDamage;
+
+            if(this.currentGForce > (double)info.maxStructuralG * 1.15D) {
+               double hardOverload = MCH_FlightModel.clamp(
+                       (this.currentGForce - (double)info.maxStructuralG * 1.15D)
+                               / Math.max(1.0D, (double)info.maxStructuralG * 0.50D),
+                       0.0D,
+                       1.0D);
+
+               this.pitchAngularVelocity *= (float)(1.0D - hardOverload * 0.55D);
+               this.yawAngularVelocity *= (float)(1.0D - hardOverload * 0.55D);
+               this.rollAngularVelocity *= (float)(1.0D - hardOverload * 0.25D);
+            }
          }
          this.applyOverspeedDamage(overspeed);
       }
@@ -3384,7 +3431,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          }
          this.applyNewFlightIdleGlideAssist(gravityAccel);
          this.lastHorizontalSpeedAfterEnergyDrag = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-         this.applyNewFlightDiveAssist(gravityAccel);
+         // Disabled: getVerticalEnergyChange() already handles altitude/speed exchange.
+         // applyNewFlightDiveAssist() adds a second artificial dive acceleration and makes
+         // shallow dives produce excessive speed/turn performance.
+         // this.applyNewFlightDiveAssist(gravityAccel);
+         this.resetNewFlightDiveAssistDebug();
       } else {
          this.resetNewFlightDiveAssistDebug();
       }
