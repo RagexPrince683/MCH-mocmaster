@@ -40,7 +40,7 @@ import net.minecraft.world.World;
 
 public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
-   private static final float PLANE_MANEUVERABILITY_FACTOR = 1.5F;
+   private static final float PLANE_MANEUVERABILITY_FACTOR = 1.0F;
 
    private MCP_PlaneInfo planeInfo = null;
    public float soundVolume;
