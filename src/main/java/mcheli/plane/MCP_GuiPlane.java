@@ -166,9 +166,18 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       lines.add(String.format("NF DBG  stall=%s recover=%s flap=%s", new Object[]{
             Boolean.valueOf(plane.getStallSeverity() > 0.0D), Boolean.valueOf(plane.isStallRecovering()),
             Boolean.valueOf(plane.isCombatFlapsDeployed())}));
-      lines.add(String.format("SPD true=%.3f fwd=%.3f horiz=%.3f current=%.3f", new Object[]{
+      lines.add(String.format("SPD side=%s path=%s currentField=%.3f control=%.3f true=%.3f bodyFwd=%.3f horiz=%.3f", new Object[]{
+            plane.isLastSetAnglesRemote() ? "client" : "server", Boolean.valueOf(plane.isLastNewFlightControlPathActive()),
+            Double.valueOf(plane.currentSpeed), Double.valueOf(plane.getLastControlSpeed()),
             Double.valueOf(plane.getTrueAirspeed()), Double.valueOf(plane.getForwardAirspeed()),
-            Double.valueOf(plane.getLastHorizontalSpeed()), Double.valueOf(plane.currentSpeed)}));
+            Double.valueOf(plane.getLastHorizontalSpeed())}));
+      lines.add(String.format("LIM dt=%.3f mAdd y=%.2f p=%.2f r=%.2f in=(%.2f,%.2f)", new Object[]{
+            Float.valueOf(plane.getLastSetAnglesPartialTicks()), Double.valueOf(plane.getLastYawMAdd()),
+            Double.valueOf(plane.getLastPitchMAdd()), Double.valueOf(plane.getLastRollMAdd()),
+            Double.valueOf(plane.getLastInputXBeforeClamp()), Double.valueOf(plane.getLastInputYBeforeClamp())}));
+      lines.add(String.format("CLAMP pitch %.2f->%.2f roll %.2f->%.2f", new Object[]{
+            Double.valueOf(plane.getLastPitchBeforeClamp()), Double.valueOf(plane.getLastPitchAfterClamp()),
+            Double.valueOf(plane.getLastRollBeforeClamp()), Double.valueOf(plane.getLastRollAfterClamp())}));
       lines.add(String.format("SPD raw=%.0f display=%.0f km/h stall=%.3f", new Object[]{
             Double.valueOf(MCH_HudShared.getRawSpeedKmh(plane)), Double.valueOf(MCH_HudShared.getDisplaySpeedPlane(plane)), Double.valueOf(stallSpeed)}));
       lines.add(String.format("aoa=%.1f demand=%.2f sev=%.2f/%.2f/%.2f", new Object[]{
