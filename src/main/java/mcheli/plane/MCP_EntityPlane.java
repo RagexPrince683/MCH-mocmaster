@@ -1618,7 +1618,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.updateVehicleStress();
 
       float controlAuthority = this.getControlAuthorityFactor();
-      double pitchAuthoritySpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      double pitchAuthoritySpeed = this.getNewFlightAuthoritySpeed();
       double pitchAuthority = MCH_FlightModel.getCompressibilityPitchAuthority(pitchAuthoritySpeed,
             this.getCompressibilitySpeed(), this.getMaxSafeSpeed(), this.getPlaneInfo().compressibilityPitchPenalty);
       double stallSpeedForAuthority = MCH_FlightModel.getStallSpeed(planeInfo.stallSpeed, this.getMaxSpeed(), planeInfo.stallSpeedFactor);
@@ -2474,6 +2474,18 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastFinalPitchAngularVelocity = this.pitchAngularVelocity;
    }
 
+   private boolean isAirborneNewConventionalFlight(boolean levelOff, double dp) {
+      return this.useNewMobilitySystem() && this.getPlaneInfo() != null && dp == 0.0D && !super.onGround
+            && this.getNozzleRotation() <= 0.01F && !levelOff;
+   }
+
+   private double getNewFlightAuthoritySpeed() {
+      if(this.useNewMobilitySystem() && this.getPlaneInfo() != null && !super.onGround && this.getNozzleRotation() <= 0.01F) {
+         return Math.max(this.getTrueAirspeed(), this.getForwardAirspeed());
+      }
+      return Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+   }
+
    private double updateNewFlightEnergyState(double mass, double gravityAccel, double horizontalSpeed, double drag) {
       MCP_PlaneInfo info = this.getPlaneInfo();
       double vx = super.motionX;
@@ -3313,6 +3325,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastPitchMomentAirflowScale = 0.0D;
       this.lastPitchMomentAngularVelocity = 0.0D;
 
+      boolean airborneNewConventional = this.isAirborneNewConventionalFlight(levelOff, dp);
+
       // If nozzle rotation angle is greater than0.001F
       if(this.getNozzleRotation() > 0.001F) {
          // Adjusts aircraft pitch according to nozzle rotation angle
@@ -3324,6 +3338,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             v.xCoord *= 0.800000011920929D;
             v.zCoord *= 0.800000011920929D;
          }
+      } else if(airborneNewConventional) {
+         // New fixed-wing flight applies thrust on the actual body-forward axis.
+         // Do not use the legacy pitch-10 vector in sustained climbs/aerobatics; gravity, drag,
+         // AoA and thrust-to-weight decide whether the climb is sustainable.
+         v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
       } else {
          // Otherwise calculates default direction vector with pitch minus 10 degrees
          v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - 10.0F);
@@ -3332,7 +3351,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // If steady flight state has not been reached
       if(!levelOff) {
          // If nozzle rotation angle is <= 0.01F, adjusts vertical speed based on throttle
-         if(this.getNozzleRotation() <= 0.01F) {
+         if(this.getNozzleRotation() <= 0.01F && !airborneNewConventional) {
             double verticalThrust = v.yCoord * (double)throttle1 / 2.0D;
             if(this.useNewMobilitySystem() && this.getPlaneInfo() != null && verticalThrust > 0.0D) {
                double mass = this.getPhysicalMass();
@@ -3367,7 +3386,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       double horizontalThrustX = v.xCoord;
       double horizontalThrustZ = v.zCoord;
-      if(this.useNewMobilitySystem() && this.getNozzleRotation() <= 0.01F) {
+      if(this.useNewMobilitySystem() && this.getNozzleRotation() <= 0.01F && !airborneNewConventional) {
          double pitchProjection = Math.sqrt(horizontalThrustX * horizontalThrustX + horizontalThrustZ * horizontalThrustZ);
          if(pitchProjection > 1.0E-4D) {
             // A propeller/jet still accelerates the aircraft along the runway/airflow direction when
@@ -3385,14 +3404,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       double forwardSpeedBefore = super.motionX * horizontalThrustX + super.motionZ * horizontalThrustZ;
 
-      // If movement is possible, updates horizontal speed
+      // If movement is possible, updates speed. New airborne conventional fixed-wing uses
+      // full body-axis thrust, while legacy/ground/VTOL paths keep horizontal-only thrust.
       if(canMove) {
-         // If reverse is enabled and throttle is backward, reverses based on throttle
-         if (this.getAcInfo().enableBack && super.throttleBack > 0.0F) {
+         if(airborneNewConventional) {
+            super.motionX += v.xCoord * (double)throttle1;
+            super.motionY += v.yCoord * (double)throttle1;
+            super.motionZ += v.zCoord * (double)throttle1;
+         } else if (this.getAcInfo().enableBack && super.throttleBack > 0.0F) {
             super.motionX -= horizontalThrustX * (double) super.throttleBack;
             super.motionZ -= horizontalThrustZ * (double) super.throttleBack;
          } else {
-            // Otherwise moves forward based on throttle
             super.motionX += horizontalThrustX * (double) throttle1;
             super.motionZ += horizontalThrustZ * (double) throttle1;
          }
@@ -3503,14 +3525,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          double energyChange = MCH_FlightModel.getVerticalEnergyChange(super.motionY,
                (float)derivedClimbLoss, (float)derivedDiveGain) / mass;
          this.lastClimbEnergyDrag = Math.max(0.0D, -energyChange);
-         double targetSpeed = Math.max(0.0D, horizontalSpeed * (1.0D - drag) + energyChange);
+         double trueSpeedForEnergy = this.getTrueAirspeed();
+         double targetSpeed = Math.max(0.0D, trueSpeedForEnergy * (1.0D - drag) + energyChange);
 
-         if(horizontalSpeed > 1.0E-4D) {
-            double energyScale = targetSpeed / horizontalSpeed;
+         if(trueSpeedForEnergy > 1.0E-4D) {
+            double energyScale = targetSpeed / trueSpeedForEnergy;
             if(this.deepStallSeverity > 0.65D && noseHighPitch > 0.35D) {
                energyScale *= 1.0D - MCH_FlightModel.clamp((this.deepStallSeverity - 0.65D) / 0.35D, 0.0D, 1.0D) * 0.35D;
             }
             super.motionX *= energyScale;
+            super.motionY *= energyScale;
             super.motionZ *= energyScale;
             if(this.deepStallSeverity > 0.80D && noseHighPitch > 0.45D) {
                double departureClamp = 1.0D - MCH_FlightModel.clamp((this.deepStallSeverity - 0.80D) / 0.20D, 0.0D, 1.0D) * 0.18D;
@@ -3521,9 +3545,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                }
             }
          } else if(targetSpeed > 0.0D) {
-            double yaw = Math.toRadians((double)this.getRotYaw());
-            super.motionX += -Math.sin(yaw) * targetSpeed;
-            super.motionZ += Math.cos(yaw) * targetSpeed;
+            Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
+            super.motionX += forward.xCoord * targetSpeed;
+            super.motionY += forward.yCoord * targetSpeed;
+            super.motionZ += forward.zCoord * targetSpeed;
          }
          this.applyNewFlightIdleGlideAssist(gravityAccel);
          this.lastHorizontalSpeedAfterEnergyDrag = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
@@ -3558,15 +3583,31 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       float speedLimit = this.useNewMobilitySystem()
             ? (float)MCH_FlightModel.getDiveSpeedLimit(levelSpeed, this.getRotPitch(), super.motionY, this.getPlaneInfo().diveSpeedMultiplier)
             : baseSpeedLimit;
-      // If current speed exceeds max speed limit, scales horizontal speed down by max speed ratio
-      if(motion1 > (double)speedLimit) {
+      double speedForCurrentSpeed = motion1;
+      if(airborneNewConventional) {
+         double trueSpeed = this.getTrueAirspeed();
+         if(trueSpeed > (double)speedLimit) {
+            double speedScale = (double)speedLimit / trueSpeed;
+            super.motionX *= speedScale;
+            super.motionY *= speedScale;
+            super.motionZ *= speedScale;
+            trueSpeed = speedLimit;
+         }
+         speedForCurrentSpeed = Math.max(this.getForwardAirspeed(), trueSpeed);
+         motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      } else if(motion1 > (double)speedLimit) {
          super.motionX *= (double)speedLimit / motion1;
          super.motionZ *= (double)speedLimit / motion1;
          motion1 = speedLimit;
+         speedForCurrentSpeed = motion1;
       }
 
-      // If current speed is greater than previous frame speed and below max speed limit, gradually increases speed
-      if(motion1 > prevMotion && super.currentSpeed < (double)speedLimit) {
+      if(airborneNewConventional) {
+         // New fixed-wing currentSpeed is a telemetry/control basis for airborne flight,
+         // so keep it tied to true/body-forward airspeed instead of the horizontal projection.
+         super.currentSpeed = MCH_FlightModel.clamp(speedForCurrentSpeed, 0.07D, (double)speedLimit);
+      } else if(speedForCurrentSpeed > prevMotion && super.currentSpeed < (double)speedLimit) {
+         // If current speed is greater than previous frame speed and below max speed limit, gradually increases speed
          super.currentSpeed += ((double)speedLimit - super.currentSpeed) / 35.0D;
          if(super.currentSpeed > (double)speedLimit) {
             super.currentSpeed = (double)speedLimit;
