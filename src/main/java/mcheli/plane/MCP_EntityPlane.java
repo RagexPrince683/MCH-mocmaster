@@ -206,6 +206,20 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastControlAuthority;
    /** Last raw pitch command requested by pilot input before authority/suppression. */
    private double lastRequestedPitchInput;
+   /** Last setAngles() input limiter debug state for new fixed-wing controls. */
+   private double lastControlSpeed;
+   private double lastYawMAdd;
+   private double lastPitchMAdd;
+   private double lastRollMAdd;
+   private double lastInputXBeforeClamp;
+   private double lastInputYBeforeClamp;
+   private double lastPitchBeforeClamp;
+   private double lastPitchAfterClamp;
+   private double lastRollBeforeClamp;
+   private double lastRollAfterClamp;
+   private boolean lastNewFlightControlPathActive;
+   private boolean lastSetAnglesRemote;
+   private float lastSetAnglesPartialTicks;
    /** Last pitch command after control authority and low-speed/stall suppression. */
    private double lastPitchInputAfterAuthority;
    /** Fresh per-tick sustainable nose-up pitch envelope in degrees. */
@@ -839,6 +853,19 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    public double getLastTrueAirspeed() { return this.lastTrueAirspeed; }
    public double getLastBodyForwardAirspeed() { return this.lastBodyForwardAirspeed; }
+   public double getLastControlSpeed() { return this.lastControlSpeed; }
+   public double getLastYawMAdd() { return this.lastYawMAdd; }
+   public double getLastPitchMAdd() { return this.lastPitchMAdd; }
+   public double getLastRollMAdd() { return this.lastRollMAdd; }
+   public double getLastInputXBeforeClamp() { return this.lastInputXBeforeClamp; }
+   public double getLastInputYBeforeClamp() { return this.lastInputYBeforeClamp; }
+   public double getLastPitchBeforeClamp() { return this.lastPitchBeforeClamp; }
+   public double getLastPitchAfterClamp() { return this.lastPitchAfterClamp; }
+   public double getLastRollBeforeClamp() { return this.lastRollBeforeClamp; }
+   public double getLastRollAfterClamp() { return this.lastRollAfterClamp; }
+   public boolean isLastNewFlightControlPathActive() { return this.lastNewFlightControlPathActive; }
+   public boolean isLastSetAnglesRemote() { return this.lastSetAnglesRemote; }
+   public float getLastSetAnglesPartialTicks() { return this.lastSetAnglesPartialTicks; }
    public double getLastLiftVectorX() { return this.lastLiftVectorX; }
    public double getLastLiftVectorY() { return this.lastLiftVectorY; }
    public double getLastLiftVectorZ() { return this.lastLiftVectorZ; }
@@ -1328,6 +1355,64 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       return super.motionX * forward.xCoord + super.motionY * forward.yCoord + super.motionZ * forward.zCoord;
    }
 
+   private boolean isAirborneNewConventionalFlight() {
+      return this.useNewMobilitySystem() && this.getPlaneInfo() != null && !super.onGround
+            && this.getNozzleRotation() <= 0.01F && !this.isHovering() && this.getWaterDepth() <= 0.0D;
+   }
+
+   private double computeNewFlightControlSpeed() {
+      if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null) {
+         return super.currentSpeed;
+      }
+      double trueAirspeed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
+            + super.motionZ * super.motionZ);
+      Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
+      double bodyForwardAirspeed = Math.max(0.0D,
+            super.motionX * forward.xCoord + super.motionY * forward.yCoord + super.motionZ * forward.zCoord);
+      double speedLimit = Math.max(0.07D, (double)this.getMaxSpeed());
+      return MCH_FlightModel.clamp(Math.max(trueAirspeed, bodyForwardAirspeed), 0.07D, speedLimit);
+   }
+
+   private void updateNewFlightClientAirspeedBasis() {
+      if(!this.isAirborneNewConventionalFlight()) {
+         this.lastControlSpeed = super.currentSpeed;
+         return;
+      }
+      double controlSpeed = this.computeNewFlightControlSpeed();
+      this.lastControlSpeed = controlSpeed;
+      this.lastTrueAirspeed = this.getTrueAirspeed();
+      this.lastBodyForwardAirspeed = this.getBodyForwardAirspeed();
+      this.lastForwardAirspeed = Math.max(0.0D, this.lastBodyForwardAirspeed);
+      super.currentSpeed = controlSpeed;
+   }
+
+   private double getNewFlightRotationLimit(double legacyLimit) {
+      if(!this.isAirborneNewConventionalFlight()) {
+         return legacyLimit;
+      }
+      double controlSpeed = this.computeNewFlightControlSpeed();
+      this.lastControlSpeed = controlSpeed;
+      MCP_PlaneInfo info = this.getPlaneInfo();
+      double stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
+      double speedAuthority = MCH_FlightModel.clamp(controlSpeed / Math.max(0.05D, stallSpeed), 0.35D, 1.0D);
+      return Math.max(legacyLimit * speedAuthority, legacyLimit * 0.35D);
+   }
+
+   @Override
+   public double getAddRotationYawLimit() {
+      return this.getNewFlightRotationLimit(super.getAddRotationYawLimit());
+   }
+
+   @Override
+   public double getAddRotationPitchLimit() {
+      return this.getNewFlightRotationLimit(super.getAddRotationPitchLimit());
+   }
+
+   @Override
+   public double getAddRotationRollLimit() {
+      return this.getNewFlightRotationLimit(super.getAddRotationRollLimit());
+   }
+
    private Vec3 createVec3(double x, double y, double z) {
       return Vec3.createVectorHelper(x, y, z);
    }
@@ -1521,10 +1606,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          super.setAngles(player, fixRot, fixYaw, fixPitch, deltaX, deltaY, x, y, partialTicks);
          return;
       }
+      this.updateNewFlightClientAirspeedBasis();
       // Render tick callbacks pass a fraction of a Minecraft tick. Treat that
       // value only as elapsed simulation time; never clamp tiny high-FPS frames
       // to a large fixed value or smooth it with previous render frames.
       partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
+      this.lastSetAnglesPartialTicks = partialTicks;
+      this.lastSetAnglesRemote = super.worldObj.isRemote;
+      this.lastNewFlightControlPathActive = this.isAirborneNewConventionalFlight();
+      this.lastInputXBeforeClamp = x;
+      this.lastInputYBeforeClamp = y;
       float ac_pitch = this.getRotPitch();
       float ac_yaw = this.getRotYaw();
       float ac_roll = this.getRotRoll();
@@ -1571,6 +1662,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double m_add;
       if(this.canUpdateYaw(player)) {
          m_add = this.getAddRotationYawLimit();
+         this.lastYawMAdd = m_add;
          yaw = useMouseAim ? this.getMouseAimYawCommand(m_add) : this.getControlRotYaw(x, y, partialTicks);
          if((double)yaw < -m_add) {
             yaw = (float)(-m_add);
@@ -1585,7 +1677,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       if(this.canUpdatePitch(player)) {
          m_add = this.getAddRotationPitchLimit();
+         this.lastPitchMAdd = m_add;
          pitch = useMouseAim ? this.getMouseAimPitchCommand(m_add) : this.getControlRotPitch(x, y, partialTicks);
+         this.lastPitchBeforeClamp = pitch;
          if((double)pitch < -m_add) {
             pitch = (float)(-m_add);
          }
@@ -1594,16 +1688,19 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             pitch = (float)m_add;
          }
 
+         this.lastPitchAfterClamp = pitch;
          pitch = (float)((double)(-pitch * this.getPitchFactor()) * 0.06D);
       }
 
       if(this.canUpdateRoll(player)) {
          m_add = this.getAddRotationRollLimit();
+         this.lastRollMAdd = m_add;
          roll = useMouseAim ? this.getManualRollKeyCommand(m_add) : this.getControlRotRoll(x, y, partialTicks);
 
          if(useMouseAim) {
             roll = this.getMouseAimRollCommand(roll, m_add);
          }
+         this.lastRollBeforeClamp = roll;
          if((double)roll < -m_add) {
             roll = (float)(-m_add);
          }
@@ -1612,6 +1709,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             roll = (float)m_add;
          }
 
+         this.lastRollAfterClamp = roll;
          roll = roll * this.getRollFactor() * 0.06F;
       }
 
@@ -2713,8 +2811,10 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                   this.rotationByKey(partialTicks);
                   float maneuverabilityFactor = this.useNewMobilitySystem()
                         ? PLANE_MANEUVERABILITY_FACTOR * this.getControlAuthorityFactor() : 1.0F;
-                  this.setRotRoll(this.getRotRoll() + this.addkeyRotValue * 0.5F * this.getAcInfo().mobilityRoll
-                        * maneuverabilityFactor);
+                  if(!this.useNewMobilitySystem()) {
+                     this.setRotRoll(this.getRotRoll() + this.addkeyRotValue * 0.5F * this.getAcInfo().mobilityRoll
+                           * maneuverabilityFactor);
+                  }
                }
             }
          } else {
