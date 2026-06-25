@@ -167,6 +167,34 @@ public final class MCH_FlightModel {
             * normalizedAoA * normalizedAoA;
    }
 
+   /**
+    * Signed coefficient-like lift curve: linear through usable AoA, then progressive post-stall loss.
+    * Positive AoA produces normal lift, negative AoA produces inverted/downward lift.
+    */
+   public static double getLiftCoefficientLikeCurve(double signedAoA, double criticalAoA, double stallSeverity) {
+      double critical = Math.max(1.0D, criticalAoA);
+      double normalized = clamp(signedAoA / critical, -3.0D, 3.0D);
+      double sign = normalized < 0.0D ? -1.0D : 1.0D;
+      double abs = Math.abs(normalized);
+      double lift;
+      if(abs <= 1.0D) {
+         lift = abs;
+      } else {
+         double post = clamp((abs - 1.0D) / 2.0D, 0.0D, 1.0D);
+         lift = 1.0D - post * (0.65D + 0.25D * clamp(stallSeverity, 0.0D, 1.0D));
+      }
+      return sign * clamp(lift, 0.08D, 1.0D);
+   }
+
+   /** Coefficient-like AoA drag curve with a strong post-critical rise. */
+   public static double getAoADragCoefficientLikeCurve(double absAoA, double criticalAoA, double baseDrag, double aoaDragMultiplier) {
+      double critical = Math.max(1.0D, criticalAoA);
+      double normalized = Math.max(0.0D, absAoA) / critical;
+      double preStall = normalized * normalized;
+      double postStall = normalized > 1.0D ? (normalized - 1.0D) * (normalized - 1.0D) * 3.0D : 0.0D;
+      return Math.max(0.0D, baseDrag) * Math.max(0.0D, aoaDragMultiplier) * (preStall + postStall);
+   }
+
    /** Returns a 0..1 severity value as airspeed falls below the stall threshold. */
    public static double getStallSeverity(double horizontalSpeed, float topSpeed, float stallSpeedFactor) {
       double stallSpeed = Math.max(0.05D, (double)topSpeed * (double)stallSpeedFactor);

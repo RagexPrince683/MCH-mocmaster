@@ -160,8 +160,24 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private String lastIdleThrottleWarning;
    /** Last combined horizontal speed used by low-speed stall diagnostics. */
    private double lastHorizontalSpeed;
-   /** Last positive horizontal velocity projected along the nose heading; vertical speed is excluded. */
+   /** Last positive body-axis velocity projected along the aircraft nose. */
    private double lastForwardAirspeed;
+   /** Last full 3D speed used by the new fixed-wing model. */
+   private double lastTrueAirspeed;
+   /** Last body-axis forward component before clamping to positive usable airflow. */
+   private double lastBodyForwardAirspeed;
+   /** Last body-relative lift vector applied by the aerodynamic model. */
+   private double lastLiftVectorX;
+   private double lastLiftVectorY;
+   private double lastLiftVectorZ;
+   /** Last body-relative drag vector applied by the aerodynamic model. */
+   private double lastDragVectorX;
+   private double lastDragVectorY;
+   private double lastDragVectorZ;
+   /** Last coefficient-like drag multiplier used by the new fixed-wing model. */
+   private double lastDragCoefficient;
+   /** Last human-readable stall/energy reason for debug output. */
+   private String lastStallReason = "";
    /** Last low-horizontal-speed warning reason emitted through debug output. */
    private String lastLowHorizontalSpeedWarning;
    /** Last compressibility-limited pitch authority multiplier before low-speed suppression. */
@@ -821,6 +837,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       return this.stallDemand;
    }
 
+   public double getLastTrueAirspeed() { return this.lastTrueAirspeed; }
+   public double getLastBodyForwardAirspeed() { return this.lastBodyForwardAirspeed; }
+   public double getLastLiftVectorX() { return this.lastLiftVectorX; }
+   public double getLastLiftVectorY() { return this.lastLiftVectorY; }
+   public double getLastLiftVectorZ() { return this.lastLiftVectorZ; }
+   public double getLastDragVectorX() { return this.lastDragVectorX; }
+   public double getLastDragVectorY() { return this.lastDragVectorY; }
+   public double getLastDragVectorZ() { return this.lastDragVectorZ; }
+   public double getLastDragCoefficient() { return this.lastDragCoefficient; }
+   public String getLastStallReason() { return this.lastStallReason; }
+
    public double getCriticalAoA() {
       return this.getPlaneInfo() != null ? (double)this.getPlaneInfo().criticalAoA : 0.0D;
    }
@@ -1286,20 +1313,59 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
             + super.motionZ * super.motionZ);
    }
 
-   /**
-    * Returns usable fixed-wing forward airspeed through the horizontal airflow.
-    * Vertical climbing/falling speed is intentionally excluded so a nose-high,
-    * energy-starved aircraft cannot treat vertical motion as lift-producing airflow
-    * or pitch authority.
-    */
+   /** Returns usable fixed-wing body-axis forward airspeed from the full 3D velocity. */
    public double getForwardAirspeed() {
-      Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), 0.0F);
-      double horizontalForward = Math.sqrt(forward.xCoord * forward.xCoord + forward.zCoord * forward.zCoord);
-      if(horizontalForward < 1.0E-6D) {
-         return 0.0D;
+      return Math.max(0.0D, this.getBodyForwardAirspeed());
+   }
+
+   public double getTrueAirspeed() {
+      return Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY
+            + super.motionZ * super.motionZ);
+   }
+
+   public double getBodyForwardAirspeed() {
+      Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
+      return super.motionX * forward.xCoord + super.motionY * forward.yCoord + super.motionZ * forward.zCoord;
+   }
+
+   private Vec3 createVec3(double x, double y, double z) {
+      return Vec3.createVectorHelper(x, y, z);
+   }
+
+   private Vec3 normalizeVec3(double x, double y, double z) {
+      double length = Math.sqrt(x * x + y * y + z * z);
+      if(length < 1.0E-6D) {
+         return this.createVec3(0.0D, 0.0D, 0.0D);
       }
-      double projected = (super.motionX * forward.xCoord + super.motionZ * forward.zCoord) / horizontalForward;
-      return Math.max(0.0D, projected);
+      return this.createVec3(x / length, y / length, z / length);
+   }
+
+   private Vec3[] getAircraftBodyAxes() {
+      Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch());
+      forward = this.normalizeVec3(forward.xCoord, forward.yCoord, forward.zCoord);
+      Vec3 yawRight = MCH_Lib.Rot2Vec3(this.getRotYaw() + 90.0F, 0.0F);
+      Vec3 right = this.normalizeVec3(yawRight.xCoord, 0.0D, yawRight.zCoord);
+      Vec3 up = this.normalizeVec3(
+            forward.yCoord * right.zCoord - forward.zCoord * right.yCoord,
+            forward.zCoord * right.xCoord - forward.xCoord * right.zCoord,
+            forward.xCoord * right.yCoord - forward.yCoord * right.xCoord);
+      right = this.normalizeVec3(
+            up.yCoord * forward.zCoord - up.zCoord * forward.yCoord,
+            up.zCoord * forward.xCoord - up.xCoord * forward.zCoord,
+            up.xCoord * forward.yCoord - up.yCoord * forward.xCoord);
+
+      double roll = Math.toRadians((double)this.getRotRoll());
+      double cos = Math.cos(roll);
+      double sin = Math.sin(roll);
+      Vec3 rolledRight = this.normalizeVec3(
+            right.xCoord * cos + up.xCoord * sin,
+            right.yCoord * cos + up.yCoord * sin,
+            right.zCoord * cos + up.zCoord * sin);
+      Vec3 rolledUp = this.normalizeVec3(
+            up.xCoord * cos - right.xCoord * sin,
+            up.yCoord * cos - right.yCoord * sin,
+            up.zCoord * cos - right.zCoord * sin);
+      return new Vec3[]{forward, rolledRight, rolledUp};
    }
 
    public boolean isNewFlightModelEnabled() {
@@ -1391,15 +1457,17 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    private double calculatePitchPlaneAngleOfAttack() {
-      double forwardAirspeed = this.getForwardAirspeed();
-      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-
-      if(horizontalSpeed < 1.0E-5D && Math.abs(super.motionY) < 1.0E-5D) {
-         return -this.getRotPitch(); // positive = nose-up AoA in MCHeli pitch convention
+      Vec3[] axes = this.getAircraftBodyAxes();
+      Vec3 forward = axes[0];
+      Vec3 up = axes[2];
+      double trueAirspeed = this.getTrueAirspeed();
+      if(trueAirspeed < 1.0E-5D) {
+         return 0.0D;
       }
 
-      double flightPathPitch = -Math.toDegrees(Math.atan2(super.motionY, Math.max(1.0E-5D, forwardAirspeed)));
-      return MCH_FlightModel.clamp(this.wrapDegrees(flightPathPitch - (double)this.getRotPitch()), -180.0D, 180.0D);
+      double forwardComponent = super.motionX * forward.xCoord + super.motionY * forward.yCoord + super.motionZ * forward.zCoord;
+      double verticalComponent = super.motionX * up.xCoord + super.motionY * up.yCoord + super.motionZ * up.zCoord;
+      return MCH_FlightModel.clamp(Math.toDegrees(Math.atan2(-verticalComponent, Math.max(forwardComponent, 1.0E-5D))), -180.0D, 180.0D);
    }
 
    private double wrapDegrees(double angle) {
@@ -1410,15 +1478,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    private double calculateSideslipAngle() {
-      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-      if(horizontalSpeed < 1.0E-5D) {
+      double trueAirspeed = this.getTrueAirspeed();
+      if(trueAirspeed < 1.0E-5D) {
          return 0.0D;
       }
 
-      Vec3 forward = MCH_Lib.Rot2Vec3(this.getRotYaw(), 0.0F);
-      Vec3 right = MCH_Lib.Rot2Vec3(this.getRotYaw() + 90.0F, 0.0F);
-      double forwardComponent = super.motionX * forward.xCoord + super.motionZ * forward.zCoord;
-      double lateralComponent = super.motionX * right.xCoord + super.motionZ * right.zCoord;
+      Vec3[] axes = this.getAircraftBodyAxes();
+      Vec3 forward = axes[0];
+      Vec3 right = axes[1];
+      double forwardComponent = super.motionX * forward.xCoord + super.motionY * forward.yCoord + super.motionZ * forward.zCoord;
+      double lateralComponent = super.motionX * right.xCoord + super.motionY * right.yCoord + super.motionZ * right.zCoord;
       return Math.toDegrees(Math.atan2(lateralComponent, Math.max(1.0E-5D, Math.abs(forwardComponent))));
    }
 
@@ -1883,6 +1952,18 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.stallSeverity += (targetSeverity - this.stallSeverity)
               * (targetSeverity > this.stallSeverity ? 0.35D : recoveryRate);
 
+      if(this.deepStallSeverity > 0.35D) {
+         this.lastStallReason = "deep stall";
+      } else if(this.aoaStallSeverity > 0.05D) {
+         this.lastStallReason = "AOA";
+      } else if(lowEnergyStall || this.lastEnergyDeficitSeverity > 0.25D) {
+         this.lastStallReason = "low energy";
+      } else if(!this.stalling && this.stallSeverity > 0.0D) {
+         this.lastStallReason = "recovery";
+      } else {
+         this.lastStallReason = "";
+      }
+
       this.stallRecovering = !this.stalling && this.stallSeverity > 0.0D;
 
       if(!this.stalling && this.stallSeverity < 1.0E-3D) {
@@ -1930,6 +2011,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       MCP_PlaneInfo info = this.getPlaneInfo();
       boolean airborne = !super.onGround && MCH_Lib.getBlockIdY(this, 1, -2) == 0;
       this.lastAirborne = airborne;
+      this.lastLiftVectorX = this.lastLiftVectorY = this.lastLiftVectorZ = 0.0D;
+      this.lastDragVectorX = this.lastDragVectorY = this.lastDragVectorZ = 0.0D;
+      this.lastDragCoefficient = 0.0D;
       if(!airborne) {
          this.lastGravityAcceleration = 0.0D;
          this.lastLiftAcceleration = 0.0D;
@@ -1946,69 +2030,80 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          gravityAccel = Math.max(0.0D, Math.min(gravityAccel, -(double)this.getAcInfo().gravityInWater));
       }
 
-      double stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
-      double forwardAirspeed = this.getForwardAirspeed();
+      Vec3[] axes = this.getAircraftBodyAxes();
+      Vec3 bodyUp = axes[2];
+      double trueAirspeed = this.getTrueAirspeed();
+      double bodyForwardAirspeed = this.getBodyForwardAirspeed();
+      double forwardAirspeed = Math.max(0.0D, bodyForwardAirspeed);
       double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      this.lastTrueAirspeed = trueAirspeed;
+      this.lastBodyForwardAirspeed = bodyForwardAirspeed;
       this.lastHorizontalSpeed = horizontalSpeed;
       this.lastForwardAirspeed = forwardAirspeed;
-      double noseDownForLift = MCH_FlightModel.clamp((double)this.getRotPitch() / 45.0D, 0.0D, 1.0D);
-      double noseHighForLift = MCH_FlightModel.clamp((double)(-this.getRotPitch() - 8.0F) / 42.0D, 0.0D, 1.0D);
-      double descentAirflow = Math.max(0.0D, -super.motionY) * (0.45D + 1.35D * noseDownForLift)
-            * (1.0D - 0.70D * noseHighForLift);
-      double effectiveLiftSpeed = Math.max(Math.max(horizontalSpeed, forwardAirspeed), descentAirflow);
-      double airspeedLift = MCH_FlightModel.clamp((effectiveLiftSpeed - stallSpeed * 0.45D) / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.25D);
-      double aoaExcess = Math.max(0.0D, Math.abs(this.angleOfAttack) - (double)info.criticalAoA);
-      double preStallAoALift = MCH_FlightModel.clamp(1.0D - aoaExcess / Math.max(1.0D, (double)info.criticalAoA * 2.5D), 0.35D, 1.0D);
-      double aoaLift = preStallAoALift * (1.0D - this.deepStallSeverity * 0.85D);
+
+      Vec3 velocityDir = trueAirspeed > 1.0E-6D
+            ? this.createVec3(super.motionX / trueAirspeed, super.motionY / trueAirspeed, super.motionZ / trueAirspeed)
+            : this.createVec3(0.0D, 0.0D, 0.0D);
+      double upDotVelocity = bodyUp.xCoord * velocityDir.xCoord + bodyUp.yCoord * velocityDir.yCoord + bodyUp.zCoord * velocityDir.zCoord;
+      Vec3 liftDir = trueAirspeed > 1.0E-6D
+            ? this.normalizeVec3(bodyUp.xCoord - velocityDir.xCoord * upDotVelocity,
+                  bodyUp.yCoord - velocityDir.yCoord * upDotVelocity,
+                  bodyUp.zCoord - velocityDir.zCoord * upDotVelocity)
+            : bodyUp;
+      if(liftDir.xCoord * liftDir.xCoord + liftDir.yCoord * liftDir.yCoord + liftDir.zCoord * liftDir.zCoord < 1.0E-12D) {
+         liftDir = bodyUp;
+      }
+
+      double stallSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
       double effectiveThrottle = this.getEffectiveEngineThrottle();
       double propulsiveThrottle = this.getPropulsiveEngineThrottle();
-      boolean hardIdle = this.getCurrentThrottle() <= 0.05D;
-      // Wing lift comes from airspeed and attitude, not directly from engine power.
-      // Keep throttle-driven lift retention as a powered-assist floor for legacy tuning,
-      // but never let a closed throttle erase speed-based lift while airborne; a plane
-      // with enough airspeed should glide and bleed energy through drag instead of
-      // being forced into a slow vertical sink just because commanded throttle is zero.
+      double dynamicPressure = MCH_FlightModel.clamp(trueAirspeed / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.8D);
+      dynamicPressure *= dynamicPressure;
+      double sideslipLoss = MCH_FlightModel.clamp(Math.abs(this.sideslipAngle) / 90.0D, 0.0D, 0.65D);
+      double liftCurve = MCH_FlightModel.getLiftCoefficientLikeCurve(this.angleOfAttack, info.criticalAoA, this.stallSeverity);
+      double liftEfficiency = (1.0D - sideslipLoss) * (1.0D - this.deepStallSeverity * 0.70D);
       double poweredLiftFloor = (double)info.newFlightLowThrottleLiftRetention
             + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * effectiveThrottle;
       double liftPower = Math.max(1.0D, poweredLiftFloor);
-      if(hardIdle && forwardAirspeed < stallSpeed * 0.65D) {
-         // Dead-stick flight still cannot prop-hang below flying speed.  Only apply
-         // the closed-throttle penalty once the wing is already running out of usable
-         // airflow, leaving normal glide lift controlled by airspeed, AoA, and drag.
-         double lowAirspeed = MCH_FlightModel.clamp((stallSpeed * 0.65D - forwardAirspeed)
-               / Math.max(0.05D, stallSpeed * 0.65D), 0.0D, 1.0D);
-         liftPower *= 1.0D - lowAirspeed * 0.10D;
-      }
       if(this.isCombatFlapsDeployed()) {
          liftPower += (double)info.newFlightCombatFlapLift;
       }
       double liftLoss = MCH_FlightModel.clamp(this.stallSeverity * (double)info.stallLiftLoss, 0.0D, 1.0D);
       this.lastLiftLoss = liftLoss;
       double stallLift = 1.0D - liftLoss;
-      this.lastLiftCoefficient = aoaLift * stallLift;
+      this.lastLiftCoefficient = liftCurve * liftEfficiency * stallLift;
+
       double mass = this.getPhysicalMass();
       double weightForce = gravityAccel * mass;
-      double liftBeforeStallLoss = weightForce * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D) * airspeedLift * aoaLift;
+      double liftBeforeStallLoss = weightForce * MCH_FlightModel.clamp(liftPower, 0.0D, 2.5D)
+            * dynamicPressure * liftCurve * liftEfficiency;
       double liftForce = liftBeforeStallLoss * stallLift;
-      double liftAccel = liftForce / mass;
-      double netAccel = (liftForce - weightForce) / mass;
-      if(hardIdle) {
-         double idleSpeedDeficit = MCH_FlightModel.clamp((stallSpeed * 0.65D - forwardAirspeed)
-               / Math.max(0.05D, stallSpeed * 0.65D), 0.0D, 1.0D);
-         netAccel -= gravityAccel * idleSpeedDeficit * 0.80D;
-      }
+      double liftAccel = Math.abs(liftForce) / mass;
+      double dragCoefficient = MCH_FlightModel.getAoADragCoefficientLikeCurve(this.getAbsoluteAoAForDrag(), info.criticalAoA,
+            info.baseDrag, info.aoaDragMultiplier) * (1.0D + sideslipLoss * 1.8D + this.stallSeverity * 1.5D);
+      double dragForce = weightForce * dynamicPressure * dragCoefficient;
+      this.lastDragCoefficient = dragCoefficient;
 
-      super.motionY += netAccel;
+      super.motionX += liftDir.xCoord * liftForce / mass - velocityDir.xCoord * dragForce / mass;
+      super.motionY += liftDir.yCoord * liftForce / mass - velocityDir.yCoord * dragForce / mass - gravityAccel;
+      super.motionZ += liftDir.zCoord * liftForce / mass - velocityDir.zCoord * dragForce / mass;
+
+      this.lastLiftVectorX = liftDir.xCoord * liftForce;
+      this.lastLiftVectorY = liftDir.yCoord * liftForce;
+      this.lastLiftVectorZ = liftDir.zCoord * liftForce;
+      this.lastDragVectorX = -velocityDir.xCoord * dragForce;
+      this.lastDragVectorY = -velocityDir.yCoord * dragForce;
+      this.lastDragVectorZ = -velocityDir.zCoord * dragForce;
       this.lastGravityAcceleration = gravityAccel;
       this.lastLiftAcceleration = liftAccel;
       this.lastWeightForce = weightForce;
       this.lastLiftForce = liftForce;
       this.lastLiftForceBeforeStallLoss = liftBeforeStallLoss;
       this.lastLiftForceAfterStallLoss = liftForce;
-      this.lastNetVerticalAcceleration = netAccel;
+      this.lastNetVerticalAcceleration = liftDir.yCoord * liftForce / mass - velocityDir.yCoord * dragForce / mass - gravityAccel;
       double thrustForce = Math.max(0.0D, (double)info.engineThrust * propulsiveThrottle);
       double thrustToWeight = thrustForce / Math.max(weightForce, 1.0E-6D);
-      double liftToWeight = liftForce / Math.max(weightForce, 1.0E-6D);
+      double liftToWeight = Math.abs(liftForce) / Math.max(weightForce, 1.0E-6D);
       double climbSustainSpeed = stallSpeed * 1.2D;
       boolean aeroClimbValid = liftToWeight > 1.0D && this.speedStallSeverity < 0.15D
             && this.stallSeverity < 0.15D && this.aoaStallSeverity < 0.15D;
@@ -3354,10 +3449,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          // Drag/sustainable-speed calculations use propulsive throttle, not idle/engine
          // spool state, so closed-throttle airborne flight coasts as a true glide.
          double energyThrottle = this.getPropulsiveEngineThrottle();
-         double drag = MCH_FlightModel.getEnergyDrag(horizontalSpeed, (double)levelSpeed, energyThrottle,
+         double energyDragSpeed = Math.max(this.getTrueAirspeed(), Math.max(horizontalSpeed, this.getForwardAirspeed()));
+         double drag = MCH_FlightModel.getEnergyDrag(energyDragSpeed, (double)levelSpeed, energyThrottle,
                turnLoad, controlLoad, this.getPlaneInfo().baseDrag, this.getPlaneInfo().inducedDrag,
                this.getPlaneInfo().controlSurfaceDrag, (float)engineBrakeDrag) / mass;
-         double aoaDrag = MCH_FlightModel.getAngleOfAttackDrag(
+         double aoaDrag = MCH_FlightModel.getAoADragCoefficientLikeCurve(
                  this.getAbsoluteAoAForDrag(),
                  this.getPlaneInfo().criticalAoA,
                  this.getPlaneInfo().baseDrag,
