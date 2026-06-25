@@ -166,26 +166,30 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       lines.add(String.format("NF DBG  stall=%s recover=%s flap=%s", new Object[]{
             Boolean.valueOf(plane.getStallSeverity() > 0.0D), Boolean.valueOf(plane.isStallRecovering()),
             Boolean.valueOf(plane.isCombatFlapsDeployed())}));
-      lines.add(String.format("spd raw=%.0f disp=%.0f km/h stall=%.3f", new Object[]{
+      lines.add(String.format("SPD true=%.3f fwd=%.3f horiz=%.3f current=%.3f", new Object[]{
+            Double.valueOf(plane.getTrueAirspeed()), Double.valueOf(plane.getForwardAirspeed()),
+            Double.valueOf(plane.getLastHorizontalSpeed()), Double.valueOf(plane.currentSpeed)}));
+      lines.add(String.format("SPD raw=%.0f display=%.0f km/h stall=%.3f", new Object[]{
             Double.valueOf(MCH_HudShared.getRawSpeedKmh(plane)), Double.valueOf(MCH_HudShared.getDisplaySpeedPlane(plane)), Double.valueOf(stallSpeed)}));
-      lines.add(String.format("phys fwd=%.3f hor=%.3f", new Object[]{
-            Double.valueOf(plane.getLastForwardAirspeed()), Double.valueOf(plane.getLastHorizontalSpeed())}));
       lines.add(String.format("aoa=%.1f demand=%.2f sev=%.2f/%.2f/%.2f", new Object[]{
             Double.valueOf(plane.getAngleOfAttackDegrees()), Double.valueOf(plane.getStallDemand()),
             Double.valueOf(plane.getSpeedStallSeverity()), Double.valueOf(plane.getAoAStallSeverity()),
             Double.valueOf(plane.getDeepStallSeverity())}));
-      lines.add(String.format("auth ctrl=%.2f pitch=%.2f up=%.2f down=%.2f", new Object[]{
-            Double.valueOf(plane.getLastControlAuthority()), Double.valueOf(plane.getLastFinalPitchAuthority()),
-            Double.valueOf(plane.getLastPitchUpAuthority()), Double.valueOf(plane.getLastPitchDownAuthority())}));
+      lines.add(String.format("auth pitch=%.2f roll=%.2f finalPitch=%.4f finalRollAV=%.4f", new Object[]{
+            Double.valueOf(plane.getLastFinalPitchAuthority()), Double.valueOf(plane.getLastRollAuthority()),
+            Double.valueOf(plane.getLastPitchInputAfterAuthority()), Float.valueOf(plane.getRollAngularVelocity())}));
+      lines.add(String.format("auth ctrl=%.2f up=%.2f down=%.2f yaw=%.2f", new Object[]{
+            Double.valueOf(plane.getLastControlAuthority()), Double.valueOf(plane.getLastPitchUpAuthority()),
+            Double.valueOf(plane.getLastPitchDownAuthority()), Double.valueOf(plane.getLastYawAuthority())}));
       lines.add(String.format("mom stall=%.4f forced=%.4f finalAV=%.4f", new Object[]{
             Double.valueOf(plane.getLastStallPitchMoment()), Double.valueOf(plane.getLastForcedNoseDownPitchDelta()),
             Double.valueOf(plane.getLastFinalPitchAngularVelocity())}));
       lines.add(String.format("lift L/W=%.2f T/W=%.2f loss=%.2f validClimb=%s", new Object[]{
             Double.valueOf(plane.getLiftToWeightRatio()), Double.valueOf(plane.getThrustToWeightRatio()),
             Double.valueOf(plane.getLastLiftLoss()), Boolean.valueOf(plane.isLastValidClimb())}));
-      lines.add(String.format("energy ratio=%.2f deficit=%.2f dE=%.4f", new Object[]{
+      lines.add(String.format("energy ratio=%.2f deficit=%.2f dE=%.4f reason=%s", new Object[]{
             Double.valueOf(plane.getLastPitchEnvelopeEnergyRatio()), Double.valueOf(plane.getLastEnergyDeficitSeverity()),
-            Double.valueOf(plane.getLastEnergyDelta())}));
+            Double.valueOf(plane.getLastEnergyDelta()), plane.getLastLowHorizontalSpeedWarning()}));
 
       int width = Math.min(super.width - 16, Math.max(220, this.getMaxHudLineWidth(lines) + 8));
       int x = MathHelper.clamp_int(MCH_Config.NewPlaneSimpleHudX.prmInt, 4, Math.max(4, super.width - width - 8));
