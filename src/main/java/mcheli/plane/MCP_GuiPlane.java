@@ -15,11 +15,13 @@ import mcheli.aircraft.MCH_HudShared;
 import mcheli.gui.MCH_Gui;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_PlaneInfo;
+import mcheli.weapon.MCH_WeaponBase;
 import mcheli.weapon.MCH_WeaponSet;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -79,8 +81,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
                   this.drawNewPlaneSimpleHud(plane);
                   this.drawNewPlaneWeaponHud(plane, player);
                   this.drawNewPlaneDebugHud(plane);
+                  this.drawPlaneCCIPReticle(plane, player);
                } else {
                   this.drawNewFlightThrottleHud(plane);
+                  this.drawPlaneCCIPReticle(plane, player);
                }
             }
 
@@ -496,6 +500,79 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             x, y - r, x, y - r * 0.35D, x, y + r * 0.35D, x, y + r}, color);
       this.drawLine(new double[]{x - r * 0.55D, y - r * 0.55D, x + r * 0.55D, y - r * 0.55D,
             x + r * 0.55D, y + r * 0.55D, x - r * 0.55D, y + r * 0.55D}, color, 2);
+   }
+
+   private void drawPlaneCCIPReticle(MCP_EntityPlane plane, EntityPlayer player) {
+      MCP_PlaneInfo info = plane != null ? plane.getPlaneInfo() : null;
+      if(plane == null || player == null || info == null || !info.hasBallisticComputer || plane.isDestroyed()) {
+         return;
+      }
+      if(plane.getSeatIdByEntity(player) != 0 || plane.getRiddenByEntity() == null) {
+         return;
+      }
+      MCH_WeaponSet ws = plane.getCurrentWeapon(player);
+      MCH_WeaponBase weapon = ws != null ? ws.getCurrentWeapon() : null;
+      boolean enabled = MCP_PlaneCCIPHelper.isBombWeapon(weapon);
+      MCP_PlaneCCIPHelper.Result result = null;
+      if(enabled) {
+         Vec3 shotOfs = weapon.getShotPos(plane);
+         Vec3 release = Vec3.createVectorHelper(plane.posX + shotOfs.xCoord, plane.posY + shotOfs.yCoord, plane.posZ + shotOfs.zCoord);
+         Vec3 initial = Vec3.createVectorHelper(plane.motionX, plane.motionY, plane.motionZ);
+         result = MCP_PlaneCCIPHelper.predict(plane.worldObj, weapon.getInfo(), release, initial);
+         if(result.valid) {
+            ScreenPoint p = this.projectWorldToHud(result.impact, player, true);
+            if(p != null && p.visible) {
+               this.drawCCIPPipper(p.x, p.y, p.clamped);
+               this.drawLine(new double[]{(double)super.centerX, (double)super.centerY + 10.0D, p.x, p.y}, p.clamped ? 0x8855FF66 : 0xCC55FF66);
+            }
+         }
+      }
+      if(MCH_Config.PlaneMouseAimReticleDebug.prmBool || MCH_Config.DebugFlightControl.prmBool) {
+         String name = weapon != null && weapon.getInfo() != null ? weapon.getInfo().name : "none";
+         String msg = String.format("CCIP enabled=%s weapon=%s valid=%s ticks=%d dist=%.1f alt=%.1f vi=%s vf=%s reason=%s",
+               Boolean.valueOf(enabled), name, Boolean.valueOf(result != null && result.valid), Integer.valueOf(result != null ? result.ticksSimulated : 0),
+               Double.valueOf(result != null ? result.impactDistance : 0.0D), Double.valueOf(result != null ? result.releaseAltitude : 0.0D),
+               this.formatVec(result != null ? result.initialVelocity : null), this.formatVec(result != null ? result.finalVelocity : null),
+               result != null ? result.reasonInvalid : (enabled ? "not_predicted" : "not_bomb_or_disabled"));
+         this.drawString(msg, super.centerX - 170, super.centerY + 70, 0xFF55FF66);
+      }
+   }
+
+   private String formatVec(Vec3 v) {
+      return v == null ? "-" : String.format("%.2f,%.2f,%.2f", Double.valueOf(v.xCoord), Double.valueOf(v.yCoord), Double.valueOf(v.zCoord));
+   }
+
+   private ScreenPoint projectWorldToHud(Vec3 pos, EntityPlayer player, boolean clamp) {
+      double dx = pos.xCoord - player.posX;
+      double dy = pos.yCoord - (player.posY + (double)player.getEyeHeight());
+      double dz = pos.zCoord - player.posZ;
+      Vec3 local = mcheli.MCH_Lib.RotVec3(dx, dy, dz, player.rotationYaw, player.rotationPitch, 0.0F);
+      if(local.zCoord <= 0.05D) return null;
+      double scale = (double)super.height * 0.75D / local.zCoord;
+      double x = (double)super.centerX - local.xCoord * scale;
+      double y = (double)super.centerY - local.yCoord * scale;
+      boolean clamped = false;
+      if(clamp) {
+         double margin = 12.0D;
+         double cx = MathHelper.clamp_double(x, margin, (double)super.width - margin);
+         double cy = MathHelper.clamp_double(y, margin, (double)super.height - margin);
+         clamped = cx != x || cy != y;
+         x = cx; y = cy;
+      }
+      return new ScreenPoint(x, y, clamped);
+   }
+
+   private void drawCCIPPipper(double x, double y, boolean clamped) {
+      int color = clamped ? 0x9955FF66 : 0xEE55FF66;
+      double r = 7.0D;
+      this.drawLine(new double[]{x - r, y, x - 2.5D, y, x + 2.5D, y, x + r, y, x, y - r, x, y - 2.5D, x, y + 2.5D, x, y + r}, color);
+      this.drawLine(new double[]{x - r, y - r, x + r, y - r, x + r, y + r, x - r, y + r, x - r, y - r}, color, 2);
+      this.drawString("CCIP", (int)x + 9, (int)y - 4, color);
+   }
+
+   private static class ScreenPoint {
+      final double x; final double y; final boolean clamped; final boolean visible = true;
+      ScreenPoint(double x, double y, boolean clamped) { this.x = x; this.y = y; this.clamped = clamped; }
    }
 
    public void drawKeybind(MCP_EntityPlane plane, EntityPlayer player, int seatID) {
