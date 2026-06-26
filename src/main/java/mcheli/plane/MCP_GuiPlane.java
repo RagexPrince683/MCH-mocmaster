@@ -534,7 +534,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          Vec3 planePos = this.getInterpolatedEntityPos(plane, partialTicks);
          Vec3 release = Vec3.createVectorHelper(planePos.xCoord + shotOfs.xCoord, planePos.yCoord + shotOfs.yCoord, planePos.zCoord + shotOfs.zCoord);
          ReleaseKinematics releaseKinematics = this.getInitialBombVelocity(plane, weapon, aircraftMotion, partialTicks);
-         result = MCP_PlaneCCIPHelper.predict(plane.worldObj, weapon.getInfo(), release, releaseKinematics.initialVelocity);
+         result = MCP_PlaneCCIPHelper.predict(plane.worldObj, weapon.getInfo(), release, releaseKinematics.initialVelocity, aircraftMotion);
          result.releaseMode = releaseKinematics.releaseMode;
          result.ejectionVelocity = releaseKinematics.ejectionVelocity;
          result.initialVelocityDeltaFromAircraft = releaseKinematics.initialVelocityDeltaFromAircraft;
@@ -639,10 +639,14 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       String msg3 = String.format("aircraftMotion=%s ejectionVelocity=%s initialBombVelocity=%s deltaFromAircraft=%s",
             this.formatVec(aircraftMotion), this.formatVec(result != null ? result.ejectionVelocity : null),
             this.formatVec(result != null ? result.initialVelocity : null), this.formatVec(result != null ? result.initialVelocityDeltaFromAircraft : null));
-      String msg4 = String.format("predictedGravity=%.4f predictedDrag=%.4f predictedTimestep=%.1f initialVelocityUpDot=%.3f initialVelocitySideDot=%.3f",
+      String msg4 = String.format("predictedGravity=%.4f predictedDrag=%.4f predictedTimestep=%.1f speedDependsAircraft=%s speedAddedFromAircraft=%.4f",
             Double.valueOf(result != null ? result.gravity : 0.0D), Double.valueOf(result != null ? result.horizontalDrag : 0.0D), Double.valueOf(result != null ? result.simulationTimeStep : 0.0D),
-            Double.valueOf(result != null ? result.initialVelocityUpDot : 0.0D), Double.valueOf(result != null ? result.initialVelocitySideDot : 0.0D));
-      String msg5 = String.format("warningImpossibleLaunch=%s cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch/Roll=%.1f/%.1f/%.1f",
+            Boolean.valueOf(result != null && result.speedDependsAircraft), Double.valueOf(result != null ? result.speedAddedFromAircraft : 0.0D));
+      String msg5 = String.format("predictedAcceleration before/after=%.4f/%.4f speedDependsApplied=%s initialVelocityUpDot=%.3f initialVelocitySideDot=%.3f",
+            Double.valueOf(result != null ? result.predictedAccelerationBeforeAircraft : 0.0D), Double.valueOf(result != null ? result.predictedAccelerationAfterAircraft : 0.0D),
+            Boolean.valueOf(result != null && result.speedDependsAircraftApplied), Double.valueOf(result != null ? result.initialVelocityUpDot : 0.0D),
+            Double.valueOf(result != null ? result.initialVelocitySideDot : 0.0D));
+      String msg6 = String.format("warningImpossibleLaunch=%s cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch/Roll=%.1f/%.1f/%.1f",
             Boolean.valueOf(result != null && result.warningImpossibleLaunch),
             Float.valueOf(camera != null ? camera.rotationYaw : 0.0F), Float.valueOf(camera != null ? camera.rotationPitch : 0.0F),
             Float.valueOf(plane.rotationYaw), Float.valueOf(plane.rotationPitch), Float.valueOf(plane.getRotRoll()));
@@ -712,21 +716,54 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          return null;
       }
       float partialTicks = this.smoothCamPartialTicks;
-      Vec3 cameraPos = this.getInterpolatedEntityPos(camera, partialTicks);
-      double dx = pos.xCoord - cameraPos.xCoord;
-      double dy = pos.yCoord - (cameraPos.yCoord + (double)camera.getEyeHeight());
-      double dz = pos.zCoord - cameraPos.zCoord;
-      float yaw = camera.prevRotationYaw + MathHelper.wrapAngleTo180_float(camera.rotationYaw - camera.prevRotationYaw) * partialTicks;
-      float pitch = camera.prevRotationPitch + (camera.rotationPitch - camera.prevRotationPitch) * partialTicks;
-      Vec3 local = mcheli.MCH_Lib.RotVec3(dx, dy, dz, yaw, pitch);
-      if(local.zCoord <= 0.05D) return null;
-      double scale = (double)super.height * 0.75D / local.zCoord;
-      double x = (double)super.centerX - local.xCoord * scale;
-      double y = (double)super.centerY - local.yCoord * scale;
+      Vec3 planePos = this.getInterpolatedEntityPos(plane, partialTicks);
+      Vec3 toImpact = Vec3.createVectorHelper(pos.xCoord - planePos.xCoord, pos.yCoord - planePos.yCoord, pos.zCoord - planePos.zCoord);
+      float yaw = plane.calcRotYaw(partialTicks);
+      float pitch = plane.calcRotPitch(partialTicks);
+      float roll = plane.calcRotRoll(partialTicks);
+      Vec3 forward = mcheli.MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -yaw, -pitch, -roll);
+      Vec3 right = mcheli.MCH_Lib.RotVec3(1.0D, 0.0D, 0.0D, -yaw, -pitch, -roll);
+      Vec3 up = mcheli.MCH_Lib.RotVec3(0.0D, 1.0D, 0.0D, -yaw, -pitch, -roll);
+      double localForward = this.dot(toImpact, forward);
+      if(localForward <= 0.05D) {
+         return null;
+      }
+     // double localRight = this.dot(toImpact, right);
+     // double localUp = this.dot(toImpact, up);
+     // double scale = (double)super.height * 0.75D / localForward;
+     // // Match the existing HUD convention: positive aircraft-right offsets draw toward screen-left.
+     // double x = (double)super.centerX - localRight * scale;
+     // double y = (double)super.centerY - localUp * scale;
+      double localRight = toImpact.dotProduct(right);
+      double localUp = toImpact.dotProduct(up);
+      double scale = (double)super.height * 0.75D / localForward;
+      double x = (double)super.centerX - localRight * scale;
+      double y = (double)super.centerY - localUp * scale;
+      //fucking pick one
       if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
          return null;
       }
-      return new ScreenPoint(x, y, false);
+
+      //double localRight = toImpact.dotProduct(right);
+      //double localUp = toImpact.dotProduct(up);
+      //double scale = (double)super.height * 0.75D / localForward;
+      //double x = (double)super.centerX - localRight * scale;
+      //double y = (double)super.centerY - localUp * scale;
+      double clampedX = MathHelper.clamp_double(x, 0.0D, (double)super.width);
+      double clampedY = MathHelper.clamp_double(y, 0.0D, (double)super.height);
+      return new ScreenPoint(clampedX, clampedY, x != clampedX || y != clampedY);
+   }
+
+   private Vec3 normalizeVec(Vec3 v) {
+      double length = v != null ? v.lengthVector() : 0.0D;
+      if(length < 1.0E-6D) {
+         return Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
+      }
+      return Vec3.createVectorHelper(v.xCoord / length, v.yCoord / length, v.zCoord / length);
+   }
+
+   private double dot(Vec3 a, Vec3 b) {
+      return a.xCoord * b.xCoord + a.yCoord * b.yCoord + a.zCoord * b.zCoord;
    }
 
    private void drawCCIPPipper(double x, double y, boolean clamped) {
