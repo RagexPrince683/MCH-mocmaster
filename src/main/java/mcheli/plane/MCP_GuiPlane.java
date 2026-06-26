@@ -529,9 +529,11 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       MCP_PlaneCCIPHelper.Result result = null;
       Vec3 aircraftMotion = Vec3.createVectorHelper(plane.motionX, plane.motionY, plane.motionZ);
       if(enabled) {
-         Vec3 shotOfs = weapon.getShotPos(plane);
-         Vec3 release = Vec3.createVectorHelper(plane.posX + shotOfs.xCoord, plane.posY + shotOfs.yCoord, plane.posZ + shotOfs.zCoord);
-         ReleaseKinematics releaseKinematics = this.getInitialBombVelocity(plane, weapon, aircraftMotion);
+         float partialTicks = super.mc.timer != null ? super.mc.timer.renderPartialTicks : 1.0F;
+         Vec3 shotOfs = this.getInterpolatedShotPos(plane, weapon, partialTicks);
+         Vec3 planePos = this.getInterpolatedEntityPos(plane, partialTicks);
+         Vec3 release = Vec3.createVectorHelper(planePos.xCoord + shotOfs.xCoord, planePos.yCoord + shotOfs.yCoord, planePos.zCoord + shotOfs.zCoord);
+         ReleaseKinematics releaseKinematics = this.getInitialBombVelocity(plane, weapon, aircraftMotion, partialTicks);
          result = MCP_PlaneCCIPHelper.predict(plane.worldObj, weapon.getInfo(), release, releaseKinematics.initialVelocity);
          result.releaseMode = releaseKinematics.releaseMode;
          result.ejectionVelocity = releaseKinematics.ejectionVelocity;
@@ -540,7 +542,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          result.initialVelocitySideDot = releaseKinematics.initialVelocitySideDot;
          result.warningImpossibleLaunch = releaseKinematics.warningImpossibleLaunch;
          if(result.valid) {
-            ScreenPoint projected = this.projectWorldToHud(result.impact, plane, true);
+            ScreenPoint projected = this.projectWorldToHud(result.impact);
             if(projected != null && projected.visible) {
                ScreenPoint p = this.smoothCCIPScreenPoint(projected, result.impact, weapon);
                this.drawCCIPPipper(p.x, p.y, p.clamped);
@@ -559,7 +561,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       }
    }
 
-   private ReleaseKinematics getInitialBombVelocity(MCP_EntityPlane plane, MCH_WeaponBase weapon, Vec3 aircraftMotion) {
+   private ReleaseKinematics getInitialBombVelocity(MCP_EntityPlane plane, MCH_WeaponBase weapon, Vec3 aircraftMotion, float partialTicks) {
       ReleaseKinematics k = new ReleaseKinematics();
       k.releaseMode = "GRAVITY_BOMB";
       k.ejectionVelocity = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
@@ -569,7 +571,9 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          k.releaseMode = "DISPENSER_EJECTED";
          // Match MCH_WeaponDispenser: add half of the weapon's forward acceleration vector to aircraft motion.
          // This uses the aircraft/weapon firing angles only; camera/freelook and aircraft roll are deliberately not inputs.
-         Vec3 eject = mcheli.MCH_Lib.Rot2Vec3(plane.rotationYaw + weapon.fixRotationYaw, plane.rotationPitch + weapon.fixRotationPitch);
+         float yaw = plane.calcRotYaw(partialTicks);
+         float pitch = plane.calcRotPitch(partialTicks);
+         Vec3 eject = mcheli.MCH_Lib.Rot2Vec3(yaw + weapon.fixRotationYaw, pitch + weapon.fixRotationPitch);
          k.ejectionVelocity = Vec3.createVectorHelper(eject.xCoord * (double)weapon.getInfo().acceleration * 0.5D,
                eject.yCoord * (double)weapon.getInfo().acceleration * 0.5D,
                eject.zCoord * (double)weapon.getInfo().acceleration * 0.5D);
@@ -581,7 +585,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       k.initialVelocityDeltaFromAircraft = Vec3.createVectorHelper(k.initialVelocity.xCoord - aircraftMotion.xCoord,
             k.initialVelocity.yCoord - aircraftMotion.yCoord, k.initialVelocity.zCoord - aircraftMotion.zCoord);
       k.initialVelocityUpDot = k.initialVelocityDeltaFromAircraft.yCoord;
-      Vec3 side = mcheli.MCH_Lib.Rot2Vec3(plane.rotationYaw + 90.0F, 0.0F);
+      Vec3 side = mcheli.MCH_Lib.Rot2Vec3(plane.calcRotYaw(partialTicks) + 90.0F, 0.0F);
       k.initialVelocitySideDot = k.initialVelocityDeltaFromAircraft.xCoord * side.xCoord + k.initialVelocityDeltaFromAircraft.zCoord * side.zCoord;
       double delta = Math.sqrt(k.initialVelocityDeltaFromAircraft.xCoord * k.initialVelocityDeltaFromAircraft.xCoord
             + k.initialVelocityDeltaFromAircraft.yCoord * k.initialVelocityDeltaFromAircraft.yCoord
@@ -653,31 +657,40 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       return v == null ? "-" : String.format("%.2f,%.2f,%.2f", Double.valueOf(v.xCoord), Double.valueOf(v.yCoord), Double.valueOf(v.zCoord));
    }
 
-   private ScreenPoint projectWorldToHud(Vec3 pos, MCP_EntityPlane plane, boolean clamp) {
+   private Vec3 getInterpolatedEntityPos(Entity entity, float partialTicks) {
+      return Vec3.createVectorHelper(entity.prevPosX + (entity.posX - entity.prevPosX) * (double)partialTicks,
+            entity.prevPosY + (entity.posY - entity.prevPosY) * (double)partialTicks,
+            entity.prevPosZ + (entity.posZ - entity.prevPosZ) * (double)partialTicks);
+   }
+
+   private Vec3 getInterpolatedShotPos(MCP_EntityPlane plane, MCH_WeaponBase weapon, float partialTicks) {
+      float yaw = plane.calcRotYaw(partialTicks);
+      float pitch = plane.calcRotPitch(partialTicks);
+      float roll = plane.calcRotRoll(partialTicks);
+      return mcheli.MCH_Lib.RotVec3(weapon.position, -yaw, -pitch, -roll);
+   }
+
+   private ScreenPoint projectWorldToHud(Vec3 pos) {
       Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
-      if(pos == null || plane == null || camera == null) {
+      if(pos == null || camera == null) {
          return null;
       }
-      double dx = pos.xCoord - camera.posX;
-      double dy = pos.yCoord - (camera.posY + (double)camera.getEyeHeight());
-      double dz = pos.zCoord - camera.posZ;
-      // CCIP is aircraft fire-control symbology, so project its impact point through the
-      // airframe attitude instead of the freelook/render camera attitude. This keeps the
-      // pipper tied to where the plane is pointed while the pilot looks around.
-      Vec3 local = mcheli.MCH_Lib.RotVec3(dx, dy, dz, plane.rotationYaw, plane.rotationPitch, plane.getRotRoll());
+      float partialTicks = super.mc.timer != null ? super.mc.timer.renderPartialTicks : 1.0F;
+      Vec3 cameraPos = this.getInterpolatedEntityPos(camera, partialTicks);
+      double dx = pos.xCoord - cameraPos.xCoord;
+      double dy = pos.yCoord - (cameraPos.yCoord + (double)camera.getEyeHeight());
+      double dz = pos.zCoord - cameraPos.zCoord;
+      float yaw = camera.prevRotationYaw + MathHelper.wrapAngleTo180_float(camera.rotationYaw - camera.prevRotationYaw) * partialTicks;
+      float pitch = camera.prevRotationPitch + (camera.rotationPitch - camera.prevRotationPitch) * partialTicks;
+      Vec3 local = mcheli.MCH_Lib.RotVec3(dx, dy, dz, yaw, pitch);
       if(local.zCoord <= 0.05D) return null;
       double scale = (double)super.height * 0.75D / local.zCoord;
       double x = (double)super.centerX - local.xCoord * scale;
       double y = (double)super.centerY - local.yCoord * scale;
-      boolean clamped = false;
-      if(clamp) {
-         double margin = 14.0D;
-         double cx = MathHelper.clamp_double(x, margin, (double)super.width - margin);
-         double cy = MathHelper.clamp_double(y, margin, (double)super.height - margin);
-         clamped = cx != x || cy != y;
-         x = cx; y = cy;
+      if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
+         return null;
       }
-      return new ScreenPoint(x, y, clamped);
+      return new ScreenPoint(x, y, false);
    }
 
    private void drawCCIPPipper(double x, double y, boolean clamped) {
