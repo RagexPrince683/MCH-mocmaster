@@ -12,6 +12,7 @@ ItemID = 28731
 MaxHp = 100
 EnableNightVision = false
 EnableEntityRadar = false
+HasBallisticComputer = true
 EnableEjectionSeat = true
 Sound = migfifteen
 Speed = 1.992

@@ -11,6 +11,7 @@ ThrottleDownFactor = 0.20
 MaxHp = 10
 ;;Speed = 0.006 for a specific server config
 Speed = 0.115
+HasBallisticComputer = true
 
 ;75mph
 Sound = radicon_heli

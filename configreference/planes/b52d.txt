@@ -14,6 +14,7 @@ Speed = 1.822
 Sound = bfiftytwo
 ThrottleUpDown = 0.1
 EnableNightVision = false
+HasBallisticComputer = true
 EnableGunnerMode = true
 CameraPosition  = 0.00, 1.80, -2.23
 InventorySize = 9
