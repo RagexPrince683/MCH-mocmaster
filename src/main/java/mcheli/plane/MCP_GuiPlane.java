@@ -663,6 +663,12 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             entity.prevPosZ + (entity.posZ - entity.prevPosZ) * (double)partialTicks);
    }
 
+   private Vec3 getInterpolatedShotPos(MCP_EntityPlane plane, MCH_WeaponBase weapon, float partialTicks) {
+      float yaw = plane.calcRotYaw(partialTicks);
+      float pitch = plane.calcRotPitch(partialTicks);
+      float roll = plane.calcRotRoll(partialTicks);
+      return mcheli.MCH_Lib.RotVec3(weapon.position, -yaw, -pitch, -roll);
+   }
 
    private ScreenPoint projectWorldToHud(Vec3 pos) {
       Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
@@ -676,18 +682,11 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       double dz = pos.zCoord - cameraPos.zCoord;
       float yaw = camera.prevRotationYaw + MathHelper.wrapAngleTo180_float(camera.rotationYaw - camera.prevRotationYaw) * partialTicks;
       float pitch = camera.prevRotationPitch + (camera.rotationPitch - camera.prevRotationPitch) * partialTicks;
-      Vec3 forward = mcheli.MCH_Lib.Rot2Vec3(yaw, pitch);
-      Vec3 right = mcheli.MCH_Lib.Rot2Vec3(yaw + 90.0F, 0.0F);
-      Vec3 up = Vec3.createVectorHelper(right.yCoord * forward.zCoord - right.zCoord * forward.yCoord,
-            right.zCoord * forward.xCoord - right.xCoord * forward.zCoord,
-            right.xCoord * forward.yCoord - right.yCoord * forward.xCoord);
-      double localZ = dx * forward.xCoord + dy * forward.yCoord + dz * forward.zCoord;
-      if(localZ <= 0.05D) return null;
-      double localX = dx * right.xCoord + dy * right.yCoord + dz * right.zCoord;
-      double localY = dx * up.xCoord + dy * up.yCoord + dz * up.zCoord;
-      double scale = (double)super.height * 0.75D / localZ;
-      double x = (double)super.centerX + localX * scale;
-      double y = (double)super.centerY - localY * scale;
+      Vec3 local = mcheli.MCH_Lib.RotVec3(dx, dy, dz, yaw, pitch);
+      if(local.zCoord <= 0.05D) return null;
+      double scale = (double)super.height * 0.75D / local.zCoord;
+      double x = (double)super.centerX - local.xCoord * scale;
+      double y = (double)super.centerY - local.yCoord * scale;
       if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
          return null;
       }
