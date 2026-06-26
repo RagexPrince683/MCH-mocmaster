@@ -696,7 +696,23 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
          return null;
       }
-      return new ScreenPoint(x, y, false);
+
+      double localRight = toImpact.dotProduct(right);
+      double localUp = toImpact.dotProduct(up);
+      double scale = (double)super.height * 0.75D / localForward;
+      double x = (double)super.centerX - localRight * scale;
+      double y = (double)super.centerY - localUp * scale;
+      double clampedX = MathHelper.clamp_double(x, 0.0D, (double)super.width);
+      double clampedY = MathHelper.clamp_double(y, 0.0D, (double)super.height);
+      return new ScreenPoint(clampedX, clampedY, x != clampedX || y != clampedY);
+   }
+
+   private Vec3 normalizeVec(Vec3 v) {
+      double length = v != null ? v.lengthVector() : 0.0D;
+      if(length < 1.0E-6D) {
+         return Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
+      }
+      return Vec3.createVectorHelper(v.xCoord / length, v.yCoord / length, v.zCoord / length);
    }
 
    private double dot(Vec3 a, Vec3 b) {
