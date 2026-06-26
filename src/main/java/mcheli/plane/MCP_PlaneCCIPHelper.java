@@ -27,10 +27,10 @@ public final class MCP_PlaneCCIPHelper {
 
       Vec3 pos = copy(releasePos);
       Vec3 vel = copy(initialVelocity);
+      double accelerationFactor = r.accelerationFactor;
 
       int max = info.timeFuse > 0 ? Math.min(MAX_STEPS, info.timeFuse) : MAX_STEPS;
       for(int i = 0; i < max; ++i) {
-         Vec3 prev = copy(pos);
          if(info.speedFactor != 0.0F && i > info.speedFactorStartTick && i < info.speedFactorEndTick) {
             double speed = Math.sqrt(vel.xCoord * vel.xCoord + vel.yCoord * vel.yCoord + vel.zCoord * vel.zCoord);
             if(speed > 1.0E-7D) {
@@ -59,6 +59,12 @@ public final class MCP_PlaneCCIPHelper {
             r.reasonInvalid = "";
             return r;
          }
+
+         pos = next;
+         if(isBombLike(info)) {
+            vel.xCoord *= 0.999D;
+            vel.zCoord *= 0.999D;
+         }
          if(pos.yCoord < -64.0D || !world.blockExists((int)pos.xCoord, Math.max(0, (int)pos.yCoord), (int)pos.zCoord)) {
             r.reasonInvalid = "out_of_world";
             break;
@@ -75,6 +81,11 @@ public final class MCP_PlaneCCIPHelper {
 
    public static boolean isBombWeapon(MCH_WeaponBase weapon) {
       return weapon != null && isBombLike(weapon.getInfo());
+   }
+
+   private static double getAccelerationFactor(MCH_WeaponInfo info) {
+      if(info == null || info.acceleration <= 4.0F) return 1.0D;
+      return (double)(info.acceleration / 4.0F);
    }
 
    public static boolean isBombLike(MCH_WeaponInfo info) {
@@ -107,6 +118,7 @@ public final class MCP_PlaneCCIPHelper {
       public Vec3 finalVelocity;
       public double gravity;
       public double horizontalDrag;
+      public double accelerationFactor;
       public double simulationTimeStep;
       public double accelerationFactor;
       public Vec3 ejectionVelocity;
