@@ -4543,6 +4543,94 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
    }
 
+   private void addExtraBoundingBoxBlockCollisions(AxisAlignedBB baseSweepBox, List collidingBoundingBoxes) {
+      if(this.extraBoundingBox == null || this.extraBoundingBox.length <= 0) {
+         return;
+      }
+
+      MCH_BoundingBox[] boxes = this.getCalculatedExtraBoundingBoxes();
+      if(boxes == null || boxes.length <= 0) {
+         return;
+      }
+
+      double motionX = this.getSweptMotionX(baseSweepBox);
+      double motionY = this.getSweptMotionY(baseSweepBox);
+      double motionZ = this.getSweptMotionZ(baseSweepBox);
+      double baseCenterX = (super.boundingBox.minX + super.boundingBox.maxX) / 2.0D;
+      double baseCenterY = (super.boundingBox.minY + super.boundingBox.maxY) / 2.0D;
+      double baseCenterZ = (super.boundingBox.minZ + super.boundingBox.maxZ) / 2.0D;
+
+      for(int boxIndex = 0; boxIndex < boxes.length; ++boxIndex) {
+         AxisAlignedBB extraBox = boxes[boxIndex].boundingBox;
+         AxisAlignedBB extraSweepBox = extraBox.addCoord(motionX, motionY, motionZ);
+         ArrayList extraCollisions = new ArrayList();
+         this.addBlockCollisionsToList(extraSweepBox, extraCollisions);
+         double extraCenterX = (extraBox.minX + extraBox.maxX) / 2.0D;
+         double extraCenterY = (extraBox.minY + extraBox.maxY) / 2.0D;
+         double extraCenterZ = (extraBox.minZ + extraBox.maxZ) / 2.0D;
+         double offsetX = baseCenterX - extraCenterX;
+         double offsetY = baseCenterY - extraCenterY;
+         double offsetZ = baseCenterZ - extraCenterZ;
+
+         for(int collisionIndex = 0; collisionIndex < extraCollisions.size(); ++collisionIndex) {
+            AxisAlignedBB collisionBox = (AxisAlignedBB)extraCollisions.get(collisionIndex);
+            collidingBoundingBoxes.add(collisionBox.getOffsetBoundingBox(offsetX, offsetY, offsetZ));
+         }
+      }
+   }
+
+   private double getSweptMotionX(AxisAlignedBB sweepBox) {
+      if(sweepBox.minX < super.boundingBox.minX) {
+         return sweepBox.minX - super.boundingBox.minX;
+      }
+      if(sweepBox.maxX > super.boundingBox.maxX) {
+         return sweepBox.maxX - super.boundingBox.maxX;
+      }
+      return 0.0D;
+   }
+
+   private double getSweptMotionY(AxisAlignedBB sweepBox) {
+      if(sweepBox.minY < super.boundingBox.minY) {
+         return sweepBox.minY - super.boundingBox.minY;
+      }
+      if(sweepBox.maxY > super.boundingBox.maxY) {
+         return sweepBox.maxY - super.boundingBox.maxY;
+      }
+      return 0.0D;
+   }
+
+   private double getSweptMotionZ(AxisAlignedBB sweepBox) {
+      if(sweepBox.minZ < super.boundingBox.minZ) {
+         return sweepBox.minZ - super.boundingBox.minZ;
+      }
+      if(sweepBox.maxZ > super.boundingBox.maxZ) {
+         return sweepBox.maxZ - super.boundingBox.maxZ;
+      }
+      return 0.0D;
+   }
+
+   private void addBlockCollisionsToList(AxisAlignedBB targetBox, List collidingBoundingBoxes) {
+      int minX = MathHelper.floor_double(targetBox.minX);
+      int maxX = MathHelper.floor_double(targetBox.maxX + 1.0D);
+      int minY = MathHelper.floor_double(targetBox.minY);
+      int maxY = MathHelper.floor_double(targetBox.maxY + 1.0D);
+      int minZ = MathHelper.floor_double(targetBox.minZ);
+      int maxZ = MathHelper.floor_double(targetBox.maxZ + 1.0D);
+
+      for(int x = minX; x < maxX; ++x) {
+         for(int z = minZ; z < maxZ; ++z) {
+            if(super.worldObj.blockExists(x, 64, z)) {
+               for(int y = minY - 1; y < maxY; ++y) {
+                  Block block = W_WorldFunc.getBlock(super.worldObj, x, y, z);
+                  if(block != null) {
+                     block.addCollisionBoxesToList(super.worldObj, x, y, z, targetBox, collidingBoundingBoxes, this);
+                  }
+               }
+            }
+         }
+      }
+   }
+
    public static List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
       //todo: make creative players/non survival mode players not collide with aircraft collisions
       ArrayList collidingBoundingBoxes = new ArrayList();
@@ -4565,6 +4653,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                }
             }
          }
+      }
+
+      if(par1Entity instanceof MCH_EntityBaseVehicle) {
+         MCH_EntityBaseVehicle vehicle = (MCH_EntityBaseVehicle)par1Entity;
+         vehicle.addExtraBoundingBoxBlockCollisions(par2AxisAlignedBB, collidingBoundingBoxes);
       }
 
       double var15 = 0.25D;
