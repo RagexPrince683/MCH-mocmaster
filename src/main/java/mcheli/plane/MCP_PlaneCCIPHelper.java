@@ -18,7 +18,8 @@ public final class MCP_PlaneCCIPHelper {
       r.initialVelocity = copy(initialVelocity);
       r.gravity = info != null ? (double)info.gravity : 0.0D;
       r.horizontalDrag = info != null && isBombLike(info) ? 0.999D : 1.0D;
-      r.simulationTimeStep = 1.0D;
+      r.accelerationFactor = getAccelerationFactor(info);
+      r.simulationTimeStep = r.accelerationFactor;
       if(world == null || info == null || releasePos == null || initialVelocity == null) {
          r.reasonInvalid = "missing_input";
          return r;
@@ -39,10 +40,11 @@ public final class MCP_PlaneCCIPHelper {
             }
          }
          vel.yCoord += (double)info.gravity;
-         pos.xCoord += vel.xCoord;
-         pos.yCoord += vel.yCoord;
-         pos.zCoord += vel.zCoord;
-         MovingObjectPosition hit = world.rayTraceBlocks(prev, pos);
+         Vec3 next = Vec3.createVectorHelper(pos.xCoord + vel.xCoord * r.accelerationFactor,
+               pos.yCoord + vel.yCoord * r.accelerationFactor,
+               pos.zCoord + vel.zCoord * r.accelerationFactor);
+         MovingObjectPosition hit = world.rayTraceBlocks(prev, next);
+         pos = next;
          if(isBombLike(info)) {
             vel.xCoord *= 0.999D;
             vel.zCoord *= 0.999D;
@@ -81,6 +83,19 @@ public final class MCP_PlaneCCIPHelper {
             || (info.gravity < 0.0F && info.acceleration <= 1.0F && info.explosion > 0);
    }
 
+   private static double getAccelerationFactor(MCH_WeaponInfo info) {
+      if(info == null || info.type == null || info.acceleration <= 4.0F) return 1.0D;
+      return isBulletLike(info) || isRocketLike(info) ? (double)(info.acceleration / 4.0F) : 1.0D;
+   }
+
+   private static boolean isBulletLike(MCH_WeaponInfo info) {
+      return info != null && info.type != null && info.type.equalsIgnoreCase("bullet");
+   }
+
+   private static boolean isRocketLike(MCH_WeaponInfo info) {
+      return info != null && info.type != null && info.type.equalsIgnoreCase("rocket");
+   }
+
    public static class Result {
       public boolean valid;
       public Vec3 impact;
@@ -93,6 +108,7 @@ public final class MCP_PlaneCCIPHelper {
       public double gravity;
       public double horizontalDrag;
       public double simulationTimeStep;
+      public double accelerationFactor;
       public Vec3 ejectionVelocity;
       public Vec3 initialVelocityDeltaFromAircraft;
       public double initialVelocityUpDot;
