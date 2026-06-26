@@ -540,7 +540,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          result.initialVelocitySideDot = releaseKinematics.initialVelocitySideDot;
          result.warningImpossibleLaunch = releaseKinematics.warningImpossibleLaunch;
          if(result.valid) {
-            ScreenPoint projected = this.projectWorldToHud(result.impact, plane, true);
+            ScreenPoint projected = this.projectWorldToHud(result.impact, plane, false);
             if(projected != null && projected.visible) {
                ScreenPoint p = this.smoothCCIPScreenPoint(projected, result.impact, weapon);
                this.drawCCIPPipper(p.x, p.y, p.clamped);
@@ -658,17 +658,26 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       if(pos == null || plane == null || camera == null) {
          return null;
       }
+
+      // The ballistic solution above is computed from the aircraft/release
+      // kinematics.  Projection is a separate concern: draw the solved world impact
+      // point through the active render camera so freelook behaves like every other
+      // world-space marker.  This makes the pipper leave the screen when the pilot
+      // looks away instead of staying pinned to the HUD, while still using the
+      // plane's pitch/yaw for the actual drop prediction.
       double dx = pos.xCoord - camera.posX;
       double dy = pos.yCoord - (camera.posY + (double)camera.getEyeHeight());
       double dz = pos.zCoord - camera.posZ;
-      // CCIP is aircraft fire-control symbology, so project its impact point through the
-      // airframe attitude instead of the freelook/render camera attitude. This keeps the
-      // pipper tied to where the plane is pointed while the pilot looks around.
-      Vec3 local = mcheli.MCH_Lib.RotVec3(dx, dy, dz, plane.rotationYaw, plane.rotationPitch, plane.getRotRoll());
-      if(local.zCoord <= 0.05D) return null;
-      double scale = (double)super.height * 0.75D / local.zCoord;
-      double x = (double)super.centerX - local.xCoord * scale;
-      double y = (double)super.centerY - local.yCoord * scale;
+      Vec3 right = mcheli.MCH_Lib.RotVec3(1.0D, 0.0D, 0.0D, -camera.rotationYaw, -camera.rotationPitch, 0.0F);
+      Vec3 up = mcheli.MCH_Lib.RotVec3(0.0D, 1.0D, 0.0D, -camera.rotationYaw, -camera.rotationPitch, 0.0F);
+      Vec3 forward = mcheli.MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -camera.rotationYaw, -camera.rotationPitch, 0.0F);
+      double localX = dx * right.xCoord + dy * right.yCoord + dz * right.zCoord;
+      double localY = dx * up.xCoord + dy * up.yCoord + dz * up.zCoord;
+      double localZ = dx * forward.xCoord + dy * forward.yCoord + dz * forward.zCoord;
+      if(localZ <= 0.05D) return null;
+      double scale = (double)super.height * 0.75D / localZ;
+      double x = (double)super.centerX + localX * scale;
+      double y = (double)super.centerY - localY * scale;
       boolean clamped = false;
       if(clamp) {
          double margin = 14.0D;
@@ -676,6 +685,8 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          double cy = MathHelper.clamp_double(y, margin, (double)super.height - margin);
          clamped = cx != x || cy != y;
          x = cx; y = cy;
+      } else if(x < -32.0D || x > (double)super.width + 32.0D || y < -32.0D || y > (double)super.height + 32.0D) {
+         return null;
       }
       return new ScreenPoint(x, y, clamped);
    }
