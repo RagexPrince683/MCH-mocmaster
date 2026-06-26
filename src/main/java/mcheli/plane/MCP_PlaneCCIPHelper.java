@@ -18,6 +18,7 @@ public final class MCP_PlaneCCIPHelper {
       r.initialVelocity = copy(initialVelocity);
       r.gravity = info != null ? (double)info.gravity : 0.0D;
       r.horizontalDrag = info != null && isBombLike(info) ? 0.999D : 1.0D;
+      r.accelerationFactor = getAccelerationFactor(info);
       r.simulationTimeStep = 1.0D;
       if(world == null || info == null || releasePos == null || initialVelocity == null) {
          r.reasonInvalid = "missing_input";
@@ -26,10 +27,10 @@ public final class MCP_PlaneCCIPHelper {
 
       Vec3 pos = copy(releasePos);
       Vec3 vel = copy(initialVelocity);
+      double accelerationFactor = r.accelerationFactor;
 
       int max = info.timeFuse > 0 ? Math.min(MAX_STEPS, info.timeFuse) : MAX_STEPS;
       for(int i = 0; i < max; ++i) {
-         Vec3 prev = copy(pos);
          if(info.speedFactor != 0.0F && i > info.speedFactorStartTick && i < info.speedFactorEndTick) {
             double speed = Math.sqrt(vel.xCoord * vel.xCoord + vel.yCoord * vel.yCoord + vel.zCoord * vel.zCoord);
             if(speed > 1.0E-7D) {
@@ -39,14 +40,11 @@ public final class MCP_PlaneCCIPHelper {
             }
          }
          vel.yCoord += (double)info.gravity;
-         pos.xCoord += vel.xCoord;
-         pos.yCoord += vel.yCoord;
-         pos.zCoord += vel.zCoord;
-         MovingObjectPosition hit = world.rayTraceBlocks(prev, pos);
-         if(isBombLike(info)) {
-            vel.xCoord *= 0.999D;
-            vel.zCoord *= 0.999D;
-         }
+
+         Vec3 next = Vec3.createVectorHelper(pos.xCoord + vel.xCoord * accelerationFactor,
+               pos.yCoord + vel.yCoord * accelerationFactor,
+               pos.zCoord + vel.zCoord * accelerationFactor);
+         MovingObjectPosition hit = world.rayTraceBlocks(pos, next);
          r.ticksSimulated = i + 1;
          if(hit != null && hit.hitVec != null) {
             r.valid = true;
@@ -56,6 +54,12 @@ public final class MCP_PlaneCCIPHelper {
             r.releaseAltitude = releasePos.yCoord - r.impact.yCoord;
             r.reasonInvalid = "";
             return r;
+         }
+
+         pos = next;
+         if(isBombLike(info)) {
+            vel.xCoord *= 0.999D;
+            vel.zCoord *= 0.999D;
          }
          if(pos.yCoord < -64.0D || !world.blockExists((int)pos.xCoord, Math.max(0, (int)pos.yCoord), (int)pos.zCoord)) {
             r.reasonInvalid = "out_of_world";
@@ -75,6 +79,11 @@ public final class MCP_PlaneCCIPHelper {
       return weapon != null && isBombLike(weapon.getInfo());
    }
 
+   private static double getAccelerationFactor(MCH_WeaponInfo info) {
+      if(info == null || info.acceleration <= 4.0F) return 1.0D;
+      return (double)(info.acceleration / 4.0F);
+   }
+
    public static boolean isBombLike(MCH_WeaponInfo info) {
       if(info == null || info.type == null) return false;
       return info.type.equalsIgnoreCase("bomb") || info.type.equalsIgnoreCase("dispenser")
@@ -92,6 +101,7 @@ public final class MCP_PlaneCCIPHelper {
       public Vec3 finalVelocity;
       public double gravity;
       public double horizontalDrag;
+      public double accelerationFactor;
       public double simulationTimeStep;
       public Vec3 ejectionVelocity;
       public Vec3 initialVelocityDeltaFromAircraft;
