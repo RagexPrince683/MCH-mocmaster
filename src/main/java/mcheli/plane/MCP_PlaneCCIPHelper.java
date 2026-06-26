@@ -87,6 +87,12 @@ public final class MCP_PlaneCCIPHelper {
       public double releaseAltitude;
       public Vec3 initialVelocity;
       public Vec3 finalVelocity;
+      public Vec3 ejectionVelocity;
+      public Vec3 initialVelocityDeltaFromAircraft;
+      public double initialVelocityUpDot;
+      public double initialVelocitySideDot;
+      public boolean warningImpossibleLaunch;
+      public String releaseMode;
       public String reasonInvalid;
    }
 }

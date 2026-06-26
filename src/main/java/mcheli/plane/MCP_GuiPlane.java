@@ -33,6 +33,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    private static final ResourceLocation PLANE_MOUSE_AIM_RETICLE_TEXTURE = new ResourceLocation("mcheli", "textures/gui/plane_crosshair.png");
    private static final double CCIP_SCREEN_SMOOTHING = 0.35D;
    private static final double CCIP_IMPACT_RESET_DISTANCE = 64.0D;
+   private static final double CCIP_PIPPER_SCALE = 1.35D;
    private double ccipScreenX;
    private double ccipScreenY;
    private boolean hasSmoothedCCIPScreenPos;
@@ -530,8 +531,14 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       if(enabled) {
          Vec3 shotOfs = weapon.getShotPos(plane);
          Vec3 release = Vec3.createVectorHelper(plane.posX + shotOfs.xCoord, plane.posY + shotOfs.yCoord, plane.posZ + shotOfs.zCoord);
-         Vec3 initial = this.getInitialBombVelocity(plane, weapon, aircraftMotion);
-         result = MCP_PlaneCCIPHelper.predict(plane.worldObj, weapon.getInfo(), release, initial);
+         ReleaseKinematics releaseKinematics = this.getInitialBombVelocity(plane, weapon, aircraftMotion);
+         result = MCP_PlaneCCIPHelper.predict(plane.worldObj, weapon.getInfo(), release, releaseKinematics.initialVelocity);
+         result.releaseMode = releaseKinematics.releaseMode;
+         result.ejectionVelocity = releaseKinematics.ejectionVelocity;
+         result.initialVelocityDeltaFromAircraft = releaseKinematics.initialVelocityDeltaFromAircraft;
+         result.initialVelocityUpDot = releaseKinematics.initialVelocityUpDot;
+         result.initialVelocitySideDot = releaseKinematics.initialVelocitySideDot;
+         result.warningImpossibleLaunch = releaseKinematics.warningImpossibleLaunch;
          if(result.valid) {
             ScreenPoint projected = this.projectWorldToHud(result.impact, true);
             if(projected != null && projected.visible) {
@@ -552,15 +559,37 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       }
    }
 
-   private Vec3 getInitialBombVelocity(MCP_EntityPlane plane, MCH_WeaponBase weapon, Vec3 aircraftMotion) {
-      Vec3 initial = Vec3.createVectorHelper(aircraftMotion.xCoord, aircraftMotion.yCoord, aircraftMotion.zCoord);
+   private ReleaseKinematics getInitialBombVelocity(MCP_EntityPlane plane, MCH_WeaponBase weapon, Vec3 aircraftMotion) {
+      ReleaseKinematics k = new ReleaseKinematics();
+      k.releaseMode = "GRAVITY_BOMB";
+      k.ejectionVelocity = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
+      k.initialVelocity = Vec3.createVectorHelper(aircraftMotion.xCoord, aircraftMotion.yCoord, aircraftMotion.zCoord);
+
       if(weapon != null && weapon.getInfo() != null && weapon.getInfo().type != null && weapon.getInfo().type.equalsIgnoreCase("dispenser")) {
+         k.releaseMode = "DISPENSER_EJECTED";
+         // Match MCH_WeaponDispenser: add half of the weapon's forward acceleration vector to aircraft motion.
+         // This uses the aircraft/weapon firing angles only; camera/freelook and aircraft roll are deliberately not inputs.
          Vec3 eject = mcheli.MCH_Lib.Rot2Vec3(plane.rotationYaw + weapon.fixRotationYaw, plane.rotationPitch + weapon.fixRotationPitch);
-         initial.xCoord += eject.xCoord * (double)weapon.getInfo().acceleration * 0.5D;
-         initial.yCoord += eject.yCoord * (double)weapon.getInfo().acceleration * 0.5D;
-         initial.zCoord += eject.zCoord * (double)weapon.getInfo().acceleration * 0.5D;
+         k.ejectionVelocity = Vec3.createVectorHelper(eject.xCoord * (double)weapon.getInfo().acceleration * 0.5D,
+               eject.yCoord * (double)weapon.getInfo().acceleration * 0.5D,
+               eject.zCoord * (double)weapon.getInfo().acceleration * 0.5D);
+         k.initialVelocity.xCoord += k.ejectionVelocity.xCoord;
+         k.initialVelocity.yCoord += k.ejectionVelocity.yCoord;
+         k.initialVelocity.zCoord += k.ejectionVelocity.zCoord;
       }
-      return initial;
+
+      k.initialVelocityDeltaFromAircraft = Vec3.createVectorHelper(k.initialVelocity.xCoord - aircraftMotion.xCoord,
+            k.initialVelocity.yCoord - aircraftMotion.yCoord, k.initialVelocity.zCoord - aircraftMotion.zCoord);
+      k.initialVelocityUpDot = k.initialVelocityDeltaFromAircraft.yCoord;
+      Vec3 side = mcheli.MCH_Lib.Rot2Vec3(plane.rotationYaw + 90.0F, 0.0F);
+      k.initialVelocitySideDot = k.initialVelocityDeltaFromAircraft.xCoord * side.xCoord + k.initialVelocityDeltaFromAircraft.zCoord * side.zCoord;
+      double delta = Math.sqrt(k.initialVelocityDeltaFromAircraft.xCoord * k.initialVelocityDeltaFromAircraft.xCoord
+            + k.initialVelocityDeltaFromAircraft.yCoord * k.initialVelocityDeltaFromAircraft.yCoord
+            + k.initialVelocityDeltaFromAircraft.zCoord * k.initialVelocityDeltaFromAircraft.zCoord);
+      boolean gravityBomb = "GRAVITY_BOMB".equals(k.releaseMode);
+      k.warningImpossibleLaunch = (gravityBomb && (Math.abs(k.initialVelocitySideDot) > 0.05D || k.initialVelocityUpDot > 0.05D || delta > 0.10D))
+            || (!gravityBomb && delta > 4.0D);
+      return k;
    }
 
    private ScreenPoint smoothCCIPScreenPoint(ScreenPoint projected, Vec3 impact, MCH_WeaponBase weapon) {
@@ -597,21 +626,26 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
       String name = weapon != null && weapon.getInfo() != null ? weapon.getInfo().name : "none";
       double horizontalSpeed = Math.sqrt(aircraftMotion.xCoord * aircraftMotion.xCoord + aircraftMotion.zCoord * aircraftMotion.zCoord);
-      String msg1 = String.format("CCIP enabled=%s weapon=%s valid=%s reason=%s ticksToImpact=%d simulatedImpactDistance=%.1f",
-            Boolean.valueOf(enabled), name, Boolean.valueOf(result != null && result.valid),
+      String msg1 = String.format("CCIP enabled=%s weapon=%s mode=%s valid=%s reason=%s ticksToImpact=%d simulatedImpactDistance=%.1f",
+            Boolean.valueOf(enabled), name, result != null ? result.releaseMode : "-", Boolean.valueOf(result != null && result.valid),
             result != null ? result.reasonInvalid : (enabled ? "not_predicted" : "not_bomb_or_disabled"),
             Integer.valueOf(result != null ? result.ticksSimulated : 0), Double.valueOf(result != null ? result.impactDistance : 0.0D));
       String msg2 = String.format("releasePos=%s impactWorldPos=%s aircraftSpeedHorizontal=%.3f",
             this.formatVec(result != null ? result.releasePos : null), this.formatVec(result != null ? result.impact : null), Double.valueOf(horizontalSpeed));
-      String msg3 = String.format("aircraftMotionX/Y/Z=%s initialBombVelocityX/Y/Z=%s finalVelocity=%s",
-            this.formatVec(aircraftMotion), this.formatVec(result != null ? result.initialVelocity : null), this.formatVec(result != null ? result.finalVelocity : null));
-      String msg4 = String.format("cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch=%.1f/%.1f",
+      String msg3 = String.format("aircraftMotion=%s ejectionVelocity=%s initialBombVelocity=%s deltaFromAircraft=%s",
+            this.formatVec(aircraftMotion), this.formatVec(result != null ? result.ejectionVelocity : null),
+            this.formatVec(result != null ? result.initialVelocity : null), this.formatVec(result != null ? result.initialVelocityDeltaFromAircraft : null));
+      String msg4 = String.format("initialVelocityUpDot=%.3f initialVelocitySideDot=%.3f warningImpossibleLaunch=%s",
+            Double.valueOf(result != null ? result.initialVelocityUpDot : 0.0D), Double.valueOf(result != null ? result.initialVelocitySideDot : 0.0D),
+            Boolean.valueOf(result != null && result.warningImpossibleLaunch));
+      String msg5 = String.format("cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch/Roll=%.1f/%.1f/%.1f",
             Float.valueOf(camera != null ? camera.rotationYaw : 0.0F), Float.valueOf(camera != null ? camera.rotationPitch : 0.0F),
-            Float.valueOf(plane.rotationYaw), Float.valueOf(plane.rotationPitch));
+            Float.valueOf(plane.rotationYaw), Float.valueOf(plane.rotationPitch), Float.valueOf(plane.getRotRoll()));
       this.drawString(msg1, super.centerX - 170, super.centerY + 70, 0xFF55FF66);
       this.drawString(msg2, super.centerX - 170, super.centerY + 80, 0xFF55FF66);
       this.drawString(msg3, super.centerX - 170, super.centerY + 90, 0xFF55FF66);
       this.drawString(msg4, super.centerX - 170, super.centerY + 100, 0xFF55FF66);
+      this.drawString(msg5, super.centerX - 170, super.centerY + 110, 0xFF55FF66);
    }
 
    private String formatVec(Vec3 v) {
@@ -644,9 +678,9 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
    private void drawCCIPPipper(double x, double y, boolean clamped) {
       int color = clamped ? 0xAA55FF66 : 0xF055FF66;
-      double r = 10.0D;
-      double tickInner = r + 2.0D;
-      double tickOuter = r + 6.0D;
+      double r = 10.0D * CCIP_PIPPER_SCALE;
+      double tickInner = r + 2.0D * CCIP_PIPPER_SCALE;
+      double tickOuter = r + 6.0D * CCIP_PIPPER_SCALE;
       double[] circle = new double[34];
       for(int i = 0; i <= 16; ++i) {
          double a = Math.PI * 2.0D * (double)i / 16.0D;
@@ -654,10 +688,20 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          circle[i * 2 + 1] = y + Math.sin(a) * r;
       }
       this.drawLine(circle, color, 2);
-      this.drawLine(new double[]{x - 1.5D, y, x + 1.5D, y, x, y - 1.5D, x, y + 1.5D,
+      this.drawLine(new double[]{x - 2.0D, y, x + 2.0D, y, x, y - 2.0D, x, y + 2.0D,
             x - tickOuter, y, x - tickInner, y, x + tickInner, y, x + tickOuter, y,
             x, y - tickOuter, x, y - tickInner, x, y + tickInner, x, y + tickOuter}, color);
-      this.drawString("CCIP", (int)x + 12, (int)y + 8, color);
+      this.drawString("CCIP", (int)(x + r + 7.0D), (int)(y + r + 4.0D), color);
+   }
+
+   private static class ReleaseKinematics {
+      Vec3 initialVelocity;
+      Vec3 ejectionVelocity;
+      Vec3 initialVelocityDeltaFromAircraft;
+      double initialVelocityUpDot;
+      double initialVelocitySideDot;
+      boolean warningImpossibleLaunch;
+      String releaseMode;
    }
 
    private static class ScreenPoint {
