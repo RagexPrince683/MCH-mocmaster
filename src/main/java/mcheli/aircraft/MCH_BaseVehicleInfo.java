@@ -30,6 +30,8 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    public HashMap displayNameLang;
    public int itemID;
    public boolean hasalert = true;
+   /** Enables client-side CCIP bomb impact reticle for plane HUDs. */
+   public boolean hasBallisticComputer = false;
    public List recipeString;
    public List recipe;
    public boolean isShapedRecipe;
@@ -872,6 +874,9 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                     this.flightCeiling = this.toFloat(data, 32.0F, 37650.0F);
                                  } else if(item.equalsIgnoreCase("FlightCeilingRange")) {
                                     this.flightCeilingRange = this.toFloat(data, 1.0F, 128.0F);
+                                 } else if(item.equalsIgnoreCase("HasBallisticComputer")
+                                       || item.equalsIgnoreCase("EnableBallisticComputer")) {
+                                    this.hasBallisticComputer = this.toBool(data);
                                  } else if(item.equalsIgnoreCase("UseNewMobilitySystem")
                                        || item.equalsIgnoreCase("EnableNewMobilitySystem")
                                        || item.equalsIgnoreCase("UseNewFlightModel")

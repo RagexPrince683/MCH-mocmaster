@@ -11,6 +11,7 @@ ThrottleDownFactor = 0.20
 ItemID = 28733
 MaxHp = 100
 Speed = 0.435
+HasBallisticComputer = true
 
 ;140
 ;.140*1.74

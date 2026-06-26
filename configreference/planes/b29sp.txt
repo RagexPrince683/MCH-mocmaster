@@ -10,6 +10,7 @@ ChaffUseTime = 0
 ThrottleDownFactor = 0.20
 MaxHp = 250
 Speed = 0.999
+HasBallisticComputer = true
 
 ;357 
 

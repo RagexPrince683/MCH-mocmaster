@@ -23,6 +23,7 @@ EnableNightVision = true
 EnableEntityRadar = true
 RWRType = DIGITAL
 RadarType = MODERN_AS
+HasBallisticComputer = true
 HasChaff = true
 EnableEjectionSeat = true
 EnableSeaSurfaceParticle = true

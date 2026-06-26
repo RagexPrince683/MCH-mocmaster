@@ -16,6 +16,7 @@ EnableNightVision = true
 EnableEntityRadar = true
 RWRType = DIGITAL
 RadarType = MODERN_AS
+HasBallisticComputer = true
 EnableEjectionSeat = true
 Speed = 4.0
 
