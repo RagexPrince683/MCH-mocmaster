@@ -540,7 +540,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          result.initialVelocitySideDot = releaseKinematics.initialVelocitySideDot;
          result.warningImpossibleLaunch = releaseKinematics.warningImpossibleLaunch;
          if(result.valid) {
-            ScreenPoint projected = this.projectWorldToHud(result.impact, plane, true);
+            ScreenPoint projected = this.projectWorldToHud(result.impact);
             if(projected != null && projected.visible) {
                ScreenPoint p = this.smoothCCIPScreenPoint(projected, result.impact, weapon);
                this.drawCCIPPipper(p.x, p.y, p.clamped);
@@ -653,31 +653,41 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       return v == null ? "-" : String.format("%.2f,%.2f,%.2f", Double.valueOf(v.xCoord), Double.valueOf(v.yCoord), Double.valueOf(v.zCoord));
    }
 
-   private ScreenPoint projectWorldToHud(Vec3 pos, MCP_EntityPlane plane, boolean clamp) {
+   private Vec3 getInterpolatedEntityPos(Entity entity, float partialTicks) {
+      return Vec3.createVectorHelper(entity.prevPosX + (entity.posX - entity.prevPosX) * (double)partialTicks,
+            entity.prevPosY + (entity.posY - entity.prevPosY) * (double)partialTicks,
+            entity.prevPosZ + (entity.posZ - entity.prevPosZ) * (double)partialTicks);
+   }
+
+
+   private ScreenPoint projectWorldToHud(Vec3 pos) {
       Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
-      if(pos == null || plane == null || camera == null) {
+      if(pos == null || camera == null) {
          return null;
       }
-      double dx = pos.xCoord - camera.posX;
-      double dy = pos.yCoord - (camera.posY + (double)camera.getEyeHeight());
-      double dz = pos.zCoord - camera.posZ;
-      // CCIP is aircraft fire-control symbology, so project its impact point through the
-      // airframe attitude instead of the freelook/render camera attitude. This keeps the
-      // pipper tied to where the plane is pointed while the pilot looks around.
-      Vec3 local = mcheli.MCH_Lib.RotVec3(dx, dy, dz, plane.rotationYaw, plane.rotationPitch, plane.getRotRoll());
-      if(local.zCoord <= 0.05D) return null;
-      double scale = (double)super.height * 0.75D / local.zCoord;
-      double x = (double)super.centerX - local.xCoord * scale;
-      double y = (double)super.centerY - local.yCoord * scale;
-      boolean clamped = false;
-      if(clamp) {
-         double margin = 14.0D;
-         double cx = MathHelper.clamp_double(x, margin, (double)super.width - margin);
-         double cy = MathHelper.clamp_double(y, margin, (double)super.height - margin);
-         clamped = cx != x || cy != y;
-         x = cx; y = cy;
+      float partialTicks = this.smoothCamPartialTicks;
+      Vec3 cameraPos = this.getInterpolatedEntityPos(camera, partialTicks);
+      double dx = pos.xCoord - cameraPos.xCoord;
+      double dy = pos.yCoord - (cameraPos.yCoord + (double)camera.getEyeHeight());
+      double dz = pos.zCoord - cameraPos.zCoord;
+      float yaw = camera.prevRotationYaw + MathHelper.wrapAngleTo180_float(camera.rotationYaw - camera.prevRotationYaw) * partialTicks;
+      float pitch = camera.prevRotationPitch + (camera.rotationPitch - camera.prevRotationPitch) * partialTicks;
+      Vec3 forward = mcheli.MCH_Lib.Rot2Vec3(yaw, pitch);
+      Vec3 right = mcheli.MCH_Lib.Rot2Vec3(yaw + 90.0F, 0.0F);
+      Vec3 up = Vec3.createVectorHelper(right.yCoord * forward.zCoord - right.zCoord * forward.yCoord,
+            right.zCoord * forward.xCoord - right.xCoord * forward.zCoord,
+            right.xCoord * forward.yCoord - right.yCoord * forward.xCoord);
+      double localZ = dx * forward.xCoord + dy * forward.yCoord + dz * forward.zCoord;
+      if(localZ <= 0.05D) return null;
+      double localX = dx * right.xCoord + dy * right.yCoord + dz * right.zCoord;
+      double localY = dx * up.xCoord + dy * up.yCoord + dz * up.zCoord;
+      double scale = (double)super.height * 0.75D / localZ;
+      double x = (double)super.centerX + localX * scale;
+      double y = (double)super.centerY - localY * scale;
+      if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
+         return null;
       }
-      return new ScreenPoint(x, y, clamped);
+      return new ScreenPoint(x, y, false);
    }
 
    private void drawCCIPPipper(double x, double y, boolean clamped) {
