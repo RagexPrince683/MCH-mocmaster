@@ -183,10 +183,7 @@ public final class MCH_FlightModel {
          double post = clamp((abs - 1.0D) / 2.0D, 0.0D, 1.0D);
          lift = 1.0D - post * (0.65D + 0.25D * clamp(stallSeverity, 0.0D, 1.0D));
       }
-      if(abs < 1.0E-4D) {
-         return 0.0D;
-      }
-      return sign * clamp(lift, 0.0D, 1.0D);
+      return sign * clamp(lift, 0.08D, 1.0D);
    }
 
    /** Coefficient-like AoA drag curve with a strong post-critical rise. */
