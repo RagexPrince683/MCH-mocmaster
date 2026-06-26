@@ -257,6 +257,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `NewFlightCombatFlapDrag` | Plane | float[0..0.25] | 0.012 | flap drag penalty |
 | `NewFlightCombatFlapControl` | Plane | float[0..1] | 0.12 | flap control-authority boost |
 | `NewFlightCombatFlapOverspeed` | Plane | float[0.1..1] | 0.78 | flap safe-speed multiplier |
+| `NewFlightWingIncidenceAoA` / `NewFlightLiftBiasAoA` | Plane | float[0..8] | 3.0 | lift-only wing incidence/camber AoA bias |
 | `StallSpeedKmh` (`StallSpeed` legacy) | Plane | km/h (legacy internal speed) | 0 = derive from `Speed*StallSpeedFactor` | fixed-wing stall entry |
 | `CriticalAoA` | Plane | float[1..90] | 14.00 | stall/AoA threshold degrees |
 | `StallLiftLoss` | Plane | float[0..1] | 0.820 | lift removed at full stall |
