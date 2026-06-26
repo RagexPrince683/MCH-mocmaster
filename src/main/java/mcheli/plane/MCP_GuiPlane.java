@@ -542,7 +542,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          result.initialVelocitySideDot = releaseKinematics.initialVelocitySideDot;
          result.warningImpossibleLaunch = releaseKinematics.warningImpossibleLaunch;
          if(result.valid) {
-            ScreenPoint projected = this.projectWorldToHud(result.impact);
+            ScreenPoint projected = this.projectWorldToAircraftHud(plane, result.impact, partialTicks);
             if(projected != null && projected.visible) {
                ScreenPoint p = this.smoothCCIPScreenPoint(projected, result.impact, weapon);
                this.drawCCIPPipper(p.x, p.y, p.clamped);
@@ -670,27 +670,58 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       return mcheli.MCH_Lib.RotVec3(weapon.position, -yaw, -pitch, -roll);
    }
 
-   private ScreenPoint projectWorldToHud(Vec3 pos) {
-      Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
-      if(pos == null || camera == null) {
+   private ScreenPoint projectWorldToAircraftHud(MCP_EntityPlane plane, Vec3 impact, float partialTicks) {
+      if(plane == null || impact == null) {
          return null;
       }
-      float partialTicks = this.smoothCamPartialTicks;
-      Vec3 cameraPos = this.getInterpolatedEntityPos(camera, partialTicks);
-      double dx = pos.xCoord - cameraPos.xCoord;
-      double dy = pos.yCoord - (cameraPos.yCoord + (double)camera.getEyeHeight());
-      double dz = pos.zCoord - cameraPos.zCoord;
-      float yaw = camera.prevRotationYaw + MathHelper.wrapAngleTo180_float(camera.rotationYaw - camera.prevRotationYaw) * partialTicks;
-      float pitch = camera.prevRotationPitch + (camera.rotationPitch - camera.prevRotationPitch) * partialTicks;
-      Vec3 local = mcheli.MCH_Lib.RotVec3(dx, dy, dz, yaw, pitch);
-      if(local.zCoord <= 0.05D) return null;
-      double scale = (double)super.height * 0.75D / local.zCoord;
-      double x = (double)super.centerX - local.xCoord * scale;
-      double y = (double)super.centerY - local.yCoord * scale;
-      if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
+
+      float yaw = plane.calcRotYaw(partialTicks);
+      float pitch = plane.calcRotPitch(partialTicks);
+      float roll = plane.calcRotRoll(partialTicks);
+
+      Vec3 forward = this.normalizeVec(mcheli.MCH_Lib.Rot2Vec3(yaw, pitch));
+      Vec3 right = this.normalizeVec(mcheli.MCH_Lib.Rot2Vec3(yaw + 90.0F, 0.0F));
+      Vec3 up = this.normalizeVec(right.crossProduct(forward));
+      right = this.normalizeVec(forward.crossProduct(up));
+
+      double rollRad = Math.toRadians((double)roll);
+      double cosRoll = Math.cos(rollRad);
+      double sinRoll = Math.sin(rollRad);
+      Vec3 rolledRight = Vec3.createVectorHelper(right.xCoord * cosRoll + up.xCoord * sinRoll,
+            right.yCoord * cosRoll + up.yCoord * sinRoll,
+            right.zCoord * cosRoll + up.zCoord * sinRoll);
+      Vec3 rolledUp = Vec3.createVectorHelper(up.xCoord * cosRoll - right.xCoord * sinRoll,
+            up.yCoord * cosRoll - right.yCoord * sinRoll,
+            up.zCoord * cosRoll - right.zCoord * sinRoll);
+      right = this.normalizeVec(rolledRight);
+      up = this.normalizeVec(rolledUp);
+
+      Vec3 aircraftHudOrigin = this.getInterpolatedEntityPos(plane, partialTicks);
+      aircraftHudOrigin.yCoord += (double)plane.getEyeHeight();
+      Vec3 toImpact = Vec3.createVectorHelper(impact.xCoord - aircraftHudOrigin.xCoord,
+            impact.yCoord - aircraftHudOrigin.yCoord,
+            impact.zCoord - aircraftHudOrigin.zCoord);
+      double localForward = toImpact.dotProduct(forward);
+      if(localForward <= 0.05D) {
          return null;
       }
-      return new ScreenPoint(x, y, false);
+
+      double localRight = toImpact.dotProduct(right);
+      double localUp = toImpact.dotProduct(up);
+      double scale = (double)super.height * 0.75D / localForward;
+      double x = (double)super.centerX - localRight * scale;
+      double y = (double)super.centerY - localUp * scale;
+      double clampedX = MathHelper.clamp_double(x, 0.0D, (double)super.width);
+      double clampedY = MathHelper.clamp_double(y, 0.0D, (double)super.height);
+      return new ScreenPoint(clampedX, clampedY, x != clampedX || y != clampedY);
+   }
+
+   private Vec3 normalizeVec(Vec3 v) {
+      double length = v != null ? v.lengthVector() : 0.0D;
+      if(length < 1.0E-6D) {
+         return Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
+      }
+      return Vec3.createVectorHelper(v.xCoord / length, v.yCoord / length, v.zCoord / length);
    }
 
    private void drawCCIPPipper(double x, double y, boolean clamped) {
