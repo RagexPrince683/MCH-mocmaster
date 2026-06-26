@@ -187,17 +187,6 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       lines.add(String.format("auth pitch=%.2f roll=%.2f finalPitch=%.4f finalRollAV=%.4f", new Object[]{
             Double.valueOf(plane.getLastFinalPitchAuthority()), Double.valueOf(plane.getLastRollAuthority()),
             Double.valueOf(plane.getLastPitchInputAfterAuthority()), Float.valueOf(plane.getRollAngularVelocity())}));
-      lines.add(String.format("cmd pitch raw=%.2f desired=%.3f av %.3f->%.3f d=%.3f", new Object[]{
-            Double.valueOf(plane.getLastRawPitchCommandNormalized()), Double.valueOf(plane.getLastDesiredPitchRate()),
-            Double.valueOf(plane.getLastPitchAngularVelocityBeforeUpdate()), Double.valueOf(plane.getLastPitchAngularVelocityAfterUpdate()),
-            Double.valueOf(plane.getLastPitchDeltaApplied())}));
-      lines.add(String.format("cmd roll raw=%.2f desired=%.3f av %.3f->%.3f d=%.3f", new Object[]{
-            Double.valueOf(plane.getLastRawRollCommandNormalized()), Double.valueOf(plane.getLastDesiredRollRate()),
-            Double.valueOf(plane.getLastRollAngularVelocityBeforeUpdate()), Double.valueOf(plane.getLastRollAngularVelocityAfterUpdate()),
-            Double.valueOf(plane.getLastRollDeltaApplied())}));
-      lines.add(String.format("roll route manual=%.2f mouse=%.2f mouseAim=%s", new Object[]{
-            Double.valueOf(plane.getLastManualRollKeyCommand()), Double.valueOf(plane.getLastMouseRollCommand()),
-            Boolean.valueOf(plane.isLastUseMouseAim())}));
       lines.add(String.format("auth ctrl=%.2f up=%.2f down=%.2f yaw=%.2f", new Object[]{
             Double.valueOf(plane.getLastControlAuthority()), Double.valueOf(plane.getLastPitchUpAuthority()),
             Double.valueOf(plane.getLastPitchDownAuthority()), Double.valueOf(plane.getLastYawAuthority())}));

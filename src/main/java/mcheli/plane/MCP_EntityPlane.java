@@ -41,8 +41,6 @@ import net.minecraft.world.World;
 public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
    private static final float PLANE_MANEUVERABILITY_FACTOR = 1.0F;
-   private static final float NEW_FLIGHT_PITCH_RATE_SCALE = 1.20F;
-   private static final float NEW_FLIGHT_ROLL_RATE_SCALE = 3.00F;
 
    private MCP_PlaneInfo planeInfo = null;
    public float soundVolume;
@@ -219,19 +217,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastPitchAfterClamp;
    private double lastRollBeforeClamp;
    private double lastRollAfterClamp;
-   private double lastRawPitchCommandNormalized;
-   private double lastDesiredPitchRate;
-   private double lastPitchAngularVelocityBeforeUpdate;
-   private double lastPitchAngularVelocityAfterUpdate;
-   private double lastPitchDeltaApplied;
-   private double lastRawRollCommandNormalized;
-   private double lastDesiredRollRate;
-   private double lastRollAngularVelocityBeforeUpdate;
-   private double lastRollAngularVelocityAfterUpdate;
-   private double lastRollDeltaApplied;
-   private double lastManualRollKeyCommand;
-   private double lastMouseRollCommand;
-   private boolean lastUseMouseAim;
    private boolean lastNewFlightControlPathActive;
    private boolean lastSetAnglesRemote;
    private float lastSetAnglesPartialTicks;
@@ -409,19 +394,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastRecoveryDueToLiftDeficit = false;
       this.lastRecoveryDueToUnsupportedClimb = false;
       this.lastFinalPitchAngularVelocity = 0.0D;
-      this.lastRawPitchCommandNormalized = 0.0D;
-      this.lastDesiredPitchRate = 0.0D;
-      this.lastPitchAngularVelocityBeforeUpdate = 0.0D;
-      this.lastPitchAngularVelocityAfterUpdate = 0.0D;
-      this.lastPitchDeltaApplied = 0.0D;
-      this.lastRawRollCommandNormalized = 0.0D;
-      this.lastDesiredRollRate = 0.0D;
-      this.lastRollAngularVelocityBeforeUpdate = 0.0D;
-      this.lastRollAngularVelocityAfterUpdate = 0.0D;
-      this.lastRollDeltaApplied = 0.0D;
-      this.lastManualRollKeyCommand = 0.0D;
-      this.lastMouseRollCommand = 0.0D;
-      this.lastUseMouseAim = false;
       this.lastAirborne = false;
       this.angleOfAttack = 0.0D;
       this.oldAngleOfAttack = 0.0D;
@@ -891,19 +863,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    public double getLastPitchAfterClamp() { return this.lastPitchAfterClamp; }
    public double getLastRollBeforeClamp() { return this.lastRollBeforeClamp; }
    public double getLastRollAfterClamp() { return this.lastRollAfterClamp; }
-   public double getLastRawPitchCommandNormalized() { return this.lastRawPitchCommandNormalized; }
-   public double getLastDesiredPitchRate() { return this.lastDesiredPitchRate; }
-   public double getLastPitchAngularVelocityBeforeUpdate() { return this.lastPitchAngularVelocityBeforeUpdate; }
-   public double getLastPitchAngularVelocityAfterUpdate() { return this.lastPitchAngularVelocityAfterUpdate; }
-   public double getLastPitchDeltaApplied() { return this.lastPitchDeltaApplied; }
-   public double getLastRawRollCommandNormalized() { return this.lastRawRollCommandNormalized; }
-   public double getLastDesiredRollRate() { return this.lastDesiredRollRate; }
-   public double getLastRollAngularVelocityBeforeUpdate() { return this.lastRollAngularVelocityBeforeUpdate; }
-   public double getLastRollAngularVelocityAfterUpdate() { return this.lastRollAngularVelocityAfterUpdate; }
-   public double getLastRollDeltaApplied() { return this.lastRollDeltaApplied; }
-   public double getLastManualRollKeyCommand() { return this.lastManualRollKeyCommand; }
-   public double getLastMouseRollCommand() { return this.lastMouseRollCommand; }
-   public boolean isLastUseMouseAim() { return this.lastUseMouseAim; }
    public boolean isLastNewFlightControlPathActive() { return this.lastNewFlightControlPathActive; }
    public boolean isLastSetAnglesRemote() { return this.lastSetAnglesRemote; }
    public float getLastSetAnglesPartialTicks() { return this.lastSetAnglesPartialTicks; }
@@ -1032,12 +991,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       this.mouseAimYawError = MathHelper.wrapAngleTo180_float(this.mouseAimSmoothedYaw - this.getRotYaw());
       this.mouseAimPitchError = MathHelper.wrapAngleTo180_float(this.mouseAimSmoothedPitch - this.getRotPitch());
-   }
-
-   private float getRateControlForAngularVelocityTarget(float desiredRate, float torque, float damping) {
-      float usableTorque = Math.max(1.0E-4F, torque);
-      float usableDamping = Math.max(1.0E-4F, damping);
-      return desiredRate * usableDamping / usableTorque;
    }
 
    private float getMouseAimYawCommand(double limit) {
@@ -1673,13 +1626,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          this.lastRequestedPitchInput = 0.0F;
          this.lastPitchInputAfterAuthority = 0.0F;
          this.lastFinalElevatorInput = 0.0D;
-         this.lastRawPitchCommandNormalized = 0.0D;
-         this.lastDesiredPitchRate = 0.0D;
-         this.lastRawRollCommandNormalized = 0.0D;
-         this.lastDesiredRollRate = 0.0D;
-         this.lastManualRollKeyCommand = 0.0D;
-         this.lastMouseRollCommand = 0.0D;
-         this.lastUseMouseAim = false;
          this.addkeyRotValue = 0.0F;
 
          // Free look decouples pilot camera input from the airframe, but it must not
@@ -1701,7 +1647,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
 
       boolean useMouseAim = this.shouldUseMouseAimControls(player);
-      this.lastUseMouseAim = useMouseAim;
       if(useMouseAim) {
          this.updateMouseAimState(deltaX, deltaY, partialTicks);
          x = 0.0F;
@@ -1744,25 +1689,16 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          }
 
          this.lastPitchAfterClamp = pitch;
-         this.lastRawPitchCommandNormalized = m_add > 1.0E-4D ? MCH_FlightModel.clamp((double)(-pitch) / m_add, -1.0D, 1.0D) : 0.0D;
-         pitch = (float)(this.lastRawPitchCommandNormalized * (double)planeInfo.mobilityPitch * (double)NEW_FLIGHT_PITCH_RATE_SCALE);
+         pitch = (float)((double)(-pitch * this.getPitchFactor()) * 0.06D);
       }
 
       if(this.canUpdateRoll(player)) {
          m_add = this.getAddRotationRollLimit();
          this.lastRollMAdd = m_add;
-         float manualRoll = this.getManualRollKeyCommand(m_add);
-         this.lastManualRollKeyCommand = manualRoll;
-         this.lastMouseRollCommand = 0.0D;
-         if(MathHelper.abs(manualRoll) > 0.001F) {
-            roll = manualRoll;
-            this.mouseAimManualRollActive = true;
-            this.mouseAimGeneratedRollCommand = manualRoll;
-         } else if(useMouseAim) {
-            roll = this.getMouseAimRollCommand(0.0F, m_add);
-            this.lastMouseRollCommand = roll;
-         } else {
-            roll = this.getControlRotRoll(x, y, partialTicks);
+         roll = useMouseAim ? this.getManualRollKeyCommand(m_add) : this.getControlRotRoll(x, y, partialTicks);
+
+         if(useMouseAim) {
+            roll = this.getMouseAimRollCommand(roll, m_add);
          }
          this.lastRollBeforeClamp = roll;
          if((double)roll < -m_add) {
@@ -1774,8 +1710,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          }
 
          this.lastRollAfterClamp = roll;
-         this.lastRawRollCommandNormalized = m_add > 1.0E-4D ? MCH_FlightModel.clamp((double)roll / m_add, -1.0D, 1.0D) : 0.0D;
-         roll = (float)(this.lastRawRollCommandNormalized * (double)planeInfo.mobilityRoll * (double)NEW_FLIGHT_ROLL_RATE_SCALE);
+         roll = roll * this.getRollFactor() * 0.06F;
       }
 
       this.updateVehicleStress();
@@ -1819,30 +1754,22 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastPitchUpAuthority = pitchUpLimiter * envelopeNoseUpAuthority;
       this.lastPitchDownAuthority = (double)controlAuthority * pitchAuthority;
       pitch *= (float)finalPitchAuthority;
-      this.lastDesiredPitchRate = pitch;
       this.lastPitchInputAfterAuthority = pitch;
       this.lastFinalElevatorInput = pitch;
       double deepAxisLimiter = MCH_FlightModel.clamp(1.0D - deepControlLoss * 0.25D, 0.70D, 1.0D);
       this.lastRollAuthority = controlAuthority * deepAxisLimiter;
       this.lastYawAuthority = controlAuthority * MCH_FlightModel.clamp(1.0D - deepControlLoss * 0.18D, 0.75D, 1.0D);
       roll *= (float)this.lastRollAuthority;
-      this.lastDesiredRollRate = roll;
       yaw *= (float)this.lastYawAuthority;
 
       // The legacy controls above still define the requested angular rate.
       // Integrating that request as a damped body rate retains existing mobility
       // tuning while preventing the airframe from snapping to every mouse movement.
       MCP_PlaneInfo info = this.getPlaneInfo();
-      this.lastPitchAngularVelocityBeforeUpdate = this.pitchAngularVelocity;
-      this.lastRollAngularVelocityBeforeUpdate = this.rollAngularVelocity;
-      float pitchRateControl = this.getRateControlForAngularVelocityTarget(pitch, info.pitchTorque, info.pitchDamping);
-      float rollRateControl = this.getRateControlForAngularVelocityTarget(roll, info.rollTorque, info.rollDamping);
-      this.pitchAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.pitchAngularVelocity, pitchRateControl,
+      this.pitchAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.pitchAngularVelocity, pitch,
             info.pitchTorque, info.pitchDamping, info.inertiaMultiplier, partialTicks);
-      this.rollAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.rollAngularVelocity, rollRateControl,
+      this.rollAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.rollAngularVelocity, roll,
             info.rollTorque, info.rollDamping, info.inertiaMultiplier, partialTicks);
-      this.lastPitchAngularVelocityAfterUpdate = this.pitchAngularVelocity;
-      this.lastRollAngularVelocityAfterUpdate = this.rollAngularVelocity;
       this.yawAngularVelocity = MCH_FlightModel.updateAngularVelocity(this.yawAngularVelocity, yaw,
             info.yawTorque, info.yawDamping, info.inertiaMultiplier, partialTicks);
       this.limitPitchYawRateByStructuralG(info);
@@ -1857,8 +1784,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       pitch = this.pitchAngularVelocity * partialTicks;
       roll = this.rollAngularVelocity * partialTicks;
       yaw = this.yawAngularVelocity * partialTicks;
-      this.lastPitchDeltaApplied = pitch;
-      this.lastRollDeltaApplied = roll;
 
       MCH_Math.FMatrix m_add1 = MCH_Math.newMatrix();
       MCH_Math.MatTurnZ(m_add1, roll / 180.0F * 3.1415927F);
@@ -2800,19 +2725,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastRecoveryDueToLiftDeficit = false;
       this.lastRecoveryDueToUnsupportedClimb = false;
       this.lastFinalPitchAngularVelocity = 0.0D;
-      this.lastRawPitchCommandNormalized = 0.0D;
-      this.lastDesiredPitchRate = 0.0D;
-      this.lastPitchAngularVelocityBeforeUpdate = 0.0D;
-      this.lastPitchAngularVelocityAfterUpdate = 0.0D;
-      this.lastPitchDeltaApplied = 0.0D;
-      this.lastRawRollCommandNormalized = 0.0D;
-      this.lastDesiredRollRate = 0.0D;
-      this.lastRollAngularVelocityBeforeUpdate = 0.0D;
-      this.lastRollAngularVelocityAfterUpdate = 0.0D;
-      this.lastRollDeltaApplied = 0.0D;
-      this.lastManualRollKeyCommand = 0.0D;
-      this.lastMouseRollCommand = 0.0D;
-      this.lastUseMouseAim = false;
       this.lastAirborne = false;
       this.pitchAngularVelocity = this.rollAngularVelocity = this.yawAngularVelocity = 0.0F;
       this.currentGForce = 1.0D;
