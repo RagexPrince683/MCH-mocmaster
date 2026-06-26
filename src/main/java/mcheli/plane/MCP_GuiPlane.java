@@ -658,18 +658,18 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          return null;
       }
 
-      // CCIP is aircraft fire-control symbology, not camera symbology.  Use the
-      // airframe as both the origin and the attitude basis so freelook/chase-camera
-      // movement cannot drag the pipper around the screen.  Build an explicit
-      // orthonormal aircraft basis instead of reusing RotVec3 as an inverse rotation;
-      // RotVec3 applies Z->X->Y, so simply changing signs does not produce the
-      // correct world-to-aircraft transform once pitch and roll are present.
-      double dx = pos.xCoord - plane.posX;
-      double dy = pos.yCoord - (plane.posY + (double)plane.height * 0.5D);
-      double dz = pos.zCoord - plane.posZ;
-      Vec3 right = mcheli.MCH_Lib.RotVec3(1.0D, 0.0D, 0.0D, -plane.rotationYaw, -plane.rotationPitch, -plane.getRotRoll());
-      Vec3 up = mcheli.MCH_Lib.RotVec3(0.0D, 1.0D, 0.0D, -plane.rotationYaw, -plane.rotationPitch, -plane.getRotRoll());
-      Vec3 forward = mcheli.MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -plane.rotationYaw, -plane.rotationPitch, -plane.getRotRoll());
+      // The ballistic solution above is computed from the aircraft/release
+      // kinematics.  Projection is a separate concern: draw the solved world impact
+      // point through the active render camera so freelook behaves like every other
+      // world-space marker.  This makes the pipper leave the screen when the pilot
+      // looks away instead of staying pinned to the HUD, while still using the
+      // plane's pitch/yaw for the actual drop prediction.
+      double dx = pos.xCoord - camera.posX;
+      double dy = pos.yCoord - (camera.posY + (double)camera.getEyeHeight());
+      double dz = pos.zCoord - camera.posZ;
+      Vec3 right = mcheli.MCH_Lib.RotVec3(1.0D, 0.0D, 0.0D, -camera.rotationYaw, -camera.rotationPitch, 0.0F);
+      Vec3 up = mcheli.MCH_Lib.RotVec3(0.0D, 1.0D, 0.0D, -camera.rotationYaw, -camera.rotationPitch, 0.0F);
+      Vec3 forward = mcheli.MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -camera.rotationYaw, -camera.rotationPitch, 0.0F);
       double localX = dx * right.xCoord + dy * right.yCoord + dz * right.zCoord;
       double localY = dx * up.xCoord + dy * up.yCoord + dz * up.zCoord;
       double localZ = dx * forward.xCoord + dy * forward.yCoord + dz * forward.zCoord;
