@@ -1214,6 +1214,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             //System.out.println("Extra chunk loader activated.");
         }
 
+        if(this instanceof MCH_EntityBomb) {
+            ((MCH_EntityBomb)this).onCCIPCalibrationImpact(hit);
+        }
+
         if(hit.entityHit instanceof MCH_EntityBaseVehicle) {
 
             MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle) hit.entityHit;

@@ -1,6 +1,8 @@
 package mcheli.weapon;
 
+import mcheli.MCH_Config;
 import mcheli.MCH_Explosion;
+import mcheli.plane.MCP_PlaneCCIPHelper;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.weapon.MCH_EntityBomb;
@@ -51,6 +53,16 @@ public class MCH_WeaponBomb extends MCH_WeaponBase {
          e.motionX = prm.entity.motionX;
          e.motionY = prm.entity.motionY;
          e.motionZ = prm.entity.motionZ;
+         if(MCH_Config.PlaneMouseAimReticleDebug.prmBool || MCH_Config.DebugFlightControl.prmBool) {
+            double hs = Math.sqrt(prm.entity.motionX * prm.entity.motionX + prm.entity.motionZ * prm.entity.motionZ);
+            System.out.println(String.format("[CCIP_BOMB_SPAWN] weapon=%s aircraftMotion=%.6f,%.6f,%.6f aircraftHorizontalSpeed=%.6f aircraftYawPitchRoll=%.2f,%.2f,%.2f releaseParam=%.6f,%.6f,%.6f bombPos=%.6f,%.6f,%.6f bombMotion=%.6f,%.6f,%.6f deltaFromAircraft=%.6f,%.6f,%.6f gravity=%.6f dragXZ=0.999000 ejection=0.000000,0.000000,0.000000 speedDependsAircraft=%s accelerationConfig=%.6f",
+                  super.name, prm.entity.motionX, prm.entity.motionY, prm.entity.motionZ, hs, prm.entity.rotationYaw, prm.entity.rotationPitch, prm.entity instanceof mcheli.aircraft.MCH_EntityBaseVehicle ? ((mcheli.aircraft.MCH_EntityBaseVehicle)prm.entity).getRotRoll() : 0.0F,
+                  prm.posX, prm.posY, prm.posZ, e.posX, e.posY, e.posZ, e.motionX, e.motionY, e.motionZ, e.motionX - prm.entity.motionX, e.motionY - prm.entity.motionY, e.motionZ - prm.entity.motionZ, this.getInfo().gravity, Boolean.valueOf(this.getInfo().speedDependsAircraft), this.getInfo().acceleration));
+            MCP_PlaneCCIPHelper.Result ccip = MCP_PlaneCCIPHelper.predict(super.worldObj, this.getInfo(), Vec3.createVectorHelper(e.posX, e.posY, e.posZ), Vec3.createVectorHelper(e.motionX, e.motionY, e.motionZ));
+            e.setCCIPCalibration(ccip, Vec3.createVectorHelper(prm.entity.motionX, prm.entity.motionY, prm.entity.motionZ), Vec3.createVectorHelper(prm.posX, prm.posY, prm.posZ));
+            System.out.println(String.format("[CCIP_BOMB_PREDICT] weapon=%s predictedRelease=%.6f,%.6f,%.6f predictedInitialVelocity=%.6f,%.6f,%.6f predictedGravity=%.6f predictedDrag=%.6f predictedEjection=0.000000,0.000000,0.000000 predictedTimestep=%.1f predictedImpact=%s ticks=%d valid=%s reason=%s",
+                  super.name, e.posX, e.posY, e.posZ, e.motionX, e.motionY, e.motionZ, ccip.gravity, ccip.horizontalDrag, ccip.simulationTimeStep, ccip.impact != null ? String.format("%.6f,%.6f,%.6f", ccip.impact.xCoord, ccip.impact.yCoord, ccip.impact.zCoord) : "-", Integer.valueOf(ccip.ticksSimulated), Boolean.valueOf(ccip.valid), ccip.reasonInvalid));
+         }
          super.worldObj.spawnEntityInWorld(e);
       }
 
