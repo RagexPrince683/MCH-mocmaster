@@ -123,6 +123,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double lastEffectiveTakeoffSpeed;
    /** True when takeoff threshold scaling is actively gating/assisting rotation. */
    private boolean lastTakeoffMultiplierActive;
+   private boolean lastTakeoffOnGround;
+   private boolean lastTakeoffBlockProbeNearGround;
+   private boolean lastTakeoffBoundingBoxNearGround;
+   private boolean lastTakeoffNearRunwayGround;
+   private String lastTakeoffAssistBlockedReason = "";
    /** True when stall state suppressed takeoff/climb lift headroom this tick. */
    private boolean lastStallSuppressedLiftHeadroom;
    /** Debug validity flags for takeoff and climb lift headroom. */
@@ -367,6 +372,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastBaseTakeoffSpeed = 0.0D;
       this.lastEffectiveTakeoffSpeed = 0.0D;
       this.lastTakeoffMultiplierActive = false;
+      this.lastTakeoffOnGround = false;
+      this.lastTakeoffBlockProbeNearGround = false;
+      this.lastTakeoffBoundingBoxNearGround = false;
+      this.lastTakeoffNearRunwayGround = false;
+      this.lastTakeoffAssistBlockedReason = "";
       this.lastStallSuppressedLiftHeadroom = false;
       this.lastValidTakeoff = false;
       this.lastValidClimb = false;
@@ -1198,6 +1208,12 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    public boolean isLastTakeoffMultiplierActive() {
       return this.lastTakeoffMultiplierActive;
    }
+
+   public boolean isLastTakeoffOnGround() { return this.lastTakeoffOnGround; }
+   public boolean isLastTakeoffBlockProbeNearGround() { return this.lastTakeoffBlockProbeNearGround; }
+   public boolean isLastTakeoffBoundingBoxNearGround() { return this.lastTakeoffBoundingBoxNearGround; }
+   public boolean isLastTakeoffNearRunwayGround() { return this.lastTakeoffNearRunwayGround; }
+   public String getLastTakeoffAssistBlockedReason() { return this.lastTakeoffAssistBlockedReason; }
 
    public boolean isLastStallSuppressedLiftHeadroom() {
       return this.lastStallSuppressedLiftHeadroom;
@@ -2266,7 +2282,8 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double dynamicPressure = MCH_FlightModel.clamp(trueAirspeed / Math.max(0.05D, stallSpeed * 1.35D), 0.0D, 1.8D);
       dynamicPressure *= dynamicPressure;
       double sideslipLoss = MCH_FlightModel.clamp(Math.abs(this.sideslipAngle) / 90.0D, 0.0D, 0.65D);
-      double liftCurve = MCH_FlightModel.getLiftCoefficientLikeCurve(this.angleOfAttack, info.criticalAoA, this.stallSeverity);
+      double effectiveLiftAoA = this.angleOfAttack + (double)info.newFlightWingIncidenceAoA;
+      double liftCurve = MCH_FlightModel.getLiftCoefficientLikeCurve(effectiveLiftAoA, info.criticalAoA, this.stallSeverity);
       double liftEfficiency = (1.0D - sideslipLoss) * (1.0D - this.deepStallSeverity * 0.70D);
       double poweredLiftFloor = (double)info.newFlightLowThrottleLiftRetention
             + (1.0D - (double)info.newFlightLowThrottleLiftRetention) * effectiveThrottle;
@@ -2321,62 +2338,117 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       }
    }
 
+   private boolean isNearRunwayGroundForTakeoff() {
+      this.lastTakeoffOnGround = super.onGround;
+      this.lastTakeoffBlockProbeNearGround = MCH_Lib.getBlockIdY(this, 3, -5) > 0;
+      this.lastTakeoffBoundingBoxNearGround = false;
+      AxisAlignedBB bb = super.boundingBox;
+      if(bb != null) {
+         double[] xs = new double[]{bb.minX + 0.15D, (bb.minX + bb.maxX) * 0.5D, bb.maxX - 0.15D};
+         double[] zs = new double[]{bb.minZ + 0.15D, (bb.minZ + bb.maxZ) * 0.5D, bb.maxZ - 0.15D};
+         int minY = MathHelper.floor_double(bb.minY - 2.5D);
+         int maxY = MathHelper.floor_double(bb.minY + 0.05D);
+         for(int ix = 0; ix < xs.length && !this.lastTakeoffBoundingBoxNearGround; ++ix) {
+            for(int iz = 0; iz < zs.length && !this.lastTakeoffBoundingBoxNearGround; ++iz) {
+               int x = MathHelper.floor_double(xs[ix]);
+               int z = MathHelper.floor_double(zs[iz]);
+               for(int y = maxY; y >= minY; --y) {
+                  Block block = super.worldObj.getBlock(x, y, z);
+                  if(block == null || W_Block.isEqual(block, Blocks.air) || W_Block.isEqual(block, Blocks.water)
+                        || W_Block.isEqual(block, Blocks.flowing_water)) {
+                     continue;
+                  }
+                  AxisAlignedBB blockBox = block.getCollisionBoundingBoxFromPool(super.worldObj, x, y, z);
+                  if(blockBox != null && blockBox.maxY <= bb.minY + 0.05D && bb.minY - blockBox.maxY <= 2.5D) {
+                     this.lastTakeoffBoundingBoxNearGround = true;
+                     break;
+                  }
+               }
+            }
+         }
+      }
+      this.lastTakeoffNearRunwayGround = this.lastTakeoffOnGround || this.lastTakeoffBlockProbeNearGround || this.lastTakeoffBoundingBoxNearGround;
+      return this.lastTakeoffNearRunwayGround;
+   }
+
    private void applyNewFlightTakeoffAssist(boolean levelOff, double waterDepth) {
       MCP_PlaneInfo info = this.getPlaneInfo();
-      if(info == null || !this.useNewMobilitySystem() || levelOff || waterDepth != 0.0D || this.getNozzleRotation() > 0.01F) {
-         this.lastTakeoffMultiplierActive = false;
-         this.lastValidTakeoff = false;
-         return;
-      }
-
-      boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
-      if(!nearGround) {
-         this.lastTakeoffMultiplierActive = false;
-         this.lastValidTakeoff = false;
-         return;
-      }
-
-      double baseTakeoffSpeed = MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor);
+      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      double baseTakeoffSpeed = info != null ? MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor) : 0.0D;
       double multiplier = this.getTakeoffDistanceMultiplier();
       double effectiveTakeoffSpeed = baseTakeoffSpeed * multiplier;
-      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      this.lastHorizontalSpeed = horizontalSpeed;
       this.lastBaseTakeoffSpeed = baseTakeoffSpeed;
       this.lastEffectiveTakeoffSpeed = effectiveTakeoffSpeed;
-      boolean multiplierAdjusted = Math.abs(multiplier - 1.0D) > 1.0E-4D;
-      this.lastTakeoffMultiplierActive = multiplierAdjusted && horizontalSpeed < baseTakeoffSpeed * 1.15D;
-      this.lastValidTakeoff = horizontalSpeed >= effectiveTakeoffSpeed && this.stallSeverity < 0.15D;
-      if(!multiplierAdjusted) {
+      boolean nearGround = this.isNearRunwayGroundForTakeoff();
+      this.lastTakeoffMultiplierActive = false;
+      this.lastValidTakeoff = false;
+      this.lastTakeoffAssistBlockedReason = "";
+
+      if(info == null || !this.useNewMobilitySystem()) {
+         this.lastTakeoffAssistBlockedReason = "not-new-flight";
          return;
       }
-
+      if(levelOff || waterDepth != 0.0D || this.getNozzleRotation() > 0.01F) {
+         this.lastTakeoffAssistBlockedReason = "mode-blocked";
+         return;
+      }
+      if(!nearGround) {
+         this.lastTakeoffAssistBlockedReason = "not-near-runway-ground";
+         return;
+      }
       if(this.stalling || this.stallSeverity >= 0.15D) {
          this.lastStallSuppressedLiftHeadroom = true;
+         this.lastTakeoffAssistBlockedReason = "stall";
          return;
       }
 
+      this.lastValidTakeoff = horizontalSpeed >= effectiveTakeoffSpeed;
       if(horizontalSpeed < effectiveTakeoffSpeed) {
+         this.lastTakeoffAssistBlockedReason = "below-takeoff-speed";
          if(multiplier > 1.0D && super.motionY > 0.0D) {
             super.motionY *= MCH_FlightModel.clamp(horizontalSpeed / Math.max(0.05D, effectiveTakeoffSpeed), 0.15D, 1.0D);
          }
          return;
       }
 
-      double runwayReadiness = MCH_FlightModel.clamp((horizontalSpeed - effectiveTakeoffSpeed)
-            / Math.max(0.05D, baseTakeoffSpeed * 0.35D), 0.0D, 1.0D);
-      double throttleLift = 0.55D + 0.45D * this.getEffectiveEngineThrottle();
+      double runwayReadiness = MCH_FlightModel.clamp((horizontalSpeed / Math.max(0.05D, effectiveTakeoffSpeed) - 0.85D) / 0.25D, 0.0D, 1.0D);
+      double rotationAoA = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 10.0D, 0.0D, 1.0D);
+      double effectiveTakeoffAoA = Math.max((double)info.newFlightWingIncidenceAoA,
+            (double)info.newFlightWingIncidenceAoA + Math.max(0.0D, (double)(-this.getRotPitch())));
+      double liftCoeff = MCH_FlightModel.getLiftCoefficientLikeCurve(effectiveTakeoffAoA, info.criticalAoA, 0.0D);
+      double throttleLift = 0.65D + 0.35D * this.getEffectiveEngineThrottle();
       if(this.isCombatFlapsDeployed()) {
          throttleLift += (double)info.newFlightCombatFlapLift;
       }
       double gravityAccel = this.resolveNewFlightGravity();
       double mass = this.getPhysicalMass();
-      double liftForce = gravityAccel * mass * MCH_FlightModel.clamp(throttleLift, 0.0D, 1.5D) * runwayReadiness;
+      double liftForce = gravityAccel * mass * MCH_FlightModel.clamp(throttleLift, 0.0D, 1.5D)
+            * runwayReadiness * MCH_FlightModel.clamp(0.45D + liftCoeff + rotationAoA * 0.35D, 0.0D, 1.6D);
       double liftAccel = liftForce / mass;
 
+      this.lastTakeoffMultiplierActive = true;
       super.motionY += liftAccel * 0.55D;
       this.lastLiftForce = Math.max(this.lastLiftForce, liftForce);
       this.lastLiftForceBeforeStallLoss = Math.max(this.lastLiftForceBeforeStallLoss, liftForce);
       this.lastLiftForceAfterStallLoss = Math.max(this.lastLiftForceAfterStallLoss, liftForce);
       this.lastLiftAcceleration = Math.max(this.lastLiftAcceleration, liftAccel);
+      this.lastLiftCoefficient = Math.max(this.lastLiftCoefficient, liftCoeff);
+   }
+
+   private void logNewFlightTakeoffDebugServer() {
+      if(super.worldObj == null || super.worldObj.isRemote || MCH_Config.DebugFlightControl == null
+            || !MCH_Config.DebugFlightControl.prmBool || this.ticksExisted % 20 != 0
+            || !this.useNewMobilitySystem() || this.getPlaneInfo() == null) {
+         return;
+      }
+      MCH_Lib.Log("[MCHeli][NewPlane][takeoff-server] posY=%.3f motionY=%.4f onGround=%s nearRunwayGround=%s blockProbeNearGround=%s boundingBoxNearGround=%s horizontalSpeed=%.3f baseTakeoffSpeed=%.3f effectiveTakeoffSpeed=%.3f liftAccel=%.4f assistActive=%s validTakeoff=%s airborneVerticalForcesActive=%s blocked=%s",
+            new Object[]{Double.valueOf(super.posY), Double.valueOf(super.motionY), Boolean.valueOf(super.onGround),
+                  Boolean.valueOf(this.lastTakeoffNearRunwayGround), Boolean.valueOf(this.lastTakeoffBlockProbeNearGround),
+                  Boolean.valueOf(this.lastTakeoffBoundingBoxNearGround), Double.valueOf(this.lastHorizontalSpeed),
+                  Double.valueOf(this.lastBaseTakeoffSpeed), Double.valueOf(this.lastEffectiveTakeoffSpeed),
+                  Double.valueOf(this.lastLiftAcceleration), Boolean.valueOf(this.lastTakeoffMultiplierActive),
+                  Boolean.valueOf(this.lastValidTakeoff), Boolean.valueOf(this.lastAirborne), this.lastTakeoffAssistBlockedReason});
    }
 
    private void applyNewFlightIdleGlideAssist(double gravityAccel) {
@@ -2685,6 +2757,21 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastFinalPitchAngularVelocity = this.pitchAngularVelocity;
    }
 
+   private boolean shouldApplyGroundPitchDamping() {
+      if(!this.useNewMobilitySystem() || this.getPlaneInfo() == null) {
+         return true;
+      }
+      double baseTakeoffSpeed = this.lastBaseTakeoffSpeed > 0.0D ? this.lastBaseTakeoffSpeed
+            : MCH_FlightModel.getStallSpeed(this.getPlaneInfo().stallSpeed, this.getMaxSpeed(), this.getPlaneInfo().stallSpeedFactor);
+      double effectiveTakeoffSpeed = this.lastEffectiveTakeoffSpeed > 0.0D ? this.lastEffectiveTakeoffSpeed
+            : baseTakeoffSpeed * this.getTakeoffDistanceMultiplier();
+      double horizontalSpeed = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      boolean takeoffRoll = horizontalSpeed >= effectiveTakeoffSpeed * 0.75D;
+      boolean pilotOrPlaneRotating = this.lastRequestedPitchInput < -0.05D || this.lastRawPitchCommandNormalized < -0.05D
+            || this.pitchAngularVelocity < -0.01F || this.getRotPitch() < -1.0F;
+      return !(takeoffRoll && pilotOrPlaneRotating && this.getRotPitch() > -15.0F);
+   }
+
    private boolean isAirborneNewConventionalFlight(boolean levelOff, double dp) {
       return this.useNewMobilitySystem() && this.getPlaneInfo() != null && dp == 0.0D && !super.onGround
             && this.getNozzleRotation() <= 0.01F && !levelOff;
@@ -2795,6 +2882,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastBaseTakeoffSpeed = 0.0D;
       this.lastEffectiveTakeoffSpeed = 0.0D;
       this.lastTakeoffMultiplierActive = false;
+      this.lastTakeoffOnGround = false;
+      this.lastTakeoffBlockProbeNearGround = false;
+      this.lastTakeoffBoundingBoxNearGround = false;
+      this.lastTakeoffNearRunwayGround = false;
+      this.lastTakeoffAssistBlockedReason = "";
       this.lastStallSuppressedLiftHeadroom = false;
       this.lastValidTakeoff = false;
       this.lastValidClimb = false;
@@ -2968,7 +3060,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          }
 
          this.addkeyRotValue = this.decayMobilityValue(this.addkeyRotValue, 0.9F, partialTicks);
-         if(!isFly && MathHelper.abs(this.getRotPitch()) < 40.0F) {
+         if(!isFly && MathHelper.abs(this.getRotPitch()) < 40.0F && this.shouldApplyGroundPitchDamping()) {
             this.applyOnGroundPitch(0.97F);
          }
 
@@ -3375,7 +3467,9 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          if(!this.isDestroyed() && (super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0)) {
             super.motionX *= 0.95D;
             super.motionZ *= 0.95D;
-            this.applyOnGroundPitch(0.95F);
+            if(this.shouldApplyGroundPitchDamping()) {
+               this.applyOnGroundPitch(0.95F);
+            }
          }
 
          if(this.isInWater()) {
@@ -3795,6 +3889,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
       this.lastNetForwardAcceleration = super.motionX * horizontalThrustX + super.motionZ * horizontalThrustZ - forwardSpeedBefore;
       this.applyNewFlightTakeoffAssist(levelOff, dp);
+      this.logNewFlightTakeoffDebugServer();
 
       // Calculates current horizontal speed magnitude
       double motion1 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
@@ -3855,7 +3950,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       // Keep ground effect for several blocks so takeoff remains forgiving. Away from
       // the runway, low speed or excessive AoA removes lift and introduces a repeatable
       // buffet/wing drop. Lowering the nose reduces AoA and lets speed build to recovery.
-      boolean nearGround = super.onGround || MCH_Lib.getBlockIdY(this, 3, -5) > 0;
+      boolean nearGround = this.isNearRunwayGroundForTakeoff();
       if(!this.useNewMobilitySystem()) {
          this.lastLiftLoss = 0.0D;
       }
@@ -3927,7 +4022,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          super.motionX *= this.getAcInfo().motionFactor;
          super.motionZ *= this.getAcInfo().motionFactor;
          // If pitch is less than 40 degrees, adjusts pitch based on ground state
-         if(MathHelper.abs(this.getRotPitch()) < 40.0F) {
+         if(MathHelper.abs(this.getRotPitch()) < 40.0F && this.shouldApplyGroundPitchDamping()) {
             this.applyOnGroundPitch(0.8F);
          }
       }
