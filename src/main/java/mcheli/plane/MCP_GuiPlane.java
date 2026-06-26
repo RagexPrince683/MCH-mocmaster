@@ -529,7 +529,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       MCP_PlaneCCIPHelper.Result result = null;
       Vec3 aircraftMotion = Vec3.createVectorHelper(plane.motionX, plane.motionY, plane.motionZ);
       if(enabled) {
-         float partialTicks = super.mc.timer != null ? super.mc.timer.renderPartialTicks : 1.0F;
+         float partialTicks = this.smoothCamPartialTicks;
          Vec3 shotOfs = this.getInterpolatedShotPos(plane, weapon, partialTicks);
          Vec3 planePos = this.getInterpolatedEntityPos(plane, partialTicks);
          Vec3 release = Vec3.createVectorHelper(planePos.xCoord + shotOfs.xCoord, planePos.yCoord + shotOfs.yCoord, planePos.zCoord + shotOfs.zCoord);
@@ -675,7 +675,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       if(pos == null || camera == null) {
          return null;
       }
-      float partialTicks = super.mc.timer != null ? super.mc.timer.renderPartialTicks : 1.0F;
+      float partialTicks = this.smoothCamPartialTicks;
       Vec3 cameraPos = this.getInterpolatedEntityPos(camera, partialTicks);
       double dx = pos.xCoord - cameraPos.xCoord;
       double dy = pos.yCoord - (cameraPos.yCoord + (double)camera.getEyeHeight());
