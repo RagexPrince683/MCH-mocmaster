@@ -11,6 +11,7 @@ ThrottleDownFactor = 0.20
 ItemID = 28779
 MaxHp = 250
 Speed = 0.971
+HasBallisticComputer = true
 Sound = btwentynine
 ThrottleUpDown = 0.1
 AutoPilotRot = 0.00

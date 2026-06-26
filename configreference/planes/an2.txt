@@ -14,6 +14,7 @@ MaxHp = 100
 ;160mph max speed
 
 Speed = 0.449
+HasBallisticComputer = true
 Sound = antwo
 ThrottleUpDown = 0.4
 MaxFuel         = 4960
