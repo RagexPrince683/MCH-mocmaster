@@ -31,6 +31,7 @@ public final class MCP_PlaneCCIPHelper {
 
       int max = info.timeFuse > 0 ? Math.min(MAX_STEPS, info.timeFuse) : MAX_STEPS;
       for(int i = 0; i < max; ++i) {
+         Vec3 prev = copy(pos);
          if(info.speedFactor != 0.0F && i > info.speedFactorStartTick && i < info.speedFactorEndTick) {
             double speed = Math.sqrt(vel.xCoord * vel.xCoord + vel.yCoord * vel.yCoord + vel.zCoord * vel.zCoord);
             if(speed > 1.0E-7D) {
@@ -83,10 +84,10 @@ public final class MCP_PlaneCCIPHelper {
       return weapon != null && isBombLike(weapon.getInfo());
    }
 
-   private static double getAccelerationFactor(MCH_WeaponInfo info) {
-      if(info == null || info.acceleration <= 4.0F) return 1.0D;
-      return (double)(info.acceleration / 4.0F);
-   }
+   //private static double getAccelerationFactor(MCH_WeaponInfo info) {
+   //   if(info == null || info.acceleration <= 4.0F) return 1.0D;
+   //   return (double)(info.acceleration / 4.0F);
+   //}
 
    public static boolean isBombLike(MCH_WeaponInfo info) {
       if(info == null || info.type == null) return false;
@@ -120,7 +121,6 @@ public final class MCP_PlaneCCIPHelper {
       public double horizontalDrag;
       public double accelerationFactor;
       public double simulationTimeStep;
-      public double accelerationFactor;
       public Vec3 ejectionVelocity;
       public Vec3 initialVelocityDeltaFromAircraft;
       public double initialVelocityUpDot;
