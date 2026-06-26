@@ -17,6 +17,7 @@ AutoPilotRot = -0.00
 CameraPosition = 2.0, 1.40, -4.0
 EnableNightVision = true
 EnableEntityRadar = false
+HasBallisticComputer = true
 EnableGunnerMode = true
 ConcurrentGunnerMode = true
 FlareType = 2

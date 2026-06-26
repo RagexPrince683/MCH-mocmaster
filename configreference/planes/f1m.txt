@@ -11,6 +11,7 @@ ThrottleDownFactor = 0.20
 ItemID = 28709
 MaxHp = 100
 Speed = 0.644
+HasBallisticComputer = true
 Float = true
 Sound = prop_fighter
 

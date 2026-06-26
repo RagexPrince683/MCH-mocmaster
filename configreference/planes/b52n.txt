@@ -17,6 +17,7 @@ ThrottleUpDown = 0.1
 ;EnableNightVision = true
 ;EnableEntityRadar = true
 EnableNightVision = true
+HasBallisticComputer = true
 EnableGunnerMode = true
 CameraPosition  = -14.84, 3.96, -18.01
 InventorySize = 9

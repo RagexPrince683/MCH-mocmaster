@@ -14,6 +14,7 @@ EnableNightVision = false
 EnableEntityRadar = true
 RWRType = ALL_WAY_EARLY
 RadarType = EARLY_AA
+HasBallisticComputer = true
 EnableEjectionSeat = true
 Speed = 4.0
 FlareType = 3

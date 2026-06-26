@@ -15,6 +15,7 @@ EnableNightVision = true
 EnableEntityRadar = true
 RWRType = DIGITAL
 RadarType = MODERN_AS
+HasBallisticComputer = true
 EnableGunnerMode = true
 Speed = 1.609
 FlareType = 3

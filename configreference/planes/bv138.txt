@@ -11,6 +11,7 @@ ThrottleDownFactor = 0.20
 ItemID = 28711
 MaxHp = 150
 Speed = 0.496
+HasBallisticComputer = true
 ;177mph
 
 Sound = junkersjumo

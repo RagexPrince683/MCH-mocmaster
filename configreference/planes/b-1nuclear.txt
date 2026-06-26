@@ -21,6 +21,7 @@ EnableNightVision = true
 EnableEntityRadar = true
 RWRType = DIGITAL
 RadarType = MODERN_AS
+HasBallisticComputer = true
 EnableGunnerMode = true
 EnableEjectionSeat = true
 ConcurrentGunnerMode = true
