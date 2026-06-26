@@ -542,7 +542,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          result.initialVelocitySideDot = releaseKinematics.initialVelocitySideDot;
          result.warningImpossibleLaunch = releaseKinematics.warningImpossibleLaunch;
          if(result.valid) {
-            ScreenPoint projected = this.projectWorldToAircraftHud(plane, result.impact, partialTicks);
+            ScreenPoint projected = this.projectWorldToAircraftHud(plane, result.impact);
             if(projected != null && projected.visible) {
                ScreenPoint p = this.smoothCCIPScreenPoint(projected, result.impact, weapon);
                this.drawCCIPPipper(p.x, p.y, p.clamped);
@@ -670,39 +670,30 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       return mcheli.MCH_Lib.RotVec3(weapon.position, -yaw, -pitch, -roll);
    }
 
-   private ScreenPoint projectWorldToAircraftHud(MCP_EntityPlane plane, Vec3 impact, float partialTicks) {
-      if(plane == null || impact == null) {
+   private ScreenPoint projectWorldToAircraftHud(MCP_EntityPlane plane, Vec3 pos) {
+      if(plane == null || pos == null) {
          return null;
       }
-
+      float partialTicks = this.smoothCamPartialTicks;
+      Vec3 planePos = this.getInterpolatedEntityPos(plane, partialTicks);
+      Vec3 toImpact = Vec3.createVectorHelper(pos.xCoord - planePos.xCoord, pos.yCoord - planePos.yCoord, pos.zCoord - planePos.zCoord);
       float yaw = plane.calcRotYaw(partialTicks);
       float pitch = plane.calcRotPitch(partialTicks);
       float roll = plane.calcRotRoll(partialTicks);
-
-      Vec3 forward = this.normalizeVec(mcheli.MCH_Lib.Rot2Vec3(yaw, pitch));
-      Vec3 right = this.normalizeVec(mcheli.MCH_Lib.Rot2Vec3(yaw + 90.0F, 0.0F));
-      Vec3 up = this.normalizeVec(right.crossProduct(forward));
-      right = this.normalizeVec(forward.crossProduct(up));
-
-      double rollRad = Math.toRadians((double)roll);
-      double cosRoll = Math.cos(rollRad);
-      double sinRoll = Math.sin(rollRad);
-      Vec3 rolledRight = Vec3.createVectorHelper(right.xCoord * cosRoll + up.xCoord * sinRoll,
-            right.yCoord * cosRoll + up.yCoord * sinRoll,
-            right.zCoord * cosRoll + up.zCoord * sinRoll);
-      Vec3 rolledUp = Vec3.createVectorHelper(up.xCoord * cosRoll - right.xCoord * sinRoll,
-            up.yCoord * cosRoll - right.yCoord * sinRoll,
-            up.zCoord * cosRoll - right.zCoord * sinRoll);
-      right = this.normalizeVec(rolledRight);
-      up = this.normalizeVec(rolledUp);
-
-      Vec3 aircraftHudOrigin = this.getInterpolatedEntityPos(plane, partialTicks);
-      aircraftHudOrigin.yCoord += (double)plane.getEyeHeight();
-      Vec3 toImpact = Vec3.createVectorHelper(impact.xCoord - aircraftHudOrigin.xCoord,
-            impact.yCoord - aircraftHudOrigin.yCoord,
-            impact.zCoord - aircraftHudOrigin.zCoord);
-      double localForward = toImpact.dotProduct(forward);
+      Vec3 forward = mcheli.MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -yaw, -pitch, -roll);
+      Vec3 right = mcheli.MCH_Lib.RotVec3(1.0D, 0.0D, 0.0D, -yaw, -pitch, -roll);
+      Vec3 up = mcheli.MCH_Lib.RotVec3(0.0D, 1.0D, 0.0D, -yaw, -pitch, -roll);
+      double localForward = this.dot(toImpact, forward);
       if(localForward <= 0.05D) {
+         return null;
+      }
+      double localRight = this.dot(toImpact, right);
+      double localUp = this.dot(toImpact, up);
+      double scale = (double)super.height * 0.75D / localForward;
+      // Match the existing HUD convention: positive aircraft-right offsets draw toward screen-left.
+      double x = (double)super.centerX - localRight * scale;
+      double y = (double)super.centerY - localUp * scale;
+      if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
          return null;
       }
 
@@ -722,6 +713,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          return Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
       }
       return Vec3.createVectorHelper(v.xCoord / length, v.yCoord / length, v.zCoord / length);
+   }
+
+   private double dot(Vec3 a, Vec3 b) {
+      return a.xCoord * b.xCoord + a.yCoord * b.yCoord + a.zCoord * b.zCoord;
    }
 
    private void drawCCIPPipper(double x, double y, boolean clamped) {
