@@ -11,11 +11,21 @@ public final class MCP_PlaneCCIPHelper {
    private MCP_PlaneCCIPHelper() {}
 
    public static Result predict(World world, MCH_WeaponInfo info, Vec3 releasePos, Vec3 initialVelocity) {
+      return predict(world, info, releasePos, initialVelocity, null);
+   }
+
+   public static Result predict(World world, MCH_WeaponInfo info, Vec3 releasePos, Vec3 initialVelocity, Vec3 aircraftMotion) {
       Result r = new Result();
       r.valid = false;
       r.reasonInvalid = "not_run";
       r.releasePos = copy(releasePos);
       r.initialVelocity = copy(initialVelocity);
+      r.aircraftMotion = copy(aircraftMotion);
+      r.speedDependsAircraft = info != null && info.speedDependsAircraft;
+      r.predictedAccelerationBeforeAircraft = info != null ? (double)info.acceleration : 0.0D;
+      r.predictedAccelerationAfterAircraft = r.predictedAccelerationBeforeAircraft;
+      r.speedAddedFromAircraft = 0.0D;
+      r.speedDependsAircraftApplied = false;
       r.gravity = info != null ? (double)info.gravity : 0.0D;
       r.horizontalDrag = info != null && isBombLike(info) ? 0.999D : 1.0D;
       r.simulationTimeStep = 1.0D;
@@ -26,6 +36,8 @@ public final class MCP_PlaneCCIPHelper {
 
       Vec3 pos = copy(releasePos);
       Vec3 vel = copy(initialVelocity);
+
+      applySpeedDependsAircraftFirstTick(info, aircraftMotion, vel, r);
 
       int max = info.timeFuse > 0 ? Math.min(MAX_STEPS, info.timeFuse) : MAX_STEPS;
       for(int i = 0; i < max; ++i) {
@@ -67,6 +79,27 @@ public final class MCP_PlaneCCIPHelper {
       return r;
    }
 
+   private static void applySpeedDependsAircraftFirstTick(MCH_WeaponInfo info, Vec3 aircraftMotion, Vec3 vel, Result r) {
+      if(info == null || aircraftMotion == null || vel == null || r == null || !info.speedDependsAircraft || !isBombLike(info)) {
+         return;
+      }
+
+      double speedAdded = Math.sqrt(aircraftMotion.xCoord * aircraftMotion.xCoord + aircraftMotion.yCoord * aircraftMotion.yCoord + aircraftMotion.zCoord * aircraftMotion.zCoord);
+      double speed = Math.sqrt(vel.xCoord * vel.xCoord + vel.yCoord * vel.yCoord + vel.zCoord * vel.zCoord);
+      if(speed <= 1.0E-7D) {
+         return;
+      }
+
+      r.speedAddedFromAircraft = speedAdded;
+      r.predictedAccelerationBeforeAircraft = (double)info.acceleration;
+      r.predictedAccelerationAfterAircraft = r.predictedAccelerationBeforeAircraft + speedAdded;
+      vel.xCoord = vel.xCoord * r.predictedAccelerationAfterAircraft / speed;
+      vel.yCoord = vel.yCoord * r.predictedAccelerationAfterAircraft / speed;
+      vel.zCoord = vel.zCoord * r.predictedAccelerationAfterAircraft / speed;
+      r.initialVelocity = copy(vel);
+      r.speedDependsAircraftApplied = true;
+   }
+
    private static Vec3 copy(Vec3 v) {
       return v != null ? Vec3.createVectorHelper(v.xCoord, v.yCoord, v.zCoord) : null;
    }
@@ -90,9 +123,15 @@ public final class MCP_PlaneCCIPHelper {
       public double releaseAltitude;
       public Vec3 initialVelocity;
       public Vec3 finalVelocity;
+      public Vec3 aircraftMotion;
       public double gravity;
       public double horizontalDrag;
       public double simulationTimeStep;
+      public boolean speedDependsAircraft;
+      public boolean speedDependsAircraftApplied;
+      public double speedAddedFromAircraft;
+      public double predictedAccelerationBeforeAircraft;
+      public double predictedAccelerationAfterAircraft;
       public Vec3 ejectionVelocity;
       public Vec3 initialVelocityDeltaFromAircraft;
       public double initialVelocityUpDot;
