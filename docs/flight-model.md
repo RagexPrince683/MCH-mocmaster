@@ -49,7 +49,6 @@ The parser also accepts several real-world-unit aliases for new packs. Those ali
 | `NewFlightCombatFlapDrag` | Added flap drag | Adds to engine-brake drag | Unitless gameplay tuning; documented |
 | `NewFlightCombatFlapControl` | Added control authority with flaps | Multiplies control authority | Fraction |
 | `NewFlightCombatFlapOverspeed` | Flap safe-speed fraction | Multiplies overspeed threshold when flaps deployed | Fraction of VNE |
-| `NewFlightWingIncidenceAoA` / `NewFlightLiftBiasAoA` | Wing incidence/camber lift bias | Added to AoA for lift coefficient only | degrees |
 | `StallSpeed` | Stall entry speed | Internal speed threshold | `StallSpeedKmh` in km/h; legacy remains supported |
 | `CriticalAoA` | Stall angle threshold | AoA stall severity and AoA drag | degrees |
 | `TimeUntilStallPastCriticalAoA` | Delay before high-AoA flight develops major energy/stall loss | Seconds above critical AoA gate deep-stall/AoA energy bleed | seconds |

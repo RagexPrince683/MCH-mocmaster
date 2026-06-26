@@ -70,8 +70,6 @@ With the default `AllPlaneSpeed = 1000`, a 500 mph plane therefore uses `Speed 0
 | `NewFlightCombatFlapDrag` | normalized drag coefficient [0..0.05] | 0.014 | **New flight model only.** Extra drag while combat flaps are deployed. |
 | `NewFlightCombatFlapControl` | normalized authority bonus [0..0.40] | 0.14 | **New flight model only.** Control-authority boost while combat flaps are deployed. |
 | `NewFlightCombatFlapOverspeed` | normalized multiplier [0.50..1] | 0.72 | **New flight model only.** Multiplier applied to `MaxSafeSpeed` while flaps are deployed; lower values punish high-speed flap use earlier. |
-| `NewFlightWingIncidenceAoA` | degrees [0..8] | 3.0 | **New flight model only.** Lift-only wing incidence/camber bias so a level fuselage can generate fixed-wing lift without fake vertical thrust or hover support. |
-| `NewFlightLiftBiasAoA` | degrees [0..8] | 3.0 | Alias for `NewFlightWingIncidenceAoA`. |
 | `NewPlaneCameraFocusOffsetX` | local blocks | 0 | **New flight model chase-camera only.** Local-space visual focus X coordinate for the smooth chase camera. Visual only; no physics effect. |
 | `NewPlaneCameraFocusOffsetY` | local blocks | 1 | **New flight model chase-camera only.** Local-space visual focus Y coordinate for the smooth chase camera. Visual only; no physics effect. |
 | `NewPlaneCameraFocusOffsetZ` | local blocks | 0 | **New flight model chase-camera only.** Local-space visual focus Z coordinate for the smooth chase camera. Visual only; no physics effect. |

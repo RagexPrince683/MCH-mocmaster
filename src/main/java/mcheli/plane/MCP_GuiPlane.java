@@ -214,13 +214,6 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       lines.add(String.format("mom stall=%.4f thrust=%.4f finalAV=%.4f", new Object[]{
             Double.valueOf(plane.getLastStallPitchMoment()), Double.valueOf(plane.getLastThrustPitchDownMoment()),
             Double.valueOf(plane.getLastFinalPitchAngularVelocity())}));
-      lines.add(String.format("takeoff on=%s block=%s bbox=%s near=%s assist=%s valid=%s", new Object[]{
-            Boolean.valueOf(plane.isLastTakeoffOnGround()), Boolean.valueOf(plane.isLastTakeoffBlockProbeNearGround()),
-            Boolean.valueOf(plane.isLastTakeoffBoundingBoxNearGround()), Boolean.valueOf(plane.isLastTakeoffNearRunwayGround()),
-            Boolean.valueOf(plane.isLastTakeoffMultiplierActive()), Boolean.valueOf(plane.isLastValidTakeoff())}));
-      lines.add(String.format("takeoff spd/base/req %.3f/%.3f/%.3f block=%s", new Object[]{
-            Double.valueOf(plane.getLastHorizontalSpeed()), Double.valueOf(plane.getLastBaseTakeoffSpeed()),
-            Double.valueOf(plane.getLastEffectiveTakeoffSpeed()), plane.getLastTakeoffAssistBlockedReason()}));
       lines.add(String.format("lift L/W=%.2f T/W=%.2f loss=%.2f validClimb=%s", new Object[]{
             Double.valueOf(plane.getLiftToWeightRatio()), Double.valueOf(plane.getThrustToWeightRatio()),
             Double.valueOf(plane.getLastLiftLoss()), Boolean.valueOf(plane.isLastValidClimb())}));

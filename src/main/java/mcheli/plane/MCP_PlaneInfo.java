@@ -79,8 +79,6 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
    public float newFlightCombatFlapDrag = 0.014F;
    public float newFlightCombatFlapControl = 0.14F;
    public float newFlightCombatFlapOverspeed = 0.72F;
-   /** Wing incidence/camber bias used for lift only, so level fuselage can generate real fixed-wing lift. */
-   public float newFlightWingIncidenceAoA = 3.0F;
    /** Local-space focus point for the new third-person chase camera; yaw-rotated on the client. */
    public float newPlaneCameraFocusOffsetX = 0.0F;
    public float newPlaneCameraFocusOffsetY = 1.0F;
@@ -377,8 +375,6 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.newFlightCombatFlapControl = this.parseNewFlightFloat("NewFlightCombatFlapControl", data, 0.0F, 0.40F);
          } else if(item.equalsIgnoreCase("NewFlightCombatFlapOverspeed")) {
             this.newFlightCombatFlapOverspeed = this.parseNewFlightFloat("NewFlightCombatFlapOverspeed", data, 0.50F, 1.0F);
-         } else if(item.equalsIgnoreCase("NewFlightWingIncidenceAoA") || item.equalsIgnoreCase("NewFlightLiftBiasAoA")) {
-            this.newFlightWingIncidenceAoA = this.parseNewFlightFloat(item, data, 0.0F, 8.0F);
          } else if(item.equalsIgnoreCase("NewPlaneCameraFocusOffsetX")) {
             this.newPlaneCameraFocusOffsetX = this.parseNewFlightFloat("NewPlaneCameraFocusOffsetX", data, -50.0F, 50.0F);
          } else if(item.equalsIgnoreCase("NewPlaneCameraFocusOffsetY")) {
