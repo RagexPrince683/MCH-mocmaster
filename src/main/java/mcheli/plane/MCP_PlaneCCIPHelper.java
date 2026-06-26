@@ -42,7 +42,7 @@ public final class MCP_PlaneCCIPHelper {
          pos.xCoord += vel.xCoord;
          pos.yCoord += vel.yCoord;
          pos.zCoord += vel.zCoord;
-         MovingObjectPosition hit = world.rayTraceBlocks(prev, pos, false, true, false);
+         MovingObjectPosition hit = world.rayTraceBlocks(prev, pos);
          r.ticksSimulated = i + 1;
          if(hit != null && hit.hitVec != null) {
             r.valid = true;
