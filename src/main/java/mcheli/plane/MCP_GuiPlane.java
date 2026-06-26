@@ -180,9 +180,8 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             Double.valueOf(plane.getLastRollBeforeClamp()), Double.valueOf(plane.getLastRollAfterClamp())}));
       lines.add(String.format("SPD raw=%.0f display=%.0f km/h stall=%.3f", new Object[]{
             Double.valueOf(MCH_HudShared.getRawSpeedKmh(plane)), Double.valueOf(MCH_HudShared.getDisplaySpeedPlane(plane)), Double.valueOf(stallSpeed)}));
-      lines.add(String.format("aoa=%.1f pos=%.1f crit=%.1f demand=%.2f sev=%.2f/%.2f/%.2f", new Object[]{
-            Double.valueOf(plane.getAngleOfAttackDegrees()), Double.valueOf(plane.getPositiveNormalAoAForDebug()),
-            Double.valueOf(plane.getCriticalAoA()), Double.valueOf(plane.getStallDemand()),
+      lines.add(String.format("aoa=%.1f demand=%.2f sev=%.2f/%.2f/%.2f", new Object[]{
+            Double.valueOf(plane.getAngleOfAttackDegrees()), Double.valueOf(plane.getStallDemand()),
             Double.valueOf(plane.getSpeedStallSeverity()), Double.valueOf(plane.getAoAStallSeverity()),
             Double.valueOf(plane.getDeepStallSeverity())}));
       lines.add(String.format("auth pitch=%.2f roll=%.2f finalPitch=%.4f finalRollAV=%.4f", new Object[]{
@@ -202,17 +201,8 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       lines.add(String.format("auth ctrl=%.2f up=%.2f down=%.2f yaw=%.2f", new Object[]{
             Double.valueOf(plane.getLastControlAuthority()), Double.valueOf(plane.getLastPitchUpAuthority()),
             Double.valueOf(plane.getLastPitchDownAuthority()), Double.valueOf(plane.getLastYawAuthority())}));
-      lines.add(String.format("wall force=%s sup=%.3f demand=%.3f torque=%.4f forcedThisTick=%.4f", new Object[]{
-            Boolean.valueOf(plane.isLastShouldForceNoseDownRecovery()), Double.valueOf(plane.getLastNoseUpPitchSuppression()),
-            Double.valueOf(plane.getLastPitchWallRecoveryDemand()), Double.valueOf(plane.getLastNoseDownRecoveryTorque()),
-            Double.valueOf(plane.getLastForcedNoseDownPitchDelta())}));
-      lines.add(String.format("wall due lift=%s climb=%s aoa=%s pitchAV %.3f->%.3f->%.3f d=%.3f", new Object[]{
-            Boolean.valueOf(plane.isLastRecoveryDueToLiftDeficit()), Boolean.valueOf(plane.isLastRecoveryDueToUnsupportedClimb()),
-            Boolean.valueOf(plane.isLastRecoveryDueToAoA()), Double.valueOf(plane.getLastPitchAngularVelocityBeforeUpdate()),
-            Double.valueOf(plane.getLastPitchAngularVelocityAfterUpdate()), Double.valueOf(plane.getLastFinalPitchAngularVelocity()),
-            Double.valueOf(plane.getLastPitchDeltaApplied())}));
-      lines.add(String.format("mom stall=%.4f thrust=%.4f finalAV=%.4f", new Object[]{
-            Double.valueOf(plane.getLastStallPitchMoment()), Double.valueOf(plane.getLastThrustPitchDownMoment()),
+      lines.add(String.format("mom stall=%.4f forced=%.4f finalAV=%.4f", new Object[]{
+            Double.valueOf(plane.getLastStallPitchMoment()), Double.valueOf(plane.getLastForcedNoseDownPitchDelta()),
             Double.valueOf(plane.getLastFinalPitchAngularVelocity())}));
       lines.add(String.format("lift L/W=%.2f T/W=%.2f loss=%.2f validClimb=%s", new Object[]{
             Double.valueOf(plane.getLiftToWeightRatio()), Double.valueOf(plane.getThrustToWeightRatio()),

@@ -256,8 +256,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private boolean lastRecoveryDueToAoA;
    private boolean lastRecoveryDueToLiftDeficit;
    private boolean lastRecoveryDueToUnsupportedClimb;
-   private double lastPitchWallRecoveryDemand;
-   private boolean lastShouldForceNoseDownRecovery;
    /** Final body-rate after post-control stall/energy recovery is applied. */
    private double lastFinalPitchAngularVelocity;
    /** Last airborne state used by the new fixed-wing force model. */
@@ -380,9 +378,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastNoseDownRecoverySeverity = 0.0D;
       this.lastStallPitchMoment = 0.0D;
       this.lastThrustPitchDownMoment = 0.0D;
-      this.lastNoseDownRecoveryTorque = 0.0D;
-      this.lastPitchWallRecoveryDemand = 0.0D;
-      this.lastShouldForceNoseDownRecovery = false;
       this.lastPitchMoment = 0.0D;
       this.lastAoAPitchMoment = 0.0D;
       this.lastStabilityPitchMoment = 0.0D;
@@ -766,8 +761,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastRecoveryDueToAoA = false;
       this.lastRecoveryDueToLiftDeficit = false;
       this.lastRecoveryDueToUnsupportedClimb = false;
-      this.lastPitchWallRecoveryDemand = 0.0D;
-      this.lastShouldForceNoseDownRecovery = false;
       this.lastCommandPitchExcess = 0.0D;
       this.lastPhysicalPitchExcess = 0.0D;
       this.lastPitchEnvelopeExcess = 0.0D;
@@ -781,25 +774,31 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       double stallSpeed = Math.max(0.05D, MCH_FlightModel.getStallSpeed(info.stallSpeed, this.getMaxSpeed(), info.stallSpeedFactor));
       double forwardAirspeed = Math.max(0.0D, this.getForwardAirspeed());
       double energyRatio = forwardAirspeed / stallSpeed;
-      double positiveAoA = this.getPositiveNormalAoAForStall();
-      double criticalAoA = Math.max(1.0D, (double)info.criticalAoA);
-      double aoaSeverity = this.smooth01(MCH_FlightModel.clamp((positiveAoA - criticalAoA) / Math.max(1.0D, criticalAoA), 0.0D, 1.0D));
-      double stallRecoveryDemand = Math.max(Math.max(aoaSeverity, this.aoaStallSeverity),
-            Math.max(this.stallSeverity, this.deepStallSeverity));
-      boolean lowEnergyAfterStall = this.timeAfterLowEnergyStall > 0.0D && stallRecoveryDemand > 0.05D;
-      double recoveryDemand = lowEnergyAfterStall
-            ? Math.max(stallRecoveryDemand, this.lastEnergyDeficitSeverity) : stallRecoveryDemand;
+      double liftMargin = this.lastWeightForce > 1.0E-6D
+            ? MCH_FlightModel.clamp(this.getLiftToWeightRatio(), 0.0D, 1.8D) : 1.0D;
+      double thrustMargin = this.lastWeightForce > 1.0E-6D
+            ? MCH_FlightModel.clamp(this.getThrustToWeightRatio(), 0.0D, 1.6D) : 0.0D;
+      double criticalAoA = Math.max(5.0D, (double)info.criticalAoA);
+      double aoaSeverity = this.smooth01(MCH_FlightModel.clamp((this.angleOfAttack - criticalAoA) / Math.max(1.0D, criticalAoA), 0.0D, 1.0D));
+      double speedDeficit = this.smooth01(MCH_FlightModel.clamp((1.0D - energyRatio) / 0.55D, 0.0D, 1.0D));
+      double liftDeficit = MCH_FlightModel.clamp((0.92D - liftMargin) / 0.42D, 0.0D, 1.0D);
+      double thrustDeficit = MCH_FlightModel.clamp(1.0D - thrustMargin, 0.0D, 1.0D);
+      double climbDemand = MCH_FlightModel.clamp(super.motionY / Math.max(0.10D, stallSpeed * 0.65D), 0.0D, 1.0D);
+      double unsupportedClimb = Math.max(this.lastUnsupportedClimbSeverity,
+            climbDemand * Math.max(Math.max(speedDeficit, liftDeficit), thrustDeficit));
+      double noseUpAttitude = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 90.0D, 0.0D, 1.0D);
+      double aerodynamicDeficit = Math.max(Math.max(this.stallSeverity, this.aoaStallSeverity),
+            Math.max(speedDeficit, liftDeficit));
+      double recoveryDemand = Math.max(Math.max(aerodynamicDeficit, this.lastEnergyDeficitSeverity), unsupportedClimb);
 
-      this.lastPitchWallRecoveryDemand = recoveryDemand;
-      this.lastShouldForceNoseDownRecovery = this.shouldForceNoseDownRecovery();
-      this.lastRecoveryDueToLowEnergy = lowEnergyAfterStall;
-      this.lastRecoveryDueToAoA = positiveAoA > criticalAoA || this.aoaStallSeverity > 0.05D;
-      this.lastRecoveryDueToLiftDeficit = false;
-      this.lastRecoveryDueToUnsupportedClimb = false;
+      this.lastRecoveryDueToLowEnergy = speedDeficit > 0.20D || this.lastEnergyDeficitSeverity > 0.20D;
+      this.lastRecoveryDueToAoA = aoaSeverity > 0.05D || this.aoaStallSeverity > 0.05D;
+      this.lastRecoveryDueToLiftDeficit = liftDeficit > 0.15D;
+      this.lastRecoveryDueToUnsupportedClimb = unsupportedClimb > 0.25D;
 
-      if(this.lastShouldForceNoseDownRecovery && recoveryDemand > 0.05D) {
-         double recoveryScale = this.smooth01(MCH_FlightModel.clamp(recoveryDemand, 0.0D, 1.0D));
-         this.lastNoseDownRecoveryTorque = recoveryScale
+      if(recoveryDemand > 0.20D && noseUpAttitude > 0.05D) {
+         double recoveryScale = this.smooth01(MCH_FlightModel.clamp((recoveryDemand - 0.20D) / 0.80D, 0.0D, 1.0D));
+         this.lastNoseDownRecoveryTorque = recoveryScale * noseUpAttitude
                * (0.08D + 0.32D * Math.max(this.stallSeverity, this.deepStallSeverity))
                * (0.55D + (double)info.stallPitchRecoveryStrength);
          this.lastPhysicalRecoveryActive = this.lastNoseDownRecoveryTorque > 1.0E-5D;
@@ -819,19 +818,13 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          return 0.0D;
       }
 
-      MCP_PlaneInfo info = this.getPlaneInfo();
-      double positiveAoA = this.getPositiveNormalAoAForStall();
-      double criticalAoA = Math.max(1.0D, (double)info.criticalAoA);
-      boolean actualAoAThreat = positiveAoA > criticalAoA * 0.85D || this.timePastCriticalAoA > 0.0D;
-      boolean actualStallThreat = this.stalling || this.stallSeverity > 0.05D || this.deepStallSeverity > 0.05D
-            || this.aoaStallSeverity > 0.05D || this.timeAfterLowEnergyStall > 0.0D;
-      if(!actualAoAThreat && !actualStallThreat) {
-         return 0.0D;
-      }
-
-      double aoaWarning = MCH_FlightModel.clamp((positiveAoA - criticalAoA * 0.85D) / Math.max(1.0D, criticalAoA * 0.15D), 0.0D, 1.0D);
-      double stallThreat = Math.max(Math.max(this.stallSeverity, this.deepStallSeverity), this.aoaStallSeverity);
-      return MCH_FlightModel.clamp(Math.max(aoaWarning, stallThreat), 0.0D, 1.0D);
+      double liftDeficit = this.lastWeightForce > 1.0E-6D
+            ? MCH_FlightModel.clamp(1.0D - this.getLiftToWeightRatio(), 0.0D, 1.0D) : 0.0D;
+      double noseUpAttitude = MCH_FlightModel.clamp((double)(-this.getRotPitch()) / 45.0D, 0.0D, 1.0D);
+      double aerodynamicDeficit = Math.max(Math.max(this.stallSeverity, this.aoaStallSeverity),
+            Math.max(this.speedStallSeverity, liftDeficit));
+      double energyDeficit = Math.max(Math.max(aerodynamicDeficit, this.lastEnergyDeficitSeverity), this.getUnsupportedClimbSeverity());
+      return MCH_FlightModel.clamp(energyDeficit * (0.35D + 0.65D * noseUpAttitude), 0.0D, 1.0D);
    }
 
    public double getCurrentGForce() {
@@ -1340,8 +1333,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    public boolean isLastRecoveryDueToAoA() { return this.lastRecoveryDueToAoA; }
    public boolean isLastRecoveryDueToLiftDeficit() { return this.lastRecoveryDueToLiftDeficit; }
    public boolean isLastRecoveryDueToUnsupportedClimb() { return this.lastRecoveryDueToUnsupportedClimb; }
-   public double getLastPitchWallRecoveryDemand() { return this.lastPitchWallRecoveryDemand; }
-   public boolean isLastShouldForceNoseDownRecovery() { return this.lastShouldForceNoseDownRecovery; }
 
    public double getLastFinalPitchAngularVelocity() {
       return this.lastFinalPitchAngularVelocity;
@@ -1572,30 +1563,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    private double getPositiveNormalAoAForStall() {
       double sideslipPenalty = Math.max(0.0D, Math.abs(this.sideslipAngle) - 8.0D) * 0.20D;
       return Math.max(0.0D, this.angleOfAttack) + sideslipPenalty;
-   }
-
-   public double getPositiveNormalAoAForDebug() {
-      return this.getPositiveNormalAoAForStall();
-   }
-
-   private boolean shouldForceNoseDownRecovery() {
-      MCP_PlaneInfo info = this.getPlaneInfo();
-      if(info == null) {
-         return false;
-      }
-
-      double positiveAoA = this.getPositiveNormalAoAForStall();
-      double criticalAoA = Math.max(1.0D, (double)info.criticalAoA);
-      return positiveAoA > criticalAoA
-            || this.aoaStallSeverity > 0.05D
-            || this.stalling
-            || this.stallSeverity > 0.10D
-            || this.deepStallSeverity > 0.10D
-            || this.timeAfterLowEnergyStall > 0.0D;
-   }
-
-   public boolean shouldForceNoseDownRecoveryForDebug() {
-      return this.shouldForceNoseDownRecovery();
    }
 
    private boolean shouldUseLegacyRotationClamp() {
@@ -2626,10 +2593,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
          return;
       }
 
-      if(!this.shouldForceNoseDownRecovery()) {
-         return;
-      }
-
       double thrustDeficit = MCH_FlightModel.clamp(1.0D - this.getThrustToWeightRatio(), 0.0D, 1.0D);
       double climbDemand = Math.max(super.motionY > 0.0D ? MCH_FlightModel.clamp(super.motionY / 0.18D, 0.0D, 1.0D) : 0.35D,
             this.speedStallSeverity);
@@ -2658,8 +2621,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    private void queueNoseDownRecovery(double pitchDownVelocity, double severity, double noseUpDamping) {
-      this.lastShouldForceNoseDownRecovery = this.shouldForceNoseDownRecovery();
-      if(pitchDownVelocity <= 1.0E-5D || !this.lastShouldForceNoseDownRecovery) {
+      if(pitchDownVelocity <= 1.0E-5D) {
          return;
       }
 
@@ -2805,9 +2767,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastNoseDownRecoverySeverity = 0.0D;
       this.lastStallPitchMoment = 0.0D;
       this.lastThrustPitchDownMoment = 0.0D;
-      this.lastNoseDownRecoveryTorque = 0.0D;
-      this.lastPitchWallRecoveryDemand = 0.0D;
-      this.lastShouldForceNoseDownRecovery = false;
       this.lastPitchMoment = 0.0D;
       this.lastAoAPitchMoment = 0.0D;
       this.lastStabilityPitchMoment = 0.0D;
@@ -3548,9 +3507,6 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.lastNoseDownRecoverySeverity = 0.0D;
       this.lastStallPitchMoment = 0.0D;
       this.lastThrustPitchDownMoment = 0.0D;
-      this.lastNoseDownRecoveryTorque = 0.0D;
-      this.lastPitchWallRecoveryDemand = 0.0D;
-      this.lastShouldForceNoseDownRecovery = false;
       this.lastPitchMoment = 0.0D;
       this.lastAoAPitchMoment = 0.0D;
       this.lastStabilityPitchMoment = 0.0D;
