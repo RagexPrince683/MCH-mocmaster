@@ -540,7 +540,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          result.initialVelocitySideDot = releaseKinematics.initialVelocitySideDot;
          result.warningImpossibleLaunch = releaseKinematics.warningImpossibleLaunch;
          if(result.valid) {
-            ScreenPoint projected = this.projectWorldToHud(result.impact, plane, false);
+            ScreenPoint projected = this.projectWorldToHud(result.impact, plane, true);
             if(projected != null && projected.visible) {
                ScreenPoint p = this.smoothCCIPScreenPoint(projected, result.impact, weapon);
                this.drawCCIPPipper(p.x, p.y, p.clamped);
@@ -654,29 +654,21 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    }
 
    private ScreenPoint projectWorldToHud(Vec3 pos, MCP_EntityPlane plane, boolean clamp) {
-      if(pos == null || plane == null) {
+      Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
+      if(pos == null || plane == null || camera == null) {
          return null;
       }
-
-      // CCIP is aircraft fire-control symbology, not camera symbology.  Use the
-      // airframe as both the origin and the attitude basis so freelook/chase-camera
-      // movement cannot drag the pipper around the screen.  Build an explicit
-      // orthonormal aircraft basis instead of reusing RotVec3 as an inverse rotation;
-      // RotVec3 applies Z->X->Y, so simply changing signs does not produce the
-      // correct world-to-aircraft transform once pitch and roll are present.
-      double dx = pos.xCoord - plane.posX;
-      double dy = pos.yCoord - (plane.posY + (double)plane.height * 0.5D);
-      double dz = pos.zCoord - plane.posZ;
-      Vec3 right = mcheli.MCH_Lib.RotVec3(1.0D, 0.0D, 0.0D, -plane.rotationYaw, -plane.rotationPitch, -plane.getRotRoll());
-      Vec3 up = mcheli.MCH_Lib.RotVec3(0.0D, 1.0D, 0.0D, -plane.rotationYaw, -plane.rotationPitch, -plane.getRotRoll());
-      Vec3 forward = mcheli.MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -plane.rotationYaw, -plane.rotationPitch, -plane.getRotRoll());
-      double localX = dx * right.xCoord + dy * right.yCoord + dz * right.zCoord;
-      double localY = dx * up.xCoord + dy * up.yCoord + dz * up.zCoord;
-      double localZ = dx * forward.xCoord + dy * forward.yCoord + dz * forward.zCoord;
-      if(localZ <= 0.05D) return null;
-      double scale = (double)super.height * 0.75D / localZ;
-      double x = (double)super.centerX + localX * scale;
-      double y = (double)super.centerY - localY * scale;
+      double dx = pos.xCoord - camera.posX;
+      double dy = pos.yCoord - (camera.posY + (double)camera.getEyeHeight());
+      double dz = pos.zCoord - camera.posZ;
+      // CCIP is aircraft fire-control symbology, so project its impact point through the
+      // airframe attitude instead of the freelook/render camera attitude. This keeps the
+      // pipper tied to where the plane is pointed while the pilot looks around.
+      Vec3 local = mcheli.MCH_Lib.RotVec3(dx, dy, dz, plane.rotationYaw, plane.rotationPitch, plane.getRotRoll());
+      if(local.zCoord <= 0.05D) return null;
+      double scale = (double)super.height * 0.75D / local.zCoord;
+      double x = (double)super.centerX - local.xCoord * scale;
+      double y = (double)super.centerY - local.yCoord * scale;
       boolean clamped = false;
       if(clamp) {
          double margin = 14.0D;
@@ -684,8 +676,6 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          double cy = MathHelper.clamp_double(y, margin, (double)super.height - margin);
          clamped = cx != x || cy != y;
          x = cx; y = cy;
-      } else if(x < -32.0D || x > (double)super.width + 32.0D || y < -32.0D || y > (double)super.height + 32.0D) {
-         return null;
       }
       return new ScreenPoint(x, y, clamped);
    }
