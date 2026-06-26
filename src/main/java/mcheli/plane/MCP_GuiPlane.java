@@ -217,6 +217,18 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       lines.add(String.format("lift L/W=%.2f T/W=%.2f loss=%.2f validClimb=%s", new Object[]{
             Double.valueOf(plane.getLiftToWeightRatio()), Double.valueOf(plane.getThrustToWeightRatio()),
             Double.valueOf(plane.getLastLiftLoss()), Boolean.valueOf(plane.isLastValidClimb())}));
+      lines.add(String.format("takeoff near=%s ground=%s assist=%s mult=%s valid=%s", new Object[]{
+            Boolean.valueOf(plane.isLastNearGround()), Boolean.valueOf(plane.onGround),
+            Boolean.valueOf(plane.isLastTakeoffAssistActive()), Boolean.valueOf(plane.isLastTakeoffMultiplierActive()),
+            Boolean.valueOf(plane.isLastValidTakeoff())}));
+      lines.add(String.format("takeoff spd %.3f base %.3f req %.3f ready %.2f rotAoA %.2f", new Object[]{
+            Double.valueOf(plane.getLastTakeoffHorizontalSpeed()), Double.valueOf(plane.getLastBaseTakeoffSpeed()),
+            Double.valueOf(plane.getLastTakeoffRequiredSpeed()), Double.valueOf(plane.getLastTakeoffReadiness()),
+            Double.valueOf(plane.getLastTakeoffRotationAoA())}));
+      lines.add(String.format("takeoff liftAccel %.4f motionY %.4f->%.4f gDamp=%s rotPhase=%s", new Object[]{
+            Double.valueOf(plane.getLastTakeoffLiftAccel()), Double.valueOf(plane.getLastTakeoffMotionYBefore()),
+            Double.valueOf(plane.getLastTakeoffMotionYAfter()), Boolean.valueOf(plane.isLastGroundPitchDampingApplied()),
+            Boolean.valueOf(plane.isLastTakeoffRotationPhase())}));
       lines.add(String.format("energy ratio=%.2f deficit=%.2f dE=%.4f reason=%s", new Object[]{
             Double.valueOf(plane.getLastPitchEnvelopeEnergyRatio()), Double.valueOf(plane.getLastEnergyDeficitSeverity()),
             Double.valueOf(plane.getLastEnergyDelta()), plane.getLastLowHorizontalSpeedWarning()}));
