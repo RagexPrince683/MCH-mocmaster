@@ -687,21 +687,27 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       if(localForward <= 0.05D) {
          return null;
       }
-      double localRight = this.dot(toImpact, right);
-      double localUp = this.dot(toImpact, up);
-      double scale = (double)super.height * 0.75D / localForward;
-      // Match the existing HUD convention: positive aircraft-right offsets draw toward screen-left.
-      double x = (double)super.centerX - localRight * scale;
-      double y = (double)super.centerY - localUp * scale;
-      if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
-         return null;
-      }
-
+     // double localRight = this.dot(toImpact, right);
+     // double localUp = this.dot(toImpact, up);
+     // double scale = (double)super.height * 0.75D / localForward;
+     // // Match the existing HUD convention: positive aircraft-right offsets draw toward screen-left.
+     // double x = (double)super.centerX - localRight * scale;
+     // double y = (double)super.centerY - localUp * scale;
       double localRight = toImpact.dotProduct(right);
       double localUp = toImpact.dotProduct(up);
       double scale = (double)super.height * 0.75D / localForward;
       double x = (double)super.centerX - localRight * scale;
       double y = (double)super.centerY - localUp * scale;
+      //fucking pick one
+      if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
+         return null;
+      }
+
+      //double localRight = toImpact.dotProduct(right);
+      //double localUp = toImpact.dotProduct(up);
+      //double scale = (double)super.height * 0.75D / localForward;
+      //double x = (double)super.centerX - localRight * scale;
+      //double y = (double)super.centerY - localUp * scale;
       double clampedX = MathHelper.clamp_double(x, 0.0D, (double)super.width);
       double clampedY = MathHelper.clamp_double(y, 0.0D, (double)super.height);
       return new ScreenPoint(clampedX, clampedY, x != clampedX || y != clampedY);
