@@ -14,18 +14,19 @@ public final class MCP_PlaneCCIPHelper {
       Result r = new Result();
       r.valid = false;
       r.reasonInvalid = "not_run";
+      r.releasePos = copy(releasePos);
+      r.initialVelocity = copy(initialVelocity);
       if(world == null || info == null || releasePos == null || initialVelocity == null) {
          r.reasonInvalid = "missing_input";
          return r;
       }
 
-      Vec3 pos = Vec3.createVectorHelper(releasePos.xCoord, releasePos.yCoord, releasePos.zCoord);
-      Vec3 vel = Vec3.createVectorHelper(initialVelocity.xCoord, initialVelocity.yCoord, initialVelocity.zCoord);
-      r.initialVelocity = Vec3.createVectorHelper(vel.xCoord, vel.yCoord, vel.zCoord);
+      Vec3 pos = copy(releasePos);
+      Vec3 vel = copy(initialVelocity);
 
       int max = info.timeFuse > 0 ? Math.min(MAX_STEPS, info.timeFuse) : MAX_STEPS;
       for(int i = 0; i < max; ++i) {
-         Vec3 prev = Vec3.createVectorHelper(pos.xCoord, pos.yCoord, pos.zCoord);
+         Vec3 prev = copy(pos);
          if(info.speedFactor != 0.0F && i > info.speedFactorStartTick && i < info.speedFactorEndTick) {
             double speed = Math.sqrt(vel.xCoord * vel.xCoord + vel.yCoord * vel.yCoord + vel.zCoord * vel.zCoord);
             if(speed > 1.0E-7D) {
@@ -42,12 +43,12 @@ public final class MCP_PlaneCCIPHelper {
          pos.xCoord += vel.xCoord;
          pos.yCoord += vel.yCoord;
          pos.zCoord += vel.zCoord;
-         MovingObjectPosition hit = world.rayTraceBlocks(prev, pos);
+         MovingObjectPosition hit = world.rayTraceBlocks(prev, pos, false, true, false);
          r.ticksSimulated = i + 1;
          if(hit != null && hit.hitVec != null) {
             r.valid = true;
             r.impact = hit.hitVec;
-            r.finalVelocity = Vec3.createVectorHelper(vel.xCoord, vel.yCoord, vel.zCoord);
+            r.finalVelocity = copy(vel);
             r.impactDistance = releasePos.distanceTo(r.impact);
             r.releaseAltitude = releasePos.yCoord - r.impact.yCoord;
             r.reasonInvalid = "";
@@ -58,9 +59,13 @@ public final class MCP_PlaneCCIPHelper {
             break;
          }
       }
-      r.finalVelocity = Vec3.createVectorHelper(vel.xCoord, vel.yCoord, vel.zCoord);
+      r.finalVelocity = copy(vel);
       if("not_run".equals(r.reasonInvalid)) r.reasonInvalid = "no_collision";
       return r;
+   }
+
+   private static Vec3 copy(Vec3 v) {
+      return v != null ? Vec3.createVectorHelper(v.xCoord, v.yCoord, v.zCoord) : null;
    }
 
    public static boolean isBombWeapon(MCH_WeaponBase weapon) {
@@ -76,6 +81,7 @@ public final class MCP_PlaneCCIPHelper {
    public static class Result {
       public boolean valid;
       public Vec3 impact;
+      public Vec3 releasePos;
       public int ticksSimulated;
       public double impactDistance;
       public double releaseAltitude;
