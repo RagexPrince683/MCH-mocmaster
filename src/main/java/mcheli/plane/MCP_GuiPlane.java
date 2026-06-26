@@ -540,7 +540,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          result.initialVelocitySideDot = releaseKinematics.initialVelocitySideDot;
          result.warningImpossibleLaunch = releaseKinematics.warningImpossibleLaunch;
          if(result.valid) {
-            ScreenPoint projected = this.projectWorldToHud(result.impact, true);
+            ScreenPoint projected = this.projectWorldToHud(result.impact, plane, true);
             if(projected != null && projected.visible) {
                ScreenPoint p = this.smoothCCIPScreenPoint(projected, result.impact, weapon);
                this.drawCCIPPipper(p.x, p.y, p.clamped);
@@ -653,15 +653,18 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       return v == null ? "-" : String.format("%.2f,%.2f,%.2f", Double.valueOf(v.xCoord), Double.valueOf(v.yCoord), Double.valueOf(v.zCoord));
    }
 
-   private ScreenPoint projectWorldToHud(Vec3 pos, boolean clamp) {
+   private ScreenPoint projectWorldToHud(Vec3 pos, MCP_EntityPlane plane, boolean clamp) {
       Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
-      if(pos == null || camera == null) {
+      if(pos == null || plane == null || camera == null) {
          return null;
       }
       double dx = pos.xCoord - camera.posX;
       double dy = pos.yCoord - (camera.posY + (double)camera.getEyeHeight());
       double dz = pos.zCoord - camera.posZ;
-      Vec3 local = mcheli.MCH_Lib.RotVec3(dx, dy, dz, camera.rotationYaw, camera.rotationPitch, 0.0F);
+      // CCIP is aircraft fire-control symbology, so project its impact point through the
+      // airframe attitude instead of the freelook/render camera attitude. This keeps the
+      // pipper tied to where the plane is pointed while the pilot looks around.
+      Vec3 local = mcheli.MCH_Lib.RotVec3(dx, dy, dz, plane.rotationYaw, plane.rotationPitch, plane.getRotRoll());
       if(local.zCoord <= 0.05D) return null;
       double scale = (double)super.height * 0.75D / local.zCoord;
       double x = (double)super.centerX - local.xCoord * scale;
