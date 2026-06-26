@@ -654,8 +654,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    }
 
    private ScreenPoint projectWorldToHud(Vec3 pos, MCP_EntityPlane plane, boolean clamp) {
-      Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
-      if(pos == null || plane == null || camera == null) {
+      if(pos == null || plane == null) {
          return null;
       }
 
