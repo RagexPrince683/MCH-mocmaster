@@ -635,10 +635,11 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       String msg3 = String.format("aircraftMotion=%s ejectionVelocity=%s initialBombVelocity=%s deltaFromAircraft=%s",
             this.formatVec(aircraftMotion), this.formatVec(result != null ? result.ejectionVelocity : null),
             this.formatVec(result != null ? result.initialVelocity : null), this.formatVec(result != null ? result.initialVelocityDeltaFromAircraft : null));
-      String msg4 = String.format("initialVelocityUpDot=%.3f initialVelocitySideDot=%.3f warningImpossibleLaunch=%s",
-            Double.valueOf(result != null ? result.initialVelocityUpDot : 0.0D), Double.valueOf(result != null ? result.initialVelocitySideDot : 0.0D),
-            Boolean.valueOf(result != null && result.warningImpossibleLaunch));
-      String msg5 = String.format("cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch/Roll=%.1f/%.1f/%.1f",
+      String msg4 = String.format("predictedGravity=%.4f predictedDrag=%.4f predictedTimestep=%.1f initialVelocityUpDot=%.3f initialVelocitySideDot=%.3f",
+            Double.valueOf(result != null ? result.gravity : 0.0D), Double.valueOf(result != null ? result.horizontalDrag : 0.0D), Double.valueOf(result != null ? result.simulationTimeStep : 0.0D),
+            Double.valueOf(result != null ? result.initialVelocityUpDot : 0.0D), Double.valueOf(result != null ? result.initialVelocitySideDot : 0.0D));
+      String msg5 = String.format("warningImpossibleLaunch=%s cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch/Roll=%.1f/%.1f/%.1f",
+            Boolean.valueOf(result != null && result.warningImpossibleLaunch),
             Float.valueOf(camera != null ? camera.rotationYaw : 0.0F), Float.valueOf(camera != null ? camera.rotationPitch : 0.0F),
             Float.valueOf(plane.rotationYaw), Float.valueOf(plane.rotationPitch), Float.valueOf(plane.getRotRoll()));
       this.drawString(msg1, super.centerX - 170, super.centerY + 70, 0xFF55FF66);

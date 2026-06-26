@@ -16,6 +16,9 @@ public final class MCP_PlaneCCIPHelper {
       r.reasonInvalid = "not_run";
       r.releasePos = copy(releasePos);
       r.initialVelocity = copy(initialVelocity);
+      r.gravity = info != null ? (double)info.gravity : 0.0D;
+      r.horizontalDrag = info != null && isBombLike(info) ? 0.999D : 1.0D;
+      r.simulationTimeStep = 1.0D;
       if(world == null || info == null || releasePos == null || initialVelocity == null) {
          r.reasonInvalid = "missing_input";
          return r;
@@ -36,14 +39,14 @@ public final class MCP_PlaneCCIPHelper {
             }
          }
          vel.yCoord += (double)info.gravity;
-         if(isBombLike(info)) {
-            vel.xCoord *= 0.999D;
-            vel.zCoord *= 0.999D;
-         }
          pos.xCoord += vel.xCoord;
          pos.yCoord += vel.yCoord;
          pos.zCoord += vel.zCoord;
          MovingObjectPosition hit = world.rayTraceBlocks(prev, pos);
+         if(isBombLike(info)) {
+            vel.xCoord *= 0.999D;
+            vel.zCoord *= 0.999D;
+         }
          r.ticksSimulated = i + 1;
          if(hit != null && hit.hitVec != null) {
             r.valid = true;
@@ -87,6 +90,9 @@ public final class MCP_PlaneCCIPHelper {
       public double releaseAltitude;
       public Vec3 initialVelocity;
       public Vec3 finalVelocity;
+      public double gravity;
+      public double horizontalDrag;
+      public double simulationTimeStep;
       public Vec3 ejectionVelocity;
       public Vec3 initialVelocityDeltaFromAircraft;
       public double initialVelocityUpDot;
