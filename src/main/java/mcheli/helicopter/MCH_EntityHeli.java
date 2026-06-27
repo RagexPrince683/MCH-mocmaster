@@ -1632,8 +1632,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float rightZ = -MathHelper.sin(yawRadians);
 
       float horizontalThrustScale = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.horizontalRotorThrustScale, 0.0F, 1000.0F):0.35F;
-      float lateralThrustScale = this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.helicopterLateralThrustScale, 0.0F, 1000.0F):0.45F;
-      float backwardThrustScale = this.heliInfo != null && this.isFinite(this.heliInfo.helicopterBackwardThrustScale)?MathHelper.clamp_float(this.heliInfo.helicopterBackwardThrustScale, 0.0F, 1000.0F):1.0F;
+      float lateralThrustScale = (this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.helicopterLateralThrustScale, 0.0F, 1000.0F):0.45F) * NEW_HELI_LATERAL_SPEED_TUNING_MULTIPLIER;
+      float backwardThrustScale = this.heliInfo != null && this.isFinite(this.heliInfo.helicopterBackwardThrustScale)?MathHelper.clamp_float(this.heliInfo.helicopterBackwardThrustScale, 0.0F, 1000.0F) * NEW_HELI_BACKWARD_TUNING_MULTIPLIER:1.0F;
       float attitudeTiltForward = MathHelper.clamp_float(MathHelper.sin(this.getRotPitch() / 180.0F * 3.1415927F), -0.75F, 0.75F);
       float attitudeTiltRight = MathHelper.clamp_float(-MathHelper.sin(this.getRotRoll() / 180.0F * 3.1415927F), -0.75F, 0.75F);
       float effectiveTiltForward = MathHelper.clamp_float(this.rotorTiltForward + attitudeTiltForward, -1.0F, 1.0F);
