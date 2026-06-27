@@ -1,6 +1,6 @@
 # Helicopter config values and rotorcraft lift model
 
-Helicopters inherit all shared keys from `base.md`. Helicopter-only parser keys are small; most helicopter behavior is controlled by shared `speed`, `gravity`, `MotionFactor`, mobility, throttle, and ceiling values. Helicopter `speed` values are authored as real-world mph divided by 100; runtime top-speed caps convert them to internal motion with `speed * 100 mph * 1.609344 / 72`, while HUD speed is shown as actual km/h.
+Helicopters inherit all shared keys from `base.md`. Helicopter-only parser keys are small; most helicopter behavior is controlled by shared `speed`, `gravity`, `MotionFactor`, mobility, throttle, and ceiling values. Helicopter `speed` values are authored as MCHeli internal horizontal speed units and are multiplied by `AllHeliSpeed` during validation; runtime top-speed caps use the same scaled internal value, while HUD speed is shown as km/h from actual motion.
 
 ## Helicopter-only keys
 
@@ -40,7 +40,7 @@ Helicopters inherit all shared keys from `base.md`. Helicopter-only parser keys 
 - Default `SoundRange = 80`.
 - Default `camerazoom = 8`.
 - HUD defaults are `heli`, `heli_gnr`, then `gunner`.
-- `speed` is multiplied by global `AllHeliSpeed` during validation. Helicopter physics then treats the resulting value as mph/100 for top-speed purposes, so `Speed = 1.82` caps around 182 mph / 293 km/h instead of 1.82 internal blocks/tick.
+- `speed` is multiplied by global `AllHeliSpeed` during validation. Helicopter physics uses that scaled internal value directly for top-speed purposes, so low legacy asset speeds such as `Speed = 0.5` become usable when the default `AllHeliSpeed = 3.4` raises them to about `1.7` internal speed.
 
 ## New helicopter flight-model foundation
 
