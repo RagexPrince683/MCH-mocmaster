@@ -12,8 +12,6 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
 
    public MCH_ItemHeli item = null;
    public boolean isEnableFoldBlade;
-   /** Raw authored Speed config before global AllHeliSpeed scaling is applied for legacy flight. */
-   public float authoredSpeed = 0.1F;
    /** Opt-in gate for the isolated helicopter flight-model rewrite. Default false keeps legacy lift/motion behavior. */
    public boolean useNewHelicopterFlightModel;
    /** Relative vehicle mass used by future helicopter physics. 1.0 matches current legacy scale. */
@@ -145,9 +143,6 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
 
    public void loadItemData(String item, String data) {
       super.loadItemData(item, data);
-      if(item.equalsIgnoreCase("Speed")) {
-         this.authoredSpeed = this.toFloat(data, 0.0F, this.getMaxSpeed());
-      }
       if(item.compareTo("enablefoldblade") == 0) {
          this.isEnableFoldBlade = this.toBool(data);
       } else if(item.equalsIgnoreCase("UseNewHelicopterFlightModel") || item.equalsIgnoreCase("EnableNewHelicopterFlightModel")) {
