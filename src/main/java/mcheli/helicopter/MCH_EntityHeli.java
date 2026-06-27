@@ -115,8 +115,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private static final double LEGACY_HELI_HOVER_TRANSLATION_ACCEL = 0.0015D;
    private static final double NEW_HELI_REGULAR_HORIZONTAL_SPEED_SCALE = 4.0D;
    private static final double NEW_HELI_HOVER_HORIZONTAL_SPEED_SCALE = 0.35D;
-   private static final float NEW_HELI_LATERAL_SPEED_TUNING_MULTIPLIER = 2.0F;
-   private static final float NEW_HELI_BACKWARD_TUNING_MULTIPLIER = 2.0F;
+   private static final float NEW_HELI_SPEED_MATCH_TILT_REFERENCE = 0.35F;
+   private static final float NEW_HELI_SPEED_MATCH_RESPONSE = 0.08F;
 
 
    public MCH_EntityHeli(World world) {
@@ -1666,12 +1666,22 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       double speedScale = this.isHoveringMode()?NEW_HELI_HOVER_HORIZONTAL_SPEED_SCALE:NEW_HELI_REGULAR_HORIZONTAL_SPEED_SCALE;
       double minimumSafetyLimit = this.isHoveringMode()?0.35D:4.0D;
       double safetyLimit = Math.max(configuredSpeed * speedScale, minimumSafetyLimit);
-      float lateralLimit = (float)(safetyLimit * (double)((this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.helicopterMaxLateralSpeedScale, 0.0F, 1000.0F):0.45F) * NEW_HELI_LATERAL_SPEED_TUNING_MULTIPLIER));
+      float backwardLimitScale = this.heliInfo != null && this.isFinite(this.heliInfo.helicopterMaxBackwardSpeedScale)?MathHelper.clamp_float(this.heliInfo.helicopterMaxBackwardSpeedScale, 0.0F, 1000.0F):1.0F;
+      float speedMatchResponse = MathHelper.clamp_float(NEW_HELI_SPEED_MATCH_RESPONSE * tickDelta, 0.0F, 1.0F);
+      float forwardSpeedCommand = MathHelper.clamp_float(effectiveTiltForward / NEW_HELI_SPEED_MATCH_TILT_REFERENCE, -1.0F, 1.0F);
+      float forwardTargetSpeed = (float)configuredSpeed * forwardSpeedCommand;
+      if(forwardTargetSpeed < 0.0F) {
+         forwardTargetSpeed *= backwardLimitScale;
+      }
+      forwardVelocity += (forwardTargetSpeed - forwardVelocity) * MathHelper.abs(forwardSpeedCommand) * speedMatchResponse;
+      float lateralLimit = (float)(safetyLimit * (double)(this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.helicopterMaxLateralSpeedScale, 0.0F, 1000.0F):0.45F));
+      float lateralSpeedCommand = MathHelper.clamp_float(effectiveTiltRight / NEW_HELI_SPEED_MATCH_TILT_REFERENCE, -1.0F, 1.0F);
+      float lateralTargetSpeed = lateralLimit * lateralSpeedCommand;
+      lateralVelocity += (lateralTargetSpeed - lateralVelocity) * MathHelper.abs(lateralSpeedCommand) * speedMatchResponse;
       this.lateralSpeedCapped = lateralLimit > 0.0F && MathHelper.abs(lateralVelocity) > lateralLimit;
       if(this.lateralSpeedCapped) {
          lateralVelocity = MathHelper.clamp_float(lateralVelocity, -lateralLimit, lateralLimit);
       }
-      float backwardLimitScale = this.heliInfo != null && this.isFinite(this.heliInfo.helicopterMaxBackwardSpeedScale)?MathHelper.clamp_float(this.heliInfo.helicopterMaxBackwardSpeedScale, 0.0F, 1000.0F) * NEW_HELI_BACKWARD_TUNING_MULTIPLIER:1.0F;
       float backwardLimit = (float)(safetyLimit * (double)backwardLimitScale);
       this.backwardSpeedCapped = forwardVelocity < -backwardLimit && MathHelper.abs(backwardLimitScale - 1.0F) > 0.0001F;
       if(this.backwardSpeedCapped) {
