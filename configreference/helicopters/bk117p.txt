@@ -9,6 +9,7 @@ ChaffUseTime = 100
 ThrottleDownFactor = 0.35
 MaxHp = 100
 EnableNightVision = true
+; top speed 250 km/h = 155 mph; Speed uses MPH-based tuning
 Speed = 1.55
 MaxFuel         = 1140
 FuelConsumption = 0.317

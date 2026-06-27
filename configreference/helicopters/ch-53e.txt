@@ -15,6 +15,7 @@ FloatOffset = -0.4
 EnableFoldBlade = true
 EnableNightVision = true
 EnableEntityRadar = false
+; top speed 315 km/h = 196 mph; Speed uses MPH-based tuning
 Speed = 1.96
 ThrottleUpDown = 0.5
 FlareType = 3

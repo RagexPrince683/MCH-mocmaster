@@ -11,6 +11,7 @@ ItemID = 288091
 MaxHp = 100
 EnableGunnerMode = true
 EnableNightVision = true
+; top speed 278 km/h = 173 mph; Speed uses MPH-based tuning
 Speed = 1.73
 FlareType = 3
 CameraPosition = 0.00,  0.66,   7.02

@@ -13,6 +13,7 @@ NewSmallUAV = true
 HideEntity = true
 
 MaxHp = 20
+; top speed 72 km/h = 45 mph; Speed uses MPH-based tuning
 Speed = 0.45
 ;idk what it'd be bc i have no idea what this is but I think I have one its just not a crop duster obv
 CameraPosition = -0.02, -0.06, 0.77

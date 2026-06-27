@@ -15,6 +15,7 @@ EnableNightVision = true
 EnableEntityRadar = true
 RWRType = DIGITAL
 RadarType = MODERN_AS
+; top speed 304 km/h = 189 mph; Speed uses MPH-based tuning
 Speed = 1.89
 Sound = r44_heli
 ThrottleUpDown = 0.8

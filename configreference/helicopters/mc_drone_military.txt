@@ -13,6 +13,7 @@ NewSmallUAV = true
 HideEntity = true
 
 MaxHp = 20
+; top speed 64 km/h = 40 mph; Speed uses MPH-based tuning
 Speed = 0.4
 CameraPosition = -0.02, -0.06, 0.77
 Sound = radicon_heli

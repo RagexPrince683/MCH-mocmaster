@@ -13,6 +13,7 @@ MaxHp = 100
 EnableGunnerMode = true
 EnableNightVision = true
 EnableEntityRadar = false
+; top speed 306 km/h = 190 mph; Speed uses MPH-based tuning
 Speed = 1.9
 Sound = heli
 ThrottleUpDown = 0.8

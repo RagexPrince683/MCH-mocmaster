@@ -16,6 +16,7 @@ EnableNightVision = true
 EnableEntityRadar = true
 RWRType = DIGITAL
 RadarType = MODERN_AS
+; top speed 259 km/h = 161 mph; Speed uses MPH-based tuning
 Speed = 1.61
 ThrottleUpDown = 0.8
 FlareType = 3

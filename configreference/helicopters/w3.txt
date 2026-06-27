@@ -13,6 +13,7 @@ EnableNightVision = true
 EnableEntityRadar = true
 RWRType = ALL_WAY_EARLY
 RadarType = EARLY_AS
+; top speed 260 km/h = 162 mph; Speed uses MPH-based tuning
 Speed = 1.62
 FlareType = 3
 HasChaff = true

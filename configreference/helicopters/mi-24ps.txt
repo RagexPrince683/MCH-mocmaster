@@ -11,6 +11,7 @@ ThrottleDownFactor = 0.35
 ItemID = 28831
 MaxHp = 100
 EnableGunnerMode = true
+; top speed 335 km/h = 208 mph; Speed uses MPH-based tuning
 Speed = 2.08
 CameraPosition = 0.00,  0.30,   5.937
 MaxFuel         = 4500

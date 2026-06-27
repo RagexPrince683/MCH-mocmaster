@@ -16,6 +16,7 @@ RWRType = ALL_WAY_EARLY
 RadarType = EARLY_AS
 Float  = true
 FloatOffset = -0.5
+; top speed 267 km/h = 166 mph; Speed uses MPH-based tuning
 Speed = 1.66
 ThrottleUpDown = 0.7
 FlareType = 3

@@ -52,6 +52,7 @@ Category = UH
 
 HUD = civilian_aircraft, civilian_aircraft, none, none, none, none, none
 
+; top speed 287 km/h = 178 mph; Speed uses MPH-based tuning
 Speed = 1.78
 
 AddRotor= 4, 90,  0.00,  3.89, -4.38,  0.0, 1.0, 0.0, false

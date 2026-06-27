@@ -12,6 +12,7 @@ MaxHp = 100
 EnableGunnerMode = true
 EnableFoldBlade = true
 EnableNightVision = true
+; top speed 270 km/h = 168 mph; Speed uses MPH-based tuning
 Speed = 1.68
 ThrottleUpDown = 0.8
 FlareType = 3

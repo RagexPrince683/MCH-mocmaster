@@ -10,6 +10,7 @@ ThrottleDownFactor = 0.35
 ItemID = 28997
 MaxHp = 100
 EnableNightVision = true
+; top speed 300 km/h = 186 mph; Speed uses MPH-based tuning
 Speed = 1.86
 ThrottleUpDown = 1.0
 FlareType = 1,2,3
