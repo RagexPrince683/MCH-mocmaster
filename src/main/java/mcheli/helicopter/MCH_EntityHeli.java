@@ -125,12 +125,16 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
     * MCHeli internal blocks/tick so physics caps match the authored real-world speed
     * instead of treating the mph-derived number as an already-converted km/h value.
     */
-   private double getConfiguredHelicopterTopSpeed() {
-      MCH_BaseVehicleInfo info = this.getAcInfo();
+   private static double calculateConfiguredHelicopterTopSpeed(MCH_BaseVehicleInfo info) {
       if(info == null) {
          return 0.0D;
       }
-      return Math.max(0.0D, (double)info.speed * HELI_CONFIG_SPEED_MPH_SCALE * MPH_TO_KMH / INTERNAL_SPEED_TO_KMH);
+      double authoredSpeed = info instanceof MCH_HeliInfo?(double)((MCH_HeliInfo)info).authoredSpeed:(double)info.speed;
+      return Math.max(0.0D, authoredSpeed * HELI_CONFIG_SPEED_MPH_SCALE * MPH_TO_KMH / INTERNAL_SPEED_TO_KMH);
+   }
+
+   private double getConfiguredHelicopterTopSpeed() {
+      return calculateConfiguredHelicopterTopSpeed(this.getAcInfo());
    }
 
    public MCH_EntityHeli(World world) {
