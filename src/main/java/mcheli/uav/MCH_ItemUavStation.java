@@ -84,6 +84,7 @@ public class MCH_ItemUavStation extends W_Item {
                int var33 = movingobjectposition.blockY;
                int var34 = movingobjectposition.blockZ;
                MCH_EntityUavStation var35 = this.createUavStation(par2World, (double)((float)i + 0.5F), (double)((float)var33 + 1.0F), (double)((float)var34 + 0.5F), this.UavStationKind);
+               var35.setOwnerUUID(par3EntityPlayer.getUniqueID());
                int rot = (int)(MCH_Lib.getRotate360((double)par3EntityPlayer.rotationYaw) + 45.0D);
                var35.rotationYaw = (float)(rot / 90 * 90 - 180);
                var35.initUavPostion();

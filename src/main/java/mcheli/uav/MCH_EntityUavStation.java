@@ -226,6 +226,11 @@ public class MCH_EntityUavStation
                       this.linkedUavEntityUUID.toString() });
                 return false;
            }
+           if(!isUavLinkedToThisStation(ac)) {
+                MCH_Lib.Log((Entity)this, "Rejected UAV %d because it belongs to another UAV station", new Object[] {
+                      Integer.valueOf(W_Entity.getEntityId((Entity)ac)) });
+                return false;
+           }
            MCH_UavRegistry.register(ac);
            if(ac.isDead) {
                 return false;
@@ -748,16 +753,42 @@ public class MCH_EntityUavStation
 
       public MCH_EntityBaseVehicle findLinkedUavEntity(World world) {
            if(this.assignedUav != null && !this.assignedUav.isDead
-                 && MCH_UavRegistry.isPresentInLoadedEntityList(world, this.assignedUav)) {
+                 && MCH_UavRegistry.isPresentInLoadedEntityList(world, this.assignedUav)
+                 && isUavLinkedToThisStation(this.assignedUav)) {
                 return this.assignedUav;
            }
            this.assignedUav = null;
-           MCH_EntityBaseVehicle ac = MCH_UavRegistry.findLinkedUav(world, this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
+           if(!hasStableLinkedUavIdentity()) {
+                return null;
+           }
+           UUID lookupUuid = this.linkedUavEntityUUID != null ? this.linkedUavEntityUUID : parseUavUUID(this.assignedUavUUID);
+           if(lookupUuid == null && (this.linkedUavCommonId == null || this.linkedUavCommonId.isEmpty())) {
+                return null;
+           }
+           MCH_EntityBaseVehicle ac = MCH_UavRegistry.findLinkedUav(world, lookupUuid, this.linkedUavCommonId, null);
            if(ac == null) {
                 loadLinkedUavChunk(world);
-                ac = MCH_UavRegistry.findLinkedUav(world, this.linkedUavEntityUUID, this.linkedUavCommonId, this.ownerUUID);
+                ac = MCH_UavRegistry.findLinkedUav(world, lookupUuid, this.linkedUavCommonId, null);
            }
-           return ac;
+           return isUavLinkedToThisStation(ac) ? ac : null;
+         }
+
+      private boolean hasStableLinkedUavIdentity() {
+           return this.linkedUavEntityUUID != null ||
+                 (this.linkedUavCommonId != null && !this.linkedUavCommonId.isEmpty()) ||
+                 (this.assignedUavUUID != null && !this.assignedUavUUID.isEmpty());
+      }
+
+      private boolean isUavLinkedToThisStation(MCH_EntityBaseVehicle ac) {
+           if(ac == null) {
+                return false;
+           }
+           MCH_EntityUavStation station = ac.getUavStation();
+           if(station != null && station != this) {
+                return false;
+           }
+           UUID linkedStationUuid = ac.getLinkedUavStationUUID();
+           return linkedStationUuid == null || linkedStationUuid.equals(this.getUniqueID());
          }
 
       private boolean pinReconnectChunks(EntityPlayerMP player) {
@@ -880,12 +911,20 @@ public class MCH_EntityUavStation
                 return false;
            }
            if(player != null) {
-                setOwnerUUID(player.getUniqueID());
+                if(this.ownerUUID != null && !this.ownerUUID.equals(player.getUniqueID())) {
+                     return false;
+                }
                 if(ac.getOwnerUUID() != null && !ac.getOwnerUUID().equals(player.getUniqueID())) {
                      return false;
                 }
+                if(this.ownerUUID == null) {
+                     setOwnerUUID(player.getUniqueID());
+                }
            }
            if(this.linkedUavDimension != 0 && ac.dimension != this.linkedUavDimension) {
+                return false;
+           }
+           if(!isUavLinkedToThisStation(ac)) {
                 return false;
            }
            return ac.isUAV() || ac.isNewUAV();
@@ -1566,7 +1605,7 @@ public class MCH_EntityUavStation
 
       public boolean interactFirst(EntityPlayer player) {
 
-          if(player != null) {
+          if(player != null && this.ownerUUID == null && !hasContinuableUavLink()) {
               this.setOwnerUUID(player.getUniqueID());
           }
 
