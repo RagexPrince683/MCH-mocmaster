@@ -1,13 +1,16 @@
 package mcheli.plane;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_ClientCommonTickHandler;
 import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
+import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
+import mcheli.MCH_Vector2;
 import mcheli.aircraft.MCH_BaseVehicleCommonGui;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_FlightModel;
@@ -134,6 +137,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       this.drawHudLines(lines, x, y, 0xFFE8E8E8, 0x66303030);
 
       this.drawStickInputGauge(x + 126, y + 12);
+      this.drawNewPlaneRadarGauge(plane, x + 126, y + 54);
 
       if(!warnings.isEmpty()) {
          int wy = y + lines.size() * 10 + 5;
@@ -142,6 +146,61 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       }
    }
 
+
+   private void drawNewPlaneRadarGauge(MCP_EntityPlane plane, int x, int y) {
+      if(plane == null || !plane.isEntityRadarMounted()) {
+         return;
+      }
+      int size = 64;
+      this.drawNewPlaneRadarTexture(plane, x, y, size);
+      this.drawLine(new double[]{(double)x, (double)(y + size / 2), (double)(x + size), (double)(y + size / 2),
+            (double)(x + size / 2), (double)y, (double)(x + size / 2), (double)(y + size)}, 0x80FFFFFF, 1);
+      this.drawRadarPoints(plane.getRadarEntityList(), plane, x, y, size, -14101432);
+      this.drawRadarPoints(plane.getRadarEnemyList(), plane, x, y, size, 0xFFDF0408);
+   }
+
+   private void drawNewPlaneRadarTexture(MCP_EntityPlane plane, int x, int y, int size) {
+      GL11.glPushMatrix();
+      boolean blend = GL11.glIsEnabled(3042);
+      int srcBlend = GL11.glGetInteger(3041);
+      int dstBlend = GL11.glGetInteger(3040);
+      GL11.glEnable(3042);
+      GL11.glBlendFunc(770, 771);
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      W_McClient.MOD_bindTexture("textures/gui/heli_hud.png");
+      this.drawTexturedModalRectRotate((double)x, (double)y, (double)size, (double)size, 0.0D, 0.0D, 128.0D, 128.0D, 0.0F);
+      this.drawTexturedModalRectRotate((double)(x + 16), (double)y, 32.0D, (double)size, 128.0D, 0.0D, 64.0D, 128.0D, (float)plane.getRadarRotate());
+      GL11.glBlendFunc(srcBlend, dstBlend);
+      if(!blend) {
+         GL11.glDisable(3042);
+      }
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      GL11.glPopMatrix();
+   }
+
+   private void drawRadarPoints(ArrayList src, MCP_EntityPlane plane, int left, int top, int size, int color) {
+      if(src == null || src.isEmpty()) {
+         return;
+      }
+      double half = (double)size / 2.0D;
+      double factor = (double)size / 64.0D;
+      double[] points = new double[src.size() * 2];
+      int idx = 0;
+      for(Iterator it = src.iterator(); it.hasNext(); idx += 2) {
+         MCH_Vector2 v = (MCH_Vector2)it.next();
+         points[idx] = v.x / 2.0D * factor;
+         points[idx + 1] = v.y / 2.0D * factor;
+      }
+      MCH_Lib.rotatePoints(points, -plane.getRotYaw() - 180.0F);
+      ArrayList drawPoints = new ArrayList();
+      for(int i = 0; i + 1 < points.length; i += 2) {
+         if(points[i] > -half && points[i] < half && points[i + 1] > -half && points[i + 1] < half) {
+            drawPoints.add(Double.valueOf(points[i] + (double)left + half));
+            drawPoints.add(Double.valueOf(points[i + 1] + (double)top + half));
+         }
+      }
+      this.drawPoints(drawPoints, color, Math.max(2, MCH_Gui.scaleFactor * 2));
+   }
 
 
    private float getDisplayPitchDegrees(MCP_EntityPlane plane) {
