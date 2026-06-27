@@ -126,7 +126,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
     * instead of treating the mph-derived number as an already-converted km/h value.
     */
    private double getConfiguredHelicopterTopSpeed() {
-      MCH_AircraftInfo info = this.getAcInfo();
+      MCH_BaseVehicleInfo info = this.getAcInfo();
       if(info == null) {
          return 0.0D;
       }
