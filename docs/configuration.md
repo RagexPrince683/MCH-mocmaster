@@ -52,7 +52,7 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `PreventingBroken` | `false` | Prevents breakage behavior where implemented. |
 | `DropItemInCreativeMode` | `false` | Allows item drops in creative mode for applicable actions. |
 | `BreakableOnlyPickaxe` | `false` | Restricts breakability to pickaxe behavior where implemented. |
-| `AllHeliSpeed` | `1.5` | Global helicopter speed scalar; clamped between 0 and 1000. |
+| `AllHeliSpeed` | `3.4` | Global helicopter speed scalar; clamped between 0 and 1000. |
 | `AllPlaneSpeed` | `1000.0` | Global plane speed scalar/clamp value; clamped between 0 and 1000. Plane config speeds use `(mph / 1000) * 1.74` before this scalar is applied. AA-missile launch speed uses the matching normalized scale, `AllPlaneSpeed / 1000 * 1.74`, so the default makes AA missiles 1.74 times their configured `Acceleration`. |
 | `NewFlightGravity` | `0.008` | Global per-tick downward acceleration for new-flight-model aircraft; individual vehicle configs can override with `NewFlightGravity`, `FlightGravity`, or `GravityOverride`. |
 | `AllShipSpeed` | `2.0` | Global ship speed scalar; clamped between 0 and 1000. |

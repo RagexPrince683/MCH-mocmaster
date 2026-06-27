@@ -113,24 +113,16 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private static final float NEW_HELI_GROUNDED_YAW_DAMPING = 0.35F;
    private static final double LEGACY_HELI_REGULAR_FORWARD_ACCEL = 0.50D;
    private static final double LEGACY_HELI_HOVER_TRANSLATION_ACCEL = 0.0015D;
-   private static final double HELI_CONFIG_SPEED_MPH_SCALE = 100.0D;
-   private static final double MPH_TO_KMH = 1.609344D;
-   private static final double INTERNAL_SPEED_TO_KMH = 72.0D;
    private static final double NEW_HELI_HOVER_HORIZONTAL_SPEED_SCALE = 0.35D;
 
 
    /**
-    * Helicopter content speeds are authored as real-world top speed in mph divided by 100
-    * (for example, Speed = 1.82 means roughly 182 mph). Convert that value back into
-    * MCHeli internal blocks/tick so physics caps match the authored real-world speed
-    * instead of treating the mph-derived number as an already-converted km/h value.
+    * Helicopter Speed values are MCHeli internal horizontal speed units after validation.
+    * Use the globally-scaled value here so legacy and new helicopter caps both honor
+    * AllHeliSpeed instead of falling back to the unscaled authored value.
     */
    private static double calculateConfiguredHelicopterTopSpeed(MCH_BaseVehicleInfo info) {
-      if(info == null) {
-         return 0.0D;
-      }
-      double authoredSpeed = info instanceof MCH_HeliInfo?(double)((MCH_HeliInfo)info).authoredSpeed:(double)info.speed;
-      return Math.max(0.0D, authoredSpeed * HELI_CONFIG_SPEED_MPH_SCALE * MPH_TO_KMH / INTERNAL_SPEED_TO_KMH);
+      return info != null?Math.max(0.0D, (double)info.speed):0.0D;
    }
 
    private double getConfiguredHelicopterTopSpeed() {

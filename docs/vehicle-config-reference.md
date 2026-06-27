@@ -279,7 +279,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `enablefoldblade` | Helicopter | boolean | false | blade folding support |
 | `addrotor` | Helicopter | `bladeNum,bladeRot,x,y,z,rx,ry,rz[,fold]` | none | rotor render/animation |
 | `addrotorold` | Helicopter | same as `addrotor` | none | legacy rotor renderer |
-| `Speed` | Helicopter | mph / 100 | inherited | authored helicopter top speed; after `AllHeliSpeed`, physics converts to internal blocks/tick and HUD reports actual km/h |
+| `Speed` | Helicopter | internal speed | inherited | authored helicopter top speed; after `AllHeliSpeed`, physics uses the scaled internal value directly and HUD reports actual km/h |
 | `HelicopterLateralThrustScale` | Helicopter | float >= 0 | 0.45 | new-heli-only roll-generated lateral acceleration multiplier |
 | `HelicopterLateralDrag` | Helicopter | float >= 0 | 0.055 | new-heli-only drag on right/left velocity component |
 | `HelicopterMaxLateralSpeedScale` | Helicopter | float >= 0 | 0.45 | new-heli-only cap for lateral speed component |
