@@ -113,25 +113,9 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    private static final float NEW_HELI_GROUNDED_YAW_DAMPING = 0.35F;
    private static final double LEGACY_HELI_REGULAR_FORWARD_ACCEL = 0.50D;
    private static final double LEGACY_HELI_HOVER_TRANSLATION_ACCEL = 0.0015D;
-   private static final double HELI_CONFIG_SPEED_MPH_SCALE = 100.0D;
-   private static final double MPH_TO_KMH = 1.609344D;
-   private static final double INTERNAL_SPEED_TO_KMH = 72.0D;
+   private static final double NEW_HELI_REGULAR_HORIZONTAL_SPEED_SCALE = 4.0D;
    private static final double NEW_HELI_HOVER_HORIZONTAL_SPEED_SCALE = 0.35D;
 
-
-   /**
-    * Helicopter content speeds are authored as real-world top speed in mph divided by 100
-    * (for example, Speed = 1.82 means roughly 182 mph). Convert that value back into
-    * MCHeli internal blocks/tick so physics caps match the authored real-world speed
-    * instead of treating the mph-derived number as an already-converted km/h value.
-    */
-   private double getConfiguredHelicopterTopSpeed() {
-      MCH_AircraftInfo info = this.getAcInfo();
-      if(info == null) {
-         return 0.0D;
-      }
-      return Math.max(0.0D, (double)info.speed * HELI_CONFIG_SPEED_MPH_SCALE * MPH_TO_KMH / INTERNAL_SPEED_TO_KMH);
-   }
 
    public MCH_EntityHeli(World world) {
       super(world);
@@ -1676,8 +1660,10 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       forwardVelocity = dampedForwardVelocity;
       lateralVelocity = dampedLateralVelocity;
 
-      double configuredTopSpeed = this.getConfiguredHelicopterTopSpeed();
-      double safetyLimit = this.isHoveringMode()?Math.max(configuredTopSpeed * NEW_HELI_HOVER_HORIZONTAL_SPEED_SCALE, 0.35D):configuredTopSpeed;
+      double configuredSpeed = (double)this.getAcInfo().speed;
+      double speedScale = this.isHoveringMode()?NEW_HELI_HOVER_HORIZONTAL_SPEED_SCALE:NEW_HELI_REGULAR_HORIZONTAL_SPEED_SCALE;
+      double minimumSafetyLimit = this.isHoveringMode()?0.35D:4.0D;
+      double safetyLimit = Math.max(configuredSpeed * speedScale, minimumSafetyLimit);
       float lateralLimit = (float)(safetyLimit * (double)(this.heliInfo != null?MathHelper.clamp_float(this.heliInfo.helicopterMaxLateralSpeedScale, 0.0F, 1000.0F):0.45F));
       this.lateralSpeedCapped = lateralLimit > 0.0F && MathHelper.abs(lateralVelocity) > lateralLimit;
       if(this.lateralSpeedCapped) {
@@ -1937,7 +1923,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       }
 
       motion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-      speedLimit = (float)this.getConfiguredHelicopterTopSpeed();
+      speedLimit = this.getAcInfo().speed;
       if(!this.newHeliFlightModelEnabled && motion > (double)speedLimit) {
          super.motionX *= (double)speedLimit / motion;
          super.motionZ *= (double)speedLimit / motion;
