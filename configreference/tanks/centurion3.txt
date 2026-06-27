@@ -219,7 +219,6 @@ StepHeight = 1.5
 
 unmountposition = 0.00,  1.50, 0.00
 
-;medium tracked tank ww2 less EARLY
-;;AddRecipe = "ABC", "DEB", "E  ", A, mcheli:mediumchassis, B, mcheli:cannon2, C, mcheli:engine3, D, mcheli:tanktracks, E, mcheli:electronics
 
-;;AddRecipe = "ABC", "D  ", "   ", A, mcheli:m46, B, mcheli:electronics, C, mcheli:cannon2, D, mcheli:wrench
+;medium tracked tank ww2 less EARLY
+AddRecipe = "ABC", "DEB", "   ", A, mcheli:mediumchassis, B, mcheli:cannon2, C, mcheli:engine3, D, mcheli:tanktracks, E, mcheli:electronics
