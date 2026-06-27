@@ -10,7 +10,7 @@ import net.minecraft.util.MathHelper;
 
 public final class MCH_HudShared {
 
-   public static final double HUD_HELI_SPEED_MULTIPLIER = 3.5D;
+   public static final double HUD_HELI_SPEED_MULTIPLIER = 1.0D;
    public static final double HUD_PLANE_SPEED_MULTIPLIER = 2.0D;
 
    private MCH_HudShared() {
