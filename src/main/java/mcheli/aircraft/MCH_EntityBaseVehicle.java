@@ -771,11 +771,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public double getThrottle() {
-      return 0.005D * (double)this.getDataWatcher().getWatchableObjectInt(29);
+      return 0.05D * (double)this.getDataWatcher().getWatchableObjectInt(29);
    }
 
    public void setThrottle(double t) {
-      int n = (int)Math.round(t * 200.0D);
+      int n = (int)(t * 20.0D);
       if(n == 0 && t > 0.0D) {
          n = 1;
       }
@@ -1728,7 +1728,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void setCurrentThrottle(double throttle) {
-      this.currentThrottle = MathHelper.clamp_double(Math.round(throttle * 200.0D) / 200.0D, 0.0D, 1.0D);
+      this.currentThrottle = throttle;
    }
 
    public void addCurrentThrottle(double throttle) {
