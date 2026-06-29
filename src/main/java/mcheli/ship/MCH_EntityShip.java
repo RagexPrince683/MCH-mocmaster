@@ -485,10 +485,21 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     protected void onUpdate_ControlNotHovering() {
         if(!super.isGunnerMode) {
             float throttleUpDown = this.getAcInfo().throttleUpDown;
+            Entity rider = this.getRiddenByEntity();
+            boolean localThrottleUp = super.throttleUp;
+            boolean localThrottleDown = super.throttleDown;
+            if(rider instanceof EntityLivingBase) {
+                float riderMoveForward = ((EntityLivingBase)rider).moveForward;
+                if(riderMoveForward > 0.0F) {
+                    localThrottleUp = true;
+                } else if(riderMoveForward < 0.0F) {
+                    localThrottleDown = true;
+                }
+            }
+
             boolean turn = super.moveLeft && !super.moveRight || !super.moveLeft && super.moveRight;
             float pivotTurnThrottle = this.getAcInfo().pivotTurnThrottle;
-            boolean localThrottleUp = super.throttleUp;
-            if(turn && this.getCurrentThrottle() < (double)this.getAcInfo().pivotTurnThrottle && !localThrottleUp && !super.throttleDown) {
+            if(turn && this.getCurrentThrottle() < (double)this.getAcInfo().pivotTurnThrottle && !localThrottleUp && !localThrottleDown) {
                 localThrottleUp = true;
                 throttleUpDown *= 2.0F;
             }
@@ -511,13 +522,13 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
                         this.setCurrentThrottle(1.0D);
                     }
                 }
-            } else if(super.throttleDown) {
+            } else if(localThrottleDown) {
                 if(this.getCurrentThrottle() > 0.0D) {
                     this.addCurrentThrottle(-0.01D * (double)throttleUpDown);
                 } else {
                     this.setCurrentThrottle(0.0D);
                     if(this.getAcInfo().enableBack) {
-                        super.throttleBack = (float)((double)super.throttleBack + 0.0025D * (double)throttleUpDown);
+                        super.throttleBack = (float)((double)super.throttleBack + 0.0025D * (double)throttleUpDown * (double)this.getAcInfo().throttleDownFactor);
                         if(super.throttleBack > 0.6F) {
                             super.throttleBack = 0.6F;
                         }
