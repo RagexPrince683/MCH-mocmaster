@@ -27,6 +27,7 @@ public class MCH_ItemInfo extends MCH_BaseInfo {
     public List recipe;
     public boolean isShapedRecipe;
     public int stackSize;
+    public boolean textureOverlay;
 
     public List<String> oreDictNames = new ArrayList<String>();
 
@@ -41,6 +42,7 @@ public class MCH_ItemInfo extends MCH_BaseInfo {
         this.recipe = new ArrayList();
         this.isShapedRecipe = true;
         this.stackSize = 1;
+        this.textureOverlay = false;
     }
 
     public void loadItemData(String item, String data) {
@@ -59,6 +61,9 @@ public class MCH_ItemInfo extends MCH_BaseInfo {
 
         } else if (item.equalsIgnoreCase("StackSize")) {
             this.stackSize = this.toInt(data, 1, 64);
+
+        } else if (item.equalsIgnoreCase("textureoverlay")) {
+            this.textureOverlay = this.toBool(data);
         //OREDICTS
         } else if (item.equalsIgnoreCase("oredict")) {
             this.oreDictNames.add(data.trim());

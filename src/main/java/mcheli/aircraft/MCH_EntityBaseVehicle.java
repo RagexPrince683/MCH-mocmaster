@@ -16,6 +16,8 @@ import mcheli.flare.MCH_Chaff;
 import mcheli.flare.MCH_Flare;
 import mcheli.flare.MCH_Maintenance;
 import mcheli.helicopter.MCH_EntityHeli;
+import mcheli.item.MCH_ItemInfo;
+import mcheli.item.MCH_ItemInfoManager;
 import mcheli.multiplay.MCH_Multiplay;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.particles.MCH_ParticleParam;
@@ -4183,6 +4185,17 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
    }
 
+   public static String getSkinOverlayTextureName(String name) {
+      return name != null && name.startsWith("skinoverlays/") ? name : "skinoverlays/" + name;
+   }
+
+   public static String getTexturePath(String directory, String textureName) {
+      if(textureName != null && textureName.startsWith("skinoverlays/")) {
+         return "textures/" + textureName + ".png";
+      }
+      return "textures/" + directory + "/" + textureName + ".png";
+   }
+
    public MCH_EntityBaseVehicle setTextureName(String name) {
       if(name != null && !name.isEmpty()) {
          this.getDataWatcher().updateObject(21, String.valueOf(name));
@@ -6959,6 +6972,21 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             switchNextTextureName();
          }
          return this.rejectInteraction(player, "wrench_action");
+      }
+      if(itemStack != null) {
+         MCH_ItemInfo itemInfo = MCH_ItemInfoManager.get(itemStack.getItem());
+         if(itemInfo != null && itemInfo.textureOverlay) {
+            if(!this.worldObj.isRemote) {
+               this.setTextureName(getSkinOverlayTextureName(itemInfo.name));
+               if(!player.capabilities.isCreativeMode) {
+                  --itemStack.stackSize;
+                  if(itemStack.stackSize <= 0) {
+                     player.inventory.setInventorySlotContents(player.inventory.currentItem, (ItemStack)null);
+                  }
+               }
+            }
+            return true;
+         }
       }
       if(itemStack != null && itemStack.getItem() instanceof mcheli.mob.MCH_ItemSpawnGunner) {
          return this.rejectInteraction(player, "gunner_item");
