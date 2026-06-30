@@ -29,7 +29,7 @@ public class MCH_RenderShip extends MCH_RenderBaseVehicle {
                 GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
                 GL11.glRotatef(roll, 0.0F, 0.0F, 1.0F);
                 try {
-                    this.bindTexture("textures/ships/" + ship.getTextureName() + ".png",
+                    this.bindTexture(MCH_EntityBaseVehicle.getTexturePath("ships", ship.getTextureName()),
                                      ship);
                 } catch (Exception var15) {
                     System.out.println("Texture not found : " + ship.getTextureName());

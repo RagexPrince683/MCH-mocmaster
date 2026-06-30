@@ -44,7 +44,7 @@ public class MCH_RenderTurret extends MCH_RenderBaseVehicle {
             GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
             GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
             try {
-            this.bindTexture("textures/" + turretInfo.getDirectoryName() + "/" + vehicle.getTextureName() + ".png", vehicle);
+            this.bindTexture(MCH_EntityBaseVehicle.getTexturePath(turretInfo.getDirectoryName(), vehicle.getTextureName()), vehicle);
             } catch (Exception var15) {
                System.out.println("Texture not found : " + vehicle.getTextureName());
                this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
