@@ -6,6 +6,7 @@ import mcheli.weapon.MCH_WeaponBase;
 import mcheli.weapon.MCH_WeaponInfo;
 import mcheli.weapon.MCH_WeaponParam;
 import mcheli.wrapper.W_WorldFunc;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -105,6 +106,10 @@ public class MCH_WeaponTorpedo extends MCH_WeaponBase {
          e.targetPosX = targetX;
          e.targetPosY = targetY;
          e.targetPosZ = targetZ;
+         Entity tgtEnt = prm.user != null ? prm.user.worldObj.getEntityByID(prm.option1) : null;
+         if(tgtEnt != null && !tgtEnt.isDead && tgtEnt != prm.entity && tgtEnt != prm.user) {
+            e.setTargetEntity(tgtEnt);
+         }
          e.motionX = mx;
          e.motionY = my;
          e.motionZ = mz;
