@@ -61,19 +61,23 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
    }
 
    private void onUpdateGuided() {
-      if(!this.isInWater()) {
-         this.onUpdateNoGuided();
-         return;
-      }
-
-      if(!super.worldObj.isRemote) {
+      if(!super.worldObj.isRemote && this.isInWater()) {
          if(this.isInvalidTorpedoTarget(super.targetEntity)) {
             this.setTargetEntity(this.findTorpedoTarget());
          }
 
-         if(super.targetEntity == null) {
-            this.onUpdateNoGuided();
-            return;
+         double tx;
+         double ty;
+         double tz;
+
+         if(super.targetEntity != null) {
+            tx = super.targetEntity.posX;
+            ty = this.getGuidanceDepth(super.targetEntity);
+            tz = super.targetEntity.posZ;
+         } else {
+            tx = this.targetPosX;
+            ty = Math.min(this.targetPosY, this.getGuidanceDepth((Entity)null));
+            tz = this.targetPosZ;
          }
 
          if(super.acceleration < this.accelerationInWater) {
@@ -82,9 +86,9 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
             super.acceleration -= 0.1D;
          }
 
-         double dx = super.targetEntity.posX - super.posX;
-         double dy = this.getGuidanceDepth(super.targetEntity) - super.posY;
-         double dz = super.targetEntity.posZ - super.posZ;
+         double dx = tx - super.posX;
+         double dy = ty - super.posY;
+         double dz = tz - super.posZ;
          double d = MathHelper.sqrt_double(dx * dx + dy * dy + dz * dz);
 
          if(d > 0.001D) {
@@ -97,11 +101,13 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
          }
       }
 
-      double yaw = (double)((float)Math.atan2(super.motionZ, super.motionX));
-      super.rotationYaw = (float)(yaw * 180.0D / Math.PI) - 90.0F;
+      if(this.isInWater()) {
+         double yaw = (double)((float)Math.atan2(super.motionZ, super.motionX));
+         super.rotationYaw = (float)(yaw * 180.0D / Math.PI) - 90.0F;
 
-      double h = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
-      super.rotationPitch = -((float)(Math.atan2(super.motionY, h) * 180.0D / Math.PI));
+         double h = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+         super.rotationPitch = -((float)(Math.atan2(super.motionY, h) * 180.0D / Math.PI));
+      }
    }
 
    private Entity findTorpedoTarget() {
@@ -126,6 +132,18 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
          double dy = e.posY - super.posY;
          double dz = e.posZ - super.posZ;
          double distSq = dx * dx + dy * dy + dz * dz;
+
+         // Front-cone check so torpedoes do not instantly 180-degree lock.
+         double motionLen = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);
+         double targetLen = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+         if(motionLen > 0.001D && targetLen > 0.001D) {
+            double dot = (super.motionX * dx + super.motionY * dy + super.motionZ * dz) / (motionLen * targetLen);
+
+            if(dot < 0.25D) {
+               continue;
+            }
+         }
 
          if(distSq < bestScore) {
             bestScore = distSq;
