@@ -1,19 +1,16 @@
 package mcheli.weapon;
 
-import net.minecraft.entity.Entity;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
+import net.minecraft.block.material.Material;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
-import java.util.List;
-
-public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
+public class MCH_EntityTorpedo extends MCH_EntityTvMissile {
 
    public double targetPosX;
    public double targetPosY;
    public double targetPosZ;
    public double accelerationInWater = 2.0D;
-
-   private Entity homingTarget;
 
 
    public MCH_EntityTorpedo(World par1World) {
@@ -21,6 +18,13 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
       this.targetPosX = 0.0D;
       this.targetPosY = 0.0D;
       this.targetPosZ = 0.0D;
+      this.isSpawnParticle = false;
+   }
+
+   public void onUpdateMotion() {
+      // Guided torpedoes intentionally apply the TV-missile steering from
+      // onUpdateGuided() only while submerged, so the inherited TV missile
+      // update cannot steer them through air or out of the water.
    }
 
    public void onUpdate() {
@@ -65,23 +69,7 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
 
    private void onUpdateGuided() {
       if(!super.worldObj.isRemote && this.isInWater()) {
-         if(this.homingTarget == null || this.homingTarget.isDead || !this.homingTarget.isInWater()) {
-            this.homingTarget = this.findTorpedoTarget();
-         }
-
-         double tx;
-         double ty;
-         double tz;
-
-         if(this.homingTarget != null) {
-            tx = this.homingTarget.posX;
-            ty = this.homingTarget.posY + this.homingTarget.height * 0.5D;
-            tz = this.homingTarget.posZ;
-         } else {
-            tx = this.targetPosX;
-            ty = this.targetPosY;
-            tz = this.targetPosZ;
-         }
+         this.applyTvGuidanceInWater();
 
          if(super.acceleration < this.accelerationInWater) {
             super.acceleration += 0.1D;
@@ -89,16 +77,14 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
             super.acceleration -= 0.1D;
          }
 
-         double dx = tx - super.posX;
-         double dy = ty - super.posY;
-         double dz = tz - super.posZ;
-         double d = MathHelper.sqrt_double(dx * dx + dy * dy + dz * dz);
-
+         double d = MathHelper.sqrt_double(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);
          if(d > 0.001D) {
-            super.motionX = dx * super.acceleration / d;
-            super.motionY = dy * super.acceleration / d;
-            super.motionZ = dz * super.acceleration / d;
+            super.motionX = super.motionX * super.acceleration / d;
+            super.motionY = super.motionY * super.acceleration / d;
+            super.motionZ = super.motionZ * super.acceleration / d;
          }
+
+         this.keepGuidedTorpedoInWater();
       }
 
       if(this.isInWater()) {
@@ -110,60 +96,47 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
       }
    }
 
-   private Entity findTorpedoTarget() {
-      double range = 96.0D;
-
-      List list = super.worldObj.getEntitiesWithinAABBExcludingEntity(
-              this,
-              super.boundingBox.expand(range, range * 0.5D, range)
-      );
-
-      Entity best = null;
-      double bestScore = Double.MAX_VALUE;
-
-      for(int i = 0; i < list.size(); ++i) {
-         Entity e = (Entity)list.get(i);
-
-         if(e == null || e.isDead || e == super.shootingEntity) {
-            continue;
-         }
-
-         if(!e.isInWater()) {
-            continue;
-         }
-
-         if(!(e instanceof mcheli.ship.MCH_EntityShip) && !(e instanceof mcheli.aircraft.MCH_EntityBaseVehicle)) {
-            continue;
-         }
-
-         double dx = e.posX - super.posX;
-         double dy = e.posY - super.posY;
-         double dz = e.posZ - super.posZ;
-         double distSq = dx * dx + dy * dy + dz * dz;
-
-         // Front-cone check so torpedoes do not instantly 180-degree lock.
-         double motionLen = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);
-         double targetLen = Math.sqrt(dx * dx + dy * dy + dz * dz);
-
-         if(motionLen > 0.001D && targetLen > 0.001D) {
-            double dot = (super.motionX * dx + super.motionY * dy + super.motionZ * dz) / (motionLen * targetLen);
-
-            if(dot < 0.25D) {
-               continue;
-            }
-         }
-
-         if(distSq < bestScore) {
-            bestScore = distSq;
-            best = e;
-         }
+   private void applyTvGuidanceInWater() {
+      if(this.getInfo() == null || this.getInfo().laserGuidance) {
+         return;
       }
 
-      return best;
+      if(super.shootingEntity != null && !super.shootingEntity.isDead) {
+         MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(super.shootingEntity);
+         if(ac != null && ac.getTVMissile() == this) {
+            float yaw = super.shootingEntity.rotationYaw;
+            float pitch = super.shootingEntity.rotationPitch;
+            double tX = -MathHelper.sin(yaw / 180.0F * (float)Math.PI) * MathHelper.cos(pitch / 180.0F * (float)Math.PI);
+            double tZ = MathHelper.cos(yaw / 180.0F * (float)Math.PI) * MathHelper.cos(pitch / 180.0F * (float)Math.PI);
+            double tY = -MathHelper.sin(pitch / 180.0F * (float)Math.PI);
+            this.setMotion(tX, tY, tZ);
+            this.setRotation(yaw, pitch);
+         }
+      }
+   }
+
+   private void keepGuidedTorpedoInWater() {
+      if(!this.isWaterAt(super.posX + super.motionX, super.posY + super.motionY, super.posZ + super.motionZ)) {
+         super.motionY = Math.min(super.motionY, -0.05D);
+
+         if(!this.isWaterAt(super.posX + super.motionX, super.posY + super.motionY, super.posZ + super.motionZ)) {
+            super.motionX *= 0.25D;
+            super.motionZ *= 0.25D;
+         }
+      }
+   }
+
+   private boolean isWaterAt(double x, double y, double z) {
+      return super.worldObj.getBlock(
+              MathHelper.floor_double(x),
+              MathHelper.floor_double(y),
+              MathHelper.floor_double(z)
+      ).getMaterial() == Material.water;
    }
 
    public MCH_EntityTorpedo(World par1World, double posX, double posY, double posZ, double targetX, double targetY, double targetZ, float yaw, float pitch, double acceleration) {
       super(par1World, posX, posY, posZ, targetX, targetY, targetZ, yaw, pitch, acceleration);
+      this.isSpawnParticle = false;
    }
 
    public MCH_BulletModel getDefaultBulletModel() {
