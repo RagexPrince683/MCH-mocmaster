@@ -1,28 +1,38 @@
 DisplayName = B-21 Raider
 AddDisplayName = en_US, B-21 Raider
 AddDisplayName = ja_JP, B-21 Raider
-ItemID = 28738
+
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = B-2
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = B-2
+ChaffWaitTime = 500
+ChaffUseTime = 160
+ThrottleDownFactor = 0.20
+;trolling
 MaxHp  = 250
 EnableNightVision  = true
 EnableEntityRadar  = true
+RWRType = DIGITAL
+RadarType = MODERN_AS
+HasBallisticComputer = true
 EnableEjectionSeat = true
-Speed = 1.757
-
-;628
+Speed = 1.6
+;allegedly slower than B-2
 
 Sound = bone
 SoundPitch = 0.8
 FlareType = 2
 ParticlesScale = 0.7
 EnableSeaSurfaceParticle = true
-MaxFuel         = 303000
-FuelConsumption = 27.297
-CameraPosition  = 0.0, 2.66, 3.78
+MaxFuel         = 260000
+FuelConsumption = 22.500
+CameraPosition  = 0.0, 2.26, 3.78
 EnableGunnerMode = true
 ConcurrentGunnerMode = true
 AutoPilotRot = 0
-Stealth = 0.35
-ThirdPersonDist = 20
+Stealth = 0.55
+ThirdPersonDist = 30
 
 ThrottleUpDown = 0.1
 
@@ -43,139 +53,138 @@ EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.
 # EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
-PhysicalMass = 4.400
-EngineThrust = 4.93
-TakeoffDistanceMultiplier = 0.78
+PhysicalMass = 3.250
+EngineThrust = 4.3
+TakeoffDistanceMultiplier = 0.74
 NewFlightGravity = 0.0087
-NewFlightThrottleResponse = 1.150
-NewFlightThrottleChangeRateUp = 0.0038
-NewFlightThrottleChangeRateDown = 0.0052
+NewFlightThrottleResponse = 1.100
+NewFlightThrottleChangeRateUp = 0.0035
+NewFlightThrottleChangeRateDown = 0.0050
 NewFlightIdleThrottle = 0.105
-NewFlightEngineBrakeDrag = 0.0034
-NewFlightLowThrottleLiftRetention = 0.740
-NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightEngineBrakeDrag = 0.0032
+NewFlightLowThrottleLiftRetention = 0.760
+NewFlightThrottleControlAuthorityScale = 0.08
 NewFlightThrottleHudDisplay = true
 NewFlightCombatFlaps = false
-FlightCeiling = 12500
+FlightCeiling = 15000
 FlightCeilingRange = 72
-StallSpeed = 0.436
-CriticalAoA = 13.20
-StallLiftLoss = 0.740
-AoADragMultiplier = 2.850
-StallInstability = 0.340
-StallRecoverySpeed = 0.645
-StallSpeedFactor = 0.19
-StallStrength = 0.95
-DiveSpeedMultiplier = 1.14
-MaxComfortableG = 2.8
-MaxStructuralG = 5.2
-GControlPenalty = 0.78
-CompressibilitySpeed = 1.581
-CompressibilityPitchPenalty = 0.58
-MaxSafeSpeed = 1.933
-OverspeedDamageRate = 0.18
-BaseDrag = 0.0025
-InducedDrag = 0.017
-ControlSurfaceDrag = 0.0065
-ClimbEnergyLoss = 0.018
-DiveEnergyGain = 0.012
-MaxLevelSpeed = 1.616
-IdleDrag = 0.0040
+StallSpeed = 0.410
+CriticalAoA = 13.00
+StallLiftLoss = 0.760
+AoADragMultiplier = 2.650
+StallInstability = 0.260
+StallRecoverySpeed = 0.610
+StallSpeedFactor = 0.17
+StallStrength = 0.82
+DiveSpeedMultiplier = 1.10
+MaxComfortableG = 2.4
+MaxStructuralG = 4.0
+GControlPenalty = 0.82
+CompressibilitySpeed = 1.500
+CompressibilityPitchPenalty = 0.62
+MaxSafeSpeed = 1.740
+OverspeedDamageRate = 0.22
+BaseDrag = 0.0022
+InducedDrag = 0.0155
+ControlSurfaceDrag = 0.0058
+ClimbEnergyLoss = 0.017
+DiveEnergyGain = 0.011
+MaxLevelSpeed = 1.590
+IdleDrag = 0.0037
 
-PitchTorque = 0.250
-RollTorque = 0.260
-YawTorque = 0.180
-PitchDamping = 0.600
-RollDamping = 0.580
-YawDamping = 0.640
-InertiaMultiplier = 3.100
-ThrottleAcceleration = 0.026
-EngineDrag = 0.011
+PitchTorque = 0.230
+RollTorque = 0.245
+YawTorque = 0.155
+PitchDamping = 0.620
+RollDamping = 0.600
+YawDamping = 0.680
+InertiaMultiplier = 2.850
+ThrottleAcceleration = 0.023
+EngineDrag = 0.010
 
 HUD = plane, plane_gnr
 
-AddSeat       =  0.80,  3.20,  0.28
-AddGunnerSeat = -0.80,  3.40,  0.28, 0.0, 2.66, 3.78, true
+AddSeat       =  0.6,  2.80,  -0.7
+AddGunnerSeat = -0.6,  3.0,  -0.7, 0.0, 3.36, 3.78, true
 
-; 前輪
-AddPartLG         =   0.00,  2.96,  2.79,  1,0,0,      75
-AddPartLGRev      =   0.00,  2.87,  3.29,  1,0,0,     -60
-AddPartLGHatch    =  -0.65,  1.75,  0.25,  0,0.22,1,  -90
+; 前輪 - B-21 transformed
+AddPartLG         =   0.00,  3.12,  1.68,  1,0,0,      75
+AddPartLGRev      =   0.00,  2.89,  2.18,  1,0,0,     -60
+AddPartLGHatch    =  -0.65,  1.80, -0.86,  0,0.22,1,  -90
 
-; 後輪
-AddPartLG         =   0.00,  3.05, -7.96,  1,0,0,     -90
-AddPartSlideRotLG =   0.00,  2.74,  3.31,  0.00, 0.00, 0.00, 1,0,0, 0
-AddPartLGRev      =  -7.74,  2.23, -7.02,  0,-0.02,1, -90
-AddPartLGRev      =   7.74,  2.23, -7.02,  0,-0.02,1,  90
+; 後輪 - B-21 transformed / narrowed inward
+AddPartLG         =   0.00,  2.86, -7.51,  1,0,0,     -90
+AddPartSlideRotLG =   0.00,  2.75,  2.18,  0.00, 0.00, 0.00, 1,0,0, 0
+AddPartLGRev      =  -5.13,  2.09, -7.51,  0,-0.02,1, -90
+AddPartLGRev      =   5.13,  2.09, -7.51,  0,-0.02,1,  90
 
-; 補助空気口
-AddPartLGRev      =  -5.06,  4.38, -5.57,  0.91, 0.10,1, -45
-AddPartLGRev      =  -4.06,  4.41, -5.57, -0.99,-0.07,1,  45
-AddPartLGRev      =   5.06,  4.38, -5.57, -0.91, 0.10,1,  45
-AddPartLGRev      =   4.06,  4.41, -5.57,  0.99,-0.07,1, -45
+; 補助空気口 / bay-door-like B-21 transformed parts
+AddPartLGRev      =  -4.32,  4.05, -5.81,  0.91, 0.10,1, -45
+AddPartLGRev      =  -3.54,  4.08, -5.81, -0.99,-0.07,1,  45
+AddPartLGRev      =   4.32,  4.05, -5.81, -0.91, 0.10,1,  45
+AddPartLGRev      =   3.54,  4.08, -5.81,  0.99,-0.07,1, -45
 
 ; 排気口
 AddPartNozzle =  4.77, 3.34, -13.32, -1,0,0
 AddPartNozzle = -4.77, 3.34, -13.32, -1,0,0
 
-; ウェポンベイ
-AddPartWeaponBay = mk82_b2/ b2gbu38 / b2gbu28 / b2agm154/ b2agm154b1/b2agm158 , -2.79, 1.86,-6.56,  0, -0.04, 1.0, -90
-AddPartWeaponBay = mk82_b2/ b2gbu38 / b2gbu28 / b2agm154/ b2agm154b1/b2agm158 , -0.15, 1.72,-6.56,  0, -0.04, 1.0,  90
-AddPartWeaponBay = mk82_b2/ b2gbu38 / b2gbu28 / b2agm154/ b2agm154b1/b2agm158 ,  2.79, 1.86,-6.56,  0, -0.04, 1.0,  90
-AddPartWeaponBay = mk82_b2/ b2gbu38 / b2gbu28 / b2agm154/ b2agm154b1/b2agm158 ,  0.15, 1.72,-6.56,  0, -0.04, 1.0, -90
+; ウェポンベイ - B-21 transformed from B-2 bay origins
+AddPartWeaponBay = b21gbu38/ b21gbu31 / b21agm158 / b21b61_12/ b21agm181_lrso/b21_hypersonic , -2.38, 1.99, -6.84,  0, -0.04, 1.0, -90
+AddPartWeaponBay = b21gbu38/ b21gbu31 / b21agm158 / b21b61_12/ b21agm181_lrso/b21_hypersonic , -0.13, 1.89, -6.84,  0, -0.04, 1.0,  90
+AddPartWeaponBay = b21gbu38/ b21gbu31 / b21agm158 / b21b61_12/ b21agm181_lrso/b21_hypersonic ,  2.38, 1.99, -6.84,  0, -0.04, 1.0,  90
+AddPartWeaponBay = b21gbu38/ b21gbu31 / b21agm158 / b21b61_12/ b21agm181_lrso/b21_hypersonic ,  0.13, 1.89, -6.84,  0, -0.04, 1.0, -90
 
 ;武器設定
 ;1番席が Mk82、  GBU-28、AGM-154、GBU-57、AGM-158　(無誘導[小]、誘導[中,散,大]、誘導[TV])
 ;2番席が         GBU-38、AGM-154、GBU-57、AGM-158　(            誘導[小,散,大]、誘導[TV])
 
-AddWeapon = dummy_bay_closed, 0,0,0,0,0         , true,  2
+;武器設定 - B-21 Raider hypothetical internal loadouts
+AddWeapon = dummy_bay_closed, 0,0,0,0,0, true, 2
 
-;33
-AddWeapon = mk82_b2,  1.84,  2.80, -4.27,  0, 0
-AddWeapon = mk82_b2, -1.84,  2.80, -4.27,  0, 0
-AddWeapon = mk82_b2,  1.84,  2.80, -8.57,  0, 0
-AddWeapon = mk82_b2, -1.84,  2.80, -8.57,  0, 0
+; Conventional precision JDAM load
+AddWeapon = b21gbu38,   1.57,  2.65, -5.05,  0, 0
+AddWeapon = b21gbu38,  -1.57,  2.65, -5.05,  0, 0
+AddWeapon = b21gbu38,   1.57,  2.65, -8.40,  0, 0
+AddWeapon = b21gbu38,  -1.57,  2.65, -8.40,  0, 0
 
-;20
-AddWeapon = b2gbu38,    1.84,  2.80, -4.27,  0, 0 , true, 2
-AddWeapon = b2gbu38,   -1.84,  2.80, -4.27,  0, 0 , true, 2
-AddWeapon = b2gbu38,    1.84,  2.80, -8.57,  0, 0 , true, 2
-AddWeapon = b2gbu38,   -1.84,  2.80, -8.57,  0, 0 , true, 2
+; Heavy JDAM / hardened target load
+AddWeapon = b21gbu31,   1.57,  1.93, -6.50,  0, 0, true, 2
+AddWeapon = b21gbu31,  -1.57,  1.93, -6.50,  0, 0, true, 2
 
-;4
-AddWeapon = b2gbu28,    1.84,  1.80, -6.13,  0, 0
-AddWeapon = b2gbu28,   -1.84,  1.80, -6.13,  0, 0
+; Conventional standoff load
+AddWeapon = b21agm158,   1.57,  1.93, -6.50,  0, 0, true, 2
+AddWeapon = b21agm158,  -1.57,  1.93, -6.50,  0, 0, true, 2
 
-;4
-AddWeapon = b2agm154,   1.84,  1.80, -6.13,  0, 0 , true,  2
-AddWeapon = b2agm154,  -1.84,  1.80, -6.13,  0, 0 , true,  2
+; Nuclear gravity load
+AddWeapon = b21b61_12,   1.57,  1.93, -6.50,  0, 0, true, 2
+AddWeapon = b21b61_12,  -1.57,  1.93, -6.50,  0, 0, true, 2
 
-;4
-AddWeapon = b2agm154b1,   1.84,  1.80, -6.13,  0, 0 , true,  2
-AddWeapon = b2agm154b1,  -1.84,  1.80, -6.13,  0, 0 , true,  2
+; Nuclear standoff load
+AddWeapon = b21agm181_lrso,   1.57,  1.93, -6.50,  0, 0, true, 2
+AddWeapon = b21agm181_lrso,  -1.57,  1.93, -6.50,  0, 0, true, 2
 
-;3
-AddWeapon = b2agm158,   1.84,  1.80, -6.13,  0, 0 , true,  2
-AddWeapon = b2agm158,  -1.84,  1.80, -6.13,  0, 0 , true,  2
+; Future speculative hypersonic load
+AddWeapon = b21_hypersonic,   1.57,  1.93, -6.50,  0, 0, true, 2
+AddWeapon = b21_hypersonic,  -1.57,  1.93, -6.50,  0, 0, true, 2
 
 AddWeapon = targeting_pod_block, 0.0, 0.9, 0.0,  0.0, 0.0
 
 AddWeapon = uhf_radar,  0.00, 3.0, 0.0,    0.0, 0.0
 
-BoundingBox =  0.0, 3.5, -1.8,  7.0, 4.0
-BoundingBox =  0.0, 3.5, -8.2,  7.0, 4.0
-BoundingBox =  0.0, 3.0,-14.8,  7.0, 2.0
-BoundingBox =  8.5, 3.2, -9.3, 10.0, 2.3
-BoundingBox = -8.5, 3.2, -9.3, 10.0, 2.3
-BoundingBox =  18.5, 3.2, -12.3, 10.0, 2.3
-BoundingBox = -18.5, 3.2, -12.3, 10.0, 2.3
+BoundingBox =  0.0, 3.5, -1.8,  7.0, 2.5
+BoundingBox =  0.0, 3.5, -8.2,  7.0, 2.5
+BoundingBox =  0.0, 3.0,-12.8,  7.0, 1.0
+BoundingBox =  8.5, 3.2, -9.3, 10.0, 1.3
+BoundingBox = -8.5, 3.2, -9.3, 10.0, 1.3
+BoundingBox =  17, 3.2, -11.3, 8, 0.8
+BoundingBox = -17, 3.2, -11.3, 8, 0.8
 
 ;large bomber aircraft modern, AOW3 style
-;;AddRecipe = "ABC", "DAC", "EF ", A, mcheli:airframebomb, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:fcs2, F, mcheli:electronics
+AddRecipe = "ABC", "DAC", "EFE", A, mcheli:airframebomb, B, mcheli:complexmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:fcs3, F, mcheli:electronics
 
 DamageFactor = 0.8
 
-unmountposition = 0.80,  1.70,  0.28
+unmountposition = 0.6,  1.70,  -0.7
 
 enableback = true
 

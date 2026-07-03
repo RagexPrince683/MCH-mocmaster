@@ -63,10 +63,11 @@ AddGunnerSeat =  0.00,  1.50,  0.00,    0.00,  2.50,  0.25,  false, -19, 9, true
 
 unmountposition = -0.0,  1.50,  0.0
 
-AddGunnerSeat = -0.4683,  2, -0.7271,   -0.587, 4.2, -0.7271, false, -90, 45, true
+;left mg
+AddGunnerSeat = 0.506,  3.04, -0.803,   0.506, 4, -0.803, false, -50, 5, true
 
-
-AddGunnerSeat =  0.55,  2.50, -0.96,    0.55,  3.60, -0.96,  false, -90, 90, true
+;right mg
+AddGunnerSeat =  -0.7064,  3.3630, -0.6965,    -0.7064,  4.3630, -0.6965,  false, -50, 5, true
 
 
 ;27.21z
@@ -104,13 +105,19 @@ AddTurretWeapon = m607.62mm,      0.43, 2.6, 2.0,  0.0, 0.0, true,1, 0,-360,360,
 
 ;-76.60
 
-AddPartTurretWeapon = magach5lmg, false, true, false, 1.2286, 2.9, -0.4445
-AddPartWeaponChild = false, true, 1.2286, 2.9, -0.4445, 0.0
-;;todo
+;L
+AddPartTurretWeapon = magach5lmg, false, true, true, 1.1686, 3.35, 0.0715
+;;AddPartWeaponChild = false, true, 1.1686, 3.35, 0.0715, 0.0
 
-AddturretWeapon = magach5lmg,    -0.6067, 3.4729, -0.7271,   0.0, 0.0, false, 2, 0, -360,360, -60,9
 
-AddturretWeapon = magach5lmg2,    -0.6067, 3.4729, -0.7271,   0.0, 0.0, false, 2, 0, -360,360, -60,9
+;left lmg fn mag
+AddturretWeapon = magach5lmg,    1.1686, 3.3810, 0.0715,   0.0, 0.0, false, 2, 0, -120,60, -50,5
+
+;R
+AddPartTurretWeapon = magach5lmg2, false, true, true, -1.1731, 3.579, -0.2298
+
+;right lmg
+AddturretWeapon = magach5lmg2,    -1.1731, 3.5790, -0.2298,   0.0, 0.0, false, 3, 0, -60,120, -50,5
 
 
 ArmorMinDamage = 20
@@ -170,5 +177,10 @@ BoundingBox = 0.0, 1.8, 0.75, 2.45, 0.2, 0.28
 ;turret 190
 BoundingBox = 0.0, 2.35, 0.0, 1.7, 1.7, 0.10
 
-;slightly really less NOT modern mbt tracked tank 
-;AddRecipe = "ABC", "DBF", "EE ", A, mcheli:mediumchassis, B, mcheli:cannon1, C, mcheli:engine3, D, mcheli:tanktracks, F, mcheli:advancedmechanicparts, E, mcheli:electronics
+
+;the m48 recipe but modern shit + cannon
+
+AddRecipe = "ABC", "DEF", "G  ", A, mcheli:mediumchassis, B, mcheli:cannon2, C, mcheli:engine3, D, mcheli:tanktracks, F, mcheli:advancedmechanicparts, E, mcheli:electronics, G, mcheli:composite
+
+;direct m48 upgrade
+AddRecipe = "ABC", "D  ", "   ", A, mcheli:m48, B, mcheli:electronics, C, mcheli:composite, D, mcheli:cannon2

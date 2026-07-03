@@ -44,6 +44,9 @@ MaxFuel         = 3000
 FuelConsumption = 0.028
 
 AddSeat = 0.00, 1.22, -2.78
+
+;;AddWeapon = sonar, 0.0, 1.22, -2.78
+
 AddGunnerSeat = 0.00,  -0.20,  0.05, 0.00, 2.54,  0.05, false, -30.0, 4.0
 AddGunnerSeat = 0.00,  -0.20,-11.09, 0.00, 3.14,-11.09, false, -30.0, 0.0
 AddGunnerSeat = 0.00,  -0.20,-14.82, 0.00, 3.14,-14.82, false, -85.0, 10.0

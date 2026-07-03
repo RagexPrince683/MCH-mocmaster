@@ -58,6 +58,8 @@ UnmountPosition = -8.84, 5, 5.76
 ;captain
 AddSeat =  -8.84, 2, 5.76
 
+AddWeapon = ddgsonar, -8.61, 10.88, 64.41
+
 
 ; entry seat
 AddSeat =  -0.25, 0.56, -0.03

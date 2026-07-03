@@ -5,8 +5,8 @@ NameOnEarlyASRadar = Large Ship
 NameOnModernASRadar = CVN-68 USS Nimitz Aircraft Carrier
 NameOnEarlyAARadar = Large Ship
 NameOnModernAARadar = CVN-68 USS Nimitz Aircraft Carrier
-ChaffWaitTime = 0
-ChaffUseTime = 0
+;;ChaffWaitTime = 0
+;;ChaffUseTime = 0
 ThrottleDownFactor = 0.30
 
 PivotTurnThrottle = 0.2
@@ -20,8 +20,8 @@ Float = true
 FloatOffset = -0.3
 Sound = big_ships
 ThrottleUpDown = 0.2
-MaxFuel         = 100000000
-FuelConsumption = 0.000
+MaxFuel         = 10
+FuelConsumption = 0.0
 ;todo nuclear fuel sht
 Gravity = -0.15
 ArmorDamageFactor = 1.0
@@ -53,6 +53,8 @@ Category = NCAC/AC
 HUD = plane, gunner, gunner, gunner, gunner, gunner, gunner, none, none, none, none, none
 
 UnmountPosition = -33, 15, -34.6
+
+;;UnmountPosition= -5, 15, -5
 
 ;　main
 AddSeat =  -5.00,  2.59, -5.0
@@ -287,22 +289,81 @@ AddRack = plane,  -14.25, 11.86, 56.69, 18.80, 45.22, -5.75,  70
 ; under
 ; fuck you I am NOT adding carrier elevators. They are ALL going on top of the carrier. FOR NOW.
 ;Y moved 4->12
-AddRack = plane,  -29.04, 12, 6.20, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
-AddRack = plane,  -29.04, 12, -5.34, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
-AddRack = plane,  -29.04, 12, -19.58, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
 
-AddRack = plane,  -14.91, 12, 6.20, 18.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
-AddRack = plane,  -14.91, 12, -5.34, 18.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
-AddRack = plane,  -14.91, 12, -19.58, 18.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+;at least 60
 
-;These don't seem to register
-;;AddRack = plane,  -29.04, 22, 6.20, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
-;;AddRack = plane,  -29.04, 22, -5.34, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
-;;AddRack = plane,  -29.04, 22, -19.58, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+;6
+AddRack = plane,  -29.04, 12, 5, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, 10, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, 15, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -14.91, 12, 5, 18.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, 10, 18.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, 15, 18.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
 
-;;AddRack = plane,  -14.91, 22, 6.20, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
-;;AddRack = plane,  -14.91, 22, -5.34, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
-;;AddRack = plane,  -14.91, 22, -19.58, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+;12
+AddRack = plane,  -29.04, 12, 20, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, 25, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, 30, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -14.91, 12, 20, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, 25, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, 30, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+
+;18
+AddRack = plane,  -29.04, 12, -5 , 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, -10, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, -15, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -14.91, 12, -5 , 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, -10, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, -15, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+
+;24
+AddRack = plane,  -29.04, 12, -20, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, -25, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, -30, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -14.91, 12, -20, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, -25, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, -30, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+
+;30
+AddRack = plane,  -29.04, 12, -35, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, -40, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, -45, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -14.91, 12, -35, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, -40, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, -45, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+
+;36
+AddRack = plane,  -29.04, 12, -50, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, -55, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, -60, 6.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -14.91, 12, -50, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, -55, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, -60, 6.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+
+;42
+
+AddRack = plane,  -29.04, 12, 35, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, 40, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -29.04, 12, 45, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  -14.91, 12, 35, 18.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, 40, 18.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+AddRack = plane,  -14.91, 12, 45, 18.80, 45.22, -5.75,  70, 100000,  90.0, 0.0
+
+
+;48
+AddRack = plane,  0, 12, 5, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  0, 12, 10, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  0, 12, 15, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+
+AddRack = plane,  0, 12, 20, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  0, 12, 25, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  0, 12, 30, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+
+
+;54
+AddRack = plane,  0, 12, -5, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  0, 12, -10, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
+AddRack = plane,  0, 12, -15, 18.80, 45.22, -5.75,  70, 100000,  -90.0, 0.0
 
 
 ;;this registers
@@ -338,6 +399,8 @@ AddRack = helicopter / mv-22,  -42.14, 11.53, -8.05,  18.80, 45.22, -5.75,  70, 
 ;AddFixedSearchLight = 4.35, 4.65, -0.21,   0x50FFFFFF,   0x10FFFFC0,    10.0, 10.0,  0, 90
 
 ;lower
+BoundingBox = -20.71, -3.5, 105.94,  10.0,  8.0
+BoundingBox = -20.71, -3.5, 90.94,  20.0,  8.0
 BoundingBox = -20.71, -3.5, 70.94,  20.0,  8.0
 BoundingBox = -20.71, -3.5, 64.53,  20.0,  8.0
 BoundingBox = -20.71, -3.5, 47.58,  20.0,  8.0
@@ -347,8 +410,8 @@ BoundingBox = -20.71, -3.5, -2.44,  32.0,  8.0
 BoundingBox = -20.71, -3.5, -29.42,  32.0,  8.0
 BoundingBox = -20.71, -3.5, -48.87,  22.0,  8.0
 BoundingBox = -20.71, -3.5, -60.20,  22.0,  8.0
-;got cut off
-;;BoundingBox = -20.71, -3.5, -104.20,  22.0,  8.0
+
+
 
 ;middle
 BoundingBox = -20.71, 3.84, -60.20,  30.0,  8.0
@@ -360,18 +423,21 @@ BoundingBox = -20.71, 3.84, 29.50,  28.0,  8.0
 BoundingBox = -20.71, 3.84, 47.58,  28.0,  8.0
 BoundingBox = -20.71, 3.84, 64.53,  28.0,  8.0
 BoundingBox = -20.71, 3.84, 70.94,  28.0,  8.0
+BoundingBox = -20.71, 3.84, 98, 28, 8
 
 ;upper
 BoundingBox = -20.71, 7.54, -60.20,  34.0,  8.0
 BoundingBox = -20.71, 7.54, -48.87,  34.0,  8.0
 BoundingBox = -20.71, 7.54, -29.42,  48.0,  8.0
 BoundingBox = -20.71, 7.54,  -2.44,  48.0,  8.0
-
 BoundingBox = -20.71, 7.54, 14.12,  40.0,  8.0
 BoundingBox = -20.71, 7.54, 29.50,  28.0,  8.0
 BoundingBox = -20.71, 7.54, 47.58,  28.0,  8.0
 BoundingBox = -20.71, 7.54, 64.53,  28.0,  8.0
 BoundingBox = -20.71, 7.54, 70.94,  28.0,  8.0
+BoundingBox = -20.71, 7.54, 74.94,  24.0,  8.0
+BoundingBox = -20.71, 7.54, 98.94,  24.0,  8.0
+
 
 ;full deck
 ;L
@@ -387,9 +453,9 @@ BoundingBox = -30, 10.04, -14, 45, 3
 
 ;front
 
+BoundingBox = -20.71, 10.04, 104, 25, 3
 BoundingBox = -20.71, 10.04, 50, 32, 3
 BoundingBox = -25, 10.04, 50, 32, 3
-
 BoundingBox = -20.71, 10.04, 78, 28.5, 3
 
 ;tower
@@ -426,4 +492,4 @@ AddParticleSplash  =  -33.43, 0.23, -110.53, 3, 10.0,  0.8, 80, 0.1, -0.01
 enableback = true
 
 ;modern carrier
-AddRecipe = "AAC", "DEE", "BAD", A, mcheli:shiphull3, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:electronics, E, mcheli:cannon2
+AddRecipe = "AAC", "DEE", "BAD", A, mcheli:shiphull3, B, mcheli:shipnuclearreactormultipart, C, mcheli:engine3, D, mcheli:fcs2, E, mcheli:cannon2

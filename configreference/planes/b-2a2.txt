@@ -32,7 +32,7 @@ EnableGunnerMode = true
 ConcurrentGunnerMode = true
 AutoPilotRot = 0
 Stealth = 0.35
-ThirdPersonDist = 20
+ThirdPersonDist = 70
 
 ThrottleUpDown = 0.1
 
