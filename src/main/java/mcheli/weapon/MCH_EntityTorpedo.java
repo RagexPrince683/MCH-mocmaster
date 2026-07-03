@@ -13,9 +13,6 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
    public double targetPosZ;
    public double accelerationInWater = 2.0D;
 
-   private Entity homingTarget;
-
-
    public MCH_EntityTorpedo(World par1World) {
       super(par1World);
       this.targetPosX = 0.0D;
@@ -65,21 +62,21 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
 
    private void onUpdateGuided() {
       if(!super.worldObj.isRemote && this.isInWater()) {
-         if(this.homingTarget == null || this.homingTarget.isDead || !this.homingTarget.isInWater()) {
-            this.homingTarget = this.findTorpedoTarget();
+         if(this.isInvalidTorpedoTarget(super.targetEntity)) {
+            this.setTargetEntity(this.findTorpedoTarget());
          }
 
          double tx;
          double ty;
          double tz;
 
-         if(this.homingTarget != null) {
-            tx = this.homingTarget.posX;
-            ty = this.homingTarget.posY + this.homingTarget.height * 0.5D;
-            tz = this.homingTarget.posZ;
+         if(super.targetEntity != null) {
+            tx = super.targetEntity.posX;
+            ty = this.getGuidanceDepth(super.targetEntity);
+            tz = super.targetEntity.posZ;
          } else {
             tx = this.targetPosX;
-            ty = this.targetPosY;
+            ty = Math.min(this.targetPosY, this.getGuidanceDepth((Entity)null));
             tz = this.targetPosZ;
          }
 
@@ -96,8 +93,11 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
 
          if(d > 0.001D) {
             super.motionX = dx * super.acceleration / d;
-            super.motionY = dy * super.acceleration / d;
+            super.motionY = this.clamp(dy * super.acceleration / d, -0.25D, 0.08D);
             super.motionZ = dz * super.acceleration / d;
+            if(!this.hasWaterAbove() && super.motionY > 0.0D) {
+               super.motionY = Math.min(super.motionY, 0.0D);
+            }
          }
       }
 
@@ -124,15 +124,7 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
       for(int i = 0; i < list.size(); ++i) {
          Entity e = (Entity)list.get(i);
 
-         if(e == null || e.isDead || e == super.shootingEntity) {
-            continue;
-         }
-
-         if(!e.isInWater()) {
-            continue;
-         }
-
-         if(!(e instanceof mcheli.ship.MCH_EntityShip) && !(e instanceof mcheli.aircraft.MCH_EntityBaseVehicle)) {
+         if(this.isInvalidTorpedoTarget(e)) {
             continue;
          }
 
@@ -160,6 +152,39 @@ public class MCH_EntityTorpedo extends MCH_EntityBaseBullet {
       }
 
       return best;
+   }
+
+   private boolean isInvalidTorpedoTarget(Entity e) {
+      if(e == null || e.isDead || e == super.shootingEntity || e == super.shootingAircraft) {
+         return true;
+      }
+
+      if(super.shootingAircraft != null && (e.ridingEntity == super.shootingAircraft || e.riddenByEntity == super.shootingAircraft)) {
+         return true;
+      }
+
+      if(!e.isInWater()) {
+         return true;
+      }
+
+      return !(e instanceof mcheli.ship.MCH_EntityShip) && !(e instanceof mcheli.aircraft.MCH_EntityBaseVehicle);
+   }
+
+   private double clamp(double value, double min, double max) {
+      return value < min ? min : (value > max ? max : value);
+   }
+
+   private double getGuidanceDepth(Entity target) {
+      double desiredY = target != null ? target.posY + target.height * 0.25D : super.posY;
+      double maxY = Math.floor(super.posY) + 0.20D;
+      return Math.min(desiredY, maxY);
+   }
+
+   private boolean hasWaterAbove() {
+      int x = MathHelper.floor_double(super.posX);
+      int y = MathHelper.floor_double(super.posY + 0.6D);
+      int z = MathHelper.floor_double(super.posZ);
+      return super.worldObj.getBlock(x, y, z).getMaterial() == net.minecraft.block.material.Material.water;
    }
 
    public MCH_EntityTorpedo(World par1World, double posX, double posY, double posZ, double targetX, double targetY, double targetZ, float yaw, float pitch, double acceleration) {
