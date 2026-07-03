@@ -16,8 +16,8 @@ Sight = MoveSight
 Delay = 10
 Sound = missile_1_snd
 
-; Keep false until guided torpedoes are fixed.
-GuidedTorpedo = false
+; Guided torpedo behavior enabled.
+GuidedTorpedo = true
 
 Gravity = -0.04
 GravityInWater = 0.01

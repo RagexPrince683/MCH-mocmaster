@@ -9,8 +9,7 @@ ExplosionInWater = 8
 Flaming = false
 Sight = None
 Delay = 3
-GuidedTorpedo = false
-;sorry! guide logic is FUCKING RETARDED
+GuidedTorpedo = true
 Gravity = -0.03
 GravityInWater = 0
 Sound = bomb_snd
