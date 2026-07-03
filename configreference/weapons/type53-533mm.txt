@@ -10,8 +10,7 @@ ProximityFuseDist = 3
 Flaming = false
 Sight = None
 Delay = 2
-GuidedTorpedo = false
-;;todo fix guided torpedos
+GuidedTorpedo = true
 Gravity = -0.04
 GravityInWater = 0
 ReloadTime = 4000
