@@ -25,6 +25,7 @@ Client keybinds and rendering settings are safest to change while the client is 
 | Option | Default | Notes |
 | --- | --- | --- |
 | `TestMode` | `false` | Development/test toggle. |
+| `DebugDrawOBB` | `false` | Single-player test-mode hit-box display toggle. `false` shows legacy AABBs; `true` shows oriented OBBs used by projectile hit processing. Can be changed at runtime with `/mcheli debugobb`. |
 | `EnableCommand` | `true` | Enables `/mcheli` subcommands. |
 | `PlaceableOnSpongeOnly` | `false` | Restricts vehicle placement to sponge blocks. |
 | `ItemDamage` | `true` | Enables item damage behavior for applicable MCHeli items. |

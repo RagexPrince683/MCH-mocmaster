@@ -26,7 +26,7 @@ public class MCP_RenderPlane extends MCH_RenderBaseVehicle {
          MCP_EntityPlane plane = (MCP_EntityPlane)entity;
          planeInfo = plane.getPlaneInfo();
          if(planeInfo != null) {
-            this.renderDebugHitBox(plane, posX, posY, posZ, yaw, pitch);
+            this.renderDebugHitBox(plane, posX, posY, posZ, yaw, pitch, roll);
             this.renderDebugPilotSeat(plane, posX, posY, posZ, yaw, pitch, roll);
             GL11.glTranslated(posX, posY, posZ);
             GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);

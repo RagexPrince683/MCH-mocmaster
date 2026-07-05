@@ -56,8 +56,9 @@ public class MCH_Command extends CommandBase {
    public static final String CMD_REMOVE_ENTITY = "removeentity";
    public static final String CMD_ATTACK_ENTITY = "attackentity";
    public static final String CMD_SHOW_BB = "showboundingbox";
+   public static final String CMD_DEBUG_OBB = "debugobb";
    public static final String CMD_LIST = "list";
-   public static String[] ALL_COMMAND = new String[]{"sendss", "modlist", "reconfig", "title", "fill", "status", "killentity", "removeentity", "attackentity", "showboundingbox", "list"};
+   public static String[] ALL_COMMAND = new String[]{"sendss", "modlist", "reconfig", "title", "fill", "status", "killentity", "removeentity", "attackentity", "showboundingbox", "debugobb", "list"};
    public static MCH_Command instance = new MCH_Command();
 
 
@@ -225,6 +226,17 @@ public class MCH_Command extends CommandBase {
                      MCH_PacketNotifyServerSettings.sendAll();
                      sender.addChatMessage(new ChatComponentText("Enabled bounding box [F3 + b]"));
                   }
+               } else if(prm[0].equalsIgnoreCase("debugobb")) {
+                  if(prm.length != 2) {
+                     throw new CommandException("Parameter error! : /mcheli debugobb true or false", new Object[0]);
+                  }
+
+                  if(!MCH_MOD.proxy.isSinglePlayer()) {
+                     throw new CommandException("/mcheli debugobb is single-player only", new Object[0]);
+                  }
+
+                  MCH_Config.DebugDrawOBB.prmBool = parseBoolean(sender, prm[1]);
+                  sender.addChatMessage(new ChatComponentText(MCH_Config.DebugDrawOBB.prmBool?"Test-mode hit boxes display as OBB":"Test-mode hit boxes display as AABB"));
                } else {
                   if(!prm[0].equalsIgnoreCase("list")) {
                      throw new CommandException("Unknown mcheli command. please type /mcheli list", new Object[0]);
@@ -559,6 +571,8 @@ public class MCH_Command extends CommandBase {
                   return getListOfStringsMatchingLastWord(prm, new String[]{"player", "inFire", "onFire", "lava", "inWall", "drown", "starve", "cactus", "fall", "outOfWorld", "generic", "magic", "wither", "anvil", "fallingBlock"});
                }
             } else if(prm[0].equalsIgnoreCase("showboundingbox") && prm.length == 2) {
+               return getListOfStringsMatchingLastWord(prm, new String[]{"true", "false"});
+            } else if(prm[0].equalsIgnoreCase("debugobb") && prm.length == 2) {
                return getListOfStringsMatchingLastWord(prm, new String[]{"true", "false"});
             }
          }

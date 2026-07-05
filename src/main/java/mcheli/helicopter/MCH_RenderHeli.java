@@ -26,7 +26,7 @@ public class MCH_RenderHeli extends MCH_RenderBaseVehicle {
          MCH_EntityHeli heli = (MCH_EntityHeli)entity;
          heliInfo = heli.getHeliInfo();
          if(heliInfo != null) {
-            this.renderDebugHitBox(heli, posX, posY, posZ, yaw, pitch);
+            this.renderDebugHitBox(heli, posX, posY, posZ, yaw, pitch, roll);
             this.renderDebugPilotSeat(heli, posX, posY, posZ, yaw, pitch, roll);
             GL11.glTranslated(posX, posY, posZ);
             GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
