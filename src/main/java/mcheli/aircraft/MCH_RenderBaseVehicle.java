@@ -8,6 +8,7 @@ import mcheli.MCH_ClientEventHook;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
+import mcheli.MCH_SkinOverlayTextureManager;
 import mcheli.flare.MCH_EntityChaff;
 import mcheli.flare.MCH_EntityFlare;
 import mcheli.gui.MCH_Gui;
