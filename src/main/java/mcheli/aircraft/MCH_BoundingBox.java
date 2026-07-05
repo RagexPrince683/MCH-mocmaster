@@ -205,6 +205,35 @@ public class MCH_BoundingBox {
               && local.zCoord >= -halfWidth && local.zCoord <= halfWidth;
    }
 
+   public Vec3 getHorizontalPushOut(AxisAlignedBB entityBox, double epsilon) {
+      Vec3 localCenter = this.toLocal(Vec3.createVectorHelper(
+              (entityBox.minX + entityBox.maxX) / 2.0D,
+              (entityBox.minY + entityBox.maxY) / 2.0D,
+              (entityBox.minZ + entityBox.maxZ) / 2.0D));
+      double halfEntityX = (entityBox.maxX - entityBox.minX) / 2.0D;
+      double halfEntityY = (entityBox.maxY - entityBox.minY) / 2.0D;
+      double halfEntityZ = (entityBox.maxZ - entityBox.minZ) / 2.0D;
+      double halfWidth = (double)this.width / 2.0D;
+      double halfHeight = (double)this.height / 2.0D;
+
+      if(Math.abs(localCenter.yCoord) >= halfHeight + halfEntityY
+              || Math.abs(localCenter.xCoord) >= halfWidth + halfEntityX
+              || Math.abs(localCenter.zCoord) >= halfWidth + halfEntityZ) {
+         return null;
+      }
+
+      double pushX = halfWidth + halfEntityX - Math.abs(localCenter.xCoord);
+      double pushZ = halfWidth + halfEntityZ - Math.abs(localCenter.zCoord);
+      Vec3 localPush;
+      if(pushX < pushZ) {
+         localPush = Vec3.createVectorHelper((localCenter.xCoord < 0.0D ? -pushX - epsilon : pushX + epsilon), 0.0D, 0.0D);
+      } else {
+         localPush = Vec3.createVectorHelper(0.0D, 0.0D, (localCenter.zCoord < 0.0D ? -pushZ - epsilon : pushZ + epsilon));
+      }
+      return MCH_Lib.RotVec3(localPush, -this.lastYaw, -this.lastPitch, -this.lastRoll);
+   }
+
+
    public MovingObjectPosition calculateIntercept(Vec3 start, Vec3 end) {
       Vec3 localStart = this.toLocal(start);
       Vec3 localEnd = this.toLocal(end);
