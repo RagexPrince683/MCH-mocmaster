@@ -1,5 +1,10 @@
 # Changelog
 
+## Keep remote ship OBB decks walkable
+
+- Expanded ship deck broad-phase searches with the full rotated corner extents of each extra OBB, so deck collision remains discoverable even when the walkable OBB is far from the ship origin.
+- Added a reusable enclosing-AABB helper for calculated vehicle OBBs before ship walkability resolves the precise OBB top contact.
+
 ## Use OBBs for ship walkability instead of using the AABBs
 
 - Changed ship moving-deck detection and carry anchors for extra bounding boxes to use the rotated OBB support surface instead of the legacy unrotated AABB.
