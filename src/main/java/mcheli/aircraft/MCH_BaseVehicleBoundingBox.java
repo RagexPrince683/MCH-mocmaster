@@ -52,9 +52,33 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
       boolean overlapsPerpendicularAxis = movingOnX
               ? other.maxZ > deck.minZ && other.minZ < deck.maxZ
               : other.maxX > deck.minX && other.minX < deck.maxX;
-      return overlapsPerpendicularAxis
-              && other.minY >= deck.maxY - bobTolerance
+      return overlapsPerpendicularAxis && this.isBaseDeckVerticalContact(deck, other, bobTolerance);
+   }
+
+   private boolean isBaseDeckVerticalContact(AxisAlignedBB deck, AxisAlignedBB other, double bobTolerance) {
+      return other.minY >= deck.maxY - bobTolerance
               && other.minY <= deck.maxY + bobTolerance;
+   }
+
+   private boolean isBaseDeckTopContact(AxisAlignedBB other, double bobTolerance) {
+      return other.maxX > super.minX + 1.0E-4D
+              && other.minX < super.maxX - 1.0E-4D
+              && other.maxZ > super.minZ + 1.0E-4D
+              && other.minZ < super.maxZ - 1.0E-4D
+              && this.isBaseDeckVerticalContact(this, other, bobTolerance);
+   }
+
+   private double getPreviousBaseTopSurfaceY() {
+      return super.maxY - (this.ac.posY - this.ac.prevPosY);
+   }
+
+   private double calculatePreviousBaseDeckYOffset(AxisAlignedBB other, double offset, double supportTolerance) {
+      if(offset >= 0.0D || !this.isBaseDeckTopContact(other, supportTolerance)) {
+         return offset;
+      }
+
+      double candidate = this.getPreviousBaseTopSurfaceY() - other.minY;
+      return candidate > offset ? candidate : offset;
    }
 
    private boolean isDeckTopContact(MCH_BoundingBox deck, AxisAlignedBB other) {
@@ -85,7 +109,12 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          return offset;
       }
 
+      double previousBaseTopY = this.getPreviousBaseTopSurfaceY();
       offset = super.calculateYOffset(other, offset);
+      if(this.ac.canFloatWater() && super.maxY > previousBaseTopY) {
+         offset = this.calculatePreviousBaseDeckYOffset(other, offset, 0.6D);
+      }
+
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
          final double supportTolerance = 0.6D;
          double previousTopY = bb.getPreviousTopSurfaceY();
