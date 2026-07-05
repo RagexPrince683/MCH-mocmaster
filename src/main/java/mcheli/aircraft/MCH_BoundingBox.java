@@ -80,8 +80,17 @@ public class MCH_BoundingBox {
    }
 
    public boolean isEntityOnTop(AxisAlignedBB entityBox, double horizontalInset, double belowTolerance, double aboveTolerance) {
-      Vec3 feet = Vec3.createVectorHelper((entityBox.minX + entityBox.maxX) / 2.0D, entityBox.minY, (entityBox.minZ + entityBox.maxZ) / 2.0D);
-      Vec3 localFeet = this.toLocal(feet);
+      double centerX = (entityBox.minX + entityBox.maxX) / 2.0D;
+      double centerZ = (entityBox.minZ + entityBox.maxZ) / 2.0D;
+      return this.isFootPointOnTop(centerX, entityBox.minY, centerZ, horizontalInset, belowTolerance, aboveTolerance)
+              || this.isFootPointOnTop(entityBox.minX, entityBox.minY, entityBox.minZ, horizontalInset, belowTolerance, aboveTolerance)
+              || this.isFootPointOnTop(entityBox.minX, entityBox.minY, entityBox.maxZ, horizontalInset, belowTolerance, aboveTolerance)
+              || this.isFootPointOnTop(entityBox.maxX, entityBox.minY, entityBox.minZ, horizontalInset, belowTolerance, aboveTolerance)
+              || this.isFootPointOnTop(entityBox.maxX, entityBox.minY, entityBox.maxZ, horizontalInset, belowTolerance, aboveTolerance);
+   }
+
+   private boolean isFootPointOnTop(double x, double y, double z, double horizontalInset, double belowTolerance, double aboveTolerance) {
+      Vec3 localFeet = this.toLocal(Vec3.createVectorHelper(x, y, z));
       double halfWidth = (double)this.width / 2.0D;
       double halfHeight = (double)this.height / 2.0D;
       return localFeet.xCoord > -halfWidth + horizontalInset
@@ -94,6 +103,30 @@ public class MCH_BoundingBox {
 
    public double getTopSurfaceY() {
       return this.getWorldTopCenter().yCoord;
+   }
+
+   public double getPreviousTopSurfaceY() {
+      return this.prevPos.yCoord + (this.getWorldTopCenter().yCoord - this.nowPos.yCoord);
+   }
+
+   public double calculateDeckYOffset(AxisAlignedBB entityBox, double offset, double supportTolerance) {
+      if(offset >= 0.0D || !this.isEntityOnTop(entityBox, 1.0E-4D, supportTolerance, supportTolerance)) {
+         return offset;
+      }
+
+      double topY = this.getTopSurfaceY();
+      double candidate = topY - entityBox.minY;
+      return candidate > offset ? candidate : offset;
+   }
+
+   public double calculatePreviousDeckYOffset(AxisAlignedBB entityBox, double offset, double supportTolerance) {
+      if(offset >= 0.0D || !this.isEntityOnTop(entityBox, 1.0E-4D, supportTolerance, supportTolerance)) {
+         return offset;
+      }
+
+      double previousTopY = this.getPreviousTopSurfaceY();
+      double candidate = previousTopY - entityBox.minY;
+      return candidate > offset ? candidate : offset;
    }
 
    public MovingObjectPosition calculateIntercept(Vec3 start, Vec3 end) {
