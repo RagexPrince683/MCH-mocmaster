@@ -1,3 +1,8 @@
+## Fix far ship bounding-box side collision
+
+- Replaced ship OBB-vs-entity side intersection checks with a full separating-axis test so configured `BoundingBox` collision remains solid even when boxes are far from the ship origin.
+- Increased horizontal side-offset resolution precision and snaps tiny residual movement to zero to reduce jitter when walking into ship bounding-box sides.
+
 ## Fix remote ship bounding-box side collision
 
 - Returned the composite ship collision resolver with the expanded extra-box search bounds for entity collision boxes, so player movement discovers and resolves side contact on ship BoundingBox volumes far from the vehicle origin without making the broad-phase enclosure solid.
