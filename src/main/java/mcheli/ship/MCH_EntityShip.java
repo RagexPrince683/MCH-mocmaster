@@ -1120,8 +1120,9 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         }
     }
 
-    private void collisionEntity(AxisAlignedBB bb) {
-        if (bb != null) {
+    private void collisionEntity(MCH_BoundingBox shipBox) {
+        if (shipBox != null) {
+            AxisAlignedBB bb = shipBox.getEnclosingAABB();
             // Calculate speed
             double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);
 
@@ -1136,7 +1137,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
                         ? ((MCH_EntitySeat) super.ridingEntity).getParent()
                         : null);
 
-                // Get a list of entities within the bounding box
+                // Get a broad-phase entity list from the OBB enclosure, then filter each hit by the ship OBB.
                 List<Entity> list = super.worldObj.getEntitiesWithinAABBExcludingEntity(this, bb.expand(0.3D, 0.3D, 0.3D), new IEntitySelector() {
                     @Override
                     public boolean isEntityApplicable(Entity e) {
@@ -1166,7 +1167,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
                 // Process each entity within the bounding box
                 for (Entity e : list) {
-                    if (this.shouldCollisionDamage(e)) {
+                    if (this.shouldCollisionDamage(e) && shipBox.intersectsAABB(e.boundingBox)) {
                         double dx = e.posX - super.posX;
                         double dz = e.posZ - super.posZ;
                         double dist = Math.sqrt(dx * dx + dz * dz);
@@ -1251,7 +1252,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
                 if(super.rand.nextInt(3) == 0) {
                     var10000 = MCH_MOD.config;
 
-                    this.collisionEntity(bb.boundingBox);
+                    this.collisionEntity(bb);
                 }
             }
 
