@@ -1,5 +1,14 @@
 # Changelog
 
+## Preserve OBB collision resolver for ship deck broad-phase
+
+- Changed ship deck broad-phase boxes to expand the vehicle's custom collision box instead of creating a plain `AxisAlignedBB`, preventing composite deck discovery from bypassing the OBB-only collision resolver.
+
+## Disable AABB player/entity vehicle collision
+
+- Removed legacy primary vehicle AABB and extra-box AABB side-wall resolution from player/entity movement collision, leaving configured OBB deck surfaces as the only solid player/entity support path.
+- Stopped vehicles from returning another entity's AABB from `getCollisionBox`, preventing the vanilla entity-collision pass from reintroducing body AABB collision.
+
 ## Stop ship AABB deck fallback jitter
 
 - Disabled primary ship AABB deck-top support whenever extra OBB deck boxes are configured, leaving the AABB as broad-phase/body coverage while player walkability resolves against the intended OBB deck surfaces.
