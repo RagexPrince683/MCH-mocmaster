@@ -601,7 +601,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          result.initialVelocitySideDot = releaseKinematics.initialVelocitySideDot;
          result.warningImpossibleLaunch = releaseKinematics.warningImpossibleLaunch;
          if(result.valid) {
-            ScreenPoint projected = this.projectWorldToAircraftHud(plane, result.impact);
+            AircraftHudProjection projected = this.projectWorldToAircraftHud(plane, result.impact);
             if(projected != null && projected.visible) {
                ScreenPoint p = this.smoothCCIPScreenPoint(projected, result.impact, weapon);
                this.drawCCIPPipper(p.x, p.y, p.clamped);
@@ -616,7 +616,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       }
 
       if(MCH_Config.PlaneMouseAimReticleDebug.prmBool || MCH_Config.DebugFlightControl.prmBool) {
-         this.drawCCIPDebug(plane, weapon, enabled, result, aircraftMotion);
+         this.drawCCIPDebug(plane, weapon, enabled, result, aircraftMotion, result != null ? this.projectWorldToAircraftHud(plane, result.impact) : null);
       }
    }
 
@@ -685,7 +685,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       this.lastCCIPImpact = null;
    }
 
-   private void drawCCIPDebug(MCP_EntityPlane plane, MCH_WeaponBase weapon, boolean enabled, MCP_PlaneCCIPHelper.Result result, Vec3 aircraftMotion) {
+   private void drawCCIPDebug(MCP_EntityPlane plane, MCH_WeaponBase weapon, boolean enabled, MCP_PlaneCCIPHelper.Result result, Vec3 aircraftMotion, AircraftHudProjection aircraftProjection) {
       Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
       String name = weapon != null && weapon.getInfo() != null ? weapon.getInfo().name : "none";
       double horizontalSpeed = Math.sqrt(aircraftMotion.xCoord * aircraftMotion.xCoord + aircraftMotion.zCoord * aircraftMotion.zCoord);
@@ -709,6 +709,13 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             Boolean.valueOf(result != null && result.warningImpossibleLaunch),
             Float.valueOf(camera != null ? camera.rotationYaw : 0.0F), Float.valueOf(camera != null ? camera.rotationPitch : 0.0F),
             Float.valueOf(plane.rotationYaw), Float.valueOf(plane.rotationPitch), Float.valueOf(plane.getRotRoll()));
+      String msg6 = String.format("aircraftHud localF/R/U=%.2f/%.2f/%.2f screenX/Y=%s/%s hiddenNear=%s",
+            Double.valueOf(aircraftProjection != null ? aircraftProjection.localForward : 0.0D),
+            Double.valueOf(aircraftProjection != null ? aircraftProjection.localRight : 0.0D),
+            Double.valueOf(aircraftProjection != null ? aircraftProjection.localUp : 0.0D),
+            aircraftProjection != null ? String.format("%.1f", new Object[]{Double.valueOf(aircraftProjection.x)}) : "-",
+            aircraftProjection != null ? String.format("%.1f", new Object[]{Double.valueOf(aircraftProjection.y)}) : "-",
+            Boolean.valueOf(aircraftProjection != null && aircraftProjection.hiddenBehindNearPlane));
       this.drawString(msg1, super.centerX - 170, super.centerY + 70, 0xFF55FF66);
       this.drawString(msg2, super.centerX - 170, super.centerY + 80, 0xFF55FF66);
       this.drawString(msg3, super.centerX - 170, super.centerY + 90, 0xFF55FF66);
@@ -734,8 +741,37 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       return mcheli.MCH_Lib.RotVec3(weapon.position, -yaw, -pitch, -roll);
    }
 
-   private ScreenPoint projectWorldToAircraftHud(MCP_EntityPlane plane, Vec3 pos) {
+   private AircraftHudProjection projectWorldToAircraftHud(MCP_EntityPlane plane, Vec3 pos) {
       if(plane == null || pos == null) {
+         return null;
+      }
+      float partialTicks = this.smoothCamPartialTicks;
+      Vec3 planePos = this.getInterpolatedEntityPos(plane, partialTicks);
+      double dx = pos.xCoord - planePos.xCoord;
+      double dy = pos.yCoord - (planePos.yCoord + (double)plane.getEyeHeight());
+      double dz = pos.zCoord - planePos.zCoord;
+      float yaw = plane.prevRotationYaw + MathHelper.wrapAngleTo180_float(plane.rotationYaw - plane.prevRotationYaw) * partialTicks;
+      float pitch = plane.prevRotationPitch + (plane.rotationPitch - plane.prevRotationPitch) * partialTicks;
+      float roll = plane.prevRotationRoll + (plane.getRotRoll() - plane.prevRotationRoll) * partialTicks;
+      Vec3 local = mcheli.MCH_Lib.RotVec3(dx, dy, dz, yaw, pitch, roll);
+      double localForward = local.zCoord;
+      double localRight = -local.xCoord;
+      double localUp = local.yCoord;
+      double nearPlane = 0.05D;
+      boolean hiddenNear = localForward <= nearPlane;
+      if(hiddenNear) {
+         return new AircraftHudProjection(0.0D, 0.0D, false, false, localForward, localRight, localUp, hiddenNear);
+      }
+      double scale = (double)super.height * 0.75D / localForward;
+      double x = (double)super.centerX + localRight * scale;
+      double y = (double)super.centerY - localUp * scale;
+      boolean visible = x >= 0.0D && x <= (double)super.width && y >= 0.0D && y <= (double)super.height;
+      return new AircraftHudProjection(x, y, false, visible, localForward, localRight, localUp, false);
+   }
+
+   private ScreenPoint projectWorldToHud(Vec3 pos) {
+      Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
+      if(pos == null || camera == null) {
          return null;
       }
       float partialTicks = this.smoothCamPartialTicks;
@@ -818,8 +854,24 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    }
 
    private static class ScreenPoint {
-      final double x; final double y; final boolean clamped; final boolean visible = true;
-      ScreenPoint(double x, double y, boolean clamped) { this.x = x; this.y = y; this.clamped = clamped; }
+      final double x; final double y; final boolean clamped; final boolean visible;
+      ScreenPoint(double x, double y, boolean clamped) { this(x, y, clamped, true); }
+      ScreenPoint(double x, double y, boolean clamped, boolean visible) { this.x = x; this.y = y; this.clamped = clamped; this.visible = visible; }
+   }
+
+   private static class AircraftHudProjection extends ScreenPoint {
+      final double localForward;
+      final double localRight;
+      final double localUp;
+      final boolean hiddenBehindNearPlane;
+
+      AircraftHudProjection(double x, double y, boolean clamped, boolean visible, double localForward, double localRight, double localUp, boolean hiddenBehindNearPlane) {
+         super(x, y, clamped, visible);
+         this.localForward = localForward;
+         this.localRight = localRight;
+         this.localUp = localUp;
+         this.hiddenBehindNearPlane = hiddenBehindNearPlane;
+      }
    }
 
    public void drawKeybind(MCP_EntityPlane plane, EntityPlayer player, int seatID) {
