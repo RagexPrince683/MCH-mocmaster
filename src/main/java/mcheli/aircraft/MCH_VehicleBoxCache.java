@@ -15,6 +15,7 @@ import mcheli.MCH_Lib;
 public class MCH_VehicleBoxCache {
    private static final double POSITION_EPSILON = 1.0E-4D;
    private static final float ROTATION_EPSILON = 1.0E-3F;
+   private static final double ROUND_TRIP_EPSILON = 1.0E-5D;
 
    private boolean dirty = true;
    private String dirtyReason = "initial";
@@ -64,6 +65,7 @@ public class MCH_VehicleBoxCache {
 
       for(int i = 0; i < currentBoxes.length; ++i) {
          currentBoxes[i].updatePosition(currentPosX, currentPosY, currentPosZ, currentYaw, currentPitch, currentRoll);
+         this.validateTransformRoundTrip(vehicle, currentBoxes[i], i);
       }
 
       this.boxes = currentBoxes;
@@ -94,6 +96,20 @@ public class MCH_VehicleBoxCache {
       if(Math.abs(this.posX - currentPosX) > POSITION_EPSILON || Math.abs(this.posY - currentPosY) > POSITION_EPSILON || Math.abs(this.posZ - currentPosZ) > POSITION_EPSILON) return "vehicle moved";
       if(Math.abs(this.yaw - currentYaw) > ROTATION_EPSILON || Math.abs(this.pitch - currentPitch) > ROTATION_EPSILON || Math.abs(this.roll - currentRoll) > ROTATION_EPSILON) return "vehicle rotated";
       return null;
+   }
+
+   private void validateTransformRoundTrip(MCH_EntityBaseVehicle vehicle, MCH_BoundingBox box, int index) {
+      if(MCH_Config.DebugVehicleBoxCache != null && MCH_Config.DebugVehicleBoxCache.prmBool) {
+         double error = box.getTransformRoundTripError();
+         if(error > ROUND_TRIP_EPSILON) {
+            String name = vehicle.getAcInfo() != null ? vehicle.getAcInfo().name : vehicle.getClass().getSimpleName();
+            if(vehicle.worldObj != null) {
+               MCH_Lib.DbgLog(vehicle.worldObj, "VehicleBoxCache %s transform round-trip error box=%d error=%.9f epsilon=%.9f", name, Integer.valueOf(index), Double.valueOf(error), Double.valueOf(ROUND_TRIP_EPSILON));
+            } else {
+               MCH_Lib.DbgLog(false, "VehicleBoxCache %s transform round-trip error box=%d error=%.9f epsilon=%.9f", name, Integer.valueOf(index), Double.valueOf(error), Double.valueOf(ROUND_TRIP_EPSILON));
+            }
+         }
+      }
    }
 
    private void debug(MCH_EntityBaseVehicle vehicle, String action, String reason, int count) {

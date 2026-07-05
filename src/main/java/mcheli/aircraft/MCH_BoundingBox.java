@@ -52,6 +52,11 @@ public class MCH_BoundingBox {
       return copy;
    }
 
+   /**
+    * Local box offsets are converted to world space with negative vehicle yaw/pitch/roll.
+    * World-to-local conversion in {@link #toLocal(Vec3)} uses positive yaw/pitch/roll, and
+    * both directions must remain exact inverses for OBB collision and deck support math.
+    */
    public void updatePosition(double posX, double posY, double posZ, float yaw, float pitch, float roll) {
       this.lastYaw = yaw;
       this.lastPitch = pitch;
@@ -109,6 +114,11 @@ public class MCH_BoundingBox {
       return this.prevPos.yCoord + (this.getWorldTopCenter().yCoord - this.nowPos.yCoord);
    }
 
+   /**
+    * Builds a broad-phase AABB by rotating each local OBB corner into world space with
+    * negative vehicle yaw/pitch/roll. Keep this paired with the positive-angle inverse in
+    * {@link #toLocal(Vec3)} so corner sampling and precise OBB tests agree.
+    */
    public AxisAlignedBB getEnclosingAABB() {
       double halfWidth = (double)this.width / 2.0D;
       double halfHeight = (double)this.height / 2.0D;
@@ -437,12 +447,45 @@ public class MCH_BoundingBox {
       return new MovingObjectPosition(0, 0, 0, 0, hit);
    }
 
+   /**
+    * Converts a world point back into this box's local space with positive vehicle
+    * yaw/pitch/roll. This is the inverse of the negative-angle local-to-world convention
+    * used by {@link #updatePosition(double, double, double, float, float, float)} and
+    * {@link #getEnclosingAABB()}; do not change one direction without the other.
+    */
    public Vec3 toLocal(Vec3 world) {
       Vec3 relative = Vec3.createVectorHelper(world.xCoord - this.nowPos.xCoord, world.yCoord - this.nowPos.yCoord, world.zCoord - this.nowPos.zCoord);
       relative.rotateAroundY(this.lastYaw / 180.0F * 3.1415927F);
       relative.rotateAroundX(this.lastPitch / 180.0F * 3.1415927F);
       W_Vec3.rotateAroundZ(this.lastRoll / 180.0F * 3.1415927F, relative);
       return relative;
+   }
+
+
+   public double getTransformRoundTripError() {
+      double halfWidth = (double)this.width / 2.0D;
+      double halfHeight = (double)this.height / 2.0D;
+      double maxErrorSq = 0.0D;
+
+      for(int x = -1; x <= 1; x += 2) {
+         for(int y = -1; y <= 1; y += 2) {
+            for(int z = -1; z <= 1; z += 2) {
+               Vec3 local = Vec3.createVectorHelper((double)x * halfWidth, (double)y * halfHeight, (double)z * halfWidth);
+               Vec3 rotated = MCH_Lib.RotVec3(local, -this.lastYaw, -this.lastPitch, -this.lastRoll);
+               Vec3 world = Vec3.createVectorHelper(this.nowPos.xCoord + rotated.xCoord, this.nowPos.yCoord + rotated.yCoord, this.nowPos.zCoord + rotated.zCoord);
+               Vec3 roundTrip = this.toLocal(world);
+               double dx = roundTrip.xCoord - local.xCoord;
+               double dy = roundTrip.yCoord - local.yCoord;
+               double dz = roundTrip.zCoord - local.zCoord;
+               double errorSq = dx * dx + dy * dy + dz * dz;
+               if(errorSq > maxErrorSq) {
+                  maxErrorSq = errorSq;
+               }
+            }
+         }
+      }
+
+      return Math.sqrt(maxErrorSq);
    }
 
    private boolean clipAxis(double start, double delta, double min, double max, double[] interval) {

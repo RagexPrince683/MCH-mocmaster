@@ -1,7 +1,7 @@
-## Fix swept ship bounding-box side collision
+## Document and validate vehicle OBB transform convention
 
-- Reworked extra bounding-box horizontal offset clipping to sweep the moving player AABB against the rotated OBB shape instead of treating an existing intersection as permission to keep moving through the box.
-- Added deterministic SAT-backed refinement for X/Z side offsets so positive and negative movement stop symmetrically at the first OBB contact.
+- Documented that vehicle OBB local-to-world transforms use negative yaw/pitch/roll while world-to-local transforms use positive yaw/pitch/roll, and that the operations must remain inverses.
+- Added debug-only vehicle box cache validation that samples OBB corners and logs excessive local-to-world-to-local round-trip error when `DebugVehicleBoxCache` is enabled.
 
 ## Fix far ship bounding-box side collision
 
