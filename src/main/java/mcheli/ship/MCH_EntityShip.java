@@ -53,6 +53,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
     public boolean iscarrier = false;
 
+    private boolean loggedNonCompositeCollisionSearchBox;
 
     private static final double SUBMARINE_VERTICAL_ACCELERATION = 0.01D;
     private static final double SUBMARINE_MAX_VERTICAL_SPEED = 0.15D;
@@ -1006,7 +1007,29 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
             return ((MCH_BaseVehicleBoundingBox)super.boundingBox).NewAABB(search.minX, search.minY, search.minZ,
                     search.maxX, search.maxY, search.maxZ);
         }
+        this.warnNonCompositeCollisionSearchBox(search);
         return search;
+    }
+
+    private void warnNonCompositeCollisionSearchBox(AxisAlignedBB search) {
+        if(this.loggedNonCompositeCollisionSearchBox || !MCH_Config.DebugVehicleBoxCache.prmBool) {
+            return;
+        }
+        this.loggedNonCompositeCollisionSearchBox = true;
+        String boundingBoxClass = super.boundingBox != null ? super.boundingBox.getClass().getName() : "null";
+        boolean hasExtraBoxes = this.extraBoundingBox != null && this.extraBoundingBox.length > 0;
+        MCH_Lib.Log((Entity)this,
+                "[MCHeli][ShipCollision][WARN] MCH_EntityShip.getCompositeCollisionSearchBox fallback to raw search AABB because super.boundingBox is %s, not MCH_BaseVehicleBoundingBox. shipId=%d shipClass=%s pos=(%.3f,%.3f,%.3f) yaw/pitch/roll=(%.2f,%.2f,%.2f) search=(%.3f,%.3f,%.3f)->(%.3f,%.3f,%.3f) hasExtraBoxes=%s",
+                new Object[]{
+                        boundingBoxClass,
+                        Integer.valueOf(W_Entity.getEntityId(this)),
+                        this.getClass().getName(),
+                        Double.valueOf(super.posX), Double.valueOf(super.posY), Double.valueOf(super.posZ),
+                        Float.valueOf(this.getRotYaw()), Float.valueOf(this.getRotPitch()), Float.valueOf(this.getRotRoll()),
+                        Double.valueOf(search.minX), Double.valueOf(search.minY), Double.valueOf(search.minZ),
+                        Double.valueOf(search.maxX), Double.valueOf(search.maxY), Double.valueOf(search.maxZ),
+                        Boolean.valueOf(hasExtraBoxes)
+                });
     }
 
     private static class DeckContact {

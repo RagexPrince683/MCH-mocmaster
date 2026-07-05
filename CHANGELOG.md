@@ -1,7 +1,6 @@
-## Refresh ship OBB collision boxes before queries
+## Add ship collision-box fallback diagnostics
 
-- Refreshed calculated ship extra bounding boxes at deck, side, damage, and composite collision entry points before running physical OBB intersection or offset queries.
-- Documented the collision-entry refresh requirement in ship and base vehicle bounding-box paths.
+- Added debug-flagged ship collision fallback diagnostics when the ship entity bounding box is not the composite vehicle resolver, preserving the non-crashing broad-phase fallback while logging ship identity, transform, search bounds, and extra-box presence.
 
 ## Fix far ship bounding-box side collision
 
