@@ -992,10 +992,15 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
     @Override
     public AxisAlignedBB getBoundingBox() {
-        if(this.getAcInfo() == null || super.extraBoundingBox == null || super.extraBoundingBox.length <= 0) {
-            return AxisAlignedBB.getBoundingBox(super.posX, super.posY, super.posZ, super.posX, super.posY, super.posZ);
-        }
-        return this.getDeckSearchBox();
+        // Do not expose the composite deck-search volume as the ship entity's
+        // vanilla bounding box. Player movement adds other entities' bounding
+        // boxes before consulting getCollisionBox(), so returning the deck
+        // search AABB here still creates a physical wall/floor near the ship
+        // origin even when getCollisionBox() returns null. Keep vanilla entity
+        // collision effectively empty; ship deck carry and damage use the
+        // explicit OBB search helpers instead.
+        return AxisAlignedBB.getBoundingBox(super.posX, super.posY, super.posZ,
+                super.posX, super.posY, super.posZ);
     }
 
     private static class DeckContact {

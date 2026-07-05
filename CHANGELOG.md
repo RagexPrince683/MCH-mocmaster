@@ -1,3 +1,8 @@
+## Fix ship-origin deck bounding-box jitter
+
+- Stopped returning the composite ship deck-search AABB from `MCH_EntityShip.getBoundingBox()` so vanilla player movement no longer treats the broad-phase deck search volume as a physical collision box near the ship origin.
+- Kept walkable ship support on the explicit rotated extra-box deck search/carry path, preserving remote OBB deck support without reintroducing origin AABB collisions.
+
 ## Fix ship-origin deck movement jitter
 
 - Prevented the ship composite deck search AABB from being used as a vanilla entity collision box, so players near the ship origin no longer collide with the broad-phase search volume while walking or jumping.
