@@ -74,7 +74,7 @@ This page summarizes the major project-wide systems that distinguish MCHeli Over
 
 ### Walkable and moving ship decks
 
-**What it does:** Ships use only rotated extra bounding-box OBBs as deck and physical collision surfaces; their base axis-aligned body box is not used for collision, ray hits, deck support, or damage/pushback broad-phase checks. The broad-phase deck search includes each extra OBB's rotated corner extents before the precise OBB top-contact check, so remote deck surfaces remain discoverable without reverting to a ship-origin AABB. Players standing on a moving or turning ship are detected and supported against those OBB deck tops, carried with the deck, receive small clearance corrections when the deck moves upward, keep grounded state, and have fall distance reset while standing on the surface.
+**What it does:** Ships use only rotated extra bounding-box OBBs as deck and physical collision surfaces; their base axis-aligned body box and composite deck search AABB are not used for vanilla entity collision, ray hits, deck support, or damage/pushback broad-phase checks. The broad-phase deck search includes each extra OBB's rotated corner extents before the precise OBB top-contact check, so remote deck surfaces remain discoverable without reverting to a ship-origin AABB. Players standing on a moving or turning ship are detected and supported against those OBB deck tops, carried with the deck, receive small clearance corrections when the deck moves upward, keep grounded state, and have fall distance reset while standing on the surface.
 
 **Why it exists:** Original MCHeli did not provide a robust moving-deck experience for large ships. Overdrive makes ships more useful as mobile platforms instead of decorative or single-seat vehicles.
 

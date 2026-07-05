@@ -1,3 +1,8 @@
+## Fix ship-origin deck movement jitter
+
+- Prevented the ship composite deck search AABB from being used as a vanilla entity collision box, so players near the ship origin no longer collide with the broad-phase search volume while walking or jumping.
+- Kept ship walkability on the precise rotated extra bounding-box deck support path instead of reintroducing physical base/composite AABB collision.
+
 ## Disable ship AABBs entirely
 
 - Forced ship debug hit-box rendering to draw configured extra bounding boxes as OBBs, independent of the single-player OBB debug toggle.
