@@ -1,8 +1,7 @@
-## Introduce ship OBB collision abstraction
+## Fix swept ship bounding-box side collision
 
-- Added a dedicated `MCH_ShipOBB` abstraction for ship-oriented bounding-box centers, half extents, axes, transforms, intersection, sweep, ray, and deck-support logic.
-- Kept legacy `MCH_BoundingBox.boundingBox` AABB behavior available for non-ship vehicles while ship callers route physical checks through `MCH_ShipOBB`.
-- Clarified that enclosing AABBs are broad-phase search volumes only, not physical ship collision volumes.
+- Reworked extra bounding-box horizontal offset clipping to sweep the moving player AABB against the rotated OBB shape instead of treating an existing intersection as permission to keep moving through the box.
+- Added deterministic SAT-backed refinement for X/Z side offsets so positive and negative movement stop symmetrically at the first OBB contact.
 
 ## Fix far ship bounding-box side collision
 
