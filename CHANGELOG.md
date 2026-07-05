@@ -5,6 +5,7 @@
 - Changed ship moving-deck detection and carry anchors for extra bounding boxes to use the rotated OBB support surface instead of the legacy unrotated AABB.
 - Added reusable OBB deck helpers on `MCH_BoundingBox` for top-center, top-height, multi-point entity-on-top checks, and OBB Y-support resolution.
 - Updated ship collision support to resolve walking/falling against extra-box OBB deck tops instead of the legacy extra-box AABBs.
+- Expanded the ship collision broad-phase box to include rotated extra-box deck extents so far-from-origin OBB decks are considered for player collision instead of falling back to nearby base AABB behavior.
 
 
 ## Unreleased

@@ -975,6 +975,15 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
     }
 
+
+    @Override
+    public AxisAlignedBB getBoundingBox() {
+        if(this.getAcInfo() == null || super.extraBoundingBox == null || super.extraBoundingBox.length <= 0) {
+            return super.getBoundingBox();
+        }
+        return this.getDeckSearchBox();
+    }
+
     private static class DeckContact {
         public final Entity entity;
         public final int surfaceIndex;
