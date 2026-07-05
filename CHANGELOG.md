@@ -1,6 +1,7 @@
-## Add ship collision-box fallback diagnostics
+## Fix swept ship bounding-box side collision
 
-- Added debug-flagged ship collision fallback diagnostics when the ship entity bounding box is not the composite vehicle resolver, preserving the non-crashing broad-phase fallback while logging ship identity, transform, search bounds, and extra-box presence.
+- Reworked extra bounding-box horizontal offset clipping to sweep the moving player AABB against the rotated OBB shape instead of treating an existing intersection as permission to keep moving through the box.
+- Added deterministic SAT-backed refinement for X/Z side offsets so positive and negative movement stop symmetrically at the first OBB contact.
 
 ## Fix far ship bounding-box side collision
 
