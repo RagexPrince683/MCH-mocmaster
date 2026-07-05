@@ -1,3 +1,9 @@
+## Disable ship AABB collision
+
+- Disabled ship base AABB collision, ray hits, and broad-phase damage/pushback so ships no longer use the vanilla axis-aligned body box as a physical collision volume.
+- Limited ship deck discovery and moving-deck support to configured extra bounding-box OBBs; ships without extra boxes now expose only an empty point search box instead of falling back to the base AABB.
+- Updated ship collision documentation to clarify that ship walkable/collision surfaces must be configured as `BoundingBox` OBBs.
+
 # Changelog
 
 ## Smooth ship AABB deck collision

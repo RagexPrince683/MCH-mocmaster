@@ -979,7 +979,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     @Override
     public AxisAlignedBB getBoundingBox() {
         if(this.getAcInfo() == null || super.extraBoundingBox == null || super.extraBoundingBox.length <= 0) {
-            return super.getBoundingBox();
+            return AxisAlignedBB.getBoundingBox(super.posX, super.posY, super.posZ, super.posX, super.posY, super.posZ);
         }
         return this.getDeckSearchBox();
     }
@@ -1021,17 +1021,21 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     }
 
     private AxisAlignedBB getDeckSearchBox() {
-        AxisAlignedBB search = AxisAlignedBB.getBoundingBox(super.boundingBox.minX, super.boundingBox.minY,
-                super.boundingBox.minZ, super.boundingBox.maxX, super.boundingBox.maxY, super.boundingBox.maxZ);
-        for(MCH_BoundingBox bb : this.getCalculatedExtraBoundingBoxes()) {
-            search = search.func_111270_a(bb.getEnclosingAABB());
+        MCH_BoundingBox[] deckBoxes = this.getCalculatedExtraBoundingBoxes();
+        if(deckBoxes.length <= 0) {
+            return AxisAlignedBB.getBoundingBox(super.posX, super.posY, super.posZ, super.posX, super.posY, super.posZ);
+        }
+
+        AxisAlignedBB search = deckBoxes[0].getEnclosingAABB();
+        for(int i = 1; i < deckBoxes.length; ++i) {
+            search = search.func_111270_a(deckBoxes[i].getEnclosingAABB());
         }
         return search.expand(0.25D, 0.6D, 0.25D);
     }
 
     private int getDeckSurfaceIndex(AxisAlignedBB entityBox) {
-        int surfaceIndex = this.isOnTopOf(entityBox, super.boundingBox)?-1:Integer.MIN_VALUE;
-        double highestSurface = surfaceIndex == -1?super.boundingBox.maxY:-Double.MAX_VALUE;
+        int surfaceIndex = Integer.MIN_VALUE;
+        double highestSurface = -Double.MAX_VALUE;
 
         MCH_BoundingBox[] deckBoxes = this.getCalculatedExtraBoundingBoxes();
         for(int i = 0; i < deckBoxes.length; ++i) {
@@ -1065,15 +1069,11 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     }
 
     private Vec3 getDeckSurfaceCenter(int surfaceIndex) {
-        if(surfaceIndex < 0) {
-            return Vec3.createVectorHelper((super.boundingBox.minX + super.boundingBox.maxX) / 2.0D, super.boundingBox.maxY,
-                    (super.boundingBox.minZ + super.boundingBox.maxZ) / 2.0D);
-        }
         return this.getCalculatedExtraBoundingBoxes()[surfaceIndex].getWorldTopCenter();
     }
 
     private double getDeckSurfaceTopY(int surfaceIndex) {
-        return surfaceIndex < 0?super.boundingBox.maxY:this.getCalculatedExtraBoundingBoxes()[surfaceIndex].getTopSurfaceY();
+        return this.getCalculatedExtraBoundingBoxes()[surfaceIndex].getTopSurfaceY();
     }
 
 
@@ -1258,7 +1258,9 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
             var10000 = MCH_MOD.config;
             //todo config
 
-            this.collisionEntity(this.getBoundingBox());
+            // Ships have no base AABB collision; extra OBBs are the only collision volumes.
+            // The broad-phase search box returned by getBoundingBox() exists only to find
+            // those OBBs and must not apply damage/pushback itself.
         }
     }
 
