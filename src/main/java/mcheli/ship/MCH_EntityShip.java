@@ -1024,16 +1024,16 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         AxisAlignedBB search = AxisAlignedBB.getBoundingBox(super.boundingBox.minX, super.boundingBox.minY,
                 super.boundingBox.minZ, super.boundingBox.maxX, super.boundingBox.maxY, super.boundingBox.maxZ);
         for(MCH_BoundingBox bb : this.getCalculatedExtraBoundingBoxes()) {
-            search = search.func_111270_a(bb.boundingBox);
+            search = search.func_111270_a(bb.getEnclosingAABB());
         }
         return search.expand(0.25D, 0.6D, 0.25D);
     }
 
     private int getDeckSurfaceIndex(AxisAlignedBB entityBox) {
-        int surfaceIndex = this.isOnTopOf(entityBox, super.boundingBox)?-1:Integer.MIN_VALUE;
+        MCH_BoundingBox[] deckBoxes = this.getCalculatedExtraBoundingBoxes();
+        int surfaceIndex = deckBoxes.length <= 0 && this.isOnTopOf(entityBox, super.boundingBox)?-1:Integer.MIN_VALUE;
         double highestSurface = surfaceIndex == -1?super.boundingBox.maxY:-Double.MAX_VALUE;
 
-        MCH_BoundingBox[] deckBoxes = this.getCalculatedExtraBoundingBoxes();
         for(int i = 0; i < deckBoxes.length; ++i) {
             MCH_BoundingBox deckBox = deckBoxes[i];
             double deckTopY = deckBox.getTopSurfaceY();

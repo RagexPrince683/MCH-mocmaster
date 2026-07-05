@@ -109,6 +109,28 @@ public class MCH_BoundingBox {
       return this.prevPos.yCoord + (this.getWorldTopCenter().yCoord - this.nowPos.yCoord);
    }
 
+   public AxisAlignedBB getEnclosingAABB() {
+      double halfWidth = (double)this.width / 2.0D;
+      double halfHeight = (double)this.height / 2.0D;
+      AxisAlignedBB enclosing = null;
+
+      for(int x = -1; x <= 1; x += 2) {
+         for(int y = -1; y <= 1; y += 2) {
+            for(int z = -1; z <= 1; z += 2) {
+               Vec3 corner = Vec3.createVectorHelper((double)x * halfWidth, (double)y * halfHeight, (double)z * halfWidth);
+               corner = MCH_Lib.RotVec3(corner, -this.lastYaw, -this.lastPitch, -this.lastRoll);
+               double worldX = this.nowPos.xCoord + corner.xCoord;
+               double worldY = this.nowPos.yCoord + corner.yCoord;
+               double worldZ = this.nowPos.zCoord + corner.zCoord;
+               AxisAlignedBB point = AxisAlignedBB.getBoundingBox(worldX, worldY, worldZ, worldX, worldY, worldZ);
+               enclosing = enclosing == null ? point : enclosing.func_111270_a(point);
+            }
+         }
+      }
+
+      return enclosing != null ? enclosing : this.boundingBox;
+   }
+
    public double calculateDeckYOffset(AxisAlignedBB entityBox, double offset, double supportTolerance) {
       if(offset >= 0.0D || !this.isEntityOnTop(entityBox, 1.0E-4D, supportTolerance, supportTolerance)) {
          return offset;
