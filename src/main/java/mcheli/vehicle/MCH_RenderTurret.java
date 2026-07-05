@@ -49,7 +49,7 @@ public class MCH_RenderTurret extends MCH_RenderBaseVehicle {
                System.out.println("Texture not found : " + vehicle.getTextureName());
                this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
             }
-            renderBody(turretInfo.model);
+            renderBodyWithSkinOverlay(turretInfo.model, turretInfo.getDirectoryName(), vehicle);
             MCH_WeaponSet ws = vehicle.getFirstSeatWeapon();
             this.drawPart(vehicle, turretInfo, yaw, pitch, ws, tickTime);
          }
