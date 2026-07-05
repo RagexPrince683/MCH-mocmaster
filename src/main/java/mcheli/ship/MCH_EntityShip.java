@@ -978,11 +978,12 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
     @Override
     public AxisAlignedBB getCollisionBox(Entity entity) {
-        // Return the composite vehicle collision resolver, not the broad-phase
-        // search box itself. MCH_BaseVehicleBoundingBox resolves movement
-        // against each configured ship BoundingBox, giving their sides solid
-        // wall-like collision while preserving the precise deck-top support path.
-        return super.boundingBox;
+        // Vanilla player movement only adds an entity collision box when that
+        // box intersects the player's movement AABB. Use the full ship extra-box
+        // enclosure for that broad-phase intersection while returning the
+        // composite resolver type, so remote BoundingBox sides are discoverable
+        // without making the enclosing AABB itself physically solid.
+        return this.getCompositeCollisionSearchBox();
     }
 
     @Override
@@ -991,6 +992,10 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         // keep the returned box as the composite vehicle resolver. Returning the
         // raw search AABB makes vanilla movement resolve against the enclosing
         // volume itself, which reintroduces jump/deck and side-contact jitter.
+        return this.getCompositeCollisionSearchBox();
+    }
+
+    private AxisAlignedBB getCompositeCollisionSearchBox() {
         AxisAlignedBB search = this.getDeckSearchBox();
         if(super.boundingBox instanceof MCH_BaseVehicleBoundingBox) {
             return ((MCH_BaseVehicleBoundingBox)super.boundingBox).NewAABB(search.minX, search.minY, search.minZ,

@@ -1,3 +1,7 @@
+## Fix remote ship bounding-box side collision
+
+- Returned the composite ship collision resolver with the expanded extra-box search bounds for entity collision boxes, so player movement discovers and resolves side contact on ship BoundingBox volumes far from the vehicle origin without making the broad-phase enclosure solid.
+
 ## Fix ship bounding-box collision jitter
 
 - Kept ship broad-phase lookup expanded to all configured extra boxes while returning the composite collision resolver, preventing the enclosing search AABB from becoming a physical jitter source during jumping, deck walking, or side contact.
