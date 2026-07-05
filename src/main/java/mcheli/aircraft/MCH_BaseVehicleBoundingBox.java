@@ -38,28 +38,13 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
    }
 
    /**
-    * Aircraft hit boxes are composite for ray tracing and damage, but only ships
-    * expose those boxes as walkable world collision.  Resolving against each
-    * component independently also prevents the small primary aircraft box from
-    * blocking horizontal movement when a player is merely touching a deck box.
+    * Player/entity movement collision is intentionally limited to configured
+    * extra OBB deck surfaces. The primary vehicle AABB remains available for
+    * broad-phase discovery, block collision, rendering, and legacy vehicle body
+    * state, but it must not become a solid player/entity collider.
     */
    private boolean hasDeckCollision() {
-      return this.ac instanceof MCH_EntityShip;
-   }
-
-   private boolean isDeckTopContact(AxisAlignedBB deck, AxisAlignedBB other, boolean movingOnX) {
-      final double bobTolerance = 0.6D;
-      boolean overlapsPerpendicularAxis = movingOnX
-              ? other.maxZ > deck.minZ && other.minZ < deck.maxZ
-              : other.maxX > deck.minX && other.minX < deck.maxX;
-      return overlapsPerpendicularAxis
-              && other.minY >= deck.maxY - bobTolerance
-              && other.minY <= deck.maxY + bobTolerance;
-   }
-
-   private boolean isDeckTopContact(MCH_BoundingBox deck, AxisAlignedBB other) {
-      final double bobTolerance = 0.6D;
-      return deck.isEntityOnTop(other, 1.0E-4D, bobTolerance, bobTolerance);
+      return this.ac instanceof MCH_EntityShip && this.ac.getCalculatedExtraBoundingBoxes().length > 0;
    }
 
    @Override
@@ -68,14 +53,8 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          return offset;
       }
 
-      if(!this.isDeckTopContact(this, other, true)) {
-         offset = super.calculateXOffset(other, offset);
-      }
-      for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
-         if(!this.isDeckTopContact(bb, other)) {
-            offset = bb.boundingBox.calculateXOffset(other, offset);
-         }
-      }
+      // Do not resolve player/entity movement against the primary AABB or the
+      // legacy extra-box AABB side walls. OBB deck contact is handled on Y only.
       return offset;
    }
 
@@ -85,11 +64,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          return offset;
       }
 
-      MCH_BoundingBox[] extraDecks = this.ac.getCalculatedExtraBoundingBoxes();
-      if(extraDecks.length <= 0) {
-         offset = super.calculateYOffset(other, offset);
-      }
-      for(MCH_BoundingBox bb : extraDecks) {
+      for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
          final double supportTolerance = 0.6D;
          double previousTopY = bb.getPreviousTopSurfaceY();
          offset = bb.calculateDeckYOffset(other, offset, supportTolerance);
@@ -111,14 +86,8 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          return offset;
       }
 
-      if(!this.isDeckTopContact(this, other, false)) {
-         offset = super.calculateZOffset(other, offset);
-      }
-      for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
-         if(!this.isDeckTopContact(bb, other)) {
-            offset = bb.boundingBox.calculateZOffset(other, offset);
-         }
-      }
+      // Do not resolve player/entity movement against the primary AABB or the
+      // legacy extra-box AABB side walls. OBB deck contact is handled on Y only.
       return offset;
    }
 
@@ -127,11 +96,6 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
       double dist = 1.0E7D;
       this.ac.lastBBDamageFactor = 1.0F;
       this.ac.lastHitBoundingBoxType = EnumBoundingBoxType.DEFAULT;
-      if(super.intersectsWith(aabb)) {
-         dist = this.getDistSq(aabb, this);
-         ret = true;
-      }
-
       MCH_BoundingBox[] arr$ = this.ac.getCalculatedExtraBoundingBoxes();
       int len$ = arr$.length;
 
