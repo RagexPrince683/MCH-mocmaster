@@ -4185,8 +4185,14 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
    }
 
-   public static String getSkinOverlayTextureName(String name) {
-      return name != null && name.startsWith("skinoverlays/") ? name : "skinoverlays/" + name;
+   public static String getSkinOverlayTextureName(String baseName, String overlayName) {
+      String overlay = overlayName != null && overlayName.startsWith("skinoverlays/") ? overlayName : "skinoverlays/" + overlayName;
+      String base = baseName;
+      int overlaySeparator = base != null ? base.indexOf("|skinoverlays/") : -1;
+      if(overlaySeparator >= 0) {
+         base = base.substring(0, overlaySeparator);
+      }
+      return (base != null && !base.isEmpty() && !base.startsWith("skinoverlays/") ? base : "") + "|" + overlay;
    }
 
    public static String getTexturePath(String directory, String textureName) {
@@ -4210,7 +4216,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public void switchNextTextureName() {
       if(this.getAcInfo() != null) {
-         this.setTextureName(this.getAcInfo().getNextTextureName(this.getTextureName()));
+         String currentTexture = this.getTextureName();
+         int overlaySeparator = currentTexture != null ? currentTexture.indexOf("|skinoverlays/") : -1;
+         if(overlaySeparator >= 0) {
+            currentTexture = currentTexture.substring(0, overlaySeparator);
+         }
+         this.setTextureName(this.getAcInfo().getNextTextureName(currentTexture));
       }
 
    }
@@ -6977,7 +6988,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          MCH_ItemInfo itemInfo = MCH_ItemInfoManager.get(itemStack.getItem());
          if(itemInfo != null && itemInfo.textureOverlay) {
             if(!this.worldObj.isRemote) {
-               this.setTextureName(getSkinOverlayTextureName(itemInfo.name));
+               this.setTextureName(getSkinOverlayTextureName(this.getTextureName(), itemInfo.name));
                if(!player.capabilities.isCreativeMode) {
                   --itemStack.stackSize;
                   if(itemStack.stackSize <= 0) {

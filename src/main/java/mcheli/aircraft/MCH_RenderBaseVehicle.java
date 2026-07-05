@@ -8,6 +8,7 @@ import mcheli.MCH_ClientEventHook;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
+import mcheli.MCH_SkinOverlayTextureManager;
 import mcheli.flare.MCH_EntityChaff;
 import mcheli.flare.MCH_EntityFlare;
 import mcheli.gui.MCH_Gui;
@@ -300,8 +301,15 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, "textures/test.png"));
       }else {
          try {
-            super.bindTexture(new ResourceLocation(W_MOD.DOMAIN,
-                                                   path));
+            int overlaySeparator = path.indexOf("|skinoverlays/");
+            if(overlaySeparator >= 0) {
+               String basePath = path.substring(0, overlaySeparator) + ".png";
+               String overlayPath = "textures/" + path.substring(overlaySeparator + 1) + ".png";
+               super.bindTexture(MCH_SkinOverlayTextureManager.getOrCreate(basePath, overlayPath));
+            } else {
+               super.bindTexture(new ResourceLocation(W_MOD.DOMAIN,
+                                                      path));
+            }
          } catch (Exception var4) {
             System.out.println("Error loading texture: " + path + " (" + var4.getMessage() + ")"); //why the fuck is this happening
             super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, "textures/test.png"));
