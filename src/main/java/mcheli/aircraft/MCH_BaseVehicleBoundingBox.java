@@ -85,11 +85,8 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          return offset;
       }
 
-      MCH_BoundingBox[] extraDecks = this.ac.getCalculatedExtraBoundingBoxes();
-      if(extraDecks.length <= 0) {
-         offset = super.calculateYOffset(other, offset);
-      }
-      for(MCH_BoundingBox bb : extraDecks) {
+      offset = super.calculateYOffset(other, offset);
+      for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
          final double supportTolerance = 0.6D;
          double previousTopY = bb.getPreviousTopSurfaceY();
          offset = bb.calculateDeckYOffset(other, offset, supportTolerance);

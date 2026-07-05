@@ -1,10 +1,5 @@
 # Changelog
 
-## Stop ship AABB deck fallback jitter
-
-- Disabled primary ship AABB deck-top support whenever extra OBB deck boxes are configured, leaving the AABB as broad-phase/body coverage while player walkability resolves against the intended OBB deck surfaces.
-- Updated moving-deck contact detection to avoid selecting the primary AABB as a carried deck surface on ships that define OBB decks.
-
 ## Keep remote ship OBB decks walkable
 
 - Expanded ship deck broad-phase searches with the full rotated corner extents of each extra OBB, so deck collision remains discoverable even when the walkable OBB is far from the ship origin.
