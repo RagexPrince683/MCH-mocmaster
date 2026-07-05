@@ -8,7 +8,6 @@ import mcheli.MCH_ClientEventHook;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
-import mcheli.MCH_SkinOverlayTextureManager;
 import mcheli.flare.MCH_EntityChaff;
 import mcheli.flare.MCH_EntityFlare;
 import mcheli.gui.MCH_Gui;
@@ -43,6 +42,8 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
 
    public static boolean renderingEntity = false;
    public static IModelCustom debugModel = null;
+   private static ResourceLocation activeSkinOverlayTexture = null;
+   private static ResourceLocation activeBaseTexture = null;
 
    public static Random rand = new Random();
 
@@ -87,8 +88,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
             if(this.shouldRenderAircraftLOD(ac, posX, posY, posZ)) {
                this.renderAircraftLOD(ac, info, posX, posY, posZ, yaw, pitch, roll, tickTime);
             } else {
+               beginSkinOverlayRender(info, ac);
                this.renderBaseVehicle(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
                this.renderCommonPart(ac, info, posX, posY, posZ, tickTime);
+               endSkinOverlayRender();
                renderLight(posX, posY, posZ, tickTime, ac, info);
             }
 
@@ -302,8 +305,8 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, "textures/test.png"));
       }else {
          try {
-            super.bindTexture(new ResourceLocation(W_MOD.DOMAIN,
-                                                   getBaseTexturePath(path)));
+            activeBaseTexture = new ResourceLocation(W_MOD.DOMAIN, getBaseTexturePath(path));
+            super.bindTexture(activeBaseTexture);
          } catch (Exception var4) {
             System.out.println("Error loading texture: " + path + " (" + var4.getMessage() + ")"); //why the fuck is this happening
             super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, "textures/test.png"));
@@ -313,8 +316,24 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
 
    protected void renderBodyWithSkinOverlay(IModelCustom model, String directory, MCH_EntityBaseVehicle ac) {
       renderBody(model);
+   }
+
+   private static void beginSkinOverlayRender(MCH_BaseVehicleInfo info, MCH_EntityBaseVehicle ac) {
+      activeSkinOverlayTexture = null;
+      activeBaseTexture = null;
       String overlayTextureName = getSkinOverlayTextureName(ac.getTextureName());
-      if(overlayTextureName == null || overlayTextureName.isEmpty()) {
+      if(overlayTextureName != null && !overlayTextureName.isEmpty()) {
+         activeSkinOverlayTexture = new ResourceLocation(W_MOD.DOMAIN, MCH_EntityBaseVehicle.getTexturePath(info.getDirectoryName(), overlayTextureName));
+      }
+   }
+
+   private static void endSkinOverlayRender() {
+      activeSkinOverlayTexture = null;
+      activeBaseTexture = null;
+   }
+
+   private static void renderSkinOverlayPass(RenderRunnable renderer) {
+      if(activeSkinOverlayTexture == null) {
          return;
       }
 
@@ -326,11 +345,18 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
       GL11.glPolygonOffset(-1.0F, -1.0F);
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-      super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, MCH_EntityBaseVehicle.getTexturePath(directory, overlayTextureName)));
-      renderBody(model);
+      Minecraft.getMinecraft().renderEngine.bindTexture(activeSkinOverlayTexture);
+      renderer.render();
       GL11.glPopAttrib();
       GL11.glDepthMask(true);
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      if(activeBaseTexture != null) {
+         Minecraft.getMinecraft().renderEngine.bindTexture(activeBaseTexture);
+      }
+   }
+
+   private interface RenderRunnable {
+      void render();
    }
 
    private static String getBaseTexturePath(String path) {
@@ -546,28 +572,46 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
 
    }
 
-   public static void renderBody(IModelCustom model) {
+   public static void renderBody(final IModelCustom model) {
       if(model != null) {
-         if(model instanceof W_ModelCustom) {
-            if(((W_ModelCustom)model).containsPart("$body")) {
-               model.renderPart("$body");
-            } else {
-               model.renderAll();
+         renderBodyModel(model);
+         renderSkinOverlayPass(new RenderRunnable() {
+            public void render() {
+               renderBodyModel(model);
             }
-         } else {
-            model.renderAll();
-         }
+         });
       }
 
    }
 
-   public static void renderPart(IModelCustom model, IModelCustom modelBody, String partName) {
+   private static void renderBodyModel(IModelCustom model) {
+      if(model instanceof W_ModelCustom) {
+         if(((W_ModelCustom)model).containsPart("$body")) {
+            model.renderPart("$body");
+         } else {
+            model.renderAll();
+         }
+      } else {
+         model.renderAll();
+      }
+   }
+
+   public static void renderPart(final IModelCustom model, final IModelCustom modelBody, final String partName) {
+      renderPartModel(model, modelBody, partName);
+      renderSkinOverlayPass(new RenderRunnable() {
+         public void render() {
+            renderPartModel(model, modelBody, partName);
+         }
+      });
+
+   }
+
+   private static void renderPartModel(IModelCustom model, IModelCustom modelBody, String partName) {
       if(model != null) {
          model.renderAll();
       } else if(modelBody instanceof W_ModelCustom && ((W_ModelCustom)modelBody).containsPart("$" + partName)) {
          modelBody.renderPart("$" + partName);
       }
-
    }
 
    public void renderCommonPart(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, double x, double y, double z, float tickTime) {
