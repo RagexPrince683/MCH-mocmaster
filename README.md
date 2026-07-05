@@ -24,7 +24,7 @@ MCHeli Overdrive+ is a combined-arms vehicle, weapon, and warfare framework for 
 
 ### Naval warfare
 
-- **Walkable moving ships:** large ships can use their collision/extra bounding boxes as moving deck surfaces, letting players stand on and move with ships.
+- **Walkable moving ships:** large ships can use their collision/rotated extra bounding-box OBBs as moving deck surfaces, letting players stand on and move with ships.
 - **Aircraft carrier operations:** carrier-style rack slots, `RideRack` compatibility, aircraft attachment/parking, launch assistance, and temporary launch no-collision grace support deck operations.
 - **Submarine behavior:** ship-based submarine mode supports diving, underwater ascend/descend controls, bounded vertical acceleration, depth-control HUD prompts, and normal ship behavior when diving is off.
 
