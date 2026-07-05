@@ -157,43 +157,7 @@ public class MCH_BoundingBox {
          return false;
       }
 
-      double centerX = (aabb.minX + aabb.maxX) / 2.0D;
-      double centerY = (aabb.minY + aabb.maxY) / 2.0D;
-      double centerZ = (aabb.minZ + aabb.maxZ) / 2.0D;
-      if(this.containsWorldPoint(centerX, centerY, centerZ)) {
-         return true;
-      }
-
-      for(int x = 0; x <= 1; ++x) {
-         for(int y = 0; y <= 1; ++y) {
-            for(int z = 0; z <= 1; ++z) {
-               if(this.containsWorldPoint(x == 0 ? aabb.minX : aabb.maxX, y == 0 ? aabb.minY : aabb.maxY, z == 0 ? aabb.minZ : aabb.maxZ)) {
-                  return true;
-               }
-            }
-         }
-      }
-
-      double halfWidth = (double)this.width / 2.0D;
-      double halfHeight = (double)this.height / 2.0D;
-      for(int x = -1; x <= 1; x += 2) {
-         for(int y = -1; y <= 1; y += 2) {
-            for(int z = -1; z <= 1; z += 2) {
-               Vec3 corner = Vec3.createVectorHelper((double)x * halfWidth, (double)y * halfHeight, (double)z * halfWidth);
-               corner = MCH_Lib.RotVec3(corner, -this.lastYaw, -this.lastPitch, -this.lastRoll);
-               double worldX = this.nowPos.xCoord + corner.xCoord;
-               double worldY = this.nowPos.yCoord + corner.yCoord;
-               double worldZ = this.nowPos.zCoord + corner.zCoord;
-               if(worldX >= aabb.minX && worldX <= aabb.maxX
-                       && worldY >= aabb.minY && worldY <= aabb.maxY
-                       && worldZ >= aabb.minZ && worldZ <= aabb.maxZ) {
-                  return true;
-               }
-            }
-         }
-      }
-
-      return false;
+      return this.intersectsAABBBySeparatingAxis(aabb);
    }
 
    private boolean containsWorldPoint(double x, double y, double z) {
@@ -203,6 +167,82 @@ public class MCH_BoundingBox {
       return local.xCoord >= -halfWidth && local.xCoord <= halfWidth
               && local.yCoord >= -halfHeight && local.yCoord <= halfHeight
               && local.zCoord >= -halfWidth && local.zCoord <= halfWidth;
+   }
+
+   private boolean intersectsAABBBySeparatingAxis(AxisAlignedBB aabb) {
+      Vec3 aabbCenter = Vec3.createVectorHelper((aabb.minX + aabb.maxX) / 2.0D, (aabb.minY + aabb.maxY) / 2.0D, (aabb.minZ + aabb.maxZ) / 2.0D);
+      double[] aabbHalfExtents = new double[] {
+              (aabb.maxX - aabb.minX) / 2.0D,
+              (aabb.maxY - aabb.minY) / 2.0D,
+              (aabb.maxZ - aabb.minZ) / 2.0D
+      };
+      double[] obbHalfExtents = new double[] {
+              (double)this.width / 2.0D,
+              (double)this.height / 2.0D,
+              (double)this.width / 2.0D
+      };
+      Vec3[] aabbAxes = new Vec3[] {
+              Vec3.createVectorHelper(1.0D, 0.0D, 0.0D),
+              Vec3.createVectorHelper(0.0D, 1.0D, 0.0D),
+              Vec3.createVectorHelper(0.0D, 0.0D, 1.0D)
+      };
+      Vec3[] obbAxes = new Vec3[] {
+              MCH_Lib.RotVec3(Vec3.createVectorHelper(1.0D, 0.0D, 0.0D), -this.lastYaw, -this.lastPitch, -this.lastRoll),
+              MCH_Lib.RotVec3(Vec3.createVectorHelper(0.0D, 1.0D, 0.0D), -this.lastYaw, -this.lastPitch, -this.lastRoll),
+              MCH_Lib.RotVec3(Vec3.createVectorHelper(0.0D, 0.0D, 1.0D), -this.lastYaw, -this.lastPitch, -this.lastRoll)
+      };
+      Vec3 centerDelta = Vec3.createVectorHelper(aabbCenter.xCoord - this.nowPos.xCoord, aabbCenter.yCoord - this.nowPos.yCoord, aabbCenter.zCoord - this.nowPos.zCoord);
+
+      for(int i = 0; i < 3; ++i) {
+         if(this.hasSeparatingAxis(aabbAxes[i], centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents)) {
+            return false;
+         }
+      }
+
+      for(int i = 0; i < 3; ++i) {
+         if(this.hasSeparatingAxis(obbAxes[i], centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents)) {
+            return false;
+         }
+      }
+
+      for(int i = 0; i < 3; ++i) {
+         for(int j = 0; j < 3; ++j) {
+            Vec3 axis = this.cross(aabbAxes[i], obbAxes[j]);
+            if(this.lengthSq(axis) > 1.0E-12D && this.hasSeparatingAxis(axis, centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents)) {
+               return false;
+            }
+         }
+      }
+
+      return true;
+   }
+
+   private boolean hasSeparatingAxis(Vec3 axis, Vec3 centerDelta, Vec3[] aabbAxes, double[] aabbHalfExtents, Vec3[] obbAxes, double[] obbHalfExtents) {
+      double centerDistance = Math.abs(this.dot(centerDelta, axis));
+      double aabbProjection = 0.0D;
+      double obbProjection = 0.0D;
+
+      for(int i = 0; i < 3; ++i) {
+         aabbProjection += aabbHalfExtents[i] * Math.abs(this.dot(aabbAxes[i], axis));
+         obbProjection += obbHalfExtents[i] * Math.abs(this.dot(obbAxes[i], axis));
+      }
+
+      return centerDistance > aabbProjection + obbProjection + 1.0E-7D;
+   }
+
+   private double dot(Vec3 a, Vec3 b) {
+      return a.xCoord * b.xCoord + a.yCoord * b.yCoord + a.zCoord * b.zCoord;
+   }
+
+   private Vec3 cross(Vec3 a, Vec3 b) {
+      return Vec3.createVectorHelper(
+              a.yCoord * b.zCoord - a.zCoord * b.yCoord,
+              a.zCoord * b.xCoord - a.xCoord * b.zCoord,
+              a.xCoord * b.yCoord - a.yCoord * b.xCoord);
+   }
+
+   private double lengthSq(Vec3 v) {
+      return v.xCoord * v.xCoord + v.yCoord * v.yCoord + v.zCoord * v.zCoord;
    }
 
    public double calculateXOffset(AxisAlignedBB entityBox, double offset) {
@@ -225,7 +265,7 @@ public class MCH_BoundingBox {
 
       double clear = 0.0D;
       double blocked = offset;
-      for(int i = 0; i < 16; ++i) {
+      for(int i = 0; i < 32; ++i) {
          double mid = (clear + blocked) / 2.0D;
          AxisAlignedBB test = xAxis ? entityBox.getOffsetBoundingBox(mid, 0.0D, 0.0D) : entityBox.getOffsetBoundingBox(0.0D, 0.0D, mid);
          if(this.intersectsAABB(test)) {
@@ -234,7 +274,7 @@ public class MCH_BoundingBox {
             clear = mid;
          }
       }
-      return clear;
+      return Math.abs(clear) < 1.0E-7D ? 0.0D : clear;
    }
 
    public Vec3 getHorizontalPushOut(AxisAlignedBB entityBox, double epsilon) {
