@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Changed
+
+- Converted extra vehicle bounding-box projectile hit processing to use vehicle-rotated oriented boxes while preserving existing damage-factor armor behavior.
+- Added a single-player test-mode toggle for rendering debug hit boxes as either oriented OBBs or legacy AABBs.
+
 ### Documentation
 
 - Rewrote `README.md` with a modern project overview, feature list, installation steps, compatibility/client-server requirements, configuration overview, command examples, troubleshooting, FAQ, and confirmed resource links.

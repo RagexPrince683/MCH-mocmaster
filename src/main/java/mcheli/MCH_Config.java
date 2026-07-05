@@ -93,6 +93,7 @@ public class MCH_Config {
    public static List CommandPermission;
    public static List CommandPermissionList;
    public static MCH_ConfigPrm TestMode;
+   public static MCH_ConfigPrm DebugDrawOBB;
    public static MCH_ConfigPrm EnableCommand;
    public static MCH_ConfigPrm PlaceableOnSpongeOnly;
    public static MCH_ConfigPrm HideKeybind;
@@ -404,6 +405,8 @@ public class MCH_Config {
       IgnoreBulletHitList = new ArrayList();
       IgnoreBulletHitItem = new MCH_ConfigPrm("IgnoreBulletHit", "");
       TestMode = new MCH_ConfigPrm("TestMode", false);
+      DebugDrawOBB = new MCH_ConfigPrm("DebugDrawOBB", false);
+      DebugDrawOBB.desc = ";Single-player test-mode debug render toggle: false draws legacy AABB boxes, true draws oriented OBB boxes used by projectile hit processing.";
       EnableCommand = new MCH_ConfigPrm("EnableCommand", true);
       PlaceableOnSpongeOnly = new MCH_ConfigPrm("PlaceableOnSpongeOnly", false);
       MultiThreadedModelLoading = new MCH_ConfigPrm("MultiThreadedModelLoading", true);
@@ -724,6 +727,7 @@ public class MCH_Config {
               RangeFinderConsume,
               EnablePutRackInFlying,
               EnableDebugBoundingBox,
+              DebugDrawOBB,
               DebugVehicleBoxCache,
               DebugFlightControl,
               null,

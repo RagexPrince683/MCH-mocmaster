@@ -30,7 +30,7 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
          tankInfo = tank.getTankInfo();
          if(tankInfo != null) {
             this.renderWheel(tank, posX, posY, posZ);
-            this.renderDebugHitBox(tank, posX, posY, posZ, yaw, pitch);
+            this.renderDebugHitBox(tank, posX, posY, posZ, yaw, pitch, roll);
             this.renderDebugPilotSeat(tank, posX, posY, posZ, yaw, pitch, roll);
             GL11.glTranslated(posX, posY, posZ);
             GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);

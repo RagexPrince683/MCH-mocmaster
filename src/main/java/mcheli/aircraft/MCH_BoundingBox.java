@@ -1,7 +1,9 @@
 package mcheli.aircraft;
 
 import mcheli.MCH_Lib;
+import mcheli.wrapper.W_Vec3;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 
 public class MCH_BoundingBox {
@@ -18,6 +20,9 @@ public class MCH_BoundingBox {
    public Vec3 prevPos;
    public final float damegeFactor;
    public EnumBoundingBoxType boundingBoxType = EnumBoundingBoxType.DEFAULT;
+   private float lastYaw;
+   private float lastPitch;
+   private float lastRoll;
 
 
    public MCH_BoundingBox(double x, double y, double z, float w, float h, float df) {
@@ -36,14 +41,21 @@ public class MCH_BoundingBox {
 
 
    public MCH_BoundingBox copy() {
-      return new MCH_BoundingBox(this.offsetX, this.offsetY, this.offsetZ, this.width, this.height, this.damegeFactor);
+      MCH_BoundingBox copy = new MCH_BoundingBox(this.offsetX, this.offsetY, this.offsetZ, this.width, this.height, this.damegeFactor);
+      copy.boundingBoxType = this.boundingBoxType;
+      return copy;
    }
 
    public wheelBoundingBox copy2() {
-      return new wheelBoundingBox(this.offsetX, this.offsetY, this.offsetZ, this.width, this.height, this.damegeFactor);
+      wheelBoundingBox copy = new wheelBoundingBox(this.offsetX, this.offsetY, this.offsetZ, this.width, this.height, this.damegeFactor);
+      copy.boundingBoxType = this.boundingBoxType;
+      return copy;
    }
 
    public void updatePosition(double posX, double posY, double posZ, float yaw, float pitch, float roll) {
+      this.lastYaw = yaw;
+      this.lastPitch = pitch;
+      this.lastRoll = roll;
       Vec3 v = Vec3.createVectorHelper(this.offsetX, this.offsetY, this.offsetZ);
       this.rotatedOffset = MCH_Lib.RotVec3(v, -yaw, -pitch, -roll);
       float w = this.width;
@@ -59,5 +71,49 @@ public class MCH_BoundingBox {
       this.nowPos.zCoord = z;
       this.backupBoundingBox.setBB(this.boundingBox);
       this.boundingBox.setBounds(x - (double)(w / 2.0F), y - (double)(h / 2.0F), z - (double)(w / 2.0F), x + (double)(w / 2.0F), y + (double)(h / 2.0F), z + (double)(w / 2.0F));
+   }
+
+   public MovingObjectPosition calculateIntercept(Vec3 start, Vec3 end) {
+      Vec3 localStart = this.toLocal(start);
+      Vec3 localEnd = this.toLocal(end);
+      double dx = localEnd.xCoord - localStart.xCoord;
+      double dy = localEnd.yCoord - localStart.yCoord;
+      double dz = localEnd.zCoord - localStart.zCoord;
+      double halfWidth = (double)this.width / 2.0D;
+      double halfHeight = (double)this.height / 2.0D;
+      double[] interval = new double[] {0.0D, 1.0D};
+
+      if(!this.clipAxis(localStart.xCoord, dx, -halfWidth, halfWidth, interval)) return null;
+      if(!this.clipAxis(localStart.yCoord, dy, -halfHeight, halfHeight, interval)) return null;
+      if(!this.clipAxis(localStart.zCoord, dz, -halfWidth, halfWidth, interval)) return null;
+
+      Vec3 hit = start.addVector((end.xCoord - start.xCoord) * interval[0], (end.yCoord - start.yCoord) * interval[0], (end.zCoord - start.zCoord) * interval[0]);
+      return new MovingObjectPosition(0, 0, 0, 0, hit);
+   }
+
+   private Vec3 toLocal(Vec3 world) {
+      Vec3 relative = Vec3.createVectorHelper(world.xCoord - this.nowPos.xCoord, world.yCoord - this.nowPos.yCoord, world.zCoord - this.nowPos.zCoord);
+      relative.rotateAroundY(this.lastYaw / 180.0F * 3.1415927F);
+      relative.rotateAroundX(this.lastPitch / 180.0F * 3.1415927F);
+      W_Vec3.rotateAroundZ(this.lastRoll / 180.0F * 3.1415927F, relative);
+      return relative;
+   }
+
+   private boolean clipAxis(double start, double delta, double min, double max, double[] interval) {
+      if(Math.abs(delta) < 1.0E-7D) {
+         return start >= min && start <= max;
+      }
+
+      double t1 = (min - start) / delta;
+      double t2 = (max - start) / delta;
+      if(t1 > t2) {
+         double tmp = t1;
+         t1 = t2;
+         t2 = tmp;
+      }
+
+      if(t1 > interval[0]) interval[0] = t1;
+      if(t2 < interval[1]) interval[1] = t2;
+      return interval[0] <= interval[1];
    }
 }

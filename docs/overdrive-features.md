@@ -80,7 +80,7 @@ This page summarizes the major project-wide systems that distinguish MCHeli Over
 
 **How it differs from original MCHeli:** The ship entity now searches for players standing on its calculated deck surfaces, rotates their relative position with ship yaw changes, and adjusts vertical placement to prevent one-tick freezing or clipping when water bobbing moves the deck.
 
-**Configuration:** Pack makers create useful deck surfaces with normal body dimensions plus `BoundingBox` entries. Large ships should define broad, flat extra boxes for decks and collision. `PreventWaterBobbing = true` can stabilize ship vertical movement for smoother walking and carrier operations.
+**Configuration:** Pack makers create useful deck surfaces with normal body dimensions plus `BoundingBox` entries. Extra boxes retain their configured damage factors and armor behavior, and projectile hit processing ray-traces them as vehicle-rotated oriented boxes instead of unrotated AABBs. Large ships should define broad, flat extra boxes for decks and collision. `PreventWaterBobbing = true` can stabilize ship vertical movement for smoother walking and carrier operations.
 
 ### Aircraft carrier and vehicle-on-vehicle interaction
 

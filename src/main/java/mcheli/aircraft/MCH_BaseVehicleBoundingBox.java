@@ -266,7 +266,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
 
       for(int i$ = 0; i$ < len$; ++i$) {
          MCH_BoundingBox bb = arr$[i$];
-         MovingObjectPosition mop2 = bb.boundingBox.calculateIntercept(v1, v2);
+         MovingObjectPosition mop2 = bb.calculateIntercept(v1, v2);
          if(mop2 != null) {
             double dist2 = v1.distanceTo(mop2.hitVec);
             if(dist2 < dist) {
