@@ -4851,10 +4851,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public AxisAlignedBB getCollisionBox(Entity par1Entity) {
-      // Player/entity movement collision is provided by MCH_BaseVehicleBoundingBox
-      // so only configured OBB deck surfaces can act as solid collision. Returning
-      // another entity's AABB here would re-enable legacy AABB body collision.
-      return null;
+      return par1Entity.boundingBox;
    }
 
    public AxisAlignedBB getBoundingBox() {
