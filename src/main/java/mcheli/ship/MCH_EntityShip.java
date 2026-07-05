@@ -978,29 +978,25 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
     @Override
     public AxisAlignedBB getCollisionBox(Entity entity) {
-        // Ships expose a large composite deck search AABB so broad-phase entity
-        // lookups can discover remote OBB decks. That search volume must not be
-        // returned to vanilla entity movement as a physical collision box: near
-        // the ship origin, players can collide with the enclosing search AABB
-        // instead of the precise deck OBB, causing vertical jitter and horizontal
-        // movement cancellation while walking or jumping. Ship walkability is
-        // resolved by getEntitiesStandingOnDeck()/finishDeckMovement() and the
-        // OBB helpers below, so vanilla entity collision should ignore the ship
-        // itself.
-        return null;
+        // Return the composite vehicle collision resolver, not the broad-phase
+        // search box itself. MCH_BaseVehicleBoundingBox resolves movement
+        // against each configured ship BoundingBox, giving their sides solid
+        // wall-like collision while preserving the precise deck-top support path.
+        return super.boundingBox;
     }
 
     @Override
     public AxisAlignedBB getBoundingBox() {
-        // Do not expose the composite deck-search volume as the ship entity's
-        // vanilla bounding box. Player movement adds other entities' bounding
-        // boxes before consulting getCollisionBox(), so returning the deck
-        // search AABB here still creates a physical wall/floor near the ship
-        // origin even when getCollisionBox() returns null. Keep vanilla entity
-        // collision effectively empty; ship deck carry and damage use the
-        // explicit OBB search helpers instead.
-        return AxisAlignedBB.getBoundingBox(super.posX, super.posY, super.posZ,
-                super.posX, super.posY, super.posZ);
+        // Expose the full extra-box enclosure for broad-phase entity lookups, but
+        // keep the returned box as the composite vehicle resolver. Returning the
+        // raw search AABB makes vanilla movement resolve against the enclosing
+        // volume itself, which reintroduces jump/deck and side-contact jitter.
+        AxisAlignedBB search = this.getDeckSearchBox();
+        if(super.boundingBox instanceof MCH_BaseVehicleBoundingBox) {
+            return ((MCH_BaseVehicleBoundingBox)super.boundingBox).NewAABB(search.minX, search.minY, search.minZ,
+                    search.maxX, search.maxY, search.maxZ);
+        }
+        return search;
     }
 
     private static class DeckContact {
