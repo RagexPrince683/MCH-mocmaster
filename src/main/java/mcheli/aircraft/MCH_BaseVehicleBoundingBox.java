@@ -57,6 +57,11 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
               && other.minY <= deck.maxY + bobTolerance;
    }
 
+   private boolean isDeckTopContact(MCH_BoundingBox deck, AxisAlignedBB other) {
+      final double bobTolerance = 0.6D;
+      return deck.isEntityOnTop(other, 1.0E-4D, bobTolerance, bobTolerance);
+   }
+
    @Override
    public double calculateXOffset(AxisAlignedBB other, double offset) {
       if(!this.hasDeckCollision()) {
@@ -67,19 +72,11 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          offset = super.calculateXOffset(other, offset);
       }
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
-         if(!this.isDeckTopContact(bb.boundingBox, other, true)) {
+         if(!this.isDeckTopContact(bb, other)) {
             offset = bb.boundingBox.calculateXOffset(other, offset);
          }
       }
       return offset;
-   }
-
-   private boolean isDeckSupportContact(AxisAlignedBB deck, AxisAlignedBB other) {
-      final double supportTolerance = 0.6D;
-      return other.maxX > deck.minX && other.minX < deck.maxX
-              && other.maxZ > deck.minZ && other.minZ < deck.maxZ
-              && other.minY >= deck.maxY - supportTolerance
-              && other.minY <= deck.maxY + supportTolerance;
    }
 
    @Override
@@ -90,17 +87,16 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
 
       offset = super.calculateYOffset(other, offset);
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
-         AxisAlignedBB deck = bb.boundingBox;
-         AxisAlignedBB previousDeck = bb.backupBoundingBox;
-         offset = deck.calculateYOffset(other, offset);
+         final double supportTolerance = 0.6D;
+         double previousTopY = bb.getPreviousTopSurfaceY();
+         offset = bb.calculateDeckYOffset(other, offset, supportTolerance);
 
          // When a floating deck rises into an entity, vanilla's Y resolver sees
          // overlapping boxes and no longer treats the deck as floor support. Use
-         // the previous top for that one transition; finishDeckMovement then
+         // the previous OBB top for that one transition; finishDeckMovement then
          // carries the entity by the matching surface delta.
-         if(this.ac.canFloatWater() && deck.maxY > previousDeck.maxY
-                 && this.isDeckSupportContact(previousDeck, other)) {
-            offset = previousDeck.calculateYOffset(other, offset);
+         if(this.ac.canFloatWater() && bb.getTopSurfaceY() > previousTopY) {
+            offset = bb.calculatePreviousDeckYOffset(other, offset, supportTolerance);
          }
       }
       return offset;
@@ -116,7 +112,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          offset = super.calculateZOffset(other, offset);
       }
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
-         if(!this.isDeckTopContact(bb.boundingBox, other, false)) {
+         if(!this.isDeckTopContact(bb, other)) {
             offset = bb.boundingBox.calculateZOffset(other, offset);
          }
       }

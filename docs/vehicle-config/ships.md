@@ -20,7 +20,7 @@ Ships are an existing vehicle category in this codebase. They inherit shared key
 
 ## Overdrive naval, carrier, and submarine behavior
 
-Ships are more than static boats in Overdrive. Large ship configs can use `BoundingBox` entries as walkable deck surfaces: the ship entity detects players standing on the base box or extra boxes, carries them with ship movement/yaw changes, corrects small upward deck movements, and keeps fall distance reset while the player remains on the deck. Use broad, flat extra boxes for carrier decks and set `PreventWaterBobbing = true` when a stable carrier surface is more important than visible buoyancy.
+Ships are more than static boats in Overdrive. Large ship configs can use `BoundingBox` entries as walkable deck surfaces: the ship entity detects and supports players standing on the base box or rotated extra-box OBBs, including deck boxes far from the ship origin, then carries them with ship movement/yaw changes, corrects small upward deck movements, and keeps fall distance reset while the player remains on the deck. Use broad, flat extra boxes for carrier decks and set `PreventWaterBobbing = true` when a stable carrier surface is more important than visible buoyancy.
 
 Carrier and vehicle-on-vehicle behavior uses the shared rack system. Parent ships define compatible parking/launch slots with `AddRack`, and child aircraft or vehicles can opt into specific parent racks with `RideRack`. Ship racks launch carried aircraft with forward/vertical assist and temporary no-collision grace against the carrier; non-launch dismounts can fall back to parachute behavior when there is no safe surface below.
 

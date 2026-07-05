@@ -73,6 +73,62 @@ public class MCH_BoundingBox {
       this.boundingBox.setBounds(x - (double)(w / 2.0F), y - (double)(h / 2.0F), z - (double)(w / 2.0F), x + (double)(w / 2.0F), y + (double)(h / 2.0F), z + (double)(w / 2.0F));
    }
 
+   public Vec3 getWorldTopCenter() {
+      Vec3 top = Vec3.createVectorHelper(0.0D, (double)this.height / 2.0D, 0.0D);
+      top = MCH_Lib.RotVec3(top, -this.lastYaw, -this.lastPitch, -this.lastRoll);
+      return Vec3.createVectorHelper(this.nowPos.xCoord + top.xCoord, this.nowPos.yCoord + top.yCoord, this.nowPos.zCoord + top.zCoord);
+   }
+
+   public boolean isEntityOnTop(AxisAlignedBB entityBox, double horizontalInset, double belowTolerance, double aboveTolerance) {
+      double centerX = (entityBox.minX + entityBox.maxX) / 2.0D;
+      double centerZ = (entityBox.minZ + entityBox.maxZ) / 2.0D;
+      return this.isFootPointOnTop(centerX, entityBox.minY, centerZ, horizontalInset, belowTolerance, aboveTolerance)
+              || this.isFootPointOnTop(entityBox.minX, entityBox.minY, entityBox.minZ, horizontalInset, belowTolerance, aboveTolerance)
+              || this.isFootPointOnTop(entityBox.minX, entityBox.minY, entityBox.maxZ, horizontalInset, belowTolerance, aboveTolerance)
+              || this.isFootPointOnTop(entityBox.maxX, entityBox.minY, entityBox.minZ, horizontalInset, belowTolerance, aboveTolerance)
+              || this.isFootPointOnTop(entityBox.maxX, entityBox.minY, entityBox.maxZ, horizontalInset, belowTolerance, aboveTolerance);
+   }
+
+   private boolean isFootPointOnTop(double x, double y, double z, double horizontalInset, double belowTolerance, double aboveTolerance) {
+      Vec3 localFeet = this.toLocal(Vec3.createVectorHelper(x, y, z));
+      double halfWidth = (double)this.width / 2.0D;
+      double halfHeight = (double)this.height / 2.0D;
+      return localFeet.xCoord > -halfWidth + horizontalInset
+              && localFeet.xCoord < halfWidth - horizontalInset
+              && localFeet.zCoord > -halfWidth + horizontalInset
+              && localFeet.zCoord < halfWidth - horizontalInset
+              && localFeet.yCoord >= halfHeight - belowTolerance
+              && localFeet.yCoord <= halfHeight + aboveTolerance;
+   }
+
+   public double getTopSurfaceY() {
+      return this.getWorldTopCenter().yCoord;
+   }
+
+   public double getPreviousTopSurfaceY() {
+      return this.prevPos.yCoord + (this.getWorldTopCenter().yCoord - this.nowPos.yCoord);
+   }
+
+   public double calculateDeckYOffset(AxisAlignedBB entityBox, double offset, double supportTolerance) {
+      if(offset >= 0.0D || !this.isEntityOnTop(entityBox, 1.0E-4D, supportTolerance, supportTolerance)) {
+         return offset;
+      }
+
+      double topY = this.getTopSurfaceY();
+      double candidate = topY - entityBox.minY;
+      return candidate > offset ? candidate : offset;
+   }
+
+   public double calculatePreviousDeckYOffset(AxisAlignedBB entityBox, double offset, double supportTolerance) {
+      if(offset >= 0.0D || !this.isEntityOnTop(entityBox, 1.0E-4D, supportTolerance, supportTolerance)) {
+         return offset;
+      }
+
+      double previousTopY = this.getPreviousTopSurfaceY();
+      double candidate = previousTopY - entityBox.minY;
+      return candidate > offset ? candidate : offset;
+   }
+
    public MovingObjectPosition calculateIntercept(Vec3 start, Vec3 end) {
       Vec3 localStart = this.toLocal(start);
       Vec3 localEnd = this.toLocal(end);
@@ -91,7 +147,7 @@ public class MCH_BoundingBox {
       return new MovingObjectPosition(0, 0, 0, 0, hit);
    }
 
-   private Vec3 toLocal(Vec3 world) {
+   public Vec3 toLocal(Vec3 world) {
       Vec3 relative = Vec3.createVectorHelper(world.xCoord - this.nowPos.xCoord, world.yCoord - this.nowPos.yCoord, world.zCoord - this.nowPos.zCoord);
       relative.rotateAroundY(this.lastYaw / 180.0F * 3.1415927F);
       relative.rotateAroundX(this.lastPitch / 180.0F * 3.1415927F);

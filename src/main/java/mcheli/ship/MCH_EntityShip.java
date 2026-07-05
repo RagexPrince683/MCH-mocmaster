@@ -975,6 +975,15 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
     }
 
+
+    @Override
+    public AxisAlignedBB getBoundingBox() {
+        if(this.getAcInfo() == null || super.extraBoundingBox == null || super.extraBoundingBox.length <= 0) {
+            return super.getBoundingBox();
+        }
+        return this.getDeckSearchBox();
+    }
+
     private static class DeckContact {
         public final Entity entity;
         public final int surfaceIndex;
@@ -982,12 +991,12 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         public final double surfaceTopY;
         public final double surfaceCenterZ;
 
-        private DeckContact(Entity entity, int surfaceIndex, AxisAlignedBB surface) {
+        private DeckContact(Entity entity, int surfaceIndex, Vec3 surfaceCenter, double surfaceTopY) {
             this.entity = entity;
             this.surfaceIndex = surfaceIndex;
-            this.surfaceCenterX = (surface.minX + surface.maxX) / 2.0D;
-            this.surfaceTopY = surface.maxY;
-            this.surfaceCenterZ = (surface.minZ + surface.maxZ) / 2.0D;
+            this.surfaceCenterX = surfaceCenter.xCoord;
+            this.surfaceTopY = surfaceTopY;
+            this.surfaceCenterZ = surfaceCenter.zCoord;
         }
     }
 
@@ -1004,7 +1013,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
                     && entity.motionY < 0.3D && entity.boundingBox.intersectsWith(search)) {
                 int surfaceIndex = this.getDeckSurfaceIndex(entity.boundingBox);
                 if(surfaceIndex != Integer.MIN_VALUE) {
-                    standing.add(new DeckContact(entity, surfaceIndex, this.getDeckSurface(surfaceIndex)));
+                    standing.add(new DeckContact(entity, surfaceIndex, this.getDeckSurfaceCenter(surfaceIndex), this.getDeckSurfaceTopY(surfaceIndex)));
                 }
             }
         }
@@ -1026,10 +1035,11 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
         MCH_BoundingBox[] deckBoxes = this.getCalculatedExtraBoundingBoxes();
         for(int i = 0; i < deckBoxes.length; ++i) {
-            AxisAlignedBB deckBox = deckBoxes[i].boundingBox;
-            if(this.isOnTopOf(entityBox, deckBox) && deckBox.maxY > highestSurface) {
+            MCH_BoundingBox deckBox = deckBoxes[i];
+            double deckTopY = deckBox.getTopSurfaceY();
+            if(this.isOnTopOf(entityBox, deckBox) && deckTopY > highestSurface) {
                 surfaceIndex = i;
-                highestSurface = deckBox.maxY;
+                highestSurface = deckTopY;
             }
         }
         return surfaceIndex;
@@ -1047,9 +1057,25 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
                 && entityBox.minY <= deckBox.maxY + aboveTolerance;
     }
 
-    private AxisAlignedBB getDeckSurface(int surfaceIndex) {
-        return surfaceIndex < 0?super.boundingBox:this.getCalculatedExtraBoundingBoxes()[surfaceIndex].boundingBox;
+    private boolean isOnTopOf(AxisAlignedBB entityBox, MCH_BoundingBox deckBox) {
+        final double horizontalInset = 1.0E-4D;
+        final double aboveTolerance = 0.25D;
+        final double belowTolerance = 0.5D;
+        return deckBox.isEntityOnTop(entityBox, horizontalInset, belowTolerance, aboveTolerance);
     }
+
+    private Vec3 getDeckSurfaceCenter(int surfaceIndex) {
+        if(surfaceIndex < 0) {
+            return Vec3.createVectorHelper((super.boundingBox.minX + super.boundingBox.maxX) / 2.0D, super.boundingBox.maxY,
+                    (super.boundingBox.minZ + super.boundingBox.maxZ) / 2.0D);
+        }
+        return this.getCalculatedExtraBoundingBoxes()[surfaceIndex].getWorldTopCenter();
+    }
+
+    private double getDeckSurfaceTopY(int surfaceIndex) {
+        return surfaceIndex < 0?super.boundingBox.maxY:this.getCalculatedExtraBoundingBoxes()[surfaceIndex].getTopSurfaceY();
+    }
+
 
     private void finishDeckMovement(List<DeckContact> deckEntities, float oldYaw) {
         float yawChange = (float)MCH_Lib.getRotateDiff(oldYaw, this.getRotYaw());
@@ -1061,13 +1087,14 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         for(DeckContact contact : deckEntities) {
             Entity entity = contact.entity;
             if(!entity.isDead && entity.ridingEntity == null) {
-                AxisAlignedBB surface = this.getDeckSurface(contact.surfaceIndex);
                 double relativeX = entity.posX - contact.surfaceCenterX;
                 double relativeZ = entity.posZ - contact.surfaceCenterZ;
                 Vec3 rotated = MCH_Lib.RotVec3(relativeX, 0.0D, relativeZ, -yawChange, 0.0F);
-                double surfaceCenterX = (surface.minX + surface.maxX) / 2.0D;
-                double surfaceCenterZ = (surface.minZ + surface.maxZ) / 2.0D;
-                double deckDeltaY = surface.maxY - contact.surfaceTopY;
+                Vec3 surfaceCenter = this.getDeckSurfaceCenter(contact.surfaceIndex);
+                double surfaceCenterX = surfaceCenter.xCoord;
+                double surfaceCenterZ = surfaceCenter.zCoord;
+                double surfaceTopY = this.getDeckSurfaceTopY(contact.surfaceIndex);
+                double deckDeltaY = surfaceTopY - contact.surfaceTopY;
                 double carriedY = entity.posY + deckDeltaY;
 
                 // Carry by the measured deck delta, but never leave the feet
@@ -1078,8 +1105,8 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
                 if(deckDeltaY > 0.0D) {
                     final double deckClearance = 1.0E-4D;
                     double carriedMinY = entity.boundingBox.minY + deckDeltaY;
-                    if(carriedMinY < surface.maxY + deckClearance) {
-                        carriedY += surface.maxY + deckClearance - carriedMinY;
+                    if(carriedMinY < surfaceTopY + deckClearance) {
+                        carriedY += surfaceTopY + deckClearance - carriedMinY;
                     }
                 }
 
