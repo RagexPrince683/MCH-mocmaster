@@ -1,3 +1,8 @@
+## Refresh ship OBB collision boxes before queries
+
+- Refreshed calculated ship extra bounding boxes at deck, side, damage, and composite collision entry points before running physical OBB intersection or offset queries.
+- Documented the collision-entry refresh requirement in ship and base vehicle bounding-box paths.
+
 ## Fix far ship bounding-box side collision
 
 - Replaced ship OBB-vs-entity side intersection checks with a full separating-axis test so configured `BoundingBox` collision remains solid even when boxes are far from the ship origin.

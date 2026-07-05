@@ -99,7 +99,9 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
       if(!this.isShip() && !this.isDeckTopContact(this, other, true)) {
          offset = super.calculateXOffset(other, offset);
       }
-      for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
+      // Refresh calculated extra boxes at this collision entry point before any physical OBB offset queries.
+      MCH_BoundingBox[] boxes = this.ac.getCalculatedExtraBoundingBoxes();
+      for(MCH_BoundingBox bb : boxes) {
          if(!this.isDeckTopContact(bb, other)) {
             offset = this.isShip() ? bb.calculateXOffset(other, offset) : bb.boundingBox.calculateXOffset(other, offset);
          }
@@ -121,7 +123,9 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          }
       }
 
-      for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
+      // Refresh calculated extra boxes at this collision entry point before any physical OBB offset queries.
+      MCH_BoundingBox[] boxes = this.ac.getCalculatedExtraBoundingBoxes();
+      for(MCH_BoundingBox bb : boxes) {
          final double supportTolerance = 0.6D;
          double previousTopY = bb.getPreviousTopSurfaceY();
          offset = bb.calculateDeckYOffset(other, offset, supportTolerance);
@@ -146,7 +150,9 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
       if(!this.isShip() && !this.isDeckTopContact(this, other, false)) {
          offset = super.calculateZOffset(other, offset);
       }
-      for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
+      // Refresh calculated extra boxes at this collision entry point before any physical OBB offset queries.
+      MCH_BoundingBox[] boxes = this.ac.getCalculatedExtraBoundingBoxes();
+      for(MCH_BoundingBox bb : boxes) {
          if(!this.isDeckTopContact(bb, other)) {
             offset = this.isShip() ? bb.calculateZOffset(other, offset) : bb.boundingBox.calculateZOffset(other, offset);
          }
@@ -164,6 +170,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          ret = true;
       }
 
+      // Refresh calculated extra boxes at this collision entry point before any physical OBB intersection queries.
       MCH_BoundingBox[] arr$ = this.ac.getCalculatedExtraBoundingBoxes();
       int len$ = arr$.length;
 
