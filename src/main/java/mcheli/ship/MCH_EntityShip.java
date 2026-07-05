@@ -987,11 +987,16 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
     @Override
     public AxisAlignedBB getBoundingBox() {
-        // Expose the full extra-box enclosure for broad-phase entity lookups so
-        // vanilla movement can discover remote ship BoundingBoxes. Physical
-        // resolution is handled by getCollisionBox()'s composite resolver, which
-        // avoids treating this enclosing search volume as a solid block.
-        return this.getDeckSearchBox();
+        // Expose the full extra-box enclosure for broad-phase entity lookups, but
+        // keep the returned box as the composite vehicle resolver. Returning the
+        // raw search AABB makes vanilla movement resolve against the enclosing
+        // volume itself, which reintroduces jump/deck and side-contact jitter.
+        AxisAlignedBB search = this.getDeckSearchBox();
+        if(super.boundingBox instanceof MCH_BaseVehicleBoundingBox) {
+            return ((MCH_BaseVehicleBoundingBox)super.boundingBox).NewAABB(search.minX, search.minY, search.minZ,
+                    search.maxX, search.maxY, search.maxZ);
+        }
+        return search;
     }
 
     private static class DeckContact {

@@ -1,3 +1,7 @@
+## Fix ship bounding-box collision jitter
+
+- Kept ship broad-phase lookup expanded to all configured extra boxes while returning the composite collision resolver, preventing the enclosing search AABB from becoming a physical jitter source during jumping, deck walking, or side contact.
+
 ## Fix ship bounding-box side collision
 
 - Restored ship `BoundingBox` side collision by returning the composite vehicle collision resolver for ship entity collision checks.
