@@ -205,6 +205,76 @@ public class MCH_BoundingBox {
               && local.zCoord >= -halfWidth && local.zCoord <= halfWidth;
    }
 
+   public double calculateXOffset(AxisAlignedBB entityBox, double offset) {
+      return this.calculateAxisOffset(entityBox, offset, true);
+   }
+
+   public double calculateZOffset(AxisAlignedBB entityBox, double offset) {
+      return this.calculateAxisOffset(entityBox, offset, false);
+   }
+
+   private double calculateAxisOffset(AxisAlignedBB entityBox, double offset, boolean xAxis) {
+      if(offset == 0.0D || this.intersectsAABB(entityBox)) {
+         return offset;
+      }
+
+      AxisAlignedBB moved = xAxis ? entityBox.getOffsetBoundingBox(offset, 0.0D, 0.0D) : entityBox.getOffsetBoundingBox(0.0D, 0.0D, offset);
+      if(!this.intersectsAABB(moved)) {
+         return offset;
+      }
+
+      double clear = 0.0D;
+      double blocked = offset;
+      for(int i = 0; i < 16; ++i) {
+         double mid = (clear + blocked) / 2.0D;
+         AxisAlignedBB test = xAxis ? entityBox.getOffsetBoundingBox(mid, 0.0D, 0.0D) : entityBox.getOffsetBoundingBox(0.0D, 0.0D, mid);
+         if(this.intersectsAABB(test)) {
+            blocked = mid;
+         } else {
+            clear = mid;
+         }
+      }
+      return clear;
+   }
+
+   public Vec3 getHorizontalPushOut(AxisAlignedBB entityBox, double epsilon) {
+      Vec3 localCenter = this.toLocal(Vec3.createVectorHelper(
+              (entityBox.minX + entityBox.maxX) / 2.0D,
+              (entityBox.minY + entityBox.maxY) / 2.0D,
+              (entityBox.minZ + entityBox.maxZ) / 2.0D));
+      Vec3 localExtent = this.getLocalHalfExtents(entityBox);
+      double halfWidth = (double)this.width / 2.0D;
+      double halfHeight = (double)this.height / 2.0D;
+
+      if(Math.abs(localCenter.yCoord) >= halfHeight + localExtent.yCoord
+              || Math.abs(localCenter.xCoord) >= halfWidth + localExtent.xCoord
+              || Math.abs(localCenter.zCoord) >= halfWidth + localExtent.zCoord) {
+         return null;
+      }
+
+      double pushX = halfWidth + localExtent.xCoord - Math.abs(localCenter.xCoord);
+      double pushZ = halfWidth + localExtent.zCoord - Math.abs(localCenter.zCoord);
+      Vec3 localPush = pushX < pushZ
+              ? Vec3.createVectorHelper((localCenter.xCoord < 0.0D ? -pushX - epsilon : pushX + epsilon), 0.0D, 0.0D)
+              : Vec3.createVectorHelper(0.0D, 0.0D, (localCenter.zCoord < 0.0D ? -pushZ - epsilon : pushZ + epsilon));
+      return MCH_Lib.RotVec3(localPush, -this.lastYaw, -this.lastPitch, -this.lastRoll);
+   }
+
+   private Vec3 getLocalHalfExtents(AxisAlignedBB box) {
+      double centerX = (box.minX + box.maxX) / 2.0D;
+      double centerY = (box.minY + box.maxY) / 2.0D;
+      double centerZ = (box.minZ + box.maxZ) / 2.0D;
+      Vec3 center = this.toLocal(Vec3.createVectorHelper(centerX, centerY, centerZ));
+      Vec3 x = this.toLocal(Vec3.createVectorHelper(box.maxX, centerY, centerZ));
+      Vec3 y = this.toLocal(Vec3.createVectorHelper(centerX, box.maxY, centerZ));
+      Vec3 z = this.toLocal(Vec3.createVectorHelper(centerX, centerY, box.maxZ));
+      double halfX = Math.abs(x.xCoord - center.xCoord) + Math.abs(y.xCoord - center.xCoord) + Math.abs(z.xCoord - center.xCoord);
+      double halfY = Math.abs(x.yCoord - center.yCoord) + Math.abs(y.yCoord - center.yCoord) + Math.abs(z.yCoord - center.yCoord);
+      double halfZ = Math.abs(x.zCoord - center.zCoord) + Math.abs(y.zCoord - center.zCoord) + Math.abs(z.zCoord - center.zCoord);
+      return Vec3.createVectorHelper(halfX, halfY, halfZ);
+   }
+
+
    public MovingObjectPosition calculateIntercept(Vec3 start, Vec3 end) {
       Vec3 localStart = this.toLocal(start);
       Vec3 localEnd = this.toLocal(end);

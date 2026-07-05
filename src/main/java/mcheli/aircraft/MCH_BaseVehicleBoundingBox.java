@@ -101,7 +101,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
       }
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
          if(!this.isDeckTopContact(bb, other)) {
-            offset = bb.boundingBox.calculateXOffset(other, offset);
+            offset = this.isShip() ? bb.calculateXOffset(other, offset) : bb.boundingBox.calculateXOffset(other, offset);
          }
       }
       return offset;
@@ -148,7 +148,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
       }
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
          if(!this.isDeckTopContact(bb, other)) {
-            offset = bb.boundingBox.calculateZOffset(other, offset);
+            offset = this.isShip() ? bb.calculateZOffset(other, offset) : bb.boundingBox.calculateZOffset(other, offset);
          }
       }
       return offset;
