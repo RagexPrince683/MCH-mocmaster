@@ -1,7 +1,7 @@
-## Document and validate vehicle OBB transform convention
+## Refresh ship OBB collision boxes before queries
 
-- Documented that vehicle OBB local-to-world transforms use negative yaw/pitch/roll while world-to-local transforms use positive yaw/pitch/roll, and that the operations must remain inverses.
-- Added debug-only vehicle box cache validation that samples OBB corners and logs excessive local-to-world-to-local round-trip error when `DebugVehicleBoxCache` is enabled.
+- Refreshed calculated ship extra bounding boxes at deck, side, damage, and composite collision entry points before running physical OBB intersection or offset queries.
+- Documented the collision-entry refresh requirement in ship and base vehicle bounding-box paths.
 
 ## Fix far ship bounding-box side collision
 

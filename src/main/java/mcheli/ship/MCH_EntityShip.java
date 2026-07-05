@@ -1000,6 +1000,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     }
 
     private AxisAlignedBB getCompositeCollisionSearchBox() {
+        // Refresh calculated extra boxes through getDeckSearchBox before exposing physical OBB collision queries.
         AxisAlignedBB search = this.getDeckSearchBox();
         if(super.boundingBox instanceof MCH_BaseVehicleBoundingBox) {
             return ((MCH_BaseVehicleBoundingBox)super.boundingBox).NewAABB(search.minX, search.minY, search.minZ,
@@ -1030,8 +1031,9 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
             return;
         }
 
-        AxisAlignedBB search = this.getDeckSearchBox();
+        // Refresh calculated extra boxes after ship movement/rotation before physical OBB side queries.
         MCH_BoundingBox[] shipBoxes = this.getCalculatedExtraBoundingBoxes();
+        AxisAlignedBB search = this.getDeckSearchBox(shipBoxes);
         for(Object value : super.worldObj.playerEntities) {
             EntityPlayer player = (EntityPlayer)value;
             if(player == this.getRiddenByEntity() || player.ridingEntity != null || player.isDead
@@ -1070,12 +1072,14 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
             return standing;
         }
 
-        AxisAlignedBB search = this.getDeckSearchBox();
+        // Refresh calculated extra boxes before deck OBB contact queries for this tick.
+        MCH_BoundingBox[] deckBoxes = this.getCalculatedExtraBoundingBoxes();
+        AxisAlignedBB search = this.getDeckSearchBox(deckBoxes);
         for(Object value : super.worldObj.playerEntities) {
             Entity entity = (Entity)value;
             if(entity != this.getRiddenByEntity() && entity.ridingEntity == null && !entity.isDead
                     && entity.motionY < 0.3D && entity.boundingBox.intersectsWith(search)) {
-                int surfaceIndex = this.getDeckSurfaceIndex(entity.boundingBox);
+                int surfaceIndex = this.getDeckSurfaceIndex(entity.boundingBox, deckBoxes);
                 if(surfaceIndex != Integer.MIN_VALUE) {
                     standing.add(new DeckContact(entity, surfaceIndex, this.getDeckSurfaceCenter(surfaceIndex), this.getDeckSurfaceTopY(surfaceIndex)));
                 }
@@ -1085,7 +1089,12 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     }
 
     private AxisAlignedBB getDeckSearchBox() {
+        // Refresh calculated extra boxes before building the broad-phase box used for physical OBB queries.
         MCH_BoundingBox[] deckBoxes = this.getCalculatedExtraBoundingBoxes();
+        return this.getDeckSearchBox(deckBoxes);
+    }
+
+    private AxisAlignedBB getDeckSearchBox(MCH_BoundingBox[] deckBoxes) {
         if(deckBoxes.length <= 0) {
             return AxisAlignedBB.getBoundingBox(super.posX, super.posY, super.posZ, super.posX, super.posY, super.posZ);
         }
@@ -1098,10 +1107,12 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     }
 
     private int getDeckSurfaceIndex(AxisAlignedBB entityBox) {
+        return this.getDeckSurfaceIndex(entityBox, this.getCalculatedExtraBoundingBoxes());
+    }
+
+    private int getDeckSurfaceIndex(AxisAlignedBB entityBox, MCH_BoundingBox[] deckBoxes) {
         int surfaceIndex = Integer.MIN_VALUE;
         double highestSurface = -Double.MAX_VALUE;
-
-        MCH_BoundingBox[] deckBoxes = this.getCalculatedExtraBoundingBoxes();
         for(int i = 0; i < deckBoxes.length; ++i) {
             MCH_BoundingBox deckBox = deckBoxes[i];
             double deckTopY = deckBox.getTopSurfaceY();
@@ -1144,8 +1155,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     private void finishDeckMovement(List<DeckContact> deckEntities, float oldYaw) {
         float yawChange = (float)MCH_Lib.getRotateDiff(oldYaw, this.getRotYaw());
 
-        // Extra boxes are normally updated before onUpdateAircraft. Refresh them at
-        // the final ship position so support uses this tick's water-bob height.
+        // Refresh calculated extra boxes at the final ship transform before physical OBB deck carry queries.
         this.getCalculatedExtraBoundingBoxes();
 
         for(DeckContact contact : deckEntities) {
@@ -1186,6 +1196,8 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
     private void collisionEntity(MCH_BoundingBox shipBox) {
         if (shipBox != null) {
+            // Refresh calculated extra boxes after ship movement/rotation before physical OBB damage queries.
+            this.getCalculatedExtraBoundingBoxes();
             AxisAlignedBB bb = shipBox.getEnclosingAABB();
             // Calculate speed
             double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);
