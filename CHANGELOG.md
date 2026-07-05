@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Converted extra vehicle bounding-box projectile hit processing to use vehicle-rotated oriented boxes while preserving existing damage-factor armor behavior.
+
 ### Documentation
 
 - Rewrote `README.md` with a modern project overview, feature list, installation steps, compatibility/client-server requirements, configuration overview, command examples, troubleshooting, FAQ, and confirmed resource links.
