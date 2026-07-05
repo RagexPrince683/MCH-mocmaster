@@ -180,6 +180,18 @@ public class MCH_BoundingBox {
    }
 
    private boolean intersectsAABBBySeparatingAxis(AxisAlignedBB aabb) {
+      return this.intersectsAABBBySeparatingAxis(aabb, 1.0E-7D);
+   }
+
+   private boolean penetratesAABB(AxisAlignedBB aabb) {
+      if(!this.getEnclosingAABB().intersectsWith(aabb)) {
+         return false;
+      }
+
+      return this.intersectsAABBBySeparatingAxis(aabb, -1.0E-7D);
+   }
+
+   private boolean intersectsAABBBySeparatingAxis(AxisAlignedBB aabb, double separationTolerance) {
       Vec3 aabbCenter = Vec3.createVectorHelper((aabb.minX + aabb.maxX) / 2.0D, (aabb.minY + aabb.maxY) / 2.0D, (aabb.minZ + aabb.maxZ) / 2.0D);
       double[] aabbHalfExtents = new double[] {
               (aabb.maxX - aabb.minX) / 2.0D,
@@ -204,13 +216,13 @@ public class MCH_BoundingBox {
       Vec3 centerDelta = Vec3.createVectorHelper(aabbCenter.xCoord - this.nowPos.xCoord, aabbCenter.yCoord - this.nowPos.yCoord, aabbCenter.zCoord - this.nowPos.zCoord);
 
       for(int i = 0; i < 3; ++i) {
-         if(this.hasSeparatingAxis(aabbAxes[i], centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents)) {
+         if(this.hasSeparatingAxis(aabbAxes[i], centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents, separationTolerance)) {
             return false;
          }
       }
 
       for(int i = 0; i < 3; ++i) {
-         if(this.hasSeparatingAxis(obbAxes[i], centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents)) {
+         if(this.hasSeparatingAxis(obbAxes[i], centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents, separationTolerance)) {
             return false;
          }
       }
@@ -218,7 +230,7 @@ public class MCH_BoundingBox {
       for(int i = 0; i < 3; ++i) {
          for(int j = 0; j < 3; ++j) {
             Vec3 axis = this.cross(aabbAxes[i], obbAxes[j]);
-            if(this.lengthSq(axis) > 1.0E-12D && this.hasSeparatingAxis(axis, centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents)) {
+            if(this.lengthSq(axis) > 1.0E-12D && this.hasSeparatingAxis(axis, centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents, separationTolerance)) {
                return false;
             }
          }
@@ -227,7 +239,7 @@ public class MCH_BoundingBox {
       return true;
    }
 
-   private boolean hasSeparatingAxis(Vec3 axis, Vec3 centerDelta, Vec3[] aabbAxes, double[] aabbHalfExtents, Vec3[] obbAxes, double[] obbHalfExtents) {
+   private boolean hasSeparatingAxis(Vec3 axis, Vec3 centerDelta, Vec3[] aabbAxes, double[] aabbHalfExtents, Vec3[] obbAxes, double[] obbHalfExtents, double separationTolerance) {
       double centerDistance = Math.abs(this.dot(centerDelta, axis));
       double aabbProjection = 0.0D;
       double obbProjection = 0.0D;
@@ -237,7 +249,7 @@ public class MCH_BoundingBox {
          obbProjection += obbHalfExtents[i] * Math.abs(this.dot(obbAxes[i], axis));
       }
 
-      return centerDistance > aabbProjection + obbProjection + 1.0E-7D;
+      return centerDistance > aabbProjection + obbProjection + separationTolerance;
    }
 
    private double dot(Vec3 a, Vec3 b) {
@@ -264,27 +276,119 @@ public class MCH_BoundingBox {
    }
 
    private double calculateAxisOffset(AxisAlignedBB entityBox, double offset, boolean xAxis) {
-      if(offset == 0.0D || this.intersectsAABB(entityBox)) {
+      if(offset == 0.0D) {
          return offset;
+      }
+
+      if(this.intersectsAABB(entityBox)) {
+         return 0.0D;
       }
 
       AxisAlignedBB moved = xAxis ? entityBox.getOffsetBoundingBox(offset, 0.0D, 0.0D) : entityBox.getOffsetBoundingBox(0.0D, 0.0D, offset);
-      if(!this.intersectsAABB(moved)) {
+      if(!this.penetratesAABB(moved)) {
          return offset;
       }
 
-      double clear = 0.0D;
+      double safeOffset = this.calculateSweptAxisOffset(entityBox, offset, xAxis);
+      double clear = safeOffset;
       double blocked = offset;
-      for(int i = 0; i < 32; ++i) {
+
+      // The swept OBB result is the authoritative collision time. This binary
+      // search is only a deterministic refinement against the same SAT-backed
+      // intersectsAABB() predicate used elsewhere, not a broad-phase AABB
+      // approximation.
+      for(int i = 0; i < 16; ++i) {
          double mid = (clear + blocked) / 2.0D;
          AxisAlignedBB test = xAxis ? entityBox.getOffsetBoundingBox(mid, 0.0D, 0.0D) : entityBox.getOffsetBoundingBox(0.0D, 0.0D, mid);
-         if(this.intersectsAABB(test)) {
+         if(this.penetratesAABB(test)) {
             blocked = mid;
          } else {
             clear = mid;
          }
       }
+
       return Math.abs(clear) < 1.0E-7D ? 0.0D : clear;
+   }
+
+   private double calculateSweptAxisOffset(AxisAlignedBB entityBox, double offset, boolean xAxis) {
+      Vec3 center = this.toLocal(Vec3.createVectorHelper(
+              (entityBox.minX + entityBox.maxX) / 2.0D,
+              (entityBox.minY + entityBox.maxY) / 2.0D,
+              (entityBox.minZ + entityBox.maxZ) / 2.0D));
+      double[] aabbHalfExtents = new double[] {
+              (entityBox.maxX - entityBox.minX) / 2.0D,
+              (entityBox.maxY - entityBox.minY) / 2.0D,
+              (entityBox.maxZ - entityBox.minZ) / 2.0D
+      };
+      double[] obbHalfExtents = new double[] {
+              (double)this.width / 2.0D,
+              (double)this.height / 2.0D,
+              (double)this.width / 2.0D
+      };
+      Vec3[] obbAxes = new Vec3[] {
+              Vec3.createVectorHelper(1.0D, 0.0D, 0.0D),
+              Vec3.createVectorHelper(0.0D, 1.0D, 0.0D),
+              Vec3.createVectorHelper(0.0D, 0.0D, 1.0D)
+      };
+      Vec3[] aabbAxes = new Vec3[] {
+              this.toLocalDirection(1.0D, 0.0D, 0.0D),
+              this.toLocalDirection(0.0D, 1.0D, 0.0D),
+              this.toLocalDirection(0.0D, 0.0D, 1.0D)
+      };
+      Vec3 movement = xAxis ? this.toLocalDirection(offset, 0.0D, 0.0D) : this.toLocalDirection(0.0D, 0.0D, offset);
+      double[] interval = new double[] {0.0D, 1.0D};
+
+      for(int i = 0; i < 3; ++i) {
+         if(!this.clipSweptSeparatingAxis(obbAxes[i], center, movement, obbAxes, obbHalfExtents, aabbAxes, aabbHalfExtents, interval)) return 0.0D;
+         if(!this.clipSweptSeparatingAxis(aabbAxes[i], center, movement, obbAxes, obbHalfExtents, aabbAxes, aabbHalfExtents, interval)) return 0.0D;
+      }
+
+      for(int i = 0; i < 3; ++i) {
+         for(int j = 0; j < 3; ++j) {
+            Vec3 axis = this.cross(obbAxes[i], aabbAxes[j]);
+            if(this.lengthSq(axis) > 1.0E-12D && !this.clipSweptSeparatingAxis(axis, center, movement, obbAxes, obbHalfExtents, aabbAxes, aabbHalfExtents, interval)) {
+               return 0.0D;
+            }
+         }
+      }
+
+      double safe = offset * Math.max(0.0D, Math.min(1.0D, interval[0]));
+      return Math.abs(safe) < 1.0E-7D ? 0.0D : safe;
+   }
+
+   private boolean clipSweptSeparatingAxis(Vec3 axis, Vec3 center, Vec3 movement, Vec3[] obbAxes, double[] obbHalfExtents, Vec3[] aabbAxes, double[] aabbHalfExtents, double[] interval) {
+      double centerDistance = this.dot(center, axis);
+      double velocity = this.dot(movement, axis);
+      double radius = 0.0D;
+
+      for(int i = 0; i < 3; ++i) {
+         radius += obbHalfExtents[i] * Math.abs(this.dot(obbAxes[i], axis));
+         radius += aabbHalfExtents[i] * Math.abs(this.dot(aabbAxes[i], axis));
+      }
+
+      if(Math.abs(velocity) < 1.0E-9D) {
+         return Math.abs(centerDistance) <= radius + 1.0E-7D;
+      }
+
+      double enter = (-radius - centerDistance) / velocity;
+      double exit = (radius - centerDistance) / velocity;
+      if(enter > exit) {
+         double tmp = enter;
+         enter = exit;
+         exit = tmp;
+      }
+
+      if(enter > interval[0]) interval[0] = enter;
+      if(exit < interval[1]) interval[1] = exit;
+      return interval[0] <= interval[1] && interval[1] >= 0.0D && interval[0] <= 1.0D;
+   }
+
+   private Vec3 toLocalDirection(double x, double y, double z) {
+      Vec3 direction = Vec3.createVectorHelper(x, y, z);
+      direction.rotateAroundY(this.lastYaw / 180.0F * 3.1415927F);
+      direction.rotateAroundX(this.lastPitch / 180.0F * 3.1415927F);
+      W_Vec3.rotateAroundZ(this.lastRoll / 180.0F * 3.1415927F, direction);
+      return direction;
    }
 
    public Vec3 getHorizontalPushOut(AxisAlignedBB entityBox, double epsilon) {
