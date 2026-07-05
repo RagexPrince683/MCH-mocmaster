@@ -1021,7 +1021,8 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     }
 
     private AxisAlignedBB getDeckSearchBox() {
-        AxisAlignedBB search = super.getBoundingBox();
+        AxisAlignedBB search = AxisAlignedBB.getBoundingBox(super.boundingBox.minX, super.boundingBox.minY,
+                super.boundingBox.minZ, super.boundingBox.maxX, super.boundingBox.maxY, super.boundingBox.maxZ);
         for(MCH_BoundingBox bb : this.getCalculatedExtraBoundingBoxes()) {
             search = search.func_111270_a(bb.getEnclosingAABB());
         }
