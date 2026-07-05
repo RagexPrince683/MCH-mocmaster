@@ -959,6 +959,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
         this.moveEntity(super.motionX, super.motionY, super.motionZ);
         this.finishDeckMovement(deckEntities, oldYaw);
+        this.resolvePlayerSideCollisions();
         //super.motionY *= 0.95D;
 
         if(this.getAcInfo().throttleUpDown > 0.0F) {
@@ -1017,6 +1018,46 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
             this.surfaceCenterX = surfaceCenter.xCoord;
             this.surfaceTopY = surfaceTopY;
             this.surfaceCenterZ = surfaceCenter.zCoord;
+        }
+    }
+
+
+    private void resolvePlayerSideCollisions() {
+        if(super.worldObj.isRemote || this.getAcInfo() == null) {
+            return;
+        }
+
+        AxisAlignedBB search = this.getDeckSearchBox();
+        MCH_BoundingBox[] shipBoxes = this.getCalculatedExtraBoundingBoxes();
+        for(Object value : super.worldObj.playerEntities) {
+            EntityPlayer player = (EntityPlayer)value;
+            if(player == this.getRiddenByEntity() || player.ridingEntity != null || player.isDead
+                    || !player.boundingBox.intersectsWith(search)) {
+                continue;
+            }
+
+            Vec3 push = null;
+            double bestPushSq = Double.MAX_VALUE;
+            for(MCH_BoundingBox shipBox : shipBoxes) {
+                if(this.isOnTopOf(player.boundingBox, shipBox)) {
+                    continue;
+                }
+
+                Vec3 candidate = shipBox.getHorizontalPushOut(player.boundingBox, 1.0E-4D);
+                if(candidate != null) {
+                    double pushSq = candidate.xCoord * candidate.xCoord + candidate.zCoord * candidate.zCoord;
+                    if(pushSq < bestPushSq) {
+                        push = candidate;
+                        bestPushSq = pushSq;
+                    }
+                }
+            }
+
+            if(push != null) {
+                player.moveEntity(push.xCoord, 0.0D, push.zCoord);
+                player.motionX = 0.0D;
+                player.motionZ = 0.0D;
+            }
         }
     }
 
