@@ -319,15 +319,19 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    }
 
    private static void beginSkinOverlayRender(MCH_BaseVehicleInfo info, MCH_EntityBaseVehicle ac) {
+      beginSkinOverlayRender(info.getDirectoryName(), ac.getTextureName());
+   }
+
+   public static void beginSkinOverlayRender(String directory, String textureName) {
       activeSkinOverlayTexture = null;
       activeBaseTexture = null;
-      String overlayTextureName = getSkinOverlayTextureName(ac.getTextureName());
+      String overlayTextureName = getSkinOverlayTextureName(textureName);
       if(overlayTextureName != null && !overlayTextureName.isEmpty()) {
-         activeSkinOverlayTexture = new ResourceLocation(W_MOD.DOMAIN, MCH_EntityBaseVehicle.getTexturePath(info.getDirectoryName(), overlayTextureName));
+         activeSkinOverlayTexture = new ResourceLocation(W_MOD.DOMAIN, MCH_EntityBaseVehicle.getTexturePath(directory, overlayTextureName));
       }
    }
 
-   private static void endSkinOverlayRender() {
+   public static void endSkinOverlayRender() {
       activeSkinOverlayTexture = null;
       activeBaseTexture = null;
    }
@@ -359,9 +363,14 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       void render();
    }
 
-   private static String getBaseTexturePath(String path) {
-      int overlaySeparator = path.indexOf("|skinoverlays/");
+   public static String getBaseTexturePath(String path) {
+      int overlaySeparator = path != null ? path.indexOf("|skinoverlays/") : -1;
       return overlaySeparator >= 0 ? path.substring(0, overlaySeparator) + ".png" : path;
+   }
+
+   public static String getBaseTextureName(String textureName) {
+      int overlaySeparator = textureName != null ? textureName.indexOf("|skinoverlays/") : -1;
+      return overlaySeparator >= 0 ? textureName.substring(0, overlaySeparator) : textureName;
    }
 
    private static String getSkinOverlayTextureName(String textureName) {
@@ -578,6 +587,18 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          renderSkinOverlayPass(new RenderRunnable() {
             public void render() {
                renderBodyModel(model);
+            }
+         });
+      }
+
+   }
+
+   public static void renderAllModel(final IModelCustom model) {
+      if(model != null) {
+         model.renderAll();
+         renderSkinOverlayPass(new RenderRunnable() {
+            public void render() {
+               model.renderAll();
             }
          });
       }
