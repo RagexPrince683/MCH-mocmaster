@@ -1,5 +1,11 @@
 # Changelog
 
+## Use OBBs for ship walkability instead of using the AABBs
+
+- Changed ship moving-deck detection and carry anchors for extra bounding boxes to use the rotated OBB support surface instead of the legacy unrotated AABB.
+- Added reusable OBB deck helpers on `MCH_BoundingBox` for top-center, top-height, and entity-on-top checks.
+
+
 ## Unreleased
 
 ### Changed

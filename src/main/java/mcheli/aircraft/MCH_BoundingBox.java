@@ -73,6 +73,29 @@ public class MCH_BoundingBox {
       this.boundingBox.setBounds(x - (double)(w / 2.0F), y - (double)(h / 2.0F), z - (double)(w / 2.0F), x + (double)(w / 2.0F), y + (double)(h / 2.0F), z + (double)(w / 2.0F));
    }
 
+   public Vec3 getWorldTopCenter() {
+      Vec3 top = Vec3.createVectorHelper(0.0D, (double)this.height / 2.0D, 0.0D);
+      top = MCH_Lib.RotVec3(top, -this.lastYaw, -this.lastPitch, -this.lastRoll);
+      return Vec3.createVectorHelper(this.nowPos.xCoord + top.xCoord, this.nowPos.yCoord + top.yCoord, this.nowPos.zCoord + top.zCoord);
+   }
+
+   public boolean isEntityOnTop(AxisAlignedBB entityBox, double horizontalInset, double belowTolerance, double aboveTolerance) {
+      Vec3 feet = Vec3.createVectorHelper((entityBox.minX + entityBox.maxX) / 2.0D, entityBox.minY, (entityBox.minZ + entityBox.maxZ) / 2.0D);
+      Vec3 localFeet = this.toLocal(feet);
+      double halfWidth = (double)this.width / 2.0D;
+      double halfHeight = (double)this.height / 2.0D;
+      return localFeet.xCoord > -halfWidth + horizontalInset
+              && localFeet.xCoord < halfWidth - horizontalInset
+              && localFeet.zCoord > -halfWidth + horizontalInset
+              && localFeet.zCoord < halfWidth - horizontalInset
+              && localFeet.yCoord >= halfHeight - belowTolerance
+              && localFeet.yCoord <= halfHeight + aboveTolerance;
+   }
+
+   public double getTopSurfaceY() {
+      return this.getWorldTopCenter().yCoord;
+   }
+
    public MovingObjectPosition calculateIntercept(Vec3 start, Vec3 end) {
       Vec3 localStart = this.toLocal(start);
       Vec3 localEnd = this.toLocal(end);
@@ -91,7 +114,7 @@ public class MCH_BoundingBox {
       return new MovingObjectPosition(0, 0, 0, 0, hit);
    }
 
-   private Vec3 toLocal(Vec3 world) {
+   public Vec3 toLocal(Vec3 world) {
       Vec3 relative = Vec3.createVectorHelper(world.xCoord - this.nowPos.xCoord, world.yCoord - this.nowPos.yCoord, world.zCoord - this.nowPos.zCoord);
       relative.rotateAroundY(this.lastYaw / 180.0F * 3.1415927F);
       relative.rotateAroundX(this.lastPitch / 180.0F * 3.1415927F);
