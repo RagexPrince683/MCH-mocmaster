@@ -977,6 +977,20 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
 
     @Override
+    public AxisAlignedBB getCollisionBox(Entity entity) {
+        // Ships expose a large composite deck search AABB so broad-phase entity
+        // lookups can discover remote OBB decks. That search volume must not be
+        // returned to vanilla entity movement as a physical collision box: near
+        // the ship origin, players can collide with the enclosing search AABB
+        // instead of the precise deck OBB, causing vertical jitter and horizontal
+        // movement cancellation while walking or jumping. Ship walkability is
+        // resolved by getEntitiesStandingOnDeck()/finishDeckMovement() and the
+        // OBB helpers below, so vanilla entity collision should ignore the ship
+        // itself.
+        return null;
+    }
+
+    @Override
     public AxisAlignedBB getBoundingBox() {
         if(this.getAcInfo() == null || super.extraBoundingBox == null || super.extraBoundingBox.length <= 0) {
             return AxisAlignedBB.getBoundingBox(super.posX, super.posY, super.posZ, super.posX, super.posY, super.posZ);
