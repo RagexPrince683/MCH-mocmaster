@@ -42,7 +42,7 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
                System.out.println("Texture not found : " + tank.getTextureName());
                this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
             }
-            renderBody(tankInfo.model);
+            renderBodyWithSkinOverlay(tankInfo.model, "tanks", tank);
          }
       }
    }

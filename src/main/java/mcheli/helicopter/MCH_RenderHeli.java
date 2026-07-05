@@ -33,7 +33,7 @@ public class MCH_RenderHeli extends MCH_RenderBaseVehicle {
             GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
             GL11.glRotatef(roll, 0.0F, 0.0F, 1.0F);
             this.bindTexture(MCH_EntityBaseVehicle.getTexturePath("helicopters", heli.getTextureName()), heli);
-            renderBody(heliInfo.model);
+            renderBodyWithSkinOverlay(heliInfo.model, "helicopters", heli);
             this.drawModelBlade(heli, heliInfo, tickTime);
          }
       }

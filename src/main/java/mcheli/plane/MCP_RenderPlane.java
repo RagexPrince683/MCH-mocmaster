@@ -50,7 +50,7 @@ public class MCP_RenderPlane extends MCH_RenderBaseVehicle {
                this.renderRotor(plane, planeInfo, tickTime);
             }
 
-            renderBody(planeInfo.model);
+            renderBodyWithSkinOverlay(planeInfo.model, "planes", plane);
          }
       }
    }

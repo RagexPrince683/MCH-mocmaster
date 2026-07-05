@@ -138,6 +138,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_CURRENT_BIT | GL11.GL_TEXTURE_BIT);
       GL11.glDisable(GL11.GL_FOG);
       GL11.glEnable(GL11.GL_BLEND);
+      GL11.glDisable(GL11.GL_ALPHA_TEST);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       this.renderBaseVehicle(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
       GL11.glPopAttrib();
@@ -301,12 +302,44 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       }else {
          try {
             super.bindTexture(new ResourceLocation(W_MOD.DOMAIN,
-                                                   path));
+                                                   getBaseTexturePath(path)));
          } catch (Exception var4) {
             System.out.println("Error loading texture: " + path + " (" + var4.getMessage() + ")"); //why the fuck is this happening
             super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, "textures/test.png"));
          }
       }
+   }
+
+   protected void renderBodyWithSkinOverlay(IModelCustom model, String directory, MCH_EntityBaseVehicle ac) {
+      renderBody(model);
+      String overlayTextureName = getSkinOverlayTextureName(ac.getTextureName());
+      if(overlayTextureName == null || overlayTextureName.isEmpty()) {
+         return;
+      }
+
+      GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_POLYGON_BIT);
+      GL11.glEnable(GL11.GL_BLEND);
+      GL11.glDisable(GL11.GL_ALPHA_TEST);
+      GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+      GL11.glDepthMask(false);
+      GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
+      GL11.glPolygonOffset(-1.0F, -1.0F);
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, MCH_EntityBaseVehicle.getTexturePath(directory, overlayTextureName)));
+      renderBody(model);
+      GL11.glPopAttrib();
+      GL11.glDepthMask(true);
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+   }
+
+   private static String getBaseTexturePath(String path) {
+      int overlaySeparator = path.indexOf("|skinoverlays/");
+      return overlaySeparator >= 0 ? path.substring(0, overlaySeparator) + ".png" : path;
+   }
+
+   private static String getSkinOverlayTextureName(String textureName) {
+      int overlaySeparator = textureName != null ? textureName.indexOf("|skinoverlays/") : -1;
+      return overlaySeparator >= 0 ? textureName.substring(overlaySeparator + 1) : null;
    }
 
    public void renderRiddenEntity(MCH_EntityBaseVehicle ac, float tickTime, float yaw, float pitch, float roll, float width, float height) {
