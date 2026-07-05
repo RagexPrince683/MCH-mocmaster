@@ -1,3 +1,7 @@
+## Add ship collision-box fallback diagnostics
+
+- Added debug-flagged ship collision fallback diagnostics when the ship entity bounding box is not the composite vehicle resolver, preserving the non-crashing broad-phase fallback while logging ship identity, transform, search bounds, and extra-box presence.
+
 ## Fix far ship bounding-box side collision
 
 - Replaced ship OBB-vs-entity side intersection checks with a full separating-axis test so configured `BoundingBox` collision remains solid even when boxes are far from the ship origin.
