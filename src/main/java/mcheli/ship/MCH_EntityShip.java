@@ -36,6 +36,9 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class MCH_EntityShip extends MCH_EntityBaseVehicle {
+    // Safety/debug fallback only. Ordinary ship side contact should resolve
+    // through MCH_BoundingBox.calculateXOffset/ZOffset during vanilla movement.
+    private static final boolean ENABLE_SIDE_COLLISION_FALLBACK = Boolean.getBoolean("mcheli.ship.sideCollisionFallback");
 
     private MCH_ShipInfo planeInfo = null;
     public float soundVolume;
@@ -959,7 +962,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
         this.moveEntity(super.motionX, super.motionY, super.motionZ);
         this.finishDeckMovement(deckEntities, oldYaw);
-        this.resolvePlayerSideCollisions();
+        this.resolvePlayerSideCollisionsFallback();
         //super.motionY *= 0.95D;
 
         if(this.getAcInfo().throttleUpDown > 0.0F) {
@@ -1023,8 +1026,8 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     }
 
 
-    private void resolvePlayerSideCollisions() {
-        if(super.worldObj.isRemote || this.getAcInfo() == null) {
+    private void resolvePlayerSideCollisionsFallback() {
+        if(!ENABLE_SIDE_COLLISION_FALLBACK || super.worldObj.isRemote || this.getAcInfo() == null) {
             return;
         }
 
