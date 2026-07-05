@@ -1,5 +1,10 @@
 # Changelog
 
+## Smooth ship AABB deck collision
+
+- Kept ship base AABB deck collision enabled while matching the extra OBB deck support path for upward water-bob transitions.
+- Added previous-top Y support for floating ship AABB decks so players remain smoothly carried instead of being pushed sideways or jittering when the ship rises.
+
 ## Keep remote ship OBB decks walkable
 
 - Expanded ship deck broad-phase searches with the full rotated corner extents of each extra OBB, so deck collision remains discoverable even when the walkable OBB is far from the ship origin.
