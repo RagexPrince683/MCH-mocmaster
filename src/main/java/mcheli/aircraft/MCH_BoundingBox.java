@@ -170,6 +170,18 @@ public class MCH_BoundingBox {
    }
 
    private boolean intersectsAABBBySeparatingAxis(AxisAlignedBB aabb) {
+      return this.intersectsAABBBySeparatingAxis(aabb, 1.0E-7D);
+   }
+
+   private boolean penetratesAABB(AxisAlignedBB aabb) {
+      if(!this.getEnclosingAABB().intersectsWith(aabb)) {
+         return false;
+      }
+
+      return this.intersectsAABBBySeparatingAxis(aabb, -1.0E-7D);
+   }
+
+   private boolean intersectsAABBBySeparatingAxis(AxisAlignedBB aabb, double separationTolerance) {
       Vec3 aabbCenter = Vec3.createVectorHelper((aabb.minX + aabb.maxX) / 2.0D, (aabb.minY + aabb.maxY) / 2.0D, (aabb.minZ + aabb.maxZ) / 2.0D);
       double[] aabbHalfExtents = new double[] {
               (aabb.maxX - aabb.minX) / 2.0D,
@@ -194,13 +206,13 @@ public class MCH_BoundingBox {
       Vec3 centerDelta = Vec3.createVectorHelper(aabbCenter.xCoord - this.nowPos.xCoord, aabbCenter.yCoord - this.nowPos.yCoord, aabbCenter.zCoord - this.nowPos.zCoord);
 
       for(int i = 0; i < 3; ++i) {
-         if(this.hasSeparatingAxis(aabbAxes[i], centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents)) {
+         if(this.hasSeparatingAxis(aabbAxes[i], centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents, separationTolerance)) {
             return false;
          }
       }
 
       for(int i = 0; i < 3; ++i) {
-         if(this.hasSeparatingAxis(obbAxes[i], centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents)) {
+         if(this.hasSeparatingAxis(obbAxes[i], centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents, separationTolerance)) {
             return false;
          }
       }
@@ -208,7 +220,7 @@ public class MCH_BoundingBox {
       for(int i = 0; i < 3; ++i) {
          for(int j = 0; j < 3; ++j) {
             Vec3 axis = this.cross(aabbAxes[i], obbAxes[j]);
-            if(this.lengthSq(axis) > 1.0E-12D && this.hasSeparatingAxis(axis, centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents)) {
+            if(this.lengthSq(axis) > 1.0E-12D && this.hasSeparatingAxis(axis, centerDelta, aabbAxes, aabbHalfExtents, obbAxes, obbHalfExtents, separationTolerance)) {
                return false;
             }
          }
@@ -217,7 +229,7 @@ public class MCH_BoundingBox {
       return true;
    }
 
-   private boolean hasSeparatingAxis(Vec3 axis, Vec3 centerDelta, Vec3[] aabbAxes, double[] aabbHalfExtents, Vec3[] obbAxes, double[] obbHalfExtents) {
+   private boolean hasSeparatingAxis(Vec3 axis, Vec3 centerDelta, Vec3[] aabbAxes, double[] aabbHalfExtents, Vec3[] obbAxes, double[] obbHalfExtents, double separationTolerance) {
       double centerDistance = Math.abs(this.dot(centerDelta, axis));
       double aabbProjection = 0.0D;
       double obbProjection = 0.0D;
@@ -227,7 +239,7 @@ public class MCH_BoundingBox {
          obbProjection += obbHalfExtents[i] * Math.abs(this.dot(obbAxes[i], axis));
       }
 
-      return centerDistance > aabbProjection + obbProjection + 1.0E-7D;
+      return centerDistance > aabbProjection + obbProjection + separationTolerance;
    }
 
    private double dot(Vec3 a, Vec3 b) {
@@ -254,12 +266,12 @@ public class MCH_BoundingBox {
    }
 
    private double calculateAxisOffset(AxisAlignedBB entityBox, double offset, boolean xAxis) {
-      if(offset == 0.0D || this.intersectsAABB(entityBox)) {
+      if(offset == 0.0D || this.penetratesAABB(entityBox)) {
          return offset;
       }
 
       AxisAlignedBB moved = xAxis ? entityBox.getOffsetBoundingBox(offset, 0.0D, 0.0D) : entityBox.getOffsetBoundingBox(0.0D, 0.0D, offset);
-      if(!this.intersectsAABB(moved)) {
+      if(!this.penetratesAABB(moved)) {
          return offset;
       }
 
@@ -268,7 +280,7 @@ public class MCH_BoundingBox {
       for(int i = 0; i < 32; ++i) {
          double mid = (clear + blocked) / 2.0D;
          AxisAlignedBB test = xAxis ? entityBox.getOffsetBoundingBox(mid, 0.0D, 0.0D) : entityBox.getOffsetBoundingBox(0.0D, 0.0D, mid);
-         if(this.intersectsAABB(test)) {
+         if(this.penetratesAABB(test)) {
             blocked = mid;
          } else {
             clear = mid;
