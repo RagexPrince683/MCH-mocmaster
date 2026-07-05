@@ -47,6 +47,10 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
       return this.ac instanceof MCH_EntityShip;
    }
 
+   private boolean isShip() {
+      return this.ac instanceof MCH_EntityShip;
+   }
+
    private boolean isDeckTopContact(AxisAlignedBB deck, AxisAlignedBB other, boolean movingOnX) {
       final double bobTolerance = 0.6D;
       boolean overlapsPerpendicularAxis = movingOnX
@@ -92,7 +96,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          return offset;
       }
 
-      if(!this.isDeckTopContact(this, other, true)) {
+      if(!this.isShip() && !this.isDeckTopContact(this, other, true)) {
          offset = super.calculateXOffset(other, offset);
       }
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
@@ -109,10 +113,12 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          return offset;
       }
 
-      double previousBaseTopY = this.getPreviousBaseTopSurfaceY();
-      offset = super.calculateYOffset(other, offset);
-      if(this.ac.canFloatWater() && super.maxY > previousBaseTopY) {
-         offset = this.calculatePreviousBaseDeckYOffset(other, offset, 0.6D);
+      if(!this.isShip()) {
+         double previousBaseTopY = this.getPreviousBaseTopSurfaceY();
+         offset = super.calculateYOffset(other, offset);
+         if(this.ac.canFloatWater() && super.maxY > previousBaseTopY) {
+            offset = this.calculatePreviousBaseDeckYOffset(other, offset, 0.6D);
+         }
       }
 
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
@@ -137,7 +143,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          return offset;
       }
 
-      if(!this.isDeckTopContact(this, other, false)) {
+      if(!this.isShip() && !this.isDeckTopContact(this, other, false)) {
          offset = super.calculateZOffset(other, offset);
       }
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
@@ -153,7 +159,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
       double dist = 1.0E7D;
       this.ac.lastBBDamageFactor = 1.0F;
       this.ac.lastHitBoundingBoxType = EnumBoundingBoxType.DEFAULT;
-      if(super.intersectsWith(aabb)) {
+      if(!this.isShip() && super.intersectsWith(aabb)) {
          dist = this.getDistSq(aabb, this);
          ret = true;
       }
@@ -280,7 +286,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
    public MovingObjectPosition calculateIntercept(Vec3 v1, Vec3 v2) {
       this.ac.lastBBDamageFactor = 1.0F;
       this.ac.lastHitBoundingBoxType = EnumBoundingBoxType.DEFAULT;
-      MovingObjectPosition mop = super.calculateIntercept(v1, v2);
+      MovingObjectPosition mop = this.isShip()?null:super.calculateIntercept(v1, v2);
       double dist = 1.0E7D;
       if(mop != null) {
          dist = v1.distanceTo(mop.hitVec);

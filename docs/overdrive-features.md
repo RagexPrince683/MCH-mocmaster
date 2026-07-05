@@ -74,13 +74,13 @@ This page summarizes the major project-wide systems that distinguish MCHeli Over
 
 ### Walkable and moving ship decks
 
-**What it does:** Ships use their base box and rotated extra bounding-box OBBs as deck surfaces, including broad-phase collision coverage for decks far from the ship origin. The broad-phase deck search includes each extra OBB's rotated corner extents before the precise OBB top-contact check, so remote deck surfaces remain discoverable instead of reverting to only the ship-origin AABB. Players standing on a moving or turning ship are detected and supported against those OBB deck tops, carried with the deck, receive small clearance corrections when the deck moves upward, keep grounded state, and have fall distance reset while standing on the surface.
+**What it does:** Ships use only rotated extra bounding-box OBBs as deck and physical collision surfaces; their base axis-aligned body box is not used for collision, ray hits, deck support, or damage/pushback broad-phase checks. The broad-phase deck search includes each extra OBB's rotated corner extents before the precise OBB top-contact check, so remote deck surfaces remain discoverable without reverting to a ship-origin AABB. Players standing on a moving or turning ship are detected and supported against those OBB deck tops, carried with the deck, receive small clearance corrections when the deck moves upward, keep grounded state, and have fall distance reset while standing on the surface.
 
 **Why it exists:** Original MCHeli did not provide a robust moving-deck experience for large ships. Overdrive makes ships more useful as mobile platforms instead of decorative or single-seat vehicles.
 
 **How it differs from original MCHeli:** The ship entity now searches for players standing on its calculated deck surfaces, rotates their relative position with ship yaw changes, and adjusts vertical placement to prevent one-tick freezing or clipping when water bobbing moves the deck.
 
-**Configuration:** Pack makers create useful deck surfaces with normal body dimensions plus `BoundingBox` entries. Extra boxes retain their configured damage factors and armor behavior, and projectile hit processing ray-traces them as vehicle-rotated oriented boxes instead of unrotated AABBs. Large ships should define broad, flat extra boxes for decks and collision. `PreventWaterBobbing = true` can stabilize ship vertical movement for smoother walking and carrier operations.
+**Configuration:** Pack makers create useful ship deck and hull collision surfaces with `BoundingBox` entries. Ship body dimensions are no longer a fallback collision surface. Extra boxes retain their configured damage factors and armor behavior, and projectile hit processing ray-traces them as vehicle-rotated oriented boxes instead of unrotated AABBs. Large ships should define broad, flat extra boxes for decks and collision. `PreventWaterBobbing = true` can stabilize ship vertical movement for smoother walking and carrier operations.
 
 ### Aircraft carrier and vehicle-on-vehicle interaction
 
