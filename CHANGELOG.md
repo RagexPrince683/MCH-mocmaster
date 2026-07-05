@@ -1,3 +1,9 @@
+## Introduce ship OBB collision abstraction
+
+- Added a dedicated `MCH_ShipOBB` abstraction for ship-oriented bounding-box centers, half extents, axes, transforms, intersection, sweep, ray, and deck-support logic.
+- Kept legacy `MCH_BoundingBox.boundingBox` AABB behavior available for non-ship vehicles while ship callers route physical checks through `MCH_ShipOBB`.
+- Clarified that enclosing AABBs are broad-phase search volumes only, not physical ship collision volumes.
+
 ## Fix far ship bounding-box side collision
 
 - Replaced ship OBB-vs-entity side intersection checks with a full separating-axis test so configured `BoundingBox` collision remains solid even when boxes are far from the ship origin.

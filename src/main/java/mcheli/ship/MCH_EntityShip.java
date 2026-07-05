@@ -1043,7 +1043,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
                     continue;
                 }
 
-                Vec3 candidate = shipBox.getHorizontalPushOut(player.boundingBox, 1.0E-4D);
+                Vec3 candidate = shipBox.getShipOBB().getHorizontalPushOut(player.boundingBox, 1.0E-4D);
                 if(candidate != null) {
                     double pushSq = candidate.xCoord * candidate.xCoord + candidate.zCoord * candidate.zCoord;
                     if(pushSq < bestPushSq) {
@@ -1087,9 +1087,9 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
             return AxisAlignedBB.getBoundingBox(super.posX, super.posY, super.posZ, super.posX, super.posY, super.posZ);
         }
 
-        AxisAlignedBB search = deckBoxes[0].getEnclosingAABB();
+        AxisAlignedBB search = deckBoxes[0].getShipOBB().getEnclosingAABB();
         for(int i = 1; i < deckBoxes.length; ++i) {
-            search = search.func_111270_a(deckBoxes[i].getEnclosingAABB());
+            search = search.func_111270_a(deckBoxes[i].getShipOBB().getEnclosingAABB());
         }
         return search.expand(0.25D, 0.6D, 0.25D);
     }
@@ -1101,7 +1101,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         MCH_BoundingBox[] deckBoxes = this.getCalculatedExtraBoundingBoxes();
         for(int i = 0; i < deckBoxes.length; ++i) {
             MCH_BoundingBox deckBox = deckBoxes[i];
-            double deckTopY = deckBox.getTopSurfaceY();
+            double deckTopY = deckBox.getShipOBB().getTopSurfaceY();
             if(this.isOnTopOf(entityBox, deckBox) && deckTopY > highestSurface) {
                 surfaceIndex = i;
                 highestSurface = deckTopY;
@@ -1126,15 +1126,15 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         final double horizontalInset = 1.0E-4D;
         final double aboveTolerance = 0.25D;
         final double belowTolerance = 0.5D;
-        return deckBox.isEntityOnTop(entityBox, horizontalInset, belowTolerance, aboveTolerance);
+        return deckBox.getShipOBB().isEntityOnTop(entityBox, horizontalInset, belowTolerance, aboveTolerance);
     }
 
     private Vec3 getDeckSurfaceCenter(int surfaceIndex) {
-        return this.getCalculatedExtraBoundingBoxes()[surfaceIndex].getWorldTopCenter();
+        return this.getCalculatedExtraBoundingBoxes()[surfaceIndex].getShipOBB().getWorldTopCenter();
     }
 
     private double getDeckSurfaceTopY(int surfaceIndex) {
-        return this.getCalculatedExtraBoundingBoxes()[surfaceIndex].getTopSurfaceY();
+        return this.getCalculatedExtraBoundingBoxes()[surfaceIndex].getShipOBB().getTopSurfaceY();
     }
 
 
@@ -1183,7 +1183,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
     private void collisionEntity(MCH_BoundingBox shipBox) {
         if (shipBox != null) {
-            AxisAlignedBB bb = shipBox.getEnclosingAABB();
+            AxisAlignedBB bb = shipBox.getShipOBB().getEnclosingAABB();
             // Calculate speed
             double speed = Math.sqrt(super.motionX * super.motionX + super.motionY * super.motionY + super.motionZ * super.motionZ);
 
@@ -1228,7 +1228,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
                 // Process each entity within the bounding box
                 for (Entity e : list) {
-                    if (this.shouldCollisionDamage(e) && shipBox.intersectsAABB(e.boundingBox)) {
+                    if (this.shouldCollisionDamage(e) && shipBox.getShipOBB().intersectsAABB(e.boundingBox)) {
                         double dx = e.posX - super.posX;
                         double dz = e.posZ - super.posZ;
                         double dist = Math.sqrt(dx * dx + dz * dz);

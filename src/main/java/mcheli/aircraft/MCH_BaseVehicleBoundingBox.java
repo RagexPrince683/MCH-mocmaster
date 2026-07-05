@@ -87,7 +87,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
 
    private boolean isDeckTopContact(MCH_BoundingBox deck, AxisAlignedBB other) {
       final double bobTolerance = 0.6D;
-      return deck.isEntityOnTop(other, 1.0E-4D, bobTolerance, bobTolerance);
+      return this.isShip() ? deck.getShipOBB().isEntityOnTop(other, 1.0E-4D, bobTolerance, bobTolerance) : this.isDeckTopContact(deck.boundingBox, other, bobTolerance);
    }
 
    @Override
@@ -101,7 +101,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
       }
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
          if(!this.isDeckTopContact(bb, other)) {
-            offset = this.isShip() ? bb.calculateXOffset(other, offset) : bb.boundingBox.calculateXOffset(other, offset);
+            offset = this.isShip() ? bb.getShipOBB().calculateXOffset(other, offset) : bb.boundingBox.calculateXOffset(other, offset);
          }
       }
       return offset;
@@ -123,15 +123,19 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
 
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
          final double supportTolerance = 0.6D;
-         double previousTopY = bb.getPreviousTopSurfaceY();
-         offset = bb.calculateDeckYOffset(other, offset, supportTolerance);
+         if(this.isShip()) {
+            double previousTopY = bb.getPreviousTopSurfaceY();
+            offset = bb.getShipOBB().calculateDeckYOffset(other, offset, supportTolerance);
 
-         // When a floating deck rises into an entity, vanilla's Y resolver sees
-         // overlapping boxes and no longer treats the deck as floor support. Use
-         // the previous OBB top for that one transition; finishDeckMovement then
-         // carries the entity by the matching surface delta.
-         if(this.ac.canFloatWater() && bb.getTopSurfaceY() > previousTopY) {
-            offset = bb.calculatePreviousDeckYOffset(other, offset, supportTolerance);
+            // When a floating deck rises into an entity, vanilla's Y resolver sees
+            // overlapping boxes and no longer treats the deck as floor support. Use
+            // the previous OBB top for that one transition; finishDeckMovement then
+            // carries the entity by the matching surface delta.
+            if(this.ac.canFloatWater() && bb.getShipOBB().getTopSurfaceY() > previousTopY) {
+               offset = bb.getShipOBB().calculatePreviousDeckYOffset(other, offset, supportTolerance);
+            }
+         } else {
+            offset = bb.boundingBox.calculateYOffset(other, offset);
          }
       }
       return offset;
@@ -148,7 +152,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
       }
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
          if(!this.isDeckTopContact(bb, other)) {
-            offset = this.isShip() ? bb.calculateZOffset(other, offset) : bb.boundingBox.calculateZOffset(other, offset);
+            offset = this.isShip() ? bb.getShipOBB().calculateZOffset(other, offset) : bb.boundingBox.calculateZOffset(other, offset);
          }
       }
       return offset;
@@ -171,8 +175,8 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          MCH_BoundingBox bb = arr$[i$];
          //wheelBoundingBox wb = arr$[i$];
 
-         if((this.isShip() ? bb.intersectsAABB(aabb) : bb.boundingBox.intersectsWith(aabb))) {
-            double dist2 = this.getDistSq(aabb, this.isShip() ? bb.getEnclosingAABB() : bb.boundingBox);
+         if((this.isShip() ? bb.getShipOBB().intersectsAABB(aabb) : bb.boundingBox.intersectsWith(aabb))) {
+            double dist2 = this.getDistSq(aabb, this.isShip() ? bb.getShipOBB().getEnclosingAABB() : bb.boundingBox);
             if(dist2 < dist) {
                dist = dist2;
                this.ac.lastBBDamageFactor = bb.damegeFactor;
@@ -297,7 +301,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
 
       for(int i$ = 0; i$ < len$; ++i$) {
          MCH_BoundingBox bb = arr$[i$];
-         MovingObjectPosition mop2 = bb.calculateIntercept(v1, v2);
+         MovingObjectPosition mop2 = this.isShip() ? bb.getShipOBB().calculateIntercept(v1, v2) : bb.boundingBox.calculateIntercept(v1, v2);
          if(mop2 != null) {
             double dist2 = v1.distanceTo(mop2.hitVec);
             if(dist2 < dist) {
