@@ -152,9 +152,15 @@ public final class MCH_VehicleLODManager {
             GL11.glRotatef(interpolateAngle(display.previousPitch, display.pitch, interpolation), 1.0F, 0.0F, 0.0F);
             GL11.glRotatef(interpolateAngle(display.previousRoll, display.roll, interpolation), 0.0F, 0.0F, 1.0F);
             GL11.glScalef(display.scale, display.scale, display.scale);
-            Minecraft.getMinecraft().renderEngine.bindTexture(
-                new ResourceLocation(W_MOD.DOMAIN, "textures/" + textureFolder + "/" + display.textureName + ".png"));
-            MCH_RenderBaseVehicle.renderBody(info.model);
+            MCH_RenderBaseVehicle.beginSkinOverlayRender(textureFolder, display.textureName);
+            try {
+                Minecraft.getMinecraft().renderEngine.bindTexture(
+                    new ResourceLocation(W_MOD.DOMAIN, "textures/" + textureFolder + "/"
+                        + MCH_RenderBaseVehicle.getBaseTextureName(display.textureName) + ".png"));
+                MCH_RenderBaseVehicle.renderAllModel(info.model);
+            } finally {
+                MCH_RenderBaseVehicle.endSkinOverlayRender();
+            }
         } finally {
             GL11.glPopMatrix();
             RENDER_STATE.end();
