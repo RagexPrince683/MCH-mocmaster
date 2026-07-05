@@ -1,3 +1,8 @@
+## Fix ship bounding-box side collision
+
+- Restored ship `BoundingBox` side collision by returning the composite vehicle collision resolver for ship entity collision checks.
+- Re-exposed the ship extra-box enclosure for broad-phase lookup so player movement can discover remote ship collision boxes while resolving against the precise configured boxes instead of the enclosing search volume.
+
 ## Fix ship-origin deck bounding-box jitter
 
 - Stopped returning the composite ship deck-search AABB from `MCH_EntityShip.getBoundingBox()` so vanilla player movement no longer treats the broad-phase deck search volume as a physical collision box near the ship origin.
