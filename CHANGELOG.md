@@ -1,3 +1,9 @@
+## Disable ship AABBs entirely
+
+- Forced ship debug hit-box rendering to draw configured extra bounding boxes as OBBs, independent of the single-player OBB debug toggle.
+- Filtered ship entity collision damage against ship OBBs instead of applying broad-phase AABB hits from their enclosing search boxes.
+- Updated ship hit detection so ship extra bounding boxes use oriented-box intersection checks rather than their legacy axis-aligned boxes.
+
 ## Disable ship AABB collision
 
 - Disabled ship base AABB collision, ray hits, and broad-phase damage/pushback so ships no longer use the vanilla axis-aligned body box as a physical collision volume.

@@ -6,6 +6,7 @@ import java.util.Random;
 import mcheli.MCH_ClientCommonTickHandler;
 import mcheli.MCH_ClientEventHook;
 import mcheli.MCH_Config;
+import mcheli.ship.MCH_EntityShip;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.flare.MCH_EntityChaff;
@@ -508,7 +509,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          GL11.glPopMatrix();
          GL11.glPushMatrix();
          GL11.glTranslated(x, y, z);
-         boolean drawObb = Minecraft.getMinecraft().isSingleplayer() && MCH_Config.DebugDrawOBB.prmBool;
+         boolean drawObb = e instanceof MCH_EntityShip || Minecraft.getMinecraft().isSingleplayer() && MCH_Config.DebugDrawOBB.prmBool;
          MCH_BoundingBox[] arr$ = e.getCalculatedExtraBoundingBoxes();
          int len$ = arr$.length;
 

@@ -151,6 +151,60 @@ public class MCH_BoundingBox {
       return candidate > offset ? candidate : offset;
    }
 
+
+   public boolean intersectsAABB(AxisAlignedBB aabb) {
+      if(!this.getEnclosingAABB().intersectsWith(aabb)) {
+         return false;
+      }
+
+      double centerX = (aabb.minX + aabb.maxX) / 2.0D;
+      double centerY = (aabb.minY + aabb.maxY) / 2.0D;
+      double centerZ = (aabb.minZ + aabb.maxZ) / 2.0D;
+      if(this.containsWorldPoint(centerX, centerY, centerZ)) {
+         return true;
+      }
+
+      for(int x = 0; x <= 1; ++x) {
+         for(int y = 0; y <= 1; ++y) {
+            for(int z = 0; z <= 1; ++z) {
+               if(this.containsWorldPoint(x == 0 ? aabb.minX : aabb.maxX, y == 0 ? aabb.minY : aabb.maxY, z == 0 ? aabb.minZ : aabb.maxZ)) {
+                  return true;
+               }
+            }
+         }
+      }
+
+      double halfWidth = (double)this.width / 2.0D;
+      double halfHeight = (double)this.height / 2.0D;
+      for(int x = -1; x <= 1; x += 2) {
+         for(int y = -1; y <= 1; y += 2) {
+            for(int z = -1; z <= 1; z += 2) {
+               Vec3 corner = Vec3.createVectorHelper((double)x * halfWidth, (double)y * halfHeight, (double)z * halfWidth);
+               corner = MCH_Lib.RotVec3(corner, -this.lastYaw, -this.lastPitch, -this.lastRoll);
+               double worldX = this.nowPos.xCoord + corner.xCoord;
+               double worldY = this.nowPos.yCoord + corner.yCoord;
+               double worldZ = this.nowPos.zCoord + corner.zCoord;
+               if(worldX >= aabb.minX && worldX <= aabb.maxX
+                       && worldY >= aabb.minY && worldY <= aabb.maxY
+                       && worldZ >= aabb.minZ && worldZ <= aabb.maxZ) {
+                  return true;
+               }
+            }
+         }
+      }
+
+      return false;
+   }
+
+   private boolean containsWorldPoint(double x, double y, double z) {
+      Vec3 local = this.toLocal(Vec3.createVectorHelper(x, y, z));
+      double halfWidth = (double)this.width / 2.0D;
+      double halfHeight = (double)this.height / 2.0D;
+      return local.xCoord >= -halfWidth && local.xCoord <= halfWidth
+              && local.yCoord >= -halfHeight && local.yCoord <= halfHeight
+              && local.zCoord >= -halfWidth && local.zCoord <= halfWidth;
+   }
+
    public MovingObjectPosition calculateIntercept(Vec3 start, Vec3 end) {
       Vec3 localStart = this.toLocal(start);
       Vec3 localEnd = this.toLocal(end);
