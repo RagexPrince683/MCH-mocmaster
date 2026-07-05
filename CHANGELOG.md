@@ -58,6 +58,11 @@
 - Added a server-side player separation pass for ship extra bounding-box side contacts so players cannot phase through hull or wall boxes that are far from the ship vehicle origin.
 - Added an OBB horizontal push-out helper for ship bounding boxes without changing damage-factor or projectile hit behavior.
 
+## Align remote ship side collision to OBBs
+
+- Changed ship side collision offset resolution to use the rotated ship OBB volume instead of each extra box's phased-out legacy AABB.
+- Refined the player side separation fallback to compute player extents in ship OBB local space, reducing jitter and keeping far-from-origin side pushes aligned with the actual OBB position.
+
 ## Unreleased
 
 ### Changed
