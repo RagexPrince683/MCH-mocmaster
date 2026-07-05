@@ -1,3 +1,8 @@
+## Fix swept ship bounding-box side collision
+
+- Reworked extra bounding-box horizontal offset clipping to sweep the moving player AABB against the rotated OBB shape instead of treating an existing intersection as permission to keep moving through the box.
+- Added deterministic SAT-backed refinement for X/Z side offsets so positive and negative movement stop symmetrically at the first OBB contact.
+
 ## Fix far ship bounding-box side collision
 
 - Replaced ship OBB-vs-entity side intersection checks with a full separating-axis test so configured `BoundingBox` collision remains solid even when boxes are far from the ship origin.
