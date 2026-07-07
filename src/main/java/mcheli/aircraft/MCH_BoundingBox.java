@@ -15,6 +15,7 @@ public class MCH_BoundingBox {
    public final double offsetZ;
    public final float width;
    public final float height;
+   public final float depth;
    public Vec3 rotatedOffset;
    public Vec3 nowPos;
    public Vec3 prevPos;
@@ -25,31 +26,38 @@ public class MCH_BoundingBox {
    private Vec3 axisZ = Vec3.createVectorHelper(0.0D, 0.0D, 1.0D);
    private final double halfWidth;
    private final double halfHeight;
+   private final double halfDepth;
 
    public MCH_BoundingBox(double x, double y, double z, float w, float h, float df) {
+      this(x, y, z, w, h, w, df);
+   }
+
+   public MCH_BoundingBox(double x, double y, double z, float w, float h, float d, float df) {
       this.offsetX = x;
       this.offsetY = y;
       this.offsetZ = z;
       this.width = w;
       this.height = h;
+      this.depth = d;
       this.halfWidth = (double)(w / 2.0F);
       this.halfHeight = (double)(h / 2.0F);
+      this.halfDepth = (double)(d / 2.0F);
       this.damegeFactor = df;
-      this.boundingBox = AxisAlignedBB.getBoundingBox(x - this.halfWidth, y - this.halfHeight, z - this.halfWidth, x + this.halfWidth, y + this.halfHeight, z + this.halfWidth);
-      this.backupBoundingBox = AxisAlignedBB.getBoundingBox(x - this.halfWidth, y - this.halfHeight, z - this.halfWidth, x + this.halfWidth, y + this.halfHeight, z + this.halfWidth);
+      this.boundingBox = AxisAlignedBB.getBoundingBox(x - this.halfWidth, y - this.halfHeight, z - this.halfDepth, x + this.halfWidth, y + this.halfHeight, z + this.halfDepth);
+      this.backupBoundingBox = AxisAlignedBB.getBoundingBox(x - this.halfWidth, y - this.halfHeight, z - this.halfDepth, x + this.halfWidth, y + this.halfHeight, z + this.halfDepth);
       this.nowPos = Vec3.createVectorHelper(x, y, z);
       this.prevPos = Vec3.createVectorHelper(x, y, z);
       this.updatePosition(0.0D, 0.0D, 0.0D, 0.0F, 0.0F, 0.0F);
    }
 
    public MCH_BoundingBox copy() {
-      MCH_BoundingBox copy = new MCH_BoundingBox(this.offsetX, this.offsetY, this.offsetZ, this.width, this.height, this.damegeFactor);
+      MCH_BoundingBox copy = new MCH_BoundingBox(this.offsetX, this.offsetY, this.offsetZ, this.width, this.height, this.depth, this.damegeFactor);
       copy.boundingBoxType = this.boundingBoxType;
       return copy;
    }
 
    public wheelBoundingBox copy2() {
-      wheelBoundingBox copy = new wheelBoundingBox(this.offsetX, this.offsetY, this.offsetZ, this.width, this.height, this.damegeFactor);
+      wheelBoundingBox copy = new wheelBoundingBox(this.offsetX, this.offsetY, this.offsetZ, this.width, this.height, this.depth, this.damegeFactor);
       copy.boundingBoxType = this.boundingBoxType;
       return copy;
    }
@@ -77,7 +85,15 @@ public class MCH_BoundingBox {
       Vec3 d = Vec3.createVectorHelper(point.xCoord - this.nowPos.xCoord, point.yCoord - this.nowPos.yCoord, point.zCoord - this.nowPos.zCoord);
       return Math.abs(dot(d, this.axisX)) <= this.halfWidth
               && Math.abs(dot(d, this.axisY)) <= this.halfHeight
-              && Math.abs(dot(d, this.axisZ)) <= this.halfWidth;
+              && Math.abs(dot(d, this.axisZ)) <= this.halfDepth;
+   }
+
+   public double distanceTo(Vec3 point) {
+      Vec3 d = Vec3.createVectorHelper(point.xCoord - this.nowPos.xCoord, point.yCoord - this.nowPos.yCoord, point.zCoord - this.nowPos.zCoord);
+      double dx = Math.max(Math.abs(dot(d, this.axisX)) - this.halfWidth, 0.0D);
+      double dy = Math.max(Math.abs(dot(d, this.axisY)) - this.halfHeight, 0.0D);
+      double dz = Math.max(Math.abs(dot(d, this.axisZ)) - this.halfDepth, 0.0D);
+      return Math.sqrt(dx * dx + dy * dy + dz * dz);
    }
 
    public boolean intersectsWith(AxisAlignedBB aabb) {
@@ -85,7 +101,7 @@ public class MCH_BoundingBox {
          return false;
       }
       Vec3 aabbCenter = Vec3.createVectorHelper((aabb.minX + aabb.maxX) / 2.0D, (aabb.minY + aabb.maxY) / 2.0D, (aabb.minZ + aabb.maxZ) / 2.0D);
-      double[] a = new double[]{this.halfWidth, this.halfHeight, this.halfWidth};
+      double[] a = new double[]{this.halfWidth, this.halfHeight, this.halfDepth};
       double[] b = new double[]{(aabb.maxX - aabb.minX) / 2.0D, (aabb.maxY - aabb.minY) / 2.0D, (aabb.maxZ - aabb.minZ) / 2.0D};
       Vec3[] u = new Vec3[]{this.axisX, this.axisY, this.axisZ};
       Vec3[] v = new Vec3[]{Vec3.createVectorHelper(1.0D, 0.0D, 0.0D), Vec3.createVectorHelper(0.0D, 1.0D, 0.0D), Vec3.createVectorHelper(0.0D, 0.0D, 1.0D)};
@@ -100,7 +116,7 @@ public class MCH_BoundingBox {
       Vec3 p = Vec3.createVectorHelper(start.xCoord - this.nowPos.xCoord, start.yCoord - this.nowPos.yCoord, start.zCoord - this.nowPos.zCoord);
       double[] s = new double[]{dot(p, this.axisX), dot(p, this.axisY), dot(p, this.axisZ)};
       double[] d = new double[]{dot(dir, this.axisX), dot(dir, this.axisY), dot(dir, this.axisZ)};
-      double[] e = new double[]{this.halfWidth, this.halfHeight, this.halfWidth};
+      double[] e = new double[]{this.halfWidth, this.halfHeight, this.halfDepth};
       double tMin = 0.0D;
       double tMax = 1.0D;
       for(int i = 0; i < 3; ++i) {
@@ -134,9 +150,9 @@ public class MCH_BoundingBox {
       Vec3[] corners = new Vec3[8];
       int i = 0;
       for(int sx = -1; sx <= 1; sx += 2) for(int sy = -1; sy <= 1; sy += 2) for(int sz = -1; sz <= 1; sz += 2) {
-         corners[i++] = Vec3.createVectorHelper(this.nowPos.xCoord + this.axisX.xCoord * this.halfWidth * sx + this.axisY.xCoord * this.halfHeight * sy + this.axisZ.xCoord * this.halfWidth * sz,
-                 this.nowPos.yCoord + this.axisX.yCoord * this.halfWidth * sx + this.axisY.yCoord * this.halfHeight * sy + this.axisZ.yCoord * this.halfWidth * sz,
-                 this.nowPos.zCoord + this.axisX.zCoord * this.halfWidth * sx + this.axisY.zCoord * this.halfHeight * sy + this.axisZ.zCoord * this.halfWidth * sz);
+         corners[i++] = Vec3.createVectorHelper(this.nowPos.xCoord + this.axisX.xCoord * this.halfWidth * sx + this.axisY.xCoord * this.halfHeight * sy + this.axisZ.xCoord * this.halfDepth * sz,
+                 this.nowPos.yCoord + this.axisX.yCoord * this.halfWidth * sx + this.axisY.yCoord * this.halfHeight * sy + this.axisZ.yCoord * this.halfDepth * sz,
+                 this.nowPos.zCoord + this.axisX.zCoord * this.halfWidth * sx + this.axisY.zCoord * this.halfHeight * sy + this.axisZ.zCoord * this.halfDepth * sz);
       }
       return corners;
    }

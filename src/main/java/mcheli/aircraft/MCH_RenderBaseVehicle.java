@@ -515,8 +515,11 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
             MCH_BoundingBox bb = arr$[i$];
             GL11.glPushMatrix();
             GL11.glTranslated(bb.rotatedOffset.xCoord, bb.rotatedOffset.yCoord, bb.rotatedOffset.zCoord);
+            GL11.glRotatef(-e.getRotYaw(), 0.0F, 1.0F, 0.0F);
+            GL11.glRotatef(-e.getRotPitch(), 1.0F, 0.0F, 0.0F);
+            GL11.glRotatef(-e.getRotRoll(), 0.0F, 0.0F, 1.0F);
             GL11.glPushMatrix();
-            GL11.glScalef(bb.width, bb.height, bb.width);
+            GL11.glScalef(bb.width, bb.height, bb.depth);
             this.bindTexture("textures/bounding_box.png");
             debugModel.renderAll();
             GL11.glPopMatrix();

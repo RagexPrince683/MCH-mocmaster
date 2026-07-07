@@ -449,10 +449,7 @@ public class MCP_PlaneChaseCamera {
       if(box == null) {
          return Double.MAX_VALUE;
       }
-      if(box.contains(point)) {
-         return 0.0D;
-      }
-      return this.distanceToAabb(point, box.boundingBox);
+      return box.distanceTo(point);
    }
 
    private double nearestAircraftBoxDistance(MCP_EntityPlane plane, Vec3 point) {
