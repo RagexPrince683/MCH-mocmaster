@@ -1074,9 +1074,10 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                                          } else if(item.equalsIgnoreCase("BoundingBox")) {
                                                             s = data.split("\\s*,\\s*");
                                                             if(s.length >= 5) {
-                                                               //defines a custom boundingbox based on TXT, the last value is optional and is the damagefactor
-                                                               var15 = s.length >= 6?this.toFloat(s[5]):1.0F;
-                                                               MCH_BoundingBox var49 = new MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), var15);
+                                                               //defines a custom boundingbox based on TXT. Five values keep a square footprint, six keeps the legacy damage factor, and seven adds depth plus damage factor.
+                                                               float depth = s.length >= 7?this.toFloat(s[5]):this.toFloat(s[3]);
+                                                               var15 = s.length >= 7?this.toFloat(s[6]):(s.length >= 6?this.toFloat(s[5]):1.0F);
+                                                               MCH_BoundingBox var49 = new MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), depth, var15);
                                                                this.extraBoundingBox.add(var49);
                                                                if(var49.boundingBox.maxY > (double)this.markerHeight) {
                                                                   this.markerHeight = (float)var49.boundingBox.maxY;

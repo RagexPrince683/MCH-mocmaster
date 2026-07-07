@@ -80,8 +80,9 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
       } else if(item.equalsIgnoreCase("AddTrackHitBox")) {
          String[] s = data.split("\\s*,\\s*");
          if(s.length >= 5) {
-            float df = s.length >= 6?this.toFloat(s[5]):1.0F;
-            MCH_BoundingBox bb = new MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), df);
+            float depth = s.length >= 7?this.toFloat(s[5]):this.toFloat(s[3]);
+            float df = s.length >= 7?this.toFloat(s[6]):(s.length >= 6?this.toFloat(s[5]):1.0F);
+            MCH_BoundingBox bb = new MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), depth, df);
             bb.boundingBoxType = EnumBoundingBoxType.TRACK;
             this.extraBoundingBox.add(bb);
          }

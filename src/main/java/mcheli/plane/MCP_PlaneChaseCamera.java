@@ -424,7 +424,7 @@ public class MCP_PlaneChaseCamera {
       MCH_BoundingBox[] boxes = plane.getCalculatedExtraBoundingBoxes();
       for(int i = 0; i < boxes.length; ++i) {
          MCH_BoundingBox box = boxes[i];
-         if(box != null && this.isPointInsideAabb(point, box.boundingBox)) {
+         if(box != null && box.contains(point)) {
             return "partBB#" + i;
          }
       }
@@ -445,13 +445,20 @@ public class MCP_PlaneChaseCamera {
       return Math.sqrt(dx * dx + dy * dy + dz * dz);
    }
 
+   private double distanceToObb(Vec3 point, MCH_BoundingBox box) {
+      if(box == null) {
+         return Double.MAX_VALUE;
+      }
+      return box.distanceTo(point);
+   }
+
    private double nearestAircraftBoxDistance(MCP_EntityPlane plane, Vec3 point) {
       double nearest = this.distanceToAabb(point, plane.boundingBox);
       MCH_BoundingBox[] boxes = plane.getCalculatedExtraBoundingBoxes();
       for(int i = 0; i < boxes.length; ++i) {
          MCH_BoundingBox box = boxes[i];
          if(box != null) {
-            nearest = Math.min(nearest, this.distanceToAabb(point, box.boundingBox));
+            nearest = Math.min(nearest, this.distanceToObb(point, box));
          }
       }
       return nearest;
