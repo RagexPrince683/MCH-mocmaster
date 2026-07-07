@@ -7,10 +7,9 @@ import mcheli.MCH_Lib;
 /**
  * Caches calculated vehicle collision / hit box positions.
  *
- * The current MCHeli collision path still consumes AxisAlignedBB-backed MCH_BoundingBox objects.
- * This cache is deliberately behavior-preserving: it updates those same boxes only when the
- * vehicle transform or source definitions change.  It is the abstraction boundary where future
- * rotating/oriented vehicle box calculations should be implemented.
+ * MCH_BoundingBox now stores oriented box geometry and maintains an enclosing
+ * AxisAlignedBB for vanilla broad-phase compatibility. This cache updates those OBB transforms
+ * only when the vehicle transform or source definitions change.
  */
 public class MCH_VehicleBoxCache {
    private static final double POSITION_EPSILON = 1.0E-4D;

@@ -3033,10 +3033,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    /**
     * Returns the current calculated extra collision / hit boxes for this vehicle.
     *
-    * This method intentionally still produces the same AxisAlignedBB-backed MCH_BoundingBox
-    * data as the legacy path.  It centralizes the transform calculation and caches stationary
-    * vehicles so future yaw/pitch/roll oriented box math can be added in one place without
-    * making every collision, damage, and debug-render caller rebuild box geometry independently.
+    * This method returns oriented MCH_BoundingBox instances with enclosing AxisAlignedBBs
+    * for vanilla broad-phase compatibility. It centralizes transform calculation and caches
+    * stationary vehicles so collision, damage, and debug-render callers share the same geometry.
     */
    public MCH_BoundingBox[] getCalculatedExtraBoundingBoxes() {
       return this.vehicleBoxCache.getBoxes(this);

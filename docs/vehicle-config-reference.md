@@ -74,7 +74,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `EntityHeight` | All | float | 1.0 | entity bounding height |
 | `EntityPitch` | All | float | 0.0 | rendered entity pitch offset |
 | `EntityRoll` | All | float | 0.0 | rendered entity roll offset |
-| `BoundingBox` | All | list | none | extra damage/collision box |
+| `BoundingBox` | All | list | none | extra damage/collision OBB; existing `x,y,z,width,height[,damageFactor]` syntax is preserved while runtime collision rotates with vehicle yaw/pitch/roll |
 | `SetWheelPos` | All | vec3 | family default wheel list | wheel contact point; repeatable |
 | `StepHeight` | All | float | 0.0 (intended plane/tank/ship helper returns 0.6 but is private) | block step height |
 | `maxhp` | All | int | 50 | health |
