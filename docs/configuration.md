@@ -225,7 +225,7 @@ Tuning guidance:
 
 ## New-flight plane mouse aim controls (currently in development)
 
-Mouse aim is currently in development as a control foundation for fixed-wing planes using `UseNewMobilitySystem = true` only. It is disabled by default and does not affect legacy aircraft. When enabled globally, pilots can toggle it in a qualifying new-flight plane with `KeyPlaneMouseAim`; the mouse moves a separate desired aim yaw/pitch and the aircraft nose chases that aim through the existing new-flight authority, stall, energy, pitch-suppression, damping, and rotation-limit path. Advanced lead/CCIP HUD polish is intentionally left for a later pass.
+Mouse aim is currently in development as a control foundation for fixed-wing planes using `UseNewMobilitySystem = true` only. It is disabled by default and does not affect legacy aircraft. When enabled globally, pilots can toggle it in a qualifying new-flight plane with `KeyPlaneMouseAim`; the mouse moves a separate desired aim yaw/pitch and the aircraft nose chases that aim through the existing new-flight authority, stall, energy, pitch-suppression, damping, and rotation-limit path. Advanced lead HUD polish is intentionally left for a later pass. Plane CCIP, where enabled by the aircraft ballistic computer, is a static ballistic bomb-impact pipper projected from the aircraft body frame and does not follow player freelook or mouse aim.
 
 This first implementation uses global client config keys. Per-plane mouse-aim overrides are not wired yet, so pack authors should tune conservatively.
 

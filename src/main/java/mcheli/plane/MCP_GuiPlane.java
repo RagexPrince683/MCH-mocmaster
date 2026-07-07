@@ -603,8 +603,11 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          if(result.valid) {
             ScreenPoint projected = this.projectWorldToAircraftHud(plane, result.impact);
             if(projected != null && projected.visible) {
-               ScreenPoint p = this.smoothCCIPScreenPoint(projected, result.impact, weapon);
-               this.drawCCIPPipper(p.x, p.y, p.clamped);
+               // Draw the pipper directly at the predicted impact projection. Do not steer or
+               // smooth the CCIP toward the player's view/mouse aim; gravity bombs fall from
+               // the aircraft's current release point and velocity, so the HUD must remain a
+               // deterministic bomb-fall solution instead of a look-following cursor.
+               this.drawCCIPPipper(projected.x, projected.y, projected.clamped);
             } else {
                this.resetCCIPSmoothing();
             }
@@ -744,6 +747,9 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       float yaw = plane.calcRotYaw(partialTicks);
       float pitch = plane.calcRotPitch(partialTicks);
       float roll = plane.calcRotRoll(partialTicks);
+      // Project into the aircraft body frame, not the player/camera frame. This keeps CCIP
+      // as a fixed ballistic impact cue for the selected bomb rather than a freelook or
+      // mouse-aim reticle.
       Vec3 forward = mcheli.MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -yaw, -pitch, -roll);
       Vec3 right = mcheli.MCH_Lib.RotVec3(1.0D, 0.0D, 0.0D, -yaw, -pitch, -roll);
       Vec3 up = mcheli.MCH_Lib.RotVec3(0.0D, 1.0D, 0.0D, -yaw, -pitch, -roll);
@@ -751,27 +757,16 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       if(localForward <= 0.05D) {
          return null;
       }
-     // double localRight = this.dot(toImpact, right);
-     // double localUp = this.dot(toImpact, up);
-     // double scale = (double)super.height * 0.75D / localForward;
-     // // Match the existing HUD convention: positive aircraft-right offsets draw toward screen-left.
-     // double x = (double)super.centerX - localRight * scale;
-     // double y = (double)super.centerY - localUp * scale;
       double localRight = toImpact.dotProduct(right);
       double localUp = toImpact.dotProduct(up);
       double scale = (double)super.height * 0.75D / localForward;
+      // Match the existing HUD convention: positive aircraft-right offsets draw toward screen-left.
       double x = (double)super.centerX - localRight * scale;
       double y = (double)super.centerY - localUp * scale;
-      //fucking pick one
       if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
          return null;
       }
 
-      //double localRight = toImpact.dotProduct(right);
-      //double localUp = toImpact.dotProduct(up);
-      //double scale = (double)super.height * 0.75D / localForward;
-      //double x = (double)super.centerX - localRight * scale;
-      //double y = (double)super.centerY - localUp * scale;
       double clampedX = MathHelper.clamp_double(x, 0.0D, (double)super.width);
       double clampedY = MathHelper.clamp_double(y, 0.0D, (double)super.height);
       return new ScreenPoint(clampedX, clampedY, x != clampedX || y != clampedY);

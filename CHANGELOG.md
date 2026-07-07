@@ -14,3 +14,7 @@
 - Added `docs/commands.md` with source-verified `/mcheli` command syntax, permission model, examples, and safety notes.
 - Added `docs/server-administration.md` with server installation, safe survival defaults, permission guidance, runtime reloads, diagnostics, and performance notes.
 - Added `docs/documentation-audit.md` listing discovered undocumented systems and remaining documentation gaps.
+
+## CCIP Static Bomb Reticle Fix
+- Fixed the plane CCIP pipper so it draws directly at the predicted bomb impact projection instead of smoothing toward a look-following cursor.
+- Documented that CCIP is projected in the aircraft body frame and is not driven by player freelook or mouse aim.
