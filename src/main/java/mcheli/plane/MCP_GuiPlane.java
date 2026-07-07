@@ -34,15 +34,7 @@ import org.lwjgl.opengl.GL11;
 public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
    private static final ResourceLocation PLANE_MOUSE_AIM_RETICLE_TEXTURE = new ResourceLocation("mcheli", "textures/gui/plane_crosshair.png");
-   private static final double CCIP_SCREEN_SMOOTHING = 0.35D;
-   private static final double CCIP_IMPACT_RESET_DISTANCE = 64.0D;
    private static final double CCIP_PIPPER_SCALE = 1.35D;
-   private double ccipScreenX;
-   private double ccipScreenY;
-   private boolean hasSmoothedCCIPScreenPos;
-   private String lastCCIPWeaponName = "";
-   private int lastCCIPDimension = Integer.MIN_VALUE;
-   private Vec3 lastCCIPImpact;
 
    public MCP_GuiPlane(Minecraft minecraft) {
       super(minecraft);
@@ -601,12 +593,11 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          result.initialVelocitySideDot = releaseKinematics.initialVelocitySideDot;
          result.warningImpossibleLaunch = releaseKinematics.warningImpossibleLaunch;
          if(result.valid) {
-            ScreenPoint projected = this.projectWorldToAircraftHud(plane, result.impact);
+            ScreenPoint projected = this.projectWorldToCameraHud(result.impact);
             if(projected != null && projected.visible) {
-               // Draw the pipper directly at the predicted impact projection. Do not steer or
-               // smooth the CCIP toward the player's view/mouse aim; gravity bombs fall from
-               // the aircraft's current release point and velocity, so the HUD must remain a
-               // deterministic bomb-fall solution instead of a look-following cursor.
+               // Draw directly at the predicted impact as seen by the active camera. Freelook
+               // changes only the camera projection, never the ballistic solution or release
+               // kinematics, so the pipper stays glued to the world point the bomb will hit.
                this.drawCCIPPipper(projected.x, projected.y, projected.clamped);
             } else {
                this.resetCCIPSmoothing();
@@ -658,34 +649,9 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       return k;
    }
 
-   private ScreenPoint smoothCCIPScreenPoint(ScreenPoint projected, Vec3 impact, MCH_WeaponBase weapon) {
-      String weaponName = weapon != null && weapon.getInfo() != null ? weapon.getInfo().name : "";
-      int dimension = super.mc.theWorld != null && super.mc.theWorld.provider != null ? super.mc.theWorld.provider.dimensionId : Integer.MIN_VALUE;
-      boolean reset = !this.hasSmoothedCCIPScreenPos || !weaponName.equals(this.lastCCIPWeaponName) || dimension != this.lastCCIPDimension;
-      if(!reset && this.lastCCIPImpact != null && impact != null && this.lastCCIPImpact.distanceTo(impact) > CCIP_IMPACT_RESET_DISTANCE) {
-         reset = true;
-      }
-
-      if(reset) {
-         this.ccipScreenX = projected.x;
-         this.ccipScreenY = projected.y;
-      } else {
-         this.ccipScreenX += (projected.x - this.ccipScreenX) * CCIP_SCREEN_SMOOTHING;
-         this.ccipScreenY += (projected.y - this.ccipScreenY) * CCIP_SCREEN_SMOOTHING;
-      }
-
-      this.hasSmoothedCCIPScreenPos = true;
-      this.lastCCIPWeaponName = weaponName;
-      this.lastCCIPDimension = dimension;
-      this.lastCCIPImpact = impact != null ? Vec3.createVectorHelper(impact.xCoord, impact.yCoord, impact.zCoord) : null;
-      return new ScreenPoint(this.ccipScreenX, this.ccipScreenY, projected.clamped);
-   }
-
    private void resetCCIPSmoothing() {
-      this.hasSmoothedCCIPScreenPos = false;
-      this.lastCCIPWeaponName = "";
-      this.lastCCIPDimension = Integer.MIN_VALUE;
-      this.lastCCIPImpact = null;
+      // CCIP is intentionally unsmoothed: the pipper must be the exact current
+      // screen projection of the predicted impact point, including during freelook.
    }
 
    private void drawCCIPDebug(MCP_EntityPlane plane, MCH_WeaponBase weapon, boolean enabled, MCP_PlaneCCIPHelper.Result result, Vec3 aircraftMotion) {
@@ -737,47 +703,44 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       return mcheli.MCH_Lib.RotVec3(weapon.position, -yaw, -pitch, -roll);
    }
 
-   private ScreenPoint projectWorldToAircraftHud(MCP_EntityPlane plane, Vec3 pos) {
-      if(plane == null || pos == null) {
+   private ScreenPoint projectWorldToCameraHud(Vec3 pos) {
+      if(pos == null || super.mc == null) {
          return null;
       }
+      Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
+      if(camera == null) {
+         return null;
+      }
+
       float partialTicks = this.smoothCamPartialTicks;
-      Vec3 planePos = this.getInterpolatedEntityPos(plane, partialTicks);
-      Vec3 toImpact = Vec3.createVectorHelper(pos.xCoord - planePos.xCoord, pos.yCoord - planePos.yCoord, pos.zCoord - planePos.zCoord);
-      float yaw = plane.calcRotYaw(partialTicks);
-      float pitch = plane.calcRotPitch(partialTicks);
-      float roll = plane.calcRotRoll(partialTicks);
-      // Project into the aircraft body frame, not the player/camera frame. This keeps CCIP
-      // as a fixed ballistic impact cue for the selected bomb rather than a freelook or
-      // mouse-aim reticle.
-      Vec3 forward = mcheli.MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -yaw, -pitch, -roll);
-      Vec3 right = mcheli.MCH_Lib.RotVec3(1.0D, 0.0D, 0.0D, -yaw, -pitch, -roll);
-      Vec3 up = mcheli.MCH_Lib.RotVec3(0.0D, 1.0D, 0.0D, -yaw, -pitch, -roll);
+      Vec3 cameraPos = this.getInterpolatedEntityPos(camera, partialTicks);
+      Vec3 toImpact = Vec3.createVectorHelper(pos.xCoord - cameraPos.xCoord, pos.yCoord - cameraPos.yCoord, pos.zCoord - cameraPos.zCoord);
+      float yaw = camera.prevRotationYaw + (camera.rotationYaw - camera.prevRotationYaw) * partialTicks;
+      float pitch = camera.prevRotationPitch + (camera.rotationPitch - camera.prevRotationPitch) * partialTicks;
+
+      Vec3 forward = mcheli.MCH_Lib.Rot2Vec3(yaw, pitch);
+      Vec3 right = mcheli.MCH_Lib.Rot2Vec3(yaw - 90.0F, 0.0F);
+      Vec3 up = this.cross(forward, right);
       double localForward = this.dot(toImpact, forward);
       if(localForward <= 0.05D) {
          return null;
       }
-      double localRight = toImpact.dotProduct(right);
-      double localUp = toImpact.dotProduct(up);
-      double scale = (double)super.height * 0.75D / localForward;
-      // Match the existing HUD convention: positive aircraft-right offsets draw toward screen-left.
-      double x = (double)super.centerX - localRight * scale;
-      double y = (double)super.centerY - localUp * scale;
-      if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
-         return null;
-      }
 
+      double localRight = this.dot(toImpact, right);
+      double localUp = this.dot(toImpact, up);
+      double fov = MathHelper.clamp_double((double)super.mc.gameSettings.fovSetting, 30.0D, 110.0D);
+      double focalLength = ((double)super.height * 0.5D) / Math.tan(fov * Math.PI / 360.0D);
+      double x = (double)super.centerX + localRight * focalLength / localForward;
+      double y = (double)super.centerY - localUp * focalLength / localForward;
       double clampedX = MathHelper.clamp_double(x, 0.0D, (double)super.width);
       double clampedY = MathHelper.clamp_double(y, 0.0D, (double)super.height);
       return new ScreenPoint(clampedX, clampedY, x != clampedX || y != clampedY);
    }
 
-   private Vec3 normalizeVec(Vec3 v) {
-      double length = v != null ? v.lengthVector() : 0.0D;
-      if(length < 1.0E-6D) {
-         return Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
-      }
-      return Vec3.createVectorHelper(v.xCoord / length, v.yCoord / length, v.zCoord / length);
+   private Vec3 cross(Vec3 a, Vec3 b) {
+      return Vec3.createVectorHelper(a.yCoord * b.zCoord - a.zCoord * b.yCoord,
+            a.zCoord * b.xCoord - a.xCoord * b.zCoord,
+            a.xCoord * b.yCoord - a.yCoord * b.xCoord);
    }
 
    private double dot(Vec3 a, Vec3 b) {
