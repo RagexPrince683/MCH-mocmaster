@@ -1,144 +1,274 @@
 package mcheli.plane;
 
+import mcheli.MCH_Config;
 import mcheli.weapon.MCH_WeaponBase;
 import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.wrapper.W_MovingObjectPosition;
+import mcheli.wrapper.W_WorldFunc;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
+/**
+ * Deterministic client/server-safe ballistic predictor for gravity bombs and
+ * dispenser projectiles. The operation order intentionally mirrors
+ * MCH_EntityBaseBullet followed by the relevant projectile subclass:
+ *
+ * speedDependsAircraft (once) -> speedFactor -> gravity -> collision sweep ->
+ * position update -> subclass horizontal drag -> water damping.
+ */
 public final class MCP_PlaneCCIPHelper {
-   public static final int MAX_STEPS = 260;
+
+   public static final int MAX_STEPS = 600;
+   private static final double BOMB_HORIZONTAL_DRAG = 0.999D;
+   private static final double EPSILON = 1.0E-7D;
+
    private MCP_PlaneCCIPHelper() {}
 
    public static Result predict(World world, MCH_WeaponInfo info, Vec3 releasePos, Vec3 initialVelocity) {
       return predict(world, info, releasePos, initialVelocity, null);
    }
 
-   public static Result predict(World world, MCH_WeaponInfo info, Vec3 releasePos, Vec3 initialVelocity, Vec3 aircraftMotion) {
-      Result r = new Result();
-      r.valid = false;
-      r.reasonInvalid = "not_run";
-      r.releasePos = copy(releasePos);
-      r.initialVelocity = copy(initialVelocity);
-      r.aircraftMotion = copy(aircraftMotion);
-      r.speedDependsAircraft = info != null && info.speedDependsAircraft;
-      r.predictedAccelerationBeforeAircraft = info != null ? (double)info.acceleration : 0.0D;
-      r.predictedAccelerationAfterAircraft = r.predictedAccelerationBeforeAircraft;
-      r.speedAddedFromAircraft = 0.0D;
-      r.speedDependsAircraftApplied = false;
-      r.gravity = info != null ? (double)info.gravity : 0.0D;
-      r.horizontalDrag = info != null && isBombLike(info) ? 0.999D : 1.0D;
-      r.accelerationFactor = getAccelerationFactor(info);
-      r.simulationTimeStep = r.accelerationFactor;
+   public static Result predict(World world, MCH_WeaponInfo info, Vec3 releasePos,
+         Vec3 initialVelocity, Vec3 aircraftMotion) {
+      Result result = new Result();
+      result.valid = false;
+      result.reasonInvalid = "not_run";
+      result.releasePos = copy(releasePos);
+      result.initialVelocity = copy(initialVelocity);
+      result.aircraftMotion = copy(aircraftMotion);
+      result.speedDependsAircraft = info != null && info.speedDependsAircraft;
+      result.predictedAccelerationBeforeAircraft = getConstructorAcceleration(info);
+      result.predictedAccelerationAfterAircraft = result.predictedAccelerationBeforeAircraft;
+      result.speedAddedFromAircraft = 0.0D;
+      result.speedDependsAircraftApplied = false;
+      result.gravity = info != null ? (double)info.gravity : 0.0D;
+      result.horizontalDrag = getInitialHorizontalDrag(info, result.predictedAccelerationBeforeAircraft);
+      result.accelerationFactor = getAccelerationFactor(info);
+      result.simulationTimeStep = result.accelerationFactor;
+
       if(world == null || info == null || releasePos == null || initialVelocity == null) {
-         r.reasonInvalid = "missing_input";
-         return r;
+         result.reasonInvalid = "missing_input";
+         return result;
+      }
+      if(!isBombLike(info)) {
+         result.reasonInvalid = "not_bomb_like";
+         return result;
+      }
+      if(info.gravity >= 0.0F) {
+         result.reasonInvalid = "non_ballistic_gravity";
+         return result;
       }
 
-      Vec3 pos = copy(releasePos);
-      Vec3 vel = copy(initialVelocity);
-      double accelerationFactor = r.accelerationFactor;
+      Vec3 position = copy(releasePos);
+      Vec3 velocity = copy(initialVelocity);
+      double entityAcceleration = getConstructorAcceleration(info);
+      entityAcceleration = applySpeedDependsAircraftFirstTick(
+            info, aircraftMotion, velocity, entityAcceleration, result);
 
-      applySpeedDependsAircraftFirstTick(info, aircraftMotion, vel, r);
+      int maxSteps = info.timeFuse > 0 ? Math.min(MAX_STEPS, info.timeFuse) : MAX_STEPS;
+      for(int stepIndex = 0; stepIndex < maxSteps; ++stepIndex) {
+         int entityTick = stepIndex + 1;
 
-      int max = info.timeFuse > 0 ? Math.min(MAX_STEPS, info.timeFuse) : MAX_STEPS;
-      for(int i = 0; i < max; ++i) {
-         Vec3 prev = copy(pos);
-         if(info.speedFactor != 0.0F && i > info.speedFactorStartTick && i < info.speedFactorEndTick) {
-            double speed = Math.sqrt(vel.xCoord * vel.xCoord + vel.yCoord * vel.yCoord + vel.zCoord * vel.zCoord);
-            if(speed > 1.0E-7D) {
-               vel.xCoord += vel.xCoord / speed * (double)info.speedFactor;
-               vel.yCoord += vel.yCoord / speed * (double)info.speedFactor;
-               vel.zCoord += vel.zCoord / speed * (double)info.speedFactor;
+         if(info.speedFactor != 0.0F
+               && entityTick > info.speedFactorStartTick
+               && entityTick < info.speedFactorEndTick) {
+            double speed = length(velocity);
+            if(speed > EPSILON) {
+               double factor = (double)info.speedFactor / speed;
+               velocity.xCoord += velocity.xCoord * factor;
+               velocity.yCoord += velocity.yCoord * factor;
+               velocity.zCoord += velocity.zCoord * factor;
+               entityAcceleration += (double)info.speedFactor;
             }
          }
-         vel.yCoord += (double)info.gravity;
-         Vec3 next = Vec3.createVectorHelper(pos.xCoord + vel.xCoord * r.accelerationFactor,
-               pos.yCoord + vel.yCoord * r.accelerationFactor,
-               pos.zCoord + vel.zCoord * r.accelerationFactor);
-         MovingObjectPosition hit = world.rayTraceBlocks(prev, next);
-         pos = next;
-         if(isBombLike(info)) {
-            vel.xCoord *= 0.999D;
-            vel.zCoord *= 0.999D;
-         }
-         r.ticksSimulated = i + 1;
+
+         // MCH_EntityBaseBullet applies gravity before its collision sweep.
+         velocity.yCoord += (double)info.gravity;
+
+         Vec3 next = Vec3.createVectorHelper(
+               position.xCoord + velocity.xCoord * result.accelerationFactor,
+               position.yCoord + velocity.yCoord * result.accelerationFactor,
+               position.zCoord + velocity.zCoord * result.accelerationFactor);
+
+         MovingObjectPosition hit = traceLikeBullet(world, position, next);
+         result.ticksSimulated = entityTick;
          if(hit != null && hit.hitVec != null) {
-            r.valid = true;
-            r.impact = hit.hitVec;
-            r.finalVelocity = copy(vel);
-            r.impactDistance = releasePos.distanceTo(r.impact);
-            r.releaseAltitude = releasePos.yCoord - r.impact.yCoord;
-            r.reasonInvalid = "";
-            return r;
+            result.valid = true;
+            result.impact = copy(hit.hitVec);
+            result.finalVelocity = copy(velocity);
+            result.impactDistance = releasePos.distanceTo(result.impact);
+            result.releaseAltitude = releasePos.yCoord - result.impact.yCoord;
+            result.reasonInvalid = "";
+            return result;
          }
 
-         pos = next;
-         if(isBombLike(info)) {
-            vel.xCoord *= 0.999D;
-            vel.zCoord *= 0.999D;
+         position = next;
+
+         // MCH_EntityBomb applies this once, after super.onUpdate().
+         if(isGravityBomb(info)) {
+            velocity.xCoord *= BOMB_HORIZONTAL_DRAG;
+            velocity.zCoord *= BOMB_HORIZONTAL_DRAG;
+         } else if(isDispenser(info) && entityAcceleration < 1.0E-4D) {
+            // MCH_EntityDispensedItem only damps X/Z at near-zero acceleration.
+            velocity.xCoord *= BOMB_HORIZONTAL_DRAG;
+            velocity.zCoord *= BOMB_HORIZONTAL_DRAG;
          }
-         if(pos.yCoord < -64.0D || !world.blockExists((int)pos.xCoord, Math.max(0, (int)pos.yCoord), (int)pos.zCoord)) {
-            r.reasonInvalid = "out_of_world";
+
+         // Both projectile subclasses apply water damping after horizontal drag.
+         if(isWaterAt(world, position)) {
+            velocity.xCoord *= (double)info.velocityInWater;
+            velocity.yCoord *= (double)info.velocityInWater;
+            velocity.zCoord *= (double)info.velocityInWater;
+         }
+
+         if(position.yCoord < -64.0D) {
+            result.reasonInvalid = "below_world";
             break;
          }
       }
-      r.finalVelocity = copy(vel);
-      if("not_run".equals(r.reasonInvalid)) r.reasonInvalid = "no_collision";
-      return r;
+
+      result.finalVelocity = copy(velocity);
+      if("not_run".equals(result.reasonInvalid)) {
+         result.reasonInvalid = "no_collision";
+      }
+      return result;
    }
 
-   private static void applySpeedDependsAircraftFirstTick(MCH_WeaponInfo info, Vec3 aircraftMotion, Vec3 vel, Result r) {
-      if(info == null || aircraftMotion == null || vel == null || r == null || !info.speedDependsAircraft || !isBombLike(info)) {
-         return;
+   private static double applySpeedDependsAircraftFirstTick(MCH_WeaponInfo info,
+         Vec3 aircraftMotion, Vec3 velocity, double entityAcceleration, Result result) {
+      if(info == null || aircraftMotion == null || velocity == null || result == null
+            || !info.speedDependsAircraft) {
+         return entityAcceleration;
       }
 
-      double speedAdded = Math.sqrt(aircraftMotion.xCoord * aircraftMotion.xCoord + aircraftMotion.yCoord * aircraftMotion.yCoord + aircraftMotion.zCoord * aircraftMotion.zCoord);
-      double speed = Math.sqrt(vel.xCoord * vel.xCoord + vel.yCoord * vel.yCoord + vel.zCoord * vel.zCoord);
-      if(speed <= 1.0E-7D) {
-         return;
+      double aircraftSpeed = length(aircraftMotion);
+      double projectileSpeed = length(velocity);
+      if(projectileSpeed <= EPSILON) {
+         return entityAcceleration;
       }
 
-      r.speedAddedFromAircraft = speedAdded;
-      r.predictedAccelerationBeforeAircraft = (double)info.acceleration;
-      r.predictedAccelerationAfterAircraft = r.predictedAccelerationBeforeAircraft + speedAdded;
-      vel.xCoord = vel.xCoord * r.predictedAccelerationAfterAircraft / speed;
-      vel.yCoord = vel.yCoord * r.predictedAccelerationAfterAircraft / speed;
-      vel.zCoord = vel.zCoord * r.predictedAccelerationAfterAircraft / speed;
-      r.initialVelocity = copy(vel);
-      r.speedDependsAircraftApplied = true;
+      result.speedAddedFromAircraft = aircraftSpeed;
+      result.predictedAccelerationBeforeAircraft = entityAcceleration;
+      entityAcceleration += aircraftSpeed;
+      result.predictedAccelerationAfterAircraft = entityAcceleration;
+
+      double scale = entityAcceleration / projectileSpeed;
+      velocity.xCoord *= scale;
+      velocity.yCoord *= scale;
+      velocity.zCoord *= scale;
+      result.initialVelocity = copy(velocity);
+      result.speedDependsAircraftApplied = true;
+      return entityAcceleration;
    }
 
-   private static Vec3 copy(Vec3 v) {
-      return v != null ? Vec3.createVectorHelper(v.xCoord, v.yCoord, v.zCoord) : null;
+   /**
+    * Mirrors MCH_EntityBaseBullet.onUpdateCollided's block trace. Breakable
+    * blocks are treated as transparent without mutating the client world.
+    */
+   private static MovingObjectPosition traceLikeBullet(World world, Vec3 start, Vec3 end) {
+      Vec3 traceStart = copy(start);
+      double dx = end.xCoord - start.xCoord;
+      double dy = end.yCoord - start.yCoord;
+      double dz = end.zCoord - start.zCoord;
+      double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      if(distance <= EPSILON) {
+         return null;
+      }
+
+      double nx = dx / distance;
+      double ny = dy / distance;
+      double nz = dz / distance;
+
+      for(int i = 0; i < 5; ++i) {
+         MovingObjectPosition hit = W_WorldFunc.clip(world, traceStart, end);
+         if(hit == null) {
+            return null;
+         }
+
+         if(W_MovingObjectPosition.isHitTypeTile(hit)) {
+            Block block = W_WorldFunc.getBlock(world, hit.blockX, hit.blockY, hit.blockZ);
+            if(MCH_Config.bulletBreakableBlocks.contains(block) && hit.hitVec != null) {
+               traceStart = Vec3.createVectorHelper(
+                     hit.hitVec.xCoord + nx * 1.0E-4D,
+                     hit.hitVec.yCoord + ny * 1.0E-4D,
+                     hit.hitVec.zCoord + nz * 1.0E-4D);
+               continue;
+            }
+         }
+         return hit;
+      }
+      return null;
+   }
+
+   private static boolean isWaterAt(World world, Vec3 position) {
+      if(world == null || position == null) {
+         return false;
+      }
+      int x = MathHelper.floor_double(position.xCoord);
+      int y = MathHelper.floor_double(position.yCoord);
+      int z = MathHelper.floor_double(position.zCoord);
+      Block block = world.getBlock(x, y, z);
+      return block != null && block.getMaterial() == Material.water;
+   }
+
+   private static double getConstructorAcceleration(MCH_WeaponInfo info) {
+      if(info == null) {
+         return 0.0D;
+      }
+      return Math.min(3.9D, Math.max(0.0D, (double)info.acceleration));
+   }
+
+   private static double getInitialHorizontalDrag(MCH_WeaponInfo info, double entityAcceleration) {
+      if(isGravityBomb(info)) {
+         return BOMB_HORIZONTAL_DRAG;
+      }
+      if(isDispenser(info) && entityAcceleration < 1.0E-4D) {
+         return BOMB_HORIZONTAL_DRAG;
+      }
+      return 1.0D;
+   }
+
+   private static double getAccelerationFactor(MCH_WeaponInfo info) {
+      // MCH_EntityBaseBullet only raises accelerationFactor for MCH_EntityBullet
+      // and MCH_EntityRocket. Bombs and dispensed items remain at 1.0.
+      return 1.0D;
+   }
+
+   private static double length(Vec3 vector) {
+      return vector == null ? 0.0D : Math.sqrt(
+            vector.xCoord * vector.xCoord
+                  + vector.yCoord * vector.yCoord
+                  + vector.zCoord * vector.zCoord);
+   }
+
+   private static Vec3 copy(Vec3 vector) {
+      return vector != null
+            ? Vec3.createVectorHelper(vector.xCoord, vector.yCoord, vector.zCoord)
+            : null;
    }
 
    public static boolean isBombWeapon(MCH_WeaponBase weapon) {
       return weapon != null && isBombLike(weapon.getInfo());
    }
 
-   //private static double getAccelerationFactor(MCH_WeaponInfo info) {
-   //   if(info == null || info.acceleration <= 4.0F) return 1.0D;
-   //   return (double)(info.acceleration / 4.0F);
-   //}
-
    public static boolean isBombLike(MCH_WeaponInfo info) {
-      if(info == null || info.type == null) return false;
-      return info.type.equalsIgnoreCase("bomb") || info.type.equalsIgnoreCase("dispenser")
+      if(info == null || info.type == null) {
+         return false;
+      }
+      return isGravityBomb(info) || isDispenser(info)
             || (info.gravity < 0.0F && info.acceleration <= 1.0F && info.explosion > 0);
    }
 
-   private static double getAccelerationFactor(MCH_WeaponInfo info) {
-      if(info == null || info.type == null || info.acceleration <= 4.0F) return 1.0D;
-      return isBulletLike(info) || isRocketLike(info) ? (double)(info.acceleration / 4.0F) : 1.0D;
+   public static boolean isGravityBomb(MCH_WeaponInfo info) {
+      return info != null && info.type != null && info.type.equalsIgnoreCase("bomb");
    }
 
-   private static boolean isBulletLike(MCH_WeaponInfo info) {
-      return info != null && info.type != null && info.type.equalsIgnoreCase("bullet");
-   }
-
-   private static boolean isRocketLike(MCH_WeaponInfo info) {
-      return info != null && info.type != null && info.type.equalsIgnoreCase("rocket");
+   public static boolean isDispenser(MCH_WeaponInfo info) {
+      return info != null && info.type != null && info.type.equalsIgnoreCase("dispenser");
    }
 
    public static class Result {

@@ -1,5 +1,9 @@
 package mcheli.plane;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,13 +26,17 @@ import mcheli.weapon.MCH_WeaponBase;
 import mcheli.weapon.MCH_WeaponSet;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
 
 @SideOnly(Side.CLIENT)
 public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
@@ -37,12 +45,22 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    private static final double CCIP_SCREEN_SMOOTHING = 0.35D;
    private static final double CCIP_IMPACT_RESET_DISTANCE = 64.0D;
    private static final double CCIP_PIPPER_SCALE = 1.35D;
+   private static final FloatBuffer CCIP_PROJECTED_COORDS = BufferUtils.createFloatBuffer(3);
+   private static Field activeRenderModelViewField;
+   private static Field activeRenderProjectionField;
+   private static Field activeRenderViewportField;
+   private static boolean activeRenderBufferLookupAttempted;
    private double ccipScreenX;
    private double ccipScreenY;
    private boolean hasSmoothedCCIPScreenPos;
    private String lastCCIPWeaponName = "";
    private int lastCCIPDimension = Integer.MIN_VALUE;
    private Vec3 lastCCIPImpact;
+   private int cachedCCIPTick = Integer.MIN_VALUE;
+   private int cachedCCIPEntityId = Integer.MIN_VALUE;
+   private int cachedCCIPDimension = Integer.MIN_VALUE;
+   private String cachedCCIPWeaponName = "";
+   private MCP_PlaneCCIPHelper.Result cachedCCIPResult;
 
    public MCP_GuiPlane(Minecraft minecraft) {
       super(minecraft);
@@ -94,10 +112,8 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
                   this.drawNewPlaneSimpleHud(plane);
                   this.drawNewPlaneWeaponHud(plane, player);
                   this.drawNewPlaneDebugHud(plane);
-                  this.drawPlaneCCIPReticle(plane, player);
                } else {
                   this.drawNewFlightThrottleHud(plane);
-                  this.drawPlaneCCIPReticle(plane, player);
                }
             }
 
@@ -108,6 +124,11 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             }
          }
 
+         // CCIP is a world-space impact cue, not part of the optional full HUD.
+         // Keep it available in third person even when DisplayHUDThirdPerson is disabled.
+         if(seatID == 0) {
+            this.drawPlaneCCIPReticle(plane, player);
+         }
 
          this.drawHitBullet(plane, -14101432, seatID);
       }
@@ -574,11 +595,11 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    private void drawPlaneCCIPReticle(MCP_EntityPlane plane, EntityPlayer player) {
       MCP_PlaneInfo info = plane != null ? plane.getPlaneInfo() : null;
       if(plane == null || player == null || info == null || !info.hasBallisticComputer || plane.isDestroyed()) {
-         this.resetCCIPSmoothing();
+         this.resetCCIPState();
          return;
       }
       if(plane.getSeatIdByEntity(player) != 0 || plane.getRiddenByEntity() == null) {
-         this.resetCCIPSmoothing();
+         this.resetCCIPState();
          return;
       }
 
@@ -587,27 +608,13 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       boolean enabled = MCP_PlaneCCIPHelper.isBombWeapon(weapon);
       MCP_PlaneCCIPHelper.Result result = null;
       Vec3 aircraftMotion = Vec3.createVectorHelper(plane.motionX, plane.motionY, plane.motionZ);
+
       if(enabled) {
-         float partialTicks = this.smoothCamPartialTicks;
-         Vec3 shotOfs = this.getInterpolatedShotPos(plane, weapon, partialTicks);
-         Vec3 planePos = this.getInterpolatedEntityPos(plane, partialTicks);
-         Vec3 release = Vec3.createVectorHelper(planePos.xCoord + shotOfs.xCoord, planePos.yCoord + shotOfs.yCoord, planePos.zCoord + shotOfs.zCoord);
-         ReleaseKinematics releaseKinematics = this.getInitialBombVelocity(plane, weapon, aircraftMotion, partialTicks);
-         result = MCP_PlaneCCIPHelper.predict(plane.worldObj, weapon.getInfo(), release, releaseKinematics.initialVelocity, aircraftMotion);
-         result.releaseMode = releaseKinematics.releaseMode;
-         result.ejectionVelocity = releaseKinematics.ejectionVelocity;
-         result.initialVelocityDeltaFromAircraft = releaseKinematics.initialVelocityDeltaFromAircraft;
-         result.initialVelocityUpDot = releaseKinematics.initialVelocityUpDot;
-         result.initialVelocitySideDot = releaseKinematics.initialVelocitySideDot;
-         result.warningImpossibleLaunch = releaseKinematics.warningImpossibleLaunch;
-         if(result.valid) {
-            ScreenPoint projected = this.projectWorldToAircraftHud(plane, result.impact);
+         result = this.getOrUpdateCCIPPrediction(plane, ws, weapon, aircraftMotion);
+         if(result != null && result.valid && result.impact != null) {
+            ScreenPoint projected = this.projectWorldToRenderCamera(result.impact, this.smoothCamPartialTicks);
             if(projected != null && projected.visible) {
-               // Draw the pipper directly at the predicted impact projection. Do not steer or
-               // smooth the CCIP toward the player's view/mouse aim; gravity bombs fall from
-               // the aircraft's current release point and velocity, so the HUD must remain a
-               // deterministic bomb-fall solution instead of a look-following cursor.
-               this.drawCCIPPipper(projected.x, projected.y, projected.clamped);
+               this.drawCCIPPipper(projected.x, projected.y, false);
             } else {
                this.resetCCIPSmoothing();
             }
@@ -615,7 +622,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             this.resetCCIPSmoothing();
          }
       } else {
-         this.resetCCIPSmoothing();
+         this.resetCCIPState();
       }
 
       if(MCH_Config.PlaneMouseAimReticleDebug.prmBool || MCH_Config.DebugFlightControl.prmBool) {
@@ -623,37 +630,99 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       }
    }
 
-   private ReleaseKinematics getInitialBombVelocity(MCP_EntityPlane plane, MCH_WeaponBase weapon, Vec3 aircraftMotion, float partialTicks) {
+   private MCP_PlaneCCIPHelper.Result getOrUpdateCCIPPrediction(MCP_EntityPlane plane, MCH_WeaponSet ws,
+         MCH_WeaponBase weapon, Vec3 aircraftMotion) {
+      String weaponName = weapon != null && weapon.getInfo() != null ? weapon.getInfo().name : "";
+      int dimension = plane.worldObj != null && plane.worldObj.provider != null
+            ? plane.worldObj.provider.dimensionId : Integer.MIN_VALUE;
+      int entityId = plane.getEntityId();
+
+      boolean refresh = this.cachedCCIPResult == null
+            || this.cachedCCIPTick != plane.ticksExisted
+            || this.cachedCCIPEntityId != entityId
+            || this.cachedCCIPDimension != dimension
+            || !weaponName.equals(this.cachedCCIPWeaponName);
+
+      if(!refresh) {
+         return this.cachedCCIPResult;
+      }
+
+      Vec3 shotOffset = weapon.getShotPos(plane);
+      Vec3 release = Vec3.createVectorHelper(
+            plane.posX + shotOffset.xCoord,
+            plane.posY + shotOffset.yCoord,
+            plane.posZ + shotOffset.zCoord);
+
+      ReleaseKinematics k = this.getInitialBombVelocity(plane, ws, weapon, aircraftMotion);
+
+      // MCH_WeaponDispenser advances the spawned entity by half of its initial
+      // velocity before adding it to the world. Mirror that exact spawn position.
+      if("DISPENSER_EJECTED".equals(k.releaseMode)) {
+         release.xCoord += k.initialVelocity.xCoord * 0.5D;
+         release.yCoord += k.initialVelocity.yCoord * 0.5D;
+         release.zCoord += k.initialVelocity.zCoord * 0.5D;
+      }
+
+      MCP_PlaneCCIPHelper.Result result = MCP_PlaneCCIPHelper.predict(
+            plane.worldObj, weapon.getInfo(), release, k.initialVelocity, aircraftMotion);
+      result.releaseMode = k.releaseMode;
+      result.ejectionVelocity = k.ejectionVelocity;
+      result.initialVelocityDeltaFromAircraft = k.initialVelocityDeltaFromAircraft;
+      result.initialVelocityUpDot = k.initialVelocityUpDot;
+      result.initialVelocitySideDot = k.initialVelocitySideDot;
+      result.warningImpossibleLaunch = k.warningImpossibleLaunch;
+
+      this.cachedCCIPTick = plane.ticksExisted;
+      this.cachedCCIPEntityId = entityId;
+      this.cachedCCIPDimension = dimension;
+      this.cachedCCIPWeaponName = weaponName;
+      this.cachedCCIPResult = result;
+      return result;
+   }
+
+   private ReleaseKinematics getInitialBombVelocity(MCP_EntityPlane plane, MCH_WeaponSet ws,
+         MCH_WeaponBase weapon, Vec3 aircraftMotion) {
       ReleaseKinematics k = new ReleaseKinematics();
       k.releaseMode = "GRAVITY_BOMB";
       k.ejectionVelocity = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
-      k.initialVelocity = Vec3.createVectorHelper(aircraftMotion.xCoord, aircraftMotion.yCoord, aircraftMotion.zCoord);
+      k.initialVelocity = Vec3.createVectorHelper(
+            aircraftMotion.xCoord, aircraftMotion.yCoord, aircraftMotion.zCoord);
 
-      if(weapon != null && weapon.getInfo() != null && weapon.getInfo().type != null && weapon.getInfo().type.equalsIgnoreCase("dispenser")) {
+      if(weapon != null && weapon.getInfo() != null && weapon.getInfo().type != null
+            && weapon.getInfo().type.equalsIgnoreCase("dispenser")) {
          k.releaseMode = "DISPENSER_EJECTED";
-         // Match MCH_WeaponDispenser: add half of the weapon's forward acceleration vector to aircraft motion.
-         // This uses the aircraft/weapon firing angles only; camera/freelook and aircraft roll are deliberately not inputs.
-         float yaw = plane.calcRotYaw(partialTicks);
-         float pitch = plane.calcRotPitch(partialTicks);
-         Vec3 eject = mcheli.MCH_Lib.Rot2Vec3(yaw + weapon.fixRotationYaw, pitch + weapon.fixRotationPitch);
-         k.ejectionVelocity = Vec3.createVectorHelper(eject.xCoord * (double)weapon.getInfo().acceleration * 0.5D,
-               eject.yCoord * (double)weapon.getInfo().acceleration * 0.5D,
-               eject.zCoord * (double)weapon.getInfo().acceleration * 0.5D);
-         k.initialVelocity.xCoord += k.ejectionVelocity.xCoord;
-         k.initialVelocity.yCoord += k.ejectionVelocity.yCoord;
-         k.initialVelocity.zCoord += k.ejectionVelocity.zCoord;
+
+         // Match MCH_WeaponSet.use + MCH_WeaponDispenser.shot exactly.
+         float yaw = plane.rotationYaw + (ws != null ? ws.rotationYaw : 0.0F) + weapon.fixRotationYaw;
+         float pitch = plane.rotationPitch + (ws != null ? ws.rotationPitch : 0.0F) + weapon.fixRotationPitch;
+         float roll = plane.getRotRoll();
+         Vec3 direction = mcheli.MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -yaw, -pitch, -roll);
+         double length = direction.lengthVector();
+         if(length > 1.0E-7D) {
+            double constructorSpeed = Math.min(3.9D, (double)weapon.getInfo().acceleration);
+            double ejectionScale = constructorSpeed * 0.5D / length;
+            k.ejectionVelocity = Vec3.createVectorHelper(
+                  direction.xCoord * ejectionScale,
+                  direction.yCoord * ejectionScale,
+                  direction.zCoord * ejectionScale);
+            k.initialVelocity.xCoord += k.ejectionVelocity.xCoord;
+            k.initialVelocity.yCoord += k.ejectionVelocity.yCoord;
+            k.initialVelocity.zCoord += k.ejectionVelocity.zCoord;
+         }
       }
 
-      k.initialVelocityDeltaFromAircraft = Vec3.createVectorHelper(k.initialVelocity.xCoord - aircraftMotion.xCoord,
-            k.initialVelocity.yCoord - aircraftMotion.yCoord, k.initialVelocity.zCoord - aircraftMotion.zCoord);
+      k.initialVelocityDeltaFromAircraft = Vec3.createVectorHelper(
+            k.initialVelocity.xCoord - aircraftMotion.xCoord,
+            k.initialVelocity.yCoord - aircraftMotion.yCoord,
+            k.initialVelocity.zCoord - aircraftMotion.zCoord);
       k.initialVelocityUpDot = k.initialVelocityDeltaFromAircraft.yCoord;
-      Vec3 side = mcheli.MCH_Lib.Rot2Vec3(plane.calcRotYaw(partialTicks) + 90.0F, 0.0F);
-      k.initialVelocitySideDot = k.initialVelocityDeltaFromAircraft.xCoord * side.xCoord + k.initialVelocityDeltaFromAircraft.zCoord * side.zCoord;
-      double delta = Math.sqrt(k.initialVelocityDeltaFromAircraft.xCoord * k.initialVelocityDeltaFromAircraft.xCoord
-            + k.initialVelocityDeltaFromAircraft.yCoord * k.initialVelocityDeltaFromAircraft.yCoord
-            + k.initialVelocityDeltaFromAircraft.zCoord * k.initialVelocityDeltaFromAircraft.zCoord);
+      Vec3 side = mcheli.MCH_Lib.Rot2Vec3(plane.rotationYaw + 90.0F, 0.0F);
+      k.initialVelocitySideDot = k.initialVelocityDeltaFromAircraft.xCoord * side.xCoord
+            + k.initialVelocityDeltaFromAircraft.zCoord * side.zCoord;
+      double delta = k.initialVelocityDeltaFromAircraft.lengthVector();
       boolean gravityBomb = "GRAVITY_BOMB".equals(k.releaseMode);
-      k.warningImpossibleLaunch = (gravityBomb && (Math.abs(k.initialVelocitySideDot) > 0.05D || k.initialVelocityUpDot > 0.05D || delta > 0.10D))
+      k.warningImpossibleLaunch = (gravityBomb && (Math.abs(k.initialVelocitySideDot) > 0.05D
+            || k.initialVelocityUpDot > 0.05D || delta > 0.10D))
             || (!gravityBomb && delta > 4.0D);
       return k;
    }
@@ -686,6 +755,15 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       this.lastCCIPWeaponName = "";
       this.lastCCIPDimension = Integer.MIN_VALUE;
       this.lastCCIPImpact = null;
+   }
+
+   private void resetCCIPState() {
+      this.resetCCIPSmoothing();
+      this.cachedCCIPTick = Integer.MIN_VALUE;
+      this.cachedCCIPEntityId = Integer.MIN_VALUE;
+      this.cachedCCIPDimension = Integer.MIN_VALUE;
+      this.cachedCCIPWeaponName = "";
+      this.cachedCCIPResult = null;
    }
 
    private void drawCCIPDebug(MCP_EntityPlane plane, MCH_WeaponBase weapon, boolean enabled, MCP_PlaneCCIPHelper.Result result, Vec3 aircraftMotion) {
@@ -724,52 +802,180 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       return v == null ? "-" : String.format("%.2f,%.2f,%.2f", Double.valueOf(v.xCoord), Double.valueOf(v.yCoord), Double.valueOf(v.zCoord));
    }
 
-   private Vec3 getInterpolatedEntityPos(Entity entity, float partialTicks) {
-      return Vec3.createVectorHelper(entity.prevPosX + (entity.posX - entity.prevPosX) * (double)partialTicks,
-            entity.prevPosY + (entity.posY - entity.prevPosY) * (double)partialTicks,
-            entity.prevPosZ + (entity.posZ - entity.prevPosZ) * (double)partialTicks);
+   private ScreenPoint projectWorldToRenderCamera(Vec3 worldPos, float partialTicks) {
+      if(worldPos == null || super.mc == null) {
+         return null;
+      }
+
+      ScreenPoint exact = this.projectWithActiveRenderMatrices(worldPos);
+      if(exact != null) {
+         return exact;
+      }
+
+      // Fallback for clients where another coremod replaces ActiveRenderInfo's
+      // private buffers. This still uses the real third-person camera position.
+      Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
+      if(!(camera instanceof EntityLivingBase)) {
+         return null;
+      }
+
+      Vec3 cameraPos = ActiveRenderInfo.projectViewFromEntity((EntityLivingBase)camera, (double)partialTicks);
+      float yaw = camera.prevRotationYaw + (camera.rotationYaw - camera.prevRotationYaw) * partialTicks;
+      float pitch = camera.prevRotationPitch + (camera.rotationPitch - camera.prevRotationPitch) * partialTicks;
+      if(super.mc.gameSettings.thirdPersonView == 2) {
+         yaw += 180.0F;
+         pitch = -pitch;
+      }
+
+      Vec3 forward = mcheli.MCH_Lib.Rot2Vec3(yaw, pitch);
+      forward = this.normalizeVec(forward);
+      Vec3 right = this.normalizeVec(Vec3.createVectorHelper(-forward.zCoord, 0.0D, forward.xCoord));
+      Vec3 up = this.normalizeVec(Vec3.createVectorHelper(
+            right.yCoord * forward.zCoord - right.zCoord * forward.yCoord,
+            right.zCoord * forward.xCoord - right.xCoord * forward.zCoord,
+            right.xCoord * forward.yCoord - right.yCoord * forward.xCoord));
+
+      Vec3 relative = Vec3.createVectorHelper(
+            worldPos.xCoord - cameraPos.xCoord,
+            worldPos.yCoord - cameraPos.yCoord,
+            worldPos.zCoord - cameraPos.zCoord);
+      double depth = relative.dotProduct(forward);
+      if(depth <= 0.01D) {
+         return null;
+      }
+
+      double fov = MathHelper.clamp_double((double)super.mc.gameSettings.fovSetting, 10.0D, 170.0D);
+      double focalLength = ((double)super.height * 0.5D) / Math.tan(Math.toRadians(fov * 0.5D));
+      double x = (double)super.centerX + relative.dotProduct(right) * focalLength / depth;
+      double y = (double)super.centerY - relative.dotProduct(up) * focalLength / depth;
+      if(!this.isFinite(x) || !this.isFinite(y) || x < 0.0D || x > (double)super.width
+            || y < 0.0D || y > (double)super.height) {
+         return null;
+      }
+      return new ScreenPoint(x, y, false, true);
    }
 
-   private Vec3 getInterpolatedShotPos(MCP_EntityPlane plane, MCH_WeaponBase weapon, float partialTicks) {
-      float yaw = plane.calcRotYaw(partialTicks);
-      float pitch = plane.calcRotPitch(partialTicks);
-      float roll = plane.calcRotRoll(partialTicks);
-      return mcheli.MCH_Lib.RotVec3(weapon.position, -yaw, -pitch, -roll);
+   private ScreenPoint projectWithActiveRenderMatrices(Vec3 worldPos) {
+      if(!this.resolveActiveRenderInfoBuffers()) {
+         return null;
+      }
+
+      try {
+         FloatBuffer modelView = ((FloatBuffer)activeRenderModelViewField.get(null)).duplicate();
+         FloatBuffer projection = ((FloatBuffer)activeRenderProjectionField.get(null)).duplicate();
+         IntBuffer viewport = ((IntBuffer)activeRenderViewportField.get(null)).duplicate();
+         modelView.rewind();
+         projection.rewind();
+         viewport.rewind();
+         CCIP_PROJECTED_COORDS.clear();
+
+         boolean projected = GLU.gluProject((float)worldPos.xCoord, (float)worldPos.yCoord,
+               (float)worldPos.zCoord, modelView, projection, viewport, CCIP_PROJECTED_COORDS);
+         if(!projected) {
+            return null;
+         }
+
+         double winX = (double)CCIP_PROJECTED_COORDS.get(0);
+         double winY = (double)CCIP_PROJECTED_COORDS.get(1);
+         double winZ = (double)CCIP_PROJECTED_COORDS.get(2);
+         if(!this.isFinite(winX) || !this.isFinite(winY) || !this.isFinite(winZ)
+               || winZ < 0.0D || winZ > 1.0D) {
+            return null;
+         }
+
+         int viewportX = viewport.get(0);
+         int viewportY = viewport.get(1);
+         int viewportWidth = viewport.get(2);
+         int viewportHeight = viewport.get(3);
+         if(viewportWidth <= 0 || viewportHeight <= 0) {
+            return null;
+         }
+
+         double normalizedX = (winX - (double)viewportX) / (double)viewportWidth;
+         double normalizedY = (winY - (double)viewportY) / (double)viewportHeight;
+         double x = normalizedX * (double)super.width;
+         double y = (1.0D - normalizedY) * (double)super.height;
+         if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
+            return null;
+         }
+         return new ScreenPoint(x, y, false, true);
+      } catch(Throwable ignored) {
+         return null;
+      }
    }
 
-   private ScreenPoint projectWorldToAircraftHud(MCP_EntityPlane plane, Vec3 pos) {
-      if(plane == null || pos == null) {
-         return null;
+   private boolean resolveActiveRenderInfoBuffers() {
+      if(activeRenderModelViewField != null && activeRenderProjectionField != null
+            && activeRenderViewportField != null) {
+         return true;
       }
-      float partialTicks = this.smoothCamPartialTicks;
-      Vec3 planePos = this.getInterpolatedEntityPos(plane, partialTicks);
-      Vec3 toImpact = Vec3.createVectorHelper(pos.xCoord - planePos.xCoord, pos.yCoord - planePos.yCoord, pos.zCoord - planePos.zCoord);
-      float yaw = plane.calcRotYaw(partialTicks);
-      float pitch = plane.calcRotPitch(partialTicks);
-      float roll = plane.calcRotRoll(partialTicks);
-      // Project into the aircraft body frame, not the player/camera frame. This keeps CCIP
-      // as a fixed ballistic impact cue for the selected bomb rather than a freelook or
-      // mouse-aim reticle.
-      Vec3 forward = mcheli.MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -yaw, -pitch, -roll);
-      Vec3 right = mcheli.MCH_Lib.RotVec3(1.0D, 0.0D, 0.0D, -yaw, -pitch, -roll);
-      Vec3 up = mcheli.MCH_Lib.RotVec3(0.0D, 1.0D, 0.0D, -yaw, -pitch, -roll);
-      double localForward = this.dot(toImpact, forward);
-      if(localForward <= 0.05D) {
-         return null;
+      if(activeRenderBufferLookupAttempted) {
+         return false;
       }
-      double localRight = toImpact.dotProduct(right);
-      double localUp = toImpact.dotProduct(up);
-      double scale = (double)super.height * 0.75D / localForward;
-      // Match the existing HUD convention: positive aircraft-right offsets draw toward screen-left.
-      double x = (double)super.centerX - localRight * scale;
-      double y = (double)super.centerY - localUp * scale;
-      if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
-         return null;
+      activeRenderBufferLookupAttempted = true;
+
+      try {
+         Field[] fields = ActiveRenderInfo.class.getDeclaredFields();
+         List floatFields = new ArrayList();
+         for(int i = 0; i < fields.length; ++i) {
+            Field field = fields[i];
+            if(!Modifier.isStatic(field.getModifiers())) {
+               continue;
+            }
+            field.setAccessible(true);
+            if(FloatBuffer.class.isAssignableFrom(field.getType())) {
+               FloatBuffer buffer = (FloatBuffer)field.get(null);
+               if(buffer != null && buffer.capacity() >= 16) {
+                  floatFields.add(field);
+                  String name = field.getName().toLowerCase();
+                  if(name.indexOf("model") >= 0) activeRenderModelViewField = field;
+                  if(name.indexOf("projection") >= 0) activeRenderProjectionField = field;
+               }
+            } else if(IntBuffer.class.isAssignableFrom(field.getType())) {
+               IntBuffer buffer = (IntBuffer)field.get(null);
+               if(buffer != null && buffer.capacity() >= 4) {
+                  activeRenderViewportField = field;
+               }
+            }
+         }
+
+         // Production obfuscation may remove useful field names. Classify the two
+         // 4x4 matrices by their values instead: a model-view matrix ends in 1,
+         // while a perspective projection normally has m15=0 and m11=-1.
+         for(int i = 0; i < floatFields.size(); ++i) {
+            Field field = (Field)floatFields.get(i);
+            FloatBuffer buffer = (FloatBuffer)field.get(null);
+            float m11 = buffer.get(11);
+            float m15 = buffer.get(15);
+            if(activeRenderModelViewField == null && Math.abs(m15 - 1.0F) < 0.25F) {
+               activeRenderModelViewField = field;
+            }
+            if(activeRenderProjectionField == null && Math.abs(m15) < 0.25F && Math.abs(m11) > 0.5F) {
+               activeRenderProjectionField = field;
+            }
+         }
+
+         if((activeRenderModelViewField == null || activeRenderProjectionField == null)
+               && floatFields.size() >= 2) {
+            if(activeRenderModelViewField == null) activeRenderModelViewField = (Field)floatFields.get(0);
+            if(activeRenderProjectionField == null) {
+               Field candidate = (Field)floatFields.get(1);
+               if(candidate == activeRenderModelViewField && floatFields.size() > 2) candidate = (Field)floatFields.get(2);
+               activeRenderProjectionField = candidate;
+            }
+         }
+      } catch(Throwable ignored) {
+         activeRenderModelViewField = null;
+         activeRenderProjectionField = null;
+         activeRenderViewportField = null;
       }
 
-      double clampedX = MathHelper.clamp_double(x, 0.0D, (double)super.width);
-      double clampedY = MathHelper.clamp_double(y, 0.0D, (double)super.height);
-      return new ScreenPoint(clampedX, clampedY, x != clampedX || y != clampedY);
+      return activeRenderModelViewField != null && activeRenderProjectionField != null
+            && activeRenderViewportField != null;
+   }
+
+   private boolean isFinite(double value) {
+      return !Double.isNaN(value) && !Double.isInfinite(value);
    }
 
    private Vec3 normalizeVec(Vec3 v) {
@@ -778,10 +984,6 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          return Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
       }
       return Vec3.createVectorHelper(v.xCoord / length, v.yCoord / length, v.zCoord / length);
-   }
-
-   private double dot(Vec3 a, Vec3 b) {
-      return a.xCoord * b.xCoord + a.yCoord * b.yCoord + a.zCoord * b.zCoord;
    }
 
    private void drawCCIPPipper(double x, double y, boolean clamped) {
@@ -813,8 +1015,21 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    }
 
    private static class ScreenPoint {
-      final double x; final double y; final boolean clamped; final boolean visible = true;
-      ScreenPoint(double x, double y, boolean clamped) { this.x = x; this.y = y; this.clamped = clamped; }
+      final double x;
+      final double y;
+      final boolean clamped;
+      final boolean visible;
+
+      ScreenPoint(double x, double y, boolean clamped) {
+         this(x, y, clamped, true);
+      }
+
+      ScreenPoint(double x, double y, boolean clamped, boolean visible) {
+         this.x = x;
+         this.y = y;
+         this.clamped = clamped;
+         this.visible = visible;
+      }
    }
 
    public void drawKeybind(MCP_EntityPlane plane, EntityPlayer player, int seatID) {
