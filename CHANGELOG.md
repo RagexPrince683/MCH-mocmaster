@@ -1,9 +1,5 @@
 # Changelog
 
-## CCIP Camera Projection Fix
-- Reprojected the plane CCIP pipper through the active render camera so freelook changes where the predicted world impact appears on screen without changing the ballistic solution.
-- Removed CCIP screen smoothing/state from the pipper path so the marker draws at the current predicted impact projection every frame.
-
 ## Unreleased
 
 ### Changed
