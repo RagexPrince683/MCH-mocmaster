@@ -11,6 +11,7 @@ import mcheli.aircraft.MCH_EntityHide;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.aircraft.MCH_SoundUpdater;
+import mcheli.aircraft.MCH_VehicleItemModelRender;
 import mcheli.block.MCH_DraftingTableItemRender;
 import mcheli.block.MCH_DraftingTableRenderer;
 import mcheli.block.MCH_DraftingTableTileEntity;
@@ -128,6 +129,25 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       W_MinecraftForgeClient.registerItemRenderer(MCH_MOD.itemGLTD, new MCH_ItemGLTDRender());
       W_MinecraftForgeClient.registerItemRenderer(MCH_MOD.itemWrench, new MCH_ItemRenderWrench());
       W_MinecraftForgeClient.registerItemRenderer(MCH_MOD.itemRangeFinder, new MCH_ItemRenderRangeFinder());
+      this.registerVehicleItemRenderers();
+   }
+
+   private void registerVehicleItemRenderers() {
+      MCH_VehicleItemModelRender renderer = new MCH_VehicleItemModelRender();
+      registerVehicleItemRenderers(MCH_HeliInfoManager.map.values().iterator(), renderer);
+      registerVehicleItemRenderers(MCP_PlaneInfoManager.map.values().iterator(), renderer);
+      registerVehicleItemRenderers(MCH_ShipInfoManager.map.values().iterator(), renderer);
+      registerVehicleItemRenderers(MCH_TankInfoManager.map.values().iterator(), renderer);
+      registerVehicleItemRenderers(MCH_TurretInfoManager.map.values().iterator(), renderer);
+   }
+
+   private void registerVehicleItemRenderers(Iterator iterator, MCH_VehicleItemModelRender renderer) {
+      while(iterator.hasNext()) {
+         MCH_BaseVehicleInfo info = (MCH_BaseVehicleInfo)iterator.next();
+         if(info != null && info.getItem() != null) {
+            W_MinecraftForgeClient.registerItemRenderer(info.getItem(), renderer);
+         }
+      }
    }
 
    public void registerBlockRenderer() {
