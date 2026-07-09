@@ -256,13 +256,8 @@ public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHan
             }
             pc.throttleDown = ac.throttleDown = this.KeyDown.isKeyPress();
             pc.throttleUp = ac.throttleUp = this.KeyUp.isKeyPress();
-            if(ac instanceof MCP_EntityPlane && ac.isFreeLookMode()) {
-               pc.moveRight = ac.moveRight = false;
-               pc.moveLeft = ac.moveLeft = false;
-            } else {
-               pc.moveRight = ac.moveRight = this.KeyRight.isKeyPress();
-               pc.moveLeft = ac.moveLeft = this.KeyLeft.isKeyPress();
-            }
+            pc.moveRight = ac.moveRight = this.KeyRight.isKeyPress();
+            pc.moveLeft = ac.moveLeft = this.KeyLeft.isKeyPress();
          }
       }
       if (!ac.isDestroyed() && this.KeyFlare.isKeyDown()) {
