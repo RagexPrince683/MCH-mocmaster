@@ -508,17 +508,16 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          GL11.glPopMatrix();
          GL11.glPushMatrix();
          GL11.glTranslated(x, y, z);
+         GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
+         GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
+         GL11.glRotatef(roll, 0.0F, 0.0F, 1.0F);
          MCH_BoundingBox[] arr$ = e.getCalculatedExtraBoundingBoxes();
          int len$ = arr$.length;
 
          for(int i$ = 0; i$ < len$; ++i$) {
             MCH_BoundingBox bb = arr$[i$];
             GL11.glPushMatrix();
-            Vec3 rotatedOffset = MCH_Lib.RotVec3(bb.offsetX, bb.offsetY, bb.offsetZ, -yaw, -pitch, -roll);
-            GL11.glTranslated(rotatedOffset.xCoord, rotatedOffset.yCoord, rotatedOffset.zCoord);
-            GL11.glRotatef(-yaw, 0.0F, 1.0F, 0.0F);
-            GL11.glRotatef(-pitch, 1.0F, 0.0F, 0.0F);
-            GL11.glRotatef(-roll, 0.0F, 0.0F, 1.0F);
+            GL11.glTranslated(bb.offsetX, bb.offsetY, bb.offsetZ);
             GL11.glPushMatrix();
             GL11.glScalef(bb.width, bb.height, bb.depth);
             this.bindTexture("textures/bounding_box.png");

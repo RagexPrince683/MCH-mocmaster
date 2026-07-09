@@ -8,7 +8,7 @@
 
 ### Changed
 
-- Fixed debug extra bounding-box roll translation so rendered boxes use the same interpolated yaw, pitch, and roll as the vehicle model instead of leaving their vertical offsets visually static during roll.
+- Fixed debug extra bounding-box rendering to use the vehicle model transform before box offsets, so boxes roll with the vehicle instead of staying visually upright while only their centers move.
 
 - Fixed plane free-look steering so A/D turn input is still sent and applied while free look is active in both mouse flight-sim and regular control modes.
 
