@@ -113,6 +113,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm Collision_EntityDamage;
    public static MCH_ConfigPrm Collision_EntityTankDamage;
    public static MCH_ConfigPrm LWeaponAutoFire;
+   public static MCH_ConfigPrm EnableHandheld;
    public static MCH_ConfigPrm DismountAll;
    public static MCH_ConfigPrm MountMinecartHeli;
    public static MCH_ConfigPrm MountMinecartPlane;
@@ -434,6 +435,7 @@ public class MCH_Config {
       Collision_EntityDamage = new MCH_ConfigPrm("Collision_EntityDamage", true);
       Collision_EntityTankDamage = new MCH_ConfigPrm("Collision_EntityTankDamage", false);
       LWeaponAutoFire = new MCH_ConfigPrm("LWeaponAutoFire", false);
+      EnableHandheld = new MCH_ConfigPrm("EnableHandheld", true);
       DismountAll = new MCH_ConfigPrm("DismountAll", false);
       MountMinecartHeli = new MCH_ConfigPrm("MountMinecartHeli", true);
       MountMinecartPlane = new MCH_ConfigPrm("MountMinecartPlane", true);
@@ -791,6 +793,7 @@ public class MCH_Config {
               AutoThrottleDownTank,
               SwitchWeaponWithMouseWheel,
               LWeaponAutoFire,
+              EnableHandheld,
               DisableItemRender,
               Override3DItemIcon,
               Heli3DItemIconScale,
