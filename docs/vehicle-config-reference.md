@@ -56,6 +56,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `addrecipe` | All | recipe | none | shaped recipe |
 | `addshapelessrecipe` | All | recipe | none | shapeless recipe |
 | `CanRide` | All | boolean | true | player mounting |
+| `CanMountShip` | All | boolean | true | allows this vehicle to mount ship/carrier racks; set false for oversized aircraft |
 | `AddSeat` | All | list | none; at least one seat required | passenger/pilot seat; vehicles support up to 500 combined seats and racks |
 | `AddGunnerSeat` | All | list | none | seat with gunner controls |
 | `AddFixRotSeat` | All | list | none | seat with fixed look rotation |
@@ -162,6 +163,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `AddPartSlideWeaponBay` | All | list | none | sliding weapon bay visual part |
 | `AddRack` | All | list | none | entity/vehicle rack seat; counts toward the 500 combined seat/rack limit |
 | `RideRack` | All | list | none | ride-rack attachment point |
+| `CanMountShip` | All | boolean | true | child-side ship/carrier rack opt-out; false blocks mounting racks on ship entities |
 | `MobDropOption` | All | list | default disabled option | mob drops from seats/racks |
 | `AddRepellingHook` | All | vec/list | none | fast-rope/repelling point |
 | `AddParticleSplash` | All | `x,y,z[,num,size,gravity,age,motionY,accel]` | optional fields 2,2,1,80,0.01,0 | water splash particles |

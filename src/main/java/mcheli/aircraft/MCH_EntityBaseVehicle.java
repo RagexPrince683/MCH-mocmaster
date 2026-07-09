@@ -6683,6 +6683,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          return false;
       } else if(super.ridingEntity != null) {
          return false;
+      } else if(ac instanceof MCH_EntityShip && !this.getAcInfo().canMountShip) {
+         return false;
       } else {
          boolean canRide = false;
          String[] arr$ = info.names;
