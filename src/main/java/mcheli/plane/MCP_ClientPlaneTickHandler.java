@@ -22,7 +22,10 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
    public MCH_Key KeyEjectSeat;
    public MCH_Key KeyZoom;
    public MCH_Key KeyMouseAim;
+   public MCH_Key KeyBombReticleMode;
    public MCH_Key[] Keys;
+   private static int bombReticlePlaneEntityId = -1;
+   private static boolean bombReticleMode = false;
    private final MCP_PlaneChaseCamera chaseCamera = new MCP_PlaneChaseCamera();
    private boolean wasUsingChaseCamera = false;
 
@@ -38,7 +41,8 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
       this.KeyEjectSeat = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
       this.KeyZoom = new MCH_Key(MCH_Config.KeyZoom.prmInt);
       this.KeyMouseAim = new MCH_Key(MCH_Config.KeyPlaneMouseAim.prmInt);
-      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, super.KeyUseWeapon,super.KeyCurrentWeaponLock, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, this.KeyMouseAim, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyChaff,super.KeyAPS, super.KeyMaintenance, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
+      this.KeyBombReticleMode = new MCH_Key(MCH_Config.KeyBombReticleMode.prmInt);
+      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, super.KeyUseWeapon,super.KeyCurrentWeaponLock, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, this.KeyMouseAim, this.KeyBombReticleMode, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyChaff,super.KeyAPS, super.KeyMaintenance, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
    }
 
    protected void update(EntityPlayer player, MCP_EntityPlane plane) {
@@ -102,6 +106,8 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
             this.playerControlInGUI(var7, var8, var9);
          }
 
+         this.updateBombReticleMode(var7, var8, var9);
+
          boolean hideHand = true;
          if(useChaseCamera) {
             this.chaseCamera.update(super.mc, var7, var8);
@@ -126,6 +132,7 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
             this.wasUsingChaseCamera = false;
          }
          super.isRiding = false;
+         resetBombReticleMode();
       }
 
       if(!super.isBeforeRiding && super.isRiding && var8 != null && !this.wasUsingChaseCamera) {
@@ -140,6 +147,28 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
          this.wasUsingChaseCamera = false;
       }
 
+   }
+
+   private void updateBombReticleMode(EntityPlayer player, MCP_EntityPlane plane, boolean isPilot) {
+      if(player == null || plane == null || !isPilot || !plane.getIsGunnerMode(player)
+            || super.mc == null || super.mc.gameSettings == null || super.mc.gameSettings.thirdPersonView != 0) {
+         resetBombReticleMode();
+         return;
+      }
+      if(this.KeyBombReticleMode.isKeyDown()) {
+         bombReticleMode = !bombReticleMode;
+         bombReticlePlaneEntityId = bombReticleMode ? plane.getEntityId() : -1;
+         playSoundOK();
+      }
+   }
+
+   public static boolean isBombReticleMode(MCP_EntityPlane plane) {
+      return plane != null && bombReticleMode && bombReticlePlaneEntityId == plane.getEntityId();
+   }
+
+   public static void resetBombReticleMode() {
+      bombReticleMode = false;
+      bombReticlePlaneEntityId = -1;
    }
 
    protected void playerControlInGUI(EntityPlayer player, MCP_EntityPlane plane, boolean isPilot) {

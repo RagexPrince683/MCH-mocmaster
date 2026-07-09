@@ -126,8 +126,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
          // CCIP is a world-space impact cue, not part of the optional full HUD.
          // Keep it available in third person even when DisplayHUDThirdPerson is disabled.
-         if(seatID == 0) {
-            this.drawPlaneCCIPReticle(plane, player);
+         if(seatID == 0 && (!plane.getIsGunnerMode(player) || (!isThirdPersonView && MCP_ClientPlaneTickHandler.isBombReticleMode(plane)))) {
+            this.drawPlaneCCIPReticle(plane, player, plane.getIsGunnerMode(player));
+         } else if(seatID == 0 && plane.getIsGunnerMode(player)) {
+            this.resetCCIPState();
          }
 
          this.drawHitBullet(plane, -14101432, seatID);
@@ -592,7 +594,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             x + r * 0.55D, y + r * 0.55D, x - r * 0.55D, y + r * 0.55D}, color, 2);
    }
 
-   private void drawPlaneCCIPReticle(MCP_EntityPlane plane, EntityPlayer player) {
+   private void drawPlaneCCIPReticle(MCP_EntityPlane plane, EntityPlayer player, boolean bomberMode) {
       MCP_PlaneInfo info = plane != null ? plane.getPlaneInfo() : null;
       if(plane == null || player == null || info == null || !info.hasBallisticComputer || plane.isDestroyed()) {
          this.resetCCIPState();
@@ -614,7 +616,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          if(result != null && result.valid && result.impact != null) {
             ScreenPoint projected = this.projectWorldToRenderCamera(result.impact, this.smoothCamPartialTicks);
             if(projected != null && projected.visible) {
-               this.drawCCIPPipper(projected.x, projected.y, false);
+               this.drawCCIPPipper(projected.x, projected.y, false, bomberMode);
             } else {
                this.resetCCIPSmoothing();
             }
@@ -986,7 +988,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       return Vec3.createVectorHelper(v.xCoord / length, v.yCoord / length, v.zCoord / length);
    }
 
-   private void drawCCIPPipper(double x, double y, boolean clamped) {
+   private void drawCCIPPipper(double x, double y, boolean clamped, boolean bomberMode) {
       int color = clamped ? 0xAA55FF66 : 0xF055FF66;
       double r = 10.0D * CCIP_PIPPER_SCALE;
       double tickInner = r + 2.0D * CCIP_PIPPER_SCALE;
@@ -1001,7 +1003,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       this.drawLine(new double[]{x - 2.0D, y, x + 2.0D, y, x, y - 2.0D, x, y + 2.0D,
             x - tickOuter, y, x - tickInner, y, x + tickInner, y, x + tickOuter, y,
             x, y - tickOuter, x, y - tickInner, x, y + tickInner, x, y + tickOuter}, color);
-      this.drawString("CCIP", (int)(x + r + 7.0D), (int)(y + r + 4.0D), color);
+      this.drawString(bomberMode ? "BOMB" : "CCIP", (int)(x + r + 7.0D), (int)(y + r + 4.0D), color);
    }
 
    private static class ReleaseKinematics {
@@ -1054,6 +1056,13 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
                   msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchMode.prmInt)).toString();
                   this.drawString(msg, RX, super.centerY - 70, c);
                }
+            }
+
+            if(seatID == 0 && plane.getIsGunnerMode(player) && !Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
+               boolean bombReticle = MCP_ClientPlaneTickHandler.isBombReticleMode(plane);
+               var12 = (new StringBuilder()).append(bombReticle ? "Bomb Sight Off : " : "Bomb Sight : ");
+               msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyBombReticleMode.prmInt)).toString();
+               this.drawCenteredString(msg, super.centerX, super.height - 42, colorActive);
             }
 
             if(seatID > 0 && plane.canSwitchGunnerModeOtherSeat(player)) {
