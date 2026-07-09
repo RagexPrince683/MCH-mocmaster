@@ -2717,11 +2717,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
                }
             }
 
-            if(!this.isFreeLookMode() && super.moveLeft && !super.moveRight) {
+            if(super.moveLeft && !super.moveRight) {
                this.setRotYaw(this.getRotYaw() - 0.6F * rot * partialTicks);
             }
 
-            if(!this.isFreeLookMode() && super.moveRight && !super.moveLeft) {
+            if(super.moveRight && !super.moveLeft) {
                this.setRotYaw(this.getRotYaw() + 0.6F * rot * partialTicks);
             }
          }

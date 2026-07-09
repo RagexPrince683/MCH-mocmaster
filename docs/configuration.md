@@ -183,7 +183,7 @@ The standard chase camera is intentionally stable: it stays behind the aircraft 
 
 * **Free Look** (`KeyFreeLook`, default Left Control): by default this remains the original toggle action, including in regular third person, so the view does not snap back when the key is released. Enabling **Hold Free Look** in the controls menu changes it to a held action that turns off on key release.
 * **Hold Plane Look Ahead** (`KeyPlaneLookAhead`, default Left Alt): while held, the camera focus blends forward along the aircraft facing direction while the camera remains behind the aircraft at normal chase distance. Releasing the key smoothly returns to centered framing.
-* **Interaction:** the new third-person chase camera no longer consumes freelook mouse movement for a custom orbit path, so freelook uses the shared aircraft freelook state instead of injecting camera-orbit deltas into flight controls.
+* **Interaction:** the new third-person chase camera no longer consumes freelook mouse movement for a custom orbit path, so freelook uses the shared aircraft freelook state instead of injecting camera-orbit deltas into flight controls. While free look is active, plane pilots can still use **A/D** to turn the aircraft in both regular controls and mouse flight-sim mode.
 
 Recommended bindings: keep **Free Look** on a comfortable key such as Left Control, enable **Hold Free Look** only if you prefer hold-to-use behavior, and bind **Plane Look Ahead** to Left Alt, a thumb mouse button, or another hold key that can be pressed briefly during target tracking.
 
