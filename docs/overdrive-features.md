@@ -24,7 +24,7 @@ This page summarizes the major project-wide systems that distinguish MCHeli Over
 
 **How it differs from original MCHeli:** Overdrive adds or documents richer missile guidance behavior, torpedo/dispenser paths, lockable entity synchronization, RWR/radar identity, flares/chaff separation, active protection support, and HBM-compatible explosion hooks.
 
-**Configuration:** Pack makers configure weapon stations with `AddWeapon`, `AddTurretWeapon`, and weapon-part keys, and tune weapon definitions through MCHeli-style weapon files. Vehicle combat/support keys include `RadarType`, `RWRType`, `Stealth`, `FlareType`, `FlareOption`, `HasChaff`, `ChaffUseTime`, `ChaffWaitTime`, `HasAPS`, `APSUseTime`, `APSWaitTime`, `APSRange`, `AmmoSupplyRange`, and `RepairOtherVehicles`.
+**Configuration:** Pack makers configure weapon stations with `AddWeapon`, `AddTurretWeapon`, and weapon-part keys, and tune weapon definitions through MCHeli-style weapon files. `Type = Dispenser` weapons can use `DispenseItem` for block or item payloads; HBM mine block payloads named like `hbm:tile.mine_he` and `hbm:tile.mine_ap` are placed directly as mine blocks on impact when a valid air space exists above the struck block, avoiding unreliable fake-player block-item use. Vehicle combat/support keys include `RadarType`, `RWRType`, `Stealth`, `FlareType`, `FlareOption`, `HasChaff`, `ChaffUseTime`, `ChaffWaitTime`, `HasAPS`, `APSUseTime`, `APSWaitTime`, `APSRange`, `AmmoSupplyRange`, and `RepairOtherVehicles`.
 
 ### Warnings, countermeasures, and protection
 
