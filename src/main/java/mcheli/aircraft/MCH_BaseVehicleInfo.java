@@ -89,6 +89,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    public int repairOtherVehiclesValue;
    public float stealth;
    public boolean canRide;
+   public boolean canMountShip;
    public float entityWidth;
    public float entityHeight;
    public float entityPitch;
@@ -318,6 +319,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
       this.repairOtherVehiclesValue = 10;
       this.stealth = 0.0F;
       this.canRide = true;
+      this.canMountShip = true;
       this.entityWidth = 1.0F;
       this.entityHeight = 1.0F;
       this.entityPitch = 0.0F;
@@ -623,6 +625,8 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
             this.category = data.toUpperCase().replaceAll("[,;:]", ".").replaceAll("[ \t]", "");
          } else if(item.equalsIgnoreCase("CanRide")) {
             this.canRide = this.toBool(data, true);
+         } else if(item.equalsIgnoreCase("CanMountShip")) {
+            this.canMountShip = this.toBool(data, true);
          } else if(item.equalsIgnoreCase("MaximumExternalPayloadCapacity")) {
             this.maximumExternalPayloadCapacity = Math.max(0.0D, Math.min(1000000000.0D, this.toDouble(data)));
          } else if(item.equalsIgnoreCase("Weight")) {
