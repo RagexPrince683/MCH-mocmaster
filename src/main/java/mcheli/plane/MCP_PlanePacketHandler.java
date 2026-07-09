@@ -94,14 +94,8 @@ public class MCP_PlanePacketHandler {
                if(plane.isPilot(player)) {
                   plane.throttleUp = pc.throttleUp;
                   plane.throttleDown = pc.throttleDown;
-                  boolean freeLookControlsOnlyThrottle = pc.switchFreeLook == 1 || (plane.isFreeLookMode() && pc.switchFreeLook != 2);
-                  if(freeLookControlsOnlyThrottle) {
-                     plane.moveLeft = false;
-                     plane.moveRight = false;
-                  } else {
-                     plane.moveLeft = pc.moveLeft;
-                     plane.moveRight = pc.moveRight;
-                  }
+                  plane.moveLeft = pc.moveLeft;
+                  plane.moveRight = pc.moveRight;
                }
 
                if(pc.useFlareType > 0) {
