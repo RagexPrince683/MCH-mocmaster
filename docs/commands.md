@@ -43,6 +43,7 @@ Permissions are per subcommand. Granting `status` does not grant `fill` or `kill
 | `removeentity` | `/mcheli removeentity <entityClassNameFragment>` | Marks matching loaded non-player entities dead by setting `isDead = true`. |
 | `attackentity` | `/mcheli attackentity <entityClassNameFragment> <damage> [damageSource]` | Damages matching loaded non-player entities. |
 | `showboundingbox` | `/mcheli showboundingbox <true|false>` | Toggles MCHeli debug bounding boxes and broadcasts server settings. This does not save the config file. |
+| `enablenukes` | `/mcheli enablenukes [true|false]` | Without an argument, prints usage and the current MCHeli nuke status. With `true` or `false`, changes whether MCHeli HBM-style nuclear weapon effects are enabled, broadcasts the colored `ENABLED`/`DISABLED` state, and plays the Wither spawn sound for players. When HBM/NTM registers `/ntmenablenukes`, this subcommand mirrors that command's current status and forwards changes back to HBM. |
 
 ## `attackentity` damage sources
 

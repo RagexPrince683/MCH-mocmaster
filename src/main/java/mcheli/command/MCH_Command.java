@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
+import mcheli.MCH_HBMUtil;
 import mcheli.MCH_PacketNotifyServerSettings;
 import mcheli.command.MCH_PacketTitle;
 import mcheli.multiplay.MCH_MultiplayPacketHandler;
@@ -57,7 +58,8 @@ public class MCH_Command extends CommandBase {
    public static final String CMD_ATTACK_ENTITY = "attackentity";
    public static final String CMD_SHOW_BB = "showboundingbox";
    public static final String CMD_LIST = "list";
-   public static String[] ALL_COMMAND = new String[]{"sendss", "modlist", "reconfig", "title", "fill", "status", "killentity", "removeentity", "attackentity", "showboundingbox", "list"};
+   public static final String CMD_ENABLE_NUKES = "enablenukes";
+   public static String[] ALL_COMMAND = new String[]{"sendss", "modlist", "reconfig", "title", "fill", "status", "killentity", "removeentity", "attackentity", "showboundingbox", "enablenukes", "list"};
    public static MCH_Command instance = new MCH_Command();
 
 
@@ -99,6 +101,13 @@ public class MCH_Command extends CommandBase {
    }
 
    public static void onCommandEvent(CommandEvent event) {
+      if(event.command != null && "ntmenablenukes".equalsIgnoreCase(event.command.getCommandName()) && event.parameters.length > 0) {
+         try {
+            MCH_HBMUtil.setMCHeliNukesEnabled(parseBoolean(event.sender, event.parameters[0]));
+         } catch(Throwable ignored) {
+         }
+      }
+
       if(event.command instanceof MCH_Command) {
          if(event.parameters.length > 0 && event.parameters[0].length() > 0) {
             if(!checkCommandPermission(event.sender, event.parameters[0])) {
@@ -225,6 +234,8 @@ public class MCH_Command extends CommandBase {
                      MCH_PacketNotifyServerSettings.sendAll();
                      sender.addChatMessage(new ChatComponentText("Enabled bounding box [F3 + b]"));
                   }
+               } else if(prm[0].equalsIgnoreCase("enablenukes")) {
+                  this.executeEnableNukes(sender, prm);
                } else {
                   if(!prm[0].equalsIgnoreCase("list")) {
                      throw new CommandException("Unknown mcheli command. please type /mcheli list", new Object[0]);
@@ -244,6 +255,56 @@ public class MCH_Command extends CommandBase {
             }
 
          }
+      }
+   }
+
+   private void executeEnableNukes(ICommandSender sender, String[] args) {
+      if(args.length > 2) {
+         throw new CommandException("Parameter error! : /mcheli enablenukes [true|false]", new Object[0]);
+      }
+
+      if(args.length == 2) {
+         boolean enabled = parseBoolean(sender, args[1]);
+         MCH_HBMUtil.setMCHeliNukesEnabled(enabled);
+         if(MCH_HBMUtil.hasHBMEnableNukesCommand()) {
+            MCH_HBMUtil.syncHBMEnableNukesCommand(sender, enabled);
+         }
+         this.broadcastEnableNukesStatus(sender, MCH_HBMUtil.areNukesEnabled());
+      } else {
+         sender.addChatMessage(new ChatComponentText("Usage: /mcheli enablenukes <true|false>"));
+         sender.addChatMessage(this.createEnableNukesStatusMessage("Current MCHeli enablenukes status: ", MCH_HBMUtil.areNukesEnabled()));
+         if(MCH_HBMUtil.hasHBMEnableNukesCommand()) {
+            sender.addChatMessage(new ChatComponentText("Linked to HBM /ntmenablenukes command."));
+         }
+      }
+   }
+
+   private IChatComponent createEnableNukesStatusMessage(String prefix, boolean enabled) {
+      ChatComponentText message = new ChatComponentText(prefix);
+      ChatComponentText status = new ChatComponentText(enabled?"ENABLED":"DISABLED");
+      status.getChatStyle().setColor(enabled?EnumChatFormatting.GREEN:EnumChatFormatting.RED);
+      message.appendSibling(status);
+      return message;
+   }
+
+   private void broadcastEnableNukesStatus(ICommandSender sender, boolean enabled) {
+      IChatComponent message = this.createEnableNukesStatusMessage("MCHeli nukes are now ", enabled);
+      MinecraftServer server = MinecraftServer.getServer();
+      if(server != null && server.getConfigurationManager() != null) {
+         server.getConfigurationManager().sendChatMsg(message);
+         List players = server.getConfigurationManager().playerEntityList;
+         for(int i = 0; i < players.size(); ++i) {
+            Object player = players.get(i);
+            if(player instanceof EntityPlayerMP) {
+               EntityPlayerMP playerMP = (EntityPlayerMP)player;
+               playerMP.worldObj.playSoundAtEntity(playerMP, "mob.wither.spawn", 1.0F, 1.0F);
+            }
+         }
+         if(!(sender instanceof EntityPlayerMP)) {
+            sender.addChatMessage(message);
+         }
+      } else {
+         sender.addChatMessage(message);
       }
    }
 
@@ -559,6 +620,8 @@ public class MCH_Command extends CommandBase {
                   return getListOfStringsMatchingLastWord(prm, new String[]{"player", "inFire", "onFire", "lava", "inWall", "drown", "starve", "cactus", "fall", "outOfWorld", "generic", "magic", "wither", "anvil", "fallingBlock"});
                }
             } else if(prm[0].equalsIgnoreCase("showboundingbox") && prm.length == 2) {
+               return getListOfStringsMatchingLastWord(prm, new String[]{"true", "false"});
+            } else if(prm[0].equalsIgnoreCase("enablenukes") && prm.length == 2) {
                return getListOfStringsMatchingLastWord(prm, new String[]{"true", "false"});
             }
          }

@@ -28,6 +28,154 @@ public class MCH_HBMUtil {
         }
     }
 
+    private static final String HBM_ENABLE_NUKES_COMMAND = "ntmenablenukes";
+    private static boolean mcheliNukesEnabled = true;
+
+    public static boolean areNukesEnabled() {
+        Boolean hbmEnabled = getHBMNukesEnabled();
+        if (hbmEnabled != null) {
+            mcheliNukesEnabled = hbmEnabled.booleanValue();
+        }
+        return mcheliNukesEnabled;
+    }
+
+    public static void setMCHeliNukesEnabled(boolean enabled) {
+        mcheliNukesEnabled = enabled;
+        setHBMNukesEnabled(enabled);
+    }
+
+    public static boolean hasHBMEnableNukesCommand() {
+        return getHBMEnableNukesCommand() != null;
+    }
+
+    public static void syncHBMEnableNukesCommand(net.minecraft.command.ICommandSender sender, boolean enabled) {
+        try {
+            net.minecraft.command.ICommand command = getHBMEnableNukesCommand();
+            if (command != null) {
+                command.processCommand(sender, new String[]{String.valueOf(enabled)});
+                setHBMNukesEnabled(enabled);
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static net.minecraft.command.ICommand getHBMEnableNukesCommand() {
+        try {
+            net.minecraft.server.MinecraftServer server = net.minecraft.server.MinecraftServer.getServer();
+            if (server != null && server.getCommandManager() != null) {
+                java.lang.reflect.Method getCommands = server.getCommandManager().getClass().getMethod("getCommands", new Class[0]);
+                Object commands = getCommands.invoke(server.getCommandManager(), new Object[0]);
+                if (commands instanceof java.util.Map) {
+                    Object command = ((java.util.Map)commands).get(HBM_ENABLE_NUKES_COMMAND);
+                    if (command instanceof net.minecraft.command.ICommand) {
+                        return (net.minecraft.command.ICommand)command;
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        return null;
+    }
+
+    private static Boolean getHBMNukesEnabled() {
+        Object command = getHBMEnableNukesCommand();
+        Boolean enabled = getBooleanField(command, "enableNukes", "enabled", "nukes", "allowNukes");
+        if (enabled != null) {
+            return enabled;
+        }
+        return getBooleanFieldFromClasses(new String[]{"com.hbm.config.BombConfig", "com.hbm.config.GeneralConfig", "com.hbm.config.WeaponConfig"}, new String[]{"enableNukes", "enabledNukes", "nukes", "allowNukes"});
+    }
+
+    private static void setHBMNukesEnabled(boolean enabled) {
+        Object command = getHBMEnableNukesCommand();
+        setBooleanField(command, enabled, "enableNukes", "enabled", "nukes", "allowNukes");
+        setBooleanFieldInClasses(new String[]{"com.hbm.config.BombConfig", "com.hbm.config.GeneralConfig", "com.hbm.config.WeaponConfig"}, enabled, new String[]{"enableNukes", "enabledNukes", "nukes", "allowNukes"});
+    }
+
+    private static Boolean getBooleanField(Object target, String... names) {
+        if (target == null) {
+            return null;
+        }
+        for (String name : names) {
+            try {
+                java.lang.reflect.Field field = target.getClass().getDeclaredField(name);
+                field.setAccessible(true);
+                if (field.getType() == Boolean.TYPE) {
+                    return Boolean.valueOf(field.getBoolean(target));
+                }
+                if (field.getType() == Boolean.class) {
+                    return (Boolean)field.get(target);
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+        return null;
+    }
+
+    private static Boolean getBooleanFieldFromClasses(String[] classNames, String[] fieldNames) {
+        for (String className : classNames) {
+            try {
+                Class<?> clazz = Class.forName(className);
+                for (String fieldName : fieldNames) {
+                    try {
+                        java.lang.reflect.Field field = clazz.getDeclaredField(fieldName);
+                        field.setAccessible(true);
+                        if (field.getType() == Boolean.TYPE) {
+                            return Boolean.valueOf(field.getBoolean(null));
+                        }
+                        if (field.getType() == Boolean.class) {
+                            return (Boolean)field.get(null);
+                        }
+                    } catch (Throwable ignored) {
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+        return null;
+    }
+
+    private static void setBooleanField(Object target, boolean value, String... names) {
+        if (target == null) {
+            return;
+        }
+        for (String name : names) {
+            try {
+                java.lang.reflect.Field field = target.getClass().getDeclaredField(name);
+                field.setAccessible(true);
+                if (field.getType() == Boolean.TYPE) {
+                    field.setBoolean(target, value);
+                } else if (field.getType() == Boolean.class) {
+                    field.set(target, Boolean.valueOf(value));
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+    }
+
+    private static void setBooleanFieldInClasses(String[] classNames, boolean value, String[] fieldNames) {
+        for (String className : classNames) {
+            try {
+                Class<?> clazz = Class.forName(className);
+                for (String fieldName : fieldNames) {
+                    try {
+                        java.lang.reflect.Field field = clazz.getDeclaredField(fieldName);
+                        field.setAccessible(true);
+                        if (field.getType() == Boolean.TYPE) {
+                            field.setBoolean(null, value);
+                        } else if (field.getType() == Boolean.class) {
+                            field.set(null, Boolean.valueOf(value));
+                        }
+                    } catch (Throwable ignored) {
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+    }
+
+
     public static Object EntityNukeExplosionMK5_statFac(World world, int r, double posX, double posY, double posZ) {
         try {
             if (nukeExplosionMK5Class != null) {
