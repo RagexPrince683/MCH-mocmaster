@@ -3,12 +3,20 @@ package mcheli.aircraft;
 import mcheli.MCH_Config;
 import mcheli.MCH_ConfigPrm;
 import mcheli.wrapper.W_McClient;
+import mcheli.wrapper.modelloader.W_MetasequoiaObject;
+import mcheli.wrapper.modelloader.W_WavefrontObject;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.model.IModelCustom;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.lwjgl.opengl.GL11;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -19,10 +27,21 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 public class MCH_VehicleItemModelRender implements IItemRenderer {
 
    private static final Map MODEL_DISPLAY_LISTS = new HashMap();
+   private static final LinkedList MODEL_BUILD_QUEUE = new LinkedList();
+   private static final Set QUEUED_MODELS = new HashSet();
+   private static final int MODEL_BUILD_FACES_PER_STEP = 256;
+   private static final long MODEL_BUILD_INTERVAL_MS = 10L;
+   private static long nextModelBuildTime;
 
    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
       MCH_BaseVehicleInfo info = getInfo(item);
-      return info != null && info.model != null && is3DIconEnabled(info);
+      if(info == null || info.model == null || !is3DIconEnabled(info)) {
+         return false;
+      }
+
+      queueModelBuild(info);
+      processQueuedModelBuild();
+      return hasRenderableModel(info);
    }
 
    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
@@ -32,6 +51,12 @@ public class MCH_VehicleItemModelRender implements IItemRenderer {
    public void renderItem(ItemRenderType type, ItemStack item, Object ... data) {
       MCH_BaseVehicleInfo info = getInfo(item);
       if(info == null || info.model == null || !is3DIconEnabled(info)) {
+         return;
+      }
+
+      queueModelBuild(info);
+      processQueuedModelBuild();
+      if(!hasRenderableModel(info)) {
          return;
       }
 
@@ -53,42 +78,120 @@ public class MCH_VehicleItemModelRender implements IItemRenderer {
 
    private static void renderCachedModel(MCH_BaseVehicleInfo info) {
       CachedDisplayList cached = (CachedDisplayList)MODEL_DISPLAY_LISTS.get(info);
-      if(cached == null || cached.model != info.model) {
-         if(cached != null) {
-            cached.delete();
-         }
-         cached = new CachedDisplayList(info.model);
-         MODEL_DISPLAY_LISTS.put(info, cached);
+      if(cached != null && cached.model == info.model) {
+         cached.render();
       }
-      cached.render();
+   }
+
+   private static boolean hasRenderableModel(MCH_BaseVehicleInfo info) {
+      CachedDisplayList cached = (CachedDisplayList)MODEL_DISPLAY_LISTS.get(info);
+      return cached != null && cached.model == info.model && cached.hasRenderableChunks();
+   }
+
+   private static void queueModelBuild(MCH_BaseVehicleInfo info) {
+      CachedDisplayList cached = (CachedDisplayList)MODEL_DISPLAY_LISTS.get(info);
+      if(cached != null && cached.model != info.model) {
+         cached.delete();
+         MODEL_DISPLAY_LISTS.remove(info);
+         cached = null;
+      }
+      if((cached == null || !cached.isComplete()) && QUEUED_MODELS.add(info)) {
+         MODEL_BUILD_QUEUE.add(info);
+      }
+   }
+
+   private static void processQueuedModelBuild() {
+      long now = Minecraft.getSystemTime();
+      if(now < nextModelBuildTime || MODEL_BUILD_QUEUE.isEmpty()) {
+         return;
+      }
+
+      MCH_BaseVehicleInfo info = (MCH_BaseVehicleInfo)MODEL_BUILD_QUEUE.removeFirst();
+      QUEUED_MODELS.remove(info);
+      if(info != null && info.model != null && is3DIconEnabled(info)) {
+         CachedDisplayList cached = (CachedDisplayList)MODEL_DISPLAY_LISTS.get(info);
+         if(cached == null || cached.model != info.model) {
+            cached = new CachedDisplayList(info.model);
+            MODEL_DISPLAY_LISTS.put(info, cached);
+         }
+         cached.buildNextChunk();
+         if(!cached.isComplete()) {
+            queueModelBuild(info);
+         }
+         nextModelBuildTime = now + MODEL_BUILD_INTERVAL_MS;
+      }
    }
 
    private static class CachedDisplayList {
       private final IModelCustom model;
-      private final int displayList;
+      private final List displayLists = new ArrayList();
+      private final int faceCount;
+      private int nextFace = 1;
+      private boolean complete;
 
       private CachedDisplayList(IModelCustom model) {
          this.model = model;
-         this.displayList = GL11.glGenLists(1);
-         if(this.displayList != 0) {
-            GL11.glNewList(this.displayList, GL11.GL_COMPILE);
-            MCH_RenderBaseVehicle.renderAllModel(model);
-            GL11.glEndList();
+         this.faceCount = getFaceCount(model);
+         this.complete = this.faceCount <= 0;
+      }
+
+      private boolean hasRenderableChunks() {
+         return !this.displayLists.isEmpty();
+      }
+
+      private boolean isComplete() {
+         return this.complete;
+      }
+
+      private void buildNextChunk() {
+         if(this.complete) {
+            return;
          }
+
+         int displayList = GL11.glGenLists(1);
+         if(displayList == 0) {
+            this.complete = true;
+            return;
+         }
+
+         int endFace = Math.min(this.nextFace + MODEL_BUILD_FACES_PER_STEP - 1, this.faceCount);
+         GL11.glNewList(displayList, GL11.GL_COMPILE);
+         renderModelRange(this.model, this.nextFace, endFace);
+         GL11.glEndList();
+         this.displayLists.add(Integer.valueOf(displayList));
+         this.nextFace = endFace + 1;
+         this.complete = this.nextFace > this.faceCount;
       }
 
       private void render() {
-         if(this.displayList != 0) {
-            GL11.glCallList(this.displayList);
-         } else {
-            MCH_RenderBaseVehicle.renderAllModel(this.model);
+         for(int i = 0; i < this.displayLists.size(); ++i) {
+            GL11.glCallList(((Integer)this.displayLists.get(i)).intValue());
          }
       }
 
       private void delete() {
-         if(this.displayList != 0) {
-            GL11.glDeleteLists(this.displayList, 1);
+         for(int i = 0; i < this.displayLists.size(); ++i) {
+            GL11.glDeleteLists(((Integer)this.displayLists.get(i)).intValue(), 1);
          }
+         this.displayLists.clear();
+      }
+   }
+
+   private static int getFaceCount(IModelCustom model) {
+      if(model instanceof W_WavefrontObject) {
+         return ((W_WavefrontObject)model).getFaceNum();
+      }
+      if(model instanceof W_MetasequoiaObject) {
+         return ((W_MetasequoiaObject)model).getFaceNum();
+      }
+      return 0;
+   }
+
+   private static void renderModelRange(IModelCustom model, int startFace, int endFace) {
+      if(model instanceof W_WavefrontObject) {
+         ((W_WavefrontObject)model).renderAll(startFace, endFace);
+      } else if(model instanceof W_MetasequoiaObject) {
+         ((W_MetasequoiaObject)model).renderAll(startFace, endFace);
       }
    }
 
