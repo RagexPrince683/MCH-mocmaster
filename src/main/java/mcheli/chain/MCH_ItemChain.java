@@ -1,6 +1,8 @@
 package mcheli.chain;
 
 import java.util.List;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntityHitBox;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.chain.MCH_EntityChain;
@@ -15,6 +17,8 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 
 public class MCH_ItemChain extends W_Item {
@@ -74,6 +78,10 @@ public class MCH_ItemChain extends W_Item {
                return;
             }
 
+            if(!canTowEntity(entityTowed, entity, player)) {
+               return;
+            }
+
             MCH_EntityChain chain = new MCH_EntityChain(world, (entityTowed.posX + entity.posX) / 2.0D, (entityTowed.posY + entity.posY) / 2.0D, (entityTowed.posZ + entity.posZ) / 2.0D);
             chain.setChainLength((int)diff);
             chain.setTowEntity(entityTowed, entity);
@@ -86,6 +94,51 @@ public class MCH_ItemChain extends W_Item {
          }
       }
 
+   }
+
+   private static boolean canTowEntity(Entity towedEntity, Entity towEntity, EntityPlayer player) {
+      MCH_BaseVehicleInfo towedInfo = getVehicleInfo(towedEntity);
+      MCH_BaseVehicleInfo towInfo = getVehicleInfo(towEntity);
+      if(towedInfo == null) {
+         return true;
+      }
+
+      double towedWeight = Math.max(0.0D, towedInfo.weight);
+      double payloadCapacity = towInfo != null?Math.max(0.0D, towInfo.maximumExternalPayloadCapacity):0.0D;
+      if(towedWeight <= payloadCapacity) {
+         return true;
+      }
+
+      if(player != null) {
+         player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Cannot attach chain: " + getEntityDisplayName(towedEntity) + " weighs " + formatPounds(towedWeight) + " lb, exceeding " + getEntityDisplayName(towEntity) + "'s external payload capacity of " + formatPounds(payloadCapacity) + " lb."));
+      }
+
+      return false;
+   }
+
+   private static MCH_BaseVehicleInfo getVehicleInfo(Entity entity) {
+      if(entity instanceof MCH_EntityBaseVehicle) {
+         return ((MCH_EntityBaseVehicle)entity).getAcInfo();
+      }
+
+      return null;
+   }
+
+   private static String getEntityDisplayName(Entity entity) {
+      MCH_BaseVehicleInfo info = getVehicleInfo(entity);
+      if(info != null && info.displayName != null && !info.displayName.isEmpty()) {
+         return info.displayName;
+      }
+
+      return entity != null?entity.getCommandSenderName():"entity";
+   }
+
+   private static String formatPounds(double pounds) {
+      if(Math.abs(pounds - (double)((long)pounds)) < 0.001D) {
+         return String.valueOf((long)pounds);
+      }
+
+      return String.format(java.util.Locale.ROOT, "%.1f", pounds);
    }
 
    public static void playConnectTowingEntity(Entity e) {
