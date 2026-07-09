@@ -22,7 +22,7 @@ public class MCH_RenderShip extends MCH_RenderBaseVehicle {
             MCH_EntityShip ship = (MCH_EntityShip)entity;
             shipInfo = ship.getShipInfo();
             if(shipInfo != null) {
-                this.renderDebugHitBox(ship, posX, posY, posZ, yaw, pitch);
+                this.renderDebugHitBox(ship, posX, posY, posZ, yaw, pitch, roll);
                 this.renderDebugPilotSeat(ship, posX, posY, posZ, yaw, pitch, roll);
                 GL11.glTranslated(posX, posY, posZ);
                 GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);

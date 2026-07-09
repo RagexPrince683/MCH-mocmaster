@@ -8,6 +8,8 @@
 
 ### Changed
 
+- Fixed debug extra bounding-box roll translation so rendered boxes use the same interpolated yaw, pitch, and roll as the vehicle model instead of leaving their vertical offsets visually static during roll.
+
 - Fixed plane free-look steering so A/D turn input is still sent and applied while free look is active in both mouse flight-sim and regular control modes.
 
 - Added a first-person bomber reticle mode for plane gunner view, toggled by the new `KeyBombReticleMode` keybind, using the existing ballistic bomb-impact predictor for accurate impact placement. The key now appears in the in-game key binding list, and its HUD hint is shown at bottom-center to avoid overlapping flap prompts.
