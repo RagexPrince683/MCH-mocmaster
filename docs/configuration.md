@@ -80,6 +80,12 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `SwitchWeaponWithMouseWheel` | `true` | Allows mouse-wheel weapon switching. |
 | `LWeaponAutoFire` | `false` | Auto-fire behavior for light weapons. |
 | `DisableItemRender` | `1` | Valid range noted in source: `0 ~ 3`; `1` recommended. |
+| `Override3DItemIcon` | `false` | Global 3D vehicle item icon override. `true` forces 3D item icons off; `false` allows per-vehicle `Enable3DItemIcon` settings. |
+| `Heli3DItemIconScale` | `1.0` | Global scale multiplier for helicopter 3D item icons. |
+| `Plane3DItemIconScale` | `1.0` | Global scale multiplier for plane 3D item icons. |
+| `Ship3DItemIconScale` | `1.0` | Global scale multiplier for ship 3D item icons. |
+| `Tank3DItemIconScale` | `1.0` | Global scale multiplier for tank 3D item icons. |
+| `Turret3DItemIconScale` | `1.0` | Global scale multiplier for turret/static vehicle 3D item icons. |
 | `HideKeybind` | `false` | Hides keybind display/help where implemented. |
 | `RenderDistanceWeight` | `1000.0` | Render-distance weight for mod rendering. |
 | `EnableAircraftLODRender` | `true` | Enables client-only far-distance model displays for aircraft, tanks, turrets, and ships. |
@@ -108,6 +114,15 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `ReplaceRenderViewEntity` | `true` | Replaces render-view entity for MCHeli camera behavior. |
 | `ItemRecipe_*` | See generated config/source defaults | Recipe strings for core MCHeli items. |
 | `MultiThreadedModelLoading` | `true` | Enables threaded model loading on the client. |
+
+## Vehicle content-pack keys
+
+Vehicle `.txt` definitions can opt individual items into or out of 3D item rendering and tune their own size after the global type scale is applied:
+
+| Key | Default | Notes |
+| --- | --- | --- |
+| `Enable3DItemIcon` | `true` | Per-vehicle toggle. Set `false` to keep that vehicle on the normal flat item icon even when the global override allows 3D icons. |
+| `ItemIconScaleFactor` | `1.0` | Per-vehicle 3D item icon scale multiplier, clamped to `0.01` through `100.0`. Alias: `3DItemIconScaleFactor`. |
 
 ## Hidden/advanced options initialized in source
 

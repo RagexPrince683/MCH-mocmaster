@@ -1,5 +1,7 @@
 package mcheli.aircraft;
 
+import mcheli.MCH_Config;
+import mcheli.MCH_ConfigPrm;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
@@ -13,7 +15,8 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 public class MCH_VehicleItemModelRender implements IItemRenderer {
 
    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-      return getInfo(item) != null;
+      MCH_BaseVehicleInfo info = getInfo(item);
+      return info != null && info.model != null && is3DIconEnabled(info);
    }
 
    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
@@ -22,7 +25,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer {
 
    public void renderItem(ItemRenderType type, ItemStack item, Object ... data) {
       MCH_BaseVehicleInfo info = getInfo(item);
-      if(info == null || info.model == null) {
+      if(info == null || info.model == null || !is3DIconEnabled(info)) {
          return;
       }
 
@@ -45,6 +48,10 @@ public class MCH_VehicleItemModelRender implements IItemRenderer {
    private static MCH_BaseVehicleInfo getInfo(ItemStack item) {
       return item != null && item.getItem() instanceof MCH_ItemBaseVehicle
          ? ((MCH_ItemBaseVehicle)item.getItem()).getAircraftInfo() : null;
+   }
+
+   private static boolean is3DIconEnabled(MCH_BaseVehicleInfo info) {
+      return info.enable3DItemIcon && (MCH_Config.Override3DItemIcon == null || !MCH_Config.Override3DItemIcon.prmBool);
    }
 
    private static void transform(ItemRenderType type, MCH_BaseVehicleInfo info) {
@@ -78,6 +85,31 @@ public class MCH_VehicleItemModelRender implements IItemRenderer {
       if(type == ItemRenderType.ENTITY) {
          scale = 1.0F / largest;
       }
+      scale *= getTypeScale(info) * info.itemIconScaleFactor;
       GL11.glScalef(scale, scale, scale);
+   }
+
+   private static float getTypeScale(MCH_BaseVehicleInfo info) {
+      String directory = info.getDirectoryName();
+      if("helicopters".equalsIgnoreCase(directory)) {
+         return getScale(MCH_Config.Heli3DItemIconScale);
+      }
+      if("planes".equalsIgnoreCase(directory)) {
+         return getScale(MCH_Config.Plane3DItemIconScale);
+      }
+      if("ships".equalsIgnoreCase(directory)) {
+         return getScale(MCH_Config.Ship3DItemIconScale);
+      }
+      if("tanks".equalsIgnoreCase(directory)) {
+         return getScale(MCH_Config.Tank3DItemIconScale);
+      }
+      if("vehicles".equalsIgnoreCase(directory) || "turrets".equalsIgnoreCase(directory)) {
+         return getScale(MCH_Config.Turret3DItemIconScale);
+      }
+      return 1.0F;
+   }
+
+   private static float getScale(MCH_ConfigPrm prm) {
+      return prm != null ? Math.max((float)prm.prmDouble, 0.01F) : 1.0F;
    }
 }

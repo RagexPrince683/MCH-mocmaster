@@ -148,6 +148,8 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
     private List textureNameList;
    public int textureCount;
    public float particlesScale;
+   public boolean enable3DItemIcon;
+   public float itemIconScaleFactor;
    public boolean hideEntity;
    public boolean smoothShading;
    public String soundMove;
@@ -364,6 +366,8 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
       this.textureNameList.add(this.name);
       this.textureCount = 0;
       this.particlesScale = 1.0F;
+      this.enable3DItemIcon = true;
+      this.itemIconScaleFactor = 1.0F;
       this.enableSeaSurfaceParticle = false;
       this.hideEntity = false;
       this.smoothShading = true;
@@ -665,6 +669,10 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
             this.itemID = this.toInt(data, 0, '\uffff');
          } else if(item.compareTo("addtexture") == 0) {
             this.textureNameList.add(data.toLowerCase());
+         } else if(item.equalsIgnoreCase("Enable3DItemIcon")) {
+            this.enable3DItemIcon = this.toBool(data, true);
+         } else if(item.equalsIgnoreCase("ItemIconScaleFactor") || item.equalsIgnoreCase("3DItemIconScaleFactor")) {
+            this.itemIconScaleFactor = this.toFloat(data, 0.01F, 100.0F);
          } else if(item.compareTo("particlesscale") == 0) {
             this.particlesScale = this.toFloat(data, 0.0F, 50.0F);
          } else if(item.equalsIgnoreCase("EnableSeaSurfaceParticle")) {

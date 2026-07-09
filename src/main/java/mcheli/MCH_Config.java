@@ -124,6 +124,12 @@ public class MCH_Config {
 
    public static MCH_ConfigPrm AutoThrottleDownTank;
    public static MCH_ConfigPrm DisableItemRender;
+   public static MCH_ConfigPrm Override3DItemIcon;
+   public static MCH_ConfigPrm Heli3DItemIconScale;
+   public static MCH_ConfigPrm Plane3DItemIconScale;
+   public static MCH_ConfigPrm Ship3DItemIconScale;
+   public static MCH_ConfigPrm Tank3DItemIconScale;
+   public static MCH_ConfigPrm Turret3DItemIconScale;
    public static MCH_ConfigPrm RenderDistanceWeight;
    public static MCH_ConfigPrm EnableAircraftLODRender;
    public static MCH_ConfigPrm AircraftLODStartDistance;
@@ -437,6 +443,18 @@ public class MCH_Config {
       AutoThrottleDownTank = new MCH_ConfigPrm("AutoThrottleDownTank", false);
       DisableItemRender = new MCH_ConfigPrm("DisableItemRender", 1);
       DisableItemRender.desc = ";DisableItemRender = 0 ~ 3 (1 = Recommended)";
+      Override3DItemIcon = new MCH_ConfigPrm("Override3DItemIcon", false);
+      Override3DItemIcon.desc = ";Global 3D vehicle item icon override. true = force 3D icons off, false = allow per-vehicle 3D icon settings.";
+      Heli3DItemIconScale = new MCH_ConfigPrm("Heli3DItemIconScale", 1.0D);
+      Heli3DItemIconScale.desc = ";Global scale multiplier for helicopter 3D item icons.";
+      Plane3DItemIconScale = new MCH_ConfigPrm("Plane3DItemIconScale", 1.0D);
+      Plane3DItemIconScale.desc = ";Global scale multiplier for plane 3D item icons.";
+      Ship3DItemIconScale = new MCH_ConfigPrm("Ship3DItemIconScale", 1.0D);
+      Ship3DItemIconScale.desc = ";Global scale multiplier for ship 3D item icons.";
+      Tank3DItemIconScale = new MCH_ConfigPrm("Tank3DItemIconScale", 1.0D);
+      Tank3DItemIconScale.desc = ";Global scale multiplier for tank 3D item icons.";
+      Turret3DItemIconScale = new MCH_ConfigPrm("Turret3DItemIconScale", 1.0D);
+      Turret3DItemIconScale.desc = ";Global scale multiplier for turret/static vehicle 3D item icons.";
       RenderDistanceWeight = new MCH_ConfigPrm("RenderDistanceWeight", 1000.0D);
       EnableAircraftLODRender = new MCH_ConfigPrm("EnableAircraftLODRender", true);
       EnableAircraftLODRender.desc = ";Enable client-only far-distance model displays for aircraft, tanks, turrets, and ships.";
@@ -771,6 +789,12 @@ public class MCH_Config {
               SwitchWeaponWithMouseWheel,
               LWeaponAutoFire,
               DisableItemRender,
+              Override3DItemIcon,
+              Heli3DItemIconScale,
+              Plane3DItemIconScale,
+              Ship3DItemIconScale,
+              Tank3DItemIconScale,
+              Turret3DItemIconScale,
               HideKeybind,
               RenderDistanceWeight,
               EnableAircraftLODRender,

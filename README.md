@@ -130,6 +130,8 @@ The mod writes `config/mcheli.cfg` on startup. Important options include:
 - `InfinityAmmo` and `InfinityFuel` - enable unlimited ammunition/fuel globally.
 - `AllHeliSpeed`, `AllPlaneSpeed`, `AllShipSpeed`, and `AllTankSpeed` - global speed multipliers/clamps.
 - `EnableAircraftLODRender`, `AircraftLODStartDistance`, and `AircraftLODFarDistance` - control long-distance vehicle model rendering.
+- `Override3DItemIcon` - globally disables 3D vehicle item icons when set to `true`; `false` allows per-vehicle 3D item icon settings.
+- `Heli3DItemIconScale`, `Plane3DItemIconScale`, `Ship3DItemIconScale`, `Tank3DItemIconScale`, and `Turret3DItemIconScale` - global scale multipliers for 3D item icons by vehicle type.
 - `MultiThreadedModelLoading` - toggles threaded model loading on the client.
 - `CommandPermission` entries - grant specific `/mcheli` subcommands to named non-operator players.
 - `Key*` entries - default key and mouse bindings for MCHeli controls.
