@@ -1,8 +1,11 @@
 package mcheli.plane;
 
 import mcheli.MCH_Config;
+import mcheli.MCH_Lib;
 import mcheli.weapon.MCH_WeaponBase;
 import mcheli.weapon.MCH_WeaponInfo;
+import mcheli.weapon.MCH_WeaponSet;
+import net.minecraft.entity.Entity;
 import mcheli.wrapper.W_MovingObjectPosition;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
@@ -249,6 +252,87 @@ public final class MCP_PlaneCCIPHelper {
       return vector != null
             ? Vec3.createVectorHelper(vector.xCoord, vector.yCoord, vector.zCoord)
             : null;
+   }
+
+
+   public static Result predictCurrentWeapon(MCP_EntityPlane plane, Entity user) {
+      if(plane == null || user == null) {
+         Result result = new Result();
+         result.valid = false;
+         result.reasonInvalid = "missing_plane_or_user";
+         return result;
+      }
+      MCH_WeaponSet ws = plane.getCurrentWeapon(user);
+      MCH_WeaponBase weapon = ws != null ? ws.getCurrentWeapon() : null;
+      if(!isBombWeapon(weapon)) {
+         Result result = new Result();
+         result.valid = false;
+         result.reasonInvalid = "not_bomb_weapon";
+         return result;
+      }
+      Vec3 aircraftMotion = Vec3.createVectorHelper(plane.motionX, plane.motionY, plane.motionZ);
+      Vec3 shotOffset = weapon.getShotPos(plane);
+      Vec3 release = Vec3.createVectorHelper(
+            plane.posX + shotOffset.xCoord,
+            plane.posY + shotOffset.yCoord,
+            plane.posZ + shotOffset.zCoord);
+      ReleaseKinematics k = getInitialBombVelocity(plane, ws, weapon, aircraftMotion);
+      if("DISPENSER_EJECTED".equals(k.releaseMode)) {
+         release.xCoord += k.initialVelocity.xCoord * 0.5D;
+         release.yCoord += k.initialVelocity.yCoord * 0.5D;
+         release.zCoord += k.initialVelocity.zCoord * 0.5D;
+      }
+      Result result = predict(plane.worldObj, weapon.getInfo(), release, k.initialVelocity, aircraftMotion);
+      result.releaseMode = k.releaseMode;
+      result.ejectionVelocity = k.ejectionVelocity;
+      result.initialVelocityDeltaFromAircraft = k.initialVelocityDeltaFromAircraft;
+      result.initialVelocityUpDot = k.initialVelocityUpDot;
+      result.initialVelocitySideDot = k.initialVelocitySideDot;
+      result.warningImpossibleLaunch = k.warningImpossibleLaunch;
+      return result;
+   }
+
+   private static ReleaseKinematics getInitialBombVelocity(MCP_EntityPlane plane, MCH_WeaponSet ws,
+         MCH_WeaponBase weapon, Vec3 aircraftMotion) {
+      ReleaseKinematics k = new ReleaseKinematics();
+      k.releaseMode = "GRAVITY_BOMB";
+      k.ejectionVelocity = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
+      k.initialVelocity = Vec3.createVectorHelper(aircraftMotion.xCoord, aircraftMotion.yCoord, aircraftMotion.zCoord);
+      if(weapon != null && weapon.getInfo() != null && weapon.getInfo().type != null
+            && weapon.getInfo().type.equalsIgnoreCase("dispenser")) {
+         k.releaseMode = "DISPENSER_EJECTED";
+         float yaw = plane.rotationYaw + (ws != null ? ws.rotationYaw : 0.0F) + weapon.fixRotationYaw;
+         float pitch = plane.rotationPitch + (ws != null ? ws.rotationPitch : 0.0F) + weapon.fixRotationPitch;
+         float roll = plane.getRotRoll();
+         Vec3 direction = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -yaw, -pitch, -roll);
+         double length = direction.lengthVector();
+         if(length > EPSILON) {
+            double constructorSpeed = Math.min(3.9D, (double)weapon.getInfo().acceleration);
+            double ejectionScale = constructorSpeed * 0.5D / length;
+            k.ejectionVelocity = Vec3.createVectorHelper(direction.xCoord * ejectionScale, direction.yCoord * ejectionScale, direction.zCoord * ejectionScale);
+            k.initialVelocity.xCoord += k.ejectionVelocity.xCoord;
+            k.initialVelocity.yCoord += k.ejectionVelocity.yCoord;
+            k.initialVelocity.zCoord += k.ejectionVelocity.zCoord;
+         }
+      }
+      k.initialVelocityDeltaFromAircraft = Vec3.createVectorHelper(k.initialVelocity.xCoord - aircraftMotion.xCoord, k.initialVelocity.yCoord - aircraftMotion.yCoord, k.initialVelocity.zCoord - aircraftMotion.zCoord);
+      k.initialVelocityUpDot = k.initialVelocityDeltaFromAircraft.yCoord;
+      Vec3 side = MCH_Lib.Rot2Vec3(plane.rotationYaw + 90.0F, 0.0F);
+      k.initialVelocitySideDot = k.initialVelocityDeltaFromAircraft.xCoord * side.xCoord + k.initialVelocityDeltaFromAircraft.zCoord * side.zCoord;
+      double delta = k.initialVelocityDeltaFromAircraft.lengthVector();
+      boolean gravityBomb = "GRAVITY_BOMB".equals(k.releaseMode);
+      k.warningImpossibleLaunch = (gravityBomb && (Math.abs(k.initialVelocitySideDot) > 0.05D || k.initialVelocityUpDot > 0.05D || delta > 0.10D)) || (!gravityBomb && delta > 4.0D);
+      return k;
+   }
+
+   private static class ReleaseKinematics {
+      Vec3 initialVelocity;
+      Vec3 ejectionVelocity;
+      Vec3 initialVelocityDeltaFromAircraft;
+      double initialVelocityUpDot;
+      double initialVelocitySideDot;
+      boolean warningImpossibleLaunch;
+      String releaseMode;
    }
 
    public static boolean isBombWeapon(MCH_WeaponBase weapon) {
