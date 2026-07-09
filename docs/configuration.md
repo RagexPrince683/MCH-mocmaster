@@ -250,7 +250,7 @@ This first implementation uses global client config keys. Per-plane mouse-aim ov
 | --- | --- | --- |
 | `EnableMouseAimControls` | `false` | Master enable for the active-development mode; new-flight-model planes only. |
 | `KeyPlaneMouseAim` | `49` | Toggle key while piloting a qualifying new-flight plane (N by default). |
-| `KeyBombReticleMode` | `37` | Toggle first-person gunner bomber sight for bomb-capable planes (K by default). |
+| `KeyBombReticleMode` | `37` | Toggle first-person gunner bomber sight for bomb-capable planes (K by default); shown in the in-game key binding list. |
 | `MouseAimSensitivity` | `0.18` | Scales raw mouse movement into desired aim yaw/pitch changes. |
 | `MouseAimSmoothing` | `0.30` | Smooths desired aim motion to reduce jitter without snapping. |
 | `MouseAimMaxPitchUp` | `70.0` | Nose-up aim clamp in degrees. |

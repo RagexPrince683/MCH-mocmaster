@@ -1062,7 +1062,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
                boolean bombReticle = MCP_ClientPlaneTickHandler.isBombReticleMode(plane);
                var12 = (new StringBuilder()).append(bombReticle ? "Bomb Sight Off : " : "Bomb Sight : ");
                msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyBombReticleMode.prmInt)).toString();
-               this.drawString(msg, RX, super.centerY - 60, colorActive);
+               this.drawCenteredString(msg, super.centerX, super.height - 42, colorActive);
             }
 
             if(seatID > 0 && plane.canSwitchGunnerModeOtherSeat(player)) {
