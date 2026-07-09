@@ -4,6 +4,10 @@ import mcheli.MCH_Config;
 import mcheli.MCH_ConfigPrm;
 import mcheli.wrapper.W_McClient;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.model.IModelCustom;
+
+import java.util.HashMap;
+import java.util.Map;
 import org.lwjgl.opengl.GL11;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
@@ -13,6 +17,8 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
  * Renders placeable vehicle items with their loaded 3D vehicle model instead of the flat item icon.
  */
 public class MCH_VehicleItemModelRender implements IItemRenderer {
+
+   private static final Map MODEL_DISPLAY_LISTS = new HashMap();
 
    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
       MCH_BaseVehicleInfo info = getInfo(item);
@@ -36,13 +42,54 @@ public class MCH_VehicleItemModelRender implements IItemRenderer {
       W_McClient.MOD_bindTexture("textures/" + info.getDirectoryName() + "/" + MCH_RenderBaseVehicle.getBaseTextureName(info.name) + ".png");
       MCH_RenderBaseVehicle.beginSkinOverlayRender(info.getDirectoryName(), info.name);
       try {
-         MCH_RenderBaseVehicle.renderAllModel(info.model);
+         renderCachedModel(info);
       } finally {
          MCH_RenderBaseVehicle.endSkinOverlayRender();
          GL11.glPopMatrix();
       }
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glEnable(3042);
+   }
+
+   private static void renderCachedModel(MCH_BaseVehicleInfo info) {
+      CachedDisplayList cached = (CachedDisplayList)MODEL_DISPLAY_LISTS.get(info);
+      if(cached == null || cached.model != info.model) {
+         if(cached != null) {
+            cached.delete();
+         }
+         cached = new CachedDisplayList(info.model);
+         MODEL_DISPLAY_LISTS.put(info, cached);
+      }
+      cached.render();
+   }
+
+   private static class CachedDisplayList {
+      private final IModelCustom model;
+      private final int displayList;
+
+      private CachedDisplayList(IModelCustom model) {
+         this.model = model;
+         this.displayList = GL11.glGenLists(1);
+         if(this.displayList != 0) {
+            GL11.glNewList(this.displayList, GL11.GL_COMPILE);
+            MCH_RenderBaseVehicle.renderAllModel(model);
+            GL11.glEndList();
+         }
+      }
+
+      private void render() {
+         if(this.displayList != 0) {
+            GL11.glCallList(this.displayList);
+         } else {
+            MCH_RenderBaseVehicle.renderAllModel(this.model);
+         }
+      }
+
+      private void delete() {
+         if(this.displayList != 0) {
+            GL11.glDeleteLists(this.displayList, 1);
+         }
+      }
    }
 
    private static MCH_BaseVehicleInfo getInfo(ItemStack item) {
