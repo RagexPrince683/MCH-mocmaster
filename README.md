@@ -153,7 +153,7 @@ Common examples:
 /mcheli title 5 2 {"text":"Mission start"}
 ```
 
-Operators can use all subcommands. Non-operators need matching `CommandPermission` entries in `mcheli.cfg`. See [docs/commands.md](docs/commands.md) for syntax, examples, and permission configuration.
+Operators can use all subcommands. Non-operators need matching `CommandPermission` entries in `mcheli.cfg`. `/mcheli enablenukes` reports usage plus the current status when run without an argument; changing it broadcasts a colored `ENABLED`/`DISABLED` status and plays the Wither spawn sound. See [docs/commands.md](docs/commands.md) for syntax, examples, and permission configuration.
 
 ## Fixed-wing flight-model tuning
 

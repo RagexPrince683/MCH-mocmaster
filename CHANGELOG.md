@@ -4,7 +4,7 @@
 
 ### Changed
 
-- Added `/mcheli enablenukes [true|false]` for MCHeli nuclear-weapon gating, with status/updates mirrored to HBM NTM's `/ntmenablenukes` command when that mod command is available.
+- Added `/mcheli enablenukes [true|false]` for MCHeli nuclear-weapon gating, with usage/status output when run without an argument, colored broadcast messages, Wither spawn sound feedback, and status/updates mirrored to HBM NTM's `/ntmenablenukes` command when that mod command is available.
 
 - Added the `CanMountShip` vehicle config key so pack makers can prevent oversized aircraft, such as heavy bombers, from mounting ship/carrier racks while preserving existing behavior by default.
 

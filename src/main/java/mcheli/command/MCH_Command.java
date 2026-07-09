@@ -269,13 +269,42 @@ public class MCH_Command extends CommandBase {
          if(MCH_HBMUtil.hasHBMEnableNukesCommand()) {
             MCH_HBMUtil.syncHBMEnableNukesCommand(sender, enabled);
          }
-         sender.addChatMessage(new ChatComponentText("MCHeli nukes " + (MCH_HBMUtil.areNukesEnabled() ? "enabled" : "disabled") + "."));
+         this.broadcastEnableNukesStatus(sender, MCH_HBMUtil.areNukesEnabled());
       } else {
-         sender.addChatMessage(new ChatComponentText("MCHeli nukes are " + (MCH_HBMUtil.areNukesEnabled() ? "enabled" : "disabled") + "."));
+         sender.addChatMessage(new ChatComponentText("Usage: /mcheli enablenukes <true|false>"));
+         sender.addChatMessage(this.createEnableNukesStatusMessage("Current MCHeli enablenukes status: ", MCH_HBMUtil.areNukesEnabled()));
+         if(MCH_HBMUtil.hasHBMEnableNukesCommand()) {
+            sender.addChatMessage(new ChatComponentText("Linked to HBM /ntmenablenukes command."));
+         }
       }
+   }
 
-      if(MCH_HBMUtil.hasHBMEnableNukesCommand()) {
-         sender.addChatMessage(new ChatComponentText("Linked to HBM /ntmenablenukes command."));
+   private IChatComponent createEnableNukesStatusMessage(String prefix, boolean enabled) {
+      ChatComponentText message = new ChatComponentText(prefix);
+      ChatComponentText status = new ChatComponentText(enabled?"ENABLED":"DISABLED");
+      status.getChatStyle().setColor(enabled?EnumChatFormatting.GREEN:EnumChatFormatting.RED);
+      message.appendSibling(status);
+      return message;
+   }
+
+   private void broadcastEnableNukesStatus(ICommandSender sender, boolean enabled) {
+      IChatComponent message = this.createEnableNukesStatusMessage("MCHeli nukes are now ", enabled);
+      MinecraftServer server = MinecraftServer.getServer();
+      if(server != null && server.getConfigurationManager() != null) {
+         server.getConfigurationManager().sendChatMsg(message);
+         List players = server.getConfigurationManager().playerEntityList;
+         for(int i = 0; i < players.size(); ++i) {
+            Object player = players.get(i);
+            if(player instanceof EntityPlayerMP) {
+               EntityPlayerMP playerMP = (EntityPlayerMP)player;
+               playerMP.worldObj.playSoundAtEntity(playerMP, "mob.wither.spawn", 1.0F, 1.0F);
+            }
+         }
+         if(!(sender instanceof EntityPlayerMP)) {
+            sender.addChatMessage(message);
+         }
+      } else {
+         sender.addChatMessage(message);
       }
    }
 
