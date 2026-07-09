@@ -311,8 +311,18 @@ public class MCH_BaseVehiclePacketHandler {
                         seat.seatID = i;
                         seat.setParent(ac);
                         seat.parentUniqueID = ac.getCommonUniqueId();
+                        if(seatList.riderEntityID == null || seatList.riderEntityID.length <= i || seatList.riderEntityID[i] <= 0) {
+                           seat.riddenByEntity = null;
+                        } else {
+                           Entity rider = player.worldObj.getEntityByID(seatList.riderEntityID[i]);
+                           if(rider != null) {
+                              seat.riddenByEntity = rider;
+                              rider.ridingEntity = seat;
+                           }
+                        }
                         ac.setSeat(i, seat);
                      } else {
+                        ac.setSeat(i, null);
                         MCH_Lib.DbgLog(player.worldObj, "[MCH-SYNC][SEAT-APPLY-FAIL] reason=seat_entity_missing_or_wrong_type aircraftId=%d index=%d requestedSeatId=%d resolved=%s",
                                 new Object[]{Integer.valueOf(seatList.entityID_AC), Integer.valueOf(i), Integer.valueOf(seatList.seatEntityID[i]), entity});
                      }

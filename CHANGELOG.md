@@ -8,7 +8,7 @@
 
 ### Changed
 
-- Fixed passenger seats becoming non-enterable after vehicles cross chunk load boundaries by recreating missing seat entities immediately when an interaction occurs in a loaded chunk.
+- Fixed passenger seats becoming non-enterable after vehicles cross chunk load boundaries or lag spikes by recreating missing server seat entities on interaction, clearing stale client seat slots, and resyncing authoritative seat occupant IDs.
 
 - Cached 3D vehicle item icon model rendering in OpenGL display lists so inventories, held items, and dropped item icons reuse compiled geometry instead of re-submitting full vehicle models every frame.
 
