@@ -15,6 +15,7 @@ public class MCH_PacketSeatListResponse extends MCH_Packet {
    public int entityID_AC = -1;
    public int seatNum = -1;
    public int[] seatEntityID = new int[]{-1};
+   public int[] riderEntityID = new int[]{-1};
 
 
    public int getMessageID() {
@@ -27,9 +28,11 @@ public class MCH_PacketSeatListResponse extends MCH_Packet {
          this.seatNum = data.readShort();
          if(this.seatNum > 0) {
             this.seatEntityID = new int[this.seatNum];
+            this.riderEntityID = new int[this.seatNum];
 
             for(int e = 0; e < this.seatNum; ++e) {
                this.seatEntityID[e] = data.readInt();
+               this.riderEntityID[e] = data.readInt();
             }
          }
       } catch (Exception var3) {
@@ -41,11 +44,13 @@ public class MCH_PacketSeatListResponse extends MCH_Packet {
    public void writeData(DataOutputStream dos) {
       try {
          dos.writeInt(this.entityID_AC);
-         if(this.seatNum > 0 && this.seatEntityID != null && this.seatEntityID.length == this.seatNum) {
+         if(this.seatNum > 0 && this.seatEntityID != null && this.seatEntityID.length == this.seatNum
+                 && this.riderEntityID != null && this.riderEntityID.length == this.seatNum) {
             dos.writeShort(this.seatNum);
 
             for(int e = 0; e < this.seatNum; ++e) {
                dos.writeInt(this.seatEntityID[e]);
+               dos.writeInt(this.riderEntityID[e]);
             }
          } else {
             dos.writeShort(-1);
@@ -72,12 +77,17 @@ public class MCH_PacketSeatListResponse extends MCH_Packet {
          this.seatNum = ac.getSeats().length;
          if(this.seatNum > 0) {
             this.seatEntityID = new int[this.seatNum];
+            this.riderEntityID = new int[this.seatNum];
 
             for(int i = 0; i < this.seatNum; ++i) {
-               this.seatEntityID[i] = W_Entity.getEntityId(ac.getSeat(i));
+               MCH_EntitySeat seat = ac.getSeat(i);
+               this.seatEntityID[i] = W_Entity.getEntityId(seat);
+               this.riderEntityID[i] = seat != null && seat.riddenByEntity != null
+                       && seat.riddenByEntity.ridingEntity == seat?W_Entity.getEntityId(seat.riddenByEntity):-1;
             }
          } else {
             this.seatEntityID = new int[]{-1};
+            this.riderEntityID = new int[]{-1};
          }
 
       }
