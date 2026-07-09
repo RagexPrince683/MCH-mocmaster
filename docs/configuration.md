@@ -242,7 +242,7 @@ Tuning guidance:
 
 ## New-flight plane mouse aim controls (currently in development)
 
-Mouse aim is currently in development as a control foundation for fixed-wing planes using `UseNewMobilitySystem = true` only. It is disabled by default and does not affect legacy aircraft. When enabled globally, pilots can toggle it in a qualifying new-flight plane with `KeyPlaneMouseAim`; the mouse moves a separate desired aim yaw/pitch and the aircraft nose chases that aim through the existing new-flight authority, stall, energy, pitch-suppression, damping, and rotation-limit path. Advanced lead HUD polish is intentionally left for a later pass. Plane CCIP, where enabled by the aircraft ballistic computer, is a static ballistic bomb-impact pipper projected from the aircraft body frame and does not follow player freelook or mouse aim.
+Mouse aim is currently in development as a control foundation for fixed-wing planes using `UseNewMobilitySystem = true` only. It is disabled by default and does not affect legacy aircraft. When enabled globally, pilots can toggle it in a qualifying new-flight plane with `KeyPlaneMouseAim`; the mouse moves a separate desired aim yaw/pitch and the aircraft nose chases that aim through the existing new-flight authority, stall, energy, pitch-suppression, damping, and rotation-limit path. Advanced lead HUD polish is intentionally left for a later pass. Plane CCIP, where enabled by the aircraft ballistic computer, is a static ballistic bomb-impact pipper projected from the aircraft body frame and does not follow player freelook or mouse aim. In first-person pilot gunner mode, `KeyBombReticleMode` toggles a bomber sight that uses the same ballistic prediction and only appears while viewing from the gunner camera.
 
 This first implementation uses global client config keys. Per-plane mouse-aim overrides are not wired yet, so pack authors should tune conservatively.
 
@@ -250,6 +250,7 @@ This first implementation uses global client config keys. Per-plane mouse-aim ov
 | --- | --- | --- |
 | `EnableMouseAimControls` | `false` | Master enable for the active-development mode; new-flight-model planes only. |
 | `KeyPlaneMouseAim` | `49` | Toggle key while piloting a qualifying new-flight plane (N by default). |
+| `KeyBombReticleMode` | `37` | Toggle first-person gunner bomber sight for bomb-capable planes (K by default). |
 | `MouseAimSensitivity` | `0.18` | Scales raw mouse movement into desired aim yaw/pitch changes. |
 | `MouseAimSmoothing` | `0.30` | Smooths desired aim motion to reduce jitter without snapping. |
 | `MouseAimMaxPitchUp` | `70.0` | Nose-up aim clamp in degrees. |
@@ -298,6 +299,7 @@ The custom cursor is required because the vanilla Minecraft crosshair is locked 
 | `KeyFreeLook` | `29` | Left Control |
 | `KeyPlaneLookAhead` | `56` | Left Alt |
 | `KeyPlaneMouseAim` | `49` | N |
+| `KeyBombReticleMode` | `37` | K |
 | `KeyGUI` | `19` | R |
 | `KeyGearUpDown` | `48` | B |
 | `KeyPutToRack` | `36` | J |
