@@ -301,12 +301,10 @@ public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnDa
          MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=team_check_failed seatId=%d", new Object[]{Integer.valueOf(this.seatID)});
          return false;
       }
-      if(!this.worldObj.isRemote && this.riddenByEntity != null
-              && (this.riddenByEntity.isDead || this.riddenByEntity.ridingEntity != this
-              || !this.worldObj.loadedEntityList.contains(this.riddenByEntity))) {
+      if(this.riddenByEntity != null && isInvalidSeatOccupant(this.riddenByEntity)) {
          MCH_Lib.DbgLog(this.worldObj,
-                 "[MCH-STATE][REPAIR] context=seat_interact reason=invalid_seat_occupant_backreference seatId=%d staleOccupantId=%d staleOccupantUuid=%s dead=%s",
-                 new Object[]{Integer.valueOf(this.seatID), Integer.valueOf(this.riddenByEntity.getEntityId()),
+                 "[MCH-STATE][REPAIR] context=seat_interact reason=invalid_seat_occupant_backreference side=%s seatId=%d staleOccupantId=%d staleOccupantUuid=%s dead=%s",
+                 new Object[]{this.worldObj.isRemote?"CLIENT":"SERVER", Integer.valueOf(this.seatID), Integer.valueOf(this.riddenByEntity.getEntityId()),
                          this.riddenByEntity.getUniqueID(), Boolean.valueOf(this.riddenByEntity.isDead)});
          this.riddenByEntity = null;
       }
@@ -330,6 +328,11 @@ public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnDa
       }
       player.mountEntity(this);
       return true;
+   }
+
+   private boolean isInvalidSeatOccupant(Entity occupant) {
+      return occupant == null || occupant.isDead || occupant.ridingEntity != this
+              || (!this.worldObj.isRemote && !this.worldObj.loadedEntityList.contains(occupant));
    }
 
    public MCH_EntityBaseVehicle getParent() {

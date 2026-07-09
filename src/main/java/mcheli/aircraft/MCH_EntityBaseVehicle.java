@@ -5449,23 +5449,29 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          if(seat == null) {
             MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][SEAT-SKIP] reason=seat_reference_null vehicle=%s seat=%d",
                     new Object[]{this.debugEntity(this), Integer.valueOf(i)});
-         } else if(seat.riddenByEntity != null) {
-            MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][SEAT-SKIP] reason=occupied vehicle=%s seat=%d occupant=%s",
-                    new Object[]{this.debugEntity(this), Integer.valueOf(i), this.debugEntity(seat.riddenByEntity)});
-         } else if(this.isMountedEntity(player)) {
-            MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][SEAT-SKIP] reason=player_already_mounted vehicle=%s seat=%d",
-                    new Object[]{this.debugEntity(this), Integer.valueOf(i)});
-         } else if(!this.canRideSeatOrRack(seatId, player)) {
-            MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][SEAT-SKIP] reason=seat_exclusion vehicle=%s seat=%d",
-                    new Object[]{this.debugEntity(this), Integer.valueOf(i)});
          } else {
-            if(!super.worldObj.isRemote) {
-               this.clearPlacementMotionLock();
-               player.mountEntity(seat);
+            if(this.clearInvalidSeatOccupant(seat, i, "vehicle_interact_search")) {
+               MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][SEAT-REPAIRED] vehicle=%s seat=%d",
+                       new Object[]{this.debugEntity(this), Integer.valueOf(i)});
             }
-            MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][SEAT-ACCEPT] vehicle=%s seat=%d player=%s",
-                    new Object[]{this.debugEntity(this), Integer.valueOf(i), this.debugEntity(player)});
-            return true;
+            if(seat.riddenByEntity != null) {
+               MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][SEAT-SKIP] reason=occupied vehicle=%s seat=%d occupant=%s",
+                       new Object[]{this.debugEntity(this), Integer.valueOf(i), this.debugEntity(seat.riddenByEntity)});
+            } else if(this.isMountedEntity(player)) {
+               MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][SEAT-SKIP] reason=player_already_mounted vehicle=%s seat=%d",
+                       new Object[]{this.debugEntity(this), Integer.valueOf(i)});
+            } else if(!this.canRideSeatOrRack(seatId, player)) {
+               MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][SEAT-SKIP] reason=seat_exclusion vehicle=%s seat=%d",
+                       new Object[]{this.debugEntity(this), Integer.valueOf(i)});
+            } else {
+               if(!super.worldObj.isRemote) {
+                  this.clearPlacementMotionLock();
+                  player.mountEntity(seat);
+               }
+               MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][SEAT-ACCEPT] vehicle=%s seat=%d player=%s",
+                       new Object[]{this.debugEntity(this), Integer.valueOf(i), this.debugEntity(player)});
+               return true;
+            }
          }
       }
       MCH_Lib.DbgLog(super.worldObj, "[MCH-INTERACT][SEAT-SEARCH-REJECT] reason=no_available_seat vehicle=%s player=%s",
@@ -6985,16 +6991,24 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          super.riddenByEntity = null;
       }
       for(int i = 0; i < this.getSeats().length; ++i) {
-         MCH_EntitySeat seat = this.getSeats()[i];
-         if(seat != null && seat.riddenByEntity != null
-                 && (seat.riddenByEntity.isDead || seat.riddenByEntity.ridingEntity != seat
-                 || !super.worldObj.loadedEntityList.contains(seat.riddenByEntity))) {
-            MCH_Lib.DbgLog(super.worldObj,
-                    "[MCH-STATE][REPAIR] context=%s reason=invalid_seat_occupant_backreference vehicle=%s seat=%d staleOccupant=%s",
-                    new Object[]{context, this.debugEntity(this), Integer.valueOf(i), this.debugEntity(seat.riddenByEntity)});
-            seat.riddenByEntity = null;
-         }
+         this.clearInvalidSeatOccupant(this.getSeats()[i], i, context);
       }
+   }
+
+   private boolean clearInvalidSeatOccupant(MCH_EntitySeat seat, int seatIndex, String context) {
+      if(seat == null || seat.riddenByEntity == null) {
+         return false;
+      }
+      Entity occupant = seat.riddenByEntity;
+      if(!occupant.isDead && occupant.ridingEntity == seat
+              && (super.worldObj.isRemote || super.worldObj.loadedEntityList.contains(occupant))) {
+         return false;
+      }
+      MCH_Lib.DbgLog(super.worldObj,
+              "[MCH-STATE][REPAIR] context=%s reason=invalid_seat_occupant_backreference side=%s vehicle=%s seat=%d staleOccupant=%s",
+              new Object[]{context, super.worldObj.isRemote?"CLIENT":"SERVER", this.debugEntity(this), Integer.valueOf(seatIndex), this.debugEntity(occupant)});
+      seat.riddenByEntity = null;
+      return true;
    }
 
    private boolean rejectInteraction(EntityPlayer player, String reason) {
