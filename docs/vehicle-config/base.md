@@ -114,6 +114,7 @@ Visual keys do not usually affect physics unless explicitly noted.
 
 - Weapons: `AddWeapon`, `AddTurretWeapon`, `AddPartWeapon`, `AddPartRotWeapon`, `AddPartTurretWeapon`, `AddPartTurretRotWeapon`, `AddPartWeaponChild`, `AddPartWeaponMissile`, `AddPartWeaponBay`, `AddPartSlideWeaponBay`.
 - Racks/hooks: `AddRack`, `RideRack`, `MobDropOption`, `AddRepellingHook`.
+- Chain towing limits: `MaximumExternalPayloadCapacity` sets how much vehicle weight this vehicle can chain-tow in pounds, and `Weight` sets this vehicle's own chain-tow weight in pounds. Defaults are `0` lb capacity and `50000` lb weight, so vehicles cannot chain-lift other configured vehicles unless a payload capacity is explicitly configured.
 - Part animation: `AddPartHatch`, `AddPartSlideHatch`, `AddPartCanopy`, `AddPartSlideCanopy`, `AddPartLG`, `AddPartLGRev`, `AddPartLGHatch`, `AddPartSlideRotLG`, `AddPartThrottle`, `AddPartRotation`, `AddPartLightHatch`.
 - Ground visuals: `SetWheelPos`, `AddCrawlerTrack`, `AddTrackRoller`, `TrackRollerRot`, `AddPartWheel`, `PartWheelRot`, `AddPartSteeringWheel`.
 - Effects/sound/render: `AddParticleSplash`, `particlesscale`, `EnableSeaSurfaceParticle`, `Sound`, `SoundRange`, `SoundVolume`, `SoundPitch`, `hideentity`, `SmoothShading`, `AddSearchLight`, `AddFixedSearchLight`, `AddSteeringSearchLight`, `RotorSpeed`.

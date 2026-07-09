@@ -32,6 +32,8 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    public boolean hasalert = true;
    /** Enables client-side CCIP bomb impact reticle for plane HUDs. */
    public boolean hasBallisticComputer = false;
+   public double maximumExternalPayloadCapacity;
+   public double weight;
    public List recipeString;
    public List recipe;
    public boolean isShapedRecipe;
@@ -263,6 +265,8 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
       this.displayName = this.name;
       this.displayNameLang = new HashMap();
       this.itemID = 0;
+      this.maximumExternalPayloadCapacity = 0.0D;
+      this.weight = 50000.0D;
       this.recipeString = new ArrayList();
       this.recipe = new ArrayList();
       this.isShapedRecipe = true;
@@ -619,6 +623,10 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
             this.category = data.toUpperCase().replaceAll("[,;:]", ".").replaceAll("[ \t]", "");
          } else if(item.equalsIgnoreCase("CanRide")) {
             this.canRide = this.toBool(data, true);
+         } else if(item.equalsIgnoreCase("MaximumExternalPayloadCapacity")) {
+            this.maximumExternalPayloadCapacity = Math.max(0.0D, Math.min(1000000000.0D, this.toDouble(data)));
+         } else if(item.equalsIgnoreCase("Weight")) {
+            this.weight = Math.max(0.0D, Math.min(1000000000.0D, this.toDouble(data)));
          } else if(item.equalsIgnoreCase("MaxFuel")) {
             this.maxFuel = this.toInt(data, 0, 100000000);
          } else if(item.equalsIgnoreCase("FuelConsumption")) {
