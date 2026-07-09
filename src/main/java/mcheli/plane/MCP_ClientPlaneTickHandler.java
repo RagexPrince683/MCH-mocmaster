@@ -15,6 +15,8 @@ import mcheli.wrapper.W_Reflection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 
 public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler {
 
@@ -107,6 +109,7 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
          }
 
          this.updateBombReticleMode(var7, var8, var9);
+         this.forceBombReticleCamera(var7, var8, var9);
 
          boolean hideHand = true;
          if(useChaseCamera) {
@@ -160,6 +163,33 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
          bombReticlePlaneEntityId = bombReticleMode ? plane.getEntityId() : -1;
          playSoundOK();
       }
+   }
+
+
+   private void forceBombReticleCamera(EntityPlayer player, MCP_EntityPlane plane, boolean isPilot) {
+      if(player == null || plane == null || !isPilot || !isBombReticleMode(plane)) {
+         return;
+      }
+      MCP_PlaneCCIPHelper.Result result = MCP_PlaneCCIPHelper.predictCurrentWeapon(plane, player);
+      if(result == null || !result.valid || result.impact == null) {
+         return;
+      }
+      Vec3 cameraPos = Vec3.createVectorHelper(plane.camera.posX, plane.camera.posY, plane.camera.posZ);
+      double dx = result.impact.xCoord - cameraPos.xCoord;
+      double dy = result.impact.yCoord - cameraPos.yCoord;
+      double dz = result.impact.zCoord - cameraPos.zCoord;
+      double horizontal = Math.sqrt(dx * dx + dz * dz);
+      if(horizontal < 1.0E-6D) {
+         return;
+      }
+      float yaw = (float)(Math.atan2(dz, dx) * 180.0D / Math.PI) - 90.0F;
+      float pitch = (float)(-(Math.atan2(dy, horizontal) * 180.0D / Math.PI));
+      pitch = MathHelper.clamp_float(pitch, -90.0F, 90.0F);
+      player.prevRotationYaw = player.rotationYaw;
+      player.prevRotationPitch = player.rotationPitch;
+      player.rotationYaw = yaw;
+      player.rotationPitch = pitch;
+      plane.updateCameraRotate(yaw, pitch);
    }
 
    public static boolean isBombReticleMode(MCP_EntityPlane plane) {

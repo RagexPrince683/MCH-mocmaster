@@ -989,6 +989,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    }
 
    private void drawCCIPPipper(double x, double y, boolean clamped, boolean bomberMode) {
+      if(bomberMode) {
+         this.drawBombSightReticle(x, y, clamped);
+         return;
+      }
       int color = clamped ? 0xAA55FF66 : 0xF055FF66;
       double r = 10.0D * CCIP_PIPPER_SCALE;
       double tickInner = r + 2.0D * CCIP_PIPPER_SCALE;
@@ -1003,7 +1007,24 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       this.drawLine(new double[]{x - 2.0D, y, x + 2.0D, y, x, y - 2.0D, x, y + 2.0D,
             x - tickOuter, y, x - tickInner, y, x + tickInner, y, x + tickOuter, y,
             x, y - tickOuter, x, y - tickInner, x, y + tickInner, x, y + tickOuter}, color);
-      this.drawString(bomberMode ? "BOMB" : "CCIP", (int)(x + r + 7.0D), (int)(y + r + 4.0D), color);
+      this.drawString("CCIP", (int)(x + r + 7.0D), (int)(y + r + 4.0D), color);
+   }
+
+   private void drawBombSightReticle(double x, double y, boolean clamped) {
+      int color = clamped ? 0xAA000000 : 0xF0000000;
+      double r = 30.0D;
+      double inner = 8.0D;
+      double outer = 46.0D;
+      double[] circle = new double[66];
+      for(int i = 0; i <= 32; ++i) {
+         double a = Math.PI * 2.0D * (double)i / 32.0D;
+         circle[i * 2] = x + Math.cos(a) * r;
+         circle[i * 2 + 1] = y + Math.sin(a) * r;
+      }
+      this.drawLine(circle, color, 3);
+      this.drawLine(new double[]{x - outer, y, x - inner, y, x + inner, y, x + outer, y,
+            x, y - outer, x, y - inner, x, y + inner, x, y + outer}, color, 3);
+      this.drawLine(new double[]{x - 3.0D, y, x + 3.0D, y, x, y - 3.0D, x, y + 3.0D}, color, 2);
    }
 
    private static class ReleaseKinematics {
