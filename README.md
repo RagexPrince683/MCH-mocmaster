@@ -149,6 +149,7 @@ Common examples:
 /mcheli reconfig
 /mcheli status entity 5
 /mcheli showboundingbox true
+/mcheli enablenukes false
 /mcheli title 5 2 {"text":"Mission start"}
 ```
 

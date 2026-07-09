@@ -1534,7 +1534,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             result = MCH_Explosion.newExplosionInWater(super.worldObj, this, this.shootingEntity, x, y, z, exp, expBlock, this.isBomblet == 1 ? super.rand.nextInt(3) == 0 : true, true, this.getInfo().flaming, true, 0, this.getInfo() != null ? this.getInfo().damageFactor : null);
         }
 
-        if(this.getInfo().nukeYield > 0) {
+        if(this.getInfo().nukeYield > 0 && MCH_HBMUtil.areNukesEnabled()) {
             if(!this.getInfo().nukeEffectOnly) {
                 worldObj.spawnEntityInWorld((Entity) MCH_HBMUtil.EntityNukeExplosionMK5_statFac(super.worldObj, this.getInfo().nukeYield, this.posX + 0.5, this.posY + 0.5, this.posZ + 0.5));
             }
