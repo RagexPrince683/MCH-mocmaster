@@ -497,7 +497,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       return prevRot + (rot - prevRot) * tickTime;
    }
 
-   public void renderDebugHitBox(MCH_EntityBaseVehicle e, double x, double y, double z, float yaw, float pitch) {
+   public void renderDebugHitBox(MCH_EntityBaseVehicle e, double x, double y, double z, float yaw, float pitch, float roll) {
       MCH_Config var10000 = MCH_MOD.config;
       if(MCH_Config.TestMode.prmBool && debugModel != null) {
          GL11.glPushMatrix();
@@ -508,16 +508,16 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          GL11.glPopMatrix();
          GL11.glPushMatrix();
          GL11.glTranslated(x, y, z);
+         GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
+         GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
+         GL11.glRotatef(roll, 0.0F, 0.0F, 1.0F);
          MCH_BoundingBox[] arr$ = e.getCalculatedExtraBoundingBoxes();
          int len$ = arr$.length;
 
          for(int i$ = 0; i$ < len$; ++i$) {
             MCH_BoundingBox bb = arr$[i$];
             GL11.glPushMatrix();
-            GL11.glTranslated(bb.rotatedOffset.xCoord, bb.rotatedOffset.yCoord, bb.rotatedOffset.zCoord);
-            GL11.glRotatef(-e.getRotYaw(), 0.0F, 1.0F, 0.0F);
-            GL11.glRotatef(-e.getRotPitch(), 1.0F, 0.0F, 0.0F);
-            GL11.glRotatef(-e.getRotRoll(), 0.0F, 0.0F, 1.0F);
+            GL11.glTranslated(bb.offsetX, bb.offsetY, bb.offsetZ);
             GL11.glPushMatrix();
             GL11.glScalef(bb.width, bb.height, bb.depth);
             this.bindTexture("textures/bounding_box.png");
