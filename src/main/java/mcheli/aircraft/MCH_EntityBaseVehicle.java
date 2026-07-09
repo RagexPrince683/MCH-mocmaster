@@ -6927,7 +6927,50 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       MCH_Lib.DbgLog(super.worldObj,
               "[MCH-STATE][SEAT-RESOLVE-FAIL] context=%s vehicle=%s index=%d reason=no_loaded_seat_with_parent_id",
               new Object[]{context, this.debugEntity(this), Integer.valueOf(seatIndex)});
-      return current;
+      MCH_EntitySeat recreated = this.recreateSeatInLoadedChunk(seatIndex, context);
+      if(recreated != null) {
+         return recreated;
+      }
+      return current != null && !current.isDead && current.worldObj == super.worldObj
+              && current.seatID == seatIndex && current.getParent() == this?current:null;
+   }
+
+   private MCH_EntitySeat recreateSeatInLoadedChunk(int seatIndex, String context) {
+      if(super.worldObj.isRemote || this.getAcInfo() == null || this.getCommonUniqueId().isEmpty()
+              || seatIndex < 0 || seatIndex >= this.seats.length) {
+         return null;
+      }
+      MCH_SeatInfo seatInfo = this.getSeatInfo(seatIndex + 1);
+      if(seatInfo == null) {
+         return null;
+      }
+      Vec3 position = this.getTransformedPosition(seatInfo.pos);
+      if(!super.worldObj.blockExists(MathHelper.floor_double(position.xCoord),
+              MathHelper.floor_double(position.yCoord), MathHelper.floor_double(position.zCoord))) {
+         MCH_Lib.DbgLog(super.worldObj,
+                 "[MCH-STATE][SEAT-RECREATE-SKIP] context=%s vehicle=%s index=%d reason=seat_chunk_not_loaded",
+                 new Object[]{context, this.debugEntity(this), Integer.valueOf(seatIndex)});
+         return null;
+      }
+      MCH_EntitySeat seat = new MCH_EntitySeat(super.worldObj);
+      seat.parentUniqueID = this.getCommonUniqueId();
+      seat.seatID = seatIndex;
+      seat.setParent(this);
+      seat.setPosition(position.xCoord, position.yCoord, position.zCoord);
+      seat.prevPosX = position.xCoord;
+      seat.prevPosY = position.yCoord;
+      seat.prevPosZ = position.zCoord;
+      if(super.worldObj.spawnEntityInWorld(seat)) {
+         this.setSeat(seatIndex, seat);
+         MCH_Lib.DbgLog(super.worldObj,
+                 "[MCH-STATE][SEAT-RECREATE] context=%s vehicle=%s index=%d seat=%s",
+                 new Object[]{context, this.debugEntity(this), Integer.valueOf(seatIndex), this.debugEntity(seat)});
+         return seat;
+      }
+      MCH_Lib.DbgLog(super.worldObj,
+              "[MCH-STATE][SEAT-RECREATE-FAIL] context=%s vehicle=%s index=%d reason=spawn_rejected",
+              new Object[]{context, this.debugEntity(this), Integer.valueOf(seatIndex)});
+      return null;
    }
 
    private void repairInvalidOccupantsForInteraction(String context) {

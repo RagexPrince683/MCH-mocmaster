@@ -8,6 +8,8 @@
 
 ### Changed
 
+- Fixed passenger seats becoming non-enterable after vehicles cross chunk load boundaries by recreating missing seat entities immediately when an interaction occurs in a loaded chunk.
+
 - Cached 3D vehicle item icon model rendering in OpenGL display lists so inventories, held items, and dropped item icons reuse compiled geometry instead of re-submitting full vehicle models every frame.
 
 - Fixed dispenser weapons using HBM mine block items such as `hbm:tile.mine_he` to place the mine block directly on impact when vanilla-style fake-player item use does not handle the block item reliably.
