@@ -11,6 +11,8 @@
 
 ### Changed
 
+- Fixed New UAV station pilot rendering so the station keeps showing the operator fake player after control transfers to an active New UAV.
+
 - Fixed passenger seats becoming non-enterable after vehicles cross chunk load boundaries or lag spikes by recreating missing server seat entities on interaction, clearing stale client seat slots, and resyncing authoritative seat occupant IDs.
 
 - Cached 3D vehicle item icon model rendering in OpenGL display lists so inventories, held items, and dropped item icons reuse compiled geometry instead of re-submitting full vehicle models every frame.
