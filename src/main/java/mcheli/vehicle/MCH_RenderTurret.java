@@ -38,7 +38,7 @@ public class MCH_RenderTurret extends MCH_RenderBaseVehicle {
                vehicle.lastRiderPitch = vehicle.rotationPitch;
             }
 
-            this.renderDebugHitBox(vehicle, posX, posY, posZ, yaw, pitch);
+            this.renderDebugHitBox(vehicle, posX, posY, posZ, yaw, pitch, roll);
             this.renderDebugPilotSeat(vehicle, posX, posY, posZ, yaw, pitch, roll);
             GL11.glTranslated(posX, posY, posZ);
             GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
