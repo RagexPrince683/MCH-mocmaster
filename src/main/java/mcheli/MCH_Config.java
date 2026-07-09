@@ -66,6 +66,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm KeyFreeLook;
    public static MCH_ConfigPrm KeyPlaneLookAhead;
    public static MCH_ConfigPrm KeyPlaneMouseAim;
+   public static MCH_ConfigPrm KeyBombReticleMode;
    public static MCH_ConfigPrm KeyGUI;
    public static MCH_ConfigPrm KeyGearUpDown;
    public static MCH_ConfigPrm KeyPutToRack;
@@ -364,6 +365,7 @@ public class MCH_Config {
       KeyFreeLook = new MCH_ConfigPrm("KeyFreeLook", 29);
       KeyPlaneLookAhead = new MCH_ConfigPrm("KeyPlaneLookAhead", 56);
       KeyPlaneMouseAim = new MCH_ConfigPrm("KeyPlaneMouseAim", 49);
+      KeyBombReticleMode = new MCH_ConfigPrm("KeyBombReticleMode", 37);
       KeyGUI = new MCH_ConfigPrm("KeyGUI", 19);
       KeyGearUpDown = new MCH_ConfigPrm("KeyGearUpDown", 48);
       KeyPutToRack = new MCH_ConfigPrm("KeyPutToRack", 36);
@@ -392,6 +394,7 @@ public class MCH_Config {
               KeyFreeLook,
               KeyPlaneLookAhead,
               KeyPlaneMouseAim,
+              KeyBombReticleMode,
               KeyGUI,
               KeyGearUpDown,
               KeyPutToRack,
