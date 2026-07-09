@@ -1214,8 +1214,10 @@ public class MCH_EntityUavStation
       }
 
       private void updateNewUavPilotProfile() {
-           Entity pilot = this.controlAircraft != null && this.controlAircraft.isNewUAV()
-                 ? this.controlAircraft.getRiddenByEntity() : null;
+           MCH_EntityBaseVehicle activeNewUav = this.controlAircraft != null && this.controlAircraft.isNewUAV()
+                 ? this.controlAircraft : MCH_UavRegistry.findLoadedByUuid(this.worldObj, this.linkedUavEntityUUID);
+           Entity pilot = activeNewUav != null && activeNewUav.isNewUAV()
+                 && activeNewUav.isLinkedToStation(this) ? activeNewUav.getRiddenByEntity() : null;
            setNewUavPilotProfile(pilot instanceof EntityPlayer ? (EntityPlayer)pilot : null);
          }
 
