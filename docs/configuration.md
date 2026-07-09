@@ -79,6 +79,7 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `AutoThrottleDownTank` | `false` | Auto-throttle-down behavior for tanks. |
 | `SwitchWeaponWithMouseWheel` | `true` | Allows mouse-wheel weapon switching. |
 | `LWeaponAutoFire` | `false` | Auto-fire behavior for light weapons. |
+| `EnableHandheld` | `true` | Enables crafting recipes for hand-held weapons and their ammunition (`Stinger`, `Javelin`, and `RPG`). Set to `false` to prevent those recipes from registering. |
 | `DisableItemRender` | `1` | Valid range noted in source: `0 ~ 3`; `1` recommended. |
 | `Override3DItemIcon` | `false` | Global 3D vehicle item icon override. `true` forces 3D item icons off; `false` allows per-vehicle `Enable3DItemIcon` settings. |
 | `Heli3DItemIconScale` | `1.0` | Global scale multiplier for helicopter 3D item icons. |
