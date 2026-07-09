@@ -107,7 +107,7 @@ For development asset testing, the build/run setup expects assets in `build/run/
 
 1. Open the MCHeli creative tabs (`MCHeliO Item`, `MCHeliO Helicopters`, `MCHeliO Planes`, `MCHeliO Ships`, `MCHeliO Tanks`, `MCHeliO Vehicles`, and `MCHeliO Recipe Items`).
 2. Place or craft a **Drafting Table** to access recipes when recipes are enabled.
-3. Use vehicle item icons to place vehicles. If `PlaceableOnSpongeOnly` is enabled, vehicles must be placed on sponge blocks.
+3. Use vehicle item icons to place vehicles; those icons render the loaded 3D vehicle model in inventories, held views, and dropped item form. If `PlaceableOnSpongeOnly` is enabled, vehicles must be placed on sponge blocks.
 4. Enter vehicles, use the configured movement/weapon keys, and refuel/repair according to the content pack's vehicle definitions.
 5. Server operators can use `/mcheli list` to discover available administrative subcommands.
 
@@ -130,6 +130,8 @@ The mod writes `config/mcheli.cfg` on startup. Important options include:
 - `InfinityAmmo` and `InfinityFuel` - enable unlimited ammunition/fuel globally.
 - `AllHeliSpeed`, `AllPlaneSpeed`, `AllShipSpeed`, and `AllTankSpeed` - global speed multipliers/clamps.
 - `EnableAircraftLODRender`, `AircraftLODStartDistance`, and `AircraftLODFarDistance` - control long-distance vehicle model rendering.
+- `Override3DItemIcon` - globally disables 3D vehicle item icons when set to `true`; `false` allows per-vehicle 3D item icon settings.
+- `Heli3DItemIconScale`, `Plane3DItemIconScale`, `Ship3DItemIconScale`, `Tank3DItemIconScale`, and `Turret3DItemIconScale` - global scale multipliers for 3D item icons by vehicle type.
 - `MultiThreadedModelLoading` - toggles threaded model loading on the client.
 - `CommandPermission` entries - grant specific `/mcheli` subcommands to named non-operator players.
 - `Key*` entries - default key and mouse bindings for MCHeli controls.
