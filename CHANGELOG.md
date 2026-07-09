@@ -8,6 +8,8 @@
 
 ### Changed
 
+- Fixed dispenser weapons using HBM mine block items such as `hbm:tile.mine_he` to place the mine block directly on impact when vanilla-style fake-player item use does not handle the block item reliably.
+
 - Added the `EnableHandheld` config toggle for disabling Stinger, Javelin, RPG, and matching ammunition crafting recipes.
 
 - Fixed debug extra bounding-box rendering to use the vehicle model transform before box offsets, so boxes roll with the vehicle instead of staying visually upright while only their centers move.

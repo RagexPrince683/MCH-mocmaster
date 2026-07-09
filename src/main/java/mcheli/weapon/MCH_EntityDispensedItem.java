@@ -174,6 +174,8 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
             info.delayFuse = 0;
             entity.setInfo(info);
             worldObj.spawnEntityInWorld(entity);
+         } else if (this.placeHbmMineBlock(x, y, z, item, itemDamage)) {
+            System.out.println("[DispensedItem] Placed HBM mine block");
          } else {
             System.out.println("[DispensedItem] Using generic item");
             ItemStack stack = new ItemStack(item, 1, itemDamage);
@@ -191,6 +193,25 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
             }
          }
       }
+   }
+
+   private boolean placeHbmMineBlock(int x, int y, int z, Item item, int itemDamage) {
+      String itemName = W_Item.getNameForItem(item);
+      if(itemName == null || !itemName.startsWith("hbm:tile.mine")) {
+         return false;
+      }
+
+      Block mineBlock = Block.getBlockFromItem(item);
+      if(mineBlock == null || mineBlock == Blocks.air) {
+         return false;
+      }
+
+      int placeY = y + 1;
+      if(placeY < 0 || placeY >= 256 || !super.worldObj.isAirBlock(x, placeY, z) || !mineBlock.canPlaceBlockAt(super.worldObj, x, placeY, z)) {
+         return false;
+      }
+
+      return super.worldObj.setBlock(x, placeY, z, mineBlock, itemDamage, 3);
    }
 
    public void sprinkleBomblet() {
