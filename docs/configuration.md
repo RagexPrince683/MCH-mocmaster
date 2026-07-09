@@ -87,7 +87,7 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `Ship3DItemIconScale` | `1.0` | Global scale multiplier for ship 3D item icons. |
 | `Tank3DItemIconScale` | `1.0` | Global scale multiplier for tank 3D item icons. |
 | `Turret3DItemIconScale` | `1.0` | Global scale multiplier for turret/static vehicle 3D item icons. |
-| 3D item icon rendering | n/a | Vehicle item models are queued and cached client-side in OpenGL display lists after first render, preventing large creative tabs from compiling every visible model in the same frame while keeping the same config toggles. |
+| 3D item icon rendering | n/a | Vehicle item models are queued and cached client-side in chunked OpenGL display lists after first render, preventing large creative tabs from compiling every visible model or full vehicle mesh in the same frame while keeping the same config toggles. |
 | `HideKeybind` | `false` | Hides keybind display/help where implemented. |
 | `RenderDistanceWeight` | `1000.0` | Render-distance weight for mod rendering. |
 | `EnableAircraftLODRender` | `true` | Enables client-only far-distance model displays for aircraft, tanks, turrets, and ships. |
