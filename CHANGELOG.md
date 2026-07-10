@@ -17,6 +17,9 @@
 
 ### Changed
 
+- Added the `HasBombSight` / `EnableBombSight` / `EnableBomberSight` vehicle config boolean for disabling the first-person gunner bombsight on aircraft such as the AC-130 while leaving gunner mode available.
+- Fixed the bombsight GUI gate to resolve plane config data before checking the new bombsight toggle.
+
 - New UAV inventory handoff now warns operators at 10 seconds, 5 seconds, and timeout while they remain within 15 blocks of the station for refuel/rearm access, and stores/clears inventory immediately if they move farther away.
 
 - Destroying a UAV station now unlinks the live UAV and returns any active operator to the station position instead of destroying the UAV and dismounting the player at the aircraft.

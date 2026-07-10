@@ -154,6 +154,7 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
 
    private void updateBombReticleMode(EntityPlayer player, MCP_EntityPlane plane, boolean isPilot) {
       if(player == null || plane == null || !isPilot || !plane.getIsGunnerMode(player)
+            || plane.getPlaneInfo() == null || !plane.getPlaneInfo().hasBombSight
             || super.mc == null || super.mc.gameSettings == null || super.mc.gameSettings.thirdPersonView != 0) {
          resetBombReticleMode();
          return;
@@ -193,7 +194,8 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
    }
 
    public static boolean isBombReticleMode(MCP_EntityPlane plane) {
-      return plane != null && bombReticleMode && bombReticlePlaneEntityId == plane.getEntityId();
+      return plane != null && plane.getPlaneInfo() != null && plane.getPlaneInfo().hasBombSight
+            && bombReticleMode && bombReticlePlaneEntityId == plane.getEntityId();
    }
 
    public static void resetBombReticleMode() {

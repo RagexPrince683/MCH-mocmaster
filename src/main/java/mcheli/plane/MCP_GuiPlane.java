@@ -74,6 +74,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
       if(ac instanceof MCP_EntityPlane && !ac.isDestroyed()) {
          MCP_EntityPlane plane = (MCP_EntityPlane)ac;
+         MCP_PlaneInfo info = plane.getPlaneInfo();
          int seatID = ac.getSeatIdByEntity(player);
          GL11.glLineWidth((float)MCH_Gui.scaleFactor);
          if(plane.getCameraMode(player) == 1) {
@@ -126,7 +127,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
          // CCIP is a world-space impact cue, not part of the optional full HUD.
          // Keep it available in third person even when DisplayHUDThirdPerson is disabled.
-         if(seatID == 0 && (!plane.getIsGunnerMode(player) || (!isThirdPersonView && MCP_ClientPlaneTickHandler.isBombReticleMode(plane)))) {
+         if(seatID == 0 && (!plane.getIsGunnerMode(player) || (!isThirdPersonView && info != null && info.hasBombSight && MCP_ClientPlaneTickHandler.isBombReticleMode(plane)))) {
             this.drawPlaneCCIPReticle(plane, player, plane.getIsGunnerMode(player));
          } else if(seatID == 0 && plane.getIsGunnerMode(player)) {
             this.resetCCIPState();
@@ -1090,7 +1091,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
                }
             }
 
-            if(seatID == 0 && plane.getIsGunnerMode(player) && !Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
+            if(seatID == 0 && plane.getIsGunnerMode(player) && info.hasBombSight && !Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
                if(super.mc != null && super.mc.gameSettings != null && super.mc.gameSettings.thirdPersonView != 0) {
                   this.drawCenteredString("Bomb sight: OFF Third Person", super.centerX, super.height - 42, colorInactive);
                } else {

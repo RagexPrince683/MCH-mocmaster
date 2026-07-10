@@ -32,6 +32,8 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    public boolean hasalert = true;
    /** Enables client-side CCIP bomb impact reticle for plane HUDs. */
    public boolean hasBallisticComputer = false;
+   /** Enables first-person gunner bombsight mode when ballistic prediction is available. */
+   public boolean hasBombSight = true;
    public double maximumExternalPayloadCapacity;
    public double weight;
    public List recipeString;
@@ -897,6 +899,10 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                  } else if(item.equalsIgnoreCase("HasBallisticComputer")
                                        || item.equalsIgnoreCase("EnableBallisticComputer")) {
                                     this.hasBallisticComputer = this.toBool(data);
+                                 } else if(item.equalsIgnoreCase("HasBombSight")
+                                       || item.equalsIgnoreCase("EnableBombSight")
+                                       || item.equalsIgnoreCase("EnableBomberSight")) {
+                                    this.hasBombSight = this.toBool(data);
                                  } else if(item.equalsIgnoreCase("UseNewMobilitySystem")
                                        || item.equalsIgnoreCase("EnableNewMobilitySystem")
                                        || item.equalsIgnoreCase("UseNewFlightModel")
