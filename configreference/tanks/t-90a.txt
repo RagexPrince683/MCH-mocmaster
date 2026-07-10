@@ -1,3 +1,4 @@
+Weight = 101000
 ﻿DisplayName = T-90A MBT
 AddDisplayName = en_US, T-90A MBT
 AddDisplayName = ja_JP, T-90A　主力戦車

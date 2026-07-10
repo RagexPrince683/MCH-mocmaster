@@ -8,6 +8,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 28605
+Weight = 2230
 MaxHp = 80
 Gravity = -9.81
 GravityInWater = -1.0

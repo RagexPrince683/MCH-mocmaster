@@ -1,5 +1,6 @@
 DisplayName = Pz.38(t) A
 AddDisplayName = Pz.38(t) A
+Weight = 100000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Pz.38(t) A
 NameOnEarlyAARadar = Tank

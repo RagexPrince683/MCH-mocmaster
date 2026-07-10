@@ -8,6 +8,7 @@ NameOnModernAARadar = T-72A MBT
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ItemID = 91129
+Weight = 92000
 MaxHp = 400
 Speed = 0.37
 ThrottleUpDown = 1.4

@@ -1,5 +1,6 @@
 DisplayName = UH-1D Iroquois
 AddDisplayName = ja_JP, UH-1D イロコイ
+Weight = 10200
 NameOnEarlyASRadar = Helicopter
 NameOnModernASRadar = UH-1D Iroquois
 NameOnEarlyAARadar = Helicopter

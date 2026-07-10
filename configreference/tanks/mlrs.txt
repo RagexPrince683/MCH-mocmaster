@@ -1,6 +1,7 @@
 DisplayName = M270 Multiple Launch Rocket System (MLRS)
 AddDisplayName = en_US, M270 Multiple Launch Rocket System (MLRS)
 AddDisplayName = ru_RU, M270 МЛРС
+Weight = 55000
 NameOnEarlyASRadar = Artillery Vehicle
 NameOnModernASRadar = M270 Multiple Launch Rocket System (MLRS)
 NameOnEarlyAARadar = Artillery Vehicle

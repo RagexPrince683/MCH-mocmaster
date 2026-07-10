@@ -8,6 +8,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 30100
+Weight = 120000
 MaxHp = 600
 Speed = 0.45
 Sound = abrams

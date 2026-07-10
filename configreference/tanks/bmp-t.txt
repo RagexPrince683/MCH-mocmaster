@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 191919
+Weight = 45000
 MaxHp = 200
 Speed = 0.37
 ;Sound = bmpt

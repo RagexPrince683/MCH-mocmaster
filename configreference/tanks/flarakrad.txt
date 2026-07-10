@@ -1,4 +1,5 @@
 DisplayName = 15T MAN KAT 1 8x8 Truck with Roland SAM System 'FlaRakRad'
+Weight = 100000
 NameOnEarlyASRadar = Air Defense Vehicle
 NameOnModernASRadar = 15T MAN KAT 1 8x8 Truck with Roland SAM System 'FlaRakRad'
 NameOnEarlyAARadar = Air Defense Vehicle

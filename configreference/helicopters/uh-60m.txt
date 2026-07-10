@@ -9,6 +9,7 @@ ChaffWaitTime = 400
 ChaffUseTime = 100
 ThrottleDownFactor = 0.35
 ItemID = 28835
+Weight = 12511
 MaxHp = 100
 EnableGunnerMode = false
 EnableFoldBlade = true

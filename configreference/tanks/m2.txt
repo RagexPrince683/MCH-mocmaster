@@ -1,3 +1,4 @@
+Weight = 100000
 ﻿DisplayName = M2 Browning
 AddDisplayName = en_US, M2 Browning
 NameOnEarlyASRadar = Tank

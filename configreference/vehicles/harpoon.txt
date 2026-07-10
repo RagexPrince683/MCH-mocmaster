@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 28698
+Weight = 1523
 AddTexture = harpoon
 CameraPosition = 0.0, 4.50, 0.0
 CameraZoom = 5

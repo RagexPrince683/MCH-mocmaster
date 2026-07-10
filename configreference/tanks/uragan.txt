@@ -1,4 +1,5 @@
 DisplayName = BM-27 Uragan MLRS
+Weight = 100000
 NameOnEarlyASRadar = Artillery Vehicle
 NameOnModernASRadar = BM-27 Uragan MLRS
 NameOnEarlyAARadar = Artillery Vehicle

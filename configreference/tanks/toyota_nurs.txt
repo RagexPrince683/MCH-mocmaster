@@ -1,6 +1,7 @@
 DisplayName = Toyota Hilux with B-8V20A
 AddDisplayName = en_US, Toyota Hilux with B-8V20A
 AddDisplayName = ru_RU, Тойота с Б-8В20А
+Weight = 4200
 NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Toyota Hilux with B-8V20A
 NameOnEarlyAARadar = Light Vehicle

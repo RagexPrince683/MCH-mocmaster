@@ -1,5 +1,6 @@
 DisplayName = MZKT-7930 heavy high mobility chassis with Bal-e Kh-35 Coastal Defense System
 AddDisplayName = en_US, MZKT-7930 heavy high mobility chassis with Bal-e Kh-35 Coastal Defense System
+Weight = 100000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = MZKT-7930 heavy high mobility chassis with Bal-e Kh-35 Coastal Defense System
 NameOnEarlyAARadar = Tank

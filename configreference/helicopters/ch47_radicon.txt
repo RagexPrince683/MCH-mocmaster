@@ -10,6 +10,7 @@ ChaffWaitTime = 400
 ChaffUseTime = 100
 ThrottleDownFactor = 0.35
 ItemID = 30024
+Weight = 24400
 MaxHp = 20
 Speed = 0.3
 EnableNightVision = false

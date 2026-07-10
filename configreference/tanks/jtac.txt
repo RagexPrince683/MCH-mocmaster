@@ -1,5 +1,6 @@
 DisplayName = Lightweight Laser Designator Rangefinder AN/PED-1 [Advanced 'JTAC' System]
 AddDisplayName = en_US, Lightweight Laser Designator Rangefinder AN/PED-1 [Advanced 'JTAC' System]
+Weight = 100000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Lightweight Laser Designator Rangefinder AN/PED-1 [Advanced 'JTAC' System]
 NameOnEarlyAARadar = Tank

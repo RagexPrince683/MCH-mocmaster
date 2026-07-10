@@ -8,6 +8,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 30100
+Weight = 100000
 MaxHp = 265
 Speed = 0.3
 Sound = mfourtyseven

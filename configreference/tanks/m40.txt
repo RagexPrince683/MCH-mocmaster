@@ -1,5 +1,6 @@
 DisplayName = 155mm M40 Gun Motor Carriage
 AddDisplayName = zh_CN,M40“长脚汤姆”自行火炮
+Weight = 66139
 NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = 155mm M40 Gun Motor Carriage
 NameOnEarlyAARadar = Light Vehicle

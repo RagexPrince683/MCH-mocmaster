@@ -9,6 +9,7 @@ ChaffWaitTime = 420
 ChaffUseTime = 80
 ThrottleDownFactor = 0.40
 ItemID = 35403
+Weight = 100000
 MaxHp = 200
 Speed = 0.43
 Sound = zilonethreefive

@@ -12,7 +12,7 @@ MCHeli Overdrive+ is a combined-arms vehicle, weapon, and warfare framework for 
 
 ### Content expansion
 
-- **Expanded vehicle roster:** the repository's `configreference/` set alone contains hundreds of vehicle definitions across planes, helicopters, ships, tanks, and ground/static vehicles, and the loader remains compatible with larger external MCHeli-style content packs.
+- **Expanded vehicle roster:** the repository's `configreference/` set alone contains hundreds of vehicle definitions across planes, helicopters, ships, tanks, and ground/static vehicles. These reference vehicle configs include `Weight = {weight in lbs}` entries based on real-world platform weight data for towing/payload balancing, and the loader remains compatible with larger external MCHeli-style content packs.
 - **More vehicle roles:** Overdrive supports modern and legacy fixed-wing aircraft, helicopters, drones/UAVs, gunships, bombers, transports, naval vessels, submarines, armored vehicles, civilian/support vehicles, turrets, carriers, and logistics platforms.
 - **Expanded pack-maker framework:** content authors can mix legacy MCHeli behavior with new Overdrive systems per vehicle rather than converting a whole pack at once.
 

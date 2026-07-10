@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.60
 ItemID = 30181
+Weight = 66139
 MaxHp = 110
 Speed = 0.25
 Sound = shermaneng

@@ -1,6 +1,7 @@
 DisplayName = M1129 Self-Propelled Mortar
 AddDisplayName = en_US, M1129 Self-Propelled Mortar
 AddDisplayName = ja_JP, M1129 自走迫撃砲
+Weight = 40000
 NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = M1129 Self-Propelled Mortar
 NameOnEarlyAARadar = Light Vehicle

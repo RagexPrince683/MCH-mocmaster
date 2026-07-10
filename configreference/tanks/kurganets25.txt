@@ -1,6 +1,7 @@
 DisplayName = Kurganets-25 IFV with DUBM-30 Epoch or 'Bumerang-BM' RWS
 AddDisplayName = en_US, Kurganets-25 IFV
 AddDisplayName = ja_JP, Kurganets-25 歩兵戦闘車
+Weight = 45000
 NameOnEarlyASRadar = Air Defense Vehicle
 NameOnModernASRadar = Kurganets-25 IFV with DUBM-30 Epoch or 'Bumerang-BM' RWS
 NameOnEarlyAARadar = Air Defense Vehicle

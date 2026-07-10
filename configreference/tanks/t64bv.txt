@@ -13,6 +13,7 @@ ExplosionSizeByCrash = 25
 Category = MBT
 
 ItemID = 31400
+Weight = 100000
 MaxHp = 400
 Speed = 0.43
 ThrottleUpDown = 1.2

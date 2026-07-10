@@ -1,5 +1,6 @@
 DisplayName = VAZ-2102
 AddDisplayName = ru_RU, ВАЗ 2102
+Weight = 3200
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = VAZ-2102
 NameOnEarlyAARadar = Tank

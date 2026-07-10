@@ -10,6 +10,7 @@ ThrottleDownFactor = 0.50
 ;AddDisplayName = en_EN, BTR-4 E Bucefal
 ;at least translate it???
 ItemID = 191919
+Weight = 45000
 MaxHp = 200
 Speed = 0.68
 Sound = apc_run

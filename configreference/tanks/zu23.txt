@@ -1,4 +1,5 @@
 DisplayName = 23mm ZU-23-2 Anti-Aircraft Twin Auto Cannon
+Weight = 9000
 ;with 23mm ZU-23-2 Anti-Aircraft Twin Auto Cannon
 AddDisplayName = ru_RU, ЗУ-23-2
 NameOnEarlyASRadar = Air Defense Vehicle

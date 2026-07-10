@@ -1,4 +1,5 @@
 DisplayName = MT-12 2A29 100mm Anti-Tank Gun
+Weight = 9000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = MT-12 2A29 100mm Anti-Tank Gun
 NameOnEarlyAARadar = Tank

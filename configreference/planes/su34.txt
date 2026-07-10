@@ -1,5 +1,6 @@
 DisplayName = Su-34
 AddDisplayName = ja_JP, Su-34
+Weight = 16500
 NameOnEarlyASRadar = Fast Jet
 NameOnModernASRadar = Su-34
 NameOnEarlyAARadar = Fast Jet

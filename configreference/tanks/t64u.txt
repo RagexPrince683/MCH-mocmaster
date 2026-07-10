@@ -8,6 +8,7 @@ NameOnModernAARadar = T-64BM Bulat
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ItemID = 31100
+Weight = 100000
 MaxHp = 450
 Speed = 0.43
 ThrottleUpDown = 1.2

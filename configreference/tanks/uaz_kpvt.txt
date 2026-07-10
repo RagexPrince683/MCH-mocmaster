@@ -1,5 +1,6 @@
 DisplayName = UAZ-469 with KPVT
 AddDisplayName = ru_RU, УАЗ-469 с КПВТ
+Weight = 3800
 NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = UAZ-469 with KPVT
 NameOnEarlyAARadar = Light Vehicle

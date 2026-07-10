@@ -1,6 +1,7 @@
 DisplayName = M2A1 Bradley IFV
 AddDisplayName = en_US, M2A1 Bradley IFV
 AddDisplayName = ru_RU, M2A1 Брэдли
+Weight = 60000
 NameOnEarlyASRadar = Air Defense Vehicle
 NameOnModernASRadar = M2A1 Bradley IFV
 NameOnEarlyAARadar = Air Defense Vehicle

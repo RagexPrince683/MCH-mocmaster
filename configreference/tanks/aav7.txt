@@ -1,3 +1,4 @@
+Weight = 57000
 ﻿DisplayName = AAVP-7A1 "Amtrac"
 AddDisplayName = en_US, AAVP-7A1 "Amtrac"
 AddDisplayName = ja_JP, AAVP-7A1 アムトラック

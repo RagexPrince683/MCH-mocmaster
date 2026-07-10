@@ -1,4 +1,5 @@
 DisplayName = Lockheed SR-71 Blackbird
+Weight = 67200
 NameOnEarlyASRadar = Fast Jet
 NameOnModernASRadar = Lockheed SR-71 Blackbird
 NameOnEarlyAARadar = Fast Jet

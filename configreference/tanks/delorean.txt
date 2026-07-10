@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.45
 ItemID = 30026
+Weight = 3200
 MaxHp = 200
 Speed = 1.3
 Sound = dmc

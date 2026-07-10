@@ -9,6 +9,7 @@ ChaffWaitTime = 360
 ChaffUseTime = 120
 ThrottleDownFactor = 0.20
 ItemID = 28715
+Weight = 12500
 MaxHp = 100
 EnableNightVision = true
 EnableEntityRadar = true

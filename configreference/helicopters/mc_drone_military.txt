@@ -1,6 +1,7 @@
 DisplayName = Improvised DJI Phantom Weaponized UAV
 AddDisplayName = en_US, Improvised DJI Phantom Weaponized UAV
 AddDisplayName = ja_JP, ??RC????UAV
+Weight = 4400
 NameOnEarlyASRadar = Small UAV
 NameOnModernASRadar = Improvised DJI Phantom Weaponized UAV
 NameOnEarlyAARadar = Small UAV

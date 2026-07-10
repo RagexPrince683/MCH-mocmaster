@@ -1,3 +1,4 @@
+Weight = 3200
 ﻿DisplayName = Nissan Silvia S14
 AddDisplayName = en_US, Nissan Silvia S14
 NameOnEarlyASRadar = Tank

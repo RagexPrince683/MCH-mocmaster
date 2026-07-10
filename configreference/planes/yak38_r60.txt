@@ -1,6 +1,7 @@
 DisplayName = Yakovlev Yak-38 with R-60
 AddDisplayName = en_US, Yakovlev Yak-38 with R-60
 AddDisplayName = ru_RU, ЯК-38 (4 Ракеты Р-60)
+Weight = 17500
 NameOnEarlyASRadar = Fast Jet
 NameOnModernASRadar = Yakovlev Yak-38 with R-60
 NameOnEarlyAARadar = Fast Jet

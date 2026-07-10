@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 30997
+Weight = 92200
 MaxHp = 162
 Speed = 0.3
 Sound = mtwentysixeng

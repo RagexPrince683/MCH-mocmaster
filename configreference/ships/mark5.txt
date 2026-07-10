@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.30
 ItemID = 28742
+Weight = 125000
 MaxHp = 1600
 Speed = 0.58
 Sound = markfive

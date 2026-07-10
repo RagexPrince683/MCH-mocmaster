@@ -1,4 +1,5 @@
 DisplayName = ASLAV-C Type II
+Weight = 45000
 NameOnEarlyASRadar = Armored Vehicle
 NameOnModernASRadar = ASLAV-C Type II
 NameOnEarlyAARadar = Armored Vehicle

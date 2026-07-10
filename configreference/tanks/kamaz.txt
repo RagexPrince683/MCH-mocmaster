@@ -1,4 +1,5 @@
 DisplayName = KamAZ-6350 8x8 Truck
+Weight = 20000
 NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = KamAZ-6350 8x8 Truck
 NameOnEarlyAARadar = Light Vehicle

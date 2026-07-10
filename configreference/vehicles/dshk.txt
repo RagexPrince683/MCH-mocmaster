@@ -1,6 +1,7 @@
 DisplayName = DSHK
 AddDisplayName = en_US, DSHK
 AddDisplayName = ru_RU, DSHK
+Weight = 75
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = DSHK
 NameOnEarlyAARadar = Tank

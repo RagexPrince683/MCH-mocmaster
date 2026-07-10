@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 30100
+Weight = 79366
 MaxHp = 205
 Speed = 0.32
 ThrottleUpDown = 1

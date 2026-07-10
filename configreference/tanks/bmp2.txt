@@ -1,3 +1,4 @@
+Weight = 31747
 ﻿DisplayName = BMP-2 IFV
 AddDisplayName = en_US, BMP-2 IFV
 AddDisplayName = ja_JP, BMP-2 歩兵戦闘車

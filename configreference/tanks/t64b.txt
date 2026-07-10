@@ -8,6 +8,7 @@ NameOnModernAARadar = T-64B
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ItemID = 31600
+Weight = 100000
 MaxHp = 400
 Speed = 0.43
 ThrottleUpDown = 1.2

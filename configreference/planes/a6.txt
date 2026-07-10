@@ -8,6 +8,7 @@ ChaffWaitTime = 360
 ChaffUseTime = 120
 ThrottleDownFactor = 0.20
 ItemID = 28740
+Weight = 17500
 MaxHp = 150
 onGroundPitch = 5
 Sound = asix

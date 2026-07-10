@@ -1,5 +1,6 @@
 DisplayName = T-26 mod. 1939
 AddDisplayName = Т-26 (образец 1939 г.)
+Weight = 100000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = T-26 mod. 1939
 NameOnEarlyAARadar = Tank

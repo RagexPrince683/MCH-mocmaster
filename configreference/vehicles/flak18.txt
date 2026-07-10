@@ -1,3 +1,4 @@
+Weight = 11243
 ﻿DisplayName = 88mm AA-Gun Flak 36
 AddDisplayName = en_US, 88mm AA-Gun Flak 36
 NameOnEarlyASRadar = Air Defense Vehicle

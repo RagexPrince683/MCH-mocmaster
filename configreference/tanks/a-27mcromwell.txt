@@ -1,3 +1,4 @@
+Weight = 100000
 ﻿DisplayName = A-27M Cromwell V
 AddDisplayName = en_US, A-27M Cromwell V
 AddDisplayName = ru_RU, A-27M Cromwell V

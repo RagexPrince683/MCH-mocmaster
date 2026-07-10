@@ -1,4 +1,5 @@
 DisplayName = FPV Drone with RPG-7 Warhead
+Weight = 2400
 NameOnEarlyASRadar = Small UAV
 NameOnModernASRadar = FPV Drone with RPG-7 Warhead
 NameOnEarlyAARadar = Small UAV

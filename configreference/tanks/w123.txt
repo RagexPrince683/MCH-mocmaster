@@ -1,4 +1,5 @@
 DisplayName = Mercedes-Benz W123 240D
+Weight = 3200
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Mercedes-Benz W123 240D
 NameOnEarlyAARadar = Tank
