@@ -1080,10 +1080,14 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             }
 
             if(seatID == 0 && plane.getIsGunnerMode(player) && !Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
-               boolean bombReticle = MCP_ClientPlaneTickHandler.isBombReticleMode(plane);
-               var12 = (new StringBuilder()).append(bombReticle ? "Bomb Sight Off : " : "Bomb Sight : ");
-               msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyBombReticleMode.prmInt)).toString();
-               this.drawCenteredString(msg, super.centerX, super.height - 42, colorActive);
+               if(super.mc != null && super.mc.gameSettings != null && super.mc.gameSettings.thirdPersonView != 0) {
+                  this.drawCenteredString("Bomb sight: OFF Third Person", super.centerX, super.height - 42, colorInactive);
+               } else {
+                  boolean bombReticle = MCP_ClientPlaneTickHandler.isBombReticleMode(plane);
+                  var12 = (new StringBuilder()).append(bombReticle ? "Bomb Sight Off : " : "Bomb Sight : ");
+                  msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyBombReticleMode.prmInt)).toString();
+                  this.drawCenteredString(msg, super.centerX, super.height - 42, colorActive);
+               }
             }
 
             if(seatID > 0 && plane.canSwitchGunnerModeOtherSeat(player)) {
