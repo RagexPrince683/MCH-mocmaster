@@ -25,6 +25,7 @@ EnableGunnerMode = true
 ConcurrentGunnerMode = true
 FlareType = 2
 HasChaff = true
+EnableBombSight = false
 InventorySize = 9
 MaxFuel         = 108800
 FuelConsumption = 26.537
