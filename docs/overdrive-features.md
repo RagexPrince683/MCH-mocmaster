@@ -132,7 +132,7 @@ This page summarizes the major project-wide systems that distinguish MCHeli Over
 
 **Why it exists:** Original MCHeli UAV behavior is fragile around restarts and station control. Overdrive adds persistence and duplicate-detection infrastructure so NewUAV/NewSmallUAV content can survive common server lifecycle events more safely.
 
-**How it differs from original MCHeli:** Overdrive stores NewUAV station/location data in `data/mcheli_new_uavs.json`, tracks destroyed stations, restores item identity/damage, keeps the linked station chunk loaded while an active NewUAV is piloted, and resolves duplicate live entities through canonical selection instead of blindly deleting potentially recoverable vehicles.
+**How it differs from original MCHeli:** Overdrive stores NewUAV station/location data in `data/mcheli_new_uavs.json`, tracks destroyed stations, restores item identity/damage, restores a NewUAV operator inventory if the linked station is destroyed mid-control, keeps the linked station chunk loaded while an active NewUAV is piloted, and resolves duplicate live entities through canonical selection instead of blindly deleting potentially recoverable vehicles.
 
 **Configuration:** Pack makers use shared `UAV`, `SmallUAV`, `NewUAV`, `NewSmallUAV`, and `TargetDrone` flags. Server owners should preserve the world `data/` folder with normal backups because it contains the NewUAV JSON persistence file.
 
