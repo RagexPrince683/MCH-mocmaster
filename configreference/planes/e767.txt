@@ -25,6 +25,7 @@ EnableEntityRadar = true
 RWRType = DIGITAL
 RadarType = MODERN_AA
 EnableGunnerMode = true
+HasBombSight = false
 ConcurrentGunnerMode = true
 FlareType = 2
 HasChaff = true

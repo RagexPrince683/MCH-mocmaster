@@ -23,6 +23,7 @@ CameraPosition = 1.13, 2.29, -0.32, false
 EnableNightVision = false
 EnableEntityRadar = false
 EnableGunnerMode = true
+HasBombSight = false
 ConcurrentGunnerMode = true
 MaxFuel         = 2120
 FuelConsumption = 1.767

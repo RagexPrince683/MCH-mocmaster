@@ -18,6 +18,7 @@ RadarType = MODERN_AA
 EnableEjectionSeat = true
 Speed = 4.0
 EnableGunnerMode = true
+HasBombSight = false
 FlareType = 4
 HasChaff = true
 MaxFuel         = 20000

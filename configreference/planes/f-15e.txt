@@ -101,6 +101,7 @@ MaxFuel         = 24400
 FuelConsumption = 6.256
 CameraPosition = 0.0, 0.70, 1.6
 EnableGunnerMode = true
+HasBombSight = false
 AutoPilotRot = 0
 ThrottleUpDown = 0.3
 

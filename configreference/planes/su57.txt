@@ -28,6 +28,7 @@ FuelConsumption = 11.771
 Stealth = 0.43
 CameraPosition = 0.0, 1.25, 0.00
 EnableGunnerMode = true
+HasBombSight = false
 AutoPilotRot = 0
 
 sound = pakfa

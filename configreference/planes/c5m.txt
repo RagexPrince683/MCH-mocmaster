@@ -21,6 +21,7 @@ MaxFuel         = 603260
 FuelConsumption = 109.168
 InventorySize = 64
 EnableGunnerMode = true
+HasBombSight = false
 AutoPilotRot = 0
 FlareType = 2
 EnableNightVision = true

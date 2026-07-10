@@ -21,6 +21,7 @@ Speed = 4.0
 ;1.5k mph
 
 EnableGunnerMode = true
+HasBombSight = false
 FlareType = 4
 HasChaff = true
 MaxFuel         = 20000

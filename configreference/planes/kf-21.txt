@@ -110,6 +110,7 @@ MobilityRoll = 2.520
 ;OnGroundPitch = 3
 
 EnableGunnerMode = true
+HasBombSight = false
 CameraPosition = 0.0, 0.7, -1.0
 AutoPilotRot = 0
 
