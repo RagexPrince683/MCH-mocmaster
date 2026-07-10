@@ -11,6 +11,8 @@
 
 ### Changed
 
+- Destroying a UAV station now unlinks the live UAV and returns any active operator to the station position instead of destroying the UAV and dismounting the player at the aircraft.
+
 - Active New UAVs now keep their linked UAV station chunk loaded while piloted so the station continue flow can resolve the tied drone outside spawn chunks.
 
 - Fixed New UAV station pilot rendering so the station keeps showing the operator fake player after control transfers to an active New UAV.
