@@ -10,6 +10,7 @@ ChaffUseTime = 120
 ThrottleDownFactor = 0.20
 ItemID = 28705
 Weight = 24959
+CanMountShip = true
 MaxHp = 250
 Sound = aten
 EnableNightVision = true

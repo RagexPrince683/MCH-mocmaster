@@ -10,6 +10,7 @@ ChaffUseTime = 120
 ThrottleDownFactor = 0.20
 ItemID = 30202
 Weight = 9500
+CanMountShip = true
 MaxHp = 100
 Speed = 1.08
 EnableRealisticFlightModel = true

@@ -2,6 +2,7 @@ DisplayName = Yakovlev Yak-38 with UB-32
 AddDisplayName = en_US, Yakovlev Yak-38 with UB-32
 AddDisplayName = ru_RU, ЯК-38 (4 Блока УБ-32)
 Weight = 17500
+CanMountShip = true
 NameOnEarlyASRadar = Large Aircraft
 NameOnModernASRadar = Yakovlev Yak-38 with UB-32
 NameOnEarlyAARadar = Large Aircraft

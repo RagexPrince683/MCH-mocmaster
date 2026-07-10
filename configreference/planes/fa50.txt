@@ -2,6 +2,7 @@ DisplayName = FA-50
 AddDisplayName = en_US, FA-50
 AddDisplayName = ko_KR, FA-50 공격기
 Weight = 12500
+CanMountShip = true
 NameOnEarlyASRadar = Fast Jet
 NameOnModernASRadar = FA-50
 NameOnEarlyAARadar = Fast Jet

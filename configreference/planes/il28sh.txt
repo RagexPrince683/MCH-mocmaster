@@ -1,6 +1,7 @@
 DisplayName = Il-28Sh
 AddDisplayName = ja_JP, Il-28Sh
 Weight = 12500
+CanMountShip = false
 NameOnEarlyASRadar = Fast Jet
 NameOnModernASRadar = Il-28Sh
 NameOnEarlyAARadar = Fast Jet
