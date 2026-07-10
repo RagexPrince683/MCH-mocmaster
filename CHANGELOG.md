@@ -1,5 +1,10 @@
 # Changelog
 
+## Freelook Indicator GUI
+
+- Added a visible `FREELOOK` indicator to the new plane overlay whenever the pilot is in regular freelook or the new third-person hold-freelook camera mode.
+- Added `FREELOOK` to the new simple plane HUD warning stack so pilots using the compact HUD can still confirm freelook state.
+
 ## Bomb Reticle Camera and Sight Update
 - Added a third-person bomber sight HUD hint that displays `Bomb sight: OFF Third Person` when the bomber sight popup is visible outside first person.
 - Bomb reticle mode now forces the first-person gunner camera to look directly at the predicted bomb impact point while active.

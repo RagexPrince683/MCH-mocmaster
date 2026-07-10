@@ -333,6 +333,9 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       if(plane.isOverspeeding()) {
          warnings.add("OVERSPEED");
       }
+      if(this.isPlaneFreelookIndicatorActive(plane)) {
+         warnings.add("FREELOOK");
+      }
       if(plane.getMaxFuel() > 0 && plane.getFuelP() < 0.10F && !plane.isInfinityFuel(plane.getRiddenByEntity(), true)) {
          warnings.add("LOW FUEL");
       }
@@ -343,6 +346,14 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          warnings.add("DAMAGED");
       }
       return warnings;
+   }
+
+   private boolean isPlaneFreelookIndicatorActive(MCP_EntityPlane plane) {
+      if(plane == null) {
+         return false;
+      }
+      EntityPlayer player = super.mc != null?super.mc.thePlayer:null;
+      return plane.isFreeLookMode() || MCP_PlaneChaseCamera.shouldUseHoldFreelookAsCameraOnly(plane, player);
    }
 
    private String formatSimpleHudFuel(MCP_EntityPlane plane) {
