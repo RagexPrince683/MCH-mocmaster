@@ -377,6 +377,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
 
       this.listDevelopButtons = new ArrayList();
       if(Minecraft.getMinecraft().isSingleplayer()) {
+         //TODO Fix for mocmaster/codebase if possible?
          this.buttonReloadAircraftInfo = new W_GuiButton(400, x1, y + 50, 150, 20, "Reload vehicle configuration settings");
          this.buttonReloadWeaponInfo = new W_GuiButton(401, x1, y + 75, 150, 20, "Reload All Weapons");
          this.buttonReloadAllHUD = new W_GuiButton(402, x1, y + 100, 150, 20, "Reload All HUD");
