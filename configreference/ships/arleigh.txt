@@ -9,6 +9,7 @@ ChaffUseTime = 0
 ThrottleDownFactor = 0.30
 ItemID = 28748
 Weight = 18300000
+MaximumExternalPayloadCapacity = 20000
 MaxHp = 8900
 ;theres no replacement for displacement bitches
 Speed = 0.35

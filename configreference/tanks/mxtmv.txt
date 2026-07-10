@@ -2,6 +2,7 @@ DisplayName = MXT-MV Husky TSV with Heckler & Koch GMG
 AddDisplayName = en_US, MXT-MV Husky TSV with Heckler & Koch GMG
 AddDisplayName = ja_JP, MXT-MV ハスキーTSV with Heckler & Koch GMG
 Weight = 100000
+MaximumExternalPayloadCapacity = 4300
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = MXT-MV Husky TSV with Heckler & Koch GMG
 NameOnEarlyAARadar = Tank

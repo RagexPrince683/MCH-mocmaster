@@ -2,6 +2,7 @@ DisplayName = Toyota Hilux (1989)
 AddDisplayName = en_US, Toyota Hilux (1989)
 AddDisplayName = ru_RU, Тойота Hilux (1989)
 Weight = 4200
+MaximumExternalPayloadCapacity = 2200
 NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Toyota Hilux (1989)
 NameOnEarlyAARadar = Light Vehicle

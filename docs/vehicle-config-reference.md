@@ -298,3 +298,8 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `addpart` | Turret/static | `drawFP,rotYaw,rotPitch,type,x,y,z[,recoilBuf]` | none | turret part |
 | `addchildpart` | Turret/static | same as `addpart` | none | child part of last turret part |
 | `PreventWaterBobbing` | Ship | boolean | false | ship water motion option |
+
+
+## Payload and towing capacities
+
+The reference configs now populate `MaximumExternalPayloadCapacity = {lbs}` on active carrier/tow-capable vehicles that define `AddRack`, using each platform's maximum towing, external-lift, payload, or cargo capacity in pounds. Vehicles without an active rack or towing/carrying role keep the default capacity unless explicitly configured.

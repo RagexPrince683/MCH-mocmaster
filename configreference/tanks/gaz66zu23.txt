@@ -1,5 +1,6 @@
 DisplayName = GAZ-66 "shishiga"
 Weight = 9000
+MaximumExternalPayloadCapacity = 4400
 ;with 23mm ZU-23-2 Anti-Aircraft Twin Auto Cannon
 AddDisplayName = ru_RU, ГАЗ-66
 NameOnEarlyASRadar = Tank
