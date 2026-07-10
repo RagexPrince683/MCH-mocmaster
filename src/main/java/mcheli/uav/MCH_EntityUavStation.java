@@ -440,8 +440,12 @@ public class MCH_EntityUavStation
                 double z = this.posZ + Math.cos(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
                 double y = this.posY + getMountedYOffset() + rider.getYOffset();
                 if(rider instanceof EntityPlayerMP) {
-                     W_EntityPlayer.closeScreen(rider);
-                     ((EntityPlayerMP)rider).setPositionAndUpdate(x, y, z);
+                     EntityPlayerMP player = (EntityPlayerMP)rider;
+                     W_EntityPlayer.closeScreen(player);
+                     player.setPositionAndUpdate(x, y, z);
+                     if(linkedUav.isNewUAV()) {
+                          MCH_UavInventory.restorePilotInventory(player, "station_destroyed");
+                     }
                 } else {
                      rider.setPosition(x, y, z);
                 }
