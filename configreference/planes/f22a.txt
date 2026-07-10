@@ -30,6 +30,7 @@ CameraPosition = 0.0, 0.70, -2.18
 ;CameraPosition = 5.0, 5.70, -22.18, false, 90, 40
 ;CameraPosition = 0.0, 5.70, -12.18, false, 30, 40
 EnableGunnerMode = true
+HasBombSight = false
 AutoPilotRot = 0
 ThrottleUpDown = 0.3
 

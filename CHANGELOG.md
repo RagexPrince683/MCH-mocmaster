@@ -1,5 +1,9 @@
 # Changelog
 
+## Config Reference Non-Bomber Gunner Bombsights
+
+- Disabled `HasBombSight` for non-bomber fixed-wing config references that use pilot gunner mode, including gunships, drones, fighters, transports, and reconnaissance aircraft, while confirming the AC-130 remains opted out via `EnableBombSight = false`.
+
 ## Config Reference Plane Carrier Eligibility
 
 - Added explicit `CanMountShip` entries to every plane config reference. Oversized bombers, strategic aircraft, large transports, AWACS/tanker, and other large non-carrier aircraft are set to `false`; remaining plane references are set to `true` to preserve carrier rack compatibility.

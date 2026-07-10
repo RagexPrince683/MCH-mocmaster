@@ -17,6 +17,7 @@ RadarType = MODERN_AS
 HasBallisticComputer = true
 EnableEjectionSeat = true
 EnableGunnerMode = true
+HasBombSight = false
 ConcurrentGunnerMode = true
 Speed = 3.306
 FlareType = 4

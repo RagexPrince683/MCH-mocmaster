@@ -26,6 +26,7 @@ EnableEntityRadar = true
 RadarType = MODERN_AA
 HasChaff = true
 EnableGunnerMode = true
+HasBombSight = false
 NewUAV = true
 ;;soon
 ;;ahh hell nah blud used slash comments in the txt

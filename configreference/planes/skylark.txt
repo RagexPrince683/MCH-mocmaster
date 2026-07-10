@@ -17,6 +17,7 @@ EnableEntityRadar = true
 RadarType = MODERN_AA
 HasChaff = true
 EnableGunnerMode = true
+HasBombSight = false
 AutoPilotRot = -0.04
 CameraPosition = 0.0, 0.40, 0.34
 ThrottleUpDown = 1.0

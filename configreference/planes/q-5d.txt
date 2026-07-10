@@ -30,6 +30,7 @@ HasChaff = true
 EnableEjectionSeat = true
 EnableSeaSurfaceParticle = true
 EnableGunnerMode = true
+HasBombSight = false
 CameraPosition = 0.0, 0.45, 2.0
 AutoPilotRot = 0.0
 ParticlesScale = 0.7

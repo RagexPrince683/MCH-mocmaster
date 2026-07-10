@@ -18,6 +18,7 @@ RWRType = DIGITAL
 RadarType = MODERN_AA
 EnableEjectionSeat = true
 EnableGunnerMode = true
+HasBombSight = false
 ConcurrentGunnerMode = true
 Speed = 4.0
 Sound = tomcat

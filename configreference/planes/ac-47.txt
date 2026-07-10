@@ -104,6 +104,7 @@ CameraPosition = 1.8, 4.40, -7.42
 CameraZoom = 1
 EnableNightVision = true
 EnableGunnerMode = true
+HasBombSight = false
 ConcurrentGunnerMode = true
 ;FlareType = 2
 ;sorry kid

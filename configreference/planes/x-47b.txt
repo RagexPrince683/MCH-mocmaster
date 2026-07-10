@@ -24,6 +24,7 @@ RWRType = DIGITAL
 RadarType = MODERN_AA
 HasChaff = true
 EnableGunnerMode = true
+HasBombSight = false
 NewUAV = true
 HideEntity = true
 AutoPilotRot = -0.06

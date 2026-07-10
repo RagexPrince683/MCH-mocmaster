@@ -19,6 +19,7 @@ EnableEjectionSeat = true
 
 AutoPilotRot = 0.00
 EnableGunnerMode = true
+HasBombSight = false
 
 Speed = 4.0
 FlareType = 4
