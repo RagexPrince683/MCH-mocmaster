@@ -103,6 +103,7 @@ For fixed-wing planes using `useNewMobilitySystem = true`, this gravity value is
 | `Stealth` | float[0..1] | 0 | Visibility modifier. |
 | `UAV`, `SmallUAV`, `NewUAV`, `NewSmallUAV`, `TargetDrone` | boolean | false | UAV/NewUAV force camera view and add a hidden seat when needed. `TargetDrone` also sets `UAV`. |
 | `enablegunnermode`, `concurrentgunnermode`, `enablenightvision`, `enableentityradar`, `EnableEjectionSeat`, `EnableParachuting` | boolean | false | Shared feature toggles. Parachuting is disabled if repelling hooks exist. |
+| `HasBombSight` / `EnableBombSight` / `EnableBomberSight` | boolean | true | Enables the first-person pilot gunner bombsight toggle when ballistic prediction is available. Set false for gunships or other aircraft that should keep gunner mode without a bombsight. |
 | `FlareType` | int list[1..10] | none | Enables flares when at least one type is present. |
 | `FlareOption` | vec3 | default flare position | Flare spawn position. |
 | `HasChaff`, `HasMaintenance`, `HasAPS` | flag | absent object | Value text is ignored; presence creates the subsystem object. |
