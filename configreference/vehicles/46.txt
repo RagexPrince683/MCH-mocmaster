@@ -19,6 +19,7 @@ CameraZoom = 4
 CameraPosition = 0.0, 6.0, 0.00
 Gravity = -9.81
 GravityInWater = -1.0
+ItemIconScaleFactor = 0.85
 
 ; W = WWII
 Category = NG

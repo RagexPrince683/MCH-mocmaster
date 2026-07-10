@@ -22,6 +22,7 @@ EnableNightVision = true
 Gravity = -9.81
 GravityInWater = -1.0
 MaxHp = 50
+ItemIconScaleFactor = 3
 
 Category = TEL/ASM/MLP/CL
 

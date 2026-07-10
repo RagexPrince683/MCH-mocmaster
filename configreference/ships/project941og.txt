@@ -34,6 +34,8 @@ ThirdPersonDist = 68
 enablegunnermode = true
 HUD = plane
 
+ItemIconScaleFactor = 0.4
+
 PivotTurnThrottle = 0.2
 
 ;;submarine

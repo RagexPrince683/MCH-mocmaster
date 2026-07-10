@@ -20,6 +20,8 @@ CameraPosition = 0.00,  1.35, -0.80
 Gravity = -9.81
 GravityInWater = -1.0
 
+ItemIconScaleFactor = 3
+
 ; M = Military,  A = AAGun(対空砲)
 Category = HMG
 

@@ -22,6 +22,8 @@ DamageFactor = 1.0
 CameraZoom = 2
 CameraPosition = 0.00, 1.41, 0.00
 
+ItemIconScaleFactor = 3
+
 
 unmountposition = 0.00, 1.5, -0.0
 

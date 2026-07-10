@@ -88,6 +88,8 @@ InertiaMultiplier = 3.200
 ThrottleAcceleration = 0.015
 EngineDrag = 0.017
 
+ItemIconScaleFactor = 0.45
+
 ;large bomber aircraft modern, AOW3 style
 AddRecipe = "ABC", "DAC", "EEC", A, mcheli:airframebomb, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:electronics
 

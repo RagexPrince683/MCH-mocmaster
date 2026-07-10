@@ -1,5 +1,5 @@
-DisplayName = Ground Drone UGV
-Weight = 100000
+DisplayName = Ratel S UGV
+Weight = 5
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Ground Drone UGV
 NameOnEarlyAARadar = Tank
@@ -7,6 +7,8 @@ NameOnModernAARadar = Ground Drone UGV
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
+
+ItemIconScaleFactor = 5
 
 ExplosionSizeByCrash = 20
 

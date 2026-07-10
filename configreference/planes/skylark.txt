@@ -29,6 +29,8 @@ HUD = plane
 ThirdPersonDist = 4
 ThrottleUpDown = 0.9
 
+ItemIconScaleFactor = 6
+
 RotorSpeed = 200.0
 
 ; M = Military(軍用機).  Q = Drone(無人航空機)

@@ -19,7 +19,7 @@ MaxRotationPitch =  5
 DamageFactor = 1.0
 CameraZoom = 2
 CameraPosition = 0.0,  2.00, -1.10
-
+ItemIconScaleFactor = 3
 
 
 ; W = WWII,  A = AAGun(対空砲)

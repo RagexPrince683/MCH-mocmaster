@@ -18,6 +18,8 @@ MinRotationPitch = -90
 MaxRotationPitch =  15
 CameraPosition = 0.0, 1.1, 0.0
 
+ItemIconScaleFactor = 3
+
 HideEntity = false
 
 DamageFactor = 1.0

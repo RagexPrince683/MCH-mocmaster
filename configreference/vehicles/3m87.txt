@@ -22,6 +22,7 @@ CameraZoom = 10
 CameraPosition = 0.0, 2.50, 0.0
 Gravity = -9.81
 GravityInWater = -1.0
+ItemIconScaleFactor = 3
 
 ; M = Military,  A = AAGun(対空砲)
 Category = HSAMGCIWS

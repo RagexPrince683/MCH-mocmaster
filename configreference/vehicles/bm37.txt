@@ -21,6 +21,8 @@ HideEntity = false
 ; M = Military,  A = AAGun(対空砲)
 Category = IM
 
+ItemIconScaleFactor = 3
+
 Gravity = -9.81
 GravityInWater = -1.0
 

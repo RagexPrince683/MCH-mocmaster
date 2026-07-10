@@ -1,5 +1,5 @@
 DisplayName = FPV Drone with RPG-7 Warhead
-Weight = 2400
+Weight = 5
 NameOnEarlyASRadar = Small UAV
 NameOnModernASRadar = FPV Drone with RPG-7 Warhead
 NameOnEarlyAARadar = Small UAV
@@ -17,6 +17,7 @@ MaxFuel         = 12
 ExplosionBlock = 0
 FuelConsumption = 0.040
 Stealth = 0.4
+ItemIconScaleFactor = 3
 
 
 explosionSizeByCrash = 10

@@ -23,6 +23,7 @@ EnableEntityRadar = true
 RadarType = MODERN_AA
 HasChaff = true
 ThirdPersonDist = 68
+ItemIconScaleFactor = 0.45
 
 Category = SA/TA
 EnableRealisticFlightModel = true

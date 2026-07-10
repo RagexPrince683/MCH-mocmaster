@@ -25,6 +25,8 @@ InertiaMultiplier = 1.180
 ThrottleAcceleration = 0.029
 EngineDrag = 0.011
 
+ItemIconScaleFactor = 3
+
 EnableRealisticFlightModel = true
 UseNewMobilitySystem = true
 # PhysicalMass is translational aircraft weight/momentum for the new flight model.

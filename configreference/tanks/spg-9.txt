@@ -9,7 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 28602
-Weight = 9000
+Weight = 105
 MaxHp = 100
 Gravity = -0.61
 GravityInWater = -1.0
@@ -22,6 +22,8 @@ CameraPosition = 0.0, 2.27, 0.0
 speed = 0.01
 ;;MaxFuel         = 0
 ;;FuelConsumption = 0.0
+
+ItemIconScaleFactor = 2
 
 ExplosionSizeByCrash = 1
 

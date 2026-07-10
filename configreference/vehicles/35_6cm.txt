@@ -20,6 +20,8 @@ CameraPosition = 0.0, 5.50, 0.0
 Gravity = -9.81
 GravityInWater = -1.0
 
+ItemIconScaleFactor = 0.9
+
 ; W = WWII,  A = AAGun(対空砲)
 Category = NG
 

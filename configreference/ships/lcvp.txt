@@ -29,6 +29,8 @@ MobilityYawOnGround = 1.8
 MotionFactor = 0.92
 EnableBack = true
 
+ItemIconScaleFactor = 2
+
 CanMoveOnGround = false
 
 InventorySize = 27

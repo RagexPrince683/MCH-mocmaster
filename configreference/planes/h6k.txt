@@ -75,6 +75,8 @@ ControlSurfaceDrag = 0.0065
 MaxLevelSpeed = 1.392
 IdleDrag = 0.0055
 
+ItemIconScaleFactor = 0.45
+
 PitchTorque = 0.250
 RollTorque = 0.260
 YawTorque = 0.180

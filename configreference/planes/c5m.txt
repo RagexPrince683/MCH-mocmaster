@@ -28,6 +28,8 @@ EnableNightVision = true
 EnableEntityRadar = false
 ThirdPersonDist = 68
 
+ItemIconScaleFactor = 0.45
+
 EnableParachuting = true
 MobDropOption  = 0.97, 1.10, -12.91, 2
 ;its technically possible

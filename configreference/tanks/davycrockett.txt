@@ -23,6 +23,8 @@ speed = 0.01
 ;;MaxFuel         = 0
 ;;FuelConsumption = 0.0
 
+ItemIconScaleFactor = 2
+
 
 ExplosionSizeByCrash = 20
 

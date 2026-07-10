@@ -13,6 +13,8 @@ CanMountShip = true
 MaxHp = 100
 Speed = 0.322
 
+ItemIconScaleFactor = 3
+
 ;144mph
 
 Sound = prop

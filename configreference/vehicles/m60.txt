@@ -16,6 +16,8 @@ DamageFactor = 1
 CameraZoom = 1
 CameraPosition = 0.00,  0.90, -1.00
 
+ItemIconScaleFactor = 3
+
 Gravity = -9.81
 GravityInWater = -1.0
 

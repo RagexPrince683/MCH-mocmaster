@@ -1,6 +1,6 @@
 DisplayName = Bicycle
 AddDisplayName = ja_JP, 自転車
-Weight = 100000
+Weight = 15
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Bicycle
 NameOnEarlyAARadar = Tank
@@ -30,6 +30,8 @@ HUD = none, none
 EntityPitch = 10
 InventorySize = 9
 EnableBack = true
+
+ItemIconScaleFactor = 2
 
 ExplosionSizeByCrash = 0
 

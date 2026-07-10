@@ -16,6 +16,7 @@ MaxRotationPitch =  5
 DamageFactor = 1
 CameraZoom = 0
 CameraPosition = -1.0,  0.80, -1.0
+ItemIconScaleFactor = 3
 
 Gravity = -9.81
 GravityInWater = -1.0

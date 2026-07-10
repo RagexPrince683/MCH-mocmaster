@@ -24,6 +24,8 @@ GravityInWater = 0.1
 DamageFactor = 0.6
 PreventWaterBobbing = true
 
+ItemIconScaleFactor = 2
+
 PivotTurnThrottle = 0.2
 
 Category = APB/ARPC/IWGB

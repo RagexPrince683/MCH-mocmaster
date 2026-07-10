@@ -32,6 +32,8 @@ DefaultFreelook = true
 EnableNightVision = true
 EnableEntityRadar = true
 
+ItemIconScaleFactor = 0.8
+
 PreventWaterBobbing = true
 
 Category = ABCD/GMD

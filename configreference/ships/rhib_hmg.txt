@@ -22,6 +22,8 @@ MobilityPitch = 0.01
 MobilityYaw = 2.60
 MobilityYawOnGround = 2.5
 
+ItemIconScaleFactor = 2
+
 Category = RHIB/RIB
 
 PivotTurnThrottle = 0.2

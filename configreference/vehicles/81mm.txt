@@ -19,6 +19,7 @@ CameraPosition = 0.0,1.6, -0.2
 ThirdPersonDist = 8
 Gravity = -9.81
 GravityInWater = -1.0
+ItemIconScaleFactor = 3
 
 ; W = WWII,  A = AAGun(対空砲)
 Category = M

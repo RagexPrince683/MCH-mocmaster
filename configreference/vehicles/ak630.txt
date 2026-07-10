@@ -25,6 +25,8 @@ CameraRotationSpeed = 70
 Gravity = -9.81
 GravityInWater = -1.0
 
+ItemIconScaleFactor = 3
+
 ; M = Military,  A = AAGun(‘Î‹ó–C)
 Category = CIWS/RC
 

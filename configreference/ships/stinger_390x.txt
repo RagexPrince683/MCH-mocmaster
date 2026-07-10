@@ -25,6 +25,8 @@ GravityInWater = -0.1
 DamageFactor = 1.0
 StepHeight = 0.0
 
+ItemIconScaleFactor = 3
+
 Category = C
 
 PivotTurnThrottle = 0.2

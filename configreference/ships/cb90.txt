@@ -26,6 +26,8 @@ GravityInWater = 0.1
 DamageFactor = 0.5
 StepHeight = 0.0
 
+ItemIconScaleFactor = 3
+
 PreventWaterBobbing = true
 
 PivotTurnThrottle = 0.2

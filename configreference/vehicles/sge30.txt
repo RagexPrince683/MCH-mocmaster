@@ -23,6 +23,8 @@ DamageFactor = 1.0
 CameraZoom = 3
 CameraPosition = 0.0, 1.67, 0.0
 
+ItemIconScaleFactor = 3
+
 UAV = false
 
 ; M = Military,  A = AAGun(対空砲)

@@ -35,6 +35,8 @@ AutoPilotRot = 0
 ;Sound = bone
 ThirdPersonDist = 68
 
+ItemIconScaleFactor = 0.45
+
 sound = tutwentytwo
 SoundPitch = 0.8
 ;"The Tu-160's engine sound is generally lower pitched compared to the Tu-22M3"

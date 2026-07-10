@@ -16,6 +16,8 @@ Speed = 2.323
 
 ;formula no work too big
 
+ItemIconScaleFactor = 0.45
+
 Sound = bone
 ThrottleUpDown = 0.1
 CameraPosition = -2.42, 4.18, -4.87

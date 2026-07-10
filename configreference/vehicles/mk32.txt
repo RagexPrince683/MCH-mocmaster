@@ -18,6 +18,7 @@ MaxRotationPitch = 2
 DamageFactor = 1.0
 CameraZoom = 2
 CameraPosition = 0.0, 1.0, -1.5
+ItemIconScaleFactor = 3
 
 Unmountposition = 0.0, 1.0, -1.5
 

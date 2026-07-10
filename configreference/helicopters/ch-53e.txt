@@ -24,6 +24,7 @@ MaxFuel         = 15300
 FuelConsumption = 3.542
 CameraPosition = 1.52, 0.46, 1.55
 ThirdPersonDist = 20
+ItemIconScaleFactor = 0.2
 
 ; New helicopter flight model: heavy transport/attack baseline tuning.
 UseNewHelicopterFlightModel = true

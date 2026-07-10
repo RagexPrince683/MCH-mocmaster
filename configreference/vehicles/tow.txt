@@ -19,6 +19,8 @@ CameraPosition = 0.45,  1.65,  0
 HideEntity = false
 EnableNightVision = false
 
+ItemIconScaleFactor = 3
+
 
 unmountposition = 0.00, 1.5, -0.0
 

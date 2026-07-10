@@ -11,6 +11,8 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.30
 
+ItemIconScaleFactor = 0.8
+
 PivotTurnThrottle = 0.2
 PreventWaterBobbing = true
 

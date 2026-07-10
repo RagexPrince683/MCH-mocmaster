@@ -32,6 +32,8 @@ FlareType = 2
 EnableNightVision = true
 EnableEntityRadar = false
 
+ItemIconScaleFactor = 0.45
+
 StepHeight = -1.0
 
 ; M = Military(軍用機).  C = Transport(輸送機)

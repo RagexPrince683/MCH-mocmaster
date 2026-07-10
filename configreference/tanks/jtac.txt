@@ -1,6 +1,6 @@
 DisplayName = Lightweight Laser Designator Rangefinder AN/PED-1 [Advanced 'JTAC' System]
 AddDisplayName = en_US, Lightweight Laser Designator Rangefinder AN/PED-1 [Advanced 'JTAC' System]
-Weight = 100000
+Weight = 15
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Lightweight Laser Designator Rangefinder AN/PED-1 [Advanced 'JTAC' System]
 NameOnEarlyAARadar = Tank
@@ -23,6 +23,8 @@ MaxRotationPitch = 30
 EnableNightVision = true
 DefaultFreelook = true
 HUD = vehicle
+
+ItemIconScaleFactor = 2
 
 ExplosionSizeByCrash = 0
 

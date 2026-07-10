@@ -1,4 +1,4 @@
-Weight = 100000
+Weight = 121
 ﻿DisplayName = M2 Browning
 AddDisplayName = en_US, M2 Browning
 NameOnEarlyASRadar = Tank
@@ -25,6 +25,8 @@ MaxFuel           = 1200
 FuelConsumption   = 1.6
 DefaultFreelook = false
 ThirdPersonDist = 3
+
+ItemIconScaleFactor = 4
 
 ExplosionSizeByCrash = 0
 

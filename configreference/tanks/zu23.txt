@@ -1,5 +1,5 @@
 DisplayName = 23mm ZU-23-2 Anti-Aircraft Twin Auto Cannon
-Weight = 9000
+Weight = 2094
 ;with 23mm ZU-23-2 Anti-Aircraft Twin Auto Cannon
 AddDisplayName = ru_RU, ЗУ-23-2
 NameOnEarlyASRadar = Air Defense Vehicle
@@ -28,6 +28,8 @@ FuelConsumption   = 1.9
 ThirdPersonDist = 10
 ;WeightType = 
 WeightedCenterZ = 0.0
+
+ItemIconScaleFactor = 2
 
 ExplosionSizeByCrash = 0
 

@@ -1,5 +1,5 @@
 DisplayName = DJI Mavic 3 with Grenade
-Weight = 3400
+Weight = 3
 NameOnEarlyASRadar = Helicopter
 NameOnModernASRadar = DJI Mavic 3 with Grenade
 NameOnEarlyAARadar = Helicopter
@@ -19,6 +19,7 @@ ParticlesScale = 0.1
 MaxFuel         = 9
 FuelConsumption = 0.003
 Stealth = 0.4
+ItemIconScaleFactor = 3
 
 HUD = heli
 

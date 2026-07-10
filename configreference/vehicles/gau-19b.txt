@@ -20,6 +20,8 @@ DamageFactor = 1.0
 CameraZoom = 3
 CameraPosition = 0.00,  1.3851, -0.20
 
+ItemIconScaleFactor = 3
+
 ;-18.49
 
 Gravity = -9.81

@@ -26,6 +26,8 @@ AutoPilotRot = 0
 FlareType = 2
 ThirdPersonDist = 68
 
+ItemIconScaleFactor = 0.45
+
 ; M = Military(軍用機).  A = Attacker(攻撃機)
 Category = SHB/HB
 EnableRealisticFlightModel = true

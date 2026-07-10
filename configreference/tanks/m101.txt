@@ -38,6 +38,8 @@ EnableBack = true
 ThirdPersonDist = 25
 DefaultFreelook = false
 
+ItemIconScaleFactor = 2
+
 ExplosionSizeByCrash = 28
 
 Category = TFG/H

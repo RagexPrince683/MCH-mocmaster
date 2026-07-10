@@ -1,4 +1,4 @@
-Weight = 9000
+Weight = 68
 ;make the fucking pain stop
 DisplayName = 30mm AGS-17 Plamya Automatic Grenade Launcher
 AddDisplayName = ru_RU, 30mm АГС-17 "Пламя"
@@ -25,6 +25,8 @@ Sound = none
 SoundVolume = 0
 Gravity = -0.61
 GravityInWater = -1.0
+
+ItemIconScaleFactor = 2
 
 ExplosionSizeByCrash = 3
 

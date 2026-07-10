@@ -19,6 +19,7 @@ CameraPosition = -0.618,  1.6132, -0.1507
 ThirdPersonDist = 10
 Gravity = -9.81
 GravityInWater = -1.0
+ItemIconScaleFactor = 2
 
 AddTexture = flak36shield
 AddTexture = flak36alt

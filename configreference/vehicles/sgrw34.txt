@@ -1,5 +1,5 @@
 DisplayName = 8cm Granatwerfer 34 Mortar
-AddDisplayName = en_US, 8 cm Granatwerfer 34 Mortar
+AddDisplayName = en_US, 8cm Granatwerfer 34 Mortar
 AddDisplayName = ru_RU, s.Gr.W.34 Mortar
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = 8cm Granatwerfer 34 Mortar
@@ -20,6 +20,8 @@ DamageFactor = 1.0
 CameraZoom = 3
 CameraPosition = -1.0,0.9, -0.2
 ThirdPersonDist = 8
+
+ItemIconScaleFactor = 3
 
 Category = M
 
