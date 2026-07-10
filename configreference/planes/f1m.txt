@@ -1,3 +1,5 @@
+EnableGunnerMode = true
+HasBombSight = false
 DisplayName = Mitsubishi F1M "Pete"
 AddDisplayName = en_US, Mitsubishi F1M "Pete"
 AddDisplayName = ja_JP, 三菱 零式水上観測機

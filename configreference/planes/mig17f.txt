@@ -16,6 +16,8 @@ EnableNightVision = false
 EnableEntityRadar = false
 HasBallisticComputer = true
 EnableEjectionSeat = true
+EnableGunnerMode = true
+HasBombSight = false
 Sound = migfifteen
 Speed = 1.992
 

@@ -18,6 +18,8 @@ HasBallisticComputer = true
 ;75mph
 Sound = radicon_heli
 CameraPosition = 0.0, 0.40, 0.34
+EnableGunnerMode = true
+HasBombSight = false
 ThrottleUpDown = 5.0
 MaxFuel         = 200
 FuelConsumption = 0.111

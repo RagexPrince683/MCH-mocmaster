@@ -18,6 +18,8 @@ RWRType = DIGITAL
 RadarType = MODERN_AS
 HasBallisticComputer = true
 EnableEjectionSeat = true
+EnableGunnerMode = true
+HasBombSight = false
 Speed = 2.05
 
 Sound = faeighteen

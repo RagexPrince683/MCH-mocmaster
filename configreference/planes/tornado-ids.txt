@@ -20,6 +20,8 @@ RWRType = DIGITAL
 RadarType = MODERN_AS
 HasBallisticComputer = true
 EnableEjectionSeat = true
+EnableGunnerMode = true
+HasBombSight = false
 Speed = 4.0
 
 ;1452mph

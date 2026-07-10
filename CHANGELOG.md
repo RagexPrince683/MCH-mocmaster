@@ -1,5 +1,13 @@
 # Changelog
 
+## Config Reference Non-Bomber Gunner Bombsights Follow-up
+
+- Added `HasBombSight = false` to the newly gunner-enabled fixed-wing config references that have fire-control/ballistic computers but are not equipped with dedicated bomber sights.
+
+## Config Reference Plane Gunner Eligibility
+
+- Added `EnableGunnerMode = true` to fixed-wing config references that have ballistic/fire-control computers or bomber roles so pilot gunner mode is available wherever the supporting criteria exist.
+
 ## Config Reference Non-Bomber Gunner Bombsights
 
 - Disabled `HasBombSight` for non-bomber fixed-wing config references that use pilot gunner mode, including gunships, drones, fighters, transports, and reconnaissance aircraft, while confirming the AC-130 remains opted out via `EnableBombSight = false`.
