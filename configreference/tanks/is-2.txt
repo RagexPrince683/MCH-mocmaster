@@ -8,6 +8,7 @@ NameOnModernAARadar = IS-2 (1944)
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ItemID = 30180
+Weight = 101413
 
 MaxHp = 180
 

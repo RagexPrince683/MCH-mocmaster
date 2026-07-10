@@ -1,6 +1,7 @@
 DisplayName = KV-1 Model 1939 (L-11)
 AddDisplayName = en_US, KV-1 Model 1939 (L-11)
 AddDisplayName = ja_JP, KV-1 Model 1939 (L-11)
+Weight = 99000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = KV-1 Model 1939 (L-11)
 NameOnEarlyAARadar = Tank

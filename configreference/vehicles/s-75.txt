@@ -8,6 +8,7 @@ ChaffWaitTime = 420
 ChaffUseTime = 80
 ThrottleDownFactor = 0.40
 ItemID = 28612
+Weight = 5070
 MaxHP = 100
 AddTexture = s-75_tan
 CameraPosition = 0.0, 4.50, 0.0

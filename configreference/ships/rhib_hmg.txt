@@ -11,6 +11,7 @@ ThrottleDownFactor = 0.30
 MaxFuel         = 250
 FuelConsumption = 0.009
 ItemID = 49998
+Weight = 18700
 MaxHp = 130
 Speed = 0.58
 Float = true

@@ -1,6 +1,7 @@
 DisplayName = DDG-1000 Zumwalt Destroyer
 AddDisplayName = en_US, DDG-1000 Zumwalt Destroyer
 AddDisplayName = ja_JP, DDG-1000 ズムウォルト駆逐艦
+Weight = 32200000
 NameOnEarlyASRadar = Surface Ship
 NameOnModernASRadar = DDG-1000 Zumwalt Destroyer
 NameOnEarlyAARadar = Surface Ship

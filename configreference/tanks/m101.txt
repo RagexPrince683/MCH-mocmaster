@@ -8,6 +8,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 30151
+Weight = 9000
 MaxHp = 100
 Sound = none
 SoundVolume = 0

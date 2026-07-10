@@ -1,4 +1,5 @@
 DisplayName = 2S3M SO-152 Akatsiya
+Weight = 90000
 NameOnEarlyASRadar = Artillery Vehicle
 NameOnModernASRadar = 2S3M SO-152 Akatsiya
 NameOnEarlyAARadar = Artillery Vehicle

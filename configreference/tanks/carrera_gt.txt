@@ -1,5 +1,6 @@
 DisplayName = Porsche Carrera GT
 AddDisplayName = en_US, Porsche Carrera GT
+Weight = 3200
 NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Porsche Carrera GT
 NameOnEarlyAARadar = Light Vehicle

@@ -1,5 +1,9 @@
 # Changelog
 
+## Config Reference Vehicle Weights
+
+- Added `Weight = {weight in lbs}` entries to every vehicle config reference under `configreference/` for aircraft, helicopters, ships, tanks, and static/ground vehicles using real-world curb, empty, combat, gross, or displacement weights as appropriate to the platform.
+
 ## Freelook Indicator GUI
 
 - Added a visible `FREELOOK` indicator to the new plane overlay whenever the pilot is in regular freelook or the new third-person hold-freelook camera mode.

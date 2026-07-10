@@ -1,6 +1,7 @@
 DisplayName = KV-2 'Gigant' (1940)
 AddDisplayName = en_US, KV-2 'Gigant' (1940)
 AddDisplayName = ja_JP, KV-2 ギガント (1940)
+Weight = 114640
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = KV-2 'Gigant' (1940)
 NameOnEarlyAARadar = Tank

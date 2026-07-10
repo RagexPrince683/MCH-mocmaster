@@ -1,4 +1,5 @@
 DisplayName = T-62
+Weight = 81571
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = T-62
 NameOnEarlyAARadar = Tank

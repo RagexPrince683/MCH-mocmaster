@@ -1,5 +1,6 @@
 DisplayName = Bicycle
 AddDisplayName = ja_JP, 自転車
+Weight = 100000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Bicycle
 NameOnEarlyAARadar = Tank

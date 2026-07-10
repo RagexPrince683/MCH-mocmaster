@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 33404
+Weight = 100000
 MaxHp = 530
 Speed = 0.40
 Sound = chinesecrap

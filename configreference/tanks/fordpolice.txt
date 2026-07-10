@@ -1,4 +1,5 @@
 DisplayName = Ford Mondeo (NYPD)
+Weight = 3200
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Ford Mondeo (NYPD)
 NameOnEarlyAARadar = Tank

@@ -8,6 +8,7 @@ ChaffWaitTime = 420
 ChaffUseTime = 80
 ThrottleDownFactor = 0.40
 ItemID = 28613
+Weight = 1290
 MaxHP = 100
 CameraPosition = 0.0, 4.50, 0.0
 CameraZoom = 2

@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.30
 ItemID = 30112
+Weight = 196000
 MaxHp = 182
 Speed = 0.46
 Sound = vehicle_drive

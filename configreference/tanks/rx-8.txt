@@ -1,4 +1,5 @@
 DisplayName = Mazda RX-8
+Weight = 3200
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Mazda RX-8
 NameOnEarlyAARadar = Tank

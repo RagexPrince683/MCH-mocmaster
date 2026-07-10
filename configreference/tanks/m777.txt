@@ -1,6 +1,7 @@
 DisplayName = 155mm M777 Lightweight Towed Howitzer
 AddDisplayName = ru_RU, 155mm M777 Lightweight Towed Howitzer
 AddDisplayName = en_US, 155mm M777 Lightweight Towed Howitzer
+Weight = 9000
 NameOnEarlyASRadar = Artillery Vehicle
 NameOnModernASRadar = 155mm M777 Lightweight Towed Howitzer
 NameOnEarlyAARadar = Artillery Vehicle

@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 30157
+Weight = 36000
 MaxHp = 200
 Speed = 0.53
 Sound = dieselman

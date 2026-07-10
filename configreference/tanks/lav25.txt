@@ -1,4 +1,5 @@
 DisplayName = LAV-25
+Weight = 28000
 NameOnEarlyASRadar = Air Defense Vehicle
 NameOnModernASRadar = LAV-25
 NameOnEarlyAARadar = Air Defense Vehicle

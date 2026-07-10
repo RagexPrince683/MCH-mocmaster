@@ -1,6 +1,7 @@
 DisplayName = CVN-68 USS Nimitz Aircraft Carrier
 AddDisplayName = en_US, CVN-68 USS Nimitz Aircraft Carrier
 AddDisplayName = ja_JP, CVN-68 Aircraft Carrier
+Weight = 204600000
 NameOnEarlyASRadar = Large Ship
 NameOnModernASRadar = CVN-68 USS Nimitz Aircraft Carrier
 NameOnEarlyAARadar = Large Ship

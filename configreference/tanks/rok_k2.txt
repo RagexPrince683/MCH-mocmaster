@@ -8,6 +8,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.60
 ItemID = 30150
+Weight = 100000
 MaxHp = 850
 Speed = 0.43
 Sound = ktwobp

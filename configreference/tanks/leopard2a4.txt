@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 30100
+Weight = 121254
 MaxHp = 585
 Speed = 0.7
 Sound = leotwo

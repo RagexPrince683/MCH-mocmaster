@@ -1,6 +1,7 @@
 DisplayName = M47 Patton
 AddDisplayName = ja_JP, M47 Patton
 AddDisplayName = en_US, M47 Patton
+Weight = 101000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = M47 Patton
 NameOnEarlyAARadar = Tank

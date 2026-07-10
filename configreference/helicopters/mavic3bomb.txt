@@ -1,4 +1,5 @@
 DisplayName = DJI Mavic 3 with Grenade
+Weight = 3400
 NameOnEarlyASRadar = Helicopter
 NameOnModernASRadar = DJI Mavic 3 with Grenade
 NameOnEarlyAARadar = Helicopter

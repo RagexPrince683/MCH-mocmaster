@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 191992
+Weight = 70548
 MaxHp = 350
 Speed = 0.34
 Sound = tthirtyfour

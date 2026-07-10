@@ -8,6 +8,7 @@ NameOnModernAARadar = IS-1
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ItemID = 30180
+Weight = 97000
 
 MaxHp = 180
 

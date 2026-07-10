@@ -1,6 +1,7 @@
 DisplayName = Landing Craft For Vehicles and Personnel (LCVP Boat)
 AddDisplayName = en_US, Landing Craft For Vehicles and Personnel (LCVP Boat)
 AddDisplayName = ja_JP, Lcvp輸送ボート
+Weight = 18000
 NameOnEarlyASRadar = Small Boat
 NameOnModernASRadar = Landing Craft For Vehicles and Personnel (LCVP Boat)
 NameOnEarlyAARadar = Small Boat

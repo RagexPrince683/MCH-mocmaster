@@ -1,6 +1,7 @@
 DisplayName = Dassault Rafale M
 AddDisplayName = en_US, Dassault Rafale M
 AddDisplayName = zh_CN, Dassault 阵风M舰载战斗机
+Weight = 12500
 NameOnEarlyASRadar = Fast Jet
 NameOnModernASRadar = Dassault Rafale M
 NameOnEarlyAARadar = Fast Jet

@@ -1,5 +1,6 @@
 DisplayName = 7.62mm M60 Machine Gun Tripod Mount
 AddDisplayName = ja_JP, M60 汎用機関銃
+Weight = 23
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = 7.62mm M60 Machine Gun Tripod Mount
 NameOnEarlyAARadar = Tank

@@ -1,6 +1,7 @@
 DisplayName = Toyota Hilux with DSHK
 AddDisplayName = en_US, Toyota Hilux with DSHK
 AddDisplayName = ru_RU, Тойота с ДШК
+Weight = 4200
 NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Toyota Hilux with DSHK
 NameOnEarlyAARadar = Light Vehicle

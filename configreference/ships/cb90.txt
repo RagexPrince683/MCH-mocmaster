@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.30
 ItemID = 30518
+Weight = 40000
 MaxHp = 1800
 ;shift by 102.88 on z axis or +1.0288
 EnableNightVision = true

@@ -1,6 +1,7 @@
 DisplayName = MXT-MV Husky TSV
 AddDisplayName = en_US, MXT-MV Husky TSV
 AddDisplayName = ja_JP, MXT-MV ハスキーTSV
+Weight = 100000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = MXT-MV Husky TSV
 NameOnEarlyAARadar = Tank

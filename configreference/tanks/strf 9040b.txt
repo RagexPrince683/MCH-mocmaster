@@ -1,4 +1,5 @@
 DisplayName = Strf 9040B
+Weight = 45000
 NameOnEarlyASRadar = Armored Vehicle
 NameOnModernASRadar = Strf 9040B
 NameOnEarlyAARadar = Armored Vehicle

@@ -10,6 +10,7 @@ ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ;hola pidor!!!
 ItemID = 30032
+Weight = 100000
 MaxHp = 230
 ThrottleUpDown = 0.81
 Speed = 0.6

@@ -1,3 +1,4 @@
+Weight = 101413
 ﻿DisplayName = T-80U MBT
 AddDisplayName = en_US, T-80U MBT
 AddDisplayName = ja_JP, T-80U 

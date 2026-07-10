@@ -2,6 +2,7 @@ DisplayName = TU-142
 AddDisplayName = en_US, TU-142
 AddDisplayName = ja_JP, TU-142
 AddDisplayName = zh_CN, TU-142
+Weight = 198000
 NameOnEarlyASRadar = Large Aircraft
 NameOnModernASRadar = TU-142
 NameOnEarlyAARadar = Large Aircraft

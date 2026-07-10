@@ -10,6 +10,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.60
 ItemID = 32357
+Weight = 153200
 ;215mm sloped/2
 MaxHp = 185
 Speed = 0.26

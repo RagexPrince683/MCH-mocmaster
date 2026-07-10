@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.50
 ItemID = 30102
+Weight = 30000
 MaxHp = 200
 Speed = 0.55
 Sound = turbobtr

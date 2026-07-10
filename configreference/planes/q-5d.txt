@@ -9,6 +9,7 @@ ChaffWaitTime = 360
 ChaffUseTime = 120
 ThrottleDownFactor = 0.20
 ItemID = 40016
+Weight = 17500
 MaxHp = 100
 Speed = 2.105
 ;752mph

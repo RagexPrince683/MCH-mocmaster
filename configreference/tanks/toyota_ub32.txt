@@ -1,6 +1,7 @@
 DisplayName = Toyota Hilux with UB-32
 AddDisplayName = en_US, Toyota Hilux with UB-32
 AddDisplayName = ru_RU, Тойота с УБ-32
+Weight = 4200
 NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Toyota Hilux with UB-32
 NameOnEarlyAARadar = Light Vehicle

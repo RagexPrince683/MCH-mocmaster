@@ -1,3 +1,4 @@
+Weight = 15000
 ﻿DisplayName = Shahed Trailer/Launcher
 AddDisplayName = en_US, Shahed Trailer/Launcher
 NameOnEarlyASRadar = Light Vehicle

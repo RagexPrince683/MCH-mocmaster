@@ -1,3 +1,4 @@
+Weight = 49500
 ;;DisplayName = Tupolev "TU-95 Bear
 DisplayName = TU-95K-22 (3x KH-22 Nuclear)
 AddDisplayName = en_US, TU-95K-22 (3x KH-22 Nuclear)

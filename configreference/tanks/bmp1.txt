@@ -1,6 +1,7 @@
 DisplayName = BMP-1 IFV
 AddDisplayName = en_US, BMP-1 IFV
 AddDisplayName = ja_JP, BMP-1 歩兵戦闘車
+Weight = 29000
 NameOnEarlyASRadar = Air Defense Vehicle
 NameOnModernASRadar = BMP-1 IFV
 NameOnEarlyAARadar = Air Defense Vehicle

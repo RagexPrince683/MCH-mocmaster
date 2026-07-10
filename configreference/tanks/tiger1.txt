@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.60
 ItemID = 90129
+Weight = 126000
 ;;estimated max armor thickness is 102mm thus divided by two equals 51
 MaxHp = 150
 ;;speed is calculated by taking the original vehicle speed eg for this vehicle it is 27.9mph*0.1 then the product is further divided by 10 and rounded up

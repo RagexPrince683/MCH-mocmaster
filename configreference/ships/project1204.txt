@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.30
 ItemID = 28748
+Weight = 20000
 MaxHp = 1850
 Speed = 0.28
 Sound = boat

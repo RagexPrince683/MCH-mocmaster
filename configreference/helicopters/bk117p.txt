@@ -1,5 +1,6 @@
 DisplayName = Kawasaki/Eurocopter BK 117 B-2 Police
 AddDisplayName = ja_JP, 川崎/ユーロコプター BK 117 B-2 警察仕様
+Weight = 12000
 NameOnEarlyASRadar = Large Aircraft
 NameOnModernASRadar = Kawasaki/Eurocopter BK 117 B-2 Police
 NameOnEarlyAARadar = Large Aircraft

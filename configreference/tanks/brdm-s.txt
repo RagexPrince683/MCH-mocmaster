@@ -1,4 +1,5 @@
 DisplayName = BRDM-2 9P148 Konkurs "BRDM-3"
+Weight = 45000
 NameOnEarlyASRadar = Air Defense Vehicle
 NameOnModernASRadar = BRDM-2 9P148 Konkurs "BRDM-3"
 NameOnEarlyAARadar = Air Defense Vehicle

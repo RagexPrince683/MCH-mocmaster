@@ -1,6 +1,7 @@
 DisplayName = Geran 2
 AddDisplayName = en_US, Geran 2
 AddDisplayName = ja_JP, Geran 2
+Weight = 3500
 NameOnEarlyASRadar = Small UAV
 NameOnModernASRadar = Geran 2
 NameOnEarlyAARadar = Small UAV

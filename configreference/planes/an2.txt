@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.20
 ItemID = 28732
+Weight = 10500
 MaxHp = 100
 ;130mph cruise speed
 ;160mph max speed

@@ -9,6 +9,7 @@ ChaffWaitTime = 360
 ChaffUseTime = 120
 ThrottleDownFactor = 0.20
 ItemID = 45600
+Weight = 48000
 MaxHp = 250
 Speed = 1.45
 sound = ilsevensix

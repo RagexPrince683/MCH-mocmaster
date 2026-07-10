@@ -8,6 +8,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ItemID = 28611
+Weight = 13450
 MaxHp = 100
 HideEntity = false
 MinRotationPitch = -89

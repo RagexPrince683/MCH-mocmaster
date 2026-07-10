@@ -1,6 +1,7 @@
 DisplayName = MXT-MV Husky TSV with M240 Machine Gun
 AddDisplayName = en_US, MXT-MV Husky TSV with M240 Machine Gun
 AddDisplayName = ja_JP, MXT-MV ハスキーTSV with M240 Machine Gun
+Weight = 100000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = MXT-MV Husky TSV with M240 Machine Gun
 NameOnEarlyAARadar = Tank

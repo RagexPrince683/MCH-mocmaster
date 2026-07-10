@@ -8,6 +8,7 @@ NameOnModernAARadar = 2S19 Msta-S
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ItemID = 30100
+Weight = 90000
 MaxHp = 200
 Speed = 0.37
 Sound = tseventytwopass

@@ -1,3 +1,4 @@
+Weight = 9000
 ;make the fucking pain stop
 DisplayName = 30mm AGS-17 Plamya Automatic Grenade Launcher
 AddDisplayName = ru_RU, 30mm АГС-17 "Пламя"

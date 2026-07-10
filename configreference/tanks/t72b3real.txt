@@ -1,6 +1,7 @@
 DisplayName = T-72B3 MBT
 AddDisplayName = en_US, T-72B3 MBT
 AddDisplayName = ja_JP, T-72B3 主力戦車
+Weight = 101000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = T-72B3 MBT
 NameOnEarlyAARadar = Tank

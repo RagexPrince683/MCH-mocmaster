@@ -1,3 +1,4 @@
+Weight = 16000
 ;общая инфа о технике
 DisplayName = "Gaz" Tigr with 7.62mm PKM Machine Gun
 NameOnEarlyASRadar = Tank

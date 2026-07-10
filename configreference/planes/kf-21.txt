@@ -9,6 +9,7 @@ ChaffWaitTime = 360
 ChaffUseTime = 120
 ThrottleDownFactor = 0.20
 ItemID = 40009
+Weight = 14500
 MaxHp = 100
 Speed = 3.828
 Sound = faeighteen

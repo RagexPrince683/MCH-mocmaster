@@ -1,4 +1,5 @@
 DisplayName = Opel Blitz 1.5T Truck - Inventory
+Weight = 100000
 NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Opel Blitz 1.5T Truck - Inventory
 NameOnEarlyAARadar = Light Vehicle

@@ -1,5 +1,6 @@
 DisplayName = PZL W-3PL Gluszec
 AddDisplayName = ja_JP, PZL W-3PL グウシェッツ
+Weight = 12000
 NameOnEarlyASRadar = Helicopter
 NameOnModernASRadar = PZL W-3PL Gluszec
 NameOnEarlyAARadar = Helicopter

@@ -1,4 +1,5 @@
 DisplayName = ShKH Ondava/Vz. 77 DANA
+Weight = 100000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = ShKH Ondava/Vz. 77 DANA
 NameOnEarlyAARadar = Tank

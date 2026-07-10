@@ -9,6 +9,7 @@ ChaffWaitTime = 360
 ChaffUseTime = 120
 ThrottleDownFactor = 0.20
 ItemID = 28733
+Weight = 12000
 MaxHp = 100
 Speed = 0.435
 HasBallisticComputer = true

@@ -1,5 +1,6 @@
 DisplayName = UH-1H Iroquois with Agent Orange spray system
 AddDisplayName = ja_JP, UH-1H イロコイ (Agent Orange)
+Weight = 5215
 NameOnEarlyASRadar = Helicopter
 NameOnModernASRadar = UH-1H Iroquois with Agent Orange spray system
 NameOnEarlyAARadar = Helicopter

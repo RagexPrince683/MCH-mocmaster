@@ -1,4 +1,5 @@
 DisplayName = 2K12 "Kub"
+Weight = 100000
 NameOnEarlyASRadar = Air Defense Vehicle
 NameOnModernASRadar = 2K12 "Kub"
 NameOnEarlyAARadar = Air Defense Vehicle

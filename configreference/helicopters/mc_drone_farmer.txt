@@ -1,6 +1,7 @@
 DisplayName = DJI Phantom Farming UAV
 AddDisplayName = en_US, DJI Phantom Farming UAV
 AddDisplayName = ja_JP, 農業用RCドローンUAV
+Weight = 3800
 NameOnEarlyASRadar = Small UAV
 NameOnModernASRadar = DJI Phantom Farming UAV
 NameOnEarlyAARadar = Small UAV

@@ -12,6 +12,7 @@ ThrottleDownFactor = 0.40
 ExplosionSizeByCrash = 3
 
 ItemID = 91128
+Weight = 45000
 MaxHp = 250
 Speed = 0.43
 ThrottleUpDown = 2.2

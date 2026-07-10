@@ -1,4 +1,5 @@
 DisplayName = 155mm Haubits BW L/52 FH-77
+Weight = 9000
 ;155 mm haubits 77 BW L/52
 AddDisplayName = ru_RU, 155mm Haubits BW L/52 FH-77
 AddDisplayName = en_US, 155mm Haubits BW L/52 FH-77
