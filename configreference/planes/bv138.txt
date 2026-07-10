@@ -1,5 +1,5 @@
 EnableGunnerMode = true
-HasBombSight = false
+HasBombSight = true
 DisplayName = BV-138 C-1
 AddDisplayName = en_US, BV-138 C-1
 AddDisplayName = ja_JP, BV-138 C-1
