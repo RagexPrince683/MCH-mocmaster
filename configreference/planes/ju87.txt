@@ -9,6 +9,7 @@ ChaffUseTime = 160
 ThrottleDownFactor = 0.20
 ItemID = 30005
 Weight = 12000
+CanMountShip = true
 MaxHp = 150
 Speed = 0.679
 HasBallisticComputer = true

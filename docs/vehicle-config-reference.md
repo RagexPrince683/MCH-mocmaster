@@ -164,7 +164,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `AddPartSlideWeaponBay` | All | list | none | sliding weapon bay visual part |
 | `AddRack` | All | list | none | entity/vehicle rack seat; counts toward the 500 combined seat/rack limit |
 | `RideRack` | All | list | none | ride-rack attachment point |
-| `CanMountShip` | All | boolean | true | child-side ship/carrier rack opt-out; false blocks mounting racks on ship entities |
+| `CanMountShip` | All | boolean | true | child-side ship/carrier rack opt-out; false blocks mounting racks on ship entities; bundled plane references set oversized bombers/transports/AWACS/tanker aircraft false and carrier-suitable planes true |
 | `MobDropOption` | All | list | default disabled option | mob drops from seats/racks |
 | `AddRepellingHook` | All | vec/list | none | fast-rope/repelling point |
 | `AddParticleSplash` | All | `x,y,z[,num,size,gravity,age,motionY,accel]` | optional fields 2,2,1,80,0.01,0 | water splash particles |

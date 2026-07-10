@@ -2,6 +2,7 @@ DisplayName = B-21 Raider
 AddDisplayName = en_US, B-21 Raider
 AddDisplayName = ja_JP, B-21 Raider
 Weight = 70000
+CanMountShip = false
 
 NameOnEarlyASRadar = Large Aircraft
 NameOnModernASRadar = B-2

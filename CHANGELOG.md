@@ -1,5 +1,9 @@
 # Changelog
 
+## Config Reference Plane Carrier Eligibility
+
+- Added explicit `CanMountShip` entries to every plane config reference. Oversized bombers, strategic aircraft, large transports, AWACS/tanker, and other large non-carrier aircraft are set to `false`; remaining plane references are set to `true` to preserve carrier rack compatibility.
+
 ## Rack payload capacity enforcement
 - Enforced `MaximumExternalPayloadCapacity` against carried vehicle `Weight` for plane, helicopter, and tank rack mounting, rejecting overweight rack attempts with an in-game message.
 - Disabled chain use for planes and now informs players that planes cannot use cargo hooks to transport cargo.

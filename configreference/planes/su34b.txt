@@ -1,6 +1,7 @@
 DisplayName = Su-34 (Bombs)
 AddDisplayName = ja_JP, Su-34 (Bombs)
 Weight = 16500
+CanMountShip = true
 NameOnEarlyASRadar = Fast Jet
 NameOnModernASRadar = Su-34 (Bombs)
 NameOnEarlyAARadar = Fast Jet

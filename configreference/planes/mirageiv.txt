@@ -1,6 +1,7 @@
 DisplayName = Mirage IVP
 AddDisplayName = zh_CN, 幻影IVP战略轰炸机
 Weight = 14500
+CanMountShip = false
 NameOnEarlyASRadar = Fast Jet
 NameOnModernASRadar = Mirage IVP
 NameOnEarlyAARadar = Fast Jet

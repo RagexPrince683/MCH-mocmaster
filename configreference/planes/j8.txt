@@ -10,6 +10,7 @@ ChaffUseTime = 120
 ThrottleDownFactor = 0.20
 ItemID = 25547
 Weight = 14500
+CanMountShip = true
 MaxHp = 100
 Speed = 4.0
 Sound = migtwentyone

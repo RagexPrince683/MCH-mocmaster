@@ -2,6 +2,7 @@ DisplayName = Mirage 2000-5F
 AddDisplayName = en_US, Mirage 2000-5F
 AddDisplayName = ja_JP, Mirage 2000-5F
 Weight = 12500
+CanMountShip = true
 NameOnEarlyASRadar = Fast Jet
 NameOnModernASRadar = Mirage 2000-5F
 NameOnEarlyAARadar = Fast Jet

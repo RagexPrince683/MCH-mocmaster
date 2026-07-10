@@ -2,6 +2,7 @@ DisplayName = Tu-160M Super Blackjack with Rotary Launchers
 AddDisplayName = en_US, Tu-160M Super Blackjack with Rotary Launchers
 AddDisplayName =  zh_CN, 图-160M 超级海盗旗 Rotary Launchers
 Weight = 242500
+CanMountShip = false
 NameOnEarlyASRadar = Fast Jet
 NameOnModernASRadar = Tu-160M Super Blackjack with Rotary Launchers
 NameOnEarlyAARadar = Fast Jet

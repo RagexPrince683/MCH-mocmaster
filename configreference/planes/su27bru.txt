@@ -1,5 +1,6 @@
 DisplayName = Su-27 Flanker-B
 Weight = 16500
+CanMountShip = true
 NameOnEarlyASRadar = Fast Jet
 NameOnModernASRadar = Su-27 Flanker-B
 NameOnEarlyAARadar = Fast Jet

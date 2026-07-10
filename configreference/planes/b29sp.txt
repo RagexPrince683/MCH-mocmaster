@@ -2,6 +2,7 @@ DisplayName = B-29 Superfortress (Silverplate Program)
 AddDisplayName = en_US, B-29 Superfortress (Silverplate Program)
 AddDisplayName = ja_JP, B-29 スーパーフォートレス (Silverplate Program)
 Weight = 74000
+CanMountShip = false
 NameOnEarlyASRadar = Large Aircraft
 NameOnModernASRadar = B-29 Superfortress (Silverplate Program)
 NameOnEarlyAARadar = Large Aircraft

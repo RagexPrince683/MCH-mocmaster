@@ -2,6 +2,7 @@ DisplayName = Douglas AC-47 Spooky "Puff, the Magic Dragon"
 AddDisplayName = en_US, Douglas AC-47 Spooky "Puff, the Magic Dragon"
 AddDisplayName = ja_JP, AC-47 Spooky "Puff, the Magic Dragon"
 Weight = 18135
+CanMountShip = false
 NameOnEarlyASRadar = Large Aircraft
 NameOnModernASRadar = Douglas AC-47 Spooky "Puff, the Magic Dragon"
 NameOnEarlyAARadar = Large Aircraft

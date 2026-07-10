@@ -11,6 +11,7 @@ ChaffUseTime = 120
 ThrottleDownFactor = 0.20
 ItemID = 40003
 Weight = 12500
+CanMountShip = true
 MaxHp = 100
 Speed = 1.663
 

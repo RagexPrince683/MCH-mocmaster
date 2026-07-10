@@ -2,6 +2,7 @@ DisplayName = Douglas C-47 Skytrain
 AddDisplayName = en_US, Douglas C-47 Skytrain
 AddDisplayName = ja_JP, C-47 スカイトレイン
 Weight = 18135
+CanMountShip = false
 MaximumExternalPayloadCapacity = 6000
 NameOnEarlyASRadar = Large Aircraft
 NameOnModernASRadar = Douglas C-47 Skytrain
