@@ -1,6 +1,7 @@
 # Changelog
 
 ## Bomb Reticle Camera and Sight Update
+- Added a third-person bomber sight HUD hint that displays `Bomb sight: OFF Third Person` when the bomber sight popup is visible outside first person.
 - Bomb reticle mode now forces the first-person gunner camera to look directly at the predicted bomb impact point while active.
 - Replaced the bomber sight drawing with a large black bomb-sight reticle instead of reusing the green CCIP pipper.
 
