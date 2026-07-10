@@ -2950,9 +2950,29 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
       Entity rider = super.riddenByEntity;
       if(rider instanceof EntityPlayerMP) {
+         EntityPlayerMP player = (EntityPlayerMP)rider;
+         if(MCH_UavInventory.hasStoredPilotInventory(player)) {
+            return;
+         }
+         updateNewUavReturnPositionFromStation();
+         if(hasNewUavReturnPosition()) {
+            double dx = player.posX - this.linkedUavStationX;
+            double dy = player.posY - this.linkedUavStationY;
+            double dz = player.posZ - this.linkedUavStationZ;
+            if(dx * dx + dy * dy + dz * dz > 225.0D) {
+               MCH_UavInventory.storeAndClearPilotInventory(player, this.getUniqueID().toString());
+               player.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "You moved more than 15 blocks from the UAV station. Your inventory has been stored until drone control ends."));
+               return;
+            }
+         }
          ++this.delayedUavInventoryTicks;
-         if(this.delayedUavInventoryTicks == 200) {
-            MCH_UavInventory.storeAndClearPilotInventory((EntityPlayerMP)rider, this.getUniqueID().toString());
+         if(this.delayedUavInventoryTicks == 1) {
+            player.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "You have 10 seconds left to refuel or rearm the drone before your inventory is stored."));
+         } else if(this.delayedUavInventoryTicks == 100) {
+            player.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "You have 5 seconds left to refuel or rearm the drone before your inventory is stored."));
+         } else if(this.delayedUavInventoryTicks == 200) {
+            MCH_UavInventory.storeAndClearPilotInventory(player, this.getUniqueID().toString());
+            player.addChatMessage(new ChatComponentText(EnumChatFormatting.YELLOW + "You have no more time left to refuel or rearm the drone. Your inventory has been stored until drone control ends."));
          }
       } else {
          this.delayedUavInventoryTicks = 0;

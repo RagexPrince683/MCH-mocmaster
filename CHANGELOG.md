@@ -11,6 +11,8 @@
 
 ### Changed
 
+- New UAV inventory handoff now warns operators at 10 seconds, 5 seconds, and timeout while they remain within 15 blocks of the station for refuel/rearm access, and stores/clears inventory immediately if they move farther away.
+
 - Destroying a UAV station now unlinks the live UAV and returns any active operator to the station position instead of destroying the UAV and dismounting the player at the aircraft.
 - Destroying a UAV station while its operator is controlling a linked New UAV now restores the operator's stored inventory immediately after returning them to the station.
 
