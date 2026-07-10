@@ -84,7 +84,7 @@ This page summarizes the major project-wide systems that distinguish MCHeli Over
 
 ### Aircraft carrier and vehicle-on-vehicle interaction
 
-**What it does:** The shared rack system lets vehicles carry other vehicles. Carrier ships can define rack seats with `AddRack`, while aircraft or vehicles can advertise compatible parent racks with `RideRack`. Launch racks apply forward/vertical launch velocity, temporary no-collision grace against the carrier, and rack-aware unmount placement.
+**What it does:** The shared rack system lets vehicles carry other vehicles while respecting `MaximumExternalPayloadCapacity` versus the carried vehicle `Weight`. Carrier ships, planes, helicopters, and tanks can define rack seats with `AddRack`, while aircraft or vehicles can advertise compatible parent racks with `RideRack`. Launch racks apply forward/vertical launch velocity, temporary no-collision grace against the carrier, and rack-aware unmount placement.
 
 **Why it exists:** Overdrive supports aircraft carrier gameplay and vehicle transport beyond simple passenger seats: aircraft can park on or launch from configured ship racks, and vehicle-on-vehicle interactions can be made data-driven by pack authors.
 

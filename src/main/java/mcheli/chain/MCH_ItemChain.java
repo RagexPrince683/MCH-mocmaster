@@ -7,6 +7,7 @@ import mcheli.aircraft.MCH_EntityHitBox;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.chain.MCH_EntityChain;
 import mcheli.parachute.MCH_EntityParachute;
+import mcheli.plane.MCP_EntityPlane;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Item;
@@ -58,6 +59,11 @@ public class MCH_ItemChain extends W_Item {
             return;
          }
 
+         if(entity instanceof MCP_EntityPlane) {
+            player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Cannot attach chain: planes cannot use cargo hooks to transport cargo."));
+            return;
+         }
+
          MCH_EntityChain towingChain = getTowedEntityChain(entity);
          if(towingChain != null) {
             towingChain.setDead();
@@ -97,6 +103,14 @@ public class MCH_ItemChain extends W_Item {
    }
 
    private static boolean canTowEntity(Entity towedEntity, Entity towEntity, EntityPlayer player) {
+      if(towedEntity instanceof MCP_EntityPlane || towEntity instanceof MCP_EntityPlane) {
+         if(player != null) {
+            player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Cannot attach chain: planes cannot use cargo hooks to transport cargo."));
+         }
+
+         return false;
+      }
+
       MCH_BaseVehicleInfo towedInfo = getVehicleInfo(towedEntity);
       MCH_BaseVehicleInfo towInfo = getVehicleInfo(towEntity);
       if(towedInfo == null) {

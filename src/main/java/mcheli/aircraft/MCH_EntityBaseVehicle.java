@@ -6617,7 +6617,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                continue;
             }
             if(!this.canRideAircraft(ac, sid, info)) {
-               MCH_Lib.DbgLog(super.worldObj, "[MCH-RACK][RACK-REJECT] reason=child_type_or_nested_rack_check carrier=%s rack=%d child=%s",
+               if(this.exceedsRackPayloadCapacity(ac)) {
+                  this.notifyRackPayloadExceeded(ac);
+               }
+               MCH_Lib.DbgLog(super.worldObj, "[MCH-RACK][RACK-REJECT] reason=child_type_or_nested_rack_or_payload_check carrier=%s rack=%d child=%s",
                        new Object[]{this.debugEntity(ac), Integer.valueOf(sid), this.debugEntity(this)});
                continue;
             }
@@ -6718,6 +6721,41 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return super.ridingEntity == null && this.canRideRackStatus;
    }
 
+   private boolean exceedsRackPayloadCapacity(MCH_EntityBaseVehicle carrier) {
+      if(carrier == null || carrier.getAcInfo() == null || this.getAcInfo() == null) {
+         return false;
+      }
+
+      double payloadCapacity = Math.max(0.0D, carrier.getAcInfo().maximumExternalPayloadCapacity);
+      double carriedWeight = Math.max(0.0D, this.getAcInfo().weight);
+      return carriedWeight > payloadCapacity;
+   }
+
+   private void notifyRackPayloadExceeded(MCH_EntityBaseVehicle carrier) {
+      EntityPlayer player = this.getFirstMountPlayer();
+      if(player != null) {
+         double payloadCapacity = carrier != null && carrier.getAcInfo() != null?Math.max(0.0D, carrier.getAcInfo().maximumExternalPayloadCapacity):0.0D;
+         double carriedWeight = this.getAcInfo() != null?Math.max(0.0D, this.getAcInfo().weight):0.0D;
+         player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Cannot mount rack: " + this.getVehicleDisplayName(this) + " weighs " + this.formatRackPounds(carriedWeight) + " lb, exceeding " + this.getVehicleDisplayName(carrier) + "'s external payload capacity of " + this.formatRackPounds(payloadCapacity) + " lb."));
+      }
+   }
+
+   private String getVehicleDisplayName(MCH_EntityBaseVehicle vehicle) {
+      if(vehicle != null && vehicle.getAcInfo() != null && vehicle.getAcInfo().displayName != null && !vehicle.getAcInfo().displayName.isEmpty()) {
+         return vehicle.getAcInfo().displayName;
+      }
+
+      return vehicle != null?vehicle.getCommandSenderName():"vehicle";
+   }
+
+   private String formatRackPounds(double pounds) {
+      if(Math.abs(pounds - (double)((long)pounds)) < 0.001D) {
+         return String.valueOf((long)pounds);
+      }
+
+      return String.format(java.util.Locale.ROOT, "%.1f", pounds);
+   }
+
    public boolean canRideAircraft(MCH_EntityBaseVehicle ac, int seatID, MCH_SeatRackInfo info) {
       if(this.getAcInfo() == null) {
          return false;
@@ -6760,6 +6798,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             if(!canRide) {
                return false;
             }
+         }
+
+         if(this.exceedsRackPayloadCapacity(ac)) {
+            return false;
          }
 
          MCH_EntitySeat[] var10 = this.getSeats();

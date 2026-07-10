@@ -1,5 +1,9 @@
 # Changelog
 
+## Rack payload capacity enforcement
+- Enforced `MaximumExternalPayloadCapacity` against carried vehicle `Weight` for plane, helicopter, and tank rack mounting, rejecting overweight rack attempts with an in-game message.
+- Disabled chain use for planes and now informs players that planes cannot use cargo hooks to transport cargo.
+
 ## Config Reference Max External Payload Capacities
 
 - Added `MaximumExternalPayloadCapacity = {lbs}` entries to every active `AddRack` carrier/tow-capable vehicle config reference under `configreference/`, using each platform's maximum towing, external-lift, payload, or cargo capacity in pounds.
