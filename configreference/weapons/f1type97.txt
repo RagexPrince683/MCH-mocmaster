@@ -6,6 +6,7 @@ DamageFactor = plane, 3.0
 DamageFactor = vehicle 2.0
 DamageFactor = heli, 3.0
 Acceleration = 0.5
+Gravity = -0.02452
 Explosion = 4
 ExplosionBlock = 2
 ExplosionInWater = 2

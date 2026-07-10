@@ -10,6 +10,7 @@ FAE = True
 
 ;bomb rewrite
 Acceleration = 0.5
+Gravity = -0.02452
 Explosion = 9
 ;Explosive mass	125 kg
 Power = 500

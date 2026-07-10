@@ -14,6 +14,7 @@ FAE = true
 
 ;bomb rewrite
 Acceleration = 0.5
+Gravity = -0.02452
 Explosion = 14
 ExplosionInWater = 7
 ExplosionBlock = 5

@@ -10,6 +10,7 @@ ModelBullet = fab250
 DisplayMortarDistance = true
 
 Acceleration = 0.5
+Gravity = -0.02452
 Explosion = 11
 ;Explosive mass	114kg
 Power = 540

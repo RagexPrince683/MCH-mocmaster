@@ -393,7 +393,10 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
             this.displayName = data;
         } else if (item.compareTo("type") == 0) {
             this.type = data.toLowerCase();
-            if (this.type.equalsIgnoreCase("bomb") || this.type.equalsIgnoreCase("dispenser")) {
+            if (this.type.equalsIgnoreCase("bomb")) {
+                this.gravity = -0.02452F;
+                this.gravityInWater = -0.02452F;
+            } else if (this.type.equalsIgnoreCase("dispenser")) {
                 this.gravity = -0.03F;
                 this.gravityInWater = -0.03F;
             }

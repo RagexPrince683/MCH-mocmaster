@@ -8,6 +8,7 @@ ModelBullet = blu10b
 FAE = true
 
 Acceleration = 0.5
+Gravity = -0.02452
 Explosion = 10
 ;Explosive mass	unknown kg kg
 Power = 1080

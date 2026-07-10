@@ -19,6 +19,7 @@ nukeyield = 210
 
 ;bomb rewrite
 Acceleration = 0.5
+Gravity = -0.02452
 Explosion = 15
 ;Explosive mass	? kg
 ;Power = 500

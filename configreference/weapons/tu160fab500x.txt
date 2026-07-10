@@ -10,7 +10,7 @@ Delay = 2
 Sound = bomb_snd
 SoundVolume = 10
 ModelBullet = fab500sh
-Gravity = -0.03
+Gravity = -0.02452
 
 
 Acceleration = 0.5

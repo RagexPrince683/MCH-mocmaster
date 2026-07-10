@@ -3,6 +3,7 @@ Type = Bomb
 Power = 300
 ;bomb rewrite
 Acceleration = 0.4
+Gravity = -0.02452
 Explosion = 8
 ;Explosive mass	45 kg
 ExplosionInWater = 4

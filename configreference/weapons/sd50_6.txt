@@ -18,6 +18,7 @@ Round = 6
 ModelBullet = type3_15_5
 
 Acceleration = 0.5
+Gravity = -0.02452
 
 ;Explosive mass	269.9 kg kg
 ExplosionBlock = 2

@@ -15,7 +15,7 @@ Bomblet = 38
 BombletDiff = 1.4
 Flaming = true
 
-Gravity = -0.08
+Gravity = -0.02452
 
 ;bomb rewrite
 Acceleration = 0.5

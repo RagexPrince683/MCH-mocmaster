@@ -14,6 +14,7 @@ BombletSTime = 15
 BombletDiff = 0.3
 
 Acceleration = 0.5
+Gravity = -0.02452
 Explosion = 7
 ;Explosive mass	125 kg
 Power = 500

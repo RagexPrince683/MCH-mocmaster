@@ -13,6 +13,7 @@ BombletDiff = 1.1
 Sound = bomb_snd
 
 Acceleration = 0.5
+Gravity = -0.02452
 
 DamageFactor = tank, 2.0
 DamageFactor = plane, 4.5
