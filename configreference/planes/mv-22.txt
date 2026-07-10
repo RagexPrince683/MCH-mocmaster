@@ -10,6 +10,7 @@ ChaffUseTime = 120
 ThrottleDownFactor = 0.20
 ItemID = 28701
 Weight = 33210
+MaximumExternalPayloadCapacity = 20000
 MaxHp = 100
 EnableNightVision = true
 EnableVtol = true

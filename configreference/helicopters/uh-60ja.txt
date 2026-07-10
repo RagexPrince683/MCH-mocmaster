@@ -10,6 +10,7 @@ ChaffUseTime = 100
 ThrottleDownFactor = 0.35
 ItemID = 28838
 Weight = 12000
+MaximumExternalPayloadCapacity = 9000
 MaxHp = 120
 EnableGunnerMode = false
 EnableFoldBlade = true

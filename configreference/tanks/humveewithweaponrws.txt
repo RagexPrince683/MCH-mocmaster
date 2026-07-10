@@ -12,6 +12,7 @@ ThrottleDownFactor = 0.45
 ;smd atom
 ItemID = 30032
 Weight = 7700
+MaximumExternalPayloadCapacity = 2500
 MaxHp = 230
 ThrottleUpDown = 0.81
 Speed = 0.6

@@ -10,6 +10,7 @@ ChaffUseTime = 120
 ThrottleDownFactor = 0.20
 ItemID = 28739
 Weight = 380000
+MaximumExternalPayloadCapacity = 285000
 MaxHp = 250
 Speed = 1.489
 

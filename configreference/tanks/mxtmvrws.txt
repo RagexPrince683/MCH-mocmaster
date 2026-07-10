@@ -2,6 +2,7 @@ DisplayName = MXT-MV Husky TSV with Protector RWS
 AddDisplayName = en_US, MXT-MV Husky TSV with Protector RWS
 AddDisplayName = ja_JP, MXT-MV ハスキーTSV with Protector RWS
 Weight = 100000
+MaximumExternalPayloadCapacity = 4300
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = MXT-MV Husky TSV with Protector RWS
 NameOnEarlyAARadar = Tank

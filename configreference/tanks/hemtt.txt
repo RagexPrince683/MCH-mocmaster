@@ -1,6 +1,7 @@
 DisplayName = M983 HEMTT Heavy Expanded Mobility Tactical Truck
 AddDisplayName = ja_JP, M983 HEMTT Heavy Expanded Mobility Tactical Truck
 Weight = 38000
+MaximumExternalPayloadCapacity = 22000
 NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = M983 HEMTT Heavy Expanded Mobility Tactical Truck
 NameOnEarlyAARadar = Light Vehicle
