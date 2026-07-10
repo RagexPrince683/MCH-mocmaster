@@ -1,4 +1,7 @@
 # Changelog
+## Guided Bomb Gravity Calibration
+- Recalibrated conventional guided-bomb config references to use real Earth gravity converted to MCHeli's 20 Hz per-tick velocity units (`9.80665 / 20^2 = 0.02452` blocks/tick²), replacing glidey `-0.001` to `-0.02` gravity values on GBU/LJDAM/KAB-style bomb drops while leaving purpose-built glide/SDB/UMPK weapons untouched.
+
 
 ## Config Reference Non-Bomber Gunner Bombsights Follow-up
 
