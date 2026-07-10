@@ -25,7 +25,7 @@ SoundVolume = 3
 SoundPitch = 0.1
 Sound = bomb_snd
 ModelBullet = gbu38
-Gravity = -0.01
+Gravity = -0.02452
 DisableSmoke = true
 Piercing  = 1
 

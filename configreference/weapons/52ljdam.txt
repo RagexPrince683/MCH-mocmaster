@@ -27,7 +27,7 @@ SoundPitch = 0.1
 SoundVolume = 3
 Sound = bomb_snd
 ModelBullet = mk82_b
-Gravity = -0.02
+Gravity = -0.02452
 DisableSmoke = true
 
 Piercing = 0

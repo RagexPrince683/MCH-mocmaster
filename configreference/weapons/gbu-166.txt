@@ -26,7 +26,7 @@ SoundVolume = 3
 SoundPitch = 0.1
 Sound = bomb_snd
 ModelBullet = gbu-16
-Gravity = -0.001
+Gravity = -0.02452
 DisableSmoke = true
 
 Acceleration = 0.5

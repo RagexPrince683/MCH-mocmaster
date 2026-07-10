@@ -16,7 +16,7 @@ BombletDiff = 1.5
 Sound = bomb_snd
 SoundVolume = 10
 disablesmoke=true
-Gravity = -0.002
+Gravity = -0.02452
 
 ModelBullet = kab500
 ModelBomblet = cbc

@@ -19,7 +19,7 @@ DamageFactor = player, 20.0
 
 ExplosionAltitude = 8
 disablesmoke = true
-Gravity = -0.005
+Gravity = -0.02452
 MaxAmmo = 8
 SuppliedNum = 1
 Item =  15, iron_ingot
