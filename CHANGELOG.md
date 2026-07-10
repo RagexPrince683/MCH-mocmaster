@@ -11,6 +11,8 @@
 
 ### Changed
 
+- Active New UAVs now keep their linked UAV station chunk loaded while piloted so the station continue flow can resolve the tied drone outside spawn chunks.
+
 - Fixed New UAV station pilot rendering so the station keeps showing the operator fake player after control transfers to an active New UAV.
 
 - Fixed passenger seats becoming non-enterable after vehicles cross chunk load boundaries or lag spikes by recreating missing server seat entities on interaction, clearing stale client seat slots, and resyncing authoritative seat occupant IDs.

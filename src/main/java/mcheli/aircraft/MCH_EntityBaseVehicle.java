@@ -85,6 +85,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    private static final int NEW_UAV_SAFE_RETURN_MIN_TICKS = 20;
    private static MCH_EntityBaseVehicle aircraft;
     private ForgeChunkManager.Ticket chunkTicket;
+   private ForgeChunkManager.Ticket newUavStationChunkTicket;
+   private ChunkCoordIntPair newUavForcedStationChunk;
    //MCH_EntityBaseVehicle ac = null;
    private static final int DATAWT_ID_DAMAGE = 19;
    private static final int DATAWT_ID_TYPE = 20;
@@ -5811,6 +5813,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void setDead(boolean dropItems) {
+      releaseNewUavStationChunk("vehicle-dead");
       if(!super.worldObj.isRemote && this.isNewUAV() && this.isDestroyed() && !this.newUavShiftExitInProgress) {
          notifyLinkedStationNewUavRemoved();
          Entity pilot = super.riddenByEntity != null ? super.riddenByEntity : this.lastRiddenByEntity;
@@ -8163,6 +8166,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
             //System.out.println("everything is WORKING");
          } else if(this.uavStation != null) {
+            updateNewUavStationChunkLoading();
             double udx1 = super.posX - this.uavStation.posX;
             double udz = super.posZ - this.uavStation.posZ;
 
@@ -8184,6 +8188,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             }
             //this.forceChunkLoading();
             //System.out.println("everything is working, now chunk loading");
+         } else {
+            releaseNewUavStationChunk("station-cleared");
          }
          //System.out.println("everything is working 2");
 
@@ -8192,8 +8198,52 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             this.uavStation = null;
          }
 
+      } else {
+         releaseNewUavStationChunk("not-uav");
       }
       //System.out.println("working 3");
+   }
+
+   private void updateNewUavStationChunkLoading() {
+      if(super.worldObj.isRemote || !this.isNewUAV() || this.uavStation == null || this.uavStation.isDead
+            || this.getRiddenByEntity() == null) {
+         releaseNewUavStationChunk("inactive-new-uav");
+         return;
+      }
+
+      ChunkCoordIntPair stationChunk = new ChunkCoordIntPair(
+            MathHelper.floor_double(this.uavStation.posX) >> 4,
+            MathHelper.floor_double(this.uavStation.posZ) >> 4);
+
+      if(this.newUavStationChunkTicket != null && stationChunk.equals(this.newUavForcedStationChunk)) {
+         return;
+      }
+
+      releaseNewUavStationChunk("station-chunk-changed");
+      this.newUavStationChunkTicket = ForgeChunkManager.requestTicket(MCH_MOD.instance, super.worldObj,
+            ForgeChunkManager.Type.NORMAL);
+      if(this.newUavStationChunkTicket == null) {
+         MCH_Lib.Log((Entity)this, "Unable to request New UAV station chunk ticket", new Object[0]);
+         return;
+      }
+
+      this.newUavForcedStationChunk = stationChunk;
+      ForgeChunkManager.forceChunk(this.newUavStationChunkTicket, this.newUavForcedStationChunk);
+      super.worldObj.getChunkFromChunkCoords(stationChunk.chunkXPos, stationChunk.chunkZPos);
+   }
+
+   private void releaseNewUavStationChunk(String reason) {
+      if(this.newUavStationChunkTicket == null) {
+         this.newUavForcedStationChunk = null;
+         return;
+      }
+      if(this.newUavForcedStationChunk != null) {
+         ForgeChunkManager.unforceChunk(this.newUavStationChunkTicket, this.newUavForcedStationChunk);
+      }
+      ForgeChunkManager.releaseTicket(this.newUavStationChunkTicket);
+      this.newUavStationChunkTicket = null;
+      this.newUavForcedStationChunk = null;
+      MCH_Lib.Log((Entity)this, "Released New UAV station chunk ticket: %s", new Object[] { reason });
    }
 
    public void switchGunnerMode(boolean mode) {
