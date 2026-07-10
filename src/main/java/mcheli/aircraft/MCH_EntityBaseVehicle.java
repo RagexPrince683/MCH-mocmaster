@@ -622,6 +622,19 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    }
 
+   public void unlinkUavStation() {
+      this.uavStation = null;
+      this.linkedUavStationUUID = null;
+      this.linkedUavStationDimension = 0;
+      this.linkedUavStationX = 0.0D;
+      this.linkedUavStationY = 0.0D;
+      this.linkedUavStationZ = 0.0D;
+      this.hasLinkedUavStationPosition = false;
+      if(!super.worldObj.isRemote) {
+         this.getDataWatcher().updateObject(22, Integer.valueOf(0));
+      }
+   }
+
    public UUID getUavPersistentUUID() {
       return getUavPersistentUUID(true);
    }

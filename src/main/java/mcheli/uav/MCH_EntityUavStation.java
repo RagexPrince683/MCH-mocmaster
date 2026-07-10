@@ -427,7 +427,48 @@ public class MCH_EntityUavStation
 
 
 
-             public void initUavPostion() {
+
+      private void detachLinkedUavForStationDestruction(MCH_EntityBaseVehicle linkedUav) {
+           if(this.worldObj.isRemote || linkedUav == null) {
+                return;
+           }
+
+           Entity rider = linkedUav.getRiddenByEntity();
+           if(rider != null) {
+                rider.mountEntity((Entity)null);
+                double x = this.posX - Math.sin(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
+                double z = this.posZ + Math.cos(this.rotationYaw * Math.PI / 180.0D) * 0.9D;
+                double y = this.posY + getMountedYOffset() + rider.getYOffset();
+                if(rider instanceof EntityPlayerMP) {
+                     W_EntityPlayer.closeScreen(rider);
+                     ((EntityPlayerMP)rider).setPositionAndUpdate(x, y, z);
+                } else {
+                     rider.setPosition(x, y, z);
+                }
+                rider.fallDistance = 0.0F;
+           }
+
+           linkedUav.unlinkUavStation();
+           MCH_UavJsonStore.remove(this.worldObj, this);
+           releaseReconnectChunks("station-destroyed");
+           this.riddenByEntity = null;
+           this.lastRiddenByEntity = null;
+           this.assignedUav = null;
+           this.assignedUavId = -1;
+           this.assignedUavUUID = "";
+           this.linkedUavEntityUUID = null;
+           this.linkedUavCommonId = "";
+           this.hasStoredUavLink = false;
+           this.awaitingLoadedUav = false;
+           this.pendingContinueTicks = 0;
+           this.controlAircraft = null;
+           setLastControlAircraft((MCH_EntityBaseVehicle)null);
+           setLastControlAircraftEntityId(0);
+           setNewUavPilotProfile((EntityPlayer)null);
+           setContinuationState(CONTINUE_NONE);
+      }
+
+      public void initUavPostion() {
            int rt = (int)(MCH_Lib.getRotate360((this.rotationYaw + 45.0F)) / 90.0D);
            boolean D = true;
            this.posUavX = (rt != 0 && rt != 3) ? -12 : 12;
@@ -477,10 +518,7 @@ public class MCH_EntityUavStation
                          linkedUav = findLinkedUavEntity(this.worldObj);
                      }
                      if(linkedUav != null && !linkedUav.isDead) {
-                         // The aircraft owns the exact persisted return coordinates and always
-                         // detaches before teleporting, including when this station is destroyed.
-                         linkedUav.setUavStation(this);
-                         linkedUav.setDead();
+                         detachLinkedUavForStationDestruction(linkedUav);
                      }
 
                      // Handle station death
