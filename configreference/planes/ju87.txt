@@ -1,3 +1,4 @@
+EnableGunnerMode = true
 DisplayName = Ju-87D-3 Stuka
 AddDisplayName = ru_RU, Ju-87D-3 Stuka
 NameOnEarlyASRadar = Fast Jet

@@ -133,7 +133,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `NewSmallUAV` | All | boolean | false | newer small UAV flag |
 | `TargetDrone` | All | boolean | false; also forces `UAV` | target-drone AI/training flag |
 | `autopilotrot` | All | float | -0.6 | gunner/auto pilot yaw drift |
-| `enablegunnermode` | All | boolean | false | gunner mode |
+| `enablegunnermode` | All | boolean | false | gunner mode; bundled plane references enable this for bombers and planes with ballistic/fire-control computers |
 | `HasBombSight` / `EnableBombSight` / `EnableBomberSight` | All planes/shared parser | boolean | true | first-person pilot gunner bombsight toggle; set false to keep gunner mode without the bomber sight |
 | `concurrentgunnermode` | All | boolean | false | pilot+gunner concurrency |
 | `enablenightvision` | All | boolean | false | night vision support |

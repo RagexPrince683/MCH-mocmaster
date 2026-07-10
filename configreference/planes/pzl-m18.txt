@@ -1,3 +1,5 @@
+EnableGunnerMode = true
+HasBombSight = false
 DisplayName = PZL M-18 Dromader
 AddDisplayName = en_US, PZL M-18 Dromader
 AddDisplayName = ja_JP, PZL M-18 ドロマーデル

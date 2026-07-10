@@ -1,3 +1,5 @@
+EnableGunnerMode = true
+HasBombSight = false
 DisplayName = An-2
 AddDisplayName = en_US, An-2
 AddDisplayName = ja_JP, An-2
