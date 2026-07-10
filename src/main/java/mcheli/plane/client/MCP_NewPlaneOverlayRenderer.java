@@ -7,6 +7,7 @@ import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.plane.MCP_EntityPlane;
+import mcheli.plane.MCP_PlaneChaseCamera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.Entity;
@@ -93,6 +94,10 @@ public class MCP_NewPlaneOverlayRenderer {
          this.drawNoseReticle(state);
          state.noseDrawn = true;
       }
+      if(state.freelookIndicatorShouldDraw) {
+         this.drawFreelookIndicator(mc, state);
+         state.freelookIndicatorDrawn = true;
+      }
       if(state.debugEnabled && state.hasPlane) {
          this.drawDebugText(mc, state);
       }
@@ -140,6 +145,7 @@ public class MCP_NewPlaneOverlayRenderer {
          state.qualifies = true;
       }
       state.crosshairSuppressed = state.plane.wasMouseAimVanillaCrosshairSuppressed();
+      state.freelookActive = state.plane.isFreeLookMode() || MCP_PlaneChaseCamera.shouldUseHoldFreelookAsCameraOnly(state.plane, player);
       return state;
    }
 
@@ -165,6 +171,7 @@ public class MCP_NewPlaneOverlayRenderer {
       state.proofShouldDraw = state.debugEnabled && state.qualifies;
       state.cursorShouldDraw = state.qualifies && (state.mouseAimEnabled || state.debugEnabled);
       state.noseShouldDraw = state.overlayActive || (state.debugEnabled && state.qualifies);
+      state.freelookIndicatorShouldDraw = state.qualifies && state.freelookActive;
       state.proofSkipReason = state.proofShouldDraw?"draw":"debug_or_plane_gate";
       state.cursorSkipReason = state.cursorShouldDraw?"draw":"mouse_aim_or_debug_gate";
       state.noseSkipReason = state.noseShouldDraw?"draw":"overlay_gate";
@@ -266,6 +273,21 @@ public class MCP_NewPlaneOverlayRenderer {
          this.drawLineCross(state.mouseX, state.mouseY, mouseSize * 0.35D, textureBound?0xAA55FF66:0xEE55FF66);
       }
       state.textureAvailable = textureBound;
+      this.endOverlayGl();
+   }
+
+   private void drawFreelookIndicator(Minecraft mc, OverlayState state) {
+      if(mc == null || mc.fontRenderer == null) {
+         return;
+      }
+      this.beginOverlayGl();
+      GL11.glEnable(3553);
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      String text = "FREELOOK";
+      int textWidth = mc.fontRenderer.getStringWidth(text);
+      int x = (state.width - textWidth) / 2;
+      int y = Math.max(8, (int)state.centerY - 42);
+      mc.fontRenderer.drawStringWithShadow(text, x, y, 0x55FF66);
       this.endOverlayGl();
    }
 
@@ -376,12 +398,12 @@ public class MCP_NewPlaneOverlayRenderer {
    }
 
    private String formatDebug(OverlayState state) {
-      return String.format("eventEntered=true stage=%s type=%s player=%s riding=%s planeQualifies=%s reason=%s renderView=%s mouseAim=%s debugReticle=%s debugFlight=%s size=%dx%d texture=%s proof=%s(%s) cursor=%s(%s) nose=%s(%s) crosshairSuppressed=%s desiredAimYaw/Pitch=(%.2f,%.2f) cameraYaw/Pitch=(%.2f,%.2f) cursorYawDelta/PitchDelta=(%.2f,%.2f) screenX/Y=(%.1f,%.1f) noseXY=(%.1f,%.1f) noseDelta=(%.2f,%.2f)",
+      return String.format("eventEntered=true stage=%s type=%s player=%s riding=%s planeQualifies=%s reason=%s renderView=%s mouseAim=%s debugReticle=%s debugFlight=%s size=%dx%d texture=%s proof=%s(%s) cursor=%s(%s) nose=%s(%s) freelookIndicator=%s freelook=%s crosshairSuppressed=%s desiredAimYaw/Pitch=(%.2f,%.2f) cameraYaw/Pitch=(%.2f,%.2f) cursorYawDelta/PitchDelta=(%.2f,%.2f) screenX/Y=(%.1f,%.1f) noseXY=(%.1f,%.1f) noseDelta=(%.2f,%.2f)",
             state.eventStage, state.eventType, state.playerEntityClass, state.ridingEntityClass, Boolean.valueOf(state.qualifies), state.skipReason,
             state.renderViewEntityClass, Boolean.valueOf(state.mouseAimEnabled), Boolean.valueOf(MCH_Config.PlaneMouseAimReticleDebug.prmBool), Boolean.valueOf(MCH_Config.DebugFlightControl.prmBool),
             Integer.valueOf(state.width), Integer.valueOf(state.height), Boolean.valueOf(reticleTextureAvailable), Boolean.valueOf(state.proofDrawn), state.proofSkipReason,
             Boolean.valueOf(state.cursorDrawn), state.cursorSkipReason, Boolean.valueOf(state.noseDrawn), state.noseSkipReason,
-            Boolean.valueOf(state.crosshairSuppressed), Double.valueOf(state.desiredAimYaw), Double.valueOf(state.desiredAimPitch),
+            Boolean.valueOf(state.freelookIndicatorDrawn), Boolean.valueOf(state.freelookActive), Boolean.valueOf(state.crosshairSuppressed), Double.valueOf(state.desiredAimYaw), Double.valueOf(state.desiredAimPitch),
             Double.valueOf(state.cameraYaw), Double.valueOf(state.cameraPitch), Double.valueOf(state.cursorYawDelta), Double.valueOf(state.cursorPitchDelta),
             Double.valueOf(state.mouseX), Double.valueOf(state.mouseY), Double.valueOf(state.noseX), Double.valueOf(state.noseY),
             Double.valueOf(state.noseYawDelta), Double.valueOf(state.nosePitchDelta));
@@ -421,6 +443,7 @@ public class MCP_NewPlaneOverlayRenderer {
       boolean mouseAimEnabled;
       boolean debugEnabled;
       boolean overlayActive;
+      boolean freelookActive;
       boolean crosshairSuppressed;
       String skipReason = "not_plane";
       String eventStage = "unknown";
@@ -458,6 +481,8 @@ public class MCP_NewPlaneOverlayRenderer {
       boolean noseShouldDraw;
       boolean noseDrawn;
       String noseSkipReason = "not_evaluated";
+      boolean freelookIndicatorShouldDraw;
+      boolean freelookIndicatorDrawn;
 
       boolean shouldSuppressCrosshair() {
          return this.qualifies && this.mouseAimEnabled && MCH_Config.HideVanillaCrosshairInPlaneMouseAim.prmBool;
