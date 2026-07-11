@@ -457,6 +457,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          return;
       }
 
+      if(this.applyEngineWaterboardingThrottleCut()) {
+         return;
+      }
+
       if(getHP() * 100 / getMaxHP() < getAcInfo().engineShutdownThreshold) {
          setCurrentThrottle(0);
          throttleUp = false;

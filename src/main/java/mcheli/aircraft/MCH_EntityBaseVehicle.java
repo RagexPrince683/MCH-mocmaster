@@ -3655,24 +3655,29 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             }
          }
 
-         if(this.getCountOnUpdate() % 30 == 0 && (this.getAcInfo() == null || !this.getAcInfo().isFloat) && MCH_Lib.isBlockInWater(super.worldObj, (int)(super.posX + 0.5D), (int)(super.posY + 1.5D + (double)this.getAcInfo().submergedDamageHeight), (int)(super.posZ + 0.5D))) {
+         if(this.getCountOnUpdate() % 30 == 0 && this.isSubmergedForDamage()) {
             int hp1 = this.getMaxHP() / 30;
             //int hp1 = this.ArmorMinDamage / 10;
             if(hp1 <= 0) {
                hp1 = 1;
             }
-            this.attackEntityFrom(DamageSource.inWall, hp1);
-            //Entity entity = damageSource.getEntity();
-            if (this instanceof MCH_EntityTank) {
 
+            if(this.isEngineWaterboarded()) {
+               this.attackEntityFromWaterboarding(hp1);
+            } else {
+               this.attackEntityFrom(DamageSource.inWall, hp1);
+            }
+
+            if(this instanceof MCH_EntityTank) {
                MCH_BaseVehicleInfo cmd1 = this.getAcInfo();
-
                if(cmd1 != null) {
-
-                  System.out.println("should be a tank");
-                  //MCH_BaseVehicleInfo.armorMinDamage
-                  //todo test for armor min damage
-                  this.attackEntityFrom(DamageSource.inWall, hp1 + cmd1.armorMinDamage);
+                  // Tanks keep their armor-minimum water pressure damage, but waterboarding
+                  // still stops applying damage once the engine shutdown threshold is reached.
+                  if(this.isEngineWaterboarded()) {
+                     this.attackEntityFromWaterboarding(hp1 + cmd1.armorMinDamage);
+                  } else {
+                     this.attackEntityFrom(DamageSource.inWall, hp1 + cmd1.armorMinDamage);
+                  }
                }
             }
 
@@ -4741,6 +4746,45 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
 
       return collidingBoundingBoxes;
+   }
+
+
+   private boolean isSubmergedForDamage() {
+      MCH_BaseVehicleInfo info = this.getAcInfo();
+      return info != null
+         && !info.isFloat
+         && MCH_Lib.isBlockInWater(super.worldObj, (int)(super.posX + 0.5D), (int)(super.posY + 1.5D + (double)info.submergedDamageHeight), (int)(super.posZ + 0.5D));
+   }
+
+   protected boolean isEngineWaterboarded() {
+      return this.isSubmergedForDamage()
+         && (this instanceof MCH_EntityTank || this instanceof MCP_EntityPlane || this instanceof MCH_EntityHeli);
+   }
+
+   protected boolean applyEngineWaterboardingThrottleCut() {
+      if(this.isEngineWaterboarded()) {
+         this.setCurrentThrottle(0.0D);
+         this.setThrottle(0.0D);
+         super.throttleUp = false;
+         super.throttleDown = false;
+         super.throttleBack = 0.0F;
+         return true;
+      }
+
+      return false;
+   }
+
+   private void attackEntityFromWaterboarding(int damage) {
+      MCH_BaseVehicleInfo info = this.getAcInfo();
+      int shutdownHp = 0;
+      if(info != null && info.engineShutdownThreshold > 0) {
+         shutdownHp = (int)Math.ceil((double)this.getMaxHP() * (double)info.engineShutdownThreshold / 100.0D);
+      }
+
+      int cappedDamage = Math.min(Math.max(damage, 0), this.getHP() - shutdownHp);
+      if(cappedDamage > 0) {
+         this.attackEntityFrom(DamageSource.inWall, cappedDamage);
+      }
    }
 
    protected void onUpdate_updateBlock() {

@@ -85,7 +85,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `ArmorMaxDamage` | All | float | 100000.0 | armor clamp ceiling |
 | `ArmorDamageFactor` | All | float | 1.0 | armor damage scale |
 | `ExplosionSizeByCrash` | All | int[0..100] | 5 | death/crash explosion radius |
-| `EngineShutdownThreshold` | All | int | 20 | engine disabled below this HP percent |
+| `EngineShutdownThreshold` | All | int | 20 | engine disabled below this HP percent; also caps waterboarding damage for submerged non-floating tanks, planes, and helicopters |
 | `float` | All | boolean | false | enables water floating behavior |
 | `floatoffset` | All | float | 0.0 | waterline offset |
 | `gravity` | All | float | -0.04 | air gravity per tick |
