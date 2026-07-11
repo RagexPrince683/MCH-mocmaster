@@ -744,6 +744,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
 
                            s = data.toLowerCase().split("\\s*,\\s*");
                            if(s != null && s.length >= 7) {
+                              //todo rename whatever the fuck I am looking at to be readable non compiled schizobabbel
                               var17 = s[0].split("\\s*/\\s*");
                               var18 = s.length >= 8?this.toFloat(s[7]):6.0F;
                               ry = s.length >= 9?this.toFloat(s[8], 0.0F, 1000000.0F):20.0F;
