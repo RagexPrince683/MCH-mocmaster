@@ -68,8 +68,9 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
    //}
 
    public void addInformation(ItemStack stack, EntityPlayer player, List lines, boolean par4) {
-      MCH_BaseVehicleInfo info = this.getAircraftInfo().category.equals("zzz") ? null : this.getAircraftInfo();
-      MCH_EntityBaseVehicle ac = createAircraft(player.worldObj, -1.0D, -1.0D, -1.0D, stack);
+      MCH_BaseVehicleInfo aircraftInfo = this.getAircraftInfo();
+      MCH_BaseVehicleInfo info = aircraftInfo != null && aircraftInfo.category.equals("zzz") ? null : aircraftInfo;
+      MCH_EntityBaseVehicle ac = aircraftInfo != null ? createAircraft(player.worldObj, -1.0D, -1.0D, -1.0D, stack) : null;
       if (info != null) {
          lines.add(EnumChatFormatting.YELLOW + "Category: " + info.category);
          if(info.weight != 0.0D) {
@@ -82,20 +83,23 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
          //         tooltip.add(TextFormatting.DARK_PURPLE + "Weapons: " + Arrays.stream(ac.weapons).map(MCH_WeaponSet::getName).collect(Collectors.joining(", ")));
          //lines.add(EnumChatFormatting.DARK_PURPLE + "Weapons: " + Arrays.stream(ac.weapons).map(MCH_WeaponSet::getName).collect(Collectors.joining(", ")));
          //im sure this will work
-         lines.add(EnumChatFormatting.DARK_PURPLE + "Weapons:");
+         if(ac != null) {
+            lines.add(EnumChatFormatting.DARK_PURPLE + "Weapons:");
 
-         Arrays.stream(ac.weapons)
-                 .map(MCH_WeaponSet::getName)
-                 .forEach(name -> lines.add(EnumChatFormatting.GRAY + " - " + name));
+            Arrays.stream(ac.weapons)
+                    .map(MCH_WeaponSet::getName)
+                    .forEach(name -> lines.add(EnumChatFormatting.GRAY + " - " + name));
+         }
          //should look cleaner
       }
 
-      if (ac != null &&
-              ac.isNewUAV()) {
-         lines.add(EnumChatFormatting.RED + "WARNING!");
-         lines.add(EnumChatFormatting.RED + "This drone has a new drone mechanic!");
-         lines.add(EnumChatFormatting.RED + "It may contain bugs, issues or edgecases!");
-         lines.add(EnumChatFormatting.RED + "Clear your inventory before use!");
+      if (isUavInfo(aircraftInfo)) {
+         lines.add(EnumChatFormatting.AQUA + getUavTypeLabel(aircraftInfo) + ": use a UAV Station to place and control.");
+         if(isSmallUavInfo(aircraftInfo)) {
+            lines.add(EnumChatFormatting.GRAY + "Small UAVs may also use a Portable UAV Controller.");
+         } else {
+            lines.add(EnumChatFormatting.GRAY + "Large UAVs require the standard UAV Station.");
+         }
       }
 //
       super.addInformation(stack, player, lines, par4);
@@ -112,6 +116,30 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
    public abstract MCH_BaseVehicleInfo getAircraftInfo();
 
    public abstract MCH_EntityBaseVehicle createAircraft(World var1, double var2, double var4, double var6, ItemStack var8);
+
+   private static boolean isUavInfo(MCH_BaseVehicleInfo info) {
+      return info != null && (info.isUAV || info.isNewUAV);
+   }
+
+   private static boolean isSmallUavInfo(MCH_BaseVehicleInfo info) {
+      return info != null && info.isSmallUAV;
+   }
+
+   private static String getUavTypeLabel(MCH_BaseVehicleInfo info) {
+      return isSmallUavInfo(info) ? "Small UAV" : "Large UAV";
+   }
+
+   private static String getUavPlacementMessage(MCH_BaseVehicleInfo info) {
+      return isSmallUavInfo(info)
+              ? "Small UAVs must be placed from a UAV Station or Portable UAV Controller."
+              : "Large UAVs must be placed from a UAV Station.";
+   }
+
+   private void notifyUavStationRequired(World world, EntityPlayer player) {
+      if(!world.isRemote) {
+         player.addChatMessage(new ChatComponentText(getUavPlacementMessage(this.getAircraftInfo())));
+      }
+   }
 
    MCH_EntityBaseVehicle ac;
    //todo add a wait time for the aircraft to be placed, we dont want people abusing vehicle hopping
@@ -150,7 +178,11 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
    }
 
    public ItemStack onItemRightClick(ItemStack par1ItemStack, World world, EntityPlayer player) {
-      //TODO fix UAV place bug, UAVs are only placeable via a station so the deploy logic should not apply to them and the player should be informed.
+      if(isUavInfo(this.getAircraftInfo())) {
+         notifyUavStationRequired(world, player);
+         return par1ItemStack;
+      }
+
       float f = 1.0F;
       float f1 = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * f;
       float f2 = player.prevRotationYaw + (player.rotationYaw - player.prevRotationYaw) * f;
@@ -264,9 +296,14 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
    @Override
    public void onUsingTick(ItemStack stack, EntityPlayer player, int count) {
-
-      //TODO if !(ac.isNewUAV()) or regular UAV and if it is tell the player to use a UAV station.
-      // Since our other code for telling the player this info does not work since adding this.
+      if(isUavInfo(this.getAircraftInfo())) {
+         if(stack.stackTagCompound != null) {
+            clearDeployTags(stack.stackTagCompound);
+         }
+         player.stopUsingItem();
+         notifyUavStationRequired(player.worldObj, player);
+         return;
+      }
 
       int used = this.getMaxItemUseDuration(stack) - count;
 
@@ -375,6 +412,14 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
    @Override
    public void onPlayerStoppedUsing(ItemStack stack, World world, EntityPlayer player, int timeLeft) {
+      if(isUavInfo(this.getAircraftInfo())) {
+         if(stack.stackTagCompound != null) {
+            clearDeployTags(stack.stackTagCompound);
+         }
+         notifyUavStationRequired(world, player);
+         return;
+      }
+
       int used = this.getMaxItemUseDuration(stack) - timeLeft;
 
       if (used >= MCH_Config.placetimer.prmInt) {
@@ -444,7 +489,11 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
 
    public MCH_EntityBaseVehicle spawnAircraft(ItemStack itemStack, World world, EntityPlayer player, int x, int y, int z) {
-
+      if(isUavInfo(this.getAircraftInfo())) {
+         notifyUavStationRequired(world, player);
+         logPlacementDebug(world, "spawnAircraft rejected UAV before placement: item=%s info=%s target=(%d,%d,%d) remote=%s", getItemDebugName(itemStack), getInfoDebugName(), Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z), Boolean.valueOf(world.isRemote));
+         return null;
+      }
 
       MCH_EntityBaseVehicle ac = this.onTileClick(itemStack, world, player.rotationYaw, x, y, z);
       if(ac != null) {

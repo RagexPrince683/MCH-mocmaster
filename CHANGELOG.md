@@ -1,4 +1,8 @@
 # Changelog
+## Clear UAV placement guidance
+- Vehicle item tooltips now identify small versus large UAVs and state whether to use a UAV Station or Portable UAV Controller.
+- Direct right-click placement for UAV vehicle items now stops before hold-to-deploy starts and immediately tells players to use the correct UAV controller instead of failing at deployment time.
+
 ## Tank and Turret Fall Damage
 - Added server-side fall damage for tanks and turrets after drops greater than three blocks, using fall damage sources so armor and existing vehicle damage handling apply consistently.
 
