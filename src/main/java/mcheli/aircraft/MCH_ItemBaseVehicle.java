@@ -72,6 +72,12 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
       MCH_EntityBaseVehicle ac = createAircraft(player.worldObj, -1.0D, -1.0D, -1.0D, stack);
       if (info != null) {
          lines.add(EnumChatFormatting.YELLOW + "Category: " + info.category);
+         if(info.weight != 0.0D) {
+            lines.add(EnumChatFormatting.YELLOW + "Weight: " + formatPounds(info.weight) + " lb");
+         }
+         if(info.maximumExternalPayloadCapacity != 0.0D) {
+            lines.add(EnumChatFormatting.YELLOW + "Max Payload: " + formatPounds(info.maximumExternalPayloadCapacity) + " lb");
+         }
          //lines.add(EnumChatFormatting.DARK_PURPLE + "Weapon: " + info.weaponSetList);
          //         tooltip.add(TextFormatting.DARK_PURPLE + "Weapons: " + Arrays.stream(ac.weapons).map(MCH_WeaponSet::getName).collect(Collectors.joining(", ")));
          //lines.add(EnumChatFormatting.DARK_PURPLE + "Weapons: " + Arrays.stream(ac.weapons).map(MCH_WeaponSet::getName).collect(Collectors.joining(", ")));
@@ -93,6 +99,14 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
       }
 //
       super.addInformation(stack, player, lines, par4);
+   }
+
+   private static String formatPounds(double pounds) {
+      if(Math.abs(pounds - (double)((long)pounds)) < 0.001D) {
+         return String.valueOf((long)pounds);
+      }
+
+      return String.format(java.util.Locale.ROOT, "%.1f", pounds);
    }
 
    public abstract MCH_BaseVehicleInfo getAircraftInfo();
