@@ -6458,6 +6458,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                         entity.mountEntity(seat);
                         ++var12;
                         break;
+                     } else if(entity instanceof MCH_EntityBaseVehicle && ((MCH_EntityBaseVehicle)entity).exceedsRackPayloadCapacity(this)) {
+                        ((MCH_EntityBaseVehicle)entity).notifyRackPayloadExceeded(this);
                      }
                   } else if(entity.ridingEntity == null) {
                      NBTTagCompound nbt = entity.getEntityData();
@@ -6722,21 +6724,48 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    private boolean exceedsRackPayloadCapacity(MCH_EntityBaseVehicle carrier) {
+      return this.getRackPayloadAfterMount(carrier) < 0.0D;
+   }
+
+   private double getRackPayloadAfterMount(MCH_EntityBaseVehicle carrier) {
       if(carrier == null || carrier.getAcInfo() == null || this.getAcInfo() == null) {
-         return false;
+         return 0.0D;
       }
 
       double payloadCapacity = Math.max(0.0D, carrier.getAcInfo().maximumExternalPayloadCapacity);
+      double mountedWeight = carrier.getMountedRackPayloadWeight();
       double carriedWeight = Math.max(0.0D, this.getAcInfo().weight);
-      return carriedWeight > payloadCapacity;
+      return payloadCapacity - mountedWeight - carriedWeight;
+   }
+
+   private double getMountedRackPayloadWeight() {
+      double mountedWeight = 0.0D;
+
+      for(int sid = 0; sid < this.getSeatNum(); ++sid) {
+         MCH_SeatInfo seatInfo = this.getSeatInfo(sid + 1);
+         MCH_EntitySeat seat = this.getSeat(sid);
+         if(seatInfo instanceof MCH_SeatRackInfo && seat != null && seat.riddenByEntity instanceof MCH_EntityBaseVehicle) {
+            MCH_BaseVehicleInfo mountedInfo = ((MCH_EntityBaseVehicle)seat.riddenByEntity).getAcInfo();
+            if(mountedInfo != null) {
+               mountedWeight += Math.max(0.0D, mountedInfo.weight);
+            }
+         }
+      }
+
+      return mountedWeight;
    }
 
    private void notifyRackPayloadExceeded(MCH_EntityBaseVehicle carrier) {
       EntityPlayer player = this.getFirstMountPlayer();
+      if(player == null && carrier != null) {
+         player = carrier.getFirstMountPlayer();
+      }
       if(player != null) {
          double payloadCapacity = carrier != null && carrier.getAcInfo() != null?Math.max(0.0D, carrier.getAcInfo().maximumExternalPayloadCapacity):0.0D;
+         double mountedWeight = carrier != null?carrier.getMountedRackPayloadWeight():0.0D;
          double carriedWeight = this.getAcInfo() != null?Math.max(0.0D, this.getAcInfo().weight):0.0D;
-         player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Cannot mount rack: " + this.getVehicleDisplayName(this) + " weighs " + this.formatRackPounds(carriedWeight) + " lb, exceeding " + this.getVehicleDisplayName(carrier) + "'s external payload capacity of " + this.formatRackPounds(payloadCapacity) + " lb."));
+         double remainingCapacity = Math.max(0.0D, payloadCapacity - mountedWeight);
+         player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Cannot mount rack: " + this.getVehicleDisplayName(this) + " weighs " + this.formatRackPounds(carriedWeight) + " lb, but " + this.getVehicleDisplayName(carrier) + " only has " + this.formatRackPounds(remainingCapacity) + " lb of external payload capacity remaining (" + this.formatRackPounds(payloadCapacity) + " lb max)."));
       }
    }
 

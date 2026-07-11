@@ -1,4 +1,7 @@
 # Changelog
+## Rack payload capacity cumulative enforcement
+- Updated rack mounting so `MaximumExternalPayloadCapacity` is checked against the total `Weight` already mounted on occupied rack seats plus the incoming vehicle, preventing the remaining payload capacity from ever going negative.
+
 ## Normal Bomb Gravity Calibration
 - Recalibrated normal `Type = Bomb` ballistic weapon references and the bomb default gravity to use standard Earth gravity in MCHeli's 20 Hz per-tick units (`9.80665 / 20^2 = 0.02452` blocks/tick²), while leaving glide weapons, mines, fuel tanks, dispensers, and other special payloads on their custom tuning.
 
