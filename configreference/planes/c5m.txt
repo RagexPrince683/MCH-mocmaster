@@ -2,7 +2,7 @@ DisplayName = C5M Super Galaxy
 AddDisplayName = en_US, C5M Super Galaxy
 Weight = 381000
 CanMountShip = false
-MaximumExternalPayloadCapacity = 285000
+MaximumExternalPayloadCapacity = 281000
 NameOnEarlyASRadar = Large Aircraft
 NameOnModernASRadar = C5M Super Galaxy
 NameOnEarlyAARadar = Large Aircraft
@@ -248,24 +248,24 @@ AddRecipe = "ABC", "DA ", "EAE", A, mcheli:airframebomb, B, mcheli:advancedmecha
 AddRecipe = "AB ", "   ", "   ", A, mcheli:c5, B, mcheli:advancedmechanicparts
 
 ; AddRack=Entity type,                    RackPos X,Y,Z,   EntryPos X,Y,Z,   Range,  Open parachute atl,  Yaw, Pitch
-AddRack = m1a2, 0.0, 2.40, -7,   0, 0, 17.0,   11,   20
-AddRack = m1a2, 0.0, 2.18,-28,   0, 0,-58.0,   11,   20
+AddRack = tank, 0.0, 2.40, -7,   0, 0, 17.0,   11,   20
+AddRack = tank, 0.0, 2.18,-28,   0, 0,-58.0,   11,   20
 
-AddRack = mh-60g/mh-60l_dap/sh-60/uh-60m/sh-3/ah-64,   0, 2.4,  -4.8,   0, 0, 17.0,      11,    100000
-AddRack = mh-60g/mh-60l_dap/sh-60/uh-60m/sh-3/ah-64,   0, 2.2, -22.8,   0, 0,-58.0,      11,    100000
+AddRack = heli,   0, 2.4,  -4.8,   0, 0, 17.0,      11,    100000
+AddRack = heli,   0, 2.2, -22.8,   0, 0,-58.0,      11,    100000
 
-AddRack = centauro/m1129/, 0.0, 2.40, -9,   0, 0, 17.0,   11,   20
-AddRack = centauro/m1129/, 0.0, 2.18,-29,   0, 0,-58.0,   11,   20	
+AddRack = tank, 0.0, 2.40, -9,   0, 0, 17.0,   11,   20
+AddRack = tank, 0.0, 2.18,-29,   0, 0,-58.0,   11,   20	
 
-AddRack = imshorad/strykericv/m1129/m2/bnr32/bnr32_police/impreza/s15/hel/hel2/humveewithweapon/ah-64, 0.0, 2.40,-11.8,   0, 0, 17.0,   11,   20
-AddRack = imshorad/strykericv/m1129/m2/bnr32/bnr32_police/impreza/s15/hel/hel2/humveewithweapon/ah-64, 0.0, 2.35, -4.8,   0, 0, 17.0,   11,   20
+AddRack = tank, 0.0, 2.40,-11.8,   0, 0, 17.0,   11,   20
+AddRack = tank/heli, 0.0, 2.35, -4.8,   0, 0, 17.0,   11,   20
 
-AddRack = growler/m2/bnr32/bnr32_police/impreza/s15/hel/hel2/humveewithweapon/ah-64, 0.0, 2.25,-18.8,   0, 0,-58.0,   12,   20
-AddRack = growler/m2/bnr32/bnr32_police/impreza/s15/hel/hel2/humveewithweapon/ah-64, 0.0, 2.20,-25.8,   0, 0,-58.0,   12,   20
-AddRack = growler/m2/bnr32/bnr32_police/impreza/s15/hel/hel2/humveewithweapon/ah-64, 0.0, 2.15,-32.8,   0, 0,-58.0,   12,   20
+AddRack = tank/heli/vehicle, 0.0, 2.25,-18.8,   0, 0,-58.0,   12,   20
+AddRack = tank/heli/vehicle, 0.0, 2.20,-25.8,   0, 0,-58.0,   12,   20
+AddRack = tank/heli/vehicle, 0.0, 2.15,-32.8,   0, 0,-58.0,   12,   20
 
-AddRack = ah-64,   0, 2.4,  -4.8,   0, 0, 17.0,      11,    100000,  0, -3.55
-AddRack = ah-64,   0, 2.2, -22.8,   0, 0,-58.0,      11,    100000,  0, -3.55
+AddRack = heli,   0, 2.4,  -4.8,   0, 0, 17.0,      11,    100000,  0, -3.55
+AddRack = heli,   0, 2.2, -22.8,   0, 0,-58.0,      11,    100000,  0, -3.55
 
 AddRack = container,   2.0, 2.1, -11.0,  0, 0,  17.0,   15,    20
 AddRack = container,  -2.0, 2.1, -11.0,  0, 0,  17.0,   15,    20
@@ -280,19 +280,19 @@ AddRack = container,  -2.0, 2.1, -32.5,  0, 0,  17.0,   15,    20
 AddRack = container,   2.0, 2.1, -34.0,  0, 0,  17.0,   15,    20
 AddRack = container,  -2.0, 2.1, -34.0,  0, 0,  17.0,   15,    20
 
-;Respecto al helicóptero delantero
+;Relative to the front helicopter
 ExclusionSeat = 3,5
 ExclusionSeat = 7,5
-ExclusionSeat = 9,5  
-ExclusionSeat = 10,5  
+ExclusionSeat = 9,5
+ExclusionSeat = 10,5
 ExclusionSeat = 11,5
 ExclusionSeat = 3,14
 ExclusionSeat = 7,14
-ExclusionSeat = 9,14 
-ExclusionSeat = 10,14  
+ExclusionSeat = 9,14
+ExclusionSeat = 10,14
 ExclusionSeat = 11,14
 
-;Respecto al helicóptero posterior
+;Relative to the rear helicopter
 ExclusionSeat = 4,6
 ExclusionSeat = 8,6
 ExclusionSeat = 11,6
@@ -304,19 +304,20 @@ ExclusionSeat = 11,15
 ExclusionSeat = 12,15
 ExclusionSeat = 13,15
 
-;Entre helicópteros
+;Between helicopters
 ExclusionSeat = 5,14
 ExclusionSeat = 6,15
 
-;Respecto al tanque delantero
+;Relative to the front tank
 ExclusionSeat = 7,3
 ExclusionSeat = 9,3
 ExclusionSeat = 10,3
 
-;Respecto al tanque posterior
+;Relative to the rear tank
 ExclusionSeat = 8,4
 ExclusionSeat = 12,4
 ExclusionSeat = 13,4
+
 
 DamageFactor = 0.8
 
