@@ -1,4 +1,7 @@
 # Changelog
+## Instant Turret Placement
+- Turret items now deploy immediately on right-click after the normal placement validation, bypassing vehicle hold-to-deploy timer setup, ready messages, and release-delay checks.
+
 ## Clear UAV placement guidance
 - Vehicle item tooltips now identify small versus large UAVs and state whether to use a UAV Station or Portable UAV Controller.
 - Direct right-click placement for UAV vehicle items now stops before hold-to-deploy starts and immediately tells players to use the correct UAV controller instead of failing at deployment time.

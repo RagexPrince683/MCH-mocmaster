@@ -117,6 +117,10 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
    public abstract MCH_EntityBaseVehicle createAircraft(World var1, double var2, double var4, double var6, ItemStack var8);
 
+   protected boolean shouldPlaceInstantly() {
+      return false;
+   }
+
    private static boolean isUavInfo(MCH_BaseVehicleInfo info) {
       return info != null && (info.isUAV || info.isNewUAV);
    }
@@ -237,6 +241,14 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
          if (world.getWorldTime() < 100) {
             logPlacementDebug(world, "rightClick ignored: world too new time=%d item=%s", Long.valueOf(world.getWorldTime()), getItemDebugName(par1ItemStack));
+            return par1ItemStack;
+         }
+
+         if(this.shouldPlaceInstantly()) {
+            if(par1ItemStack.stackTagCompound != null) {
+               clearDeployTags(par1ItemStack.stackTagCompound);
+            }
+            deployVehicle(par1ItemStack, world, player, mop.blockX, mop.blockY, mop.blockZ, 0);
             return par1ItemStack;
          }
 
@@ -433,41 +445,41 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
          int y = tag.getInteger("TargetY");
          int z = tag.getInteger("TargetZ");
 
-         logPlacementDebug(world, "stopUsing placement attempt: item=%s player=%s used=%d target=(%d,%d,%d)", getItemDebugName(stack), player.getCommandSenderName(), Integer.valueOf(used), Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z));
-         MCH_EntityBaseVehicle placed = spawnAircraft(stack, world, player, x, y, z);
+         deployVehicle(stack, world, player, x, y, z, used);
          clearDeployTags(tag);
-         if(placed == null) {
-            if(!world.isRemote) {
-               player.addChatMessage(new ChatComponentText("Vehicle deployment failed. Check server log for [VehiclePlacement] details."));
-            }
-            return;
+      }
+      // Minecraft handles usage reset automatically
+   }
+
+   private boolean deployVehicle(ItemStack stack, World world, EntityPlayer player, int x, int y, int z, int used) {
+      logPlacementDebug(world, "placement attempt: item=%s player=%s used=%d target=(%d,%d,%d) instant=%s", getItemDebugName(stack), player.getCommandSenderName(), Integer.valueOf(used), Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z), Boolean.valueOf(this.shouldPlaceInstantly()));
+      MCH_EntityBaseVehicle placed = spawnAircraft(stack, world, player, x, y, z);
+      if(placed == null) {
+         if(!world.isRemote) {
+            player.addChatMessage(new ChatComponentText("Vehicle deployment failed. Check server log for [VehiclePlacement] details."));
          }
+         return false;
+      }
 
-         W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
+      W_WorldFunc.MOD_playSoundAtEntity(player, "deploy", 1.0F, 1.0F);
 
-         // SERVER SIDE ONLY
-         if (!world.isRemote) {
-            // Message to the deploying player
-            player.addChatMessage(new ChatComponentText("Vehicle deployed."));
+      if(!world.isRemote) {
+         player.addChatMessage(new ChatComponentText("Vehicle deployed."));
 
-            // Message to everyone else
-            MinecraftServer server = MinecraftServer.getServer();
-            if (server != null) {
-               for (Object o : server.getConfigurationManager().playerEntityList) {
-                  EntityPlayerMP other = (EntityPlayerMP) o;
-                  if (other != player) {
-                     other.addChatMessage(
-                             new ChatComponentText( EnumChatFormatting.DARK_BLUE +
-                                     player.getCommandSenderName() + " has deployed a vehicle!"
-                             )
-                     );
-                  }
+         MinecraftServer server = MinecraftServer.getServer();
+         if(server != null) {
+            for(Object o : server.getConfigurationManager().playerEntityList) {
+               EntityPlayerMP other = (EntityPlayerMP)o;
+               if(other != player) {
+                  other.addChatMessage(new ChatComponentText(EnumChatFormatting.DARK_BLUE + player.getCommandSenderName() + " has deployed a vehicle!"));
                }
             }
          }
       }
-      // Minecraft handles usage reset automatically
+
+      return true;
    }
+
 
 
    //@Override
@@ -475,7 +487,6 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
    //   return true;
    //}
    //idk if we will still need this but it is here
-
    //@Override
    //public boolean canContinueUsing(ItemStack oldStack, ItemStack newStack) {
    //   // Return true only if StartCount tag is still present (meaning still holding)
