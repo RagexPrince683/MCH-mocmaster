@@ -2740,6 +2740,11 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
    }
 
    protected void onUpdate_Control() {
+      if(this.applyEngineWaterboardingThrottleCut()) {
+         this.engineThrottle = 0.0D;
+         return;
+      }
+
       if(super.isGunnerMode && !this.canUseFuel()) {
          this.switchGunnerMode(false);
       }

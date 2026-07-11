@@ -1061,6 +1061,13 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       //}
       //hovering and death animation had issues with this. Not good!
 
+      if(this.applyEngineWaterboardingThrottleCut()) {
+         this.normalizedRotorRPM = 0.0F;
+         this.targetRotorRPM = 0.0F;
+         this.enginePowerOutput = 0.0F;
+         return;
+      }
+
       if(this.isHoveringMode() && !this.canUseFuel(true)) {
          this.switchHoveringMode(false);
       }

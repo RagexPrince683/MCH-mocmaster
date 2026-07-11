@@ -85,7 +85,7 @@ For fixed-wing planes using `useNewMobilitySystem = true`, this gravity value is
 | `ArmorDamageFactor` | float[0..10000] | 1 | Armor multiplier. |
 | `ArmorMinDamage` / `ArmorMaxDamage` | float[0..1000000] | 0 / 100000 | Armor damage clamp. Constructor field for max is 100000, parser allows up to 1000000. |
 | `ExplosionSizeByCrash` | int[0..100] | 5 | Explosion size when destroyed/crashed. |
-| `EngineShutdownThreshold` | int[0..100] | 20 | Engine shutdown below this health percentage. |
+| `EngineShutdownThreshold` | int[0..100] | 20 | Engine shutdown below this health percentage. For non-floating tanks, planes, and helicopters submerged by `SubmergedDamageHeight`, waterboarding damage now stops at this threshold and throttle is forced to 0 while the engine is waterlogged. |
 | `MaxFuel` | int[0..100000000] | 0 | Capacity; zero effectively disables fuel limit. |
 | `FuelConsumption` | float[0..10000] | 1 | Consumption multiplier. |
 | `FuelSupplyRange` / `AmmoSupplyRange` | float[0..1000] | 0 | Support radius. |
