@@ -1,4 +1,7 @@
 # Changelog
+## Vehicle tooltip payload stats
+- Added vehicle item tooltip lines for non-zero configured `Weight` and `MaximumExternalPayloadCapacity` values so players can see vehicle weight and max payload capacity before spawning.
+
 ## Rack payload capacity cumulative enforcement
 - Updated rack mounting so `MaximumExternalPayloadCapacity` is checked against the total `Weight` already mounted on occupied rack seats plus the incoming vehicle, preventing the remaining payload capacity from ever going negative.
 
