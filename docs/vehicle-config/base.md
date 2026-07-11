@@ -101,7 +101,7 @@ For fixed-wing planes using `useNewMobilitySystem = true`, this gravity value is
 | `RWRType` | enum | `NONE` | Invalid values fall back to `NONE`; set `DIGITAL` to enable the current RWR display. |
 | `NameOnModernAARadar`, `NameOnEarlyAARadar`, `NameOnModernASRadar`, `NameOnEarlyASRadar` | string | `?` | Radar labels. |
 | `Stealth` | float[0..1] | 0 | Visibility modifier. |
-| `UAV`, `SmallUAV`, `NewUAV`, `NewSmallUAV`, `TargetDrone` | boolean | false | UAV/NewUAV force camera view and add a hidden seat when needed. `TargetDrone` also sets `UAV`. |
+| `UAV`, `SmallUAV`, `NewUAV`, `NewSmallUAV`, `TargetDrone` | boolean | false | UAV/NewUAV force camera view and add a hidden seat when needed. UAV vehicle items skip normal hold-to-deploy placement: large UAVs tell players to use a UAV Station, while small UAVs tell players to use a UAV Station or Portable UAV Controller. `TargetDrone` also sets `UAV`. |
 | `enablegunnermode`, `concurrentgunnermode`, `enablenightvision`, `enableentityradar`, `EnableEjectionSeat`, `EnableParachuting` | boolean | false | Shared feature toggles. Parachuting is disabled if repelling hooks exist. |
 | `HasBombSight` / `EnableBombSight` / `EnableBomberSight` | boolean | true | Enables the first-person pilot gunner bombsight toggle when ballistic prediction is available. Set false for gunships or other aircraft that should keep gunner mode without a bombsight. |
 | `FlareType` | int list[1..10] | none | Enables flares when at least one type is present. |
