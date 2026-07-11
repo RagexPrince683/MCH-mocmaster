@@ -1,4 +1,7 @@
 # Changelog
+## Tank and Turret Fall Damage
+- Added server-side fall damage for tanks and turrets after drops greater than three blocks, using fall damage sources so armor and existing vehicle damage handling apply consistently.
+
 ## Vehicle tooltip payload stats
 - Added vehicle item tooltip lines for non-zero configured `Weight` and `MaximumExternalPayloadCapacity` values so players can see vehicle weight and max payload capacity before spawning.
 

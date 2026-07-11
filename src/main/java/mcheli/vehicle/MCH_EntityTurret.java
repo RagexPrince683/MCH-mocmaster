@@ -311,6 +311,17 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
    }
 
 
+   protected void fall(float distance) {
+      if(!super.worldObj.isRemote && distance > 3.0F && !this.isDestroyed()) {
+         float damage = (distance - 3.0F) * 2.0F;
+         this.attackEntityFrom(DamageSource.fall, damage);
+      }
+
+      if(this.getRiddenByEntity() != null) {
+         this.getRiddenByEntity().fallDistance = 0.0F;
+      }
+   }
+
    //no usages
    protected void onUpdate_Particle() {
       double particlePosY = super.posY;
