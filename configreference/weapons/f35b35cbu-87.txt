@@ -16,6 +16,7 @@ Round = 2
 ReloadTime = 1000
 
 Acceleration = 0.5
+Gravity = -0.02452
 
 DamageFactor = tank, 2.0
 DamageFactor = plane, 4.5

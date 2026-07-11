@@ -16,6 +16,7 @@ ReloadTime = 120
 Round = 2
 
 Acceleration = 0.5
+Gravity = -0.02452
 ;DamageFactor = tank, 2.0
 DamageFactor = plane, 4.5
 DamageFactor = vehicle 4.5

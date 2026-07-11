@@ -10,7 +10,7 @@ Delay = 5
 ReloadTime = 1900
 Sound = bomb_snd
 
-Gravity = -0.2
+Gravity = -0.02452
 
 ;bomb rewrite
 Acceleration = 0.5

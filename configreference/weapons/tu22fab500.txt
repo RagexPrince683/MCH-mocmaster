@@ -7,7 +7,7 @@ Sight = None
 Delay = 5
 Sound = bomb_snd
 ModelBullet = fab500sh
-Gravity = -0.01
+Gravity = -0.02452
 
 Acceleration = 0.5
 Explosion = 15

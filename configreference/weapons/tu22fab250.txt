@@ -18,6 +18,7 @@ DamageFactor = tank, 2
 DamageFactor =vehicle , 4
 
 Acceleration = 0.5
+Gravity = -0.02452
 Explosion = 11
 ;Explosive mass	269.9/around 2 kg kg
 Power = 540

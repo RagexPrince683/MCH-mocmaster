@@ -2,6 +2,7 @@ DisplayName = Tsar Bomba [50MT]
 Type = Bomb
 Power = 50
 Acceleration = 0.01
+Gravity = -0.02452
 Explosion = 20
 ExplosionBlock = 1
 ExplosionInWater = 1

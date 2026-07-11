@@ -23,7 +23,7 @@ ModeNum = 2
 ModelBullet = rn28
 ;1-2mt
 nukeyield = 150
-gravity = -0.01
+Gravity = -0.02452
 ;bomb rewrite
 Acceleration = 2
 Explosion = 15

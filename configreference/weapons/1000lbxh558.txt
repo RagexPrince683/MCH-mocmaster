@@ -10,6 +10,7 @@ Round = 21
 ModelBullet = us_500lb
 ;bomb rewrite
 Acceleration = 0.5
+Gravity = -0.02452
 Explosion = 13
 ;Explosive mass	269.9 kg kg
 Power = 1080

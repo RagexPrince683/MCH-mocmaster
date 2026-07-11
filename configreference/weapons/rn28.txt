@@ -23,7 +23,7 @@ DisableSmoke = true
 ModelBullet = rn28
 ;400kt
 nukeyield = 30
-gravity = -0.01
+Gravity = -0.02452
 ;bomb rewrite
 Acceleration = 2
 Explosion = 15
