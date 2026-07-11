@@ -510,6 +510,17 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    }
 
+   protected void fall(float distance) {
+      if(!super.worldObj.isRemote && distance > 3.0F && !this.isDestroyed()) {
+         float damage = (distance - 3.0F) * 2.0F;
+         this.attackEntityFrom(DamageSource.fall, damage);
+      }
+
+      if(this.getRiddenByEntity() != null) {
+         this.getRiddenByEntity().fallDistance = 0.0F;
+      }
+   }
+
    public boolean attackEntityFrom(DamageSource damageSource, float damage) {
       EnumBoundingBoxType hitType = this.lastHitBoundingBoxType;
       if(!super.worldObj.isRemote && hitType == EnumBoundingBoxType.TRACK && !this.isDestroyed()) {
