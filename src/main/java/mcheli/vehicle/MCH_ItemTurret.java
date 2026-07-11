@@ -20,6 +20,11 @@ public class MCH_ItemTurret extends MCH_ItemBaseVehicle {
       return MCH_TurretInfoManager.getFromItem(this);
    }
 
+   @Override
+   protected boolean shouldPlaceInstantly() {
+      return true;
+   }
+
    public MCH_EntityTurret createAircraft(World world, double x, double y, double z, ItemStack item) {
       MCH_TurretInfo info = MCH_TurretInfoManager.getFromItem(this);
       if(info == null) {
