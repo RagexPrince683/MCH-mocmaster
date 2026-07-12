@@ -17,6 +17,8 @@ import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler {
 
@@ -28,6 +30,10 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
    public MCH_Key[] Keys;
    private static int bombReticlePlaneEntityId = -1;
    private static boolean bombReticleMode = false;
+   private static final int BOMB_RETICLE_IMPACT_GRACE_TICKS = 20;
+   private static final double BOMB_RETICLE_FALLBACK_MIN_DISTANCE = 32.0D;
+   private static final double BOMB_RETICLE_FALLBACK_MAX_DISTANCE = 512.0D;
+   private static final Map bombReticleFallbacks = new HashMap();
    private final MCP_PlaneChaseCamera chaseCamera = new MCP_PlaneChaseCamera();
    private boolean wasUsingChaseCamera = false;
 
@@ -169,16 +175,25 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
 
    private void forceBombReticleCamera(EntityPlayer player, MCP_EntityPlane plane, boolean isPilot) {
       if(player == null || plane == null || !isPilot || !isBombReticleMode(plane)) {
+         clearBombReticleFallback(plane);
          return;
       }
       MCP_PlaneCCIPHelper.Result result = MCP_PlaneCCIPHelper.predictCurrentWeapon(plane, player);
-      if(result == null || !result.valid || result.impact == null) {
+      Vec3 target = null;
+      int planeEntityId = plane.getEntityId();
+      if(result != null && result.valid && result.impact != null) {
+         target = result.impact;
+         updateBombReticleFallback(planeEntityId, target, plane.ticksExisted);
+      } else {
+         target = getBombReticleFallbackTarget(plane, player);
+      }
+      if(target == null) {
          return;
       }
       Vec3 cameraPos = Vec3.createVectorHelper(plane.camera.posX, plane.camera.posY, plane.camera.posZ);
-      double dx = result.impact.xCoord - cameraPos.xCoord;
-      double dy = result.impact.yCoord - cameraPos.yCoord;
-      double dz = result.impact.zCoord - cameraPos.zCoord;
+      double dx = target.xCoord - cameraPos.xCoord;
+      double dy = target.yCoord - cameraPos.yCoord;
+      double dz = target.zCoord - cameraPos.zCoord;
       double horizontal = Math.sqrt(dx * dx + dz * dz);
       if(horizontal < 1.0E-6D) {
          return;
@@ -193,6 +208,58 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
       plane.updateCameraRotate(yaw, pitch);
    }
 
+   private static void updateBombReticleFallback(int planeEntityId, Vec3 impact, int tick) {
+      if(impact != null) {
+         bombReticleFallbacks.put(Integer.valueOf(planeEntityId), new BombReticleFallback(impact, tick));
+      }
+   }
+
+   private static Vec3 getBombReticleFallbackTarget(MCP_EntityPlane plane, EntityPlayer player) {
+      int planeEntityId = plane.getEntityId();
+      BombReticleFallback fallback = (BombReticleFallback)bombReticleFallbacks.get(Integer.valueOf(planeEntityId));
+      if(fallback != null && plane.ticksExisted - fallback.tick <= BOMB_RETICLE_IMPACT_GRACE_TICKS) {
+         return fallback.copyImpact();
+      }
+      Vec3 derived = deriveBombReticleCameraTarget(plane, player);
+      updateBombReticleFallback(planeEntityId, derived, plane.ticksExisted);
+      return derived;
+   }
+
+   private static Vec3 deriveBombReticleCameraTarget(MCP_EntityPlane plane, EntityPlayer player) {
+      if(plane == null || player == null || plane.camera == null) {
+         return null;
+      }
+      Vec3 cameraPos = Vec3.createVectorHelper(plane.camera.posX, plane.camera.posY, plane.camera.posZ);
+      Vec3 forward = MCH_Lib.Rot2Vec3(plane.getRotYaw(), MathHelper.clamp_float(plane.getRotPitch() + 35.0F, 15.0F, 80.0F));
+      double horizontalSpeed = Math.sqrt(plane.motionX * plane.motionX + plane.motionZ * plane.motionZ);
+      double distance = MathHelper.clamp_double(cameraPos.yCoord * 2.5D + horizontalSpeed * 80.0D,
+            BOMB_RETICLE_FALLBACK_MIN_DISTANCE, BOMB_RETICLE_FALLBACK_MAX_DISTANCE);
+      return Vec3.createVectorHelper(
+            cameraPos.xCoord + forward.xCoord * distance,
+            cameraPos.yCoord + forward.yCoord * distance,
+            cameraPos.zCoord + forward.zCoord * distance);
+   }
+
+   private static void clearBombReticleFallback(MCP_EntityPlane plane) {
+      if(plane != null) {
+         bombReticleFallbacks.remove(Integer.valueOf(plane.getEntityId()));
+      }
+   }
+
+   private static class BombReticleFallback {
+      private final Vec3 impact;
+      private final int tick;
+
+      private BombReticleFallback(Vec3 impact, int tick) {
+         this.impact = Vec3.createVectorHelper(impact.xCoord, impact.yCoord, impact.zCoord);
+         this.tick = tick;
+      }
+
+      private Vec3 copyImpact() {
+         return Vec3.createVectorHelper(this.impact.xCoord, this.impact.yCoord, this.impact.zCoord);
+      }
+   }
+
    public static boolean isBombReticleMode(MCP_EntityPlane plane) {
       return plane != null && plane.getPlaneInfo() != null && plane.getPlaneInfo().hasBombSight
             && bombReticleMode && bombReticlePlaneEntityId == plane.getEntityId();
@@ -201,6 +268,7 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
    public static void resetBombReticleMode() {
       bombReticleMode = false;
       bombReticlePlaneEntityId = -1;
+      bombReticleFallbacks.clear();
    }
 
    protected void playerControlInGUI(EntityPlayer player, MCP_EntityPlane plane, boolean isPilot) {
