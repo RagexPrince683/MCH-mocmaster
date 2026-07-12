@@ -1,4 +1,7 @@
 # Changelog
+## Tank wheel grass trampling
+- Added server-side tank wheel trampling so each simulated `SetWheelPos` contact point turns grass blocks beneath moving tank wheels into dirt.
+
 ## Config Reference Weight Audit
 - Corrected config reference vehicle weights to integer pounds using DisplayName/AddDisplayName identification and category-appropriate real-world weight definitions.
 - Added a config weight plausibility validator for cars, motorcycles, consumer drones, helicopters, tanks/armored vehicles, ships, aircraft, static weapons, trailers, and equipment.

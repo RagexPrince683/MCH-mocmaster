@@ -22,7 +22,7 @@ Tanks inherit all shared keys from `base.md` and add track/weight keys. Tank `sp
 ## Practical tuning
 
 - Use shared `speed`, `MotionFactor`, `MobilityYawOnGround`, `CanMoveOnGround`, `CanRotOnGround`, and `PivotTurnThrottle` for driving feel.
-- Use `SetWheelPos` for wheel/contact layout and `AddTrackHitBox` for damageable tracks.
+- Use `SetWheelPos` for wheel/contact layout and `AddTrackHitBox` for damageable tracks. Moving tanks also use their `SetWheelPos` contact points to trample grass blocks under their wheels into dirt.
 - `TrackRollerRot`, `PartWheelRot`, `AddCrawlerTrack`, `AddTrackRoller`, and `AddPartWheel` are visual helpers inherited from the shared parser.
 
 ## Minimal tank config
