@@ -69,6 +69,11 @@ Emergency cleanup examples:
 
 Be careful: matching is a case-insensitive substring search against full Java class names and excludes players only.
 
+## Logging and diagnostics
+
+- Leave the legacy `McHeliOutputDebugLog` marker disabled for normal servers. Startup milestones, system checks, warnings, and errors still log without it.
+- Enable `McHeliOutputDebugLog` only while diagnosing noisy internals such as per-item registration, ore dictionary confirmations, language-entry registration, reload traces, and similar spam-level debug output.
+
 ## Performance notes
 
 - `EnableAircraftLODRender`, `AircraftLODStartDistance`, and `AircraftLODFarDistance` are client-side rendering aids for far vehicle snapshots.

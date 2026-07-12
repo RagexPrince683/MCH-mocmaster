@@ -1,6 +1,7 @@
 package mcheli.multithread;
 
 import mcheli.MCH_ClientProxy;
+import mcheli.MCH_Lib;
 import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.ship.MCH_ShipInfoManager;
@@ -119,6 +120,6 @@ public class MultiThreadModelManager {
             retries++;
         }
 
-        System.out.println(name + " data ready with " + map.size() + " entries.");
+        MCH_Lib.DbgLog(false, "%s data ready with %d entries.", name, Integer.valueOf(map.size()));
     }
 }

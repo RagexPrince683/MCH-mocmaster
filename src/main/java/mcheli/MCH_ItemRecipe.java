@@ -217,10 +217,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
          return OreDictionary.getOreName(oreIDs[0]);
       }
 
-      System.out.println(
-              "AUTOORE CHECK: " + stack +
-                      " ORES=" + Arrays.toString(OreDictionary.getOreIDs(stack))
-      );
+      MCH_Lib.DbgLog(false, "AUTOORE CHECK: %s ORES=%s", stack, Arrays.toString(OreDictionary.getOreIDs(stack)));
 
 
       return obj;

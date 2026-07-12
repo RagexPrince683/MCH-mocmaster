@@ -177,9 +177,7 @@ public class MCH_MOD {
 
 
 
-      System.out.println(
-              "[MCH] fml.deobf = " + Launch.blackboard.get("fml.deobfuscatedEnvironment")
-      );
+      MCH_Lib.DbgLog(false, "[MCH] fml.deobf = %s", Launch.blackboard.get("fml.deobfuscatedEnvironment"));
 
 
 
@@ -196,21 +194,18 @@ public class MCH_MOD {
          sourcePath = modsDir.getAbsolutePath() + "/mcheli" + "/";
 
 
-         MCH_Lib.Log("Mods Directory: " + sourcePath, new Object[0]);
-         System.out.println("Mods Directory: " + sourcePath);
+         MCH_Lib.DbgLog(false, "Mods Directory: %s", sourcePath);
       } else {
          //works in a live minecraft instance
          sourcePath = Loader.instance().activeModContainer().getSource().getPath();
-         System.out.println("Mods Directory: " + sourcePath);
+         MCH_Lib.DbgLog(false, "Mods Directory: %s", sourcePath);
       }
 
       ///sourcePath = "D:\\Software\\GitHub\\MCHeli-Reforged\\src\\main\\resources";
               //new File(evt.getModConfigurationDirectory().getParentFile(), "/mods").getPath();
-      MCH_Lib.Log("SourcePath: " + sourcePath, new Object[0]);
-      System.out.println("SourcePath: " + sourcePath);
+      MCH_Lib.DbgLog(false, "SourcePath: %s", sourcePath);
       //MCH_Lib I have NO FUCKING CLUE HOW TO USE. I LITERALLY DO NOT THINK IT WORKS ANYMORE.
-      MCH_Lib.Log("CurrentDirectory:" + (new File(".")).getAbsolutePath(), new Object[0]);
-      System.out.println("CurrentDirectory:" + (new File(".")).getAbsolutePath());
+      MCH_Lib.DbgLog(false, "CurrentDirectory: %s", (new File(".")).getAbsolutePath());
 
 
 
@@ -418,27 +413,27 @@ public class MCH_MOD {
 
    //do this first so oredict shit can work properly...?
    public static void registerItemCustom() {
-      System.out.println("[mcheli.MCH_MOD:registerItemCustom] Starting custom item registration...");
+      MCH_Lib.DbgLog(false, "[mcheli.MCH_MOD:registerItemCustom] Starting custom item registration...");
 
       Iterator<String> i$ = MCH_ItemInfoManager.getKeySet().iterator();
 
       while (i$.hasNext()) {
          String name = i$.next();
-         System.out.println("[mcheli.MCH_MOD:registerItemCustom] Processing item: " + name);
+         MCH_Lib.DbgLog(false, "[mcheli.MCH_MOD:registerItemCustom] Processing item: %s", name);
 
          // Get the item info for the current item
          MCH_ItemInfo info = MCH_ItemInfoManager.get(name);
 
          // Check if item info is null
          if (info == null) {
-            System.out.println("[mcheli.MCH_MOD:registerItemCustom] Error: Item info for " + name + " is null! Skipping...");
+            MCH_Lib.Log("[mcheli.MCH_MOD:registerItemCustom] Error: Item info for %s is null! Skipping...", name);
             continue;
          }
 
          // Separate logic for throwable items (grenades)
          if (isThrowableItem(name)) {
             // Skip registering the throwable item in the normal item registration logic
-            System.out.println("[mcheli.MCH_MOD:registerItemCustom] Skipping throwable item: " + name);
+            MCH_Lib.DbgLog(false, "[mcheli.MCH_MOD:registerItemCustom] Skipping throwable item: %s", name);
             continue;
          }
 
@@ -466,7 +461,7 @@ public class MCH_MOD {
                        new ItemStack(info.item, 1, 0)
                );
 
-               System.out.println("[mcheli.MCH_MOD] Registered OreDict: " + ore + " -> " + name);
+               MCH_Lib.DbgLog(false, "[mcheli.MCH_MOD] Registered OreDict: %s -> %s", ore, name);
             }
          }
 
