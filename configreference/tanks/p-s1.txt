@@ -1,7 +1,7 @@
 DisplayName = Pantsir SA-22 Greyhound Air Defense System
 AddDisplayName = en_US, KAMAZ-6560 with Pantsir SA-22 Greyhound Air Defense System
 AddDisplayName = ja_JP, Pantsir 自走式近距離防空システム
-Weight = 100000
+Weight = 66100
 NameOnEarlyASRadar = Air Defense Vehicle
 NameOnModernASRadar = Pantsir SA-22 Greyhound Air Defense System
 NameOnEarlyAARadar = Air Defense Vehicle

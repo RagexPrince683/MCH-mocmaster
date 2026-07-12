@@ -1,6 +1,6 @@
 DisplayName = T-14 Armata
 AddDisplayName = en_US, T-14 Armata
-Weight = 100000
+Weight = 121254
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = T-14 Armata
 NameOnEarlyAARadar = Tank

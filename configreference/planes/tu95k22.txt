@@ -1,4 +1,4 @@
-Weight = 49500
+Weight = 198000
 CanMountShip = false
 ;;DisplayName = Tupolev "TU-95 Bear
 DisplayName = TU-95K-22 (3x KH-22 Nuclear)

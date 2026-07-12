@@ -1,5 +1,5 @@
 DisplayName = Volkswagen Iltis
-Weight = 100000
+Weight = 2950
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Volkswagen Iltis
 NameOnEarlyAARadar = Tank

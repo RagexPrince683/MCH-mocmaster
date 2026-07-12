@@ -1,6 +1,6 @@
 DisplayName = M42 Duster
 AddDisplayName = zh_CN, M42“除尘者”自行防空炮
-Weight = 66139
+Weight = 49400
 NameOnEarlyASRadar = Air Defense Vehicle
 NameOnModernASRadar = M42 Duster
 NameOnEarlyAARadar = Air Defense Vehicle

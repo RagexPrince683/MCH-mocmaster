@@ -1,6 +1,6 @@
 DisplayName = Generic Tractor
 AddDisplayName = ja_JP, Generic トラクター
-Weight = 100000
+Weight = 3000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Generic Tractor
 NameOnEarlyAARadar = Tank

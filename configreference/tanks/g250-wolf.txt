@@ -1,5 +1,5 @@
 DisplayName = Mercedes G250 Wolf
-Weight = 100000
+Weight = 4190
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Mercedes G250 Wolf
 NameOnEarlyAARadar = Tank

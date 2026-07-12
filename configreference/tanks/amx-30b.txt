@@ -1,4 +1,4 @@
-Weight = 100000
+Weight = 79366
     DisplayName = AMX-30B
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = AMX-30B

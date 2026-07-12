@@ -1,5 +1,5 @@
 DisplayName = leKPz M41 Walker Bulldog
-Weight = 100000
+Weight = 52000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = leKPz M41 Walker Bulldog
 NameOnEarlyAARadar = Tank

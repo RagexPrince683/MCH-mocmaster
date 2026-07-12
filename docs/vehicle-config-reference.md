@@ -303,3 +303,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 ## Payload and towing capacities
 
 The reference configs now populate `MaximumExternalPayloadCapacity = {lbs}` on active carrier/tow-capable vehicles that define `AddRack`, using each platform's maximum towing, external-lift, payload, or cargo capacity in pounds. Vehicles without an active rack or towing/carrying role keep the default capacity unless explicitly configured.
+
+## Weight field audit
+
+`Weight =` values in `configreference/` are integer pounds. Use the audited definitions in [Config reference weight audit](configreference-weights.md) when adding or changing vehicle weights, and run `python3 tools/validate_config_weights.py` to catch implausible units or category mismatches.

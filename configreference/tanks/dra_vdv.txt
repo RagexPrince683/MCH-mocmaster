@@ -1,5 +1,5 @@
 DisplayName = VDV Buggy/Fast Attack Vehicle/Ukrainian Attack Buggy
-Weight = 100000
+Weight = 3300
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = VDV Buggy/Fast Attack Vehicle/Ukrainian Attack Buggy
 NameOnEarlyAARadar = Tank

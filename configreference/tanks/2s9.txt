@@ -1,5 +1,5 @@
 DisplayName = 2S9 Nona Self-Propelled Mortar
-Weight = 90000
+Weight = 19180
 NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = 2S9 Nona Self-Propelled Mortar
 NameOnEarlyAARadar = Light Vehicle

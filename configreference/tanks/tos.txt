@@ -1,5 +1,5 @@
 DisplayName = TOS-1A Buratino
-Weight = 90000
+Weight = 98400
 NameOnEarlyASRadar = Artillery Vehicle
 NameOnModernASRadar = TOS-1A Buratino
 NameOnEarlyAARadar = Artillery Vehicle
