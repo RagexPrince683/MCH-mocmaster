@@ -68,8 +68,6 @@ public final class MCP_PlaneCCIPHelper {
 
       Vec3 position = copy(releasePos);
       Vec3 velocity = copy(initialVelocity);
-      Vec3 firstUnloadedPosition = null;
-      Vec3 previousPosition = null;
       double entityAcceleration = getConstructorAcceleration(info);
       entityAcceleration = applySpeedDependsAircraftFirstTick(
             info, aircraftMotion, velocity, entityAcceleration, result);
@@ -111,23 +109,11 @@ public final class MCP_PlaneCCIPHelper {
             return result;
          }
 
-         if(firstUnloadedPosition == null && !isChunkLoadedForPrediction(world, next)) {
-            firstUnloadedPosition = copy(next);
+         if(!isChunkLoadedForPrediction(world, next)) {
+            return buildUnloadedChunkFallback(result, info, releasePos, position, next,
+                  velocity, entityAcceleration, entityTick, maxSteps);
          }
 
-         if(firstUnloadedPosition != null && next.yCoord <= 0.0D) {
-            result.valid = true;
-            result.unloadedChunkFallback = true;
-            result.firstUnloadedPosition = copy(firstUnloadedPosition);
-            result.impact = interpolateAtY(previousPosition != null ? previousPosition : position, next, 0.0D);
-            result.finalVelocity = copy(velocity);
-            result.impactDistance = releasePos.distanceTo(result.impact);
-            result.releaseAltitude = releasePos.yCoord - result.impact.yCoord;
-            result.reasonInvalid = "unloaded_chunk_fallback";
-            return result;
-         }
-
-         previousPosition = position;
          position = next;
 
          // MCH_EntityBomb applies this once, after super.onUpdate().
@@ -154,21 +140,78 @@ public final class MCP_PlaneCCIPHelper {
       }
 
       result.finalVelocity = copy(velocity);
-      if(firstUnloadedPosition != null && position != null) {
-         result.valid = true;
-         result.unloadedChunkFallback = true;
-         result.firstUnloadedPosition = copy(firstUnloadedPosition);
-         result.impact = copy(position);
-         result.impactDistance = releasePos.distanceTo(result.impact);
-         result.releaseAltitude = releasePos.yCoord - result.impact.yCoord;
-         result.reasonInvalid = "unloaded_chunk_fallback";
-         return result;
-      }
       if("not_run".equals(result.reasonInvalid)) {
          result.reasonInvalid = "no_collision";
       }
       return result;
    }
+   private static Result buildUnloadedChunkFallback(Result result, MCH_WeaponInfo info, Vec3 releasePos,
+         Vec3 segmentStart, Vec3 firstUnloadedPosition, Vec3 velocity, double entityAcceleration,
+         int entityTick, int maxSteps) {
+      Vec3 fallbackStart = segmentStart;
+      Vec3 fallbackEnd = firstUnloadedPosition;
+      Vec3 fallbackVelocity = copy(velocity);
+      int fallbackTick = entityTick;
+
+      if(fallbackEnd != null && fallbackEnd.yCoord > 0.0D) {
+         Vec3 position = copy(fallbackEnd);
+         Vec3 simulatedVelocity = copy(velocity);
+         double simulatedAcceleration = entityAcceleration;
+
+         for(int stepIndex = entityTick; stepIndex < maxSteps; ++stepIndex) {
+            if(isGravityBomb(info)) {
+               simulatedVelocity.xCoord *= BOMB_HORIZONTAL_DRAG;
+               simulatedVelocity.zCoord *= BOMB_HORIZONTAL_DRAG;
+            } else if(isDispenser(info) && simulatedAcceleration < 1.0E-4D) {
+               simulatedVelocity.xCoord *= BOMB_HORIZONTAL_DRAG;
+               simulatedVelocity.zCoord *= BOMB_HORIZONTAL_DRAG;
+            }
+
+            int nextEntityTick = stepIndex + 1;
+            if(info.speedFactor != 0.0F
+                  && nextEntityTick > info.speedFactorStartTick
+                  && nextEntityTick < info.speedFactorEndTick) {
+               double speed = length(simulatedVelocity);
+               if(speed > EPSILON) {
+                  double factor = (double)info.speedFactor / speed;
+                  simulatedVelocity.xCoord += simulatedVelocity.xCoord * factor;
+                  simulatedVelocity.yCoord += simulatedVelocity.yCoord * factor;
+                  simulatedVelocity.zCoord += simulatedVelocity.zCoord * factor;
+                  simulatedAcceleration += (double)info.speedFactor;
+               }
+            }
+
+            simulatedVelocity.yCoord += (double)info.gravity;
+            Vec3 simulatedNext = Vec3.createVectorHelper(
+                  position.xCoord + simulatedVelocity.xCoord * result.accelerationFactor,
+                  position.yCoord + simulatedVelocity.yCoord * result.accelerationFactor,
+                  position.zCoord + simulatedVelocity.zCoord * result.accelerationFactor);
+
+            fallbackStart = position;
+            fallbackEnd = simulatedNext;
+            fallbackVelocity = copy(simulatedVelocity);
+            fallbackTick = nextEntityTick;
+            if(simulatedNext.yCoord <= 0.0D || simulatedNext.yCoord < -64.0D) {
+               break;
+            }
+            position = simulatedNext;
+         }
+      }
+
+      result.valid = true;
+      result.unloadedChunkFallback = true;
+      result.firstUnloadedPosition = copy(firstUnloadedPosition);
+      result.impact = fallbackEnd != null && fallbackEnd.yCoord <= 0.0D
+            ? interpolateAtY(fallbackStart, fallbackEnd, 0.0D)
+            : copy(fallbackEnd);
+      result.finalVelocity = copy(fallbackVelocity);
+      result.ticksSimulated = fallbackTick;
+      result.impactDistance = releasePos.distanceTo(result.impact);
+      result.releaseAltitude = releasePos.yCoord - result.impact.yCoord;
+      result.reasonInvalid = "unloaded_chunk_fallback";
+      return result;
+   }
+
 
    private static double applySpeedDependsAircraftFirstTick(MCH_WeaponInfo info,
          Vec3 aircraftMotion, Vec3 velocity, double entityAcceleration, Result result) {
