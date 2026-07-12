@@ -1,5 +1,8 @@
 # Changelog
 
+## CCIP-only Unloaded Chunk Fallback
+- Fixed plane CCIP prediction so reaching unloaded terrain immediately returns a valid unloaded-chunk fallback impact, preserving CCIP debug fallback metadata without relying on bomber-sight camera forcing.
+
 ## Bomb Sight Unloaded Chunk Fallback
 - Kept the plane CCIP/bomb-sight reticle rendering when the predicted bomb path reaches unloaded or far-away chunks by falling back to a non-mutating ballistic ground projection instead of treating the missing chunk ray trace as no impact.
 
