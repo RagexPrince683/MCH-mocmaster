@@ -24,6 +24,8 @@ import net.minecraft.world.World;
 
 public class MCH_EntityParachute extends W_Entity {
 
+   public static final double MAX_CARGO_AIRDROP_WEIGHT_LB = 34800.0D;
+
    private double speedMultiplier;
    private int paraPosRotInc;
    private double paraX;

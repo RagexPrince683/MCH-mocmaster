@@ -1,4 +1,8 @@
 # Changelog
+## Cargo Paradrop Weight Limit
+- Added a 34,800 lb cargo airdrop limit so rack-dropped vehicles over the historical maximum cargo airdrop weight are released without spawning a paradrop parachute.
+- Added the 34,800 lb cargo airdrop limit to the parachute item tooltip.
+
 ## Instant Turret Placement
 - Turret items now deploy immediately on right-click after the normal placement validation, bypassing vehicle hold-to-deploy timer setup, ready messages, and release-delay checks.
 
