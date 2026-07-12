@@ -788,8 +788,9 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             Boolean.valueOf(enabled), name, result != null ? result.releaseMode : "-", Boolean.valueOf(result != null && result.valid),
             result != null ? result.reasonInvalid : (enabled ? "not_predicted" : "not_bomb_or_disabled"),
             Integer.valueOf(result != null ? result.ticksSimulated : 0), Double.valueOf(result != null ? result.impactDistance : 0.0D));
-      String msg2 = String.format("releasePos=%s impactWorldPos=%s aircraftSpeedHorizontal=%.3f",
-            this.formatVec(result != null ? result.releasePos : null), this.formatVec(result != null ? result.impact : null), Double.valueOf(horizontalSpeed));
+      String msg2 = String.format("releasePos=%s impactWorldPos=%s aircraftSpeedHorizontal=%.3f unloadedFallback=%s",
+            this.formatVec(result != null ? result.releasePos : null), this.formatVec(result != null ? result.impact : null),
+            Double.valueOf(horizontalSpeed), Boolean.valueOf(result != null && result.unloadedChunkFallback));
       String msg3 = String.format("aircraftMotion=%s ejectionVelocity=%s initialBombVelocity=%s deltaFromAircraft=%s",
             this.formatVec(aircraftMotion), this.formatVec(result != null ? result.ejectionVelocity : null),
             this.formatVec(result != null ? result.initialVelocity : null), this.formatVec(result != null ? result.initialVelocityDeltaFromAircraft : null));
