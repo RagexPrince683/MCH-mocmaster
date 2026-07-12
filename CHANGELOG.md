@@ -1,5 +1,8 @@
 # Changelog
 
+## BOMBER SIGHT-only Unloaded Prediction Gap Camera Snap Fix
+- Fixed first-person bomber sight camera snap so temporary prediction gaps, such as unloaded terrain during bombing runs, no longer stop forced sight tracking. The fallback is scoped only to bomber sight camera forcing and does not alter CCIP reticle rendering or third-person CCIP behavior.
+
 ## CCIP-only Unloaded Chunk Fallback
 - Fixed plane CCIP prediction so reaching unloaded terrain immediately returns a valid unloaded-chunk fallback impact, preserving CCIP debug fallback metadata without relying on bomber-sight camera forcing.
 
