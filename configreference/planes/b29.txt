@@ -13,14 +13,15 @@ Weight = 74000
 CanMountShip = false
 MaxHp = 250
 Speed = 0.999
-HasBallisticComputer = true
+HasBallisticComputer = false
+;it had a early one but not a CCIP.
 
 ;357 
 
 Sound = btwentynine
 ThrottleUpDown = 0.1
 AutoPilotRot = 0.00
-CameraPosition = 2.0, 1.40, -4.0
+CameraPosition = 0.0, -1.40, -4.0
 ;EnableNightVision = true
 ;EnableEntityRadar = true
 EnableGunnerMode = true

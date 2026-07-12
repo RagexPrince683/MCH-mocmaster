@@ -13,6 +13,8 @@ ThrottleDownFactor = 0.20
 MaxHp = 250
 Speed = 1.566
 
+MaximumExternalPayloadCapacity = 132000
+
 ThrottleUpDown = 0.1
 MaxFuel         = 438000
 FuelConsumption = 99.545
@@ -147,11 +149,11 @@ AddPartHatch = -1.8131, 4.25, -38.9012, -1.4513, -3.3656,14.3613, -115
 AddPartHatch = 1.8131, 4.25, -38.9012, 1.4513, -3.3656,14.3613, 115
 AddPartHatch = 0, 1.6953, -30.2565, -1,0,0,35
 
-AddPartLG =       0.00, 1.62,  -2.78,  0,  0, 0
+AddPartLG =       0.00, 3,  -2.78,  1,0,0, 86.0
 
-AddPartLG      =  3.6, 2.2, -19.61,  0,  0, 0
+AddPartLG      =  3.0, -8.8, -19.61,  0,0,1, -30
 
-AddPartLG      = -3.6, 2.2, -19.61,  0,  0, 0
+AddPartLG      = -3.0, -8.8, -19.61,  0,0,-1, -30
 
 DamageFactor = 0.8
 
@@ -242,9 +244,13 @@ BoundingBox = -7.18, 18.37, -49.69, 3.0, 0.3
 AddRecipe = "ABC", "DA ", "EAE", A, mcheli:airframebomb, B, mcheli:basicmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:electronics
 
 ; AddRack=Entity type,                    RackPos X,Y,Z,   EntryPos X,Y,Z,   Range,  Open parachute atl,  Yaw, Pitch
-;AddRack = mh-60g/mh-60l_dap/sh-60/sh-3,   0, 2.1,  -4.8,   0, 0, -2.5,      11,    100000
+AddRack = helicopter,   0, 2.1,  -4.8,   0, 0, -2.5,      11,    100000
 
-;AddRack = container,   2.0, 2.1, -11.0,  0, 0,  -4.3,   15,    20
+AddRack = tank,   0, 2.1,  -12.8,   0, 0, -2.5,      11,    100000
+
+AddRack = tank,   0, 2.1,  -6,   0, 0, -2.5,      11,    100000
+
+AddRack = container,   2.0, 2.1, -11.0,  0, 0,  -4.3,   15,    20
 
 DamageFactor = 0.8
 

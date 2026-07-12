@@ -1,4 +1,4 @@
-DisplayName = Little Boy Nuclear Bomb [15KT AIRBURST - 576M]
+DisplayName = Little Boy Nuclear Bomb [15KT AIRBURST - 144M]
 
 Type = bomb
 nukeYield = 50

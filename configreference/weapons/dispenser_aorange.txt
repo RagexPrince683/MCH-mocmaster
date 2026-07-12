@@ -29,7 +29,7 @@ TrajectoryParticle = cloud
 MaxAmmo = 2000
 SuppliedNum = 100
 
-chemYield = 5
+chemYield = 1
 ;it'd be too gassy sir -moc at some point or something
 chemSpeed = 0.25
 chemType = 3

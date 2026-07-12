@@ -4,7 +4,7 @@ DisplayName = Seed Dispenser
 Type = Dispenser
 Acceleration = 0
 Sight = None
-Delay = 2
+Delay = 5
 ;hopefully will make running a server less cancer world
 Sound = smoke_snd
 SoundDelay = 4
