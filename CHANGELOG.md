@@ -1,4 +1,8 @@
 # Changelog
+
+## MQ-8B Fire Scout Speed Correction
+- Slowed the MQ-8B Fire Scout config reference speed so it no longer outruns the MQ-9 Reaper, matching the real-world MQ-8B/MQ-9A speed relationship.
+
 ## Config Reference Fl 282 Speed Nerf
 - Reduced the Flettner Fl 282 config reference top-speed and forward rotor-thrust tuning so the ultralight helicopter no longer outruns its intended scout role.
 
