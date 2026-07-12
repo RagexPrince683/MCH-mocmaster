@@ -1,4 +1,7 @@
 # Changelog
+## Vehicle tooltip floating indicator
+- Added a vehicle item tooltip line for configs with `Float = true` so plane, helicopter, tank, and turret/static-vehicle descriptions show when the vehicle floats on water.
+
 ## Cargo Paradrop Weight Limit
 - Added a 34,800 lb cargo airdrop limit so rack-dropped vehicles over the historical maximum cargo airdrop weight are released without spawning a paradrop parachute.
 - Added the 34,800 lb cargo airdrop limit to the parachute item tooltip.

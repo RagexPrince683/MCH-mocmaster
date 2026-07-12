@@ -79,6 +79,9 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
          if(info.maximumExternalPayloadCapacity != 0.0D) {
             lines.add(EnumChatFormatting.YELLOW + "Max Payload: " + formatPounds(info.maximumExternalPayloadCapacity) + " lb");
          }
+         if(info.isFloat) {
+            lines.add(EnumChatFormatting.YELLOW + "Floats on water");
+         }
          //lines.add(EnumChatFormatting.DARK_PURPLE + "Weapon: " + info.weaponSetList);
          //         tooltip.add(TextFormatting.DARK_PURPLE + "Weapons: " + Arrays.stream(ac.weapons).map(MCH_WeaponSet::getName).collect(Collectors.joining(", ")));
          //lines.add(EnumChatFormatting.DARK_PURPLE + "Weapons: " + Arrays.stream(ac.weapons).map(MCH_WeaponSet::getName).collect(Collectors.joining(", ")));
