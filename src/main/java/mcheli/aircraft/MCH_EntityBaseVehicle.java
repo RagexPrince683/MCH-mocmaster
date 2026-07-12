@@ -1345,31 +1345,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       nbt.setBoolean("MCH_HasUavStationPosition", this.hasLinkedUavStationPosition);
    }
 
-
-   protected float calculateVehicleFallDamage(float distance, double impactSpeed, double downwardAcceleration, double gravity) {
-      if(distance <= 3.0F || this.isDestroyed()) {
-         return 0.0F;
-      }
-
-      float maxHp = (float)Math.max(1, this.getMaxHP());
-      float healthRatio = Math.max(0.0F, Math.min(1.0F, (float)this.getHP() / maxHp));
-      float missingHealthFactor = 1.0F + (1.0F - healthRatio) * 0.75F;
-      float hpScale = Math.max(1.0F, maxHp / 100.0F);
-      float distanceDamage = (distance - 3.0F) * 2.0F;
-      float speedDamage = (float)(impactSpeed * impactSpeed * 20.0D);
-      float accelerationDamage = (float)(Math.max(0.0D, downwardAcceleration) * 12.0D);
-      float gravityDamage = (float)(Math.abs(gravity) * 10.0D);
-      float damage = (distanceDamage + speedDamage + accelerationDamage + gravityDamage) * hpScale * missingHealthFactor;
-
-      MCH_BaseVehicleInfo info = this.getAcInfo();
-      if(info != null) {
-         float armorFactor = info.armorDamageFactor <= 0.0F?1.0F:info.armorDamageFactor;
-         damage = damage / armorFactor + info.armorMinDamage + 1.0F;
-      }
-
-      return Math.max(1.0F, damage);
-   }
-
    public boolean attackEntityFrom(DamageSource damageSource, float org_damage) {
 
       this.clearPlacementMotionLock();
