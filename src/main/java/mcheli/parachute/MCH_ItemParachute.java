@@ -1,9 +1,11 @@
 package mcheli.parachute;
 
+import java.util.List;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.wrapper.W_Item;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 
 public class MCH_ItemParachute extends W_Item {
@@ -35,5 +37,18 @@ public class MCH_ItemParachute extends W_Item {
       }
 
       return item;
+   }
+
+   public void addInformation(ItemStack item, EntityPlayer player, List lines, boolean par4) {
+      lines.add(EnumChatFormatting.YELLOW + "Cargo airdrop limit: " + formatPounds(MCH_EntityParachute.MAX_CARGO_AIRDROP_WEIGHT_LB) + " lb");
+      super.addInformation(item, player, lines, par4);
+   }
+
+   private static String formatPounds(double pounds) {
+      if(Math.abs(pounds - (double)((long)pounds)) < 0.001D) {
+         return String.valueOf((long)pounds);
+      }
+
+      return String.format(java.util.Locale.ROOT, "%.1f", pounds);
    }
 }

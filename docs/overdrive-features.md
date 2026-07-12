@@ -90,9 +90,9 @@ Conventional guided-bomb and normal ballistic bomb references use real standard 
 
 **Why it exists:** Overdrive supports aircraft carrier gameplay and vehicle transport beyond simple passenger seats: aircraft can park on or launch from configured ship racks, and vehicle-on-vehicle interactions can be made data-driven by pack authors.
 
-**How it differs from original MCHeli:** Original MCHeli did not include this generalized carrier/rack workflow for vehicle-to-vehicle mounting. Overdrive adds rack discovery, compatibility checks, occupied-rack rejection, launch assistance, parachute fallback for non-launch dismounts, and debug logging for interaction failures.
+**How it differs from original MCHeli:** Original MCHeli did not include this generalized carrier/rack workflow for vehicle-to-vehicle mounting. Overdrive adds rack discovery, compatibility checks, occupied-rack rejection, launch assistance, parachute fallback for non-launch dismounts, the 34,800 lb cargo airdrop ceiling, and debug logging for interaction failures.
 
-**Configuration:** Parent vehicles use `AddRack = name/kind, x, y, z, entryX, entryY, entryZ[, range, parachuteAlt, fixYaw, fixPitch, rotSeat, launchRack]`. Child vehicles can use `RideRack = parentName, rackId`. Users use the rack keybinds (`KeyPutToRack`, `KeyDownFromRack`) exposed in the common vehicle controls.
+**Configuration:** Parent vehicles use `AddRack = name/kind, x, y, z, entryX, entryY, entryZ[, range, parachuteAlt, fixYaw, fixPitch, rotSeat, launchRack]`. Child vehicles can use `RideRack = parentName, rackId`. Users use the rack keybinds (`KeyPutToRack`, `KeyDownFromRack`) exposed in the common vehicle controls. Non-launch rack dismounts only spawn a vehicle paradrop parachute when the carried vehicle `Weight` is 34,800 lb or less; heavier vehicles exceed the historical cargo airdrop ceiling and are released without parachute support.
 
 ### Functional diving submarines
 

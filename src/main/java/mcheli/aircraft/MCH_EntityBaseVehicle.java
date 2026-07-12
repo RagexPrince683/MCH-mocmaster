@@ -6632,6 +6632,22 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void dropEntityParachute(Entity entity) {
+      if(entity instanceof MCH_EntityBaseVehicle) {
+         MCH_BaseVehicleInfo info = ((MCH_EntityBaseVehicle)entity).getAcInfo();
+         double weight = info != null?Math.max(0.0D, info.weight):0.0D;
+         if(weight > MCH_EntityParachute.MAX_CARGO_AIRDROP_WEIGHT_LB) {
+            MCH_Lib.DbgLog(super.worldObj, "[MCH-RACK][PARADROP-REJECT] reason=overweight vehicle=%s weight=%.1f max=%.1f",
+                    new Object[]{this.debugEntity(entity), Double.valueOf(weight), Double.valueOf(MCH_EntityParachute.MAX_CARGO_AIRDROP_WEIGHT_LB)});
+            EntityPlayer player = ((MCH_EntityBaseVehicle)entity).getFirstMountPlayer();
+            if(player == null) {
+               player = this.getFirstMountPlayer();
+            }
+            if(player != null) {
+               player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Cannot paradrop " + this.getVehicleDisplayName((MCH_EntityBaseVehicle)entity) + ": vehicle weighs " + this.formatRackPounds(weight) + " lb, exceeding the " + this.formatRackPounds(MCH_EntityParachute.MAX_CARGO_AIRDROP_WEIGHT_LB) + " lb cargo airdrop limit."));
+            }
+            return;
+         }
+      }
       entity.motionX = super.motionX;
       entity.motionY = super.motionY;
       entity.motionZ = super.motionZ;
