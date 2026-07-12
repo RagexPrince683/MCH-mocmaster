@@ -1,5 +1,8 @@
 # Changelog
 
+## Bomber Sight Far Focus Reticle Culling Fix
+- Kept the first-person `HasBombSight` bomber sight visible when the forced camera is already aimed at an extremely far predicted impact but the projected focus cannot be resolved by the active render matrices. This fallback is scoped to bomber sight mode and does not alter CCIP rendering.
+
 ## BOMBER SIGHT-only Unloaded Prediction Gap Camera Snap Fix
 - Fixed first-person bomber sight camera snap so temporary prediction gaps, such as unloaded terrain during bombing runs, no longer stop forced sight tracking. The fallback is scoped only to bomber sight camera forcing and does not alter CCIP reticle rendering or third-person CCIP behavior.
 

@@ -629,6 +629,13 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             ScreenPoint projected = this.projectWorldToRenderCamera(result.impact, this.smoothCamPartialTicks);
             if(projected != null && projected.visible) {
                this.drawCCIPPipper(projected.x, projected.y, false, bomberMode);
+            } else if(bomberMode) {
+               // Bomber sight camera forcing already points the view at the
+               // impact. If very distant focus projection is culled by the
+               // render matrices, keep only the bomber sight centered; leave
+               // normal CCIP projection/culling behavior unchanged.
+               this.drawCCIPPipper((double)super.centerX, (double)super.centerY, false, true);
+               this.resetCCIPSmoothing();
             } else {
                this.resetCCIPSmoothing();
             }
