@@ -1,7 +1,7 @@
 DisplayName = M3A3 Bradley IFV
 AddDisplayName = en_US, M3A3 Bradley IFV
 AddDisplayName = ru_RU, M3 Брэдли
-Weight = 60000
+Weight = 56000
 NameOnEarlyASRadar = Armored Vehicle
 NameOnModernASRadar = M3A3 Bradley IFV
 NameOnEarlyAARadar = Armored Vehicle
