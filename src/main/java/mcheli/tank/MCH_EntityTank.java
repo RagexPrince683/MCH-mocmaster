@@ -57,6 +57,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    public final MCH_WheelManager WheelMng;
    public float partialTicks;
    private int trackDamageTaken;
+   private double fallImpactSpeed;
+   private double fallDownwardAcceleration;
+   private double fallGravity;
 
    //TODO
    private int currentGear = 1;  // Starting gear
@@ -81,6 +84,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.prevRotationRotor = 0.0F;
       this.WheelMng = new MCH_WheelManager(this);
       this.trackDamageTaken = 0;
+      this.fallImpactSpeed = 0.0D;
+      this.fallDownwardAcceleration = 0.0D;
+      this.fallGravity = 0.0D;
    }
 
    //tracks are very broken
@@ -516,7 +522,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    protected void fall(float distance) {
       if(!super.worldObj.isRemote && distance > 3.0F && !this.isDestroyed()) {
-         float damage = (distance - 3.0F) * 2.0F;
+         float damage = this.calculateVehicleFallDamage(distance, this.fallImpactSpeed, this.fallDownwardAcceleration, this.fallGravity);
          this.attackEntityFrom(DamageSource.fall, damage);
       }
 
@@ -959,6 +965,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // --------------------------------------------------
       double dp = this.canFloatWater() ? this.getWaterDepth() : 0.0D;
       boolean levelOff = super.isGunnerMode;
+      double previousMotionY = super.motionY;
+      this.fallGravity = !this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater;
 
       if (dp == 0.0D) {
          if (!levelOff) {
@@ -978,6 +986,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
             super.motionY += 0.007D;
          }
       }
+
+      this.fallDownwardAcceleration = Math.max(0.0D, previousMotionY - super.motionY);
 
       // --------------------------------------------------
       // THRUST (ACCEL ONLY, NOT SPEED)
@@ -1044,6 +1054,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // MOVE
       // --------------------------------------------------
       this.updateWheels();
+      this.fallImpactSpeed = Math.max(0.0D, -super.motionY);
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
 
       // --------------------------------------------------

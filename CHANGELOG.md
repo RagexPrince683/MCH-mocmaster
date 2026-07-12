@@ -1,4 +1,7 @@
 # Changelog
+## Tank and Turret Fall Damage Physics Fix
+- Fixed tank and turret fall damage being absorbed by armor minimums by scaling impact damage with vehicle health, configured gravity, downward acceleration, and impact speed before applying the normal fall damage source.
+
 ## Instant Turret Placement
 - Turret items now deploy immediately on right-click after the normal placement validation, bypassing vehicle hold-to-deploy timer setup, ready messages, and release-delay checks.
 

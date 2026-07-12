@@ -19,6 +19,7 @@ import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -30,6 +31,9 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
    public float lastRiderYaw;
    public float lastRiderPitch;
    private int trackDamageTaken;
+   private double fallImpactSpeed;
+   private double fallDownwardAcceleration;
+   private double fallGravity;
 
 
    public MCH_EntityTurret(World world) {
@@ -45,6 +49,9 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
       this.lastRiderYaw = 0.0F;
       this.lastRiderPitch = 0.0F;
       this.trackDamageTaken = 0;
+      this.fallImpactSpeed = 0.0D;
+      this.fallDownwardAcceleration = 0.0D;
+      this.fallGravity = 0.0D;
       super.weapons = this.createWeapon(0);
    }
 
@@ -313,7 +320,7 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
 
    protected void fall(float distance) {
       if(!super.worldObj.isRemote && distance > 3.0F && !this.isDestroyed()) {
-         float damage = (distance - 3.0F) * 2.0F;
+         float damage = this.calculateVehicleFallDamage(distance, this.fallImpactSpeed, this.fallDownwardAcceleration, this.fallGravity);
          this.attackEntityFrom(DamageSource.fall, damage);
       }
 
@@ -405,8 +412,11 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
          dp = this.getWaterDepth();
       }
 
+      double previousMotionY = super.motionY;
+      this.fallGravity = !this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater;
+
       if(dp == 0.0D) {
-         super.motionY += (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
+         super.motionY += (double)this.fallGravity;
       } else if(dp < 1.0D) {
          super.motionY -= 1.0E-4D;
          super.motionY += 0.007D * this.getCurrentThrottle();
@@ -417,6 +427,8 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
 
          super.motionY += 0.007D;
       }
+
+      this.fallDownwardAcceleration = Math.max(0.0D, previousMotionY - super.motionY);
 
       double motion = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       float speedLimit = this.getAcInfo().speed;
@@ -443,6 +455,7 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
          super.motionZ *= 0.5D;
       }
 
+      this.fallImpactSpeed = Math.max(0.0D, -super.motionY);
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
       super.motionY *= 0.95D;
       super.motionX *= 0.99D;
