@@ -1,4 +1,7 @@
 # Changelog
+## Config Reference Fl 282 Speed Nerf
+- Reduced the Flettner Fl 282 config reference top-speed and forward rotor-thrust tuning so the ultralight helicopter no longer outruns its intended scout role.
+
 ## Tank wheel grass trampling
 - Added server-side tank wheel trampling so each simulated `SetWheelPos` contact point turns grass blocks beneath moving tank wheels into dirt.
 
