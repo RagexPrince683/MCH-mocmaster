@@ -68,6 +68,8 @@ public final class MCP_PlaneCCIPHelper {
 
       Vec3 position = copy(releasePos);
       Vec3 velocity = copy(initialVelocity);
+      Vec3 firstUnloadedPosition = null;
+      Vec3 previousPosition = null;
       double entityAcceleration = getConstructorAcceleration(info);
       entityAcceleration = applySpeedDependsAircraftFirstTick(
             info, aircraftMotion, velocity, entityAcceleration, result);
@@ -109,6 +111,23 @@ public final class MCP_PlaneCCIPHelper {
             return result;
          }
 
+         if(firstUnloadedPosition == null && !isChunkLoadedForPrediction(world, next)) {
+            firstUnloadedPosition = copy(next);
+         }
+
+         if(firstUnloadedPosition != null && next.yCoord <= 0.0D) {
+            result.valid = true;
+            result.unloadedChunkFallback = true;
+            result.firstUnloadedPosition = copy(firstUnloadedPosition);
+            result.impact = interpolateAtY(previousPosition != null ? previousPosition : position, next, 0.0D);
+            result.finalVelocity = copy(velocity);
+            result.impactDistance = releasePos.distanceTo(result.impact);
+            result.releaseAltitude = releasePos.yCoord - result.impact.yCoord;
+            result.reasonInvalid = "unloaded_chunk_fallback";
+            return result;
+         }
+
+         previousPosition = position;
          position = next;
 
          // MCH_EntityBomb applies this once, after super.onUpdate().
@@ -135,6 +154,16 @@ public final class MCP_PlaneCCIPHelper {
       }
 
       result.finalVelocity = copy(velocity);
+      if(firstUnloadedPosition != null && position != null) {
+         result.valid = true;
+         result.unloadedChunkFallback = true;
+         result.firstUnloadedPosition = copy(firstUnloadedPosition);
+         result.impact = copy(position);
+         result.impactDistance = releasePos.distanceTo(result.impact);
+         result.releaseAltitude = releasePos.yCoord - result.impact.yCoord;
+         result.reasonInvalid = "unloaded_chunk_fallback";
+         return result;
+      }
       if("not_run".equals(result.reasonInvalid)) {
          result.reasonInvalid = "no_collision";
       }
@@ -205,6 +234,32 @@ public final class MCP_PlaneCCIPHelper {
          return hit;
       }
       return null;
+   }
+
+
+   private static boolean isChunkLoadedForPrediction(World world, Vec3 position) {
+      if(world == null || position == null) {
+         return false;
+      }
+      int x = MathHelper.floor_double(position.xCoord);
+      int z = MathHelper.floor_double(position.zCoord);
+      // Use a mid-world Y so this is a chunk availability check, not an altitude check.
+      return world.blockExists(x, 64, z);
+   }
+
+   private static Vec3 interpolateAtY(Vec3 start, Vec3 end, double targetY) {
+      if(start == null || end == null) {
+         return end != null ? copy(end) : null;
+      }
+      double dy = end.yCoord - start.yCoord;
+      if(Math.abs(dy) <= EPSILON) {
+         return copy(end);
+      }
+      double t = MathHelper.clamp_double((targetY - start.yCoord) / dy, 0.0D, 1.0D);
+      return Vec3.createVectorHelper(
+            start.xCoord + (end.xCoord - start.xCoord) * t,
+            targetY,
+            start.zCoord + (end.zCoord - start.zCoord) * t);
    }
 
    private static boolean isWaterAt(World world, Vec3 position) {
@@ -374,6 +429,8 @@ public final class MCP_PlaneCCIPHelper {
       public double speedAddedFromAircraft;
       public double predictedAccelerationBeforeAircraft;
       public double predictedAccelerationAfterAircraft;
+      public boolean unloadedChunkFallback;
+      public Vec3 firstUnloadedPosition;
       public Vec3 ejectionVelocity;
       public Vec3 initialVelocityDeltaFromAircraft;
       public double initialVelocityUpDot;

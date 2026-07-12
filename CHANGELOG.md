@@ -1,5 +1,8 @@
 # Changelog
 
+## Bomb Sight Unloaded Chunk Fallback
+- Kept the plane CCIP/bomb-sight reticle rendering when the predicted bomb path reaches unloaded or far-away chunks by falling back to a non-mutating ballistic ground projection instead of treating the missing chunk ray trace as no impact.
+
 ## Debug-gated spam logging
 - Gated noisy startup, item registration, ore dictionary confirmation, language registration, reload, and auto-ore diagnostic logs behind `McHeliOutputDebugLog` while preserving normal startup milestones, model completion checks, warnings, and errors.
 
