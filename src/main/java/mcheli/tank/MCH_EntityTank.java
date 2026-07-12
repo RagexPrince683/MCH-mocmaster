@@ -960,6 +960,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       double dp = this.canFloatWater() ? this.getWaterDepth() : 0.0D;
       boolean levelOff = super.isGunnerMode;
 
+      boolean wasOnGroundBeforeMove = super.onGround;
+      double motionYBeforeGravity = super.motionY;
+
       if (dp == 0.0D) {
          if (!levelOff) {
             super.motionY += 0.04D + (!this.isInWater()
@@ -1044,7 +1047,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // MOVE
       // --------------------------------------------------
       this.updateWheels();
+      double motionYBeforeMove = super.motionY;
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
+      this.updateGroundVehicleFallDamage(wasOnGroundBeforeMove, motionYBeforeGravity, motionYBeforeMove);
 
       // --------------------------------------------------
       // C: after move

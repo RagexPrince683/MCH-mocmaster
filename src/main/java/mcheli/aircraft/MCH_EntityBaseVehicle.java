@@ -118,6 +118,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    protected static final int PART_ID_WING = 3;
    protected static final int PART_ID_HATCH = 4;
    public static final byte LIMIT_GROUND_PITCH = 40;
+   private double groundVehicleFallStartY = Double.MAX_VALUE;
+   private double groundVehicleMaxFallSpeed = 0.0D;
+   private double groundVehicleMaxDownwardAcceleration = 0.0D;
    public static final byte LIMIT_GROUND_ROLL = 40;
    public boolean isRequestedSyncStatus = false;
    private MCH_BaseVehicleInfo acInfo;
@@ -3058,6 +3061,53 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.rotLightHatch = 0.0F;
       }
 
+   }
+
+
+   protected void updateGroundVehicleFallDamage(boolean wasOnGroundBeforeMove, double motionYBeforeGravity, double motionYBeforeMove) {
+      if(super.worldObj.isRemote || this.isDestroyed()) {
+         return;
+      }
+
+      double downwardAcceleration = Math.max(0.0D, motionYBeforeGravity - motionYBeforeMove);
+      double gravity = this.getAcInfo() != null?Math.abs((double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater)):0.04D;
+      if(gravity < 1.0E-4D) {
+         gravity = 0.04D;
+      }
+
+      if(!super.onGround) {
+         if(!wasOnGroundBeforeMove && this.groundVehicleFallStartY == Double.MAX_VALUE) {
+            this.groundVehicleFallStartY = super.prevPosY;
+         }
+
+         if(this.groundVehicleFallStartY == Double.MAX_VALUE) {
+            this.groundVehicleFallStartY = super.posY;
+         }
+
+         this.groundVehicleMaxFallSpeed = Math.max(this.groundVehicleMaxFallSpeed, Math.max(0.0D, -motionYBeforeMove));
+         this.groundVehicleMaxDownwardAcceleration = Math.max(this.groundVehicleMaxDownwardAcceleration, downwardAcceleration);
+         return;
+      }
+
+      if(!wasOnGroundBeforeMove && this.groundVehicleFallStartY != Double.MAX_VALUE) {
+         double dropDistance = Math.max(0.0D, this.groundVehicleFallStartY - super.posY);
+         double speedDistance = this.groundVehicleMaxFallSpeed * this.groundVehicleMaxFallSpeed / (2.0D * gravity);
+         double effectiveDistance = Math.max(dropDistance, speedDistance);
+         if(effectiveDistance > 3.0D) {
+            double healthRatio = this.getMaxHP() > 0?(double)this.getHP() / (double)this.getMaxHP():1.0D;
+            double healthFactor = 1.0D + (1.0D - MathHelper.clamp_double(healthRatio, 0.0D, 1.0D)) * 0.5D;
+            double gravityFactor = MathHelper.clamp_double(gravity / 0.04D, 0.5D, 2.0D);
+            double accelerationFactor = MathHelper.clamp_double(this.groundVehicleMaxDownwardAcceleration / gravity, 0.75D, 2.0D);
+            float damage = (float)((effectiveDistance - 3.0D) * 2.0D * healthFactor * gravityFactor * accelerationFactor);
+            if(damage > 0.0F) {
+               this.attackEntityFrom(DamageSource.fall, damage);
+            }
+         }
+      }
+
+      this.groundVehicleFallStartY = Double.MAX_VALUE;
+      this.groundVehicleMaxFallSpeed = 0.0D;
+      this.groundVehicleMaxDownwardAcceleration = 0.0D;
    }
 
    public void updateExtraBoundingBox() {

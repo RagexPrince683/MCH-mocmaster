@@ -406,6 +406,9 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
          dp = this.getWaterDepth();
       }
 
+      boolean wasOnGroundBeforeMove = super.onGround;
+      double motionYBeforeGravity = super.motionY;
+
       if(dp == 0.0D) {
          super.motionY += (double)(!this.isInWater()?this.getAcInfo().gravity:this.getAcInfo().gravityInWater);
       } else if(dp < 1.0D) {
@@ -444,7 +447,9 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
          super.motionZ *= 0.5D;
       }
 
+      double motionYBeforeMove = super.motionY;
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
+      this.updateGroundVehicleFallDamage(wasOnGroundBeforeMove, motionYBeforeGravity, motionYBeforeMove);
       super.motionY *= 0.95D;
       super.motionX *= 0.99D;
       super.motionZ *= 0.99D;
