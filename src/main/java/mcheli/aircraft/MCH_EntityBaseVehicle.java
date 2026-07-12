@@ -3674,7 +3674,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                   // Tanks keep their armor-minimum water pressure damage, but waterboarding
                   // still stops applying damage once the engine shutdown threshold is reached.
                   if(this.isEngineWaterboarded()) {
-                     this.attackEntityFromWaterboarding(hp1 + cmd1.armorMinDamage);
+                     this.attackEntityFromWaterboarding((int) (hp1 + cmd1.armorMinDamage));
                   } else {
                      this.attackEntityFrom(DamageSource.inWall, hp1 + cmd1.armorMinDamage);
                   }
@@ -4765,9 +4765,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(this.isEngineWaterboarded()) {
          this.setCurrentThrottle(0.0D);
          this.setThrottle(0.0D);
-         super.throttleUp = false;
-         super.throttleDown = false;
-         super.throttleBack = 0.0F;
+         this.throttleUp = false;
+         this.throttleDown = false;
+         this.throttleBack = 0.0F;
          return true;
       }
 
