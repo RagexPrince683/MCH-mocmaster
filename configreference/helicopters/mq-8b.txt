@@ -15,7 +15,7 @@ EnableNightVision = true
 EnableEntityRadar = true
 RadarType = MODERN_AS
 EnableFoldBlade = true
-Speed = 1.84
+Speed = 0.24
 ThrottleUpDown = 0.8
 FlareType = 3
 HasChaff = true
@@ -30,6 +30,7 @@ HideEntity = true
 ThirdPersonDist = 20
 
 ; New helicopter flight model: light scout/attack baseline tuning.
+; Speed normalized below MQ-9 because real MQ-8B airspeed is roughly half of MQ-9A.
 UseNewHelicopterFlightModel = true
 PhysicalMass = 0.72
 MainRotorMaxThrust = 0.218
