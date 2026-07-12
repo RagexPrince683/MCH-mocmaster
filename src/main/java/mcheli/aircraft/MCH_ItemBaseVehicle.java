@@ -7,6 +7,7 @@ import mcheli.MCH_Achievement;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
+import mcheli.ship.MCH_EntityShip;
 import mcheli.wrapper.W_EntityPlayer;
 import mcheli.wrapper.W_Item;
 import mcheli.wrapper.W_MovingObjectPosition;
@@ -79,8 +80,13 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
          if(info.maximumExternalPayloadCapacity != 0.0D) {
             lines.add(EnumChatFormatting.YELLOW + "Max Payload: " + formatPounds(info.maximumExternalPayloadCapacity) + " lb");
          }
+         //todo && not ship
          if(info.isFloat) {
-            lines.add(EnumChatFormatting.YELLOW + "Floats on water");
+            if (!(ac instanceof MCH_EntityShip)) {
+               lines.add(EnumChatFormatting.YELLOW + "Floats on water");
+            } else {
+                lines.add(EnumChatFormatting.YELLOW + "Requires water (ship)");
+            }
          }
          //lines.add(EnumChatFormatting.DARK_PURPLE + "Weapon: " + info.weaponSetList);
          //         tooltip.add(TextFormatting.DARK_PURPLE + "Weapons: " + Arrays.stream(ac.weapons).map(MCH_WeaponSet::getName).collect(Collectors.joining(", ")));
