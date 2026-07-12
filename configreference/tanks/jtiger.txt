@@ -1,4 +1,4 @@
-Weight = 100000
+Weight = 157630
 ﻿DisplayName = Jagdpanzer VI Jagdtiger
 AddDisplayName = en_US, Jagdpanzer VI Jagdtiger
 NameOnEarlyASRadar = Tank

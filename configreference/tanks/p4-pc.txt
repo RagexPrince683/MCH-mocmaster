@@ -1,5 +1,5 @@
 DisplayName = Peugeot P4
-Weight = 100000
+Weight = 3850
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Peugeot P4
 NameOnEarlyAARadar = Tank

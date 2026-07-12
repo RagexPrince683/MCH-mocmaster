@@ -1,7 +1,7 @@
 DisplayName = M-SHORAD Stryker 'Sergeant Stout'
 AddDisplayName = en_US, M-SHORAD Stryker 'Sergeant Stout'
 AddDisplayName = ja_JP, M-SHORAD Stryker
-Weight = 100000
+Weight = 44000
 NameOnEarlyASRadar = Air Defense Vehicle
 NameOnModernASRadar = M-SHORAD Stryker 'Sergeant Stout'
 NameOnEarlyAARadar = Air Defense Vehicle

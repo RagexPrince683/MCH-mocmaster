@@ -1,5 +1,5 @@
 DisplayName = 2S25 Sprut-SD
-Weight = 90000
+Weight = 39683
 NameOnEarlyASRadar = Artillery Vehicle
 NameOnModernASRadar = 2S25 Sprut-SD
 NameOnEarlyAARadar = Artillery Vehicle

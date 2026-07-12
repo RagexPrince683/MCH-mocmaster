@@ -1,4 +1,4 @@
-Weight = 100000
+Weight = 176370
 ﻿DisplayName = HTF5980 Strategic DF-41 ICBM TEL
 AddDisplayName = ja_JP, DF-41D
 AddDisplayName = en_US, HTF5980 Strategic DF-41 ICBM TEL

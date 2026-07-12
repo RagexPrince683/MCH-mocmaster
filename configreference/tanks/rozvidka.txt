@@ -1,5 +1,5 @@
 DisplayName = Ratel S UGV
-Weight = 5
+Weight = 77
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Ground Drone UGV
 NameOnEarlyAARadar = Tank

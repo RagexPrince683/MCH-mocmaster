@@ -1,5 +1,5 @@
 DisplayName = MiG-31 Foxhound
-Weight = 23000
+Weight = 48281
 CanMountShip = true
 NameOnEarlyASRadar = Fast Jet
 NameOnModernASRadar = MiG-31 Foxhound

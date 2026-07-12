@@ -1,7 +1,7 @@
 DisplayName = MXT-MV Husky TSV with M2 Browning
 AddDisplayName = en_US, MXT-MV Husky TSV with M2 Browning
 AddDisplayName = ja_JP, MXT-MV ハスキーTSV with M2 Browning
-Weight = 100000
+Weight = 16000
 MaximumExternalPayloadCapacity = 4300
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = MXT-MV Husky TSV with M2 Browning

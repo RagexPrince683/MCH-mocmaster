@@ -10,7 +10,7 @@ ChaffUseTime = 0
 ThrottleDownFactor = 0.40
 ;hola pidor!!!
 ItemID = 30032
-Weight = 100000
+Weight = 7700
 MaximumExternalPayloadCapacity = 2500
 MaxHp = 230
 ThrottleUpDown = 0.81

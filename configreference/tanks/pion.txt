@@ -1,5 +1,5 @@
 DisplayName = 2S7 Pion "Peony"
-Weight = 90000
+Weight = 101413
 NameOnEarlyASRadar = Artillery Vehicle
 NameOnModernASRadar = 2S7 Pion "Peony"
 NameOnEarlyAARadar = Artillery Vehicle

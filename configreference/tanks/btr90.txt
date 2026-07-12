@@ -1,4 +1,4 @@
-Weight = 45000
+Weight = 45900
 ﻿DisplayName = BTR-90 APC
 AddDisplayName = en_US, BTR-90 APC
 NameOnEarlyASRadar = Armored Vehicle

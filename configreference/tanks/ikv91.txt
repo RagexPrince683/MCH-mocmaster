@@ -1,5 +1,5 @@
 DisplayName = Ikv 91 (Infanterikanonvagn 91)
-Weight = 100000
+Weight = 36376
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Ikv 91 (Infanterikanonvagn 91)
 NameOnEarlyAARadar = Tank

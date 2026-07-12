@@ -1,6 +1,6 @@
 DisplayName = VAZ 2105 "Tsar Zhiga" (Fresh Auto Team, Drift Car)
 AddDisplayName = ru_RU, ВАЗ 2105 "Царь Жига" (Fresh Auto Team)
-Weight = 100000
+Weight = 2500
 NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = VAZ 2105 "Tsar Zhiga" (Fresh Auto Team, Drift Car)
 NameOnEarlyAARadar = Light Vehicle

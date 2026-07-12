@@ -1,4 +1,4 @@
-Weight = 100000
+Weight = 46297
 ﻿DisplayName = Type 62
 AddDisplayName = ja_JP, Type 62
 AddDisplayName = en_US, Type 62 

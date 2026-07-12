@@ -11,7 +11,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.20
 ItemID = 28732
-Weight = 10500
+Weight = 7280
 CanMountShip = false
 MaxHp = 100
 ;130mph cruise speed

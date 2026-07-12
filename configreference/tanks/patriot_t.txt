@@ -1,6 +1,6 @@
 DisplayName =  MIM-104A Patriot Trailer Mobile Surface-to-Air Missile System TEL
 AddDisplayName = ja_JP, MIM-104A Patriot Trailer Mobile Surface-to-Air Missile System TEL
-Weight = 100000
+Weight = 36000
 NameOnEarlyASRadar = Air Defense Vehicle
 NameOnModernASRadar = MIM-104A Patriot Trailer Mobile Surface-to-Air Missile System TEL
 NameOnEarlyAARadar = Air Defense Vehicle

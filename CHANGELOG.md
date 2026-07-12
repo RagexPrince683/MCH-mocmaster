@@ -1,4 +1,8 @@
 # Changelog
+## Config Reference Weight Audit
+- Corrected config reference vehicle weights to integer pounds using DisplayName/AddDisplayName identification and category-appropriate real-world weight definitions.
+- Added a config weight plausibility validator for cars, motorcycles, consumer drones, helicopters, tanks/armored vehicles, ships, aircraft, static weapons, trailers, and equipment.
+
 ## Vehicle tooltip floating indicator
 - Added a vehicle item tooltip line for configs with `Float = true` so plane, helicopter, tank, and turret/static-vehicle descriptions show when the vehicle floats on water.
 

@@ -1,5 +1,5 @@
 DisplayName = KTO Rosomak 'Wolverine' with Oto Melara Hitfist
-Weight = 100000
+Weight = 48502
 NameOnEarlyASRadar = Air Defense Vehicle
 NameOnModernASRadar = KTO Rosomak 'Wolverine' with Oto Melara Hitfist
 NameOnEarlyAARadar = Air Defense Vehicle

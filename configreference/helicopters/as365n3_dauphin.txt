@@ -1,7 +1,7 @@
 DisplayName = Eurocopter AS365 Dauphin
 AddDisplayName = en_US, Eurocopter AS365 Dauphin
 AddDisplayName = ja_JP, AS365N3 ドーファン
-Weight = 12000
+Weight = 5291
 NameOnEarlyASRadar = Helicopter
 NameOnModernASRadar = Eurocopter AS365 Dauphin
 NameOnEarlyAARadar = Helicopter

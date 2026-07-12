@@ -1,4 +1,4 @@
-Weight = 100000
+Weight = 700
 ﻿DisplayName = Generic ATV
 AddDisplayName = en_US, Generic ATV
 

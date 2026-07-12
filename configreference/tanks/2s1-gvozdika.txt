@@ -1,5 +1,5 @@
 DisplayName = 2S1 SAU-122 Gvozdika 
-Weight = 90000
+Weight = 34833
 NameOnEarlyASRadar = Artillery Vehicle
 NameOnModernASRadar = 2S1 SAU-122 Gvozdika
 NameOnEarlyAARadar = Artillery Vehicle

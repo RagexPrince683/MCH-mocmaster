@@ -1,7 +1,7 @@
 DisplayName = Il-76MD-90A
 AddDisplayName = en_US, Il-76MD-90A
 AddDisplayName = ru_RU, Ил-76MD-90A
-Weight = 45000
+Weight = 202825
 CanMountShip = false
 NameOnEarlyASRadar = Large Aircraft
 NameOnModernASRadar = Il-76MD-90A
