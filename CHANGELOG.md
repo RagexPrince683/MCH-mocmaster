@@ -7,6 +7,7 @@
 - Direct right-click placement for UAV vehicle items now stops before hold-to-deploy starts and immediately tells players to use the correct UAV controller instead of failing at deployment time.
 
 ## Tank and Turret Fall Damage
+- Fixed tank and turret fall damage tracking when the shared vehicle update loop clears vanilla `fallDistance`; landings now calculate server-side impact damage from drop height, gravity, downward acceleration, landing speed, and current health.
 - Added server-side fall damage for tanks and turrets after drops greater than three blocks, using fall damage sources so armor and existing vehicle damage handling apply consistently.
 
 ## Vehicle tooltip payload stats

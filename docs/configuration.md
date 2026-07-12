@@ -19,6 +19,7 @@ Client keybinds and rendering settings are safest to change while the client is 
 - `HitMarkColor` uses `Alpha, Red, Green, Blue`, each clamped to 0-255.
 - `CommandPermission` uses `commandName:Player1, Player2`.
 - Damage factors use either a plain multiplier such as `1.0` or a multiplier with an entity-class filter, depending on the existing config format.
+- Tank and turret fall damage is server-side vehicle behavior, not a separate config key: impacts above three effective blocks use the vehicle fall damage source and scale from current health, configured gravity/gravity-in-water, downward acceleration, and landing speed.
 
 ## General options
 
