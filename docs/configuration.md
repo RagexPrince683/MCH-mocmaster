@@ -128,6 +128,7 @@ Vehicle `.txt` definitions can opt individual items into or out of 3D item rende
 | `ItemIconScaleFactor` | `1.0` | Per-vehicle 3D item icon scale multiplier, clamped to `0.01` through `100.0`. Alias: `3DItemIconScaleFactor`. |
 | `MaximumExternalPayloadCapacity` | `0` | Maximum total vehicle weight, in pounds, that this vehicle can lift/tow with a chain or carry across all occupied configured racks. Rack mounting subtracts already-mounted vehicle `Weight` plus the incoming vehicle `Weight`; the remaining capacity is never allowed below zero. A value of `0` prevents chain-towing or rack-carrying other configured vehicles by default. Non-zero values are shown on the vehicle item tooltip as max payload. |
 | `Weight` | `50000` | Vehicle weight, in pounds, used when another vehicle attempts to chain-tow it or mount it on a rack. Non-zero values are shown on the vehicle item tooltip. |
+| `Float` | `false` | Allows a vehicle to float on water. Enabled floating is shown on the vehicle item tooltip for plane, helicopter, tank, and turret/static-vehicle items. |
 
 ## Hidden/advanced options initialized in source
 
