@@ -558,6 +558,7 @@ public class MCH_WheelManager {
 
    public void updateBlock() {
       MCH_Config var10000 = MCH_MOD.config;
+      this.trampleGrassUnderWheels();
       if(MCH_Config.Collision_DestroyBlock.prmBool) {
          MCH_EntityBaseVehicle ac = this.parent;
          MCH_EntityWheel[] arr$ = this.wheels;
@@ -579,6 +580,39 @@ public class MCH_WheelManager {
             }
          }
 
+      }
+   }
+
+   private void trampleGrassUnderWheels() {
+      MCH_EntityBaseVehicle ac = this.parent;
+      if(ac == null || ac.worldObj == null || ac.worldObj.isRemote || this.wheels == null || this.wheels.length <= 0) {
+         return;
+      }
+
+      double horizontalMotionSq = ac.motionX * ac.motionX + ac.motionZ * ac.motionZ;
+      if(horizontalMotionSq < 1.0E-4D && Math.abs(this.prevYaw - ac.getRotYaw()) < 0.05F) {
+         return;
+      }
+
+      for(int i = 0; i < this.wheels.length; ++i) {
+         MCH_EntityWheel w = this.wheels[i];
+         if(w == null || w.pos == null) {
+            continue;
+         }
+
+         Vec3 v = ac.getTransformedPosition(w.pos);
+         int x = MathHelper.floor_double(v.xCoord + 0.5D);
+         int y = MathHelper.floor_double(v.yCoord - 0.5D);
+         int z = MathHelper.floor_double(v.zCoord + 0.5D);
+         Block block = ac.worldObj.getBlock(x, y, z);
+         if(Block.isEqualTo(block, Blocks.air)) {
+            --y;
+            block = ac.worldObj.getBlock(x, y, z);
+         }
+
+         if(Block.isEqualTo(block, Blocks.grass)) {
+            ac.worldObj.setBlock(x, y, z, Blocks.dirt, 0, 3);
+         }
       }
    }
 
