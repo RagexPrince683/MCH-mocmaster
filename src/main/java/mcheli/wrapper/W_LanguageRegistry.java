@@ -1,5 +1,6 @@
 package mcheli.wrapper;
 
+import mcheli.MCH_Lib;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -22,7 +23,7 @@ public class W_LanguageRegistry {
 
     public static void addNameForObject(Object o, String lang, String name, String key, String desc) {
         if (o == null || lang == null || name == null) {
-            System.out.println("[MCH] Lang skipped null: " + o + ", " + lang + ", " + name);
+            MCH_Lib.Log("[MCH] Lang skipped null: %s, %s, %s", o, lang, name);
             return;
         }
 
@@ -36,7 +37,7 @@ public class W_LanguageRegistry {
             locKey = "achievement." + key;
         }
 
-        System.out.println("[MCH] Lang add: " + lang + " | " + locKey + " = " + name);
+        MCH_Lib.DbgLog(false, "[MCH] Lang add: %s | %s = %s", lang, locKey, name);
 
         map.putIfAbsent(lang, new HashMap<String, String>());
         Map<String, String> entries = map.get(lang);
