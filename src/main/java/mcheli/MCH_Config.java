@@ -554,7 +554,7 @@ public class MCH_Config {
       AllShipSpeed = new MCH_ConfigPrm("AllShipSpeed", 2.0D);
       AllTankSpeed = new MCH_ConfigPrm("AllTankSpeed", 1.0D);
       HurtResistantTime = new MCH_ConfigPrm("HurtResistantTime", 0.0D);
-      DisplayHUDThirdPerson = new MCH_ConfigPrm("DisplayHUDThirdPerson", false);
+      DisplayHUDThirdPerson = new MCH_ConfigPrm("DisplayHUDThirdPerson", true);
       EnableNewPlaneThirdPersonCamera = new MCH_ConfigPrm("EnableNewPlaneThirdPersonCamera", false);
       EnableNewPlaneThirdPersonCamera.desc = ";Client-only visual chase camera for third-person new-flight planes. Does not change flight physics, weapons, or HUD rendering.";
       NewPlaneCameraDistance = new MCH_ConfigPrm("PlaneChaseBaseDistance", 15.0D);
