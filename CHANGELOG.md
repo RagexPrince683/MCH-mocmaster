@@ -1,5 +1,8 @@
 # Changelog
 
+## Bomber Sight Local Reticle Culling Fix
+- Fixed the `HasBombSight` first-person bomber sight reticle so it renders as a local camera sight at screen center during bomber-sight mode instead of being culled by the distant predicted impact projection. CCIP projection and culling behavior are unchanged.
+
 ## BOMBER SIGHT-only Unloaded Prediction Gap Camera Snap Fix
 - Fixed first-person bomber sight camera snap so temporary prediction gaps, such as unloaded terrain during bombing runs, no longer stop forced sight tracking. The fallback is scoped only to bomber sight camera forcing and does not alter CCIP reticle rendering or third-person CCIP behavior.
 

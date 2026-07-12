@@ -625,10 +625,18 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
       if(enabled) {
          result = this.getOrUpdateCCIPPrediction(plane, ws, weapon, aircraftMotion);
-         if(result != null && result.valid && result.impact != null) {
+         if(bomberMode) {
+            // The hasBombSight reticle is a first-person optical sight attached to
+            // the forced bomber-sight camera. Do not cull it through the world
+            // impact projection: when the camera is correctly aimed at a very
+            // distant focus point, the impact can fall outside the active render
+            // frustum/far plane even though the local sight should remain visible.
+            this.drawBombSightReticle((double)super.centerX, (double)super.centerY, false);
+            this.resetCCIPSmoothing();
+         } else if(result != null && result.valid && result.impact != null) {
             ScreenPoint projected = this.projectWorldToRenderCamera(result.impact, this.smoothCamPartialTicks);
             if(projected != null && projected.visible) {
-               this.drawCCIPPipper(projected.x, projected.y, false, bomberMode);
+               this.drawCCIPPipper(projected.x, projected.y, false, false);
             } else {
                this.resetCCIPSmoothing();
             }
