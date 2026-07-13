@@ -38,10 +38,6 @@ public class W_GroupObject {
 
    public void render() {
       if(this.faces.size() > 0) {
-         if(this.renderVbo()) {
-            return;
-         }
-
          Tessellator tessellator = Tessellator.instance;
          tessellator.startDrawing(this.glDrawingMode);
          this.render(tessellator);
