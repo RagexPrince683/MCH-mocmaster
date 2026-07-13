@@ -144,7 +144,13 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       GL11.glEnable(GL11.GL_BLEND);
       GL11.glDisable(GL11.GL_ALPHA_TEST);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-      this.renderBaseVehicle(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+      beginSkinOverlayRender(info, ac);
+      try {
+         this.renderBaseVehicle(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+         this.renderCommonPart(ac, info, posX, posY, posZ, tickTime);
+      } finally {
+         endSkinOverlayRender();
+      }
       GL11.glPopAttrib();
       GL11.glPopMatrix();
    }
