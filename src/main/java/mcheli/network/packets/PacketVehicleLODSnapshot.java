@@ -52,6 +52,8 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             data.writeFloat(entry.pitch);
             data.writeFloat(entry.roll);
             data.writeFloat(entry.scale);
+            data.writeFloat(entry.landingGearRotation);
+            data.writeFloat(entry.prevLandingGearRotation);
             data.writeInt(entry.packedLight);
         }
     }
@@ -75,6 +77,8 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             entry.pitch = data.readFloat();
             entry.roll = data.readFloat();
             entry.scale = data.readFloat();
+            entry.landingGearRotation = data.readFloat();
+            entry.prevLandingGearRotation = data.readFloat();
             entry.packedLight = data.readInt();
             decoded.add(entry);
         }
@@ -118,6 +122,8 @@ public class PacketVehicleLODSnapshot extends PacketBase {
         public float pitch;
         public float roll;
         public float scale = 1.0F;
+        public float landingGearRotation;
+        public float prevLandingGearRotation;
         public int packedLight;
     }
 }
