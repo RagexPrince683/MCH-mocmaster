@@ -45,6 +45,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    private static final double CCIP_SCREEN_SMOOTHING = 0.35D;
    private static final double CCIP_IMPACT_RESET_DISTANCE = 64.0D;
    private static final double CCIP_PIPPER_SCALE = 1.35D;
+   private static final int CCIP_HYSTERESIS_GRACE_TICKS = 5;
    private static final FloatBuffer CCIP_PROJECTED_COORDS = BufferUtils.createFloatBuffer(3);
    private static Field activeRenderModelViewField;
    private static Field activeRenderProjectionField;
@@ -61,6 +62,11 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    private int cachedCCIPDimension = Integer.MIN_VALUE;
    private String cachedCCIPWeaponName = "";
    private MCP_PlaneCCIPHelper.Result cachedCCIPResult;
+   private MCP_PlaneCCIPHelper.Result lastStableCCIPResult;
+   private int lastStableCCIPTick = Integer.MIN_VALUE;
+   private int lastStableCCIPEntityId = Integer.MIN_VALUE;
+   private int lastStableCCIPDimension = Integer.MIN_VALUE;
+   private String lastStableCCIPWeaponName = "";
    private String lastCCIPProjectionStatus = "invalid";
    private String lastCCIPProjectMode = "invalid";
    private double lastCCIPProjectWinZ = Double.NaN;
@@ -700,12 +706,85 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       result.initialVelocitySideDot = k.initialVelocitySideDot;
       result.warningImpossibleLaunch = k.warningImpossibleLaunch;
 
+      if(result.valid && result.impact != null && !result.unloadedChunkFallback) {
+         this.lastStableCCIPResult = result;
+         this.lastStableCCIPTick = plane.ticksExisted;
+         this.lastStableCCIPEntityId = entityId;
+         this.lastStableCCIPDimension = dimension;
+         this.lastStableCCIPWeaponName = weaponName;
+      } else if(this.canReuseStableCCIP(plane.ticksExisted, entityId, dimension, weaponName)) {
+         MCP_PlaneCCIPHelper.Result transientResult = result;
+         result = this.copyCCIPResult(this.lastStableCCIPResult);
+         result.hysteresisReused = true;
+         result.hysteresisAgeTicks = plane.ticksExisted - this.lastStableCCIPTick;
+         result.unloadedChunkFallback = transientResult.unloadedChunkFallback;
+         result.firstUnloadedPosition = this.copyVec(transientResult.firstUnloadedPosition);
+         result.firstUnloadedChunkX = transientResult.firstUnloadedChunkX;
+         result.firstUnloadedChunkZ = transientResult.firstUnloadedChunkZ;
+         result.fallbackReason = transientResult.fallbackReason;
+         result.fallbackTargetY = transientResult.fallbackTargetY;
+         result.syntheticFallback = transientResult.syntheticFallback;
+         result.reasonInvalid = transientResult.reasonInvalid;
+      }
+
       this.cachedCCIPTick = plane.ticksExisted;
       this.cachedCCIPEntityId = entityId;
       this.cachedCCIPDimension = dimension;
       this.cachedCCIPWeaponName = weaponName;
       this.cachedCCIPResult = result;
       return result;
+   }
+
+   private boolean canReuseStableCCIP(int tick, int entityId, int dimension, String weaponName) {
+      return this.lastStableCCIPResult != null
+            && this.lastStableCCIPResult.valid
+            && this.lastStableCCIPResult.impact != null
+            && tick - this.lastStableCCIPTick <= CCIP_HYSTERESIS_GRACE_TICKS
+            && this.lastStableCCIPEntityId == entityId
+            && this.lastStableCCIPDimension == dimension
+            && weaponName.equals(this.lastStableCCIPWeaponName);
+   }
+
+   private MCP_PlaneCCIPHelper.Result copyCCIPResult(MCP_PlaneCCIPHelper.Result source) {
+      MCP_PlaneCCIPHelper.Result copy = new MCP_PlaneCCIPHelper.Result();
+      copy.valid = source.valid;
+      copy.impact = this.copyVec(source.impact);
+      copy.releasePos = this.copyVec(source.releasePos);
+      copy.ticksSimulated = source.ticksSimulated;
+      copy.impactDistance = source.impactDistance;
+      copy.releaseAltitude = source.releaseAltitude;
+      copy.initialVelocity = this.copyVec(source.initialVelocity);
+      copy.finalVelocity = this.copyVec(source.finalVelocity);
+      copy.aircraftMotion = this.copyVec(source.aircraftMotion);
+      copy.gravity = source.gravity;
+      copy.horizontalDrag = source.horizontalDrag;
+      copy.accelerationFactor = source.accelerationFactor;
+      copy.simulationTimeStep = source.simulationTimeStep;
+      copy.speedDependsAircraft = source.speedDependsAircraft;
+      copy.speedDependsAircraftApplied = source.speedDependsAircraftApplied;
+      copy.speedAddedFromAircraft = source.speedAddedFromAircraft;
+      copy.predictedAccelerationBeforeAircraft = source.predictedAccelerationBeforeAircraft;
+      copy.predictedAccelerationAfterAircraft = source.predictedAccelerationAfterAircraft;
+      copy.unloadedChunkFallback = source.unloadedChunkFallback;
+      copy.firstUnloadedPosition = this.copyVec(source.firstUnloadedPosition);
+      copy.firstUnloadedChunkX = source.firstUnloadedChunkX;
+      copy.firstUnloadedChunkZ = source.firstUnloadedChunkZ;
+      copy.fallbackReason = source.fallbackReason;
+      copy.fallbackTargetY = source.fallbackTargetY;
+      copy.hitRealTerrain = source.hitRealTerrain;
+      copy.syntheticFallback = source.syntheticFallback;
+      copy.ejectionVelocity = this.copyVec(source.ejectionVelocity);
+      copy.initialVelocityDeltaFromAircraft = this.copyVec(source.initialVelocityDeltaFromAircraft);
+      copy.initialVelocityUpDot = source.initialVelocityUpDot;
+      copy.initialVelocitySideDot = source.initialVelocitySideDot;
+      copy.warningImpossibleLaunch = source.warningImpossibleLaunch;
+      copy.releaseMode = source.releaseMode;
+      copy.reasonInvalid = source.reasonInvalid;
+      return copy;
+   }
+
+   private Vec3 copyVec(Vec3 source) {
+      return source != null ? Vec3.createVectorHelper(source.xCoord, source.yCoord, source.zCoord) : null;
    }
 
    private ReleaseKinematics getInitialBombVelocity(MCP_EntityPlane plane, MCH_WeaponSet ws,
@@ -792,6 +871,11 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       this.cachedCCIPDimension = Integer.MIN_VALUE;
       this.cachedCCIPWeaponName = "";
       this.cachedCCIPResult = null;
+      this.lastStableCCIPResult = null;
+      this.lastStableCCIPTick = Integer.MIN_VALUE;
+      this.lastStableCCIPEntityId = Integer.MIN_VALUE;
+      this.lastStableCCIPDimension = Integer.MIN_VALUE;
+      this.lastStableCCIPWeaponName = "";
       this.lastCCIPProjectionStatus = "invalid";
       this.lastCCIPProjectMode = "invalid";
       this.lastCCIPProjectWinZ = Double.NaN;
@@ -806,9 +890,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             Boolean.valueOf(enabled), name, result != null ? result.releaseMode : "-", Boolean.valueOf(result != null && result.valid),
             result != null ? result.reasonInvalid : (enabled ? "not_predicted" : "not_bomb_or_disabled"),
             Integer.valueOf(result != null ? result.ticksSimulated : 0), Double.valueOf(result != null ? result.impactDistance : 0.0D));
-      String msg2 = String.format("releasePos=%s impactWorldPos=%s aircraftSpeedHorizontal=%.3f unloadedFallback=%s",
+      String msg2 = String.format("releasePos=%s impactWorldPos=%s aircraftSpeedHorizontal=%.3f unloadedFallback=%s synthetic=%s realTerrain=%s",
             this.formatVec(result != null ? result.releasePos : null), this.formatVec(result != null ? result.impact : null),
-            Double.valueOf(horizontalSpeed), Boolean.valueOf(result != null && result.unloadedChunkFallback));
+            Double.valueOf(horizontalSpeed), Boolean.valueOf(result != null && result.unloadedChunkFallback),
+            Boolean.valueOf(result != null && result.syntheticFallback), Boolean.valueOf(result != null && result.hitRealTerrain));
       String msg3 = String.format("aircraftMotion=%s ejectionVelocity=%s initialBombVelocity=%s deltaFromAircraft=%s",
             this.formatVec(aircraftMotion), this.formatVec(result != null ? result.ejectionVelocity : null),
             this.formatVec(result != null ? result.initialVelocity : null), this.formatVec(result != null ? result.initialVelocityDeltaFromAircraft : null));
@@ -819,9 +904,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             Double.valueOf(result != null ? result.predictedAccelerationBeforeAircraft : 0.0D), Double.valueOf(result != null ? result.predictedAccelerationAfterAircraft : 0.0D),
             Boolean.valueOf(result != null && result.speedDependsAircraftApplied), Double.valueOf(result != null ? result.initialVelocityUpDot : 0.0D),
             Double.valueOf(result != null ? result.initialVelocitySideDot : 0.0D));
-      String msg6 = String.format("warningImpossibleLaunch=%s projection=%s projectMode=%s winZ=%s farPlaneRejected=%s cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch/Roll=%.1f/%.1f/%.1f",
+      String msg6 = String.format("warningImpossibleLaunch=%s projection=%s projectMode=%s winZ=%s farPlaneRejected=%s hysteresis=%s/%d cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch/Roll=%.1f/%.1f/%.1f",
             Boolean.valueOf(result != null && result.warningImpossibleLaunch), this.lastCCIPProjectionStatus, this.lastCCIPProjectMode,
             this.formatProjectWinZ(this.lastCCIPProjectWinZ), Boolean.valueOf(this.lastCCIPFarPlaneRejected),
+            Boolean.valueOf(result != null && result.hysteresisReused), Integer.valueOf(result != null ? result.hysteresisAgeTicks : 0),
             Float.valueOf(camera != null ? camera.rotationYaw : 0.0F), Float.valueOf(camera != null ? camera.rotationPitch : 0.0F),
             Float.valueOf(plane.rotationYaw), Float.valueOf(plane.rotationPitch), Float.valueOf(plane.getRotRoll()));
       this.drawString(msg1, super.centerX - 170, super.centerY + 70, 0xFF55FF66);
@@ -830,6 +916,11 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       this.drawString(msg4, super.centerX - 170, super.centerY + 100, 0xFF55FF66);
       this.drawString(msg5, super.centerX - 170, super.centerY + 110, 0xFF55FF66);
       this.drawString(msg6, super.centerX - 170, super.centerY + 120, 0xFF55FF66);
+      String msg7 = String.format("fallbackChunk=%d,%d firstUnloaded=%s fallbackReason=%s fallbackTargetY=%.1f",
+            Integer.valueOf(result != null ? result.firstUnloadedChunkX : 0), Integer.valueOf(result != null ? result.firstUnloadedChunkZ : 0),
+            this.formatVec(result != null ? result.firstUnloadedPosition : null), result != null && result.fallbackReason != null ? result.fallbackReason : "-",
+            Double.valueOf(result != null ? result.fallbackTargetY : 0.0D));
+      this.drawString(msg7, super.centerX - 170, super.centerY + 130, 0xFF55FF66);
    }
 
    private String formatVec(Vec3 v) {
