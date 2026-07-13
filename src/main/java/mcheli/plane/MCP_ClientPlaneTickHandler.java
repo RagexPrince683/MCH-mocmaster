@@ -33,6 +33,7 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
    public static final int BOMB_RETICLE_IMPACT_GRACE_TICKS = 20;
    private static final double BOMB_RETICLE_FALLBACK_MIN_DISTANCE = 32.0D;
    private static final double BOMB_RETICLE_FALLBACK_MAX_DISTANCE = 512.0D;
+   private static final double BOMB_RETICLE_NO_TERRAIN_TARGET_Y = 0.0D;
    private static final Map bombReticleFallbacks = new HashMap();
    private final MCP_PlaneChaseCamera chaseCamera = new MCP_PlaneChaseCamera();
    private boolean wasUsingChaseCamera = false;
@@ -182,7 +183,7 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
       Vec3 target = null;
       int planeEntityId = plane.getEntityId();
       if(result != null && result.valid && result.impact != null) {
-         target = result.impact;
+         target = result.hitRealTerrain ? result.impact : getNoTerrainBombReticleTarget(result);
          updateBombReticleFallback(planeEntityId, target, plane.ticksExisted);
       } else {
          target = getBombReticleFallbackTarget(plane, player);
@@ -219,6 +220,40 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
       }
    }
 
+   private static Vec3 getNoTerrainBombReticleTarget(MCP_PlaneCCIPHelper.Result result) {
+      if(result == null || result.releasePos == null || result.impact == null) {
+         return result != null ? result.impact : null;
+      }
+      Vec3 start = result.releasePos;
+      Vec3 end = result.impact;
+      if(result.firstUnloadedPosition != null) {
+         start = result.firstUnloadedPosition;
+      }
+      Vec3 target = interpolateBombReticleTargetAtY(start, end, BOMB_RETICLE_NO_TERRAIN_TARGET_Y);
+      if(target != null) {
+         return target;
+      }
+      return result.impact;
+   }
+
+   private static Vec3 interpolateBombReticleTargetAtY(Vec3 start, Vec3 end, double targetY) {
+      if(start == null || end == null) {
+         return null;
+      }
+      double dy = end.yCoord - start.yCoord;
+      if(Math.abs(dy) < 1.0E-7D) {
+         return Vec3.createVectorHelper(end.xCoord, targetY, end.zCoord);
+      }
+      double t = (targetY - start.yCoord) / dy;
+      if(t < 0.0D) {
+         t = 0.0D;
+      }
+      return Vec3.createVectorHelper(
+            start.xCoord + (end.xCoord - start.xCoord) * t,
+            targetY,
+            start.zCoord + (end.zCoord - start.zCoord) * t);
+   }
+
    private static Vec3 getBombReticleFallbackTarget(MCP_EntityPlane plane, EntityPlayer player) {
       int planeEntityId = plane.getEntityId();
       BombReticleFallback fallback = (BombReticleFallback)bombReticleFallbacks.get(Integer.valueOf(planeEntityId));
@@ -235,14 +270,26 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
          return null;
       }
       Vec3 cameraPos = Vec3.createVectorHelper(plane.camera.posX, plane.camera.posY, plane.camera.posZ);
-      Vec3 forward = MCH_Lib.Rot2Vec3(plane.getRotYaw(), MathHelper.clamp_float(plane.getRotPitch() + 35.0F, 15.0F, 80.0F));
+      Vec3 motion = Vec3.createVectorHelper(plane.motionX, plane.motionY, plane.motionZ);
+      double motionSpeed = motion.lengthVector();
+      Vec3 forward = motionSpeed > 1.0E-4D ? motion : MCH_Lib.Rot2Vec3(plane.getRotYaw(), plane.getRotPitch());
+      double forwardLength = forward.lengthVector();
+      if(forwardLength < 1.0E-7D) {
+         return null;
+      }
+      forward = Vec3.createVectorHelper(forward.xCoord / forwardLength, forward.yCoord / forwardLength, forward.zCoord / forwardLength);
       double horizontalSpeed = Math.sqrt(plane.motionX * plane.motionX + plane.motionZ * plane.motionZ);
       double distance = MathHelper.clamp_double(cameraPos.yCoord * 2.5D + horizontalSpeed * 80.0D,
             BOMB_RETICLE_FALLBACK_MIN_DISTANCE, BOMB_RETICLE_FALLBACK_MAX_DISTANCE);
-      return Vec3.createVectorHelper(
+      double gravityDrop = Math.max(0.0D, distance * 0.15D);
+      Vec3 fallback = Vec3.createVectorHelper(
             cameraPos.xCoord + forward.xCoord * distance,
-            cameraPos.yCoord + forward.yCoord * distance,
+            cameraPos.yCoord + forward.yCoord * distance - gravityDrop,
             cameraPos.zCoord + forward.zCoord * distance);
+      if(fallback.yCoord > BOMB_RETICLE_NO_TERRAIN_TARGET_Y) {
+         fallback.yCoord = BOMB_RETICLE_NO_TERRAIN_TARGET_Y;
+      }
+      return fallback;
    }
 
    private static void clearBombReticleFallback(MCP_EntityPlane plane) {
