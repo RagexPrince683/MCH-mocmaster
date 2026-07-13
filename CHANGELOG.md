@@ -1,8 +1,7 @@
-## Fix live LOD landing gear snapshots
+## Fix large aircraft landing gear in LOD rendering
 
-- Added landing-gear animation state to live server LOD snapshot packets so clients without the real vehicle entity can render large-aircraft `AddPartLG` parts correctly.
-- Reused the landing-gear renderer for both real-entity LOD and snapshot-only LOD paths.
-- Documented why the live snapshot path differs from runclient's real-entity render path.
+- Restored common animated part rendering during far-distance vehicle LOD passes so large aircraft landing gear (`AddPartLG`/related parts) continues to animate beyond the LOD start distance.
+- Documented that the LOD path keeps animated parts while only skipping close-range light effects.
 
 ## Bomb Sight No-Terrain Stability
 

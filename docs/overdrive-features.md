@@ -112,7 +112,7 @@ Conventional guided-bomb and normal ballistic bomb references use real standard 
 
 **Why it exists:** Large combined-arms servers often need aircraft, ships, tanks, and turrets to remain visually identifiable at distances where full entity tracking/rendering is too expensive or unreliable.
 
-**How it differs from original MCHeli:** Overdrive adds a dedicated snapshot packet and client LOD manager. Snapshots include entity identity, category, type, texture, position, rotation, scale, sampled world lighting, and landing-gear animation state. The render path switches to cheaper displays beyond `AircraftLODStartDistance`. Far LOD rendering still draws configured landing gear parts (`AddPartLG`, `AddPartLGRev`, `AddPartLGHatch`, and `AddPartSlideRotLG`) from the synchronized gear state, while skipping close-range-only light effects.
+**How it differs from original MCHeli:** Overdrive adds a dedicated snapshot packet and client LOD manager. Snapshots include entity identity, category, type, texture, position, rotation, scale, and sampled world lighting, and the render path switches to cheaper displays beyond `AircraftLODStartDistance`. Far LOD rendering still draws configured animated vehicle parts, including landing gear (`AddPartLG`, `AddPartLGRev`, `AddPartLGHatch`, and `AddPartSlideRotLG`), while skipping close-range-only light effects.
 
 **Configuration:** Users/server owners configure `EnableAircraftLODRender`, `AircraftLODStartDistance`, and `AircraftLODFarDistance`. `AircraftLODFarDistance` also guides the extended tracking range helper so the render-only system has useful data without replacing real entity simulation.
 
