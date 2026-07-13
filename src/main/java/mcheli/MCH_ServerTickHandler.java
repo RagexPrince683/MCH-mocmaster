@@ -91,6 +91,8 @@ public class MCH_ServerTickHandler {
          entry.pitch = vehicle.getRotPitch();
          entry.roll = vehicle.getRotRoll();
          entry.scale = 1.0F;
+         entry.landingGearRotation = vehicle.getLandingGearRotation();
+         entry.prevLandingGearRotation = vehicle.getPrevLandingGearRotation();
          entry.packedLight = getPackedLight(world, vehicle);
          entries.add(entry);
       }

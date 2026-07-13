@@ -157,7 +157,9 @@ public final class MCH_VehicleLODManager {
                 Minecraft.getMinecraft().renderEngine.bindTexture(
                     new ResourceLocation(W_MOD.DOMAIN, "textures/" + textureFolder + "/"
                         + MCH_RenderBaseVehicle.getBaseTextureName(display.textureName) + ".png"));
-                MCH_RenderBaseVehicle.renderAllModel(info.model);
+                MCH_RenderBaseVehicle.renderBody(info.model);
+                MCH_RenderBaseVehicle.renderLandingGear(
+                    info, display.landingGearRotation, display.previousLandingGearRotation, interpolation);
             } finally {
                 MCH_RenderBaseVehicle.endSkinOverlayRender();
             }
@@ -237,6 +239,8 @@ public final class MCH_VehicleLODManager {
         private float pitch;
         private float roll;
         private float scale;
+        private float previousLandingGearRotation;
+        private float landingGearRotation;
         private int packedLight;
         private long previousUpdateMs;
         private long lastUpdateMs;
@@ -249,6 +253,7 @@ public final class MCH_VehicleLODManager {
             this.previousYaw = this.yaw = entry.yaw;
             this.previousPitch = this.pitch = entry.pitch;
             this.previousRoll = this.roll = entry.roll;
+            this.previousLandingGearRotation = this.landingGearRotation = entry.prevLandingGearRotation;
             update(entry);
         }
 
@@ -261,6 +266,7 @@ public final class MCH_VehicleLODManager {
             this.previousYaw = interpolateAngle(this.previousYaw, this.yaw, partial);
             this.previousPitch = interpolateAngle(this.previousPitch, this.pitch, partial);
             this.previousRoll = interpolateAngle(this.previousRoll, this.roll, partial);
+            this.previousLandingGearRotation = this.previousLandingGearRotation + (this.landingGearRotation - this.previousLandingGearRotation) * partial;
             this.previousUpdateMs = now;
             this.entityId = entry.entityId;
             this.category = entry.category;
@@ -273,6 +279,7 @@ public final class MCH_VehicleLODManager {
             this.pitch = entry.pitch;
             this.roll = entry.roll;
             this.scale = entry.scale > 0.0F ? entry.scale : 1.0F;
+            this.landingGearRotation = entry.landingGearRotation;
             this.packedLight = entry.packedLight;
         }
     }
