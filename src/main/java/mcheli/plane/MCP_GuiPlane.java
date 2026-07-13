@@ -78,6 +78,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    private String lastCCIPProjectMode = "invalid";
    private double lastCCIPProjectWinZ = Double.NaN;
    private boolean lastCCIPFarPlaneRejected;
+   private final CCIPProjectionDiagnostic lastCCIPProjectionDiagnostic = new CCIPProjectionDiagnostic();
 
    public MCP_GuiPlane(Minecraft minecraft) {
       super(minecraft);
@@ -624,6 +625,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    }
 
    private void drawPlaneCCIPReticle(MCP_EntityPlane plane, EntityPlayer player, boolean bomberMode) {
+      this.resetCCIPProjectionDiagnostic();
       MCP_PlaneInfo info = plane != null ? plane.getPlaneInfo() : null;
       if(plane == null || player == null || info == null || !info.hasBallisticComputer || plane.isDestroyed()) {
          this.resetCCIPState();
@@ -942,10 +944,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       this.lastStableCCIPEntityId = Integer.MIN_VALUE;
       this.lastStableCCIPDimension = Integer.MIN_VALUE;
       this.lastStableCCIPWeaponName = "";
-      this.lastCCIPProjectionStatus = "invalid";
-      this.lastCCIPProjectMode = "invalid";
-      this.lastCCIPProjectWinZ = Double.NaN;
-      this.lastCCIPFarPlaneRejected = false;
+      this.resetCCIPProjectionDiagnostic();
       this.clearCCIPGraceCache();
    }
 
@@ -988,6 +987,13 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             this.formatVec(result != null ? result.firstUnloadedPosition : null), result != null && result.fallbackReason != null ? result.fallbackReason : "-",
             Double.valueOf(result != null ? result.fallbackTargetY : 0.0D));
       this.drawString(msg7, super.centerX - 170, super.centerY + 130, 0xFF55FF66);
+      String msg8 = String.format("projectionDiag path=%s reason=%s screen=%s camDist=%s camDepth=%s winZ=%s",
+            this.lastCCIPProjectionDiagnostic.path, this.lastCCIPProjectionDiagnostic.reason,
+            this.formatScreenPoint(this.lastCCIPProjectionDiagnostic.screenX, this.lastCCIPProjectionDiagnostic.screenY),
+            this.formatDiagnosticDouble(this.lastCCIPProjectionDiagnostic.cameraDistance),
+            this.formatDiagnosticDouble(this.lastCCIPProjectionDiagnostic.cameraDepth),
+            this.formatProjectWinZ(this.lastCCIPProjectionDiagnostic.winZ));
+      this.drawString(msg8, super.centerX - 170, super.centerY + 140, 0xFF55FF66);
    }
 
    private String formatVec(Vec3 v) {
@@ -998,18 +1004,33 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       return this.isFinite(winZ) ? String.format("%.4f", Double.valueOf(winZ)) : "-";
    }
 
-   private ScreenPoint projectWorldToRenderCamera(Vec3 worldPos, float partialTicks) {
+   private String formatDiagnosticDouble(double value) {
+      return this.isFinite(value) ? String.format("%.2f", Double.valueOf(value)) : "-";
+   }
+
+   private String formatScreenPoint(double x, double y) {
+      return this.isFinite(x) && this.isFinite(y) ? String.format("%.1f,%.1f", Double.valueOf(x), Double.valueOf(y)) : "-";
+   }
+
+   private void resetCCIPProjectionDiagnostic() {
       this.lastCCIPProjectionStatus = "invalid";
-      this.lastCCIPProjectMode = "invalid";
+      this.lastCCIPProjectMode = "null";
       this.lastCCIPProjectWinZ = Double.NaN;
       this.lastCCIPFarPlaneRejected = false;
+      this.lastCCIPProjectionDiagnostic.reset();
+   }
+
+   private ScreenPoint projectWorldToRenderCamera(Vec3 worldPos, float partialTicks) {
+      this.resetCCIPProjectionDiagnostic();
       if(worldPos == null || super.mc == null) {
+         this.recordCCIPProjectionFailure("null", "null");
          return null;
       }
 
+      this.updateCCIPProjectionCameraMetrics(worldPos, partialTicks);
       ScreenPoint exact = this.projectWithActiveRenderMatrices(worldPos);
       if(exact != null) {
-         this.lastCCIPProjectionStatus = exact.clamped ? "clamped" : "exact";
+         this.recordCCIPProjectionResult(exact.clamped ? "clamped" : "exact", exact.clamped ? "offscreen_clamped" : "exact", exact);
          this.lastCCIPProjectMode = "gluProject";
          return exact;
       }
@@ -1017,10 +1038,49 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       boolean farPlaneRejected = this.lastCCIPFarPlaneRejected;
       ScreenPoint fallback = this.projectWorldToRenderCameraFallback(worldPos, partialTicks);
       if(fallback != null) {
-         this.lastCCIPProjectionStatus = fallback.clamped ? "clamped" : "fallback";
+         this.recordCCIPProjectionResult(fallback.clamped ? "clamped" : "fallback", fallback.clamped ? "offscreen_clamped" : "exact", fallback);
          this.lastCCIPProjectMode = farPlaneRejected ? "camera-vector-far" : "camera-vector";
       }
       return fallback;
+   }
+
+   private void updateCCIPProjectionCameraMetrics(Vec3 worldPos, float partialTicks) {
+      Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
+      if(!(camera instanceof EntityLivingBase)) {
+         this.lastCCIPProjectionDiagnostic.reason = "no_camera";
+         return;
+      }
+
+      Vec3 cameraPos = ActiveRenderInfo.projectViewFromEntity((EntityLivingBase)camera, (double)partialTicks);
+      Vec3 relative = Vec3.createVectorHelper(worldPos.xCoord - cameraPos.xCoord, worldPos.yCoord - cameraPos.yCoord,
+            worldPos.zCoord - cameraPos.zCoord);
+      this.lastCCIPProjectionDiagnostic.cameraDistance = relative.lengthVector();
+      float yaw = camera.prevRotationYaw + (camera.rotationYaw - camera.prevRotationYaw) * partialTicks;
+      float pitch = camera.prevRotationPitch + (camera.rotationPitch - camera.prevRotationPitch) * partialTicks;
+      if(super.mc.gameSettings.thirdPersonView == 2) {
+         yaw += 180.0F;
+         pitch = -pitch;
+      }
+      Vec3 forward = this.normalizeVec(mcheli.MCH_Lib.Rot2Vec3(yaw, pitch));
+      this.lastCCIPProjectionDiagnostic.cameraDepth = relative.dotProduct(forward);
+   }
+
+   private void recordCCIPProjectionResult(String path, String reason, ScreenPoint point) {
+      this.lastCCIPProjectionDiagnostic.path = path;
+      this.lastCCIPProjectionDiagnostic.reason = reason;
+      this.lastCCIPProjectionDiagnostic.winZ = this.lastCCIPProjectWinZ;
+      if(point != null) {
+         this.lastCCIPProjectionDiagnostic.screenX = point.x;
+         this.lastCCIPProjectionDiagnostic.screenY = point.y;
+      }
+      this.lastCCIPProjectionStatus = reason;
+   }
+
+   private void recordCCIPProjectionFailure(String path, String reason) {
+      this.lastCCIPProjectionDiagnostic.path = path;
+      this.lastCCIPProjectionDiagnostic.reason = reason;
+      this.lastCCIPProjectionDiagnostic.winZ = this.lastCCIPProjectWinZ;
+      this.lastCCIPProjectionStatus = reason;
    }
 
    private ScreenPoint projectWorldToRenderCameraFallback(Vec3 worldPos, float partialTicks) {
@@ -1029,6 +1089,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       // viewport/far clip. This still uses the real third-person camera position.
       Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
       if(!(camera instanceof EntityLivingBase)) {
+         this.recordCCIPProjectionFailure("null", "no_camera");
          return null;
       }
 
@@ -1054,7 +1115,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             worldPos.zCoord - cameraPos.zCoord);
       double depth = relative.dotProduct(forward);
       if(!this.isFinite(depth) || depth <= 0.01D) {
-         this.lastCCIPProjectionStatus = "behind-camera";
+         this.recordCCIPProjectionFailure("null", !this.isFinite(depth) ? "nonfinite" : "behind_camera");
          return null;
       }
 
@@ -1063,7 +1124,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       double x = (double)super.centerX + relative.dotProduct(right) * focalLength / depth;
       double y = (double)super.centerY - relative.dotProduct(up) * focalLength / depth;
       if(!this.isFinite(x) || !this.isFinite(y)) {
-         this.lastCCIPProjectionStatus = "invalid";
+         this.recordCCIPProjectionFailure("null", "nonfinite");
          return null;
       }
       if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
@@ -1098,6 +1159,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
    private ScreenPoint projectWithActiveRenderMatrices(Vec3 worldPos) {
       if(!this.resolveActiveRenderInfoBuffers()) {
+         this.recordCCIPProjectionFailure("null", "no_active_matrices");
          return null;
       }
 
@@ -1113,6 +1175,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          boolean projected = GLU.gluProject((float)worldPos.xCoord, (float)worldPos.yCoord,
                (float)worldPos.zCoord, modelView, projection, viewport, CCIP_PROJECTED_COORDS);
          if(!projected) {
+            this.recordCCIPProjectionFailure("null", "null");
             return null;
          }
 
@@ -1122,10 +1185,15 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          this.lastCCIPProjectWinZ = winZ;
          if(this.isFinite(winZ) && winZ > 1.0D) {
             this.lastCCIPFarPlaneRejected = true;
+            this.recordCCIPProjectionFailure("null", "far_plane");
             return null;
          }
-         if(!this.isFinite(winX) || !this.isFinite(winY) || !this.isFinite(winZ)
-               || winZ < 0.0D) {
+         if(!this.isFinite(winX) || !this.isFinite(winY) || !this.isFinite(winZ)) {
+            this.recordCCIPProjectionFailure("null", "nonfinite");
+            return null;
+         }
+         if(winZ < 0.0D) {
+            this.recordCCIPProjectionFailure("null", "behind_camera");
             return null;
          }
 
@@ -1134,6 +1202,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          int viewportWidth = viewport.get(2);
          int viewportHeight = viewport.get(3);
          if(viewportWidth <= 0 || viewportHeight <= 0) {
+            this.recordCCIPProjectionFailure("null", "nonfinite");
             return null;
          }
 
@@ -1142,10 +1211,12 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          double x = normalizedX * (double)super.width;
          double y = (1.0D - normalizedY) * (double)super.height;
          if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
+            this.recordCCIPProjectionFailure("null", "offscreen_clamped");
             return null;
          }
          return new ScreenPoint(x, y, false, true);
       } catch(Throwable ignored) {
+         this.recordCCIPProjectionFailure("null", "null");
          return null;
       }
    }
@@ -1283,6 +1354,26 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       double initialVelocitySideDot;
       boolean warningImpossibleLaunch;
       String releaseMode;
+   }
+
+   private static class CCIPProjectionDiagnostic {
+      String path;
+      String reason;
+      double winZ;
+      double screenX;
+      double screenY;
+      double cameraDistance;
+      double cameraDepth;
+
+      void reset() {
+         this.path = "null";
+         this.reason = "null";
+         this.winZ = Double.NaN;
+         this.screenX = Double.NaN;
+         this.screenY = Double.NaN;
+         this.cameraDistance = Double.NaN;
+         this.cameraDepth = Double.NaN;
+      }
    }
 
    private static class ScreenPoint {
