@@ -1,3 +1,9 @@
+## CCIP Unloaded Chunk Fallback Stability
+
+- Added CCIP prediction diagnostics for unloaded chunk coordinates, fallback reason, fallback target height, and whether an impact came from real terrain or synthetic fallback.
+- Improved unloaded chunk fallback to use nearby loaded terrain height when available while keeping a deterministic Y=0 fallback for truly unloaded areas.
+- Added short GUI hysteresis so transient invalid/unloaded fallback predictions reuse the last stable impact briefly, while preserving fallback diagnostics in the debug overlay.
+
 # Changelog
 
 ## CCIP Far-Plane Projection Fallback

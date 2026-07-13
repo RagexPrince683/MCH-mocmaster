@@ -28,6 +28,7 @@ public final class MCP_PlaneCCIPHelper {
    public static final int MAX_STEPS = 600;
    private static final double BOMB_HORIZONTAL_DRAG = 0.999D;
    private static final double EPSILON = 1.0E-7D;
+   private static final int FALLBACK_TERRAIN_SEARCH_RADIUS = 1;
 
    private MCP_PlaneCCIPHelper() {}
 
@@ -106,11 +107,13 @@ public final class MCP_PlaneCCIPHelper {
             result.impactDistance = releasePos.distanceTo(result.impact);
             result.releaseAltitude = releasePos.yCoord - result.impact.yCoord;
             result.reasonInvalid = "";
+            result.hitRealTerrain = true;
+            result.syntheticFallback = false;
             return result;
          }
 
          if(!isChunkLoadedForPrediction(world, next)) {
-            return buildUnloadedChunkFallback(result, info, releasePos, position, next,
+            return buildUnloadedChunkFallback(world, result, info, releasePos, position, next,
                   velocity, entityAcceleration, entityTick, maxSteps);
          }
 
@@ -145,15 +148,17 @@ public final class MCP_PlaneCCIPHelper {
       }
       return result;
    }
-   private static Result buildUnloadedChunkFallback(Result result, MCH_WeaponInfo info, Vec3 releasePos,
+   private static Result buildUnloadedChunkFallback(World world, Result result, MCH_WeaponInfo info, Vec3 releasePos,
          Vec3 segmentStart, Vec3 firstUnloadedPosition, Vec3 velocity, double entityAcceleration,
          int entityTick, int maxSteps) {
       Vec3 fallbackStart = segmentStart;
       Vec3 fallbackEnd = firstUnloadedPosition;
       Vec3 fallbackVelocity = copy(velocity);
       int fallbackTick = entityTick;
+      double fallbackTargetY = findLoadedTerrainFallbackY(world, segmentStart, firstUnloadedPosition);
+      String fallbackReason = fallbackTargetY > 0.0D ? "nearby_loaded_terrain_height" : "unloaded_chunk_safe_y0";
 
-      if(fallbackEnd != null && fallbackEnd.yCoord > 0.0D) {
+      if(fallbackEnd != null && fallbackEnd.yCoord > fallbackTargetY) {
          Vec3 position = copy(fallbackEnd);
          Vec3 simulatedVelocity = copy(velocity);
          double simulatedAcceleration = entityAcceleration;
@@ -191,7 +196,7 @@ public final class MCP_PlaneCCIPHelper {
             fallbackEnd = simulatedNext;
             fallbackVelocity = copy(simulatedVelocity);
             fallbackTick = nextEntityTick;
-            if(simulatedNext.yCoord <= 0.0D || simulatedNext.yCoord < -64.0D) {
+            if(simulatedNext.yCoord <= fallbackTargetY || simulatedNext.yCoord < -64.0D) {
                break;
             }
             position = simulatedNext;
@@ -201,8 +206,16 @@ public final class MCP_PlaneCCIPHelper {
       result.valid = true;
       result.unloadedChunkFallback = true;
       result.firstUnloadedPosition = copy(firstUnloadedPosition);
-      result.impact = fallbackEnd != null && fallbackEnd.yCoord <= 0.0D
-            ? interpolateAtY(fallbackStart, fallbackEnd, 0.0D)
+      if(firstUnloadedPosition != null) {
+         result.firstUnloadedChunkX = MathHelper.floor_double(firstUnloadedPosition.xCoord) >> 4;
+         result.firstUnloadedChunkZ = MathHelper.floor_double(firstUnloadedPosition.zCoord) >> 4;
+      }
+      result.fallbackReason = fallbackReason;
+      result.fallbackTargetY = fallbackTargetY;
+      result.hitRealTerrain = false;
+      result.syntheticFallback = true;
+      result.impact = fallbackEnd != null && fallbackEnd.yCoord <= fallbackTargetY
+            ? interpolateAtY(fallbackStart, fallbackEnd, fallbackTargetY)
             : copy(fallbackEnd);
       result.finalVelocity = copy(fallbackVelocity);
       result.ticksSimulated = fallbackTick;
@@ -286,8 +299,35 @@ public final class MCP_PlaneCCIPHelper {
       }
       int x = MathHelper.floor_double(position.xCoord);
       int z = MathHelper.floor_double(position.zCoord);
-      // Use a mid-world Y so this is a chunk availability check, not an altitude check.
-      return world.blockExists(x, 64, z);
+      // Use a stable in-world Y so this is a chunk availability check, not an altitude check.
+      return world.blockExists(x, 64, z) || world.blockExists(x, 1, z);
+   }
+
+   private static double findLoadedTerrainFallbackY(World world, Vec3 segmentStart, Vec3 firstUnloadedPosition) {
+      if(world == null || firstUnloadedPosition == null) {
+         return 0.0D;
+      }
+      int firstChunkX = MathHelper.floor_double(firstUnloadedPosition.xCoord) >> 4;
+      int firstChunkZ = MathHelper.floor_double(firstUnloadedPosition.zCoord) >> 4;
+      int centerX = MathHelper.floor_double(segmentStart != null ? segmentStart.xCoord : firstUnloadedPosition.xCoord);
+      int centerZ = MathHelper.floor_double(segmentStart != null ? segmentStart.zCoord : firstUnloadedPosition.zCoord);
+      double totalHeight = 0.0D;
+      int samples = 0;
+
+      for(int dx = -FALLBACK_TERRAIN_SEARCH_RADIUS; dx <= FALLBACK_TERRAIN_SEARCH_RADIUS; ++dx) {
+         for(int dz = -FALLBACK_TERRAIN_SEARCH_RADIUS; dz <= FALLBACK_TERRAIN_SEARCH_RADIUS; ++dz) {
+            int sampleX = centerX + dx * 16;
+            int sampleZ = centerZ + dz * 16;
+            if((sampleX >> 4) == firstChunkX && (sampleZ >> 4) == firstChunkZ) {
+               continue;
+            }
+            if(isChunkLoadedForPrediction(world, Vec3.createVectorHelper((double)sampleX, 64.0D, (double)sampleZ))) {
+               totalHeight += (double)Math.max(0, world.getHeightValue(sampleX, sampleZ));
+               ++samples;
+            }
+         }
+      }
+      return samples > 0 ? totalHeight / (double)samples : 0.0D;
    }
 
    private static Vec3 interpolateAtY(Vec3 start, Vec3 end, double targetY) {
@@ -474,6 +514,14 @@ public final class MCP_PlaneCCIPHelper {
       public double predictedAccelerationAfterAircraft;
       public boolean unloadedChunkFallback;
       public Vec3 firstUnloadedPosition;
+      public int firstUnloadedChunkX;
+      public int firstUnloadedChunkZ;
+      public String fallbackReason;
+      public double fallbackTargetY;
+      public boolean hitRealTerrain;
+      public boolean syntheticFallback;
+      public boolean hysteresisReused;
+      public int hysteresisAgeTicks;
       public Vec3 ejectionVelocity;
       public Vec3 initialVelocityDeltaFromAircraft;
       public double initialVelocityUpDot;
