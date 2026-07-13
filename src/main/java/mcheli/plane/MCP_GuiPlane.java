@@ -707,7 +707,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       }
       ScreenPoint projected = this.projectWorldToRenderCamera(this.lastValidCCIPImpact, this.smoothCamPartialTicks);
       if(projected == null || !projected.visible) {
-         return false;
+         if(!this.hasSmoothedCCIPScreenPos) {
+            return false;
+         }
+         projected = new ScreenPoint(this.ccipScreenX, this.ccipScreenY, true);
       }
       this.lastCCIPGraceUsed = true;
       ScreenPoint smoothed = this.smoothCCIPScreenPoint(projected, this.lastValidCCIPImpact, weapon);
