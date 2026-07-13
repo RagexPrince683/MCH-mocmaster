@@ -1,3 +1,9 @@
+## Angelica Dynamic Vehicle Part Render Compatibility
+
+- Added an Angelica-only Tessellator compatibility path for dynamically transformed MCHeli model parts so per-part `glPushMatrix`/translate/rotate transforms are consumed by Angelica's fixed-function state emulation.
+- Kept normal static whole-model/body rendering on the existing VBO path and preserved the existing non-Angelica dynamic part path.
+- Added opt-in one-shot diagnostics for Angelica dynamic part path selection via `-Dmcheli.debugAngelicaDynamicPartRender=true`.
+
 ## Bomb Sight No-Terrain Stability
 
 - Fixed first-person bomb-sight camera forcing so no-terrain predictions use a stable ballistic target angle instead of bobbing with nearby fallback terrain heights.

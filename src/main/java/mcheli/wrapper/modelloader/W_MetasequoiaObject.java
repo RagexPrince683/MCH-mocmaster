@@ -278,6 +278,16 @@ public class W_MetasequoiaObject extends W_ModelCustom {
       }
    }
 
+   public void renderAllTransformed() {
+      Iterator i$ = this.groupObjects.iterator();
+      while(i$.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)i$.next();
+         if(groupObject != null) {
+            groupObject.renderTransformed();
+         }
+      }
+   }
+
    public void tessellateAll(Tessellator tessellator) {
       Iterator i$ = this.groupObjects.iterator();
 
@@ -351,6 +361,39 @@ public class W_MetasequoiaObject extends W_ModelCustom {
             groupObject = (W_GroupObject)var4.next();
             if(partName.equalsIgnoreCase(groupObject.name)) {
                groupObject.render();
+            }
+         }
+      }
+
+   }
+
+   public void renderPartTransformed(String partName) {
+      W_GroupObject groupObject;
+      if(partName.charAt(0) == 36) {
+         for(int i$ = 0; i$ < this.groupObjects.size(); ++i$) {
+            groupObject = (W_GroupObject)this.groupObjects.get(i$);
+            if(partName.equalsIgnoreCase(groupObject.name)) {
+               groupObject.renderTransformed();
+               ++i$;
+
+               while(i$ < this.groupObjects.size()) {
+                  groupObject = (W_GroupObject)this.groupObjects.get(i$);
+                  if(groupObject.name.charAt(0) == 36) {
+                     break;
+                  }
+
+                  groupObject.renderTransformed();
+                  ++i$;
+               }
+            }
+         }
+      } else {
+         Iterator var4 = this.groupObjects.iterator();
+
+         while(var4.hasNext()) {
+            groupObject = (W_GroupObject)var4.next();
+            if(partName.equalsIgnoreCase(groupObject.name)) {
+               groupObject.renderTransformed();
             }
          }
       }
