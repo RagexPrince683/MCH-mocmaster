@@ -1,5 +1,9 @@
 # Changelog
 
+## CCIP Far-Plane Projection Fallback
+- Changed plane CCIP projection so `gluProject` points beyond the active render far plane fall back to camera-vector projection/clamping instead of suppressing an otherwise valid impact solution.
+- Added CCIP debug projection metadata for project mode, `winZ`, and far-plane rejection state.
+
 ## CCIP Edge-Clamped Offscreen Indicator
 - Added an edge-clamped fallback CCIP projection for valid ballistic impacts that are in front of the camera but outside the viewport or beyond the exact projection far clip.
 - Added CCIP debug projection status text for exact, fallback, clamped, behind-camera, and invalid pipper projection states.

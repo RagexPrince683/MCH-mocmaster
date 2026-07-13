@@ -62,6 +62,9 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    private String cachedCCIPWeaponName = "";
    private MCP_PlaneCCIPHelper.Result cachedCCIPResult;
    private String lastCCIPProjectionStatus = "invalid";
+   private String lastCCIPProjectMode = "invalid";
+   private double lastCCIPProjectWinZ = Double.NaN;
+   private boolean lastCCIPFarPlaneRejected;
 
    public MCP_GuiPlane(Minecraft minecraft) {
       super(minecraft);
@@ -790,6 +793,9 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       this.cachedCCIPWeaponName = "";
       this.cachedCCIPResult = null;
       this.lastCCIPProjectionStatus = "invalid";
+      this.lastCCIPProjectMode = "invalid";
+      this.lastCCIPProjectWinZ = Double.NaN;
+      this.lastCCIPFarPlaneRejected = false;
    }
 
    private void drawCCIPDebug(MCP_EntityPlane plane, MCH_WeaponBase weapon, boolean enabled, MCP_PlaneCCIPHelper.Result result, Vec3 aircraftMotion) {
@@ -813,8 +819,9 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             Double.valueOf(result != null ? result.predictedAccelerationBeforeAircraft : 0.0D), Double.valueOf(result != null ? result.predictedAccelerationAfterAircraft : 0.0D),
             Boolean.valueOf(result != null && result.speedDependsAircraftApplied), Double.valueOf(result != null ? result.initialVelocityUpDot : 0.0D),
             Double.valueOf(result != null ? result.initialVelocitySideDot : 0.0D));
-      String msg6 = String.format("warningImpossibleLaunch=%s projection=%s cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch/Roll=%.1f/%.1f/%.1f",
-            Boolean.valueOf(result != null && result.warningImpossibleLaunch), this.lastCCIPProjectionStatus,
+      String msg6 = String.format("warningImpossibleLaunch=%s projection=%s projectMode=%s winZ=%s farPlaneRejected=%s cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch/Roll=%.1f/%.1f/%.1f",
+            Boolean.valueOf(result != null && result.warningImpossibleLaunch), this.lastCCIPProjectionStatus, this.lastCCIPProjectMode,
+            this.formatProjectWinZ(this.lastCCIPProjectWinZ), Boolean.valueOf(this.lastCCIPFarPlaneRejected),
             Float.valueOf(camera != null ? camera.rotationYaw : 0.0F), Float.valueOf(camera != null ? camera.rotationPitch : 0.0F),
             Float.valueOf(plane.rotationYaw), Float.valueOf(plane.rotationPitch), Float.valueOf(plane.getRotRoll()));
       this.drawString(msg1, super.centerX - 170, super.centerY + 70, 0xFF55FF66);
@@ -829,8 +836,15 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       return v == null ? "-" : String.format("%.2f,%.2f,%.2f", Double.valueOf(v.xCoord), Double.valueOf(v.yCoord), Double.valueOf(v.zCoord));
    }
 
+   private String formatProjectWinZ(double winZ) {
+      return this.isFinite(winZ) ? String.format("%.4f", Double.valueOf(winZ)) : "-";
+   }
+
    private ScreenPoint projectWorldToRenderCamera(Vec3 worldPos, float partialTicks) {
       this.lastCCIPProjectionStatus = "invalid";
+      this.lastCCIPProjectMode = "invalid";
+      this.lastCCIPProjectWinZ = Double.NaN;
+      this.lastCCIPFarPlaneRejected = false;
       if(worldPos == null || super.mc == null) {
          return null;
       }
@@ -838,12 +852,15 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       ScreenPoint exact = this.projectWithActiveRenderMatrices(worldPos);
       if(exact != null) {
          this.lastCCIPProjectionStatus = exact.clamped ? "clamped" : "exact";
+         this.lastCCIPProjectMode = "gluProject";
          return exact;
       }
 
+      boolean farPlaneRejected = this.lastCCIPFarPlaneRejected;
       ScreenPoint fallback = this.projectWorldToRenderCameraFallback(worldPos, partialTicks);
       if(fallback != null) {
          this.lastCCIPProjectionStatus = fallback.clamped ? "clamped" : "fallback";
+         this.lastCCIPProjectMode = farPlaneRejected ? "camera-vector-far" : "camera-vector";
       }
       return fallback;
    }
@@ -944,8 +961,13 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          double winX = (double)CCIP_PROJECTED_COORDS.get(0);
          double winY = (double)CCIP_PROJECTED_COORDS.get(1);
          double winZ = (double)CCIP_PROJECTED_COORDS.get(2);
+         this.lastCCIPProjectWinZ = winZ;
+         if(this.isFinite(winZ) && winZ > 1.0D) {
+            this.lastCCIPFarPlaneRejected = true;
+            return null;
+         }
          if(!this.isFinite(winX) || !this.isFinite(winY) || !this.isFinite(winZ)
-               || winZ < 0.0D || winZ > 1.0D) {
+               || winZ < 0.0D) {
             return null;
          }
 
