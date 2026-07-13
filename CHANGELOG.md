@@ -1,3 +1,7 @@
+## Bomber Sight Vertical Camera Lock
+
+- Fixed first-person bomber sight tracking so the camera pitch is locked to the predicted bomb-impact angle, preventing freelook from moving above or below the calculated impact point while preserving existing CCIP prediction and horizontal tracking behavior.
+
 ## Plane CCIP Estimated Fallback Stability
 
 - Fixed plane CCIP disappearing or randomly entering short grace-only rendering during steep dives, extreme pitch angles, high speed, unloaded chunks, or no-terrain-collision prediction gaps.
