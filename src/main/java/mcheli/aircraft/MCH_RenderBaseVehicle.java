@@ -1,7 +1,11 @@
 package mcheli.aircraft;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.Set;
+
+import cpw.mods.fml.common.Loader;
 
 import mcheli.MCH_ClientCommonTickHandler;
 import mcheli.MCH_ClientEventHook;
@@ -44,6 +48,9 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    public static IModelCustom debugModel = null;
    private static ResourceLocation activeSkinOverlayTexture = null;
    private static ResourceLocation activeBaseTexture = null;
+   private static final boolean ANGELICA_DYNAMIC_PART_COMPAT = Loader.isModLoaded("angelica");
+   private static final boolean DEBUG_ANGELICA_DYNAMIC_PART_RENDER = Boolean.getBoolean("mcheli.debugAngelicaDynamicPartRender");
+   private static final Set angelicaDynamicPartRenderDiagnostics = new HashSet();
 
    public static Random rand = new Random();
 
@@ -621,10 +628,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    }
 
    public static void renderPart(final IModelCustom model, final IModelCustom modelBody, final String partName) {
-      renderPartModel(model, modelBody, partName);
+      renderPartModelTransformed(model, modelBody, partName);
       renderSkinOverlayPass(new RenderRunnable() {
          public void render() {
-            renderPartModel(model, modelBody, partName);
+            renderPartModelTransformed(model, modelBody, partName);
          }
       });
 
@@ -635,6 +642,35 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          model.renderAll();
       } else if(modelBody instanceof W_ModelCustom && ((W_ModelCustom)modelBody).containsPart("$" + partName)) {
          modelBody.renderPart("$" + partName);
+      }
+   }
+
+   private static void renderPartModelTransformed(IModelCustom model, IModelCustom modelBody, String partName) {
+      if(ANGELICA_DYNAMIC_PART_COMPAT && model instanceof W_ModelCustom) {
+         logAngelicaDynamicPartRender((W_ModelCustom)model, partName, "external", "compat-tessellator");
+         ((W_ModelCustom)model).renderAllTransformed();
+      } else if(model != null) {
+         logAngelicaDynamicPartRender(model, partName, "external", "vbo");
+         model.renderAll();
+      } else if(modelBody instanceof W_ModelCustom && ((W_ModelCustom)modelBody).containsPart("$" + partName)) {
+         if(ANGELICA_DYNAMIC_PART_COMPAT) {
+            logAngelicaDynamicPartRender(modelBody, partName, "body-part", "compat-tessellator");
+            ((W_ModelCustom)modelBody).renderPartTransformed("$" + partName);
+         } else {
+            logAngelicaDynamicPartRender(modelBody, partName, "body-part", "vbo");
+            modelBody.renderPart("$" + partName);
+         }
+      }
+   }
+
+   private static void logAngelicaDynamicPartRender(IModelCustom model, String partName, String modelType, String path) {
+      if(!DEBUG_ANGELICA_DYNAMIC_PART_RENDER || !ANGELICA_DYNAMIC_PART_COMPAT) {
+         return;
+      }
+
+      String key = model.getClass().getName() + ":" + modelType + ":" + partName + ":" + path;
+      if(angelicaDynamicPartRenderDiagnostics.add(key)) {
+         MCH_Lib.Log("[AngelicaDynamicPartRender] angelica=true model=%s modelType=%s group=%s transformedDynamicPart=true path=%s", new Object[]{model.getClass().getName(), modelType, partName, path});
       }
    }
 

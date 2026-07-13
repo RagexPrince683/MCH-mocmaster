@@ -180,6 +180,16 @@ public class W_WavefrontObject extends W_ModelCustom {
       }
    }
 
+   public void renderAllTransformed() {
+      Iterator i$ = this.groupObjects.iterator();
+      while(i$.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)i$.next();
+         if(groupObject != null) {
+            groupObject.renderTransformed();
+         }
+      }
+   }
+
    private void compactFaces() {
       Iterator i$ = this.groupObjects.iterator();
 
@@ -271,6 +281,18 @@ public class W_WavefrontObject extends W_ModelCustom {
          W_GroupObject groupObject = (W_GroupObject)i$.next();
          if(partName.equalsIgnoreCase(groupObject.name)) {
             groupObject.render();
+         }
+      }
+
+   }
+
+   public void renderPartTransformed(String partName) {
+      Iterator i$ = this.groupObjects.iterator();
+
+      while(i$.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)i$.next();
+         if(partName.equalsIgnoreCase(groupObject.name)) {
+            groupObject.renderTransformed();
          }
       }
 

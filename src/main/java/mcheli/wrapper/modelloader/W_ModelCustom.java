@@ -79,6 +79,10 @@ public abstract class W_ModelCustom implements IModelCustom {
 
    public abstract boolean containsPart(String var1);
 
+   public abstract void renderAllTransformed();
+
+   public abstract void renderPartTransformed(String var1);
+
    public abstract void renderAll(int var1, int var2);
 
    public abstract void renderAllLine(int var1, int var2);

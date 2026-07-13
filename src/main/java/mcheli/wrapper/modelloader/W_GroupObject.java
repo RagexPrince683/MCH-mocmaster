@@ -49,6 +49,15 @@ public class W_GroupObject {
       }
    }
 
+   public void renderTransformed() {
+      if(this.faces.size() > 0) {
+         Tessellator tessellator = Tessellator.instance;
+         tessellator.startDrawing(this.glDrawingMode);
+         this.render(tessellator);
+         tessellator.draw();
+      }
+   }
+
    private boolean renderVbo() {
       if(this.vboUnavailable || !GLContext.getCapabilities().OpenGL15) {
          return false;
