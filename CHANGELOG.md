@@ -1,3 +1,9 @@
+## Plane CCIP Estimated Fallback Stability
+
+- Fixed plane CCIP disappearing or randomly entering short grace-only rendering during steep dives, extreme pitch angles, high speed, unloaded chunks, or no-terrain-collision prediction gaps.
+- Added a synthetic estimated impact fallback that keeps the CCIP marker visible from ballistic altitude, velocity, aircraft motion/orientation, bomb gravity, and acceleration data while preserving normal real-terrain hits when loaded terrain is available.
+- Kept grace-mode pippers stable by reusing the last smoothed screen position if the cached impact cannot be projected for a frame.
+
 ## Plane CCIP Projection Diagnostics
 
 - Added CCIP projection diagnostics for the plane debug overlay, including projection path, rejection reason, screen coordinates, winZ, camera distance, and camera depth.

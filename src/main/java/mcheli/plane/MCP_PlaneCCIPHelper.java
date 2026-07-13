@@ -144,10 +144,104 @@ public final class MCP_PlaneCCIPHelper {
 
       result.finalVelocity = copy(velocity);
       if("not_run".equals(result.reasonInvalid)) {
-         result.reasonInvalid = "no_collision";
+         return buildEstimatedImpactFallback(world, result, info, releasePos, position, result.initialVelocity,
+               result.predictedAccelerationAfterAircraft, maxSteps, "no_collision_estimated_fallback");
+      }
+      if("below_world".equals(result.reasonInvalid)) {
+         return buildEstimatedImpactFallback(world, result, info, releasePos, position, result.initialVelocity,
+               result.predictedAccelerationAfterAircraft, maxSteps, "below_world_estimated_fallback");
       }
       return result;
    }
+
+   private static Result buildEstimatedImpactFallback(World world, Result result, MCH_WeaponInfo info, Vec3 releasePos,
+         Vec3 lastPosition, Vec3 lastVelocity, double entityAcceleration, int maxSteps, String reason) {
+      Vec3 fallbackTarget = estimateBallisticGroundImpact(world, info, releasePos, lastPosition, lastVelocity,
+            entityAcceleration, result.accelerationFactor, maxSteps);
+      if(fallbackTarget == null) {
+         result.reasonInvalid = reason;
+         return result;
+      }
+
+      result.valid = true;
+      result.unloadedChunkFallback = false;
+      result.fallbackReason = reason;
+      result.fallbackTargetY = fallbackTarget.yCoord;
+      result.hitRealTerrain = false;
+      result.syntheticFallback = true;
+      result.impact = fallbackTarget;
+      result.finalVelocity = copy(lastVelocity);
+      result.impactDistance = releasePos.distanceTo(result.impact);
+      result.releaseAltitude = releasePos.yCoord - result.impact.yCoord;
+      result.reasonInvalid = reason;
+      return result;
+   }
+
+   private static Vec3 estimateBallisticGroundImpact(World world, MCH_WeaponInfo info, Vec3 releasePos,
+         Vec3 lastPosition, Vec3 lastVelocity, double entityAcceleration, double accelerationFactor, int maxSteps) {
+      if(info == null || releasePos == null) {
+         return null;
+      }
+      double targetY = findEstimatedFallbackY(world, releasePos, lastPosition);
+      Vec3 position = copy(releasePos);
+      Vec3 velocity = copy(lastVelocity);
+      if(velocity == null) {
+         return null;
+      }
+      Vec3 previous = copy(position);
+      double simulatedAcceleration = entityAcceleration;
+      for(int stepIndex = 0; stepIndex < maxSteps * 2; ++stepIndex) {
+         int entityTick = stepIndex + 1;
+         if(stepIndex > 0) {
+            if(isGravityBomb(info)) {
+               velocity.xCoord *= BOMB_HORIZONTAL_DRAG;
+               velocity.zCoord *= BOMB_HORIZONTAL_DRAG;
+            } else if(isDispenser(info) && simulatedAcceleration < 1.0E-4D) {
+               velocity.xCoord *= BOMB_HORIZONTAL_DRAG;
+               velocity.zCoord *= BOMB_HORIZONTAL_DRAG;
+            }
+         }
+         if(info.speedFactor != 0.0F
+               && entityTick > info.speedFactorStartTick
+               && entityTick < info.speedFactorEndTick) {
+            double speed = length(velocity);
+            if(speed > EPSILON) {
+               double factor = (double)info.speedFactor / speed;
+               velocity.xCoord += velocity.xCoord * factor;
+               velocity.yCoord += velocity.yCoord * factor;
+               velocity.zCoord += velocity.zCoord * factor;
+               simulatedAcceleration += (double)info.speedFactor;
+            }
+         }
+         velocity.yCoord += (double)info.gravity;
+         Vec3 next = Vec3.createVectorHelper(
+               position.xCoord + velocity.xCoord * accelerationFactor,
+               position.yCoord + velocity.yCoord * accelerationFactor,
+               position.zCoord + velocity.zCoord * accelerationFactor);
+         previous = position;
+         if(next.yCoord <= targetY || next.yCoord < -64.0D) {
+            return interpolateAtY(previous, next, Math.max(targetY, -64.0D));
+         }
+         position = next;
+      }
+      return position;
+   }
+
+   private static double findEstimatedFallbackY(World world, Vec3 releasePos, Vec3 lastPosition) {
+      if(world != null && releasePos != null) {
+         int x = MathHelper.floor_double(releasePos.xCoord);
+         int z = MathHelper.floor_double(releasePos.zCoord);
+         if(isChunkLoadedForPrediction(world, releasePos)) {
+            return (double)Math.max(0, world.getHeightValue(x, z));
+         }
+      }
+      if(world != null && lastPosition != null && isChunkLoadedForPrediction(world, lastPosition)) {
+         return (double)Math.max(0, world.getHeightValue(
+               MathHelper.floor_double(lastPosition.xCoord), MathHelper.floor_double(lastPosition.zCoord)));
+      }
+      return 0.0D;
+   }
+
    private static Result buildUnloadedChunkFallback(World world, Result result, MCH_WeaponInfo info, Vec3 releasePos,
          Vec3 segmentStart, Vec3 firstUnloadedPosition, Vec3 velocity, double entityAcceleration,
          int entityTick, int maxSteps) {
