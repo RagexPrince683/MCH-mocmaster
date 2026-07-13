@@ -46,6 +46,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    private static final double CCIP_IMPACT_RESET_DISTANCE = 64.0D;
    private static final double CCIP_PIPPER_SCALE = 1.35D;
    private static final int CCIP_HYSTERESIS_GRACE_TICKS = 5;
+   private static final int CCIP_IMPACT_GRACE_TICKS = MCP_ClientPlaneTickHandler.BOMB_RETICLE_IMPACT_GRACE_TICKS;
    private static final FloatBuffer CCIP_PROJECTED_COORDS = BufferUtils.createFloatBuffer(3);
    private static Field activeRenderModelViewField;
    private static Field activeRenderProjectionField;
@@ -57,6 +58,12 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    private String lastCCIPWeaponName = "";
    private int lastCCIPDimension = Integer.MIN_VALUE;
    private Vec3 lastCCIPImpact;
+   private Vec3 lastValidCCIPImpact;
+   private int lastValidCCIPEntityId = Integer.MIN_VALUE;
+   private int lastValidCCIPDimension = Integer.MIN_VALUE;
+   private String lastValidCCIPWeaponName = "";
+   private int lastValidCCIPTick = Integer.MIN_VALUE;
+   private boolean lastCCIPGraceUsed;
    private int cachedCCIPTick = Integer.MIN_VALUE;
    private int cachedCCIPEntityId = Integer.MIN_VALUE;
    private int cachedCCIPDimension = Integer.MIN_VALUE;
@@ -634,6 +641,12 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       Vec3 aircraftMotion = Vec3.createVectorHelper(plane.motionX, plane.motionY, plane.motionZ);
 
       if(enabled) {
+         String weaponName = weapon != null && weapon.getInfo() != null ? weapon.getInfo().name : "";
+         int dimension = plane.worldObj != null && plane.worldObj.provider != null
+               ? plane.worldObj.provider.dimensionId : Integer.MIN_VALUE;
+         int entityId = plane.getEntityId();
+         this.validateCCIPGraceCache(entityId, dimension, weaponName);
+         this.lastCCIPGraceUsed = false;
          result = this.getOrUpdateCCIPPrediction(plane, ws, weapon, aircraftMotion);
          if(bomberMode) {
             // The hasBombSight reticle is a first-person optical sight attached to
@@ -644,16 +657,19 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             this.drawBombSightReticle((double)super.centerX, (double)super.centerY, false);
             this.resetCCIPSmoothing();
          } else if(result != null && result.valid && result.impact != null) {
+            this.updateLastValidCCIPImpact(result.impact, entityId, dimension, weaponName, plane.ticksExisted);
             ScreenPoint projected = this.projectWorldToRenderCamera(result.impact, this.smoothCamPartialTicks);
             if(projected != null && projected.visible) {
                ScreenPoint smoothed = this.smoothCCIPScreenPoint(projected, result.impact, weapon);
                this.drawCCIPPipper(smoothed.x, smoothed.y, smoothed.clamped, false);
-            } else {
+            } else if(!this.drawGraceCCIPPipper(plane, weapon, entityId, dimension, weaponName)) {
                this.resetCCIPSmoothing();
             }
          } else {
             this.lastCCIPProjectionStatus = "invalid";
-            this.resetCCIPSmoothing();
+            if(!this.drawGraceCCIPPipper(plane, weapon, entityId, dimension, weaponName)) {
+               this.resetCCIPSmoothing();
+            }
          }
       } else {
          this.resetCCIPState();
@@ -662,6 +678,56 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       if(MCH_Config.PlaneMouseAimReticleDebug.prmBool || MCH_Config.DebugFlightControl.prmBool) {
          this.drawCCIPDebug(plane, weapon, enabled, result, aircraftMotion);
       }
+   }
+
+
+   private void validateCCIPGraceCache(int entityId, int dimension, String weaponName) {
+      if(this.lastValidCCIPImpact != null && (this.lastValidCCIPEntityId != entityId
+            || this.lastValidCCIPDimension != dimension || !weaponName.equals(this.lastValidCCIPWeaponName))) {
+         this.clearCCIPGraceCache();
+      }
+   }
+
+   private void updateLastValidCCIPImpact(Vec3 impact, int entityId, int dimension, String weaponName, int tick) {
+      if(impact == null) {
+         return;
+      }
+      this.lastValidCCIPImpact = Vec3.createVectorHelper(impact.xCoord, impact.yCoord, impact.zCoord);
+      this.lastValidCCIPEntityId = entityId;
+      this.lastValidCCIPDimension = dimension;
+      this.lastValidCCIPWeaponName = weaponName;
+      this.lastValidCCIPTick = tick;
+   }
+
+   private boolean drawGraceCCIPPipper(MCP_EntityPlane plane, MCH_WeaponBase weapon, int entityId, int dimension, String weaponName) {
+      if(!this.canUseLastValidCCIPImpact(plane, entityId, dimension, weaponName)) {
+         return false;
+      }
+      ScreenPoint projected = this.projectWorldToRenderCamera(this.lastValidCCIPImpact, this.smoothCamPartialTicks);
+      if(projected == null || !projected.visible) {
+         return false;
+      }
+      this.lastCCIPGraceUsed = true;
+      ScreenPoint smoothed = this.smoothCCIPScreenPoint(projected, this.lastValidCCIPImpact, weapon);
+      this.drawCCIPPipper(smoothed.x, smoothed.y, true, false, true);
+      return true;
+   }
+
+   private boolean canUseLastValidCCIPImpact(MCP_EntityPlane plane, int entityId, int dimension, String weaponName) {
+      return plane != null && this.lastValidCCIPImpact != null
+            && plane.ticksExisted - this.lastValidCCIPTick <= CCIP_IMPACT_GRACE_TICKS
+            && this.lastValidCCIPEntityId == entityId
+            && this.lastValidCCIPDimension == dimension
+            && weaponName.equals(this.lastValidCCIPWeaponName);
+   }
+
+   private void clearCCIPGraceCache() {
+      this.lastValidCCIPImpact = null;
+      this.lastValidCCIPEntityId = Integer.MIN_VALUE;
+      this.lastValidCCIPDimension = Integer.MIN_VALUE;
+      this.lastValidCCIPWeaponName = "";
+      this.lastValidCCIPTick = Integer.MIN_VALUE;
+      this.lastCCIPGraceUsed = false;
    }
 
    private MCP_PlaneCCIPHelper.Result getOrUpdateCCIPPrediction(MCP_EntityPlane plane, MCH_WeaponSet ws,
@@ -880,6 +946,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       this.lastCCIPProjectMode = "invalid";
       this.lastCCIPProjectWinZ = Double.NaN;
       this.lastCCIPFarPlaneRejected = false;
+      this.clearCCIPGraceCache();
    }
 
    private void drawCCIPDebug(MCP_EntityPlane plane, MCH_WeaponBase weapon, boolean enabled, MCP_PlaneCCIPHelper.Result result, Vec3 aircraftMotion) {
@@ -904,10 +971,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             Double.valueOf(result != null ? result.predictedAccelerationBeforeAircraft : 0.0D), Double.valueOf(result != null ? result.predictedAccelerationAfterAircraft : 0.0D),
             Boolean.valueOf(result != null && result.speedDependsAircraftApplied), Double.valueOf(result != null ? result.initialVelocityUpDot : 0.0D),
             Double.valueOf(result != null ? result.initialVelocitySideDot : 0.0D));
-      String msg6 = String.format("warningImpossibleLaunch=%s projection=%s projectMode=%s winZ=%s farPlaneRejected=%s hysteresis=%s/%d cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch/Roll=%.1f/%.1f/%.1f",
+      String msg6 = String.format("warningImpossibleLaunch=%s projection=%s projectMode=%s winZ=%s farPlaneRejected=%s hysteresis=%s/%d ccipGrace=%s cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch/Roll=%.1f/%.1f/%.1f",
             Boolean.valueOf(result != null && result.warningImpossibleLaunch), this.lastCCIPProjectionStatus, this.lastCCIPProjectMode,
             this.formatProjectWinZ(this.lastCCIPProjectWinZ), Boolean.valueOf(this.lastCCIPFarPlaneRejected),
-            Boolean.valueOf(result != null && result.hysteresisReused), Integer.valueOf(result != null ? result.hysteresisAgeTicks : 0),
+            Boolean.valueOf(result != null && result.hysteresisReused), Integer.valueOf(result != null ? result.hysteresisAgeTicks : 0), Boolean.valueOf(this.lastCCIPGraceUsed),
             Float.valueOf(camera != null ? camera.rotationYaw : 0.0F), Float.valueOf(camera != null ? camera.rotationPitch : 0.0F),
             Float.valueOf(plane.rotationYaw), Float.valueOf(plane.rotationPitch), Float.valueOf(plane.getRotRoll()));
       this.drawString(msg1, super.centerX - 170, super.centerY + 70, 0xFF55FF66);
@@ -1166,11 +1233,15 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    }
 
    private void drawCCIPPipper(double x, double y, boolean clamped, boolean bomberMode) {
+      this.drawCCIPPipper(x, y, clamped, bomberMode, false);
+   }
+
+   private void drawCCIPPipper(double x, double y, boolean clamped, boolean bomberMode, boolean grace) {
       if(bomberMode) {
          this.drawBombSightReticle(x, y, clamped);
          return;
       }
-      int color = clamped ? 0xAA55FF66 : 0xF055FF66;
+      int color = grace ? 0x6655FF66 : (clamped ? 0xAA55FF66 : 0xF055FF66);
       double r = 10.0D * CCIP_PIPPER_SCALE;
       double tickInner = r + 2.0D * CCIP_PIPPER_SCALE;
       double tickOuter = r + 6.0D * CCIP_PIPPER_SCALE;
@@ -1184,7 +1255,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       this.drawLine(new double[]{x - 2.0D, y, x + 2.0D, y, x, y - 2.0D, x, y + 2.0D,
             x - tickOuter, y, x - tickInner, y, x + tickInner, y, x + tickOuter, y,
             x, y - tickOuter, x, y - tickInner, x, y + tickInner, x, y + tickOuter}, color);
-      this.drawString("CCIP", (int)(x + r + 7.0D), (int)(y + r + 4.0D), color);
+      this.drawString(grace ? "CCIP GRACE" : "CCIP", (int)(x + r + 7.0D), (int)(y + r + 4.0D), color);
    }
 
    private void drawBombSightReticle(double x, double y, boolean clamped) {

@@ -30,7 +30,7 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
    public MCH_Key[] Keys;
    private static int bombReticlePlaneEntityId = -1;
    private static boolean bombReticleMode = false;
-   private static final int BOMB_RETICLE_IMPACT_GRACE_TICKS = 20;
+   public static final int BOMB_RETICLE_IMPACT_GRACE_TICKS = 20;
    private static final double BOMB_RETICLE_FALLBACK_MIN_DISTANCE = 32.0D;
    private static final double BOMB_RETICLE_FALLBACK_MAX_DISTANCE = 512.0D;
    private static final Map bombReticleFallbacks = new HashMap();

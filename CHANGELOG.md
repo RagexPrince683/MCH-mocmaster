@@ -1,3 +1,8 @@
+## Plane CCIP Last Valid Impact Grace Cache
+
+- Added a short normal-CCIP last-valid-impact grace cache so transient invalid predictions or projection gaps draw a dimmed, edge-clamped cached pipper instead of hiding the cue.
+- Added CCIP debug output for `ccipGrace=true` while cached impact rendering is active.
+
 ## CCIP Unloaded Chunk Fallback Stability
 
 - Added CCIP prediction diagnostics for unloaded chunk coordinates, fallback reason, fallback target height, and whether an impact came from real terrain or synthetic fallback.
