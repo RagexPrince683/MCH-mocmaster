@@ -61,6 +61,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    private int cachedCCIPDimension = Integer.MIN_VALUE;
    private String cachedCCIPWeaponName = "";
    private MCP_PlaneCCIPHelper.Result cachedCCIPResult;
+   private String lastCCIPProjectionStatus = "invalid";
 
    public MCP_GuiPlane(Minecraft minecraft) {
       super(minecraft);
@@ -636,11 +637,13 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          } else if(result != null && result.valid && result.impact != null) {
             ScreenPoint projected = this.projectWorldToRenderCamera(result.impact, this.smoothCamPartialTicks);
             if(projected != null && projected.visible) {
-               this.drawCCIPPipper(projected.x, projected.y, false, false);
+               ScreenPoint smoothed = this.smoothCCIPScreenPoint(projected, result.impact, weapon);
+               this.drawCCIPPipper(smoothed.x, smoothed.y, smoothed.clamped, false);
             } else {
                this.resetCCIPSmoothing();
             }
          } else {
+            this.lastCCIPProjectionStatus = "invalid";
             this.resetCCIPSmoothing();
          }
       } else {
@@ -786,6 +789,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       this.cachedCCIPDimension = Integer.MIN_VALUE;
       this.cachedCCIPWeaponName = "";
       this.cachedCCIPResult = null;
+      this.lastCCIPProjectionStatus = "invalid";
    }
 
    private void drawCCIPDebug(MCP_EntityPlane plane, MCH_WeaponBase weapon, boolean enabled, MCP_PlaneCCIPHelper.Result result, Vec3 aircraftMotion) {
@@ -809,8 +813,8 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             Double.valueOf(result != null ? result.predictedAccelerationBeforeAircraft : 0.0D), Double.valueOf(result != null ? result.predictedAccelerationAfterAircraft : 0.0D),
             Boolean.valueOf(result != null && result.speedDependsAircraftApplied), Double.valueOf(result != null ? result.initialVelocityUpDot : 0.0D),
             Double.valueOf(result != null ? result.initialVelocitySideDot : 0.0D));
-      String msg6 = String.format("warningImpossibleLaunch=%s cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch/Roll=%.1f/%.1f/%.1f",
-            Boolean.valueOf(result != null && result.warningImpossibleLaunch),
+      String msg6 = String.format("warningImpossibleLaunch=%s projection=%s cameraYaw/Pitch=%.1f/%.1f planeYaw/Pitch/Roll=%.1f/%.1f/%.1f",
+            Boolean.valueOf(result != null && result.warningImpossibleLaunch), this.lastCCIPProjectionStatus,
             Float.valueOf(camera != null ? camera.rotationYaw : 0.0F), Float.valueOf(camera != null ? camera.rotationPitch : 0.0F),
             Float.valueOf(plane.rotationYaw), Float.valueOf(plane.rotationPitch), Float.valueOf(plane.getRotRoll()));
       this.drawString(msg1, super.centerX - 170, super.centerY + 70, 0xFF55FF66);
@@ -826,17 +830,28 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    }
 
    private ScreenPoint projectWorldToRenderCamera(Vec3 worldPos, float partialTicks) {
+      this.lastCCIPProjectionStatus = "invalid";
       if(worldPos == null || super.mc == null) {
          return null;
       }
 
       ScreenPoint exact = this.projectWithActiveRenderMatrices(worldPos);
       if(exact != null) {
+         this.lastCCIPProjectionStatus = exact.clamped ? "clamped" : "exact";
          return exact;
       }
 
+      ScreenPoint fallback = this.projectWorldToRenderCameraFallback(worldPos, partialTicks);
+      if(fallback != null) {
+         this.lastCCIPProjectionStatus = fallback.clamped ? "clamped" : "fallback";
+      }
+      return fallback;
+   }
+
+   private ScreenPoint projectWorldToRenderCameraFallback(Vec3 worldPos, float partialTicks) {
       // Fallback for clients where another coremod replaces ActiveRenderInfo's
-      // private buffers. This still uses the real third-person camera position.
+      // private buffers or when the exact GL projection is outside the current
+      // viewport/far clip. This still uses the real third-person camera position.
       Entity camera = super.mc.renderViewEntity != null ? super.mc.renderViewEntity : super.mc.thePlayer;
       if(!(camera instanceof EntityLivingBase)) {
          return null;
@@ -863,7 +878,8 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             worldPos.yCoord - cameraPos.yCoord,
             worldPos.zCoord - cameraPos.zCoord);
       double depth = relative.dotProduct(forward);
-      if(depth <= 0.01D) {
+      if(!this.isFinite(depth) || depth <= 0.01D) {
+         this.lastCCIPProjectionStatus = "behind-camera";
          return null;
       }
 
@@ -871,11 +887,38 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       double focalLength = ((double)super.height * 0.5D) / Math.tan(Math.toRadians(fov * 0.5D));
       double x = (double)super.centerX + relative.dotProduct(right) * focalLength / depth;
       double y = (double)super.centerY - relative.dotProduct(up) * focalLength / depth;
-      if(!this.isFinite(x) || !this.isFinite(y) || x < 0.0D || x > (double)super.width
-            || y < 0.0D || y > (double)super.height) {
+      if(!this.isFinite(x) || !this.isFinite(y)) {
+         this.lastCCIPProjectionStatus = "invalid";
          return null;
       }
+      if(x < 0.0D || x > (double)super.width || y < 0.0D || y > (double)super.height) {
+         return this.clampScreenPointToEdge(x, y);
+      }
       return new ScreenPoint(x, y, false, true);
+   }
+
+   private ScreenPoint clampScreenPointToEdge(double x, double y) {
+      double dx = x - (double)super.centerX;
+      double dy = y - (double)super.centerY;
+      if(!this.isFinite(dx) || !this.isFinite(dy) || (Math.abs(dx) < 1.0E-6D && Math.abs(dy) < 1.0E-6D)) {
+         return null;
+      }
+
+      double edgeX = dx > 0.0D ? (double)super.width : 0.0D;
+      double edgeY = dy > 0.0D ? (double)super.height : 0.0D;
+      double scaleX = Math.abs(dx) > 1.0E-6D ? (edgeX - (double)super.centerX) / dx : Double.POSITIVE_INFINITY;
+      double scaleY = Math.abs(dy) > 1.0E-6D ? (edgeY - (double)super.centerY) / dy : Double.POSITIVE_INFINITY;
+      double scale = Math.min(scaleX, scaleY);
+      if(!this.isFinite(scale) || scale < 0.0D) {
+         return null;
+      }
+
+      double clampedX = MathHelper.clamp_double((double)super.centerX + dx * scale, 0.0D, (double)super.width);
+      double clampedY = MathHelper.clamp_double((double)super.centerY + dy * scale, 0.0D, (double)super.height);
+      if(!this.isFinite(clampedX) || !this.isFinite(clampedY)) {
+         return null;
+      }
+      return new ScreenPoint(clampedX, clampedY, true, true);
    }
 
    private ScreenPoint projectWithActiveRenderMatrices(Vec3 worldPos) {

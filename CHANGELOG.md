@@ -1,5 +1,9 @@
 # Changelog
 
+## CCIP Edge-Clamped Offscreen Indicator
+- Added an edge-clamped fallback CCIP projection for valid ballistic impacts that are in front of the camera but outside the viewport or beyond the exact projection far clip.
+- Added CCIP debug projection status text for exact, fallback, clamped, behind-camera, and invalid pipper projection states.
+
 ## Bomber Sight Local Reticle Culling Fix
 - Fixed the `HasBombSight` first-person bomber sight reticle so it renders as a local camera sight at screen center during bomber-sight mode instead of being culled by the distant predicted impact projection. CCIP projection and culling behavior are unchanged.
 
