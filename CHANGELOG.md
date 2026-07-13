@@ -1,3 +1,8 @@
+## Bomb Sight No-Terrain Stability
+
+- Fixed first-person bomb-sight camera forcing so no-terrain predictions use a stable ballistic target angle instead of bobbing with nearby fallback terrain heights.
+- Kept the bomb sight continuously visible by deriving fallback target direction from aircraft motion and the predicted bomb solution when terrain cannot be detected.
+
 ## Bomber Sight Vertical Camera Lock
 
 - Fixed first-person bomber sight tracking so the camera pitch is locked to the predicted bomb-impact angle, preventing freelook from moving above or below the calculated impact point while preserving existing CCIP prediction and horizontal tracking behavior.
