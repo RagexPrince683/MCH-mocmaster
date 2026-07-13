@@ -1,3 +1,7 @@
+## Plane CCIP Projection Diagnostics
+
+- Added CCIP projection diagnostics for the plane debug overlay, including projection path, rejection reason, screen coordinates, winZ, camera distance, and camera depth.
+
 ## Plane CCIP Last Valid Impact Grace Cache
 
 - Added a short normal-CCIP last-valid-impact grace cache so transient invalid predictions or projection gaps draw a dimmed, edge-clamped cached pipper instead of hiding the cue.
