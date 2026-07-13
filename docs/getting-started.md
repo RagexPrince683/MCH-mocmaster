@@ -94,8 +94,6 @@ The config stores key codes rather than names. Common defaults:
 | Scoreboard | `KeyScoreboard` | L |
 | Multiplayer manager | `KeyMultiplayManager` | M |
 
-In live multiplayer, the Gear key sends the pilot's gear intent to the server even if the local client has stale clearance or animation state. This keeps large aircraft, including Tu-95-style bombers, from getting stuck with gear down when the client prediction differs from the dedicated server.
-
 ## 7. Useful first configuration changes
 
 For survival-friendly servers:

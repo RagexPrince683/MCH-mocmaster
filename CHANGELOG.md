@@ -1,8 +1,3 @@
-## Fix live landing gear key sync
-
-- Changed the landing-gear key handler to send a gear intent even when the live client-side clearance/rotation prediction is stale, letting the server-authoritative vehicle process retraction or extension for large planes such as the Tu-95.
-- Documented that live multiplayer gear input is server-authoritative, while local prompts may still be conservative.
-
 ## Fix live LOD landing gear snapshots
 
 - Added landing-gear animation state to live server LOD snapshot packets so clients without the real vehicle entity can render large-aircraft `AddPartLG` parts correctly.

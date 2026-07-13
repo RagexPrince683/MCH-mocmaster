@@ -195,21 +195,14 @@ public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHan
                        new Object[]{Integer.valueOf(ac.getEntityId())});
             }
          }
-         if (this.KeyGearUpDown.isKeyDown() && ac.getAcInfo().haveLandingGear()) {
+         if (this.KeyGearUpDown.isKeyDown() && ac.getAcInfo().haveLandingGear())
             if (ac.canFoldLandingGear()) {
                pc.switchGear = 1;
                send = true;
             } else if (ac.canUnfoldLandingGear()) {
                pc.switchGear = 2;
                send = true;
-            } else if (!ac.isLandingGearFolded()) {
-               pc.switchGear = 1;
-               send = true;
-            } else if (ac.isLandingGearFolded()) {
-               pc.switchGear = 2;
-               send = true;
             }
-         }
          if (ac.canSwitchFreeLook()) {
             if (MCH_Config.EnableHoldFreelook.prmBool) {
                boolean cameraOnlyPlaneFreelook = ac instanceof MCP_EntityPlane
