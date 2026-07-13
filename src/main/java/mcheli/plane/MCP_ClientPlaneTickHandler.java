@@ -201,10 +201,15 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
       float yaw = (float)(Math.atan2(dz, dx) * 180.0D / Math.PI) - 90.0F;
       float pitch = (float)(-(Math.atan2(dy, horizontal) * 180.0D / Math.PI));
       pitch = MathHelper.clamp_float(pitch, -90.0F, 90.0F);
+      applyBombReticleCameraRotation(player, plane, yaw, pitch);
+   }
+
+   private static void applyBombReticleCameraRotation(EntityPlayer player, MCP_EntityPlane plane, float yaw, float pitch) {
       player.prevRotationYaw = player.rotationYaw;
-      player.prevRotationPitch = player.rotationPitch;
+      player.prevRotationPitch = pitch;
       player.rotationYaw = yaw;
       player.rotationPitch = pitch;
+      setRotLimitPitch(pitch, pitch, player);
       plane.updateCameraRotate(yaw, pitch);
    }
 
