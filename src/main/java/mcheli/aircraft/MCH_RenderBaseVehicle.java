@@ -144,13 +144,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       GL11.glEnable(GL11.GL_BLEND);
       GL11.glDisable(GL11.GL_ALPHA_TEST);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-      beginSkinOverlayRender(info, ac);
-      try {
-         this.renderBaseVehicle(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
-         this.renderCommonPart(ac, info, posX, posY, posZ, tickTime);
-      } finally {
-         endSkinOverlayRender();
-      }
+      this.renderBaseVehicle(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
       GL11.glPopAttrib();
       GL11.glPopMatrix();
    }
@@ -1197,13 +1191,9 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    }
 
    public static void renderLandingGear(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
-      if (ac.partLandingGear != null) {
-         renderLandingGear(info, ac.getLandingGearRotation(), ac.getPrevLandingGearRotation(), tickTime);
-      }
-   }
-
-   public static void renderLandingGear(MCH_BaseVehicleInfo info, float rot, float prevRot, float tickTime) {
-      if (info.haveLandingGear()) {
+      if (info.haveLandingGear() && ac.partLandingGear != null) {
+         float rot = ac.getLandingGearRotation();
+         float prevRot = ac.getPrevLandingGearRotation();
          float revR = 90.0F - rot;
          float revPr = 90.0F - prevRot;
          float rot1 = prevRot + (rot - prevRot) * tickTime;
