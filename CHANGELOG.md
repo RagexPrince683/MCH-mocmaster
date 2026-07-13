@@ -1,8 +1,3 @@
-## Fix large aircraft landing gear in LOD rendering
-
-- Restored common animated part rendering during far-distance vehicle LOD passes so large aircraft landing gear (`AddPartLG`/related parts) continues to animate beyond the LOD start distance.
-- Documented that the LOD path keeps animated parts while only skipping close-range light effects.
-
 ## Bomb Sight No-Terrain Stability
 
 - Fixed first-person bomb-sight camera forcing so no-terrain predictions use a stable ballistic target angle instead of bobbing with nearby fallback terrain heights.
