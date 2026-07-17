@@ -1,3 +1,8 @@
+## Hold Shift Vehicle Dismount
+
+- Changed vehicle dismounting to require holding Left Shift continuously for three seconds, preventing accidental exits from pilot seats.
+- Updated the in-game vehicle control hint and getting-started control reference to document the hold-to-dismount behavior.
+
 ## Angelica Dynamic Vehicle Part Render Compatibility
 
 - Added an Angelica-only Tessellator compatibility path for dynamically transformed MCHeli model parts so per-part `glPushMatrix`/translate/rotate transforms are consumed by Angelica's fixed-function state emulation.
