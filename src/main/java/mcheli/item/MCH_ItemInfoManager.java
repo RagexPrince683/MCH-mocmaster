@@ -15,8 +15,10 @@ import net.minecraft.item.Item;
 public class MCH_ItemInfoManager {
 
     private static HashMap map = new LinkedHashMap();
+    private static String lastPath;
 
     public static boolean load(String path) {
+        lastPath = path;
         path = path.replace('\\', '/');
         String dirPrefix = path + "item";
         List<String> entries = MCH_ResourceHelper.listResources(dirPrefix, ".txt");
@@ -59,6 +61,17 @@ public class MCH_ItemInfoManager {
             MCH_Lib.Log("Read %d item", new Object[]{Integer.valueOf(map.size())});
             return map.size() > 0;
         } else {
+            return false;
+        }
+    }
+
+    public static boolean reload() {
+        if(lastPath == null) return false;
+        try {
+            map.clear();
+            return load(lastPath);
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }

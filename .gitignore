@@ -6,4 +6,6 @@ eclipse
 .classpath
 .project
 run/
-McheliO LoaderMod v2.0.jar
+*.jar
+*.class
+*.log

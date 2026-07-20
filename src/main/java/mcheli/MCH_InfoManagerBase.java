@@ -9,11 +9,16 @@ import mcheli.MCH_Lib;
 //Inherited by all vehicle classes.
 public abstract class MCH_InfoManagerBase {
 
+   private String lastPath;
+   private String lastType;
+
    public abstract MCH_BaseInfo newInfo(String var1);
 
    public abstract Map getMap();
 
    public boolean load(String path, String type) {
+      lastPath = path;
+      lastType = type;
       path = path.replace('\\', '/');
       String dirPrefix = path + type;
       List<String> entries = MCH_ResourceHelper.listResources(dirPrefix, ".txt");
@@ -59,6 +64,20 @@ public abstract class MCH_InfoManagerBase {
          MCH_Lib.Log("Read %d %s", new Object[]{Integer.valueOf(this.getMap().size()), type});
          return this.getMap().size() > 0;
       } else {
+         return false;
+      }
+   }
+
+   public boolean reload() {
+      if(lastPath == null || lastType == null) {
+         MCH_Lib.Log("### Cannot reload: never loaded");
+         return false;
+      }
+      try {
+         this.getMap().clear();
+         return this.load(lastPath, lastType);
+      } catch (Exception e) {
+         e.printStackTrace();
          return false;
       }
    }

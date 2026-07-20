@@ -12,7 +12,9 @@ import java.util.Map.Entry;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 import mcheli.MCH_HBMUtil;
+import mcheli.MCH_Lib;
 import mcheli.MCH_PacketNotifyServerSettings;
+import mcheli.MCH_SoundsJson;
 import mcheli.command.MCH_PacketTitle;
 import mcheli.multiplay.MCH_MultiplayPacketHandler;
 import mcheli.multiplay.MCH_PacketIndClient;
@@ -42,6 +44,7 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.IChatComponent.Serializer;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.CommandEvent;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -59,7 +62,8 @@ public class MCH_Command extends CommandBase {
    public static final String CMD_SHOW_BB = "showboundingbox";
    public static final String CMD_LIST = "list";
    public static final String CMD_ENABLE_NUKES = "enablenukes";
-   public static String[] ALL_COMMAND = new String[]{"sendss", "modlist", "reconfig", "title", "fill", "status", "killentity", "removeentity", "attackentity", "showboundingbox", "enablenukes", "list"};
+   public static final String CMD_RELOAD = "reload";
+   public static String[] ALL_COMMAND = new String[]{"sendss", "modlist", "reconfig", "reload", "title", "fill", "status", "killentity", "removeentity", "attackentity", "showboundingbox", "enablenukes", "list"};
    public static MCH_Command instance = new MCH_Command();
 
 
@@ -159,21 +163,79 @@ public class MCH_Command extends CommandBase {
                if(arr$ != null) {
                   MCH_PacketIndClient.send(arr$, 2, "" + MCH_MultiplayPacketHandler.getPlayerInfoId(msg));
                }
-            } else if(prm[0].equalsIgnoreCase("reconfig")) {
-               if(prm.length != 1) {
-                  throw new CommandException("Parameter error! : /mcheli reconfig", new Object[0]);
-               }
+             } else if(prm[0].equalsIgnoreCase("reconfig")) {
+                if(prm.length != 1) {
+                   throw new CommandException("Parameter error! : /mcheli reconfig", new Object[0]);
+                }
 
-               MCH_MOD.proxy.reconfig();
-               if(sender.getEntityWorld() != null && !sender.getEntityWorld().isRemote) {
-                  MCH_PacketNotifyServerSettings.sendAll();
-               }
+                MCH_MOD.proxy.reconfig();
+                if(sender.getEntityWorld() != null && !sender.getEntityWorld().isRemote) {
+                   MCH_PacketNotifyServerSettings.sendAll();
+                }
 
-               if(MCH_MOD.proxy.isSinglePlayer()) {
-                  sender.addChatMessage(new ChatComponentText("Reload mcheli.cfg"));
-               } else {
-                  sender.addChatMessage(new ChatComponentText("Reload server side mcheli.cfg"));
-               }
+                if(MCH_MOD.proxy.isSinglePlayer()) {
+                   sender.addChatMessage(new ChatComponentText("Reload mcheli.cfg"));
+                } else {
+                   sender.addChatMessage(new ChatComponentText("Reload server side mcheli.cfg"));
+                }
+             } else if(prm[0].equalsIgnoreCase("reload")) {
+                if(prm.length != 1) {
+                   throw new CommandException("Parameter error! : /mcheli reload", new Object[0]);
+                }
+
+                int count = 0;
+                StringBuilder sb = new StringBuilder();
+
+                if(mcheli.helicopter.MCH_HeliInfoManager.getInstance().reload()) {
+                   sb.append("helicopters, "); ++count;
+                }
+                if(mcheli.plane.MCP_PlaneInfoManager.getInstance().reload()) {
+                   sb.append("planes, "); ++count;
+                }
+                if(mcheli.ship.MCH_ShipInfoManager.getInstance().reload()) {
+                   sb.append("ships, "); ++count;
+                }
+                if(mcheli.tank.MCH_TankInfoManager.getInstance().reload()) {
+                   sb.append("tanks, "); ++count;
+                }
+                if(mcheli.vehicle.MCH_TurretInfoManager.getInstance().reload()) {
+                   sb.append("vehicles, "); ++count;
+                }
+                if(mcheli.weapon.MCH_WeaponInfoManager.reload()) {
+                   sb.append("weapons, "); ++count;
+                }
+                if(mcheli.item.MCH_ItemInfoManager.reload()) {
+                   sb.append("items, "); ++count;
+                }
+                if(mcheli.throwable.MCH_ThrowableInfoManager.reload()) {
+                   sb.append("throwables, "); ++count;
+                }
+
+                // Re-apply updated info to all loaded vehicles on the server
+                WorldServer[] worlds = MinecraftServer.getServer().worldServers;
+                for(WorldServer ws : worlds) {
+                   List list = ws.loadedEntityList;
+                   for(int i = 0; i < list.size(); ++i) {
+                      if(list.get(i) instanceof mcheli.aircraft.MCH_EntityBaseVehicle) {
+                         mcheli.aircraft.MCH_EntityBaseVehicle ac =
+                            (mcheli.aircraft.MCH_EntityBaseVehicle)list.get(i);
+                         if(ac.getAcInfo() != null) {
+                            ac.changeType(ac.getAcInfo().name);
+                            ac.createSeats(java.util.UUID.randomUUID().toString());
+                         }
+                      }
+                   }
+                }
+
+                MCH_MOD.proxy.reloadHUD();
+                MCH_SoundsJson.update("assets/mcheli/");
+
+                // Notify clients to also reload (matters on dedicated servers)
+                mcheli.aircraft.MCH_PacketNotifyInfoReloaded.sendToAllClients(2);
+
+                String reloadMsg = "Reloaded " + count + " info types: " + sb.toString();
+                MCH_Lib.Log(reloadMsg);
+                sender.addChatMessage(new ChatComponentText(reloadMsg));
             } else {
                int len$;
                String var9;

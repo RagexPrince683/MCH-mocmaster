@@ -44,4 +44,10 @@ public class MCH_PacketNotifyInfoReloaded extends MCH_Packet {
       s.type = 1;
       W_Network.sendToServer(s);
    }
+
+   public static void sendToAllClients(int type) {
+      MCH_PacketNotifyInfoReloaded s = new MCH_PacketNotifyInfoReloaded();
+      s.type = type;
+      W_Network.sendToAllPlayers(s);
+   }
 }

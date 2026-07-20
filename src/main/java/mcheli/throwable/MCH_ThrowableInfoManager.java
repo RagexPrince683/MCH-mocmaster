@@ -17,9 +17,11 @@ public class MCH_ThrowableInfoManager {
 
    private static MCH_ThrowableInfoManager instance = new MCH_ThrowableInfoManager();
    private static HashMap map = new LinkedHashMap();
+   private static String lastPath;
 
 
    public static boolean load(String path) {
+      lastPath = path;
       path = path.replace('\\', '/');
       String dirPrefix = path + "throwable";
       List<String> entries = MCH_ResourceHelper.listResources(dirPrefix, ".txt");
@@ -63,6 +65,17 @@ public class MCH_ThrowableInfoManager {
          MCH_Lib.Log("Read %d throwable", new Object[]{Integer.valueOf(map.size())});
          return map.size() > 0;
       } else {
+         return false;
+      }
+   }
+
+   public static boolean reload() {
+      if(lastPath == null) return false;
+      try {
+         map.clear();
+         return load(lastPath);
+      } catch (Exception e) {
+         e.printStackTrace();
          return false;
       }
    }
