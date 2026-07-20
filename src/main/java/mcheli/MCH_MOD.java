@@ -213,6 +213,11 @@ public class MCH_MOD {
        //MCH_Lib I have NO FUCKING CLUE HOW TO USE. I LITERALLY DO NOT THINK IT WORKS ANYMORE.
        MCH_Lib.DbgLog(false, "CurrentDirectory: %s", (new File(".")).getAbsolutePath());
 
+       // Set up addon directory for user-created content
+       // Addons live in <minecraft>/mcheli_addons/ and mirror the assets/mcheli/ structure
+       File addonsDir = new File(evt.getModConfigurationDirectory().getParentFile(), "mcheli_addons");
+       MCH_ResourceHelper.setAddonDir(addonsDir);
+
 
 
 

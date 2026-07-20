@@ -2,8 +2,11 @@ package mcheli;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -16,9 +19,23 @@ public class MCH_ResourceHelper {
 
     private static File sourceJar = null;
     private static List<File> devClasspathDirs = null;
+    private static File addonDir = null;
 
     public static void setSourceJar(File jar) {
         sourceJar = jar;
+    }
+
+    public static void setAddonDir(File dir) {
+        addonDir = dir;
+        if (addonDir != null && !addonDir.exists()) {
+            addonDir.mkdirs();
+            MCH_Lib.Log("MCH_ResourceHelper: Created addon directory: %s", addonDir.getAbsolutePath());
+        }
+        MCH_Lib.Log("MCH_ResourceHelper: Addon directory: %s", addonDir != null ? addonDir.getAbsolutePath() : "null");
+    }
+
+    public static File getAddonDir() {
+        return addonDir;
     }
 
     public static void discoverDevClasspath() {
@@ -141,11 +158,45 @@ public class MCH_ResourceHelper {
             }
         }
 
+        // Scan addon directory for additional files (additive, never removes JAR entries)
+        if (addonDir != null && addonDir.isDirectory()) {
+            // jarPrefix is like "assets/mcheli/helicopters/"
+            // Strip "assets/mcheli/" to get the relative subdir
+            String assetPrefix = "assets/mcheli/";
+            if (jarPrefix.startsWith(assetPrefix)) {
+                String relSubdir = jarPrefix.substring(assetPrefix.length());
+                File addonSubdir = new File(addonDir, relSubdir);
+                if (addonSubdir.isDirectory()) {
+                    try {
+                        Path dirPath = addonSubdir.toPath();
+                        Files.walk(dirPath)
+                            .filter(p -> p.toString().endsWith(suffix) && !Files.isDirectory(p))
+                            .forEach(p -> {
+                                String rel = dirPath.relativize(p).toString().replace('\\', '/');
+                                String resourcePath = assetPrefix + relSubdir + rel;
+                                // Avoid duplicates from JAR
+                                if (!result.contains(resourcePath)) {
+                                    result.add(resourcePath);
+                                }
+                            });
+                    } catch (Exception e) {
+                        MCH_Lib.Log("MCH_ResourceHelper: Failed to walk addon dir %s: %s", addonSubdir, e.getMessage());
+                    }
+                }
+            }
+        }
+
         return result;
     }
 
     public static boolean resourceExists(String resourcePath) {
         if (!resourcePath.startsWith("/")) resourcePath = "/" + resourcePath;
+
+        // Check addon directory first (additive overlay)
+        if (addonDir != null) {
+            File addonFile = addonResourceFile(resourcePath);
+            if (addonFile != null && addonFile.isFile()) return true;
+        }
 
         if (sourceJar != null && sourceJar.exists() && sourceJar.isFile()) {
             try (JarFile jar = new JarFile(sourceJar)) {
@@ -167,9 +218,36 @@ public class MCH_ResourceHelper {
     public static BufferedReader openResource(String resourcePath) {
         if (!resourcePath.startsWith("/")) resourcePath = "/" + resourcePath;
 
+        // Check addon directory first (user overrides take priority)
+        if (addonDir != null) {
+            File addonFile = addonResourceFile(resourcePath);
+            if (addonFile != null && addonFile.isFile()) {
+                try {
+                    return new BufferedReader(new InputStreamReader(new FileInputStream(addonFile), StandardCharsets.UTF_8));
+                } catch (FileNotFoundException e) {
+                    // fall through to classpath
+                }
+            }
+        }
+
         InputStream is = MCH_ResourceHelper.class.getResourceAsStream(resourcePath);
         if (is == null) return null;
         return new BufferedReader(new InputStreamReader(is));
+    }
+
+    /**
+     * Maps a classpath resource path like "/assets/mcheli/helicopters/ah-64.txt"
+     * to a file under the addon directory, e.g. "mcheli_addons/helicopters/ah-64.txt".
+     * Returns null if the path doesn't map to an addon resource.
+     */
+    private static File addonResourceFile(String resourcePath) {
+        String path = resourcePath.startsWith("/") ? resourcePath.substring(1) : resourcePath;
+        String prefix = "assets/mcheli/";
+        if (path.startsWith(prefix)) {
+            String relPath = path.substring(prefix.length());
+            return new File(addonDir, relPath);
+        }
+        return null;
     }
 
     public static String getFileName(String resourcePath) {
