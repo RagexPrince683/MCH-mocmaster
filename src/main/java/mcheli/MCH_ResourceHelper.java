@@ -20,22 +20,57 @@ public class MCH_ResourceHelper {
     private static File sourceJar = null;
     private static List<File> devClasspathDirs = null;
     private static File addonDir = null;
+    private static List<File> addonAssetRoots = null;
+
+    private static final String ASSET_PREFIX = "assets/mcheli/";
 
     public static void setSourceJar(File jar) {
         sourceJar = jar;
     }
 
+    /**
+     * Sets the addon directory and discovers addon asset roots.
+     * Supports two layouts:
+     *   Flat:      mcheli_addons/helicopters/ah-60.txt
+     *   Nested:    mcheli_addons/atom4a/assets/mcheli/helicopters/ah-60.txt
+     */
     public static void setAddonDir(File dir) {
         addonDir = dir;
-        if (addonDir != null && !addonDir.exists()) {
-            addonDir.mkdirs();
-            MCH_Lib.Log("MCH_ResourceHelper: Created addon directory: %s", addonDir.getAbsolutePath());
+        addonAssetRoots = new ArrayList<>();
+        if (addonDir != null) {
+            if (!addonDir.exists()) {
+                addonDir.mkdirs();
+                MCH_Lib.Log("MCH_ResourceHelper: Created addon directory: %s", addonDir.getAbsolutePath());
+            }
+            discoverAddonRoots();
         }
-        MCH_Lib.Log("MCH_ResourceHelper: Addon directory: %s", addonDir != null ? addonDir.getAbsolutePath() : "null");
+        MCH_Lib.Log("MCH_ResourceHelper: Addon directory: %s (%d asset roots)",
+                addonDir != null ? addonDir.getAbsolutePath() : "null", addonAssetRoots.size());
     }
 
     public static File getAddonDir() {
         return addonDir;
+    }
+
+    private static void discoverAddonRoots() {
+        addonAssetRoots = new ArrayList<>();
+
+        // Check if the addon root itself is an asset root (flat layout)
+        if (new File(addonDir, ASSET_PREFIX).isDirectory()) {
+            addonAssetRoots.add(addonDir);
+            MCH_Lib.Log("  Flat addon root: %s", addonDir.getAbsolutePath());
+        }
+
+        // Scan subdirectories for nested addon packs (e.g. atom4a/assets/mcheli/)
+        File[] children = addonDir.listFiles();
+        if (children != null) {
+            for (File child : children) {
+                if (child.isDirectory() && new File(child, ASSET_PREFIX).isDirectory()) {
+                    addonAssetRoots.add(child);
+                    MCH_Lib.Log("  Nested addon root: %s", child.getName());
+                }
+            }
+        }
     }
 
     public static void discoverDevClasspath() {
@@ -159,13 +194,10 @@ public class MCH_ResourceHelper {
         }
 
         // Scan addon directory for additional files (additive, never removes JAR entries)
-        if (addonDir != null && addonDir.isDirectory()) {
-            // jarPrefix is like "assets/mcheli/helicopters/"
-            // Strip "assets/mcheli/" to get the relative subdir
-            String assetPrefix = "assets/mcheli/";
-            if (jarPrefix.startsWith(assetPrefix)) {
-                String relSubdir = jarPrefix.substring(assetPrefix.length());
-                File addonSubdir = new File(addonDir, relSubdir);
+        if (addonAssetRoots != null && jarPrefix.startsWith(ASSET_PREFIX)) {
+            String relSubdir = jarPrefix.substring(ASSET_PREFIX.length());
+            for (File root : addonAssetRoots) {
+                File addonSubdir = new File(root, ASSET_PREFIX + relSubdir);
                 if (addonSubdir.isDirectory()) {
                     try {
                         Path dirPath = addonSubdir.toPath();
@@ -173,8 +205,7 @@ public class MCH_ResourceHelper {
                             .filter(p -> p.toString().endsWith(suffix) && !Files.isDirectory(p))
                             .forEach(p -> {
                                 String rel = dirPath.relativize(p).toString().replace('\\', '/');
-                                String resourcePath = assetPrefix + relSubdir + rel;
-                                // Avoid duplicates from JAR
+                                String resourcePath = ASSET_PREFIX + relSubdir + rel;
                                 if (!result.contains(resourcePath)) {
                                     result.add(resourcePath);
                                 }
@@ -192,9 +223,9 @@ public class MCH_ResourceHelper {
     public static boolean resourceExists(String resourcePath) {
         if (!resourcePath.startsWith("/")) resourcePath = "/" + resourcePath;
 
-        // Check addon directory first (additive overlay)
-        if (addonDir != null) {
-            File addonFile = addonResourceFile(resourcePath);
+        // Check addon asset roots first (additive overlay)
+        if (addonAssetRoots != null && !addonAssetRoots.isEmpty()) {
+            File addonFile = findAddonResourceFile(resourcePath);
             if (addonFile != null && addonFile.isFile()) return true;
         }
 
@@ -218,9 +249,9 @@ public class MCH_ResourceHelper {
     public static BufferedReader openResource(String resourcePath) {
         if (!resourcePath.startsWith("/")) resourcePath = "/" + resourcePath;
 
-        // Check addon directory first (user overrides take priority)
-        if (addonDir != null) {
-            File addonFile = addonResourceFile(resourcePath);
+        // Check addon asset roots first (user overrides take priority)
+        if (addonAssetRoots != null && !addonAssetRoots.isEmpty()) {
+            File addonFile = findAddonResourceFile(resourcePath);
             if (addonFile != null && addonFile.isFile()) {
                 try {
                     return new BufferedReader(new InputStreamReader(new FileInputStream(addonFile), StandardCharsets.UTF_8));
@@ -236,16 +267,26 @@ public class MCH_ResourceHelper {
     }
 
     /**
-     * Maps a classpath resource path like "/assets/mcheli/helicopters/ah-64.txt"
-     * to a file under the addon directory, e.g. "mcheli_addons/helicopters/ah-64.txt".
-     * Returns null if the path doesn't map to an addon resource.
+     * Searches all addon asset roots for a resource file.
+     * Checks nested packs first (higher priority), then flat layout.
+     * Returns the first match found.
      */
-    private static File addonResourceFile(String resourcePath) {
+    private static File findAddonResourceFile(String resourcePath) {
         String path = resourcePath.startsWith("/") ? resourcePath.substring(1) : resourcePath;
-        String prefix = "assets/mcheli/";
-        if (path.startsWith(prefix)) {
-            String relPath = path.substring(prefix.length());
-            return new File(addonDir, relPath);
+        if (!path.startsWith(ASSET_PREFIX)) return null;
+        String relPath = path.substring(ASSET_PREFIX.length());
+
+        // Check nested addon packs first (they can override flat)
+        for (File root : addonAssetRoots) {
+            if (root != addonDir) {
+                File candidate = new File(root, ASSET_PREFIX + relPath);
+                if (candidate.isFile()) return candidate;
+            }
+        }
+        // Check flat layout last
+        if (addonDir != null && addonAssetRoots.contains(addonDir)) {
+            File candidate = new File(addonDir, relPath);
+            if (candidate.isFile()) return candidate;
         }
         return null;
     }

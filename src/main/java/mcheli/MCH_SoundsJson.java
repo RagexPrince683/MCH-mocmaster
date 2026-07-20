@@ -73,12 +73,12 @@ public class MCH_SoundsJson {
     public static boolean update(String path) {
        path = path.replace('\\', '/');
 
-       // Check if bundled sounds.json is accessible via classpath
+       // Check if bundled sounds.json is accessible via classpath or addon overlay
        try {
-          java.io.InputStream is = MCH_SoundsJson.class.getResourceAsStream("/" + path + "sounds.json");
-          if (is != null) {
-             is.close();
-             MCH_Lib.Log("sounds.json found on classpath", new Object[0]);
+          java.io.BufferedReader br = MCH_ResourceHelper.openResource("/" + path + "sounds.json");
+          if (br != null) {
+             br.close();
+             MCH_Lib.Log("sounds.json found on classpath/addon", new Object[0]);
              return true;
           }
        } catch (Exception e) {
