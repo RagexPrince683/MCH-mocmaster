@@ -267,6 +267,29 @@ public class MCH_ResourceHelper {
     }
 
     /**
+     * Opens a resource as an InputStream (for binary resources like .mqo, .obj models).
+     * Checks addon dirs first, then classpath.
+     * Caller is responsible for closing the stream.
+     */
+    public static InputStream openResourceStream(String resourcePath) {
+        if (!resourcePath.startsWith("/")) resourcePath = "/" + resourcePath;
+
+        // Check addon asset roots first
+        if (addonAssetRoots != null && !addonAssetRoots.isEmpty()) {
+            File addonFile = findAddonResourceFile(resourcePath);
+            if (addonFile != null && addonFile.isFile()) {
+                try {
+                    return new FileInputStream(addonFile);
+                } catch (FileNotFoundException e) {
+                    // fall through
+                }
+            }
+        }
+
+        return MCH_ResourceHelper.class.getResourceAsStream(resourcePath);
+    }
+
+    /**
      * Searches all addon asset roots for a resource file.
      * Checks nested packs first (higher priority), then flat layout.
      * Returns the first match found.

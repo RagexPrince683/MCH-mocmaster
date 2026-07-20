@@ -34,12 +34,28 @@ public class W_MetasequoiaObject extends W_ModelCustom {
    public W_MetasequoiaObject(ResourceLocation resource) throws ModelFormatException {
       this.fileName = resource.toString();
 
+      // Try Minecraft's resource manager first (works for JAR-bundled resources)
       try {
          IResource e = Minecraft.getMinecraft().getResourceManager().getResource(resource);
          this.loadObjModel(e.getInputStream());
-      } catch (IOException var3) {
-         throw new ModelFormatException("IO Exception reading model format:" + this.fileName, var3);
+         return;
+      } catch (IOException ignored) {
+         // Fall through to MCH_ResourceHelper for addon filesystem resources
       }
+
+      // Try MCH_ResourceHelper for addon directory files
+      String resourcePath = resource.getResourceDomain() + ":" + resource.getResourcePath();
+      InputStream is = mcheli.MCH_ResourceHelper.openResourceStream(resourcePath);
+      if (is != null) {
+         try {
+            this.loadObjModel(is);
+            return;
+         } catch (Exception var3) {
+            throw new ModelFormatException("IO Exception reading model format:" + this.fileName, var3);
+         }
+      }
+
+      throw new ModelFormatException("IO Exception reading model format:" + this.fileName);
    }
 
    public W_MetasequoiaObject(String fileName, URL resource) throws ModelFormatException {
