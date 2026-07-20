@@ -1,4 +1,4 @@
 // Add any additional repositories for your dependencies here
 repositories {
-    maven { name = "chickenbones"; url = uri("http://chickenbones.net/maven/") }
+    // GTNH Maven is already provided by the gtnhsettingsconvention plugin
 }
