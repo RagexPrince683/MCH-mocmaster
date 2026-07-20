@@ -193,8 +193,9 @@ public class MCH_MOD {
           // Use this for scanning assets
           sourcePath = modsDir.getAbsolutePath() + "/mcheli" + "/";
 
-          // In dev, set sourceJar to null so MCH_ResourceHelper uses filesystem enumeration
-          MCH_ResourceHelper.setSourceJar(null);
+           // In dev, discover classpath directories containing assets
+           MCH_ResourceHelper.setSourceJar(null);
+           MCH_ResourceHelper.discoverDevClasspath();
 
           MCH_Lib.DbgLog(false, "Mods Directory: %s", sourcePath);
        } else {

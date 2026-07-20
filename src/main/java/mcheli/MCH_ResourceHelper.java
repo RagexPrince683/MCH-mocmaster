@@ -4,10 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -17,41 +15,78 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-/**
- * Utility for enumerating and reading classpath resources.
- * Used by InfoManagers to load vehicle/weapon definitions from assets/mcheli/
- * without requiring the mod to be extracted to a filesystem folder.
- */
 public class MCH_ResourceHelper {
 
     private static File sourceJar = null;
+    private static List<File> devClasspathDirs = null;
 
-    /**
-     * Sets the source JAR file for classpath resource enumeration.
-     * Called from MCH_MOD.PreInit() with the mod's own JAR location.
-     */
     public static void setSourceJar(File jar) {
         sourceJar = jar;
     }
 
     /**
+     * Discovers filesystem directories on the classpath that contain assets.
+     * Called from PreInit when sourceJar is null (dev mode).
+     */
+    public static void discoverDevClasspath() {
+        devClasspathDirs = new ArrayList<>();
+
+        // Try URLClassLoader.getURLs() first (works in most dev setups)
+        ClassLoader cl = MCH_ResourceHelper.class.getClassLoader();
+        if (cl instanceof URLClassLoader) {
+            for (URL url : ((URLClassLoader) cl).getURLs()) {
+                if ("file".equals(url.getProtocol())) {
+                    File dir = new File(url.getPath());
+                    if (dir.isDirectory()) {
+                        devClasspathDirs.add(dir);
+                    }
+                }
+            }
+        }
+
+        // Also walk java.class.path as a fallback
+        String cp = System.getProperty("java.class.path", "");
+        for (String entry : cp.split(File.pathSeparator)) {
+            File f = new File(entry);
+            if (f.isDirectory() && !devClasspathDirs.contains(f)) {
+                devClasspathDirs.add(f);
+            }
+        }
+
+        // Check which dirs actually contain our assets
+        List<File> validDirs = new ArrayList<>();
+        for (File dir : devClasspathDirs) {
+            File assetsDir = new File(dir, "assets/mcheli");
+            if (assetsDir.isDirectory()) {
+                validDirs.add(dir);
+            }
+        }
+
+        if (!validDirs.isEmpty()) {
+            devClasspathDirs = validDirs;
+            MCH_Lib.DbgLog(false, "MCH_ResourceHelper: Found %d dev classpath dirs with assets", validDirs.size());
+            for (File dir : validDirs) {
+                MCH_Lib.DbgLog(false, "  -> %s", dir.getAbsolutePath());
+            }
+        } else {
+            MCH_Lib.DbgLog(true, "MCH_ResourceHelper: WARNING - no dev classpath dirs found containing assets/mcheli");
+        }
+    }
+
+    /**
      * Lists all resource entry names under the given classpath directory prefix.
-     * Example: listResources("assets/mcheli/helicopters") returns
-     * ["assets/mcheli/helicopters/ah-64.txt", "assets/mcheli/helicopters/ah-1.txt", ...]
-     *
-     * Only entries ending with the given suffix are returned.
+     * Returns paths like "assets/mcheli/helicopters/ah-64.txt".
      */
     public static List<String> listResources(String dirPrefix, String suffix) {
         List<String> result = new ArrayList<>();
 
-        // Normalize prefix: ensure it ends with /
         if (!dirPrefix.endsWith("/")) dirPrefix = dirPrefix + "/";
 
         final String normalizedPrefix = dirPrefix;
         final String jarPrefix = dirPrefix.startsWith("/") ? dirPrefix.substring(1) : dirPrefix;
 
         if (sourceJar != null && sourceJar.exists() && sourceJar.isFile()) {
-            // Running from a JAR file — enumerate JAR entries
+            // JAR mode — enumerate JAR entries
             try (JarFile jar = new JarFile(sourceJar)) {
                 Enumeration<JarEntry> entries = jar.entries();
                 while (entries.hasMoreElements()) {
@@ -62,47 +97,38 @@ public class MCH_ResourceHelper {
                     }
                 }
             } catch (Exception e) {
-                MCH_Lib.DbgLog(true, "MCH_ResourceHelper: Failed to enumerate JAR entries: %s", e.getMessage());
+                MCH_Lib.DbgLog(true, "MCH_ResourceHelper: Failed to enumerate JAR: %s", e.getMessage());
             }
         } else {
-            // Running in dev environment — enumerate filesystem
-            try {
-                URL dirUrl = MCH_ResourceHelper.class.getResource(normalizedPrefix);
-                if (dirUrl != null) {
-                    URI uri = dirUrl.toURI();
-                    if ("file".equals(uri.getScheme())) {
-                        // Filesystem directory
-                        Path dirPath = new File(uri).toPath();
-                        Files.walk(dirPath)
-                            .filter(p -> p.toString().endsWith(suffix) && !Files.isDirectory(p))
-                            .forEach(p -> result.add(jarPrefix + dirPath.relativize(p).toString().replace('\\', '/')));
-                    } else if ("jar".equals(uri.getScheme())) {
-                        // Inside a JAR (shouldn't happen if sourceJar is null, but handle it)
-                        String jarPath = uri.toString().split("!")[0].replace("jar:file:", "");
-                        try (JarFile jar = new JarFile(jarPath)) {
-                            Enumeration<JarEntry> entries = jar.entries();
-                            while (entries.hasMoreElements()) {
-                                JarEntry entry = entries.nextElement();
-                                String name = entry.getName();
-                                if (name.startsWith(jarPrefix) && name.endsWith(suffix) && !entry.isDirectory()) {
-                                    result.add(name);
-                                }
-                            }
+            // Dev mode — walk classpath directories on the filesystem
+            if (devClasspathDirs != null) {
+                for (File cpDir : devClasspathDirs) {
+                    File targetDir = new File(cpDir, jarPrefix);
+                    if (targetDir.isDirectory()) {
+                        try {
+                            Path dirPath = targetDir.toPath();
+                            Files.walk(dirPath)
+                                .filter(p -> p.toString().endsWith(suffix) && !Files.isDirectory(p))
+                                .forEach(p -> {
+                                    String rel = dirPath.relativize(p).toString().replace('\\', '/');
+                                    result.add(jarPrefix + rel);
+                                });
+                        } catch (Exception e) {
+                            MCH_Lib.DbgLog(true, "MCH_ResourceHelper: Failed to walk %s: %s", targetDir, e.getMessage());
                         }
                     }
                 }
-            } catch (Exception e) {
-                MCH_Lib.DbgLog(true, "MCH_ResourceHelper: Failed to enumerate filesystem resources: %s", e.getMessage());
+            }
+
+            // Fallback: try getResourceAsStream (works for individual files)
+            if (result.isEmpty()) {
+                MCH_Lib.DbgLog(false, "MCH_ResourceHelper: devClasspath walk found nothing for %s, trying getResourceAsStream fallback", jarPrefix);
             }
         }
 
         return result;
     }
 
-    /**
-     * Checks if a classpath resource exists.
-     * Example: resourceExists("assets/mcheli/models/ah-64.mqo")
-     */
     public static boolean resourceExists(String resourcePath) {
         if (!resourcePath.startsWith("/")) resourcePath = "/" + resourcePath;
 
@@ -113,14 +139,18 @@ public class MCH_ResourceHelper {
                 return false;
             }
         } else {
-            return MCH_ResourceHelper.class.getResource(resourcePath) != null;
+            // Check classpath dirs first
+            String relPath = resourcePath.startsWith("/") ? resourcePath.substring(1) : resourcePath;
+            if (devClasspathDirs != null) {
+                for (File cpDir : devClasspathDirs) {
+                    if (new File(cpDir, relPath).isFile()) return true;
+                }
+            }
+            // Fallback to getResourceAsStream
+            return MCH_ResourceHelper.class.getResourceAsStream(resourcePath) != null;
         }
     }
 
-    /**
-     * Opens a classpath resource as a BufferedReader (UTF-8).
-     * Returns null if the resource is not found.
-     */
     public static BufferedReader openResource(String resourcePath) {
         if (!resourcePath.startsWith("/")) resourcePath = "/" + resourcePath;
 
@@ -129,19 +159,11 @@ public class MCH_ResourceHelper {
         return new BufferedReader(new InputStreamReader(is));
     }
 
-    /**
-     * Returns the entry name (just the filename, no path) from a full resource path.
-     * Example: "assets/mcheli/helicopters/ah-64.txt" -> "ah-64.txt"
-     */
     public static String getFileName(String resourcePath) {
         int lastSlash = resourcePath.lastIndexOf('/');
         return lastSlash >= 0 ? resourcePath.substring(lastSlash + 1) : resourcePath;
     }
 
-    /**
-     * Returns the entry name without extension, lowercased.
-     * Example: "assets/mcheli/helicopters/AH-64.txt" -> "ah-64"
-     */
     public static String getEntryName(String resourcePath) {
         String fileName = getFileName(resourcePath);
         int dot = fileName.lastIndexOf('.');

@@ -1,6 +1,6 @@
 [
   {
-    "modid": "Mcheli Overdrive",
+    "modid": "mcheli",
     "name": "MC Helicopter Overdrive+",
     "version": "${modVersion}",
     "mcversion": "${minecraftVersion}",
