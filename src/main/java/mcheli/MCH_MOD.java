@@ -232,16 +232,16 @@ public class MCH_MOD {
       creativeTabsVehicle = new MCH_CreativeTabs("MCHeliO Vehicles");
       W_ItemList.init();
       config = proxy.loadConfig("config/mcheli.cfg");
-      proxy.loadHUD("assets/" + "mcheli" + "/hud");
-      MCH_WeaponInfoManager.load("assets/" + "mcheli" + "/weapons");
+       proxy.loadHUD("assets/" + "mcheli" + "/");
+      MCH_WeaponInfoManager.load("assets/" + "mcheli" + "/");
       MCH_HeliInfoManager.getInstance().load("assets/" + "mcheli" + "/", "helicopters");
       MCP_PlaneInfoManager.getInstance().load("assets/" + "mcheli" + "/", "planes");
       MCH_ShipInfoManager.getInstance().load("assets/" + "mcheli" + "/", "ships");
       MCH_TankInfoManager.getInstance().load("assets/" + "mcheli" + "/", "tanks");
       MCH_TurretInfoManager.getInstance().load("assets/" + "mcheli" + "/", "vehicles");
       MCH_TurretInfoManager.getInstance().load("assets/" + "mcheli" + "/", "turrets");
-      MCH_ItemInfoManager.load("assets/" + "mcheli" + "/item");
-      MCH_ThrowableInfoManager.load("assets/" + "mcheli" + "/throwable");
+      MCH_ItemInfoManager.load("assets/" + "mcheli" + "/");
+      MCH_ThrowableInfoManager.load("assets/" + "mcheli" + "/");
       MCH_SoundsJson.update("assets/" + "mcheli" + "/");
       MCH_Lib.Log("Register item", new Object[0]);
       //do this first so our oredict shit can work properly
