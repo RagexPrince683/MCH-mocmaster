@@ -1,0 +1,117 @@
+DisplayName = Elbit Skylark
+AddDisplayName = ja_JP, エルビット スカイラーク
+NameOnEarlyASRadar = Small UAV
+NameOnModernASRadar = Elbit Skylark
+NameOnEarlyAARadar = Small UAV
+NameOnModernAARadar = Elbit Skylark
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
+ItemID = 28745
+Weight = 17
+CanMountShip = true
+MaxHp = 20
+Speed = 0.12
+EnableNightVision = true
+EnableEntityRadar = true
+RadarType = MODERN_AA
+HasChaff = true
+EnableGunnerMode = true
+HasBombSight = false
+AutoPilotRot = -0.04
+CameraPosition = 0.0, 0.40, 0.34
+ThrottleUpDown = 1.0
+MaxFuel         = 12
+FuelConsumption = 0.3
+NewSmallUAV = true
+HideEntity = true
+HUD = plane
+ThirdPersonDist = 4
+ThrottleUpDown = 0.9
+
+ItemIconScaleFactor = 6
+
+RotorSpeed = 200.0
+
+; M = Military(軍用機).  Q = Drone(無人航空機)
+Category = MUAV
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 0.350
+EngineThrust = 0.364
+NewFlightGravity = 0.0076
+NewFlightThrottleResponse = 0.900
+NewFlightThrottleChangeRateUp = 0.0070
+NewFlightThrottleChangeRateDown = 0.0095
+NewFlightIdleThrottle = 0.075
+NewFlightEngineBrakeDrag = 0.0054
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = false
+FlightCeiling = 8000
+FlightCeilingRange = 56
+StallSpeed = 0.066
+CriticalAoA = 17.50
+TimeUntilStallPastCriticalAoA = 1.25
+TimeAfterStallUntilPitchDown = 1.05
+StallLiftLoss = 0.780
+AoADragMultiplier = 2.800
+StallInstability = 0.420
+StallRecoverySpeed = 0.094
+StallSpeedFactor = 0.22
+StallStrength = 1.05
+StallRecoveryRate = 0.18
+StallBreakStrength = 0.68
+StallPitchRecoveryStrength = 0.55
+DiveSpeedMultiplier = 1.18
+MaxComfortableG = 4.5
+MaxStructuralG = 7.5
+GControlPenalty = 0.740
+CompressibilitySpeed = 0.168
+CompressibilityPitchPenalty = 0.55
+MaxSafeSpeed = 0.184
+OverspeedDamageRate = 0.12
+BaseDrag = 0.0026
+InducedDrag = 0.015
+ControlSurfaceDrag = 0.0060
+MaxLevelSpeed = 0.16
+IdleDrag = 0.0032
+
+PitchTorque = 0.300
+RollTorque = 0.340
+YawTorque = 0.220
+PitchDamping = 0.360
+RollDamping = 0.330
+YawDamping = 0.390
+InertiaMultiplier = 0.700
+ThrottleAcceleration = 0.018
+EngineDrag = 0.013
+
+MobilityYaw = 0.888
+MobilityPitch = 0.981
+MobilityRoll = 0.869
+
+MinRotationPitch = -60
+MaxRotationPitch =  60
+MinRotationRoll  = -60
+MaxRotationRoll  =  60
+
+AddWeapon = targeting_pod_mob,   0.0, 0.4, 0.3,  0.0, 0.0
+AddWeapon = targeting_pod_pv10s, 0.0, 0.4, 0.3,  0.0, 0.0
+AddWeapon = targeting_pod_block, 0.0, 0.4, 0.3,  0.0, 0.0
+
+AddTexture = skylark_camo
+
+;basic unarmed prop drone (modern drone), AOW3 style
+AddRecipe = "ABC", "   ", "   ", A, mcheli:item.ingot_aluminum, B, mcheli:basicmechanicparts, C, mcheli:electronics
+
+AddPartRotor =      0.00,  0.00,  0.00,   1,0,0
+AddBlade = 1, 0,  0.00,  0.00,  0.00,   0,0,-1
+
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; Skylark small UAV.
+; HandlingBalancePass = prop-maneuverability-2026-06-11; role=uav_prop

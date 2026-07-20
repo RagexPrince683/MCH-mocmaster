@@ -1,0 +1,36 @@
+DisplayName = 7.62x54mm Type 86 Gun
+Type = MachineGun1
+RecoilPitch = 0.75F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.26F
+RecoilYawRange = 0.19F
+RecoilRecoverFactor = 0.8F
+Power = 15
+Acceleration = 9.0
+Accuracy = 0.25
+Flaming = false
+Sight = MoveSight
+Delay = 1
+ReloadTime = 200
+;SoundDelay = 3
+;Accuracy = 4.0
+HeatCount = 5
+MaxHeatCount = 300
+SoundPitch = 1.0
+Sound = typesevenfourmachinegun
+SoundVolume = 0.5
+AddMuzzleFlash      =           2.3,   0.25,        1,  220,254,219,104
+AddMuzzleFlashSmoke   =              2.5,     2,   3.0,  0.5,       15,  220,160,140,120
+
+DamageFactor = tank, 1.0
+DamageFactor = plane, 0.5
+DamageFactor = vehicle, 1.0
+DamageFactor = heli, 0.5
+
+MaxAmmo = 2500
+SuppliedNum = 500
+Item =  2, iron_ingot
+Item =  2, gunpowder
+
+AddDisplayName = en_US, 7.62mm Gun
+Acceleration = 7.0

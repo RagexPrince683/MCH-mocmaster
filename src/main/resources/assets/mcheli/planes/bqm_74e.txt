@@ -1,0 +1,95 @@
+DisplayName = BQM-74E CHUKAR III (Target Drone)
+AddDisplayName = ja_JP, BQM-74E CHUKAR III (標的機)
+NameOnEarlyASRadar = Small UAV
+NameOnModernASRadar = BQM-74E CHUKAR III (Target Drone)
+NameOnEarlyAARadar = Small UAV
+NameOnModernAARadar = BQM-74E CHUKAR III (Target Drone)
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
+ItemID = 28736
+Weight = 443
+CanMountShip = true
+MaxHp = 100
+Speed = 1.55
+MobilityYaw = 0.848
+MobilityPitch = 0.982
+MobilityRoll = 1.212
+PitchTorque = 0.400
+RollTorque = 0.460
+YawTorque = 0.280
+PitchDamping = 0.410
+RollDamping = 0.370
+YawDamping = 0.440
+InertiaMultiplier = 1.180
+ThrottleAcceleration = 0.029
+EngineDrag = 0.011
+
+ItemIconScaleFactor = 3
+
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 1.250
+EngineThrust = 1.350
+NewFlightGravity = 0.0080
+NewFlightThrottleResponse = 1.200
+NewFlightThrottleChangeRateUp = 0.0045
+NewFlightThrottleChangeRateDown = 0.0065
+NewFlightIdleThrottle = 0.090
+NewFlightEngineBrakeDrag = 0.0028
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = false
+FlightCeiling = 13000
+FlightCeilingRange = 60
+StallSpeed = 0.318
+CriticalAoA = 17.50
+TimeUntilStallPastCriticalAoA = 1.25
+TimeAfterStallUntilPitchDown = 1.05
+StallLiftLoss = 0.780
+AoADragMultiplier = 2.800
+StallInstability = 0.450
+StallRecoverySpeed = 0.451
+StallSpeedFactor = 0.22
+StallStrength = 1.10
+StallRecoveryRate = 0.18
+StallBreakStrength = 0.68
+StallPitchRecoveryStrength = 0.55
+DiveSpeedMultiplier = 1.18
+MaxComfortableG = 4.5
+MaxStructuralG = 7.5
+GControlPenalty = 0.740
+CompressibilitySpeed = 1.628
+CompressibilityPitchPenalty = 0.55
+MaxSafeSpeed = 1.782
+OverspeedDamageRate = 0.12
+BaseDrag = 0.0020
+InducedDrag = 0.010
+ControlSurfaceDrag = 0.0040
+MaxLevelSpeed = 1.55
+IdleDrag = 0.0032
+
+;606mph
+
+Sound = rocket
+onGroundPitch = 20
+UAV = true
+TargetDrone = true
+AutoPilotRot = -1.0
+ThrottleUpDown = 20.0
+MaxFuel         = 180
+FuelConsumption = 1.0
+
+; M = Military(軍用機).  Q = Drone(無人航空機)
+Category = UAV/TD
+
+ParticlesScale = 2.5
+AddPartNozzle = 0.00, 0.02, -1.59, -1,0,0
+
+;basic target drone
+AddRecipe = "ABC", " E ", "   ", A, mcheli:airframe, B, mcheli:basicmechanicparts, C, mcheli:engine1, E, mcheli:electronics
+
+BoundingBox =  0.0, 1.2, 0.0,  5.0, 2.5

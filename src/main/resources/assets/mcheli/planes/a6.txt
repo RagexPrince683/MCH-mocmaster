@@ -1,0 +1,174 @@
+DisplayName = A-6 Intruder
+AddDisplayName = ja_JP, A-6 Intruder
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = A-6 Intruder
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = A-6 Intruder
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
+ItemID = 28740
+Weight = 26600
+CanMountShip = true
+MaxHp = 150
+onGroundPitch = 5
+Sound = asix
+
+EnableNightVision = true
+EnableEntityRadar = true
+RWRType = ALL_WAY_EARLY
+RadarType = EARLY_AA
+EnableEjectionSeat = true
+Speed = 1.81
+FlareType = 3
+HasChaff = true
+ParticlesScale = 0.7
+EnableSeaSurfaceParticle = true
+MaxFuel         = 27760
+FuelConsumption = 5.338
+ThirdPersonDist = 20
+ThrottleUpDown = 0.3
+
+DamageFactor = 0.8
+
+enableback = true
+
+; M = Military(軍用機).  A = Attacker(攻撃機)
+Category = AA
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 1.750
+EngineThrust = 1.988
+NewFlightGravity = 0.0082
+NewFlightThrottleResponse = 1.280
+NewFlightThrottleChangeRateUp = 0.0045
+NewFlightThrottleChangeRateDown = 0.0065
+NewFlightIdleThrottle = 0.095
+NewFlightEngineBrakeDrag = 0.0038
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.13
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = true
+NewFlightCombatFlapLift = 0.105
+NewFlightCombatFlapDrag = 0.014
+NewFlightCombatFlapControl = 0.140
+NewFlightCombatFlapOverspeed = 0.720
+FlightCeiling = 12500
+FlightCeilingRange = 60
+StallSpeed = 0.371
+CriticalAoA = 21.00
+TimeUntilStallPastCriticalAoA = 1.25
+TimeAfterStallUntilPitchDown = 1.05
+StallLiftLoss = 0.860
+AoADragMultiplier = 2.750
+StallInstability = 0.500
+StallRecoverySpeed = 0.527
+StallSpeedFactor = 0.21
+StallStrength = 1.18
+StallRecoveryRate = 0.22
+StallBreakStrength = 0.86
+StallPitchRecoveryStrength = 0.72
+DiveSpeedMultiplier = 1.24
+MaxComfortableG = 5.8
+MaxStructuralG = 8.5
+GControlPenalty = 0.720
+CompressibilitySpeed = 1.683
+CompressibilityPitchPenalty = 0.62
+MaxSafeSpeed = 2.136
+OverspeedDamageRate = 0.16
+BaseDrag = 0.0023
+InducedDrag = 0.013
+ControlSurfaceDrag = 0.0048
+MaxLevelSpeed = 1.774
+IdleDrag = 0.0043
+
+MobilityYaw = 1.002
+MobilityPitch = 1.156
+MobilityRoll = 1.307
+PitchTorque = 0.380
+RollTorque = 0.420
+YawTorque = 0.290
+PitchDamping = 0.440
+RollDamping = 0.405
+YawDamping = 0.475
+InertiaMultiplier = 1.550
+ThrottleAcceleration = 0.033
+EngineDrag = 0.011
+
+AddTexture = a62
+AddTexture = a63
+AddTexture = a64
+
+HUD = planesu24, plane_gnrsu24
+
+AddSeat       = -0.528,  2.794,  -0.9981
+AddSeat       = 0.528,  2.794,  -0.9981
+
+AddPartWing  = -4.504, 3.23, -5.878,  0, 0, 1,  -170
+
+AddPartWing  = 4.504, 3.23, -5.878,  0, 0, 1,  160
+
+;Front
+AddPartLG    =  0.00, 1.74, 0.3636,  1,0,0, 105
+
+;Left
+AddPartLG    =  1.692, 2.494, -5.77,      1,0,0, -90,   0,1,0, -100
+;Right
+AddPartLG    = -1.692, 2.494, -5.77,      1,0,0, -90,   0,1,0,  100
+
+; 使用直後は非表示
+AddPartWeaponMissile = agm84a7,    false,  false,  false,   -4.192, 2.135, -4.988
+AddPartWeaponMissile = agm84a7,    false,  false,  false,    4.192, 2.135, -4.988
+AddPartWeaponMissile = agm84a7,    false,  false,  false,   -2.814, 1.966, -4.623
+AddPartWeaponMissile = agm84a7,    false,  false,  false,    2.814, 1.966, -4.623
+
+AddPartWeaponMissile = gbu-12a6,    false,  false,  false,    0.0, 1.9, -4.0
+
+AddWeapon = agm84a7,    -4.192, 2.135, -4.988,   0.0, 0.0
+AddWeapon = agm84a7,     4.192, 2.135, -4.988,   0.0, 0.0
+AddWeapon = agm84a7,    -2.814, 1.966, -4.623,   0.0, 0.0
+AddWeapon = agm84a7,     2.814, 1.966, -4.623,   0.0, 0.0
+
+AddWeapon = gbu-12a6, 0.0, 1.9, -4.0, 0.0, 0.0
+
+AddWeapon = targeting_pod_ph50s,   0.0, 3.4, 0.0,    0.0, 0.0, true,  1
+
+;modern medium-light plane (no gun early jet), AOW3 style
+AddRecipe = "ABC", "DGF", "   ", A, mcheli:airframe2, B, mcheli:basicmechanicparts, C, mcheli:engine2, D, mcheli:wheelair, F, mcheli:rocket2, G, mcheli:electronics 
+
+BoundingBox =  0.00, 2.90, -3.00,  3.5, 2.8
+BoundingBox =  0.00, 2.80, -5.60,  3.0, 2.0
+BoundingBox =  0.00, 2.80, -8.60,  3.0, 2.0
+
+BoundingBox = -2.92, 2.80, -5.60,  4.0, 1.0
+BoundingBox =  2.92, 2.80, -5.60,  4.0, 1.0
+
+BoundingBox = -5.55, 3.00, -6.26,  2.0, 0.2
+BoundingBox =  5.55, 3.00, -6.26,  2.0, 0.2
+
+BoundingBox = -7.55, 3.00, -7.26,  2.0, 0.2
+BoundingBox =  7.55, 3.00, -7.26,  2.0, 0.2
+
+BoundingBox =  0.00, 3.10, -10,  1.5, 1.5
+BoundingBox =  0.00, 3.15, -11.5,  1.5, 1.5
+BoundingBox =  0.00, 3.25, -13,  1.5, 1.5
+BoundingBox =  0.00, 3.45, -14.5,  1.5, 1.5
+BoundingBox =  0.00, 3.55, -15.5,  1.0, 1.0
+BoundingBox =  0.00, 3.55, -16.5,  1.0, 1.0
+
+BoundingBox = 0.0, 4.0, -14, 0.5, 2.5
+BoundingBox = 0.0, 4.5, -14.5, 0.5, 2.5
+BoundingBox = 0.0, 5.0, -15, 0.5, 2.5
+BoundingBox = 0.0, 5.3, -15.5, 0.5, 2.5
+BoundingBox = 0.0, 5.3, -16, 0.5, 2.5
+BoundingBox = 0.0, 5.3, -16.5, 0.5, 2.5
+
+BoundingBox = 1.47, 3.5, -15.25, 2.0, 0.2
+BoundingBox = -1.47, 3.5, -15.25, 2.0, 0.2
+
+Unmountposition = -0.528,  1.594,  -0.9981
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; A-6 Intruder.

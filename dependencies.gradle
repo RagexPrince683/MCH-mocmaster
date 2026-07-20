@@ -1,0 +1,7 @@
+// MCHeli Overdrive+ dependencies
+dependencies {
+    // CodeChicken libs (runtime for dev testing)
+    devOnlyNonPublishable "codechicken:CodeChickenLib:1.7.10-1.1.3.140:dev"
+    devOnlyNonPublishable "codechicken:CodeChickenCore:1.7.10-1.0.7.47:dev"
+    devOnlyNonPublishable "codechicken:NotEnoughItems:1.7.10-1.0.5.120:dev"
+}

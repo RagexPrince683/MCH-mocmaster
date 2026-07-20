@@ -1,0 +1,40 @@
+DisplayName = 25mm GAU-12 Equalizer
+Type = MachineGun1
+RecoilPitch = 1.00F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.35F
+RecoilYawRange = 0.25F
+RecoilRecoverFactor = 0.8F
+SpeedDependsAircraft = true
+Power = 20
+Acceleration = 8.0
+Explosion = 1
+Flaming = false
+Sight = MoveSight
+Delay = 0
+ReloadTime = 50
+Round = 300
+SoundDelay = 3
+SoundPitch = 0.5
+Sound = ah
+Accuracy = 1.0
+HeatCount = 1
+MaxHeatCount = 150
+
+Gravity = -0.001
+
+Acceleration = 7.5
+Piercing = 0
+DamageFactor = tank, 1.0
+DamageFactor = plane, 1.5
+DamageFactor = vehicle, 1.5
+DamageFactor = heli, 1.5
+DamageFactor = player, 20.0
+;AddDisplayName = en_US,
+SoundVolume = 15
+
+
+MaxAmmo = 1200
+SuppliedNum = 200
+Item =  2, iron_ingot
+Item =  2, gunpowder

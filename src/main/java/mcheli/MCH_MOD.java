@@ -182,30 +182,35 @@ public class MCH_MOD {
 
 
 
-      if (isDev) {
+       if (isDev) {
 
 
-         //works in the IDE (codebase)
-         // The config directory is usually ".minecraft/config"
-         File configDir = evt.getModConfigurationDirectory();
-         // The mod directory is usually one level up + /mods
-         File modsDir = new File(configDir.getParentFile(), "mods");
-         // Use this for scanning assets
-         sourcePath = modsDir.getAbsolutePath() + "/mcheli" + "/";
+          //works in the IDE (codebase)
+          // The config directory is usually ".minecraft/config"
+          File configDir = evt.getModConfigurationDirectory();
+          // The mod directory is usually one level up + /mods
+          File modsDir = new File(configDir.getParentFile(), "mods");
+          // Use this for scanning assets
+          sourcePath = modsDir.getAbsolutePath() + "/mcheli" + "/";
 
+          // In dev, set sourceJar to null so MCH_ResourceHelper uses filesystem enumeration
+          MCH_ResourceHelper.setSourceJar(null);
 
-         MCH_Lib.DbgLog(false, "Mods Directory: %s", sourcePath);
-      } else {
-         //works in a live minecraft instance
-         sourcePath = Loader.instance().activeModContainer().getSource().getPath();
-         MCH_Lib.DbgLog(false, "Mods Directory: %s", sourcePath);
-      }
+          MCH_Lib.DbgLog(false, "Mods Directory: %s", sourcePath);
+       } else {
+          //works in a live minecraft instance
+          sourcePath = Loader.instance().activeModContainer().getSource().getPath();
+          // Set the JAR file for classpath resource enumeration
+          File sourceFile = Loader.instance().activeModContainer().getSource();
+          MCH_ResourceHelper.setSourceJar(sourceFile);
+          MCH_Lib.DbgLog(false, "Mods Directory: %s", sourcePath);
+       }
 
-      ///sourcePath = "D:\\Software\\GitHub\\MCHeli-Reforged\\src\\main\\resources";
-              //new File(evt.getModConfigurationDirectory().getParentFile(), "/mods").getPath();
-      MCH_Lib.DbgLog(false, "SourcePath: %s", sourcePath);
-      //MCH_Lib I have NO FUCKING CLUE HOW TO USE. I LITERALLY DO NOT THINK IT WORKS ANYMORE.
-      MCH_Lib.DbgLog(false, "CurrentDirectory: %s", (new File(".")).getAbsolutePath());
+       ///sourcePath = "D:\\Software\\GitHub\\MCHeli-Reforged\\src\\main\\resources";
+               //new File(evt.getModConfigurationDirectory().getParentFile(), "/mods").getPath();
+       MCH_Lib.DbgLog(false, "SourcePath: %s", sourcePath);
+       //MCH_Lib I have NO FUCKING CLUE HOW TO USE. I LITERALLY DO NOT THINK IT WORKS ANYMORE.
+       MCH_Lib.DbgLog(false, "CurrentDirectory: %s", (new File(".")).getAbsolutePath());
 
 
 
@@ -226,17 +231,17 @@ public class MCH_MOD {
       creativeTabsVehicle = new MCH_CreativeTabs("MCHeliO Vehicles");
       W_ItemList.init();
       config = proxy.loadConfig("config/mcheli.cfg");
-      proxy.loadHUD(sourcePath + "/assets/" + "mcheli" + "/hud");
-      MCH_WeaponInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/weapons");
-      MCH_HeliInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "helicopters");
-      MCP_PlaneInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "planes");
-      MCH_ShipInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "ships");
-      MCH_TankInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "tanks");
-      MCH_TurretInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "vehicles");
-      MCH_TurretInfoManager.getInstance().load(sourcePath + "/assets/" + "mcheli" + "/", "turrets");
-      MCH_ItemInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/item");
-      MCH_ThrowableInfoManager.load(sourcePath + "/assets/" + "mcheli" + "/throwable");
-      MCH_SoundsJson.update(sourcePath + "/assets/" + "mcheli" + "/");
+      proxy.loadHUD("assets/" + "mcheli" + "/hud");
+      MCH_WeaponInfoManager.load("assets/" + "mcheli" + "/weapons");
+      MCH_HeliInfoManager.getInstance().load("assets/" + "mcheli" + "/", "helicopters");
+      MCP_PlaneInfoManager.getInstance().load("assets/" + "mcheli" + "/", "planes");
+      MCH_ShipInfoManager.getInstance().load("assets/" + "mcheli" + "/", "ships");
+      MCH_TankInfoManager.getInstance().load("assets/" + "mcheli" + "/", "tanks");
+      MCH_TurretInfoManager.getInstance().load("assets/" + "mcheli" + "/", "vehicles");
+      MCH_TurretInfoManager.getInstance().load("assets/" + "mcheli" + "/", "turrets");
+      MCH_ItemInfoManager.load("assets/" + "mcheli" + "/item");
+      MCH_ThrowableInfoManager.load("assets/" + "mcheli" + "/throwable");
+      MCH_SoundsJson.update("assets/" + "mcheli" + "/");
       MCH_Lib.Log("Register item", new Object[0]);
       //do this first so our oredict shit can work properly
       registerItemCustom();

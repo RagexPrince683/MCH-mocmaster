@@ -1,0 +1,31 @@
+DisplayName = 7.62x54mmR KV-2 lear
+Type = MachineGun1
+RecoilPitch = 0.75F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.26F
+RecoilYawRange = 0.19F
+RecoilRecoverFactor = 0.8F
+Power = 15
+Acceleration = 7.5
+Explosion = 0
+Flaming = false
+Sight = MoveSight
+Delay = 1
+;SoundDelay = 3
+;Accuracy = 2.0
+HeatCount = 4
+MaxHeatCount = 150
+SoundPitch = 1.0
+Sound = gun_l1_snd
+
+DamageFactor = tank, 1.0
+DamageFactor = plane, 0.5
+DamageFactor = vehicle, 1.0
+DamageFactor = heli, 0.5
+
+Gravity = -0.001
+
+MaxAmmo = 1200
+SuppliedNum = 200
+Item =  2, iron_ingot
+Item =  2, gunpowder

@@ -1,0 +1,50 @@
+DisplayName = 77N6-N [SAM]
+Type = AAMissile
+Power = 1000
+Acceleration = 9.45
+Explosion = 14
+Flaming = false
+Sight = MissileSight
+Delay = 5
+ReloadTime = 1000
+Round = 2
+LockTime = 10
+ProximityFuseDist = 0
+RigidityTime = 3
+TurningFactor = 0.16
+MaxLockOnRange = 1400
+AntiFlareCount = 36
+ActiveRadar = true
+ScanInterval = 1
+CanLockMissile = true
+EnableBVR = true
+IsHeatSeekerMissile = false
+IsRadarMissile = true
+TickEndHoming = 2600
+MaxDegreeOfMissile = 28
+SpeedDependsAircraft = true
+MaxLockOnAngle = 10
+PdHDNMaxDegree = 60.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 25
+PassiveRadar = false
+PassiveRadarLockOutCount = 20
+LaserGuidance = false
+HasLaserGuidancePod = false
+ModelBullet = 77h6h
+Sound = missile_3_snd
+
+
+DamageFactor = tank, 1.5
+DamageFactor = plane, 3.0
+DamageFactor = vehicle 2.0
+DamageFactor = heli, 3.0
+
+
+SoundVolume = 15
+RidableOnly = false
+MaxAmmo = 2
+SuppliedNum = 1
+Item =  10, iron_ingot
+Item =  10, gunpowder
+Item =  10, redstone

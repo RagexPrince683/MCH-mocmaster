@@ -1,0 +1,23 @@
+DisplayName = Horn
+Type = MachineGun1
+RecoilPitch = 0.05F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.02F
+RecoilYawRange = 0.01F
+RecoilRecoverFactor = 0.8F
+
+
+
+Sound = gtr_horn_snd
+
+Sight = None
+Delay = 10
+Power = 0
+Accuracy = 0
+Flaming = false
+ModelBullet = 0_none
+Particle = none
+SoundVolume = 15.0
+SoundPitchRandom = 0
+Gravity = -9
+AddDisplayName = en_US, Horn

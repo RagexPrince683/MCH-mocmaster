@@ -1,0 +1,41 @@
+DisplayName = RPK-6 Vodopad Nuclear Depth Charge
+Type = torpedo
+
+
+Power = 12000
+Explosion = 8
+ExplosionInWater = 12
+nukeyield = 15
+
+ModelBullet = LWT
+Acceleration = 1.2
+AccelerationInWater = 8.0
+
+ProximityFuseDist = 8
+Flaming = false
+Sight = MoveSight
+Delay = 1000
+Sound = missile_1_snd
+
+; Keep false until guided torpedoes are fixed.
+GuidedTorpedo = false
+
+Gravity = -0.04
+GravityInWater = 0.01
+TrajectoryParticle = cloud
+
+ReloadTime = 8000
+Round = 1
+
+DamageFactor = tank, 2.0
+DamageFactor = plane, 4.5
+DamageFactor = vehicle, 4.5
+DamageFactor = heli, 4.5
+DamageFactor = player, 10.0
+
+
+MaxAmmo = 1
+SuppliedNum = 1
+
+Item =  1, mcheli:genericnuclearwarhead
+Item =  4, redstone

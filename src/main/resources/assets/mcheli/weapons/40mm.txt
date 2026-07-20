@@ -1,0 +1,17 @@
+DisplayName = 40mm
+Type = MachineGun2
+RecoilPitch = 1.75F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.61F
+RecoilYawRange = 0.44F
+RecoilRecoverFactor = 0.8F
+Power = 35
+ModelBullet = bullet76mm
+Acceleration = 3.5
+Explosion = 2
+Flaming = false
+Sight = MoveSight
+Delay = 15
+ModeNum = 2
+SoundVolume = 0.6
+SetCartridge = cartridge, 0.4,  0, 0, 5.00, -0.04, 0.40

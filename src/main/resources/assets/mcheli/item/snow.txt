@@ -1,0 +1,6 @@
+DisplayName = White Camo Skin
+AddDisplayName = ja_JP, White Camo Skin
+
+textureoverlay = true
+
+StackSize = 64

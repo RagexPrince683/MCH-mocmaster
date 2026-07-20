@@ -2,7 +2,6 @@ package mcheli;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import java.io.File;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -51,18 +50,17 @@ public class MCH_ModelManager extends W_ModelBase {
          }
 
          try {
-            String base = "/assets/mcheli/models/" + name;
-            String mqo = base + ".mqo";
-            String obj = base + ".obj";
-            String tcn = base + ".tcn";
+            String mqoPath = "assets/mcheli/models/" + name + ".mqo";
+            String objPath = "assets/mcheli/models/" + name + ".obj";
+            String tcnPath = "assets/mcheli/models/" + name + ".tcn";
 
             String modelPath = null;
 
-            if (new File(MCH_MOD.sourcePath + mqo).exists()) {
+            if (MCH_ResourceHelper.resourceExists(mqoPath)) {
                modelPath = W_ResourcePath.getModelPath() + "models/" + name + ".mqo";
-            } else if (new File(MCH_MOD.sourcePath + obj).exists()) {
+            } else if (MCH_ResourceHelper.resourceExists(objPath)) {
                modelPath = W_ResourcePath.getModelPath() + "models/" + name + ".obj";
-            } else if (new File(MCH_MOD.sourcePath + tcn).exists()) {
+            } else if (MCH_ResourceHelper.resourceExists(tcnPath)) {
                modelPath = W_ResourcePath.getModelPath() + "models/" + name + ".tcn";
             }
 

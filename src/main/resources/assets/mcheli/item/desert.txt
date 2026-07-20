@@ -1,0 +1,6 @@
+DisplayName = Desert Camo Skin
+AddDisplayName = ja_JP, Desert Camo Skin
+
+textureoverlay = true
+
+StackSize = 64

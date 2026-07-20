@@ -1,0 +1,151 @@
+EnableGunnerMode = true
+HasBombSight = false
+DisplayName = An-2
+AddDisplayName = en_US, An-2
+AddDisplayName = ja_JP, An-2
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = An-2
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = An-2
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.20
+ItemID = 28732
+Weight = 7280
+CanMountShip = false
+MaxHp = 100
+;130mph cruise speed
+;160mph max speed
+
+Speed = 0.449
+HasBallisticComputer = true
+Sound = antwo
+ThrottleUpDown = 0.4
+MaxFuel         = 4960
+FuelConsumption = 5.87
+onGroundPitch = 12.31
+InventorySize = 18
+
+RotorSpeed = 2000.0
+
+Regeneration = false
+
+AddTexture = an2_2
+AddTexture = an2_3
+AddTexture = an2_4
+AddTexture = an2_5
+
+; C = Civilian(民間機)
+Category = C/AUA
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 1.050
+EngineThrust = 1.134
+NewFlightGravity = 0.0081
+NewFlightThrottleResponse = 0.900
+NewFlightThrottleChangeRateUp = 0.0070
+NewFlightThrottleChangeRateDown = 0.0095
+NewFlightIdleThrottle = 0.075
+NewFlightEngineBrakeDrag = 0.0054
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.16
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = false
+FlightCeiling = 4500
+FlightCeilingRange = 54
+StallSpeed = 0.110
+CriticalAoA = 17.50
+TimeUntilStallPastCriticalAoA = 1.25
+TimeAfterStallUntilPitchDown = 1.05
+StallLiftLoss = 0.780
+AoADragMultiplier = 2.800
+StallInstability = 0.420
+StallRecoverySpeed = 0.156
+StallSpeedFactor = 0.24
+StallStrength = 1.05
+StallRecoveryRate = 0.18
+StallBreakStrength = 0.68
+StallPitchRecoveryStrength = 0.55
+DiveSpeedMultiplier = 1.2
+MaxComfortableG = 5
+MaxStructuralG = 8.5
+GControlPenalty = 0.680
+CompressibilitySpeed = 0.458
+CompressibilityPitchPenalty = 0.45
+MaxSafeSpeed = 0.548
+OverspeedDamageRate = 0.12
+BaseDrag = 0.0028
+InducedDrag = 0.015
+ControlSurfaceDrag = 0.0060
+MaxLevelSpeed = 0.431
+IdleDrag = 0.0055
+
+PitchTorque = 0.380
+RollTorque = 0.420
+YawTorque = 0.270
+PitchDamping = 0.420
+RollDamping = 0.380
+YawDamping = 0.455
+InertiaMultiplier = 1.250
+ThrottleAcceleration = 0.018
+EngineDrag = 0.016
+
+MobilityYaw = 0.829
+MobilityPitch = 0.981
+MobilityRoll = 0.869
+
+EntityWidth  = 0.81
+EntityHeight = 0.81
+
+EnableParachuting = true
+;MobDropOption =降下位置X, 降下位置Y, 降下位置Z, 降下間隔(1/20秒)
+MobDropOption = 0.8, 1.9321,  -3.5,  5
+ParticlesScale = 0.7
+EnableSeaSurfaceParticle = true
+HUD = plane_wwii, plane_wwii, none, none, none
+
+AddFixedSearchLight =  6.4, 1.6, -0.47,   0x50FFFFFF,   0x00FFFFC0,  60.0, 26.0,-3, 15
+AddFixedSearchLight = -6.4, 1.6, -0.47,   0x50FFFFFF,   0x00FFFFC0,  60.0, 26.0, 3, 15
+
+AddSeat =  0.5267, 2.01,  0.0
+AddSeat =  -0.5267, 2.01,  0.0
+
+AddSeat =  -0.5767, 1.8321,  -3.5
+AddSeat =  0.48, 1.63,  -2.25
+AddSeat =  0.48, 1.63,  -1.54
+
+AddPartRotor =    0.00, 2.081, 0.0,   1,0,0
+AddBlade = 4, 90,  0.00, 2.081, 0.0,   0,0,-1
+AddPartRotor =    0.00, 2.081, 0.0,   1,0,0
+AddBlade = 1, 0,  0.00, 2.081, 0.0,   0,0,-1
+
+AddWeapon = dispenser_water,  0.0, 0.0, 0.54,   1.0, 0.0
+; DEBUG Only
+;AddWeapon = dispenser_fire,  0.0, 0.0, 0.54,   1.0, 0.0
+
+;;AddRecipe = "CAC", "E  ", "W W", W, hfr:item.part_wheel, A, hfr:item.part_plating_1, C, hfr:item.part_chassis_1, E, hfr:item.part_engine_2
+
+;basic unarmed prop plane, AOW3 style
+AddRecipe = "ABC", "D  ", "   ", A, mcheli:airframe, B, mcheli:basicmechanicparts, C, mcheli:engine1, D, mcheli:wheelair
+
+BoundingBox =  0.00,  2.15, -3.41,  1.5, 1.5
+BoundingBox =  0.00,  2.15,  2.03,  1.3, 1.3
+
+BoundingBox =  1.88,  3.38, -0.32,  2.0, 0.3
+BoundingBox = -1.88,  3.38, -0.32,  2.0, 0.3
+BoundingBox =  3.88,  3.38, -0.32,  2.0, 0.3
+BoundingBox = -3.88,  3.38, -0.32,  2.0, 0.3
+BoundingBox =  5.88,  3.38, -0.32,  2.0, 0.3
+BoundingBox = -5.88,  3.38, -0.32,  2.0, 0.3
+
+DamageFactor = 0.8
+
+unmountposition = 0.5267, 1.51,  0.0
+
+enableback = true
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; Antonov An-2.
+; HandlingBalancePass = prop-maneuverability-2026-06-11; role=utility_prop

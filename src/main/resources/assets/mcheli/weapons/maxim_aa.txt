@@ -1,0 +1,30 @@
+DisplayName = 7.7x56mmR Vickers Machine Gun
+Type = MachineGun1
+RecoilPitch = 0.08F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.03F
+RecoilYawRange = 0.02F
+RecoilRecoverFactor = 0.8F
+Power = 15
+Acceleration = 7.5
+Flaming = false
+Sight = MoveSight
+Delay = 1
+Accuracy = 1.5
+HeatCount = 4
+MaxHeatCount = 200
+SoundPitch = 1.0
+ModelBullet = bullet
+DamageFactor = tank, 1.0
+DamageFactor = plane, 0.5
+DamageFactor = vehicle, 1.0
+DamageFactor = heli, 0.5
+
+Gravity = -0.001
+
+
+
+MaxAmmo = 600
+SuppliedNum = 300
+Item =  2, iron_ingot
+Item =  2, gunpowder

@@ -1,16 +1,15 @@
 package mcheli.weapon;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
+import mcheli.MCH_ResourceHelper;
 import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.weapon.MCH_WeaponInfo;
 import mcheli.wrapper.W_Item;
@@ -46,27 +45,19 @@ public class MCH_WeaponInfoManager {
    public static boolean load(String path) {
       lastPath = path;
       path = path.replace('\\', '/');
-      File dir = new File(path);
-      File[] files = dir.listFiles(new FileFilter() {
-         public boolean accept(File pathname) {
-            String s = pathname.getName().toLowerCase();
-            return pathname.isFile() && s.length() >= 5 && s.substring(s.length() - 4).compareTo(".txt") == 0;
-         }
-      });
-      if(files != null && files.length > 0) {
-         File[] arr$ = files;
-         int len$ = files.length;
-
-         for(int i$ = 0; i$ < len$; ++i$) {
-            File f = arr$[i$];
+      String dirPrefix = path + "weapons";
+      List<String> entries = MCH_ResourceHelper.listResources(dirPrefix, ".txt");
+      if(entries != null && entries.size() > 0) {
+         for(int i = 0; i < entries.size(); ++i) {
+            String resourcePath = entries.get(i);
             BufferedReader br = null;
             int line = 0;
 
             try {
-               String e = f.getName().toLowerCase();
-               e = e.substring(0, e.length() - 4);
+               String e = MCH_ResourceHelper.getEntryName(resourcePath);
                if(!map.containsKey(e)) {
-                  br = new BufferedReader(new FileReader(f));
+                  br = MCH_ResourceHelper.openResource("/" + resourcePath);
+                  if (br == null) continue;
                   MCH_WeaponInfo info = new MCH_WeaponInfo(e);
 
                   String str;
@@ -84,9 +75,9 @@ public class MCH_WeaponInfoManager {
                }
             } catch (IOException var22) {
                if(line > 0) {
-                  MCH_Lib.Log("### Load failed %s : line=%d", new Object[]{f.getName(), Integer.valueOf(line)});
+                  MCH_Lib.Log("### Load failed %s : line=%d", new Object[]{resourcePath, Integer.valueOf(line)});
                } else {
-                  MCH_Lib.Log("### Load failed %s", new Object[]{f.getName()});
+                  MCH_Lib.Log("### Load failed %s", new Object[]{resourcePath});
                }
 
                var22.printStackTrace();

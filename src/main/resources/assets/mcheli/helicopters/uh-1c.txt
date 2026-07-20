@@ -1,0 +1,117 @@
+DisplayName = UH-1C Iroquois
+AddDisplayName = ja_JP, UH-1C イロコイ
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = UH-1C Iroquois
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = UH-1C Iroquois
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
+ItemID = 28821
+Weight = 5215
+MaxHp = 100
+EnableGunnerMode = true
+EnableNightVision = true
+ThirdPersonDist = 20
+
+; New helicopter flight model: medium utility/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.96
+MainRotorMaxThrust = 0.252
+RotorInertia = 1.02
+RotorSpoolUpRate = 0.026
+RotorSpoolDownRate = 0.034
+CollectiveResponse = 0.09
+CyclicAuthority = 0.8
+TailRotorAuthority = 1.364
+YawDamping = 0.2
+AngularInertia = 1.02
+TranslationalLiftCoefficient = 0.004
+VerticalDrag = 0.025
+MaxClimbRate = 0.14
+ParasiteDrag = 0.031
+HorizontalRotorThrustScale = 1.48
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.055
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.35
+HelicopterMaxBackwardSpeedScale = 0.35
+HoverAssistStrength = 0.75
+
+
+Speed = 1.35
+ThrottleUpDown = 0.8
+FlareType = 3
+CameraPosition = 0.0, 0.7, 3.0
+MaxFuel         = 1080
+FuelConsumption = 0.360
+ConcurrentGunnerMode = true
+
+Sound = r44_heli
+soundpitch = 1.45
+soundvolume = 15
+
+; M = Military(軍用機).  M = Multi-Mission(多目的機)
+Category = UH
+
+HUD = helinvg, heli_gnrnvg, gunner, gunner
+
+AddTexture = uh-1c-usam1
+AddTexture = uh-1c-usam2
+AddTexture = uh-1c-usmc
+AddTexture = uh-1c-usnv
+
+AddPartCamera = 0.0, 0.55,  2.07, true, false
+
+AddPartWeapon       = uh1m134,      false, false, true,  2.4592, 0.4913, -2.54
+AddPartRotWeapon    = uh1m134,      false, false, true,  2.4592, 0.4913, -2.54
+
+AddPartWeapon       = uh1m134,      false, false, true, -2.4592, 0.4913, -2.54
+AddPartRotWeapon    = uh1m134,      false, false, true, -2.4592, 0.4913, -2.54
+
+AddPartWeapon       = uh1m60_l,     false, true,  true,  1.6646, 1.1747, -1.4552
+AddPartWeapon       = uh1m60_r,     false, true,  true, -1.6646, 1.1747, -1.4552
+AddPartWeapon       = uh1m75_40mm,  false, true, false,  0.0000, 0.55,  2.07
+AddPartWeaponChild  =                   false, true,  0.0000, 0.55,  2.07
+AddPartWeapon       = uh1ffar, false, false, true,  0.0000, 0.27, -2.54
+
+AddRotor= 1, 0,  0.00,  3.715,  -2.536,  0.0, 1.0, 0.0, false
+AddRotor= 1, 0,  0.00,  3.715, -12.005,  1.0, 0.0, 0.0, false
+
+AddSeat       =-0.50,  0.80,  0.10
+AddGunnerSeat = 0.50,  0.80,  0.10,  0.0, 0.7, 3.0,  true
+AddSeat       = 1.05,  0.70, -1.45
+AddSeat       =-1.05,  0.70, -1.45
+
+AddWeapon = uh1m134,        2.46, 0.49, -2.54,   1.0, 0.0,  true,  1,  0,0,0, -30, 30
+AddWeapon = uh1m134,       -2.46, 0.49, -2.54,  -1.0, 0.0,  true,  1,  0,0,0,  30, 30
+AddWeapon = uh1m60_l,       1.66, 1.17, -1.45,   0.0, 0.0,  false, 3, -90,-80, 80, -50,80
+AddWeapon = uh1m60_r,      -1.66, 1.17, -1.45,   0.0, 0.0,  false, 4,  90,-80, 80, -50,80
+AddWeapon = uh1m75_40mm,    0.00, 0.55,  2.07,   0.0, 0.0,  true,  2,   0,-30, 30, -10,70
+;AddWeapon = targeting_pod_mob,  0.0, 0.7, 3.0,0.0, 0.0,  true,  2
+AddWeapon = targeting_pod_pv10s,0.0, 0.7, 3.0,0.0, 0.0,  false, 2
+AddWeapon = uh1ffar,   1.91, 0.27, -2.54,   1.0, 0.0,  true,  1,  0,0,0, 0, 30
+AddWeapon = uh1ffar,  -1.91, 0.27, -2.54,  -1.0, 0.0,  true,  1,  0,0,0, 0, 30
+
+;basic armed small modern helicopter NO WHEEL, AOW3 style
+AddRecipe = "ABC", "DEF", "   ", A, mcheli:airframe2, B, mcheli:heliblade, C, mcheli:engine1, E, mcheli:electronics, D, mcheli:rocket, F, mcheli:cannon1
+
+BoundingBox = 0.0, 3.3, -2.5, 0.5, 1.5, 1.5
+BoundingBox =  0.0, 2.0, -3.5,  2.8, 1.4
+BoundingBox =  0.0, 3.2,-12.0,  1.0, 1.5, 1.25
+
+BoundingBox = 0.0, 1.46, -5.50, 1.0, 1.0
+BoundingBox = 0.0, 1.46, -6.50, 1.0, 1.0
+BoundingBox = 0.0, 1.56, -7.50, 1.0, 1.0
+BoundingBox = 0.0, 1.56, -8.50, 1.0, 1.0
+BoundingBox = 0.0, 1.56, -9.50, 1.0, 1.0
+BoundingBox = 0.0, 1.86, -10.50, 1.0, 1.0
+BoundingBox = 0.0, 1.86, -11.50, 1.0, 1.0
+
+unmountposition = -0.50,  1.50,  0.10
+
+DamageFactor = 0.8
+
+
+ThrottleUpDown = 0.5
+DamageFactor = 0.8

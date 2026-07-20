@@ -1,0 +1,6 @@
+DisplayName = Green Camo Skin
+AddDisplayName = ja_JP, Green Camo Skin
+
+textureoverlay = true
+
+StackSize = 64

@@ -1,0 +1,4 @@
+DisplayName = Labubu
+AddDisplayName = ja_JP, Labubu
+
+StackSize = 64

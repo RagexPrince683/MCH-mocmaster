@@ -1,0 +1,47 @@
+DisplayName = 9A33BM3 [9M33 - Anti-Air Missile]
+Type = AAMissile
+Power = 60
+Acceleration = 4.93
+Explosion = 6
+Flaming = false
+Sight = MissileSight
+Delay = 5
+ReloadTime = 1000
+LockTime = 35
+ProximityFuseDist = 1
+RigidityTime = 1
+TurningFactor = 0.1
+MaxLockOnRange = 600
+AntiFlareCount = 14
+ActiveRadar = false
+ScanInterval = 4
+CanLockMissile = false
+EnableBVR = true
+IsHeatSeekerMissile = false
+IsRadarMissile = true
+TickEndHoming = 1400
+MaxDegreeOfMissile = 48
+SpeedDependsAircraft = true
+MaxLockOnAngle = 25
+PdHDNMaxDegree = 180.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 0
+PassiveRadar = false
+PassiveRadarLockOutCount = 0
+LaserGuidance = false
+HasLaserGuidancePod = false
+Sound = aimnine
+SoundPitch = 0.5
+
+
+
+DamageFactor = tank, 1.5
+DamageFactor = plane, 3.0
+DamageFactor = vehicle 2.0
+DamageFactor = heli, 3.0
+
+MaxAmmo = 6
+SuppliedNum = 1
+Item =  1, iron_ingot
+Item =  1, gunpowder
+Item =  2, redstone

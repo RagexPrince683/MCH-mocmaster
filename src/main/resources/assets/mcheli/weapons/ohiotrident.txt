@@ -1,0 +1,81 @@
+DisplayName = UGM-96 Trident I W76 - MIRV C4 Missile [8x100KT - SURFACE]
+Type = ASMissile
+IsHeatSeekerMissile = false
+IsRadarMissile = true
+MaxLockOnAngle = 180
+PdHDNMaxDegree = 60.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 0
+PassiveRadar = true
+PassiveRadarLockOutCount = 20
+LaserGuidance = false
+HasLaserGuidancePod = false
+ActiveRadar = false
+ScanInterval = 20
+;;SpeedDependsAircraft = true
+Power = 2000
+Acceleration = 140
+ReloadTime = 10000
+Explosion = 3
+ExplosionBlock = 6
+ExplosionInWater = 9
+Flaming = false
+Sight = MoveSight
+Delay = 45
+;;ModelBullet = rgm109
+ModelBullet = ballistic
+Piercing = 1
+NukeYield = 100
+FixCameraPitch = true
+
+SoundVolume = 15.0
+Sound = missile_cruise_snd
+
+BombletSTime = 32
+BombletDiff = 3.5
+Bomblet = 8
+ModelBomblet = scud
+
+RigidityTime = 3
+Gravity = -0.05
+
+DisableSmoke = true
+DamageFactor = tank, 2.0
+DamageFactor = plane, 4.5
+DamageFactor = vehicle, 4.5
+DamageFactor = heli, 4.5
+DamageFactor = player, 20.0
+
+AddMuzzleFlash      =  2.2,      1.80,        8,  200,254,129,44
+AddMuzzleFlash      =  2.1,      1.75,        7,  200,254,219,104
+AddMuzzleFlash      =  2.0,      1.70,        6,  200,254,219,184
+
+AddMuzzleFlash      =  2.2,      5.80,        8,  200,254,129,44
+AddMuzzleFlash      =  2.1,      5.75,        7,  200,254,219,104
+AddMuzzleFlash      =  2.0,      5.70,        6,  200,254,219,184
+
+
+AddMuzzleFlashSmoke =  3.2, 20,  11.0,  3.0, 45,  220,160,140,120
+AddMuzzleFlashSmoke =  4.2, 10,  12.0,  6.0, 35,  200,190,170,150
+
+AddMuzzleFlash      =  -4.2,      1.80,        8,  200,254,129,44
+AddMuzzleFlash      =  -4.1,      1.75,        7,  200,254,219,104
+AddMuzzleFlash      =  -4.0,      1.70,        6,  200,254,219,184
+
+
+AddMuzzleFlash      =  -4.2,      5.80,        8,  200,254,129,44
+AddMuzzleFlash      =  -4.1,      5.75,        7,  200,254,219,104
+AddMuzzleFlash      =  -4.0,      5.70,        6,  200,254,219,184
+
+
+AddMuzzleFlashSmoke =  -5.2, 25,  12.0,  3.0, 45,  220,160,140,120
+AddMuzzleFlashSmoke =  -6.2, 13,  13.0,  6.0, 35,  200,190,170,150
+
+DisplayMortarDistance = true
+TrajectoryParticle = largeexplode
+
+MaxAmmo = 24
+SuppliedNum = 1
+Item = 8, mcheli:genericnuclearwarheadhigh
+Item = 8, tnt
+Item = 8, iron

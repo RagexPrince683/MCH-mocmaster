@@ -1,0 +1,25 @@
+DisplayName = Police Speaker
+Type = MachineGun1
+RecoilPitch = 0.05F
+RecoilYaw = 0.0F
+RecoilPitchRange = 0.02F
+RecoilYawRange = 0.01F
+RecoilRecoverFactor = 0.8F
+Power = 0
+ModelBullet = 0_none
+Acceleration = 1.0
+Flaming = false
+Sight = None
+Delay = 40
+ReloadTime = 150
+SoundVolume = 15.0
+Sound = speaker
+DelayFuse = 1
+Particle = none
+Gravity = -5
+TimeFuse = 1
+
+
+MaxAmmo = 1000
+SuppliedNum = 1000
+;Item =  1, redstone

@@ -1,0 +1,67 @@
+DisplayName = World Tech Elite Goblin 2.4GHz 4.5CH RC Goblin
+AddDisplayName = ja_JP, World Tech Elite Goblin 2.4GHz 4.5CH RC Goblin
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = World Tech Elite Goblin 2.4GHz 4.5CH RC Goblin
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = World Tech Elite Goblin 2.4GHz 4.5CH RC Goblin
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
+ItemID = 28814
+Weight = 5
+MaxHp = 15
+Speed = 1.55
+CameraPosition = 0.00, -0.05, 0.18
+SmallUAV = true
+Sound = radicon_heli
+ThrottleUpDown = 5.0
+ParticlesScale = 0.2
+MaxFuel         = 18
+FuelConsumption = 0.010
+Stealth = 0.4
+ItemIconScaleFactor = 5
+
+HUD = heli
+
+; C = Civilian(–¯ŠÔ‹@)
+
+; New helicopter flight model: special case / unusual rotorcraft baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.42
+MainRotorMaxThrust = 0.155
+RotorInertia = 0.5
+RotorSpoolUpRate = 0.036
+RotorSpoolDownRate = 0.044
+CollectiveResponse = 0.13
+CyclicAuthority = 0.9
+TailRotorAuthority = 1.485
+YawDamping = 0.22
+AngularInertia = 0.46
+TranslationalLiftCoefficient = 0.005
+VerticalDrag = 0.02
+MaxClimbRate = 0.13
+ParasiteDrag = 0.02
+HorizontalRotorThrustScale = 1.65
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.055
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.35
+HelicopterMaxBackwardSpeedScale = 0.35
+HoverAssistStrength = 0.75
+
+Category = sUAS
+
+AddSeat =  0.0, 0.0, 0.0
+
+AddTexture = rc-goblin-1
+AddTexture = rc-goblin-2
+
+AddRotor = 1, 0, 0.00,  0.24, -0.14,  0,-1, 0
+AddRotor = 1, 0, 0.00, -0.00, -0.65,  1, 0, 0
+
+
+
+;basic unarmed drone
+AddRecipe = "ABC", "   ", "   ", A, mcheli:item.ingot_aluminum, B, mcheli:electronics, C, mcheli:basicmechanicparts
+
+ThrottleUpDown = 0.8

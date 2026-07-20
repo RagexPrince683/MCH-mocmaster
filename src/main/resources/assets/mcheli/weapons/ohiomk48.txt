@@ -1,0 +1,25 @@
+DisplayName = Mark 48 Torpedo
+Type = Torpedo
+Power = 1050
+ModelBullet = mk46
+Acceleration = 0.0
+AccelerationInWater = 1.8
+Explosion = 8
+ExplosionInWater = 16
+ProximityFuseDist = 5
+ProximityDist = 5
+Flaming = false
+Sight = None
+Delay = 3
+GuidedTorpedo = true
+Gravity = -0.03
+GravityInWater = 0
+Sound = bomb_snd 
+Round = 4
+ReloadTime = 1000
+
+MaxAmmo = 12
+SuppliedNum = 1
+Item =  3, iron_ingot
+Item =  3, gunpowder
+Item =  1, redstone

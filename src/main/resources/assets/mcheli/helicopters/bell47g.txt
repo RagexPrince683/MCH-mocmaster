@@ -1,0 +1,88 @@
+DisplayName = Bell47G
+AddDisplayName = en_US, Bell 47 G
+AddDisplayName = ja_JP, Bell47G
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Bell47G
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Bell47G
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
+ItemID = 28807
+Weight = 1893
+MaxHp = 100
+Speed = 1.05
+MaxFuel         = 258
+FuelConsumption = 0.096
+ThirdPersonDist = 20
+
+; New helicopter flight model: light scout/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.66
+MainRotorMaxThrust = 0.205
+RotorInertia = 0.76
+RotorSpoolUpRate = 0.03
+RotorSpoolDownRate = 0.038
+CollectiveResponse = 0.11
+CyclicAuthority = 0.82
+TailRotorAuthority = 1.337
+YawDamping = 0.2
+AngularInertia = 0.74
+TranslationalLiftCoefficient = 0.005
+VerticalDrag = 0.023
+MaxClimbRate = 0.13
+ParasiteDrag = 0.024
+HorizontalRotorThrustScale = 1.65
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.055
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.35
+HelicopterMaxBackwardSpeedScale = 0.35
+HoverAssistStrength = 0.75
+
+
+Sound = bellfourtyseven
+soundpitch = 1.3
+Soundvolume = 15
+
+; C = Civilian(–¯ŠÔ‹@)
+Category = MULH
+
+HUD = civilian_aircraft, none
+
+AddTexture = bell47g_k
+AddTexture = bell47g_w
+
+AddRotor= 1, 0,  0.00,  3.78,  -1.17,  0.0, 1.0, 0.0
+AddRotor= 1, 0, -0.05,  2.34, -10.04,  1.0, 0.0, 0.0
+
+AddSeat = 0.50,  0.96,  0.29
+AddSeat =-0.50,  0.96,  0.29
+
+;basic unarmed small modern helicopter NO WHEEL, AOW3 style
+AddRecipe = "ABC", " E ", "   ", A, mcheli:airframe, B, mcheli:heliblade, C, mcheli:engine1, E, mcheli:electronics
+
+
+;BoundingBox =  0.0, 1.7, 0.0,  2.4, 2.5
+
+BoundingBox = 0.0, 3.66, -1.21, 1.0, 1.5, 1.5
+BoundingBox = 0.0, 2.15, -10.07, 1.5, 1.5, 1.25
+BoundingBox = 0.0, 1.50, -1.21, 2.0, 2.0, 1.5
+
+BoundingBox = 0.0, 1.47, -2.65, 1.5, 1.5
+BoundingBox = 0.0, 1.57, -3.65, 1.0, 1.0
+BoundingBox = 0.0, 1.57, -4.65, 1.0, 1.0
+BoundingBox = 0.0, 1.67, -5.65, 1.0, 1.0
+BoundingBox = 0.0, 1.77, -6.65, 1.0, 1.0
+BoundingBox = 0.0, 1.77, -7.65, 1.0, 1.0
+BoundingBox = 0.0, 1.77, -8.65, 1.0, 1.0
+BoundingBox = 0.0, 1.77, -9.65, 1.0, 1.0
+
+
+
+Unmountposition = 0.50,  1.50,  0.29
+
+DamageFactor = 0.8
+
+ThrottleUpDown = 0.5
+DamageFactor = 0.8

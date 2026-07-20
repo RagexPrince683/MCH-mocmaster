@@ -1,0 +1,103 @@
+DisplayName = AH-6 Little Bird 'Killer Egg'
+AddDisplayName = ja_JP, AH-6 Little Bird 'キラ－エッグ'
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = AH-6 Little Bird 'Killer Egg'
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = AH-6 Little Bird 'Killer Egg'
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
+ItemID = 28801
+Weight = 1591
+MaxHp = 100
+EnableNightVision = true
+Speed = 1.7
+ThrottleUpDown = 1.2
+FlareType = 3
+MaxFuel         = 410
+FuelConsumption = 0.228
+ThirdPersonDist = 20
+
+
+; New helicopter flight model: light scout/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.75
+MainRotorMaxThrust = 0.225
+RotorInertia = 0.85
+RotorSpoolUpRate = 0.028
+RotorSpoolDownRate = 0.035
+CollectiveResponse = 0.10
+CyclicAuthority = 0.88
+TailRotorAuthority = 1.418
+YawDamping = 0.18
+AngularInertia = 0.85
+TranslationalLiftCoefficient = 0.0045
+VerticalDrag = 0.024
+MaxClimbRate = 0.13
+ParasiteDrag = 0.025
+HorizontalRotorThrustScale = 1.70
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.055
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.35
+HelicopterMaxBackwardSpeedScale = 0.35
+HoverAssistStrength = 0.75
+
+; M = Military(軍用機).  A = Attacker(攻撃機)
+Category = LA/MM
+
+Sound = littlebird
+Soundvolume = 15
+
+HUD = heli, none, none, none
+
+AddTexture = ah-6_jp
+
+AddRotor = 1,0,  0.00,  3.35,  0.00,  0.0, 1.0, 0.0
+AddRotor = 1,0,  0.50,  1.90, -6.55,  1.0, 0.0, 0.0
+
+AddPartRotWeapon = m134ah6,   false, true, true,   1.488, 0.314, -1.444
+AddPartRotWeapon = m134ah6,   false, true, true,  -1.488, 0.314, -1.444
+
+AddSeat =-0.45,  0.80,  1.20
+AddSeat = 0.45,  0.80,  1.20
+AddSeat =-0.90,  0.80,  0.20
+AddSeat = 0.90,  0.80,  0.20
+
+AddWeapon = m134ah6,  1.48, 0.40, 1.54,   1.0, 0.0
+AddWeapon = m134ah6, -1.48, 0.40, 1.54,  -1.0, 0.0
+
+AddWeapon = ah6hydra70_l,  2.20, 0.16, 1.11,   1.0, 0.0
+AddWeapon = ah6hydra70_l, -2.20, 0.16, 1.11,  -1.0, 0.0
+
+AddWeapon = ah6hydra70_m264rp,  2.20, 0.16, 1.11,   1.0, 0.0
+AddWeapon = ah6hydra70_m264rp, -2.20, 0.16, 1.11,  -1.0, 0.0
+
+;AddWeapon = aim92,  2.30, 0.16, 1.11,   1.0, 0.0
+;AddWeapon = aim92, -2.30, 0.16, 1.11,  -1.0, 0.0
+;they arent on the model
+
+AddWeapon = targeting_pod_mob,     0.0, 0.10, 2.91,   0.0, 0.0,  true, 2
+AddWeapon = targeting_pod_pv10s,   0.0, 0.10, 2.91,   0.0, 0.0,  false,2
+
+;basic armed small modern helicopter NO WHEEL, AOW3 style
+AddRecipe = "ABC", "DEF", "   ", A, mcheli:airframe2, B, mcheli:heliblade, C, mcheli:engine1, E, mcheli:electronics, D, mcheli:rocket, F, mcheli:cannon1
+AddRecipe = "ABC", "   ", "   ", A, mcheli:mh-6, B, mcheli:rocket, C, mcheli:cannon1
+
+BoundingBox =  0.0, 1.7, -1.5,  2.0, 2.0
+
+BoundingBox = 0.0, 2.8, 0.0, 1.0, 1.5, 1.5
+
+BoundingBox = 0.0, 1.96, -2.83, 1.0, 1.0
+BoundingBox = 0.0, 1.96, -3.83, 1.0, 1.0
+BoundingBox = 0.0, 1.96, -4.83, 1.0, 1.0
+BoundingBox = 0.0, 1.96, -5.83, 1.0, 1.0
+BoundingBox = 0.0, 2.36, -6.83, 1.0, 1.8, 1.25
+
+unmountposition = -0.45,  1.50,  1.20
+
+DamageFactor = 0.8
+
+
+ThrottleUpDown = 0.5
+DamageFactor = 0.8

@@ -1,0 +1,7 @@
+DisplayName = PWR Reactor Crafting Parts
+AddDisplayName = ja_JP, PWR Reactor Crafting Parts
+StackSize = 64
+AddRecipe = "ABC", "DEF", "GHI", A, hbm:tile.pwr_fuel, B, hbm:tile.pwr_controller, C, hbm:tile.pwr_channel, D, hbm:tile.pwr_reflector, E, hbm:tile.pwr_port, F, hbm:tile.pwr_control, G, hbm:tile.pwr_neutron_source, H, hbm:tile.pwr_heatex, I,hbm:item.pwr_fuel,2
+
+;to contrast now we pray modded shit regs like vanilla
+;;AddRecipe = "DY",  Y, iron_ingot, D,dye,15

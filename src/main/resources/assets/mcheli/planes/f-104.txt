@@ -1,0 +1,181 @@
+﻿DisplayName = F-104C Starfighter
+AddDisplayName = en_US, F-104C Starfighter
+AddDisplayName = ko_KR, F-104C 스타파이터
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F-104C Starfighter
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F-104C Starfighter
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
+ItemID = 40005
+Weight = 14000
+CanMountShip = true
+MaxHp = 100
+Speed = 3.70
+
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 1.250
+EngineThrust = 1.489
+NewFlightGravity = 0.0080
+NewFlightThrottleResponse = 1.280
+NewFlightThrottleChangeRateUp = 0.0045
+NewFlightThrottleChangeRateDown = 0.0065
+NewFlightIdleThrottle = 0.095
+NewFlightEngineBrakeDrag = 0.0038
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.13
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = false
+FlightCeiling = 15000
+FlightCeilingRange = 72
+StallSpeed = 0.611
+CriticalAoA = 21.00
+TimeUntilStallPastCriticalAoA = 0.90
+TimeAfterStallUntilPitchDown = 0.85
+StallLiftLoss = 0.860
+AoADragMultiplier = 2.750
+StallInstability = 0.500
+StallRecoverySpeed = 0.867
+StallSpeedFactor = 0.21
+StallStrength = 1.18
+StallRecoveryRate = 0.22
+StallBreakStrength = 0.86
+StallPitchRecoveryStrength = 0.72
+DiveSpeedMultiplier = 1.24
+MaxComfortableG = 5.8
+MaxStructuralG = 8.5
+GControlPenalty = 0.720
+CompressibilitySpeed = 3.441
+CompressibilityPitchPenalty = 0.62
+MaxSafeSpeed = 4.366
+OverspeedDamageRate = 0.16
+BaseDrag = 0.0016
+InducedDrag = 0.013
+ControlSurfaceDrag = 0.0048
+MaxLevelSpeed = 3.626
+IdleDrag = 0.0043
+
+PitchTorque = 0.380
+RollTorque = 0.440
+YawTorque = 0.260
+PitchDamping = 0.455
+RollDamping = 0.405
+YawDamping = 0.485
+ThrottleAcceleration = 0.035
+EngineDrag = 0.01
+
+InertiaMultiplier = 1.360
+; Deprecated/invalid legacy FM key retained for audit context: StallThrottle = 0.2
+; Deprecated/invalid legacy FM key retained for audit context: MinRecoveryThrottle = 0.5
+; Deprecated/invalid legacy FM key retained for audit context: SpeedLossFactor = 0.5
+; Deprecated/invalid legacy FM key retained for audit context: LiftCoefficient = 0.9
+; Deprecated/invalid legacy FM key retained for audit context: MaxGroundLiftSpeed = 0.4
+; Deprecated/invalid legacy FM key retained for audit context: MaxGroundLiftFactor = 1.3
+; Deprecated/invalid legacy FM key retained for audit context: CompressibilityStart = 0.75
+; Deprecated/invalid legacy FM key retained for audit context: CompressibilityLinear = 1.0
+; Deprecated/invalid legacy FM key retained for audit context: CompressibilityQuadratic = 1.5
+; Deprecated/invalid legacy FM key retained for audit context: StartOverspeed = 1.5
+; Deprecated/invalid legacy FM key retained for audit context: FullOverspeed = 2.0
+; Deprecated/invalid legacy FM key retained for audit context: OverspeedFactor = 0.03
+; Deprecated/invalid legacy FM key retained for audit context: YawStability = 0.0
+; Deprecated/invalid legacy FM key retained for audit context: FallOfEffectSpeed = 0.6
+
+Sound = phantomplane
+onGroundPitch = 0.5
+ThrottleUpDown = 0.3
+MaxFuel = 3600
+FuelConsumption = 1.3
+ThrottleUpDownOnEntity = 2.0
+EnableEjectionSeat = true
+EnableSeaSurfaceParticle = true
+ParticlesScale = 0.7
+ThirdPersonDist = 20
+EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AA
+HasChaff = true
+enableback = true
+
+DamageFactor = 0.8
+
+; M = Military.  F = Fighter
+Category = IA/FA
+;/FB
+
+HUD = plane
+
+;early modern light plane (late jet), AOW3 style (only AA)
+AddRecipe = "ABC", "DEG", "   ", A, mcheli:airframe, B, mcheli:basicmechanicparts, C, mcheli:engine1, D, mcheli:wheelair, E, mcheli:cannon1, G, mcheli:electronics 
+
+MobilityYaw = 1.082
+MobilityPitch = 1.373
+MobilityRoll = 1.668
+
+AddTexture = f-104-2
+;AddTexture = f-104-de
+;AddTexture = f-104-it
+
+EntityWidth  = 0.9
+EntityHeight = 0.9
+
+AddSeat = 0.0, 1.27, 1.98
+
+unmountposition = 0.0, 1.57, 1.98
+
+AddPartCanopy = 0.61, 2.08, 2.234, 0,0,-1, 60
+
+AddPartLG    =  0.00, 0.728, 0.02,  -1,0,0, 110
+
+AddPartLG =  0.708, 1.164, -5.477,  1,0,0, 100,  0,-1,-1, 70
+AddPartLG =  -0.708, 1.164, -5.477, 1,0,0, 100,  0,1,1, 70
+
+AddWeapon = m61f104, 0.343, 1.852, 4.178,   0.0, 0.0
+AddWeapon = aim9b, 4.298, 1.118, -6.511,  -1.0, 0.0
+AddWeapon = aim9b, -4.298, 1.118, -6.511,  -1.0, 0.0
+
+AddPartWeaponMissile = aim9,  false, false, false, 4.298, 1.118, -6.511
+AddPartWeaponMissile = aim9,  false, false, false, -4.298, 1.118, -6.511
+
+;AddPartNozzle = 0.0, 1.92, -8.47, -1, 0, 0
+
+;<HitBoxes>
+BoundingBox =  0.00, 1.45, 3.45,  1.1, 1.1
+
+BoundingBox =  0.00, 1.45, 0.60,  1.6, 1.5
+
+BoundingBox =  0.00, 1.6, -0.40,  1.6, 1.8
+
+BoundingBox =  0.00, 1.6, -1.70,  1.6, 1.8
+
+BoundingBox =  0.00, 1.7, -3.5,  2, 1.6
+
+BoundingBox =  0.00, 1.7, -5.5,  2, 1.6
+
+BoundingBox =  0.00, 1.7, -7.5,  2, 1.6
+
+BoundingBox =  0.00, 1.8, -9.3,  1.6, 1.6
+
+BoundingBox =  0.00, 1.8, -10.6,  1.4, 1.4
+
+BoundingBox =  0.00, 1.8, -11.6,  1.3, 1.3, 1.5
+
+BoundingBox = 0.0, 2.03, -9.76, 0.5, 2.0
+BoundingBox = 0.0, 2.43, -10.26, 0.5, 2.0
+BoundingBox = 0.0, 2.93, -10.76, 0.5, 2.5
+BoundingBox = 0.0, 3.33, -11.26, 0.5, 2.5
+BoundingBox = 0.0, 3.63, -11.76, 0.5, 2.5
+BoundingBox = 0.0, 3.75, -12.26, 0.5, 2.45
+BoundingBox = 0.0, 3.65, -12.76, 0.5, 2.45
+
+BoundingBox = 0.0, 4.62, -13.06, 1.5, 0.2
+
+BoundingBox = 1.2, 4.62, -13.06, 1.0, 0.2
+BoundingBox = -1.2, 4.62, -13.06, 1.0, 0.2
+
+BoundingBox = -2.2, 1.39,  -6.65,  2.5, 0.6, 0.9
+BoundingBox = 2.2, 1.39,  -6.65,  2.5, 0.6, 0.9
+DamageFactor = 0.8

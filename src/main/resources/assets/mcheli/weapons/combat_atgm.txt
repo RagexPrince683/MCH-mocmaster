@@ -1,0 +1,35 @@
+DisplayName = ATGM Combat
+;still no idea what this is
+Type = TVMissile
+IsHeatSeekerMissile = true
+IsRadarMissile = false
+MaxLockOnAngle = 25
+PdHDNMaxDegree = 180.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 0
+PassiveRadar = false
+PassiveRadarLockOutCount = 0
+LaserGuidance = false
+HasLaserGuidancePod = false
+ActiveRadar = false
+ScanInterval = 1
+SpeedDependsAircraft = false
+FixMode = 1
+ModeNum = 2
+Power = 100
+Acceleration = 2.0
+Explosion = 1
+Flaming = true
+Sight = MoveSight
+Delay = 180
+ModelBullet = 9M113
+Sound = missile_2_snd
+Group = MainGun
+
+DamageFactor = tank, 1.2
+
+MaxAmmo = 10
+SuppliedNum = 5
+Item =  3, iron_ingot
+Item =  2, gunpowder
+Item =  1, redstone

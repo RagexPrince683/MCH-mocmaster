@@ -1,0 +1,100 @@
+DisplayName = Bell 206L Long Ranger
+AddDisplayName = ja_JP, Bell 206L ロングレンジャー
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Bell 206L Long Ranger
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Bell 206L Long Ranger
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
+ItemID = 28806
+Weight = 2214
+MaxHp = 100
+MaxFuel         = 625
+FuelConsumption = 0.174
+ThirdPersonDist = 20
+
+; New helicopter flight model: light scout/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.76
+MainRotorMaxThrust = 0.222
+RotorInertia = 0.86
+RotorSpoolUpRate = 0.028
+RotorSpoolDownRate = 0.036
+CollectiveResponse = 0.1
+CyclicAuthority = 0.84
+TailRotorAuthority = 1.364
+YawDamping = 0.19
+AngularInertia = 0.86
+TranslationalLiftCoefficient = 0.005
+VerticalDrag = 0.024
+MaxClimbRate = 0.13
+ParasiteDrag = 0.026
+HorizontalRotorThrustScale = 1.65
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.055
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.35
+HelicopterMaxBackwardSpeedScale = 0.35
+HoverAssistStrength = 0.75
+
+
+; C = Civilian(民間機)
+;multipurpose
+Category = MUUH
+
+Sound = littlebird
+Soundvolume = 15
+
+HUD = civilian_aircraft, none, none, none, none, none
+
+AddTexture = bell206l_bw
+AddTexture = bell206l_go
+AddTexture = bell206l_rw
+AddTexture = bell206l_wb
+AddTexture = bell206l_wr
+AddTexture = bell206l_t
+AddTexture = bell206l_mp
+
+Speed = 1.4
+
+AddRotor= 1, 0,  0.00,  3.80,  -0.91,  0.0, 1.0, 0.0
+AddRotor= 1, 0,  0.17,  3.00, -11.55,  1.0, 0.0, 0.0
+
+AddSeat =-0.44,  1.06,  1.49
+AddSeat = 0.44,  1.06,  1.49
+AddSeat =-0.44,  1.20,  0.05
+AddSeat = 0.44,  1.20,  0.05
+AddSeat =-0.44,  1.20, -0.89
+AddSeat = 0.44,  1.20, -0.89
+
+;basic unarmed small modern helicopter NO WHEEL, AOW3 style
+AddRecipe = "ABC", " E ", "   ", A, mcheli:airframe, B, mcheli:heliblade, C, mcheli:engine1, E, mcheli:electronics
+
+
+InventorySize = 27
+
+
+;BoundingBox =  0.0, 1.7, 1.5,  2.4, 2.5
+BoundingBox = 0.0, 4.27, -0.932, 1.0, 1.5, 1.5
+
+BoundingBox =  0.0, 2.1, -2.5,  2.4, 3.3
+BoundingBox =  0.0, 3.2, -11.5,  1.0, 2.4
+
+
+BoundingBox = 0.0, 2.70, -2.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -3.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -4.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -5.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -6.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -7.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -8.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -9.80, 1.0, 1.0
+BoundingBox = 0.0, 2.70, -10.80, 1.0, 1.0, 1.25
+
+Unmountposition = -0.44,  1.50,  1.49
+
+DamageFactor = 0.8
+
+ThrottleUpDown = 0.5
+DamageFactor = 0.8
