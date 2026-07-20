@@ -66,8 +66,8 @@ public class W_WavefrontObject extends W_ModelCustom {
       }
 
       // Try MCH_ResourceHelper for addon directory files
-      String resourcePath = resource.getResourceDomain() + ":" + resource.getResourcePath();
-      InputStream is = mcheli.MCH_ResourceHelper.openResourceStream(resourcePath);
+      String assetPath = "assets/" + resource.getResourceDomain() + "/" + resource.getResourcePath();
+      InputStream is = mcheli.MCH_ResourceHelper.openResourceStream(assetPath);
       if (is != null) {
          try {
             this.loadObjModel(is);
