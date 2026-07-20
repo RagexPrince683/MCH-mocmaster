@@ -1,3 +1,0 @@
-package com.norwood.mcheli.wrapper;
-
-public interface IPacketHandler {}
