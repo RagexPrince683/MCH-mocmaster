@@ -83,7 +83,8 @@ The config stores key codes rather than names. Common defaults:
 | Switch weapon mode | `KeySwitchWeaponMode` | X |
 | Zoom | `KeyZoom` | Z |
 | Camera mode | `KeyCameraMode` | C |
-| Dismount mob/seat action | `KeyUnmountMob` | Y |
+| Dismount vehicle | Fixed control | Hold Left Shift for 3 seconds |
+| Dismount mob/crew action | `KeyUnmountMob` | Y |
 | Flares/chaff/maintenance/APS | `KeyFlare`, `KeyChaff`, `KeyMaintenance`, `KeyAPS` | V |
 | Extra function | `KeyExtra` | F |
 | Hold free look | `KeyFreeLook` | Left Control |
