@@ -218,19 +218,24 @@ public class MCH_MOD {
        File addonsDir = new File(evt.getModConfigurationDirectory().getParentFile(), "mcheli_addons");
        MCH_ResourceHelper.setAddonDir(addonsDir);
 
-       // Register addon resource pack with Minecraft's resource manager
-       // so that bindTexture(), getResource() etc. find addon files automatically
+       // Register addon resource pack with Minecraft's defaultResourcePacks list via reflection.
+       // This ensures our pack survives refreshResources() calls, which rebuild from
+       // defaultResourcePacks + repositoryEntries every time. The old reloadResourcePack()
+       // approach was wiped by clearResources() on each reload.
        if (isDev || true) {
           try {
              java.util.List<File> roots = MCH_ResourceHelper.getAddonAssetRoots();
              if (roots != null && !roots.isEmpty()) {
                 File[] rootArray = roots.toArray(new File[0]);
                 net.minecraft.client.resources.IResourcePack addonPack = new MCH_AddonResourcePack(rootArray);
-                net.minecraft.client.resources.SimpleReloadableResourceManager rm =
-                    (net.minecraft.client.resources.SimpleReloadableResourceManager)
-                    net.minecraft.client.Minecraft.getMinecraft().getResourceManager();
-                rm.reloadResourcePack(addonPack);
-                MCH_Lib.Log("Registered addon resource pack with %d roots", rootArray.length);
+                // Access Minecraft.defaultResourcePacks (private List<IResourcePack>)
+                java.lang.reflect.Field field = net.minecraft.client.Minecraft.class.getDeclaredField("defaultResourcePacks");
+                field.setAccessible(true);
+                @SuppressWarnings("unchecked")
+                java.util.List<net.minecraft.client.resources.IResourcePack> defaultPacks =
+                    (java.util.List<net.minecraft.client.resources.IResourcePack>) field.get(net.minecraft.client.Minecraft.getMinecraft());
+                defaultPacks.add(addonPack);
+                MCH_Lib.Log("Registered addon resource pack in defaultResourcePacks with %d roots", rootArray.length);
              }
           } catch (Exception e) {
              MCH_Lib.Log("Failed to register addon resource pack: %s", e.getMessage());
