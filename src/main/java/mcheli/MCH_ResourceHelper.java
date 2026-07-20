@@ -9,7 +9,6 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -24,59 +23,66 @@ public class MCH_ResourceHelper {
         sourceJar = jar;
     }
 
-    /**
-     * Discovers filesystem directories on the classpath that contain assets.
-     * Called from PreInit when sourceJar is null (dev mode).
-     */
     public static void discoverDevClasspath() {
         devClasspathDirs = new ArrayList<>();
 
-        // Try URLClassLoader.getURLs() first (works in most dev setups)
-        ClassLoader cl = MCH_ResourceHelper.class.getClassLoader();
-        if (cl instanceof URLClassLoader) {
-            for (URL url : ((URLClassLoader) cl).getURLs()) {
-                if ("file".equals(url.getProtocol())) {
-                    File dir = new File(url.getPath());
-                    if (dir.isDirectory()) {
-                        devClasspathDirs.add(dir);
-                    }
-                }
-            }
-        }
-
-        // Also walk java.class.path as a fallback
+        // Method 1: Check java.class.path entries for directories containing assets/mcheli
         String cp = System.getProperty("java.class.path", "");
         for (String entry : cp.split(File.pathSeparator)) {
             File f = new File(entry);
-            if (f.isDirectory() && !devClasspathDirs.contains(f)) {
+            if (f.isDirectory() && new File(f, "assets/mcheli").isDirectory()) {
                 devClasspathDirs.add(f);
             }
         }
 
-        // Check which dirs actually contain our assets
-        List<File> validDirs = new ArrayList<>();
-        for (File dir : devClasspathDirs) {
-            File assetsDir = new File(dir, "assets/mcheli");
-            if (assetsDir.isDirectory()) {
-                validDirs.add(dir);
+        // Method 2: Search classloader hierarchy for URLClassLoaders
+        if (devClasspathDirs.isEmpty()) {
+            ClassLoader cl = MCH_ResourceHelper.class.getClassLoader();
+            while (cl != null) {
+                if (cl instanceof URLClassLoader) {
+                    try {
+                        for (URL url : ((URLClassLoader) cl).getURLs()) {
+                            if ("file".equals(url.getProtocol())) {
+                                File dir = new File(url.getPath());
+                                if (dir.isDirectory() && new File(dir, "assets/mcheli").isDirectory()) {
+                                    devClasspathDirs.add(dir);
+                                }
+                            }
+                        }
+                    } catch (Exception ignored) {}
+                }
+                cl = cl.getParent();
             }
         }
 
-        if (!validDirs.isEmpty()) {
-            devClasspathDirs = validDirs;
-            MCH_Lib.DbgLog(false, "MCH_ResourceHelper: Found %d dev classpath dirs with assets", validDirs.size());
-            for (File dir : validDirs) {
-                MCH_Lib.DbgLog(false, "  -> %s", dir.getAbsolutePath());
+        // Method 3: Walk upward from working directory to find build/resources/main
+        if (devClasspathDirs.isEmpty()) {
+            File cwd = new File(System.getProperty("user.dir"));
+            File candidate = new File(cwd, "build/resources/main");
+            if (candidate.isDirectory() && new File(candidate, "assets/mcheli").isDirectory()) {
+                devClasspathDirs.add(candidate);
             }
-        } else {
-            MCH_Lib.DbgLog(true, "MCH_ResourceHelper: WARNING - no dev classpath dirs found containing assets/mcheli");
+        }
+
+        // Method 4: Also check src/main/resources as last resort
+        if (devClasspathDirs.isEmpty()) {
+            File cwd = new File(System.getProperty("user.dir"));
+            File candidate = new File(cwd, "src/main/resources");
+            if (candidate.isDirectory() && new File(candidate, "assets/mcheli").isDirectory()) {
+                devClasspathDirs.add(candidate);
+            }
+        }
+
+        MCH_Lib.Log("MCH_ResourceHelper: dev classpath search found %d dirs", devClasspathDirs.size());
+        for (File dir : devClasspathDirs) {
+            MCH_Lib.Log("  -> %s", dir.getAbsolutePath());
+        }
+
+        if (devClasspathDirs.isEmpty()) {
+            MCH_Lib.Log("WARNING: java.class.path = %s", cp);
         }
     }
 
-    /**
-     * Lists all resource entry names under the given classpath directory prefix.
-     * Returns paths like "assets/mcheli/helicopters/ah-64.txt".
-     */
     public static List<String> listResources(String dirPrefix, String suffix) {
         List<String> result = new ArrayList<>();
 
@@ -86,7 +92,6 @@ public class MCH_ResourceHelper {
         final String jarPrefix = dirPrefix.startsWith("/") ? dirPrefix.substring(1) : dirPrefix;
 
         if (sourceJar != null && sourceJar.exists() && sourceJar.isFile()) {
-            // JAR mode — enumerate JAR entries
             try (JarFile jar = new JarFile(sourceJar)) {
                 Enumeration<JarEntry> entries = jar.entries();
                 while (entries.hasMoreElements()) {
@@ -97,10 +102,9 @@ public class MCH_ResourceHelper {
                     }
                 }
             } catch (Exception e) {
-                MCH_Lib.DbgLog(true, "MCH_ResourceHelper: Failed to enumerate JAR: %s", e.getMessage());
+                MCH_Lib.Log("MCH_ResourceHelper: Failed to enumerate JAR: %s", e.getMessage());
             }
         } else {
-            // Dev mode — walk classpath directories on the filesystem
             if (devClasspathDirs != null) {
                 for (File cpDir : devClasspathDirs) {
                     File targetDir = new File(cpDir, jarPrefix);
@@ -114,15 +118,10 @@ public class MCH_ResourceHelper {
                                     result.add(jarPrefix + rel);
                                 });
                         } catch (Exception e) {
-                            MCH_Lib.DbgLog(true, "MCH_ResourceHelper: Failed to walk %s: %s", targetDir, e.getMessage());
+                            MCH_Lib.Log("MCH_ResourceHelper: Failed to walk %s: %s", targetDir, e.getMessage());
                         }
                     }
                 }
-            }
-
-            // Fallback: try getResourceAsStream (works for individual files)
-            if (result.isEmpty()) {
-                MCH_Lib.DbgLog(false, "MCH_ResourceHelper: devClasspath walk found nothing for %s, trying getResourceAsStream fallback", jarPrefix);
             }
         }
 
@@ -139,14 +138,12 @@ public class MCH_ResourceHelper {
                 return false;
             }
         } else {
-            // Check classpath dirs first
             String relPath = resourcePath.startsWith("/") ? resourcePath.substring(1) : resourcePath;
             if (devClasspathDirs != null) {
                 for (File cpDir : devClasspathDirs) {
                     if (new File(cpDir, relPath).isFile()) return true;
                 }
             }
-            // Fallback to getResourceAsStream
             return MCH_ResourceHelper.class.getResourceAsStream(resourcePath) != null;
         }
     }
