@@ -52,6 +52,10 @@ public class MCH_ResourceHelper {
         return addonDir;
     }
 
+    public static List<File> getAddonAssetRoots() {
+        return addonAssetRoots;
+    }
+
     private static void discoverAddonRoots() {
         addonAssetRoots = new ArrayList<>();
 
