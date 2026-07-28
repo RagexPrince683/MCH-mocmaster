@@ -1,13 +1,12 @@
 package mcheli.hud;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import mcheli.MCH_InputFile;
 import mcheli.MCH_Lib;
+import mcheli.MCH_ResourceHelper;
 import mcheli.hud.MCH_Hud;
 import mcheli.hud.MCH_HudItem;
 import net.minecraft.client.Minecraft;
@@ -26,30 +25,21 @@ public class MCH_HudManager {
       MCH_HudItem.mc = Minecraft.getMinecraft();
       map.clear();
       path = path.replace('\\', '/');
-      File dir = new File(path);
-      File[] files = dir.listFiles(new FileFilter() {
-         public boolean accept(File pathname) {
-            String s = pathname.getName().toLowerCase();
-            return pathname.isFile() && s.length() >= 5 && s.substring(s.length() - 4).compareTo(".txt") == 0;
-         }
-      });
-      if(files != null && files.length > 0) {
-         File[] arr$ = files;
-         int len$ = files.length;
-
-         for(int i$ = 0; i$ < len$; ++i$) {
-            File f = arr$[i$];
+      String dirPrefix = path + "hud";
+      List<String> entries = MCH_ResourceHelper.listResources(dirPrefix, ".txt");
+      if(entries != null && entries.size() > 0) {
+         for(int i = 0; i < entries.size(); ++i) {
+            String resourcePath = entries.get(i);
             MCH_InputFile inFile = new MCH_InputFile();
             int line = 0;
 
             try {
-               String e = f.getName().toLowerCase();
-               e = e.substring(0, e.length() - 4);
-               if(!map.containsKey(e) && inFile.openUTF8(f)) {
-                  MCH_Hud info = new MCH_Hud(e, f.getPath());
+               String e = MCH_ResourceHelper.getEntryName(resourcePath);
+               if(!map.containsKey(e) && inFile.openClasspath("/" + resourcePath)) {
+                  MCH_Hud info = new MCH_Hud(e, resourcePath);
 
                   String str;
-                  while((str = inFile.br.readLine()) != null) {
+                  while((str = inFile.readLine()) != null) {
                      ++line;
                      str = str.trim();
                      if(str.equalsIgnoreCase("endif")) {
@@ -69,10 +59,8 @@ public class MCH_HudManager {
                   info.checkData();
                   map.put(e, info);
                }
-            } catch (IOException var17) {
-               var17.printStackTrace();
             } catch (Exception var18) {
-               MCH_Lib.Log("### HUD file error! %s Line=%d", new Object[]{f.getName(), Integer.valueOf(line)});
+               MCH_Lib.Log("### HUD file error! %s Line=%d", new Object[]{resourcePath, Integer.valueOf(line)});
                var18.printStackTrace();
                throw new RuntimeException(var18);
             } finally {

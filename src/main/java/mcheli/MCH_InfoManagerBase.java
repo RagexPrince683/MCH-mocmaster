@@ -1,7 +1,6 @@
 package mcheli;
 
-import java.io.File;
-import java.io.FileFilter;
+import java.util.List;
 import java.util.Map;
 import mcheli.MCH_BaseInfo;
 import mcheli.MCH_InputFile;
@@ -10,39 +9,33 @@ import mcheli.MCH_Lib;
 //Inherited by all vehicle classes.
 public abstract class MCH_InfoManagerBase {
 
+   private String lastPath;
+   private String lastType;
+
    public abstract MCH_BaseInfo newInfo(String var1);
 
    public abstract Map getMap();
 
    public boolean load(String path, String type) {
+      lastPath = path;
+      lastType = type;
       path = path.replace('\\', '/');
-      File dir = new File(path + type);
-      File[] files = dir.listFiles(new FileFilter() {
-         public boolean accept(File pathname) {
-            String s = pathname.getName().toLowerCase();
-            return pathname.isFile() && s.length() >= 5 && s.substring(s.length() - 4).compareTo(".txt") == 0;
-            //we could add our own file format here if we want to.
-         }
-      });
-      if(files != null && files.length > 0) {
-         File[] arr$ = files;
-         int len$ = files.length;
-
-         for(int i$ = 0; i$ < len$; ++i$) {
-            File f = arr$[i$];
-            int line = 0;
+      String dirPrefix = path + type;
+      List<String> entries = MCH_ResourceHelper.listResources(dirPrefix, ".txt");
+      if(entries != null && entries.size() > 0) {
+         for(int i = 0; i < entries.size(); ++i) {
+            String resourcePath = entries.get(i);
             MCH_InputFile inFile = new MCH_InputFile();
-            Object br = null;
+            int line = 0;
 
             try {
-               String e = f.getName().toLowerCase();
-               e = e.substring(0, e.length() - 4);
-               if(!this.getMap().containsKey(e) && inFile.openUTF8(f)) {
+               String e = MCH_ResourceHelper.getEntryName(resourcePath);
+               if(!this.getMap().containsKey(e) && inFile.openClasspath("/" + resourcePath)) {
                   MCH_BaseInfo info = this.newInfo(e);
-                  info.filePath = f.getCanonicalPath();
+                  info.filePath = resourcePath;
 
                   String str;
-                  while((str = inFile.br.readLine()) != null) {
+                  while((str = inFile.readLine()) != null) {
                      ++line;
                      str = str.trim();
                      int eqIdx = str.indexOf(61);
@@ -51,16 +44,15 @@ public abstract class MCH_InfoManagerBase {
                      }
                   }
 
-                  boolean var21 = false;
                   if(info.isValidData()) {
                      this.getMap().put(e, info);
                   }
                }
             } catch (Exception var19) {
                if(line > 0) {
-                  MCH_Lib.Log("### Load failed %s : line=%d", new Object[]{f.getName(), Integer.valueOf(line)});
+                  MCH_Lib.Log("### Load failed %s : line=%d", new Object[]{resourcePath, Integer.valueOf(line)});
                } else {
-                  MCH_Lib.Log("### Load failed %s", new Object[]{f.getName()});
+                  MCH_Lib.Log("### Load failed %s", new Object[]{resourcePath});
                }
 
                var19.printStackTrace();
@@ -72,6 +64,20 @@ public abstract class MCH_InfoManagerBase {
          MCH_Lib.Log("Read %d %s", new Object[]{Integer.valueOf(this.getMap().size()), type});
          return this.getMap().size() > 0;
       } else {
+         return false;
+      }
+   }
+
+   public boolean reload() {
+      if(lastPath == null || lastType == null) {
+         MCH_Lib.Log("### Cannot reload: never loaded");
+         return false;
+      }
+      try {
+         this.getMap().clear();
+         return this.load(lastPath, lastType);
+      } catch (Exception e) {
+         e.printStackTrace();
          return false;
       }
    }

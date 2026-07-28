@@ -1,0 +1,51 @@
+DisplayName = 3M9M3 [SAM]
+Type = AAMissile
+Power = 59
+Acceleration = 4.5
+Explosion = 9
+Flaming = false
+Sight = MissileSight
+Delay = 2
+ReloadTime = 1000
+Round = 3
+LockTime = 12
+ProximityFuseDist = 3
+RigidityTime = 1
+TurningFactor = 0.1
+MaxLockOnRange = 600
+AntiFlareCount = 14
+ActiveRadar = false
+ScanInterval = 4
+CanLockMissile = false
+EnableBVR = true
+IsHeatSeekerMissile = false
+IsRadarMissile = true
+TickEndHoming = 1400
+MaxDegreeOfMissile = 48
+SpeedDependsAircraft = true
+MaxLockOnAngle = 10
+PdHDNMaxDegree = 60.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 25
+PassiveRadar = true
+PassiveRadarLockOutCount = 20
+LaserGuidance = false
+HasLaserGuidancePod = false
+Sound = missile_1_snd
+
+
+
+Piercing = 0
+DamageFactor = tank, 2.0
+DamageFactor = plane, 4.5
+DamageFactor = vehicle 4.5
+DamageFactor = heli, 4.5
+DamageFactor = player, 20.0
+
+
+MaxAmmo = 3
+
+SuppliedNum = 1
+Item =  2, iron_ingot
+Item =  2, gunpowder
+Item =  4, redstone

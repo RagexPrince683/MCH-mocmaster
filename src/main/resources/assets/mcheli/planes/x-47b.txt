@@ -1,0 +1,149 @@
+DisplayName = X-47B Pegasus
+AddDisplayName = ja_JP, X-47B ペガサス
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = X-47B Pegasus
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = X-47B Pegasus
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
+ItemID = 28728
+Weight = 44000
+CanMountShip = true
+MaxHp = 100
+Speed = 1.20
+
+;685mph cruising speed
+
+FlareType = 4
+ParticlesScale = 0.7
+EnableSeaSurfaceParticle = true
+EnableNightVision = true
+EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AA
+HasChaff = true
+EnableGunnerMode = true
+HasBombSight = false
+NewUAV = true
+HideEntity = true
+AutoPilotRot = -0.06
+CameraPosition = 0.0, 1.7, 5.2
+ThrottleUpDown = 0.7
+MaxFuel         = 26000
+FuelConsumption = 6.667
+Stealth = 0.35
+
+; M = Military(軍用機).  Q = Drone(無人航空機)
+Category = UCAV/TECD
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 4.400
+EngineThrust = 5.918
+NewFlightGravity = 0.0087
+NewFlightThrottleResponse = 1.160
+NewFlightThrottleChangeRateUp = 0.0052
+NewFlightThrottleChangeRateDown = 0.0072
+NewFlightIdleThrottle = 0.085
+NewFlightEngineBrakeDrag = 0.0029
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = false
+FlightCeiling = 12500
+FlightCeilingRange = 72
+StallSpeed = 0.246
+CriticalAoA = 17.50
+TimeUntilStallPastCriticalAoA = 1.25
+TimeAfterStallUntilPitchDown = 1.05
+StallLiftLoss = 0.780
+AoADragMultiplier = 2.800
+StallInstability = 0.440
+StallRecoverySpeed = 0.349
+StallSpeedFactor = 0.22
+StallStrength = 1.15
+StallRecoveryRate = 0.18
+StallBreakStrength = 0.68
+StallPitchRecoveryStrength = 0.55
+DiveSpeedMultiplier = 1.18
+MaxComfortableG = 4.5
+MaxStructuralG = 7.5
+GControlPenalty = 0.740
+CompressibilitySpeed = 2.01
+CompressibilityPitchPenalty = 0.55
+MaxSafeSpeed = 2.201
+OverspeedDamageRate = 0.12
+BaseDrag = 0.0025
+InducedDrag = 0.0075
+ControlSurfaceDrag = 0.0035
+MaxLevelSpeed = 1.914
+IdleDrag = 0.0032
+
+MobilityYaw = 0.570
+MobilityPitch = 0.658
+MobilityRoll = 0.604
+PitchTorque = 0.250
+RollTorque = 0.260
+YawTorque = 0.180
+PitchDamping = 0.600
+RollDamping = 0.580
+YawDamping = 0.640
+InertiaMultiplier = 3.100
+ThrottleAcceleration = 0.026
+EngineDrag = 0.011
+
+HUD = plane
+
+;Front
+AddPartSlideRotLG =  0.00,  0.70,  0.00,  0.00, 1.80, 1.99, -1,0,0, 110
+AddPartLGRev      = -0.43,  1.29,  0.94,  0.00, 0.26, 1.00, -90
+AddPartLGRev      =  0.43,  1.29,  0.94,  0.00, 0.26, 1.00,  90
+
+;RL Gear
+AddPartLG         = -2.48,  1.73, -2.24,  1,0,0, -90,  0,1,0,  90
+AddPartLG         =  2.48,  1.73, -2.24,  1,0,0, -90,  0,1,0, -90
+;RL Gear hatch
+AddPartLGRev      = -2.68,  1.63, -1.46,  0,0,1, -100
+AddPartLGRev      =  2.68,  1.63, -1.46,  0,0,1,  100
+;RL Gear hatch2
+AddPartLGHatch    = -2.02,  1.36, -1.00,  0,0,1,  90
+AddPartLGHatch    =  2.02,  1.36, -1.00,  0,0,1, -90
+
+AddPartWing =  -5.04, 2.10, 0.00,  0,0,1,-150
+AddPartWing =   5.04, 2.10, 0.00,  0,0,1, 150
+
+AddPartNozzle = -0.35, 2.23, -5.23, -1,0,0
+AddPartNozzle =  0.35, 2.23, -5.23, -1,0,0
+
+AddPartWeaponBay = x47gbu-31, -0.62, 1.22,-1.45,  0, -0.02, 1.0,  90
+AddPartWeaponBay = x47gbu-31,  0.62, 1.22,-1.45,  0, -0.02, 1.0, -90
+
+AddPartWeaponMissile = x47gbu-31,   false,  false,  false,    1.15,  1.97, -3.55
+AddPartWeaponMissile = x47gbu-31,   false,  false,  false,   -1.15,  1.97, -3.55
+
+AddWeapon = dummy_bay_closed, 0,0,0,0,0
+AddWeapon = x47gbu-31,  1.15,  1.97, -3.55,  0, 0
+
+;AddTurretWeapon = gbu-31, 1.15,  1.97, -3.55,  0.0, 0.0, true,1, 0,-360,360, -20, 9
+
+AddWeapon = gbu-31, -1.15,  1.97, -3.55,  0, 0
+
+AddWeapon = targeting_pod_mob,   0.0, 1.7, 5.2,  0.0, 0.0
+AddWeapon = targeting_pod_pv30s, 0.0, 1.7, 5.2,  0.0, 0.0
+AddWeapon = targeting_pod_block, 0.0, 1.7, 5.2,  0.0, 0.0
+
+;advanced prop drone (modern drone), AOW3 style
+AddRecipe = "ABC", "DEF", "FBE", A, mcheli:airframe3, B, mcheli:complexmechanicparts, C, mcheli:engine2, D, mcheli:wheelair, E, mcheli:electronics, F, mcheli:fcs2
+;prototype thing... but like there's probably something like this in active service we just dont know about or something
+
+BoundingBox =  0.0, 2.0,  1.0,  3.0, 1.8
+BoundingBox =  3.0, 2.0, -3.0,  3.0, 1.5
+BoundingBox =  0.0, 2.0, -2.0,  3.0, 1.8
+BoundingBox = -3.0, 2.0, -3.0,  3.0, 1.5
+BoundingBox =  0.0, 2.0, -5.0,  3.0, 1.8
+
+enableback = true
+
+; RealismSource = MCHO plane scripted pass; X-47B UCAV.

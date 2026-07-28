@@ -1,0 +1,45 @@
+DisplayName = GBU-44/B Viper Strike
+Type = ATMissile
+IsHeatSeekerMissile = true
+IsRadarMissile = false
+MaxLockOnAngle = 25
+PdHDNMaxDegree = 180.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 0
+PassiveRadar = false
+PassiveRadarLockOutCount = 0
+LaserGuidance = true
+HasLaserGuidancePod = false
+ActiveRadar = false
+ScanInterval = 1
+SpeedDependsAircraft = true
+Acceleration = 1.5
+Flaming = true
+Sight = MissileSight
+Delay = 200
+LockTime = 25
+Sound = bomb_snd
+ModeNum = 1
+DisableSmoke = true
+ProximityFuseDist = 1
+ModelBullet = sdb
+RidableOnly = true
+
+;bomb rewrite
+;Acceleration = 0.5
+Explosion = 2
+;Explosive mass	125 kg
+Power = 300
+ExplosionBlock = 2
+ExplosionInWater = 1
+DamageFactor = tank, 2.0
+DamageFactor = plane, 4.5
+DamageFactor = vehicle 4.5
+DamageFactor = heli, 4.5
+DamageFactor = player, 20.0
+
+MaxAmmo = 6
+SuppliedNum = 1
+Item =  2, iron_ingot
+Item =  2, gunpowder
+Item =  2, redstone

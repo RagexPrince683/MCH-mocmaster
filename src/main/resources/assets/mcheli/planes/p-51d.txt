@@ -1,0 +1,153 @@
+DisplayName = P-51D Mustang
+AddDisplayName = en_US, P-51D Mustang
+AddDisplayName = ja_JP, P-51D マスタング
+NameOnEarlyASRadar = Prop Aircraft
+NameOnModernASRadar = P-51D Mustang
+NameOnEarlyAARadar = Prop Aircraft
+NameOnModernAARadar = P-51D Mustang
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
+ItemID = 30202
+Weight = 7635
+CanMountShip = true
+MaxHp = 100
+Speed = 1.08
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 0.950
+EngineThrust = 1.034
+NewFlightGravity = 0.0080
+NewFlightThrottleResponse = 0.920
+NewFlightThrottleChangeRateUp = 0.0072
+NewFlightThrottleChangeRateDown = 0.0095
+NewFlightIdleThrottle = 0.075
+NewFlightEngineBrakeDrag = 0.0054
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.16
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = true
+NewFlightCombatFlapLift = 0.145
+NewFlightCombatFlapDrag = 0.016
+NewFlightCombatFlapControl = 0.190
+NewFlightCombatFlapOverspeed = 0.680
+FlightCeiling = 12800
+FlightCeilingRange = 56
+StallSpeed = 0.232
+CriticalAoA = 22.00
+TimeUntilStallPastCriticalAoA = 1.25
+TimeAfterStallUntilPitchDown = 1.05
+StallLiftLoss = 0.820
+AoADragMultiplier = 2.700
+StallInstability = 0.560
+StallRecoverySpeed = 0.330
+StallSpeedFactor = 0.24
+StallStrength = 1.22
+StallRecoveryRate = 0.22
+StallBreakStrength = 0.90
+StallPitchRecoveryStrength = 0.76
+DiveSpeedMultiplier = 1.2
+MaxComfortableG = 5
+MaxStructuralG = 8.5
+GControlPenalty = 0.680
+CompressibilitySpeed = 1.102
+CompressibilityPitchPenalty = 0.45
+MaxSafeSpeed = 1.318
+OverspeedDamageRate = 0.12
+BaseDrag = 0.0023
+InducedDrag = 0.013
+ControlSurfaceDrag = 0.0045
+MaxLevelSpeed = 1.037
+IdleDrag = 0.0055
+
+PitchTorque = 0.460
+RollTorque = 0.550
+YawTorque = 0.320
+PitchDamping = 0.355
+RollDamping = 0.320
+YawDamping = 0.390
+InertiaMultiplier = 0.960
+ThrottleAcceleration = 0.024
+EngineDrag = 0.012
+
+;441 
+
+Sound = mustang
+onGroundPitch = 13
+ThrottleUpDown = 0.3
+MaxFuel         = 1200
+FuelConsumption = 1.0
+ThrottleUpDownOnEntity = 2.0
+ThirdPersonDist = 12
+
+UnmountPosition = 0.0,  1.80, -1.82
+
+; W = WWII.  F = Fighter(戦闘機)
+Category = FA
+
+HUD = plane_wwii
+
+AddTexture = p-51d_c
+
+AddSeat = 0.0,  2.00, -1.82
+
+AddPartSlideCanopy = 0, 0.00, -0.6
+
+MobilityYaw = 1.165
+MobilityRoll = 1.966
+MobilityPitch = 1.442
+
+AddPartLG =   2.46, 1.60, -0.36,  0,0,-1, 88.5, 1,0,0, 25
+AddPartLG =  -2.46, 1.60, -0.36,  0,0, 1, 88.5, 1,0,0, 25
+AddPartLG =   0.00, 1.70,  4.00,  1,0, 0, 5
+AddPartLG =   0.00, 1.70,  4.00,  1,0, 0, 4
+AddPartLG =   0.00, 1.70,  4.00,  1,0, 0, 4
+
+AddPartRotor =    0.00,  2.27, 3.87,   1,0, 0
+AddBlade = 1, 0,  0.00,  2.27, 3.87,   0,0,-1
+
+AddWeapon = musmg12_7mmp,  3.39, 1.63, -0.01, -0.5, -0.5
+AddWeapon = musmg12_7mmp,  3.12, 1.61,  0.01, -0.5, -0.5
+AddWeapon = musmg12_7mmp,  2.82, 1.59,  0.01, -0.5, -0.5
+AddWeapon = musmg12_7mmp, -3.39, 1.63, -0.01, -0.5, -0.5
+AddWeapon = musmg12_7mmp, -3.12, 1.61,  0.01, -0.5, -0.5
+AddWeapon = musmg12_7mmp, -2.82, 1.59,  0.01, -0.5, -0.5
+
+;basic ww2 prop plane, AOW3 style
+AddRecipe = "ABC", "DE ", "   ", A, mcheli:airframe, B, mcheli:basicmechanicparts, C, mcheli:engine1, D, mcheli:wheelair, E, mcheli:cannon2
+
+BoundingBox =  0.00, 2.24,  2.63,   1.1, 1.1,  1.5
+BoundingBox =  0.00, 2.15,  1.10,   1.5, 1.5,  1.5
+BoundingBox =  0.00, 2.13, -0.50,   1.5, 1.8
+BoundingBox =  0.00, 1.25, -2.17,   1.5, 1.0
+BoundingBox =  0.00, 2.08, -3.67,   1.2, 2.0
+BoundingBox =  0.00, 2.25, -4.95,   1.0, 1.5
+BoundingBox =  0.00, 2.50, -6.15,   1.0, 1.0
+BoundingBox =  0.00, 2.70, -7.50,   1.0, 1.0
+BoundingBox =  0.00, 3.77, -8.60,   0.2, 2.0,  1.0
+BoundingBox =  0.00, 3.77, -8.70,   0.2, 2.0,  1.0
+BoundingBox =  0.00, 3.77, -8.80,   0.2, 2.0,  1.0
+BoundingBox =  0.00, 3.77, -8.90,   0.2, 2.0,  1.0
+BoundingBox =  0.00, 3.77, -9.00,   0.2, 2.0,  1.0
+BoundingBox =  0.00, 3.77, -9.10,   0.2, 2.0,  1.0
+BoundingBox =  0.00, 3.77, -9.20,   0.2, 2.0,  1.0
+
+BoundingBox =  0.00, 3.77, -8.50,   0.2, 2.0,  1.0
+BoundingBox =  0.00, 3.77, -8.40,   0.2, 2.0,  1.0
+BoundingBox =  0.00, 3.77, -8.30,   0.2, 2.0,  1.0
+BoundingBox =  0.00, 3.77, -8.20,   0.2, 2.0,  1.0
+
+BoundingBox =  1.50, 2.85, -7.95,   1.3, 0.1,  1.0
+BoundingBox = -1.50, 2.85, -7.95,   1.3, 0.1,  1.0
+BoundingBox =  2.20, 1.55, -1.50,   2.8, 0.4,  1.0
+BoundingBox = -2.20, 1.55, -1.50,   2.8, 0.4,  1.0
+BoundingBox =  5.15, 1.75, -1.35,   2.2, 0.3,  1.0
+BoundingBox = -5.15, 1.75, -1.35,   2.2, 0.3,  1.0
+
+RotorSpeed = 2000.0
+
+enableback = true
+DamageFactor = 0.8
+; HandlingBalancePass = prop-maneuverability-2026-06-11; role=energy_fighter

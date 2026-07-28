@@ -5204,7 +5204,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public void setSeat(int idx, MCH_EntitySeat seat) {
       if(idx < this.seats.length) {
-         MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseVehicle.setSeat SeatID=" + idx + " / seat[]" + (this.seats[idx] != null) + " / " + (seat.riddenByEntity != null), new Object[0]);
+         MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseVehicle.setSeat SeatID=" + idx + " / seat[]" + (this.seats[idx] != null) + " / " + (seat != null && seat.riddenByEntity != null), new Object[0]);
          if(this.seats[idx] != null && this.seats[idx].riddenByEntity != null) {
             ;
          }

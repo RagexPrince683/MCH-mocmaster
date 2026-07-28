@@ -1,0 +1,91 @@
+DisplayName = DJI Phantom Farming UAV
+AddDisplayName = en_US, DJI Phantom Farming UAV
+AddDisplayName = ja_JP, 農業用RCドローンUAV
+Weight = 4
+NameOnEarlyASRadar = Small UAV
+NameOnModernASRadar = DJI Phantom Farming UAV
+NameOnEarlyAARadar = Small UAV
+NameOnModernAARadar = DJI Phantom Farming UAV
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
+ItemIconScaleFactor = 3
+
+NewSmallUAV = true
+HideEntity = true
+
+MaxHp = 20
+Speed = 0.45
+;idk what it'd be bc i have no idea what this is but I think I have one its just not a crop duster obv
+CameraPosition = -0.02, -0.06, 0.77
+Sound = radicon_heli
+ThrottleUpDown = 5.0
+ParticlesScale = 0.2
+MaxFuel         = 12
+FuelConsumption = 0.007
+
+
+MobilityYaw = 2.4
+MobilityPitch = 1.4
+MobilityRoll = 1.4
+
+
+HUD = heli
+
+; C = Civilian(民間機)
+
+; New helicopter flight model: special case / unusual rotorcraft baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.38
+MainRotorMaxThrust = 0.142
+RotorInertia = 0.48
+RotorSpoolUpRate = 0.038
+RotorSpoolDownRate = 0.048
+CollectiveResponse = 0.13
+CyclicAuthority = 0.88
+TailRotorAuthority = 1.458
+YawDamping = 0.23
+AngularInertia = 0.44
+TranslationalLiftCoefficient = 0.005
+VerticalDrag = 0.02
+MaxClimbRate = 0.13
+ParasiteDrag = 0.021
+HorizontalRotorThrustScale = 1.6
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.055
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.35
+HelicopterMaxBackwardSpeedScale = 0.35
+HoverAssistStrength = 0.75
+
+Category = UAS
+
+
+AddPartCamera =  -0.02, -0.06, 0.00, true, true
+AddPartCamera =  -0.02, -0.06, 0.00, true, false
+
+
+
+AddSeat =  -0.03, 0.36, 0.00
+
+
+AddRotor = 1, 0,  0.57,  0.38, -0.49,  0, -1, 0
+AddRotor = 1, 0,  -0.53, 0.38, -0.60,  0, -1, 0
+
+AddRotor = 1, 0,  0.45, 0.38,  0.60,  0, -1, 0
+AddRotor = 1, 0,  -0.61,  0.38, 0.49,  0, -1, 0
+
+
+
+AddWeapon = fdronedispenser_water_till,  0.04, -0.14, -0.47,   1.0, 0.0
+AddWeapon = fdronedispenser_seed,        0.04, -0.14, -0.47,   1.0, 0.0
+AddWeapon = fdronedispenser_fertilizer,  0.04, -0.14, -0.47,   1.0, 0.0
+
+
+;basic unarmed drone
+AddRecipe = "ABC", "   ", "   ", A, mcheli:item.ingot_aluminum, B, mcheli:fcs, C, mcheli:basicmechanicparts
+
+
+BoundingBox =  -0.03, 0.36, 0.00, 1.0, 1.0
+
+ThrottleUpDown = 0.8

@@ -1,0 +1,72 @@
+DisplayName = FPV Drone with RPG-7 Warhead
+Weight = 5
+NameOnEarlyASRadar = Small UAV
+NameOnModernASRadar = FPV Drone with RPG-7 Warhead
+NameOnEarlyAARadar = Small UAV
+NameOnModernAARadar = FPV Drone with RPG-7 Warhead
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
+MaxHp = 5
+Speed = 0.8
+CameraPosition = 0.00, -0.2, 0.4
+Sound = fpvdrone
+ThrottleUpDown = 2.0
+ParticlesScale = 0.1
+MaxFuel         = 12
+ExplosionBlock = 0
+FuelConsumption = 0.040
+Stealth = 0.4
+ItemIconScaleFactor = 3
+
+
+explosionSizeByCrash = 10
+
+NewSmallUAV = true
+HideEntity = true
+
+HUD = heli
+
+; C = Civilian(–¯ŠÔ‹@)
+
+; New helicopter flight model: special case / unusual rotorcraft baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.24
+MainRotorMaxThrust = 0.105
+RotorInertia = 0.34
+RotorSpoolUpRate = 0.045
+RotorSpoolDownRate = 0.055
+CollectiveResponse = 0.16
+CyclicAuthority = 0.96
+TailRotorAuthority = 1.552
+YawDamping = 0.24
+AngularInertia = 0.3
+TranslationalLiftCoefficient = 0.005
+VerticalDrag = 0.018
+MaxClimbRate = 0.13
+ParasiteDrag = 0.018
+HorizontalRotorThrustScale = 1.70
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.055
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.35
+HelicopterMaxBackwardSpeedScale = 0.35
+HoverAssistStrength = 0.75
+
+Category = sUAS
+
+MobilityYaw = 10.0
+MobilityPitch = 10.0
+MobilityRoll = 10.0
+
+;AddFixRotSeat =  0.0, 1.0, 0.0
+
+AddRotor = 1, 0, 0.5689,  0.3219, 0.3443,  0 ,1, 0
+AddRotor = 1, 0, -0.5898,  0.3219, 0.3443,  -0 , 1, 0
+AddRotor = 1, 0, 0.5105,  -0.3219, -0.6412,  0, 1, 0
+AddRotor = 1, 0, -0.5274,  -0.3219, -0.6412,  -0 , 1, 0
+
+AddWeapon = fpvbomb, 0.1435, 0.0799, 0.1506,  0,0
+
+AddRecipe = "ABC", "D  ", "   ", A, mcheli:item.ingot_aluminum, B, mcheli:electronics, C, mcheli:fcs2, D, mcheli:basicmechanicparts
+

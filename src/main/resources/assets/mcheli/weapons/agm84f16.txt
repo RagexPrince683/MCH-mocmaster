@@ -1,0 +1,44 @@
+DisplayName = AGM-84 Harpoon
+Type = TVMissile
+IsHeatSeekerMissile = true
+IsRadarMissile = false
+MaxLockOnAngle = 25
+PdHDNMaxDegree = 180.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 0
+PassiveRadar = false
+PassiveRadarLockOutCount = 0
+LaserGuidance = false
+HasLaserGuidancePod = false
+ActiveRadar = false
+ScanInterval = 1
+SpeedDependsAircraft = false
+Power = 1000
+Acceleration = 2.9
+Flaming = true
+Sight = MoveSight
+Delay = 5
+ModelBullet = agm84
+Sound = mlrs
+SoundPitch = 0.8
+SoundVolume = 15
+
+;Acceleration = 0.5
+Explosion = 14
+;Explosive mass	50 kg kg
+;Power = 1080
+ExplosionBlock = 5
+ExplosionInWater = 14
+ModeNum = 2
+DamageFactor = tank, 2.0
+DamageFactor = plane, 4.5
+DamageFactor = vehicle 4.5
+DamageFactor = heli, 4.5
+DamageFactor = player, 20.0
+
+
+MaxAmmo = 2
+SuppliedNum = 1
+Item =  4, iron_ingot
+Item =  8, gunpowder
+Item =  2, redstone

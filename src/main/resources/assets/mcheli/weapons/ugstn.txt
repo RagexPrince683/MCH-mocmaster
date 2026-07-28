@@ -1,0 +1,33 @@
+DisplayName = 533mm UGST Nuclear Torpedo 
+Type = torpedo
+Power = 12000
+ModelBullet = ugst
+Acceleration = 1.1
+Accelerationinwater = 12
+Explosion = 15
+ExplosionInWater = 25
+Flaming = false
+Sight = None
+Delay = 20
+GuidedTorpedo = true
+Gravity = -0.01
+GravityInWater = 0
+ReloadTime = 400
+Round = 2
+
+nukeyield = 100
+;I hate hbm proportions
+;150kt
+
+DamageFactor = tank, 2000.0
+DamageFactor = plane, 1000.0
+DamageFactor = vehicle 400.5
+DamageFactor = heli, 400.5
+DamageFactor = player, 2000.0
+Sound = bomb_snd
+
+MaxAmmo = 12
+SuppliedNum = 4
+Item =  8, hbm:item.ammo_nuke,2
+Item =  12, hbm:item.fluid_barrel_full,39
+

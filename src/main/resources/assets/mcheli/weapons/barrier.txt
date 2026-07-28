@@ -1,0 +1,51 @@
+DisplayName = Skif (Stugna-P) [RK-2S - ATGM]
+Type = ATMissile
+IsHeatSeekerMissile = true
+IsRadarMissile = false
+MaxLockOnAngle = 25
+PdHDNMaxDegree = 180.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 0
+PassiveRadar = false
+PassiveRadarLockOutCount = 0
+LaserGuidance = false
+HasLaserGuidancePod = false
+ActiveRadar = false
+ScanInterval = 1
+SpeedDependsAircraft = true
+FixMode = 1
+ModeNum = 2
+Power = 1000
+Piercing = 1
+Acceleration = 3
+Explosion = 4
+LockTime = 20
+
+ExplosionInWater = 2
+
+ExplosionBlock = 3
+Flaming = false
+Sight = MoveSight
+Delay = 100
+ModeNum = 2
+ModelBullet = 9m113
+Sound = missile_atgm2_snd
+
+
+DamageFactor = tank, 2.0
+DamageFactor = plane, 1.0
+DamageFactor = vehicle 4.5
+DamageFactor = heli, 4.5
+DamageFactor = player, 20.0
+
+;DEBUG:Manual control only
+;FixMode = 1
+
+; DEBUG
+;RigidityTime = 30
+
+MaxAmmo = 2
+SuppliedNum = 1
+Item =  2, iron_ingot
+Item =  6, gunpowder
+Item =  2, redstone

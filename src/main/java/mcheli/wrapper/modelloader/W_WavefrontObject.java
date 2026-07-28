@@ -56,12 +56,28 @@ public class W_WavefrontObject extends W_ModelCustom {
    public W_WavefrontObject(ResourceLocation resource) throws ModelFormatException {
       this.fileName = resource.toString();
 
+      // Try Minecraft's resource manager first
       try {
          IResource e = Minecraft.getMinecraft().getResourceManager().getResource(resource);
          this.loadObjModel(e.getInputStream());
-      } catch (IOException var3) {
-         throw new ModelFormatException("IO Exception reading model format", var3);
+         return;
+      } catch (IOException ignored) {
+         // Fall through to MCH_ResourceHelper for addon directory files
       }
+
+      // Try MCH_ResourceHelper for addon directory files
+      String assetPath = "assets/" + resource.getResourceDomain() + "/" + resource.getResourcePath();
+      InputStream is = mcheli.MCH_ResourceHelper.openResourceStream(assetPath);
+      if (is != null) {
+         try {
+            this.loadObjModel(is);
+            return;
+         } catch (Exception var3) {
+            throw new ModelFormatException("IO Exception reading model format", var3);
+         }
+      }
+
+      throw new ModelFormatException("IO Exception reading model format:" + this.fileName);
    }
 
    public W_WavefrontObject(String fileName, URL resource) throws ModelFormatException {

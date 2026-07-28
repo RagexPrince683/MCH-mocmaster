@@ -1,0 +1,187 @@
+DisplayName = Magach 5
+AddDisplayName = zh_CN,Magach 5 巴顿 主战坦克
+NameOnEarlyASRadar = Tank
+NameOnModernASRadar = Magach 5
+NameOnEarlyAARadar = Tank
+NameOnModernAARadar = Magach 5
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.40
+ItemID = 30100
+Weight = 107000
+MaxHp = 265
+Speed = 0.3
+Sound = mfourtyseven
+MinRotationPitch = -19
+MaxRotationPitch = 9
+MobilityRoll = 0
+Gravity = -0.61
+GravityInWater = -1.0
+DamageFactor = 0.0
+CameraZoom = 8
+CameraPosition = 0.0,  3.9, 0.0, true
+CameraRotationSpeed = 17
+;EnableEntityRadar = true
+MaxFuel         = 2400
+FuelConsumption = 3.2
+DefaultFreelook = true
+
+ExplosionSizeByCrash = 15
+
+Category = MBT/MED
+
+EnableNightvision = true
+
+FlareType = 10
+
+ThirdPersonDist = 12
+
+
+ThrottleUpDown = 1.5
+MobilityYawOnGround = 2.5
+OnGroundPitchFactor = 5
+OnGroundRollFactor  = 5
+MotionFactor = 0.95
+
+
+
+SubmergedDamageHeight = 2
+
+HideEntity = true
+
+StepHeight = 1.8
+
+
+; Tank or Car or Unknown
+WeightType = tank
+
+WeightedCenterZ = 0.0
+
+
+HUD = mbt_hudtwo, gunnernone
+
+AddGunnerSeat =  0.00,  1.50,  0.00,    0.00,  2.50,  0.25,  false, -19, 9, true
+
+unmountposition = -0.0,  1.50,  0.0
+
+;left mg
+AddGunnerSeat = 0.506,  3.04, -0.803,   0.506, 4, -0.803, false, -50, 5, true
+
+;right mg
+AddGunnerSeat =  -0.7064,  3.3630, -0.6965,    -0.7064,  4.3630, -0.6965,  false, -50, 5, true
+
+
+;27.21z
+
+EnableBack = true
+
+;PivotTurnThrottle を0より大きい値にすると超信地旋回ができなくなる。デフォルトは0
+PivotTurnThrottle = 0.0
+
+SetWheelPos =  1.65,  -0.24,  2.34, 1.23, 0.11, -0.91, -2.01, -3.11
+
+
+AddTrackRoller = -1.82,  1.0358,  3.3731
+AddTrackRoller = -1.82,  0.2122,  2.3434
+AddTrackRoller = -1.82,  0.2122,  1.2318
+AddTrackRoller = -1.82,  0.2122,  0.1156
+AddTrackRoller = -1.82,  0.2122, -0.9145
+AddTrackRoller = -1.82,  0.2122, -2.0182
+AddTrackRoller = -1.82,  0.2122, -3.1103
+AddTrackRoller = -1.82,  1.05, -4.05
+
+
+AddCrawlerTrack = false, 0.22, -1.5,  -0.2713/ 2.3816,  0.1/3.2,  0.8023/ 3.7773,  1.0358/ 3.84,  1.2692/ 3.7773,  1.5027/ 3.3731, 1.5027/  0.0,  1.5/ -4.0,  1.2552/ -4.3935,  1.0562/ -4.452,  0.7841/ -4.3935,  0.2/ -3.8,-0.2713/ -3.2,-0.2713/ 0.0
+
+AddPartWeapon = magm4890mm_gun_m3/magm48he/magm48heat, false, true, false,  0.00, 2.4475, 0.00, 0
+;/m48m2
+;-55.20
+AddPartWeaponChild = false, true, 0.00, 2.41, 1.368, 0.0
+AddPartWeaponChild = false, true, 0.00, 2.41, 1.368, 0.5
+AddTurretWeapon = magm4890mm_gun_m3, 0.00, 2.3915, 0.0,  0.0, 0.0, true,1, 0,-360,360, -19, 9
+;;AddTurretWeapon = magm48290mm_gun_m3,     0.00, 2.3915, 0.0,  0.0, 0.0, true,1, 0,-360,360, -19, 9
+AddTurretWeapon = magm48he,      0.00, 2.3915, 0.0,  0.0, 0.0, true,1, 0,-360,360, -19, 9
+AddTurretWeapon = magm48heat,      0.00, 2.3915, 0.0,  0.0, 0.0, true,1, 0,-360,360, -19, 9
+AddTurretWeapon = m607.62mm,      0.43, 2.6, 2.0,  0.0, 0.0, true,1, 0,-360,360, -19, 9
+
+;-76.60
+
+;L
+AddPartTurretWeapon = magach5lmg, false, true, true, 1.1686, 3.35, 0.0715
+;;AddPartWeaponChild = false, true, 1.1686, 3.35, 0.0715, 0.0
+
+
+;left lmg fn mag
+AddturretWeapon = magach5lmg,    1.1686, 3.3810, 0.0715,   0.0, 0.0, false, 2, 0, -120,60, -50,5
+
+;R
+AddPartTurretWeapon = magach5lmg2, false, true, true, -1.1731, 3.579, -0.2298
+
+;right lmg
+AddturretWeapon = magach5lmg2,    -1.1731, 3.5790, -0.2298,   0.0, 0.0, false, 3, 0, -60,120, -50,5
+
+
+ArmorMinDamage = 20
+
+ArmorDamageFactor = 0.95
+
+
+;side
+
+BoundingBox = 0.0, 1.0, 1.5, 2.5, 1.0, 0.30
+
+BoundingBox = 0.0, 1.0, 0.0, 2.5, 1.0, 0.30
+
+BoundingBox = 0.0, 1.0, -2.5, 2.5, 1.0, 0.30
+
+
+;back
+BoundingBox = 0.0, 1.45, -3.45, 2.45, 1.0, 0.41
+
+BoundingBox = 0.0, 0.65, -3.15, 2.45, 0.6, 0.26
+
+;side top
+
+BoundingBox = 0.0, 1.25, -1.0, 2.45, 1.0, 0.4
+
+;forward side top 
+
+BoundingBox = 0.0, 1.15, 1.45, 2.45, 1.0, 0.4
+
+
+;very bottom 135
+BoundingBox = 0.0, 0.35, 1.95, 2.4, 0.2, 0.14
+;160
+BoundingBox = 0.0, 0.55, 2.05, 2.4, 0.2, 0.13
+;
+BoundingBox = 0.0, 0.75, 2.15, 2.4, 0.2, 0.12
+;155
+BoundingBox = 0.0, 0.95, 2.25, 2.4, 0.2, 0.13
+;145
+BoundingBox = 0.0, 1.15, 2.45, 2.4, 0.2, 0.13
+
+;203 upper
+BoundingBox = 0.0, 1.35, 2.65, 2.4, 0.2, 0.09
+
+;225
+BoundingBox = 0.0, 1.5, 2.0, 2.4, 0.2, 0.08
+
+;213
+BoundingBox = 0.0, 1.6, 1.75, 2.4, 0.2, 0.09
+
+;turret ring 175?
+BoundingBox = 0.0, 1.8, 0.8, 2.4, 0.2, 0.11
+;side turret ring 70mm
+BoundingBox = 0.0, 1.8, 0.75, 2.45, 0.2, 0.28
+
+
+;turret 190
+BoundingBox = 0.0, 2.35, 0.0, 1.7, 1.7, 0.10
+
+
+;the m48 recipe but modern shit + cannon
+
+AddRecipe = "ABC", "DEF", "G  ", A, mcheli:mediumchassis, B, mcheli:cannon2, C, mcheli:engine3, D, mcheli:tanktracks, F, mcheli:advancedmechanicparts, E, mcheli:electronics, G, mcheli:composite
+
+;direct m48 upgrade
+AddRecipe = "ABC", "D  ", "   ", A, mcheli:m48, B, mcheli:electronics, C, mcheli:composite, D, mcheli:cannon2

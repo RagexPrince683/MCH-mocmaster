@@ -1,0 +1,168 @@
+EnableGunnerMode = true
+HasBombSight = false
+DisplayName = Mitsubishi F1M "Pete"
+AddDisplayName = en_US, Mitsubishi F1M "Pete"
+AddDisplayName = ja_JP, 三菱 零式水上観測機
+NameOnEarlyASRadar = Prop Aircraft
+NameOnModernASRadar = Mitsubishi F1M "Pete"
+NameOnEarlyAARadar = Prop Aircraft
+NameOnModernAARadar = Mitsubishi F1M "Pete"
+ChaffWaitTime = 0
+ChaffUseTime = 0
+ThrottleDownFactor = 0.20
+ItemID = 28709
+Weight = 4233
+CanMountShip = true
+MaxHp = 100
+Speed = 0.644
+HasBallisticComputer = true
+Float = true
+Sound = prop_fighter
+
+EnableBack = true
+
+SoundPitch = 1.3
+
+ThrottleUpDown = 0.3
+MaxFuel         = 1320
+FuelConsumption = 1.234
+ThirdPersonDist = 12
+
+RotorSpeed = 2000.0
+
+; W = WWII.  R = Reconnaissance(偵察機)
+Category = RFLP
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 1.200
+EngineThrust = 1.296
+NewFlightGravity = 0.0081
+NewFlightThrottleResponse = 0.920
+NewFlightThrottleChangeRateUp = 0.0072
+NewFlightThrottleChangeRateDown = 0.0095
+NewFlightIdleThrottle = 0.075
+NewFlightEngineBrakeDrag = 0.0054
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.16
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = true
+NewFlightCombatFlapLift = 0.145
+NewFlightCombatFlapDrag = 0.016
+NewFlightCombatFlapControl = 0.190
+NewFlightCombatFlapOverspeed = 0.680
+FlightCeiling = 8500
+FlightCeilingRange = 54
+StallSpeed = 0.138
+CriticalAoA = 22.00
+TimeUntilStallPastCriticalAoA = 1.25
+TimeAfterStallUntilPitchDown = 1.05
+StallLiftLoss = 0.820
+AoADragMultiplier = 2.700
+StallInstability = 0.560
+StallRecoverySpeed = 0.197
+StallSpeedFactor = 0.24
+StallStrength = 1.22
+StallRecoveryRate = 0.22
+StallBreakStrength = 0.90
+StallPitchRecoveryStrength = 0.76
+DiveSpeedMultiplier = 1.2
+MaxComfortableG = 5
+MaxStructuralG = 8.5
+GControlPenalty = 0.680
+CompressibilitySpeed = 0.657
+CompressibilityPitchPenalty = 0.45
+MaxSafeSpeed = 0.786
+OverspeedDamageRate = 0.12
+BaseDrag = 0.0028
+InducedDrag = 0.013
+ControlSurfaceDrag = 0.0045
+MaxLevelSpeed = 0.618
+IdleDrag = 0.0055
+
+PitchTorque = 0.380
+RollTorque = 0.420
+YawTorque = 0.270
+PitchDamping = 0.420
+RollDamping = 0.380
+YawDamping = 0.455
+InertiaMultiplier = 1.250
+ThrottleAcceleration = 0.022
+EngineDrag = 0.014
+
+MobilityYaw = 1.269
+MobilityPitch = 1.537
+MobilityRoll = 1.404
+
+; 水しぶき を発生させる
+;AddParticleSplash = 座標X,   Y,    Z,   表示数, サイズ,  速度,  表示時間, 上昇, 重力
+AddParticleSplash =  0.3, -0.60,   4.0,   3,      5.0,    1.1,   20,       0.30,  -0.03
+AddParticleSplash = -0.3, -0.60,   4.0,   3,      5.0,    1.1,   20,       0.30,  -0.03
+AddParticleSplash =  0.6, -0.60,   1.0,   2,      9.0,    1.1,   60,       0.01,   0
+AddParticleSplash = -0.6, -0.60,   1.0,   2,      9.0,    1.1,   60,       0.01,   0
+
+AddParticleSplash =  5.0,  0.01,   1.2,   2,      6.0,    1.1,   60,       0.01,   0
+AddParticleSplash = -5.0,  0.01,   1.2,   2,      6.0,    1.1,   60,       0.01,   0
+
+HUD = plane_wwii, gunner
+
+AddSeat = 0.0,  1.63, -0.09
+
+unmountposition = 0.0,  2.13, -0.09
+
+AddSeat = 0.0,  1.58, -1.05
+
+AddPartWeapon = f1lewis7_7mm, false, true, true,  0.00, 2.58, -1.80
+
+AddPartRotor =    0.00,  1.93, 3.92,   1,0, 0
+AddBlade = 1, 0,  0.00,  1.93, 3.92,   0,0,-1
+
+AddWeapon = f1mg7_7mm,     0.30, 2.63, 2.02,  0.0,-2.0
+AddWeapon = f1mg7_7mm,    -0.30, 2.63, 2.02,  0.0,-2.0
+AddWeapon = f1type97,      2.30, 1.20, 0.00,  0.0, 0.0
+AddWeapon = f1type97,     -2.30, 1.20, 0.00,  0.0, 0.0
+AddWeapon = f1lewis7_7mm,  0.00, 2.58,-1.80,  0.0, 0.0, false,2, 180,-120,120, -80, 30
+
+;basic ww2 prop plane float, AOW3 style
+AddRecipe = "ABC", "DED", "   ", A, mcheli:airframe, B, mcheli:basicmechanicparts, C, mcheli:engine1, D, mcheli:wheelair, E, mcheli:cannon2
+
+AddPartWing =  -1.06, 3.21, 0.30,  0, 1,0, -96
+AddPartWing =   1.06, 3.21, 0.30,  0,-1,0, -96
+
+BoundingBox =  0.00, 2.00, 1.20,  1.2, 1.2
+BoundingBox =  0.00, 1.80, -0.00,  1.2, 1.2
+BoundingBox =  0.00, 1.90, -1.20,  1.2, 1.0
+BoundingBox =  0.00, 1.90, -2.20,  0.85, 1.0
+BoundingBox =  0.00, 2.00, -3.05,  0.85, 0.85
+BoundingBox =  0.00, 2.00, -3.9,  0.85, 0.85
+BoundingBox =  0.00, 2.00, -4.75,  0.85, 0.85
+
+BoundingBox =  0.80, 1.90, -4.35,  0.9, 0.2
+BoundingBox =  -0.80, 1.90, -4.35,  0.9, 0.2
+
+BoundingBox =  1.20, 1.90, -4.35,  0.8, 0.2
+BoundingBox =  -1.20, 1.90, -4.35,  0.8, 0.2
+
+BoundingBox = -1.5, 1.20,  0.40,  2.0, 0.3
+BoundingBox =  1.5, 1.20,  0.40,  2.0, 0.3
+
+BoundingBox = -3.5, 1.40,  0.40,  2.0, 0.3
+BoundingBox =  3.5, 1.40,  0.40,  2.0, 0.3
+
+BoundingBox = -1.0, 3.20,  1.10,  2.0, 0.3
+BoundingBox =  1.0, 3.20,  1.10,  2.0, 0.3
+
+BoundingBox = -3.0, 3.30,  1.10,  2.0, 0.3
+BoundingBox =  3.0, 3.30,  1.10,  2.0, 0.3
+
+BoundingBox = 0.0, 2.75, -3.85, 0.2, 1.5
+BoundingBox = 0.0, 2.85, -4.05, 0.2, 1.5
+BoundingBox = 0.0, 3.15, -4.25, 0.2, 1.5
+BoundingBox = 0.0, 3.15, -4.45, 0.2, 1.7
+BoundingBox = 0.0, 3.15, -4.65, 0.2, 1.5
+BoundingBox = 0.0, 3.15, -4.85, 0.2, 1.5
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; Mitsubishi F1M Pete floatplane.
+; HandlingBalancePass = prop-maneuverability-2026-06-11; role=light_float_fighter

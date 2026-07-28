@@ -1,0 +1,95 @@
+DisplayName = Robinson R44 Float
+AddDisplayName = ja_JP, ロビンソン R44 フロート
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = Robinson R44 Float
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = Robinson R44 Float
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
+ItemID = 28823
+Weight = 1505
+MaxHp = 100
+Speed = 1.37
+Float = true
+Sound = r44_heli
+MaxFuel         = 300
+FuelConsumption = 0.104
+ThirdPersonDist = 20
+
+; New helicopter flight model: light scout/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 0.7
+MainRotorMaxThrust = 0.214
+RotorInertia = 0.8
+RotorSpoolUpRate = 0.029
+RotorSpoolDownRate = 0.037
+CollectiveResponse = 0.1
+CyclicAuthority = 0.84
+TailRotorAuthority = 1.35
+YawDamping = 0.19
+AngularInertia = 0.8
+TranslationalLiftCoefficient = 0.005
+VerticalDrag = 0.024
+MaxClimbRate = 0.13
+ParasiteDrag = 0.024
+HorizontalRotorThrustScale = 1.65
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.055
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.35
+HelicopterMaxBackwardSpeedScale = 0.35
+HoverAssistStrength = 0.75
+
+
+Soundpitch = 1.65
+SoundVolume = 15
+
+; C = Civilian(民間機)
+Category = LU/TRH
+
+HUD = civilian_aircraft, none, none, none
+
+AddTexture = robinson_r44_b
+AddTexture = robinson_r44_g
+AddTexture = robinson_r44_y
+AddTexture = robinson_r44_fire
+AddTexture = robinson_r44_j4m
+
+
+AddRotor = 1,  0,  0.00,  4.55,  0.00,  0.0, 1.0, 0.0
+AddRotor = 1,  0,  0.47,  2.61, -8.55,  1.0, 0.0, 0.0
+
+AddSeat = -0.43,  0.91,  1.76
+AddSeat =  0.43,  0.91,  1.76
+AddSeat = -0.43,  0.95,  0.64
+AddSeat =  0.43,  0.95,  0.64
+
+AddPartHatch =  0.87, 1.01, 2.48,  0.046, -1.0,  0.51,  70
+AddPartHatch = -0.87, 1.01, 2.48,  0.046,  1.0, -0.51,  70
+AddPartHatch =  0.87, 1.01, 2.48,  0.046, -1.0,  0.51,  70
+AddPartHatch = -0.87, 1.01, 2.48,  0.046,  1.0, -0.51,  70
+
+;basic unarmed modern helicopter, AOW3 style
+AddRecipe = "ABC", "DE ", "   ", A, mcheli:airframe, B, mcheli:heliblade, C, mcheli:engine2, D, mcheli:wheelair, E, mcheli:electronics
+
+BoundingBox = 0.0, 3.5, 0.0, 1.0, 2.0, 1.5
+
+BoundingBox = 0.0, 1.33, -1.00, 2.0, 2.0
+BoundingBox = 0.0, 2.06, -0.50, 1.0, 1.0
+BoundingBox = 0.0, 2.06, -1.50, 1.0, 1.0
+BoundingBox = 0.0, 2.06, -2.50, 1.0, 1.0
+BoundingBox = 0.0, 2.06, -3.50, 1.0, 1.0
+BoundingBox = 0.0, 2.06, -4.50, 1.0, 1.0
+BoundingBox = 0.0, 2.06, -5.50, 1.0, 1.0
+BoundingBox = 0.0, 2.06, -6.50, 1.0, 1.0
+BoundingBox = 0.0, 2.06, -7.50, 1.0, 1.0
+BoundingBox = 0.0, 2.56, -8.50, 1.0, 1.5, 1.25
+
+unmountposition = -0.43,  1.50,  1.76
+
+InventorySize = 27
+
+
+ThrottleUpDown = 0.5
+DamageFactor = 0.8

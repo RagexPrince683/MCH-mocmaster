@@ -46,6 +46,24 @@ public class MCH_InputFile {
       }
    }
 
+   /**
+    * Opens a classpath resource for reading (UTF-8).
+    * The resourcePath should be like "/assets/mcheli/helicopters/ah-64.txt"
+    * or "assets/mcheli/helicopters/ah-64.txt" (leading / is optional).
+    */
+   public boolean openClasspath(String resourcePath) {
+      this.close();
+      this.file = null;
+
+      try {
+         this.br = MCH_ResourceHelper.openResource(resourcePath);
+         return this.br != null;
+      } catch (Exception e) {
+         e.printStackTrace();
+         return false;
+      }
+   }
+
    public String readLine() {
       try {
          return this.br != null?this.br.readLine():null;

@@ -1,0 +1,218 @@
+DisplayName = Su-27 Flanker-B
+Weight = 36376
+CanMountShip = true
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = Su-27 Flanker-B
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = Su-27 Flanker-B
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
+MaxHp = 100
+Speed = 4.0
+EnableNightVision = false
+EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AA
+EnableEjectionSeat = true
+ThrottleUpDown = 0.3
+FlareType = 4
+HasChaff = true
+ParticlesScale = 0.7
+EnableSeaSurfaceParticle = true
+MaxFuel         = 37600
+FuelConsumption = 10.652
+ThirdPersonDist = 20
+Sound = sutwentyseven
+
+SweepWingSpeed = 0.85
+
+; M = Military(軍用機).  F = Fighter(戦闘機)
+Category = MF/ASF
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 1.650
+EngineThrust = 2.867
+NewFlightGravity = 0.0080
+NewFlightThrottleResponse = 1.160
+NewFlightThrottleChangeRateUp = 0.0052
+NewFlightThrottleChangeRateDown = 0.0072
+NewFlightIdleThrottle = 0.085
+NewFlightEngineBrakeDrag = 0.0029
+NewFlightLowThrottleLiftRetention = 0.720
+NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = true
+NewFlightCombatFlapLift = 0.120
+NewFlightCombatFlapDrag = 0.013
+NewFlightCombatFlapControl = 0.130
+NewFlightCombatFlapOverspeed = 0.780
+FlightCeiling = 16500
+FlightCeilingRange = 72
+StallSpeed = 0.660
+CriticalAoA = 27.00
+TimeUntilStallPastCriticalAoA = 0.90
+TimeAfterStallUntilPitchDown = 0.85
+StallLiftLoss = 0.840
+AoADragMultiplier = 2.550
+StallInstability = 0.440
+StallRecoverySpeed = 0.937
+StallSpeedFactor = 0.18
+StallStrength = 1.15
+StallRecoveryRate = 0.24
+StallBreakStrength = 1.00
+StallPitchRecoveryStrength = 0.88
+DiveSpeedMultiplier = 1.28
+MaxComfortableG = 7.5
+MaxStructuralG = 10.0
+GControlPenalty = 0.680
+CompressibilitySpeed = 3.84
+CompressibilityPitchPenalty = 0.5
+MaxSafeSpeed = 4.88
+OverspeedDamageRate = 0.14
+BaseDrag = 0.0015
+InducedDrag = 0.0075
+ControlSurfaceDrag = 0.0035
+MaxLevelSpeed = 4
+IdleDrag = 0.0034
+
+MobilityYaw = 1.429
+MobilityPitch = 1.731
+MobilityRoll = 2.015
+PitchTorque = 0.430
+RollTorque = 0.490
+YawTorque = 0.320
+PitchDamping = 0.410
+RollDamping = 0.365
+YawDamping = 0.450
+InertiaMultiplier = 1.300
+ThrottleAcceleration = 0.037
+EngineDrag = 0.01
+
+HUD = planenvgonly
+
+enableback = true
+
+AddTexture = su27b-ru_2
+AddTexture = su27b-ru_3
+AddTexture = su27b-ru_4
+AddTexture = su27b-antares
+AddTexture = su27b-cn
+AddTexture = su27b-cn_2
+AddTexture = su27b-cn_3
+AddTexture = su27b-cn_4
+AddTexture = su27b-idn
+AddTexture = su27b-ua
+
+AddSeat = 0.0, 2.2757, 2.8290
+
+unmountposition = 0.0, 1.9757, 2.8290
+
+AddPartLG    =  0.0,    2.0280,  0.2609, -1, 0,   0, 110
+AddPartLG    =  0.0,    2.1071, -1.2156, -1, 0,   0, 60
+AddPartLGRev = -0.3011, 1.8716,  1.2412,  0, 0,  -1, 100
+
+AddPartLG    =  1.9987, 2.1521, -5.9321, -1,-0.4, 0, 80, 0, -1, 0, 90
+AddPartLGRev =  2.3540, 2.2603, -4.1278,  0, 0,   1, 100
+AddPartLGRev =  2.2778, 2.1853, -5.5007,  0, 0,   1, 110
+
+AddPartLG    = -1.9987, 2.1521, -5.9321, -1, 0.4, 0, 90, 0,  1, 0, 90
+AddPartLGRev = -2.3540, 2.2603, -4.1278,  0, 0,  -1, 100
+AddPartLGRev = -2.2778, 2.1853, -5.5007,  0, 0,  -1, 110
+
+AddPartWeaponMissile = su27r-73e,  false, false, false,   6.5259, 1.8519, -7.6642
+AddPartWeaponMissile = su27r-73e,  false, false, false,  -6.5259, 1.8519, -7.6642
+AddPartWeaponMissile = su27r-73e,  false, false, false,   4.9154, 1.6903, -6.1041
+AddPartWeaponMissile = su27r-73e,  false, false, false,  -4.9154, 1.6903, -6.1041
+
+AddPartWeaponMissile = su27x-25_2, false, false, false,   1.2223, 0.4577, -5.0653
+AddPartWeaponMissile = su27x-25_2, false, false, false,  -1.2223, 0.4577, -5.0653
+AddPartWeaponMissile = su27x-25_2, false, false, false,   0.00,   1.6277, -3.2562
+AddPartWeaponMissile = su27x-25_2, false, false, false,  -0.00,   1.6522, -9.1284
+
+AddWeapon = su27gsh-30-1, -1.0126, 2.4849,  1.1137,  0.0, -1.0
+AddWeapon = su27r-73e,      6.5259, 1.8519, -7.6642,  0.0, -1.0
+AddWeapon = su27r-73e,     -6.5259, 1.8519, -7.6642,  0.0, -1.0
+AddWeapon = su27r-73e,      4.9154, 1.6903, -6.1041,  0.0, -1.0
+AddWeapon = su27r-73e,     -4.9154, 1.6903, -6.1041,  0.0, -1.0
+
+AddWeapon = su27x-25_2,      1.2223, 0.4577, -5.0653,  0.0, -1.0
+AddWeapon = su27x-25_2,     -1.2223, 0.4577, -5.0653,  0.0, -1.0
+AddWeapon = su27x-25_2,      0.00,   1.6277, -3.2562,  0.0, -1.0
+AddWeapon = su27x-25_2,      0.00,   1.6522, -9.1284,  0.0, -1.0
+
+AddWeapon = targeting_pod_ph50s_ru,   0.0, 3.1,-0.6,    0.0, 0.0
+AddWeapon = uhf_radar,  0.00, 3.0, 0.0,    0.0, 0.0
+
+AddPartSteeringWheel =  1.9192,  1.8065, -10.4225,  1,  0,  0,   10
+AddPartSteeringWheel = -1.9192,  1.8065, -10.4225, -1,  0,  0,   10
+
+AddPartSteeringWheel =  2.3215,  2.3553, -6.6984,   1,  0, -0.4, 20
+AddPartSteeringWheel = -2.3215,  2.3553, -6.6984,  -1,  0, -0.4, 20
+
+AddPartSteeringWheel =  2.2075,  2.6861, -9.4737,   0, -1,  0.2, 20
+AddPartSteeringWheel = -2.2075,  2.6861, -9.4737,   0, -1,  0.2, 20
+
+AddPartSteeringWheel =  0.00,    2.3903,  3.1111,   0,  0, -1,   20
+
+AddPartSteeringWheel =   0, 0, 0, 0, 0, 0, 0
+AddPartSteeringWheel =   0, 0, 0, 0, 0, 0, 0
+
+AddPartCanopy = 0.00, 0, 0, 0,0,0,  0
+
+AddPartHatch =  0.00,    3.2313, -1.0219,   1,  0, 0, 53
+AddPartHatch =  0.00,    2.6710, -4.0226,  -1,  0, 0, 45
+
+BoundingBox =  0.0, 2.6, 1.0,  2.0, 1.4
+
+BoundingBox =  0.0, 2.2, -1.0,  2.0, 1.4
+
+BoundingBox =  0.0, 1.6, -4,  4.0, 2.0
+
+BoundingBox =  0.0, 1.6, -8,  4.0, 1.4
+
+BoundingBox = -2.9, 2.2, -5.5,  3.0, 0.8
+BoundingBox =  2.9, 2.2, -5.5,  3.0, 0.8
+
+BoundingBox = -5.3, 2.2, -6.9,  3.0, 0.8
+BoundingBox =  5.3, 2.2, -6.9,  3.0, 0.8
+
+BoundingBox = 2.3, 2.28, -7.36, 0.5, 2.8
+BoundingBox = -2.3, 2.28, -7.36, 0.5, 2.8
+
+BoundingBox = 2.3, 2.88, -7.86, 0.5, 2.8
+BoundingBox = -2.3, 2.88, -7.86, 0.5, 2.8
+
+BoundingBox = 2.3, 3.48, -8.36, 0.5, 2.8
+BoundingBox = -2.3, 3.48, -8.36, 0.5, 2.8
+
+BoundingBox = 2.3, 3.68, -8.86, 0.5, 2.8
+BoundingBox = -2.3, 3.68, -8.86, 0.5, 2.8
+
+BoundingBox = 2.3, 3.68, -9.36, 0.5, 3.8
+BoundingBox = -2.3, 3.68, -9.36, 0.5, 3.8
+
+BoundingBox = 2.3, 3.88, -9.86, 0.5, 4.2
+BoundingBox = -2.3, 3.88, -9.86, 0.5, 4.2
+
+BoundingBox = 2.3, 3.68, -10.36, 0.5, 3.8
+BoundingBox = -2.3, 3.68, -10.36, 0.5, 3.8
+
+BoundingBox = -2.9, 1.8, -10.5,  2.0, 0.3
+BoundingBox =  2.9, 1.8, -10.5,  2.0, 0.3
+
+BoundingBox = -3.9, 1.8, -11.5,  2.0, 0.3
+BoundingBox =  3.9, 1.8, -11.5,  2.0, 0.3
+
+BoundingBox = -1.3, 1.8, -10.5,  1.3, 1.3, 1.5
+BoundingBox =  1.3, 1.8, -10.5,  1.3, 1.3, 1.5
+
+;modern light plane (late jet), AOW3 style (fcs)
+AddRecipe = "ABC", "DEF", "G  ", A, mcheli:airframe3, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:cannon1, F, mcheli:fcs2, G, mcheli:electronics 
+
+DamageFactor = 0.8
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; Su-27 Flanker-B.

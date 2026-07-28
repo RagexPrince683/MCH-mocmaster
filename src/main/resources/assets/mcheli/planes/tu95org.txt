@@ -1,0 +1,294 @@
+DisplayName = TU-95 Bear
+AddDisplayName = en_US, TU-95 Bear
+AddDisplayName = ja_JP, TU-95 Bear
+AddDisplayName = zh_CN, 图95 Bear
+Weight = 198000
+CanMountShip = false
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = TU-95 Bear
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = TU-95 Bear
+ChaffWaitTime = 500
+ChaffUseTime = 160
+ThrottleDownFactor = 0.20
+;ItemID = 19112
+MaxHp = 250
+EnableNightVision = false
+EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AS
+HasBallisticComputer = true
+EnableGunnerMode = true
+Speed = 1.601
+FlareType = 3
+HasChaff = true
+Sound = twinprop
+ThrottleUpDown = 0.10
+CameraPosition = -0.3021, 0.3021, 0.3021
+MaxFuel = 348000
+FuelConsumption = 23.2
+ParticlesScale = 0.7
+EnableSeaSurfaceParticle = true
+ThirdPersonDist = 40
+AutoPilotRot = 0
+; M = Military(軍用機).  A = Attacker(攻撃機)
+Category = SHNB/SB
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 4.700
+EngineThrust = 5.08
+NewFlightGravity = 0.0088
+NewFlightThrottleResponse = 1.150
+NewFlightThrottleChangeRateUp = 0.0038
+NewFlightThrottleChangeRateDown = 0.0052
+NewFlightIdleThrottle = 0.105
+NewFlightEngineBrakeDrag = 0.0034
+NewFlightLowThrottleLiftRetention = 0.740
+NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = false
+FlightCeiling = 11800
+FlightCeilingRange = 72
+StallSpeed = 0.328
+CriticalAoA = 14.80
+TimeUntilStallPastCriticalAoA = 1.55
+TimeAfterStallUntilPitchDown = 1.30
+StallLiftLoss = 0.760
+AoADragMultiplier = 3.050
+StallInstability = 0.340
+StallRecoverySpeed = 0.466
+StallSpeedFactor = 0.19
+StallStrength = 0.95
+StallRecoveryRate = 0.14
+StallBreakStrength = 0.52
+StallPitchRecoveryStrength = 0.42
+DiveSpeedMultiplier = 1.14
+MaxComfortableG = 2.8
+MaxStructuralG = 5.2
+GControlPenalty = 0.78
+CompressibilitySpeed = 1.441
+CompressibilityPitchPenalty = 0.58
+MaxSafeSpeed = 1.761
+OverspeedDamageRate = 0.18
+BaseDrag = 0.0030
+InducedDrag = 0.017
+ControlSurfaceDrag = 0.0065
+MaxLevelSpeed = 1.473
+IdleDrag = 0.0040
+
+ItemIconScaleFactor = 0.45
+
+PitchTorque = 0.200
+RollTorque = 0.220
+YawTorque = 0.150
+PitchDamping = 0.620
+RollDamping = 0.600
+YawDamping = 0.660
+InertiaMultiplier = 3.200
+ThrottleAcceleration = 0.015
+EngineDrag = 0.017
+
+;large bomber aircraft modern, AOW3 style
+AddRecipe = "ABC", "DAC", "E C", A, mcheli:airframebomb, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:electronics
+
+DamageFactor = 0.8
+
+RotorSpeed = 2000.0
+
+HUD = plane, plane_gnr
+
+EnableBack = true
+
+AddPartCanopy   =  0.000, 0.000, 0.000,  0,0,0, 0
+
+MobilityYaw = 0.338
+MobilityPitch = 0.381
+MobilityRoll = 0.248
+
+AddSeat = 0.4,  4.1094,  1.2
+
+UnmountPosition = 0.4,  2.9,  1.2
+
+EnableBack = True
+
+AddGunnerSeat = -0.4,  4.1094,  1.2, -0.3021, 0.3021, 0.3021, true
+AddGunnerSeat =  0.00, 5, -47.00,  0.00,6, -48.5
+AddPartLG = 0, 3.1, 0, 1,0,0, 100
+AddPartLGrev = 0.76, 2.4116, 0, 0,0,1, 90
+AddPartLGrev =  -0.76, 2.4116, 0, 0,0,1, -90
+AddPartLG = 7.6, 2.9, -16.6, 0,0,0, 100
+AddPartLGrev = 8.15, 2.385, -17, 0,0,1, 90
+AddPartLGrev =  7.053, 2.385, -17, 0,0,1, -90
+AddPartLG = -7.6, 2.9, -16.6, 0,0,0, 100
+AddPartLGrev =  -7.053, 2.385, -17, 0,0,1, 90
+AddPartLGrev = -8.15, 2.385, -17, 0,0,1, -90
+
+AddPartWeaponMissile = kh102,  false, false, false,  11.74, 1.6734,  -13
+AddPartWeaponMissile = kh102,  false, false, false,   -11.74, 1.6734,  -13
+AddPartWeaponMissile = kh102,  false, false, false,  10.6, 1.6734,  -13
+AddPartWeaponMissile = kh102,  false, false, false,   -10.6, 1.6734,  -13
+AddPartWeaponMissile = kh102n,  false, false, false,  3.75, 2.5,  -8
+AddPartWeaponMissile = kh102n,  false, false, false,    -3.75, 2.5,  -8
+AddPartWeaponMissile = kh102n,  false, false, false,  2.6, 2.5,  -8
+AddPartWeaponMissile = kh102n,  false, false, false,  -2.6, 2.5,  -8
+AddPartWeapon = gsh232tu, false, true, true,  0, 4.963, -48.6
+AddPartWeaponChild = false, true,0, 4.963, -53
+
+AddWeapon = dummy_bay_closed, 0,0,0,0,0         , true,  2
+
+;10
+AddWeapon = 250kgtu, 0, 2.3628,  -19,  -1.0, 0.0, true, 2
+
+;6
+AddWeapon = fab500tu, 0, 2.3628,  -19,  -1.0, 0.0, true, 2
+
+;4
+AddWeapon = fab1500tu, 0, 2.3628,  -19,  -1.0, 0.0, true, 2
+
+;1
+AddWeapon =  rn28, 0, 2.3628,  -19,  -1.0, 0.0, true, 2, 0,-90,90, -5,90
+
+;meme shit1
+AddWeapon = tsarbombahalf, 0, 2.3628,  -19,  -1.0, 0.0, true, 2
+
+;meme shit2
+AddWeapon = tsarbomba, 0, 2.3628,  -19,   1.0, 0.0, true, 2
+
+AddWeapon = gsh232tu,  0.11, 4.963, -48.5,  0.0, 0.0, false, 3, -180,  -50,  60, -45, 45
+AddWeapon = gsh232tu,  -0.11, 4.963, -48.5,  0.0, 0.0, false, 3, -180,  -50,  60, -45, 45
+AddPartWeaponBay = 250kgtu/fab500tu/fab1500tu/rn28/tsarbombahalf/tsarbomba, 0.9108, 2.4935, -19.0, 0, 0, 1, 90
+AddPartWeaponBay = 250kgtu/fab500tu/fab1500tu/rn28/tsarbombahalf/tsarbomba, -0.9108, 2.4935, -19.0, 0, 0, 1, -90
+
+AddPartRotor =   14.8945,  3.1643,  -9,   0, 0, 3
+AddBlade = 1,0,   14.8945,  3.1643,  -9,   0, 0, 3
+
+AddPartRotor =   7.6306,  3.0442,  -4,   0, 0, 3
+AddBlade = 1,0,   7.6306,  3.0442,  -4,   0, 0, 3
+
+AddPartRotor =   -7.6288,  3.0442,  -4,   0, 0, 3
+AddBlade = 1,0,   -7.6288,  3.0442,  -4,   0, 0, 3
+
+AddPartRotor =   -14.8927,  3.1643,  -9,   0, 0, 3
+AddBlade = 1,0,   -14.8927,  3.1643,  -9,   0, 0, 3
+
+;;BoundingBox =  0.0, 4.2,  2.5,  3.5, 3
+;cockpit
+BoundingBox =  0.0, 4.2,  -1,  3.5, 3
+BoundingBox =  0.0, 4.2,  -4.5,  3.5, 3
+BoundingBox =  0.0, 4.2, -8, 3.5, 3
+BoundingBox =  0.0, 4.2, -11.5, 3.5, 3
+BoundingBox =  0.0, 4.2, -15, 3.5, 3
+BoundingBox =  0.0, 4.2,  -18.5,  3.5, 3
+
+BoundingBox =  0.0, 4.2,  -22,  3.5, 3
+BoundingBox = 0.0, 4.2,  -25.5,  3.5, 3
+BoundingBox = 0.0, 4.2,  -29,  3.5, 3
+BoundingBox = 0.0, 4.2,  -32.5,  3.5, 3
+BoundingBox = 0.0, 4.2,  -36,  3.5, 3
+BoundingBox =  0.0, 5.2, -39, 2.5, 3
+BoundingBox =  0.0, 5.2, -41.5, 2.5, 3
+BoundingBox =  0.0, 5.2, -44, 2.5, 3
+BoundingBox =  0.0, 5.2, -46.5, 2.5, 3
+
+;rear tail
+BoundingBox = -2.5, 6.8, -44.5,  5, 0.5
+BoundingBox =  2.5, 6.8, -44.5,  5, 0.5
+
+BoundingBox = -6.5, 6.8, -48.5,  3, 0.5
+BoundingBox =  6.5, 6.8, -48.5,  3, 0.5
+
+;tail height map
+BoundingBox = 0.0, 7.0, -40, 0.5, 1.0
+BoundingBox = 0.0, 7.1, -40.5, 0.5, 1.0
+BoundingBox = 0.0, 7.2, -41, 0.5, 1.0
+BoundingBox = 0.0, 7.4, -41.5, 0.5, 1.0
+BoundingBox = 0.0, 7.8, -42, 0.5, 1.0
+BoundingBox = 0.0, 8, -42.5, 0.5, 1.5
+BoundingBox = 0.0, 8.5, -43, 0.5, 1.8
+BoundingBox = 0.0, 9, -43.5, 0.5, 2.8
+BoundingBox = 0.0, 9.5, -44, 0.5, 2.8
+BoundingBox = 0.0, 9.5, -44.5, 0.5, 3.8
+BoundingBox = 0.0, 9.8, -45, 0.5, 3.8
+BoundingBox = 0.0, 10, -45.5, 0.5, 4.8
+BoundingBox = 0.0, 10, -46, 0.5, 5.8
+BoundingBox = 0.0, 10.5, -46.5, 0.5, 5.8
+BoundingBox = 0.0, 11, -47, 0.5, 6.2
+BoundingBox = 0.0, 11, -47.5, 0.5, 6.8
+BoundingBox = 0.0, 11.2, -48, 0.5, 6.8
+BoundingBox = 0.0, 11.6, -48.5, 0.5, 6.2
+BoundingBox = 0.0, 11.8, -49, 0.5, 5.8
+BoundingBox = 0.0, 12.3, -49.5, 0.5, 4.8
+BoundingBox = 0.0, 12.8, -50, 0.5, 3.8
+
+;wings
+BoundingBox = -6.2, 4.3, -15,  9, 1.0, 1.10
+BoundingBox =  6.2, 4.3, -15,  9, 1.0, 1.10
+BoundingBox = -13.4, 3.5, -20,  6, 1
+BoundingBox =  13.4, 3.5, -20,  6, 1
+
+BoundingBox = -19.4, 3.4, -22.5,  6, 0.6
+BoundingBox =  19.4, 3.4, -22.5,  6, 0.6
+
+;eng
+
+BoundingBox = -7.6288, 3.0442, -5.0062, 1.0, 1.0, 1.25
+
+BoundingBox = 7.6288, 3.0442, -5.0062, 1.0, 1.0, 1.25
+
+BoundingBox = 14.8945,  3.1643,  -10, 1.0, 1.0, 1.25
+
+BoundingBox = -14.8945,  3.1643,  -10, 1.0, 1.0, 1.25
+
+BoundingBox = -7.6288, 3.0442, -6.0062, 1.0, 1.0, 1.25
+
+BoundingBox = 7.6288, 3.0442, -6.0062, 1.0, 1.0, 1.25
+
+BoundingBox = 14.8945,  3.1643,  -11, 1.0, 1.0, 1.25
+
+BoundingBox = -14.8945,  3.1643,  -11, 1.0, 1.0, 1.25
+
+BoundingBox = -7.6288, 3.0442, -7.0062, 1.0, 1.0, 1.25
+
+BoundingBox = 7.6288, 3.0442, -7.0062, 1.0, 1.0, 1.25
+
+BoundingBox = 14.8945,  3.1643,  -12, 1.0, 1.0, 1.25
+
+BoundingBox = -14.8945,  3.1643,  -12, 1.0, 1.0, 1.25
+
+BoundingBox = -7.6288, 3.0442, -8.0062, 1.0, 1.0, 1.25
+
+BoundingBox = 7.6288, 3.0442, -8.0062, 1.0, 1.0, 1.25
+
+BoundingBox = 14.8945,  3.1643,  -13, 1.0, 1.0, 1.25
+
+BoundingBox = -14.8945,  3.1643,  -13, 1.0, 1.0, 1.25
+
+BoundingBox = -7.6288, 3.0442, -9.0062, 1.0, 1.0, 1.25
+
+BoundingBox = 7.6288, 3.0442, -9.0062, 1.0, 1.0, 1.25
+
+BoundingBox = 14.8945,  3.1643,  -14, 1.0, 1.0, 1.25
+
+BoundingBox = -14.8945,  3.1643,  -14, 1.0, 1.0, 1.25
+
+BoundingBox = -7.6288, 3.0442, -10.0062, 1.0, 1.0, 1.25
+
+BoundingBox = 7.6288, 3.0442, -10.0062, 1.0, 1.0, 1.25
+
+BoundingBox = 14.8945,  3.1643,  -15, 1.0, 1.0, 1.25
+
+BoundingBox = -14.8945,  3.1643,  -15, 1.0, 1.0, 1.25
+
+BoundingBox = 14.8945,  3.1643,  -16, 1.0, 1.0, 1.25
+
+BoundingBox = -14.8945,  3.1643,  -16, 1.0, 1.0, 1.25
+
+BoundingBox = 14.8945,  3.1643,  -17, 1.0, 1.0, 1.25
+
+BoundingBox = -14.8945,  3.1643,  -17, 1.0, 1.0, 1.25
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; Tu-95 Bear.
+; HandlingBalancePass = prop-maneuverability-2026-06-11; role=heavy_turboprop

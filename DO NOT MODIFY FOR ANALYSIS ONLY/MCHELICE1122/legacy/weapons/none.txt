@@ -1,2 +1,0 @@
-DisplayName = none
-Type = Dummy

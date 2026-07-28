@@ -1,0 +1,183 @@
+DisplayName = F-35C Lightning II
+AddDisplayName = en_US, F-35C Lightning II
+AddDisplayName = ja_JP, F-35C ライトニング II
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = F-35C Lightning II
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = F-35C Lightning II
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
+ItemID = 28724
+Weight = 34700
+CanMountShip = true
+MaxHp = 100
+EnableNightVision = true
+EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AA
+HasBallisticComputer = true
+EnableEjectionSeat = true
+EnableGunnerMode = true
+HasBombSight = false
+sound = fthirtyfive
+Speed = 3.60
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 1.450
+EngineThrust = 2.595
+NewFlightGravity = 0.0080
+NewFlightThrottleResponse = 1.160
+NewFlightThrottleChangeRateUp = 0.0052
+NewFlightThrottleChangeRateDown = 0.0072
+NewFlightIdleThrottle = 0.085
+NewFlightEngineBrakeDrag = 0.0029
+NewFlightLowThrottleLiftRetention = 0.720
+NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = true
+NewFlightCombatFlapLift = 0.120
+NewFlightCombatFlapDrag = 0.013
+NewFlightCombatFlapControl = 0.130
+NewFlightCombatFlapOverspeed = 0.780
+FlightCeiling = 17500
+FlightCeilingRange = 76
+StallSpeed = 0.594
+CriticalAoA = 27.00
+TimeUntilStallPastCriticalAoA = 0.90
+TimeAfterStallUntilPitchDown = 0.85
+StallLiftLoss = 0.840
+AoADragMultiplier = 2.550
+StallInstability = 0.440
+StallRecoverySpeed = 0.843
+StallSpeedFactor = 0.18
+StallStrength = 1.15
+StallRecoveryRate = 0.24
+StallBreakStrength = 1.00
+StallPitchRecoveryStrength = 0.88
+DiveSpeedMultiplier = 1.28
+MaxComfortableG = 7.5
+MaxStructuralG = 10.0
+GControlPenalty = 0.680
+CompressibilitySpeed = 3.456
+CompressibilityPitchPenalty = 0.5
+MaxSafeSpeed = 4.392
+OverspeedDamageRate = 0.14
+BaseDrag = 0.0012
+InducedDrag = 0.0075
+ControlSurfaceDrag = 0.0035
+MaxLevelSpeed = 3.6
+IdleDrag = 0.0034
+
+PitchTorque = 0.500
+RollTorque = 0.580
+YawTorque = 0.360
+PitchDamping = 0.365
+RollDamping = 0.325
+YawDamping = 0.405
+InertiaMultiplier = 1.080
+ThrottleAcceleration = 0.042
+EngineDrag = 0.009
+
+MobilityYaw = 1.666
+MobilityPitch = 2.102
+MobilityRoll = 2.520
+DamageFactor = 0.8
+FlareType = 4
+HasChaff = true
+ParticlesScale = 0.7
+EnableSeaSurfaceParticle = true
+MaxFuel         = 10000
+FuelConsumption = 1.1
+ThrottleUpDown = 0.3
+
+ThirdPersonDist = 20
+Stealth = 0.35
+
+; M = Military(軍用機).  F = Fighter(戦闘機)
+Category = MSF
+
+HUD = plane
+
+AddSeat = 0.00,  1.92,  0.32
+
+AddPartCanopy = 0.00, 2.63,  1.91,  1,0,0,  40
+
+AddPartNozzle = 0.00, 2.20, -10.82, -1,0,0
+
+;Front
+AddPartLG    =  0.000, 1.455,-0.076,   -1.00, 0.000, 0.00, 104
+AddPartLGRev =  0.270, 1.450, 1.840,   -0.05, 0.075, 1.00,  89
+AddPartLGRev = -0.270, 1.450, 1.840,    0.05, 0.075, 1.00, -89
+;Left
+AddPartLG    =  2.18, 1.91, -7.23,    -1,0, -0.05, 90,  0,-1,0, 90
+;Right
+AddPartLG    = -2.18, 1.91, -7.23,    -1,0, -0.05, 90,  0, 1,0, 90
+
+AddPartWing =   5.10, 2.10, -9.00,  0,0, 1, 90
+AddPartWing =  -5.10, 2.10, -9.00,  0,0,-1, 90
+
+;AddPartWeaponBay = 武器名1 / 武器名2 / 武器名3, 位置X, 位置Y, 位置Z, 回転軸X, 回転軸Y, 回転軸Z, 回転角度 0～180
+AddPartWeaponBay = f35caim-9x / f35caim120,  1.65, 1.43,-2.64,  -0.027, -0.031, 1.000,  80
+AddPartWeaponBay = f35caim-9x / f35caim120, -1.65, 1.43,-2.64,   0.027, -0.031, 1.000, -80
+AddPartWeaponBay = f35caim-9x / f35caim120,  0.51, 1.15,-2.64,   0.000, -0.011, 1.000, -80
+AddPartWeaponBay = f35caim-9x / f35caim120, -0.51, 1.15,-2.64,   0.000, -0.011, 1.000,  80
+AddPartWeaponBay = f35caim-9x,           0.65, 1.22,-4.92,   0.000,  0.000, 1.000, -110
+AddPartWeaponBay = f35caim-9x,          -0.65, 1.22,-4.92,   0.000,  0.000, 1.000,  110
+
+AddPartWeaponMissile = f35caim120, false,  false,  false,    1.33, 1.77, -6.75
+AddPartWeaponMissile = f35caim120, false,  false,  false,   -1.33, 1.77, -6.75
+AddPartWeaponMissile = f35caim120, false,  false,  false,    1.33, 1.77, -6.75
+AddPartWeaponMissile = f35caim120, false,  false,  false,   -1.33, 1.77, -6.75
+AddPartWeaponMissile = f35cagm84,  false,  false,  false,    3.42, 1.40, -8.17
+AddPartWeaponMissile = f35cagm84,  false,  false,  false,   -3.42, 1.40, -8.17
+AddPartWeaponMissile = f35cmk62,   false,  false,  false,    4.72, 1.18, -7.77
+AddPartWeaponMissile = f35cmk62,   false,  false,  false,   -4.72, 1.18, -7.77
+AddPartWeaponMissile = f35cmk62,   false,  false,  false,    4.72, 1.18, -7.77
+AddPartWeaponMissile = f35cmk62,   false,  false,  false,   -4.72, 1.18, -7.77
+
+AddWeapon = f35bgau-22a35,    0.00, 0.79, -4.63,   0.0,-3.0
+AddWeapon = f35caim-9x,     0.90, 1.16, -6.53,   0.0, 0.0
+AddWeapon = f35caim-9x,    -0.90, 1.16, -6.53,   0.0, 0.0
+AddWeapon = f35caim120,     1.33, 1.77, -6.75,   0.0, 0.0
+AddWeapon = f35caim120,    -1.33, 1.77, -6.75,   0.0, 0.0
+AddWeapon = f35caim120,     1.33, 1.77, -6.75,   0.0, 0.0
+AddWeapon = f35caim120,    -1.33, 1.77, -6.75,   0.0, 0.0
+AddWeapon = f35cagm84,      3.42, 1.40, -8.17,   0.0, 0.0
+AddWeapon = f35cagm84,     -3.42, 1.40, -8.17,   0.0, 0.0
+AddWeapon = f35cmk62,       4.72, 1.18, -7.77,   0.0, 0.0
+AddWeapon = f35cmk62,      -4.72, 1.18, -7.77,   0.0, 0.0
+AddWeapon = f35cmk62,       4.72, 1.18, -7.77,   0.0, 0.0
+AddWeapon = f35cmk62,      -4.72, 1.18, -7.77,   0.0, 0.0
+
+AddWeapon = targeting_pod_ph75s,  0.00, 3.0, 0.3,    0.0, 0.0
+AddWeapon = uhf_radar,  0.00, 3.0, 0.0,    0.0, 0.0
+
+;modern light plane (late jet), AOW3 style (fcs)
+AddRecipe = "ABC", "DEF", "GGG", A, mcheli:airframe2, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:cannon1, F, mcheli:fcs3, G, mcheli:electronics
+
+BoundingBox =  0.00, 1.90, -3.10,  3.0, 2.0
+BoundingBox =  0.00, 1.90, -6.60,  4.0, 2.0
+BoundingBox = -2.92, 2.20, -7.60,  3.0, 1.0
+BoundingBox =  2.92, 2.20, -7.60,  3.0, 1.0
+BoundingBox =  0.00, 2.20, -9.80,  3.0, 1.0
+
+BoundingBox = -4.82, 2.20, -8.00,  2.5, 1.0
+BoundingBox =  4.82, 2.20, -8.00,  2.5, 1.0
+
+BoundingBox = -2.52, 2.20, -11.60,  2.0, 1.0
+BoundingBox =  2.52, 2.20, -11.60,  2.0, 1.0
+
+BoundingBox = 2.03, 3.55, -10.96, 1.0, 2.5
+BoundingBox = -2.03, 3.55, -10.96, 1.0, 2.5
+BoundingBox = 2.03, 3.55, -11.96, 1.0, 2.5
+BoundingBox = -2.03, 3.55, -11.96, 1.0, 2.5
+BoundingBox = 2.03, 3.05, -9.96, 1.0, 2.5
+BoundingBox = -2.03, 3.05, -9.96, 1.0, 2.5
+
+unmountposition = 0.00,  1.52,  0.32
+
+enableback = true
+DamageFactor = 0.8

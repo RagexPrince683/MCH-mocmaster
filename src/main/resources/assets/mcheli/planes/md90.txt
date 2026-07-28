@@ -1,0 +1,180 @@
+DisplayName = MD-90-30
+AddDisplayName = en_US, MD-90-30
+AddDisplayName = ja_JP,MD-90-30
+NameOnEarlyASRadar = Fast Jet
+NameOnModernASRadar = MD-90-30
+NameOnEarlyAARadar = Fast Jet
+NameOnModernAARadar = MD-90-30
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
+ItemID = 28727
+Weight = 88000
+CanMountShip = false
+MaxHp = 250
+Speed = 1.609
+;.644*1.74
+;644mph
+
+Sound = mdninety
+ThrottleUpDown = 0.1
+MaxFuel         = 88400
+FuelConsumption = 22.902
+InventorySize = 64
+
+; C = Civilian(民間機)
+Category = C/NBJA
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 3.100
+EngineThrust = 3.410
+NewFlightGravity = 0.0087
+NewFlightThrottleResponse = 1.120
+NewFlightThrottleChangeRateUp = 0.0038
+NewFlightThrottleChangeRateDown = 0.0052
+NewFlightIdleThrottle = 0.105
+NewFlightEngineBrakeDrag = 0.0034
+NewFlightLowThrottleLiftRetention = 0.740
+NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = false
+FlightCeiling = 11300
+FlightCeilingRange = 72
+StallSpeed = 0.330
+CriticalAoA = 16.20
+TimeUntilStallPastCriticalAoA = 1.55
+TimeAfterStallUntilPitchDown = 1.30
+StallLiftLoss = 0.740
+AoADragMultiplier = 2.950
+StallInstability = 0.320
+StallRecoverySpeed = 0.468
+StallSpeedFactor = 0.19
+StallStrength = 0.90
+StallRecoveryRate = 0.15
+StallBreakStrength = 0.58
+StallPitchRecoveryStrength = 0.48
+DiveSpeedMultiplier = 1.14
+MaxComfortableG = 2.8
+MaxStructuralG = 5.2
+GControlPenalty = 0.78
+CompressibilitySpeed = 1.448
+CompressibilityPitchPenalty = 0.58
+MaxSafeSpeed = 1.77
+OverspeedDamageRate = 0.18
+BaseDrag = 0.0025
+InducedDrag = 0.016
+ControlSurfaceDrag = 0.0065
+MaxLevelSpeed = 1.48
+IdleDrag = 0.0040
+
+PitchTorque = 0.250
+RollTorque = 0.260
+YawTorque = 0.180
+PitchDamping = 0.600
+RollDamping = 0.580
+YawDamping = 0.640
+InertiaMultiplier = 3.100
+ThrottleAcceleration = 0.026
+EngineDrag = 0.011
+
+HUD = civilian_aircraft, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none
+
+MobilityYaw = 0.505
+MobilityPitch = 0.566
+MobilityRoll = 0.503
+MinRotationPitch = -20
+MaxRotationPitch =  20
+MinRotationRoll  = -30
+MaxRotationRoll  =  30
+
+AddPartHatch = 2,3.1,-1.5, 0,1,0, -180
+AddPartHatch = 0,-1.4,0, 0,0,1, -50
+
+AddTexture = md90_2
+AddTexture = md90_3
+AddTexture = md90_4
+
+AddSeat = 0.8, 3.1, 0
+AddSeat = -0.8, 3.1, 0
+
+AddSeat = -0.65, 2.8, -4.7
+AddSeat = -1.4, 2.8, -4.7
+AddSeat = -0.65, 2.8, -6.2
+AddSeat = -1.4, 2.8, -6.2
+AddSeat = 0.65, 2.8, -6.2
+AddSeat = 1.4, 2.8, -6.2
+AddSeat = -0.65, 2.8, -7.7
+AddSeat = -1.4, 2.8, -7.7
+AddSeat = 0.65, 2.8, -7.7
+AddSeat = 1.4, 2.8, -7.7
+AddSeat = -0.65, 2.8, -9.2
+AddSeat = -1.4, 2.8, -9.2
+AddSeat = 0.65, 2.8, -9.2
+AddSeat = 1.4, 2.8, -9.2
+AddSeat = -0.65, 2.8, -10.7
+AddSeat = -1.4, 2.8, -10.7
+AddSeat = 0.65, 2.8, -10.7
+AddSeat = 1.4, 2.8, -10.7
+
+AddSeat = -0.65, 2.8, -11.7
+AddSeat = -1.4, 2.8, -11.7
+AddSeat = 0.65, 2.8, -11.7
+AddSeat = 1.4, 2.8, -11.7
+
+AddSeat = -0.65, 2.8, -12.7
+AddSeat = -1.4, 2.8, -12.7
+AddSeat = 0.65, 2.8, -12.7
+AddSeat = 1.4, 2.8, -12.7
+
+AddSeat = -0.65, 2.8, -14.2
+AddSeat = -1.4, 2.8, -14.2
+AddSeat = 0.65, 2.8, -14.2
+AddSeat = 1.4, 2.8, -14.2
+
+;basic unarmed large plane, AOW3 style
+AddRecipe = "ABC", "DAE", "   ", A, mcheli:airframe3, B, mcheli:basicmechanicparts, C, mcheli:engine2, D, mcheli:wheelair, E, mcheli:electronics
+
+;Right
+AddPartLG = 0, 1.50,  1.39,  1,0,0, -125
+AddPartLG = 1.96, 2.26,  1.13,  0,0, 1, -90
+AddPartLG = -1.96, 2.26,  1.13,  0,0, 1, 90
+
+;BoundingBox =  0.00,  3.00, -1.00,  3.0, 3.0
+;BoundingBox =  0.00,  3.00, -5.00,  3.0, 3.0
+;BoundingBox =  0.00,  3.00, -9.00,  3.0, 3.0
+;BoundingBox =  0.00,  3.00, -13.00,  3.0, 3.0
+;BoundingBox =  0.00,  3.00, -17.00,  3.0, 3.0
+;BoundingBox =  0.00,  3.00, -21.00,  3.0, 3.0
+;BoundingBox =  0.00,  3.00, -25.00,  3.0, 3.0
+;BoundingBox =  0.00,  3.00, -29.00,  3.0, 3.0
+;BoundingBox =  0.00,  3.00, -33.00,  3.0, 3.0
+;BoundingBox =  0.00,  3.00, -37.00,  3.0, 3.0
+BoundingBox =  0.00,  3.00, -41.00,  3.0, 3.0
+BoundingBox =  0.00,  3.50, -44.00,  2.0, 2.0
+
+BoundingBox =  5.00,  2.00, -28.50,  4.0, 0.2
+BoundingBox =  -5.00,  2.00, -28.50,  4.0, 0.2
+BoundingBox =  9.00,  2.00, -30.00,  3.0, 0.2
+BoundingBox =  -9.00,  2.00, -30.00,  3.0, 0.2
+BoundingBox =  13.00,  2.00, -32.00,  3.0, 0.2
+BoundingBox =  -13.00,  2.00, -32.00,  3.0, 0.2
+BoundingBox =  16.00,  2.00, -33.50,  2.0, 0.2
+BoundingBox =  -16.00,  2.00, -33.50,  2.0, 0.2
+BoundingBox =  19.00,  2.00, -34.00,  2.0, 0.2
+BoundingBox =  -19.00,  2.00, -34.00,  2.0, 0.2
+
+BoundingBox =  4.00,  3.00, -39.00,  2.0, 2.0
+BoundingBox =  -4.00,  3.00, -39.00,  2.0, 2.0
+
+BoundingBox =  0.00,  8.50, -48.50,  3.0, 0.2
+BoundingBox =  4.00,  8.50, -49.50,  3.0, 0.2
+BoundingBox =  -4.00,  8.50, -49.50,  3.0, 0.2
+
+unmountposition = 0.8, 1.5, 0
+
+enableback = true
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; MD-90-30 airliner.

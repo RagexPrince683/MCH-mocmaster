@@ -1,0 +1,49 @@
+DisplayName = GBU-28A
+Type = ASMissile
+IsHeatSeekerMissile = true
+IsRadarMissile = false
+MaxLockOnAngle = 25
+PdHDNMaxDegree = 180.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 0
+PassiveRadar = false
+PassiveRadarLockOutCount = 0
+LaserGuidance = true
+HasLaserGuidancePod = false
+ActiveRadar = false
+ScanInterval = 1
+SpeedDependsAircraft = true
+Power = 1000
+radius = 3000
+Acceleration = 1.7
+Flaming = true
+Sight = MoveSight
+Delay = 8
+Round = 1
+ReloadTime = 90
+SoundVolume = 3
+SoundPitch = 0.1
+Sound = bomb_snd
+ModelBullet = gbu28
+Gravity = -0.02452
+DisableSmoke = true
+Piercing  = 2
+
+;bomb rewrite
+;Acceleration = 0.5
+Explosion = 15
+;Explosive mass	269.9*5 kg kg
+Power = 5080
+ExplosionBlock = 15
+ExplosionInWater = 8
+DamageFactor = tank, 2.0
+DamageFactor = plane, 4.5
+DamageFactor = vehicle 4.5
+DamageFactor = heli, 4.5
+DamageFactor = player, 20.0
+
+MaxAmmo = 2
+SuppliedNum = 1
+Item =  4, iron_ingot
+Item =  8, gunpowder
+Item =  4, redstone

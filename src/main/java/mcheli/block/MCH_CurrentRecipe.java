@@ -1,11 +1,11 @@
 package mcheli.block;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import mcheli.MCH_IRecipeList;
 import mcheli.MCH_MOD;
 import mcheli.MCH_ModelManager;
+import mcheli.MCH_ResourceHelper;
 import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.aircraft.MCH_BaseVehicleInfoManager;
 import mcheli.plane.MCP_PlaneInfo;
@@ -204,8 +204,7 @@ public class MCH_CurrentRecipe {
             }
 
             itemName = "/textures/drafting_table_desc/" + itemName + "#" + i + ".png";
-            File filePng = new File(MCH_MOD.sourcePath, "/assets/mcheli/" + itemName);
-            if(filePng.exists()) {
+            if(MCH_ResourceHelper.resourceExists("assets/mcheli" + itemName)) {
                list.add(new ResourceLocation("mcheli", itemName));
             }
          }

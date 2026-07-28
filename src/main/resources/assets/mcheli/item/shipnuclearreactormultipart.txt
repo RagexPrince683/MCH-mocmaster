@@ -1,0 +1,8 @@
+DisplayName = Ship Nuclear Reactor Recipe Part
+AddDisplayName = ja_JP, Ship Nuclear Reactor Recipe Part
+StackSize = 64
+AddRecipe = " B ", "AAA", "CBC", A, mcheli:complexmechanicparts, B, hbm:tile.machine_chungus, C, mcheli:pwrmultipart
+;;REDDIT MOMENT!!!
+
+;;fuck it, you wanna play this in survival it's gonna cost a nether star
+AddRecipe = " B ", "AAA", " B ", A, mcheli:complexmechanicparts, B, beacon

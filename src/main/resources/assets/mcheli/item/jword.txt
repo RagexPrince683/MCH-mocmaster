@@ -1,0 +1,4 @@
+DisplayName = Job Application
+AddDisplayName = ja_JP, Job Application
+
+StackSize = 64

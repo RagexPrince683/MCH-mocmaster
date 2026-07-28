@@ -1,0 +1,44 @@
+DisplayName = P-800 Oniks/Yakhont
+Type = TVmissile
+IsHeatSeekerMissile = true
+IsRadarMissile = false
+MaxLockOnAngle = 25
+PdHDNMaxDegree = 180.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 0
+PassiveRadar = false
+PassiveRadarLockOutCount = 0
+LaserGuidance = false
+HasLaserGuidancePod = false
+ActiveRadar = false
+ScanInterval = 1
+SpeedDependsAircraft = false
+Power = 3000
+Acceleration = 16
+Accelerationinwater = 2
+Explosion = 15
+ExplosionInWater = 8
+piercing = 2
+Flaming = false
+Sight = MoveSight
+Delay = 2
+ModeNum = 2
+ModelBullet = p800
+;soundvloume= 30
+DamageFactor = tank, 2.0
+DamageFactor = plane, 4.5
+DamageFactor = vehicle 4.5
+DamageFactor = heli, 4.5
+DamageFactor = player, 20.0
+ProximityFuseDist = 1
+
+Sound = hydraseventy
+SoundVolume = 10
+
+
+
+MaxAmmo = 2
+SuppliedNum = 1
+Item =  4, iron_ingot
+Item =  16, gunpowder
+Item =  2, redstone

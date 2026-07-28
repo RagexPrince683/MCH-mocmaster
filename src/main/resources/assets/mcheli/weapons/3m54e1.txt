@@ -1,0 +1,41 @@
+DisplayName = 3M54 "Kalibr" Cruise Missile [TV-Guided]
+Type = TVMissile
+IsHeatSeekerMissile = true
+IsRadarMissile = false
+MaxLockOnAngle = 25
+PdHDNMaxDegree = 180.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 0
+PassiveRadar = false
+PassiveRadarLockOutCount = 0
+LaserGuidance = false
+HasLaserGuidancePod = false
+ActiveRadar = false
+ScanInterval = 1
+SpeedDependsAircraft = false
+Power = 7000
+Acceleration = 3
+Explosion = 20
+Explosionblock = 18
+Flaming = false
+Sight = MoveSight
+Delay = 20
+ModeNum = 2
+ModelBullet = 3m54
+Sound = missile_1_snd
+ReloadTime = 100
+
+DamageFactor = tank, 40.0
+DamageFactor = plane, 15.5
+DamageFactor = vehicle 15.5
+DamageFactor = heli, 15.5
+DamageFactor = player, 15.0
+ProximityFuseDist = 1
+
+
+
+
+
+MaxAmmo = 10
+SuppliedNum = 5
+Item =  5, hbm:item.missile_generic

@@ -1,0 +1,117 @@
+DisplayName = Geran 2
+AddDisplayName = en_US, Geran 2
+AddDisplayName = ja_JP, Geran 2
+Weight = 441
+CanMountShip = true
+NameOnEarlyASRadar = Small UAV
+NameOnModernASRadar = Geran 2
+NameOnEarlyAARadar = Small UAV
+NameOnModernAARadar = Geran 2
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
+MaxHp = 10
+;;Speed = 0.006 for a specific server config
+Speed = 0.115
+;;HasBallisticComputer = true
+
+ItemIconScaleFactor = 4
+
+;75mph
+Sound = radicon_heli
+CameraPosition = 0.0, 0.40, 0.34
+EnableGunnerMode = true
+HasBombSight = false
+ThrottleUpDown = 5.0
+MaxFuel         = 200
+FuelConsumption = 0.111
+Stealth = 0.2
+NewUAV = true
+HideEntity = true
+ParticlesScale = 0.2
+HUD = plane
+ThirdPersonDist = 4
+
+explosionSizeByCrash = 10
+
+AddSeat =  0.0, 0.0, 0.0
+
+; M = Military(軍用機).  Q = Drone(無人航空機)
+Category = OWAD
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 0.350
+EngineThrust = 0.364
+NewFlightGravity = 0.0076
+NewFlightThrottleResponse = 0.900
+NewFlightThrottleChangeRateUp = 0.0070
+NewFlightThrottleChangeRateDown = 0.0095
+NewFlightIdleThrottle = 0.075
+NewFlightEngineBrakeDrag = 0.0054
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.10
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = false
+FlightCeiling = 8000
+FlightCeilingRange = 56
+StallSpeed = 0.063
+CriticalAoA = 17.50
+TimeUntilStallPastCriticalAoA = 1.25
+TimeAfterStallUntilPitchDown = 1.05
+StallLiftLoss = 0.780
+AoADragMultiplier = 2.800
+StallInstability = 0.420
+StallRecoverySpeed = 0.090
+StallSpeedFactor = 0.22
+StallStrength = 1.05
+StallRecoveryRate = 0.18
+StallBreakStrength = 0.68
+StallPitchRecoveryStrength = 0.55
+DiveSpeedMultiplier = 1.18
+MaxComfortableG = 4.5
+MaxStructuralG = 7.5
+GControlPenalty = 0.740
+CompressibilitySpeed = 0.338
+CompressibilityPitchPenalty = 0.55
+MaxSafeSpeed = 0.37
+OverspeedDamageRate = 0.12
+BaseDrag = 0.0026
+InducedDrag = 0.015
+ControlSurfaceDrag = 0.0060
+MaxLevelSpeed = 0.322
+IdleDrag = 0.0032
+
+PitchTorque = 0.300
+RollTorque = 0.340
+YawTorque = 0.220
+PitchDamping = 0.360
+RollDamping = 0.330
+YawDamping = 0.390
+InertiaMultiplier = 0.700
+ThrottleAcceleration = 0.018
+EngineDrag = 0.013
+
+MobilityYaw = 0.888
+MobilityPitch = 0.981
+MobilityRoll = 0.869
+
+AddWeapon = geran_bomb, 0,0,0,  0,0
+;AddWeapon = plastic_bomb, 0,0,0,  0,0
+
+;basic suicide drone
+AddRecipe = "ABC", "GEG", " G ", A, mcheli:airframe, B, mcheli:basicmechanicparts, C, mcheli:engine1, E, mcheli:electronics, G, gunpowder
+
+AddPartRotor= 1, 0, 0,  0,     0,  0.0, 0.0, 1.0
+;,false
+AddBlade= 1, 0, 0,  0,     0,  0.0, 0.0, 1.0
+;,false
+RotorSpeed = 200.0
+
+;BoundingBox =  0.0, 0.0, 0.0,  1.5, 1.5
+
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; Geran-2/Shahed-136 loitering munition.
+; HandlingBalancePass = prop-maneuverability-2026-06-11; role=uav_prop

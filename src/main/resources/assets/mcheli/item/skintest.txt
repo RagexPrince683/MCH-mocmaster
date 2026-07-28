@@ -1,0 +1,6 @@
+DisplayName = Skin test
+AddDisplayName = ja_JP, Skin test
+
+textureoverlay = true
+
+StackSize = 64

@@ -5,4 +5,7 @@ build
 eclipse
 .classpath
 .project
-/src/main/resources/assets/mcheli
+run/
+*.jar
+*.class
+*.log

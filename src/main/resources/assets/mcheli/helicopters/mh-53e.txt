@@ -1,0 +1,171 @@
+DisplayName = MH-53E Sea Dragon
+AddDisplayName = ja_JP, MH-53E シードラゴン
+NameOnEarlyASRadar = Helicopter
+NameOnModernASRadar = MH-53E Sea Dragon
+NameOnEarlyAARadar = Helicopter
+NameOnModernAARadar = MH-53E Sea Dragon
+ChaffWaitTime = 400
+ChaffUseTime = 100
+ThrottleDownFactor = 0.35
+ItemID = 28828
+Weight = 33000
+MaximumExternalPayloadCapacity = 32000
+MaxHp = 200
+Float = true
+FloatOffset = -0.4
+EnableFoldBlade = true
+EnableNightVision = true
+EnableEntityRadar = true
+RWRType = DIGITAL
+RadarType = MODERN_AS
+Speed = 2
+ThrottleUpDown = 0.5
+FlareType = 3
+HasChaff = true
+CameraPosition = 0.0, 0.7, 3.5
+MaxFuel         = 15300
+FuelConsumption = 3.542
+ThirdPersonDist = 20
+ItemIconScaleFactor = 0.2
+
+; New helicopter flight model: heavy transport/attack baseline tuning.
+UseNewHelicopterFlightModel = true
+PhysicalMass = 2.18
+MainRotorMaxThrust = 0.26
+RotorInertia = 2.08
+RotorSpoolUpRate = 0.019
+RotorSpoolDownRate = 0.027
+CollectiveResponse = 0.07
+CyclicAuthority = 0.58
+TailRotorAuthority = 0.966
+YawDamping = 0.25
+AngularInertia = 2.18
+TranslationalLiftCoefficient = 0.003
+VerticalDrag = 0.034
+MaxClimbRate = 0.13
+ParasiteDrag = 0.05
+HorizontalRotorThrustScale = 1.18
+HelicopterLateralThrustScale = 0.45
+HelicopterLateralDrag = 0.055
+HelicopterMaxLateralSpeedScale = 0.45
+HelicopterBackwardThrustScale = 0.35
+HelicopterMaxBackwardSpeedScale = 0.35
+HoverAssistStrength = 0.75
+
+
+sound = stallion
+soundvolume = 15
+
+; M = Military(軍用機).  M = Multi-Mission(多目的機)
+Category = HLCHA
+
+HUD = helinvg, none, gunner, gunner, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none
+
+MobilityYaw = 0.4
+MobilityPitch = 0.4
+MobilityRoll = 0.4
+
+AddTexture = mh-53e-us1
+AddTexture = mh-53e-us2
+AddTexture = mh-53e-gr
+AddTexture = mh-53e-jp
+
+AddPartWeapon    = m3m_l,    false, true, true,    1.47, 1.70,-1.62
+AddPartWeapon    = m3m_r,    false, true, true,   -1.47, 1.70,-1.62
+
+AddRotor= 7, 51,   0.00, 5.60,  -5.40,    0.000, 1.000, 0.0,   true
+AddRotor= 1,  0,   2.39, 5.94, -22.63,   -1.267, 0.461, 0.0,   false
+
+; seat 1,2
+AddSeat =-0.85,  1.63,  0.07
+AddSeat = 0.85,  1.63,  0.07
+; M3M
+AddGunnerSeat = 0.50,  1.17, -1.62,   1.40,  2.37, -1.62, false, -90, 50
+AddGunnerSeat =-0.50,  1.17, -1.62,  -1.40,  2.37, -1.62, false, -90, 50
+
+;30
+
+AddSeat = 1.05,  1.20, -2.95
+AddSeat =-1.05,  1.20, -2.95
+
+AddSeat = 0.50,  1.00, -2.95
+AddSeat = 0.00,  0.90, -2.95
+AddSeat =-0.50,  1.00, -2.95
+
+AddSeat = 1.05,  1.20, -4.05
+AddSeat =-1.05,  1.20, -4.05
+
+AddSeat = 0.50,  1.00, -4.05
+AddSeat = 0.00,  0.90, -4.05
+AddSeat =-0.50,  1.00, -4.05
+
+AddSeat = 1.05,  1.20, -5.20
+AddSeat =-1.05,  1.20, -5.20
+
+AddSeat = 0.50,  1.00, -5.25
+AddSeat = 0.00,  0.90, -5.25
+AddSeat =-0.50,  1.00, -5.25
+
+AddSeat = 1.05,  1.20, -6.40
+AddSeat =-1.05,  1.20, -6.40
+
+AddSeat = 0.50,  1.00, -6.45
+AddSeat = 0.00,  0.90, -6.45
+AddSeat =-0.50,  1.00, -6.45
+
+AddSeat = 1.05,  1.20, -7.60
+AddSeat =-1.05,  1.20, -7.60
+
+AddSeat = 0.50,  1.00, -7.60
+AddSeat = 0.00,  0.90, -7.60
+AddSeat =-0.50,  1.00, -7.60
+
+AddSeat = 1.05,  1.20, -8.70
+AddSeat =-1.05,  1.20, -8.70
+
+AddSeat = 1.05,  1.20, -9.85
+
+AddSeat = 0.0,  1.20, -9.85
+
+AddSeat =-1.05,  1.20, -9.85
+
+AddPartLG  = 0, 1.12,  0.93,  1,0,0,  77
+AddPartLG  = 0, 1.01, -8.35,  1,0,0, -90
+
+AddPartHatch  = 0, 2.500, -15.65, 1,0,0, -33
+AddPartHatch  = 0, 0.543, -10.47, 1,0,0, -34
+
+AddWeapon = m3m_l,     1.47, 1.70,-1.62,   0.0, 0.0, false, 3, -90,-70, 70, -50,80
+AddWeapon = m3m_r,    -1.47, 1.70,-1.62,   0.0, 0.0, false, 4,  90,-70, 70, -50,80
+
+;advanced large modern helicopter transport armed, AOW3 style
+AddRecipe = "ABC", "DEF", " A ", A, mcheli:airframe3, B, mcheli:heliblade, C, mcheli:engine2, D, mcheli:wheelair, E, mcheli:electronics, F, mcheli:cannon1
+
+AddRecipe = "AB ", "   ", "   ", A, mcheli:ch-53e, B, mcheli:cannon1
+
+InventorySize = 54
+
+
+BoundingBox = 0.0, 5.0, -5.42, 1.5, 1.5, 1.5
+
+BoundingBox = 0.0, 3.8, -2.0, 3.5, 1.0
+BoundingBox = 0.0, 3.8, -5.5, 3.5, 1.0
+BoundingBox = 0.0, 3.8, -9.0, 3.5, 1.0
+
+BoundingBox = 0.0, 3.4, -12.0, 2.5, 1.0
+BoundingBox = 0.0, 3.2, -14.5, 2.5, 1.0
+BoundingBox = 0.0, 3.0, -17.0, 2.5, 1.0
+BoundingBox = 0.0, 3.0, -19.5, 2.5, 1.0
+
+BoundingBox =  0.0, 5.5,-22.5,  3.0, 4.0, 1.25
+
+
+AddRack = growler, 0.0, 0.85, -9.0, 0.0, 0.00, -12.0, 7.0, 500000, 180
+AddRack = growler, 0.0, 0.85, -4.5, 0.0, 0.00, -12.0, 7.0, 500000, 180
+
+unmountposition = -0.85,  1.50,  0.07
+
+DamageFactor = 0.8
+
+ThrottleUpDown = 0.3
+DamageFactor = 0.8

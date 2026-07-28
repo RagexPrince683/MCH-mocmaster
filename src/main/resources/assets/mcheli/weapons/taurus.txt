@@ -1,0 +1,44 @@
+DisplayName = Taurus KEPD 350 Cruise Missile
+Type = TVMissile
+IsHeatSeekerMissile = true
+IsRadarMissile = false
+MaxLockOnAngle = 25
+PdHDNMaxDegree = 180.0
+PdHDNMaxDegreeLockOutCount = 50
+LockMinHeight = 0
+PassiveRadar = false
+PassiveRadarLockOutCount = 0
+LaserGuidance = false
+HasLaserGuidancePod = false
+ActiveRadar = false
+ScanInterval = 1
+SpeedDependsAircraft = false
+Acceleration = 2.9
+Explosion = 18
+Sight = MoveSight
+Delay = 5
+Piercing = 5
+Round = 2
+ModeNum = 2
+ModelBullet = Taurus
+Sound = missile_1_snd
+DisableSmoke = true
+Particle = largeexplode
+
+
+;Explosive mass	269.9 kg kg
+Power = 4000
+ExplosionBlock = 10
+ExplosionInWater = 9
+DamageFactor = tank, 2.0
+DamageFactor = plane, 4.5
+DamageFactor = vehicle 4.5
+DamageFactor = heli, 4.5
+DamageFactor = player, 20.0
+
+
+MaxAmmo = 2
+SuppliedNum = 1
+Item = 8, iron_ingot
+Item = 20, gunpowder
+Item = 10, redstone

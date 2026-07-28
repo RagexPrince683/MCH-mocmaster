@@ -1,0 +1,19 @@
+DisplayName = AN/SQQ-90 Active Sonar
+Type = TargetingPod
+Delay = 40
+Sight = MoveSight
+SoundPitch = 1.0
+Sound = acsonar
+SoundVolume = 15.0
+SoundPitchRandom = 0.0
+
+; Radius = Length * Power
+;its classified so fuck you
+Length = 1000
+Power = 10
+
+; Target = ships uses bit 64 in MCH_Multiplay
+Target = ships/others/players
+
+MarkTime = 300
+Radius = 1000

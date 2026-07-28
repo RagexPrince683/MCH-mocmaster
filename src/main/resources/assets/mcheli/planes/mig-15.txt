@@ -1,0 +1,161 @@
+DisplayName = Mikoyan-Gurevich MiG-15 (No Payload)
+AddDisplayName = en_US, Mikoyan-Gurevich MiG-15 (No Payload)
+AddDisplayName = ko_KR, 미그-15
+AddDisplayName = ja_JP, MiG-15
+NameOnEarlyASRadar = Large Aircraft
+NameOnModernASRadar = Mikoyan-Gurevich MiG-15 (No Payload)
+NameOnEarlyAARadar = Large Aircraft
+NameOnModernAARadar = Mikoyan-Gurevich MiG-15 (No Payload)
+ChaffWaitTime = 360
+ChaffUseTime = 120
+ThrottleDownFactor = 0.20
+ItemID = 40004
+Weight = 7900
+CanMountShip = true
+MaxHp = 100
+Speed = 1.872
+
+DamageFactor = 0.8
+
+;669 mph
+
+Sound = migfifteen
+onGroundPitch = 2
+ThrottleUpDown = 0.3
+MaxFuel = 5800
+FuelConsumption = 4.833
+ThrottleUpDownOnEntity = 2.0
+EnableEjectionSeat = false
+EnableSeaSurfaceParticle = true
+ParticlesScale = 0.6
+ThirdPersonDist = 12
+
+; M = Military.  F = Fighter
+Category = FA
+EnableRealisticFlightModel = true
+UseNewMobilitySystem = true
+# PhysicalMass is translational aircraft weight/momentum for the new flight model.
+# EngineThrust is physical engine force; InertiaMultiplier remains rotational response only.
+PhysicalMass = 1.250
+EngineThrust = 1.489
+NewFlightGravity = 0.0080
+NewFlightThrottleResponse = 1.280
+NewFlightThrottleChangeRateUp = 0.0045
+NewFlightThrottleChangeRateDown = 0.0065
+NewFlightIdleThrottle = 0.095
+NewFlightEngineBrakeDrag = 0.0038
+NewFlightLowThrottleLiftRetention = 0.700
+NewFlightThrottleControlAuthorityScale = 0.13
+NewFlightThrottleHudDisplay = true
+NewFlightCombatFlaps = true
+NewFlightCombatFlapLift = 0.105
+NewFlightCombatFlapDrag = 0.014
+NewFlightCombatFlapControl = 0.140
+NewFlightCombatFlapOverspeed = 0.720
+FlightCeiling = 15500
+FlightCeilingRange = 60
+StallSpeed = 0.384
+CriticalAoA = 21.00
+TimeUntilStallPastCriticalAoA = 0.90
+TimeAfterStallUntilPitchDown = 0.85
+StallLiftLoss = 0.860
+AoADragMultiplier = 2.750
+StallInstability = 0.500
+StallRecoverySpeed = 0.545
+StallSpeedFactor = 0.21
+StallStrength = 1.18
+StallRecoveryRate = 0.22
+StallBreakStrength = 0.86
+StallPitchRecoveryStrength = 0.72
+DiveSpeedMultiplier = 1.24
+MaxComfortableG = 5.8
+MaxStructuralG = 8.5
+GControlPenalty = 0.720
+CompressibilitySpeed = 1.741
+CompressibilityPitchPenalty = 0.62
+MaxSafeSpeed = 2.209
+OverspeedDamageRate = 0.16
+BaseDrag = 0.0020
+InducedDrag = 0.013
+ControlSurfaceDrag = 0.0048
+MaxLevelSpeed = 1.835
+IdleDrag = 0.0043
+
+MobilityYaw = 0.890
+MobilityPitch = 1.040
+MobilityRoll = 1.307
+PitchTorque = 0.400
+RollTorque = 0.460
+YawTorque = 0.280
+PitchDamping = 0.410
+RollDamping = 0.370
+YawDamping = 0.440
+InertiaMultiplier = 1.180
+ThrottleAcceleration = 0.029
+EngineDrag = 0.011
+
+HUD = plane_wwii
+
+AddTexture = mig-15-ru2
+AddTexture = mig-15-ru3
+AddTexture = mig-15-nk
+AddTexture = mig-15-cz
+
+EntityWidth  = 0.9
+EntityHeight = 0.9
+
+AddSeat = 0.0, 1.72, 2.65
+
+;AddPartCanopy = -0.511,2.534, 2.896, -1,0,0, 45
+AddPartSlideCanopy = 0.0, 0.05, -0.7
+
+AddPartLG    =  0.00, 0.70, 4.249,  1,0,0,  120
+AddPartLG =  -2.726, 1.578, -0.176,  0,0, 1, 90
+AddPartLG =  2.726, 1.578, -0.176,  0,0, -1, 90
+
+AddWeapon = nr-23mig, 0.588, 0.948, 5.057,   0.0, -2.5
+AddWeapon = nr-23mig,  0.3981, 0.851, 5.23,   0.0, -2.5
+AddWeapon = mign-37,  -0.395, 0.849, 5.446, 0.0, -2.5
+
+;AddPartNozzle = 0.0, 1.92, -8.47, -1, 0, 0
+
+;<HitBoxes>
+BoundingBox =  0.00, 1.6, 4.75,  1.6, 1.6
+BoundingBox =  0.00, 1.6, 3.15,  1.6, 1.6, 1.0
+BoundingBox =  0.00, 1.6, 2.05,  1.6, 1.6, 1.0
+BoundingBox =  0.00, 1.6, 1.11,  2.0, 1.8
+BoundingBox =  0.00, 1.6, -0.60,  1.6, 1.6
+BoundingBox =  0.00, 1.6, -2.00,  1.6, 1.6
+
+BoundingBox =  0.00, 1.6, -3.5,  1.5, 1.5
+
+BoundingBox =  0.00, 1.6, -5.0,  1.5, 1.5
+
+BoundingBox =  0.00, 4.4, -7.5,  0.5, 2.0
+BoundingBox =  0.00, 3.9, -7.0,  0.5, 2.5
+BoundingBox =  0.00, 3.6, -6.5,  0.5, 2.5
+BoundingBox =  0.00, 3.6, -6.0,  0.5, 2.5
+BoundingBox =  0.00, 3.3, -5.5,  0.5, 2.0
+BoundingBox =  0.00, 3.0, -5.0,  0.5, 2.0
+BoundingBox =  0.00, 2.7, -4.5,  0.5, 2.0
+BoundingBox =  0.00, 2.4, -4.0,  0.5, 2.0
+BoundingBox =  0.00, 2.1, -3.5,  0.5, 2.0
+
+BoundingBox =  -1.00, 4.2, -7.0,  1.5, 0.3
+BoundingBox =   1.00, 4.2, -7.0,  1.5, 0.3
+
+BoundingBox = -2.41, 1.6,  -0.11,  2.8, 0.6
+BoundingBox =  2.41, 1.6,  -0.11,  2.8, 0.6
+
+BoundingBox =  -4.7, 1.6,  -1.44,  2.4, 0.5, 1.0
+BoundingBox =  4.7, 1.6,  -1.44,  2.4, 0.5, 1.0
+
+enableback = true
+
+;early modern light plane (late jet), AOW3 style (justcan)
+AddRecipe = "ABC", "DEG", "   ", A, mcheli:airframe, B, mcheli:basicmechanicparts, C, mcheli:engine1, D, mcheli:wheelair, E, mcheli:cannon2, G, mcheli:electronics
+
+unmountposition = 0.0, 1.72, 2.65
+DamageFactor = 0.8
+
+; RealismSource = MCHO plane scripted pass; MiG-15.
