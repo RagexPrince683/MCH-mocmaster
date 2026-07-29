@@ -166,7 +166,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       lines.add(MCH_HudShared.formatSpeedKmh(plane));
       lines.add(MCH_HudShared.formatAltitude(plane));
       lines.add(String.format("X: %+.1f", new Object[]{Double.valueOf(plane.posX)}));
-      lines.add(String.format("Y: %+.1f", new Object[]{Double.valueOf(plane.posY)}));
+      //lines.add(String.format("Y: %+.1f", new Object[]{Double.valueOf(plane.posY)})); altitude already covers this
       lines.add(String.format("Z: %+.1f", new Object[]{Double.valueOf(plane.posZ)}));
       lines.add(MCH_HudShared.formatVerticalSpeed(plane));
       lines.add(String.format("PITCH %+.0f\u00B0", new Object[]{Float.valueOf(this.getDisplayPitchDegrees(plane))}));
