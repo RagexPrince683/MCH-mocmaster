@@ -2,6 +2,9 @@ package mcheli.block;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import mcheli.MCH_Lib;
 import mcheli.MCH_IRecipeList;
 import mcheli.MCH_MOD;
 import mcheli.MCH_ModelManager;
@@ -23,7 +26,8 @@ public class MCH_CurrentRecipe {
    public final IRecipe recipe;
    public final int index;
    public final String displayName;
-   public final List descTexture;
+   public final List<ResourceLocation> descTexture;
+   private static final Set<String> WARNED_DESC_TEXTURES = new HashSet<String>();
    private final MCH_BaseVehicleInfo acInfo;
    public List infoItem;
    public List infoData;
@@ -190,8 +194,8 @@ public class MCH_CurrentRecipe {
       return this.getAcInfo() != null && this.descPage == this.descMaxPage - 1;
    }
 
-   private List getDescTexture(IRecipe r) {
-      ArrayList list = new ArrayList();
+   private List<ResourceLocation> getDescTexture(IRecipe r) {
+      ArrayList<ResourceLocation> list = new ArrayList<ResourceLocation>();
       if(r != null) {
          for(int i = 0; i < 20; ++i) {
             String itemName = r.getRecipeOutput().getUnlocalizedName();
@@ -203,13 +207,31 @@ public class MCH_CurrentRecipe {
                itemName = itemName.substring(itemName.indexOf(":") + 1);
             }
 
-            itemName = "/textures/drafting_table_desc/" + itemName + "#" + i + ".png";
-            if(MCH_ResourceHelper.resourceExists("assets/mcheli" + itemName)) {
-               list.add(new ResourceLocation("mcheli", itemName));
+            // ResourceLocation paths omit assets/mcheli and never begin with a slash.
+            String texturePath = normalizeTexturePath("textures/drafting_table_desc/" + itemName + "#" + i + ".png");
+            String assetPath = MCH_ResourceHelper.normalizeAssetPath("assets/mcheli/" + texturePath);
+            if(MCH_ResourceHelper.resourceExists(assetPath)) {
+               list.add(new ResourceLocation("mcheli", texturePath));
+            } else {
+               warnMissingDescTexture(r.getRecipeOutput().getDisplayName(), assetPath);
             }
          }
       }
 
       return list;
+   }
+
+   private static String normalizeTexturePath(String path) {
+      path = path.replace('\\', '/');
+      while(path.startsWith("/")) path = path.substring(1);
+      while(path.contains("//")) path = path.replace("//", "/");
+      return path;
+   }
+
+   private static void warnMissingDescTexture(String outputName, String resourcePath) {
+      String warningKey = outputName + "|" + resourcePath;
+      if(WARNED_DESC_TEXTURES.add(warningKey)) {
+         MCH_Lib.Log("WARNING: Drafting table description texture unresolved for '%s': %s", outputName, resourcePath);
+      }
    }
 }

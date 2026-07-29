@@ -1,3 +1,9 @@
+## PR #564 - Drafting Table Description Textures
+
+- Fixed drafting table description bindings so classpath and addon existence checks resolve the same texture path used by Minecraft's resource manager.
+- Preserved numbered description pages, addon overrides, and the intended description crop while supporting textures with dimensions other than 512 by 512 pixels.
+- Added one-time warnings for unresolved description pages instead of adding textures that render as the missing-texture checkerboard.
+
 ## Hold Shift Vehicle Dismount
 
 - Changed vehicle dismounting to require holding Left Shift continuously for three seconds, preventing accidental exits from pilot seats.
