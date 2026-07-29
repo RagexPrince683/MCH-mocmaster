@@ -897,6 +897,27 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public void onPlayerTickPre(EntityPlayer player) {
+      if(player == super.mc.thePlayer) {
+         boolean ridingVehicle = player.ridingEntity instanceof MCH_EntityBaseVehicle
+               || player.ridingEntity instanceof MCH_EntitySeat;
+         boolean dismountKeyPressed = MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak);
+
+         if(!ridingVehicle || !dismountKeyPressed) {
+            this.dismountHoldTicks = 0;
+            this.suppressedDismountKey = false;
+         } else {
+            if(this.dismountHoldTicks < DISMOUNT_HOLD_TICKS) {
+               ++this.dismountHoldTicks;
+            }
+
+            if(this.dismountHoldTicks < DISMOUNT_HOLD_TICKS) {
+               KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(), false);
+               ((EntityClientPlayerMP)player).movementInput.sneak = false;
+               this.suppressedDismountKey = true;
+            }
+         }
+      }
+
       if(player.worldObj.isRemote) {
          ItemStack currentItemstack = player.getCurrentEquippedItem();
          if(currentItemstack != null && currentItemstack.getItem() instanceof MCH_ItemWrench && player.getItemInUseCount() > 0 && player.getItemInUse() != currentItemstack) {
@@ -910,7 +931,13 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
    }
 
-   public void onPlayerTickPost(EntityPlayer player) {}
+   public void onPlayerTickPost(EntityPlayer player) {
+      if(player == super.mc.thePlayer && this.suppressedDismountKey) {
+         KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(),
+               MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak));
+         this.suppressedDismountKey = false;
+      }
+   }
 
    public void onRenderTickPost(float partialTicks) {
       if (this.mc.thePlayer != null) {
