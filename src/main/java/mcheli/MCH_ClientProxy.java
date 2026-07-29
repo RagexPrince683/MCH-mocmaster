@@ -40,6 +40,7 @@ import mcheli.multiplay.MCH_MultiplayClient;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.parachute.MCH_RenderParachute;
 import mcheli.particles.MCH_ParticlesUtil;
+import mcheli.particles.MCH_ParticleTexture;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_PlaneInfo;
 import mcheli.plane.MCP_PlaneInfoManager;
@@ -629,6 +630,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    }
 
    public void init() {
+      MCH_ParticleTexture.register();
       MinecraftForge.EVENT_BUS.register(new MCH_ParticlesUtil());
       MinecraftForge.EVENT_BUS.register(new MCH_ClientEventHook());
       MinecraftForge.EVENT_BUS.register(new MCH_RenderBVRLockBox());

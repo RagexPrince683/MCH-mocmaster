@@ -1,3 +1,9 @@
+## PR #566 - Soft Particle Texture Runtime Reconstruction
+
+- Kept the crunched eight-frame smoke asset and added one-time, client-side runtime reconstruction of soft alpha edges for undersized or binary-alpha resource-pack textures.
+- Added isolated-frame bicubic scaling, alpha/luminance reconstruction, blur, transparent gutters, inset UVs, linear filtering, and resource-reload-safe dynamic texture replacement for smoke and custom splash particles.
+- Added image-only regression coverage for the current 64 by 8 atlas, frame isolation, alpha preservation, direct-use bypass, invalid widths, and missing resources.
+
 ## PR #564 - Drafting Table Description Textures
 
 - Fixed drafting table description bindings so classpath and addon existence checks resolve the same texture path used by Minecraft's resource manager.
