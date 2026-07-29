@@ -190,6 +190,7 @@ public class MCH_Flare {
          }
 
          MCH_EntityFlare e = new MCH_EntityFlare(this.worldObj, x, y, z, tx * 0.5D, ty * 0.5D, tz * 0.5D, 6.0F, fuseCount);
+         e.setCountermeasure(true);
          e.rotationPitch = this.rand.nextFloat() * 360.0F;
          e.rotationYaw = this.rand.nextFloat() * 360.0F;
          e.prevRotationPitch = this.rand.nextFloat() * 360.0F;

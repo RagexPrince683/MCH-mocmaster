@@ -180,7 +180,9 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
                ++this.lockCount;  // If target is locked, increments lock count
             }
          } else if(this.targetEntity != null && !this.targetEntity.isDead) {  // If a target already exists and is not dead
-            boolean canLockTarget = true;  // Whether target can continue to be locked
+            // Apply the same classification used to acquire a target; visual flare emitters and
+            // expired countermeasures may outlive the effect that made them appear target-like.
+            boolean canLockTarget = this.canLockEntity(this.targetEntity);  // Whether target can continue to be locked
 
             if(targetEntity instanceof MCH_EntityBaseVehicle) {
                if(isRadarMissile && targetEntity.getEntityData().getBoolean("ChaffUsing")) {
@@ -363,13 +365,10 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
          if(className.indexOf("EntityCamera") >= 0) {
             return false;
          }
-         // IR missiles can lock flares
-         if(this.isHeatSeekerMissile && entity instanceof MCH_EntityFlare) {
-            return true;
-         }
-         // Radar missiles can lock chaff
-         if(this.isRadarMissile && entity instanceof MCH_EntityChaff) {
-            return true;
+         // Countermeasure entities are classified before normal living/vehicle targets. Smoke
+         // particles are client-only EntityFX objects and never participate in this entity list.
+         if(entity instanceof MCH_EntityFlare || entity instanceof MCH_EntityChaff) {
+            return isValidCountermeasureTarget(entity, this.isHeatSeekerMissile, this.isRadarMissile);
          }
          // Locks missiles
          if(this.canLockMissile &&
@@ -404,6 +403,16 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
             return (this.canLockOnGround || !ong) && (this.canLockInAir || ong);
          }
       }
+   }
+
+   public static boolean isValidCountermeasureTarget(Entity entity, boolean heatSeeking, boolean radarGuided) {
+      if(entity instanceof MCH_EntityFlare) {
+         return !radarGuided && heatSeeking && ((MCH_EntityFlare)entity).isActiveCountermeasure();
+      }
+      if(entity instanceof MCH_EntityChaff) {
+         return radarGuided && ((MCH_EntityChaff)entity).isActiveCountermeasure();
+      }
+      return false;
    }
 
 

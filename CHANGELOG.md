@@ -245,3 +245,9 @@
 
 ## Engine Waterboarding
 - Added waterboarding behavior for tank, plane, and helicopter engines: submerged non-floating vehicles now have throttle forced to zero while waterlogged, and recurring water damage stops once the configured `EngineShutdownThreshold` health percentage is reached instead of always continuing to destruction.
+
+# Missile lock target classification
+
+- Keep client-side smoke and visual flare emitters out of missile lock candidate lists.
+- Restrict heat guidance to active flare countermeasures and radar guidance to active chaff,
+  including revalidation while a weapon or active-radar missile continues tracking.
