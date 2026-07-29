@@ -4,6 +4,7 @@ import mcheli.MCH_ClientTickHandlerBase;
 import mcheli.MCH_Config;
 import mcheli.MCH_Key;
 import mcheli.MCH_Lib;
+import mcheli.MCH_ClientCommonTickHandler;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_PacketSeatPlayerControl;
@@ -37,7 +38,7 @@ public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
       this.KeySwitchPrevSeat = new MCH_Key(MCH_Config.KeyGUI.prmInt);
       this.KeyParachuting = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
       this.KeyHeliEject = new MCH_Key(MCH_Config.KeyEjectHeli.prmInt);
-      this.KeyUnmountForce = new MCH_Key(42);
+      this.KeyUnmountForce = new MCH_Key(super.mc.gameSettings.keyBindSneak.getKeyCode());
       this.KeyFreeLook = new MCH_Key(MCH_Config.KeyFreeLook.prmInt);
       this.Keys = new MCH_Key[]{this.KeySwitchNextSeat, this.KeySwitchPrevSeat, this.KeyParachuting, this.KeyUnmountForce, this.KeyFreeLook};
    }
@@ -80,6 +81,10 @@ public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
    private void playerControl(EntityPlayer player, MCH_EntitySeat seat, MCH_EntityBaseVehicle ac) {
       MCH_PacketSeatPlayerControl pc = new MCH_PacketSeatPlayerControl();
       boolean send = false;
+      if(MCH_ClientCommonTickHandler.instance.consumeDismountRequest(player)) {
+         pc.isUnmount = true;
+         send = true;
+      }
       if(this.KeyFreeLook.isKeyDown() && ac.canSwitchGunnerFreeLook(player)) {
          ac.switchGunnerFreeLookMode();
       }
