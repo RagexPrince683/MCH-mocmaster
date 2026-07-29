@@ -1,3 +1,8 @@
+## Real-Time Dismount Countdown
+
+- Measure the three-second MCHeli dismount hold with Java's monotonic clock so low client TPS no longer extends the real-world wait.
+- Show the synchronized `3s`, `2s`, and `1s` remaining hold time beside the configured Sneak key in the vehicle HUD.
+
 ## Three-Second MCHeli Dismount
 
 - Require pilots and passengers to hold the configured Minecraft Sneak key for 60 continuous client ticks before requesting a server-authoritative dismount.

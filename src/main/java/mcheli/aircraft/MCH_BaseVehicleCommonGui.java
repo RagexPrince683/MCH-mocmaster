@@ -2,6 +2,7 @@ package mcheli.aircraft;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mcheli.MCH_ClientCommonTickHandler;
 import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_Lib;
@@ -226,7 +227,12 @@ public abstract class MCH_BaseVehicleCommonGui extends MCH_Gui {
             msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyUnmount.prmInt)).toString();
             color = -256;
          } else {
-            msg = "Dismount : Hold " + MCH_KeyName.getDescOrName(super.mc.gameSettings.keyBindSneak.getKeyCode()) + " (3s)";
+            int remainingSeconds = 3;
+            if(MCH_ClientCommonTickHandler.instance != null) {
+               remainingSeconds = MCH_ClientCommonTickHandler.instance.getDismountHoldRemainingSeconds(player);
+            }
+            msg = "Dismount : Hold " + MCH_KeyName.getDescOrName(super.mc.gameSettings.keyBindSneak.getKeyCode())
+                  + " (" + remainingSeconds + "s)";
          }
 
          this.drawString(msg, LX, super.centerY - 30, color);
