@@ -6,7 +6,11 @@ import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.flare.MCH_EntityChaff;
 import mcheli.flare.MCH_EntityFlare;
 import mcheli.plane.MCP_EntityPlane;
+import mcheli.helicopter.MCH_EntityHeli;
+import mcheli.ship.MCH_EntityShip;
+import mcheli.tank.MCH_EntityTank;
 import mcheli.uav.MCH_EntityUavStation;
+import mcheli.vehicle.MCH_EntityTurret;
 import mcheli.vector.Vector3f;
 import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Lib;
@@ -21,6 +25,14 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
+
+   public enum TargetDomain {
+      AIR,
+      GROUND,
+      SURFACE,
+      UNDERWATER,
+      UNKNOWN
+   }
 
    public World worldObj;
    protected Entity user;
@@ -104,10 +116,13 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
             return true;
          }
 
-         for(int i = 0; i < height; ++i) {
-            int x = (int)(entity.posX + 0.5D);
-            int y = (int)(entity.posY + 0.5D) - i;
-            int z = (int)(entity.posZ + 0.5D);
+         // LockMinHeight remains the optional look-down distance.  A one-block contact
+         // probe is always retained for compatibility when it is zero.
+         int probeHeight = Math.max(1, height);
+         for(int i = 0; i < probeHeight; ++i) {
+            int x = (int)Math.floor(entity.posX);
+            int y = (int)Math.floor(entity.boundingBox.minY - 0.01D) - i;
+            int z = (int)Math.floor(entity.posZ);
             int blockId = W_WorldFunc.getBlockId(entity.worldObj, x, y, z);
             if(blockId != 0) {
                return true;
@@ -115,6 +130,56 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
          }
       }
 
+      return false;
+   }
+
+   /** Classifies stable vehicle roles before using transient physical contact. */
+   public static TargetDomain getTargetDomain(Entity entity, int groundProbeHeight) {
+      if(entity == null || entity.isDead) {
+         return TargetDomain.UNKNOWN;
+      }
+      if(entity instanceof MCP_EntityPlane || entity instanceof MCH_EntityHeli) {
+         return TargetDomain.AIR;
+      }
+      if(entity instanceof MCH_EntityShip) {
+         MCH_EntityShip ship = (MCH_EntityShip)entity;
+         return ship.isDiving && ship.isInWater() ? TargetDomain.UNDERWATER : TargetDomain.SURFACE;
+      }
+      if(entity instanceof MCH_EntityTank || entity instanceof MCH_EntityTurret
+              || entity instanceof MCH_EntityUavStation) {
+         return TargetDomain.GROUND;
+      }
+
+      String className = entity.getClass().getName();
+      // Preserve the legacy external-mod compatibility contract, but give its known
+      // roles stable domains instead of treating all vehicles as airborne off blocks.
+      if(className.indexOf("EntityPlane") >= 0) {
+         return TargetDomain.AIR;
+      }
+      if(className.indexOf("EntityVehicle") >= 0 || className.indexOf("EntityMecha") >= 0
+              || className.indexOf("EntityAAGun") >= 0) {
+         return TargetDomain.GROUND;
+      }
+      if(entity instanceof MCH_EntityBaseVehicle) {
+         return TargetDomain.UNKNOWN;
+      }
+      return isEntityOnGround(entity, groundProbeHeight) ? TargetDomain.GROUND : TargetDomain.AIR;
+   }
+
+   private boolean isDomainAllowed(Entity entity) {
+      TargetDomain domain = getTargetDomain(entity, this.lockMinHeight);
+      if(domain == TargetDomain.GROUND) {
+         return this.canLockOnGround;
+      }
+      if(domain == TargetDomain.AIR) {
+         return this.canLockInAir;
+      }
+      if(domain == TargetDomain.SURFACE) {
+         return this.canLockInWater;
+      }
+      if(domain == TargetDomain.UNDERWATER) {
+         return this.canLockInWater;
+      }
       return false;
    }
 
@@ -188,22 +253,6 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
                if(isRadarMissile && targetEntity.getEntityData().getBoolean("ChaffUsing")) {
                   canLockTarget = false;
                }
-            }
-
-            // Checks whether target is in water; sets false if underwater targets cannot be locked
-            if(!this.canLockInWater && this.targetEntity.isInWater()) {
-               canLockTarget = false;
-            }
-
-            boolean isTargetOnGround = isEntityOnGround(this.targetEntity, lockMinHeight);  // Determines whether target is on ground
-            // Checks whether target can be locked on ground
-            if(!this.canLockOnGround && isTargetOnGround) {
-               canLockTarget = false;
-            }
-
-            // Checks whether target can be locked in air
-            if(!this.canLockInAir && !isTargetOnGround) {
-               canLockTarget = false;
             }
 
             //todo here
@@ -381,27 +430,25 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
          // If entity is neither a living entity nor a specific type such as aircraft or vehicle, returns false
          if(!W_Lib.isEntityLivingBase(entity)
                  && !(entity instanceof MCH_EntityBaseVehicle)
+                 && !(entity instanceof MCH_EntityUavStation)
                  && className.indexOf("EntityVehicle") < 0
                  && className.indexOf("EntityPlane") < 0
                  && className.indexOf("EntityMecha") < 0
                  && className.indexOf("EntityAAGun") < 0) {
             return false;
          }
-         // If entity is in water and underwater entities cannot be locked, returns false
+         // Water immersion remains an independent permission for non-ship targets.
          else if(!this.canLockInWater && entity.isInWater()) {
             return false;
          }
-         // If there is a custom entity lock checker and it returns false, returns false
+         else if(!this.isDomainAllowed(entity)) {
+            return false;
+         }
+         // Custom restrictions are intentionally applied after shared domain permissions.
          else if(this.checker != null && !this.checker.canLockEntity(entity)) {
             return false;
          }
-
-         else {
-            // Determines whether entity is on ground
-            boolean ong = isEntityOnGround(entity, lockMinHeight);
-            // If ground entities can be locked or entity is not on ground, and airborne entities can be locked, returns true
-            return (this.canLockOnGround || !ong) && (this.canLockInAir || ong);
-         }
+         return true;
       }
    }
 

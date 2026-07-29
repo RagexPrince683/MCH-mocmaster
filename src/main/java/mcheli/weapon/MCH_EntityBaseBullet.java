@@ -604,7 +604,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         }
 
         if(this instanceof MCH_EntityAAMissile
-                && MCH_WeaponGuidanceSystem.isEntityOnGround(targetEntity, weaponInfo.lockMinHeight)) {
+                && MCH_WeaponGuidanceSystem.getTargetDomain(targetEntity, weaponInfo.lockMinHeight)
+                != MCH_WeaponGuidanceSystem.TargetDomain.AIR) {
             targetEntity = null;
             return;
         }
