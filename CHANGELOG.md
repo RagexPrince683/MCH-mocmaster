@@ -1,3 +1,10 @@
+## Fix Reconstructed Smoke Particle Backgrounds
+
+- Removed reconstruction haze by scaling per-frame alpha coverage instead of bicubic ARGB, applying a silhouette-limited blur, discarding alpha at or below 4/255, and renormalizing the retained soft coverage.
+- Increased each reconstructed frame's transparent gutter to two pixels, forced content edges and zero-alpha RGB transparent, and sampled the complete cell with half-texel UV insets.
+- Preserved source-alpha blending while adding a 1/255 alpha-test guard and restoring all fixed-function state changed by standalone smoke rendering.
+- Added image-only regressions for the bundled 64 by 8 smoke texture, transparent borders/corners, soft coverage, frame isolation, edge-touching coverage, and transparent RGB.
+
 ## PR #566 - Soft Particle Texture Runtime Reconstruction
 
 - Kept the crunched eight-frame smoke asset and added one-time, client-side runtime reconstruction of soft alpha edges for undersized or binary-alpha resource-pack textures.
