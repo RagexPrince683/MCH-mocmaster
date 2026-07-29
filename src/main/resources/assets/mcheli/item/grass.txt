@@ -1,6 +1,14 @@
 DisplayName = Green Camo Skin
 AddDisplayName = ja_JP, Green Camo Skin
 
+AddRecipe = "ABA", "ABA", "   ", A, leaves, B, dirt
+
+AddRecipe = "ABA", "ABA", "   ", A, leaves,1, B, dirt
+
+AddRecipe = "ABA", "ABA", "   ", A, leaves,2, B, dirt
+
+AddRecipe = "ABA", "ABA", "   ", A, leaves,3, B, dirt
+
 textureoverlay = true
 
 StackSize = 64

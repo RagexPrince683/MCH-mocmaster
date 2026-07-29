@@ -1,6 +1,8 @@
 DisplayName = Desert Camo Skin
 AddDisplayName = ja_JP, Desert Camo Skin
 
+AddRecipe = "ABA", "ABA", "   ", A, sand, B, sandstone
+
 textureoverlay = true
 
 StackSize = 64

@@ -1,6 +1,8 @@
 DisplayName = White Camo Skin
 AddDisplayName = ja_JP, White Camo Skin
 
+AddRecipe = "ABA", "ABA", "   ", A, snow, B, dirt
+
 textureoverlay = true
 
 StackSize = 64
