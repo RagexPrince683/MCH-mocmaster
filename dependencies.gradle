@@ -1,6 +1,14 @@
 // MCHeli Overdrive+ dependencies
+
+def localDevMods = fileTree("devmods") {
+    include "*.jar"
+}
+
 dependencies {
-    // GTNH-forked CodeChicken libs (runtime for dev testing)
     devOnlyNonPublishable "com.github.GTNewHorizons:CodeChickenCore:1.4.16:dev"
     devOnlyNonPublishable "com.github.GTNewHorizons:NotEnoughItems:2.8.114-GTNH:dev"
+
+    localDevMods.files.each { modJar ->
+        devOnlyNonPublishable(rfg.deobf(project.files(modJar)))
+    }
 }
