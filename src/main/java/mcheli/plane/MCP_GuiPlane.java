@@ -165,6 +165,9 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
       lines.add(MCH_HudShared.formatThrottleOrCollective("THR  ", plane));
       lines.add(MCH_HudShared.formatSpeedKmh(plane));
       lines.add(MCH_HudShared.formatAltitude(plane));
+      lines.add(String.format("X: %+.1f", new Object[]{Double.valueOf(plane.posX)}));
+      lines.add(String.format("Y: %+.1f", new Object[]{Double.valueOf(plane.posY)}));
+      lines.add(String.format("Z: %+.1f", new Object[]{Double.valueOf(plane.posZ)}));
       lines.add(MCH_HudShared.formatVerticalSpeed(plane));
       lines.add(String.format("PITCH %+.0f\u00B0", new Object[]{Float.valueOf(this.getDisplayPitchDegrees(plane))}));
       lines.add(MCH_HudShared.formatFuelMinutes(plane));
@@ -174,8 +177,11 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
       List warnings = this.collectSimpleHudWarnings(plane);
       int x = MathHelper.clamp_int(MCH_Config.NewPlaneSimpleHudX.prmInt, 4, Math.max(4, super.width - 118));
-      int y = MathHelper.clamp_int(MCH_Config.NewPlaneSimpleHudY.prmInt, 4, Math.max(4, super.height - 102));
-      this.drawHudPanel(x - 4, y - 4, 116, lines.size() * 10 + 8);
+      int mainPanelHeight = lines.size() * 10 + 8;
+      int warningPanelHeight = warnings.isEmpty()?0:warnings.size() * 10 + 4;
+      int panelStackHeight = mainPanelHeight + (warnings.isEmpty()?0:warningPanelHeight + 3);
+      int y = MathHelper.clamp_int(MCH_Config.NewPlaneSimpleHudY.prmInt, 4, Math.max(4, super.height - panelStackHeight));
+      this.drawHudPanel(x - 4, y - 4, 116, mainPanelHeight);
       this.drawHudLines(lines, x, y, 0xFFE8E8E8, 0x66303030);
 
       this.drawStickInputGauge(x + 126, y + 12);

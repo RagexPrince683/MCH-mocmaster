@@ -1,3 +1,8 @@
+## New Plane Simple HUD Coordinates
+
+- Added signed, one-decimal X, Y, and Z aircraft coordinates directly below altitude in the new plane simple HUD.
+- Made the simple HUD vertical clamp use the rendered main and warning panel heights so the expanded stack remains on screen at small GUI resolutions.
+
 ## Real-Time Dismount Countdown
 
 - Measure the three-second MCHeli dismount hold with Java's monotonic clock so low client TPS no longer extends the real-world wait.
