@@ -118,11 +118,16 @@ public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase {
          return;
       }
 
+      GL11.glPushAttrib(GL11.GL_CURRENT_BIT | GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT |
+         GL11.GL_LIGHTING_BIT | GL11.GL_POLYGON_BIT | GL11.GL_TEXTURE_BIT);
       MCH_ParticleTexture.bind();
+      boolean alphaTest = GL11.glIsEnabled(GL11.GL_ALPHA_TEST);
+      int alphaFunction = GL11.glGetInteger(GL11.GL_ALPHA_TEST_FUNC);
+      float alphaReference = GL11.glGetFloat(GL11.GL_ALPHA_TEST_REF);
       GL11.glEnable(3042);
-      int srcBlend = GL11.glGetInteger(3041);
-      int dstBlend = GL11.glGetInteger(3040);
       GL11.glBlendFunc(770, 771);
+      GL11.glEnable(GL11.GL_ALPHA_TEST);
+      GL11.glAlphaFunc(GL11.GL_GREATER, 1.0F / 255.0F);
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glDisable(2896);
       GL11.glDisable(2884);
@@ -143,9 +148,8 @@ public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase {
       par1Tessellator.addVertexWithUV((double)(f11 + par3 * f10 + par6 * f10), (double)(f12 + par4 * f10), (double)(f13 + par5 * f10 + par7 * f10), (double)f6, (double)f8);
       par1Tessellator.addVertexWithUV((double)(f11 + par3 * f10 - par6 * f10), (double)(f12 - par4 * f10), (double)(f13 + par5 * f10 - par7 * f10), (double)f6, (double)f9);
       par1Tessellator.draw();
-      GL11.glEnable(2884);
-      GL11.glEnable(2896);
-      GL11.glBlendFunc(srcBlend, dstBlend);
-      GL11.glDisable(3042);
+      GL11.glAlphaFunc(alphaFunction, alphaReference);
+      if(!alphaTest) GL11.glDisable(GL11.GL_ALPHA_TEST);
+      GL11.glPopAttrib();
    }
 }

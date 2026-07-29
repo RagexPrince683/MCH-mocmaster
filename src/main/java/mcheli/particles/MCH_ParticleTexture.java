@@ -44,7 +44,7 @@ public final class MCH_ParticleTexture implements IResourceManagerReloadListener
       if(!INSTANCE.result.processed) {
          return (frame + 0.5F / INSTANCE.result.cellWidth) / 8.0F;
       }
-      return (frame * INSTANCE.result.cellWidth + INSTANCE.result.padding + 0.5F) / INSTANCE.result.image.getWidth();
+      return (frame * INSTANCE.result.cellWidth + 0.5F) / INSTANCE.result.image.getWidth();
    }
 
    public static float maxU(int frame) {
@@ -53,21 +53,21 @@ public final class MCH_ParticleTexture implements IResourceManagerReloadListener
       if(!INSTANCE.result.processed) {
          return (frame + 1.0F - 0.5F / INSTANCE.result.cellWidth) / 8.0F;
       }
-      return ((frame + 1) * INSTANCE.result.cellWidth - INSTANCE.result.padding - 0.5F) / INSTANCE.result.image.getWidth();
+      return ((frame + 1) * INSTANCE.result.cellWidth - 0.5F) / INSTANCE.result.image.getWidth();
    }
 
    public static float minV() {
       INSTANCE.ensureLoaded();
       if(INSTANCE.result == null) return 0.0F;
       return INSTANCE.result.processed
-         ? (INSTANCE.result.padding + 0.5F) / INSTANCE.result.image.getHeight() : 0.5F / INSTANCE.result.cellHeight;
+         ? 0.5F / INSTANCE.result.image.getHeight() : 0.5F / INSTANCE.result.cellHeight;
    }
 
    public static float maxV() {
       INSTANCE.ensureLoaded();
       if(INSTANCE.result == null) return 1.0F;
       return INSTANCE.result.processed
-         ? (INSTANCE.result.image.getHeight() - INSTANCE.result.padding - 0.5F) / INSTANCE.result.image.getHeight()
+         ? (INSTANCE.result.image.getHeight() - 0.5F) / INSTANCE.result.image.getHeight()
          : 1.0F - 0.5F / INSTANCE.result.cellHeight;
    }
 
