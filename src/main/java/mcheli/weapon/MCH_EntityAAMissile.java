@@ -90,8 +90,8 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet implements MCH_IEn
                   continue;
                }
 
-               boolean isTargetOnGround = MCH_WeaponGuidanceSystem.isEntityOnGround(entity, getInfo().lockMinHeight);
-               if (isTargetOnGround) {
+               if (MCH_WeaponGuidanceSystem.getTargetDomain(entity, getInfo().lockMinHeight)
+                       != MCH_WeaponGuidanceSystem.TargetDomain.AIR) {
                   continue;
                }
 

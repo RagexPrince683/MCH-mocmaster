@@ -165,8 +165,8 @@ public class MCH_EntityATMissile extends MCH_EntityBaseBullet {
                         continue;
                     }
 
-                    boolean isTargetOnGround = MCH_WeaponGuidanceSystem.isEntityOnGround(entity, getInfo().lockMinHeight);
-                    if (!isTargetOnGround) {
+                    if (MCH_WeaponGuidanceSystem.getTargetDomain(entity, getInfo().lockMinHeight)
+                            != MCH_WeaponGuidanceSystem.TargetDomain.GROUND) {
                         continue;
                     }
 
@@ -190,7 +190,6 @@ public class MCH_EntityATMissile extends MCH_EntityBaseBullet {
 
             if (closestTarget != null) {
                 super.targetEntity = closestTarget;
-                System.out.println("Active AT missile locked entity " + ((MCH_EntityBaseVehicle)closestTarget).getAcInfo().name + "  distance " + (int)getDistanceToEntity(closestTarget));
             }
         }
     }
