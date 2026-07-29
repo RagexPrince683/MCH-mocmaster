@@ -3,6 +3,7 @@ package mcheli.weapon;
 import mcheli.MCH_Config;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.flare.MCH_EntityChaff;
+import mcheli.flare.MCH_EntityFlare;
 import mcheli.vector.Vector3f;
 import mcheli.wrapper.W_Entity;
 import net.minecraft.entity.Entity;
@@ -39,7 +40,7 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet implements MCH_IEn
       }
 
       if(!super.worldObj.isRemote && this.getInfo() != null) {
-         if(super.shootingEntity != null && super.targetEntity != null && !super.targetEntity.isDead) {
+         if(super.shootingEntity != null && isValidExistingTarget(super.targetEntity)) {
             double x = super.posX - super.targetEntity.posX;
             double y = super.posY - super.targetEntity.posY;
             double z = super.posZ - super.targetEntity.posZ;
@@ -58,6 +59,9 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet implements MCH_IEn
                }
             }
          } else {
+            if(super.targetEntity instanceof MCH_EntityFlare || super.targetEntity instanceof MCH_EntityChaff) {
+               super.targetEntity = null;
+            }
             if(getInfo().activeRadar && ticksExisted % getInfo().scanInterval == 0) {
                scanForTargets();
             }
@@ -79,7 +83,8 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet implements MCH_IEn
          Entity closestTarget = null;
 
          for (Entity entity : list) {
-            if (entity instanceof MCH_EntityBaseVehicle || entity instanceof MCH_EntityChaff) {
+            if (entity instanceof MCH_EntityBaseVehicle
+                    || MCH_WeaponGuidanceSystem.isValidCountermeasureTarget(entity, false, true)) {
 
                if (W_Entity.isEqual(entity, shootingAircraft)) {
                   continue;
@@ -112,6 +117,16 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet implements MCH_IEn
             super.targetEntity = closestTarget;
          }
       }
+   }
+
+   private boolean isValidExistingTarget(Entity entity) {
+      if(entity == null || entity.isDead) {
+         return false;
+      }
+      if(entity instanceof MCH_EntityFlare || entity instanceof MCH_EntityChaff) {
+         return MCH_WeaponGuidanceSystem.isValidCountermeasureTarget(entity, false, true);
+      }
+      return true;
    }
 
 

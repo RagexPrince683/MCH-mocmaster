@@ -18,10 +18,13 @@ import net.minecraft.world.World;
 
 public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnData , MCH_IEntityLockChecker {
 
+   public static final int MAX_TICK_EXISTED = 300;
+
    public double gravity;
    public double airResistance;
    public float size;
    public int fuseCount;
+   private boolean countermeasure;
 
 
    public MCH_EntityFlare(World par1World) {
@@ -34,6 +37,7 @@ public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnD
       super.prevRotationPitch = super.rotationPitch;
       this.size = 6.0F;
       this.fuseCount = 0;
+      this.countermeasure = false;
    }
 
    public MCH_EntityFlare(World par1World, double pX, double pY, double pZ, double mX, double mY, double mZ, float size, int fuseCount) {
@@ -49,6 +53,16 @@ public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnD
 
    public boolean isEntityInvulnerable() {
       return true;
+   }
+
+   public void setCountermeasure(boolean countermeasure) {
+      this.countermeasure = countermeasure;
+   }
+
+   public boolean isActiveCountermeasure() {
+      int lifetime = this.fuseCount > 0 ? this.fuseCount : MAX_TICK_EXISTED;
+      return this.countermeasure && !this.isDead && this.ticksExisted < lifetime
+              && !this.onGround && !this.isInWater();
    }
 
    @SideOnly(Side.CLIENT)
@@ -87,6 +101,7 @@ public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnD
    public void writeSpawnData(ByteBuf buffer) {
       try {
          buffer.writeByte(this.fuseCount);
+         buffer.writeBoolean(this.countermeasure);
       } catch (Exception var3) {
          var3.printStackTrace();
       }
@@ -96,6 +111,7 @@ public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnD
    public void readSpawnData(ByteBuf additionalData) {
       try {
          this.fuseCount = additionalData.readByte();
+         this.countermeasure = additionalData.readBoolean();
       } catch (Exception var3) {
          var3.printStackTrace();
       }
@@ -107,7 +123,7 @@ public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnD
          this.setDead();
       } else if(!super.worldObj.isRemote && !super.worldObj.blockExists((int)super.posX, (int)super.posY, (int)super.posZ)) {
          this.setDead();
-      } else if(super.ticksExisted > 300 && !super.worldObj.isRemote) {
+      } else if(super.ticksExisted > MAX_TICK_EXISTED && !super.worldObj.isRemote) {
          this.setDead();
       } else {
          super.onUpdate();

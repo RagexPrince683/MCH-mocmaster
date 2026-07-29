@@ -38,6 +38,11 @@ public class MCH_EntityChaff extends W_Entity implements MCH_IEntityLockChecker 
       super.motionZ = mZ;
    }
 
+   public boolean isActiveCountermeasure() {
+      return !this.isDead && this.ticksExisted <= MAX_TICK_EXISTED
+              && !this.onGround && !this.isInWater();
+   }
+
    @Override
    public void onUpdate() {
       if (worldObj.isRemote) {
