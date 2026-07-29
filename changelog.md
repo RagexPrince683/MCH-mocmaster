@@ -269,3 +269,10 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Keep client-side smoke and visual flare emitters out of missile lock candidate lists.
 - Restrict heat guidance to active flare countermeasures and radar guidance to active chaff,
   including revalidation while a weapon or active-radar missile continues tracking.
+## Fix Active Protection System reliability
+
+- Made APS activation, timers, threat selection, interception, and sounds server-authoritative.
+- Added typed MCHeli projectile filtering, shooter/vehicle/seat ownership checks, approach and projected-path checks, and once-only harmless interception effects.
+- Preserved legacy `APSRange = 100` Iron Curtain content while limiting its protection to projectile and explosion damage.
+- Enabled the Merkava Mk.4 Barak APS with an explicit active duration, cooldown, and range.
+- Made optional FMUR reflection cached and quiet when FMUR is absent or incompatible.

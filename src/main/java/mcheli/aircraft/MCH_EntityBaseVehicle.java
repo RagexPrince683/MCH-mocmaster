@@ -1357,9 +1357,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       //        + " src=" + srcName + " org=" + org_damage);
 
 
-      if(ironCurtainRunningTick > 0) {
-         //todo fix aps
-         System.out.println("APS is running cancelling damage");
+      if(ironCurtainRunningTick > 0 && isIronCurtainDamage(damageSource)) {
          return false;
       }
 
@@ -5056,6 +5054,14 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
    }
 
+   private boolean isIronCurtainDamage(DamageSource source) {
+      if(source == null || this.aps == null || !this.aps.isActive() || !this.aps.isIronCurtainMode()) {
+         return false;
+      }
+      Entity direct = source.getSourceOfDamage();
+      return source.isExplosion() || source.isProjectile() || direct instanceof mcheli.weapon.MCH_EntityBaseBullet;
+   }
+
    public int getCurrentFlareType() {
       return !this.haveFlare()?0:this.getAcInfo().flare.types[this.currentFlareIndex];
    }
@@ -5100,7 +5106,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public boolean canUseAPS() {
-      return this.getAcInfo() != null && this.getAcInfo().haveAPS() && this.aps.tick == 0;
+      return this.getAcInfo() != null && this.getAcInfo().haveAPS() && !this.isDead && !this.isDestroyed()
+              && this.aps != null && !this.aps.isCoolingDown() && !this.aps.isActive();
    }
 
    public boolean haveChaff() {
@@ -5940,6 +5947,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void setDead(boolean dropItems) {
+      if(this.aps != null) {
+         this.aps.reset();
+      }
       releaseNewUavStationChunk("vehicle-dead");
       if(!super.worldObj.isRemote && this.isNewUAV() && this.isDestroyed() && !this.newUavShiftExitInProgress) {
          notifyLinkedStationNewUavRemoved();
