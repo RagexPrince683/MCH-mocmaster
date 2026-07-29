@@ -60,8 +60,8 @@ import mcheli.ship.MCH_GuiShip;
 @SideOnly(Side.CLIENT)
 public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
-   /** Three seconds at Minecraft's normal 20 client ticks per second. */
-   public static final int DISMOUNT_HOLD_TICKS = 60;
+   /** Three seconds measured against a monotonic clock. */
+   public static final long DISMOUNT_HOLD_NANOS = 3000000000L;
 
    public static MCH_ClientCommonTickHandler instance;
    public MCH_GuiCommon gui_Common;
@@ -100,8 +100,9 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    private static double mouseRollDeltaY = 0.0D;
    private static boolean isRideAircraft = false;
    private static float prevTick = 0.0F;
-   private int dismountHoldTicks;
+   private long dismountHoldStartNanos = -1L;
    private boolean dismountRequestPending;
+   private boolean dismountHoldTriggered;
    private boolean suppressedDismountKey;
    private Entity dismountMount;
    private EntityClientPlayerMP dismountPlayer;
@@ -909,13 +910,15 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
       boolean pressed = MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak);
       if(!mcheliMount || super.mc.currentScreen != null || !pressed) {
-         this.dismountHoldTicks = 0;
+         this.dismountHoldStartNanos = -1L;
          this.dismountRequestPending = false;
-      } else if(this.dismountHoldTicks < DISMOUNT_HOLD_TICKS) {
-         ++this.dismountHoldTicks;
-         if(this.dismountHoldTicks == DISMOUNT_HOLD_TICKS) {
-            this.dismountRequestPending = true;
-         }
+         this.dismountHoldTriggered = false;
+      } else if(this.dismountHoldStartNanos < 0L) {
+         this.dismountHoldStartNanos = System.nanoTime();
+      } else if(!this.dismountHoldTriggered
+            && System.nanoTime() - this.dismountHoldStartNanos >= DISMOUNT_HOLD_NANOS) {
+         this.dismountRequestPending = true;
+         this.dismountHoldTriggered = true;
       }
 
       if(this.isHoldingMCHeliDismount()) {
@@ -926,8 +929,8 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    private boolean isHoldingMCHeliDismount() {
-      return this.dismountMount != null && this.dismountHoldTicks > 0
-            && this.dismountHoldTicks < DISMOUNT_HOLD_TICKS;
+      return this.dismountMount != null && this.dismountHoldStartNanos >= 0L
+            && !this.dismountHoldTriggered;
    }
 
    private void resetDismountHoldState() {
@@ -935,8 +938,9 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(),
                MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak));
       }
-      this.dismountHoldTicks = 0;
+      this.dismountHoldStartNanos = -1L;
       this.dismountRequestPending = false;
+      this.dismountHoldTriggered = false;
       this.suppressedDismountKey = false;
       this.dismountMount = null;
       this.dismountPlayer = null;
@@ -951,6 +955,19 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          return true;
       }
       return false;
+   }
+
+   public int getDismountHoldRemainingSeconds(EntityPlayer player) {
+      if(player == null || player != this.dismountPlayer || player != super.mc.thePlayer
+            || player.ridingEntity != this.dismountMount || this.dismountHoldStartNanos < 0L
+            || this.dismountHoldTriggered || super.mc.currentScreen != null
+            || !MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak)) {
+         return 3;
+      }
+
+      long remainingNanos = DISMOUNT_HOLD_NANOS - (System.nanoTime() - this.dismountHoldStartNanos);
+      int seconds = (int)Math.ceil((double)remainingNanos / 1000000000.0D);
+      return Math.max(1, Math.min(3, seconds));
    }
 
    public void onRenderTickPost(float partialTicks) {
