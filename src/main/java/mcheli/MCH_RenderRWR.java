@@ -3,10 +3,8 @@ package mcheli;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import mcheli.aircraft.EnumRWRType;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
-import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.plane.MCP_EntityPlane;
-import mcheli.uav.MCH_EntityUavStation;
 import mcheli.wrapper.W_MOD;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
@@ -46,14 +44,8 @@ public class MCH_RenderRWR {
         if (player == null || world == null) return;
 
         //Gets the player aircraft weapon
-        MCH_EntityBaseVehicle ac = null;
-        if(player.ridingEntity instanceof MCH_EntityBaseVehicle) {
-            ac = (MCH_EntityBaseVehicle)player.ridingEntity;
-        } else if(player.ridingEntity instanceof MCH_EntitySeat) {
-            ac = ((MCH_EntitySeat)player.ridingEntity).getParent();
-        } else if(player.ridingEntity instanceof MCH_EntityUavStation) {
-            ac = ((MCH_EntityUavStation)player.ridingEntity).getControlAircract();
-        }
+        MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
+        if(ac == null) return;
         if(!(ac instanceof MCP_EntityPlane || ac instanceof MCH_EntityHeli)) return;
         if(ac.getAcInfo().rwrType == null || ac.getAcInfo().rwrType == EnumRWRType.NONE) return;
 
@@ -67,7 +59,7 @@ public class MCH_RenderRWR {
             // New entity rendering logic
             double circleRadius = sc.getScaledHeight() * (RWR_SIZE / SCREEN_HEIGHT_ADAPT_CONSTANT) / 2.0;
             for(MCH_EntityInfo entity : getServerLoadedEntity()) {
-                if(!isValidEntity(entity, player)) continue;
+                if(!isValidEntity(entity, player, ac)) continue;
 
                 // Calculates interpolated position
                 double xPos = interpolate(entity.posX, entity.lastTickPosX, event.partialTicks);
@@ -141,7 +133,13 @@ public class MCH_RenderRWR {
 
 
     // New entity validation method
-    private boolean isValidEntity(MCH_EntityInfo entity, EntityPlayer player) {
+    private boolean isValidEntity(MCH_EntityInfo entity, EntityPlayer player, MCH_EntityBaseVehicle ac) {
+        if(entity == null || entity.entityId <= 0) {
+            return false;
+        }
+        if(entity.entityId == ac.getEntityId()) {
+            return false;
+        }
         if (entity.entityClassName.contains("MCH_EntityChaff") || entity.entityClassName.contains("MCH_EntityFlare")
                 || entity.entityClassName.contains("EntityPlayer")) {
             return false;
