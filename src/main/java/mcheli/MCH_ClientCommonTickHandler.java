@@ -248,6 +248,47 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       MCH_PlayerViewHandler.onUpdate();
    }
 
+   /**
+    * Prevent vanilla's mounted-player update from seeing Sneak until it has been held long
+    * enough. Sending a delayed MCHeli unmount packet alone is insufficient because vanilla
+    * dismounts the local player immediately when the Sneak key reaches its movement input.
+    */
+   @Override
+   public void onPlayerTickPre(EntityPlayer player) {
+      if(player != super.mc.thePlayer) {
+         return;
+      }
+
+      boolean ridingVehicle = player.ridingEntity instanceof MCH_EntityBaseVehicle
+            || player.ridingEntity instanceof MCH_EntitySeat;
+      boolean dismountKeyPressed = MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak);
+
+      if(!ridingVehicle || !dismountKeyPressed) {
+         this.dismountHoldTicks = 0;
+         this.suppressedDismountKey = false;
+         return;
+      }
+
+      if(this.dismountHoldTicks < DISMOUNT_HOLD_TICKS) {
+         ++this.dismountHoldTicks;
+      }
+
+      if(this.dismountHoldTicks < DISMOUNT_HOLD_TICKS) {
+         KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(), false);
+         player.movementInput.sneak = false;
+         this.suppressedDismountKey = true;
+      }
+   }
+
+   @Override
+   public void onPlayerTickPost(EntityPlayer player) {
+      if(player == super.mc.thePlayer && this.suppressedDismountKey) {
+         KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(),
+               MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak));
+         this.suppressedDismountKey = false;
+      }
+   }
+
    public static double getCurrentStickX() {
       return mouseRollDeltaX;
    }
