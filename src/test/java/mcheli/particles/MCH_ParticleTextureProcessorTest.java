@@ -12,6 +12,15 @@ public class MCH_ParticleTextureProcessorTest {
    public void processesBundledSmokeWithTransparentFrameBorders() throws IOException {
       InputStream stream = getClass().getResourceAsStream("/assets/mcheli/textures/particles/smoke.png");
       assertNotNull(stream);
+      BufferedImage source = javax.imageio.ImageIO.read(stream);
+      assertEquals(64, source.getWidth());
+      assertEquals(8, source.getHeight());
+      for(int x = 0; x < source.getWidth(); ++x) for(int y = 0; y < source.getHeight(); ++y) {
+         int alpha = source.getRGB(x, y) >>> 24;
+         assertTrue("source alpha must be binary", alpha == 0 || alpha == 255);
+      }
+      stream.close();
+      stream = getClass().getResourceAsStream("/assets/mcheli/textures/particles/smoke.png");
       MCH_ParticleTextureProcessor.Result result;
       try {
          result = MCH_ParticleTextureProcessor.readAndProcess(stream);
@@ -20,6 +29,7 @@ public class MCH_ParticleTextureProcessorTest {
       }
 
       assertTrue(result.processed);
+      assertEquals(MCH_ParticleTextureProcessor.BINARY_DENSITY, result.reconstructionPath);
       assertEquals(2, result.padding);
       assertEquals(288, result.image.getWidth());
       assertEquals(36, result.image.getHeight());
@@ -28,7 +38,24 @@ public class MCH_ParticleTextureProcessorTest {
          assertTrue("frame " + frame + " should remain visible", hasAlpha(result, frame, false));
          assertTrue("frame " + frame + " should retain soft alpha", hasIntermediateAlpha(result, frame));
       }
+      assertTrue("first frame should be denser than final frame", alphaSum(result, 0) > alphaSum(result, 7));
+      assertTrue("final frame must not be independently normalized", maxAlpha(result, 7) < maxAlpha(result, 0));
       assertZeroAlphaHasZeroRgb(result.image);
+   }
+
+   @Test
+   public void blursBinarySamplesBeforeScaling() {
+      BufferedImage source = new BufferedImage(64, 8, BufferedImage.TYPE_INT_ARGB);
+      source.setRGB(2, 4, 0xFFFFFFFF);
+      source.setRGB(4, 4, 0xFFFFFFFF);
+      MCH_ParticleTextureProcessor.Result result = MCH_ParticleTextureProcessor.process(source);
+      int centerY = result.cellHeight / 2;
+      int left = alpha(result.image, 11, centerY);
+      int gap = alpha(result.image, 15, centerY);
+      int right = alpha(result.image, 20, centerY);
+      assertTrue("transparent source gap should receive blurred coverage", gap > 1);
+      assertTrue("nearby samples should merge into a continuous gradient", left > 0 && right > 0);
+      assertNotEquals("a source sample must not become a flat enlarged square", left, alpha(result.image, 12, centerY));
    }
 
    @Test
@@ -72,6 +99,7 @@ public class MCH_ParticleTextureProcessorTest {
       source.setRGB(0, 0, 0x80FFFFFF);
       MCH_ParticleTextureProcessor.Result result = MCH_ParticleTextureProcessor.process(source);
       assertFalse(result.processed);
+      assertEquals(MCH_ParticleTextureProcessor.DIRECT_USE, result.reconstructionPath);
       assertSame(source, result.image);
    }
 
@@ -129,5 +157,27 @@ public class MCH_ParticleTextureProcessorTest {
             if((argb >>> 24) == 0) assertEquals(0, argb);
          }
       }
+   }
+
+   private static int alpha(BufferedImage image, int x, int y) {
+      return image.getRGB(x, y) >>> 24;
+   }
+
+   private static long alphaSum(MCH_ParticleTextureProcessor.Result result, int frame) {
+      long sum = 0L;
+      int start = frame * result.cellWidth;
+      for(int y = 0; y < result.cellHeight; ++y) for(int x = start; x < start + result.cellWidth; ++x) {
+         sum += result.image.getRGB(x, y) >>> 24;
+      }
+      return sum;
+   }
+
+   private static int maxAlpha(MCH_ParticleTextureProcessor.Result result, int frame) {
+      int maximum = 0;
+      int start = frame * result.cellWidth;
+      for(int y = 0; y < result.cellHeight; ++y) for(int x = start; x < start + result.cellWidth; ++x) {
+         maximum = Math.max(maximum, result.image.getRGB(x, y) >>> 24);
+      }
+      return maximum;
    }
 }

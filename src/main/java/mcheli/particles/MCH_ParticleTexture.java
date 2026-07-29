@@ -3,7 +3,9 @@ package mcheli.particles;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.InputStream;
+import javax.imageio.ImageIO;
 import mcheli.MCH_Lib;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -40,6 +42,7 @@ public final class MCH_ParticleTexture implements IResourceManagerReloadListener
 
    public static float minU(int frame) {
       INSTANCE.ensureLoaded();
+      frame = clampFrame(frame);
       if(INSTANCE.result == null) return frame / 8.0F;
       if(!INSTANCE.result.processed) {
          return (frame + 0.5F / INSTANCE.result.cellWidth) / 8.0F;
@@ -49,6 +52,7 @@ public final class MCH_ParticleTexture implements IResourceManagerReloadListener
 
    public static float maxU(int frame) {
       INSTANCE.ensureLoaded();
+      frame = clampFrame(frame);
       if(INSTANCE.result == null) return (frame + 1) / 8.0F;
       if(!INSTANCE.result.processed) {
          return (frame + 1.0F - 0.5F / INSTANCE.result.cellWidth) / 8.0F;
@@ -71,6 +75,10 @@ public final class MCH_ParticleTexture implements IResourceManagerReloadListener
          : 1.0F - 0.5F / INSTANCE.result.cellHeight;
    }
 
+   private static int clampFrame(int frame) {
+      return Math.max(0, Math.min(MCH_ParticleTextureProcessor.FRAME_COUNT - 1, frame));
+   }
+
    private void ensureLoaded() {
       if(loaded) return;
       loaded = true;
@@ -86,11 +94,14 @@ public final class MCH_ParticleTexture implements IResourceManagerReloadListener
          if(result.processed) {
             TextureManager manager = Minecraft.getMinecraft().getTextureManager();
             texture = manager.getDynamicTextureLocation("mcheli_soft_smoke", new LinearDynamicTexture(result.image));
+            if(Boolean.getBoolean("mcheli.debugParticleAtlas")) dumpAtlas(result.image);
          } else {
             texture = SOURCE;
          }
-         MCH_Lib.Log("Particle smoke texture %s: source/result %dx%d, atlas %dx%d.",
-            result.processed ? "processed" : "used directly", width, height, result.image.getWidth(), result.image.getHeight());
+         MCH_Lib.Log("Particle smoke texture: source %dx%d, atlas %dx%d, path=%s, blur radius=%d, sigma=%.2f, gamma=%.2f, normalization=%.6f.",
+            width, height, result.image.getWidth(), result.image.getHeight(), result.reconstructionPath,
+            MCH_ParticleTextureProcessor.BLUR_RADIUS, MCH_ParticleTextureProcessor.BLUR_SIGMA,
+            MCH_ParticleTextureProcessor.GAMMA, result.normalizationReference);
       } catch(Exception error) {
          texture = SOURCE;
          result = null;
@@ -100,6 +111,17 @@ public final class MCH_ParticleTexture implements IResourceManagerReloadListener
          }
       } finally {
          if(stream != null) try { stream.close(); } catch(Exception ignored) {}
+      }
+   }
+
+   private static void dumpAtlas(BufferedImage image) {
+      File output = new File(Minecraft.getMinecraft().mcDataDir, "mcheli-debug-particle-atlas.png");
+      try {
+         ImageIO.write(image, "png", output);
+         MCH_Lib.Log("Particle smoke generated atlas written to %s", output.getAbsolutePath());
+      } catch(Exception error) {
+         MCH_Lib.Log("Particle smoke generated atlas could not be written to %s: %s",
+            output.getAbsolutePath(), error.toString());
       }
    }
 

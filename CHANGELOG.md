@@ -1,3 +1,9 @@
+## PR #568 - Binary-density Smoke Reconstruction
+
+- Confirmed that PR #567 enlarged the bundled texture's binary-alpha density samples before a zero-skipping blur, producing block-shaped alpha in the generated atlas even though the renderer correctly bound it.
+- Reconstruct each 8 by 8 frame independently by padding and Gaussian-blurring its low-resolution density field (radius 2, sigma 1.0), globally normalizing all eight frames, applying gamma 0.8, and only then bilinearly scaling into the 288 by 36 atlas.
+- Added opt-in generated-atlas dumping with `-Dmcheli.debugParticleAtlas=true`, reconstruction diagnostics, clamped half-texel frame UVs, and image-only regressions for source alpha, soft gaps, global fade, transparent gutters, frame isolation, and clean transparent RGB.
+
 ## Fix Reconstructed Smoke Particle Backgrounds
 
 - Removed reconstruction haze by scaling per-frame alpha coverage instead of bicubic ARGB, applying a silhouette-limited blur, discarding alpha at or below 4/255, and renormalizing the retained soft coverage.
