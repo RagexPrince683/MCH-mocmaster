@@ -42,6 +42,7 @@ import mcheli.wrapper.W_TickHandler;
 import mcheli.wrapper.W_Vec3;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
@@ -57,6 +58,9 @@ import mcheli.ship.MCH_GuiShip;
 //Eventhooks, clientproxy, tickhandler, guis and config just to name a few inheritors
 @SideOnly(Side.CLIENT)
 public class MCH_ClientCommonTickHandler extends W_TickHandler {
+
+   /** Three seconds at Minecraft's normal 20 player ticks per second. */
+   private static final int DISMOUNT_HOLD_TICKS = 60;
 
    public static MCH_ClientCommonTickHandler instance;
    public MCH_GuiCommon gui_Common;
@@ -95,6 +99,8 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    private static double mouseRollDeltaY = 0.0D;
    private static boolean isRideAircraft = false;
    private static float prevTick = 0.0F;
+   private int dismountHoldTicks;
+   private boolean suppressedDismountKey;
 
 
 
@@ -240,6 +246,47 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          MCH_GuiTargetMarker.onClientTick();
       }
       MCH_PlayerViewHandler.onUpdate();
+   }
+
+   /**
+    * Prevent vanilla's mounted-player update from seeing Sneak until it has been held long
+    * enough. Sending a delayed MCHeli unmount packet alone is insufficient because vanilla
+    * dismounts the local player immediately when the Sneak key reaches its movement input.
+    */
+   @Override
+   public void onPlayerTickPre(EntityPlayer player) {
+      if(player != super.mc.thePlayer) {
+         return;
+      }
+
+      boolean ridingVehicle = player.ridingEntity instanceof MCH_EntityBaseVehicle
+            || player.ridingEntity instanceof MCH_EntitySeat;
+      boolean dismountKeyPressed = MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak);
+
+      if(!ridingVehicle || !dismountKeyPressed) {
+         this.dismountHoldTicks = 0;
+         this.suppressedDismountKey = false;
+         return;
+      }
+
+      if(this.dismountHoldTicks < DISMOUNT_HOLD_TICKS) {
+         ++this.dismountHoldTicks;
+      }
+
+      if(this.dismountHoldTicks < DISMOUNT_HOLD_TICKS) {
+         KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(), false);
+         player.movementInput.sneak = false;
+         this.suppressedDismountKey = true;
+      }
+   }
+
+   @Override
+   public void onPlayerTickPost(EntityPlayer player) {
+      if(player == super.mc.thePlayer && this.suppressedDismountKey) {
+         KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(),
+               MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak));
+         this.suppressedDismountKey = false;
+      }
    }
 
    public static double getCurrentStickX() {
