@@ -1,3 +1,8 @@
+## Fix local vehicle appearing on RWR
+
+- Excluded the locally controlled aircraft from RWR contacts by synchronized entity ID before applying contact type or display-distance filters.
+- Reused the shared direct-ride, seat-parent, and UAV-control aircraft resolution without changing shared entity synchronization or BVR tracking.
+
 ## Changed
 
 - Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classification for missile guidance.
