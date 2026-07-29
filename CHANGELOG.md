@@ -1,3 +1,8 @@
+## Three-Second MCHeli Dismount
+
+- Require pilots and passengers to hold the configured Minecraft Sneak key for 60 continuous client ticks before requesting a server-authoritative dismount.
+- Prevent vanilla's mounted-player Sneak handling from dismounting early while leaving non-MCHeli mounts and unmounted sneaking unchanged.
+
 ## PR #568 - Binary-density Smoke Reconstruction
 
 - Confirmed that PR #567 enlarged the bundled texture's binary-alpha density samples before a zero-skipping blur, producing block-shaped alpha in the generated atlas even though the renderer correctly bound it.

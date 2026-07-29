@@ -226,7 +226,7 @@ public abstract class MCH_BaseVehicleCommonGui extends MCH_Gui {
             msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyUnmount.prmInt)).toString();
             color = -256;
          } else {
-            msg = "Dismount : Hold Left Shift (3s)";
+            msg = "Dismount : Hold " + MCH_KeyName.getDescOrName(super.mc.gameSettings.keyBindSneak.getKeyCode()) + " (3s)";
          }
 
          this.drawString(msg, LX, super.centerY - 30, color);
