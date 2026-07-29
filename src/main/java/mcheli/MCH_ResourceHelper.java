@@ -225,7 +225,7 @@ public class MCH_ResourceHelper {
     }
 
     public static boolean resourceExists(String resourcePath) {
-        if (!resourcePath.startsWith("/")) resourcePath = "/" + resourcePath;
+        resourcePath = normalizeAssetPath(resourcePath);
 
         // Check addon asset roots first (additive overlay)
         if (addonAssetRoots != null && !addonAssetRoots.isEmpty()) {
@@ -235,19 +235,19 @@ public class MCH_ResourceHelper {
 
         if (sourceJar != null && sourceJar.exists() && sourceJar.isFile()) {
             try (JarFile jar = new JarFile(sourceJar)) {
-                return jar.getEntry(resourcePath.substring(1)) != null;
+                return jar.getEntry(resourcePath) != null;
             } catch (Exception e) {
                 return false;
             }
         }
 
-        String relPath = resourcePath.substring(1);
+        String relPath = resourcePath;
         if (devClasspathDirs != null) {
             for (File cpDir : devClasspathDirs) {
                 if (new File(cpDir, relPath).isFile()) return true;
             }
         }
-        return MCH_ResourceHelper.class.getResourceAsStream(resourcePath) != null;
+        return MCH_ResourceHelper.class.getResourceAsStream("/" + resourcePath) != null;
     }
 
     public static BufferedReader openResource(String resourcePath) {
@@ -299,7 +299,7 @@ public class MCH_ResourceHelper {
      * Returns the first match found.
      */
     private static File findAddonResourceFile(String resourcePath) {
-        String path = resourcePath.startsWith("/") ? resourcePath.substring(1) : resourcePath;
+        String path = normalizeAssetPath(resourcePath);
         if (!path.startsWith(ASSET_PREFIX)) return null;
         String relPath = path.substring(ASSET_PREFIX.length());
 
@@ -312,10 +312,18 @@ public class MCH_ResourceHelper {
         }
         // Check flat layout last
         if (addonDir != null && addonAssetRoots.contains(addonDir)) {
-            File candidate = new File(addonDir, relPath);
+            File candidate = new File(addonDir, ASSET_PREFIX + relPath);
             if (candidate.isFile()) return candidate;
         }
         return null;
+    }
+
+    /** Classpath and filesystem probes always use an assets/mcheli path. */
+    public static String normalizeAssetPath(String resourcePath) {
+        String path = resourcePath == null ? "" : resourcePath.replace('\\', '/');
+        while (path.startsWith("/")) path = path.substring(1);
+        while (path.contains("//")) path = path.replace("//", "/");
+        return path;
     }
 
     public static String getFileName(String resourcePath) {

@@ -585,7 +585,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
             if(this.current.isCurrentPageTexture()) {
                GL11.glColor4d(1.0D, 1.0D, 1.0D, 1.0D);
                super.mc.getTextureManager().bindTexture(this.current.getCurrentPageTexture());
-               this.drawTexturedModalRect(210, 20, 170, 190, 0, 0, 340, 380);
+               this.drawDescriptionTexture(210, 20, 170, 190);
             } else if(this.current.isCurrentPageAcInfo()) {
                i = -9491968;
 
@@ -1028,6 +1028,25 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       tessellator.addVertexWithUV((double)(dx + dw), (double)(dy + dh), (double)super.zLevel, (double)((float)(u + tw) * w), (double)((float)(v + th) * h));
       tessellator.addVertexWithUV((double)(dx + dw), (double)(dy + 0), (double)super.zLevel, (double)((float)(u + tw) * w), (double)((float)(v + 0) * h));
       tessellator.addVertexWithUV((double)(dx + 0), (double)(dy + 0), (double)super.zLevel, (double)((float)(u + 0) * w), (double)((float)(v + 0) * h));
+      tessellator.draw();
+   }
+
+   private void drawDescriptionTexture(int x, int y, int width, int height) {
+      int textureWidth = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
+      int textureHeight = GL11.glGetTexLevelParameteri(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
+      if(textureWidth <= 0 || textureHeight <= 0) return;
+
+      // Scale the original 340x380 region proportionally for non-512 textures.
+      float sourceWidth = textureWidth * (340.0F / 512.0F);
+      float sourceHeight = textureHeight * (380.0F / 512.0F);
+      float maxU = sourceWidth / textureWidth;
+      float maxV = sourceHeight / textureHeight;
+      Tessellator tessellator = Tessellator.instance;
+      tessellator.startDrawingQuads();
+      tessellator.addVertexWithUV(x, y + height, super.zLevel, 0.0D, maxV);
+      tessellator.addVertexWithUV(x + width, y + height, super.zLevel, maxU, maxV);
+      tessellator.addVertexWithUV(x + width, y, super.zLevel, maxU, 0.0D);
+      tessellator.addVertexWithUV(x, y, super.zLevel, 0.0D, 0.0D);
       tessellator.draw();
    }
 

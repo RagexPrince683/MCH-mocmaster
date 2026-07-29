@@ -66,7 +66,9 @@ public class MCH_AddonResourcePack implements IResourcePack {
     }
 
     private File findFile(ResourceLocation location) {
-        String path = location.getResourcePath();
+        String path = location.getResourcePath().replace('\\', '/');
+        while (path.startsWith("/")) path = path.substring(1);
+        while (path.contains("//")) path = path.replace("//", "/");
         for (File root : addonRoots) {
             File candidate = new File(root, "assets/" + DOMAIN + "/" + path);
             if (candidate.isFile()) {
