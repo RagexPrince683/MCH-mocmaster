@@ -13,7 +13,8 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
 import mcheli.network.packets.PacketEntityInfoSync;
-import mcheli.network.packets.PacketIronCurtainUse;
+import mcheli.network.packets.PacketAPSEffect;
+import mcheli.network.packets.PacketAPSState;
 import mcheli.network.packets.PacketLaserGuidanceTargeting;
 import mcheli.network.packets.PacketLockTarget;
 import mcheli.network.packets.PacketVehicleLODSnapshot;
@@ -120,7 +121,8 @@ public class PacketHandler extends MessageToMessageCodec<FMLProxyPacket, PacketB
     public void initialise() {
         channels = NetworkRegistry.INSTANCE.newChannel("MCHReforged", this);
         registerPacket(PacketEntityInfoSync.class);
-        registerPacket(PacketIronCurtainUse.class);
+        registerPacket(PacketAPSEffect.class);
+        registerPacket(PacketAPSState.class);
         registerPacket(PacketLaserGuidanceTargeting.class);
         registerPacket(PacketLockTarget.class);
         registerPacket(PacketVehicleLODSnapshot.class);

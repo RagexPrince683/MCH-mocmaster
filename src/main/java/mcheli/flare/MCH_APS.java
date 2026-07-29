@@ -1,229 +1,236 @@
 package mcheli.flare;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import mcheli.MCH_FMURUtil;
+import cpw.mods.fml.common.network.NetworkRegistry;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
-import mcheli.aircraft.MCH_EntityHitBox;
 import mcheli.aircraft.MCH_EntitySeat;
-import mcheli.network.packets.PacketIronCurtainUse;
+import mcheli.network.packets.PacketAPSEffect;
+import mcheli.network.packets.PacketAPSState;
 import mcheli.weapon.MCH_EntityBaseBullet;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-/** Server-authoritative active protection state for one vehicle. */
+/** Server-owned hard-kill active protection for one vehicle. */
 public class MCH_APS {
-    private static final int LEGACY_IRON_CURTAIN_RANGE = 100;
-    private static final String INTERCEPTED_TAG = "MCH_APSIntercepted";
+    public enum State { DISARMED, ARMING, READY, RELOADING, EMPTY }
 
-    public int tick;
-    public int useTick;
-    public int useTime;
-    public int waitTime;
-    public World worldObj;
-    public MCH_EntityBaseVehicle aircraft;
-    public int range;
-    private Entity user;
+    private static final int TOGGLE_COOLDOWN = 4;
+    private static final double MIN_SPEED_SQ = 1.0E-6D;
+    private static final double MAX_PREDICTION_TICKS = 80.0D;
+    private final World worldObj;
+    private final MCH_EntityBaseVehicle aircraft;
+    private State state = State.DISARMED;
+    private boolean armed;
+    private int armingTimer;
+    private int reloadTimer;
+    private int ammoRemaining = -1;
+    private int lastToggleTick = Integer.MIN_VALUE;
+    private int reloadTicks;
+    private int armingTicks;
+    private int range;
+    private int ammoCapacity = -1;
 
     public MCH_APS(World world, MCH_EntityBaseVehicle aircraft) {
         this.worldObj = world;
         this.aircraft = aircraft;
     }
 
-    public boolean onUse(Entity entity) {
-        if (worldObj.isRemote) {
-            return canActivate(entity);
+    public void configure(int reload, int wait, int detectionRange, int ammo) {
+        reloadTicks = clamp(reload, 0, 12000);
+        armingTicks = clamp(wait, 0, 12000);
+        range = clamp(detectionRange, 1, 128);
+        int newCapacity = ammo < 0 ? -1 : clamp(ammo, 0, 1024);
+        if (ammoCapacity != newCapacity) {
+            ammoCapacity = newCapacity;
+            if (ammoRemaining < 0 || ammoRemaining > ammoCapacity) ammoRemaining = ammoCapacity;
         }
-        return activate(entity);
     }
 
-    public boolean canActivate(Entity entity) {
-        return aircraft != null && aircraft.getAcInfo() != null && aircraft.getAcInfo().haveAPS()
-                && !aircraft.isDead && !aircraft.isDestroyed() && tick == 0 && !isActive()
-                && isAuthorized(entity);
+    private int clamp(int value, int min, int max) { return Math.max(min, Math.min(max, value)); }
+
+    public boolean requestToggle(Entity requester) {
+        if (worldObj.isRemote || !canToggle(requester)) return false;
+        int now = aircraft.ticksExisted;
+        if (lastToggleTick != Integer.MIN_VALUE && now - lastToggleTick < TOGGLE_COOLDOWN) return false;
+        lastToggleTick = now;
+        return armed ? disarm() : arm();
     }
 
-    public boolean activate(Entity entity) {
-        if (worldObj.isRemote || !canActivate(entity)) {
-            return false;
-        }
-        int duration = Math.max(0, useTime);
-        if (duration == 0) {
-            return false;
-        }
-        user = entity;
-        tick = Math.max(0, waitTime);
-        useTick = duration;
-        aircraft.getEntityData().setBoolean("APSUsing", true);
-        if (isIronCurtainMode()) {
-            aircraft.ironCurtainRunningTick = useTick;
-            W_WorldFunc.MOD_playSoundEffect(worldObj, aircraft.posX, aircraft.posY, aircraft.posZ,
-                    "iron_curtain", 10.0F, 1.0F);
-            MCH_MOD.getPacketHandler().sendToAll(new PacketIronCurtainUse(aircraft.getEntityId(), useTick));
-        } else {
-            W_WorldFunc.MOD_playSoundEffect(worldObj, aircraft.posX, aircraft.posY, aircraft.posZ,
-                    "aps_activate", 10.0F, 1.0F);
-        }
+    private boolean canToggle(Entity requester) {
+        if (requester == null || aircraft == null || aircraft.isDead || aircraft.isDestroyed()
+                || aircraft.getAcInfo() == null || !aircraft.getAcInfo().haveAPS()) return false;
+        return requester == aircraft.getRiddenByEntity()
+                || MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(requester) == aircraft
+                && requester == aircraft.getRiddenByEntity();
+    }
+
+    public boolean arm() {
+        if (worldObj.isRemote || armed || ammoCapacity == 0) return false;
+        armed = true;
+        armingTimer = armingTicks;
+        updateState();
+        W_WorldFunc.MOD_playSoundEffect(worldObj, aircraft.posX, aircraft.posY, aircraft.posZ, "aps_activate", 10.0F, 1.0F);
+        syncState();
         return true;
     }
 
-    private boolean isAuthorized(Entity entity) {
-        return entity != null && (aircraft.isMountedEntity(entity)
-                || MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(entity) == aircraft);
+    public boolean disarm() {
+        if (worldObj.isRemote || !armed) return false;
+        armed = false;
+        armingTimer = 0;
+        updateState();
+        W_WorldFunc.MOD_playSoundEffect(worldObj, aircraft.posX, aircraft.posY, aircraft.posZ, "aps_deactivate", 10.0F, 1.0F);
+        syncState();
+        return true;
     }
 
     public void onUpdate() {
         if (aircraft == null || aircraft.isDead || aircraft.isDestroyed() || aircraft.getAcInfo() == null
-                || !aircraft.getAcInfo().haveAPS()) {
-            reset();
+                || !aircraft.getAcInfo().haveAPS()) { reset(); return; }
+        if (worldObj.isRemote) {
+            if (armingTimer > 0) --armingTimer;
+            if (reloadTimer > 0) --reloadTimer;
             return;
         }
-        if (tick > 0) {
-            --tick;
+        State old = state;
+        int oldArming = armingTimer, oldReload = reloadTimer;
+        if (armingTimer > 0) --armingTimer;
+        if (reloadTimer > 0) --reloadTimer;
+        updateState();
+        if (isReady()) {
+            MCH_EntityBaseBullet threat = findBestThreat();
+            if (threat != null) interceptThreat(threat);
         }
-        if (useTick > 0) {
-            --useTick;
-            if (!worldObj.isRemote && useTick > 0 && !isIronCurtainMode()) {
-                onUsing();
-            }
-            if (useTick == 0) {
-                endActiveState();
-            }
-        }
+        if (old != state || oldArming > 0 && armingTimer == 0 || oldReload > 0 && reloadTimer == 0) syncState();
     }
 
-    private void onUsing() {
-        List entities = worldObj.getEntitiesWithinAABBExcludingEntity(aircraft,
+    private void updateState() {
+        if (!armed) state = State.DISARMED;
+        else if (!hasAmmo()) state = State.EMPTY;
+        else if (armingTimer > 0) state = State.ARMING;
+        else if (reloadTimer > 0) state = State.RELOADING;
+        else state = State.READY;
+    }
+
+    public MCH_EntityBaseBullet findBestThreat() {
+        if (!isReady()) return null;
+        List threats = worldObj.getEntitiesWithinAABB(MCH_EntityBaseBullet.class,
                 aircraft.boundingBox.expand(range, range, range));
-        for (Object object : entities) {
-            Entity entity = (Entity)object;
-            if (isValidThreat(entity) && isHostileThreat(entity) && isApproaching(entity)) {
-                interceptThreat(entity);
+        for (int i = threats.size() - 1; i >= 0; --i) {
+            if (!isValidThreat((MCH_EntityBaseBullet)threats.get(i))) threats.remove(i);
+        }
+        Collections.sort(threats, new Comparator() {
+            public int compare(Object a, Object b) {
+                MCH_EntityBaseBullet x = (MCH_EntityBaseBullet)a, y = (MCH_EntityBaseBullet)b;
+                double tx = predictThreat(x), ty = predictThreat(y);
+                if (tx < ty) return -1; if (tx > ty) return 1;
+                double dx = x.getDistanceSqToEntity(aircraft), dy = y.getDistanceSqToEntity(aircraft);
+                if (dx < dy) return -1; if (dx > dy) return 1;
+                return x.getEntityId() < y.getEntityId() ? -1 : x.getEntityId() == y.getEntityId() ? 0 : 1;
             }
-        }
+        });
+        return threats.isEmpty() ? null : (MCH_EntityBaseBullet)threats.get(0);
     }
 
-    public boolean isValidThreat(Entity entity) {
-        if (entity == null || entity.isDead || entity.getEntityData().getBoolean(INTERCEPTED_TAG)
-                || entity == aircraft || entity instanceof MCH_EntityBaseVehicle
-                || entity instanceof MCH_EntitySeat || entity instanceof MCH_EntityHitBox
-                || entity instanceof MCH_EntityFlare || entity instanceof MCH_EntityChaff
-                || entity instanceof EntityItem || entity.getClass().getName().startsWith("mcheli.particles.")) {
-            return false;
-        }
-        return entity instanceof MCH_EntityBaseBullet || MCH_FMURUtil.isAPSThreat(entity);
+    public boolean isValidThreat(MCH_EntityBaseBullet bullet) {
+        if (bullet == null || bullet.isDead || bullet.isInterceptedByAPS() || !bullet.canBeInterceptedByAPS()
+                || bullet.getDistanceSqToEntity(aircraft) > range * range || !isHostileThreat(bullet)) return false;
+        double time = predictThreat(bullet);
+        if (time <= 0.0D) return false;
+        Vec3 start = Vec3.createVectorHelper(bullet.posX, bullet.posY, bullet.posZ);
+        Vec3 end = getVehicleCenter();
+        MovingObjectPosition obstruction = worldObj.rayTraceBlocks(start, end, false);
+        return obstruction == null;
     }
 
-    public boolean isHostileThreat(Entity entity) {
-        Entity shooter = getShooter(entity);
-        Entity shooterVehicle = getVehicle(shooter);
-        if (entity.getEntityData().getBoolean("MCH_APSSpawned") || shooter == aircraft
-                || shooterVehicle == aircraft || aircraft.isMountedEntity(shooter)) {
-            return false;
-        }
-        EntityLivingBase shooterLiving = shooter instanceof EntityLivingBase ? (EntityLivingBase)shooter : null;
-        if (shooterLiving != null && aircraft.isMountedSameTeamEntity(shooterLiving)) {
-            return false;
-        }
+    public boolean isHostileThreat(MCH_EntityBaseBullet bullet) {
+        Entity shooterVehicle = resolveVehicle(bullet.shootingAircraft);
+        Entity shooter = bullet.shootingEntity;
+        if (shooterVehicle == aircraft || shooter == aircraft || aircraft.isMountedEntity(shooter)) return false;
+        Entity mountedVehicle = resolveVehicle(shooter);
+        if (mountedVehicle == aircraft) return false;
+        if (shooter instanceof EntityLivingBase && aircraft.isMountedSameTeamEntity((EntityLivingBase)shooter)) return false;
         if (shooterVehicle instanceof MCH_EntityBaseVehicle) {
-            EntityLivingBase occupant = getLivingOccupant((MCH_EntityBaseVehicle)shooterVehicle);
-            if (occupant != null && aircraft.isMountedSameTeamEntity(occupant)) {
-                return false;
+            MCH_EntityBaseVehicle vehicle = (MCH_EntityBaseVehicle)shooterVehicle;
+            for (int i = 0; i <= vehicle.getSeatNum(); ++i) {
+                Entity occupant = vehicle.getEntityBySeatId(i);
+                if (occupant instanceof EntityLivingBase && aircraft.isMountedSameTeamEntity((EntityLivingBase)occupant)) return false;
             }
         }
         return true;
     }
 
-    private Entity getShooter(Entity entity) {
-        if (entity instanceof MCH_EntityBaseBullet) {
-            MCH_EntityBaseBullet bullet = (MCH_EntityBaseBullet)entity;
-            return bullet.shootingEntity != null ? bullet.shootingEntity : bullet.shootingAircraft;
-        }
-        return MCH_FMURUtil.getAPSOwner(entity);
-    }
-
-    private Entity getVehicle(Entity entity) {
+    private Entity resolveVehicle(Entity entity) {
         if (entity instanceof MCH_EntityBaseVehicle) return entity;
         if (entity instanceof MCH_EntitySeat) return ((MCH_EntitySeat)entity).getParent();
         return MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(entity);
     }
 
-    private EntityLivingBase getLivingOccupant(MCH_EntityBaseVehicle vehicle) {
-        for (int i = 0; i <= vehicle.getSeatNum(); ++i) {
-            Entity occupant = vehicle.getEntityBySeatId(i);
-            if (occupant instanceof EntityLivingBase) return (EntityLivingBase)occupant;
-        }
-        return null;
+    /** Returns time in ticks to closest approach, or -1 when the path misses. */
+    public double predictThreat(MCH_EntityBaseBullet bullet) {
+        Vec3 center = getVehicleCenter();
+        double rx = bullet.posX - center.xCoord, ry = bullet.posY - center.yCoord, rz = bullet.posZ - center.zCoord;
+        double vx = bullet.motionX - aircraft.motionX, vy = bullet.motionY - aircraft.motionY, vz = bullet.motionZ - aircraft.motionZ;
+        double speedSq = vx * vx + vy * vy + vz * vz;
+        if (speedSq < MIN_SPEED_SQ) return -1.0D;
+        double time = -(rx * vx + ry * vy + rz * vz) / speedSq;
+        if (time <= 0.0D || time > MAX_PREDICTION_TICKS) return -1.0D;
+        double cx = rx + vx * time, cy = ry + vy * time, cz = rz + vz * time;
+        double radius = Math.max(aircraft.boundingBox.maxX - aircraft.boundingBox.minX,
+                Math.max(aircraft.boundingBox.maxY - aircraft.boundingBox.minY,
+                        aircraft.boundingBox.maxZ - aircraft.boundingBox.minZ)) * 0.5D + 1.0D;
+        return cx * cx + cy * cy + cz * cz <= radius * radius ? time : -1.0D;
     }
 
-    public boolean isApproaching(Entity entity) {
-        double dx = aircraft.posX - entity.posX;
-        double dy = aircraft.posY + aircraft.height * 0.5D - entity.posY;
-        double dz = aircraft.posZ - entity.posZ;
-        double dot = dx * entity.motionX + dy * entity.motionY + dz * entity.motionZ;
-        if (dot <= 0.0D) return false;
-        double speedSq = entity.motionX * entity.motionX + entity.motionY * entity.motionY
-                + entity.motionZ * entity.motionZ;
-        if (speedSq <= 1.0E-6D) return false;
-        double time = dot / speedSq;
-        double cx = dx - entity.motionX * time;
-        double cy = dy - entity.motionY * time;
-        double cz = dz - entity.motionZ * time;
-        double protectedRadius = Math.max(2.0D, Math.max(aircraft.width, aircraft.height) * 0.75D + 1.0D);
-        return cx * cx + cy * cy + cz * cz <= protectedRadius * protectedRadius;
+    private Vec3 getVehicleCenter() {
+        return Vec3.createVectorHelper((aircraft.boundingBox.minX + aircraft.boundingBox.maxX) * 0.5D,
+                (aircraft.boundingBox.minY + aircraft.boundingBox.maxY) * 0.5D,
+                (aircraft.boundingBox.minZ + aircraft.boundingBox.maxZ) * 0.5D);
     }
 
-    public boolean interceptThreat(Entity entity) {
-        if (worldObj.isRemote || entity == null || entity.isDead
-                || entity.getEntityData().getBoolean(INTERCEPTED_TAG)) return false;
-        entity.getEntityData().setBoolean(INTERCEPTED_TAG, true);
-        Entity shooter = getShooter(entity);
-        double x = entity.posX, y = entity.posY, z = entity.posZ;
-        boolean externalHandled = !(entity instanceof MCH_EntityBaseBullet)
-                && MCH_FMURUtil.destroyAPSThreat(entity, user instanceof EntityLivingBase ? (EntityLivingBase)user : null);
-        if (!externalHandled) entity.setDead();
+    public boolean interceptThreat(MCH_EntityBaseBullet bullet) {
+        if (!isReady() || !isValidThreat(bullet) || !bullet.interceptByAPS()) return false;
+        double x = bullet.posX, y = bullet.posY, z = bullet.posZ;
+        if (ammoRemaining > 0) --ammoRemaining;
+        reloadTimer = reloadTicks;
+        updateState();
         W_WorldFunc.MOD_playSoundEffect(worldObj, x, y, z, "aps_shoot", 10.0F, 1.0F);
-        if (shooter instanceof EntityPlayerMP) MCH_FMURUtil.sendAPSMarker((EntityPlayerMP)shooter);
+        MCH_MOD.getPacketHandler().sendToAllAround(new PacketAPSEffect(x, y, z),
+                new NetworkRegistry.TargetPoint(aircraft.dimension, x, y, z, 96.0D));
+        syncState();
         return true;
     }
 
-    public boolean isIronCurtainMode() {
-        return range == LEGACY_IRON_CURTAIN_RANGE;
-    }
-
-    public boolean isActive() { return useTick > 0; }
-    public boolean isCoolingDown() { return tick > 0; }
-    public boolean isUsing() { return isActive(); }
-    public boolean isInPreparation() { return isCoolingDown(); }
-
-    private void endActiveState() {
-        aircraft.getEntityData().setBoolean("APSUsing", false);
-        if (!worldObj.isRemote) {
-            W_WorldFunc.MOD_playSoundEffect(worldObj, aircraft.posX, aircraft.posY, aircraft.posZ,
-                    "aps_deactivate", 10.0F, 1.0F);
-        }
-        clearIronCurtain();
-        user = null;
-    }
-
-    private void clearIronCurtain() {
-        if (aircraft != null) {
-            aircraft.ironCurtainRunningTick = 0;
-            aircraft.ironCurtainWaveTimer = 0;
-            aircraft.ironCurtainCurrentFactor = 0.5F;
-            aircraft.ironCurtainLastFactor = 0.5F;
-        }
+    public void refillAmmo() {
+        if (ammoCapacity >= 0 && ammoRemaining < ammoCapacity) { ammoRemaining = ammoCapacity; updateState(); syncState(); }
     }
 
     public void reset() {
-        tick = 0;
-        useTick = 0;
-        user = null;
-        if (aircraft != null) aircraft.getEntityData().setBoolean("APSUsing", false);
-        clearIronCurtain();
+        armed = false; armingTimer = 0; reloadTimer = 0; lastToggleTick = Integer.MIN_VALUE; updateState();
     }
+
+    public void loadAmmo(int ammo) { ammoRemaining = ammoCapacity < 0 ? -1 : clamp(ammo, 0, ammoCapacity); reset(); }
+    public void applyClientState(int ordinal, boolean isArmed, int ammo, int arming, int reload) {
+        if (!worldObj.isRemote) return;
+        state = ordinal >= 0 && ordinal < State.values().length ? State.values()[ordinal] : State.DISARMED;
+        armed = isArmed; ammoRemaining = ammo; armingTimer = arming; reloadTimer = reload;
+    }
+    public void syncState() { if (!worldObj.isRemote) MCH_MOD.getPacketHandler().sendToAll(new PacketAPSState(aircraft, this)); }
+    public State getState() { return state; }
+    public boolean isArmed() { return armed; }
+    public boolean isReady() { return state == State.READY; }
+    public boolean isArming() { return state == State.ARMING; }
+    public boolean isReloading() { return state == State.RELOADING; }
+    public boolean isEmpty() { return state == State.EMPTY; }
+    public boolean hasAmmo() { return ammoRemaining < 0 || ammoRemaining > 0; }
+    public int getAmmoRemaining() { return ammoRemaining; }
+    public int getArmingTimer() { return armingTimer; }
+    public int getReloadTimer() { return reloadTimer; }
 }

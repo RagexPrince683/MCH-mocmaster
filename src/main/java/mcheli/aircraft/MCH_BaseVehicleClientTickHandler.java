@@ -300,7 +300,7 @@ public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHan
       }
       if (!ac.isDestroyed() && this.KeyAPS.isKeyDown()) {
          if (ac.getSeatIdByEntity(player) <= 1) {
-            if (ac.canUseAPS()) {
+            if (ac.haveAPS()) {
                pc.useAPS = true;
                send = true;
             } else {

@@ -106,8 +106,10 @@ For fixed-wing planes using `useNewMobilitySystem = true`, this gravity value is
 | `HasBombSight` / `EnableBombSight` / `EnableBomberSight` | boolean | true | Enables the first-person pilot gunner bombsight toggle when ballistic prediction is available. Set false for gunships or other aircraft that should keep gunner mode without a bombsight. |
 | `FlareType` | int list[1..10] | none | Enables flares when at least one type is present. |
 | `FlareOption` | vec3 | default flare position | Flare spawn position. |
-| `HasChaff`, `HasMaintenance`, `HasAPS` | flag | absent object | Value text is ignored; presence creates the subsystem object. |
-| `ChaffUseTime`, `ChaffWaitTime`, `MaintenanceUseTime`, `MaintenanceWaitTime`, `APSUseTime`, `APSWaitTime`, `APSRange` | int | see main table | Subsystem timing and radius. |
+| `HasChaff`, `HasMaintenance`, `HasAPS` | flag | absent object | Value text is ignored; presence creates the subsystem object. `HasAPS` enables the server-owned hard-kill APS. |
+| `APSUseTime`, `APSWaitTime`, `APSRange`, `APSAmmo` | int | reload 0..12000, arming 0..12000, range 1..128, ammo -1..1024 | APS reload ticks after an interception, arming delay, detection range, and charge capacity. `APSAmmo = -1` (the compatibility default) is unlimited, zero is empty, and positive values are finite. |
+
+APS only considers native MCHeli projectile entities. Weapon definitions may set `APSInterceptable = true` or `false`; when omitted, guided AA/AS/AT/TV missiles and rockets are interceptable, while bombs, guns/cannon shells, marker rockets, dispensers, bomblets, and torpedoes are not. Flares and chaff are never projectile candidates.
 
 ## Visual and attachment keys
 

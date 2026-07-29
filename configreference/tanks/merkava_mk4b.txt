@@ -34,17 +34,12 @@ ExplosionSizeByCrash = 3
 
 Category = MBT
 
-;debug: testing new APS feature
-;HasAPS = true
-;APSUseTime = 500
-;APSWaitTime = 0
-;APSRange = 30
-
-hasaps=true
-apsUseTime= 4500
-apsWaitTime=5
-apsRange = 16
-
+; Trophy hard-kill APS
+HasAPS = true
+APSUseTime = 20
+APSWaitTime = 10
+APSRange = 16
+APSAmmo = 4
 OnGroundPitchFactor = 2.0
 OnGroundRollFactor  = 1.3
 

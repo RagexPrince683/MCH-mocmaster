@@ -287,11 +287,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public MCH_Maintenance maintenance;
    public MCH_APS aps;
 
-   public int ironCurtainRunningTick = 0;
-   public float ironCurtainLastFactor = 0.5f;
-   public float ironCurtainCurrentFactor = 0.5f;
-   public int ironCurtainWaveTimer = 0;
-
    private boolean hasLinkedUavStationPosition;
    private int newUavMountSyncTicks;
    private boolean newUavShiftExitInProgress;
@@ -1174,6 +1169,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public void onAcInfoReloaded() {
       if(this.getAcInfo() != null) {
          this.setSize(this.getAcInfo().bodyWidth, this.getAcInfo().bodyHeight);
+         this.aps.configure(this.getAcInfo().apsUseTime, this.getAcInfo().apsWaitTime,
+                 this.getAcInfo().apsRange, this.getAcInfo().apsAmmo);
       }
    }
 
@@ -1195,6 +1192,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       byte[] commonId = this.getCommonUniqueId().getBytes(StandardCharsets.UTF_8);
       buffer.writeShort(commonId.length);
       buffer.writeBytes(commonId);
+      buffer.writeByte(this.aps.getState().ordinal());
+      buffer.writeBoolean(this.aps.isArmed());
+      buffer.writeInt(this.aps.getAmmoRemaining());
+      buffer.writeInt(this.aps.getArmingTimer());
+      buffer.writeInt(this.aps.getReloadTimer());
    }
 
    public void readSpawnData(ByteBuf additionalData) {
@@ -1215,6 +1217,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             additionalData.readBytes(commonId);
             this.setCommonUniqueId(new String(commonId, StandardCharsets.UTF_8));
          }
+         this.aps.applyClientState(additionalData.readByte(), additionalData.readBoolean(),
+                 additionalData.readInt(), additionalData.readInt(), additionalData.readInt());
       } catch (Exception var4) {
          var4.printStackTrace();
       }
@@ -1240,6 +1244,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.setFuel(nbt.getInteger("AcFuel"));
       setGunnerStatus(nbt.getBoolean("AcGunnerStatus"));
       int[] wa_list = nbt.getIntArray("AcWeaponsAmmo");
+      if(this.getAcInfo() != null) {
+         this.aps.configure(this.getAcInfo().apsUseTime, this.getAcInfo().apsWaitTime,
+                 this.getAcInfo().apsRange, this.getAcInfo().apsAmmo);
+         this.aps.loadAmmo(nbt.hasKey("AcAPSAmmo") ? nbt.getInteger("AcAPSAmmo") : this.getAcInfo().apsAmmo);
+      }
 
       for(int i = 0; i < wa_list.length; ++i) {
          this.getWeapon(i).setRestAllAmmoNum(wa_list[i]);
@@ -1332,6 +1341,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       nbt.setTag("AcWeaponsAmmo", W_NBTTag.newTagIntArray("AcWeaponsAmmo", wa_list));
       nbt.setInteger("AcDamage", this.getDamageTaken());
+      if(this.getAcInfo() != null && this.getAcInfo().apsAmmo >= 0) nbt.setInteger("AcAPSAmmo", this.aps.getAmmoRemaining());
       nbt.setBoolean("AcDismounted", this.dismountedUserCtrl);
       UUID persistentId = this.getUavPersistentUUID(false);
       if(persistentId == null && (this.isUAV() || this.isNewUAV())) {
@@ -1356,10 +1366,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       //System.out.println("[DBG] attackEntityFrom: dmgType=" + damageSource.getDamageType()
       //        + " src=" + srcName + " org=" + org_damage);
 
-
-      if(ironCurtainRunningTick > 0 && isIronCurtainDamage(damageSource)) {
-         return false;
-      }
 
       //System.out.println("the damage source is " + damageSource.getDamageType());
       //System.out.println("org damage: " + org_damage);
@@ -2437,18 +2443,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       //   }
       //}
 
-      if(ironCurtainRunningTick > 0) {
-         ironCurtainRunningTick--;
-         ironCurtainWaveTimer++;
-         ironCurtainLastFactor = ironCurtainCurrentFactor;//Generates a fluctuation curve based on timer (0.5~1.0)
-         float waveSpeed = 0.25f;
-         ironCurtainCurrentFactor = 0.75f + 0.25f * (float) Math.sin(ironCurtainWaveTimer * waveSpeed);
-      } else {
-         ironCurtainWaveTimer = 0;
-         ironCurtainCurrentFactor = 0.5f;
-         ironCurtainLastFactor = 0.5f;
-      }
-
       this.prevCurrentThrottle = this.getCurrentThrottle();
       this.lastBBDamageFactor = 1.0F;
       //this.updateVehicleStress();
@@ -2711,9 +2705,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.maintenance.onUpdate();
       }
       if(this.getAcInfo() != null && this.aps != null) {
-         this.aps.useTime = getAcInfo().apsUseTime;
-         this.aps.waitTime = getAcInfo().apsWaitTime;
-         this.aps.range = getAcInfo().apsRange;
+         this.aps.configure(getAcInfo().apsUseTime, getAcInfo().apsWaitTime, getAcInfo().apsRange, getAcInfo().apsAmmo);
          this.aps.onUpdate();
       }
       if(!super.worldObj.isRemote && this.getFlareTick() == 0 && var7 != 0) {
@@ -5045,21 +5037,13 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public boolean useAPS(Entity e) {
       if(this.getAcInfo() != null && this.getAcInfo().haveAPS()) {
-         if(this.aps.onUse(e)) {
+         if(this.aps.requestToggle(e)) {
             return true;
          }
          return false;
       } else {
          return false;
       }
-   }
-
-   private boolean isIronCurtainDamage(DamageSource source) {
-      if(source == null || this.aps == null || !this.aps.isActive() || !this.aps.isIronCurtainMode()) {
-         return false;
-      }
-      Entity direct = source.getSourceOfDamage();
-      return source.isExplosion() || source.isProjectile() || direct instanceof mcheli.weapon.MCH_EntityBaseBullet;
    }
 
    public int getCurrentFlareType() {
@@ -5107,7 +5091,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public boolean canUseAPS() {
       return this.getAcInfo() != null && this.getAcInfo().haveAPS() && !this.isDead && !this.isDestroyed()
-              && this.aps != null && !this.aps.isCoolingDown() && !this.aps.isActive();
+              && this.aps != null;
    }
 
    public boolean haveChaff() {
@@ -7666,6 +7650,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void reloadAllWeapon() {
+      if(this.aps != null) this.aps.refillAmmo();
       for(int i = 0; i < this.getWeaponNum(); ++i) {
          this.getWeapon(i).reloadMag();
       }

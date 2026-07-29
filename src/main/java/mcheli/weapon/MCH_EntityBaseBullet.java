@@ -77,6 +77,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     public int sprinkleTime;
     public byte isBomblet;
     private MCH_WeaponInfo weaponInfo;
+    private boolean interceptedByAPS;
     private MCH_BulletModel model;
     public double prevPosX2;
     public double prevPosY2;
@@ -382,6 +383,27 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         //   System.out.println("Setting dead " + this.isDead);
         //}
 
+    }
+
+    public boolean canBeInterceptedByAPS() {
+        return !interceptedByAPS && !isDead && isBomblet == 0 && getInfo() != null
+                && getInfo().isAPSInterceptableByDefault();
+    }
+
+    public boolean isInterceptedByAPS() { return interceptedByAPS; }
+
+    public boolean interceptByAPS() {
+        if (worldObj.isRemote || interceptedByAPS || isDead || !canBeInterceptedByAPS()) return false;
+        interceptedByAPS = true;
+        targetEntity = null;
+        setTargetEntity(null);
+        clearBulletChunks();
+        if (loaderTicket != null) {
+            ForgeChunkManager.releaseTicket(loaderTicket);
+            loaderTicket = null;
+        }
+        setDead();
+        return true;
     }
 
     public void setBomblet() {
@@ -913,6 +935,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     public void onUpdateTimeout() {
+        if (interceptedByAPS) return;
         if (this.isInWater()) {
             if (this.explosionPowerInWater > 0) {
                 this.newExplosion(super.posX, super.posY, super.posZ, (float) this.explosionPowerInWater, (float) this.explosionPowerInWater, true);
@@ -1159,20 +1182,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
 
     public void onImpact(MovingObjectPosition hit, float damageFactor) {
+        if (interceptedByAPS) return;
 
         //shouldn't we clear chunks here?
-
-        if(hit.entityHit instanceof MCH_EntityBaseVehicle) {
-
-            MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle) hit.entityHit;
-            if(ac.ironCurtainRunningTick > 0) {
-                System.out.println("aps hit2");
-                spawnIronCurtainParticle(hit, hit.blockX, hit.blockY, hit.blockZ);
-            }
-        }
-
-
-
 
         //todo shouldLoadChunks() check here
         //if (shouldLoadChunks() && initialized) {
@@ -1202,6 +1214,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     private void handleServerSideImpact(MovingObjectPosition hit, float damageFactor) {
+        if (interceptedByAPS) return;
         if (hit.entityHit != null) {
             processEntityImpact(hit, damageFactor);
         }
@@ -1219,17 +1232,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             ((MCH_EntityBomb)this).onCCIPCalibrationImpact(hit);
         }
 
-        if(hit.entityHit instanceof MCH_EntityBaseVehicle) {
-
-            MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle) hit.entityHit;
-            if(ac.ironCurtainRunningTick > 0) {
-                System.out.println("aps hit");
-                spawnIronCurtainParticle(hit, hit.blockX, hit.blockY, hit.blockZ);
-                //set dead here
-                this.setDead();
-            }
-        }
-
         float explosionPower = this.explosionPower * damageFactor;
         float waterExplosionPower = this.explosionPowerInWater * damageFactor;
 
@@ -1238,42 +1240,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         } else {
             handleRegularHit(hit, explosionPower, waterExplosionPower);
             finalizeImpact();
-        }
-    }
-
-    @SideOnly(Side.CLIENT)
-    public void spawnIronCurtainParticle(MovingObjectPosition raytraceResult, int xTile, int yTile, int zTile) {
-        // Defines dark red parameters (RGB：0.5, 0.1, 0.1)
-        final float DARK_RED_R = 0.5f;
-        final float DARK_RED_G = 0.1f;
-        final float DARK_RED_B = 0.1f;
-
-        int num = getInfo().flakParticlesCrack + rand.nextInt(3);
-        float scale = 1.0F;
-        for (int i = 0; i < num; i++) {
-            EntityDiggingFX fx = new EntityDiggingFX(
-                    this.worldObj,
-                    raytraceResult.hitVec.xCoord + (rand.nextFloat() - 0.5D) * width,
-                    raytraceResult.hitVec.yCoord + 0.1D,
-                    raytraceResult.hitVec.zCoord + (rand.nextFloat() - 0.5D) * width,
-                    0, 0, 0,
-                    worldObj.getBlock(xTile, yTile, zTile),
-                    this.worldObj.getBlockMetadata(xTile, yTile, zTile)
-            );
-
-            // Overrides original color setting
-            fx.setRBGColorF(DARK_RED_R, DARK_RED_G, DARK_RED_B); // Forces color to dark red
-            fx.multipleParticleScaleBy(scale * 0.8f); // Appropriately reduces particle size
-
-            // Adjusts motion parameters
-            fx.motionX += getInfo().flakParticlesDiff * (rand.nextGaussian() * 0.5);
-            fx.motionZ += getInfo().flakParticlesDiff * (rand.nextGaussian() * 0.5);
-            fx.motionY += getInfo().flakParticlesDiff * Math.abs(rand.nextGaussian());
-
-            Minecraft.getMinecraft().effectRenderer.addEffect(fx);
-
-
-
         }
     }
 
@@ -1392,6 +1358,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     private int getChunkX() { return (int) Math.floor(posX / 16.0); }
     private int getChunkZ() { return (int) Math.floor(posZ / 16.0); }
     public boolean shouldLoadChunks() {
+        if (interceptedByAPS) return false;
         if (this.ticksExisted < 3) return false;
 
         if (this.bomblet) {
@@ -1442,19 +1409,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     private final Set<Entity> hitEntities = new HashSet<>();
 
     public void onImpactEntity(Entity entity, float damageFactor) {
-
-        // APS logic to prevent damage
-        if (entity instanceof MCH_EntityBaseVehicle) {
-            MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle) entity;
-            if (ac.ironCurtainRunningTick > 0) {
-                MovingObjectPosition fakeHit = new MovingObjectPosition(entity);
-                spawnIronCurtainParticle(fakeHit, (int)entity.posX, (int)entity.posY, (int)entity.posZ);
-                System.out.println("aps hit3");
-                spawnIronCurtainParticle(fakeHit, (int)this.posX, (int)this.posY, (int)this.posZ);
-                this.setDead(); // Optional: Destroy the bullet after interception
-                return; // Exit to prevent any further damage
-            }
-        }
+        if (interceptedByAPS) return;
 
         if (!hitEntities.contains(entity)) {
             hitEntities.add(entity);
@@ -1508,6 +1463,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     public void newFAExplosion(double x, double y, double z, float exp, float expBlock) {
+        if (interceptedByAPS) return;
         MCH_Explosion.ExplosionResult result = MCH_Explosion.newExplosion(super.worldObj, this, this.shootingEntity, x, y, z, exp, expBlock, true, true, this.getInfo().flaming, false, 15);
         if (result != null && result.hitEntity) {
             this.notifyHitBullet();
@@ -1516,6 +1472,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
     }
 
     public void newExplosion(double x, double y, double z, float exp, float expBlock, boolean inWater) {
+        if (interceptedByAPS) return;
         MCH_Explosion.ExplosionResult result;
         if(!inWater) {
             if (this.getInfo().explosionType.equals("hbmNT_Bomb")) {

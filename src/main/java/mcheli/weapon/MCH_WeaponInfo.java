@@ -29,6 +29,8 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public boolean nukeEffectOnly;
     public String displayName;
     public String type;
+    /** Explicit content override; null selects the type-based native default. */
+    public Boolean apsInterceptable;
     public int power;
     public float acceleration;
     public float accelerationInWater;
@@ -269,6 +271,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         this.name = name;
         this.displayName = name;
         this.type = "";
+        this.apsInterceptable = null;
         this.power = 0;
         this.acceleration = 1.0F;
         this.accelerationInWater = 1.0F;
@@ -400,6 +403,8 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
                 this.gravity = -0.03F;
                 this.gravityInWater = -0.03F;
             }
+        } else if (item.equalsIgnoreCase("APSInterceptable")) {
+            this.apsInterceptable = Boolean.valueOf(this.toBool(data));
         } else if (item.compareTo("group") == 0) {
             this.group = data.toLowerCase().trim();
         } else if (item.compareTo("power") == 0) {
@@ -745,6 +750,14 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
             }
         }
 
+    }
+
+    public boolean isAPSInterceptableByDefault() {
+        if (this.apsInterceptable != null) return this.apsInterceptable.booleanValue();
+        if (this.bomblet > 0 || this.isGuidedTorpedo) return false;
+        return this.type.equalsIgnoreCase("AAMissile") || this.type.equalsIgnoreCase("ASMissile")
+                || this.type.equalsIgnoreCase("ATMissile") || this.type.equalsIgnoreCase("TVMissile")
+                || this.type.equalsIgnoreCase("Rocket");
     }
 
     public float getDamageFactor(Entity e) {

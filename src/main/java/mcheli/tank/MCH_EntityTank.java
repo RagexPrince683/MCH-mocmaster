@@ -23,8 +23,6 @@ import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.EntityCloudFX;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -42,7 +40,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import org.lwjgl.opengl.GL11;
 
 //the cursed extension
 //refactoring would be a fucking nightmare
@@ -695,86 +692,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          }
 
 
-         if(ironCurtainRunningTick > 0) {
-            if(this.getTankInfo() != null) {
-               int bbNum = this.getTankInfo().extraBoundingBox.size();
-               double py;
-               double pz;
-               for(int b = 0; b < bbNum; ++b) {
-                  MCH_BoundingBox box = (MCH_BoundingBox)this.getTankInfo().extraBoundingBox.get(b);
-                  Vec3 pos = this.getTransformedPosition(box.offsetX, box.offsetY, box.offsetZ);
-                  py = pos.xCoord;
-                  pz = pos.yCoord;
-                  double pos1 = pos.zCoord;
-                  this.onUpdate_IronCurtainParticle(b, py, pz, pos1, 1.0F);
-               }
-            }
-         }
 
 
-      }
-   }
 
-   @SideOnly(Side.CLIENT)
-   public void onUpdate_IronCurtainParticle(int ri, double x, double y, double z, float size) {
-      // Generates particles only on the client while Iron Curtain is active
-      if(worldObj.isRemote && ironCurtainRunningTick > 0) {
-         // Color fluctuation parameters (uses the interpolated actual factor)
-         float factor = 0.5f + 0.5f * (float)Math.sin(ironCurtainRunningTick * 0.15f);
-         final float DARK_RED_R = 0.5f * factor;
-         final float DARK_RED_G = 0.1f * factor;
-         final float DARK_RED_B = 0.1f * factor;
-
-         // Base particle parameters
-         int particleCount = 2 + rand.nextInt(3); // Generates 2-4 particles per collision box
-         float baseSize = size * (0.8f + rand.nextFloat() * 0.4f); // Size fluctuation
-
-         // Generates surrounding particle groups
-         for(int i = 0; i < particleCount; i++) {
-            EntityCloudFX particle = new EntityCloudFX(worldObj,
-                    x + (rand.nextGaussian() * 0.3),
-                    y + (rand.nextGaussian() * 0.2),
-                    z + (rand.nextGaussian() * 0.3),
-                    0, 0, 0) {
-
-               // Overrides render logic to force color application
-               @Override
-               public void renderParticle(Tessellator tess, float partialTicks,
-                                          float rotX, float rotZ, float rotYZ,
-                                          float rotXY, float rotXZ) {
-                  GL11.glColor4f(DARK_RED_R, DARK_RED_G, DARK_RED_B, this.particleAlpha);
-                  super.renderParticle(tess, partialTicks, rotX, rotZ, rotYZ, rotXY, rotXZ);
-               }
-            };
-
-            // Particle dynamic parameter configuration
-            particle.setRBGColorF(DARK_RED_R, DARK_RED_G, DARK_RED_B);
-
-            // Motion parameters (with rotational spread)
-            float motionSpread = 0.015f * (ironCurtainRunningTick % 40 + 1);
-            particle.motionX = (rand.nextFloat() - 0.5f) * motionSpread;
-            particle.motionY = 0.01f + rand.nextFloat() * 0.02f;
-            particle.motionZ = (rand.nextFloat() - 0.5f) * motionSpread;
-
-            // Adds special effects
-            Minecraft.getMinecraft().effectRenderer.addEffect(particle);
-         }
-
-         // 10%chance to generate core highlight particles
-         if(rand.nextFloat() < 0.1f) {
-            EntityCloudFX coreParticle = new EntityCloudFX(worldObj, x, y, z, 0, 0, 0) {
-               @Override
-               public void renderParticle(Tessellator tess, float partialTicks,
-                                          float rotX, float rotZ, float rotYZ,
-                                          float rotXY, float rotXZ) {
-                  GL11.glColor4f(DARK_RED_R * 1.2f, DARK_RED_G * 0.8f, DARK_RED_B * 0.8f, this.particleAlpha);
-                  super.renderParticle(tess, partialTicks, rotX, rotZ, rotYZ, rotXY, rotXZ);
-               }
-            };
-
-            coreParticle.motionY = 0.03f;
-            Minecraft.getMinecraft().effectRenderer.addEffect(coreParticle);
-         }
       }
    }
 

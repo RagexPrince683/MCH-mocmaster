@@ -276,3 +276,8 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Preserved legacy `APSRange = 100` Iron Curtain content while limiting its protection to projectile and explosion damage.
 - Enabled the Merkava Mk.4 Barak APS with an explicit active duration, cooldown, and range.
 - Made optional FMUR reflection cached and quiet when FMUR is absent or incompatible.
+# Server-authoritative hard-kill APS
+
+- Replaced the timed protection bubble and hidden Iron Curtain immunity with a five-state automatic hard-kill APS.
+- Added native projectile interception, closest-approach prediction, finite ammunition persistence/refill, state/effect packets, HUD values, and `APSInterceptable` weapon overrides.
+- Removed FMUR/Flan's Mod reflection integration and updated Merkava and APS configuration documentation.

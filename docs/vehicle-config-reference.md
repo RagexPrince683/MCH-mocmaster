@@ -149,9 +149,10 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `MaintenanceUseTime` | All | int | 20 | maintenance duration/heal percent |
 | `MaintenanceWaitTime` | All | int | 300 | maintenance cooldown |
 | `HasAPS` | All | flag (value ignored) | absent/null APS object | creates active-protection system |
-| `APSUseTime` | All | int | 100 | APS active ticks |
-| `APSWaitTime` | All | int | 400 | APS cooldown ticks |
-| `APSRange` | All | int | 8 | APS interception radius |
+| `APSUseTime` | All | int[0..12000] | 100 | hard-kill APS reload ticks after each interception |
+| `APSWaitTime` | All | int[0..12000] | 400 | APS arming delay after it is toggled on |
+| `APSRange` | All | int[1..128] | 8 | maximum native-projectile threat detection range |
+| `APSAmmo` | All | int[-1..1024] | -1 | interception charges; -1 unlimited, 0 empty, positive finite |
 | `AddWeapon` | All | list | none | weapon station; repeatable |
 | `AddTurretWeapon` | All | list | none | turreted weapon station |
 | `AddPartWeapon` | All | part pose/list | none | visual weapon part |

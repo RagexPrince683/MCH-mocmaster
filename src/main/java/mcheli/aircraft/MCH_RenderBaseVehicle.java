@@ -85,13 +85,6 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
                GL11.glColor4f(0.75F, 0.75F, 0.75F, 1.0F);
             }
 
-            if (ac.ironCurtainRunningTick > 0) {
-               float actualFactor = ac.ironCurtainLastFactor +
-                       (ac.ironCurtainCurrentFactor - ac.ironCurtainLastFactor) *
-                               (float) Math.sin(MCH_ClientEventHook.smoothing * Math.PI / 2);
-               GL11.glColor4f(0.8F * actualFactor, 0.4F * actualFactor, 0.4F * actualFactor, 1.0F);
-            }
-
             if(this.shouldRenderAircraftLOD(ac, posX, posY, posZ)) {
                this.renderAircraftLOD(ac, info, posX, posY, posZ, yaw, pitch, roll, tickTime);
             } else {
