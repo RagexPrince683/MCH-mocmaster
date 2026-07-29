@@ -2,7 +2,6 @@
 
 - Blocked Minecraft's built-in instant Sneak dismount while riding MCHeli vehicles and seats, then restored normal dismount handling only after Sneak has been held continuously for three seconds.
 - Applied the delay to the configured Minecraft Sneak key instead of a hard-coded Left Shift key and clarified the control documentation.
-- Integrated the dismount gate into the existing player-tick callbacks and used the client-player type for movement input, correcting source compilation errors from the initial implementation.
 
 ## PR #568 - Binary-density Smoke Reconstruction
 
