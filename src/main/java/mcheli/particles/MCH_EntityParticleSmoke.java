@@ -5,7 +5,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 import java.util.List;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.particles.MCH_EntityParticleBase;
-import mcheli.wrapper.W_McClient;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.world.World;
@@ -119,7 +118,7 @@ public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase {
          return;
       }
 
-      W_McClient.MOD_bindTexture("textures/particles/smoke.png");
+      MCH_ParticleTexture.bind();
       GL11.glEnable(3042);
       int srcBlend = GL11.glGetInteger(3041);
       int dstBlend = GL11.glGetInteger(3040);
@@ -127,10 +126,10 @@ public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase {
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       GL11.glDisable(2896);
       GL11.glDisable(2884);
-      float f6 = (float)super.particleTextureIndexX / 8.0F;
-      float f7 = f6 + 0.125F;
-      float f8 = 0.0F;
-      float f9 = 1.0F;
+      float f6 = MCH_ParticleTexture.minU(super.particleTextureIndexX);
+      float f7 = MCH_ParticleTexture.maxU(super.particleTextureIndexX);
+      float f8 = MCH_ParticleTexture.minV();
+      float f9 = MCH_ParticleTexture.maxV();
       float f10 = 0.1F * super.particleScale;
       float f11 = (float)(super.prevPosX + (super.posX - super.prevPosX) * (double)par2 - EntityFX.interpPosX);
       float f12 = (float)(super.prevPosY + (super.posY - super.prevPosY) * (double)par2 - EntityFX.interpPosY);

@@ -2,7 +2,6 @@ package mcheli.particles;
 
 import mcheli.particles.MCH_EntityParticleBase;
 import mcheli.wrapper.W_Block;
-import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
 import net.minecraft.client.particle.EntityFX;
@@ -55,11 +54,11 @@ public class MCH_EntityParticleSplash extends MCH_EntityParticleBase {
          return;
       }
 
-      W_McClient.MOD_bindTexture("textures/particles/smoke.png");
-      float f6 = (float)super.particleTextureIndexX / 8.0F;
-      float f7 = f6 + 0.125F;
-      float f8 = 0.0F;
-      float f9 = 1.0F;
+      MCH_ParticleTexture.bind();
+      float f6 = MCH_ParticleTexture.minU(super.particleTextureIndexX);
+      float f7 = MCH_ParticleTexture.maxU(super.particleTextureIndexX);
+      float f8 = MCH_ParticleTexture.minV();
+      float f9 = MCH_ParticleTexture.maxV();
       float f10 = 0.1F * super.particleScale;
       float f11 = (float)(super.prevPosX + (super.posX - super.prevPosX) * (double)par2 - EntityFX.interpPosX);
       float f12 = (float)(super.prevPosY + (super.posY - super.prevPosY) * (double)par2 - EntityFX.interpPosY);
