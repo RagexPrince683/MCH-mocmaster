@@ -42,6 +42,7 @@ import mcheli.wrapper.W_TickHandler;
 import mcheli.wrapper.W_Vec3;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
@@ -57,6 +58,9 @@ import mcheli.ship.MCH_GuiShip;
 //Eventhooks, clientproxy, tickhandler, guis and config just to name a few inheritors
 @SideOnly(Side.CLIENT)
 public class MCH_ClientCommonTickHandler extends W_TickHandler {
+
+   /** Three seconds at Minecraft's normal 20 player ticks per second. */
+   private static final int DISMOUNT_HOLD_TICKS = 60;
 
    public static MCH_ClientCommonTickHandler instance;
    public MCH_GuiCommon gui_Common;
@@ -95,6 +99,8 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    private static double mouseRollDeltaY = 0.0D;
    private static boolean isRideAircraft = false;
    private static float prevTick = 0.0F;
+   private int dismountHoldTicks;
+   private boolean suppressedDismountKey;
 
 
 
@@ -850,6 +856,27 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public void onPlayerTickPre(EntityPlayer player) {
+      if(player == super.mc.thePlayer) {
+         boolean ridingVehicle = player.ridingEntity instanceof MCH_EntityBaseVehicle
+               || player.ridingEntity instanceof MCH_EntitySeat;
+         boolean dismountKeyPressed = MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak);
+
+         if(!ridingVehicle || !dismountKeyPressed) {
+            this.dismountHoldTicks = 0;
+            this.suppressedDismountKey = false;
+         } else {
+            if(this.dismountHoldTicks < DISMOUNT_HOLD_TICKS) {
+               ++this.dismountHoldTicks;
+            }
+
+            if(this.dismountHoldTicks < DISMOUNT_HOLD_TICKS) {
+               KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(), false);
+               ((EntityClientPlayerMP)player).movementInput.sneak = false;
+               this.suppressedDismountKey = true;
+            }
+         }
+      }
+
       if(player.worldObj.isRemote) {
          ItemStack currentItemstack = player.getCurrentEquippedItem();
          if(currentItemstack != null && currentItemstack.getItem() instanceof MCH_ItemWrench && player.getItemInUseCount() > 0 && player.getItemInUse() != currentItemstack) {
@@ -863,7 +890,13 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
    }
 
-   public void onPlayerTickPost(EntityPlayer player) {}
+   public void onPlayerTickPost(EntityPlayer player) {
+      if(player == super.mc.thePlayer && this.suppressedDismountKey) {
+         KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(),
+               MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak));
+         this.suppressedDismountKey = false;
+      }
+   }
 
    public void onRenderTickPost(float partialTicks) {
       if (this.mc.thePlayer != null) {
