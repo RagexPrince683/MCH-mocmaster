@@ -34,11 +34,12 @@ ExplosionSizeByCrash = 3
 
 Category = MBT
 
-; Trophy APS: 5 seconds active, 20 seconds between accepted activations.
+; Trophy hard-kill APS: 10-tick arming delay, 20-tick reload, four charges.
 HasAPS = true
-APSUseTime = 100
-APSWaitTime = 400
+APSUseTime = 20
+APSWaitTime = 10
 APSRange = 16
+APSAmmo = 4
 
 OnGroundPitchFactor = 2.0
 OnGroundRollFactor  = 1.3

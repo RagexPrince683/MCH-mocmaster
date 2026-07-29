@@ -21,7 +21,7 @@ MCHeli Overdrive+ is a combined-arms vehicle, weapon, and warfare framework for 
 - **Large weapon-definition support:** Overdrive keeps MCHeli's data-driven weapon model for large content packs, including weapon libraries that can scale to hundreds or thousands of definitions, and expands combat roles for anti-air, anti-armor, anti-ship, close-air-support, torpedo, guided-weapon, bomb, rocket, cannon, dispenser, chemical/nuclear-compatible, and support-equipment loadouts.
 - **Missile and warning systems:** radar/RWR identity fields, lock-on warning logic, missile guidance behavior, multipath/lock tuning, lockable entity synchronization, and vehicle naming fields support richer air-combat and radar gameplay.
 - **Countermeasures and protection:** flares and chaff are distinct systems, while active protection system (APS), maintenance, collision damage, tank/turret fall damage, damage factors, and armor configuration expand vehicle survivability and defensive roles.
-  APS is server-authoritative: configured vehicles use `APSUseTime`, `APSWaitTime`, and `APSRange` to intercept hostile projectiles approaching their protected area. Legacy vehicles with `APSRange = 100` retain the separate Iron Curtain mode.
+  APS is server-authoritative: configured vehicles automatically intercept one hostile native MCHeli missile or rocket on a predicted impact path, then reload. `APSAmmo` optionally limits charges.
 
 ### Naval warfare
 

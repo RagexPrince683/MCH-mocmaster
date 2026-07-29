@@ -282,6 +282,14 @@ public abstract class MCH_HudItem extends Gui {
       updateVarMapItem("have_maintenance", ac.haveMaintenance()?1.0D:0.0D);
       updateVarMapItem("have_aps", ac.haveAPS()?1.0D:0.0D);
       updateVarMapItem("can_aps", ac.canUseAPS()?1.0D:0.0D);
+      updateVarMapItem("APSUsing", ac.aps.isArmed()?1.0D:0.0D);
+      updateVarMapItem("aps_armed", ac.aps.isArmed()?1.0D:0.0D);
+      updateVarMapItem("aps_ready", ac.aps.isReady()?1.0D:0.0D);
+      updateVarMapItem("aps_arming", ac.aps.isArming()?1.0D:0.0D);
+      updateVarMapItem("aps_reloading", ac.aps.isReloading()?1.0D:0.0D);
+      updateVarMapItem("aps_empty", ac.aps.isEmpty()?1.0D:0.0D);
+      updateVarMapItem("aps_ammo", (double)ac.aps.getAmmoRemaining());
+      updateVarMapItem("aps_reload_ticks", (double)ac.aps.getReloadTimer());
    }
 
    public static void updateVarMapItem(String key, double value) {

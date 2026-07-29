@@ -240,11 +240,11 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    public int engineShutdownThreshold = 20;
 
    /**
-    * APS active duration
+    * APS reload duration after an interception
     */
    public int apsUseTime = 100;
    /**
-    * APS cooldown duration
+    * APS arming delay
     */
    public int apsWaitTime = 400;
 
@@ -252,6 +252,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
     * APS range
     */
    public int apsRange = 8;
+   public int apsAmmo = -1;
 
    public abstract Item getItem();
 
@@ -986,7 +987,9 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                           } else if(item.equalsIgnoreCase("APSWaitTime")) {
                                              apsWaitTime = this.toInt(data, 0, 10000);
                                           } else if(item.equalsIgnoreCase("APSRange")) {
-                                             apsRange = this.toInt(data, 0, 100);
+                                             apsRange = this.toInt(data, 1, 128);
+                                          } else if(item.equalsIgnoreCase("APSAmmo")) {
+                                             apsAmmo = this.toInt(data, -1, 1024);
                                           }
                                           else if(item.equalsIgnoreCase("Sound")) {
                                              this.soundMove = data.toLowerCase();
