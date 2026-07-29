@@ -83,7 +83,7 @@ The config stores key codes rather than names. Common defaults:
 | Switch weapon mode | `KeySwitchWeaponMode` | X |
 | Zoom | `KeyZoom` | Z |
 | Camera mode | `KeyCameraMode` | C |
-| Dismount vehicle | Minecraft Sneak control | Hold the configured Sneak key for 3 seconds (Left Shift by default) |
+| Dismount vehicle | Fixed control | Hold Left Shift for 3 seconds |
 | Dismount mob/crew action | `KeyUnmountMob` | Y |
 | Flares/chaff/maintenance/APS | `KeyFlare`, `KeyChaff`, `KeyMaintenance`, `KeyAPS` | V |
 | Extra function | `KeyExtra` | F |

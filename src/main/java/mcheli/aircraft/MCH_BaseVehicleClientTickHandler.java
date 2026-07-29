@@ -16,6 +16,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.input.Keyboard;
 
 public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHandlerBase {
+   /** Three seconds at Minecraft's 20 client ticks per second. */
+   private static final int DISMOUNT_HOLD_TICKS = 60;
+
    protected boolean isRiding = false;
 
    protected boolean isBeforeRiding = false;
@@ -58,6 +61,8 @@ public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHan
 
    public MCH_Key KeyBrake;
    public MCH_Key KeyCurrentWeaponLock;
+
+   private int unmountForceHoldTicks;
 
    /**
     * Chaff key
@@ -133,6 +138,21 @@ public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHan
          }
       }
       boolean send = false;
+
+      if(this.KeyUnmountForce.isKeyPress()) {
+         if(this.unmountForceHoldTicks < DISMOUNT_HOLD_TICKS) {
+            ++this.unmountForceHoldTicks;
+         }
+      } else {
+         this.unmountForceHoldTicks = 0;
+      }
+
+      if(this.unmountForceHoldTicks == DISMOUNT_HOLD_TICKS) {
+         pc.isUnmount = 1;
+         send = true;
+         // Do not send another dismount request until Shift is released and held again.
+         ++this.unmountForceHoldTicks;
+      }
 
       if (this.KeyCameraMode.isKeyDown())
          if (ac.haveSearchLight()) {
