@@ -34,6 +34,7 @@ public class MCH_HeliPacketHandler {
          }
 
          if(heli != null) {
+            mcheli.aircraft.MCH_BaseVehiclePacketHandler.handleVehicleAccessLockToggle(player, heli, pc);
             if(pc.isUnmount == 1) {
                heli.unmountEntity();
             } else if(pc.isUnmount == 2) {

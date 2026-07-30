@@ -301,3 +301,8 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Schedule client reload, model, HUD, sound, renderer, and OpenGL cache work on the Minecraft client thread.
 - Clear stale vehicle item display lists and pending model builds during the client reload.
 - Rebuild the shared vehicle registry from current manager snapshots without exposing partially loaded data.
+# Persistent server-authoritative vehicle access locks
+
+- Added placing-player ownership and legacy pilot claiming for player-ridable vehicles.
+- Added an operator-aware, persistent entry lock toggled by the pilot with O.
+- Added synchronized lock HUD state and owner/lock entity and item NBT data.

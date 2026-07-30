@@ -223,3 +223,25 @@ Conventional guided-bomb and normal ballistic bomb references use real standard 
 **How it differs from original MCHeli:** The project treats shared vehicle infrastructure as a cross-category framework for planes, helicopters, ships, tanks, turrets, UAVs, seats, weapons, renderers, and controls rather than a helicopter-only or aircraft-only layer.
 
 **Configuration:** Most refactor-facing options are documented in `docs/configuration.md`; developer-facing boundaries are documented in `docs/frame-rate-physics.md` and `docs/vehicle-naming-conventions.md`.
+# Persistent vehicle access locks
+
+Player-ridable helicopters, planes, ships, tanks, turrets, and other vehicles
+have a server-authoritative entry lock. The placing player owns a newly placed
+vehicle, which always starts unlocked. An ownerless legacy vehicle is claimed by
+the first player who successfully enters its pilot position; passenger entry and
+inventory, repair, fuel, or ammunition actions never claim it.
+
+Only the current pilot may toggle the lock, and that pilot must be the owner or
+a server operator. Owners and operators may enter a locked vehicle; everyone
+else is denied both pilot and passenger entry. Existing occupants are not
+ejected, may leave normally, and may switch seats inside the same vehicle.
+
+Ownership is stored as a Java-compatible UUID string in
+`MCH_VehicleOwnerUUID`, and the state is stored in
+`MCH_VehicleAccessLocked`. Missing or invalid owner data clears ownership and
+starts the legacy vehicle unlocked. Whole-vehicle item data records both values,
+but placement transfers ownership to the placing player and starts unlocked.
+
+The access lock is a door-style permission control only. It does not require or
+animate a visual hatch or canopy and does not affect weapon/missile target locks,
+UAV control, racks, towing, or AI gunners.

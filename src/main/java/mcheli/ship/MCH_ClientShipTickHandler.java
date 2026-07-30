@@ -37,7 +37,7 @@ public class MCH_ClientShipTickHandler extends MCH_BaseVehicleClientTickHandler 
         this.KeyZoom = new MCH_Key(MCH_Config.KeyZoom.prmInt);
         this.KeySubmarineAscend = new MCH_Key(MCH_Config.KeySubmarineAscend.prmInt);
         this.KeySubmarineDescend = new MCH_Key(MCH_Config.KeySubmarineDescend.prmInt);
-        this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, this.KeySubmarineAscend, this.KeySubmarineDescend, super.KeyUseWeapon, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
+        this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, this.KeySubmarineAscend, this.KeySubmarineDescend, super.KeyUseWeapon, super.KeyVehicleLock, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
     }
 
     protected void update(EntityPlayer player, MCH_EntityShip plane) {

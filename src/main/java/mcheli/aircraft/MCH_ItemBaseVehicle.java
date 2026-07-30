@@ -532,6 +532,8 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
          } else {
             if(!world.isRemote) {
                ac.getAcDataFromItem(itemStack);
+               ac.setVehicleOwnerUUID(player.getUniqueID());
+               ac.setVehicleAccessLocked(false);
                ac.markFreshlyPlaced();
                boolean spawned = world.spawnEntityInWorld(ac);
                logPlacementDebug(world, "spawnAircraft world.spawnEntityInWorld result=%s item=%s type=%s entityId=%d dim=%d", Boolean.valueOf(spawned), getItemDebugName(itemStack), ac.getTypeName(), Integer.valueOf(ac.getEntityId()), Integer.valueOf(world.provider.dimensionId));

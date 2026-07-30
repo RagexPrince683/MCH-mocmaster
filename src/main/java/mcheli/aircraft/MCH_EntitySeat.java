@@ -14,6 +14,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 
 public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnData {
@@ -317,6 +319,10 @@ public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnDa
       if(player.ridingEntity != null) {
          MCH_Lib.DbgLog(this.worldObj, "[MCH-INTERACT][SEAT-REJECT] reason=player_already_riding seatId=%d riding=%s",
                  new Object[]{Integer.valueOf(this.seatID), player.ridingEntity});
+         return false;
+      }
+      if(!this.worldObj.isRemote && !getParent().canPlayerEnterVehicle(player)) {
+         player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "This vehicle is locked."));
          return false;
       }
       if(!canRideMob(player)) {

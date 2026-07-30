@@ -343,3 +343,8 @@ Plane camera tuning is exposed in the in-game MCHeli options opened from the air
 For awareness, prefer stable distance plus a wider FOV rather than large dynamic distance swings. `EnablePlaneChaseFOVOverride` is disabled by default for public testing; when manually enabled it uses `PlaneChaseFOV = 95`. Recommended chase FOV values are 85-105. `PlaneChaseFreelookFOV` defaults to the same value, and `PlaneChaseFOVSmoothing` blends the override when entering, freelooking, or leaving the camera.
 
 Hold-freelook is hold-to-orbit: mouse input changes raw orbit yaw/pitch targets, while `PlaneFreelookYawSmoothing` and `PlaneFreelookPitchSmoothing` smooth the rendered orbit. `PlaneFreelookReturnSmoothing` controls the blend back to rear chase after release. Recommended starting values are sensitivity 0.15, yaw/pitch smoothing around 0.18-0.28, return smoothing around 0.12-0.22, max pitch up around 75 degrees, and max pitch down around 65 degrees. Freelook should feel smooth and camera-like, not raw or jittery.
+# Vehicle access lock key
+
+`KeyVehicleLock` defaults to LWJGL key code `24` (**O**). While directly riding
+the pilot seat, press it to ask the server to lock or unlock vehicle entry.
+The server, not the client key binding, decides whether the request is allowed.
