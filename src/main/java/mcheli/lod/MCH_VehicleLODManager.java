@@ -13,6 +13,8 @@ import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.helicopter.MCH_HeliInfoManager;
+import mcheli.helicopter.MCH_HeliInfo;
+import mcheli.helicopter.MCH_RenderHeli;
 import mcheli.network.packets.PacketVehicleLODSnapshot;
 import mcheli.plane.MCP_PlaneInfoManager;
 import mcheli.ship.MCH_ShipInfoManager;
@@ -129,11 +131,11 @@ public final class MCH_VehicleLODManager {
             if (x * x + y * y + z * z > farSq) {
                 continue;
             }
-            render(display, x, y, z, interpolation);
+            render(display, x, y, z, interpolation, now);
         }
     }
 
-    private static void render(Display display, double x, double y, double z, float interpolation) {
+    private static void render(Display display, double x, double y, double z, float interpolation, long now) {
         MCH_BaseVehicleInfo info = getInfo(display.category, display.typeName);
         String textureFolder = getTextureFolder(display.category);
         if (info == null || info.model == null || textureFolder == null) {
@@ -157,7 +159,21 @@ public final class MCH_VehicleLODManager {
                 Minecraft.getMinecraft().renderEngine.bindTexture(
                     new ResourceLocation(W_MOD.DOMAIN, "textures/" + textureFolder + "/"
                         + MCH_RenderBaseVehicle.getBaseTextureName(display.textureName) + ".png"));
-                MCH_RenderBaseVehicle.renderAllModel(info.model);
+                if (MCH_RenderBaseVehicle.hasSeparableBody(info.model)) {
+                    MCH_RenderBaseVehicle.renderBody(info.model);
+                    if (display.category == 3) {
+                        int weaponCount = Math.min(info.partWeapon.size(), display.weaponPoses.length);
+                        for (int i = 0; i < weaponCount; ++i) {
+                            MCH_RenderBaseVehicle.renderSnapshotWeapon(info,
+                                (MCH_BaseVehicleInfo.PartWeapon)info.partWeapon.get(i), display.weaponPoses[i], interpolation);
+                        }
+                    } else if (display.category == 0 && info instanceof MCH_HeliInfo) {
+                        MCH_RenderHeli.drawSnapshotBlades((MCH_HeliInfo)info, display.getRotorPhase(now), display.rotorFolded);
+                    }
+                } else {
+                    // Legacy monolithic models cannot exclude bind-pose groups safely.
+                    MCH_RenderBaseVehicle.renderAllModel(info.model);
+                }
             } finally {
                 MCH_RenderBaseVehicle.endSkinOverlayRender();
             }
@@ -238,6 +254,11 @@ public final class MCH_VehicleLODManager {
         private float roll;
         private float scale;
         private int packedLight;
+        private PacketVehicleLODSnapshot.WeaponPose[] weaponPoses = new PacketVehicleLODSnapshot.WeaponPose[0];
+        private float rotorPhase;
+        private float rotorAngularChange;
+        private boolean rotorFolded;
+        private long rotorPhaseTimeMs;
         private long previousUpdateMs;
         private long lastUpdateMs;
 
@@ -254,6 +275,8 @@ public final class MCH_VehicleLODManager {
 
         private void update(PacketVehicleLODSnapshot.Entry entry) {
             long now = System.currentTimeMillis();
+            byte oldCategory = this.category;
+            String oldTypeName = this.typeName;
             float partial = this.previousUpdateMs == 0L ? 1.0F : Math.min(1.0F, (float)(now - this.previousUpdateMs) / 1000.0F);
             this.previousX = this.previousX + (this.x - this.previousX) * partial;
             this.previousY = this.previousY + (this.y - this.previousY) * partial;
@@ -273,7 +296,64 @@ public final class MCH_VehicleLODManager {
             this.pitch = entry.pitch;
             this.roll = entry.roll;
             this.scale = entry.scale > 0.0F ? entry.scale : 1.0F;
+            boolean categoryChanged = oldTypeName != null && (oldCategory != entry.category || !oldTypeName.equals(entry.typeName));
+            if (categoryChanged) {
+                this.weaponPoses = new PacketVehicleLODSnapshot.WeaponPose[0];
+                this.rotorPhaseTimeMs = 0L;
+                this.rotorAngularChange = 0.0F;
+            }
+            PacketVehicleLODSnapshot.WeaponPose[] incoming = entry.weaponPoses == null
+                ? new PacketVehicleLODSnapshot.WeaponPose[0] : entry.weaponPoses;
+            for (int i = 0; i < incoming.length; ++i) {
+                PacketVehicleLODSnapshot.WeaponPose current = incoming[i];
+                if (!categoryChanged && i < this.weaponPoses.length) {
+                    PacketVehicleLODSnapshot.WeaponPose previous = this.weaponPoses[i];
+                    current.prevYaw = previous.yaw;
+                    current.prevPitch = previous.pitch;
+                    current.prevTurretYaw = previous.turretYaw;
+                    current.prevBarrelRotation = previous.barrelRotation;
+                    current.prevRecoil = previous.recoil;
+                } else {
+                    current.prevYaw = current.yaw;
+                    current.prevPitch = current.pitch;
+                    current.prevTurretYaw = current.turretYaw;
+                    current.prevBarrelRotation = current.barrelRotation;
+                    current.prevRecoil = current.recoil;
+                }
+            }
+            this.weaponPoses = incoming;
+            if (entry.category == 0) {
+                if (this.rotorPhaseTimeMs == 0L) {
+                    this.rotorPhase = entry.rotorRotation;
+                } else {
+                    float predicted = advanceRotorPhase(now);
+                    float error = interpolateAngle(predicted, entry.rotorRotation, 1.0F) - predicted;
+                    this.rotorPhase = predicted + error * 0.25F;
+                }
+                this.rotorPhaseTimeMs = now;
+                this.rotorAngularChange = entry.rotorAngularChange;
+                this.rotorFolded = entry.rotorFolded;
+            } else {
+                this.rotorPhaseTimeMs = 0L;
+                this.rotorAngularChange = 0.0F;
+                this.rotorFolded = false;
+            }
             this.packedLight = entry.packedLight;
+        }
+
+        private float getRotorPhase(long now) {
+            this.rotorPhase = advanceRotorPhase(now);
+            this.rotorPhaseTimeMs = now;
+            return this.rotorPhase;
+        }
+
+        private float advanceRotorPhase(long now) {
+            if (this.rotorPhaseTimeMs == 0L) return this.rotorPhase;
+            long elapsed = now - this.rotorPhaseTimeMs;
+            long snapshotAge = now - this.lastUpdateMs;
+            if (snapshotAge > 1250L) elapsed = Math.max(0L, 1250L - (this.rotorPhaseTimeMs - this.lastUpdateMs));
+            if (elapsed < 0L) elapsed = 0L;
+            return this.rotorPhase + this.rotorAngularChange * (float)elapsed / 50.0F;
         }
     }
 }

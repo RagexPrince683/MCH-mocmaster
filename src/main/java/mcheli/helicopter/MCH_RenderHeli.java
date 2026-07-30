@@ -80,6 +80,41 @@ public class MCH_RenderHeli extends MCH_RenderBaseVehicle {
 
    }
 
+   /** Snapshot-only equivalent which needs no entity or simulated rotor objects. */
+   public static void drawSnapshotBlades(MCH_HeliInfo info, float phase, boolean folded) {
+      for(int rotorIndex = 0; rotorIndex < info.rotorList.size(); ++rotorIndex) {
+         MCH_HeliInfo.Rotor rotorInfo = (MCH_HeliInfo.Rotor)info.rotorList.get(rotorIndex);
+         GL11.glPushMatrix();
+         try {
+            if(rotorInfo.oldRenderMethod) {
+               GL11.glTranslated(rotorInfo.pos.xCoord, rotorInfo.pos.yCoord, rotorInfo.pos.zCoord);
+            }
+            for(int bladeIndex = 0; bladeIndex < rotorInfo.bladeNum; ++bladeIndex) {
+               GL11.glPushMatrix();
+               try {
+                  float angle = phase + (float)(bladeIndex * rotorInfo.bladeRot);
+                  if(folded && rotorInfo.haveFoldFunc) {
+                     float foldAngle = (float)(5 + bladeIndex * 3);
+                     angle = angle < 180.0F ? foldAngle : 360.0F - foldAngle;
+                  }
+                  if(!rotorInfo.oldRenderMethod) {
+                     GL11.glTranslated(rotorInfo.pos.xCoord, rotorInfo.pos.yCoord, rotorInfo.pos.zCoord);
+                  }
+                  GL11.glRotatef(angle, (float)rotorInfo.rot.xCoord, (float)rotorInfo.rot.yCoord, (float)rotorInfo.rot.zCoord);
+                  if(!rotorInfo.oldRenderMethod) {
+                     GL11.glTranslated(-rotorInfo.pos.xCoord, -rotorInfo.pos.yCoord, -rotorInfo.pos.zCoord);
+                  }
+                  renderPart(rotorInfo.model, info.model, rotorInfo.modelName);
+               } finally {
+                  GL11.glPopMatrix();
+               }
+            }
+         } finally {
+            GL11.glPopMatrix();
+         }
+      }
+   }
+
    protected ResourceLocation getEntityTexture(Entity entity) {
       return W_Render.TEX_DEFAULT;
    }
