@@ -131,6 +131,17 @@ UseGlobalArtilleryRangeModifier = true
 
 The weapon-key default is `false`, so existing weapon files and explicitly disabled weapons retain their original speed and range. `ArtilleryRangeModifier = 1.0` also preserves the original range. `DisplayMortarDistance` controls only whether the HUD displays an impact distance; it neither classifies a weapon as artillery nor controls modifier eligibility. This is a per-weapon opt-in, not a per-vehicle setting, so one vehicle can combine a modified artillery weapon with an unchanged secondary weapon.
 
+## Weapon damage factors
+
+Weapon text files use comma-separated `DamageFactor = type, multiplier` entries. The existing `tank`, `plane`, `vehicle`, `heli`/`helicopter`, `ship`, and `player` types are supported. `other` and `others` select non-player, non-villager living entities:
+
+```text
+DamageFactor = player, 20.0
+DamageFactor = other, 3.0
+```
+
+Players and villagers use `player`. Other living entities use `other` when it is present and fall back to `player` when it is absent. Explicit aircraft and vehicle factors take priority and apply to subclasses. Nonliving entities have a factor of `1.0` unless an explicit class factor applies.
+
 Vehicle `.txt` definitions can opt individual items into or out of 3D item rendering and tune their own size after the global type scale is applied:
 
 | Key | Default | Notes |

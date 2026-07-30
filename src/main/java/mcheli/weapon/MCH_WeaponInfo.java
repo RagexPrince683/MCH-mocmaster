@@ -10,6 +10,7 @@ import mcheli.tank.MCH_EntityTank;
 import mcheli.vehicle.MCH_EntityTurret;
 import mcheli.wrapper.W_Item;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -714,6 +715,8 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
                                 String var14 = s[0].toLowerCase();
                                 if (var14.equals("player")) {
                                     var13 = EntityPlayer.class;
+                                } else if (var14.equals("other") || var14.equals("others")) {
+                                    var13 = EntityLivingBase.class;
                                 } else if (!var14.equals("heli") && !var14.equals("helicopter")) {
                                     if (var14.equals("plane")) {
                                         var13 = MCP_EntityPlane.class;

@@ -1,3 +1,9 @@
+## Player-Style Villager and Living Damage Factors
+
+- Added inheritance-aware weapon damage-factor matching, with explicit aircraft and vehicle types taking priority over player and living fallbacks.
+- Added `other` and `others` weapon factor aliases for non-player, non-villager living entities; without one, living targets inherit the player factor.
+- Routed villagers through global player damage configuration and removed duplicate direct-hit player-factor multiplication.
+
 ## Global Artillery Range Modifier
 
 - Added the reloadable, minimum-clamped `ArtilleryRangeModifier` global setting and the opt-in `UseGlobalArtilleryRangeModifier` weapon text key.
