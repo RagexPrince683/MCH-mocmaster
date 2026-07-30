@@ -112,7 +112,7 @@ Conventional guided-bomb and normal ballistic bomb references use real standard 
 
 **Why it exists:** Large combined-arms servers often need aircraft, ships, tanks, and turrets to remain visually identifiable at distances where full entity tracking/rendering is too expensive or unreliable.
 
-**How it differs from original MCHeli:** Overdrive adds a dedicated snapshot packet and client LOD manager. Snapshots include entity identity, category, type, texture, position, rotation, scale, and sampled world lighting, and the render path switches to cheaper displays beyond `AircraftLODStartDistance`.
+**How it differs from original MCHeli:** Overdrive adds a dedicated snapshot packet and client LOD manager. Snapshots include entity identity, category, type, texture, hull transform, sampled world lighting, indexed tank weapon poses, and helicopter rotor phase/speed/fold state. Beyond `AircraftLODStartDistance`, tracked entities still use the normal entity LOD renderer; after an entity leaves client tracking, the snapshot manager renders the named `$body` and animated named parts without creating a proxy entity. Monolithic models without a separable `$body` retain their safe all-model fallback and therefore cannot receive snapshot-only named-part animation.
 
 **Configuration:** Users/server owners configure `EnableAircraftLODRender`, `AircraftLODStartDistance`, and `AircraftLODFarDistance`. `AircraftLODFarDistance` also guides the extended tracking range helper so the render-only system has useful data without replacing real entity simulation.
 

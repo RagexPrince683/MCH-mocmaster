@@ -20,6 +20,7 @@ public class PacketVehicleLODSnapshot extends PacketBase {
     private static final Charset UTF_8 = Charset.forName("UTF-8");
     private static final int MAX_ENTRIES = 512;
     private static final int MAX_STRING_BYTES = 128;
+    public static final int MAX_WEAPON_POSES = 64;
 
     public int dimension;
     public List<Entry> entries = Collections.emptyList();
@@ -52,6 +53,28 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             data.writeFloat(entry.pitch);
             data.writeFloat(entry.roll);
             data.writeFloat(entry.scale);
+            int weaponCount = entry.weaponPoses == null ? 0 : Math.min(entry.weaponPoses.length, MAX_WEAPON_POSES);
+            data.writeByte(weaponCount);
+            for (int weaponIndex = 0; weaponIndex < weaponCount; ++weaponIndex) {
+                WeaponPose pose = entry.weaponPoses[weaponIndex];
+                data.writeFloat(pose.yaw);
+                data.writeFloat(pose.prevYaw);
+                data.writeFloat(pose.pitch);
+                data.writeFloat(pose.prevPitch);
+                data.writeFloat(pose.turretYaw);
+                data.writeFloat(pose.prevTurretYaw);
+                data.writeFloat(pose.rotationTurretYaw);
+                data.writeFloat(pose.defaultRotationYaw);
+                data.writeFloat(pose.barrelRotation);
+                data.writeFloat(pose.prevBarrelRotation);
+                data.writeFloat(pose.recoil);
+                data.writeFloat(pose.prevRecoil);
+                data.writeBoolean(pose.visible);
+            }
+            data.writeFloat(entry.rotorRotation);
+            data.writeFloat(entry.prevRotorRotation);
+            data.writeFloat(entry.rotorAngularChange);
+            data.writeBoolean(entry.rotorFolded);
             data.writeInt(entry.packedLight);
         }
     }
@@ -59,7 +82,10 @@ public class PacketVehicleLODSnapshot extends PacketBase {
     @Override
     public void decodeInto(ChannelHandlerContext ctx, ByteBuf data) {
         this.dimension = data.readInt();
-        int count = Math.min(data.readUnsignedShort(), MAX_ENTRIES);
+        int count = data.readUnsignedShort();
+        if (count > MAX_ENTRIES) {
+            throw new IllegalArgumentException("Vehicle LOD snapshot entry count exceeds " + MAX_ENTRIES);
+        }
         List<Entry> decoded = new ArrayList<Entry>(count);
         for (int i = 0; i < count; ++i) {
             Entry entry = new Entry();
@@ -75,6 +101,32 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             entry.pitch = data.readFloat();
             entry.roll = data.readFloat();
             entry.scale = data.readFloat();
+            int weaponCount = data.readUnsignedByte();
+            if (weaponCount > MAX_WEAPON_POSES) {
+                throw new IllegalArgumentException("Vehicle LOD weapon pose count exceeds " + MAX_WEAPON_POSES);
+            }
+            entry.weaponPoses = new WeaponPose[weaponCount];
+            for (int weaponIndex = 0; weaponIndex < weaponCount; ++weaponIndex) {
+                WeaponPose pose = new WeaponPose();
+                pose.yaw = data.readFloat();
+                pose.prevYaw = data.readFloat();
+                pose.pitch = data.readFloat();
+                pose.prevPitch = data.readFloat();
+                pose.turretYaw = data.readFloat();
+                pose.prevTurretYaw = data.readFloat();
+                pose.rotationTurretYaw = data.readFloat();
+                pose.defaultRotationYaw = data.readFloat();
+                pose.barrelRotation = data.readFloat();
+                pose.prevBarrelRotation = data.readFloat();
+                pose.recoil = data.readFloat();
+                pose.prevRecoil = data.readFloat();
+                pose.visible = data.readBoolean();
+                entry.weaponPoses[weaponIndex] = pose;
+            }
+            entry.rotorRotation = data.readFloat();
+            entry.prevRotorRotation = data.readFloat();
+            entry.rotorAngularChange = data.readFloat();
+            entry.rotorFolded = data.readBoolean();
             entry.packedLight = data.readInt();
             decoded.add(entry);
         }
@@ -118,6 +170,28 @@ public class PacketVehicleLODSnapshot extends PacketBase {
         public float pitch;
         public float roll;
         public float scale = 1.0F;
+        public WeaponPose[] weaponPoses = new WeaponPose[0];
+        public float rotorRotation;
+        public float prevRotorRotation;
+        public float rotorAngularChange;
+        public boolean rotorFolded;
         public int packedLight;
+    }
+
+    /** Render-only pose at the matching index in MCH_BaseVehicleInfo.partWeapon. */
+    public static class WeaponPose {
+        public float yaw;
+        public float prevYaw;
+        public float pitch;
+        public float prevPitch;
+        public float turretYaw;
+        public float prevTurretYaw;
+        public float rotationTurretYaw;
+        public float defaultRotationYaw;
+        public float barrelRotation;
+        public float prevBarrelRotation;
+        public float recoil;
+        public float prevRecoil;
+        public boolean visible = true;
     }
 }

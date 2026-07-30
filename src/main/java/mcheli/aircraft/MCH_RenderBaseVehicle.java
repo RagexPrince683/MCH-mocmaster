@@ -620,6 +620,85 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
 
    }
 
+   /** True only when rendering the body separately cannot also draw named dynamic groups. */
+   public static boolean hasSeparableBody(IModelCustom model) {
+      return model instanceof W_ModelCustom && ((W_ModelCustom)model).containsPart("$body");
+   }
+
+   public static void renderSnapshotWeapon(MCH_BaseVehicleInfo info, MCH_BaseVehicleInfo.PartWeapon w,
+         mcheli.network.packets.PacketVehicleLODSnapshot.WeaponPose pose, float tickTime) {
+      if(info == null || w == null || pose == null || !pose.visible) return;
+      GL11.glPushMatrix();
+      try {
+         float turretYaw = interpolateSnapshotAngle(pose.prevTurretYaw, pose.turretYaw, tickTime);
+         if(w.turret) {
+            GL11.glTranslated(info.turretPosition.xCoord, info.turretPosition.yCoord, info.turretPosition.zCoord);
+            GL11.glRotatef(turretYaw, 0.0F, -1.0F, 0.0F);
+            GL11.glTranslated(-info.turretPosition.xCoord, -info.turretPosition.yCoord, -info.turretPosition.zCoord);
+         }
+         GL11.glTranslated(w.pos.xCoord, w.pos.yCoord, w.pos.zCoord);
+         if(w.yaw) GL11.glRotatef(interpolateSnapshotAngle(pose.prevYaw, pose.yaw, tickTime), 0.0F, -1.0F, 0.0F);
+         if(w.turret) GL11.glRotatef(-(turretYaw - pose.rotationTurretYaw), 0.0F, -1.0F, 0.0F);
+         boolean reversePitch = false;
+         if((int)pose.defaultRotationYaw != 0) {
+            float wrapped = MathHelper.wrapAngleTo180_float(pose.defaultRotationYaw);
+            reversePitch = wrapped >= 45.0F && wrapped <= 135.0F || wrapped <= -45.0F && wrapped >= -135.0F;
+            GL11.glRotatef(-pose.defaultRotationYaw, 0.0F, -1.0F, 0.0F);
+         }
+         if(w.pitch) {
+            float pitch = pose.prevPitch + (pose.pitch - pose.prevPitch) * tickTime;
+            GL11.glRotatef(reversePitch ? -pitch : pitch, 1.0F, 0.0F, 0.0F);
+         }
+         if(w.recoilBuf != 0.0F) {
+            float recoil = pose.prevRecoil + (pose.recoil - pose.prevRecoil) * tickTime;
+            GL11.glTranslated(0.0D, 0.0D, (double)(w.recoilBuf * recoil));
+         }
+         GL11.glRotatef(pose.defaultRotationYaw, 0.0F, -1.0F, 0.0F);
+         if(w.rotBarrel) {
+            GL11.glRotatef(interpolateSnapshotAngle(pose.prevBarrelRotation, pose.barrelRotation, tickTime),
+               (float)w.rot.xCoord, (float)w.rot.yCoord, (float)w.rot.zCoord);
+         }
+         GL11.glTranslated(-w.pos.xCoord, -w.pos.yCoord, -w.pos.zCoord);
+         renderPart(w.model, info.model, w.modelName);
+         for(int i = 0; i < w.child.size(); ++i) {
+            MCH_BaseVehicleInfo.PartWeaponChild child = (MCH_BaseVehicleInfo.PartWeaponChild)w.child.get(i);
+            GL11.glPushMatrix();
+            try {
+               renderSnapshotWeaponChild(info, child, pose, tickTime);
+            } finally {
+               GL11.glPopMatrix();
+            }
+         }
+      } finally {
+         GL11.glPopMatrix();
+      }
+   }
+
+   private static void renderSnapshotWeaponChild(MCH_BaseVehicleInfo info, MCH_BaseVehicleInfo.PartWeaponChild w,
+         mcheli.network.packets.PacketVehicleLODSnapshot.WeaponPose pose, float tickTime) {
+      GL11.glTranslated(w.pos.xCoord, w.pos.yCoord, w.pos.zCoord);
+      if(w.yaw) GL11.glRotatef(interpolateSnapshotAngle(pose.prevYaw, pose.yaw, tickTime), 0.0F, -1.0F, 0.0F);
+      float wrapped = MathHelper.wrapAngleTo180_float(pose.defaultRotationYaw);
+      boolean reversePitch = wrapped >= 45.0F && wrapped <= 135.0F || wrapped <= -45.0F && wrapped >= -135.0F;
+      if((int)pose.defaultRotationYaw != 0) GL11.glRotatef(-pose.defaultRotationYaw, 0.0F, -1.0F, 0.0F);
+      if(w.pitch) {
+         float pitch = pose.prevPitch + (pose.pitch - pose.prevPitch) * tickTime;
+         GL11.glRotatef(reversePitch ? -pitch : pitch, 1.0F, 0.0F, 0.0F);
+      }
+      if(w.recoilBuf != 0.0F) {
+         float recoil = pose.prevRecoil + (pose.recoil - pose.prevRecoil) * tickTime;
+         GL11.glTranslated(0.0D, 0.0D, (double)(-w.recoilBuf * recoil));
+      }
+      GL11.glRotatef(pose.defaultRotationYaw, 0.0F, -1.0F, 0.0F);
+      GL11.glTranslated(-w.pos.xCoord, -w.pos.yCoord, -w.pos.zCoord);
+      renderPart(w.model, info.model, w.modelName);
+   }
+
+   private static float interpolateSnapshotAngle(float previous, float current, float partial) {
+      float delta = MathHelper.wrapAngleTo180_float(current - previous);
+      return previous + delta * partial;
+   }
+
    public static void renderAllModel(final IModelCustom model) {
       if(model != null) {
          model.renderAll();
