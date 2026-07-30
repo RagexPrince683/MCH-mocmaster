@@ -57,7 +57,7 @@ OnGroundRollFactor  = 0.8
 
 HUD = mbt_hudtwo, none, none, none, none, none, none
 
-AddGunnerSeat =  0.00, 1.68,  0.00, 0.00, 1.68,  0.00, false, -70, 10
+AddGunnerSeat =  0.00, 1.08,  0.00, 0.00, 1.68,  0.00, false, -70, 10
 AddSeat = -0.31, 0.75, -1.62 
 AddSeat =  0.31, 0.75, -1.62 
 AddSeat = -0.31, 0.75, -2.48
