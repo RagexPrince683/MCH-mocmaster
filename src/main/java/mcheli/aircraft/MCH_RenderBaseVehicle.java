@@ -158,8 +158,19 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       GL11.glDisable(GL11.GL_ALPHA_TEST);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       this.renderBaseVehicle(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
+      this.renderAircraftLODParts(ac, info, posX, posY, posZ, tickTime);
       GL11.glPopAttrib();
       GL11.glPopMatrix();
+   }
+
+   /**
+    * Renders dynamic parts required by a vehicle's far-model pass.  The base model
+    * renderer intentionally leaves the vehicle translation and interpolated hull
+    * rotations on the current matrix, just as it does before the normal common-part
+    * pass.  Subclasses can therefore reuse the normal part renderers without
+    * duplicating animation calculations.
+    */
+   protected void renderAircraftLODParts(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, double posX, double posY, double posZ, float tickTime) {
    }
 
    public static boolean shouldSkipRender(Entity entity) {

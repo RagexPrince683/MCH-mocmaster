@@ -1,3 +1,8 @@
+# Fix Tank LOD Part Transforms
+
+- Made the tank far-model pass render all configured dynamic named parts through the same common-part renderers used by the full-detail pass.
+- Preserved the interpolated hull transform as the parent of turret, weapon, recoil, hatch, wheel, track, suspension, and nested weapon-part transforms while retaining per-part matrix isolation and optional-part handling.
+
 ## Multiplayer Vehicle Yaw and Running-Gear Synchronization
 
 - Removed the tank's extra per-packet interpolation delay and made remote hull yaw corrections follow the shortest wrapped angle over the server-provided interpolation window.
