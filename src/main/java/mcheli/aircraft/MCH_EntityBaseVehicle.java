@@ -7134,7 +7134,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void debugVehicleState(String context, EntityPlayer player) {
-      if(!MCH_Config.DebugLog) {
+      if(!MCH_Config.EnableMCHLibDebugLog.prmBool) {
          return;
       }
       MCH_Lib.DbgLog(super.worldObj,
@@ -7152,7 +7152,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void debugRackState(String context) {
-      if(!MCH_Config.DebugLog) {
+      if(!MCH_Config.EnableMCHLibDebugLog.prmBool) {
          return;
       }
       int rackCount = 0;

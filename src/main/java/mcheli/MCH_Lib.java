@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import mcheli.plane.MCP_PlaneChaseCamera;
 import mcheli.wrapper.W_Block;
 import mcheli.wrapper.W_McClient;
@@ -18,7 +21,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -35,6 +37,7 @@ import net.minecraft.world.World;
 //Very broken logger, and misc functions such as all vehicle speed mult, and some other stuff I still have no idea what it does.
 public class MCH_Lib {
 
+   private static final Logger LOGGER = LogManager.getLogger("mcheli");
    private static HashMap mapMaterial = new HashMap();
    public static final String[] AZIMUTH_8 = new String[]{"S", "SW", "W", "NW", "N", "NE", "E", "SE"};
    public static final int AZIMUTH_8_ANG = 360 / AZIMUTH_8.length;
@@ -232,15 +235,19 @@ public class MCH_Lib {
    }
 
    public static void Log(String format, Object ... data) {
-      String side = MCH_MOD.proxy.isRemote()?"[Client]":"[Server]";
-      System.out.printf("[" + getTime() + "][" + "mcheli" + "]" + side + " " + format + "\n", data);
+      if(MCH_Config.EnableMCHLibLog == null || !MCH_Config.EnableMCHLibLog.prmBool) {
+         return;
+      }
+
+      String side = MCH_MOD.proxy == null?"[Unknown]":(MCH_MOD.proxy.isRemote()?"[Client]":"[Server]");
+      LOGGER.info(side + " " + formatMessage(format, data));
    }
 
    public static void Log(World world, String format, Object ... data) {
       if(world != null) {
          Log((world.isRemote?"[ClientWorld]":"[ServerWorld]") + " " + format, data);
       } else {
-         Log("[UnknownWorld]" + format, data);
+         Log("[UnknownWorld] " + format, data);
       }
 
    }
@@ -255,25 +262,36 @@ public class MCH_Lib {
    }
 
    public static void DbgLog(boolean isRemote, String format, Object ... data) {
-      MCH_Config var10000 = MCH_MOD.config;
-      if(MCH_Config.DebugLog) {
-         String t = getTime();
-         if(isRemote) {
-            String playerName = "null";
-            if(getClientPlayer() instanceof EntityPlayer) {
-               playerName = ((EntityPlayer)getClientPlayer()).getDisplayName();
-            }
-
-            System.out.println(String.format(format, data));
-         } else {
-            System.out.println(String.format(format, data));
-         }
+      if(MCH_Config.EnableMCHLibDebugLog == null || !MCH_Config.EnableMCHLibDebugLog.prmBool) {
+         return;
       }
 
+      LOGGER.info("[MCH DEBUG] " + (isRemote?"[Client]":"[Server]") + " " + formatMessage(format, data));
    }
 
-   public static void DbgLog(World w, String format, Object ... data) {
-      DbgLog(w.isRemote, format, data);
+   public static void DbgLog(World world, String format, Object ... data) {
+      if(MCH_Config.EnableMCHLibDebugLog == null || !MCH_Config.EnableMCHLibDebugLog.prmBool) {
+         return;
+      }
+
+      String side = world == null?"[UnknownWorld]":(world.isRemote?"[ClientWorld]":"[ServerWorld]");
+      LOGGER.info("[MCH DEBUG] " + side + " " + formatMessage(format, data));
+   }
+
+   private static String formatMessage(String format, Object ... data) {
+      if(format == null) {
+         return "null";
+      }
+
+      if(data == null || data.length == 0) {
+         return format;
+      }
+
+      try {
+         return String.format(format, data);
+      } catch(RuntimeException e) {
+         return format + " [format error: " + e.getClass().getSimpleName() + "]";
+      }
    }
 
    public static String getTime() {

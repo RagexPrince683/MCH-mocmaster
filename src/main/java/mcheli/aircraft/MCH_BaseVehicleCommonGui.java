@@ -49,7 +49,7 @@ public abstract class MCH_BaseVehicleCommonGui extends MCH_Gui {
 
    public void drawDebugtInfo(MCH_EntityBaseVehicle ac) {
       MCH_Config var10000 = MCH_MOD.config;
-      if(MCH_Config.DebugLog) {
+      if(MCH_Config.EnableMCHLibDebugLog.prmBool) {
          int LX = super.centerX - 100;
       }
 

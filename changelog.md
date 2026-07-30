@@ -1,3 +1,10 @@
+## Configurable MCH_Lib Logging
+
+- Added independent normal and verbose MCHLib logging controls backed by standard config properties.
+- Routed MCHLib messages through Forge's Log4j logger with safe printf formatting and side/world labels.
+- Preserved legacy `McHeliOutputDebugLog` configs while migrating rewritten files to the new debug property.
+- Loaded the configuration before configurable startup and content-loading messages.
+
 ## Player-Style Villager and Living Damage Factors
 
 - Added inheritance-aware weapon damage-factor matching, with explicit aircraft and vehicle types taking priority over player and living fallbacks.
