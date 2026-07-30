@@ -1,4 +1,11 @@
-# Fix Tank LOD Part Transforms
+# Snapshot-only Tank Turret and Helicopter Rotor Animation
+
+- Extended distant-vehicle packets with bounded, index-stable tank weapon poses and helicopter rotor phase, per-tick angular change, and folded state.
+- Changed the entity-free snapshot renderer to separate `$body` from animated tank weapons and helicopter rotor blades while preserving external models, embedded named parts, skin overlays, and the monolithic-model fallback.
+- Added per-display weapon interpolation and continuously advanced, smoothly corrected rotor phases so one-second snapshots do not alias fast rotors.
+- Documented that the earlier real-entity LOD change could not affect vehicles which had already left client tracking.
+
+## Fix Tank LOD Part Transforms
 
 - Made the tank far-model pass render all configured dynamic named parts through the same common-part renderers used by the full-detail pass.
 - Preserved the interpolated hull transform as the parent of turret, weapon, recoil, hatch, wheel, track, suspension, and nested weapon-part transforms while retaining per-part matrix isolation and optional-part handling.
