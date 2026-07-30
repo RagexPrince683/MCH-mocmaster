@@ -46,6 +46,18 @@ public class MCH_VehicleItemModelRender implements IItemRenderer {
 
    private static long nextModelBuildTime;
 
+   /** Releases reload-stale GL state. Must only be called on the client thread. */
+   public static void resetForReload() {
+      for(Object value : MODEL_DISPLAY_LISTS.values()) {
+         ((CachedDisplayList)value).delete();
+      }
+      MODEL_DISPLAY_LISTS.clear();
+      MODEL_BUILD_QUEUE.clear();
+      QUEUED_MODELS.clear();
+      activeModelBuild = null;
+      nextModelBuildTime = 0L;
+   }
+
    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
       MCH_BaseVehicleInfo info = getInfo(item);
 

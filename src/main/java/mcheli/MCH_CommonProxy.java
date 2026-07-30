@@ -77,6 +77,8 @@ public class MCH_CommonProxy {
 
    public void reloadHUD() {}
 
+   public void scheduleClientInfoReload() {}
+
    public Entity getClientPlayer() {
       return null;
    }

@@ -87,7 +87,6 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
             this.extraBoundingBox.add(bb);
          }
       }
-      MCH_BaseVehicleInfo.allBaseVehicleInfo.put(name, this);
    }
 
    public String getDirectoryName() {

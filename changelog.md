@@ -281,3 +281,11 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Replaced the timed protection bubble and hidden Iron Curtain immunity with a five-state automatic hard-kill APS.
 - Added native projectile interception, closest-approach prediction, finite ammunition persistence/refill, state/effect packets, HUD values, and `APSInterceptable` weapon overrides.
 - Removed FMUR/Flan's Mod reflection integration and updated Merkava and APS configuration documentation.
+
+## Fix `/mcheli reload` concurrency crash
+
+- Reload manager data into ordered, private snapshots and publish it atomically only after successful parsing.
+- Preserve registered items, runtime item IDs, and reusable vehicle/throwable models across matching definitions.
+- Schedule client reload, model, HUD, sound, renderer, and OpenGL cache work on the Minecraft client thread.
+- Clear stale vehicle item display lists and pending model builds during the client reload.
+- Rebuild the shared vehicle registry from current manager snapshots without exposing partially loaded data.

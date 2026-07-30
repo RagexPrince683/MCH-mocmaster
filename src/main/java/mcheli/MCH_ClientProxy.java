@@ -34,6 +34,7 @@ import mcheli.helicopter.MCH_HeliInfoManager;
 import mcheli.helicopter.MCH_RenderHeli;
 import mcheli.hud.MCH_HudManager;
 import mcheli.lweapon.MCH_ItemLightWeaponRender;
+import mcheli.item.MCH_ItemInfoManager;
 import mcheli.lod.MCH_VehicleLODManager;
 import mcheli.network.packets.PacketVehicleLODSnapshot;
 import mcheli.multiplay.MCH_MultiplayClient;
@@ -156,6 +157,25 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       W_MinecraftForgeClient.registerItemRenderer(W_Item.getItemFromBlock(MCH_MOD.blockDraftingTable), new MCH_DraftingTableItemRender());
    }
 
+
+   public void scheduleClientInfoReload() {
+      Minecraft.getMinecraft().func_152344_a(new Runnable() {
+         public void run() {
+            MCH_HeliInfoManager.getInstance().reload();
+            MCP_PlaneInfoManager.getInstance().reload();
+            MCH_ShipInfoManager.getInstance().reload();
+            MCH_TankInfoManager.getInstance().reload();
+            MCH_TurretInfoManager.getInstance().reload();
+            MCH_WeaponInfoManager.reload();
+            MCH_ItemInfoManager.reload();
+            MCH_ThrowableInfoManager.reload();
+            MCH_VehicleItemModelRender.resetForReload();
+            registerModels();
+            reloadHUD();
+            MCH_SoundsJson.update("assets/mcheli/");
+         }
+      });
+   }
 
    public void registerModels() {
       MCH_ModelManager.setForceReloadMode(true);

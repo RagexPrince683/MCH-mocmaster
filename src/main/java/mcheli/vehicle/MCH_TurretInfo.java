@@ -76,7 +76,6 @@ public class MCH_TurretInfo extends MCH_BaseVehicleInfo {
             }
          }
       }
-      MCH_BaseVehicleInfo.allBaseVehicleInfo.put(name, this);
    }
 
    public String getDirectoryName() {
