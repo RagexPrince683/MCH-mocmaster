@@ -167,6 +167,7 @@ public class MCH_MOD {
    public void PreInit(FMLPreInitializationEvent evt) {
 
       VER = Loader.instance().activeModContainer().getVersion();
+      config = proxy.loadConfig("config/mcheli.cfg");
       MCH_Lib.init();
       MCH_Lib.Log("MC Ver:1.7.10 MOD Ver:" + VER + "", new Object[0]);
       MCH_Lib.Log("Start load...", new Object[0]);
@@ -260,7 +261,6 @@ public class MCH_MOD {
       creativeTabsTank = new MCH_CreativeTabs("MCHeliO Tanks");
       creativeTabsVehicle = new MCH_CreativeTabs("MCHeliO Vehicles");
       W_ItemList.init();
-      config = proxy.loadConfig("config/mcheli.cfg");
        proxy.loadHUD("assets/" + "mcheli" + "/");
       MCH_WeaponInfoManager.load("assets/" + "mcheli" + "/");
       MCH_HeliInfoManager.getInstance().load("assets/" + "mcheli" + "/", "helicopters");

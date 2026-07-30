@@ -186,7 +186,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             label85: {
                if(super.mc.isSingleplayer()) {
                   MCH_Config var10000 = MCH_MOD.config;
-                  if(!MCH_Config.DebugLog) {
+                  if(!MCH_Config.EnableMCHLibDebugLog.prmBool) {
                      break label85;
                   }
                }

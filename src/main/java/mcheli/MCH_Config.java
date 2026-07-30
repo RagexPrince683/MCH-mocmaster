@@ -28,7 +28,8 @@ public class MCH_Config {
 
    public static String mcPath;
    public static String configFilePath;
-   public static boolean DebugLog;
+   public static MCH_ConfigPrm EnableMCHLibLog;
+   public static MCH_ConfigPrm EnableMCHLibDebugLog;
    public static String configVer;
    public static int hitMarkColorRGB;
    public static float hitMarkColorAlpha;
@@ -332,7 +333,6 @@ public class MCH_Config {
    public MCH_Config(String minecraftPath, String cfgFile) {
       mcPath = minecraftPath;
       configFilePath = mcPath + cfgFile;
-      DebugLog = false;
       configVer = "0.0.0";
       bulletBreakableBlocks = new ArrayList();
       carBreakableBlocks = new ArrayList();
@@ -418,6 +418,10 @@ public class MCH_Config {
       CommandPermissionList = new ArrayList();
       IgnoreBulletHitList = new ArrayList();
       IgnoreBulletHitItem = new MCH_ConfigPrm("IgnoreBulletHit", "");
+      EnableMCHLibLog = new MCH_ConfigPrm("EnableMCHLibLog", true);
+      EnableMCHLibLog.desc = ";Write normal MCH_Lib.Log messages to the Minecraft log.";
+      EnableMCHLibDebugLog = new MCH_ConfigPrm("EnableMCHLibDebugLog", false);
+      EnableMCHLibDebugLog.desc = ";Write verbose MCH_Lib.DbgLog messages to the Minecraft log.";
       TestMode = new MCH_ConfigPrm("TestMode", false);
       EnableCommand = new MCH_ConfigPrm("EnableCommand", true);
       PlaceableOnSpongeOnly = new MCH_ConfigPrm("PlaceableOnSpongeOnly", false);
@@ -706,6 +710,8 @@ public class MCH_Config {
       BlockID_DraftingTableOFF = new MCH_ConfigPrm("BlockID_DraftingTable", 3450);
       BlockID_DraftingTableON = new MCH_ConfigPrm("BlockID_DraftingTableON", 3451);
       General = new MCH_ConfigPrm[]{
+              EnableMCHLibLog,
+              EnableMCHLibDebugLog,
               TestMode,
               EnableCommand,
               null,
@@ -1199,7 +1205,7 @@ public class MCH_Config {
       if(file.open(configFilePath)) {
          for(String str = file.readLine(); str != null; str = file.readLine()) {
             if(str.trim().equalsIgnoreCase("McHeliOutputDebugLog")) {
-               DebugLog = true;
+               EnableMCHLibDebugLog.prmBool = true;
             } else {
                this.readConfigData(str);
             }
@@ -1289,11 +1295,6 @@ public class MCH_Config {
       pw.println("MOD_Version = " + MCH_MOD.VER);
       pw.println("MOD_MC_Version = 1.7.10");
       pw.println();
-      if(DebugLog) {
-         pw.println("McHeliOutputDebugLog");
-         pw.println();
-      }
-
       MCH_ConfigPrm[] arr$ = General;
       int len$ = arr$.length;
 

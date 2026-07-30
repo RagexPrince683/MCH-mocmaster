@@ -71,8 +71,9 @@ Be careful: matching is a case-insensitive substring search against full Java cl
 
 ## Logging and diagnostics
 
-- Leave the legacy `McHeliOutputDebugLog` marker disabled for normal servers. Startup milestones, system checks, warnings, and errors still log without it.
-- Enable `McHeliOutputDebugLog` only while diagnosing noisy internals such as per-item registration, ore dictionary confirmations, language-entry registration, reload traces, and similar spam-level debug output.
+- `EnableMCHLibLog = true` writes normal `MCH_Lib.Log` startup milestones, system checks, warnings, and errors to the Minecraft/Forge log. Set it to `false` to suppress only those MCHeli messages.
+- `EnableMCHLibDebugLog = false` controls verbose `MCH_Lib.DbgLog` output. Enable it only while diagnosing noisy internals such as per-item registration, ore dictionary confirmations, language-entry registration, reload traces, and similar spam-level debug output.
+- The old standalone `McHeliOutputDebugLog` marker remains accepted for compatibility and enables `EnableMCHLibDebugLog`. The next config rewrite removes the marker and writes `EnableMCHLibDebugLog = true` instead.
 
 ## Performance notes
 
