@@ -1,3 +1,9 @@
+## Multiplayer Vehicle Yaw and Running-Gear Synchronization
+
+- Removed the tank's extra per-packet interpolation delay and made remote hull yaw corrections follow the shortest wrapped angle over the server-provided interpolation window.
+- Derived wheel, track-roller, and crawler-track motion from synchronized vehicle displacement and wrapped hull rotation instead of delayed client control flags and throttle.
+- Corrected crawler-track render interpolation to use the frame partial tick and the shortest path across phase wrap boundaries.
+
 ## Configurable MCH_Lib Logging
 
 - Added independent normal and verbose MCHLib logging controls backed by standard config properties.
