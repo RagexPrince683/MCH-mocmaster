@@ -213,8 +213,6 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
             this.rotorList.add(e);
          }
       }
-
-      MCH_BaseVehicleInfo.allBaseVehicleInfo.put(name, this);
    }
 
    public String getDirectoryName() {

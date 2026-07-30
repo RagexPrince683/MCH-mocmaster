@@ -227,9 +227,6 @@ public class MCH_Command extends CommandBase {
                    }
                 }
 
-                MCH_MOD.proxy.reloadHUD();
-                MCH_SoundsJson.update("assets/mcheli/");
-
                 // Notify clients to also reload (matters on dedicated servers)
                 mcheli.aircraft.MCH_PacketNotifyInfoReloaded.sendToAllClients(2);
 

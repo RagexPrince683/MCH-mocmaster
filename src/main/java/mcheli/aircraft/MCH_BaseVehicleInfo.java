@@ -23,7 +23,18 @@ import java.util.*;
 
 public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
 
-   public static Map<String, MCH_BaseVehicleInfo> allBaseVehicleInfo = new HashMap<>();
+   public static volatile Map<String, MCH_BaseVehicleInfo> allBaseVehicleInfo = new LinkedHashMap<String, MCH_BaseVehicleInfo>();
+
+   /** Atomically rebuilds the cross-family registry from published manager snapshots. */
+   public static void rebuildGlobalRegistry() {
+      LinkedHashMap<String, MCH_BaseVehicleInfo> registry = new LinkedHashMap<String, MCH_BaseVehicleInfo>();
+      registry.putAll(mcheli.helicopter.MCH_HeliInfoManager.map);
+      registry.putAll(mcheli.plane.MCP_PlaneInfoManager.map);
+      registry.putAll(mcheli.ship.MCH_ShipInfoManager.map);
+      registry.putAll(mcheli.tank.MCH_TankInfoManager.map);
+      registry.putAll(mcheli.vehicle.MCH_TurretInfoManager.map);
+      allBaseVehicleInfo = registry;
+   }
 
    public final String name;
    public String displayName;

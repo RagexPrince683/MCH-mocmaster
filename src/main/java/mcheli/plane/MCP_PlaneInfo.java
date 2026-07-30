@@ -425,7 +425,6 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
             this.overspeedDamageRate = this.parseNewFlightFloat("OverspeedDamageRate", data, 0.0F, 1.0F);
          }
       }
-      MCH_BaseVehicleInfo.allBaseVehicleInfo.put(name, this);
    }
 
    public String getDirectoryName() {

@@ -402,16 +402,7 @@ public class MCH_BaseVehiclePacketHandler {
 
       // Client-side: full info reload (sent by server after /mcheli reload)
       if(player.worldObj.isRemote && pc.type == 2) {
-         mcheli.helicopter.MCH_HeliInfoManager.getInstance().reload();
-         mcheli.plane.MCP_PlaneInfoManager.getInstance().reload();
-         mcheli.ship.MCH_ShipInfoManager.getInstance().reload();
-         mcheli.tank.MCH_TankInfoManager.getInstance().reload();
-         mcheli.vehicle.MCH_TurretInfoManager.getInstance().reload();
-         mcheli.weapon.MCH_WeaponInfoManager.reload();
-         mcheli.item.MCH_ItemInfoManager.reload();
-         mcheli.throwable.MCH_ThrowableInfoManager.reload();
-         mcheli.MCH_MOD.proxy.reloadHUD();
-         mcheli.MCH_SoundsJson.update("assets/mcheli/");
+         MCH_MOD.proxy.scheduleClientInfoReload();
          return;
       }
 

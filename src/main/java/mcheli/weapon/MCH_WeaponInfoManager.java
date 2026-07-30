@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -19,89 +21,64 @@ import net.minecraft.item.ItemStack;
 public class MCH_WeaponInfoManager {
 
    private static MCH_WeaponInfoManager instance = new MCH_WeaponInfoManager();
-   private static HashMap map;
+   private static volatile Map map;
    private static String lastPath;
 
 
    private MCH_WeaponInfoManager() {
-      map = new HashMap();
+      map = new LinkedHashMap();
    }
 
    public static boolean reload() {
-      boolean ret = false;
-
-      try {
-         map.clear();
-         ret = load(lastPath);
-         setRoundItems();
-         MCH_MOD.proxy.registerModels();
-      } catch (Exception var2) {
-         var2.printStackTrace();
-      }
-
-      return ret;
+      return lastPath != null && loadAndPublish(lastPath, true);
    }
 
    public static boolean load(String path) {
       lastPath = path;
+      return loadAndPublish(path, false);
+   }
+
+   private static boolean loadAndPublish(String path, boolean reload) {
+      LinkedHashMap newMap = new LinkedHashMap();
       path = path.replace('\\', '/');
-      String dirPrefix = path + "weapons";
-      List<String> entries = MCH_ResourceHelper.listResources(dirPrefix, ".txt");
-      if(entries != null && entries.size() > 0) {
-         for(int i = 0; i < entries.size(); ++i) {
-            String resourcePath = entries.get(i);
-            BufferedReader br = null;
-            int line = 0;
-
-            try {
-               String e = MCH_ResourceHelper.getEntryName(resourcePath);
-               if(!map.containsKey(e)) {
-                  br = MCH_ResourceHelper.openResource("/" + resourcePath);
-                  if (br == null) continue;
-                  MCH_WeaponInfo info = new MCH_WeaponInfo(e);
-
-                  String str;
-                  while((str = br.readLine()) != null) {
-                     ++line;
-                     str = str.trim();
-                     int eqIdx = str.indexOf(61);
-                     if(eqIdx >= 0 && str.length() > eqIdx + 1) {
-                        info.loadItemData(str.substring(0, eqIdx).trim().toLowerCase(), str.substring(eqIdx + 1).trim());
-                     }
-                  }
-
-                  info.checkData();
-                  map.put(e, info);
+      List<String> entries = MCH_ResourceHelper.listResources(path + "weapons", ".txt");
+      if(entries == null || entries.isEmpty()) return false;
+      for(int i = 0; i < entries.size(); ++i) {
+         String resourcePath = entries.get(i);
+         BufferedReader br = null;
+         int line = 0;
+         try {
+            String name = MCH_ResourceHelper.getEntryName(resourcePath);
+            if(!newMap.containsKey(name)) {
+               br = MCH_ResourceHelper.openResource("/" + resourcePath);
+               if(br == null) continue;
+               MCH_WeaponInfo info = new MCH_WeaponInfo(name);
+               String str;
+               while((str = br.readLine()) != null) {
+                  ++line; str = str.trim(); int eqIdx = str.indexOf(61);
+                  if(eqIdx >= 0 && str.length() > eqIdx + 1) info.loadItemData(str.substring(0, eqIdx).trim().toLowerCase(), str.substring(eqIdx + 1).trim());
                }
-            } catch (IOException var22) {
-               if(line > 0) {
-                  MCH_Lib.Log("### Load failed %s : line=%d", new Object[]{resourcePath, Integer.valueOf(line)});
-               } else {
-                  MCH_Lib.Log("### Load failed %s", new Object[]{resourcePath});
-               }
-
-               var22.printStackTrace();
-            } finally {
-               try {
-                  if(br != null) {
-                     br.close();
-                  }
-               } catch (Exception var21) {
-                  ;
-               }
-
+               info.checkData();
+               newMap.put(name, info);
             }
-         }
-
-         MCH_Lib.Log("[mcheli] Read %d weapons", new Object[]{Integer.valueOf(map.size())});
-         return map.size() > 0;
-      } else {
-         return false;
+         } catch(Exception e) {
+            MCH_Lib.Log("### Reload failed %s : line=%d; keeping previous weapon data", new Object[]{resourcePath, Integer.valueOf(line)});
+            e.printStackTrace(); return false;
+         } finally { try { if(br != null) br.close(); } catch(IOException ignored) {} }
       }
+      if(newMap.isEmpty()) return false;
+      setRoundItems(newMap);
+      map = newMap;
+      MCH_Lib.Log("[mcheli] Read %d weapons", new Object[]{Integer.valueOf(newMap.size())});
+      return true;
    }
 
    public static void setRoundItems() {
-      Iterator i$ = map.values().iterator();
+      setRoundItems(map);
+   }
+
+   private static void setRoundItems(Map snapshot) {
+      Iterator i$ = snapshot.values().iterator();
 
       while(i$.hasNext()) {
          MCH_WeaponInfo w = (MCH_WeaponInfo)i$.next();
