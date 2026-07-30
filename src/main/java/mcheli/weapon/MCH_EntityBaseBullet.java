@@ -1423,8 +1423,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 DamageSource ds = DamageSource.causeThrownDamage(this, this.shootingEntity);
                 if (this.power == 1) {
                     ds = new MCH_DamageSource("bullet", this);
-
-                    this.power *= this.weaponInfo.damageFactor.getDamageFactor(EntityPlayer.class);
                 }
                 MCH_Config var10000 = MCH_MOD.config;
                 float damage = MCH_Config.applyDamageVsEntity(entity, ds, (float) this.getPower() * damageFactor);
@@ -1440,8 +1438,6 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 DamageSource ds = DamageSource.causeThrownDamage(this, this.shootingEntity);
                 if (this.power == 1) {
                     ds = new MCH_DamageSource("bullet", this);
-
-                    this.power *= this.weaponInfo.damageFactor.getDamageFactor(EntityPlayer.class);
                 }
                 //todone: add piercing compat here
 

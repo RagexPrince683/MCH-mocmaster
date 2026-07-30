@@ -19,6 +19,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
 
@@ -1150,10 +1151,10 @@ public class MCH_Config {
                list = DamageVsMCHeliTank.list;
             } else if(target instanceof MCH_EntityTurret) {
                list = DamageVsMCHeliVehicle.list;
+            } else if(target instanceof EntityPlayer || target instanceof EntityVillager) {
+               list = DamageVsPlayer.list;
             } else if(targetName.indexOf("mcheli.") > 0) {
                list = DamageVsMCHeliOther.list;
-            } else if(target instanceof EntityPlayer) {
-               list = DamageVsPlayer.list;
             } else if(target instanceof EntityLivingBase) {
                list = DamageVsLiving.list;
             } else {
