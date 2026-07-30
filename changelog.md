@@ -1,3 +1,9 @@
+## Creative Instant Vehicle Placement
+
+- Made all normal non-UAV vehicle items place instantly for Creative-mode players after the existing target, world-age, sponge-only, entity, and collision checks.
+- Preserved the configured hold-to-deploy timer for Survival-mode players and the existing instant-placement behavior of vehicle types such as turrets.
+- Updated the player and configuration documentation to distinguish Creative and Survival placement behavior.
+
 ## Fix local vehicle appearing on RWR
 
 - Excluded the locally controlled aircraft from RWR contacts by synchronized entity ID before applying contact type or display-distance filters.

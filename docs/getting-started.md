@@ -58,7 +58,7 @@ Set `ItemRecipe_DraftingTable` in `mcheli.cfg` to change or disable the recipe a
 
 ## 5. Place and use vehicles
 
-- Vehicle placement is controlled by item definitions and global settings.
+- Creative-mode players place non-UAV vehicles instantly after the normal placement checks. Survival-mode players retain the configured placement delay, except for vehicle types such as turrets whose item definitions already opt into instant placement.
 - UAV vehicle items are not placed with the normal hold-to-deploy flow. Large UAVs must be placed and controlled from a UAV Station; small UAVs use a UAV Station or Portable UAV Controller when supported.
 - If `PlaceableOnSpongeOnly = true`, vehicle placement is restricted to sponge blocks.
 - Global speed scalars are controlled by `AllHeliSpeed`, `AllPlaneSpeed`, `AllShipSpeed`, and `AllTankSpeed`.
