@@ -4,6 +4,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
+import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.tank.MCH_EntityTank;
@@ -21,6 +22,14 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
 
    public MCH_RenderTank() {
       super.shadowSize = 2.0F;
+   }
+
+   @Override
+   protected void renderAircraftLODParts(MCH_EntityBaseVehicle tank, MCH_BaseVehicleInfo info, double posX, double posY, double posZ, float tickTime) {
+      // renderBaseVehicle leaves the interpolated hull transform active here.  Reuse
+      // the full-detail common-part pass so every configured tank part gets exactly
+      // the same turret, weapon, recoil, hatch, wheel, track, and child transforms.
+      this.renderCommonPart(tank, info, posX, posY, posZ, tickTime);
    }
 
    public void renderBaseVehicle(MCH_EntityBaseVehicle entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
