@@ -15,6 +15,7 @@ import mcheli.MCH_TextureManagerDummy;
 import mcheli.MCH_ViewEntityDummy;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.aircraft.MCH_BaseVehiclePacketHandler;
 import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.lweapon.MCH_ClientLightWeaponTickHandler;
 import mcheli.multiplay.MCH_GuiTargetMarker;
@@ -171,13 +172,20 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
 
    public void worldEventUnload(Unload event) {
       MCH_ViewEntityDummy.onUnloadWorld();
+      MCH_MOD.proxy.clearVehicleLODSnapshots();
+      MCH_BaseVehiclePacketHandler.clearPendingMounts();
    }
 
    public void entityJoinWorldEvent(EntityJoinWorldEvent event) {
+      if(event.entity instanceof MCH_EntityBaseVehicle) {
+         ((MCH_EntityBaseVehicle)event.entity).isRenderingLOD = false;
+      }
       if(event.entity.isEntityEqual(MCH_Lib.getClientPlayer())) {
          MCH_Lib.DbgLog(true, "MCH_ClientEventHook.entityJoinWorldEvent : " + event.entity, new Object[0]);
          MCH_ItemRangeFinder.mode = Minecraft.getMinecraft().isSingleplayer()?1:0;
          MCH_ParticlesUtil.clearMarkPoint();
+         MCH_MOD.proxy.clearVehicleLODSnapshots();
+         MCH_BaseVehiclePacketHandler.clearPendingMounts();
       }
 
    }

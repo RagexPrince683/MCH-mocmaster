@@ -118,10 +118,23 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          return false;
       }
 
+      Minecraft mc = Minecraft.getMinecraft();
+      Entity camera = mc.renderViewEntity;
+      if(camera == null || camera.isDead || camera.worldObj != ac.worldObj || mc.theWorld != ac.worldObj) {
+         ac.isRenderingLOD = false;
+         return false;
+      }
+
+      // Do not use a player (or the renderer coordinates derived from one) cached
+      // before respawn.  The render-view entity is replaceable and is authoritative
+      // for the current frame's distance.
+      double dx = ac.posX - camera.posX;
+      double dy = ac.posY - camera.posY;
+      double dz = ac.posZ - camera.posZ;
       double hysteresis = 16.0D;
       double exitDistance = Math.max(0.0D, startDistance - hysteresis);
       double threshold = ac.isRenderingLOD?exitDistance:startDistance;
-      boolean shouldRenderLOD = posX * posX + posY * posY + posZ * posZ >= threshold * threshold;
+      boolean shouldRenderLOD = dx * dx + dy * dy + dz * dz >= threshold * threshold;
       ac.isRenderingLOD = shouldRenderLOD;
       return shouldRenderLOD;
    }

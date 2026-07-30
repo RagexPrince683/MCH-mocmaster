@@ -5864,6 +5864,15 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             player.playerNetServerHandler.sendPacket(new S1BPacketEntityAttach(0, seat.riddenByEntity, seat));
          }
       }
+      // Vanilla attach packets are discarded when their target has not spawned on
+      // the client yet.  Give the affected normal-vehicle rider a bounded, ID-only
+      // correction which can wait for aircraft/seat spawn ordering to settle.
+      if(!this.isUAV() && !this.isNewUAV()) {
+         int riderSeat = this.getSeatIdByEntity(player);
+         if(riderSeat >= 0) {
+            MCH_PacketNotifyOnMountEntity.sendToRider(this, player, riderSeat);
+         }
+      }
    }
 
    private void recreateMissingSeatsInLoadedChunks() {
@@ -7350,6 +7359,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          if(!this.worldObj.isRemote) {
             this.clearPlacementMotionLock();
             player.mountEntity(this);
+            if(player.ridingEntity == this) {
+               MCH_PacketNotifyOnMountEntity.sendToRider(this, player, 0);
+            }
             if(player.ridingEntity == this && this.vehicleOwnerUUID == null) {
                this.vehicleOwnerUUID = player.getUniqueID();
             }

@@ -866,6 +866,13 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public void onPlayerTickPre(EntityPlayer player) {
+      if(player == super.mc.thePlayer) {
+         MCH_BaseVehiclePacketHandler.tickPendingMounts(player);
+         if(player.isDead) {
+            MCH_MOD.proxy.clearVehicleLODSnapshots();
+            MCH_BaseVehiclePacketHandler.clearPendingMounts();
+         }
+      }
       if(player == super.mc.thePlayer && this.isHoldingMCHeliDismount()) {
          KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(), false);
          ((EntityClientPlayerMP)player).movementInput.sneak = false;
