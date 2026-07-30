@@ -108,7 +108,7 @@ For development asset testing, the build/run setup expects assets in `build/run/
 
 1. Open the MCHeli creative tabs (`MCHeliO Item`, `MCHeliO Helicopters`, `MCHeliO Planes`, `MCHeliO Ships`, `MCHeliO Tanks`, `MCHeliO Vehicles`, and `MCHeliO Recipe Items`).
 2. Place or craft a **Drafting Table** to access recipes when recipes are enabled.
-3. Use vehicle item icons to place vehicles; those icons render the loaded 3D vehicle model in inventories, held views, and dropped item form. Turret items place instantly after the normal placement checks, while other vehicles use the hold-to-deploy flow. If `PlaceableOnSpongeOnly` is enabled, vehicles must be placed on sponge blocks.
+3. Use vehicle item icons to place vehicles; those icons render the loaded 3D vehicle model in inventories, held views, and dropped item form. Creative-mode players place all non-UAV vehicles instantly after the normal placement checks. In Survival, turret items remain instant while other vehicles use the configured hold-to-deploy delay. If `PlaceableOnSpongeOnly` is enabled, vehicles must be placed on sponge blocks.
 4. Enter vehicles, use the configured movement/weapon keys, and refuel/repair according to the content pack's vehicle definitions.
 5. Server operators can use `/mcheli list` to discover available administrative subcommands.
 

@@ -63,7 +63,7 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `delayrangeloader` | `5` | Advanced loader timing option. Exact gameplay effect needs code-level tracing. |
 | `bombletloader` | `10` | Advanced bomblet loader option. Exact gameplay effect needs code-level tracing. |
 | `wrenchdropitem` | `false` | Wrench drop-item behavior toggle. |
-| `placetimer` | `60` | Placement timer value. |
+| `placetimer` | `60` | Survival-mode vehicle hold-to-deploy timer; Creative placement is instant. |
 | `RangeFinderSpotDist` | `400` | Rangefinder spot distance. |
 | `RangeFinderSpotTime` | `15` | Rangefinder spot duration. |
 | `RangeFinderConsume` | `true` | Rangefinder consumes required item/ammo when spotting. |

@@ -253,7 +253,7 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
             return par1ItemStack;
          }
 
-         if(this.shouldPlaceInstantly()) {
+         if(player.capabilities.isCreativeMode || this.shouldPlaceInstantly()) {
             if(par1ItemStack.stackTagCompound != null) {
                clearDeployTags(par1ItemStack.stackTagCompound);
             }
