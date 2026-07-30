@@ -162,6 +162,12 @@ public final class MCH_VehicleLODManager {
                 if (MCH_RenderBaseVehicle.hasSeparableBody(info.model)) {
                     MCH_RenderBaseVehicle.renderBody(info.model);
                     if (display.category == 3) {
+                        MCH_RenderBaseVehicle.renderTrackRoller(info, display.trackRollerRotation,
+                            display.previousTrackRollerRotation, interpolation);
+                        MCH_RenderBaseVehicle.renderCrawlerTrack(info, display.crawlerTrackPhase,
+                            display.previousCrawlerTrackPhase, display.crawlerTrackDirection, interpolation);
+                        MCH_RenderBaseVehicle.renderWheel(info, display.wheelRotation, display.previousWheelRotation,
+                            display.wheelYaw, display.previousWheelYaw, interpolation);
                         int weaponCount = Math.min(info.partWeapon.size(), display.weaponPoses.length);
                         for (int i = 0; i < weaponCount; ++i) {
                             MCH_RenderBaseVehicle.renderSnapshotWeapon(info,
@@ -254,6 +260,16 @@ public final class MCH_VehicleLODManager {
         private float roll;
         private float scale;
         private int packedLight;
+        private final float[] trackRollerRotation = new float[2];
+        private final float[] previousTrackRollerRotation = new float[2];
+        private final float[] crawlerTrackPhase = new float[2];
+        private final float[] previousCrawlerTrackPhase = new float[2];
+        private final float[] crawlerTrackDirection = new float[2];
+        private float wheelRotation;
+        private float previousWheelRotation;
+        private float wheelYaw;
+        private float previousWheelYaw;
+        private boolean runningGearInitialized;
         private PacketVehicleLODSnapshot.WeaponPose[] weaponPoses = new PacketVehicleLODSnapshot.WeaponPose[0];
         private float rotorPhase;
         private float rotorAngularChange;
@@ -301,6 +317,36 @@ public final class MCH_VehicleLODManager {
                 this.weaponPoses = new PacketVehicleLODSnapshot.WeaponPose[0];
                 this.rotorPhaseTimeMs = 0L;
                 this.rotorAngularChange = 0.0F;
+                this.runningGearInitialized = false;
+            }
+            if (entry.category == 3) {
+                for (int side = 0; side < 2; ++side) {
+                    if (this.runningGearInitialized) {
+                        this.previousTrackRollerRotation[side] = interpolateAngle(this.previousTrackRollerRotation[side],
+                            this.trackRollerRotation[side], partial);
+                        this.previousCrawlerTrackPhase[side] = interpolatePhase(this.previousCrawlerTrackPhase[side],
+                            this.crawlerTrackPhase[side], this.crawlerTrackDirection[side], partial);
+                    } else {
+                        this.previousTrackRollerRotation[side] = entry.trackRollerRotation[side];
+                        this.previousCrawlerTrackPhase[side] = entry.crawlerTrackPhase[side];
+                    }
+                    this.trackRollerRotation[side] = entry.trackRollerRotation[side];
+                    this.crawlerTrackPhase[side] = entry.crawlerTrackPhase[side];
+                    this.crawlerTrackDirection[side] = phaseDelta(entry.previousCrawlerTrackPhase[side],
+                        entry.crawlerTrackPhase[side], 0.0F);
+                }
+                if (this.runningGearInitialized) {
+                    this.previousWheelRotation = interpolateAngle(this.previousWheelRotation, this.wheelRotation, partial);
+                    this.previousWheelYaw = interpolateAngle(this.previousWheelYaw, this.wheelYaw, partial);
+                } else {
+                    this.previousWheelRotation = entry.wheelRotation;
+                    this.previousWheelYaw = entry.wheelYaw;
+                }
+                this.wheelRotation = entry.wheelRotation;
+                this.wheelYaw = entry.wheelYaw;
+                this.runningGearInitialized = true;
+            } else {
+                this.runningGearInitialized = false;
             }
             PacketVehicleLODSnapshot.WeaponPose[] incoming = entry.weaponPoses == null
                 ? new PacketVehicleLODSnapshot.WeaponPose[0] : entry.weaponPoses;
@@ -354,6 +400,22 @@ public final class MCH_VehicleLODManager {
             if (snapshotAge > 1250L) elapsed = Math.max(0L, 1250L - (this.rotorPhaseTimeMs - this.lastUpdateMs));
             if (elapsed < 0L) elapsed = 0L;
             return this.rotorPhase + this.rotorAngularChange * (float)elapsed / 50.0F;
+        }
+
+        private static float interpolatePhase(float previous, float current, float direction, float partial) {
+            float value = previous + phaseDelta(previous, current, direction) * partial;
+            value -= (float)Math.floor(value);
+            return value;
+        }
+
+        private static float phaseDelta(float previous, float current, float direction) {
+            float delta = current - previous;
+            while (delta > 0.5F) delta -= 1.0F;
+            while (delta < -0.5F) delta += 1.0F;
+            if (Math.abs(Math.abs(delta) - 0.5F) < 0.0001F && direction != 0.0F) {
+                delta = direction > 0.0F ? 0.5F : -0.5F;
+            }
+            return delta;
         }
     }
 }

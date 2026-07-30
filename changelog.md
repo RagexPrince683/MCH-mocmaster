@@ -1,3 +1,9 @@
+# Fix Tank LOD Running-Gear Rendering
+
+- Restored track rollers, crawler tracks, and wheels in both tracked-entity and entity-free snapshot tank LOD passes without restoring the monolithic common-part renderer.
+- Added fixed two-side running-gear snapshot state and wrap-aware interpolation for independent forward, reverse, and turning track movement.
+- Shared the entity and snapshot OpenGL transforms while preserving tank weapon poses, helicopter rotors, skin overlays, and legacy monolithic model fallback behavior.
+
 # Snapshot-only Tank Turret and Helicopter Rotor Animation
 
 - Extended distant-vehicle packets with bounded, index-stable tank weapon poses and helicopter rotor phase, per-tick angular change, and folded state.

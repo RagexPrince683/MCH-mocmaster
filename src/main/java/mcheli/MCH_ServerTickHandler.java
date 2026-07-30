@@ -94,6 +94,18 @@ public class MCH_ServerTickHandler {
          entry.pitch = vehicle.getRotPitch();
          entry.roll = vehicle.getRotRoll();
          entry.scale = 1.0F;
+         if(entry.category == 3) {
+            for(int side = 0; side < 2; ++side) {
+               entry.trackRollerRotation[side] = vehicle.rotTrackRoller[side];
+               entry.previousTrackRollerRotation[side] = vehicle.prevRotTrackRoller[side];
+               entry.crawlerTrackPhase[side] = vehicle.rotCrawlerTrack[side];
+               entry.previousCrawlerTrackPhase[side] = vehicle.prevRotCrawlerTrack[side];
+            }
+            entry.wheelRotation = vehicle.rotWheel;
+            entry.previousWheelRotation = vehicle.prevRotWheel;
+            entry.wheelYaw = vehicle.rotYawWheel;
+            entry.previousWheelYaw = vehicle.prevRotYawWheel;
+         }
          entry.weaponPoses = collectWeaponPoses(vehicle);
          if(vehicle instanceof MCH_EntityHeli) {
             MCH_EntityHeli heli = (MCH_EntityHeli)vehicle;
