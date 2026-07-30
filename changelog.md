@@ -1,3 +1,9 @@
+## Global Artillery Range Modifier
+
+- Added the reloadable, minimum-clamped `ArtilleryRangeModifier` global setting and the opt-in `UseGlobalArtilleryRangeModifier` weapon text key.
+- Kept existing weapons unchanged by default while using one effective launch acceleration for projectile spawning, high-speed projectile stepping, mortar distance output, and client ballistic prediction.
+- Documented that mortar-distance display is independent of modifier eligibility and that vehicles do not receive a separate artillery modifier.
+
 ## Creative Instant Vehicle Placement
 
 - Made all normal non-UAV vehicle items place instantly for Creative-mode players after the existing target, world-age, sponge-only, entity, and collision checks.

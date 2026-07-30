@@ -26,7 +26,7 @@ public class MCH_WeaponMarkerRocket extends MCH_WeaponBase {
       if(!super.worldObj.isRemote) {
          this.playSound(prm.entity);
          Vec3 v = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -prm.rotYaw, -prm.rotPitch, -prm.rotRoll);
-         MCH_EntityMarkerRocket e = new MCH_EntityMarkerRocket(super.worldObj, prm.posX, prm.posY, prm.posZ, v.xCoord, v.yCoord, v.zCoord, prm.rotYaw, prm.rotPitch, (double)super.acceleration);
+         MCH_EntityMarkerRocket e = new MCH_EntityMarkerRocket(super.worldObj, prm.posX, prm.posY, prm.posZ, v.xCoord, v.yCoord, v.zCoord, prm.rotYaw, prm.rotPitch, super.getEffectiveLaunchAcceleration());
          e.setName(super.name);
          e.setParameterFromWeapon(this, prm.entity, prm.user);
          e.setMarkerStatus(1);

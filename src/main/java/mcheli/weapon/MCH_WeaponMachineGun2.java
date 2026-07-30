@@ -30,7 +30,7 @@ public class MCH_WeaponMachineGun2 extends MCH_WeaponBase {
    public boolean shot(MCH_WeaponParam prm) {
       if(!super.worldObj.isRemote) {
          Vec3 v = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -prm.rotYaw, -prm.rotPitch, -prm.rotRoll);
-         MCH_EntityBullet e = new MCH_EntityBullet(super.worldObj, prm.posX, prm.posY, prm.posZ, v.xCoord, v.yCoord, v.zCoord, prm.rotYaw, prm.rotPitch, (double)super.acceleration);
+         MCH_EntityBullet e = new MCH_EntityBullet(super.worldObj, prm.posX, prm.posY, prm.posZ, v.xCoord, v.yCoord, v.zCoord, prm.rotYaw, prm.rotPitch, super.getEffectiveLaunchAcceleration());
          e.setName(super.name);
          e.setParameterFromWeapon(this, prm.entity, prm.user);
          if(this.getInfo().modeNum < 2) {

@@ -113,6 +113,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm Collision_EntityDamage;
    public static MCH_ConfigPrm Collision_EntityTankDamage;
    public static MCH_ConfigPrm LWeaponAutoFire;
+   public static MCH_ConfigPrm ArtilleryRangeModifier;
    public static MCH_ConfigPrm EnableHandheld;
    public static MCH_ConfigPrm DismountAll;
    public static MCH_ConfigPrm MountMinecartHeli;
@@ -435,6 +436,8 @@ public class MCH_Config {
       Collision_EntityDamage = new MCH_ConfigPrm("Collision_EntityDamage", true);
       Collision_EntityTankDamage = new MCH_ConfigPrm("Collision_EntityTankDamage", false);
       LWeaponAutoFire = new MCH_ConfigPrm("LWeaponAutoFire", false);
+      ArtilleryRangeModifier = new MCH_ConfigPrm("ArtilleryRangeModifier", 1.0D);
+      ArtilleryRangeModifier.desc = ";Multiplies launch speed for weapon text files that enable UseGlobalArtilleryRangeModifier. 1.0 keeps the original speed.";
       EnableHandheld = new MCH_ConfigPrm("EnableHandheld", true);
       DismountAll = new MCH_ConfigPrm("DismountAll", false);
       MountMinecartHeli = new MCH_ConfigPrm("MountMinecartHeli", true);
@@ -792,6 +795,7 @@ public class MCH_Config {
               AutoThrottleDownShip,
               AutoThrottleDownTank,
               SwitchWeaponWithMouseWheel,
+              ArtilleryRangeModifier,
               LWeaponAutoFire,
               EnableHandheld,
               DisableItemRender,
@@ -1252,6 +1256,9 @@ public class MCH_Config {
                var8 = var7[i$];
                if(var8 != null && var8.compare(s[0]) && var8.isValidVer(configVer)) {
                   var8.setPrm(s[1]);
+                  if(var8 == ArtilleryRangeModifier && ArtilleryRangeModifier.prmDouble < 0.01D) {
+                     ArtilleryRangeModifier.prmDouble = 0.01D;
+                  }
                   return;
                }
             }

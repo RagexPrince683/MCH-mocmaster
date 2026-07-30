@@ -287,7 +287,14 @@ SmokeMaxAge = 500
 ; Maximum duration the smoke is displayed.
 
 DisplayMortarDistance = true
-; Displays the distance to impact for mortars.
+; Controls only the HUD distance-to-impact display. It does not make a weapon
+; eligible for the global artillery range modifier.
+
+UseGlobalArtilleryRangeModifier = true
+; This key belongs in a weapon text file and defaults to false. When true, the
+; configured Acceleration launch speed is multiplied by the global
+; ArtilleryRangeModifier. A global value of 1.0 keeps the original range.
+; DisplayMortarDistance does not control modifier eligibility.
 
 FixCameraPitch = true
 ; Fixes the vertical camera angle to 0.

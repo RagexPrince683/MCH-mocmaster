@@ -92,7 +92,7 @@ public class MCH_WeaponASMissile extends MCH_WeaponBase {
       // If raycast hits a valid block and it is not underwater
       if (!this.worldObj.isRemote) {
          // Creates missile entity and sets parameters
-         MCH_EntityASMissile missile = new MCH_EntityASMissile(this.worldObj, params.posX, params.posY, params.posZ, targetX, targetY, targetZ, yaw, pitch, this.acceleration);
+         MCH_EntityASMissile missile = new MCH_EntityASMissile(this.worldObj, params.posX, params.posY, params.posZ, targetX, targetY, targetZ, yaw, pitch, this.getEffectiveLaunchAcceleration());
          missile.setName(this.name);
          missile.setParameterFromWeapon(this, params.entity, params.user);
 

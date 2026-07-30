@@ -454,7 +454,8 @@ public final class MCP_PlaneCCIPHelper {
       if(info == null) {
          return 0.0D;
       }
-      return Math.min(3.9D, Math.max(0.0D, (double)info.acceleration));
+      double effectiveAcceleration = MCH_WeaponBase.getEffectiveLaunchAcceleration(info, (double)info.acceleration);
+      return Math.min(3.9D, Math.max(0.0D, effectiveAcceleration));
    }
 
    private static double getInitialHorizontalDrag(MCH_WeaponInfo info, double entityAcceleration) {
@@ -539,7 +540,7 @@ public final class MCP_PlaneCCIPHelper {
          Vec3 direction = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -yaw, -pitch, -roll);
          double length = direction.lengthVector();
          if(length > EPSILON) {
-            double constructorSpeed = Math.min(3.9D, (double)weapon.getInfo().acceleration);
+            double constructorSpeed = Math.min(3.9D, weapon.getEffectiveLaunchAcceleration());
             double ejectionScale = constructorSpeed * 0.5D / length;
             k.ejectionVelocity = Vec3.createVectorHelper(direction.xCoord * ejectionScale, direction.yCoord * ejectionScale, direction.zCoord * ejectionScale);
             k.initialVelocity.xCoord += k.ejectionVelocity.xCoord;

@@ -93,6 +93,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public float radius;
     public float angle;
     public boolean displayMortarDistance;
+    public boolean useGlobalArtilleryRangeModifier = false;
     public boolean fixCameraPitch;
     public float cameraRotationSpeedPitch;
     public int target;
@@ -439,6 +440,8 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
             this.flaming = this.toBool(data);
         } else if (item.equalsIgnoreCase("DisplayMortarDistance")) {
             this.displayMortarDistance = this.toBool(data);
+        } else if (item.equalsIgnoreCase("UseGlobalArtilleryRangeModifier")) {
+            this.useGlobalArtilleryRangeModifier = this.toBool(data);
         } else if (item.equalsIgnoreCase("FixCameraPitch")) {
             this.fixCameraPitch = this.toBool(data);
         } else if (item.equalsIgnoreCase("CameraRotationSpeedPitch")) {

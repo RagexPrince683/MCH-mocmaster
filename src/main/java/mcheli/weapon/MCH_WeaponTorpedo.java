@@ -59,11 +59,12 @@ public class MCH_WeaponTorpedo extends MCH_WeaponBase {
          double mx = (double)(-MathHelper.sin(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
          double mz = (double)(MathHelper.cos(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
          double my = (double)(-MathHelper.sin(pitch / 180.0F * 3.1415927F));
-         mx = mx * (double)this.getInfo().acceleration + prm.entity.motionX;
-         my = my * (double)this.getInfo().acceleration + prm.entity.motionY;
-         mz = mz * (double)this.getInfo().acceleration + prm.entity.motionZ;
-         super.acceleration = MathHelper.sqrt_double(mx * mx + my * my + mz * mz);
-         MCH_EntityTorpedo e = new MCH_EntityTorpedo(super.worldObj, prm.posX, prm.posY, prm.posZ, mx, my, mz, yaw, 0.0F, (double)super.acceleration);
+         double launchAcceleration = MCH_WeaponBase.getEffectiveLaunchAcceleration(this.getInfo(), (double)this.getInfo().acceleration);
+         mx = mx * launchAcceleration + prm.entity.motionX;
+         my = my * launchAcceleration + prm.entity.motionY;
+         mz = mz * launchAcceleration + prm.entity.motionZ;
+         double acceleration = MathHelper.sqrt_double(mx * mx + my * my + mz * mz);
+         MCH_EntityTorpedo e = new MCH_EntityTorpedo(super.worldObj, prm.posX, prm.posY, prm.posZ, mx, my, mz, yaw, 0.0F, acceleration);
          e.setName(super.name);
          e.setParameterFromWeapon(this, prm.entity, prm.user);
          e.motionX = mx;
@@ -86,12 +87,13 @@ public class MCH_WeaponTorpedo extends MCH_WeaponBase {
       double mx = (double)(-MathHelper.sin(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
       double mz = (double)(MathHelper.cos(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
       double my = (double)(-MathHelper.sin(pitch / 180.0F * 3.1415927F));
-      mx = mx * (double)this.getInfo().acceleration + prm.entity.motionX;
-      my = my * (double)this.getInfo().acceleration + prm.entity.motionY;
-      mz = mz * (double)this.getInfo().acceleration + prm.entity.motionZ;
-      super.acceleration = MathHelper.sqrt_double(mx * mx + my * my + mz * mz);
+      double launchAcceleration = MCH_WeaponBase.getEffectiveLaunchAcceleration(this.getInfo(), (double)this.getInfo().acceleration);
+      mx = mx * launchAcceleration + prm.entity.motionX;
+      my = my * launchAcceleration + prm.entity.motionY;
+      mz = mz * launchAcceleration + prm.entity.motionZ;
+      double acceleration = MathHelper.sqrt_double(mx * mx + my * my + mz * mz);
 
-      MCH_EntityTorpedo e = new MCH_EntityTorpedo(super.worldObj, prm.posX, prm.posY, prm.posZ, mx, my, mz, yaw, pitch, (double)super.acceleration);
+      MCH_EntityTorpedo e = new MCH_EntityTorpedo(super.worldObj, prm.posX, prm.posY, prm.posZ, mx, my, mz, yaw, pitch, acceleration);
       e.setName(super.name);
       e.setParameterFromWeapon(this, prm.entity, prm.user);
       e.motionX = mx;
