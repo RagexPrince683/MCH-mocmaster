@@ -16,6 +16,7 @@ public class MCH_TurretPacketHandler {
             MCH_PacketTurretPlayerControl pc = new MCH_PacketTurretPlayerControl();
             pc.readData(data);
             MCH_EntityTurret vehicle = (MCH_EntityTurret)player.ridingEntity;
+            mcheli.aircraft.MCH_BaseVehiclePacketHandler.handleVehicleAccessLockToggle(player, vehicle, pc);
             if(pc.isUnmount == 1) {
                vehicle.unmountEntity();
             } else if(pc.isUnmount == 2) {

@@ -53,6 +53,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm KeyAttack;
    public static MCH_ConfigPrm KeyUseWeapon;
    public static MCH_ConfigPrm KeyCurrentWeaponLock;
+   public static MCH_ConfigPrm KeyVehicleLock;
    public static MCH_ConfigPrm KeySwitchWeapon1;
    public static MCH_ConfigPrm KeySwitchWeapon2;
    public static MCH_ConfigPrm KeySwWeaponMode;
@@ -350,6 +351,7 @@ public class MCH_Config {
       KeyAttack = new MCH_ConfigPrm("KeyAttack", -100);
       KeyUseWeapon = new MCH_ConfigPrm("KeyUseWeapon", -99);
       KeyCurrentWeaponLock = new MCH_ConfigPrm("KeyCurrentWeaponLock", -100);
+      KeyVehicleLock = new MCH_ConfigPrm("KeyVehicleLock", 24);
       KeySwitchWeapon1 = new MCH_ConfigPrm("KeySwitchWeapon1", -98);
       KeySwitchWeapon2 = new MCH_ConfigPrm("KeySwitchWeapon2", 34);
       KeySwWeaponMode = new MCH_ConfigPrm("KeySwitchWeaponMode", 45);
@@ -407,7 +409,8 @@ public class MCH_Config {
               KeyAPS,
               KeyUseWeapon,
               KeyAttack,
-              KeyCurrentWeaponLock};
+              KeyCurrentWeaponLock,
+              KeyVehicleLock};
       DamageVs = new ArrayList();
       CommandPermission = new ArrayList();
       CommandPermissionList = new ArrayList();

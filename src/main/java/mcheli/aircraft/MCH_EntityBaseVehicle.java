@@ -105,6 +105,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    private static final int CMN_ID_CNTRL_UP = 9;
    private static final int CMN_ID_CNTRL_DOWN = 10;
    private static final int CMN_ID_CNTRL_BRAKE = 11;
+   /** Bit 12 is the first unused bit in the shared status watcher. */
+   private static final int CMN_ID_VEHICLE_ACCESS_LOCK = 12;
    private static final int DATAWT_ID_USE_WEAPON = 24;
    private static final int DATAWT_ID_FUEL = 25;
    private static final int DATAWT_ID_ROT_ROLL = 26;
@@ -271,6 +273,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    private int delayedUavInventoryTicks;
    private UUID uavPersistentUUID;
    private UUID uavOwnerUUID;
+   private UUID vehicleOwnerUUID;
    private UUID linkedUavStationUUID;
    private int linkedUavStationDimension;
    private double linkedUavStationX;
@@ -762,6 +765,55 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public boolean getCommonStatus(int bit) {
       return (this.commonStatus >> bit & 1) != 0;
+   }
+
+   public UUID getVehicleOwnerUUID() {
+      return this.vehicleOwnerUUID;
+   }
+
+   public void setVehicleOwnerUUID(UUID ownerUUID) {
+      this.vehicleOwnerUUID = ownerUUID;
+   }
+
+   public boolean isVehicleAccessLocked() {
+      return this.getCommonStatus(CMN_ID_VEHICLE_ACCESS_LOCK);
+   }
+
+   public void setVehicleAccessLocked(boolean locked) {
+      this.setCommonStatus(CMN_ID_VEHICLE_ACCESS_LOCK, locked);
+   }
+
+   private boolean isVehicleAccessOperator(EntityPlayer player) {
+      return player != null && (new net.minecraft.command.CommandGameMode()).canCommandSenderUseCommand(player);
+   }
+
+   public boolean canPlayerEnterVehicle(EntityPlayer player) {
+      return player != null && (!this.isVehicleAccessLocked()
+              || player.getUniqueID().equals(this.vehicleOwnerUUID)
+              || this.isVehicleAccessOperator(player));
+   }
+
+   private void notifyVehicleAccessDenied(EntityPlayer player) {
+      if(!super.worldObj.isRemote) {
+         player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "This vehicle is locked."));
+      }
+   }
+
+   public void requestVehicleAccessLockToggle(EntityPlayer player) {
+      if(super.worldObj.isRemote || player == null || this.isDead || this.isDestroyed()
+              || this.getRiddenByEntity() != player || player.ridingEntity != this) {
+         return;
+      }
+      if(this.vehicleOwnerUUID == null) {
+         this.vehicleOwnerUUID = player.getUniqueID();
+      }
+      if(!player.getUniqueID().equals(this.vehicleOwnerUUID) && !this.isVehicleAccessOperator(player)) {
+         player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "You do not own this vehicle."));
+         return;
+      }
+      this.setVehicleAccessLocked(!this.isVehicleAccessLocked());
+      player.addChatMessage(new ChatComponentText(this.isVehicleAccessLocked() ? "Vehicle locked." : "Vehicle unlocked."));
+      W_WorldFunc.DEF_playSoundEffect(super.worldObj, super.posX, super.posY, super.posZ, "random.click", 1.0F, 1.0F);
    }
 
    public void setCommonStatus(int bit, boolean b) {
@@ -1277,6 +1329,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.uavPersistentUUID = this.getUniqueID();
       }
       this.uavOwnerUUID = parseUUID(nbt.getString("MCH_UavOwnerUUID"));
+      this.vehicleOwnerUUID = parseUUID(nbt.getString("MCH_VehicleOwnerUUID"));
+      this.setVehicleAccessLocked(this.vehicleOwnerUUID != null && nbt.getBoolean("MCH_VehicleAccessLocked"));
       this.linkedUavStationUUID = parseUUID(nbt.getString("MCH_UavStationUUID"));
       this.linkedUavStationDimension = nbt.getInteger("MCH_UavStationDim");
       this.linkedUavStationX = nbt.getDouble("MCH_UavStationX");
@@ -1350,6 +1404,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
       nbt.setString("MCH_UavPersistentUUID", persistentId == null ? "" : persistentId.toString());
       nbt.setString("MCH_UavOwnerUUID", this.uavOwnerUUID == null ? "" : this.uavOwnerUUID.toString());
+      nbt.setString("MCH_VehicleOwnerUUID", this.vehicleOwnerUUID == null ? "" : this.vehicleOwnerUUID.toString());
+      nbt.setBoolean("MCH_VehicleAccessLocked", this.isVehicleAccessLocked());
       nbt.setString("MCH_UavStationUUID", this.linkedUavStationUUID == null ? "" : this.linkedUavStationUUID.toString());
       nbt.setInteger("MCH_UavStationDim", this.linkedUavStationDimension);
       nbt.setDouble("MCH_UavStationX", this.linkedUavStationX);
@@ -1645,6 +1701,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(MCH_Config.ItemDamage.prmBool) {
          is.setItemDamage(this.getDamageTaken());
       }
+
+      nbt.setString("MCH_VehicleOwnerUUID", this.vehicleOwnerUUID == null ? "" : this.vehicleOwnerUUID.toString());
+      nbt.setBoolean("MCH_VehicleAccessLocked", this.isVehicleAccessLocked());
 
    }
 
@@ -5554,6 +5613,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public boolean interactFirstSeat(EntityPlayer player) {
+      if(!super.worldObj.isRemote && !this.switchSeat && !this.canPlayerEnterVehicle(player)) {
+         this.notifyVehicleAccessDenied(player);
+         return false;
+      }
       if(!super.worldObj.isRemote) {
          this.searchSeat();
       }
@@ -7285,6 +7348,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          if(!canRideSeatOrRack(0, player)) {
             return this.rejectInteraction(player, "pilot_seat_exclusion");
          }
+         if(!super.worldObj.isRemote && !this.switchSeat && !this.canPlayerEnterVehicle(player)) {
+            this.notifyVehicleAccessDenied(player);
+            return false;
+         }
          if(!this.switchSeat) {
             if(getAcInfo().haveCanopy() && isCanopyClose()) {
                openCanopy();
@@ -7300,6 +7367,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          if(!this.worldObj.isRemote) {
             this.clearPlacementMotionLock();
             player.mountEntity(this);
+            if(player.ridingEntity == this && this.vehicleOwnerUUID == null) {
+               this.vehicleOwnerUUID = player.getUniqueID();
+            }
             if(!this.keepOnRideRotation) {
                mountMobToSeats();
             }

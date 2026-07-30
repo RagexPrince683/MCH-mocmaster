@@ -34,6 +34,13 @@ import net.minecraft.world.WorldServer;
 
 public class MCH_BaseVehiclePacketHandler {
 
+   public static void handleVehicleAccessLockToggle(EntityPlayer player, MCH_EntityBaseVehicle vehicle,
+                                                     MCH_PacketPlayerControlBase control) {
+      if(control.toggleVehicleAccessLock) {
+         vehicle.requestVehicleAccessLockToggle(player);
+      }
+   }
+
    public static void onPacketIndRotation(EntityPlayer player, ByteArrayDataInput data) {
       if(player != null && !player.worldObj.isRemote) {
          MCH_PacketIndRotation req = new MCH_PacketIndRotation();

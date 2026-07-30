@@ -59,6 +59,7 @@ public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHan
 
    public MCH_Key KeyBrake;
    public MCH_Key KeyCurrentWeaponLock;
+   public MCH_Key KeyVehicleLock;
 
    /**
     * Chaff key
@@ -99,6 +100,7 @@ public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHan
       this.KeyDownFromRack = new MCH_Key(MCH_Config.KeyDownFromRack.prmInt);
       this.KeyBrake = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
       this.KeyCurrentWeaponLock = new MCH_Key(MCH_Config.KeyCurrentWeaponLock.prmInt);
+      this.KeyVehicleLock = new MCH_Key(MCH_Config.KeyVehicleLock.prmInt);
       //todo here
       this.KeyChaff = new MCH_Key(MCH_Config.KeyChaff.prmInt);
       this.KeyMaintenance = new MCH_Key(MCH_Config.KeyMaintenance.prmInt);
@@ -163,6 +165,10 @@ public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHan
       if (this.KeyUnmount.isKeyDown() && !ac.isDestroyed() && ac.getSizeInventory() > 0 && !isPilot)
          MCH_PacketIndOpenScreen.send(3);
       if (isPilot) {
+         if(this.KeyVehicleLock.isKeyDown()) {
+            pc.toggleVehicleAccessLock = true;
+            send = true;
+         }
          if (this.KeyUnmount.isKeyDown()) {
             pc.isUnmount = 2;
             send = true;

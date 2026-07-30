@@ -108,6 +108,9 @@ public abstract class MCH_BaseVehicleCommonGui extends MCH_Gui {
       boolean c = false;
       StringBuilder var10000;
       MCH_Config var10001;
+      if(seatID == 0) {
+         this.drawString(ac.isVehicleAccessLocked() ? "Lock: LOCKED" : "Lock: UNLOCKED", LX, super.centerY + 20, colorActive);
+      }
       if(seatID == 0 && ac.canPutToRack()) {
          var10000 = (new StringBuilder()).append("PutRack : ");
          var10001 = MCH_MOD.config;
