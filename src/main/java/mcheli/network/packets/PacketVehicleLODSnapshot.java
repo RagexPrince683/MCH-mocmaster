@@ -53,6 +53,14 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             data.writeFloat(entry.pitch);
             data.writeFloat(entry.roll);
             data.writeFloat(entry.scale);
+            for (int side = 0; side < 2; ++side) data.writeFloat(entry.trackRollerRotation[side]);
+            for (int side = 0; side < 2; ++side) data.writeFloat(entry.previousTrackRollerRotation[side]);
+            for (int side = 0; side < 2; ++side) data.writeFloat(entry.crawlerTrackPhase[side]);
+            for (int side = 0; side < 2; ++side) data.writeFloat(entry.previousCrawlerTrackPhase[side]);
+            data.writeFloat(entry.wheelRotation);
+            data.writeFloat(entry.previousWheelRotation);
+            data.writeFloat(entry.wheelYaw);
+            data.writeFloat(entry.previousWheelYaw);
             int weaponCount = entry.weaponPoses == null ? 0 : Math.min(entry.weaponPoses.length, MAX_WEAPON_POSES);
             data.writeByte(weaponCount);
             for (int weaponIndex = 0; weaponIndex < weaponCount; ++weaponIndex) {
@@ -101,6 +109,14 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             entry.pitch = data.readFloat();
             entry.roll = data.readFloat();
             entry.scale = data.readFloat();
+            for (int side = 0; side < 2; ++side) entry.trackRollerRotation[side] = data.readFloat();
+            for (int side = 0; side < 2; ++side) entry.previousTrackRollerRotation[side] = data.readFloat();
+            for (int side = 0; side < 2; ++side) entry.crawlerTrackPhase[side] = data.readFloat();
+            for (int side = 0; side < 2; ++side) entry.previousCrawlerTrackPhase[side] = data.readFloat();
+            entry.wheelRotation = data.readFloat();
+            entry.previousWheelRotation = data.readFloat();
+            entry.wheelYaw = data.readFloat();
+            entry.previousWheelYaw = data.readFloat();
             int weaponCount = data.readUnsignedByte();
             if (weaponCount > MAX_WEAPON_POSES) {
                 throw new IllegalArgumentException("Vehicle LOD weapon pose count exceeds " + MAX_WEAPON_POSES);
@@ -170,6 +186,14 @@ public class PacketVehicleLODSnapshot extends PacketBase {
         public float pitch;
         public float roll;
         public float scale = 1.0F;
+        public final float[] trackRollerRotation = new float[2];
+        public final float[] previousTrackRollerRotation = new float[2];
+        public final float[] crawlerTrackPhase = new float[2];
+        public final float[] previousCrawlerTrackPhase = new float[2];
+        public float wheelRotation;
+        public float previousWheelRotation;
+        public float wheelYaw;
+        public float previousWheelYaw;
         public WeaponPose[] weaponPoses = new WeaponPose[0];
         public float rotorRotation;
         public float prevRotorRotation;

@@ -824,8 +824,14 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    }
 
    public static void renderWheel(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
+      renderWheel(info, ac.rotWheel, ac.prevRotWheel, ac.rotYawWheel, ac.prevRotYawWheel, tickTime);
+   }
+
+   public static void renderWheel(MCH_BaseVehicleInfo info, float wheelRotation, float previousWheelRotation,
+         float wheelYaw, float previousWheelYaw, float tickTime) {
       if(info.partWheel.size() > 0) {
-         float yaw = ac.prevRotYawWheel + (ac.rotYawWheel - ac.prevRotYawWheel) * tickTime;
+         float yaw = interpolateSnapshotAngle(previousWheelYaw, wheelYaw, tickTime);
+         float rotation = interpolateSnapshotAngle(previousWheelRotation, wheelRotation, tickTime);
          Iterator i$ = info.partWheel.iterator();
 
          while(i$.hasNext()) {
@@ -835,7 +841,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
             GL11.glRotated((double)(yaw * t.rotDir), t.rot.xCoord, t.rot.yCoord, t.rot.zCoord);
             GL11.glTranslated(-t.pos2.xCoord, -t.pos2.yCoord, -t.pos2.zCoord);
             GL11.glTranslated(t.pos.xCoord, t.pos.yCoord, t.pos.zCoord);
-            GL11.glRotatef(ac.prevRotWheel + (ac.rotWheel - ac.prevRotWheel) * tickTime, 1.0F, 0.0F, 0.0F);
+            GL11.glRotatef(rotation, 1.0F, 0.0F, 0.0F);
             GL11.glTranslated(-t.pos.xCoord, -t.pos.yCoord, -t.pos.zCoord);
             renderPart(t.model, info.model, t.modelName);
             GL11.glPopMatrix();
@@ -1110,16 +1116,18 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    }
 
    public static void renderTrackRoller(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
+      renderTrackRoller(info, ac.rotTrackRoller, ac.prevRotTrackRoller, tickTime);
+   }
+
+   public static void renderTrackRoller(MCH_BaseVehicleInfo info, float[] rot, float[] prevRot, float tickTime) {
       if(info.partTrackRoller.size() > 0) {
-         float[] rot = ac.rotTrackRoller;
-         float[] prevRot = ac.prevRotTrackRoller;
          Iterator i$ = info.partTrackRoller.iterator();
 
          while(i$.hasNext()) {
             MCH_BaseVehicleInfo.TrackRoller t = (MCH_BaseVehicleInfo.TrackRoller)i$.next();
             GL11.glPushMatrix();
             GL11.glTranslated(t.pos.xCoord, t.pos.yCoord, t.pos.zCoord);
-            GL11.glRotatef(prevRot[t.side] + (rot[t.side] - prevRot[t.side]) * tickTime, 1.0F, 0.0F, 0.0F);
+            GL11.glRotatef(interpolateSnapshotAngle(prevRot[t.side], rot[t.side], tickTime), 1.0F, 0.0F, 0.0F);
             GL11.glTranslated(-t.pos.xCoord, -t.pos.yCoord, -t.pos.zCoord);
             renderPart(t.model, info.model, t.modelName);
             GL11.glPopMatrix();
@@ -1129,11 +1137,18 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    }
 
    public static void renderCrawlerTrack(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
+      float[] direction = new float[2];
+      for(int side = 0; side < 2; ++side) direction[side] = wrappedPhaseDelta(ac.prevRotCrawlerTrack[side], ac.rotCrawlerTrack[side], 0.0F);
+      renderCrawlerTrack(info, ac.rotCrawlerTrack, ac.prevRotCrawlerTrack, direction, tickTime);
+   }
+
+   public static void renderCrawlerTrack(MCH_BaseVehicleInfo info, float[] phase, float[] previousPhase,
+         float[] movementDirection, float tickTime) {
       if(info.partCrawlerTrack.size() > 0) {
-         int prevWidth = GL11.glGetInteger(2833);
+         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_POINT_BIT);
          Tessellator tessellator = Tessellator.instance;
          Iterator i$ = info.partCrawlerTrack.iterator();
-
+         try {
          while(i$.hasNext()) {
             MCH_BaseVehicleInfo.CrawlerTrack c = (MCH_BaseVehicleInfo.CrawlerTrack)i$.next();
             GL11.glPointSize(c.len * 20.0F);
@@ -1155,16 +1170,9 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
             GL11.glEnable(3553);
             GL11.glEnable(3042);
             L = c.lp.size() - 1;
-            double rc = ac != null?(double)ac.rotCrawlerTrack[c.side]:0.0D;
-            double pc = ac != null?(double)ac.prevRotCrawlerTrack[c.side]:0.0D;
-            double phaseDiff = rc - pc;
-            if(phaseDiff > 0.5D) {
-               pc += 1.0D;
-            } else if(phaseDiff < -0.5D) {
-               pc -= 1.0D;
-            }
-            double phase = pc + (rc - pc) * (double)tickTime;
-            phase -= Math.floor(phase);
+            double trackPhase = previousPhase[c.side]
+               + wrappedPhaseDelta(previousPhase[c.side], phase[c.side], movementDirection[c.side]) * tickTime;
+            trackPhase -= Math.floor(trackPhase);
 
             for(int i = 0; i < L; ++i) {
                MCH_BaseVehicleInfo.CrawlerTrackPrm cp = (MCH_BaseVehicleInfo.CrawlerTrackPrm)c.lp.get(i);
@@ -1183,9 +1191,9 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
                   r2 -= 360.0D;
                }
 
-               double x = x1 + (x2 - x1) * phase;
-               double y = y1 + (y2 - y1) * phase;
-               double r = r1 + (r2 - r1) * phase;
+               double x = x1 + (x2 - x1) * trackPhase;
+               double y = y1 + (y2 - y1) * trackPhase;
+               double r = r1 + (r2 - r1) * trackPhase;
                GL11.glPushMatrix();
                GL11.glTranslated(0.0D, x, y);
                GL11.glRotatef((float)r, -1.0F, 0.0F, 0.0F);
@@ -1194,9 +1202,20 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
             }
          }
 
-         GL11.glEnable(3042);
-         GL11.glPointSize((float)prevWidth);
+         } finally {
+            GL11.glPopAttrib();
+         }
       }
+   }
+
+   private static float wrappedPhaseDelta(float previous, float current, float movementDirection) {
+      float delta = current - previous;
+      while(delta > 0.5F) delta -= 1.0F;
+      while(delta < -0.5F) delta += 1.0F;
+      if(Math.abs(Math.abs(delta) - 0.5F) < 0.0001F && movementDirection != 0.0F) {
+         delta = movementDirection > 0.0F ? 0.5F : -0.5F;
+      }
+      return delta;
    }
 
    public static void renderHatch(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {

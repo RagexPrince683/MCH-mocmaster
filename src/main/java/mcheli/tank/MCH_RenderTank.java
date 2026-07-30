@@ -26,10 +26,12 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
 
    @Override
    protected void renderAircraftLODParts(MCH_EntityBaseVehicle tank, MCH_BaseVehicleInfo info, double posX, double posY, double posZ, float tickTime) {
-      // renderBaseVehicle leaves the interpolated hull transform active here.  Reuse
-      // the full-detail common-part pass so every configured tank part gets exactly
-      // the same turret, weapon, recoil, hatch, wheel, track, and child transforms.
-      this.renderCommonPart(tank, info, posX, posY, posZ, tickTime);
+      // Keep the far pass limited to named parts that are absent from $body.  These
+      // are the same entity-state renderers used by the normal common-part pass.
+      renderTrackRoller(tank, info, tickTime);
+      renderCrawlerTrack(tank, info, tickTime);
+      renderWheel(tank, info, tickTime);
+      renderWeapon(tank, info, tickTime);
    }
 
    public void renderBaseVehicle(MCH_EntityBaseVehicle entity, double posX, double posY, double posZ, float yaw, float pitch, float roll, float tickTime) {
