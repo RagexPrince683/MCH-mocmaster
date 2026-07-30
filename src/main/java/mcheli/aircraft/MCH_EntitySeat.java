@@ -333,6 +333,10 @@ public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnDa
          getParent().clearPlacementMotionLock();
       }
       player.mountEntity(this);
+      if(!this.worldObj.isRemote && player.ridingEntity == this && getParent() != null
+              && !getParent().isUAV() && !getParent().isNewUAV()) {
+         MCH_PacketNotifyOnMountEntity.sendToRider(getParent(), player, this.seatID + 1);
+      }
       return true;
    }
 

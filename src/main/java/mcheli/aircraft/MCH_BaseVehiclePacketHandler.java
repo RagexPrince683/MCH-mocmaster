@@ -1,6 +1,7 @@
 package mcheli.aircraft;
 
 import com.google.common.io.ByteArrayDataInput;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import mcheli.MCH_Lib;
@@ -33,6 +34,64 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 
 public class MCH_BaseVehiclePacketHandler {
+   private static final int MAX_PENDING_MOUNTS = 64;
+   private static final int PENDING_MOUNT_TICKS = 100;
+   private static final List<PendingMount> pendingMounts = new ArrayList<PendingMount>();
+   private static Object pendingWorld;
+
+   private static final class PendingMount {
+      final int aircraftId;
+      final int riderId;
+      final int seatId;
+      int ticksLeft = PENDING_MOUNT_TICKS;
+
+      PendingMount(int aircraftId, int riderId, int seatId) {
+         this.aircraftId = aircraftId;
+         this.riderId = riderId;
+         this.seatId = seatId;
+      }
+   }
+
+   public static void clearPendingMounts() {
+      pendingMounts.clear();
+      pendingWorld = null;
+   }
+
+   public static void tickPendingMounts(EntityPlayer player) {
+      if(player == null || !player.worldObj.isRemote) return;
+      if(pendingWorld != player.worldObj) {
+         pendingMounts.clear();
+         pendingWorld = player.worldObj;
+      }
+      for(int i = pendingMounts.size() - 1; i >= 0; --i) {
+         PendingMount pending = pendingMounts.get(i);
+         if(applyMount(player, pending.aircraftId, pending.riderId, pending.seatId) || --pending.ticksLeft <= 0) {
+            pendingMounts.remove(i);
+         }
+      }
+   }
+
+   private static void queueMount(EntityPlayer player, int aircraftId, int riderId, int seatId) {
+      if(pendingWorld != player.worldObj) clearPendingMounts();
+      pendingWorld = player.worldObj;
+      for(PendingMount pending : pendingMounts) {
+         if(pending.aircraftId == aircraftId && pending.riderId == riderId && pending.seatId == seatId) return;
+      }
+      if(pendingMounts.size() >= MAX_PENDING_MOUNTS) pendingMounts.remove(0);
+      pendingMounts.add(new PendingMount(aircraftId, riderId, seatId));
+   }
+
+   private static boolean applyMount(EntityPlayer player, int aircraftId, int riderId, int seatId) {
+      Entity aircraftEntity = player.worldObj.getEntityByID(aircraftId);
+      Entity rider = player.worldObj.getEntityByID(riderId);
+      if(!(aircraftEntity instanceof MCH_EntityBaseVehicle) || rider == null || rider.isDead) return false;
+      MCH_EntityBaseVehicle aircraft = (MCH_EntityBaseVehicle)aircraftEntity;
+      if(aircraft.isUAV() || aircraft.isNewUAV()) return true;
+      Entity mount = seatId == 0 ? aircraft : aircraft.getSeat(seatId - 1);
+      if(mount == null || mount.isDead) return false;
+      if(rider.ridingEntity != mount) rider.mountEntity(mount);
+      return rider.ridingEntity == mount && mount.riddenByEntity == rider;
+   }
 
    public static void handleVehicleAccessLockToggle(EntityPlayer player, MCH_EntityBaseVehicle vehicle,
                                                      MCH_PacketPlayerControlBase control) {
@@ -83,18 +142,9 @@ public class MCH_BaseVehiclePacketHandler {
          MCH_PacketNotifyOnMountEntity req = new MCH_PacketNotifyOnMountEntity();
          req.readData(data);
          MCH_Lib.DbgLog(player.worldObj, "onPacketOnMountEntity.rcv:%d, %d, %d, %d", new Object[]{Integer.valueOf(W_Entity.getEntityId(player)), Integer.valueOf(req.entityID_Ac), Integer.valueOf(req.entityID_rider), Integer.valueOf(req.seatID)});
-         if(req.entityID_Ac > 0) {
-            if(req.entityID_rider > 0) {
-               if(req.seatID >= 0) {
-                  Entity e = player.worldObj.getEntityByID(req.entityID_Ac);
-                  if(e instanceof MCH_EntityBaseVehicle) {
-                     MCH_Lib.DbgLog(player.worldObj, "onPacketOnMountEntity:" + W_Entity.getEntityId(player), new Object[0]);
-                     player.worldObj.getEntityByID(req.entityID_rider);
-                     MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)e;
-                  }
-
-               }
-            }
+         if(req.entityID_Ac > 0 && req.entityID_rider > 0 && req.seatID >= 0
+               && !applyMount(player, req.entityID_Ac, req.entityID_rider, req.seatID)) {
+            queueMount(player, req.entityID_Ac, req.entityID_rider, req.seatID);
          }
       }
    }

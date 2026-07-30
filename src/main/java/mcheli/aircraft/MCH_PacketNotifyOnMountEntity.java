@@ -55,4 +55,13 @@ public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
          }
       }
    }
+
+   public static void sendToRider(MCH_EntityBaseVehicle ac, EntityPlayer rider, int seatId) {
+      if(ac == null || rider == null || ac.isUAV() || ac.isNewUAV()) return;
+      MCH_PacketNotifyOnMountEntity packet = new MCH_PacketNotifyOnMountEntity();
+      packet.entityID_Ac = W_Entity.getEntityId(ac);
+      packet.entityID_rider = W_Entity.getEntityId(rider);
+      packet.seatID = seatId;
+      W_Network.sendToPlayer(packet, rider);
+   }
 }

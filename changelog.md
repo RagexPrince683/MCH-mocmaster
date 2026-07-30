@@ -319,3 +319,8 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Added placing-player ownership and legacy pilot claiming for player-ridable vehicles.
 - Added an operator-aware, persistent entry lock toggled by the pilot with O.
 - Added synchronized lock HUD state and owner/lock entity and item NBT data.
+# Fix vehicle LOD and mount synchronization
+
+* Fixed aircraft LOD selection retaining render state across local-player death, respawn, world changes, and entity retracking.
+* Restored normal vehicle and passenger-seat mount relationships with an authoritative server notification and a bounded client retry when tracking packets arrive out of order.
+* Kept UAV and NewUAV mounting paths excluded from the new normal-vehicle correction flow.
