@@ -1,5 +1,6 @@
 package mcheli.weapon;
 
+import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.wrapper.W_McClient;
@@ -79,6 +80,18 @@ public abstract class MCH_WeaponBase {
 
    public MCH_WeaponInfo getInfo() {
       return this.weaponInfo;
+   }
+
+   public static double getEffectiveLaunchAcceleration(MCH_WeaponInfo weaponInfo, double originalAcceleration) {
+      double effectiveAcceleration = originalAcceleration;
+      if(weaponInfo != null && weaponInfo.useGlobalArtilleryRangeModifier) {
+         effectiveAcceleration *= Math.max(0.01D, MCH_Config.ArtilleryRangeModifier.prmDouble);
+      }
+      return effectiveAcceleration;
+   }
+
+   public double getEffectiveLaunchAcceleration() {
+      return getEffectiveLaunchAcceleration(this.weaponInfo, (double)this.acceleration);
    }
 
    public String getName() {
@@ -241,14 +254,15 @@ public abstract class MCH_WeaponBase {
       } else {
          Vec3 v = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -prm.rotYaw, -prm.rotPitch, -prm.rotRoll);
          double s = Math.sqrt(v.xCoord * v.xCoord + v.yCoord * v.yCoord + v.zCoord * v.zCoord);
-         double acc = this.acceleration < 4.0F?(double)this.acceleration:4.0D;
-         double accFac = (double)this.acceleration / acc;
-         double my = v.yCoord * (double)this.acceleration / s;
+         double effectiveAcceleration = this.getEffectiveLaunchAcceleration();
+         double acc = effectiveAcceleration < 4.0D?effectiveAcceleration:4.0D;
+         double accFac = effectiveAcceleration / acc;
+         double my = v.yCoord * effectiveAcceleration / s;
          if(my <= 0.0D) {
             return -1.0D;
          } else {
-            double mx = v.xCoord * (double)this.acceleration / s;
-            double mz = v.zCoord * (double)this.acceleration / s;
+            double mx = v.xCoord * effectiveAcceleration / s;
+            double mz = v.zCoord * effectiveAcceleration / s;
             double ls = my / (double)this.weaponInfo.gravity;
             double gravity = (double)this.weaponInfo.gravity * accFac;
             double spx;

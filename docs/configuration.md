@@ -80,6 +80,7 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `AutoThrottleDownTank` | `false` | Auto-throttle-down behavior for tanks. |
 | `SwitchWeaponWithMouseWheel` | `true` | Allows mouse-wheel weapon switching. |
 | `LWeaponAutoFire` | `false` | Auto-fire behavior for light weapons. |
+| `ArtilleryRangeModifier` | `1.0` | Multiplies launch speed only for weapon text files with `UseGlobalArtilleryRangeModifier = true`. Values below `0.01` are clamped to `0.01`; `1.0` keeps original range. |
 | `EnableHandheld` | `true` | Enables crafting recipes for hand-held weapons and their ammunition (`Stinger`, `Javelin`, and `RPG`). Set to `false` to prevent those recipes from registering. |
 | `DisableItemRender` | `1` | Valid range noted in source: `0 ~ 3`; `1` recommended. |
 | `Override3DItemIcon` | `false` | Global 3D vehicle item icon override. `true` forces 3D item icons off; `false` allows per-vehicle `Enable3DItemIcon` settings. |
@@ -119,6 +120,16 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `MultiThreadedModelLoading` | `true` | Enables threaded model loading on the client. |
 
 ## Vehicle content-pack keys
+
+## Weapon artillery range opt-in
+
+Place the following key in an individual weapon text file to opt that weapon into the global launch-speed multiplier:
+
+```text
+UseGlobalArtilleryRangeModifier = true
+```
+
+The weapon-key default is `false`, so existing weapon files and explicitly disabled weapons retain their original speed and range. `ArtilleryRangeModifier = 1.0` also preserves the original range. `DisplayMortarDistance` controls only whether the HUD displays an impact distance; it neither classifies a weapon as artillery nor controls modifier eligibility. This is a per-weapon opt-in, not a per-vehicle setting, so one vehicle can combine a modified artillery weapon with an unchanged secondary weapon.
 
 Vehicle `.txt` definitions can opt individual items into or out of 3D item rendering and tune their own size after the global type scale is applied:
 

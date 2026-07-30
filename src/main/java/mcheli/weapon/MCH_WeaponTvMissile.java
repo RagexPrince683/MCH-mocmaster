@@ -123,7 +123,8 @@ public class MCH_WeaponTvMissile extends MCH_WeaponBase {
          acr = (float)((double)acr * 1.5D);
       }
 
-      MCH_EntityTvMissile e = new MCH_EntityTvMissile(super.worldObj, prm.posX, prm.posY, prm.posZ, tX, tY, tZ, yaw, pitch, (double)acr);
+      double effectiveAcceleration = MCH_WeaponBase.getEffectiveLaunchAcceleration(this.getInfo(), (double)acr);
+      MCH_EntityTvMissile e = new MCH_EntityTvMissile(super.worldObj, prm.posX, prm.posY, prm.posZ, tX, tY, tZ, yaw, pitch, effectiveAcceleration);
       e.setName(super.name);
       e.setParameterFromWeapon(this, prm.entity, prm.user);
       this.lastShotEntity = prm.entity;

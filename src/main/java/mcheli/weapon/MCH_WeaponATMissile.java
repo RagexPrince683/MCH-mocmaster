@@ -62,7 +62,7 @@ public class MCH_WeaponATMissile extends MCH_WeaponEntitySeeker {
             double tX = -MathHelper.sin(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F);
             double tZ = MathHelper.cos(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F);
             double tY = -MathHelper.sin(pitch / 180.0F * 3.1415927F);
-            MCH_EntityATMissile e = new MCH_EntityATMissile(super.worldObj, prm.posX, prm.posY, prm.posZ, tX, tY, tZ, yaw, pitch, (double) super.acceleration);
+            MCH_EntityATMissile e = new MCH_EntityATMissile(super.worldObj, prm.posX, prm.posY, prm.posZ, tX, tY, tZ, yaw, pitch, super.getEffectiveLaunchAcceleration());
             if (yaw > 180.0F) {//so we are just basically defining yaw to like not go 360 mlg mode right hopefully pray to god it works okay
                yaw -= 360.0F;
             } else if (yaw < -180.0F) {
@@ -88,7 +88,7 @@ public class MCH_WeaponATMissile extends MCH_WeaponEntitySeeker {
                double tX = (double) (-MathHelper.sin(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
                double tZ = (double) (MathHelper.cos(yaw / 180.0F * 3.1415927F) * MathHelper.cos(pitch / 180.0F * 3.1415927F));
                double tY = (double) (-MathHelper.sin(pitch / 180.0F * 3.1415927F));
-               MCH_EntityATMissile e = new MCH_EntityATMissile(super.worldObj, prm.posX, prm.posY, prm.posZ, tX, tY, tZ, yaw, pitch, (double) super.acceleration);
+               MCH_EntityATMissile e = new MCH_EntityATMissile(super.worldObj, prm.posX, prm.posY, prm.posZ, tX, tY, tZ, yaw, pitch, super.getEffectiveLaunchAcceleration());
                if (yaw > 180.0F) {//so we are just basically defining yaw to like not go 360 mlg mode right hopefully pray to god it works okay
                   yaw -= 360.0F;
                } else if (yaw < -180.0F) {

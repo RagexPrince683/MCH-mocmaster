@@ -30,7 +30,7 @@ public class MCH_WeaponRocket extends MCH_WeaponBase {
       if(!super.worldObj.isRemote) {
          this.playSound(prm.entity);
          Vec3 v = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -prm.rotYaw, -prm.rotPitch, -prm.rotRoll);
-         MCH_EntityRocket e = new MCH_EntityRocket(super.worldObj, prm.posX, prm.posY, prm.posZ, v.xCoord, v.yCoord, v.zCoord, prm.rotYaw, prm.rotPitch, (double)super.acceleration);
+         MCH_EntityRocket e = new MCH_EntityRocket(super.worldObj, prm.posX, prm.posY, prm.posZ, v.xCoord, v.yCoord, v.zCoord, prm.rotYaw, prm.rotPitch, super.getEffectiveLaunchAcceleration());
          e.setName(super.name);
          e.setParameterFromWeapon(this, prm.entity, prm.user);
          if(prm.option1 == 0 && super.numMode > 1) {

@@ -883,7 +883,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          Vec3 direction = mcheli.MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -yaw, -pitch, -roll);
          double length = direction.lengthVector();
          if(length > 1.0E-7D) {
-            double constructorSpeed = Math.min(3.9D, (double)weapon.getInfo().acceleration);
+            double constructorSpeed = Math.min(3.9D, weapon.getEffectiveLaunchAcceleration());
             double ejectionScale = constructorSpeed * 0.5D / length;
             k.ejectionVelocity = Vec3.createVectorHelper(
                   direction.xCoord * ejectionScale,

@@ -45,7 +45,7 @@ public class MCH_WeaponBomb extends MCH_WeaponBase {
                prm.posX, prm.posY, prm.posZ,
                prm.entity.motionX, prm.entity.motionY, prm.entity.motionZ,
                prm.entity.rotationYaw, 0.0F,
-               (double)super.acceleration);
+               super.getEffectiveLaunchAcceleration());
 
          bomb.setName(super.name);
          bomb.setParameterFromWeapon(this, prm.entity, prm.user);

@@ -347,11 +347,15 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
         this.piercing = this.getInfo().piercing;
         if (this instanceof MCH_EntityBullet) {
-            if (this.getInfo().acceleration > 4.0F) {
-                this.accelerationFactor = (double) (this.getInfo().acceleration / 4.0F);
+            double effectiveAcceleration = MCH_WeaponBase.getEffectiveLaunchAcceleration(this.getInfo(), (double)this.getInfo().acceleration);
+            if (effectiveAcceleration > 4.0D) {
+                this.accelerationFactor = effectiveAcceleration / 4.0D;
             }
-        } else if (this instanceof MCH_EntityRocket && this.isBomblet == 0 && this.getInfo().acceleration > 4.0F) {
-            this.accelerationFactor = (double) (this.getInfo().acceleration / 4.0F);
+        } else if (this instanceof MCH_EntityRocket && this.isBomblet == 0) {
+            double effectiveAcceleration = MCH_WeaponBase.getEffectiveLaunchAcceleration(this.getInfo(), (double)this.getInfo().acceleration);
+            if(effectiveAcceleration > 4.0D) {
+                this.accelerationFactor = effectiveAcceleration / 4.0D;
+            }
         }
 
     }
