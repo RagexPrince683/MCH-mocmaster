@@ -237,6 +237,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public float prevRotWheel = 0.0F;
    public float rotYawWheel = 0.0F;
    public float prevRotYawWheel = 0.0F;
+   private boolean partAnimationPositionInitialized;
+   private double lastPartAnimationPosX;
+   private double lastPartAnimationPosZ;
+   private float lastPartAnimationYaw;
+   private double partAnimationForwardTravel;
+   private double partAnimationYawTravel;
    private boolean isParachuting;
    public float ropesLength = 0.0F;
    private MCH_Queue prevPosition;
@@ -3193,23 +3199,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public void updatePartWheel() {
       if(super.worldObj.isRemote) {
          if(this.getAcInfo() != null) {
+            this.updatePartAnimationTravel();
             this.prevRotWheel = this.rotWheel;
             this.prevRotYawWheel = this.rotYawWheel;
-            float LEN = 1.0F;
-            float MIN = 0.0F;
-            double throttle = this.getCurrentThrottle();
-            double pivotTurnThrottle = (double)this.getAcInfo().pivotTurnThrottle;
-            if(pivotTurnThrottle <= 0.0D) {
-               pivotTurnThrottle = 1.0D;
-            } else {
-               pivotTurnThrottle *= 0.10000000149011612D;
-            }
-
             boolean localMoveLeft = this.moveLeft;
             boolean localMoveRight = this.moveRight;
-            if(this.getAcInfo().enableBack && (double)this.throttleBack > 0.01D && throttle <= 0.0D) {
-               throttle = (double)(-this.throttleBack * 15.0F);
-            }
 
             if(localMoveLeft && !localMoveRight) {
                this.rotYawWheel += 0.1F;
@@ -3225,14 +3219,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                this.rotYawWheel *= 0.9F;
             }
 
-            this.rotWheel = (float)((double)this.rotWheel + throttle * (double)this.getAcInfo().partWheelRot);
-            if(this.rotWheel >= 360.0F) {
-               this.rotWheel -= 360.0F;
-               this.prevRotWheel -= 360.0F;
-            } else if(this.rotWheel < 0.0F) {
-               this.rotWheel += 360.0F;
-               this.prevRotWheel += 360.0F;
-            }
+            this.rotWheel += (float)(this.partAnimationForwardTravel * (double)this.getAcInfo().partWheelRot);
+            this.wrapWheelAngle();
 
          }
       }
@@ -3245,62 +3233,16 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             this.prevRotTrackRoller[1] = this.rotTrackRoller[1];
             this.prevRotCrawlerTrack[0] = this.rotCrawlerTrack[0];
             this.prevRotCrawlerTrack[1] = this.rotCrawlerTrack[1];
-            float LEN = 1.0F;
-            float MIN = 0.0F;
-            double throttle = this.getCurrentThrottle();
-            double pivotTurnThrottle = (double)this.getAcInfo().pivotTurnThrottle;
-            if(pivotTurnThrottle <= 0.0D) {
-               pivotTurnThrottle = 1.0D;
-            } else {
-               pivotTurnThrottle *= 0.10000000149011612D;
-            }
-
-            boolean localMoveLeft = this.moveLeft;
-            boolean localMoveRight = this.moveRight;
-            byte dir = 1;
-            if(this.getAcInfo().enableBack && this.throttleBack > 0.0F && throttle <= 0.0D) {
-               throttle = (double)(-this.throttleBack * 5.0F);
-               if(localMoveLeft != localMoveRight) {
-                  boolean i = localMoveLeft;
-                  localMoveLeft = localMoveRight;
-                  localMoveRight = i;
-                  dir = -1;
-               }
-            }
-
-            if(localMoveLeft && !localMoveRight) {
-               throttle = 0.2D * (double)dir;
-               this.throttleCrawlerTrack[0] = (float)((double)this.throttleCrawlerTrack[0] + throttle);
-               this.throttleCrawlerTrack[1] = (float)((double)this.throttleCrawlerTrack[1] - pivotTurnThrottle * throttle);
-            } else if(!localMoveLeft && localMoveRight) {
-               throttle = 0.2D * (double)dir;
-               this.throttleCrawlerTrack[0] = (float)((double)this.throttleCrawlerTrack[0] - pivotTurnThrottle * throttle);
-               this.throttleCrawlerTrack[1] = (float)((double)this.throttleCrawlerTrack[1] + throttle);
-            } else {
-               if(throttle > 0.2D) {
-                  throttle = 0.2D;
-               }
-
-               if(throttle < -0.2D) {
-                  throttle = -0.2D;
-               }
-
-               this.throttleCrawlerTrack[0] = (float)((double)this.throttleCrawlerTrack[0] + throttle);
-               this.throttleCrawlerTrack[1] = (float)((double)this.throttleCrawlerTrack[1] + throttle);
-            }
+            this.throttleCrawlerTrack[0] = (float)(this.partAnimationForwardTravel + this.partAnimationYawTravel);
+            this.throttleCrawlerTrack[1] = (float)(this.partAnimationForwardTravel - this.partAnimationYawTravel);
 
             for(int var11 = 0; var11 < 2; ++var11) {
-               if(this.throttleCrawlerTrack[var11] < -0.72F) {
-                  this.throttleCrawlerTrack[var11] = -0.72F;
-               } else if(this.throttleCrawlerTrack[var11] > 0.72F) {
-                  this.throttleCrawlerTrack[var11] = 0.72F;
-               }
-
                this.rotTrackRoller[var11] += this.throttleCrawlerTrack[var11] * this.getAcInfo().trackRollerRot;
-               if(this.rotTrackRoller[var11] >= 360.0F) {
+               while(this.rotTrackRoller[var11] >= 360.0F) {
                   this.rotTrackRoller[var11] -= 360.0F;
                   this.prevRotTrackRoller[var11] -= 360.0F;
-               } else if(this.rotTrackRoller[var11] < 0.0F) {
+               }
+               while(this.rotTrackRoller[var11] < 0.0F) {
                   this.rotTrackRoller[var11] += 360.0F;
                   this.prevRotTrackRoller[var11] += 360.0F;
                }
@@ -3317,10 +3259,58 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                   ++this.prevRotCrawlerTrack[var11];
                }
 
-               this.throttleCrawlerTrack[var11] = (float)((double)this.throttleCrawlerTrack[var11] * 0.75D);
             }
 
          }
+      }
+   }
+
+   private void updatePartAnimationTravel() {
+      if(!this.partAnimationPositionInitialized) {
+         this.partAnimationPositionInitialized = true;
+         this.lastPartAnimationPosX = super.posX;
+         this.lastPartAnimationPosZ = super.posZ;
+         this.lastPartAnimationYaw = this.getRotYaw();
+         this.partAnimationForwardTravel = 0.0D;
+         this.partAnimationYawTravel = 0.0D;
+         return;
+      }
+
+      double dx = super.posX - this.lastPartAnimationPosX;
+      double dz = super.posZ - this.lastPartAnimationPosZ;
+      float yawChange = MathHelper.wrapAngleTo180_float(this.getRotYaw() - this.lastPartAnimationYaw);
+      float middleYaw = this.lastPartAnimationYaw + yawChange * 0.5F;
+      double yawRadians = (double)middleYaw * Math.PI / 180.0D;
+      double travel = dx * -Math.sin(yawRadians) + dz * Math.cos(yawRadians);
+      if(dx * dx + dz * dz < 1.0E-6D) {
+         travel = 0.0D;
+      }
+
+      this.partAnimationForwardTravel = travel;
+      this.partAnimationYawTravel = (double)yawChange * Math.PI / 180.0D * this.getTrackHalfWidth();
+      this.lastPartAnimationPosX = super.posX;
+      this.lastPartAnimationPosZ = super.posZ;
+      this.lastPartAnimationYaw = this.getRotYaw();
+   }
+
+   private double getTrackHalfWidth() {
+      double halfWidth = 0.0D;
+      Iterator i$ = this.getAcInfo().wheels.iterator();
+      while(i$.hasNext()) {
+         MCH_BaseVehicleInfo.Wheel wheel = (MCH_BaseVehicleInfo.Wheel)i$.next();
+         halfWidth = Math.max(halfWidth, Math.abs(wheel.pos.xCoord));
+      }
+      return halfWidth > 0.01D?halfWidth:Math.max(0.5D, (double)this.getAcInfo().bodyWidth * 0.5D);
+   }
+
+   private void wrapWheelAngle() {
+      while(this.rotWheel >= 360.0F) {
+         this.rotWheel -= 360.0F;
+         this.prevRotWheel -= 360.0F;
+      }
+      while(this.rotWheel < 0.0F) {
+         this.rotWheel += 360.0F;
+         this.prevRotWheel += 360.0F;
       }
    }
 
@@ -5333,22 +5323,15 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public int getClientPositionDelayCorrection() {
-      return 7;
+      return 0;
    }
 
    public void setPositionAndRotation2(double par1, double par3, double par5, float par7, float par8, int par9) {
-      // Validate inputs
-      if (par9 < 0) {
-         System.out.println("get fucked");
-         throw new IllegalArgumentException("par9 must be non-negative");
-      }
-
-      // Enhanced precision and accuracy
-      this.aircraftPosRotInc = par9 + this.getClientPositionDelayCorrection();
+      this.aircraftPosRotInc = Math.max(1, par9 + this.getClientPositionDelayCorrection());
       this.aircraftX = par1;
       this.aircraftY = par3;
       this.aircraftZ = par5;
-      this.aircraftYaw = (double) par7;
+      this.aircraftYaw = (double)this.getRotYaw() + MathHelper.wrapAngleTo180_double((double)par7 - (double)this.getRotYaw());
       this.aircraftPitch = (double) par8;
 
       // Apply current velocities

@@ -1054,6 +1054,14 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
             L = c.lp.size() - 1;
             double rc = ac != null?(double)ac.rotCrawlerTrack[c.side]:0.0D;
             double pc = ac != null?(double)ac.prevRotCrawlerTrack[c.side]:0.0D;
+            double phaseDiff = rc - pc;
+            if(phaseDiff > 0.5D) {
+               pc += 1.0D;
+            } else if(phaseDiff < -0.5D) {
+               pc -= 1.0D;
+            }
+            double phase = pc + (rc - pc) * (double)tickTime;
+            phase -= Math.floor(phase);
 
             for(int i = 0; i < L; ++i) {
                MCH_BaseVehicleInfo.CrawlerTrackPrm cp = (MCH_BaseVehicleInfo.CrawlerTrackPrm)c.lp.get(i);
@@ -1072,15 +1080,9 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
                   r2 -= 360.0D;
                }
 
-               double sx = x1 + (x2 - x1) * rc;
-               double sy = y1 + (y2 - y1) * rc;
-               double sr = r1 + (r2 - r1) * rc;
-               double ex = x1 + (x2 - x1) * pc;
-               double ey = y1 + (y2 - y1) * pc;
-               double er = r1 + (r2 - r1) * pc;
-               double x = sx + (ex - sx) * pc;
-               double y = sy + (ey - sy) * pc;
-               double r = sr + (er - sr) * pc;
+               double x = x1 + (x2 - x1) * phase;
+               double y = y1 + (y2 - y1) * phase;
+               double r = r1 + (r2 - r1) * phase;
                GL11.glPushMatrix();
                GL11.glTranslated(0.0D, x, y);
                GL11.glRotatef((float)r, -1.0F, 0.0F, 0.0F);

@@ -818,10 +818,6 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       }
    }
 
-   public int getClientPositionDelayCorrection() {
-      return this.getTankInfo() == null?7:(this.getTankInfo().weightType == 1?2:7);
-   }
-
    protected void onUpdate_Client() {
 //      if(this.getRiddenByEntity() != null && W_Lib.isClientPlayer(this.getRiddenByEntity())) {
 //         this.getRiddenByEntity().rotationPitch = this.getRiddenByEntity().prevRotationPitch;
