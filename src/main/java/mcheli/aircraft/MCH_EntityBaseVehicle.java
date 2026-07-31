@@ -310,14 +310,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.commonStatus = 0;
       super.dropContentsWhenDead = false;
       super.ignoreFrustumCheck = true;
-      /*
-       * Vanilla's EntityTracker only starts tracking distant entities in chunks the
-       * player is already watching unless forceSpawn is true.  Aircraft LODs are
-       * explicitly intended to be visible beyond the normal chunk/render distance,
-       * so force tracking to use the mod's configured AircraftLODFarDistance range
-       * instead of silently cutting off near the server/client view-distance edge.
-       */
-      super.forceSpawn = true;
+      // Normal vehicles must follow Forge's watched-chunk spawn lifecycle.
+      super.forceSpawn = false;
       this.flareDv = new MCH_Flare(world, this);
       this.chaff = new MCH_Chaff(world, this);
       this.maintenance = new MCH_Maintenance(world, this);
@@ -8368,8 +8362,14 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public abstract Item getItem();
 
+   /** UAVs retain their legacy cross-chunk control policy; normal vehicles do not. */
+   public void updateForceSpawnPolicy() {
+      super.forceSpawn = this.acInfo != null && (this.isUAV() || this.isNewUAV());
+   }
+
    public void setAcInfo(MCH_BaseVehicleInfo info) {
       this.acInfo = info;
+      this.updateForceSpawnPolicy();
       if(info != null) {
          this.partHatch = this.createHatch();
          this.partCanopy = this.createCanopy();

@@ -1,3 +1,8 @@
+# Normal vehicle respawn ordering (PR pending)
+
+- Replaced failed tracker resend/repair logic from PRs #593–#598 with watched-chunk normal spawning, unwatched-chunk render-only LOD snapshots, and bounded observer-directed mount graphs.
+- Preserved UAV/NewUAV force-spawn behavior and documented that the required two-client graphical acceptance matrix remains pending.
+
 ## PR - Prevent tracker reflection from crashing respawn repair
 
 - Replace the crashing mixed MCP/SRG reflection lookup with a cached, hierarchy-aware, type-validated `IntHashMap` resolver and bounded diagnostics.

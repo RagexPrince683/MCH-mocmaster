@@ -18,8 +18,7 @@ import mcheli.network.packets.PacketAPSState;
 import mcheli.network.packets.PacketLaserGuidanceTargeting;
 import mcheli.network.packets.PacketLockTarget;
 import mcheli.network.packets.PacketVehicleLODSnapshot;
-import mcheli.network.packets.PacketVehicleRespawnProbe;
-import mcheli.network.packets.PacketVehicleRespawnProbeResult;
+import mcheli.network.packets.PacketVehicleMountGraph;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -128,8 +127,7 @@ public class PacketHandler extends MessageToMessageCodec<FMLProxyPacket, PacketB
         registerPacket(PacketLaserGuidanceTargeting.class);
         registerPacket(PacketLockTarget.class);
         registerPacket(PacketVehicleLODSnapshot.class);
-        registerPacket(PacketVehicleRespawnProbe.class);
-        registerPacket(PacketVehicleRespawnProbeResult.class);
+        registerPacket(PacketVehicleMountGraph.class);
     }
 
     /**

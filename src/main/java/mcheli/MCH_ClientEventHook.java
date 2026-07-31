@@ -171,22 +171,10 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
    public void renderPlayerPost(net.minecraftforge.client.event.RenderPlayerEvent.Post event) {}
 
    public void worldEventUnload(Unload event) {
-      int logged = 0;
-      for(Object value : event.world.loadedEntityList) {
-         if(value instanceof MCH_EntityBaseVehicle && logged++ < 32) {
-            MCH_EntityBaseVehicle vehicle = (MCH_EntityBaseVehicle)value;
-            Minecraft mc = Minecraft.getMinecraft();
-            MCH_Lib.RespawnAuditLog("client-remove vehicleId=%d uuid=%s object=%x world=%x type=%s dead=%s stage=world-unload player=%x currentWorld=%x generation=%d",
-               Integer.valueOf(vehicle.getEntityId()), vehicle.getUniqueID(), Integer.valueOf(System.identityHashCode(vehicle)),
-               Integer.valueOf(System.identityHashCode(vehicle.worldObj)), vehicle.getAcInfo()==null?vehicle.getClass().getSimpleName():vehicle.getAcInfo().name,
-               Boolean.valueOf(vehicle.isDead), Integer.valueOf(System.identityHashCode(mc.thePlayer)), Integer.valueOf(System.identityHashCode(mc.theWorld)),
-               Integer.valueOf(mcheli.network.packets.PacketVehicleRespawnProbe.getClientGeneration()));
-         }
-      }
-      mcheli.network.packets.PacketVehicleRespawnProbe.clearClientResolutionState();
       MCH_ViewEntityDummy.onUnloadWorld();
       MCH_MOD.proxy.clearVehicleLODSnapshots();
       MCH_BaseVehiclePacketHandler.clearPendingMounts();
+      mcheli.network.packets.PacketVehicleMountGraph.clearClientQueue();
    }
 
    public void entityJoinWorldEvent(EntityJoinWorldEvent event) {
@@ -199,6 +187,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
          MCH_ParticlesUtil.clearMarkPoint();
          MCH_MOD.proxy.clearVehicleLODSnapshots();
          MCH_BaseVehiclePacketHandler.clearPendingMounts();
+         mcheli.network.packets.PacketVehicleMountGraph.clearClientQueue();
       }
 
    }
