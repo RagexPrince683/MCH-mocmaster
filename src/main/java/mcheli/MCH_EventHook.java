@@ -9,6 +9,8 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
+import mcheli.aircraft.MCH_EntityHitBox;
+import mcheli.aircraft.MCH_EntityPSeat;
 import mcheli.aircraft.MCH_ItemBaseVehicle;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.uav.MCH_UavInventory;
@@ -186,12 +188,31 @@ public class MCH_EventHook extends W_EventHook {
    public void onLivingDeathEvent(LivingDeathEvent event) {
       if(event.entity instanceof EntityPlayerMP) {
          EntityPlayerMP player = (EntityPlayerMP)event.entity;
+         MCH_Lib.DbgLog(player.worldObj,
+            "[MCH-RESPAWN-TRACK] death player=%s id=%d uuid=%s object=%x dim=%d world=%x chunk=%d,%d",
+            new Object[]{player.getCommandSenderName(), Integer.valueOf(player.getEntityId()), player.getUniqueID(),
+               Integer.valueOf(System.identityHashCode(player)), Integer.valueOf(player.dimension),
+               Integer.valueOf(System.identityHashCode(player.worldObj)), Integer.valueOf(player.chunkCoordX),
+               Integer.valueOf(player.chunkCoordZ)});
          MCH_UavInventory.restorePilotInventory(player, "player_death");
          for(Object object : player.worldObj.loadedEntityList) {
             if(object instanceof MCH_EntityBaseVehicle) {
                ((MCH_EntityBaseVehicle)object).clearDeadNormalVehicleRider(player);
             }
          }
+      }
+   }
+
+   @SubscribeEvent
+   public void onPlayerClone(PlayerEvent.Clone event) {
+      if(event.entityPlayer instanceof EntityPlayerMP && !event.entityPlayer.worldObj.isRemote) {
+         MCH_Lib.DbgLog(event.entityPlayer.worldObj,
+            "[MCH-RESPAWN-TRACK] clone oldId=%d oldUuid=%s oldObject=%x newId=%d newUuid=%s newObject=%x dim=%d world=%x death=%s",
+            new Object[]{Integer.valueOf(event.original.getEntityId()), event.original.getUniqueID(),
+               Integer.valueOf(System.identityHashCode(event.original)), Integer.valueOf(event.entityPlayer.getEntityId()),
+               event.entityPlayer.getUniqueID(), Integer.valueOf(System.identityHashCode(event.entityPlayer)),
+               Integer.valueOf(event.entityPlayer.dimension), Integer.valueOf(System.identityHashCode(event.entityPlayer.worldObj)),
+               Boolean.valueOf(event.wasDeath)});
       }
    }
 
@@ -220,8 +241,40 @@ public class MCH_EventHook extends W_EventHook {
       }
 
       if(aircraft != null) {
+         this.logTrackingTransition("start", (EntityPlayerMP)event.entityPlayer, event.target, aircraft);
          aircraft.syncCompleteAircraftState((EntityPlayerMP)event.entityPlayer);
+         MCH_Lib.DbgLog(event.entityPlayer.worldObj,
+            "[MCH-RESPAWN-TRACK] syncCompleteAircraftState playerId=%d targetId=%d vehicleId=%d vehicleUuid=%s",
+            new Object[]{Integer.valueOf(event.entityPlayer.getEntityId()), Integer.valueOf(event.target.getEntityId()),
+               Integer.valueOf(aircraft.getEntityId()), aircraft.getUniqueID()});
+      } else if(event.target instanceof MCH_EntityHitBox) {
+         this.logTrackingTransition("start-unresolved", (EntityPlayerMP)event.entityPlayer, event.target,
+            ((MCH_EntityHitBox)event.target).parent);
       }
+   }
+
+   @SubscribeEvent
+   public void onStopTracking(PlayerEvent.StopTracking event) {
+      if(!(event.entityPlayer instanceof EntityPlayerMP) || event.entityPlayer.worldObj.isRemote) return;
+      MCH_EntityBaseVehicle aircraft = event.target instanceof MCH_EntityBaseVehicle
+         ? (MCH_EntityBaseVehicle)event.target : null;
+      if(event.target instanceof MCH_EntitySeat) aircraft = ((MCH_EntitySeat)event.target).getParent();
+      else if(event.target instanceof MCH_EntityHitBox) aircraft = ((MCH_EntityHitBox)event.target).parent;
+      if(aircraft != null || event.target instanceof MCH_EntityHitBox) {
+         this.logTrackingTransition("stop", (EntityPlayerMP)event.entityPlayer, event.target, aircraft);
+      }
+   }
+
+   private void logTrackingTransition(String action, EntityPlayerMP player, Entity target,
+      MCH_EntityBaseVehicle aircraft) {
+      String kind = target instanceof MCH_EntityPSeat ? "passenger-seat"
+         : target instanceof MCH_EntitySeat ? "seat"
+         : target instanceof MCH_EntityHitBox ? "hitbox" : "vehicle";
+      MCH_Lib.DbgLog(player.worldObj,
+         "[MCH-RESPAWN-TRACK] %s kind=%s playerId=%d playerObject=%x targetId=%d targetUuid=%s parentId=%d parentRef=%x dead=%s",
+         new Object[]{action, kind, Integer.valueOf(player.getEntityId()), Integer.valueOf(System.identityHashCode(player)),
+            Integer.valueOf(target.getEntityId()), target.getUniqueID(), Integer.valueOf(aircraft != null ? aircraft.getEntityId() : -1),
+            Integer.valueOf(System.identityHashCode(aircraft)), Boolean.valueOf(target.isDead)});
    }
 
    @SubscribeEvent

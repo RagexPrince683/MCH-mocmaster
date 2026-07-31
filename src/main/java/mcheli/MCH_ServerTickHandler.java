@@ -1,12 +1,16 @@
 package mcheli;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.helicopter.MCH_EntityHeli;
@@ -31,13 +35,89 @@ public class MCH_ServerTickHandler {
    private static final int MAX_ENTRIES = 512;
    /** Must match the normal vehicle/seat registration range in MCH_MOD. */
    private static final double NORMAL_TRACKING_RANGE_SQ = 200.0D * 200.0D;
+   private static final int TRACKING_REFRESH_DELAY_TICKS = 1;
+   private final Map<EntityPlayerMP, Integer> pendingTrackingRefreshes = new HashMap<EntityPlayerMP, Integer>();
    private int tick;
 
    @SubscribeEvent
-   public void onServerTickEvent(ServerTickEvent event) {
-      if(event.phase != Phase.END || ++this.tick < UPDATE_INTERVAL_TICKS) {
+   public void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+      this.queueTrackingRefresh(event.player, "respawn");
+   }
+
+   @SubscribeEvent
+   public void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+      this.queueTrackingRefresh(event.player, "dimension " + event.fromDim + "->" + event.toDim);
+   }
+
+   private void queueTrackingRefresh(Entity playerEntity, String reason) {
+      if(!(playerEntity instanceof EntityPlayerMP) || playerEntity.worldObj.isRemote) {
          return;
       }
+      EntityPlayerMP player = (EntityPlayerMP)playerEntity;
+      this.pendingTrackingRefreshes.put(player, Integer.valueOf(TRACKING_REFRESH_DELAY_TICKS));
+      MCH_Lib.DbgLog(player.worldObj, "[MCH-RESPAWN-TRACK] queued %s refresh player=%s id=%d uuid=%s object=%x dim=%d world=%x chunk=%d,%d",
+         new Object[]{reason, player.getCommandSenderName(), Integer.valueOf(player.getEntityId()), player.getUniqueID(),
+            Integer.valueOf(System.identityHashCode(player)), Integer.valueOf(player.dimension),
+            Integer.valueOf(System.identityHashCode(player.worldObj)), Integer.valueOf(player.chunkCoordX), Integer.valueOf(player.chunkCoordZ)});
+   }
+
+   private void refreshPendingPlayerTracking() {
+      Iterator<Map.Entry<EntityPlayerMP, Integer>> iterator = this.pendingTrackingRefreshes.entrySet().iterator();
+      while(iterator.hasNext()) {
+         Map.Entry<EntityPlayerMP, Integer> entry = iterator.next();
+         EntityPlayerMP player = entry.getKey();
+         int delay = entry.getValue().intValue() - 1;
+         if(delay > 0) {
+            entry.setValue(Integer.valueOf(delay));
+            continue;
+         }
+         iterator.remove();
+         if(player.isDead || !(player.worldObj instanceof WorldServer)
+            || !containsPlayerInstance(player.worldObj.playerEntities, player)) {
+            MCH_Lib.DbgLog(player.worldObj, "[MCH-RESPAWN-TRACK] skipped stale refresh player=%s id=%d object=%x dead=%s",
+               new Object[]{player.getCommandSenderName(), Integer.valueOf(player.getEntityId()),
+                  Integer.valueOf(System.identityHashCode(player)), Boolean.valueOf(player.isDead)});
+            continue;
+         }
+
+         WorldServer world = (WorldServer)player.worldObj;
+         int nearbyVehicles = 0;
+         for(Object object : world.loadedEntityList) {
+            if(object instanceof MCH_EntityBaseVehicle && !((MCH_EntityBaseVehicle)object).isDead
+               && ((MCH_EntityBaseVehicle)object).getDistanceSqToEntity(player) <= NORMAL_TRACKING_RANGE_SQ) {
+               ++nearbyVehicles;
+            }
+         }
+
+         // The replacement player deliberately reuses the dead player's entity ID.
+         // EntityTrackerEntry's watcher set can consequently regard a stale old
+         // player object as equal to the replacement and suppress its spawn packet.
+         // Remove that one player's watcher generation, then let vanilla rebuild it
+         // after PlayerManager has installed the replacement's watched chunks.
+         world.getEntityTracker().removePlayerFromTrackers(player);
+         world.getEntityTracker().updateTrackedEntities();
+         MCH_Lib.DbgLog(world, "[MCH-RESPAWN-TRACK] refreshed player=%s id=%d uuid=%s object=%x dim=%d world=%x chunk=%d,%d nearbyVehicles=%d",
+            new Object[]{player.getCommandSenderName(), Integer.valueOf(player.getEntityId()), player.getUniqueID(),
+               Integer.valueOf(System.identityHashCode(player)), Integer.valueOf(player.dimension),
+               Integer.valueOf(System.identityHashCode(world)), Integer.valueOf(player.chunkCoordX),
+               Integer.valueOf(player.chunkCoordZ), Integer.valueOf(nearbyVehicles)});
+      }
+   }
+
+   private static boolean containsPlayerInstance(List<?> players, EntityPlayerMP player) {
+      for(Object candidate : players) {
+         if(candidate == player) return true;
+      }
+      return false;
+   }
+
+   @SubscribeEvent
+   public void onServerTickEvent(ServerTickEvent event) {
+      if(event.phase != Phase.END) {
+         return;
+      }
+      this.refreshPendingPlayerTracking();
+      if(++this.tick < UPDATE_INTERVAL_TICKS) return;
       this.tick = 0;
 
       MinecraftServer server = MinecraftServer.getServer();
