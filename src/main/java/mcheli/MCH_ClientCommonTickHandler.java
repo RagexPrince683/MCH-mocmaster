@@ -117,6 +117,10 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       return instance == null ? -1 : instance.auditRespawnTicks;
    }
 
+   public static boolean isRespawnAuditPlayer(EntityClientPlayerMP player) {
+      return instance != null && instance.auditPlayer == player;
+   }
+
 
 
    public MCH_ClientCommonTickHandler(Minecraft minecraft, MCH_Config config) {
