@@ -2797,6 +2797,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.updatePartLightHatch();
       this.regenerationMob();
       if(this.getRiddenByEntity() == null && this.lastRiddenByEntity != null) {
+         if(!super.worldObj.isRemote && !this.isUAV() && !this.isNewUAV()
+               && this.lastRiddenByEntity instanceof EntityPlayer) {
+            MCH_PacketNotifyOnMountEntity.sendDismount(this, (EntityPlayer)this.lastRiddenByEntity);
+         }
          this.unmountEntity();
       }
 
@@ -5751,6 +5755,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
 
       MCH_Lib.DbgLog(super.worldObj, "onUnmountPlayerSeat:%d", new Object[]{Integer.valueOf(W_Entity.getEntityId(entity))});
+      if(!super.worldObj.isRemote && !this.isUAV() && !this.isNewUAV() && entity instanceof EntityPlayer) {
+         MCH_PacketNotifyOnMountEntity.sendDismount(this, (EntityPlayer)entity);
+      }
       int sid = this.getSeatIdByEntity(entity);
       this.camera.initCamera(sid, entity);
       MCH_SeatInfo seatInfo = this.getSeatInfo(seat.seatID + 1);
@@ -7258,6 +7265,32 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
       for(int i = 0; i < this.getSeats().length; ++i) {
          this.clearInvalidSeatOccupant(this.getSeats()[i], i, context);
+      }
+   }
+
+   /**
+    * Breaks only invalid direct-riding relationships owned by a dying player.
+    * Remote UAV control is deliberately excluded because it is not a normal
+    * Entity riding relationship and has its own death/inventory lifecycle.
+    */
+   public void clearDeadNormalVehicleRider(EntityPlayerMP player) {
+      if(player == null || super.worldObj.isRemote || this.isUAV() || this.isNewUAV()) {
+         return;
+      }
+      if(super.riddenByEntity == player) {
+         super.riddenByEntity = null;
+         MCH_PacketNotifyOnMountEntity.sendDismount(this, player);
+      }
+      for(int i = 0; i < this.seats.length; ++i) {
+         MCH_EntitySeat seat = this.seats[i];
+         if(seat != null && seat.riddenByEntity == player) {
+            seat.riddenByEntity = null;
+            MCH_PacketNotifyOnMountEntity.sendDismount(this, player);
+         }
+      }
+      if(player.ridingEntity == this || player.ridingEntity instanceof MCH_EntitySeat
+            && ((MCH_EntitySeat)player.ridingEntity).getParent() == this) {
+         player.mountEntity((Entity)null);
       }
    }
 
