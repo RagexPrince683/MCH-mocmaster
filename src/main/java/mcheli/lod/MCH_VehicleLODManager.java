@@ -4,10 +4,18 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import org.lwjgl.BufferUtils;
+import mcheli.MCH_ActiveRenderInfoHolder;
+import mcheli.MCH_Camera;
+import mcheli.MCH_ClientCommonTickHandler;
+import mcheli.MCH_Lib;
 import mcheli.MCH_Config;
 import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
@@ -28,6 +36,7 @@ import mcheli.vehicle.MCH_TurretInfo;
 import mcheli.vehicle.MCH_RenderTurret;
 import mcheli.wrapper.W_MOD;
 import mcheli.wrapper.W_Render;
+import mcheli.wrapper.modelloader.W_ModelCustom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.Entity;
@@ -46,6 +55,10 @@ public final class MCH_VehicleLODManager {
     public static final MCH_VehicleLODManager INSTANCE = new MCH_VehicleLODManager();
     private static final long STALE_AFTER_MS = 5000L;
     private static final LODRenderState RENDER_STATE = new LODRenderState();
+    private static final FloatBuffer FALLBACK_PROJECTION = BufferUtils.createFloatBuffer(16);
+    private static final IntBuffer FALLBACK_VIEWPORT = BufferUtils.createIntBuffer(16);
+    private static final Map<Object, Double> TARGET_DIMENSIONS = new IdentityHashMap<Object, Double>();
+    private static long nextDiagnosticMs;
     private final Map<UUID, Display> displays = new HashMap<UUID, Display>();
     private int dimension = Integer.MIN_VALUE;
     private World world;
@@ -117,8 +130,9 @@ public final class MCH_VehicleLODManager {
         double cameraX = camera.lastTickPosX + (camera.posX - camera.lastTickPosX) * event.partialTicks;
         double cameraY = camera.lastTickPosY + (camera.posY - camera.lastTickPosY) * event.partialTicks;
         double cameraZ = camera.lastTickPosZ + (camera.posZ - camera.lastTickPosZ) * event.partialTicks;
-        double far = MCH_Config.AircraftLODFarDistance != null ? MCH_Config.AircraftLODFarDistance.prmDouble : 4096.0D;
-        double farSq = far > 0.0D ? far * far : Double.MAX_VALUE;
+        double far = Math.min(4800.0D, config(MCH_Config.AircraftLODFarDistance, 4800.0D));
+        double farSq = far * far;
+        RenderContext context = captureRenderContext(mc, event.partialTicks);
 
         for (Display display : this.displays.values()) {
             if (now - display.lastUpdateMs > STALE_AFTER_MS || hasRealEntity(display, trackedAircraft)) {
@@ -131,11 +145,139 @@ public final class MCH_VehicleLODManager {
             double x = worldX - cameraX;
             double y = worldY - cameraY;
             double z = worldZ - cameraZ;
-            if (x * x + y * y + z * z > farSq) {
+            double distanceSq = x * x + y * y + z * z;
+            double realDistance = Math.sqrt(distanceSq);
+            if (distanceSq > farSq) {
+                diagnose(display, context, realDistance, far, 1.0D, display.scale, 0.0D, 0.0D, "hard_range", now);
                 continue;
             }
-            render(display, x, y, z, interpolation, now);
+            MCH_BaseVehicleInfo info = getInfo(display.category, display.typeName);
+            if (info == null || info.model == null) {
+                diagnose(display, context, realDistance, far, 1.0D, display.scale, 0.0D, 0.0D, "missing_model", now);
+                continue;
+            }
+            double projectedPixels = MCH_VehicleLODVisibility.projectedPixels(
+                targetDimension(info) * display.scale, realDistance, context.projection[5], context.viewportHeight);
+            double minimumPixels = context.thermal ? nonNegativeConfig(MCH_Config.AircraftLODThermalMinPixels, 0.35D)
+                : nonNegativeConfig(MCH_Config.AircraftLODOpticalMinPixels, 0.75D);
+            if (projectedPixels < minimumPixels) {
+                diagnose(display, context, realDistance, far, 1.0D, display.scale, 0.0D, projectedPixels, "projected_size", now);
+                continue;
+            }
+            double effectiveVisibility = config(MCH_Config.AircraftLODVisibilityDistance, 4800.0D) * context.weatherMultiplier;
+            double transmission = MCH_VehicleLODVisibility.transmission(realDistance, effectiveVisibility);
+            double alpha = context.thermal ? MCH_VehicleLODVisibility.thermalAlpha(transmission,
+                config(MCH_Config.AircraftLODThermalContrastExponent, 0.35D)) : transmission;
+            double depthScale = MCH_VehicleLODVisibility.depthScale(realDistance, context.safeProxyDepth);
+            if (alpha < 1.0D / 255.0D) {
+                diagnose(display, context, realDistance, far, depthScale, display.scale * depthScale,
+                    transmission, projectedPixels, "negligible_alpha", now);
+                continue;
+            }
+            render(display, info, x * depthScale, y * depthScale, z * depthScale,
+                (float)(display.scale * depthScale), (float)alpha, interpolation, now);
+            diagnose(display, context, realDistance, far, depthScale, display.scale * depthScale,
+                transmission, projectedPixels, "render", now);
         }
+    }
+
+    private static RenderContext captureRenderContext(Minecraft mc, float partialTicks) {
+        RenderContext context = new RenderContext();
+        boolean validProjection = copyProjection(MCH_ActiveRenderInfoHolder.projection, context.projection);
+        if (!validProjection) {
+            FALLBACK_PROJECTION.clear();
+            GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, FALLBACK_PROJECTION);
+            validProjection = copyProjection(FALLBACK_PROJECTION, context.projection);
+        }
+        double fallbackFar = Math.max(64.0D, (double)mc.gameSettings.renderDistanceChunks * 16.0D);
+        context.farPlane = validProjection
+            ? MCH_VehicleLODVisibility.projectionFarPlane(context.projection[10], context.projection[14], fallbackFar)
+            : fallbackFar;
+        context.safeProxyDepth = MCH_VehicleLODVisibility.safeProxyDepth(context.farPlane);
+        context.viewportHeight = copyViewportHeight(MCH_ActiveRenderInfoHolder.viewport);
+        if (context.viewportHeight <= 0) {
+            FALLBACK_VIEWPORT.clear();
+            GL11.glGetInteger(GL11.GL_VIEWPORT, FALLBACK_VIEWPORT);
+            context.viewportHeight = copyViewportHeight(FALLBACK_VIEWPORT);
+        }
+        if (context.viewportHeight <= 0) context.viewportHeight = Math.max(1, mc.displayHeight);
+        context.cameraMode = MCH_ClientCommonTickHandler.cameraMode;
+        context.thermal = context.cameraMode == MCH_Camera.MODE_THERMALVISION;
+        if (mc.theWorld.getWeightedThunderStrength(partialTicks) > 0.0F) {
+            context.weather = "thunder";
+            context.weatherMultiplier = config(MCH_Config.AircraftLODThunderVisibilityMultiplier, 0.45D);
+        } else if (mc.theWorld.getRainStrength(partialTicks) > 0.0F) {
+            context.weather = "rain";
+            context.weatherMultiplier = config(MCH_Config.AircraftLODRainVisibilityMultiplier, 0.70D);
+        } else {
+            context.weather = "clear";
+            context.weatherMultiplier = 1.0D;
+        }
+        return context;
+    }
+
+    private static boolean copyProjection(FloatBuffer source, float[] destination) {
+        if (source == null || source.capacity() < 16) return false;
+        for (int i = 0; i < 16; ++i) {
+            float value = source.get(i);
+            if (Float.isNaN(value) || Float.isInfinite(value)) return false;
+            destination[i] = value;
+        }
+        return Math.abs(destination[0]) > 1.0E-6F && Math.abs(destination[5]) > 1.0E-6F
+            && Math.abs(destination[11]) > 1.0E-6F;
+    }
+
+    private static int copyViewportHeight(IntBuffer viewport) {
+        return viewport != null && viewport.capacity() >= 4 ? viewport.get(3) : 0;
+    }
+
+    private static double targetDimension(MCH_BaseVehicleInfo info) {
+        Double cached = TARGET_DIMENSIONS.get(info);
+        if (cached != null) return cached.doubleValue();
+        double dimension = 1.0D;
+        if (info.model instanceof W_ModelCustom) {
+            W_ModelCustom model = (W_ModelCustom)info.model;
+            dimension = Math.max((double)model.sizeX, Math.max((double)model.sizeY, (double)model.sizeZ));
+        }
+        dimension = MCH_VehicleLODVisibility.positive(dimension, 1.0D);
+        TARGET_DIMENSIONS.put(info, Double.valueOf(dimension));
+        return dimension;
+    }
+
+    private static double config(mcheli.MCH_ConfigPrm parameter, double fallback) {
+        return parameter == null ? fallback : MCH_VehicleLODVisibility.positive(parameter.prmDouble, fallback);
+    }
+
+    private static double nonNegativeConfig(mcheli.MCH_ConfigPrm parameter, double fallback) {
+        if (parameter == null || Double.isNaN(parameter.prmDouble) || Double.isInfinite(parameter.prmDouble)) return fallback;
+        return Math.max(0.0D, parameter.prmDouble);
+    }
+
+    private static void diagnose(Display display, RenderContext context, double distance, double hardRange,
+        double depthScale, double renderScale, double transmission, double pixels, String reason, long now) {
+        if (MCH_Config.DebugVehicleLODVisibility == null || !MCH_Config.DebugVehicleLODVisibility.prmBool
+            || now < nextDiagnosticMs) return;
+        nextDiagnosticMs = now + 1000L;
+        double effectiveVisibility = config(MCH_Config.AircraftLODVisibilityDistance, 4800.0D) * context.weatherMultiplier;
+        double alpha = context.thermal ? MCH_VehicleLODVisibility.thermalAlpha(transmission,
+            config(MCH_Config.AircraftLODThermalContrastExponent, 0.35D)) : transmission;
+        MCH_Lib.DbgLog(true,
+            "VehicleLODVisibility type=%s distance=%.1f hardRange=%.1f farPlane=%.1f safeDepth=%.1f depthScale=%.5f renderScale=%.5f visibility=%.1f transmission=%.5f alpha=%.5f pixels=%.3f cameraMode=%d weather=%s result=%s",
+            new Object[]{display.typeName, Double.valueOf(distance), Double.valueOf(hardRange),
+                Double.valueOf(context.farPlane), Double.valueOf(context.safeProxyDepth), Double.valueOf(depthScale),
+                Double.valueOf(renderScale), Double.valueOf(effectiveVisibility), Double.valueOf(transmission),
+                Double.valueOf(alpha), Double.valueOf(pixels), Integer.valueOf(context.cameraMode), context.weather, reason});
+    }
+
+    private static final class RenderContext {
+        private final float[] projection = new float[16];
+        private int viewportHeight;
+        private double farPlane;
+        private double safeProxyDepth;
+        private int cameraMode;
+        private boolean thermal;
+        private String weather;
+        private double weatherMultiplier;
     }
 
     private static boolean hasRealEntity(Display display, List<MCH_EntityBaseVehicle> vehicles) {
@@ -148,8 +290,8 @@ public final class MCH_VehicleLODManager {
         return false;
     }
 
-    private static void render(Display display, double x, double y, double z, float interpolation, long now) {
-        MCH_BaseVehicleInfo info = getInfo(display.category, display.typeName);
+    private static void render(Display display, MCH_BaseVehicleInfo info, double x, double y, double z,
+        float renderScale, float alpha, float interpolation, long now) {
         String textureFolder = info instanceof MCH_TurretInfo ? ((MCH_TurretInfo)info).getDirectoryName() : getTextureFolder(display.category);
         if (info == null || info.model == null || textureFolder == null) {
             return;
@@ -157,16 +299,25 @@ public final class MCH_VehicleLODManager {
 
         float previousLightX = OpenGlHelper.lastBrightnessX;
         float previousLightY = OpenGlHelper.lastBrightnessY;
+        int previousMatrixMode = GL11.glGetInteger(GL11.GL_MATRIX_MODE);
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
         RENDER_STATE.begin(info.smoothShading, display.packedLight);
         GL11.glPushMatrix();
         try {
-            // Keep the active world shader/fog state and use the normal aircraft model setup.
-            GL11.glColor4f(0.75F, 0.75F, 0.75F, 1.0F);
+            GL11.glDisable(GL11.GL_FOG);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            GL11.glDisable(GL11.GL_ALPHA_TEST);
+            GL11.glEnable(GL11.GL_DEPTH_TEST);
+            GL11.glDepthFunc(GL11.GL_LEQUAL);
+            GL11.glDepthMask(false);
+            GL11.glColor4f(0.75F, 0.75F, 0.75F, alpha);
             GL11.glTranslated(x, y, z);
             GL11.glRotatef(interpolateAngle(display.previousYaw, display.yaw, interpolation), 0.0F, -1.0F, 0.0F);
             GL11.glRotatef(interpolateAngle(display.previousPitch, display.pitch, interpolation), 1.0F, 0.0F, 0.0F);
             GL11.glRotatef(interpolateAngle(display.previousRoll, display.roll, interpolation), 0.0F, 0.0F, 1.0F);
-            GL11.glScalef(display.scale, display.scale, display.scale);
+            GL11.glScalef(renderScale, renderScale, renderScale);
             MCH_RenderBaseVehicle.beginSkinOverlayRender(textureFolder, display.textureName);
             try {
                 Minecraft.getMinecraft().renderEngine.bindTexture(
@@ -227,6 +378,8 @@ public final class MCH_VehicleLODManager {
             GL11.glPopMatrix();
             RENDER_STATE.end();
             OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, previousLightX, previousLightY);
+            GL11.glPopAttrib();
+            GL11.glMatrixMode(previousMatrixMode);
         }
     }
 

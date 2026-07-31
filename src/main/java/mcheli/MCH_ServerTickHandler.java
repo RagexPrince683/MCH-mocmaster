@@ -88,8 +88,10 @@ public class MCH_ServerTickHandler {
       }
 
       double farDistance = MCH_Config.AircraftLODFarDistance != null
-         ? MCH_Config.AircraftLODFarDistance.prmDouble : 4096.0D;
-      double farDistanceSq = farDistance > 0.0D ? farDistance * farDistance : Double.MAX_VALUE;
+         ? MCH_Config.AircraftLODFarDistance.prmDouble : 4800.0D;
+      if(Double.isNaN(farDistance) || Double.isInfinite(farDistance) || farDistance <= 0.0D) farDistance = 4800.0D;
+      farDistance = Math.min(4800.0D, farDistance);
+      double farDistanceSq = farDistance * farDistance;
 
       for(WorldServer world : server.worldServers) {
          for(Object playerObject : world.playerEntities) {
