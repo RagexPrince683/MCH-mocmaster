@@ -1,3 +1,9 @@
+## PR #595 - Forge 1.7.10 Respawn Probe API Corrections
+
+- Corrected PR #595's incompatible `EntityTrackerEntry.removeFromTrackedPlayers` call to Forge 1.7.10's `EntityTrackerEntry.removeFromWatchingList` while retaining the normal `tryStartWachingThis` retrack path.
+- Replaced the unavailable `MinecraftServer.func_152344_a` scheduler with a thread-safe `ConcurrentLinkedQueue` processed during every `ServerTickEvent` end phase.
+- Compilation verifies the API corrections; the dedicated-server, two-client runtime procedure remains required before claiming the invisible-vehicle issue is fixed.
+
 ## PR #594 - Verify and Repair Respawn Tracking
 
 - Replaced PR #593's unverified one-tick global tracker reset with a 40-tick, chunk-ready, per-player targeted verification and repair.

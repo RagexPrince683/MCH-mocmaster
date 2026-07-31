@@ -11,7 +11,6 @@ import mcheli.MCH_ServerTickHandler;
 import mcheli.network.PacketBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
 
 /** Client resolution evidence returned to the authoritative server audit. */
 public class PacketVehicleRespawnProbeResult extends PacketBase {
@@ -50,9 +49,8 @@ public class PacketVehicleRespawnProbeResult extends PacketBase {
         e.renderingLod=d.readBoolean(); e.skipNormalRender=d.readBoolean(); e.collidable=d.readBoolean(); e.boundingBox=readUTF(d);
         e.seatCount=d.readInt(); e.validSeatParents=d.readInt(); e.hitboxCount=d.readInt(); e.validHitboxParents=d.readInt(); return e;
     }
-    @Override public void handleServerSide(final EntityPlayerMP player) {
-        final PacketVehicleRespawnProbeResult result=this;
-        MinecraftServer.getServer().func_152344_a(new Runnable(){ @Override public void run(){ MCH_ServerTickHandler.acceptProbeResult(player,result); }});
+    @Override public void handleServerSide(EntityPlayerMP player) {
+        MCH_ServerTickHandler.enqueueProbeResult(player, this);
     }
     @Override @SideOnly(Side.CLIENT) public void handleClientSide(EntityPlayer player) {}
 }

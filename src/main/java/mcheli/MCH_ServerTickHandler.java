@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.helicopter.MCH_EntityHeli;
@@ -46,11 +48,20 @@ public class MCH_ServerTickHandler {
    private static final double NORMAL_TRACKING_RANGE_SQ = 200.0D * 200.0D;
    private static final int TRACKING_REFRESH_TIMEOUT_TICKS = 60;
    private static int nextRespawnGeneration;
-   private static MCH_ServerTickHandler instance;
+   private static final Queue<PendingProbeResult> PENDING_PROBE_RESULTS =
+      new ConcurrentLinkedQueue<PendingProbeResult>();
    private final Map<String, TrackingRefresh> pendingTrackingRefreshes = new HashMap<String, TrackingRefresh>();
    private int tick;
 
-   public MCH_ServerTickHandler() { instance = this; }
+   private static final class PendingProbeResult {
+      final EntityPlayerMP player;
+      final PacketVehicleRespawnProbeResult result;
+
+      PendingProbeResult(EntityPlayerMP player, PacketVehicleRespawnProbeResult result) {
+         this.player = player;
+         this.result = result;
+      }
+   }
 
    @SubscribeEvent
    public void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
@@ -170,9 +181,34 @@ public class MCH_ServerTickHandler {
          Integer.valueOf(refresh.age), Integer.valueOf(refresh.player.getEntityId()), Integer.valueOf(packet.vehicles.size()));
    }
 
-   public static void acceptProbeResult(EntityPlayerMP player, PacketVehicleRespawnProbeResult result) {
-      if(instance == null) return;
-      instance.handleProbeResult(player, result);
+   public static void enqueueProbeResult(EntityPlayerMP player, PacketVehicleRespawnProbeResult result) {
+      if(player == null || result == null) {
+         return;
+      }
+
+      PENDING_PROBE_RESULTS.offer(new PendingProbeResult(player, result));
+   }
+
+   private void processPendingProbeResults() {
+      PendingProbeResult pending;
+
+      while((pending = PENDING_PROBE_RESULTS.poll()) != null) {
+         EntityPlayerMP player = pending.player;
+
+         if(player == null
+            || player.isDead
+            || player.playerNetServerHandler == null
+            || !(player.worldObj instanceof WorldServer)
+            || !containsPlayerInstance(player.worldObj.playerEntities, player)) {
+            MCH_Lib.RespawnAuditLog(
+               "probe-result-discarded player=%s generation=%d reason=stale-player",
+               player == null ? "null" : player.getCommandSenderName(),
+               Integer.valueOf(pending.result.generation));
+            continue;
+         }
+
+         this.handleProbeResult(player, pending.result);
+      }
    }
 
    private void handleProbeResult(EntityPlayerMP player, PacketVehicleRespawnProbeResult result) {
@@ -224,13 +260,22 @@ public class MCH_ServerTickHandler {
       EntityTrackerEntry parentEntry = trackerEntry((WorldServer)refresh.player.worldObj, expected.vehicle.getEntityId());
       if(parentEntry == null) { MCH_Lib.RespawnAuditLog("resend-no-entry generation=%d vehicleId=%d", Integer.valueOf(refresh.generation), Integer.valueOf(expected.vehicle.getEntityId())); return; }
       ++expected.resendAttempts; ++refresh.attempts;
-      parentEntry.removeFromTrackedPlayers(refresh.player);
+      parentEntry.removeFromWatchingList(refresh.player);
       parentEntry.tryStartWachingThis(refresh.player);
-      expected.vehicle.syncCompleteAircraftState(refresh.player);
       for(Object object : refresh.player.worldObj.loadedEntityList) {
          boolean dependent = object instanceof MCH_EntitySeat && ((MCH_EntitySeat)object).getParent() == expected.vehicle
             || object instanceof MCH_EntityHitBox && ((MCH_EntityHitBox)object).parent == expected.vehicle;
-         if(dependent) { EntityTrackerEntry entry=trackerEntry((WorldServer)refresh.player.worldObj,((Entity)object).getEntityId()); if(entry!=null) { entry.removeFromTrackedPlayers(refresh.player); entry.tryStartWachingThis(refresh.player); } }
+         if(dependent) {
+            Entity dependentEntity = (Entity)object;
+            EntityTrackerEntry entry = trackerEntry(
+               (WorldServer)refresh.player.worldObj,
+               dependentEntity.getEntityId());
+
+            if(entry != null) {
+               entry.removeFromWatchingList(refresh.player);
+               entry.tryStartWachingThis(refresh.player);
+            }
+         }
       }
       refresh.probeRequested = true;
       MCH_Lib.RespawnAuditLog("targeted-resend generation=%d vehicleId=%d uuid=%s attempt=%d premature=%s",
@@ -255,6 +300,7 @@ public class MCH_ServerTickHandler {
       if(event.phase != Phase.END) {
          return;
       }
+      this.processPendingProbeResults();
       this.refreshPendingPlayerTracking();
       if(++this.tick < UPDATE_INTERVAL_TICKS) return;
       this.tick = 0;
