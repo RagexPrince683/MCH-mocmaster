@@ -474,9 +474,9 @@ public class MCH_Config {
       RenderDistanceWeight = new MCH_ConfigPrm("RenderDistanceWeight", 1000.0D);
       EnableAircraftLODRender = new MCH_ConfigPrm("EnableAircraftLODRender", true);
       EnableAircraftLODRender.desc = ";Enable client-only far-distance model displays for aircraft, tanks, turrets, and ships.";
-      AircraftLODStartDistance = new MCH_ConfigPrm("AircraftLODStartDistance", 256.0D);
+      AircraftLODStartDistance = new MCH_ConfigPrm("AircraftLODStartDistance", 140.0D);
       AircraftLODStartDistance.desc = ";Distance in blocks where tracked aircraft rendering switches to its cheaper model-only pass.";
-      AircraftLODFarDistance = new MCH_ConfigPrm("AircraftLODFarDistance", 4096.0D);
+      AircraftLODFarDistance = new MCH_ConfigPrm("AircraftLODFarDistance", 4800.0D);
       AircraftLODFarDistance.desc = ";Maximum distance for client-only vehicle LOD snapshots. Real vehicle entity tracking remains unchanged and aligned with child seats.";
       MobRenderDistanceWeight = new MCH_ConfigPrm("MobRenderDistanceWeight", 10.0D);
       CreativeTabIcon = new MCH_ConfigPrm("CreativeTabIconItem", "fuel");
