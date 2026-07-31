@@ -1,3 +1,9 @@
+## PR - Prevent tracker reflection from crashing respawn repair
+
+- Replace the crashing mixed MCP/SRG reflection lookup with a cached, hierarchy-aware, type-validated `IntHashMap` resolver and bounded diagnostics.
+- Use Forge's public watcher view and its single normal remove/re-add path, count only initiated parent resends, retry unavailable entries every five ticks, and isolate parent/dependent failures.
+- Preserve PR #597's corrected client identity, readiness, classification, chunk gating, timeout, resend limits, and UAV exclusions; full two-client graphical verification remains outstanding.
+
 ## PR #597 - Correct Normal-Vehicle Respawn Repair Identity
 
 - Treat Forge numeric entity IDs plus MCHeli type, dimension, bounded position, and synchronized non-empty common ID as vehicle identity; keep vanilla UUID comparisons diagnostic.
