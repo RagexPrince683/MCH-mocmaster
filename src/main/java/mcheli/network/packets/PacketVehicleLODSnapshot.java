@@ -21,6 +21,7 @@ public class PacketVehicleLODSnapshot extends PacketBase {
     private static final int MAX_ENTRIES = 512;
     private static final int MAX_STRING_BYTES = 128;
     public static final int MAX_WEAPON_POSES = 64;
+    public static final int MAX_TURRET_PARTS = 128;
 
     public int dimension;
     public List<Entry> entries = Collections.emptyList();
@@ -83,6 +84,25 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             data.writeFloat(entry.prevRotorRotation);
             data.writeFloat(entry.rotorAngularChange);
             data.writeBoolean(entry.rotorFolded);
+            data.writeFloat(entry.landingGearRotation);
+            data.writeFloat(entry.prevLandingGearRotation);
+            data.writeFloat(entry.nozzleRotation);
+            data.writeFloat(entry.prevNozzleRotation);
+            data.writeFloat(entry.wingRotation);
+            data.writeFloat(entry.prevWingRotation);
+            data.writeFloat(entry.aimYaw);
+            data.writeFloat(entry.prevAimYaw);
+            data.writeFloat(entry.aimPitch);
+            data.writeFloat(entry.prevAimPitch);
+            data.writeFloat(entry.turretBarrelRotation);
+            data.writeFloat(entry.prevTurretBarrelRotation);
+            int turretCount = entry.turretParts == null ? 0 : Math.min(entry.turretParts.length, MAX_TURRET_PARTS);
+            data.writeByte(turretCount);
+            for (int partIndex = 0; partIndex < turretCount; ++partIndex) {
+                data.writeFloat(entry.turretParts[partIndex].recoil);
+                data.writeFloat(entry.turretParts[partIndex].prevRecoil);
+                data.writeBoolean(entry.turretParts[partIndex].visible);
+            }
             data.writeInt(entry.packedLight);
         }
     }
@@ -143,6 +163,28 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             entry.prevRotorRotation = data.readFloat();
             entry.rotorAngularChange = data.readFloat();
             entry.rotorFolded = data.readBoolean();
+            entry.landingGearRotation = data.readFloat();
+            entry.prevLandingGearRotation = data.readFloat();
+            entry.nozzleRotation = data.readFloat();
+            entry.prevNozzleRotation = data.readFloat();
+            entry.wingRotation = data.readFloat();
+            entry.prevWingRotation = data.readFloat();
+            entry.aimYaw = data.readFloat();
+            entry.prevAimYaw = data.readFloat();
+            entry.aimPitch = data.readFloat();
+            entry.prevAimPitch = data.readFloat();
+            entry.turretBarrelRotation = data.readFloat();
+            entry.prevTurretBarrelRotation = data.readFloat();
+            int turretCount = data.readUnsignedByte();
+            if (turretCount > MAX_TURRET_PARTS) throw new IllegalArgumentException("Vehicle LOD turret part count exceeds " + MAX_TURRET_PARTS);
+            entry.turretParts = new TurretPartPose[turretCount];
+            for (int partIndex = 0; partIndex < turretCount; ++partIndex) {
+                TurretPartPose pose = new TurretPartPose();
+                pose.recoil = data.readFloat();
+                pose.prevRecoil = data.readFloat();
+                pose.visible = data.readBoolean();
+                entry.turretParts[partIndex] = pose;
+            }
             entry.packedLight = data.readInt();
             decoded.add(entry);
         }
@@ -199,6 +241,12 @@ public class PacketVehicleLODSnapshot extends PacketBase {
         public float prevRotorRotation;
         public float rotorAngularChange;
         public boolean rotorFolded;
+        public float landingGearRotation, prevLandingGearRotation;
+        public float nozzleRotation, prevNozzleRotation;
+        public float wingRotation, prevWingRotation;
+        public float aimYaw, prevAimYaw, aimPitch, prevAimPitch;
+        public float turretBarrelRotation, prevTurretBarrelRotation;
+        public TurretPartPose[] turretParts = new TurretPartPose[0];
         public int packedLight;
     }
 
@@ -214,6 +262,12 @@ public class PacketVehicleLODSnapshot extends PacketBase {
         public float defaultRotationYaw;
         public float barrelRotation;
         public float prevBarrelRotation;
+        public float recoil;
+        public float prevRecoil;
+        public boolean visible = true;
+    }
+
+    public static class TurretPartPose {
         public float recoil;
         public float prevRecoil;
         public boolean visible = true;

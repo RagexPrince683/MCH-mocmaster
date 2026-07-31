@@ -53,8 +53,10 @@ public class MCH_RenderShip extends MCH_RenderBaseVehicle {
     }
 
     public void renderRotor(MCH_EntityShip ship, MCH_ShipInfo shipInfo, float tickTime) {
-        float rot = ship.getNozzleRotation();
-        float prevRot = ship.getPrevNozzleRotation();
+        renderRotor(shipInfo, ship.getNozzleRotation(), ship.getPrevNozzleRotation(), ship.rotationRotor, ship.prevRotationRotor, tickTime);
+    }
+
+    public static void renderRotor(MCH_ShipInfo shipInfo, float rot, float prevRot, float rotorPhase, float prevRotorPhase, float tickTime) {
         Iterator i$ = shipInfo.rotorList.iterator();
 
         while(i$.hasNext()) {
@@ -68,8 +70,7 @@ public class MCH_RenderShip extends MCH_RenderBaseVehicle {
 
             while(i$1.hasNext()) {
                 MCH_ShipInfo.Blade b = (MCH_ShipInfo.Blade)i$1.next();
-                float br = ship.prevRotationRotor;
-                br += (ship.rotationRotor - ship.prevRotationRotor) * tickTime;
+                float br = prevRotorPhase + (rotorPhase - prevRotorPhase) * tickTime;
                 GL11.glPushMatrix();
                 GL11.glTranslated(b.pos.xCoord, b.pos.yCoord, b.pos.zCoord);
                 GL11.glRotatef(br, (float)b.rot.xCoord, (float)b.rot.yCoord, (float)b.rot.zCoord);
@@ -91,8 +92,10 @@ public class MCH_RenderShip extends MCH_RenderBaseVehicle {
     }
 
     public void renderWing(MCH_EntityShip plane, MCH_ShipInfo planeInfo, float tickTime) {
-        float rot = plane.getWingRotation();
-        float prevRot = plane.getPrevWingRotation();
+        renderWing(planeInfo, plane.getWingRotation(), plane.getPrevWingRotation(), tickTime);
+    }
+
+    public static void renderWing(MCH_ShipInfo planeInfo, float rot, float prevRot, float tickTime) {
 
         for(Iterator i$ = planeInfo.wingList.iterator(); i$.hasNext(); GL11.glPopMatrix()) {
             MCH_ShipInfo.Wing w = (MCH_ShipInfo.Wing)i$.next();
@@ -119,8 +122,10 @@ public class MCH_RenderShip extends MCH_RenderBaseVehicle {
     }
 
     public void renderNozzle(MCH_EntityShip ship, MCH_ShipInfo shipInfo, float tickTime) {
-        float rot = ship.getNozzleRotation();
-        float prevRot = ship.getPrevNozzleRotation();
+        renderNozzle(shipInfo, ship.getNozzleRotation(), ship.getPrevNozzleRotation(), tickTime);
+    }
+
+    public static void renderNozzle(MCH_ShipInfo shipInfo, float rot, float prevRot, float tickTime) {
         Iterator i$ = shipInfo.nozzles.iterator();
 
         while(i$.hasNext()) {
