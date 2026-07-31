@@ -140,6 +140,12 @@ public class MCH_Config {
    public static MCH_ConfigPrm EnableAircraftLODRender;
    public static MCH_ConfigPrm AircraftLODStartDistance;
    public static MCH_ConfigPrm AircraftLODFarDistance;
+   public static MCH_ConfigPrm AircraftLODVisibilityDistance;
+   public static MCH_ConfigPrm AircraftLODRainVisibilityMultiplier;
+   public static MCH_ConfigPrm AircraftLODThunderVisibilityMultiplier;
+   public static MCH_ConfigPrm AircraftLODThermalContrastExponent;
+   public static MCH_ConfigPrm AircraftLODOpticalMinPixels;
+   public static MCH_ConfigPrm AircraftLODThermalMinPixels;
    public static MCH_ConfigPrm MobRenderDistanceWeight;
    public static MCH_ConfigPrm CreativeTabIcon;
    public static MCH_ConfigPrm CreativeTabIconHeli;
@@ -263,6 +269,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm EnablePutRackInFlying;
    public static MCH_ConfigPrm EnableDebugBoundingBox;
    public static MCH_ConfigPrm DebugVehicleBoxCache;
+   public static MCH_ConfigPrm DebugVehicleLODVisibility;
    public static MCH_ConfigPrm DebugFlightControl;
 
    //TODOne mch1.0.5 -> mchr?
@@ -478,6 +485,13 @@ public class MCH_Config {
       AircraftLODStartDistance.desc = ";Distance in blocks where tracked aircraft rendering switches to its cheaper model-only pass.";
       AircraftLODFarDistance = new MCH_ConfigPrm("AircraftLODFarDistance", 4800.0D);
       AircraftLODFarDistance.desc = ";Maximum distance for client-only vehicle LOD snapshots. Real vehicle entity tracking remains unchanged and aligned with child seats.";
+      AircraftLODVisibilityDistance = new MCH_ConfigPrm("AircraftLODVisibilityDistance", 4800.0D);
+      AircraftLODVisibilityDistance.desc = ";Clear-air distance where snapshot optical contrast falls to approximately two percent.";
+      AircraftLODRainVisibilityMultiplier = new MCH_ConfigPrm("AircraftLODRainVisibilityMultiplier", 0.70D);
+      AircraftLODThunderVisibilityMultiplier = new MCH_ConfigPrm("AircraftLODThunderVisibilityMultiplier", 0.45D);
+      AircraftLODThermalContrastExponent = new MCH_ConfigPrm("AircraftLODThermalContrastExponent", 0.35D);
+      AircraftLODOpticalMinPixels = new MCH_ConfigPrm("AircraftLODOpticalMinPixels", 0.75D);
+      AircraftLODThermalMinPixels = new MCH_ConfigPrm("AircraftLODThermalMinPixels", 0.35D);
       MobRenderDistanceWeight = new MCH_ConfigPrm("MobRenderDistanceWeight", 10.0D);
       CreativeTabIcon = new MCH_ConfigPrm("CreativeTabIconItem", "fuel");
       CreativeTabIconHeli = new MCH_ConfigPrm("CreativeTabIconHeli", "ah-64");
@@ -664,6 +678,8 @@ public class MCH_Config {
       EnableDebugBoundingBox = new MCH_ConfigPrm("EnableDebugBoundingBox", false);
       DebugVehicleBoxCache = new MCH_ConfigPrm("DebugVehicleBoxCache", false);
       DebugVehicleBoxCache.desc = ";Print vehicle collision/hit box cache hits, rebuilds, invalidation reasons, and generated box counts.";
+      DebugVehicleLODVisibility = new MCH_ConfigPrm("DebugVehicleLODVisibility", false);
+      DebugVehicleLODVisibility.desc = ";Print one bounded distant snapshot visibility diagnostic per second.";
       DebugFlightControl = new MCH_ConfigPrm("DebugFlightControl", false);
       DebugFlightControl.desc = ";Print FPS, elapsed tick fraction, control inputs, angular velocity, pitch/yaw/roll, new-flight gravity/lift, and placement motion-lock state once per second while piloting.";
       DespawnCount = new MCH_ConfigPrm("DespawnCount", 25);
@@ -820,6 +836,13 @@ public class MCH_Config {
               EnableAircraftLODRender,
               AircraftLODStartDistance,
               AircraftLODFarDistance,
+              AircraftLODVisibilityDistance,
+              AircraftLODRainVisibilityMultiplier,
+              AircraftLODThunderVisibilityMultiplier,
+              AircraftLODThermalContrastExponent,
+              AircraftLODOpticalMinPixels,
+              AircraftLODThermalMinPixels,
+              DebugVehicleLODVisibility,
               MobRenderDistanceWeight,
               CreativeTabIcon,
               CreativeTabIconHeli,
@@ -1033,13 +1056,22 @@ public class MCH_Config {
          MobRenderDistanceWeight.prmDouble = 100.0D;
       }
 
-      if(AircraftLODStartDistance.prmDouble < 0.0D) {
-         AircraftLODStartDistance.prmDouble = 0.0D;
-      }
+      AircraftLODStartDistance.prmDouble = finiteRange(AircraftLODStartDistance.prmDouble, 0.0D, 4800.0D, 140.0D);
+
+      AircraftLODFarDistance.prmDouble = finiteRange(AircraftLODFarDistance.prmDouble, 1.0D, 4800.0D, 4800.0D);
 
       if(AircraftLODFarDistance.prmDouble > 0.0D && AircraftLODFarDistance.prmDouble < AircraftLODStartDistance.prmDouble) {
          AircraftLODFarDistance.prmDouble = AircraftLODStartDistance.prmDouble;
       }
+
+      AircraftLODVisibilityDistance.prmDouble = finitePositive(AircraftLODVisibilityDistance.prmDouble, 4800.0D);
+      AircraftLODRainVisibilityMultiplier.prmDouble = finiteRange(AircraftLODRainVisibilityMultiplier.prmDouble, 0.01D, 1.0D, 0.70D);
+      AircraftLODThunderVisibilityMultiplier.prmDouble = finiteRange(AircraftLODThunderVisibilityMultiplier.prmDouble, 0.01D, 1.0D, 0.45D);
+      AircraftLODThunderVisibilityMultiplier.prmDouble = Math.min(AircraftLODThunderVisibilityMultiplier.prmDouble,
+         AircraftLODRainVisibilityMultiplier.prmDouble);
+      AircraftLODThermalContrastExponent.prmDouble = finiteRange(AircraftLODThermalContrastExponent.prmDouble, 0.01D, 1.0D, 0.35D);
+      AircraftLODOpticalMinPixels.prmDouble = finiteRange(AircraftLODOpticalMinPixels.prmDouble, 0.0D, 64.0D, 0.75D);
+      AircraftLODThermalMinPixels.prmDouble = finiteRange(AircraftLODThermalMinPixels.prmDouble, 0.0D, 64.0D, 0.35D);
 
       Iterator isNoDamageVsSetting = CommandPermission.iterator();
 
@@ -1359,6 +1391,15 @@ public class MCH_Config {
 
    }
 
+
+   private static double finitePositive(double value, double fallback) {
+      return !Double.isNaN(value) && !Double.isInfinite(value) && value > 0.0D ? value : fallback;
+   }
+
+   private static double finiteRange(double value, double minimum, double maximum, double fallback) {
+      if(Double.isNaN(value) || Double.isInfinite(value)) return fallback;
+      return Math.max(minimum, Math.min(maximum, value));
+   }
 
    class DamageFactor {
 

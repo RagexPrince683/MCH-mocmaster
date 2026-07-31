@@ -93,8 +93,15 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `HideKeybind` | `false` | Hides keybind display/help where implemented. |
 | `RenderDistanceWeight` | `1000.0` | Render-distance weight for mod rendering. |
 | `EnableAircraftLODRender` | `true` | Enables client-only far-distance model displays for aircraft, tanks, turrets, and ships. |
-| `AircraftLODStartDistance` | `256.0` | Distance where tracked vehicles switch to cheaper model-only rendering. |
-| `AircraftLODFarDistance` | `4096.0` | Maximum distance for client-only LOD snapshots. If positive and below start distance, it is corrected upward. |
+| `AircraftLODStartDistance` | `140.0` | Distance where tracked vehicles switch to cheaper model-only rendering, with the existing hysteresis around the transition. |
+| `AircraftLODFarDistance` | `4800.0` | Hard maximum detection range for render-only vehicle snapshots; this is not a full-detail visibility distance. |
+| `AircraftLODVisibilityDistance` | `4800.0` | Clear/hazy atmospheric visibility distance where Koschmieder contrast transmission reaches approximately two percent. |
+| `AircraftLODRainVisibilityMultiplier` | `0.70` | Multiplier applied to atmospheric visibility distance in rain. |
+| `AircraftLODThunderVisibilityMultiplier` | `0.45` | Multiplier applied to atmospheric visibility distance in thunder. |
+| `AircraftLODThermalContrastExponent` | `0.35` | Raises atmospheric transmission to this exponent in thermal mode, improving contrast without extending the hard range. |
+| `AircraftLODOpticalMinPixels` | `0.75` | Minimum projected target dimension in pixels for normal optical detection. |
+| `AircraftLODThermalMinPixels` | `0.35` | Minimum projected target dimension in pixels for thermal detection. |
+| `DebugVehicleLODVisibility` | `false` | Logs at most one snapshot visibility decision per second, including projection, atmosphere, projected size, camera, weather, and skip reason. |
 | `MobRenderDistanceWeight` | `10.0` | Mob render-distance weight; clamped to 0.1-100. |
 | `CreativeTabIconItem` | `fuel` | Icon item for general tab. |
 | `CreativeTabIconHeli` | `ah-64` | Icon item for helicopter tab. |
@@ -118,6 +125,8 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `ReplaceRenderViewEntity` | `true` | Replaces render-view entity for MCHeli camera behavior. |
 | `ItemRecipe_*` | See generated config/source defaults | Recipe strings for core MCHeli items. |
 | `MultiThreadedModelLoading` | `true` | Enables threaded model loading on the client. |
+
+Snapshot visibility uses the active projection matrix, so scopes and other FOV magnification increase projected target size naturally. Magnification does not change real distance or atmospheric transmission. Thermal vision lowers the projected-size threshold and improves contrast, but it never extends `AircraftLODFarDistance`. Snapshot rendering retains depth testing, allowing loaded nearby terrain and structures to occlude a target; unloaded terrain has no depth information and therefore cannot occlude this render-only data.
 
 ## Vehicle content-pack keys
 
