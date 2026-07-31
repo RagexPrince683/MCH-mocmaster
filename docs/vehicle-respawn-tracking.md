@@ -1,62 +1,30 @@
 # Normal vehicle tracking across player respawn
 
-## Corrected diagnosis
+## Proven evidence and diagnosis
 
-PR #593 / merge `1244d0ca86765817bf89e11b4a6079086bd2a7a5` claimed that a stale
-`EntityPlayerMP` remained in `EntityTrackerEntry.trackingPlayers`. The supplied run
-contains no lifecycle messages (they were hidden behind `EnableMCHLibDebugLog=false`),
-so that run neither proves the claim nor proves that the old refresh ran.
+Commit `769e711ad3b77d2063c99ec7265d1967e1e11d46` (PR #594) did not fix the issue. The supplied dedicated-server run is authoritative: the replacement player started tracking parent IDs 60, 206, and 2792, and all three received complete-state syncs. Its `nearby=3`, `tracked=3`, `targetedAttempts=0` result proves that the real server entities and replacement-player tracker memberships were already valid. Watcher membership is therefore not evidence that the replacement client has an entity.
 
-The 1.7.10 source audit rejects the claim as a generally valid root cause. During
-`ServerConfigurationManager.respawnPlayer`, vanilla calls
-`removePlayerFromTrackers(oldPlayer)` before constructing and spawning the replacement.
-A reused numeric ID alone therefore does not leave an old watcher. A stale watcher is
-now reported if it actually occurs; it is not assumed.
+The same run reports `tracked=3` with `chunkReady=0`. Parent `StartTracking` occurred before `PlayerRespawnEvent`, and seats began later. PR #594's watcher-only success condition was invalid. `MCH_EntityBaseVehicle.forceSpawn=true` permits this ordering: a parent can start tracking without `PlayerManager` watching its chunk. The tracker spawn path is independent of the subsequent `S07PacketRespawn`; client respawn handling replaces `Minecraft.theWorld`, so a parent inserted in the old `WorldClient` can be discarded. The server-only run establishes this timing hazard but cannot prove client packet handling order. The first proven client divergence is now recorded only when a probe result reaches the server.
 
-The failed fix introduced a deterministic tracking hole: one tick after respawn it
-sent destroy packets with `removePlayerFromTrackers(replacement)`, then called global
-`updateTrackedEntities()`. That update is movement-driven and does not promise to
-reconsider every stationary tracker entry for that player. It also removed the queue
-record regardless of the result. The first divergence created by that path is stage 3:
-the server vehicle and tracker entry exist, while the replacement player is absent
-from the entry; consequently no real client entity can remain after the destroy packet.
+## Client-confirmed protocol and repair
 
-## Repair
+For 60 server ticks after `PlayerRespawnEvent`, the server inventories at most 128 normal parent vehicles within 200 blocks. UAV and NewUAV parents are excluded. Probes are sent at ticks 1, 5, 10, 20, 40, and 60, plus after repair—not every tick. They carry the respawn generation, replacement player and server-world identities, and expected parent IDs, UUIDs, types, positions, and chunks.
 
-The unconditional destructive removal and global update are gone. A lifecycle record
-is keyed by UUID plus replacement-object identity and retains the exact replacement
-reference. For up to 40 server ticks it verifies, by exact object identity, every
-nearby normal parent vehicle in Forge's tracker view and independently verifies that
-`PlayerManager` watches its chunk. Missing entries are reconsidered only with
-`EntityTracker.func_85172_a(replacement, chunk)`, and only after that chunk is watched.
-The record ends immediately when all expected parents track the replacement, or logs a
-visible timeout. Ordinary `StartTracking` remains responsible for dependent entities
-and calls `syncCompleteAircraftState` only after the real parent starts tracking.
+Client inspection is scheduled with `Minecraft.func_152344_a`. It resolves each parent by numeric ID and independently by UUID and returns player/world/view identities, respawn readiness and age, entity lifecycle/chunk state, aircraft info, renderer flags, collision state and box, and seat/hitbox parent counts. Result handling is scheduled on the server thread. The audit classifies missing entities, ID collisions, dead or unchunked entities, missing aircraft info, render suppression, invalid collision, and invalid dependent parents. It succeeds only after the client confirms every original ID and UUID in the replacement world.
 
-This does not expand tracker ranges or alter LOD snapshots. Snapshot displays remain
-render-only and excluded inside 200 blocks. UAV, NewUAV, station, inventory, remote
-camera, and safe-return paths are unchanged.
+For a missing or ID-collided parent, the server removes only the exact replacement-player object from that parent's `EntityTrackerEntry`, then asks the same entry to watch the same original server entity. This uses the normal Forge spawn path and preserves the instance, ID, and UUID. The parent is resent before targeted reconsideration of its seats and hitboxes and complete-state synchronization. Correctly resolved parents and unrelated tracker entries are untouched. A parent receives at most two resends per respawn generation, all packet lists are bounded, and a visible timeout is logged at tick 60.
 
-## Audit logging
+`forceSpawn=true` remains because removing it without normal-boundary and distant-LOD runtime coverage risks a separate regression. LOD snapshots remain render-only and excluded inside the normal 200-block range; they are not a fallback for a missing real parent.
 
-Essential evidence uses the normal `mcheli` logger even when debug logging is off and
-has prefix `[MCH-RESPAWN-AUDIT]`:
+A graphical two-client dedicated-server run is still required to learn whether the first classification is `3-missing-entity` (proving premature spawn/world replacement), removal after creation, or later client-state corruption. This source change does not claim that run passed.
 
-- startup `registered` lines identify the Forge and FML event buses;
-- `death`, `clone`, `queue`, and client `dead`/`replacement+N` lines delimit lifecycle;
-- `readiness`, `attempt`, `success`, and `timeout` show the bounded targeted repair;
-- `start`, `stop`, and `syncCompleteAircraftState` prove Forge tracking transitions;
-- client snapshots at replacement ticks 0, 1, 5, 20, and 40 report player/world/view
-  identity and real-vehicle versus LOD-display counts.
+## Commit and pull-request audit
 
-A graphical dedicated-server/client run is still required to capture per-vehicle
-server/client resolution evidence. This repository change does not claim that such a
-run was performed in the source-only environment.
+* `3509e441...` only updated the uppercase changelog.
+* PR #587 (`1d293104...`, merge `3287a81...`) reset client LOD/mount caches and render state.
+* PR #592 (`b328858...`, merge `c3add9e...`) restored the 200-block snapshot boundary and UUID mount generations.
+* PR #593 (`75610d3...`, merge `1244d0c...`) added an unverified destructive global tracker refresh.
+* PR #594 (`7bb2b52...`, merge `769e711...`) removed that global refresh but incorrectly accepted tracker membership as success and logged client evidence only on the client.
+* Current commit `e6d4b10...` only updated the uppercase changelog.
 
-## Commit and PR audit
-
-PR #587 (`1d293104...`, merge `3287a81...`) reset client LOD/mount caches and render
-state. PR #592 (`b328858...`, merge `c3add9e...`) restored the 200-block snapshot
-boundary and UUID mount generations. PR #593 (`75610d3...`, merge `1244d0c...`) added
-the unverified one-tick destructive refresh described above. The current repair keeps
-the useful #587/#592 LOD and mount behavior and replaces only #593's refresh.
+This repair retains #587/#592's LOD and mount work, does not revive #593's global refresh, and replaces #594's incomplete audit with bounded client confirmation and targeted resend.
