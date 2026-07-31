@@ -17,9 +17,15 @@ import mcheli.helicopter.MCH_HeliInfo;
 import mcheli.helicopter.MCH_RenderHeli;
 import mcheli.network.packets.PacketVehicleLODSnapshot;
 import mcheli.plane.MCP_PlaneInfoManager;
+import mcheli.plane.MCP_PlaneInfo;
+import mcheli.plane.MCP_RenderPlane;
 import mcheli.ship.MCH_ShipInfoManager;
+import mcheli.ship.MCH_ShipInfo;
+import mcheli.ship.MCH_RenderShip;
 import mcheli.tank.MCH_TankInfoManager;
 import mcheli.vehicle.MCH_TurretInfoManager;
+import mcheli.vehicle.MCH_TurretInfo;
+import mcheli.vehicle.MCH_RenderTurret;
 import mcheli.wrapper.W_MOD;
 import mcheli.wrapper.W_Render;
 import net.minecraft.client.Minecraft;
@@ -137,7 +143,7 @@ public final class MCH_VehicleLODManager {
 
     private static void render(Display display, double x, double y, double z, float interpolation, long now) {
         MCH_BaseVehicleInfo info = getInfo(display.category, display.typeName);
-        String textureFolder = getTextureFolder(display.category);
+        String textureFolder = info instanceof MCH_TurretInfo ? ((MCH_TurretInfo)info).getDirectoryName() : getTextureFolder(display.category);
         if (info == null || info.model == null || textureFolder == null) {
             return;
         }
@@ -175,6 +181,33 @@ public final class MCH_VehicleLODManager {
                         }
                     } else if (display.category == 0 && info instanceof MCH_HeliInfo) {
                         MCH_RenderHeli.drawSnapshotBlades((MCH_HeliInfo)info, display.getRotorPhase(now), display.rotorFolded);
+                    } else if (display.category == 1 && info instanceof MCP_PlaneInfo) {
+                        MCP_PlaneInfo plane = (MCP_PlaneInfo)info;
+                        MCP_RenderPlane.renderNozzle(plane, display.nozzleRotation, display.previousNozzleRotation, interpolation);
+                        MCP_RenderPlane.renderWing(plane, display.wingRotation, display.previousWingRotation, interpolation);
+                        float phase = display.getRotorPhase(now);
+                        MCP_RenderPlane.renderRotor(plane, display.nozzleRotation, display.previousNozzleRotation, phase, phase, interpolation);
+                        MCH_RenderBaseVehicle.renderLandingGear(info, display.landingGearRotation, display.previousLandingGearRotation, interpolation);
+                    } else if (display.category == 2 && info instanceof MCH_ShipInfo) {
+                        MCH_ShipInfo ship = (MCH_ShipInfo)info;
+                        MCH_RenderShip.renderNozzle(ship, display.nozzleRotation, display.previousNozzleRotation, interpolation);
+                        MCH_RenderShip.renderWing(ship, display.wingRotation, display.previousWingRotation, interpolation);
+                        float phase = display.getRotorPhase(now);
+                        MCH_RenderShip.renderRotor(ship, display.nozzleRotation, display.previousNozzleRotation, phase, phase, interpolation);
+                        MCH_RenderBaseVehicle.renderLandingGear(info, display.landingGearRotation, display.previousLandingGearRotation, interpolation);
+                    } else if (display.category == 4 && info instanceof MCH_TurretInfo) {
+                        MCH_RenderTurret.drawSnapshotParts((MCH_TurretInfo)info,
+                            interpolateAngle(display.previousYaw, display.yaw, interpolation),
+                            interpolateAngle(display.previousPitch, display.pitch, interpolation),
+                            interpolateAngle(display.previousAimYaw, display.aimYaw, interpolation),
+                            display.previousAimPitch + (display.aimPitch - display.previousAimPitch) * interpolation,
+                            interpolateAngle(display.previousTurretBarrelRotation, display.turretBarrelRotation, interpolation),
+                            display.turretParts, interpolation);
+                    }
+                    if (display.category != 3 && display.category != 4) {
+                        int weaponCount = Math.min(info.partWeapon.size(), display.weaponPoses.length);
+                        for (int i = 0; i < weaponCount; ++i) MCH_RenderBaseVehicle.renderSnapshotWeapon(info,
+                            (MCH_BaseVehicleInfo.PartWeapon)info.partWeapon.get(i), display.weaponPoses[i], interpolation);
                     }
                 } else {
                     // Legacy monolithic models cannot exclude bind-pose groups safely.
@@ -274,6 +307,11 @@ public final class MCH_VehicleLODManager {
         private float rotorPhase;
         private float rotorAngularChange;
         private boolean rotorFolded;
+        private float landingGearRotation, previousLandingGearRotation;
+        private float nozzleRotation, previousNozzleRotation, wingRotation, previousWingRotation;
+        private float aimYaw, previousAimYaw, aimPitch, previousAimPitch;
+        private float turretBarrelRotation, previousTurretBarrelRotation;
+        private PacketVehicleLODSnapshot.TurretPartPose[] turretParts = new PacketVehicleLODSnapshot.TurretPartPose[0];
         private long rotorPhaseTimeMs;
         private long previousUpdateMs;
         private long lastUpdateMs;
@@ -318,6 +356,7 @@ public final class MCH_VehicleLODManager {
                 this.rotorPhaseTimeMs = 0L;
                 this.rotorAngularChange = 0.0F;
                 this.runningGearInitialized = false;
+                this.turretParts = new PacketVehicleLODSnapshot.TurretPartPose[0];
             }
             if (entry.category == 3) {
                 for (int side = 0; side < 2; ++side) {
@@ -368,7 +407,27 @@ public final class MCH_VehicleLODManager {
                 }
             }
             this.weaponPoses = incoming;
-            if (entry.category == 0) {
+            this.previousLandingGearRotation = (categoryChanged || oldTypeName == null) ? entry.prevLandingGearRotation : this.landingGearRotation;
+            this.landingGearRotation = entry.landingGearRotation;
+            this.previousNozzleRotation = (categoryChanged || oldTypeName == null) ? entry.prevNozzleRotation : this.nozzleRotation;
+            this.nozzleRotation = entry.nozzleRotation;
+            this.previousWingRotation = (categoryChanged || oldTypeName == null) ? entry.prevWingRotation : this.wingRotation;
+            this.wingRotation = entry.wingRotation;
+            this.previousAimYaw = (categoryChanged || oldTypeName == null) ? entry.prevAimYaw : this.aimYaw;
+            this.aimYaw = entry.aimYaw;
+            this.previousAimPitch = (categoryChanged || oldTypeName == null) ? entry.prevAimPitch : this.aimPitch;
+            this.aimPitch = entry.aimPitch;
+            this.previousTurretBarrelRotation = (categoryChanged || oldTypeName == null) ? entry.prevTurretBarrelRotation : this.turretBarrelRotation;
+            this.turretBarrelRotation = entry.turretBarrelRotation;
+            PacketVehicleLODSnapshot.TurretPartPose[] incomingTurretParts = entry.turretParts == null
+                ? new PacketVehicleLODSnapshot.TurretPartPose[0] : entry.turretParts;
+            if (!categoryChanged && oldTypeName != null) {
+                for (int i = 0; i < incomingTurretParts.length && i < this.turretParts.length; ++i) {
+                    incomingTurretParts[i].prevRecoil = this.turretParts[i].recoil;
+                }
+            }
+            this.turretParts = incomingTurretParts;
+            if (entry.category == 0 || entry.category == 1 || entry.category == 2) {
                 if (this.rotorPhaseTimeMs == 0L) {
                     this.rotorPhase = entry.rotorRotation;
                 } else {

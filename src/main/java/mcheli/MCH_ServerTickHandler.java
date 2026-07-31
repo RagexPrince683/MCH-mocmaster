@@ -15,6 +15,7 @@ import mcheli.plane.MCP_EntityPlane;
 import mcheli.ship.MCH_EntityShip;
 import mcheli.tank.MCH_EntityTank;
 import mcheli.vehicle.MCH_EntityTurret;
+import mcheli.vehicle.MCH_TurretInfo;
 import mcheli.weapon.MCH_WeaponSet;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -94,6 +95,8 @@ public class MCH_ServerTickHandler {
          entry.pitch = vehicle.getRotPitch();
          entry.roll = vehicle.getRotRoll();
          entry.scale = 1.0F;
+         entry.landingGearRotation = vehicle.getLandingGearRotation();
+         entry.prevLandingGearRotation = vehicle.getPrevLandingGearRotation();
          if(entry.category == 3) {
             for(int side = 0; side < 2; ++side) {
                entry.trackRollerRotation[side] = vehicle.rotTrackRoller[side];
@@ -116,10 +119,65 @@ public class MCH_ServerTickHandler {
             if(entry.rotorAngularChange > 180.0F) entry.rotorAngularChange -= 360.0F;
             entry.rotorFolded = heli.isFoldBlades();
          }
+         if(vehicle instanceof MCP_EntityPlane) {
+            MCP_EntityPlane plane = (MCP_EntityPlane)vehicle;
+            capturePlaneLikeState(entry, plane.getNozzleRotation(), plane.getPrevNozzleRotation(),
+               plane.getWingRotation(), plane.getPrevWingRotation(), plane.rotationRotor, plane.prevRotationRotor);
+         } else if(vehicle instanceof MCH_EntityShip) {
+            MCH_EntityShip ship = (MCH_EntityShip)vehicle;
+            capturePlaneLikeState(entry, ship.getNozzleRotation(), ship.getPrevNozzleRotation(),
+               ship.getWingRotation(), ship.getPrevWingRotation(), ship.rotationRotor, ship.prevRotationRotor);
+         } else if(vehicle instanceof MCH_EntityTurret) {
+            captureTurretState(entry, (MCH_EntityTurret)vehicle);
+         }
          entry.packedLight = getPackedLight(world, vehicle);
          entries.add(entry);
       }
       return entries;
+   }
+
+   private static void capturePlaneLikeState(PacketVehicleLODSnapshot.Entry entry, float nozzle, float prevNozzle,
+      float wing, float prevWing, float rotor, float prevRotor) {
+      entry.nozzleRotation = nozzle;
+      entry.prevNozzleRotation = prevNozzle;
+      entry.wingRotation = wing;
+      entry.prevWingRotation = prevWing;
+      entry.rotorRotation = rotor;
+      entry.prevRotorRotation = prevRotor;
+      entry.rotorAngularChange = rotor - prevRotor;
+      if(entry.rotorAngularChange < -180.0F) entry.rotorAngularChange += 360.0F;
+      if(entry.rotorAngularChange > 180.0F) entry.rotorAngularChange -= 360.0F;
+   }
+
+   private static void captureTurretState(PacketVehicleLODSnapshot.Entry entry, MCH_EntityTurret turret) {
+      MCH_TurretInfo info = turret.getTurretInfo();
+      MCH_WeaponSet ws = turret.getFirstSeatWeapon();
+      entry.aimYaw = turret.getLastRiderYaw();
+      entry.prevAimYaw = turret.prevLastRiderYaw;
+      entry.aimPitch = turret.getLastRiderPitch();
+      entry.prevAimPitch = turret.prevLastRiderPitch;
+      if(info == null || ws == null) return;
+      entry.turretBarrelRotation = ws.rotBarrel;
+      entry.prevTurretBarrelRotation = ws.prevRotBarrel;
+      List<PacketVehicleLODSnapshot.TurretPartPose> poses = new ArrayList<PacketVehicleLODSnapshot.TurretPartPose>();
+      int index = 0;
+      for(Object object : info.partList) index = captureTurretPart((MCH_TurretInfo.VPart)object, turret, ws, index, poses);
+      entry.turretParts = poses.toArray(new PacketVehicleLODSnapshot.TurretPartPose[poses.size()]);
+   }
+
+   private static int captureTurretPart(MCH_TurretInfo.VPart part, MCH_EntityTurret turret, MCH_WeaponSet ws,
+      int index, List<PacketVehicleLODSnapshot.TurretPartPose> poses) {
+      if(poses.size() >= PacketVehicleLODSnapshot.MAX_TURRET_PARTS) return index;
+      PacketVehicleLODSnapshot.TurretPartPose pose = new PacketVehicleLODSnapshot.TurretPartPose();
+      poses.add(pose);
+      if(index < ws.getWeaponNum()) {
+         pose.recoil = ws.recoilBuf[index].recoilBuf;
+         pose.prevRecoil = ws.recoilBuf[index].prevRecoilBuf;
+      }
+      if(part.type == 2 || part.type == 3) ++index;
+      if(part.child != null) for(Object child : part.child) index = captureTurretPart((MCH_TurretInfo.VPart)child, turret, ws, index, poses);
+      pose.visible = part.type != 3 || !turret.isWeaponNotCooldown(ws, index);
+      return index;
    }
 
    private static PacketVehicleLODSnapshot.WeaponPose[] collectWeaponPoses(MCH_EntityBaseVehicle vehicle) {

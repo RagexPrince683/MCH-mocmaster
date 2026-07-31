@@ -348,3 +348,10 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 * Fixed aircraft LOD selection retaining render state across local-player death, respawn, world changes, and entity retracking.
 * Restored normal vehicle and passenger-seat mount relationships with an authoritative server notification and a bounded client retry when tracking packets arrive out of order.
 * Kept UAV and NewUAV mounting paths excluded from the new normal-vehicle correction flow.
+
+## Vehicle LOD named-part completion
+
+- Restored tracked and snapshot landing-gear rendering for separable plane models, including reverse, hatch, secondary-axis, and sliding gear definitions.
+- Added continuous snapshot propeller animation plus nozzle/nacelle, wing, pylon, and generic weapon rendering for planes and ships.
+- Added bounded, depth-first stationary-turret pose snapshots and recursive snapshot rendering for yaw, pitch, barrel rotation, recoil, cooldown visibility, and nested parts.
+- Resolved turret snapshot textures from each turret info's legacy `vehicles` or newer `turrets` asset directory.

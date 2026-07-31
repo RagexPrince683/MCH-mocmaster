@@ -56,8 +56,11 @@ public class MCP_RenderPlane extends MCH_RenderBaseVehicle {
    }
 
    public void renderRotor(MCP_EntityPlane plane, MCP_PlaneInfo planeInfo, float tickTime) {
-      float rot = plane.getNozzleRotation();
-      float prevRot = plane.getPrevNozzleRotation();
+      renderRotor(planeInfo, plane.getNozzleRotation(), plane.getPrevNozzleRotation(),
+         plane.rotationRotor, plane.prevRotationRotor, tickTime);
+   }
+
+   public static void renderRotor(MCP_PlaneInfo planeInfo, float rot, float prevRot, float rotorPhase, float prevRotorPhase, float tickTime) {
       Iterator i$ = planeInfo.rotorList.iterator();
 
       while(i$.hasNext()) {
@@ -71,8 +74,7 @@ public class MCP_RenderPlane extends MCH_RenderBaseVehicle {
 
          while(i$1.hasNext()) {
             MCP_PlaneInfo.Blade b = (MCP_PlaneInfo.Blade)i$1.next();
-            float br = plane.prevRotationRotor;
-            br += (plane.rotationRotor - plane.prevRotationRotor) * tickTime;
+            float br = prevRotorPhase + (rotorPhase - prevRotorPhase) * tickTime;
             GL11.glPushMatrix();
             GL11.glTranslated(b.pos.xCoord, b.pos.yCoord, b.pos.zCoord);
             GL11.glRotatef(br, (float)b.rot.xCoord, (float)b.rot.yCoord, (float)b.rot.zCoord);
@@ -94,8 +96,10 @@ public class MCP_RenderPlane extends MCH_RenderBaseVehicle {
    }
 
    public void renderWing(MCP_EntityPlane plane, MCP_PlaneInfo planeInfo, float tickTime) {
-      float rot = plane.getWingRotation();
-      float prevRot = plane.getPrevWingRotation();
+      renderWing(planeInfo, plane.getWingRotation(), plane.getPrevWingRotation(), tickTime);
+   }
+
+   public static void renderWing(MCP_PlaneInfo planeInfo, float rot, float prevRot, float tickTime) {
 
       for(Iterator i$ = planeInfo.wingList.iterator(); i$.hasNext(); GL11.glPopMatrix()) {
          MCP_PlaneInfo.Wing w = (MCP_PlaneInfo.Wing)i$.next();
@@ -122,8 +126,10 @@ public class MCP_RenderPlane extends MCH_RenderBaseVehicle {
    }
 
    public void renderNozzle(MCP_EntityPlane plane, MCP_PlaneInfo planeInfo, float tickTime) {
-      float rot = plane.getNozzleRotation();
-      float prevRot = plane.getPrevNozzleRotation();
+      renderNozzle(planeInfo, plane.getNozzleRotation(), plane.getPrevNozzleRotation(), tickTime);
+   }
+
+   public static void renderNozzle(MCP_PlaneInfo planeInfo, float rot, float prevRot, float tickTime) {
       Iterator i$ = planeInfo.nozzles.iterator();
 
       while(i$.hasNext()) {
@@ -136,6 +142,11 @@ public class MCP_RenderPlane extends MCH_RenderBaseVehicle {
          GL11.glPopMatrix();
       }
 
+   }
+
+   @Override
+   protected void renderAircraftLODParts(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, double x, double y, double z, float tickTime) {
+      renderLandingGear(ac, info, tickTime);
    }
 
    protected ResourceLocation getEntityTexture(Entity entity) {
