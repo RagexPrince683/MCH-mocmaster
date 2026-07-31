@@ -375,3 +375,8 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Added continuous snapshot propeller animation plus nozzle/nacelle, wing, pylon, and generic weapon rendering for planes and ships.
 - Added bounded, depth-first stationary-turret pose snapshots and recursive snapshot rendering for yaw, pitch, barrel rotation, recoil, cooldown visibility, and nested parts.
 - Resolved turret snapshot textures from each turret info's legacy `vehicles` or newer `turrets` asset directory.
+
+# Client-confirmed normal vehicle respawn repair
+
+* Replaced watcher-only respawn success with bounded server-to-client probes and detailed client-to-server resolution evidence.
+* Targetedly resend only missing normal parents and then their dependents, with two-attempt and 60-tick limits; UAV paths remain unchanged.

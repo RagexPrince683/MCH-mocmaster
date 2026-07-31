@@ -272,11 +272,15 @@ public class MCH_EventHook extends W_EventHook {
       String kind = target instanceof MCH_EntityPSeat ? "passenger-seat"
          : target instanceof MCH_EntitySeat ? "seat"
          : target instanceof MCH_EntityHitBox ? "hitbox" : "vehicle";
+      boolean chunkReady = aircraft != null && player.worldObj instanceof net.minecraft.world.WorldServer
+         && ((net.minecraft.world.WorldServer)player.worldObj).getPlayerManager().isPlayerWatchingChunk(player, aircraft.chunkCoordX, aircraft.chunkCoordZ);
+      boolean premature = "start".equals(action) && aircraft != null && aircraft.forceSpawn && !chunkReady;
       MCH_Lib.RespawnAuditLog(
-         "%s kind=%s playerId=%d playerObject=%x targetId=%d targetUuid=%s parentId=%d parentRef=%x dead=%s",
+         "%s kind=%s playerId=%d playerObject=%x targetId=%d targetUuid=%s parentId=%d parentRef=%x dead=%s chunkReady=%s premature=%s forceSpawn=%s",
          new Object[]{action, kind, Integer.valueOf(player.getEntityId()), Integer.valueOf(System.identityHashCode(player)),
             Integer.valueOf(target.getEntityId()), target.getUniqueID(), Integer.valueOf(aircraft != null ? aircraft.getEntityId() : -1),
-            Integer.valueOf(System.identityHashCode(aircraft)), Boolean.valueOf(target.isDead)});
+            Integer.valueOf(System.identityHashCode(aircraft)), Boolean.valueOf(target.isDead), Boolean.valueOf(chunkReady),
+            Boolean.valueOf(premature), Boolean.valueOf(aircraft != null && aircraft.forceSpawn)});
    }
 
    private static boolean containsExact(List<?> values, Object expected) {

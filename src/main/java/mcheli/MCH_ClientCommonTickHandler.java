@@ -113,10 +113,15 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    private int auditRespawnTicks = -1;
    private boolean auditDeadLogged;
 
+   public static int getRespawnAuditAge() {
+      return instance == null ? -1 : instance.auditRespawnTicks;
+   }
+
 
 
    public MCH_ClientCommonTickHandler(Minecraft minecraft, MCH_Config config) {
       super(minecraft);
+      instance = this;
       this.gui_Common = new MCH_GuiCommon(minecraft);
       this.gui_Heli = new MCH_GuiHeli(minecraft);
       this.gui_Plane = new MCP_GuiPlane(minecraft);
