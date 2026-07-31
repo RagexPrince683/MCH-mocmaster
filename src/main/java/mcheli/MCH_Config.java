@@ -650,7 +650,7 @@ public class MCH_Config {
       BlockMarkerSize = new MCH_ConfigPrm("BlockMarkerSize", 10.0D);
       ReplaceRenderViewEntity = new MCH_ConfigPrm("ReplaceRenderViewEntity", true);
       StingerLockRange = new MCH_ConfigPrm("StingerLockRange", 4988.0D);
-      delayrangeloader = new MCH_ConfigPrm("delayrangeloader", 5);
+      delayrangeloader = new MCH_ConfigPrm("delayrangeloader", 6);
       bombletloader = new MCH_ConfigPrm("bombletloader", 10);
       wrenchdropitem = new MCH_ConfigPrm("wrenchdropitem", false);
       AutoRepairEnabled = new MCH_ConfigPrm("AutoRepairEnabled", false);
