@@ -1,3 +1,9 @@
+## PR #594 - Verify and Repair Respawn Tracking
+
+- Replaced PR #593's unverified one-tick global tracker reset with a 40-tick, chunk-ready, per-player targeted verification and repair.
+- Added bounded, always-visible `[MCH-RESPAWN-AUDIT]` server and client lifecycle evidence while preserving the 200-block LOD exclusion and UAV behavior.
+- Corrected the respawn tracking documentation to distinguish verified vanilla lifecycle behavior from the former stale-watcher theory.
+
 ## PR #593 - Restore Real Vehicle Tracking After Respawn
 
 - Rebuild the replacement server player's vanilla tracker membership once, after Forge's respawn or dimension-change lifecycle has installed the player and its watched chunks.

@@ -90,6 +90,10 @@ public final class MCH_VehicleLODManager {
         this.world = null;
     }
 
+    public synchronized int getDisplayCountForAudit() {
+        return this.displays.size();
+    }
+
     @SubscribeEvent
     public synchronized void onRenderWorldLast(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();

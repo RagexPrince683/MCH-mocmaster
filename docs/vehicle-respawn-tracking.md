@@ -1,59 +1,62 @@
 # Normal vehicle tracking across player respawn
 
-## Root cause and lifecycle fix
+## Corrected diagnosis
 
-Minecraft 1.7.10 replaces `EntityPlayerMP` on respawn while deliberately reusing
-the old player's numeric entity ID. `Entity.equals` and `hashCode` use that ID,
-and each `EntityTrackerEntry` stores its watching players in a `HashSet`. If an
-old watcher survives the replacement boundary, the set therefore reports that
-the replacement is already watching an existing vehicle. The normal spawn
-packet and Forge `StartTracking` event are then suppressed. The server vehicle
-continues to exist, but the client has no real entity to render, collide with,
-select, mount, or use.
+PR #593 / merge `1244d0ca86765817bf89e11b4a6079086bd2a7a5` claimed that a stale
+`EntityPlayerMP` remained in `EntityTrackerEntry.trackingPlayers`. The supplied run
+contains no lifecycle messages (they were hidden behind `EnableMCHLibDebugLog=false`),
+so that run neither proves the claim nor proves that the old refresh ran.
 
-The server now queues one refresh from Forge's `PlayerRespawnEvent` (and the
-corresponding dimension-change event). At the next server-tick end, after the
-replacement belongs to the world and `PlayerManager` has installed its watched
-chunks, the refresh removes only that player's membership from tracker entries
-and asks vanilla `EntityTracker` to rebuild memberships. Vanilla consequently
-sends the existing parent vehicle and dependent seat/hitbox entities with their
-original IDs and UUIDs. Their ordinary `StartTracking` events retain
-`syncCompleteAircraftState` as the post-spawn state synchronization step. The
-refresh is removed from the queue immediately and is never repeated per tick.
+The 1.7.10 source audit rejects the claim as a generally valid root cause. During
+`ServerConfigurationManager.respawnPlayer`, vanilla calls
+`removePlayerFromTrackers(oldPlayer)` before constructing and spawning the replacement.
+A reused numeric ID alone therefore does not leave an old watcher. A stale watcher is
+now reported if it actually occurs; it is not assumed.
 
-Enable `EnableMCHLibDebugLog` to record the debug-only
-`[MCH-RESPAWN-TRACK] queued`, `refreshed`, and `skipped stale refresh` lifecycle
-tags. These include player entity ID, UUID and object identity, world identity,
-dimension, chunk, and nearby normal-vehicle count without logging every vehicle
-on every tick.
+The failed fix introduced a deterministic tracking hole: one tick after respawn it
+sent destroy packets with `removePlayerFromTrackers(replacement)`, then called global
+`updateTrackedEntities()`. That update is movement-driven and does not promise to
+reconsider every stationary tracker entry for that player. It also removed the queue
+record regardless of the result. The first divergence created by that path is stage 3:
+the server vehicle and tracker entry exist, while the replacement player is absent
+from the entry; consequently no real client entity can remain after the destroy packet.
 
-## Synchronization audit
+## Repair
 
-- `3509e4419f6f37ef238d730b151302eb934211e4` is the pre-synchronization base.
-- PR #587 (`1d293104335744b46da4cbf08dad58915f4dc3e9`, merged as
-  `3287a81d3bfe00fa15eaa520c1e11df15d2765f3`) cleared client LOD and pending
-  mount caches at death/world/player replacement, reset real vehicles' LOD
-  render flag on join, and added bounded normal-mount correction. Clearing the
-  render-only cache exposed the absent real entity; it did not remove a server
-  vehicle or cause the interaction failure.
-- PR #592 (`b328858acbf1b060be429d05cf3adbc2480558ac`, merged as
-  `c3add9e638143c8de3889f9d9e37a24ee9e52b4e`) excluded the normal 200-block
-  range from snapshots, keyed snapshots and mount generations by UUID, removed
-  the unsafe global tracker-range reflection, and cleaned dead normal riders.
-  The tighter snapshot boundary made the tracking hole unambiguous. The UUID,
-  mount-sequence, and dead-rider changes remain intact because none supplies or
-  replaces a missing entity spawn packet.
+The unconditional destructive removal and global update are gone. A lifecycle record
+is keyed by UUID plus replacement-object identity and retains the exact replacement
+reference. For up to 40 server ticks it verifies, by exact object identity, every
+nearby normal parent vehicle in Forge's tracker view and independently verifies that
+`PlayerManager` watches its chunk. Missing entries are reconsidered only with
+`EntityTracker.func_85172_a(replacement, chunk)`, and only after that chunk is watched.
+The record ends immediately when all expected parents track the replacement, or logs a
+visible timeout. Ordinary `StartTracking` remains responsible for dependent entities
+and calls `syncCompleteAircraftState` only after the real parent starts tracking.
 
-The former LOD image was only plain render data, so it could visually mask the
-missing tracked entity while providing no collision or interaction target. This
-fix restores authoritative real entities; it does not restore snapshots inside
-200 blocks, create fake client entities, or make snapshots interactable. UAV and
-NewUAV code paths are unchanged.
+This does not expand tracker ranges or alter LOD snapshots. Snapshot displays remain
+render-only and excluded inside 200 blocks. UAV, NewUAV, station, inventory, remote
+camera, and safe-return paths are unchanged.
 
-## Dedicated-server verification status
+## Audit logging
 
-The automated source environment does not provide two graphical Forge clients,
-so the full two-client death/respawn matrix must be exercised in a manual game
-session. The source-level audit verifies that the refresh uses Forge 1.7.10's
-server event bus and vanilla tracker APIs, is delayed until the player is in the
-world, preserves entity identity, and runs once per lifecycle transition.
+Essential evidence uses the normal `mcheli` logger even when debug logging is off and
+has prefix `[MCH-RESPAWN-AUDIT]`:
+
+- startup `registered` lines identify the Forge and FML event buses;
+- `death`, `clone`, `queue`, and client `dead`/`replacement+N` lines delimit lifecycle;
+- `readiness`, `attempt`, `success`, and `timeout` show the bounded targeted repair;
+- `start`, `stop`, and `syncCompleteAircraftState` prove Forge tracking transitions;
+- client snapshots at replacement ticks 0, 1, 5, 20, and 40 report player/world/view
+  identity and real-vehicle versus LOD-display counts.
+
+A graphical dedicated-server/client run is still required to capture per-vehicle
+server/client resolution evidence. This repository change does not claim that such a
+run was performed in the source-only environment.
+
+## Commit and PR audit
+
+PR #587 (`1d293104...`, merge `3287a81...`) reset client LOD/mount caches and render
+state. PR #592 (`b328858...`, merge `c3add9e...`) restored the 200-block snapshot
+boundary and UUID mount generations. PR #593 (`75610d3...`, merge `1244d0c...`) added
+the unverified one-tick destructive refresh described above. The current repair keeps
+the useful #587/#592 LOD and mount behavior and replaces only #593's refresh.

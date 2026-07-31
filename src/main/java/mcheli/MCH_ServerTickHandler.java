@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.helicopter.MCH_EntityHeli;
@@ -35,8 +36,8 @@ public class MCH_ServerTickHandler {
    private static final int MAX_ENTRIES = 512;
    /** Must match the normal vehicle/seat registration range in MCH_MOD. */
    private static final double NORMAL_TRACKING_RANGE_SQ = 200.0D * 200.0D;
-   private static final int TRACKING_REFRESH_DELAY_TICKS = 1;
-   private final Map<EntityPlayerMP, Integer> pendingTrackingRefreshes = new HashMap<EntityPlayerMP, Integer>();
+   private static final int TRACKING_REFRESH_TIMEOUT_TICKS = 40;
+   private final Map<String, TrackingRefresh> pendingTrackingRefreshes = new HashMap<String, TrackingRefresh>();
    private int tick;
 
    @SubscribeEvent
@@ -54,54 +55,74 @@ public class MCH_ServerTickHandler {
          return;
       }
       EntityPlayerMP player = (EntityPlayerMP)playerEntity;
-      this.pendingTrackingRefreshes.put(player, Integer.valueOf(TRACKING_REFRESH_DELAY_TICKS));
-      MCH_Lib.DbgLog(player.worldObj, "[MCH-RESPAWN-TRACK] queued %s refresh player=%s id=%d uuid=%s object=%x dim=%d world=%x chunk=%d,%d",
+      String key = player.getUniqueID().toString() + ":" + System.identityHashCode(player);
+      this.pendingTrackingRefreshes.put(key, new TrackingRefresh(player, reason));
+      MCH_Lib.RespawnAuditLog("queue reason=%s player=%s id=%d uuid=%s object=%x dim=%d world=%x chunk=%d,%d",
          new Object[]{reason, player.getCommandSenderName(), Integer.valueOf(player.getEntityId()), player.getUniqueID(),
             Integer.valueOf(System.identityHashCode(player)), Integer.valueOf(player.dimension),
             Integer.valueOf(System.identityHashCode(player.worldObj)), Integer.valueOf(player.chunkCoordX), Integer.valueOf(player.chunkCoordZ)});
    }
 
    private void refreshPendingPlayerTracking() {
-      Iterator<Map.Entry<EntityPlayerMP, Integer>> iterator = this.pendingTrackingRefreshes.entrySet().iterator();
+      Iterator<Map.Entry<String, TrackingRefresh>> iterator = this.pendingTrackingRefreshes.entrySet().iterator();
       while(iterator.hasNext()) {
-         Map.Entry<EntityPlayerMP, Integer> entry = iterator.next();
-         EntityPlayerMP player = entry.getKey();
-         int delay = entry.getValue().intValue() - 1;
-         if(delay > 0) {
-            entry.setValue(Integer.valueOf(delay));
-            continue;
-         }
-         iterator.remove();
+         TrackingRefresh refresh = iterator.next().getValue();
+         EntityPlayerMP player = refresh.player;
+         ++refresh.age;
          if(player.isDead || !(player.worldObj instanceof WorldServer)
             || !containsPlayerInstance(player.worldObj.playerEntities, player)) {
-            MCH_Lib.DbgLog(player.worldObj, "[MCH-RESPAWN-TRACK] skipped stale refresh player=%s id=%d object=%x dead=%s",
+            iterator.remove();
+            MCH_Lib.RespawnAuditLog("timeout-stale player=%s id=%d object=%x dead=%s age=%d",
                new Object[]{player.getCommandSenderName(), Integer.valueOf(player.getEntityId()),
-                  Integer.valueOf(System.identityHashCode(player)), Boolean.valueOf(player.isDead)});
+                  Integer.valueOf(System.identityHashCode(player)), Boolean.valueOf(player.isDead), Integer.valueOf(refresh.age)});
             continue;
          }
 
          WorldServer world = (WorldServer)player.worldObj;
-         int nearbyVehicles = 0;
+         int nearbyVehicles = 0, trackedVehicles = 0, readyChunks = 0;
+         List<Chunk> repairChunks = new ArrayList<Chunk>();
          for(Object object : world.loadedEntityList) {
             if(object instanceof MCH_EntityBaseVehicle && !((MCH_EntityBaseVehicle)object).isDead
                && ((MCH_EntityBaseVehicle)object).getDistanceSqToEntity(player) <= NORMAL_TRACKING_RANGE_SQ) {
                ++nearbyVehicles;
+               MCH_EntityBaseVehicle vehicle = (MCH_EntityBaseVehicle)object;
+               boolean chunkReady = world.getPlayerManager().isPlayerWatchingChunk(player, vehicle.chunkCoordX, vehicle.chunkCoordZ);
+               if(chunkReady) ++readyChunks;
+               Set<?> watchers = world.getEntityTracker().getTrackingPlayers(vehicle);
+               if(containsPlayerInstance(new ArrayList<Object>(watchers), player)) {
+                  ++trackedVehicles;
+               } else if(chunkReady) {
+                  Chunk chunk = world.getChunkFromChunkCoords(vehicle.chunkCoordX, vehicle.chunkCoordZ);
+                  if(!repairChunks.contains(chunk)) repairChunks.add(chunk);
+               }
             }
          }
-
-         // The replacement player deliberately reuses the dead player's entity ID.
-         // EntityTrackerEntry's watcher set can consequently regard a stale old
-         // player object as equal to the replacement and suppress its spawn packet.
-         // Remove that one player's watcher generation, then let vanilla rebuild it
-         // after PlayerManager has installed the replacement's watched chunks.
-         world.getEntityTracker().removePlayerFromTrackers(player);
-         world.getEntityTracker().updateTrackedEntities();
-         MCH_Lib.DbgLog(world, "[MCH-RESPAWN-TRACK] refreshed player=%s id=%d uuid=%s object=%x dim=%d world=%x chunk=%d,%d nearbyVehicles=%d",
-            new Object[]{player.getCommandSenderName(), Integer.valueOf(player.getEntityId()), player.getUniqueID(),
-               Integer.valueOf(System.identityHashCode(player)), Integer.valueOf(player.dimension),
-               Integer.valueOf(System.identityHashCode(world)), Integer.valueOf(player.chunkCoordX),
-               Integer.valueOf(player.chunkCoordZ), Integer.valueOf(nearbyVehicles)});
+         if(refresh.age == 1 || refresh.age == 5 || refresh.age == 20 || refresh.age == 40)
+            MCH_Lib.RespawnAuditLog("readiness player=%s age=%d nearby=%d chunkReady=%d tracked=%d",
+               player.getCommandSenderName(), Integer.valueOf(refresh.age), Integer.valueOf(nearbyVehicles), Integer.valueOf(readyChunks), Integer.valueOf(trackedVehicles));
+         if(nearbyVehicles == trackedVehicles) {
+            iterator.remove();
+            MCH_Lib.RespawnAuditLog("success player=%s age=%d vehicles=%d targetedAttempts=%d",
+               player.getCommandSenderName(), Integer.valueOf(refresh.age), Integer.valueOf(nearbyVehicles), Integer.valueOf(refresh.attempts));
+         } else if(!repairChunks.isEmpty()) {
+            ++refresh.attempts;
+            for(Chunk chunk : repairChunks) world.getEntityTracker().func_85172_a(player, chunk);
+            MCH_Lib.RespawnAuditLog("attempt player=%s age=%d chunks=%d missing=%d",
+               player.getCommandSenderName(), Integer.valueOf(refresh.age), Integer.valueOf(repairChunks.size()), Integer.valueOf(nearbyVehicles - trackedVehicles));
+         } else if(refresh.age >= TRACKING_REFRESH_TIMEOUT_TICKS) {
+            iterator.remove();
+            MCH_Lib.RespawnAuditLog("timeout player=%s vehicles=%d tracked=%d ready=%d",
+               player.getCommandSenderName(), Integer.valueOf(nearbyVehicles), Integer.valueOf(trackedVehicles), Integer.valueOf(readyChunks));
+         }
       }
+   }
+
+   private static final class TrackingRefresh {
+      final EntityPlayerMP player;
+      final String reason;
+      int age;
+      int attempts;
+      TrackingRefresh(EntityPlayerMP player, String reason) { this.player = player; this.reason = reason; }
    }
 
    private static boolean containsPlayerInstance(List<?> players, EntityPlayerMP player) {
