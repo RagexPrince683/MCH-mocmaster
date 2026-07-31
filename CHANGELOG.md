@@ -1,3 +1,10 @@
+## PR #597 - Correct Normal-Vehicle Respawn Repair Identity
+
+- Treat Forge numeric entity IDs plus MCHeli type, dimension, bounded position, and synchronized non-empty common ID as vehicle identity; keep vanilla UUID comparisons diagnostic.
+- Gate client readiness on the replacement player/world runtime objects and defer bounded parent-first tracker resends until the replacement watches the vehicle chunk.
+- Preserve age-60 probe results through an age-80 timeout and clear generation-scoped client resolution history on world unload.
+- Compilation passed; the required two-client graphical runtime verification remains outstanding, so runtime success is not claimed.
+
 ## PR #595 - Forge 1.7.10 Respawn Probe API Corrections
 
 - Corrected PR #595's incompatible `EntityTrackerEntry.removeFromTrackedPlayers` call to Forge 1.7.10's `EntityTrackerEntry.removeFromWatchingList` while retaining the normal `tryStartWachingThis` retrack path.

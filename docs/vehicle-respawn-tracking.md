@@ -1,3 +1,21 @@
+# PR #597 - Runtime-correct respawn identity and delayed targeted repair
+
+Commit `04542189dc3b28f9073d7e7ea40ed6f2f8edfe1d` (PR #596) did not fix the runtime issue. The supplied runtime log is authoritative: normal parent IDs 63, 198, and 6125 all started tracking while their chunks were not ready because `forceSpawn=true`. The first client probe nevertheless found the correct MCHeli objects, numeric IDs, classes, and aircraft types. Their vanilla client entity UUIDs differed from the server UUIDs. The failed probe called those differences ID collisions, required the replacement player's client UUID to equal its server UUID, consequently left replacement readiness false, prevented every targeted resend, and deleted the audit at age 60 before processing the final result.
+
+## Corrected client readiness and vehicle identity
+
+Replacement readiness now requires the current Minecraft player and world references, the replacement numeric player ID, the server dimension, object identity with the player observed by `MCH_ClientCommonTickHandler`, and a client respawn audit age of at least one tick. The server player UUID remains in the probe and its match is logged as diagnostic evidence only.
+
+A normal parent is resolved primarily with `WorldClient.getEntityByID`. Confirmation requires an MCHeli base vehicle at that ID, matching aircraft-info type, probe dimension, current client world, a position within 32 blocks, a live entity, usable aircraft info, normal rendering and collision state, and valid seat/hitbox parent references. Vanilla entity UUID agreement is diagnostic only and cannot create an ID-collision classification. Missing-after-create history is bounded to the current respawn generation and numeric entity IDs and is cleared on world unload.
+
+`commonUniqueId` was inspected rather than assumed: `MCH_EntityBaseVehicle.writeSpawnData` writes it and `readSpawnData` installs it on the spawned client vehicle. The probe therefore carries a non-empty server common ID as an additional synchronized MCHeli identity check; empty IDs do not block the numeric-ID/type/dimension/position rules. This is distinct from vanilla `Entity.getUniqueID()`.
+
+## Delayed targeted repair and timeout
+
+A ready client report of a genuinely missing or collided parent marks that parent repair-pending. The next server tick keeps it pending until the exact replacement player remains active, the original server vehicle remains alive, and `PlayerManager.isPlayerWatchingChunk` is true. It then removes the exact watcher object by identity (Forge 1.7.10's `HashSet.contains/remove` path uses equality), invokes the normal tracker removal/re-add path, verifies exact membership, resends the original parent before only its own seats and hitboxes, and schedules a post-resend probe. Confirmed parents are not retracked, UAV/NewUAV parents remain excluded, and each parent is limited to two attempts.
+
+Probe ages remain 1, 5, 10, 20, 40, and 60, but the hard timeout is age 80. Thus the age-60 response has a 20-tick processing window and is not made stale by same-tick audit deletion. LOD snapshots remain render-only and excluded inside 200 blocks. A full two-client graphical respawn test is still required; this source change does not claim runtime success.
+
 # Normal vehicle tracking across player respawn
 
 ## Proven evidence and diagnosis

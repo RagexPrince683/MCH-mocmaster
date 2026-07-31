@@ -183,6 +183,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
                Integer.valueOf(mcheli.network.packets.PacketVehicleRespawnProbe.getClientGeneration()));
          }
       }
+      mcheli.network.packets.PacketVehicleRespawnProbe.clearClientResolutionState();
       MCH_ViewEntityDummy.onUnloadWorld();
       MCH_MOD.proxy.clearVehicleLODSnapshots();
       MCH_BaseVehiclePacketHandler.clearPendingMounts();
