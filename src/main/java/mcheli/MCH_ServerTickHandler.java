@@ -1,27 +1,23 @@
 package mcheli;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.network.packets.PacketVehicleLODSnapshot;
-import mcheli.network.packets.PacketVehicleRespawnProbe;
-import mcheli.network.packets.PacketVehicleRespawnProbeResult;
+import mcheli.network.packets.PacketVehicleMountGraph;
 import mcheli.aircraft.MCH_EntitySeat;
-import mcheli.aircraft.MCH_EntityHitBox;
+import net.minecraft.entity.player.EntityPlayer;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.ship.MCH_EntityShip;
 import mcheli.tank.MCH_EntityTank;
@@ -35,10 +31,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.entity.EntityTracker;
-import net.minecraft.entity.EntityTrackerEntry;
-import net.minecraft.util.IntHashMap;
-import java.lang.reflect.Field;
 
 /** Sends render-only vehicle snapshots without changing Forge entity tracking. */
 public class MCH_ServerTickHandler {
@@ -46,475 +38,47 @@ public class MCH_ServerTickHandler {
    private static final int MAX_ENTRIES = 512;
    /** Must match the normal vehicle/seat registration range in MCH_MOD. */
    private static final double NORMAL_TRACKING_RANGE_SQ = 200.0D * 200.0D;
-   private static final int TRACKING_REFRESH_TIMEOUT_TICKS = 80;
-   private static final int TRACKER_LOOKUP_RETRY_TICKS = 5;
-   private static final String[] TRACKER_MAP_FIELD_NAMES = new String[]{"trackedEntityIDs"};
-   private static Field trackerEntryMapField;
-   private static Class<?> trackerEntryMapClass;
-   private static boolean trackerMapResolutionAttempted;
-   private static boolean trackerMapResolutionDiagnosticLogged;
-   private static int nextRespawnGeneration;
-   private static final Queue<PendingProbeResult> PENDING_PROBE_RESULTS =
-      new ConcurrentLinkedQueue<PendingProbeResult>();
-   private final Map<String, TrackingRefresh> pendingTrackingRefreshes = new HashMap<String, TrackingRefresh>();
    private int tick;
-   private long respawnAuditTick;
+   private static final Map<String, PendingMountGraph> PENDING_MOUNT_GRAPHS = new HashMap<String, PendingMountGraph>();
+   private static final AtomicInteger NEXT_MOUNT_SEQUENCE = new AtomicInteger();
 
-   private static final class PendingProbeResult {
-      final EntityPlayerMP player;
-      final PacketVehicleRespawnProbeResult result;
-
-      PendingProbeResult(EntityPlayerMP player, PacketVehicleRespawnProbeResult result) {
-         this.player = player;
-         this.result = result;
-      }
-   }
-
-   @SubscribeEvent
-   public void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
-      this.queueTrackingRefresh(event.player, "respawn");
-   }
-
-   @SubscribeEvent
-   public void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-      this.queueTrackingRefresh(event.player, "dimension " + event.fromDim + "->" + event.toDim);
-   }
-
-   private void queueTrackingRefresh(Entity playerEntity, String reason) {
-      if(!(playerEntity instanceof EntityPlayerMP) || playerEntity.worldObj.isRemote) {
-         return;
-      }
-      EntityPlayerMP player = (EntityPlayerMP)playerEntity;
-      String key = player.getUniqueID().toString() + ":" + System.identityHashCode(player);
-      this.pendingTrackingRefreshes.put(key, new TrackingRefresh(player, reason, ++nextRespawnGeneration));
-      MCH_Lib.RespawnAuditLog("queue reason=%s player=%s id=%d uuid=%s object=%x dim=%d world=%x chunk=%d,%d",
-         new Object[]{reason, player.getCommandSenderName(), Integer.valueOf(player.getEntityId()), player.getUniqueID(),
-            Integer.valueOf(System.identityHashCode(player)), Integer.valueOf(player.dimension),
-            Integer.valueOf(System.identityHashCode(player.worldObj)), Integer.valueOf(player.chunkCoordX), Integer.valueOf(player.chunkCoordZ)});
-   }
-
-   private void refreshPendingPlayerTracking() {
-      Iterator<Map.Entry<String, TrackingRefresh>> iterator = this.pendingTrackingRefreshes.entrySet().iterator();
-      while(iterator.hasNext()) {
-         TrackingRefresh refresh = iterator.next().getValue();
-         EntityPlayerMP player = refresh.player;
-         ++refresh.age;
-         if(player.isDead || !(player.worldObj instanceof WorldServer)
-            || !containsPlayerInstance(player.worldObj.playerEntities, player)) {
-            iterator.remove();
-            MCH_Lib.RespawnAuditLog("timeout-stale player=%s id=%d object=%x dead=%s age=%d",
-               new Object[]{player.getCommandSenderName(), Integer.valueOf(player.getEntityId()),
-                  Integer.valueOf(System.identityHashCode(player)), Boolean.valueOf(player.isDead), Integer.valueOf(refresh.age)});
-            continue;
-         }
-
-         WorldServer world = (WorldServer)player.worldObj;
-         int nearbyVehicles = 0, trackedVehicles = 0, readyChunks = 0;
-         for(Object object : world.loadedEntityList) {
-            if(object instanceof MCH_EntityBaseVehicle && !((MCH_EntityBaseVehicle)object).isDead
-               && !((MCH_EntityBaseVehicle)object).isUAV() && !((MCH_EntityBaseVehicle)object).isNewUAV()
-               && ((MCH_EntityBaseVehicle)object).getDistanceSqToEntity(player) <= NORMAL_TRACKING_RANGE_SQ) {
-               ++nearbyVehicles;
-               MCH_EntityBaseVehicle vehicle = (MCH_EntityBaseVehicle)object;
-               boolean chunkReady = world.getPlayerManager().isPlayerWatchingChunk(player, vehicle.chunkCoordX, vehicle.chunkCoordZ);
-               if(chunkReady) ++readyChunks;
-               Set<?> watchers = world.getEntityTracker().getTrackingPlayers(vehicle);
-               if(containsPlayerInstance(new ArrayList<Object>(watchers), player)) {
-                  ++trackedVehicles;
-               }
-               if(!refresh.expected.containsKey(Integer.valueOf(vehicle.getEntityId())))
-                  refresh.expected.put(Integer.valueOf(vehicle.getEntityId()), new ExpectedVehicle(vehicle, !chunkReady));
-            }
-         }
-         if(refresh.age == 1 || refresh.age == 5 || refresh.age == 20 || refresh.age == 40)
-            MCH_Lib.RespawnAuditLog("readiness player=%s age=%d nearby=%d chunkReady=%d tracked=%d",
-               player.getCommandSenderName(), Integer.valueOf(refresh.age), Integer.valueOf(nearbyVehicles), Integer.valueOf(readyChunks), Integer.valueOf(trackedVehicles));
-         this.executePendingRepairs(refresh, world);
-         if(shouldSendProbe(refresh.age) || refresh.probeRequested) {
-            refresh.probeRequested = false;
-            this.sendProbe(refresh);
-         }
-         if(refresh.confirmedAll) {
-            iterator.remove();
-            MCH_Lib.RespawnAuditLog("success-confirmed generation=%d player=%s age=%d vehicles=%d targetedAttempts=%d",
-               Integer.valueOf(refresh.generation), player.getCommandSenderName(), Integer.valueOf(refresh.age),
-               Integer.valueOf(refresh.expected.size()), Integer.valueOf(refresh.attempts));
-         } else if(refresh.age >= TRACKING_REFRESH_TIMEOUT_TICKS) {
-            iterator.remove();
-            MCH_Lib.RespawnAuditLog("timeout generation=%d player=%s vehicles=%d tracked=%d ready=%d clientConfirmed=%s classification=%s reason=%s",
-               Integer.valueOf(refresh.generation), player.getCommandSenderName(), Integer.valueOf(nearbyVehicles),
-               Integer.valueOf(trackedVehicles), Integer.valueOf(readyChunks), Boolean.valueOf(refresh.confirmedAll),
-               refresh.resultReceived ? "unconfirmed-after-probes" : "1-client-never-returned-probe",
-               refresh.trackerEntryAccessUnavailable ? "tracker-entry-access-unavailable" : "client-not-confirmed");
-         }
-      }
-   }
-
-   private static final class TrackingRefresh {
-      final EntityPlayerMP player;
-      final String reason;
-      int age;
-      int attempts;
-      final int generation;
-      final Map<Integer, ExpectedVehicle> expected = new HashMap<Integer, ExpectedVehicle>();
-      boolean confirmedAll, probeRequested, resultReceived, replacementReady, trackerEntryAccessUnavailable;
-      TrackingRefresh(EntityPlayerMP player, String reason, int generation) { this.player = player; this.reason = reason; this.generation = generation; }
-   }
-
-   private static final class ExpectedVehicle {
+   private static final class PendingMountGraph {
+      final EntityPlayerMP observer;
       final MCH_EntityBaseVehicle vehicle;
-      final boolean premature;
-      int resendAttempts;
-      boolean clientReportedMissing, clientReportedCollision, clientConfirmed, repairPending;
-      long repairNotBeforeTick;
-      String lastClassification = "not-probed";
-      ExpectedVehicle(MCH_EntityBaseVehicle vehicle, boolean premature) { this.vehicle = vehicle; this.premature = premature; }
-   }
-
-   private static boolean shouldSendProbe(int age) { return age == 1 || age == 5 || age == 10 || age == 20 || age == 40 || age == 60; }
-
-   private void sendProbe(TrackingRefresh refresh) {
-      PacketVehicleRespawnProbe packet = new PacketVehicleRespawnProbe();
-      packet.generation = refresh.generation; packet.playerId = refresh.player.getEntityId();
-      packet.playerUuid = refresh.player.getUniqueID(); packet.dimension = refresh.player.dimension;
-      packet.serverWorldIdentity = System.identityHashCode(refresh.player.worldObj);
-      for(ExpectedVehicle expected : refresh.expected.values()) {
-         if(packet.vehicles.size() >= PacketVehicleRespawnProbe.MAX_VEHICLES) break;
-         MCH_EntityBaseVehicle vehicle = expected.vehicle;
-         if(vehicle.isDead || vehicle.worldObj != refresh.player.worldObj) continue;
-         PacketVehicleRespawnProbe.Entry entry = new PacketVehicleRespawnProbe.Entry();
-         entry.entityId=vehicle.getEntityId(); entry.uuid=vehicle.getUniqueID();
-         entry.typeName=vehicle.getAcInfo()==null?vehicle.getClass().getSimpleName():vehicle.getAcInfo().name;
-         entry.commonUniqueId=vehicle.getCommonUniqueId()==null?"":vehicle.getCommonUniqueId();
-         entry.x=vehicle.posX; entry.y=vehicle.posY; entry.z=vehicle.posZ; entry.chunkX=vehicle.chunkCoordX; entry.chunkZ=vehicle.chunkCoordZ;
-         packet.vehicles.add(entry);
-      }
-      MCH_MOD.getPacketHandler().sendTo(packet, refresh.player);
-      MCH_Lib.RespawnAuditLog("probe-send generation=%d age=%d playerId=%d vehicles=%d", Integer.valueOf(refresh.generation),
-         Integer.valueOf(refresh.age), Integer.valueOf(refresh.player.getEntityId()), Integer.valueOf(packet.vehicles.size()));
-   }
-
-   public static void enqueueProbeResult(EntityPlayerMP player, PacketVehicleRespawnProbeResult result) {
-      if(player == null || result == null) {
-         return;
-      }
-
-      PENDING_PROBE_RESULTS.offer(new PendingProbeResult(player, result));
-   }
-
-   private void processPendingProbeResults() {
-      PendingProbeResult pending;
-
-      while((pending = PENDING_PROBE_RESULTS.poll()) != null) {
-         EntityPlayerMP player = pending.player;
-
-         if(player == null
-            || player.isDead
-            || player.playerNetServerHandler == null
-            || !(player.worldObj instanceof WorldServer)
-            || !containsPlayerInstance(player.worldObj.playerEntities, player)) {
-            MCH_Lib.RespawnAuditLog(
-               "probe-result-discarded player=%s generation=%d reason=stale-player",
-               player == null ? "null" : player.getCommandSenderName(),
-               Integer.valueOf(pending.result.generation));
-            continue;
-         }
-
-         this.handleProbeResult(player, pending.result);
+      final int dimension;
+      final String commonUniqueId;
+      final int sequence;
+      int age;
+      int sends;
+      PendingMountGraph(EntityPlayerMP observer, MCH_EntityBaseVehicle vehicle) {
+         this.observer = observer;
+         this.vehicle = vehicle;
+         this.dimension = observer.dimension;
+         this.commonUniqueId = vehicle.getCommonUniqueId();
+         this.sequence = NEXT_MOUNT_SEQUENCE.incrementAndGet();
       }
    }
 
-   private void handleProbeResult(EntityPlayerMP player, PacketVehicleRespawnProbeResult result) {
-      TrackingRefresh refresh = null;
-      for(TrackingRefresh candidate : this.pendingTrackingRefreshes.values()) {
-         if(candidate.player == player && candidate.generation == result.generation) {
-            refresh = candidate;
-            break;
-         }
-      }
-      if(refresh == null) {
-         MCH_Lib.RespawnAuditLog("probe-result-stale generation=%d playerId=%d", Integer.valueOf(result.generation), Integer.valueOf(player.getEntityId()));
-         return;
-      }
-      refresh.resultReceived = true;
-      refresh.replacementReady = result.replacementProcessed;
-      boolean all = result.replacementProcessed;
-      MCH_Lib.RespawnAuditLog("probe-result generation=%d ready=%s playerPresent=%s worldPresent=%s playerIdMatches=%s playerUuidDiagnostic=%s dimensionMatches=%s auditPlayerMatches=%s respawnAgeReady=%s age=%d vehicles=%d",
-         Integer.valueOf(result.generation), Boolean.valueOf(result.replacementProcessed), Boolean.valueOf(result.playerPresent), Boolean.valueOf(result.worldPresent),
-         Boolean.valueOf(result.playerIdMatches), Boolean.valueOf(result.playerUuidMatchesDiagnostic), Boolean.valueOf(result.dimensionMatches),
-         Boolean.valueOf(result.auditPlayerMatches), Boolean.valueOf(result.respawnAgeReady), Integer.valueOf(result.respawnAge), Integer.valueOf(result.vehicles.size()));
-      if(!result.playerPresent || !result.worldPresent) {
-         MCH_Lib.RespawnAuditLog("probe-divergence generation=%d classification=2-probe-before-replacement-world", Integer.valueOf(result.generation));
-      }
-      for(PacketVehicleRespawnProbeResult.Entry entry : result.vehicles) {
-         ExpectedVehicle expected = refresh.expected.get(Integer.valueOf(entry.expectedId));
-         String classification = classify(entry, result.respawnAge);
-         boolean correct = "confirmed".equals(classification);
-         all &= correct;
-         MCH_Lib.RespawnAuditLog("probe-vehicle generation=%d expectedId=%d expectedType=%s serverUuid=%s class=%s foundId=%d foundType=%s clientUuidDiagnostic=%s uuidMatchesDiagnostic=%s positionDelta=%.2f previouslyConfirmedById=%s chunk=%s repairPending=%s classification=%s",
-            Integer.valueOf(result.generation), Integer.valueOf(entry.expectedId), entry.expectedType, entry.expectedUuid, entry.foundClass,
-            Integer.valueOf(entry.foundId), entry.foundType, entry.foundUuid, Boolean.valueOf(entry.uuidMatchesDiagnostic),
-            Double.valueOf(Math.sqrt(entry.positionDeltaSq)), Boolean.valueOf(entry.previouslyFound), Boolean.valueOf(entry.addedToChunk),
-            Boolean.valueOf(expected != null && expected.repairPending), classification);
-         if(expected != null) {
-            expected.lastClassification = classification;
-            expected.clientConfirmed = correct;
-            if(correct) {
-               expected.repairPending = false;
-            } else if(result.replacementProcessed && ("3-missing-entity".equals(classification) || "4-id-collision".equals(classification) || "5-removed-after-create".equals(classification))) {
-               expected.clientReportedMissing |= !entry.foundById;
-               expected.clientReportedCollision |= "4-id-collision".equals(classification);
-               expected.repairPending = expected.resendAttempts < 2;
-               expected.repairNotBeforeTick = this.respawnAuditTick + 1L;
-               MCH_Lib.RespawnAuditLog("repair-pending generation=%d vehicleId=%d classification=%s pending=%s",
-                  Integer.valueOf(refresh.generation), Integer.valueOf(entry.expectedId), classification, Boolean.valueOf(expected.repairPending));
-            }
-         }
-      }
-      refresh.confirmedAll = all && result.vehicles.size() == refresh.expected.size();
+   public static synchronized void scheduleMountGraph(MCH_EntityBaseVehicle vehicle, EntityPlayerMP observer) {
+      if(vehicle == null || observer == null || vehicle.isDead || vehicle.isUAV() || vehicle.isNewUAV()
+         || vehicle.getCommonUniqueId() == null || vehicle.getCommonUniqueId().length() == 0) return;
+      String key = System.identityHashCode(observer) + ":" + observer.dimension + ":" + vehicle.getEntityId()
+         + ":" + vehicle.getCommonUniqueId();
+      if(!PENDING_MOUNT_GRAPHS.containsKey(key)) PENDING_MOUNT_GRAPHS.put(key, new PendingMountGraph(observer, vehicle));
    }
 
-   private static String classify(PacketVehicleRespawnProbeResult.Entry e, int respawnAge) {
-      if(!e.foundById && e.previouslyFound) return "5-removed-after-create";
-      if(!e.foundById) return "3-missing-entity";
-      if(!e.baseVehicle || e.foundId != e.expectedId || !e.typeMatches || !e.dimensionMatches || !e.positionMatches || !e.currentWorld || !e.commonIdMatches) return "4-id-collision";
-      if(e.dead) return "6-dead";
-      if(!e.addedToChunk && respawnAge >= 10) return "7-not-in-chunk";
-      if("null".equals(e.foundType)) return "8-no-ac-info";
-      if(e.skipNormalRender) return "9-render-skipped";
-      if(!e.collidable || "null".equals(e.boundingBox)) return "10-invalid-collision";
-      if(e.validSeatParents != e.seatCount || e.validHitboxParents < e.hitboxCount) return "11-invalid-dependent-parent";
-      return "confirmed";
-   }
-
-   private void executePendingRepairs(TrackingRefresh refresh, WorldServer world) {
-      for(ExpectedVehicle expected : refresh.expected.values()) {
-         if(!expected.repairPending || expected.clientConfirmed || expected.resendAttempts >= 2) continue;
-         if(this.respawnAuditTick < expected.repairNotBeforeTick) continue;
-         if(!refresh.replacementReady || refresh.player.isDead || refresh.player.playerNetServerHandler == null
-            || refresh.player.worldObj != world || !containsPlayerInstance(world.playerEntities, refresh.player)) {
-            continue;
-         }
-         if(expected.vehicle.isDead || expected.vehicle.worldObj != world) {
-            expected.repairPending = false;
-            continue;
-         }
-         if(!world.getPlayerManager().isPlayerWatchingChunk(refresh.player, expected.vehicle.chunkCoordX, expected.vehicle.chunkCoordZ)) {
-            MCH_Lib.RespawnAuditLog("repair-wait generation=%d vehicleId=%d reason=chunk-not-watched", Integer.valueOf(refresh.generation), Integer.valueOf(expected.vehicle.getEntityId()));
-            continue;
-         }
-         try {
-            this.targetedResend(refresh, expected, world);
-         } catch(RuntimeException exception) {
-            expected.repairPending = true;
-            expected.repairNotBeforeTick = this.respawnAuditTick + TRACKER_LOOKUP_RETRY_TICKS;
-            MCH_Lib.RespawnAuditLog("repair-failure generation=%d vehicleId=%d failure=%s",
-               Integer.valueOf(refresh.generation), Integer.valueOf(expected.vehicle.getEntityId()), exception.toString());
-         } catch(LinkageError error) {
-            expected.repairPending = true;
-            expected.repairNotBeforeTick = this.respawnAuditTick + TRACKER_LOOKUP_RETRY_TICKS;
-            MCH_Lib.RespawnAuditLog("repair-failure generation=%d vehicleId=%d failure=%s",
-               Integer.valueOf(refresh.generation), Integer.valueOf(expected.vehicle.getEntityId()), error.toString());
-         }
+   public static synchronized void cancelMountGraph(MCH_EntityBaseVehicle vehicle, EntityPlayerMP observer) {
+      Iterator<PendingMountGraph> iterator = PENDING_MOUNT_GRAPHS.values().iterator();
+      while(iterator.hasNext()) {
+         PendingMountGraph pending = iterator.next();
+         if(pending.observer == observer && pending.vehicle == vehicle) iterator.remove();
       }
-   }
-
-   private void targetedResend(TrackingRefresh refresh, ExpectedVehicle expected, WorldServer world) {
-      int vehicleId = expected.vehicle.getEntityId();
-      EntityTrackerEntry parentEntry = trackerEntry(world, vehicleId);
-      if(parentEntry == null) {
-         refresh.trackerEntryAccessUnavailable = true;
-         expected.repairPending = true;
-         expected.repairNotBeforeTick = this.respawnAuditTick + TRACKER_LOOKUP_RETRY_TICKS;
-         MCH_Lib.RespawnAuditLog("tracker-entry-missing generation=%d vehicleId=%d repairPending=true",
-            Integer.valueOf(refresh.generation), Integer.valueOf(vehicleId));
-         return;
-      }
-      if(parentEntry.myEntity != expected.vehicle) {
-         expected.repairNotBeforeTick = this.respawnAuditTick + TRACKER_LOOKUP_RETRY_TICKS;
-         MCH_Lib.RespawnAuditLog("tracker-entry-owner-mismatch generation=%d vehicleId=%d exactEntity=false",
-            Integer.valueOf(refresh.generation), Integer.valueOf(vehicleId));
-         return;
-      }
-      MCH_Lib.RespawnAuditLog("tracker-entry-resolved generation=%d vehicleId=%d entryEntityId=%d exactEntity=true",
-         Integer.valueOf(refresh.generation), Integer.valueOf(vehicleId), Integer.valueOf(parentEntry.myEntity.getEntityId()));
-      if(!removeAndReaddWatcher(parentEntry, refresh.player, refresh.generation, vehicleId)) {
-         expected.repairPending = true;
-         expected.repairNotBeforeTick = this.respawnAuditTick + TRACKER_LOOKUP_RETRY_TICKS;
-         return;
-      }
-      ++expected.resendAttempts;
-      ++refresh.attempts;
-      expected.repairPending = false;
-      MCH_Lib.RespawnAuditLog("targeted-resend generation=%d vehicleId=%d attempt=%d", Integer.valueOf(refresh.generation), Integer.valueOf(vehicleId), Integer.valueOf(expected.resendAttempts));
-      for(Object object : world.loadedEntityList) {
-         boolean dependent = object instanceof MCH_EntitySeat && ((MCH_EntitySeat)object).getParent() == expected.vehicle
-            || object instanceof MCH_EntityHitBox && ((MCH_EntityHitBox)object).parent == expected.vehicle;
-         if(dependent) {
-            Entity entity = (Entity)object;
-            try {
-               EntityTrackerEntry entry = trackerEntry(world, entity.getEntityId());
-               if(entry != null && removeAndReaddWatcher(entry, refresh.player, refresh.generation, entity.getEntityId())) {
-                  MCH_Lib.RespawnAuditLog("dependent-resend generation=%d parentId=%d dependentId=%d", Integer.valueOf(refresh.generation), Integer.valueOf(expected.vehicle.getEntityId()), Integer.valueOf(entity.getEntityId()));
-               } else if(entry == null) {
-                  MCH_Lib.RespawnAuditLog("dependent-resend-no-entry generation=%d parentId=%d dependentId=%d",
-                     Integer.valueOf(refresh.generation), Integer.valueOf(expected.vehicle.getEntityId()), Integer.valueOf(entity.getEntityId()));
-               }
-            } catch(RuntimeException exception) {
-               MCH_Lib.RespawnAuditLog("dependent-resend-failure generation=%d parentId=%d dependentId=%d failure=%s",
-                  Integer.valueOf(refresh.generation), Integer.valueOf(expected.vehicle.getEntityId()),
-                  Integer.valueOf(entity.getEntityId()), exception.toString());
-            } catch(LinkageError error) {
-               MCH_Lib.RespawnAuditLog("dependent-resend-failure generation=%d parentId=%d dependentId=%d failure=%s",
-                  Integer.valueOf(refresh.generation), Integer.valueOf(expected.vehicle.getEntityId()),
-                  Integer.valueOf(entity.getEntityId()), error.toString());
-            }
-         }
-      }
-      refresh.probeRequested = true;
-      MCH_Lib.RespawnAuditLog("post-resend-probe generation=%d vehicleId=%d", Integer.valueOf(refresh.generation), Integer.valueOf(expected.vehicle.getEntityId()));
-   }
-
-   private static boolean removeAndReaddWatcher(EntityTrackerEntry entry, EntityPlayerMP player, int generation, int vehicleId) {
-      Set<?> watchers = ((WorldServer)player.worldObj).getEntityTracker().getTrackingPlayers(entry.myEntity);
-      boolean exactPresentBefore = containsPlayerInstance(watchers, player);
-      entry.removeFromWatchingList(player);
-      boolean exactPresentAfter = containsPlayerInstance(
-         ((WorldServer)player.worldObj).getEntityTracker().getTrackingPlayers(entry.myEntity), player);
-      MCH_Lib.RespawnAuditLog("watcher-remove generation=%d vehicleId=%d exactPresentBefore=%s exactPresentAfter=%s",
-         Integer.valueOf(generation), Integer.valueOf(vehicleId), Boolean.valueOf(exactPresentBefore), Boolean.valueOf(exactPresentAfter));
-      if(exactPresentAfter) {
-         return false;
-      }
-      entry.tryStartWachingThis(player);
-      boolean exactPresent = containsPlayerInstance(
-         ((WorldServer)player.worldObj).getEntityTracker().getTrackingPlayers(entry.myEntity), player);
-      MCH_Lib.RespawnAuditLog("watcher-readd generation=%d vehicleId=%d exactPresent=%s", Integer.valueOf(generation), Integer.valueOf(vehicleId), Boolean.valueOf(exactPresent));
-      return exactPresent;
-   }
-
-   private static EntityTrackerEntry trackerEntry(WorldServer world, int entityId) {
-      if(world == null || world.getEntityTracker() == null) {
-         return null;
-      }
-      EntityTracker tracker = world.getEntityTracker();
-      try {
-         Field field = resolveTrackerEntryMapField(tracker.getClass());
-         if(field == null) {
-            return null;
-         }
-         Object value = field.get(tracker);
-         if(!(value instanceof IntHashMap)) {
-            logTrackerMapResolutionFailure(tracker.getClass(), "resolved-field-value-not-IntHashMap");
-            return null;
-         }
-         Object result = ((IntHashMap)value).lookup(entityId);
-         if(!(result instanceof EntityTrackerEntry)) {
-            return null;
-         }
-         EntityTrackerEntry entry = (EntityTrackerEntry)result;
-         if(entry.myEntity == null || entry.myEntity.getEntityId() != entityId) {
-            MCH_Lib.RespawnAuditLog("tracker-entry-owner-mismatch vehicleId=%d entryType=%s entryEntityId=%d",
-               Integer.valueOf(entityId), result.getClass().getName(),
-               Integer.valueOf(entry.myEntity == null ? -1 : entry.myEntity.getEntityId()));
-            return null;
-         }
-         return entry;
-      } catch(SecurityException exception) {
-         logTrackerMapResolutionFailure(tracker.getClass(), exception.toString());
-      } catch(IllegalAccessException exception) {
-         logTrackerMapResolutionFailure(tracker.getClass(), exception.toString());
-      } catch(RuntimeException exception) {
-         logTrackerMapResolutionFailure(tracker.getClass(), exception.toString());
-      } catch(LinkageError error) {
-         logTrackerMapResolutionFailure(tracker.getClass(), error.toString());
-      }
-      return null;
-   }
-
-   private static synchronized Field resolveTrackerEntryMapField(Class<?> trackerClass) {
-      if(trackerEntryMapField != null && trackerEntryMapClass == trackerClass) {
-         return trackerEntryMapField;
-      }
-      if(trackerMapResolutionAttempted && trackerEntryMapClass == trackerClass) {
-         return null;
-      }
-      trackerMapResolutionAttempted = true;
-      trackerEntryMapClass = trackerClass;
-      List<Field> typedFields = new ArrayList<Field>();
-      for(Class<?> type = trackerClass; type != null; type = type.getSuperclass()) {
-         Field[] fields = type.getDeclaredFields();
-         for(Field field : fields) {
-            if(matchesTrackerMapName(field.getName()) && IntHashMap.class.isAssignableFrom(field.getType())) {
-               return cacheTrackerMapField(trackerClass, field);
-            }
-            if(IntHashMap.class.isAssignableFrom(field.getType())) {
-               typedFields.add(field);
-            }
-         }
-      }
-      if(typedFields.size() == 1) {
-         return cacheTrackerMapField(trackerClass, typedFields.get(0));
-      }
-      logTrackerMapResolutionFailure(trackerClass, typedFields.size() > 1 ? "ambiguous-IntHashMap-fields" : "no-IntHashMap-field");
-      return null;
-   }
-
-   private static Field cacheTrackerMapField(Class<?> trackerClass, Field field) {
-      field.setAccessible(true);
-      trackerEntryMapField = field;
-      MCH_Lib.RespawnAuditLog("tracker-map-resolved class=%s field=%s type=%s",
-         trackerClass.getName(), field.getName(), field.getType().getName());
-      return field;
-   }
-
-   private static boolean matchesTrackerMapName(String name) {
-      for(String candidate : TRACKER_MAP_FIELD_NAMES) {
-         if(candidate.equals(name)) {
-            return true;
-         }
-      }
-      return false;
-   }
-
-   private static synchronized void logTrackerMapResolutionFailure(Class<?> trackerClass, String reason) {
-      if(trackerMapResolutionDiagnosticLogged) {
-         return;
-      }
-      trackerMapResolutionDiagnosticLogged = true;
-      StringBuilder fields = new StringBuilder();
-      for(Class<?> type = trackerClass; type != null; type = type.getSuperclass()) {
-         for(Field field : type.getDeclaredFields()) {
-            if(fields.length() > 0) {
-               fields.append(';');
-            }
-            fields.append(field.getName()).append(':').append(field.getType().getName())
-               .append('@').append(type.getName()).append(" accessible=").append(field.isAccessible())
-               .append(" candidate=").append(matchesTrackerMapName(field.getName()))
-               .append(" expectedType=").append(IntHashMap.class.isAssignableFrom(field.getType()));
-         }
-      }
-      MCH_Lib.RespawnAuditLog("tracker-map-resolution-failed trackerClass=%s candidates=%s reason=%s declaredFields=%s",
-         trackerClass.getName(), java.util.Arrays.toString(TRACKER_MAP_FIELD_NAMES), reason, fields.toString());
-   }
-
-   private static boolean containsPlayerInstance(Iterable<?> players, EntityPlayerMP player) {
-      for(Object candidate : players) {
-         if(candidate == player) {
-            return true;
-         }
-      }
-      return false;
    }
 
    @SubscribeEvent
    public void onServerTickEvent(ServerTickEvent event) {
-      if(event.phase != Phase.END) {
-         return;
-      }
-      ++this.respawnAuditTick;
-      this.processPendingProbeResults();
-      this.refreshPendingPlayerTracking();
+      if(event.phase != Phase.END) return;
+      tickMountGraphs();
       if(++this.tick < UPDATE_INTERVAL_TICKS) return;
       this.tick = 0;
 
@@ -545,8 +109,9 @@ public class MCH_ServerTickHandler {
          if(object instanceof MCH_EntityBaseVehicle) {
             MCH_EntityBaseVehicle vehicle = (MCH_EntityBaseVehicle)object;
             if(!vehicle.isDead && vehicle.getAcInfo() != null && categoryOf(vehicle) >= 0
+               && !vehicle.isUAV() && !vehicle.isNewUAV()
                && vehicle.getDistanceSqToEntity(player) <= farDistanceSq
-               && vehicle.getDistanceSqToEntity(player) > NORMAL_TRACKING_RANGE_SQ) {
+               && !world.getPlayerManager().isPlayerWatchingChunk(player, vehicle.chunkCoordX, vehicle.chunkCoordZ)) {
                aircraft.add(vehicle);
             }
          }
@@ -566,6 +131,8 @@ public class MCH_ServerTickHandler {
          PacketVehicleLODSnapshot.Entry entry = new PacketVehicleLODSnapshot.Entry();
          entry.uuid = vehicle.getUniqueID();
          entry.entityId = vehicle.getEntityId();
+         entry.commonUniqueId = vehicle.getCommonUniqueId();
+         entry.dimension = world.provider.dimensionId;
          entry.category = categoryOf(vehicle);
          entry.typeName = vehicle.getAcInfo().name;
          entry.textureName = vehicle.getTextureName();
@@ -615,6 +182,62 @@ public class MCH_ServerTickHandler {
          entries.add(entry);
       }
       return entries;
+   }
+
+   private static synchronized void tickMountGraphs() {
+      Iterator<PendingMountGraph> iterator = PENDING_MOUNT_GRAPHS.values().iterator();
+      while(iterator.hasNext()) {
+         PendingMountGraph pending = iterator.next();
+         ++pending.age;
+         EntityPlayerMP observer = pending.observer;
+         MCH_EntityBaseVehicle vehicle = pending.vehicle;
+         if(observer.isDead || observer.playerNetServerHandler == null || observer.dimension != pending.dimension
+            || observer.worldObj != vehicle.worldObj || vehicle.isDead
+            || !pending.commonUniqueId.equals(vehicle.getCommonUniqueId())
+            || !(observer.worldObj instanceof WorldServer)
+            || !((WorldServer)observer.worldObj).getPlayerManager().isPlayerWatchingChunk(observer, vehicle.chunkCoordX, vehicle.chunkCoordZ)
+            || vehicle.getDistanceSqToEntity(observer) > NORMAL_TRACKING_RANGE_SQ) {
+            iterator.remove();
+            continue;
+         }
+         if(pending.age == 1 || pending.age == 5 || pending.age == 10) {
+            MCH_MOD.getPacketHandler().sendTo(createMountGraph(pending), observer);
+            ++pending.sends;
+         }
+         if(pending.age >= 10 || pending.sends >= 3) iterator.remove();
+      }
+   }
+
+   private static PacketVehicleMountGraph createMountGraph(PendingMountGraph pending) {
+      MCH_EntityBaseVehicle vehicle = pending.vehicle;
+      PacketVehicleMountGraph packet = new PacketVehicleMountGraph();
+      packet.observerId = pending.observer.getEntityId();
+      packet.dimension = pending.dimension;
+      packet.vehicleId = vehicle.getEntityId();
+      packet.commonUniqueId = pending.commonUniqueId;
+      packet.aircraftType = vehicle.getAcInfo() == null ? "" : vehicle.getAcInfo().name;
+      packet.sequence = pending.sequence;
+      List<PacketVehicleMountGraph.RiderEntry> riders = new ArrayList<PacketVehicleMountGraph.RiderEntry>();
+      addRider(riders, vehicle.getRiddenByEntity(), vehicle, 0);
+      int count = Math.min(vehicle.getSeatNum(), 63);
+      for(int i = 0; i < count; ++i) {
+         MCH_EntitySeat seat = vehicle.getSeat(i);
+         if(seat != null) addRider(riders, seat.riddenByEntity, seat, i + 1);
+      }
+      packet.riders = riders;
+      return packet;
+   }
+
+   private static void addRider(List<PacketVehicleMountGraph.RiderEntry> riders, Entity rider, Entity mount, int seatIndex) {
+      if(rider == null || rider.isDead) return;
+      PacketVehicleMountGraph.RiderEntry entry = new PacketVehicleMountGraph.RiderEntry();
+      entry.riderId = rider.getEntityId();
+      entry.seatEntityId = seatIndex == 0 ? -1 : mount.getEntityId();
+      entry.seatIndex = seatIndex;
+      entry.riderClass = rider.getClass().getName();
+      if(rider instanceof EntityPlayer) entry.playerProfileId = ((EntityPlayer)rider).getGameProfile().getId();
+      if(mount instanceof MCH_EntitySeat) entry.parentCommonUniqueId = ((MCH_EntitySeat)mount).parentUniqueID;
+      riders.add(entry);
    }
 
    private static void capturePlaneLikeState(PacketVehicleLODSnapshot.Entry entry, float nozzle, float prevNozzle,

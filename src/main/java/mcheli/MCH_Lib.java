@@ -243,11 +243,6 @@ public class MCH_Lib {
       LOGGER.info(side + " " + formatMessage(format, data));
    }
 
-   /** Lifecycle evidence which must remain visible when the debug logger is disabled. */
-   public static void RespawnAuditLog(String format, Object ... data) {
-      LOGGER.info("[MCH-RESPAWN-AUDIT] " + formatMessage(format, data));
-   }
-
    public static void Log(World world, String format, Object ... data) {
       if(world != null) {
          Log((world.isRemote?"[ClientWorld]":"[ServerWorld]") + " " + format, data);

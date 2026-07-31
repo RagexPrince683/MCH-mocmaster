@@ -41,7 +41,7 @@ public class MCH_BaseVehiclePacketHandler {
    private static final List<PendingMount> pendingMounts = new ArrayList<PendingMount>();
    private static int pendingWorldIdentity;
    private static int pendingPlayerIdentity;
-   private static final Map<UUID, Integer> lastMountSequences = new HashMap<UUID, Integer>();
+   private static final Map<Integer, Integer> lastMountSequences = new HashMap<Integer, Integer>();
 
    private static final class PendingMount {
       final int aircraftId;
@@ -94,7 +94,7 @@ public class MCH_BaseVehiclePacketHandler {
          pendingPlayerIdentity = playerIdentity;
       }
       for(int i = pendingMounts.size() - 1; i >= 0; --i) {
-         if(pendingMounts.get(i).riderUUID.equals(packet.riderUUID)) pendingMounts.remove(i);
+         if(pendingMounts.get(i).riderId == packet.entityID_rider) pendingMounts.remove(i);
       }
       if(pendingMounts.size() >= MAX_PENDING_MOUNTS) pendingMounts.remove(0);
       pendingMounts.add(new PendingMount(packet));
@@ -104,13 +104,12 @@ public class MCH_BaseVehiclePacketHandler {
                                      UUID aircraftUUID, UUID riderUUID) {
       Entity aircraftEntity = player.worldObj.getEntityByID(aircraftId);
       Entity rider = player.worldObj.getEntityByID(riderId);
-      if(rider == null || rider.isDead || !riderUUID.equals(rider.getUniqueID())) return false;
+      if(rider == null || rider.isDead) return false;
       if(seatId < 0) {
          if(rider.ridingEntity != null) rider.mountEntity((Entity)null);
          return rider.ridingEntity == null;
       }
-      if(!(aircraftEntity instanceof MCH_EntityBaseVehicle)
-            || !aircraftUUID.equals(aircraftEntity.getUniqueID())) return false;
+      if(!(aircraftEntity instanceof MCH_EntityBaseVehicle)) return false;
       MCH_EntityBaseVehicle aircraft = (MCH_EntityBaseVehicle)aircraftEntity;
       if(aircraft.isUAV() || aircraft.isNewUAV()) return true;
       Entity mount = seatId == 0 ? aircraft : aircraft.getSeat(seatId - 1);
@@ -169,13 +168,14 @@ public class MCH_BaseVehiclePacketHandler {
          MCH_PacketNotifyOnMountEntity req = new MCH_PacketNotifyOnMountEntity();
          req.readData(data);
          MCH_Lib.DbgLog(player.worldObj, "onPacketOnMountEntity.rcv:%d, %d, %d, %d", new Object[]{Integer.valueOf(W_Entity.getEntityId(player)), Integer.valueOf(req.entityID_Ac), Integer.valueOf(req.entityID_rider), Integer.valueOf(req.seatID)});
-         Integer lastSequence = req.riderUUID == null ? null : lastMountSequences.get(req.riderUUID);
-         if(req.entityID_Ac > 0 && req.entityID_rider > 0 && req.aircraftUUID != null && req.riderUUID != null
+         Integer riderKey = Integer.valueOf(req.entityID_rider);
+         Integer lastSequence = lastMountSequences.get(riderKey);
+         if(req.entityID_Ac > 0 && req.entityID_rider > 0
                && (lastSequence == null || req.sequence > lastSequence.intValue())) {
-            if(lastMountSequences.size() >= MAX_PENDING_MOUNTS && !lastMountSequences.containsKey(req.riderUUID)) {
+            if(lastMountSequences.size() >= MAX_PENDING_MOUNTS && !lastMountSequences.containsKey(riderKey)) {
                lastMountSequences.remove(lastMountSequences.keySet().iterator().next());
             }
-            lastMountSequences.put(req.riderUUID, Integer.valueOf(req.sequence));
+            lastMountSequences.put(riderKey, Integer.valueOf(req.sequence));
             if(!applyMount(player, req.entityID_Ac, req.entityID_rider, req.seatID,
                   req.aircraftUUID, req.riderUUID) && req.seatID >= 0) {
                queueMount(player, req);

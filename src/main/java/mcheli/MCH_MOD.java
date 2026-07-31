@@ -314,7 +314,6 @@ public class MCH_MOD {
       MCH_Lib.Log("Register system", new Object[0]);
       W_NetworkRegistry.registerChannel(packetHandler, "MCHeli_CH");
       MinecraftForge.EVENT_BUS.register(new MCH_EventHook());
-      MCH_Lib.RespawnAuditLog("registered Forge handlers: LivingDeathEvent, Clone, StartTracking, StopTracking");
 
       proxy.registerClientTick();
 

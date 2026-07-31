@@ -55,7 +55,6 @@ import org.lwjgl.opengl.Display;
 import mcheli.ship.MCH_ClientShipTickHandler;
 import mcheli.ship.MCH_EntityShip;
 import mcheli.ship.MCH_GuiShip;
-import mcheli.lod.MCH_VehicleLODManager;
 
 //Eventhooks, clientproxy, tickhandler, guis and config just to name a few inheritors
 @SideOnly(Side.CLIENT)
@@ -109,23 +108,11 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    private EntityClientPlayerMP dismountPlayer;
    private World dismountWorld;
    private Object dismountConnection;
-   private EntityClientPlayerMP auditPlayer;
-   private int auditRespawnTicks = -1;
-   private boolean auditDeadLogged;
-
-   public static int getRespawnAuditAge() {
-      return instance == null ? -1 : instance.auditRespawnTicks;
-   }
-
-   public static boolean isRespawnAuditPlayer(EntityClientPlayerMP player) {
-      return instance != null && instance.auditPlayer == player;
-   }
 
 
 
    public MCH_ClientCommonTickHandler(Minecraft minecraft, MCH_Config config) {
       super(minecraft);
-      instance = this;
       this.gui_Common = new MCH_GuiCommon(minecraft);
       this.gui_Heli = new MCH_GuiHeli(minecraft);
       this.gui_Plane = new MCP_GuiPlane(minecraft);
@@ -880,11 +867,12 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
    public void onPlayerTickPre(EntityPlayer player) {
       if(player == super.mc.thePlayer) {
-         this.auditRespawnState((EntityClientPlayerMP)player);
          MCH_BaseVehiclePacketHandler.tickPendingMounts(player);
+         mcheli.network.packets.PacketVehicleMountGraph.tickClient(player);
          if(player.isDead) {
             MCH_MOD.proxy.clearVehicleLODSnapshots();
             MCH_BaseVehiclePacketHandler.clearPendingMounts();
+            mcheli.network.packets.PacketVehicleMountGraph.clearClientQueue();
          }
       }
       if(player == super.mc.thePlayer && this.isHoldingMCHeliDismount()) {
@@ -904,34 +892,6 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          }
       }
 
-   }
-
-   private void auditRespawnState(EntityClientPlayerMP player) {
-      if(player != this.auditPlayer) {
-         this.auditPlayer = player;
-         this.auditRespawnTicks = 0;
-         this.auditDeadLogged = false;
-         this.logClientAudit("replacement");
-      } else if(player.isDead && !this.auditDeadLogged) {
-         this.auditDeadLogged = true;
-         this.logClientAudit("dead");
-      } else if(this.auditRespawnTicks >= 0) {
-         ++this.auditRespawnTicks;
-         if(this.auditRespawnTicks == 1 || this.auditRespawnTicks == 5 || this.auditRespawnTicks == 20 || this.auditRespawnTicks == 40)
-            this.logClientAudit("replacement+" + this.auditRespawnTicks);
-         if(this.auditRespawnTicks >= 40) this.auditRespawnTicks = -1;
-      }
-   }
-
-   private void logClientAudit(String stage) {
-      int vehicles = 0;
-      if(super.mc.theWorld != null) for(Object value : super.mc.theWorld.loadedEntityList)
-         if(value instanceof MCH_EntityBaseVehicle) ++vehicles;
-      MCH_Lib.RespawnAuditLog("client %s playerId=%d playerObject=%x world=%x view=%x dim=%d pos=%.1f,%.1f,%.1f realVehicles=%d lodDisplays=%d",
-         stage, Integer.valueOf(this.auditPlayer.getEntityId()), Integer.valueOf(System.identityHashCode(this.auditPlayer)),
-         Integer.valueOf(System.identityHashCode(super.mc.theWorld)), Integer.valueOf(System.identityHashCode(super.mc.renderViewEntity)),
-         Integer.valueOf(this.auditPlayer.dimension), Double.valueOf(this.auditPlayer.posX), Double.valueOf(this.auditPlayer.posY),
-         Double.valueOf(this.auditPlayer.posZ), Integer.valueOf(vehicles), Integer.valueOf(MCH_VehicleLODManager.INSTANCE.getDisplayCountForAudit()));
    }
 
    public void onPlayerTickPost(EntityPlayer player) {

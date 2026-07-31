@@ -90,10 +90,6 @@ public final class MCH_VehicleLODManager {
         this.world = null;
     }
 
-    public synchronized int getDisplayCountForAudit() {
-        return this.displays.size();
-    }
-
     @SubscribeEvent
     public synchronized void onRenderWorldLast(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
@@ -107,10 +103,10 @@ public final class MCH_VehicleLODManager {
         }
 
         long now = System.currentTimeMillis();
-        Set<UUID> trackedAircraft = new HashSet<UUID>();
+        List<MCH_EntityBaseVehicle> trackedAircraft = new java.util.ArrayList<MCH_EntityBaseVehicle>();
         for (Object object : mc.theWorld.loadedEntityList) {
-            if (object instanceof MCH_EntityBaseVehicle) {
-                trackedAircraft.add(((Entity)object).getUniqueID());
+            if (object instanceof MCH_EntityBaseVehicle && !((Entity)object).isDead) {
+                trackedAircraft.add((MCH_EntityBaseVehicle)object);
             }
         }
 
@@ -125,7 +121,7 @@ public final class MCH_VehicleLODManager {
         double farSq = far > 0.0D ? far * far : Double.MAX_VALUE;
 
         for (Display display : this.displays.values()) {
-            if (now - display.lastUpdateMs > STALE_AFTER_MS || trackedAircraft.contains(display.uuid)) {
+            if (now - display.lastUpdateMs > STALE_AFTER_MS || hasRealEntity(display, trackedAircraft)) {
                 continue;
             }
             float interpolation = Math.min(1.0F, (float)(now - display.previousUpdateMs) / 1000.0F);
@@ -140,6 +136,16 @@ public final class MCH_VehicleLODManager {
             }
             render(display, x, y, z, interpolation, now);
         }
+    }
+
+    private static boolean hasRealEntity(Display display, List<MCH_EntityBaseVehicle> vehicles) {
+        for(MCH_EntityBaseVehicle vehicle : vehicles) {
+            if(vehicle.getEntityId() == display.entityId) return true;
+            String commonId = vehicle.getCommonUniqueId();
+            if(commonId != null && commonId.length() > 0 && commonId.equals(display.commonUniqueId)
+                && vehicle.getAcInfo() != null && display.typeName.equals(vehicle.getAcInfo().name)) return true;
+        }
+        return false;
     }
 
     private static void render(Display display, double x, double y, double z, float interpolation, long now) {
@@ -277,6 +283,8 @@ public final class MCH_VehicleLODManager {
     private static final class Display {
         private final UUID uuid;
         private int entityId;
+        private String commonUniqueId;
+        private int dimension;
         private byte category;
         private String typeName;
         private String textureName;
@@ -341,6 +349,8 @@ public final class MCH_VehicleLODManager {
             this.previousRoll = interpolateAngle(this.previousRoll, this.roll, partial);
             this.previousUpdateMs = now;
             this.entityId = entry.entityId;
+            this.commonUniqueId = entry.commonUniqueId;
+            this.dimension = entry.dimension;
             this.category = entry.category;
             this.typeName = entry.typeName;
             this.textureName = entry.textureName;

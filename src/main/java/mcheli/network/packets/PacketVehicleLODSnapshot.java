@@ -44,6 +44,8 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             data.writeLong(entry.uuid.getMostSignificantBits());
             data.writeLong(entry.uuid.getLeastSignificantBits());
             data.writeInt(entry.entityId);
+            writeString(data, entry.commonUniqueId);
+            data.writeInt(entry.dimension);
             data.writeByte(entry.category);
             writeString(data, entry.typeName);
             writeString(data, entry.textureName);
@@ -119,6 +121,8 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             Entry entry = new Entry();
             entry.uuid = new UUID(data.readLong(), data.readLong());
             entry.entityId = data.readInt();
+            entry.commonUniqueId = readString(data);
+            entry.dimension = data.readInt();
             entry.category = data.readByte();
             entry.typeName = readString(data);
             entry.textureName = readString(data);
@@ -218,6 +222,8 @@ public class PacketVehicleLODSnapshot extends PacketBase {
     public static class Entry {
         public UUID uuid;
         public int entityId;
+        public String commonUniqueId = "";
+        public int dimension;
         public byte category;
         public String typeName;
         public String textureName;
