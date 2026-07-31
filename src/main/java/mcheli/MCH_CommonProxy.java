@@ -44,6 +44,7 @@ public class MCH_CommonProxy {
 
    public void registerServerTick() {
       FMLCommonHandler.instance().bus().register(new MCH_ServerTickHandler());
+      MCH_Lib.RespawnAuditLog("registered FML server handlers: PlayerRespawnEvent, PlayerChangedDimensionEvent, ServerTickEvent");
    }
 
    public boolean isRemote() {

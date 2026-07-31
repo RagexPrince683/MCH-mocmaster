@@ -188,12 +188,14 @@ public class MCH_EventHook extends W_EventHook {
    public void onLivingDeathEvent(LivingDeathEvent event) {
       if(event.entity instanceof EntityPlayerMP) {
          EntityPlayerMP player = (EntityPlayerMP)event.entity;
-         MCH_Lib.DbgLog(player.worldObj,
-            "[MCH-RESPAWN-TRACK] death player=%s id=%d uuid=%s object=%x dim=%d world=%x chunk=%d,%d",
+         MCH_Lib.RespawnAuditLog(
+            "death player=%s id=%d uuid=%s object=%x dim=%d world=%x pos=%.1f,%.1f,%.1f chunk=%d,%d dead=%s net=%s exactWorldPlayer=%s",
             new Object[]{player.getCommandSenderName(), Integer.valueOf(player.getEntityId()), player.getUniqueID(),
                Integer.valueOf(System.identityHashCode(player)), Integer.valueOf(player.dimension),
-               Integer.valueOf(System.identityHashCode(player.worldObj)), Integer.valueOf(player.chunkCoordX),
-               Integer.valueOf(player.chunkCoordZ)});
+               Integer.valueOf(System.identityHashCode(player.worldObj)), Double.valueOf(player.posX), Double.valueOf(player.posY),
+               Double.valueOf(player.posZ), Integer.valueOf(player.chunkCoordX), Integer.valueOf(player.chunkCoordZ),
+               Boolean.valueOf(player.isDead), player.playerNetServerHandler == null ? "null" : "open",
+               Boolean.valueOf(containsExact(player.worldObj.playerEntities, player))});
          MCH_UavInventory.restorePilotInventory(player, "player_death");
          for(Object object : player.worldObj.loadedEntityList) {
             if(object instanceof MCH_EntityBaseVehicle) {
@@ -206,8 +208,8 @@ public class MCH_EventHook extends W_EventHook {
    @SubscribeEvent
    public void onPlayerClone(PlayerEvent.Clone event) {
       if(event.entityPlayer instanceof EntityPlayerMP && !event.entityPlayer.worldObj.isRemote) {
-         MCH_Lib.DbgLog(event.entityPlayer.worldObj,
-            "[MCH-RESPAWN-TRACK] clone oldId=%d oldUuid=%s oldObject=%x newId=%d newUuid=%s newObject=%x dim=%d world=%x death=%s",
+         MCH_Lib.RespawnAuditLog(
+            "clone oldId=%d oldUuid=%s oldObject=%x newId=%d newUuid=%s newObject=%x dim=%d world=%x death=%s",
             new Object[]{Integer.valueOf(event.original.getEntityId()), event.original.getUniqueID(),
                Integer.valueOf(System.identityHashCode(event.original)), Integer.valueOf(event.entityPlayer.getEntityId()),
                event.entityPlayer.getUniqueID(), Integer.valueOf(System.identityHashCode(event.entityPlayer)),
@@ -243,8 +245,8 @@ public class MCH_EventHook extends W_EventHook {
       if(aircraft != null) {
          this.logTrackingTransition("start", (EntityPlayerMP)event.entityPlayer, event.target, aircraft);
          aircraft.syncCompleteAircraftState((EntityPlayerMP)event.entityPlayer);
-         MCH_Lib.DbgLog(event.entityPlayer.worldObj,
-            "[MCH-RESPAWN-TRACK] syncCompleteAircraftState playerId=%d targetId=%d vehicleId=%d vehicleUuid=%s",
+         MCH_Lib.RespawnAuditLog(
+            "syncCompleteAircraftState playerId=%d targetId=%d vehicleId=%d vehicleUuid=%s",
             new Object[]{Integer.valueOf(event.entityPlayer.getEntityId()), Integer.valueOf(event.target.getEntityId()),
                Integer.valueOf(aircraft.getEntityId()), aircraft.getUniqueID()});
       } else if(event.target instanceof MCH_EntityHitBox) {
@@ -270,11 +272,16 @@ public class MCH_EventHook extends W_EventHook {
       String kind = target instanceof MCH_EntityPSeat ? "passenger-seat"
          : target instanceof MCH_EntitySeat ? "seat"
          : target instanceof MCH_EntityHitBox ? "hitbox" : "vehicle";
-      MCH_Lib.DbgLog(player.worldObj,
-         "[MCH-RESPAWN-TRACK] %s kind=%s playerId=%d playerObject=%x targetId=%d targetUuid=%s parentId=%d parentRef=%x dead=%s",
+      MCH_Lib.RespawnAuditLog(
+         "%s kind=%s playerId=%d playerObject=%x targetId=%d targetUuid=%s parentId=%d parentRef=%x dead=%s",
          new Object[]{action, kind, Integer.valueOf(player.getEntityId()), Integer.valueOf(System.identityHashCode(player)),
             Integer.valueOf(target.getEntityId()), target.getUniqueID(), Integer.valueOf(aircraft != null ? aircraft.getEntityId() : -1),
             Integer.valueOf(System.identityHashCode(aircraft)), Boolean.valueOf(target.isDead)});
+   }
+
+   private static boolean containsExact(List<?> values, Object expected) {
+      for(Object value : values) if(value == expected) return true;
+      return false;
    }
 
    @SubscribeEvent
