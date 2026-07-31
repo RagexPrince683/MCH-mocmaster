@@ -1,3 +1,10 @@
+## PR #593 - Restore Real Vehicle Tracking After Respawn
+
+- Rebuild the replacement server player's vanilla tracker membership once, after Forge's respawn or dimension-change lifecycle has installed the player and its watched chunks.
+- Remove the replacement player's stale watcher generation before the rebuild so existing vehicle, seat, passenger-seat, and hitbox spawn packets are not suppressed by Minecraft 1.7.10's entity-ID-based player equality.
+- Keep normal-range LOD snapshots suppressed and preserve UUID-validated mount correction, dead-rider cleanup, and all UAV and NewUAV paths.
+- Add debug-only `[MCH-RESPAWN-TRACK]` transition and failure diagnostics, including player/world identity, dimension, chunk, and nearby normal-vehicle count.
+
 # Fix Tank LOD Running-Gear Rendering
 
 - Restored track rollers, crawler tracks, and wheels in both tracked-entity and entity-free snapshot tank LOD passes without restoring the monolithic common-part renderer.
