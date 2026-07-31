@@ -1,7 +1,6 @@
 package mcheli;
 
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,12 +25,10 @@ import mcheli.wrapper.W_EventHook;
 import mcheli.wrapper.W_Lib;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
@@ -48,45 +45,6 @@ public class MCH_EventHook extends W_EventHook {
 
    int acloaded = 0;
 
-
-   @SubscribeEvent
-   public void worldLoad(WorldEvent.Load event) {
-      if(event.world instanceof WorldServer && !event.world.isRemote) {
-         this.expandAircraftLODTrackingRange((WorldServer)event.world);
-      }
-
-   }
-
-   private void expandAircraftLODTrackingRange(WorldServer world) {
-      double farDistance = MCH_Config.AircraftLODFarDistance != null?MCH_Config.AircraftLODFarDistance.prmDouble:0.0D;
-      if(farDistance <= 0.0D) {
-         return;
-      }
-
-      int range = (int)Math.min(2147483647.0D, Math.max(600.0D, Math.ceil(farDistance)));
-      EntityTracker tracker = world.getEntityTracker();
-      Field[] fields = EntityTracker.class.getDeclaredFields();
-
-      for(int i = 0; i < fields.length; ++i) {
-         Field field = fields[i];
-         if(field.getType() == Integer.TYPE) {
-            try {
-               field.setAccessible(true);
-               int currentRange = field.getInt(tracker);
-               if(currentRange < range) {
-                  field.setInt(tracker, range);
-                  MCH_Lib.Log(world, "Expanded EntityTracker max range from %d to %d for aircraft LODs", new Object[]{Integer.valueOf(currentRange), Integer.valueOf(range)});
-               }
-            } catch(Exception e) {
-               MCH_Lib.Log(world, "Failed to expand EntityTracker range for aircraft LODs: %s", new Object[]{e.toString()});
-            }
-
-            return;
-         }
-      }
-
-      MCH_Lib.Log(world, "Failed to find EntityTracker max range field for aircraft LODs", new Object[0]);
-   }
 
    public void commandEvent(CommandEvent event) {
       MCH_Command.onCommandEvent(event);
@@ -227,7 +185,13 @@ public class MCH_EventHook extends W_EventHook {
    @SubscribeEvent
    public void onLivingDeathEvent(LivingDeathEvent event) {
       if(event.entity instanceof EntityPlayerMP) {
-         MCH_UavInventory.restorePilotInventory((EntityPlayerMP)event.entity, "player_death");
+         EntityPlayerMP player = (EntityPlayerMP)event.entity;
+         MCH_UavInventory.restorePilotInventory(player, "player_death");
+         for(Object object : player.worldObj.loadedEntityList) {
+            if(object instanceof MCH_EntityBaseVehicle) {
+               ((MCH_EntityBaseVehicle)object).clearDeadNormalVehicleRider(player);
+            }
+         }
       }
    }
 

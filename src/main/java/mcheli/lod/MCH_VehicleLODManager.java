@@ -104,11 +104,9 @@ public final class MCH_VehicleLODManager {
 
         long now = System.currentTimeMillis();
         Set<UUID> trackedAircraft = new HashSet<UUID>();
-        Set<Integer> trackedAircraftIds = new HashSet<Integer>();
         for (Object object : mc.theWorld.loadedEntityList) {
             if (object instanceof MCH_EntityBaseVehicle) {
                 trackedAircraft.add(((Entity)object).getUniqueID());
-                trackedAircraftIds.add(((Entity)object).getEntityId());
             }
         }
 
@@ -123,8 +121,7 @@ public final class MCH_VehicleLODManager {
         double farSq = far > 0.0D ? far * far : Double.MAX_VALUE;
 
         for (Display display : this.displays.values()) {
-            if (now - display.lastUpdateMs > STALE_AFTER_MS || trackedAircraft.contains(display.uuid)
-                || trackedAircraftIds.contains(display.entityId)) {
+            if (now - display.lastUpdateMs > STALE_AFTER_MS || trackedAircraft.contains(display.uuid)) {
                 continue;
             }
             float interpolation = Math.min(1.0F, (float)(now - display.previousUpdateMs) / 1000.0F);

@@ -349,6 +349,13 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 * Restored normal vehicle and passenger-seat mount relationships with an authoritative server notification and a bounded client retry when tracking packets arrive out of order.
 * Kept UAV and NewUAV mounting paths excluded from the new normal-vehicle correction flow.
 
+# Fix post-respawn vehicle tracking and mount generations
+
+* Removed the LOD-only reflection change to vanilla's global entity-tracker range; packet snapshots now begin outside MCHeli's normal 200-block vehicle tracking range.
+* Made snapshot handoff use the server vehicle UUID, preventing a reused entity ID from hiding an otherwise valid distant snapshot.
+* Added UUID- and sequence-validated normal-vehicle attach/detach corrections, bounded retries that contain IDs rather than entity references, and invalidation when the client player or world instance changes.
+* Cleared dead-player pilot and passenger back-references at the death lifecycle event while preserving UAV and NewUAV remote-control paths.
+
 ## Vehicle LOD named-part completion
 
 - Restored tracked and snapshot landing-gear rendering for separable plane models, including reverse, hatch, secondary-axis, and sliding gear definitions.

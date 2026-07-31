@@ -29,6 +29,8 @@ import net.minecraft.world.chunk.Chunk;
 public class MCH_ServerTickHandler {
    private static final int UPDATE_INTERVAL_TICKS = 20;
    private static final int MAX_ENTRIES = 512;
+   /** Must match the normal vehicle/seat registration range in MCH_MOD. */
+   private static final double NORMAL_TRACKING_RANGE_SQ = 200.0D * 200.0D;
    private int tick;
 
    @SubscribeEvent
@@ -65,7 +67,8 @@ public class MCH_ServerTickHandler {
          if(object instanceof MCH_EntityBaseVehicle) {
             MCH_EntityBaseVehicle vehicle = (MCH_EntityBaseVehicle)object;
             if(!vehicle.isDead && vehicle.getAcInfo() != null && categoryOf(vehicle) >= 0
-               && vehicle.getDistanceSqToEntity(player) <= farDistanceSq) {
+               && vehicle.getDistanceSqToEntity(player) <= farDistanceSq
+               && vehicle.getDistanceSqToEntity(player) > NORMAL_TRACKING_RANGE_SQ) {
                aircraft.add(vehicle);
             }
          }
