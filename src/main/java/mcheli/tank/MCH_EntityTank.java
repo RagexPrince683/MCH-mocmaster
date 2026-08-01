@@ -232,7 +232,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
             this.updateTurretPopDestructionTransition();
             this.updateTurretPop();
          }
-         else this.updateTurretPopSmoke();
+         else {
+            this.predictTurretPopClient();
+            this.updateTurretPopSmoke();
+         }
          if(!super.isRequestedSyncStatus) {
             super.isRequestedSyncStatus = true;
             if(super.worldObj.isRemote) {
@@ -870,25 +873,19 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    private void onTurretPopDestructionTransition() {
       this.turretPopDestructionObserved = true;
       if(this.turretPopStarted || this.tankInfo == null || !this.tankInfo.enableTurretPop) return;
-      MCH_BaseVehicleInfo.PartWeapon root = this.getTurretPopRoot();
-      if(root != null) this.startTurretPop();
-      else this.warnMissingTurretPart();
+      // Starting is configuration-driven and server authoritative. Model-section
+      // validation is client-only and may safely fall back to the intact wreck.
+      this.startTurretPop();
    }
 
    /**
-    * Resolves the configured main-cannon assembly. Part order is configuration order,
-    * so the first top-level weapon part with a loaded group is the primary gun; coax,
-    * cupola and remote stations configured later cannot displace it.
+    * Resolves the canonical configured main cannon, never an arbitrary loaded part.
     */
    public MCH_BaseVehicleInfo.PartWeapon getTurretPopRoot() {
       if(this.tankInfo == null || !this.tankInfo.enableTurretPop) return null;
-      mcheli.wrapper.modelloader.W_ModelCustom model = this.tankInfo.model instanceof mcheli.wrapper.modelloader.W_ModelCustom
-            ? (mcheli.wrapper.modelloader.W_ModelCustom)this.tankInfo.model : null;
       for(Object object : this.tankInfo.partWeapon) {
          MCH_BaseVehicleInfo.PartWeapon part = (MCH_BaseVehicleInfo.PartWeapon)object;
-         // Dedicated servers intentionally do not load render models. They select the
-         // same configured root; clients additionally reject a missing loaded group.
-         if(model == null || model.containsPart("$" + part.modelName)) return part;
+         if("weapon0".equalsIgnoreCase(part.modelName)) return part;
       }
       return null;
    }
@@ -959,6 +956,18 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.turretPopStarted = true; this.turretPopLanded = p.landed; this.turretPopX=p.x; this.turretPopY=p.y; this.turretPopZ=p.z; this.turretPopYaw=p.yaw; this.turretPopPitch=p.pitch; this.turretPopRoll=p.roll; this.turretPopAge=p.age;
       this.turretPopMotionX=p.mx; this.turretPopMotionY=p.my; this.turretPopMotionZ=p.mz; this.turretPopAngularYaw=p.ay; this.turretPopAngularPitch=p.ap; this.turretPopAngularRoll=p.ar;
       this.turretPopFrozenYaw=p.frozenYaw; this.turretPopFrozenPitch=p.frozenPitch;
+   }
+
+   /** Predicts between three-tick server snapshots; each snapshot remains corrective. */
+   @SideOnly(Side.CLIENT)
+   private void predictTurretPopClient() {
+      if(!this.turretPopStarted || this.turretPopLanded) return;
+      this.prevTurretPopX = this.turretPopX; this.prevTurretPopY = this.turretPopY; this.prevTurretPopZ = this.turretPopZ;
+      this.prevTurretPopYaw = this.turretPopYaw; this.prevTurretPopPitch = this.turretPopPitch; this.prevTurretPopRoll = this.turretPopRoll;
+      this.turretPopMotionY = Math.max(-1.5D, this.turretPopMotionY - 0.055D);
+      this.turretPopX += this.turretPopMotionX; this.turretPopY += this.turretPopMotionY; this.turretPopZ += this.turretPopMotionZ;
+      this.turretPopYaw += this.turretPopAngularYaw; this.turretPopPitch += this.turretPopAngularPitch; this.turretPopRoll += this.turretPopAngularRoll;
+      ++this.turretPopAge;
    }
 
    private void updateTurretPopSmoke() {

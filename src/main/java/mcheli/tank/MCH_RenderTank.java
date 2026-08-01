@@ -53,18 +53,21 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
                System.out.println("Texture not found : " + tank.getTextureName());
                this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
             }
-            if(tank.turretPopStarted) {
-               renderTankBodyWithoutPoppedTurret(tankInfo.model, tank.getTurretPopRoot());
+            MCH_TurretPopModelCache.Entry popModel = tank.turretPopStarted
+                  ? MCH_TurretPopModelCache.get(tankInfo, tank.getTurretPopRoot()) : null;
+            if(tank.turretPopStarted && popModel != null) {
+               renderBodyWithSkinOverlay(popModel.wreck, "tanks", tank);
             } else {
                renderBodyWithSkinOverlay(tankInfo.model, "tanks", tank);
             }
-            this.renderPoppedTurret(tank, tankInfo, yaw, pitch, roll, tickTime);
+            this.renderPoppedTurret(tank, tankInfo, popModel, yaw, pitch, roll, tickTime);
          }
       }
    }
 
-   private void renderPoppedTurret(MCH_EntityTank tank, MCH_TankInfo info, float hullYaw, float hullPitch, float hullRoll, float tickTime) {
-      if(!tank.turretPopStarted || tank.getTurretPopRoot() == null) return;
+   private void renderPoppedTurret(MCH_EntityTank tank, MCH_TankInfo info,
+         MCH_TurretPopModelCache.Entry popModel, float hullYaw, float hullPitch, float hullRoll, float tickTime) {
+      if(!tank.turretPopStarted || popModel == null) return;
       double x = tank.prevTurretPopX + (tank.turretPopX - tank.prevTurretPopX) * tickTime;
       double y = tank.prevTurretPopY + (tank.turretPopY - tank.prevTurretPopY) * tickTime;
       double z = tank.prevTurretPopZ + (tank.turretPopZ - tank.prevTurretPopZ) * tickTime;
@@ -82,7 +85,7 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
       GL11.glRotatef(popYaw, 0.0F, -1.0F, 0.0F);
       GL11.glRotatef(popPitch, 1.0F, 0.0F, 0.0F);
       GL11.glRotatef(popRoll, 0.0F, 0.0F, 1.0F);
-      renderDetachedTankTurret(tank, info);
+      renderDetachedTankTurret(tank, popModel);
       GL11.glPopMatrix();
    }
 
