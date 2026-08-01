@@ -54,8 +54,33 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
                this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
             }
             renderBodyWithSkinOverlay(tankInfo.model, "tanks", tank);
+            this.renderPoppedTurret(tank, tankInfo, yaw, pitch, roll, tickTime);
          }
       }
+   }
+
+   private void renderPoppedTurret(MCH_EntityTank tank, MCH_TankInfo info, float hullYaw, float hullPitch, float hullRoll, float tickTime) {
+      if(!tank.turretPopStarted || tank.getTurretPopRoot() == null) return;
+      double x = tank.prevTurretPopX + (tank.turretPopX - tank.prevTurretPopX) * tickTime;
+      double y = tank.prevTurretPopY + (tank.turretPopY - tank.prevTurretPopY) * tickTime;
+      double z = tank.prevTurretPopZ + (tank.turretPopZ - tank.prevTurretPopZ) * tickTime;
+      float popYaw = tank.prevTurretPopYaw + (tank.turretPopYaw - tank.prevTurretPopYaw) * tickTime;
+      float popPitch = tank.prevTurretPopPitch + (tank.turretPopPitch - tank.prevTurretPopPitch) * tickTime;
+      float popRoll = tank.prevTurretPopRoll + (tank.turretPopRoll - tank.prevTurretPopRoll) * tickTime;
+      GL11.glPushMatrix();
+      GL11.glRotatef(-hullRoll, 0.0F, 0.0F, 1.0F);
+      GL11.glRotatef(-hullPitch, 1.0F, 0.0F, 0.0F);
+      GL11.glRotatef(-hullYaw, 0.0F, -1.0F, 0.0F);
+      double tankX = tank.prevPosX + (tank.posX - tank.prevPosX) * tickTime;
+      double tankY = tank.prevPosY + (tank.posY - tank.prevPosY) * tickTime;
+      double tankZ = tank.prevPosZ + (tank.posZ - tank.prevPosZ) * tickTime;
+      GL11.glTranslated(x - tankX, y - tankY, z - tankZ);
+      GL11.glRotatef(popYaw, 0.0F, -1.0F, 0.0F);
+      GL11.glRotatef(popPitch, 1.0F, 0.0F, 0.0F);
+      GL11.glRotatef(popRoll, 0.0F, 0.0F, 1.0F);
+      GL11.glTranslated(-info.turretPosition.xCoord, -info.turretPosition.yCoord, -info.turretPosition.zCoord);
+      renderDetachedTurretWeapon(tank, info, tickTime);
+      GL11.glPopMatrix();
    }
 
    public void renderWheel(MCH_EntityTank tank, double posX, double posY, double posZ) {

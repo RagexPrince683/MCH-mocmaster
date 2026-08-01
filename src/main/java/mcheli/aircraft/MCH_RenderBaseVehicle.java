@@ -873,6 +873,14 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    }
 
    public static void renderWeapon(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
+      renderWeapon(ac, info, tickTime, false);
+   }
+
+   public static void renderDetachedTurretWeapon(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
+      renderWeapon(ac, info, tickTime, true);
+   }
+
+   private static void renderWeapon(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime, boolean detachedOnly) {
       MCH_WeaponSet beforeWs = null;
       Entity e = ac.getRiddenByEntity();
       int weaponIndex = 0;
@@ -881,6 +889,12 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
 
       while(i$.hasNext()) {
          MCH_BaseVehicleInfo.PartWeapon w = (MCH_BaseVehicleInfo.PartWeapon)i$.next();
+         if(ac instanceof mcheli.tank.MCH_EntityTank && ((mcheli.tank.MCH_EntityTank)ac).turretPopStarted) {
+            MCH_BaseVehicleInfo.PartWeapon root = ((mcheli.tank.MCH_EntityTank)ac).getTurretPopRoot();
+            if((detachedOnly && w != root) || (!detachedOnly && w == root)) continue;
+         } else if(detachedOnly) {
+            continue;
+         }
          MCH_WeaponSet ws = ac.getWeaponByName(w.name[0]);
          boolean var10000;
          if(ws != null && ws.getFirstWeapon().onTurret) {

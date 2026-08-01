@@ -291,6 +291,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `WeightType` | Tank | enum `normal`, `car`, `tank` | `normal`/0 | ground physics weight behavior |
 | `WeightedCenterZ` | Tank | float[-1000..1000] | 0.0 | fore/aft center of weight |
 | `TrackMaxHP` | Tank | int[1..1000000] | 100 | track durability |
+| `EnableTurretPop` | Tank | boolean | `false` | `true` enables the catastrophic detached-turret destruction effect; requires a configured dynamic turret assembly |
 | `AddTrackHitBox` | Tank | `x,y,z,width,height[,damageFactor]` | damageFactor 1.0 | track hitbox |
 | `canmove` | Turret/static | boolean | false | movable turret vehicle |
 | `canrotation` | Turret/static | boolean | false | base rotation enabled |

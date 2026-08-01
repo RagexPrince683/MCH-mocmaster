@@ -11,6 +11,7 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 | `WeightType` | enum `normal`, `car`, `tank` | `normal` / 0 | Parser maps `car` to 1 and `tank` to 2; any other text is 0. |
 | `WeightedCenterZ` | float[-1000..1000] | 0 | Moves the simulated center of weight forward/back. Positive/negative effect depends on model orientation. |
 | `TrackMaxHP` | int[1..1000000] | 100 | Track durability. |
+| `EnableTurretPop` | boolean | `false` | When `true`, enables the catastrophic detached-turret destruction effect. Requires a configured dynamic turret assembly. |
 | `AddTrackHitBox` | `x,y,z,width,height[,damageFactor]` | none; damage factor 1 | Adds a track-typed extra bounding box. |
 
 ## Tank defaults that differ from base
@@ -39,6 +40,7 @@ maxhp = 250
 speed = 0.35
 WeightType = tank
 TrackMaxHP = 120
+EnableTurretPop = false
 LWR = false
 AddTrackHitBox = 1.2, 0.0, 0.0, 0.5, 0.5, 1.0
 AddTrackHitBox = -1.2, 0.0, 0.0, 0.5, 0.5, 1.0
@@ -46,4 +48,6 @@ AddTrackHitBox = -1.2, 0.0, 0.0, 0.5, 0.5, 1.0
 
 ## Safe-to-omit notes
 
-`WeightType`, `WeightedCenterZ`, `TrackMaxHP`, `AddTrackHitBox`, and `LWR` are optional. Omitting `LWR` leaves tank alert audio disabled; omitting the other keys leaves default ground behavior and no explicit track hitboxes.
+`WeightType`, `WeightedCenterZ`, `TrackMaxHP`, `AddTrackHitBox`, `EnableTurretPop`, and `LWR` are optional. Omitting `EnableTurretPop` keeps the turret attached when the tank is destroyed. Omitting `LWR` leaves tank alert audio disabled; omitting the other keys leaves default ground behavior and no explicit track hitboxes.
+
+`EnableTurretPop = true` enables a catastrophic destruction effect which launches the complete main dynamic turret weapon part and its configured child parts off the chassis. The tank must define a dynamic turret assembly with `AddPartTurretWeapon` or `AddPartTurretRotWeapon`; geometry baked into `$body` cannot be detached.

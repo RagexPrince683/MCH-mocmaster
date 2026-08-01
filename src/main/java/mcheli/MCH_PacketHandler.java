@@ -71,6 +71,9 @@ public class MCH_PacketHandler extends W_PacketHandler {
       case 268439649:
          MCH_BaseVehiclePacketHandler.onPacketStatusResponse(entityPlayer, data);
          break;
+      case 268439650:
+         MCH_TankPacketHandler.onPacket_TurretPop(entityPlayer, data);
+         break;
       case 536872992:
          MCH_CommonPacketHandler.onPacketIndOpenScreen(entityPlayer, data);
          break;

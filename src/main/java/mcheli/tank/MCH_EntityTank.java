@@ -40,6 +40,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import io.netty.buffer.ByteBuf;
 
 //the cursed extension
 //refactoring would be a fucking nightmare
@@ -54,6 +55,15 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    public final MCH_WheelManager WheelMng;
    public float partialTicks;
    private int trackDamageTaken;
+   public boolean turretPopStarted;
+   public boolean turretPopLanded;
+   public double turretPopX, turretPopY, turretPopZ;
+   public double prevTurretPopX, prevTurretPopY, prevTurretPopZ;
+   public double turretPopMotionX, turretPopMotionY, turretPopMotionZ;
+   public float turretPopYaw, turretPopPitch, turretPopRoll;
+   public float prevTurretPopYaw, prevTurretPopPitch, prevTurretPopRoll;
+   public float turretPopAngularYaw, turretPopAngularPitch, turretPopAngularRoll;
+   public int turretPopAge;
 
    //TODO
    private int currentGear = 1;  // Starting gear
@@ -78,6 +88,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.prevRotationRotor = 0.0F;
       this.WheelMng = new MCH_WheelManager(this);
       this.trackDamageTaken = 0;
+      this.turretPopStarted = false;
+      this.turretPopLanded = false;
    }
 
    //tracks are very broken
@@ -144,11 +156,28 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    protected void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
       super.writeEntityToNBT(par1NBTTagCompound);
       par1NBTTagCompound.setInteger("TrackDamage", this.trackDamageTaken);
+      par1NBTTagCompound.setBoolean("TurretPopStarted", this.turretPopStarted);
+      if(this.turretPopStarted) {
+         par1NBTTagCompound.setBoolean("TurretPopLanded", this.turretPopLanded);
+         par1NBTTagCompound.setDouble("TurretPopX", this.turretPopX); par1NBTTagCompound.setDouble("TurretPopY", this.turretPopY); par1NBTTagCompound.setDouble("TurretPopZ", this.turretPopZ);
+         par1NBTTagCompound.setDouble("TurretPopMX", this.turretPopMotionX); par1NBTTagCompound.setDouble("TurretPopMY", this.turretPopMotionY); par1NBTTagCompound.setDouble("TurretPopMZ", this.turretPopMotionZ);
+         par1NBTTagCompound.setFloat("TurretPopYaw", this.turretPopYaw); par1NBTTagCompound.setFloat("TurretPopPitch", this.turretPopPitch); par1NBTTagCompound.setFloat("TurretPopRoll", this.turretPopRoll);
+         par1NBTTagCompound.setFloat("TurretPopAY", this.turretPopAngularYaw); par1NBTTagCompound.setFloat("TurretPopAP", this.turretPopAngularPitch); par1NBTTagCompound.setFloat("TurretPopAR", this.turretPopAngularRoll);
+         par1NBTTagCompound.setInteger("TurretPopAge", this.turretPopAge);
+      }
    }
 
    protected void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
       super.readEntityFromNBT(par1NBTTagCompound);
       this.trackDamageTaken = Math.max(0, par1NBTTagCompound.getInteger("TrackDamage"));
+      this.turretPopStarted = par1NBTTagCompound.getBoolean("TurretPopStarted");
+      if(this.turretPopStarted) {
+         this.turretPopLanded = par1NBTTagCompound.getBoolean("TurretPopLanded");
+         this.turretPopX = this.prevTurretPopX = par1NBTTagCompound.getDouble("TurretPopX"); this.turretPopY = this.prevTurretPopY = par1NBTTagCompound.getDouble("TurretPopY"); this.turretPopZ = this.prevTurretPopZ = par1NBTTagCompound.getDouble("TurretPopZ");
+         this.turretPopMotionX = par1NBTTagCompound.getDouble("TurretPopMX"); this.turretPopMotionY = par1NBTTagCompound.getDouble("TurretPopMY"); this.turretPopMotionZ = par1NBTTagCompound.getDouble("TurretPopMZ");
+         this.turretPopYaw = this.prevTurretPopYaw = par1NBTTagCompound.getFloat("TurretPopYaw"); this.turretPopPitch = this.prevTurretPopPitch = par1NBTTagCompound.getFloat("TurretPopPitch"); this.turretPopRoll = this.prevTurretPopRoll = par1NBTTagCompound.getFloat("TurretPopRoll");
+         this.turretPopAngularYaw = par1NBTTagCompound.getFloat("TurretPopAY"); this.turretPopAngularPitch = par1NBTTagCompound.getFloat("TurretPopAP"); this.turretPopAngularRoll = par1NBTTagCompound.getFloat("TurretPopAR"); this.turretPopAge = Math.max(0, par1NBTTagCompound.getInteger("TurretPopAge"));
+      }
       if(this.tankInfo == null) {
          this.tankInfo = MCH_TankInfoManager.get(this.getTypeName());
          if(this.tankInfo == null) {
@@ -187,6 +216,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          super.prevPosY = super.posY;
          super.prevPosZ = super.posZ;
       } else {
+         if(!super.worldObj.isRemote) this.updateTurretPop();
          if(!super.isRequestedSyncStatus) {
             super.isRequestedSyncStatus = true;
             if(super.worldObj.isRemote) {
@@ -808,7 +838,62 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       super.rotDestroyedPitch = 0.0F;
       super.rotDestroyedRoll = 0.0F;
       super.rotDestroyedYaw = 0.0F;
+      if(!super.worldObj.isRemote && !this.turretPopStarted && this.tankInfo != null && this.tankInfo.enableTurretPop && this.getTurretPopRoot() != null) {
+         this.startTurretPop();
+      }
    }
+
+   public MCH_BaseVehicleInfo.PartWeapon getTurretPopRoot() {
+      if(this.tankInfo != null) for(Object o : this.tankInfo.partWeapon) {
+         MCH_BaseVehicleInfo.PartWeapon part = (MCH_BaseVehicleInfo.PartWeapon)o;
+         if(part.turret) return part;
+      }
+      return null;
+   }
+
+   private void startTurretPop() {
+      Vec3 p = this.getTransformedPosition(this.tankInfo.turretPosition);
+      this.turretPopStarted = true; this.turretPopLanded = false; this.turretPopAge = 0;
+      this.turretPopX = this.prevTurretPopX = p.xCoord; this.turretPopY = this.prevTurretPopY = p.yCoord; this.turretPopZ = this.prevTurretPopZ = p.zCoord;
+      double a = super.rand.nextDouble() * Math.PI * 2.0D;
+      double speed = 0.18D + super.rand.nextDouble() * 0.16D;
+      this.turretPopMotionX = Math.cos(a) * speed; this.turretPopMotionY = 1.05D + super.rand.nextDouble() * 0.35D; this.turretPopMotionZ = Math.sin(a) * speed;
+      this.turretPopYaw = this.prevTurretPopYaw = this.getRotYaw(); this.turretPopPitch = this.prevTurretPopPitch = 0.0F; this.turretPopRoll = this.prevTurretPopRoll = 0.0F;
+      this.turretPopAngularYaw = 8.0F + super.rand.nextFloat() * 12.0F; this.turretPopAngularPitch = (super.rand.nextFloat() - 0.5F) * 24.0F; this.turretPopAngularRoll = (super.rand.nextFloat() - 0.5F) * 30.0F;
+      MCH_PacketTurretPop.send(this);
+   }
+
+   private void updateTurretPop() {
+      if(!this.turretPopStarted || this.turretPopLanded) return;
+      this.prevTurretPopX = this.turretPopX; this.prevTurretPopY = this.turretPopY; this.prevTurretPopZ = this.turretPopZ;
+      this.prevTurretPopYaw = this.turretPopYaw; this.prevTurretPopPitch = this.turretPopPitch; this.prevTurretPopRoll = this.turretPopRoll;
+      this.turretPopMotionY = Math.max(-1.5D, this.turretPopMotionY - 0.055D);
+      this.turretPopX += this.turretPopMotionX; this.turretPopY += this.turretPopMotionY; this.turretPopZ += this.turretPopMotionZ;
+      this.turretPopYaw += this.turretPopAngularYaw; this.turretPopPitch += this.turretPopAngularPitch; this.turretPopRoll += this.turretPopAngularRoll;
+      ++this.turretPopAge;
+      int bx = MathHelper.floor_double(this.turretPopX), by = MathHelper.floor_double(this.turretPopY), bz = MathHelper.floor_double(this.turretPopZ);
+      int previousY = MathHelper.floor_double(this.prevTurretPopY);
+      int groundY = Integer.MIN_VALUE;
+      if(this.turretPopMotionY <= 0.0D) for(int testY = previousY; testY >= by; --testY) {
+         if(!super.worldObj.isAirBlock(bx, testY, bz)) { groundY = testY; break; }
+      }
+      boolean timedOut = this.turretPopAge >= 600;
+      if(groundY != Integer.MIN_VALUE || timedOut) {
+         this.turretPopY = (timedOut?super.worldObj.getHeightValue(bx, bz):groundY + 1) + 0.02D; this.turretPopMotionX = this.turretPopMotionY = this.turretPopMotionZ = 0.0D;
+         this.turretPopAngularYaw *= 0.08F; this.turretPopAngularPitch *= 0.08F; this.turretPopAngularRoll *= 0.08F; this.turretPopLanded = true;
+      }
+      if((this.turretPopAge % 3) == 0 || this.turretPopLanded) MCH_PacketTurretPop.send(this);
+   }
+
+   public void applyTurretPopState(MCH_PacketTurretPop p) {
+      this.prevTurretPopX = this.turretPopStarted?this.turretPopX:p.x; this.prevTurretPopY = this.turretPopStarted?this.turretPopY:p.y; this.prevTurretPopZ = this.turretPopStarted?this.turretPopZ:p.z;
+      this.prevTurretPopYaw = this.turretPopStarted?this.turretPopYaw:p.yaw; this.prevTurretPopPitch = this.turretPopStarted?this.turretPopPitch:p.pitch; this.prevTurretPopRoll = this.turretPopStarted?this.turretPopRoll:p.roll;
+      this.turretPopStarted = true; this.turretPopLanded = p.landed; this.turretPopX=p.x; this.turretPopY=p.y; this.turretPopZ=p.z; this.turretPopYaw=p.yaw; this.turretPopPitch=p.pitch; this.turretPopRoll=p.roll; this.turretPopAge=p.age;
+      this.turretPopMotionX=p.mx; this.turretPopMotionY=p.my; this.turretPopMotionZ=p.mz; this.turretPopAngularYaw=p.ay; this.turretPopAngularPitch=p.ap; this.turretPopAngularRoll=p.ar;
+   }
+
+   public void writeSpawnData(ByteBuf buffer) { super.writeSpawnData(buffer); MCH_PacketTurretPop.writeState(buffer, this); }
+   public void readSpawnData(ByteBuf buffer) { super.readSpawnData(buffer); if(buffer.readableBytes() > 0) MCH_PacketTurretPop.readState(buffer, this); }
 
    public void performActionIfWeightTypeIsOne() {
       // Check if TankInfo exists and weightType is 1
