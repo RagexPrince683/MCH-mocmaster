@@ -27,6 +27,7 @@ import mcheli.wrapper.W_Lib;
 import mcheli.wrapper.W_MOD;
 import mcheli.wrapper.W_Render;
 import mcheli.wrapper.modelloader.W_ModelCustom;
+import mcheli.tank.MCH_TurretPopModelCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.FontRenderer;
@@ -928,29 +929,39 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       renderWeapon(ac, info, tickTime, true);
    }
 
-   /** Draws the resolved configured tank groups with their frozen destruction pose. */
-   public static void renderDetachedTankTurret(mcheli.tank.MCH_EntityTank tank, MCH_BaseVehicleInfo info) {
-      MCH_BaseVehicleInfo.PartWeapon root = tank.getTurretPopRoot();
-      if(root == null || !(info.model instanceof W_ModelCustom)) return;
-      W_ModelCustom model = (W_ModelCustom)info.model;
+   /** Draws only cached detached groups with their frozen destruction pose. */
+   public static void renderDetachedTankTurret(final mcheli.tank.MCH_EntityTank tank,
+         final MCH_TurretPopModelCache.Entry entry) {
+      if(entry == null) return;
+      renderDetachedTankTurretModel(tank, entry);
+      renderSkinOverlayPass(new RenderRunnable() {
+         public void render() { renderDetachedTankTurretModel(tank, entry); }
+      });
+   }
+
+   private static void renderDetachedTankTurretModel(mcheli.tank.MCH_EntityTank tank,
+         MCH_TurretPopModelCache.Entry entry) {
+      MCH_BaseVehicleInfo.PartWeapon root = entry.mainGun;
       GL11.glPushMatrix();
       try {
-         GL11.glTranslated(info.turretPosition.xCoord, info.turretPosition.yCoord, info.turretPosition.zCoord);
          GL11.glRotatef(tank.turretPopFrozenYaw, 0.0F, -1.0F, 0.0F);
-         GL11.glTranslated(-info.turretPosition.xCoord, -info.turretPosition.yCoord, -info.turretPosition.zCoord);
-         if(model.containsPart("$turret")) model.renderPart("$turret");
+         // The world origin is already the flying pivot; recenter source geometry
+         // instead of translating to turretPosition and applying that pivot twice.
+         GL11.glTranslated(-entry.pivot.xCoord, -entry.pivot.yCoord, -entry.pivot.zCoord);
+         entry.detached.renderPart("$turret");
+         if(root == null) return;
          GL11.glPushMatrix();
          try {
             applyFrozenTurretPitch(root.pos, root.pitch, tank.turretPopFrozenPitch);
-            if(model.containsPart("$" + root.modelName)) model.renderPart("$" + root.modelName);
+            if(entry.detached.containsPart("$" + root.modelName)) entry.detached.renderPart("$" + root.modelName);
             // Children inherit the root transform, matching renderWeaponChild.
             for(Object object : root.child) {
                MCH_BaseVehicleInfo.PartWeaponChild child = (MCH_BaseVehicleInfo.PartWeaponChild)object;
-               if(!model.containsPart("$" + child.modelName)) continue;
+               if(!entry.detached.containsPart("$" + child.modelName)) continue;
                GL11.glPushMatrix();
                try {
                   applyFrozenTurretPitch(child.pos, child.pitch, tank.turretPopFrozenPitch);
-                  model.renderPart("$" + child.modelName);
+                  entry.detached.renderPart("$" + child.modelName);
                } finally { GL11.glPopMatrix(); }
             }
          } finally { GL11.glPopMatrix(); }
@@ -974,8 +985,12 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       while(i$.hasNext()) {
          MCH_BaseVehicleInfo.PartWeapon w = (MCH_BaseVehicleInfo.PartWeapon)i$.next();
          if(ac instanceof mcheli.tank.MCH_EntityTank && ((mcheli.tank.MCH_EntityTank)ac).turretPopStarted) {
-            MCH_BaseVehicleInfo.PartWeapon root = ((mcheli.tank.MCH_EntityTank)ac).getTurretPopRoot();
-            if((detachedOnly && w != root) || (!detachedOnly && w == root)) continue;
+            mcheli.tank.MCH_EntityTank tank = (mcheli.tank.MCH_EntityTank)ac;
+            MCH_BaseVehicleInfo.PartWeapon root = tank.getTurretPopRoot();
+            MCH_TurretPopModelCache.Entry popModel = info instanceof mcheli.tank.MCH_TankInfo
+                  ? MCH_TurretPopModelCache.get((mcheli.tank.MCH_TankInfo)info, root) : null;
+            if(popModel != null && ((detachedOnly && w != root) || (!detachedOnly && w == root))) continue;
+            if(popModel == null && detachedOnly) continue;
          } else if(detachedOnly) {
             continue;
          }

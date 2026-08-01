@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Collection;
 import mcheli.wrapper.modelloader.W_Face;
 import mcheli.wrapper.modelloader.W_GroupObject;
 import mcheli.wrapper.modelloader.W_ModelCustom;
@@ -29,6 +30,78 @@ public class W_MetasequoiaObject extends W_ModelCustom {
    private String fileName;
    private int vertexNum = 0;
    private int faceNum = 0;
+
+   /** Half-open range in the ordered MQO object list. */
+   public static final class GroupRange {
+      public final int start;
+      public final int end;
+
+      private GroupRange(int start, int end) {
+         this.start = start;
+         this.end = end;
+      }
+   }
+
+   private W_MetasequoiaObject(W_MetasequoiaObject source, ArrayList selected) {
+      this.fileName = source.fileName + "#view";
+      // Geometry is immutable after parsing.  A view owns its list, but deliberately
+      // shares the groups (and their VBOs) so the source cache is never mutated.
+      this.groupObjects = selected;
+      this.vertices = null;
+      this.vertexNum = source.vertexNum;
+      this.faceNum = 0;
+      this.min = source.min; this.minX = source.minX; this.minY = source.minY; this.minZ = source.minZ;
+      this.max = source.max; this.maxX = source.maxX; this.maxY = source.maxY; this.maxZ = source.maxZ;
+      this.size = source.size; this.sizeX = source.sizeX; this.sizeY = source.sizeY; this.sizeZ = source.sizeZ;
+      for(Object object : selected) this.faceNum += ((W_GroupObject)object).faces.size();
+   }
+
+   /**
+    * MQO '$' groups are section markers: the section includes every following
+    * unprefixed group and ends immediately before the next '$' marker.
+    */
+   public GroupRange resolveGroupRange(String sectionName) {
+      for(int i = 0; i < this.groupObjects.size(); ++i) {
+         W_GroupObject group = (W_GroupObject)this.groupObjects.get(i);
+         if(sectionName.equalsIgnoreCase(group.name)) {
+            int end = i + 1;
+            while(end < this.groupObjects.size()) {
+               String name = ((W_GroupObject)this.groupObjects.get(end)).name;
+               if(name != null && name.startsWith("$")) break;
+               ++end;
+            }
+            return new GroupRange(i, end);
+         }
+      }
+      return null;
+   }
+
+   public W_MetasequoiaObject createView(Collection ranges) {
+      ArrayList selected = new ArrayList();
+      boolean[] included = new boolean[this.groupObjects.size()];
+      for(Object object : ranges) {
+         GroupRange range = (GroupRange)object;
+         for(int i = range.start; i < range.end; ++i) included[i] = true;
+      }
+      for(int i = 0; i < included.length; ++i) if(included[i]) selected.add(this.groupObjects.get(i));
+      return new W_MetasequoiaObject(this, selected);
+   }
+
+   public W_MetasequoiaObject createViewExcluding(Collection ranges) {
+      ArrayList selected = new ArrayList(this.groupObjects);
+      boolean[] excluded = new boolean[this.groupObjects.size()];
+      for(Object object : ranges) {
+         GroupRange range = (GroupRange)object;
+         for(int i = range.start; i < range.end; ++i) excluded[i] = true;
+      }
+      selected.clear();
+      for(int i = 0; i < excluded.length; ++i) if(!excluded[i]) selected.add(this.groupObjects.get(i));
+      return new W_MetasequoiaObject(this, selected);
+   }
+
+   public int getGroupCount() {
+      return this.groupObjects.size();
+   }
 
 
    public W_MetasequoiaObject(ResourceLocation resource) throws ModelFormatException {
