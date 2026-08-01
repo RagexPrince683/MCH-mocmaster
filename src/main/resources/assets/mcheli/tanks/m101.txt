@@ -4,6 +4,7 @@ NameOnEarlyASRadar = Artillery Vehicle
 NameOnModernASRadar = 105mm M119 Howitzer
 NameOnEarlyAARadar = Artillery Vehicle
 NameOnModernAARadar = 105mm M119 Howitzer
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

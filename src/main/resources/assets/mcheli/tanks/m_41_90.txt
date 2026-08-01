@@ -4,6 +4,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = leKPz M41 Walker Bulldog
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = leKPz M41 Walker Bulldog
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.60

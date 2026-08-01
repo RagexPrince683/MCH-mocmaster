@@ -35,6 +35,7 @@ HUD = ww2tank_hud, gunner
 unmountposition = -0.0,  1.50,  -0
 EnableNightVision = false
 EnableEntityRadar = false
+LWR = false
 
 MobilityYawOnGround = 1.8
 MobilityYaw = 2.0

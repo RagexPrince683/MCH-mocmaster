@@ -6,6 +6,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Type 62
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = Type 62
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

@@ -31,6 +31,7 @@ ExplosionSizeByCrash = 18
 Category = MFT/MED/FT
 
 EnableNightvision = false
+LWR = false
 ;nope!
 
 ;FlareType = 10

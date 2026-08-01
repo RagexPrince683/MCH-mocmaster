@@ -25,6 +25,7 @@ Category = AIFV/AAPC
 GravityInWater = -0.2
 DamageFactor = 0.8
 EnableNightVision = true
+LWR = false
 CameraRotationSpeed = 12
 StepHeight = 1.8
 MinRotationPitch = -33

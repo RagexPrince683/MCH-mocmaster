@@ -19,6 +19,7 @@ FuelConsumption = 0.7
 CameraZoom = 6
 EnableNightVision = true
 EnableEntityRadar = true
+LWR = false
 RadarType = MODERN_AA
 ;EnableGunnerMode = true
 Gravity = -0.61

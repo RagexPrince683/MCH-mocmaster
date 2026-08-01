@@ -32,6 +32,7 @@ HideEntity = false
 WeightType = tank
 HUD = ww2tank_hudtwo
 EnableNightVision = false
+LWR = false
 
 ExplosionSizeByCrash = 9
 

@@ -17,6 +17,7 @@ Gravity = -0.61
 GravityInWater = -1.0
 DamageFactor = 0.8
 EnableNightVision = false
+LWR = false
 CameraRotationSpeed = 15
 CameraZoom = 0
 StepHeight = 1.8

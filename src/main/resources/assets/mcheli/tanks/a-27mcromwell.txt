@@ -18,6 +18,7 @@ Gravity = -0.61
 GravityInWater = -1.0
 DamageFactor = 0.0
 EnableNightVision = false
+LWR = false
 CameraRotationSpeed = 15
 DefaultFreeLook = true
 ThirdPersonDist = 12

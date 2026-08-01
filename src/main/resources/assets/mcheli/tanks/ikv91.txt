@@ -16,6 +16,7 @@ CameraPosition = 0.00,  2.72, -0.304, true
 EnableNightVision = true
 CameraRotationSpeed = 15
 EnableEntityRadar = false
+LWR = false
 MaxFuel         = 1200
 FuelConsumption = 1.6
 DefaultFreelook = true

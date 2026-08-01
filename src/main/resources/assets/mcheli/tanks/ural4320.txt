@@ -5,6 +5,7 @@ NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Ural-4320
 NameOnEarlyAARadar = Light Vehicle
 NameOnModernAARadar = Ural-4320
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.45

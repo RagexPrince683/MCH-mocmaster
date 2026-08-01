@@ -5,6 +5,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Lenco Bearcat F-550
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = Lenco Bearcat F-550
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

@@ -18,6 +18,7 @@ GravityInWater = -1.0
 DamageFactor = 0.0
 EnableNightVision = false
 EnableEntityRadar = false
+LWR = false
 Sound = Tank
 HUD = ww2tank_hud, vehiclescoped, vehiclescoped
 WeightType = Tank

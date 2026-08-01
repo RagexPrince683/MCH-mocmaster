@@ -21,6 +21,7 @@ GravityInWater = -1.0
 DamageFactor = 0.00
 EnableNightVision = true
 EnableEntityRadar = false
+LWR = true
 Sound = puma
 HUD = mbt_hud
 WeightType = Tank

@@ -23,6 +23,7 @@ GravityInWater = -1.0
 DamageFactor   = 1.0
 HUD = bnr32_hud, none, none, none
 EnableNightVision = false
+LWR = false
 MaxFuel           = 650
 FuelConsumption   = 0.7
 ;CameraZoom = 8

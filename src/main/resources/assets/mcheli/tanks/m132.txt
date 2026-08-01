@@ -19,6 +19,7 @@ Float = true
 DamageFactor = 0.45
 EnableNightVision = false
 EnableEntityRadar = false
+LWR = false
 Sound = moneonethreeapc
 HUD = ww2tank_hud
 WeightType = Tank

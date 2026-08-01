@@ -6,6 +6,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = M47 Patton
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = M47 Patton
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.60

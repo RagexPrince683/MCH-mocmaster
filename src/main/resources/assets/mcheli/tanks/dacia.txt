@@ -4,6 +4,7 @@ NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Dacia Sandero (2009)
 NameOnEarlyAARadar = Light Vehicle
 NameOnModernAARadar = Dacia Sandero (2009)
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.45

@@ -32,6 +32,7 @@ DamageFactor = 0.0
 CameraZoom = 8
 CameraPosition = -0.01,  3.5, -0.01, true
 EnableNightVision = true
+LWR = false
 CameraRotationSpeed = 30
 FlareType = 10
 MaxFuel = 1300

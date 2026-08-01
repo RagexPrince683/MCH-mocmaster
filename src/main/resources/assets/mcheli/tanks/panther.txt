@@ -38,6 +38,7 @@ AddRecipe = "ABC", "DA ", "   ", A, mcheli:mediumchassis, B, mcheli:cannon3, C, 
 
 EnableNightVision = false
 EnableEntityRadar = false
+LWR = false
 
 MobilityYawOnGround = 2.5
 MobilityYaw = 1.9

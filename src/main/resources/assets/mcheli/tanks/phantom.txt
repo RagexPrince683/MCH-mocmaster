@@ -5,6 +5,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Rolls-Royce Phantom
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = Rolls-Royce Phantom
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

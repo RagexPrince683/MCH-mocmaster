@@ -28,6 +28,7 @@ Category = LT
 EnableNightVision = false
 CameraRotationSpeed = 10
 EnableEntityRadar = false
+LWR = false
 MaxFuel         = 1400
 FuelConsumption = 1.8
 StepHeight = 1.5

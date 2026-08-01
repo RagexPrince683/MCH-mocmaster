@@ -16,6 +16,7 @@ Gravity = -0.61
 
 DamageFactor = 0.8
 EnableNightVision = true
+LWR = false
 CameraRotationSpeed = 8
 StepHeight = 1.8
 MinRotationPitch = -80

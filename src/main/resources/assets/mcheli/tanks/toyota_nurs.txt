@@ -6,6 +6,7 @@ NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Toyota Hilux with B-8V20A
 NameOnEarlyAARadar = Light Vehicle
 NameOnModernAARadar = Toyota Hilux with B-8V20A
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.45

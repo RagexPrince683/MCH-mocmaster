@@ -28,6 +28,7 @@ GravityInWater = -0.2
 CameraZoom = 10
 CameraPosition = 0.00,  2.0, -1.0
 EnableNightVision = true
+LWR = false
 HideEntity = true
 EnableBack = true
 DamageFactor = 0.0

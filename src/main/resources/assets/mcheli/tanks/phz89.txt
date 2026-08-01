@@ -25,6 +25,7 @@ GravityInWater = -1.0
 DamageFactor = 0.2
 CameraPosition = 0.00, 7.3089, 0.00, true
 EnableNightVision = true
+LWR = false
 CameraRotationSpeed = 10
 StepHeight = 1.8
 DefaultFreelook = true

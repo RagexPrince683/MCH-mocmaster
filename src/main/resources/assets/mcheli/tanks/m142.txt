@@ -34,6 +34,7 @@ ArmorDamageFactor = 2.32
 
 CameraZoom = 10
 EnableNightVision = true
+LWR = false
 CameraRotationSpeed = 25
 MaxFuel = 2200
 FuelConsumption = 2.8

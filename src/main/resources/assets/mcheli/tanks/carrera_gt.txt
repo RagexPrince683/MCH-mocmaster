@@ -5,6 +5,7 @@ NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Porsche Carrera GT
 NameOnEarlyAARadar = Light Vehicle
 NameOnModernAARadar = Porsche Carrera GT
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.45

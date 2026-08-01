@@ -40,6 +40,7 @@ CameraRotationSpeed = 18
 ;EnableGunnerMode = true
 EnableNightVision = true
 EnableEntityRadar = false
+LWR = true
 
 
 

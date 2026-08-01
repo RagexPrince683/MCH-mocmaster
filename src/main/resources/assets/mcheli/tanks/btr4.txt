@@ -49,6 +49,7 @@ TurretPosition = -0.0761, 3.31, -1.30
 
 EnableNightVision = true
 EnableEntityRadar = false
+LWR = true
 ; Tank or Car or Unknown    
 WeightType = Tank
 

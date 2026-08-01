@@ -16,6 +16,7 @@ DefaultFreelook = false
 EnableBack = true
 HUD = mbt_hudtwo, mbt_gnrtwo
 EnableEntityRadar = false
+LWR = false
 MaxFuel         = 1300
 FuelConsumption = 1.9
 ;CameraZoom = 1

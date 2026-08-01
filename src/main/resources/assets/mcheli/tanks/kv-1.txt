@@ -6,6 +6,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = KV-1 Model 1939 (L-11)
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = KV-1 Model 1939 (L-11)
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.60

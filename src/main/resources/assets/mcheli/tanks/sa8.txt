@@ -29,6 +29,7 @@ EnableNightVision = true
 MaxFuel           = 2200
 FuelConsumption   = 2.8
 EnableEntityRadar = true
+LWR = false
 RadarType = MODERN_AA
 CameraPosition = -0.50, 1.8,  3.83, true
 

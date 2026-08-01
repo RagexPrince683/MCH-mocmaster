@@ -21,6 +21,7 @@ CameraZoom = 16
 MinRotationPitch = -10
 MaxRotationPitch = 30
 EnableNightVision = true
+LWR = false
 DefaultFreelook = true
 HUD = vehicle
 

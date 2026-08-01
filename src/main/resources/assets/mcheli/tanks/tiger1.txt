@@ -21,6 +21,7 @@ GravityInWater = -1.0
 DamageFactor = 0.0
 EnableNightVision = false
 EnableEntityRadar = false
+LWR = false
 Sound = V12TIGER
 HUD = ww2tank_hud, gunner
 WeightType = Tank

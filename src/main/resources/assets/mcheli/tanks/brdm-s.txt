@@ -24,6 +24,7 @@ Category = AASC
 PivotTurnThrottle = 0.1
 
 EnableEntityRadar = false
+LWR = false
 MaxFuel         = 1600
 FuelConsumption = 2.2
 

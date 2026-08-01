@@ -5,6 +5,7 @@ NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = DMC-12 DeLorean
 NameOnEarlyAARadar = Light Vehicle
 NameOnModernAARadar = DMC-12 DeLorean
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.45

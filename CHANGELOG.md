@@ -1,3 +1,7 @@
+# Audit tank laser-warning receiver configuration (PR pending)
+
+- Added an explicit `LWR` capability value to every tank configuration, enabling it only for exact vehicle variants with sufficiently reliable laser-warning receiver evidence.
+
 # Tank LWR alert opt-in (PR pending)
 
 - Added the shared `LWR` vehicle option, defaulting to false, and require tanks to enable it before direct, UAV, packet, or client-tick warning audio can play.

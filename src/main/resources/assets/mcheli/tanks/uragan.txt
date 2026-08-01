@@ -28,6 +28,7 @@ CameraZoom = 4
 EnableNightVision = true
 CameraRotationSpeed = 40
 EnableEntityRadar = false
+LWR = false
 MaxFuel  = 2200
 FuelConsumption = 2.8
 CameraPosition = 0.00,  7.42, -2.52

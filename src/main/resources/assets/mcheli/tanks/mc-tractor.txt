@@ -5,6 +5,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Generic Tractor
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = Generic Tractor
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

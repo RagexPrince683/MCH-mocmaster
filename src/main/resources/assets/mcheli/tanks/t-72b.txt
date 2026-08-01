@@ -18,6 +18,7 @@ GravityInWater = -1.0
 DamageFactor = 0.0
 EnableNightVision = true
 EnableEntityRadar = false
+LWR = false
 Sound = tseventytwopass
 HUD = mbt_hudtwo, gunnernvg
 WeightType = Tank

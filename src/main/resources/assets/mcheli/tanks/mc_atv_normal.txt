@@ -28,6 +28,7 @@ StepHeight = 1.5
 MobilityYawOnGround = 12
 PivotTurnThrottle = 0.03
 EnableEntityRadar = false
+LWR = false
 MotionFactor = 0.91
 EnableBack = true
 ThirdPersonDist = 8

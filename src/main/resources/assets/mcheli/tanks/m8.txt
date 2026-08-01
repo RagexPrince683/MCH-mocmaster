@@ -4,6 +4,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = M8 Greyhound
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = M8 Greyhound
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

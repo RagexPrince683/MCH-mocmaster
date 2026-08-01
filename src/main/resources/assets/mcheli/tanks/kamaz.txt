@@ -17,6 +17,7 @@ DefaultFreelook = false
 EnableBack = true
 HUD = super_duty_hud,none
 EnableEntityRadar = false
+LWR = false
 MaxFuel         = 1600
 FuelConsumption = 1.8
 MobilityRoll = 0

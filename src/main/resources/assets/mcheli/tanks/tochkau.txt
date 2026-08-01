@@ -30,6 +30,7 @@ Float = true
 
 DamageFactor = 0.8
 EnableNightVision = true
+LWR = false
 DefaultFreelook = false
 
 SubmergedDamageHeight = 4

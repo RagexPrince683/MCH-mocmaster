@@ -4,6 +4,7 @@ NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Nissan 350Z
 NameOnEarlyAARadar = Light Vehicle
 NameOnModernAARadar = Nissan 350Z
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.45
