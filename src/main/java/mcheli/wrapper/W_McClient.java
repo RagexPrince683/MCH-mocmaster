@@ -3,6 +3,7 @@ package mcheli.wrapper;
 
 
 import mcheli.plane.MCP_PlaneChaseCamera;
+import mcheli.compat.MCH_ReplayModCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -47,8 +48,11 @@ public class W_McClient {
     }
 
     public static void setRenderEntity(EntityLivingBase entity) {
+        if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+            MCH_ReplayModCompat.logBlockedCameraWrite("W_McClient.setRenderEntity");
+            return;
+        }
         Minecraft.getMinecraft().renderViewEntity = entity;
         MCP_PlaneChaseCamera.logCameraWrite("W_McClient.setRenderEntity", entity != null?entity.getClass().getName():"null");
     }
 }
-

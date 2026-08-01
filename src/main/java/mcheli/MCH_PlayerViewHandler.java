@@ -32,6 +32,11 @@ public class MCH_PlayerViewHandler {
      */
     public static void onUpdate() {
 
+        if(mcheli.compat.MCH_ReplayModCompat.isReplayPlaybackActive()) {
+            clearRecoil();
+            return;
+        }
+
         if(minecraft.thePlayer == null) {
             return;
         }
@@ -52,5 +57,12 @@ public class MCH_PlayerViewHandler {
         antiRecoilYaw *= 0.8F;
 
         playerRecoilYaw *= 0.8F;
+    }
+
+    public static void clearRecoil() {
+        playerRecoilPitch = 0.0F;
+        playerRecoilYaw = 0.0F;
+        antiRecoilPitch = 0.0F;
+        antiRecoilYaw = 0.0F;
     }
 }

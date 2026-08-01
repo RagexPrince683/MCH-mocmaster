@@ -8,6 +8,7 @@ import mcheli.vector.Vector3f;
 import mcheli.weapon.MCH_WeaponGuidanceSystem;
 import mcheli.weapon.MCH_WeaponInfo;
 import mcheli.wrapper.W_MOD;
+import mcheli.compat.MCH_ReplayModCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.ScaledResolution;
@@ -33,6 +34,7 @@ public class MCH_RenderBVRLockBox {
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
+        if (MCH_ReplayModCompat.isReplayPlaybackActive()) return;
         if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
 
         //Gets basic information

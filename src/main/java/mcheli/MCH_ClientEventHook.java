@@ -25,6 +25,7 @@ import mcheli.plane.client.MCP_NewPlaneOverlayRenderer;
 import mcheli.tool.rangefinder.MCH_ItemRangeFinder;
 import mcheli.wrapper.W_ClientEventHook;
 import mcheli.wrapper.W_Reflection;
+import mcheli.compat.MCH_ReplayModCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -110,6 +111,9 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
    }
 
    public void mouseEvent(MouseEvent event) {
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         return;
+      }
       if(MCH_ClientTickHandlerBase.updateMouseWheel(event.dwheel)) {
          event.setCanceled(true);
       }
@@ -194,23 +198,33 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
 
    @SubscribeEvent
    public void onRenderOverlayPre(RenderGameOverlayEvent.Pre event) {
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         return;
+      }
       this.newPlaneOverlayRenderer.onRenderOverlayPre(event);
    }
 
    @SubscribeEvent
    public void onRenderOverlayPost(RenderGameOverlayEvent.Post event) {
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         return;
+      }
       this.newPlaneOverlayRenderer.onRenderOverlayPost(event);
    }
 
    @SubscribeEvent
    public void onFovUpdate(FOVUpdateEvent event) {
-      if(event != null && MCP_PlaneChaseCamera.isFovOverrideActive()) {
+      if(event != null && !MCH_ReplayModCompat.isReplayPlaybackActive() && MCP_PlaneChaseCamera.isFovOverrideActive()) {
          event.newfov = MCP_PlaneChaseCamera.applyFovOverride(event.newfov);
       }
    }
 
    @SubscribeEvent
    public void renderTick(TickEvent.RenderTickEvent event) {
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         MCP_PlaneChaseCamera.releaseForReplayPlayback(Minecraft.getMinecraft());
+         return;
+      }
       switch (event.phase) {
          case START:
             smoothing = event.renderTickTime;
