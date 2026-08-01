@@ -43,6 +43,11 @@ public class MCH_Key {
       }
    }
 
+   public void reset() {
+      this.isPress = false;
+      this.isBeforePress = false;
+   }
+
    public static boolean isKeyDown(int key) {
       return key > 0?Keyboard.isKeyDown(key):(key < 0?Mouse.isButtonDown(key + 100):false);
    }

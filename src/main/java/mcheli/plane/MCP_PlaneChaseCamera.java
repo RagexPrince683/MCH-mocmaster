@@ -5,6 +5,7 @@ import mcheli.MCH_Lib;
 import mcheli.MCH_Key;
 import mcheli.MCH_ViewEntityDummy;
 import mcheli.aircraft.MCH_BoundingBox;
+import mcheli.compat.MCH_ReplayModCompat;
 import mcheli.wrapper.W_Reflection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -559,7 +560,7 @@ public class MCP_PlaneChaseCamera {
    }
 
    public static boolean isFovOverrideActive() {
-      return activeCamera != null && activeRenderPlane != null && MCH_Config.EnablePlaneChaseFOVOverride.prmBool;
+      return !MCH_ReplayModCompat.isReplayPlaybackActive() && activeCamera != null && activeRenderPlane != null && MCH_Config.EnablePlaneChaseFOVOverride.prmBool;
    }
 
    public static float applyFovOverride(float currentFov) {
@@ -612,6 +613,10 @@ public class MCP_PlaneChaseCamera {
    }
 
    public static boolean applyRenderStartCamera(Minecraft mc) {
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         MCH_ReplayModCompat.logBlockedCameraWrite("MCP_PlaneChaseCamera.applyRenderStartCamera");
+         return false;
+      }
       if(activeCamera == null || activeRenderPlane == null || mc == null || mc.theWorld == null || activeRenderPlane.isDead) {
          logPhase("RENDER_START", mc, activeDummy, false, true);
          return false;
@@ -639,6 +644,10 @@ public class MCP_PlaneChaseCamera {
    }
 
    public static boolean applyActiveRenderCamera(Minecraft mc) {
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         MCH_ReplayModCompat.logBlockedCameraWrite("MCP_PlaneChaseCamera.applyActiveRenderCamera");
+         return false;
+      }
       if(activeCamera == null || activeRenderPlane == null || mc == null || mc.theWorld == null || activeRenderPlane.isDead) {
          return false;
       }
@@ -662,6 +671,10 @@ public class MCP_PlaneChaseCamera {
    }
 
    public static boolean applyActiveRiderCamera(MCP_EntityPlane plane) {
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         MCH_ReplayModCompat.logBlockedCameraWrite("MCP_PlaneChaseCamera.applyActiveRiderCamera");
+         return false;
+      }
       if(activeCamera == null || activeRenderPlane == null || activeRenderPlane != plane) {
          return false;
       }
@@ -713,6 +726,10 @@ public class MCP_PlaneChaseCamera {
    }
 
    public static boolean enforceActiveRenderCameraOwnership(Minecraft mc, String stage) {
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         MCH_ReplayModCompat.logBlockedCameraWrite("MCP_PlaneChaseCamera.enforceActiveRenderCameraOwnership");
+         return false;
+      }
       if(activeCamera == null || activeRenderPlane == null || mc == null || mc.theWorld == null || activeRenderPlane.isDead) {
          return false;
       }
@@ -761,6 +778,10 @@ public class MCP_PlaneChaseCamera {
 
 
    public static void beginOrientCameraBypass(Minecraft mc, float partialTicks) {
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         MCH_ReplayModCompat.logBlockedCameraWrite("MCP_PlaneChaseCamera.beginOrientCameraBypass");
+         return;
+      }
       if(activeCamera == null || activeRenderPlane == null || activeDummy == null || mc == null || mc.gameSettings == null) {
          return;
       }
@@ -785,6 +806,26 @@ public class MCP_PlaneChaseCamera {
       logPhase("RENDER_END", mc, activeDummy, false, false);
       renderStartAppliedThisPhase = false;
       renderTickBypassActive = false;
+   }
+
+   /** Drops only MCHeli-owned chase state; never writes renderViewEntity. */
+   public static void releaseForReplayPlayback(Minecraft mc) {
+      if(renderTickBypassActive) {
+         endOrientCameraBypass(mc);
+      }
+      if(activeCamera != null) {
+         activeCamera.reset();
+      }
+      activeCamera = null;
+      activeRenderPlane = null;
+      activeDummy = null;
+      consumedByRenderHook = false;
+      renderStartAppliedThisPhase = false;
+      renderTickBypassActive = false;
+      allowNextChaseDummyWrite = false;
+      pendingFreelookMouseX = 0.0D;
+      pendingFreelookMouseY = 0.0D;
+      currentOwner = "NONE";
    }
 
    private static void logOrientCameraBypass(Minecraft mc, float partialTicks, float beforeDistance, float beforeDistanceTemp, float afterDistance, float afterDistanceTemp, boolean bypassApplied) {

@@ -1,3 +1,9 @@
+# Replay Mod playback camera ownership compatibility (PR pending)
+
+- Detect Replay Mod's playback-only `CameraEntity` without linking Replay Mod, release stale MCHeli chase/view state, and leave `renderViewEntity`, camera transforms, FOV, and view-mode ownership to Replay Mod.
+- Suppress local MCHeli vehicle controls, outbound control packets, recoil/bombsight mutations, and mounted-vehicle HUDs during playback while keeping passive vehicle state updates and rendering active.
+- Restore normal MCHeli camera handling automatically after playback ends; Replay Mod installation and live recording do not activate the compatibility path.
+
 # Tank countermeasure smoke thermal visibility (PR pending)
 
 - Keep smoke emitted by vehicle smoke weapons and countermeasure flares visible as cold smoke in thermal vision, without changing its normal particle lifetime, movement, scale, opacity, or fade.

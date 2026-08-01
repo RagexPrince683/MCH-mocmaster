@@ -19,11 +19,15 @@ import mcheli.wrapper.W_PacketBase;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import mcheli.compat.MCH_ReplayModCompat;
 
 public class W_Network {
     public static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel("MCHeli_CH");
 
     public static void sendToServer(W_PacketBase pkt) {
+        if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+            return;
+        }
         INSTANCE.sendToServer((IMessage)pkt);
     }
 
@@ -42,4 +46,3 @@ public class W_Network {
         INSTANCE.sendToAll((IMessage)pkt);
     }
 }
-

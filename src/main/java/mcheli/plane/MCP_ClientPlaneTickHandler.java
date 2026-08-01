@@ -175,6 +175,10 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
 
 
    private void forceBombReticleCamera(EntityPlayer player, MCP_EntityPlane plane, boolean isPilot) {
+      if(mcheli.compat.MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         resetBombReticleMode();
+         return;
+      }
       if(player == null || plane == null || !isPilot || !isBombReticleMode(plane)) {
          clearBombReticleFallback(plane);
          return;

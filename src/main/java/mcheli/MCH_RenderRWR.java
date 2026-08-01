@@ -6,6 +6,7 @@ import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.wrapper.W_MOD;
+import mcheli.compat.MCH_ReplayModCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
@@ -35,6 +36,7 @@ public class MCH_RenderRWR {
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
+        if (MCH_ReplayModCompat.isReplayPlaybackActive()) return;
         if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
         //Gets basic information
         Minecraft mc = Minecraft.getMinecraft();

@@ -54,6 +54,7 @@ import org.lwjgl.opengl.Display;
 import mcheli.ship.MCH_ClientShipTickHandler;
 import mcheli.ship.MCH_EntityShip;
 import mcheli.ship.MCH_GuiShip;
+import mcheli.compat.MCH_ReplayModCompat;
 
 //Eventhooks, clientproxy, tickhandler, guis and config just to name a few inheritors
 @SideOnly(Side.CLIENT)
@@ -108,6 +109,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    private World dismountWorld;
    private Object dismountConnection;
    private boolean restoreMouseFocusAfterRender;
+   private boolean replayPlaybackActive;
 
 
 
@@ -242,6 +244,18 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public void onTickPre() {
+      boolean replayActive = MCH_ReplayModCompat.updatePlaybackState();
+      if(replayActive != this.replayPlaybackActive) {
+         this.replayPlaybackActive = replayActive;
+         if(replayActive) {
+            this.releaseCameraAndControlForReplay();
+         } else {
+            MCH_ReplayModCompat.logCameraHandlingRestored();
+         }
+      }
+      if(replayActive) {
+         return;
+      }
       if(super.mc.thePlayer != null && super.mc.theWorld != null) {
          this.updateDismountHoldState();
          this.onTick();
@@ -252,6 +266,10 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public void onTickPost() {
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         MCH_PlayerViewHandler.clearRecoil();
+         return;
+      }
       if(super.mc.thePlayer != null && super.mc.theWorld != null) {
          MCH_GuiTargetMarker.onClientTick();
       }
@@ -643,6 +661,11 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public void onRenderTickPre(float partialTicks) {
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         ridingAircraft = null;
+         cameraMode = 0;
+         return;
+      }
       MCH_GuiTargetMarker.clearMarkEntityPos();
       if(!MCH_ServerSettings.enableDebugBoundingBox) {
          RenderManager.debugBoundingBox = false;
@@ -1010,6 +1033,14 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public void onRenderTickPost(float partialTicks) {
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         MCH_ThermalParticleFilter.endRender();
+         if(this.restoreMouseFocusAfterRender) {
+            this.mc.inGameHasFocus = true;
+            this.restoreMouseFocusAfterRender = false;
+         }
+         return;
+      }
       MCH_ThermalParticleFilter.endRender();
       if(this.restoreMouseFocusAfterRender) {
          this.mc.inGameHasFocus = true;
@@ -1044,12 +1075,37 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public boolean drawGui(MCH_Gui gui, float partialTicks) {
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         return false;
+      }
       if(gui.isDrawGui(super.mc.thePlayer)) {
          gui.drawScreen(0, 0, partialTicks);
          return true;
       } else {
          return false;
       }
+   }
+
+   private void releaseCameraAndControlForReplay() {
+      MCP_PlaneChaseCamera.releaseForReplayPlayback(super.mc);
+      MCP_ClientPlaneTickHandler.resetBombReticleMode();
+      MCH_PlayerViewHandler.clearRecoil();
+      W_Reflection.clearMCHeliCameraRollForReplayPlayback();
+      MCH_Lib.enableFirstPersonItemRender();
+      ridingAircraft = null;
+      cameraMode = 0;
+      isRideAircraft = false;
+      isDrawScoreboard = false;
+      mouseDeltaX = mouseDeltaY = 0.0D;
+      prevMouseDeltaX = prevMouseDeltaY = 0.0D;
+      mouseRollDeltaX = mouseRollDeltaY = 0.0D;
+      this.resetDismountHoldState();
+      if(this.Keys != null) {
+         for(MCH_Key key : this.Keys) {
+            key.reset();
+         }
+      }
+      MCH_ReplayModCompat.logCameraOwnershipReleased();
    }
 
 }

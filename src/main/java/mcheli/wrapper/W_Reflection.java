@@ -22,6 +22,7 @@ package mcheli.wrapper;
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import java.util.List;
 import mcheli.plane.MCP_PlaneChaseCamera;
+import mcheli.compat.MCH_ReplayModCompat;
 import java.util.Queue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
@@ -94,6 +95,18 @@ public class W_Reflection {
 	   }
 
 	   public static void setCameraRoll(float roll) {
+	      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+	         MCH_ReplayModCompat.logBlockedCameraWrite("W_Reflection.setCameraRoll");
+	         return;
+	      }
+	      setCameraRollUnchecked(roll);
+	   }
+
+	   public static void clearMCHeliCameraRollForReplayPlayback() {
+	      setCameraRollUnchecked(0.0F);
+	   }
+
+	   private static void setCameraRollUnchecked(float roll) {
 	      try {
 	         roll = MathHelper.wrapAngleTo180_float(roll);
 	         Minecraft e = Minecraft.getMinecraft();
