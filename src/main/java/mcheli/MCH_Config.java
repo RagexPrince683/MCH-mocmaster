@@ -166,6 +166,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm BreakableOnlyPickaxe;
    public static MCH_ConfigPrm InvertMouse;
    public static MCH_ConfigPrm MouseSensitivity;
+   public static MCH_ConfigPrm ZoomSensitivityEffect;
    public static MCH_ConfigPrm MouseControlStickModeHeli;
    public static MCH_ConfigPrm MouseControlStickModePlane;
    public static MCH_ConfigPrm MouseControlFlightSimMode;
@@ -515,6 +516,7 @@ public class MCH_Config {
       BreakableOnlyPickaxe = new MCH_ConfigPrm("BreakableOnlyPickaxe", false);
       InvertMouse = new MCH_ConfigPrm("InvertMouse", false);
       MouseSensitivity = new MCH_ConfigPrm("MouseSensitivity", 30.0D);
+      ZoomSensitivityEffect = new MCH_ConfigPrm("ZoomSensitivityEffect", 100.0D);
       MouseControlStickModeHeli = new MCH_ConfigPrm("MouseControlStickModeHeli", false);
       MouseControlStickModePlane = new MCH_ConfigPrm("MouseControlStickModePlane", false);
       MouseControlFlightSimMode = new MCH_ConfigPrm("MouseControlFlightSimMode", true);
@@ -781,6 +783,7 @@ public class MCH_Config {
               null,
               InvertMouse,
               MouseSensitivity,
+              ZoomSensitivityEffect,
               MouseControlStickModeHeli,
               MouseControlStickModePlane,
               MouseControlFlightSimMode,
@@ -1026,6 +1029,7 @@ public class MCH_Config {
       NewPlaneCameraRollInfluence.prmDouble = MCH_Lib.RNG(NewPlaneCameraRollInfluence.prmDouble, 0.0D, 1.0D);
       AllTankSpeed.prmDouble = MCH_Lib.RNG(AllTankSpeed.prmDouble, 0.0D, 1000.0D);
       AllShipSpeed.prmDouble = MCH_Lib.RNG(AllShipSpeed.prmDouble, 0.0D, 1000.0D);
+      ZoomSensitivityEffect.prmDouble = finiteRange(ZoomSensitivityEffect.prmDouble, 0.0D, 100.0D, 100.0D);
       this.setBlockListFromString(bulletBreakableBlocks, BulletBreakableBlock.prmString);
       this.setBlockListFromString(carBreakableBlocks, Collision_Car_BreakableBlock.prmString);
       this.setBlockListFromString(carNoBreakableBlocks, Collision_Car_NoBreakableBlock.prmString);
