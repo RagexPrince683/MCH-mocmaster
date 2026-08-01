@@ -67,6 +67,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    public float turretPopFrozenYaw, turretPopFrozenPitch;
    public int turretPopAge;
    private boolean turretPopMissingPartWarned;
+   /** Persisted destruction edge latch; prevents old wrecks from starting after reload. */
+   private boolean turretPopDestructionObserved;
 
    //TODO
    private int currentGear = 1;  // Starting gear
@@ -93,6 +95,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.trackDamageTaken = 0;
       this.turretPopStarted = false;
       this.turretPopLanded = false;
+      this.turretPopDestructionObserved = false;
    }
 
    //tracks are very broken
@@ -160,6 +163,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       super.writeEntityToNBT(par1NBTTagCompound);
       par1NBTTagCompound.setInteger("TrackDamage", this.trackDamageTaken);
       par1NBTTagCompound.setBoolean("TurretPopStarted", this.turretPopStarted);
+      par1NBTTagCompound.setBoolean("TurretPopDestructionObserved", this.turretPopDestructionObserved || this.isDestroyed());
       if(this.turretPopStarted) {
          par1NBTTagCompound.setBoolean("TurretPopLanded", this.turretPopLanded);
          par1NBTTagCompound.setDouble("TurretPopX", this.turretPopX); par1NBTTagCompound.setDouble("TurretPopY", this.turretPopY); par1NBTTagCompound.setDouble("TurretPopZ", this.turretPopZ);
@@ -175,6 +179,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       super.readEntityFromNBT(par1NBTTagCompound);
       this.trackDamageTaken = Math.max(0, par1NBTTagCompound.getInteger("TrackDamage"));
       this.turretPopStarted = par1NBTTagCompound.getBoolean("TurretPopStarted");
+      // Old saves have no latch: an already destroyed entity must be treated as observed.
+      this.turretPopDestructionObserved = par1NBTTagCompound.hasKey("TurretPopDestructionObserved")
+            ? par1NBTTagCompound.getBoolean("TurretPopDestructionObserved") : this.isDestroyed();
       if(this.turretPopStarted) {
          this.turretPopLanded = par1NBTTagCompound.getBoolean("TurretPopLanded");
          this.turretPopX = this.prevTurretPopX = par1NBTTagCompound.getDouble("TurretPopX"); this.turretPopY = this.prevTurretPopY = par1NBTTagCompound.getDouble("TurretPopY"); this.turretPopZ = this.prevTurretPopZ = par1NBTTagCompound.getDouble("TurretPopZ");
@@ -221,7 +228,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          super.prevPosY = super.posY;
          super.prevPosZ = super.posZ;
       } else {
-         if(!super.worldObj.isRemote) this.updateTurretPop();
+         if(!super.worldObj.isRemote) {
+            this.updateTurretPopDestructionTransition();
+            this.updateTurretPop();
+         }
          else this.updateTurretPopSmoke();
          if(!super.isRequestedSyncStatus) {
             super.isRequestedSyncStatus = true;
@@ -840,36 +850,61 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    }
 
    public void destroyAircraft() {
+      boolean wasDestroyed = this.isDestroyed();
       super.destroyAircraft();
       super.rotDestroyedPitch = 0.0F;
       super.rotDestroyedRoll = 0.0F;
       super.rotDestroyedYaw = 0.0F;
-      if(!super.worldObj.isRemote && !this.turretPopStarted && this.tankInfo != null && this.tankInfo.enableTurretPop) {
-         if(this.getTurretPopRoot() != null) this.startTurretPop();
-         else this.warnMissingTurretPart();
+      if(!super.worldObj.isRemote && !wasDestroyed && this.isDestroyed()) {
+         this.onTurretPopDestructionTransition();
       }
    }
 
+   /** Detects every server-side alive-to-destroyed edge, including max-HP setters. */
+   private void updateTurretPopDestructionTransition() {
+      boolean destroyed = this.isDestroyed();
+      if(destroyed && !this.turretPopDestructionObserved) this.onTurretPopDestructionTransition();
+      else if(!destroyed) this.turretPopDestructionObserved = false;
+   }
+
+   private void onTurretPopDestructionTransition() {
+      this.turretPopDestructionObserved = true;
+      if(this.turretPopStarted || this.tankInfo == null || !this.tankInfo.enableTurretPop) return;
+      MCH_BaseVehicleInfo.PartWeapon root = this.getTurretPopRoot();
+      if(root != null) this.startTurretPop();
+      else this.warnMissingTurretPart();
+   }
+
+   /**
+    * Resolves the configured main-cannon assembly. Part order is configuration order,
+    * so the first top-level weapon part with a loaded group is the primary gun; coax,
+    * cupola and remote stations configured later cannot displace it.
+    */
    public MCH_BaseVehicleInfo.PartWeapon getTurretPopRoot() {
-      boolean canonicalModel = this.tankInfo != null && (!super.worldObj.isRemote
-            || this.tankInfo.model instanceof mcheli.wrapper.modelloader.W_ModelCustom
-            && ((mcheli.wrapper.modelloader.W_ModelCustom)this.tankInfo.model).containsPart("$turret"));
-      if(canonicalModel) {
-         /* weapon0 is the repository convention for the main gun/turret assembly;
-          * the model group, rather than the 'turret' aiming flag, is authoritative. */
-         for(Object o : this.tankInfo.partWeapon) {
-            MCH_BaseVehicleInfo.PartWeapon part = (MCH_BaseVehicleInfo.PartWeapon)o;
-            if("weapon0".equalsIgnoreCase(part.modelName)) return part;
-         }
+      if(this.tankInfo == null || !this.tankInfo.enableTurretPop) return null;
+      mcheli.wrapper.modelloader.W_ModelCustom model = this.tankInfo.model instanceof mcheli.wrapper.modelloader.W_ModelCustom
+            ? (mcheli.wrapper.modelloader.W_ModelCustom)this.tankInfo.model : null;
+      for(Object object : this.tankInfo.partWeapon) {
+         MCH_BaseVehicleInfo.PartWeapon part = (MCH_BaseVehicleInfo.PartWeapon)object;
+         // Dedicated servers intentionally do not load render models. They select the
+         // same configured root; clients additionally reject a missing loaded group.
+         if(model == null || model.containsPart("$" + part.modelName)) return part;
       }
       return null;
    }
 
    private void warnMissingTurretPart() {
-      if(!this.turretPopMissingPartWarned) {
-         this.turretPopMissingPartWarned = true;
-         MCH_Lib.Log((Entity)this, "Turret pop disabled for tank '%s': loaded model has no canonical $turret part", new Object[]{this.getTypeName()});
+      if(this.turretPopMissingPartWarned) return;
+      this.turretPopMissingPartWarned = true;
+      java.util.List attempted = new java.util.ArrayList();
+      if(this.tankInfo != null) for(Object object : this.tankInfo.partWeapon) {
+         MCH_BaseVehicleInfo.PartWeapon part = (MCH_BaseVehicleInfo.PartWeapon)object;
+         attempted.add("$" + part.modelName);
+         for(Object childObject : part.child) attempted.add("$" + ((MCH_BaseVehicleInfo.PartWeaponChild)childObject).modelName);
       }
+      MCH_Lib.Log((Entity)this,
+            "Turret pop disabled: display='%s', type='%s', no configured model group found; attempted=%s",
+            new Object[]{this.tankInfo != null ? this.tankInfo.displayName : "?", this.getTypeName(), attempted.toString()});
    }
 
    private void startTurretPop() {
