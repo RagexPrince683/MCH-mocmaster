@@ -1,3 +1,9 @@
+# Catastrophic tank turret-pop correction (PR pending)
+
+- Detach the exact `$turret` model group with its configured weapon children, preserving the destruction-time turret yaw and gun elevation in synchronized/NBT state.
+- Add server-authoritative swept solid-block landing, unloaded-chunk protection, and a client-created dark smoke trail following the synchronized detached turret.
+- Keep the canonical turret suppressed in both close and LOD attached weapon passes while leaving unrelated turreted stations visible.
+
 # Audit tank laser-warning receiver configuration (PR pending)
 
 - Added an explicit `LWR` capability value to every tank configuration, enabling it only for exact vehicle variants with sufficiently reliable laser-warning receiver evidence.

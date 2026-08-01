@@ -880,6 +880,30 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       renderWeapon(ac, info, tickTime, true);
    }
 
+   /** Draws the canonical tank group and the configured children with a frozen pose. */
+   public static void renderDetachedTankTurret(mcheli.tank.MCH_EntityTank tank, MCH_BaseVehicleInfo info) {
+      MCH_BaseVehicleInfo.PartWeapon root = tank.getTurretPopRoot();
+      if(root == null) return;
+      GL11.glPushMatrix();
+      try {
+         GL11.glTranslated(info.turretPosition.xCoord, info.turretPosition.yCoord, info.turretPosition.zCoord);
+         GL11.glRotatef(tank.turretPopFrozenYaw, 0.0F, -1.0F, 0.0F);
+         GL11.glTranslated(-info.turretPosition.xCoord, -info.turretPosition.yCoord, -info.turretPosition.zCoord);
+         // The exact named model group is the detachable source of truth.
+         renderPart(null, info.model, "turret");
+         for(Object object : root.child) {
+            MCH_BaseVehicleInfo.PartWeaponChild child = (MCH_BaseVehicleInfo.PartWeaponChild)object;
+            GL11.glPushMatrix();
+            try {
+               GL11.glTranslated(child.pos.xCoord, child.pos.yCoord, child.pos.zCoord);
+               if(child.pitch) GL11.glRotatef(tank.turretPopFrozenPitch, 1.0F, 0.0F, 0.0F);
+               GL11.glTranslated(-child.pos.xCoord, -child.pos.yCoord, -child.pos.zCoord);
+               renderPart(child.model, info.model, child.modelName);
+            } finally { GL11.glPopMatrix(); }
+         }
+      } finally { GL11.glPopMatrix(); }
+   }
+
    private static void renderWeapon(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime, boolean detachedOnly) {
       MCH_WeaponSet beforeWs = null;
       Entity e = ac.getRiddenByEntity();
