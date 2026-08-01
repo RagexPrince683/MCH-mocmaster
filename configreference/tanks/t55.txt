@@ -1,4 +1,5 @@
 ﻿DisplayName = T-55
+EnableTurretPop = true
 AddDisplayName = ja_JP, T-55
 AddDisplayName = en_US, T-55
 NameOnEarlyASRadar = Tank

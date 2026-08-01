@@ -1,4 +1,5 @@
 ﻿DisplayName = BT-5
+EnableTurretPop = true
 AddDisplayName = ja_JP, BT-5
 AddDisplayName = en_US, BT-5
 NameOnEarlyASRadar = Tank

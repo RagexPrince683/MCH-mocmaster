@@ -1,4 +1,5 @@
 ﻿DisplayName = IS-2 (1944)
+EnableTurretPop = true
 AddDisplayName = ja_JP, IS-2 (1944)
 AddDisplayName = en_US, IS-2 (1944)
 NameOnEarlyASRadar = Tank

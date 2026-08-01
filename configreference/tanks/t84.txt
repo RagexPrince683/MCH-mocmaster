@@ -1,4 +1,5 @@
 DisplayName = T-84 Oplot-M
+EnableTurretPop = true
 AddDisplayName = en_US, T-84 Oplot-M
 AddDisplayName = ja_JP, T-84 オプロートM
 NameOnEarlyASRadar = Tank

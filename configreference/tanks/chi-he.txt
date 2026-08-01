@@ -1,4 +1,5 @@
 DisplayName = Type 1 Chi-He
+EnableTurretPop = true
 AddDisplayName = ja_JP, 一式中戦車 チへ
 AddDisplayName = en_US, Type 1 Chi-He
 NameOnEarlyASRadar = Tank

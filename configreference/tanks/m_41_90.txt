@@ -1,4 +1,5 @@
 DisplayName = leKPz M41 Walker Bulldog
+EnableTurretPop = true
 Weight = 52000
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = leKPz M41 Walker Bulldog

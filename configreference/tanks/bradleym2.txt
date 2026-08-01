@@ -1,4 +1,5 @@
 DisplayName = M2A1 Bradley IFV
+EnableTurretPop = true
 AddDisplayName = en_US, M2A1 Bradley IFV
 AddDisplayName = ru_RU, M2A1 Брэдли
 Weight = 50200

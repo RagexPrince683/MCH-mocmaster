@@ -1,4 +1,5 @@
 DisplayName = Type 89 IFV
+EnableTurretPop = true
 AddDisplayName = ja_JP, Type 89 IFV
 NameOnEarlyASRadar = Armored Vehicle
 NameOnModernASRadar = Type 89 IFV

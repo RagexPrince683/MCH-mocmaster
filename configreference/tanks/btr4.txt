@@ -1,4 +1,5 @@
 DisplayName = BTR-4-E Bucefal
+EnableTurretPop = true
 NameOnEarlyASRadar = Armored Vehicle
 NameOnModernASRadar = BTR-4-E Bucefal
 NameOnEarlyAARadar = Armored Vehicle

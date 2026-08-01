@@ -1,4 +1,5 @@
 ﻿DisplayName = Leopard 1A1
+EnableTurretPop = true
 AddDisplayName = en_US, Leopard 1A1
 AddDisplayName = ja_JP, レオパルト1A1
 NameOnEarlyASRadar = Tank

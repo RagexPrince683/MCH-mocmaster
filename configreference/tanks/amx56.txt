@@ -1,4 +1,5 @@
 DisplayName = AMX56 Leclerc MBT
+EnableTurretPop = true
 AddDisplayName = zh_CN,AMX56 勒克莱尔主战坦克
 AddDisplayName = en_US, AMX56 Leclerc MBT
 NameOnEarlyASRadar = Tank

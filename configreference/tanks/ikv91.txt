@@ -1,4 +1,5 @@
 DisplayName = Ikv 91 (Infanterikanonvagn 91)
+EnableTurretPop = true
 Weight = 36376
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Ikv 91 (Infanterikanonvagn 91)

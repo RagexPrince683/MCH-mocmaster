@@ -1,4 +1,5 @@
 ﻿DisplayName = Type 16 Maneuver Combat Vehicle
+EnableTurretPop = true
 AddDisplayName = en_US, Type 16 Maneuver Combat Vehicle
 AddDisplayName = ja_JP, 陸上自衛隊 機動戦闘車
 NameOnEarlyASRadar = Air Defense Vehicle

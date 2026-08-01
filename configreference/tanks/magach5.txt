@@ -1,4 +1,5 @@
 DisplayName = Magach 5
+EnableTurretPop = true
 AddDisplayName = zh_CN,Magach 5 巴顿 主战坦克
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Magach 5

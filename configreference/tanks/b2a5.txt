@@ -1,4 +1,5 @@
 ﻿DisplayName = Leopard 2A5
+EnableTurretPop = true
 AddDisplayName = en_US, Leopard 2A5
 AddDisplayName = zh_CN, 豹 2A5
 NameOnEarlyASRadar = Tank

@@ -1,4 +1,5 @@
 ﻿DisplayName = T-64BM Bulat
+EnableTurretPop = true
 AddDisplayName = en_US, T-64BM Bulat
 AddDisplayName = ja_JP, T-64BM Bulat
 NameOnEarlyASRadar = Tank

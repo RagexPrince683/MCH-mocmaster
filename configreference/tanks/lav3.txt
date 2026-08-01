@@ -1,4 +1,5 @@
 DisplayName = LAV III (Light Armoured Vehicle 3)
+EnableTurretPop = true
 Weight = 37000
 NameOnEarlyASRadar = Armored Vehicle
 NameOnModernASRadar = LAV III (Light Armoured Vehicle 3)

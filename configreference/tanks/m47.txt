@@ -1,4 +1,5 @@
 DisplayName = M47 Patton
+EnableTurretPop = true
 AddDisplayName = ja_JP, M47 Patton
 AddDisplayName = en_US, M47 Patton
 Weight = 101000

@@ -1,4 +1,5 @@
 DisplayName = M1A1SA Abrams TUSK II
+EnableTurretPop = true
 AddDisplayName = ja_JP, M1A1SA エイブラムス TUSK II
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = M1A1SA Abrams TUSK II

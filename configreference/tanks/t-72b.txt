@@ -1,4 +1,5 @@
 ﻿DisplayName = T-72A MBT
+EnableTurretPop = true
 AddDisplayName = en_US, T-72A
 AddDisplayName = ja_JP, T-72A ウラル 主力戦車
 NameOnEarlyASRadar = Tank

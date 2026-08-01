@@ -1,4 +1,5 @@
 DisplayName = T-26 mod. 1939
+EnableTurretPop = true
 AddDisplayName = Т-26 (образец 1939 г.)
 Weight = 22500
 NameOnEarlyASRadar = Tank

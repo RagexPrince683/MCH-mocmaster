@@ -1,4 +1,5 @@
 DisplayName = M46 Patton
+EnableTurretPop = true
 AddDisplayName = ja_JP, M46 Patton
 AddDisplayName = en_US, M46 Patton
 Weight = 94600

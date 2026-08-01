@@ -1,5 +1,6 @@
 Weight = 46297
 ﻿DisplayName = Type 62
+EnableTurretPop = true
 AddDisplayName = ja_JP, Type 62
 AddDisplayName = en_US, Type 62 
 NameOnEarlyASRadar = Tank

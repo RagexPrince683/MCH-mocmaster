@@ -1,4 +1,5 @@
 DisplayName = Centurion Mk 3
+EnableTurretPop = true
 AddDisplayName = ja_JP, Centurion Mk 3
 AddDisplayName = en_US, Centurion Mk 3
 Weight = 112436

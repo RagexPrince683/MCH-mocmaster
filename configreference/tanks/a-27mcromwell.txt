@@ -1,5 +1,6 @@
 Weight = 61729
 ﻿DisplayName = A-27M Cromwell V
+EnableTurretPop = true
 AddDisplayName = en_US, A-27M Cromwell V
 AddDisplayName = ru_RU, A-27M Cromwell V
 NameOnEarlyASRadar = Tank

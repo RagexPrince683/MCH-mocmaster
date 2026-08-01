@@ -1,4 +1,5 @@
 DisplayName = AMX-13/75 FL-10
+EnableTurretPop = true
 Weight = 31967
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = AMX-13/75 FL-10
