@@ -68,9 +68,9 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
       double x = tank.prevTurretPopX + (tank.turretPopX - tank.prevTurretPopX) * tickTime;
       double y = tank.prevTurretPopY + (tank.turretPopY - tank.prevTurretPopY) * tickTime;
       double z = tank.prevTurretPopZ + (tank.turretPopZ - tank.prevTurretPopZ) * tickTime;
-      float popYaw = tank.prevTurretPopYaw + (tank.turretPopYaw - tank.prevTurretPopYaw) * tickTime;
-      float popPitch = tank.prevTurretPopPitch + (tank.turretPopPitch - tank.prevTurretPopPitch) * tickTime;
-      float popRoll = tank.prevTurretPopRoll + (tank.turretPopRoll - tank.prevTurretPopRoll) * tickTime;
+      float popYaw = interpolateAngle(tank.prevTurretPopYaw, tank.turretPopYaw, tickTime);
+      float popPitch = interpolateAngle(tank.prevTurretPopPitch, tank.turretPopPitch, tickTime);
+      float popRoll = interpolateAngle(tank.prevTurretPopRoll, tank.turretPopRoll, tickTime);
       GL11.glPushMatrix();
       GL11.glRotatef(-hullRoll, 0.0F, 0.0F, 1.0F);
       GL11.glRotatef(-hullPitch, 1.0F, 0.0F, 0.0F);
@@ -84,6 +84,10 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
       GL11.glRotatef(popRoll, 0.0F, 0.0F, 1.0F);
       renderDetachedTankTurret(tank, info);
       GL11.glPopMatrix();
+   }
+
+   private static float interpolateAngle(float previous, float current, float tickTime) {
+      return previous + net.minecraft.util.MathHelper.wrapAngleTo180_float(current - previous) * tickTime;
    }
 
    public void renderWheel(MCH_EntityTank tank, double posX, double posY, double posZ) {

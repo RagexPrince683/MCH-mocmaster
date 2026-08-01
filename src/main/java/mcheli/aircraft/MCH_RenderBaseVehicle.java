@@ -628,7 +628,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    public static void renderTankBodyWithoutPoppedTurret(final IModelCustom model,
          MCH_BaseVehicleInfo.PartWeapon turretRoot) {
       if(model == null) return;
-      final String[] excluded = getDetachedTankTurretGroups(turretRoot);
+      final String[] excluded = getDetachedTankTurretGroups(model, turretRoot);
       renderTankBodyModelWithoutPoppedTurret(model, excluded);
       renderSkinOverlayPass(new RenderRunnable() {
          public void render() {
@@ -651,15 +651,19 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       }
    }
 
-   private static String[] getDetachedTankTurretGroups(MCH_BaseVehicleInfo.PartWeapon root) {
+   private static String[] getDetachedTankTurretGroups(IModelCustom model,
+         MCH_BaseVehicleInfo.PartWeapon root) {
       java.util.List groups = new java.util.ArrayList();
-      groups.add("$turret");
-      if(root != null) {
-         groups.add("$" + root.modelName);
+      if(root != null && model instanceof W_ModelCustom) {
+         W_ModelCustom custom = (W_ModelCustom)model;
+         String rootName = "$" + root.modelName;
+         if(custom.containsPart(rootName)) groups.add(rootName);
          for(Object object : root.child) {
-            MCH_BaseVehicleInfo.PartWeaponChild child = (MCH_BaseVehicleInfo.PartWeaponChild)object;
-            groups.add("$" + child.modelName);
+            String childName = "$" + ((MCH_BaseVehicleInfo.PartWeaponChild)object).modelName;
+            if(custom.containsPart(childName)) groups.add(childName);
          }
+         // Some packs provide a separate shell around the configured main gun.
+         if(custom.containsPart("$turret")) groups.add("$turret");
       }
       return (String[])groups.toArray(new String[groups.size()]);
    }
@@ -924,31 +928,40 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       renderWeapon(ac, info, tickTime, true);
    }
 
-   /** Draws the canonical tank group and the configured children with a frozen pose. */
+   /** Draws the resolved configured tank groups with their frozen destruction pose. */
    public static void renderDetachedTankTurret(mcheli.tank.MCH_EntityTank tank, MCH_BaseVehicleInfo info) {
       MCH_BaseVehicleInfo.PartWeapon root = tank.getTurretPopRoot();
-      if(root == null) return;
+      if(root == null || !(info.model instanceof W_ModelCustom)) return;
+      W_ModelCustom model = (W_ModelCustom)info.model;
       GL11.glPushMatrix();
       try {
          GL11.glTranslated(info.turretPosition.xCoord, info.turretPosition.yCoord, info.turretPosition.zCoord);
          GL11.glRotatef(tank.turretPopFrozenYaw, 0.0F, -1.0F, 0.0F);
          GL11.glTranslated(-info.turretPosition.xCoord, -info.turretPosition.yCoord, -info.turretPosition.zCoord);
-         // The exact named model group is the detachable source of truth.
-         renderPart(null, info.model, "turret");
-         GL11.glTranslated(root.pos.xCoord, root.pos.yCoord, root.pos.zCoord);
-         if(root.pitch) GL11.glRotatef(tank.turretPopFrozenPitch, 1.0F, 0.0F, 0.0F);
-         GL11.glTranslated(-root.pos.xCoord, -root.pos.yCoord, -root.pos.zCoord);
-         renderPart(root.model, info.model, root.modelName);
-         for(Object object : root.child) {
-            MCH_BaseVehicleInfo.PartWeaponChild child = (MCH_BaseVehicleInfo.PartWeaponChild)object;
-            GL11.glPushMatrix();
-            try {
-               GL11.glTranslated(child.pos.xCoord, child.pos.yCoord, child.pos.zCoord);
-               GL11.glTranslated(-child.pos.xCoord, -child.pos.yCoord, -child.pos.zCoord);
-               renderPart(child.model, info.model, child.modelName);
-            } finally { GL11.glPopMatrix(); }
-         }
+         if(model.containsPart("$turret")) model.renderPart("$turret");
+         GL11.glPushMatrix();
+         try {
+            applyFrozenTurretPitch(root.pos, root.pitch, tank.turretPopFrozenPitch);
+            if(model.containsPart("$" + root.modelName)) model.renderPart("$" + root.modelName);
+            // Children inherit the root transform, matching renderWeaponChild.
+            for(Object object : root.child) {
+               MCH_BaseVehicleInfo.PartWeaponChild child = (MCH_BaseVehicleInfo.PartWeaponChild)object;
+               if(!model.containsPart("$" + child.modelName)) continue;
+               GL11.glPushMatrix();
+               try {
+                  applyFrozenTurretPitch(child.pos, child.pitch, tank.turretPopFrozenPitch);
+                  model.renderPart("$" + child.modelName);
+               } finally { GL11.glPopMatrix(); }
+            }
+         } finally { GL11.glPopMatrix(); }
       } finally { GL11.glPopMatrix(); }
+   }
+
+   private static void applyFrozenTurretPitch(Vec3 pivot, boolean pitches, float frozenPitch) {
+      if(!pitches) return;
+      GL11.glTranslated(pivot.xCoord, pivot.yCoord, pivot.zCoord);
+      GL11.glRotatef(frozenPitch, 1.0F, 0.0F, 0.0F);
+      GL11.glTranslated(-pivot.xCoord, -pivot.yCoord, -pivot.zCoord);
    }
 
    private static void renderWeapon(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime, boolean detachedOnly) {
