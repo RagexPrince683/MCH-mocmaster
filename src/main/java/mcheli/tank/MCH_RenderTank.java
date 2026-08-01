@@ -53,7 +53,11 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
                System.out.println("Texture not found : " + tank.getTextureName());
                this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
             }
-            renderBodyWithSkinOverlay(tankInfo.model, "tanks", tank);
+            if(tank.turretPopStarted) {
+               renderTankBodyWithoutPoppedTurret(tankInfo.model, tank.getTurretPopRoot());
+            } else {
+               renderBodyWithSkinOverlay(tankInfo.model, "tanks", tank);
+            }
             this.renderPoppedTurret(tank, tankInfo, yaw, pitch, roll, tickTime);
          }
       }

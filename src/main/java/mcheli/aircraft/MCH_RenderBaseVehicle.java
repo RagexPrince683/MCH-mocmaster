@@ -620,6 +620,50 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
 
    }
 
+   /**
+    * Renders a popped tank's chassis without the canonical turret or the configured
+    * main-gun groups. The same runnable is used for the base texture and skin overlay,
+    * so neither pass can put the attached assembly back on the wreck.
+   */
+   public static void renderTankBodyWithoutPoppedTurret(final IModelCustom model,
+         MCH_BaseVehicleInfo.PartWeapon turretRoot) {
+      if(model == null) return;
+      final String[] excluded = getDetachedTankTurretGroups(turretRoot);
+      renderTankBodyModelWithoutPoppedTurret(model, excluded);
+      renderSkinOverlayPass(new RenderRunnable() {
+         public void render() {
+            renderTankBodyModelWithoutPoppedTurret(model, excluded);
+         }
+      });
+   }
+
+   private static void renderTankBodyModelWithoutPoppedTurret(IModelCustom model, String[] excluded) {
+      if(model instanceof W_ModelCustom) {
+         W_ModelCustom custom = (W_ModelCustom)model;
+         if(custom.containsPart("$body")) {
+            custom.renderPart("$body");
+         } else {
+            custom.renderAllExcept(excluded);
+         }
+      } else {
+         // Models without named-part support cannot contain the canonical $turret.
+         model.renderAll();
+      }
+   }
+
+   private static String[] getDetachedTankTurretGroups(MCH_BaseVehicleInfo.PartWeapon root) {
+      java.util.List groups = new java.util.ArrayList();
+      groups.add("$turret");
+      if(root != null) {
+         groups.add("$" + root.modelName);
+         for(Object object : root.child) {
+            MCH_BaseVehicleInfo.PartWeaponChild child = (MCH_BaseVehicleInfo.PartWeaponChild)object;
+            groups.add("$" + child.modelName);
+         }
+      }
+      return (String[])groups.toArray(new String[groups.size()]);
+   }
+
    /** True only when rendering the body separately cannot also draw named dynamic groups. */
    public static boolean hasSeparableBody(IModelCustom model) {
       return model instanceof W_ModelCustom && ((W_ModelCustom)model).containsPart("$body");
@@ -891,12 +935,15 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          GL11.glTranslated(-info.turretPosition.xCoord, -info.turretPosition.yCoord, -info.turretPosition.zCoord);
          // The exact named model group is the detachable source of truth.
          renderPart(null, info.model, "turret");
+         GL11.glTranslated(root.pos.xCoord, root.pos.yCoord, root.pos.zCoord);
+         if(root.pitch) GL11.glRotatef(tank.turretPopFrozenPitch, 1.0F, 0.0F, 0.0F);
+         GL11.glTranslated(-root.pos.xCoord, -root.pos.yCoord, -root.pos.zCoord);
+         renderPart(root.model, info.model, root.modelName);
          for(Object object : root.child) {
             MCH_BaseVehicleInfo.PartWeaponChild child = (MCH_BaseVehicleInfo.PartWeaponChild)object;
             GL11.glPushMatrix();
             try {
                GL11.glTranslated(child.pos.xCoord, child.pos.yCoord, child.pos.zCoord);
-               if(child.pitch) GL11.glRotatef(tank.turretPopFrozenPitch, 1.0F, 0.0F, 0.0F);
                GL11.glTranslated(-child.pos.xCoord, -child.pos.yCoord, -child.pos.zCoord);
                renderPart(child.model, info.model, child.modelName);
             } finally { GL11.glPopMatrix(); }

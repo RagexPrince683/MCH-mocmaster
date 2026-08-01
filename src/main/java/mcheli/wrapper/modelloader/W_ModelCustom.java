@@ -81,6 +81,8 @@ public abstract class W_ModelCustom implements IModelCustom {
 
    public abstract void renderAllTransformed();
 
+   public abstract void renderAllExcept(String ... excludedGroupNames);
+
    public abstract void renderPartTransformed(String var1);
 
    public abstract void renderAll(int var1, int var2);
