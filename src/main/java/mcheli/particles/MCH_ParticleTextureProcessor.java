@@ -78,8 +78,7 @@ public final class MCH_ParticleTextureProcessor {
          for(int y = 0; y < cellHeight; ++y) {
             for(int x = 0; x < cellWidth; ++x) {
                int alpha = clamp((int)Math.round(scaled[y * cellWidth + x] * 255.0D));
-               if(x < OUTPUT_PADDING || x >= cellWidth - OUTPUT_PADDING ||
-                  y < OUTPUT_PADDING || y >= cellHeight - OUTPUT_PADDING || alpha <= 1) alpha = 0;
+               if(isProtectedTransparentBorder(x, y, cellWidth, cellHeight) || alpha <= 1) alpha = 0;
                atlas.setRGB(frame * cellWidth + x, y, alpha == 0 ? 0x00000000 : alpha << 24 | 0x00FFFFFF);
             }
          }
@@ -152,6 +151,11 @@ public final class MCH_ParticleTextureProcessor {
 
    private static double sample(double[] source, int width, int height, int x, int y) {
       return x < 0 || x >= width || y < 0 || y >= height ? 0.0D : source[y * width + x];
+   }
+
+   private static boolean isProtectedTransparentBorder(int x, int y, int width, int height) {
+      return x <= OUTPUT_PADDING || x >= width - OUTPUT_PADDING - 1 ||
+         y <= OUTPUT_PADDING || y >= height - OUTPUT_PADDING - 1;
    }
 
    private static int clamp(int value) { return Math.max(0, Math.min(255, value)); }
