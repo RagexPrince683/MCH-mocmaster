@@ -1,4 +1,5 @@
 DisplayName = Panther G
+EnableTurretPop = true
 AddDisplayName = Panther G
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Panther G

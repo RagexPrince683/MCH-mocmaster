@@ -1,4 +1,5 @@
 DisplayName = Tiger H1
+EnableTurretPop = true
 AddDisplayName = ja_JP, タイガー H1
 AddDisplayName = en_US, Tiger H1
 NameOnEarlyASRadar = Tank

@@ -1,4 +1,5 @@
 DisplayName = Type 10 MBT
+EnableTurretPop = true
 AddDisplayName = ja_JP, 10式戦車
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Type 10 MBT

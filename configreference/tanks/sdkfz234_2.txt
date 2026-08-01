@@ -1,4 +1,5 @@
 ﻿DisplayName = Sd.Kfz. 234/2 "Puma"
+EnableTurretPop = true
 AddDisplayName = en_US, Sd.Kfz. 234/2 "Puma"
 AddDisplayName = ja_JP, Sd Kfz 234/2 "Puma"
 NameOnEarlyASRadar = Tank

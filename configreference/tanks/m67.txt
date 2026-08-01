@@ -1,4 +1,5 @@
 DisplayName = M67 Flame Thrower Tank 'Zippo'
+EnableTurretPop = true
 AddDisplayName = zh_CN,M67 Zippo
 Weight = 104000
 NameOnEarlyASRadar = Tank

@@ -1,4 +1,5 @@
 DisplayName = 2S25 Sprut-SD
+EnableTurretPop = true
 Weight = 39683
 NameOnEarlyASRadar = Artillery Vehicle
 NameOnModernASRadar = 2S25 Sprut-SD

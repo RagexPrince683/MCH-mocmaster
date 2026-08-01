@@ -1,4 +1,5 @@
 ﻿DisplayName = Type 74 C
+EnableTurretPop = true
 AddDisplayName = en_US, Type 74 C
 AddDisplayName = ja_JP, 74式戦車 C型
 NameOnEarlyASRadar = Tank

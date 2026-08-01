@@ -1,4 +1,5 @@
 DisplayName = M1A1 Abrams
+EnableTurretPop = true
 AddDisplayName = ja_JP, M1A1 エイブラムス
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = M1A1 Abrams

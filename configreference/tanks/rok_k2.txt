@@ -1,4 +1,5 @@
 DisplayName = K2 Black Panther
+EnableTurretPop = true
 AddDisplayName = ja_JP, K2 黒豹
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = K2 Black Panther

@@ -1,5 +1,6 @@
 Weight = 41226
 ﻿DisplayName = BMP-3 IFV
+EnableTurretPop = true
 AddDisplayName = en_US, BMP-3 IFV
 AddDisplayName = ja_JP, BMP-3 歩兵戦闘車
 NameOnEarlyASRadar = Air Defense Vehicle

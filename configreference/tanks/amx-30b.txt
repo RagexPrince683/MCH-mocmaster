@@ -1,5 +1,6 @@
 Weight = 79366
     DisplayName = AMX-30B
+EnableTurretPop = true
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = AMX-30B
 NameOnEarlyAARadar = Tank

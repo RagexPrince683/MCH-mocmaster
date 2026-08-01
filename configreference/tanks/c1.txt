@@ -1,4 +1,5 @@
 DisplayName = Challenger Mk.2 MBT
+EnableTurretPop = true
 AddDisplayName = en_US, Challenger Mk.2 MBT
 AddDisplayName = ja_JP, チャレンジャーMk.2
 NameOnEarlyASRadar = Tank

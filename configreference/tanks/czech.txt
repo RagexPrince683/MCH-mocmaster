@@ -1,4 +1,5 @@
 DisplayName = Pz.38(t) A
+EnableTurretPop = true
 AddDisplayName = Pz.38(t) A
 Weight = 21500
 NameOnEarlyASRadar = Tank

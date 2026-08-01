@@ -1,4 +1,5 @@
 DisplayName = BMP-1 IFV
+EnableTurretPop = true
 AddDisplayName = en_US, BMP-1 IFV
 AddDisplayName = ja_JP, BMP-1 歩兵戦闘車
 Weight = 29000

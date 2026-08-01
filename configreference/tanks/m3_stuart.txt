@@ -1,4 +1,5 @@
 ﻿DisplayName = M3 Stuart
+EnableTurretPop = true
 AddDisplayName = ja_JP, M3 スチュアート
 AddDisplayName = en_US, M3 Stuart
 NameOnEarlyASRadar = Tank

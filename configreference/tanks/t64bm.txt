@@ -1,4 +1,5 @@
 ﻿DisplayName = T-64BV
+EnableTurretPop = true
 AddDisplayName = en_US, T-64BV
 AddDisplayName = ja_JP, T-64BV
 NameOnEarlyASRadar = Tank

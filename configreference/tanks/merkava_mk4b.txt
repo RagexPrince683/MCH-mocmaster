@@ -1,4 +1,5 @@
 DisplayName = Merkava Mk.4 Barak
+EnableTurretPop = true
 AddDisplayName = ja_JP, Merkava Mk.4 Barak
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Merkava Mk.4 Barak

@@ -1,4 +1,5 @@
 DisplayName = M60 Patton
+EnableTurretPop = true
 AddDisplayName = zh_CN,M60 巴顿 主战坦克
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = M60 Patton

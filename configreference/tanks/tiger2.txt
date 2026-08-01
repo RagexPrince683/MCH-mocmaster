@@ -1,4 +1,5 @@
 DisplayName = Tiger II (H)
+EnableTurretPop = true
 AddDisplayName = Tiger II (H)
 ;this is a comment, I like using comments
 AddDisplayName = en_US, Tiger II (H)

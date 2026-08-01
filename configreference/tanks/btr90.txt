@@ -1,5 +1,6 @@
 Weight = 45900
 ﻿DisplayName = BTR-90 APC
+EnableTurretPop = true
 AddDisplayName = en_US, BTR-90 APC
 NameOnEarlyASRadar = Armored Vehicle
 NameOnModernASRadar = BTR-90 APC

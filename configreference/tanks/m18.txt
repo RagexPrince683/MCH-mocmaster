@@ -1,4 +1,5 @@
 ﻿DisplayName = M18 GMC 'Hellcat'
+EnableTurretPop = true
 AddDisplayName = en_US, M18 GMC 'Hellcat'
 AddDisplayName = ja_JP, M18 GMC ヘルキャット
 NameOnEarlyASRadar = Tank

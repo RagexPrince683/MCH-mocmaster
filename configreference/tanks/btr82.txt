@@ -1,4 +1,5 @@
 ﻿DisplayName = BTR-82 APC
+EnableTurretPop = true
 AddDisplayName = ru_RU, BTR-82 APC
 AddDisplayName = en_US, BTR-82 APC
 NameOnEarlyASRadar = Armored Vehicle

@@ -1,4 +1,5 @@
 DisplayName = Type 3 Chi-Nu
+EnableTurretPop = true
 AddDisplayName = ja_JP, 三式中戦車 チヌ
 AddDisplayName = en_US, Type 3 Chi-Nu
 NameOnEarlyASRadar = Tank

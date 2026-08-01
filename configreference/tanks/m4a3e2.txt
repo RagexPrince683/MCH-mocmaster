@@ -1,4 +1,5 @@
 ﻿DisplayName = M4A3E2 Sherman
+EnableTurretPop = true
 AddDisplayName = en_US, M4A3E2 Sherman
 AddDisplayName = ja_JP, M4A3E2 シャーマン
 NameOnEarlyASRadar = Tank

@@ -1,5 +1,6 @@
 Weight = 45000
 ﻿DisplayName = SPz Marder 1A3 IFV
+EnableTurretPop = true
 AddDisplayName = en_US, SPz Marder 1A3 IFV
 AddDisplayName = ja_JP, マルダー1A3 歩兵戦闘車
 NameOnEarlyASRadar = Armored Vehicle

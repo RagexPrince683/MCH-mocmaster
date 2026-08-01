@@ -1,4 +1,5 @@
 DisplayName = M26 Pershing
+EnableTurretPop = true
 AddDisplayName = ja_JP, M26 パーシング
 AddDisplayName = en_US, M26 Pershing
 NameOnEarlyASRadar = Tank

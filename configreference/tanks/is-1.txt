@@ -1,4 +1,5 @@
 ﻿DisplayName = IS-1
+EnableTurretPop = true
 AddDisplayName = ja_JP, IS-1
 AddDisplayName = en_US, IS-1
 NameOnEarlyASRadar = Tank

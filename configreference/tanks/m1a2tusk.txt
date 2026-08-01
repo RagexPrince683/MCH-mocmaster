@@ -1,4 +1,5 @@
 DisplayName = M1A2 Abrams SEPv2 ARAT Reactive Armor TUSK II
+EnableTurretPop = true
 AddDisplayName = ja_JP, M1A2 SEPv2 エイブラムス ARAT Reactive Armor TUSK II
 NameOnEarlyASRadar = Tank
 NameOnModernASRadar = M1A2 Abrams SEPv2 ARAT Reactive Armor TUSK II
