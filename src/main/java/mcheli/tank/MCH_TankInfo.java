@@ -17,6 +17,7 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    public int weightType = 0;
    public float weightedCenterZ = 0.0F;
    public int trackMaxHP = 100;
+   public boolean enableTurretPop = false;
 
 
    public Item getItem() {
@@ -77,6 +78,8 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
          this.weightedCenterZ = this.toFloat(data, -1000.0F, 1000.0F);
       } else if(item.equalsIgnoreCase("TrackMaxHP")) {
          this.trackMaxHP = this.toInt(data, 1, 1000000);
+      } else if(item.equalsIgnoreCase("EnableTurretPop")) {
+         this.enableTurretPop = this.toBool(data, false);
       } else if(item.equalsIgnoreCase("AddTrackHitBox")) {
          String[] s = data.split("\\s*,\\s*");
          if(s.length >= 5) {

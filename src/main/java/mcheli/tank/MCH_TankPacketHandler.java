@@ -10,6 +10,14 @@ import net.minecraft.entity.player.EntityPlayer;
 
 public class MCH_TankPacketHandler {
 
+   public static void onPacket_TurretPop(EntityPlayer player, ByteArrayDataInput data) {
+      if(player.worldObj.isRemote) {
+         MCH_PacketTurretPop packet = new MCH_PacketTurretPop(); packet.readData(data);
+         net.minecraft.entity.Entity entity = player.worldObj.getEntityByID(packet.entityId);
+         if(entity instanceof MCH_EntityTank) ((MCH_EntityTank)entity).applyTurretPopState(packet);
+      }
+   }
+
    public static void onPacket_PlayerControl(EntityPlayer player, ByteArrayDataInput data) {
       if(!player.worldObj.isRemote) {
          MCH_TankPacketPlayerControl pc = new MCH_TankPacketPlayerControl();
