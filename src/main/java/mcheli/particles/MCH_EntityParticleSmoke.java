@@ -12,12 +12,22 @@ import org.lwjgl.opengl.GL11;
 
 public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase implements MCH_ISmokeParticle {
 
+   private boolean visibleInThermal;
+
    public MCH_EntityParticleSmoke(World par1World, double x, double y, double z, double mx, double my, double mz) {
       super(par1World, x, y, z, mx, my, mz);
       super.particleRed = super.particleGreen = super.particleBlue = super.rand.nextFloat() * 0.3F + 0.7F;
       this.setParticleScale(super.rand.nextFloat() * 0.5F + 5.0F);
       this.setParticleMaxAge((int)(16.0D / ((double)super.rand.nextFloat() * 0.8D + 0.2D)) + 2);
       super.noClip = true;
+   }
+
+   public void setVisibleInThermal(boolean visible) {
+      this.visibleInThermal = visible;
+   }
+
+   public boolean isVisibleInThermal() {
+      return this.visibleInThermal;
    }
 
    public void onUpdate() {

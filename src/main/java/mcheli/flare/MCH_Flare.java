@@ -73,6 +73,7 @@ public class MCH_Flare {
 
          for(int i = 0; i < num; ++i) {
             MCH_ParticleParam prm = new MCH_ParticleParam(this.worldObj, "smoke", this.aircraft.prevPosX + x * (double)i, this.aircraft.prevPosY + y * (double)i, this.aircraft.prevPosZ + z * (double)i);
+            prm.visibleInThermal = true;
             prm.size = size + this.rand.nextFloat();
             MCH_ParticlesUtil.spawnParticle(prm);
          }

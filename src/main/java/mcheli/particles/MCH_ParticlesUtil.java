@@ -307,6 +307,9 @@ public class MCH_ParticlesUtil {
          ((MCH_EntityParticleBase)entityFX).isEffectedWind = p.isEffectWind;
          ((MCH_EntityParticleBase)entityFX).diffusible = p.diffusible;
          ((MCH_EntityParticleBase)entityFX).toWhite = p.toWhite;
+         if(entityFX instanceof MCH_EntityParticleSmoke) {
+            ((MCH_EntityParticleSmoke)entityFX).setVisibleInThermal(p.visibleInThermal);
+         }
          if(p.diffusible) {
             ((MCH_EntityParticleBase)entityFX).setParticleScale(p.size * 0.2F);
             ((MCH_EntityParticleBase)entityFX).particleMaxScale = p.size * 2.0F;

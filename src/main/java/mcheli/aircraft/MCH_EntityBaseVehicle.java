@@ -4929,6 +4929,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                               prm.age = maxAge;
                               prm.toWhite = true;
                               prm.diffusible = true;
+                              prm.visibleInThermal = true;
                               MCH_ParticlesUtil.spawnParticle(prm);
                            }
                         }
