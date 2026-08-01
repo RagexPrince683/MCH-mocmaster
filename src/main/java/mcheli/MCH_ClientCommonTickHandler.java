@@ -29,9 +29,7 @@ import mcheli.tool.MCH_ClientToolTickHandler;
 import mcheli.tool.MCH_GuiWrench;
 import mcheli.tool.MCH_ItemWrench;
 import mcheli.tool.rangefinder.MCH_GuiRangeFinder;
-import mcheli.uav.MCH_EntityUavStation;
 import mcheli.vehicle.MCH_ClientTurretTickHandler;
-import mcheli.vehicle.MCH_EntityTurret;
 import mcheli.vehicle.MCH_GuiTurret;
 import mcheli.weapon.MCH_WeaponSet;
 import mcheli.wrapper.W_Lib;
@@ -108,6 +106,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    private EntityClientPlayerMP dismountPlayer;
    private World dismountWorld;
    private Object dismountConnection;
+   private boolean restoreMouseFocusAfterRender;
 
 
 
@@ -281,24 +280,15 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public static double getZoomSensitivityMultiplier(Entity player) {
-      MCH_EntityBaseVehicle vehicle = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
-      if(vehicle == null || vehicle.camera == null) {
-         return 1.0D;
-      }
-
-      float cameraZoom = vehicle.camera.getCameraZoom();
-      if(Float.isNaN(cameraZoom) || Float.isInfinite(cameraZoom)) {
-         return 1.0D;
-      }
-
-      double zoom = Math.max(1.0D, (double)cameraZoom);
-      double clampedEffect = Math.max(0.0D, Math.min(100.0D, MCH_Config.ZoomSensitivityEffect.prmDouble));
-      // Zero preserves legacy input; 100 applies the full inverse optical magnification.
-      double effect = clampedEffect / 100.0D;
-      return 1.0D / (1.0D + (zoom - 1.0D) * effect);
+      return player instanceof EntityPlayer?MCH_ZoomContext.resolve(Minecraft.getMinecraft(), (EntityPlayer)player).getSensitivityMultiplier():1.0D;
    }
 
    public void updateMouseDelta(boolean stickMode, float partialTicks) {
+      MCH_ZoomContext context = MCH_ZoomContext.resolve(super.mc, super.mc.thePlayer);
+      this.updateMouseDelta(stickMode, partialTicks, context.getSensitivityMultiplier());
+   }
+
+   private void updateMouseDelta(boolean stickMode, float partialTicks, double zoomSensitivityMultiplier) {
       prevMouseDeltaX = mouseDeltaX;
       prevMouseDeltaY = mouseDeltaY;
       mouseDeltaX = 0.0D;
@@ -321,7 +311,6 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          double ms = MCH_Config.MouseSensitivity.prmDouble * 0.1D;
          mouseDeltaX = ms * (double)super.mc.mouseHelper.deltaX * (double)f2;
          mouseDeltaY = ms * (double)super.mc.mouseHelper.deltaY * (double)f2;
-         double zoomSensitivityMultiplier = getZoomSensitivityMultiplier(super.mc.thePlayer);
          mouseDeltaX *= zoomSensitivityMultiplier;
          mouseDeltaY *= zoomSensitivityMultiplier;
          byte inv = 1;
@@ -351,6 +340,29 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          }
       }
 
+   }
+
+   /** Consumes the render-frame mouse sample before EntityRenderer can apply it a second time. */
+   private void updateVanillaLook(MCH_ZoomContext context) {
+      double multiplier = context.getSensitivityMultiplier();
+      if(context.inputPath != MCH_ZoomContext.InputPath.VANILLA_LOOK || multiplier >= 1.0D ||
+            !super.mc.inGameHasFocus || !Display.isActive() || super.mc.currentScreen != null) {
+         return;
+      }
+
+      super.mc.mouseHelper.mouseXYChange();
+      float sensitivity = super.mc.gameSettings.mouseSensitivity * 0.6F + 0.2F;
+      float curve = sensitivity * sensitivity * sensitivity * 8.0F;
+      float yaw = (float)((double)super.mc.mouseHelper.deltaX * (double)curve * multiplier);
+      float pitch = (float)((double)super.mc.mouseHelper.deltaY * (double)curve * multiplier);
+      if(super.mc.gameSettings.invertMouse) {
+         pitch = -pitch;
+      }
+      super.mc.thePlayer.setAngles(yaw, pitch);
+      // EntityRenderer runs after RenderTickEvent.START. Suppress only its mouse branch so
+      // the raw sample consumed above cannot be applied again during this render frame.
+      super.mc.inGameHasFocus = false;
+      this.restoreMouseFocusAfterRender = true;
    }
 
    /** Returns elapsed render time in Minecraft ticks; visual interpolation still uses raw partialTicks. */
@@ -656,7 +668,9 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                W_Reflection.setItemRendererProgress(1.0F);
             }
 
-            ridingAircraft = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(var17);
+            MCH_ZoomContext zoomContext = MCH_ZoomContext.resolve(super.mc, var17);
+            this.updateVanillaLook(zoomContext);
+            ridingAircraft = zoomContext.vehicle;
             if(ridingAircraft != null) {
                cameraMode = ridingAircraft.getCameraMode(var17);
             } else if(var17.ridingEntity instanceof MCH_EntityGLTD) {
@@ -666,17 +680,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                cameraMode = 0;
             }
 
-            MCH_EntityBaseVehicle var19 = null;
-            if(!(var17.ridingEntity instanceof MCH_EntityHeli) && !(var17.ridingEntity instanceof MCP_EntityPlane) && !(var17.ridingEntity instanceof MCH_EntityShip) && !(var17.ridingEntity instanceof MCH_EntityTank)) {
-               if(var17.ridingEntity instanceof MCH_EntityUavStation) {
-                  var19 = ((MCH_EntityUavStation)var17.ridingEntity).getControlAircract();
-               } else if(var17.ridingEntity instanceof MCH_EntityTurret) {
-                  MCH_EntityBaseVehicle stickMode = (MCH_EntityBaseVehicle)var17.ridingEntity;
-                  stickMode.setupAllRiderRenderPosition(partialTicks, var17);
-               }
-            } else {
-               var19 = (MCH_EntityBaseVehicle)var17.ridingEntity;
-            }
+            MCH_EntityBaseVehicle var19 = zoomContext.vehicle;
 
             boolean var20 = false;
             MCH_Config var10000;
@@ -692,13 +696,13 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
             float p;
             float r;
-            if(var19 != null && var19.canMouseRot()) {
+            if(!(var17.ridingEntity instanceof MCH_EntitySeat) && var19 != null && var19.canMouseRot()) {
                if(!isRideAircraft) {
                   var19.onInteractFirst(var17);
                }
 
                isRideAircraft = true;
-               this.updateMouseDelta(var20, simDelta);
+               this.updateMouseDelta(var20, simDelta, zoomContext.getSensitivityMultiplier());
                boolean var22 = false;
                float var23 = 0.0F;
                float var25 = 0.0F;
@@ -760,7 +764,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             } else {
                MCH_EntitySeat var21 = var17.ridingEntity instanceof MCH_EntitySeat?(MCH_EntitySeat)var17.ridingEntity:null;
                if(var21 != null && var21.getParent() != null) {
-                  this.updateMouseDelta(var20, simDelta);
+                  this.updateMouseDelta(var20, simDelta, zoomContext.getSensitivityMultiplier());
                   var19 = var21.getParent();
                   boolean wi = false;
                   MCH_SeatInfo seatInfo = var19.getSeatInfo(var17);
@@ -1001,6 +1005,10 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public void onRenderTickPost(float partialTicks) {
+      if(this.restoreMouseFocusAfterRender) {
+         this.mc.inGameHasFocus = true;
+         this.restoreMouseFocusAfterRender = false;
+      }
       if (this.mc.thePlayer != null) {
          MCH_ClientTickHandlerBase.applyRotLimit((Entity)this.mc.thePlayer);
          MCH_ViewEntityDummy mCH_ViewEntityDummy = MCH_ViewEntityDummy.getInstance(this.mc.thePlayer.worldObj);
