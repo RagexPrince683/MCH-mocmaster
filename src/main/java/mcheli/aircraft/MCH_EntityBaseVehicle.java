@@ -9028,13 +9028,24 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return "?";
    }
 
-   public boolean hasalert() {
-      if (this.acInfo.hasalert) {
-         return true;
-      }
+   /** Returns whether this vehicle has an enabled laser warning receiver. */
+   public boolean hasLWR() {
+      return this.getAcInfo() != null && this.getAcInfo().LWR;
+   }
 
-      return false;
-      //temp
+   /** Keeps legacy warning audio for non-tanks while making tanks opt in with LWR. */
+   public boolean canPlayAlertSound() {
+      return !(this instanceof MCH_EntityTank) || this.hasLWR();
+   }
+
+   /** Lock packets historically required flares; tank LWR is independent of them. */
+   public boolean canNotifyLock() {
+      return this instanceof MCH_EntityTank ? this.hasLWR() : this.haveFlare();
+   }
+
+   /** Tank warning detection may run without flares only when LWR is enabled. */
+   public boolean canDetectWarning() {
+      return this.haveFlare() || this instanceof MCH_EntityTank && this.hasLWR();
    }
 
    public class WeaponBay {

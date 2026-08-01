@@ -40,7 +40,8 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    public String displayName;
    public HashMap displayNameLang;
    public int itemID;
-   public boolean hasalert = true;
+   /** Enables the tank laser-warning alert sound. */
+   public boolean LWR = false;
    /** Enables client-side CCIP bomb impact reticle for plane HUDs. */
    public boolean hasBallisticComputer = false;
    /** Enables first-person gunner bombsight mode when ballistic prediction is available. */
@@ -676,6 +677,9 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
             } catch (Exception e) {
                this.rwrType = EnumRWRType.NONE;
             }
+         }
+         else if(item.equalsIgnoreCase("LWR")) {
+            this.LWR = this.toBool(data);
          }
          else if(item.equalsIgnoreCase("NameOnModernAARadar")) {
             nameOnModernAARadar = data;

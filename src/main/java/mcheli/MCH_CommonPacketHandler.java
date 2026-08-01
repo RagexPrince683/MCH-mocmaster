@@ -92,7 +92,7 @@ public class MCH_CommonPacketHandler {
                   ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(target);
                }
 
-               if(ac != null && ac.haveFlare() && !ac.isDestroyed()) {
+               if(ac != null && ac.canNotifyLock() && !ac.isDestroyed()) {
                   for(int i = 0; i < 2; ++i) {
                      Entity entity = ac.getEntityBySeatId(i);
                      if(entity instanceof EntityPlayerMP) {

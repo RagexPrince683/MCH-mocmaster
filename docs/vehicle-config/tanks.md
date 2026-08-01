@@ -2,6 +2,8 @@
 
 Tanks inherit all shared keys from `base.md` and add track/weight keys. Tank `speed` is multiplied by global `AllTankSpeed` during validation.
 
+Set the shared `LWR = true` option to enable the existing tank laser warning alert sound. Its default is `false`, so `LWR = false`, an invalid value, or an omitted entry disables that sound. LWR detection does not require flares and does not grant or alter flares, chaff, APS, smoke launchers, or the separate `RWRType` radar warning receiver.
+
 ## Tank-only keys
 
 | Key | Type/range | Default | Notes |
@@ -37,10 +39,11 @@ maxhp = 250
 speed = 0.35
 WeightType = tank
 TrackMaxHP = 120
+LWR = false
 AddTrackHitBox = 1.2, 0.0, 0.0, 0.5, 0.5, 1.0
 AddTrackHitBox = -1.2, 0.0, 0.0, 0.5, 0.5, 1.0
 ```
 
 ## Safe-to-omit notes
 
-`WeightType`, `WeightedCenterZ`, `TrackMaxHP`, and `AddTrackHitBox` are optional. Omitting them leaves default ground behavior and no explicit track hitboxes.
+`WeightType`, `WeightedCenterZ`, `TrackMaxHP`, `AddTrackHitBox`, and `LWR` are optional. Omitting `LWR` leaves tank alert audio disabled; omitting the other keys leaves default ground behavior and no explicit track hitboxes.
