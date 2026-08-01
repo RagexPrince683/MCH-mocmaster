@@ -918,3 +918,6 @@ achievement.McHeliAintWarHell=Ain't war hell?
 achievement.McHeliAintWarHell.desc=?
 achievement.McHeliReliefSupplies=Relief supplies
 achievement.McHeliReliefSupplies.desc=Drop a container
+mcheli.nei.vehicle_ammunition=MCHeli Vehicle Ammunition
+mcheli.nei.vehicle=Vehicle
+mcheli.nei.weapon=Weapon

@@ -1,3 +1,8 @@
+# Optional NEI Vehicle Ammunition Compatibility (PR pending)
+
+- Added an optional, client-only NotEnoughItems category relating complete weapon reload inputs to helicopters, planes, ships, tanks, vehicles, and turrets.
+- Rebuild NEI query results from live vehicle and weapon definitions so `/mcheli reload` is reflected without duplicate handler registration.
+
 # Replay Mod playback camera ownership compatibility (PR pending)
 
 - Detect Replay Mod's playback-only `CameraEntity` without linking Replay Mod, release stale MCHeli chase/view state, and leave `renderViewEntity`, camera transforms, FOV, and view-mode ownership to Replay Mod.
