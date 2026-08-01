@@ -280,6 +280,24 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       return 40.0D;
    }
 
+   public static double getZoomSensitivityMultiplier(Entity player) {
+      MCH_EntityBaseVehicle vehicle = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
+      if(vehicle == null || vehicle.camera == null) {
+         return 1.0D;
+      }
+
+      float cameraZoom = vehicle.camera.getCameraZoom();
+      if(Float.isNaN(cameraZoom) || Float.isInfinite(cameraZoom)) {
+         return 1.0D;
+      }
+
+      double zoom = Math.max(1.0D, (double)cameraZoom);
+      double clampedEffect = Math.max(0.0D, Math.min(100.0D, MCH_Config.ZoomSensitivityEffect.prmDouble));
+      // Zero preserves legacy input; 100 applies the full inverse optical magnification.
+      double effect = clampedEffect / 100.0D;
+      return 1.0D / (1.0D + (zoom - 1.0D) * effect);
+   }
+
    public void updateMouseDelta(boolean stickMode, float partialTicks) {
       prevMouseDeltaX = mouseDeltaX;
       prevMouseDeltaY = mouseDeltaY;
@@ -303,6 +321,9 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          double ms = MCH_Config.MouseSensitivity.prmDouble * 0.1D;
          mouseDeltaX = ms * (double)super.mc.mouseHelper.deltaX * (double)f2;
          mouseDeltaY = ms * (double)super.mc.mouseHelper.deltaY * (double)f2;
+         double zoomSensitivityMultiplier = getZoomSensitivityMultiplier(super.mc.thePlayer);
+         mouseDeltaX *= zoomSensitivityMultiplier;
+         mouseDeltaY *= zoomSensitivityMultiplier;
          byte inv = 1;
          if(super.mc.gameSettings.invertMouse) {
             inv = -1;

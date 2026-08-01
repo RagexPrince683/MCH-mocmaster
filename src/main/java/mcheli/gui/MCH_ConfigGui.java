@@ -62,6 +62,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
    private MCH_GuiSlider sliderEntityMarkerSize;
    private MCH_GuiSlider sliderBlockMarkerSize;
    private MCH_GuiSlider sliderSensitivity;
+   private MCH_GuiSlider sliderZoomSensitivityEffect;
    private MCH_GuiSlider[] sliderHitMark;
    private MCH_GuiOnOffButton buttonTestMode;
    private MCH_GuiOnOffButton buttonThrottleHeli;
@@ -125,6 +126,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.listControlButtons = new ArrayList();
       this.buttonMouseInv = new MCH_GuiOnOffButton(0, x1, y + 25, 150, 20, "Invert Mouse : ");
       this.sliderSensitivity = new MCH_GuiSlider(0, x1, y + 50, 150, 20, "Sensitivity : %.1f", 0.0F, 0.0F, 30.0F, 0.1F);
+      this.sliderZoomSensitivityEffect = new MCH_GuiSlider(0, x3, y + 50, 150, 20, "Zoom Sensitivity Effect : %.0f%%", 100.0F, 0.0F, 100.0F, 1.0F);
       this.buttonFlightSimMode = new MCH_GuiOnOffButton(0, x1, y + 75, 150, 20, "Mouse Flight Sim Mode : ");
       this.buttonHoldFreelook = new MCH_GuiOnOffButton(0, x1, y + 100, 150, 20, "Hold Free Look : ");
       this.buttonSwitchWeaponWheel = new MCH_GuiOnOffButton(0, x1, y + 125, 150, 20, "Switch Weapon Wheel : ");
@@ -142,6 +144,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.listControlButtons.add(this.buttonStickModeHeli);
       this.listControlButtons.add(this.buttonStickModePlane);
       this.listControlButtons.add(this.sliderSensitivity);
+      this.listControlButtons.add(this.sliderZoomSensitivityEffect);
       this.listControlButtons.add(this.buttonThrottleHeli);
       this.listControlButtons.add(this.buttonThrottlePlane);
       this.listControlButtons.add(this.buttonThrottleShip);
@@ -414,6 +417,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.buttonStickModePlane.setOnOff(config.MouseControlStickModePlane.prmBool);
 
       this.sliderSensitivity.setSliderValue((float) config.MouseSensitivity.prmDouble);
+      this.sliderZoomSensitivityEffect.setSliderValue((float)config.ZoomSensitivityEffect.prmDouble);
 
       this.buttonShowHUDTP.setOnOff(config.DisplayHUDThirdPerson.prmBool);
       this.buttonSmoothShading.setOnOff(config.SmoothShading.prmBool);
@@ -475,6 +479,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       config.SwitchWeaponWithMouseWheel.setPrm(buttonSwitchWeaponWheel.getOnOff());
 
       config.MouseSensitivity.setPrm(sliderSensitivity.getSliderValueInt(1));
+      config.ZoomSensitivityEffect.setPrm(sliderZoomSensitivityEffect.getSliderValueInt(0));
 
       config.DisplayHUDThirdPerson.setPrm(buttonShowHUDTP.getOnOff());
       config.SmoothShading.setPrm(buttonSmoothShading.getOnOff());

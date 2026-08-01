@@ -71,6 +71,7 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `EnableDebugBoundingBox` | `false` | Enables debug bounding boxes. Can be toggled in memory with `/mcheli showboundingbox`. |
 | `InvertMouse` | `false` | Inverts aircraft mouse controls. |
 | `MouseSensitivity` | `30.0` | MCHeli mouse sensitivity. |
+| `ZoomSensitivityEffect` | `100.0` | Client-side MCHeli mouse-input zoom reduction, valid from `0` to `100`. `0` keeps the old sensitivity behavior, while `100` scales sensitivity fully against optical magnification; intermediate values blend the two behaviors. This does not modify vanilla Minecraft sensitivity. |
 | `MouseControlStickModeHeli` | `false` | Enables stick-style mouse mode for helicopters. |
 | `MouseControlStickModePlane` | `false` | Enables stick-style mouse mode for planes. |
 | `MouseControlFlightSimMode` | `true` | Flight-sim mouse mode (`Yaw:key, Roll=mouse` per source comment). |
