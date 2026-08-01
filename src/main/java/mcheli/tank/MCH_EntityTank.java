@@ -63,7 +63,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    public float turretPopYaw, turretPopPitch, turretPopRoll;
    public float prevTurretPopYaw, prevTurretPopPitch, prevTurretPopRoll;
    public float turretPopAngularYaw, turretPopAngularPitch, turretPopAngularRoll;
+   /** Frozen local pose of the canonical $turret assembly at destruction. */
+   public float turretPopFrozenYaw, turretPopFrozenPitch;
    public int turretPopAge;
+   private boolean turretPopMissingPartWarned;
 
    //TODO
    private int currentGear = 1;  // Starting gear
@@ -163,6 +166,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          par1NBTTagCompound.setDouble("TurretPopMX", this.turretPopMotionX); par1NBTTagCompound.setDouble("TurretPopMY", this.turretPopMotionY); par1NBTTagCompound.setDouble("TurretPopMZ", this.turretPopMotionZ);
          par1NBTTagCompound.setFloat("TurretPopYaw", this.turretPopYaw); par1NBTTagCompound.setFloat("TurretPopPitch", this.turretPopPitch); par1NBTTagCompound.setFloat("TurretPopRoll", this.turretPopRoll);
          par1NBTTagCompound.setFloat("TurretPopAY", this.turretPopAngularYaw); par1NBTTagCompound.setFloat("TurretPopAP", this.turretPopAngularPitch); par1NBTTagCompound.setFloat("TurretPopAR", this.turretPopAngularRoll);
+         par1NBTTagCompound.setFloat("TurretPopFrozenYaw", this.turretPopFrozenYaw); par1NBTTagCompound.setFloat("TurretPopFrozenPitch", this.turretPopFrozenPitch);
          par1NBTTagCompound.setInteger("TurretPopAge", this.turretPopAge);
       }
    }
@@ -177,6 +181,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          this.turretPopMotionX = par1NBTTagCompound.getDouble("TurretPopMX"); this.turretPopMotionY = par1NBTTagCompound.getDouble("TurretPopMY"); this.turretPopMotionZ = par1NBTTagCompound.getDouble("TurretPopMZ");
          this.turretPopYaw = this.prevTurretPopYaw = par1NBTTagCompound.getFloat("TurretPopYaw"); this.turretPopPitch = this.prevTurretPopPitch = par1NBTTagCompound.getFloat("TurretPopPitch"); this.turretPopRoll = this.prevTurretPopRoll = par1NBTTagCompound.getFloat("TurretPopRoll");
          this.turretPopAngularYaw = par1NBTTagCompound.getFloat("TurretPopAY"); this.turretPopAngularPitch = par1NBTTagCompound.getFloat("TurretPopAP"); this.turretPopAngularRoll = par1NBTTagCompound.getFloat("TurretPopAR"); this.turretPopAge = Math.max(0, par1NBTTagCompound.getInteger("TurretPopAge"));
+         this.turretPopFrozenYaw = par1NBTTagCompound.getFloat("TurretPopFrozenYaw"); this.turretPopFrozenPitch = par1NBTTagCompound.getFloat("TurretPopFrozenPitch");
       }
       if(this.tankInfo == null) {
          this.tankInfo = MCH_TankInfoManager.get(this.getTypeName());
@@ -217,6 +222,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          super.prevPosZ = super.posZ;
       } else {
          if(!super.worldObj.isRemote) this.updateTurretPop();
+         else this.updateTurretPopSmoke();
          if(!super.isRequestedSyncStatus) {
             super.isRequestedSyncStatus = true;
             if(super.worldObj.isRemote) {
@@ -838,17 +844,32 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       super.rotDestroyedPitch = 0.0F;
       super.rotDestroyedRoll = 0.0F;
       super.rotDestroyedYaw = 0.0F;
-      if(!super.worldObj.isRemote && !this.turretPopStarted && this.tankInfo != null && this.tankInfo.enableTurretPop && this.getTurretPopRoot() != null) {
-         this.startTurretPop();
+      if(!super.worldObj.isRemote && !this.turretPopStarted && this.tankInfo != null && this.tankInfo.enableTurretPop) {
+         if(this.getTurretPopRoot() != null) this.startTurretPop();
+         else this.warnMissingTurretPart();
       }
    }
 
    public MCH_BaseVehicleInfo.PartWeapon getTurretPopRoot() {
-      if(this.tankInfo != null) for(Object o : this.tankInfo.partWeapon) {
-         MCH_BaseVehicleInfo.PartWeapon part = (MCH_BaseVehicleInfo.PartWeapon)o;
-         if(part.turret) return part;
+      boolean canonicalModel = this.tankInfo != null && (!super.worldObj.isRemote
+            || this.tankInfo.model instanceof mcheli.wrapper.modelloader.W_ModelCustom
+            && ((mcheli.wrapper.modelloader.W_ModelCustom)this.tankInfo.model).containsPart("$turret"));
+      if(canonicalModel) {
+         /* weapon0 is the repository convention for the main gun/turret assembly;
+          * the model group, rather than the 'turret' aiming flag, is authoritative. */
+         for(Object o : this.tankInfo.partWeapon) {
+            MCH_BaseVehicleInfo.PartWeapon part = (MCH_BaseVehicleInfo.PartWeapon)o;
+            if("weapon0".equalsIgnoreCase(part.modelName)) return part;
+         }
       }
       return null;
+   }
+
+   private void warnMissingTurretPart() {
+      if(!this.turretPopMissingPartWarned) {
+         this.turretPopMissingPartWarned = true;
+         MCH_Lib.Log((Entity)this, "Turret pop disabled for tank '%s': loaded model has no canonical $turret part", new Object[]{this.getTypeName()});
+      }
    }
 
    private void startTurretPop() {
@@ -859,6 +880,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       double speed = 0.18D + super.rand.nextDouble() * 0.16D;
       this.turretPopMotionX = Math.cos(a) * speed; this.turretPopMotionY = 1.05D + super.rand.nextDouble() * 0.35D; this.turretPopMotionZ = Math.sin(a) * speed;
       this.turretPopYaw = this.prevTurretPopYaw = this.getRotYaw(); this.turretPopPitch = this.prevTurretPopPitch = 0.0F; this.turretPopRoll = this.prevTurretPopRoll = 0.0F;
+      this.turretPopFrozenYaw = MathHelper.wrapAngleTo180_float(this.getLastRiderYaw() - this.getRotYaw());
+      MCH_BaseVehicleInfo.PartWeapon root = this.getTurretPopRoot();
+      MCH_WeaponSet weapon = root != null ? this.getWeaponByName(root.name[0]) : null;
+      this.turretPopFrozenPitch = weapon != null ? weapon.rotationPitch : this.getLastRiderPitch();
       this.turretPopAngularYaw = 8.0F + super.rand.nextFloat() * 12.0F; this.turretPopAngularPitch = (super.rand.nextFloat() - 0.5F) * 24.0F; this.turretPopAngularRoll = (super.rand.nextFloat() - 0.5F) * 30.0F;
       MCH_PacketTurretPop.send(this);
    }
@@ -872,14 +897,22 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.turretPopYaw += this.turretPopAngularYaw; this.turretPopPitch += this.turretPopAngularPitch; this.turretPopRoll += this.turretPopAngularRoll;
       ++this.turretPopAge;
       int bx = MathHelper.floor_double(this.turretPopX), by = MathHelper.floor_double(this.turretPopY), bz = MathHelper.floor_double(this.turretPopZ);
-      int previousY = MathHelper.floor_double(this.prevTurretPopY);
-      int groundY = Integer.MIN_VALUE;
-      if(this.turretPopMotionY <= 0.0D) for(int testY = previousY; testY >= by; --testY) {
-         if(!super.worldObj.isAirBlock(bx, testY, bz)) { groundY = testY; break; }
+      double groundTop = Double.NEGATIVE_INFINITY;
+      if(!super.worldObj.blockExists(bx, 0, bz)) {
+         this.turretPopX = this.prevTurretPopX; this.turretPopY = this.prevTurretPopY; this.turretPopZ = this.prevTurretPopZ;
+         this.turretPopMotionY = 0.0D;
+         return;
+      }
+      if(this.turretPopMotionY <= 0.0D) for(int testY = MathHelper.floor_double(this.prevTurretPopY); testY >= by - 1; --testY) {
+         Block block = super.worldObj.getBlock(bx, testY, bz);
+         AxisAlignedBB box = block.getCollisionBoundingBoxFromPool(super.worldObj, bx, testY, bz);
+         if(box != null && block.getMaterial().blocksMovement() && box.maxY <= this.prevTurretPopY && box.maxY >= this.turretPopY - 0.35D) { groundTop = box.maxY; break; }
       }
       boolean timedOut = this.turretPopAge >= 600;
-      if(groundY != Integer.MIN_VALUE || timedOut) {
-         this.turretPopY = (timedOut?super.worldObj.getHeightValue(bx, bz):groundY + 1) + 0.02D; this.turretPopMotionX = this.turretPopMotionY = this.turretPopMotionZ = 0.0D;
+      if(groundTop != Double.NEGATIVE_INFINITY || timedOut) {
+         // Models expose no group bounds, so 0.35 is a conservative pivot-to-bottom clearance.
+         this.turretPopY = (timedOut ? super.worldObj.getHeightValue(bx, bz) : groundTop) + 0.35D;
+         this.turretPopMotionY = 0.0D; this.turretPopMotionX *= 0.15D; this.turretPopMotionZ *= 0.15D;
          this.turretPopAngularYaw *= 0.08F; this.turretPopAngularPitch *= 0.08F; this.turretPopAngularRoll *= 0.08F; this.turretPopLanded = true;
       }
       if((this.turretPopAge % 3) == 0 || this.turretPopLanded) MCH_PacketTurretPop.send(this);
@@ -890,6 +923,19 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.prevTurretPopYaw = this.turretPopStarted?this.turretPopYaw:p.yaw; this.prevTurretPopPitch = this.turretPopStarted?this.turretPopPitch:p.pitch; this.prevTurretPopRoll = this.turretPopStarted?this.turretPopRoll:p.roll;
       this.turretPopStarted = true; this.turretPopLanded = p.landed; this.turretPopX=p.x; this.turretPopY=p.y; this.turretPopZ=p.z; this.turretPopYaw=p.yaw; this.turretPopPitch=p.pitch; this.turretPopRoll=p.roll; this.turretPopAge=p.age;
       this.turretPopMotionX=p.mx; this.turretPopMotionY=p.my; this.turretPopMotionZ=p.mz; this.turretPopAngularYaw=p.ay; this.turretPopAngularPitch=p.ap; this.turretPopAngularRoll=p.ar;
+      this.turretPopFrozenYaw=p.frozenYaw; this.turretPopFrozenPitch=p.frozenPitch;
+   }
+
+   private void updateTurretPopSmoke() {
+      if(!this.turretPopStarted || (this.turretPopLanded && this.turretPopAge > 620)) return;
+      if(!this.turretPopLanded || this.turretPopAge % 5 == 0) {
+         MCH_ParticleParam prm = new MCH_ParticleParam(super.worldObj, "smoke", this.turretPopX, this.turretPopY, this.turretPopZ);
+         prm.motionX = (super.rand.nextDouble() - 0.5D) * 0.06D;
+         prm.motionY = 0.08D + super.rand.nextDouble() * 0.04D;
+         prm.motionZ = (super.rand.nextDouble() - 0.5D) * 0.06D;
+         prm.size = 3.0F + super.rand.nextFloat(); prm.age = 35; prm.setColor(0.85F, 0.12F, 0.12F, 0.12F);
+         MCH_ParticlesUtil.spawnParticle(prm);
+      }
    }
 
    public void writeSpawnData(ByteBuf buffer) { super.writeSpawnData(buffer); MCH_PacketTurretPop.writeState(buffer, this); }

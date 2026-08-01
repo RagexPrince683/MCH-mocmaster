@@ -50,4 +50,4 @@ AddTrackHitBox = -1.2, 0.0, 0.0, 0.5, 0.5, 1.0
 
 `WeightType`, `WeightedCenterZ`, `TrackMaxHP`, `AddTrackHitBox`, `EnableTurretPop`, and `LWR` are optional. Omitting `EnableTurretPop` keeps the turret attached when the tank is destroyed. Omitting `LWR` leaves tank alert audio disabled; omitting the other keys leaves default ground behavior and no explicit track hitboxes.
 
-`EnableTurretPop = true` enables a catastrophic destruction effect which launches the complete main dynamic turret weapon part and its configured child parts off the chassis. The tank must define a dynamic turret assembly with `AddPartTurretWeapon` or `AddPartTurretRotWeapon`; geometry baked into `$body` cannot be detached.
+`EnableTurretPop = true` enables a catastrophic destruction effect which launches the exact `$turret` model group and the main (`weapon0`) gun's configured child parts off the chassis. Models without `$turret` skip the effect safely; geometry baked into `$body` cannot be detached.

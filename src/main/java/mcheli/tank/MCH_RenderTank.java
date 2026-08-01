@@ -78,8 +78,7 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
       GL11.glRotatef(popYaw, 0.0F, -1.0F, 0.0F);
       GL11.glRotatef(popPitch, 1.0F, 0.0F, 0.0F);
       GL11.glRotatef(popRoll, 0.0F, 0.0F, 1.0F);
-      GL11.glTranslated(-info.turretPosition.xCoord, -info.turretPosition.yCoord, -info.turretPosition.zCoord);
-      renderDetachedTurretWeapon(tank, info, tickTime);
+      renderDetachedTankTurret(tank, info);
       GL11.glPopMatrix();
    }
 
