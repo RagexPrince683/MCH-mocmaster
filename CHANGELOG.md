@@ -1,3 +1,9 @@
+# Client-side thermal particle visibility fix (PR pending)
+
+- Filter MCHeli smoke plus vanilla normal and large smoke at render time while the local active camera is in thermal mode.
+- Preserve particle spawning, lifetime, motion, networking, and world state so hidden smoke becomes visible again immediately after thermal vision ends.
+- Keep fire, flame, flashes, tracers, sparks, flares, debris, dust, and water particles unchanged.
+
 # Normal vehicle respawn ordering (PR pending)
 
 - Replaced failed tracker resend/repair logic from PRs #593–#598 with watched-chunk normal spawning, unwatched-chunk render-only LOD snapshots, and bounded observer-directed mount graphs.

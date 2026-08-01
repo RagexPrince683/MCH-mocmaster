@@ -19,6 +19,7 @@ import mcheli.mob.MCH_GuiSpawnGunner;
 import mcheli.multiplay.MCH_GuiScoreboard;
 import mcheli.multiplay.MCH_GuiTargetMarker;
 import mcheli.multiplay.MCH_MultiplayClient;
+import mcheli.particles.MCH_ThermalParticleFilter;
 import mcheli.plane.MCP_ClientPlaneTickHandler;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.plane.MCP_GuiPlane;
@@ -680,6 +681,10 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                cameraMode = 0;
             }
 
+            // Hide smoke only for drawing; particles keep updating so existing smoke returns
+            // immediately when the local camera leaves thermal vision.
+            MCH_ThermalParticleFilter.beginRender();
+
             MCH_EntityBaseVehicle var19 = zoomContext.vehicle;
 
             boolean var20 = false;
@@ -1005,6 +1010,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public void onRenderTickPost(float partialTicks) {
+      MCH_ThermalParticleFilter.endRender();
       if(this.restoreMouseFocusAfterRender) {
          this.mc.inGameHasFocus = true;
          this.restoreMouseFocusAfterRender = false;

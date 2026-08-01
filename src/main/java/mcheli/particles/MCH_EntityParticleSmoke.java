@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
-public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase {
+public class MCH_EntityParticleSmoke extends MCH_EntityParticleBase implements MCH_ISmokeParticle {
 
    public MCH_EntityParticleSmoke(World par1World, double x, double y, double z, double mx, double my, double mz) {
       super(par1World, x, y, z, mx, my, mz);
