@@ -35,6 +35,7 @@ FlareType = 10
 ;EnableGunnerMode = true
 SubmergedDamageHeight = 2
 EnableEntityRadar = true
+LWR = false
 RadarType = MODERN_AS
 HideEntity = true
 

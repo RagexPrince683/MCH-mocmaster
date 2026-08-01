@@ -7,6 +7,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = 155mm Haubits BW L/52 FH-77
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = 155mm Haubits BW L/52 FH-77
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

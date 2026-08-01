@@ -18,6 +18,7 @@ GravityInWater = -1.0
 DamageFactor = 1.0
 EnableNightVision = false
 EnableEntityRadar = false
+LWR = false
 Sound = sdkfz
 HUD = ww2tank_hud, none, none, none, none
 WeightType = Tank

@@ -33,6 +33,7 @@ Gravity = -0.1
 GravityInWater = 0.1
 MotionFactor = 0.93
 EnableNightVision = false
+LWR = false
 
 OnGroundPitchFactor = 0.01
 OnGroundRollFactor  = 1.0

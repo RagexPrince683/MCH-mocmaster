@@ -22,6 +22,7 @@ WeightType = car
 ExplosionSizeByCrash = 8
 
 EnableEntityRadar = false
+LWR = false
 MaxFuel         = 900
 FuelConsumption = 1.1
 

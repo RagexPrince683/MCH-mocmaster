@@ -22,6 +22,7 @@ Gravity = -0.61
 GravityInWater = -1.0
 DamageFactor = 0.0
 EnableNightVision = true
+LWR = true
 StepHeight = 1.8
 DefaultFreelook = true
 OnGroundPitchFactor = 2.0

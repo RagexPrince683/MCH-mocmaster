@@ -19,6 +19,7 @@ MaxFuel         = 2200
 FuelConsumption = 2.8
 EnableNightVision = true
 EnableEntityRadar = true
+LWR = false
 RadarType = MODERN_AA
 Gravity = -0.61
 GravityInWater = -1

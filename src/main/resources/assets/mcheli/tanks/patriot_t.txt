@@ -29,6 +29,7 @@ CameraRotationSpeed = 15
 
 AddGunnerSeat = -2.65,  -0.35, -7.35, 0.0,  1.85, -0.86, false, -90, 5, false
 EnableNightVision = true
+LWR = false
 ThirdPersonDist = 12
 DefaultFreelook = true
 

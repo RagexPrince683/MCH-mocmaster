@@ -18,6 +18,7 @@ Gravity = -0.61
 GravityInWater = -1.0
 DamageFactor = 0.2
 EnableNightVision = true
+LWR = false
 CameraRotationSpeed = 42
 
 ExplosionSizeByCrash = 15

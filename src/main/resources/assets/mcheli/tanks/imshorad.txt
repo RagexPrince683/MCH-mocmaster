@@ -20,6 +20,7 @@ CameraPosition = 0.1048,  3.95, -2.8476, true
 CameraZoom = 10
 EnableNightVision = true
 EnableEntityRadar = true
+LWR = false
 RadarType = MODERN_AA
 Gravity = -0.61
 GravityInWater = -1.0

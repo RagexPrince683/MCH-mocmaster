@@ -19,6 +19,7 @@ Gravity = -0.61
 GravityInWater = -1.0
 DamageFactor = 0.8
 EnableNightVision = false
+LWR = false
 CameraRotationSpeed = 10
 MaxFuel         = 900
 FuelConsumption = 1.1

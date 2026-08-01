@@ -5,6 +5,7 @@ NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = 155mm M40 Gun Motor Carriage
 NameOnEarlyAARadar = Light Vehicle
 NameOnModernAARadar = 155mm M40 Gun Motor Carriage
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.45

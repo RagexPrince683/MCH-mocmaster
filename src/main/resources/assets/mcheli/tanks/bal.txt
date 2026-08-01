@@ -19,6 +19,7 @@ FuelConsumption = 2.8
 CameraPosition = 0.0, 4.2, -1, false
 EnableNightVision = true
 EnableEntityRadar = false
+LWR = false
 Gravity = -0.61
 GravityInWater = -1.0
 CameraRotationSpeed = 35

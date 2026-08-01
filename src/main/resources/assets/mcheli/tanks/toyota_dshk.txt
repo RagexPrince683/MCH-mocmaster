@@ -6,6 +6,7 @@ NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Toyota Hilux with DSHK
 NameOnEarlyAARadar = Light Vehicle
 NameOnModernAARadar = Toyota Hilux with DSHK
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.45

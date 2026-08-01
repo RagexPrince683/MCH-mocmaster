@@ -34,6 +34,7 @@ AddTexture = m142des
 
 CameraZoom = 8
 EnableNightVision = true
+LWR = false
 CameraRotationSpeed = 25
 MaxFuel = 2200
 FuelConsumption = 2.8

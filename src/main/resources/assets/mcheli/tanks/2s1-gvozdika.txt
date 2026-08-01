@@ -34,6 +34,7 @@ OnGroundRollFactor  = 1.0
 ;EnableGunnerMode = true
 SubmergedDamageHeight = 3
 EnableEntityRadar = false
+LWR = false
 HideEntity = true
 
 GravityInWater = -0.2

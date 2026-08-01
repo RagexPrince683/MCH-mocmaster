@@ -23,6 +23,7 @@ Category = IMV
 WeightType = car
 
 EnableEntityRadar = false
+LWR = false
 MaxFuel         = 900
 FuelConsumption = 1.1
 unmountposition = -0.0,  1.50,  -2.12

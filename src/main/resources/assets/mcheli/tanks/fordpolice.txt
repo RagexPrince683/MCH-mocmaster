@@ -43,6 +43,7 @@ DamageFactor = 0.8
 ;MinRotationPitch = -90
 ;MaxRotationPitch = 60
 EnableEntityRadar = false
+LWR = false
 HUD = s15_hud, none, none,none, none
 SetWheelPos =  0.85,  -0.2,  2.11, -2.06
 

@@ -23,6 +23,7 @@ DamageFactor = 0.0
 CameraZoom = 8
 CameraPosition = 0.52, 3.70, -0.1, true
 EnableNightVision = true
+LWR = false
 CameraRotationSpeed = 28
 StepHeight = 1.8
 DefaultFreelook = true

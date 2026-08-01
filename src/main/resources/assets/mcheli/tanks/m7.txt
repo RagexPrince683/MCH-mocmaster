@@ -4,6 +4,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = M7 Priest
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = M7 Priest
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

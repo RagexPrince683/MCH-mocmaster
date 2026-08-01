@@ -19,6 +19,7 @@ GravityInWater = -1.0
 DamageFactor = 0.00
 EnableNightVision = true
 EnableEntityRadar = false
+LWR = true
 Sound = leclerc
 HUD = mbt_hud
 WeightType = Tank

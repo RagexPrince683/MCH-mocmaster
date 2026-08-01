@@ -5,6 +5,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = M26 Pershing
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = M26 Pershing
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

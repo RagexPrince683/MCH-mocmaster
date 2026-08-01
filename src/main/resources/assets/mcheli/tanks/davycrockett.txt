@@ -5,6 +5,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = M-29 Davy Crockett
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = M-29 Davy Crockett
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

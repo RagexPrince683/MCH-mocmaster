@@ -27,6 +27,7 @@ WeightType = car
 Category = IMV
 
 EnableEntityRadar = true
+LWR = false
 RadarType = MODERN_AS
 MaxFuel         = 900
 FuelConsumption = 1.1

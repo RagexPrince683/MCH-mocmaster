@@ -23,6 +23,7 @@ CameraZoom = 10
 CameraPosition = 0.00, 3.5, 1.00
 HideEntity = false
 EnableNightVision = false
+LWR = false
 CameraRotationSpeed = 3
 MaxFuel         = 2400
 FuelConsumption = 3.2

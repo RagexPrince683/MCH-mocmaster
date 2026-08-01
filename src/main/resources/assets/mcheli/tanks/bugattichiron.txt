@@ -4,6 +4,7 @@ NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Bugatti Chiron
 NameOnEarlyAARadar = Light Vehicle
 NameOnModernAARadar = Bugatti Chiron
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.45

@@ -18,6 +18,7 @@ GravityInWater = -1.0
 DamageFactor = 0.8
 EnableNightVision = false
 EnableEntityRadar = false
+LWR = false
 Sound = bmptwoeng
 
 ExplosionSizeByCrash = 8

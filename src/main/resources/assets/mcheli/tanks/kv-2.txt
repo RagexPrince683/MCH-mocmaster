@@ -6,6 +6,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = KV-2 'Gigant' (1940)
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = KV-2 'Gigant' (1940)
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.60

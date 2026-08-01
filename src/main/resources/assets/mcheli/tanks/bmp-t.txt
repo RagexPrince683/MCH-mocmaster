@@ -30,6 +30,7 @@ Gravity = -0.61
 GravityInWater = -1.0
 DamageFactor = 0.0
 EnableNightVision = true
+LWR = true
 DefaultFreelook = true
 CameraRotationSpeed = 22
 SubmergedDamageHeight = 2

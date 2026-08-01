@@ -5,6 +5,7 @@ NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Toyota Corolla AE86
 NameOnEarlyAARadar = Light Vehicle
 NameOnModernAARadar = Toyota Corolla AE86
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.45

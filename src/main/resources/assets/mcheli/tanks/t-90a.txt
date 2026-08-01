@@ -18,6 +18,7 @@ Gravity = -0.61
 GravityInWater = -1.0
 DamageFactor = 0.0
 EnableNightVision = true
+LWR = true
 CameraRotationSpeed = 14
 FlareType = 10
 

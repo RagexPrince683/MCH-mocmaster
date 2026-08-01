@@ -5,6 +5,7 @@ NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = VAZ 2105 "Tsar Zhiga" (Fresh Auto Team, Drift Car)
 NameOnEarlyAARadar = Light Vehicle
 NameOnModernAARadar = VAZ 2105 "Tsar Zhiga" (Fresh Auto Team, Drift Car)
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.45

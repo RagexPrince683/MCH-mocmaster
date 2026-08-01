@@ -4,6 +4,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = MT-12 2A29 100mm Anti-Tank Gun
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = MT-12 2A29 100mm Anti-Tank Gun
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

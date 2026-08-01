@@ -38,6 +38,7 @@ DamageFactor = 0.0
 EnableNightVision = true
 CameraRotationSpeed = 36
 EnableEntityRadar = false
+LWR = false
 MaxFuel         = 1300
 FuelConsumption = 1.9
 StepHeight = 1.8

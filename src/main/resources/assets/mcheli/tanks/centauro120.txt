@@ -26,6 +26,7 @@ ExplosionSizeByCrash = 18
 
 EnableNightVision = true
 EnableEntityRadar = false
+LWR = false
 Gravity = -0.61
 GravityInWater = -1.0
 CameraRotationSpeed = 17

@@ -5,6 +5,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = TOYOTA COROLLA 2014
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = TOYOTA COROLLA 2014
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

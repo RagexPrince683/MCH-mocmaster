@@ -4,6 +4,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = AMX-13/75 FL-10
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = AMX-13/75 FL-10
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

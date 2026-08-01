@@ -6,6 +6,7 @@ NameOnEarlyASRadar = Artillery Vehicle
 NameOnModernASRadar = 155mm M777 Lightweight Towed Howitzer
 NameOnEarlyAARadar = Artillery Vehicle
 NameOnModernAARadar = 155mm M777 Lightweight Towed Howitzer
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

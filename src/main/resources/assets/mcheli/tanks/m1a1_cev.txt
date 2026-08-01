@@ -27,6 +27,7 @@ DamageFactor = 0.2
 CameraZoom = 0
 CameraPosition = 0.00,  3.50, 0.0
 EnableNightVision = true
+LWR = false
 CameraRotationSpeed = 24
 ;EnableEntityRadar = true
 MaxFuel         = 2400

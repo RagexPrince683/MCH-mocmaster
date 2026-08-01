@@ -5,6 +5,7 @@ NameOnEarlyASRadar = Light Vehicle
 NameOnModernASRadar = Subaru Impreza
 NameOnEarlyAARadar = Light Vehicle
 NameOnModernAARadar = Subaru Impreza
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.45

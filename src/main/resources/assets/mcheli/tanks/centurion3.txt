@@ -6,6 +6,7 @@ NameOnEarlyASRadar = Tank
 NameOnModernASRadar = Centurion Mk 3
 NameOnEarlyAARadar = Tank
 NameOnModernAARadar = Centurion Mk 3
+LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
 ThrottleDownFactor = 0.40

@@ -19,6 +19,7 @@ Float = true
 DamageFactor = 1
 EnableNightVision = true
 EnableEntityRadar = false
+LWR = false
 Sound = moneonethreeapc
 HUD = mbt_hudtwo, gunnernvg, gunnernvg, none, none, none, none, none
 WeightType = Tank
