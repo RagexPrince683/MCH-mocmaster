@@ -50,31 +50,32 @@ public class MCH_MissileDetector {
     }
 
     public void update() {
-        if (this.ac.haveFlare()) {
-            if (this.alertCount > 0) {
-                --this.alertCount;
-            }
+        if (!this.ac.canDetectWarning()) {
+            return;
+        }
 
-            boolean isLocked = this.ac.getEntityData().getBoolean("Tracking");
-            if (isLocked) {
-                this.ac.getEntityData().setBoolean("Tracking", false);
-            }
+        if (this.alertCount > 0) {
+            --this.alertCount;
+        }
 
-            if (this.ac.getEntityData().getBoolean("LockOn")) {
-                if (this.alertCount == 0) {
-                    this.alertCount = 10;
-                    if (this.ac != null && this.ac.haveFlare() && !this.ac.isDestroyed()) {
-                        for (int rider = 0; rider < 2; ++rider) {
-                            Entity entity = this.ac.getEntityBySeatId(rider);
-                            if (entity instanceof EntityPlayerMP) {
-                                MCH_PacketNotifyLock.sendToPlayer((EntityPlayerMP) entity);
-                            }
-                        }
+        boolean isLocked = this.ac.getEntityData().getBoolean("Tracking");
+        if (isLocked) {
+            this.ac.getEntityData().setBoolean("Tracking", false);
+        }
+
+        if (this.ac.getEntityData().getBoolean("LockOn")) {
+            if (this.alertCount == 0 && this.ac.canNotifyLock() && !this.ac.isDestroyed()) {
+                this.alertCount = 10;
+                for (int rider = 0; rider < 2; ++rider) {
+                    Entity entity = this.ac.getEntityBySeatId(rider);
+                    if (entity instanceof EntityPlayerMP) {
+                        MCH_PacketNotifyLock.sendToPlayer((EntityPlayerMP) entity);
                     }
                 }
-
-                this.ac.getEntityData().setBoolean("LockOn", false);
             }
+
+            this.ac.getEntityData().setBoolean("LockOn", false);
+        }
 
             if (!this.ac.isDestroyed()) {
                 Entity var4 = this.ac.getRiddenByEntity();
@@ -83,20 +84,18 @@ public class MCH_MissileDetector {
                 }
 
                 if (var4 != null) {
-                    if (this.ac.isFlareUsing()) {
+                    if (this.ac.haveFlare() && this.ac.isFlareUsing()) {
 
 
 
                         this.destroyMissile();
                     } else if (!this.ac.isUAV() && !this.world.isRemote) {
 
-                        //if (this.hasalert())
-
-                            if (this.alertCount == 0 && ((isLocked || this.isLockedByMissile() || this.isLockedByHMGVT())) && this.hasalert()) {
-                                this.alertCount = 20;
-                                W_WorldFunc.MOD_playSoundAtEntity(this.ac, "alert", 50.0F, 1.0F);
-                            }
-                    } else if (this.ac.isUAV() && this.world.isRemote && this.alertCount == 0 && ((isLocked || this.isLockedByMissile() || this.isLockedByHMGVT())) && this.hasalert()) {
+                        if (this.alertCount == 0 && ((isLocked || this.isLockedByMissile() || this.isLockedByHMGVT())) && this.ac.canPlayAlertSound()) {
+                            this.alertCount = 20;
+                            W_WorldFunc.MOD_playSoundAtEntity(this.ac, "alert", 50.0F, 1.0F);
+                        }
+                    } else if (this.ac.isUAV() && this.world.isRemote && this.alertCount == 0 && ((isLocked || this.isLockedByMissile() || this.isLockedByHMGVT())) && this.ac.canPlayAlertSound()) {
                         this.alertCount = 20;
                         if (W_Lib.isClientPlayer(var4)) {
                             W_McClient.MOD_playSoundFX("alert", 50.0F, 1.0F);
@@ -108,7 +107,6 @@ public class MCH_MissileDetector {
 
 
             }
-        }
     }
 
     private static void initHMG() {
@@ -291,15 +289,6 @@ public class MCH_MissileDetector {
                     return true;
                 }
             }
-        }
-
-        return false;
-    }
-
-
-    public boolean hasalert() {
-        if (this.ac.hasalert()) {
-            return true;
         }
 
         return false;

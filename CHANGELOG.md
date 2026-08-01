@@ -1,3 +1,8 @@
+# Tank LWR alert opt-in (PR pending)
+
+- Added the shared `LWR` vehicle option, defaulting to false, and require tanks to enable it before direct, UAV, packet, or client-tick warning audio can play.
+- Decoupled tank warning detection and audio from flare availability without changing flare deployment or missile-destruction behavior; non-tank alert behavior remains unchanged.
+
 # Optional NEI Vehicle Ammunition Compatibility (PR pending)
 
 - Added an optional, client-only NotEnoughItems category relating complete weapon reload inputs to helicopters, planes, ships, tanks, vehicles, and turrets.

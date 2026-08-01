@@ -99,6 +99,7 @@ For fixed-wing planes using `useNewMobilitySystem = true`, this gravity value is
 |---|---|---:|---|
 | `RadarType` | enum | `EARLY_AA` | Invalid values fall back to `MODERN_AA`. |
 | `RWRType` | enum | `NONE` | Invalid values fall back to `NONE`; set `DIGITAL` to enable the current RWR display. |
+| `LWR` | boolean | false | Controls the tank laser warning alert sound. Tanks play the warning only when this is `true`; it is separate from `RWRType`, flares, chaff, APS, and smoke launchers. |
 | `NameOnModernAARadar`, `NameOnEarlyAARadar`, `NameOnModernASRadar`, `NameOnEarlyASRadar` | string | `?` | Radar labels. |
 | `Stealth` | float[0..1] | 0 | Visibility modifier. |
 | `UAV`, `SmallUAV`, `NewUAV`, `NewSmallUAV`, `TargetDrone` | boolean | false | UAV/NewUAV force camera view and add a hidden seat when needed. UAV vehicle items skip normal hold-to-deploy placement: large UAVs tell players to use a UAV Station, while small UAVs tell players to use a UAV Station or Portable UAV Controller. `TargetDrone` also sets `UAV`. |
