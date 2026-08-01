@@ -83,6 +83,7 @@ public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnD
             double y = (super.rand.nextDouble() - 0.5D) * 10.0D;
             double z = (super.rand.nextDouble() - 0.5D) * 10.0D;
             MCH_ParticleParam prm = new MCH_ParticleParam(super.worldObj, "smoke", super.posX + x, super.posY + y, super.posZ + z);
+            prm.visibleInThermal = this.countermeasure;
             prm.age = 200 + super.rand.nextInt(100);
             prm.size = (float)(20 + super.rand.nextInt(25));
             prm.motionX = (super.rand.nextDouble() - 0.5D) * 0.45D;
@@ -142,6 +143,7 @@ public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnD
 
             for(int i = 0; i < 2; ++i) {
                MCH_ParticleParam prm = new MCH_ParticleParam(super.worldObj, "smoke", super.prevPosX + x * (double)i, super.prevPosY + y * (double)i, super.prevPosZ + z * (double)i);
+               prm.visibleInThermal = this.countermeasure;
                prm.size = 6.0F + super.rand.nextFloat();
                if(this.size < 5.0F) {
                   prm.a = (float)((double)prm.a * 0.75D);

@@ -27,6 +27,12 @@ public final class MCH_ThermalParticleFilter {
       return particle instanceof MCH_ISmokeParticle || particle instanceof EntitySmokeFX;
    }
 
+   /** Countermeasure smoke remains a cold, opaque smoke visual in thermal vision. */
+   public static boolean shouldHideSmokeParticle(EntityFX particle) {
+      return isSmokeParticle(particle) && (!(particle instanceof MCH_ISmokeParticle)
+         || !((MCH_ISmokeParticle)particle).isVisibleInThermal());
+   }
+
    public static void beginRender() {
       restoreSmokeAlpha();
       if(!MCH_ThermalVision.isActiveCameraThermal()) {
@@ -46,7 +52,7 @@ public final class MCH_ThermalParticleFilter {
             Iterator iterator = layer.iterator();
             while(iterator.hasNext()) {
                Object value = iterator.next();
-               if(value instanceof EntityFX && isSmokeParticle((EntityFX)value)) {
+               if(value instanceof EntityFX && shouldHideSmokeParticle((EntityFX)value)) {
                   EntityFX particle = (EntityFX)value;
                   Float alpha = (Float)ObfuscationReflectionHelper.getPrivateValue(EntityFX.class,
                      particle, new String[]{"field_82339_as", "particleAlpha"});

@@ -1,3 +1,8 @@
+# Tank countermeasure smoke thermal visibility (PR pending)
+
+- Keep smoke emitted by vehicle smoke weapons and countermeasure flares visible as cold smoke in thermal vision, without changing its normal particle lifetime, movement, scale, opacity, or fade.
+- Continue filtering unrelated MCHeli and vanilla smoke particles from the thermal render pass.
+
 # Client-side thermal particle visibility fix (PR pending)
 
 - Filter MCHeli smoke plus vanilla normal and large smoke at render time while the local active camera is in thermal mode.

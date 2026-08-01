@@ -21,6 +21,7 @@ public class MCH_ParticleParam {
    public int age;
    public boolean diffusible;
    public boolean toWhite;
+   public boolean visibleInThermal;
    public float gravity;
    public float motionYUpAge;
 
@@ -38,6 +39,7 @@ public class MCH_ParticleParam {
       this.age = 0;
       this.diffusible = false;
       this.toWhite = false;
+      this.visibleInThermal = false;
       this.gravity = 0.0F;
       this.motionYUpAge = 2.0F;
       this.world = w;
