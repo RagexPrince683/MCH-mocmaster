@@ -148,8 +148,9 @@ public class MCH_Config {
    public static MCH_ConfigPrm AircraftLODOpticalMinPixels;
    public static MCH_ConfigPrm AircraftLODThermalMinPixels;
    public static MCH_ConfigPrm EnableModelTextureRepair, EnableModelUVCorrection;
-   public static MCH_ConfigPrm ModelTextureMaxHoleArea, ModelTextureMaxHoleThickness;
-   public static MCH_ConfigPrm ModelTextureRGBBleedRadius, ModelTextureAlphaExpansionRadius, ModelTextureUVCorrectionRadius;
+   public static MCH_ConfigPrm ModelTextureMaxHoleArea, ModelTextureRGBBleedRadius;
+   public static MCH_ConfigPrm ModelTextureThinMinLength, ModelTextureThinMaxThickness, ModelTextureThinExpansionRadius;
+   public static MCH_ConfigPrm ModelTextureUVIslandSearchRadius, ModelTextureUVMinScoreGain, ModelTextureTinyIslandMinSize;
    public static MCH_ConfigPrm ModelTextureRepairDebugLogging, ModelTextureRepairDebugPreviews;
    public static MCH_ConfigPrm MobRenderDistanceWeight;
    public static MCH_ConfigPrm CreativeTabIcon;
@@ -503,10 +504,13 @@ public class MCH_Config {
       EnableModelTextureRepair = new MCH_ConfigPrm("EnableModelTextureRepair", true);
       EnableModelUVCorrection = new MCH_ConfigPrm("EnableModelUVCorrection", true);
       ModelTextureMaxHoleArea = new MCH_ConfigPrm("ModelTextureMaxHoleArea", 16);
-      ModelTextureMaxHoleThickness = new MCH_ConfigPrm("ModelTextureMaxHoleThickness", 2);
       ModelTextureRGBBleedRadius = new MCH_ConfigPrm("ModelTextureRGBBleedRadius", 2);
-      ModelTextureAlphaExpansionRadius = new MCH_ConfigPrm("ModelTextureAlphaExpansionRadius", 1);
-      ModelTextureUVCorrectionRadius = new MCH_ConfigPrm("ModelTextureUVCorrectionRadius", 2);
+      ModelTextureThinMinLength = new MCH_ConfigPrm("ModelTextureThinMinLength", 6);
+      ModelTextureThinMaxThickness = new MCH_ConfigPrm("ModelTextureThinMaxThickness", 1);
+      ModelTextureThinExpansionRadius = new MCH_ConfigPrm("ModelTextureThinExpansionRadius", 1);
+      ModelTextureUVIslandSearchRadius = new MCH_ConfigPrm("ModelTextureUVIslandSearchRadius", 8);
+      ModelTextureUVMinScoreGain = new MCH_ConfigPrm("ModelTextureUVMinScoreGainPercent", 20);
+      ModelTextureTinyIslandMinSize = new MCH_ConfigPrm("ModelTextureTinyIslandMinTexels", 1);
       ModelTextureRepairDebugLogging = new MCH_ConfigPrm("ModelTextureRepairDebugLogging", false);
       ModelTextureRepairDebugPreviews = new MCH_ConfigPrm("ModelTextureRepairDebugPreviews", false);
       MobRenderDistanceWeight = new MCH_ConfigPrm("MobRenderDistanceWeight", 10.0D);
@@ -750,9 +754,10 @@ public class MCH_Config {
               TestMode,
               EnableCommand,
               EnableModelTextureRepair, EnableModelUVCorrection,
-              ModelTextureMaxHoleArea, ModelTextureMaxHoleThickness,
-              ModelTextureRGBBleedRadius, ModelTextureAlphaExpansionRadius,
-              ModelTextureUVCorrectionRadius, ModelTextureRepairDebugLogging,
+              ModelTextureMaxHoleArea, ModelTextureRGBBleedRadius,
+              ModelTextureThinMinLength, ModelTextureThinMaxThickness, ModelTextureThinExpansionRadius,
+              ModelTextureUVIslandSearchRadius, ModelTextureUVMinScoreGain, ModelTextureTinyIslandMinSize,
+              ModelTextureRepairDebugLogging,
               ModelTextureRepairDebugPreviews,
               null,
               PlaceableOnSpongeOnly,

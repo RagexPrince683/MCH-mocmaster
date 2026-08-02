@@ -114,6 +114,22 @@ public class W_GroupObject {
       GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
    }
 
+   /** Discards packed UV data so the next render uploads the current face coordinates. */
+   public void invalidateVbo() {
+      int oldBuffer = this.vertexBufferId;
+      this.vertexBufferId = 0;
+      this.vertexCount = 0;
+      this.vboUnavailable = false;
+      if(oldBuffer != 0) {
+         try {
+            if(GLContext.getCapabilities().OpenGL15) GL15.glDeleteBuffers(oldBuffer);
+         } catch(RuntimeException ignored) {
+            // A resource reload may run while the display is being replaced. The Java-side
+            // handle is still cleared, and no stale UV buffer can be rendered afterward.
+         }
+      }
+   }
+
    public void render(Tessellator tessellator) {
       if(this.faces.size() > 0) {
          Iterator i$ = this.faces.iterator();
