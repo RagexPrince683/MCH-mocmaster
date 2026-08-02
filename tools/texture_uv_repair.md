@@ -3,7 +3,7 @@
 Run from the repository root (Pillow is a development-only requirement):
 
 ```sh
-python -m pip install Pillow
+python -m pip install Pillow==12.3.0
 python tools/repair_texture_uvs.py audit
 python tools/repair_texture_uvs.py repair --dry-run
 python tools/repair_texture_uvs.py repair --apply
@@ -24,6 +24,8 @@ Static renderer inspection confirms ordinary vehicle textures resolve as `textur
 Only add an entry after locating a genuine source. Record its repository-relative source and destination, dimensions, SHA-256 values, `premultiplied_lanczos` resize, `transparent_rgb_edge_bleed` alpha repair, reason, and affected `models`. Use `uv_transform: null` for proportional resizing. For a proven canvas change, specify old/new dimensions, crop, padding, and independent scales; only the listed MQOs are rewritten.
 
 Run `audit`, inspect its transparent coverage and edge sampling counts, then run dry-run. After reviewing its exact file list, use `--apply` and `verify`. Hash checks make an asset update fail safely until the manifest is deliberately refreshed.
+
+An empty manifest is an explicit no-op in dry-run mode and an error in apply mode. Apply also refuses to run while unresolved entries remain; verification checks every source and output hash and reports each missing asset. `suspicious_assets.csv` ranks missing assets, transparent UV coverage, sampling edges, sub-texel triangles, and out-of-range coordinates. The ranking labels glass, windows, sights, rotor/propeller/exhaust effects, lamps, decals, and HUD assets for intentional-transparency review rather than automatically treating them as damage.
 
 ## Unresolved sources
 
