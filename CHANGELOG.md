@@ -1,3 +1,7 @@
+# Configurable NEI Vehicle Ammunition Handler (PR pending)
+
+- Added the `EnableNEIHandler` boolean startup option, defaulting to `true`, to allow clients to prevent the optional NEI vehicle ammunition recipe and usage handler from registering.
+
 # Complete deterministic texture/UV repair validation (PR pending)
 
 - Replaced unsupported per-channel `putchannel` mutation with split/dilate/merge RGB bleeding that preserves alpha byte-for-byte across every pass.

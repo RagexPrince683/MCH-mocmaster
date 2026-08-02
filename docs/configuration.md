@@ -27,6 +27,7 @@ Client keybinds and rendering settings are safest to change while the client is 
 | --- | --- | --- |
 | `TestMode` | `false` | Development/test toggle. |
 | `EnableCommand` | `true` | Enables `/mcheli` subcommands. |
+| `EnableNEIHandler` | `true` | `true` registers the MCHeli vehicle ammunition recipe and usage handler in NotEnoughItems; `false` prevents the handler from registering. Changing NEI registration requires a client restart and is not applied by `/mcheli reconfig`. |
 | `PlaceableOnSpongeOnly` | `false` | Restricts vehicle placement to sponge blocks. |
 | `ItemDamage` | `true` | Enables item damage behavior for applicable MCHeli items. |
 | `ItemFuel` | `true` | Enables fuel item behavior. |
