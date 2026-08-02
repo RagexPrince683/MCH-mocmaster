@@ -222,6 +222,10 @@ public class W_Face {
       this.repairedTextureCoordinates = coordinates;
    }
 
+   public void clearRepairedTextureCoordinates() {
+      this.repairedTextureCoordinates = null;
+   }
+
    private boolean hasVertexNormal(int index) {
       if(this.packedData != null) {
          return this.packedNormalOffset >= 0 && index < this.packedVertexCount;
