@@ -82,6 +82,11 @@ import org.lwjgl.Sys;
 public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideBaseVehicle, IEntityAdditionalSpawnData {
    private static final Map<UUID, NewUavSafeReturn> NEW_UAV_SAFE_RETURNS = new HashMap<UUID, NewUavSafeReturn>();
    private final MCH_VehicleBoxCache vehicleBoxCache = new MCH_VehicleBoxCache();
+   private MCH_BoundingBox[] blockCollisionProbeBoxes = new MCH_BoundingBox[0];
+   private final ArrayList blockCollisionProbeResults = new ArrayList();
+   private static final double HULL_COLLISION_TOLERANCE = 1.0E-4D;
+   private static final int CONTROL_YAW_SEARCH_STEPS = 8;
+   private boolean latestHorizontalMoveClipped;
    private static final int NEW_UAV_SAFE_RETURN_MIN_TICKS = 20;
    private static MCH_EntityBaseVehicle aircraft;
     private ForgeChunkManager.Ticket chunkTicket;
@@ -454,6 +459,105 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public void setRotYaw(float f) {
       super.rotationYaw = f;
+   }
+
+   /** Applies a driver/autopilot chassis yaw without allowing the configured hull to enter blocks. */
+   protected void setCollisionSafeControlYaw(float requestedYaw) {
+      this.setRotYaw(this.resolveCollisionSafeControlYaw(this.getRotYaw(), requestedYaw));
+   }
+
+   /**
+    * Resolves only control-driven yaw. Synchronization, loading and forced transforms continue
+    * to use setRotYaw directly so an authoritative correction can never be rejected locally.
+    */
+   protected float resolveCollisionSafeControlYaw(float currentYaw, float requestedYaw) {
+      float delta = MathHelper.wrapAngleTo180_float(requestedYaw - currentYaw);
+      if(MathHelper.abs(delta) < 1.0E-5F || this.worldObj == null || this.getAcInfo() == null) {
+         return requestedYaw;
+      }
+
+      double requestedPenetration = this.getBlockHullPenetrationAtTransform(super.posX, super.posY, super.posZ,
+              currentYaw + delta, this.getRotPitch(), this.getRotRoll());
+      if(requestedPenetration <= 0.0D) {
+         return currentYaw + delta;
+      }
+      double currentPenetration = this.getBlockHullPenetrationAtTransform(super.posX, super.posY, super.posZ,
+              currentYaw, this.getRotPitch(), this.getRotRoll());
+      if(requestedPenetration + HULL_COLLISION_TOLERANCE < currentPenetration) {
+         return currentYaw + delta;
+      }
+      if(currentPenetration > 0.0D) {
+         return currentYaw;
+      }
+
+      float safeFraction = 0.0F;
+      float blockedFraction = 1.0F;
+      for(int i = 0; i < CONTROL_YAW_SEARCH_STEPS; ++i) {
+         float candidateFraction = (safeFraction + blockedFraction) * 0.5F;
+         float candidateYaw = currentYaw + delta * candidateFraction;
+         if(!this.collidesWithBlocksAtTransform(super.posX, super.posY, super.posZ,
+                 candidateYaw, this.getRotPitch(), this.getRotRoll())) {
+            safeFraction = candidateFraction;
+         } else {
+            blockedFraction = candidateFraction;
+         }
+      }
+      return currentYaw + delta * safeFraction;
+   }
+
+   /** Current at the next control update because moveEntity records clipping after offset resolution. */
+   protected boolean wasLatestHorizontalMoveClipped() {
+      return this.latestHorizontalMoveClipped;
+   }
+
+   protected boolean collidesWithBlocksAtTransform(double x, double y, double z, float yaw, float pitch, float roll) {
+      return this.getBlockHullPenetrationAtTransform(x, y, z, yaw, pitch, roll) > 0.0D;
+   }
+
+   /** Uses disposable probe OBBs; live hit-box positions and the vehicle box cache are untouched. */
+   private double getBlockHullPenetrationAtTransform(double x, double y, double z, float yaw, float pitch, float roll) {
+      double penetration = 0.0D;
+      double offsetX = x - super.posX;
+      double offsetY = y - super.posY;
+      double offsetZ = z - super.posZ;
+      AxisAlignedBB root = super.boundingBox.getOffsetBoundingBox(offsetX, offsetY, offsetZ)
+              .contract(HULL_COLLISION_TOLERANCE, HULL_COLLISION_TOLERANCE, HULL_COLLISION_TOLERANCE);
+      penetration += this.getBlockPenetration(root, null);
+
+      MCH_BoundingBox[] source = this.extraBoundingBox != null ? this.extraBoundingBox : new MCH_BoundingBox[0];
+      if(this.blockCollisionProbeBoxes.length != source.length) {
+         this.blockCollisionProbeBoxes = new MCH_BoundingBox[source.length];
+      }
+      for(int i = 0; i < source.length; ++i) {
+         MCH_BoundingBox configured = source[i];
+         MCH_BoundingBox probe = this.blockCollisionProbeBoxes[i];
+         if(probe == null || probe.width != configured.width || probe.height != configured.height
+                 || probe.depth != configured.depth || probe.offsetX != configured.offsetX
+                 || probe.offsetY != configured.offsetY || probe.offsetZ != configured.offsetZ) {
+            probe = configured.copy();
+            this.blockCollisionProbeBoxes[i] = probe;
+         }
+         probe.updatePosition(x, y, z, yaw, pitch, roll);
+         penetration += this.getBlockPenetration(probe.boundingBox, probe);
+      }
+      return penetration;
+   }
+
+   private double getBlockPenetration(AxisAlignedBB broadPhase, MCH_BoundingBox narrowPhase) {
+      this.blockCollisionProbeResults.clear();
+      this.addBlockCollisionsToList(broadPhase, this.blockCollisionProbeResults);
+      double penetration = 0.0D;
+      for(int i = 0; i < this.blockCollisionProbeResults.size(); ++i) {
+         AxisAlignedBB blockBox = ((AxisAlignedBB)this.blockCollisionProbeResults.get(i)).contract(
+                 HULL_COLLISION_TOLERANCE, HULL_COLLISION_TOLERANCE, HULL_COLLISION_TOLERANCE);
+         if(narrowPhase == null ? broadPhase.intersectsWith(blockBox) : narrowPhase.intersectsWith(blockBox)) {
+            double overlapX = Math.min(broadPhase.maxX, blockBox.maxX) - Math.max(broadPhase.minX, blockBox.minX);
+            double overlapY = Math.min(broadPhase.maxY, blockBox.maxY) - Math.max(broadPhase.minY, blockBox.minY);
+            double overlapZ = Math.min(broadPhase.maxZ, blockBox.maxZ) - Math.max(broadPhase.minZ, blockBox.minZ);
+            penetration += Math.max(overlapX, 0.0D) * Math.max(overlapY, 0.0D) * Math.max(overlapZ, 0.0D);
+         }
+      }
+      return penetration;
    }
 
    public void setRotPitch(float f) {
@@ -4577,6 +4681,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          super.posY = super.boundingBox.minY + (double)super.yOffset - (double)super.ySize;
          super.posZ = (super.boundingBox.minZ + super.boundingBox.maxZ) / 2.0D;
          super.isCollidedHorizontally = d6 != par1 || d8 != par5;
+         this.latestHorizontalMoveClipped = super.isCollidedHorizontally;
          super.isCollidedVertically = d7 != par3;
          super.onGround = d7 != par3 && d7 < 0.0D;
          super.isCollided = super.isCollidedHorizontally || super.isCollidedVertically;

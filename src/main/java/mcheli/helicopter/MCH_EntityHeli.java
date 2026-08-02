@@ -907,11 +907,11 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
             if(!this.newHeliFlightModelEnabled && this.heliInfo.isEnableFoldBlade && this.rotors.length > 0 && this.getFoldBladeStat() == 0 && !this.isDestroyed()) {
                if(super.moveLeft && !super.moveRight) {
-                  this.setRotYaw(this.getRotYaw() - 0.5F * partialTicks);
+                  this.setCollisionSafeControlYaw(this.getRotYaw() - 0.5F * partialTicks);
                }
 
                if(super.moveRight && !super.moveLeft) {
-                  this.setRotYaw(this.getRotYaw() + 0.5F * partialTicks);
+                  this.setCollisionSafeControlYaw(this.getRotYaw() + 0.5F * partialTicks);
                }
             }
          }
@@ -957,7 +957,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          this.yawDampingApplied = 0.0F;
          this.debugFinalYawRate = this.heliYawAngularVelocity;
          this.finalRotYaw = this.getRotYaw() + this.heliYawAngularVelocity * tickDelta;
-         this.setRotYaw(this.finalRotYaw);
+         this.setCollisionSafeControlYaw(this.finalRotYaw);
          this.logNewHelicopterControlDebug();
          return;
       }
@@ -978,7 +978,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       this.logNewHelicopterControlDebug();
 
       this.finalRotYaw = this.getRotYaw() + this.heliYawAngularVelocity * tickDelta;
-      this.setRotYaw(this.finalRotYaw);
+      this.setCollisionSafeControlYaw(this.finalRotYaw);
    }
 
    private boolean isNewHelicopterGroundedForYaw() {
