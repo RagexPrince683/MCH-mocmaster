@@ -487,8 +487,51 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
             }
          }
+         else if(!super.onGround || this.WheelMng.hasWheelContact()) {
+            this.applyMovingAirborneSteering(partialTicks);
+         }
 
          this.addkeyRotValue = this.decayMobilityValue(this.addkeyRotValue, 0.9F, partialTicks);
+      }
+   }
+
+   /**
+    * Retains directional yaw while a moving tank is briefly unsupported or has
+    * only partial track contact. Grounded and floating steering remain handled
+    * by the existing path above.
+    */
+   private void applyMovingAirborneSteering(float partialTicks) {
+      float pivotTurnThrottle1 = this.getAcInfo().pivotTurnThrottle;
+      if(pivotTurnThrottle1 > 0.0F && this.getAcInfo().enableBack && super.throttleDown && this.getCurrentThrottle() <= 0.0D && super.throttleBack > 0.0F) {
+         // onUpdate_ControlSub already applies the established reverse yaw here.
+         return;
+      }
+
+      double dx = super.posX - super.prevPosX;
+      double dz = super.posZ - super.prevPosZ;
+      double dist = dx * dx + dz * dz;
+      if(dist <= 1.0E-6D) {
+         dist = super.motionX * super.motionX + super.motionZ * super.motionZ;
+      }
+
+      if(dist <= 1.0E-6D) {
+         return;
+      }
+
+      if(pivotTurnThrottle1 <= 0.0F || this.getCurrentThrottle() >= (double)pivotTurnThrottle1 || super.throttleBack >= pivotTurnThrottle1 / 10.0F || dist > (double)super.throttleBack * 0.01D) {
+         float sf = (float)Math.sqrt(dist <= 1.0D?dist:1.0D);
+         if(pivotTurnThrottle1 <= 0.0F) {
+            sf = 1.0F;
+         }
+
+         float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D?-1.0F:1.0F;
+         if(super.moveLeft && !super.moveRight) {
+            this.setRotYaw(this.getRotYaw() - 0.6F * partialTicks * flag * sf);
+         }
+
+         if(super.moveRight && !super.moveLeft) {
+            this.setRotYaw(this.getRotYaw() + 0.6F * partialTicks * flag * sf);
+         }
       }
    }
 

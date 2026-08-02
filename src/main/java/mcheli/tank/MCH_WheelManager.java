@@ -52,6 +52,16 @@ public class MCH_WheelManager {
       this.weightedCenter = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
    }
 
+   /** Returns whether any wheel currently has collision-derived ground contact. */
+   public boolean hasWheelContact() {
+      for(int i = 0; i < this.wheels.length; ++i) {
+         if(this.wheels[i] != null && this.wheels[i].onGround) {
+            return true;
+         }
+      }
+      return false;
+   }
+
    // fast top-surface query (returns top solid/liquid block Y)
    private double getGroundYAt(double wx, double wz) {
       int ix = MathHelper.floor_double(wx + 0.5D);
