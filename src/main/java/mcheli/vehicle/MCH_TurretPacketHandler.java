@@ -30,10 +30,6 @@ public class MCH_TurretPacketHandler {
                   vehicle.switchCameraMode(player, pc.switchCameraMode - 1);
                }
 
-               if(pc.switchFreeLook > 0 && vehicle.isPilot(player)) {
-                  vehicle.switchFreeLookMode(pc.switchFreeLook == 1);
-               }
-
                if(pc.switchWeapon >= 0) {
                   vehicle.switchWeapon(player, pc.switchWeapon);
                }

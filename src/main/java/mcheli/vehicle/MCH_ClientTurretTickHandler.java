@@ -15,7 +15,6 @@ import mcheli.wrapper.W_Reflection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.MathHelper;
 
 public class MCH_ClientTurretTickHandler extends MCH_BaseVehicleClientTickHandler {
 
@@ -24,8 +23,6 @@ public class MCH_ClientTurretTickHandler extends MCH_BaseVehicleClientTickHandle
    public MCH_Key KeyZoom;
    public MCH_Key KeyExtra;
    public MCH_Key[] Keys;
-   private MCH_EntityTurret freeLookTurret;
-   private boolean recenteringFreeLook;
 
 
    public MCH_ClientTurretTickHandler(Minecraft minecraft, MCH_Config config) {
@@ -39,7 +36,7 @@ public class MCH_ClientTurretTickHandler extends MCH_BaseVehicleClientTickHandle
       this.KeySwitchHovering = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
       this.KeyZoom = new MCH_Key(MCH_Config.KeyZoom.prmInt);
       this.KeyExtra = new MCH_Key(MCH_Config.KeyExtra.prmInt);
-      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeySwitchHovering, super.KeyUseWeapon, super.KeyCurrentWeaponLock, super.KeyVehicleLock, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyChaff, super.KeyMaintenance,super.KeyAPS, this.KeyExtra, super.KeyFreeLook, super.KeyGUI};
+      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeySwitchHovering, super.KeyUseWeapon, super.KeyCurrentWeaponLock, super.KeyVehicleLock, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyChaff, super.KeyMaintenance,super.KeyAPS, this.KeyExtra, super.KeyGUI};
    }
 
    protected void update(EntityPlayer player, MCH_EntityTurret vehicle, MCH_TurretInfo info) {
@@ -77,10 +74,6 @@ public class MCH_ClientTurretTickHandler extends MCH_BaseVehicleClientTickHandle
       }
 
       if(var7 != null && var7.getAcInfo() != null) {
-         if(this.freeLookTurret != var7) {
-            this.freeLookTurret = var7;
-            this.recenteringFreeLook = false;
-         }
          MCH_Lib.disableFirstPersonItemRender(var6.getCurrentEquippedItem());
          this.update(var6, var7, var7.getTurretInfo());
          MCH_ViewEntityDummy var10 = MCH_ViewEntityDummy.getInstance(super.mc.theWorld);
@@ -97,8 +90,6 @@ public class MCH_ClientTurretTickHandler extends MCH_BaseVehicleClientTickHandle
          super.isRiding = true;
       } else {
          super.isRiding = false;
-         this.freeLookTurret = null;
-         this.recenteringFreeLook = false;
       }
 
       if (!this.isBeforeRiding && this.isRiding) {
@@ -119,25 +110,6 @@ public class MCH_ClientTurretTickHandler extends MCH_BaseVehicleClientTickHandle
       MCH_PacketTurretPlayerControl pc = new MCH_PacketTurretPlayerControl();
       boolean send = false;
       send = this.commonPlayerControl(player, vehicle, isPilot, pc);
-      if(pc.switchFreeLook == 2) {
-         // Return the camera to the held aim before re-coupling it to the turret.
-         pc.switchFreeLook = 0;
-         this.recenteringFreeLook = true;
-      }
-      if(this.recenteringFreeLook) {
-         float yawDiff = MathHelper.wrapAngleTo180_float(vehicle.rotationYaw - player.rotationYaw);
-         float pitchDiff = vehicle.rotationPitch - player.rotationPitch;
-         player.rotationYaw += MathHelper.clamp_float(yawDiff, -10.0F, 10.0F);
-         player.rotationPitch += MathHelper.clamp_float(pitchDiff, -10.0F, 10.0F);
-         player.prevRotationYaw = player.rotationYaw;
-         player.prevRotationPitch = player.rotationPitch;
-         vehicle.updateCameraRotate(player.rotationYaw, player.rotationPitch);
-         if(Math.abs(yawDiff) <= 10.0F && Math.abs(pitchDiff) <= 10.0F) {
-            pc.switchFreeLook = 2;
-            this.recenteringFreeLook = false;
-            send = true;
-         }
-      }
       if(this.KeyExtra.isKeyDown()) {
          if(vehicle.getTowChainEntity() != null) {
             playSoundOK();
