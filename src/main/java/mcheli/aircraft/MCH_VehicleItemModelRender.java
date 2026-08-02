@@ -109,13 +109,8 @@ public class MCH_VehicleItemModelRender implements IItemRenderer {
 
       transform(type, info);
 
-      W_McClient.MOD_bindTexture(
-              "textures/"
-                      + info.getDirectoryName()
-                      + "/"
-                      + MCH_RenderBaseVehicle.getBaseTextureName(info.name)
-                      + ".png"
-      );
+      net.minecraft.util.ResourceLocation original = new net.minecraft.util.ResourceLocation("mcheli", "textures/" + info.getDirectoryName() + "/" + MCH_RenderBaseVehicle.getBaseTextureName(info.name) + ".png");
+      Minecraft.getMinecraft().getTextureManager().bindTexture(mcheli.texture.MCH_ModelTextureRepairManager.resolve(original, info.model, info.getDirectoryName() + "/" + info.name));
 
       MCH_RenderBaseVehicle.beginSkinOverlayRender(
               info.getDirectoryName(),
