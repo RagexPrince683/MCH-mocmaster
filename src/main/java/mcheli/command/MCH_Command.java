@@ -14,7 +14,7 @@ import mcheli.MCH_MOD;
 import mcheli.MCH_HBMUtil;
 import mcheli.MCH_Lib;
 import mcheli.MCH_PacketNotifyServerSettings;
-import mcheli.MCH_SoundsJson;
+import mcheli.MCH_ResourceHelper;
 import mcheli.command.MCH_PacketTitle;
 import mcheli.multiplay.MCH_MultiplayPacketHandler;
 import mcheli.multiplay.MCH_PacketIndClient;
@@ -49,6 +49,17 @@ import net.minecraftforge.event.CommandEvent;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public class MCH_Command extends CommandBase {
+
+   /** Updates only definition-derived runtime objects; seats and persistent state stay intact. */
+   private static void applyReloadedInfo(mcheli.aircraft.MCH_EntityBaseVehicle vehicle, String name) {
+      mcheli.aircraft.MCH_BaseVehicleInfo info = null;
+      if(vehicle instanceof mcheli.helicopter.MCH_EntityHeli) info = mcheli.helicopter.MCH_HeliInfoManager.get(name);
+      else if(vehicle instanceof mcheli.plane.MCP_EntityPlane) info = mcheli.plane.MCP_PlaneInfoManager.get(name);
+      else if(vehicle instanceof mcheli.ship.MCH_EntityShip) info = mcheli.ship.MCH_ShipInfoManager.get(name);
+      else if(vehicle instanceof mcheli.tank.MCH_EntityTank) info = mcheli.tank.MCH_TankInfoManager.get(name);
+      else if(vehicle instanceof mcheli.vehicle.MCH_EntityTurret) info = mcheli.vehicle.MCH_TurretInfoManager.get(name);
+      if(info != null) vehicle.setAcInfo(info);
+   }
 
    public static final String CMD_GET_SS = "sendss";
    public static final String CMD_MOD_LIST = "modlist";
@@ -183,6 +194,7 @@ public class MCH_Command extends CommandBase {
                    throw new CommandException("Parameter error! : /mcheli reload", new Object[0]);
                 }
 
+                MCH_ResourceHelper.refreshResourceSources();
                 int count = 0;
                 StringBuilder sb = new StringBuilder();
 
@@ -219,18 +231,22 @@ public class MCH_Command extends CommandBase {
                       if(list.get(i) instanceof mcheli.aircraft.MCH_EntityBaseVehicle) {
                          mcheli.aircraft.MCH_EntityBaseVehicle ac =
                             (mcheli.aircraft.MCH_EntityBaseVehicle)list.get(i);
-                         if(ac.getAcInfo() != null) {
-                            ac.changeType(ac.getAcInfo().name);
-                            ac.createSeats(java.util.UUID.randomUUID().toString());
-                         }
+                         if(ac.getAcInfo() != null) applyReloadedInfo(ac, ac.getAcInfo().name);
                       }
                    }
                 }
 
                 // Notify clients to also reload (matters on dedicated servers)
-                mcheli.aircraft.MCH_PacketNotifyInfoReloaded.sendToAllClients(2);
+                boolean notified = false;
+                try {
+                   mcheli.aircraft.MCH_PacketNotifyInfoReloaded.sendToAllClients(2);
+                   notified = true;
+                } catch(Exception notifyError) {
+                   MCH_Lib.Log("Client reload notification failed: %s", notifyError.getMessage());
+                }
 
-                String reloadMsg = "Reloaded " + count + " info types: " + sb.toString();
+                String reloadMsg = "Server info reload: " + count + " types (" + sb.toString()
+                   + "); client notification: " + (notified ? "sent" : "failed");
                 MCH_Lib.Log(reloadMsg);
                 sender.addChatMessage(new ChatComponentText(reloadMsg));
             } else {

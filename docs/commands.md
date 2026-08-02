@@ -34,6 +34,7 @@ Permissions are per subcommand. Granting `status` does not grant `fill` or `kill
 | --- | --- | --- |
 | `list` | `/mcheli list` | Prints the available MCHeli subcommands. |
 | `reconfig` | `/mcheli reconfig` | Reloads `mcheli.cfg`; on servers, broadcasts updated server settings to clients. |
+| `reload` | `/mcheli reload` | Re-scans configuration and client assets, then notifies connected clients. |
 | `sendss` | `/mcheli sendss <playerName>` | Sends a client packet requesting/triggering screenshot-related client handling for the named player. |
 | `modlist` | `/mcheli modlist <playerName>` | Requests mod-list information from the named player. |
 | `title` | `/mcheli title <timeSeconds> <position> <jsonMessage>` | Sends a JSON chat title/message packet to clients. Time is clamped to 1-180 seconds; position is clamped by code to 0-5. |
@@ -87,6 +88,32 @@ Enable debug bounding boxes for connected clients:
 ```text
 /mcheli showboundingbox true
 ```
+
+## Development live reload
+
+In a repository development run, `/mcheli reload` reads the editable
+`src/main/resources/assets/mcheli` tree directly. Running `processResources`, relogging, and
+restarting the world are not required. Resolution is deterministic: an external
+`mcheli_addons` override wins first, followed by the editable source tree, an ordinary
+classpath resource directory, and finally a packaged/development JAR. When the editable
+tree is present it is authoritative, so deleting a source asset cannot reveal an old copy
+from `build/resources/main` or a development JAR.
+
+The client-thread reload covers vehicle, weapon, item, throwable, and HUD definitions;
+MQO, OBJ, and TCN models; textures; `sounds.json`; and referenced OGG files. Existing
+vehicles retain seats, riders, ownership, locks, ammunition, fuel, health, damage,
+throttle, and weapon state while definition-derived objects are refreshed. Definitions
+which require a newly registered Minecraft item still print the existing restart warning.
+
+### Manual verification
+
+1. Start `runClient`, enter a world, and use an existing MCHeli vehicle.
+2. Edit its source `.txt`, run `/mcheli reload`, and confirm the value changes in place.
+3. Repeat after editing its MQO or OBJ model and then a texture.
+4. Repeat after editing a HUD file, `sounds.json`, or an OGG asset.
+5. Add a configuration, reload, and confirm discovery or the explicit item-registration restart warning.
+6. Delete a configuration, reload, and confirm no generated copy restores it.
+7. Reload several times and check for crashes, duplicate seats, leaked display lists, or overlapping model jobs.
 
 ## Safety notes
 

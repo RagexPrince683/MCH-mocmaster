@@ -6,335 +6,252 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Stream;
 
+/** Resolves MCHeli resources with a stable overlay order. */
 public class MCH_ResourceHelper {
 
-    private static File sourceJar = null;
-    private static List<File> devClasspathDirs = null;
-    private static File addonDir = null;
-    private static List<File> addonAssetRoots = null;
-
     private static final String ASSET_PREFIX = "assets/mcheli/";
+    private static File sourceJar;
+    private static File addonDir;
+    private static List<File> addonAssetRoots = Collections.emptyList();
+    private static List<File> devSourceDirs = Collections.emptyList();
+    private static List<File> classpathDirs = Collections.emptyList();
+    private static List<File> jarSources = Collections.emptyList();
 
-    public static void setSourceJar(File jar) {
+    public static synchronized void setSourceJar(File jar) {
         sourceJar = jar;
     }
 
-    /**
-     * Sets the addon directory and discovers addon asset roots.
-     * Supports two layouts:
-     *   Flat:      mcheli_addons/helicopters/ah-60.txt
-     *   Nested:    mcheli_addons/atom4a/assets/mcheli/helicopters/ah-60.txt
-     */
-    public static void setAddonDir(File dir) {
+    public static synchronized void setAddonDir(File dir) {
         addonDir = dir;
-        addonAssetRoots = new ArrayList<>();
-        if (addonDir != null) {
-            if (!addonDir.exists()) {
-                addonDir.mkdirs();
-                MCH_Lib.Log("MCH_ResourceHelper: Created addon directory: %s", addonDir.getAbsolutePath());
-            }
-            discoverAddonRoots();
-        }
+        if (dir != null && !dir.exists()) dir.mkdirs();
+        discoverAddonRoots();
         MCH_Lib.Log("MCH_ResourceHelper: Addon directory: %s (%d asset roots)",
-                addonDir != null ? addonDir.getAbsolutePath() : "null", addonAssetRoots.size());
+                dir != null ? dir.getAbsolutePath() : "null", addonAssetRoots.size());
     }
 
-    public static File getAddonDir() {
-        return addonDir;
-    }
+    public static File getAddonDir() { return addonDir; }
+    public static List<File> getAddonAssetRoots() { return new ArrayList<File>(addonAssetRoots); }
+    public static List<File> getDevelopmentSourceDirs() { return new ArrayList<File>(devSourceDirs); }
 
-    public static List<File> getAddonAssetRoots() {
-        return addonAssetRoots;
+    /** Re-scans both the classpath/project layout and addon packs for /mcheli reload. */
+    public static synchronized void refreshResourceSources() {
+        discoverDevClasspath();
+        discoverAddonRoots();
     }
 
     private static void discoverAddonRoots() {
-        addonAssetRoots = new ArrayList<>();
-
-        // Check if the addon root itself is an asset root (flat layout)
-        if (new File(addonDir, ASSET_PREFIX).isDirectory()) {
-            addonAssetRoots.add(addonDir);
-            MCH_Lib.Log("  Flat addon root: %s", addonDir.getAbsolutePath());
-        }
-
-        // Scan subdirectories for nested addon packs (e.g. atom4a/assets/mcheli/)
-        File[] children = addonDir.listFiles();
-        if (children != null) {
-            for (File child : children) {
-                if (child.isDirectory() && new File(child, ASSET_PREFIX).isDirectory()) {
-                    addonAssetRoots.add(child);
-                    MCH_Lib.Log("  Nested addon root: %s", child.getName());
+        ArrayList<File> roots = new ArrayList<File>();
+        if (addonDir != null) {
+            File[] children = addonDir.listFiles();
+            if (children != null) {
+                List<File> sorted = new ArrayList<File>();
+                Collections.addAll(sorted, children);
+                Collections.sort(sorted);
+                for (File child : sorted) {
+                    if (child.isDirectory() && new File(child, ASSET_PREFIX).isDirectory()) roots.add(canonical(child));
                 }
             }
+            if (new File(addonDir, ASSET_PREFIX).isDirectory() || isFlatAddon(addonDir)) roots.add(canonical(addonDir));
         }
+        addonAssetRoots = roots;
     }
 
-    public static void discoverDevClasspath() {
-        devClasspathDirs = new ArrayList<>();
+    private static boolean isFlatAddon(File root) {
+        String[] assetDirs = {"helicopters", "planes", "ships", "tanks", "vehicles", "weapons", "items", "throwable", "hud", "models", "textures", "sounds"};
+        for (String dir : assetDirs) if (new File(root, dir).isDirectory()) return true;
+        return false;
+    }
+
+    /** Discovers all source types; finding a jar never terminates directory discovery. */
+    public static synchronized void discoverDevClasspath() {
+        LinkedHashSet<File> sources = new LinkedHashSet<File>();
+        LinkedHashSet<File> dirs = new LinkedHashSet<File>();
+        LinkedHashSet<File> jars = new LinkedHashSet<File>();
+        if (sourceJar != null && sourceJar.isFile()) jars.add(canonical(sourceJar));
+
+        File root = findProjectRoot(new File(System.getProperty("user.dir", ".")));
+        if (root != null) addIfAssetRoot(sources, new File(root, "src/main/resources"));
 
         String cp = System.getProperty("java.class.path", "");
-
-        // Method 1: Find JARs on classpath that contain assets/mcheli/ (RFG dev mode)
-        for (String entry : cp.split(File.pathSeparator)) {
-            File f = new File(entry);
-            if (f.isFile() && entry.endsWith(".jar")) {
-                try (JarFile jar = new JarFile(f)) {
-                    Enumeration<JarEntry> entries = jar.entries();
-                    while (entries.hasMoreElements()) {
-                        JarEntry e = entries.nextElement();
-                        if (e.getName().startsWith("assets/mcheli/") && !e.isDirectory()) {
-                            sourceJar = f;
-                            MCH_Lib.Log("MCH_ResourceHelper: Found dev JAR with assets: %s", f.getName());
-                            return;
-                        }
-                    }
-                } catch (Exception ignored) {}
-            }
-        }
-
-        // Method 2: Find directories on classpath with assets/mcheli
-        for (String entry : cp.split(File.pathSeparator)) {
-            File f = new File(entry);
-            if (f.isDirectory() && new File(f, "assets/mcheli").isDirectory()) {
-                devClasspathDirs.add(f);
-            }
-        }
-
-        // Method 3: Search classloader hierarchy for URLClassLoaders
-        if (devClasspathDirs.isEmpty()) {
-            ClassLoader cl = MCH_ResourceHelper.class.getClassLoader();
-            while (cl != null) {
-                if (cl instanceof java.net.URLClassLoader) {
-                    try {
-                        for (java.net.URL url : ((java.net.URLClassLoader) cl).getURLs()) {
-                            if ("file".equals(url.getProtocol())) {
-                                File dir = new File(url.getPath());
-                                if (dir.isDirectory() && new File(dir, "assets/mcheli").isDirectory()) {
-                                    devClasspathDirs.add(dir);
-                                }
-                            }
-                        }
-                    } catch (Exception ignored) {}
-                }
-                cl = cl.getParent();
-            }
-        }
-
-        // Method 4: Walk upward from working directory to find build/resources/main or src/main/resources
-        if (devClasspathDirs.isEmpty()) {
-            File cwd = new File(System.getProperty("user.dir"));
-            File projectRoot = cwd;
-            // If user.dir is a run/ subdirectory, walk up to project root
-            while (projectRoot != null && !new File(projectRoot, "src").isDirectory()) {
-                projectRoot = projectRoot.getParentFile();
-            }
-            if (projectRoot != null) {
-                for (String rel : new String[]{"build/resources/main", "src/main/resources"}) {
-                    File candidate = new File(projectRoot, rel);
-                    if (candidate.isDirectory() && new File(candidate, "assets/mcheli").isDirectory()) {
-                        devClasspathDirs.add(candidate);
-                    }
+        for (String entry : cp.split(java.util.regex.Pattern.quote(File.pathSeparator))) classify(new File(entry), sources, dirs, jars);
+        ClassLoader loader = MCH_ResourceHelper.class.getClassLoader();
+        while (loader != null) {
+            if (loader instanceof URLClassLoader) {
+                for (URL url : ((URLClassLoader)loader).getURLs()) if ("file".equals(url.getProtocol())) {
+                    try { classify(new File(url.toURI()), sources, dirs, jars); } catch (Exception ignored) {}
                 }
             }
+            loader = loader.getParent();
         }
+        devSourceDirs = new ArrayList<File>(sources);
+        classpathDirs = new ArrayList<File>(dirs);
+        jarSources = new ArrayList<File>(jars);
+        MCH_Lib.DbgLog(false, "Resource roots refreshed: editable=%s classpath=%s jars=%s",
+                devSourceDirs, classpathDirs, jarSources);
+    }
 
-        MCH_Lib.Log("MCH_ResourceHelper: dev classpath found %d dirs", devClasspathDirs.size());
-        for (File dir : devClasspathDirs) {
-            MCH_Lib.Log("  -> %s", dir.getAbsolutePath());
-        }
-
-        if (devClasspathDirs.isEmpty() && sourceJar == null) {
-            MCH_Lib.Log("WARNING: No assets found on classpath. java.class.path entries: %d", cp.split(File.pathSeparator).length);
+    private static void classify(File file, Set<File> sources, Set<File> dirs, Set<File> jars) {
+        if (file.isDirectory() && new File(file, ASSET_PREFIX).isDirectory()) {
+            File c = canonical(file);
+            String p = c.getPath().replace('\\', '/');
+            if (p.endsWith("/src/main/resources")) sources.add(c); else dirs.add(c);
+        } else if (file.isFile() && file.getName().toLowerCase().endsWith(".jar") && containsAssets(file)) {
+            jars.add(canonical(file));
         }
     }
 
-    public static List<String> listResources(String dirPrefix, String suffix) {
-        List<String> result = new ArrayList<>();
-
-        if (!dirPrefix.endsWith("/")) dirPrefix = dirPrefix + "/";
-
-        final String jarPrefix = dirPrefix.startsWith("/") ? dirPrefix.substring(1) : dirPrefix;
-
-        if (sourceJar != null && sourceJar.exists() && sourceJar.isFile()) {
-            try (JarFile jar = new JarFile(sourceJar)) {
-                Enumeration<JarEntry> entries = jar.entries();
-                while (entries.hasMoreElements()) {
-                    JarEntry entry = entries.nextElement();
-                    String name = entry.getName();
-                    if (name.startsWith(jarPrefix) && name.endsWith(suffix) && !entry.isDirectory()) {
-                        result.add(name);
-                    }
-                }
-            } catch (Exception e) {
-                MCH_Lib.Log("MCH_ResourceHelper: Failed to enumerate JAR: %s", e.getMessage());
-            }
-        }
-
-        if (result.isEmpty() && devClasspathDirs != null) {
-            for (File cpDir : devClasspathDirs) {
-                File targetDir = new File(cpDir, jarPrefix);
-                if (targetDir.isDirectory()) {
-                    try {
-                        Path dirPath = targetDir.toPath();
-                        Files.walk(dirPath)
-                            .filter(p -> p.toString().endsWith(suffix) && !Files.isDirectory(p))
-                            .forEach(p -> {
-                                String rel = dirPath.relativize(p).toString().replace('\\', '/');
-                                result.add(jarPrefix + rel);
-                            });
-                    } catch (Exception e) {
-                        MCH_Lib.Log("MCH_ResourceHelper: Failed to walk %s: %s", targetDir, e.getMessage());
-                    }
-                }
-            }
-        }
-
-        // Scan addon directory for additional files (additive, never removes JAR entries)
-        if (addonAssetRoots != null && jarPrefix.startsWith(ASSET_PREFIX)) {
-            String relSubdir = jarPrefix.substring(ASSET_PREFIX.length());
-            for (File root : addonAssetRoots) {
-                File addonSubdir = new File(root, ASSET_PREFIX + relSubdir);
-                if (addonSubdir.isDirectory()) {
-                    try {
-                        Path dirPath = addonSubdir.toPath();
-                        Files.walk(dirPath)
-                            .filter(p -> p.toString().endsWith(suffix) && !Files.isDirectory(p))
-                            .forEach(p -> {
-                                String rel = dirPath.relativize(p).toString().replace('\\', '/');
-                                String resourcePath = ASSET_PREFIX + relSubdir + rel;
-                                if (!result.contains(resourcePath)) {
-                                    result.add(resourcePath);
-                                }
-                            });
-                    } catch (Exception e) {
-                        MCH_Lib.Log("MCH_ResourceHelper: Failed to walk addon dir %s: %s", addonSubdir, e.getMessage());
-                    }
-                }
-            }
-        }
-
-        return result;
+    private static boolean containsAssets(File file) {
+        try (JarFile jar = new JarFile(file)) {
+            Enumeration<JarEntry> e = jar.entries();
+            while (e.hasMoreElements()) if (e.nextElement().getName().startsWith(ASSET_PREFIX)) return true;
+        } catch (Exception ignored) {}
+        return false;
     }
 
-    public static boolean resourceExists(String resourcePath) {
-        resourcePath = normalizeAssetPath(resourcePath);
-
-        // Check addon asset roots first (additive overlay)
-        if (addonAssetRoots != null && !addonAssetRoots.isEmpty()) {
-            File addonFile = findAddonResourceFile(resourcePath);
-            if (addonFile != null && addonFile.isFile()) return true;
-        }
-
-        if (sourceJar != null && sourceJar.exists() && sourceJar.isFile()) {
-            try (JarFile jar = new JarFile(sourceJar)) {
-                return jar.getEntry(resourcePath) != null;
-            } catch (Exception e) {
-                return false;
-            }
-        }
-
-        String relPath = resourcePath;
-        if (devClasspathDirs != null) {
-            for (File cpDir : devClasspathDirs) {
-                if (new File(cpDir, relPath).isFile()) return true;
-            }
-        }
-        return MCH_ResourceHelper.class.getResourceAsStream("/" + resourcePath) != null;
-    }
-
-    public static BufferedReader openResource(String resourcePath) {
-        if (!resourcePath.startsWith("/")) resourcePath = "/" + resourcePath;
-
-        // Check addon asset roots first (user overrides take priority)
-        if (addonAssetRoots != null && !addonAssetRoots.isEmpty()) {
-            File addonFile = findAddonResourceFile(resourcePath);
-            if (addonFile != null && addonFile.isFile()) {
-                try {
-                    return new BufferedReader(new InputStreamReader(new FileInputStream(addonFile), StandardCharsets.UTF_8));
-                } catch (FileNotFoundException e) {
-                    // fall through to classpath
-                }
-            }
-        }
-
-        InputStream is = MCH_ResourceHelper.class.getResourceAsStream(resourcePath);
-        if (is == null) return null;
-        return new BufferedReader(new InputStreamReader(is));
-    }
-
-    /**
-     * Opens a resource as an InputStream (for binary resources like .mqo, .obj models).
-     * Checks addon dirs first, then classpath.
-     * Caller is responsible for closing the stream.
-     */
-    public static InputStream openResourceStream(String resourcePath) {
-        if (!resourcePath.startsWith("/")) resourcePath = "/" + resourcePath;
-
-        // Check addon asset roots first
-        if (addonAssetRoots != null && !addonAssetRoots.isEmpty()) {
-            File addonFile = findAddonResourceFile(resourcePath);
-            if (addonFile != null && addonFile.isFile()) {
-                try {
-                    return new FileInputStream(addonFile);
-                } catch (FileNotFoundException e) {
-                    // fall through
-                }
-            }
-        }
-
-        return MCH_ResourceHelper.class.getResourceAsStream(resourcePath);
-    }
-
-    /**
-     * Searches all addon asset roots for a resource file.
-     * Checks nested packs first (higher priority), then flat layout.
-     * Returns the first match found.
-     */
-    private static File findAddonResourceFile(String resourcePath) {
-        String path = normalizeAssetPath(resourcePath);
-        if (!path.startsWith(ASSET_PREFIX)) return null;
-        String relPath = path.substring(ASSET_PREFIX.length());
-
-        // Check nested addon packs first (they can override flat)
-        for (File root : addonAssetRoots) {
-            if (root != addonDir) {
-                File candidate = new File(root, ASSET_PREFIX + relPath);
-                if (candidate.isFile()) return candidate;
-            }
-        }
-        // Check flat layout last
-        if (addonDir != null && addonAssetRoots.contains(addonDir)) {
-            File candidate = new File(addonDir, ASSET_PREFIX + relPath);
-            if (candidate.isFile()) return candidate;
+    private static File findProjectRoot(File from) {
+        for (File f = canonical(from); f != null; f = f.getParentFile()) {
+            if ((new File(f, "build.gradle.kts").isFile() || new File(f, "build.gradle").isFile())
+                    && new File(f, "src/main/resources/" + ASSET_PREFIX).isDirectory()) return f;
         }
         return null;
     }
 
-    /** Classpath and filesystem probes always use an assets/mcheli path. */
-    public static String normalizeAssetPath(String resourcePath) {
-        String path = resourcePath == null ? "" : resourcePath.replace('\\', '/');
+    private static void addIfAssetRoot(Set<File> result, File root) {
+        if (new File(root, ASSET_PREFIX).isDirectory()) result.add(canonical(root));
+    }
+
+    public static synchronized List<String> listResources(String dirPrefix, String suffix) {
+        String prefix = normalizeAssetPath(dirPrefix);
+        if (!prefix.endsWith("/")) prefix += "/";
+        LinkedHashSet<String> result = new LinkedHashSet<String>();
+        // Highest-precedence files are enumerated first, matching openResource.
+        addDirectoryResources(result, addonAssetRoots, prefix, suffix);
+        addDirectoryResources(result, devSourceDirs, prefix, suffix);
+        // An editable tree is authoritative: absent source files are deletions, not jar fallbacks.
+        if (devSourceDirs.isEmpty()) {
+            addDirectoryResources(result, classpathDirs, prefix, suffix);
+            addJarResources(result, jarSources, prefix, suffix);
+        }
+        return new ArrayList<String>(result);
+    }
+
+    private static void addDirectoryResources(Set<String> result, List<File> roots, String prefix, String suffix) {
+        for (File root : roots) {
+            File target = resourceFile(root, prefix);
+            if (!target.isDirectory()) continue;
+            ArrayList<String> found = new ArrayList<String>();
+            try (Stream<Path> paths = Files.walk(target.toPath())) {
+                for (java.util.Iterator<Path> it = paths.iterator(); it.hasNext();) {
+                    Path p = it.next();
+                    if (!Files.isDirectory(p) && p.toString().endsWith(suffix))
+                        found.add(prefix + target.toPath().relativize(p).toString().replace('\\', '/'));
+                }
+            } catch (Exception e) { MCH_Lib.Log("Failed to walk resource root %s: %s", target, e.getMessage()); }
+            Collections.sort(found);
+            result.addAll(found);
+        }
+    }
+
+    private static void addJarResources(Set<String> result, List<File> jars, String prefix, String suffix) {
+        for (File file : jars) try (JarFile jar = new JarFile(file)) {
+            ArrayList<String> found = new ArrayList<String>();
+            Enumeration<JarEntry> entries = jar.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry e = entries.nextElement();
+                if (!e.isDirectory() && e.getName().startsWith(prefix) && e.getName().endsWith(suffix)) found.add(e.getName());
+            }
+            Collections.sort(found); result.addAll(found);
+        } catch (Exception e) { MCH_Lib.Log("Failed to enumerate resource jar %s: %s", file, e.getMessage()); }
+    }
+
+    public static synchronized boolean resourceExists(String path) {
+        ResolvedResource r = resolve(path);
+        if (r.file != null) return true;
+        if (r.jar != null) { try (JarFile j = new JarFile(r.jar)) { return j.getEntry(r.path) != null; } catch (Exception ignored) {} }
+        return r.classpath && MCH_ResourceHelper.class.getResource("/" + r.path) != null;
+    }
+
+    public static BufferedReader openResource(String path) {
+        InputStream in = openResourceStream(path);
+        return in == null ? null : new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+    }
+
+    public static synchronized InputStream openResourceStream(String path) {
+        ResolvedResource r = resolve(path);
+        try {
+            if (r.file != null) { debugSource(r.path, r.file); return new FileInputStream(r.file); }
+            if (r.jar != null) {
+                // JarFile must remain open until its entry stream is closed.
+                final JarFile jar = new JarFile(r.jar);
+                JarEntry entry = jar.getJarEntry(r.path);
+                if (entry != null) { debugSource(r.path, r.jar); return new java.io.FilterInputStream(jar.getInputStream(entry)) {
+                    public void close() throws java.io.IOException { try { super.close(); } finally { jar.close(); } }
+                }; }
+                jar.close();
+            }
+        } catch (Exception e) { MCH_Lib.Log("Failed to open resource %s: %s", r.path, e.getMessage()); return null; }
+        if (r.classpath) {
+            URL url = MCH_ResourceHelper.class.getResource("/" + r.path);
+            if (url != null) MCH_Lib.DbgLog(false, "Resource %s <- %s", r.path, url);
+            return MCH_ResourceHelper.class.getResourceAsStream("/" + r.path);
+        }
+        return null;
+    }
+
+    private static ResolvedResource resolve(String raw) {
+        String path = normalizeAssetPath(raw);
+        File f = findFile(addonAssetRoots, path);
+        if (f != null) return new ResolvedResource(path, f, null, false);
+        f = findFile(devSourceDirs, path);
+        if (f != null) return new ResolvedResource(path, f, null, false);
+        if (!devSourceDirs.isEmpty()) return new ResolvedResource(path, null, null, false);
+        f = findFile(classpathDirs, path);
+        if (f != null) return new ResolvedResource(path, f, null, false);
+        for (File jar : jarSources) if (jarHas(jar, path)) return new ResolvedResource(path, null, jar, false);
+        return new ResolvedResource(path, null, null, true);
+    }
+
+    private static File findFile(List<File> roots, String path) {
+        for (File root : roots) { File f = resourceFile(root, path); if (f.isFile()) return f; }
+        return null;
+    }
+    private static File resourceFile(File root, String path) {
+        if (root.equals(addonDir) && !new File(root, ASSET_PREFIX).isDirectory() && path.startsWith(ASSET_PREFIX))
+            return new File(root, path.substring(ASSET_PREFIX.length()));
+        return new File(root, path);
+    }
+    private static boolean jarHas(File file, String path) {
+        try (JarFile jar = new JarFile(file)) { return jar.getJarEntry(path) != null; } catch (Exception ignored) { return false; }
+    }
+    private static void debugSource(String path, File source) { MCH_Lib.DbgLog(false, "Resource %s <- %s", path, source); }
+    private static File canonical(File f) { try { return f.getCanonicalFile(); } catch (Exception e) { return f.getAbsoluteFile(); } }
+
+    public static String normalizeAssetPath(String path) {
+        path = path == null ? "" : path.replace('\\', '/');
         while (path.startsWith("/")) path = path.substring(1);
         while (path.contains("//")) path = path.replace("//", "/");
         return path;
     }
+    public static String getFileName(String path) { int i = path.lastIndexOf('/'); return i < 0 ? path : path.substring(i + 1); }
+    public static String getEntryName(String path) { String n = getFileName(path); int i = n.lastIndexOf('.'); return (i > 0 ? n.substring(0, i) : n).toLowerCase(); }
 
-    public static String getFileName(String resourcePath) {
-        int lastSlash = resourcePath.lastIndexOf('/');
-        return lastSlash >= 0 ? resourcePath.substring(lastSlash + 1) : resourcePath;
-    }
-
-    public static String getEntryName(String resourcePath) {
-        String fileName = getFileName(resourcePath);
-        int dot = fileName.lastIndexOf('.');
-        if (dot > 0) fileName = fileName.substring(0, dot);
-        return fileName.toLowerCase();
+    private static final class ResolvedResource {
+        final String path; final File file; final File jar; final boolean classpath;
+        ResolvedResource(String p, File f, File j, boolean c) { path = p; file = f; jar = j; classpath = c; }
     }
 }

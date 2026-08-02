@@ -25,12 +25,22 @@ public class MCH_AddonResourcePack implements IResourcePack {
     private static final String DOMAIN = "mcheli";
     private final File[] addonRoots;
 
+    /** Dynamic pack used by reload; it follows MCH_ResourceHelper's live precedence. */
+    public MCH_AddonResourcePack() {
+        this.addonRoots = null;
+    }
+
     public MCH_AddonResourcePack(File[] addonRoots) {
         this.addonRoots = addonRoots;
     }
 
     @Override
     public InputStream getInputStream(ResourceLocation location) throws IOException {
+        if (addonRoots == null) {
+            InputStream stream = MCH_ResourceHelper.openResourceStream(toAssetPath(location));
+            if (stream != null) return stream;
+            throw new IOException("Resource not found: " + location);
+        }
         File file = findFile(location);
         if (file == null) {
             throw new IOException("Resource not found: " + location);
@@ -40,6 +50,7 @@ public class MCH_AddonResourcePack implements IResourcePack {
 
     @Override
     public boolean resourceExists(ResourceLocation location) {
+        if (addonRoots == null) return MCH_ResourceHelper.resourceExists(toAssetPath(location));
         return findFile(location) != null;
     }
 
@@ -62,7 +73,7 @@ public class MCH_AddonResourcePack implements IResourcePack {
 
     @Override
     public String getPackName() {
-        return "MCHeli Addon Pack";
+        return addonRoots == null ? "MCHeli Live Development Resources" : "MCHeli Addon Pack";
     }
 
     private File findFile(ResourceLocation location) {
@@ -76,5 +87,9 @@ public class MCH_AddonResourcePack implements IResourcePack {
             }
         }
         return null;
+    }
+
+    private String toAssetPath(ResourceLocation location) {
+        return "assets/" + location.getResourceDomain() + "/" + location.getResourcePath();
     }
 }

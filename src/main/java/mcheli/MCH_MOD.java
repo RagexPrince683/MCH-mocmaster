@@ -205,6 +205,7 @@ public class MCH_MOD {
           // Set the JAR file for classpath resource enumeration
           File sourceFile = Loader.instance().activeModContainer().getSource();
           MCH_ResourceHelper.setSourceJar(sourceFile);
+          MCH_ResourceHelper.discoverDevClasspath();
           MCH_Lib.DbgLog(false, "Mods Directory: %s", sourcePath);
        }
 
@@ -225,10 +226,8 @@ public class MCH_MOD {
        // approach was wiped by clearResources() on each reload.
        if (isDev || true) {
           try {
-             java.util.List<File> roots = MCH_ResourceHelper.getAddonAssetRoots();
-             if (roots != null && !roots.isEmpty()) {
-                File[] rootArray = roots.toArray(new File[0]);
-                net.minecraft.client.resources.IResourcePack addonPack = new MCH_AddonResourcePack(rootArray);
+             {
+                net.minecraft.client.resources.IResourcePack addonPack = new MCH_AddonResourcePack();
                 // Access Minecraft.defaultResourcePacks (private List<IResourcePack>)
                 java.lang.reflect.Field field = net.minecraft.client.Minecraft.class.getDeclaredField("defaultResourcePacks");
                 field.setAccessible(true);
@@ -236,7 +235,7 @@ public class MCH_MOD {
                 java.util.List<net.minecraft.client.resources.IResourcePack> defaultPacks =
                     (java.util.List<net.minecraft.client.resources.IResourcePack>) field.get(net.minecraft.client.Minecraft.getMinecraft());
                 defaultPacks.add(addonPack);
-                MCH_Lib.Log("Registered addon resource pack in defaultResourcePacks with %d roots", rootArray.length);
+                MCH_Lib.Log("Registered live MCHeli resource pack");
              }
           } catch (Exception e) {
              MCH_Lib.Log("Failed to register addon resource pack: %s", e.getMessage());
