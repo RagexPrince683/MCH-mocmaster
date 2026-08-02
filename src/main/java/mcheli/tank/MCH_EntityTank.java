@@ -249,9 +249,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
          this.updateWeapons();
          this.onUpdate_Seats();
-         float controlYaw = this.getRotYaw();
          this.onUpdate_Control(partialTicks);
-         this.validateControlYaw(controlYaw);
          this.prevRotationRotor = this.rotationRotor;
          this.rotationRotor = (float)((double)this.rotationRotor + this.getCurrentThrottle() * (double)this.getAcInfo().rotorSpeed);
          if(this.rotationRotor > 360.0F) {
@@ -1480,9 +1478,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.setRotYaw(v.y);
       this.setRotPitch(v.x);
       this.setRotRoll(v.z);
-      float controlYaw = this.getRotYaw();
       this.onUpdateAngles(partialTicks);
-      this.validateControlYaw(controlYaw);
       if(this.getAcInfo().limitRotation) {
          v.x = MCH_Lib.RNG(this.getRotPitch(), -90.0F, 90.0F);
          v.z = MCH_Lib.RNG(this.getRotRoll(), -90.0F, 90.0F);

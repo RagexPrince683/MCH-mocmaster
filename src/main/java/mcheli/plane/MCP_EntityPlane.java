@@ -501,9 +501,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
 
          this.updateWeapons();
          this.onUpdate_Seats();
-         float controlYaw = this.getRotYaw();
          this.onUpdate_Control();
-         this.validateControlYaw(controlYaw);
          this.prevRotationRotor = this.rotationRotor;
          this.rotationRotor = (float)((double)this.rotationRotor + this.getCurrentThrottle() * (double)this.getAcInfo().rotorSpeed);
          if(this.rotationRotor > 360.0F) {
@@ -1716,9 +1714,7 @@ public class MCP_EntityPlane extends MCH_EntityBaseVehicle {
       this.setRotYaw(v.y);
       this.setRotPitch(v.x);
       this.setRotRoll(v.z);
-      float controlYaw = this.getRotYaw();
       this.onUpdateAngles(partialTicks);
-      this.validateControlYaw(controlYaw);
       if(this.shouldUseLegacyRotationClamp()) {
          v.x = MCH_Lib.RNG(this.getRotPitch(), this.getAcInfo().minRotationPitch, this.getAcInfo().maxRotationPitch);
          v.x = this.clampIdleUnsupportedNoseUpPitch(v.x, stallSpeed);

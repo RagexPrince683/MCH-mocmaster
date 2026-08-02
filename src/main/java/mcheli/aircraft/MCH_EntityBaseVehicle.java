@@ -82,12 +82,6 @@ import org.lwjgl.Sys;
 public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideBaseVehicle, IEntityAdditionalSpawnData {
    private static final Map<UUID, NewUavSafeReturn> NEW_UAV_SAFE_RETURNS = new HashMap<UUID, NewUavSafeReturn>();
    private final MCH_VehicleBoxCache vehicleBoxCache = new MCH_VehicleBoxCache();
-   private MCH_BoundingBox[] controlYawProbeBoxes = new MCH_BoundingBox[0];
-   private final ArrayList controlYawBlockBoxes = new ArrayList();
-   private final ArrayList controlYawCurrentContacts = new ArrayList();
-   private final ArrayList controlYawCandidateContacts = new ArrayList();
-   private static final double CONTROL_YAW_EPSILON = 1.0E-4D;
-   private static final int CONTROL_YAW_SEARCH_STEPS = 9;
    private static final int NEW_UAV_SAFE_RETURN_MIN_TICKS = 20;
    private static MCH_EntityBaseVehicle aircraft;
     private ForgeChunkManager.Ticket chunkTicket;
@@ -460,137 +454,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public void setRotYaw(float f) {
       super.rotationYaw = f;
-   }
-
-   /**
-    * Validates the result of a completed control calculation.  Callers deliberately run their
-    * normal steering first; this method changes only the final chassis yaw when that rotation
-    * would increase horizontal hull penetration.
-    */
-   protected void validateControlYaw(float originalYaw) {
-      float requestedYaw = this.getRotYaw();
-      float delta = MathHelper.wrapAngleTo180_float(requestedYaw - originalYaw);
-      if(MathHelper.abs(delta) < 1.0E-5F || this.worldObj == null || this.getAcInfo() == null) {
-         return;
-      }
-
-      this.collectControlYawContacts(originalYaw, this.controlYawCurrentContacts);
-      if(this.isControlYawSafe(originalYaw + delta, this.controlYawCurrentContacts)) {
-         return;
-      }
-
-      float safe = 0.0F;
-      float blocked = 1.0F;
-      for(int i = 0; i < CONTROL_YAW_SEARCH_STEPS; ++i) {
-         float fraction = (safe + blocked) * 0.5F;
-         if(this.isControlYawSafe(originalYaw + delta * fraction, this.controlYawCurrentContacts)) {
-            safe = fraction;
-         } else {
-            blocked = fraction;
-         }
-      }
-      this.setRotYaw(originalYaw + delta * safe);
-   }
-
-   private boolean isControlYawSafe(float yaw, List baseline) {
-      this.collectControlYawContacts(yaw, this.controlYawCandidateContacts);
-      for(int i = 0; i < this.controlYawCandidateContacts.size(); ++i) {
-         HullBlockContact candidate = (HullBlockContact)this.controlYawCandidateContacts.get(i);
-         double previousDepth = 0.0D;
-         for(int j = 0; j < baseline.size(); ++j) {
-            HullBlockContact current = (HullBlockContact)baseline.get(j);
-            if(candidate.sameObstacle(current)) {
-               previousDepth = current.depth;
-               break;
-            }
-         }
-         if(candidate.depth > previousDepth + CONTROL_YAW_EPSILON) {
-            return false;
-         }
-      }
-      return true;
-   }
-
-   /** Uses disposable OBBs and never updates the live hit boxes or their cache. */
-   private void collectControlYawContacts(float yaw, List contacts) {
-      contacts.clear();
-      MCH_BoundingBox[] source = this.extraBoundingBox != null ? this.extraBoundingBox : new MCH_BoundingBox[0];
-      if(this.controlYawProbeBoxes.length != source.length) {
-         this.controlYawProbeBoxes = new MCH_BoundingBox[source.length];
-      }
-      for(int i = 0; i < source.length; ++i) {
-         MCH_BoundingBox configured = source[i];
-         // Tracks, engines and turrets are damage/interaction regions, not solid hull volume.
-         if(configured.boundingBoxType != EnumBoundingBoxType.DEFAULT) {
-            continue;
-         }
-         MCH_BoundingBox probe = this.controlYawProbeBoxes[i];
-         if(probe == null || probe.width != configured.width || probe.height != configured.height
-                 || probe.depth != configured.depth || probe.offsetX != configured.offsetX
-                 || probe.offsetY != configured.offsetY || probe.offsetZ != configured.offsetZ) {
-            probe = configured.copy();
-            this.controlYawProbeBoxes[i] = probe;
-         }
-         // Yaw-only geometry intentionally decouples this side probe from suspension pitch/roll.
-         probe.updatePosition(super.posX, super.posY, super.posZ, yaw, 0.0F, 0.0F);
-         this.controlYawBlockBoxes.clear();
-         this.addBlockCollisionsToList(probe.boundingBox, this.controlYawBlockBoxes);
-         for(int blockIndex = 0; blockIndex < this.controlYawBlockBoxes.size(); ++blockIndex) {
-            AxisAlignedBB blockBox = (AxisAlignedBB)this.controlYawBlockBoxes.get(blockIndex);
-            double horizontalDepth = getHorizontalObbPenetration(probe, blockBox, yaw);
-            double verticalDepth = Math.min(probe.boundingBox.maxY, blockBox.maxY)
-                    - Math.max(probe.boundingBox.minY, blockBox.minY);
-            // The shallowest separating direction is vertical for ordinary floor/support contact.
-            if(horizontalDepth > CONTROL_YAW_EPSILON
-                    && verticalDepth > horizontalDepth + CONTROL_YAW_EPSILON) {
-               contacts.add(new HullBlockContact(i, blockBox, horizontalDepth));
-            }
-         }
-      }
-   }
-
-   /** Exact XZ SAT minimum translation depth for a yaw-oriented rectangle and block AABB. */
-   private static double getHorizontalObbPenetration(MCH_BoundingBox hull, AxisAlignedBB block, float yaw) {
-      double radians = Math.toRadians(-yaw);
-      double ux = Math.cos(radians), uz = Math.sin(radians);
-      double vx = -uz, vz = ux;
-      double cx = (block.minX + block.maxX) * 0.5D;
-      double cz = (block.minZ + block.maxZ) * 0.5D;
-      double dx = cx - hull.nowPos.xCoord;
-      double dz = cz - hull.nowPos.zCoord;
-      double blockHalfX = (block.maxX - block.minX) * 0.5D;
-      double blockHalfZ = (block.maxZ - block.minZ) * 0.5D;
-      double min = Double.MAX_VALUE;
-      for(int i = 0; i < 4; ++i) {
-         double axisX = i == 0 ? ux : i == 1 ? vx : i == 2 ? 1.0D : 0.0D;
-         double axisZ = i == 0 ? uz : i == 1 ? vz : i == 2 ? 0.0D : 1.0D;
-         double hullRadius = hull.width * 0.5D * Math.abs(axisX * ux + axisZ * uz)
-                 + hull.depth * 0.5D * Math.abs(axisX * vx + axisZ * vz);
-         double blockRadius = blockHalfX * Math.abs(axisX) + blockHalfZ * Math.abs(axisZ);
-         double overlap = hullRadius + blockRadius - Math.abs(dx * axisX + dz * axisZ);
-         if(overlap <= CONTROL_YAW_EPSILON) return 0.0D;
-         min = Math.min(min, overlap);
-      }
-      return min;
-   }
-
-   private static final class HullBlockContact {
-      private final int hullIndex;
-      private final AxisAlignedBB block;
-      private final double depth;
-
-      private HullBlockContact(int hullIndex, AxisAlignedBB block, double depth) {
-         this.hullIndex = hullIndex;
-         this.block = block;
-         this.depth = depth;
-      }
-
-      private boolean sameObstacle(HullBlockContact other) {
-         return this.hullIndex == other.hullIndex && this.block.minX == other.block.minX
-                 && this.block.minY == other.block.minY && this.block.minZ == other.block.minZ
-                 && this.block.maxX == other.block.maxX && this.block.maxY == other.block.maxY
-                 && this.block.maxZ == other.block.maxZ;
-      }
    }
 
    public void setRotPitch(float f) {
@@ -2292,9 +2155,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.setRotYaw(v.y);
       this.setRotPitch(v.x);
       this.setRotRoll(v.z);
-      float controlYaw = this.getRotYaw();
       this.onUpdateAngles(partialTicks);
-      this.validateControlYaw(controlYaw);
       if(this.getAcInfo().limitRotation) {
          v.x = MCH_Lib.RNG(this.getRotPitch(), this.getAcInfo().minRotationPitch, this.getAcInfo().maxRotationPitch);
          v.z = MCH_Lib.RNG(this.getRotRoll(), this.getAcInfo().minRotationRoll, this.getAcInfo().maxRotationRoll);
@@ -2456,9 +2317,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.setRotYaw(v.y);
       this.setRotPitch(v.x);
       this.setRotRoll(v.z);
-      float controlYaw = this.getRotYaw();
       this.onUpdateAngles(partialTicks);
-      this.validateControlYaw(controlYaw);
       if(this.getAcInfo().limitRotation) {
          v.x = MCH_Lib.RNG(this.getRotPitch(), this.getAcInfo().minRotationPitch, this.getAcInfo().maxRotationPitch);
          v.z = MCH_Lib.RNG(this.getRotRoll(), this.getAcInfo().minRotationRoll, this.getAcInfo().maxRotationRoll);

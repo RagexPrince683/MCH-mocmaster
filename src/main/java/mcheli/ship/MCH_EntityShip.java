@@ -267,9 +267,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
             this.updateWeapons();
             this.onUpdate_Seats();
-            float controlYaw = this.getRotYaw();
             this.onUpdate_Control();
-            this.validateControlYaw(controlYaw);
             this.prevRotationRotor = this.rotationRotor;
             this.rotationRotor = (float)((double)this.rotationRotor + this.getCurrentThrottle() * (double)this.getAcInfo().rotorSpeed);
             if(this.rotationRotor > 360.0F) {
