@@ -440,7 +440,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       if(!this.isDestroyed()) {
          if(super.isGunnerMode) {
             this.setRotPitch(this.decayMobilityValue(this.getRotPitch(), 0.95F, partialTicks));
-            this.setCollisionSafeControlYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 0.2F * partialTicks);
+            this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 0.2F * partialTicks);
             if(MathHelper.abs(this.getRotRoll()) > 20.0F) {
                this.setRotRoll(this.decayMobilityValue(this.getRotRoll(), 0.95F, partialTicks));
             }
@@ -478,11 +478,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
                float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D?-1.0F:1.0F;
                if(super.moveLeft && !super.moveRight) {
-                  this.setCollisionSafeControlYaw(this.getRotYaw() - 0.6F * rotonground * partialTicks * flag * sf);
+                  this.setRotYaw(this.getRotYaw() - 0.6F * rotonground * partialTicks * flag * sf);
                }
 
                if(super.moveRight && !super.moveLeft) {
-                  this.setCollisionSafeControlYaw(this.getRotYaw() + 0.6F * rotonground * partialTicks * flag * sf);
+                  this.setRotYaw(this.getRotYaw() + 0.6F * rotonground * partialTicks * flag * sf);
                }
 
             }
@@ -510,7 +510,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       double dx = super.posX - super.prevPosX;
       double dz = super.posZ - super.prevPosZ;
       double dist = dx * dx + dz * dz;
-      if(dist <= 1.0E-6D && !this.wasLatestHorizontalMoveClipped()) {
+      if(dist <= 1.0E-6D) {
          dist = super.motionX * super.motionX + super.motionZ * super.motionZ;
       }
 
@@ -526,11 +526,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
          float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D?-1.0F:1.0F;
          if(super.moveLeft && !super.moveRight) {
-            this.setCollisionSafeControlYaw(this.getRotYaw() - 0.6F * partialTicks * flag * sf);
+            this.setRotYaw(this.getRotYaw() - 0.6F * partialTicks * flag * sf);
          }
 
          if(super.moveRight && !super.moveLeft) {
-            this.setCollisionSafeControlYaw(this.getRotYaw() + 0.6F * partialTicks * flag * sf);
+            this.setRotYaw(this.getRotYaw() + 0.6F * partialTicks * flag * sf);
          }
       }
    }
@@ -701,11 +701,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
                         float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D ? -1.0F : 1.0F;
                         if(super.moveLeft && !super.moveRight) {
-                           this.setCollisionSafeControlYaw(this.getRotYaw() + 0.6F * rotonground * partialTicks * flag * sf);
+                           this.setRotYaw(this.getRotYaw() + 0.6F * rotonground * partialTicks * flag * sf);
                         }
 
                         if(super.moveRight && !super.moveLeft) {
-                           this.setCollisionSafeControlYaw(this.getRotYaw() - 0.6F * rotonground * partialTicks * flag * sf);
+                           this.setRotYaw(this.getRotYaw() - 0.6F * rotonground * partialTicks * flag * sf);
                         }
                      }
                   }

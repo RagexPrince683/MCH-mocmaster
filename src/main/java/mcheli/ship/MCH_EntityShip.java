@@ -391,7 +391,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         if(!this.isDestroyed()) {
             if(super.isGunnerMode) {
                 this.setRotPitch(this.decayMobilityValue(this.getRotPitch(), 0.95F, partialTicks));
-                this.setCollisionSafeControlYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 0.2F * partialTicks);
+                this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 0.2F * partialTicks);
                 if(MathHelper.abs(this.getRotRoll()) > 20.0F) {
                     this.setRotRoll(this.decayMobilityValue(this.getRotRoll(), 0.95F, partialTicks));
                 }
@@ -421,12 +421,12 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
 
 
                 if(super.moveLeft && !super.moveRight) {
-                    this.setCollisionSafeControlYaw(this.getRotYaw() - 0.6F * rot * partialTicks);
+                    this.setRotYaw(this.getRotYaw() - 0.6F * rot * partialTicks);
                     this.currentSpeed = currentSpeed - rot;
                 }
 
                 if(super.moveRight && !super.moveLeft) {
-                    this.setCollisionSafeControlYaw(this.getRotYaw() + 0.6F * rot * partialTicks);
+                    this.setRotYaw(this.getRotYaw() + 0.6F * rot * partialTicks);
                     this.currentSpeed = currentSpeed - rot;
                 }
             }
@@ -815,13 +815,13 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
                 if(throttle != null && !W_Block.isEqual(throttle, Blocks.air)) {
                     throttle = MCH_Lib.getBlockY(this, 3, -5, true);
                     if(throttle == null || W_Block.isEqual(throttle, Blocks.air)) {
-                        this.setCollisionSafeControlYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 2.0F);
+                        this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 2.0F);
                         if(this.getRotPitch() > -20.0F) {
                             this.setRotPitch(this.getRotPitch() - 0.5F);
                         }
                     }
                 } else {
-                    this.setCollisionSafeControlYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 1.0F);
+                    this.setRotYaw(this.getRotYaw() + this.getAcInfo().autoPilotRot * 1.0F);
                     this.setRotPitch(this.decayMobilityValue(this.getRotPitch(), 0.95F, 1.0F));
                     if(this.canFoldLandingGear()) {
                         this.foldLandingGear();
