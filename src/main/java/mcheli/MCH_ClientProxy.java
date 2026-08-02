@@ -161,18 +161,25 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    public void scheduleClientInfoReload() {
       Minecraft.getMinecraft().func_152344_a(new Runnable() {
          public void run() {
-            MCH_HeliInfoManager.getInstance().reload();
-            MCP_PlaneInfoManager.getInstance().reload();
-            MCH_ShipInfoManager.getInstance().reload();
-            MCH_TankInfoManager.getInstance().reload();
-            MCH_TurretInfoManager.getInstance().reload();
-            MCH_WeaponInfoManager.reload();
-            MCH_ItemInfoManager.reload();
-            MCH_ThrowableInfoManager.reload();
+            MCH_ResourceHelper.refreshResourceSources();
+            // 1.7.10 rebuilds textures and the sound registry on this client-thread call.
+            Minecraft.getMinecraft().refreshResources();
+            int succeeded = 0;
+            if(MCH_HeliInfoManager.getInstance().reload()) ++succeeded;
+            if(MCP_PlaneInfoManager.getInstance().reload()) ++succeeded;
+            if(MCH_ShipInfoManager.getInstance().reload()) ++succeeded;
+            if(MCH_TankInfoManager.getInstance().reload()) ++succeeded;
+            if(MCH_TurretInfoManager.getInstance().reload()) ++succeeded;
+            if(MCH_WeaponInfoManager.reload()) ++succeeded;
+            if(MCH_ItemInfoManager.reload()) ++succeeded;
+            if(MCH_ThrowableInfoManager.reload()) ++succeeded;
             MCH_VehicleItemModelRender.resetForReload();
+            MCH_ModelManager.clearForReload();
             registerModels();
-            reloadHUD();
-            MCH_SoundsJson.update("assets/mcheli/");
+            boolean hud = false;
+            try { reloadHUD(); hud = true; } catch(RuntimeException e) { MCH_Lib.Log("HUD reload failed: %s", e.getMessage()); }
+            MCH_Lib.Log("Client live reload: info=%d/8, models=complete, HUD=%s, textures/sounds=refreshed",
+                    Integer.valueOf(succeeded), hud ? "complete" : "failed");
          }
       });
    }

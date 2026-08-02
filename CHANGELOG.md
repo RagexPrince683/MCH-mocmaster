@@ -1,3 +1,9 @@
+# Forge 1.7.10 development asset live reload (PR pending)
+
+- Make `/mcheli reload` prefer external addons and the editable `src/main/resources/assets/mcheli` tree over generated classpath output and development JARs.
+- Refresh configuration, HUD, model, texture, and sound resources on the client thread while preserving loaded vehicle seats and persistent state.
+- Add deterministic source-selection coverage and document the development verification workflow.
+
 # Missile target classification and locking correction (PR pending)
 
 - Classify planes and helicopters by deterministic full-footprint ground contact while retaining stable domains for tanks, turrets, UAV stations, ships, and compatible external vehicles.

@@ -29,7 +29,14 @@ public abstract class MCH_InfoManagerBase {
       LinkedHashMap newMap = new LinkedHashMap();
       path = path.replace('\\', '/');
       List<String> entries = MCH_ResourceHelper.listResources(path + type, ".txt");
-      if(entries == null || entries.isEmpty()) return false;
+      if(entries == null || entries.isEmpty()) {
+         if(reload) {
+            setMap(newMap);
+            MCH_Lib.Log("Read 0 %s (all definitions removed)", new Object[]{type});
+            return true;
+         }
+         return false;
+      }
 
       for(int i = 0; i < entries.size(); ++i) {
          String resourcePath = entries.get(i);

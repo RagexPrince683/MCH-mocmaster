@@ -16,10 +16,9 @@ import java.util.concurrent.*;
 public class MultiThreadModelManager {
 
     private static final int THREADS = Runtime.getRuntime().availableProcessors();
-    private static final ExecutorService EXECUTOR =
-            Executors.newFixedThreadPool(THREADS);
+    public static synchronized void start(MCH_ClientProxy proxy) {
 
-    public static void start(MCH_ClientProxy proxy) {
+        ExecutorService executor = Executors.newFixedThreadPool(THREADS);
 
         waitForData("helicopter", MCH_HeliInfoManager.map);
         waitForData("plane", MCP_PlaneInfoManager.map);
@@ -34,7 +33,7 @@ public class MultiThreadModelManager {
         // Helicopters
         for (Object key : MCH_HeliInfoManager.map.keySet()) {
             String name = (String) key;
-            futures.add(EXECUTOR.submit(() ->
+            futures.add(executor.submit(() ->
                     proxy.registerModelsHeli(name, false)
             ));
         }
@@ -42,7 +41,7 @@ public class MultiThreadModelManager {
         // Planes
         for (Object key : MCP_PlaneInfoManager.map.keySet()) {
             String name = (String) key;
-            futures.add(EXECUTOR.submit(() ->
+            futures.add(executor.submit(() ->
                     proxy.registerModelsPlane(name, false)
             ));
         }
@@ -50,7 +49,7 @@ public class MultiThreadModelManager {
         // Ships
         for (Object key : MCH_ShipInfoManager.map.keySet()) {
             String name = (String) key;
-            futures.add(EXECUTOR.submit(() ->
+            futures.add(executor.submit(() ->
                     proxy.registerModelsShip(name, false)
             ));
         }
@@ -58,7 +57,7 @@ public class MultiThreadModelManager {
         // Tanks
         for (Object key : MCH_TankInfoManager.map.keySet()) {
             String name = (String) key;
-            futures.add(EXECUTOR.submit(() ->
+            futures.add(executor.submit(() ->
                     proxy.registerModelsTank(name, false)
             ));
         }
@@ -66,7 +65,7 @@ public class MultiThreadModelManager {
         // Vehicles
         for (Object key : MCH_TurretInfoManager.map.keySet()) {
             String name = (String) key;
-            futures.add(EXECUTOR.submit(() -> {
+            futures.add(executor.submit(() -> {
                 try {
                     proxy.registerModelsVehicle(name, false);
                 } catch (Exception e) {
@@ -88,7 +87,7 @@ public class MultiThreadModelManager {
 
 
 
-        EXECUTOR.shutdown();
+        executor.shutdown();
 
         // Bullets (register once only)
         proxy.registerModels_Bullet();

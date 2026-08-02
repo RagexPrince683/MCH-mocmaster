@@ -35,6 +35,13 @@ public class MCH_ModelManager extends W_ModelBase {
       forceReloadMode = b;
    }
 
+   /** Drops all model objects before a complete client-thread registration pass. */
+   public static void clearForReload() {
+      MAP.clear();
+      mcheli.tank.MCH_TurretPopModelCache.clear();
+      forceReloadMode = true;
+   }
+
    public static IModelCustom load(String path, String name) {
       return (name != null && !name.isEmpty()) ? load(path + "/" + name) : null;
    }
