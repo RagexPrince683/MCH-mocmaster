@@ -2772,7 +2772,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
 
       e = this.getRiddenByEntity();
-      if(e != null && !e.isDead && !this.isDestroyed()) {
+      if(e != null && !e.isDead && !this.isDestroyed() && this.shouldUpdateLastRiderAngles()) {
          this.lastRiderYaw = e.rotationYaw;
          this.prevLastRiderYaw = e.prevRotationYaw;
          this.lastRiderPitch = e.rotationPitch;
@@ -2850,6 +2850,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.lastRiddenByEntity = this.getRiddenByEntity();
       this.lastRidingEntity = this.getRidingEntity();
       this.prevPosition.put(Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
+   }
+
+   protected boolean shouldUpdateLastRiderAngles() {
+      return true;
    }
 
    private void updateSearchlightBlocks() {
