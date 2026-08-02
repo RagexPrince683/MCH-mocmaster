@@ -1,4 +1,5 @@
 DisplayName = 105mm Howitzer [M444 APICM - Cluster]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 25
 Acceleration = 7

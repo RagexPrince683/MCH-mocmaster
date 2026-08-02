@@ -1,4 +1,5 @@
 DisplayName = 220mm TOS-1A Launcher [MO-1.01.04 - Rocket]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 500
 Explosion = 9

@@ -1,4 +1,5 @@
 DisplayName = 105mm M2 Howitzer [H M60 Shell - Chemical]
+UseGlobalArtilleryRangeModifier = true
 Type = MachineGun2
 RecoilPitch = 0.50F
 RecoilYaw = 0.0F

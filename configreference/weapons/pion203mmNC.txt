@@ -1,4 +1,5 @@
 DisplayName = 203mm 2A44 Cannon L/56.2 [3BV2 Nuclear Artillery Shell - 5KT SURFACE]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 800
 Explosion = 6

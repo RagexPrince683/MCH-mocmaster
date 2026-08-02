@@ -1,4 +1,5 @@
 DisplayName = B-8V20A [S-8KO Rocket - HEAT]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 400
 ModelBullet = hydra70

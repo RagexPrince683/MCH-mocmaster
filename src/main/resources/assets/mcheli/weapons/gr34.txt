@@ -1,4 +1,5 @@
 DisplayName = 8cm Wurfgranate 34 Mortar [Mortar grenade 34 - HE]
+UseGlobalArtilleryRangeModifier = true
 Type = MachineGun1
 RecoilPitch = 1.70F
 RecoilYaw = 0.0F

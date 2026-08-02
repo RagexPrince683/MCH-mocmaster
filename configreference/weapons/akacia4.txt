@@ -1,4 +1,5 @@
 DisplayName = 152mm 2A33 Cannon [3OF25 (PF) - HE-VT]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 62
 Explosion = 8

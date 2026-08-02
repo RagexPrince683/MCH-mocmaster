@@ -1,4 +1,5 @@
 DisplayName = 155mm Haubits BW L/52 FH-77 [Nexter BONUS]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 500
 ModelBullet = 155mm

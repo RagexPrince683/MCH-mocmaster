@@ -1,4 +1,5 @@
 DisplayName = 227mm Rocket [M26 - AT2 Mine]
+UseGlobalArtilleryRangeModifier = true
 Type = Dispenser
 Power = 80
 DamageFactor = tank, 1.0

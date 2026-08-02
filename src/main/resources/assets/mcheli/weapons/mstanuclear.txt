@@ -1,4 +1,5 @@
 DisplayName = 152mm 2A65 Howitzer [3BV3 Nuclear Artillery Shell - ~1KT]
+UseGlobalArtilleryRangeModifier = true
 Type = MachineGun1
 RecoilPitch = 3.00F
 RecoilYaw = 0.0F

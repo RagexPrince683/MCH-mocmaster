@@ -1,4 +1,5 @@
 DisplayName = 81mm M252 Mortar [M374A2 - HE]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 35
 Explosion = 3
@@ -19,11 +20,11 @@ DamageFactor = plane, 3.0
 DamageFactor = vehicle 2.0
 DamageFactor = heli, 3.0
 
-; ’…’e‹——£‚Ì•\¦
+; ç€å¼¾è·é›¢ã®è¡¨ç¤º
 DisplayMortarDistance = true
-; ƒJƒƒ‰‚Ì‚’¼•ûŒü‚ğ0‚ÉŒÅ’è‚·‚é
+; ã‚«ãƒ¡ãƒ©ã®å‚ç›´æ–¹å‘ã‚’0ã«å›ºå®šã™ã‚‹
 FixCameraPitch = true
-; ƒJƒƒ‰‚Ì‰ñ“]‘¬“x‚Ì”{—¦(¬‚³‚­‚·‚é‚Æ‚æ‚è×‚©‚­’…’e’n“_‚ª’²®‚ª‚Å‚«‚é)
+; ã‚«ãƒ¡ãƒ©ã®å›è»¢é€Ÿåº¦ã®å€ç‡(å°ã•ãã™ã‚‹ã¨ã‚ˆã‚Šç´°ã‹ãç€å¼¾åœ°ç‚¹ãŒèª¿æ•´ãŒã§ãã‚‹)
 CameraRotationSpeedPitch = 0.3
 
 DisableSmoke = true
@@ -37,10 +38,10 @@ HeatCount = 100
 MaxHeatCount = 250
 
 
-; AddMuzzleFlash = ”­ËŒ³‚©‚ç‚Ì‹——£, ƒTƒCƒY, •\¦ŠÔ,  A,  R,  G,  B
+; AddMuzzleFlash = ç™ºå°„å…ƒã‹ã‚‰ã®è·é›¢, ã‚µã‚¤ã‚º, è¡¨ç¤ºæ™‚é–“,  A,  R,  G,  B
 AddMuzzleFlash      =           2.1,   1.05,        2,  220,254,219,104
 AddMuzzleFlash      =           2.0,   1.00,        1,  220,254,219,184
-; AddMuzzleFlashSmoke = ”­ËŒ³‚©‚ç‚Ì‹——£, •\¦”, ƒTƒCƒY, ”ÍˆÍ, •\¦ŠÔ,  A,  R,  G,  B
+; AddMuzzleFlashSmoke = ç™ºå°„å…ƒã‹ã‚‰ã®è·é›¢, è¡¨ç¤ºæ•°, ã‚µã‚¤ã‚º, ç¯„å›², è¡¨ç¤ºæ™‚é–“,  A,  R,  G,  B
 AddMuzzleFlashSmoke   =             3.2,     10,    6.0,  3.0,       25,  220,160,140,120
 AddMuzzleFlashSmoke   =             2.2,      5,    6.0,  4.0,       35,  200,190,170,150
 

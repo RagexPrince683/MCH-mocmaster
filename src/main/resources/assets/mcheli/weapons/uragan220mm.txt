@@ -1,4 +1,5 @@
 DisplayName = 220mm Rocket [9M27F - HE-Frag]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 500
 Explosion = 18

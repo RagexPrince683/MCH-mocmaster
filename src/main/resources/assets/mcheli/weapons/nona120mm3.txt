@@ -1,4 +1,5 @@
 DisplayName = 120mm 2A60 Mortar [OF-843B - 3Z2 Incendiary]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 30
 Explosion = 2
