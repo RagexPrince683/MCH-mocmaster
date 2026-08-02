@@ -246,6 +246,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public void onTickPre() {
+      MCH_MOD.proxy.tickTargetedVehicleReload();
       boolean replayActive = MCH_ReplayModCompat.updatePlaybackState();
       if(replayActive != this.replayPlaybackActive) {
          this.replayPlaybackActive = replayActive;

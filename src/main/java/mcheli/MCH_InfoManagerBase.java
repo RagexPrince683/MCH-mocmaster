@@ -123,6 +123,13 @@ public abstract class MCH_InfoManagerBase {
             MCH_Lib.Log("### %s", new Object[]{lastReloadError});
             return false;
          }
+         if(oldInfo instanceof mcheli.aircraft.MCH_BaseVehicleInfo
+               && newInfo instanceof mcheli.aircraft.MCH_BaseVehicleInfo
+               && ((mcheli.aircraft.MCH_BaseVehicleInfo)oldInfo).getNumSeatAndRack()
+               != ((mcheli.aircraft.MCH_BaseVehicleInfo)newInfo).getNumSeatAndRack()) {
+            lastReloadError = "Seat count changed; restart is required";
+            return false;
+         }
          preserveRuntimeState(oldInfo, newInfo);
          LinkedHashMap newMap = new LinkedHashMap(oldMap);
          newMap.put(name, newInfo);

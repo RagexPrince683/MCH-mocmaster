@@ -8397,6 +8397,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.markVehicleBoxCacheDirty("targeted vehicle config reload");
       super.stepHeight = info.stepHeight;
       this.setSize(info.bodyWidth, info.bodyHeight);
+      this.aps.configure(info.apsUseTime, info.apsWaitTime, info.apsRange, info.apsAmmo);
       return true;
    }
 

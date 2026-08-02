@@ -96,8 +96,11 @@ The Development GUI deliberately provides four separate scopes:
 - **Reload vehicle configuration settings** targets only the definition selected by the
   MCHeli vehicle the player currently rides or controls. The server validates that entity,
   replaces one manager entry, applies it only to that entity, and the client reloads only
-  that definition's main/part models and item/LOD caches. The button stays disabled while
-  the request is pending; seat-count changes are rejected as restart-required.
+  that definition's main/part models and item/LOD caches. Pressing the button immediately
+  closes the GUI and unpauses an integrated game; completion is reported in chat. A pending
+  request is owned by the client proxy rather than the closed screen and is cleared by a
+  response, a ten-second timeout, disconnect, or world replacement. The button stays
+  disabled while a request is pending; seat-count changes are rejected as restart-required.
 - **Reload All Weapons** reloads weapon definitions. It does not reload vehicle definitions.
 - **Reload All HUD** reloads HUD definitions. It does not trigger the vehicle button.
 - **`/mcheli reload`** remains the expensive complete development reload for all information
@@ -105,6 +108,10 @@ The Development GUI deliberately provides four separate scopes:
 
 The targeted vehicle button never scans loaded worlds or other vehicles with the same name,
 and does not recreate seats or reset the selected vehicle's riders and runtime state.
+Most definition values are read through the newly installed information snapshot. Runtime
+dimensions, step height, extra collision boxes, camera bounds, force-spawn policy, and APS
+timings/range/capacity are refreshed explicitly. Changing the combined seat/rack count still
+requires a restart, as does adding content that requires registration of a new Minecraft item.
 
 In a repository development run, `/mcheli reload` reads the editable
 `src/main/resources/assets/mcheli` tree directly. Running `processResources`, relogging, and
@@ -121,6 +128,17 @@ throttle, and weapon state while definition-derived objects are refreshed. Defin
 which require a newly registered Minecraft item still print the existing restart warning.
 
 ### Manual verification
+
+For the targeted vehicle button:
+
+1. Start `runClient`, enter an existing MCHeli vehicle, and open the Development GUI.
+2. Change a visible value in that vehicle's source `.txt` and press **Reload vehicle configuration settings**.
+3. Confirm the GUI closes immediately, gameplay resumes without **Save & Close**, chat reports success, and the edited value is active.
+4. Confirm no controlled-vehicle-change error appears, then edit the selected MQO/OBJ model and repeat.
+5. Confirm only the selected entity/model changes and that seats, riders, fuel, health, ammunition, ownership, locks, and throttle remain unchanged.
+6. Repeat several times and check for crashes, stale requests, duplicate seats, or display-list growth.
+
+For the complete reload command:
 
 1. Start `runClient`, enter a world, and use an existing MCHeli vehicle.
 2. Edit its source `.txt`, run `/mcheli reload`, and confirm the value changes in place.

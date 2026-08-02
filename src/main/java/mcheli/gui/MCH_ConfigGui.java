@@ -106,8 +106,6 @@ public class MCH_ConfigGui extends W_GuiContainer {
    public static final int SCREEN_DEVELOP = 3;
    public static final int SCREEN_PLANE_CAMERA = 4;
    private int ignoreButtonCounter = 0;
-   private boolean targetedReloadPending;
-   private int targetedReloadTimeout;
 
 
    public MCH_ConfigGui(EntityPlayer player) {
@@ -718,14 +716,9 @@ public class MCH_ConfigGui extends W_GuiContainer {
             this.applySwitchScreen();
          }
       }
-      if(this.targetedReloadPending && --this.targetedReloadTimeout <= 0) {
-         this.targetedReloadPending = false;
-         if(super.mc.thePlayer != null) super.mc.thePlayer.addChatMessage(
-               new net.minecraft.util.ChatComponentText("Vehicle reload failed: request timed out"));
-      }
       if(this.buttonReloadAircraftInfo != null) {
          MCH_EntityBaseVehicle target = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(this.thePlayer);
-         this.buttonReloadAircraftInfo.enabled = !this.targetedReloadPending
+         this.buttonReloadAircraftInfo.enabled = !MCH_MOD.proxy.isTargetedVehicleReloadPending()
                && target != null && target.getAcInfo() != null
                && mcheli.aircraft.MCH_VehicleInfoReload.managerFor(target) != null;
       }
@@ -814,10 +807,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
          case 400:
             ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(this.thePlayer);
             if(ac != null && ac.getAcInfo() != null) {
-               this.targetedReloadPending = true;
-               this.targetedReloadTimeout = 200;
-               this.buttonReloadAircraftInfo.enabled = false;
-               MCH_PacketNotifyInfoReloaded.sendTargetedRequest(ac);
+               if(MCH_MOD.proxy.requestTargetedVehicleReload(ac)) super.mc.thePlayer.closeScreen();
             }
             break;
          }
@@ -825,14 +815,6 @@ public class MCH_ConfigGui extends W_GuiContainer {
          var7.printStackTrace();
       }
 
-   }
-
-   public static void onTargetedReloadResult(boolean success, String reason) {
-      if(Minecraft.getMinecraft().currentScreen instanceof MCH_ConfigGui) {
-         MCH_ConfigGui gui = (MCH_ConfigGui)Minecraft.getMinecraft().currentScreen;
-         gui.targetedReloadPending = false;
-         gui.targetedReloadTimeout = 0;
-      }
    }
 
    public boolean doesGuiPauseGame() {

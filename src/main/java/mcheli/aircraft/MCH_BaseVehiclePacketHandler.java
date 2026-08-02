@@ -500,7 +500,7 @@ public class MCH_BaseVehiclePacketHandler {
       }
 
       if(player.worldObj.isRemote && pc.type == 4) {
-         MCH_MOD.proxy.scheduleTargetedVehicleReload(pc.entityId, pc.entityUuid,
+         MCH_MOD.proxy.scheduleTargetedVehicleReload(pc.requestId, pc.entityId,
                pc.definition, pc.success, pc.reason);
          return;
       }
@@ -544,20 +544,19 @@ public class MCH_BaseVehiclePacketHandler {
          MCH_PacketNotifyInfoReloaded request, boolean validateIdentity) {
       MCH_EntityBaseVehicle vehicle = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
       if(vehicle == null || vehicle.getAcInfo() == null) {
-         MCH_PacketNotifyInfoReloaded.sendTargetedResult(player, null, "", false,
-               "No controlled MCHeli vehicle exists");
+         MCH_PacketNotifyInfoReloaded.sendTargetedResult(player, request.requestId,
+               request.entityId, "", false, "No controlled vehicle");
          return;
       }
-      if(validateIdentity && (request.entityId != vehicle.getEntityId()
-            || !vehicle.getUniqueID().toString().equals(request.entityUuid))) {
-         MCH_PacketNotifyInfoReloaded.sendTargetedResult(player, vehicle,
-               vehicle.getAcInfo().name, false, "The controlled vehicle changed before reload");
+      if(validateIdentity && request.entityId != vehicle.getEntityId()) {
+         MCH_PacketNotifyInfoReloaded.sendTargetedResult(player, request.requestId,
+               request.entityId, vehicle.getAcInfo().name, false, "Entity ID changed");
          return;
       }
       String name = vehicle.getAcInfo().name;
       MCH_InfoManagerBase manager = MCH_VehicleInfoReload.managerFor(vehicle);
       if(manager == null) {
-         MCH_PacketNotifyInfoReloaded.sendTargetedResult(player, vehicle, name, false,
+         MCH_PacketNotifyInfoReloaded.sendTargetedResult(player, request.requestId, request.entityId, name, false,
                "Unsupported MCHeli vehicle type");
          return;
       }
@@ -568,7 +567,7 @@ public class MCH_BaseVehiclePacketHandler {
          success = vehicle.applyTargetedInfo(info);
          if(!success) reason = "Seat count changed; restart is required";
       }
-      MCH_PacketNotifyInfoReloaded.sendTargetedResult(player, vehicle, name, success,
+      MCH_PacketNotifyInfoReloaded.sendTargetedResult(player, request.requestId, request.entityId, name, success,
             success ? "Reloaded vehicle definition and model" : reason);
    }
 
