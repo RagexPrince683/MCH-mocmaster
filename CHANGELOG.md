@@ -1,3 +1,9 @@
+# Texture downscale and MQO UV audit tooling (PR pending)
+
+- Added a deterministic, manifest-driven Python audit/repair/verification tool for runtime-selected vehicle model and texture pairs.
+- Added parser, affine UV conversion, premultiplied-alpha resizing, transparent-edge bleed, alpha-coverage, and deterministic-output tests.
+- Documented that normalized MQO UVs do not change under proportional resizing and that validated pre-downscale sources remain unavailable, so no binary texture or model asset was modified.
+
 # Targeted vehicle configuration live reload (PR pending)
 
 - Make the Development GUI vehicle button reload one server-validated controlled vehicle definition instead of scanning and rebuilding every matching loaded entity.
