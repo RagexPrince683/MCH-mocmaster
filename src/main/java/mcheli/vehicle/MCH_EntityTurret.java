@@ -171,6 +171,17 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
    }
 
    public boolean useCurrentWeapon(MCH_WeaponParam prm) {
+      if(this.isFreeLookMode() && prm.user != null) {
+         float cameraPitch = prm.user.rotationPitch;
+         float cameraYaw = prm.user.rotationYaw;
+         prm.user.rotationPitch = this.getLastRiderPitch();
+         prm.user.rotationYaw = this.getLastRiderYaw();
+         boolean result = super.useCurrentWeapon(prm);
+         prm.user.rotationPitch = cameraPitch;
+         prm.user.rotationYaw = cameraYaw;
+         return result;
+      }
+
       if(prm.user != null) {
          MCH_WeaponSet breforeUseWeaponPitch = this.getCurrentWeapon(prm.user);
          if(breforeUseWeaponPitch != null) {
@@ -460,6 +471,10 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
 
    public void onUpdateAngles(float partialTicks) {}
 
+   protected boolean shouldUpdateLastRiderAngles() {
+      return !this.isFreeLookMode();
+   }
+
    //no usages
    public void _updateRiderPosition() {
       float yaw = super.rotationYaw;
@@ -472,6 +487,6 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
    }
 
    public boolean canSwitchFreeLook() {
-      return false;
+      return true;
    }
 }

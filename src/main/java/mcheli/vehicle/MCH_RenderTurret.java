@@ -30,7 +30,7 @@ public class MCH_RenderTurret extends MCH_RenderBaseVehicle {
          MCH_EntityTurret vehicle = (MCH_EntityTurret)entity;
          turretInfo = vehicle.getTurretInfo();
          if(turretInfo != null) {
-            if(vehicle.riddenByEntity != null && !vehicle.isDestroyed()) {
+            if(vehicle.riddenByEntity != null && !vehicle.isDestroyed() && !vehicle.isFreeLookMode()) {
                vehicle.isUsedPlayer = true;
                vehicle.lastRiderYaw = vehicle.riddenByEntity.rotationYaw;
                vehicle.lastRiderPitch = vehicle.riddenByEntity.rotationPitch;

@@ -489,3 +489,7 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Match client and server vehicles by their synchronized entity ID instead of comparing side-local entity UUIDs.
 - Close the development GUI as soon as a targeted request is sent, while a client-side pending request tracks the response, timeout, and world lifetime.
 - Reload and apply only the selected definition and its models, preserving runtime vehicle state and rejecting seat-count changes before publication.
+# Stationary Turret Free Look (PR pending)
+
+- Enabled the existing free-look control for stationary turrets.
+- Kept turret weapon aim fixed while the rider looks around and smoothly recenters the camera before normal aiming resumes.
