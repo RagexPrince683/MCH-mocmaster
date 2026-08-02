@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "alpha_threshold_byte": 1,
+  "comparison_parent": "b71d72bf1c3af1788f305ee533d1abe634a4308c",
+  "migration_commit": "d89a6472e09701807e470603fd7493291ab8a867",
+  "repairs": [],
+  "unresolved": [
+    {
+      "scope": "textures used by migrated vehicle models that audit as transparent-covered",
+      "required_source": "original, pre-downscale texture with provenance and original canvas dimensions",
+      "reason": "the parent does not contain the newly tracked assets and no validated high-resolution source is present in repository history"
+    }
+  ]
+}
