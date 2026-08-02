@@ -78,6 +78,8 @@ public class MCH_CommonProxy {
    public void reloadHUD() {}
 
    public void scheduleClientInfoReload() {}
+   public void scheduleTargetedVehicleReload(int entityId, String uuid, String definition,
+         boolean success, String reason) {}
 
    public Entity getClientPlayer() {
       return null;

@@ -106,6 +106,8 @@ public class MCH_ConfigGui extends W_GuiContainer {
    public static final int SCREEN_DEVELOP = 3;
    public static final int SCREEN_PLANE_CAMERA = 4;
    private int ignoreButtonCounter = 0;
+   private boolean targetedReloadPending;
+   private int targetedReloadTimeout;
 
 
    public MCH_ConfigGui(EntityPlayer player) {
@@ -716,6 +718,17 @@ public class MCH_ConfigGui extends W_GuiContainer {
             this.applySwitchScreen();
          }
       }
+      if(this.targetedReloadPending && --this.targetedReloadTimeout <= 0) {
+         this.targetedReloadPending = false;
+         if(super.mc.thePlayer != null) super.mc.thePlayer.addChatMessage(
+               new net.minecraft.util.ChatComponentText("Vehicle reload failed: request timed out"));
+      }
+      if(this.buttonReloadAircraftInfo != null) {
+         MCH_EntityBaseVehicle target = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(this.thePlayer);
+         this.buttonReloadAircraftInfo.enabled = !this.targetedReloadPending
+               && target != null && target.getAcInfo() != null
+               && mcheli.aircraft.MCH_VehicleInfoReload.managerFor(target) != null;
+      }
 
    }
 
@@ -793,50 +806,33 @@ public class MCH_ConfigGui extends W_GuiContainer {
             MCH_Lib.DbgLog(true, "MCH_BaseInfo.reload all weapon info.", new Object[0]);
             MCH_PacketNotifyInfoReloaded.sendRealodAllWeapon();
             MCH_WeaponInfoManager.reload();
-            List list = super.mc.theWorld.loadedEntityList;
-
-            for(int i = 0; i < list.size(); ++i) {
-               if(list.get(i) instanceof MCH_EntityBaseVehicle) {
-                  ac = (MCH_EntityBaseVehicle)list.get(i);
-                  if(ac.getAcInfo() != null) {
-                     ac.getAcInfo().reload();
-                     ac.changeType(ac.getAcInfo().name);
-                     ac.onAcInfoReloaded();
-                  }
-               }
-            }
-
             super.mc.thePlayer.closeScreen();
             break;
          case 402:
             MCH_MOD.proxy.reloadHUD();
+            break;
          case 400:
             ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(this.thePlayer);
             if(ac != null && ac.getAcInfo() != null) {
-               String var9 = ac.getAcInfo().name;
-               MCH_Lib.DbgLog(true, "MCH_BaseInfo.reload : " + var9, new Object[0]);
-               List var12 = super.mc.theWorld.loadedEntityList;
-
-               for(int i1 = 0; i1 < var12.size(); ++i1) {
-                  if(var12.get(i1) instanceof MCH_EntityBaseVehicle) {
-                     ac = (MCH_EntityBaseVehicle)var12.get(i1);
-                     if(ac.getAcInfo() != null && ac.getAcInfo().name.equals(var9)) {
-                        ac.getAcInfo().reload();
-                        ac.changeType(var9);
-                        ac.onAcInfoReloaded();
-                     }
-                  }
-               }
-
-               MCH_PacketNotifyInfoReloaded.sendRealodAc();
+               this.targetedReloadPending = true;
+               this.targetedReloadTimeout = 200;
+               this.buttonReloadAircraftInfo.enabled = false;
+               MCH_PacketNotifyInfoReloaded.sendTargetedRequest(ac);
             }
-
-            super.mc.thePlayer.closeScreen();
+            break;
          }
       } catch (Exception var7) {
          var7.printStackTrace();
       }
 
+   }
+
+   public static void onTargetedReloadResult(boolean success, String reason) {
+      if(Minecraft.getMinecraft().currentScreen instanceof MCH_ConfigGui) {
+         MCH_ConfigGui gui = (MCH_ConfigGui)Minecraft.getMinecraft().currentScreen;
+         gui.targetedReloadPending = false;
+         gui.targetedReloadTimeout = 0;
+      }
    }
 
    public boolean doesGuiPauseGame() {

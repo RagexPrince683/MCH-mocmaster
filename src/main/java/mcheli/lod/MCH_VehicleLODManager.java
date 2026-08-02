@@ -103,6 +103,10 @@ public final class MCH_VehicleLODManager {
         this.world = null;
     }
 
+    public synchronized void invalidate(UUID vehicleId) {
+        if (vehicleId != null) this.displays.remove(vehicleId);
+    }
+
     @SubscribeEvent
     public synchronized void onRenderWorldLast(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();

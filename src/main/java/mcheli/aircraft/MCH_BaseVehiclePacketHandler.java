@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
+import mcheli.MCH_InfoManagerBase;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_PacketIndNotifyAmmoNum;
@@ -498,33 +499,22 @@ public class MCH_BaseVehiclePacketHandler {
          return;
       }
 
+      if(player.worldObj.isRemote && pc.type == 4) {
+         MCH_MOD.proxy.scheduleTargetedVehicleReload(pc.entityId, pc.entityUuid,
+               pc.definition, pc.success, pc.reason);
+         return;
+      }
+
       if(!player.worldObj.isRemote) {
          MCH_EntityBaseVehicle ac;
          int i$;
          switch(pc.type) {
          case 0:
-            ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
-            if(ac != null && ac.getAcInfo() != null) {
-               String var11 = ac.getAcInfo().name;
-               WorldServer[] var12 = MinecraftServer.getServer().worldServers;
-               i$ = var12.length;
-
-               for(int var13 = 0; var13 < i$; ++var13) {
-                  WorldServer var14 = var12[var13];
-                  List var15 = var14.loadedEntityList;
-
-                  for(int i1 = 0; i1 < var15.size(); ++i1) {
-                     if(var15.get(i1) instanceof MCH_EntityBaseVehicle) {
-                        ac = (MCH_EntityBaseVehicle)var15.get(i1);
-                        if(ac.getAcInfo() != null && ac.getAcInfo().name.equals(var11)) {
-                           ac.changeType(var11);
-                           ac.createSeats(UUID.randomUUID().toString());
-                           ac.onAcInfoReloaded();
-                        }
-                     }
-                  }
-               }
-            }
+            // Legacy clients get the same authoritative, single-entity behavior.
+            handleTargetedReload(player, pc, false);
+            break;
+         case 3:
+            handleTargetedReload(player, pc, true);
             break;
          case 1:
             MCH_WeaponInfoManager.reload();
@@ -548,6 +538,38 @@ public class MCH_BaseVehiclePacketHandler {
          }
 
       }
+   }
+
+   private static void handleTargetedReload(EntityPlayer player,
+         MCH_PacketNotifyInfoReloaded request, boolean validateIdentity) {
+      MCH_EntityBaseVehicle vehicle = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
+      if(vehicle == null || vehicle.getAcInfo() == null) {
+         MCH_PacketNotifyInfoReloaded.sendTargetedResult(player, null, "", false,
+               "No controlled MCHeli vehicle exists");
+         return;
+      }
+      if(validateIdentity && (request.entityId != vehicle.getEntityId()
+            || !vehicle.getUniqueID().toString().equals(request.entityUuid))) {
+         MCH_PacketNotifyInfoReloaded.sendTargetedResult(player, vehicle,
+               vehicle.getAcInfo().name, false, "The controlled vehicle changed before reload");
+         return;
+      }
+      String name = vehicle.getAcInfo().name;
+      MCH_InfoManagerBase manager = MCH_VehicleInfoReload.managerFor(vehicle);
+      if(manager == null) {
+         MCH_PacketNotifyInfoReloaded.sendTargetedResult(player, vehicle, name, false,
+               "Unsupported MCHeli vehicle type");
+         return;
+      }
+      boolean success = manager.reloadEntry(name);
+      String reason = manager.getLastReloadError();
+      if(success) {
+         MCH_BaseVehicleInfo info = (MCH_BaseVehicleInfo)manager.getMap().get(name);
+         success = vehicle.applyTargetedInfo(info);
+         if(!success) reason = "Seat count changed; restart is required";
+      }
+      MCH_PacketNotifyInfoReloaded.sendTargetedResult(player, vehicle, name, success,
+            success ? "Reloaded vehicle definition and model" : reason);
    }
 
    public static void onPacketAircraftLocation(EntityPlayer entityPlayer, ByteArrayDataInput data) {

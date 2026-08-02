@@ -91,6 +91,21 @@ Enable debug bounding boxes for connected clients:
 
 ## Development live reload
 
+The Development GUI deliberately provides four separate scopes:
+
+- **Reload vehicle configuration settings** targets only the definition selected by the
+  MCHeli vehicle the player currently rides or controls. The server validates that entity,
+  replaces one manager entry, applies it only to that entity, and the client reloads only
+  that definition's main/part models and item/LOD caches. The button stays disabled while
+  the request is pending; seat-count changes are rejected as restart-required.
+- **Reload All Weapons** reloads weapon definitions. It does not reload vehicle definitions.
+- **Reload All HUD** reloads HUD definitions. It does not trigger the vehicle button.
+- **`/mcheli reload`** remains the expensive complete development reload for all information
+  managers and client assets, including resource, texture, sound, HUD, and model work.
+
+The targeted vehicle button never scans loaded worlds or other vehicles with the same name,
+and does not recreate seats or reset the selected vehicle's riders and runtime state.
+
 In a repository development run, `/mcheli reload` reads the editable
 `src/main/resources/assets/mcheli` tree directly. Running `processResources`, relogging, and
 restarting the world are not required. Resolution is deterministic: an external
