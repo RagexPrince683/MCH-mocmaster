@@ -449,27 +449,16 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          this.updateRecoil(partialTicks);
          this.setRotPitch(this.getRotPitch() + (this.WheelMng.targetPitch - this.getRotPitch()) * partialTicks);
          this.setRotRoll(this.getRotRoll() + (this.WheelMng.targetRoll - this.getRotRoll()) * partialTicks);
-         boolean isFly = MCH_Lib.getBlockIdY(this, 3, -3) == 0;
-         //System.out.println("isfly" + isFly);
+         double dx = super.posX - super.prevPosX;
+         double dz = super.posZ - super.prevPosZ;
+         double dist = dx * dx + dz * dz;
+         if(dist <= 1.0E-6D) {
+            dist = super.motionX * super.motionX + super.motionZ * super.motionZ;
+         }
+         float rotonground = this.getTankSteeringYawFactor(dist);
 
-         //logic for like rotation
-         if(!isFly || this.getAcInfo().isFloat && this.getWaterDepth() > 0.0D) {
-            float rotonground = 1.0F;
-            if(!isFly) {
-               rotonground = this.getAcInfo().mobilityYawOnGround;
-               if(!this.getAcInfo().canRotOnGround) {
-                  Block pivotTurnThrottle = MCH_Lib.getBlockY(this, 3, -2, false);
-                  if(!W_Block.isEqual(pivotTurnThrottle, W_Block.getWater()) && !W_Block.isEqual(pivotTurnThrottle, Blocks.air)) {
-                     rotonground = 0.0F;
-                  }
-               }
-            }
-
+         if(rotonground > 0.0F) {
             float pivotTurnThrottle1 = this.getAcInfo().pivotTurnThrottle;
-            double dx = super.posX - super.prevPosX;
-            double dz = super.posZ - super.prevPosZ;
-            double dist = dx * dx + dz * dz;
-
             if(pivotTurnThrottle1 <= 0.0F || this.getCurrentThrottle() >= (double)pivotTurnThrottle1 || super.throttleBack >= pivotTurnThrottle1 / 10.0F || dist > (double)super.throttleBack * 0.01D) {
                float sf = (float)Math.sqrt(dist <= 1.0D?dist:1.0D);
                if(pivotTurnThrottle1 <= 0.0F) {
@@ -484,12 +473,38 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
                if(super.moveRight && !super.moveLeft) {
                   this.setRotYaw(this.getRotYaw() + 0.6F * rotonground * partialTicks * flag * sf);
                }
-
             }
          }
 
          this.addkeyRotValue = this.decayMobilityValue(this.addkeyRotValue, 0.9F, partialTicks);
       }
+   }
+
+   /**
+    * Determines whether tank yaw input can be applied. A block check beneath the
+    * tank center is unreliable when only one track reaches a diagonal step, so
+    * collision and actual wheel contact are the authoritative support signals.
+    */
+   private float getTankSteeringYawFactor(double horizontalMovementSq) {
+      boolean floating = this.getAcInfo().isFloat && this.getWaterDepth() > 0.0D;
+      boolean supported = super.onGround || this.WheelMng.hasWheelSupport();
+      if(!supported && !floating) {
+         // Moving tanks retain directional control in a fall, but cannot pivot in midair.
+         return horizontalMovementSq > 1.0E-6D ? 1.0F : 0.0F;
+      }
+
+      if(floating && !supported) {
+         return 1.0F;
+      }
+
+      float yawFactor = this.getAcInfo().mobilityYawOnGround;
+      if(!this.getAcInfo().canRotOnGround) {
+         Block block = MCH_Lib.getBlockY(this, 3, -2, false);
+         if(!W_Block.isEqual(block, W_Block.getWater()) && !W_Block.isEqual(block, Blocks.air)) {
+            yawFactor = 0.0F;
+         }
+      }
+      return yawFactor;
    }
 
    protected void onUpdate_Control(float partialTicks) {
@@ -638,23 +653,15 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
                         double dx = super.posX - super.prevPosX;
                         double dz = super.posZ - super.prevPosZ;
                         double dist = dx * dx + dz * dz;
+                        if(dist <= 1.0E-6D) {
+                           dist = super.motionX * super.motionX + super.motionZ * super.motionZ;
+                        }
                         float sf = (float)Math.sqrt(dist <= 1.0D ? dist : 1.0D);
                         if (pivotTurnThrottle1 <= 0.0F) {
                            sf = 1.0F;
                         }
 
-                        float rotonground = 1.0F;
-                        boolean isFly = MCH_Lib.getBlockIdY(this, 3, -3) == 0;
-
-                        if (!isFly) {
-                           rotonground = this.getAcInfo().mobilityYawOnGround;
-                           if (!this.getAcInfo().canRotOnGround) {
-                              Block pivotTurnThrottle = MCH_Lib.getBlockY(this, 3, -2, false);
-                              if (!W_Block.isEqual(pivotTurnThrottle, W_Block.getWater()) && !W_Block.isEqual(pivotTurnThrottle, Blocks.air)) {
-                                 rotonground = 0.0F;
-                              }
-                           }
-                        }
+                        float rotonground = this.getTankSteeringYawFactor(dist);
 
                         float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D ? -1.0F : 1.0F;
                         if(super.moveLeft && !super.moveRight) {

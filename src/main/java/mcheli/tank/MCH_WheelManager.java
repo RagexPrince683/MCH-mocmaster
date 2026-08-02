@@ -33,6 +33,8 @@ public class MCH_WheelManager {
    public float targetRoll;
    public float prevYaw;
    private static Random rand = new Random();
+   private int wheelSupportGraceTicks;
+   private static final int WHEEL_SUPPORT_GRACE_TICKS = 2;
 
    // per-wheel state (persist during runtime)
    //*unused helper
@@ -60,6 +62,31 @@ public class MCH_WheelManager {
       return (double)top;
    }
 
+
+   /**
+    * Returns collision-derived wheel support, retaining it briefly because angle
+    * updates can run before wheel movement refreshes contact for the current tick.
+    */
+   public boolean hasWheelSupport() {
+      return this.hasCurrentWheelContact() || this.wheelSupportGraceTicks > 0;
+   }
+
+   private boolean hasCurrentWheelContact() {
+      for(int i = 0; i < this.wheels.length; ++i) {
+         if(this.wheels[i] != null && this.wheels[i].onGround) {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private void updateWheelSupport() {
+      if(this.hasCurrentWheelContact()) {
+         this.wheelSupportGraceTicks = WHEEL_SUPPORT_GRACE_TICKS;
+      } else if(this.wheelSupportGraceTicks > 0) {
+         --this.wheelSupportGraceTicks;
+      }
+   }
 
    public void createWheels(World w, List list, Vec3 weightedCenter) {
       this.wheels = new MCH_EntityWheel[list.size() * 2];
@@ -153,6 +180,8 @@ public class MCH_WheelManager {
             b.onGround = true;
          }
       }
+
+      this.updateWheelSupport();
 
       // horizontal speed and small-stop guard (prevent jitter when stopped)
       double horizSpeed = Math.sqrt(ac.motionX * ac.motionX + ac.motionZ * ac.motionZ);
