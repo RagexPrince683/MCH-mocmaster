@@ -1,5 +1,7 @@
 # Texture and UV audit
 
+This optional Python utility is diagnostic only. It is not required by the automatic Java runtime repair system, and its tests do not change a PNG, MQO, or rendered model.
+
 Run from the repository root (Pillow is a development-only requirement):
 
 ```sh

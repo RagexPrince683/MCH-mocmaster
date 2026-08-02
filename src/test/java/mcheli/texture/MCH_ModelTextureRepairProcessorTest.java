@@ -1,0 +1,13 @@
+package mcheli.texture;
+import java.awt.image.BufferedImage;
+import org.junit.Test;
+import static org.junit.Assert.*;
+public class MCH_ModelTextureRepairProcessorTest {
+ @Test public void triangleAndQuadCoverage(){boolean[] t=new boolean[64];MCH_ModelTextureRepairProcessor.rasterizeTriangle(t,8,8,new float[]{0,0,1,0,0,1});assertTrue(count(t)>20);boolean[] q=new boolean[64];MCH_ModelTextureRepairProcessor.rasterizeFace(q,8,8,new float[]{0,0,1,0,1,1,0,1});assertTrue(count(q)>50);}
+ @Test public void wrappingUvsRemainUntouched(){boolean[] m=new boolean[16];MCH_ModelTextureRepairProcessor.rasterizeTriangle(m,4,4,new float[]{-0.1F,0,1,0,0,1});assertEquals(0,count(m));assertEquals(-.2F,MCH_ModelTextureRepairProcessor.correctUV(-.2F,.5F,opaque(4,4),2)[0],0);assertEquals(1.2F,MCH_ModelTextureRepairProcessor.correctUV(1.2F,.5F,opaque(4,4),2)[0],0);}
+ @Test public void onlySmallEnclosedBinaryHolesFill(){BufferedImage i=opaque(9,9);i.setRGB(4,4,0);assertEquals(1,MCH_ModelTextureRepairProcessor.repair(i,full(81),4,2,0,1).repairedPixels);BufferedImage large=opaque(9,9);for(int y=2;y<7;y++)for(int x=2;x<7;x++)large.setRGB(x,y,0);assertEquals(0,MCH_ModelTextureRepairProcessor.repair(large,full(81),4,2,0,1).repairedPixels);BufferedImage smooth=opaque(9,9);smooth.setRGB(4,4,0x80606060);assertEquals(0,MCH_ModelTextureRepairProcessor.repair(smooth,full(81),4,2,0,1).repairedPixels);}
+ @Test public void bleedPreservesAlphaAndCoverage(){BufferedImage i=new BufferedImage(5,5,BufferedImage.TYPE_INT_ARGB);i.setRGB(2,2,0xFFFF0000);boolean[] c=new boolean[25];c[12]=c[13]=true;BufferedImage r=MCH_ModelTextureRepairProcessor.repair(i,c,0,0,1,0).image;assertEquals(0,r.getRGB(3,2)>>>24);assertEquals(0xFF0000,r.getRGB(3,2)&0xFFFFFF);assertEquals(0,r.getRGB(1,2));}
+ @Test public void nearestUvObeysRadius(){BufferedImage i=new BufferedImage(8,8,BufferedImage.TYPE_INT_ARGB);i.setRGB(5,4,0xFFFFFFFF);assertNotEquals(.5F,MCH_ModelTextureRepairProcessor.correctUV(.5F,.5F,i,1)[0],0);assertArrayEquals(new float[]{.5F,.5F},MCH_ModelTextureRepairProcessor.correctUV(.5F,.5F,i,0),0);}
+ @Test public void validHalfTexelTinyIslandDoesNotCollapse(){assertArrayEquals(new float[]{.25F,.75F},MCH_ModelTextureRepairProcessor.correctUV(.25F,.75F,opaque(2,2),1),0);}
+ private static int count(boolean[] a){int n=0;for(boolean b:a)if(b)n++;return n;}private static boolean[] full(int n){boolean[] a=new boolean[n];java.util.Arrays.fill(a,true);return a;}private static BufferedImage opaque(int w,int h){BufferedImage i=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);for(int y=0;y<h;y++)for(int x=0;x<w;x++)i.setRGB(x,y,0xFF336699);return i;}
+}

@@ -147,6 +147,10 @@ public class MCH_Config {
    public static MCH_ConfigPrm AircraftLODThermalContrastExponent;
    public static MCH_ConfigPrm AircraftLODOpticalMinPixels;
    public static MCH_ConfigPrm AircraftLODThermalMinPixels;
+   public static MCH_ConfigPrm EnableModelTextureRepair, EnableModelUVCorrection;
+   public static MCH_ConfigPrm ModelTextureMaxHoleArea, ModelTextureMaxHoleThickness;
+   public static MCH_ConfigPrm ModelTextureRGBBleedRadius, ModelTextureAlphaExpansionRadius, ModelTextureUVCorrectionRadius;
+   public static MCH_ConfigPrm ModelTextureRepairDebugLogging, ModelTextureRepairDebugPreviews;
    public static MCH_ConfigPrm MobRenderDistanceWeight;
    public static MCH_ConfigPrm CreativeTabIcon;
    public static MCH_ConfigPrm CreativeTabIconHeli;
@@ -496,6 +500,15 @@ public class MCH_Config {
       AircraftLODThermalContrastExponent = new MCH_ConfigPrm("AircraftLODThermalContrastExponent", 0.35D);
       AircraftLODOpticalMinPixels = new MCH_ConfigPrm("AircraftLODOpticalMinPixels", 0.75D);
       AircraftLODThermalMinPixels = new MCH_ConfigPrm("AircraftLODThermalMinPixels", 0.35D);
+      EnableModelTextureRepair = new MCH_ConfigPrm("EnableModelTextureRepair", true);
+      EnableModelUVCorrection = new MCH_ConfigPrm("EnableModelUVCorrection", true);
+      ModelTextureMaxHoleArea = new MCH_ConfigPrm("ModelTextureMaxHoleArea", 16);
+      ModelTextureMaxHoleThickness = new MCH_ConfigPrm("ModelTextureMaxHoleThickness", 2);
+      ModelTextureRGBBleedRadius = new MCH_ConfigPrm("ModelTextureRGBBleedRadius", 2);
+      ModelTextureAlphaExpansionRadius = new MCH_ConfigPrm("ModelTextureAlphaExpansionRadius", 1);
+      ModelTextureUVCorrectionRadius = new MCH_ConfigPrm("ModelTextureUVCorrectionRadius", 2);
+      ModelTextureRepairDebugLogging = new MCH_ConfigPrm("ModelTextureRepairDebugLogging", false);
+      ModelTextureRepairDebugPreviews = new MCH_ConfigPrm("ModelTextureRepairDebugPreviews", false);
       MobRenderDistanceWeight = new MCH_ConfigPrm("MobRenderDistanceWeight", 10.0D);
       CreativeTabIcon = new MCH_ConfigPrm("CreativeTabIconItem", "fuel");
       CreativeTabIconHeli = new MCH_ConfigPrm("CreativeTabIconHeli", "ah-64");
@@ -736,6 +749,11 @@ public class MCH_Config {
               EnableNEIHandler,
               TestMode,
               EnableCommand,
+              EnableModelTextureRepair, EnableModelUVCorrection,
+              ModelTextureMaxHoleArea, ModelTextureMaxHoleThickness,
+              ModelTextureRGBBleedRadius, ModelTextureAlphaExpansionRadius,
+              ModelTextureUVCorrectionRadius, ModelTextureRepairDebugLogging,
+              ModelTextureRepairDebugPreviews,
               null,
               PlaceableOnSpongeOnly,
               ItemDamage,
