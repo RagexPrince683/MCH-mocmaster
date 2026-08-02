@@ -78,7 +78,10 @@ public class MCH_CommonProxy {
    public void reloadHUD() {}
 
    public void scheduleClientInfoReload() {}
-   public void scheduleTargetedVehicleReload(int entityId, String uuid, String definition,
+   public boolean requestTargetedVehicleReload(mcheli.aircraft.MCH_EntityBaseVehicle vehicle) { return false; }
+   public boolean isTargetedVehicleReloadPending() { return false; }
+   public void tickTargetedVehicleReload() {}
+   public void scheduleTargetedVehicleReload(long requestId, int entityId, String definition,
          boolean success, String reason) {}
 
    public Entity getClientPlayer() {

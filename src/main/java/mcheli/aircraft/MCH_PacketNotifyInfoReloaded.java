@@ -11,7 +11,7 @@ public class MCH_PacketNotifyInfoReloaded extends MCH_Packet {
 
    public int type = -1;
    public int entityId = -1;
-   public String entityUuid = "";
+   public long requestId;
    public String definition = "";
    public boolean success;
    public String reason = "";
@@ -25,8 +25,8 @@ public class MCH_PacketNotifyInfoReloaded extends MCH_Packet {
       try {
          this.type = data.readInt();
          if(this.type == 3 || this.type == 4) {
+            this.requestId = data.readLong();
             this.entityId = data.readInt();
-            this.entityUuid = data.readUTF();
             if(this.type == 4) {
                this.definition = data.readUTF();
                this.success = data.readBoolean();
@@ -43,8 +43,8 @@ public class MCH_PacketNotifyInfoReloaded extends MCH_Packet {
       try {
          dos.writeInt(this.type);
          if(this.type == 3 || this.type == 4) {
+            dos.writeLong(this.requestId);
             dos.writeInt(this.entityId);
-            dos.writeUTF(this.entityUuid);
             if(this.type == 4) {
                dos.writeUTF(this.definition);
                dos.writeBoolean(this.success);
@@ -63,17 +63,16 @@ public class MCH_PacketNotifyInfoReloaded extends MCH_Packet {
       W_Network.sendToServer(s);
    }
 
-   public static void sendTargetedRequest(MCH_EntityBaseVehicle vehicle) {
+   public static void sendTargetedRequest(long requestId, int entityId) {
       MCH_PacketNotifyInfoReloaded p = new MCH_PacketNotifyInfoReloaded();
-      p.type = 3; p.entityId = vehicle.getEntityId(); p.entityUuid = vehicle.getUniqueID().toString();
+      p.type = 3; p.requestId = requestId; p.entityId = entityId;
       W_Network.sendToServer(p);
    }
 
-   public static void sendTargetedResult(EntityPlayer player, MCH_EntityBaseVehicle vehicle,
+   public static void sendTargetedResult(EntityPlayer player, long requestId, int entityId,
          String definition, boolean success, String reason) {
       MCH_PacketNotifyInfoReloaded p = new MCH_PacketNotifyInfoReloaded();
-      p.type = 4; p.entityId = vehicle == null ? -1 : vehicle.getEntityId();
-      p.entityUuid = vehicle == null ? "" : vehicle.getUniqueID().toString();
+      p.type = 4; p.requestId = requestId; p.entityId = entityId;
       p.definition = definition == null ? "" : definition; p.success = success;
       p.reason = reason == null ? "" : reason;
       W_Network.sendToPlayer(p, player);

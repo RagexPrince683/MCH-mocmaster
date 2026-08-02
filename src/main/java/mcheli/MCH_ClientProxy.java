@@ -4,6 +4,7 @@ import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.relauncher.Side;
 import java.util.Iterator;
+import java.util.UUID;
 
 import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
@@ -86,6 +87,13 @@ import mcheli.mob.MCH_RenderGunner;
 public class MCH_ClientProxy extends MCH_CommonProxy {
 
    public String lastLoadHUDPath = "";
+   private long nextTargetedReloadId;
+   private long pendingTargetedReloadId;
+   private int pendingTargetedEntityId = -1;
+   private UUID pendingTargetedEntityUuid;
+   private String pendingTargetedDefinition;
+   private Object pendingTargetedWorld;
+   private long pendingTargetedDeadline;
 
 
    public String getDataDir() {
@@ -184,20 +192,72 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       });
    }
 
-   public void scheduleTargetedVehicleReload(final int entityId, final String uuid,
+   public boolean requestTargetedVehicleReload(MCH_EntityBaseVehicle vehicle) {
+      Minecraft mc = Minecraft.getMinecraft();
+      if(this.pendingTargetedReloadId != 0L) {
+         chatTargetedReload(false, "A vehicle reload request is already pending");
+         return false;
+      }
+      if(vehicle == null || vehicle.getAcInfo() == null) return false;
+      long id = ++this.nextTargetedReloadId;
+      if(id == 0L) id = ++this.nextTargetedReloadId;
+      this.pendingTargetedReloadId = id;
+      this.pendingTargetedEntityId = vehicle.getEntityId();
+      this.pendingTargetedEntityUuid = vehicle.getUniqueID();
+      this.pendingTargetedDefinition = vehicle.getAcInfo().name;
+      this.pendingTargetedWorld = mc.theWorld;
+      this.pendingTargetedDeadline = System.currentTimeMillis() + 10000L;
+      mcheli.aircraft.MCH_PacketNotifyInfoReloaded.sendTargetedRequest(id, vehicle.getEntityId());
+      return true;
+   }
+
+   public boolean isTargetedVehicleReloadPending() { return this.pendingTargetedReloadId != 0L; }
+
+   public void tickTargetedVehicleReload() {
+      if(this.pendingTargetedReloadId == 0L) return;
+      Minecraft mc = Minecraft.getMinecraft();
+      if(mc.theWorld == null || mc.theWorld != this.pendingTargetedWorld) {
+         clearTargetedReload();
+      } else if(System.currentTimeMillis() >= this.pendingTargetedDeadline) {
+         clearTargetedReload();
+         chatTargetedReload(false, "Request timed out");
+      }
+   }
+
+   private void clearTargetedReload() {
+      this.pendingTargetedReloadId = 0L;
+      this.pendingTargetedEntityId = -1;
+      this.pendingTargetedEntityUuid = null;
+      this.pendingTargetedDefinition = null;
+      this.pendingTargetedWorld = null;
+      this.pendingTargetedDeadline = 0L;
+   }
+
+   private void chatTargetedReload(boolean success, String text) {
+      if(Minecraft.getMinecraft().thePlayer != null)
+         Minecraft.getMinecraft().thePlayer.addChatMessage(new net.minecraft.util.ChatComponentText(
+               success ? "Vehicle configuration reloaded: " + text : "Vehicle reload failed: " + text));
+   }
+
+   public void scheduleTargetedVehicleReload(final long requestId, final int entityId,
          final String definition, final boolean serverSuccess, final String serverReason) {
       Minecraft.getMinecraft().func_152344_a(new Runnable() {
          public void run() {
+            if(requestId == 0L || requestId != pendingTargetedReloadId) return;
             boolean success = serverSuccess;
             String reason = serverReason;
             Entity entity = Minecraft.getMinecraft().theWorld == null ? null
                   : Minecraft.getMinecraft().theWorld.getEntityByID(entityId);
             MCH_EntityBaseVehicle vehicle = entity instanceof MCH_EntityBaseVehicle
                   ? (MCH_EntityBaseVehicle)entity : null;
-            if(success && (vehicle == null || !vehicle.getUniqueID().toString().equals(uuid)
-                  || vehicle.getAcInfo() == null || !vehicle.getAcInfo().name.equals(definition))) {
+            if(success && vehicle == null) {
                success = false;
-               reason = "Target vehicle changed before the reload result arrived";
+               reason = "Client entity unloaded";
+            } else if(success && (entityId != pendingTargetedEntityId
+                  || !vehicle.getUniqueID().equals(pendingTargetedEntityUuid)
+                  || !definition.equals(pendingTargetedDefinition))) {
+               success = false;
+               reason = "Client entity changed before the reload result arrived";
             }
             if(success) {
                mcheli.MCH_InfoManagerBase manager = mcheli.aircraft.MCH_VehicleInfoReload.managerFor(vehicle);
@@ -207,21 +267,26 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
                   MCH_BaseVehicleInfo info = (MCH_BaseVehicleInfo)manager.getMap().get(definition);
                   success = vehicle.applyTargetedInfo(info);
                   if(success) {
-                     MCH_VehicleItemModelRender.invalidate(oldInfo);
-                     mcheli.tank.MCH_TurretPopModelCache.invalidate(oldInfo);
-                     if(vehicle instanceof MCH_EntityHeli) registerModelsHeli(definition, true);
-                     else if(vehicle instanceof MCP_EntityPlane) registerModelsPlane(definition, true);
-                     else if(vehicle instanceof MCH_EntityShip) registerModelsShip(definition, true);
-                     else if(vehicle instanceof MCH_EntityTank) registerModelsTank(definition, true);
-                     else if(vehicle instanceof MCH_EntityTurret) registerModelsVehicle(definition, true);
-                     MCH_VehicleLODManager.INSTANCE.invalidate(vehicle.getUniqueID());
+                     try {
+                        MCH_VehicleItemModelRender.invalidate(oldInfo);
+                        mcheli.tank.MCH_TurretPopModelCache.invalidate(oldInfo);
+                        if(vehicle instanceof MCH_EntityHeli) registerModelsHeli(definition, true);
+                        else if(vehicle instanceof MCP_EntityPlane) registerModelsPlane(definition, true);
+                        else if(vehicle instanceof MCH_EntityShip) registerModelsShip(definition, true);
+                        else if(vehicle instanceof MCH_EntityTank) registerModelsTank(definition, true);
+                        else if(vehicle instanceof MCH_EntityTurret) registerModelsVehicle(definition, true);
+                        else throw new IllegalStateException("Unsupported vehicle type");
+                        MCH_VehicleLODManager.INSTANCE.invalidate(vehicle.getUniqueID());
+                     } catch(RuntimeException e) {
+                        success = false;
+                        reason = "Client model reload failed: " + e.getMessage();
+                     }
                   } else reason = "Seat count changed; restart is required";
-               } else if(manager != null) reason = manager.getLastReloadError();
+               } else reason = manager == null ? "Unsupported vehicle type"
+                     : "Client definition reload failed: " + manager.getLastReloadError();
             }
-            mcheli.gui.MCH_ConfigGui.onTargetedReloadResult(success, reason);
-            if(Minecraft.getMinecraft().thePlayer != null)
-               Minecraft.getMinecraft().thePlayer.addChatMessage(new net.minecraft.util.ChatComponentText(
-                     (success ? "Vehicle reload complete: " : "Vehicle reload failed: ") + reason));
+            clearTargetedReload();
+            chatTargetedReload(success, success ? definition : reason);
          }
       });
    }

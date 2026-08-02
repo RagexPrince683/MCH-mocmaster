@@ -468,3 +468,8 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 
 * Replaced watcher-only respawn success with bounded server-to-client probes and detailed client-to-server resolution evidence.
 * Targetedly resend only missing normal parents and then their dependents, with two-attempt and 60-tick limits; UAV paths remain unchanged.
+# Fix targeted vehicle configuration reload
+
+- Match client and server vehicles by their synchronized entity ID instead of comparing side-local entity UUIDs.
+- Close the development GUI as soon as a targeted request is sent, while a client-side pending request tracks the response, timeout, and world lifetime.
+- Reload and apply only the selected definition and its models, preserving runtime vehicle state and rejecting seat-count changes before publication.
