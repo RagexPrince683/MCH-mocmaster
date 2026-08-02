@@ -19,6 +19,7 @@ import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -133,13 +134,30 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
       return false;
    }
 
+   /**
+    * Uses the physics flag plus a narrow, full-footprint block probe.  Unlike
+    * LockMinHeight, this is contact detection and cannot classify low flight as ground.
+    */
+   public static boolean hasAircraftGroundContact(Entity entity) {
+      if(entity == null || entity.isDead || entity.worldObj == null || entity.boundingBox == null) {
+         return false;
+      }
+      if(entity.onGround) {
+         return true;
+      }
+      AxisAlignedBB contactBox = entity.boundingBox.copy();
+      contactBox.minY -= 0.0625D;
+      contactBox.maxY = entity.boundingBox.minY + 0.001D;
+      return entity.worldObj.checkBlockCollision(contactBox);
+   }
+
    /** Classifies stable vehicle roles before using transient physical contact. */
    public static TargetDomain getTargetDomain(Entity entity, int groundProbeHeight) {
       if(entity == null || entity.isDead) {
          return TargetDomain.UNKNOWN;
       }
       if(entity instanceof MCP_EntityPlane || entity instanceof MCH_EntityHeli) {
-         return TargetDomain.AIR;
+         return hasAircraftGroundContact(entity) ? TargetDomain.GROUND : TargetDomain.AIR;
       }
       if(entity instanceof MCH_EntityShip) {
          MCH_EntityShip ship = (MCH_EntityShip)entity;
@@ -154,7 +172,7 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
       // Preserve the legacy external-mod compatibility contract, but give its known
       // roles stable domains instead of treating all vehicles as airborne off blocks.
       if(className.indexOf("EntityPlane") >= 0) {
-         return TargetDomain.AIR;
+         return hasAircraftGroundContact(entity) ? TargetDomain.GROUND : TargetDomain.AIR;
       }
       if(className.indexOf("EntityVehicle") >= 0 || className.indexOf("EntityMecha") >= 0
               || className.indexOf("EntityAAGun") >= 0) {
@@ -234,6 +252,7 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
                      MovingObjectPosition m = W_WorldFunc.clip(this.worldObj, v1, v2, false, true, false);
                      if(m == null || W_MovingObjectPosition.isHitTypeEntity(m)) {
                         potentialTarget = currentEntity;  // Sets lock target
+                        dist = distance;
                      }
                   }
                }
@@ -389,6 +408,9 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
       this.lockCount = 0;
       this.continueLockCount = 0;
       this.lockSoundCount = 0;
+      if(this.lastLockEntity != null && this.lastLockEntity.isDead) {
+         this.lastLockEntity = null;
+      }
    }
 
    public Entity getLockEntity(Entity entity) {
@@ -452,6 +474,67 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
       }
    }
 
+   public boolean canLockEntity(Entity shooter, Entity entity) {
+      this.user = shooter;
+      return canLockEntity(entity);
+   }
+
+   /** Server-side validation for the entity id supplied by the client. */
+   public boolean canLaunchAt(Entity shooter, Entity entity) {
+      if(shooter == null || !canLockEntity(shooter, entity)) {
+         return false;
+      }
+      Entity locker = getLockEntity(shooter);
+      double dx = entity.posX - shooter.posX;
+      double dy = entity.posY - shooter.posY;
+      double dz = entity.posZ - shooter.posZ;
+      double range = this.lockRange * (double)(1.0F - getEntityStealth(entity));
+      if(dx * dx + dy * dy + dz * dz >= range * range
+              || !inLockAngle(locker, shooter.rotationYaw, shooter.rotationPitch, entity, (float)this.lockAngle)) {
+         return false;
+      }
+      Vec3 from = W_WorldFunc.getWorldVec3(this.worldObj, locker.posX, locker.posY, locker.posZ);
+      Vec3 to = W_WorldFunc.getWorldVec3(this.worldObj, entity.posX,
+              entity.posY + (double)(entity.height / 2.0F), entity.posZ);
+      MovingObjectPosition hit = W_WorldFunc.clip(this.worldObj, from, to, false, true, false);
+      return hit == null || W_MovingObjectPosition.isHitTypeEntity(hit);
+   }
+
+   public static boolean isEligibleMissileTarget(Entity target, Entity shooter, MCH_WeaponInfo info,
+           boolean allowGround, boolean allowAir, boolean allowWater) {
+      if(target == null || info == null || target.isDead || W_Entity.isEqual(target, shooter)) {
+         return false;
+      }
+      if(target instanceof MCH_EntityFlare || target instanceof MCH_EntityChaff) {
+         return isValidCountermeasureTarget(target, info.isHeatSeekerMissile, info.isRadarMissile);
+      }
+      if(info.ridableOnly && target instanceof EntityPlayer && target.ridingEntity == null) {
+         return false;
+      }
+      if(target instanceof MCH_EntityBaseBullet) {
+         return info.canLockMissile
+                 && !W_Entity.isEqual(shooter, ((MCH_EntityBaseBullet)target).shootingEntity);
+      }
+      String className = target.getClass().getName();
+      if(className.indexOf("EntityCamera") >= 0
+              || !W_Lib.isEntityLivingBase(target)
+              && !(target instanceof MCH_EntityBaseVehicle)
+              && !(target instanceof MCH_EntityUavStation)
+              && className.indexOf("EntityVehicle") < 0
+              && className.indexOf("EntityPlane") < 0
+              && className.indexOf("EntityMecha") < 0
+              && className.indexOf("EntityAAGun") < 0) {
+         return false;
+      }
+      if(!allowWater && target.isInWater()) {
+         return false;
+      }
+      TargetDomain domain = getTargetDomain(target, info.lockMinHeight);
+      return domain == TargetDomain.GROUND ? allowGround
+              : domain == TargetDomain.AIR ? allowAir
+              : (domain == TargetDomain.SURFACE || domain == TargetDomain.UNDERWATER) && allowWater;
+   }
+
    public static boolean isValidCountermeasureTarget(Entity entity, boolean heatSeeking, boolean radarGuided) {
       if(entity instanceof MCH_EntityFlare) {
          return !radarGuided && heatSeeking && ((MCH_EntityFlare)entity).isActiveCountermeasure();
@@ -478,8 +561,7 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
 
    @Override
    protected Entity getLastLockEntity() {
-      // TODO Auto-generated method stub
-      return null;
+      return this.lastLockEntity;
    }
 
    @Override

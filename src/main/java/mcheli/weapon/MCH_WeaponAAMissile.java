@@ -60,7 +60,7 @@ public class MCH_WeaponAAMissile extends MCH_WeaponEntitySeeker {
             result = true;
          } else {
             Entity tgtEnt = prm.user.worldObj.getEntityByID(prm.option1);
-            if (tgtEnt != null && !tgtEnt.isDead) {
+            if (super.guidanceSystem.canLaunchAt(prm.user, tgtEnt)) {
                this.playSound(prm.entity);
                float yaw, pitch;
                if(getInfo().enableOffAxis) {

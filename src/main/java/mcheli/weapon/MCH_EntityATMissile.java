@@ -94,12 +94,13 @@ public class MCH_EntityATMissile extends MCH_EntityBaseBullet {
         }
 
         if (!super.worldObj.isRemote && this.getInfo() != null) {
-            if (super.shootingEntity != null && super.targetEntity != null && !super.targetEntity.isDead) {
+            if (super.shootingEntity != null && MCH_WeaponGuidanceSystem.isEligibleMissileTarget(
+                    super.targetEntity, shootingAircraft, getInfo(), true, false, false)) {
                 double x = super.posX - super.targetEntity.posX;
                 double y = super.posY - super.targetEntity.posY;
                 double z = super.posZ - super.targetEntity.posZ;
-                double d = x * x + y * y + z * z;
-                if (d > 3422500.0D) {
+                double distanceSq = x * x + y * y + z * z;
+                if (distanceSq > 3422500.0D) {
                     this.setDead();
                 } else if (this.getCountOnUpdate() > this.getInfo().rigidityTime) {
 
@@ -126,7 +127,8 @@ public class MCH_EntityATMissile extends MCH_EntityBaseBullet {
 
                     //Non-top-attack
                     else {
-                        if (this.getInfo().proximityFuseDist >= 0.1F && d < (double) this.getInfo().proximityFuseDist) {
+                        double fuseDistanceSq = (double)this.getInfo().proximityFuseDist * (double)this.getInfo().proximityFuseDist;
+                        if (this.getInfo().proximityFuseDist >= 0.1F && distanceSq < fuseDistanceSq) {
                             MovingObjectPosition mop = new MovingObjectPosition(super.targetEntity);
                             super.posX = (super.targetEntity.posX + super.posX) / 2.0D;
                             super.posY = (super.targetEntity.posY + super.posY) / 2.0D;
@@ -159,14 +161,10 @@ public class MCH_EntityATMissile extends MCH_EntityBaseBullet {
             Entity closestTarget = null;
 
             for (Entity entity : list) {
-                if (entity instanceof MCH_EntityBaseVehicle) {
+                if (MCH_WeaponGuidanceSystem.isEligibleMissileTarget(entity, shootingAircraft,
+                        getInfo(), true, false, false)) {
 
                     if (W_Entity.isEqual(entity, shootingAircraft)) {
-                        continue;
-                    }
-
-                    if (MCH_WeaponGuidanceSystem.getTargetDomain(entity, getInfo().lockMinHeight)
-                            != MCH_WeaponGuidanceSystem.TargetDomain.GROUND) {
                         continue;
                     }
 
