@@ -1,4 +1,5 @@
 DisplayName = 220mm Rocket [9M27K2 - Anti-Personnel Mines]
+UseGlobalArtilleryRangeModifier = true
 Type = Dispenser
 Power = 80
 Acceleration = 7.0

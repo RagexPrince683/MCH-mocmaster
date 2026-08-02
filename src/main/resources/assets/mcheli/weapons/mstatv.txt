@@ -1,4 +1,5 @@
 DisplayName = 152mm 2A65 Howitzer [3V0F64 - GUIDED]
+UseGlobalArtilleryRangeModifier = true
 Type = TVMissile
 IsHeatSeekerMissile = true
 IsRadarMissile = false

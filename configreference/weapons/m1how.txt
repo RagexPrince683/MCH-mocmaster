@@ -1,4 +1,5 @@
 DisplayName = 105mm Howitzer [M1 Shell - HE]
+UseGlobalArtilleryRangeModifier = true
 Type = MachineGun2
 RecoilPitch = 3.00F
 RecoilYaw = 0.0F

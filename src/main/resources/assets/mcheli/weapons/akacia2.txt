@@ -1,4 +1,5 @@
 DisplayName = 152mm 2A33 Cannon [BR-540B - APHEBC]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 171
 Explosion = 2

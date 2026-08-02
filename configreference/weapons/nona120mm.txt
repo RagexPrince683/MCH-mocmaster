@@ -1,4 +1,5 @@
 DisplayName = 120mm 2A60 Mortar [OF-49 - HE-FRAG]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 75
 Explosion = 3

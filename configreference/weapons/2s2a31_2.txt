@@ -1,4 +1,5 @@
 DisplayName = 122mm 2A31 Howitzer [SH-1 AP - Flechete]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 50
 ModelBullet = bullet

@@ -1,4 +1,5 @@
 DisplayName = 107mm Type-63 Rocket Launcher [HE]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 42
 ModelBullet = hydra70

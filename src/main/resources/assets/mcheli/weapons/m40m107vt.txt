@@ -1,4 +1,5 @@
 DisplayName = 155mm M1 Long Tom Cannon [HE - M107]
+UseGlobalArtilleryRangeModifier = true
 Type = MachineGun1
 RecoilPitch = 3.00F
 RecoilYaw = 0.0F

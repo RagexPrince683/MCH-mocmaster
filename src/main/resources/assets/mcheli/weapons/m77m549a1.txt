@@ -1,4 +1,5 @@
 DisplayName = 155mm M777 Howitzer [M549A1 Shell - HE-RA]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 800
 ModelBullet = 155mm

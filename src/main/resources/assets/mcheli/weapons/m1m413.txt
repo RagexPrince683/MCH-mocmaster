@@ -1,4 +1,5 @@
 DisplayName = 105mm Howitzer [M413 - Cluster Grenades]
+UseGlobalArtilleryRangeModifier = true
 Type = Rocket
 Power = 20
 Acceleration = 7

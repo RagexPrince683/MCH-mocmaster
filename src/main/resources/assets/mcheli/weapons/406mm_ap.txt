@@ -1,4 +1,5 @@
 DisplayName = 406mm Artillery Grenade [AP]
+UseGlobalArtilleryRangeModifier = true
 Type = MachineGun1
 RecoilPitch = 3.00F
 RecoilYaw = 0.0F
