@@ -765,6 +765,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
    public void init() {
       MCH_ParticleTexture.register();
+      mcheli.texture.MCH_ModelTextureRepairManager.register();
       MinecraftForge.EVENT_BUS.register(new MCH_ParticlesUtil());
       MinecraftForge.EVENT_BUS.register(new MCH_ClientEventHook());
       MinecraftForge.EVENT_BUS.register(new MCH_RenderBVRLockBox());

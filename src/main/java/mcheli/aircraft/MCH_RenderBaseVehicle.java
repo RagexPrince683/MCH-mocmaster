@@ -331,6 +331,9 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       }else {
          try {
             activeBaseTexture = new ResourceLocation(W_MOD.DOMAIN, getBaseTexturePath(path));
+            activeBaseTexture = mcheli.texture.MCH_ModelTextureRepairManager.resolve(activeBaseTexture,
+                  ac.getAcInfo() != null ? ac.getAcInfo().model : null,
+                  ac.getAcInfo() != null ? ac.getAcInfo().getDirectoryName() + "/" + ac.getAcInfo().name : "unknown");
             super.bindTexture(activeBaseTexture);
          } catch (Exception var4) {
             System.out.println("Error loading texture: " + path + " (" + var4.getMessage() + ")"); //why the fuck is this happening

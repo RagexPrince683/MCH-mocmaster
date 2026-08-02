@@ -23,6 +23,7 @@ public class W_Face {
    private float faceNormalY;
    private float faceNormalZ;
    private boolean hasPackedFaceNormal;
+   private float[] repairedTextureCoordinates;
 
    public W_Face copy() {
       W_Face f = new W_Face();
@@ -199,7 +200,7 @@ public class W_Face {
       return new W_Vertex(normalX, normalY, normalZ);
    }
 
-   private int getTextureCoordinateCount() {
+   public int getTextureCoordinateCount() {
       if(this.packedData != null) {
          return this.packedTextureOffset >= 0 ? this.packedVertexCount : 0;
       }
@@ -207,12 +208,18 @@ public class W_Face {
       return this.textureCoordinates != null ? this.textureCoordinates.length : 0;
    }
 
-   private float getTextureU(int index) {
-      return this.packedData != null ? this.packedData[index * this.packedStride + this.packedTextureOffset] : this.textureCoordinates[index].u;
+   public float getTextureU(int index) {
+      return this.repairedTextureCoordinates != null ? this.repairedTextureCoordinates[index * 2]
+         : this.packedData != null ? this.packedData[index * this.packedStride + this.packedTextureOffset] : this.textureCoordinates[index].u;
    }
 
-   private float getTextureV(int index) {
-      return this.packedData != null ? this.packedData[index * this.packedStride + this.packedTextureOffset + 1] : this.textureCoordinates[index].v;
+   public float getTextureV(int index) {
+      return this.repairedTextureCoordinates != null ? this.repairedTextureCoordinates[index * 2 + 1]
+         : this.packedData != null ? this.packedData[index * this.packedStride + this.packedTextureOffset + 1] : this.textureCoordinates[index].v;
+   }
+
+   public void setRepairedTextureCoordinates(float[] coordinates) {
+      this.repairedTextureCoordinates = coordinates;
    }
 
    private boolean hasVertexNormal(int index) {
