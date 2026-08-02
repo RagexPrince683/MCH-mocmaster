@@ -1,3 +1,9 @@
+# Complete deterministic texture/UV repair validation (PR pending)
+
+- Replaced unsupported per-channel `putchannel` mutation with split/dilate/merge RGB bleeding that preserves alpha byte-for-byte across every pass.
+- Corrected premultiplied-alpha resizing, removed deprecated Pillow pixel access, and expanded command and image edge-case coverage.
+- Made empty, unresolved, missing-source, and hash-failure repair states explicit and fail-safe, and added ranked suspicious-asset CSV output.
+
 # Texture downscale and MQO UV audit tooling (PR pending)
 
 - Added a deterministic, manifest-driven Python audit/repair/verification tool for runtime-selected vehicle model and texture pairs.

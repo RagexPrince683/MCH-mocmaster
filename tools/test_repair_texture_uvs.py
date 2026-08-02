@@ -1,4 +1,4 @@
-import hashlib, io, tempfile, unittest
+import contextlib, hashlib, io, json, tempfile, unittest
 from pathlib import Path
 import repair_texture_uvs as tool
 Image=tool.Image
@@ -44,14 +44,32 @@ class ImageTests(unittest.TestCase):
     def test_premultiplied_resize_and_alpha_coverage(self):
         result=tool.premultiplied_resize(self.make_image(),(8,8))
         self.assertEqual((8,8),result.size)
-        self.assertGreater(sum(a>=128 for *_,a in result.getdata()),8)
+        self.assertGreater(sum(a>=128 for *_,a in tool.flattened_data(result)),8)
         self.assertGreater(result.getpixel((4,4))[3],240)
 
     def test_bleed_does_not_expand_alpha(self):
-        image=self.make_image(); before=list(image.getchannel("A").getdata())
+        image=self.make_image(); before=list(tool.flattened_data(image.getchannel("A")))
         result=tool.bleed_transparent_rgb(image)
-        self.assertEqual(before,list(result.getchannel("A").getdata()))
+        self.assertEqual(before,list(tool.flattened_data(result.getchannel("A"))))
         self.assertNotEqual((0,0,0),result.getpixel((3,3))[:3])
+
+    def test_each_bleed_pass_propagates_farther(self):
+        image=Image.new("RGBA",(9,1),(0,0,0,0)); image.putpixel((0,0),(90,40,10,255))
+        one=tool.bleed_transparent_rgb(image,1); four=tool.bleed_transparent_rgb(image,4)
+        self.assertEqual((0,0,0),one.getpixel((4,0))[:3])
+        self.assertNotEqual((0,0,0),four.getpixel((4,0))[:3])
+
+    def test_opaque_and_transparent_extremes(self):
+        opaque=tool.premultiplied_resize(Image.new("RGBA",(4,4),(3,8,20,255)),(7,7))
+        transparent=tool.premultiplied_resize(Image.new("RGBA",(4,4),(3,8,20,0)),(7,7))
+        self.assertTrue(all(a==255 for *_,a in tool.flattened_data(opaque)))
+        self.assertTrue(all(a==0 for *_,a in tool.flattened_data(transparent)))
+
+    def test_semitransparent_and_border_rgb_are_valid(self):
+        result=tool.premultiplied_resize(self.make_image(),(8,8))
+        semi=[p for p in tool.flattened_data(result) if 0<p[3]<255]
+        self.assertTrue(semi); self.assertTrue(all(any(p[:3]) for p in semi))
+        self.assertNotEqual((0,0,0),result.getpixel((1,1))[:3])
 
     def test_deterministic_hash(self):
         hashes=[]
@@ -59,5 +77,43 @@ class ImageTests(unittest.TestCase):
             result=tool.premultiplied_resize(self.make_image(),(8,8)); out=io.BytesIO()
             result.save(out,"PNG",compress_level=9,optimize=False); hashes.append(hashlib.sha256(out.getvalue()).hexdigest())
         self.assertEqual(hashes[0],hashes[1])
+
+    def test_repair_dry_run_apply_and_complete_verification(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory); (root/"sources").mkdir(); source=root/"sources/original.png"
+            Image.new("RGBA",(4,4),(20,40,60,255)).save(source)
+            result=tool.premultiplied_resize(Image.open(source),(2,2)); encoded=io.BytesIO()
+            result.save(encoded,"PNG",optimize=False,compress_level=9)
+            manifest=root/"manifest.json"; manifest.write_text(json.dumps({"repairs":[{
+                "current_texture_path":"textures/out.png","source_texture_path":"sources/original.png",
+                "source_sha256":tool.sha256(source.read_bytes()),"output_sha256":tool.sha256(encoded.getvalue()),
+                "output_width":2,"output_height":2,"models":[],"uv_transform":None}],"unresolved":[]}))
+            common=["--assets",str(root),"--manifest",str(manifest),"repair"]
+            output=io.StringIO()
+            with contextlib.redirect_stdout(output): self.assertEqual(0,tool.main(common+["--dry-run"]))
+            self.assertIn(str(root/"textures/out.png"),output.getvalue()); self.assertFalse((root/"textures/out.png").exists())
+            with contextlib.redirect_stdout(io.StringIO()): self.assertEqual(0,tool.main(common+["--apply"]))
+            self.assertTrue((root/"textures/out.png").exists())
+            with contextlib.redirect_stdout(io.StringIO()): self.assertEqual(0,tool.main(["--assets",str(root),"--manifest",str(manifest),"verify"]))
+
+class CommandTests(unittest.TestCase):
+    def manifest(self, root, content):
+        path=root/"manifest.json"; path.write_text(json.dumps(content)); return path
+
+    def test_empty_manifest_messages_and_apply_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory); manifest=self.manifest(root,{"repairs":[],"unresolved":[]})
+            for mode, expected in (("--dry-run",0),("--apply",1)):
+                output=io.StringIO()
+                with contextlib.redirect_stdout(output): result=tool.main(["--assets",str(root),"--manifest",str(manifest),"repair",mode])
+                self.assertEqual(expected,result); self.assertIn("No repair entries are defined",output.getvalue()); self.assertIn("No files were changed",output.getvalue())
+
+    def test_verify_rejects_unresolved_and_missing_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            unresolved=self.manifest(root,{"repairs":[],"unresolved":[{"required_source":"original.png"}]})
+            with contextlib.redirect_stdout(io.StringIO()): self.assertEqual(1,tool.main(["--assets",str(root),"--manifest",str(unresolved),"verify"]))
+            missing=self.manifest(root,{"repairs":[{"source_texture_path":"missing.png","current_texture_path":"out.png","source_sha256":"0","output_sha256":"0"}],"unresolved":[]})
+            with contextlib.redirect_stdout(io.StringIO()): self.assertEqual(1,tool.main(["--assets",str(root),"--manifest",str(missing),"verify"]))
 
 if __name__=="__main__": unittest.main()
