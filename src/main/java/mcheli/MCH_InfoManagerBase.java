@@ -9,6 +9,7 @@ public abstract class MCH_InfoManagerBase {
 
    private String lastPath;
    private String lastType;
+   private String lastReloadError = "";
 
    public abstract MCH_BaseInfo newInfo(String name);
    public abstract Map getMap();
@@ -87,4 +88,56 @@ public abstract class MCH_InfoManagerBase {
       }
       return loadAndPublish(lastPath, lastType, true);
    }
+
+   /** Reloads one already-published definition without exposing partial data. */
+   public synchronized boolean reloadEntry(String name) {
+      lastReloadError = "";
+      Map oldMap = getMap();
+      MCH_BaseInfo oldInfo = (MCH_BaseInfo)oldMap.get(name);
+      if(lastPath == null || lastType == null || oldInfo == null) {
+         lastReloadError = "Vehicle definition is not loaded: " + name;
+         return false;
+      }
+      MCH_ResourceHelper.refreshResourceSources();
+      String resourcePath = MCH_ResourceHelper.normalizeAssetPath(oldInfo.filePath);
+      MCH_InputFile inFile = new MCH_InputFile();
+      int line = 0;
+      try {
+         if(!MCH_ResourceHelper.resourceExists(resourcePath) || !inFile.openClasspath(resourcePath)) {
+            lastReloadError = "Vehicle definition resource is missing: " + resourcePath;
+            MCH_Lib.Log("### %s", new Object[]{lastReloadError});
+            return false;
+         }
+         MCH_BaseInfo newInfo = newInfo(name);
+         newInfo.filePath = resourcePath;
+         String str;
+         while((str = inFile.readLine()) != null) {
+            ++line;
+            str = str.trim();
+            int eqIdx = str.indexOf('=');
+            if(eqIdx >= 0 && str.length() > eqIdx + 1)
+               newInfo.loadItemData(str.substring(0, eqIdx).trim().toLowerCase(), str.substring(eqIdx + 1).trim());
+         }
+         if(!newInfo.isValidData()) {
+            lastReloadError = "Vehicle definition is invalid: " + resourcePath + " : line=" + line;
+            MCH_Lib.Log("### %s", new Object[]{lastReloadError});
+            return false;
+         }
+         preserveRuntimeState(oldInfo, newInfo);
+         LinkedHashMap newMap = new LinkedHashMap(oldMap);
+         newMap.put(name, newInfo);
+         setMap(newMap);
+         MCH_Lib.Log("Reloaded one %s: %s", new Object[]{lastType, resourcePath});
+         return true;
+      } catch(Exception e) {
+         lastReloadError = "Parse failed: " + resourcePath + " : line=" + line + " (" + e.getMessage() + ")";
+         MCH_Lib.Log("### %s", new Object[]{lastReloadError});
+         e.printStackTrace();
+         return false;
+      } finally {
+         inFile.close();
+      }
+   }
+
+   public String getLastReloadError() { return lastReloadError; }
 }

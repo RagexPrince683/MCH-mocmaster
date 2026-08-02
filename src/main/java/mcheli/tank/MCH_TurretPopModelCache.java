@@ -105,4 +105,8 @@ public final class MCH_TurretPopModelCache {
       CACHE.clear();
       WARNED.clear();
    }
+
+   public static synchronized void invalidate(MCH_BaseVehicleInfo info) {
+      if(info != null && info.model != null) CACHE.remove(info.model);
+   }
 }

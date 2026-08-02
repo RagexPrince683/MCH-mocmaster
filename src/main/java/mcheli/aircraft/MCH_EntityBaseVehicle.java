@@ -8386,6 +8386,20 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
    }
 
+   /** Applies a targeted definition snapshot without recreating seats, weapons, or moving-part state. */
+   public boolean applyTargetedInfo(MCH_BaseVehicleInfo info) {
+      if(info == null || this.acInfo == null) return false;
+      if(info.getNumSeatAndRack() != this.acInfo.getNumSeatAndRack()) return false;
+      this.acInfo = info;
+      this.updateForceSpawnPolicy();
+      this.cameraId = Math.max(0, Math.min(this.cameraId, Math.max(0, info.cameraPosition.size() - 1)));
+      this.extraBoundingBox = this.createExtraBoundingBox();
+      this.markVehicleBoxCacheDirty("targeted vehicle config reload");
+      super.stepHeight = info.stepHeight;
+      this.setSize(info.bodyWidth, info.bodyHeight);
+      return true;
+   }
+
    public MCH_BoundingBox[] createExtraBoundingBox() {
       // Get the list of extra bounding boxes
       MCH_BaseVehicleInfo acInfo = this.getAcInfo();

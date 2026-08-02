@@ -184,6 +184,48 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       });
    }
 
+   public void scheduleTargetedVehicleReload(final int entityId, final String uuid,
+         final String definition, final boolean serverSuccess, final String serverReason) {
+      Minecraft.getMinecraft().func_152344_a(new Runnable() {
+         public void run() {
+            boolean success = serverSuccess;
+            String reason = serverReason;
+            Entity entity = Minecraft.getMinecraft().theWorld == null ? null
+                  : Minecraft.getMinecraft().theWorld.getEntityByID(entityId);
+            MCH_EntityBaseVehicle vehicle = entity instanceof MCH_EntityBaseVehicle
+                  ? (MCH_EntityBaseVehicle)entity : null;
+            if(success && (vehicle == null || !vehicle.getUniqueID().toString().equals(uuid)
+                  || vehicle.getAcInfo() == null || !vehicle.getAcInfo().name.equals(definition))) {
+               success = false;
+               reason = "Target vehicle changed before the reload result arrived";
+            }
+            if(success) {
+               mcheli.MCH_InfoManagerBase manager = mcheli.aircraft.MCH_VehicleInfoReload.managerFor(vehicle);
+               MCH_BaseVehicleInfo oldInfo = vehicle.getAcInfo();
+               success = manager != null && manager.reloadEntry(definition);
+               if(success) {
+                  MCH_BaseVehicleInfo info = (MCH_BaseVehicleInfo)manager.getMap().get(definition);
+                  success = vehicle.applyTargetedInfo(info);
+                  if(success) {
+                     MCH_VehicleItemModelRender.invalidate(oldInfo);
+                     mcheli.tank.MCH_TurretPopModelCache.invalidate(oldInfo);
+                     if(vehicle instanceof MCH_EntityHeli) registerModelsHeli(definition, true);
+                     else if(vehicle instanceof MCP_EntityPlane) registerModelsPlane(definition, true);
+                     else if(vehicle instanceof MCH_EntityShip) registerModelsShip(definition, true);
+                     else if(vehicle instanceof MCH_EntityTank) registerModelsTank(definition, true);
+                     else if(vehicle instanceof MCH_EntityTurret) registerModelsVehicle(definition, true);
+                     MCH_VehicleLODManager.INSTANCE.invalidate(vehicle.getUniqueID());
+                  } else reason = "Seat count changed; restart is required";
+               } else if(manager != null) reason = manager.getLastReloadError();
+            }
+            mcheli.gui.MCH_ConfigGui.onTargetedReloadResult(success, reason);
+            if(Minecraft.getMinecraft().thePlayer != null)
+               Minecraft.getMinecraft().thePlayer.addChatMessage(new net.minecraft.util.ChatComponentText(
+                     (success ? "Vehicle reload complete: " : "Vehicle reload failed: ") + reason));
+         }
+      });
+   }
+
    public void registerModels() {
       MCH_ModelManager.setForceReloadMode(true);
       MCH_RenderBaseVehicle.debugModel = MCH_ModelManager.load("box");

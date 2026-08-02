@@ -58,6 +58,16 @@ public class MCH_VehicleItemModelRender implements IItemRenderer {
       nextModelBuildTime = 0L;
    }
 
+   /** Releases only the display lists associated with one definition snapshot. */
+   public static void invalidate(MCH_BaseVehicleInfo info) {
+      if(info == null) return;
+      CachedDisplayList cached = (CachedDisplayList)MODEL_DISPLAY_LISTS.remove(info);
+      if(cached != null) cached.delete();
+      MODEL_BUILD_QUEUE.remove(info);
+      QUEUED_MODELS.remove(info);
+      if(activeModelBuild == info) activeModelBuild = null;
+   }
+
    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
       MCH_BaseVehicleInfo info = getInfo(item);
 

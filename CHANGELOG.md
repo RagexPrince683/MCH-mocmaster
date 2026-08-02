@@ -1,3 +1,10 @@
+# Targeted vehicle configuration live reload (PR pending)
+
+- Make the Development GUI vehicle button reload one server-validated controlled vehicle definition instead of scanning and rebuilding every matching loaded entity.
+- Resolve the definition through addon/development/classpath/JAR precedence, atomically replace one manager entry, and preserve the previous snapshot on missing or invalid input.
+- Reload only the selected vehicle's model dependencies and related item, LOD, and turret-pop caches while preserving seats, riders, identity, and runtime state.
+- Separate the vehicle, weapon, and HUD buttons and retain `/mcheli reload` as the complete expensive asset reload.
+
 # Fix AA missile target validation and server null target handling (PR pending)
 
 - Reject null, dead, self, cross-world, unloaded, stale, and vehicle-occupant targets through the shared client/server guidance validator.

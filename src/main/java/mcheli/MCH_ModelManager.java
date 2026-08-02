@@ -29,9 +29,6 @@ public class MCH_ModelManager extends W_ModelBase {
    private MCH_ModelManager() {}
 
    public static void setForceReloadMode(boolean b) {
-      if (b && !forceReloadMode) {
-         mcheli.tank.MCH_TurretPopModelCache.clear();
-      }
       forceReloadMode = b;
    }
 
