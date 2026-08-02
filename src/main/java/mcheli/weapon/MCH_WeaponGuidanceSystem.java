@@ -35,6 +35,16 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
       UNKNOWN
    }
 
+   public enum TargetCategory {
+      AIRCRAFT,
+      GROUND_VEHICLE,
+      SHIP,
+      LIVING,
+      MISSILE,
+      COUNTERMEASURE,
+      UNKNOWN
+   }
+
    public World worldObj;
    protected Entity user;
    public Entity lastLockEntity;
@@ -181,7 +191,47 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
       if(entity instanceof MCH_EntityBaseVehicle) {
          return TargetDomain.UNKNOWN;
       }
-      return isEntityOnGround(entity, groundProbeHeight) ? TargetDomain.GROUND : TargetDomain.AIR;
+      // A transient movement state does not change an ordinary entity's physical role.
+      // In particular, jumping players and falling mobs are not aircraft.
+      if(W_Lib.isEntityLivingBase(entity)) {
+         return TargetDomain.GROUND;
+      }
+      return TargetDomain.UNKNOWN;
+   }
+
+   /** Returns the stable role independently of the target's current physical domain. */
+   public static TargetCategory getTargetCategory(Entity entity) {
+      if(entity == null || entity.isDead) {
+         return TargetCategory.UNKNOWN;
+      }
+      if(entity instanceof MCH_EntityFlare || entity instanceof MCH_EntityChaff) {
+         return TargetCategory.COUNTERMEASURE;
+      }
+      if(entity instanceof MCH_EntityBaseBullet) {
+         return TargetCategory.MISSILE;
+      }
+      if(entity instanceof MCP_EntityPlane || entity instanceof MCH_EntityHeli) {
+         return TargetCategory.AIRCRAFT;
+      }
+      if(entity instanceof MCH_EntityShip) {
+         return TargetCategory.SHIP;
+      }
+      if(entity instanceof MCH_EntityTank || entity instanceof MCH_EntityTurret
+              || entity instanceof MCH_EntityUavStation) {
+         return TargetCategory.GROUND_VEHICLE;
+      }
+      String className = entity.getClass().getName();
+      if(className.indexOf("EntityPlane") >= 0) {
+         return TargetCategory.AIRCRAFT;
+      }
+      if(className.indexOf("EntityVehicle") >= 0 || className.indexOf("EntityMecha") >= 0
+              || className.indexOf("EntityAAGun") >= 0) {
+         return TargetCategory.GROUND_VEHICLE;
+      }
+      if(W_Lib.isEntityLivingBase(entity)) {
+         return TargetCategory.LIVING;
+      }
+      return TargetCategory.UNKNOWN;
    }
 
    private boolean isDomainAllowed(Entity entity) {
@@ -211,7 +261,10 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
    }
 
    public boolean lock(Entity user, boolean isLockContinue) {
-
+      if(user == null || user.isDead || this.worldObj == null || user.worldObj != this.worldObj) {
+         this.clearLock();
+         return false;
+      }
       // If server side, returns immediately
       if(!this.worldObj.isRemote) {
          return false;
@@ -230,11 +283,7 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
             for(int i = 0; i < canLock.size(); ++i) {
                Entity currentEntity = (Entity)canLock.get(i);
                // Checks whether entity can be locked
-               if(this.canLockEntity(currentEntity) ) { //please fucking work
-                  //&& !this.aircraft.isFreeLookMode()
-                  //do not fucking do this here god hates this
-                  //&& !this.aircraft.isFreeLookMode()
-                  //todo here I CANT FUCKING ACCESS THIS SHIT FROM HERE AAAAA //this.aircraft.isFreeLookMode()
+               if(this.canLockEntity(currentEntity)) {
                   dz = currentEntity.posX - user.posX;
                   double dy = currentEntity.posY - user.posY;
                   double dz1 = currentEntity.posZ - user.posZ;
@@ -274,23 +323,12 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
                }
             }
 
-            //todo here
-            //if (this.aircraft.isFreeLookMode()) {
-            //   canLockTarget = false;
-            //}
-            //should work please I pray actually I should probably use the bullshit below this for that because
-            // I assigned aircraft earlier and java just fucking hates actual working logic because fuck you also
-            // fucking goddamn it has no constructor or some bullshit idk fuck this goddamn mod
-
-            //no god hates ts
-
             MCH_EntityBaseVehicle ac = null; //Entity ridden by the player
             if(user.ridingEntity instanceof MCH_EntityBaseVehicle) {
                ac = (MCH_EntityBaseVehicle)user.ridingEntity;
 
                if (ac.isFreeLookMode() && this.canLockInAir && (ac instanceof MCP_EntityPlane)) {
                   canLockTarget = false;
-                  //NO MORE BITCH SHIT
                }
 
             } else if(user.ridingEntity instanceof MCH_EntitySeat) {
@@ -408,12 +446,17 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
       this.lockCount = 0;
       this.continueLockCount = 0;
       this.lockSoundCount = 0;
-      if(this.lastLockEntity != null && this.lastLockEntity.isDead) {
+      if(this.lastLockEntity != null && (this.lastLockEntity.isDead
+              || this.lastLockEntity.worldObj == null
+              || this.lastLockEntity.worldObj.getEntityByID(this.lastLockEntity.getEntityId()) != this.lastLockEntity)) {
          this.lastLockEntity = null;
       }
    }
 
    public Entity getLockEntity(Entity entity) {
+      if(entity == null) {
+         return null;
+      }
       if(entity.ridingEntity instanceof MCH_EntityUavStation) {
          MCH_EntityUavStation us = (MCH_EntityUavStation)entity.ridingEntity;
          if(us.getControlAircract() != null) {
@@ -425,6 +468,12 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
    }
 
    public boolean canLockEntity(Entity entity) {
+      if(!isBasicTargetValid(this.user, entity)) {
+         return false;
+      }
+      if(isVehicleOccupant(entity)) {
+         return false;
+      }
       // If locking players is not allowed and entity is a player, returns false
       if(this.ridableOnly && entity instanceof EntityPlayer && entity.ridingEntity == null) {
          return false;
@@ -475,16 +524,41 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
    }
 
    public boolean canLockEntity(Entity shooter, Entity entity) {
+      if(!isBasicTargetValid(shooter, entity)) {
+         return false;
+      }
       this.user = shooter;
       return canLockEntity(entity);
    }
 
+   private static boolean isBasicTargetValid(Entity shooter, Entity target) {
+      return shooter != null && target != null && !shooter.isDead && !target.isDead
+              && !W_Entity.isEqual(shooter, target) && shooter.worldObj != null
+              && shooter.worldObj == target.worldObj
+              && target.worldObj.getEntityByID(target.getEntityId()) == target;
+   }
+
+   private static boolean isVehicleOccupant(Entity entity) {
+      if(entity == null || entity.ridingEntity == null) {
+         return false;
+      }
+      Entity mount = entity.ridingEntity;
+      if(mount instanceof MCH_EntitySeat) {
+         return ((MCH_EntitySeat)mount).getParent() != null;
+      }
+      return mount instanceof MCH_EntityBaseVehicle || mount instanceof MCH_EntityUavStation;
+   }
+
    /** Server-side validation for the entity id supplied by the client. */
    public boolean canLaunchAt(Entity shooter, Entity entity) {
-      if(shooter == null || !canLockEntity(shooter, entity)) {
+      if(!isBasicTargetValid(shooter, entity) || this.worldObj == null
+              || shooter.worldObj != this.worldObj || !canLockEntity(shooter, entity)) {
          return false;
       }
       Entity locker = getLockEntity(shooter);
+      if(locker == null || locker.worldObj != this.worldObj) {
+         return false;
+      }
       double dx = entity.posX - shooter.posX;
       double dy = entity.posY - shooter.posY;
       double dz = entity.posZ - shooter.posZ;
@@ -502,7 +576,7 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
 
    public static boolean isEligibleMissileTarget(Entity target, Entity shooter, MCH_WeaponInfo info,
            boolean allowGround, boolean allowAir, boolean allowWater) {
-      if(target == null || info == null || target.isDead || W_Entity.isEqual(target, shooter)) {
+      if(info == null || !isBasicTargetValid(shooter, target) || isVehicleOccupant(target)) {
          return false;
       }
       if(target instanceof MCH_EntityFlare || target instanceof MCH_EntityChaff) {
@@ -547,6 +621,10 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
 
 
    public static boolean inLockAngle(Entity entity, float rotationYaw, float rotationPitch, Entity target, float lockAng) {
+      if(entity == null || target == null || entity.isDead || target.isDead
+              || entity.worldObj == null || entity.worldObj != target.worldObj) {
+         return false;
+      }
       double dx = target.posX - entity.posX;
       double dy = target.posY + (double)(target.height / 2.0F) - entity.posY;
       double dz = target.posZ - entity.posZ;
@@ -566,16 +644,16 @@ public class MCH_WeaponGuidanceSystem extends MCH_EntityGuidanceSystem {
 
    @Override
    public double getLockPosX() {
-      return targetEntity.posX;
+      return targetEntity != null ? targetEntity.posX : 0.0D;
    }
 
    @Override
    public double getLockPosY() {
-      return targetEntity.posY;
+      return targetEntity != null ? targetEntity.posY : 0.0D;
    }
 
    @Override
    public double getLockPosZ() {
-      return targetEntity.posZ;
+      return targetEntity != null ? targetEntity.posZ : 0.0D;
    }
 }

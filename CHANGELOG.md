@@ -1,3 +1,10 @@
+# Fix AA missile target validation and server null target handling (PR pending)
+
+- Reject null, dead, self, cross-world, unloaded, stale, and vehicle-occupant targets through the shared client/server guidance validator.
+- Keep ordinary players and mobs in the Ground domain regardless of jumping or falling, while classifying aircraft separately by real collision contact.
+- Clear stale client entity options before lock acquisition and reject zero or invalid target IDs before server missile creation, sound, ammunition, or cooldown handling.
+- Audit all runtime and reference AA missile assets; no weapon configuration changes were required.
+
 # Forge 1.7.10 development asset live reload (PR pending)
 
 - Make `/mcheli reload` prefer external addons and the editable `src/main/resources/assets/mcheli` tree over generated classpath output and development JARs.

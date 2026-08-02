@@ -13,9 +13,18 @@ This audit traces every repository weapon configured as `ATMissile`, `ASMissile`
 1. Planes and helicopters are **Ground** while `onGround` is true or a narrow block-collision probe immediately below their complete bounding box finds contact; otherwise they are **Air**. Speed and `LockMinHeight` are not part of aircraft contact detection.
 2. Tanks, static turrets, UAV stations, and compatible external ground vehicle/mecha/AA-gun roles are **Ground**, even while jumping or crossing rough terrain.
 3. Ships are **Surface**; a diving ship entity in water is **Underwater**. Surface/underwater permissions remain separate from ground permission and use the existing water permission for backward compatibility.
-4. Unknown living/non-vehicle targets fall back to physical state. The fallback honors `onGround`, and always probes immediately below the bounding box even when `LockMinHeight = 0`; positive `LockMinHeight` retains its extra look-down meaning.
+4. Ordinary players and mobs have a stable **Ground** role regardless of `onGround`, jumping, falling, or block proximity. Unknown non-living entities are **Unknown** and are not lockable. `LockMinHeight` remains seeker behavior and does not define aircraft contact.
 5. Unknown MCHeli base-vehicle roles are not guessed from block contact. External compatibility name checks remain in place and now map their established roles to a stable domain.
 6. Weapon class permissions remain final: AA enables Air; AT enables Ground; immersion still requires `canLockInWater`; missile locking still requires `canLockMissile`; custom checkers run after basic domain checks.
+7. Target category is evaluated separately from domain. Aircraft retain the Aircraft category after landing (and therefore become valid Ground targets for AT weapons), while their occupants are not exposed as separate targets. Ships, submarines, and their existing Surface/Underwater behavior are unchanged.
+
+## Invalid entity-id correction
+
+The client weapon option could retain the ID from an earlier completed lock. By the time the server handled the control packet, `World.getEntityByID` could return `null` because the target died or unloaded; the public lock validator then dereferenced that value. A reused ID could likewise resolve to a different role. Client acquisition now resets the option to zero before every ordinary seeker attempt and writes an ID only after the completed target passes the shared validator again.
+
+The server rejects option zero and repeats the shared null, liveness, identity, world membership, canonical entity-ID, occupant, category/domain, seeker, countermeasure, range, angle, stealth, custom-checker, water, missile ownership, and line-of-sight checks. A rejected `shot` returns `false` before sound or entity creation, so `MCH_WeaponSet.use` does not apply ammunition, heat, reload, cooldown, or weapon-index state. No exception is logged for a stale ID.
+
+`PassiveRadar` and `ActiveRadar` remain the explicit configuration switches for targetless launch: those weapons deliberately launch into their existing post-launch search or continuous-designation flow. Other AA and AT missiles require a completely validated selected entity both on the HUD/client and at server launch.
 
 ## Corrected end-to-end behavior
 
@@ -33,7 +42,7 @@ Active AA and AT scans and in-flight homing use the same role/domain and counter
 
 ## Weapon asset result
 
-Every file under both weapon directories was inspected for the requested type, seeker, radar, laser, height, range, angle, fuze, rider, and missile-interception fields. **No weapon asset change was required.** In particular, `agm114.txt` and `mqagm114.txt` remain `ATMissile` weapons with `LockMinHeight = 0`; landed-aircraft support is supplied by the shared domain rule, not an air-lock permission or weapon-name exception. Existing multi-mode seeker flags were retained because the runtime countermeasure behavior is explicitly driven by those configured capabilities. Runtime and `configreference` assets therefore remain synchronized.
+Every file under both weapon directories was inspected for the requested type, seeker, radar, laser, height, range, angle, fuze, rider, and missile-interception fields, including all 178 AA missile definitions in each tree. **No weapon asset change was required.** In particular, `agm114.txt` and `mqagm114.txt` remain `ATMissile` weapons with `LockMinHeight = 0`; landed-aircraft support is supplied by the shared domain rule, not an air-lock permission or weapon-name exception. Existing multi-mode seeker flags and explicit passive/active radar launch modes were retained because runtime countermeasure and targetless-launch behavior is driven by those configured capabilities. Runtime and `configreference` assets therefore remain synchronized.
 
 ## Per-weapon audit
 
