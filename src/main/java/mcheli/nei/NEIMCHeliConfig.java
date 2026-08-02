@@ -4,6 +4,7 @@ import codechicken.nei.api.API;
 import codechicken.nei.api.IConfigureNEI;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mcheli.MCH_Config;
 import mcheli.MCH_MOD;
 
 /**
@@ -15,6 +16,9 @@ public class NEIMCHeliConfig implements IConfigureNEI {
 
     @Override
     public void loadConfig() {
+        if (!MCH_Config.EnableNEIHandler.prmBool) {
+            return;
+        }
         MCH_VehicleAmmoRecipeHandler handler = new MCH_VehicleAmmoRecipeHandler();
         API.registerRecipeHandler(handler);
         API.registerUsageHandler(handler);

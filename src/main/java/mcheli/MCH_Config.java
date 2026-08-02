@@ -30,6 +30,7 @@ public class MCH_Config {
    public static String configFilePath;
    public static MCH_ConfigPrm EnableMCHLibLog;
    public static MCH_ConfigPrm EnableMCHLibDebugLog;
+   public static MCH_ConfigPrm EnableNEIHandler;
    public static String configVer;
    public static int hitMarkColorRGB;
    public static float hitMarkColorAlpha;
@@ -434,6 +435,8 @@ public class MCH_Config {
       EnableMCHLibLog.desc = ";Write normal MCH_Lib.Log messages to the Minecraft log.";
       EnableMCHLibDebugLog = new MCH_ConfigPrm("EnableMCHLibDebugLog", false);
       EnableMCHLibDebugLog.desc = ";Write verbose MCH_Lib.DbgLog messages to the Minecraft log.";
+      EnableNEIHandler = new MCH_ConfigPrm("EnableNEIHandler", true);
+      EnableNEIHandler.desc = ";Controls the MCHeli vehicle ammunition category in NotEnoughItems. Requires a client restart.";
       TestMode = new MCH_ConfigPrm("TestMode", false);
       EnableCommand = new MCH_ConfigPrm("EnableCommand", true);
       PlaceableOnSpongeOnly = new MCH_ConfigPrm("PlaceableOnSpongeOnly", false);
@@ -743,6 +746,7 @@ public class MCH_Config {
       General = new MCH_ConfigPrm[]{
               EnableMCHLibLog,
               EnableMCHLibDebugLog,
+              EnableNEIHandler,
               TestMode,
               EnableCommand,
               EnableModelTextureRepair, EnableModelUVCorrection,

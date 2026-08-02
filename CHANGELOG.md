@@ -1,8 +1,6 @@
-# Automatic runtime model texture and UV repair (PR pending)
+# Configurable NEI Vehicle Ammunition Handler (PR pending)
 
-- Discover model/texture pairs at vehicle and 3D vehicle-item binding time, rasterize in-range MQO/OBJ UV faces, and conservatively repair small enclosed alpha damage in cached dynamic textures without changing source assets.
-- Preserve wrapping UVs, large and smooth transparency, and original UV data; move only repaired, in-range UV samples to nearby opaque texel centers when confidence permits.
-- Delete repaired GL textures on resource reload, expose conservative client configuration and optional development previews, and clarify that the Python manifest workflow is diagnostic only.
+- Added the `EnableNEIHandler` boolean startup option, defaulting to `true`, to allow clients to prevent the optional NEI vehicle ammunition recipe and usage handler from registering.
 
 # Complete deterministic texture/UV repair validation (PR pending)
 
