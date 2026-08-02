@@ -1,9 +1,3 @@
-# Runtime model texture and UV repair correction (PR pending)
-
-- Run texture bleeding, thin-feature restoration, and connected UV-island correction independently instead of abandoning the repair when no tiny enclosed alpha hole is found.
-- Rebuild model VBOs after UV changes, clear repaired UV state on resource reload, and expose conservative controls for holes, thin features, UV searches, score gain, and tiny islands.
-- Add real Merkava Mk.4 asset regression coverage, explicit no-op diagnostics, and complete debug-preview output without modifying binary model or texture assets.
-
 # Configurable NEI Vehicle Ammunition Handler (PR pending)
 
 - Added the `EnableNEIHandler` boolean startup option, defaulting to `true`, to allow clients to prevent the optional NEI vehicle ammunition recipe and usage handler from registering.

@@ -370,23 +370,3 @@ Hold-freelook is hold-to-orbit: mouse input changes raw orbit yaw/pitch targets,
 `KeyVehicleLock` defaults to LWJGL key code `24` (**O**). While directly riding
 the pilot seat, press it to ask the server to lock or unlock vehicle entry.
 The server, not the client key binding, decides whether the request is allowed.
-# Runtime model texture repair
-
-The client can conservatively repair downscaled vehicle textures at first render. `EnableModelTextureRepair`
-controls texture analysis and `EnableModelUVCorrection` controls connected-island translation. Repairs are cached
-against the exact model object used by entity, LOD, and item rendering, and are discarded on resource reload.
-
-The available integer controls are:
-
-* `ModelTextureMaxHoleArea` (default `16`) — largest enclosed binary-alpha hole eligible for filling.
-* `ModelTextureRGBBleedRadius` (default `2`) — transparent-edge color-bleed passes; these never change alpha.
-* `ModelTextureThinMinLength` (default `6`) — minimum texel length of an opaque thin feature.
-* `ModelTextureThinMaxThickness` (default `1`) — maximum thickness eligible for thin-feature restoration.
-* `ModelTextureThinExpansionRadius` (default `1`) — perpendicular expansion applied to a qualifying feature.
-* `ModelTextureUVIslandSearchRadius` (default `8`) — integer-texel translation search around a suspicious island.
-* `ModelTextureUVMinScoreGainPercent` (default `20`) — required opaque-coverage improvement in percentage points.
-* `ModelTextureTinyIslandMinTexels` (default `1`) — size below which an island is treated as downscale-collapsed.
-
-`ModelTextureRepairDebugLogging` logs the complete decision, including explicit safe no-op reasons.
-`ModelTextureRepairDebugPreviews` writes the original, coverage layers, proposals, final image, and score report
-under `mcheli-texture-repair` in the Minecraft directory. These diagnostics do not alter packaged assets.
