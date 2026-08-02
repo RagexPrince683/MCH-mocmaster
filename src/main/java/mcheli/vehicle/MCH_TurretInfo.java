@@ -31,7 +31,6 @@ public class MCH_TurretInfo extends MCH_BaseVehicleInfo {
 
    public MCH_TurretInfo(String name) {
       super(name);
-      this.defaultFreelook = true;
    }
 
    public boolean isValidData() throws Exception {
@@ -113,7 +112,6 @@ public class MCH_TurretInfo extends MCH_BaseVehicleInfo {
 
    public void preReload() {
       super.preReload();
-      this.defaultFreelook = true;
       this.partList.clear();
    }
 
