@@ -890,34 +890,22 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       return null;
    }
 
-   private void warnMissingTurretPart() {
-      if(this.turretPopMissingPartWarned) return;
-      this.turretPopMissingPartWarned = true;
-      java.util.List attempted = new java.util.ArrayList();
-      if(this.tankInfo != null) for(Object object : this.tankInfo.partWeapon) {
-         MCH_BaseVehicleInfo.PartWeapon part = (MCH_BaseVehicleInfo.PartWeapon)object;
-         attempted.add("$" + part.modelName);
-         for(Object childObject : part.child) attempted.add("$" + ((MCH_BaseVehicleInfo.PartWeaponChild)childObject).modelName);
-      }
-      MCH_Lib.Log((Entity)this,
-            "Turret pop disabled: display='%s', type='%s', no configured model group found; attempted=%s",
-            new Object[]{this.tankInfo != null ? this.tankInfo.displayName : "?", this.getTypeName(), attempted.toString()});
-   }
-
    private void startTurretPop() {
-      Vec3 p = this.getTransformedPosition(this.tankInfo.turretPosition);
-      this.turretPopStarted = true; this.turretPopLanded = false; this.turretPopAge = 0;
-      this.turretPopX = this.prevTurretPopX = p.xCoord; this.turretPopY = this.prevTurretPopY = p.yCoord; this.turretPopZ = this.prevTurretPopZ = p.zCoord;
-      double a = super.rand.nextDouble() * Math.PI * 2.0D;
-      double speed = 0.18D + super.rand.nextDouble() * 0.16D;
-      this.turretPopMotionX = Math.cos(a) * speed; this.turretPopMotionY = 1.05D + super.rand.nextDouble() * 0.35D; this.turretPopMotionZ = Math.sin(a) * speed;
-      this.turretPopYaw = this.prevTurretPopYaw = this.getRotYaw(); this.turretPopPitch = this.prevTurretPopPitch = 0.0F; this.turretPopRoll = this.prevTurretPopRoll = 0.0F;
-      this.turretPopFrozenYaw = MathHelper.wrapAngleTo180_float(this.getLastRiderYaw() - this.getRotYaw());
-      MCH_BaseVehicleInfo.PartWeapon root = this.getTurretPopRoot();
-      MCH_WeaponSet weapon = root != null ? this.getWeaponByName(root.name[0]) : null;
-      this.turretPopFrozenPitch = weapon != null ? weapon.rotationPitch : this.getLastRiderPitch();
-      this.turretPopAngularYaw = 8.0F + super.rand.nextFloat() * 12.0F; this.turretPopAngularPitch = (super.rand.nextFloat() - 0.5F) * 24.0F; this.turretPopAngularRoll = (super.rand.nextFloat() - 0.5F) * 30.0F;
-      MCH_PacketTurretPop.send(this);
+      return;
+      //aye bro none of that shit worked
+      //Vec3 p = this.getTransformedPosition(this.tankInfo.turretPosition);
+      //this.turretPopStarted = true; this.turretPopLanded = false; this.turretPopAge = 0;
+      //this.turretPopX = this.prevTurretPopX = p.xCoord; this.turretPopY = this.prevTurretPopY = p.yCoord; this.turretPopZ = this.prevTurretPopZ = p.zCoord;
+      //double a = super.rand.nextDouble() * Math.PI * 2.0D;
+      //double speed = 0.18D + super.rand.nextDouble() * 0.16D;
+      //this.turretPopMotionX = Math.cos(a) * speed; this.turretPopMotionY = 1.05D + super.rand.nextDouble() * 0.35D; this.turretPopMotionZ = Math.sin(a) * speed;
+      //this.turretPopYaw = this.prevTurretPopYaw = this.getRotYaw(); this.turretPopPitch = this.prevTurretPopPitch = 0.0F; this.turretPopRoll = this.prevTurretPopRoll = 0.0F;
+      //this.turretPopFrozenYaw = MathHelper.wrapAngleTo180_float(this.getLastRiderYaw() - this.getRotYaw());
+      //MCH_BaseVehicleInfo.PartWeapon root = this.getTurretPopRoot();
+      //MCH_WeaponSet weapon = root != null ? this.getWeaponByName(root.name[0]) : null;
+      //this.turretPopFrozenPitch = weapon != null ? weapon.rotationPitch : this.getLastRiderPitch();
+      //this.turretPopAngularYaw = 8.0F + super.rand.nextFloat() * 12.0F; this.turretPopAngularPitch = (super.rand.nextFloat() - 0.5F) * 24.0F; this.turretPopAngularRoll = (super.rand.nextFloat() - 0.5F) * 30.0F;
+      //MCH_PacketTurretPop.send(this);
    }
 
    private void updateTurretPop() {
@@ -985,13 +973,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    public void writeSpawnData(ByteBuf buffer) { super.writeSpawnData(buffer); MCH_PacketTurretPop.writeState(buffer, this); }
    public void readSpawnData(ByteBuf buffer) { super.readSpawnData(buffer); if(buffer.readableBytes() > 0) MCH_PacketTurretPop.readState(buffer, this); }
 
-   public void performActionIfWeightTypeIsOne() {
-      // Check if TankInfo exists and weightType is 1
-      if (this.getTankInfo() != null && this.getTankInfo().weightType == 1) {
-         System.out.println("Weight type is 1.");
 
-      }
-   }
 
    protected void onUpdate_Client() {
 //      if(this.getRiddenByEntity() != null && W_Lib.isClientPlayer(this.getRiddenByEntity())) {
