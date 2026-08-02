@@ -9,6 +9,8 @@ public class MCH_PacketTurretPlayerControl extends MCH_PacketPlayerControlBase {
 
    public byte switchFold = -1;
    public int unhitchChainId = -1;
+   public float weaponAimYaw;
+   public float weaponAimPitch;
 
 
    public int getMessageID() {
@@ -21,6 +23,10 @@ public class MCH_PacketTurretPlayerControl extends MCH_PacketPlayerControlBase {
       try {
          this.switchFold = data.readByte();
          this.unhitchChainId = data.readInt();
+         if(this.useWeapon) {
+            this.weaponAimYaw = data.readFloat();
+            this.weaponAimPitch = data.readFloat();
+         }
       } catch (Exception var3) {
          var3.printStackTrace();
       }
@@ -33,6 +39,10 @@ public class MCH_PacketTurretPlayerControl extends MCH_PacketPlayerControlBase {
       try {
          dos.writeByte(this.switchFold);
          dos.writeInt(this.unhitchChainId);
+         if(this.useWeapon) {
+            dos.writeFloat(this.weaponAimYaw);
+            dos.writeFloat(this.weaponAimPitch);
+         }
       } catch (IOException var3) {
          var3.printStackTrace();
       }

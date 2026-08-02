@@ -36,7 +36,7 @@ public class MCH_ClientTurretTickHandler extends MCH_BaseVehicleClientTickHandle
       this.KeySwitchHovering = new MCH_Key(MCH_Config.KeySwitchHovering.prmInt);
       this.KeyZoom = new MCH_Key(MCH_Config.KeyZoom.prmInt);
       this.KeyExtra = new MCH_Key(MCH_Config.KeyExtra.prmInt);
-      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeySwitchHovering, super.KeyUseWeapon, super.KeyCurrentWeaponLock, super.KeyVehicleLock, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyChaff, super.KeyMaintenance,super.KeyAPS, this.KeyExtra, super.KeyGUI};
+      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeySwitchHovering, super.KeyUseWeapon, super.KeyCurrentWeaponLock, super.KeyVehicleLock, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyChaff, super.KeyMaintenance,super.KeyAPS, this.KeyExtra, super.KeyFreeLook, super.KeyGUI};
    }
 
    protected void update(EntityPlayer player, MCH_EntityTurret vehicle, MCH_TurretInfo info) {
@@ -110,6 +110,13 @@ public class MCH_ClientTurretTickHandler extends MCH_BaseVehicleClientTickHandle
       MCH_PacketTurretPlayerControl pc = new MCH_PacketTurretPlayerControl();
       boolean send = false;
       send = this.commonPlayerControl(player, vehicle, isPilot, pc);
+      if(vehicle.getAcInfo().defaultFreelook && pc.switchFreeLook > 0) {
+         pc.switchFreeLook = 0;
+      }
+      if(pc.useWeapon) {
+         pc.weaponAimYaw = player.rotationYaw;
+         pc.weaponAimPitch = player.rotationPitch;
+      }
       if(this.KeyExtra.isKeyDown()) {
          if(vehicle.getTowChainEntity() != null) {
             playSoundOK();

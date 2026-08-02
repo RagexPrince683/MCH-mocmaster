@@ -30,15 +30,6 @@ public class MCH_RenderTurret extends MCH_RenderBaseVehicle {
          MCH_EntityTurret vehicle = (MCH_EntityTurret)entity;
          turretInfo = vehicle.getTurretInfo();
          if(turretInfo != null) {
-            if(vehicle.riddenByEntity != null && !vehicle.isDestroyed()) {
-               vehicle.isUsedPlayer = true;
-               vehicle.lastRiderYaw = vehicle.riddenByEntity.rotationYaw;
-               vehicle.lastRiderPitch = vehicle.riddenByEntity.rotationPitch;
-            } else if(!vehicle.isUsedPlayer && !vehicle.worldObj.isRemote) {
-               vehicle.lastRiderYaw = vehicle.rotationYaw;
-               vehicle.lastRiderPitch = vehicle.rotationPitch;
-            }
-
             this.renderDebugHitBox(vehicle, posX, posY, posZ, yaw, pitch, roll);
             this.renderDebugPilotSeat(vehicle, posX, posY, posZ, yaw, pitch, roll);
             GL11.glTranslated(posX, posY, posZ);
