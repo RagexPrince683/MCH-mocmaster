@@ -84,6 +84,7 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
       } else {
          this.setAcInfo(this.turretInfo);
          this.newSeats(this.getAcInfo().getNumSeatAndRack());
+         this.switchFreeLookModeClient(this.getAcInfo().defaultFreelook);
          super.weapons = this.createWeapon(1 + this.getSeatNum());
          this.initPartRotation(super.rotationYaw, super.rotationPitch);
       }
@@ -181,14 +182,16 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
          }
       }
 
-      float breforeUseWeaponPitch1 = super.rotationPitch;
-      float breforeUseWeaponYaw1 = super.rotationYaw;
-      super.rotationPitch = prm.user.rotationPitch;
-      super.rotationYaw = prm.user.rotationYaw;
-      boolean result = super.useCurrentWeapon(prm);
-      super.rotationPitch = breforeUseWeaponPitch1;
-      super.rotationYaw = breforeUseWeaponYaw1;
-      return result;
+      float beforeUseWeaponPitch = super.rotationPitch;
+      float beforeUseWeaponYaw = super.rotationYaw;
+      try {
+         super.rotationPitch = prm.user.rotationPitch;
+         super.rotationYaw = prm.user.rotationYaw;
+         return super.useCurrentWeapon(prm);
+      } finally {
+         super.rotationPitch = beforeUseWeaponPitch;
+         super.rotationYaw = beforeUseWeaponYaw;
+      }
    }
 
    public void onUpdateAircraft() {
@@ -472,6 +475,6 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
    }
 
    public boolean canSwitchFreeLook() {
-      return false;
+      return true;
    }
 }

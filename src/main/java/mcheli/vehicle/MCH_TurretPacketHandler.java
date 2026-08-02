@@ -30,11 +30,20 @@ public class MCH_TurretPacketHandler {
                   vehicle.switchCameraMode(player, pc.switchCameraMode - 1);
                }
 
+               if(pc.switchFreeLook > 0 && vehicle.isPilot(player)
+                     && vehicle.canSwitchFreeLook() && !vehicle.getAcInfo().defaultFreelook) {
+                  vehicle.switchFreeLookMode(pc.switchFreeLook == 1);
+               }
+
                if(pc.switchWeapon >= 0) {
                   vehicle.switchWeapon(player, pc.switchWeapon);
                }
 
                if(pc.useWeapon) {
+                  player.rotationYaw = pc.weaponAimYaw;
+                  player.rotationPitch = pc.weaponAimPitch;
+                  vehicle.lastRiderYaw = pc.weaponAimYaw;
+                  vehicle.lastRiderPitch = pc.weaponAimPitch;
                   MCH_WeaponParam e = new MCH_WeaponParam();
                   e.entity = vehicle;
                   e.user = player;
