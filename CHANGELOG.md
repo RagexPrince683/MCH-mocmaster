@@ -1,3 +1,10 @@
+# Missile target classification and locking correction (PR pending)
+
+- Classify planes and helicopters by deterministic full-footprint ground contact while retaining stable domains for tanks, turrets, UAV stations, ships, and compatible external vehicles.
+- Share domain and countermeasure eligibility across acquisition, server launch validation, active scanning, and in-flight guidance; reject forged or stale wrong-domain target IDs.
+- Select the nearest eligible lock target, expose the last completed lock correctly, and correct AA/AT proximity-fuze squared-distance comparisons.
+- Audit all missile weapon assets without changing their configuration or loadouts.
+
 # Catastrophic tank turret-pop correction (PR pending)
 
 - Detach the exact `$turret` model group with its configured weapon children, preserving the destruction-time turret yaw and gun elevation in synchronized/NBT state.

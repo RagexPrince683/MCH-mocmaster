@@ -4,18 +4,36 @@ This audit traces every repository weapon configured as `ATMissile`, `ASMissile`
 
 ## Confirmed classification and launch paths
 
-* **Stinger:** `fim92`, `aim92`, `aim92_2`, `aim92_l`, `mqaim92_l`, `gepstinger`, and `imshoradstinger` select through `MCH_WeaponAAMissile` → `MCH_WeaponGuidanceSystem`. The client sends `lastLockEntity` as `optionParameter1`; the server resolves that same entity ID and assigns it to `MCH_EntityAAMissile`. Air permission is enabled by weapon class, not by name. Previously a ground vehicle with false `onGround` and `LockMinHeight = 0` appeared airborne.
-* **Hellfire:** `agm114` (mounted by the AH-64, AH-1W, and AH-1Z) and `mqagm114` (MQ-9) select through `MCH_WeaponATMissile` → the same guidance system. The selected client entity ID follows the same `optionParameter1` server path and is assigned to `MCH_EntityATMissile`; top-attack mode remains in `optionParameter2`. Ground permission is enabled by weapon class. Previously the same false airborne classification rejected the vehicle. TV Hellfire variants retain manual/camera guidance.
+* **Stinger:** `fim92`, `aim92`, `aim92_2`, `aim92_l`, `mqaim92_l`, `gepstinger`, and `imshoradstinger` select through `MCH_WeaponAAMissile` → `MCH_WeaponGuidanceSystem`. The client sends `lastLockEntity` as `optionParameter1`; the server resolves that same entity ID and assigns it to `MCH_EntityAAMissile`. Air permission is enabled by weapon class, not by name. Aircraft now follow physical ground contact, while stable ground-vehicle roles remain Ground despite transient `onGround` values.
+* **Hellfire:** `agm114` (mounted by the AH-64, AH-1W, and AH-1Z) and `mqagm114` (MQ-9) select through `MCH_WeaponATMissile` → the same guidance system. The selected client entity ID follows the same `optionParameter1` server path and is assigned to `MCH_EntityATMissile`; top-attack mode remains in `optionParameter2`. Ground permission is enabled by weapon class. The shared contact-aware domain rule now accepts landed planes and helicopters without permitting airborne aircraft. TV Hellfire variants retain manual/camera guidance.
 * **Continued locks and active seekers:** continued player locks now call the same classification used for acquisition without repeating physical ground/air decisions. Active AA and AT missile scans and AA terminal homing also use the shared role classifier. Countermeasure eligibility remains an earlier, separate heat/radar decision.
 
 ## Final target-domain rules
 
-1. Planes and helicopters are **Air**, even while landed.
+1. Planes and helicopters are **Ground** while `onGround` is true or a narrow block-collision probe immediately below their complete bounding box finds contact; otherwise they are **Air**. Speed and `LockMinHeight` are not part of aircraft contact detection.
 2. Tanks, static turrets, UAV stations, and compatible external ground vehicle/mecha/AA-gun roles are **Ground**, even while jumping or crossing rough terrain.
 3. Ships are **Surface**; a diving ship entity in water is **Underwater**. Surface/underwater permissions remain separate from ground permission and use the existing water permission for backward compatibility.
 4. Unknown living/non-vehicle targets fall back to physical state. The fallback honors `onGround`, and always probes immediately below the bounding box even when `LockMinHeight = 0`; positive `LockMinHeight` retains its extra look-down meaning.
 5. Unknown MCHeli base-vehicle roles are not guessed from block contact. External compatibility name checks remain in place and now map their established roles to a stable domain.
 6. Weapon class permissions remain final: AA enables Air; AT enables Ground; immersion still requires `canLockInWater`; missile locking still requires `canLockMissile`; custom checkers run after basic domain checks.
+
+## Corrected end-to-end behavior
+
+Acquisition and continued locks use `canLockEntity`; deterministic acquisition retains the nearest visible eligible candidate. The server resolves the client entity id but now repeats eligibility, domain, range, angle, stealth, custom-checker, water, rider, missile-interception, and line-of-sight checks before spawning an entity-guided AA or AT missile. Passive-radar lock updates retain the last completed live lock, while ordinary resets cannot expose a completed stale lock.
+
+Active AA and AT scans and in-flight homing use the same role/domain and countermeasure helper. Thus an already-launched AAM drops an aircraft after ground contact and an AT missile drops it after takeoff; an active seeker cannot reacquire the now-wrong-domain aircraft. Countermeasures use each weapon's actual heat/radar flags: heat-only accepts active flares, radar accepts active chaff, and neither accepts the other countermeasure.
+
+## Additional confirmed corrections
+
+* The acquisition loop now updates its best squared distance instead of allowing entity-list order to choose the final target.
+* `getLastLockEntity()` returns the completed-lock field; `clearLock()` also removes a dead completed target while preserving a live completed target needed by passive-radar updates.
+* AA and AT proximity fuzes compare squared target distance with the square of the configured linear distance.
+* Bomb proximity queries, ordinary bullet fuzes, and AS missile coordinate fuzes were inspected and left unchanged: they already use a linear AABB range, a correct squared comparison, and a true linear distance respectively.
+* TV/camera, coordinate, and manual guidance were inspected and left unchanged because they do not use the entity-domain lock path.
+
+## Weapon asset result
+
+Every file under both weapon directories was inspected for the requested type, seeker, radar, laser, height, range, angle, fuze, rider, and missile-interception fields. **No weapon asset change was required.** In particular, `agm114.txt` and `mqagm114.txt` remain `ATMissile` weapons with `LockMinHeight = 0`; landed-aircraft support is supplied by the shared domain rule, not an air-lock permission or weapon-name exception. Existing multi-mode seeker flags were retained because the runtime countermeasure behavior is explicitly driven by those configured capabilities. Runtime and `configreference` assets therefore remain synchronized.
 
 ## Per-weapon audit
 
