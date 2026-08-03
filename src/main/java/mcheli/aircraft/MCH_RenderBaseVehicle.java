@@ -1,7 +1,9 @@
 package mcheli.aircraft;
 
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -16,6 +18,8 @@ import mcheli.flare.MCH_EntityChaff;
 import mcheli.flare.MCH_EntityFlare;
 import mcheli.gui.MCH_Gui;
 import mcheli.lweapon.MCH_ClientLightWeaponTickHandler;
+import mcheli.lod.MCH_VehicleLODProjection;
+import mcheli.lod.MCH_VehicleLODManager;
 import mcheli.multiplay.MCH_GuiTargetMarker;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.uav.MCH_EntityUavStation;
@@ -52,6 +56,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    private static final boolean ANGELICA_DYNAMIC_PART_COMPAT = Loader.isModLoaded("angelica");
    private static final boolean DEBUG_ANGELICA_DYNAMIC_PART_RENDER = Boolean.getBoolean("mcheli.debugAngelicaDynamicPartRender");
    private static final Set angelicaDynamicPartRenderDiagnostics = new HashSet();
+   private static final Map vehicleLODDiagnosticTimes = new HashMap();
 
    public static Random rand = new Random();
 
@@ -152,16 +157,66 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
        * supposed to become useful.  The matrix/attribute pushes keep this isolated from
        * normal close-range aircraft and world rendering.
        */
+      double realDistance = Math.sqrt(posX * posX + posY * posY + posZ * posZ);
+      MCH_VehicleLODProjection.Context projection = MCH_VehicleLODProjection.capture(Minecraft.getMinecraft(), realDistance);
+      double depthScale = projection.depthScale;
+      diagnoseTrackedLOD(ac, posX, posY, posZ, realDistance, projection);
+      int previousMatrixMode = GL11.glGetInteger(GL11.GL_MATRIX_MODE);
+      GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+      GL11.glMatrixMode(GL11.GL_MODELVIEW);
       GL11.glPushMatrix();
-      GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_CURRENT_BIT | GL11.GL_TEXTURE_BIT);
-      GL11.glDisable(GL11.GL_FOG);
-      GL11.glEnable(GL11.GL_BLEND);
-      GL11.glDisable(GL11.GL_ALPHA_TEST);
-      GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-      this.renderBaseVehicle(ac, posX, posY, posZ, yaw, pitch, roll, tickTime);
-      this.renderAircraftLODParts(ac, info, posX, posY, posZ, tickTime);
-      GL11.glPopAttrib();
-      GL11.glPopMatrix();
+      try {
+         GL11.glDisable(GL11.GL_FOG);
+         GL11.glEnable(GL11.GL_BLEND);
+         GL11.glDisable(GL11.GL_ALPHA_TEST);
+         GL11.glEnable(GL11.GL_DEPTH_TEST);
+         GL11.glDepthMask(true);
+         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+         // Pattern A: this wrapper owns world placement; every vehicle renderer was
+         // audited to translate by its position arguments and accepts zero here.
+         GL11.glTranslated(posX * depthScale, posY * depthScale, posZ * depthScale);
+         GL11.glScaled(depthScale, depthScale, depthScale);
+         this.renderBaseVehicle(ac, 0.0D, 0.0D, 0.0D, yaw, pitch, roll, tickTime);
+         this.renderAircraftLODParts(ac, info, 0.0D, 0.0D, 0.0D, tickTime);
+      } finally {
+         GL11.glPopMatrix();
+         GL11.glPopAttrib();
+         GL11.glMatrixMode(previousMatrixMode);
+      }
+   }
+
+   private static void diagnoseTrackedLOD(MCH_EntityBaseVehicle ac, double posX, double posY, double posZ,
+      double realDistance, MCH_VehicleLODProjection.Context projection) {
+      if(MCH_Config.DebugVehicleLODVisibility == null || !MCH_Config.DebugVehicleLODVisibility.prmBool) return;
+      long now = System.currentTimeMillis();
+      Integer id = Integer.valueOf(ac.getEntityId());
+      Long previous = (Long)vehicleLODDiagnosticTimes.get(id);
+      if(previous != null && now - previous.longValue() < 1000L) return;
+      vehicleLODDiagnosticTimes.put(id, Long.valueOf(now));
+      Minecraft mc = Minecraft.getMinecraft();
+      Entity camera = mc.renderViewEntity;
+      double dx = camera == null ? posX : ac.posX - camera.posX;
+      double dy = camera == null ? posY : ac.posY - camera.posY;
+      double dz = camera == null ? posZ : ac.posZ - camera.posZ;
+      double horizontal = Math.sqrt(dx * dx + dz * dz);
+      boolean eligible = ac.isInRangeToRenderDist(realDistance * realDistance);
+      boolean snapshotReceived = MCH_VehicleLODManager.INSTANCE.hasSnapshotFor(ac);
+      int glError = GL11.glGetError();
+      String type = ac.getAcInfo() == null ? ac.getClass().getName() : ac.getAcInfo().name;
+      MCH_Lib.DbgLog(true,
+         "TrackedVehicleLOD id=%d type=%s camera=(%.2f,%.2f,%.2f) vehicle=(%.2f,%.2f,%.2f) horizontal=%.2f vertical=%.2f distance3d=%.2f renderer=(%.2f,%.2f,%.2f) doRender=true path=lod eligible=%s renderChunks=%d projectionValid=%s projection=[%.6f,%.6f,%.6f,%.6f] farPlane=%.2f safeDepth=%.2f depthScale=%.6f watchedChunk=true snapshotReceived=%s snapshotSuppressed=%s final=(%.2f,%.2f,%.2f) modelScale=%.6f glError=%d",
+         new Object[]{id, type, Double.valueOf(camera == null ? Double.NaN : camera.posX),
+            Double.valueOf(camera == null ? Double.NaN : camera.posY), Double.valueOf(camera == null ? Double.NaN : camera.posZ),
+            Double.valueOf(ac.posX), Double.valueOf(ac.posY), Double.valueOf(ac.posZ), Double.valueOf(horizontal),
+            Double.valueOf(Math.abs(dy)), Double.valueOf(realDistance), Double.valueOf(posX), Double.valueOf(posY),
+            Double.valueOf(posZ), Boolean.valueOf(eligible), Integer.valueOf(mc.gameSettings.renderDistanceChunks),
+            Boolean.valueOf(projection.validProjection), Float.valueOf(projection.projection[0]),
+            Float.valueOf(projection.projection[5]), Float.valueOf(projection.projection[10]),
+            Float.valueOf(projection.projection[14]), Double.valueOf(projection.farPlane),
+            Double.valueOf(projection.safeProxyDepth), Double.valueOf(projection.depthScale),
+            Boolean.valueOf(snapshotReceived), Boolean.valueOf(snapshotReceived),
+            Double.valueOf(posX * projection.depthScale), Double.valueOf(posY * projection.depthScale),
+            Double.valueOf(posZ * projection.depthScale), Double.valueOf(projection.depthScale), Integer.valueOf(glError)});
    }
 
    /**
