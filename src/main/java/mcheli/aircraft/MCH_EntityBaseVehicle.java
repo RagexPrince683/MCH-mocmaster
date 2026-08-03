@@ -98,15 +98,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    protected static final int HULL_PATH_STEP_Z = 6;
    protected static final int HULL_PATH_STEP_DOWN = 7;
    protected static final int HULL_PATH_STEP_ROTATION = 8;
-   protected static final int HULL_PATH_PRE_CONTACT = 9;
-   protected static final int HULL_PATH_STEP_HORIZONTAL = 10;
-   protected static final int HULL_PATH_STEP_FINAL_ROTATION = 11;
    private final PhysicalHullPath physicalHullPath = new PhysicalHullPath();
    private final PhysicalHullPath physicalHullNormalPath = new PhysicalHullPath();
    private boolean physicalHullPathCommitted;
    private boolean physicalHullPathIsStep;
-   /** True only between route selection and finishPhysicalHullStep in this update. */
-   private boolean physicalHullPathAlreadyValidated;
    private boolean rootMovementCandidateCalculation;
    private boolean acceptAuthoritativeHullTransform;
    private boolean hasBlockedHorizontalNormal;
@@ -527,7 +522,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.physicalHullNormalPath.clear();
       this.physicalHullPathCommitted = false;
       this.physicalHullPathIsStep = false;
-      this.physicalHullPathAlreadyValidated = false;
    }
 
    /**
@@ -550,30 +544,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    protected final void recordPhysicalHullWaypoint(AxisAlignedBB root, float yaw, float pitch, float roll,
                                                    int segmentType) {
       this.physicalHullPath.add(root, yaw, pitch, roll, segmentType, this);
-   }
-
-   /** Records immutable entity coordinates together with their matching root bounds. */
-   protected final void recordPhysicalHullWaypoint(double x, double y, double z, AxisAlignedBB root,
-                                                   float yaw, float pitch, float roll, int segmentType) {
-      this.physicalHullPath.add(x, y, z, root, yaw, pitch, roll, segmentType);
-   }
-
-   /**
-    * The sole final route decision used by tank movement.  It validates the
-    * scratch route with the same OBB sweeps and contact policy used by the
-    * normal physical-hull lifecycle, before the tank changes its live state.
-    */
-   protected final boolean validateRecordedPhysicalHullRoute() {
-      if(!this.physicalHullStepActive || this.physicalHullPath.count == 0) return false;
-      List hulls = this.getPhysicalHullBoxesForYaw();
-      return !hulls.isEmpty() && this.isPhysicalHullPathSafe(this.physicalHullPath, hulls);
-   }
-
-   /** Marks the selected scratch route as consumed; finish must not decide it again. */
-   protected final void markRecordedPhysicalHullRouteApplied(boolean step) {
-      this.physicalHullPathCommitted = true;
-      this.physicalHullPathIsStep = step;
-      this.physicalHullPathAlreadyValidated = true;
    }
 
    protected final float getPhysicalHullStartPitch() { return this.controlTransformStart.pitch; }
@@ -616,7 +586,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.physicalHullNormalPath.clear();
       this.physicalHullPathCommitted = false;
       this.physicalHullPathIsStep = false;
-      this.physicalHullPathAlreadyValidated = false;
       this.acceptAuthoritativeHullTransform = false;
    }
 
@@ -634,16 +603,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(this.acceptAuthoritativeHullTransform) {
          this.updatePhysicalHullPositions();
          this.vehicleBoxCache.markDirty("authoritative vehicle interpolation");
-         return;
-      }
-      if(this.physicalHullPathAlreadyValidated) {
-         TransformSnapshot applied = new TransformSnapshot();
-         applied.set(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(),
-                 this.getRotRoll(), super.boundingBox);
-         this.lastSafePhysicalTransform.copyFrom(applied);
-         this.hasLastSafePhysicalTransform = true;
-         this.updatePhysicalHullPositions();
-         this.vehicleBoxCache.markDirty("prevalidated physical hull route");
          return;
       }
       List hulls = this.getPhysicalHullBoxesForYaw();
@@ -741,7 +700,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(verticalStep && (Math.abs(dx) > CONTROL_YAW_EPSILON || Math.abs(dz) > CONTROL_YAW_EPSILON)) return false;
       if(segmentType == HULL_PATH_STEP_UP && dy < -CONTROL_YAW_EPSILON) return false;
       if(segmentType == HULL_PATH_STEP_DOWN && dy > CONTROL_YAW_EPSILON) return false;
-      if((segmentType == HULL_PATH_STEP_ROTATION || segmentType == HULL_PATH_STEP_FINAL_ROTATION)
+      if(segmentType == HULL_PATH_STEP_ROTATION
               && (Math.abs(dx) > CONTROL_YAW_EPSILON || Math.abs(dy) > CONTROL_YAW_EPSILON
               || Math.abs(dz) > CONTROL_YAW_EPSILON
               || Math.abs(MathHelper.wrapAngleTo180_float(end.yaw - start.yaw)) > 1.0E-4F)) return false;
@@ -892,8 +851,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    /** Classifies a landing from world-up geometry; the SAT minimum axis may be horizontal. */
    private boolean isStepSupportContact(TransformSnapshot start, TransformSnapshot end,
                                         HullBlockContact contact, int segmentType) {
-      if(segmentType != HULL_PATH_STEP_DOWN && segmentType != HULL_PATH_STEP_ROTATION
-              && segmentType != HULL_PATH_STEP_FINAL_ROTATION) return false;
+      if(segmentType != HULL_PATH_STEP_DOWN && segmentType != HULL_PATH_STEP_ROTATION) return false;
       if(segmentType == HULL_PATH_STEP_DOWN && end.y > start.y + CONTROL_YAW_EPSILON) return false;
       if(Math.abs(end.x - start.x) > CONTROL_YAW_EPSILON || Math.abs(end.z - start.z) > CONTROL_YAW_EPSILON) return false;
       Obb previous = Obb.from(contact.sourceHull, start);
@@ -989,17 +947,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       void add(AxisAlignedBB root, float yaw, float pitch, float roll, int type, MCH_EntityBaseVehicle vehicle) {
          if(this.count >= this.points.length) return;
          TransformSnapshot point = this.points[this.count];
-         double x = vehicle.controlTransformStart.x + (root.minX + root.maxX
-                 - vehicle.controlTransformStart.rootBounds[0] - vehicle.controlTransformStart.rootBounds[3]) * 0.5D;
-         double y = vehicle.controlTransformStart.y + root.minY - vehicle.controlTransformStart.rootBounds[1];
-         double z = vehicle.controlTransformStart.z + (root.minZ + root.maxZ
-                 - vehicle.controlTransformStart.rootBounds[2] - vehicle.controlTransformStart.rootBounds[5]) * 0.5D;
+         double x = (root.minX + root.maxX) * 0.5D;
+         double y = root.minY + (double)vehicle.yOffset - (double)vehicle.ySize;
+         double z = (root.minZ + root.maxZ) * 0.5D;
          point.set(x, y, z, yaw, pitch, roll, root);
-         this.segmentTypes[this.count++] = type;
-      }
-      void add(double x, double y, double z, AxisAlignedBB root, float yaw, float pitch, float roll, int type) {
-         if(this.count >= this.points.length) return;
-         this.points[this.count].set(x, y, z, yaw, pitch, roll, root);
          this.segmentTypes[this.count++] = type;
       }
       void copyFrom(PhysicalHullPath other) {
