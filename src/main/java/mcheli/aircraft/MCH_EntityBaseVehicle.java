@@ -82,10 +82,10 @@ import org.lwjgl.Sys;
 public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideBaseVehicle, IEntityAdditionalSpawnData {
    private static final Map<UUID, NewUavSafeReturn> NEW_UAV_SAFE_RETURNS = new HashMap<UUID, NewUavSafeReturn>();
    private final MCH_VehicleBoxCache vehicleBoxCache = new MCH_VehicleBoxCache();
-   private MCH_BoundingBox[] controlYawProbeBoxes = new MCH_BoundingBox[0];
-   private final ArrayList controlYawBlockBoxes = new ArrayList();
-   private final ArrayList controlYawCurrentContacts = new ArrayList();
-   private final ArrayList controlYawCandidateContacts = new ArrayList();
+   private final TransformSnapshot controlTransformStart = new TransformSnapshot();
+   private final ArrayList controlTransformBlocks = new ArrayList();
+   private final ArrayList controlTransformStartContacts = new ArrayList();
+   private boolean controlTransformPending;
    private static final double CONTROL_YAW_EPSILON = 1.0E-4D;
    private static final int CONTROL_YAW_SEARCH_STEPS = 9;
    private static final int NEW_UAV_SAFE_RETURN_MIN_TICKS = 20;
@@ -462,178 +462,262 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       super.rotationYaw = f;
    }
 
-   /** Applies the same chassis-yaw guard to authoritative control rotation received by the server. */
-   public void validateReceivedControlYaw(float originalYaw) {
-      this.validateControlYaw(originalYaw);
+   /** Records the transform before steering; movement is validated after translation resolves. */
+   protected void validateControlYaw(float originalYaw) {
+      this.captureControlTransform(originalYaw, this.getRotPitch(), this.getRotRoll());
    }
 
-   /** Resolves a completed chassis steering calculation against solid block shapes. */
-   protected void validateControlYaw(float originalYaw) {
-      float requestedYaw = this.getRotYaw();
-      float delta = MathHelper.wrapAngleTo180_float(requestedYaw - originalYaw);
-      if(MathHelper.abs(delta) < 1.0E-5F || this.worldObj == null || this.getAcInfo() == null) {
-         return;
-      }
+   protected final void captureControlTransform(float originalYaw, float originalPitch, float originalRoll) {
+      if(this.worldObj == null || this.getAcInfo() == null) return;
+      this.controlTransformStart.set(super.posX, super.posY, super.posZ, originalYaw,
+              originalPitch, originalRoll, super.boundingBox);
+      this.controlTransformPending = true;
+   }
 
-      List hulls = this.getPhysicalHullBoxesForYaw();
-      if(hulls.isEmpty()) {
-         return;
-      }
-      this.collectControlYawContacts(originalYaw, hulls, this.controlYawCurrentContacts);
-
-      double radius = 0.0D;
-      for(int i = 0; i < hulls.size(); ++i) {
-         MCH_BoundingBox hull = (MCH_BoundingBox)hulls.get(i);
-         radius = Math.max(radius, Math.sqrt(hull.offsetX * hull.offsetX + hull.offsetZ * hull.offsetZ)
-                 + Math.sqrt(hull.width * hull.width + hull.depth * hull.depth) * 0.5D);
-      }
-      double maximumStep = Math.toDegrees(0.25D / Math.max(radius, 0.25D));
-      int subdivisions = Math.max(1, Math.min(32, (int)Math.ceil(Math.abs(delta) / Math.max(maximumStep, 0.25D))));
-      float safeFraction = 0.0F;
-      for(int step = 1; step <= subdivisions; ++step) {
-         float candidateFraction = (float)step / (float)subdivisions;
-         if(!this.isControlYawSafe(originalYaw + delta * candidateFraction, hulls, this.controlYawCurrentContacts)) {
-            float blockedFraction = candidateFraction;
-            for(int search = 0; search < CONTROL_YAW_SEARCH_STEPS; ++search) {
-               float middle = (safeFraction + blockedFraction) * 0.5F;
-               if(this.isControlYawSafe(originalYaw + delta * middle, hulls, this.controlYawCurrentContacts)) {
-                  safeFraction = middle;
-               } else {
-                  blockedFraction = middle;
-               }
-            }
-            this.setRotYaw(originalYaw + delta * safeFraction);
-            return;
-         }
-         safeFraction = candidateFraction;
-      }
+   /** Server packet safety check. Packet yaw is never trusted until its swept transform is clear. */
+   public void validateReceivedControlYaw(float originalYaw) {
+      this.validateControlYaw(originalYaw);
+      this.resolveControlTransformAfterMove();
+      float acceptedYaw = this.getRotYaw();
+      this.controlTransformStart.set(super.posX, super.posY, super.posZ, originalYaw,
+              this.getRotPitch(), this.getRotRoll(), super.boundingBox);
+      this.controlTransformPending = MathHelper.abs(MathHelper.wrapAngleTo180_float(acceptedYaw - originalYaw)) > 1.0E-5F;
    }
 
    /**
-    * Returns chassis volume only. DEFAULT boxes are configured body/cabin/bed hit boxes;
-    * typed engine, turret, track and wheel regions are damage or moving-part zones.
+    * Resolves steering and the same-tick, translation-collision-resolved movement as one transform.
+    * Tanks call this once, immediately after moveEntity has produced its requested final position.
     */
+   protected final void resolveControlTransformAfterMove() {
+      if(!this.controlTransformPending || this.worldObj == null) return;
+      this.controlTransformPending = false;
+      List hulls = this.getPhysicalHullBoxesForYaw();
+      if(hulls.isEmpty()) return;
+
+      TransformSnapshot end = new TransformSnapshot();
+      end.set(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll(), super.boundingBox);
+      float yawDelta = MathHelper.wrapAngleTo180_float(end.yaw - this.controlTransformStart.yaw);
+      if(Math.abs(yawDelta) < 1.0E-5F && samePosition(this.controlTransformStart, end)) return;
+
+      this.collectSweptBlocks(this.controlTransformStart, end, hulls);
+      this.collectContacts(this.controlTransformStart, hulls, this.controlTransformStartContacts);
+      if(this.isSweptTransformSafe(this.controlTransformStart, end, hulls, 1.0F, 1.0F)) return;
+
+      float safeYaw = 0.0F;
+      float blockedYaw = 1.0F;
+      if(this.isSweptTransformSafe(this.controlTransformStart, end, hulls, 1.0F, 0.0F)) {
+         for(int i = 0; i < CONTROL_YAW_SEARCH_STEPS; ++i) {
+            float middle = (safeYaw + blockedYaw) * 0.5F;
+            if(this.isSweptTransformSafe(this.controlTransformStart, end, hulls, 1.0F, middle)) safeYaw = middle;
+            else blockedYaw = middle;
+         }
+         this.setRotYaw(this.controlTransformStart.yaw + yawDelta * safeYaw);
+         this.updatePhysicalHullPositions();
+         return;
+      }
+
+      float safeMove = 0.0F;
+      float blockedMove = 1.0F;
+      for(int i = 0; i < CONTROL_YAW_SEARCH_STEPS; ++i) {
+         float middle = (safeMove + blockedMove) * 0.5F;
+         if(this.isSweptTransformSafe(this.controlTransformStart, end, hulls, middle, 0.0F)) safeMove = middle;
+         else blockedMove = middle;
+      }
+      this.applyResolvedPosition(this.controlTransformStart, end, safeMove);
+      this.setRotYaw(this.controlTransformStart.yaw);
+      this.updatePhysicalHullPositions();
+   }
+
    protected List getPhysicalHullBoxesForYaw() {
       ArrayList hulls = new ArrayList();
-      if(this.extraBoundingBox != null) {
-         for(int i = 0; i < this.extraBoundingBox.length; ++i) {
-            MCH_BoundingBox box = this.extraBoundingBox[i];
-            if(box != null && box.boundingBoxType == EnumBoundingBoxType.DEFAULT) {
-               hulls.add(box);
-            }
-         }
+      if(this.extraBoundingBox != null) for(int i = 0; i < this.extraBoundingBox.length; ++i) {
+         MCH_BoundingBox box = this.extraBoundingBox[i];
+         if(box != null && box.boundingBoxType == EnumBoundingBoxType.DEFAULT) hulls.add(box);
       }
       if(hulls.isEmpty()) {
          MCH_BaseVehicleInfo info = this.getAcInfo();
          float width = Math.max(info.entityWidth, info.bodyWidth);
          float height = Math.max(info.entityHeight, info.bodyHeight);
-         float minZ = info.bbZmin;
-         float maxZ = info.bbZmax;
-         if(maxZ <= minZ + CONTROL_YAW_EPSILON) {
-            minZ = -info.entityWidth * 0.5F;
-            maxZ = info.entityWidth * 0.5F;
-         }
-         hulls.add(new MCH_BoundingBox(0.0D, (double)(height * 0.5F), (double)((minZ + maxZ) * 0.5F),
+         float minZ = info.bbZmin, maxZ = info.bbZmax;
+         if(maxZ <= minZ + CONTROL_YAW_EPSILON) { minZ = -info.entityWidth * 0.5F; maxZ = info.entityWidth * 0.5F; }
+         hulls.add(new MCH_BoundingBox(0.0D, height * 0.5D, (minZ + maxZ) * 0.5D,
                  width, height, maxZ - minZ, 1.0F));
       }
       return hulls;
    }
 
-   private boolean isControlYawSafe(float yaw, List hulls, List baseline) {
-      this.collectControlYawContacts(yaw, hulls, this.controlYawCandidateContacts);
-      for(int i = 0; i < this.controlYawCandidateContacts.size(); ++i) {
-         HullBlockContact candidate = (HullBlockContact)this.controlYawCandidateContacts.get(i);
-         double previousDepth = 0.0D;
-         for(int j = 0; j < baseline.size(); ++j) {
-            HullBlockContact current = (HullBlockContact)baseline.get(j);
-            if(candidate.sameObstacle(current)) {
-               previousDepth = current.depth;
-               break;
-            }
-         }
-         if(candidate.depth > previousDepth + CONTROL_YAW_EPSILON) {
-            return false;
-         }
+   private void collectSweptBlocks(TransformSnapshot start, TransformSnapshot end, List hulls) {
+      this.controlTransformBlocks.clear();
+      for(int i = 0; i < hulls.size(); ++i) {
+         MCH_BoundingBox hull = (MCH_BoundingBox)hulls.get(i);
+         double radius = Math.sqrt(hull.offsetX * hull.offsetX + hull.offsetY * hull.offsetY + hull.offsetZ * hull.offsetZ)
+                 + Math.sqrt(hull.width * hull.width + hull.height * hull.height + hull.depth * hull.depth) * 0.5D;
+         double minX = Math.min(start.x, end.x) - radius, maxX = Math.max(start.x, end.x) + radius;
+         double minY = Math.min(start.y, end.y) - radius, maxY = Math.max(start.y, end.y) + radius;
+         double minZ = Math.min(start.z, end.z) - radius, maxZ = Math.max(start.z, end.z) + radius;
+         this.addBlockCollisionsToList(AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ), this.controlTransformBlocks);
+      }
+   }
+
+   private boolean isSweptTransformSafe(TransformSnapshot start, TransformSnapshot end, List hulls,
+                                        float moveFraction, float yawFraction) {
+      double move = Math.sqrt(square((end.x - start.x) * moveFraction) + square((end.y - start.y) * moveFraction)
+              + square((end.z - start.z) * moveFraction));
+      double radius = 0.0D;
+      for(int i = 0; i < hulls.size(); ++i) {
+         MCH_BoundingBox h = (MCH_BoundingBox)hulls.get(i);
+         radius = Math.max(radius, Math.sqrt(h.offsetX * h.offsetX + h.offsetY * h.offsetY + h.offsetZ * h.offsetZ)
+                 + Math.sqrt(h.width * h.width + h.height * h.height + h.depth * h.depth) * 0.5D);
+      }
+      double yawArc = radius * Math.toRadians(Math.abs(MathHelper.wrapAngleTo180_float(end.yaw - start.yaw)) * yawFraction);
+      int steps = Math.max(1, Math.min(64, (int)Math.ceil((move + yawArc) / 0.10D)));
+      ArrayList contacts = new ArrayList();
+      for(int step = 1; step <= steps; ++step) {
+         float fraction = (float)step / (float)steps;
+         TransformSnapshot candidate = interpolate(start, end, fraction * moveFraction, fraction * yawFraction);
+         this.collectContacts(candidate, hulls, contacts);
+         if(!this.areContactsSafe(candidate, contacts)) return false;
       }
       return true;
    }
 
-   /** Uses disposable yaw-only OBBs and actual per-block collision shapes. */
-   private void collectControlYawContacts(float yaw, List hulls, List contacts) {
-      contacts.clear();
-      if(this.controlYawProbeBoxes.length != hulls.size()) {
-         this.controlYawProbeBoxes = new MCH_BoundingBox[hulls.size()];
-      }
-      for(int i = 0; i < hulls.size(); ++i) {
-         MCH_BoundingBox configured = (MCH_BoundingBox)hulls.get(i);
-         MCH_BoundingBox probe = this.controlYawProbeBoxes[i];
-         if(probe == null || probe.width != configured.width || probe.height != configured.height
-                 || probe.depth != configured.depth || probe.offsetX != configured.offsetX
-                 || probe.offsetY != configured.offsetY || probe.offsetZ != configured.offsetZ) {
-            probe = configured.copy();
-            this.controlYawProbeBoxes[i] = probe;
+   private boolean areContactsSafe(TransformSnapshot candidateTransform, List contacts) {
+      for(int i = 0; i < contacts.size(); ++i) {
+         HullBlockContact candidate = (HullBlockContact)contacts.get(i);
+         if(candidate.floor) continue;
+         HullBlockContact original = null;
+         for(int j = 0; j < this.controlTransformStartContacts.size(); ++j) {
+            HullBlockContact contact = (HullBlockContact)this.controlTransformStartContacts.get(j);
+            if(!contact.floor && candidate.sameObstacle(contact)) { original = contact; break; }
          }
-         probe.updatePosition(super.posX, super.posY, super.posZ, yaw, 0.0F, 0.0F);
-         this.controlYawBlockBoxes.clear();
-         this.addBlockCollisionsToList(probe.boundingBox, this.controlYawBlockBoxes);
-         for(int blockIndex = 0; blockIndex < this.controlYawBlockBoxes.size(); ++blockIndex) {
-            AxisAlignedBB blockBox = (AxisAlignedBB)this.controlYawBlockBoxes.get(blockIndex);
-            double verticalDepth = Math.min(probe.boundingBox.maxY, blockBox.maxY)
-                    - Math.max(probe.boundingBox.minY, blockBox.minY);
-            if(verticalDepth <= CONTROL_YAW_EPSILON
-                    || blockBox.maxY <= probe.boundingBox.minY + 0.15D) {
-               continue;
-            }
-            double horizontalDepth = getHorizontalObbPenetration(probe, blockBox, yaw);
-            if(horizontalDepth > CONTROL_YAW_EPSILON) {
-               contacts.add(new HullBlockContact(i, blockBox, horizontalDepth));
-            }
+         if(original == null) return false;
+         double candidateSide = candidate.supportSeparation(original.normalX, original.normalY,
+                 original.normalZ, original.plane);
+         double centerSide = (candidate.hull.center[0] - original.blockCenterX) * original.normalX
+                 + (candidate.hull.center[1] - original.blockCenterY) * original.normalY
+                 + (candidate.hull.center[2] - original.blockCenterZ) * original.normalZ;
+         if(candidateSide < original.signedSeparation - CONTROL_YAW_EPSILON || centerSide < -CONTROL_YAW_EPSILON) return false;
+      }
+      return true;
+   }
+
+   private void collectContacts(TransformSnapshot transform, List hulls, List contacts) {
+      contacts.clear();
+      for(int hullIndex = 0; hullIndex < hulls.size(); ++hullIndex) {
+         MCH_BoundingBox hull = (MCH_BoundingBox)hulls.get(hullIndex);
+         Obb obb = Obb.from(hull, transform);
+         for(int blockIndex = 0; blockIndex < this.controlTransformBlocks.size(); ++blockIndex) {
+            AxisAlignedBB block = (AxisAlignedBB)this.controlTransformBlocks.get(blockIndex);
+            MCH_ObbCollision.Contact sat = MCH_ObbCollision.intersect(obb.center, obb.axes, obb.half,
+                    center(block), half(block));
+            if(sat == null) continue;
+            boolean vertical = Math.abs(sat.normalY) > 0.75D;
+            double hullBottom = obb.center[1] - obb.verticalRadius();
+            boolean floor = vertical && block.maxY <= obb.center[1]
+                    && Math.abs(block.maxY - hullBottom) <= 0.15D && Math.abs(sat.normalY) > 0.9D;
+            contacts.add(new HullBlockContact(hullIndex, blockIndex, block, obb, sat, floor));
          }
       }
    }
 
-   /** Exact XZ SAT minimum penetration for a yaw-oriented hull and block AABB. */
-   private static double getHorizontalObbPenetration(MCH_BoundingBox hull, AxisAlignedBB block, float yaw) {
-      double radians = Math.toRadians(-yaw);
-      double ux = Math.cos(radians), uz = Math.sin(radians);
-      double vx = -uz, vz = ux;
-      double cx = (block.minX + block.maxX) * 0.5D;
-      double cz = (block.minZ + block.maxZ) * 0.5D;
-      double dx = cx - hull.nowPos.xCoord;
-      double dz = cz - hull.nowPos.zCoord;
-      double blockHalfX = (block.maxX - block.minX) * 0.5D;
-      double blockHalfZ = (block.maxZ - block.minZ) * 0.5D;
-      double min = Double.MAX_VALUE;
-      for(int i = 0; i < 4; ++i) {
-         double axisX = i == 0 ? ux : i == 1 ? vx : i == 2 ? 1.0D : 0.0D;
-         double axisZ = i == 0 ? uz : i == 1 ? vz : i == 2 ? 0.0D : 1.0D;
-         double hullRadius = hull.width * 0.5D * Math.abs(axisX * ux + axisZ * uz)
-                 + hull.depth * 0.5D * Math.abs(axisX * vx + axisZ * vz);
-         double blockRadius = blockHalfX * Math.abs(axisX) + blockHalfZ * Math.abs(axisZ);
-         double overlap = hullRadius + blockRadius - Math.abs(dx * axisX + dz * axisZ);
-         if(overlap <= CONTROL_YAW_EPSILON) return 0.0D;
-         min = Math.min(min, overlap);
+   private void applyResolvedPosition(TransformSnapshot start, TransformSnapshot end, float fraction) {
+      double x = start.x + (end.x - start.x) * fraction;
+      double y = start.y + (end.y - start.y) * fraction;
+      double z = start.z + (end.z - start.z) * fraction;
+      super.posX = x; super.posY = y; super.posZ = z;
+      double dx = x - end.x, dy = y - end.y, dz = z - end.z;
+      super.boundingBox.offset(dx, dy, dz);
+   }
+
+   private void updatePhysicalHullPositions() {
+      if(this.extraBoundingBox != null) for(int i = 0; i < this.extraBoundingBox.length; ++i) {
+         this.extraBoundingBox[i].updatePosition(super.posX, super.posY, super.posZ,
+                 this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
       }
-      return min;
+   }
+
+   private static boolean samePosition(TransformSnapshot a, TransformSnapshot b) {
+      return Math.abs(a.x - b.x) < 1.0E-7D && Math.abs(a.y - b.y) < 1.0E-7D && Math.abs(a.z - b.z) < 1.0E-7D;
+   }
+   private static double square(double value) { return value * value; }
+   private static double[] center(AxisAlignedBB box) { return new double[]{(box.minX + box.maxX) * 0.5D, (box.minY + box.maxY) * 0.5D, (box.minZ + box.maxZ) * 0.5D}; }
+   private static double[] half(AxisAlignedBB box) { return new double[]{(box.maxX - box.minX) * 0.5D, (box.maxY - box.minY) * 0.5D, (box.maxZ - box.minZ) * 0.5D}; }
+
+   private static TransformSnapshot interpolate(TransformSnapshot start, TransformSnapshot end, float move, float rotation) {
+      TransformSnapshot result = new TransformSnapshot();
+      result.x = start.x + (end.x - start.x) * move;
+      result.y = start.y + (end.y - start.y) * move;
+      result.z = start.z + (end.z - start.z) * move;
+      result.yaw = start.yaw + MathHelper.wrapAngleTo180_float(end.yaw - start.yaw) * rotation;
+      result.pitch = start.pitch + MathHelper.wrapAngleTo180_float(end.pitch - start.pitch) * move;
+      result.roll = start.roll + MathHelper.wrapAngleTo180_float(end.roll - start.roll) * move;
+      return result;
+   }
+
+   private static final class TransformSnapshot {
+      double x, y, z;
+      float yaw, pitch, roll;
+      final double[] rootBounds = new double[6];
+      void set(double x, double y, double z, float yaw, float pitch, float roll, AxisAlignedBB root) {
+         this.x=x; this.y=y; this.z=z; this.yaw=yaw; this.pitch=pitch; this.roll=roll;
+         this.rootBounds[0]=root.minX; this.rootBounds[1]=root.minY; this.rootBounds[2]=root.minZ;
+         this.rootBounds[3]=root.maxX; this.rootBounds[4]=root.maxY; this.rootBounds[5]=root.maxZ;
+      }
+   }
+
+   private static final class Obb {
+      final double[] center = new double[3], half = new double[3];
+      final double[][] axes = new double[3][3];
+      static Obb from(MCH_BoundingBox hull, TransformSnapshot t) {
+         Obb result = new Obb();
+         double[][] rotation = rotation(t.yaw, t.pitch, t.roll);
+         result.center[0] = t.x + rotation[0][0]*hull.offsetX + rotation[1][0]*hull.offsetY + rotation[2][0]*hull.offsetZ;
+         result.center[1] = t.y + rotation[0][1]*hull.offsetX + rotation[1][1]*hull.offsetY + rotation[2][1]*hull.offsetZ;
+         result.center[2] = t.z + rotation[0][2]*hull.offsetX + rotation[1][2]*hull.offsetY + rotation[2][2]*hull.offsetZ;
+         result.axes[0]=rotation[0]; result.axes[1]=rotation[1]; result.axes[2]=rotation[2];
+         result.half[0]=hull.width*0.5D; result.half[1]=hull.height*0.5D; result.half[2]=hull.depth*0.5D;
+         return result;
+      }
+      double verticalRadius() { return Math.abs(axes[0][1])*half[0] + Math.abs(axes[1][1])*half[1] + Math.abs(axes[2][1])*half[2]; }
+      private static double[][] rotation(float yaw, float pitch, float roll) {
+         double y=Math.toRadians(-yaw), p=Math.toRadians(-pitch), r=Math.toRadians(-roll);
+         double cy=Math.cos(y), sy=Math.sin(y), cp=Math.cos(p), sp=Math.sin(p), cr=Math.cos(r), sr=Math.sin(r);
+         // Matches MCH_Lib.RotVec3: Z, then X, then Y using Minecraft's rotation signs.
+         return new double[][]{{cr*cy+sr*sp*sy, -sr*cp, sr*sp*cy-cr*sy},
+                 {sr*cy-cr*sp*sy, cr*cp, -cr*sp*cy-sr*sy}, {cp*sy, sp, cp*cy}};
+      }
    }
 
    private static final class HullBlockContact {
-      private final int hullIndex;
-      private final AxisAlignedBB block;
-      private final double depth;
-
-      private HullBlockContact(int hullIndex, AxisAlignedBB block, double depth) {
-         this.hullIndex = hullIndex;
-         this.block = block;
-         this.depth = depth;
+      final int hullIndex, shapeIndex;
+      final long boundsKey;
+      final double normalX, normalY, normalZ, penetration, signedSeparation, plane;
+      final double supportX, supportY, supportZ, blockCenterX, blockCenterY, blockCenterZ;
+      final Obb hull;
+      final boolean floor;
+      HullBlockContact(int hullIndex, int shapeIndex, AxisAlignedBB block, Obb hull,
+                       MCH_ObbCollision.Contact contact, boolean floor) {
+         this.hullIndex=hullIndex; this.shapeIndex=shapeIndex; this.floor=floor; this.hull=hull;
+         this.boundsKey=boundsKey(block);
+         this.normalX=contact.normalX; this.normalY=contact.normalY; this.normalZ=contact.normalZ;
+         this.penetration=contact.penetration;
+         this.blockCenterX=(block.minX+block.maxX)*0.5D; this.blockCenterY=(block.minY+block.maxY)*0.5D; this.blockCenterZ=(block.minZ+block.maxZ)*0.5D;
+         double blockRadius=(block.maxX-block.minX)*0.5D*Math.abs(normalX)+(block.maxY-block.minY)*0.5D*Math.abs(normalY)+(block.maxZ-block.minZ)*0.5D*Math.abs(normalZ);
+         this.plane=blockCenterX*normalX+blockCenterY*normalY+blockCenterZ*normalZ+blockRadius;
+         double hullRadius=hull.half[0]*Math.abs(dot(hull.axes[0],normalX,normalY,normalZ))+hull.half[1]*Math.abs(dot(hull.axes[1],normalX,normalY,normalZ))+hull.half[2]*Math.abs(dot(hull.axes[2],normalX,normalY,normalZ));
+         this.supportX=hull.center[0]-normalX*hullRadius; this.supportY=hull.center[1]-normalY*hullRadius; this.supportZ=hull.center[2]-normalZ*hullRadius;
+         this.signedSeparation=supportX*normalX+supportY*normalY+supportZ*normalZ-plane;
       }
-
-      private boolean sameObstacle(HullBlockContact other) {
-         return this.hullIndex == other.hullIndex && this.block.minX == other.block.minX
-                 && this.block.minY == other.block.minY && this.block.minZ == other.block.minZ
-                 && this.block.maxX == other.block.maxX && this.block.maxY == other.block.maxY
-                 && this.block.maxZ == other.block.maxZ;
+      boolean sameObstacle(HullBlockContact other) { return hullIndex==other.hullIndex && boundsKey==other.boundsKey; }
+      double supportSeparation(double x, double y, double z, double blockingPlane) {
+         double radius=hull.half[0]*Math.abs(dot(hull.axes[0],x,y,z))+hull.half[1]*Math.abs(dot(hull.axes[1],x,y,z))+hull.half[2]*Math.abs(dot(hull.axes[2],x,y,z));
+         return (hull.center[0]-x*radius)*x+(hull.center[1]-y*radius)*y+(hull.center[2]-z*radius)*z-blockingPlane;
       }
+      private static long boundsKey(AxisAlignedBB b) {
+         long h=17L; double[] v={b.minX,b.minY,b.minZ,b.maxX,b.maxY,b.maxZ};
+         for(int i=0;i<v.length;++i) h=31L*h+Math.round(v[i]*1000000.0D); return h;
+      }
+      private static double dot(double[] a,double x,double y,double z) { return a[0]*x+a[1]*y+a[2]*z; }
    }
 
    public void setRotPitch(float f) {
@@ -2336,8 +2420,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.setRotPitch(v.x);
       this.setRotRoll(v.z);
       float controlYaw = this.getRotYaw();
+      this.captureControlTransform(controlYaw, ac_pitch, ac_roll);
       this.onUpdateAngles(partialTicks);
-      this.validateControlYaw(controlYaw);
       if(this.getAcInfo().limitRotation) {
          v.x = MCH_Lib.RNG(this.getRotPitch(), this.getAcInfo().minRotationPitch, this.getAcInfo().maxRotationPitch);
          v.z = MCH_Lib.RNG(this.getRotRoll(), this.getAcInfo().minRotationRoll, this.getAcInfo().maxRotationRoll);
@@ -2500,8 +2584,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.setRotPitch(v.x);
       this.setRotRoll(v.z);
       float controlYaw = this.getRotYaw();
+      this.captureControlTransform(controlYaw, ac_pitch, ac_roll);
       this.onUpdateAngles(partialTicks);
-      this.validateControlYaw(controlYaw);
       if(this.getAcInfo().limitRotation) {
          v.x = MCH_Lib.RNG(this.getRotPitch(), this.getAcInfo().minRotationPitch, this.getAcInfo().maxRotationPitch);
          v.z = MCH_Lib.RNG(this.getRotRoll(), this.getAcInfo().minRotationRoll, this.getAcInfo().maxRotationRoll);
