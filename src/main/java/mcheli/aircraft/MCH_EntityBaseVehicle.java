@@ -89,6 +89,19 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    private long physicalHullCaptureTick = Long.MIN_VALUE;
    private boolean physicalHullCaptureRemote;
    private Entity physicalHullRider;
+   protected static final int HULL_PATH_ROTATION = 0;
+   protected static final int HULL_PATH_NORMAL_Y = 1;
+   protected static final int HULL_PATH_NORMAL_X = 2;
+   protected static final int HULL_PATH_NORMAL_Z = 3;
+   protected static final int HULL_PATH_STEP_UP = 4;
+   protected static final int HULL_PATH_STEP_X = 5;
+   protected static final int HULL_PATH_STEP_Z = 6;
+   protected static final int HULL_PATH_STEP_DOWN = 7;
+   private final PhysicalHullPath physicalHullPath = new PhysicalHullPath();
+   private final PhysicalHullPath physicalHullNormalPath = new PhysicalHullPath();
+   private boolean physicalHullPathCommitted;
+   private boolean physicalHullPathIsStep;
+   private boolean acceptAuthoritativeHullTransform;
    private final TransformSnapshot lastSafePhysicalTransform = new TransformSnapshot();
    private boolean hasLastSafePhysicalTransform;
    private static final double CONTROL_YAW_EPSILON = 1.0E-4D;
@@ -499,6 +512,40 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.captureControlTransform(this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
    }
 
+   /** Starts recording the collision-resolved route without allocating per tick. */
+   protected final void beginPhysicalHullPath() {
+      this.physicalHullPath.clear();
+      this.physicalHullNormalPath.clear();
+      this.physicalHullPathCommitted = false;
+      this.physicalHullPathIsStep = false;
+   }
+
+   protected final void recordPhysicalHullWaypoint(AxisAlignedBB root, int segmentType) {
+      this.physicalHullPath.add(root, segmentType, this);
+   }
+
+   protected final void saveNormalPhysicalHullPath() {
+      this.physicalHullNormalPath.copyFrom(this.physicalHullPath);
+   }
+
+   protected final void restoreNormalPhysicalHullPathForRecording() {
+      this.physicalHullPath.copyFrom(this.physicalHullNormalPath);
+   }
+
+   protected final void clearRecordedPhysicalHullPath() {
+      this.physicalHullPath.clear();
+   }
+
+   protected final void commitPhysicalHullPath(boolean step) {
+      this.physicalHullPathCommitted = this.physicalHullPath.count > 0;
+      this.physicalHullPathIsStep = step;
+   }
+
+   /** Remote interpolation is an already server-approved transform, not a new physical route. */
+   protected final void acceptAuthoritativePhysicalHullTransform() {
+      this.acceptAuthoritativeHullTransform = true;
+   }
+
    public final void finishPhysicalHullStep() {
       try {
          this.resolveControlTransformAfterMove();
@@ -510,6 +557,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    private void clearPhysicalHullStep() {
       this.physicalHullStepActive = false;
       this.physicalHullCaptureTick = Long.MIN_VALUE;
+      this.physicalHullPath.clear();
+      this.physicalHullNormalPath.clear();
+      this.physicalHullPathCommitted = false;
+      this.physicalHullPathIsStep = false;
+      this.acceptAuthoritativeHullTransform = false;
    }
 
    /** Server packet safety check. Packet yaw is never trusted until its swept transform is clear. */
@@ -523,6 +575,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
     */
    protected final void resolveControlTransformAfterMove() {
       if(!this.physicalHullStepActive || this.worldObj == null) return;
+      if(this.acceptAuthoritativeHullTransform) {
+         this.updatePhysicalHullPositions();
+         this.vehicleBoxCache.markDirty("authoritative vehicle interpolation");
+         return;
+      }
       List hulls = this.getPhysicalHullBoxesForYaw();
       if(hulls.isEmpty()) return;
 
@@ -532,6 +589,27 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(Math.abs(yawDelta) < 1.0E-5F && samePosition(this.controlTransformStart, end)
               && Math.abs(end.pitch - this.controlTransformStart.pitch) < 1.0E-5F
               && Math.abs(end.roll - this.controlTransformStart.roll) < 1.0E-5F) return;
+
+      if(this.physicalHullPathCommitted) {
+         if(this.isPhysicalHullPathSafe(this.physicalHullPath, hulls)) {
+            this.lastSafePhysicalTransform.copyFrom(end);
+            this.hasLastSafePhysicalTransform = true;
+            return;
+         }
+         if(this.physicalHullPathIsStep && this.physicalHullNormalPath.count > 0) {
+            TransformSnapshot normalEnd = this.physicalHullNormalPath.points[this.physicalHullNormalPath.count - 1];
+            this.applySnapshot(normalEnd);
+            if(this.isPhysicalHullPathSafe(this.physicalHullNormalPath, hulls)) {
+               this.lastSafePhysicalTransform.copyFrom(normalEnd);
+               this.hasLastSafePhysicalTransform = true;
+               this.projectBlockedHorizontalMotion(end);
+               this.updatePhysicalHullPositions();
+               this.vehicleBoxCache.markDirty("physical hull step fallback");
+               return;
+            }
+            end = normalEnd;
+         }
+      }
 
       this.collectSweptBlocks(this.controlTransformStart, end, hulls);
       this.collectContacts(this.controlTransformStart, hulls, this.controlTransformStartContacts);
@@ -572,6 +650,25 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.projectBlockedHorizontalMotion(end);
       this.updatePhysicalHullPositions();
       this.vehicleBoxCache.markDirty("physical hull movement clipped");
+   }
+
+   private boolean isPhysicalHullPathSafe(PhysicalHullPath path, List hulls) {
+      TransformSnapshot start = this.controlTransformStart;
+      for(int i = 0; i < path.count; ++i) {
+         TransformSnapshot end = path.points[i];
+         this.collectSweptBlocks(start, end, hulls);
+         this.collectContacts(start, hulls, this.controlTransformStartContacts);
+         if(!this.isSweptTransformSafe(start, end, hulls, 1.0F, 1.0F)) return false;
+         start = end;
+      }
+      return true;
+   }
+
+   private void applySnapshot(TransformSnapshot snapshot) {
+      super.posX = snapshot.x; super.posY = snapshot.y; super.posZ = snapshot.z;
+      this.setRotYaw(snapshot.yaw); this.setRotPitch(snapshot.pitch); this.setRotRoll(snapshot.roll);
+      super.boundingBox.setBounds(snapshot.rootBounds[0], snapshot.rootBounds[1], snapshot.rootBounds[2],
+              snapshot.rootBounds[3], snapshot.rootBounds[4], snapshot.rootBounds[5]);
    }
 
    private boolean hasInvalidStartContact() {
@@ -746,6 +843,30 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       void copyFrom(TransformSnapshot other) {
          this.x=other.x; this.y=other.y; this.z=other.z; this.yaw=other.yaw; this.pitch=other.pitch; this.roll=other.roll;
          System.arraycopy(other.rootBounds, 0, this.rootBounds, 0, this.rootBounds.length);
+      }
+   }
+
+   private static final class PhysicalHullPath {
+      final TransformSnapshot[] points = new TransformSnapshot[8];
+      final int[] segmentTypes = new int[8];
+      int count;
+      PhysicalHullPath() { for(int i = 0; i < this.points.length; ++i) this.points[i] = new TransformSnapshot(); }
+      void clear() { this.count = 0; }
+      void add(AxisAlignedBB root, int type, MCH_EntityBaseVehicle vehicle) {
+         if(this.count >= this.points.length) return;
+         TransformSnapshot point = this.points[this.count];
+         double x = (root.minX + root.maxX) * 0.5D;
+         double y = root.minY + (double)vehicle.yOffset - (double)vehicle.ySize;
+         double z = (root.minZ + root.maxZ) * 0.5D;
+         point.set(x, y, z, vehicle.getRotYaw(), vehicle.getRotPitch(), vehicle.getRotRoll(), root);
+         this.segmentTypes[this.count++] = type;
+      }
+      void copyFrom(PhysicalHullPath other) {
+         this.count = other.count;
+         for(int i = 0; i < other.count; ++i) {
+            this.points[i].copyFrom(other.points[i]);
+            this.segmentTypes[i] = other.segmentTypes[i];
+         }
       }
    }
 
