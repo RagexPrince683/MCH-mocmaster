@@ -497,3 +497,10 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Added regression coverage using the Abrams and Toyota Hilux physical hull dimensions, full and
   diagonal segmented climbs, a stable following tick, tall/stacked obstacles, ceilings, and
   partial-height collision shapes.
+# PR: Scope tank hull phasing to validated step risers
+
+- Record the exact physical hull and block collision shape that activates an Abrams step attempt,
+  and permit that contact only during the upward and top-clearing portions of the raised route.
+- Keep normal movement, rotation, tall obstacles, ceilings, adjacent shapes, and failed raised
+  routes subject to ordinary physical hull collision.
+- Add deterministic Abrams route-policy coverage using its configured `StepHeight` and front hull.
