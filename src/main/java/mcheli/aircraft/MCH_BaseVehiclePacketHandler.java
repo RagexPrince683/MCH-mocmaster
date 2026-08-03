@@ -153,7 +153,11 @@ public class MCH_BaseVehiclePacketHandler {
                   }
                }
 
+               float originalYaw = ac.getRotYaw();
                ac.setRotYaw(req.yaw);
+               if(ac instanceof mcheli.tank.MCH_EntityTank) {
+                  ac.validateReceivedControlYaw(originalYaw);
+               }
                //System.out.println("yaw changed");
                ac.setRotPitch(req.pitch);
                //System.out.println("pitch changed");
