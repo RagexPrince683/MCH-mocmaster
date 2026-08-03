@@ -378,6 +378,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          this.saveNormalPhysicalHullPath();
          boolean selectedStepRoute = false;
          if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F && (mx != parX || mz != parZ)) {
+            float stepYaw = this.getRotYaw();
+            float startPitch = this.getPhysicalHullStartPitch();
+            float startRoll = this.getPhysicalHullStartRoll();
+            float suspensionPitch = this.getRotPitch();
+            float suspensionRoll = this.getRotRoll();
             var38 = parX;
             var39 = parY;
             minX = parZ;
@@ -385,16 +390,22 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
             AxisAlignedBB minZ = super.boundingBox.copy();
             super.boundingBox.setBB(backUpAxisalignedBB);
             this.clearRecordedPhysicalHullPath();
-            this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_ROTATION);
+            // Yaw remains strict at the lower position. Suspension attitude is applied only after ascent.
+            this.recordPhysicalHullWaypoint(super.boundingBox, stepYaw, startPitch, startRoll, HULL_PATH_ROTATION);
             list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(mx, parY, mz));
             this.calculateYOffset(list, super.boundingBox, parY);
-            this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_UP);
+            this.recordPhysicalHullWaypoint(super.boundingBox, stepYaw, startPitch, startRoll, HULL_PATH_STEP_UP);
+            this.recordPhysicalHullWaypoint(super.boundingBox, stepYaw, suspensionPitch, suspensionRoll,
+                    HULL_PATH_STEP_ROTATION);
             parX = this.calculateXOffset(list, super.boundingBox, mx);
-            this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_X);
+            this.recordPhysicalHullWaypoint(super.boundingBox, stepYaw, suspensionPitch, suspensionRoll,
+                    HULL_PATH_STEP_X);
             parZ = this.calculateZOffset(list, super.boundingBox, mz);
-            this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_Z);
+            this.recordPhysicalHullWaypoint(super.boundingBox, stepYaw, suspensionPitch, suspensionRoll,
+                    HULL_PATH_STEP_Z);
             parY = this.calculateYOffset(list, super.boundingBox, (double)(-super.stepHeight));
-            this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_DOWN);
+            this.recordPhysicalHullWaypoint(super.boundingBox, stepYaw, suspensionPitch, suspensionRoll,
+                    HULL_PATH_STEP_DOWN);
             if(var38 * var38 + minX * minX >= parX * parX + parZ * parZ) {
                parX = var38;
                parY = var39;

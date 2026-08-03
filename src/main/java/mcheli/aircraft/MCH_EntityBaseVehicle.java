@@ -97,12 +97,15 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    protected static final int HULL_PATH_STEP_X = 5;
    protected static final int HULL_PATH_STEP_Z = 6;
    protected static final int HULL_PATH_STEP_DOWN = 7;
+   protected static final int HULL_PATH_STEP_ROTATION = 8;
    private final PhysicalHullPath physicalHullPath = new PhysicalHullPath();
    private final PhysicalHullPath physicalHullNormalPath = new PhysicalHullPath();
    private boolean physicalHullPathCommitted;
    private boolean physicalHullPathIsStep;
    private boolean rootMovementCandidateCalculation;
    private boolean acceptAuthoritativeHullTransform;
+   private boolean hasBlockedHorizontalNormal;
+   private double blockedHorizontalNormalX, blockedHorizontalNormalZ;
    private final TransformSnapshot lastSafePhysicalTransform = new TransformSnapshot();
    private boolean hasLastSafePhysicalTransform;
    private static final double CONTROL_YAW_EPSILON = 1.0E-4D;
@@ -537,6 +540,15 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.physicalHullPath.add(root, segmentType, this);
    }
 
+   /** Records a candidate orientation without changing the live vehicle or its hull boxes. */
+   protected final void recordPhysicalHullWaypoint(AxisAlignedBB root, float yaw, float pitch, float roll,
+                                                   int segmentType) {
+      this.physicalHullPath.add(root, yaw, pitch, roll, segmentType, this);
+   }
+
+   protected final float getPhysicalHullStartPitch() { return this.controlTransformStart.pitch; }
+   protected final float getPhysicalHullStartRoll() { return this.controlTransformStart.roll; }
+
    protected final void saveNormalPhysicalHullPath() {
       this.physicalHullNormalPath.copyFrom(this.physicalHullPath);
    }
@@ -610,11 +622,16 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             return;
          }
          if(this.physicalHullPathIsStep && this.physicalHullNormalPath.count > 0) {
+            boolean stepBlocked = this.hasBlockedHorizontalNormal;
+            double stepNormalX = this.blockedHorizontalNormalX, stepNormalZ = this.blockedHorizontalNormalZ;
             TransformSnapshot normalEnd = this.physicalHullNormalPath.points[this.physicalHullNormalPath.count - 1];
             this.applySnapshot(normalEnd);
             if(this.isPhysicalHullPathSafe(this.physicalHullNormalPath, hulls)) {
                this.lastSafePhysicalTransform.copyFrom(normalEnd);
                this.hasLastSafePhysicalTransform = true;
+               this.hasBlockedHorizontalNormal = stepBlocked;
+               this.blockedHorizontalNormalX = stepNormalX;
+               this.blockedHorizontalNormalZ = stepNormalZ;
                this.projectBlockedHorizontalMotion(end);
                this.updatePhysicalHullPositions();
                this.vehicleBoxCache.markDirty("physical hull step fallback");
@@ -669,12 +686,28 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       TransformSnapshot start = this.controlTransformStart;
       for(int i = 0; i < path.count; ++i) {
          TransformSnapshot end = path.points[i];
-         this.collectSweptBlocks(start, end, hulls);
-         this.collectContacts(start, hulls, this.controlTransformStartContacts);
-         if(!this.isSweptTransformSafe(start, end, hulls, 1.0F, 1.0F)) return false;
+         if(!this.isPhysicalHullSegmentSafe(start, end, path.segmentTypes[i], hulls)) return false;
          start = end;
       }
       return true;
+   }
+
+   private boolean isPhysicalHullSegmentSafe(TransformSnapshot start, TransformSnapshot end, int segmentType,
+                                             List hulls) {
+      this.hasBlockedHorizontalNormal = false;
+      double dx = end.x - start.x, dy = end.y - start.y, dz = end.z - start.z;
+      boolean verticalStep = segmentType == HULL_PATH_STEP_UP || segmentType == HULL_PATH_STEP_DOWN;
+      if(verticalStep && (Math.abs(dx) > CONTROL_YAW_EPSILON || Math.abs(dz) > CONTROL_YAW_EPSILON)) return false;
+      if(segmentType == HULL_PATH_STEP_UP && dy < -CONTROL_YAW_EPSILON) return false;
+      if(segmentType == HULL_PATH_STEP_DOWN && dy > CONTROL_YAW_EPSILON) return false;
+      if(segmentType == HULL_PATH_STEP_ROTATION
+              && (Math.abs(dx) > CONTROL_YAW_EPSILON || Math.abs(dy) > CONTROL_YAW_EPSILON
+              || Math.abs(dz) > CONTROL_YAW_EPSILON
+              || Math.abs(MathHelper.wrapAngleTo180_float(end.yaw - start.yaw)) > 1.0E-4F)) return false;
+
+      this.collectSweptBlocks(start, end, hulls);
+      this.collectContacts(start, hulls, this.controlTransformStartContacts);
+      return this.isSweptTransformSafe(start, end, hulls, 1.0F, 1.0F, segmentType, start);
    }
 
    private void applySnapshot(TransformSnapshot snapshot) {
@@ -703,12 +736,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    private void projectBlockedHorizontalMotion(TransformSnapshot requested) {
-      double removedX = requested.x - super.posX;
-      double removedZ = requested.z - super.posZ;
-      double length = Math.sqrt(removedX * removedX + removedZ * removedZ);
+      double normalX = this.hasBlockedHorizontalNormal ? -this.blockedHorizontalNormalX : requested.x - super.posX;
+      double normalZ = this.hasBlockedHorizontalNormal ? -this.blockedHorizontalNormalZ : requested.z - super.posZ;
+      double length = Math.sqrt(normalX * normalX + normalZ * normalZ);
       if(length <= CONTROL_YAW_EPSILON) return;
-      double normalX = removedX / length;
-      double normalZ = removedZ / length;
+      normalX /= length;
+      normalZ /= length;
       double inward = super.motionX * normalX + super.motionZ * normalZ;
       if(inward > 0.0D) {
          super.motionX -= inward * normalX;
@@ -751,6 +784,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    private boolean isSweptTransformSafe(TransformSnapshot start, TransformSnapshot end, List hulls,
                                         float moveFraction, float yawFraction) {
+      return this.isSweptTransformSafe(start, end, hulls, moveFraction, yawFraction, HULL_PATH_ROTATION, start);
+   }
+
+   private boolean isSweptTransformSafe(TransformSnapshot start, TransformSnapshot end, List hulls,
+                                        float moveFraction, float yawFraction, int segmentType,
+                                        TransformSnapshot segmentStart) {
       double move = Math.sqrt(square((end.x - start.x) * moveFraction) + square((end.y - start.y) * moveFraction)
               + square((end.z - start.z) * moveFraction));
       double radius = 0.0D;
@@ -760,35 +799,71 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                  + Math.sqrt(h.width * h.width + h.height * h.height + h.depth * h.depth) * 0.5D);
       }
       double yawArc = radius * Math.toRadians(Math.abs(MathHelper.wrapAngleTo180_float(end.yaw - start.yaw)) * yawFraction);
-      int steps = Math.max(1, Math.min(64, (int)Math.ceil((move + yawArc) / 0.10D)));
+      double suspensionArc = radius * Math.toRadians((Math.abs(MathHelper.wrapAngleTo180_float(end.pitch - start.pitch))
+              + Math.abs(MathHelper.wrapAngleTo180_float(end.roll - start.roll))) * moveFraction);
+      int steps = Math.max(1, Math.min(64, (int)Math.ceil((move + yawArc + suspensionArc) / 0.10D)));
       ArrayList contacts = new ArrayList();
       for(int step = 1; step <= steps; ++step) {
          float fraction = (float)step / (float)steps;
          TransformSnapshot candidate = interpolate(start, end, fraction * moveFraction, fraction * yawFraction);
          this.collectContacts(candidate, hulls, contacts);
-         if(!this.areContactsSafe(candidate, contacts)) return false;
+         if(!this.areContactsSafe(segmentStart, candidate, contacts, segmentType)) return false;
       }
       return true;
    }
 
-   private boolean areContactsSafe(TransformSnapshot candidateTransform, List contacts) {
+   private boolean areContactsSafe(TransformSnapshot segmentStart, TransformSnapshot candidateTransform,
+                                   List contacts, int segmentType) {
       for(int i = 0; i < contacts.size(); ++i) {
          HullBlockContact candidate = (HullBlockContact)contacts.get(i);
-         if(candidate.floor) continue;
+         if(candidate.floor || this.isStepSupportContact(segmentStart, candidateTransform, candidate, segmentType)) continue;
          HullBlockContact original = null;
          for(int j = 0; j < this.controlTransformStartContacts.size(); ++j) {
             HullBlockContact contact = (HullBlockContact)this.controlTransformStartContacts.get(j);
-            if(!contact.floor && candidate.sameObstacle(contact)) { original = contact; break; }
+            if(!contact.floor && candidate.sameObstacleSide(contact)
+                    && (original == null || contact.signedSeparation < original.signedSeparation)) original = contact;
          }
-         if(original == null) return false;
+         if(original == null) {
+            this.rememberBlockedHorizontalNormal(candidate.normalX, candidate.normalZ);
+            return false;
+         }
          double candidateSide = candidate.supportSeparation(original.normalX, original.normalY,
                  original.normalZ, original.plane);
          double centerSide = (candidate.hull.center[0] - original.blockCenterX) * original.normalX
                  + (candidate.hull.center[1] - original.blockCenterY) * original.normalY
                  + (candidate.hull.center[2] - original.blockCenterZ) * original.normalZ;
-         if(candidateSide < original.signedSeparation - CONTROL_YAW_EPSILON || centerSide < -CONTROL_YAW_EPSILON) return false;
+         if(candidateSide < original.signedSeparation - CONTROL_YAW_EPSILON || centerSide < -CONTROL_YAW_EPSILON) {
+            this.rememberBlockedHorizontalNormal(original.normalX, original.normalZ);
+            return false;
+         }
       }
       return true;
+   }
+
+   private void rememberBlockedHorizontalNormal(double x, double z) {
+      if(x * x + z * z <= CONTROL_YAW_EPSILON * CONTROL_YAW_EPSILON) return;
+      this.hasBlockedHorizontalNormal = true;
+      this.blockedHorizontalNormalX = x;
+      this.blockedHorizontalNormalZ = z;
+   }
+
+   /** Classifies a landing from world-up geometry; the SAT minimum axis may be horizontal. */
+   private boolean isStepSupportContact(TransformSnapshot start, TransformSnapshot end,
+                                        HullBlockContact contact, int segmentType) {
+      if(segmentType != HULL_PATH_STEP_DOWN && segmentType != HULL_PATH_STEP_ROTATION) return false;
+      if(segmentType == HULL_PATH_STEP_DOWN && end.y > start.y + CONTROL_YAW_EPSILON) return false;
+      if(Math.abs(end.x - start.x) > CONTROL_YAW_EPSILON || Math.abs(end.z - start.z) > CONTROL_YAW_EPSILON) return false;
+      Obb previous = Obb.from(contact.sourceHull, start);
+      double previousBottom = previous.center[1] - previous.verticalRadius();
+      double candidateBottom = contact.hull.center[1] - contact.hull.verticalRadius();
+      if(contact.blockMaxY > contact.hull.center[1] + CONTROL_YAW_EPSILON) return false;
+      if(previousBottom < contact.blockMaxY - 0.16D || candidateBottom > contact.blockMaxY + 0.16D
+              || candidateBottom < contact.blockMaxY - 0.16D) return false;
+      double radiusX = contact.hull.horizontalRadius(0), radiusZ = contact.hull.horizontalRadius(2);
+      return contact.hull.center[0] + radiusX > contact.blockMinX + CONTROL_YAW_EPSILON
+              && contact.hull.center[0] - radiusX < contact.blockMaxX - CONTROL_YAW_EPSILON
+              && contact.hull.center[2] + radiusZ > contact.blockMinZ + CONTROL_YAW_EPSILON
+              && contact.hull.center[2] - radiusZ < contact.blockMaxZ - CONTROL_YAW_EPSILON;
    }
 
    private void collectContacts(TransformSnapshot transform, List hulls, List contacts) {
@@ -805,7 +880,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             double hullBottom = obb.center[1] - obb.verticalRadius();
             boolean floor = vertical && block.maxY <= obb.center[1]
                     && Math.abs(block.maxY - hullBottom) <= 0.15D && Math.abs(sat.normalY) > 0.9D;
-            contacts.add(new HullBlockContact(hullIndex, blockIndex, block, obb, sat, floor));
+            contacts.add(new HullBlockContact(hullIndex, blockIndex, block, hull, obb, sat, floor));
          }
       }
    }
@@ -860,18 +935,21 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    private static final class PhysicalHullPath {
-      final TransformSnapshot[] points = new TransformSnapshot[8];
-      final int[] segmentTypes = new int[8];
+      final TransformSnapshot[] points = new TransformSnapshot[10];
+      final int[] segmentTypes = new int[10];
       int count;
       PhysicalHullPath() { for(int i = 0; i < this.points.length; ++i) this.points[i] = new TransformSnapshot(); }
       void clear() { this.count = 0; }
       void add(AxisAlignedBB root, int type, MCH_EntityBaseVehicle vehicle) {
+         this.add(root, vehicle.getRotYaw(), vehicle.getRotPitch(), vehicle.getRotRoll(), type, vehicle);
+      }
+      void add(AxisAlignedBB root, float yaw, float pitch, float roll, int type, MCH_EntityBaseVehicle vehicle) {
          if(this.count >= this.points.length) return;
          TransformSnapshot point = this.points[this.count];
          double x = (root.minX + root.maxX) * 0.5D;
          double y = root.minY + (double)vehicle.yOffset - (double)vehicle.ySize;
          double z = (root.minZ + root.maxZ) * 0.5D;
-         point.set(x, y, z, vehicle.getRotYaw(), vehicle.getRotPitch(), vehicle.getRotRoll(), root);
+         point.set(x, y, z, yaw, pitch, roll, root);
          this.segmentTypes[this.count++] = type;
       }
       void copyFrom(PhysicalHullPath other) {
@@ -897,6 +975,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          return result;
       }
       double verticalRadius() { return Math.abs(axes[0][1])*half[0] + Math.abs(axes[1][1])*half[1] + Math.abs(axes[2][1])*half[2]; }
+      double horizontalRadius(int axis) { return Math.abs(axes[0][axis])*half[0] + Math.abs(axes[1][axis])*half[1] + Math.abs(axes[2][axis])*half[2]; }
       private static double[][] rotation(float yaw, float pitch, float roll) {
          double y=Math.toRadians(-yaw), p=Math.toRadians(-pitch), r=Math.toRadians(-roll);
          double cy=Math.cos(y), sy=Math.sin(y), cp=Math.cos(p), sp=Math.sin(p), cr=Math.cos(r), sr=Math.sin(r);
@@ -911,11 +990,14 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       final long boundsKey;
       final double normalX, normalY, normalZ, penetration, signedSeparation, plane;
       final double supportX, supportY, supportZ, blockCenterX, blockCenterY, blockCenterZ;
+      final double blockMinX, blockMaxX, blockMinZ, blockMaxZ, blockMaxY;
+      final MCH_BoundingBox sourceHull;
       final Obb hull;
       final boolean floor;
-      HullBlockContact(int hullIndex, int shapeIndex, AxisAlignedBB block, Obb hull,
+      HullBlockContact(int hullIndex, int shapeIndex, AxisAlignedBB block, MCH_BoundingBox sourceHull, Obb hull,
                        MCH_ObbCollision.Contact contact, boolean floor) {
-         this.hullIndex=hullIndex; this.shapeIndex=shapeIndex; this.floor=floor; this.hull=hull;
+         this.hullIndex=hullIndex; this.shapeIndex=shapeIndex; this.floor=floor; this.hull=hull; this.sourceHull=sourceHull;
+         this.blockMinX=block.minX; this.blockMaxX=block.maxX; this.blockMinZ=block.minZ; this.blockMaxZ=block.maxZ; this.blockMaxY=block.maxY;
          this.boundsKey=boundsKey(block);
          this.normalX=contact.normalX; this.normalY=contact.normalY; this.normalZ=contact.normalZ;
          this.penetration=contact.penetration;
@@ -927,6 +1009,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.signedSeparation=supportX*normalX+supportY*normalY+supportZ*normalZ-plane;
       }
       boolean sameObstacle(HullBlockContact other) { return hullIndex==other.hullIndex && boundsKey==other.boundsKey; }
+      boolean sameObstacleSide(HullBlockContact other) {
+         return boundsKey == other.boundsKey && normalX * other.normalX + normalY * other.normalY
+                 + normalZ * other.normalZ > 0.5D;
+      }
       double supportSeparation(double x, double y, double z, double blockingPlane) {
          double radius=hull.half[0]*Math.abs(dot(hull.axes[0],x,y,z))+hull.half[1]*Math.abs(dot(hull.axes[1],x,y,z))+hull.half[2]*Math.abs(dot(hull.axes[2],x,y,z));
          return (hull.center[0]-x*radius)*x+(hull.center[1]-y*radius)*y+(hull.center[2]-z*radius)*z-blockingPlane;
