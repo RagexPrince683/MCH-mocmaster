@@ -388,7 +388,7 @@ public class MCH_MOD {
 
 
       MCH_ItemRecipe.registerItemRecipe();
-      MCH_WeaponInfoManager.setRoundItems();
+      MCH_WeaponInfoManager.resolveAllExternalItems();
       proxy.readClientModList();
    }
 

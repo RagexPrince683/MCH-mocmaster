@@ -86,6 +86,10 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
     public int smokeNum;
     public int smokeMaxAge;
     public Item dispenseItem;
+    /** Complete registry name retained so external items can be resolved after pre-init. */
+    public String dispenseItemName;
+    /** Deduplicates the unresolved-reference warning for this loaded definition. */
+    public boolean dispenseItemWarningLogged;
     public int dispenseDamege;
     public int dispenseRange;
     public int recoilBufCount;
@@ -331,6 +335,7 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
         this.smokeNum = 1;
         this.smokeSize = 2.0F;
         this.dispenseItem = null;
+        this.dispenseItemName = "";
         this.dispenseDamege = 0;
         this.dispenseRange = 1;
         this.recoilBufCount = 2;
@@ -683,7 +688,13 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
                                 this.dispenseDamege = this.toInt(s[1], 0, 100000000);
                             }
 
-                            this.dispenseItem = W_Item.getItemByName(s[0]);
+                            if (s.length > 0) {
+                                this.dispenseItemName = s[0].toLowerCase().trim();
+                                if (this.dispenseItemName.indexOf(':') < 0) {
+                                    this.dispenseItemName = "minecraft:" + this.dispenseItemName;
+                                }
+                                this.resolveDispenseItem();
+                            }
                         } else if (item.equalsIgnoreCase("DispenseRange")) {
                             this.dispenseRange = this.toInt(data, 1, 100);
                         } else if (item.equalsIgnoreCase("Length")) {
@@ -756,6 +767,14 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
             }
         }
 
+    }
+
+    /** Resolves and caches a DispenseItem through Minecraft's Forge-backed registry. */
+    public Item resolveDispenseItem() {
+        if (this.dispenseItem == null && this.dispenseItemName != null && !this.dispenseItemName.isEmpty()) {
+            this.dispenseItem = W_Item.getItemByName(this.dispenseItemName);
+        }
+        return this.dispenseItem;
     }
 
     public boolean isAPSInterceptableByDefault() {

@@ -2,6 +2,7 @@ package mcheli.weapon;
 
 import mcheli.MCH_Config;
 import mcheli.MCH_HBMUtil;
+import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.throwable.MCH_EntityThrowable;
 import mcheli.throwable.MCH_ItemThrowable;
@@ -23,32 +24,26 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
 
    public MCH_EntityDispensedItem(World par1World) {
       super(par1World);
-      System.out.println("[DispensedItem] Constructor called: World");
    }
 
    public MCH_EntityDispensedItem(World par1World, double posX, double posY, double posZ, double targetX, double targetY, double targetZ, float yaw, float pitch, double acceleration) {
       super(par1World, posX, posY, posZ, targetX, targetY, targetZ, yaw, pitch, acceleration);
-      System.out.println("[DispensedItem] Constructor called: Full Params");
    }
 
    public void onUpdate() {
       super.onUpdate();
-      System.out.println("[DispensedItem] onUpdate called");
 
       if(this.getInfo() != null && !this.getInfo().disableSmoke) {
-         System.out.println("[DispensedItem] Spawning particles");
          this.spawnExplosionParticle(this.getInfo().trajectoryParticleName, 3, 7.0F * this.getInfo().smokeSize);
       }
 
       if(!super.worldObj.isRemote && this.getInfo() != null) {
          if(super.acceleration < 1.0E-4D) {
-            System.out.println("[DispensedItem] Low acceleration, damping motion");
             super.motionX *= 0.999D;
             super.motionZ *= 0.999D;
          }
 
          if(this.isInWater()) {
-            System.out.println("[DispensedItem] In water, adjusting velocity");
             super.motionX *= (double)this.getInfo().velocityInWater;
             super.motionY *= (double)this.getInfo().velocityInWater;
             super.motionZ *= (double)this.getInfo().velocityInWater;
@@ -59,14 +54,9 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
    }
 
    public void onImpact(MovingObjectPosition m, float damageFactor) {
-
-      System.out.println("[DispensedItem] onImpact called");
-
       if(!super.worldObj.isRemote) {
-         System.out.println("[DispensedItem] Handling impact on server");
-
-         if(this.getInfo().chemYield > 0) {
-            System.out.println("chem yield detected");
+         MCH_WeaponInfo weaponInfo = this.getInfo();
+         if(weaponInfo != null && weaponInfo.chemYield > 0) {
             MCH_HBMUtil.ExplosionChaos_spawnChlorine(super.worldObj, posX, posY + 0.5, posZ, this.getInfo().chemYield, this.getInfo().chemSpeed, this.getInfo().chemType);
          }
 
@@ -78,7 +68,6 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
          int itemDamage = 0;
 
          if(m != null && this.getInfo() != null) {
-            System.out.println("[DispensedItem] Valid impact and info");
 
             if(super.shootingAircraft instanceof EntityPlayer) {
                player = (EntityPlayer)super.shootingAircraft;
@@ -88,37 +77,22 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
                player = (EntityPlayer)super.shootingEntity;
             }
 
-            item = this.getInfo().dispenseItem;
-            itemDamage = this.getInfo().dispenseDamege;
+            item = MCH_WeaponInfoManager.resolveDispenseItem(weaponInfo);
+            itemDamage = weaponInfo.dispenseDamege;
          }
 
-         // Handle nulls and re-registration
-         //if (item == null) {
-         //   System.out.println("[DispensedItem] Item was null, attempting re-registration...");
-         //   try {
-         //      MCH_WeaponInfoManager.reload();
-         //      item = this.getInfo().dispenseItem;
-         //      if (item == null) {
-         //         System.out.println("[DispensedItem] Still null after reload!");
-         //      } else {
-         //         System.out.println("[DispensedItem] Item re-registered successfully.");
-         //      }
-         //   } catch (Exception e) {
-         //      System.out.println("[DispensedItem] Exception during reload: " + e.getMessage());
-         //      e.printStackTrace();
-         //   }
-         //}
-         //don't do that.
-
-         if(player != null && !player.isDead && item != null) {
-            System.out.println("[DispensedItem] Dispensing item to blocks");
-            MCH_DummyEntityPlayer dummyPlayer = new MCH_DummyEntityPlayer(super.worldObj, player);
-            dummyPlayer.rotationPitch = 90.0F;
+         boolean directBlockPayload = item != null && weaponInfo != null
+               && isHbmMine(weaponInfo.dispenseItemName);
+         if(item != null && (directBlockPayload || player != null && !player.isDead)) {
+            MCH_DummyEntityPlayer dummyPlayer = player != null && !player.isDead
+                  ? new MCH_DummyEntityPlayer(super.worldObj, player) : null;
+            if(dummyPlayer != null) dummyPlayer.rotationPitch = 90.0F;
             int RNG = this.getInfo().dispenseRange - 1;
 
             for(int x = -RNG; x <= RNG; ++x) {
                for(int y = -RNG; y <= RNG; ++y) {
-                  if(y >= 0 && y < 256) {
+                  int targetY = m.blockY + y;
+                  if(targetY >= 0 && targetY < 256) {
                      for(int z = -RNG; z <= RNG; ++z) {
                         int dist = x * x + y * y + z * z;
                         if(dist <= RNG * RNG) {
@@ -133,29 +107,26 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
          }
 
          this.setDead();
-         System.out.println("[DispensedItem] Entity marked as dead");
       }
    }
 
    private void useItemToBlock(int x, int y, int z, Item item, int itemDamage, EntityPlayer dummyPlayer) {
-      System.out.println("[DispensedItem] Attempting to use item at " + x + ", " + y + ", " + z);
-      dummyPlayer.posX = x + 0.5D;
-      dummyPlayer.posY = y + 2.5D;
-      dummyPlayer.posZ = z + 0.5D;
-      dummyPlayer.rotationYaw = super.rand.nextInt(360);
-
       Block block = W_WorldFunc.getBlock(super.worldObj, x, y, z);
       Material blockMat = W_WorldFunc.getBlockMaterial(super.worldObj, x, y, z);
 
       if (block != Blocks.air && blockMat != Material.air) {
-         System.out.println("[DispensedItem] Block is not air: " + block);
+         if (this.placeHbmMineBlock(x, y, z, item, itemDamage)) return;
+         if (dummyPlayer == null) return;
+
+         dummyPlayer.posX = x + 0.5D;
+         dummyPlayer.posY = y + 2.5D;
+         dummyPlayer.posZ = z + 0.5D;
+         dummyPlayer.rotationYaw = super.rand.nextInt(360);
 
          if (item == W_Item.getItemByName("water_bucket")) {
-            System.out.println("[DispensedItem] Using water bucket");
             if (MCH_MOD.config != null && MCH_MOD.config.Collision_DestroyBlock.prmBool) {
                if (blockMat == Material.fire) {
                   super.worldObj.setBlockToAir(x, y, z);
-                  System.out.println("[DispensedItem] Extinguished fire");
                } else if (blockMat == Material.lava) {
                   int metadata = super.worldObj.getBlockMetadata(x, y, z);
                   if (metadata == 0) {
@@ -163,21 +134,17 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
                   } else if (metadata <= 4) {
                      W_WorldFunc.setBlock(super.worldObj, x, y, z, Blocks.cobblestone);
                   }
-                  System.out.println("[DispensedItem] Converted lava");
                }
             }
          } else if (item instanceof MCH_ItemThrowable) {
-            System.out.println("[DispensedItem] Spawning throwable");
-            MCH_ItemThrowable throwable = (MCH_ItemThrowable)item;
             MCH_EntityThrowable entity = new MCH_EntityThrowable(worldObj, dummyPlayer, 0);
             MCH_ThrowableInfo info = MCH_ThrowableInfoManager.get(item);
-            info.delayFuse = 0;
-            entity.setInfo(info);
-            worldObj.spawnEntityInWorld(entity);
-         } else if (this.placeHbmMineBlock(x, y, z, item, itemDamage)) {
-            System.out.println("[DispensedItem] Placed HBM mine block");
+            if(info != null) {
+               info.delayFuse = 0;
+               entity.setInfo(info);
+               worldObj.spawnEntityInWorld(entity);
+            }
          } else {
-            System.out.println("[DispensedItem] Using generic item");
             ItemStack stack = new ItemStack(item, 1, itemDamage);
             try {
                boolean used = item.onItemUseFirst(stack, dummyPlayer, worldObj, x, y, z, 1, x, y, z);
@@ -188,34 +155,42 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
                   item.onItemRightClick(stack, worldObj, dummyPlayer);
                }
             } catch (Exception e) {
-               System.err.println("[MCH] Skipped item use due to fake player crash risk: " + e.getMessage());
-               e.printStackTrace();
+               MCH_WeaponInfo info = this.getInfo();
+               MCH_Lib.Log("Unexpected dispenser item failure for weapon '%s', item '%s': %s",
+                     new Object[]{info != null ? info.name : this.getName(),
+                           info != null ? info.dispenseItemName : W_Item.getNameForItem(item), e.toString()});
             }
          }
       }
    }
 
    private boolean placeHbmMineBlock(int x, int y, int z, Item item, int itemDamage) {
-      String itemName = W_Item.getNameForItem(item);
-      if(itemName == null || !itemName.startsWith("hbm:tile.mine")) {
+      MCH_WeaponInfo info = this.getInfo();
+      String itemName = info != null ? info.dispenseItemName : W_Item.getNameForItem(item);
+      if(!isHbmMine(itemName)) {
          return false;
       }
 
       Block mineBlock = Block.getBlockFromItem(item);
       if(mineBlock == null || mineBlock == Blocks.air) {
-         return false;
+         mineBlock = (Block)Block.blockRegistry.getObject(itemName);
       }
 
       int placeY = y + 1;
-      if(placeY < 0 || placeY >= 256 || !super.worldObj.isAirBlock(x, placeY, z) || !mineBlock.canPlaceBlockAt(super.worldObj, x, placeY, z)) {
+      if(mineBlock == null || mineBlock == Blocks.air || y < 0 || y >= 255 || placeY >= 256
+            || super.worldObj.isAirBlock(x, y, z) || !super.worldObj.isAirBlock(x, placeY, z)
+            || !mineBlock.canPlaceBlockAt(super.worldObj, x, placeY, z)) {
          return false;
       }
 
       return super.worldObj.setBlock(x, placeY, z, mineBlock, itemDamage, 3);
    }
 
+   private static boolean isHbmMine(String registryName) {
+      return registryName != null && registryName.startsWith("hbm:tile.mine");
+   }
+
    public void sprinkleBomblet() {
-      System.out.println("[DispensedItem] sprinkleBomblet called");
 
       if(!super.worldObj.isRemote) {
          MCH_EntityDispensedItem e = new MCH_EntityDispensedItem(super.worldObj, super.posX, super.posY, super.posZ, super.motionX, super.motionY, super.motionZ, (float)super.rand.nextInt(360), 0.0F, super.acceleration);
@@ -229,7 +204,6 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
 
          e.setBomblet();
          super.worldObj.spawnEntityInWorld(e);
-         System.out.println("[DispensedItem] Bomblet spawned");
       }
    }
 
@@ -237,4 +211,3 @@ public class MCH_EntityDispensedItem extends MCH_EntityBaseBullet {
       return MCH_DefaultBulletModels.Bomb;
    }
 }
-
