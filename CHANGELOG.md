@@ -510,3 +510,8 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Keep normal movement, rotation, tall obstacles, ceilings, adjacent shapes, and failed raised
   routes subject to ordinary physical hull collision.
 - Add deterministic Abrams route-policy coverage using its configured `StepHeight` and front hull.
+# Tank step route validation redesign
+
+- Validate tank step routes with the shared physical-hull OBB authority before applying them.
+- Keep explicit entity coordinates and root bounds in each route waypoint, and separate landing from final suspension rotation.
+- Prevent `finishPhysicalHullStep` from revalidating and rolling back a route already accepted in the same update.
