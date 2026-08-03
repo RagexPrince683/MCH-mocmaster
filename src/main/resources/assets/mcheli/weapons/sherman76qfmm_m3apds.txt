@@ -7,6 +7,7 @@ RecoilYawRange = 0.30F
 RecoilRecoverFactor = 0.8F
 SpeedDependsAircraft = true
 Power = 256
+Piercing = 2
 Acceleration = 7
 Sight = None
 Round = 1

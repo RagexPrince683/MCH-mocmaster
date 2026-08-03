@@ -6,6 +6,7 @@ RecoilPitchRange = 0.42F
 RecoilYawRange = 0.30F
 RecoilRecoverFactor = 0.8F
 Power = 384
+Piercing = 2
 
 ModelBullet = bullet
 Acceleration = 7.0

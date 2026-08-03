@@ -6,6 +6,7 @@ RecoilPitchRange = 0.14F
 RecoilYawRange = 0.10F
 RecoilRecoverFactor = 0.8F
 Power = 127
+Piercing = 1
 ModelBullet = shortapfsds
 Flaming = false
 Sight = MoveSight

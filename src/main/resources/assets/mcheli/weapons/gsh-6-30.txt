@@ -40,7 +40,7 @@ AddMuzzleFlashSmoke =  3.2,  1,   6.0,  2.5, 25,  130,220,217,214
 
 
 Acceleration = 7.5
-Piercing = 0
+Piercing = 1
 DamageFactor = tank, 1.0
 DamageFactor = plane, 1.5
 DamageFactor = vehicle, 1.0

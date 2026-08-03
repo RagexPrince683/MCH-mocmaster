@@ -26,7 +26,6 @@ MaxHeatCount = 450
 Gravity = -0.001
 
 Acceleration = 7.5
-Piercing = 0
 AddDisplayName = en_US, 25mm Gun
 SoundVolume = 15
 DamageFactor = tank, 1.0

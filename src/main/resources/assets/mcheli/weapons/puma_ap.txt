@@ -6,6 +6,7 @@ RecoilPitchRange = 0.12F
 RecoilYawRange = 0.09F
 RecoilRecoverFactor = 0.8F
 Power = 121
+Piercing = 1
 Acceleration = 7
 Gravity = -0.005
 DisplayMortarDistance = true

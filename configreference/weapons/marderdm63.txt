@@ -6,6 +6,7 @@ RecoilPitchRange = 0.23F
 RecoilYawRange = 0.16F
 RecoilRecoverFactor = 0.8F
 Power = 66
+Piercing = 1
 Flaming = false
 Sight = MoveSight
 Delay = 2
