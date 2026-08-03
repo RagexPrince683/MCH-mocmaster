@@ -2,7 +2,6 @@ package mcheli.tank;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import mcheli.MCH_Config;
@@ -229,8 +228,6 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          super.prevPosY = super.posY;
          super.prevPosZ = super.posZ;
       } else {
-         this.beginPhysicalHullStep();
-         try {
          if(!super.worldObj.isRemote) {
             this.updateTurretPopDestructionTransition();
             this.updateTurretPop();
@@ -284,9 +281,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          } else {
             this.onUpdate_Server();
          }
-         } finally {
-            this.finishPhysicalHullStep();
-         }
+
       }
    }
 
@@ -334,9 +329,6 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    public void moveEntity(double parX, double parY, double parZ) {
 
-      this.beginPhysicalHullPath();
-      this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_ROTATION);
-
       // Check for slowing blocks under the tank, and slow the tank
       Block blockUnder = MCH_Lib.getBlockY(this, 3, -2, false);
       if (BlockUtils.isSlowingBlock(blockUnder, super.worldObj, (int)super.posX, (int)super.posY, (int)super.posZ, this)) {
@@ -354,102 +346,40 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       double my = parY;
       double mz = parZ;
       AxisAlignedBB backUpAxisalignedBB = super.boundingBox.copy();
-      List list;
+      List list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(parX, parY, parZ));
+      parY = this.calculateYOffset(list, super.boundingBox, parY);
+      boolean flag1 = super.onGround || my != parY && my < 0.0D;
+      MCH_BoundingBox[] prevPX = super.extraBoundingBox;
+      int len$ = prevPX.length;
+
+      for(int prevPZ = 0; prevPZ < len$; ++prevPZ) {
+         MCH_BoundingBox ebb = prevPX[prevPZ];
+         ebb.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
+      }
+
+      parX = this.calculateXOffset(list, super.boundingBox, parX);
+      parZ = this.calculateZOffset(list, super.boundingBox, parZ);
       double minX;
       double var38;
       double var39;
-      this.beginRootMovementCandidateCalculation();
-      try {
-         list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(parX, parY, parZ));
-         parY = this.calculateYOffset(list, super.boundingBox, parY);
-         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_NORMAL_Y);
-         boolean flag1 = super.onGround || my != parY && my < 0.0D;
-         MCH_BoundingBox[] prevPX = super.extraBoundingBox;
-         int len$ = prevPX.length;
-
-         for(int prevPZ = 0; prevPZ < len$; ++prevPZ) {
-            MCH_BoundingBox ebb = prevPX[prevPZ];
-            ebb.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
+      if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F && (mx != parX || mz != parZ)) {
+         var38 = parX;
+         var39 = parY;
+         minX = parZ;
+         parY = (double)super.stepHeight;
+         AxisAlignedBB minZ = super.boundingBox.copy();
+         super.boundingBox.setBB(backUpAxisalignedBB);
+         list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(mx, parY, mz));
+         this.calculateYOffset(list, super.boundingBox, parY);
+         parX = this.calculateXOffset(list, super.boundingBox, mx);
+         parZ = this.calculateZOffset(list, super.boundingBox, mz);
+         parY = this.calculateYOffset(list, super.boundingBox, (double)(-super.stepHeight));
+         if(var38 * var38 + minX * minX >= parX * parX + parZ * parZ) {
+            parX = var38;
+            parY = var39;
+            parZ = minX;
+            super.boundingBox.setBB(minZ);
          }
-
-         parX = this.calculateXOffset(list, super.boundingBox, parX);
-         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_NORMAL_X);
-         parZ = this.calculateZOffset(list, super.boundingBox, parZ);
-         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_NORMAL_Z);
-         this.saveNormalPhysicalHullPath();
-         boolean selectedStepRoute = false;
-         boolean rootHorizontallyBlocked = mx != parX || mz != parZ;
-         if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F && mx*mx+mz*mz > 1.0E-8D) {
-            ArrayList stepBlocks = new ArrayList();
-            AxisAlignedBB search = backUpAxisalignedBB.addCoord(mx, super.stepHeight + 0.1D, mz).expand(12.0D, 2.0D, 12.0D);
-            this.collectPhysicalHullBlockCollisions(search, stepBlocks);
-            MCH_TankStepSolver.Transform start = new MCH_TankStepSolver.Transform(nowPosX, nowPosY, nowPosZ,
-                    this.getRotYaw(), this.getPhysicalHullStartPitch(), this.getPhysicalHullStartRoll());
-            MCH_TankStepSolver.Result solution = MCH_TankStepSolver.solve(start, this.getPhysicalHullBoxesForYaw(),
-                    stepBlocks, mx, mz, backUpAxisalignedBB.minY, super.stepHeight, flag1);
-            if(solution.selectedRoute != null && solution.selectedRoute.stepped) {
-               MCH_TankStepSolver.Route route = solution.selectedRoute;
-               float yaw = this.getRotYaw();
-               float startPitch = this.getPhysicalHullStartPitch(), startRoll = this.getPhysicalHullStartRoll();
-               float finalPitch = this.getRotPitch(), finalRoll = this.getRotRoll();
-               this.clearRecordedPhysicalHullPath();
-               AxisAlignedBB routeBox = backUpAxisalignedBB.copy();
-               this.recordPhysicalHullWaypoint(nowPosX, nowPosY, nowPosZ, routeBox, yaw, startPitch, startRoll, HULL_PATH_ROTATION);
-               routeBox.offset(route.preContact.x-nowPosX, route.preContact.y-nowPosY, route.preContact.z-nowPosZ);
-               this.recordPhysicalHullWaypoint(route.preContact.x, route.preContact.y, route.preContact.z,
-                       routeBox, yaw, startPitch, startRoll, HULL_PATH_PRE_CONTACT);
-               routeBox.offset(route.raised.x-route.preContact.x, route.raised.y-route.preContact.y,
-                       route.raised.z-route.preContact.z);
-               this.recordPhysicalHullWaypoint(route.raised.x, route.raised.y, route.raised.z,
-                       routeBox, yaw, startPitch, startRoll, HULL_PATH_STEP_UP);
-               routeBox.offset(route.raisedEnd.x-route.raised.x, route.raisedEnd.y-route.raised.y,
-                       route.raisedEnd.z-route.raised.z);
-               this.recordPhysicalHullWaypoint(route.raisedEnd.x, route.raisedEnd.y, route.raisedEnd.z,
-                       routeBox, yaw, startPitch, startRoll, HULL_PATH_STEP_HORIZONTAL);
-               routeBox.offset(route.end.x-route.raisedEnd.x, route.end.y-route.raisedEnd.y,
-                       route.end.z-route.raisedEnd.z);
-               this.recordPhysicalHullWaypoint(route.end.x, route.end.y, route.end.z,
-                       routeBox, yaw, startPitch, startRoll, HULL_PATH_STEP_DOWN);
-               this.recordPhysicalHullWaypoint(route.end.x, route.end.y, route.end.z,
-                       routeBox, yaw, finalPitch, finalRoll, HULL_PATH_STEP_FINAL_ROTATION);
-               if(this.validateRecordedPhysicalHullRoute()) {
-                  super.boundingBox.setBB(routeBox);
-                  parX=route.end.x-nowPosX; parY=route.end.y-nowPosY; parZ=route.end.z-nowPosZ;
-                  selectedStepRoute=true;
-                  this.markRecordedPhysicalHullRouteApplied(true);
-               } else {
-                  this.restoreNormalPhysicalHullPathForRecording();
-               }
-            } else if(rootHorizontallyBlocked) {
-               this.restoreNormalPhysicalHullPathForRecording();
-            }
-            if(solution.stepRoute == null && solution.normalRoute != null
-                    && solution.normalRoute.safeFraction < 1.0D && MCH_Config.EnableMCHLibDebugLog.prmBool) {
-               MCH_TankStepSolver.Contact contact = solution.failureContact;
-               double landingRise = solution.stepRoute == null ? 0.0D : solution.stepRoute.requiredRise;
-               double clearanceLift = solution.stepRoute == null ? 0.0D : solution.stepRoute.lift;
-               MCH_Lib.DbgLog(super.worldObj, "Tank step rejected type=%s move=(%.4f,%.4f) start=(%.4f,%.4f,%.4f)"
-                       + " rotation=(%.3f,%.3f,%.3f) hull=%d hullBounds=%s block=%s normal=(%.3f,%.3f,%.3f)"
-                       + " penetration=%.6f existed=%s floor=%s landingRise=%.4f clearanceLift=%.4f"
-                       + " stepHeight=%.4f segment=%s safe=%.6f",
-                       this.getTypeName(), Double.valueOf(mx), Double.valueOf(mz), Double.valueOf(nowPosX),
-                       Double.valueOf(nowPosY), Double.valueOf(nowPosZ), Float.valueOf(this.getRotYaw()),
-                       Float.valueOf(this.getPhysicalHullStartPitch()), Float.valueOf(this.getPhysicalHullStartRoll()),
-                       Integer.valueOf(contact == null ? -1 : contact.hullIndex),
-                       String.valueOf(contact == null ? null : contact.sourceHull.boundingBox),
-                       String.valueOf(solution.failureBlock), Double.valueOf(solution.failureNormalX),
-                       Double.valueOf(solution.failureNormalY), Double.valueOf(solution.failureNormalZ),
-                       Double.valueOf(contact == null ? 0.0D : contact.penetration),
-                       Boolean.valueOf(contact != null && contact.existedAtStart),
-                       Boolean.valueOf(contact != null && contact.floor), Double.valueOf(landingRise),
-                       Double.valueOf(clearanceLift), Float.valueOf(super.stepHeight), solution.failureSegment,
-                       Double.valueOf(solution.normalRoute.safeFraction));
-            }
-         }
-
-         if(!selectedStepRoute) this.commitPhysicalHullPath(false);
-      } finally {
-         this.endRootMovementCandidateCalculation();
       }
 
       var38 = super.posX;
@@ -1094,7 +1024,6 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 //      }
 
       if(super.aircraftPosRotInc > 0) {
-         this.acceptAuthoritativePhysicalHullTransform();
          this.applyServerPositionAndRotation();
       } else {
          this.setPosition(super.posX + super.motionX, super.posY + super.motionY, super.posZ + super.motionZ);
@@ -1549,8 +1478,6 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.setRotYaw(v.y);
       this.setRotPitch(v.x);
       this.setRotRoll(v.z);
-      float controlYaw = this.getRotYaw();
-      this.captureControlTransform(controlYaw, ac_pitch, ac_roll);
       this.onUpdateAngles(partialTicks);
       if(this.getAcInfo().limitRotation) {
          v.x = MCH_Lib.RNG(this.getRotPitch(), -90.0F, 90.0F);

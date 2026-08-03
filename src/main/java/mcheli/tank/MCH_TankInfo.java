@@ -26,7 +26,6 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
 
    public MCH_TankInfo(String name) {
       super(name);
-      this.stepHeight = 0.6F;
    }
 
    public List getDefaultWheelList() {
