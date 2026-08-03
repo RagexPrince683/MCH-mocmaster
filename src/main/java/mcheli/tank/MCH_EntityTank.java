@@ -377,7 +377,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_NORMAL_Z);
          this.saveNormalPhysicalHullPath();
          boolean selectedStepRoute = false;
-         if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F && (mx != parX || mz != parZ)) {
+         boolean rootHorizontallyBlocked = mx != parX || mz != parZ;
+         boolean physicalHullLedge = !rootHorizontallyBlocked && flag1 && super.ySize < 0.05F
+                 && this.hasClimbablePhysicalHullLedge(mx, mz, super.stepHeight);
+         if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F
+                 && shouldTryTankStep(rootHorizontallyBlocked, physicalHullLedge, mx, mz)) {
             float stepYaw = this.getRotYaw();
             float startPitch = this.getPhysicalHullStartPitch();
             float startRoll = this.getPhysicalHullStartRoll();
@@ -406,7 +410,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
             parY = this.calculateYOffset(list, super.boundingBox, (double)(-super.stepHeight));
             this.recordPhysicalHullWaypoint(super.boundingBox, stepYaw, suspensionPitch, suspensionRoll,
                     HULL_PATH_STEP_DOWN);
-            if(var38 * var38 + minX * minX >= parX * parX + parZ * parZ) {
+            if(!physicalHullLedge && var38 * var38 + minX * minX >= parX * parX + parZ * parZ) {
                parX = var38;
                parY = var39;
                parZ = minX;
@@ -417,7 +421,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
             }
          }
 
-         this.commitPhysicalHullPath(selectedStepRoute);
+         this.commitPhysicalHullPath(selectedStepRoute, physicalHullLedge);
       } finally {
          this.endRootMovementCandidateCalculation();
       }

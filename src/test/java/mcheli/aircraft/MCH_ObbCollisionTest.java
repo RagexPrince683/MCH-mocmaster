@@ -85,6 +85,18 @@ public class MCH_ObbCollisionTest {
               shortHull, new double[]{0.0D, 0.5D, 3.75D}, new double[]{0.5D, 0.5D, 0.5D}));
    }
 
+   @Test
+   public void physicalLedgeTriggerUsesSupportPlaneRise() {
+      assertFalse(MCH_EntityBaseVehicle.shouldTryTankStep(false, false, 0.2D, 0.0D));
+      assertTrue(MCH_EntityBaseVehicle.shouldTryTankStep(false, true, 0.2D, 0.0D));
+      assertTrue(MCH_EntityBaseVehicle.shouldTryTankStep(true, false, 0.2D, 0.0D));
+      assertFalse(MCH_EntityBaseVehicle.shouldTryTankStep(false, true, 0.0D, 0.0D));
+      assertTrue(MCH_EntityBaseVehicle.isClimbablePhysicalStepContact(1.0D, 1.8F));
+      assertTrue(MCH_EntityBaseVehicle.isClimbablePhysicalStepContact(1.0D, 1.5F));
+      assertFalse(MCH_EntityBaseVehicle.isClimbablePhysicalStepContact(0.0D, 1.8F));
+      assertFalse(MCH_EntityBaseVehicle.isClimbablePhysicalStepContact(2.0D, 1.8F));
+   }
+
    private static boolean sweepHits(double[] start, double[] end, double[] hullHalf,
                                     double[] blockCenter, double[] blockHalf) {
       for(int i = 1; i <= 40; ++i) {
