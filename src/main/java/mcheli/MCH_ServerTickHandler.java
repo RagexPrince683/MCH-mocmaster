@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_BaseVehicleInfo;
+import mcheli.lod.MCH_VehicleLODVisibility;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.network.packets.PacketVehicleLODSnapshot;
 import mcheli.network.packets.PacketVehicleMountGraph;
@@ -37,8 +38,9 @@ public class MCH_ServerTickHandler {
    private static final int UPDATE_INTERVAL_TICKS = 20;
    private static final int MAX_ENTRIES = 512;
    /** Must match the normal vehicle/seat registration range in MCH_MOD. */
-   private static final double NORMAL_TRACKING_RANGE_SQ = 200.0D * 200.0D;
+   private static final double NORMAL_TRACKING_RANGE_SQ = MCH_VehicleLODVisibility.NORMAL_TRACKING_RANGE_SQ;
    private int tick;
+   private static long nextLodDiagnosticMs;
    private static final Map<String, PendingMountGraph> PENDING_MOUNT_GRAPHS = new HashMap<String, PendingMountGraph>();
    private static final AtomicInteger NEXT_MOUNT_SEQUENCE = new AtomicInteger();
 
@@ -88,9 +90,8 @@ public class MCH_ServerTickHandler {
       }
 
       double farDistance = MCH_Config.AircraftLODFarDistance != null
-         ? MCH_Config.AircraftLODFarDistance.prmDouble : 4800.0D;
-      if(Double.isNaN(farDistance) || Double.isInfinite(farDistance) || farDistance <= 0.0D) farDistance = 4800.0D;
-      farDistance = Math.min(4800.0D, farDistance);
+         ? MCH_Config.AircraftLODFarDistance.prmDouble : MCH_VehicleLODVisibility.MAX_LOD_DISTANCE;
+      farDistance = MCH_VehicleLODVisibility.hardDistance(farDistance);
       double farDistanceSq = farDistance * farDistance;
 
       for(WorldServer world : server.worldServers) {
@@ -110,10 +111,15 @@ public class MCH_ServerTickHandler {
       for(Object object : world.loadedEntityList) {
          if(object instanceof MCH_EntityBaseVehicle) {
             MCH_EntityBaseVehicle vehicle = (MCH_EntityBaseVehicle)object;
-            if(!vehicle.isDead && vehicle.getAcInfo() != null && categoryOf(vehicle) >= 0
+            double dx = vehicle.posX - player.posX;
+            double dy = vehicle.posY - player.posY;
+            double dz = vehicle.posZ - player.posZ;
+            double distanceSq = MCH_VehicleLODVisibility.distanceSq(dx, dy, dz);
+            boolean qualifies = !vehicle.isDead && vehicle.getAcInfo() != null && categoryOf(vehicle) >= 0
                && !vehicle.isUAV() && !vehicle.isNewUAV()
-               && vehicle.getDistanceSqToEntity(player) <= farDistanceSq
-               && !world.getPlayerManager().isPlayerWatchingChunk(player, vehicle.chunkCoordX, vehicle.chunkCoordZ)) {
+               && distanceSq > NORMAL_TRACKING_RANGE_SQ && distanceSq < farDistanceSq;
+            diagnoseSnapshot(world, player, vehicle, dx, dy, dz, farDistanceSq, qualifies);
+            if(qualifies) {
                aircraft.add(vehicle);
             }
          }
@@ -184,6 +190,26 @@ public class MCH_ServerTickHandler {
          entries.add(entry);
       }
       return entries;
+   }
+
+   private static void diagnoseSnapshot(WorldServer world, EntityPlayerMP player, MCH_EntityBaseVehicle vehicle,
+      double dx, double dy, double dz, double farDistanceSq, boolean qualifies) {
+      long now = System.currentTimeMillis();
+      if(MCH_Config.DebugVehicleLODVisibility == null || !MCH_Config.DebugVehicleLODVisibility.prmBool
+         || now < nextLodDiagnosticMs) return;
+      nextLodDiagnosticMs = now + 1000L;
+      double horizontal = Math.sqrt(dx * dx + dz * dz);
+      double vertical = Math.abs(dy);
+      double distance = Math.sqrt(MCH_VehicleLODVisibility.distanceSq(dx, dy, dz));
+      double hardRange = Math.sqrt(farDistanceSq);
+      boolean watched = world.getPlayerManager().isPlayerWatchingChunk(player, vehicle.chunkCoordX, vehicle.chunkCoordZ);
+      String reason = qualifies ? "snapshot" : distance <= MCH_VehicleLODVisibility.NORMAL_TRACKING_RANGE
+         ? "normal_tracking" : distance >= hardRange ? "hard_range" : "excluded_vehicle";
+      MCH_Lib.DbgLog(true,
+         "VehicleLODSnapshot horizontal=%.1f vertical=%.1f distance3d=%.1f normalRange=%.1f hardRange=%.1f watchedChunk=%s qualifies=%s result=%s",
+         new Object[]{Double.valueOf(horizontal), Double.valueOf(vertical), Double.valueOf(distance),
+            Double.valueOf(MCH_VehicleLODVisibility.NORMAL_TRACKING_RANGE), Double.valueOf(hardRange),
+            Boolean.valueOf(watched), Boolean.valueOf(qualifies), reason});
    }
 
    private static synchronized void tickMountGraphs() {

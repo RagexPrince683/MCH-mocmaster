@@ -96,8 +96,8 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `RenderDistanceWeight` | `1000.0` | Render-distance weight for mod rendering. |
 | `EnableAircraftLODRender` | `true` | Enables client-only far-distance model displays for aircraft, tanks, turrets, and ships. |
 | `AircraftLODStartDistance` | `140.0` | Distance where tracked vehicles switch to cheaper model-only rendering, with the existing hysteresis around the transition. |
-| `AircraftLODFarDistance` | `4800.0` | Hard maximum detection range for render-only vehicle snapshots; this is not a full-detail visibility distance. |
-| `AircraftLODVisibilityDistance` | `4800.0` | Clear/hazy atmospheric visibility distance where Koschmieder contrast transmission reaches approximately two percent. |
+| `AircraftLODFarDistance` | `60000.0` | Hard maximum detection range for render-only vehicle snapshots. Values are capped at 60,000 blocks. |
+| `AircraftLODVisibilityDistance` | `60000.0` | Clear-air reference distance where Koschmieder contrast transmission reaches approximately two percent; values are capped at 60,000 blocks. |
 | `AircraftLODRainVisibilityMultiplier` | `0.70` | Multiplier applied to atmospheric visibility distance in rain. |
 | `AircraftLODThunderVisibilityMultiplier` | `0.45` | Multiplier applied to atmospheric visibility distance in thunder. |
 | `AircraftLODThermalContrastExponent` | `0.35` | Raises atmospheric transmission to this exponent in thermal mode, improving contrast without extending the hard range. |
@@ -129,6 +129,8 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `MultiThreadedModelLoading` | `true` | Enables threaded model loading on the client. |
 
 Snapshot visibility uses the active projection matrix, so scopes and other FOV magnification increase projected target size naturally. Magnification does not change real distance or atmospheric transmission. Thermal vision lowers the projected-size threshold and improves contrast, but it never extends `AircraftLODFarDistance`. Snapshot rendering retains depth testing, allowing loaded nearby terrain and structures to occlude a target; unloaded terrain has no depth information and therefore cannot occlude this render-only data.
+
+The hard LOD limit uses full three-dimensional distance: vertical separation counts exactly like horizontal separation, and a vehicle at 60,000 blocks or farther is not rendered. The snapshot system does not increase Forge's normal 200-block entity tracking range and does not load distant chunks; it only reports eligible vehicles from chunks the server has already loaded. A bounded, at-most-one-pixel apparent footprint keeps extremely distant vehicle models visible without replacing their shape, texture, orientation, or animated parts with a marker.
 
 ## Vehicle content-pack keys
 

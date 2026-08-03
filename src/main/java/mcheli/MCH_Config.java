@@ -491,9 +491,9 @@ public class MCH_Config {
       EnableAircraftLODRender.desc = ";Enable client-only far-distance model displays for aircraft, tanks, turrets, and ships.";
       AircraftLODStartDistance = new MCH_ConfigPrm("AircraftLODStartDistance", 140.0D);
       AircraftLODStartDistance.desc = ";Distance in blocks where tracked aircraft rendering switches to its cheaper model-only pass.";
-      AircraftLODFarDistance = new MCH_ConfigPrm("AircraftLODFarDistance", 4800.0D);
+      AircraftLODFarDistance = new MCH_ConfigPrm("AircraftLODFarDistance", mcheli.lod.MCH_VehicleLODVisibility.MAX_LOD_DISTANCE);
       AircraftLODFarDistance.desc = ";Maximum distance for client-only vehicle LOD snapshots. Real vehicle entity tracking remains unchanged and aligned with child seats.";
-      AircraftLODVisibilityDistance = new MCH_ConfigPrm("AircraftLODVisibilityDistance", 4800.0D);
+      AircraftLODVisibilityDistance = new MCH_ConfigPrm("AircraftLODVisibilityDistance", mcheli.lod.MCH_VehicleLODVisibility.MAX_LOD_DISTANCE);
       AircraftLODVisibilityDistance.desc = ";Clear-air distance where snapshot optical contrast falls to approximately two percent.";
       AircraftLODRainVisibilityMultiplier = new MCH_ConfigPrm("AircraftLODRainVisibilityMultiplier", 0.70D);
       AircraftLODThunderVisibilityMultiplier = new MCH_ConfigPrm("AircraftLODThunderVisibilityMultiplier", 0.45D);
@@ -1082,15 +1082,15 @@ public class MCH_Config {
          MobRenderDistanceWeight.prmDouble = 100.0D;
       }
 
-      AircraftLODStartDistance.prmDouble = finiteRange(AircraftLODStartDistance.prmDouble, 0.0D, 4800.0D, 140.0D);
+      AircraftLODStartDistance.prmDouble = finiteRange(AircraftLODStartDistance.prmDouble, 0.0D, mcheli.lod.MCH_VehicleLODVisibility.MAX_LOD_DISTANCE, 140.0D);
 
-      AircraftLODFarDistance.prmDouble = finiteRange(AircraftLODFarDistance.prmDouble, 1.0D, 4800.0D, 4800.0D);
+      AircraftLODFarDistance.prmDouble = finiteRange(AircraftLODFarDistance.prmDouble, 1.0D, mcheli.lod.MCH_VehicleLODVisibility.MAX_LOD_DISTANCE, mcheli.lod.MCH_VehicleLODVisibility.MAX_LOD_DISTANCE);
 
       if(AircraftLODFarDistance.prmDouble > 0.0D && AircraftLODFarDistance.prmDouble < AircraftLODStartDistance.prmDouble) {
          AircraftLODFarDistance.prmDouble = AircraftLODStartDistance.prmDouble;
       }
 
-      AircraftLODVisibilityDistance.prmDouble = finitePositive(AircraftLODVisibilityDistance.prmDouble, 4800.0D);
+      AircraftLODVisibilityDistance.prmDouble = finiteRange(AircraftLODVisibilityDistance.prmDouble, 1.0D, mcheli.lod.MCH_VehicleLODVisibility.MAX_LOD_DISTANCE, mcheli.lod.MCH_VehicleLODVisibility.MAX_LOD_DISTANCE);
       AircraftLODRainVisibilityMultiplier.prmDouble = finiteRange(AircraftLODRainVisibilityMultiplier.prmDouble, 0.01D, 1.0D, 0.70D);
       AircraftLODThunderVisibilityMultiplier.prmDouble = finiteRange(AircraftLODThunderVisibilityMultiplier.prmDouble, 0.01D, 1.0D, 0.45D);
       AircraftLODThunderVisibilityMultiplier.prmDouble = Math.min(AircraftLODThunderVisibilityMultiplier.prmDouble,
