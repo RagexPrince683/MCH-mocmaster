@@ -333,6 +333,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    public void moveEntity(double parX, double parY, double parZ) {
 
+      this.beginPhysicalHullPath();
+      this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_ROTATION);
+
       // Check for slowing blocks under the tank, and slow the tank
       Block blockUnder = MCH_Lib.getBlockY(this, 3, -2, false);
       if (BlockUtils.isSlowingBlock(blockUnder, super.worldObj, (int)super.posX, (int)super.posY, (int)super.posZ, this)) {
@@ -352,6 +355,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       AxisAlignedBB backUpAxisalignedBB = super.boundingBox.copy();
       List list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(parX, parY, parZ));
       parY = this.calculateYOffset(list, super.boundingBox, parY);
+      this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_NORMAL_Y);
       boolean flag1 = super.onGround || my != parY && my < 0.0D;
       MCH_BoundingBox[] prevPX = super.extraBoundingBox;
       int len$ = prevPX.length;
@@ -362,7 +366,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       }
 
       parX = this.calculateXOffset(list, super.boundingBox, parX);
+      this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_NORMAL_X);
       parZ = this.calculateZOffset(list, super.boundingBox, parZ);
+      this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_NORMAL_Z);
+      this.saveNormalPhysicalHullPath();
+      boolean selectedStepRoute = false;
       double minX;
       double var38;
       double var39;
@@ -373,18 +381,29 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          parY = (double)super.stepHeight;
          AxisAlignedBB minZ = super.boundingBox.copy();
          super.boundingBox.setBB(backUpAxisalignedBB);
+         this.clearRecordedPhysicalHullPath();
+         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_ROTATION);
          list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(mx, parY, mz));
          this.calculateYOffset(list, super.boundingBox, parY);
+         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_UP);
          parX = this.calculateXOffset(list, super.boundingBox, mx);
+         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_X);
          parZ = this.calculateZOffset(list, super.boundingBox, mz);
+         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_Z);
          parY = this.calculateYOffset(list, super.boundingBox, (double)(-super.stepHeight));
+         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_DOWN);
          if(var38 * var38 + minX * minX >= parX * parX + parZ * parZ) {
             parX = var38;
             parY = var39;
             parZ = minX;
             super.boundingBox.setBB(minZ);
+            this.restoreNormalPhysicalHullPathForRecording();
+         } else {
+            selectedStepRoute = true;
          }
       }
+
+      this.commitPhysicalHullPath(selectedStepRoute);
 
       var38 = super.posX;
       var39 = super.posZ;
@@ -1028,6 +1047,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 //      }
 
       if(super.aircraftPosRotInc > 0) {
+         this.acceptAuthoritativePhysicalHullTransform();
          this.applyServerPositionAndRotation();
       } else {
          this.setPosition(super.posX + super.motionX, super.posY + super.motionY, super.posZ + super.motionZ);

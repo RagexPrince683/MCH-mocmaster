@@ -47,6 +47,37 @@ public class MCH_ObbCollisionTest {
       assertEquals(2.0F, delta, 0.0F);
    }
 
+   @Test
+   public void directStepDiagonalHitsButRaisedSegmentsClear() {
+      double[] half = {0.2D, 0.2D, 0.2D};
+      double[] stepCenter = {1.0D, 0.5D, 0.0D};
+      double[] stepHalf = {0.5D, 0.5D, 0.5D};
+      assertTrue(sweepHits(new double[]{0.0D, 0.21D, 0.0D}, new double[]{1.5D, 1.21D, 0.0D}, half,
+              stepCenter, stepHalf));
+      assertFalse(sweepHits(new double[]{0.0D, 1.21D, 0.0D}, new double[]{1.5D, 1.21D, 0.0D}, half,
+              stepCenter, stepHalf));
+   }
+
+   @Test
+   public void raisedSegmentStillHitsTwoBlockWallAndWallBehindStep() {
+      double[] half = {0.2D, 0.2D, 0.2D};
+      assertTrue(sweepHits(new double[]{0.0D, 1.21D, 0.0D}, new double[]{1.5D, 1.21D, 0.0D}, half,
+              new double[]{1.0D, 1.0D, 0.0D}, new double[]{0.5D, 1.0D, 0.5D}));
+      assertTrue(sweepHits(new double[]{0.0D, 1.21D, 0.0D}, new double[]{2.0D, 1.21D, 0.0D}, half,
+              new double[]{1.75D, 1.5D, 0.0D}, new double[]{0.25D, 1.5D, 0.5D}));
+   }
+
+   private static boolean sweepHits(double[] start, double[] end, double[] hullHalf,
+                                    double[] blockCenter, double[] blockHalf) {
+      for(int i = 1; i <= 40; ++i) {
+         double f = i / 40.0D;
+         double[] center = {start[0] + (end[0] - start[0]) * f,
+                 start[1] + (end[1] - start[1]) * f, start[2] + (end[2] - start[2]) * f};
+         if(MCH_ObbCollision.intersect(center, axes(0.0D), hullHalf, blockCenter, blockHalf) != null) return true;
+      }
+      return false;
+   }
+
    private static MCH_ObbCollision.Contact contact(double x, double y, double z, double yaw) {
       return MCH_ObbCollision.intersect(new double[]{x, y + 0.5D, z}, axes(yaw), HALF,
               BLOCK_CENTER, BLOCK_HALF);
