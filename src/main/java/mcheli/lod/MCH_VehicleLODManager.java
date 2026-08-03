@@ -9,10 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import org.lwjgl.BufferUtils;
-import mcheli.MCH_ActiveRenderInfoHolder;
 import mcheli.MCH_Camera;
 import mcheli.MCH_ClientCommonTickHandler;
 import mcheli.MCH_Lib;
@@ -55,8 +51,6 @@ public final class MCH_VehicleLODManager {
     public static final MCH_VehicleLODManager INSTANCE = new MCH_VehicleLODManager();
     private static final long STALE_AFTER_MS = 5000L;
     private static final LODRenderState RENDER_STATE = new LODRenderState();
-    private static final FloatBuffer FALLBACK_PROJECTION = BufferUtils.createFloatBuffer(16);
-    private static final IntBuffer FALLBACK_VIEWPORT = BufferUtils.createIntBuffer(16);
     private static final Map<Object, Double> TARGET_DIMENSIONS = new IdentityHashMap<Object, Double>();
     private static long nextDiagnosticMs;
     private final Map<UUID, Display> displays = new HashMap<UUID, Display>();
@@ -105,6 +99,18 @@ public final class MCH_VehicleLODManager {
 
     public synchronized void invalidate(UUID vehicleId) {
         if (vehicleId != null) this.displays.remove(vehicleId);
+    }
+
+    /** Diagnostic ownership query; a live tracked entity still remains the sole renderer. */
+    public synchronized boolean hasSnapshotFor(MCH_EntityBaseVehicle vehicle) {
+        if (vehicle == null) return false;
+        for (Display display : this.displays.values()) {
+            if (vehicle.getEntityId() == display.entityId) return true;
+            String commonId = vehicle.getCommonUniqueId();
+            if (commonId != null && commonId.length() > 0 && commonId.equals(display.commonUniqueId)
+                && vehicle.getAcInfo() != null && display.typeName.equals(vehicle.getAcInfo().name)) return true;
+        }
+        return false;
     }
 
     @SubscribeEvent
@@ -187,24 +193,11 @@ public final class MCH_VehicleLODManager {
 
     private static RenderContext captureRenderContext(Minecraft mc, float partialTicks) {
         RenderContext context = new RenderContext();
-        boolean validProjection = copyProjection(MCH_ActiveRenderInfoHolder.projection, context.projection);
-        if (!validProjection) {
-            FALLBACK_PROJECTION.clear();
-            GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, FALLBACK_PROJECTION);
-            validProjection = copyProjection(FALLBACK_PROJECTION, context.projection);
-        }
-        double fallbackFar = Math.max(64.0D, (double)mc.gameSettings.renderDistanceChunks * 16.0D);
-        context.farPlane = validProjection
-            ? MCH_VehicleLODVisibility.projectionFarPlane(context.projection[10], context.projection[14], fallbackFar)
-            : fallbackFar;
-        context.safeProxyDepth = MCH_VehicleLODVisibility.safeProxyDepth(context.farPlane);
-        context.viewportHeight = copyViewportHeight(MCH_ActiveRenderInfoHolder.viewport);
-        if (context.viewportHeight <= 0) {
-            FALLBACK_VIEWPORT.clear();
-            GL11.glGetInteger(GL11.GL_VIEWPORT, FALLBACK_VIEWPORT);
-            context.viewportHeight = copyViewportHeight(FALLBACK_VIEWPORT);
-        }
-        if (context.viewportHeight <= 0) context.viewportHeight = Math.max(1, mc.displayHeight);
+        MCH_VehicleLODProjection.Context projection = MCH_VehicleLODProjection.capture(mc, 0.0D);
+        System.arraycopy(projection.projection, 0, context.projection, 0, 16);
+        context.farPlane = projection.farPlane;
+        context.safeProxyDepth = projection.safeProxyDepth;
+        context.viewportHeight = projection.viewportHeight;
         context.cameraMode = MCH_ClientCommonTickHandler.cameraMode;
         context.thermal = context.cameraMode == MCH_Camera.MODE_THERMALVISION;
         if (mc.theWorld.getWeightedThunderStrength(partialTicks) > 0.0F) {
@@ -218,21 +211,6 @@ public final class MCH_VehicleLODManager {
             context.weatherMultiplier = 1.0D;
         }
         return context;
-    }
-
-    private static boolean copyProjection(FloatBuffer source, float[] destination) {
-        if (source == null || source.capacity() < 16) return false;
-        for (int i = 0; i < 16; ++i) {
-            float value = source.get(i);
-            if (Float.isNaN(value) || Float.isInfinite(value)) return false;
-            destination[i] = value;
-        }
-        return Math.abs(destination[0]) > 1.0E-6F && Math.abs(destination[5]) > 1.0E-6F
-            && Math.abs(destination[11]) > 1.0E-6F;
-    }
-
-    private static int copyViewportHeight(IntBuffer viewport) {
-        return viewport != null && viewport.capacity() >= 4 ? viewport.get(3) : 0;
     }
 
     private static double targetDimension(MCH_BaseVehicleInfo info) {
