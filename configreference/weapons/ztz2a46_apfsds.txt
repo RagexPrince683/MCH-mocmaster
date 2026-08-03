@@ -6,6 +6,7 @@ RecoilPitchRange = 0.59F
 RecoilYawRange = 0.42F
 RecoilRecoverFactor = 0.8F
 Power = 466
+Piercing = 5
 
 Sight = None
 ReloadTime = 165

@@ -7,6 +7,7 @@ RecoilYawRange = 0.42F
 RecoilRecoverFactor = 0.8F
 SpeedDependsAircraft = true
 Power = 457
+Piercing = 5
 Sight = None
 Sound = teightymain
 BulletColor        = 255, 255, 100, 100
