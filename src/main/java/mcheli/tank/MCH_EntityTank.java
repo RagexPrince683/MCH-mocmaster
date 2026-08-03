@@ -228,6 +228,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          super.prevPosY = super.posY;
          super.prevPosZ = super.posZ;
       } else {
+         this.beginPhysicalHullStep();
+         try {
          if(!super.worldObj.isRemote) {
             this.updateTurretPopDestructionTransition();
             this.updateTurretPop();
@@ -281,7 +283,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          } else {
             this.onUpdate_Server();
          }
-
+         } finally {
+            this.finishPhysicalHullStep();
+         }
       }
    }
 
@@ -1039,7 +1043,6 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          }
       }
 
-      this.resolveControlTransformAfterMove();
       this.updateWheels();
       this.onUpdate_Particle2();
       this.updateSound();
@@ -1166,7 +1169,6 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.updateWheels();
       double motionYBeforeMove = super.motionY;
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
-      this.resolveControlTransformAfterMove();
       this.updateGroundVehicleFallDamage(wasOnGroundBeforeMove, motionYBeforeGravity, motionYBeforeMove);
 
       // --------------------------------------------------

@@ -85,7 +85,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    private final TransformSnapshot controlTransformStart = new TransformSnapshot();
    private final ArrayList controlTransformBlocks = new ArrayList();
    private final ArrayList controlTransformStartContacts = new ArrayList();
-   private boolean controlTransformPending;
+   private boolean physicalHullStepActive;
+   private long physicalHullCaptureTick = Long.MIN_VALUE;
+   private boolean physicalHullCaptureRemote;
+   private Entity physicalHullRider;
+   private final TransformSnapshot lastSafePhysicalTransform = new TransformSnapshot();
+   private boolean hasLastSafePhysicalTransform;
    private static final double CONTROL_YAW_EPSILON = 1.0E-4D;
    private static final int CONTROL_YAW_SEARCH_STEPS = 9;
    private static final int NEW_UAV_SAFE_RETURN_MIN_TICKS = 20;
@@ -469,19 +474,47 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    protected final void captureControlTransform(float originalYaw, float originalPitch, float originalRoll) {
       if(this.worldObj == null || this.getAcInfo() == null) return;
+      long tick = this.worldObj.getTotalWorldTime();
+      boolean remote = this.worldObj.isRemote;
+      if(this.physicalHullStepActive && this.physicalHullCaptureTick == tick
+              && this.physicalHullCaptureRemote == remote) return;
       this.controlTransformStart.set(super.posX, super.posY, super.posZ, originalYaw,
               originalPitch, originalRoll, super.boundingBox);
-      this.controlTransformPending = true;
+      this.physicalHullStepActive = true;
+      this.physicalHullCaptureTick = tick;
+      this.physicalHullCaptureRemote = remote;
+      this.physicalHullRider = this.getRiddenByEntity();
+   }
+
+   /** Starts one hull-validation lifecycle, independently of rider input. */
+   public final void beginPhysicalHullStep() {
+      if(this.worldObj == null || this.getAcInfo() == null) return;
+      long tick = this.worldObj.getTotalWorldTime();
+      Entity rider = this.getRiddenByEntity();
+      if(this.physicalHullStepActive && (this.physicalHullCaptureTick != tick
+              || this.physicalHullCaptureRemote != this.worldObj.isRemote || this.physicalHullRider != rider)) {
+         this.clearPhysicalHullStep();
+      }
+      this.physicalHullRider = rider;
+      this.captureControlTransform(this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
+   }
+
+   public final void finishPhysicalHullStep() {
+      try {
+         this.resolveControlTransformAfterMove();
+      } finally {
+         this.clearPhysicalHullStep();
+      }
+   }
+
+   private void clearPhysicalHullStep() {
+      this.physicalHullStepActive = false;
+      this.physicalHullCaptureTick = Long.MIN_VALUE;
    }
 
    /** Server packet safety check. Packet yaw is never trusted until its swept transform is clear. */
    public void validateReceivedControlYaw(float originalYaw) {
-      this.validateControlYaw(originalYaw);
-      this.resolveControlTransformAfterMove();
-      float acceptedYaw = this.getRotYaw();
-      this.controlTransformStart.set(super.posX, super.posY, super.posZ, originalYaw,
-              this.getRotPitch(), this.getRotRoll(), super.boundingBox);
-      this.controlTransformPending = MathHelper.abs(MathHelper.wrapAngleTo180_float(acceptedYaw - originalYaw)) > 1.0E-5F;
+      this.captureControlTransform(originalYaw, this.getRotPitch(), this.getRotRoll());
    }
 
    /**
@@ -489,19 +522,24 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
     * Tanks call this once, immediately after moveEntity has produced its requested final position.
     */
    protected final void resolveControlTransformAfterMove() {
-      if(!this.controlTransformPending || this.worldObj == null) return;
-      this.controlTransformPending = false;
+      if(!this.physicalHullStepActive || this.worldObj == null) return;
       List hulls = this.getPhysicalHullBoxesForYaw();
       if(hulls.isEmpty()) return;
 
       TransformSnapshot end = new TransformSnapshot();
       end.set(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll(), super.boundingBox);
       float yawDelta = MathHelper.wrapAngleTo180_float(end.yaw - this.controlTransformStart.yaw);
-      if(Math.abs(yawDelta) < 1.0E-5F && samePosition(this.controlTransformStart, end)) return;
+      if(Math.abs(yawDelta) < 1.0E-5F && samePosition(this.controlTransformStart, end)
+              && Math.abs(end.pitch - this.controlTransformStart.pitch) < 1.0E-5F
+              && Math.abs(end.roll - this.controlTransformStart.roll) < 1.0E-5F) return;
 
       this.collectSweptBlocks(this.controlTransformStart, end, hulls);
       this.collectContacts(this.controlTransformStart, hulls, this.controlTransformStartContacts);
-      if(this.isSweptTransformSafe(this.controlTransformStart, end, hulls, 1.0F, 1.0F)) return;
+      if(this.isSweptTransformSafe(this.controlTransformStart, end, hulls, 1.0F, 1.0F)) {
+         this.lastSafePhysicalTransform.copyFrom(end);
+         this.hasLastSafePhysicalTransform = true;
+         return;
+      }
 
       float safeYaw = 0.0F;
       float blockedYaw = 1.0F;
@@ -513,6 +551,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
          this.setRotYaw(this.controlTransformStart.yaw + yawDelta * safeYaw);
          this.updatePhysicalHullPositions();
+         this.vehicleBoxCache.markDirty("physical hull rotation clipped");
          return;
       }
 
@@ -523,9 +562,50 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          if(this.isSweptTransformSafe(this.controlTransformStart, end, hulls, middle, 0.0F)) safeMove = middle;
          else blockedMove = middle;
       }
+      if(safeMove <= 1.0E-5F && this.hasLastSafePhysicalTransform && this.hasInvalidStartContact()) {
+         this.restoreLastSafePhysicalTransform();
+         this.projectBlockedHorizontalMotion(end);
+         return;
+      }
       this.applyResolvedPosition(this.controlTransformStart, end, safeMove);
       this.setRotYaw(this.controlTransformStart.yaw);
+      this.projectBlockedHorizontalMotion(end);
       this.updatePhysicalHullPositions();
+      this.vehicleBoxCache.markDirty("physical hull movement clipped");
+   }
+
+   private boolean hasInvalidStartContact() {
+      for(int i = 0; i < this.controlTransformStartContacts.size(); ++i) {
+         HullBlockContact contact = (HullBlockContact)this.controlTransformStartContacts.get(i);
+         if(!contact.floor && contact.penetration > 0.25D) return true;
+      }
+      return false;
+   }
+
+   private void restoreLastSafePhysicalTransform() {
+      TransformSnapshot safe = this.lastSafePhysicalTransform;
+      super.posX = safe.x; super.posY = safe.y; super.posZ = safe.z;
+      this.setRotYaw(safe.yaw); this.setRotPitch(safe.pitch); this.setRotRoll(safe.roll);
+      super.boundingBox.setBounds(safe.rootBounds[0], safe.rootBounds[1], safe.rootBounds[2],
+              safe.rootBounds[3], safe.rootBounds[4], safe.rootBounds[5]);
+      this.updatePhysicalHullPositions();
+      this.vehicleBoxCache.markDirty("invalid physical hull start recovered");
+   }
+
+   private void projectBlockedHorizontalMotion(TransformSnapshot requested) {
+      double removedX = requested.x - super.posX;
+      double removedZ = requested.z - super.posZ;
+      double length = Math.sqrt(removedX * removedX + removedZ * removedZ);
+      if(length <= CONTROL_YAW_EPSILON) return;
+      double normalX = removedX / length;
+      double normalZ = removedZ / length;
+      double inward = super.motionX * normalX + super.motionZ * normalZ;
+      if(inward > 0.0D) {
+         super.motionX -= inward * normalX;
+         super.motionZ -= inward * normalZ;
+         super.isCollidedHorizontally = true;
+         super.isCollided = true;
+      }
    }
 
    protected List getPhysicalHullBoxesForYaw() {
@@ -662,6 +742,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.x=x; this.y=y; this.z=z; this.yaw=yaw; this.pitch=pitch; this.roll=roll;
          this.rootBounds[0]=root.minX; this.rootBounds[1]=root.minY; this.rootBounds[2]=root.minZ;
          this.rootBounds[3]=root.maxX; this.rootBounds[4]=root.maxY; this.rootBounds[5]=root.maxZ;
+      }
+      void copyFrom(TransformSnapshot other) {
+         this.x=other.x; this.y=other.y; this.z=other.z; this.yaw=other.yaw; this.pitch=other.pitch; this.roll=other.roll;
+         System.arraycopy(other.rootBounds, 0, this.rootBounds, 0, this.rootBounds.length);
       }
    }
 
