@@ -115,9 +115,11 @@ public class MCH_ServerTickHandler {
             double dy = vehicle.posY - player.posY;
             double dz = vehicle.posZ - player.posZ;
             double distanceSq = MCH_VehicleLODVisibility.distanceSq(dx, dy, dz);
+            boolean watched = world.getPlayerManager().isPlayerWatchingChunk(player,
+               vehicle.chunkCoordX, vehicle.chunkCoordZ);
             boolean qualifies = !vehicle.isDead && vehicle.getAcInfo() != null && categoryOf(vehicle) >= 0
                && !vehicle.isUAV() && !vehicle.isNewUAV()
-               && distanceSq > NORMAL_TRACKING_RANGE_SQ && distanceSq < farDistanceSq;
+               && MCH_VehicleLODVisibility.shouldSendSnapshot(watched, distanceSq, Math.sqrt(farDistanceSq));
             diagnoseSnapshot(world, player, vehicle, dx, dy, dz, farDistanceSq, qualifies);
             if(qualifies) {
                aircraft.add(vehicle);

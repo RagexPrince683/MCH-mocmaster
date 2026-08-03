@@ -53,11 +53,10 @@ public final class MCH_VehicleLODVisibility {
         return physicalSize * Math.abs((double)projectionY) * (double)viewportHeight / (2.0D * realDistance);
     }
 
-    /** Full three-dimensional snapshot selection; chunk watching is intentionally irrelevant. */
-    public static boolean qualifiesForSnapshot(double dx, double dy, double dz, double hardDistance) {
+    /** Preserves the vanilla horizontal chunk-watching split used by snapshot selection. */
+    public static boolean shouldSendSnapshot(boolean watchedChunk, double distanceSq, double hardDistance) {
         double limit = hardDistance(hardDistance);
-        double distanceSq = distanceSq(dx, dy, dz);
-        return isFinite(distanceSq) && distanceSq > NORMAL_TRACKING_RANGE_SQ && distanceSq < limit * limit;
+        return !watchedChunk && isFinite(distanceSq) && distanceSq >= 0.0D && distanceSq < limit * limit;
     }
 
     public static boolean insideHardRange(double dx, double dy, double dz, double hardDistance) {
@@ -73,6 +72,17 @@ public final class MCH_VehicleLODVisibility {
     public static double hardDistance(double configured) {
         return isFinite(configured) && configured > 0.0D
             ? Math.min(configured, MAX_LOD_DISTANCE) : MAX_LOD_DISTANCE;
+    }
+
+    /**
+     * Extends Minecraft's tracked-entity render eligibility to the configured LOD
+     * boundary. The distance supplied by Entity is already squared.
+     */
+    public static boolean isTrackedEntityRenderEligible(boolean lodEnabled, double distanceSq,
+        double configuredHardDistance, boolean vanillaResult) {
+        if (!lodEnabled) return vanillaResult;
+        double hard = hardDistance(configuredHardDistance);
+        return isFinite(distanceSq) && distanceSq >= 0.0D && distanceSq < hard * hard;
     }
 
     /** Never enlarges a distant model beyond a one-pixel apparent footprint. */
