@@ -35,6 +35,9 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `AutoRepairEnabled` | `false` | Auto-repair feature toggle. The source contains a commented older initialization and an active generated-config entry. |
 | `Explosion_DestroyBlock` | `true` | Allows explosions to destroy blocks. |
 | `Explosion_FlamingBlock` | `true` | Allows explosions to create flaming blocks. |
+| `PiercingBlockHardnessLimit` | `10.0` | Stops a piercing projectile when the impacted block's hardness is greater than or equal to this limit. Negative hardness always stops piercing. This check does not control block destruction. |
+| `PiercingBlockBlastResistanceLimit` | `100.0` | Stops a piercing projectile when the impacted block's blast resistance is greater than or equal to this limit. The hardness and blast-resistance limits use OR logic, so either one can stop the projectile. |
+| `DebugPiercingBlocks` | `false` | Logs each server-side resistance check for a piercing projectile, including weapon and block details, resistance values, remaining `Piercing`, and the `PASS` or `STOP` result. |
 | `BulletBreakableBlocks` | `glass_pane, stained_glass_pane, tallgrass, double_plant, yellow_flower, red_flower, vine, wheat, reeds, waterlily` | Blocks bullets can break. |
 | `Collision_DestroyBlock` | `true` | Allows collision block destruction. |
 | `Collision_Car_BreakableBlock` | `double_plant, glass_pane,stained_glass_pane` | Car/vehicle collision breakable block list. |
@@ -127,6 +130,8 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `ReplaceRenderViewEntity` | `true` | Replaces render-view entity for MCHeli camera behavior. |
 | `ItemRecipe_*` | See generated config/source defaults | Recipe strings for core MCHeli items. |
 | `MultiThreadedModelLoading` | `true` | Enables threaded model loading on the client. |
+
+Piercing block resistance is checked independently of block destruction and therefore still applies when the server's `mobGriefing` game rule is `false`; existing destruction behavior continues to decide whether the block remains intact. The feature only changes the impacted projectile instance's remaining penetration distance when a limit stops it. It does not change the integer type, parser, or meaning of existing weapon `Piercing` values.
 
 Snapshot visibility uses the active projection matrix, so scopes and other FOV magnification increase projected target size naturally. Magnification does not change real distance or atmospheric transmission. Thermal vision lowers the projected-size threshold and improves contrast, but it never extends `AircraftLODFarDistance`. Snapshot rendering retains depth testing, allowing loaded nearby terrain and structures to occlude a target; unloaded terrain has no depth information and therefore cannot occlude this render-only data.
 
