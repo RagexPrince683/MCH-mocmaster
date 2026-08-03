@@ -92,6 +92,37 @@ public class MCH_TankStepSolverTest {
       assertFalse(rotation.selectedRoute.stepped);
    }
 
+   @Test public void continuousFloorContactsDoNotRejectAbramsFullBlockClimb() {
+      AxisAlignedBB floor=block(-8,-1, -8, 8,.401,8);
+      AxisAlignedBB obstacle=block(-1,.4,5,1,1.4,6);
+      MCH_TankStepSolver.Result r=MCH_TankStepSolver.solve(
+              new MCH_TankStepSolver.Transform(0,0,0,0,0,0),m1Hulls(),blocks(floor,obstacle),
+              0,1,.4,M1_STEP_HEIGHT,true);
+      assertStep(r);
+      assertEquals(1.0D,r.stepRoute.requiredRise,1.0E-8D);
+      assertTrue(r.stepRoute.lift>=r.stepRoute.requiredRise);
+      assertEquals(0.0F,r.stepRoute.end.yaw,0.0F);
+   }
+
+   @Test public void baselineSideContactMaySeparateOrSlideButCannotDeepen() {
+      List hull=hulls(new MCH_BoundingBox(0,.5,0,1,1,1,1));
+      List wall=blocks(block(.49,0,-2,1.49,1,2));
+      MCH_TankStepSolver.Result away=solve(hull,wall,-.2,0,0,.6,true);
+      MCH_TankStepSolver.Result parallel=solve(hull,wall,0,.2,0,.6,true);
+      MCH_TankStepSolver.Result deeper=solve(hull,wall,.2,0,0,.6,true);
+      assertEquals(-.2,away.selectedRoute.end.x,1.0E-6D);
+      assertEquals(.2,parallel.selectedRoute.end.z,1.0E-6D);
+      assertTrue(deeper.selectedRoute.safeFraction<1.0D);
+      assertFalse(deeper.selectedRoute.stepped);
+   }
+
+   @Test public void tankStepHeightDefaultsAndExplicitConfiguration() {
+      MCH_TankInfo defaults=new MCH_TankInfo("default-step-test");
+      assertEquals(.6F,defaults.stepHeight,0.0F);
+      defaults.loadItemData("StepHeight","1.25");
+      assertEquals(1.25F,defaults.stepHeight,0.0F);
+   }
+
    private static void assertStep(MCH_TankStepSolver.Result r){assertNotNull(r.stepRoute);assertTrue(r.selectedRoute.stepped);}
    private static void assertBlocked(MCH_TankStepSolver.Result r){assertNotNull(r.selectedRoute);assertFalse(r.selectedRoute.stepped);assertTrue(r.selectedRoute.safeFraction<1);}
    private static MCH_TankStepSolver.Result solve(List hulls,List blocks,double x,double z,float yaw,double step,boolean support){

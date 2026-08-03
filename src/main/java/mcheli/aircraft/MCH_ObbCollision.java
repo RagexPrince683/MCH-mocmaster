@@ -1,12 +1,12 @@
 package mcheli.aircraft;
 
 /** Allocation-light full 3D OBB/AABB SAT used by vehicle transform validation. */
-final class MCH_ObbCollision {
+public final class MCH_ObbCollision {
    private static final double AXIS_EPSILON = 1.0E-8D;
 
-   static final class Contact {
-      final double normalX, normalY, normalZ;
-      final double penetration;
+   public static final class Contact {
+      public final double normalX, normalY, normalZ;
+      public final double penetration;
 
       Contact(double x, double y, double z, double penetration) {
          this.normalX = x;
@@ -19,7 +19,7 @@ final class MCH_ObbCollision {
    private MCH_ObbCollision() {}
 
    /** Tests the three OBB axes, three block axes, and nine cross-product axes. */
-   static Contact intersect(double[] center, double[][] axes, double[] half,
+   public static Contact intersect(double[] center, double[][] axes, double[] half,
                             double[] blockCenter, double[] blockHalf) {
       double dx = center[0] - blockCenter[0];
       double dy = center[1] - blockCenter[1];
