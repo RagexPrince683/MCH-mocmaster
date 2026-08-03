@@ -102,6 +102,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    private final PhysicalHullPath physicalHullNormalPath = new PhysicalHullPath();
    private boolean physicalHullPathCommitted;
    private boolean physicalHullPathIsStep;
+   private boolean physicalHullStepTriggeredByHull;
    private boolean rootMovementCandidateCalculation;
    private boolean acceptAuthoritativeHullTransform;
    private boolean hasBlockedHorizontalNormal;
@@ -522,6 +523,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.physicalHullNormalPath.clear();
       this.physicalHullPathCommitted = false;
       this.physicalHullPathIsStep = false;
+      this.physicalHullStepTriggeredByHull = false;
    }
 
    /**
@@ -562,8 +564,66 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    protected final void commitPhysicalHullPath(boolean step) {
+      this.commitPhysicalHullPath(step, false);
+   }
+
+   protected final void commitPhysicalHullPath(boolean step, boolean triggeredByHull) {
       this.physicalHullPathCommitted = this.physicalHullPath.count > 0;
       this.physicalHullPathIsStep = step;
+      this.physicalHullStepTriggeredByHull = step && triggeredByHull;
+   }
+
+   /**
+    * Probes translated scratch hulls for a new, low horizontal block contact.  This deliberately
+    * does not resolve movement: it only lets the root route builder consider its ordinary raised
+    * route before a long hull is clipped by the final transform resolver.
+    */
+   protected final boolean hasClimbablePhysicalHullLedge(double moveX, double moveZ, float stepHeight) {
+      if(stepHeight <= 0.0F || moveX * moveX + moveZ * moveZ <= CONTROL_YAW_EPSILON * CONTROL_YAW_EPSILON
+              || this.worldObj == null) return false;
+      List hulls = this.getPhysicalHullBoxesForYaw();
+      if(hulls.isEmpty()) return false;
+      TransformSnapshot start = new TransformSnapshot();
+      start.set(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll(), super.boundingBox);
+      TransformSnapshot end = new TransformSnapshot();
+      end.set(super.posX + moveX, super.posY, super.posZ + moveZ, start.yaw, start.pitch, start.roll, super.boundingBox);
+      this.collectSweptBlocks(start, end, hulls);
+      ArrayList startContacts = new ArrayList();
+      ArrayList candidateContacts = new ArrayList();
+      this.collectContacts(start, hulls, startContacts);
+      double distance = Math.sqrt(moveX * moveX + moveZ * moveZ);
+      int steps = Math.max(1, Math.min(64, (int)Math.ceil(distance / 0.05D)));
+      for(int step = 1; step <= steps; ++step) {
+         float fraction = (float)step / (float)steps;
+         TransformSnapshot candidate = interpolate(start, end, fraction, 0.0F);
+         this.collectContacts(candidate, hulls, candidateContacts);
+         for(int i = 0; i < candidateContacts.size(); ++i) {
+            HullBlockContact contact = (HullBlockContact)candidateContacts.get(i);
+            if(contact.floor || Math.abs(contact.normalY) > 0.75D) continue;
+            boolean existed = false;
+            for(int j = 0; j < startContacts.size(); ++j) {
+               if(contact.sameObstacleSide((HullBlockContact)startContacts.get(j))) { existed = true; break; }
+            }
+            if(existed) continue;
+            double horizontalNormal = Math.sqrt(contact.normalX * contact.normalX + contact.normalZ * contact.normalZ);
+            if(horizontalNormal < 0.75D) continue;
+            double toward = moveX * contact.normalX + moveZ * contact.normalZ;
+            if(toward >= -CONTROL_YAW_EPSILON) continue;
+            double requiredRise = contact.blockMaxY - super.boundingBox.minY;
+            if(isClimbablePhysicalStepContact(requiredRise, stepHeight)) return true;
+         }
+      }
+      return false;
+   }
+
+   static boolean isClimbablePhysicalStepContact(double requiredRise, float stepHeight) {
+      return requiredRise > CONTROL_YAW_EPSILON && requiredRise <= (double)stepHeight + 0.05D;
+   }
+
+   protected static boolean shouldTryTankStep(boolean rootBlocked, boolean physicalLedge,
+                                              double requestedX, double requestedZ) {
+      return requestedX * requestedX + requestedZ * requestedZ > CONTROL_YAW_EPSILON * CONTROL_YAW_EPSILON
+              && (rootBlocked || physicalLedge);
    }
 
    /** Remote interpolation is an already server-approved transform, not a new physical route. */
@@ -586,6 +646,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.physicalHullNormalPath.clear();
       this.physicalHullPathCommitted = false;
       this.physicalHullPathIsStep = false;
+      this.physicalHullStepTriggeredByHull = false;
       this.acceptAuthoritativeHullTransform = false;
    }
 
@@ -616,6 +677,24 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
               && Math.abs(end.roll - this.controlTransformStart.roll) < 1.0E-5F) return;
 
       if(this.physicalHullPathCommitted) {
+         if(this.physicalHullStepTriggeredByHull && this.physicalHullNormalPath.count > 0) {
+            TransformSnapshot normalEnd = this.physicalHullNormalPath.points[this.physicalHullNormalPath.count - 1];
+            if(this.isPhysicalHullPathSafe(this.physicalHullNormalPath, hulls)) {
+               this.applySnapshot(normalEnd);
+               this.lastSafePhysicalTransform.copyFrom(normalEnd);
+               this.hasLastSafePhysicalTransform = true;
+               this.updatePhysicalHullPositions();
+               this.vehicleBoxCache.markDirty("physical hull normal route selected");
+               return;
+            }
+            if(this.isPhysicalHullPathSafe(this.physicalHullPath, hulls)) {
+               this.lastSafePhysicalTransform.copyFrom(end);
+               this.hasLastSafePhysicalTransform = true;
+               return;
+            }
+            this.applySnapshot(normalEnd);
+            end = normalEnd;
+         } else
          if(this.isPhysicalHullPathSafe(this.physicalHullPath, hulls)) {
             this.lastSafePhysicalTransform.copyFrom(end);
             this.hasLastSafePhysicalTransform = true;
