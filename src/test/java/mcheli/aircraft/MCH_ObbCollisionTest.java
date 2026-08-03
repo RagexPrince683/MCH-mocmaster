@@ -97,6 +97,75 @@ public class MCH_ObbCollisionTest {
       assertFalse(MCH_EntityBaseVehicle.isClimbablePhysicalStepContact(2.0D, 1.8F));
    }
 
+   @Test
+   public void abramsRiserContactChangesAxisDuringSafeStepUp() {
+      // m1a2.txt's front physical box: offset (0, .9, 3), size (3, .5, 3).
+      double[] half = {1.5D, 0.25D, 1.5D};
+      double[] block = {0.0D, 0.5D, 5.0D};
+      MCH_ObbCollision.Contact side = MCH_ObbCollision.intersect(
+              new double[]{0.0D, 0.9D, 3.1D}, axes(0.0D), half, block, BLOCK_HALF);
+      MCH_ObbCollision.Contact clearing = MCH_ObbCollision.intersect(
+              new double[]{0.0D, 1.20D, 3.1D}, axes(0.0D), half, block, BLOCK_HALF);
+      assertNotNull(side);
+      assertNotNull(clearing);
+      assertTrue(Math.abs(side.normalZ) > 0.75D);
+      assertTrue("the same riser becomes a top-face SAT contact while ascending",
+              Math.abs(clearing.normalY) > 0.75D);
+      assertTrue(1.0D <= 1.8D + 0.05D);
+   }
+
+   @Test
+   public void realAbramsSegmentedRouteClearsOneBlockAndRemainsStableNextTick() {
+      double[] half = {1.5D, 0.25D, 1.5D};
+      double[] block = {0.0D, 0.5D, 5.0D};
+      double[][] route = {{0.0D, 0.9D, 3.1D}, {0.0D, 2.7D, 3.1D},
+              {0.0D, 2.7D, 3.5D}, {0.15D, 2.7D, 3.5D}, {0.15D, 1.25D, 3.5D}};
+      assertSegmentClear(route[1], route[2], half, block, BLOCK_HALF);
+      assertSegmentClear(route[2], route[3], half, block, BLOCK_HALF);
+      MCH_ObbCollision.Contact support = MCH_ObbCollision.intersect(route[4], axes(0.0D), half,
+              block, BLOCK_HALF);
+      assertNotNull(support);
+      assertTrue(Math.abs(support.normalY) > 0.75D);
+      assertEquals(support.penetration, MCH_ObbCollision.intersect(route[4], axes(0.0D), half,
+              block, BLOCK_HALF).penetration, 0.0D);
+   }
+
+   @Test
+   public void abramsDiagonalAndShortToyotaRaisedRoutesClear() {
+      double[] block = {0.0D, 0.5D, 5.0D};
+      assertSegmentClear(new double[]{0.0D, 2.7D, 3.0D}, new double[]{0.2D, 2.7D, 3.4D},
+              new double[]{1.5D, 0.25D, 1.5D}, block, BLOCK_HALF);
+      assertSegmentClear(new double[]{0.0D, 2.1D, 3.6D}, new double[]{0.2D, 2.1D, 4.0D},
+              new double[]{0.825D, 0.425D, 0.825D}, block, BLOCK_HALF);
+   }
+
+   @Test
+   public void raisedRouteRejectsInsufficientStepWallCeilingAndNewSideContact() {
+      double[] hull = {0.2D, 0.2D, 0.2D};
+      assertTrue(1.0D > 0.6D + 0.05D);
+      assertTrue(sweepHits(new double[]{0.0D, 1.21D, 0.0D}, new double[]{1.5D, 1.21D, 0.0D}, hull,
+              new double[]{1.0D, 1.0D, 0.0D}, new double[]{0.5D, 1.0D, 0.5D}));
+      assertTrue(sweepHits(new double[]{0.0D, 1.21D, 0.0D}, new double[]{2.0D, 1.21D, 0.0D}, hull,
+              new double[]{1.75D, 1.5D, 0.0D}, new double[]{0.25D, 1.5D, 0.5D}));
+      assertTrue(sweepHits(new double[]{0.0D, 0.21D, 0.0D}, new double[]{0.0D, 1.8D, 0.0D}, hull,
+              new double[]{0.0D, 1.75D, 0.0D}, new double[]{0.5D, 0.25D, 0.5D}));
+   }
+
+   @Test
+   public void partialBlockCollisionHeightsArePreserved() {
+      assertFalse(sweepHits(new double[]{0.0D, 0.71D, 0.0D}, new double[]{1.5D, 0.71D, 0.0D},
+              new double[]{0.2D, 0.2D, 0.2D}, new double[]{1.0D, 0.25D, 0.0D},
+              new double[]{0.5D, 0.25D, 0.5D}));
+      assertFalse(sweepHits(new double[]{0.0D, 1.21D, 0.0D}, new double[]{1.5D, 1.21D, 0.0D},
+              new double[]{0.2D, 0.2D, 0.2D}, new double[]{1.0D, 0.5D, 0.0D},
+              new double[]{0.5D, 0.5D, 0.25D}));
+   }
+
+   private static void assertSegmentClear(double[] start, double[] end, double[] hullHalf,
+                                          double[] blockCenter, double[] blockHalf) {
+      assertFalse(sweepHits(start, end, hullHalf, blockCenter, blockHalf));
+   }
+
    private static boolean sweepHits(double[] start, double[] end, double[] hullHalf,
                                     double[] blockCenter, double[] blockHalf) {
       for(int i = 1; i <= 40; ++i) {

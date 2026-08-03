@@ -886,13 +886,13 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          float fraction = (float)step / (float)steps;
          TransformSnapshot candidate = interpolate(start, end, fraction * moveFraction, fraction * yawFraction);
          this.collectContacts(candidate, hulls, contacts);
-         if(!this.areContactsSafe(segmentStart, candidate, contacts, segmentType)) return false;
+         if(!this.areContactsSafe(segmentStart, end, candidate, contacts, segmentType)) return false;
       }
       return true;
    }
 
-   private boolean areContactsSafe(TransformSnapshot segmentStart, TransformSnapshot candidateTransform,
-                                   List contacts, int segmentType) {
+   private boolean areContactsSafe(TransformSnapshot segmentStart, TransformSnapshot segmentEnd,
+                                   TransformSnapshot candidateTransform, List contacts, int segmentType) {
       for(int i = 0; i < contacts.size(); ++i) {
          HullBlockContact candidate = (HullBlockContact)contacts.get(i);
          if(candidate.floor || this.isStepSupportContact(segmentStart, candidateTransform, candidate, segmentType)) continue;
@@ -902,6 +902,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             if(!contact.floor && candidate.sameObstacleSide(contact)
                     && (original == null || contact.signedSeparation < original.signedSeparation)) original = contact;
          }
+         if(original == null && segmentType == HULL_PATH_STEP_UP
+                 && this.isExistingStepUpClearanceSafe(segmentStart, segmentEnd, candidateTransform, candidate)) continue;
          if(original == null) {
             this.rememberBlockedHorizontalNormal(candidate.normalX, candidate.normalZ);
             return false;
@@ -917,6 +919,37 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
       }
       return true;
+   }
+
+   /**
+    * A hull which starts against the riser changes SAT minimum axes from the riser's horizontal
+    * face to its top face while it is lifted.  Match that contact by hull and collision shape,
+    * rather than by the changing SAT normal, and permit it only for a strictly vertical ascent
+    * which is clearing a top within the recorded step height.
+    */
+   private boolean isExistingStepUpClearanceSafe(TransformSnapshot start, TransformSnapshot segmentEnd,
+                                                  TransformSnapshot candidateTransform,
+                                                  HullBlockContact candidate) {
+      double rise = segmentEnd.y - start.y;
+      if(rise <= CONTROL_YAW_EPSILON || candidateTransform.y <= start.y + CONTROL_YAW_EPSILON
+              || Math.abs(segmentEnd.x - start.x) > CONTROL_YAW_EPSILON
+              || Math.abs(segmentEnd.z - start.z) > CONTROL_YAW_EPSILON
+              || candidate.blockMaxY - start.rootBounds[1] > rise + 0.05D) return false;
+      for(int i = 0; i < this.controlTransformStartContacts.size(); ++i) {
+         HullBlockContact original = (HullBlockContact)this.controlTransformStartContacts.get(i);
+         if(original.floor || !candidate.sameObstacle(original)
+                 || Math.sqrt(original.normalX * original.normalX + original.normalZ * original.normalZ) < 0.75D)
+            continue;
+         double oldSide = original.signedSeparation;
+         double newSide = candidate.supportSeparation(original.normalX, original.normalY,
+                 original.normalZ, original.plane);
+         if(newSide < oldSide - CONTROL_YAW_EPSILON) continue;
+         double oldBottom = Obb.from(candidate.sourceHull, start).center[1]
+                 - Obb.from(candidate.sourceHull, start).verticalRadius();
+         double newBottom = candidate.hull.center[1] - candidate.hull.verticalRadius();
+         if(newBottom > oldBottom + CONTROL_YAW_EPSILON) return true;
+      }
+      return false;
    }
 
    private void rememberBlockedHorizontalNormal(double x, double z) {

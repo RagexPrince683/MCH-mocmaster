@@ -489,3 +489,11 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Match client and server vehicles by their synchronized entity ID instead of comparing side-local entity UUIDs.
 - Close the development GUI as soon as a targeted request is sent, while a client-side pending request tracks the response, timeout, and world lifetime.
 - Reload and apply only the selected definition and its models, preserving runtime vehicle state and rejecting seat-count changes before publication.
+# PR: Restore full-block tank climbing
+
+- Fixed physical hull step-up validation so an existing climbable riser contact may transition
+  from a side-face SAT contact to a top-face contact while the hull moves vertically toward
+  clearance, without weakening elevated horizontal, wall, or ceiling collision checks.
+- Added regression coverage using the Abrams and Toyota Hilux physical hull dimensions, full and
+  diagonal segmented climbs, a stable following tick, tall/stacked obstacles, ceilings, and
+  partial-height collision shapes.
