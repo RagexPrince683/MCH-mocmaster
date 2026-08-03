@@ -1039,6 +1039,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          }
       }
 
+      this.resolveControlTransformAfterMove();
       this.updateWheels();
       this.onUpdate_Particle2();
       this.updateSound();
@@ -1165,6 +1166,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.updateWheels();
       double motionYBeforeMove = super.motionY;
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
+      this.resolveControlTransformAfterMove();
       this.updateGroundVehicleFallDamage(wasOnGroundBeforeMove, motionYBeforeGravity, motionYBeforeMove);
 
       // --------------------------------------------------
@@ -1479,8 +1481,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.setRotPitch(v.x);
       this.setRotRoll(v.z);
       float controlYaw = this.getRotYaw();
+      this.captureControlTransform(controlYaw, ac_pitch, ac_roll);
       this.onUpdateAngles(partialTicks);
-      this.validateControlYaw(controlYaw);
       if(this.getAcInfo().limitRotation) {
          v.x = MCH_Lib.RNG(this.getRotPitch(), -90.0F, 90.0F);
          v.z = MCH_Lib.RNG(this.getRotRoll(), -90.0F, 90.0F);
