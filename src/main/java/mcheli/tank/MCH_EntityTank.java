@@ -394,21 +394,32 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
                float finalPitch = this.getRotPitch(), finalRoll = this.getRotRoll();
                this.clearRecordedPhysicalHullPath();
                AxisAlignedBB routeBox = backUpAxisalignedBB.copy();
-               this.recordPhysicalHullWaypoint(routeBox, yaw, startPitch, startRoll, HULL_PATH_ROTATION);
+               this.recordPhysicalHullWaypoint(nowPosX, nowPosY, nowPosZ, routeBox, yaw, startPitch, startRoll, HULL_PATH_ROTATION);
                routeBox.offset(route.preContact.x-nowPosX, route.preContact.y-nowPosY, route.preContact.z-nowPosZ);
-               this.recordPhysicalHullWaypoint(routeBox, yaw, startPitch, startRoll, HULL_PATH_NORMAL_X);
+               this.recordPhysicalHullWaypoint(route.preContact.x, route.preContact.y, route.preContact.z,
+                       routeBox, yaw, startPitch, startRoll, HULL_PATH_PRE_CONTACT);
                routeBox.offset(route.raised.x-route.preContact.x, route.raised.y-route.preContact.y,
                        route.raised.z-route.preContact.z);
-               this.recordPhysicalHullWaypoint(routeBox, yaw, startPitch, startRoll, HULL_PATH_STEP_UP);
+               this.recordPhysicalHullWaypoint(route.raised.x, route.raised.y, route.raised.z,
+                       routeBox, yaw, startPitch, startRoll, HULL_PATH_STEP_UP);
                routeBox.offset(route.raisedEnd.x-route.raised.x, route.raisedEnd.y-route.raised.y,
                        route.raisedEnd.z-route.raised.z);
-               this.recordPhysicalHullWaypoint(routeBox, yaw, startPitch, startRoll, HULL_PATH_STEP_X);
+               this.recordPhysicalHullWaypoint(route.raisedEnd.x, route.raisedEnd.y, route.raisedEnd.z,
+                       routeBox, yaw, startPitch, startRoll, HULL_PATH_STEP_HORIZONTAL);
                routeBox.offset(route.end.x-route.raisedEnd.x, route.end.y-route.raisedEnd.y,
                        route.end.z-route.raisedEnd.z);
-               this.recordPhysicalHullWaypoint(routeBox, yaw, finalPitch, finalRoll, HULL_PATH_STEP_DOWN);
-               super.boundingBox.setBB(routeBox);
-               parX=route.end.x-nowPosX; parY=route.end.y-nowPosY; parZ=route.end.z-nowPosZ;
-               selectedStepRoute=true;
+               this.recordPhysicalHullWaypoint(route.end.x, route.end.y, route.end.z,
+                       routeBox, yaw, startPitch, startRoll, HULL_PATH_STEP_DOWN);
+               this.recordPhysicalHullWaypoint(route.end.x, route.end.y, route.end.z,
+                       routeBox, yaw, finalPitch, finalRoll, HULL_PATH_STEP_FINAL_ROTATION);
+               if(this.validateRecordedPhysicalHullRoute()) {
+                  super.boundingBox.setBB(routeBox);
+                  parX=route.end.x-nowPosX; parY=route.end.y-nowPosY; parZ=route.end.z-nowPosZ;
+                  selectedStepRoute=true;
+                  this.markRecordedPhysicalHullRouteApplied(true);
+               } else {
+                  this.restoreNormalPhysicalHullPathForRecording();
+               }
             } else if(rootHorizontallyBlocked) {
                this.restoreNormalPhysicalHullPathForRecording();
             }
@@ -425,7 +436,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
             }
          }
 
-         this.commitPhysicalHullPath(selectedStepRoute);
+         if(!selectedStepRoute) this.commitPhysicalHullPath(false);
       } finally {
          this.endRootMovementCandidateCalculation();
       }
