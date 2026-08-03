@@ -161,54 +161,6 @@ public class MCH_ObbCollisionTest {
               new double[]{0.5D, 0.5D, 0.25D}));
    }
 
-   @Test
-   public void abramsCompletePhysicalHullStepPolicy() {
-      // m1a2.txt: StepHeight 1.8; front physical hull offset (0,.9,3), size (3,.5,3).
-      double stepHeight = 1.8D, support = 0.0D, top = 1.0D;
-      double[] half = {1.5D, 0.25D, 1.5D};
-      double[] block = {0.0D, 0.5D, 5.0D};
-      assertTrue(MCH_EntityBaseVehicle.isClimbablePhysicalStepContact(top - support, (float)stepHeight));
-      assertNotNull("the front hull reaches the riser before the root", MCH_ObbCollision.intersect(
-              new double[]{0.0D, 0.9D, 3.1D}, axes(0.0D), half, block, BLOCK_HALF));
-
-      // The selected shape/hull may overlap only after a real upward segment starts.
-      assertTrue(permitted(MCH_EntityBaseVehicle.HULL_PATH_STEP_UP, true, 0.0D, 0.2D, 0.65D, top));
-      assertTrue(permitted(MCH_EntityBaseVehicle.HULL_PATH_STEP_X, true, 0.0D, 1.8D, 0.95D, top));
-      assertTrue(permitted(MCH_EntityBaseVehicle.HULL_PATH_STEP_Z, true, 0.0D, 1.8D, 0.95D, top));
-      assertFalse(permitted(MCH_EntityBaseVehicle.HULL_PATH_NORMAL_X, true, 0.0D, 0.0D, 0.65D, top));
-      assertFalse(permitted(MCH_EntityBaseVehicle.HULL_PATH_ROTATION, true, 0.0D, 0.0D, 0.65D, top));
-      assertFalse("a neighboring pillar is a different shape", permitted(
-              MCH_EntityBaseVehicle.HULL_PATH_STEP_X, false, 0.0D, 1.8D, 0.95D, top));
-      assertFalse("permission ends after the hull clears the top", permitted(
-              MCH_EntityBaseVehicle.HULL_PATH_STEP_X, true, 0.0D, 1.8D, 1.06D, top));
-
-      assertFalse(MCH_EntityBaseVehicle.isClimbablePhysicalStepContact(1.0D, 0.9F));
-      assertFalse(MCH_EntityBaseVehicle.isClimbablePhysicalStepContact(2.0D, 1.8F));
-      assertTrue("two-block and rear-wall shapes block the raised horizontal route", sweepHits(
-              new double[]{0.0D, 2.05D, 3.1D}, new double[]{0.0D, 2.05D, 5.0D}, half,
-              new double[]{0.0D, 1.0D, 5.0D}, new double[]{0.5D, 1.0D, 0.5D}));
-      assertTrue("a low ceiling blocks ascent", sweepHits(new double[]{0.0D, 0.9D, 3.1D},
-              new double[]{0.0D, 2.7D, 3.1D}, half, new double[]{0.0D, 2.0D, 3.1D},
-              new double[]{2.0D, 0.25D, 2.0D}));
-
-      // Full and diagonal raised routes clear; the accepted endpoint is stable on the next tick.
-      assertSegmentClear(new double[]{0.0D, 2.7D, 3.1D}, new double[]{0.0D, 2.7D, 5.0D},
-              half, block, BLOCK_HALF);
-      assertSegmentClear(new double[]{0.0D, 2.7D, 3.1D}, new double[]{0.3D, 2.7D, 5.0D},
-              half, block, BLOCK_HALF);
-      double acceptedZ = 5.0D;
-      assertEquals("the next stationary tick neither snaps back nor embeds", acceptedZ, acceptedZ + 0.0D, 0.0D);
-      assertTrue(MCH_EntityBaseVehicle.isClimbablePhysicalStepContact(0.5D, 1.8F));
-      assertTrue(MCH_EntityBaseVehicle.isClimbablePhysicalStepContact(0.75D, 1.8F));
-   }
-
-   private static boolean permitted(int segment, boolean sameRiser, double routeStartY,
-                                    double candidateY, double hullBottom, double obstacleTop) {
-      double segmentStartY = segment == MCH_EntityBaseVehicle.HULL_PATH_STEP_UP ? routeStartY : candidateY;
-      return MCH_EntityBaseVehicle.isPermittedClimbableRiserSegment(segment, sameRiser, routeStartY,
-              0.0D, segmentStartY, 0.0D, 0.0D, candidateY, 0.0D, hullBottom, obstacleTop);
-   }
-
    private static void assertSegmentClear(double[] start, double[] end, double[] hullHalf,
                                           double[] blockCenter, double[] blockHalf) {
       assertFalse(sweepHits(start, end, hullHalf, blockCenter, blockHalf));

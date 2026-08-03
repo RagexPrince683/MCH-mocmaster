@@ -2,6 +2,7 @@ package mcheli.tank;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import mcheli.MCH_Config;
@@ -378,50 +379,53 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          this.saveNormalPhysicalHullPath();
          boolean selectedStepRoute = false;
          boolean rootHorizontallyBlocked = mx != parX || mz != parZ;
-         boolean physicalHullLedge = !rootHorizontallyBlocked && flag1 && super.ySize < 0.05F
-                 && this.hasClimbablePhysicalHullLedge(mx, mz, super.stepHeight);
-         if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F
-                 && shouldTryTankStep(rootHorizontallyBlocked, physicalHullLedge, mx, mz)) {
-            float stepYaw = this.getRotYaw();
-            float startPitch = this.getPhysicalHullStartPitch();
-            float startRoll = this.getPhysicalHullStartRoll();
-            float suspensionPitch = this.getRotPitch();
-            float suspensionRoll = this.getRotRoll();
-            var38 = parX;
-            var39 = parY;
-            minX = parZ;
-            parY = (double)super.stepHeight;
-            AxisAlignedBB minZ = super.boundingBox.copy();
-            super.boundingBox.setBB(backUpAxisalignedBB);
-            this.clearRecordedPhysicalHullPath();
-            // Yaw remains strict at the lower position. Suspension attitude is applied only after ascent.
-            this.recordPhysicalHullWaypoint(super.boundingBox, stepYaw, startPitch, startRoll, HULL_PATH_ROTATION);
-            list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(mx, parY, mz));
-            this.calculateYOffset(list, super.boundingBox, parY);
-            this.recordPhysicalHullWaypoint(super.boundingBox, stepYaw, startPitch, startRoll, HULL_PATH_STEP_UP);
-            this.recordPhysicalHullWaypoint(super.boundingBox, stepYaw, suspensionPitch, suspensionRoll,
-                    HULL_PATH_STEP_ROTATION);
-            parX = this.calculateXOffset(list, super.boundingBox, mx);
-            this.recordPhysicalHullWaypoint(super.boundingBox, stepYaw, suspensionPitch, suspensionRoll,
-                    HULL_PATH_STEP_X);
-            parZ = this.calculateZOffset(list, super.boundingBox, mz);
-            this.recordPhysicalHullWaypoint(super.boundingBox, stepYaw, suspensionPitch, suspensionRoll,
-                    HULL_PATH_STEP_Z);
-            parY = this.calculateYOffset(list, super.boundingBox, (double)(-super.stepHeight));
-            this.recordPhysicalHullWaypoint(super.boundingBox, stepYaw, suspensionPitch, suspensionRoll,
-                    HULL_PATH_STEP_DOWN);
-            if(!physicalHullLedge && var38 * var38 + minX * minX >= parX * parX + parZ * parZ) {
-               parX = var38;
-               parY = var39;
-               parZ = minX;
-               super.boundingBox.setBB(minZ);
+         if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F && mx*mx+mz*mz > 1.0E-8D) {
+            ArrayList stepBlocks = new ArrayList();
+            AxisAlignedBB search = backUpAxisalignedBB.addCoord(mx, super.stepHeight + 0.1D, mz).expand(12.0D, 2.0D, 12.0D);
+            this.collectPhysicalHullBlockCollisions(search, stepBlocks);
+            MCH_TankStepSolver.Transform start = new MCH_TankStepSolver.Transform(nowPosX, nowPosY, nowPosZ,
+                    this.getRotYaw(), this.getPhysicalHullStartPitch(), this.getPhysicalHullStartRoll());
+            MCH_TankStepSolver.Result solution = MCH_TankStepSolver.solve(start, this.getPhysicalHullBoxesForYaw(),
+                    stepBlocks, mx, mz, backUpAxisalignedBB.minY, super.stepHeight, flag1);
+            if(solution.selectedRoute != null && solution.selectedRoute.stepped) {
+               MCH_TankStepSolver.Route route = solution.selectedRoute;
+               float yaw = this.getRotYaw();
+               float startPitch = this.getPhysicalHullStartPitch(), startRoll = this.getPhysicalHullStartRoll();
+               float finalPitch = this.getRotPitch(), finalRoll = this.getRotRoll();
+               this.clearRecordedPhysicalHullPath();
+               AxisAlignedBB routeBox = backUpAxisalignedBB.copy();
+               this.recordPhysicalHullWaypoint(routeBox, yaw, startPitch, startRoll, HULL_PATH_ROTATION);
+               routeBox.offset(route.preContact.x-nowPosX, route.preContact.y-nowPosY, route.preContact.z-nowPosZ);
+               this.recordPhysicalHullWaypoint(routeBox, yaw, startPitch, startRoll, HULL_PATH_NORMAL_X);
+               routeBox.offset(route.raised.x-route.preContact.x, route.raised.y-route.preContact.y,
+                       route.raised.z-route.preContact.z);
+               this.recordPhysicalHullWaypoint(routeBox, yaw, startPitch, startRoll, HULL_PATH_STEP_UP);
+               routeBox.offset(route.raisedEnd.x-route.raised.x, route.raisedEnd.y-route.raised.y,
+                       route.raisedEnd.z-route.raised.z);
+               this.recordPhysicalHullWaypoint(routeBox, yaw, startPitch, startRoll, HULL_PATH_STEP_X);
+               routeBox.offset(route.end.x-route.raisedEnd.x, route.end.y-route.raisedEnd.y,
+                       route.end.z-route.raisedEnd.z);
+               this.recordPhysicalHullWaypoint(routeBox, yaw, finalPitch, finalRoll, HULL_PATH_STEP_DOWN);
+               super.boundingBox.setBB(routeBox);
+               parX=route.end.x-nowPosX; parY=route.end.y-nowPosY; parZ=route.end.z-nowPosZ;
+               selectedStepRoute=true;
+            } else if(rootHorizontallyBlocked) {
                this.restoreNormalPhysicalHullPathForRecording();
-            } else {
-               selectedStepRoute = true;
+            }
+            if(solution.stepRoute == null && solution.normalRoute != null
+                    && solution.normalRoute.safeFraction < 1.0D && MCH_Config.EnableMCHLibDebugLog.prmBool) {
+               MCH_Lib.DbgLog(super.worldObj, "Tank step rejected type=%s move=(%.4f,%.4f) safe=%.6f"
+                       + " hull=%d block=%s rise=%.4f stepHeight=%.4f segment=%s failedBlock=%s normal=(%.3f,%.3f,%.3f)",
+                       this.getTypeName(), Double.valueOf(mx), Double.valueOf(mz),
+                       Double.valueOf(solution.normalRoute.safeFraction), Integer.valueOf(-1),
+                       String.valueOf(solution.failureBlock), Double.valueOf(0.0D), Float.valueOf(super.stepHeight),
+                       solution.failureSegment, String.valueOf(solution.failureBlock),
+                       Double.valueOf(solution.failureNormalX), Double.valueOf(solution.failureNormalY),
+                       Double.valueOf(solution.failureNormalZ));
             }
          }
 
-         this.commitPhysicalHullPath(selectedStepRoute, physicalHullLedge);
+         this.commitPhysicalHullPath(selectedStepRoute);
       } finally {
          this.endRootMovementCandidateCalculation();
       }

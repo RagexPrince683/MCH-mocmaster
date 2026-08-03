@@ -102,8 +102,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    private final PhysicalHullPath physicalHullNormalPath = new PhysicalHullPath();
    private boolean physicalHullPathCommitted;
    private boolean physicalHullPathIsStep;
-   /** The one hull/collision-shape pair allowed to phase while validating this tick's raised route. */
-   private final ClimbableRiser physicalHullStepRiser = new ClimbableRiser();
    private boolean rootMovementCandidateCalculation;
    private boolean acceptAuthoritativeHullTransform;
    private boolean hasBlockedHorizontalNormal;
@@ -524,7 +522,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.physicalHullNormalPath.clear();
       this.physicalHullPathCommitted = false;
       this.physicalHullPathIsStep = false;
-      this.physicalHullStepRiser.clear();
    }
 
    /**
@@ -565,66 +562,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    protected final void commitPhysicalHullPath(boolean step) {
-      this.commitPhysicalHullPath(step, false);
-   }
-
-   protected final void commitPhysicalHullPath(boolean step, boolean triggeredByHull) {
       this.physicalHullPathCommitted = this.physicalHullPath.count > 0;
       this.physicalHullPathIsStep = step;
-      if(!step || !triggeredByHull) this.physicalHullStepRiser.clear();
-   }
-
-   /**
-    * Probes translated scratch hulls for a new, low horizontal block contact.  This deliberately
-    * does not resolve movement: it only lets the root route builder consider its ordinary raised
-    * route before a long hull is clipped by the final transform resolver.
-    */
-   protected final boolean hasClimbablePhysicalHullLedge(double moveX, double moveZ, float stepHeight) {
-      if(stepHeight <= 0.0F || moveX * moveX + moveZ * moveZ <= CONTROL_YAW_EPSILON * CONTROL_YAW_EPSILON
-              || this.worldObj == null || !(this instanceof MCH_EntityTank)) return false;
-      this.physicalHullStepRiser.clear();
-      List hulls = this.getPhysicalHullBoxesForYaw();
-      if(hulls.isEmpty()) return false;
-      TransformSnapshot start = new TransformSnapshot();
-      start.set(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll(), super.boundingBox);
-      TransformSnapshot end = new TransformSnapshot();
-      end.set(super.posX + moveX, super.posY, super.posZ + moveZ, start.yaw, start.pitch, start.roll, super.boundingBox);
-      this.collectSweptBlocks(start, end, hulls);
-      ArrayList startContacts = new ArrayList();
-      ArrayList candidateContacts = new ArrayList();
-      this.collectContacts(start, hulls, startContacts);
-      double distance = Math.sqrt(moveX * moveX + moveZ * moveZ);
-      int steps = Math.max(1, Math.min(64, (int)Math.ceil(distance / 0.05D)));
-      for(int step = 1; step <= steps; ++step) {
-         float fraction = (float)step / (float)steps;
-         TransformSnapshot candidate = interpolate(start, end, fraction, 0.0F);
-         this.collectContacts(candidate, hulls, candidateContacts);
-         for(int i = 0; i < candidateContacts.size(); ++i) {
-            HullBlockContact contact = (HullBlockContact)candidateContacts.get(i);
-            if(contact.floor || Math.abs(contact.normalY) > 0.75D) continue;
-            double horizontalNormal = Math.sqrt(contact.normalX * contact.normalX + contact.normalZ * contact.normalZ);
-            if(horizontalNormal < 0.75D) continue;
-            double toward = moveX * contact.normalX + moveZ * contact.normalZ;
-            if(toward >= -CONTROL_YAW_EPSILON) continue;
-            double requiredRise = contact.blockMaxY - super.boundingBox.minY;
-            if(isClimbablePhysicalStepContact(requiredRise, stepHeight)) {
-               this.physicalHullStepRiser.set(contact, super.boundingBox.minY, super.posY,
-                       requiredRise, moveX, moveZ);
-               return true;
-            }
-         }
-      }
-      return false;
-   }
-
-   static boolean isClimbablePhysicalStepContact(double requiredRise, float stepHeight) {
-      return requiredRise > CONTROL_YAW_EPSILON && requiredRise <= (double)stepHeight + 0.05D;
-   }
-
-   protected static boolean shouldTryTankStep(boolean rootBlocked, boolean physicalLedge,
-                                              double requestedX, double requestedZ) {
-      return requestedX * requestedX + requestedZ * requestedZ > CONTROL_YAW_EPSILON * CONTROL_YAW_EPSILON
-              && (rootBlocked || physicalLedge);
    }
 
    /** Remote interpolation is an already server-approved transform, not a new physical route. */
@@ -647,7 +586,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.physicalHullNormalPath.clear();
       this.physicalHullPathCommitted = false;
       this.physicalHullPathIsStep = false;
-      this.physicalHullStepRiser.clear();
       this.acceptAuthoritativeHullTransform = false;
    }
 
@@ -678,24 +616,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
               && Math.abs(end.roll - this.controlTransformStart.roll) < 1.0E-5F) return;
 
       if(this.physicalHullPathCommitted) {
-         if(this.physicalHullStepRiser.active && this.physicalHullNormalPath.count > 0) {
-            TransformSnapshot normalEnd = this.physicalHullNormalPath.points[this.physicalHullNormalPath.count - 1];
-            if(this.isPhysicalHullPathSafe(this.physicalHullNormalPath, hulls)) {
-               this.applySnapshot(normalEnd);
-               this.lastSafePhysicalTransform.copyFrom(normalEnd);
-               this.hasLastSafePhysicalTransform = true;
-               this.updatePhysicalHullPositions();
-               this.vehicleBoxCache.markDirty("physical hull normal route selected");
-               return;
-            }
-            if(this.isPhysicalHullPathSafe(this.physicalHullPath, hulls)) {
-               this.lastSafePhysicalTransform.copyFrom(end);
-               this.hasLastSafePhysicalTransform = true;
-               return;
-            }
-            this.applySnapshot(normalEnd);
-            end = normalEnd;
-         } else
          if(this.isPhysicalHullPathSafe(this.physicalHullPath, hulls)) {
             this.lastSafePhysicalTransform.copyFrom(end);
             this.hasLastSafePhysicalTransform = true;
@@ -896,8 +816,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                                    TransformSnapshot candidateTransform, List contacts, int segmentType) {
       for(int i = 0; i < contacts.size(); ++i) {
          HullBlockContact candidate = (HullBlockContact)contacts.get(i);
-         if(candidate.floor || this.isStepSupportContact(segmentStart, candidateTransform, candidate, segmentType)
-                 || this.isPermittedClimbableRiserContact(segmentStart, candidateTransform, candidate, segmentType)) continue;
+         if(candidate.floor || this.isStepSupportContact(segmentStart, candidateTransform, candidate, segmentType)) continue;
          HullBlockContact original = null;
          for(int j = 0; j < this.controlTransformStartContacts.size(); ++j) {
             HullBlockContact contact = (HullBlockContact)this.controlTransformStartContacts.get(j);
@@ -921,27 +840,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return true;
    }
 
-   private boolean isPermittedClimbableRiserContact(TransformSnapshot segmentStart,
-                                                     TransformSnapshot candidateTransform,
-                                                     HullBlockContact candidate, int segmentType) {
-      ClimbableRiser riser = this.physicalHullStepRiser;
-      double hullBottom = candidate.hull.center[1] - candidate.hull.verticalRadius();
-      return isPermittedClimbableRiserSegment(segmentType, riser.matches(candidate), riser.routeStartY,
-              segmentStart.x, segmentStart.y, segmentStart.z, candidateTransform.x, candidateTransform.y,
-              candidateTransform.z, hullBottom, riser.maxY);
-   }
-
-   static boolean isPermittedClimbableRiserSegment(int segmentType, boolean sameRiser, double routeStartY,
-                                                     double segmentStartX, double segmentStartY,
-                                                     double segmentStartZ, double candidateX, double candidateY,
-                                                     double candidateZ, double hullBottom, double obstacleTop) {
-      if(!sameRiser || candidateY <= routeStartY + CONTROL_YAW_EPSILON) return false;
-      if(segmentType == HULL_PATH_STEP_UP) return Math.abs(candidateX - segmentStartX) <= CONTROL_YAW_EPSILON
-              && Math.abs(candidateZ - segmentStartZ) <= CONTROL_YAW_EPSILON
-              && candidateY > segmentStartY + CONTROL_YAW_EPSILON;
-      return (segmentType == HULL_PATH_STEP_X || segmentType == HULL_PATH_STEP_Z)
-              && hullBottom <= obstacleTop + 0.05D;
-   }
 
    private void rememberBlockedHorizontalNormal(double x, double z) {
       if(x * x + z * z <= CONTROL_YAW_EPSILON * CONTROL_YAW_EPSILON) return;
@@ -1125,34 +1023,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          for(int i=0;i<v.length;++i) h=31L*h+Math.round(v[i]*1000000.0D); return h;
       }
       private static double dot(double[] a,double x,double y,double z) { return a[0]*x+a[1]*y+a[2]*z; }
-   }
-
-   private static final class ClimbableRiser {
-      boolean active;
-      MCH_BoundingBox sourceHull;
-      long boundsKey;
-      double supportPlane, routeStartY, requiredRise, maxY;
-      void set(HullBlockContact contact, double supportPlane, double routeStartY, double requiredRise,
-               double requestedX, double requestedZ) {
-         this.active = requestedX * requestedX + requestedZ * requestedZ
-                 > CONTROL_YAW_EPSILON * CONTROL_YAW_EPSILON;
-         this.sourceHull = contact.sourceHull;
-         this.boundsKey = contact.boundsKey;
-         this.supportPlane = supportPlane;
-         this.routeStartY = routeStartY;
-         this.requiredRise = requiredRise;
-         this.maxY = contact.blockMaxY;
-      }
-      boolean matches(HullBlockContact contact) {
-         return this.active && contact.sourceHull == this.sourceHull && contact.boundsKey == this.boundsKey
-                 && this.requiredRise > CONTROL_YAW_EPSILON;
-      }
-      void clear() {
-         this.active = false;
-         this.sourceHull = null;
-         this.boundsKey = 0L;
-         this.supportPlane = this.routeStartY = this.requiredRise = this.maxY = 0.0D;
-      }
    }
 
    public void setRotPitch(float f) {
@@ -5460,6 +5330,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          return sweepBox.maxZ - super.boundingBox.maxZ;
       }
       return 0.0D;
+   }
+
+   /** Supplies ordinary world collision shapes to specialized route planners without changing live hulls. */
+   protected final void collectPhysicalHullBlockCollisions(AxisAlignedBB targetBox, List collidingBoundingBoxes) {
+      this.addBlockCollisionsToList(targetBox, collidingBoundingBoxes);
    }
 
    private void addBlockCollisionsToList(AxisAlignedBB targetBox, List collidingBoundingBoxes) {

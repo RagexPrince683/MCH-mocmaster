@@ -1,3 +1,9 @@
+# PR pending - Pre-contact Tank Physical-Hull Step Solver
+
+- Replaced selected-riser collision permission with a tank-only, scratch-geometry route planner that stops before first contact, lifts clear, traverses normally, and lands on the real collision-shape top.
+- Kept normal physical-hull collision active on every route segment and retained safely clipped normal movement whenever a complete step route cannot be validated.
+- Added complete solver regressions using the M1A2's ten physical hull boxes and a shorter comparison hull, including block, slab, stair, wall, pillar, ceiling, occupancy, steering, and stability cases.
+
 # Configurable NEI Vehicle Ammunition Handler (PR pending)
 
 - Added the `EnableNEIHandler` boolean startup option, defaulting to `true`, to allow clients to prevent the optional NEI vehicle ammunition recipe and usage handler from registering.
