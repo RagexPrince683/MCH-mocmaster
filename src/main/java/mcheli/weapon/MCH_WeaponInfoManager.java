@@ -15,6 +15,7 @@ import mcheli.MCH_ResourceHelper;
 import mcheli.aircraft.MCH_BaseVehicleInfo;
 import mcheli.weapon.MCH_WeaponInfo;
 import mcheli.wrapper.W_Item;
+import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -67,7 +68,7 @@ public class MCH_WeaponInfoManager {
          } finally { try { if(br != null) br.close(); } catch(IOException ignored) {} }
       }
       if(newMap.isEmpty()) return false;
-      setRoundItems(newMap);
+      resolveAllExternalItems(newMap, reload);
       map = newMap;
       MCH_Lib.Log("[mcheli] Read %d weapons", new Object[]{Integer.valueOf(newMap.size())});
       return true;
@@ -75,6 +76,40 @@ public class MCH_WeaponInfoManager {
 
    public static void setRoundItems() {
       setRoundItems(map);
+   }
+
+   /** Resolves references which may belong to mods that register after MCHeli pre-init. */
+   public static void resolveAllExternalItems() {
+      resolveAllExternalItems(map, true);
+   }
+
+   public static Item resolveDispenseItem(MCH_WeaponInfo weapon) {
+      Item item = weapon.resolveDispenseItem();
+      if(item == null && weapon.dispenseItemName != null && !weapon.dispenseItemName.isEmpty()
+            && !weapon.dispenseItemWarningLogged) {
+         weapon.dispenseItemWarningLogged = true;
+         logUnresolvedDispenseItem(weapon);
+      }
+      return item;
+   }
+
+   private static void resolveAllExternalItems(Map snapshot, boolean warn) {
+      setRoundItems(snapshot);
+      Iterator iterator = snapshot.values().iterator();
+      while(iterator.hasNext()) {
+         MCH_WeaponInfo weapon = (MCH_WeaponInfo)iterator.next();
+         if(weapon.resolveDispenseItem() == null && warn && weapon.dispenseItemName != null
+               && !weapon.dispenseItemName.isEmpty() && !weapon.dispenseItemWarningLogged) {
+            weapon.dispenseItemWarningLogged = true;
+            logUnresolvedDispenseItem(weapon);
+         }
+      }
+   }
+
+   private static void logUnresolvedDispenseItem(MCH_WeaponInfo weapon) {
+      MCH_Lib.Log("Unable to resolve DispenseItem for weapon '%s': registry name '%s' on %s side",
+            new Object[]{weapon.name, weapon.dispenseItemName,
+                  FMLCommonHandler.instance().getEffectiveSide().toString().toLowerCase()});
    }
 
    private static void setRoundItems(Map snapshot) {
