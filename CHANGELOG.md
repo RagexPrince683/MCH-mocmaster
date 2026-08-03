@@ -1,3 +1,8 @@
+# Prevent Small-Explosion Knockback (PR pending)
+
+- Prevented entity explosions below size `3.0F` from adding MCHeli or vanilla damage knockback while preserving each affected entity's existing motion.
+- Kept damage, hit reporting, effects, fire, and block behavior unchanged, and retained existing knockback behavior at or above the threshold for normal and underwater explosions.
+
 # PR pending - Pre-contact Tank Physical-Hull Step Solver
 
 - Replaced selected-riser collision permission with a tank-only, scratch-geometry route planner that stops before first contact, lifts clear, traverses normally, and lands on the real collision-shape top.

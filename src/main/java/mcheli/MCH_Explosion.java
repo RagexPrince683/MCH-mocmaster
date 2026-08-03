@@ -39,6 +39,8 @@ import cpw.mods.fml.common.Loader;
 
 public class MCH_Explosion extends Explosion {
 
+   private static final float MIN_KNOCKBACK_EXPLOSION_SIZE = 3.0F;
+
    //todo make it so that explosions don't just ignore safezones or claims
    //todo make it so explosions aren't as powerful and do not ignore blocks; specifically proximityfusedist/proximity weaponry
    //todo also make it so that explosions are not as powerful and correspond to the actual damagefactor they were assigned
@@ -102,7 +104,9 @@ public class MCH_Explosion extends Explosion {
          double d1;
          double d2;
          if(i >= 16) {
-            float var33 = super.explosionSize;
+            // Use the configured entity explosion size before the temporary radius doubling below.
+            float originalExplosionSize = super.explosionSize;
+            boolean shouldApplyKnockback = originalExplosionSize >= MIN_KNOCKBACK_EXPLOSION_SIZE;
             super.affectedBlockPositions.addAll(hashset);
             super.explosionSize *= 2.0F;
             i = MathHelper.floor_double(super.explosionX - (double)super.explosionSize - 1.0D);
@@ -177,16 +181,26 @@ public class MCH_Explosion extends Explosion {
                      MCH_Config var36 = MCH_MOD.config;
                      damage = MCH_Config.applyDamageVsEntity(entity, ds, damage);
                      damage *= this.damageFactor != null?this.damageFactor.getDamageFactor(entity):1.0F;
+                     double originalMotionX = entity.motionX;
+                     double originalMotionY = entity.motionY;
+                     double originalMotionZ = entity.motionZ;
                      W_Entity.attackEntityFrom(entity, ds, damage);
-                     double d11 = EnchantmentProtection.func_92092_a(entity, var41);
-                     if(!(entity instanceof MCH_EntityBaseBullet)) {
-                        entity.motionX += d0 * d11 * 0.4D;
-                        entity.motionY += d1 * d11 * 0.1D;
-                        entity.motionZ += d2 * d11 * 0.4D;
-                     }
+                     if(shouldApplyKnockback) {
+                        double d11 = EnchantmentProtection.func_92092_a(entity, var41);
+                        if(!(entity instanceof MCH_EntityBaseBullet)) {
+                           entity.motionX += d0 * d11 * 0.4D;
+                           entity.motionY += d1 * d11 * 0.1D;
+                           entity.motionZ += d2 * d11 * 0.4D;
+                        }
 
-                     if(entity instanceof EntityPlayer) {
-                        this.field_77288_k.put((EntityPlayer)entity, W_WorldFunc.getWorldVec3(this.world, d0 * var41, d1 * var41, d2 * var41));
+                        if(entity instanceof EntityPlayer) {
+                           this.field_77288_k.put((EntityPlayer)entity, W_WorldFunc.getWorldVec3(this.world, d0 * var41, d1 * var41, d2 * var41));
+                        }
+                     } else {
+                        // Damage can apply vanilla knockback, so restore the entity's pre-explosion motion.
+                        entity.motionX = originalMotionX;
+                        entity.motionY = originalMotionY;
+                        entity.motionZ = originalMotionZ;
                      }
 
                      if(damage > 0.0F && this.countSetFireEntity > 0) {
@@ -199,7 +213,7 @@ public class MCH_Explosion extends Explosion {
                }
             }
 
-            super.explosionSize = var33;
+            super.explosionSize = originalExplosionSize;
             return;
          }
 
