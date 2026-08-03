@@ -136,6 +136,7 @@ public class MCH_BaseVehiclePacketHandler {
             if(e instanceof MCH_EntityBaseVehicle) {
                MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)e;
                float originalYaw = ac.getRotYaw();
+               ac.beginPhysicalHullStep();
                ac.setRotRoll(req.roll);
                if(req.rollRev) {
                   //System.out.println("req.rollRev");
