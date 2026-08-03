@@ -101,6 +101,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    private final PhysicalHullPath physicalHullNormalPath = new PhysicalHullPath();
    private boolean physicalHullPathCommitted;
    private boolean physicalHullPathIsStep;
+   private boolean rootMovementCandidateCalculation;
    private boolean acceptAuthoritativeHullTransform;
    private final TransformSnapshot lastSafePhysicalTransform = new TransformSnapshot();
    private boolean hasLastSafePhysicalTransform;
@@ -518,6 +519,18 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.physicalHullNormalPath.clear();
       this.physicalHullPathCommitted = false;
       this.physicalHullPathIsStep = false;
+   }
+
+   /**
+    * Root movement candidates must be resolved from the root box only.  The
+    * selected route is subsequently checked against every physical hull OBB.
+    */
+   protected final void beginRootMovementCandidateCalculation() {
+      this.rootMovementCandidateCalculation = true;
+   }
+
+   protected final void endRootMovementCandidateCalculation() {
+      this.rootMovementCandidateCalculation = false;
    }
 
    protected final void recordPhysicalHullWaypoint(AxisAlignedBB root, int segmentType) {
@@ -5280,7 +5293,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       if(par1Entity instanceof MCH_EntityBaseVehicle) {
          MCH_EntityBaseVehicle vehicle = (MCH_EntityBaseVehicle)par1Entity;
-         vehicle.addExtraBoundingBoxBlockCollisions(par2AxisAlignedBB, collidingBoundingBoxes);
+         if(!vehicle.rootMovementCandidateCalculation) {
+            vehicle.addExtraBoundingBoxBlockCollisions(par2AxisAlignedBB, collidingBoundingBoxes);
+         }
       }
 
       double var15 = 0.25D;

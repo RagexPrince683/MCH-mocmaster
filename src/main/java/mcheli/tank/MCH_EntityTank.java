@@ -353,57 +353,63 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       double my = parY;
       double mz = parZ;
       AxisAlignedBB backUpAxisalignedBB = super.boundingBox.copy();
-      List list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(parX, parY, parZ));
-      parY = this.calculateYOffset(list, super.boundingBox, parY);
-      this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_NORMAL_Y);
-      boolean flag1 = super.onGround || my != parY && my < 0.0D;
-      MCH_BoundingBox[] prevPX = super.extraBoundingBox;
-      int len$ = prevPX.length;
-
-      for(int prevPZ = 0; prevPZ < len$; ++prevPZ) {
-         MCH_BoundingBox ebb = prevPX[prevPZ];
-         ebb.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
-      }
-
-      parX = this.calculateXOffset(list, super.boundingBox, parX);
-      this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_NORMAL_X);
-      parZ = this.calculateZOffset(list, super.boundingBox, parZ);
-      this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_NORMAL_Z);
-      this.saveNormalPhysicalHullPath();
-      boolean selectedStepRoute = false;
+      List list;
       double minX;
       double var38;
       double var39;
-      if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F && (mx != parX || mz != parZ)) {
-         var38 = parX;
-         var39 = parY;
-         minX = parZ;
-         parY = (double)super.stepHeight;
-         AxisAlignedBB minZ = super.boundingBox.copy();
-         super.boundingBox.setBB(backUpAxisalignedBB);
-         this.clearRecordedPhysicalHullPath();
-         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_ROTATION);
-         list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(mx, parY, mz));
-         this.calculateYOffset(list, super.boundingBox, parY);
-         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_UP);
-         parX = this.calculateXOffset(list, super.boundingBox, mx);
-         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_X);
-         parZ = this.calculateZOffset(list, super.boundingBox, mz);
-         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_Z);
-         parY = this.calculateYOffset(list, super.boundingBox, (double)(-super.stepHeight));
-         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_DOWN);
-         if(var38 * var38 + minX * minX >= parX * parX + parZ * parZ) {
-            parX = var38;
-            parY = var39;
-            parZ = minX;
-            super.boundingBox.setBB(minZ);
-            this.restoreNormalPhysicalHullPathForRecording();
-         } else {
-            selectedStepRoute = true;
-         }
-      }
+      this.beginRootMovementCandidateCalculation();
+      try {
+         list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(parX, parY, parZ));
+         parY = this.calculateYOffset(list, super.boundingBox, parY);
+         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_NORMAL_Y);
+         boolean flag1 = super.onGround || my != parY && my < 0.0D;
+         MCH_BoundingBox[] prevPX = super.extraBoundingBox;
+         int len$ = prevPX.length;
 
-      this.commitPhysicalHullPath(selectedStepRoute);
+         for(int prevPZ = 0; prevPZ < len$; ++prevPZ) {
+            MCH_BoundingBox ebb = prevPX[prevPZ];
+            ebb.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
+         }
+
+         parX = this.calculateXOffset(list, super.boundingBox, parX);
+         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_NORMAL_X);
+         parZ = this.calculateZOffset(list, super.boundingBox, parZ);
+         this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_NORMAL_Z);
+         this.saveNormalPhysicalHullPath();
+         boolean selectedStepRoute = false;
+         if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F && (mx != parX || mz != parZ)) {
+            var38 = parX;
+            var39 = parY;
+            minX = parZ;
+            parY = (double)super.stepHeight;
+            AxisAlignedBB minZ = super.boundingBox.copy();
+            super.boundingBox.setBB(backUpAxisalignedBB);
+            this.clearRecordedPhysicalHullPath();
+            this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_ROTATION);
+            list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(mx, parY, mz));
+            this.calculateYOffset(list, super.boundingBox, parY);
+            this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_UP);
+            parX = this.calculateXOffset(list, super.boundingBox, mx);
+            this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_X);
+            parZ = this.calculateZOffset(list, super.boundingBox, mz);
+            this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_Z);
+            parY = this.calculateYOffset(list, super.boundingBox, (double)(-super.stepHeight));
+            this.recordPhysicalHullWaypoint(super.boundingBox, HULL_PATH_STEP_DOWN);
+            if(var38 * var38 + minX * minX >= parX * parX + parZ * parZ) {
+               parX = var38;
+               parY = var39;
+               parZ = minX;
+               super.boundingBox.setBB(minZ);
+               this.restoreNormalPhysicalHullPathForRecording();
+            } else {
+               selectedStepRoute = true;
+            }
+         }
+
+         this.commitPhysicalHullPath(selectedStepRoute);
+      } finally {
+         this.endRootMovementCandidateCalculation();
+      }
 
       var38 = super.posX;
       var39 = super.posZ;
