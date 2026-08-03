@@ -96,21 +96,6 @@ public class MCH_BoundingBox {
       return Math.sqrt(dx * dx + dy * dy + dz * dz);
    }
 
-   /** Returns the shared full-SAT contact used by physical hull route validation. */
-   public MCH_ObbCollision.Contact getCollisionContact(AxisAlignedBB aabb) {
-      if(aabb == null || !this.boundingBox.intersectsWith(aabb)) return null;
-      return MCH_ObbCollision.intersect(
-              new double[]{this.nowPos.xCoord, this.nowPos.yCoord, this.nowPos.zCoord},
-              new double[][]{{this.axisX.xCoord, this.axisX.yCoord, this.axisX.zCoord},
-                      {this.axisY.xCoord, this.axisY.yCoord, this.axisY.zCoord},
-                      {this.axisZ.xCoord, this.axisZ.yCoord, this.axisZ.zCoord}},
-              new double[]{this.halfWidth, this.halfHeight, this.halfDepth},
-              new double[]{(aabb.minX+aabb.maxX)*0.5D, (aabb.minY+aabb.maxY)*0.5D,
-                      (aabb.minZ+aabb.maxZ)*0.5D},
-              new double[]{(aabb.maxX-aabb.minX)*0.5D, (aabb.maxY-aabb.minY)*0.5D,
-                      (aabb.maxZ-aabb.minZ)*0.5D});
-   }
-
    public boolean intersectsWith(AxisAlignedBB aabb) {
       if(aabb == null || !this.boundingBox.intersectsWith(aabb)) {
          return false;

@@ -1133,7 +1133,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                                                this.markerWidth = (float)Math.max((double)this.markerWidth, Math.abs(var49.boundingBox.maxZ) / 2.0D);
                                                                this.markerWidth = (float)Math.max((double)this.markerWidth, Math.abs(var49.boundingBox.minZ) / 2.0D);
                                                                this.bbZmin = (float)Math.min((double)this.bbZmin, var49.boundingBox.minZ);
-                                                               this.bbZmax = (float)Math.max((double)this.bbZmax, var49.boundingBox.maxZ);
+                                                               this.bbZmax = (float)Math.min((double)this.bbZmax, var49.boundingBox.maxZ);
                                                             }
                                                          } else if(item.equalsIgnoreCase("RotorSpeed")) {
                                                             this.rotorSpeed = this.toFloat(data, -10000.0F, 10000.0F);

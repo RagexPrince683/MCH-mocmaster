@@ -135,8 +135,6 @@ public class MCH_BaseVehiclePacketHandler {
             Entity e = player.worldObj.getEntityByID(req.entityID_Ac);
             if(e instanceof MCH_EntityBaseVehicle) {
                MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)e;
-               float originalYaw = ac.getRotYaw();
-               ac.beginPhysicalHullStep();
                ac.setRotRoll(req.roll);
                if(req.rollRev) {
                   //System.out.println("req.rollRev");
@@ -156,11 +154,8 @@ public class MCH_BaseVehiclePacketHandler {
                }
 
                ac.setRotYaw(req.yaw);
-               ac.setRotPitch(req.pitch);
-               if(ac instanceof mcheli.tank.MCH_EntityTank) {
-                  ac.validateReceivedControlYaw(originalYaw);
-               }
                //System.out.println("yaw changed");
+               ac.setRotPitch(req.pitch);
                //System.out.println("pitch changed");
             }
 
