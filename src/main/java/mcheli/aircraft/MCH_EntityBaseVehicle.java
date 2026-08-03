@@ -18,6 +18,7 @@ import mcheli.flare.MCH_Maintenance;
 import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.item.MCH_ItemInfo;
 import mcheli.item.MCH_ItemInfoManager;
+import mcheli.lod.MCH_VehicleLODVisibility;
 import mcheli.multiplay.MCH_Multiplay;
 import mcheli.parachute.MCH_EntityParachute;
 import mcheli.particles.MCH_ParticleParam;
@@ -402,12 +403,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public boolean isInRangeToRenderDist(double distanceSq) {
-      double farDistance = MCH_Config.AircraftLODFarDistance != null?MCH_Config.AircraftLODFarDistance.prmDouble:0.0D;
-      if(farDistance > 0.0D) {
-         return distanceSq < farDistance * farDistance;
-      }
-
-      return super.isInRangeToRenderDist(distanceSq);
+      boolean lodEnabled = MCH_Config.EnableAircraftLODRender != null && MCH_Config.EnableAircraftLODRender.prmBool;
+      double farDistance = MCH_Config.AircraftLODFarDistance != null
+         ? MCH_Config.AircraftLODFarDistance.prmDouble : MCH_VehicleLODVisibility.MAX_LOD_DISTANCE;
+      return MCH_VehicleLODVisibility.isTrackedEntityRenderEligible(
+         lodEnabled, distanceSq, farDistance, super.isInRangeToRenderDist(distanceSq));
    }
 
    protected void entityInit() {

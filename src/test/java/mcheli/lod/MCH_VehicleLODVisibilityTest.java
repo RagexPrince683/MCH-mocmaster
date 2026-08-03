@@ -53,24 +53,42 @@ public class MCH_VehicleLODVisibilityTest {
     }
 
     @Test
-    public void verticalSnapshotSelectionIgnoresHorizontalChunkWatching() {
-        // Chunk watching is deliberately absent from this pure predicate: same X/Z at 400 blocks qualifies.
-        assertTrue(MCH_VehicleLODVisibility.qualifiesForSnapshot(0.0D, 400.0D, 0.0D, 60000.0D));
-        assertTrue(MCH_VehicleLODVisibility.qualifiesForSnapshot(0.0D, 1000.0D, 0.0D, 60000.0D));
-        assertTrue(MCH_VehicleLODVisibility.qualifiesForSnapshot(0.0D, 10000.0D, 0.0D, 60000.0D));
-        assertTrue(MCH_VehicleLODVisibility.qualifiesForSnapshot(0.0D, 59999.0D, 0.0D, 60000.0D));
+    public void trackedEntityRenderEligibilityIncludesVerticalDistancesInsideHardRange() {
+        double[] eligible = {140.0D, 199.0D, 200.0D, 201.0D, 399.0D, 400.0D, 401.0D,
+            1000.0D, 10000.0D, 59999.0D};
+        for (double vertical : eligible) {
+            assertTrue("vertical separation " + vertical, MCH_VehicleLODVisibility
+                .isTrackedEntityRenderEligible(true, vertical * vertical, 60000.0D, false));
+        }
+        assertTrue(!MCH_VehicleLODVisibility.isTrackedEntityRenderEligible(
+            true, 60000.0D * 60000.0D, 60000.0D, true));
+        assertTrue(!MCH_VehicleLODVisibility.isTrackedEntityRenderEligible(
+            true, 60001.0D * 60001.0D, 60000.0D, true));
     }
 
     @Test
-    public void normalTrackingPreventsSnapshotDuplicate() {
-        assertTrue(!MCH_VehicleLODVisibility.qualifiesForSnapshot(0.0D, 199.0D, 0.0D, 60000.0D));
-        assertTrue(!MCH_VehicleLODVisibility.qualifiesForSnapshot(120.0D, 120.0D, 20.0D, 60000.0D));
+    public void trackedEntityRenderEligibilityClampsHardRangeAndPreservesVanillaWhenDisabled() {
+        assertTrue(MCH_VehicleLODVisibility.isTrackedEntityRenderEligible(
+            true, 59999.0D * 59999.0D, 90000.0D, false));
+        assertTrue(!MCH_VehicleLODVisibility.isTrackedEntityRenderEligible(
+            true, 60000.0D * 60000.0D, 90000.0D, true));
+        assertTrue(MCH_VehicleLODVisibility.isTrackedEntityRenderEligible(false, 1.0D, 60000.0D, true));
+        assertTrue(!MCH_VehicleLODVisibility.isTrackedEntityRenderEligible(false, 1.0D, 60000.0D, false));
+    }
+
+    @Test
+    public void watchedChunkUsesTrackedPathAndUnwatchedChunkUsesSnapshotPath() {
+        assertTrue(!MCH_VehicleLODVisibility.shouldSendSnapshot(true, 10000.0D * 10000.0D, 60000.0D));
+        assertTrue(MCH_VehicleLODVisibility.shouldSendSnapshot(false, 201.0D * 201.0D, 60000.0D));
+        assertTrue(MCH_VehicleLODVisibility.shouldSendSnapshot(false, 59999.0D * 59999.0D, 60000.0D));
+        assertTrue(!MCH_VehicleLODVisibility.shouldSendSnapshot(false, 60000.0D * 60000.0D, 60000.0D));
     }
 
     @Test
     public void hardRangeIsExclusiveAndThreeDimensional() {
         assertTrue(MCH_VehicleLODVisibility.insideHardRange(59999.0D, 0.0D, 0.0D, 60000.0D));
-        assertTrue(MCH_VehicleLODVisibility.qualifiesForSnapshot(30000.0D, 40000.0D, 0.0D, 60000.0D));
+        assertTrue(MCH_VehicleLODVisibility.shouldSendSnapshot(false,
+            MCH_VehicleLODVisibility.distanceSq(30000.0D, 40000.0D, 0.0D), 60000.0D));
         assertTrue(!MCH_VehicleLODVisibility.insideHardRange(0.0D, 60000.0D, 0.0D, 60000.0D));
         assertTrue(!MCH_VehicleLODVisibility.insideHardRange(60001.0D, 0.0D, 0.0D, 60000.0D));
         assertTrue(!MCH_VehicleLODVisibility.insideHardRange(50000.0D, 40000.0D, 0.0D, 60000.0D));
