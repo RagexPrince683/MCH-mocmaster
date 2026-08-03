@@ -3,6 +3,11 @@ package mcheli.lod;
 /** Pure, deterministic visibility math shared by the snapshot renderer and tests. */
 public final class MCH_VehicleLODVisibility {
     public static final double KOSCHMIEDER_CONSTANT = 3.912D;
+    /** Design limit: one block is one metre and naked-eye visibility ends at 60 km. */
+    public static final double MAX_LOD_DISTANCE = 60000.0D;
+    public static final double MAX_LOD_DISTANCE_SQ = MAX_LOD_DISTANCE * MAX_LOD_DISTANCE;
+    public static final double NORMAL_TRACKING_RANGE = 200.0D;
+    public static final double NORMAL_TRACKING_RANGE_SQ = NORMAL_TRACKING_RANGE * NORMAL_TRACKING_RANGE;
 
     private MCH_VehicleLODVisibility() {
     }
@@ -46,6 +51,35 @@ public final class MCH_VehicleLODVisibility {
             return 0.0D;
         }
         return physicalSize * Math.abs((double)projectionY) * (double)viewportHeight / (2.0D * realDistance);
+    }
+
+    /** Full three-dimensional snapshot selection; chunk watching is intentionally irrelevant. */
+    public static boolean qualifiesForSnapshot(double dx, double dy, double dz, double hardDistance) {
+        double limit = hardDistance(hardDistance);
+        double distanceSq = distanceSq(dx, dy, dz);
+        return isFinite(distanceSq) && distanceSq > NORMAL_TRACKING_RANGE_SQ && distanceSq < limit * limit;
+    }
+
+    public static boolean insideHardRange(double dx, double dy, double dz, double hardDistance) {
+        double limit = hardDistance(hardDistance);
+        double distanceSq = distanceSq(dx, dy, dz);
+        return isFinite(distanceSq) && distanceSq < limit * limit;
+    }
+
+    public static double distanceSq(double dx, double dy, double dz) {
+        return dx * dx + dy * dy + dz * dz;
+    }
+
+    public static double hardDistance(double configured) {
+        return isFinite(configured) && configured > 0.0D
+            ? Math.min(configured, MAX_LOD_DISTANCE) : MAX_LOD_DISTANCE;
+    }
+
+    /** Never enlarges a distant model beyond a one-pixel apparent footprint. */
+    public static double minimumFootprintScale(double projectedPixels, double configuredMinimumPixels) {
+        if (!isFinite(projectedPixels) || projectedPixels <= 0.0D) return 1.0D;
+        double minimum = clamp(configuredMinimumPixels, 0.0D, 1.0D);
+        return minimum > projectedPixels ? minimum / projectedPixels : 1.0D;
     }
 
     public static double positive(double value, double fallback) {

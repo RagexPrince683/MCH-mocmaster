@@ -16,7 +16,7 @@ History (`git log -S"forceSpawn = true"`) attributes the original flag to `fb633
 
 Normal helicopters, planes, ships, tanks, turrets, and other directly controlled vehicles use `forceSpawn=false`. They follow Forge's normal ordering: respawn installs the replacement world, `PlayerManager` marks the chunk watched, Forge spawns the real parent, and only then does `StartTracking` synchronize MCHeli state. UAV and NewUAV vehicles retain their legacy force-spawn policy after aircraft information is assigned.
 
-LOD snapshots now cover every eligible normal vehicle inside `AircraftLODFarDistance` whose chunk is **not** watched. The former 200-block lower bound is gone, avoiding a gap with low server view distance. A watched chunk receives no snapshot. Snapshots remain render-only, non-ticking, non-collidable, non-interactable data and cannot be mounts.
+LOD snapshots cover eligible normal vehicles that are outside the 200-block normal entity tracking range and inside `AircraftLODFarDistance`, using full X/Y/Z distance. Chunk watching is horizontal-only and therefore does not suppress snapshots: a player directly above a vehicle may still watch its chunk after the real entity leaves tracking range. Snapshots remain render-only, non-ticking, non-collidable, non-interactable data and cannot be mounts.
 
 LOD suppression no longer requires equality with the server's vanilla UUID. A real client vehicle wins first by numeric entity ID, then by non-empty `commonUniqueId` with aircraft type validation. Snapshot state is cleared when the client world unloads or is replaced.
 

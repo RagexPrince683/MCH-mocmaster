@@ -134,7 +134,8 @@ public final class MCH_VehicleLODManager {
         double cameraX = camera.lastTickPosX + (camera.posX - camera.lastTickPosX) * event.partialTicks;
         double cameraY = camera.lastTickPosY + (camera.posY - camera.lastTickPosY) * event.partialTicks;
         double cameraZ = camera.lastTickPosZ + (camera.posZ - camera.lastTickPosZ) * event.partialTicks;
-        double far = Math.min(4800.0D, config(MCH_Config.AircraftLODFarDistance, 4800.0D));
+        double far = MCH_VehicleLODVisibility.hardDistance(config(MCH_Config.AircraftLODFarDistance,
+            MCH_VehicleLODVisibility.MAX_LOD_DISTANCE));
         double farSq = far * far;
         RenderContext context = captureRenderContext(mc, event.partialTicks);
 
@@ -151,7 +152,7 @@ public final class MCH_VehicleLODManager {
             double z = worldZ - cameraZ;
             double distanceSq = x * x + y * y + z * z;
             double realDistance = Math.sqrt(distanceSq);
-            if (distanceSq > farSq) {
+            if (distanceSq >= farSq) {
                 diagnose(display, context, realDistance, far, 1.0D, display.scale, 0.0D, 0.0D, "hard_range", now);
                 continue;
             }
@@ -164,11 +165,9 @@ public final class MCH_VehicleLODManager {
                 targetDimension(info) * display.scale, realDistance, context.projection[5], context.viewportHeight);
             double minimumPixels = context.thermal ? nonNegativeConfig(MCH_Config.AircraftLODThermalMinPixels, 0.35D)
                 : nonNegativeConfig(MCH_Config.AircraftLODOpticalMinPixels, 0.75D);
-            if (projectedPixels < minimumPixels) {
-                diagnose(display, context, realDistance, far, 1.0D, display.scale, 0.0D, projectedPixels, "projected_size", now);
-                continue;
-            }
-            double effectiveVisibility = config(MCH_Config.AircraftLODVisibilityDistance, 4800.0D) * context.weatherMultiplier;
+            double footprintScale = MCH_VehicleLODVisibility.minimumFootprintScale(projectedPixels, minimumPixels);
+            double effectiveVisibility = config(MCH_Config.AircraftLODVisibilityDistance,
+                MCH_VehicleLODVisibility.MAX_LOD_DISTANCE) * context.weatherMultiplier;
             double transmission = MCH_VehicleLODVisibility.transmission(realDistance, effectiveVisibility);
             double alpha = context.thermal ? MCH_VehicleLODVisibility.thermalAlpha(transmission,
                 config(MCH_Config.AircraftLODThermalContrastExponent, 0.35D)) : transmission;
@@ -178,9 +177,10 @@ public final class MCH_VehicleLODManager {
                     transmission, projectedPixels, "negligible_alpha", now);
                 continue;
             }
+            double renderScale = display.scale * depthScale * footprintScale;
             render(display, info, x * depthScale, y * depthScale, z * depthScale,
-                (float)(display.scale * depthScale), (float)alpha, interpolation, now);
-            diagnose(display, context, realDistance, far, depthScale, display.scale * depthScale,
+                (float)renderScale, (float)alpha, interpolation, now);
+            diagnose(display, context, realDistance, far, depthScale, renderScale,
                 transmission, projectedPixels, "render", now);
         }
     }
@@ -262,12 +262,14 @@ public final class MCH_VehicleLODManager {
         if (MCH_Config.DebugVehicleLODVisibility == null || !MCH_Config.DebugVehicleLODVisibility.prmBool
             || now < nextDiagnosticMs) return;
         nextDiagnosticMs = now + 1000L;
-        double effectiveVisibility = config(MCH_Config.AircraftLODVisibilityDistance, 4800.0D) * context.weatherMultiplier;
+        double effectiveVisibility = config(MCH_Config.AircraftLODVisibilityDistance,
+            MCH_VehicleLODVisibility.MAX_LOD_DISTANCE) * context.weatherMultiplier;
         double alpha = context.thermal ? MCH_VehicleLODVisibility.thermalAlpha(transmission,
             config(MCH_Config.AircraftLODThermalContrastExponent, 0.35D)) : transmission;
         MCH_Lib.DbgLog(true,
-            "VehicleLODVisibility type=%s distance=%.1f hardRange=%.1f farPlane=%.1f safeDepth=%.1f depthScale=%.5f renderScale=%.5f visibility=%.1f transmission=%.5f alpha=%.5f pixels=%.3f cameraMode=%d weather=%s result=%s",
-            new Object[]{display.typeName, Double.valueOf(distance), Double.valueOf(hardRange),
+            "VehicleLODVisibility type=%s distance3d=%.1f normalRange=%.1f hardRange=%.1f qualifies=true farPlane=%.1f safeDepth=%.1f proxyDepthScale=%.5f renderScale=%.5f visibility=%.1f transmission=%.5f alpha=%.5f projectedPixels=%.3f cameraMode=%d weather=%s result=%s",
+            new Object[]{display.typeName, Double.valueOf(distance),
+                Double.valueOf(MCH_VehicleLODVisibility.NORMAL_TRACKING_RANGE), Double.valueOf(hardRange),
                 Double.valueOf(context.farPlane), Double.valueOf(context.safeProxyDepth), Double.valueOf(depthScale),
                 Double.valueOf(renderScale), Double.valueOf(effectiveVisibility), Double.valueOf(transmission),
                 Double.valueOf(alpha), Double.valueOf(pixels), Integer.valueOf(context.cameraMode), context.weather, reason});
