@@ -1239,12 +1239,51 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         float explosionPower = this.explosionPower * damageFactor;
         float waterExplosionPower = this.explosionPowerInWater * damageFactor;
 
+        if (piercing > 0
+                && W_MovingObjectPosition.isHitTypeTile(hit)
+                && shouldBlockStopPiercing(hit)) {
+            piercing = 0;
+        }
+
         if (piercing > 0) {
             handlePiercingHit(hit, explosionPower, waterExplosionPower, damageFactor);
         } else {
             handleRegularHit(hit, explosionPower, waterExplosionPower);
             finalizeImpact();
         }
+    }
+
+    private boolean shouldBlockStopPiercing(MovingObjectPosition hit) {
+        if (!W_MovingObjectPosition.isHitTypeTile(hit)) {
+            return false;
+        }
+
+        int x = hit.blockX;
+        int y = hit.blockY;
+        int z = hit.blockZ;
+        Block block = worldObj.getBlock(x, y, z);
+        if (block == null || worldObj.isAirBlock(x, y, z)) {
+            return false;
+        }
+
+        float hardness = block.getBlockHardness(worldObj, x, y, z);
+        Entity resistanceSource = shootingEntity != null ? shootingEntity : this;
+        float blastResistance = block.getExplosionResistance(resistanceSource, worldObj, x, y, z,
+                posX, posY, posZ);
+        boolean stop = hardness < 0.0F
+                || hardness >= MCH_Config.PiercingBlockHardnessLimit.prmDouble
+                || blastResistance >= MCH_Config.PiercingBlockBlastResistanceLimit.prmDouble;
+
+        if (MCH_Config.DebugPiercingBlocks.prmBool) {
+            Object blockName = Block.blockRegistry.getNameForObject(block);
+            MCH_Lib.Log(this,
+                    "Piercing block check: weapon=%s block=%s metadata=%d coordinates=(%d,%d,%d) hardness=%.2f blastResistance=%.2f piercing=%d result=%s",
+                    getName(), String.valueOf(blockName), Integer.valueOf(worldObj.getBlockMetadata(x, y, z)),
+                    Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z), Float.valueOf(hardness),
+                    Float.valueOf(blastResistance), Integer.valueOf(piercing), stop ? "STOP" : "PASS");
+        }
+
+        return stop;
     }
 
     @SideOnly(Side.CLIENT)

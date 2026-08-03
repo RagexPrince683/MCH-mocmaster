@@ -108,6 +108,9 @@ public class MCH_Config {
    public static MCH_ConfigPrm Explosion_DestroyBlock;
    public static MCH_ConfigPrm Explosion_FlamingBlock;
    public static MCH_ConfigPrm BulletBreakableBlock;
+   public static MCH_ConfigPrm PiercingBlockHardnessLimit;
+   public static MCH_ConfigPrm PiercingBlockBlastResistanceLimit;
+   public static MCH_ConfigPrm DebugPiercingBlocks;
    public static MCH_ConfigPrm Collision_Car_BreakableBlock;
    public static MCH_ConfigPrm Collision_Car_NoBreakableBlock;
    public static MCH_ConfigPrm Collision_Car_BreakableMaterial;
@@ -449,6 +452,12 @@ public class MCH_Config {
       Collision_DestroyBlock = new MCH_ConfigPrm("Collision_DestroyBlock", true);
       Explosion_DestroyBlock = new MCH_ConfigPrm("Explosion_DestroyBlock", true);
       Explosion_FlamingBlock = new MCH_ConfigPrm("Explosion_FlamingBlock", true);
+      PiercingBlockHardnessLimit = new MCH_ConfigPrm("PiercingBlockHardnessLimit", 10.0D);
+      PiercingBlockHardnessLimit.desc = ";Stops a piercing projectile when block hardness reaches this value. Either resistance limit can stop piercing; these limits do not control block destruction and still apply when mobGriefing is false.";
+      PiercingBlockBlastResistanceLimit = new MCH_ConfigPrm("PiercingBlockBlastResistanceLimit", 100.0D);
+      PiercingBlockBlastResistanceLimit.desc = ";Stops a piercing projectile when block blast resistance reaches this value. Either resistance limit can stop piercing; these limits do not control block destruction and still apply when mobGriefing is false.";
+      DebugPiercingBlocks = new MCH_ConfigPrm("DebugPiercingBlocks", false);
+      DebugPiercingBlocks.desc = ";Logs server-side piercing block resistance checks, including the weapon, block, resistance values, remaining Piercing, and PASS or STOP result.";
       Collision_Car_BreakableBlock = new MCH_ConfigPrm("Collision_Car_BreakableBlock", "double_plant, glass_pane,stained_glass_pane");
       Collision_Car_NoBreakableBlock = new MCH_ConfigPrm("Collision_Car_NoBreakBlock", "torch");
       Collision_Car_BreakableMaterial = new MCH_ConfigPrm("Collision_Car_BreakableMaterial", "cactus, cake, gourd, leaves, vine, plants");
@@ -762,6 +771,9 @@ public class MCH_Config {
               AutoRepairEnabled,
               Explosion_DestroyBlock,
               Explosion_FlamingBlock,
+              PiercingBlockHardnessLimit,
+              PiercingBlockBlastResistanceLimit,
+              DebugPiercingBlocks,
               BulletBreakableBlock,
               Collision_DestroyBlock,
               Collision_Car_BreakableBlock,
