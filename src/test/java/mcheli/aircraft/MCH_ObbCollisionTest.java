@@ -67,6 +67,24 @@ public class MCH_ObbCollisionTest {
               new double[]{1.75D, 1.5D, 0.0D}, new double[]{0.25D, 1.5D, 0.5D}));
    }
 
+   @Test
+   public void abramsLengthNeedsStepUpBeforeSuspensionPitch() {
+      double[] longHull = {1.15D, 0.55D, 3.7D};
+      double[] step = {0.0D, 0.5D, 3.75D};
+      double[] block = {0.5D, 0.5D, 0.5D};
+      assertNotNull(MCH_ObbCollision.intersect(new double[]{0.0D, 0.72D, 0.0D}, pitchAxes(-6.0D),
+              longHull, step, block));
+      assertNull(MCH_ObbCollision.intersect(new double[]{0.0D, 1.82D, 0.0D}, pitchAxes(-6.0D),
+              longHull, step, block));
+   }
+
+   @Test
+   public void toyotaLengthKeepsExistingStepClearance() {
+      double[] shortHull = {0.9D, 0.55D, 1.6D};
+      assertNull(MCH_ObbCollision.intersect(new double[]{0.0D, 0.72D, 0.0D}, pitchAxes(-6.0D),
+              shortHull, new double[]{0.0D, 0.5D, 3.75D}, new double[]{0.5D, 0.5D, 0.5D}));
+   }
+
    private static boolean sweepHits(double[] start, double[] end, double[] hullHalf,
                                     double[] blockCenter, double[] blockHalf) {
       for(int i = 1; i <= 40; ++i) {
@@ -86,5 +104,10 @@ public class MCH_ObbCollisionTest {
    private static double[][] axes(double degrees) {
       double r = Math.toRadians(degrees), c = Math.cos(r), s = Math.sin(r);
       return new double[][]{{c, 0.0D, -s}, {0.0D, 1.0D, 0.0D}, {s, 0.0D, c}};
+   }
+
+   private static double[][] pitchAxes(double degrees) {
+      double r = Math.toRadians(degrees), c = Math.cos(r), s = Math.sin(r);
+      return new double[][]{{1.0D, 0.0D, 0.0D}, {0.0D, c, -s}, {0.0D, s, c}};
    }
 }
