@@ -148,7 +148,7 @@ If = have_flare==1
 Endif
 
 ; レーダーを持つ機体の場合
-If = have_radar==1
+If = have_radar==1 && radar_active==1
 	DrawTexture = plane_hud, 144, 37,  64,64,  0,0, 128,128
 
 	Color = 0xFF28d448

@@ -55,7 +55,7 @@ If = is_heat_wpn==1
 EndIf
 
 ; レーダーを持つ機体の場合
-If = have_radar==1
+If = have_radar==1 && radar_active==1
 	Color = 0x80FFFFFF
 	DrawLine = 144,21,   144+64, 21,   144+64, 21+64,   144, 21+64,   144, 21
 	

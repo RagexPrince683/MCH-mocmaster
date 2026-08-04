@@ -25,7 +25,9 @@ DrawTexture = p, -7, 5, 5,5 ,0,0, 256,256
 EndIf
 DrawTexture = normal, -40, -40, 60,55 ,0,0, 256,256
 DrawTexture = suihei, -15, -35, 32,55 ,0,0, 256,256,roll
+If=have_radar==1&&radar_active==1
 DrawEntityRadar = -yaw-180, -25, -30,  50,45
+EndIf
 Color=0xffffff
 DrawCenteredString =-333,-170,"THR"
 If=throttle==1

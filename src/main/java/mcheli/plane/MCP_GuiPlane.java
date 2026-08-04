@@ -196,7 +196,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
 
    private void drawNewPlaneRadarGauge(MCP_EntityPlane plane, int x, int y) {
-      if(plane == null || !plane.isEntityRadarMounted()) {
+      if(plane == null || !plane.hasRadar() || !plane.isRadarActive()) {
          return;
       }
       int size = 64;
