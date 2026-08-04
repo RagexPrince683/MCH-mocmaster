@@ -86,6 +86,7 @@ import mcheli.mob.MCH_RenderGunner;
 
 public class MCH_ClientProxy extends MCH_CommonProxy {
 
+   private final MCH_RenderRWR rwrRenderer = new MCH_RenderRWR();
    public String lastLoadHUDPath = "";
    private long nextTargetedReloadId;
    private long pendingTargetedReloadId;
@@ -769,7 +770,11 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       MinecraftForge.EVENT_BUS.register(new MCH_ParticlesUtil());
       MinecraftForge.EVENT_BUS.register(new MCH_ClientEventHook());
       MinecraftForge.EVENT_BUS.register(new MCH_RenderBVRLockBox());
-      MinecraftForge.EVENT_BUS.register(new MCH_RenderRWR());
+      MinecraftForge.EVENT_BUS.register(this.rwrRenderer);
+   }
+
+   public MCH_RenderRWR getRwrRenderer() {
+      return this.rwrRenderer;
    }
 
    public void setCreativeDigDelay(int n) {

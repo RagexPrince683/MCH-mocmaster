@@ -7,6 +7,8 @@ import mcheli.helicopter.MCH_EntityHeli;
 import mcheli.plane.MCP_EntityPlane;
 import mcheli.wrapper.W_MOD;
 import mcheli.compat.MCH_ReplayModCompat;
+import mcheli.hud.layout.MCH_GuiHudLayoutEditor;
+import mcheli.hud.layout.MCH_HudLayoutManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
@@ -33,50 +35,70 @@ public class MCH_RenderRWR {
     private static final double MIN_DISTANCE = 50.0;  // Minimum display distance (meters)
     private static final double MAX_DISTANCE = 1000.0; // Maximum display distance (meters)
     private static final int MIN_RADIUS = 30;          // Minimum display radius (pixels
+    private boolean blendEnabled;
+    private int sourceBlend;
+    private int destinationBlend;
+    private int boundTexture;
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
-        if (MCH_ReplayModCompat.isReplayPlaybackActive()) return;
         if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        //Gets basic information
+        if (Minecraft.getMinecraft().currentScreen instanceof MCH_GuiHudLayoutEditor) return;
+        renderRwr(event.partialTicks);
+    }
+
+    /** Draws the gameplay RWR through the same path used by the layout editor. */
+    private boolean renderRwr(final float partialTicks) {
+        if (MCH_ReplayModCompat.isReplayPlaybackActive()) return false;
         Minecraft mc = Minecraft.getMinecraft();
         EntityPlayer player = mc.thePlayer;
         World world = mc.theWorld;
-        ScaledResolution sc = new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
-        if (player == null || world == null) return;
+        final ScaledResolution sc = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
+        if (player == null || world == null) return false;
 
-        //Gets the player aircraft weapon
-        MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
-        if(ac == null) return;
-        if(!(ac instanceof MCP_EntityPlane || ac instanceof MCH_EntityHeli)) return;
-        if(ac.getAcInfo().rwrType == null || ac.getAcInfo().rwrType == EnumRWRType.NONE) return;
+        final MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(player);
+        if(ac == null) return false;
+        if(!(ac instanceof MCP_EntityPlane || ac instanceof MCH_EntityHeli)) return false;
+        if(ac.getAcInfo().rwrType == null || ac.getAcInfo().rwrType == EnumRWRType.NONE) return false;
+        final EntityPlayer renderPlayer = player;
+        final double sx = sc.getScaledHeight() * (RWR_CENTER_X / SCREEN_HEIGHT_ADAPT_CONSTANT);
+        final double sy = sc.getScaledHeight() * (RWR_CENTER_Y / SCREEN_HEIGHT_ADAPT_CONSTANT);
+        MCH_HudLayoutManager.renderBuiltin("rwr", "rwr.display", "RWR", sx, sy, new Runnable() {
+            public void run() { drawRwrContents(renderPlayer, ac, sc, sx, sy, partialTicks); }
+        });
+        return true;
+    }
 
-        //Starts rendering
-        GL11.glPushMatrix();
-        {
-            double sx = sc.getScaledHeight() * (RWR_CENTER_X / SCREEN_HEIGHT_ADAPT_CONSTANT);
-            double sy = sc.getScaledHeight() * (RWR_CENTER_Y / SCREEN_HEIGHT_ADAPT_CONSTANT);
+    /** Called while the HUD layout manager's editor frame is already active. */
+    public boolean renderHudLayoutEditorPreview(float partialTicks) {
+        return renderRwr(partialTicks);
+    }
+
+    private void drawRwrContents(EntityPlayer player, MCH_EntityBaseVehicle ac, ScaledResolution sc,
+                                 double sx, double sy, float partialTicks) {
             drawRWRCircle(sx, sy, sc);
+            double halfSize = sc.getScaledHeight() * (RWR_SIZE / SCREEN_HEIGHT_ADAPT_CONSTANT) / 2.0D;
+            MCH_HudLayoutManager.capture(sx - halfSize, sy - halfSize, sx + halfSize, sy + halfSize);
 
             // New entity rendering logic
-            double circleRadius = sc.getScaledHeight() * (RWR_SIZE / SCREEN_HEIGHT_ADAPT_CONSTANT) / 2.0;
+            double circleRadius = halfSize;
             for(MCH_EntityInfo entity : getServerLoadedEntity()) {
                 if(!isValidEntity(entity, player, ac)) continue;
                 if(!isActiveRadarEmitter(entity) && !isMissileThreat(entity)) continue;
 
                 // Calculates interpolated position
-                double xPos = interpolate(entity.posX, entity.lastTickPosX, event.partialTicks);
-                double yPos = interpolate(entity.posY, entity.lastTickPosY, event.partialTicks);
-                double zPos = interpolate(entity.posZ, entity.lastTickPosZ, event.partialTicks);
+                double xPos = interpolate(entity.posX, entity.lastTickPosX, partialTicks);
+                double yPos = interpolate(entity.posY, entity.lastTickPosY, partialTicks);
+                double zPos = interpolate(entity.posZ, entity.lastTickPosZ, partialTicks);
 
                 // Calculates relative vector
                 Vec3 delta = Vec3.createVectorHelper(
-                        xPos - (player.posX + (player.posX - player.lastTickPosX) * event.partialTicks),
-                        yPos - (player.posY + (player.posY - player.lastTickPosY) * event.partialTicks),
-                        zPos - (player.posZ + (player.posZ - player.lastTickPosZ) * event.partialTicks)
+                        xPos - (player.posX + (player.posX - player.lastTickPosX) * partialTicks),
+                        yPos - (player.posY + (player.posY - player.lastTickPosY) * partialTicks),
+                        zPos - (player.posZ + (player.posZ - player.lastTickPosZ) * partialTicks)
                 );
 
-                Vec3 lookVec = getDirection(ac, event.partialTicks);
+                Vec3 lookVec = getDirection(ac, partialTicks);
                 Vec3 deltaHorizontal = Vec3.createVectorHelper(delta.xCoord, 0, delta.zCoord).normalize();
                 Vec3 lookHorizontal = Vec3.createVectorHelper(lookVec.xCoord, 0, lookVec.zCoord).normalize();
 
@@ -105,9 +127,10 @@ public class MCH_RenderRWR {
                         (int)(markerY - 4),
                         color, true
                 );
+                MCH_HudLayoutManager.capture(markerX - textWidth / 2.0D, markerY - 4.0D,
+                        markerX + textWidth / 2.0D + 1.0D,
+                        markerY - 4.0D + Minecraft.getMinecraft().fontRenderer.FONT_HEIGHT + 1.0D);
             }
-        }
-        GL11.glPopMatrix();
     }
 
     public Vec3 getDirection(Entity e, float factor) {
@@ -192,29 +215,35 @@ public class MCH_RenderRWR {
 
     private void drawRWRCircle(double x, double y, ScaledResolution sc) {
         prepareRenderState();
-        Minecraft.getMinecraft().renderEngine.bindTexture(RWR);
-        Tessellator tess = Tessellator.instance;
-        tess.startDrawingQuads();
-        double halfSize = sc.getScaledHeight() * (RWR_SIZE / SCREEN_HEIGHT_ADAPT_CONSTANT) / 2.0;
-        tess.addVertexWithUV(x - halfSize, y + halfSize, 0, 0, 1);
-        tess.addVertexWithUV(x + halfSize, y + halfSize, 0, 1, 1);
-        tess.addVertexWithUV(x + halfSize, y - halfSize, 0, 1, 0);
-        tess.addVertexWithUV(x - halfSize, y - halfSize, 0, 0, 0);
-        tess.draw();
-        restoreRenderState();
+        try {
+            Minecraft.getMinecraft().renderEngine.bindTexture(RWR);
+            Tessellator tess = Tessellator.instance;
+            tess.startDrawingQuads();
+            double halfSize = sc.getScaledHeight() * (RWR_SIZE / SCREEN_HEIGHT_ADAPT_CONSTANT) / 2.0;
+            tess.addVertexWithUV(x - halfSize, y + halfSize, 0, 0, 1);
+            tess.addVertexWithUV(x + halfSize, y + halfSize, 0, 1, 1);
+            tess.addVertexWithUV(x + halfSize, y - halfSize, 0, 1, 0);
+            tess.addVertexWithUV(x - halfSize, y - halfSize, 0, 0, 0);
+            tess.draw();
+        } finally {
+            restoreRenderState();
+        }
     }
 
     private void prepareRenderState() {
+        blendEnabled = GL11.glIsEnabled(GL11.GL_BLEND);
+        sourceBlend = GL11.glGetInteger(GL11.GL_BLEND_SRC);
+        destinationBlend = GL11.glGetInteger(GL11.GL_BLEND_DST);
+        boundTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
         GL11.glEnable(3042);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glBlendFunc(770, 771);
     }
 
     private void restoreRenderState() {
-        int srcBlend = GL11.glGetInteger(3041);
-        int dstBlend = GL11.glGetInteger(3040);
-        GL11.glBlendFunc(srcBlend, dstBlend);
-        GL11.glDisable(3042);
+        GL11.glBlendFunc(sourceBlend, destinationBlend);
+        if(blendEnabled) GL11.glEnable(GL11.GL_BLEND); else GL11.glDisable(GL11.GL_BLEND);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, boundTexture);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
