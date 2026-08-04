@@ -14,13 +14,15 @@ MaxHp = 100
 Speed = 0
 DamageFactor = 2
 ThrottleUpDown = 0.0
-FuelSupplyRange = 35
+FuelSupplyRange = 20
 CanRide = false
 InventorySize = 64
 
 GasPump = true
 
-ExplosionSizeByCrash = 20
+ForceY = true
+
+ExplosionSizeByCrash = 40
 
 
 
@@ -28,6 +30,6 @@ Category = EQ
 
 AddSeat = 0.00,  0.80,  0.0
 
-;Creative only
-;AddRecipe = "XXX",  "XCX",  "XXX",  X, iron_block, C, coal
+;Survival friendly!
+AddRecipe = "XXX",  "XCX",  "XXX",  X, mcheli:map, C, coal_block
 DamageFactor = 0.8
