@@ -251,7 +251,8 @@ public class MCH_Hud extends MCH_BaseInfo {
                      final MCH_HudItem drawItem = hud;
                      String id = MCH_HudLayoutManager.parsedId(this.name, hud.fileLine, hud.getLayoutDirective(), hud.getLayoutOrdinal(), hud.getLayoutGroupId());
                      MCH_HudLayoutManager.renderParsed(MCH_HudLayoutManager.currentParsedProfileId(), id, this.name,
-                           hud.getLayoutFingerprint(), hud.fileLine, new Runnable() { public void run() { drawItem.execute(); } });
+                           hud.getLayoutFingerprint(), hud.fileLine, hud.getLayoutDisplayName(), hud.isLayoutMovable(),
+                           new Runnable() { public void run() { drawItem.execute(); } });
                   } else hud.execute();
                   if(this.exit) {
                      break;

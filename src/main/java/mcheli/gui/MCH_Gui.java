@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_ScaledResolution;
+import mcheli.hud.layout.MCH_HudLayoutManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.Tessellator;
@@ -64,6 +65,7 @@ public abstract class MCH_Gui extends GuiScreen {
    }
 
    public void drawTexturedModalRectRotate(double left, double top, double width, double height, double uLeft, double vTop, double uWidth, double vHeight, float rot) {
+      MCH_HudLayoutManager.capture(left, top, left + width, top + height);
       GL11.glPushMatrix();
       GL11.glTranslated(left + width / 2.0D, top + height / 2.0D, 0.0D);
       GL11.glRotatef(rot, 0.0F, 0.0F, 1.0F);
@@ -79,6 +81,7 @@ public abstract class MCH_Gui extends GuiScreen {
    }
 
    public void drawTexturedRect(double left, double top, double width, double height, double uLeft, double vTop, double uWidth, double vHeight, double textureWidth, double textureHeight) {
+      MCH_HudLayoutManager.capture(left, top, left + width, top + height);
       float fx = (float)(1.0D / textureWidth);
       float fy = (float)(1.0D / textureHeight);
       Tessellator tessellator = Tessellator.instance;
@@ -98,10 +101,12 @@ public abstract class MCH_Gui extends GuiScreen {
    }
 
    public void drawLine(double[] line, int color) {
+      MCH_HudLayoutManager.captureLine(line);
       this.drawLine(line, color, 1);
    }
 
    public void drawString(String s, int x, int y, int color) {
+      MCH_HudLayoutManager.capture(x, y, x + super.mc.fontRenderer.getStringWidth(s), y + super.mc.fontRenderer.FONT_HEIGHT);
       this.drawString(super.mc.fontRenderer, s, x, y, color);
    }
 
@@ -129,10 +134,13 @@ public abstract class MCH_Gui extends GuiScreen {
    }
 
    public void drawCenteredString(String s, int x, int y, int color) {
+      int w = super.mc.fontRenderer.getStringWidth(s);
+      MCH_HudLayoutManager.capture(x - w / 2, y, x + w / 2, y + super.mc.fontRenderer.FONT_HEIGHT);
       this.drawCenteredString(super.mc.fontRenderer, s, x, y, color);
    }
 
    public void drawLine(double[] line, int color, int mode) {
+      MCH_HudLayoutManager.captureLine(line);
       GL11.glPushMatrix();
       GL11.glEnable(3042);
       GL11.glDisable(3553);
@@ -153,6 +161,7 @@ public abstract class MCH_Gui extends GuiScreen {
    }
 
    public void drawPoints(double[] points, int color, int pointWidth) {
+      MCH_HudLayoutManager.captureLine(points);
       int prevWidth = GL11.glGetInteger(2833);
       GL11.glPushMatrix();
       GL11.glEnable(3042);
@@ -176,6 +185,11 @@ public abstract class MCH_Gui extends GuiScreen {
    }
 
    public void drawPoints(ArrayList points, int color, int pointWidth) {
+      if(points != null && points.size() >= 2) {
+         double[] boundsPoints = new double[points.size()];
+         for(int i = 0; i < points.size(); i++) boundsPoints[i] = ((Double)points.get(i)).doubleValue();
+         MCH_HudLayoutManager.captureLine(boundsPoints);
+      }
       int prevWidth = GL11.glGetInteger(2833);
       GL11.glPushMatrix();
       GL11.glEnable(3042);

@@ -1089,6 +1089,18 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       }
    }
 
+   /** Draws the same first applicable vehicle GUI used by the gameplay overlay. */
+   public boolean drawHudLayoutEditorPreview(float partialTicks) {
+      if(this.mc.thePlayer == null) return false;
+      for(MCH_Gui gui : this.guis) {
+         if(gui.isDrawGui(this.mc.thePlayer)) {
+            gui.drawScreen(0, 0, partialTicks);
+            return true;
+         }
+      }
+      return false;
+   }
+
    private void releaseCameraAndControlForReplay() {
       MCP_PlaneChaseCamera.releaseForReplayPlayback(super.mc);
       MCP_ClientPlaneTickHandler.resetBombReticleMode();
