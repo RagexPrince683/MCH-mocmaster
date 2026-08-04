@@ -18,6 +18,8 @@ FuelSupplyRange = 35
 CanRide = false
 InventorySize = 64
 
+GasPump = true
+
 ExplosionSizeByCrash = 20
 
 
