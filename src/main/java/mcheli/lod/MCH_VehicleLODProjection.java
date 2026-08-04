@@ -12,10 +12,16 @@ import org.lwjgl.opengl.GL11;
 /** Projection information shared by tracked and snapshot vehicle LOD rendering. */
 @SideOnly(Side.CLIENT)
 public final class MCH_VehicleLODProjection {
-    private static final FloatBuffer PROJECTION_BUFFER = BufferUtils.createFloatBuffer(16);
-    private static final IntBuffer VIEWPORT_BUFFER = BufferUtils.createIntBuffer(16);
-
     private MCH_VehicleLODProjection() {
+    }
+
+    /** Client-only reusable state, initialized only when a render capture is requested. */
+    private static final class CaptureBuffers {
+        private static final FloatBuffer PROJECTION = BufferUtils.createFloatBuffer(16);
+        private static final IntBuffer VIEWPORT = BufferUtils.createIntBuffer(16);
+
+        private CaptureBuffers() {
+        }
     }
 
     /** Captures the projection which is active at the world-render call site. */
@@ -23,9 +29,9 @@ public final class MCH_VehicleLODProjection {
         float[] projection = new float[16];
         boolean valid = false;
         try {
-            PROJECTION_BUFFER.clear();
-            GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, PROJECTION_BUFFER);
-            valid = copyProjection(PROJECTION_BUFFER, projection);
+            CaptureBuffers.PROJECTION.clear();
+            GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, CaptureBuffers.PROJECTION);
+            valid = copyProjection(CaptureBuffers.PROJECTION, projection);
         } catch (RuntimeException ignored) {
             // A headless/incomplete OpenGL implementation may reject glGet.
         }
@@ -35,9 +41,9 @@ public final class MCH_VehicleLODProjection {
 
         int viewportHeight = 0;
         try {
-            VIEWPORT_BUFFER.clear();
-            GL11.glGetInteger(GL11.GL_VIEWPORT, VIEWPORT_BUFFER);
-            viewportHeight = copyViewportHeight(VIEWPORT_BUFFER);
+            CaptureBuffers.VIEWPORT.clear();
+            GL11.glGetInteger(GL11.GL_VIEWPORT, CaptureBuffers.VIEWPORT);
+            viewportHeight = copyViewportHeight(CaptureBuffers.VIEWPORT);
         } catch (RuntimeException ignored) {
         }
         if (viewportHeight <= 0) viewportHeight = copyViewportHeight(MCH_ActiveRenderInfoHolder.viewport);
