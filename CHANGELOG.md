@@ -1,3 +1,10 @@
+# Toggleable Active Radar
+
+Added pilot-controlled, persistent active radar, capability-aware scanning, synchronized emitter
+  state, and RWR filtering so disabled or unequipped vehicles do not emit signatures.
+- Added `KeyRadar` and documented `HasRadar`, including compatibility with explicit `RadarType` and
+  enabled `EnableEntityRadar` vehicle configurations.
+
 # Finite cargo-backed service vehicles (PR pending)
 
 - Added opt-in `GasPump`, `AmmoLoader`, and `ForceY` shared vehicle configuration while retaining infinite legacy range-only suppliers.
