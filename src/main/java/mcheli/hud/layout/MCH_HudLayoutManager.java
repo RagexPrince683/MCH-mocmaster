@@ -27,6 +27,7 @@ public final class MCH_HudLayoutManager {
     private static final class Scope {
         final MCH_HudLayoutElement element; final int x, y; final double scale, pivotX, pivotY;
         Scope(MCH_HudLayoutElement element) { this.element = element; this.x = element.offsetX; this.y = element.offsetY; this.scale=MCH_HudLayoutElement.normalizeScale(element.scale); this.pivotX=element.hasFramePivot?element.framePivotX:element.geometry==null?0.0D:element.geometry.centerX(); this.pivotY=element.hasFramePivot?element.framePivotY:element.geometry==null?0.0D:element.geometry.centerY(); }
+        Scope(MCH_HudLayoutElement element,double pivotX,double pivotY) { this.element=element; this.x=element.offsetX; this.y=element.offsetY; this.scale=MCH_HudLayoutElement.normalizeScale(element.scale); this.pivotX=pivotX; this.pivotY=pivotY; }
         double tx(double value){return x+pivotX+(value-pivotX)*scale;}
         double ty(double value){return y+pivotY+(value-pivotY)*scale;}
     }
@@ -84,15 +85,22 @@ public final class MCH_HudLayoutManager {
         renderScope(e, draw);
     }
     public static void renderBuiltin(String context, String id, Runnable draw) {
+        renderBuiltin(context, id, displayName(id), Double.NaN, Double.NaN, draw);
+    }
+    public static void renderBuiltin(String context, String id, String name, double pivotX, double pivotY, Runnable draw) {
         String profileId="builtin:"+safeId(context); MCH_HudLayoutProfile p=renderProfile(profileId,"Java-rendered HUD groups");
         MCH_HudLayoutElement e=p.elements.get(id);
         if(e==null) { e=new MCH_HudLayoutElement(); e.id=id; e.fingerprint="builtin:"+id; e.groupId=id; p.elements.put(id,e); }
-        e.id=id; e.profileId=profileId; e.displayName=displayName(id); e.movable=true; e.scale=MCH_HudLayoutElement.normalizeScale(e.scale); renderScope(e,draw);
+        e.id=id; e.profileId=profileId; e.displayName=name; e.movable=true; e.scale=MCH_HudLayoutElement.normalizeScale(e.scale);
+        renderScope(e, draw, pivotX, pivotY);
     }
     private static void renderScope(MCH_HudLayoutElement e, Runnable draw) {
+        renderScope(e, draw, Double.NaN, Double.NaN);
+    }
+    private static void renderScope(MCH_HudLayoutElement e, Runnable draw, double pivotX, double pivotY) {
         boolean capture=editorFrame && e.movable;
         if(capture && !FRAME.contains(e)) { e.hasFramePivot=e.geometry!=null; if(e.hasFramePivot){e.framePivotX=e.geometry.centerX();e.framePivotY=e.geometry.centerY();} e.bounds=null; e.geometry=null; }
-        Scope scope=new Scope(e); if(capture) { SCOPES.push(scope); }
+        Scope scope=new Scope(e); if(!Double.isNaN(pivotX)&&!Double.isNaN(pivotY)){scope=new Scope(e,pivotX,pivotY);} if(capture) { SCOPES.push(scope); }
         GL11.glPushMatrix(); try { GL11.glTranslated(scope.x+scope.pivotX,scope.y+scope.pivotY,0); if(scope.scale!=1.0D) GL11.glScaled(scope.scale,scope.scale,1); GL11.glTranslated(-scope.pivotX,-scope.pivotY,0); draw.run(); }
         finally { GL11.glPopMatrix(); if(capture) { SCOPES.pop(); if(e.bounds!=null && !FRAME.contains(e)) FRAME.add(e); } }
     }
