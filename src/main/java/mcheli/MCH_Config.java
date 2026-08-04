@@ -57,6 +57,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm KeyUseWeapon;
    public static MCH_ConfigPrm KeyCurrentWeaponLock;
    public static MCH_ConfigPrm KeyVehicleLock;
+   public static MCH_ConfigPrm KeyRadar;
    public static MCH_ConfigPrm KeySwitchWeapon1;
    public static MCH_ConfigPrm KeySwitchWeapon2;
    public static MCH_ConfigPrm KeySwWeaponMode;
@@ -370,6 +371,8 @@ public class MCH_Config {
       KeyUseWeapon = new MCH_ConfigPrm("KeyUseWeapon", -99);
       KeyCurrentWeaponLock = new MCH_ConfigPrm("KeyCurrentWeaponLock", -100);
       KeyVehicleLock = new MCH_ConfigPrm("KeyVehicleLock", 24);
+      // R is already the GUI key, so active radar defaults to P.
+      KeyRadar = new MCH_ConfigPrm("KeyRadar", 25);
       KeySwitchWeapon1 = new MCH_ConfigPrm("KeySwitchWeapon1", -98);
       KeySwitchWeapon2 = new MCH_ConfigPrm("KeySwitchWeapon2", 34);
       KeySwWeaponMode = new MCH_ConfigPrm("KeySwitchWeaponMode", 45);
@@ -428,6 +431,7 @@ public class MCH_Config {
               KeyUseWeapon,
               KeyAttack,
               KeyCurrentWeaponLock,
+              KeyRadar,
               KeyVehicleLock};
       DamageVs = new ArrayList();
       CommandPermission = new ArrayList();

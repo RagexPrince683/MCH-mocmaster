@@ -107,8 +107,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    private static final int CMN_ID_CNTRL_UP = 9;
    private static final int CMN_ID_CNTRL_DOWN = 10;
    private static final int CMN_ID_CNTRL_BRAKE = 11;
-   /** Bit 12 is the first unused bit in the shared status watcher. */
+   /** Vehicle access lock occupies bit 12 in the shared status watcher. */
    private static final int CMN_ID_VEHICLE_ACCESS_LOCK = 12;
+   private static final int CMN_ID_ACTIVE_RADAR = 13;
    private static final int DATAWT_ID_USE_WEAPON = 24;
    private static final int DATAWT_ID_FUEL = 25;
    private static final int DATAWT_ID_ROT_ROLL = 26;
@@ -1146,7 +1147,25 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public boolean isEntityRadarMounted() {
-      return this.getAcInfo() != null?this.getAcInfo().isEnableEntityRadar:false;
+      return this.hasRadar();
+   }
+
+   public boolean hasRadar() { return this.getAcInfo() != null && this.getAcInfo().hasRadar(); }
+
+   public boolean isRadarActive() { return this.hasRadar() && this.getCommonStatus(CMN_ID_ACTIVE_RADAR); }
+
+   public void setRadarActive(boolean active) {
+      boolean enabled = active && this.hasRadar();
+      this.setCommonStatus(CMN_ID_ACTIVE_RADAR, enabled);
+      if(!enabled) this.initRadar();
+   }
+
+   public boolean toggleRadar(EntityPlayer player) {
+      if(this.worldObj.isRemote || !this.hasRadar() || !this.isPilot(player)) return false;
+      this.setRadarActive(!this.isRadarActive());
+      player.addChatMessage(new ChatComponentTranslation(this.isRadarActive() ? "mcheli.radar.on" : "mcheli.radar.off"));
+      W_WorldFunc.DEF_playSoundEffect(this.worldObj, this.posX, this.posY, this.posZ, "random.click", 1.0F, 1.0F);
+      return true;
    }
 
    public boolean canFloatWater() {
@@ -1223,6 +1242,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public void onAcInfoReloaded() {
       if(this.getAcInfo() != null) {
+         if(!this.hasRadar()) this.setRadarActive(false);
          this.setSize(this.getAcInfo().bodyWidth, this.getAcInfo().bodyHeight);
          this.aps.configure(this.getAcInfo().apsUseTime, this.getAcInfo().apsWaitTime,
                  this.getAcInfo().apsRange, this.getAcInfo().apsAmmo);
@@ -1294,6 +1314,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.setPartStatus(nbt.getInteger("PartStatus"));
       this.setTypeName(nbt.getString("TypeName"));
       super.readEntityFromNBT(nbt);
+      this.setRadarActive(nbt.hasKey("MCH_RadarActive") ? nbt.getBoolean("MCH_RadarActive") : this.hasRadar());
       this.getGuiInventory().readEntityFromNBT(nbt);
       this.setCommandForce(nbt.getString("AcCommand"));
       this.setFuel(nbt.getInteger("AcFuel"));
@@ -1365,6 +1386,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       nbt.setInteger("AcDespawnCount", this.getDespawnCount());
       nbt.setFloat("AcRoll", this.getRotRoll());
       nbt.setBoolean("SearchLight", this.isSearchLightON());
+      nbt.setBoolean("MCH_RadarActive", this.isRadarActive());
       nbt.setFloat("AcLastRYaw", this.getLastRiderYaw());
       nbt.setFloat("AcLastRPitch", this.getLastRiderPitch());
       nbt.setString("AcCommand", this.getCommand());
@@ -4592,7 +4614,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void updateRadar(int radarSpeed) {
-      if(this.isEntityRadarMounted()) {
+      if(this.isRadarActive()) {
          this.radarRotate += radarSpeed;
          if(this.radarRotate >= 360) {
             this.radarRotate = 0;
@@ -8552,7 +8574,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void setAcInfo(MCH_BaseVehicleInfo info) {
+      boolean hadInfo = this.acInfo != null;
       this.acInfo = info;
+      if(!hadInfo) this.setRadarActive(info != null && info.hasRadar());
+      else if(info == null || !info.hasRadar()) this.setRadarActive(false);
       this.updateForceSpawnPolicy();
       if(info != null) {
          this.partHatch = this.createHatch();
@@ -8573,7 +8598,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public boolean applyTargetedInfo(MCH_BaseVehicleInfo info) {
       if(info == null || this.acInfo == null) return false;
       if(info.getNumSeatAndRack() != this.acInfo.getNumSeatAndRack()) return false;
+      boolean hadRadar = this.hasRadar();
       this.acInfo = info;
+      if(!info.hasRadar()) this.setRadarActive(false);
+      else if(!hadRadar) this.setRadarActive(true);
       this.updateForceSpawnPolicy();
       this.cameraId = Math.max(0, Math.min(this.cameraId, Math.max(0, info.cameraPosition.size() - 1)));
       this.extraBoundingBox = this.createExtraBoundingBox();
