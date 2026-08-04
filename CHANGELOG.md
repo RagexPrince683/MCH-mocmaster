@@ -1,3 +1,9 @@
+# Finite cargo-backed service vehicles (PR pending)
+
+- Added opt-in `GasPump`, `AmmoLoader`, and `ForceY` shared vehicle configuration while retaining infinite legacy range-only suppliers.
+- Added persistent, overflow-safe service fuel reserves, cargo fuel-can draining, deterministic target ordering, and transactional configured ammunition-package consumption.
+- Documented finite support inventory, range, fuel conversion, and same-level requirements.
+
 # Prevent Small-Explosion Knockback (PR pending)
 
 - Prevented entity explosions below size `3.0F` from adding MCHeli or vanilla damage knockback while preserving each affected entity's existing motion.

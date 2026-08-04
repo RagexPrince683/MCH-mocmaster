@@ -99,6 +99,12 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    public float fuelConsumption;
    public float fuelSupplyRange;
    public float ammoSupplyRange;
+   /** Opts this vehicle into finite, cargo-backed fuel service. */
+   public boolean gasPump;
+   /** Opts this vehicle into finite, cargo-backed ammunition service. */
+   public boolean ammoLoader;
+   /** Restricts finite service to targets on the same block Y level. */
+   public boolean forceY;
    public float repairOtherVehiclesRange;
    public int repairOtherVehiclesValue;
    public float stealth;
@@ -330,6 +336,9 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
       this.fuelConsumption = 1.0F;
       this.fuelSupplyRange = 0.0F;
       this.ammoSupplyRange = 0.0F;
+      this.gasPump = false;
+      this.ammoLoader = false;
+      this.forceY = false;
       this.repairOtherVehiclesRange = 0.0F;
       this.repairOtherVehiclesValue = 10;
       this.stealth = 0.0F;
@@ -654,6 +663,12 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
             this.fuelSupplyRange = this.toFloat(data, 0.0F, 1000.0F);
          } else if(item.equalsIgnoreCase("AmmoSupplyRange")) {
             this.ammoSupplyRange = this.toFloat(data, 0.0F, 1000.0F);
+         } else if(item.equalsIgnoreCase("GasPump")) {
+            this.gasPump = this.toBool(data, false);
+         } else if(item.equalsIgnoreCase("AmmoLoader")) {
+            this.ammoLoader = this.toBool(data, false);
+         } else if(item.equalsIgnoreCase("ForceY")) {
+            this.forceY = this.toBool(data, false);
          } else if(item.equalsIgnoreCase("RepairOtherVehicles")) {
             s = this.splitParam(data);
             if(s.length >= 1) {
