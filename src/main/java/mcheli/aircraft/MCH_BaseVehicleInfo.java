@@ -57,6 +57,14 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    public boolean isEnableConcurrentGunnerMode;
    public boolean isEnableNightVision;
    public boolean isEnableEntityRadar;
+   private Boolean explicitHasRadar;
+   private boolean radarTypeExplicit;
+
+   /** True only when active radar equipment was explicitly configured. */
+   public boolean hasRadar() {
+      return this.explicitHasRadar != null ? this.explicitHasRadar.booleanValue()
+              : this.radarTypeExplicit || this.isEnableEntityRadar;
+   }
    public boolean isEnableEjectionSeat;
    public boolean isEnableParachuting;
    public MCH_BaseVehicleInfo.Flare flare;
@@ -665,11 +673,15 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
          }
 
          else if(item.equalsIgnoreCase("RadarType")) {
+            this.radarTypeExplicit = true;
             try {
                this.radarType = EnumRadarType.valueOf(data);
             } catch (Exception e) {
                this.radarType = EnumRadarType.MODERN_AA;
             }
+         }
+         else if(item.equalsIgnoreCase("HasRadar")) {
+            this.explicitHasRadar = Boolean.valueOf(this.toBool(data));
          }
          else if(item.equalsIgnoreCase("RWRType")) {
             try {

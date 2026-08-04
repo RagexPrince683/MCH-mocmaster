@@ -121,7 +121,8 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `inventorysize` | All | int | 0 | inventory slots |
 | `regeneration` | All | boolean | false | self-repair/regen flag |
 | `Stealth` | All | float | 0.0 | radar/targeting visibility modifier |
-| `RadarType` | All | enum `EARLY_AA`, `MODERN_AA`, etc. | `EARLY_AA`; invalid -> `MODERN_AA` | radar classification |
+| `HasRadar` | All | boolean | inferred | explicit active-radar capability override |
+| `RadarType` | All | enum `EARLY_AA`, `MODERN_AA`, etc. | `EARLY_AA`; invalid -> `MODERN_AA` | radar classification; explicit presence implies equipment |
 | `RWRType` | All | enum | `NONE`; invalid -> `NONE` | radar-warning receiver; set `DIGITAL` to enable the current RWR display |
 | `NameOnModernAARadar` | All | string | `?` | radar label |
 | `NameOnEarlyAARadar` | All | string | `?` | radar label |

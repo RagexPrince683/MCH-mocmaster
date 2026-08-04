@@ -29,6 +29,7 @@ public class MCH_ShipPacketHandler {
 
             if(plane != null) {
                 mcheli.aircraft.MCH_BaseVehiclePacketHandler.handleVehicleAccessLockToggle(player, plane, pc);
+            mcheli.aircraft.MCH_BaseVehiclePacketHandler.handleRadarToggle(player, plane, pc);
                 if(pc.isUnmount == 1) {
                     plane.unmountEntity();
                 } else if(pc.isUnmount == 2) {

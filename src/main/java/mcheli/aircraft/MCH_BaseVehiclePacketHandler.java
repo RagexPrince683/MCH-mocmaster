@@ -127,6 +127,13 @@ public class MCH_BaseVehiclePacketHandler {
       }
    }
 
+   public static void handleRadarToggle(EntityPlayer player, MCH_EntityBaseVehicle vehicle,
+                                        MCH_PacketPlayerControlBase control) {
+      if(control.toggleRadar && vehicle != null && vehicle.hasRadar() && vehicle.isPilot(player)) {
+         vehicle.toggleRadar(player);
+      }
+   }
+
    public static void onPacketIndRotation(EntityPlayer player, ByteArrayDataInput data) {
       if(player != null && !player.worldObj.isRemote) {
          MCH_PacketIndRotation req = new MCH_PacketIndRotation();

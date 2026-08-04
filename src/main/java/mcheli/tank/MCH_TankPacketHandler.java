@@ -39,6 +39,7 @@ public class MCH_TankPacketHandler {
 
          if(tank != null) {
             mcheli.aircraft.MCH_BaseVehiclePacketHandler.handleVehicleAccessLockToggle(player, tank, pc);
+            mcheli.aircraft.MCH_BaseVehiclePacketHandler.handleRadarToggle(player, tank, pc);
             if(pc.isUnmount == 1) {
                tank.unmountEntity();
             } else if(pc.isUnmount == 2) {

@@ -921,3 +921,5 @@ achievement.McHeliReliefSupplies.desc=Drop a container
 mcheli.nei.vehicle_ammunition=MCHeli Vehicle Ammunition
 mcheli.nei.vehicle=Vehicle
 mcheli.nei.weapon=Weapon
+mcheli.radar.on=Radar ON
+mcheli.radar.off=Radar OFF
