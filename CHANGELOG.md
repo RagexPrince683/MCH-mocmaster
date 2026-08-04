@@ -557,3 +557,8 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Added mouse hover, overlap-aware selection, dragging, grid snapping, keyboard nudging, and immediate reset previews.
 - Added transactional multi-profile edit sessions so Save persists changed profiles and Cancel discards all edits.
 - Added logical screen-space bounds capture for HUD text, textures, rectangles, lines, and compound built-in scopes.
+
+## HUD layout scaling and multi-selection
+
+- Added persistent, center-pivoted HUD element scaling with schema version 2 migration.
+- Added right-click multi-selection, group dragging, group arrow movement, and multi-element reset controls to the live HUD layout editor.

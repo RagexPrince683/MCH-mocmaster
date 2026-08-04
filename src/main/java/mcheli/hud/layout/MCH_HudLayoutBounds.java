@@ -19,4 +19,7 @@ public final class MCH_HudLayoutBounds {
         left = Math.min(left, other.left); top = Math.min(top, other.top);
         right = Math.max(right, other.right); bottom = Math.max(bottom, other.bottom);
     }
+
+    public double centerX() { return (left + right) * 0.5D; }
+    public double centerY() { return (top + bottom) * 0.5D; }
 }
