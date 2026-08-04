@@ -95,10 +95,18 @@ For fixed-wing planes using `useNewMobilitySystem = true`, this gravity value is
 
 ## Sensors, countermeasures, UAV flags
 
+Active radar is enabled by default only for equipped vehicles. `HasRadar false` disables it even
+when older radar keys exist; otherwise an explicit `RadarType` or `EnableEntityRadar true` preserves
+existing pack behavior. With no active-radar declaration, a vehicle never emits an RWR signature.
+`RWRType` is a passive receiver and does not imply radar equipment. Passive RWR continues operating
+while active radar is off; switching radar off clears contacts and removes the vehicle's emission.
+
 | Key | Type | Default | Notes |
 |---|---|---:|---|
-| `RadarType` | enum | `EARLY_AA` | Invalid values fall back to `MODERN_AA`. |
+| `HasRadar` | boolean | inferred | Explicit capability override; takes precedence over all inferred values. |
+| `RadarType` | enum | `EARLY_AA` | Explicit presence implies radar equipment; invalid values fall back to `MODERN_AA`. The default alone does not imply equipment. |
 | `RWRType` | enum | `NONE` | Invalid values fall back to `NONE`; set `DIGITAL` to enable the current RWR display. |
+
 | `LWR` | boolean | false | Controls the tank laser warning alert sound. Tanks play the warning only when this is `true`; it is separate from `RWRType`, flares, chaff, APS, and smoke launchers. |
 | `NameOnModernAARadar`, `NameOnEarlyAARadar`, `NameOnModernASRadar`, `NameOnEarlyASRadar` | string | `?` | Radar labels. |
 | `Stealth` | float[0..1] | 0 | Visibility modifier. |

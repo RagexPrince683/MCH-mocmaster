@@ -16,8 +16,10 @@ public class MCH_EntityInfo {
     public double lastTickPosY;
     public double lastTickPosZ;
     public long lastUpdateTime;
+    public boolean hasRadar;
+    public boolean radarActive;
 
-    public MCH_EntityInfo(int entityId, String worldName, String entityName, String entityClassName, double posX, double posY, double posZ, double lastTickPosX, double lastTickPosY, double lastTickPosZ) {
+    public MCH_EntityInfo(int entityId, String worldName, String entityName, String entityClassName, double posX, double posY, double posZ, double lastTickPosX, double lastTickPosY, double lastTickPosZ, boolean hasRadar, boolean radarActive) {
         this.entityId = entityId;
         this.worldName = worldName;
         this.entityName = entityName;
@@ -28,6 +30,8 @@ public class MCH_EntityInfo {
         this.lastTickPosX = lastTickPosX;
         this.lastTickPosY = lastTickPosY;
         this.lastTickPosZ = lastTickPosZ;
+        this.hasRadar = hasRadar;
+        this.radarActive = hasRadar && radarActive;
         this.lastUpdateTime = System.currentTimeMillis();
     }
 
@@ -39,12 +43,14 @@ public class MCH_EntityInfo {
                 name = ac.getAcInfo().name;
             }
         }
+        boolean hasRadar = e instanceof MCH_EntityBaseVehicle && ((MCH_EntityBaseVehicle)e).hasRadar();
         return new MCH_EntityInfo(e.getEntityId(),
                 e.worldObj.getWorldInfo().getWorldName(),
                 name,
                 e.getClass().getName(),
                 e.posX, e.posY, e.posZ,
-                e.lastTickPosX, e.lastTickPosY, e.lastTickPosZ
+                e.lastTickPosX, e.lastTickPosY, e.lastTickPosZ,
+                hasRadar, hasRadar && ((MCH_EntityBaseVehicle)e).isRadarActive()
         );
     }
 

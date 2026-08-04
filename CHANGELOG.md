@@ -1,3 +1,10 @@
+# Toggleable Active Radar (PR pending)
+
+- Added pilot-controlled, persistent active radar, capability-aware scanning, synchronized emitter
+  state, and RWR filtering so disabled or unequipped vehicles do not emit signatures.
+- Added `KeyRadar` and documented `HasRadar`, including compatibility with explicit `RadarType` and
+  enabled `EnableEntityRadar` vehicle configurations.
+
 # Prevent Small-Explosion Knockback (PR pending)
 
 - Prevented entity explosions below size `3.0F` from adding MCHeli or vanilla damage knockback while preserving each affected entity's existing motion.

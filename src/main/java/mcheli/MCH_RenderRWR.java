@@ -62,6 +62,7 @@ public class MCH_RenderRWR {
             double circleRadius = sc.getScaledHeight() * (RWR_SIZE / SCREEN_HEIGHT_ADAPT_CONSTANT) / 2.0;
             for(MCH_EntityInfo entity : getServerLoadedEntity()) {
                 if(!isValidEntity(entity, player, ac)) continue;
+                if(!isActiveRadarEmitter(entity) && !isMissileThreat(entity)) continue;
 
                 // Calculates interpolated position
                 double xPos = interpolate(entity.posX, entity.lastTickPosX, event.partialTicks);
@@ -155,28 +156,38 @@ public class MCH_RenderRWR {
     private MCH_RWRResult getTargetTypeOnRadar(MCH_EntityInfo entity, MCH_EntityBaseVehicle ac) {
         switch (ac.getAcInfo().rwrType) {
             case DIGITAL: {
-                if(isRadarEmitter(entity)) {
+                if(isActiveRadarEmitter(entity)) {
                     return new MCH_RWRResult(ac.getNameOnMyRadar(entity), 0x00FF00);
                 } else {
                     return new MCH_RWRResult("MSL", 0xFF0000);
                 }
             }
             case ALL_WAY_EARLY: {
-                return new MCH_RWRResult(isRadarEmitter(entity) ? "RDR" : "MSL", isRadarEmitter(entity) ? 0x00FF00 : 0xFF0000);
+                return new MCH_RWRResult(isActiveRadarEmitter(entity) ? "RDR" : "MSL", isActiveRadarEmitter(entity) ? 0x00FF00 : 0xFF0000);
             }
             case FOUR_WAY: {
-                return new MCH_RWRResult(isRadarEmitter(entity) ? "R" : "M", isRadarEmitter(entity) ? 0x00FF00 : 0xFF0000);
+                return new MCH_RWRResult(isActiveRadarEmitter(entity) ? "R" : "M", isActiveRadarEmitter(entity) ? 0x00FF00 : 0xFF0000);
             }
         }
         return new MCH_RWRResult("?", 0x00FF00);
     }
 
-    private boolean isRadarEmitter(MCH_EntityInfo entity) {
-        return entity.entityClassName.contains("MCH_EntityHeli")
-                || entity.entityClassName.contains("MCP_EntityPlane")
-                || entity.entityClassName.contains("MCH_EntityShip")
-                || entity.entityClassName.contains("MCH_EntityTank")
-                || entity.entityClassName.contains("MCH_EntityTurret");
+    private boolean isVehicleEntity(MCH_EntityInfo entity) {
+        String type = entity.entityClassName;
+        return type.equals("mcheli.helicopter.MCH_EntityHeli")
+                || type.equals("mcheli.plane.MCP_EntityPlane")
+                || type.equals("mcheli.ship.MCH_EntityShip")
+                || type.equals("mcheli.tank.MCH_EntityTank")
+                || type.equals("mcheli.vehicle.MCH_EntityTurret");
+    }
+
+    private boolean isActiveRadarEmitter(MCH_EntityInfo entity) {
+        return isVehicleEntity(entity) && entity.hasRadar && entity.radarActive;
+    }
+
+    private boolean isMissileThreat(MCH_EntityInfo entity) {
+        String type = entity.entityClassName;
+        return type.startsWith("mcheli.weapon.MCH_Entity") && type.endsWith("Missile");
     }
 
     private void drawRWRCircle(double x, double y, ScaledResolution sc) {
