@@ -218,28 +218,7 @@ public abstract class MCH_BaseVehicleCommonGui extends MCH_Gui {
          this.drawString(msg, LX, super.centerY - 50, colorActive);
       }
 
-      if(seatID == 0 && ac.getSeatNum() >= 1) {
-         int color = colorActive;
-         if(info.isEnableParachuting && MCH_Lib.getBlockIdY(ac, 3, -10) == 0) {
-            var10000 = (new StringBuilder()).append("Parachuting : ");
-            var10001 = MCH_MOD.config;
-            msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyUnmount.prmInt)).toString();
-         } else if(ac.canStartRepelling()) {
-            var10000 = (new StringBuilder()).append("Repelling : ");
-            var10001 = MCH_MOD.config;
-            msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyUnmount.prmInt)).toString();
-            color = -256;
-         } else {
-            int remainingSeconds = 3;
-            if(MCH_ClientCommonTickHandler.instance != null) {
-               remainingSeconds = MCH_ClientCommonTickHandler.instance.getDismountHoldRemainingSeconds(player);
-            }
-            msg = "Dismount : Hold " + MCH_KeyName.getDescOrName(super.mc.gameSettings.keyBindSneak.getKeyCode())
-                  + " (" + remainingSeconds + "s)";
-         }
-
-         this.drawString(msg, LX, super.centerY - 30, color);
-      }
+      this.drawDismountKeyBind(ac, info, player, seatID, LX, super.centerY - 30, colorActive);
 
       if(seatID == 0 && ac.canSwitchFreeLook() || seatID > 0 && ac.canSwitchGunnerModeOtherSeat(player)) {
          var10000 = (new StringBuilder()).append("FreeLook : ");
@@ -248,5 +227,47 @@ public abstract class MCH_BaseVehicleCommonGui extends MCH_Gui {
          this.drawString(msg, LX, super.centerY - 20, colorActive);
       }
 
+   }
+
+   protected void drawDismountKeyBind(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, EntityPlayer player,
+         int seatID, int x, int y, int colorActive) {
+      if(!this.isPhysicallyMountedInSeat(ac, player, seatID)) {
+         return;
+      }
+
+      int color = colorActive;
+      String msg;
+      if(seatID == 0 && info.isEnableParachuting && MCH_Lib.getBlockIdY(ac, 3, -10) == 0) {
+         msg = "Parachuting : " + MCH_KeyName.getDescOrName(MCH_Config.KeyUnmount.prmInt);
+      } else if(seatID == 0 && ac.canStartRepelling()) {
+         msg = "Repelling : " + MCH_KeyName.getDescOrName(MCH_Config.KeyUnmount.prmInt);
+         color = -256;
+      } else {
+         int remainingSeconds = 3;
+         if(MCH_ClientCommonTickHandler.instance != null) {
+            remainingSeconds = MCH_ClientCommonTickHandler.instance.getDismountHoldRemainingSeconds(player);
+         }
+         msg = "Dismount : Hold " + MCH_KeyName.getDescOrName(super.mc.gameSettings.keyBindSneak.getKeyCode())
+               + " (" + remainingSeconds + "s)";
+      }
+
+      this.drawString(msg, x, y, color);
+   }
+
+   private boolean isPhysicallyMountedInSeat(MCH_EntityBaseVehicle ac, EntityPlayer player, int seatID) {
+      if(ac == null || player == null || !ac.isValidSeatID(seatID) || ac.getSeatIdByEntity(player) != seatID) {
+         return false;
+      }
+
+      if(seatID == 0) {
+         return player.ridingEntity == ac;
+      }
+
+      if(player.ridingEntity instanceof MCH_EntitySeat) {
+         MCH_EntitySeat seat = (MCH_EntitySeat)player.ridingEntity;
+         return seat.getParent() == ac && seat.seatID + 1 == seatID;
+      }
+
+      return false;
    }
 }
