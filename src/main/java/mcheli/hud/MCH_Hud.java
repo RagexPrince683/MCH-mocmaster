@@ -3,6 +3,10 @@ package mcheli.hud;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import mcheli.hud.layout.MCH_HudLayoutManager;
 import mcheli.MCH_BaseInfo;
 import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
@@ -32,6 +36,10 @@ public class MCH_Hud extends MCH_BaseInfo {
    private boolean isDrawing;
    public boolean isIfFalse;
    public boolean exit;
+   private String layoutGroupId = "";
+   private String layoutGroupName = "";
+   private boolean layoutGroupMovable = true;
+   private final Map<String, Integer> layoutOrdinals = new HashMap<String, Integer>();
 
 
    public MCH_Hud(String name, String fname) {
@@ -52,10 +60,27 @@ public class MCH_Hud extends MCH_BaseInfo {
       if(this.isWaitEndif) {
          throw new RuntimeException("Endif not found!");
       }
+      if(this.layoutGroupId.length() > 0) throw new RuntimeException("EndLayoutGroup not found for " + this.layoutGroupId);
    }
 
    public void loadItemData(int fileLine, String item, String data) {
+      if(item.equalsIgnoreCase("LayoutGroup")) {
+         if(this.layoutGroupId.length() > 0) throw new RuntimeException("Nested LayoutGroup is not supported");
+         String[] group = data.split("\\s*,\\s*");
+         if(group.length != 3 || (!group[2].equalsIgnoreCase("movable") && !group[2].equalsIgnoreCase("fixed")))
+            throw new RuntimeException("LayoutGroup requires: stable-id, display name, movable|fixed");
+         this.layoutGroupId = MCH_HudLayoutManager.safeId(group[0]);
+         this.layoutGroupName = group[1];
+         this.layoutGroupMovable = group[2].equalsIgnoreCase("movable");
+         return;
+      }
+      if(item.equalsIgnoreCase("EndLayoutGroup")) {
+         if(this.layoutGroupId.length() == 0) throw new RuntimeException("EndLayoutGroup without LayoutGroup");
+         this.layoutGroupId = ""; this.layoutGroupName = ""; this.layoutGroupMovable = true;
+         return;
+      }
       String[] prm = data.split("\\s*,\\s*");
+      int previousSize = this.list.size();
       if(prm != null && prm.length != 0) {
          if(item.equalsIgnoreCase("If")) {
             if(this.isWaitEndif) {
@@ -155,6 +180,33 @@ public class MCH_Hud extends MCH_BaseInfo {
          }
 
       }
+      if(this.list.size() > previousSize) {
+         MCH_HudItem added = (MCH_HudItem)this.list.get(this.list.size() - 1);
+         boolean control = item.equalsIgnoreCase("If") || item.equalsIgnoreCase("Endif") || item.equalsIgnoreCase("Color") || item.equalsIgnoreCase("Exit");
+         boolean viewAligned = added instanceof MCH_HudItemGraduation || added instanceof MCH_HudItemCameraRot;
+         boolean implicitCall = added instanceof MCH_HudItemCall && this.layoutGroupId.length() == 0;
+         String key = item.toLowerCase() + ":" + this.layoutGroupId;
+         Integer ordinal = this.layoutOrdinals.get(key);
+         int value = ordinal == null ? 0 : ordinal.intValue();
+         this.layoutOrdinals.put(key, Integer.valueOf(value + 1));
+         added.setLayoutMetadata(item, fingerprint(item, prm), this.layoutGroupId, this.layoutGroupName,
+               !control && !viewAligned && !implicitCall && this.layoutGroupMovable, value);
+      }
+   }
+
+   private static String fingerprint(String directive, String[] prm) {
+      StringBuilder b = new StringBuilder(directive);
+      int start = directive.equalsIgnoreCase("DrawLineStipple") ? 2 : 0;
+      for(int i = start; i < prm.length; ++i) {
+         // Most directives store their first two expressions as the movable position.
+         if(i == start || i == start + 1) continue;
+         b.append(':').append(prm[i].trim().toLowerCase());
+      }
+      return b.toString();
+   }
+
+   public List<MCH_HudItem> getItems() {
+      return Collections.unmodifiableList(new ArrayList<MCH_HudItem>(this.list));
    }
 
    public void draw(MCH_EntityBaseVehicle ac, EntityPlayer player, float partialTicks) {
@@ -176,7 +228,8 @@ public class MCH_Hud extends MCH_BaseInfo {
       this.exit = false;
       if(ac != null && ac.getAcInfo() != null && player != null) {
          MCH_HudItem.update();
-         this.drawItems();
+         MCH_HudLayoutManager.beginHud(this.name);
+         try { this.drawItems(); } finally { MCH_HudLayoutManager.endHud(); }
          MCH_HudItem.drawVarMap();
       }
 
@@ -194,7 +247,12 @@ public class MCH_Hud extends MCH_BaseInfo {
             try {
                int line1 = hud.fileLine;
                if(hud.canExecute()) {
-                  hud.execute();
+                  if(hud.isLayoutMovable()) {
+                     final MCH_HudItem drawItem = hud;
+                     String id = MCH_HudLayoutManager.parsedId(this.name, hud.fileLine, hud.getLayoutDirective(), hud.getLayoutOrdinal(), hud.getLayoutGroupId());
+                     MCH_HudLayoutManager.renderParsed(MCH_HudLayoutManager.currentParsedProfileId(), id, this.name,
+                           hud.getLayoutFingerprint(), hud.fileLine, new Runnable() { public void run() { drawItem.execute(); } });
+                  } else hud.execute();
                   if(this.exit) {
                      break;
                   }

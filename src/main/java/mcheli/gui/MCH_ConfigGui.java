@@ -18,6 +18,7 @@ import mcheli.gui.MCH_GuiOnOffButton;
 import mcheli.gui.MCH_GuiSlider;
 import mcheli.multiplay.MCH_GuiTargetMarker;
 import mcheli.weapon.MCH_WeaponInfoManager;
+import mcheli.hud.layout.MCH_GuiHudLayoutEditor;
 import mcheli.wrapper.W_GuiButton;
 import mcheli.wrapper.W_GuiContainer;
 import mcheli.wrapper.W_McClient;
@@ -96,6 +97,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
    public static final int BUTTON_DEV_RELOAD_AC = 400;
    public static final int BUTTON_DEV_RELOAD_WEAPON = 401;
    public static final int BUTTON_DEV_RELOAD_HUD = 402;
+   public static final int BUTTON_HUD_LAYOUT = 403;
    public static final int BUTTON_SAVE_CLOSE = 100;
    public static final int BUTTON_CANCEL = 101;
    public static final int BUTTON_APPLY = 102;
@@ -168,6 +170,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.buttonReplaceCamera = new MCH_GuiOnOffButton(0, x1, y + 150, 150, 20, "Change Camera Pos : ");
       this.listRenderButtons.add(new W_GuiButton(52, x1, y + 175, 90, 20, "Controls <<"));
       this.listRenderButtons.add(new W_GuiButton(56, x1 + 95, y + 175, 110, 20, "Plane Camera >>"));
+      this.listRenderButtons.add(new W_GuiButton(BUTTON_HUD_LAYOUT, x2, y + 175, 150, 20, "HUD Layout >>"));
       this.buttonSmoothShading = new MCH_GuiOnOffButton(0, x2, y + 25, 150, 20, "Smooth Shading : ");
       this.buttonShowEntityMarker = new MCH_GuiOnOffButton(0, x2, y + 50, 150, 20, "Show Entity Maker : ");
       this.sliderEntityMarkerSize = new MCH_GuiSlider(0, x2 + 30, y + 75, 120, 20, "Entity Marker Size:%.0f", 10.0F, 0.0F, 30.0F, 1.0F);
@@ -805,6 +808,9 @@ public class MCH_ConfigGui extends W_GuiContainer {
             break;
          case 402:
             MCH_MOD.proxy.reloadHUD();
+            break;
+         case BUTTON_HUD_LAYOUT:
+            super.mc.displayGuiScreen(new MCH_GuiHudLayoutEditor(this));
             break;
          case 400:
             ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(this.thePlayer);

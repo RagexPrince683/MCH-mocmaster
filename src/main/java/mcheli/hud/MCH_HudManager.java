@@ -10,6 +10,7 @@ import mcheli.MCH_ResourceHelper;
 import mcheli.hud.MCH_Hud;
 import mcheli.hud.MCH_HudItem;
 import net.minecraft.client.Minecraft;
+import mcheli.hud.layout.MCH_HudLayoutManager;
 
 public class MCH_HudManager {
 
@@ -22,6 +23,7 @@ public class MCH_HudManager {
    }
 
    public static boolean load(String path) {
+      MCH_HudLayoutManager.reload();
       MCH_HudItem.mc = Minecraft.getMinecraft();
       map.clear();
       path = path.replace('\\', '/');
@@ -48,6 +50,9 @@ public class MCH_HudManager {
 
                      if(str.equalsIgnoreCase("exit")) {
                         str = "exit=0";
+                     }
+                     if(str.equalsIgnoreCase("endlayoutgroup")) {
+                        str = "endlayoutgroup=0";
                      }
 
                      int eqIdx = str.indexOf(61);

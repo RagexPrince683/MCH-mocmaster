@@ -1,3 +1,4 @@
+LayoutGroup = fixed_aiming, Fixed aiming sight, fixed
 
 If = sight_type==1
 	DrawLineStipple = 0xCCCC, 1,  -25,  0,   -8, 0
@@ -23,3 +24,4 @@ If = sight_type==2
 
 	DrawRect = -19, 22,  38*lock, 6
 EndIf
+EndLayoutGroup

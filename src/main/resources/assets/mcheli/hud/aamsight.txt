@@ -1,3 +1,4 @@
+LayoutGroup = fixed_aiming, Fixed aiming sight, fixed
 If = sight_type==1
 	DrawLineStipple = 0xCCCC, 1,  -25,  0,   -8, 0
 	DrawLineStipple = 0xCCCC, 1,   25,  0,    8, 0
@@ -219,3 +220,4 @@ EndIf
 If=lock==1
 DrawTexture = lockon, -75, -75, 150,150 , 0,0, 256,256
 EndIf
+EndLayoutGroup

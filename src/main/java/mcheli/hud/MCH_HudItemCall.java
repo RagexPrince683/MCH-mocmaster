@@ -3,6 +3,7 @@ package mcheli.hud;
 import mcheli.hud.MCH_Hud;
 import mcheli.hud.MCH_HudItem;
 import mcheli.hud.MCH_HudManager;
+import mcheli.hud.layout.MCH_HudLayoutManager;
 
 public class MCH_HudItemCall extends MCH_HudItem {
 
@@ -17,7 +18,8 @@ public class MCH_HudItemCall extends MCH_HudItem {
    public void execute() {
       MCH_Hud hud = MCH_HudManager.get(this.hudName);
       if(hud != null) {
-         hud.drawItems();
+         MCH_HudLayoutManager.pushCall(this.hudName + "-line-" + this.fileLine);
+         try { hud.drawItems(); } finally { MCH_HudLayoutManager.popCall(); }
       }
 
    }
