@@ -1,3 +1,8 @@
+# Fix Active Radar Toggle Input (PR pending)
+
+- Updated the shared radar key in every vehicle input handler so one press sends one synchronized radar toggle request and disabling radar hides the active radar HUD.
+- Radar toggles now play the standard local cockpit click without broadcasting a duplicate server-world sound.
+
 # Hide Disabled Active Radar HUD Widgets (PR pending)
 
 - Active radar HUD widgets now hide completely when radar is disabled while passive RWR and unrelated HUD elements remain visible.

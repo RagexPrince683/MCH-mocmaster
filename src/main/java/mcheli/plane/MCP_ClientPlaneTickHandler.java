@@ -51,7 +51,7 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
       this.KeyZoom = new MCH_Key(MCH_Config.KeyZoom.prmInt);
       this.KeyMouseAim = new MCH_Key(MCH_Config.KeyPlaneMouseAim.prmInt);
       this.KeyBombReticleMode = new MCH_Key(MCH_Config.KeyBombReticleMode.prmInt);
-      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, super.KeyUseWeapon,super.KeyCurrentWeaponLock, super.KeyVehicleLock, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, this.KeyMouseAim, this.KeyBombReticleMode, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyChaff,super.KeyAPS, super.KeyMaintenance, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
+      this.Keys = new MCH_Key[]{super.KeyUp, super.KeyDown, super.KeyRight, super.KeyLeft, this.KeySwitchMode, this.KeyEjectSeat, super.KeyUseWeapon,super.KeyCurrentWeaponLock, super.KeyVehicleLock, super.KeyRadar, super.KeySwWeaponMode, super.KeySwitchWeapon1, super.KeySwitchWeapon2, this.KeyZoom, this.KeyMouseAim, this.KeyBombReticleMode, super.KeyCameraMode, super.KeyUnmount, super.KeyUnmountForce, super.KeyFlare, super.KeyChaff,super.KeyAPS, super.KeyMaintenance, super.KeyExtra, super.KeyFreeLook, super.KeyGUI, super.KeyGearUpDown, super.KeyPutToRack, super.KeyDownFromRack};
    }
 
    protected void update(EntityPlayer player, MCP_EntityPlane plane) {
