@@ -9,9 +9,9 @@ public final class MCH_ModelTextureRepairProcessor {
 
    public static void rasterizeTriangle(boolean[] mask, int width, int height, float[] uv) {
       for(float value : uv) if(value < 0.0F || value > 1.0F) return; // wrapping must remain wrapping
-      float ax=uv[0]*(width-1), ay=(1.0F-uv[1])*(height-1);
-      float bx=uv[2]*(width-1), by=(1.0F-uv[3])*(height-1);
-      float cx=uv[4]*(width-1), cy=(1.0F-uv[5])*(height-1);
+      float ax=uv[0]*width, ay=(1.0F-uv[1])*height;
+      float bx=uv[2]*width, by=(1.0F-uv[3])*height;
+      float cx=uv[4]*width, cy=(1.0F-uv[5])*height;
       int minX=Math.max(0,(int)Math.floor(Math.min(ax,Math.min(bx,cx))));
       int maxX=Math.min(width-1,(int)Math.ceil(Math.max(ax,Math.max(bx,cx))));
       int minY=Math.max(0,(int)Math.floor(Math.min(ay,Math.min(by,cy))));
