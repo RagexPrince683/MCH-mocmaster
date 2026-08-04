@@ -44,7 +44,7 @@ Added pilot-controlled, persistent active radar, capability-aware scanning, sync
 - Prevented entity explosions below size `3.0F` from adding MCHeli or vanilla damage knockback while preserving each affected entity's existing motion.
 - Kept damage, hit reporting, effects, fire, and block behavior unchanged, and retained existing knockback behavior at or above the threshold for normal and underwater explosions.
 
-# PR pending - Pre-contact Tank Physical-Hull Step Solver
+# PR pending - Pre-contact Tank Physical-Hull Step Solver - DID NOT WORK! Was reverted.
 
 - Replaced selected-riser collision permission with a tank-only, scratch-geometry route planner that stops before first contact, lifts clear, traverses normally, and lands on the real collision-shape top.
 - Kept normal physical-hull collision active on every route segment and retained safely clipped normal movement whenever a complete step route cannot be validated.
@@ -93,7 +93,7 @@ Added pilot-controlled, persistent active radar, capability-aware scanning, sync
 - Select the nearest eligible lock target, expose the last completed lock correctly, and correct AA/AT proximity-fuze squared-distance comparisons.
 - Audit all missile weapon assets without changing their configuration or loadouts.
 
-# Catastrophic tank turret-pop correction (PR pending)
+# Catastrophic tank turret-pop correction (PR pending) - DID NOT WORK.
 
 - Detach the exact `$turret` model group with its configured weapon children, preserving the destruction-time turret yaw and gun elevation in synchronized/NBT state.
 - Add server-authoritative swept solid-block landing, unloaded-chunk protection, and a client-created dark smoke trail following the synchronized detached turret.
