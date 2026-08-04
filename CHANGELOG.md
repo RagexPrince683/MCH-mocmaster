@@ -4,6 +4,7 @@ Added pilot-controlled, persistent active radar, capability-aware scanning, sync
   state, and RWR filtering so disabled or unequipped vehicles do not emit signatures.
 - Added `KeyRadar` and documented `HasRadar`, including compatibility with explicit `RadarType` and
   enabled `EnableEntityRadar` vehicle configurations.
+- Fixed the creative inventory crash caused by radar initialization on temporary vehicle tooltip entities.
 
 # Finite cargo-backed service vehicles (PR pending)
 

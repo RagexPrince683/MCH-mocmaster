@@ -166,6 +166,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public MCH_LowPassFilterFloat lowPassPartialTicks;
    private MCH_Radar entityRadar;
    private int radarRotate;
+   private Boolean pendingRadarActive;
    private MCH_Flare flareDv;
    private int currentFlareIndex;
    public MCH_WeaponSet[] weapons;
@@ -311,8 +312,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public MCH_EntityBaseVehicle(World world) {
       super(world);
-      this.setAcInfo(null);
       this.commonStatus = 0;
+      this.entityRadar = new MCH_Radar(world);
+      this.radarRotate = 0;
+      this.pendingRadarActive = null;
+      this.setAcInfo(null);
       super.dropContentsWhenDead = false;
       super.ignoreFrustumCheck = true;
       // Normal vehicles must follow Forge's watched-chunk spawn lifecycle.
@@ -322,8 +326,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.maintenance = new MCH_Maintenance(world, this);
       this.aps = new MCH_APS(world, this);
       this.currentFlareIndex = 0;
-      this.entityRadar = new MCH_Radar(world);
-      this.radarRotate = 0;
       this.currentWeaponID = new int[0];
       //this.aircraftPosRotInc = 0;
       this.aircraftX = 0.0D;
@@ -1156,8 +1158,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public void setRadarActive(boolean active) {
       boolean enabled = active && this.hasRadar();
+      boolean wasEnabled = this.getCommonStatus(CMN_ID_ACTIVE_RADAR);
       this.setCommonStatus(CMN_ID_ACTIVE_RADAR, enabled);
-      if(!enabled) this.initRadar();
+      if(wasEnabled && !enabled) this.initRadar();
    }
 
    public boolean toggleRadar(EntityPlayer player) {
@@ -1314,7 +1317,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.setPartStatus(nbt.getInteger("PartStatus"));
       this.setTypeName(nbt.getString("TypeName"));
       super.readEntityFromNBT(nbt);
-      this.setRadarActive(nbt.hasKey("MCH_RadarActive") ? nbt.getBoolean("MCH_RadarActive") : this.hasRadar());
+      boolean savedRadarActive = nbt.hasKey("MCH_RadarActive") ? nbt.getBoolean("MCH_RadarActive") : true;
+      if(this.getAcInfo() != null) {
+         this.setRadarActive(savedRadarActive);
+      } else {
+         this.pendingRadarActive = Boolean.valueOf(savedRadarActive);
+      }
       this.getGuiInventory().readEntityFromNBT(nbt);
       this.setCommandForce(nbt.getString("AcCommand"));
       this.setFuel(nbt.getInteger("AcFuel"));
@@ -4614,7 +4622,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void updateRadar(int radarSpeed) {
-      if(this.isRadarActive()) {
+      if(this.entityRadar != null && this.isRadarActive()) {
          this.radarRotate += radarSpeed;
          if(this.radarRotate >= 360) {
             this.radarRotate = 0;
@@ -4632,16 +4640,18 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void initRadar() {
-      this.entityRadar.clear();
+      if(this.entityRadar != null) {
+         this.entityRadar.clear();
+      }
       this.radarRotate = 0;
    }
 
    public ArrayList getRadarEntityList() {
-      return this.entityRadar.getEntityList();
+      return this.entityRadar != null ? this.entityRadar.getEntityList() : new ArrayList();
    }
 
    public ArrayList getRadarEnemyList() {
-      return this.entityRadar.getEnemyList();
+      return this.entityRadar != null ? this.entityRadar.getEnemyList() : new ArrayList();
    }
 
   // @Override
@@ -8574,10 +8584,22 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void setAcInfo(MCH_BaseVehicleInfo info) {
-      boolean hadInfo = this.acInfo != null;
+      MCH_BaseVehicleInfo previousInfo = this.acInfo;
+      boolean hadRadar = previousInfo != null && previousInfo.hasRadar();
       this.acInfo = info;
-      if(!hadInfo) this.setRadarActive(info != null && info.hasRadar());
-      else if(info == null || !info.hasRadar()) this.setRadarActive(false);
+      if(previousInfo == null && info != null) {
+         boolean active = this.pendingRadarActive != null ? this.pendingRadarActive.booleanValue() : info.hasRadar();
+         this.pendingRadarActive = null;
+         this.setRadarActive(active);
+      } else if(previousInfo != null && (info == null || !info.hasRadar())) {
+         boolean wasActive = this.getCommonStatus(CMN_ID_ACTIVE_RADAR);
+         this.setRadarActive(false);
+         if(!wasActive && (info == null || hadRadar)) {
+            this.initRadar();
+         }
+      } else if(previousInfo != null && !hadRadar && info.hasRadar()) {
+         this.setRadarActive(true);
+      }
       this.updateForceSpawnPolicy();
       if(info != null) {
          this.partHatch = this.createHatch();
@@ -8599,8 +8621,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(info == null || this.acInfo == null) return false;
       if(info.getNumSeatAndRack() != this.acInfo.getNumSeatAndRack()) return false;
       boolean hadRadar = this.hasRadar();
+      boolean wasRadarActive = this.getCommonStatus(CMN_ID_ACTIVE_RADAR);
       this.acInfo = info;
-      if(!info.hasRadar()) this.setRadarActive(false);
+      if(!info.hasRadar()) {
+         this.setRadarActive(false);
+         if(hadRadar && !wasRadarActive) this.initRadar();
+      }
       else if(!hadRadar) this.setRadarActive(true);
       this.updateForceSpawnPolicy();
       this.cameraId = Math.max(0, Math.min(this.cameraId, Math.max(0, info.cameraPosition.size() - 1)));
