@@ -82,6 +82,8 @@ public class MCH_GuiTurret extends MCH_BaseVehicleCommonGui {
             int colorInactive = -1349546097;
             int RX = super.centerX + 120;
             int LX = super.centerX - 200;
+            int seatID = vehicle.getSeatIdByEntity(player);
+            this.drawRadarKeyBind(vehicle, player, seatID, RX, super.centerY + 20, colorActive, colorInactive);
             String msg;
             StringBuilder var11;
             MCH_Config var10001;
