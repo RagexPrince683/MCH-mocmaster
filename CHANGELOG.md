@@ -1,3 +1,9 @@
+## HUD Layout Editor
+
+- Added client-side, JSON-backed HUD layout profiles and a non-pausing editor entry on Render Settings.
+- Added parsed HUD element identities, safe OpenGL offset scopes, nested `Call` paths, and optional `LayoutGroup` metadata.
+- Documented HUD pack layout metadata and fixed aiming/full-screen element requirements.
+
 # Fix Active Radar Toggle Input (PR pending)
 
 - Updated the shared radar key in every vehicle input handler so one press sends one synchronized radar toggle request and disabling radar hides the active radar HUD.

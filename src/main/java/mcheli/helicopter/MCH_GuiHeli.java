@@ -22,6 +22,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
+import mcheli.hud.layout.MCH_HudLayoutManager;
 
 @SideOnly(Side.CLIENT)
 public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
@@ -71,14 +72,14 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
                }
 
                if(seatID == 0) {
-                  this.drawNewHeliSharedHud(heli, player);
-                  this.drawNewHeliHealthHud(heli, player);
-                  this.drawNewHeliPitchReadout(heli, player);
-                  this.drawNewHeliRadarHud(heli);
-                  this.drawNewHeliWeaponHud(heli, player);
+                  MCH_HudLayoutManager.renderBuiltin("heli", "heli.flight_readouts", () -> this.drawNewHeliSharedHud(heli, player));
+                  MCH_HudLayoutManager.renderBuiltin("heli", "heli.health", () -> this.drawNewHeliHealthHud(heli, player));
+                  MCH_HudLayoutManager.renderBuiltin("heli", "heli.pitch_readout", () -> this.drawNewHeliPitchReadout(heli, player));
+                  MCH_HudLayoutManager.renderBuiltin("heli", "heli.radar", () -> this.drawNewHeliRadarHud(heli));
+                  MCH_HudLayoutManager.renderBuiltin("heli", "heli.weapon_list", () -> this.drawNewHeliWeaponHud(heli, player));
                }
 
-               this.drawKeyBind(heli, player, seatID);
+               MCH_HudLayoutManager.renderBuiltin("heli", "heli.keybinds", () -> this.drawKeyBind(heli, player, seatID));
             }
 
             this.drawHitBullet(heli, -14101432, seatID);
@@ -93,14 +94,14 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
 
                MCH_EntityTvMissile tvmissile = heli.getTVMissile();
                if(seatID == 0) {
-                  this.drawNewHeliSharedHud(heli, player);
-                  this.drawNewHeliHealthHud(heli, player);
-                  this.drawNewHeliPitchReadout(heli, player);
-                  this.drawNewHeliWeaponHud(heli, player);
+                  MCH_HudLayoutManager.renderBuiltin("heli", "heli.flight_readouts", () -> this.drawNewHeliSharedHud(heli, player));
+                  MCH_HudLayoutManager.renderBuiltin("heli", "heli.health", () -> this.drawNewHeliHealthHud(heli, player));
+                  MCH_HudLayoutManager.renderBuiltin("heli", "heli.pitch_readout", () -> this.drawNewHeliPitchReadout(heli, player));
+                  MCH_HudLayoutManager.renderBuiltin("heli", "heli.weapon_list", () -> this.drawNewHeliWeaponHud(heli, player));
                }
 
                if(!heli.isMissileCameraMode(player)) {
-                  this.drawKeyBind(heli, player, seatID);
+                  MCH_HudLayoutManager.renderBuiltin("heli", "heli.keybinds", () -> this.drawKeyBind(heli, player, seatID));
                } else if(tvmissile != null) {
                   this.drawTvMissileNoise(heli, tvmissile);
                }

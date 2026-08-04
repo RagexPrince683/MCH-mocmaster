@@ -70,6 +70,12 @@ public abstract class MCH_HudItem extends Gui {
    protected static ArrayList EnemyList;
    protected static Map varMap = null;
    protected MCH_Hud parent;
+   private String layoutDirective = "item";
+   private String layoutFingerprint = "";
+   private String layoutGroupId = "";
+   private String layoutGroupName = "";
+   private boolean layoutMovable = true;
+   private int layoutOrdinal;
    protected static float partialTicks;
    private static MCH_HudItemExit dummy = new MCH_HudItemExit(0);
 
@@ -82,6 +88,22 @@ public abstract class MCH_HudItem extends Gui {
    }
 
    public abstract void execute();
+
+   public final void setLayoutMetadata(String directive, String fingerprint, String groupId, String groupName, boolean movable, int ordinal) {
+      this.layoutDirective = directive;
+      this.layoutFingerprint = fingerprint;
+      this.layoutGroupId = groupId == null ? "" : groupId;
+      this.layoutGroupName = groupName == null ? directive : groupName;
+      this.layoutMovable = movable;
+      this.layoutOrdinal = ordinal;
+   }
+
+   public final boolean isLayoutMovable() { return this.layoutMovable; }
+   public final String getLayoutDirective() { return this.layoutDirective; }
+   public final String getLayoutFingerprint() { return this.layoutFingerprint; }
+   public final String getLayoutGroupId() { return this.layoutGroupId; }
+   public final String getLayoutDisplayName() { return this.layoutGroupName; }
+   public final int getLayoutOrdinal() { return this.layoutOrdinal; }
 
    public boolean canExecute() {
       return !this.parent.isIfFalse;

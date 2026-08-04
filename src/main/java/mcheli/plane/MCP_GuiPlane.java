@@ -36,6 +36,7 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
+import mcheli.hud.layout.MCH_HudLayoutManager;
 import org.lwjgl.util.glu.GLU;
 
 @SideOnly(Side.CLIENT)
@@ -128,18 +129,18 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
 
             if(seatID == 0) {
                if(this.shouldDrawNewPlaneSimpleHud(plane, seatID)) {
-                  this.drawNewPlaneSimpleHud(plane);
-                  this.drawNewPlaneWeaponHud(plane, player);
-                  this.drawNewPlaneDebugHud(plane);
+                  MCH_HudLayoutManager.renderBuiltin("plane", "plane.flight_readouts", () -> this.drawNewPlaneSimpleHud(plane));
+                  MCH_HudLayoutManager.renderBuiltin("plane", "plane.weapon_list", () -> this.drawNewPlaneWeaponHud(plane, player));
+                  MCH_HudLayoutManager.renderBuiltin("plane", "plane.debug", () -> this.drawNewPlaneDebugHud(plane));
                } else {
-                  this.drawNewFlightThrottleHud(plane);
+                  MCH_HudLayoutManager.renderBuiltin("plane", "plane.throttle", () -> this.drawNewFlightThrottleHud(plane));
                }
             }
 
             if(plane.getTVMissile() != null && (plane.getIsGunnerMode(player) || plane.isUAV())) {
                this.drawTvMissileNoise(plane, plane.getTVMissile());
             } else {
-               this.drawKeybind(plane, player, seatID);
+               MCH_HudLayoutManager.renderBuiltin("plane", "plane.keybinds", () -> this.drawKeybind(plane, player, seatID));
             }
          }
 

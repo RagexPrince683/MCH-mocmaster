@@ -13,6 +13,7 @@ import mcheli.tank.MCH_TankInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.opengl.GL11;
+import mcheli.hud.layout.MCH_HudLayoutManager;
 
 @SideOnly(Side.CLIENT)
 public class MCH_GuiTank extends MCH_BaseVehicleCommonGui {
@@ -59,7 +60,7 @@ public class MCH_GuiTank extends MCH_BaseVehicleCommonGui {
             if(tank.getTVMissile() != null && (tank.getIsGunnerMode(player) || tank.isUAV())) {
                this.drawTvMissileNoise(tank, tank.getTVMissile());
             } else {
-               this.drawKeybind(tank, player, seatID);
+               MCH_HudLayoutManager.renderBuiltin("tank", "tank.keybinds", () -> this.drawKeybind(tank, player, seatID));
             }
          }
 
