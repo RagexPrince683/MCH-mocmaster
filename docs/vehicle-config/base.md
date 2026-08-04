@@ -88,10 +88,24 @@ For fixed-wing planes using `useNewMobilitySystem = true`, this gravity value is
 | `EngineShutdownThreshold` | int[0..100] | 20 | Engine shutdown below this health percentage. For non-floating tanks, planes, and helicopters submerged by `SubmergedDamageHeight`, waterboarding damage now stops at this threshold and throttle is forced to 0 while the engine is waterlogged. |
 | `MaxFuel` | int[0..100000000] | 0 | Capacity; zero effectively disables fuel limit. |
 | `FuelConsumption` | float[0..10000] | 1 | Consumption multiplier. |
-| `FuelSupplyRange` / `AmmoSupplyRange` | float[0..1000] | 0 | Support radius. |
+| `FuelSupplyRange` / `AmmoSupplyRange` | float[0..1000] | 0 | Fuel and ammunition support radii, respectively. |
+| `GasPump` | boolean | false | Makes fuel support finite and cargo-backed. Requires `InventorySize > 0`; accepts coal (100 units), charcoal (75), coal blocks (900), and remaining charge in `MCH_ItemFuel` cans. |
+| `AmmoLoader` | boolean | false | Makes ammunition support finite and consumes each weapon's configured `RoundItem` package from cargo. Requires `InventorySize > 0`. |
+| `ForceY` | boolean | false | Restricts finite gas-pump and ammo-loader service to vehicles on the same block Y level. |
 | `RepairOtherVehicles` | `range[,value]` | `0,10` | Support repair radius and repair value. |
 | `inventorysize` | int[0..54] | 0 | Inventory slots. |
 | `regeneration` | boolean | false | Enables regeneration flag used by vehicle logic. |
+
+`FuelSupplyRange` controls gas-pump range and `AmmoSupplyRange` controls ammo-loader range. A vehicle may enable both services. Legacy vehicles that set only either range remain infinite suppliers for compatibility. Example finite support vehicle:
+
+```text
+InventorySize = 27
+FuelSupplyRange = 4
+GasPump = true
+AmmoSupplyRange = 4
+AmmoLoader = true
+ForceY = true
+```
 
 ## Sensors, countermeasures, UAV flags
 

@@ -44,6 +44,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecartEmpty;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
@@ -153,6 +154,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    private double prevCurrentThrottle;
    public double currentSpeed;
    public int currentFuel;
+   /** Fuel held for finite gas-pump service, separate from propulsion fuel. */
+   private long serviceFuel;
    public float throttleBack = 0.0F;
    public double beforeHoverThrottle;
    public int waitMountEntity = 0;
@@ -1315,6 +1318,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.getGuiInventory().readEntityFromNBT(nbt);
       this.setCommandForce(nbt.getString("AcCommand"));
       this.setFuel(nbt.getInteger("AcFuel"));
+      this.serviceFuel = Math.max(0L, nbt.getLong("MCH_ServiceFuel"));
       setGunnerStatus(nbt.getBoolean("AcGunnerStatus"));
       int[] wa_list = nbt.getIntArray("AcWeaponsAmmo");
       if(this.getAcInfo() != null) {
@@ -1378,6 +1382,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       nbt.setString("TypeName", this.getTypeName());
       nbt.setInteger("PartStatus", this.getPartStatus() & this.getLastPartStatusMask());
       nbt.setInteger("AcFuel", this.getFuel());
+      nbt.setLong("MCH_ServiceFuel", this.serviceFuel);
       nbt.setInteger("AcDespawnCount", this.getDespawnCount());
       nbt.setFloat("AcRoll", this.getRotRoll());
       nbt.setBoolean("SearchLight", this.isSearchLightON());
@@ -1714,6 +1719,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       NBTTagCompound nbt = is.getTagCompound();
       nbt.setString("MCH_Command", this.getCommand());
+      nbt.setLong("MCH_ServiceFuel", this.serviceFuel);
       MCH_Config var10000 = MCH_MOD.config;
       if(MCH_Config.ItemFuel.prmBool) {
          nbt.setInteger("MCH_Fuel", this.getFuel());
@@ -1733,6 +1739,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(is.hasTagCompound()) {
          NBTTagCompound nbt = is.getTagCompound();
          this.setCommandForce(nbt.getString("MCH_Command"));
+         this.serviceFuel = Math.max(0L, nbt.getLong("MCH_ServiceFuel"));
          MCH_Config var10000 = MCH_MOD.config;
          if(MCH_Config.ItemFuel.prmBool) {
             this.setFuel(nbt.getInteger("MCH_Fuel"));
@@ -3994,11 +4001,53 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return this.getAcInfo() != null?this.getAcInfo().maxFuel:0;
    }
 
+   public long getServiceFuel() {
+      return this.serviceFuel;
+   }
+
+   /** Server-authoritative, saturating addition to the service reserve. */
+   public void addServiceFuel(long amount) {
+      if(!super.worldObj.isRemote && amount > 0L) {
+         this.serviceFuel = Long.MAX_VALUE - this.serviceFuel < amount ? Long.MAX_VALUE : this.serviceFuel + amount;
+      }
+   }
+
+   /** Server-authoritative deduction; returns the amount actually removed. */
+   public long removeServiceFuel(long amount) {
+      if(super.worldObj.isRemote || amount <= 0L) {
+         return 0L;
+      }
+      long removed = Math.min(amount, this.serviceFuel);
+      this.serviceFuel -= removed;
+      return removed;
+   }
+
    public void supplyFuel() {
       float range = this.getAcInfo() != null?this.getAcInfo().fuelSupplyRange:0.0F;
       if(range > 0.0F) {
          if(!super.worldObj.isRemote && this.getCountOnUpdate() % 10 == 0) {
             List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityBaseVehicle.class, this.getBoundingBox().expand((double)range, (double)range, (double)range));
+
+            if(this.getAcInfo().gasPump) {
+               if(this.isDestroyed() || this.getSizeInventory() <= 0) {
+                  return;
+               }
+               this.convertSolidServiceFuel();
+               this.sortServiceTargets(list);
+               for(int i = 0; i < list.size(); ++i) {
+                  MCH_EntityBaseVehicle target = (MCH_EntityBaseVehicle)list.get(i);
+                  if(this.isFiniteServiceTarget(target) && (!super.onGround || target.canSupply())
+                          && target.getMaxFuel() > 0 && target.getFuel() < target.getMaxFuel()) {
+                     int wanted = Math.min(30, target.getMaxFuel() - target.getFuel());
+                     int moved = this.takeServiceFuel(wanted);
+                     if(moved > 0) {
+                        target.setFuel(target.getFuel() + moved);
+                        target.fuelSuppliedCount = 40;
+                     }
+                  }
+               }
+               return;
+            }
 
             for(int i = 0; i < list.size(); ++i) {
                MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)list.get(i);
@@ -4018,6 +4067,60 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
 
       }
+   }
+
+   private boolean isFiniteServiceTarget(MCH_EntityBaseVehicle target) {
+      return target != null && !W_Entity.isEqual(this, target) && !target.isDestroyed()
+              && (!this.getAcInfo().forceY || MathHelper.floor_double(super.posY) == MathHelper.floor_double(target.posY));
+   }
+
+   private void sortServiceTargets(List targets) {
+      Collections.sort(targets, new Comparator() {
+         public int compare(Object left, Object right) {
+            Entity a = (Entity)left;
+            Entity b = (Entity)right;
+            int distance = Double.compare(MCH_EntityBaseVehicle.this.getDistanceSqToEntity(a), MCH_EntityBaseVehicle.this.getDistanceSqToEntity(b));
+            return distance != 0 ? distance : Integer.compare(W_Entity.getEntityId(a), W_Entity.getEntityId(b));
+         }
+      });
+   }
+
+   private void convertSolidServiceFuel() {
+      for(int slot = 0; slot < this.getSizeInventory(); ++slot) {
+         ItemStack stack = this.getStackInSlot(slot);
+         long value = 0L;
+         if(stack != null && stack.stackSize > 0) {
+            if(stack.getItem() == Items.coal && stack.getItemDamage() == 0) value = 100L;
+            else if(stack.getItem() == Items.coal && stack.getItemDamage() == 1) value = 75L;
+            else if(stack.getItem() == Item.getItemFromBlock(Blocks.coal_block)) value = 900L;
+         }
+         if(value > 0L) {
+            int count = 0;
+            while(count < stack.stackSize && this.serviceFuel <= Long.MAX_VALUE - value) {
+               this.addServiceFuel(value);
+               ++count;
+            }
+            if(count > 0) this.decrStackSize(slot, count);
+            if(this.getStackInSlot(slot) != null && this.getStackInSlot(slot).stackSize <= 0) this.setInventorySlotContents(slot, (ItemStack)null);
+         }
+      }
+   }
+
+   private int takeServiceFuel(int wanted) {
+      int moved = (int)this.removeServiceFuel(wanted);
+      for(int slot = 0; moved < wanted && slot < this.getSizeInventory(); ++slot) {
+         ItemStack stack = this.getStackInSlot(slot);
+         if(stack != null && stack.getItem() instanceof MCH_ItemFuel) {
+            int remaining = Math.max(0, stack.getMaxDamage() - stack.getItemDamage());
+            int amount = Math.min(wanted - moved, remaining);
+            if(amount > 0) {
+               stack.setItemDamage(stack.getItemDamage() + amount);
+               this.setInventorySlotContents(slot, stack);
+               moved += amount;
+            }
+         }
+      }
+      return moved;
    }
 
    public void updateFuel() {
@@ -4254,9 +4357,29 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public void supplyAmmoToOtherAircraft() {
       float range = this.getAcInfo() != null?this.getAcInfo().ammoSupplyRange:0.0F;
       if(range > 0.0F) {
-         //todo umm what the figma no fuck you no more free nukes wtf
          if(!super.worldObj.isRemote && this.getCountOnUpdate() % 40 == 0) {
             List list = super.worldObj.getEntitiesWithinAABB(MCH_EntityBaseVehicle.class, this.getBoundingBox().expand((double)range, (double)range, (double)range));
+
+            if(this.getAcInfo().ammoLoader) {
+               if(this.isDestroyed() || this.getSizeInventory() <= 0) {
+                  return;
+               }
+               this.sortServiceTargets(list);
+               for(int i = 0; i < list.size(); ++i) {
+                  MCH_EntityBaseVehicle target = (MCH_EntityBaseVehicle)list.get(i);
+                  if(!this.isFiniteServiceTarget(target) || !target.canSupply()) continue;
+                  for(int wid = 0; wid < target.getWeaponNum(); ++wid) {
+                     if(this.supplyCargoAmmoPackage(target, wid)) {
+                        MCH_WeaponSet ws = target.getWeapon(wid);
+                        if(ws.getAmmoNum() <= 0) ws.reloadMag();
+                        MCH_PacketNotifyAmmoNum.sendAmmoNum(target, target.getEntityByWeaponId(wid) instanceof EntityPlayer
+                                ? (EntityPlayer)target.getEntityByWeaponId(wid) : null, wid);
+                        MCH_PacketNotifyAmmoNum.sendAllAmmoNum(target, (EntityPlayer)null);
+                     }
+                  }
+               }
+               return;
+            }
 
             for(int i = 0; i < list.size(); ++i) {
                MCH_EntityBaseVehicle ac = (MCH_EntityBaseVehicle)list.get(i);
@@ -4286,6 +4409,66 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
 
       }
+   }
+
+   private boolean supplyCargoAmmoPackage(MCH_EntityBaseVehicle target, int weaponId) {
+      MCH_WeaponSet ws = target.getWeapon(weaponId);
+      if(ws == null || ws.getInfo() == null || ws.getInfo().roundItems == null || ws.getInfo().roundItems.isEmpty()) return false;
+      int space = ws.getAllAmmoNum() - ws.getRestAllAmmoNum() - ws.getAmmoNum();
+      if(space <= 0) return false;
+      int supplied = Math.max(1, ws.getInfo().suppliedNum);
+      int cycleLimit = Math.max(1, ws.getAllAmmoNum() / 10);
+      int packages = Math.max(1, cycleLimit / supplied);
+      packages = Math.min(packages, Math.max(1, (space + supplied - 1) / supplied));
+      int availablePackages = this.countCompleteAmmoPackages(ws);
+      packages = Math.min(packages, availablePackages);
+      if(packages <= 0) return false;
+
+      // Consume only after the complete transaction has been proved available.
+      Iterator requirements = ws.getInfo().roundItems.iterator();
+      while(requirements.hasNext()) {
+         MCH_WeaponInfo.RoundItem requirement = (MCH_WeaponInfo.RoundItem)requirements.next();
+         int remaining = Math.max(1, requirement.num) * packages;
+         for(int slot = 0; slot < this.getSizeInventory() && remaining > 0; ++slot) {
+            ItemStack stack = this.getStackInSlot(slot);
+            if(stack != null && requirement.itemStack != null && stack.isItemEqual(requirement.itemStack)) {
+               int amount = Math.min(remaining, stack.stackSize);
+               this.decrStackSize(slot, amount);
+               remaining -= amount;
+               ItemStack left = this.getStackInSlot(slot);
+               if(left != null && left.stackSize <= 0) this.setInventorySlotContents(slot, (ItemStack)null);
+            }
+         }
+      }
+      int add = Math.min(space, packages * supplied);
+      int before = ws.getRestAllAmmoNum() + ws.getAmmoNum();
+      ws.setRestAllAmmoNum(ws.getRestAllAmmoNum() + add);
+      return ws.getRestAllAmmoNum() + ws.getAmmoNum() > before;
+   }
+
+   private int countCompleteAmmoPackages(MCH_WeaponSet ws) {
+      int packages = Integer.MAX_VALUE;
+      for(int index = 0; index < ws.getInfo().roundItems.size(); ++index) {
+         MCH_WeaponInfo.RoundItem requirement = (MCH_WeaponInfo.RoundItem)ws.getInfo().roundItems.get(index);
+         if(requirement == null || requirement.itemStack == null) return 0;
+         boolean alreadyCounted = false;
+         int cost = 0;
+         for(int other = 0; other < ws.getInfo().roundItems.size(); ++other) {
+            MCH_WeaponInfo.RoundItem candidate = (MCH_WeaponInfo.RoundItem)ws.getInfo().roundItems.get(other);
+            if(candidate != null && candidate.itemStack != null && requirement.itemStack.isItemEqual(candidate.itemStack)) {
+               if(other < index) alreadyCounted = true;
+               cost += Math.max(1, candidate.num);
+            }
+         }
+         if(alreadyCounted) continue;
+         int found = 0;
+         for(int slot = 0; slot < this.getSizeInventory(); ++slot) {
+            ItemStack stack = this.getStackInSlot(slot);
+            if(stack != null && stack.isItemEqual(requirement.itemStack)) found += stack.stackSize;
+         }
+         packages = Math.min(packages, found / cost);
+      }
+      return packages == Integer.MAX_VALUE ? 0 : packages;
    }
 
    public boolean canPlayerSupplyAmmo(EntityPlayer player, int weaponId) {

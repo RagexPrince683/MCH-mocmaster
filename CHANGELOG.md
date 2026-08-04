@@ -1,9 +1,8 @@
-# Toggleable Active Radar (PR pending)
+# Finite cargo-backed service vehicles (PR pending)
 
-- Added pilot-controlled, persistent active radar, capability-aware scanning, synchronized emitter
-  state, and RWR filtering so disabled or unequipped vehicles do not emit signatures.
-- Added `KeyRadar` and documented `HasRadar`, including compatibility with explicit `RadarType` and
-  enabled `EnableEntityRadar` vehicle configurations.
+- Added opt-in `GasPump`, `AmmoLoader`, and `ForceY` shared vehicle configuration while retaining infinite legacy range-only suppliers.
+- Added persistent, overflow-safe service fuel reserves, cargo fuel-can draining, deterministic target ordering, and transactional configured ammunition-package consumption.
+- Documented finite support inventory, range, fuel conversion, and same-level requirements.
 
 # Prevent Small-Explosion Knockback (PR pending)
 
