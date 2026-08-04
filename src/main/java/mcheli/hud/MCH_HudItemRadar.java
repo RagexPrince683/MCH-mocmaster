@@ -28,7 +28,7 @@ public class MCH_HudItemRadar extends MCH_HudItem {
    }
 
    public void execute() {
-      if(MCH_HudItem.ac == null || !MCH_HudItem.ac.isRadarActive()) {
+      if(MCH_HudItem.ac == null || !MCH_HudItem.ac.hasRadar() || !MCH_HudItem.ac.isRadarActive()) {
          return;
       }
       if(MCH_HudShared.isNewHeliPilotHudActive(MCH_HudItem.ac, MCH_HudItem.player) && this.left.equals("144") && this.top.equals("21")) {

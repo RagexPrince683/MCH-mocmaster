@@ -533,3 +533,10 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Keep normal movement, rotation, tall obstacles, ceilings, adjacent shapes, and failed raised
   routes subject to ordinary physical hull collision.
 - Add deterministic Abrams route-policy coverage using its configured `StepHeight` and front hull.
+# Synchronized active radar HUD and control hint (PR pending)
+
+- Read active radar power directly from the synchronized vehicle status watcher on clients, so all
+  active radar panels and contacts disappear immediately when the server turns radar off.
+- Add a shared, authority-aware `Radar ON`/`Radar OFF` vehicle HUD line that follows the configured
+  `KeyRadar` binding, including turret and remote-pilot control HUDs.
+- Preserve passive RWR and warning displays independently of active radar visibility.

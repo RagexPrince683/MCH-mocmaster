@@ -246,8 +246,8 @@ public abstract class MCH_HudItem extends Gui {
       updateVarMapItem("roll", (double)MathHelper.wrapAngleTo180_float(ac.getRotRoll()));
       updateVarMapItem("altitude", (double)Altitude);
       updateVarMapItem("sea_alt", getSeaAltitude(ac));
-      updateVarMapItem("have_radar", ac.isEntityRadarMounted()?1.0D:0.0D);
-      updateVarMapItem("radar_active", ac != null && ac.getAcInfo() != null && ac.isRadarActive()?1.0D:0.0D);
+      updateVarMapItem("have_radar", ac != null && ac.hasRadar()?1.0D:0.0D);
+      updateVarMapItem("radar_active", ac != null && ac.isRadarActive()?1.0D:0.0D);
       updateVarMapItem("radar_rot", (double)getRadarRot(ac));
       updateVarMapItem("hp", (double)ac.getHP());
       updateVarMapItem("max_hp", (double)ac.getMaxHP());

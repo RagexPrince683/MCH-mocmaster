@@ -111,6 +111,7 @@ public abstract class MCH_BaseVehicleCommonGui extends MCH_Gui {
       if(seatID == 0) {
          this.drawString(ac.isVehicleAccessLocked() ? "Lock: LOCKED" : "Lock: UNLOCKED", LX, super.centerY + 50, colorActive);
       }
+      this.drawRadarKeyBind(ac, player, seatID, RX, super.centerY + 20, colorActive, colorInactive);
       if(seatID == 0 && ac.canPutToRack()) {
          var10000 = (new StringBuilder()).append("PutRack : ");
          var10001 = MCH_MOD.config;
@@ -227,6 +228,17 @@ public abstract class MCH_BaseVehicleCommonGui extends MCH_Gui {
          this.drawString(msg, LX, super.centerY - 20, colorActive);
       }
 
+   }
+
+   protected void drawRadarKeyBind(MCH_EntityBaseVehicle ac, EntityPlayer player, int seatID,
+         int x, int y, int colorActive, int colorInactive) {
+      if(ac == null || !ac.hasRadar() || seatID != 0 || !ac.isPilot(player)) {
+         return;
+      }
+      boolean active = ac.isRadarActive();
+      String msg = "Radar " + (active ? "ON" : "OFF") + " : "
+            + MCH_KeyName.getDescOrName(MCH_Config.KeyRadar.prmInt);
+      this.drawString(msg, x, y, active ? colorActive : colorInactive);
    }
 
    protected void drawDismountKeyBind(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, EntityPlayer player,

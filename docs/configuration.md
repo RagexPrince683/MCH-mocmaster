@@ -4,7 +4,10 @@
 
 `KeyRadar` toggles pilot-controlled active radar and defaults to **P**, because **R** is already the
 vehicle GUI control. Passengers cannot toggle radar. Vehicles without configured equipment reject
-the control. Disabling radar removes the vehicle's RWR emission but leaves passive RWR enabled.
+the control. The shared vehicle control HUD displays `Radar ON` or `Radar OFF` from the synchronized
+vehicle state alongside the currently configured `KeyRadar` key; the line remains available while
+radar is off so the pilot or valid remote controller can turn it back on. Disabling radar removes the
+vehicle's RWR emission but leaves passive RWR enabled.
 
 MC Helicopter Overdrive+ writes `config/mcheli.cfg` during startup. The file is generated from source-defined defaults, then rewritten after loading so missing options are restored.
 

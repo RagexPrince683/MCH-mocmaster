@@ -770,7 +770,19 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public boolean getCommonStatus(int bit) {
-      return (this.commonStatus >> bit & 1) != 0;
+      return (this.getSynchronizedCommonStatus() >> bit & 1) != 0;
+   }
+
+   /**
+    * The server owns commonStatus. On clients the data watcher is the synchronized
+    * value, while commonStatus is only a once-per-tick cache and can be stale while
+    * a HUD is being rendered between entity updates.
+    */
+   private int getSynchronizedCommonStatus() {
+      if(super.worldObj != null && super.worldObj.isRemote && this.getDataWatcher() != null) {
+         return this.getDataWatcher().getWatchableObjectInt(DATAWT_ID_STATUS);
+      }
+      return this.commonStatus;
    }
 
    public UUID getVehicleOwnerUUID() {
@@ -828,16 +840,21 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public void setCommonStatus(int bit, boolean b, boolean writeClient) {
       if(!super.worldObj.isRemote || writeClient) {
-         int bofore = this.commonStatus;
+         // Client-predicted bits (for example free look) must start from the latest
+         // watched value. Starting from the tick cache can write an old radar bit
+         // back into ID 23 after the server's radar update has arrived.
+         int bofore = this.getSynchronizedCommonStatus();
+         int updatedStatus = bofore;
          int mask = 1 << bit;
          if(b) {
-            this.commonStatus |= mask;
+            updatedStatus |= mask;
          } else {
-            this.commonStatus &= ~mask;
+            updatedStatus &= ~mask;
          }
 
-         if(bofore != this.commonStatus) {
-            this.getDataWatcher().updateObject(23, Integer.valueOf(this.commonStatus));
+         this.commonStatus = updatedStatus;
+         if(bofore != updatedStatus) {
+            this.getDataWatcher().updateObject(DATAWT_ID_STATUS, Integer.valueOf(updatedStatus));
          }
       }
 
