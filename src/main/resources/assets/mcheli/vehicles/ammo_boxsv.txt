@@ -22,6 +22,8 @@ GravityInWater = -1.0
 CanRide = false
 ExplosionSizeByCrash = 40
 
+ItemIconScaleFactor = 2
+
 ForceY = true
 ;debug
 

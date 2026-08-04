@@ -18,6 +18,10 @@ FuelSupplyRange = 20
 CanRide = false
 InventorySize = 64
 
+ItemIconScaleFactor = 2
+
+AddTexture = fuel_truck_2
+
 GasPump = true
 
 ForceY = true
