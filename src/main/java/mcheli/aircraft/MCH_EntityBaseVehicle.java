@@ -1184,7 +1184,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(this.worldObj.isRemote || !this.hasRadar() || !this.isPilot(player)) return false;
       this.setRadarActive(!this.isRadarActive());
       player.addChatMessage(new ChatComponentTranslation(this.isRadarActive() ? "mcheli.radar.on" : "mcheli.radar.off"));
-      W_WorldFunc.DEF_playSoundEffect(this.worldObj, this.posX, this.posY, this.posZ, "random.click", 1.0F, 1.0F);
       return true;
    }
 
