@@ -1,3 +1,7 @@
+# Hide Disabled Active Radar HUD Widgets (PR pending)
+
+- Active radar HUD widgets now hide completely when radar is disabled while passive RWR and unrelated HUD elements remain visible.
+
 # Toggleable Active Radar
 
 Added pilot-controlled, persistent active radar, capability-aware scanning, synchronized emitter

@@ -38,7 +38,7 @@ If = is_heat_wpn==1
 	DrawRect = -144, 58, 41*wpn_heat, 8
 EndIf
 
-If = have_radar==1
+If = have_radar==1 && radar_active==1
 	DrawTexture = plane_hud, 144, 37,  64,64,  0,0, 128,128
 
 	Color = 0xFF28d448

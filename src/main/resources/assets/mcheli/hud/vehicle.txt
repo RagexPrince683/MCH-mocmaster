@@ -70,7 +70,7 @@ Endif
 
 
 ; レーダーを持つ機体の場合
-If = have_radar==1
+If = have_radar==1 && radar_active==1
 	DrawTexture = vehicle_hud, 144, 21,  64,64,  0,0, 128,128
 	
 	Color = 0x80FFFFFF

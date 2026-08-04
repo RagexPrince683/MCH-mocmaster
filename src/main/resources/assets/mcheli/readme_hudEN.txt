@@ -61,6 +61,7 @@
 ; dsp_mt_dist : Whether to display impact distance (0 = do not display, 1 = display)
 ; mt_dist     : Impact distance (cannot calculate if less than 0.0)
 ; have_radar  : Whether a radar is equipped (0 = no radar, 1 = radar present)
+; radar_active: Whether the equipped radar is powered (0 = off or unavailable, 1 = active)
 ; radar_rot   : Radar rotation angle. The entity position is updated when the radar completes a full rotation.
 ; vtol_stat   : Fixed-wing aircraft only. 0 = normal, 1 = switching to VTOL, 2 = in VTOL mode
 ; free_look   : 0 = normal, 1 = in FREE LOOK mode

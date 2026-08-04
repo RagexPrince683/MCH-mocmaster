@@ -189,7 +189,7 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
    }
 
    private void drawNewHeliRadarHud(MCH_EntityHeli heli) {
-      if(!this.shouldDrawNewHeliHudAdditions(heli) || !heli.isEntityRadarMounted()) {
+      if(!this.shouldDrawNewHeliHudAdditions(heli) || !heli.hasRadar() || !heli.isRadarActive()) {
          return;
       }
       int x = super.centerX + 144;
@@ -214,7 +214,7 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       W_McClient.MOD_bindTexture("textures/gui/heli_hud.png");
       this.drawTexturedModalRectRotate((double)x, (double)y, (double)size, (double)size, 0.0D, 0.0D, 128.0D, 128.0D, 0.0F);
-      this.drawTexturedModalRectRotate((double)(x + 16), (double)y, 32.0D, (double)size, 128.0D, 0.0D, 64.0D, 128.0D, (float)((heli.ticksExisted * 4) % 360));
+      this.drawTexturedModalRectRotate((double)(x + 16), (double)y, 32.0D, (double)size, 128.0D, 0.0D, 64.0D, 128.0D, (float)heli.getRadarRotate());
       GL11.glBlendFunc(srcBlend, dstBlend);
       if(!blend) {
          GL11.glDisable(3042);
