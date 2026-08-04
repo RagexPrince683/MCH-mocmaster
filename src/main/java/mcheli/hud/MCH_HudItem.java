@@ -26,6 +26,7 @@ import mcheli.weapon.MCH_WeaponSet;
 import mcheli.wrapper.W_McClient;
 import mcheli.wrapper.W_OpenGlHelper;
 import mcheli.wrapper.W_WorldFunc;
+import mcheli.hud.layout.MCH_HudLayoutManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.Tessellator;
@@ -137,14 +138,18 @@ public abstract class MCH_HudItem extends Gui {
    }
 
    public void drawCenteredString(String s, int x, int y, int color) {
+      int w = mc.fontRenderer.getStringWidth(s);
+      MCH_HudLayoutManager.capture(x - w / 2, y, x + w / 2, y + mc.fontRenderer.FONT_HEIGHT);
       this.drawCenteredString(mc.fontRenderer, s, x, y, color);
    }
 
    public void drawString(String s, int x, int y, int color) {
+      MCH_HudLayoutManager.capture(x, y, x + mc.fontRenderer.getStringWidth(s), y + mc.fontRenderer.FONT_HEIGHT);
       this.drawString(mc.fontRenderer, s, x, y, color);
    }
 
    public void drawTexture(String name, double left, double top, double width, double height, double uLeft, double vTop, double uWidth, double vHeight, float rot, int textureWidth, int textureHeight) {
+      MCH_HudLayoutManager.capture(left, top, left + width, top + height);
       W_McClient.MOD_bindTexture("textures/gui/" + name + ".png");
       GL11.glPushMatrix();
       GL11.glTranslated(left + width / 2.0D, top + height / 2.0D, 0.0D);
@@ -162,6 +167,7 @@ public abstract class MCH_HudItem extends Gui {
    }
 
    public static void drawRect(double par0, double par1, double par2, double par3, int par4) {
+      MCH_HudLayoutManager.capture(par0, par1, par2, par3);
       double j1;
       if(par0 < par2) {
          j1 = par0;
@@ -195,10 +201,12 @@ public abstract class MCH_HudItem extends Gui {
    }
 
    public void drawLine(double[] line, int color) {
+      MCH_HudLayoutManager.captureLine(line);
       this.drawLine(line, color, 1);
    }
 
    public void drawLine(double[] line, int color, int mode) {
+      MCH_HudLayoutManager.captureLine(line);
       GL11.glPushMatrix();
       GL11.glEnable(3042);
       GL11.glDisable(3553);

@@ -551,3 +551,9 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Add a shared, authority-aware `Radar ON`/`Radar OFF` vehicle HUD line that follows the configured
   `KeyRadar` binding, including turret and remote-pilot control HUDs.
 - Preserve passive RWR and warning displays independently of active radar visibility.
+# HUD Layout Editor direct manipulation
+
+- Replaced the profile/coordinate list with a live, non-darkening vehicle HUD preview.
+- Added mouse hover, overlap-aware selection, dragging, grid snapping, keyboard nudging, and immediate reset previews.
+- Added transactional multi-profile edit sessions so Save persists changed profiles and Cancel discards all edits.
+- Added logical screen-space bounds capture for HUD text, textures, rectangles, lines, and compound built-in scopes.
