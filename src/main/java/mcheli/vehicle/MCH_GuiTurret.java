@@ -6,6 +6,7 @@ import mcheli.MCH_Config;
 import mcheli.MCH_KeyName;
 import mcheli.MCH_MOD;
 import mcheli.aircraft.MCH_BaseVehicleCommonGui;
+import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.gui.MCH_Gui;
 import mcheli.vehicle.MCH_EntityTurret;
 import mcheli.vehicle.MCH_TurretInfo;
@@ -26,12 +27,12 @@ public class MCH_GuiTurret extends MCH_BaseVehicleCommonGui {
    }
 
    public boolean isDrawGui(EntityPlayer player) {
-      return player.ridingEntity != null && player.ridingEntity instanceof MCH_EntityTurret;
+      return this.getRiddenTurret(player) != null;
    }
 
    public void drawGui(EntityPlayer player, boolean isThirdPersonView) {
-      if(player.ridingEntity != null && player.ridingEntity instanceof MCH_EntityTurret) {
-         MCH_EntityTurret vehicle = (MCH_EntityTurret)player.ridingEntity;
+      MCH_EntityTurret vehicle = this.getRiddenTurret(player);
+      if(vehicle != null) {
          if(!vehicle.isDestroyed()) {
             int seatID = vehicle.getSeatIdByEntity(player);
             GL11.glLineWidth((float)MCH_Gui.scaleFactor);
@@ -59,6 +60,17 @@ public class MCH_GuiTurret extends MCH_BaseVehicleCommonGui {
             this.drawHitBullet(vehicle, -14066, seatID);
          }
       }
+   }
+
+   private MCH_EntityTurret getRiddenTurret(EntityPlayer player) {
+      if(player.ridingEntity instanceof MCH_EntityTurret) {
+         return (MCH_EntityTurret)player.ridingEntity;
+      }
+      if(player.ridingEntity instanceof MCH_EntitySeat
+            && ((MCH_EntitySeat)player.ridingEntity).getParent() instanceof MCH_EntityTurret) {
+         return (MCH_EntityTurret)((MCH_EntitySeat)player.ridingEntity).getParent();
+      }
+      return null;
    }
 
    public void drawKeyBind(MCH_EntityTurret vehicle, EntityPlayer player) {
@@ -121,14 +133,8 @@ public class MCH_GuiTurret extends MCH_BaseVehicleCommonGui {
                this.drawString(msg, LX, super.centerY - 50, colorActive);
             }
 
-            msg = "Dismount all : LShift";
-            this.drawString(msg, LX, super.centerY - 40, colorActive);
-            if(vehicle.getSeatNum() >= 2) {
-               var11 = (new StringBuilder()).append("Dismount : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeyUnmount.prmInt)).toString();
-               this.drawString(msg, LX, super.centerY - 30, colorActive);
-            }
+            this.drawDismountKeyBind(vehicle, info, player, vehicle.getSeatIdByEntity(player), LX,
+                  super.centerY - 30, colorActive);
 
          }
       }
