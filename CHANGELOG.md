@@ -1,3 +1,8 @@
+# HUD rectangle selection (PR pending)
+
+- Added live click-and-drag rectangle selection for movable HUD editor elements, including Shift-add and snapshot-based Control-toggle behavior.
+- Preserved group dragging, overlap cycling, scaling, editor controls, grid snapping, and fixed HUD category exclusions.
+
 ## HUD Layout Editor
 
 - Added client-side, JSON-backed HUD layout profiles and a non-pausing editor entry on Render Settings.
