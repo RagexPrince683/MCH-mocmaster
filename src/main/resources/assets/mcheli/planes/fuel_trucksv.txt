@@ -1,13 +1,13 @@
-DisplayName = Infinite Fuel Truck
-AddDisplayName = ja_JP, Inf 燃料補給車
-NameOnEarlyASRadar = Fast Jet
-NameOnModernASRadar = Infinite Fuel Truck
-NameOnEarlyAARadar = Fast Jet
-NameOnModernAARadar = Infinite Fuel Truck
+DisplayName = Fuel Truck
+AddDisplayName = ja_JP, 燃料補給車
+NameOnEarlyASRadar = FT
+NameOnModernASRadar = Fuel Truck
+NameOnEarlyAARadar = FT
+NameOnModernAARadar = Fuel Truck
 ChaffWaitTime = 360
 ChaffUseTime = 120
 ThrottleDownFactor = 0.20
-ItemID = 28722
+ItemID = 28723
 Weight = 15000
 CanMountShip = true
 MaxHp = 100
@@ -16,8 +16,13 @@ DamageFactor = 2
 ThrottleUpDown = 0.0
 FuelSupplyRange = 35
 CanRide = false
+InventorySize = 64
 
-Category = ADMIN
+ExplosionSizeByCrash = 20
+
+
+
+Category = EQ
 
 AddSeat = 0.00,  0.80,  0.0
 
