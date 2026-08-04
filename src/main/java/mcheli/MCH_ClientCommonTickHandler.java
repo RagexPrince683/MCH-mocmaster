@@ -1092,13 +1092,18 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    /** Draws the same first applicable vehicle GUI used by the gameplay overlay. */
    public boolean drawHudLayoutEditorPreview(float partialTicks) {
       if(this.mc.thePlayer == null) return false;
+      boolean rendered = false;
       for(MCH_Gui gui : this.guis) {
          if(gui.isDrawGui(this.mc.thePlayer)) {
             gui.drawScreen(0, 0, partialTicks);
-            return true;
+            rendered = true;
+            break;
          }
       }
-      return false;
+      if(MCH_MOD.proxy instanceof MCH_ClientProxy) {
+         rendered |= ((MCH_ClientProxy)MCH_MOD.proxy).getRwrRenderer().renderHudLayoutEditorPreview(partialTicks);
+      }
+      return rendered;
    }
 
    private void releaseCameraAndControlForReplay() {
