@@ -220,27 +220,9 @@ public class MCH_MOD {
        File addonsDir = new File(evt.getModConfigurationDirectory().getParentFile(), "mcheli_addons");
        MCH_ResourceHelper.setAddonDir(addonsDir);
 
-       // Register addon resource pack with Minecraft's defaultResourcePacks list via reflection.
-       // This ensures our pack survives refreshResources() calls, which rebuild from
-       // defaultResourcePacks + repositoryEntries every time. The old reloadResourcePack()
-       // approach was wiped by clearResources() on each reload.
-       if (isDev || true) {
-          try {
-             {
-                net.minecraft.client.resources.IResourcePack addonPack = new MCH_AddonResourcePack();
-                // Access Minecraft.defaultResourcePacks (private List<IResourcePack>)
-                java.lang.reflect.Field field = net.minecraft.client.Minecraft.class.getDeclaredField("defaultResourcePacks");
-                field.setAccessible(true);
-                @SuppressWarnings("unchecked")
-                java.util.List<net.minecraft.client.resources.IResourcePack> defaultPacks =
-                    (java.util.List<net.minecraft.client.resources.IResourcePack>) field.get(net.minecraft.client.Minecraft.getMinecraft());
-                defaultPacks.add(addonPack);
-                MCH_Lib.Log("Registered live MCHeli resource pack");
-             }
-          } catch (Exception e) {
-             MCH_Lib.Log("Failed to register addon resource pack: %s", e.getMessage());
-          }
-       }
+       // Resource packs are a client-only Minecraft API. Keep their classes out of this
+       // common entry point so Forge can load PreInit on a dedicated server.
+       proxy.registerAddonResourcePack();
 
 
 

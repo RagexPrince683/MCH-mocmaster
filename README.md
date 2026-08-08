@@ -91,6 +91,9 @@ The Forge metadata marks the mod as client-required and server-optional, but mul
 4. Stop the server, edit the configuration, then restart. Some server settings can be reloaded with `/mcheli reconfig`.
 5. Ensure every joining client has the same mod and compatible content/assets.
 
+Addon resource-pack registration runs only on Minecraft clients. Dedicated servers load addon
+definitions from `mcheli_addons` without attempting to initialize client rendering or resource-pack classes.
+
 ### Development builds
 
 This repository uses ForgeGradle 1.x through the Gradle wrapper.

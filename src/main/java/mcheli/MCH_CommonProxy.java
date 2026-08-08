@@ -60,6 +60,9 @@ public class MCH_CommonProxy {
 
    public void registerSounds() {}
 
+   /** Client-only hook; dedicated servers must not resolve resource-pack classes. */
+   public void registerAddonResourcePack() {}
+
    public MCH_Config loadConfig(String fileName) {
       this.lastConfigFileName = fileName;
       MCH_Config config = new MCH_Config("./", fileName);

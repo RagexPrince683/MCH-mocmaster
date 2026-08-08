@@ -101,6 +101,23 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       return Minecraft.getMinecraft().mcDataDir.getPath();
    }
 
+   @Override
+   public void registerAddonResourcePack() {
+      try {
+         MCH_AddonResourcePack addonPack = new MCH_AddonResourcePack();
+         // Register as a default pack so refreshResources() retains the live addon source.
+         java.lang.reflect.Field field = Minecraft.class.getDeclaredField("defaultResourcePacks");
+         field.setAccessible(true);
+         @SuppressWarnings("unchecked")
+         java.util.List<net.minecraft.client.resources.IResourcePack> defaultPacks =
+             (java.util.List<net.minecraft.client.resources.IResourcePack>) field.get(Minecraft.getMinecraft());
+         defaultPacks.add(addonPack);
+         MCH_Lib.Log("Registered live MCHeli resource pack");
+      } catch (Exception e) {
+         MCH_Lib.Log("Failed to register addon resource pack: %s", e.getMessage());
+      }
+   }
+
    public void registerRenderer() {
       MinecraftForge.EVENT_BUS.register(MCH_VehicleLODManager.INSTANCE);
       RenderingRegistry.registerEntityRenderingHandler(MCH_EntitySeat.class, new MCH_RenderTest(0.0F, 0.0F, 0.0F, "seat"));
