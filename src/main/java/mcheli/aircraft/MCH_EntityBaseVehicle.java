@@ -179,7 +179,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    protected MCH_WeaponSet dummyWeapon;
    protected int useWeaponStat;
    protected int hitStatus;
-   protected final MCH_SoundUpdater soundUpdater;
+   protected final MCH_IEntitySoundUpdater soundUpdater;
    protected Entity lastRiddenByEntity;
    protected Entity lastRidingEntity;
    public List listUnmountReserve = new ArrayList();

@@ -76,6 +76,7 @@ import mcheli.wrapper.W_TickRegistry;
 import mcheli.wrapper.modelloader.W_ModelCustom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.Packet;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.model.IModelCustom;
 import net.minecraftforge.common.MinecraftForge;
@@ -99,6 +100,23 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
    public String getDataDir() {
       return Minecraft.getMinecraft().mcDataDir.getPath();
+   }
+
+   @Override
+   public void registerAddonResourcePack() {
+      try {
+         MCH_AddonResourcePack addonPack = new MCH_AddonResourcePack();
+         // Register as a default pack so refreshResources() retains the live addon source.
+         java.lang.reflect.Field field = Minecraft.class.getDeclaredField("defaultResourcePacks");
+         field.setAccessible(true);
+         @SuppressWarnings("unchecked")
+         java.util.List<net.minecraft.client.resources.IResourcePack> defaultPacks =
+             (java.util.List<net.minecraft.client.resources.IResourcePack>) field.get(Minecraft.getMinecraft());
+         defaultPacks.add(addonPack);
+         MCH_Lib.Log("Registered live MCHeli resource pack");
+      } catch (Exception e) {
+         MCH_Lib.Log("Failed to register addon resource pack: %s", e.getMessage());
+      }
    }
 
    public void registerRenderer() {
@@ -762,6 +780,13 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
    public Entity getClientPlayer() {
       return Minecraft.getMinecraft().thePlayer;
+   }
+
+   @Override
+   public void sendPacketToServer(Packet packet) {
+      if (packet != null && Minecraft.getMinecraft().thePlayer != null) {
+         Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(packet);
+      }
    }
 
    public void init() {

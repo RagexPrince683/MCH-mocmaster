@@ -5,12 +5,13 @@ import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
 import mcheli.MCH_ServerTickHandler;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
-import mcheli.aircraft.MCH_SoundUpdater;
+import mcheli.aircraft.MCH_IEntitySoundUpdater;
 import mcheli.network.packets.PacketVehicleLODSnapshot;
 import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.network.Packet;
 
 public class MCH_CommonProxy {
 
@@ -54,11 +55,14 @@ public class MCH_CommonProxy {
       return "Server";
    }
 
-   public MCH_SoundUpdater CreateSoundUpdater(MCH_EntityBaseVehicle aircraft) {
+   public MCH_IEntitySoundUpdater CreateSoundUpdater(MCH_EntityBaseVehicle aircraft) {
       return null;
    }
 
    public void registerSounds() {}
+
+   /** Client-only hook; dedicated servers must not resolve resource-pack classes. */
+   public void registerAddonResourcePack() {}
 
    public MCH_Config loadConfig(String fileName) {
       this.lastConfigFileName = fileName;
@@ -87,6 +91,9 @@ public class MCH_CommonProxy {
    public Entity getClientPlayer() {
       return null;
    }
+
+   /** Client-only packet queue hook. Calls on a dedicated server are ignored. */
+   public void sendPacketToServer(Packet packet) {}
 
    public void setCreativeDigDelay(int n) {}
 

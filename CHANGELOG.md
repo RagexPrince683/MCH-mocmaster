@@ -574,3 +574,18 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 
 - Added persistent, center-pivoted HUD element scaling with schema version 2 migration.
 - Added right-click multi-selection, group dragging, group arrow movement, and multi-element reset controls to the live HUD layout editor.
+
+# (17b2efa Fix dedicated server addon resource loading)
+
+- Moved addon resource-pack registration behind the sided proxy so dedicated servers no longer
+  resolve Forge client-only resource classes during pre-initialization.
+- Preserved live addon resource registration and resource-refresh behavior on clients.
+- Documented the dedicated-server/client split for addon resource handling.
+
+# (b48a875 Isolate remaining client runtime links)
+
+- Removed direct Minecraft client references from the shared packet handler and delegated client
+  player and packet-queue access through the sided proxy.
+- Replaced the common proxy and vehicle entity's client-only sound-updater type with a common-side
+  update contract while retaining the existing client implementation.
+- Audited the common mod entry point and shared packet initialization path for client linkage.
