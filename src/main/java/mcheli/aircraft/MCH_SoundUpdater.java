@@ -9,7 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 
 @SideOnly(Side.CLIENT)
-public class MCH_SoundUpdater extends W_SoundUpdater {
+public class MCH_SoundUpdater extends W_SoundUpdater implements MCH_IEntitySoundUpdater {
 
 
    //todo: rewrite completely or something for xradar compat

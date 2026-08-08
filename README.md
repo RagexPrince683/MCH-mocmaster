@@ -93,6 +93,8 @@ The Forge metadata marks the mod as client-required and server-optional, but mul
 
 Addon resource-pack registration runs only on Minecraft clients. Dedicated servers load addon
 definitions from `mcheli_addons` without attempting to initialize client rendering or resource-pack classes.
+Client-player lookup and client-bound packet-queue access are likewise isolated behind the sided proxy;
+the shared packet handler can therefore initialize without linking Minecraft client classes on a server.
 
 ### Development builds
 

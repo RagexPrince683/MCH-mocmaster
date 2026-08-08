@@ -76,6 +76,7 @@ import mcheli.wrapper.W_TickRegistry;
 import mcheli.wrapper.modelloader.W_ModelCustom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.Packet;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.model.IModelCustom;
 import net.minecraftforge.common.MinecraftForge;
@@ -779,6 +780,13 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
    public Entity getClientPlayer() {
       return Minecraft.getMinecraft().thePlayer;
+   }
+
+   @Override
+   public void sendPacketToServer(Packet packet) {
+      if (packet != null && Minecraft.getMinecraft().thePlayer != null) {
+         Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(packet);
+      }
    }
 
    public void init() {

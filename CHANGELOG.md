@@ -581,3 +581,11 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
   resolve Forge client-only resource classes during pre-initialization.
 - Preserved live addon resource registration and resource-refresh behavior on clients.
 - Documented the dedicated-server/client split for addon resource handling.
+
+# (b48a875 Isolate remaining client runtime links)
+
+- Removed direct Minecraft client references from the shared packet handler and delegated client
+  player and packet-queue access through the sided proxy.
+- Replaced the common proxy and vehicle entity's client-only sound-updater type with a common-side
+  update contract while retaining the existing client implementation.
+- Audited the common mod entry point and shared packet initialization path for client linkage.

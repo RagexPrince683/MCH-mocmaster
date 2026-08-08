@@ -6,7 +6,6 @@ import cpw.mods.fml.common.network.FMLOutboundHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
@@ -19,7 +18,7 @@ import mcheli.network.packets.PacketLaserGuidanceTargeting;
 import mcheli.network.packets.PacketLockTarget;
 import mcheli.network.packets.PacketVehicleLODSnapshot;
 import mcheli.network.packets.PacketVehicleMountGraph;
-import net.minecraft.client.Minecraft;
+import mcheli.MCH_MOD;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.INetHandler;
@@ -105,7 +104,7 @@ public class PacketHandler extends MessageToMessageCodec<FMLProxyPacket, PacketB
         //Check the side and handle our packet accordingly
         switch (FMLCommonHandler.instance().getEffectiveSide()) {
             case CLIENT: {
-                packet.handleClientSide(getClientPlayer());
+                packet.handleClientSide((EntityPlayer) MCH_MOD.proxy.getClientPlayer());
                 break;
             }
             case SERVER: {
@@ -151,11 +150,6 @@ public class PacketHandler extends MessageToMessageCodec<FMLProxyPacket, PacketB
                 }
             }
         );
-    }
-
-    @SideOnly(Side.CLIENT)
-    private EntityPlayer getClientPlayer() {
-        return Minecraft.getMinecraft().thePlayer;
     }
 
     /**
@@ -235,7 +229,7 @@ public class PacketHandler extends MessageToMessageCodec<FMLProxyPacket, PacketB
      * Send a packet to the server
      */
     public void sendToServer(Packet packet) {
-        Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(packet);
+        MCH_MOD.proxy.sendPacketToServer(packet);
     }
 
     /**
@@ -246,12 +240,7 @@ public class PacketHandler extends MessageToMessageCodec<FMLProxyPacket, PacketB
     }
 
     public void sendToDonut(PacketBase packet, double x, double y, double z, float minRange, float maxRange, int dimension) {
-        List players;
-        if (FMLCommonHandler.instance().getSide().isClient()) {
-            players = Minecraft.getMinecraft().theWorld.playerEntities;
-        } else {
-            players = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
-        }
+        List players = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
 
         float minRangeSq = minRange * minRange;
         float maxRangeSq = maxRange * maxRange;
@@ -270,12 +259,7 @@ public class PacketHandler extends MessageToMessageCodec<FMLProxyPacket, PacketB
     }
 
     public void sendToAllExcept(PacketBase packet, double x, double y, double z, float range, EntityPlayer player, int dimension) {
-        List players;
-        if (FMLCommonHandler.instance().getSide().isClient()) {
-            players = Minecraft.getMinecraft().theWorld.playerEntities;
-        } else {
-            players = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
-        }
+        List players = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
 
         float rangeSq = range * range;
 
