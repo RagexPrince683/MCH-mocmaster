@@ -57,6 +57,8 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    private static final boolean DEBUG_ANGELICA_DYNAMIC_PART_RENDER = Boolean.getBoolean("mcheli.debugAngelicaDynamicPartRender");
    private static final Set angelicaDynamicPartRenderDiagnostics = new HashSet();
    private static final Map vehicleLODDiagnosticTimes = new HashMap();
+   /** Shared immutable input for crawler tracks rendered without a live vehicle. */
+   private static final float[] STATIC_CRAWLER_TRACK_STATE = new float[]{0.0F, 0.0F};
 
    public static Random rand = new Random();
 
@@ -1308,9 +1310,19 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    }
 
    public static void renderCrawlerTrack(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
+      if(ac == null) {
+         renderCrawlerTrack(info, tickTime);
+         return;
+      }
+
       float[] direction = new float[2];
       for(int side = 0; side < 2; ++side) direction[side] = wrappedPhaseDelta(ac.prevRotCrawlerTrack[side], ac.rotCrawlerTrack[side], 0.0F);
       renderCrawlerTrack(info, ac.rotCrawlerTrack, ac.prevRotCrawlerTrack, direction, tickTime);
+   }
+
+   public static void renderCrawlerTrack(MCH_BaseVehicleInfo info, float tickTime) {
+      renderCrawlerTrack(info, STATIC_CRAWLER_TRACK_STATE, STATIC_CRAWLER_TRACK_STATE,
+         STATIC_CRAWLER_TRACK_STATE, tickTime);
    }
 
    public static void renderCrawlerTrack(MCH_BaseVehicleInfo info, float[] phase, float[] previousPhase,

@@ -7,7 +7,6 @@ import java.util.List;
 import mcheli.MCH_IRecipeList;
 import mcheli.MCH_ItemRecipe;
 import mcheli.MCH_Lib;
-import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_RenderBaseVehicle;
 import mcheli.block.MCH_CurrentRecipe;
 import mcheli.block.MCH_DraftingTableCreatePacket;
@@ -962,7 +961,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          float lw = GL11.glGetFloat(2849);
          GL11.glLineWidth(1.0F);
          model.renderAll(this.drawFace - faceNum, this.drawFace);
-         MCH_RenderBaseVehicle.renderCrawlerTrack((MCH_EntityBaseVehicle)null, this.current.getAcInfo(), partialTicks);
+         MCH_RenderBaseVehicle.renderCrawlerTrack(this.current.getAcInfo(), partialTicks);
          GL11.glLineWidth(lw);
          GL11.glPolygonMode(1032, 6914);
          GL11.glEnable(3553);
@@ -971,7 +970,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       if(this.drawFace >= faceNum) {
          GL11.glColor4d(1.0D, 1.0D, 1.0D, 1.0D);
          model.renderAll(0, this.drawFace - faceNum);
-         MCH_RenderBaseVehicle.renderCrawlerTrack((MCH_EntityBaseVehicle)null, this.current.getAcInfo(), partialTicks);
+         MCH_RenderBaseVehicle.renderCrawlerTrack(this.current.getAcInfo(), partialTicks);
       }
 
       GL11.glEnable('\u803a');
