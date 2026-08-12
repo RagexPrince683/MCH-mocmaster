@@ -1,3 +1,8 @@
+# Fix Drafting Table Crawler Track Preview Crash (PR pending)
+
+- Fixed vehicle previews with crawler tracks crashing when the drafting table rendered without a live vehicle entity.
+- Kept preview tracks visible at a stable static phase while preserving live vehicle and LOD crawler track animation.
+
 # Treat RWR as single HUD element and integrate it into the HUD Layout Editor (PR pending)
 
 - Registered the complete RWR display as the single `builtin:rwr` / `rwr.display` HUD layout element.
