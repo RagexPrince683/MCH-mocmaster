@@ -787,7 +787,9 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          }
          this.updateWeapons();
          this.onUpdate_Seats();
+         float controlYaw = this.getRotYaw();
          this.onUpdate_Control();
+         this.validateControlYaw(controlYaw);
          this.onUpdate_Rotor();
          super.prevPosX = super.posX;
          super.prevPosY = super.posY;
