@@ -136,9 +136,10 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `DisplayEntityMarker` | `true` | Shows entity markers. |
 | `EntityMarkerSize` | `10.0` | Entity marker size; minimum corrected to 0. |
 | `BlockMarkerSize` | `10.0` | Block marker size; minimum corrected to 0. |
-| `ReplaceRenderViewEntity` | `true` | Replaces render-view entity for MCHeli camera behavior. |
 | `ItemRecipe_*` | See generated config/source defaults | Recipe strings for core MCHeli items. |
 | `MultiThreadedModelLoading` | `true` | Enables threaded model loading on the client. |
+
+MCHeli render-view switching is mandatory internal camera behavior rather than a user-configurable option. Legacy configuration lines such as `ReplaceRenderViewEntity=false` are safely ignored and are not written to newly generated configuration files, so they can no longer disable MCHeli camera positioning.
 
 Piercing block resistance is checked independently of block destruction and therefore still applies when the server's `mobGriefing` game rule is `false`; existing destruction behavior continues to decide whether the block remains intact. The feature only changes the impacted projectile instance's remaining penetration distance when a limit stops it. It does not change the integer type, parser, or meaning of existing weapon `Piercing` values.
 
