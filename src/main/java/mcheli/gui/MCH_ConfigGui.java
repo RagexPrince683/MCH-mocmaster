@@ -42,7 +42,6 @@ public class MCH_ConfigGui extends W_GuiContainer {
    private MCH_GuiOnOffButton buttonSmoothShading;
    private MCH_GuiOnOffButton buttonShowEntityMarker;
    private MCH_GuiOnOffButton buttonMarkThroughWall;
-   private MCH_GuiOnOffButton buttonReplaceCamera;
    private MCH_GuiOnOffButton buttonNewExplosion;
    private MCH_GuiOnOffButton buttonPlaneChaseCamera;
    private MCH_GuiOnOffButton buttonPlaneChaseSpeedDistance;
@@ -167,9 +166,8 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.buttonShowHUDTP = new MCH_GuiOnOffButton(0, x1, y + 25, 150, 20, "Show HUD Third Person : ");
       this.buttonHideKeyBind = new MCH_GuiOnOffButton(0, x1, y + 50, 150, 20, "Hide Key Binding : ");
       this.sliderHitMark = new MCH_GuiSlider[]{new MCH_GuiSlider(0, x1 + 0, y + 125, 75, 20, "Alpha:%.0f", 0.0F, 0.0F, 255.0F, 16.0F), new MCH_GuiSlider(0, x1 + 75, y + 75, 75, 20, "Red:%.0f", 0.0F, 0.0F, 255.0F, 16.0F), new MCH_GuiSlider(0, x1 + 75, y + 100, 75, 20, "Green:%.0f", 0.0F, 0.0F, 255.0F, 16.0F), new MCH_GuiSlider(0, x1 + 75, y + 125, 75, 20, "Blue:%.0f", 0.0F, 0.0F, 255.0F, 16.0F)};
-      this.buttonReplaceCamera = new MCH_GuiOnOffButton(0, x1, y + 150, 150, 20, "Change Camera Pos : ");
-      this.listRenderButtons.add(new W_GuiButton(52, x1, y + 175, 90, 20, "Controls <<"));
-      this.listRenderButtons.add(new W_GuiButton(56, x1 + 95, y + 175, 110, 20, "Plane Camera >>"));
+      this.listRenderButtons.add(new W_GuiButton(52, x1, y + 150, 90, 20, "Controls <<"));
+      this.listRenderButtons.add(new W_GuiButton(56, x1 + 95, y + 150, 110, 20, "Plane Camera >>"));
       this.listRenderButtons.add(new W_GuiButton(BUTTON_HUD_LAYOUT, x2, y + 175, 150, 20, "HUD Layout >>"));
       this.buttonSmoothShading = new MCH_GuiOnOffButton(0, x2, y + 25, 150, 20, "Smooth Shading : ");
       this.buttonShowEntityMarker = new MCH_GuiOnOffButton(0, x2, y + 50, 150, 20, "Show Entity Maker : ");
@@ -186,7 +184,6 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.listRenderButtons.add(this.buttonSmoothShading);
       this.listRenderButtons.add(this.buttonHideKeyBind);
       this.listRenderButtons.add(this.buttonShowEntityMarker);
-      this.listRenderButtons.add(this.buttonReplaceCamera);
       this.listRenderButtons.add(this.buttonNewExplosion);
       this.listRenderButtons.add(this.sliderEntityMarkerSize);
       this.listRenderButtons.add(this.sliderBlockMarkerSize);
@@ -434,7 +431,6 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.sliderEntityMarkerSize.setSliderValue((float) config.EntityMarkerSize.prmDouble);
       this.sliderBlockMarkerSize.setSliderValue((float) config.BlockMarkerSize.prmDouble);
 
-      this.buttonReplaceCamera.setOnOff(config.ReplaceRenderViewEntity.prmBool);
       this.buttonNewExplosion.setOnOff(config.DefaultExplosionParticle.prmBool);
 
       this.sliderHitMark[0].setSliderValue(config.hitMarkColorAlpha * 255.0F);
@@ -496,7 +492,6 @@ public class MCH_ConfigGui extends W_GuiContainer {
       config.EntityMarkerSize.setPrm(sliderEntityMarkerSize.getSliderValueInt(1));
       config.BlockMarkerSize.setPrm(sliderBlockMarkerSize.getSliderValueInt(1));
 
-      config.ReplaceRenderViewEntity.setPrm(buttonReplaceCamera.getOnOff());
       config.DefaultExplosionParticle.setPrm(buttonNewExplosion.getOnOff());
 
       // Set hit mark color
