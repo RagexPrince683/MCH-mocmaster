@@ -5977,8 +5977,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(seatInfo instanceof MCH_SeatRackInfo) {
          Vec3 rackUnmountPosition = this.getRackUnmountPosition((MCH_SeatRackInfo)seatInfo);
          if(rackUnmountPosition != null) {
-            entity.setLocationAndAngles(rackUnmountPosition.xCoord, rackUnmountPosition.yCoord, rackUnmountPosition.zCoord,
-                  this.getRotYaw() + seatInfo.fixYaw, seatInfo.fixPitch);
+            this.applyUnmountLocation(entity, rackUnmountPosition.xCoord, rackUnmountPosition.yCoord,
+                  rackUnmountPosition.zCoord, this.getRotYaw() + seatInfo.fixYaw, seatInfo.fixPitch);
          } else {
             this.setUnmountPosition(entity, Vec3.createVectorHelper(seatInfo.pos.xCoord, 0.0D, seatInfo.pos.zCoord));
          }
@@ -6634,13 +6634,35 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                v = this.getTransformedPosition(x, 2.0D, pos.zCoord);
             }
 
-            rByEntity.setPosition(v.xCoord, v.yCoord, v.zCoord);
+            this.applyUnmountPosition(rByEntity, v.xCoord, v.yCoord, v.zCoord);
          }
 
       } else if(rByEntity != null && !super.worldObj.isRemote) {
          this.returnNewUavPilotToStation(rByEntity, "uav_unmount_position");
       }
 
+   }
+
+   /**
+    * Commits MC Heli's final post-detach player exit through the same server movement
+    * handshake used by vanilla teleports. A plain Entity#setPosition here leaves
+    * NetHandlerPlayServer's accepted position at vanilla's provisional dismount exit.
+    */
+   private void applyUnmountPosition(Entity entity, double x, double y, double z) {
+      if(!super.worldObj.isRemote && entity instanceof EntityPlayerMP && entity.ridingEntity == null) {
+         EntityPlayerMP player = (EntityPlayerMP)entity;
+         player.playerNetServerHandler.setPlayerLocation(x, y, z, player.rotationYaw, player.rotationPitch);
+      } else {
+         entity.setPosition(x, y, z);
+      }
+   }
+
+   private void applyUnmountLocation(Entity entity, double x, double y, double z, float yaw, float pitch) {
+      if(!super.worldObj.isRemote && entity instanceof EntityPlayerMP && entity.ridingEntity == null) {
+         ((EntityPlayerMP)entity).playerNetServerHandler.setPlayerLocation(x, y, z, yaw, pitch);
+      } else {
+         entity.setLocationAndAngles(x, y, z, yaw, pitch);
+      }
    }
 
    public boolean unmountEntityFromSeat(Entity entity) {
@@ -6883,7 +6905,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             float unmountYaw = entity.rotationYaw;
             float unmountPitch = entity.rotationPitch;
             entity.mountEntity((Entity)null);
-            entity.setLocationAndAngles(unmountX, unmountY, unmountZ, unmountYaw, unmountPitch);
+            this.applyUnmountLocation(entity, unmountX, unmountY, unmountZ, unmountYaw, unmountPitch);
             boolean launchedAircraft = entity instanceof MCH_EntityBaseVehicle && this.isLaunchRack(this, info);
             if(entity instanceof MCH_EntityBaseVehicle) {
                ((MCH_EntityBaseVehicle)entity).applyRackLaunch(this, info);
