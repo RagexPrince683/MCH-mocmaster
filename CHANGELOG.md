@@ -1,3 +1,9 @@
+# Remove optional MCHeli camera render-view toggle (PR pending)
+
+- Removed the `Change Camera Pos` GUI toggle and its `ReplaceRenderViewEntity` configuration option.
+- Made MCHeli render-view switching mandatory after the existing Replay Mod and plane chase camera ownership protections.
+- Made legacy `ReplaceRenderViewEntity=false` configuration lines harmless so they can no longer disable MCHeli camera positioning.
+
 # Fix Drafting Table Crawler Track Preview Crash (PR pending)
 
 - Fixed vehicle previews with crawler tracks crashing when the drafting table rendered without a live vehicle entity.

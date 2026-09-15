@@ -270,7 +270,6 @@ public class MCH_Config {
    public static MCH_ConfigPrm EntityMarkerSize;
    public static MCH_ConfigPrm BlockMarkerSize;
    public static MCH_ConfigPrm DisplayMarkThroughWall;
-   public static MCH_ConfigPrm ReplaceRenderViewEntity;
    public static MCH_ConfigPrm StingerLockRange;
    public static MCH_ConfigPrm DefaultExplosionParticle;
    public static MCH_ConfigPrm RangeFinderSpotDist;
@@ -693,7 +692,6 @@ public class MCH_Config {
       DisplayMarkThroughWall = new MCH_ConfigPrm("DisplayMarkThroughWall", true);
       EntityMarkerSize = new MCH_ConfigPrm("EntityMarkerSize", 10.0D);
       BlockMarkerSize = new MCH_ConfigPrm("BlockMarkerSize", 10.0D);
-      ReplaceRenderViewEntity = new MCH_ConfigPrm("ReplaceRenderViewEntity", true);
       StingerLockRange = new MCH_ConfigPrm("StingerLockRange", 4988.0D);
       delayrangeloader = new MCH_ConfigPrm("delayrangeloader", 6);
       bombletloader = new MCH_ConfigPrm("bombletloader", 10);
@@ -946,7 +944,6 @@ public class MCH_Config {
               DisplayEntityMarker,
               EntityMarkerSize,
               BlockMarkerSize,
-              ReplaceRenderViewEntity,
               null,
               ItemRecipe_Fuel,
               ItemRecipe_GLTD,

@@ -494,15 +494,12 @@ public class MCH_Lib {
          mcheli.compat.MCH_ReplayModCompat.logBlockedCameraWrite("MCH_Lib.setRenderViewEntity");
          return;
       }
-      MCH_Config var10000 = MCH_MOD.config;
       if(MCP_PlaneChaseCamera.isAnyRenderCameraActive() && !MCP_PlaneChaseCamera.ownsRenderEntity(entity)) {
          MCP_PlaneChaseCamera.warnSkippedRenderViewRestore(entity, "MCH_Lib.setRenderViewEntity");
          return;
       }
       MCP_PlaneChaseCamera.logCameraWrite("MCH_Lib.setRenderViewEntity", entity != null?entity.getClass().getName():"null");
-      if(MCH_Config.ReplaceRenderViewEntity.prmBool) {
-         W_McClient.setRenderEntity(entity);
-      }
+      W_McClient.setRenderEntity(entity);
 
    }
 
