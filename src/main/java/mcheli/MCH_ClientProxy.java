@@ -347,9 +347,10 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       MCH_DefaultBulletModels.Rocket = this.loadBulletModel("rocket");
       MCH_DefaultBulletModels.Torpedo = this.loadBulletModel("torpedo");
 
-      MCH_ThrowableInfo var7;
-      for(var5 = MCH_ThrowableInfoManager.getValues().iterator(); var5.hasNext(); var7.model = MCH_ModelManager.load("throwable", var7.name)) {
-         var7 = (MCH_ThrowableInfo)var5.next();
+      Iterator<?> throwableInfoIterator = MCH_ThrowableInfoManager.getValues().iterator();
+      while(throwableInfoIterator.hasNext()) {
+         MCH_ThrowableInfo throwableInfo = (MCH_ThrowableInfo)throwableInfoIterator.next();
+         throwableInfo.model = MCH_ModelManager.load("throwable", throwableInfo.name);
       }
 
       MCH_ModelManager.load("blocks", "drafting_table");
@@ -792,8 +793,8 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       try {
          Minecraft e = Minecraft.getMinecraft();
          MCH_MultiplayClient.readModList(e.getSession().getPlayerID());
-      } catch (Exception var2) {
-         var2.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
