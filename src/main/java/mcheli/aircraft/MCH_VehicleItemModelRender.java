@@ -70,6 +70,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer {
 
    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
       MCH_BaseVehicleInfo info = getInfo(item);
+      mcheli.MCH_ClientProxy.ensureVehicleModel(info);
 
       if(info == null || info.model == null || !is3DIconEnabled(info)) {
          return false;
@@ -91,6 +92,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer {
 
    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
       MCH_BaseVehicleInfo info = getInfo(item);
+      mcheli.MCH_ClientProxy.ensureVehicleModel(info);
 
       if(info == null || info.model == null || !is3DIconEnabled(info)) {
          return;

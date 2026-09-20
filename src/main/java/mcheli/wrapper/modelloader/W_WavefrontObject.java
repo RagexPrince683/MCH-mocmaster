@@ -206,23 +206,11 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    private void compactFaces() {
-      Iterator i$ = this.groupObjects.iterator();
-
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
-         if(groupObject != null && groupObject.faces.size() > 0) {
-            Iterator i$1 = groupObject.faces.iterator();
-
-            while(i$1.hasNext()) {
-               W_Face face = (W_Face)i$1.next();
-               face.compact();
-               ++this.faceNum;
-            }
-
-            groupObject.faces.trimToSize();
-         }
+      for(Object object : this.groupObjects) {
+         W_GroupObject group = (W_GroupObject)object;
+         this.faceNum += group.faces.size();
+         group.finalizeGeometry();
       }
-
    }
 
    private void releaseLoaderScratch() {
@@ -558,45 +546,37 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public void renderAllLine(Tessellator tessellator, int startLine, int maxLine) {
-      int lineCnt = 0;
-      Iterator i$ = this.groupObjects.iterator();
-
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
-         if(groupObject.faces.size() > 0) {
-            Iterator i$1 = groupObject.faces.iterator();
-
-            while(i$1.hasNext()) {
-               W_Face face = (W_Face)i$1.next();
-
-               for(int i = 0; i < face.getVertexCount() / 3; ++i) {
-                  int vertexOffset = i * 3;
-                  ++lineCnt;
-                  if(lineCnt > maxLine) {
-                     return;
-                  }
-
-                  tessellator.addVertex((double)face.getVertexX(vertexOffset), (double)face.getVertexY(vertexOffset), (double)face.getVertexZ(vertexOffset));
-                  tessellator.addVertex((double)face.getVertexX(vertexOffset + 1), (double)face.getVertexY(vertexOffset + 1), (double)face.getVertexZ(vertexOffset + 1));
-                  ++lineCnt;
-                  if(lineCnt > maxLine) {
-                     return;
-                  }
-
-                  tessellator.addVertex((double)face.getVertexX(vertexOffset + 1), (double)face.getVertexY(vertexOffset + 1), (double)face.getVertexZ(vertexOffset + 1));
-                  tessellator.addVertex((double)face.getVertexX(vertexOffset + 2), (double)face.getVertexY(vertexOffset + 2), (double)face.getVertexZ(vertexOffset + 2));
-                  ++lineCnt;
-                  if(lineCnt > maxLine) {
-                     return;
-                  }
-
-                  tessellator.addVertex((double)face.getVertexX(vertexOffset + 2), (double)face.getVertexY(vertexOffset + 2), (double)face.getVertexZ(vertexOffset + 2));
-                  tessellator.addVertex((double)face.getVertexX(vertexOffset), (double)face.getVertexY(vertexOffset), (double)face.getVertexZ(vertexOffset));
+      int lineCount = 0;
+      for(Object object : this.groupObjects) {
+         W_GroupObject group = (W_GroupObject)object;
+         for(int face = 0; face < group.getFaceCount(); ++face) {
+            int vertices = group.getFaceVertexCount(face);
+            int firstVertex = group.getFaceFirstVertex(face);
+            for(int triangle = 0; triangle < vertices / 3; ++triangle) {
+               int vertex = firstVertex + triangle * 3;
+               lineCount = this.addTriangleLines(tessellator, group, vertex, lineCount, maxLine);
+               if(lineCount > maxLine) {
+                  return;
                }
             }
          }
       }
+   }
 
+   private int addTriangleLines(Tessellator tessellator, W_GroupObject group, int vertex, int lineCount, int maxLine) {
+      int[] from = new int[]{0, 1, 2};
+      int[] to = new int[]{1, 2, 0};
+      for(int edge = 0; edge < 3; ++edge) {
+         ++lineCount;
+         if(lineCount > maxLine) {
+            return lineCount;
+         }
+         int a = vertex + from[edge];
+         int b = vertex + to[edge];
+         tessellator.addVertex(group.getVertexX(a), group.getVertexY(a), group.getVertexZ(a));
+         tessellator.addVertex(group.getVertexX(b), group.getVertexY(b), group.getVertexZ(b));
+      }
+      return lineCount;
    }
 
    public int getVertexNum() {
@@ -618,29 +598,20 @@ public class W_WavefrontObject extends W_ModelCustom {
       tessellator.draw();
    }
 
-   public void renderAll(Tessellator tessellator, int startFace, int maxLine) {
-      int faceCnt = 0;
-      Iterator i$ = this.groupObjects.iterator();
-
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
-         if(groupObject.faces.size() > 0) {
-            Iterator i$1 = groupObject.faces.iterator();
-
-            while(i$1.hasNext()) {
-               W_Face face = (W_Face)i$1.next();
-               ++faceCnt;
-               if(faceCnt >= startFace) {
-                  if(faceCnt > maxLine) {
-                     return;
-                  }
-
-                  face.addFaceForRender(tessellator);
-               }
-            }
+   public void renderAll(Tessellator tessellator, int startFace, int maxFace) {
+      int faceCount = 0;
+      for(Object object : this.groupObjects) {
+         W_GroupObject group = (W_GroupObject)object;
+         int first = Math.max(0, startFace - faceCount);
+         int last = Math.min(group.getFaceCount() - 1, maxFace - faceCount);
+         if(first <= last) {
+            group.renderFaces(tessellator, first, last);
+         }
+         faceCount += group.getFaceCount();
+         if(faceCount > maxFace) {
+            return;
          }
       }
-
    }
 
 }

@@ -1,3 +1,11 @@
+# Optimize Lazy Model Geometry Loading (PR pending)
+
+- Replaced retained per-face model graphs with group-sized primitive geometry and face-boundary arrays.
+- Changed vehicle meshes to load on first entity or item-renderer use instead of eagerly parsing every vehicle during startup.
+- Canonicalized and atomically cached model requests, preserved the previous model after failed targeted reloads, and retired unsafe worker-thread vehicle registration.
+- Updated UV repair to mutate compact geometry and defer VBO recreation to the render thread.
+- Added disabled-by-default model loading diagnostics through `-Dmcheli.debugModelLoading=true`.
+
 # Fix Three-Second MCHeli Dismount Hold (#673)
 
 - Replaced tick/event-order-dependent Sneak mutation with one monotonic, physical-input hold state machine for direct vehicle and seat riders.

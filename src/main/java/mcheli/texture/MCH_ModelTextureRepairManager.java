@@ -12,7 +12,6 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
-import mcheli.wrapper.modelloader.W_Face;
 import mcheli.wrapper.modelloader.W_GroupObject;
 import mcheli.wrapper.modelloader.W_MetasequoiaObject;
 import mcheli.wrapper.modelloader.W_WavefrontObject;
@@ -51,8 +50,60 @@ public final class MCH_ModelTextureRepairManager implements IResourceManagerRelo
       return new Entry(location,dynamic);
    }catch(Exception e){if(MCH_Config.ModelTextureRepairDebugLogging!=null&&MCH_Config.ModelTextureRepairDebugLogging.prmBool)MCH_Lib.Log("Texture repair skipped: model=%s texture=%s (%s)",modelPath,source,e.getMessage());return new Entry(source,null);}finally{if(in!=null)try{in.close();}catch(Exception ignored){}}}
    private static int positive(mcheli.MCH_ConfigPrm p,int d){return p==null?d:Math.max(0,p.prmInt);}
-   private static boolean coverage(IModelCustom model,boolean[] mask,int w,int h){Iterator groups=null;if(model instanceof W_MetasequoiaObject)groups=((W_MetasequoiaObject)model).groupObjects.iterator();else if(model instanceof W_WavefrontObject)groups=((W_WavefrontObject)model).groupObjects.iterator();if(groups==null)return false;boolean any=false;while(groups.hasNext()){W_GroupObject g=(W_GroupObject)groups.next();for(Object o:g.faces){W_Face f=(W_Face)o;int n=f.getTextureCoordinateCount();if(n!=3&&n!=4)continue;float[] uv=new float[n*2];for(int i=0;i<n;i++){uv[i*2]=f.getTextureU(i);uv[i*2+1]=f.getTextureV(i);}MCH_ModelTextureRepairProcessor.rasterizeFace(mask,w,h,uv);any=true;}}return any;}
-   private static void correct(IModelCustom model,BufferedImage image,int radius){Iterator groups=model instanceof W_MetasequoiaObject?((W_MetasequoiaObject)model).groupObjects.iterator():model instanceof W_WavefrontObject?((W_WavefrontObject)model).groupObjects.iterator():null;if(groups==null)return;while(groups.hasNext())for(Object o:((W_GroupObject)groups.next()).faces){W_Face f=(W_Face)o;int n=f.getTextureCoordinateCount();float[] uv=new float[n*2];boolean changed=false;for(int i=0;i<n;i++){float u=f.getTextureU(i),v=f.getTextureV(i);float[] c=MCH_ModelTextureRepairProcessor.correctUV(u,v,image,radius);uv[i*2]=c[0];uv[i*2+1]=c[1];changed|=u!=c[0]||v!=c[1];}if(changed)f.setRepairedTextureCoordinates(uv);}}
+   private static boolean coverage(IModelCustom model, boolean[] mask, int width, int height) {
+      Iterator groups = groups(model);
+      if(groups == null) {
+         return false;
+      }
+      boolean any = false;
+      while(groups.hasNext()) {
+         W_GroupObject group = (W_GroupObject)groups.next();
+         int vertex = 0;
+         for(int face = 0; face < group.getFaceCount(); ++face) {
+            int count = group.getFaceVertexCount(face);
+            if(count == 3 || count == 4) {
+               float[] uv = new float[count * 2];
+               for(int index = 0; index < count; ++index) {
+                  uv[index * 2] = group.getTextureU(vertex + index);
+                  uv[index * 2 + 1] = group.getTextureV(vertex + index);
+               }
+               MCH_ModelTextureRepairProcessor.rasterizeFace(mask, width, height, uv);
+               any = true;
+            }
+            vertex += count;
+         }
+      }
+      return any;
+   }
+
+   private static void correct(IModelCustom model, BufferedImage image, int radius) {
+      Iterator groups = groups(model);
+      if(groups == null) {
+         return;
+      }
+      while(groups.hasNext()) {
+         W_GroupObject group = (W_GroupObject)groups.next();
+         for(int vertex = 0; vertex < group.getVertexCount(); ++vertex) {
+            float u = group.getTextureU(vertex);
+            float v = group.getTextureV(vertex);
+            float[] corrected = MCH_ModelTextureRepairProcessor.correctUV(u, v, image, radius);
+            if(u != corrected[0] || v != corrected[1]) {
+               group.setTextureCoordinates(vertex, corrected[0], corrected[1]);
+            }
+         }
+      }
+   }
+
+   private static Iterator groups(IModelCustom model) {
+      if(model instanceof W_MetasequoiaObject) {
+         return ((W_MetasequoiaObject)model).groupObjects.iterator();
+      }
+      if(model instanceof W_WavefrontObject) {
+         return ((W_WavefrontObject)model).groupObjects.iterator();
+      }
+      return null;
+   }
+
    private static void preview(String model,ResourceLocation texture,BufferedImage original,boolean[] mask,MCH_ModelTextureRepairProcessor.Result result)throws Exception{File dir=new File(Minecraft.getMinecraft().mcDataDir,"mcheli-texture-repair/"+safe(model+"__"+texture));dir.mkdirs();ImageIO.write(original,"png",new File(dir,"original.png"));BufferedImage m=new BufferedImage(original.getWidth(),original.getHeight(),BufferedImage.TYPE_INT_ARGB),components=new BufferedImage(original.getWidth(),original.getHeight(),BufferedImage.TYPE_INT_ARGB),overlay=new BufferedImage(original.getWidth(),original.getHeight(),BufferedImage.TYPE_INT_ARGB);for(int p=0;p<mask.length;p++){int x=p%original.getWidth(),y=p/original.getWidth();if(mask[p])m.setRGB(x,y,Color.WHITE.getRGB());if(result.components[p])components.setRGB(x,y,0xFFFF0000);overlay.setRGB(x,y,result.components[p]?0xFFFF00FF:original.getRGB(x,y));}ImageIO.write(m,"png",new File(dir,"uv-coverage.png"));ImageIO.write(components,"png",new File(dir,"transparent-components.png"));ImageIO.write(result.image,"png",new File(dir,"repaired.png"));ImageIO.write(overlay,"png",new File(dir,"uv-correction-overlay.png"));java.io.PrintWriter report=new java.io.PrintWriter(new File(dir,"report.txt"),"UTF-8");report.println("model="+model);report.println("texture="+texture);report.close();}
    private static String safe(String s){return s.replaceAll("[^A-Za-z0-9._-]","_");}
    public void onResourceManagerReload(IResourceManager ignored){TextureManager tm=Minecraft.getMinecraft().getTextureManager();for(Object o:cache.values()){Entry e=(Entry)o;if(e.dynamic!=null)tm.deleteTexture(e.location);}cache.clear();generation=0;}

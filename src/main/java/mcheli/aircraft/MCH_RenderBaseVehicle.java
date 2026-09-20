@@ -10,6 +10,7 @@ import java.util.Set;
 import cpw.mods.fml.common.Loader;
 
 import mcheli.MCH_ClientCommonTickHandler;
+import mcheli.MCH_ClientProxy;
 import mcheli.MCH_ClientEventHook;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
@@ -75,6 +76,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       //   ac.onAcInfoReloaded();
       //}
       MCH_BaseVehicleInfo info = ac.getAcInfo();
+      MCH_ClientProxy.ensureVehicleModel(info);
       if(info != null) {
          GL11.glPushMatrix();
          float yaw = this.calcRot(ac.getRotYaw(), ac.prevRotationYaw, tickTime);
