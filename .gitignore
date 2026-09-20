@@ -9,3 +9,4 @@ run/
 *.jar
 *.class
 *.log
+*.pyc
