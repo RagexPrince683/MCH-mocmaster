@@ -46,14 +46,14 @@ public class StringExpression extends WordExpression {
    public long evalLong() {
       try {
          return NumberUtil.parseLong(super.word);
-      } catch (Exception var4) {
+      } catch (Exception exception) {
          try {
             return Long.parseLong(super.word);
-         } catch (Exception var3) {
+         } catch (Exception exception2) {
             try {
                return (long)Double.parseDouble(super.word);
-            } catch (Exception var2) {
-               throw new EvalException(2003, super.word, super.string, super.pos, var2);
+            } catch (Exception exception3) {
+               throw new EvalException(2003, super.word, super.string, super.pos, exception3);
             }
          }
       }
@@ -62,11 +62,11 @@ public class StringExpression extends WordExpression {
    public double evalDouble() {
       try {
          return Double.parseDouble(super.word);
-      } catch (Exception var4) {
+      } catch (Exception exception) {
          try {
             return (double)NumberUtil.parseLong(super.word);
-         } catch (Exception var3) {
-            throw new EvalException(2003, super.word, super.string, super.pos, var4);
+         } catch (Exception exception2) {
+            throw new EvalException(2003, super.word, super.string, super.pos, exception);
          }
       }
    }

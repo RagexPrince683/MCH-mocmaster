@@ -76,62 +76,62 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
       }
 
       super.isBeforeRiding = super.isRiding;
-      EntityClientPlayerMP var7 = super.mc.thePlayer;
-      MCP_EntityPlane var8 = null;
-      boolean var9 = true;
-      if(var7 != null) {
-         if(var7.ridingEntity instanceof MCP_EntityPlane) {
-            var8 = (MCP_EntityPlane)var7.ridingEntity;
-         } else if(var7.ridingEntity instanceof MCH_EntitySeat) {
-            MCH_EntitySeat var10 = (MCH_EntitySeat)var7.ridingEntity;
-            if(var10.getParent() instanceof MCP_EntityPlane) {
-               var9 = false;
-               var8 = (MCP_EntityPlane)var10.getParent();
+      EntityClientPlayerMP player2 = super.mc.thePlayer;
+      MCP_EntityPlane planeEntity = null;
+      boolean isMounted = true;
+      if(player2 != null) {
+         if(player2.ridingEntity instanceof MCP_EntityPlane) {
+            planeEntity = (MCP_EntityPlane)player2.ridingEntity;
+         } else if(player2.ridingEntity instanceof MCH_EntitySeat) {
+            MCH_EntitySeat seatEntity = (MCH_EntitySeat)player2.ridingEntity;
+            if(seatEntity.getParent() instanceof MCP_EntityPlane) {
+               isMounted = false;
+               planeEntity = (MCP_EntityPlane)seatEntity.getParent();
             }
-         } else if(var7.ridingEntity instanceof MCH_EntityUavStation) {
-            MCH_EntityUavStation var11 = (MCH_EntityUavStation)var7.ridingEntity;
-            if(var11.getControlAircract() instanceof MCP_EntityPlane) {
-               var8 = (MCP_EntityPlane)var11.getControlAircract();
+         } else if(player2.ridingEntity instanceof MCH_EntityUavStation) {
+            MCH_EntityUavStation uavStationEntity = (MCH_EntityUavStation)player2.ridingEntity;
+            if(uavStationEntity.getControlAircract() instanceof MCP_EntityPlane) {
+               planeEntity = (MCP_EntityPlane)uavStationEntity.getControlAircract();
             }
          }
       }
 
-      if(var8 != null && var8.getAcInfo() != null) {
-         this.update(var7, var8);
-         boolean useChaseCamera = this.chaseCamera.shouldUse(super.mc, var7, var8, var9);
+      if(planeEntity != null && planeEntity.getAcInfo() != null) {
+         this.update(player2, planeEntity);
+         boolean useChaseCamera = this.chaseCamera.shouldUse(super.mc, player2, planeEntity, isMounted);
          if(!useChaseCamera && this.wasUsingChaseCamera) {
             this.chaseCamera.reset();
-            W_Reflection.setThirdPersonDistance(var8.thirdPersonDist);
+            W_Reflection.setThirdPersonDistance(planeEntity.thirdPersonDist);
          }
-         MCH_ViewEntityDummy var12 = MCH_ViewEntityDummy.getInstance(super.mc.theWorld);
+         MCH_ViewEntityDummy result = MCH_ViewEntityDummy.getInstance(super.mc.theWorld);
          if(!useChaseCamera) {
-            var12.update(var8.camera);
+            result.update(planeEntity.camera);
          }
          if(!inGUI) {
-            if(!var8.isDestroyed()) {
-               this.playerControl(var7, var8, var9);
+            if(!planeEntity.isDestroyed()) {
+               this.playerControl(player2, planeEntity, isMounted);
             }
          } else {
-            this.playerControlInGUI(var7, var8, var9);
+            this.playerControlInGUI(player2, planeEntity, isMounted);
          }
 
-         this.updateBombReticleMode(var7, var8, var9);
-         this.forceBombReticleCamera(var7, var8, var9);
+         this.updateBombReticleMode(player2, planeEntity, isMounted);
+         this.forceBombReticleCamera(player2, planeEntity, isMounted);
 
          boolean hideHand = true;
          if(useChaseCamera) {
-            this.chaseCamera.update(super.mc, var7, var8);
-         } else if((!var9 || !var8.isAlwaysCameraView()) && !var8.getIsGunnerMode(var7) && var8.getCameraId() <= 0) {
-            MCH_Lib.setRenderViewEntity(var7);
-            if(!var9 && var8.getCurrentWeaponID(var7) < 0) {
+            this.chaseCamera.update(super.mc, player2, planeEntity);
+         } else if((!isMounted || !planeEntity.isAlwaysCameraView()) && !planeEntity.getIsGunnerMode(player2) && planeEntity.getCameraId() <= 0) {
+            MCH_Lib.setRenderViewEntity(player2);
+            if(!isMounted && planeEntity.getCurrentWeaponID(player2) < 0) {
                hideHand = false;
             }
          } else {
-            MCH_Lib.setRenderViewEntity(var12);
+            MCH_Lib.setRenderViewEntity(result);
          }
 
          if(hideHand) {
-            MCH_Lib.disableFirstPersonItemRender(var7.getCurrentEquippedItem());
+            MCH_Lib.disableFirstPersonItemRender(player2.getCurrentEquippedItem());
          }
 
          this.wasUsingChaseCamera = useChaseCamera;
@@ -145,13 +145,13 @@ public class MCP_ClientPlaneTickHandler extends MCH_BaseVehicleClientTickHandler
          resetBombReticleMode();
       }
 
-      if(!super.isBeforeRiding && super.isRiding && var8 != null && !this.wasUsingChaseCamera) {
-         W_Reflection.setThirdPersonDistance(var8.thirdPersonDist);
-         MCH_ViewEntityDummy.getInstance(super.mc.theWorld).setPosition(var8.posX, var8.posY + 0.5D, var8.posZ);
+      if(!super.isBeforeRiding && super.isRiding && planeEntity != null && !this.wasUsingChaseCamera) {
+         W_Reflection.setThirdPersonDistance(planeEntity.thirdPersonDist);
+         MCH_ViewEntityDummy.getInstance(super.mc.theWorld).setPosition(planeEntity.posX, planeEntity.posY + 0.5D, planeEntity.posZ);
       } else if(super.isBeforeRiding && !super.isRiding) {
          W_Reflection.restoreDefaultThirdPersonDistance();
          MCH_Lib.enableFirstPersonItemRender();
-         MCH_Lib.setRenderViewEntity(var7);
+         MCH_Lib.setRenderViewEntity(player2);
          W_Reflection.setCameraRoll(0.0F);
          this.chaseCamera.reset();
          this.wasUsingChaseCamera = false;

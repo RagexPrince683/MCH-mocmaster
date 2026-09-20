@@ -59,7 +59,7 @@ public class MCH_GuiCommonHandler implements IGuiHandler {
          return new MCH_DraftingTableGuiContainer(player, x, y, z);
       case 5:
          if(MinecraftServer.getServer().isSinglePlayer()) {
-            MCH_Config var10000 = MCH_MOD.config;
+            MCH_Config configuration = MCH_MOD.config;
             if(!MCH_Config.EnableMCHLibDebugLog.prmBool) {
                return null;
             }

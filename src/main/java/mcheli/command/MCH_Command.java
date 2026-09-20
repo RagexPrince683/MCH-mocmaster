@@ -92,17 +92,17 @@ public class MCH_Command extends CommandBase {
       } else {
          if(sender instanceof EntityPlayer && cmd.length() > 0) {
             String playerName = ((EntityPlayer)sender).getGameProfile().getName();
-            MCH_Config var10000 = MCH_MOD.config;
-            Iterator i$ = MCH_Config.CommandPermissionList.iterator();
+            MCH_Config configuration = MCH_MOD.config;
+            Iterator iteratedValueIndex = MCH_Config.CommandPermissionList.iterator();
 
-            while(i$.hasNext()) {
-               MCH_Config.CommandPermission c = (MCH_Config.CommandPermission)i$.next();
+            while(iteratedValueIndex.hasNext()) {
+               MCH_Config.CommandPermission c = (MCH_Config.CommandPermission)iteratedValueIndex.next();
                if(c.name.equals(cmd)) {
-                  String[] arr$ = c.players;
-                  int len$ = arr$.length;
+                  String[] iteratedValues = c.players;
+                  int iteratedValueCount = iteratedValues.length;
 
-                  for(int i$1 = 0; i$1 < len$; ++i$1) {
-                     String s = arr$[i$1];
+                  for(int iteratedValueIndex1 = 0; iteratedValueIndex1 < iteratedValueCount; ++iteratedValueIndex1) {
+                     String s = iteratedValues[iteratedValueIndex1];
                      if(s.equalsIgnoreCase(playerName)) {
                         return true;
                      }
@@ -147,12 +147,12 @@ public class MCH_Command extends CommandBase {
    }
 
    public void processCommand(ICommandSender sender, String[] prm) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.EnableCommand.prmBool) {
          if(!checkCommandPermission(sender, prm[0])) {
-            ChatComponentTranslation var11 = new ChatComponentTranslation("commands.generic.permission", new Object[0]);
-            var11.getChatStyle().setColor(EnumChatFormatting.RED);
-            sender.addChatMessage(var11);
+            ChatComponentTranslation chatComponentTranslation = new ChatComponentTranslation("commands.generic.permission", new Object[0]);
+            chatComponentTranslation.getChatStyle().setColor(EnumChatFormatting.RED);
+            sender.addChatMessage(chatComponentTranslation);
          } else {
             EntityPlayerMP msg;
             if(prm[0].equalsIgnoreCase("sendss")) {
@@ -170,9 +170,9 @@ public class MCH_Command extends CommandBase {
                }
 
                msg = sender instanceof EntityPlayerMP?(EntityPlayerMP)sender:null;
-               EntityPlayerMP arr$ = getPlayer(sender, prm[1]);
-               if(arr$ != null) {
-                  MCH_PacketIndClient.send(arr$, 2, "" + MCH_MultiplayPacketHandler.getPlayerInfoId(msg));
+               EntityPlayerMP iteratedValues = getPlayer(sender, prm[1]);
+               if(iteratedValues != null) {
+                  MCH_PacketIndClient.send(iteratedValues, 2, "" + MCH_MultiplayPacketHandler.getPlayerInfoId(msg));
                }
              } else if(prm[0].equalsIgnoreCase("reconfig")) {
                 if(prm.length != 1) {
@@ -250,37 +250,37 @@ public class MCH_Command extends CommandBase {
                 MCH_Lib.Log(reloadMsg);
                 sender.addChatMessage(new ChatComponentText(reloadMsg));
             } else {
-               int len$;
-               String var9;
+               int iteratedValueCount;
+               String formattedText;
                if(prm[0].equalsIgnoreCase("title")) {
                   if(prm.length < 4) {
                      throw new WrongUsageException("Parameter error! : /mcheli title time[1~180] position[0~4] messege[JSON format]", new Object[0]);
                   }
 
-                  var9 = func_82360_a(sender, prm, 3);
-                  int var10 = Integer.valueOf(prm[1]).intValue();
-                  if(var10 < 1) {
-                     var10 = 1;
+                  formattedText = func_82360_a(sender, prm, 3);
+                  int ticks = Integer.valueOf(prm[1]).intValue();
+                  if(ticks < 1) {
+                     ticks = 1;
                   }
 
-                  if(var10 > 180) {
-                     var10 = 180;
+                  if(ticks > 180) {
+                     ticks = 180;
                   }
 
-                  len$ = Integer.valueOf(prm[2]).intValue();
-                  if(len$ < 0) {
-                     len$ = 0;
+                  iteratedValueCount = Integer.valueOf(prm[2]).intValue();
+                  if(iteratedValueCount < 0) {
+                     iteratedValueCount = 0;
                   }
 
-                  if(len$ > 5) {
-                     len$ = 5;
+                  if(iteratedValueCount > 5) {
+                     iteratedValueCount = 5;
                   }
 
                   try {
-                     IChatComponent i$ = Serializer.func_150699_a(var9);
-                     MCH_PacketTitle.send(i$, 20 * var10, len$);
-                  } catch (JsonParseException var8) {
-                     Throwable s = ExceptionUtils.getRootCause(var8);
+                     IChatComponent iteratedValueIndex = Serializer.func_150699_a(formattedText);
+                     MCH_PacketTitle.send(iteratedValueIndex, 20 * ticks, iteratedValueCount);
+                  } catch (JsonParseException jsonParseException) {
+                     Throwable s = ExceptionUtils.getRootCause(jsonParseException);
                      throw new SyntaxErrorException("mcheli.title.jsonException", new Object[]{s == null?"":s.getMessage()});
                   }
                } else if(prm[0].equalsIgnoreCase("fill")) {
@@ -316,16 +316,16 @@ public class MCH_Command extends CommandBase {
                      throw new CommandException("Unknown mcheli command. please type /mcheli list", new Object[0]);
                   }
 
-                  var9 = "";
-                  String[] var12 = ALL_COMMAND;
-                  len$ = var12.length;
+                  formattedText = "";
+                  String[] text = ALL_COMMAND;
+                  iteratedValueCount = text.length;
 
-                  for(int var13 = 0; var13 < len$; ++var13) {
-                     String var14 = var12[var13];
-                     var9 = var9 + var14 + ", ";
+                  for(int index = 0; index < iteratedValueCount; ++index) {
+                     String text2 = text[index];
+                     formattedText = formattedText + text2 + ", ";
                   }
 
-                  sender.addChatMessage(new ChatComponentText("/mcheli command list : " + var9));
+                  sender.addChatMessage(new ChatComponentText("/mcheli command list : " + formattedText));
                }
             }
 
@@ -503,27 +503,27 @@ public class MCH_Command extends CommandBase {
          }
       }
 
-      ArrayList var12 = new ArrayList(map.entrySet());
-      Collections.sort(var12, new Comparator<Map.Entry<String, Integer>>(){
+      ArrayList arrayList = new ArrayList(map.entrySet());
+      Collections.sort(arrayList, new Comparator<Map.Entry<String, Integer>>(){
          public int compare(Entry entry1, Entry entry2) {
             return ((String)entry1.getKey()).compareTo((String)entry2.getKey());
          }
       });
-      boolean var13 = false;
+      boolean result = false;
       sender.addChatMessage(new ChatComponentText("--- " + title + " ---"));
-      Iterator i$ = var12.iterator();
+      Iterator iteratedValueIndex = arrayList.iterator();
 
-      while(i$.hasNext()) {
-         Entry s = (Entry)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         Entry s = (Entry)iteratedValueIndex.next();
          if(((Integer)s.getValue()).intValue() >= minNum) {
             String msg = " " + (String)s.getKey() + " : " + s.getValue();
             System.out.println(msg);
             sender.addChatMessage(new ChatComponentText(msg));
-            var13 = true;
+            result = true;
          }
       }
 
-      if(!var13) {
+      if(!result) {
          System.out.println("none");
          sender.addChatMessage(new ChatComponentText("none"));
       }
@@ -594,16 +594,16 @@ public class MCH_Command extends CommandBase {
 
                      nbttagcompound = (NBTTagCompound)y;
                      flag = true;
-                  } catch (NBTException var27) {
-                     throw new CommandException("commands.setblock.tagError", new Object[]{var27.getMessage()});
+                  } catch (NBTException nbtException) {
+                     throw new CommandException("commands.setblock.tagError", new Object[]{nbtException.getMessage()});
                   }
                }
 
-               for(int var28 = x1; var28 <= x2; ++var28) {
-                  for(int var29 = y1; var29 <= y2; ++var29) {
+               for(int index = x1; index <= x2; ++index) {
+                  for(int index2 = y1; index2 <= y2; ++index2) {
                      for(int z = z1; z <= z2; ++z) {
-                        if(world.blockExists(var28, var29, z)) {
-                           if(world.isAirBlock(var28, var29, z)) {
+                        if(world.blockExists(index, index2, z)) {
+                           if(world.isAirBlock(index, index2, z)) {
                               if(override) {
                                  continue;
                               }
@@ -612,10 +612,10 @@ public class MCH_Command extends CommandBase {
                            }
 
                            if(destroy) {
-                              world.func_147480_a(var28, var29, z, false);
+                              world.func_147480_a(index, index2, z, false);
                            }
 
-                           TileEntity block2 = world.getTileEntity(var28, var29, z);
+                           TileEntity block2 = world.getTileEntity(index, index2, z);
                            if(block2 instanceof IInventory) {
                               IInventory tileentity = (IInventory)block2;
 
@@ -627,14 +627,14 @@ public class MCH_Command extends CommandBase {
                               }
                            }
 
-                           if(world.setBlock(var28, var29, z, block, metadata, 3)) {
+                           if(world.setBlock(index, index2, z, block, metadata, 3)) {
                               if(flag) {
-                                 TileEntity var30 = world.getTileEntity(var28, var29, z);
-                                 if(var30 != null) {
-                                    nbttagcompound.setInteger("x", var28);
-                                    nbttagcompound.setInteger("y", var29);
+                                 TileEntity tileEntity = world.getTileEntity(index, index2, z);
+                                 if(tileEntity != null) {
+                                    nbttagcompound.setInteger("x", index);
+                                    nbttagcompound.setInteger("y", index2);
                                     nbttagcompound.setInteger("z", z);
-                                    var30.readFromNBT(nbttagcompound);
+                                    tileEntity.readFromNBT(nbttagcompound);
                                  }
                               }
 
@@ -658,7 +658,7 @@ public class MCH_Command extends CommandBase {
    }
 
    public List addTabCompletionOptions(ICommandSender sender, String[] prm) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(!MCH_Config.EnableCommand.prmBool) {
          return null;
       } else if(prm.length <= 1) {

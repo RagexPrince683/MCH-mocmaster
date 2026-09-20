@@ -37,7 +37,7 @@ public class MCH_RenderTurret extends MCH_RenderBaseVehicle {
             GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
             try {
             this.bindTexture(MCH_EntityBaseVehicle.getTexturePath(turretInfo.getDirectoryName(), vehicle.getTextureName()), vehicle);
-            } catch (Exception var15) {
+            } catch (Exception exception) {
                System.out.println("Texture not found : " + vehicle.getTextureName());
                this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
             }
@@ -53,8 +53,8 @@ public class MCH_RenderTurret extends MCH_RenderBaseVehicle {
       int index = 0;
 
       MCH_TurretInfo.VPart vp;
-      for(Iterator i$ = info.partList.iterator(); i$.hasNext(); index = this.drawPart(vp, vehicle, info, yaw, pitch, rotBrl, tickTime, ws, index)) {
-         vp = (MCH_TurretInfo.VPart)i$.next();
+      for(Iterator iteratedValueIndex = info.partList.iterator(); iteratedValueIndex.hasNext(); index = this.drawPart(vp, vehicle, info, yaw, pitch, rotBrl, tickTime, ws, index)) {
+         vp = (MCH_TurretInfo.VPart)iteratedValueIndex.next();
       }
 
    }
@@ -74,8 +74,8 @@ public class MCH_RenderTurret extends MCH_RenderBaseVehicle {
          }
 
          if(vp.rotPitch) {
-            float i$ = MCH_Lib.RNG(vehicle.getLastRiderPitch(), info.minRotationPitch, info.maxRotationPitch);
-            GL11.glRotatef(i$ - pitch, 1.0F, 0.0F, 0.0F);
+            float iteratedValueIndex = MCH_Lib.RNG(vehicle.getLastRiderPitch(), info.minRotationPitch, info.maxRotationPitch);
+            GL11.glRotatef(iteratedValueIndex - pitch, 1.0F, 0.0F, 0.0F);
          }
 
          if(vp.type == 1) {
@@ -95,8 +95,8 @@ public class MCH_RenderTurret extends MCH_RenderBaseVehicle {
 
       MCH_TurretInfo.VPart vcp;
       if(vp.child != null) {
-         for(Iterator var14 = vp.child.iterator(); var14.hasNext(); index = this.drawPart(vcp, vehicle, info, yaw, pitch, rotBrl, recoilBuf, ws, index)) {
-            vcp = (MCH_TurretInfo.VPart)var14.next();
+         for(Iterator iterator2 = vp.child.iterator(); iterator2.hasNext(); index = this.drawPart(vcp, vehicle, info, yaw, pitch, rotBrl, recoilBuf, ws, index)) {
+            vcp = (MCH_TurretInfo.VPart)iterator2.next();
          }
       }
 

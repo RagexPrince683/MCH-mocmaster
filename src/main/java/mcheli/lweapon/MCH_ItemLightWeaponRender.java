@@ -55,7 +55,7 @@ public class MCH_ItemLightWeaponRender implements IItemRenderer {
          GL11.glEnable('\u803a');
          GL11.glEnable(2903);
          GL11.glPushMatrix();
-         MCH_Config var10000 = MCH_MOD.config;
+         MCH_Config configuration = MCH_MOD.config;
          if(MCH_Config.SmoothShading.prmBool) {
             GL11.glShadeModel(7425);
          }

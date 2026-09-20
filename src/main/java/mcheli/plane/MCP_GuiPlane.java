@@ -100,10 +100,10 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             this.drawNightVisionNoise();
          }
 
-         MCH_Config var10000;
+         MCH_Config configuration;
          label50: {
             if(isThirdPersonView) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                if(!MCH_Config.DisplayHUDThirdPerson.prmBool) {
                   break label50;
                }
@@ -121,7 +121,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
          label51: {
             this.drawDebugtInfo(plane);
             if(isThirdPersonView) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                if(!MCH_Config.DisplayHUDThirdPerson.prmBool) {
                   break label51;
                }
@@ -1405,7 +1405,7 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
    }
 
    public void drawKeybind(MCP_EntityPlane plane, EntityPlayer player, int seatID) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(!MCH_Config.HideKeybind.prmBool) {
          MCP_PlaneInfo info = plane.getPlaneInfo();
          if(info != null) {
@@ -1415,15 +1415,15 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
             int LX = super.centerX - 200;
             this.drawKeyBind(plane, info, player, seatID, RX, LX, colorActive, colorInactive);
             String msg;
-            StringBuilder var12;
-            MCH_Config var10001;
+            StringBuilder messageBuilder;
+            MCH_Config configuration2;
             if(seatID == 0 && info.isEnableGunnerMode) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                if(!Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
                   int c = plane.isHoveringMode()?colorInactive:colorActive;
-                  var12 = (new StringBuilder()).append(plane.getIsGunnerMode(player)?"Normal":"Gunner").append(" : ");
-                  var10001 = MCH_MOD.config;
-                  msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchMode.prmInt)).toString();
+                  messageBuilder = (new StringBuilder()).append(plane.getIsGunnerMode(player)?"Normal":"Gunner").append(" : ");
+                  configuration2 = MCH_MOD.config;
+                  msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchMode.prmInt)).toString();
                   this.drawString(msg, RX, super.centerY - 70, c);
                }
             }
@@ -1433,66 +1433,66 @@ public class MCP_GuiPlane extends MCH_BaseVehicleCommonGui {
                   this.drawCenteredString("Bomb sight: OFF Third Person", super.centerX, super.height - 42, colorInactive);
                } else {
                   boolean bombReticle = MCP_ClientPlaneTickHandler.isBombReticleMode(plane);
-                  var12 = (new StringBuilder()).append(bombReticle ? "Bomb Sight Off : " : "Bomb Sight : ");
-                  msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyBombReticleMode.prmInt)).toString();
+                  messageBuilder = (new StringBuilder()).append(bombReticle ? "Bomb Sight Off : " : "Bomb Sight : ");
+                  msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyBombReticleMode.prmInt)).toString();
                   this.drawCenteredString(msg, super.centerX, super.height - 42, colorActive);
                }
             }
 
             if(seatID > 0 && plane.canSwitchGunnerModeOtherSeat(player)) {
-               var12 = (new StringBuilder()).append(plane.getIsGunnerMode(player)?"Normal":"Camera").append(" : ");
-               var10001 = MCH_MOD.config;
-               msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchMode.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append(plane.getIsGunnerMode(player)?"Normal":"Camera").append(" : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchMode.prmInt)).toString();
                this.drawString(msg, RX, super.centerY - 40, colorActive);
             }
 
             if(seatID == 0 && plane.canUseCombatFlaps() && !info.isEnableVtol) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                if(!Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
-                  var12 = (new StringBuilder()).append(plane.isCombatFlapsDeployed()?"Flaps Up : ":"Combat Flaps : ");
-                  var10001 = MCH_MOD.config;
-                  msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
+                  messageBuilder = (new StringBuilder()).append(plane.isCombatFlapsDeployed()?"Flaps Up : ":"Combat Flaps : ");
+                  configuration2 = MCH_MOD.config;
+                  msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
                   this.drawString(msg, RX, super.centerY - 60, colorActive);
                }
             }
 
             if(seatID == 0 && info.isEnableVtol) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                if(!Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
                   int stat = plane.getVtolMode();
                   if(stat != 1) {
-                     var12 = (new StringBuilder()).append(stat == 0?"VTOL : ":"Normal : ");
-                     var10001 = MCH_MOD.config;
-                     msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
+                     messageBuilder = (new StringBuilder()).append(stat == 0?"VTOL : ":"Normal : ");
+                     configuration2 = MCH_MOD.config;
+                     msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
                      this.drawString(msg, RX, super.centerY - 60, colorActive);
                   }
                }
             }
 
             if(plane.canEjectSeat(player)) {
-               var12 = (new StringBuilder()).append("Eject seat: ");
-               var10001 = MCH_MOD.config;
-               msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchHovering.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("Eject seat: ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchHovering.prmInt)).toString();
                this.drawString(msg, RX, super.centerY - 30, colorActive);
             }
 
             if(plane.getIsGunnerMode(player) && info.cameraZoom > 1) {
-               var12 = (new StringBuilder()).append("Zoom : ");
-               var10001 = MCH_MOD.config;
-               msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("Zoom : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
                this.drawString(msg, LX, super.centerY - 80, colorActive);
             } else if(seatID == 0) {
                if(!plane.canFoldWing() && !plane.canUnfoldWing()) {
                   if(plane.canFoldHatch() || plane.canUnfoldHatch()) {
-                     var12 = (new StringBuilder()).append("OpenHatch : ");
-                     var10001 = MCH_MOD.config;
-                     msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
+                     messageBuilder = (new StringBuilder()).append("OpenHatch : ");
+                     configuration2 = MCH_MOD.config;
+                     msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
                      this.drawString(msg, LX, super.centerY - 80, colorActive);
                   }
                } else {
-                  var12 = (new StringBuilder()).append("FoldWing : ");
-                  var10001 = MCH_MOD.config;
-                  msg = var12.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
+                  messageBuilder = (new StringBuilder()).append("FoldWing : ");
+                  configuration2 = MCH_MOD.config;
+                  msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
                   this.drawString(msg, LX, super.centerY - 80, colorActive);
                }
             }

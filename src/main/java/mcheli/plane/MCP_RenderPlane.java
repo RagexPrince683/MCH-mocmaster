@@ -34,7 +34,7 @@ public class MCP_RenderPlane extends MCH_RenderBaseVehicle {
             GL11.glRotatef(roll, 0.0F, 0.0F, 1.0F);
             try {
             this.bindTexture(MCH_EntityBaseVehicle.getTexturePath("planes", plane.getTextureName()), plane);
-            } catch (Exception var15) {
+            } catch (Exception exception) {
                System.out.println("Texture not found : " + plane.getTextureName());
                this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
             }
@@ -61,19 +61,19 @@ public class MCP_RenderPlane extends MCH_RenderBaseVehicle {
    }
 
    public static void renderRotor(MCP_PlaneInfo planeInfo, float rot, float prevRot, float rotorPhase, float prevRotorPhase, float tickTime) {
-      Iterator i$ = planeInfo.rotorList.iterator();
+      Iterator iteratedValueIndex = planeInfo.rotorList.iterator();
 
-      while(i$.hasNext()) {
-         MCP_PlaneInfo.Rotor r = (MCP_PlaneInfo.Rotor)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCP_PlaneInfo.Rotor r = (MCP_PlaneInfo.Rotor)iteratedValueIndex.next();
          GL11.glPushMatrix();
          GL11.glTranslated(r.pos.xCoord, r.pos.yCoord, r.pos.zCoord);
          GL11.glRotatef((prevRot + (rot - prevRot) * tickTime) * r.maxRotFactor, (float)r.rot.xCoord, (float)r.rot.yCoord, (float)r.rot.zCoord);
          GL11.glTranslated(-r.pos.xCoord, -r.pos.yCoord, -r.pos.zCoord);
          renderPart(r.model, planeInfo.model, r.modelName);
-         Iterator i$1 = r.blades.iterator();
+         Iterator iteratedValueIndex1 = r.blades.iterator();
 
-         while(i$1.hasNext()) {
-            MCP_PlaneInfo.Blade b = (MCP_PlaneInfo.Blade)i$1.next();
+         while(iteratedValueIndex1.hasNext()) {
+            MCP_PlaneInfo.Blade b = (MCP_PlaneInfo.Blade)iteratedValueIndex1.next();
             float br = prevRotorPhase + (rotorPhase - prevRotorPhase) * tickTime;
             GL11.glPushMatrix();
             GL11.glTranslated(b.pos.xCoord, b.pos.yCoord, b.pos.zCoord);
@@ -101,18 +101,18 @@ public class MCP_RenderPlane extends MCH_RenderBaseVehicle {
 
    public static void renderWing(MCP_PlaneInfo planeInfo, float rot, float prevRot, float tickTime) {
 
-      for(Iterator i$ = planeInfo.wingList.iterator(); i$.hasNext(); GL11.glPopMatrix()) {
-         MCP_PlaneInfo.Wing w = (MCP_PlaneInfo.Wing)i$.next();
+      for(Iterator iteratedValueIndex = planeInfo.wingList.iterator(); iteratedValueIndex.hasNext(); GL11.glPopMatrix()) {
+         MCP_PlaneInfo.Wing w = (MCP_PlaneInfo.Wing)iteratedValueIndex.next();
          GL11.glPushMatrix();
          GL11.glTranslated(w.pos.xCoord, w.pos.yCoord, w.pos.zCoord);
          GL11.glRotatef((prevRot + (rot - prevRot) * tickTime) * w.maxRotFactor, (float)w.rot.xCoord, (float)w.rot.yCoord, (float)w.rot.zCoord);
          GL11.glTranslated(-w.pos.xCoord, -w.pos.yCoord, -w.pos.zCoord);
          renderPart(w.model, planeInfo.model, w.modelName);
          if(w.pylonList != null) {
-            Iterator i$1 = w.pylonList.iterator();
+            Iterator iteratedValueIndex1 = w.pylonList.iterator();
 
-            while(i$1.hasNext()) {
-               MCP_PlaneInfo.Pylon p = (MCP_PlaneInfo.Pylon)i$1.next();
+            while(iteratedValueIndex1.hasNext()) {
+               MCP_PlaneInfo.Pylon p = (MCP_PlaneInfo.Pylon)iteratedValueIndex1.next();
                GL11.glPushMatrix();
                GL11.glTranslated(p.pos.xCoord, p.pos.yCoord, p.pos.zCoord);
                GL11.glRotatef((prevRot + (rot - prevRot) * tickTime) * p.maxRotFactor, (float)p.rot.xCoord, (float)p.rot.yCoord, (float)p.rot.zCoord);
@@ -130,10 +130,10 @@ public class MCP_RenderPlane extends MCH_RenderBaseVehicle {
    }
 
    public static void renderNozzle(MCP_PlaneInfo planeInfo, float rot, float prevRot, float tickTime) {
-      Iterator i$ = planeInfo.nozzles.iterator();
+      Iterator iteratedValueIndex = planeInfo.nozzles.iterator();
 
-      while(i$.hasNext()) {
-         MCH_BaseVehicleInfo.DrawnPart n = (MCH_BaseVehicleInfo.DrawnPart)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_BaseVehicleInfo.DrawnPart n = (MCH_BaseVehicleInfo.DrawnPart)iteratedValueIndex.next();
          GL11.glPushMatrix();
          GL11.glTranslated(n.pos.xCoord, n.pos.yCoord, n.pos.zCoord);
          GL11.glRotatef(prevRot + (rot - prevRot) * tickTime, (float)n.rot.xCoord, (float)n.rot.yCoord, (float)n.rot.zCoord);

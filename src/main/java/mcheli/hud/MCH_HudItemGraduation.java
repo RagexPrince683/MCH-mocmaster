@@ -117,10 +117,10 @@ public class MCH_HudItemGraduation extends MCH_HudItem {
       }
 
       this.drawLine(line, color);
-      double[] var18 = new double[]{(double)(posX_L - 25), (double)(linePosY - 90), (double)posX_L, (double)(linePosY - 90), (double)posX_L, (double)(linePosY + 90), (double)(posX_L - 25), (double)(linePosY + 90)};
-      this.drawLine(var18, color, 3);
-      var18 = new double[]{(double)(posX_R + 25), (double)(linePosY - 90), (double)posX_R, (double)(linePosY - 90), (double)posX_R, (double)(linePosY + 90), (double)(posX_R + 25), (double)(linePosY + 90)};
-      this.drawLine(var18, color, 3);
+      double[] positionX = new double[]{(double)(posX_L - 25), (double)(linePosY - 90), (double)posX_L, (double)(linePosY - 90), (double)posX_L, (double)(linePosY + 90), (double)(posX_L - 25), (double)(linePosY + 90)};
+      this.drawLine(positionX, color, 3);
+      positionX = new double[]{(double)(posX_R + 25), (double)(linePosY - 90), (double)posX_R, (double)(linePosY - 90), (double)posX_R, (double)(linePosY + 90), (double)(posX_R + 25), (double)(linePosY + 90)};
+      this.drawLine(positionX, color, 3);
    }
 
    private void drawCommonGraduationYaw(double playerYaw, int color, int posX, int posY) {

@@ -28,7 +28,7 @@ public class MCH_CommonPacketHandler {
          Object exploder = null;
          if(player.getDistanceSq(pkt.prm.posX, pkt.prm.posY, pkt.prm.posZ) <= 40000.0D) {
             if(!pkt.prm.inWater) {
-               MCH_Config var10000 = MCH_MOD.config;
+               MCH_Config configuration = MCH_MOD.config;
                if(!MCH_Config.DefaultExplosionParticle.prmBool) {
                   MCH_Explosion.effectExplosion(player.worldObj, (Entity)exploder, pkt.prm.posX, pkt.prm.posY, pkt.prm.posZ, pkt.prm.size, pkt.prm.isSmoking);
                } else {

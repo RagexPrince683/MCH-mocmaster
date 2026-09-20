@@ -41,10 +41,10 @@ public class MCH_GuiScoreboard extends W_GuiContainer implements MCH_IGuiScorebo
       this.listScreen = new HashMap();
       this.listScreen.put(MCH_GuiScoreboard_Base.SCREEN_ID.MAIN, new MCH_GuiScoreboard_Main(this, this.thePlayer));
       this.listScreen.put(MCH_GuiScoreboard_Base.SCREEN_ID.CREATE_TEAM, new MCH_GuiScoreboard_CreateTeam(this, this.thePlayer));
-      Iterator i$ = this.listScreen.values().iterator();
+      Iterator iteratedValueIndex = this.listScreen.values().iterator();
 
-      while(i$.hasNext()) {
-         MCH_GuiScoreboard_Base s = (MCH_GuiScoreboard_Base)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_GuiScoreboard_Base s = (MCH_GuiScoreboard_Base)iteratedValueIndex.next();
          s.initGui(super.buttonList, this);
       }
 
@@ -60,15 +60,15 @@ public class MCH_GuiScoreboard extends W_GuiContainer implements MCH_IGuiScorebo
          this.initGui();
       }
 
-      Iterator i$ = this.listScreen.values().iterator();
+      Iterator iteratedValueIndex = this.listScreen.values().iterator();
 
-      while(i$.hasNext()) {
-         MCH_GuiScoreboard_Base s = (MCH_GuiScoreboard_Base)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_GuiScoreboard_Base s = (MCH_GuiScoreboard_Base)iteratedValueIndex.next();
 
          try {
             s.updateScreenButtons(super.buttonList);
             s.updateScreen();
-         } catch (Exception var5) {
+         } catch (Exception exception) {
             ;
          }
       }
@@ -76,10 +76,10 @@ public class MCH_GuiScoreboard extends W_GuiContainer implements MCH_IGuiScorebo
    }
 
    public void switchScreen(MCH_GuiScoreboard_Base.SCREEN_ID id) {
-      Iterator i$ = this.listScreen.values().iterator();
+      Iterator iteratedValueIndex = this.listScreen.values().iterator();
 
-      while(i$.hasNext()) {
-         MCH_GuiScoreboard_Base b = (MCH_GuiScoreboard_Base)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_GuiScoreboard_Base b = (MCH_GuiScoreboard_Base)iteratedValueIndex.next();
          b.leaveScreen();
       }
 
@@ -116,7 +116,7 @@ public class MCH_GuiScoreboard extends W_GuiContainer implements MCH_IGuiScorebo
          }
 
          super.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
-      } catch (Exception var6) {
+      } catch (Exception exception) {
          ;
       }
 
@@ -139,10 +139,10 @@ public class MCH_GuiScoreboard extends W_GuiContainer implements MCH_IGuiScorebo
 
    protected void drawGuiContainerForegroundLayer(int x, int y) {
       this.getCurrentScreen().drawGuiContainerForegroundLayerScreen(x, y);
-      Iterator i$ = super.buttonList.iterator();
+      Iterator iteratedValueIndex = super.buttonList.iterator();
 
-      while(i$.hasNext()) {
-         Object o = i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         Object o = iteratedValueIndex.next();
          if(o instanceof W_GuiButton) {
             W_GuiButton btn = (W_GuiButton)o;
             if(btn.isOnMouseOver() && btn.hoverStringList != null) {
@@ -164,10 +164,10 @@ public class MCH_GuiScoreboard extends W_GuiContainer implements MCH_IGuiScorebo
 
    public void setWorldAndResolution(Minecraft p_146280_1_, int p_146280_2_, int p_146280_3_) {
       super.setWorldAndResolution(p_146280_1_, p_146280_2_, p_146280_3_);
-      Iterator i$ = this.listScreen.values().iterator();
+      Iterator iteratedValueIndex = this.listScreen.values().iterator();
 
-      while(i$.hasNext()) {
-         MCH_GuiScoreboard_Base s = (MCH_GuiScoreboard_Base)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_GuiScoreboard_Base s = (MCH_GuiScoreboard_Base)iteratedValueIndex.next();
          s.setWorldAndResolution(p_146280_1_, p_146280_2_, p_146280_3_);
       }
 

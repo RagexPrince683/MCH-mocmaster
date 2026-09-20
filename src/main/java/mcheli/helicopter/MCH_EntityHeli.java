@@ -503,7 +503,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    }
 
    public boolean canMountWithNearEmptyMinecart() {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       return MCH_Config.MountMinecartHeli.prmBool;
    }
 
@@ -625,8 +625,8 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          this.rotors = new MCH_Rotor[this.heliInfo.rotorList.size()];
          int i = 0;
 
-         for(Iterator i$ = this.heliInfo.rotorList.iterator(); i$.hasNext(); ++i) {
-            MCH_HeliInfo.Rotor r = (MCH_HeliInfo.Rotor)i$.next();
+         for(Iterator iteratedValueIndex = this.heliInfo.rotorList.iterator(); iteratedValueIndex.hasNext(); ++i) {
+            MCH_HeliInfo.Rotor r = (MCH_HeliInfo.Rotor)iteratedValueIndex.next();
             this.rotors[i] = new MCH_Rotor(r.bladeNum, r.bladeRot, super.worldObj.isRemote?2:2, (float)r.pos.xCoord, (float)r.pos.yCoord, (float)r.pos.zCoord, (float)r.rot.xCoord, (float)r.rot.yCoord, (float)r.rot.zCoord, r.haveFoldFunc);
          }
 
@@ -635,11 +635,11 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
    protected void forceFoldBlade() {
       if(this.heliInfo != null && this.rotors.length > 0 && this.heliInfo.isEnableFoldBlade) {
-         MCH_Rotor[] arr$ = this.rotors;
-         int len$ = arr$.length;
+         MCH_Rotor[] iteratedValues = this.rotors;
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_Rotor r = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_Rotor r = iteratedValues[iteratedValueIndex];
             r.update((float)this.rotationRotor);
             this.foldBlades();
             r.forceFold();
@@ -662,11 +662,11 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       } else if(this.rotors.length <= 0) {
          return true;
       } else if(this.getFoldBladeStat() == 2) {
-         MCH_Rotor[] arr$ = this.rotors;
-         int len$ = arr$.length;
+         MCH_Rotor[] iteratedValues = this.rotors;
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_Rotor r = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_Rotor r = iteratedValues[iteratedValueIndex];
             if(r.isFoldingOrUnfolding()) {
                return false;
             }
@@ -685,11 +685,11 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    protected void foldBlades() {
       if(this.heliInfo != null && this.rotors.length > 0) {
          this.setCurrentThrottle(0.0D);
-         MCH_Rotor[] arr$ = this.rotors;
-         int len$ = arr$.length;
+         MCH_Rotor[] iteratedValues = this.rotors;
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_Rotor r = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_Rotor r = iteratedValues[iteratedValueIndex];
             r.startFold();
          }
 
@@ -698,11 +698,11 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
 
    public void unfoldBlades() {
       if(this.heliInfo != null && this.rotors.length > 0) {
-         MCH_Rotor[] arr$ = this.rotors;
-         int len$ = arr$.length;
+         MCH_Rotor[] iteratedValues = this.rotors;
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_Rotor r = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_Rotor r = iteratedValues[iteratedValueIndex];
             r.startUnfold();
          }
 
@@ -840,11 +840,11 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
       float roll = super.getRollFactor();
       double d = this.getDistanceSq(super.prevPosX, super.posY, super.prevPosZ);
       double s = (double)this.getAcInfo().speed;
-      double var10000;
+      double positionX;
       if(s > 0.1D) {
-         var10000 = d / s;
+         positionX = d / s;
       } else {
-         var10000 = 0.0D;
+         positionX = 0.0D;
       }
 
       float f = this.prevRollFactor;
@@ -1026,11 +1026,11 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
          --this.foldBladesCooldown;
       }
 
-      MCH_Rotor[] arr$ = this.rotors;
-      int len$ = arr$.length;
+      MCH_Rotor[] iteratedValues = this.rotors;
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_Rotor r = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_Rotor r = iteratedValues[iteratedValueIndex];
          r.update((float)this.rotationRotor);
          if(r.isFoldingOrUnfolding()) {
             isEndSwitch = false;
@@ -2102,14 +2102,14 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
    public void updateCollisionBox() {
       if(this.getAcInfo() != null) {
          //this.WheelMng.updateBlock();
-         MCH_BoundingBox[] arr$ = this.getCalculatedExtraBoundingBoxes();
-         int len$ = arr$.length;
+         MCH_BoundingBox[] iteratedValues = this.getCalculatedExtraBoundingBoxes();
+         int iteratedValueCount = iteratedValues.length;
 
-         MCH_Config var10000;
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_BoundingBox bb = arr$[i$];
+         MCH_Config configuration;
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_BoundingBox bb = iteratedValues[iteratedValueIndex];
             if(super.rand.nextInt(3) == 0) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                //todo config
                //if(MCH_Config.Collision_DestroyBlock.prmBool) {
                //   Vec3 v = this.getTransformedPosition(bb.offsetX, bb.offsetY, bb.offsetZ);
@@ -2120,7 +2120,7 @@ public class MCH_EntityHeli extends MCH_EntityBaseVehicle {
             }
          }
 
-         var10000 = MCH_MOD.config;
+         configuration = MCH_MOD.config;
          //todo config
          //if(MCH_Config.Collision_DestroyBlock.prmBool) {
          //this.destoryBlockRange(this.getTransformedPosition(0.0D, 0.0D, 0.0D), (double)super.width * 1.5D, (double)(super.height * 2.0F));

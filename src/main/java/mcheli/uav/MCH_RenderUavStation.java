@@ -50,14 +50,14 @@ public class MCH_RenderUavStation extends W_Render {
                if(uavSt.getControlAircract() != null && uavSt.riddenByEntity != null) {
                   try {
                      this.bindTexture("textures/" + TEX_NAME_ON[kind] + ".png");
-                  } catch (Exception var10) {
+                  } catch (Exception exception) {
                      System.out.println("Texture not found : " + TEX_NAME_ON[kind]);
                      this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
                   }
                } else {
                   try {
                      this.bindTexture("textures/" + TEX_NAME_OFF[kind] + ".png");
-                  } catch (Exception var11) {
+                  } catch (Exception exception2) {
                      System.out.println("Texture not found : " + TEX_NAME_OFF[kind]);
                      this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
                   }

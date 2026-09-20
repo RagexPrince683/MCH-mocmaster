@@ -45,9 +45,9 @@ public abstract class Col1Expression extends AbstractExpression {
       return this.operateDouble(this.exp.evalDouble());
    }
 
-   protected abstract long operateLong(long var1);
+   protected abstract long operateLong(long result1);
 
-   protected abstract double operateDouble(double var1);
+   protected abstract double operateDouble(double result1);
 
    protected void search() {
       super.share.srch.search(this);

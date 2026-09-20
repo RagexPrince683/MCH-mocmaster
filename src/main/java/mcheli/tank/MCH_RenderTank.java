@@ -49,7 +49,7 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
             GL11.glRotatef(roll, 0.0F, 0.0F, 1.0F);
             try {
             this.bindTexture(MCH_EntityBaseVehicle.getTexturePath("tanks", tank.getTextureName()), tank);
-            } catch (Exception var15) {
+            } catch (Exception exception) {
                System.out.println("Texture not found : " + tank.getTextureName());
                this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
             }
@@ -94,7 +94,7 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
    }
 
    public void renderWheel(MCH_EntityTank tank, double posX, double posY, double posZ) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.TestMode.prmBool) {
          if(MCH_RenderBaseVehicle.debugModel != null) {
             GL11.glColor4f(0.75F, 0.75F, 0.75F, 0.5F);
@@ -114,35 +114,35 @@ public class MCH_RenderTank extends MCH_RenderBaseVehicle {
             }
 
             GL11.glColor4f(0.75F, 0.75F, 0.75F, 1.0F);
-            Tessellator var13 = Tessellator.instance;
-            var13.startDrawing(1);
-            Vec3 var14 = tank.getTransformedPosition(tank.WheelMng.weightedCenter);
-            var14.xCoord -= tank.posX;
-            var14.yCoord -= tank.posY;
-            var14.zCoord -= tank.posZ;
+            Tessellator tessellator2 = Tessellator.instance;
+            tessellator2.startDrawing(1);
+            Vec3 position = tank.getTransformedPosition(tank.WheelMng.weightedCenter);
+            position.xCoord -= tank.posX;
+            position.yCoord -= tank.posY;
+            position.zCoord -= tank.posZ;
 
             for(i = 0; i < tank.WheelMng.wheels.length / 2; ++i) {
-               var13.setColorRGBA_I(((i & 4) > 0?16711680:0) | ((i & 2) > 0?'\uff00':0) | ((i & 1) > 0?255:0), 192);
+               tessellator2.setColorRGBA_I(((i & 4) > 0?16711680:0) | ((i & 2) > 0?'\uff00':0) | ((i & 1) > 0?255:0), 192);
                w1 = tank.WheelMng.wheels[i * 2 + 0];
                MCH_EntityWheel w2 = tank.WheelMng.wheels[i * 2 + 1];
                if(w1.isPlus) {
-                  var13.addVertex(w2.posX - tank.posX + posX, w2.posY - tank.posY + posY, w2.posZ - tank.posZ + posZ);
-                  var13.addVertex(w1.posX - tank.posX + posX, w1.posY - tank.posY + posY, w1.posZ - tank.posZ + posZ);
-                  var13.addVertex(w1.posX - tank.posX + posX, w1.posY - tank.posY + posY, w1.posZ - tank.posZ + posZ);
-                  var13.addVertex(posX + var14.xCoord, posY + var14.yCoord, posZ + var14.zCoord);
-                  var13.addVertex(posX + var14.xCoord, posY + var14.yCoord, posZ + var14.zCoord);
-                  var13.addVertex(w2.posX - tank.posX + posX, w2.posY - tank.posY + posY, w2.posZ - tank.posZ + posZ);
+                  tessellator2.addVertex(w2.posX - tank.posX + posX, w2.posY - tank.posY + posY, w2.posZ - tank.posZ + posZ);
+                  tessellator2.addVertex(w1.posX - tank.posX + posX, w1.posY - tank.posY + posY, w1.posZ - tank.posZ + posZ);
+                  tessellator2.addVertex(w1.posX - tank.posX + posX, w1.posY - tank.posY + posY, w1.posZ - tank.posZ + posZ);
+                  tessellator2.addVertex(posX + position.xCoord, posY + position.yCoord, posZ + position.zCoord);
+                  tessellator2.addVertex(posX + position.xCoord, posY + position.yCoord, posZ + position.zCoord);
+                  tessellator2.addVertex(w2.posX - tank.posX + posX, w2.posY - tank.posY + posY, w2.posZ - tank.posZ + posZ);
                } else {
-                  var13.addVertex(w1.posX - tank.posX + posX, w1.posY - tank.posY + posY, w1.posZ - tank.posZ + posZ);
-                  var13.addVertex(w2.posX - tank.posX + posX, w2.posY - tank.posY + posY, w2.posZ - tank.posZ + posZ);
-                  var13.addVertex(w2.posX - tank.posX + posX, w2.posY - tank.posY + posY, w2.posZ - tank.posZ + posZ);
-                  var13.addVertex(posX + var14.xCoord, posY + var14.yCoord, posZ + var14.zCoord);
-                  var13.addVertex(posX + var14.xCoord, posY + var14.yCoord, posZ + var14.zCoord);
-                  var13.addVertex(w1.posX - tank.posX + posX, w1.posY - tank.posY + posY, w1.posZ - tank.posZ + posZ);
+                  tessellator2.addVertex(w1.posX - tank.posX + posX, w1.posY - tank.posY + posY, w1.posZ - tank.posZ + posZ);
+                  tessellator2.addVertex(w2.posX - tank.posX + posX, w2.posY - tank.posY + posY, w2.posZ - tank.posZ + posZ);
+                  tessellator2.addVertex(w2.posX - tank.posX + posX, w2.posY - tank.posY + posY, w2.posZ - tank.posZ + posZ);
+                  tessellator2.addVertex(posX + position.xCoord, posY + position.yCoord, posZ + position.zCoord);
+                  tessellator2.addVertex(posX + position.xCoord, posY + position.yCoord, posZ + position.zCoord);
+                  tessellator2.addVertex(w1.posX - tank.posX + posX, w1.posY - tank.posY + posY, w1.posZ - tank.posZ + posZ);
                }
             }
 
-            var13.draw();
+            tessellator2.draw();
          }
       }
    }

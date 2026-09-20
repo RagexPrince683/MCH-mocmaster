@@ -30,8 +30,8 @@ public class MCH_PacketModList extends MCH_Packet {
          for(int e = 0; e < this.num; ++e) {
             this.list.add(data.readUTF());
          }
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -47,8 +47,8 @@ public class MCH_PacketModList extends MCH_Packet {
             String s = (String)e.next();
             dos.writeUTF(s);
          }
-      } catch (Exception var4) {
-         var4.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -61,10 +61,10 @@ public class MCH_PacketModList extends MCH_Packet {
       MCH_PacketModList p = null;
       int size = 0;
       boolean isFirst = true;
-      Iterator i$ = list.iterator();
+      Iterator iteratedValueIndex = list.iterator();
 
-      while(i$.hasNext()) {
-         String s = (String)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         String s = (String)iteratedValueIndex.next();
          if(p == null) {
             p = new MCH_PacketModList();
             p.id = id;

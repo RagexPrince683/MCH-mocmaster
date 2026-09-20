@@ -20,8 +20,8 @@ public class MCH_PacketIndMultiplayCommand extends MCH_Packet {
       try {
          this.CmdID = data.readInt();
          this.CmdStr = data.readUTF();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -30,8 +30,8 @@ public class MCH_PacketIndMultiplayCommand extends MCH_Packet {
       try {
          dos.writeInt(this.CmdID);
          dos.writeUTF(this.CmdStr);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

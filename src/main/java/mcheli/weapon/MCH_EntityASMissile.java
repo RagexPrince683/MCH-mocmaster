@@ -50,41 +50,41 @@ public class MCH_EntityASMissile extends MCH_EntityBaseBullet {
                         this.sprinkleBomblet();
                      }
                   } else {
-                     MovingObjectPosition var15 = new MovingObjectPosition(this);
-                     this.onImpact(var15, 1.0F);
+                     MovingObjectPosition movingObjectPosition = new MovingObjectPosition(this);
+                     this.onImpact(movingObjectPosition, 1.0F);
                   }
 
                   this.setDead();
                } else {
-                  double var16;
+                  double positionX;
                   double y;
                   double z;
                   double d;
                   if((double)this.getGravity() == 0.0D) {
-                     var16 = 0.0D;
+                     positionX = 0.0D;
 
                      y = this.targetPosX - super.posX;
-                     z = this.targetPosY + var16 - super.posY;
+                     z = this.targetPosY + positionX - super.posY;
                      d = this.targetPosZ - super.posZ;
                      double d1 = (double)MathHelper.sqrt_double(y * y + z * z + d * d);
                      super.motionX = y * super.acceleration / d1;
                      super.motionY = z * super.acceleration / d1;
                      super.motionZ = d * super.acceleration / d1;
                   } else {
-                     var16 = this.targetPosX - super.posX;
+                     positionX = this.targetPosX - super.posX;
                      y = this.targetPosY - super.posY;
                      y *= 0.3D;
                      z = this.targetPosZ - super.posZ;
-                     d = (double)MathHelper.sqrt_double(var16 * var16 + y * y + z * z);
-                     super.motionX = var16 * super.acceleration / d;
+                     d = (double)MathHelper.sqrt_double(positionX * positionX + y * y + z * z);
+                     super.motionX = positionX * super.acceleration / d;
                      super.motionZ = z * super.acceleration / d;
                   }
                }
             }
          }
 
-         double var14 = (double)((float)Math.atan2(super.motionZ, super.motionX));
-         super.rotationYaw = (float)(var14 * 180.0D / Math.PI) - 90.0F;
+         double result = (double)((float)Math.atan2(super.motionZ, super.motionX));
+         super.rotationYaw = (float)(result * 180.0D / Math.PI) - 90.0F;
          double r = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
          super.rotationPitch = -((float)(Math.atan2(super.motionY, r) * 180.0D / Math.PI));
          this.onUpdateBomblet();

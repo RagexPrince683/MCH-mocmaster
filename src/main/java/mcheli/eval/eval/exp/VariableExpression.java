@@ -31,20 +31,20 @@ public class VariableExpression extends WordExpression {
    public long evalLong() {
       try {
          return super.share.var.evalLong(this.getVarValue());
-      } catch (EvalException var2) {
-         throw var2;
-      } catch (Exception var3) {
-         throw new EvalException(2003, super.word, super.string, super.pos, var3);
+      } catch (EvalException evalException) {
+         throw evalException;
+      } catch (Exception exception) {
+         throw new EvalException(2003, super.word, super.string, super.pos, exception);
       }
    }
 
    public double evalDouble() {
       try {
          return super.share.var.evalDouble(this.getVarValue());
-      } catch (EvalException var2) {
-         throw var2;
-      } catch (Exception var3) {
-         throw new EvalException(2003, super.word, super.string, super.pos, var3);
+      } catch (EvalException evalException) {
+         throw evalException;
+      } catch (Exception exception) {
+         throw new EvalException(2003, super.word, super.string, super.pos, exception);
       }
    }
 
@@ -57,10 +57,10 @@ public class VariableExpression extends WordExpression {
 
       try {
          super.share.var.setValue(name, val);
-      } catch (EvalException var5) {
-         throw var5;
-      } catch (Exception var6) {
-         throw new EvalException(2102, name, super.string, pos, var6);
+      } catch (EvalException evalException) {
+         throw evalException;
+      } catch (Exception exception) {
+         throw new EvalException(2102, name, super.string, pos, exception);
       }
    }
 
@@ -70,10 +70,10 @@ public class VariableExpression extends WordExpression {
       Object val;
       try {
          val = super.share.var.getObject(word);
-      } catch (EvalException var4) {
-         throw var4;
-      } catch (Exception var5) {
-         throw new EvalException(2101, word, super.string, super.pos, var5);
+      } catch (EvalException evalException) {
+         throw evalException;
+      } catch (Exception exception) {
+         throw new EvalException(2101, word, super.string, super.pos, exception);
       }
 
       if(val == null) {
@@ -86,9 +86,9 @@ public class VariableExpression extends WordExpression {
    protected Object getVariable() {
       try {
          return super.share.var.getObject(super.word);
-      } catch (EvalException var2) {
-         throw var2;
-      } catch (Exception var3) {
+      } catch (EvalException evalException) {
+         throw evalException;
+      } catch (Exception exception) {
          throw new EvalException(2002, super.word, super.string, super.pos, (Throwable)null);
       }
    }

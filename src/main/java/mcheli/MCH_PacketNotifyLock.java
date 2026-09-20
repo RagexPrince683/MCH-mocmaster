@@ -21,8 +21,8 @@ public class MCH_PacketNotifyLock extends MCH_Packet {
    public void readData(ByteArrayDataInput data) {
       try {
          this.entityID = data.readInt();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -30,8 +30,8 @@ public class MCH_PacketNotifyLock extends MCH_Packet {
    public void writeData(DataOutputStream dos) {
       try {
          dos.writeInt(this.entityID);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

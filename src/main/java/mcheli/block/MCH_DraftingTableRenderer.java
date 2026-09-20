@@ -11,7 +11,7 @@ import org.lwjgl.opengl.GL11;
 
 public class MCH_DraftingTableRenderer extends TileEntitySpecialRenderer {
 
-   public void renderTileEntityAt(TileEntity tile, double posX, double posY, double posZ, float var8) {
+   public void renderTileEntityAt(TileEntity tile, double posX, double posY, double posZ, float positionX) {
       GL11.glPushMatrix();
       GL11.glEnable(2884);
       GL11.glTranslated(posX + 0.5D, posY, posZ + 0.5D);
@@ -23,7 +23,7 @@ public class MCH_DraftingTableRenderer extends TileEntitySpecialRenderer {
       int srcBlend = GL11.glGetInteger(3041);
       int dstBlend = GL11.glGetInteger(3040);
       GL11.glBlendFunc(770, 771);
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.SmoothShading.prmBool) {
          GL11.glShadeModel(7425);
       }

@@ -72,10 +72,10 @@ public abstract class AbstractRule {
          n.setPriority(this.prio);
          n.share = share;
          return n;
-      } catch (RuntimeException var5) {
-         throw var5;
-      } catch (Exception var6) {
-         throw new RuntimeException(var6);
+      } catch (RuntimeException runtimeException) {
+         throw runtimeException;
+      } catch (Exception exception) {
+         throw new RuntimeException(exception);
       }
    }
 
@@ -87,5 +87,5 @@ public abstract class AbstractRule {
 
    }
 
-   protected abstract AbstractExpression parse(Lex var1);
+   protected abstract AbstractExpression parse(Lex result1);
 }

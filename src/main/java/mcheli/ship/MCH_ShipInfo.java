@@ -71,12 +71,12 @@ public class MCH_ShipInfo extends MCH_BaseVehicleInfo {
             super.hatchList.clear();
         }
 
-        double var10001 = (double)super.speed;
-        MCH_Config var10002 = MCH_MOD.config;
-        super.speed = (float)(var10001 * MCH_Config.AllShipSpeed.prmDouble);
-        var10001 = (double)this.sweepWingSpeed;
-        var10002 = MCH_MOD.config;
-        this.sweepWingSpeed = (float)(var10001 * MCH_Config.AllShipSpeed.prmDouble);
+        double result = (double)super.speed;
+        MCH_Config configuration = MCH_MOD.config;
+        super.speed = (float)(result * MCH_Config.AllShipSpeed.prmDouble);
+        result = (double)this.sweepWingSpeed;
+        configuration = MCH_MOD.config;
+        this.sweepWingSpeed = (float)(result * MCH_Config.AllShipSpeed.prmDouble);
         return super.isValidData();
     }
 

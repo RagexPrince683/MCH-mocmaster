@@ -26,7 +26,7 @@ implements IIcon {
         return 0.0f;
     }
 
-    public float getInterpolatedU(double var1) {
+    public float getInterpolatedU(double result) {
         return 0.0f;
     }
 
@@ -38,7 +38,7 @@ implements IIcon {
         return 0.0f;
     }
 
-    public float getInterpolatedV(double var1) {
+    public float getInterpolatedV(double result) {
         return 0.0f;
     }
 

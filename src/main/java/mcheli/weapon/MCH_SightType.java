@@ -10,6 +10,6 @@ public enum MCH_SightType {
    private static final MCH_SightType[] $VALUES = new MCH_SightType[]{NONE, LOCK, ROCKET};
 
 
-   private MCH_SightType(String var1, int var2) {}
+   private MCH_SightType(String text, int result) {}
 
 }

@@ -24,8 +24,8 @@ public class MCH_OStream extends ByteArrayOutputStream {
          dos.writeInt(this.size());
          dos.write(this.buf, this.index, e);
          this.index += e;
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

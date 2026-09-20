@@ -48,7 +48,7 @@ public class MCH_HudItemString extends MCH_HudItem {
       double hp_per = MCH_HudItem.ac.getMaxHP() > 0?(double)MCH_HudItem.ac.getHP() / (double)MCH_HudItem.ac.getMaxHP():0.0D;
 
       for(int i = 0; i < prm.length; ++i) {
-         switch(MCH_HudItemString.NamelessClass1090813585.$SwitchMap$mcheli$hud$MCH_HudItemStringArgs[this.args[i].ordinal()]) {
+         switch(MCH_HudItemString.NamelessClass1090813585.$SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[this.args[i].ordinal()]) {
          case 1:
             prm[i] = MCH_HudItem.ac.getAcInfo().displayName;
             break;
@@ -184,7 +184,7 @@ public class MCH_HudItemString extends MCH_HudItem {
             prm[i] = Double.valueOf(MCH_HudItem.UAV_Dist);
             break;
          case 37:
-            MCH_Config var10002 = MCH_MOD.config;
+            MCH_Config result = MCH_MOD.config;
             prm[i] = MCH_KeyName.getDescOrName(MCH_Config.KeyGUI.prmInt);
             break;
          case 38:
@@ -205,241 +205,241 @@ public class MCH_HudItemString extends MCH_HudItem {
    static class NamelessClass1090813585 {
 
       // $FF: synthetic field
-      static final int[] $SwitchMap$mcheli$hud$MCH_HudItemStringArgs = new int[MCH_HudItemStringArgs.values().length];
+      static final int[] $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs = new int[MCH_HudItemStringArgs.values().length];
 
 
       static {
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.NAME.ordinal()] = 1;
-         } catch (NoSuchFieldError var39) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.NAME.ordinal()] = 1;
+         } catch (NoSuchFieldError noSuchFieldError) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.ALTITUDE.ordinal()] = 2;
-         } catch (NoSuchFieldError var38) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.ALTITUDE.ordinal()] = 2;
+         } catch (NoSuchFieldError noSuchFieldError2) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.DATE.ordinal()] = 3;
-         } catch (NoSuchFieldError var37) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.DATE.ordinal()] = 3;
+         } catch (NoSuchFieldError noSuchFieldError3) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MC_THOR.ordinal()] = 4;
-         } catch (NoSuchFieldError var36) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MC_THOR.ordinal()] = 4;
+         } catch (NoSuchFieldError noSuchFieldError4) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MC_TMIN.ordinal()] = 5;
-         } catch (NoSuchFieldError var35) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MC_TMIN.ordinal()] = 5;
+         } catch (NoSuchFieldError noSuchFieldError5) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MC_TSEC.ordinal()] = 6;
-         } catch (NoSuchFieldError var34) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MC_TSEC.ordinal()] = 6;
+         } catch (NoSuchFieldError noSuchFieldError6) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MAX_HP.ordinal()] = 7;
-         } catch (NoSuchFieldError var33) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MAX_HP.ordinal()] = 7;
+         } catch (NoSuchFieldError noSuchFieldError7) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.HP.ordinal()] = 8;
-         } catch (NoSuchFieldError var32) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.HP.ordinal()] = 8;
+         } catch (NoSuchFieldError noSuchFieldError8) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.HP_PER.ordinal()] = 9;
-         } catch (NoSuchFieldError var31) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.HP_PER.ordinal()] = 9;
+         } catch (NoSuchFieldError noSuchFieldError9) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.POS_X.ordinal()] = 10;
-         } catch (NoSuchFieldError var30) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.POS_X.ordinal()] = 10;
+         } catch (NoSuchFieldError noSuchFieldError10) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.POS_Y.ordinal()] = 11;
-         } catch (NoSuchFieldError var29) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.POS_Y.ordinal()] = 11;
+         } catch (NoSuchFieldError noSuchFieldError11) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.POS_Z.ordinal()] = 12;
-         } catch (NoSuchFieldError var28) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.POS_Z.ordinal()] = 12;
+         } catch (NoSuchFieldError noSuchFieldError12) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MOTION_X.ordinal()] = 13;
-         } catch (NoSuchFieldError var27) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MOTION_X.ordinal()] = 13;
+         } catch (NoSuchFieldError noSuchFieldError13) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MOTION_Y.ordinal()] = 14;
-         } catch (NoSuchFieldError var26) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MOTION_Y.ordinal()] = 14;
+         } catch (NoSuchFieldError noSuchFieldError14) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MOTION_Z.ordinal()] = 15;
-         } catch (NoSuchFieldError var25) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MOTION_Z.ordinal()] = 15;
+         } catch (NoSuchFieldError noSuchFieldError15) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.INVENTORY.ordinal()] = 16;
-         } catch (NoSuchFieldError var24) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.INVENTORY.ordinal()] = 16;
+         } catch (NoSuchFieldError noSuchFieldError16) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.WPN_NAME.ordinal()] = 17;
-         } catch (NoSuchFieldError var23) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.WPN_NAME.ordinal()] = 17;
+         } catch (NoSuchFieldError noSuchFieldError17) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.WPN_AMMO.ordinal()] = 18;
-         } catch (NoSuchFieldError var22) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.WPN_AMMO.ordinal()] = 18;
+         } catch (NoSuchFieldError noSuchFieldError18) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.WPN_RM_AMMO.ordinal()] = 19;
-         } catch (NoSuchFieldError var21) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.WPN_RM_AMMO.ordinal()] = 19;
+         } catch (NoSuchFieldError noSuchFieldError19) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.RELOAD_PER.ordinal()] = 20;
-         } catch (NoSuchFieldError var20) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.RELOAD_PER.ordinal()] = 20;
+         } catch (NoSuchFieldError noSuchFieldError20) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.RELOAD_SEC.ordinal()] = 21;
-         } catch (NoSuchFieldError var19) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.RELOAD_SEC.ordinal()] = 21;
+         } catch (NoSuchFieldError noSuchFieldError21) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MORTAR_DIST.ordinal()] = 22;
-         } catch (NoSuchFieldError var18) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MORTAR_DIST.ordinal()] = 22;
+         } catch (NoSuchFieldError noSuchFieldError22) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MC_VER.ordinal()] = 23;
-         } catch (NoSuchFieldError var17) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MC_VER.ordinal()] = 23;
+         } catch (NoSuchFieldError noSuchFieldError23) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MOD_VER.ordinal()] = 24;
-         } catch (NoSuchFieldError var16) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MOD_VER.ordinal()] = 24;
+         } catch (NoSuchFieldError noSuchFieldError24) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MOD_NAME.ordinal()] = 25;
-         } catch (NoSuchFieldError var15) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.MOD_NAME.ordinal()] = 25;
+         } catch (NoSuchFieldError noSuchFieldError25) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.YAW.ordinal()] = 26;
-         } catch (NoSuchFieldError var14) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.YAW.ordinal()] = 26;
+         } catch (NoSuchFieldError noSuchFieldError26) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.PITCH.ordinal()] = 27;
-         } catch (NoSuchFieldError var13) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.PITCH.ordinal()] = 27;
+         } catch (NoSuchFieldError noSuchFieldError27) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.ROLL.ordinal()] = 28;
-         } catch (NoSuchFieldError var12) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.ROLL.ordinal()] = 28;
+         } catch (NoSuchFieldError noSuchFieldError28) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.PLYR_YAW.ordinal()] = 29;
-         } catch (NoSuchFieldError var11) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.PLYR_YAW.ordinal()] = 29;
+         } catch (NoSuchFieldError noSuchFieldError29) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.PLYR_PITCH.ordinal()] = 30;
-         } catch (NoSuchFieldError var10) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.PLYR_PITCH.ordinal()] = 30;
+         } catch (NoSuchFieldError noSuchFieldError30) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.TVM_POS_X.ordinal()] = 31;
-         } catch (NoSuchFieldError var9) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.TVM_POS_X.ordinal()] = 31;
+         } catch (NoSuchFieldError noSuchFieldError31) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.TVM_POS_Y.ordinal()] = 32;
-         } catch (NoSuchFieldError var8) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.TVM_POS_Y.ordinal()] = 32;
+         } catch (NoSuchFieldError noSuchFieldError32) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.TVM_POS_Z.ordinal()] = 33;
-         } catch (NoSuchFieldError var7) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.TVM_POS_Z.ordinal()] = 33;
+         } catch (NoSuchFieldError noSuchFieldError33) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.TVM_DIFF.ordinal()] = 34;
-         } catch (NoSuchFieldError var6) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.TVM_DIFF.ordinal()] = 34;
+         } catch (NoSuchFieldError noSuchFieldError34) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.CAM_ZOOM.ordinal()] = 35;
-         } catch (NoSuchFieldError var5) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.CAM_ZOOM.ordinal()] = 35;
+         } catch (NoSuchFieldError noSuchFieldError35) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.UAV_DIST.ordinal()] = 36;
-         } catch (NoSuchFieldError var4) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.UAV_DIST.ordinal()] = 36;
+         } catch (NoSuchFieldError noSuchFieldError36) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.KEY_GUI.ordinal()] = 37;
-         } catch (NoSuchFieldError var3) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.KEY_GUI.ordinal()] = 37;
+         } catch (NoSuchFieldError noSuchFieldError37) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.THROTTLE.ordinal()] = 38;
-         } catch (NoSuchFieldError var2) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.THROTTLE.ordinal()] = 38;
+         } catch (NoSuchFieldError noSuchFieldError38) {
             ;
          }
 
          try {
-            $SwitchMap$mcheli$hud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.NONE.ordinal()] = 39;
-         } catch (NoSuchFieldError var1) {
+            $SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[MCH_HudItemStringArgs.NONE.ordinal()] = 39;
+         } catch (NoSuchFieldError noSuchFieldError39) {
             ;
          }
 

@@ -14,7 +14,7 @@ public class OptimizeLong extends OptimizeObject {
       try {
          long e = exp.evalLong();
          return NumberExpression.create(exp, Long.toString(e));
-      } catch (Exception var4) {
+      } catch (Exception exception) {
          return exp;
       }
    }

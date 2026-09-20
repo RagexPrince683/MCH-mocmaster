@@ -32,8 +32,8 @@ public class MCH_PacketNotifyServerSettings extends MCH_Packet {
          this.enablePVP = this.getBit(e, 2);
          this.stingerLockRange = (double)data.readFloat();
          this.enableDebugBoundingBox = this.getBit(e, 3);
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -47,22 +47,22 @@ public class MCH_PacketNotifyServerSettings extends MCH_Packet {
          e1 = this.setBit(e1, 3, this.enableDebugBoundingBox);
          dos.writeByte(e1);
          dos.writeFloat((float)this.stingerLockRange);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }
 
    public static void send(EntityPlayerMP player) {
       MCH_PacketNotifyServerSettings s = new MCH_PacketNotifyServerSettings();
-      MCH_Config var10001 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       s.enableCamDistChange = !MCH_Config.DisableCameraDistChange.prmBool;
-      var10001 = MCH_MOD.config;
+      configuration = MCH_MOD.config;
       s.enableEntityMarker = MCH_Config.DisplayEntityMarker.prmBool;
       s.enablePVP = MinecraftServer.getServer().isPVPEnabled();
-      var10001 = MCH_MOD.config;
+      configuration = MCH_MOD.config;
       s.stingerLockRange = MCH_Config.StingerLockRange.prmDouble;
-      var10001 = MCH_MOD.config;
+      configuration = MCH_MOD.config;
       s.enableDebugBoundingBox = MCH_Config.EnableDebugBoundingBox.prmBool;
       if(player != null) {
          W_Network.sendToPlayer(s, player);

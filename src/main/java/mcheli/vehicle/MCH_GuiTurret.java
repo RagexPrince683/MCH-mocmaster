@@ -47,7 +47,7 @@ public class MCH_GuiTurret extends MCH_BaseVehicleCommonGui {
             label24: {
                this.drawDebugtInfo(vehicle);
                if(isThirdPersonView) {
-                  MCH_Config var10000 = MCH_MOD.config;
+                  MCH_Config configuration = MCH_MOD.config;
                   if(!MCH_Config.DisplayHUDThirdPerson.prmBool) {
                      break label24;
                   }
@@ -74,7 +74,7 @@ public class MCH_GuiTurret extends MCH_BaseVehicleCommonGui {
    }
 
    public void drawKeyBind(MCH_EntityTurret vehicle, EntityPlayer player) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(!MCH_Config.HideKeybind.prmBool) {
          MCH_TurretInfo info = vehicle.getTurretInfo();
          if(info != null) {
@@ -85,13 +85,13 @@ public class MCH_GuiTurret extends MCH_BaseVehicleCommonGui {
             int seatID = vehicle.getSeatIdByEntity(player);
             this.drawRadarKeyBind(vehicle, player, seatID, RX, super.centerY + 20, colorActive, colorInactive);
             String msg;
-            StringBuilder var11;
-            MCH_Config var10001;
+            StringBuilder messageBuilder;
+            MCH_Config configuration2;
             if(vehicle.haveFlare()) {
                int c = vehicle.isFlarePreparation()?colorInactive:colorActive;
-               var11 = (new StringBuilder()).append("Flare : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeyFlare.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("Flare : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyFlare.prmInt)).toString();
                this.drawString(msg, RX, super.centerY - 50, c);
             }
 
@@ -100,38 +100,38 @@ public class MCH_GuiTurret extends MCH_BaseVehicleCommonGui {
             }
 
             if(vehicle.getTowChainEntity() != null && !vehicle.getTowChainEntity().isDead) {
-               var11 = (new StringBuilder()).append("Drop  : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("Drop  : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
                this.drawString(msg, RX, super.centerY - 30, colorActive);
             }
 
             if(vehicle.camera.getCameraZoom() > 1.0F) {
-               var11 = (new StringBuilder()).append("Zoom : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("Zoom : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
                this.drawString(msg, LX, super.centerY - 80, colorActive);
             }
 
             MCH_WeaponSet ws = vehicle.getCurrentWeapon(player);
             if(vehicle.getWeaponNum() > 1) {
-               var11 = (new StringBuilder()).append("Weapon : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchWeapon2.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("Weapon : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchWeapon2.prmInt)).toString();
                this.drawString(msg, LX, super.centerY - 70, colorActive);
             }
 
             if(ws.getCurrentWeapon().numMode > 0) {
-               var11 = (new StringBuilder()).append("WeaponMode : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwWeaponMode.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("WeaponMode : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwWeaponMode.prmInt)).toString();
                this.drawString(msg, LX, super.centerY - 60, colorActive);
             }
 
             if(info.isEnableNightVision) {
-               var11 = (new StringBuilder()).append("CameraMode : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeyCameraMode.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("CameraMode : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyCameraMode.prmInt)).toString();
                this.drawString(msg, LX, super.centerY - 50, colorActive);
             }
 

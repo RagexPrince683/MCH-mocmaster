@@ -192,7 +192,7 @@ public class MCH_WeaponCAS extends MCH_WeaponBase {
       if(W_MovingObjectPosition.isHitTypeTile(m)) {
          if(super.worldObj.isRemote) {
             double dx = m.hitVec.xCoord - px;
-            double var10000 = m.hitVec.yCoord - py;
+            double positionX = m.hitVec.yCoord - py;
             double dz = m.hitVec.zCoord - pz;
             if(Math.sqrt(dx * dx + dz * dz) < 20.0D) {
                return false;

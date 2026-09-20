@@ -33,8 +33,8 @@ public class MCH_PacketNotifyInfoReloaded extends MCH_Packet {
                this.reason = data.readUTF();
             }
          }
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -51,8 +51,8 @@ public class MCH_PacketNotifyInfoReloaded extends MCH_Packet {
                dos.writeUTF(this.reason);
             }
          }
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

@@ -242,11 +242,11 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       }
 
       if(id < this.screenButtonList.size()) {
-         List var5 = (List)this.screenButtonList.get(id);
-         Iterator i$ = var5.iterator();
+         List items = (List)this.screenButtonList.get(id);
+         Iterator iteratedValueIndex = items.iterator();
 
-         while(i$.hasNext()) {
-            GuiButton b = (GuiButton)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            GuiButton b = (GuiButton)iteratedValueIndex.next();
             W_GuiButton.setVisible(b, true);
          }
       }
@@ -599,12 +599,12 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
                W_McClient.MOD_bindTexture("textures/gui/drafting_table.png");
                this.drawTexturedModalRect(340, 215, 45, 15, 400, 60, 90, 30);
                if(mx >= 350 && mx <= 400 && my >= 214 && my <= 230) {
-                  boolean var12 = Mouse.isButtonDown(0);
-                  boolean var13 = Mouse.isButtonDown(1);
-                  boolean var14 = Mouse.isButtonDown(2);
-                  index.add((var12?EnumChatFormatting.AQUA:"") + "Mouse left button drag : Rotation model");
-                  index.add((var13?EnumChatFormatting.AQUA:"") + "Mouse right button drag : Zoom model");
-                  index.add((var14?EnumChatFormatting.AQUA:"") + "Mouse middle button drag : Move model");
+                  boolean isValid = Mouse.isButtonDown(0);
+                  boolean isValid2 = Mouse.isButtonDown(1);
+                  boolean isValid3 = Mouse.isButtonDown(2);
+                  index.add((isValid?EnumChatFormatting.AQUA:"") + "Mouse left button drag : Rotation model");
+                  index.add((isValid2?EnumChatFormatting.AQUA:"") + "Mouse right button drag : Zoom model");
+                  index.add((isValid3?EnumChatFormatting.AQUA:"") + "Mouse middle button drag : Move model");
                }
             }
          }
@@ -617,18 +617,18 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       }
 
       if(this.getScreenId() == 1) {
-         int var11 = 2 * (int)this.listSlider.getSliderValue();
+         int index2 = 2 * (int)this.listSlider.getSliderValue();
          i = 0;
 
          int rx;
          int ry;
-         int var15;
+         int index3;
          for(r = 0; r < 3; ++r) {
-            for(var15 = 0; var15 < 2; ++var15) {
-               if(var11 + i < this.getCurrentList().getRecipeListSize()) {
-                  rx = 110 + 140 * var15;
+            for(index3 = 0; index3 < 2; ++index3) {
+               if(index2 + i < this.getCurrentList().getRecipeListSize()) {
+                  rx = 110 + 140 * index3;
                   ry = 20 + 70 * r;
-                  String s = this.getCurrentList().getRecipe(var11 + i).getRecipeOutput().getDisplayName();
+                  String s = this.getCurrentList().getRecipe(index2 + i).getRecipeOutput().getDisplayName();
                   this.drawCenteredString(s, rx, ry, -1);
                }
 
@@ -640,9 +640,9 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          i = 0;
 
          for(r = 0; r < 3; ++r) {
-            for(var15 = 0; var15 < 2; ++var15) {
-               if(var11 + i < this.getCurrentList().getRecipeListSize()) {
-                  rx = 80 + 140 * var15 - 1;
+            for(index3 = 0; index3 < 2; ++index3) {
+               if(index2 + i < this.getCurrentList().getRecipeListSize()) {
+                  rx = 80 + 140 * index3 - 1;
                   ry = 30 + 70 * r - 1;
                   this.drawTexturedModalRect(rx, ry, 400, 0, 75, 54);
                }
@@ -654,11 +654,11 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          i = 0;
 
          for(r = 0; r < 3; ++r) {
-            for(var15 = 0; var15 < 2; ++var15) {
-               if(var11 + i < this.getCurrentList().getRecipeListSize()) {
-                  rx = 80 + 140 * var15;
+            for(index3 = 0; index3 < 2; ++index3) {
+               if(index2 + i < this.getCurrentList().getRecipeListSize()) {
+                  rx = 80 + 140 * index3;
                   ry = 30 + 70 * r;
-                  this.drawItemRecipe(this.getCurrentList().getRecipe(var11 + i), rx, ry);
+                  this.drawItemRecipe(this.getCurrentList().getRecipe(index2 + i), rx, ry);
                }
 
                ++i;
@@ -982,7 +982,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
    }
 
-   protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
+   protected void drawGuiContainerBackgroundLayer(float scale, int id, int id2) {
       W_ScaledResolution scaledresolution = new W_ScaledResolution(super.mc, super.mc.displayWidth, super.mc.displayHeight);
       this.scaleFactor = scaledresolution.getScaleFactor();
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);

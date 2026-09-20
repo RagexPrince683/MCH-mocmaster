@@ -114,7 +114,7 @@ public class MCH_EntityGLTD extends W_Entity {
       if(this.isEntityInvulnerable()) {
          return false;
       } else if(!super.worldObj.isRemote && !super.isDead) {
-         MCH_Config var10000 = MCH_MOD.config;
+         MCH_Config configuration = MCH_MOD.config;
          damage = MCH_Config.applyDamageByExternal(this, ds, damage);
          if(!MCH_Multiplay.canAttackEntity(ds, this)) {
             return false;
@@ -284,7 +284,7 @@ public class MCH_EntityGLTD extends W_Entity {
          super.rotationYaw = (float)((double)super.rotationYaw + d12);
          this.setRotation(super.rotationYaw, super.rotationPitch);
          if(!super.worldObj.isRemote) {
-            MCH_Config var10000 = MCH_MOD.config;
+            MCH_Config configuration = MCH_MOD.config;
             if(MCH_Config.Collision_DestroyBlock.prmBool) {
                for(int l = 0; l < 4; ++l) {
                   int i1 = MathHelper.floor_double(super.posX + ((double)(l % 2) - 0.5D) * 0.8D);

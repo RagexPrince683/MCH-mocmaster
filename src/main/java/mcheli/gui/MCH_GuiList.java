@@ -97,10 +97,10 @@ public class MCH_GuiList extends W_GuiButton {
    public void mouseReleased(int x, int y) {
       if(this.isVisible()) {
          this.scrollBar.mouseReleased(x, y);
-         Iterator i$ = this.listItems.iterator();
+         Iterator iteratedValueIndex = this.listItems.iterator();
 
-         while(i$.hasNext()) {
-            MCH_GuiListItem item = (MCH_GuiListItem)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_GuiListItem item = (MCH_GuiListItem)iteratedValueIndex.next();
             item.mouseReleased(x, y);
          }
       }

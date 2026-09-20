@@ -22,12 +22,12 @@ public class MCH_RenderChain extends W_Render {
             GL11.glPushMatrix();
             GL11.glEnable(2884);
             GL11.glColor4f(0.5F, 0.5F, 0.5F, 1.0F);
-            RenderManager var10001 = RenderManager.instance;
-            double var10000 = chain.towedEntity.lastTickPosX - RenderManager.renderPosX;
-            RenderManager var10002 = RenderManager.instance;
-            double var27 = chain.towedEntity.lastTickPosY - RenderManager.renderPosY;
-            RenderManager var10003 = RenderManager.instance;
-            GL11.glTranslated(var10000, var27, chain.towedEntity.lastTickPosZ - RenderManager.renderPosZ);
+            RenderManager renderManager = RenderManager.instance;
+            double positionX = chain.towedEntity.lastTickPosX - RenderManager.renderPosX;
+            RenderManager renderManager2 = RenderManager.instance;
+            double positionX2 = chain.towedEntity.lastTickPosY - RenderManager.renderPosY;
+            RenderManager renderManager3 = RenderManager.instance;
+            GL11.glTranslated(positionX, positionX2, chain.towedEntity.lastTickPosZ - RenderManager.renderPosZ);
             this.bindTexture("textures/chain.png");
             double dx = chain.towEntity.lastTickPosX - chain.towedEntity.lastTickPosX;
             double dy = chain.towEntity.lastTickPosY - chain.towedEntity.lastTickPosY;

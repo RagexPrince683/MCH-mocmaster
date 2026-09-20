@@ -94,11 +94,11 @@ public abstract class MCH_EntityParticleBase extends W_EntityFX {
             par1 = 0.0D;
          }
 
-         boolean var10000;
+         boolean result;
          if(!super.onGround && (d7 == par3 || d7 >= 0.0D)) {
-            var10000 = false;
+            result = false;
          } else {
-            var10000 = true;
+            result = true;
          }
 
          int j;
@@ -146,14 +146,14 @@ public abstract class MCH_EntityParticleBase extends W_EntityFX {
             super.motionZ = 0.0D;
          }
 
-         double var35 = super.posX - d3;
-         var35 = super.posY - d4;
-         var35 = super.posZ - d5;
+         double result2 = super.posX - d3;
+         result2 = super.posY - d4;
+         result2 = super.posZ - d5;
 
          try {
             this.doBlockCollisions();
-         } catch (Throwable var34) {
-            CrashReport crashreport = CrashReport.makeCrashReport(var34, "Checking entity block collision");
+         } catch (Throwable throwable) {
+            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Checking entity block collision");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being checked for collision");
             this.addEntityCrashInfo(crashreportcategory);
             throw new ReportedException(crashreport);

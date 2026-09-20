@@ -102,9 +102,9 @@ public class MCH_EntityThrowable extends EntityThrowable {
          this.setDead();
       } else {
          if(this.getInfo() == null) {
-            String var6 = this.getDataWatcher().getWatchableObjectString(31);
-            if(!var6.isEmpty()) {
-               this.setInfo(MCH_ThrowableInfoManager.get(var6));
+            String text = this.getDataWatcher().getWatchableObjectString(31);
+            if(!text.isEmpty()) {
+               this.setInfo(MCH_ThrowableInfoManager.get(text));
             }
 
             if(this.getInfo() == null) {
@@ -130,8 +130,8 @@ public class MCH_EntityThrowable extends EntityThrowable {
                   return;
                }
             } else if(this.countOnUpdate >= this.getInfo().timeFuse && this.getInfo().explosion <= 0) {
-               for(int var7 = 0; var7 < this.getInfo().smokeNum; ++var7) {
-                  float var8 = this.getInfo().smokeVelocityVertical >= 0.0F?0.2F:-0.2F;
+               for(int index = 0; index < this.getInfo().smokeNum; ++index) {
+                  float result = this.getInfo().smokeVelocityVertical >= 0.0F?0.2F:-0.2F;
                   float r = this.getInfo().smokeColor.r * 0.9F + super.rand.nextFloat() * 0.1F;
                   float g = this.getInfo().smokeColor.g * 0.9F + super.rand.nextFloat() * 0.1F;
                   float b = this.getInfo().smokeColor.b * 0.9F + super.rand.nextFloat() * 0.1F;

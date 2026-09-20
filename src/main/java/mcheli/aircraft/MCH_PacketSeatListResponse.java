@@ -35,8 +35,8 @@ public class MCH_PacketSeatListResponse extends MCH_Packet {
                this.riderEntityID[e] = data.readInt();
             }
          }
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -55,8 +55,8 @@ public class MCH_PacketSeatListResponse extends MCH_Packet {
          } else {
             dos.writeShort(-1);
          }
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

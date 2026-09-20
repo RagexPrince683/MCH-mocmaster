@@ -84,9 +84,9 @@ public abstract class MCH_Packet extends W_PacketBase {
       return (data >> bit & 1) != 0;
    }
 
-   public abstract void readData(ByteArrayDataInput var1);
+   public abstract void readData(ByteArrayDataInput result1);
 
-   public abstract void writeData(DataOutputStream var1);
+   public abstract void writeData(DataOutputStream result1);
 
    public abstract int getMessageID();
 
@@ -98,8 +98,8 @@ public abstract class MCH_Packet extends W_PacketBase {
          dos.writeInt(this.getMessageID());
          //todo for debug
          //System.out.println("getMessageID: " + this.getMessageID());
-      } catch (IOException var4) {
-         var4.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
       this.writeData(dos);

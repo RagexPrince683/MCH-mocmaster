@@ -1,3 +1,9 @@
+# Rename Decompiled Local Variables (PR pending)
+
+- Replaced numbered decompiler-style local variables and parameters throughout maintained Java sources with purpose-based names.
+- Renamed synthetic enhanced-loop array, length, and index locals and removed a stale commented duplicate wheel implementation.
+- Preserved gameplay, packet, rendering, model-loading, and Forge 1.7.10 behavior while improving source readability.
+
 # Fix Lazy Model Loading Regression (PR pending)
 
 - Fixed MQO parsing after compact geometry finalization and made model groups safe both before and after finalization.

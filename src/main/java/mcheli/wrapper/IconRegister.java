@@ -9,6 +9,6 @@ package mcheli.wrapper;
 import net.minecraft.util.IIcon;
 
 public interface IconRegister {
-    public IIcon registerIcon(String var1);
+    public IIcon registerIcon(String result1);
 }
 

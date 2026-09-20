@@ -34,11 +34,11 @@ public class MCH_ClientToolTickHandler extends MCH_ClientTickHandlerBase {
    }
 
    protected void onTick(boolean inGUI) {
-      MCH_Key[] arr$ = this.Keys;
-      int len$ = arr$.length;
+      MCH_Key[] iteratedValues = this.Keys;
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_Key k = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_Key k = iteratedValues[iteratedValueIndex];
          k.update();
       }
 

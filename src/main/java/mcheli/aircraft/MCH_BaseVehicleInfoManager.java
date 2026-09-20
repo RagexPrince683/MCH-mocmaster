@@ -30,7 +30,7 @@ public abstract class MCH_BaseVehicleInfoManager extends MCH_InfoManagerBase imp
       }
    }
 
-   public abstract MCH_BaseVehicleInfo getAcInfoFromItem(Item var1);
+   public abstract MCH_BaseVehicleInfo getAcInfoFromItem(Item result1);
 
    public MCH_BaseVehicleInfo getAcInfoFromItem(IRecipe recipe) {
       Map map = this.getMap();

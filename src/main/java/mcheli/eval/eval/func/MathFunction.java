@@ -12,8 +12,8 @@ public class MathFunction implements Function {
          types[m] = Long.TYPE;
       }
 
-      Method var7 = Math.class.getMethod(name, types);
-      Object ret = var7.invoke((Object)null, (Object[])args);
+      Method result = Math.class.getMethod(name, types);
+      Object ret = result.invoke((Object)null, (Object[])args);
       return ((Long)ret).longValue();
    }
 
@@ -24,8 +24,8 @@ public class MathFunction implements Function {
          types[m] = Double.TYPE;
       }
 
-      Method var7 = Math.class.getMethod(name, types);
-      Object ret = var7.invoke((Object)null, (Object[])args);
+      Method result = Math.class.getMethod(name, types);
+      Object ret = result.invoke((Object)null, (Object[])args);
       return ((Double)ret).doubleValue();
    }
 
@@ -47,7 +47,7 @@ public class MathFunction implements Function {
          types[m] = c;
       }
 
-      Method var7 = Math.class.getMethod(name, types);
-      return var7.invoke((Object)null, args);
+      Method result = Math.class.getMethod(name, types);
+      return result.invoke((Object)null, args);
    }
 }

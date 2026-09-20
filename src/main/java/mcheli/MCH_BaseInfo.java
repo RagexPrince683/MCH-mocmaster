@@ -105,18 +105,18 @@ public class MCH_BaseInfo {
                }
             }
 
-            boolean var14 = false;
+            boolean result = false;
             info.isValidData();
             info.postReload();
          }
-      } catch (Exception var12) {
+      } catch (Exception exception) {
          if(line > 0) {
             MCH_Lib.Log("### Load failed %s : line=%d", new Object[]{f.getName(), Integer.valueOf(line)});
          } else {
             MCH_Lib.Log("### Load failed %s", new Object[]{f.getName()});
          }
 
-         var12.printStackTrace();
+         exception.printStackTrace();
       } finally {
          inFile.close();
       }

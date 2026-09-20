@@ -35,7 +35,7 @@ public class MCH_RenderCartridge extends W_Render {
          GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
          try {
          this.bindTexture("textures/bullets/" + cartridge.texture_name + ".png");
-            } catch (Exception var11) {
+            } catch (Exception exception) {
                 System.out.println("Texture not found : " + cartridge.texture_name);
                 this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
             }

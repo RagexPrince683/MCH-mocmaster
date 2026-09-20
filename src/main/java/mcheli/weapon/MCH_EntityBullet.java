@@ -86,7 +86,7 @@ public class MCH_EntityBullet extends MCH_EntityBaseBullet {
          boolean list = false;
          if(super.shootingEntity != null && W_MovingObjectPosition.isHitTypeTile(m)) {
             Block d0 = W_WorldFunc.getBlock(super.worldObj, m.blockX, m.blockY, m.blockZ);
-            MCH_Config var10000 = MCH_MOD.config;
+            MCH_Config configuration = MCH_MOD.config;
             if(MCH_Config.bulletBreakableBlocks.contains(d0)) {
                W_WorldFunc.destroyBlock(super.worldObj, m.blockX, m.blockY, m.blockZ, true);
                list = true;
@@ -113,28 +113,28 @@ public class MCH_EntityBullet extends MCH_EntityBaseBullet {
             vec31 = W_WorldFunc.getWorldVec3(super.worldObj, m.hitVec.xCoord, m.hitVec.yCoord, m.hitVec.zCoord);
          }
 
-         Entity var22 = null;
-         List var23 = super.worldObj.getEntitiesWithinAABBExcludingEntity(this, super.boundingBox.addCoord(mx, my, mz).expand(21.0D, 21.0D, 21.0D));
-         double var24 = 0.0D;
+         Entity result = null;
+         List entities = super.worldObj.getEntitiesWithinAABBExcludingEntity(this, super.boundingBox.addCoord(mx, my, mz).expand(21.0D, 21.0D, 21.0D));
+         double result2 = 0.0D;
 
-         for(int j = 0; j < var23.size(); ++j) {
-            Entity entity1 = (Entity)var23.get(j);
+         for(int j = 0; j < entities.size(); ++j) {
+            Entity entity1 = (Entity)entities.get(j);
             if(this.canBeCollidedEntity(entity1)) {
                float f = 0.3F;
                AxisAlignedBB axisalignedbb = entity1.boundingBox.expand((double)f, (double)f, (double)f);
                MovingObjectPosition m1 = axisalignedbb.calculateIntercept(vec3, vec31);
                if(m1 != null) {
                   double d1 = vec3.distanceTo(m1.hitVec);
-                  if(d1 < var24 || var24 == 0.0D) {
-                     var22 = entity1;
-                     var24 = d1;
+                  if(d1 < result2 || result2 == 0.0D) {
+                     result = entity1;
+                     result2 = d1;
                   }
                }
             }
          }
 
-         if(var22 != null) {
-            m = new MovingObjectPosition(var22);
+         if(result != null) {
+            m = new MovingObjectPosition(result);
          }
 
          if(m != null) {

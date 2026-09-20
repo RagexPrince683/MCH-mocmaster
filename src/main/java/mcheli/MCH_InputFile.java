@@ -22,9 +22,9 @@ public class MCH_InputFile {
       try {
          this.br = new BufferedReader(new FileReader(this.file));
          return true;
-      } catch (FileNotFoundException var4) {
+      } catch (FileNotFoundException fileNotFoundException) {
          MCH_Lib.DbgLog(true, "FILE open failed MCH_InputFile.open:" + filePath, new Object[0]);
-         var4.printStackTrace();
+         fileNotFoundException.printStackTrace();
          return false;
       }
    }
@@ -40,8 +40,8 @@ public class MCH_InputFile {
       try {
          this.br = new BufferedReader(new InputStreamReader(new FileInputStream(this.file), "UTF-8"));
          return true;
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
          return false;
       }
    }
@@ -67,7 +67,7 @@ public class MCH_InputFile {
    public String readLine() {
       try {
          return this.br != null?this.br.readLine():null;
-      } catch (IOException var2) {
+      } catch (IOException oException) {
          return null;
       }
    }
@@ -77,7 +77,7 @@ public class MCH_InputFile {
          if(this.br != null) {
             this.br.close();
          }
-      } catch (IOException var2) {
+      } catch (IOException oException) {
          ;
       }
 

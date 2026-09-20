@@ -20,8 +20,8 @@ public class MCH_PacketNotifyTVMissileEntity extends MCH_Packet {
       try {
          this.entityID_Ac = data.readInt();
          this.entityID_TVMissile = data.readInt();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -30,8 +30,8 @@ public class MCH_PacketNotifyTVMissileEntity extends MCH_Packet {
       try {
          dos.writeInt(this.entityID_Ac);
          dos.writeInt(this.entityID_TVMissile);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

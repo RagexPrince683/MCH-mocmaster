@@ -33,7 +33,7 @@ public class OptimizeObject extends ReplaceAdapter {
       try {
          Object e = exp.evalObject();
          return (AbstractExpression)(e instanceof String?StringExpression.create(exp, (String)e):(e instanceof Character?CharExpression.create(exp, e.toString()):NumberExpression.create(exp, e.toString())));
-      } catch (Exception var3) {
+      } catch (Exception exception) {
          return exp;
       }
    }

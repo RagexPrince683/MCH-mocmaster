@@ -36,7 +36,7 @@ public class MCH_DraftingTableCreatePacket extends MCH_Packet {
                this.map.put(item, Integer.valueOf(0 + num));
             }
          }
-      } catch (Exception var7) {
+      } catch (Exception exception) {
          ;
       }
 
@@ -53,8 +53,8 @@ public class MCH_DraftingTableCreatePacket extends MCH_Packet {
             dos.writeUTF(this.getItemName(key));
             dos.writeByte(((Integer)this.map.get(key)).byteValue());
          }
-      } catch (IOException var4) {
-         var4.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

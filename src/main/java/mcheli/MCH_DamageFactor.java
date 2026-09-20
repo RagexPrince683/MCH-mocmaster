@@ -33,10 +33,10 @@ public class MCH_DamageFactor {
 
       Class best = null;
       Float bestValue = null;
-      Iterator i$ = this.map.entrySet().iterator();
+      Iterator iteratedValueIndex = this.map.entrySet().iterator();
 
-      while(i$.hasNext()) {
-         Map.Entry entry = (Map.Entry)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         Map.Entry entry = (Map.Entry)iteratedValueIndex.next();
          Class configured = (Class)entry.getKey();
          if(configured != EntityPlayer.class && configured != EntityLivingBase.class && configured.isAssignableFrom(c)
                && (best == null || best.isAssignableFrom(configured))) {

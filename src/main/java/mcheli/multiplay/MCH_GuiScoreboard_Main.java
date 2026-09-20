@@ -53,10 +53,10 @@ public class MCH_GuiScoreboard_Main extends MCH_GuiScoreboard_Base {
    }
 
    public void updateScreenButtons(List list) {
-      Iterator i$ = list.iterator();
+      Iterator iteratedValueIndex = list.iterator();
 
-      while(i$.hasNext()) {
-         Object o = i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         Object o = iteratedValueIndex.next();
          GuiButton button = (GuiButton)o;
          if(button.id == 1024) {
             button.displayString = "PVP : " + (MCH_ServerSettings.enablePVP?"ON":"OFF");

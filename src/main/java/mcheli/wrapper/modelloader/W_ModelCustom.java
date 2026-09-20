@@ -77,17 +77,17 @@ public abstract class W_ModelCustom implements IModelCustom {
       this.size = this.max - this.min;
    }
 
-   public abstract boolean containsPart(String var1);
+   public abstract boolean containsPart(String result1);
 
    public abstract void renderAllTransformed();
 
    public abstract void renderAllExcept(String ... excludedGroupNames);
 
-   public abstract void renderPartTransformed(String var1);
+   public abstract void renderPartTransformed(String result1);
 
-   public abstract void renderAll(int var1, int var2);
+   public abstract void renderAll(int result1, int result2);
 
-   public abstract void renderAllLine(int var1, int var2);
+   public abstract void renderAllLine(int result1, int result2);
 
    public abstract int getVertexNum();
 

@@ -55,7 +55,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
    private final MCP_NewPlaneOverlayRenderer newPlaneOverlayRenderer = new MCP_NewPlaneOverlayRenderer();
 
    public void renderLivingEventSpecialsPre(Pre event) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.DisableRenderLivingSpecials.prmBool) {
          MCH_EntityBaseVehicle ac = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(Minecraft.getMinecraft().thePlayer);
          if(ac != null && ac.isMountedEntity(event.entity)) {
@@ -134,11 +134,11 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
          OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, ac.getSearchLightValue(event.entity), 240.0F);
       }
 
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config result = MCH_MOD.config;
       if(MCH_Config.EnableModEntityRender.prmBool && cancelRender && (event.entity.ridingEntity instanceof MCH_EntityBaseVehicle || event.entity.ridingEntity instanceof MCH_EntitySeat)) {
          event.setCanceled(true);
       } else {
-         var10000 = MCH_MOD.config;
+         result = MCH_MOD.config;
          if(MCH_Config.EnableReplaceTextureManager.prmBool) {
             RenderManager rm1 = W_Reflection.getRenderManager(event.renderer);
             if(rm1 != null && !(rm1.renderEngine instanceof MCH_TextureManagerDummy)) {

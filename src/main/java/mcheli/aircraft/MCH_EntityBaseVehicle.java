@@ -345,7 +345,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.cs_heliAutoThrottleDown = true;
       this.cs_planeAutoThrottleDown = false;
       this.cs_shipAutoThrottleDown = true;
-      MCH_Config var10001 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       super.renderDistanceWeight = MCH_Config.RenderDistanceWeight.prmDouble;
       //todo test change this
       this.setCommonUniqueId("");
@@ -436,9 +436,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.getDataWatcher().addObject(29, new Integer(0));
       this.getDataWatcher().addObject(31, new Integer(0));
       if(!super.worldObj.isRemote) {
-         MCH_Config var10002 = MCH_MOD.config;
+         MCH_Config configuration = MCH_MOD.config;
          this.setCommonStatus(3, MCH_Config.InfinityAmmo.prmBool);
-         var10002 = MCH_MOD.config;
+         configuration = MCH_MOD.config;
          this.setCommonStatus(4, MCH_Config.InfinityFuel.prmBool);
          setGunnerStatus(true);
          //if (isUAV());
@@ -527,11 +527,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public boolean isInfinityFuel(Entity player, boolean checkOtherSeet) {
       if(!this.isCreative(player) && !this.getCommonStatus(4)) {
          if(checkOtherSeet) {
-            MCH_EntitySeat[] arr$ = this.getSeats();
-            int len$ = arr$.length;
+            MCH_EntitySeat[] iteratedValues = this.getSeats();
+            int iteratedValueCount = iteratedValues.length;
 
-            for(int i$ = 0; i$ < len$; ++i$) {
-               MCH_EntitySeat seat = arr$[i$];
+            for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+               MCH_EntitySeat seat = iteratedValues[iteratedValueIndex];
                if(seat != null && this.isCreative(seat.riddenByEntity)) {
                   return true;
                }
@@ -584,7 +584,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return this.getDataWatcher().getWatchableObjectString(20);
    }
 
-   public abstract void changeType(String var1);
+   public abstract void changeType(String result1);
 
    public boolean isTargetDrone() {
       return this.getAcInfo() != null && this.getAcInfo().isTargetDrone;
@@ -1047,9 +1047,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       if(!super.worldObj.isRemote) {
          this.ejectSeat(this.getRiddenByEntity());
-         Entity var3 = this.getEntityBySeatId(1);
-         if(var3 != null) {
-            this.ejectSeat(var3);
+         Entity entity2 = this.getEntityBySeatId(1);
+         if(entity2 != null) {
+            this.ejectSeat(entity2);
          }
 
 
@@ -1318,8 +1318,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
          this.aps.applyClientState(additionalData.readByte(), additionalData.readBoolean(),
                  additionalData.readInt(), additionalData.readInt(), additionalData.readInt());
-      } catch (Exception var4) {
-         var4.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -1517,7 +1517,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                }
             }
 
-            MCH_Config var10000 = MCH_MOD.config;
+            MCH_Config result = MCH_MOD.config;
             float damage = MCH_Config.applyDamageByExternal(this, damageSource, org_damage);
             if(!MCH_Multiplay.canAttackEntity(damageSource, this)) {
                return false;
@@ -1573,9 +1573,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                      if(isCreative) {
                         isDamegeSourcePlayer = true;
                      } else {
-                        var10000 = MCH_MOD.config;
+                        result = MCH_MOD.config;
                         if(!MCH_Config.PreventingBroken.prmBool) {
-                           var10000 = MCH_MOD.config;
+                           result = MCH_MOD.config;
                            if(MCH_Config.BreakableOnlyPickaxe.prmBool) {
                               if(cmd.getCurrentEquippedItem() != null && cmd.getCurrentEquippedItem().getItem() instanceof ItemPickaxe) {
                                  isDamegeSourcePlayer = true;
@@ -1672,13 +1672,13 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                      } else {
                         if(this.getAcInfo() != null && this.getAcInfo().getItem() != null) {
                            if(isCreative) {
-                              var10000 = MCH_MOD.config;
+                              result = MCH_MOD.config;
                               if(MCH_Config.DropItemInCreativeMode.prmBool && !isSneaking) {
                                  //this.clearSearchlightBlocks();
                                  this.dropItemWithOffset(this.getAcInfo().getItem(), 1, 0.0F);
                               }
 
-                              var10000 = MCH_MOD.config;
+                              result = MCH_MOD.config;
                               if(!MCH_Config.DropItemInCreativeMode.prmBool && isSneaking) {
                                  //this.clearSearchlightBlocks();
                                  this.dropItemWithOffset(this.getAcInfo().getItem(), 1, 0.0F);
@@ -1749,12 +1749,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       NBTTagCompound nbt = is.getTagCompound();
       nbt.setString("MCH_Command", this.getCommand());
       nbt.setLong("MCH_ServiceFuel", this.serviceFuel);
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.ItemFuel.prmBool) {
          nbt.setInteger("MCH_Fuel", this.getFuel());
       }
 
-      var10000 = MCH_MOD.config;
+      configuration = MCH_MOD.config;
       if(MCH_Config.ItemDamage.prmBool) {
          is.setItemDamage(this.getDamageTaken());
       }
@@ -1769,12 +1769,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          NBTTagCompound nbt = is.getTagCompound();
          this.setCommandForce(nbt.getString("MCH_Command"));
          this.serviceFuel = Math.max(0L, nbt.getLong("MCH_ServiceFuel"));
-         MCH_Config var10000 = MCH_MOD.config;
+         MCH_Config configuration = MCH_MOD.config;
          if(MCH_Config.ItemFuel.prmBool) {
             this.setFuel(nbt.getInteger("MCH_Fuel"));
          }
 
-         var10000 = MCH_MOD.config;
+         configuration = MCH_MOD.config;
          if(MCH_Config.ItemDamage.prmBool) {
             this.setDamageTaken(is.getItemDamage());
          }
@@ -1838,9 +1838,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public void onFirstUpdate() {
       if(!super.worldObj.isRemote) {
-         MCH_Config var10002 = MCH_MOD.config;
+         MCH_Config configuration = MCH_MOD.config;
          this.setCommonStatus(3, MCH_Config.InfinityAmmo.prmBool);
-         var10002 = MCH_MOD.config;
+         configuration = MCH_MOD.config;
          this.setCommonStatus(4, MCH_Config.InfinityFuel.prmBool);
       }
 
@@ -1928,7 +1928,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return 1.0F;
    }
 
-   public abstract void onUpdateAngles(float var1);
+   public abstract void onUpdateAngles(float result1);
 
    public float getControlRotYaw(float mouseX, float mouseY, float tick) {
       return 0.0F;
@@ -2464,10 +2464,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
 
 
-         Iterator i$ = this.getAcInfo().searchLights.iterator();
+         Iterator iteratedValueIndex = this.getAcInfo().searchLights.iterator();
 
-         while(i$.hasNext()) {
-            MCH_BaseVehicleInfo.SearchLight sl = (MCH_BaseVehicleInfo.SearchLight)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_BaseVehicleInfo.SearchLight sl = (MCH_BaseVehicleInfo.SearchLight)iteratedValueIndex.next();
             Vec3 pos = this.getTransformedPosition(sl.pos);
             double dist = entity.getDistanceSq(pos.xCoord, pos.yCoord, pos.zCoord);
             if(dist > 2.0D && dist < (double)(sl.height * sl.height + 20.0F)) {
@@ -2579,14 +2579,14 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       //}
 
       Entity e;
-      int var7;
+      int index;
       if (isDestroyed() && getCountOnUpdate() % 20 == 0) {
 
          //todo wait about 15-20 seconds bc fire
                 for (int i = 0; i < getSeatNum() + 1; i++) {
                      Entity entity = getEntityBySeatId(i);
                      if (entity != null && (i != 0 || !isUAV() || !isNewUAV())) {
-                          MCH_Config var10000 = MCH_MOD.config;
+                          MCH_Config configuration = MCH_MOD.config;
                           if (MCH_Config.applyDamageVsEntity(entity, DamageSource.inFire, 1.0F) > 0.0F) {
                              //todo get and summon a random few items used in the recipe for the vehicle here
                              //this is where vehicle dies; we want people killing things to at least return some profit
@@ -2701,8 +2701,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
 
       if(!super.worldObj.isRemote && (int)this.prevRotationRoll != (int)this.getRotRoll()) {
-         float var8 = MathHelper.wrapAngleTo180_float(this.getRotRoll());
-         this.getDataWatcher().updateObject(26, new Short((short)((int)var8)));
+         float angle = MathHelper.wrapAngleTo180_float(this.getRotRoll());
+         this.getDataWatcher().updateObject(26, new Short((short)((int)angle)));
       }
 
       this.prevRotationRoll = this.getRotRoll();
@@ -2729,11 +2729,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       super.onUpdate();
       if(this.getParts() != null) {
-         Entity[] var9 = this.getParts();
-         int var10 = var9.length;
+         Entity[] entity2 = this.getParts();
+         int index2 = entity2.length;
 
-         for(int prevOnGround = 0; prevOnGround < var10; ++prevOnGround) {
-            Entity prevMotionY = var9[prevOnGround];
+         for(int prevOnGround = 0; prevOnGround < index2; ++prevOnGround) {
+            Entity prevMotionY = entity2[prevOnGround];
             if(prevMotionY != null) {
                prevMotionY.onUpdate();
             }
@@ -2786,12 +2786,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       this.updateSupplyAmmo();
 
-      //MCH_Config var10001 = MCH_MOD.config;
+      //MCH_Config calculatedValue = MCH_MOD.config;
 
 
       this.autoRepair();
 
-      var7 = this.getFlareTick();
+      index = this.getFlareTick();
       this.flareDv.update();
       if(this.getAcInfo() != null && this.chaff != null) {
          this.chaff.chaffUseTime = getAcInfo().chaffUseTime;
@@ -2807,7 +2807,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.aps.configure(getAcInfo().apsUseTime, getAcInfo().apsWaitTime, getAcInfo().apsRange, getAcInfo().apsAmmo);
          this.aps.onUpdate();
       }
-      if(!super.worldObj.isRemote && this.getFlareTick() == 0 && var7 != 0) {
+      if(!super.worldObj.isRemote && this.getFlareTick() == 0 && index != 0) {
          this.setCommonStatus(0, false);
       }
 
@@ -2842,8 +2842,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       //this.updateExtraWheelBoundingBox();
 
-      boolean var11 = super.onGround;
-      double var12 = super.motionY;
+      boolean isMounted = super.onGround;
+      double motionY2 = super.motionY;
       double lockedPosX = super.posX;
       double lockedPosY = super.posY;
       double lockedPosZ = super.posZ;
@@ -2868,8 +2868,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.updateRecoil(1.0F);
       }
 
-      if(!super.worldObj.isRemote && this.isDestroyed() && !this.isExploded() && !var11 && super.onGround && var12 < -0.2D) {
-         this.explosionByCrash(var12);
+      if(!super.worldObj.isRemote && this.isDestroyed() && !this.isExploded() && !isMounted && super.onGround && motionY2 < -0.2D) {
+         this.explosionByCrash(motionY2);
          this.damageSinceDestroyed = this.getMaxHP();
          //basic crash physic system
          //todo maybe mend? change?
@@ -3012,26 +3012,26 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             }
 
             if(super.ridingEntity instanceof MCH_EntitySeat) {
-               MCH_EntityBaseVehicle var3 = ((MCH_EntitySeat)super.ridingEntity).getParent();
-               if(var3 != null) {
-                  this.noCollisionEntities.put(var3, 60);
+               MCH_EntityBaseVehicle baseVehicleEntity = ((MCH_EntitySeat)super.ridingEntity).getParent();
+               if(baseVehicleEntity != null) {
+                  this.noCollisionEntities.put(baseVehicleEntity, 60);
                }
             } else if(super.ridingEntity != null) {
                this.noCollisionEntities.put(super.ridingEntity, 60);
             }
 
-            Iterator var4 = this.noCollisionEntities.keySet().iterator();
+            Iterator iterator2 = this.noCollisionEntities.keySet().iterator();
 
-            while(var4.hasNext()) {
-               key1 = (Entity)var4.next();
+            while(iterator2.hasNext()) {
+               key1 = (Entity)iterator2.next();
                this.noCollisionEntities.put(key1, (Integer) this.noCollisionEntities.get(key1) - 1);
             }
 
-            var4 = this.noCollisionEntities.values().iterator();
+            iterator2 = this.noCollisionEntities.values().iterator();
 
-            while(var4.hasNext()) {
-               if(((Integer)var4.next()).intValue() <= 0) {
-                  var4.remove();
+            while(iterator2.hasNext()) {
+               if(((Integer)iterator2.next()).intValue() <= 0) {
+                  iterator2.remove();
                }
             }
 
@@ -3274,27 +3274,27 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             this.throttleCrawlerTrack[0] = (float)(this.partAnimationForwardTravel + this.partAnimationYawTravel);
             this.throttleCrawlerTrack[1] = (float)(this.partAnimationForwardTravel - this.partAnimationYawTravel);
 
-            for(int var11 = 0; var11 < 2; ++var11) {
-               this.rotTrackRoller[var11] += this.throttleCrawlerTrack[var11] * this.getAcInfo().trackRollerRot;
-               while(this.rotTrackRoller[var11] >= 360.0F) {
-                  this.rotTrackRoller[var11] -= 360.0F;
-                  this.prevRotTrackRoller[var11] -= 360.0F;
+            for(int index = 0; index < 2; ++index) {
+               this.rotTrackRoller[index] += this.throttleCrawlerTrack[index] * this.getAcInfo().trackRollerRot;
+               while(this.rotTrackRoller[index] >= 360.0F) {
+                  this.rotTrackRoller[index] -= 360.0F;
+                  this.prevRotTrackRoller[index] -= 360.0F;
                }
-               while(this.rotTrackRoller[var11] < 0.0F) {
-                  this.rotTrackRoller[var11] += 360.0F;
-                  this.prevRotTrackRoller[var11] += 360.0F;
-               }
-
-               for(this.rotCrawlerTrack[var11] -= this.throttleCrawlerTrack[var11]; this.rotCrawlerTrack[var11] >= 1.0F; --this.prevRotCrawlerTrack[var11]) {
-                  --this.rotCrawlerTrack[var11];
+               while(this.rotTrackRoller[index] < 0.0F) {
+                  this.rotTrackRoller[index] += 360.0F;
+                  this.prevRotTrackRoller[index] += 360.0F;
                }
 
-               while(this.rotCrawlerTrack[var11] < 0.0F) {
-                  ++this.rotCrawlerTrack[var11];
+               for(this.rotCrawlerTrack[index] -= this.throttleCrawlerTrack[index]; this.rotCrawlerTrack[index] >= 1.0F; --this.prevRotCrawlerTrack[index]) {
+                  --this.rotCrawlerTrack[index];
                }
 
-               while(this.prevRotCrawlerTrack[var11] < 0.0F) {
-                  ++this.prevRotCrawlerTrack[var11];
+               while(this.rotCrawlerTrack[index] < 0.0F) {
+                  ++this.rotCrawlerTrack[index];
+               }
+
+               while(this.prevRotCrawlerTrack[index] < 0.0F) {
+                  ++this.prevRotCrawlerTrack[index];
                }
 
             }
@@ -3333,9 +3333,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    private double getTrackHalfWidth() {
       double halfWidth = 0.0D;
-      Iterator i$ = this.getAcInfo().wheels.iterator();
-      while(i$.hasNext()) {
-         MCH_BaseVehicleInfo.Wheel wheel = (MCH_BaseVehicleInfo.Wheel)i$.next();
+      Iterator iteratedValueIndex = this.getAcInfo().wheels.iterator();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_BaseVehicleInfo.Wheel wheel = (MCH_BaseVehicleInfo.Wheel)iteratedValueIndex.next();
          halfWidth = Math.max(halfWidth, Math.abs(wheel.pos.xCoord));
       }
       return halfWidth > 0.01D?halfWidth:Math.max(0.5D, (double)this.getAcInfo().bodyWidth * 0.5D);
@@ -3662,7 +3662,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             super.rotationYaw += bkPosX;
          }
 
-         double var10 = super.posX;
+         double result = super.posX;
          double bkPosY = super.posY;
          double bkPosZ = super.posZ;
          if(this.getRidingEntity().isDead) {
@@ -3679,7 +3679,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             }
          }
 
-         super.posX = var10;
+         super.posX = result;
          super.posY = bkPosY;
          super.posZ = bkPosZ;
       }
@@ -3876,7 +3876,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                } else {
                   this.repairCount = 40;
                   double hpp = (double) this.getHP() / (double) this.getMaxHP();
-                  MCH_Config var10001 = MCH_MOD.config;
+                  MCH_Config configuration = MCH_MOD.config;
                   if (hpp >= MCH_Config.AutoRepairHP.prmDouble) {
                      this.repair(this.getMaxHP() / 100);
                   }
@@ -3927,11 +3927,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          if(!super.worldObj.isRemote) {
             if(this.getAcInfo() != null && this.getAcInfo().regeneration && this.getRiddenByEntity() != null) {
                MCH_EntitySeat[] st = this.getSeats();
-               MCH_EntitySeat[] arr$ = st;
-               int len$ = st.length;
+               MCH_EntitySeat[] iteratedValues = st;
+               int iteratedValueCount = st.length;
 
-               for(int i$ = 0; i$ < len$; ++i$) {
-                  MCH_EntitySeat s = arr$[i$];
+               for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+                  MCH_EntitySeat s = iteratedValues[iteratedValueIndex];
                   if(s != null && !s.isDead) {
                      Entity e = s.riddenByEntity;
                      if(W_Lib.isEntityLivingBase(e) && !e.isDead) {
@@ -4155,32 +4155,32 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                }
             }
 
-            int var5 = this.getFuel();
-            if(this.canSupply() && this.getCountOnUpdate() % 10 == 0 && var5 < this.getMaxFuel()) {
+            int result = this.getFuel();
+            if(this.canSupply() && this.getCountOnUpdate() % 10 == 0 && result < this.getMaxFuel()) {
                for(int i = 0; i < 3; ++i) {
-                  if(var5 < this.getMaxFuel()) {
-                     ItemStack var6 = this.getGuiInventory().getFuelSlotItemStack(i);
-                     if(var6 != null && var6.getItem() instanceof MCH_ItemFuel && var6.getItemDamage() < var6.getMaxDamage()) {
-                        int fc = this.getMaxFuel() - var5;
+                  if(result < this.getMaxFuel()) {
+                     ItemStack itemStack = this.getGuiInventory().getFuelSlotItemStack(i);
+                     if(itemStack != null && itemStack.getItem() instanceof MCH_ItemFuel && itemStack.getItemDamage() < itemStack.getMaxDamage()) {
+                        int fc = this.getMaxFuel() - result;
                         if(fc > 100) {
                            fc = 100;
                         }
 
-                        if(var6.getItemDamage() > var6.getMaxDamage() - fc) {
-                           fc = var6.getMaxDamage() - var6.getItemDamage();
+                        if(itemStack.getItemDamage() > itemStack.getMaxDamage() - fc) {
+                           fc = itemStack.getMaxDamage() - itemStack.getItemDamage();
                         }
 
-                        var6.setItemDamage(var6.getItemDamage() + fc);
-                        var5 += fc;
+                        itemStack.setItemDamage(itemStack.getItemDamage() + fc);
+                        result += fc;
                      }
                   }
                }
 
-               if(this.getFuel() != var5) {
+               if(this.getFuel() != result) {
                   MCH_Achievement.addStat(super.riddenByEntity, MCH_Achievement.supplyFuel, 1);
                }
 
-               this.setFuel(var5);
+               this.setFuel(result);
             }
          }
 
@@ -4272,9 +4272,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          return 0;
       }
 
-      Iterator i$ = ws.getInfo().roundItems.iterator();
-      while(i$.hasNext()) {
-         MCH_WeaponInfo.RoundItem ri = (MCH_WeaponInfo.RoundItem)i$.next();
+      Iterator iteratedValueIndex = ws.getInfo().roundItems.iterator();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_WeaponInfo.RoundItem ri = (MCH_WeaponInfo.RoundItem)iteratedValueIndex.next();
          if(ri != null && ri.itemStack != null && stack.isItemEqual(ri.itemStack)) {
             int itemCost = ri.num <= 0 ? 1 : ri.num;
             int supplied = ws.getInfo().suppliedNum <= 0 ? 1 : ws.getInfo().suppliedNum;
@@ -4308,9 +4308,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(ws == null || stack == null || ws.getInfo() == null || ws.getInfo().roundItems == null || ws.getInfo().roundItems.size() != 1) {
          return false;
       }
-      Iterator i$ = ws.getInfo().roundItems.iterator();
-      while(i$.hasNext()) {
-         MCH_WeaponInfo.RoundItem ri = (MCH_WeaponInfo.RoundItem)i$.next();
+      Iterator iteratedValueIndex = ws.getInfo().roundItems.iterator();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_WeaponInfo.RoundItem ri = (MCH_WeaponInfo.RoundItem)iteratedValueIndex.next();
          if(ri != null && ri.itemStack != null && stack.isItemEqual(ri.itemStack)) {
             return true;
          }
@@ -4325,17 +4325,17 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       } else {
          MCH_Achievement.addStat(super.riddenByEntity, MCH_Achievement.supplyAmmo, 1);
          if(this.getRiddenByEntity() instanceof EntityPlayer) {
-            EntityPlayer var9 = (EntityPlayer)this.getRiddenByEntity();
-            if(this.canPlayerSupplyAmmo(var9, weaponID)) {
+            EntityPlayer player2 = (EntityPlayer)this.getRiddenByEntity();
+            if(this.canPlayerSupplyAmmo(player2, weaponID)) {
                MCH_WeaponSet ws = this.getWeapon(weaponID);
-               Iterator i$ = ws.getInfo().roundItems.iterator();
+               Iterator iteratedValueIndex = ws.getInfo().roundItems.iterator();
 
-               while(i$.hasNext()) {
-                  MCH_WeaponInfo.RoundItem ri = (MCH_WeaponInfo.RoundItem)i$.next();
+               while(iteratedValueIndex.hasNext()) {
+                  MCH_WeaponInfo.RoundItem ri = (MCH_WeaponInfo.RoundItem)iteratedValueIndex.next();
                   int num = ri.num;
 
-                  for(int i = 0; i < var9.inventory.mainInventory.length; ++i) {
-                     ItemStack itemStack = var9.inventory.mainInventory[i];
+                  for(int i = 0; i < player2.inventory.mainInventory.length; ++i) {
+                     ItemStack itemStack = player2.inventory.mainInventory[i];
                      if(itemStack != null && itemStack.isItemEqual(ri.itemStack)) {
                         if(itemStack.getItem() != W_Item.getItemByName("water_bucket") && itemStack.getItem() != W_Item.getItemByName("lava_bucket")) {
                            if(itemStack.stackSize > num) {
@@ -4344,10 +4344,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                            } else {
                               num -= itemStack.stackSize;
                               itemStack.stackSize = 0;
-                              var9.inventory.mainInventory[i] = null;
+                              player2.inventory.mainInventory[i] = null;
                            }
                         } else if(itemStack.stackSize == 1) {
-                           var9.inventory.setInventorySlotContents(i, new ItemStack(W_Item.getItemByName("bucket"), 1));
+                           player2.inventory.setInventorySlotContents(i, new ItemStack(W_Item.getItemByName("bucket"), 1));
                            --num;
                         }
                      }
@@ -4493,24 +4493,24 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          if(ws.getRestAllAmmoNum() + ws.getAmmoNum() >= ws.getAllAmmoNum()) {
             return false;
          } else {
-            Iterator i$ = ws.getInfo().roundItems.iterator();
+            Iterator iteratedValueIndex = ws.getInfo().roundItems.iterator();
 
-            while(i$.hasNext()) {
-               MCH_WeaponInfo.RoundItem ri = (MCH_WeaponInfo.RoundItem)i$.next();
+            while(iteratedValueIndex.hasNext()) {
+               MCH_WeaponInfo.RoundItem ri = (MCH_WeaponInfo.RoundItem)iteratedValueIndex.next();
                int num = ri.num;
-               ItemStack[] arr$ = player.inventory.mainInventory;
-               int len$ = arr$.length;
-               int i$1 = 0;
+               ItemStack[] iteratedValues = player.inventory.mainInventory;
+               int iteratedValueCount = iteratedValues.length;
+               int iteratedValueIndex1 = 0;
 
                while(true) {
-                  if(i$1 < len$) {
-                     ItemStack itemStack = arr$[i$1];
+                  if(iteratedValueIndex1 < iteratedValueCount) {
+                     ItemStack itemStack = iteratedValues[iteratedValueIndex1];
                      if(itemStack != null && itemStack.isItemEqual(ri.itemStack)) {
                         num -= itemStack.stackSize;
                      }
 
                      if(num > 0) {
-                        ++i$1;
+                        ++iteratedValueIndex1;
                         continue;
                      }
                   }
@@ -4697,7 +4697,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             par1 = 0.0D;
          }
 
-         boolean var34 = super.onGround || d7 != par3 && d7 < 0.0D;
+         boolean result = super.onGround || d7 != par3 && d7 < 0.0D;
 
          int j;
          for(j = 0; j < list.size(); ++j) {
@@ -4722,7 +4722,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             par1 = 0.0D;
          }
 
-         if(super.stepHeight > 0.0F && var34 && super.ySize < 0.05F && (d6 != par1 || d8 != par5)) {
+         if(super.stepHeight > 0.0F && result && super.ySize < 0.05F && (d6 != par1 || d8 != par5)) {
             double d12 = par1;
             double d10 = par3;
             double d11 = par5;
@@ -4811,14 +4811,14 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             super.motionZ = 0.0D;
          }
 
-         double var10000 = super.posX - d3;
-         var10000 = super.posY - d4;
-         var10000 = super.posZ - d5;
+         double result2 = super.posX - d3;
+         result2 = super.posY - d4;
+         result2 = super.posZ - d5;
 
          try {
             this.doBlockCollisions();
-         } catch (Throwable var33) {
-            CrashReport crashreport = CrashReport.makeCrashReport(var33, "Checking entity tile collision");
+         } catch (Throwable throwable2) {
+            CrashReport crashreport = CrashReport.makeCrashReport(throwable2, "Checking entity tile collision");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being checked for collision");
             this.addEntityCrashInfo(crashreportcategory);
             throw new ReportedException(crashreport);
@@ -5028,11 +5028,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          vehicle.addExtraBoundingBoxBlockCollisions(par2AxisAlignedBB, collidingBoundingBoxes);
       }
 
-      double var15 = 0.25D;
-      List var16 = par1Entity.worldObj.getEntitiesWithinAABBExcludingEntity(par1Entity, par2AxisAlignedBB.expand(var15, var15, var15));
+      double result = 0.25D;
+      List entities = par1Entity.worldObj.getEntitiesWithinAABBExcludingEntity(par1Entity, par2AxisAlignedBB.expand(result, result, result));
 
-      for(int var17 = 0; var17 < var16.size(); ++var17) {
-         Entity entity = (Entity)var16.get(var17);
+      for(int index = 0; index < entities.size(); ++index) {
+         Entity entity = (Entity)entities.get(index);
          if(par1Entity instanceof MCH_EntityBaseVehicle
                  && ((MCH_EntityBaseVehicle)par1Entity).noCollisionEntities.containsKey(entity)) {
             continue;
@@ -5093,7 +5093,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    protected void onUpdate_updateBlock() {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.Collision_DestroyBlock.prmBool) {
          for(int l = 0; l < 4; ++l) {
             int i1 = MathHelper.floor_double(super.posX + ((double)(l % 2) - 0.5D) * 0.8D);
@@ -5213,9 +5213,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             }
          }
 
-         double var20 = (double)(rangeY - y + 1) / (5.0D * (double)scale) / 2.0D;
+         double result = (double)(rangeY - y + 1) / (5.0D * (double)scale) / 2.0D;
          if(b && this.getAcInfo().particlesScale > 0.01F) {
-            for(int var21 = 0; var21 < (int)(throttle * 6.0D * var20); ++var21) {
+            for(int index = 0; index < (int)(throttle * 6.0D * result); ++index) {
                float r = (float)(super.rand.nextDouble() * 3.141592653589793D * 2.0D);
                double dx = (double)MathHelper.cos(r);
                double dz = (double)MathHelper.sin(r);
@@ -5260,11 +5260,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public boolean useFlare(int type) {
       if(this.getAcInfo() != null && this.getAcInfo().haveFlare()) {
-         int[] arr$ = this.getAcInfo().flare.types;
-         int len$ = arr$.length;
+         int[] iteratedValues = this.getAcInfo().flare.types;
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            int i = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            int i = iteratedValues[iteratedValueIndex];
             if(i == type) {
                this.setCommonStatus(0, true);
                if(this.flareDv.use(type)) {
@@ -5498,13 +5498,13 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
       }
 
-      int var17 = 0;
-      MCH_EntitySeat[] arr$ = this.seats;
-      int len$ = arr$.length;
+      int result = 0;
+      MCH_EntitySeat[] iteratedValues = this.seats;
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_EntitySeat seat = arr$[i$];
-         ++var17;
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_EntitySeat seat = iteratedValues[iteratedValueIndex];
+         ++result;
          if(seat != null && !seat.isDead) {
             float offsetY = 0.0F;
             if(seat.riddenByEntity != null) {
@@ -5518,7 +5518,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             seat.prevPosX = seat.posX;
             seat.prevPosY = seat.posY;
             seat.prevPosZ = seat.posZ;
-            MCH_SeatInfo si = var17 < info.length?info[var17]:info[0];
+            MCH_SeatInfo si = result < info.length?info[result]:info[0];
             Vec3 v = this.getTransformedPosition(si.pos.xCoord, si.pos.yCoord + (double)offsetY, si.pos.zCoord, px, py, pz, si.rotSeat);
             seat.setPosition(v.xCoord, v.yCoord, v.zCoord);
             seat.rotationPitch = this.getRotPitch();
@@ -5671,24 +5671,24 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
 
       if(this.getTVMissile() != null && W_Lib.isClientPlayer(this.getTVMissile().shootingEntity)) {
-         MCH_EntityTvMissile var14 = this.getTVMissile();
-         x = var14.prevPosX + (var14.posX - var14.prevPosX) * (double)tick;
-         y = var14.prevPosY + (var14.posY - var14.prevPosY) * (double)tick;
-         z = var14.prevPosZ + (var14.posZ - var14.prevPosZ) * (double)tick;
+         MCH_EntityTvMissile tvMissileEntity = this.getTVMissile();
+         x = tvMissileEntity.prevPosX + (tvMissileEntity.posX - tvMissileEntity.prevPosX) * (double)tick;
+         y = tvMissileEntity.prevPosY + (tvMissileEntity.posY - tvMissileEntity.prevPosY) * (double)tick;
+         z = tvMissileEntity.prevPosZ + (tvMissileEntity.posZ - tvMissileEntity.prevPosZ) * (double)tick;
          MCH_ViewEntityDummy.setCameraPosition(x, y, z);
       } else {
-         MCH_BaseVehicleInfo.CameraPosition var13 = this.getCameraPosInfo();
-         if(var13 != null && var13.pos != null) {
-            MCH_SeatInfo var12 = this.getSeatInfo(player);
+         MCH_BaseVehicleInfo.CameraPosition cameraPosition = this.getCameraPosInfo();
+         if(cameraPosition != null && cameraPosition.pos != null) {
+            MCH_SeatInfo seatInfo2 = this.getSeatInfo(player);
             Vec3 v;
-            if(var12 != null && var12.rotSeat) {
-               v = this.calcOnTurretPos(var13.pos);
+            if(seatInfo2 != null && seatInfo2.rotSeat) {
+               v = this.calcOnTurretPos(cameraPosition.pos);
             } else {
-               v = MCH_Lib.RotVec3(var13.pos, -this.getRotYaw(), -this.getRotPitch(), -this.getRotRoll());
+               v = MCH_Lib.RotVec3(cameraPosition.pos, -this.getRotYaw(), -this.getRotPitch(), -this.getRotRoll());
             }
 
             MCH_ViewEntityDummy.setCameraPosition(x + v.xCoord, y + v.yCoord, z + v.zCoord);
-            if(var13.fixRot) {
+            if(cameraPosition.fixRot) {
                ;
             }
          }
@@ -5947,11 +5947,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(this.getRiddenByEntity() instanceof EntityPlayer) {
          return true;
       } else {
-         MCH_EntitySeat[] arr$ = this.getSeats();
-         int len$ = arr$.length;
+         MCH_EntitySeat[] iteratedValues = this.getSeats();
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_EntitySeat seat = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_EntitySeat seat = iteratedValues[iteratedValueIndex];
             if(seat != null && seat.riddenByEntity instanceof EntityPlayer) {
                return true;
             }
@@ -6225,12 +6225,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
 
       this.getGuiInventory().setDead();
-      MCH_EntitySeat[] arr$ = this.seats;
-      int len$ = arr$.length;
+      MCH_EntitySeat[] iteratedValues = this.seats;
+      int iteratedValueCount = iteratedValues.length;
 
-      int i$;
-      for(i$ = 0; i$ < len$; ++i$) {
-         MCH_EntitySeat e = arr$[i$];
+      int iteratedValueIndex;
+      for(iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_EntitySeat e = iteratedValues[iteratedValueIndex];
          if(e != null) {
             e.setDead();
          }
@@ -6245,13 +6245,13 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          this.setTowChainEntity((MCH_EntityChain)null);
       }
 
-      Entity[] var6 = this.getParts();
-      len$ = var6.length;
+      Entity[] result = this.getParts();
+      iteratedValueCount = result.length;
 
-      for(i$ = 0; i$ < len$; ++i$) {
-         Entity var7 = var6[i$];
-         if(var7 != null) {
-            var7.setDead();
+      for(iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         Entity entity = result[iteratedValueIndex];
+         if(entity != null) {
+            entity.setDead();
          }
       }
 
@@ -6758,11 +6758,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
 
       if(this.seats != null && this.seats.length > 0) {
-         MCH_EntitySeat[] arr$ = this.seats;
-         int len$ = arr$.length;
+         MCH_EntitySeat[] iteratedValues = this.seats;
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_EntitySeat seat = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_EntitySeat seat = iteratedValues[iteratedValueIndex];
             if(seat != null && seat.riddenByEntity != null && !seat.riddenByEntity.isDead) {
                ++num;
             }
@@ -6779,11 +6779,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          Entity entity = (Entity)list.get(i);
          if(!(entity instanceof EntityPlayer) && entity.ridingEntity == null) {
             int sid = 1;
-            MCH_EntitySeat[] arr$ = this.getSeats();
-            int len$ = arr$.length;
+            MCH_EntitySeat[] iteratedValues = this.getSeats();
+            int iteratedValueCount = iteratedValues.length;
 
-            for(int i$ = 0; i$ < len$; ++i$) {
-               MCH_EntitySeat seat = arr$[i$];
+            for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+               MCH_EntitySeat seat = iteratedValues[iteratedValueIndex];
                if(seat != null && seat.riddenByEntity == null && !this.isMountedEntity(entity) && this.canRideSeatOrRack(sid, entity)) {
                   if(this.getSeatInfo(sid) instanceof MCH_SeatRackInfo) {
                      break;
@@ -6801,7 +6801,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public void mountEntityToRack() {
       this.debugRackState("ADD-RACK-BEGIN");
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(!MCH_Config.EnablePutRackInFlying.prmBool) {
          if(this.getCurrentThrottle() > 0.3D) {
             MCH_Lib.DbgLog(super.worldObj, "[MCH-RACK][ADD-RACK-REJECT] reason=throttle_too_high throttle=%.3f carrier=%s",
@@ -6817,7 +6817,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
       }
 
-      int var12 = 0;
+      int result = 0;
 
       for(int sid = 0; sid < this.getSeatNum(); ++sid) {
          MCH_EntitySeat seat = this.getSeat(sid);
@@ -6838,7 +6838,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                      if(((MCH_IEntityCanRideBaseVehicle)entity).canRideAircraft(this, sid, info)) {
                         MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseVehicle.mountEntityToRack:%d:%s", new Object[]{Integer.valueOf(sid), entity});
                         entity.mountEntity(seat);
-                        ++var12;
+                        ++result;
                         break;
                      } else if(entity instanceof MCH_EntityBaseVehicle && ((MCH_EntityBaseVehicle)entity).exceedsRackPayloadCapacity(this)) {
                         ((MCH_EntityBaseVehicle)entity).notifyRackPayloadExceeded(this);
@@ -6848,7 +6848,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                      if(nbt.hasKey("CanMountEntity") && nbt.getBoolean("CanMountEntity")) {
                         MCH_Lib.DbgLog(super.worldObj, "MCH_EntityBaseVehicle.mountEntityToRack:%d:%s:%s", new Object[]{Integer.valueOf(sid), entity, entity.getClass()});
                         entity.mountEntity(seat);
-                        ++var12;
+                        ++result;
                         break;
                      }
                   }
@@ -6857,10 +6857,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
       }
 
-      if(var12 > 0) {
+      if(result > 0) {
          W_WorldFunc.DEF_playSoundEffect(super.worldObj, super.posX, super.posY, super.posZ, "random.click", 1.0F, 1.0F);
          MCH_Lib.DbgLog(super.worldObj, "[MCH-RACK][ADD-RACK-ACCEPT] mounted=%d carrier=%s",
-                 new Object[]{Integer.valueOf(var12), this.debugEntity(this)});
+                 new Object[]{Integer.valueOf(result), this.debugEntity(this)});
       } else {
          MCH_Lib.DbgLog(super.worldObj, "[MCH-RACK][ADD-RACK-REJECT] reason=no_eligible_entity_or_rack carrier=%s",
                  new Object[]{this.debugEntity(this)});
@@ -7086,23 +7086,23 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                            if(seat != null && seat.riddenByEntity == null) {
                               Vec3 v = ac.getTransformedPosition(info.getEntryPos());
                               float r = info.range;
-                              boolean var10000;
+                              boolean isValid;
                               if(super.posX >= v.xCoord - (double)r && super.posX <= v.xCoord + (double)r) {
-                                 var10000 = true;
+                                 isValid = true;
                               } else {
-                                 var10000 = false;
+                                 isValid = false;
                               }
 
                               if(super.posY >= v.yCoord - (double)r && super.posY <= v.yCoord + (double)r) {
-                                 var10000 = true;
+                                 isValid = true;
                               } else {
-                                 var10000 = false;
+                                 isValid = false;
                               }
 
                               if(super.posZ >= v.zCoord - (double)r && super.posZ <= v.zCoord + (double)r) {
-                                 var10000 = true;
+                                 isValid = true;
                               } else {
-                                 var10000 = false;
+                                 isValid = false;
                               }
 
                               if(super.posX >= v.xCoord - (double)r && super.posX <= v.xCoord + (double)r && super.posY >= v.yCoord - (double)r && super.posY <= v.yCoord + (double)r && super.posZ >= v.zCoord - (double)r && super.posZ <= v.zCoord + (double)r && this.canRideAircraft(ac, sid, info)) {
@@ -7197,28 +7197,28 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          return false;
       } else {
          boolean canRide = false;
-         String[] arr$ = info.names;
-         int len$ = arr$.length;
+         String[] iteratedValues = info.names;
+         int iteratedValueCount = iteratedValues.length;
 
-         int i$;
-         for(i$ = 0; i$ < len$; ++i$) {
-            String seat = arr$[i$];
+         int iteratedValueIndex;
+         for(iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            String seat = iteratedValues[iteratedValueIndex];
             if(seat.equalsIgnoreCase(this.getAcInfo().name) || seat.equalsIgnoreCase(this.getAcInfo().getKindName())) {
                canRide = true;
                break;
             }
          }
 
-         MCH_EntitySeat var12;
+         MCH_EntitySeat result;
          if(!canRide) {
-            Iterator var9 = this.getAcInfo().rideRacks.iterator();
+            Iterator iterator2 = this.getAcInfo().rideRacks.iterator();
 
-            while(var9.hasNext()) {
-               MCH_BaseVehicleInfo.RideRack var11 = (MCH_BaseVehicleInfo.RideRack)var9.next();
-               i$ = ac.getAcInfo().getNumSeat() - 1 + (var11.rackID - 1);
-               if(i$ == seatID && var11.name.equalsIgnoreCase(ac.getAcInfo().name)) {
-                  var12 = ac.getSeat(ac.getAcInfo().getNumSeat() - 1 + var11.rackID - 1);
-                  if(var12 != null && var12.riddenByEntity == null) {
+            while(iterator2.hasNext()) {
+               MCH_BaseVehicleInfo.RideRack rideRack = (MCH_BaseVehicleInfo.RideRack)iterator2.next();
+               iteratedValueIndex = ac.getAcInfo().getNumSeat() - 1 + (rideRack.rackID - 1);
+               if(iteratedValueIndex == seatID && rideRack.name.equalsIgnoreCase(ac.getAcInfo().name)) {
+                  result = ac.getSeat(ac.getAcInfo().getNumSeat() - 1 + rideRack.rackID - 1);
+                  if(result != null && result.riddenByEntity == null) {
                      canRide = true;
                      break;
                   }
@@ -7234,12 +7234,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             return false;
          }
 
-         MCH_EntitySeat[] var10 = this.getSeats();
-         len$ = var10.length;
+         MCH_EntitySeat[] result2 = this.getSeats();
+         iteratedValueCount = result2.length;
 
-         for(i$ = 0; i$ < len$; ++i$) {
-            var12 = var10[i$];
-            if(var12 != null && var12.riddenByEntity instanceof MCH_IEntityCanRideBaseVehicle) {
+         for(iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            result = result2[iteratedValueIndex];
+            if(result != null && result.riddenByEntity instanceof MCH_IEntityCanRideBaseVehicle) {
                return false;
             }
          }
@@ -7256,11 +7256,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(this.getRiddenByEntity() instanceof EntityPlayer) {
          return (EntityPlayer)this.getRiddenByEntity();
       } else {
-         MCH_EntitySeat[] arr$ = this.getSeats();
-         int len$ = arr$.length;
+         MCH_EntitySeat[] iteratedValues = this.getSeats();
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_EntitySeat seat = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_EntitySeat seat = iteratedValues[iteratedValueIndex];
             if(seat != null && seat.riddenByEntity instanceof EntityPlayer) {
                return (EntityPlayer)seat.riddenByEntity;
             }
@@ -7275,11 +7275,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          if(super.riddenByEntity instanceof EntityLivingBase && player.isOnSameTeam((EntityLivingBase)super.riddenByEntity)) {
             return true;
          } else {
-            MCH_EntitySeat[] arr$ = this.getSeats();
-            int len$ = arr$.length;
+            MCH_EntitySeat[] iteratedValues = this.getSeats();
+            int iteratedValueCount = iteratedValues.length;
 
-            for(int i$ = 0; i$ < len$; ++i$) {
-               MCH_EntitySeat seat = arr$[i$];
+            for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+               MCH_EntitySeat seat = iteratedValues[iteratedValueIndex];
                if(seat != null && seat.riddenByEntity instanceof EntityLivingBase && player.isOnSameTeam((EntityLivingBase)seat.riddenByEntity)) {
                   return true;
                }
@@ -7304,11 +7304,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             }
          }
 
-         MCH_EntitySeat[] arr$ = this.getSeats();
-         int len$ = arr$.length;
+         MCH_EntitySeat[] iteratedValues = this.getSeats();
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_EntitySeat seat = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_EntitySeat seat = iteratedValues[iteratedValueIndex];
             if(seat != null && seat.riddenByEntity instanceof EntityLivingBase) {
                target = (EntityLivingBase)seat.riddenByEntity;
                if(player.getTeam() != null && target.getTeam() != null && !player.isOnSameTeam(target)) {
@@ -7325,11 +7325,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(W_Entity.getEntityId(super.riddenByEntity) == entityId) {
          return true;
       } else {
-         MCH_EntitySeat[] arr$ = this.getSeats();
-         int len$ = arr$.length;
+         MCH_EntitySeat[] iteratedValues = this.getSeats();
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_EntitySeat seat = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_EntitySeat seat = iteratedValues[iteratedValueIndex];
             if(seat != null && seat.riddenByEntity != null && W_Entity.getEntityId(seat.riddenByEntity) == entityId) {
                return true;
             }
@@ -7662,16 +7662,16 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(this.getAcInfo() == null) {
          return false;
       } else {
-         Iterator i$ = this.getAcInfo().exclusionSeatList.iterator();
+         Iterator iteratedValueIndex = this.getAcInfo().exclusionSeatList.iterator();
 
-         while(i$.hasNext()) {
-            Integer[] a = (Integer[])i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            Integer[] a = (Integer[])iteratedValueIndex.next();
             if(Arrays.asList(a).contains(Integer.valueOf(seatId))) {
-               Integer[] arr$ = a;
-               int len$ = a.length;
+               Integer[] iteratedValues = a;
+               int iteratedValueCount = a.length;
 
-               for(int i$1 = 0; i$1 < len$; ++i$1) {
-                  int id = arr$[i$1].intValue();
+               for(int iteratedValueIndex1 = 0; iteratedValueIndex1 < iteratedValueCount; ++iteratedValueIndex1) {
+                  int id = iteratedValues[iteratedValueIndex1].intValue();
                   if(this.getEntityBySeatId(id) != null) {
                      return false;
                   }
@@ -7684,15 +7684,15 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void updateClientSettings(int seatId) {
-      MCH_Config var10001 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       this.cs_dismountAll = MCH_Config.DismountAll.prmBool;
-      var10001 = MCH_MOD.config;
+      configuration = MCH_MOD.config;
       this.cs_heliAutoThrottleDown = MCH_Config.AutoThrottleDownHeli.prmBool;
-      var10001 = MCH_MOD.config;
+      configuration = MCH_MOD.config;
       this.cs_planeAutoThrottleDown = MCH_Config.AutoThrottleDownPlane.prmBool;
-      var10001 = MCH_MOD.config;
+      configuration = MCH_MOD.config;
       this.cs_tankAutoThrottleDown = MCH_Config.AutoThrottleDownTank.prmBool;
-      var10001 = MCH_MOD.config;
+      configuration = MCH_MOD.config;
       this.cs_shipAutoThrottleDown = MCH_Config.AutoThrottleDownShip.prmBool;
 
       this.camera.setShaderSupport(seatId, Boolean.valueOf(W_EntityRenderer.isShaderSupport()));
@@ -7709,13 +7709,13 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             if(this.isMountedEntity(entity)) {
                boolean isFound = false;
                int sid = 1;
-               MCH_EntitySeat[] arr$ = this.seats;
-               int len$ = arr$.length;
+               MCH_EntitySeat[] iteratedValues = this.seats;
+               int iteratedValueCount = iteratedValues.length;
 
-               int i$;
+               int iteratedValueIndex;
                MCH_EntitySeat seat;
-               for(i$ = 0; i$ < len$; ++i$) {
-                  seat = arr$[i$];
+               for(iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+                  seat = iteratedValues[iteratedValueIndex];
                   if(seat != null) {
                      if(this.getSeatInfo(sid) instanceof MCH_SeatRackInfo) {
                         break;
@@ -7733,11 +7733,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                }
 
                sid = 1;
-               arr$ = this.seats;
-               len$ = arr$.length;
+               iteratedValues = this.seats;
+               iteratedValueCount = iteratedValues.length;
 
-               for(i$ = 0; i$ < len$; ++i$) {
-                  seat = arr$[i$];
+               for(iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+                  seat = iteratedValues[iteratedValueIndex];
                   if(seat != null && seat.riddenByEntity == null) {
                      if(!(this.getSeatInfo(sid) instanceof MCH_SeatRackInfo)) {
                         entity.mountEntity(seat);
@@ -7876,7 +7876,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
 
       if(this.getAcInfo() != null && this.getAcInfo().weaponSetList.size() > 0 && seat_num > 0) {
-         MCH_WeaponSet[] var7 = new MCH_WeaponSet[this.getAcInfo().weaponSetList.size()];
+         MCH_WeaponSet[] weaponSet = new MCH_WeaponSet[this.getAcInfo().weaponSetList.size()];
 
          for(int i = 0; i < this.getAcInfo().weaponSetList.size(); ++i) {
             MCH_BaseVehicleInfo.WeaponSet ws = (MCH_BaseVehicleInfo.WeaponSet)this.getAcInfo().weaponSetList.get(i);
@@ -7888,15 +7888,15 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             }
 
             if(wb.length > 0 && wb[0] != null) {
-               float var8 = ((MCH_BaseVehicleInfo.Weapon)ws.weapons.get(0)).defaultYaw;
-               var7[i] = new MCH_WeaponSet(wb);
-               var7[i].prevRotationYaw = var8;
-               var7[i].rotationYaw = var8;
-               var7[i].defaultRotationYaw = var8;
+               float rotationYaw2 = ((MCH_BaseVehicleInfo.Weapon)ws.weapons.get(0)).defaultYaw;
+               weaponSet[i] = new MCH_WeaponSet(wb);
+               weaponSet[i].prevRotationYaw = rotationYaw2;
+               weaponSet[i].rotationYaw = rotationYaw2;
+               weaponSet[i].defaultRotationYaw = rotationYaw2;
             }
          }
 
-         return var7;
+         return weaponSet;
       } else {
          return new MCH_WeaponSet[]{this.dummyWeapon};
       }
@@ -7952,11 +7952,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public MCH_WeaponSet getWeaponByName(String name) {
-      MCH_WeaponSet[] arr$ = this.weapons;
-      int len$ = arr$.length;
+      MCH_WeaponSet[] iteratedValues = this.weapons;
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_WeaponSet ws = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_WeaponSet ws = iteratedValues[iteratedValueIndex];
          if(ws.isEqual(name)) {
             return ws;
          }
@@ -7967,11 +7967,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public int getWeaponIdByName(String name) {
       int id = 0;
-      MCH_WeaponSet[] arr$ = this.weapons;
-      int len$ = arr$.length;
+      MCH_WeaponSet[] iteratedValues = this.weapons;
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_WeaponSet ws = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_WeaponSet ws = iteratedValues[iteratedValueIndex];
          if(ws.isEqual(name)) {
             return id;
          }
@@ -8117,32 +8117,32 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             int lastUsedIndex = currentWs.getCurrentWeaponIndex();
             if(currentWs.use(prm)) {
                MCH_WeaponSet[] shift = this.weapons;
-               int arr$ = shift.length;
+               int iteratedValues = shift.length;
 
-               int len$;
-               for(len$ = 0; len$ < arr$; ++len$) {
-                  MCH_WeaponSet i$ = shift[len$];
-                  if(i$ != currentWs && !i$.getInfo().group.isEmpty() && i$.getInfo().group.equals(currentWs.getInfo().group)) {
-                     i$.waitAndReloadByOther(prm.reload);
+               int iteratedValueCount;
+               for(iteratedValueCount = 0; iteratedValueCount < iteratedValues; ++iteratedValueCount) {
+                  MCH_WeaponSet iteratedValueIndex = shift[iteratedValueCount];
+                  if(iteratedValueIndex != currentWs && !iteratedValueIndex.getInfo().group.isEmpty() && iteratedValueIndex.getInfo().group.equals(currentWs.getInfo().group)) {
+                     iteratedValueIndex.waitAndReloadByOther(prm.reload);
                   }
                }
 
                if(!super.worldObj.isRemote) {
-                  int var10 = 0;
-                  MCH_WeaponSet[] var11 = this.weapons;
-                  len$ = var11.length;
+                  int index = 0;
+                  MCH_WeaponSet[] weaponSet = this.weapons;
+                  iteratedValueCount = weaponSet.length;
 
-                  for(int var12 = 0; var12 < len$; ++var12) {
-                     MCH_WeaponSet ws = var11[var12];
+                  for(int index2 = 0; index2 < iteratedValueCount; ++index2) {
+                     MCH_WeaponSet ws = weaponSet[index2];
                      if(ws == currentWs) {
                         break;
                      }
 
-                     var10 += ws.getWeaponNum();
+                     index += ws.getWeaponNum();
                   }
 
-                  var10 += lastUsedIndex;
-                  this.useWeaponStat |= var10 < 32?1 << var10:0;
+                  index += lastUsedIndex;
+                  this.useWeaponStat |= index < 32?1 << index:0;
                }
 
                return true;
@@ -8224,11 +8224,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       } else {
          int stat = 0;
          int i = 0;
-         MCH_WeaponSet[] arr$ = this.weapons;
-         int len$ = arr$.length;
+         MCH_WeaponSet[] iteratedValues = this.weapons;
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_WeaponSet w = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_WeaponSet w = iteratedValues[iteratedValueIndex];
             if(i >= 32) {
                break;
             }
@@ -8250,11 +8250,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          return false;
       } else {
          int shift = 0;
-         MCH_WeaponSet[] arr$ = this.weapons;
-         int len$ = arr$.length;
+         MCH_WeaponSet[] iteratedValues = this.weapons;
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_WeaponSet ws = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_WeaponSet ws = iteratedValues[iteratedValueIndex];
             if(ws == checkWs) {
                break;
             }
@@ -8307,18 +8307,18 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                      isSelected = true;
                   }
 
-                  boolean var16 = false;
+                  boolean result = false;
 
                   float ey;
                   for(wi = 0; wi < w.getWeaponNum(); ++wi) {
-                     boolean var18 = id < 32 && (prevUseWeaponStat & 1 << id) != 0;
-                     boolean var20 = id < 32 && (this.useWeaponStat & 1 << id) != 0;
-                     if(isLongDelay && var18 && var20) {
-                        var20 = false;
+                     boolean isValid = id < 32 && (prevUseWeaponStat & 1 << id) != 0;
+                     boolean isValid2 = id < 32 && (this.useWeaponStat & 1 << id) != 0;
+                     if(isLongDelay && isValid && isValid2) {
+                        isValid2 = false;
                      }
 
-                     var16 |= var20;
-                     if(!var18 && var20) {
+                     result |= isValid2;
+                     if(!isValid && isValid2) {
                         ey = w.getInfo().recoil;
                         if(ey > 0.0F) {
                            this.recoilCount = 30;
@@ -8327,57 +8327,57 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                         }
                      }
 
-                     if(super.worldObj.isRemote && var20) {
-                        Vec3 var21 = MCH_Lib.RotVec3(0.0D, 0.0D, -1.0D, -w.rotationYaw - yaw, -w.rotationPitch);
+                     if(super.worldObj.isRemote && isValid2) {
+                        Vec3 position = MCH_Lib.RotVec3(0.0D, 0.0D, -1.0D, -w.rotationYaw - yaw, -w.rotationPitch);
                         Vec3 targetYaw = w.getCurrentWeapon().getShotPos(this);
-                        this.spawnParticleMuzzleFlash(super.worldObj, w.getInfo(), super.posX + targetYaw.xCoord, super.posY + targetYaw.yCoord, super.posZ + targetYaw.zCoord, var21);
+                        this.spawnParticleMuzzleFlash(super.worldObj, w.getInfo(), super.posX + targetYaw.xCoord, super.posY + targetYaw.yCoord, super.posZ + targetYaw.zCoord, position);
                      }
 
-                     w.updateWeapon(this, var20, wi);
+                     w.updateWeapon(this, isValid2, wi);
                      ++id;
                   }
 
-                  w.update(this, isSelected, var16);
-                  MCH_BaseVehicleInfo.Weapon var17 = this.getAcInfo().getWeaponById(wid);
-                  if(var17 != null && !this.isDestroyed()) {
-                     Entity var19 = this.getEntityBySeatId(this.getWeaponSeatID(this.getWeaponInfoById(wid), var17));
-                     if(var17.canUsePilot && !(var19 instanceof EntityPlayer) && !(var19 instanceof MCH_EntityGunner) ) { //
-                        var19 = this.getEntityBySeatId(0);
+                  w.update(this, isSelected, result);
+                  MCH_BaseVehicleInfo.Weapon weapon = this.getAcInfo().getWeaponById(wid);
+                  if(weapon != null && !this.isDestroyed()) {
+                     Entity entity2 = this.getEntityBySeatId(this.getWeaponSeatID(this.getWeaponInfoById(wid), weapon));
+                     if(weapon.canUsePilot && !(entity2 instanceof EntityPlayer) && !(entity2 instanceof MCH_EntityGunner) ) { //
+                        entity2 = this.getEntityBySeatId(0);
                      }
 
 
 
 
-                     if(var19 instanceof EntityPlayer || var19 instanceof MCH_EntityGunner) {
-                        float var22;
-                        if((int)var17.minYaw != 0 || (int)var17.maxYaw != 0) {
-                           var22 = var17.turret?MathHelper.wrapAngleTo180_float(this.getLastRiderYaw()) - yaw:0.0F;
-                           ey = MathHelper.wrapAngleTo180_float(var19.rotationYaw - yaw - var17.defaultYaw - var22);
-                           if(Math.abs((int)var17.minYaw) < 360 && Math.abs((int)var17.maxYaw) < 360) {
-                              float var23 = MCH_Lib.RNG(ey, var17.minYaw, var17.maxYaw);
-                              float wy = w.rotationYaw - var17.defaultYaw - var22;
-                              if(var23 < wy) {
-                                 if(wy - var23 > 15.0F) {
+                     if(entity2 instanceof EntityPlayer || entity2 instanceof MCH_EntityGunner) {
+                        float positionY;
+                        if((int)weapon.minYaw != 0 || (int)weapon.maxYaw != 0) {
+                           positionY = weapon.turret?MathHelper.wrapAngleTo180_float(this.getLastRiderYaw()) - yaw:0.0F;
+                           ey = MathHelper.wrapAngleTo180_float(entity2.rotationYaw - yaw - weapon.defaultYaw - positionY);
+                           if(Math.abs((int)weapon.minYaw) < 360 && Math.abs((int)weapon.maxYaw) < 360) {
+                              float positionY2 = MCH_Lib.RNG(ey, weapon.minYaw, weapon.maxYaw);
+                              float wy = w.rotationYaw - weapon.defaultYaw - positionY;
+                              if(positionY2 < wy) {
+                                 if(wy - positionY2 > 15.0F) {
                                     wy -= 15.0F;
                                  } else {
-                                    wy = var23;
+                                    wy = positionY2;
                                  }
-                              } else if(var23 > wy) {
-                                 if(var23 - wy > 15.0F) {
+                              } else if(positionY2 > wy) {
+                                 if(positionY2 - wy > 15.0F) {
                                     wy += 15.0F;
                                  } else {
-                                    wy = var23;
+                                    wy = positionY2;
                                  }
                               }
 
-                              w.rotationYaw = wy + var17.defaultYaw + var22;
+                              w.rotationYaw = wy + weapon.defaultYaw + positionY;
                            } else {
-                              w.rotationYaw = ey + var22;
+                              w.rotationYaw = ey + positionY;
                            }
                         }
 
-                        var22 = MathHelper.wrapAngleTo180_float(var19.rotationPitch - pitch);
-                        w.rotationPitch = MCH_Lib.RNG(var22, var17.minPitch, var17.maxPitch);
+                        positionY = MathHelper.wrapAngleTo180_float(entity2.rotationPitch - pitch);
+                        w.rotationPitch = MCH_Lib.RNG(positionY, weapon.minPitch, weapon.maxPitch);
                         w.rotationTurretYaw = 0.0F;
                      } else {
                         w.rotationTurretYaw = this.getLastRiderYaw() - this.getRotYaw();
@@ -8473,13 +8473,13 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    private void spawnParticleMuzzleFlash(World w, MCH_WeaponInfo wi, double px, double py, double pz, Vec3 wrv) {
-      Iterator i$;
+      Iterator iteratedValueIndex;
       MCH_WeaponInfo.MuzzleFlash mf;
       if(wi.listMuzzleFlashSmoke != null) {
-         i$ = wi.listMuzzleFlashSmoke.iterator();
+         iteratedValueIndex = wi.listMuzzleFlashSmoke.iterator();
 
-         while(i$.hasNext()) {
-            mf = (MCH_WeaponInfo.MuzzleFlash)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            mf = (MCH_WeaponInfo.MuzzleFlash)iteratedValueIndex.next();
             double color = px + -wrv.xCoord * (double)mf.dist;
             double y = py + -wrv.yCoord * (double)mf.dist;
             double z = pz + -wrv.zCoord * (double)mf.dist;
@@ -8505,12 +8505,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
 
       if(wi.listMuzzleFlash != null) {
-         i$ = wi.listMuzzleFlash.iterator();
+         iteratedValueIndex = wi.listMuzzleFlash.iterator();
 
-         while(i$.hasNext()) {
-            mf = (MCH_WeaponInfo.MuzzleFlash)i$.next();
-            float var21 = super.rand.nextFloat() * 0.1F + 0.9F;
-            MCH_ParticlesUtil.spawnParticleExplode(super.worldObj, px + -wrv.xCoord * (double)mf.dist, py + -wrv.yCoord * (double)mf.dist, pz + -wrv.zCoord * (double)mf.dist, mf.size, var21 * mf.r, var21 * mf.g, var21 * mf.b, mf.a, mf.age + w.rand.nextInt(3));
+         while(iteratedValueIndex.hasNext()) {
+            mf = (MCH_WeaponInfo.MuzzleFlash)iteratedValueIndex.next();
+            float result = super.rand.nextFloat() * 0.1F + 0.9F;
+            MCH_ParticlesUtil.spawnParticleExplode(super.worldObj, px + -wrv.xCoord * (double)mf.dist, py + -wrv.yCoord * (double)mf.dist, pz + -wrv.zCoord * (double)mf.dist, mf.size, result * mf.r, result * mf.g, result * mf.b, mf.a, mf.age + w.rand.nextInt(3));
          }
       }
 
@@ -8521,11 +8521,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          MCH_EntityBaseVehicle.WeaponBay wb = this.weaponBays[i];
          MCH_BaseVehicleInfo.WeaponBay info = (MCH_BaseVehicleInfo.WeaponBay)this.getAcInfo().partWeaponBay.get(i);
          boolean isSelected = false;
-         Integer[] arr$ = info.weaponIds;
-         int len$ = arr$.length;
+         Integer[] iteratedValues = info.weaponIds;
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            int wid = arr$[i$].intValue();
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            int wid = iteratedValues[iteratedValueIndex].intValue();
 
             for(int sid = 0; sid < this.currentWeaponID.length; ++sid) {
                if(wid == this.currentWeaponID[sid] && this.getEntityBySeatId(sid) != null) {
@@ -8959,8 +8959,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          MCH_Parts[] blockId = parts;
          int unfold = parts.length;
 
-         for(int i$ = 0; i$ < unfold; ++i$) {
-            MCH_Parts p = blockId[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < unfold; ++iteratedValueIndex) {
+            MCH_Parts p = blockId[iteratedValueIndex];
             if(p != null) {
                p.updateStatusClient(stat);
                p.update();
@@ -8968,28 +8968,28 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
 
          if(!this.isDestroyed() && !super.worldObj.isRemote && this.partLandingGear != null) {
-            boolean var7 = false;
-            int var8;
+            boolean isValid = false;
+            int id;
             if(!this.isLandingGearFolded() && this.partLandingGear.getFactor() <= 0.1F) {
-               var8 = MCH_Lib.getBlockIdY(this, 3, -20);
-               if((this.getCurrentThrottle() <= 0.800000011920929D || super.onGround || var8 != 0) && this.getAcInfo().isFloat && (this.isInWater() || MCH_Lib.getBlockY(this, 3, -20, true) == W_Block.getWater())) {
+               id = MCH_Lib.getBlockIdY(this, 3, -20);
+               if((this.getCurrentThrottle() <= 0.800000011920929D || super.onGround || id != 0) && this.getAcInfo().isFloat && (this.isInWater() || MCH_Lib.getBlockY(this, 3, -20, true) == W_Block.getWater())) {
                   this.partLandingGear.setStatusServer(true);
                }
             } else if(this.isLandingGearFolded() && this.partLandingGear.getFactor() >= 0.9F) {
-               var8 = MCH_Lib.getBlockIdY(this, 3, -10);
-               if(this.getCurrentThrottle() < (double)this.getUnfoldLandingGearThrottle() && var8 != 0) {
-                  boolean var9 = true;
+               id = MCH_Lib.getBlockIdY(this, 3, -10);
+               if(this.getCurrentThrottle() < (double)this.getUnfoldLandingGearThrottle() && id != 0) {
+                  boolean isValid2 = true;
                   if(this.getAcInfo().isFloat) {
-                     var8 = MCH_Lib.getBlockIdY(super.worldObj, super.posX, super.posY + 1.0D + (double)this.getAcInfo().floatOffset, super.posZ, 1, -150, true);
-                     if(W_Block.isEqual(var8, W_Block.getWater())) {
-                        var9 = false;
+                     id = MCH_Lib.getBlockIdY(super.worldObj, super.posX, super.posY + 1.0D + (double)this.getAcInfo().floatOffset, super.posZ, 1, -150, true);
+                     if(W_Block.isEqual(id, W_Block.getWater())) {
+                        isValid2 = false;
                      }
                   }
 
-                  if(var9) {
+                  if(isValid2) {
                      this.partLandingGear.setStatusServer(false);
                   }
-               } else if(this.getVtolMode() == 2 && var8 != 0) {
+               } else if(this.getVtolMode() == 2 && id != 0) {
                   this.partLandingGear.setStatusServer(false);
                }
             }

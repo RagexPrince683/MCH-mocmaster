@@ -23,20 +23,20 @@ public class ArrayExpression extends Col2OpeExpression {
    public long evalLong() {
       try {
          return super.share.var.evalLong(this.getVariable());
-      } catch (EvalException var2) {
-         throw var2;
-      } catch (Exception var3) {
-         throw new EvalException(2201, this.toString(), super.string, super.pos, var3);
+      } catch (EvalException evalException) {
+         throw evalException;
+      } catch (Exception exception) {
+         throw new EvalException(2201, this.toString(), super.string, super.pos, exception);
       }
    }
 
    public double evalDouble() {
       try {
          return super.share.var.evalDouble(this.getVariable());
-      } catch (EvalException var2) {
-         throw var2;
-      } catch (Exception var3) {
-         throw new EvalException(2201, this.toString(), super.string, super.pos, var3);
+      } catch (EvalException evalException) {
+         throw evalException;
+      } catch (Exception exception) {
+         throw new EvalException(2201, this.toString(), super.string, super.pos, exception);
       }
    }
 
@@ -53,10 +53,10 @@ public class ArrayExpression extends Col2OpeExpression {
 
          try {
             return super.share.var.getObject(obj, index);
-         } catch (EvalException var4) {
-            throw var4;
-         } catch (Exception var5) {
-            throw new EvalException(2201, this.toString(), super.string, super.pos, var5);
+         } catch (EvalException evalException) {
+            throw evalException;
+         } catch (Exception exception) {
+            throw new EvalException(2201, this.toString(), super.string, super.pos, exception);
          }
       }
    }
@@ -70,10 +70,10 @@ public class ArrayExpression extends Col2OpeExpression {
 
          try {
             super.share.var.setValue(obj, index, val);
-         } catch (EvalException var6) {
-            throw var6;
-         } catch (Exception var7) {
-            throw new EvalException(2202, this.toString(), super.string, pos, var7);
+         } catch (EvalException evalException) {
+            throw evalException;
+         } catch (Exception exception) {
+            throw new EvalException(2202, this.toString(), super.string, pos, exception);
          }
       }
    }

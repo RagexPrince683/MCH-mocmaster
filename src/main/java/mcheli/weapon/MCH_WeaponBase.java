@@ -114,7 +114,7 @@ public abstract class MCH_WeaponBase {
   //    return prm;
   // }
 
-   public abstract boolean shot(MCH_WeaponParam var1);
+   public abstract boolean shot(MCH_WeaponParam result1);
 
    public boolean lock(MCH_WeaponParam prm) {
       return false;

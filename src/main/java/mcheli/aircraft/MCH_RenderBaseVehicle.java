@@ -82,7 +82,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          float yaw = this.calcRot(ac.getRotYaw(), ac.prevRotationYaw, tickTime);
          float pitch = ac.calcRotPitch(tickTime);
          float roll = this.calcRot(ac.getRotRoll(), ac.prevRotationRoll, tickTime);
-         MCH_Config var10000 = MCH_MOD.config;
+         MCH_Config configuration = MCH_MOD.config;
          if(MCH_Config.EnableModEntityRender.prmBool) {
             this.renderRiddenEntity(ac, tickTime, yaw, pitch + info.entityPitch, roll + info.entityRoll, info.entityWidth, info.entityHeight);
          }
@@ -328,10 +328,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
             GL11.glDisable(2884);
             GL11.glDepthMask(false);
             float rot = ac.prevRotYawWheel + (ac.rotYawWheel - ac.prevRotYawWheel) * tickTime;
-            Iterator i$ = info.searchLights.iterator();
+            Iterator iteratedValueIndex = info.searchLights.iterator();
 
-            while(i$.hasNext()) {
-               MCH_BaseVehicleInfo.SearchLight sl = (MCH_BaseVehicleInfo.SearchLight)i$.next();
+            while(iteratedValueIndex.hasNext()) {
+               MCH_BaseVehicleInfo.SearchLight sl = (MCH_BaseVehicleInfo.SearchLight)iteratedValueIndex.next();
                GL11.glPushMatrix();
                GL11.glTranslated(sl.pos.xCoord, sl.pos.yCoord, sl.pos.zCoord);
                float height;
@@ -394,8 +394,8 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
                   ac.getAcInfo() != null ? ac.getAcInfo().model : null,
                   ac.getAcInfo() != null ? ac.getAcInfo().getDirectoryName() + "/" + ac.getAcInfo().name : "unknown");
             super.bindTexture(activeBaseTexture);
-         } catch (Exception var4) {
-            System.out.println("Error loading texture: " + path + " (" + var4.getMessage() + ")"); //why the fuck is this happening
+         } catch (Exception exception) {
+            System.out.println("Error loading texture: " + path + " (" + exception.getMessage() + ")"); //why the fuck is this happening
             super.bindTexture(new ResourceLocation(W_MOD.DOMAIN, "textures/test.png"));
          }
       }
@@ -469,11 +469,11 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       MCH_ClientEventHook.setCancelRender(false);
       GL11.glPushMatrix();
       this.renderEntitySimple(ac, ac.riddenByEntity, tickTime, yaw, pitch, roll, width, height);
-      MCH_EntitySeat[] arr$ = ac.getSeats();
-      int len$ = arr$.length;
+      MCH_EntitySeat[] iteratedValues = ac.getSeats();
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_EntitySeat s = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_EntitySeat s = iteratedValues[iteratedValueIndex];
          if(s != null) {
             this.renderEntitySimple(ac, s.riddenByEntity, tickTime, yaw, pitch, roll, width, height);
          }
@@ -508,11 +508,11 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
             int k = i / 65536;
             OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)j / 1.0F, (float)k / 1.0F);
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderManager var10001 = super.renderManager;
+            RenderManager renderManager2 = super.renderManager;
             double dx = x - RenderManager.renderPosX;
-            var10001 = super.renderManager;
+            renderManager2 = super.renderManager;
             double dy = y - RenderManager.renderPosY;
-            var10001 = super.renderManager;
+            renderManager2 = super.renderManager;
             double dz = z - RenderManager.renderPosZ;
             GL11.glTranslated(dx, dy, dz);
             GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
@@ -570,7 +570,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       GL11.glLight(16385, light, setColorBuffer(a, b, c, 1.0F));
    }
 
-   public abstract void renderBaseVehicle(MCH_EntityBaseVehicle var1, double var2, double var4, double var6, float var8, float var9, float var10, float var11);
+   public abstract void renderBaseVehicle(MCH_EntityBaseVehicle result1, double result2, double result4, double result6, float result8, float result9, float result10, float result11);
 
    public float calcRot(float rot, float prevRot, float tickTime) {
       rot = MathHelper.wrapAngleTo180_float(rot);
@@ -585,7 +585,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    }
 
    public void renderDebugHitBox(MCH_EntityBaseVehicle e, double x, double y, double z, float yaw, float pitch, float roll) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.TestMode.prmBool && debugModel != null) {
          GL11.glPushMatrix();
          GL11.glTranslated(x, y, z);
@@ -598,11 +598,11 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
          GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
          GL11.glRotatef(roll, 0.0F, 0.0F, 1.0F);
-         MCH_BoundingBox[] arr$ = e.getCalculatedExtraBoundingBoxes();
-         int len$ = arr$.length;
+         MCH_BoundingBox[] iteratedValues = e.getCalculatedExtraBoundingBoxes();
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_BoundingBox bb = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_BoundingBox bb = iteratedValues[iteratedValueIndex];
             GL11.glPushMatrix();
             GL11.glTranslated(bb.offsetX, bb.offsetY, bb.offsetZ);
             GL11.glPushMatrix();
@@ -654,7 +654,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    }
 
    public void renderDebugPilotSeat(MCH_EntityBaseVehicle e, double x, double y, double z, float yaw, float pitch, float roll) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.TestMode.prmBool && debugModel != null) {
          GL11.glPushMatrix();
          MCH_SeatInfo seat = e.getSeatInfo(0);
@@ -901,10 +901,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    public static void renderLightHatch(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if(info.lightHatchList.size() > 0) {
          float rot = ac.prevRotLightHatch + (ac.rotLightHatch - ac.prevRotLightHatch) * tickTime;
-         Iterator i$ = info.lightHatchList.iterator();
+         Iterator iteratedValueIndex = info.lightHatchList.iterator();
 
-         while(i$.hasNext()) {
-            MCH_BaseVehicleInfo.Hatch t = (MCH_BaseVehicleInfo.Hatch)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_BaseVehicleInfo.Hatch t = (MCH_BaseVehicleInfo.Hatch)iteratedValueIndex.next();
             GL11.glPushMatrix();
             GL11.glTranslated(t.pos.xCoord, t.pos.yCoord, t.pos.zCoord);
             GL11.glRotated((double)(rot * t.maxRot), t.rot.xCoord, t.rot.yCoord, t.rot.zCoord);
@@ -919,10 +919,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    public static void renderSteeringWheel(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if(info.partSteeringWheel.size() > 0) {
          float rot = ac.prevRotYawWheel + (ac.rotYawWheel - ac.prevRotYawWheel) * tickTime;
-         Iterator i$ = info.partSteeringWheel.iterator();
+         Iterator iteratedValueIndex = info.partSteeringWheel.iterator();
 
-         while(i$.hasNext()) {
-            MCH_BaseVehicleInfo.PartWheel t = (MCH_BaseVehicleInfo.PartWheel)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_BaseVehicleInfo.PartWheel t = (MCH_BaseVehicleInfo.PartWheel)iteratedValueIndex.next();
             GL11.glPushMatrix();
             GL11.glTranslated(t.pos.xCoord, t.pos.yCoord, t.pos.zCoord);
             GL11.glRotated((double)(rot * t.rotDir), t.rot.xCoord, t.rot.yCoord, t.rot.zCoord);
@@ -943,10 +943,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       if(info.partWheel.size() > 0) {
          float yaw = interpolateSnapshotAngle(previousWheelYaw, wheelYaw, tickTime);
          float rotation = interpolateSnapshotAngle(previousWheelRotation, wheelRotation, tickTime);
-         Iterator i$ = info.partWheel.iterator();
+         Iterator iteratedValueIndex = info.partWheel.iterator();
 
-         while(i$.hasNext()) {
-            MCH_BaseVehicleInfo.PartWheel t = (MCH_BaseVehicleInfo.PartWheel)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_BaseVehicleInfo.PartWheel t = (MCH_BaseVehicleInfo.PartWheel)iteratedValueIndex.next();
             GL11.glPushMatrix();
             GL11.glTranslated(t.pos2.xCoord, t.pos2.yCoord, t.pos2.zCoord);
             GL11.glRotated((double)(yaw * t.rotDir), t.rot.xCoord, t.rot.yCoord, t.rot.zCoord);
@@ -1042,10 +1042,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       Entity e = ac.getRiddenByEntity();
       int weaponIndex = 0;
       int cnt = 0;
-      Iterator i$ = info.partWeapon.iterator();
+      Iterator iteratedValueIndex = info.partWeapon.iterator();
 
-      while(i$.hasNext()) {
-         MCH_BaseVehicleInfo.PartWeapon w = (MCH_BaseVehicleInfo.PartWeapon)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_BaseVehicleInfo.PartWeapon w = (MCH_BaseVehicleInfo.PartWeapon)iteratedValueIndex.next();
          if(ac instanceof mcheli.tank.MCH_EntityTank && ((mcheli.tank.MCH_EntityTank)ac).turretPopStarted) {
             mcheli.tank.MCH_EntityTank tank = (mcheli.tank.MCH_EntityTank)ac;
             MCH_BaseVehicleInfo.PartWeapon root = tank.getTurretPopRoot();
@@ -1057,11 +1057,11 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
             continue;
          }
          MCH_WeaponSet ws = ac.getWeaponByName(w.name[0]);
-         boolean var10000;
+         boolean isValid;
          if(ws != null && ws.getFirstWeapon().onTurret) {
-            var10000 = true;
+            isValid = true;
          } else {
-            var10000 = false;
+            isValid = false;
          }
 
          if(ws != beforeWs) {
@@ -1074,16 +1074,16 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          float rotPitch = 0.0F;
          float prevPitch = 0.0F;
          boolean rev_sign;
-         int len$;
+         int iteratedValueCount;
          if(w.hideGM && W_Lib.isFirstPerson()) {
             if(ws != null) {
                rev_sign = false;
-               String[] i$1 = w.name;
-               int wc = i$1.length;
+               String[] iteratedValueIndex1 = w.name;
+               int wc = iteratedValueIndex1.length;
 
-               for(len$ = 0; len$ < wc; ++len$) {
-                  String i$2 = i$1[len$];
-                  if(W_Lib.isClientPlayer(ac.getWeaponUserByWeaponName(i$2))) {
+               for(iteratedValueCount = 0; iteratedValueCount < wc; ++iteratedValueCount) {
+                  String iteratedValueIndex2 = iteratedValueIndex1[iteratedValueCount];
+                  if(W_Lib.isClientPlayer(ac.getWeaponUserByWeaponName(iteratedValueIndex2))) {
                      rev_sign = true;
                      break;
                   }
@@ -1098,11 +1098,11 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          }
 
          GL11.glPushMatrix();
-         float var22;
+         float rotationYaw2;
          if(w.turret) {
             GL11.glTranslated(info.turretPosition.xCoord, info.turretPosition.yCoord, info.turretPosition.zCoord);
-            var22 = MCH_Lib.smooth(ac.getLastRiderYaw() - ac.getRotYaw(), ac.prevLastRiderYaw - ac.prevRotationYaw, tickTime);
-            GL11.glRotatef(var22, 0.0F, -1.0F, 0.0F);
+            rotationYaw2 = MCH_Lib.smooth(ac.getLastRiderYaw() - ac.getRotYaw(), ac.prevLastRiderYaw - ac.prevRotationYaw, tickTime);
+            GL11.glRotatef(rotationYaw2, 0.0F, -1.0F, 0.0F);
             GL11.glTranslated(-info.turretPosition.xCoord, -info.turretPosition.yCoord, -info.turretPosition.zCoord);
          }
 
@@ -1129,16 +1129,16 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          }
 
          if(w.turret) {
-            var22 = MCH_Lib.smooth(ac.getLastRiderYaw() - ac.getRotYaw(), ac.prevLastRiderYaw - ac.prevRotationYaw, tickTime);
-            var22 -= ws.rotationTurretYaw;
-            GL11.glRotatef(-var22, 0.0F, -1.0F, 0.0F);
+            rotationYaw2 = MCH_Lib.smooth(ac.getLastRiderYaw() - ac.getRotYaw(), ac.prevLastRiderYaw - ac.prevRotationYaw, tickTime);
+            rotationYaw2 -= ws.rotationTurretYaw;
+            GL11.glRotatef(-rotationYaw2, 0.0F, -1.0F, 0.0F);
          }
 
          rev_sign = false;
-         float var23;
+         float rotationYaw3;
          if(ws != null && (int)ws.defaultRotationYaw != 0) {
-            var23 = MathHelper.wrapAngleTo180_float(ws.defaultRotationYaw);
-            rev_sign = var23 >= 45.0F && var23 <= 135.0F || var23 <= -45.0F && var23 >= -135.0F;
+            rotationYaw3 = MathHelper.wrapAngleTo180_float(ws.defaultRotationYaw);
+            rev_sign = rotationYaw3 >= 45.0F && rotationYaw3 <= 135.0F || rotationYaw3 <= -45.0F && rotationYaw3 >= -135.0F;
             GL11.glRotatef(-ws.defaultRotationYaw, 0.0F, -1.0F, 0.0F);
          }
 
@@ -1163,41 +1163,41 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          }
 
          if(ws != null && w.recoilBuf != 0.0F) {
-            MCH_WeaponSet.Recoil var24 = ws.recoilBuf[0];
+            MCH_WeaponSet.Recoil recoil = ws.recoilBuf[0];
             if(w.name.length > 1) {
-               String[] var25 = w.name;
-               len$ = var25.length;
+               String[] name2 = w.name;
+               iteratedValueCount = name2.length;
 
-               for(int var29 = 0; var29 < len$; ++var29) {
-                  String wnm = var25[var29];
+               for(int index = 0; index < iteratedValueCount; ++index) {
+                  String wnm = name2[index];
                   MCH_WeaponSet tws = ac.getWeaponByName(wnm);
-                  if(tws != null && tws.recoilBuf[0].recoilBuf > var24.recoilBuf) {
-                     var24 = tws.recoilBuf[0];
+                  if(tws != null && tws.recoilBuf[0].recoilBuf > recoil.recoilBuf) {
+                     recoil = tws.recoilBuf[0];
                   }
                }
             }
 
-            float var26 = var24.prevRecoilBuf + (var24.recoilBuf - var24.prevRecoilBuf) * tickTime;
-            GL11.glTranslated(0.0D, 0.0D, (double)(w.recoilBuf * var26));
+            float result = recoil.prevRecoilBuf + (recoil.recoilBuf - recoil.prevRecoilBuf) * tickTime;
+            GL11.glTranslated(0.0D, 0.0D, (double)(w.recoilBuf * result));
          }
 
          if(ws != null) {
             GL11.glRotatef(ws.defaultRotationYaw, 0.0F, -1.0F, 0.0F);
             if(w.rotBarrel) {
-               var23 = ws.prevRotBarrel + (ws.rotBarrel - ws.prevRotBarrel) * tickTime;
-               GL11.glRotatef(var23, (float)w.rot.xCoord, (float)w.rot.yCoord, (float)w.rot.zCoord);
+               rotationYaw3 = ws.prevRotBarrel + (ws.rotBarrel - ws.prevRotBarrel) * tickTime;
+               GL11.glRotatef(rotationYaw3, (float)w.rot.xCoord, (float)w.rot.yCoord, (float)w.rot.zCoord);
             }
          }
 
          GL11.glTranslated(-w.pos.xCoord, -w.pos.yCoord, -w.pos.zCoord);
          if(!w.isMissile || !ac.isWeaponNotCooldown(ws, weaponIndex)) {
             renderPart(w.model, info.model, w.modelName);
-            Iterator var27 = w.child.iterator();
+            Iterator iterator2 = w.child.iterator();
 
-            while(var27.hasNext()) {
-               MCH_BaseVehicleInfo.PartWeaponChild var28 = (MCH_BaseVehicleInfo.PartWeaponChild)var27.next();
+            while(iterator2.hasNext()) {
+               MCH_BaseVehicleInfo.PartWeaponChild partWeaponChild = (MCH_BaseVehicleInfo.PartWeaponChild)iterator2.next();
                GL11.glPushMatrix();
-               renderWeaponChild(ac, info, var28, ws, e, tickTime);
+               renderWeaponChild(ac, info, partWeaponChild, ws, e, tickTime);
                GL11.glPopMatrix();
             }
          }
@@ -1264,22 +1264,22 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       }
 
       if(ws != null && w.recoilBuf != 0.0F) {
-         MCH_WeaponSet.Recoil var17 = ws.recoilBuf[0];
+         MCH_WeaponSet.Recoil recoil = ws.recoilBuf[0];
          if(w.name.length > 1) {
             String[] recoilBuf = w.name;
-            int len$ = recoilBuf.length;
+            int iteratedValueCount = recoilBuf.length;
 
-            for(int i$ = 0; i$ < len$; ++i$) {
-               String wnm = recoilBuf[i$];
+            for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+               String wnm = recoilBuf[iteratedValueIndex];
                MCH_WeaponSet tws = ac.getWeaponByName(wnm);
-               if(tws != null && tws.recoilBuf[0].recoilBuf > var17.recoilBuf) {
-                  var17 = tws.recoilBuf[0];
+               if(tws != null && tws.recoilBuf[0].recoilBuf > recoil.recoilBuf) {
+                  recoil = tws.recoilBuf[0];
                }
             }
          }
 
-         float var18 = var17.prevRecoilBuf + (var17.recoilBuf - var17.prevRecoilBuf) * tickTime;
-         GL11.glTranslated(0.0D, 0.0D, (double)(-w.recoilBuf * var18));
+         float result = recoil.prevRecoilBuf + (recoil.recoilBuf - recoil.prevRecoilBuf) * tickTime;
+         GL11.glTranslated(0.0D, 0.0D, (double)(-w.recoilBuf * result));
       }
 
       if(ws != null) {
@@ -1296,10 +1296,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
 
    public static void renderTrackRoller(MCH_BaseVehicleInfo info, float[] rot, float[] prevRot, float tickTime) {
       if(info.partTrackRoller.size() > 0) {
-         Iterator i$ = info.partTrackRoller.iterator();
+         Iterator iteratedValueIndex = info.partTrackRoller.iterator();
 
-         while(i$.hasNext()) {
-            MCH_BaseVehicleInfo.TrackRoller t = (MCH_BaseVehicleInfo.TrackRoller)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_BaseVehicleInfo.TrackRoller t = (MCH_BaseVehicleInfo.TrackRoller)iteratedValueIndex.next();
             GL11.glPushMatrix();
             GL11.glTranslated(t.pos.xCoord, t.pos.yCoord, t.pos.zCoord);
             GL11.glRotatef(interpolateSnapshotAngle(prevRot[t.side], rot[t.side], tickTime), 1.0F, 0.0F, 0.0F);
@@ -1332,12 +1332,12 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       if(info.partCrawlerTrack.size() > 0) {
          GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_POINT_BIT);
          Tessellator tessellator = Tessellator.instance;
-         Iterator i$ = info.partCrawlerTrack.iterator();
+         Iterator iteratedValueIndex = info.partCrawlerTrack.iterator();
          try {
-         while(i$.hasNext()) {
-            MCH_BaseVehicleInfo.CrawlerTrack c = (MCH_BaseVehicleInfo.CrawlerTrack)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_BaseVehicleInfo.CrawlerTrack c = (MCH_BaseVehicleInfo.CrawlerTrack)iteratedValueIndex.next();
             GL11.glPointSize(c.len * 20.0F);
-            MCH_Config var10000 = MCH_MOD.config;
+            MCH_Config configuration = MCH_MOD.config;
             int L;
             if(MCH_Config.TestMode.prmBool) {
                GL11.glDisable(3553);
@@ -1407,10 +1407,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       if(info.haveHatch() && ac.partHatch != null) {
          float rot = ac.getHatchRotation();
          float prevRot = ac.getPrevHatchRotation();
-         Iterator i$ = info.hatchList.iterator();
+         Iterator iteratedValueIndex = info.hatchList.iterator();
 
-         while(i$.hasNext()) {
-            MCH_BaseVehicleInfo.Hatch h = (MCH_BaseVehicleInfo.Hatch)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_BaseVehicleInfo.Hatch h = (MCH_BaseVehicleInfo.Hatch)iteratedValueIndex.next();
             GL11.glPushMatrix();
             if(h.isSlide) {
                float r = ac.partHatch.rotation / ac.partHatch.rotationMax;
@@ -1433,10 +1433,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    public static void renderThrottle(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
       if(info.havePartThrottle()) {
          float throttle = MCH_Lib.smooth((float)ac.getCurrentThrottle(), (float)ac.getPrevCurrentThrottle(), tickTime);
-         Iterator i$ = info.partThrottle.iterator();
+         Iterator iteratedValueIndex = info.partThrottle.iterator();
 
-         while(i$.hasNext()) {
-            MCH_BaseVehicleInfo.Throttle h = (MCH_BaseVehicleInfo.Throttle)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_BaseVehicleInfo.Throttle h = (MCH_BaseVehicleInfo.Throttle)iteratedValueIndex.next();
             GL11.glPushMatrix();
             GL11.glTranslated(h.pos.xCoord, h.pos.yCoord, h.pos.zCoord);
             GL11.glRotatef(throttle * h.rot2, (float)h.rot.xCoord, (float)h.rot.yCoord, (float)h.rot.zCoord);
@@ -1479,10 +1479,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          float prevRotPitch = ac.camera.prevPartRotationPitch;
          float yaw = prevRotYaw + (rotYaw - prevRotYaw) * tickTime - ac.getRotYaw();
          float pitch = prevRotPitch + (rotPitch - prevRotPitch) * tickTime - ac.getRotPitch();
-         Iterator i$ = info.cameraList.iterator();
+         Iterator iteratedValueIndex = info.cameraList.iterator();
 
-         while(i$.hasNext()) {
-            MCH_BaseVehicleInfo.Camera c = (MCH_BaseVehicleInfo.Camera)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_BaseVehicleInfo.Camera c = (MCH_BaseVehicleInfo.Camera)iteratedValueIndex.next();
             GL11.glPushMatrix();
             GL11.glTranslated(c.pos.xCoord, c.pos.yCoord, c.pos.zCoord);
             if(c.yawSync) {
@@ -1505,10 +1505,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       if(info.haveCanopy() && ac.partCanopy != null) {
          float rot = ac.getCanopyRotation();
          float prevRot = ac.getPrevCanopyRotation();
-         Iterator i$ = info.canopyList.iterator();
+         Iterator iteratedValueIndex = info.canopyList.iterator();
 
-         while(i$.hasNext()) {
-            MCH_BaseVehicleInfo.Canopy c = (MCH_BaseVehicleInfo.Canopy)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_BaseVehicleInfo.Canopy c = (MCH_BaseVehicleInfo.Canopy)iteratedValueIndex.next();
             GL11.glPushMatrix();
             if(c.isSlide) {
                float r = ac.partCanopy.rotation / ac.partCanopy.rotationMax;
@@ -1545,10 +1545,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
             rotHatch = 90.0F;
          }
 
-         Iterator i$ = info.landingGear.iterator();
+         Iterator iteratedValueIndex = info.landingGear.iterator();
 
-         while (i$.hasNext()) {
-            MCH_BaseVehicleInfo.LandingGear n = (MCH_BaseVehicleInfo.LandingGear) i$.next();
+         while (iteratedValueIndex.hasNext()) {
+            MCH_BaseVehicleInfo.LandingGear n = (MCH_BaseVehicleInfo.LandingGear) iteratedValueIndex.next();
             GL11.glPushMatrix();
             GL11.glTranslated(n.pos.xCoord, n.pos.yCoord, n.pos.zCoord);
             if (!n.reverse) {

@@ -41,14 +41,14 @@ public class NumberExpression extends WordExpression {
    public long evalLong() {
       try {
          return NumberUtil.parseLong(super.word);
-      } catch (Exception var4) {
+      } catch (Exception exception) {
          try {
             return Long.parseLong(super.word);
-         } catch (Exception var3) {
+         } catch (Exception exception2) {
             try {
                return (long)Double.parseDouble(super.word);
-            } catch (Exception var2) {
-               throw new EvalException(2003, super.word, super.string, super.pos, var2);
+            } catch (Exception exception3) {
+               throw new EvalException(2003, super.word, super.string, super.pos, exception3);
             }
          }
       }
@@ -57,11 +57,11 @@ public class NumberExpression extends WordExpression {
    public double evalDouble() {
       try {
          return Double.parseDouble(super.word);
-      } catch (Exception var4) {
+      } catch (Exception exception) {
          try {
             return (double)NumberUtil.parseLong(super.word);
-         } catch (Exception var3) {
-            throw new EvalException(2003, super.word, super.string, super.pos, var4);
+         } catch (Exception exception2) {
+            throw new EvalException(2003, super.word, super.string, super.pos, exception);
          }
       }
    }
@@ -69,14 +69,14 @@ public class NumberExpression extends WordExpression {
    public Object evalObject() {
       try {
          return new Long(NumberUtil.parseLong(super.word));
-      } catch (Exception var4) {
+      } catch (Exception exception) {
          try {
             return Long.valueOf(super.word);
-         } catch (Exception var3) {
+         } catch (Exception exception2) {
             try {
                return Double.valueOf(super.word);
-            } catch (Exception var2) {
-               throw new EvalException(2003, super.word, super.string, super.pos, var2);
+            } catch (Exception exception3) {
+               throw new EvalException(2003, super.word, super.string, super.pos, exception3);
             }
          }
       }

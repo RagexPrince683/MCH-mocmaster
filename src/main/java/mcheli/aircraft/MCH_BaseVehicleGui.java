@@ -172,17 +172,17 @@ public class MCH_BaseVehicleGui extends W_GuiContainer {
             this.drawString(s, 145, 70, color);
             int itemPosX = 90;
 
-            Iterator i$;
+            Iterator iteratedValueIndex;
             MCH_WeaponInfo.RoundItem r;
-            for(i$ = ws.getInfo().roundItems.iterator(); i$.hasNext(); itemPosX += 20) {
-               r = (MCH_WeaponInfo.RoundItem)i$.next();
+            for(iteratedValueIndex = ws.getInfo().roundItems.iterator(); iteratedValueIndex.hasNext(); itemPosX += 20) {
+               r = (MCH_WeaponInfo.RoundItem)iteratedValueIndex.next();
                this.drawString("" + r.num, itemPosX, 80, 16777215);
             }
 
             itemPosX = 85;
 
-            for(i$ = ws.getInfo().roundItems.iterator(); i$.hasNext(); itemPosX += 20) {
-               r = (MCH_WeaponInfo.RoundItem)i$.next();
+            for(iteratedValueIndex = ws.getInfo().roundItems.iterator(); iteratedValueIndex.hasNext(); itemPosX += 20) {
+               r = (MCH_WeaponInfo.RoundItem)iteratedValueIndex.next();
                this.drawItemStack(r.itemStack, itemPosX, 62);
             }
          }
@@ -210,7 +210,7 @@ public class MCH_BaseVehicleGui extends W_GuiContainer {
 
    }
 
-   protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
+   protected void drawGuiContainerBackgroundLayer(float scale, int id, int id2) {
       W_ScaledResolution scaledresolution = new W_ScaledResolution(super.mc, super.mc.displayWidth, super.mc.displayHeight);
       this.scaleFactor = scaledresolution.getScaleFactor();
       W_McClient.MOD_bindTexture("textures/gui/gui.png");

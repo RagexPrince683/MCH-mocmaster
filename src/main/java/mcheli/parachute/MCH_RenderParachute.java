@@ -44,7 +44,7 @@ public class MCH_RenderParachute extends W_Render {
             int srcBlend = GL11.glGetInteger(3041);
             int dstBlend = GL11.glGetInteger(3040);
             GL11.glBlendFunc(770, 771);
-            MCH_Config var10000 = MCH_MOD.config;
+            MCH_Config configuration = MCH_MOD.config;
             if(MCH_Config.SmoothShading.prmBool) {
                GL11.glShadeModel(7425);
             }

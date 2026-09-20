@@ -113,43 +113,43 @@ public class MCH_Explosion extends Explosion {
             j = MathHelper.floor_double(super.explosionX + (double)super.explosionSize + 1.0D);
             k = MathHelper.floor_double(super.explosionY - (double)super.explosionSize - 1.0D);
             int l1 = MathHelper.floor_double(super.explosionY + (double)super.explosionSize + 1.0D);
-            int var34 = MathHelper.floor_double(super.explosionZ - (double)super.explosionSize - 1.0D);
+            int result2 = MathHelper.floor_double(super.explosionZ - (double)super.explosionSize - 1.0D);
             int j2 = MathHelper.floor_double(super.explosionZ + (double)super.explosionSize + 1.0D);
-            List var35 = this.world.getEntitiesWithinAABBExcludingEntity(super.exploder, W_AxisAlignedBB.getAABB((double)i, (double)k, (double)var34, (double)j, (double)l1, (double)j2));
+            List entities = this.world.getEntitiesWithinAABBExcludingEntity(super.exploder, W_AxisAlignedBB.getAABB((double)i, (double)k, (double)result2, (double)j, (double)l1, (double)j2));
             Vec3 vec3 = W_WorldFunc.getWorldVec3(this.world, super.explosionX, super.explosionY, super.explosionZ);
             super.exploder = this.explodedPlayer;
 
-            for(int var37 = 0; var37 < var35.size(); ++var37) {
-               Entity entity = (Entity)var35.get(var37);
-               double var38 = entity.getDistance(super.explosionX, super.explosionY, super.explosionZ) / (double)super.explosionSize;
-               if(var38 <= 1.0D) {
+            for(int index = 0; index < entities.size(); ++index) {
+               Entity entity = (Entity)entities.get(index);
+               double positionX = entity.getDistance(super.explosionX, super.explosionY, super.explosionZ) / (double)super.explosionSize;
+               if(positionX <= 1.0D) {
                   d0 = entity.posX - super.explosionX;
                   d1 = entity.posY + (double)entity.getEyeHeight() - super.explosionY;
                   d2 = entity.posZ - super.explosionZ;
-                  double var39 = (double)MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
-                  if(var39 != 0.0D) {
-                     d0 /= var39;
-                     d1 /= var39;
-                     d2 /= var39;
-                     double var40 = this.getBlockDensity(vec3, entity.boundingBox);
-                     double var41 = (1.0D - var38) * var40;
+                  double positionY = (double)MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
+                  if(positionY != 0.0D) {
+                     d0 /= positionY;
+                     d1 /= positionY;
+                     d2 /= positionY;
+                     double result3 = this.getBlockDensity(vec3, entity.boundingBox);
+                     double result4 = (1.0D - positionX) * result3;
                      //WTF
-                     //float damage = (float)((int)((var41 * var41 + var41) / 2.0D * 8.0D * (double)super.explosionSize + 1.0D));
+                     //float damage = (float)((int)((calculatedValue * calculatedValue + calculatedValue) / 2.0D * 8.0D * (double)super.explosionSize + 1.0D));
                      //todo HERE
                      //todo get MCH_WeaponInfo.power for this
                      //whatever this looks like complete fucking cancer (double)this.getpower
                      //gonna just use damagefactor oh my FUCKING GOD
-                     //float damage = (float)((int)((var41 * var41 + var41) / 2.0D * 2.0D * (double)this.damageFactor ));
+                     //float damage = (float)((int)((calculatedValue * calculatedValue + calculatedValue) / 2.0D * 2.0D * (double)this.damageFactor ));
                      //this shit pmo
 
                      //too weak:
-                     //float damage = (float)((int)((var41 * var41 + var41) / 1.2D * (double)super.explosionSize));
+                     //float damage = (float)((int)((calculatedValue * calculatedValue + calculatedValue) / 1.2D * (double)super.explosionSize));
 
                      //too powerful:
-                     //float damage = (float)((int)((var41 * var41 + var41) / 2.0D * 8.0D * (double)super.explosionSize + 1.0D));
+                     //float damage = (float)((int)((calculatedValue * calculatedValue + calculatedValue) / 2.0D * 8.0D * (double)super.explosionSize + 1.0D));
 
                      //median
-                     float damage = (float)((int)(((var41 * var41 + var41) / 1.6D) * 4.0D * (double)super.explosionSize + 0.5D));
+                     float damage = (float)((int)(((result4 * result4 + result4) / 1.6D) * 4.0D * (double)super.explosionSize + 0.5D));
 
 
                      //this is the most fucking overly complex retarded shit I have ever seen and I'm definitely not helping
@@ -163,7 +163,7 @@ public class MCH_Explosion extends Explosion {
                      //SOMEONE FUCKING HELP ME
 
                      //of fucking course this caused a game crash
-                     //float damage = (float)((int)((var41 * var41 + var41) / 2.0D * 2.0D * (double)(this.damageFactor != null ? this.damageFactor : 1.0F) + 1.0D));
+                     //float damage = (float)((int)((calculatedValue * calculatedValue + calculatedValue) / 2.0D * 2.0D * (double)(this.damageFactor != null ? this.damageFactor : 1.0F) + 1.0D));
                      if(damage > 0.0F && this.result != null && !(entity instanceof EntityItem) && !(entity instanceof EntityExpBottle) && !(entity instanceof EntityXPOrb) && !W_Entity.isEntityFallingBlock(entity)) {
                         if(entity instanceof MCH_EntityBaseBullet && super.exploder instanceof EntityPlayer) {
                            if(!W_Entity.isEqual(((MCH_EntityBaseBullet)entity).shootingEntity, super.exploder)) {
@@ -178,7 +178,7 @@ public class MCH_Explosion extends Explosion {
 
                      MCH_Lib.applyEntityHurtResistantTimeConfig(entity);
                      DamageSource ds = DamageSource.setExplosionSource(this);
-                     MCH_Config var36 = MCH_MOD.config;
+                     MCH_Config configuration = MCH_MOD.config;
                      damage = MCH_Config.applyDamageVsEntity(entity, ds, damage);
                      damage *= this.damageFactor != null?this.damageFactor.getDamageFactor(entity):1.0F;
                      double originalMotionX = entity.motionX;
@@ -186,7 +186,7 @@ public class MCH_Explosion extends Explosion {
                      double originalMotionZ = entity.motionZ;
                      W_Entity.attackEntityFrom(entity, ds, damage);
                      if(shouldApplyKnockback) {
-                        double d11 = EnchantmentProtection.func_92092_a(entity, var41);
+                        double d11 = EnchantmentProtection.func_92092_a(entity, result4);
                         if(!(entity instanceof MCH_EntityBaseBullet)) {
                            entity.motionX += d0 * d11 * 0.4D;
                            entity.motionY += d1 * d11 * 0.1D;
@@ -194,7 +194,7 @@ public class MCH_Explosion extends Explosion {
                         }
 
                         if(entity instanceof EntityPlayer) {
-                           this.field_77288_k.put((EntityPlayer)entity, W_WorldFunc.getWorldVec3(this.world, d0 * var41, d1 * var41, d2 * var41));
+                           this.field_77288_k.put((EntityPlayer)entity, W_WorldFunc.getWorldVec3(this.world, d0 * result4, d1 * result4, d2 * result4));
                         }
                      } else {
                         // Damage can apply vanilla knockback, so restore the entity's pre-explosion motion.
@@ -204,7 +204,7 @@ public class MCH_Explosion extends Explosion {
                      }
 
                      if(damage > 0.0F && this.countSetFireEntity > 0) {
-                        double fireFactor = 1.0D - var39 / (double)super.explosionSize;
+                        double fireFactor = 1.0D - positionY / (double)super.explosionSize;
                         if(fireFactor > 0.0D) {
                            entity.setFire((int)(fireFactor * (double)this.countSetFireEntity));
                         }
@@ -249,15 +249,15 @@ public class MCH_Explosion extends Explosion {
                      }
                   }
 
-                  float var10000 = (float)i;
+                  float result5 = (float)i;
                   this.getClass();
-                  double f = (double)(var10000 / (16.0F - 1.0F) * 2.0F - 1.0F);
-                  var10000 = (float)j;
+                  double f = (double)(result5 / (16.0F - 1.0F) * 2.0F - 1.0F);
+                  result5 = (float)j;
                   this.getClass();
-                  double i2 = (double)(var10000 / (16.0F - 1.0F) * 2.0F - 1.0F);
-                  var10000 = (float)k;
+                  double i2 = (double)(result5 / (16.0F - 1.0F) * 2.0F - 1.0F);
+                  result5 = (float)k;
                   this.getClass();
-                  double list = (double)(var10000 / (16.0F - 1.0F) * 2.0F - 1.0F);
+                  double list = (double)(result5 / (16.0F - 1.0F) * 2.0F - 1.0F);
                   double k2 = Math.sqrt(f * f + i2 * i2 + list * list);
                   f /= k2;
                   i2 /= k2;
@@ -338,7 +338,7 @@ public class MCH_Explosion extends Explosion {
          W_WorldFunc.DEF_playSoundEffect(this.world, super.explosionX, super.explosionY, super.explosionZ, "random.explode", 4.0F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
       }
 
-      MCH_Config var10000;
+      MCH_Config result;
       Iterator iterator;
       ChunkPosition chunkposition;
       int i;
@@ -356,7 +356,7 @@ public class MCH_Explosion extends Explosion {
             k = chunkposition.chunkPosZ;
             l = W_WorldFunc.getBlockId(this.world, i, j, k);
             if(l > 0 && this.isDestroyBlock && this.explosionSizeBlock > 0.0F) {
-               var10000 = MCH_MOD.config;
+               result = MCH_MOD.config;
                if(MCH_Config.Explosion_DestroyBlock.prmBool) {
                   b = W_Block.getBlockById(l);
                   if(b.canDropFromExplosion(this)) {
@@ -370,7 +370,7 @@ public class MCH_Explosion extends Explosion {
       }
 
       if(super.isFlaming) {
-         var10000 = MCH_MOD.config;
+         result = MCH_MOD.config;
          if(MCH_Config.Explosion_FlamingBlock.prmBool) {
             iterator = super.affectedBlockPositions.iterator();
 
@@ -572,12 +572,12 @@ public class MCH_Explosion extends Explosion {
       //}
 
       if(isSmoking) {
-         Iterator var50 = affectedBlockPositions.iterator();
+         Iterator iterator2 = affectedBlockPositions.iterator();
          int cnt = 0;
-         int var51 = (int)explosionSize;
+         int result = (int)explosionSize;
 
-         while(var50.hasNext()) {
-            ChunkPosition chunkposition = (ChunkPosition)var50.next();
+         while(iterator2.hasNext()) {
+            ChunkPosition chunkposition = (ChunkPosition)iterator2.next();
             i = chunkposition.chunkPosX;
             j = chunkposition.chunkPosY;
             k = chunkposition.chunkPosZ;
@@ -588,44 +588,44 @@ public class MCH_Explosion extends Explosion {
             d2 = (double)((float)k + world.rand.nextFloat());
             double mx = d0 - explosionX;
             double my = d1 - explosionY;
-            double var52 = d2 - explosionZ;
-            double var53 = (double)MathHelper.sqrt_double(mx * mx + my * my + var52 * var52);
-            mx /= var53;
-            my /= var53;
-            var52 /= var53;
-            double var54 = 0.5D / (var53 / (double)explosionSize + 0.1D);
-            var54 *= (double)(world.rand.nextFloat() * world.rand.nextFloat() + 0.3F);
-            mx *= var54 * 0.5D;
-            my *= var54 * 0.5D;
-            var52 *= var54 * 0.5D;
-            double var55 = (d0 + explosionX * 1.0D) / 2.0D;
+            double distance = d2 - explosionZ;
+            double distance2 = (double)MathHelper.sqrt_double(mx * mx + my * my + distance * distance);
+            mx /= distance2;
+            my /= distance2;
+            distance /= distance2;
+            double distance3 = 0.5D / (distance2 / (double)explosionSize + 0.1D);
+            distance3 *= (double)(world.rand.nextFloat() * world.rand.nextFloat() + 0.3F);
+            mx *= distance3 * 0.5D;
+            my *= distance3 * 0.5D;
+            distance *= distance3 * 0.5D;
+            double result2 = (d0 + explosionX * 1.0D) / 2.0D;
             double py = (d1 + explosionY * 1.0D) / 2.0D;
             double pz = (d2 + explosionZ * 1.0D) / 2.0D;
             double r = 3.141592653589793D * (double)world.rand.nextInt(360) / 180.0D;
-            if(explosionSize >= 4.0F && var51 > 0) {
+            if(explosionSize >= 4.0F && result > 0) {
                double es = Math.min((double)(explosionSize / 12.0F), 0.6D) * (double)(0.5F + world.rand.nextFloat() * 0.5F);
-               world.spawnEntityInWorld(new MCH_EntityFlare(world, var55, py + 2.0D, pz, Math.sin(r) * es, (1.0D + my / 5.0D) * es, Math.cos(r) * es, 2.0F, 0));
-               --var51;
+               world.spawnEntityInWorld(new MCH_EntityFlare(world, result2, py + 2.0D, pz, Math.sin(r) * es, (1.0D + my / 5.0D) * es, Math.cos(r) * es, 2.0F, 0));
+               --result;
             }
 
             if(cnt % 4 == 0) {
-               float var48 = Math.min(explosionSize / 3.0F, 2.0F) * (0.5F + world.rand.nextFloat() * 0.5F);
-               MCH_ParticlesUtil.spawnParticleTileDust(world, (int)(var55 + 0.5D), (int)(py - 0.5D), (int)(pz + 0.5D), var55, py + 1.0D, pz, Math.sin(r) * (double)var48, 0.5D + my / 5.0D * (double)var48, Math.cos(r) * (double)var48, Math.min(explosionSize / 2.0F, 3.0F) * (0.5F + world.rand.nextFloat() * 0.5F));
+               float result3 = Math.min(explosionSize / 3.0F, 2.0F) * (0.5F + world.rand.nextFloat() * 0.5F);
+               MCH_ParticlesUtil.spawnParticleTileDust(world, (int)(result2 + 0.5D), (int)(py - 0.5D), (int)(pz + 0.5D), result2, py + 1.0D, pz, Math.sin(r) * (double)result3, 0.5D + my / 5.0D * (double)result3, Math.cos(r) * (double)result3, Math.min(explosionSize / 2.0F, 3.0F) * (0.5F + world.rand.nextFloat() * 0.5F));
             }
 
-            int var49 = (int)(explosionSize >= 4.0F?explosionSize:4.0F);
-            if(explosionSize <= 1.0F || cnt % var49 == 0) {
+            int result4 = (int)(explosionSize >= 4.0F?explosionSize:4.0F);
+            if(explosionSize <= 1.0F || cnt % result4 == 0) {
                if(world.rand.nextBoolean()) {
                   my *= 3.0D;
                   mx *= 0.1D;
-                  var52 *= 0.1D;
+                  distance *= 0.1D;
                } else {
                   my *= 0.2D;
                   mx *= 3.0D;
-                  var52 *= 3.0D;
+                  distance *= 3.0D;
                }
 
-               MCH_ParticleParam prm = new MCH_ParticleParam(world, "explode", var55, py, pz, mx, my, var52, explosionSize < 8.0F?(explosionSize < 2.0F?2.0F:explosionSize * 2.0F):16.0F);
+               MCH_ParticleParam prm = new MCH_ParticleParam(world, "explode", result2, py, pz, mx, my, distance, explosionSize < 8.0F?(explosionSize < 2.0F?2.0F:explosionSize * 2.0F):16.0F);
                prm.r = prm.g = prm.b = 0.3F + world.rand.nextFloat() * 0.4F;
                prm.r += 0.1F;
                prm.g += 0.05F;
@@ -700,10 +700,10 @@ public class MCH_Explosion extends Explosion {
       }
 
       if(isSmoking) {
-         Iterator var39 = affectedBlockPositions.iterator();
+         Iterator iterator2 = affectedBlockPositions.iterator();
 
-         while(var39.hasNext()) {
-            ChunkPosition chunkposition = (ChunkPosition)var39.next();
+         while(iterator2.hasNext()) {
+            ChunkPosition chunkposition = (ChunkPosition)iterator2.next();
             i = chunkposition.chunkPosX;
             j = chunkposition.chunkPosY;
             k = chunkposition.chunkPosZ;
@@ -714,15 +714,15 @@ public class MCH_Explosion extends Explosion {
             double d3 = d0 - explosionX;
             double d4 = d1 - explosionY;
             double d51 = d2 - explosionZ;
-            double var40 = (double)MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d51 * d51);
-            d3 /= var40;
-            d4 /= var40;
-            d51 /= var40;
-            double var41 = 0.5D / (var40 / (double)explosionSize + 0.1D);
-            var41 *= (double)(world.rand.nextFloat() * world.rand.nextFloat() + 0.3F);
-            d3 *= var41;
-            d4 *= var41;
-            d51 *= var41;
+            double distance = (double)MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d51 * d51);
+            d3 /= distance;
+            d4 /= distance;
+            d51 /= distance;
+            double distance2 = 0.5D / (distance / (double)explosionSize + 0.1D);
+            distance2 *= (double)(world.rand.nextFloat() * world.rand.nextFloat() + 0.3F);
+            d3 *= distance2;
+            d4 *= distance2;
+            d51 *= distance2;
             MCH_ParticlesUtil.DEF_spawnParticle("explode", (d0 + explosionX * 1.0D) / 2.0D, (d1 + explosionY * 1.0D) / 2.0D, (d2 + explosionZ * 1.0D) / 2.0D, d3, d4, d51, 10.0F);
             MCH_ParticlesUtil.DEF_spawnParticle("smoke", d0, d1, d2, d3, d4, d51, 10.0F);
          }

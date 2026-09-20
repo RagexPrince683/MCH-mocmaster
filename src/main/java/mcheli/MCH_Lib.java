@@ -150,8 +150,8 @@ public class MCH_Lib {
       if(recipe != null) {
          Map map = getItemMapFromRecipe(recipe);
 
-         for(int i$ = 0; i$ < inventory.getSizeInventory(); ++i$) {
-            ItemStack i = inventory.getStackInSlot(i$);
+         for(int iteratedValueIndex = 0; iteratedValueIndex < inventory.getSizeInventory(); ++iteratedValueIndex) {
+            ItemStack i = inventory.getStackInSlot(iteratedValueIndex);
             if(i != null) {
                Item item = i.getItem();
                if(map.containsKey(item)) {
@@ -160,16 +160,16 @@ public class MCH_Lib {
             }
          }
 
-         Iterator var6 = map.values().iterator();
+         Iterator iterator2 = map.values().iterator();
 
-         int var7;
+         int result;
          do {
-            if(!var6.hasNext()) {
+            if(!iterator2.hasNext()) {
                return true;
             }
 
-            var7 = ((Integer)var6.next()).intValue();
-         } while(var7 <= 0);
+            result = ((Integer)iterator2.next()).intValue();
+         } while(result <= 0);
 
          return false;
       } else {
@@ -180,7 +180,7 @@ public class MCH_Lib {
    public static void applyEntityHurtResistantTimeConfig(Entity entity) {
       if(entity instanceof EntityLivingBase) {
          EntityLivingBase elb = (EntityLivingBase)entity;
-         MCH_Config var10000 = MCH_MOD.config;
+         MCH_Config configuration = MCH_MOD.config;
          double h_time = MCH_Config.HurtResistantTime.prmDouble * (double)elb.hurtResistantTime;
          elb.hurtResistantTime = (int)h_time;
       }
@@ -343,11 +343,11 @@ public class MCH_Lib {
       if(y <= 0) {
          return false;
       } else {
-         int[][] arr$ = offset;
-         int len$ = offset.length;
+         int[][] iteratedValues = offset;
+         int iteratedValueCount = offset.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            int[] o = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            int[] o = iteratedValues[iteratedValueIndex];
             if(W_WorldFunc.isBlockWater(w, x + o[0], y + o[1], z + o[2])) {
                return true;
             }
@@ -441,7 +441,7 @@ public class MCH_Lib {
    }
 
    public static void enableFirstPersonItemRender() {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       switch(MCH_Config.DisableItemRender.prmInt) {
       case 1:
       default:
@@ -465,7 +465,7 @@ public class MCH_Lib {
 
    public static void disableFirstPersonItemRender() {
       //System.out.println("disabled fp item render");
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       switch(MCH_Config.DisableItemRender.prmInt) {
       case 1:
          //System.out.println("disabled fp item render 1");
@@ -494,7 +494,7 @@ public class MCH_Lib {
          mcheli.compat.MCH_ReplayModCompat.logBlockedCameraWrite("MCH_Lib.setRenderViewEntity");
          return;
       }
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config result = MCH_MOD.config;
       if(MCP_PlaneChaseCamera.isAnyRenderCameraActive() && !MCP_PlaneChaseCamera.ownsRenderEntity(entity)) {
          MCP_PlaneChaseCamera.warnSkippedRenderViewRestore(entity, "MCH_Lib.setRenderViewEntity");
          return;
@@ -509,11 +509,11 @@ public class MCH_Lib {
    public static Map getItemMapFromRecipe(IRecipe recipe) {
       HashMap map = new HashMap();
       if(recipe instanceof ShapedRecipes) {
-         ItemStack[] i$ = ((ShapedRecipes)recipe).recipeItems;
-         int o = i$.length;
+         ItemStack[] iteratedValueIndex = ((ShapedRecipes)recipe).recipeItems;
+         int o = iteratedValueIndex.length;
 
          for(int is = 0; is < o; ++is) {
-            ItemStack item = i$[is];
+            ItemStack item = iteratedValueIndex[is];
             if(item != null) {
                Item item1 = item.getItem();
                if(map.containsKey(item1)) {
@@ -524,17 +524,17 @@ public class MCH_Lib {
             }
          }
       } else if(recipe instanceof ShapelessRecipes) {
-         Iterator var7 = ((ShapelessRecipes)recipe).recipeItems.iterator();
+         Iterator iterator2 = ((ShapelessRecipes)recipe).recipeItems.iterator();
 
-         while(var7.hasNext()) {
-            Object var8 = var7.next();
-            ItemStack var9 = (ItemStack)var8;
-            if(var9 != null) {
-               Item var10 = var9.getItem();
-               if(map.containsKey(var10)) {
-                  map.put(var10, Integer.valueOf(((Integer)map.get(var10)).intValue() + 1));
+         while(iterator2.hasNext()) {
+            Object element = iterator2.next();
+            ItemStack itemStack = (ItemStack)element;
+            if(itemStack != null) {
+               Item item2 = itemStack.getItem();
+               if(map.containsKey(item2)) {
+                  map.put(item2, Integer.valueOf(((Integer)map.get(item2)).intValue() + 1));
                } else {
-                  map.put(var10, Integer.valueOf(1));
+                  map.put(item2, Integer.valueOf(1));
                }
             }
          }

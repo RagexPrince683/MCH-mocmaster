@@ -36,8 +36,8 @@ public class MCH_PacketGLTDPlayerControl extends MCH_Packet {
          }
 
          this.unmount = data.readByte() != 0;
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -56,8 +56,8 @@ public class MCH_PacketGLTDPlayerControl extends MCH_Packet {
          }
 
          dos.writeByte(this.unmount?1:0);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

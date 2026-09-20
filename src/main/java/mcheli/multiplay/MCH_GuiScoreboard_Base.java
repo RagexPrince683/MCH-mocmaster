@@ -56,10 +56,10 @@ public abstract class MCH_GuiScoreboard_Base extends W_GuiContainer {
       super.width = parents.width;
       super.height = parents.height;
       this.initGui();
-      Iterator i$ = this.listGui.iterator();
+      Iterator iteratedValueIndex = this.listGui.iterator();
 
-      while(i$.hasNext()) {
-         Gui b = (Gui)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         Gui b = (Gui)iteratedValueIndex.next();
          if(b instanceof GuiButton) {
             buttonList.add(b);
          }
@@ -90,10 +90,10 @@ public abstract class MCH_GuiScoreboard_Base extends W_GuiContainer {
    protected void acviveScreen() {}
 
    public void onSwitchScreen() {
-      Iterator i$ = this.listGui.iterator();
+      Iterator iteratedValueIndex = this.listGui.iterator();
 
-      while(i$.hasNext()) {
-         Gui b = (Gui)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         Gui b = (Gui)iteratedValueIndex.next();
          setVisible(b, true);
       }
 
@@ -101,10 +101,10 @@ public abstract class MCH_GuiScoreboard_Base extends W_GuiContainer {
    }
 
    public void leaveScreen() {
-      Iterator i$ = this.listGui.iterator();
+      Iterator iteratedValueIndex = this.listGui.iterator();
 
-      while(i$.hasNext()) {
-         Gui b = (Gui)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         Gui b = (Gui)iteratedValueIndex.next();
          setVisible(b, false);
       }
 
@@ -117,7 +117,7 @@ public abstract class MCH_GuiScoreboard_Base extends W_GuiContainer {
    public void mouseClickedScreen(int p_73864_1_, int p_73864_2_, int p_73864_3_) {
       try {
          this.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
-      } catch (Exception var7) {
+      } catch (Exception exception) {
          if(p_73864_3_ == 0) {
             for(int l = 0; l < super.buttonList.size(); ++l) {
                GuiButton guibutton = (GuiButton)super.buttonList.get(l);
@@ -177,11 +177,11 @@ public abstract class MCH_GuiScoreboard_Base extends W_GuiContainer {
          }
       });
 
-      for(int var6 = 0; var6 < teamList.size(); ++var6) {
+      for(int index = 0; index < teamList.size(); ++index) {
          if(mng) {
-            drawPlayersList(mc, fontRendererObj, (ScorePlayerTeam)teamList.get(var6), 1 + var6, 1 + teamList.size());
+            drawPlayersList(mc, fontRendererObj, (ScorePlayerTeam)teamList.get(index), 1 + index, 1 + teamList.size());
          } else {
-            drawPlayersList(mc, fontRendererObj, (ScorePlayerTeam)teamList.get(var6), var6, teamList.size());
+            drawPlayersList(mc, fontRendererObj, (ScorePlayerTeam)teamList.get(index), index, teamList.size());
          }
       }
 
@@ -282,7 +282,7 @@ public abstract class MCH_GuiScoreboard_Base extends W_GuiContainer {
       private static final MCH_GuiScoreboard_Base.SCREEN_ID[] $VALUES = new MCH_GuiScoreboard_Base.SCREEN_ID[]{MAIN, CREATE_TEAM};
 
 
-      private SCREEN_ID(String var1, int var2) {}
+      private SCREEN_ID(String text, int id) {}
 
    }
 }

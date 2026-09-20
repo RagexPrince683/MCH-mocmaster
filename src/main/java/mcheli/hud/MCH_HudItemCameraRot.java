@@ -41,8 +41,8 @@ public class MCH_HudItemCameraRot extends MCH_HudItem {
 
          pitch -= 20.0F;
          pitch = (float)((double)pitch * 0.16D);
-         float var10000 = ac.prevRotationYaw + (ac.rotationYaw - ac.prevRotationYaw) / 2.0F;
-         var10000 = camera.prevRotationYaw + (camera.rotationYaw - camera.prevRotationYaw) / 2.0F;
+         float positionY = ac.prevRotationYaw + (ac.rotationYaw - ac.prevRotationYaw) / 2.0F;
+         positionY = camera.prevRotationYaw + (camera.rotationYaw - camera.prevRotationYaw) / 2.0F;
          float yaw = (float)MCH_Lib.getRotateDiff((double)ac.rotationYaw, (double)camera.rotationYaw);
          yaw *= 2.0F;
          if(yaw < -50.0F) {

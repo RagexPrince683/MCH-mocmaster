@@ -63,16 +63,16 @@ public class MCH_ItemGLTD extends W_Item {
          } else {
             if(W_MovingObjectPosition.isHitTypeTile(movingobjectposition)) {
                i = movingobjectposition.blockX;
-               int var32 = movingobjectposition.blockY;
-               int var33 = movingobjectposition.blockZ;
-               MCH_EntityGLTD var34 = new MCH_EntityGLTD(par2World, (double)((float)i + 0.5F), (double)((float)var32 + 1.0F), (double)((float)var33 + 0.5F));
-               var34.rotationYaw = par3EntityPlayer.rotationYaw;
-               if(!par2World.getCollidingBoundingBoxes(var34, var34.boundingBox.expand(-0.1D, -0.1D, -0.1D)).isEmpty()) {
+               int result = movingobjectposition.blockY;
+               int result2 = movingobjectposition.blockZ;
+               MCH_EntityGLTD gltdEntity = new MCH_EntityGLTD(par2World, (double)((float)i + 0.5F), (double)((float)result + 1.0F), (double)((float)result2 + 0.5F));
+               gltdEntity.rotationYaw = par3EntityPlayer.rotationYaw;
+               if(!par2World.getCollidingBoundingBoxes(gltdEntity, gltdEntity.boundingBox.expand(-0.1D, -0.1D, -0.1D)).isEmpty()) {
                   return par1ItemStack;
                }
 
                if(!par2World.isRemote) {
-                  par2World.spawnEntityInWorld(var34);
+                  par2World.spawnEntityInWorld(gltdEntity);
                }
 
                if(!par3EntityPlayer.capabilities.isCreativeMode) {

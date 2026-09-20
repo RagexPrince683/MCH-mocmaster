@@ -179,8 +179,8 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.buttonNewExplosion = new MCH_GuiOnOffButton(0, x2, y + 150, 150, 20, "Default Explosion : ");
       this.listRenderButtons.add(this.buttonShowHUDTP);
 
-      for(int var12 = 0; var12 < this.sliderHitMark.length; ++var12) {
-         this.listRenderButtons.add(this.sliderHitMark[var12]);
+      for(int index = 0; index < this.sliderHitMark.length; ++index) {
+         this.listRenderButtons.add(this.sliderHitMark[index]);
       }
 
       this.listRenderButtons.add(this.buttonSmoothShading);
@@ -247,117 +247,117 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.listKeyBindingButtons.add(this.keyBindingList);
       this.listKeyBindingButtons.add(new W_GuiButton(52, x1, y + 220, 90, 20, "Controls <<"));
       this.listKeyBindingButtons.add(new W_GuiButton(54, x1 + 90, y + 220, 60, 20, "Reset All"));
-      boolean var13 = true;
-      boolean var14 = true;
-      MCH_GuiListItemKeyBind[] var10000 = new MCH_GuiListItemKeyBind[32];
-      MCH_GuiListItemKeyBind var10003 = new MCH_GuiListItemKeyBind(200, 300, x1, "Up", MCH_Config.KeyUp);
-      MCH_Config var10009 = MCH_MOD.config;
-      var10000[0] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(201, 301, x1, "Down", MCH_Config.KeyDown);
-      var10009 = MCH_MOD.config;
-      var10000[1] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(202, 302, x1, "Right", MCH_Config.KeyRight);
-      var10009 = MCH_MOD.config;
-      var10000[2] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(203, 303, x1, "Left", MCH_Config.KeyLeft);
-      var10009 = MCH_MOD.config;
-      var10000[3] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(204, 304, x1, "Switch Gunner", MCH_Config.KeySwitchMode);
-      var10009 = MCH_MOD.config;
-      var10000[4] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(205, 305, x1, "Switch Hovering", MCH_Config.KeySwitchHovering);
-      var10009 = MCH_MOD.config;
-      var10000[5] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(206, 306, x1, "Switch Weapon1", MCH_Config.KeySwitchWeapon1);
-      var10009 = MCH_MOD.config;
-      var10000[6] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(207, 307, x1, "Switch Weapon2", MCH_Config.KeySwitchWeapon2);
-      var10009 = MCH_MOD.config;
-      var10000[7] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(208, 308, x1, "Switch Weapon Mode", MCH_Config.KeySwWeaponMode);
-      var10009 = MCH_MOD.config;
-      var10000[8] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(209, 309, x1, "Zoom / Fold Wing", MCH_Config.KeyZoom);
-      var10009 = MCH_MOD.config;
-      var10000[9] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(210, 310, x1, "Camera Mode", MCH_Config.KeyCameraMode);
-      var10009 = MCH_MOD.config;
-      var10000[10] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(211, 311, x1, "Unmount Mobs", MCH_Config.KeyUnmount);
-      var10009 = MCH_MOD.config;
-      var10000[11] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(212, 312, x1, "Flare", MCH_Config.KeyFlare);
-      var10009 = MCH_MOD.config;
-      var10000[12] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(213, 313, x1, "Vtol / Drop / Fold Blade", MCH_Config.KeyExtra);
-      var10009 = MCH_MOD.config;
-      var10000[13] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(214, 314, x1, "Third Person Distance Up", MCH_Config.KeyCameraDistUp);
-      var10009 = MCH_MOD.config;
-      var10000[14] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(215, 315, x1, "Third Person Distance Down", MCH_Config.KeyCameraDistDown);
-      var10009 = MCH_MOD.config;
-      var10000[15] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(216, 316, x1, "Switch Free Look", MCH_Config.KeyFreeLook);
-      var10009 = MCH_MOD.config;
-      var10000[16] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(217, 317, x1, "Open GUI", MCH_Config.KeyGUI);
-      var10009 = MCH_MOD.config;
-      var10000[17] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(218, 318, x1, "Gear Up Down", MCH_Config.KeyGearUpDown);
-      var10009 = MCH_MOD.config;
-      var10000[18] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(219, 319, x1, "Put entity in the rack", MCH_Config.KeyPutToRack);
-      var10009 = MCH_MOD.config;
-      var10000[19] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(220, 320, x1, "Drop entity from the rack", MCH_Config.KeyDownFromRack);
-      var10009 = MCH_MOD.config;
-      var10000[20] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(221, 321, x1, "[MP]Score board", MCH_Config.KeyScoreboard);
-      var10009 = MCH_MOD.config;
-      var10000[21] = var10003;
+      boolean isValid = true;
+      boolean isValid2 = true;
+      MCH_GuiListItemKeyBind[] guiListItemKeyBind = new MCH_GuiListItemKeyBind[32];
+      MCH_GuiListItemKeyBind guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(200, 300, x1, "Up", MCH_Config.KeyUp);
+      MCH_Config configuration = MCH_MOD.config;
+      guiListItemKeyBind[0] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(201, 301, x1, "Down", MCH_Config.KeyDown);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[1] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(202, 302, x1, "Right", MCH_Config.KeyRight);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[2] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(203, 303, x1, "Left", MCH_Config.KeyLeft);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[3] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(204, 304, x1, "Switch Gunner", MCH_Config.KeySwitchMode);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[4] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(205, 305, x1, "Switch Hovering", MCH_Config.KeySwitchHovering);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[5] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(206, 306, x1, "Switch Weapon1", MCH_Config.KeySwitchWeapon1);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[6] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(207, 307, x1, "Switch Weapon2", MCH_Config.KeySwitchWeapon2);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[7] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(208, 308, x1, "Switch Weapon Mode", MCH_Config.KeySwWeaponMode);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[8] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(209, 309, x1, "Zoom / Fold Wing", MCH_Config.KeyZoom);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[9] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(210, 310, x1, "Camera Mode", MCH_Config.KeyCameraMode);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[10] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(211, 311, x1, "Unmount Mobs", MCH_Config.KeyUnmount);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[11] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(212, 312, x1, "Flare", MCH_Config.KeyFlare);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[12] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(213, 313, x1, "Vtol / Drop / Fold Blade", MCH_Config.KeyExtra);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[13] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(214, 314, x1, "Third Person Distance Up", MCH_Config.KeyCameraDistUp);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[14] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(215, 315, x1, "Third Person Distance Down", MCH_Config.KeyCameraDistDown);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[15] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(216, 316, x1, "Switch Free Look", MCH_Config.KeyFreeLook);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[16] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(217, 317, x1, "Open GUI", MCH_Config.KeyGUI);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[17] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(218, 318, x1, "Gear Up Down", MCH_Config.KeyGearUpDown);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[18] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(219, 319, x1, "Put entity in the rack", MCH_Config.KeyPutToRack);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[19] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(220, 320, x1, "Drop entity from the rack", MCH_Config.KeyDownFromRack);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[20] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(221, 321, x1, "[MP]Score board", MCH_Config.KeyScoreboard);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[21] = guiListItemKeyBind2;
       //so this won't fucking show up for some reason
       //oh! it's because this is INFINITE BULLSHIT SPAGHETTI HELL AND YOU HAVE TO TYPE 3 9 0 AND THE BIT NUMBER
       //BEFORE EVERY FUCKING KEY CODE LIKE THIS SHIT IS STILL RUNNING TEMPLE FUCKING OS ON A 1999 MACINTOSH
       //NO I AM NOT HAVING FUN LOOKING AT THIS BULLSHIT GOD FUCKING DAMMIT
-      var10003 = new MCH_GuiListItemKeyBind(222, 322, x1, "[MP][OP]Multiplay manager", MCH_Config.KeyMultiplayManager);
-      var10009 = MCH_MOD.config;
-      var10000[22] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(223, 323, x1, "Eject Seat Heli", MCH_Config.KeyEjectHeli);
-      var10009 = MCH_MOD.config;
-      var10000[23] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(224, 324, x1, "Chaff", MCH_Config.KeyChaff);
-      var10009 = MCH_MOD.config;
-      var10000[24] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(225, 325, x1, "Maintenance", MCH_Config.KeyMaintenance);
-      var10009 = MCH_MOD.config;
-      var10000[25] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(226, 326, x1, "APS", MCH_Config.KeyAPS);
-      var10009 = MCH_MOD.config;
-      var10000[26] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(227, 327, x1, "Submarine Ascend", MCH_Config.KeySubmarineAscend);
-      var10009 = MCH_MOD.config;
-      var10000[27] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(228, 328, x1, "Submarine Descend", MCH_Config.KeySubmarineDescend);
-      var10009 = MCH_MOD.config;
-      var10000[28] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(229, 329, x1, "Plane Look Ahead", MCH_Config.KeyPlaneLookAhead);
-      var10009 = MCH_MOD.config;
-      var10000[29] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(230, 330, x1, "Bomb Reticle Mode", MCH_Config.KeyBombReticleMode);
-      var10009 = MCH_MOD.config;
-      var10000[30] = var10003;
-      var10003 = new MCH_GuiListItemKeyBind(231, 331, x1, "Toggle Active Radar", MCH_Config.KeyRadar);
-      var10000[31] = var10003;
-      //var10003 = new MCH_GuiListItemKeyBind(227, 327, x1, "Use Weapon Vehicle", MCH_Config.KeyUseWeapon);
-      //var10009 = MCH_MOD.config;
-      //var10000[26] = var10003;
-      //var10003 = new MCH_GuiListItemKeyBind(228, 328, x1, "Use Light Weapon", MCH_Config.KeyAttack);
-      //var10009 = MCH_MOD.config;
-     // var10000[26] = var10003;
-      //var10003 = new MCH_GuiListItemKeyBind(228, 328, x1, "Weapon Lock On", MCH_Config.KeyCurrentWeaponLock);
-      //var10009 = MCH_MOD.config;
-      //var10000[28] = var10003;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(222, 322, x1, "[MP][OP]Multiplay manager", MCH_Config.KeyMultiplayManager);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[22] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(223, 323, x1, "Eject Seat Heli", MCH_Config.KeyEjectHeli);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[23] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(224, 324, x1, "Chaff", MCH_Config.KeyChaff);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[24] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(225, 325, x1, "Maintenance", MCH_Config.KeyMaintenance);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[25] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(226, 326, x1, "APS", MCH_Config.KeyAPS);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[26] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(227, 327, x1, "Submarine Ascend", MCH_Config.KeySubmarineAscend);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[27] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(228, 328, x1, "Submarine Descend", MCH_Config.KeySubmarineDescend);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[28] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(229, 329, x1, "Plane Look Ahead", MCH_Config.KeyPlaneLookAhead);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[29] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(230, 330, x1, "Bomb Reticle Mode", MCH_Config.KeyBombReticleMode);
+      configuration = MCH_MOD.config;
+      guiListItemKeyBind[30] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(231, 331, x1, "Toggle Active Radar", MCH_Config.KeyRadar);
+      guiListItemKeyBind[31] = guiListItemKeyBind2;
+      //calculatedValue = new MCH_GuiListItemKeyBind(227, 327, x1, "Use Weapon Vehicle", MCH_Config.KeyUseWeapon);
+      //calculatedValue = MCH_MOD.config;
+      //calculatedValue[26] = calculatedValue;
+      //calculatedValue = new MCH_GuiListItemKeyBind(228, 328, x1, "Use Light Weapon", MCH_Config.KeyAttack);
+      //calculatedValue = MCH_MOD.config;
+     // calculatedValue[26] = calculatedValue;
+      //calculatedValue = new MCH_GuiListItemKeyBind(228, 328, x1, "Weapon Lock On", MCH_Config.KeyCurrentWeaponLock);
+      //calculatedValue = MCH_MOD.config;
+      //calculatedValue[28] = calculatedValue;
       //so somehow this crashed the fucking game
 
       //it starts in 0 and ends in 0. Hmm I wonder if I could get the retarded attack key shit to work now
@@ -366,21 +366,21 @@ public class MCH_ConfigGui extends W_GuiContainer {
       // Convert user-facing one-based values to zero-based indexes.
 
 
-      MCH_GuiListItemKeyBind[] listKeyBindItems = var10000;
-      MCH_GuiListItemKeyBind[] i$ = listKeyBindItems;
+      MCH_GuiListItemKeyBind[] listKeyBindItems = guiListItemKeyBind;
+      MCH_GuiListItemKeyBind[] iteratedValueIndex = listKeyBindItems;
       int b = listKeyBindItems.length;
 
-      for(int i$1 = 0; i$1 < b; ++i$1) {
-         MCH_GuiListItemKeyBind item = i$[i$1];
+      for(int iteratedValueIndex1 = 0; iteratedValueIndex1 < b; ++iteratedValueIndex1) {
+         MCH_GuiListItemKeyBind item = iteratedValueIndex[iteratedValueIndex1];
          this.keyBindingList.addItem(item);
       }
 
-      Iterator var15 = this.listKeyBindingButtons.iterator();
+      Iterator iterator2 = this.listKeyBindingButtons.iterator();
 
-      W_GuiButton var16;
-      while(var15.hasNext()) {
-         var16 = (W_GuiButton)var15.next();
-         super.buttonList.add(var16);
+      W_GuiButton guiButton;
+      while(iterator2.hasNext()) {
+         guiButton = (W_GuiButton)iterator2.next();
+         super.buttonList.add(guiButton);
       }
 
       this.listDevelopButtons = new ArrayList();
@@ -395,11 +395,11 @@ public class MCH_ConfigGui extends W_GuiContainer {
       }
 
       this.listDevelopButtons.add(new W_GuiButton(52, x1, y + 220, 90, 20, "Controls <<"));
-      var15 = this.listDevelopButtons.iterator();
+      iterator2 = this.listDevelopButtons.iterator();
 
-      while(var15.hasNext()) {
-         var16 = (W_GuiButton)var15.next();
-         super.buttonList.add(var16);
+      while(iterator2.hasNext()) {
+         guiButton = (W_GuiButton)iterator2.next();
+         super.buttonList.add(guiButton);
       }
 
       super.buttonList.add(new GuiButton(102, x2, y + 220, 80, 20, "Apply"));
@@ -557,39 +557,39 @@ public class MCH_ConfigGui extends W_GuiContainer {
    public void switchScreen(int screenID) {
       this.waitKeyButtonId = 0;
       this.currentScreenId = screenID;
-      Iterator i$ = this.listControlButtons.iterator();
+      Iterator iteratedValueIndex = this.listControlButtons.iterator();
 
       W_GuiButton b;
-      while(i$.hasNext()) {
-         b = (W_GuiButton)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         b = (W_GuiButton)iteratedValueIndex.next();
          b.setVisible(false);
       }
 
-      i$ = this.listRenderButtons.iterator();
+      iteratedValueIndex = this.listRenderButtons.iterator();
 
-      while(i$.hasNext()) {
-         b = (W_GuiButton)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         b = (W_GuiButton)iteratedValueIndex.next();
          b.setVisible(false);
       }
 
-      i$ = this.listPlaneCameraButtons.iterator();
+      iteratedValueIndex = this.listPlaneCameraButtons.iterator();
 
-      while(i$.hasNext()) {
-         b = (W_GuiButton)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         b = (W_GuiButton)iteratedValueIndex.next();
          b.setVisible(false);
       }
 
-      i$ = this.listKeyBindingButtons.iterator();
+      iteratedValueIndex = this.listKeyBindingButtons.iterator();
 
-      while(i$.hasNext()) {
-         b = (W_GuiButton)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         b = (W_GuiButton)iteratedValueIndex.next();
          b.setVisible(false);
       }
 
-      i$ = this.listDevelopButtons.iterator();
+      iteratedValueIndex = this.listDevelopButtons.iterator();
 
-      while(i$.hasNext()) {
-         b = (W_GuiButton)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         b = (W_GuiButton)iteratedValueIndex.next();
          b.setVisible(false);
       }
 
@@ -597,51 +597,51 @@ public class MCH_ConfigGui extends W_GuiContainer {
    }
 
    public void applySwitchScreen() {
-      Iterator i$;
+      Iterator iteratedValueIndex;
       W_GuiButton b;
       switch(this.currentScreenId) {
       case 0:
       default:
-         i$ = this.listControlButtons.iterator();
+         iteratedValueIndex = this.listControlButtons.iterator();
 
-         while(i$.hasNext()) {
-            b = (W_GuiButton)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            b = (W_GuiButton)iteratedValueIndex.next();
             b.setVisible(true);
          }
 
          return;
       case 1:
-         i$ = this.listRenderButtons.iterator();
+         iteratedValueIndex = this.listRenderButtons.iterator();
 
-         while(i$.hasNext()) {
-            b = (W_GuiButton)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            b = (W_GuiButton)iteratedValueIndex.next();
             b.setVisible(true);
          }
 
          return;
       case 4:
-         i$ = this.listPlaneCameraButtons.iterator();
+         iteratedValueIndex = this.listPlaneCameraButtons.iterator();
 
-         while(i$.hasNext()) {
-            b = (W_GuiButton)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            b = (W_GuiButton)iteratedValueIndex.next();
             b.setVisible(true);
          }
 
          return;
       case 2:
-         i$ = this.listKeyBindingButtons.iterator();
+         iteratedValueIndex = this.listKeyBindingButtons.iterator();
 
-         while(i$.hasNext()) {
-            b = (W_GuiButton)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            b = (W_GuiButton)iteratedValueIndex.next();
             b.setVisible(true);
          }
 
          return;
       case 3:
-         i$ = this.listDevelopButtons.iterator();
+         iteratedValueIndex = this.listDevelopButtons.iterator();
 
-         while(i$.hasNext()) {
-            b = (W_GuiButton)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            b = (W_GuiButton)iteratedValueIndex.next();
             b.setVisible(true);
          }
 
@@ -697,11 +697,11 @@ public class MCH_ConfigGui extends W_GuiContainer {
    public void handleMouseInput() {
       super.handleMouseInput();
       if(this.waitKeyButtonId == 0) {
-         int var16 = Mouse.getEventDWheel();
-         if(var16 != 0) {
-            if(var16 > 0) {
+         int id = Mouse.getEventDWheel();
+         if(id != 0) {
+            if(id > 0) {
                this.keyBindingList.scrollDown(2.0F);
-            } else if(var16 < 0) {
+            } else if(id < 0) {
                this.keyBindingList.scrollUp(2.0F);
             }
          }
@@ -763,23 +763,23 @@ public class MCH_ConfigGui extends W_GuiContainer {
          case 53:
             MCH_GuiListItem e = this.keyBindingList.lastPushItem;
             if(e != null) {
-               MCH_GuiListItemKeyBind var10 = (MCH_GuiListItemKeyBind)e;
-               if(var10.lastPushButton != null) {
-                  int var11 = this.keyBindingList.getItemNum();
-                  if(var10.lastPushButton.id >= 200 && var10.lastPushButton.id < 200 + var11) {
-                     this.waitKeyButtonId = var10.lastPushButton.id;
+               MCH_GuiListItemKeyBind guiListItemKeyBind = (MCH_GuiListItemKeyBind)e;
+               if(guiListItemKeyBind.lastPushButton != null) {
+                  int id2 = this.keyBindingList.getItemNum();
+                  if(guiListItemKeyBind.lastPushButton.id >= 200 && guiListItemKeyBind.lastPushButton.id < 200 + id2) {
+                     this.waitKeyButtonId = guiListItemKeyBind.lastPushButton.id;
                      this.waitKeyAcceptCount = 5;
-                  } else if(var10.lastPushButton.id >= 300 && var10.lastPushButton.id < 300 + var11) {
-                     var10.resetKeycode();
+                  } else if(guiListItemKeyBind.lastPushButton.id >= 300 && guiListItemKeyBind.lastPushButton.id < 300 + id2) {
+                     guiListItemKeyBind.resetKeycode();
                   }
 
-                  var10.lastPushButton = null;
+                  guiListItemKeyBind.lastPushButton = null;
                }
             }
             break;
          case 54:
-            for(int var8 = 0; var8 < this.keyBindingList.getItemNum(); ++var8) {
-               ((MCH_GuiListItemKeyBind)this.keyBindingList.getItem(var8)).resetKeycode();
+            for(int index = 0; index < this.keyBindingList.getItemNum(); ++index) {
+               ((MCH_GuiListItemKeyBind)this.keyBindingList.getItem(index)).resetKeycode();
             }
 
             return;
@@ -819,8 +819,8 @@ public class MCH_ConfigGui extends W_GuiContainer {
             }
             break;
          }
-      } catch (Exception var7) {
-         var7.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -838,34 +838,34 @@ public class MCH_ConfigGui extends W_GuiContainer {
          this.drawString("< Render >", 170, 10, 16777215);
          this.drawString("Hit Mark", 10, 75, 16777215);
          byte ignoreItems = 0;
-         int var11 = ignoreItems | (int)this.sliderHitMark[0].getSliderValue() << 24;
-         var11 |= (int)this.sliderHitMark[1].getSliderValue() << 16;
-         var11 |= (int)this.sliderHitMark[2].getSliderValue() << 8;
-         var11 |= (int)this.sliderHitMark[3].getSliderValue() << 0;
-         this.drawSampleHitMark(40, 105, var11);
+         int id = ignoreItems | (int)this.sliderHitMark[0].getSliderValue() << 24;
+         id |= (int)this.sliderHitMark[1].getSliderValue() << 16;
+         id |= (int)this.sliderHitMark[2].getSliderValue() << 8;
+         id |= (int)this.sliderHitMark[3].getSliderValue() << 0;
+         this.drawSampleHitMark(40, 105, id);
          double y = (double)this.sliderEntityMarkerSize.getSliderValue();
-         double len$ = 170.0D + (30.0D - y) / 2.0D;
+         double iteratedValueCount = 170.0D + (30.0D - y) / 2.0D;
          double s = (double)(this.sliderEntityMarkerSize.yPosition - this.sliderEntityMarkerSize.getHeight());
-         double[] ls = new double[]{len$ + y, s, len$, s, len$ + y / 2.0D, s + y};
+         double[] ls = new double[]{iteratedValueCount + y, s, iteratedValueCount, s, iteratedValueCount + y / 2.0D, s + y};
          this.drawLine(ls, -65536, 4);
          y = (double)this.sliderBlockMarkerSize.getSliderValue();
-         len$ = 185.0D;
+         iteratedValueCount = 185.0D;
          s = (double)this.sliderBlockMarkerSize.yPosition;
-         var11 = -65536;
+         id = -65536;
          GL11.glPushMatrix();
          GL11.glEnable(3042);
          GL11.glDisable(3553);
          GL11.glBlendFunc(770, 771);
-         GL11.glColor4ub((byte)(var11 >> 16 & 255), (byte)(var11 >> 8 & 255), (byte)(var11 >> 0 & 255), (byte)(var11 >> 24 & 255));
+         GL11.glColor4ub((byte)(id >> 16 & 255), (byte)(id >> 8 & 255), (byte)(id >> 0 & 255), (byte)(id >> 24 & 255));
          Tessellator.instance.startDrawing(1);
-         MCH_GuiTargetMarker.drawRhombus(Tessellator.instance, 15, len$, s, (double)super.zLevel, y, var11);
+         MCH_GuiTargetMarker.drawRhombus(Tessellator.instance, 15, iteratedValueCount, s, (double)super.zLevel, y, id);
          Tessellator.instance.draw();
          GL11.glEnable(3553);
          GL11.glDisable(3042);
          GL11.glColor4b((byte)-1, (byte)-1, (byte)-1, (byte)-1);
          GL11.glPopMatrix();
       } else {
-         int var12;
+         int id2;
          if(this.currentScreenId == 4) {
             this.drawString("< Plane Camera >", 170, 10, 16777215);
             this.drawString("Stable distance + FOV; Apply works in-flight", 10, 212, 16777215);
@@ -873,24 +873,24 @@ public class MCH_ConfigGui extends W_GuiContainer {
             this.drawString("< Key Binding >", 170, 10, 16777215);
             if(this.waitKeyButtonId != 0) {
                drawRect(30, 30, super.xSize - 30, super.ySize - 30, -533712848);
-               String var13 = "Press any key or mouse button.";
-               var12 = this.getStringWidth(var13);
-               this.drawString(var13, (super.xSize - var12) / 2, super.ySize / 2 - 4, 16777215);
+               String text = "Press any key or mouse button.";
+               id2 = this.getStringWidth(text);
+               this.drawString(text, (super.xSize - id2) / 2, super.ySize / 2 - 4, 16777215);
             }
          } else if(this.currentScreenId == 3) {
             this.drawString("< Development >", 170, 10, 16777215);
             this.drawString("Single player only!", 10, 30, 16711680);
             if(this.buttonReloadAircraftInfo != null && this.buttonReloadAircraftInfo.isOnMouseOver()) {
                this.drawString("The following things will not be reloaded until restart.", 170, 30, 16777215);
-               String[] var14 = MCH_BaseVehicleInfo.getCannotReloadItem();
-               var12 = 10;
-               String[] arr$ = var14;
-               int var15 = var14.length;
+               String[] text2 = MCH_BaseVehicleInfo.getCannotReloadItem();
+               id2 = 10;
+               String[] iteratedValues = text2;
+               int index = text2.length;
 
-               for(int i$ = 0; i$ < var15; ++i$) {
-                  String var16 = arr$[i$];
-                  this.drawString("  " + var16, 170, 30 + var12, 16777215);
-                  var12 += 10;
+               for(int iteratedValueIndex = 0; iteratedValueIndex < index; ++iteratedValueIndex) {
+                  String text3 = iteratedValues[iteratedValueIndex];
+                  this.drawString("  " + text3, 170, 30 + id2, 16777215);
+                  id2 += 10;
                }
             }
          }
@@ -898,7 +898,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
 
    }
 
-   protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
+   protected void drawGuiContainerBackgroundLayer(float scale, int id, int id2) {
       W_ScaledResolution scaledresolution = new W_ScaledResolution(super.mc, super.mc.displayWidth, super.mc.displayHeight);
       this.scaleFactor = scaledresolution.getScaleFactor();
       W_McClient.MOD_bindTexture("textures/gui/config.png");

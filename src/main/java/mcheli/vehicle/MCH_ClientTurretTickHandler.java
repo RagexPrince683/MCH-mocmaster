@@ -58,46 +58,46 @@ public class MCH_ClientTurretTickHandler extends MCH_BaseVehicleClientTickHandle
       }
 
       super.isBeforeRiding = super.isRiding;
-      EntityClientPlayerMP var6 = super.mc.thePlayer;
-      MCH_EntityTurret var7 = null;
-      boolean var8 = true;
-      if(var6 != null) {
-         if(var6.ridingEntity instanceof MCH_EntityTurret) {
-            var7 = (MCH_EntityTurret)var6.ridingEntity;
-         } else if(var6.ridingEntity instanceof MCH_EntitySeat) {
-            MCH_EntitySeat var9 = (MCH_EntitySeat)var6.ridingEntity;
-            if(var9.getParent() instanceof MCH_EntityTurret) {
-               var8 = false;
-               var7 = (MCH_EntityTurret)var9.getParent();
+      EntityClientPlayerMP player2 = super.mc.thePlayer;
+      MCH_EntityTurret turretEntity = null;
+      boolean isMounted = true;
+      if(player2 != null) {
+         if(player2.ridingEntity instanceof MCH_EntityTurret) {
+            turretEntity = (MCH_EntityTurret)player2.ridingEntity;
+         } else if(player2.ridingEntity instanceof MCH_EntitySeat) {
+            MCH_EntitySeat seatEntity = (MCH_EntitySeat)player2.ridingEntity;
+            if(seatEntity.getParent() instanceof MCH_EntityTurret) {
+               isMounted = false;
+               turretEntity = (MCH_EntityTurret)seatEntity.getParent();
             }
          }
       }
 
-      if(var7 != null && var7.getAcInfo() != null) {
-         MCH_Lib.disableFirstPersonItemRender(var6.getCurrentEquippedItem());
-         this.update(var6, var7, var7.getTurretInfo());
-         MCH_ViewEntityDummy var10 = MCH_ViewEntityDummy.getInstance(super.mc.theWorld);
-         var10.update(var7.camera);
+      if(turretEntity != null && turretEntity.getAcInfo() != null) {
+         MCH_Lib.disableFirstPersonItemRender(player2.getCurrentEquippedItem());
+         this.update(player2, turretEntity, turretEntity.getTurretInfo());
+         MCH_ViewEntityDummy viewEntityDummy2 = MCH_ViewEntityDummy.getInstance(super.mc.theWorld);
+         viewEntityDummy2.update(turretEntity.camera);
          if(!inGUI) {
-            if(!var7.isDestroyed()) {
-               this.playerControl(var6, var7, var8);
+            if(!turretEntity.isDestroyed()) {
+               this.playerControl(player2, turretEntity, isMounted);
             }
          } else {
-            this.playerControlInGUI(var6, var7, var8);
+            this.playerControlInGUI(player2, turretEntity, isMounted);
          }
 
-         MCH_Lib.setRenderViewEntity(var10);
+         MCH_Lib.setRenderViewEntity(viewEntityDummy2);
          super.isRiding = true;
       } else {
          super.isRiding = false;
       }
 
       if (!this.isBeforeRiding && this.isRiding) {
-         W_Reflection.setThirdPersonDistance(var7.thirdPersonDist);
+         W_Reflection.setThirdPersonDistance(turretEntity.thirdPersonDist);
       } else if (this.isBeforeRiding && !this.isRiding) {
          W_Reflection.restoreDefaultThirdPersonDistance();
          MCH_Lib.enableFirstPersonItemRender();
-         MCH_Lib.setRenderViewEntity(var6);
+         MCH_Lib.setRenderViewEntity(player2);
       }
 
    }

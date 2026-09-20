@@ -39,9 +39,9 @@ public abstract class MCH_Gui extends GuiScreen {
 
    public void onTick() {}
 
-   public abstract boolean isDrawGui(EntityPlayer var1);
+   public abstract boolean isDrawGui(EntityPlayer player);
 
-   public abstract void drawGui(EntityPlayer var1, boolean var2);
+   public abstract void drawGui(EntityPlayer player, boolean result);
 
    public void drawScreen(int par1, int par2, float partialTicks) {
       this.smoothCamPartialTicks = partialTicks;

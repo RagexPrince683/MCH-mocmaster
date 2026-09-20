@@ -77,7 +77,7 @@ public class MCH_EntityWheel extends W_Entity {
       }
 
       super.boundingBox.offset(0.0D, parY, 0.0D);
-      boolean var32 = super.onGround || my != parY && my < 0.0D;
+      boolean isValid = super.onGround || my != parY && my < 0.0D;
 
       int bkParY;
       for(bkParY = 0; bkParY < list.size(); ++bkParY) {
@@ -91,9 +91,9 @@ public class MCH_EntityWheel extends W_Entity {
       }
 
       super.boundingBox.offset(0.0D, 0.0D, parZ);
-      if(super.stepHeight > 0.0F && var32 && super.ySize < 0.05F && (mx != parX || mz != parZ)) {
+      if(super.stepHeight > 0.0F && isValid && super.ySize < 0.05F && (mx != parX || mz != parZ)) {
          double bkParX = parX;
-         double var33 = parY;
+         double result = parY;
          double bkParZ = parZ;
          parX = mx;
          parY = (double)super.stepHeight;
@@ -129,7 +129,7 @@ public class MCH_EntityWheel extends W_Entity {
          super.boundingBox.offset(0.0D, parY, 0.0D);
          if(bkParX * bkParX + bkParZ * bkParZ >= parX * parX + parZ * parZ) {
             parX = bkParX;
-            parY = var33;
+            parY = result;
             parZ = bkParZ;
             super.boundingBox.setBB(throwable);
          }
@@ -159,9 +159,9 @@ public class MCH_EntityWheel extends W_Entity {
 
       try {
          this.doBlockCollisions();
-      } catch (Throwable var31) {
-         CrashReport var34 = CrashReport.makeCrashReport(var31, "Checking entity tile collision");
-         CrashReportCategory crashreportcategory = var34.makeCategory("Entity being checked for collision");
+      } catch (Throwable throwable2) {
+         CrashReport crashReport = CrashReport.makeCrashReport(throwable2, "Checking entity tile collision");
+         CrashReportCategory crashreportcategory = crashReport.makeCategory("Entity being checked for collision");
          this.addEntityCrashInfo(crashreportcategory);
       }
 
@@ -191,11 +191,11 @@ public class MCH_EntityWheel extends W_Entity {
          }
       }
 
-      double var16 = 0.25D;
-      List var17 = par1Entity.worldObj.getEntitiesWithinAABBExcludingEntity(par1Entity, par2AxisAlignedBB.expand(var16, var16, var16));
+      double result = 0.25D;
+      List entities = par1Entity.worldObj.getEntitiesWithinAABBExcludingEntity(par1Entity, par2AxisAlignedBB.expand(result, result, result));
 
-      for(int var18 = 0; var18 < var17.size(); ++var18) {
-         Entity entity = (Entity)var17.get(var18);
+      for(int index = 0; index < entities.size(); ++index) {
+         Entity entity = (Entity)entities.get(index);
          if(!W_Lib.isEntityLivingBase(entity) && !(entity instanceof MCH_EntitySeat) && !(entity instanceof MCH_EntityHitBox) && entity != this.parents) {
             AxisAlignedBB axisalignedbb1 = entity.getBoundingBox();
             if(axisalignedbb1 != null && axisalignedbb1.intersectsWith(par2AxisAlignedBB)) {

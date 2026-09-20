@@ -68,7 +68,7 @@ public class MCH_CurrentRecipe {
                try {
                   this.modelTexture = new ResourceLocation("mcheli",
                                                            "textures/" + dir + "/" + name + ".png");
-               } catch (Exception var9) {
+               } catch (Exception exception) {
                   System.out.println("Texture not found : " + name);
                   this.modelTexture = new ResourceLocation("textures/blocks/planks_oak.png");
                }
@@ -106,13 +106,13 @@ public class MCH_CurrentRecipe {
          if(info.getWeaponNum() > 0) {
             this.getAcInfoTextSub("Armed----------------");
 
-            for(int var6 = 0; var6 < info.getWeaponNum(); ++var6) {
-               String type = info.getWeaponSetById(var6).type;
+            for(int index = 0; index < info.getWeaponNum(); ++index) {
+               String type = info.getWeaponSetById(index).type;
                MCH_WeaponInfo winfo = MCH_WeaponInfoManager.get(type);
                if(winfo != null) {
                   this.getAcInfoTextSub(winfo.getWeaponTypeName(), winfo.displayName);
                } else {
-                  this.getAcInfoTextSub("ERROR", "Not found weapon " + (var6 + 1));
+                  this.getAcInfoTextSub("ERROR", "Not found weapon " + (index + 1));
                }
             }
          }

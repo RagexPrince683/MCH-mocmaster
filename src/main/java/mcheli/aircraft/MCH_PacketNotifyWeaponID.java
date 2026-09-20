@@ -28,8 +28,8 @@ public class MCH_PacketNotifyWeaponID extends MCH_Packet {
          this.weaponID = data.readByte();
          this.ammo = data.readShort();
          this.restAmmo = data.readShort();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -41,8 +41,8 @@ public class MCH_PacketNotifyWeaponID extends MCH_Packet {
          dos.writeByte(this.weaponID);
          dos.writeShort(this.ammo);
          dos.writeShort(this.restAmmo);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

@@ -26,24 +26,24 @@ public class MCH_ToolPacketHandler {
                   W_WorldFunc.MOD_playSoundAtEntity(player, "ng", 1.0F, 1.0F);
                }
             } else if(itemStack.getItemDamage() < itemStack.getMaxDamage()) {
-               MCH_Config var10000 = MCH_MOD.config;
+               MCH_Config configuration = MCH_MOD.config;
                if(MCH_Config.RangeFinderConsume.prmBool) {
                   itemStack.damageItem(1, player);
                }
 
-               int var5;
+               int result;
                if((pc.targetFilter & 252) == 0) {
-                  var5 = 60;
+                  result = 60;
                } else {
-                  var10000 = MCH_MOD.config;
-                  var5 = MCH_Config.RangeFinderSpotTime.prmInt;
+                  configuration = MCH_MOD.config;
+                  result = MCH_Config.RangeFinderSpotTime.prmInt;
                }
 
-               int time = var5;
-               double var10002 = player.posX;
-               double var10003 = player.posY + (double)player.getEyeHeight();
-               MCH_Config var10006 = MCH_MOD.config;
-               if(MCH_Multiplay.spotEntity(player, (MCH_EntityBaseVehicle)null, var10002, var10003, player.posZ, pc.targetFilter, (float)MCH_Config.RangeFinderSpotDist.prmInt, time, 20.0F)) {
+               int time = result;
+               double positionX = player.posX;
+               double positionX2 = player.posY + (double)player.getEyeHeight();
+               MCH_Config configuration2 = MCH_MOD.config;
+               if(MCH_Multiplay.spotEntity(player, (MCH_EntityBaseVehicle)null, positionX, positionX2, player.posZ, pc.targetFilter, (float)MCH_Config.RangeFinderSpotDist.prmInt, time, 20.0F)) {
                   W_WorldFunc.MOD_playSoundAtEntity(player, "pi", 1.0F, 1.0F);
                } else {
                   W_WorldFunc.MOD_playSoundAtEntity(player, "ng", 1.0F, 1.0F);

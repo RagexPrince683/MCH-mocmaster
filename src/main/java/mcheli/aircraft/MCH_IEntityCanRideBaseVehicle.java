@@ -7,5 +7,5 @@ public interface MCH_IEntityCanRideBaseVehicle {
 
    boolean isSkipNormalRender();
 
-   boolean canRideAircraft(MCH_EntityBaseVehicle var1, int var2, MCH_SeatRackInfo var3);
+   boolean canRideAircraft(MCH_EntityBaseVehicle result1, int result2, MCH_SeatRackInfo result3);
 }

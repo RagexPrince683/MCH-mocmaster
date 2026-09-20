@@ -25,7 +25,7 @@ public abstract class MCH_ClientTickHandlerBase {
    private static int mouseWheel = 0;
 
 
-   public abstract void updateKeybind(MCH_Config var1);
+   public abstract void updateKeybind(MCH_Config configuration);
 
    public static void setRotLimitPitch(float min, float max, Entity player) {
       playerRotMinPitch = min;

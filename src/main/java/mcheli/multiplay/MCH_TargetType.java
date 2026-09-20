@@ -14,6 +14,6 @@ public enum MCH_TargetType {
    private static final MCH_TargetType[] $VALUES = new MCH_TargetType[]{NONE, OTHER_MOB, MONSTER, NO_TEAM_PLAYER, SAME_TEAM_PLAYER, OTHER_TEAM_PLAYER, POINT};
 
 
-   private MCH_TargetType(String var1, int var2) {}
+   private MCH_TargetType(String text, int result) {}
 
 }

@@ -53,8 +53,8 @@ public class MCH_Hud extends MCH_BaseInfo {
 
    public void checkData() {
       MCH_HudItem hud;
-      for(Iterator i$ = this.list.iterator(); i$.hasNext(); hud.parent = this) {
-         hud = (MCH_HudItem)i$.next();
+      for(Iterator iteratedValueIndex = this.list.iterator(); iteratedValueIndex.hasNext(); hud.parent = this) {
+         hud = (MCH_HudItem)iteratedValueIndex.next();
       }
 
       if(this.isWaitEndif) {
@@ -238,10 +238,10 @@ public class MCH_Hud extends MCH_BaseInfo {
    protected void drawItems() {
       if(!this.isDrawing) {
          this.isDrawing = true;
-         Iterator i$ = this.list.iterator();
+         Iterator iteratedValueIndex = this.list.iterator();
 
-         while(i$.hasNext()) {
-            MCH_HudItem hud = (MCH_HudItem)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_HudItem hud = (MCH_HudItem)iteratedValueIndex.next();
             byte line = -1;
 
             try {
@@ -258,10 +258,10 @@ public class MCH_Hud extends MCH_BaseInfo {
                      break;
                   }
                }
-            } catch (Exception var5) {
+            } catch (Exception exception) {
                MCH_Lib.Log("#### Draw HUD Error!!!: line=%d, file=%s", new Object[]{Integer.valueOf(line), this.fileName});
-               var5.printStackTrace();
-               throw new RuntimeException(var5);
+               exception.printStackTrace();
+               throw new RuntimeException(exception);
             }
          }
 

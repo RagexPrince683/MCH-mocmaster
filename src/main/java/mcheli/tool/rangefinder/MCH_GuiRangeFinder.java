@@ -118,21 +118,21 @@ public class MCH_GuiRangeFinder extends MCH_Gui {
          py = 10.0D;
       }
 
-      StringBuilder var10000 = (new StringBuilder()).append("Spot      : ");
-      MCH_Config var10001 = MCH_MOD.config;
-      String s1 = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyAttack.prmInt)).toString();
+      StringBuilder result = (new StringBuilder()).append("Spot      : ");
+      MCH_Config configuration = MCH_MOD.config;
+      String s1 = result.append(MCH_KeyName.getDescOrName(MCH_Config.KeyAttack.prmInt)).toString();
       this.drawString(s1, (int)px, (int)py + 0, -1);
-      var10000 = (new StringBuilder()).append("Zoom in   : ");
-      var10001 = MCH_MOD.config;
-      s1 = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
+      result = (new StringBuilder()).append("Zoom in   : ");
+      configuration = MCH_MOD.config;
+      s1 = result.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
       this.drawString(s1, (int)px, (int)py + 10, MCH_ItemRangeFinder.zoom < 10.0F?-1:-12566464);
-      var10000 = (new StringBuilder()).append("Zoom out : ");
-      var10001 = MCH_MOD.config;
-      s1 = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwWeaponMode.prmInt)).toString();
+      result = (new StringBuilder()).append("Zoom out : ");
+      configuration = MCH_MOD.config;
+      s1 = result.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwWeaponMode.prmInt)).toString();
       this.drawString(s1, (int)px, (int)py + 20, MCH_ItemRangeFinder.zoom > 1.2F?-1:-12566464);
-      var10000 = (new StringBuilder()).append("Mode      : ");
-      var10001 = MCH_MOD.config;
-      s1 = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyFlare.prmInt)).toString();
+      result = (new StringBuilder()).append("Mode      : ");
+      configuration = MCH_MOD.config;
+      s1 = result.append(MCH_KeyName.getDescOrName(MCH_Config.KeyFlare.prmInt)).toString();
       this.drawString(s1, (int)px, (int)py + 30, -1);
    }
 }

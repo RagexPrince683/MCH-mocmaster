@@ -175,12 +175,12 @@ public class MCP_PlaneInfo extends MCH_BaseVehicleInfo {
          super.hatchList.clear();
       }
 
-      double var10001 = (double)super.speed;
-      MCH_Config var10002 = MCH_MOD.config;
-      super.speed = (float)(var10001 * MCH_Config.AllPlaneSpeed.prmDouble);
-      var10001 = (double)this.sweepWingSpeed;
-      var10002 = MCH_MOD.config;
-      this.sweepWingSpeed = (float)(var10001 * MCH_Config.AllPlaneSpeed.prmDouble);
+      double result = (double)super.speed;
+      MCH_Config configuration = MCH_MOD.config;
+      super.speed = (float)(result * MCH_Config.AllPlaneSpeed.prmDouble);
+      result = (double)this.sweepWingSpeed;
+      configuration = MCH_MOD.config;
+      this.sweepWingSpeed = (float)(result * MCH_Config.AllPlaneSpeed.prmDouble);
       if(this.maxLevelSpeed > 0.0F) {
          this.maxLevelSpeed = (float)((double)this.maxLevelSpeed * MCH_Config.AllPlaneSpeed.prmDouble);
       }

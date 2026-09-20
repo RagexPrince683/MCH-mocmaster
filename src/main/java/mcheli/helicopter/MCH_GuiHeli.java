@@ -45,10 +45,10 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
             this.drawNightVisionNoise();
          }
 
-         MCH_Config var10000;
+         MCH_Config configuration;
          label57: {
             if(isThirdPersonView) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                if(!MCH_Config.DisplayHUDThirdPerson.prmBool) {
                   break label57;
                }
@@ -65,7 +65,7 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
          if(!heli.getIsGunnerMode(player)) {
             label39: {
                if(isThirdPersonView) {
-                  var10000 = MCH_MOD.config;
+                  configuration = MCH_MOD.config;
                   if(!MCH_Config.DisplayHUDThirdPerson.prmBool) {
                      break label39;
                   }
@@ -86,7 +86,7 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
          } else {
             label34: {
                if(isThirdPersonView) {
-                  var10000 = MCH_MOD.config;
+                  configuration = MCH_MOD.config;
                   if(!MCH_Config.DisplayHUDThirdPerson.prmBool) {
                      break label34;
                   }
@@ -315,7 +315,7 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
    }
 
    public void drawKeyBind(MCH_EntityHeli heli, EntityPlayer player, int seatID) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(!MCH_Config.HideKeybind.prmBool) {
          MCH_HeliInfo info = heli.getHeliInfo();
          if(info != null) {
@@ -326,67 +326,67 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
             this.drawKeyBind(heli, info, player, seatID, RX, LX, colorActive, colorInactive);
             String msg;
             int c;
-            StringBuilder var11;
-            MCH_Config var10001;
+            StringBuilder messageBuilder;
+            MCH_Config configuration2;
             if(seatID == 0 && info.isEnableGunnerMode) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                if(!Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
                   c = heli.isHoveringMode()?colorInactive:colorActive;
-                  var11 = (new StringBuilder()).append(heli.getIsGunnerMode(player)?"Normal":"Gunner").append(" : ");
-                  var10001 = MCH_MOD.config;
-                  msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchMode.prmInt)).toString();
+                  messageBuilder = (new StringBuilder()).append(heli.getIsGunnerMode(player)?"Normal":"Gunner").append(" : ");
+                  configuration2 = MCH_MOD.config;
+                  msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchMode.prmInt)).toString();
                   this.drawString(msg, RX, super.centerY - 70, c);
                }
             }
 
             if(seatID > 0 && heli.canSwitchGunnerModeOtherSeat(player)) {
-               var11 = (new StringBuilder()).append(heli.getIsGunnerMode(player)?"Normal":"Camera").append(" : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchMode.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append(heli.getIsGunnerMode(player)?"Normal":"Camera").append(" : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchMode.prmInt)).toString();
                this.drawString(msg, RX, super.centerY - 40, colorActive);
             }
 
             if(seatID == 0) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                if(!Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
                   c = heli.getIsGunnerMode(player)?colorInactive:colorActive;
-                  var11 = (new StringBuilder()).append(heli.getIsGunnerMode(player)?"Normal":"Hovering").append(" : ");
-                  var10001 = MCH_MOD.config;
-                  msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchHovering.prmInt)).toString();
+                  messageBuilder = (new StringBuilder()).append(heli.getIsGunnerMode(player)?"Normal":"Hovering").append(" : ");
+                  configuration2 = MCH_MOD.config;
+                  msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchHovering.prmInt)).toString();
                   this.drawString(msg, RX, super.centerY - 60, c);
                }
             }
 
             if(heli.canEjectSeat(player)) {
-               var11 = (new StringBuilder()).append("Eject seat: ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeyEjectHeli.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("Eject seat: ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyEjectHeli.prmInt)).toString();
                this.drawString(msg, RX, super.centerY - 30, colorActive);
             }
 
             if(seatID == 0) {
                if(heli.getTowChainEntity() != null && !heli.getTowChainEntity().isDead) {
-                  var11 = (new StringBuilder()).append("Drop  : ");
-                  var10001 = MCH_MOD.config;
-                  msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
+                  messageBuilder = (new StringBuilder()).append("Drop  : ");
+                  configuration2 = MCH_MOD.config;
+                  msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
                   this.drawString(msg, RX, super.centerY - 30, colorActive);
                } else if(info.isEnableFoldBlade && MCH_Lib.getBlockIdY(heli.worldObj, heli.posX, heli.posY, heli.posZ, 1, -2, true) > 0 && heli.getCurrentThrottle() <= 0.01D) {
-                  var11 = (new StringBuilder()).append("FoldBlade  : ");
-                  var10001 = MCH_MOD.config;
-                  msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
+                  messageBuilder = (new StringBuilder()).append("FoldBlade  : ");
+                  configuration2 = MCH_MOD.config;
+                  msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
                   this.drawString(msg, RX, super.centerY - 30, colorActive);
                }
             }
 
             if((heli.getIsGunnerMode(player) || heli.isUAV()) && info.cameraZoom > 1) {
-               var11 = (new StringBuilder()).append("Zoom : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("Zoom : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
                this.drawString(msg, LX, super.centerY - 80, colorActive);
             } else if(seatID == 0 && (heli.canFoldHatch() || heli.canUnfoldHatch())) {
-               var11 = (new StringBuilder()).append("OpenHatch : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("OpenHatch : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
                this.drawString(msg, LX, super.centerY - 80, colorActive);
             }
 

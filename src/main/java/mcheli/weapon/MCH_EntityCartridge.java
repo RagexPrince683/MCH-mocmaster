@@ -78,7 +78,7 @@ public class MCH_EntityCartridge extends W_Entity {
       super.prevPosZ = super.posZ;
       super.prevRotationYaw = super.rotationYaw;
       super.prevRotationPitch = super.rotationPitch;
-      MCH_Config var10001 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(this.countOnUpdate < MCH_Config.AliveTimeOfCartridge.prmInt) {
          ++this.countOnUpdate;
       } else {
@@ -188,7 +188,7 @@ public class MCH_EntityCartridge extends W_Entity {
 
    }
 
-   protected void readEntityFromNBT(NBTTagCompound var1) {}
+   protected void readEntityFromNBT(NBTTagCompound nbtTagCompound) {}
 
-   protected void writeEntityToNBT(NBTTagCompound var1) {}
+   protected void writeEntityToNBT(NBTTagCompound nbtTagCompound) {}
 }

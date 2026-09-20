@@ -29,7 +29,7 @@ public class MCH_RenderTest extends W_Render {
    }
 
    public void doRender(Entity e, double posX, double posY, double posZ, float par8, float par9) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.TestMode.prmBool) {
          GL11.glPushMatrix();
          GL11.glTranslated(posX + (double)this.offsetX, posY + (double)this.offsetY, posZ + (double)this.offsetZ);

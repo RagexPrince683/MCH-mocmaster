@@ -343,7 +343,7 @@ public class MCH_EventHook extends W_EventHook {
             }
          }
       } else if(W_Lib.isEntityLivingBase(event.entity) && !W_EntityPlayer.isPlayer(event.entity)) {
-         MCH_Config var10002 = MCH_MOD.config;
+         MCH_Config configuration = MCH_MOD.config;
          event.entity.renderDistanceWeight *= MCH_Config.MobRenderDistanceWeight.prmDouble;
       } else if(event.entity instanceof MCH_EntityBaseVehicle) {
          MCH_EntityBaseVehicle joinedAircraft = (MCH_EntityBaseVehicle)event.entity;

@@ -85,9 +85,9 @@ public class MCH_DummyEntityPlayer extends W_EntityPlayer {
  //  }
    //end of newshit
 
-   public void addChatMessage(IChatComponent var1) {}
+   public void addChatMessage(IChatComponent chatComponent) {}
 
-   public boolean canCommandSenderUseCommand(int var1, String var2) {
+   public boolean canCommandSenderUseCommand(int result, String text) {
       return false;
    }
 

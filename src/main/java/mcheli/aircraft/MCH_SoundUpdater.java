@@ -113,9 +113,9 @@ public class MCH_SoundUpdater extends W_SoundUpdater implements MCH_IEntitySound
             }
          }
 
-         boolean var24 = false;
-         var24 = true;
-         if(var24 && this.aircraftVolume > 0.0F) {
+         boolean result = false;
+         result = true;
+         if(result && this.aircraftVolume > 0.0F) {
             if(isRide) {
                this.updateSoundLocation(this.theAircraft);
             } else {

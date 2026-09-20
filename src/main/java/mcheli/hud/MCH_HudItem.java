@@ -267,7 +267,7 @@ public abstract class MCH_HudItem extends Gui {
       updateVarMapItem("width", width);
       updateVarMapItem("height", height);
       updateVarMapItem("time", (double)(player.worldObj.getWorldTime() % 24000L));
-      MCH_Config var10001 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       updateVarMapItem("test_mode", MCH_Config.TestMode.prmBool?1.0D:0.0D);
       updateVarMapItem("plyr_yaw", (double)MathHelper.wrapAngleTo180_float(player.rotationYaw));
       updateVarMapItem("plyr_pitch", (double)player.rotationPitch);
@@ -328,15 +328,15 @@ public abstract class MCH_HudItem extends Gui {
    }
 
    public static void drawVarMap() {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.TestMode.prmBool) {
          int i = 0;
          int x = (int)(-300.0D + centerX);
          int y = (int)(-100.0D + centerY);
-         Iterator i$ = varMap.keySet().iterator();
+         Iterator iteratedValueIndex = varMap.keySet().iterator();
 
-         while(i$.hasNext()) {
-            String key = (String)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            String key = (String)iteratedValueIndex.next();
             dummy.drawString(key, x, y, -12544);
             Double d = (Double)varMap.get(key);
             String fmt = key.equalsIgnoreCase("color")?String.format(": 0x%08X", new Object[]{Integer.valueOf(d.intValue())}):String.format(": %.2f", new Object[]{d});
