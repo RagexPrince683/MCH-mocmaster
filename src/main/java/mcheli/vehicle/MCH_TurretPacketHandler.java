@@ -19,7 +19,10 @@ public class MCH_TurretPacketHandler {
             mcheli.aircraft.MCH_BaseVehiclePacketHandler.handleVehicleAccessLockToggle(player, vehicle, pc);
             mcheli.aircraft.MCH_BaseVehiclePacketHandler.handleRadarToggle(player, vehicle, pc);
             if(pc.isUnmount == 1) {
-               vehicle.unmountEntity();
+               if(mcheli.aircraft.MCH_BaseVehiclePacketHandler.validateNormalDismount(
+                     player, vehicle, pc.dismountMountEntityId, pc.dismountParentEntityId, pc.dismountSeatId)) {
+                  vehicle.unmountEntity();
+               }
             } else if(pc.isUnmount == 2) {
                vehicle.unmountCrew();
             } else {

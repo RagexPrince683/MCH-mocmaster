@@ -37,6 +37,43 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 
 public class MCH_BaseVehiclePacketHandler {
+
+   public static boolean validateNormalDismount(EntityPlayer player, MCH_EntityBaseVehicle parent,
+         int mountEntityId, int parentEntityId, int seatId) {
+      Entity mount = player != null ? player.ridingEntity : null;
+      MCH_EntityBaseVehicle actualParent = null;
+      int actualSeatId = -1;
+      if(mount instanceof MCH_EntityBaseVehicle) {
+         actualParent = (MCH_EntityBaseVehicle)mount;
+         actualSeatId = 0;
+      } else if(mount instanceof MCH_EntitySeat) {
+         actualParent = ((MCH_EntitySeat)mount).getParent();
+         actualSeatId = ((MCH_EntitySeat)mount).seatID;
+      }
+
+      String rejection = null;
+      if(player == null || player.isDead) {
+         rejection = "player missing or dead";
+      } else if(mount == null || mount.isDead) {
+         rejection = "mount missing or dead";
+      } else if(parent == null || parent.isDead || parent.isDestroyed()) {
+         rejection = "parent missing or invalid";
+      } else if(mount.getEntityId() != mountEntityId) {
+         rejection = "mount entity mismatch";
+      } else if(actualParent != parent || parent.getEntityId() != parentEntityId) {
+         rejection = "parent vehicle mismatch";
+      } else if(actualSeatId != seatId) {
+         rejection = "seat mismatch";
+      }
+
+      MCH_Lib.DbgLog(player != null ? player.worldObj : null,
+            "[MCH-DISMOUNT] action=%s player=%s mountId=%d parentId=%d seatId=%d elapsedMs=unavailable reason=%s",
+            new Object[]{rejection == null ? "Packet accepted" : "Packet rejected", player,
+                  Integer.valueOf(mount != null ? mount.getEntityId() : -1),
+                  Integer.valueOf(actualParent != null ? actualParent.getEntityId() : -1),
+                  Integer.valueOf(actualSeatId), rejection != null ? rejection : "none"});
+      return rejection == null;
+   }
    private static final int MAX_PENDING_MOUNTS = 64;
    private static final int PENDING_MOUNT_TICKS = 100;
    private static final List<PendingMount> pendingMounts = new ArrayList<PendingMount>();
@@ -452,7 +489,10 @@ public class MCH_BaseVehiclePacketHandler {
             MCH_PacketSeatPlayerControl pc1 = new MCH_PacketSeatPlayerControl();
             pc1.readData(data);
             if(pc1.isUnmount) {
-               ac.unmountEntityFromSeat(player);
+               if(validateNormalDismount(player, ac, pc1.dismountMountEntityId,
+                     pc1.dismountParentEntityId, pc1.dismountSeatId)) {
+                  ac.unmountEntityFromSeat(player);
+               }
             } else if(pc1.switchSeat > 0) {
                if(pc1.switchSeat == 3) {
                   player.mountEntity((Entity)null);

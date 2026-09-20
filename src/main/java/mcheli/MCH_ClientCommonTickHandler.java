@@ -43,7 +43,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -100,16 +99,23 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    private static double mouseRollDeltaY = 0.0D;
    private static boolean isRideAircraft = false;
    private static float prevTick = 0.0F;
+   private DismountHoldState dismountHoldState = DismountHoldState.IDLE;
    private long dismountHoldStartNanos = -1L;
-   private boolean dismountRequestPending;
-   private boolean dismountHoldTriggered;
-   private boolean suppressedDismountKey;
    private Entity dismountMount;
+   private MCH_EntityBaseVehicle dismountParent;
+   private int dismountSeatId = -1;
    private EntityClientPlayerMP dismountPlayer;
    private World dismountWorld;
    private Object dismountConnection;
    private boolean restoreMouseFocusAfterRender;
    private boolean replayPlaybackActive;
+
+   private enum DismountHoldState {
+      IDLE,
+      HOLDING,
+      PENDING,
+      CONSUMED_AWAIT_RELEASE
+   }
 
 
 
@@ -931,12 +937,6 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             mcheli.network.packets.PacketVehicleMountGraph.clearClientQueue();
          }
       }
-      if(player == super.mc.thePlayer && this.isHoldingMCHeliDismount()) {
-         KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(), false);
-         ((EntityClientPlayerMP)player).movementInput.sneak = false;
-         this.suppressedDismountKey = true;
-      }
-
       if(player.worldObj.isRemote) {
          ItemStack currentItemstack = player.getCurrentEquippedItem();
          if(currentItemstack != null && currentItemstack.getItem() instanceof MCH_ItemWrench && player.getItemInUseCount() > 0 && player.getItemInUse() != currentItemstack) {
@@ -950,73 +950,122 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
    }
 
-   public void onPlayerTickPost(EntityPlayer player) {
-      if(player == super.mc.thePlayer && this.suppressedDismountKey) {
-         KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(),
-               MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak));
-         this.suppressedDismountKey = false;
+   /**
+    * Updates the one authoritative hold state from the physical binding. The core transformer
+    * calls this directly after vanilla polls movement input, so event ordering cannot expose
+    * Sneak to vanilla before this gate runs.
+    *
+    * @return true when vanilla must not observe Sneak for the current MCHeli mount
+    */
+   public boolean updateDismountHoldFromPhysicalInput() {
+      if(super.mc.thePlayer == null || super.mc.theWorld == null) {
+         this.resetDismountHoldState("missing player or world");
+         return false;
       }
-   }
 
-   private void updateDismountHoldState() {
       EntityClientPlayerMP player = super.mc.thePlayer;
       Entity mount = player.ridingEntity;
-      boolean mcheliMount = mount instanceof MCH_EntityBaseVehicle || mount instanceof MCH_EntitySeat;
+      MCH_EntityBaseVehicle parent = this.getDismountParent(mount);
+      int seatId = mount instanceof MCH_EntitySeat ? ((MCH_EntitySeat)mount).seatID : 0;
       boolean contextChanged = player != this.dismountPlayer || player.worldObj != this.dismountWorld
-            || player.sendQueue != this.dismountConnection || mount != this.dismountMount;
+            || player.sendQueue != this.dismountConnection || mount != this.dismountMount
+            || parent != this.dismountParent || seatId != this.dismountSeatId;
 
       if(contextChanged) {
-         this.resetDismountHoldState();
+         this.resetDismountHoldState("mount context changed");
          this.dismountPlayer = player;
          this.dismountWorld = player.worldObj;
          this.dismountConnection = player.sendQueue;
          this.dismountMount = mount;
+         this.dismountParent = parent;
+         this.dismountSeatId = seatId;
       }
 
       boolean pressed = MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak);
-      if(!mcheliMount || super.mc.currentScreen != null || !pressed) {
-         this.dismountHoldStartNanos = -1L;
-         this.dismountRequestPending = false;
-         this.dismountHoldTriggered = false;
-      } else if(this.dismountHoldStartNanos < 0L) {
-         this.dismountHoldStartNanos = System.nanoTime();
-      } else if(!this.dismountHoldTriggered
-            && System.nanoTime() - this.dismountHoldStartNanos >= DISMOUNT_HOLD_NANOS) {
-         this.dismountRequestPending = true;
-         this.dismountHoldTriggered = true;
+      String invalidReason = this.getDismountInvalidReason(player, mount, parent, pressed);
+      if(invalidReason != null) {
+         this.resetDismountHoldState(invalidReason);
+         return false;
       }
 
-      if(this.isHoldingMCHeliDismount()) {
-         KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(), false);
-         player.movementInput.sneak = false;
-         this.suppressedDismountKey = true;
+      long now = System.nanoTime();
+      if(this.dismountHoldState == DismountHoldState.IDLE) {
+         this.dismountHoldStartNanos = now;
+         this.dismountHoldState = DismountHoldState.HOLDING;
+         this.logDismountState("Hold started", null, 0L);
+      } else if(this.dismountHoldState == DismountHoldState.HOLDING
+            && now - this.dismountHoldStartNanos >= DISMOUNT_HOLD_NANOS) {
+         this.dismountHoldState = DismountHoldState.PENDING;
+         this.logDismountState("Hold completed", null, now - this.dismountHoldStartNanos);
+         this.logDismountState("Request queued", null, now - this.dismountHoldStartNanos);
       }
+      return true;
    }
 
-   private boolean isHoldingMCHeliDismount() {
-      return this.dismountMount != null && this.dismountHoldStartNanos >= 0L
-            && !this.dismountHoldTriggered;
+   private void updateDismountHoldState() {
+      this.updateDismountHoldFromPhysicalInput();
    }
 
-   private void resetDismountHoldState() {
-      if(this.suppressedDismountKey) {
-         KeyBinding.setKeyBindState(super.mc.gameSettings.keyBindSneak.getKeyCode(),
-               MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak));
+   private MCH_EntityBaseVehicle getDismountParent(Entity mount) {
+      if(mount instanceof MCH_EntityBaseVehicle) {
+         return (MCH_EntityBaseVehicle)mount;
       }
+      return mount instanceof MCH_EntitySeat ? ((MCH_EntitySeat)mount).getParent() : null;
+   }
+
+   private String getDismountInvalidReason(EntityClientPlayerMP player, Entity mount,
+         MCH_EntityBaseVehicle parent, boolean pressed) {
+      if(!pressed) {
+         return "physical Sneak released";
+      }
+      if(player.isDead) {
+         return "player died";
+      }
+      if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
+         return "replay owns player control";
+      }
+      if(super.mc.currentScreen != null) {
+         return "blocking GUI opened";
+      }
+      if(!(mount instanceof MCH_EntityBaseVehicle) && !(mount instanceof MCH_EntitySeat)) {
+         return "not riding an MCHeli mount";
+      }
+      if(mount.isDead) {
+         return "mount became invalid";
+      }
+      if(parent == null || parent.isDead || parent.isDestroyed()) {
+         return "parent vehicle became invalid";
+      }
+      if(mount instanceof MCH_EntitySeat && ((MCH_EntitySeat)mount).getParent() != parent) {
+         return "seat parent changed";
+      }
+      return null;
+   }
+
+   private void resetDismountHoldState(String reason) {
+      if(this.dismountHoldState != DismountHoldState.IDLE) {
+         this.logDismountState("Hold reset", reason, this.getDismountElapsedNanos());
+      }
+      this.dismountHoldState = DismountHoldState.IDLE;
       this.dismountHoldStartNanos = -1L;
-      this.dismountRequestPending = false;
-      this.dismountHoldTriggered = false;
-      this.suppressedDismountKey = false;
       this.dismountMount = null;
+      this.dismountParent = null;
+      this.dismountSeatId = -1;
       this.dismountPlayer = null;
       this.dismountWorld = null;
       this.dismountConnection = null;
    }
 
+   private void resetDismountHoldState() {
+      this.resetDismountHoldState("client context cleared");
+   }
+
    public boolean consumeDismountRequest(EntityPlayer player) {
       if(player == this.dismountPlayer && player.ridingEntity == this.dismountMount
-            && this.dismountRequestPending) {
-         this.dismountRequestPending = false;
+            && this.getDismountParent(player.ridingEntity) == this.dismountParent
+            && this.dismountHoldState == DismountHoldState.PENDING) {
+         this.dismountHoldState = DismountHoldState.CONSUMED_AWAIT_RELEASE;
+         this.logDismountState("Request consumed", null, this.getDismountElapsedNanos());
          return true;
       }
       return false;
@@ -1024,8 +1073,8 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
    public int getDismountHoldRemainingSeconds(EntityPlayer player) {
       if(player == null || player != this.dismountPlayer || player != super.mc.thePlayer
-            || player.ridingEntity != this.dismountMount || this.dismountHoldStartNanos < 0L
-            || this.dismountHoldTriggered || super.mc.currentScreen != null
+            || player.ridingEntity != this.dismountMount || this.dismountHoldState != DismountHoldState.HOLDING
+            || super.mc.currentScreen != null
             || !MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak)) {
          return 3;
       }
@@ -1033,6 +1082,35 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       long remainingNanos = DISMOUNT_HOLD_NANOS - (System.nanoTime() - this.dismountHoldStartNanos);
       int seconds = (int)Math.ceil((double)remainingNanos / 1000000000.0D);
       return Math.max(1, Math.min(3, seconds));
+   }
+
+   public void populateDismountContext(MCH_PacketPlayerControlBase packet) {
+      packet.dismountMountEntityId = this.dismountMount != null ? this.dismountMount.getEntityId() : -1;
+      packet.dismountParentEntityId = this.dismountParent != null ? this.dismountParent.getEntityId() : -1;
+      packet.dismountSeatId = this.dismountSeatId;
+      this.logDismountState("Packet sent", null, this.getDismountElapsedNanos());
+   }
+
+   public void populateDismountContext(MCH_PacketSeatPlayerControl packet) {
+      packet.dismountMountEntityId = this.dismountMount != null ? this.dismountMount.getEntityId() : -1;
+      packet.dismountParentEntityId = this.dismountParent != null ? this.dismountParent.getEntityId() : -1;
+      packet.dismountSeatId = this.dismountSeatId;
+      this.logDismountState("Packet sent", null, this.getDismountElapsedNanos());
+   }
+
+   private long getDismountElapsedNanos() {
+      return this.dismountHoldStartNanos < 0L ? 0L : System.nanoTime() - this.dismountHoldStartNanos;
+   }
+
+   private void logDismountState(String action, String reason, long elapsedNanos) {
+      if(!MCH_Config.EnableMCHLibDebugLog.prmBool) {
+         return;
+      }
+      MCH_Lib.DbgLog(this.dismountWorld,
+            "[MCH-DISMOUNT] action=%s player=%s mountId=%d parentId=%d seatId=%d elapsedMs=%d reason=%s",
+            new Object[]{action, this.dismountPlayer, Integer.valueOf(this.dismountMount != null ? this.dismountMount.getEntityId() : -1),
+                  Integer.valueOf(this.dismountParent != null ? this.dismountParent.getEntityId() : -1),
+                  Integer.valueOf(this.dismountSeatId), Long.valueOf(elapsedNanos / 1000000L), reason != null ? reason : "none"});
    }
 
    public void onRenderTickPost(float partialTicks) {

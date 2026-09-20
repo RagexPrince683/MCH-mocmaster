@@ -83,6 +83,7 @@ public class MCH_ClientSeatTickHandler extends MCH_ClientTickHandlerBase {
       boolean send = false;
       if(MCH_ClientCommonTickHandler.instance.consumeDismountRequest(player)) {
          pc.isUnmount = true;
+         MCH_ClientCommonTickHandler.instance.populateDismountContext(pc);
          send = true;
       }
       if(this.KeyFreeLook.isKeyDown() && ac.canSwitchGunnerFreeLook(player)) {

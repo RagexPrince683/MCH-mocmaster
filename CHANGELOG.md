@@ -1,3 +1,9 @@
+# Fix Three-Second MCHeli Dismount Hold (#673)
+
+- Replaced tick/event-order-dependent Sneak mutation with one monotonic, physical-input hold state machine for direct vehicle and seat riders.
+- Added a narrow movement-input transformer that keeps incomplete MCHeli dismount holds out of vanilla's server Sneak state, even when other mods reorder client tick handlers.
+- Added mount-context IDs to normal dismount requests, server-side stale-request rejection, and focused lifecycle diagnostics behind the existing MCHeli debug option.
+
 # Fix Drafting Table Crawler Track Preview Crash (PR pending)
 
 - Fixed vehicle previews with crawler tracks crashing when the drafting table rendered without a live vehicle entity.
