@@ -146,3 +146,4 @@ BoundingBox = 0.0, 1.7, -0.8, 2.6, 0.1
 
 ;vietnam era rkt bullshit meme
 AddRecipe = "ABC", "DEE", "EF ", A, mcheli:lightchassis, B, mcheli:cannon1, C, mcheli:engine1, D, mcheli:tanktracks, E, mcheli:rocket2, F, mcheli:electronics
+TechYear = 1956

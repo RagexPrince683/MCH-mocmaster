@@ -172,3 +172,4 @@ Unmountposition = -0.528,  1.594,  -0.9981
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; A-6 Intruder.
+TechYear = 1963

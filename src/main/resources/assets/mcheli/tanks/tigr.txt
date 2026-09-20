@@ -115,3 +115,4 @@ AddRecipe = "AB ", "   ", "   ", A, mcheli:tigr-a, B, mcheli:wrench
 AddRecipe = "AB ", "   ", "   ", A, mcheli:tigr-k, B, mcheli:wrench
 
 AddRecipe = "AB ", "   ", "   ", A, mcheli:tigr-m, B, mcheli:wrench
+TechYear = 2006

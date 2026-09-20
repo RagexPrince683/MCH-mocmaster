@@ -62,3 +62,4 @@ BoundingBox =  0.0, -0.15, 0.0,  2.8, 0.1
 
 BoundingBox =  0.0, 2.5, 0.0,  1.25, 4.6
 
+TechYear = 2016

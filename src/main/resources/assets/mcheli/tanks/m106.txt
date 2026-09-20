@@ -153,3 +153,4 @@ light tracked tank/apc (mortar) (modern no composite)
 AddRecipe = "ABC", "D F", "   ", A, mcheli:lightchassis, B, mcheli:cannon2, C, mcheli:engine1, D, mcheli:tanktracks, F, mcheli:electronics
 
 unmountposition = 0.84, 1.37,  1.26
+TechYear = 1964

@@ -158,3 +158,4 @@ unmountposition = 0.00,  1.50, 0.00
 
 ;med tracked cannon arty (m109base)
 AddRecipe = "ABC", "DEF", "   ", A, mcheli:mediumchassis, B, mcheli:cannon3, C, mcheli:engine3, D, mcheli:tanktracks, E, mcheli:lap, F, mcheli:fcs3
+TechYear = 1997

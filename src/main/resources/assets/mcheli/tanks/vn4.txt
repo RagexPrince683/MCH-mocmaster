@@ -151,3 +151,4 @@ Regeneration = false
 AddRecipe = "ABC", "DDD", "E  ", A, mcheli:lightchassis, B, mcheli:wheel4, C, mcheli:engine1, D, mcheli:lap, E, mcheli:electronics
 
 unmountposition = 0.0, 1.50,  -2.8044
+TechYear = 2009

@@ -100,3 +100,4 @@ AddPartWeapon = LAkord, false, true, false,  0.00, 1.6047, -1.19, 0
 AddPartWeaponChild = false, true, 0.0, 2.0787, -0.4154
 
 AddPartSteeringWheel =  0.5755, 0.7505, 0.4594,  0, 0.3625,-1,  110
+TechYear = 2022

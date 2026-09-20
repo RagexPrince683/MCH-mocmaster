@@ -139,3 +139,4 @@ UnmountPosition = -0.0114, 1.5456, 0.2101
 
 ;armored armed 6x6
 AddRecipe = "ABC", "DE ", "   ", A, mcheli:lightchassis, B, mcheli:wheel6, C, mcheli:engine2, D, mcheli:lap, E, mcheli:cannon1
+TechYear = 1943

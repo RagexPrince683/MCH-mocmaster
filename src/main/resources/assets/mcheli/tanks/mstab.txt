@@ -109,3 +109,4 @@ StepHeight = 0.0
 
 ;advanced arty turret (less)
 AddRecipe = "   ", "DEF", "GG ", D, mcheli:electronics, E, mcheli:lap, F, mcheli:advancedmechanicparts, G, mcheli:cannon3
+TechYear = 1987

@@ -163,3 +163,4 @@ ArmorMinDamage = 35
 ArmorDamageFactor = 2.32
 
 WeightedCenterZ = 0.6
+TechYear = 1985

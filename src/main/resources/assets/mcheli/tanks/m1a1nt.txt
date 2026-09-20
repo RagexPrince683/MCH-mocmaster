@@ -188,3 +188,4 @@ AddRecipe = "ABC", "D  ", "   ", A, mcheli:cannon3, B, mcheli:m1abrams, C, mchel
 ; og abrams
 ;AddRecipe = "ABC", "DGF", "E  ", A, mcheli:mediumchassis, B, mcheli:cannon2, C, mcheli:engine3, D, mcheli:tanktracks, F, mcheli:electronics, G, mcheli:composite2, E, mcheli:fcs
 
+TechYear = 1985

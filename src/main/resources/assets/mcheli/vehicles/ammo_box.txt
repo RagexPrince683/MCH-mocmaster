@@ -28,3 +28,4 @@ AddSeat = 0.00,  1.0, 0.00
 
 ;Creative only
 ;AddRecipe = "XXX",  "XIX",  "XXX",  X, iron_block, I, iron_ingot
+TechYear = 2000

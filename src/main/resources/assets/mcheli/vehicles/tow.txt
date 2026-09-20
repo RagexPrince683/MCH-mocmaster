@@ -49,3 +49,4 @@ AddRecipe = "BBC", "DCC", "   ", B, mcheli:lap, C, mcheli:electronics, D, mcheli
 Boundingbox = 0.00,  0.95,  0.00,  0.7, 1.0
 
 ArmorMinDamage = 10
+TechYear = 1970

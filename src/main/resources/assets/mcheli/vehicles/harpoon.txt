@@ -42,3 +42,4 @@ AddRecipe = "BBC", "DCC", "   ", B, mcheli:map, C, mcheli:electronics, D, mcheli
 unmountposition = 0.0, 1.5, 0.0
 
 ArmorMinDamage = 10
+TechYear = 1977

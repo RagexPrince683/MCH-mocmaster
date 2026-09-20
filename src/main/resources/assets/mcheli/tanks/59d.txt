@@ -195,3 +195,4 @@ AddRecipe = "ABC", "   ", "   ", A, mcheli:t55, B, mcheli:fcs, C, mcheli:composi
 
 ;EntityWidth  = 0.8
 ;EntityHeight = 0.8
+TechYear = 1995

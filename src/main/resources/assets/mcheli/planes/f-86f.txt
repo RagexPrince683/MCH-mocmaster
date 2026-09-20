@@ -170,3 +170,4 @@ BoundingBox = 0.0, 3.94, -7.75, 0.3, 1.2
 ;early modern light plane (late jet), AOW3 style (justcan)
 AddRecipe = "ABC", "DEG", "   ", A, mcheli:airframe, B, mcheli:basicmechanicparts, C, mcheli:engine1, D, mcheli:wheelair, E, mcheli:cannon1, G, mcheli:electronics
 DamageFactor = 0.8
+TechYear = 1952

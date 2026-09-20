@@ -186,3 +186,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Tornado IDS.
+TechYear = 1979

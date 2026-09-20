@@ -230,3 +230,4 @@ enableback = true
 DamageFactor = 0.2
 
 ; RealismSource = MCHO plane scripted pass; Su-25T Frogfoot.
+TechYear = 1990

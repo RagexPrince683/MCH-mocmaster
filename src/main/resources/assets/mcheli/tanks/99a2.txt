@@ -161,3 +161,4 @@ UnmountPosition = 0.00,  2.00,  0.00
 
 EntityWidth  = 0.8
 EntityHeight = 0.8
+TechYear = 2011

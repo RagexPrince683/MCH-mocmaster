@@ -71,3 +71,4 @@ BoundingBox =  0.0, 1.66, 0.0,  0.9779, 0.651, 1.5
 AddRecipe = "ACC", " C ", " C ", A, mcheli:cannon2, C, mcheli:lap
 
 ArmorMinDamage = 10
+TechYear = 1933

@@ -106,3 +106,4 @@ AddPartCanopy =  0.9161, 1.0659,  0.7560,  0,1,0, -65
 AddPartCanopy =  0.9161, 1.0659,  0.7560,  0,1,0, -65
 
 AddPartCanopy =  0, 0, 0, 0, 0, 0, 0
+TechYear = 1990

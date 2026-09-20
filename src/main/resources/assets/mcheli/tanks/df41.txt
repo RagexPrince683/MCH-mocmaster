@@ -142,3 +142,4 @@ unmountposition = 2.224,  1.8, -0.39
 ;rocket transport large armed 8x8
 AddRecipe = "ABC", "DFE", "EEA", A, mcheli:lightchassis, B, mcheli:wheel8, C, mcheli:engine2, D, mcheli:electronics, E, mcheli:rocket3, F, mcheli:fcs3
 ;it's either a v6 or a v8 idk idrc fucking china and their secrets was hard enough finding a fucking sound for this shit
+TechYear = 2019

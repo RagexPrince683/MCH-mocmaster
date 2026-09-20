@@ -98,3 +98,4 @@ AddWeapon = mg7_7mmdr,  -0.029,  -0.127,  0.228,   0.0,  0.0,   true, 1, 0, -90,
 BoundingBox =  -0.03, 0.36, 0.00, 1.0, 1.0
 
 ThrottleUpDown = 0.8
+TechYear = 2014

@@ -48,3 +48,4 @@ AddTurretWeapon = h2hb,  -0.16, 0.99, 0,   0.0, 0, true, 1, 0, -360,360, -80,25
 BoundingBox =  0.00, 0.40,  0.00,  0.5, 1.5
 
 ArmorMinDamage = 10
+TechYear = 1943

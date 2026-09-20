@@ -256,3 +256,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Tupolev Tu-4.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=heavy_bomber_prop
+TechYear = 1949

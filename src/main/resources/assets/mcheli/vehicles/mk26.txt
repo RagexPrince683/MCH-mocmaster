@@ -47,3 +47,4 @@ BoundingBox =  0.0, 0.5, -0.4220,  0.75, 1.8
 unmountposition = 0.00, 1.5, -0.0
 ;basic aa launcher
 AddRecipe = "BBC", "DCC", "   ", B, mcheli:lap, C, mcheli:electronics, D, mcheli:fcs
+TechYear = 1976

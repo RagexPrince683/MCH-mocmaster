@@ -109,3 +109,4 @@ unmountposition = -0.50,  1.50,  0.10
 
 ThrottleUpDown = 0.5
 DamageFactor = 0.8
+TechYear = 1966

@@ -162,3 +162,4 @@ UnmountPosition = 0.00,  1.50, 1.55
 ;BoundingBox =  0.0, 3.0, -2.0,   2.0, 1.0,  1.25
 ;BoundingBox = -0.9, 1.2, -4.5,   2.4, 1.6,  1.25
 ;BoundingBox =  0.9, 1.2, -4.5,   2.4, 1.6,  1.25
+TechYear = 1992

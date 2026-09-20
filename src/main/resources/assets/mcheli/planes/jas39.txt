@@ -178,3 +178,4 @@ UnmountPosition = 0.00, 1.50, -0.60
 AddRecipe = "ABC", "DE ", "GG ", A, mcheli:airframe2, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:wheelair, E, mcheli:cannon1, G, mcheli:electronics 
 enableback = true
 DamageFactor = 0.8
+TechYear = 1997

@@ -131,3 +131,4 @@ ArmorDamageFactor = 2.32
 UnmountPosition = -0.6105, 1.5, -0.007953
 
 WeightedCenterZ = 1.0
+TechYear = 2003

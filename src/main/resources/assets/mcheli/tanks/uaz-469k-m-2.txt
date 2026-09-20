@@ -111,3 +111,4 @@ AddRecipe = "ABC", "D  ", "   ", A, mcheli:lightchassis, B, mcheli:wheel4, C, mc
 ArmorDamageFactor = 1
 
 ArmorMinDamage = 2
+TechYear = 1972

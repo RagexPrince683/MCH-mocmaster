@@ -176,3 +176,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; F/A-18 carrier fighter.
+TechYear = 2001

@@ -171,3 +171,4 @@ unmountposition = 0.00,  2.5,  1.252
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; A-7 Corsair II.
+TechYear = 1967

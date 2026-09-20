@@ -497,3 +497,4 @@ enableback = true
 
 ;modern carrier
 AddRecipe = "AAC", "DEE", "BAD", A, mcheli:shiphull3, B, mcheli:shipnuclearreactormultipart, C, mcheli:engine3, D, mcheli:fcs2, E, mcheli:cannon2
+TechYear = 1975

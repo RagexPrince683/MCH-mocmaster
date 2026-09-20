@@ -326,3 +326,4 @@ RotorSpeed = 2000.0
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; C-5 Galaxy.
+TechYear = 1970

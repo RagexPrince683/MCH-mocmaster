@@ -155,3 +155,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; A6M2 Zero.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=turn_fighter
+TechYear = 1940

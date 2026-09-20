@@ -149,3 +149,4 @@ AddRecipe = "ACB", "BDD", "   ", A, mcheli:shiphull1, C, mcheli:engine1, B, mche
 
 enableback = true
 
+TechYear = 1942

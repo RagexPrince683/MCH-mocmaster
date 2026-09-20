@@ -188,3 +188,4 @@ AddCrawlerTrack = true, 0.38,-1.6778, 1.0870/3.2560, 0.9452/3.6742, 0.6170/3.896
 
 ;heavier tracked tank ww2
 AddRecipe = "ABC", "DEE", "EAE", A, mcheli:heavychassis, B, mcheli:cannon2, C, mcheli:engine3, D, mcheli:tanktracks, E, mcheli:hap
+TechYear = 1944

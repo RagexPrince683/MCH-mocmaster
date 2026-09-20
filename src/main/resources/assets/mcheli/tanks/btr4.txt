@@ -173,3 +173,4 @@ AddRecipe = "ABC", "D  ", "   ", A, mcheli:btr3, B, mcheli:fcs3, C, mcheli:elect
 ;;AddRecipe = "ABC", "DEF", "G  ", A, mcheli:lightchassis, B, mcheli:wheel8, C, mcheli:engine1, D, mcheli:fcs2, E, mcheli:lap, F, mcheli:advancedmechanicparts, G, mcheli:cannon2
 ;;AddRecipe = "ABC", "D  ", "   ", A, mcheli:fcs2, B, mcheli:advancedmechanicparts, C, mcheli:cannon1, D, mcheli:btr82
 
+TechYear = 2012

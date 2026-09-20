@@ -110,3 +110,4 @@ AddPartCanopy =  0.8432, 1.5253,  1.6896,  0,1,0, -60
 
 
 AddPartSteeringWheel =  0.4010, 1.4055, 1.4802,  0, 0.488, -1,  130
+TechYear = 1930

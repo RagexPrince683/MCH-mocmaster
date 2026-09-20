@@ -205,3 +205,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; E-767/Boeing 767 AWACS.
+TechYear = 1998

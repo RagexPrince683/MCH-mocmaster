@@ -195,3 +195,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Panavia Tornado GR.4.
+TechYear = 1998

@@ -231,3 +231,4 @@ BoundingBox = 0.0, 4.5, 45.23, 1, 6
 
 ;modern submarine
 AddRecipe = "AAC", "AAE", "BAD", A, mcheli:shiphull3, B, mcheli:shipnuclearreactormultipart, C, mcheli:engine3, D, mcheli:fcs, E, mcheli:cannon3
+TechYear = 1981

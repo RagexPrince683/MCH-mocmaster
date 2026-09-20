@@ -184,3 +184,4 @@ Regeneration = false
 ;ArmorMaxDamage = 50
 
 WeightedCenterZ = 0.6
+TechYear = 1985

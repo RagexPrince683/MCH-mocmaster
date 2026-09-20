@@ -94,3 +94,4 @@ ArmorMinDamage = 8
 
 ;basic turret
 AddRecipe = "   ", "DEF", "GGG", D, mcheli:electronics, E, mcheli:lap, F, mcheli:advancedmechanicparts, G, mcheli:cannon2
+TechYear = 1961

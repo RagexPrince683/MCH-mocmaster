@@ -237,3 +237,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; MV-22 Osprey tiltrotor; handled as VTOL airplane.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=tiltrotor
+TechYear = 2007

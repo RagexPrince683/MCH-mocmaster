@@ -118,3 +118,4 @@ InventorySize = 9
 ;basic civ car
 AddRecipe = "ABC", "D  ", "   ", A, mcheli:lightchassis, B, mcheli:wheel4, C, mcheli:engine1, D, glass_pane
 
+TechYear = 1980

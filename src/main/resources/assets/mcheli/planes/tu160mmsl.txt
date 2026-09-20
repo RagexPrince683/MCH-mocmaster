@@ -199,3 +199,4 @@ AddRecipe = "ABC", "   ", "   ", A, mcheli:tu160m, B, mcheli:fcs3, C, mcheli:air
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Tu-160M missile loadout.
+TechYear = 2022

@@ -210,3 +210,4 @@ BoundingBox = 0.0, 6.90, -13.06, 0.5, 2.0
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Su-24.
+TechYear = 1974

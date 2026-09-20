@@ -214,3 +214,4 @@ BoundingBox = 0.0, 1.4, 3.2, 1.6, 1.0
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Lockheed SR-71 Blackbird; high-speed low-G reconnaissance aircraft.
+TechYear = 1966

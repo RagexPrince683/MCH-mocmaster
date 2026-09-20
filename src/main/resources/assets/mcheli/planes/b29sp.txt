@@ -236,3 +236,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; B-29 Silverplate Program.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=heavy_bomber_prop
+TechYear = 1945

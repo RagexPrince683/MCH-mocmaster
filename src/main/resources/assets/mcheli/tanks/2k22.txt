@@ -204,3 +204,4 @@ DefaultFreeLook = true
 
 ;light tracked spaa (modern)
 AddRecipe = "ABC", "DEF", "   ", A, mcheli:lightchassis, B, mcheli:rocket, C, mcheli:engine3, D, mcheli:tanktracks, E, mcheli:fcs3, F, mcheli:electronics
+TechYear = 1982

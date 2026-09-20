@@ -82,3 +82,4 @@ BoundingBox =  0.0, 1.0, 0.0,  1.0, 1.0
 AddRecipe = "   ", "DEF", "GG ", D, mcheli:electronics, E, mcheli:lap, F, mcheli:advancedmechanicparts, G, mcheli:cannon3
 
 UnmountPosition = 1.06,  1.54, -0.41
+TechYear = 1989

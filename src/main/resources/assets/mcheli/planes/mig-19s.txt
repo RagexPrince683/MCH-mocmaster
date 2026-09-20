@@ -170,3 +170,4 @@ BoundingBox = 0.0, 3.9, -10.43, 0.5, 1.0
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; MiG-19S Farmer.
+TechYear = 1955

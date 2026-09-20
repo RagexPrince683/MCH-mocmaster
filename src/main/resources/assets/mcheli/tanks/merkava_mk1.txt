@@ -186,3 +186,4 @@ AddSeat = -0.75, 0.45, -1.92
 
 
 unmountposition = 0.00,  1.50,  0.25
+TechYear = 1979

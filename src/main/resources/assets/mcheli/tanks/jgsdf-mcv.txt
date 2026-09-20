@@ -149,3 +149,4 @@ BoundingBox = 0.0, 1.0, 1.7887, 2.8, 1.0, 0.05
 BoundingBox = 0.0, 1.0, 3.1887, 2.6, 0.6, 0.12
 
 unmountposition = 0.0, 1.50, 0.1137
+TechYear = 2016

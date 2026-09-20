@@ -308,3 +308,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Airbus A400M Atlas.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=heavy_prop_transport
+TechYear = 2013

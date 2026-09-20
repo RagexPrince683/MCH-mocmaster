@@ -137,3 +137,4 @@ UnmountPosition = 0.00, 1.68,  0.00
 
 ;IFV armed light 8x8
 AddRecipe = "ABC", "DEF", "   ", A, mcheli:lightchassis, B, mcheli:wheel8, C, mcheli:engine1, D, mcheli:electronics, E, mcheli:lap, F, mcheli:cannon1
+TechYear = 1986

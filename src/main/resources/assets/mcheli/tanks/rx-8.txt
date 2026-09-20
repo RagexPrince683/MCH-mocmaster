@@ -111,3 +111,4 @@ AddWeapon = L_Claxon,    0.00, 0.00, 0.00,  0.0,0.0
 AddWeapon = drift, 1.2642, 0.0, -1.7811,  0.0,0.0
 AddWeapon = drift,   -1.2642, 0.0, -1.7811,  0.0,0.0
 
+TechYear = 2003

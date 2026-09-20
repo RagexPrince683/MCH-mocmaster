@@ -151,3 +151,4 @@ unmountposition = -0.62, 1.5, 1.0
 
 ;armored armed half track
 AddRecipe = "ABC", "BED", "   ", A, mcheli:lightchassis, B, mcheli:wheel, C, mcheli:engine1, E, mcheli:rocket, D, mcheli:tanktracks
+TechYear = 1943

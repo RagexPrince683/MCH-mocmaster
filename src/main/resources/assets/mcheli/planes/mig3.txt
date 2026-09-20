@@ -145,3 +145,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Mikoyan-Gurevich MiG-3-15.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=energy_fighter
+TechYear = 1941

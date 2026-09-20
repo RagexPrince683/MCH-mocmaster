@@ -53,3 +53,4 @@ unmountposition = 0.0, 1.5, 0.0
 AddRecipe = "ABC", "DCC", "   ", A, mcheli:cannon1, B, mcheli:lap, C, mcheli:electronics, D, mcheli:fcs3
 
 BoundingBox =  0.0, 1, 0.0,  1.8, 1.8
+TechYear = 1989

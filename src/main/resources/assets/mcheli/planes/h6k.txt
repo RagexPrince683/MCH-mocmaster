@@ -223,3 +223,4 @@ DamageFactor = 0.8
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; H6K flying boat.
+TechYear = 2011

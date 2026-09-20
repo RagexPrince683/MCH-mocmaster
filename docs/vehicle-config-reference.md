@@ -315,3 +315,9 @@ The reference configs now populate `MaximumExternalPayloadCapacity = {lbs}` on a
 Use `TechYear = <year>` for the represented vehicle or major variant's real introduction/service year. The configured year ranges determine its tier. `TechTier = <0.0..5.0>` is an optional half-step override intended for fictional equipment, prototypes, and special cases; when both fields exist, the override is authoritative and the year remains informational.
 
 Both keys are optional. Omitting them leaves old addon content unrestricted for compatibility.
+
+All vehicle definitions bundled with MC Heli Overdrive carry an explicit `TechYear`, including
+helicopters, fixed-wing aircraft, UAVs, ships, submarines, armored and civilian ground vehicles,
+artillery, static launchers, and support objects represented through a vehicle manager. Alternate
+loadouts share their platform year unless the configuration depicts a later variant or
+modernization. Third-party addons remain free to omit both keys and use the compatibility fallback.

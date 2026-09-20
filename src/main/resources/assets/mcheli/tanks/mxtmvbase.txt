@@ -128,3 +128,4 @@ AddRecipe = "AB ", "   ", "   ", A, mcheli:mxtmvrws, B, mcheli:wrench
 AddRecipe = "AB ", "   ", "   ", A, mcheli:mxtmv, B, mcheli:wrench
 
 AddRecipe = "AB ", "   ", "   ", A, mcheli:mxtmvm240, B, mcheli:wrench
+TechYear = 2009

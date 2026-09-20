@@ -138,3 +138,4 @@ Regeneration = false
 AddRecipe = "ABC", "DDD", "GEF", A, mcheli:lightchassis, B, mcheli:wheel4, C, mcheli:engine1, D, mcheli:map, G, mcheli:cannon1, E, mcheli:electronics, F, mcheli:basicmechanicparts
 
 AddRecipe = "ABC", "D  ", "   ", A, mcheli:mxtmvbase, B, mcheli:electronics, C, mcheli:cannon1, D, mcheli:basicmechanicparts
+TechYear = 2009

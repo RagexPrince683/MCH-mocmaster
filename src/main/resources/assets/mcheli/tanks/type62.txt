@@ -141,3 +141,4 @@ FuelConsumption = 1.8
 StepHeight = 1.8
 
 
+TechYear = 1963

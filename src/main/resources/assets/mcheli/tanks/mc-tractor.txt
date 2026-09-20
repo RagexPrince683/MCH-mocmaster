@@ -84,3 +84,4 @@ ArmorDamageFactor = 1.0
 DamageFactor = 1.0
 
 PartWheelRot = 20
+TechYear = 1940

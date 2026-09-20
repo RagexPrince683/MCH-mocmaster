@@ -167,3 +167,4 @@ Boundingbox = 0.0, 1.34, -1.5, 2.0, 1.0, 1
 AddRecipe = "ABC", "D  ", "   ", A, mcheli:mediumchassis, B, mcheli:cannon2, C, mcheli:engine3, D, mcheli:tanktracks
 
 StepHeight = 1.5
+TechYear = 1944

@@ -193,3 +193,4 @@ EntityHeight = 0.8
 
 ;heavy MEME (APS) IFV tracked IFV (modern)
 AddRecipe = "ABC", "DGF", "EHG", A, mcheli:mediumchassis, B, mcheli:cannon2, C, mcheli:engine3, D, mcheli:tanktracks, F, mcheli:electronics, G, mcheli:composite3, E, mcheli:complexmechanicparts, H, mcheli:fcs3
+TechYear = 2015

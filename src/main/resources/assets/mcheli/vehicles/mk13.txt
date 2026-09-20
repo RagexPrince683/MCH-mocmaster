@@ -40,3 +40,4 @@ AddChildPart = true,false,true,  3,  0.00, 2.25, 1.00,
 AddRecipe = "BBC", "DC ", "   ", B, mcheli:lap, C, mcheli:electronics, D, mcheli:fcs
 
 BoundingBox =  0.0, 1.5, 1.52,  2.0, 2.6
+TechYear = 1960

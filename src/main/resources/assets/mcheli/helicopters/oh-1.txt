@@ -129,3 +129,4 @@ DamageFactor = 0.8
 ThrottleUpDown = 0.5
 
 DamageFactor = 0.8
+TechYear = 2000

@@ -132,3 +132,4 @@ AddRecipe = "ABC", "DFF", "E  ", A, mcheli:lightchassis, B, mcheli:cannon2, C, m
 AddRecipe = "ABC", "B  ", "   ", A, mcheli:m113unarmed, B, mcheli:electronics, C, mcheli:cannon1
 
 unmountposition = 0.00,  1.50,  0.00
+TechYear = 1968

@@ -182,3 +182,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; J-15 Fly Shark.
+TechYear = 2013

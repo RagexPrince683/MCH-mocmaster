@@ -193,3 +193,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; B-2A Spirit conventional payload.
+TechYear = 2027

@@ -71,3 +71,4 @@ AddRecipe = "ABC", "D  ", "   ", A, mcheli:item.ingot_aluminum, B, mcheli:electr
 AddRecipe = "AB ", "   ", "   ", A, mcheli:mavic3, B, mcheli:basicmechanicparts
 
 ThrottleUpDown = 0.8
+TechYear = 2022

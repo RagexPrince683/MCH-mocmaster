@@ -154,3 +154,4 @@ BoundingBox = 0.0, 0.75, -1.75, 2.1, 1.0, 1
 
 ;turret 53
 BoundingBox = 0.0, 1.45, 0.0, 1.7, 1, 0.37
+TechYear = 1953

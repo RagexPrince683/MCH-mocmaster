@@ -206,3 +206,4 @@ AddRecipe = "ABC", "DEH", "GHG", A, mcheli:airframe3, B, mcheli:advancedmechanic
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; KF-21 Boramae; estimated from public class metrics.
+TechYear = 2026

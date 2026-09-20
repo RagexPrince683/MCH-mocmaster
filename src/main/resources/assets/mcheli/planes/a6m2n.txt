@@ -136,3 +136,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; A6M2-N Rufe float fighter.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=light_float_fighter
+TechYear = 1942

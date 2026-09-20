@@ -191,3 +191,4 @@ BoundingBox = -2.2, 1.2, -3.5, 2.4, 0.5
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; F-5E Tiger II.
+TechYear = 1972

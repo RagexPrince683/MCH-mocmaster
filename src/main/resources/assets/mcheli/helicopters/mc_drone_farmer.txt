@@ -89,3 +89,4 @@ AddRecipe = "ABC", "   ", "   ", A, mcheli:item.ingot_aluminum, B, mcheli:fcs, C
 BoundingBox =  -0.03, 0.36, 0.00, 1.0, 1.0
 
 ThrottleUpDown = 0.8
+TechYear = 2013

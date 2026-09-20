@@ -182,3 +182,4 @@ ArmorMinDamage = 20
 unmountposition = 0.00,  1.50, 1.55
 
 Sound = tsixtyfoureng
+TechYear = 2017

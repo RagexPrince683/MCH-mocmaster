@@ -45,3 +45,4 @@ AddRecipe = "BBC", "DCC", "CC ", B, mcheli:lap, C, mcheli:electronics, D, mcheli
 BoundingBox =  0.0, 0.4, 0.0,  1.2, 1.5
 
 BoundingBox =  0.0, 1.44, 0.0,  2.0, 1.25
+TechYear = 1976

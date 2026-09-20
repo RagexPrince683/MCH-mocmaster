@@ -149,3 +149,4 @@ BoundingBox = 0.0, 0.7, -0.17, 2.5, 0.2
 BoundingBox = 0.0, 0.7, -1.50, 2.5, 0.2
 
 BoundingBox = 0.0, 1.2, 2.5, 0.8, 0.8
+TechYear = 1964

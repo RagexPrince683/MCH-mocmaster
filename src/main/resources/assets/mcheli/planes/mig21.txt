@@ -226,3 +226,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; MiG-21 F-13.
+TechYear = 1960

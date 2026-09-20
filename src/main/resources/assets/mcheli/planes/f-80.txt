@@ -152,3 +152,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Lockheed P-80/F-80 Shooting Star.
+TechYear = 1945

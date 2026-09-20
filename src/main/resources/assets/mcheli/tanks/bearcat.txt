@@ -145,3 +145,4 @@ UnmountPosition = 0.0, 1.50, -2.0
 
 ;armored civ 6x6
 AddRecipe = "ABC", "DDF", "   ", A, mcheli:lightchassis, B, mcheli:wheel6, C, mcheli:engine2, D, mcheli:lap, F, glass
+TechYear = 2001

@@ -685,3 +685,15 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
   packaging, reobfuscation, and a bounded development-client bootstrap passed; UniMixins found
   the MC Heli early loader and offered the new mixin. In-world dismount behavior still requires
   gameplay validation.
+
+2026-09-20 10:08 — Complete bundled vehicle technology-year metadata
+
+- Inventoried all 503 bundled vehicle definitions: 59 helicopters, 128 planes, 18 ships, 247 tanks
+  and ground vehicles, and 51 static/deployable vehicle definitions.
+- Added explicit `TechYear` metadata to the 474 previously unclassified definitions. Every bundled
+  definition now has exactly one year/tier declaration, including drones, civilian vehicles,
+  support vehicles, boats, artillery, launchers, and alternate weapon/loadout variants.
+- Corrected the represented T-72A configuration from the original T-72 family's 1973 date to its
+  1979 production-variant introduction. Generic, fictional, improvised, and near-future definitions
+  use consistent approximate years instead of falling through to unrestricted behavior. Static
+  completeness validation passed; in-game tier display and gating remain to be tested.

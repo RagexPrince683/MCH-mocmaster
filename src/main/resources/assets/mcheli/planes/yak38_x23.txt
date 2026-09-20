@@ -182,3 +182,4 @@ RotorSpeed = 2000.0
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Yak-38 with Kh-23M loadout.
+TechYear = 1976

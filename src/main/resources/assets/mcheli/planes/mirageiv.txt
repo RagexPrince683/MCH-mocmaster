@@ -193,3 +193,4 @@ BoundingBox =  0.00, 5.20, -20.5,  0.5, 3.0
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Mirage IV.
+TechYear = 1986

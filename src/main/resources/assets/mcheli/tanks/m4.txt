@@ -193,3 +193,4 @@ AddRecipe = "AB ", "   ", "   ", A, mcheli:m4_calliope, B, mcheli:wrench
 ;AddRecipe = "   ",  " X ",  "   ",  X,mcheli:m4_calliope
 
 ;AddShapelessRecipe = mcheli:m4_calliope,iron_ingot
+TechYear = 1942

@@ -189,3 +189,4 @@ Unmountposition = -0.0,  1.6,  0.2
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; A-4E Skyhawk Early.
+TechYear = 1962

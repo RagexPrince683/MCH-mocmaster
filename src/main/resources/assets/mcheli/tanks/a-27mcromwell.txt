@@ -178,3 +178,4 @@ AddRecipe = "ABC", "DE ", "   ", A, mcheli:mediumchassis, B, mcheli:cannon2, C, 
 unmountposition = 0.00, 1.5957, -0.2821
 
 StepHeight = 1.8
+TechYear = 1944

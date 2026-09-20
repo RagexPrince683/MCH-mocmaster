@@ -223,3 +223,4 @@ unmountposition = -0.0,  1.50, -0.0
 
 ;light tracked tank ww2 late
 AddRecipe = "ABC", "D  ", "   ", A, mcheli:lightchassis, B, mcheli:cannon2, C, mcheli:engine2, D, mcheli:tanktracks
+TechYear = 1944

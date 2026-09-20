@@ -201,3 +201,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; BV-138 C-1 flying boat.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=heavy_prop_transport
+TechYear = 1941

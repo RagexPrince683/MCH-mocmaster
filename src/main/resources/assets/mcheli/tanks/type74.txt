@@ -131,3 +131,4 @@ unmountposition = -0.5,  1.5, -0.33
 
 ;slightly really less modern mbt tracked tank 
 AddRecipe = "ABC", "DGF", "E  ", A, mcheli:mediumchassis, B, mcheli:cannon2, C, mcheli:engine3, D, mcheli:tanktracks, G, mcheli:lap, E, mcheli:advancedmechanicparts, F, mcheli:fcs
+TechYear = 1987

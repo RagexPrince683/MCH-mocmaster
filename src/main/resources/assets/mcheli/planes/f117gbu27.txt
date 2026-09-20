@@ -145,3 +145,4 @@ BoundingBox =  0.00, 1.65, -3.8,  3.0, 0.8, 1.5
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; F-117 Nighthawk GBU-27 loadout.
+TechYear = 1991

@@ -114,3 +114,4 @@ ArmorDamageFactor = 1.0
 unmountposition = 0.41, 2.25, -0.27
 
 ArmorMinDamage = 2
+TechYear = 2009

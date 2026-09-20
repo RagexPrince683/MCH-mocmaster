@@ -86,3 +86,4 @@ BoundingBox = 0.0, 1.77, -8.65, 1.0, 1.0
 
 ThrottleUpDown = 0.5
 DamageFactor = 0.8
+TechYear = 1960

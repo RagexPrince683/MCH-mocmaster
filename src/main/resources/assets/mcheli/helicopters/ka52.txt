@@ -159,3 +159,4 @@ AddRecipe = "ABC", "DEF", "G  ", A, mcheli:airframe3, B, mcheli:heliblade2, C, m
 
 ThrottleUpDown = 0.5
 DamageFactor = 0.3
+TechYear = 2011

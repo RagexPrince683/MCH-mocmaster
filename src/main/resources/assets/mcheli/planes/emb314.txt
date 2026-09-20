@@ -168,3 +168,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; EMB 314 Super Tucano.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=super_tucano
+TechYear = 2003

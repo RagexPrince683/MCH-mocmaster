@@ -151,3 +151,4 @@ BoundingBox = 0.0, 1.2, 0.75, 1.95, 0.1, 0.09
 
 ;light tracked tank ww2 EARLY
 AddRecipe = "ABC", "D  ", "   ", A, mcheli:lightchassis, B, mcheli:cannon1, C, mcheli:engine1, D, mcheli:tanktracks
+TechYear = 1941

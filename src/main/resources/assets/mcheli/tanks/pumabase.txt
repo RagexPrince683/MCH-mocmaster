@@ -172,3 +172,4 @@ Category = IFV
 
 ;light tracked tank/ifv (not bradley family) (heavier composite)
 AddRecipe = "ABC", "DEF", "GHH", A, mcheli:lightchassis, B, mcheli:cannon2, C, mcheli:engine2, D, mcheli:tanktracks, E, mcheli:composite2, F, mcheli:fcs, G, mcheli:advancedmechanicparts, H, mcheli:electronics
+TechYear = 2015

@@ -194,3 +194,4 @@ AddRecipe = "ABC", "   ", "   ", A, mcheli:m4, B, mcheli:cannon3, C, mcheli:wren
 ;AddRecipe = "   ",  " X ",  "   ",  X,mcheli:m4_calliope
 
 ;AddShapelessRecipe = mcheli:m4_calliope,iron_ingot
+TechYear = 1944

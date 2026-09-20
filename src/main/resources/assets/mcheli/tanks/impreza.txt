@@ -117,3 +117,4 @@ InventorySize = 9
 AddRecipe = "ABC", "DE ", "   ", A, mcheli:lightchassis, B, mcheli:wheel4, C, mcheli:engine1, D, mcheli:advancedmechanicparts, E, glass_pane
 
 ArmorMinDamage = 2
+TechYear = 1992

@@ -119,3 +119,4 @@ InventorySize = 9
 AddRecipe = "ABC", "DEF", "   ", A, mcheli:lightchassis, B, mcheli:wheel4, C, mcheli:engine1, D, mcheli:advancedmechanicparts, E, gold_nugget, F, glass_pane
 
 
+TechYear = 1993

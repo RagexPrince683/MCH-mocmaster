@@ -162,3 +162,4 @@ InventorySize = 9
 ;0.1582
 
 ArmorMinDamage = 2
+TechYear = 1970

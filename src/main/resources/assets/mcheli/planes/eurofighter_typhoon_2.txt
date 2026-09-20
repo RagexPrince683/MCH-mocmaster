@@ -202,3 +202,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Eurofighter Typhoon II Storm Shadow loadout.
+TechYear = 2003

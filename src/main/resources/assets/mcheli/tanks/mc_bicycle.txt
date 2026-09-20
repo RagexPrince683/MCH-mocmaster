@@ -95,3 +95,4 @@ DamageFactor = 1.0
 
 
 
+TechYear = 1885

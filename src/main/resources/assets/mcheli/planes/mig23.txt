@@ -175,3 +175,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; MiG-23.
+TechYear = 1982

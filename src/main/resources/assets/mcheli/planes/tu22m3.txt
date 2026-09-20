@@ -205,3 +205,4 @@ AddRecipe = "ABC", "DAC", "E  ", A, mcheli:airframebomb, B, mcheli:advancedmecha
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Tu-22M3 Backfire.
+TechYear = 1983

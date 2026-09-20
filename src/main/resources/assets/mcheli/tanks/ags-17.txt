@@ -110,3 +110,4 @@ ArmorMinDamage = 8
 ;AddPartWeapon = ags17, false, true, false,  0.00, 0.66, -0.10, 0
 
 ;AddPartTurretWeapon = ags17, false, true, false,  0.00, 0.455, -0.152 
+TechYear = 1970

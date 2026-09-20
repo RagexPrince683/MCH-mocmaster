@@ -52,3 +52,4 @@ unmountposition = 0.00, 1.5, -0.0
 AddRecipe = " BC", "BCB", "A A", A, mcheli:cannon3, B, mcheli:map, C, mcheli:hap
 
 ArmorMinDamage = 10
+TechYear = 1908

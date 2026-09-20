@@ -300,3 +300,4 @@ enableback = true
 
 ;transport
 AddRecipe = "AAC", "D  ", "BC ", A, mcheli:shiphull3, B, mcheli:advancedmechanicparts, C, mcheli:engine3, D, mcheli:electronics
+TechYear = 1998

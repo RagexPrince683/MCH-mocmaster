@@ -144,3 +144,4 @@ AddRecipe = "ABC", "D  ", "   ", A, mcheli:mediumchassis, B, mcheli:cannon2, C, 
 BoundingBox =  0.00, 2.32, 0.52,  1.90, 1.23, 0.30
 
 StepHeight = 1.8
+TechYear = 1943

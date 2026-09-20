@@ -166,3 +166,4 @@ BoundingBox = 0.0, 2.35, 0.0, 1.7, 1.7, 0.10
 
 ;slightly really less NOT modern mbt tracked tank 
 AddRecipe = "ABC", "DBF", "   ", A, mcheli:mediumchassis, B, mcheli:cannon1, C, mcheli:engine3, D, mcheli:tanktracks, F, mcheli:advancedmechanicparts
+TechYear = 1953

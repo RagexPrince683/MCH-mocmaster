@@ -181,3 +181,4 @@ BoundingBox =  -4.8,2.7, -5.5, 5.5, 0.3,1
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; MiG-25 Foxbat.
+TechYear = 1970

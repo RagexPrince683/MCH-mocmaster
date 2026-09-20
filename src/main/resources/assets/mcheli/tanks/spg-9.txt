@@ -82,3 +82,4 @@ AddPartWeaponChild = false, true, 0.00, 1.15, -0.09, 0.5
 
 ;basic cannon turret 
 AddRecipe = "   ", "GEF", "   ", E, mcheli:electronics, F, mcheli:basicmechanicparts, G, mcheli:cannon2
+TechYear = 1962

@@ -148,3 +148,4 @@ AddRecipe = "ABC", "DE ", "   ", A, mcheli:lightchassis, B, mcheli:cannon2, C, m
 UnmountPosition = -0.0, 1.50, -3.0
 
 
+TechYear = 1972

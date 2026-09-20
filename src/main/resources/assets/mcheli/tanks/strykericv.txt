@@ -136,3 +136,4 @@ UnmountPosition = -0.0,  1.5,-3.5
 AddRecipe = "ABC", "DEG", "   ", A, mcheli:lightchassis, B, mcheli:wheel8, C, mcheli:engine1, D, mcheli:fcs, E, mcheli:lap, G, mcheli:cannon1
 
 AddRecipe = "ABC", "   ", "   ", A, mcheli:m1129, B, mcheli:cannon1, C, mcheli:wrench
+TechYear = 2002

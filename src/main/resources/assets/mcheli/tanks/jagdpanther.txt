@@ -207,3 +207,4 @@ BoundingBox = 0.0, 2.2, -1.1, 1.8, 0.8, 0.4
 
 ;heavy tracked TD ww2
 AddRecipe = "ABC", "DE ", "   ", A, mcheli:heavychassis, B, mcheli:cannon3, C, mcheli:engine3, D, mcheli:tanktracks, E, mcheli:hap
+TechYear = 1944

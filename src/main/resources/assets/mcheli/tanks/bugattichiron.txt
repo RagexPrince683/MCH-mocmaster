@@ -180,3 +180,4 @@ OnGroundRollFactor  = 4.8
 InventorySize = 9
 
 ArmorMinDamage = 2
+TechYear = 2016

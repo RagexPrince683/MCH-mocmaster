@@ -134,3 +134,4 @@ AddRecipe = "ABB", "DEF", "C  ", A, mcheli:lightchassis, B, mcheli:cannon3, C, m
 
 EntityWidth  = 0.8
 EntityHeight = 0.8
+TechYear = 1972

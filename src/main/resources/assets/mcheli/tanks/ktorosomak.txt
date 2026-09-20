@@ -131,3 +131,4 @@ BoundingBox =  0.0, 2.3, 1.0,   2.9, 0.1,  0.20
 
 ;light 8x8 with cannon
 AddRecipe = "ABC", "DEF", "G  ", A, mcheli:lightchassis, B, mcheli:wheel8, C, mcheli:engine1, D, mcheli:electronics, E, mcheli:fcs2, F, mcheli:basicmechanicparts, G, mcheli:cannon3
+TechYear = 2003

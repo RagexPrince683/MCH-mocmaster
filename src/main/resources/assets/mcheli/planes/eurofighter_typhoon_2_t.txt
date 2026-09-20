@@ -205,3 +205,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Eurofighter Typhoon II Taurus loadout.
+TechYear = 2005

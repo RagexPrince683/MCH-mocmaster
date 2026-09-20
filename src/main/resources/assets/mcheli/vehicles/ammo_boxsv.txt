@@ -38,3 +38,4 @@ AddSeat = 0.00,  1.0, 0.00
 
 ;Survival friendly!
 AddRecipe = "XXX",  "III",  "XXX",  X, mcheli:lap, I, mcheli:item.ingot_steel
+TechYear = 1940

@@ -186,3 +186,4 @@ AddRecipe = "ABC", "DEF", "G  ", A, mcheli:mediumchassis, B, mcheli:cannon2, C, 
 
 ;direct m48 upgrade
 AddRecipe = "ABC", "D  ", "   ", A, mcheli:m48, B, mcheli:electronics, C, mcheli:composite, D, mcheli:cannon2
+TechYear = 1976

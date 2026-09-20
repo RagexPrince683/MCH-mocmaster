@@ -126,3 +126,4 @@ ArmorMinDamage = 2
 
 
 
+TechYear = 1977

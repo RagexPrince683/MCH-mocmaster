@@ -149,3 +149,4 @@ ArmorMinDamage = 15
 
 ;med tracked cannon arty (m109)
 AddRecipe = "ABC", "DEF", "   ", A, mcheli:mediumchassis, B, mcheli:cannon3, C, mcheli:engine3, D, mcheli:tanktracks, E, mcheli:lap, F, mcheli:electronics
+TechYear = 1963

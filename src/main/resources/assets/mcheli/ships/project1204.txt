@@ -104,3 +104,4 @@ BoundingBox =  0.0, 0.2, -18.0,  3.0,  1.7
 unmountposition = 0.00, 1.50, -2.78
 
 enableback = true
+TechYear = 1967

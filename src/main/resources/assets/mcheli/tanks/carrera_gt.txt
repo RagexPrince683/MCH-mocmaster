@@ -145,3 +145,4 @@ StepHeight = 1.2
 UnmountPosition = 0.5838,  1.50, 0.2252
 
 ArmorMinDamage = 2
+TechYear = 2004

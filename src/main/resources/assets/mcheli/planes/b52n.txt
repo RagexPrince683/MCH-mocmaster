@@ -280,3 +280,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; B-52 nuclear/alt config.
+TechYear = 1961

@@ -169,3 +169,4 @@ UnmountPosition = 0.00,  1.50, 0.00
 
 ;medium MEME (missiles and extra unnecessary bullshit) 'mbt' (IFV thing) tracked tank 3 mod1 (modern)
 AddRecipe = "ABC", "DGF", "ER ", A, mcheli:mediumchassis, B, mcheli:cannon3, C, mcheli:engine3, D, mcheli:tanktracks, F, mcheli:electronics, G, mcheli:composite2, E, mcheli:advancedmechanicparts, R, mcheli:fcs2
+TechYear = 2011

@@ -137,3 +137,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; PZL M-18 Dromader.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=utility_prop
+TechYear = 1978

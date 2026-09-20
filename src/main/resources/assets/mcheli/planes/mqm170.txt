@@ -97,3 +97,4 @@ BoundingBox =  0.0, 1.2, 0.0,  5.0, 2.5
 
 ; RealismSource = MCHO plane scripted pass; Target drone class.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=uav_prop
+TechYear = 2004

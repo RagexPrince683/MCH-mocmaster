@@ -61,3 +61,4 @@ AddRecipe = " C ", "DDD", "   ", C, mcheli:engine1, D, mcheli:rubber
 enableback = true
 
 
+TechYear = 1952

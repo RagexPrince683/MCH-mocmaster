@@ -210,3 +210,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Harrier export/alt config.
+TechYear = 1989

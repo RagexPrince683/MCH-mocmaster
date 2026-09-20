@@ -108,3 +108,4 @@ AddRecipe = "   ", "GEF", "GF ", E, mcheli:electronics, F, mcheli:basicmechanicp
 ;AddPartSteeringWheel =  0.7677,  1.713,  2.6156,  0, 0.9296, -1,   80
 ;;AddPartCanopy =  1.2968, 1.5635, 2.824, 0, -1, 0, 75
 ;AddPartCanopy = -1.2968, 1.5635, 2.824, 0,  1, 0, 75
+TechYear = 1960

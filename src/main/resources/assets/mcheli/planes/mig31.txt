@@ -179,3 +179,4 @@ BoundingBox = -1.31, 3.65, -12.65, 0.5, 2.5
 BoundingBox = 1.31, 3.65, -12.65, 0.5, 2.5
 
 DamageFactor = 0.8
+TechYear = 1981

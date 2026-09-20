@@ -127,3 +127,4 @@ BoundingBox = 0.0, 1.2, -1.6, 3.0, 2.2
 AddRecipe = "ABC", "DDD", "EF ", A, mcheli:lightchassis, B, mcheli:wheel4, C, mcheli:engine1, D, mcheli:lap, E, mcheli:fcs, F, mcheli:electronics
 
 AddRecipe = "ABC", "   ", "   ", A, mcheli:tigr, B, mcheli:fcs, C, mcheli:wrench
+TechYear = 2016

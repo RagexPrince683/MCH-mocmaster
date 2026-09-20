@@ -69,3 +69,4 @@ BoundingBox =  -0.2, 0.232, -0.0,  0.64, 0.225, 0.75
 unmountposition = -0.423,  1.536, -0.460
 
 ArmorMinDamage = 10
+TechYear = 1936

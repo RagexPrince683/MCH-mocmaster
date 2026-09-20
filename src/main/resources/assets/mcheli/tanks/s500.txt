@@ -121,3 +121,4 @@ ArmorMinDamage = 2
 
 ;light 10x10 spaa SAM system (modern)
 AddRecipe = "ABC", "D G", "AHH", A, mcheli:lightchassis, B, mcheli:wheel8, C, mcheli:engine3, D, mcheli:electronics, G, mcheli:rocket, H, mcheli:wheel
+TechYear = 2021

@@ -159,3 +159,4 @@ unmountposition = 0.0, 1.72, 2.65
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; MiG-15.
+TechYear = 1949

@@ -112,3 +112,4 @@ BoundingBox = 0.0, 1.882,  0.0,  2.15,  2, 2
 BoundingBox = 0.0, 1.882,  2.15,  2.15,  2, 2
 BoundingBox = 0.0, 1.882, -2.15, 2.15,  2, 2
 BoundingBox = 0.0, 1.882, -4.3, 2.15,  2, 2
+TechYear = 1989

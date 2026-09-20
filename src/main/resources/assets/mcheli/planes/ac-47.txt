@@ -224,3 +224,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; AC-47/DC-3 class.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=heavy_prop_transport
+TechYear = 1965

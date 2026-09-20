@@ -43,3 +43,4 @@ BoundingBox =  0.0, 2.4, 0.0,  1.4, 1.4, 2.0
 BoundingBox =  0.0, 1.5, 0.0,  2.4, 0.7
 
 ArmorMinDamage = 8
+TechYear = 1957

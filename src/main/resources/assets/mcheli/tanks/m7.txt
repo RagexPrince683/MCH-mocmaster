@@ -153,3 +153,4 @@ StepHeight = 1.2
 
 ;medium tracked arty ww2 less EARLY
 AddRecipe = "ABC", "DB ", "   ", A, mcheli:lightchassis, B, mcheli:cannon2, C, mcheli:engine1, D, mcheli:tanktracks
+TechYear = 1942

@@ -165,3 +165,4 @@ AddRecipe = "ABC", "   ", "   ", A, mcheli:m60pat, B, mcheli:basicmechanicparts,
 
 ;AddRecipe = "ABC", "DGF", "   ", A, mcheli:mediumchassis, B, mcheli:cannon2, C, mcheli:engine3, D, mcheli:tanktracks, F, mcheli:electronics, G, mcheli:map
 
+TechYear = 1962

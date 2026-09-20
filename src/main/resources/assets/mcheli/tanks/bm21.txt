@@ -360,3 +360,4 @@ DefaultFreelook = false
 unmountposition = 0.71,1.39,5.34
 
 ArmorMinDamage = 2
+TechYear = 1963

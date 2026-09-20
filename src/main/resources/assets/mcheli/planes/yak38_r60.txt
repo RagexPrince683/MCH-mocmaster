@@ -187,3 +187,4 @@ sound = yakthirtyeight
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Yak-38 R-60 loadout.
+TechYear = 1976

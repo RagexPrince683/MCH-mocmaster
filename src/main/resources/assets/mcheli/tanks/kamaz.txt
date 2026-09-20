@@ -116,3 +116,4 @@ AddPartSteeringWheel =  1.3475, 2.9296, 6.6145, 0, 1.2, -1, 110
 
 ;light 8x8 unarmed mil modern
 AddRecipe = "ABC", "D  ", "   ", A, mcheli:lightchassis, B, mcheli:wheel8, C, mcheli:engine1, D, mcheli:electronics
+TechYear = 1998

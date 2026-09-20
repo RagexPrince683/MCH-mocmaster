@@ -195,3 +195,4 @@ AddRecipe = "ABC", "DEG", "F  ", A, mcheli:airframe, B, mcheli:basicmechanicpart
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Q-5 Fantan class.
+TechYear = 1990

@@ -177,3 +177,4 @@ BoundingBox = 0.0, 2.2, 0.0, 2.8, 0.85, 0.02
 
 ; m1a2T mod1
 AddRecipe = "ABC", "DGF", "GE ", A, mcheli:heavychassis, B, mcheli:cannon3, C, mcheli:engine3, D, mcheli:tanktracks, F, mcheli:fcs3, G, mcheli:composite3, E, mcheli:advancedmechanicparts
+TechYear = 2014

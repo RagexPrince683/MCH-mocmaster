@@ -87,3 +87,4 @@ ArmorMinDamage = 8
 
 ;advanced anti tank turret (less)
 AddRecipe = "   ", "DEF", "G  ", D, mcheli:electronics, E, mcheli:lap, F, mcheli:advancedmechanicparts, G, mcheli:cannon2
+TechYear = 1970

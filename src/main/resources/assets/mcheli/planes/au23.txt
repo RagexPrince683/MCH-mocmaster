@@ -155,3 +155,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Fairchild AU-23A Peacemaker.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=attack_prop
+TechYear = 1972

@@ -170,3 +170,4 @@ unmountposition = 0.00, 1.58, 0.44
 AddRecipe = "ABC", "DGF", "EHG", A, mcheli:mediumchassis, B, mcheli:cannon3, C, mcheli:engine3, D, mcheli:tanktracks, F, mcheli:electronics, G, mcheli:composite3, E, mcheli:complexmechanicparts, H, mcheli:fcs2
 
 AddRecipe = "AB ", "   ", "   ", A, mcheli:t-90, B, mcheli:fcs2, C, mcheli:composite3
+TechYear = 2004

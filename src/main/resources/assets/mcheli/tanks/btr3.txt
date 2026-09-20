@@ -149,3 +149,4 @@ BoundingBox = 0.0, 1.2, -5.4, 3.0, 2.0, 0.75
 UnmountPosition = -0.0154, 1.6291, -0.0245
 
 
+TechYear = 2001

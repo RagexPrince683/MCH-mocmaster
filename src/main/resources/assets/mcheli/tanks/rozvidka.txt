@@ -62,3 +62,4 @@ ArmorMinDamage = 2
 
 ;basic ground drone
 AddRecipe = "ABC", "   ", "   ", A, mcheli:item.ingot_aluminum, B, mcheli:wheel, C, mcheli:electronics
+TechYear = 2022

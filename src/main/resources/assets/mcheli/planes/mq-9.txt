@@ -156,3 +156,4 @@ enableback = true
 
 ; RealismSource = MCHO plane scripted pass; MQ-9 Reaper.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=uav_prop
+TechYear = 2007

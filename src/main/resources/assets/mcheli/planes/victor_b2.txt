@@ -191,3 +191,4 @@ AddRecipe = "ABC", "D C", " E ", A, mcheli:airframebomb, B, mcheli:advancedmecha
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Handley Page Victor B.2.
+TechYear = 1962

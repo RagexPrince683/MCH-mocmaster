@@ -143,3 +143,4 @@ BoundingBox = -0.1, 2.2, 0.0, 4.0, 0.85, 1.0
 AddRecipe = "ABC", "DEF", "   ", A, mcheli:lightchassis, C, mcheli:engine3, D, mcheli:tanktracks, E, mcheli:lap, F, mcheli:electronics, B, mcheli:fcs
 
 ArmorMinDamage = 10
+TechYear = 1965

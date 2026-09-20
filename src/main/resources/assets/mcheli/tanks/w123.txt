@@ -103,3 +103,4 @@ AddFixedSearchLight =  -0.599, 0.513,-2.805,   0x80FF0000,   0x00FF0000,    0.02
 
 
 AddPartSteeringWheel =  0.4856,  0.8552,  0.7596,  0, 0.488, -1,  130
+TechYear = 1976

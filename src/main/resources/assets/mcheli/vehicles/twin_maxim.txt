@@ -49,3 +49,4 @@ AddRecipe = "AAB", " B ", "   ", A, mcheli:cannon1, B, mcheli:lap
 unmountposition = 0.00,  1.50, -0.83
 
 ArmorMinDamage = 10
+TechYear = 1910

@@ -103,3 +103,4 @@ BoundingBox =  0.0, 1.9, -5.5,  1.0, 1.0
 BoundingBox =  0.0, 2.0, -6.5,  1.0, 1.0, 1.25
 
 ThrottleUpDown = 0.8
+TechYear = 2009

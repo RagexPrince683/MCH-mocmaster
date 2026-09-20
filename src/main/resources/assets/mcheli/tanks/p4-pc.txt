@@ -98,3 +98,4 @@ InventorySize = 9
 
 
 AddPartSteeringWheel =  0.5221,  0.9968,  0.2732,  0, 0.570, -1,  130
+TechYear = 1982

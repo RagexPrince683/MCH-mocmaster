@@ -196,3 +196,4 @@ BoundingBox = -2.20, 4.2, -5, 0.5, 3.5
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Su-34.
+TechYear = 2014

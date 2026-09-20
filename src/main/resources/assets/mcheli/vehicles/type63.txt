@@ -77,3 +77,4 @@ AddRecipe = "ABB", "B  ", "   ", A, mcheli:rocket, B, mcheli:lap
 BoundingBox =  0.0, 0.6, 0.0,  1.00, 1.00
 
 ArmorMinDamage = 10
+TechYear = 1963

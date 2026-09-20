@@ -129,3 +129,4 @@ AddRecipe = "ABC", "DGF", "EH ", A, mcheli:mediumchassis, B, mcheli:cannon3, C, 
 
 
 ;AddRecipe = "TBT",  "TXT",  "IDI",  T, tnt_minecart, B, bow, X, dispenser, I, iron_ingot, D, diamond
+TechYear = 1992

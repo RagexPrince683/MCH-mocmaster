@@ -184,3 +184,4 @@ sound = yakthirtyeight
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Yak-38 with GSh-23 gun pods.
+TechYear = 1976

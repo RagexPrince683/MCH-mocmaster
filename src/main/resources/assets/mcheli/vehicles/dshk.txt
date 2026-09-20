@@ -76,3 +76,4 @@ AddRecipe = "   ", "GEF", "   ", E, mcheli:lap, F, mcheli:basicmechanicparts, G,
 unmountposition = 0.0,  1.2,  -0.84
 
 ArmorMinDamage = 10
+TechYear = 1938

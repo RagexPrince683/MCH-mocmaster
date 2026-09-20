@@ -183,3 +183,4 @@ ArmorDamageFactor = 2.32
 
 ArmorMinDamage = 2
 
+TechYear = 1969

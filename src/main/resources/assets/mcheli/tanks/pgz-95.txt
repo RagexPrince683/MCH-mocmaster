@@ -201,3 +201,4 @@ unmountposition = 0.00,  1.5, 0.00
 
 ;light tracked spaa alt (modern)
 AddRecipe = "AFC", "DEF", "B  ", A, mcheli:lightchassis, C, mcheli:engine3, D, mcheli:tanktracks, E, mcheli:lap, F, mcheli:fcs2, B, mcheli:basicmechanicparts
+TechYear = 1999

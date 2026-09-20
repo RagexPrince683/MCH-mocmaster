@@ -175,3 +175,4 @@ AddRecipe = "ABC", "DEG", " GR", A, mcheli:airframe2, B, mcheli:basicmechanicpar
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Mirage IIIE.
+TechYear = 1964

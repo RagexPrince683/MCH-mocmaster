@@ -106,3 +106,4 @@ DamageFactor = 0.8
 
 
 ThrottleUpDown = 0.5
+TechYear = 2006

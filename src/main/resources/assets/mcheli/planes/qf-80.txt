@@ -103,3 +103,4 @@ BoundingBox =  5.70, 1.50,  -1.68,  1.6, 0.6, 0.7
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; F/QF-80 Shooting Star.
+TechYear = 1950

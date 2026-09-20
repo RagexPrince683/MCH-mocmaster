@@ -196,3 +196,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; J-11B Flanker derivative.
+TechYear = 2007

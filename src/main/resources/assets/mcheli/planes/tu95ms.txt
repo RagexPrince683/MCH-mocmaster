@@ -300,3 +300,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Tu-95MSM.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=heavy_turboprop
+TechYear = 2015

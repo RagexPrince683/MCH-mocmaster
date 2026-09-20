@@ -79,3 +79,4 @@ BoundingBox =  0.00,  0.05,  0.00,  0.3, 0.3
 
 
 ThrottleUpDown = 0.8
+TechYear = 2025

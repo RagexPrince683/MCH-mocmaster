@@ -215,3 +215,4 @@ AddRecipe = "ABC", "   ", "   ", A, mcheli:tu160mmsl, B, mcheli:fcs2, C, mcheli:
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Tu-160M.
+TechYear = 2022

@@ -103,3 +103,4 @@ AddPartCanopy   =  0.8115, 0.8417, 0.7622,  0, 1, 0, -75
 ArmorDamageFactor = 1
 
 ArmorMinDamage = 2
+TechYear = 1972

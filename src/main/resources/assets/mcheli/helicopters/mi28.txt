@@ -152,3 +152,4 @@ DamageFactor = 0.3
 
 
 ThrottleUpDown = 0.5
+TechYear = 2009

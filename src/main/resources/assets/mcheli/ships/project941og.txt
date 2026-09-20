@@ -233,3 +233,4 @@ AddRecipe = "AAC", "AAE", "BAD", A, mcheli:shiphull3, B, mcheli:shipnuclearreact
 
 ;modernization
 AddRecipe = "ABC", "   ", "   ", A, mcheli:project941, B, mcheli:fcs3, C, mcheli:wrench
+TechYear = 1981

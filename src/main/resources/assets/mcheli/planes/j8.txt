@@ -165,3 +165,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; J-8 interceptor.
+TechYear = 1987

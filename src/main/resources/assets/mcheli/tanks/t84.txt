@@ -163,3 +163,4 @@ AddRecipe = "AB ", "   ", "   ", A, mcheli:t-80u, B, mcheli:fcs3
 unmountposition = 0.00,  1.50, 0.25
 
 ArmorMinDamage = 20
+TechYear = 2009

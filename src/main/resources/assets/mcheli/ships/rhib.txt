@@ -74,3 +74,4 @@ BoundingBox = 0.0, 0.0, -1.8, 3.0, 0.3
 BoundingBox = 0.0, 0.0, 0, 3.0, 0.3
 BoundingBox = 0.0, 0.0, 3, 3.0, 0.3
 BoundingBox = 0.0, 0.0, 5, 2.0, 0.3
+TechYear = 1997

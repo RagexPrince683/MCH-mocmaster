@@ -132,3 +132,4 @@ unmountposition = 0.0, 1.9,  0.0
 
 ;armored armed 8x8 ww2
 AddRecipe = "ABC", "DE ", "   ", A, mcheli:lightchassis, B, mcheli:wheel8, C, mcheli:engine2, D, mcheli:lap, E, mcheli:cannon1
+TechYear = 1943

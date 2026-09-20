@@ -104,3 +104,4 @@ BoundingBox = 0.0, 2.45, 0.0, 3.0, 2.0, 1.8
 
 EntityWidth  = 0.8
 EntityHeight = 0.8
+TechYear = 1981

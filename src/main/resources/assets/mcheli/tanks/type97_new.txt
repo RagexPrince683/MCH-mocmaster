@@ -149,3 +149,4 @@ AddRecipe = "ABC", "D  ", "   ", A, mcheli:mediumchassis, B, mcheli:cannon1, C, 
 
 
 StepHeight = 1.5
+TechYear = 1942

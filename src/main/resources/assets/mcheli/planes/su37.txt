@@ -192,3 +192,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Sukhoi Su-35/Su-37 thrust-vectoring class.
+TechYear = 1996

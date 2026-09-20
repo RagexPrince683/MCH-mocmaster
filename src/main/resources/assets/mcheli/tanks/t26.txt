@@ -129,3 +129,4 @@ AddFixedSearchLight =  0.072, 1.2216, 1.42,   0xFFFFFFFF,   0x00FFFFC0,    0.15,
 
 ;light tracked tank ww2 EARLY
 AddRecipe = "ABC", "D  ", "   ", A, mcheli:lightchassis, B, mcheli:cannon1, C, mcheli:engine1, D, mcheli:tanktracks
+TechYear = 1939

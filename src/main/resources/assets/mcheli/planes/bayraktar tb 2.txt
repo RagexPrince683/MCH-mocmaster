@@ -149,3 +149,4 @@ RotorSpeed = 200.0
 
 ; RealismSource = MCHO plane scripted pass; Baykar Bayraktar TB2.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=uav_prop
+TechYear = 2014

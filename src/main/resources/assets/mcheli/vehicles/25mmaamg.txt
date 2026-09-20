@@ -47,3 +47,4 @@ AddRecipe = "AAB", "AAA", "AB ", A, mcheli:cannon1, B, mcheli:lap
 BoundingBox =  0.0, 1.0, 0.0,  1.5, 1.5
 
 ArmorMinDamage = 10
+TechYear = 1936

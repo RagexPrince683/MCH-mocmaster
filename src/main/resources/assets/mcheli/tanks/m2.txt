@@ -84,3 +84,4 @@ AddRecipe = "   ", "GEF", "   ", E, mcheli:lap, F, mcheli:basicmechanicparts, G,
 
 
 AddTurretWeapon = m2_fifty,   0.00, 0.1746,-0.15,  0.0, 0.0,  false, 2, 0,  -25,25, -37, 28
+TechYear = 1981

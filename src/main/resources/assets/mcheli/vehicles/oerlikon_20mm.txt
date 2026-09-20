@@ -52,3 +52,4 @@ AddTurretWeapon = Oerlikon_20mm, 0.0, 0.7663, 0,   0.0, 0.0,   true,2, 0,-360,36
 AddRecipe = "AAB", "   ", "   ", A, mcheli:cannon1, B, mcheli:lap
 
 BoundingBox = 0.0, 0.2, 0.0, 1.2, 1.4
+TechYear = 1918

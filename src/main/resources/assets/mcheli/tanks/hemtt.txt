@@ -95,3 +95,4 @@ BoundingBox = 0.0, 1.0, 4.0, 1.0, 1.0
 BoundingBox = 0.0, 1.8, 2.2, 1.5, 1.0, 1.5
 
 InventorySize = 10
+TechYear = 1982

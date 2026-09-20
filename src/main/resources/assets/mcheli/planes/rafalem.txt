@@ -177,3 +177,4 @@ BoundingBox =  0.0, 6, -13,  0.5, 2
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Rafale M.
+TechYear = 2001

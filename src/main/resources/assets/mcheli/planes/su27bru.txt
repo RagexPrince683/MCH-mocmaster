@@ -216,3 +216,4 @@ DamageFactor = 0.8
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Su-27 Flanker-B.
+TechYear = 1985

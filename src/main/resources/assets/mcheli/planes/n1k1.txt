@@ -151,3 +151,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; N1K1-J Shiden class.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=agile_fighter
+TechYear = 1943

@@ -115,3 +115,4 @@ InventorySize = 9
 
 ;light 8x8 spaa (modern)
 AddRecipe = "ABC", "DEG", "G  ", A, mcheli:lightchassis, B, mcheli:wheel8, C, mcheli:engine1, D, mcheli:fcs2, E, mcheli:lap, G, mcheli:complexmechanicparts
+TechYear = 1981

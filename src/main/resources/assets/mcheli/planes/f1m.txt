@@ -166,3 +166,4 @@ DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Mitsubishi F1M Pete floatplane.
 ; HandlingBalancePass = prop-maneuverability-2026-06-11; role=light_float_fighter
+TechYear = 1941

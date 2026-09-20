@@ -181,3 +181,4 @@ BoundingBox = -1.8, 1.63, -9.81, 1.0, 0.3
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; MiG-21PF Fishbed.
+TechYear = 1961
