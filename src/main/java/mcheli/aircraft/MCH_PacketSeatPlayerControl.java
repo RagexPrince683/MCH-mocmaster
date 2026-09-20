@@ -10,6 +10,9 @@ public class MCH_PacketSeatPlayerControl extends MCH_Packet {
    public boolean isUnmount = false;
    public byte switchSeat = 0;
    public boolean parachuting;
+   public int dismountMountEntityId = -1;
+   public int dismountParentEntityId = -1;
+   public int dismountSeatId = -1;
 
 
    public int getMessageID() {
@@ -22,6 +25,9 @@ public class MCH_PacketSeatPlayerControl extends MCH_Packet {
          this.isUnmount = (e >> 3 & 1) != 0;
          this.switchSeat = (byte)(e >> 1 & 3);
          this.parachuting = (e >> 0 & 1) != 0;
+         this.dismountMountEntityId = data.readInt();
+         this.dismountParentEntityId = data.readInt();
+         this.dismountSeatId = data.readInt();
       } catch (Exception var3) {
          var3.printStackTrace();
       }
@@ -32,6 +38,9 @@ public class MCH_PacketSeatPlayerControl extends MCH_Packet {
       try {
          byte e = (byte)((this.isUnmount?8:0) | this.switchSeat << 1 | (this.parachuting?1:0));
          dos.writeByte(e);
+         dos.writeInt(this.dismountMountEntityId);
+         dos.writeInt(this.dismountParentEntityId);
+         dos.writeInt(this.dismountSeatId);
       } catch (IOException var3) {
          var3.printStackTrace();
       }

@@ -37,7 +37,10 @@ public class MCH_HeliPacketHandler {
             mcheli.aircraft.MCH_BaseVehiclePacketHandler.handleVehicleAccessLockToggle(player, heli, pc);
             mcheli.aircraft.MCH_BaseVehiclePacketHandler.handleRadarToggle(player, heli, pc);
             if(pc.isUnmount == 1) {
-               heli.unmountEntity();
+               if(mcheli.aircraft.MCH_BaseVehiclePacketHandler.validateNormalDismount(
+                     player, heli, pc.dismountMountEntityId, pc.dismountParentEntityId, pc.dismountSeatId)) {
+                  heli.unmountEntity();
+               }
             } else if(pc.isUnmount == 2) {
                heli.unmountCrew();
             } else if(pc.ejectSeat) {

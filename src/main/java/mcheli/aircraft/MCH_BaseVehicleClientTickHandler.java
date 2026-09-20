@@ -142,6 +142,7 @@ public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHan
       if(player.ridingEntity instanceof MCH_EntityBaseVehicle
             && MCH_ClientCommonTickHandler.instance.consumeDismountRequest(player)) {
          pc.isUnmount = 1;
+         MCH_ClientCommonTickHandler.instance.populateDismountContext(pc);
          send = true;
       }
 

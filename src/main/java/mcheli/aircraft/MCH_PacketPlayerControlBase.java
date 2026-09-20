@@ -35,6 +35,9 @@ public abstract class MCH_PacketPlayerControlBase extends MCH_Packet {
    public boolean useAPS = false;
    public boolean toggleVehicleAccessLock = false;
    public boolean toggleRadar = false;
+   public int dismountMountEntityId = -1;
+   public int dismountParentEntityId = -1;
+   public int dismountSeatId = -1;
 
    public void readData(ByteArrayDataInput data) {
       try {
@@ -72,6 +75,9 @@ public abstract class MCH_PacketPlayerControlBase extends MCH_Packet {
          this.switchHatch = (byte)(e >> 4 & 3);
          this.switchFreeLook = (byte)(e >> 2 & 3);
          this.switchGear = (byte)(e >> 0 & 3);
+         this.dismountMountEntityId = data.readInt();
+         this.dismountParentEntityId = data.readInt();
+         this.dismountSeatId = data.readInt();
       } catch (Exception var3) {
          var3.printStackTrace();
       }
@@ -110,6 +116,9 @@ public abstract class MCH_PacketPlayerControlBase extends MCH_Packet {
 
          e1 = (short)((byte)((this.switchCameraMode & 3) << 6 | (this.switchHatch & 3) << 4 | (this.switchFreeLook & 3) << 2 | (this.switchGear & 3) << 0));
          dos.writeByte(e1);
+         dos.writeInt(this.dismountMountEntityId);
+         dos.writeInt(this.dismountParentEntityId);
+         dos.writeInt(this.dismountSeatId);
       } catch (IOException var3) {
          var3.printStackTrace();
       }
