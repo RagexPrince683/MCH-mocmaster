@@ -168,6 +168,11 @@ public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnDa
       if (this.riddenByEntity != null && this.riddenByEntity.ridingEntity == this) {
          if(this.parent != null) MCH_Dismount.observeMount(this.parent, this.riddenByEntity, this, this.seatID + 1);
          this.riddenByEntity.setPosition(this.posX, this.posY, this.posZ);
+         if(this.parent != null) {
+            MCH_SeatInfo seatInfo = this.parent.getSeatInfo(this.seatID + 1);
+            double configuredSeatY = seatInfo != null?seatInfo.pos.yCoord:0.0D;
+            this.parent.debugMountedRiderPosition(this.riddenByEntity, this.seatID + 1, configuredSeatY, this.posY);
+         }
          this.riddenByEntity.motionX = this.riddenByEntity.motionY = this.riddenByEntity.motionZ = 0.0D;
       }
    }
