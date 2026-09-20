@@ -10,15 +10,21 @@ import net.minecraft.util.Vec3;
 public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
 
    private final MCH_EntityBaseVehicle ac;
+   private final boolean physical;
 
 
    protected MCH_BaseVehicleBoundingBox(MCH_EntityBaseVehicle ac) {
+      this(ac, false);
+   }
+
+   protected MCH_BaseVehicleBoundingBox(MCH_EntityBaseVehicle ac, boolean physical) {
       super(ac.boundingBox.minX, ac.boundingBox.minY, ac.boundingBox.minZ, ac.boundingBox.maxX, ac.boundingBox.maxY, ac.boundingBox.maxZ);
       this.ac = ac;
+      this.physical = physical;
    }
 
    public AxisAlignedBB NewAABB(double p_72324_1_, double p_72324_3_, double p_72324_5_, double p_72324_7_, double p_72324_9_, double p_72324_11_) {
-      return (new MCH_BaseVehicleBoundingBox(this.ac)).setBounds(p_72324_1_, p_72324_3_, p_72324_5_, p_72324_7_, p_72324_9_, p_72324_11_);
+      return (new MCH_BaseVehicleBoundingBox(this.ac, this.physical)).setBounds(p_72324_1_, p_72324_3_, p_72324_5_, p_72324_7_, p_72324_9_, p_72324_11_);
    }
 
 
@@ -59,15 +65,11 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
 
    @Override
    public double calculateXOffset(AxisAlignedBB other, double offset) {
-      if(!this.hasDeckCollision()) {
-         return offset;
-      }
-
-      if(!this.isDeckTopContact(this, other, true)) {
+      if(!this.hasDeckCollision() || !this.isDeckTopContact(this, other, true)) {
          offset = super.calculateXOffset(other, offset);
       }
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
-         if(!this.isDeckTopContact(bb.boundingBox, other, true)) {
+         if(this.ac.isPhysicalBoundingBox(bb) && (!this.hasDeckCollision() || !this.isDeckTopContact(bb.boundingBox, other, true))) {
             offset = bb.boundingBox.calculateXOffset(other, offset);
          }
       }
@@ -84,12 +86,9 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
 
    @Override
    public double calculateYOffset(AxisAlignedBB other, double offset) {
-      if(!this.hasDeckCollision()) {
-         return offset;
-      }
-
       offset = super.calculateYOffset(other, offset);
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
+         if(!this.ac.isPhysicalBoundingBox(bb)) continue;
          AxisAlignedBB deck = bb.boundingBox;
          AxisAlignedBB previousDeck = bb.backupBoundingBox;
          offset = deck.calculateYOffset(other, offset);
@@ -98,7 +97,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          // overlapping boxes and no longer treats the deck as floor support. Use
          // the previous top for that one transition; finishDeckMovement then
          // carries the entity by the matching surface delta.
-         if(this.ac.canFloatWater() && deck.maxY > previousDeck.maxY
+         if(this.hasDeckCollision() && this.ac.canFloatWater() && deck.maxY > previousDeck.maxY
                  && this.isDeckSupportContact(previousDeck, other)) {
             offset = previousDeck.calculateYOffset(other, offset);
          }
@@ -108,74 +107,35 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
 
    @Override
    public double calculateZOffset(AxisAlignedBB other, double offset) {
-      if(!this.hasDeckCollision()) {
-         return offset;
-      }
-
-      if(!this.isDeckTopContact(this, other, false)) {
+      if(!this.hasDeckCollision() || !this.isDeckTopContact(this, other, false)) {
          offset = super.calculateZOffset(other, offset);
       }
       for(MCH_BoundingBox bb : this.ac.getCalculatedExtraBoundingBoxes()) {
-         if(!this.isDeckTopContact(bb.boundingBox, other, false)) {
+         if(this.ac.isPhysicalBoundingBox(bb) && (!this.hasDeckCollision() || !this.isDeckTopContact(bb.boundingBox, other, false))) {
             offset = bb.boundingBox.calculateZOffset(other, offset);
          }
       }
       return offset;
    }
 
+   /** Physical queries never change the damage selected by calculateIntercept. */
    public boolean intersectsWith(AxisAlignedBB aabb) {
-      boolean ret = false;
-      double dist = 1.0E7D;
-      this.ac.lastBBDamageFactor = 1.0F;
-      this.ac.lastHitBoundingBoxType = EnumBoundingBoxType.DEFAULT;
-      if(super.intersectsWith(aabb)) {
-         dist = this.getDistSq(aabb, this);
-         ret = true;
-      }
-
-      MCH_BoundingBox[] iteratedValues = this.ac.getCalculatedExtraBoundingBoxes();
-      int iteratedValueCount = iteratedValues.length;
-
-      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
-         MCH_BoundingBox bb = iteratedValues[iteratedValueIndex];
-         //wheelBoundingBox wb = iteratedValues[iteratedValueIndex];
-
-         if(bb.intersectsWith(aabb)) {
-            double dist2 = this.getDistSq(aabb, bb.boundingBox);
-            if(dist2 < dist) {
-               dist = dist2;
-               this.ac.lastBBDamageFactor = bb.damegeFactor;
-               this.ac.lastHitBoundingBoxType = bb.boundingBoxType;
-            }
-
-            ret = true;
+      if(super.intersectsWith(aabb)) return true;
+      for(MCH_BoundingBox box : this.ac.getCalculatedExtraBoundingBoxes()) {
+         if(this.ac.isPhysicalBoundingBox(box)) {
+            // The movement resolver uses these same axis-aligned envelopes.
+            if(box.boundingBox.intersectsWith(aabb)) return true;
+         } else if(!this.physical && box.intersectsWith(aabb)) {
+            return true;
          }
       }
-
-      //wheelBoundingBox[] arr2$ = this.ac.extrawheelboundingbox;
-      //int len2$ = arr2$.length;
-//
-      //for(int i2$ = 0; i2$ < len2$; ++i2$) {
-      //   wheelBoundingBox wb = arr2$[i2$];
-      //   //wheelBoundingBox wb = iteratedValues[iteratedValueIndex];
-//
-      //   if(wb.boundingBox.intersectsWith(aabb)) {
-      //      double dist3 = this.getDistSq(aabb, this);
-      //      if(dist3 < dist) {
-      //         dist = dist3;
-      //         this.ac.lastBBDamageFactor = wb.damegeFactor;
-      //      }
-//
-      //      ret = true;
-      //   }
-      //}
-      //new collision?
-
-
-
-      return ret;
+      return false;
    }
 
+   /** Optional compatibility contract: this instance represents movement obstacles. */
+   public boolean isPhysicalCollisionBox() {
+      return this.physical;
+   }
    public AxisAlignedBB expand(double p_72314_1_, double p_72314_3_, double p_72314_5_) {
       double d3 = super.minX - p_72314_1_;
       double d4 = super.minY - p_72314_3_;

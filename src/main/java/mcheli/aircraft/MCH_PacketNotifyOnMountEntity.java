@@ -20,6 +20,8 @@ public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
    public UUID aircraftUUID;
    public UUID riderUUID;
    public int sequence;
+   public int exitSeat;
+   public double feetX, feetY, feetZ;
    private static final AtomicInteger NEXT_SEQUENCE = new AtomicInteger();
 
 
@@ -35,6 +37,12 @@ public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
          this.aircraftUUID = new UUID(data.readLong(), data.readLong());
          this.riderUUID = new UUID(data.readLong(), data.readLong());
          this.sequence = data.readInt();
+         if(this.seatID == -2) {
+            this.exitSeat = data.readInt();
+            this.feetX = data.readDouble();
+            this.feetY = data.readDouble();
+            this.feetZ = data.readDouble();
+         }
       } catch (Exception exception) {
          exception.printStackTrace();
       }
@@ -51,6 +59,12 @@ public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
          dos.writeLong(this.riderUUID.getMostSignificantBits());
          dos.writeLong(this.riderUUID.getLeastSignificantBits());
          dos.writeInt(this.sequence);
+         if(this.seatID == -2) {
+            dos.writeInt(this.exitSeat);
+            dos.writeDouble(this.feetX);
+            dos.writeDouble(this.feetY);
+            dos.writeDouble(this.feetZ);
+         }
       } catch (IOException oException) {
          oException.printStackTrace();
       }
@@ -85,9 +99,29 @@ public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
       sendToRider(ac, rider, -1);
    }
 
+   public static int nextSequence() {
+      return NEXT_SEQUENCE.incrementAndGet();
+   }
+
+   public static void sendExit(MCH_EntityBaseVehicle vehicle, EntityPlayer rider, int operation, int seat,
+                               net.minecraft.util.Vec3 feet) {
+      MCH_PacketNotifyOnMountEntity packet = new MCH_PacketNotifyOnMountEntity();
+      packet.entityID_Ac = vehicle.getEntityId();
+      packet.entityID_rider = rider.getEntityId();
+      packet.aircraftUUID = vehicle.getUniqueID();
+      packet.riderUUID = rider.getUniqueID();
+      packet.sequence = operation;
+      packet.seatID = -2;
+      packet.exitSeat = seat;
+      packet.feetX = feet.xCoord;
+      packet.feetY = feet.yCoord;
+      packet.feetZ = feet.zCoord;
+      W_Network.sendToPlayer(packet, rider);
+   }
+
    private static void populateIdentity(MCH_PacketNotifyOnMountEntity packet, MCH_EntityBaseVehicle ac, Entity rider) {
       packet.aircraftUUID = ac.getUniqueID();
       packet.riderUUID = rider.getUniqueID();
-      packet.sequence = NEXT_SEQUENCE.incrementAndGet();
+      packet.sequence = nextSequence();
    }
 }

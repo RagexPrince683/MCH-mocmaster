@@ -165,17 +165,23 @@ public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnDa
    }
 
    public void updatePosition() {
-      if (this.riddenByEntity != null) {
+      if (this.riddenByEntity != null && this.riddenByEntity.ridingEntity == this) {
+         if(this.parent != null) MCH_Dismount.observeMount(this.parent, this.riddenByEntity, this, this.seatID + 1);
          this.riddenByEntity.setPosition(this.posX, this.posY, this.posZ);
          this.riddenByEntity.motionX = this.riddenByEntity.motionY = this.riddenByEntity.motionZ = 0.0D;
       }
    }
 
    public void updateRotation(float yaw, float pitch) {
-      if (this.riddenByEntity != null) {
+      if (this.riddenByEntity != null && this.riddenByEntity.ridingEntity == this) {
          this.riddenByEntity.rotationYaw = yaw;
          this.riddenByEntity.rotationPitch = pitch;
       }
+   }
+
+   /** Consume the tick callback when an explicit path has already placed/transferred this rider. */
+   public void finishDismount(Entity rider) {
+      if(this.lastRiddenByEntity == rider) this.lastRiddenByEntity = null;
    }
 
    protected void checkDetachmentAndDelete() {

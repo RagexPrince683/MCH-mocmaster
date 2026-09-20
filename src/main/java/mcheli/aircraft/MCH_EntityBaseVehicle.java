@@ -82,9 +82,7 @@ import org.lwjgl.Sys;
 /** Shared controllable vehicle entity base used by aircraft, ground vehicles, ships, and turrets. */
 
 public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements MCH_IEntityLockChecker, MCH_IEntityCanRideBaseVehicle, IEntityAdditionalSpawnData {
-   private static final Map<UUID, NewUavSafeReturn> NEW_UAV_SAFE_RETURNS = new HashMap<UUID, NewUavSafeReturn>();
    private final MCH_VehicleBoxCache vehicleBoxCache = new MCH_VehicleBoxCache();
-   private static final int NEW_UAV_SAFE_RETURN_MIN_TICKS = 20;
    private static MCH_EntityBaseVehicle aircraft;
     private ForgeChunkManager.Ticket chunkTicket;
    private ForgeChunkManager.Ticket newUavStationChunkTicket;
@@ -1847,6 +1845,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void onRidePilotFirstUpdate() {
+      MCH_Dismount.observeMount(this, this.getRiddenByEntity(), this, 0);
       if(super.worldObj.isRemote && W_Lib.isClientPlayer(this.getRiddenByEntity())) {
          this.updateClientSettings(0);
       }
@@ -2831,10 +2830,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.updatePartLightHatch();
       this.regenerationMob();
       if(this.getRiddenByEntity() == null && this.lastRiddenByEntity != null) {
-         if(!super.worldObj.isRemote && !this.isUAV() && !this.isNewUAV()
-               && this.lastRiddenByEntity instanceof EntityPlayer) {
-            MCH_PacketNotifyOnMountEntity.sendDismount(this, (EntityPlayer)this.lastRiddenByEntity);
-         }
          this.unmountEntity();
       }
 
@@ -5239,7 +5234,13 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public AxisAlignedBB getBoundingBox() {
-      return super.boundingBox;
+      return new MCH_BaseVehicleBoundingBox(this, true);
+   }
+
+   /** Configured hulls are physical; typed component damage zones are not hulls.
+    * Ships retain their existing walkable component/deck collision. */
+   public boolean isPhysicalBoundingBox(MCH_BoundingBox box) {
+      return this instanceof mcheli.ship.MCH_EntityShip || box.boundingBoxType == EnumBoundingBoxType.DEFAULT;
    }
 
    public boolean canBePushed() {
@@ -5568,7 +5569,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public void updateRiderPosition(double px, double py, double pz) {
       MCH_SeatInfo[] info = this.getSeatsInfo();
-      if(super.riddenByEntity != null && !super.riddenByEntity.isDead) {
+      if(super.riddenByEntity != null && !super.riddenByEntity.isDead && super.riddenByEntity.ridingEntity == this) {
+         MCH_Dismount.observeMount(this, super.riddenByEntity, this, 0);
          float riddenEntityYOffset = super.riddenByEntity.yOffset;
          float offset = 0.0F;
          if(super.riddenByEntity instanceof EntityPlayer && !W_Lib.isClientPlayer(super.riddenByEntity)) {
@@ -5582,9 +5584,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             v = this.getTransformedPosition(0.0D, (double)(riddenEntityYOffset - 1.0F), 0.0D);
          }
 
-         super.riddenByEntity.yOffset = 0.0F;
-         super.riddenByEntity.setPosition(v.xCoord, v.yCoord, v.zCoord);
-         super.riddenByEntity.yOffset = riddenEntityYOffset;
+         // Keep the legacy rendered feet location without breaking Entity's anchor relation.
+         super.riddenByEntity.setPosition(v.xCoord, v.yCoord + riddenEntityYOffset, v.zCoord);
       }
 
    }
@@ -5863,6 +5864,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void onMountPlayerSeat(MCH_EntitySeat seat, Entity entity) {
+      if(seat != null) MCH_Dismount.observeMount(this, entity, seat, seat.seatID + 1);
       if (seat == null || !((entity instanceof EntityPlayer || entity instanceof MCH_EntityGunner) ? true : false))
          return;
       if(this.worldObj.isRemote && MCH_Lib.getClientPlayer() == entity) {
@@ -5963,8 +5965,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    public void onUnmountPlayerSeat(MCH_EntitySeat seat, Entity entity) {
 
+      if(!MCH_Dismount.canComplete(this, entity, seat)) return;
+      seat.finishDismount(entity);
+
       if(this.isNewUAV() && !super.worldObj.isRemote) {
          this.returnNewUavPilotToStation(entity, "uav_seat_exit");
+         return;
       }
 
       MCH_Lib.DbgLog(super.worldObj, "onUnmountPlayerSeat:%d", new Object[]{Integer.valueOf(W_Entity.getEntityId(entity))});
@@ -6343,15 +6349,23 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          return false;
       }
 
+      Entity mount = pilot.ridingEntity;
+      if(mount != null && mount != this && !(mount instanceof MCH_EntitySeat && ((MCH_EntitySeat)mount).getParent() == this)) return false;
+      if(mount != null) MCH_Dismount.observeMount(this, pilot, mount,
+            mount instanceof MCH_EntitySeat ? ((MCH_EntitySeat)mount).seatID + 1 : 0);
+
       updateNewUavReturnPositionFromStation();
       if(!hasNewUavReturnPosition()) {
          MCH_Lib.Log((Entity)this, "Unable to return New UAV pilot: station link is missing or still restoring; preserving UAV control", new Object[0]);
          return false;
       }
 
+      // Load the destination before releasing ownership; never pin the player with repeated teleports.
+      this.worldObj.getChunkFromBlockCoords(MathHelper.floor_double(this.linkedUavStationX), MathHelper.floor_double(this.linkedUavStationZ));
       if(pilot.ridingEntity != null) {
          pilot.mountEntity((Entity)null);
       }
+      if(mount instanceof MCH_EntitySeat) ((MCH_EntitySeat)mount).finishDismount(pilot);
       this.moveLeft = false;
       this.moveRight = false;
       this.throttleDown = false;
@@ -6368,63 +6382,17 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       pilot.motionZ = 0.0D;
       pilot.fallDistance = 0.0F;
       double safeY = this.linkedUavStationY + 2.0D;
+      MCH_Dismount.commit(this, pilot, this.linkedUavStationX, safeY, this.linkedUavStationZ,
+            pilot.rotationYaw, pilot.rotationPitch, "uav-station-return");
       if(pilot instanceof EntityPlayerMP) {
          EntityPlayerMP player = (EntityPlayerMP)pilot;
-         player.setPositionAndUpdate(this.linkedUavStationX, safeY, this.linkedUavStationZ);
-         NEW_UAV_SAFE_RETURNS.put(player.getUniqueID(), new NewUavSafeReturn(
-               this.linkedUavStationDimension, this.linkedUavStationX, safeY, this.linkedUavStationZ));
          MCH_EntityUavStation station = resolveLinkedUavStation();
          if(station != null) {
             station.clearNewUavReturnState(player);
          }
          MCH_UavInventory.restorePilotInventory(player, inventoryReason);
-      } else {
-         pilot.setPosition(this.linkedUavStationX, safeY, this.linkedUavStationZ);
       }
       return true;
-   }
-
-   public static void updateNewUavSafeReturn(EntityPlayerMP player) {
-      if(player == null) {
-         return;
-      }
-      NewUavSafeReturn pending = NEW_UAV_SAFE_RETURNS.get(player.getUniqueID());
-      if(pending == null) {
-         return;
-      }
-      if(player.dimension != pending.dimension || player.isDead) {
-         NEW_UAV_SAFE_RETURNS.remove(player.getUniqueID());
-         return;
-      }
-
-      int blockX = MathHelper.floor_double(pending.x);
-      int blockY = MathHelper.floor_double(pending.y);
-      int blockZ = MathHelper.floor_double(pending.z);
-      boolean stationChunkLoaded = player.worldObj.blockExists(blockX, blockY, blockZ);
-      if(pending.ticks++ < NEW_UAV_SAFE_RETURN_MIN_TICKS || !stationChunkLoaded) {
-         player.motionX = 0.0D;
-         player.motionY = 0.0D;
-         player.motionZ = 0.0D;
-         player.fallDistance = 0.0F;
-         player.setPositionAndUpdate(pending.x, pending.y, pending.z);
-      } else {
-         NEW_UAV_SAFE_RETURNS.remove(player.getUniqueID());
-      }
-   }
-
-   private static final class NewUavSafeReturn {
-      private final int dimension;
-      private final double x;
-      private final double y;
-      private final double z;
-      private int ticks;
-
-      private NewUavSafeReturn(int dimension, double x, double y, double z) {
-         this.dimension = dimension;
-         this.x = x;
-         this.y = y;
-         this.z = z;
-      }
    }
 
    /** Called by every concrete vehicle subclass when its pilot entity dies. */
@@ -6450,6 +6418,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       Entity rByEntity = null;
       if(super.riddenByEntity != null) {
          rByEntity = super.riddenByEntity;
+         if(!this.isUAV() && !this.isNewUAV() && rByEntity.ridingEntity != this) {
+            super.riddenByEntity = null;
+            this.lastRiddenByEntity = null;
+            return;
+         }
+         MCH_Dismount.observeMount(this, rByEntity, this, 0);
          this.camera.initCamera(0, rByEntity);
          if(!super.worldObj.isRemote && this.isNewUAV()) {
             if(!this.returnNewUavPilotToStation(rByEntity, "uav_exit")) {
@@ -6460,6 +6434,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
       } else if(this.lastRiddenByEntity != null) {
          rByEntity = this.lastRiddenByEntity;
+         if(!this.isUAV() && !this.isNewUAV() && !MCH_Dismount.canComplete(this, rByEntity, this)) {
+            this.lastRiddenByEntity = null;
+            return;
+         }
          if(rByEntity instanceof EntityPlayer) {
             this.camera.initCamera(0, rByEntity);
          }
@@ -6485,6 +6463,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                rByEntity.mountEntity((Entity)null);
             }
          } else {
+            if(!this.worldObj.isRemote && rByEntity instanceof EntityPlayer) {
+               MCH_PacketNotifyOnMountEntity.sendDismount(this, (EntityPlayer)rByEntity);
+            }
             setUnmountPosition(rByEntity, this.getSeatsInfo()[0].pos);
          }
       }
@@ -6649,20 +6630,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
     * NetHandlerPlayServer's accepted position at vanilla's provisional dismount exit.
     */
    private void applyUnmountPosition(Entity entity, double x, double y, double z) {
-      if(!super.worldObj.isRemote && entity instanceof EntityPlayerMP && entity.ridingEntity == null) {
-         EntityPlayerMP player = (EntityPlayerMP)entity;
-         player.playerNetServerHandler.setPlayerLocation(x, y, z, player.rotationYaw, player.rotationPitch);
-      } else {
-         entity.setPosition(x, y, z);
-      }
+      MCH_Dismount.commit(this, entity, x, y, z, entity.rotationYaw, entity.rotationPitch, "configured-exit");
    }
 
    private void applyUnmountLocation(Entity entity, double x, double y, double z, float yaw, float pitch) {
-      if(!super.worldObj.isRemote && entity instanceof EntityPlayerMP && entity.ridingEntity == null) {
-         ((EntityPlayerMP)entity).playerNetServerHandler.setPlayerLocation(x, y, z, yaw, pitch);
-      } else {
-         entity.setLocationAndAngles(x, y, z, yaw, pitch);
-      }
+      MCH_Dismount.commit(this, entity, x, y, z, yaw, pitch, "rack-exit");
    }
 
    public boolean unmountEntityFromSeat(Entity entity) {
@@ -6676,8 +6648,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       for(MCH_EntitySeat seat : this.seats) {
          if(seat != null && W_Entity.isEqual(seat.riddenByEntity, entity)) {
+            MCH_Dismount.observeMount(this, entity, seat, seat.seatID + 1);
             entity.mountEntity((Entity)null);
-            break;
+            this.onUnmountPlayerSeat(seat, entity);
+            return true;
          }
       }
       return false;

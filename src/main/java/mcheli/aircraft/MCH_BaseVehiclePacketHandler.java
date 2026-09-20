@@ -80,6 +80,8 @@ public class MCH_BaseVehiclePacketHandler {
    private static int pendingWorldIdentity;
    private static int pendingPlayerIdentity;
    private static final Map<Integer, Integer> lastMountSequences = new HashMap<Integer, Integer>();
+   private static MCH_PacketNotifyOnMountEntity pendingExit;
+   private static int pendingExitTicks;
 
    private static final class PendingMount {
       final int aircraftId;
@@ -101,6 +103,7 @@ public class MCH_BaseVehiclePacketHandler {
    public static void clearPendingMounts() {
       pendingMounts.clear();
       lastMountSequences.clear();
+      pendingExit = null;
       pendingWorldIdentity = 0;
       pendingPlayerIdentity = 0;
    }
@@ -119,6 +122,30 @@ public class MCH_BaseVehiclePacketHandler {
          if(applyMount(player, pending.aircraftId, pending.riderId, pending.seatId,
                pending.aircraftUUID, pending.riderUUID) || --pending.ticksLeft <= 0) {
             pendingMounts.remove(i);
+         }
+      }
+      if(pendingExit != null) {
+         MCH_PacketNotifyOnMountEntity exit = pendingExit;
+         Integer current = lastMountSequences.get(exit.entityID_rider);
+         if(player.ridingEntity != null || current == null || current.intValue() != exit.sequence
+               || !player.getUniqueID().equals(exit.riderUUID)) {
+            MCH_Lib.DbgLog(player.worldObj, "[MCH-EXIT] side=CLIENT player=%s vehicle=%s seat=%d operation=%d stale-completion",
+                  player.getUniqueID(), exit.aircraftUUID, exit.exitSeat, exit.sequence);
+            pendingExit = null;
+         } else if(Math.abs(player.posX - exit.feetX) < 0.01D && Math.abs(player.posZ - exit.feetZ) < 0.01D
+               && Math.abs(player.boundingBox.minY - exit.feetY) < 0.01D) {
+            pendingExit = null;
+            net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new MCH_DismountEvent(player, exit.aircraftUUID,
+                  exit.entityID_Ac, exit.exitSeat, exit.sequence,
+                  net.minecraft.util.Vec3.createVectorHelper(exit.feetX, exit.feetY, exit.feetZ), true));
+            MCH_Lib.DbgLog(player.worldObj,
+                  "[MCH-EXIT] side=CLIENT player=%s vehicle=%s seat=%d operation=%d accepted posY=%.5f minY=%.5f yOffset=%.5f ySize=%.5f",
+                  player.getUniqueID(), exit.aircraftUUID, exit.exitSeat, exit.sequence,
+                  player.posY, player.boundingBox.minY, player.yOffset, player.ySize);
+         } else if(--pendingExitTicks <= 0) {
+            MCH_Lib.DbgLog(player.worldObj, "[MCH-EXIT] side=CLIENT player=%s vehicle=%s seat=%d operation=%d completion-unobserved; no teleport retry",
+                  player.getUniqueID(), exit.aircraftUUID, exit.exitSeat, exit.sequence);
+            pendingExit = null;
          }
       }
    }
@@ -142,12 +169,18 @@ public class MCH_BaseVehiclePacketHandler {
                                      UUID aircraftUUID, UUID riderUUID) {
       Entity aircraftEntity = player.worldObj.getEntityByID(aircraftId);
       Entity rider = player.worldObj.getEntityByID(riderId);
-      if(rider == null || rider.isDead) return false;
+      if(rider == null || rider.isDead || !rider.getUniqueID().equals(riderUUID)) return false;
       if(seatId < 0) {
-         if(rider.ridingEntity != null) rider.mountEntity((Entity)null);
+         Entity currentMount = rider.ridingEntity;
+         Entity parent = currentMount instanceof MCH_EntitySeat ? ((MCH_EntitySeat)currentMount).getParent() : currentMount;
+         // A stale dismount must never detach an unrelated/newer mount.
+         if(parent != null && parent.getEntityId() == aircraftId && parent.getUniqueID().equals(aircraftUUID)) {
+            rider.mountEntity((Entity)null);
+         }
          return rider.ridingEntity == null;
       }
       if(!(aircraftEntity instanceof MCH_EntityBaseVehicle)) return false;
+      if(!aircraftEntity.getUniqueID().equals(aircraftUUID)) return false;
       MCH_EntityBaseVehicle aircraft = (MCH_EntityBaseVehicle)aircraftEntity;
       if(aircraft.isUAV() || aircraft.isNewUAV()) return true;
       Entity mount = seatId == 0 ? aircraft : aircraft.getSeat(seatId - 1);
@@ -212,6 +245,13 @@ public class MCH_BaseVehiclePacketHandler {
       if(player != null && player.worldObj.isRemote) {
          MCH_PacketNotifyOnMountEntity req = new MCH_PacketNotifyOnMountEntity();
          req.readData(data);
+         int worldIdentity = System.identityHashCode(player.worldObj);
+         int playerIdentity = System.identityHashCode(player);
+         if(pendingWorldIdentity != worldIdentity || pendingPlayerIdentity != playerIdentity) {
+            clearPendingMounts();
+            pendingWorldIdentity = worldIdentity;
+            pendingPlayerIdentity = playerIdentity;
+         }
          MCH_Lib.DbgLog(player.worldObj, "onPacketOnMountEntity.rcv:%d, %d, %d, %d", new Object[]{Integer.valueOf(W_Entity.getEntityId(player)), Integer.valueOf(req.entityID_Ac), Integer.valueOf(req.entityID_rider), Integer.valueOf(req.seatID)});
          Integer riderKey = Integer.valueOf(req.entityID_rider);
          Integer lastSequence = lastMountSequences.get(riderKey);
@@ -221,6 +261,16 @@ public class MCH_BaseVehiclePacketHandler {
                lastMountSequences.remove(lastMountSequences.keySet().iterator().next());
             }
             lastMountSequences.put(riderKey, Integer.valueOf(req.sequence));
+            for(int i = pendingMounts.size() - 1; i >= 0; --i) {
+               if(pendingMounts.get(i).riderId == req.entityID_rider) pendingMounts.remove(i);
+            }
+            if(req.seatID == -2) {
+               if(req.entityID_rider == player.getEntityId() && player.getUniqueID().equals(req.riderUUID)) {
+                  pendingExit = req;
+                  pendingExitTicks = 40;
+               }
+               return;
+            }
             if(!applyMount(player, req.entityID_Ac, req.entityID_rider, req.seatID,
                   req.aircraftUUID, req.riderUUID) && req.seatID >= 0) {
                queueMount(player, req);
