@@ -1523,6 +1523,12 @@ public class MCH_EntityUavStation
      public void handleItem(Entity user, ItemStack itemStack) {
            if (user != null && !user.isDead && itemStack != null && itemStack.stackSize == 1 &&
                      !this.worldObj.isRemote) {
+                EntityPlayer techPlayer = user instanceof EntityPlayer ? (EntityPlayer)user : null;
+                mcheli.aircraft.MCH_BaseVehicleInfo techInfo = mcheli.tech.MCH_TechTierManager.getInfo(itemStack);
+                if(techInfo != null && !mcheli.tech.MCH_TechTierManager.isUnlocked(techInfo, techPlayer, this.worldObj)) {
+                     mcheli.tech.MCH_TechTierManager.notifyLocked(techPlayer, techInfo);
+                     return;
+                }
                 Object ac = null;
                 double x = this.posX + this.posUavX;
                 double y = this.posY + this.posUavY;

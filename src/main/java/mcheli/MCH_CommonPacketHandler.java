@@ -72,6 +72,11 @@ public class MCH_CommonPacketHandler {
          MCH_ServerSettings.enablePVP = pkt.enablePVP;
          MCH_ServerSettings.stingerLockRange = pkt.stingerLockRange;
          MCH_ServerSettings.enableDebugBoundingBox = pkt.enableDebugBoundingBox;
+         MCH_ServerSettings.enableTechTiers = pkt.enableTechTiers;
+         MCH_ServerSettings.unlockedTechTierHalfSteps = pkt.unlockedTechTierHalfSteps;
+         MCH_ServerSettings.techTierMaximumYears = pkt.techTierMaximumYears.clone();
+         mcheli.tech.MCH_TechTierManager.acceptClientState(pkt.enableTechTiers,
+                 pkt.unlockedTechTierHalfSteps, pkt.techTierMaximumYears);
          MCH_ClientLightWeaponTickHandler.lockRange = MCH_ServerSettings.stingerLockRange;
       }
    }

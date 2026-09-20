@@ -187,3 +187,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; F-14D Tomcat.
+TechYear = 1991

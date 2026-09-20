@@ -175,3 +175,4 @@ BoundingBox = -1.25, 3.88,  -7.40,  1.4, 3.0
 
 enableback = true
 DamageFactor = 0.8
+TechYear = 1999

@@ -153,3 +153,10 @@ For the complete reload command:
 - `fill`, `killentity`, `removeentity`, and `attackentity` are destructive admin tools. Grant them only to trusted users.
 - Entity matching uses case-insensitive substring matching against Java class names. A broad fragment can affect more entities than intended.
 - `showboundingbox` changes the in-memory setting but the save call is commented out in source, so restart/reload behavior depends on `EnableDebugBoundingBox` in `mcheli.cfg`.
+## Technology progression
+
+- `/mcheli tier get` reports the world's unlocked MC Heli tier.
+- `/mcheli tier set <tier>` accepts `0.0` through `5.0` in `0.5` increments and immediately synchronizes connected clients.
+- `/mcheli tier item` inspects the held vehicle item's identifier, year, override, resolved requirement, server tier, and lock state.
+
+The existing MC Heli command permission system applies. MC Heli progression is persisted and synchronized independently of HMG.

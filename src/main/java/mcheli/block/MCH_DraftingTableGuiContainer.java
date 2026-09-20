@@ -356,6 +356,11 @@ public class MCH_DraftingTableGuiContainer extends Container {
       }
 
       ItemStack outputStack = new ItemStack(outputItem);
+      mcheli.aircraft.MCH_BaseVehicleInfo techInfo = mcheli.tech.MCH_TechTierManager.getInfo(outputStack);
+      if(techInfo != null && !mcheli.tech.MCH_TechTierManager.isUnlocked(techInfo, this.player, this.player.worldObj)) {
+         mcheli.tech.MCH_TechTierManager.notifyLocked(this.player, techInfo);
+         return;
+      }
       IRecipe recipe = this.findRecipeByOutput(outputStack);
 
       if(recipe == null) {

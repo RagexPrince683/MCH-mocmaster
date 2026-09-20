@@ -17,6 +17,8 @@ public class MCH_ItemBaseVehicleDispenseBehavior extends BehaviorDefaultDispense
       double y = bs.getY() + (double)enumfacing.getFrontOffsetY() * 2.0D;
       double z = bs.getZ() + (double)enumfacing.getFrontOffsetZ() * 2.0D;
       if(itemStack.getItem() instanceof MCH_ItemBaseVehicle) {
+         MCH_BaseVehicleInfo techInfo = ((MCH_ItemBaseVehicle)itemStack.getItem()).getAircraftInfo();
+         if(!mcheli.tech.MCH_TechTierManager.isUnlocked(techInfo, null, bs.getWorld())) return itemStack;
          MCH_EntityBaseVehicle ac = ((MCH_ItemBaseVehicle)itemStack.getItem()).onTileClick(itemStack, bs.getWorld(), 0.0F, (int)x, (int)y, (int)z);
          if(ac != null && !ac.isUAV()) {
             if(!bs.getWorld().isRemote) {

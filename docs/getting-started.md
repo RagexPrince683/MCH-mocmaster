@@ -24,7 +24,9 @@ assets/mcheli/sounds
 assets/mcheli/sounds.json
 ```
 
-In a normal Minecraft install, put the mod jar and matching content in `mods/`. In the development run directory, the code expects assets under `build/run/mods/mcheli/`.
+In a normal Minecraft install, put UniMixins 0.3.1, the mod jar, and matching content in `mods/`.
+In the development repository, put the UniMixins runtime jar in `devmods/`; the code expects editable
+assets under `build/run/mods/mcheli/`.
 
 ## 2. Start the game once
 

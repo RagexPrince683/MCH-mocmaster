@@ -168,6 +168,7 @@ public class MCH_MOD {
 
       VER = Loader.instance().activeModContainer().getVersion();
       config = proxy.loadConfig("config/mcheli.cfg");
+      mcheli.tech.MCH_TechTierManager.configure(new File(evt.getModConfigurationDirectory(), "mcheli_tech.cfg"));
       MCH_Lib.init();
       MCH_Lib.Log("MC Ver:1.7.10 MOD Ver:" + VER + "", new Object[0]);
       MCH_Lib.Log("Start load...", new Object[0]);
@@ -295,6 +296,7 @@ public class MCH_MOD {
       MCH_Lib.Log("Register system", new Object[0]);
       W_NetworkRegistry.registerChannel(packetHandler, "MCHeli_CH");
       MinecraftForge.EVENT_BUS.register(new MCH_EventHook());
+      FMLCommonHandler.instance().bus().register(new mcheli.tech.MCH_TechTierEvents());
 
       proxy.registerClientTick();
 

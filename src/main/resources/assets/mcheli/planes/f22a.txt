@@ -202,3 +202,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; F-22A Raptor.
+TechYear = 2005

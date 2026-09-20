@@ -205,3 +205,4 @@ BoundingBox = 0.0, 1.7, 0.0, 2.3, 0.7, 0.04
 AddRecipe = "ABC", "DGF", "EF ", A, mcheli:mediumchassis, B, mcheli:cannon3, C, mcheli:engine3, D, mcheli:tanktracks, F, mcheli:electronics, G, mcheli:composite2, E, mcheli:basicmechanicparts
 
 unmountposition = 0.0, 1.5, 0.3
+TechYear = 1973

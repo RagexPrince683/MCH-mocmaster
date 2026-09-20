@@ -310,3 +310,8 @@ The reference configs now populate `MaximumExternalPayloadCapacity = {lbs}` on a
 ## Weight field audit
 
 `Weight =` values in `configreference/` are integer pounds. Use the audited definitions in [Config reference weight audit](configreference-weights.md) when adding or changing vehicle weights, and run `python3 tools/validate_config_weights.py` to catch implausible units or category mismatches.
+## Technology progression
+
+Use `TechYear = <year>` for the represented vehicle or major variant's real introduction/service year. The configured year ranges determine its tier. `TechTier = <0.0..5.0>` is an optional half-step override intended for fictional equipment, prototypes, and special cases; when both fields exist, the override is authoritative and the year remains informational.
+
+Both keys are optional. Omitting them leaves old addon content unrestricted for compatibility.

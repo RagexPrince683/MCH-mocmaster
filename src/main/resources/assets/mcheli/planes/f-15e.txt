@@ -221,3 +221,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; F-15E Strike Eagle.
+TechYear = 1989

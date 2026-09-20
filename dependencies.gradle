@@ -3,6 +3,21 @@
 def localDevMods = fileTree("devmods") {
     include "*.jar"
 }
+def uniMixinsRuntime = file("devmods/+unimixins-all-1.7.10-0.3.1.jar")
+
+// The convention plugin keeps UniMixins on the compile and annotation-processor paths. At
+// runtime, use the normal MC Heli devmods path instead of also loading the Maven dev artifact.
+configurations.runtimeClasspath {
+    exclude group: "io.github.legacymoddingmc", module: "unimixins"
+}
+
+tasks.matching { it.name == "runClient" || it.name == "runServer" }.configureEach {
+    doFirst {
+        if(!uniMixinsRuntime.isFile()) {
+            throw new GradleException("Missing UniMixins runtime: ${uniMixinsRuntime}. See devmods/README.md.")
+        }
+    }
+}
 
 dependencies {
     testImplementation "junit:junit:4.13.2"

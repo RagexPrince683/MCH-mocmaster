@@ -67,6 +67,7 @@ For a detailed project-wide audit of Overdrive-only systems, see [Overdrive Feat
 | Minecraft | 1.7.10 only |
 | Mod loader | Minecraft Forge 1.7.10; build script uses `1.7.10-10.13.4.1614-1.7.10` |
 | Java | Java 8 recommended/required for development and runtime compatibility with ForgeGradle 1.x |
+| UniMixins | UniMixins 0.3.1 is a required external runtime dependency on clients and servers |
 | Client | Required for players connecting to servers that use the mod |
 | Server | Install on dedicated servers that need MCHeli entities, recipes, commands, and configuration |
 | Asset pack | Required for actual vehicles/weapons/content beyond the registered core items; assets are read from `assets/mcheli/...` in the mod jar or from `mods/mcheli/` in the development run directory |
@@ -78,7 +79,7 @@ The Forge metadata marks the mod as client-required and server-optional, but mul
 ### Single-player or client
 
 1. Install Minecraft Forge for Minecraft 1.7.10.
-2. Place the built MC Helicopter Overdrive+ jar in `.minecraft/mods/`.
+2. Place UniMixins 0.3.1 and the built MC Helicopter Overdrive+ jar in `.minecraft/mods/`.
 3. Install the matching MCHeli asset/content pack so the folder structure includes `assets/mcheli/` content such as `helicopters`, `planes`, `ships`, `tanks`, `vehicles`, `weapons`, `hud`, `models`, `textures`, `sounds`, `item`, and `throwable` where applicable.
 4. Start the game once to generate `.minecraft/config/mcheli.cfg`.
 5. Adjust configuration options as needed, then restart or use `/mcheli reconfig` for server-side config reloads.
@@ -86,7 +87,7 @@ The Forge metadata marks the mod as client-required and server-optional, but mul
 ### Dedicated server
 
 1. Install Forge 1.7.10 on the server.
-2. Place the mod jar and matching asset/content pack in the server `mods/` directory.
+2. Place UniMixins 0.3.1, the mod jar, and the matching asset/content pack in the server `mods/` directory.
 3. Start the server once to generate `config/mcheli.cfg`.
 4. Stop the server, edit the configuration, then restart. Some server settings can be reloaded with `/mcheli reconfig`.
 5. Ensure every joining client has the same mod and compatible content/assets.
@@ -99,6 +100,11 @@ the shared packet handler can therefore initialize without linking Minecraft cli
 ### Development builds
 
 This repository uses ForgeGradle 1.x through the Gradle wrapper.
+
+Development launches also require UniMixins 0.3.1 at
+`devmods/+unimixins-all-1.7.10-0.3.1.jar`. The `devmods` directory is the project's established
+source for external runtime mod/coremod jars; Gradle supplies the compile-time Mixin API and
+generated refmap integration separately. See `devmods/README.md` for the expected layout.
 
 ```bash
 ./gradlew setupDecompWorkspace

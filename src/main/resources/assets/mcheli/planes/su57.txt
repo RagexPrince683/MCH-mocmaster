@@ -206,3 +206,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; Su-57 Felon.
+TechYear = 2020

@@ -1,6 +1,7 @@
 package mcheli.aircraft;
 
 import mcheli.MCH_BaseInfo;
+import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
 import mcheli.hud.MCH_Hud;
 import mcheli.hud.MCH_HudManager;
@@ -37,6 +38,10 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    }
 
    public final String name;
+   /** Optional real-world introduction/service year. Null preserves legacy unrestricted behavior. */
+   public Integer techYear;
+   /** Optional explicit tier override, stored as 0..10 half-steps; -1 means derive from techYear. */
+   public int techTierHalfSteps = -1;
    public String displayName;
    public HashMap displayNameLang;
    public int itemID;
@@ -644,7 +649,21 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
    }
 
    public void loadItemData(String item, String data) {
-      if(item.compareTo("displayname") == 0) {
+      if(item.equalsIgnoreCase("TechYear")) {
+         try {
+            this.techYear = Integer.valueOf(Integer.parseInt(data.trim()));
+         } catch (NumberFormatException invalidYear) {
+            MCH_Lib.Log("Ignoring malformed TechYear for %s: %s", new Object[]{this.name, data});
+         }
+      } else if(item.equalsIgnoreCase("TechTier")) {
+         try {
+            float tier = Float.parseFloat(data.trim());
+            if(!mcheli.tech.MCH_TechTierManager.isValidTier(tier)) throw new NumberFormatException("invalid tier");
+            this.techTierHalfSteps = mcheli.tech.MCH_TechTierManager.toHalfSteps(tier);
+         } catch (NumberFormatException invalidTier) {
+            MCH_Lib.Log("Ignoring malformed TechTier for %s: %s", new Object[]{this.name, data});
+         }
+      } else if(item.compareTo("displayname") == 0) {
          this.displayName = data.trim();
       } else {
          String[] s;

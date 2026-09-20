@@ -189,3 +189,4 @@ DamageFactor = 0.2
 UnmountPosition = 0.00,  2.80,  0.0
 
 enableback = true
+TechYear = 1977

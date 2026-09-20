@@ -70,6 +70,18 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
    public void addInformation(ItemStack stack, EntityPlayer player, List lines, boolean par4) {
       MCH_BaseVehicleInfo aircraftInfo = this.getAircraftInfo();
+      if(aircraftInfo != null && aircraftInfo.techYear != null) {
+         lines.add(EnumChatFormatting.GRAY + "Introduced: " + aircraftInfo.techYear);
+      }
+      if(aircraftInfo != null && (aircraftInfo.techYear != null || aircraftInfo.techTierHalfSteps >= 0)) {
+         float requiredTier = mcheli.tech.MCH_TechTierManager.resolveRequiredTier(aircraftInfo, player == null ? null : player.worldObj);
+         lines.add(EnumChatFormatting.GRAY + "Required Tech Tier: " + requiredTier
+                 + (aircraftInfo.techTierHalfSteps >= 0 ? " (override)" : ""));
+         if(player != null && !mcheli.tech.MCH_TechTierManager.isUnlocked(aircraftInfo, player, player.worldObj)) {
+            lines.add(EnumChatFormatting.RED + "LOCKED — Server Tech Tier: "
+                    + mcheli.tech.MCH_TechTierManager.getUnlockedTier(player.worldObj));
+         }
+      }
       MCH_BaseVehicleInfo info = aircraftInfo != null && aircraftInfo.category.equals("zzz") ? null : aircraftInfo;
       MCH_EntityBaseVehicle ac = aircraftInfo != null ? createAircraft(player.worldObj, -1.0D, -1.0D, -1.0D, stack) : null;
       if (info != null) {
@@ -191,6 +203,11 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
    }
 
    public ItemStack onItemRightClick(ItemStack par1ItemStack, World world, EntityPlayer player) {
+      MCH_BaseVehicleInfo techInfo = this.getAircraftInfo();
+      if(!mcheli.tech.MCH_TechTierManager.isUnlocked(techInfo, player, world)) {
+         mcheli.tech.MCH_TechTierManager.notifyLocked(player, techInfo);
+         return par1ItemStack;
+      }
       if(isUavInfo(this.getAircraftInfo())) {
          notifyUavStationRequired(world, player);
          return par1ItemStack;
@@ -598,6 +615,11 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
    }
 
    public void rideEntity(ItemStack item, Entity target, EntityPlayer player) {
+      MCH_BaseVehicleInfo techInfo = this.getAircraftInfo();
+      if(!mcheli.tech.MCH_TechTierManager.isUnlocked(techInfo, player, player.worldObj)) {
+         mcheli.tech.MCH_TechTierManager.notifyLocked(player, techInfo);
+         return;
+      }
       MCH_Config configuration = MCH_MOD.config;
       if(!MCH_Config.PlaceableOnSpongeOnly.prmBool && target instanceof EntityMinecartEmpty && target.riddenByEntity == null) {
          MCH_EntityBaseVehicle ac = this.spawnAircraft(item, player.worldObj, player, (int)target.posX, (int)target.posY + 2, (int)target.posZ);

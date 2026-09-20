@@ -223,6 +223,32 @@ Conventional guided-bomb and normal ballistic bomb references use real standard 
 **How it differs from original MCHeli:** The project treats shared vehicle infrastructure as a cross-category framework for planes, helicopters, ships, tanks, turrets, UAVs, seats, weapons, renderers, and controls rather than a helicopter-only or aircraft-only layer.
 
 **Configuration:** Most refactor-facing options are documented in `docs/configuration.md`; developer-facing boundaries are documented in `docs/frame-rate-physics.md` and `docs/vehicle-naming-conventions.md`.
+
+### UniMixins foundation and transformer audit
+
+The Combatives reference build declares the UniMixins 0.3.1 all-in-one jar from `libs/`, adds the
+Mixin API and annotation processor, writes an explicit refmap and SRG output, feeds that SRG back
+into reobfuscation, and packages the refmap at the jar root. Its development launch names both the
+Mixin tweaker and UniMixins `AllCore`, while its jar manifest declares the FML core plugin. The
+core plugin implements `IEarlyMixinLoader`, owns one mixin configuration, and returns the early
+mixin class list; the JSON lists stay empty so manifest/bootstrap discovery cannot register the
+same injections a second time. Mixin sources use the normal Java source set and configs use the
+normal resource source set.
+
+MC Heli follows that LaunchWrapper/core-plugin/early-loader architecture, but its newer GTNH
+Gradle convention already supplies the matching UniMixins compile API and annotation processor,
+emits `mixins.mcheli.refmap.json`, feeds generated SRG data into reobfuscation, and writes the
+Mixin/core-plugin manifest entries. Reimplementing Combatives' manual Gradle wiring would create a
+second build path, so MC Heli uses the convention for build integration and retains its established
+`devmods/` directory for the external all-in-one runtime jar. Packaged clients and servers install
+the same external UniMixins 0.3.1 jar through their normal `mods/` directory.
+
+The former hand-written `MCH_DismountInputTransformer` was the repository's only custom
+`IClassTransformer`/ASM hook. Its single RETURN injection is now the client-side
+`MovementInputFromOptionsMixin`, while `MCH_DismountInputGate` retains the exact vehicle-specific
+filtering policy. No other custom transformer currently needs classification or migration; future
+small vanilla method injections should use this Mixin foundation, while unusual class generation
+or broad bytecode rewriting should be reviewed individually rather than assumed safe to convert.
 # Persistent vehicle access locks
 
 Player-ridable helicopters, planes, ships, tanks, turrets, and other vehicles

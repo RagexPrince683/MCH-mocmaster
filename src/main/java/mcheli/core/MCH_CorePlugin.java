@@ -1,16 +1,23 @@
 package mcheli.core;
 
+import com.gtnewhorizon.gtnhmixins.IEarlyMixinLoader;
+import cpw.mods.fml.relauncher.FMLLaunchHandler;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-@IFMLLoadingPlugin.Name("MCHeli input gate")
+@IFMLLoadingPlugin.Name("MCHeli mixin loader")
 @IFMLLoadingPlugin.MCVersion("1.7.10")
 @IFMLLoadingPlugin.TransformerExclusions("mcheli.core")
-public final class MCH_CorePlugin implements IFMLLoadingPlugin {
+public final class MCH_CorePlugin implements IFMLLoadingPlugin, IEarlyMixinLoader {
+
+   private static final String MIXIN_CONFIG = "mixins.mcheli.json";
 
    @Override
    public String[] getASMTransformerClass() {
-      return new String[]{MCH_DismountInputTransformer.class.getName()};
+      return new String[0];
    }
 
    @Override
@@ -30,5 +37,17 @@ public final class MCH_CorePlugin implements IFMLLoadingPlugin {
    @Override
    public String getAccessTransformerClass() {
       return null;
+   }
+
+   @Override
+   public String getMixinConfig() {
+      return MIXIN_CONFIG;
+   }
+
+   @Override
+   public List<String> getMixins(Set<String> loadedCoreMods) {
+      return FMLLaunchHandler.side().isClient()
+            ? Collections.singletonList("MovementInputFromOptionsMixin")
+            : Collections.<String>emptyList();
    }
 }

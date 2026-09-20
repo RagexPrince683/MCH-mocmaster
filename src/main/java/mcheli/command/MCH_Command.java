@@ -74,7 +74,7 @@ public class MCH_Command extends CommandBase {
    public static final String CMD_LIST = "list";
    public static final String CMD_ENABLE_NUKES = "enablenukes";
    public static final String CMD_RELOAD = "reload";
-   public static String[] ALL_COMMAND = new String[]{"sendss", "modlist", "reconfig", "reload", "title", "fill", "status", "killentity", "removeentity", "attackentity", "showboundingbox", "enablenukes", "list"};
+   public static String[] ALL_COMMAND = new String[]{"sendss", "modlist", "reconfig", "reload", "tier", "title", "fill", "status", "killentity", "removeentity", "attackentity", "showboundingbox", "enablenukes", "list"};
    public static MCH_Command instance = new MCH_Command();
 
 
@@ -309,6 +309,8 @@ public class MCH_Command extends CommandBase {
                      MCH_PacketNotifyServerSettings.sendAll();
                      sender.addChatMessage(new ChatComponentText("Enabled bounding box [F3 + b]"));
                   }
+               } else if(prm[0].equalsIgnoreCase("tier")) {
+                  this.executeTechTier(sender, prm);
                } else if(prm[0].equalsIgnoreCase("enablenukes")) {
                   this.executeEnableNukes(sender, prm);
                } else {
@@ -352,6 +354,42 @@ public class MCH_Command extends CommandBase {
             sender.addChatMessage(new ChatComponentText("Linked to HBM /ntmenablenukes command."));
          }
       }
+   }
+
+   private void executeTechTier(ICommandSender sender, String[] args) {
+      if(args.length == 2 && args[1].equalsIgnoreCase("get")) {
+         sender.addChatMessage(new ChatComponentText("MC Heli unlocked tech tier: "
+                 + mcheli.tech.MCH_TechTierManager.getUnlockedTier(sender.getEntityWorld())));
+         return;
+      }
+      if(args.length == 3 && args[1].equalsIgnoreCase("set")) {
+         float tier;
+         try { tier = Float.parseFloat(args[2]); }
+         catch(NumberFormatException e) { throw new WrongUsageException("/mcheli tier set <0.0..5.0>", new Object[0]); }
+         if(!mcheli.tech.MCH_TechTierManager.isValidTier(tier)) {
+            throw new WrongUsageException("/mcheli tier set <0.0..5.0 in 0.5 increments>", new Object[0]);
+         }
+         mcheli.tech.MCH_TechTierManager.setUnlockedTier(sender.getEntityWorld(), tier);
+         sender.addChatMessage(new ChatComponentText("MC Heli unlocked tech tier set to " + tier));
+         return;
+      }
+      if(args.length == 2 && args[1].equalsIgnoreCase("item") && sender instanceof EntityPlayer) {
+         EntityPlayer player = (EntityPlayer)sender;
+         ItemStack stack = player.getHeldItem();
+         mcheli.aircraft.MCH_BaseVehicleInfo info = mcheli.tech.MCH_TechTierManager.getInfo(stack);
+         if(info == null) {
+            sender.addChatMessage(new ChatComponentText("Held item is not an MC Heli vehicle item."));
+         } else {
+            sender.addChatMessage(new ChatComponentText("MC Heli content=" + mcheli.tech.MCH_TechTierManager.identify(stack)
+                    + ", TechYear=" + (info.techYear == null ? "undefined" : info.techYear)
+                    + ", explicit TechTier=" + (info.techTierHalfSteps < 0 ? "undefined" : mcheli.tech.MCH_TechTierManager.fromHalfSteps(info.techTierHalfSteps))
+                    + ", required=" + mcheli.tech.MCH_TechTierManager.resolveRequiredTier(info, player.worldObj)
+                    + ", server=" + mcheli.tech.MCH_TechTierManager.getUnlockedTier(player.worldObj)
+                    + ", locked=" + !mcheli.tech.MCH_TechTierManager.isUnlocked(info, player, player.worldObj)));
+         }
+         return;
+      }
+      throw new WrongUsageException("/mcheli tier <get|set <tier>|item>", new Object[0]);
    }
 
    private IChatComponent createEnableNukesStatusMessage(String prefix, boolean enabled) {
@@ -698,6 +736,10 @@ public class MCH_Command extends CommandBase {
                return getListOfStringsMatchingLastWord(prm, new String[]{"true", "false"});
             } else if(prm[0].equalsIgnoreCase("enablenukes") && prm.length == 2) {
                return getListOfStringsMatchingLastWord(prm, new String[]{"true", "false"});
+            } else if(prm[0].equalsIgnoreCase("tier") && prm.length == 2) {
+               return getListOfStringsMatchingLastWord(prm, new String[]{"get", "set", "item"});
+            } else if(prm[0].equalsIgnoreCase("tier") && prm.length == 3 && prm[1].equalsIgnoreCase("set")) {
+               return getListOfStringsMatchingLastWord(prm, new String[]{"0.0", "0.5", "1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "4.5", "5.0"});
             }
          }
 

@@ -193,3 +193,4 @@ enableback = true
 DamageFactor = 0.8
 
 ; RealismSource = MCHO plane scripted pass; MiG-29 Fulcrum.
+TechYear = 1983

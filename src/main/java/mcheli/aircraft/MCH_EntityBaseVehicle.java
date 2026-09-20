@@ -5828,6 +5828,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public boolean interactFirstSeat(EntityPlayer player) {
+      if(!mcheli.tech.MCH_TechTierManager.isUnlocked(this.getAcInfo(), player, super.worldObj)) {
+         mcheli.tech.MCH_TechTierManager.notifyLocked(player, this.getAcInfo());
+         return false;
+      }
       if(!super.worldObj.isRemote && !this.switchSeat && !this.canPlayerEnterVehicle(player)) {
          this.notifyVehicleAccessDenied(player);
          return false;
@@ -7553,6 +7557,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       }
       if(getAcInfo() == null) {
          return this.rejectInteraction(player, "aircraft_info_null");
+      }
+      if(!mcheli.tech.MCH_TechTierManager.isUnlocked(this.getAcInfo(), player, super.worldObj)) {
+         mcheli.tech.MCH_TechTierManager.notifyLocked(player, this.getAcInfo());
+         return this.rejectInteraction(player, "technology_tier_locked");
       }
       if(!checkTeam(player)) {
          return this.rejectInteraction(player, "team_check_failed");

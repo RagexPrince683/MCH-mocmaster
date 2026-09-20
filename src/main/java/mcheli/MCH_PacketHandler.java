@@ -27,6 +27,15 @@ public class MCH_PacketHandler extends W_PacketHandler {
 
    public void onPacket(ByteArrayDataInput data, EntityPlayer entityPlayer) {
       int msgid = this.getMessageId(data);
+      if(!entityPlayer.worldObj.isRemote && isVehicleControlPacket(msgid)) {
+         mcheli.aircraft.MCH_EntityBaseVehicle vehicle =
+                 mcheli.aircraft.MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(entityPlayer);
+         if(vehicle != null && !mcheli.tech.MCH_TechTierManager.isUnlocked(
+                 vehicle.getAcInfo(), entityPlayer, entityPlayer.worldObj)) {
+            mcheli.tech.MCH_TechTierManager.notifyLocked(entityPlayer, vehicle.getAcInfo());
+            return;
+         }
+      }
       switch(msgid) {
       case 0:
       default:
@@ -166,6 +175,21 @@ public class MCH_PacketHandler extends W_PacketHandler {
       } catch (Exception exception) {
          exception.printStackTrace();
          return 0;
+      }
+   }
+
+   private static boolean isVehicleControlPacket(int msgid) {
+      switch(msgid) {
+      case MCH_Packet.MSGID_SEAT_PLAYER_CONTROL:
+      case MCH_Packet.MSGID_HELI_PLAYER_CONTROL:
+      case MCH_Packet.MSGID_PLANE_PLAYER_CONTROL:
+      case MCH_Packet.MSGID_SHIP_PLAYER_CONTROL:
+      case MCH_Packet.MSGID_TANK_PLAYER_CONTROL:
+      case MCH_Packet.MSGID_VEHICLE_PLAYER_CONTROL:
+      case MCH_Packet.MSGID_UAV_STATUS:
+         return true;
+      default:
+         return false;
       }
    }
 }

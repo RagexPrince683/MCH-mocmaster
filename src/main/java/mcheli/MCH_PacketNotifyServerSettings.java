@@ -18,6 +18,9 @@ public class MCH_PacketNotifyServerSettings extends MCH_Packet {
    public double stingerLockRange = 120.0D;
    //todo change bullshit
    public boolean enableDebugBoundingBox = false;
+   public boolean enableTechTiers = false;
+   public int unlockedTechTierHalfSteps = 0;
+   public int[] techTierMaximumYears = new int[11];
 
 
    public int getMessageID() {
@@ -32,6 +35,9 @@ public class MCH_PacketNotifyServerSettings extends MCH_Packet {
          this.enablePVP = this.getBit(e, 2);
          this.stingerLockRange = (double)data.readFloat();
          this.enableDebugBoundingBox = this.getBit(e, 3);
+         this.enableTechTiers = data.readBoolean();
+         this.unlockedTechTierHalfSteps = data.readByte();
+         for(int i = 0; i < this.techTierMaximumYears.length; ++i) this.techTierMaximumYears[i] = data.readInt();
       } catch (Exception exception) {
          exception.printStackTrace();
       }
@@ -47,6 +53,9 @@ public class MCH_PacketNotifyServerSettings extends MCH_Packet {
          e1 = this.setBit(e1, 3, this.enableDebugBoundingBox);
          dos.writeByte(e1);
          dos.writeFloat((float)this.stingerLockRange);
+         dos.writeBoolean(this.enableTechTiers);
+         dos.writeByte(this.unlockedTechTierHalfSteps);
+         for(int i = 0; i < this.techTierMaximumYears.length; ++i) dos.writeInt(this.techTierMaximumYears[i]);
       } catch (IOException oException) {
          oException.printStackTrace();
       }
@@ -64,6 +73,12 @@ public class MCH_PacketNotifyServerSettings extends MCH_Packet {
       s.stingerLockRange = MCH_Config.StingerLockRange.prmDouble;
       configuration = MCH_MOD.config;
       s.enableDebugBoundingBox = MCH_Config.EnableDebugBoundingBox.prmBool;
+      s.enableTechTiers = mcheli.tech.MCH_TechTierManager.serverEnabled();
+      net.minecraft.world.World tierWorld = player != null ? player.worldObj
+              : (MinecraftServer.getServer() == null ? null : MinecraftServer.getServer().worldServerForDimension(0));
+      s.unlockedTechTierHalfSteps = mcheli.tech.MCH_TechTierManager.toHalfSteps(
+              mcheli.tech.MCH_TechTierManager.getUnlockedTier(tierWorld));
+      s.techTierMaximumYears = mcheli.tech.MCH_TechTierManager.serverMaxYears();
       if(player != null) {
          W_Network.sendToPlayer(s, player);
       } else {

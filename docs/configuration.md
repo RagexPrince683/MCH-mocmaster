@@ -406,3 +406,8 @@ Snapshots are stored in `mcheli/cache/vehicle-icons-v2` under the Minecraft game
 that directory while the game is stopped, or use the snapshot cache clear action, to rebuild every
 icon. A targeted vehicle reload invalidates only that appearance; an ordinary resource reload
 releases GPU textures and lazily reloads the valid PNGs.
+## Technology tiers
+
+MC Heli's independent progression settings are written to `config/mcheli_tech.cfg`. The system is disabled by default so existing worlds and packs retain their former behavior. `enabled` turns enforcement on, `operatorBypass` and `creativeBypass` control non-progression access, and `tierMaximumYears` defines eleven strictly increasing inclusive year ceilings for tiers `0.0` through `5.0`.
+
+The current unlocked tier is saved with the world and synchronized to connected clients. Vehicle definitions lacking both technology fields remain unrestricted; malformed metadata is logged and ignored.
