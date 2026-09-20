@@ -5572,22 +5572,36 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(super.riddenByEntity != null && !super.riddenByEntity.isDead && super.riddenByEntity.ridingEntity == this) {
          MCH_Dismount.observeMount(this, super.riddenByEntity, this, 0);
          float riddenEntityYOffset = super.riddenByEntity.yOffset;
-         float offset = 0.0F;
-         if(super.riddenByEntity instanceof EntityPlayer && !W_Lib.isClientPlayer(super.riddenByEntity)) {
-            --offset;
-         }
-
-         Vec3 v;
+         double configuredSeatY;
+         Vec3 transformedSeatPosition;
          if(info != null && info.length > 0) {
-            v = this.getTransformedPosition(info[0].pos.xCoord, info[0].pos.yCoord + (double)riddenEntityYOffset - 0.5D, info[0].pos.zCoord, px, py, pz, info[0].rotSeat);
+            configuredSeatY = info[0].pos.yCoord;
+            double riderAnchorY = configuredSeatY + (double)riddenEntityYOffset - 0.5D;
+            transformedSeatPosition = this.getTransformedPosition(info[0].pos.xCoord, riderAnchorY, info[0].pos.zCoord, px, py, pz, info[0].rotSeat);
          } else {
-            v = this.getTransformedPosition(0.0D, (double)(riddenEntityYOffset - 1.0F), 0.0D);
+            configuredSeatY = 0.0D;
+            double riderAnchorY = (double)(riddenEntityYOffset - 1.0F);
+            transformedSeatPosition = this.getTransformedPosition(0.0D, riderAnchorY, 0.0D);
          }
 
-         // Keep the legacy rendered feet location without breaking Entity's anchor relation.
-         super.riddenByEntity.setPosition(v.xCoord, v.yCoord + riddenEntityYOffset, v.zCoord);
+         // The transformed position already contains yOffset. Entity.setPosition then uses the
+         // unchanged yOffset to keep boundingBox.minY = posY - yOffset + ySize.
+         super.riddenByEntity.setPosition(transformedSeatPosition.xCoord, transformedSeatPosition.yCoord, transformedSeatPosition.zCoord);
+         this.debugMountedRiderPosition(super.riddenByEntity, 0, configuredSeatY, transformedSeatPosition.yCoord);
       }
 
+   }
+
+   void debugMountedRiderPosition(Entity rider, int seatId, double configuredSeatY, double transformedSeatY) {
+      if(rider == null || MCH_Config.EnableMCHLibDebugLog == null || !MCH_Config.EnableMCHLibDebugLog.prmBool) {
+         return;
+      }
+
+      MCH_Lib.DbgLog(super.worldObj,
+              "[MCH-RIDER-POS] configuredY=%.4f transformedY=%.4f posY=%.4f boundingMinY=%.4f yOffset=%.4f ySize=%.4f rider=%s side=%s seat=%s",
+              new Object[]{Double.valueOf(configuredSeatY), Double.valueOf(transformedSeatY), Double.valueOf(rider.posY),
+                      Double.valueOf(rider.boundingBox.minY), Float.valueOf(rider.yOffset), Float.valueOf(rider.ySize),
+                      rider.getClass().getName(), super.worldObj.isRemote?"CLIENT":"SERVER", seatId == 0?"pilot":"passenger:" + seatId});
    }
 
    public void updateRiderPosition() {

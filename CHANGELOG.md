@@ -1,3 +1,9 @@
+# Fix Mounted Pilot Seat Height Regression (PR pending)
+
+- Restored the pilot rider model to the configured, transformed seat anchor without adding the rider's `yOffset` twice.
+- Kept the rider's `yOffset` unchanged so Forge maintains a consistent `posY` and bounding-box anchor relationship.
+- Added pilot and passenger mounted-position diagnostics behind the existing MCHeli debug logging control.
+
 # Rename Decompiled Local Variables (PR pending)
 
 - Replaced numbered decompiler-style local variables and parameters throughout maintained Java sources with purpose-based names.
