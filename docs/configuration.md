@@ -103,13 +103,7 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `Ship3DItemIconScale` | `1.0` | Global scale multiplier for ship 3D item icons. |
 | `Tank3DItemIconScale` | `1.0` | Global scale multiplier for tank 3D item icons. |
 | `Turret3DItemIconScale` | `1.0` | Global scale multiplier for turret/static vehicle 3D item icons. |
-| `EnableVehicleInventorySnapshots` | `true` | Uses persistent PNG captures of the original 3D model for inventory and NEI icons. |
-| `AutoGenerateVehicleInventorySnapshots` | `true` | Generates missing captures on the render thread with visible items ahead of background work. |
-| `VehicleSnapshotResolution` | `128` | Width and height of generated transparent PNG icons. |
-| `VehicleSnapshotGenerationInterval` | `500` | Baseline generation interval in milliseconds; generation accelerates only while FPS is safely above the configured minimum. |
-| `VehicleSnapshotMinimumFps` | `45` | Pauses snapshot generation below this measured render rate. |
-| `VehicleSnapshotTextureLimit` | `128` | Maximum uploaded snapshot textures retained in the client LRU; evicted PNGs remain on disk. |
-| `DebugVehicleInventorySnapshots` | `false` | Enables bounded snapshot state, queue, cache, capability, failure, and timing diagnostics. |
+| `DebugVehicleLiveIcons` | `false` | Logs bounded live-icon render counts, prepared-model hits, model-load/VBO-preparation timing, duplicate requests avoided, texture lookup time, and average draw time. |
 | `HideKeybind` | `false` | Hides keybind display/help where implemented. |
 | `RenderDistanceWeight` | `1000.0` | Render-distance weight for mod rendering. |
 | `EnableAircraftLODRender` | `true` | Enables client-only far-distance model displays for aircraft, tanks, turrets, and ships. |
@@ -392,20 +386,18 @@ Hold-freelook is hold-to-orbit: mouse input changes raw orbit yaw/pitch targets,
 `KeyVehicleLock` defaults to LWJGL key code `24` (**O**). While directly riding
 the pilot seat, press it to ask the server to lock or unlock vehicle entry.
 The server, not the client key binding, decides whether the request is allowed.
-# Vehicle inventory snapshot icons
+# Live 3D vehicle inventory icons
 
-Vehicle inventory and NEI icons use persistent PNG snapshots by default. Missing snapshots show a
-shared three-dimensional snapshot placeholder until fair, FPS-paced generation completes; they do
-not fall back to the unrelated legacy item art. Held and dropped items still use live
-three-dimensional models. `EnableVehicleInventorySnapshots` controls the snapshot path and
-`AutoGenerateVehicleInventorySnapshots` controls background generation. Resolution, generation
-interval, minimum generation FPS, loaded texture limit, and diagnostics are configurable through the
-corresponding `VehicleSnapshot*` and `DebugVehicleInventorySnapshots` settings.
+Vehicle inventory, creative-tab, and NEI icons render the actual retained `IModelCustom` geometry.
+They do not use framebuffer captures, PNG snapshots, textured quads, or disk cache files. The
+ordinary item sprite is a temporary fallback only while a requested model is being loaded and its
+retained VBO groups are prepared; the icon switches to genuine 3D as soon as preparation completes.
 
-Snapshots are stored in `mcheli/cache/vehicle-icons-v2` under the Minecraft game directory. Delete
-that directory while the game is stopped, or use the snapshot cache clear action, to rebuild every
-icon. A targeted vehicle reload invalidates only that appearance; an ordinary resource reload
-releases GPU textures and lazily reloads the valid PNGs.
+Preparation is lazy and deduplicated. At most one monolithic model load or one VBO group is handled
+at the end of a render frame, and item-render callbacks never parse models, upload VBOs, read pixels,
+or write files. Resource and targeted vehicle reloads invalidate the corresponding in-memory
+prepared references. Set `DebugVehicleLiveIcons = true` for periodic aggregate timing and queue
+diagnostics; it does not log every icon draw.
 ## Technology tiers
 
 MC Heli's independent progression settings are written to `config/mcheli_tech.cfg`. The system is disabled by default so existing worlds and packs retain their former behavior. `enabled` turns enforcement on, `operatorBypass` and `creativeBypass` control non-progression access, and `tierMaximumYears` defines eleven strictly increasing inclusive year ceilings for tiers `0.0` through `5.0`.

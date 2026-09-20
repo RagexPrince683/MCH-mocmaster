@@ -446,6 +446,16 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       }
    }
 
+   /** Draws the active canonical skin overlay through already-prepared geometry. */
+   public static void renderPreparedSkinOverlay(final IModelCustom model) {
+      if(model == null) return;
+      renderSkinOverlayPass(new RenderRunnable() {
+         public void render() {
+            model.renderAll();
+         }
+      });
+   }
+
    private interface RenderRunnable {
       void render();
    }

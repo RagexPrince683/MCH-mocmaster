@@ -697,3 +697,17 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
   1979 production-variant introduction. Generic, fictional, improvised, and near-future definitions
   use consistent approximate years instead of falling through to unrestricted behavior. Static
   completeness validation passed; in-game tier display and gating remain to be tested.
+
+2026-09-20 14:58 — Restore retained live 3D vehicle icons
+
+- Reversed the semantic regression from `53213ea5`/`73210c3b`: inventory, creative-tab, and NEI
+  vehicle icons again draw the actual retained `IModelCustom` geometry instead of framebuffer PNGs
+  on flat quads. Held, dropped, entity, scale, orientation, texture-repair, and skin-overlay paths
+  remain shared with the existing renderer behavior.
+- Kept expensive work outside item callbacks. First requests enter a deduplicated preparation state
+  machine; render-tick work performs at most one lazy model load or one retained VBO-group upload,
+  and later callbacks only bind the resolved texture and draw prepared geometry.
+- Removed active snapshot-generation settings and documented the temporary ordinary-sprite fallback,
+  reload invalidation, and aggregate `DebugVehicleLiveIcons` counters. Offline Java compilation
+  passed; inventory/creative/NEI depth, framing, skins, and stall reduction still require in-game
+  validation.
