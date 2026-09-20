@@ -4,10 +4,14 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import mcheli.wrapper.W_ModelBase;
 import mcheli.wrapper.W_ResourcePath;
 import mcheli.wrapper.modelloader.W_ModelCustom;
+import mcheli.wrapper.modelloader.W_GroupObject;
+import mcheli.wrapper.modelloader.W_MetasequoiaObject;
+import mcheli.wrapper.modelloader.W_WavefrontObject;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraftforge.client.model.IModelCustom;
 
@@ -19,7 +23,10 @@ public class MCH_ModelManager extends W_ModelBase {
 
    private static final ModelRenderer DEFAULT_MODEL;
 
-   private static volatile boolean forceReloadMode = false;
+   private static final AtomicLong REQUESTS = new AtomicLong();
+   private static final AtomicLong PARSED = new AtomicLong();
+   private static final AtomicLong CACHE_HITS = new AtomicLong();
+   private static final AtomicLong FAILURES = new AtomicLong();
 
    static {
       DEFAULT_MODEL = new ModelRenderer(new MCH_ModelManager(), 0, 0);
@@ -29,55 +36,100 @@ public class MCH_ModelManager extends W_ModelBase {
    private MCH_ModelManager() {}
 
    public static void setForceReloadMode(boolean b) {
-      forceReloadMode = b;
+      // Compatibility shim. Reload intent is now carried by each load request.
    }
 
    /** Drops all model objects before a complete client-thread registration pass. */
    public static void clearForReload() {
       MAP.clear();
       mcheli.tank.MCH_TurretPopModelCache.clear();
-      forceReloadMode = true;
    }
 
    public static IModelCustom load(String path, String name) {
       return (name != null && !name.isEmpty()) ? load(path + "/" + name) : null;
    }
 
-   public static IModelCustom load(String name) {
-      if (name == null || name.isEmpty()) return null;
+   public static IModelCustom load(String path, String name, boolean reload) {
+      return (name != null && !name.isEmpty()) ? load(path + "/" + name, reload) : null;
+   }
 
-      if (!forceReloadMode) {
-         IModelCustom existing = MAP.get(name);
-         if (existing != null) return existing;
+   public static IModelCustom load(String name) {
+      return load(name, false);
+   }
+
+   public static IModelCustom load(String name, final boolean reload) {
+      if (name == null || name.isEmpty()) return null;
+      final String canonicalName = name.replace('\\', '/').toLowerCase(java.util.Locale.ROOT);
+      REQUESTS.incrementAndGet();
+
+      if (!reload) {
+         IModelCustom existing = MAP.get(canonicalName);
+         if (existing != null) {
+            CACHE_HITS.incrementAndGet();
+            return existing;
+         }
       }
 
-      return MAP.compute(name, (key, existing) -> {
-         if (existing != null && !forceReloadMode) {
+      return MAP.compute(canonicalName, (key, existing) -> {
+         if (existing != null && !reload) {
+            CACHE_HITS.incrementAndGet();
             return existing;
          }
 
          try {
-            String mqoPath = "assets/mcheli/models/" + name + ".mqo";
-            String objPath = "assets/mcheli/models/" + name + ".obj";
-            String tcnPath = "assets/mcheli/models/" + name + ".tcn";
+            String mqoPath = "assets/mcheli/models/" + canonicalName + ".mqo";
+            String objPath = "assets/mcheli/models/" + canonicalName + ".obj";
+            String tcnPath = "assets/mcheli/models/" + canonicalName + ".tcn";
 
             String modelPath = null;
 
             if (MCH_ResourceHelper.resourceExists(mqoPath)) {
-               modelPath = W_ResourcePath.getModelPath() + "models/" + name + ".mqo";
+               modelPath = W_ResourcePath.getModelPath() + "models/" + canonicalName + ".mqo";
             } else if (MCH_ResourceHelper.resourceExists(objPath)) {
-               modelPath = W_ResourcePath.getModelPath() + "models/" + name + ".obj";
+               modelPath = W_ResourcePath.getModelPath() + "models/" + canonicalName + ".obj";
             } else if (MCH_ResourceHelper.resourceExists(tcnPath)) {
-               modelPath = W_ResourcePath.getModelPath() + "models/" + name + ".tcn";
+               modelPath = W_ResourcePath.getModelPath() + "models/" + canonicalName + ".tcn";
             }
 
-            return (modelPath != null) ? W_ModelBase.loadModel(modelPath) : null;
+            IModelCustom loaded = (modelPath != null) ? W_ModelBase.loadModel(modelPath) : null;
+            if(loaded != null) {
+               PARSED.incrementAndGet();
+               return loaded;
+            }
+            FAILURES.incrementAndGet();
+            return existing;
 
          } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            FAILURES.incrementAndGet();
+            return existing;
          }
       });
+   }
+
+   public static void logDiagnostics() {
+      if(Boolean.getBoolean("mcheli.debugModelLoading")) {
+         long groups = 0L;
+         long faces = 0L;
+         long bytes = 0L;
+         for(IModelCustom model : MAP.values()) {
+            java.util.List groupObjects = model instanceof W_MetasequoiaObject
+                  ? ((W_MetasequoiaObject)model).groupObjects
+                  : model instanceof W_WavefrontObject ? ((W_WavefrontObject)model).groupObjects : null;
+            if(groupObjects == null) {
+               continue;
+            }
+            for(Object object : groupObjects) {
+               W_GroupObject group = (W_GroupObject)object;
+               ++groups;
+               faces += group.getFaceCount();
+               bytes += group.getRetainedGeometryBytes();
+            }
+         }
+         MCH_Lib.Log("Model geometry: uniqueRequests=%d parsed=%d cacheHits=%d joined=%d failures=%d groups=%d faces=%d bytes=%d pending=0",
+               Long.valueOf(REQUESTS.get()), Long.valueOf(PARSED.get()), Long.valueOf(CACHE_HITS.get()),
+               Long.valueOf(0L), Long.valueOf(FAILURES.get()), Long.valueOf(groups), Long.valueOf(faces), Long.valueOf(bytes));
+      }
    }
 
    public static void render(String path, String name) {

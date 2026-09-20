@@ -334,48 +334,9 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       MCH_ModelManager.load("rangefinder");
       MCH_HeliInfoManager.getInstance();
 
-      if (MCH_Config.MultiThreadedModelLoading.prmBool) {
-         System.out.println("Starting multithreaded model loading");
-         MultiThreadModelManager.start(this);
-         return;
-      }
-
-      Iterator var5 = MCH_HeliInfoManager.map.keySet().iterator();
-
-      String var6;
-      while(var5.hasNext()) {
-         var6 = (String)var5.next();
-         this.registerModelsHeli(var6, false);
-      }
-
-      var5 = MCP_PlaneInfoManager.map.keySet().iterator();
-
-      while(var5.hasNext()) {
-         var6 = (String)var5.next();
-         this.registerModelsPlane(var6, false);
-      }
-
-      var5 = MCH_ShipInfoManager.map.keySet().iterator();
-
-      while(var5.hasNext()) {
-         var6 = (String)var5.next();
-         this.registerModelsShip(var6, false);
-      }
-
-      MCH_TankInfoManager.getInstance();
-      var5 = MCH_TankInfoManager.map.keySet().iterator();
-
-      while(var5.hasNext()) {
-         var6 = (String)var5.next();
-         this.registerModelsTank(var6, false);
-      }
-
-      var5 = MCH_TurretInfoManager.map.keySet().iterator();
-
-      while(var5.hasNext()) {
-         var6 = (String)var5.next();
-         this.registerModelsVehicle(var6, false);
-      }
+      // Vehicle definitions stay lightweight. Body and part meshes are finalized on
+      // the client render thread when an entity, item, or preview first consumes them.
+      MultiThreadModelManager.start(this);
 
       registerModels_Bullet();
       MCH_DefaultBulletModels.Bullet = this.loadBulletModel("bullet");
@@ -443,10 +404,28 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
    }
 
+   public static void ensureVehicleModel(MCH_BaseVehicleInfo info) {
+      if(info == null || info.model != null || !(MCH_MOD.proxy instanceof MCH_ClientProxy)) {
+         return;
+      }
+      MCH_ClientProxy proxy = (MCH_ClientProxy)MCH_MOD.proxy;
+      if(info instanceof MCH_HeliInfo) {
+         proxy.registerModelsHeli(info.name, false);
+      } else if(info instanceof MCP_PlaneInfo) {
+         proxy.registerModelsPlane(info.name, false);
+      } else if(info instanceof MCH_ShipInfo) {
+         proxy.registerModelsShip(info.name, false);
+      } else if(info instanceof MCH_TankInfo) {
+         proxy.registerModelsTank(info.name, false);
+      } else if(info instanceof MCH_TurretInfo) {
+         proxy.registerModelsVehicle(info.name, false);
+      }
+      MCH_ModelManager.logDiagnostics();
+   }
+
    public void registerModelsHeli(String name, boolean reload) {
-      MCH_ModelManager.setForceReloadMode(reload);
       MCH_HeliInfo info = (MCH_HeliInfo)MCH_HeliInfoManager.map.get(name);
-      info.model = MCH_ModelManager.load("helicopters", info.name);
+      info.model = MCH_ModelManager.load("helicopters", info.name, reload);
 
       MCH_HeliInfo.Rotor rotor;
       for(Iterator i$ = info.rotorList.iterator(); i$.hasNext(); rotor.model = this.loadPartModel("helicopters", info.name, info.model, rotor.modelName)) {
@@ -454,13 +433,11 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       }
 
       this.registerCommonPart("helicopters", info);
-      MCH_ModelManager.setForceReloadMode(false);
    }
 
    public void registerModelsPlane(String name, boolean reload) {
-      MCH_ModelManager.setForceReloadMode(reload);
       MCP_PlaneInfo info = (MCP_PlaneInfo)MCP_PlaneInfoManager.map.get(name);
-      info.model = MCH_ModelManager.load("planes", info.name);
+      info.model = MCH_ModelManager.load("planes", info.name, reload);
 
       Iterator i$;
       MCH_BaseVehicleInfo.DrawnPart w;
@@ -495,13 +472,11 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       }
 
       this.registerCommonPart("planes", info);
-      MCH_ModelManager.setForceReloadMode(false);
    }
 
    public void registerModelsShip(String name, boolean reload) {
-      MCH_ModelManager.setForceReloadMode(reload);
       MCH_ShipInfo info = (MCH_ShipInfo)MCH_ShipInfoManager.map.get(name);
-      info.model = MCH_ModelManager.load("ships", info.name);
+      info.model = MCH_ModelManager.load("ships", info.name, reload);
 
       Iterator i$;
       MCH_BaseVehicleInfo.DrawnPart w;
@@ -536,14 +511,12 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       }
 
       this.registerCommonPart("ships", info);
-      MCH_ModelManager.setForceReloadMode(false);
    }
 
    public void registerModelsVehicle(String name, boolean reload) {
-      MCH_ModelManager.setForceReloadMode(reload);
       MCH_TurretInfo info = (MCH_TurretInfo)MCH_TurretInfoManager.map.get(name);
       String turretDirectory = info.getDirectoryName();
-      info.model = MCH_ModelManager.load(turretDirectory, info.name);
+      info.model = MCH_ModelManager.load(turretDirectory, info.name, reload);
       Iterator i$ = info.partList.iterator();
 
       while(i$.hasNext()) {
@@ -555,15 +528,12 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       }
 
       this.registerCommonPart(turretDirectory, info);
-      MCH_ModelManager.setForceReloadMode(false);
    }
 
    public void registerModelsTank(String name, boolean reload) {
-      MCH_ModelManager.setForceReloadMode(reload);
       MCH_TankInfo info = (MCH_TankInfo)MCH_TankInfoManager.map.get(name);
-      info.model = MCH_ModelManager.load("tanks", info.name);
+      info.model = MCH_ModelManager.load("tanks", info.name, reload);
       this.registerCommonPart("tanks", info);
-      MCH_ModelManager.setForceReloadMode(false);
    }
 
    public MCH_BulletModel loadBulletModel(String name) {
