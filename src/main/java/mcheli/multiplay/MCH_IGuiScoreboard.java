@@ -4,5 +4,5 @@ import mcheli.multiplay.MCH_GuiScoreboard_Base;
 
 public interface MCH_IGuiScoreboard {
 
-   void switchScreen(MCH_GuiScoreboard_Base.SCREEN_ID var1);
+   void switchScreen(MCH_GuiScoreboard_Base.SCREEN_ID result1);
 }

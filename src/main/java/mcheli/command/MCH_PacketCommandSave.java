@@ -18,8 +18,8 @@ public class MCH_PacketCommandSave extends MCH_Packet {
    public void readData(ByteArrayDataInput data) {
       try {
          this.str = data.readUTF();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -27,8 +27,8 @@ public class MCH_PacketCommandSave extends MCH_Packet {
    public void writeData(DataOutputStream dos) {
       try {
          dos.writeUTF(this.str);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

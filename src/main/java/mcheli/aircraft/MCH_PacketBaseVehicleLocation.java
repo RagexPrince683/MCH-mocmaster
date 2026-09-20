@@ -20,40 +20,40 @@ public class MCH_PacketBaseVehicleLocation extends MCH_Packet {
 
 
     @Override
-    public void readData(ByteArrayDataInput var1) {
-        x = var1.readDouble();
-        y = var1.readDouble();
-        z = var1.readDouble();
+    public void readData(ByteArrayDataInput byteArrayDataInput) {
+        x = byteArrayDataInput.readDouble();
+        y = byteArrayDataInput.readDouble();
+        z = byteArrayDataInput.readDouble();
 
 
-        rotX = var1.readDouble();
-        rotY = var1.readDouble();
-        rotZ = var1.readDouble();
+        rotX = byteArrayDataInput.readDouble();
+        rotY = byteArrayDataInput.readDouble();
+        rotZ = byteArrayDataInput.readDouble();
 
-        entityId = var1.readInt();
+        entityId = byteArrayDataInput.readInt();
 
 
-        model = var1.readUTF();
+        model = byteArrayDataInput.readUTF();
 
-        texture = var1.readUTF();
+        texture = byteArrayDataInput.readUTF();
     }
 
     @Override
-    public void writeData(DataOutputStream var1) {
+    public void writeData(DataOutputStream dataOutputStream) {
         try {
-            var1.writeDouble(x);
-            var1.writeDouble(y);
-            var1.writeDouble(z);
+            dataOutputStream.writeDouble(x);
+            dataOutputStream.writeDouble(y);
+            dataOutputStream.writeDouble(z);
 
 
-            var1.writeDouble(rotX);
-            var1.writeDouble(rotY);
-            var1.writeDouble(rotZ);
+            dataOutputStream.writeDouble(rotX);
+            dataOutputStream.writeDouble(rotY);
+            dataOutputStream.writeDouble(rotZ);
 
-            var1.writeInt(entityId);
+            dataOutputStream.writeInt(entityId);
 
-            var1.writeUTF(model);
-            var1.writeUTF(texture);
+            dataOutputStream.writeUTF(model);
+            dataOutputStream.writeUTF(texture);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -75,7 +75,7 @@ public class MCH_PacketBaseVehicleLocation extends MCH_Packet {
             s.model = ac.getAcInfo().name;
             try {
                 s.texture = "textures/planes/" + ac.getTextureName() + ".png";
-            } catch (Exception var15) {
+            } catch (Exception exception) {
                 System.out.println("Texture not found : " + ac.getTextureName());
                 s.texture = "textures/blocks/planks_oak.png";
             }

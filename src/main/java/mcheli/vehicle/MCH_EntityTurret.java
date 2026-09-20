@@ -92,7 +92,7 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
    }
 
    public boolean canMountWithNearEmptyMinecart() {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       return MCH_Config.MountMinecartVehicle.prmBool;
    }
 
@@ -357,9 +357,9 @@ public class MCH_EntityTurret extends MCH_EntityBaseVehicle {
          }
       }
 
-      double var9 = (double)(5 - y + 1) / 5.0D;
+      double result = (double)(5 - y + 1) / 5.0D;
       if(b) {
-         for(k = 0; k < (int)(this.getCurrentThrottle() * 6.0D * var9); ++k) {
+         for(k = 0; k < (int)(this.getCurrentThrottle() * 6.0D * result); ++k) {
             float f3 = 0.25F;
             super.worldObj.spawnParticle("explode", super.posX + (super.rand.nextDouble() - 0.5D), particlePosY + (super.rand.nextDouble() - 0.5D), super.posZ + (super.rand.nextDouble() - 0.5D), (super.rand.nextDouble() - 0.5D) * 2.0D, -0.4D, (super.rand.nextDouble() - 0.5D) * 2.0D);
          }

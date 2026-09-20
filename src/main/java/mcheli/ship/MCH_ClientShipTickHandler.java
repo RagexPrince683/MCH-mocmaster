@@ -62,50 +62,50 @@ public class MCH_ClientShipTickHandler extends MCH_BaseVehicleClientTickHandler 
         }
 
         super.isBeforeRiding = super.isRiding;
-        EntityClientPlayerMP var7 = super.mc.thePlayer;
-        MCH_EntityShip var8 = null;
-        boolean var9 = true;
-        if(var7 != null) {
-            if(var7.ridingEntity instanceof MCH_EntityShip) {
-                var8 = (MCH_EntityShip)var7.ridingEntity;
-            } else if(var7.ridingEntity instanceof MCH_EntitySeat) {
-                MCH_EntitySeat var10 = (MCH_EntitySeat)var7.ridingEntity;
-                if(var10.getParent() instanceof MCH_EntityShip) {
-                    var9 = false;
-                    var8 = (MCH_EntityShip)var10.getParent();
+        EntityClientPlayerMP player2 = super.mc.thePlayer;
+        MCH_EntityShip shipEntity = null;
+        boolean isMounted = true;
+        if(player2 != null) {
+            if(player2.ridingEntity instanceof MCH_EntityShip) {
+                shipEntity = (MCH_EntityShip)player2.ridingEntity;
+            } else if(player2.ridingEntity instanceof MCH_EntitySeat) {
+                MCH_EntitySeat seatEntity = (MCH_EntitySeat)player2.ridingEntity;
+                if(seatEntity.getParent() instanceof MCH_EntityShip) {
+                    isMounted = false;
+                    shipEntity = (MCH_EntityShip)seatEntity.getParent();
                 }
-            } else if(var7.ridingEntity instanceof MCH_EntityUavStation) {
-                MCH_EntityUavStation var11 = (MCH_EntityUavStation)var7.ridingEntity;
-                if(var11.getControlAircract() instanceof MCH_EntityShip) {
-                    var8 = (MCH_EntityShip)var11.getControlAircract();
+            } else if(player2.ridingEntity instanceof MCH_EntityUavStation) {
+                MCH_EntityUavStation uavStationEntity = (MCH_EntityUavStation)player2.ridingEntity;
+                if(uavStationEntity.getControlAircract() instanceof MCH_EntityShip) {
+                    shipEntity = (MCH_EntityShip)uavStationEntity.getControlAircract();
                 }
             }
         }
 
-        if(var8 != null && var8.getAcInfo() != null) {
-            this.update(var7, var8);
-            MCH_ViewEntityDummy var12 = MCH_ViewEntityDummy.getInstance(super.mc.theWorld);
-            var12.update(var8.camera);
+        if(shipEntity != null && shipEntity.getAcInfo() != null) {
+            this.update(player2, shipEntity);
+            MCH_ViewEntityDummy viewEntityDummy2 = MCH_ViewEntityDummy.getInstance(super.mc.theWorld);
+            viewEntityDummy2.update(shipEntity.camera);
             if(!inGUI) {
-                if(!var8.isDestroyed()) {
-                    this.playerControl(var7, var8, var9);
+                if(!shipEntity.isDestroyed()) {
+                    this.playerControl(player2, shipEntity, isMounted);
                 }
             } else {
-                this.playerControlInGUI(var7, var8, var9);
+                this.playerControlInGUI(player2, shipEntity, isMounted);
             }
 
             boolean hideHand = true;
-            if((!var9 || !var8.isAlwaysCameraView()) && !var8.getIsGunnerMode(var7) && var8.getCameraId() <= 0) {
-                MCH_Lib.setRenderViewEntity(var7);
-                if(!var9 && var8.getCurrentWeaponID(var7) < 0) {
+            if((!isMounted || !shipEntity.isAlwaysCameraView()) && !shipEntity.getIsGunnerMode(player2) && shipEntity.getCameraId() <= 0) {
+                MCH_Lib.setRenderViewEntity(player2);
+                if(!isMounted && shipEntity.getCurrentWeaponID(player2) < 0) {
                     hideHand = false;
                 }
             } else {
-                MCH_Lib.setRenderViewEntity(var12);
+                MCH_Lib.setRenderViewEntity(viewEntityDummy2);
             }
 
             if(hideHand) {
-                MCH_Lib.disableFirstPersonItemRender(var7.getCurrentEquippedItem());
+                MCH_Lib.disableFirstPersonItemRender(player2.getCurrentEquippedItem());
             }
 
             super.isRiding = true;
@@ -113,11 +113,11 @@ public class MCH_ClientShipTickHandler extends MCH_BaseVehicleClientTickHandler 
             super.isRiding = false;
         }
 
-        if(!super.isBeforeRiding && super.isRiding && var8 != null) {
-            MCH_ViewEntityDummy.getInstance(super.mc.theWorld).setPosition(var8.posX, var8.posY + 0.5D, var8.posZ);
+        if(!super.isBeforeRiding && super.isRiding && shipEntity != null) {
+            MCH_ViewEntityDummy.getInstance(super.mc.theWorld).setPosition(shipEntity.posX, shipEntity.posY + 0.5D, shipEntity.posZ);
         } else if(super.isBeforeRiding && !super.isRiding) {
             MCH_Lib.enableFirstPersonItemRender();
-            MCH_Lib.setRenderViewEntity(var7);
+            MCH_Lib.setRenderViewEntity(player2);
             W_Reflection.setCameraRoll(0.0F);
         }
 

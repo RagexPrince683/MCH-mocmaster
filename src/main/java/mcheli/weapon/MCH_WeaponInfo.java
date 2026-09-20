@@ -663,17 +663,17 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
                 } else if (item.equalsIgnoreCase("DisableSmoke")) {
                     this.disableSmoke = this.toBool(data);
                 } else {
-                    float var10;
+                    float result;
                     if (item.equalsIgnoreCase("SetCartridge")) {
                         s = data.split("\\s*,\\s*");
                         if (s.length > 0 && s[0].length() > 0) {
-                            var10 = s.length >= 2 ? this.toFloat(s[1]) : 0.0F;
-                            float var11 = s.length >= 3 ? this.toFloat(s[2]) : 0.0F;
+                            result = s.length >= 2 ? this.toFloat(s[1]) : 0.0F;
+                            float result2 = s.length >= 3 ? this.toFloat(s[2]) : 0.0F;
                             float pt = s.length >= 4 ? this.toFloat(s[3]) : 0.0F;
                             float sc = s.length >= 5 ? this.toFloat(s[4]) : 1.0F;
                             float gr = s.length >= 6 ? this.toFloat(s[5]) : -0.04F;
                             float bo = s.length >= 7 ? this.toFloat(s[6]) : 0.5F;
-                            this.cartridge = new MCH_Cartridge(s[0].toLowerCase(), var10, var11, pt, bo, gr, sc);
+                            this.cartridge = new MCH_Cartridge(s[0].toLowerCase(), result, result2, pt, bo, gr, sc);
                         }
                     } else if (!item.equalsIgnoreCase("BulletColorInWater") && !item.equalsIgnoreCase("BulletColor") && !item.equalsIgnoreCase("SmokeColor")) {
                         if (item.equalsIgnoreCase("SmokeSize")) {
@@ -722,44 +722,44 @@ public class MCH_WeaponInfo extends MCH_BaseInfo {
                         } else if (item.equalsIgnoreCase("DamageFactor")) {
                             s = this.splitParam(data);
                             if (s.length >= 2) {
-                                Class var13 = null;
-                                String var14 = s[0].toLowerCase();
-                                if (var14.equals("player")) {
-                                    var13 = EntityPlayer.class;
-                                } else if (var14.equals("other") || var14.equals("others")) {
-                                    var13 = EntityLivingBase.class;
-                                } else if (!var14.equals("heli") && !var14.equals("helicopter")) {
-                                    if (var14.equals("plane")) {
-                                        var13 = MCP_EntityPlane.class;
-                                    } else if (var14.equals("tank")) {
-                                        var13 = MCH_EntityTank.class;
-                                    } else if (var14.equals("vehicle")) {
-                                        var13 = MCH_EntityTurret.class;
-                                    } else if (var14.equals("ship")) {
-                                        var13 = MCH_EntityShip.class;
+                                Class type2 = null;
+                                String token = s[0].toLowerCase();
+                                if (token.equals("player")) {
+                                    type2 = EntityPlayer.class;
+                                } else if (token.equals("other") || token.equals("others")) {
+                                    type2 = EntityLivingBase.class;
+                                } else if (!token.equals("heli") && !token.equals("helicopter")) {
+                                    if (token.equals("plane")) {
+                                        type2 = MCP_EntityPlane.class;
+                                    } else if (token.equals("tank")) {
+                                        type2 = MCH_EntityTank.class;
+                                    } else if (token.equals("vehicle")) {
+                                        type2 = MCH_EntityTurret.class;
+                                    } else if (token.equals("ship")) {
+                                        type2 = MCH_EntityShip.class;
                                     }
                                 } else {
-                                    var13 = MCH_EntityHeli.class;
+                                    type2 = MCH_EntityHeli.class;
                                 }
 
-                                if (var13 != null) {
+                                if (type2 != null) {
                                     if (this.damageFactor == null) {
                                         this.damageFactor = new MCH_DamageFactor();
                                     }
 
-                                    this.damageFactor.add(var13, this.toFloat(s[1], 0.0F, 1000000.0F));
+                                    this.damageFactor.add(type2, this.toFloat(s[1], 0.0F, 1000000.0F));
                                 }
                             }
                         }
                     } else {
                         s = data.split("\\s*,\\s*");
                         if (s.length >= 4) {
-                            var10 = 0.003921569F;
-                            MCH_Color var12 = new MCH_Color(0.003921569F * (float) this.toInt(s[0], 0, 255), 0.003921569F * (float) this.toInt(s[1], 0, 255), 0.003921569F * (float) this.toInt(s[2], 0, 255), 0.003921569F * (float) this.toInt(s[3], 0, 255));
+                            result = 0.003921569F;
+                            MCH_Color color2 = new MCH_Color(0.003921569F * (float) this.toInt(s[0], 0, 255), 0.003921569F * (float) this.toInt(s[1], 0, 255), 0.003921569F * (float) this.toInt(s[2], 0, 255), 0.003921569F * (float) this.toInt(s[3], 0, 255));
                             if (item.equalsIgnoreCase("BulletColorInWater")) {
-                                this.colorInWater = var12;
+                                this.colorInWater = color2;
                             } else {
-                                this.color = var12;
+                                this.color = color2;
                             }
                         }
                     }

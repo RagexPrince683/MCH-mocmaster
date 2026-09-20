@@ -86,15 +86,15 @@ public class MCH_GuiTargetMarker extends MCH_Gui {
 
    public static boolean isSpotedEntity(Entity entity) {
       int entityId = entity.getEntityId();
-      Iterator i$ = spotedEntity.keySet().iterator();
+      Iterator iteratedValueIndex = spotedEntity.keySet().iterator();
 
       int key;
       do {
-         if(!i$.hasNext()) {
+         if(!iteratedValueIndex.hasNext()) {
             return false;
          }
 
-         key = ((Integer)i$.next()).intValue();
+         key = ((Integer)iteratedValueIndex.next()).intValue();
       } while(key != entityId);
 
       return true;
@@ -172,18 +172,18 @@ public class MCH_GuiTargetMarker extends MCH_Gui {
    }
 
    public static boolean isEnableEntityMarker() {
-      MCH_Config var10000 = MCH_MOD.config;
-      boolean var0;
+      MCH_Config configuration = MCH_MOD.config;
+      boolean isValid;
       if(MCH_Config.DisplayEntityMarker.prmBool && (Minecraft.getMinecraft().isSingleplayer() || MCH_ServerSettings.enableEntityMarker)) {
-         var10000 = MCH_MOD.config;
+         configuration = MCH_MOD.config;
          if(MCH_Config.EntityMarkerSize.prmDouble > 0.0D) {
-            var0 = true;
-            return var0;
+            isValid = true;
+            return isValid;
          }
       }
 
-      var0 = false;
-      return var0;
+      isValid = false;
+      return isValid;
    }
 
    public void drawGui(EntityPlayer player, boolean isThirdPersonView) {
@@ -219,10 +219,10 @@ public class MCH_GuiTargetMarker extends MCH_Gui {
             tessellator.startDrawing(i == 0?4:1);
          }
 
-         Iterator i$ = entityPos.iterator();
+         Iterator iteratedValueIndex = entityPos.iterator();
 
-         while(i$.hasNext()) {
-            MCH_MarkEntityPos e = (MCH_MarkEntityPos)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_MarkEntityPos e = (MCH_MarkEntityPos)iteratedValueIndex.next();
             int color = COLOR_TABLE[e.type];
             x = (double)(e.pos.get(0) / (float)scale);
             z = (double)e.pos.get(2);
@@ -235,16 +235,16 @@ public class MCH_GuiTargetMarker extends MCH_Gui {
                x = -10000.0D;
             }
 
-            MCH_Config var10000;
+            MCH_Config configuration;
             double MARK_SIZE;
             if(i == 0) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                MARK_SIZE = MCH_Config.EntityMarkerSize.prmDouble;
                if(e.type < MCH_TargetType.POINT.ordinal() && z < 1.0D && x >= 0.0D && x <= (double)DSW && y >= 0.0D && y <= (double)DSH) {
                   this.drawTriangle1(tessellator, x, y, MARK_SIZE, color);
                }
             } else if(e.type == MCH_TargetType.POINT.ordinal() && e.entity != null) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                MARK_SIZE = MCH_Config.BlockMarkerSize.prmDouble;
                double S;
                if(z < 1.0D && x >= 0.0D && x <= (double)(DSW - 20) && y >= 0.0D && y <= (double)(DSH - 40)) {

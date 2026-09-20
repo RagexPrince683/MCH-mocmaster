@@ -27,11 +27,11 @@ public class MCH_ItemLightWeaponBase extends W_Item {
    //}
 //
    ////ontick
-   //protected void onTick(EntityPlayer var6) {
-   //   //EntityClientPlayerMP var6 = super.mc.thePlayer;
-   //   int lightWeaponCount = countLightWeapons(var6);
+   //protected void onTick(EntityPlayer calculatedValue) {
+   //   //EntityClientPlayerMP calculatedValue = super.mc.thePlayer;
+   //   int lightWeaponCount = countLightWeapons(calculatedValue);
    //   if (lightWeaponCount > 1) {
-   //      var6.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, lightWeaponCount, true));
+   //      calculatedValue.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, lightWeaponCount, true));
    //   }
    //   //well hopefully this works, at least it's not client side anymore.
 //

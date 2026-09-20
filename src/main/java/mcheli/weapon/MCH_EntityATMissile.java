@@ -51,9 +51,9 @@ public class MCH_EntityATMissile extends MCH_EntityBaseBullet {
 //      double d = x * x + y * y + z * z;
 //      if(d <= 2250000.0D && !super.targetEntity.isDead) {
 //         if(this.getInfo().proximityFuseDist >= 0.1F && d < (double)this.getInfo().proximityFuseDist) {
-//            MovingObjectPosition var11 = new MovingObjectPosition(super.targetEntity);
-//            var11.entityHit = null;
-//            this.onImpact(var11, 1.0F);
+//            MovingObjectPosition calculatedValue = new MovingObjectPosition(super.targetEntity);
+//            calculatedValue.entityHit = null;
+//            this.onImpact(calculatedValue, 1.0F);
 //         } else {
 //            int rigidityTime = this.getInfo().rigidityTime;
 //            float af = this.getCountOnUpdate() < rigidityTime + this.getInfo().trajectoryParticleStartTick?0.5F:1.0F;

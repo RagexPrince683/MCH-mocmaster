@@ -56,10 +56,10 @@ public class MapVariable implements Variable {
          Class e = obj.getClass();
          Field f = e.getField(field);
          return f.get(obj);
-      } catch (RuntimeException var5) {
-         throw var5;
-      } catch (Exception var6) {
-         throw new RuntimeException(var6);
+      } catch (RuntimeException runtimeException) {
+         throw runtimeException;
+      } catch (Exception exception) {
+         throw new RuntimeException(exception);
       }
    }
 
@@ -68,10 +68,10 @@ public class MapVariable implements Variable {
          Class e = obj.getClass();
          Field f = e.getField(field);
          f.set(obj, val);
-      } catch (RuntimeException var6) {
-         throw var6;
-      } catch (Exception var7) {
-         throw new RuntimeException(var7);
+      } catch (RuntimeException runtimeException) {
+         throw runtimeException;
+      } catch (Exception exception) {
+         throw new RuntimeException(exception);
       }
    }
 }

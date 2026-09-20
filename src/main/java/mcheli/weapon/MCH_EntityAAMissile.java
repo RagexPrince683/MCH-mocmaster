@@ -131,7 +131,7 @@ public class MCH_EntityAAMissile extends MCH_EntityBaseBullet implements MCH_IEn
    }
 
    @Override
-   public boolean canLockEntity(Entity var1) {
+   public boolean canLockEntity(Entity entity) {
       return false;
    }
 }

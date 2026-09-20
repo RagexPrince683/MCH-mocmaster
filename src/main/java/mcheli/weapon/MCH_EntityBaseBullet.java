@@ -489,10 +489,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             double z2 = (super.prevPosZ - this.prevPosZ2) / (double) num;
 
             //if (this.shouldRenderRocketTrail() && name != "rocket") {
-            //   double var7 = 40;
-            //   //x -= super.motionX * (double)var7;
-            //   //y -= super.motionY * (double)var7;
-            //   //z -= super.motionZ * (double)var7;
+            //   double calculatedValue = 40;
+            //   //x -= super.motionX * (double)calculatedValue;
+            //   //y -= super.motionY * (double)calculatedValue;
+            //   //z -= super.motionZ * (double)calculatedValue;
             //}
 
             int i;
@@ -734,8 +734,8 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
         }
 
         if (this.prevMotionX != super.motionX || this.prevMotionY != super.motionY || this.prevMotionZ != super.motionZ) {
-            double var5 = (double) ((float) Math.atan2(super.motionZ, super.motionX));
-            super.rotationYaw = (float) (var5 * 180.0D / 3.141592653589793D) - 90.0F;
+            double motionX2 = (double) ((float) Math.atan2(super.motionZ, super.motionX));
+            super.rotationYaw = (float) (motionX2 * 180.0D / 3.141592653589793D) - 90.0F;
             double r = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
             super.rotationPitch = -((float) (Math.atan2(super.motionY, r) * 180.0D / 3.141592653589793D));
         }
@@ -808,9 +808,9 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             }
 
             if(this.getInfo().explosionAltitude > 0 && MCH_Lib.getBlockIdY(this, 3, -this.getInfo().explosionAltitude) != 0) {
-                MovingObjectPosition var6 = new MovingObjectPosition((int)super.posX, (int)super.posY, (int)super.posZ, 0,
+                MovingObjectPosition movingObjectPosition = new MovingObjectPosition((int)super.posX, (int)super.posY, (int)super.posZ, 0,
                         Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
-                this.onImpact(var6, 1.0F);
+                this.onImpact(movingObjectPosition, 1.0F);
             }
         }
 
@@ -883,10 +883,10 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
 
         // Handle water particles if in water
         if (this.isInWater()) {
-            float var7 = 0.25F;
-            super.worldObj.spawnParticle("bubble", super.posX - super.motionX * (double) var7,
-                    super.posY - super.motionY * (double) var7,
-                    super.posZ - super.motionZ * (double) var7,
+            float motionX3 = 0.25F;
+            super.worldObj.spawnParticle("bubble", super.posX - super.motionX * (double) motionX3,
+                    super.posY - super.motionY * (double) motionX3,
+                    super.posZ - super.motionZ * (double) motionX3,
                     super.motionX, super.motionY, super.motionZ);
         }
 
@@ -1041,7 +1041,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
             boolean list = false;
             if (this.shootingEntity != null && W_MovingObjectPosition.isHitTypeTile(m)) {
                 Block d0 = W_WorldFunc.getBlock(super.worldObj, m.blockX, m.blockY, m.blockZ);
-                MCH_Config var10000 = MCH_MOD.config;
+                MCH_Config configuration = MCH_MOD.config;
                 if (MCH_Config.bulletBreakableBlocks.contains(d0)) {
                     W_WorldFunc.destroyBlock(super.worldObj, m.blockX, m.blockY, m.blockZ, true);
                     list = true;
@@ -1068,28 +1068,28 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 vec31 = W_WorldFunc.getWorldVec3(super.worldObj, m.hitVec.xCoord, m.hitVec.yCoord, m.hitVec.zCoord);
             }
 
-            Entity var22 = null;
-            List var23 = super.worldObj.getEntitiesWithinAABBExcludingEntity(this, super.boundingBox.addCoord(mx, my, mz).expand(21.0D, 21.0D, 21.0D));
-            double var24 = 0.0D;
+            Entity result = null;
+            List entities = super.worldObj.getEntitiesWithinAABBExcludingEntity(this, super.boundingBox.addCoord(mx, my, mz).expand(21.0D, 21.0D, 21.0D));
+            double result2 = 0.0D;
 
-            for (int j = 0; j < var23.size(); ++j) {
-                Entity entity1 = (Entity) var23.get(j);
+            for (int j = 0; j < entities.size(); ++j) {
+                Entity entity1 = (Entity) entities.get(j);
                 if (this.canBeCollidedEntity(entity1)) {
                     float f = 0.3F;
                     AxisAlignedBB axisalignedbb = entity1.boundingBox.expand((double) f, (double) f, (double) f);
                     MovingObjectPosition m1 = axisalignedbb.calculateIntercept(vec3, vec31);
                     if (m1 != null) {
                         double d1 = vec3.distanceTo(m1.hitVec);
-                        if (d1 < var24 || var24 == 0.0D) {
-                            var22 = entity1;
-                            var24 = d1;
+                        if (d1 < result2 || result2 == 0.0D) {
+                            result = entity1;
+                            result2 = d1;
                         }
                     }
                 }
             }
 
-            if (var22 != null) {
-                m = new MovingObjectPosition(var22);
+            if (result != null) {
+                m = new MovingObjectPosition(result);
             }
 
             if (m != null) {
@@ -1111,12 +1111,12 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                     return false;
                 }
 
-                MCH_EntityBaseBullet i$ = (MCH_EntityBaseBullet) entity;
-                if (W_Entity.isEqual(i$.shootingAircraft, this.shootingAircraft)) {
+                MCH_EntityBaseBullet iteratedValueIndex = (MCH_EntityBaseBullet) entity;
+                if (W_Entity.isEqual(iteratedValueIndex.shootingAircraft, this.shootingAircraft)) {
                     return false;
                 }
 
-                if (W_Entity.isEqual(i$.shootingEntity, this.shootingEntity)) {
+                if (W_Entity.isEqual(iteratedValueIndex.shootingEntity, this.shootingEntity)) {
                     return false;
                 }
             }
@@ -1156,16 +1156,16 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                     }
                 }
 
-                MCH_Config var10000 = MCH_MOD.config;
-                Iterator i$1 = MCH_Config.IgnoreBulletHitList.iterator();
+                MCH_Config result = MCH_MOD.config;
+                Iterator iteratedValueIndex1 = MCH_Config.IgnoreBulletHitList.iterator();
 
                 String s;
                 do {
-                    if (!i$1.hasNext()) {
+                    if (!iteratedValueIndex1.hasNext()) {
                         return true;
                     }
 
-                    s = (String) i$1.next();
+                    s = (String) iteratedValueIndex1.next();
                 } while (entity.getClass().getName().toLowerCase().indexOf(s.toLowerCase()) < 0);
 
                 return false;
@@ -1463,7 +1463,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 if (this.power == 1) {
                     ds = new MCH_DamageSource("bullet", this);
                 }
-                MCH_Config var10000 = MCH_MOD.config;
+                MCH_Config result = MCH_MOD.config;
                 float damage = MCH_Config.applyDamageVsEntity(entity, ds, (float) this.getPower() * damageFactor);
                 damage *= this.getInfo() != null ? this.getInfo().getDamageFactor(entity) : 1.0F;
                 entity.attackEntityFrom(ds, damage);
@@ -1481,7 +1481,7 @@ public abstract class MCH_EntityBaseBullet extends W_Entity implements MCH_IChun
                 //todone: add piercing compat here
 
 
-                MCH_Config var10000 = MCH_MOD.config;
+                MCH_Config result = MCH_MOD.config;
                 float damage = MCH_Config.applyDamageVsEntity(entity, ds, (float) this.getPower() * damageFactor);
                 damage *= this.getInfo() != null ? this.getInfo().getDamageFactor(entity) : 1.0F;
                 entity.attackEntityFrom(ds, damage);

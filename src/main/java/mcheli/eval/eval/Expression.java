@@ -42,17 +42,17 @@ public abstract class Expression {
 
    public abstract Object eval();
 
-   public abstract void optimizeLong(Variable var1);
+   public abstract void optimizeLong(Variable result1);
 
-   public abstract void optimizeDouble(Variable var1);
+   public abstract void optimizeDouble(Variable result1);
 
-   public abstract void optimize(Variable var1, Operator var2);
+   public abstract void optimize(Variable result1, Operator result2);
 
-   public abstract void search(Search var1);
+   public abstract void search(Search result1);
 
-   public abstract void refactorName(Refactor var1);
+   public abstract void refactorName(Refactor result1);
 
-   public abstract void refactorFunc(Refactor var1, Rule var2);
+   public abstract void refactorFunc(Refactor result1, Rule result2);
 
    public abstract Expression dup();
 

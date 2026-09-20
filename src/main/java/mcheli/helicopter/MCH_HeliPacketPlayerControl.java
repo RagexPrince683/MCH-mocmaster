@@ -21,8 +21,8 @@ public class MCH_HeliPacketPlayerControl extends MCH_PacketPlayerControlBase {
       try {
          this.switchFold = data.readByte();
          this.unhitchChainId = data.readInt();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -33,8 +33,8 @@ public class MCH_HeliPacketPlayerControl extends MCH_PacketPlayerControlBase {
       try {
          dos.writeByte(this.switchFold);
          dos.writeInt(this.unhitchChainId);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

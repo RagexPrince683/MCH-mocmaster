@@ -73,10 +73,10 @@ public class FunctionExpression extends Col1Expression {
       try {
          Long[] e = new Long[args.size()];
          return super.share.func.evalLong(obj, this.name, (Long[])((Long[])args.toArray(e)));
-      } catch (EvalException var4) {
-         throw var4;
-      } catch (Throwable var5) {
-         throw new EvalException(2401, this.name, super.string, super.pos, var5);
+      } catch (EvalException evalException) {
+         throw evalException;
+      } catch (Throwable throwable) {
+         throw new EvalException(2401, this.name, super.string, super.pos, throwable);
       }
    }
 
@@ -91,10 +91,10 @@ public class FunctionExpression extends Col1Expression {
       try {
          Double[] e = new Double[args.size()];
          return super.share.func.evalDouble(obj, this.name, (Double[])((Double[])args.toArray(e)));
-      } catch (EvalException var4) {
-         throw var4;
-      } catch (Throwable var5) {
-         throw new EvalException(2401, this.name, super.string, super.pos, var5);
+      } catch (EvalException evalException) {
+         throw evalException;
+      } catch (Throwable throwable) {
+         throw new EvalException(2401, this.name, super.string, super.pos, throwable);
       }
    }
 
@@ -109,10 +109,10 @@ public class FunctionExpression extends Col1Expression {
       try {
          Object[] e = new Object[args.size()];
          return super.share.func.evalObject(obj, this.name, args.toArray(e));
-      } catch (EvalException var4) {
-         throw var4;
-      } catch (Throwable var5) {
-         throw new EvalException(2401, this.name, super.string, super.pos, var5);
+      } catch (EvalException evalException) {
+         throw evalException;
+      } catch (Throwable throwable) {
+         throw new EvalException(2401, this.name, super.string, super.pos, throwable);
       }
    }
 

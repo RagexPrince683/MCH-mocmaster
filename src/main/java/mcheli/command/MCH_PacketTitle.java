@@ -24,8 +24,8 @@ public class MCH_PacketTitle extends MCH_Packet {
          this.chatComponent = Serializer.func_150699_a(data.readUTF());
          this.showTime = data.readShort();
          this.position = data.readShort();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -35,8 +35,8 @@ public class MCH_PacketTitle extends MCH_Packet {
          dos.writeUTF(Serializer.func_150696_a(this.chatComponent));
          dos.writeShort(this.showTime);
          dos.writeShort(this.position);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

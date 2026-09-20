@@ -124,7 +124,7 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
    public abstract MCH_BaseVehicleInfo getAircraftInfo();
 
-   public abstract MCH_EntityBaseVehicle createAircraft(World var1, double var2, double var4, double var6, ItemStack var8);
+   public abstract MCH_EntityBaseVehicle createAircraft(World result1, double result2, double result4, double result6, ItemStack result8);
 
    protected boolean shouldPlaceInstantly() {
       return false;
@@ -598,7 +598,7 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
    }
 
    public void rideEntity(ItemStack item, Entity target, EntityPlayer player) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(!MCH_Config.PlaceableOnSpongeOnly.prmBool && target instanceof EntityMinecartEmpty && target.riddenByEntity == null) {
          MCH_EntityBaseVehicle ac = this.spawnAircraft(item, player.worldObj, player, (int)target.posX, (int)target.posY + 2, (int)target.posZ);
          if(!player.worldObj.isRemote && ac != null) {

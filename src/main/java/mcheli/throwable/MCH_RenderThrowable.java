@@ -28,7 +28,7 @@ public class MCH_RenderThrowable extends W_Render {
          if(info.model != null) {
             try {
             this.bindTexture("textures/throwable/" + info.name + ".png");
-                } catch (Exception var11) {
+                } catch (Exception exception) {
                      System.out.println("Texture not found : " + info.name);
                      this.bindTexture(new ResourceLocation("textures/blocks/planks_oak.png"));
                 }

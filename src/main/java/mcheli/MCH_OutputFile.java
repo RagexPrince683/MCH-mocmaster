@@ -19,7 +19,7 @@ public class MCH_OutputFile {
       try {
          this.pw = new PrintWriter(this.file);
          return true;
-      } catch (FileNotFoundException var3) {
+      } catch (FileNotFoundException fileNotFoundException) {
          return false;
       }
    }
@@ -31,8 +31,8 @@ public class MCH_OutputFile {
       try {
          this.pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.file), "UTF-8"));
          return true;
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
          return false;
       }
    }

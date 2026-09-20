@@ -100,11 +100,11 @@ public class MCH_GuiTitle extends MCH_Gui {
          IChatComponent iterator = (IChatComponent)arraylist1.get(ichatcomponent2);
          String[] splitLine = (iterator.getUnformattedTextForChat() + "").split("\n");
          int lineCnt = 0;
-         String[] arr$ = splitLine;
-         int len$ = splitLine.length;
+         String[] iteratedValues = splitLine;
+         int iteratedValueCount = splitLine.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            String sLine = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            String sLine = iteratedValues[iteratedValueIndex];
             String s = this.func_146235_b(iterator.getChatStyle().getFormattingCode() + sLine);
             int j1 = super.mc.fontRenderer.getStringWidth(s);
             ChatComponentText chatcomponenttext1 = new ChatComponentText(s);
@@ -154,11 +154,11 @@ public class MCH_GuiTitle extends MCH_Gui {
       }
 
       arraylist.add(chatcomponenttext);
-      Iterator var28 = arraylist.iterator();
+      Iterator iterator2 = arraylist.iterator();
 
-      while(var28.hasNext()) {
-         IChatComponent var27 = (IChatComponent)var28.next();
-         this.chatLines.add(new ChatLine(displayTime, var27, line));
+      while(iterator2.hasNext()) {
+         IChatComponent chatComponent2 = (IChatComponent)iterator2.next();
+         this.chatLines.add(new ChatLine(displayTime, chatComponent2, line));
       }
 
       while(this.chatLines.size() > 100) {

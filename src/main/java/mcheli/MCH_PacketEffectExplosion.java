@@ -24,8 +24,8 @@ public class MCH_PacketEffectExplosion extends MCH_Packet {
          this.prm.exploderID = data.readInt();
          this.prm.inWater = data.readByte() != 0;
          this.prm.isSmoking = data.readByte() != 0;
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -39,8 +39,8 @@ public class MCH_PacketEffectExplosion extends MCH_Packet {
          dos.writeInt(this.prm.exploderID);
          dos.writeByte(this.prm.inWater?1:0);
          dos.writeByte(this.prm.isSmoking?1:0);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

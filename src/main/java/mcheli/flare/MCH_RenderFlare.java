@@ -18,9 +18,9 @@ public class MCH_RenderFlare extends W_Render {
    public void doRender(Entity entity, double posX, double posY, double posZ, float yaw, float partialTickTime) {
       GL11.glPushMatrix();
       GL11.glEnable(2884);
-      double var10000 = entity.prevPosX + entity.motionX * (double)partialTickTime;
-      var10000 = entity.prevPosY + entity.motionY * (double)partialTickTime;
-      var10000 = entity.prevPosZ + entity.motionZ * (double)partialTickTime;
+      double motionX2 = entity.prevPosX + entity.motionX * (double)partialTickTime;
+      motionX2 = entity.prevPosY + entity.motionY * (double)partialTickTime;
+      motionX2 = entity.prevPosZ + entity.motionZ * (double)partialTickTime;
       GL11.glTranslated(posX, posY, posZ);
       GL11.glRotatef(-entity.rotationYaw, 0.0F, 1.0F, 0.0F);
       GL11.glRotatef(entity.rotationPitch, 1.0F, 0.0F, 0.0F);

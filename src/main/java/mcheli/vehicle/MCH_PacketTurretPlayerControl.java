@@ -27,8 +27,8 @@ public class MCH_PacketTurretPlayerControl extends MCH_PacketPlayerControlBase {
             this.weaponAimYaw = data.readFloat();
             this.weaponAimPitch = data.readFloat();
          }
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -43,8 +43,8 @@ public class MCH_PacketTurretPlayerControl extends MCH_PacketPlayerControlBase {
             dos.writeFloat(this.weaponAimYaw);
             dos.writeFloat(this.weaponAimPitch);
          }
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

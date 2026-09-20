@@ -34,8 +34,8 @@ public class MCH_PacketLightWeaponPlayerControl extends MCH_Packet {
 
          this.cmpReload = data.readByte();
          this.camMode = data.readByte();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -53,8 +53,8 @@ public class MCH_PacketLightWeaponPlayerControl extends MCH_Packet {
 
          dos.writeByte(this.cmpReload);
          dos.writeByte(this.camMode);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

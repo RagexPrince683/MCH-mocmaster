@@ -19,8 +19,8 @@ public class MCH_PacketIndSpotEntity extends MCH_Packet {
    public void readData(ByteArrayDataInput data) {
       try {
          this.targetFilter = data.readInt();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -28,8 +28,8 @@ public class MCH_PacketIndSpotEntity extends MCH_Packet {
    public void writeData(DataOutputStream dos) {
       try {
          dos.writeInt(this.targetFilter);
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }

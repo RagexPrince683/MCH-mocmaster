@@ -19,8 +19,8 @@ public class MCH_TankPacketPlayerControl extends MCH_PacketPlayerControlBase {
 
       try {
          this.switchVtol = data.readByte();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -30,8 +30,8 @@ public class MCH_TankPacketPlayerControl extends MCH_PacketPlayerControlBase {
 
       try {
          dos.writeByte(this.switchVtol);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

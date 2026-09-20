@@ -27,8 +27,8 @@ public class MCH_PacketNotifyMarkPoint extends MCH_Packet {
          this.px = data.readInt();
          this.py = data.readInt();
          this.pz = data.readInt();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -38,8 +38,8 @@ public class MCH_PacketNotifyMarkPoint extends MCH_Packet {
          dos.writeInt(this.px);
          dos.writeInt(this.py);
          dos.writeInt(this.pz);
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }

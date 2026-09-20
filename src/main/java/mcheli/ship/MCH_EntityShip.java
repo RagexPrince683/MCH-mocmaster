@@ -172,7 +172,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     }
 
     public boolean canMountWithNearEmptyMinecart() {
-        MCH_Config var10000 = MCH_MOD.config;
+        MCH_Config configuration = MCH_MOD.config;
         return MCH_Config.MountMinecartShip.prmBool;
     }
 
@@ -348,7 +348,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     }
 
     public float getControlRotYaw(float mouseX, float mouseY, float tick) {
-        MCH_Config var10000 = MCH_MOD.config;
+        MCH_Config configuration = MCH_MOD.config;
         if(MCH_Config.MouseControlFlightSimMode.prmBool) {
             this.rotationByKey(tick);
             return this.addkeyRotValue * 20.0F;
@@ -362,13 +362,13 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     }
 
     public float getControlRotRoll(float mouseX, float mouseY, float tick) {
-        MCH_Config var10000 = MCH_MOD.config;
+        MCH_Config configuration = MCH_MOD.config;
         return MCH_Config.MouseControlFlightSimMode.prmBool?mouseX * 2.0F:(this.getVtolMode() == 0?mouseX * 0.5F:mouseX);
     }
 
     private void rotationByKey(float partialTicks) {
         float rot = 0.2F;
-        MCH_Config var10000 = MCH_MOD.config;
+        MCH_Config configuration = MCH_MOD.config;
         if(!MCH_Config.MouseControlFlightSimMode.prmBool && this.getVtolMode() != 0) {
             rot *= 0.0F;
             System.out.println("vtol mode isn't 0, ships");
@@ -401,7 +401,7 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
             float rot;
             if(isFly && !this.isFreeLookMode() && !super.isGunnerMode && (!this.getAcInfo().isFloat || this.getWaterDepth() <= 0.0D)) {
                 if(isFly) {
-                    MCH_Config var10000 = MCH_MOD.config;
+                    MCH_Config configuration = MCH_MOD.config;
                     if(!MCH_Config.MouseControlFlightSimMode.prmBool) {
                         this.rotationByKey(partialTicks);
                         this.setRotRoll(this.getRotRoll() + this.addkeyRotValue * 0.5F * this.getAcInfo().mobilityRoll);
@@ -579,8 +579,8 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
                             }
                         }
 
-                        Vec3 var16 = ((MCH_ShipInfo.Rotor)this.getShipInfo().rotorList.get(px)).pos;
-                        Vec3 py = MCH_Lib.RotVec3(var16, -yaw, -pitch, -roll);
+                        Vec3 result = ((MCH_ShipInfo.Rotor)this.getShipInfo().rotorList.get(px)).pos;
+                        Vec3 py = MCH_Lib.RotVec3(result, -yaw, -pitch, -roll);
                         double x = super.posX + py.xCoord;
                         double y = super.posY + py.yCoord;
                         double z = super.posZ + py.zCoord;
@@ -595,17 +595,17 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
                         }
                     }
 
-                    double var15 = super.posX;
-                    double var17 = super.posY;
+                    double result2 = super.posX;
+                    double positionX = super.posY;
                     double pz = super.posZ;
                     if(this.getSeatInfo(0) != null && this.getSeatInfo(0).pos != null) {
                         Vec3 pos = MCH_Lib.RotVec3(0.0D, this.getSeatInfo(0).pos.yCoord, -2.0D, -yaw, -pitch, -roll);
-                        var15 += pos.xCoord;
-                        var17 += pos.yCoord;
+                        result2 += pos.xCoord;
+                        positionX += pos.yCoord;
                         pz += pos.zCoord;
                     }
 
-                    this.onUpdate_Particle2SpawnSmoke(rotorNum, var15, var17, pz, rotorNum == 0?2.0F:1.0F, spawnSmoke);
+                    this.onUpdate_Particle2SpawnSmoke(rotorNum, result2, positionX, pz, rotorNum == 0?2.0F:1.0F, spawnSmoke);
                     super.isFirstDamageSmoke = false;
                 }
             }
@@ -660,10 +660,10 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
                     dist = 1.0D;
                 }
 
-                Iterator i$ = this.getAcInfo().particleSplashs.iterator();
+                Iterator iteratedValueIndex = this.getAcInfo().particleSplashs.iterator();
 
-                while(i$.hasNext()) {
-                    MCH_BaseVehicleInfo.ParticleSplash p = (MCH_BaseVehicleInfo.ParticleSplash)i$.next();
+                while(iteratedValueIndex.hasNext()) {
+                    MCH_BaseVehicleInfo.ParticleSplash p = (MCH_BaseVehicleInfo.ParticleSplash)iteratedValueIndex.next();
 
                     for(int i = 0; i < p.num; ++i) {
                         if(dist > 0.03D + (double)super.rand.nextFloat() * 0.1D) {
@@ -704,10 +704,10 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
                 float pitch = this.getRotPitch();
                 float roll = this.getRotRoll();
                 Vec3 nozzleRot = MCH_Lib.RotVec3(0.0D, 0.0D, 1.0D, -yaw - 180.0F, pitch - this.getNozzleRotation(), roll);
-                Iterator i$ = this.planeInfo.nozzles.iterator();
+                Iterator iteratedValueIndex = this.planeInfo.nozzles.iterator();
 
-                while(i$.hasNext()) {
-                    MCH_BaseVehicleInfo.DrawnPart nozzle = (MCH_BaseVehicleInfo.DrawnPart)i$.next();
+                while(iteratedValueIndex.hasNext()) {
+                    MCH_BaseVehicleInfo.DrawnPart nozzle = (MCH_BaseVehicleInfo.DrawnPart)iteratedValueIndex.next();
                     if((double)super.rand.nextFloat() <= this.getCurrentThrottle() * 1.5D) {
                         Vec3 nozzlePos = MCH_Lib.RotVec3(nozzle.pos, -yaw, -pitch, -roll);
                         double x = super.posX + nozzlePos.xCoord + nozzleRot.xCoord;
@@ -1215,20 +1215,20 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
     public void updateCollisionBox() {
         if(this.getAcInfo() != null) {
             //this.WheelMng.updateBlock();
-            MCH_BoundingBox[] arr$ = this.getCalculatedExtraBoundingBoxes();
-            int len$ = arr$.length;
+            MCH_BoundingBox[] iteratedValues = this.getCalculatedExtraBoundingBoxes();
+            int iteratedValueCount = iteratedValues.length;
 
-            MCH_Config var10000;
-            for(int i$ = 0; i$ < len$; ++i$) {
-                MCH_BoundingBox bb = arr$[i$];
+            MCH_Config configuration;
+            for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+                MCH_BoundingBox bb = iteratedValues[iteratedValueIndex];
                 if(super.rand.nextInt(3) == 0) {
-                    var10000 = MCH_MOD.config;
+                    configuration = MCH_MOD.config;
 
                     this.collisionEntity(bb.boundingBox);
                 }
             }
 
-            var10000 = MCH_MOD.config;
+            configuration = MCH_MOD.config;
             //todo config
 
             this.collisionEntity(this.getBoundingBox());
@@ -1282,11 +1282,11 @@ public class MCH_EntityShip extends MCH_EntityBaseVehicle {
         super.updateParts(stat);
         if(!this.isDestroyed()) {
             MCH_Parts[] parts = new MCH_Parts[]{this.partNozzle, this.partWing};
-            MCH_Parts[] arr$ = parts;
-            int len$ = parts.length;
+            MCH_Parts[] iteratedValues = parts;
+            int iteratedValueCount = parts.length;
 
-            for(int i$ = 0; i$ < len$; ++i$) {
-                MCH_Parts p = arr$[i$];
+            for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+                MCH_Parts p = iteratedValues[iteratedValueIndex];
                 if(p != null) {
                     p.updateStatusClient(stat);
                     p.update();

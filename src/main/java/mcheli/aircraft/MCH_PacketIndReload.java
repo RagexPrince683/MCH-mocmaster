@@ -22,8 +22,8 @@ public class MCH_PacketIndReload extends MCH_Packet {
       try {
          this.entityID_Ac = data.readInt();
          this.weaponID = data.readByte();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -32,8 +32,8 @@ public class MCH_PacketIndReload extends MCH_Packet {
       try {
          dos.writeInt(this.entityID_Ac);
          dos.writeByte(this.weaponID);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

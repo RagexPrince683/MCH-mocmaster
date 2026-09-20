@@ -35,7 +35,7 @@ public class InvokeFunction implements Function {
          types[m] = args[m].getClass();
       }
 
-      Method var6 = c.getMethod(name, types);
-      return var6.invoke(obj, args);
+      Method result = c.getMethod(name, types);
+      return result.invoke(obj, args);
    }
 }

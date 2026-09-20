@@ -270,9 +270,9 @@ public class MCH_MOD {
       this.registerItemLightWeaponBullet();
       this.registerItemLightWeapon();
       registerItemAircraft();
-      MCH_DraftingTableBlock var10000 = new MCH_DraftingTableBlock(MCH_Config.BlockID_DraftingTableOFF.prmInt, false);
-      MCH_Config var10002 = config;
-      blockDraftingTable = var10000;
+      MCH_DraftingTableBlock draftingTableBlock = new MCH_DraftingTableBlock(MCH_Config.BlockID_DraftingTableOFF.prmInt, false);
+      MCH_Config configuration = config;
+      blockDraftingTable = draftingTableBlock;
       blockDraftingTable.setBlockName("drafting_table");
       lightBlock = (BlockLight) new BlockLight()
               .setBlockName("mcheli_lightblock")       // must be called BEFORE register
@@ -282,9 +282,9 @@ public class MCH_MOD {
       GameRegistry.registerBlock(lightBlock, "mcheli_lightblock");
 
       blockDraftingTable.setCreativeTab(creativeTabs);
-      var10000 = new MCH_DraftingTableBlock(MCH_Config.BlockID_DraftingTableON.prmInt, true);
-      var10002 = config;
-      blockDraftingTableLit = var10000;
+      draftingTableBlock = new MCH_DraftingTableBlock(MCH_Config.BlockID_DraftingTableON.prmInt, true);
+      configuration = config;
+      blockDraftingTableLit = draftingTableBlock;
       blockDraftingTableLit.setBlockName("lit_drafting_table");
       GameRegistry.registerBlock(blockDraftingTable, "drafting_table");
       //GameRegistry.registerBlock(lightBlock, "mcheli_lightblock");
@@ -354,17 +354,17 @@ public class MCH_MOD {
    @EventHandler
    public void postInit(FMLPostInitializationEvent evt) {
       getPacketHandler().postInitialise();
-      MCH_Config var10001 = config;
+      MCH_Config configuration2 = config;
       creativeTabs.setFixedIconItem(MCH_Config.CreativeTabIcon.prmString);
-      var10001 = config;
+      configuration2 = config;
       creativeTabsHeli.setFixedIconItem(MCH_Config.CreativeTabIconHeli.prmString);
-      var10001 = config;
+      configuration2 = config;
       creativeTabsPlane.setFixedIconItem(MCH_Config.CreativeTabIconPlane.prmString);
-      var10001 = config;
+      configuration2 = config;
       creativeTabsShip.setFixedIconItem(MCH_Config.CreativeTabIconShip.prmString);
-      var10001 = config;
+      configuration2 = config;
       creativeTabsTank.setFixedIconItem(MCH_Config.CreativeTabIconTank.prmString);
-      var10001 = config;
+      configuration2 = config;
       creativeTabsVehicle.setFixedIconItem(MCH_Config.CreativeTabIconVehicle.prmString);
 
 
@@ -431,10 +431,10 @@ public class MCH_MOD {
    public static void registerItemCustom() {
       MCH_Lib.DbgLog(false, "[mcheli.MCH_MOD:registerItemCustom] Starting custom item registration...");
 
-      Iterator<String> i$ = MCH_ItemInfoManager.getKeySet().iterator();
+      Iterator<String> iteratedValueIndex = MCH_ItemInfoManager.getKeySet().iterator();
 
-      while (i$.hasNext()) {
-         String name = i$.next();
+      while (iteratedValueIndex.hasNext()) {
+         String name = iteratedValueIndex.next();
          MCH_Lib.DbgLog(false, "[mcheli.MCH_MOD:registerItemCustom] Processing item: %s", name);
 
          // Get the item info for the current item
@@ -487,9 +487,9 @@ public class MCH_MOD {
 
    private void registerItemRangeFinder() {
       String name = "rangefinder";
-      MCH_ItemRangeFinder var10000 = new MCH_ItemRangeFinder(MCH_Config.ItemID_RangeFinder.prmInt);
-      MCH_Config var10002 = config;
-      MCH_ItemRangeFinder item = var10000;
+      MCH_ItemRangeFinder draftingTableBlock = new MCH_ItemRangeFinder(MCH_Config.ItemID_RangeFinder.prmInt);
+      MCH_Config configuration = config;
+      MCH_ItemRangeFinder item = draftingTableBlock;
       itemRangeFinder = item;
       registerItem(item, "rangefinder", creativeTabs);
       W_LanguageRegistry.addName(item, "Laser Rangefinder");
@@ -530,9 +530,9 @@ public class MCH_MOD {
 
    private void registerItemWrench() {
       String name = "wrench";
-      MCH_ItemWrench var10000 = new MCH_ItemWrench(MCH_Config.ItemID_Wrench.prmInt, ToolMaterial.IRON);
-      MCH_Config var10002 = config;
-      MCH_ItemWrench item = var10000;
+      MCH_ItemWrench draftingTableBlock = new MCH_ItemWrench(MCH_Config.ItemID_Wrench.prmInt, ToolMaterial.IRON);
+      MCH_Config configuration = config;
+      MCH_ItemWrench item = draftingTableBlock;
       itemWrench = item;
       registerItem(item, "wrench", creativeTabs);
       W_LanguageRegistry.addName(item, "Wrench");
@@ -541,9 +541,9 @@ public class MCH_MOD {
 
    public void registerItemInvisible() {
       String name = "internal";
-      MCH_InvisibleItem var10000 = new MCH_InvisibleItem(MCH_Config.ItemID_InvisibleItem.prmInt);
-      MCH_Config var10002 = config;
-      MCH_InvisibleItem item = var10000;
+      MCH_InvisibleItem draftingTableBlock = new MCH_InvisibleItem(MCH_Config.ItemID_InvisibleItem.prmInt);
+      MCH_Config configuration = config;
+      MCH_InvisibleItem item = draftingTableBlock;
       invisibleItem = item;
       registerItem(item, "internal", (MCH_CreativeTabs)null);
    }
@@ -556,9 +556,9 @@ public class MCH_MOD {
 
       for(int i = 0; i < itemUavStation.length; ++i) {
          String nn = i > 0?"" + (i + 1):"";
-         MCH_ItemUavStation var10000 = new MCH_ItemUavStation(MCH_Config.ItemID_UavStation[i].prmInt, 1 + i);
-         MCH_Config var10002 = config;
-         MCH_ItemUavStation item = var10000;
+         MCH_ItemUavStation draftingTableBlock = new MCH_ItemUavStation(MCH_Config.ItemID_UavStation[i].prmInt, 1 + i);
+         MCH_Config configuration = config;
+         MCH_ItemUavStation item = draftingTableBlock;
          itemUavStation[i] = item;
          registerItem(item, "uav_station" + nn, creativeTabs);
          W_LanguageRegistry.addName(item, dispName[i]);
@@ -569,9 +569,9 @@ public class MCH_MOD {
 
    public void registerItemParachute() {
       String name = "parachute";
-      MCH_ItemParachute var10000 = new MCH_ItemParachute(MCH_Config.ItemID_Parachute.prmInt);
-      MCH_Config var10002 = config;
-      MCH_ItemParachute item = var10000;
+      MCH_ItemParachute draftingTableBlock = new MCH_ItemParachute(MCH_Config.ItemID_Parachute.prmInt);
+      MCH_Config configuration = config;
+      MCH_ItemParachute item = draftingTableBlock;
       itemParachute = item;
       registerItem(item, "parachute", creativeTabs);
       W_LanguageRegistry.addName(item, "Parachute");
@@ -580,9 +580,9 @@ public class MCH_MOD {
 
    public void registerItemContainer() {
       String name = "container";
-      MCH_ItemContainer var10000 = new MCH_ItemContainer(MCH_Config.ItemID_Container.prmInt);
-      MCH_Config var10002 = config;
-      MCH_ItemContainer item = var10000;
+      MCH_ItemContainer draftingTableBlock = new MCH_ItemContainer(MCH_Config.ItemID_Container.prmInt);
+      MCH_Config configuration = config;
+      MCH_ItemContainer item = draftingTableBlock;
       itemContainer = item;
       registerItem(item, "container", creativeTabs);
       W_LanguageRegistry.addName(item, "Container");
@@ -591,23 +591,23 @@ public class MCH_MOD {
 
    public void registerItemLightWeapon() {
       String name = "fim92";
-      MCH_ItemLightWeaponBase var10000 = new MCH_ItemLightWeaponBase(MCH_Config.ItemID_Stinger.prmInt, itemStingerBullet);
-      MCH_Config var10002 = config;
-      MCH_ItemLightWeaponBase item = var10000;
+      MCH_ItemLightWeaponBase draftingTableBlock = new MCH_ItemLightWeaponBase(MCH_Config.ItemID_Stinger.prmInt, itemStingerBullet);
+      MCH_Config configuration = config;
+      MCH_ItemLightWeaponBase item = draftingTableBlock;
       itemStinger = item;
       registerItem(item, name, creativeTabs);
       W_LanguageRegistry.addName(item, "FIM-92 Stinger");
       name = "fgm148";
-      var10000 = new MCH_ItemLightWeaponBase(MCH_Config.ItemID_Stinger.prmInt, itemJavelinBullet);
-      var10002 = config;
-      item = var10000;
+      draftingTableBlock = new MCH_ItemLightWeaponBase(MCH_Config.ItemID_Stinger.prmInt, itemJavelinBullet);
+      configuration = config;
+      item = draftingTableBlock;
       itemJavelin = item;
       registerItem(item, name, creativeTabs);
       W_LanguageRegistry.addName(item, "FGM-148 Javelin");
       name = "rpg7";
-      var10000 = new MCH_ItemLightWeaponBase(MCH_Config.ItemID_Stinger.prmInt, itemRpgBullet);
-      var10002 = config;
-      item = var10000;
+      draftingTableBlock = new MCH_ItemLightWeaponBase(MCH_Config.ItemID_Stinger.prmInt, itemRpgBullet);
+      configuration = config;
+      item = draftingTableBlock;
       itemRpg = item;
       registerItem(item, name, creativeTabs);
       W_LanguageRegistry.addName(item, "RPG-7");
@@ -615,23 +615,23 @@ public class MCH_MOD {
 
    public void registerItemLightWeaponBullet() {
       String name = "fim92_bullet";
-      MCH_ItemLightWeaponBullet var10000 = new MCH_ItemLightWeaponBullet(MCH_Config.ItemID_StingerMissile.prmInt);
-      MCH_Config var10002 = config;
-      MCH_ItemLightWeaponBullet item = var10000;
+      MCH_ItemLightWeaponBullet draftingTableBlock = new MCH_ItemLightWeaponBullet(MCH_Config.ItemID_StingerMissile.prmInt);
+      MCH_Config configuration = config;
+      MCH_ItemLightWeaponBullet item = draftingTableBlock;
       itemStingerBullet = item;
       registerItem(item, name, creativeTabs);
       W_LanguageRegistry.addName(item, "FIM-92 Stinger missile");
       name = "fgm148_bullet";
-      var10000 = new MCH_ItemLightWeaponBullet(MCH_Config.ItemID_StingerMissile.prmInt);
-      var10002 = config;
-      item = var10000;
+      draftingTableBlock = new MCH_ItemLightWeaponBullet(MCH_Config.ItemID_StingerMissile.prmInt);
+      configuration = config;
+      item = draftingTableBlock;
       itemJavelinBullet = item;
       registerItem(item, name, creativeTabs);
       W_LanguageRegistry.addName(item, "FGM-148 Javelin missile");
       name = "rpg7_bullet";
-      var10000 = new MCH_ItemLightWeaponBullet(MCH_Config.ItemID_StingerMissile.prmInt);
-      var10002 = config;
-      item = var10000;
+      draftingTableBlock = new MCH_ItemLightWeaponBullet(MCH_Config.ItemID_StingerMissile.prmInt);
+      configuration = config;
+      item = draftingTableBlock;
       itemRpgBullet = item;
       registerItem(item, name, creativeTabs);
       W_LanguageRegistry.addName(item, "RPG-7 Warhead");
@@ -639,9 +639,9 @@ public class MCH_MOD {
 
    public void registerItemChain() {
       String name = "chain";
-      MCH_ItemChain var10000 = new MCH_ItemChain(MCH_Config.ItemID_Chain.prmInt);
-      MCH_Config var10002 = config;
-      MCH_ItemChain item = var10000;
+      MCH_ItemChain draftingTableBlock = new MCH_ItemChain(MCH_Config.ItemID_Chain.prmInt);
+      MCH_Config configuration = config;
+      MCH_ItemChain item = draftingTableBlock;
       itemChain = item;
       registerItem(item, "chain", creativeTabs);
       W_LanguageRegistry.addName(item, "Chain");
@@ -650,9 +650,9 @@ public class MCH_MOD {
 
    public void registerItemFuel() {
       String name = "fuel";
-      MCH_ItemFuel var10000 = new MCH_ItemFuel(MCH_Config.ItemID_Fuel.prmInt);
-      MCH_Config var10002 = config;
-      MCH_ItemFuel item = var10000;
+      MCH_ItemFuel draftingTableBlock = new MCH_ItemFuel(MCH_Config.ItemID_Fuel.prmInt);
+      MCH_Config configuration = config;
+      MCH_ItemFuel item = draftingTableBlock;
       itemFuel = item;
       registerItem(item, "fuel", creativeTabs);
       W_LanguageRegistry.addName(item, "Fuel");
@@ -661,9 +661,9 @@ public class MCH_MOD {
 
    public void registerItemGLTD() {
       String name = "gltd";
-      MCH_ItemGLTD var10000 = new MCH_ItemGLTD(MCH_Config.ItemID_GLTD.prmInt);
-      MCH_Config var10002 = config;
-      MCH_ItemGLTD item = var10000;
+      MCH_ItemGLTD draftingTableBlock = new MCH_ItemGLTD(MCH_Config.ItemID_GLTD.prmInt);
+      MCH_Config configuration = config;
+      MCH_ItemGLTD item = draftingTableBlock;
       itemGLTD = item;
       registerItem(item, "gltd", creativeTabs);
       W_LanguageRegistry.addName(item, "GLTD:Target Designator");
@@ -683,10 +683,10 @@ public class MCH_MOD {
 
 
    public static void registerItemThrowable() {
-      Iterator i$ = MCH_ThrowableInfoManager.getKeySet().iterator();
+      Iterator iteratedValueIndex = MCH_ThrowableInfoManager.getKeySet().iterator();
 
-      while(i$.hasNext()) {
-         String name = (String)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         String name = (String)iteratedValueIndex.next();
          MCH_ThrowableInfo info = MCH_ThrowableInfoManager.get(name);
          info.item = new MCH_ItemThrowable(info.itemID);
          info.item.setMaxStackSize(info.stackSize);
@@ -694,10 +694,10 @@ public class MCH_MOD {
          MCH_ItemThrowable.registerDispenseBehavior(info.item);
          info.itemID = W_Item.getIdFromItem(info.item) - 256;
          W_LanguageRegistry.addName(info.item, info.displayName);
-         Iterator i$1 = info.displayNameLang.keySet().iterator();
+         Iterator iteratedValueIndex1 = info.displayNameLang.keySet().iterator();
 
-         while(i$1.hasNext()) {
-            String lang = (String)i$1.next();
+         while(iteratedValueIndex1.hasNext()) {
+            String lang = (String)iteratedValueIndex1.next();
             W_LanguageRegistry.addNameForObject(info.item, lang, (String)info.displayNameLang.get(lang));
          }
       }
@@ -716,13 +716,13 @@ public class MCH_MOD {
    }
 
    public static void registerItemAircraft() {
-      Iterator i$ = MCH_HeliInfoManager.map.keySet().iterator();
+      Iterator iteratedValueIndex = MCH_HeliInfoManager.map.keySet().iterator();
 
       String name;
-      Iterator i$1;
+      Iterator iteratedValueIndex1;
       String lang;
-      while(i$.hasNext()) {
-         name = (String)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         name = (String)iteratedValueIndex.next();
          MCH_HeliInfo info = (MCH_HeliInfo)MCH_HeliInfoManager.map.get(name);
          info.item = new MCH_ItemHeli(info.itemID);
          info.item.setMaxDamage(info.maxHp);
@@ -735,18 +735,18 @@ public class MCH_MOD {
          MCH_ItemBaseVehicle.registerDispenseBehavior(info.item);
          info.itemID = W_Item.getIdFromItem(info.item) - 256;
          W_LanguageRegistry.addName(info.item, info.displayName);
-         i$1 = info.displayNameLang.keySet().iterator();
+         iteratedValueIndex1 = info.displayNameLang.keySet().iterator();
 
-         while(i$1.hasNext()) {
-            lang = (String)i$1.next();
+         while(iteratedValueIndex1.hasNext()) {
+            lang = (String)iteratedValueIndex1.next();
             W_LanguageRegistry.addNameForObject(info.item, lang, (String)info.displayNameLang.get(lang));
          }
       }
 
-      i$ = MCP_PlaneInfoManager.map.keySet().iterator();
+      iteratedValueIndex = MCP_PlaneInfoManager.map.keySet().iterator();
 
-      while(i$.hasNext()) {
-         name = (String)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         name = (String)iteratedValueIndex.next();
          MCP_PlaneInfo info1 = (MCP_PlaneInfo)MCP_PlaneInfoManager.map.get(name);
          info1.item = new MCP_ItemPlane(info1.itemID);
          info1.item.setMaxDamage(info1.maxHp);
@@ -759,18 +759,18 @@ public class MCH_MOD {
          MCH_ItemBaseVehicle.registerDispenseBehavior(info1.item);
          info1.itemID = W_Item.getIdFromItem(info1.item) - 256;
          W_LanguageRegistry.addName(info1.item, info1.displayName);
-         i$1 = info1.displayNameLang.keySet().iterator();
+         iteratedValueIndex1 = info1.displayNameLang.keySet().iterator();
 
-         while(i$1.hasNext()) {
-            lang = (String)i$1.next();
+         while(iteratedValueIndex1.hasNext()) {
+            lang = (String)iteratedValueIndex1.next();
             W_LanguageRegistry.addNameForObject(info1.item, lang, (String)info1.displayNameLang.get(lang));
          }
       }
 
-      i$ = MCH_ShipInfoManager.map.keySet().iterator();
+      iteratedValueIndex = MCH_ShipInfoManager.map.keySet().iterator();
 
-      while(i$.hasNext()) {
-         name = (String)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         name = (String)iteratedValueIndex.next();
          MCH_ShipInfo info4 = (MCH_ShipInfo) MCH_ShipInfoManager.map.get(name);
          info4.item = new MCH_ItemShip(info4.itemID);
          info4.item.setMaxDamage(info4.maxHp);
@@ -783,18 +783,18 @@ public class MCH_MOD {
          MCH_ItemBaseVehicle.registerDispenseBehavior(info4.item);
          info4.itemID = W_Item.getIdFromItem(info4.item) - 256;
          W_LanguageRegistry.addName(info4.item, info4.displayName);
-         i$1 = info4.displayNameLang.keySet().iterator();
+         iteratedValueIndex1 = info4.displayNameLang.keySet().iterator();
 
-         while(i$1.hasNext()) {
-            lang = (String)i$1.next();
+         while(iteratedValueIndex1.hasNext()) {
+            lang = (String)iteratedValueIndex1.next();
             W_LanguageRegistry.addNameForObject(info4.item, lang, (String)info4.displayNameLang.get(lang));
          }
       }
 
-      i$ = MCH_TankInfoManager.map.keySet().iterator();
+      iteratedValueIndex = MCH_TankInfoManager.map.keySet().iterator();
 
-      while(i$.hasNext()) {
-         name = (String)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         name = (String)iteratedValueIndex.next();
          MCH_TankInfo info2 = (MCH_TankInfo)MCH_TankInfoManager.map.get(name);
          info2.item = new MCH_ItemTank(info2.itemID);
          info2.item.setMaxDamage(info2.maxHp);
@@ -807,18 +807,18 @@ public class MCH_MOD {
          MCH_ItemBaseVehicle.registerDispenseBehavior(info2.item);
          info2.itemID = W_Item.getIdFromItem(info2.item) - 256;
          W_LanguageRegistry.addName(info2.item, info2.displayName);
-         i$1 = info2.displayNameLang.keySet().iterator();
+         iteratedValueIndex1 = info2.displayNameLang.keySet().iterator();
 
-         while(i$1.hasNext()) {
-            lang = (String)i$1.next();
+         while(iteratedValueIndex1.hasNext()) {
+            lang = (String)iteratedValueIndex1.next();
             W_LanguageRegistry.addNameForObject(info2.item, lang, (String)info2.displayNameLang.get(lang));
          }
       }
 
-      i$ = MCH_TurretInfoManager.map.keySet().iterator();
+      iteratedValueIndex = MCH_TurretInfoManager.map.keySet().iterator();
 
-      while(i$.hasNext()) {
-         name = (String)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         name = (String)iteratedValueIndex.next();
          MCH_TurretInfo info3 = (MCH_TurretInfo)MCH_TurretInfoManager.map.get(name);
          info3.item = new MCH_ItemTurret(info3.itemID);
          info3.item.setMaxDamage(info3.maxHp);
@@ -831,10 +831,10 @@ public class MCH_MOD {
          MCH_ItemBaseVehicle.registerDispenseBehavior(info3.item);
          info3.itemID = W_Item.getIdFromItem(info3.item) - 256;
          W_LanguageRegistry.addName(info3.item, info3.displayName);
-         i$1 = info3.displayNameLang.keySet().iterator();
+         iteratedValueIndex1 = info3.displayNameLang.keySet().iterator();
 
-         while(i$1.hasNext()) {
-            lang = (String)i$1.next();
+         while(iteratedValueIndex1.hasNext()) {
+            lang = (String)iteratedValueIndex1.next();
             W_LanguageRegistry.addNameForObject(info3.item, lang, (String)info3.displayNameLang.get(lang));
          }
       }

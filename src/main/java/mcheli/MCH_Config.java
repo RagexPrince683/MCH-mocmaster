@@ -983,11 +983,11 @@ public class MCH_Config {
    public void setBlockListFromString(List list, String str) {
       list.clear();
       String[] s = str.split("\\s*,\\s*");
-      String[] arr$ = s;
-      int len$ = s.length;
+      String[] iteratedValues = s;
+      int iteratedValueCount = s.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         String blockName = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         String blockName = iteratedValues[iteratedValueIndex];
          Block b = W_Block.getBlockFromName(blockName);
          if(b != null) {
             list.add(b);
@@ -999,11 +999,11 @@ public class MCH_Config {
    public void setMaterialListFromString(List list, String str) {
       list.clear();
       String[] s = str.split("\\s*,\\s*");
-      String[] arr$ = s;
-      int len$ = s.length;
+      String[] iteratedValues = s;
+      int iteratedValueCount = s.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         String name = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         String name = iteratedValues[iteratedValueIndex];
          Material m = MCH_Lib.getMaterialFromName(name);
          if(m != null) {
             list.add(m);
@@ -1118,10 +1118,10 @@ public class MCH_Config {
       Iterator isNoDamageVsSetting = CommandPermission.iterator();
 
       while(isNoDamageVsSetting.hasNext()) {
-         MCH_ConfigPrm arr$ = (MCH_ConfigPrm)isNoDamageVsSetting.next();
-         MCH_Config.CommandPermission len$ = new MCH_Config.CommandPermission(arr$.prmString);
-         if(!len$.name.isEmpty()) {
-            CommandPermissionList.add(len$);
+         MCH_ConfigPrm iteratedValues = (MCH_ConfigPrm)isNoDamageVsSetting.next();
+         MCH_Config.CommandPermission iteratedValueCount = new MCH_Config.CommandPermission(iteratedValues.prmString);
+         if(!iteratedValueCount.name.isEmpty()) {
+            CommandPermissionList.add(iteratedValueCount);
          }
       }
 
@@ -1130,43 +1130,43 @@ public class MCH_Config {
          IgnoreBulletHitList.add("flansmod.common.guns.EntityGrenade");
       }
 
-      boolean var10 = DamageVs.size() <= 0;
-      Iterator var11 = DamageVs.iterator();
+      boolean result = DamageVs.size() <= 0;
+      Iterator iterator2 = DamageVs.iterator();
 
-      while(var11.hasNext()) {
-         MCH_ConfigPrm var13 = (MCH_ConfigPrm)var11.next();
-         MCH_Config.DamageFactor[] i$ = DamageFactorList;
-         int df = i$.length;
+      while(iterator2.hasNext()) {
+         MCH_ConfigPrm configPrm = (MCH_ConfigPrm)iterator2.next();
+         MCH_Config.DamageFactor[] iteratedValueIndex = DamageFactorList;
+         int df = iteratedValueIndex.length;
 
          for(int foundCommon = 0; foundCommon < df; ++foundCommon) {
-            MCH_Config.DamageFactor i$1 = i$[foundCommon];
-            if(var13.name.equals(i$1.itemName)) {
-               i$1.list.add(this.newDamageEntity(var13.prmString));
+            MCH_Config.DamageFactor iteratedValueIndex1 = iteratedValueIndex[foundCommon];
+            if(configPrm.name.equals(iteratedValueIndex1.itemName)) {
+               iteratedValueIndex1.list.add(this.newDamageEntity(configPrm.prmString));
             }
          }
       }
 
-      MCH_Config.DamageFactor[] var12 = DamageFactorList;
-      int var14 = var12.length;
+      MCH_Config.DamageFactor[] result2 = DamageFactorList;
+      int index = result2.length;
 
-      for(int var15 = 0; var15 < var14; ++var15) {
-         MCH_Config.DamageFactor var16 = var12[var15];
-         if(var16.list.size() <= 0) {
-            DamageVs.add(new MCH_ConfigPrm(var16.itemName, "1.0"));
+      for(int index2 = 0; index2 < index; ++index2) {
+         MCH_Config.DamageFactor damageFactor = result2[index2];
+         if(damageFactor.list.size() <= 0) {
+            DamageVs.add(new MCH_ConfigPrm(damageFactor.itemName, "1.0"));
          } else {
-            boolean var17 = false;
-            Iterator var18 = var16.list.iterator();
+            boolean isValid = false;
+            Iterator iterator3 = damageFactor.list.iterator();
 
-            while(var18.hasNext()) {
-               MCH_Config.DamageEntity n = (MCH_Config.DamageEntity)var18.next();
+            while(iterator3.hasNext()) {
+               MCH_Config.DamageEntity n = (MCH_Config.DamageEntity)iterator3.next();
                if(n.name.isEmpty()) {
-                  var17 = true;
+                  isValid = true;
                   break;
                }
             }
 
-            if(!var17) {
-               DamageVs.add(new MCH_ConfigPrm(var16.itemName, "1.0"));
+            if(!isValid) {
+               DamageVs.add(new MCH_ConfigPrm(damageFactor.itemName, "1.0"));
             }
          }
       }
@@ -1179,7 +1179,7 @@ public class MCH_Config {
       PitchLimitMax.prmInt = (PitchLimitMax.prmInt > 80) ? 80 : (Math.max(PitchLimitMax.prmInt, 0));
       PitchLimitMin.prmInt = (PitchLimitMin.prmInt < -80) ? -80 : (Math.min(PitchLimitMin.prmInt, 0));
       RollLimit.prmInt = (RollLimit.prmInt > 80) ? 80 : (Math.max(RollLimit.prmInt, 0));
-      if(var10) {
+      if(result) {
          DamageVs.add(new MCH_ConfigPrm("DamageVsEntity", "3.0, flansmod"));
          DamageVs.add(new MCH_ConfigPrm("DamageMCHeliAircraftByExternal", "0.5, flansmod"));
          DamageVs.add(new MCH_ConfigPrm("DamageMCHeliVehicleByExternal", "0.5, flansmod"));
@@ -1208,10 +1208,10 @@ public class MCH_Config {
 
       Entity attacker = ds.getEntity();
       Entity attackerSource = ds.getSourceOfDamage();
-      Iterator i$ = list.iterator();
+      Iterator iteratedValueIndex = list.iterator();
 
-      while(i$.hasNext()) {
-         MCH_Config.DamageEntity de = (MCH_Config.DamageEntity)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_Config.DamageEntity de = (MCH_Config.DamageEntity)iteratedValueIndex.next();
          if(de.name.isEmpty() || attacker != null && attacker.getClass().toString().indexOf(de.name) > 0 || attackerSource != null && attackerSource.getClass().toString().indexOf(de.name) > 0) {
             damage = (float)((double)damage * de.factor);
          }
@@ -1244,10 +1244,10 @@ public class MCH_Config {
             list = DamageVsMCHeliAircraft.list;
          }
 
-         Iterator i$ = list.iterator();
+         Iterator iteratedValueIndex = list.iterator();
 
-         while(i$.hasNext()) {
-            MCH_Config.DamageEntity de = (MCH_Config.DamageEntity)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            MCH_Config.DamageEntity de = (MCH_Config.DamageEntity)iteratedValueIndex.next();
             if(de.name.isEmpty() || targetName.indexOf(de.name) > 0) {
                damage = (float)((double)damage * de.factor);
             }
@@ -1306,12 +1306,12 @@ public class MCH_Config {
                CommandPermission.add(new MCH_ConfigPrm("CommandPermission", s[1]));
             }
 
-            MCH_Config.DamageFactor[] arr$ = DamageFactorList;
-            int len$ = arr$.length;
+            MCH_Config.DamageFactor[] iteratedValues = DamageFactorList;
+            int iteratedValueCount = iteratedValues.length;
 
-            int i$;
-            for(i$ = 0; i$ < len$; ++i$) {
-               MCH_Config.DamageFactor p = arr$[i$];
+            int iteratedValueIndex;
+            for(iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+               MCH_Config.DamageFactor p = iteratedValues[iteratedValueIndex];
                if(p.itemName.equalsIgnoreCase(s[0])) {
                   DamageVs.add(new MCH_ConfigPrm(p.itemName, s[1]));
                }
@@ -1321,26 +1321,26 @@ public class MCH_Config {
                IgnoreBulletHitList.add(s[1]);
             }
 
-            MCH_ConfigPrm[] var7 = KeyConfig;
-            len$ = var7.length;
+            MCH_ConfigPrm[] result = KeyConfig;
+            iteratedValueCount = result.length;
 
-            MCH_ConfigPrm var8;
-            for(i$ = 0; i$ < len$; ++i$) {
-               var8 = var7[i$];
-               if(var8 != null && var8.compare(s[0]) && var8.isValidVer(configVer)) {
-                  var8.setPrm(s[1]);
+            MCH_ConfigPrm configPrm;
+            for(iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+               configPrm = result[iteratedValueIndex];
+               if(configPrm != null && configPrm.compare(s[0]) && configPrm.isValidVer(configVer)) {
+                  configPrm.setPrm(s[1]);
                   return;
                }
             }
 
-            var7 = General;
-            len$ = var7.length;
+            result = General;
+            iteratedValueCount = result.length;
 
-            for(i$ = 0; i$ < len$; ++i$) {
-               var8 = var7[i$];
-               if(var8 != null && var8.compare(s[0]) && var8.isValidVer(configVer)) {
-                  var8.setPrm(s[1]);
-                  if(var8 == ArtilleryRangeModifier && ArtilleryRangeModifier.prmDouble < 0.01D) {
+            for(iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+               configPrm = result[iteratedValueIndex];
+               if(configPrm != null && configPrm.compare(s[0]) && configPrm.isValidVer(configVer)) {
+                  configPrm.setPrm(s[1]);
+                  if(configPrm == ArtilleryRangeModifier && ArtilleryRangeModifier.prmDouble < 0.01D) {
                      ArtilleryRangeModifier.prmDouble = 0.01D;
                   }
                   return;
@@ -1369,13 +1369,13 @@ public class MCH_Config {
       pw.println("MOD_Version = " + MCH_MOD.VER);
       pw.println("MOD_MC_Version = 1.7.10");
       pw.println();
-      MCH_ConfigPrm[] arr$ = General;
-      int len$ = arr$.length;
+      MCH_ConfigPrm[] iteratedValues = General;
+      int iteratedValueCount = iteratedValues.length;
 
-      int i$;
+      int iteratedValueIndex;
       MCH_ConfigPrm p;
-      for(i$ = 0; i$ < len$; ++i$) {
-         p = arr$[i$];
+      for(iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         p = iteratedValues[iteratedValueIndex];
          if(p != null) {
             if(!p.desc.isEmpty()) {
                pw.println(p.desc);
@@ -1388,20 +1388,20 @@ public class MCH_Config {
       }
 
       pw.println();
-      Iterator var6 = DamageVs.iterator();
+      Iterator iterator2 = DamageVs.iterator();
 
-      MCH_ConfigPrm var7;
-      while(var6.hasNext()) {
-         var7 = (MCH_ConfigPrm)var6.next();
-         pw.println(var7.name + " = " + var7);
+      MCH_ConfigPrm configPrm;
+      while(iterator2.hasNext()) {
+         configPrm = (MCH_ConfigPrm)iterator2.next();
+         pw.println(configPrm.name + " = " + configPrm);
       }
 
       pw.println();
-      var6 = IgnoreBulletHitList.iterator();
+      iterator2 = IgnoreBulletHitList.iterator();
 
-      while(var6.hasNext()) {
-         String var8 = (String)var6.next();
-         pw.println(IgnoreBulletHitItem.name + " = " + var8);
+      while(iterator2.hasNext()) {
+         String name2 = (String)iterator2.next();
+         pw.println(IgnoreBulletHitItem.name + " = " + name2);
       }
 
       pw.println();
@@ -1411,11 +1411,11 @@ public class MCH_Config {
          pw.println(";CommandPermission = status :  example2");
       }
 
-      var6 = CommandPermission.iterator();
+      iterator2 = CommandPermission.iterator();
 
-      while(var6.hasNext()) {
-         var7 = (MCH_ConfigPrm)var6.next();
-         pw.println(var7.name + " = " + var7);
+      while(iterator2.hasNext()) {
+         configPrm = (MCH_ConfigPrm)iterator2.next();
+         pw.println(configPrm.name + " = " + configPrm);
       }
 
       pw.println();
@@ -1423,11 +1423,11 @@ public class MCH_Config {
       pw.println("[Key config]");
       pw.println("http://minecraft.gamepedia.com/Key_codes");
       pw.println();
-      arr$ = KeyConfig;
-      len$ = arr$.length;
+      iteratedValues = KeyConfig;
+      iteratedValueCount = iteratedValues.length;
 
-      for(i$ = 0; i$ < len$; ++i$) {
-         p = arr$[i$];
+      for(iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         p = iteratedValues[iteratedValueIndex];
          pw.println(p.name + " = " + p);
       }
 

@@ -20,11 +20,11 @@ public class MCH_KeyName {
 
    public static int getValue(String name) {
       String n = name.toUpperCase();
-      MCH_KeyName[] arr$ = list;
-      int len$ = arr$.length;
+      MCH_KeyName[] iteratedValues = list;
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_KeyName key = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_KeyName key = iteratedValues[iteratedValueIndex];
          if(key.name.compareTo(n) == 0) {
             return key.value;
          }
@@ -34,11 +34,11 @@ public class MCH_KeyName {
    }
 
    public static String getName(int value) {
-      MCH_KeyName[] arr$ = list;
-      int len$ = arr$.length;
+      MCH_KeyName[] iteratedValues = list;
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_KeyName key = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_KeyName key = iteratedValues[iteratedValueIndex];
          if(key.value == value) {
             return key.name;
          }
@@ -48,11 +48,11 @@ public class MCH_KeyName {
    }
 
    public static String getDescription(int value) {
-      MCH_KeyName[] arr$ = list;
-      int len$ = arr$.length;
+      MCH_KeyName[] iteratedValues = list;
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_KeyName key = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_KeyName key = iteratedValues[iteratedValueIndex];
          if(key.value == value) {
             return key.description;
          }
@@ -62,11 +62,11 @@ public class MCH_KeyName {
    }
 
    public static String getDescOrName(int value) {
-      MCH_KeyName[] arr$ = list;
-      int len$ = arr$.length;
+      MCH_KeyName[] iteratedValues = list;
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_KeyName key = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_KeyName key = iteratedValues[iteratedValueIndex];
          if(key.value == value) {
             return key.description.isEmpty()?key.name:key.description;
          }

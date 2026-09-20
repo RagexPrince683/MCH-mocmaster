@@ -554,7 +554,7 @@ public class MCH_BaseVehiclePacketHandler {
 
       if(!player.worldObj.isRemote) {
          MCH_EntityBaseVehicle ac;
-         int i$;
+         int iteratedValueIndex;
          switch(pc.type) {
          case 0:
             // Legacy clients get the same authoritative, single-entity behavior.
@@ -565,11 +565,11 @@ public class MCH_BaseVehiclePacketHandler {
             break;
          case 1:
             MCH_WeaponInfoManager.reload();
-            WorldServer[] arr$ = MinecraftServer.getServer().worldServers;
-            int len$ = arr$.length;
+            WorldServer[] iteratedValues = MinecraftServer.getServer().worldServers;
+            int iteratedValueCount = iteratedValues.length;
 
-            for(i$ = 0; i$ < len$; ++i$) {
-               WorldServer world = arr$[i$];
+            for(iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+               WorldServer world = iteratedValues[iteratedValueIndex];
                List list = world.loadedEntityList;
 
                for(int i = 0; i < list.size(); ++i) {

@@ -462,7 +462,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
       return this.landingGear.size() > 0;
    }
 
-   public abstract String getDefaultHudName(int var1);
+   public abstract String getDefaultHudName(int result1);
 
    public boolean isValidData() throws Exception {
       if(this.cameraPosition.size() <= 0) {
@@ -493,10 +493,10 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
       if(this.getNumSeat() < 1) {
          throw new Exception();
       } else {
-         int var10;
+         int index;
          if(this.getNumHud() < this.getNumSeat()) {
-            for(var10 = this.getNumHud(); var10 < this.getNumSeat(); ++var10) {
-               this.hudList.add(MCH_HudManager.get(this.getDefaultHudName(var10)));
+            for(index = this.getNumHud(); index < this.getNumSeat(); ++index) {
+               this.hudList.add(MCH_HudManager.get(this.getDefaultHudName(index)));
             }
          }
 
@@ -504,10 +504,10 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
             this.hudList.add(MCH_HudManager.get(this.getDefaultHudName(1)));
          }
 
-         Iterator var11 = this.entityRackList.iterator();
+         Iterator iterator2 = this.entityRackList.iterator();
 
-         while(var11.hasNext()) {
-            MCH_SeatRackInfo wb = (MCH_SeatRackInfo)var11.next();
+         while(iterator2.hasNext()) {
+            MCH_SeatRackInfo wb = (MCH_SeatRackInfo)iterator2.next();
             this.seatList.add(wb);
          }
 
@@ -523,18 +523,18 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                ;
             }
 
-            for(var10 = 0; var10 < this.partWeaponBay.size(); ++var10) {
-               MCH_BaseVehicleInfo.WeaponBay var12 = (MCH_BaseVehicleInfo.WeaponBay)this.partWeaponBay.get(var10);
-               String[] weaponNames = var12.weaponName.split("\\s*/\\s*");
+            for(index = 0; index < this.partWeaponBay.size(); ++index) {
+               MCH_BaseVehicleInfo.WeaponBay weaponBay = (MCH_BaseVehicleInfo.WeaponBay)this.partWeaponBay.get(index);
+               String[] weaponNames = weaponBay.weaponName.split("\\s*/\\s*");
                if(weaponNames.length <= 0) {
-                  this.partWeaponBay.remove(var10);
+                  this.partWeaponBay.remove(index);
                } else {
                   ArrayList list = new ArrayList();
-                  String[] arr$ = weaponNames;
-                  int len$ = weaponNames.length;
+                  String[] iteratedValues = weaponNames;
+                  int iteratedValueCount = weaponNames.length;
 
-                  for(int i$ = 0; i$ < len$; ++i$) {
-                     String s = arr$[i$];
+                  for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+                     String s = iteratedValues[iteratedValueIndex];
                      int id = this.getWeaponIdByName(s);
                      if(id >= 0) {
                         list.add(Integer.valueOf(id));
@@ -542,9 +542,9 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                   }
 
                   if(list.size() <= 0) {
-                     this.partWeaponBay.remove(var10);
+                     this.partWeaponBay.remove(index);
                   } else {
-                     ((MCH_BaseVehicleInfo.WeaponBay)this.partWeaponBay.get(var10)).weaponIds = (Integer[])list.toArray(new Integer[0]);
+                     ((MCH_BaseVehicleInfo.WeaponBay)this.partWeaponBay.get(index)).weaponIds = (Integer[])list.toArray(new Integer[0]);
                   }
                }
             }
@@ -756,28 +756,28 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                }
             } else {
                float w;
-               int var22;
-               float var26;
+               int index;
+               float result;
                if(!item.equalsIgnoreCase("AddSearchLight") && !item.equalsIgnoreCase("AddFixedSearchLight") && !item.equalsIgnoreCase("AddSteeringSearchLight")) {
-                  float var15;
+                  float result2;
                   if(item.equalsIgnoreCase("AddPartLightHatch")) {
                      s = this.splitParam(data);
                      if(s.length >= 6) {
-                        var15 = s.length >= 7?this.toFloat(s[6], -1800.0F, 1800.0F):90.0F;
-                        this.lightHatchList.add(new MCH_BaseVehicleInfo.Hatch(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), var15, "light_hatch" + this.lightHatchList.size(), false));
+                        result2 = s.length >= 7?this.toFloat(s[6], -1800.0F, 1800.0F):90.0F;
+                        this.lightHatchList.add(new MCH_BaseVehicleInfo.Hatch(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), result2, "light_hatch" + this.lightHatchList.size(), false));
                      }
                   } else {
-                     int var16;
+                     int index2;
                      if(item.equalsIgnoreCase("AddRepellingHook")) {
                         s = this.splitParam(data);
                         if(s != null && s.length >= 3) {
-                           var16 = s.length >= 4?this.toInt(s[3], 1, 100000):10;
-                           this.repellingHooks.add(new MCH_BaseVehicleInfo.RepellingHook(this.toVec3(s[0], s[1], s[2]), var16));
+                           index2 = s.length >= 4?this.toInt(s[3], 1, 100000):10;
+                           this.repellingHooks.add(new MCH_BaseVehicleInfo.RepellingHook(this.toVec3(s[0], s[1], s[2]), index2));
                         }
                      } else {
-                        String[] var17;
-                        float var18;
-                        boolean var31;
+                        String[] text;
+                        float result3;
+                        boolean isValid;
                         if(item.equalsIgnoreCase("AddRack")) {
                            //parent vehicle to eat child
                            //todo: fix addrack bug where it won't go up block with a vehicle racked or something
@@ -788,37 +788,37 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                            s = data.toLowerCase().split("\\s*,\\s*");
                            if(s != null && s.length >= 7) {
                               //todo rename whatever the fuck I am looking at to be readable non compiled schizobabbel
-                              var17 = s[0].split("\\s*/\\s*");
-                              var18 = s.length >= 8?this.toFloat(s[7]):6.0F;
+                              text = s[0].split("\\s*/\\s*");
+                              result3 = s.length >= 8?this.toFloat(s[7]):6.0F;
                               ry = s.length >= 9?this.toFloat(s[8], 0.0F, 1000000.0F):20.0F;
                               rz = s.length >= 10?this.toFloat(s[9]):0.0F;
-                              var26 = s.length >= 11?this.toFloat(s[10]):0.0F;
-                              var31 = s.length >= 12?this.toBool(s[11]):false;
+                              result = s.length >= 11?this.toFloat(s[10]):0.0F;
+                              isValid = s.length >= 12?this.toBool(s[11]):false;
                               boolean launchRack = s.length >= 13 && this.toBool(s[12]);
-                              this.entityRackList.add(new MCH_SeatRackInfo(var17, this.toDouble(s[1]), this.toDouble(s[2]), this.toDouble(s[3]), new MCH_BaseVehicleInfo.CameraPosition(this.toVec3(s[4], s[5], s[6]).addVector(0.0D, 1.5D, 0.0D)), var18, ry, rz, var26, var31, launchRack));
+                              this.entityRackList.add(new MCH_SeatRackInfo(text, this.toDouble(s[1]), this.toDouble(s[2]), this.toDouble(s[3]), new MCH_BaseVehicleInfo.CameraPosition(this.toVec3(s[4], s[5], s[6]).addVector(0.0D, 1.5D, 0.0D)), result3, ry, rz, result, isValid, launchRack));
                            }
                         } else if(item.equalsIgnoreCase("RideRack")) {
                            //child vehicle to ride parent
                            s = this.splitParam(data);
                            if(s.length >= 2) {
-                              MCH_BaseVehicleInfo.RideRack var19 = new MCH_BaseVehicleInfo.RideRack(s[0].trim().toLowerCase(), this.toInt(s[1], 1, 10000));
-                              this.rideRacks.add(var19);
+                              MCH_BaseVehicleInfo.RideRack rideRack = new MCH_BaseVehicleInfo.RideRack(s[0].trim().toLowerCase(), this.toInt(s[1], 1, 10000));
+                              this.rideRacks.add(rideRack);
                            }
                         } else {
-                           Vec3 var20;
-                           boolean var25;
-                           boolean var34;
-                           boolean var37;
+                           Vec3 direction;
+                           boolean isValid2;
+                           boolean isValid3;
+                           boolean isValid4;
                            if(!item.equalsIgnoreCase("AddSeat") && !item.equalsIgnoreCase("AddGunnerSeat") && !item.equalsIgnoreCase("AddFixRotSeat")) {
                               if(item.equalsIgnoreCase("SetWheelPos")) {
                                  s = this.splitParam(data);
                                  if(s.length >= 4) {
-                                    var15 = Math.abs(this.toFloat(s[0]));
-                                    var18 = this.toFloat(s[1]);
+                                    result2 = Math.abs(this.toFloat(s[0]));
+                                    result3 = this.toFloat(s[1]);
                                     this.wheels.clear();
 
-                                    for(var22 = 2; var22 < s.length; ++var22) {
-                                       this.wheels.add(new MCH_BaseVehicleInfo.Wheel(Vec3.createVectorHelper((double)var15, (double)var18, (double)this.toFloat(s[var22]))));
+                                    for(index = 2; index < s.length; ++index) {
+                                       this.wheels.add(new MCH_BaseVehicleInfo.Wheel(Vec3.createVectorHelper((double)result2, (double)result3, (double)this.toFloat(s[index]))));
                                     }
 
                                     Collections.sort(this.wheels, new Comparator<Wheel>(){
@@ -830,28 +830,28 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                               } else if(item.equalsIgnoreCase("ExclusionSeat")) {
                                  s = this.splitParam(data);
                                  if(s.length >= 2) {
-                                    Integer[] var27 = new Integer[s.length];
+                                    Integer[] integer = new Integer[s.length];
 
-                                    for(c = 0; c < var27.length; ++c) {
-                                       var27[c] = Integer.valueOf(this.toInt(s[c], 1, 10000) - 1);
+                                    for(c = 0; c < integer.length; ++c) {
+                                       integer[c] = Integer.valueOf(this.toInt(s[c], 1, 10000) - 1);
                                     }
 
-                                    this.exclusionSeatList.add(var27);
+                                    this.exclusionSeatList.add(integer);
                                  }
                               } else if(MCH_MOD.proxy.isRemote() && item.equalsIgnoreCase("HUD")) {
                                  this.hudList.clear();
                                  s = data.split("\\s*,\\s*");
-                                 var17 = s;
+                                 text = s;
                                  c = s.length;
 
-                                 for(var22 = 0; var22 < c; ++var22) {
-                                    String var43 = var17[var22];
-                                    MCH_Hud var38 = MCH_HudManager.get(var43);
-                                    if(var38 == null) {
-                                       var38 = MCH_Hud.NoDisp;
+                                 for(index = 0; index < c; ++index) {
+                                    String text2 = text[index];
+                                    MCH_Hud hud = MCH_HudManager.get(text2);
+                                    if(hud == null) {
+                                       hud = MCH_Hud.NoDisp;
                                     }
 
-                                    this.hudList.add(var38);
+                                    this.hudList.add(hud);
                                  }
                               } else if(item.compareTo("enablenightvision") == 0) {
                                  this.isEnableNightVision = this.toBool(data);
@@ -880,15 +880,15 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                               } else if(item.compareTo("gravityinwater") == 0) {
                                  this.gravityInWater = this.toFloat(data, -50.0F, 50.0F);
                               } else {
-                                 boolean var28;
+                                 boolean isValid5;
                                  if(item.compareTo("cameraposition") == 0) {
                                     s = data.split("\\s*,\\s*");
                                     if(s.length >= 3) {
                                        this.alwaysCameraView = s.length >= 4?this.toBool(s[3]):false;
-                                       var28 = s.length >= 5;
-                                       var18 = s.length >= 5?this.toFloat(s[4]):0.0F;
+                                       isValid5 = s.length >= 5;
+                                       result3 = s.length >= 5?this.toFloat(s[4]):0.0F;
                                        ry = s.length >= 6?this.toFloat(s[5]):0.0F;
-                                       this.cameraPosition.add(new MCH_BaseVehicleInfo.CameraPosition(this.toVec3(s[0], s[1], s[2]), var28, var18, ry));
+                                       this.cameraPosition.add(new MCH_BaseVehicleInfo.CameraPosition(this.toVec3(s[0], s[1], s[2]), isValid5, result3, ry));
                                     }
                                  } else if(item.equalsIgnoreCase("UnmountPosition")) {
                                     s = data.split("\\s*,\\s*");
@@ -977,9 +977,9 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                        if(item.equalsIgnoreCase("AddPartWeaponChild")) {
                                           s = data.split("\\s*,\\s*");
                                           if(s.length >= 5 && this.lastWeaponPart != null) {
-                                             var15 = s.length >= 6?this.toFloat(s[5]):0.0F;
-                                             MCH_BaseVehicleInfo.PartWeaponChild var30 = new MCH_BaseVehicleInfo.PartWeaponChild(this.lastWeaponPart.name, this.toBool(s[0]), this.toBool(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.lastWeaponPart.modelName + "_" + this.lastWeaponPart.child.size(), 0.0F, 0.0F, 0.0F, var15);
-                                             this.lastWeaponPart.child.add(var30);
+                                             result2 = s.length >= 6?this.toFloat(s[5]):0.0F;
+                                             MCH_BaseVehicleInfo.PartWeaponChild partWeaponChild = new MCH_BaseVehicleInfo.PartWeaponChild(this.lastWeaponPart.name, this.toBool(s[0]), this.toBool(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.lastWeaponPart.modelName + "_" + this.lastWeaponPart.child.size(), 0.0F, 0.0F, 0.0F, result2);
+                                             this.lastWeaponPart.child.add(partWeaponChild);
                                           }
                                        } else if(item.compareTo("addrecipe") != 0 && item.compareTo("addshapelessrecipe") != 0) {
                                           if(item.compareTo("maxhp") == 0) {
@@ -1000,8 +1000,8 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                              s = data.split("\\s*,\\s*");
                                              this.flare.types = new int[s.length];
 
-                                             for(var16 = 0; var16 < s.length; ++var16) {
-                                                this.flare.types[var16] = this.toInt(s[var16], 1, 10);
+                                             for(index2 = 0; index2 < s.length; ++index2) {
+                                                this.flare.types[index2] = this.toInt(s[index2], 1, 10);
                                              }
                                           } else if(item.equalsIgnoreCase("FlareOption")) {
                                              s = this.splitParam(data);
@@ -1068,7 +1068,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                           } else if(item.compareTo("concurrentgunnermode") == 0) {
                                              this.isEnableConcurrentGunnerMode = this.toBool(data);
                                           } else {
-                                             boolean var32;
+                                             boolean isValid6;
                                              if(!item.equalsIgnoreCase("AddPartWeaponBay") && !item.equalsIgnoreCase("AddPartSlideWeaponBay")) {
                                                 if(item.compareTo("addparthatch") != 0 && item.compareTo("addpartslidehatch") != 0) {
                                                    if(item.compareTo("addpartcanopy") != 0 && item.compareTo("addpartslidecanopy") != 0) {
@@ -1076,38 +1076,38 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                                          if(item.equalsIgnoreCase("AddPartThrottle")) {
                                                             s = data.split("\\s*,\\s*");
                                                             if(s.length >= 7) {
-                                                               var15 = s.length >= 8?this.toFloat(s[7]):0.0F;
-                                                               var18 = s.length >= 9?this.toFloat(s[8]):0.0F;
+                                                               result2 = s.length >= 8?this.toFloat(s[7]):0.0F;
+                                                               result3 = s.length >= 9?this.toFloat(s[8]):0.0F;
                                                                ry = s.length >= 10?this.toFloat(s[9]):0.0F;
-                                                               MCH_BaseVehicleInfo.Throttle var40 = new MCH_BaseVehicleInfo.Throttle(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "throttle" + this.partThrottle.size(), var15, var18, ry);
-                                                               this.partThrottle.add(var40);
+                                                               MCH_BaseVehicleInfo.Throttle throttle = new MCH_BaseVehicleInfo.Throttle(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "throttle" + this.partThrottle.size(), result2, result3, ry);
+                                                               this.partThrottle.add(throttle);
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddPartRotation")) {
                                                             s = data.split("\\s*,\\s*");
                                                             if(s.length >= 7) {
-                                                               var28 = s.length >= 8?this.toBool(s[7]):true;
-                                                               MCH_BaseVehicleInfo.RotPart var46 = new MCH_BaseVehicleInfo.RotPart(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), var28, "rotpart" + this.partThrottle.size());
-                                                               this.partRotPart.add(var46);
+                                                               isValid5 = s.length >= 8?this.toBool(s[7]):true;
+                                                               MCH_BaseVehicleInfo.RotPart rotPart = new MCH_BaseVehicleInfo.RotPart(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), isValid5, "rotpart" + this.partThrottle.size());
+                                                               this.partRotPart.add(rotPart);
                                                             }
                                                          } else if(item.compareTo("addpartcamera") == 0) {
                                                             s = data.split("\\s*,\\s*");
                                                             if(s.length >= 3) {
-                                                               var28 = s.length >= 4?this.toBool(s[3]):true;
-                                                               boolean var48 = s.length >= 5?this.toBool(s[4]):false;
-                                                               MCH_BaseVehicleInfo.Camera var45 = new MCH_BaseVehicleInfo.Camera(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), 0.0F, -1.0F, 0.0F, "camera" + this.cameraList.size(), var28, var48);
-                                                               this.cameraList.add(var45);
+                                                               isValid5 = s.length >= 4?this.toBool(s[3]):true;
+                                                               boolean isValid7 = s.length >= 5?this.toBool(s[4]):false;
+                                                               MCH_BaseVehicleInfo.Camera camera = new MCH_BaseVehicleInfo.Camera(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), 0.0F, -1.0F, 0.0F, "camera" + this.cameraList.size(), isValid5, isValid7);
+                                                               this.cameraList.add(camera);
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddPartWheel")) {
                                                             s = this.splitParam(data);
                                                             if(s.length >= 3) {
-                                                               var15 = s.length >= 4?this.toFloat(s[3], -1800.0F, 1800.0F):0.0F;
-                                                               var18 = s.length >= 7?this.toFloat(s[4]):0.0F;
+                                                               result2 = s.length >= 4?this.toFloat(s[3], -1800.0F, 1800.0F):0.0F;
+                                                               result3 = s.length >= 7?this.toFloat(s[4]):0.0F;
                                                                ry = s.length >= 7?this.toFloat(s[5]):1.0F;
                                                                rz = s.length >= 7?this.toFloat(s[6]):0.0F;
-                                                               var26 = s.length >= 10?this.toFloat(s[7]):this.toFloat(s[0]);
+                                                               result = s.length >= 10?this.toFloat(s[7]):this.toFloat(s[0]);
                                                                py = s.length >= 10?this.toFloat(s[8]):this.toFloat(s[1]);
                                                                pz = s.length >= 10?this.toFloat(s[9]):this.toFloat(s[2]);
-                                                               this.partWheel.add(new MCH_BaseVehicleInfo.PartWheel(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), var18, ry, rz, var15, var26, py, pz, "wheel" + this.partWheel.size()));
+                                                               this.partWheel.add(new MCH_BaseVehicleInfo.PartWheel(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), result3, ry, rz, result2, result, py, pz, "wheel" + this.partWheel.size()));
                                                                //TODO: define a boundingbox here
                                                             }
                                                          } else if(item.equalsIgnoreCase("AddPartSteeringWheel")) {
@@ -1148,19 +1148,19 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                                             if(s.length >= 5) {
                                                                //defines a custom boundingbox based on TXT. Five values keep a square footprint, six keeps the legacy damage factor, and seven adds depth plus damage factor.
                                                                float depth = s.length >= 7?this.toFloat(s[5]):this.toFloat(s[3]);
-                                                               var15 = s.length >= 7?this.toFloat(s[6]):(s.length >= 6?this.toFloat(s[5]):1.0F);
-                                                               MCH_BoundingBox var49 = new MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), depth, var15);
-                                                               this.extraBoundingBox.add(var49);
-                                                               if(var49.boundingBox.maxY > (double)this.markerHeight) {
-                                                                  this.markerHeight = (float)var49.boundingBox.maxY;
+                                                               result2 = s.length >= 7?this.toFloat(s[6]):(s.length >= 6?this.toFloat(s[5]):1.0F);
+                                                               MCH_BoundingBox boundingBox2 = new MCH_BoundingBox((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), depth, result2);
+                                                               this.extraBoundingBox.add(boundingBox2);
+                                                               if(boundingBox2.boundingBox.maxY > (double)this.markerHeight) {
+                                                                  this.markerHeight = (float)boundingBox2.boundingBox.maxY;
                                                                }
 
-                                                               this.markerWidth = (float)Math.max((double)this.markerWidth, Math.abs(var49.boundingBox.maxX) / 2.0D);
-                                                               this.markerWidth = (float)Math.max((double)this.markerWidth, Math.abs(var49.boundingBox.minX) / 2.0D);
-                                                               this.markerWidth = (float)Math.max((double)this.markerWidth, Math.abs(var49.boundingBox.maxZ) / 2.0D);
-                                                               this.markerWidth = (float)Math.max((double)this.markerWidth, Math.abs(var49.boundingBox.minZ) / 2.0D);
-                                                               this.bbZmin = (float)Math.min((double)this.bbZmin, var49.boundingBox.minZ);
-                                                               this.bbZmax = (float)Math.min((double)this.bbZmax, var49.boundingBox.maxZ);
+                                                               this.markerWidth = (float)Math.max((double)this.markerWidth, Math.abs(boundingBox2.boundingBox.maxX) / 2.0D);
+                                                               this.markerWidth = (float)Math.max((double)this.markerWidth, Math.abs(boundingBox2.boundingBox.minX) / 2.0D);
+                                                               this.markerWidth = (float)Math.max((double)this.markerWidth, Math.abs(boundingBox2.boundingBox.maxZ) / 2.0D);
+                                                               this.markerWidth = (float)Math.max((double)this.markerWidth, Math.abs(boundingBox2.boundingBox.minZ) / 2.0D);
+                                                               this.bbZmin = (float)Math.min((double)this.bbZmin, boundingBox2.boundingBox.minZ);
+                                                               this.bbZmax = (float)Math.min((double)this.bbZmax, boundingBox2.boundingBox.maxZ);
                                                             }
                                                          } else if(item.equalsIgnoreCase("RotorSpeed")) {
                                                             this.rotorSpeed = this.toFloat(data, -10000.0F, 10000.0F);
@@ -1178,88 +1178,88 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                                          }
                                                       } else {
                                                          s = data.split("\\s*,\\s*");
-                                                         MCH_BaseVehicleInfo.LandingGear var42;
+                                                         MCH_BaseVehicleInfo.LandingGear landingGear2;
                                                          if(!item.equalsIgnoreCase("AddPartSlideRotLG") && s.length >= 6) {
-                                                            var15 = s.length >= 7?this.toFloat(s[6], -180.0F, 180.0F):90.0F;
-                                                            var15 /= 90.0F;
-                                                            var42 = new MCH_BaseVehicleInfo.LandingGear(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), "lg" + this.landingGear.size(), var15, item.equalsIgnoreCase("AddPartLgRev"), item.equalsIgnoreCase("AddPartLGHatch"));
+                                                            result2 = s.length >= 7?this.toFloat(s[6], -180.0F, 180.0F):90.0F;
+                                                            result2 /= 90.0F;
+                                                            landingGear2 = new MCH_BaseVehicleInfo.LandingGear(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), "lg" + this.landingGear.size(), result2, item.equalsIgnoreCase("AddPartLgRev"), item.equalsIgnoreCase("AddPartLGHatch"));
                                                             if(s.length >= 8) {
-                                                               var42.enableRot2 = true;
-                                                               var42.maxRotFactor2 = s.length >= 11?this.toFloat(s[10], -180.0F, 180.0F):90.0F;
-                                                               var42.maxRotFactor2 /= 90.0F;
-                                                               var42.rot2 = Vec3.createVectorHelper((double)this.toFloat(s[7]), (double)this.toFloat(s[8]), (double)this.toFloat(s[9]));
+                                                               landingGear2.enableRot2 = true;
+                                                               landingGear2.maxRotFactor2 = s.length >= 11?this.toFloat(s[10], -180.0F, 180.0F):90.0F;
+                                                               landingGear2.maxRotFactor2 /= 90.0F;
+                                                               landingGear2.rot2 = Vec3.createVectorHelper((double)this.toFloat(s[7]), (double)this.toFloat(s[8]), (double)this.toFloat(s[9]));
                                                             }
 
-                                                            this.landingGear.add(var42);
+                                                            this.landingGear.add(landingGear2);
                                                          }
 
                                                          if(item.equalsIgnoreCase("AddPartSlideRotLG") && s.length >= 9) {
-                                                            var15 = s.length >= 10?this.toFloat(s[9], -180.0F, 180.0F):90.0F;
-                                                            var15 /= 90.0F;
-                                                            var42 = new MCH_BaseVehicleInfo.LandingGear(this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), this.toFloat(s[7]), this.toFloat(s[8]), "lg" + this.landingGear.size(), var15, false, false);
-                                                            var42.slide = Vec3.createVectorHelper((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]));
-                                                            this.landingGear.add(var42);
+                                                            result2 = s.length >= 10?this.toFloat(s[9], -180.0F, 180.0F):90.0F;
+                                                            result2 /= 90.0F;
+                                                            landingGear2 = new MCH_BaseVehicleInfo.LandingGear(this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), this.toFloat(s[7]), this.toFloat(s[8]), "lg" + this.landingGear.size(), result2, false, false);
+                                                            landingGear2.slide = Vec3.createVectorHelper((double)this.toFloat(s[0]), (double)this.toFloat(s[1]), (double)this.toFloat(s[2]));
+                                                            this.landingGear.add(landingGear2);
                                                          }
                                                       }
                                                    } else {
                                                       s = data.split("\\s*,\\s*");
-                                                      var28 = item.compareTo("addpartslidecanopy") == 0;
-                                                      var22 = this.canopyList.size();
-                                                      if(var22 > 0) {
-                                                         --var22;
+                                                      isValid5 = item.compareTo("addpartslidecanopy") == 0;
+                                                      index = this.canopyList.size();
+                                                      if(index > 0) {
+                                                         --index;
                                                       }
 
-                                                      MCH_BaseVehicleInfo.Canopy var35;
-                                                      if(var28) {
+                                                      MCH_BaseVehicleInfo.Canopy canopy;
+                                                      if(isValid5) {
                                                          if(s.length >= 3) {
-                                                            var35 = new MCH_BaseVehicleInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), 0.0F, 0.0F, 0.0F, 90.0F, "canopy" + var22, var28);
-                                                            this.canopyList.add(var35);
-                                                            if(var22 == 0) {
-                                                               var35 = new MCH_BaseVehicleInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), 0.0F, 0.0F, 0.0F, 90.0F, "canopy", var28);
-                                                               this.canopyList.add(var35);
+                                                            canopy = new MCH_BaseVehicleInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), 0.0F, 0.0F, 0.0F, 90.0F, "canopy" + index, isValid5);
+                                                            this.canopyList.add(canopy);
+                                                            if(index == 0) {
+                                                               canopy = new MCH_BaseVehicleInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), 0.0F, 0.0F, 0.0F, 90.0F, "canopy", isValid5);
+                                                               this.canopyList.add(canopy);
                                                             }
                                                          }
                                                       } else if(s.length >= 6) {
-                                                         var18 = s.length >= 7?this.toFloat(s[6], -180.0F, 180.0F):90.0F;
-                                                         var18 /= 90.0F;
-                                                         var35 = new MCH_BaseVehicleInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), var18, "canopy" + var22, var28);
-                                                         this.canopyList.add(var35);
-                                                         if(var22 == 0) {
-                                                            var35 = new MCH_BaseVehicleInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), var18, "canopy", var28);
-                                                            this.canopyList.add(var35);
+                                                         result3 = s.length >= 7?this.toFloat(s[6], -180.0F, 180.0F):90.0F;
+                                                         result3 /= 90.0F;
+                                                         canopy = new MCH_BaseVehicleInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), result3, "canopy" + index, isValid5);
+                                                         this.canopyList.add(canopy);
+                                                         if(index == 0) {
+                                                            canopy = new MCH_BaseVehicleInfo.Canopy(this.toFloat(s[0]), this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), result3, "canopy", isValid5);
+                                                            this.canopyList.add(canopy);
                                                          }
                                                       }
                                                    }
                                                 } else {
-                                                   var32 = item.compareTo("addpartslidehatch") == 0;
-                                                   var17 = data.split("\\s*,\\s*");
-                                                   var20 = null;
-                                                   MCH_BaseVehicleInfo.Hatch var36;
-                                                   if(var32) {
-                                                      if(var17.length >= 3) {
-                                                         var36 = new MCH_BaseVehicleInfo.Hatch(this.toFloat(var17[0]), this.toFloat(var17[1]), this.toFloat(var17[2]), 0.0F, 0.0F, 0.0F, 90.0F, "hatch" + this.hatchList.size(), var32);
-                                                         this.hatchList.add(var36);
+                                                   isValid6 = item.compareTo("addpartslidehatch") == 0;
+                                                   text = data.split("\\s*,\\s*");
+                                                   direction = null;
+                                                   MCH_BaseVehicleInfo.Hatch hatch;
+                                                   if(isValid6) {
+                                                      if(text.length >= 3) {
+                                                         hatch = new MCH_BaseVehicleInfo.Hatch(this.toFloat(text[0]), this.toFloat(text[1]), this.toFloat(text[2]), 0.0F, 0.0F, 0.0F, 90.0F, "hatch" + this.hatchList.size(), isValid6);
+                                                         this.hatchList.add(hatch);
                                                       }
-                                                   } else if(var17.length >= 6) {
-                                                      ry = var17.length >= 7?this.toFloat(var17[6], -180.0F, 180.0F):90.0F;
-                                                      var36 = new MCH_BaseVehicleInfo.Hatch(this.toFloat(var17[0]), this.toFloat(var17[1]), this.toFloat(var17[2]), this.toFloat(var17[3]), this.toFloat(var17[4]), this.toFloat(var17[5]), ry, "hatch" + this.hatchList.size(), var32);
-                                                      this.hatchList.add(var36);
+                                                   } else if(text.length >= 6) {
+                                                      ry = text.length >= 7?this.toFloat(text[6], -180.0F, 180.0F):90.0F;
+                                                      hatch = new MCH_BaseVehicleInfo.Hatch(this.toFloat(text[0]), this.toFloat(text[1]), this.toFloat(text[2]), this.toFloat(text[3]), this.toFloat(text[4]), this.toFloat(text[5]), ry, "hatch" + this.hatchList.size(), isValid6);
+                                                      this.hatchList.add(hatch);
                                                    }
                                                 }
                                              } else {
-                                                var32 = item.equalsIgnoreCase("AddPartSlideWeaponBay");
-                                                var17 = data.split("\\s*,\\s*");
-                                                var20 = null;
-                                                MCH_BaseVehicleInfo.WeaponBay var33;
-                                                if(var32) {
-                                                   if(var17.length >= 4) {
-                                                      var33 = new MCH_BaseVehicleInfo.WeaponBay(var17[0].trim().toLowerCase(), this.toFloat(var17[1]), this.toFloat(var17[2]), this.toFloat(var17[3]), 0.0F, 0.0F, 0.0F, 90.0F, "wb" + this.partWeaponBay.size(), var32);
-                                                      this.partWeaponBay.add(var33);
+                                                isValid6 = item.equalsIgnoreCase("AddPartSlideWeaponBay");
+                                                text = data.split("\\s*,\\s*");
+                                                direction = null;
+                                                MCH_BaseVehicleInfo.WeaponBay weaponBay;
+                                                if(isValid6) {
+                                                   if(text.length >= 4) {
+                                                      weaponBay = new MCH_BaseVehicleInfo.WeaponBay(text[0].trim().toLowerCase(), this.toFloat(text[1]), this.toFloat(text[2]), this.toFloat(text[3]), 0.0F, 0.0F, 0.0F, 90.0F, "wb" + this.partWeaponBay.size(), isValid6);
+                                                      this.partWeaponBay.add(weaponBay);
                                                    }
-                                                } else if(var17.length >= 7) {
-                                                   ry = var17.length >= 8?this.toFloat(var17[7], -180.0F, 180.0F):90.0F;
-                                                   var33 = new MCH_BaseVehicleInfo.WeaponBay(var17[0].trim().toLowerCase(), this.toFloat(var17[1]), this.toFloat(var17[2]), this.toFloat(var17[3]), this.toFloat(var17[4]), this.toFloat(var17[5]), this.toFloat(var17[6]), ry / 90.0F, "wb" + this.partWeaponBay.size(), var32);
-                                                   this.partWeaponBay.add(var33);
+                                                } else if(text.length >= 7) {
+                                                   ry = text.length >= 8?this.toFloat(text[7], -180.0F, 180.0F):90.0F;
+                                                   weaponBay = new MCH_BaseVehicleInfo.WeaponBay(text[0].trim().toLowerCase(), this.toFloat(text[1]), this.toFloat(text[2]), this.toFloat(text[3]), this.toFloat(text[4]), this.toFloat(text[5]), this.toFloat(text[6]), ry / 90.0F, "wb" + this.partWeaponBay.size(), isValid6);
+                                                   this.partWeaponBay.add(weaponBay);
                                                 }
                                              }
                                           }
@@ -1270,49 +1270,49 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                     } else {
                                        s = data.split("\\s*,\\s*");
                                        if(s.length >= 7) {
-                                          var15 = 0.0F;
-                                          var18 = 0.0F;
+                                          result2 = 0.0F;
+                                          result3 = 0.0F;
                                           ry = 0.0F;
                                           rz = 0.0F;
-                                          var34 = item.equalsIgnoreCase("AddPartRotWeapon") || item.equalsIgnoreCase("AddPartTurretRotWeapon");
-                                          var31 = item.equalsIgnoreCase("AddPartWeaponMissile");
-                                          var37 = item.equalsIgnoreCase("AddPartTurretWeapon") || item.equalsIgnoreCase("AddPartTurretRotWeapon");
-                                          if(var34) {
-                                             var15 = s.length >= 10?this.toFloat(s[7]):0.0F;
-                                             var18 = s.length >= 10?this.toFloat(s[8]):0.0F;
+                                          isValid3 = item.equalsIgnoreCase("AddPartRotWeapon") || item.equalsIgnoreCase("AddPartTurretRotWeapon");
+                                          isValid = item.equalsIgnoreCase("AddPartWeaponMissile");
+                                          isValid4 = item.equalsIgnoreCase("AddPartTurretWeapon") || item.equalsIgnoreCase("AddPartTurretRotWeapon");
+                                          if(isValid3) {
+                                             result2 = s.length >= 10?this.toFloat(s[7]):0.0F;
+                                             result3 = s.length >= 10?this.toFloat(s[8]):0.0F;
                                              ry = s.length >= 10?this.toFloat(s[9]):-1.0F;
                                           } else {
                                              rz = s.length >= 8?this.toFloat(s[7]):0.0F;
                                           }
 
-                                          MCH_BaseVehicleInfo.PartWeapon var41 = new MCH_BaseVehicleInfo.PartWeapon(this.splitParamSlash(s[0].toLowerCase().trim()), var34, var31, this.toBool(s[1]), this.toBool(s[2]), this.toBool(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "weapon" + this.partWeapon.size(), var15, var18, ry, rz, var37);
-                                          this.lastWeaponPart = var41;
-                                          this.partWeapon.add(var41);
+                                          MCH_BaseVehicleInfo.PartWeapon partWeapon2 = new MCH_BaseVehicleInfo.PartWeapon(this.splitParamSlash(s[0].toLowerCase().trim()), isValid3, isValid, this.toBool(s[1]), this.toBool(s[2]), this.toBool(s[3]), this.toFloat(s[4]), this.toFloat(s[5]), this.toFloat(s[6]), "weapon" + this.partWeapon.size(), result2, result3, ry, rz, isValid4);
+                                          this.lastWeaponPart = partWeapon2;
+                                          this.partWeapon.add(partWeapon2);
                                        }
                                     }
                                  } else {
                                     s = data.split("\\s*,\\s*");
-                                    String var29 = s[0].toLowerCase();
-                                    if(s.length >= 4 && MCH_WeaponInfoManager.contains(var29)) {
-                                       var18 = s.length >= 5?this.toFloat(s[4]):0.0F;
+                                    String token = s[0].toLowerCase();
+                                    if(s.length >= 4 && MCH_WeaponInfoManager.contains(token)) {
+                                       result3 = s.length >= 5?this.toFloat(s[4]):0.0F;
                                        ry = s.length >= 6?this.toFloat(s[5]):0.0F;
-                                       var25 = s.length >= 7?this.toBool(s[6]):true;
+                                       isValid2 = s.length >= 7?this.toBool(s[6]):true;
                                        px = s.length >= 8?this.toInt(s[7], 1, this.getInfo_MaxSeatNum()) - 1:0;
                                        if(px <= 0) {
-                                          var25 = true;
+                                          isValid2 = true;
                                        }
 
                                        py = s.length >= 9?this.toFloat(s[8]):0.0F;
                                        py = MathHelper.wrapAngleTo180_float(py);
                                        pz = s.length >= 10?this.toFloat(s[9]):0.0F;
                                        w = s.length >= 11?this.toFloat(s[10]):0.0F;
-                                       float var44 = s.length >= 12?this.toFloat(s[11]):0.0F;
-                                       float var47 = s.length >= 13?this.toFloat(s[12]):0.0F;
-                                       MCH_BaseVehicleInfo.Weapon e = new MCH_BaseVehicleInfo.Weapon(this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), var18, ry, var25, px, py, pz, w, var44, var47, item.equalsIgnoreCase("AddTurretWeapon"));
-                                       if(var29.compareTo(this.lastWeaponType) != 0) {
-                                          this.weaponSetList.add(new MCH_BaseVehicleInfo.WeaponSet(var29));
+                                       float result4 = s.length >= 12?this.toFloat(s[11]):0.0F;
+                                       float result5 = s.length >= 13?this.toFloat(s[12]):0.0F;
+                                       MCH_BaseVehicleInfo.Weapon e = new MCH_BaseVehicleInfo.Weapon(this.toFloat(s[1]), this.toFloat(s[2]), this.toFloat(s[3]), result3, ry, isValid2, px, py, pz, w, result4, result5, item.equalsIgnoreCase("AddTurretWeapon"));
+                                       if(token.compareTo(this.lastWeaponType) != 0) {
+                                          this.weaponSetList.add(new MCH_BaseVehicleInfo.WeaponSet(token));
                                           ++this.lastWeaponIndex;
-                                          this.lastWeaponType = var29;
+                                          this.lastWeaponType = token;
                                        }
 
                                        ((MCH_BaseVehicleInfo.WeaponSet)this.weaponSetList.get(this.lastWeaponIndex)).weapons.add(e);
@@ -1329,43 +1329,43 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                                  return;
                               }
 
-                              var20 = this.toVec3(s[0], s[1], s[2]);
-                              MCH_SeatInfo var21;
+                              direction = this.toVec3(s[0], s[1], s[2]);
+                              MCH_SeatInfo seatInfo;
                               if(item.equalsIgnoreCase("AddSeat")) {
-                                 boolean var23 = s.length >= 4?this.toBool(s[3]):false;
-                                 var21 = new MCH_SeatInfo(var20, var23);
-                                 this.seatList.add(var21);
+                                 boolean isValid8 = s.length >= 4?this.toBool(s[3]):false;
+                                 seatInfo = new MCH_SeatInfo(direction, isValid8);
+                                 this.seatList.add(seatInfo);
                               } else {
                                  if(s.length >= 6) {
-                                    MCH_BaseVehicleInfo.CameraPosition var24 = new MCH_BaseVehicleInfo.CameraPosition(this.toVec3(s[3], s[4], s[5]));
-                                    var25 = s.length >= 7?this.toBool(s[6]):false;
+                                    MCH_BaseVehicleInfo.CameraPosition cameraPosition2 = new MCH_BaseVehicleInfo.CameraPosition(this.toVec3(s[3], s[4], s[5]));
+                                    isValid2 = s.length >= 7?this.toBool(s[6]):false;
                                     if(item.equalsIgnoreCase("AddGunnerSeat")) {
                                        if(s.length >= 9) {
-                                          var26 = this.toFloat(s[7], -90.0F, 90.0F);
+                                          result = this.toFloat(s[7], -90.0F, 90.0F);
                                           py = this.toFloat(s[8], -90.0F, 90.0F);
-                                          if(var26 > py) {
-                                             pz = var26;
-                                             var26 = py;
+                                          if(result > py) {
+                                             pz = result;
+                                             result = py;
                                              py = pz;
                                           }
 
-                                          var37 = s.length >= 10?this.toBool(s[9]):false;
-                                          var21 = new MCH_SeatInfo(var20, true, var24, true, var25, false, 0.0F, 0.0F, var26, py, var37);
+                                          isValid4 = s.length >= 10?this.toBool(s[9]):false;
+                                          seatInfo = new MCH_SeatInfo(direction, true, cameraPosition2, true, isValid2, false, 0.0F, 0.0F, result, py, isValid4);
                                        } else {
-                                          var21 = new MCH_SeatInfo(var20, true, var24, true, var25, false, 0.0F, 0.0F, false);
+                                          seatInfo = new MCH_SeatInfo(direction, true, cameraPosition2, true, isValid2, false, 0.0F, 0.0F, false);
                                        }
                                     } else {
-                                       var34 = s.length >= 9;
-                                       py = var34?this.toFloat(s[7]):0.0F;
-                                       pz = var34?this.toFloat(s[8]):0.0F;
-                                       boolean var39 = s.length >= 10?this.toBool(s[9]):false;
-                                       var21 = new MCH_SeatInfo(var20, true, var24, true, var25, var34, py, pz, var39);
+                                       isValid3 = s.length >= 9;
+                                       py = isValid3?this.toFloat(s[7]):0.0F;
+                                       pz = isValid3?this.toFloat(s[8]):0.0F;
+                                       boolean isValid9 = s.length >= 10?this.toBool(s[9]):false;
+                                       seatInfo = new MCH_SeatInfo(direction, true, cameraPosition2, true, isValid2, isValid3, py, pz, isValid9);
                                     }
                                  } else {
-                                    var21 = new MCH_SeatInfo(var20, true, new MCH_BaseVehicleInfo.CameraPosition(), false, false, false, 0.0F, 0.0F, false);
+                                    seatInfo = new MCH_SeatInfo(direction, true, new MCH_BaseVehicleInfo.CameraPosition(), false, false, false, 0.0F, 0.0F, false);
                                  }
 
-                                 this.seatList.add(var21);
+                                 this.seatList.add(seatInfo);
                               }
                            }
                         }
@@ -1376,15 +1376,15 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                   if(s.length >= 7) {
                      df = this.toVec3(s[0], s[1], s[2]);
                      c = this.hex2dec(s[3]);
-                     var22 = this.hex2dec(s[4]);
+                     index = this.hex2dec(s[4]);
                      rz = this.toFloat(s[5]);
-                     var26 = this.toFloat(s[6]);
+                     result = this.toFloat(s[6]);
                      py = s.length >= 8?this.toFloat(s[7]):0.0F;
                      pz = s.length >= 9?this.toFloat(s[8]):0.0F;
                      w = s.length >= 10?this.toFloat(s[9]):0.0F;
                      boolean mnp = !item.equalsIgnoreCase("AddSearchLight");
                      boolean mxp = item.equalsIgnoreCase("AddSteeringSearchLight");
-                     this.searchLights.add(new MCH_BaseVehicleInfo.SearchLight(df, c, var22, rz, var26, mnp, py, pz, mxp, w));
+                     this.searchLights.add(new MCH_BaseVehicleInfo.SearchLight(df, c, index, rz, result, mnp, py, pz, mxp, w));
                   }
                }
             }
@@ -1412,46 +1412,46 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
             cy[lp] = (double)this.toFloat(xy[1]);
          }
 
-         ArrayList var21 = new ArrayList();
-         var21.add(new MCH_BaseVehicleInfo.CrawlerTrackPrm((float)cx[0], (float)cy[0]));
-         double var22 = 0.0D;
+         ArrayList arrayList = new ArrayList();
+         arrayList.add(new MCH_BaseVehicleInfo.CrawlerTrackPrm((float)cx[0], (float)cy[0]));
+         double distance = 0.0D;
 
          int c;
          for(c = 0; c < PC; ++c) {
             double pp = cx[(c + 1) % PC] - cx[c];
             double np = cy[(c + 1) % PC] - cy[c];
-            var22 += Math.sqrt(pp * pp + np * np);
-            double nr = var22;
+            distance += Math.sqrt(pp * pp + np * np);
+            double nr = distance;
 
-            for(int nnr = 1; var22 >= (double)LEN; ++nnr) {
-               var21.add(new MCH_BaseVehicleInfo.CrawlerTrackPrm((float)(cx[c] + pp * ((double)(LEN * (float)nnr) / nr)), (float)(cy[c] + np * ((double)(LEN * (float)nnr) / nr))));
-               var22 -= (double)LEN;
+            for(int nnr = 1; distance >= (double)LEN; ++nnr) {
+               arrayList.add(new MCH_BaseVehicleInfo.CrawlerTrackPrm((float)(cx[c] + pp * ((double)(LEN * (float)nnr) / nr)), (float)(cy[c] + np * ((double)(LEN * (float)nnr) / nr))));
+               distance -= (double)LEN;
             }
          }
 
-         for(c = 0; c < var21.size(); ++c) {
-            MCH_BaseVehicleInfo.CrawlerTrackPrm var24 = (MCH_BaseVehicleInfo.CrawlerTrackPrm)var21.get((c + var21.size() - 1) % var21.size());
-            MCH_BaseVehicleInfo.CrawlerTrackPrm cp = (MCH_BaseVehicleInfo.CrawlerTrackPrm)var21.get(c);
-            MCH_BaseVehicleInfo.CrawlerTrackPrm var25 = (MCH_BaseVehicleInfo.CrawlerTrackPrm)var21.get((c + 1) % var21.size());
-            float pr = (float)(Math.atan2((double)(var24.x - cp.x), (double)(var24.y - cp.y)) * 180.0D / 3.141592653589793D);
-            float var26 = (float)(Math.atan2((double)(var25.x - cp.x), (double)(var25.y - cp.y)) * 180.0D / 3.141592653589793D);
+         for(c = 0; c < arrayList.size(); ++c) {
+            MCH_BaseVehicleInfo.CrawlerTrackPrm crawlerTrackPrm = (MCH_BaseVehicleInfo.CrawlerTrackPrm)arrayList.get((c + arrayList.size() - 1) % arrayList.size());
+            MCH_BaseVehicleInfo.CrawlerTrackPrm cp = (MCH_BaseVehicleInfo.CrawlerTrackPrm)arrayList.get(c);
+            MCH_BaseVehicleInfo.CrawlerTrackPrm crawlerTrackPrm2 = (MCH_BaseVehicleInfo.CrawlerTrackPrm)arrayList.get((c + 1) % arrayList.size());
+            float pr = (float)(Math.atan2((double)(crawlerTrackPrm.x - cp.x), (double)(crawlerTrackPrm.y - cp.y)) * 180.0D / 3.141592653589793D);
+            float result = (float)(Math.atan2((double)(crawlerTrackPrm2.x - cp.x), (double)(crawlerTrackPrm2.y - cp.y)) * 180.0D / 3.141592653589793D);
             float ppr = (pr + 360.0F) % 360.0F;
-            float var27 = var26 + 180.0F;
-            if(((double)var27 < (double)ppr - 0.3D || (double)var27 > (double)ppr + 0.3D) && var27 - ppr < 100.0F && var27 - ppr > -100.0F) {
-               var27 = (var27 + ppr) / 2.0F;
+            float result2 = result + 180.0F;
+            if(((double)result2 < (double)ppr - 0.3D || (double)result2 > (double)ppr + 0.3D) && result2 - ppr < 100.0F && result2 - ppr > -100.0F) {
+               result2 = (result2 + ppr) / 2.0F;
             }
 
-            cp.r = var27;
+            cp.r = result2;
          }
 
-         MCH_BaseVehicleInfo.CrawlerTrack var23 = new MCH_BaseVehicleInfo.CrawlerTrack(name);
-         var23.len = LEN;
-         var23.cx = cx;
-         var23.cy = cy;
-         var23.lp = var21;
-         var23.z = Z;
-         var23.side = Z >= 0.0F?1:0;
-         return var23;
+         MCH_BaseVehicleInfo.CrawlerTrack crawlerTrack = new MCH_BaseVehicleInfo.CrawlerTrack(name);
+         crawlerTrack.len = LEN;
+         crawlerTrack.cx = cx;
+         crawlerTrack.cy = cy;
+         crawlerTrack.lp = arrayList;
+         crawlerTrack.z = Z;
+         crawlerTrack.side = Z >= 0.0F?1:0;
+         return crawlerTrack;
       }
    }
 
@@ -1518,11 +1518,11 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
 
    public boolean canReloadItem(String item) {
       String[] ignoreItems = getCannotReloadItem();
-      String[] arr$ = ignoreItems;
-      int len$ = ignoreItems.length;
+      String[] iteratedValues = ignoreItems;
+      int iteratedValueCount = ignoreItems.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         String s = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         String s = iteratedValues[iteratedValueIndex];
          if(s.equalsIgnoreCase(item)) {
             return false;
          }

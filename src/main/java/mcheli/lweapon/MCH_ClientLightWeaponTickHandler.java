@@ -120,26 +120,26 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
       }
 
       this.isBeforeHeldItem = this.isHeldItem;
-      EntityClientPlayerMP var6 = super.mc.thePlayer;
-      if(this.prevThePlayer == null || this.prevThePlayer != var6) {
-         this.initWeaponParam(var6);
-         this.prevThePlayer = var6;
+      EntityClientPlayerMP player2 = super.mc.thePlayer;
+      if(this.prevThePlayer == null || this.prevThePlayer != player2) {
+         this.initWeaponParam(player2);
+         this.prevThePlayer = player2;
       }
 
-      ItemStack var7 = var6 != null?var6.getHeldItem():null;
-      if(var6 == null || var6.ridingEntity instanceof MCH_EntityGLTD || var6.ridingEntity instanceof MCH_EntityBaseVehicle) {
-         var7 = null;
+      ItemStack result = player2 != null?player2.getHeldItem():null;
+      if(player2 == null || player2.ridingEntity instanceof MCH_EntityGLTD || player2.ridingEntity instanceof MCH_EntityBaseVehicle) {
+         result = null;
       }
 
       if(gs.getLockingEntity() == null) {
          markEntity = null;
       }
 
-      if(var7 != null && var7.getItem() instanceof MCH_ItemLightWeaponBase) {
-         MCH_ItemLightWeaponBase var8 = (MCH_ItemLightWeaponBase)var7.getItem();
-         if(this.prevItemStack == null || !this.prevItemStack.isItemEqual(var7) && !this.prevItemStack.getUnlocalizedName().equals(var7.getUnlocalizedName())) {
-            this.initWeaponParam(var6);
-            weapon = MCH_WeaponCreator.createWeapon(var6.worldObj, MCH_ItemLightWeaponBase.getName(var7), Vec3.createVectorHelper(0.0D, 0.0D, 0.0D), 0.0F, 0.0F, (MCH_IEntityLockChecker)null, false);
+      if(result != null && result.getItem() instanceof MCH_ItemLightWeaponBase) {
+         MCH_ItemLightWeaponBase lightWeaponBaseItem = (MCH_ItemLightWeaponBase)result.getItem();
+         if(this.prevItemStack == null || !this.prevItemStack.isItemEqual(result) && !this.prevItemStack.getUnlocalizedName().equals(result.getUnlocalizedName())) {
+            this.initWeaponParam(player2);
+            weapon = MCH_WeaponCreator.createWeapon(player2.worldObj, MCH_ItemLightWeaponBase.getName(result), Vec3.createVectorHelper(0.0D, 0.0D, 0.0D), 0.0F, 0.0F, (MCH_IEntityLockChecker)null, false);
             if(weapon != null && weapon.getInfo() != null && weapon.getGuidanceSystem() != null) {
                gs = (MCH_WeaponGuidanceSystem) weapon.getGuidanceSystem();
             }
@@ -149,9 +149,9 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
             return;
          }
 
-         gs.setWorld(var6.worldObj);
+         gs.setWorld(player2.worldObj);
          gs.lockRange = lockRange;
-         if(var6.getItemInUseDuration() > 10) {
+         if(player2.getItemInUseDuration() > 10) {
             selectedZoom %= weapon.getInfo().zoom.length;
             W_Reflection.setCameraZoom(weapon.getInfo().zoom[selectedZoom]);
          } else {
@@ -166,9 +166,9 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          //done: make sure rpg-7 isn't getting it's item damage reduced even though it cannot lock, it was this:
          //also ensure that the chinese change to how which button press for click to fire isn't affecting this.
 
-         if(var7.getItemDamage() < var7.getMaxDamage() && !"rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(var6.getHeldItem()))) {
-            if(var6.getItemInUseDuration() > 10) {
-               gs.lock(var6);
+         if(result.getItemDamage() < result.getMaxDamage() && !"rpg7".equalsIgnoreCase(MCH_ItemLightWeaponBase.getName(player2.getHeldItem()))) {
+            if(player2.getItemInUseDuration() > 10) {
+               gs.lock(player2);
                if(gs.getLockCount() > 0) {
                   if(lockonSoundCount > 0) {
                      --lockonSoundCount;
@@ -190,12 +190,12 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
             reloadCount = 0;
          } else {
             lockonSoundCount = 0;
-            if(W_EntityPlayer.hasItem(var6, var8.bullet) && var6.getItemInUseCount() <= 0) {
+            if(W_EntityPlayer.hasItem(player2, lightWeaponBaseItem.bullet) && player2.getItemInUseCount() <= 0) {
                if(reloadCount == 10) {
                   W_McClient.MOD_playSoundFX("fim92_reload", 1.0F, 1.0F);
                }
 
-               boolean var10 = true;
+               boolean result2 = true;
                if(reloadCount < 110) {
                   ++reloadCount;
                   if(reloadCount == 110) {
@@ -210,10 +210,10 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
          }
 
          if(!inGUI) {
-            this.playerControl(var6, var7, (MCH_ItemLightWeaponBase)var7.getItem());
+            this.playerControl(player2, result, (MCH_ItemLightWeaponBase)result.getItem());
          }
 
-         this.isHeldItem = MCH_ItemLightWeaponBase.isHeld(var6);
+         this.isHeldItem = MCH_ItemLightWeaponBase.isHeld(player2);
       } else {
          lockonSoundCount = 0;
          reloadCount = 0;
@@ -223,11 +223,11 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
       if(this.isBeforeHeldItem != this.isHeldItem) {
          MCH_Lib.DbgLog(true, "LWeapon cancel", new Object[0]);
          if(!this.isHeldItem) {
-            if(getPotionNightVisionDuration(var6) < 250) {
-               MCH_PacketLightWeaponPlayerControl var9 = new MCH_PacketLightWeaponPlayerControl();
-               var9.camMode = 1;
+            if(getPotionNightVisionDuration(player2) < 250) {
+               MCH_PacketLightWeaponPlayerControl packetLightWeaponPlayerControl = new MCH_PacketLightWeaponPlayerControl();
+               packetLightWeaponPlayerControl.camMode = 1;
                System.out.println("pre sent dogshit to the server");
-               W_Network.sendToServer(var9);
+               W_Network.sendToServer(packetLightWeaponPlayerControl);
                System.out.println("sent dogshit to the server");
                prevThePlayer.removePotionEffect(Potion.nightVision.getId());
             }
@@ -239,9 +239,9 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
       //if ()
       //check if this is on the server
       //if (this.isRemote)
-      //int lightWeaponCount = countLightWeapons(var6);
+      //int lightWeaponCount = countLightWeapons(calculatedValue);
       //if (lightWeaponCount > 1) {
-      //   var6.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, 2, true));
+      //   calculatedValue.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, 2, true));
       //} else {
       //   prevThePlayer.removePotionEffect(Potion.moveSlowdown.getId());
       //}
@@ -252,7 +252,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
 
 
 
-      this.prevItemStack = var7;
+      this.prevItemStack = result;
       gs.update();
 
    }
@@ -278,7 +278,7 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
       MCH_PacketLightWeaponPlayerControl pc = new MCH_PacketLightWeaponPlayerControl();
       boolean send = false;
       boolean autoShot = false;
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.LWeaponAutoFire.prmBool && is.getItemDamage() < is.getMaxDamage() && gs.isLockComplete()) {
          autoShot = true;
          System.out.println("autoshot true");
@@ -353,24 +353,24 @@ public class MCH_ClientLightWeaponTickHandler extends MCH_ClientTickHandlerBase 
       }
 
       //if (lightWeaponCount > 1) {
-      //         var6.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, 2, true));
+      //         calculatedValue.addPotionEffect(new PotionEffect(Potion.moveSlowdown.getId(), 200, 2, true));
       //      } else {
       //         prevThePlayer.removePotionEffect(Potion.moveSlowdown.getId());
       //      }
 
       if(this.KeyCameraMode.isKeyDown()) {
-         EntityClientPlayerMP var6 = super.mc.thePlayer;
+         EntityClientPlayerMP player2 = super.mc.thePlayer;
          PotionEffect pe2 = player.getActivePotionEffect(Potion.nightVision);
          MCH_Lib.DbgLog(true, "LWeapon NV %s", new Object[]{pe2 != null?"ON->OFF":"OFF->ON"});
          if(pe2 != null) {
-            var6.removePotionEffect(Potion.nightVision.getId());
+            player2.removePotionEffect(Potion.nightVision.getId());
             System.out.println("pe2 is not null");
             pc.camMode = 1;
             send = true;
             W_McClient.MOD_playSoundFX("pi", 0.5F, 0.9F);
          } else if(player.getItemInUseDuration() > 60) {
             System.out.println("fat error most likely");
-            var6.addPotionEffect(new PotionEffect(Potion.nightVision.getId(), 250, 0, false));
+            player2.addPotionEffect(new PotionEffect(Potion.nightVision.getId(), 250, 0, false));
             pc.camMode = 2;
             send = true;
             W_McClient.MOD_playSoundFX("pi", 0.5F, 0.9F);

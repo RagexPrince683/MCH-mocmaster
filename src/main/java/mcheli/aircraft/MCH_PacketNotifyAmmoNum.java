@@ -42,8 +42,8 @@ public class MCH_PacketNotifyAmmoNum extends MCH_Packet {
             this.ammo = new short[]{data.readShort()};
             this.restAmmo = new short[]{data.readShort()};
          }
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -64,8 +64,8 @@ public class MCH_PacketNotifyAmmoNum extends MCH_Packet {
             dos.writeShort(this.ammo[0]);
             dos.writeShort(this.restAmmo[0]);
          }
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

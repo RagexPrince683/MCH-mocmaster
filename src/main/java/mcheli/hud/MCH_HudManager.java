@@ -64,10 +64,10 @@ public class MCH_HudManager {
                   info.checkData();
                   map.put(e, info);
                }
-            } catch (Exception var18) {
+            } catch (Exception exception) {
                MCH_Lib.Log("### HUD file error! %s Line=%d", new Object[]{resourcePath, Integer.valueOf(line)});
-               var18.printStackTrace();
-               throw new RuntimeException(var18);
+               exception.printStackTrace();
+               throw new RuntimeException(exception);
             } finally {
                inFile.close();
             }

@@ -48,7 +48,7 @@ public abstract class MCH_BaseVehicleCommonGui extends MCH_Gui {
    }
 
    public void drawDebugtInfo(MCH_EntityBaseVehicle ac) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.EnableMCHLibDebugLog.prmBool) {
          int LX = super.centerX - 100;
       }
@@ -77,10 +77,10 @@ public abstract class MCH_BaseVehicleCommonGui extends MCH_Gui {
          byte SZY = 5;
          double[] ls = new double[]{(double)(cx - IVX), (double)(cy - IVY), (double)(cx - SZX), (double)(cy - SZY), (double)(cx - IVX), (double)(cy + IVY), (double)(cx - SZX), (double)(cy + SZY), (double)(cx + IVX), (double)(cy - IVY), (double)(cx + SZX), (double)(cy - SZY), (double)(cx + IVX), (double)(cy + IVY), (double)(cx + SZX), (double)(cy + SZY)};
          //TODO clean up random magic number slop
-         MCH_Config var10000 = MCH_MOD.config;
+         MCH_Config configuration = MCH_MOD.config;
          color = MCH_Config.hitMarkColorRGB;
          int alpha = hs * (256 / hsMax);
-         MCH_Config var10001 = MCH_MOD.config;
+         MCH_Config configuration2 = MCH_MOD.config;
          color |= (int)(MCH_Config.hitMarkColorAlpha * (float)alpha) << 24;
          this.drawLine(ls, color);
       }
@@ -106,125 +106,125 @@ public abstract class MCH_BaseVehicleCommonGui extends MCH_Gui {
    public void drawKeyBind(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, EntityPlayer player, int seatID, int RX, int LX, int colorActive, int colorInactive) {
       String msg = "";
       boolean c = false;
-      StringBuilder var10000;
-      MCH_Config var10001;
+      StringBuilder configuration;
+      MCH_Config configuration2;
       if(seatID == 0) {
          this.drawString(ac.isVehicleAccessLocked() ? "Lock: LOCKED" : "Lock: UNLOCKED", LX, super.centerY + 50, colorActive);
       }
       this.drawRadarKeyBind(ac, player, seatID, RX, super.centerY + 20, colorActive, colorInactive);
       if(seatID == 0 && ac.canPutToRack()) {
-         var10000 = (new StringBuilder()).append("PutRack : ");
-         var10001 = MCH_MOD.config;
-         msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyPutToRack.prmInt)).toString();
+         configuration = (new StringBuilder()).append("PutRack : ");
+         configuration2 = MCH_MOD.config;
+         msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeyPutToRack.prmInt)).toString();
          this.drawString(msg, LX, super.centerY - 10, colorActive);
       }
 
       if(seatID == 0 && ac.canDownFromRack()) {
-         var10000 = (new StringBuilder()).append("DownRack : ");
-         var10001 = MCH_MOD.config;
-         msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyDownFromRack.prmInt)).toString();
+         configuration = (new StringBuilder()).append("DownRack : ");
+         configuration2 = MCH_MOD.config;
+         msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeyDownFromRack.prmInt)).toString();
          this.drawString(msg, LX, super.centerY - 0, colorActive);
       }
 
       if(seatID == 0 && ac.canRideRack()) {
-         var10000 = (new StringBuilder()).append("RideRack : ");
-         var10001 = MCH_MOD.config;
-         msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyPutToRack.prmInt)).toString();
+         configuration = (new StringBuilder()).append("RideRack : ");
+         configuration2 = MCH_MOD.config;
+         msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeyPutToRack.prmInt)).toString();
          this.drawString(msg, LX, super.centerY + 10, colorActive);
       }
 
       if(seatID == 0 && ac.ridingEntity != null) {
-         var10000 = (new StringBuilder()).append("DismountRack : ");
-         var10001 = MCH_MOD.config;
-         msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyDownFromRack.prmInt)).toString();
+         configuration = (new StringBuilder()).append("DismountRack : ");
+         configuration2 = MCH_MOD.config;
+         msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeyDownFromRack.prmInt)).toString();
          this.drawString(msg, LX, super.centerY + 10, colorActive);
       }
 
       int c1;
       label133: {
          if(seatID <= 0 || ac.getSeatNum() <= 1) {
-            MCH_Config var15 = MCH_MOD.config;
+            MCH_Config configuration3 = MCH_MOD.config;
             if(!Keyboard.isKeyDown(MCH_Config.KeyFreeLook.prmInt)) {
                break label133;
             }
          }
 
          c1 = seatID == 0?-208:colorActive;
-         String var16;
+         String name;
          if(seatID == 0) {
-            var10000 = new StringBuilder();
-            var10001 = MCH_MOD.config;
-            var16 = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyFreeLook.prmInt)).append(" + ").toString();
+            configuration = new StringBuilder();
+            configuration2 = MCH_MOD.config;
+            name = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeyFreeLook.prmInt)).append(" + ").toString();
          } else {
-            var16 = "";
+            name = "";
          }
 
-         String ws = var16;
-         var10000 = (new StringBuilder()).append("NextSeat : ").append(ws);
-         var10001 = MCH_MOD.config;
-         msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyGUI.prmInt)).toString();
+         String ws = name;
+         configuration = (new StringBuilder()).append("NextSeat : ").append(ws);
+         configuration2 = MCH_MOD.config;
+         msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeyGUI.prmInt)).toString();
          this.drawString(msg, RX, super.centerY - 70, c1);
-         var10000 = (new StringBuilder()).append("PrevSeat : ").append(ws);
-         var10001 = MCH_MOD.config;
-         msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
+         configuration = (new StringBuilder()).append("PrevSeat : ").append(ws);
+         configuration2 = MCH_MOD.config;
+         msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeyExtra.prmInt)).toString();
          this.drawString(msg, RX, super.centerY - 60, c1);
       }
 
       if(seatID >= 0 && seatID <= 1 && ac.haveFlare()) {
          c1 = ac.isFlarePreparation()?colorInactive:colorActive;
-         var10000 = (new StringBuilder()).append("Flare : ");
-         var10001 = MCH_MOD.config;
-         msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyFlare.prmInt)).toString();
+         configuration = (new StringBuilder()).append("Flare : ");
+         configuration2 = MCH_MOD.config;
+         msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeyFlare.prmInt)).toString();
          this.drawString(msg, RX, super.centerY - 50, c1);
       }
 
       if(seatID == 0 && info.haveLandingGear()) {
          if(ac.canFoldLandingGear()) {
-            var10000 = (new StringBuilder()).append("Gear Up : ");
-            var10001 = MCH_MOD.config;
-            msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyGearUpDown.prmInt)).toString();
+            configuration = (new StringBuilder()).append("Gear Up : ");
+            configuration2 = MCH_MOD.config;
+            msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeyGearUpDown.prmInt)).toString();
             this.drawString(msg, RX, super.centerY - 40, colorActive);
          } else if(ac.canUnfoldLandingGear()) {
-            var10000 = (new StringBuilder()).append("Gear Down : ");
-            var10001 = MCH_MOD.config;
-            msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyGearUpDown.prmInt)).toString();
+            configuration = (new StringBuilder()).append("Gear Down : ");
+            configuration2 = MCH_MOD.config;
+            msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeyGearUpDown.prmInt)).toString();
             this.drawString(msg, RX, super.centerY - 40, colorActive);
          }
       }
 
       MCH_WeaponSet ws1 = ac.getCurrentWeapon(player);
       if(ac.getWeaponNum() > 1) {
-         var10000 = (new StringBuilder()).append("Weapon : ");
-         var10001 = MCH_MOD.config;
-         msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchWeapon2.prmInt)).toString();
+         configuration = (new StringBuilder()).append("Weapon : ");
+         configuration2 = MCH_MOD.config;
+         msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchWeapon2.prmInt)).toString();
          this.drawString(msg, LX, super.centerY - 70, colorActive);
       }
 
       if(ws1.getCurrentWeapon().numMode > 0) {
-         var10000 = (new StringBuilder()).append("WeaponMode : ");
-         var10001 = MCH_MOD.config;
-         msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwWeaponMode.prmInt)).toString();
+         configuration = (new StringBuilder()).append("WeaponMode : ");
+         configuration2 = MCH_MOD.config;
+         msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwWeaponMode.prmInt)).toString();
          this.drawString(msg, LX, super.centerY - 60, colorActive);
       }
 
       if(ac.canSwitchSearchLight(player)) {
-         var10000 = (new StringBuilder()).append("SearchLight : ");
-         var10001 = MCH_MOD.config;
-         msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyCameraMode.prmInt)).toString();
+         configuration = (new StringBuilder()).append("SearchLight : ");
+         configuration2 = MCH_MOD.config;
+         msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeyCameraMode.prmInt)).toString();
          this.drawString(msg, LX, super.centerY - 50, colorActive);
       } else if(ac.canSwitchCameraMode(seatID)) {
-         var10000 = (new StringBuilder()).append("CameraMode : ");
-         var10001 = MCH_MOD.config;
-         msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyCameraMode.prmInt)).toString();
+         configuration = (new StringBuilder()).append("CameraMode : ");
+         configuration2 = MCH_MOD.config;
+         msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeyCameraMode.prmInt)).toString();
          this.drawString(msg, LX, super.centerY - 50, colorActive);
       }
 
       this.drawDismountKeyBind(ac, info, player, seatID, LX, super.centerY - 30, colorActive);
 
       if(seatID == 0 && ac.canSwitchFreeLook() || seatID > 0 && ac.canSwitchGunnerModeOtherSeat(player)) {
-         var10000 = (new StringBuilder()).append("FreeLook : ");
-         var10001 = MCH_MOD.config;
-         msg = var10000.append(MCH_KeyName.getDescOrName(MCH_Config.KeyFreeLook.prmInt)).toString();
+         configuration = (new StringBuilder()).append("FreeLook : ");
+         configuration2 = MCH_MOD.config;
+         msg = configuration.append(MCH_KeyName.getDescOrName(MCH_Config.KeyFreeLook.prmInt)).toString();
          this.drawString(msg, LX, super.centerY - 20, colorActive);
       }
 

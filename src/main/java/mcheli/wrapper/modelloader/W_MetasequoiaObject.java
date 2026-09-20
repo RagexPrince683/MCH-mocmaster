@@ -114,8 +114,8 @@ public class W_MetasequoiaObject extends W_ModelCustom {
          try {
             this.loadObjModel(is);
             return;
-         } catch (Exception var3) {
-            throw new ModelFormatException("IO Exception reading model format:" + this.fileName, var3);
+         } catch (Exception exception) {
+            throw new ModelFormatException("IO Exception reading model format:" + this.fileName, exception);
          }
       }
 
@@ -135,8 +135,8 @@ public class W_MetasequoiaObject extends W_ModelCustom {
 
       try {
          this.loadObjModel(resource.openStream());
-      } catch (IOException var4) {
-         throw new ModelFormatException("IO Exception reading model format:" + this.fileName, var4);
+      } catch (IOException iterator2) {
+         throw new ModelFormatException("IO Exception reading model format:" + this.fileName, iterator2);
       }
    }
 
@@ -146,15 +146,15 @@ public class W_MetasequoiaObject extends W_ModelCustom {
    }
 
    public boolean containsPart(String partName) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
       W_GroupObject groupObject;
       do {
-         if(!i$.hasNext()) {
+         if(!iteratedValueIndex.hasNext()) {
             return false;
          }
 
-         groupObject = (W_GroupObject)i$.next();
+         groupObject = (W_GroupObject)iteratedValueIndex.next();
       } while(!partName.equalsIgnoreCase(groupObject.name));
 
       return true;
@@ -222,40 +222,40 @@ public class W_MetasequoiaObject extends W_ModelCustom {
                         }
                      }
 
-                     int var30 = 0;
+                     int result = 0;
 
                      while((currentLine = reader.readLine()) != null) {
                         ++lineCount;
                         currentLine = currentLine.replaceAll("\\s+", " ").trim();
                         if(isValidFaceLine(currentLine)) {
-                           var30 = Integer.valueOf(currentLine.split(" ")[1]).intValue();
+                           result = Integer.valueOf(currentLine.split(" ")[1]).intValue();
                            break;
                         }
                      }
 
-                     if(var30 > 0) {
+                     if(result > 0) {
                         while((currentLine = reader.readLine()) != null) {
                            ++lineCount;
                            currentLine = currentLine.replaceAll("\\s+", " ").trim();
-                           String[] var31 = currentLine.split(" ");
-                           if(var31.length <= 2) {
-                              if(var31.length > 2 && Integer.valueOf(var31[0]).intValue() != 3) {
+                           String[] formattedText = currentLine.split(" ");
+                           if(formattedText.length <= 2) {
+                              if(formattedText.length > 2 && Integer.valueOf(formattedText[0]).intValue() != 3) {
                                  throw new ModelFormatException("found face is not triangle : " + this.fileName + " : line=" + lineCount);
                               }
                            } else {
-                              if(Integer.valueOf(var31[0]).intValue() >= 3) {
+                              if(Integer.valueOf(formattedText[0]).intValue() >= 3) {
                                  W_Face[] faces = this.parseFace(currentLine, lineCount, mirror);
-                                 W_Face[] arr$ = faces;
-                                 int len$ = faces.length;
+                                 W_Face[] iteratedValues = faces;
+                                 int iteratedValueCount = faces.length;
 
-                                 for(int i$ = 0; i$ < len$; ++i$) {
-                                    W_Face face = arr$[i$];
+                                 for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+                                    W_Face face = iteratedValues[iteratedValueIndex];
                                     e.faces.add(face);
                                  }
                               }
 
-                              --var30;
-                              if(var30 <= 0) {
+                              --result;
+                              if(result <= 0) {
                                  break;
                               }
                            }
@@ -273,8 +273,8 @@ public class W_MetasequoiaObject extends W_ModelCustom {
                }
             }
          }
-      } catch (IOException var28) {
-         throw new ModelFormatException("IO Exception reading model format : " + this.fileName, var28);
+      } catch (IOException oException) {
+         throw new ModelFormatException("IO Exception reading model format : " + this.fileName, oException);
       } finally {
          this.checkMinMaxFinal();
          this.groupObjects.trimToSize();
@@ -282,13 +282,13 @@ public class W_MetasequoiaObject extends W_ModelCustom {
 
          try {
             reader.close();
-         } catch (IOException var27) {
+         } catch (IOException oException2) {
             ;
          }
 
          try {
             inputStream.close();
-         } catch (IOException var26) {
+         } catch (IOException oException3) {
             ;
          }
 
@@ -301,10 +301,10 @@ public class W_MetasequoiaObject extends W_ModelCustom {
    }
 
    public void calcVerticesNormal(W_GroupObject group, boolean shading, double facet) {
-      Iterator i$ = group.faces.iterator();
+      Iterator iteratedValueIndex = group.faces.iterator();
 
-      while(i$.hasNext()) {
-         W_Face f = (W_Face)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         W_Face f = (W_Face)iteratedValueIndex.next();
          f.vertexNormals = new W_Vertex[f.verticesID.length];
 
          for(int i = 0; i < f.verticesID.length; ++i) {
@@ -326,15 +326,15 @@ public class W_MetasequoiaObject extends W_ModelCustom {
 
    public W_Vertex getVerticesNormalFromFace(W_Vertex faceNormal, int verticesID, W_GroupObject group, float facet) {
       W_Vertex v = new W_Vertex(0.0F, 0.0F, 0.0F);
-      Iterator i$ = group.faces.iterator();
+      Iterator iteratedValueIndex = group.faces.iterator();
 
-      while(i$.hasNext()) {
-         W_Face f = (W_Face)i$.next();
-         int[] arr$ = f.verticesID;
-         int len$ = arr$.length;
+      while(iteratedValueIndex.hasNext()) {
+         W_Face f = (W_Face)iteratedValueIndex.next();
+         int[] iteratedValues = f.verticesID;
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$1 = 0; i$1 < len$; ++i$1) {
-            int id = arr$[i$1];
+         for(int iteratedValueIndex1 = 0; iteratedValueIndex1 < iteratedValueCount; ++iteratedValueIndex1) {
+            int id = iteratedValues[iteratedValueIndex1];
             if(id == verticesID) {
                if(f.faceNormal.x * faceNormal.x + f.faceNormal.y * faceNormal.y + f.faceNormal.z * faceNormal.z >= facet) {
                   v.add(f.faceNormal);
@@ -349,9 +349,9 @@ public class W_MetasequoiaObject extends W_ModelCustom {
    }
 
    public void renderAll() {
-      Iterator i$ = this.groupObjects.iterator();
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          if(groupObject != null) {
             groupObject.render();
          }
@@ -359,9 +359,9 @@ public class W_MetasequoiaObject extends W_ModelCustom {
    }
 
    public void renderAllTransformed() {
-      Iterator i$ = this.groupObjects.iterator();
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          if(groupObject != null) {
             groupObject.renderTransformed();
          }
@@ -369,25 +369,25 @@ public class W_MetasequoiaObject extends W_ModelCustom {
    }
 
    public void tessellateAll(Tessellator tessellator) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          groupObject.render(tessellator);
       }
 
    }
 
    public void renderOnly(String ... groupNames) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
-         String[] arr$ = groupNames;
-         int len$ = groupNames.length;
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
+         String[] iteratedValues = groupNames;
+         int iteratedValueCount = groupNames.length;
 
-         for(int i$1 = 0; i$1 < len$; ++i$1) {
-            String groupName = arr$[i$1];
+         for(int iteratedValueIndex1 = 0; iteratedValueIndex1 < iteratedValueCount; ++iteratedValueIndex1) {
+            String groupName = iteratedValues[iteratedValueIndex1];
             if(groupName.equalsIgnoreCase(groupObject.name)) {
                groupObject.render();
             }
@@ -397,15 +397,15 @@ public class W_MetasequoiaObject extends W_ModelCustom {
    }
 
    public void tessellateOnly(Tessellator tessellator, String ... groupNames) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
-         String[] arr$ = groupNames;
-         int len$ = groupNames.length;
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
+         String[] iteratedValues = groupNames;
+         int iteratedValueCount = groupNames.length;
 
-         for(int i$1 = 0; i$1 < len$; ++i$1) {
-            String groupName = arr$[i$1];
+         for(int iteratedValueIndex1 = 0; iteratedValueIndex1 < iteratedValueCount; ++iteratedValueIndex1) {
+            String groupName = iteratedValues[iteratedValueIndex1];
             if(groupName.equalsIgnoreCase(groupObject.name)) {
                groupObject.render(tessellator);
             }
@@ -417,28 +417,28 @@ public class W_MetasequoiaObject extends W_ModelCustom {
    public void renderPart(String partName) {
       W_GroupObject groupObject;
       if(partName.charAt(0) == 36) {
-         for(int i$ = 0; i$ < this.groupObjects.size(); ++i$) {
-            groupObject = (W_GroupObject)this.groupObjects.get(i$);
+         for(int iteratedValueIndex = 0; iteratedValueIndex < this.groupObjects.size(); ++iteratedValueIndex) {
+            groupObject = (W_GroupObject)this.groupObjects.get(iteratedValueIndex);
             if(partName.equalsIgnoreCase(groupObject.name)) {
                groupObject.render();
-               ++i$;
+               ++iteratedValueIndex;
 
-               while(i$ < this.groupObjects.size()) {
-                  groupObject = (W_GroupObject)this.groupObjects.get(i$);
+               while(iteratedValueIndex < this.groupObjects.size()) {
+                  groupObject = (W_GroupObject)this.groupObjects.get(iteratedValueIndex);
                   if(groupObject.name.charAt(0) == 36) {
                      break;
                   }
 
                   groupObject.render();
-                  ++i$;
+                  ++iteratedValueIndex;
                }
             }
          }
       } else {
-         Iterator var4 = this.groupObjects.iterator();
+         Iterator iterator2 = this.groupObjects.iterator();
 
-         while(var4.hasNext()) {
-            groupObject = (W_GroupObject)var4.next();
+         while(iterator2.hasNext()) {
+            groupObject = (W_GroupObject)iterator2.next();
             if(partName.equalsIgnoreCase(groupObject.name)) {
                groupObject.render();
             }
@@ -450,28 +450,28 @@ public class W_MetasequoiaObject extends W_ModelCustom {
    public void renderPartTransformed(String partName) {
       W_GroupObject groupObject;
       if(partName.charAt(0) == 36) {
-         for(int i$ = 0; i$ < this.groupObjects.size(); ++i$) {
-            groupObject = (W_GroupObject)this.groupObjects.get(i$);
+         for(int iteratedValueIndex = 0; iteratedValueIndex < this.groupObjects.size(); ++iteratedValueIndex) {
+            groupObject = (W_GroupObject)this.groupObjects.get(iteratedValueIndex);
             if(partName.equalsIgnoreCase(groupObject.name)) {
                groupObject.renderTransformed();
-               ++i$;
+               ++iteratedValueIndex;
 
-               while(i$ < this.groupObjects.size()) {
-                  groupObject = (W_GroupObject)this.groupObjects.get(i$);
+               while(iteratedValueIndex < this.groupObjects.size()) {
+                  groupObject = (W_GroupObject)this.groupObjects.get(iteratedValueIndex);
                   if(groupObject.name.charAt(0) == 36) {
                      break;
                   }
 
                   groupObject.renderTransformed();
-                  ++i$;
+                  ++iteratedValueIndex;
                }
             }
          }
       } else {
-         Iterator var4 = this.groupObjects.iterator();
+         Iterator iterator2 = this.groupObjects.iterator();
 
-         while(var4.hasNext()) {
-            groupObject = (W_GroupObject)var4.next();
+         while(iterator2.hasNext()) {
+            groupObject = (W_GroupObject)iterator2.next();
             if(partName.equalsIgnoreCase(groupObject.name)) {
                groupObject.renderTransformed();
             }
@@ -481,10 +481,10 @@ public class W_MetasequoiaObject extends W_ModelCustom {
    }
 
    public void tessellatePart(Tessellator tessellator, String partName) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          if(partName.equalsIgnoreCase(groupObject.name)) {
             groupObject.render(tessellator);
          }
@@ -493,16 +493,16 @@ public class W_MetasequoiaObject extends W_ModelCustom {
    }
 
    public void renderAllExcept(String ... excludedGroupNames) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          boolean skipPart = false;
-         String[] arr$ = excludedGroupNames;
-         int len$ = excludedGroupNames.length;
+         String[] iteratedValues = excludedGroupNames;
+         int iteratedValueCount = excludedGroupNames.length;
 
-         for(int i$1 = 0; i$1 < len$; ++i$1) {
-            String excludedGroupName = arr$[i$1];
+         for(int iteratedValueIndex1 = 0; iteratedValueIndex1 < iteratedValueCount; ++iteratedValueIndex1) {
+            String excludedGroupName = iteratedValues[iteratedValueIndex1];
             if(excludedGroupName.equalsIgnoreCase(groupObject.name)) {
                skipPart = true;
             }
@@ -516,16 +516,16 @@ public class W_MetasequoiaObject extends W_ModelCustom {
    }
 
    public void tessellateAllExcept(Tessellator tessellator, String ... excludedGroupNames) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          boolean exclude = false;
-         String[] arr$ = excludedGroupNames;
-         int len$ = excludedGroupNames.length;
+         String[] iteratedValues = excludedGroupNames;
+         int iteratedValueCount = excludedGroupNames.length;
 
-         for(int i$1 = 0; i$1 < len$; ++i$1) {
-            String excludedGroupName = arr$[i$1];
+         for(int iteratedValueIndex1 = 0; iteratedValueIndex1 < iteratedValueCount; ++iteratedValueIndex1) {
+            String excludedGroupName = iteratedValues[iteratedValueIndex1];
             if(excludedGroupName.equalsIgnoreCase(groupObject.name)) {
                exclude = true;
             }

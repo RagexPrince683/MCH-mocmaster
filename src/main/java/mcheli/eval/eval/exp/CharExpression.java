@@ -45,16 +45,16 @@ public class CharExpression extends WordExpression {
    public long evalLong() {
       try {
          return (long)super.word.charAt(0);
-      } catch (Exception var2) {
-         throw new EvalException(2003, super.word, super.string, super.pos, var2);
+      } catch (Exception exception) {
+         throw new EvalException(2003, super.word, super.string, super.pos, exception);
       }
    }
 
    public double evalDouble() {
       try {
          return (double)super.word.charAt(0);
-      } catch (Exception var2) {
-         throw new EvalException(2003, super.word, super.string, super.pos, var2);
+      } catch (Exception exception) {
+         throw new EvalException(2003, super.word, super.string, super.pos, exception);
       }
    }
 

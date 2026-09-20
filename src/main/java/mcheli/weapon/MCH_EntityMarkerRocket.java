@@ -70,9 +70,9 @@ public class MCH_EntityMarkerRocket extends MCH_EntityBaseBullet {
          } else if(this.countDown > 0) {
             --this.countDown;
             if(this.countDown == 40) {
-               int var5 = 6 + super.rand.nextInt(2);
+               int index = 6 + super.rand.nextInt(2);
 
-               for(int i = 0; i < var5; ++i) {
+               for(int i = 0; i < index; ++i) {
                   MCH_EntityBomb e = new MCH_EntityBomb(super.worldObj, super.posX + (double)((super.rand.nextFloat() - 0.5F) * 15.0F), (double)(260.0F + super.rand.nextFloat() * 10.0F + (float)(i * 30)), super.posZ + (double)((super.rand.nextFloat() - 0.5F) * 15.0F), 0.0D, -0.5D, 0.0D, 0.0F, 90.0F, 4.0D);
                   e.setName(this.getName());
                   e.explosionPower = 3 + super.rand.nextInt(2);
@@ -144,7 +144,7 @@ public class MCH_EntityMarkerRocket extends MCH_EntityBaseBullet {
             }
 
             if(super.worldObj.isAirBlock(x, y, z)) {
-               MCH_Config var10000 = MCH_MOD.config;
+               MCH_Config configuration = MCH_MOD.config;
                if(MCH_Config.Explosion_FlamingBlock.prmBool) {
                   W_WorldFunc.setBlock(super.worldObj, x, y, z, Blocks.fire);
                }

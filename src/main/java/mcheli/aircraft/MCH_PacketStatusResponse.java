@@ -31,8 +31,8 @@ public class MCH_PacketStatusResponse extends MCH_Packet {
                this.weaponIDs[e] = data.readByte();
             }
          }
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -49,8 +49,8 @@ public class MCH_PacketStatusResponse extends MCH_Packet {
          } else {
             dos.writeShort(-1);
          }
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

@@ -189,7 +189,7 @@ public class MCH_EntityParachute extends W_Entity {
       }
 
       if(!this.isOpenParachute() && super.motionY > 0.01D) {
-         float var12 = 0.6F + super.rand.nextFloat() * 0.2F;
+         float motionX2 = 0.6F + super.rand.nextFloat() * 0.2F;
          double dx = super.prevPosX - super.posX;
          double dy = super.prevPosY - super.posY;
          double dz = super.prevPosZ - super.posZ;
@@ -201,7 +201,7 @@ public class MCH_EntityParachute extends W_Entity {
             prm.motionX = super.motionY * -0.5D + (super.rand.nextDouble() - 0.5D) * 0.5D;
             prm.motionX = super.motionZ * 0.5D + (super.rand.nextDouble() - 0.5D) * 0.5D;
             prm.size = 5.0F;
-            prm.setColor(0.8F + super.rand.nextFloat(), var12, var12, var12);
+            prm.setColor(0.8F + super.rand.nextFloat(), motionX2, motionX2, motionX2);
             MCH_ParticlesUtil.spawnParticle(prm);
          }
       }
@@ -345,7 +345,7 @@ public class MCH_EntityParachute extends W_Entity {
 
                if(foundBlock) {
                   countWater = 0;
-                  boolean var11 = true;
+                  boolean isValid = true;
 
                   for(int entityboat = 0; entityboat < 3 && py + entityboat >= 0 && py + entityboat <= 255; ++entityboat) {
                      int x = -2;
@@ -376,10 +376,10 @@ public class MCH_EntityParachute extends W_Entity {
                   }
 
                   if(countWater > 37) {
-                     EntityBoat var12 = new EntityBoat(super.worldObj, (double)px, (double)((float)py + 1.0F), (double)pz);
-                     var12.rotationYaw = super.rotationYaw - 90.0F;
-                     super.worldObj.spawnEntityInWorld(var12);
-                     super.riddenByEntity.mountEntity(var12);
+                     EntityBoat boatEntity = new EntityBoat(super.worldObj, (double)px, (double)((float)py + 1.0F), (double)pz);
+                     boatEntity.rotationYaw = super.rotationYaw - 90.0F;
+                     super.worldObj.spawnEntityInWorld(boatEntity);
+                     super.riddenByEntity.mountEntity(boatEntity);
                   }
 
                }

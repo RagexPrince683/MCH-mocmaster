@@ -81,19 +81,19 @@ public class MCH_ItemUavStation extends W_Item {
          } else {
             if(W_MovingObjectPosition.isHitTypeTile(movingobjectposition)) {
                i = movingobjectposition.blockX;
-               int var33 = movingobjectposition.blockY;
-               int var34 = movingobjectposition.blockZ;
-               MCH_EntityUavStation var35 = this.createUavStation(par2World, (double)((float)i + 0.5F), (double)((float)var33 + 1.0F), (double)((float)var34 + 0.5F), this.UavStationKind);
-               var35.setOwnerUUID(par3EntityPlayer.getUniqueID());
+               int result = movingobjectposition.blockY;
+               int result2 = movingobjectposition.blockZ;
+               MCH_EntityUavStation uavStationEntity = this.createUavStation(par2World, (double)((float)i + 0.5F), (double)((float)result + 1.0F), (double)((float)result2 + 0.5F), this.UavStationKind);
+               uavStationEntity.setOwnerUUID(par3EntityPlayer.getUniqueID());
                int rot = (int)(MCH_Lib.getRotate360((double)par3EntityPlayer.rotationYaw) + 45.0D);
-               var35.rotationYaw = (float)(rot / 90 * 90 - 180);
-               var35.initUavPostion();
-               if(!par2World.getCollidingBoundingBoxes(var35, var35.boundingBox.expand(-0.1D, -0.1D, -0.1D)).isEmpty()) {
+               uavStationEntity.rotationYaw = (float)(rot / 90 * 90 - 180);
+               uavStationEntity.initUavPostion();
+               if(!par2World.getCollidingBoundingBoxes(uavStationEntity, uavStationEntity.boundingBox.expand(-0.1D, -0.1D, -0.1D)).isEmpty()) {
                   return par1ItemStack;
                }
 
                if(!par2World.isRemote) {
-                  par2World.spawnEntityInWorld(var35);
+                  par2World.spawnEntityInWorld(uavStationEntity);
                }
 
                if(!par3EntityPlayer.capabilities.isCreativeMode) {

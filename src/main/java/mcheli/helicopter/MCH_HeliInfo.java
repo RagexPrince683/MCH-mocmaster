@@ -115,9 +115,9 @@ public class MCH_HeliInfo extends MCH_BaseVehicleInfo {
    }
 
    public boolean isValidData() throws Exception {
-      double var10001 = (double)super.speed;
-      MCH_Config var10002 = MCH_MOD.config;
-      super.speed = (float)(var10001 * MCH_Config.AllHeliSpeed.prmDouble);
+      double result = (double)super.speed;
+      MCH_Config configuration = MCH_MOD.config;
+      super.speed = (float)(result * MCH_Config.AllHeliSpeed.prmDouble);
       return super.isValidData();
    }
 

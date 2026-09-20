@@ -30,8 +30,8 @@ public class MCH_PacketNotifySpotedEntity extends MCH_Packet {
          } else {
             this.num = 0;
          }
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -44,8 +44,8 @@ public class MCH_PacketNotifySpotedEntity extends MCH_Packet {
          for(int e = 0; e < this.num; ++e) {
             dos.writeInt(this.entityId[e]);
          }
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }

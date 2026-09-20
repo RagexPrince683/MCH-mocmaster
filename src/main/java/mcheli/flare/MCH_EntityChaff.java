@@ -88,7 +88,7 @@ public class MCH_EntityChaff extends W_Entity implements MCH_IEntityLockChecker 
    }
 
    @Override
-   public boolean canLockEntity(Entity var1) {
+   public boolean canLockEntity(Entity entity) {
       return false;
    }
 

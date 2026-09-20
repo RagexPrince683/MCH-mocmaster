@@ -87,10 +87,10 @@ public class MCH_Achievement {
          if(info != null && info.item != null) {
             item = info.item;
          } else {
-            Iterator i$ = MCH_HeliInfoManager.map.values().iterator();
+            Iterator iteratedValueIndex = MCH_HeliInfoManager.map.values().iterator();
 
-            while(i$.hasNext()) {
-               MCH_HeliInfo i = (MCH_HeliInfo)i$.next();
+            while(iteratedValueIndex.hasNext()) {
+               MCH_HeliInfo i = (MCH_HeliInfo)iteratedValueIndex.next();
                if(i.item != null) {
                   item = i.item;
                   break;

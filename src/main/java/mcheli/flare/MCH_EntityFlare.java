@@ -103,8 +103,8 @@ public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnD
       try {
          buffer.writeByte(this.fuseCount);
          buffer.writeBoolean(this.countermeasure);
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -113,8 +113,8 @@ public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnD
       try {
          this.fuseCount = additionalData.readByte();
          this.countermeasure = additionalData.readBoolean();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -225,7 +225,7 @@ public class MCH_EntityFlare extends W_Entity implements IEntityAdditionalSpawnD
    }
 
    @Override
-   public boolean canLockEntity(Entity var1) {
+   public boolean canLockEntity(Entity entity) {
       return false;
    }
 }

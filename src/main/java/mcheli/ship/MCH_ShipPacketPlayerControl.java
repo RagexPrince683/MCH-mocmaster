@@ -24,8 +24,8 @@ public class MCH_ShipPacketPlayerControl extends MCH_PacketPlayerControlBase {
             byte submarineControl = data.readByte();
             this.submarineAscend = this.getBit(submarineControl, 0);
             this.submarineDescend = this.getBit(submarineControl, 1);
-        } catch (Exception var3) {
-            var3.printStackTrace();
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
 
     }
@@ -39,8 +39,8 @@ public class MCH_ShipPacketPlayerControl extends MCH_PacketPlayerControlBase {
             submarineControl = this.setBit(submarineControl, 0, this.submarineAscend);
             submarineControl = this.setBit(submarineControl, 1, this.submarineDescend);
             dos.writeByte(submarineControl);
-        } catch (IOException var3) {
-            var3.printStackTrace();
+        } catch (IOException oException) {
+            oException.printStackTrace();
         }
 
     }

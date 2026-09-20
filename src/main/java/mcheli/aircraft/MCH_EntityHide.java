@@ -269,11 +269,11 @@ public class MCH_EntityHide extends W_Entity {
          }
       }
 
-      double var16 = 0.25D;
-      List var17 = super.worldObj.getEntitiesWithinAABBExcludingEntity(par1Entity, par2AxisAlignedBB.expand(var16, var16, var16));
+      double result = 0.25D;
+      List entities = super.worldObj.getEntitiesWithinAABBExcludingEntity(par1Entity, par2AxisAlignedBB.expand(result, result, result));
 
-      for(int var18 = 0; var18 < var17.size(); ++var18) {
-         Entity entity = (Entity)var17.get(var18);
+      for(int index = 0; index < entities.size(); ++index) {
+         Entity entity = (Entity)entities.get(index);
          if(!W_Lib.isEntityLivingBase(entity) && !(entity instanceof MCH_EntitySeat) && !(entity instanceof MCH_EntityHitBox)) {
             AxisAlignedBB axisalignedbb1 = entity.getBoundingBox();
             if(axisalignedbb1 != null && axisalignedbb1.intersectsWith(par2AxisAlignedBB)) {
@@ -313,7 +313,7 @@ public class MCH_EntityHide extends W_Entity {
          par1 = 0.0D;
       }
 
-      boolean var34 = super.onGround || d7 != par3 && d7 < 0.0D;
+      boolean result = super.onGround || d7 != par3 && d7 < 0.0D;
 
       int j;
       for(j = 0; j < list.size(); ++j) {
@@ -338,7 +338,7 @@ public class MCH_EntityHide extends W_Entity {
          par1 = 0.0D;
       }
 
-      if(super.stepHeight > 0.0F && var34 && super.ySize < 0.05F && (d6 != par1 || d8 != par5)) {
+      if(super.stepHeight > 0.0F && result && super.ySize < 0.05F && (d6 != par1 || d8 != par5)) {
          double d12 = par1;
          double d10 = par3;
          double d11 = par5;
@@ -427,14 +427,14 @@ public class MCH_EntityHide extends W_Entity {
          super.motionZ = 0.0D;
       }
 
-      double var10000 = super.posX - d3;
-      var10000 = super.posY - d4;
-      var10000 = super.posZ - d5;
+      double result2 = super.posX - d3;
+      result2 = super.posY - d4;
+      result2 = super.posZ - d5;
 
       try {
          this.doBlockCollisions();
-      } catch (Throwable var33) {
-         CrashReport crashreport = CrashReport.makeCrashReport(var33, "Checking entity tile collision");
+      } catch (Throwable throwable2) {
+         CrashReport crashreport = CrashReport.makeCrashReport(throwable2, "Checking entity tile collision");
          CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being checked for collision");
          this.addEntityCrashInfo(crashreportcategory);
          throw new ReportedException(crashreport);

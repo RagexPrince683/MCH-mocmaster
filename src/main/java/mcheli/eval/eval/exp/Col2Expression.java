@@ -55,11 +55,11 @@ public abstract class Col2Expression extends AbstractExpression {
       return this.operateObject(this.expl.evalObject(), this.expr.evalObject());
    }
 
-   protected abstract long operateLong(long var1, long var3);
+   protected abstract long operateLong(long result1, long result3);
 
-   protected abstract double operateDouble(double var1, double var3);
+   protected abstract double operateDouble(double result1, double result3);
 
-   protected abstract Object operateObject(Object var1, Object var2);
+   protected abstract Object operateObject(Object result1, Object result2);
 
    protected void search() {
       super.share.srch.search(this);

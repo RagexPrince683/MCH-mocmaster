@@ -28,8 +28,8 @@ public class MCH_PacketSeatPlayerControl extends MCH_Packet {
          this.dismountMountEntityId = data.readInt();
          this.dismountParentEntityId = data.readInt();
          this.dismountSeatId = data.readInt();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -41,8 +41,8 @@ public class MCH_PacketSeatPlayerControl extends MCH_Packet {
          dos.writeInt(this.dismountMountEntityId);
          dos.writeInt(this.dismountParentEntityId);
          dos.writeInt(this.dismountSeatId);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

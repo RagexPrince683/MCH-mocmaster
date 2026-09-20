@@ -7,5 +7,5 @@ public interface MCH_IRecipeList {
 
    int getRecipeListSize();
 
-   IRecipe getRecipe(int var1);
+   IRecipe getRecipe(int result1);
 }

@@ -15,9 +15,9 @@ public class MCH_RenderBullet extends MCH_RenderBulletBase {
    public void renderBullet(Entity entity, double posX, double posY, double posZ, float yaw, float tickTime) {
       MCH_EntityBaseBullet blt = (MCH_EntityBaseBullet)entity;
       GL11.glPushMatrix();
-      double var10000 = entity.prevPosX + entity.motionX * (double)tickTime;
-      var10000 = entity.prevPosY + entity.motionY * (double)tickTime;
-      var10000 = entity.prevPosZ + entity.motionZ * (double)tickTime;
+      double motionX2 = entity.prevPosX + entity.motionX * (double)tickTime;
+      motionX2 = entity.prevPosY + entity.motionY * (double)tickTime;
+      motionX2 = entity.prevPosZ + entity.motionZ * (double)tickTime;
       GL11.glTranslated(posX, posY, posZ);
       GL11.glRotatef(-entity.rotationYaw, 0.0F, 1.0F, 0.0F);
       GL11.glRotatef(entity.rotationPitch, 1.0F, 0.0F, 0.0F);

@@ -78,12 +78,12 @@ public class MCH_MissileDetector {
         }
 
             if (!this.ac.isDestroyed()) {
-                Entity var4 = this.ac.getRiddenByEntity();
-                if (var4 == null) {
-                    var4 = this.ac.getEntityBySeatId(1);
+                Entity entity2 = this.ac.getRiddenByEntity();
+                if (entity2 == null) {
+                    entity2 = this.ac.getEntityBySeatId(1);
                 }
 
-                if (var4 != null) {
+                if (entity2 != null) {
                     if (this.ac.haveFlare() && this.ac.isFlareUsing()) {
 
 
@@ -97,7 +97,7 @@ public class MCH_MissileDetector {
                         }
                     } else if (this.ac.isUAV() && this.world.isRemote && this.alertCount == 0 && ((isLocked || this.isLockedByMissile() || this.isLockedByHMGVT())) && this.ac.canPlayAlertSound()) {
                         this.alertCount = 20;
-                        if (W_Lib.isClientPlayer(var4)) {
+                        if (W_Lib.isClientPlayer(entity2)) {
                             W_McClient.MOD_playSoundFX("alert", 50.0F, 1.0F);
                         }
                     }

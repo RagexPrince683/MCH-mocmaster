@@ -133,12 +133,12 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          ret = true;
       }
 
-      MCH_BoundingBox[] arr$ = this.ac.getCalculatedExtraBoundingBoxes();
-      int len$ = arr$.length;
+      MCH_BoundingBox[] iteratedValues = this.ac.getCalculatedExtraBoundingBoxes();
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_BoundingBox bb = arr$[i$];
-         //wheelBoundingBox wb = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_BoundingBox bb = iteratedValues[iteratedValueIndex];
+         //wheelBoundingBox wb = iteratedValues[iteratedValueIndex];
 
          if(bb.intersectsWith(aabb)) {
             double dist2 = this.getDistSq(aabb, bb.boundingBox);
@@ -157,7 +157,7 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
 //
       //for(int i2$ = 0; i2$ < len2$; ++i2$) {
       //   wheelBoundingBox wb = arr2$[i2$];
-      //   //wheelBoundingBox wb = arr$[i$];
+      //   //wheelBoundingBox wb = iteratedValues[iteratedValueIndex];
 //
       //   if(wb.boundingBox.intersectsWith(aabb)) {
       //      double dist3 = this.getDistSq(aabb, this);
@@ -261,11 +261,11 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
          dist = v1.distanceTo(mop.hitVec);
       }
 
-      MCH_BoundingBox[] arr$ = this.ac.getCalculatedExtraBoundingBoxes();
-      int len$ = arr$.length;
+      MCH_BoundingBox[] iteratedValues = this.ac.getCalculatedExtraBoundingBoxes();
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_BoundingBox bb = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_BoundingBox bb = iteratedValues[iteratedValueIndex];
          MovingObjectPosition mop2 = bb.calculateIntercept(v1, v2);
          if(mop2 != null) {
             double dist2 = v1.distanceTo(mop2.hitVec);

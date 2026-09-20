@@ -145,11 +145,11 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       this.KeyScoreboard = new MCH_Key(MCH_Config.KeyScoreboard.prmInt);
       this.KeyMultiplayManager = new MCH_Key(MCH_Config.KeyMultiplayManager.prmInt);
       this.Keys = new MCH_Key[]{this.KeyCamDistUp, this.KeyCamDistDown, this.KeyScoreboard, this.KeyMultiplayManager};
-      MCH_ClientTickHandlerBase[] arr$ = this.ticks;
-      int len$ = arr$.length;
+      MCH_ClientTickHandlerBase[] iteratedValues = this.ticks;
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_ClientTickHandlerBase t = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_ClientTickHandlerBase t = iteratedValues[iteratedValueIndex];
          t.updateKeybind(config);
       }
 
@@ -165,12 +165,12 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       int inOtherGui = player.length;
 
       for(int ac = 0; ac < inOtherGui; ++ac) {
-         MCH_Key len$ = player[ac];
-         len$.update();
+         MCH_Key iteratedValueCount = player[ac];
+         iteratedValueCount.update();
       }
 
-      EntityClientPlayerMP var7 = super.mc.thePlayer;
-      if(var7 != null && super.mc.currentScreen == null) {
+      EntityClientPlayerMP result = super.mc.thePlayer;
+      if(result != null && super.mc.currentScreen == null) {
          if(MCH_ServerSettings.enableCamDistChange && (this.KeyCamDistUp.isKeyDown() || this.KeyCamDistDown.isKeyDown())) {
             inOtherGui = (int)W_Reflection.getThirdPersonDistance();
             if(this.KeyCamDistUp.isKeyDown() && inOtherGui < 60) {
@@ -193,7 +193,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          if(super.mc.currentScreen == null) {
             label85: {
                if(super.mc.isSingleplayer()) {
-                  MCH_Config var10000 = MCH_MOD.config;
+                  MCH_Config configuration = MCH_MOD.config;
                   if(!MCH_Config.EnableMCHLibDebugLog.prmBool) {
                      break label85;
                   }
@@ -214,29 +214,29 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          sendLDCount = 0;
       }
 
-      boolean var12 = super.mc.currentScreen != null;
-      MCH_ClientTickHandlerBase[] var8 = this.ticks;
-      int var10 = var8.length;
+      boolean result2 = super.mc.currentScreen != null;
+      MCH_ClientTickHandlerBase[] clientTickHandlerBase = this.ticks;
+      int index = clientTickHandlerBase.length;
 
-      int i$;
-      for(i$ = 0; i$ < var10; ++i$) {
-         MCH_ClientTickHandlerBase g = var8[i$];
-         g.onTick(var12);
+      int iteratedValueIndex;
+      for(iteratedValueIndex = 0; iteratedValueIndex < index; ++iteratedValueIndex) {
+         MCH_ClientTickHandlerBase g = clientTickHandlerBase[iteratedValueIndex];
+         g.onTick(result2);
       }
 
-      MCH_Gui[] var9 = this.guiTicks;
-      var10 = var9.length;
+      MCH_Gui[] result3 = this.guiTicks;
+      index = result3.length;
 
-      for(i$ = 0; i$ < var10; ++i$) {
-         MCH_Gui var13 = var9[i$];
-         var13.onTick();
+      for(iteratedValueIndex = 0; iteratedValueIndex < index; ++iteratedValueIndex) {
+         MCH_Gui gui2 = result3[iteratedValueIndex];
+         gui2.onTick();
       }
 
-      MCH_EntityBaseVehicle var11 = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(var7);
-      if(var7 != null && var11 != null && !var11.isDestroyed()) {
+      MCH_EntityBaseVehicle result4 = MCH_EntityBaseVehicle.getAircraft_RiddenOrControl(result);
+      if(result != null && result4 != null && !result4.isDestroyed()) {
          if(isLocked && lockedSoundCount == 0) {
             isLocked = false;
-            if(var11.canPlayAlertSound()) {
+            if(result4.canPlayAlertSound()) {
                lockedSoundCount = 20;
                MCH_ClientTickHandlerBase.playSound("locked");
             }
@@ -295,7 +295,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          inv = -inv;
       }
 
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.InvertMouse.prmBool) {
          inv = -inv;
       }
@@ -335,7 +335,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          super.mc.mouseHelper.mouseXYChange();
          float f1 = super.mc.gameSettings.mouseSensitivity * 0.6F + 0.2F;
          float f2 = f1 * f1 * f1 * 8.0F;
-         MCH_Config var10000 = MCH_MOD.config;
+         MCH_Config configuration = MCH_MOD.config;
          double ms = MCH_Config.MouseSensitivity.prmDouble * 0.1D;
          mouseDeltaX = ms * (double)super.mc.mouseHelper.deltaX * (double)f2;
          mouseDeltaY = ms * (double)super.mc.mouseHelper.deltaY * (double)f2;
@@ -346,7 +346,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             inv = -1;
          }
 
-         var10000 = MCH_MOD.config;
+         configuration = MCH_MOD.config;
          if(MCH_Config.InvertMouse.prmBool) {
             inv *= -1;
          }
@@ -693,21 +693,21 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       }
 
       if(!W_McClient.isGamePaused()) {
-         EntityClientPlayerMP var17 = super.mc.thePlayer;
-         if(var17 != null) {
+         EntityClientPlayerMP player2 = super.mc.thePlayer;
+         if(player2 != null) {
             float simDelta = getRenderSimulationDelta(partialTicks);
-            ItemStack var18 = var17.getCurrentEquippedItem();
-            if(var18 != null && var18.getItem() instanceof MCH_ItemWrench && var17.getItemInUseCount() > 0) {
+            ItemStack itemStack = player2.getCurrentEquippedItem();
+            if(itemStack != null && itemStack.getItem() instanceof MCH_ItemWrench && player2.getItemInUseCount() > 0) {
                W_Reflection.setItemRendererProgress(1.0F);
             }
 
-            MCH_ZoomContext zoomContext = MCH_ZoomContext.resolve(super.mc, var17);
+            MCH_ZoomContext zoomContext = MCH_ZoomContext.resolve(super.mc, player2);
             this.updateVanillaLook(zoomContext);
             ridingAircraft = zoomContext.vehicle;
             if(ridingAircraft != null) {
-               cameraMode = ridingAircraft.getCameraMode(var17);
-            } else if(var17.ridingEntity instanceof MCH_EntityGLTD) {
-               MCH_EntityGLTD ac = (MCH_EntityGLTD)var17.ridingEntity;
+               cameraMode = ridingAircraft.getCameraMode(player2);
+            } else if(player2.ridingEntity instanceof MCH_EntityGLTD) {
+               MCH_EntityGLTD ac = (MCH_EntityGLTD)player2.ridingEntity;
                cameraMode = ac.camera.getMode(0);
             } else {
                cameraMode = 0;
@@ -717,52 +717,52 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
             // immediately when the local camera leaves thermal vision.
             MCH_ThermalParticleFilter.beginRender();
 
-            MCH_EntityBaseVehicle var19 = zoomContext.vehicle;
+            MCH_EntityBaseVehicle baseVehicleEntity = zoomContext.vehicle;
 
-            boolean var20 = false;
-            MCH_Config var10000;
-            if(var19 instanceof MCH_EntityHeli) {
-               var10000 = MCH_MOD.config;
-               var20 = MCH_Config.MouseControlStickModeHeli.prmBool;
+            boolean canRender = false;
+            MCH_Config configuration;
+            if(baseVehicleEntity instanceof MCH_EntityHeli) {
+               configuration = MCH_MOD.config;
+               canRender = MCH_Config.MouseControlStickModeHeli.prmBool;
             }
 
-            if(var19 instanceof MCP_EntityPlane || var19 instanceof MCH_EntityShip) {
-               var10000 = MCH_MOD.config;
-               var20 = MCH_Config.MouseControlStickModePlane.prmBool;
+            if(baseVehicleEntity instanceof MCP_EntityPlane || baseVehicleEntity instanceof MCH_EntityShip) {
+               configuration = MCH_MOD.config;
+               canRender = MCH_Config.MouseControlStickModePlane.prmBool;
             }
 
             float p;
             float r;
-            if(!(var17.ridingEntity instanceof MCH_EntitySeat) && var19 != null && var19.canMouseRot()) {
+            if(!(player2.ridingEntity instanceof MCH_EntitySeat) && baseVehicleEntity != null && baseVehicleEntity.canMouseRot()) {
                if(!isRideAircraft) {
-                  var19.onInteractFirst(var17);
+                  baseVehicleEntity.onInteractFirst(player2);
                }
 
                isRideAircraft = true;
-               this.updateMouseDelta(var20, simDelta, zoomContext.getSensitivityMultiplier());
-               boolean var22 = false;
-               float var23 = 0.0F;
-               float var25 = 0.0F;
-               MCH_SeatInfo var26 = var19.getSeatInfo(var17);
-               if(var26 != null && var26.fixRot && var19.getIsGunnerMode(var17) && !var19.isGunnerLookMode(var17)) {
-                  var22 = true;
-                  var23 = var26.fixYaw;
+               this.updateMouseDelta(canRender, simDelta, zoomContext.getSensitivityMultiplier());
+               boolean isValid = false;
+               float positionZ = 0.0F;
+               float positionZ2 = 0.0F;
+               MCH_SeatInfo seatInfo2 = baseVehicleEntity.getSeatInfo(player2);
+               if(seatInfo2 != null && seatInfo2.fixRot && baseVehicleEntity.getIsGunnerMode(player2) && !baseVehicleEntity.isGunnerLookMode(player2)) {
+                  isValid = true;
+                  positionZ = seatInfo2.fixYaw;
                   //System.out.println("yaw1");
-                  var25 = var26.fixPitch;
+                  positionZ2 = seatInfo2.fixPitch;
                   mouseRollDeltaX *= 0.0D;
                   mouseRollDeltaY *= 0.0D;
                   mouseDeltaX *= 0.0D;
                   mouseDeltaY *= 0.0D;
-               } else if(var19.isPilot(var17)) {
-                  MCH_BaseVehicleInfo.CameraPosition var28 = var19.getCameraPosInfo();
-                  if(var28 != null) {
-                     var23 = var28.yaw;
+               } else if(baseVehicleEntity.isPilot(player2)) {
+                  MCH_BaseVehicleInfo.CameraPosition cameraPosition = baseVehicleEntity.getCameraPosInfo();
+                  if(cameraPosition != null) {
+                     positionZ = cameraPosition.yaw;
                      //System.out.println("yaw2");
-                     var25 = var28.pitch;
+                     positionZ2 = cameraPosition.pitch;
                   }
                }
 
-               if(var19 instanceof MCP_EntityPlane && MCP_PlaneChaseCamera.shouldConsumeFreelookMouse((MCP_EntityPlane)var19, var17)) {
+               if(baseVehicleEntity instanceof MCP_EntityPlane && MCP_PlaneChaseCamera.shouldConsumeFreelookMouse((MCP_EntityPlane)baseVehicleEntity, player2)) {
                   MCP_PlaneChaseCamera.addFreelookMouseDelta((mouseDeltaX + prevMouseDeltaX) / 2.0D, (mouseDeltaY + prevMouseDeltaY) / 2.0D);
                   mouseDeltaX = 0.0D;
                   mouseDeltaY = 0.0D;
@@ -770,42 +770,42 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                   prevMouseDeltaY = 0.0D;
                }
 
-               if(var19.getAcInfo() == null) {
-                  var17.setAngles((float)mouseDeltaX, (float)mouseDeltaY);
+               if(baseVehicleEntity.getAcInfo() == null) {
+                  player2.setAngles((float)mouseDeltaX, (float)mouseDeltaY);
                } else {
-                  var19.setAngles(var17, var22, var23, var25, (float)(mouseDeltaX + prevMouseDeltaX) / 2.0F, (float)(mouseDeltaY + prevMouseDeltaY) / 2.0F, (float)mouseRollDeltaX, (float)mouseRollDeltaY, simDelta);
-                  debugFlightControl(var19, simDelta, (float)mouseDeltaX, (float)mouseDeltaY, (float)mouseRollDeltaX, (float)mouseRollDeltaY);
+                  baseVehicleEntity.setAngles(player2, isValid, positionZ, positionZ2, (float)(mouseDeltaX + prevMouseDeltaX) / 2.0F, (float)(mouseDeltaY + prevMouseDeltaY) / 2.0F, (float)mouseRollDeltaX, (float)mouseRollDeltaY, simDelta);
+                  debugFlightControl(baseVehicleEntity, simDelta, (float)mouseDeltaX, (float)mouseDeltaY, (float)mouseRollDeltaX, (float)mouseRollDeltaY);
                }
 
-               if(!(var19 instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)var19, var17)) {
-                  var19.setupAllRiderRenderPosition(partialTicks, var17);
+               if(!(baseVehicleEntity instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)baseVehicleEntity, player2)) {
+                  baseVehicleEntity.setupAllRiderRenderPosition(partialTicks, player2);
                }
-               double var29 = (double)MathHelper.sqrt_double(mouseRollDeltaX * mouseRollDeltaX + mouseRollDeltaY * mouseRollDeltaY);
-               if(!var20 || var29 < getMaxStickLength() * 0.1D) {
+               double result5 = (double)MathHelper.sqrt_double(mouseRollDeltaX * mouseRollDeltaX + mouseRollDeltaY * mouseRollDeltaY);
+               if(!canRender || result5 < getMaxStickLength() * 0.1D) {
                   mouseRollDeltaX = (double)mcheli.aircraft.MCH_FlightModel.decayPerTick((float)mouseRollDeltaX, 0.95F, simDelta);
                   mouseRollDeltaY = (double)mcheli.aircraft.MCH_FlightModel.decayPerTick((float)mouseRollDeltaY, 0.95F, simDelta);
                }
 
-               p = MathHelper.wrapAngleTo180_float(var19.getRotRoll());
-               r = MathHelper.wrapAngleTo180_float(var19.getRotYaw() - var17.rotationYaw);
+               p = MathHelper.wrapAngleTo180_float(baseVehicleEntity.getRotRoll());
+               r = MathHelper.wrapAngleTo180_float(baseVehicleEntity.getRotYaw() - player2.rotationYaw);
                //System.out.println("yaw3");
                p *= MathHelper.cos((float)((double)r * 3.141592653589793D / 180.0D));
-               if(var19.getTVMissile() != null && W_Lib.isClientPlayer(var19.getTVMissile().shootingEntity) && var19.getIsGunnerMode(var17)) {
+               if(baseVehicleEntity.getTVMissile() != null && W_Lib.isClientPlayer(baseVehicleEntity.getTVMissile().shootingEntity) && baseVehicleEntity.getIsGunnerMode(player2)) {
                   p = 0.0F;
                }
 
                W_Reflection.setCameraRoll(p);
-               if(!(var19 instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)var19, var17)) {
-                  this.correctViewEntityDummy(var17);
+               if(!(baseVehicleEntity instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)baseVehicleEntity, player2)) {
+                  this.correctViewEntityDummy(player2);
                }
             } else {
-               MCH_EntitySeat var21 = var17.ridingEntity instanceof MCH_EntitySeat?(MCH_EntitySeat)var17.ridingEntity:null;
-               if(var21 != null && var21.getParent() != null) {
-                  this.updateMouseDelta(var20, simDelta, zoomContext.getSensitivityMultiplier());
-                  var19 = var21.getParent();
+               MCH_EntitySeat seatEntity = player2.ridingEntity instanceof MCH_EntitySeat?(MCH_EntitySeat)player2.ridingEntity:null;
+               if(seatEntity != null && seatEntity.getParent() != null) {
+                  this.updateMouseDelta(canRender, simDelta, zoomContext.getSensitivityMultiplier());
+                  baseVehicleEntity = seatEntity.getParent();
                   boolean wi = false;
-                  MCH_SeatInfo seatInfo = var19.getSeatInfo(var17);
-                  if(seatInfo != null && seatInfo.fixRot && var19.getIsGunnerMode(var17) && !var19.isGunnerLookMode(var17)) {
+                  MCH_SeatInfo seatInfo = baseVehicleEntity.getSeatInfo(player2);
+                  if(seatInfo != null && seatInfo.fixRot && baseVehicleEntity.getIsGunnerMode(player2) && !baseVehicleEntity.isGunnerLookMode(player2)) {
                      wi = true;
                      mouseRollDeltaX *= 0.0D;
                      mouseRollDeltaY *= 0.0D;
@@ -814,61 +814,61 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                   }
 
                   Vec3 v = Vec3.createVectorHelper(mouseDeltaX, mouseRollDeltaY, 0.0D);
-                  W_Vec3.rotateAroundZ((float)((double)(var19.calcRotRoll(partialTicks) / 180.0F) * 3.141592653589793D), v);
-                  MCH_WeaponSet ws = var19.getCurrentWeapon(var17);
+                  W_Vec3.rotateAroundZ((float)((double)(baseVehicleEntity.calcRotRoll(partialTicks) / 180.0F) * 3.141592653589793D), v);
+                  MCH_WeaponSet ws = baseVehicleEntity.getCurrentWeapon(player2);
                   mouseDeltaY *= ws != null && ws.getInfo() != null?(double)ws.getInfo().cameraRotationSpeedPitch:1.0D;
-                  var17.setAngles((float)mouseDeltaX, (float)mouseDeltaY);
-                  float y = var19.getRotYaw();
+                  player2.setAngles((float)mouseDeltaX, (float)mouseDeltaY);
+                  float y = baseVehicleEntity.getRotYaw();
                   //System.out.println("yaw4");
-                  p = var19.getRotPitch();
-                  r = var19.getRotRoll();
-                  var19.setRotYaw(var19.calcRotYaw(partialTicks));
+                  p = baseVehicleEntity.getRotPitch();
+                  r = baseVehicleEntity.getRotRoll();
+                  baseVehicleEntity.setRotYaw(baseVehicleEntity.calcRotYaw(partialTicks));
                   //System.out.println("yaw5");
-                  var19.setRotPitch(var19.calcRotPitch(partialTicks));
-                  var19.setRotRoll(var19.calcRotRoll(partialTicks));
+                  baseVehicleEntity.setRotPitch(baseVehicleEntity.calcRotPitch(partialTicks));
+                  baseVehicleEntity.setRotRoll(baseVehicleEntity.calcRotRoll(partialTicks));
                   float revRoll = 0.0F;
                   if(wi) {
-                     var17.rotationYaw = var19.getRotYaw() + seatInfo.fixYaw;
+                     player2.rotationYaw = baseVehicleEntity.getRotYaw() + seatInfo.fixYaw;
                      //System.out.println("yaw6");
-                     var17.rotationPitch = var19.getRotPitch() + seatInfo.fixPitch;
-                     if(var17.rotationPitch > 90.0F) {
-                        var17.prevRotationPitch -= (var17.rotationPitch - 90.0F) * 2.0F;
-                        var17.rotationPitch -= (var17.rotationPitch - 90.0F) * 2.0F;
-                        var17.prevRotationYaw += 180.0F;
-                        var17.rotationYaw += 180.0F;
+                     player2.rotationPitch = baseVehicleEntity.getRotPitch() + seatInfo.fixPitch;
+                     if(player2.rotationPitch > 90.0F) {
+                        player2.prevRotationPitch -= (player2.rotationPitch - 90.0F) * 2.0F;
+                        player2.rotationPitch -= (player2.rotationPitch - 90.0F) * 2.0F;
+                        player2.prevRotationYaw += 180.0F;
+                        player2.rotationYaw += 180.0F;
                         //System.out.println("yaw7");
                         revRoll = 180.0F;
-                     } else if(var17.rotationPitch < -90.0F) {
-                        var17.prevRotationPitch -= (var17.rotationPitch - 90.0F) * 2.0F;
-                        var17.rotationPitch -= (var17.rotationPitch - 90.0F) * 2.0F;
-                        var17.prevRotationYaw += 180.0F;
-                        var17.rotationYaw += 180.0F;
+                     } else if(player2.rotationPitch < -90.0F) {
+                        player2.prevRotationPitch -= (player2.rotationPitch - 90.0F) * 2.0F;
+                        player2.rotationPitch -= (player2.rotationPitch - 90.0F) * 2.0F;
+                        player2.prevRotationYaw += 180.0F;
+                        player2.rotationYaw += 180.0F;
                         //System.out.println("yaw8");
                         revRoll = 180.0F;
                      }
                   }
 
-                  if(!(var19 instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)var19, var17)) {
-                     var19.setupAllRiderRenderPosition(partialTicks, var17);
+                  if(!(baseVehicleEntity instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)baseVehicleEntity, player2)) {
+                     baseVehicleEntity.setupAllRiderRenderPosition(partialTicks, player2);
                   }
-                  var19.setRotYaw(y);
+                  baseVehicleEntity.setRotYaw(y);
                   //System.out.println("yaw9");
-                  var19.setRotPitch(p);
-                  var19.setRotRoll(r);
+                  baseVehicleEntity.setRotPitch(p);
+                  baseVehicleEntity.setRotRoll(r);
                   mouseRollDeltaX = (double)mcheli.aircraft.MCH_FlightModel.decayPerTick((float)mouseRollDeltaX, 0.9F, simDelta);
                   mouseRollDeltaY = (double)mcheli.aircraft.MCH_FlightModel.decayPerTick((float)mouseRollDeltaY, 0.9F, simDelta);
-                  float roll = MathHelper.wrapAngleTo180_float(var19.getRotRoll());
-                  float yaw = MathHelper.wrapAngleTo180_float(var19.getRotYaw() - var17.rotationYaw);
+                  float roll = MathHelper.wrapAngleTo180_float(baseVehicleEntity.getRotRoll());
+                  float yaw = MathHelper.wrapAngleTo180_float(baseVehicleEntity.getRotYaw() - player2.rotationYaw);
                   //System.out.println("yaw10");
                   roll *= MathHelper.cos((float)((double)yaw * 3.141592653589793D / 180.0D));
                   //System.out.println("yaw11");
-                  if(var19.getTVMissile() != null && W_Lib.isClientPlayer(var19.getTVMissile().shootingEntity) && var19.getIsGunnerMode(var17)) {
+                  if(baseVehicleEntity.getTVMissile() != null && W_Lib.isClientPlayer(baseVehicleEntity.getTVMissile().shootingEntity) && baseVehicleEntity.getIsGunnerMode(player2)) {
                      roll = 0.0F;
                   }
 
                   W_Reflection.setCameraRoll(roll + revRoll);
-                  if(!(var19 instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)var19, var17)) {
-                     this.correctViewEntityDummy(var17);
+                  if(!(baseVehicleEntity instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)baseVehicleEntity, player2)) {
+                     this.correctViewEntityDummy(player2);
                   }
                } else {
                   if(isRideAircraft) {
@@ -881,29 +881,29 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
                }
             }
 
-            if(var19 != null) {
-               if(var19.getSeatIdByEntity(var17) == 0 && !var19.isDestroyed()) {
-                  var19.lastRiderYaw = var17.rotationYaw;
+            if(baseVehicleEntity != null) {
+               if(baseVehicleEntity.getSeatIdByEntity(player2) == 0 && !baseVehicleEntity.isDestroyed()) {
+                  baseVehicleEntity.lastRiderYaw = player2.rotationYaw;
                   //System.out.println("yaw12");
-                  var19.prevLastRiderYaw = var17.prevRotationYaw;
+                  baseVehicleEntity.prevLastRiderYaw = player2.prevRotationYaw;
                   //System.out.println("yaw13");
-                  var19.lastRiderPitch = var17.rotationPitch;
-                  var19.prevLastRiderPitch = var17.prevRotationPitch;
+                  baseVehicleEntity.lastRiderPitch = player2.rotationPitch;
+                  baseVehicleEntity.prevLastRiderPitch = player2.prevRotationPitch;
                }
 
-               var19.updateWeaponsRotation();
+               baseVehicleEntity.updateWeaponsRotation();
             }
 
-            MCH_ViewEntityDummy var24 = MCH_ViewEntityDummy.getInstance(var17.worldObj);
-            if(var24 != null && (!(var19 instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)var19, var17))) {
-               var24.rotationYaw = var17.rotationYaw;
+            MCH_ViewEntityDummy result6 = MCH_ViewEntityDummy.getInstance(player2.worldObj);
+            if(result6 != null && (!(baseVehicleEntity instanceof MCP_EntityPlane) || !MCP_PlaneChaseCamera.isRenderCameraActiveFor((MCP_EntityPlane)baseVehicleEntity, player2))) {
+               result6.rotationYaw = player2.rotationYaw;
                //System.out.println("yaw14");
-               var24.prevRotationYaw = var17.prevRotationYaw;
+               result6.prevRotationYaw = player2.prevRotationYaw;
                //System.out.println("yaw15");
-               if(var19 != null) {
-                  MCH_WeaponSet var27 = var19.getCurrentWeapon(var17);
-                  if(var27 != null && var27.getInfo() != null && var27.getInfo().fixCameraPitch) {
-                     var24.rotationPitch = var24.prevRotationPitch = 0.0F;
+               if(baseVehicleEntity != null) {
+                  MCH_WeaponSet weaponSet = baseVehicleEntity.getCurrentWeapon(player2);
+                  if(weaponSet != null && weaponSet.getInfo() != null && weaponSet.getInfo().fixCameraPitch) {
+                     result6.rotationPitch = result6.prevRotationPitch = 0.0F;
                   }
                }
             }

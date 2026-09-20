@@ -328,11 +328,11 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       MCH_ModelManager.load("lweapons", "fim92");
       MCH_ModelManager.load("lweapons", "fgm148");
       MCH_ModelManager.load("lweapons", "rpg7");
-      String[] i$ = MCH_RenderUavStation.MODEL_NAME;
-      int wi = i$.length;
+      String[] iteratedValueIndex = MCH_RenderUavStation.MODEL_NAME;
+      int wi = iteratedValueIndex.length;
 
-      for(int i$1 = 0; i$1 < wi; ++i$1) {
-         String s = i$[i$1];
+      for(int iteratedValueIndex1 = 0; iteratedValueIndex1 < wi; ++iteratedValueIndex1) {
+         String s = iteratedValueIndex[iteratedValueIndex1];
          MCH_ModelManager.load(s);
       }
 
@@ -382,10 +382,10 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    }
 
    public static void registerModels_Bullet() {
-      Iterator i$ = MCH_WeaponInfoManager.getValues().iterator();
+      Iterator iteratedValueIndex = MCH_WeaponInfoManager.getValues().iterator();
 
-      while(i$.hasNext()) {
-         MCH_WeaponInfo wi = (MCH_WeaponInfo)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_WeaponInfo wi = (MCH_WeaponInfo)iteratedValueIndex.next();
          IModelCustom m = null;
          if(!wi.bulletModelName.isEmpty()) {
             m = MCH_ModelManager.load("bullets", wi.bulletModelName);
@@ -442,8 +442,8 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       requireBodyModel("helicopters", info);
 
       MCH_HeliInfo.Rotor rotor;
-      for(Iterator i$ = info.rotorList.iterator(); i$.hasNext(); rotor.model = this.loadPartModel("helicopters", info.name, info.model, rotor.modelName)) {
-         rotor = (MCH_HeliInfo.Rotor)i$.next();
+      for(Iterator iteratedValueIndex = info.rotorList.iterator(); iteratedValueIndex.hasNext(); rotor.model = this.loadPartModel("helicopters", info.name, info.model, rotor.modelName)) {
+         rotor = (MCH_HeliInfo.Rotor)iteratedValueIndex.next();
       }
 
       this.registerCommonPart("helicopters", info);
@@ -456,34 +456,34 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       info.model = MCH_ModelManager.load("planes", info.name, reload);
       requireBodyModel("planes", info);
 
-      Iterator i$;
+      Iterator iteratedValueIndex;
       MCH_BaseVehicleInfo.DrawnPart w;
-      for(i$ = info.nozzles.iterator(); i$.hasNext(); w.model = this.loadPartModel("planes", info.name, info.model, w.modelName)) {
-         w = (MCH_BaseVehicleInfo.DrawnPart)i$.next();
+      for(iteratedValueIndex = info.nozzles.iterator(); iteratedValueIndex.hasNext(); w.model = this.loadPartModel("planes", info.name, info.model, w.modelName)) {
+         w = (MCH_BaseVehicleInfo.DrawnPart)iteratedValueIndex.next();
       }
 
-      i$ = info.rotorList.iterator();
+      iteratedValueIndex = info.rotorList.iterator();
 
-      Iterator i$1;
-      while(i$.hasNext()) {
-         MCP_PlaneInfo.Rotor w1 = (MCP_PlaneInfo.Rotor)i$.next();
+      Iterator iteratedValueIndex1;
+      while(iteratedValueIndex.hasNext()) {
+         MCP_PlaneInfo.Rotor w1 = (MCP_PlaneInfo.Rotor)iteratedValueIndex.next();
          w1.model = this.loadPartModel("planes", info.name, info.model, w1.modelName);
 
          MCP_PlaneInfo.Blade p;
-         for(i$1 = w1.blades.iterator(); i$1.hasNext(); p.model = this.loadPartModel("planes", info.name, info.model, p.modelName)) {
-            p = (MCP_PlaneInfo.Blade)i$1.next();
+         for(iteratedValueIndex1 = w1.blades.iterator(); iteratedValueIndex1.hasNext(); p.model = this.loadPartModel("planes", info.name, info.model, p.modelName)) {
+            p = (MCP_PlaneInfo.Blade)iteratedValueIndex1.next();
          }
       }
 
-      i$ = info.wingList.iterator();
+      iteratedValueIndex = info.wingList.iterator();
 
-      while(i$.hasNext()) {
-         MCP_PlaneInfo.Wing w2 = (MCP_PlaneInfo.Wing)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCP_PlaneInfo.Wing w2 = (MCP_PlaneInfo.Wing)iteratedValueIndex.next();
          w2.model = this.loadPartModel("planes", info.name, info.model, w2.modelName);
          MCP_PlaneInfo.Pylon p1;
          if(w2.pylonList != null) {
-            for(i$1 = w2.pylonList.iterator(); i$1.hasNext(); p1.model = this.loadPartModel("planes", info.name, info.model, p1.modelName)) {
-               p1 = (MCP_PlaneInfo.Pylon)i$1.next();
+            for(iteratedValueIndex1 = w2.pylonList.iterator(); iteratedValueIndex1.hasNext(); p1.model = this.loadPartModel("planes", info.name, info.model, p1.modelName)) {
+               p1 = (MCP_PlaneInfo.Pylon)iteratedValueIndex1.next();
             }
          }
       }
@@ -498,34 +498,34 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       info.model = MCH_ModelManager.load("ships", info.name, reload);
       requireBodyModel("ships", info);
 
-      Iterator i$;
+      Iterator iteratedValueIndex;
       MCH_BaseVehicleInfo.DrawnPart w;
-      for(i$ = info.nozzles.iterator(); i$.hasNext(); w.model = this.loadPartModel("ships", info.name, info.model, w.modelName)) {
-         w = (MCH_BaseVehicleInfo.DrawnPart)i$.next();
+      for(iteratedValueIndex = info.nozzles.iterator(); iteratedValueIndex.hasNext(); w.model = this.loadPartModel("ships", info.name, info.model, w.modelName)) {
+         w = (MCH_BaseVehicleInfo.DrawnPart)iteratedValueIndex.next();
       }
 
-      i$ = info.rotorList.iterator();
+      iteratedValueIndex = info.rotorList.iterator();
 
-      Iterator i$1;
-      while(i$.hasNext()) {
-         MCH_ShipInfo.Rotor w1 = (MCH_ShipInfo.Rotor)i$.next();
+      Iterator iteratedValueIndex1;
+      while(iteratedValueIndex.hasNext()) {
+         MCH_ShipInfo.Rotor w1 = (MCH_ShipInfo.Rotor)iteratedValueIndex.next();
          w1.model = this.loadPartModel("ships", info.name, info.model, w1.modelName);
 
          MCH_ShipInfo.Blade p;
-         for(i$1 = w1.blades.iterator(); i$1.hasNext(); p.model = this.loadPartModel("ships", info.name, info.model, p.modelName)) {
-            p = (MCH_ShipInfo.Blade)i$1.next();
+         for(iteratedValueIndex1 = w1.blades.iterator(); iteratedValueIndex1.hasNext(); p.model = this.loadPartModel("ships", info.name, info.model, p.modelName)) {
+            p = (MCH_ShipInfo.Blade)iteratedValueIndex1.next();
          }
       }
 
-      i$ = info.wingList.iterator();
+      iteratedValueIndex = info.wingList.iterator();
 
-      while(i$.hasNext()) {
-         MCH_ShipInfo.Wing w2 = (MCH_ShipInfo.Wing)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_ShipInfo.Wing w2 = (MCH_ShipInfo.Wing)iteratedValueIndex.next();
          w2.model = this.loadPartModel("ships", info.name, info.model, w2.modelName);
          MCH_ShipInfo.Pylon p1;
          if(w2.pylonList != null) {
-            for(i$1 = w2.pylonList.iterator(); i$1.hasNext(); p1.model = this.loadPartModel("ships", info.name, info.model, p1.modelName)) {
-               p1 = (MCH_ShipInfo.Pylon)i$1.next();
+            for(iteratedValueIndex1 = w2.pylonList.iterator(); iteratedValueIndex1.hasNext(); p1.model = this.loadPartModel("ships", info.name, info.model, p1.modelName)) {
+               p1 = (MCH_ShipInfo.Pylon)iteratedValueIndex1.next();
             }
          }
       }
@@ -540,10 +540,10 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       String turretDirectory = info.getDirectoryName();
       info.model = MCH_ModelManager.load(turretDirectory, info.name, reload);
       requireBodyModel(turretDirectory, info);
-      Iterator i$ = info.partList.iterator();
+      Iterator iteratedValueIndex = info.partList.iterator();
 
-      while(i$.hasNext()) {
-         MCH_TurretInfo.VPart vp = (MCH_TurretInfo.VPart)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_TurretInfo.VPart vp = (MCH_TurretInfo.VPart)iteratedValueIndex.next();
          vp.model = this.loadPartModel(turretDirectory, info.name, info.model, vp.modelName);
          if(vp.child != null) {
             this.registerVCPModels(info, vp);
@@ -599,80 +599,80 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    }
 
    private void registerCommonPart(String path, MCH_BaseVehicleInfo info) {
-      Iterator i$;
+      Iterator iteratedValueIndex;
       MCH_BaseVehicleInfo.Hatch c;
-      for(i$ = info.hatchList.iterator(); i$.hasNext(); c.model = this.loadPartModel(path, info.name, info.model, c.modelName)) {
-         c = (MCH_BaseVehicleInfo.Hatch)i$.next();
+      for(iteratedValueIndex = info.hatchList.iterator(); iteratedValueIndex.hasNext(); c.model = this.loadPartModel(path, info.name, info.model, c.modelName)) {
+         c = (MCH_BaseVehicleInfo.Hatch)iteratedValueIndex.next();
       }
 
       MCH_BaseVehicleInfo.Camera c1;
-      for(i$ = info.cameraList.iterator(); i$.hasNext(); c1.model = this.loadPartModel(path, info.name, info.model, c1.modelName)) {
-         c1 = (MCH_BaseVehicleInfo.Camera)i$.next();
+      for(iteratedValueIndex = info.cameraList.iterator(); iteratedValueIndex.hasNext(); c1.model = this.loadPartModel(path, info.name, info.model, c1.modelName)) {
+         c1 = (MCH_BaseVehicleInfo.Camera)iteratedValueIndex.next();
       }
 
       MCH_BaseVehicleInfo.Throttle c2;
-      for(i$ = info.partThrottle.iterator(); i$.hasNext(); c2.model = this.loadPartModel(path, info.name, info.model, c2.modelName)) {
-         c2 = (MCH_BaseVehicleInfo.Throttle)i$.next();
+      for(iteratedValueIndex = info.partThrottle.iterator(); iteratedValueIndex.hasNext(); c2.model = this.loadPartModel(path, info.name, info.model, c2.modelName)) {
+         c2 = (MCH_BaseVehicleInfo.Throttle)iteratedValueIndex.next();
       }
 
       MCH_BaseVehicleInfo.RotPart c3;
-      for(i$ = info.partRotPart.iterator(); i$.hasNext(); c3.model = this.loadPartModel(path, info.name, info.model, c3.modelName)) {
-         c3 = (MCH_BaseVehicleInfo.RotPart)i$.next();
+      for(iteratedValueIndex = info.partRotPart.iterator(); iteratedValueIndex.hasNext(); c3.model = this.loadPartModel(path, info.name, info.model, c3.modelName)) {
+         c3 = (MCH_BaseVehicleInfo.RotPart)iteratedValueIndex.next();
       }
 
-      i$ = info.partWeapon.iterator();
+      iteratedValueIndex = info.partWeapon.iterator();
 
-      while(i$.hasNext()) {
-         MCH_BaseVehicleInfo.PartWeapon c4 = (MCH_BaseVehicleInfo.PartWeapon)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_BaseVehicleInfo.PartWeapon c4 = (MCH_BaseVehicleInfo.PartWeapon)iteratedValueIndex.next();
          c4.model = this.loadPartModel(path, info.name, info.model, c4.modelName);
 
          MCH_BaseVehicleInfo.PartWeaponChild wc;
-         for(Iterator i$1 = c4.child.iterator(); i$1.hasNext(); wc.model = this.loadPartModel(path, info.name, info.model, wc.modelName)) {
-            wc = (MCH_BaseVehicleInfo.PartWeaponChild)i$1.next();
+         for(Iterator iteratedValueIndex1 = c4.child.iterator(); iteratedValueIndex1.hasNext(); wc.model = this.loadPartModel(path, info.name, info.model, wc.modelName)) {
+            wc = (MCH_BaseVehicleInfo.PartWeaponChild)iteratedValueIndex1.next();
          }
       }
 
       MCH_BaseVehicleInfo.Canopy c5;
-      for(i$ = info.canopyList.iterator(); i$.hasNext(); c5.model = this.loadPartModel(path, info.name, info.model, c5.modelName)) {
-         c5 = (MCH_BaseVehicleInfo.Canopy)i$.next();
+      for(iteratedValueIndex = info.canopyList.iterator(); iteratedValueIndex.hasNext(); c5.model = this.loadPartModel(path, info.name, info.model, c5.modelName)) {
+         c5 = (MCH_BaseVehicleInfo.Canopy)iteratedValueIndex.next();
       }
 
       MCH_BaseVehicleInfo.LandingGear c6;
-      for(i$ = info.landingGear.iterator(); i$.hasNext(); c6.model = this.loadPartModel(path, info.name, info.model, c6.modelName)) {
-         c6 = (MCH_BaseVehicleInfo.LandingGear)i$.next();
+      for(iteratedValueIndex = info.landingGear.iterator(); iteratedValueIndex.hasNext(); c6.model = this.loadPartModel(path, info.name, info.model, c6.modelName)) {
+         c6 = (MCH_BaseVehicleInfo.LandingGear)iteratedValueIndex.next();
       }
 
       MCH_BaseVehicleInfo.WeaponBay c7;
-      for(i$ = info.partWeaponBay.iterator(); i$.hasNext(); c7.model = this.loadPartModel(path, info.name, info.model, c7.modelName)) {
-         c7 = (MCH_BaseVehicleInfo.WeaponBay)i$.next();
+      for(iteratedValueIndex = info.partWeaponBay.iterator(); iteratedValueIndex.hasNext(); c7.model = this.loadPartModel(path, info.name, info.model, c7.modelName)) {
+         c7 = (MCH_BaseVehicleInfo.WeaponBay)iteratedValueIndex.next();
       }
 
       MCH_BaseVehicleInfo.CrawlerTrack c8;
-      for(i$ = info.partCrawlerTrack.iterator(); i$.hasNext(); c8.model = this.loadPartModel(path, info.name, info.model, c8.modelName)) {
-         c8 = (MCH_BaseVehicleInfo.CrawlerTrack)i$.next();
+      for(iteratedValueIndex = info.partCrawlerTrack.iterator(); iteratedValueIndex.hasNext(); c8.model = this.loadPartModel(path, info.name, info.model, c8.modelName)) {
+         c8 = (MCH_BaseVehicleInfo.CrawlerTrack)iteratedValueIndex.next();
       }
 
       MCH_BaseVehicleInfo.TrackRoller c9;
-      for(i$ = info.partTrackRoller.iterator(); i$.hasNext(); c9.model = this.loadPartModel(path, info.name, info.model, c9.modelName)) {
-         c9 = (MCH_BaseVehicleInfo.TrackRoller)i$.next();
+      for(iteratedValueIndex = info.partTrackRoller.iterator(); iteratedValueIndex.hasNext(); c9.model = this.loadPartModel(path, info.name, info.model, c9.modelName)) {
+         c9 = (MCH_BaseVehicleInfo.TrackRoller)iteratedValueIndex.next();
       }
 
       MCH_BaseVehicleInfo.PartWheel c10;
-      for(i$ = info.partWheel.iterator(); i$.hasNext(); c10.model = this.loadPartModel(path, info.name, info.model, c10.modelName)) {
-         c10 = (MCH_BaseVehicleInfo.PartWheel)i$.next();
+      for(iteratedValueIndex = info.partWheel.iterator(); iteratedValueIndex.hasNext(); c10.model = this.loadPartModel(path, info.name, info.model, c10.modelName)) {
+         c10 = (MCH_BaseVehicleInfo.PartWheel)iteratedValueIndex.next();
       }
 
-      for(i$ = info.partSteeringWheel.iterator(); i$.hasNext(); c10.model = this.loadPartModel(path, info.name, info.model, c10.modelName)) {
-         c10 = (MCH_BaseVehicleInfo.PartWheel)i$.next();
+      for(iteratedValueIndex = info.partSteeringWheel.iterator(); iteratedValueIndex.hasNext(); c10.model = this.loadPartModel(path, info.name, info.model, c10.modelName)) {
+         c10 = (MCH_BaseVehicleInfo.PartWheel)iteratedValueIndex.next();
       }
 
    }
 
    private void registerVCPModels(MCH_TurretInfo info, MCH_TurretInfo.VPart vp) {
-      Iterator i$ = vp.child.iterator();
+      Iterator iteratedValueIndex = vp.child.iterator();
 
-      while(i$.hasNext()) {
-         MCH_TurretInfo.VPart vcp = (MCH_TurretInfo.VPart)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_TurretInfo.VPart vcp = (MCH_TurretInfo.VPart)iteratedValueIndex.next();
          vcp.model = this.loadPartModel(info.getDirectoryName(), info.name, info.model, vcp.modelName);
          if(vcp.child != null) {
             this.registerVCPModels(info, vcp);
@@ -727,49 +727,49 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       W_McClient.addSound("fim92_snd.ogg");
       W_McClient.addSound("fim92_reload.ogg");
       W_McClient.addSound("lockon.ogg");
-      Iterator i$ = MCH_WeaponInfoManager.getValues().iterator();
+      Iterator iteratedValueIndex = MCH_WeaponInfoManager.getValues().iterator();
 
-      while(i$.hasNext()) {
-         MCH_WeaponInfo info = (MCH_WeaponInfo)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_WeaponInfo info = (MCH_WeaponInfo)iteratedValueIndex.next();
          W_McClient.addSound(info.soundFileName + ".ogg");
       }
 
-      while(i$.hasNext()) {
-         MCH_WeaponInfo info = (MCH_WeaponInfo)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_WeaponInfo info = (MCH_WeaponInfo)iteratedValueIndex.next();
          W_McClient.addSound(info.weaponSwitchSound + ".ogg");
       }
 
-      i$ = MCP_PlaneInfoManager.map.values().iterator();
+      iteratedValueIndex = MCP_PlaneInfoManager.map.values().iterator();
 
-      while(i$.hasNext()) {
-         MCP_PlaneInfo info1 = (MCP_PlaneInfo)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCP_PlaneInfo info1 = (MCP_PlaneInfo)iteratedValueIndex.next();
          if(!info1.soundMove.isEmpty()) {
             W_McClient.addSound(info1.soundMove + ".ogg");
          }
       }
 
-      i$ = MCH_HeliInfoManager.map.values().iterator();
+      iteratedValueIndex = MCH_HeliInfoManager.map.values().iterator();
 
-      while(i$.hasNext()) {
-         MCH_HeliInfo info2 = (MCH_HeliInfo)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_HeliInfo info2 = (MCH_HeliInfo)iteratedValueIndex.next();
          if(!info2.soundMove.isEmpty()) {
             W_McClient.addSound(info2.soundMove + ".ogg");
          }
       }
 
-      i$ = MCH_TankInfoManager.map.values().iterator();
+      iteratedValueIndex = MCH_TankInfoManager.map.values().iterator();
 
-      while(i$.hasNext()) {
-         MCH_TankInfo info3 = (MCH_TankInfo)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_TankInfo info3 = (MCH_TankInfo)iteratedValueIndex.next();
          if(!info3.soundMove.isEmpty()) {
             W_McClient.addSound(info3.soundMove + ".ogg");
          }
       }
 
-      i$ = MCH_TurretInfoManager.map.values().iterator();
+      iteratedValueIndex = MCH_TurretInfoManager.map.values().iterator();
 
-      while(i$.hasNext()) {
-         MCH_TurretInfo info4 = (MCH_TurretInfo)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_TurretInfo info4 = (MCH_TurretInfo)iteratedValueIndex.next();
          if(!info4.soundMove.isEmpty()) {
             W_McClient.addSound(info4.soundMove + ".ogg");
          }

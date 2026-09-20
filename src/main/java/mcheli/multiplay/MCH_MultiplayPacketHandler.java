@@ -81,10 +81,10 @@ public class MCH_MultiplayPacketHandler {
    private static void destoryAllAircraft(EntityPlayer player) {
       CommandSummon cmd = new CommandSummon();
       if(cmd.canCommandSenderUseCommand(player)) {
-         Iterator i$ = player.worldObj.loadedEntityList.iterator();
+         Iterator iteratedValueIndex = player.worldObj.loadedEntityList.iterator();
 
-         while(i$.hasNext()) {
-            Object e = i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            Object e = iteratedValueIndex.next();
             if(e instanceof MCH_EntityBaseVehicle) {
                ((MCH_EntityBaseVehicle)e).setDead();
             }
@@ -168,8 +168,8 @@ public class MCH_MultiplayPacketHandler {
                file = new File(file, player.getDisplayName() + "_" + dt + ".png");
                String s = file.getAbsolutePath();
                LogInfo("[mcheli]Save Screenshot has been completed: %s", new Object[]{s});
-               FileOutputStream var12 = new FileOutputStream(s);
-               dos = new DataOutputStream(var12);
+               FileOutputStream fileOutputStream = new FileOutputStream(s);
+               dos = new DataOutputStream(fileOutputStream);
                dos.write(imageData);
                dos.flush();
                dos.close();
@@ -177,8 +177,8 @@ public class MCH_MultiplayPacketHandler {
                lastPlayerName = "";
                lastDataPercent = 0.0D;
             }
-         } catch (Exception var11) {
-            var11.printStackTrace();
+         } catch (Exception exception) {
+            exception.printStackTrace();
          }
 
       }
@@ -219,7 +219,7 @@ public class MCH_MultiplayPacketHandler {
       MCH_PacketModList pc = new MCH_PacketModList();
       pc.readData(data);
       MCH_Lib.DbgLog(player.worldObj, "MCH_MultiplayPacketHandler.onPacket_ModList : ID=%d, Num=%d", new Object[]{Integer.valueOf(pc.id), Integer.valueOf(pc.num)});
-      Iterator i$;
+      Iterator iteratedValueIndex;
       String s;
       if(player.worldObj.isRemote) {
          if(pc.firstData) {
@@ -227,10 +227,10 @@ public class MCH_MultiplayPacketHandler {
             player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "###### " + player.getDisplayName() + " ######"));
          }
 
-         i$ = pc.list.iterator();
+         iteratedValueIndex = pc.list.iterator();
 
-         while(i$.hasNext()) {
-            s = (String)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            s = (String)iteratedValueIndex.next();
             MCH_Lib.Log(s, new Object[0]);
             player.addChatMessage(new ChatComponentText(s));
          }
@@ -242,10 +242,10 @@ public class MCH_MultiplayPacketHandler {
                LogInfo("###### " + player.getDisplayName() + " ######", new Object[0]);
             }
 
-            i$ = pc.list.iterator();
+            iteratedValueIndex = pc.list.iterator();
 
-            while(i$.hasNext()) {
-               s = (String)i$.next();
+            while(iteratedValueIndex.hasNext()) {
+               s = (String)iteratedValueIndex.next();
                LogInfo(s, new Object[0]);
             }
          }

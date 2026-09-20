@@ -10,7 +10,7 @@ import net.minecraft.world.World;
 
 public class MCH_RecipeReloadRangeFinder implements IRecipe {
 
-   public boolean matches(InventoryCrafting inv, World var2) {
+   public boolean matches(InventoryCrafting inv, World world) {
       int jcnt = 0;
       int ccnt = 0;
 

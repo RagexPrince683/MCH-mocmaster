@@ -23,8 +23,8 @@ public class MCH_UavPacketStatus extends MCH_Packet {
             this.posUavY = data.readByte();
             this.posUavZ = data.readByte();
             this.continueControl = data.readByte() != 0;
-        } catch (Exception var3) {
-            var3.printStackTrace();
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
 
     }
@@ -35,8 +35,8 @@ public class MCH_UavPacketStatus extends MCH_Packet {
             dos.writeByte(this.posUavY);
             dos.writeByte(this.posUavZ);
             dos.writeByte(this.continueControl?1:0);
-        } catch (IOException var3) {
-            var3.printStackTrace();
+        } catch (IOException oException) {
+            oException.printStackTrace();
         }
 
     }

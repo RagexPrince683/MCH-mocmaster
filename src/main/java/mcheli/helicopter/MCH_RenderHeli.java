@@ -48,11 +48,11 @@ public class MCH_RenderHeli extends MCH_RenderBaseVehicle {
             GL11.glTranslated(rotorInfo.pos.xCoord, rotorInfo.pos.yCoord, rotorInfo.pos.zCoord);
          }
 
-         MCH_Blade[] arr$ = rotor.blades;
-         int len$ = arr$.length;
+         MCH_Blade[] iteratedValues = rotor.blades;
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_Blade b = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_Blade b = iteratedValues[iteratedValueIndex];
             GL11.glPushMatrix();
             float rot = b.getRotation();
             float prevRot = b.getPrevRotation();

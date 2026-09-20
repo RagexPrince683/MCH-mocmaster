@@ -73,19 +73,19 @@ public class MCH_ItemRenderRangeFinder implements IItemRenderer {
       static {
          try {
             $SwitchMap$net$minecraftforge$client$IItemRenderer$ItemRenderType[ItemRenderType.ENTITY.ordinal()] = 1;
-         } catch (NoSuchFieldError var3) {
+         } catch (NoSuchFieldError noSuchFieldError) {
             ;
          }
 
          try {
             $SwitchMap$net$minecraftforge$client$IItemRenderer$ItemRenderType[ItemRenderType.EQUIPPED.ordinal()] = 2;
-         } catch (NoSuchFieldError var2) {
+         } catch (NoSuchFieldError noSuchFieldError2) {
             ;
          }
 
          try {
             $SwitchMap$net$minecraftforge$client$IItemRenderer$ItemRenderType[ItemRenderType.EQUIPPED_FIRST_PERSON.ordinal()] = 3;
-         } catch (NoSuchFieldError var1) {
+         } catch (NoSuchFieldError noSuchFieldError3) {
             ;
          }
 

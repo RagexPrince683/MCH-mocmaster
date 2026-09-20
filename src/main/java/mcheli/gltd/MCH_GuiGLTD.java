@@ -39,7 +39,7 @@ public class MCH_GuiGLTD extends MCH_Gui {
 
    public void drawGui(EntityPlayer player, boolean isThirdPersonView) {
       if(isThirdPersonView) {
-         MCH_Config var10000 = MCH_MOD.config;
+         MCH_Config configuration = MCH_MOD.config;
          if(!MCH_Config.DisplayHUDThirdPerson.prmBool) {
             return;
          }
@@ -78,14 +78,14 @@ public class MCH_GuiGLTD extends MCH_Gui {
       this.drawString("ZOOM IN   :", OffX, OffY + 20, camera.getCameraZoom() < 10.0F?color:colorCannotUse);
       this.drawString("ZOOM OUT :", OffX, OffY + 30, camera.getCameraZoom() > 1.0F?color:colorCannotUse);
       OffX += 60;
-      StringBuilder var10001 = (new StringBuilder()).append(MCH_KeyName.getDescOrName(42)).append(" or ");
-      MCH_Config var10002 = MCH_MOD.config;
-      this.drawString(var10001.append(MCH_KeyName.getDescOrName(MCH_Config.KeyUnmount.prmInt)).toString(), OffX, OffY + 0, color);
-      MCH_Config var6 = MCH_MOD.config;
+      StringBuilder messageBuilder = (new StringBuilder()).append(MCH_KeyName.getDescOrName(42)).append(" or ");
+      MCH_Config configuration2 = MCH_MOD.config;
+      this.drawString(messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyUnmount.prmInt)).toString(), OffX, OffY + 0, color);
+      MCH_Config configuration3 = MCH_MOD.config;
       this.drawString(MCH_KeyName.getDescOrName(MCH_Config.KeyCameraMode.prmInt), OffX, OffY + 10, color);
-      var6 = MCH_MOD.config;
+      configuration3 = MCH_MOD.config;
       this.drawString(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt), OffX, OffY + 20, camera.getCameraZoom() < 10.0F?color:colorCannotUse);
-      var6 = MCH_MOD.config;
+      configuration3 = MCH_MOD.config;
       this.drawString(MCH_KeyName.getDescOrName(MCH_Config.KeySwWeaponMode.prmInt), OffX, OffY + 30, camera.getCameraZoom() > 1.0F?color:colorCannotUse);
    }
 

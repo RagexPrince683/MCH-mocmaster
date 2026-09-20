@@ -68,11 +68,11 @@ public class MCH_Rotor {
       if(this.haveFoldBladeFunc) {
          this.isFoldBladeTarget = true;
          this.isFoldBlade = true;
-         MCH_Blade[] arr$ = this.blades;
-         int len$ = arr$.length;
+         MCH_Blade[] iteratedValues = this.blades;
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_Blade b = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_Blade b = iteratedValues[iteratedValueIndex];
             b.forceFold();
          }
       }
@@ -81,11 +81,11 @@ public class MCH_Rotor {
 
    public void update(float rot) {
       boolean isCmpFoldUnfold = true;
-      MCH_Blade[] arr$ = this.blades;
-      int len$ = arr$.length;
+      MCH_Blade[] iteratedValues = this.blades;
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_Blade b = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_Blade b = iteratedValues[iteratedValueIndex];
          b.setPrevRotation(b.getRotation());
          if(!this.isFoldBlade) {
             if(!this.isFoldBladeTarget) {

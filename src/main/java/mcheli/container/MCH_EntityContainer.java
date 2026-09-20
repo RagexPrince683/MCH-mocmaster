@@ -103,7 +103,7 @@ public class MCH_EntityContainer extends W_EntityContainer implements MCH_IEntit
       if(this.isEntityInvulnerable()) {
          return false;
       } else if(!super.worldObj.isRemote && !super.isDead) {
-         MCH_Config var10000 = MCH_MOD.config;
+         MCH_Config configuration = MCH_MOD.config;
          damage = MCH_Config.applyDamageByExternal(this, ds, damage);
          if(!MCH_Multiplay.canAttackEntity(ds, this)) {
             return false;
@@ -190,10 +190,10 @@ public class MCH_EntityContainer extends W_EntityContainer implements MCH_IEntit
          }
       }
 
-      double var22 = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
+      double result = Math.sqrt(super.motionX * super.motionX + super.motionZ * super.motionZ);
       double d4;
       double d5;
-      if(var22 > 0.2625D) {
+      if(result > 0.2625D) {
          d4 = Math.cos((double)super.rotationYaw * 3.141592653589793D / 180.0D);
          d5 = Math.sin((double)super.rotationYaw * 3.141592653589793D / 180.0D);
       }
@@ -247,7 +247,7 @@ public class MCH_EntityContainer extends W_EntityContainer implements MCH_IEntit
             d4 = 0.35D;
          }
 
-         if(d4 > var22 && this.speedMultiplier < 0.35D) {
+         if(d4 > result && this.speedMultiplier < 0.35D) {
             this.speedMultiplier += (0.35D - this.speedMultiplier) / 35.0D;
             if(this.speedMultiplier > 0.35D) {
                this.speedMultiplier = 0.35D;
@@ -277,16 +277,16 @@ public class MCH_EntityContainer extends W_EntityContainer implements MCH_IEntit
             d5 = (double)((float)(Math.atan2(d10, d11) * 180.0D / 3.141592653589793D));
          }
 
-         double var23 = MathHelper.wrapAngleTo180_double(d5 - (double)super.rotationYaw);
-         if(var23 > 5.0D) {
-            var23 = 5.0D;
+         double result2 = MathHelper.wrapAngleTo180_double(d5 - (double)super.rotationYaw);
+         if(result2 > 5.0D) {
+            result2 = 5.0D;
          }
 
-         if(var23 < -5.0D) {
-            var23 = -5.0D;
+         if(result2 < -5.0D) {
+            result2 = -5.0D;
          }
 
-         super.rotationYaw = (float)((double)super.rotationYaw + var23);
+         super.rotationYaw = (float)((double)super.rotationYaw + result2);
          this.setRotation(super.rotationYaw, super.rotationPitch);
          if(!super.worldObj.isRemote) {
             List list = super.worldObj.getEntitiesWithinAABBExcludingEntity(this, super.boundingBox.expand(0.2D, 0.0D, 0.2D));
@@ -300,18 +300,18 @@ public class MCH_EntityContainer extends W_EntityContainer implements MCH_IEntit
                }
             }
 
-            MCH_Config var10000 = MCH_MOD.config;
+            MCH_Config result3 = MCH_MOD.config;
             if(MCH_Config.Collision_DestroyBlock.prmBool) {
                for(l = 0; l < 4; ++l) {
-                  int var24 = MathHelper.floor_double(super.posX + ((double)(l % 2) - 0.5D) * 0.8D);
+                  int index = MathHelper.floor_double(super.posX + ((double)(l % 2) - 0.5D) * 0.8D);
                   int j1 = MathHelper.floor_double(super.posZ + ((double)(l / 2) - 0.5D) * 0.8D);
 
                   for(int k1 = 0; k1 < 2; ++k1) {
                      int l1 = MathHelper.floor_double(super.posY) + k1;
-                     if(W_WorldFunc.isEqualBlock(super.worldObj, var24, l1, j1, W_Block.getSnowLayer())) {
-                        super.worldObj.setBlockToAir(var24, l1, j1);
-                     } else if(W_WorldFunc.isEqualBlock(super.worldObj, var24, l1, j1, Blocks.waterlily)) {
-                        W_WorldFunc.destroyBlock(super.worldObj, var24, l1, j1, true);
+                     if(W_WorldFunc.isEqualBlock(super.worldObj, index, l1, j1, W_Block.getSnowLayer())) {
+                        super.worldObj.setBlockToAir(index, l1, j1);
+                     } else if(W_WorldFunc.isEqualBlock(super.worldObj, index, l1, j1, Blocks.waterlily)) {
+                        W_WorldFunc.destroyBlock(super.worldObj, index, l1, j1, true);
                      }
                   }
                }
@@ -367,11 +367,11 @@ public class MCH_EntityContainer extends W_EntityContainer implements MCH_IEntit
    }
 
    public boolean canRideAircraft(MCH_EntityBaseVehicle ac, int seatID, MCH_SeatRackInfo info) {
-      String[] arr$ = info.names;
-      int len$ = arr$.length;
+      String[] iteratedValues = info.names;
+      int iteratedValueCount = iteratedValues.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         String s = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         String s = iteratedValues[iteratedValueIndex];
          if(s.equalsIgnoreCase("container")) {
             return ac.ridingEntity == null && super.ridingEntity == null;
          }

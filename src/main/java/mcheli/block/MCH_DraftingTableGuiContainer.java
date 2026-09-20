@@ -59,12 +59,12 @@ public class MCH_DraftingTableGuiContainer extends Container {
       }
 
       this.outputSlotIndex = super.inventoryItemStacks.size();
-      Slot var7 = new Slot(this.outputSlot, this.outputSlotIndex, 178, 90) {
+      Slot slot = new Slot(this.outputSlot, this.outputSlotIndex, 178, 90) {
          public boolean isItemValid(ItemStack par1ItemStack) {
             return false;
          }
       };
-      this.addSlotToContainer(var7);
+      this.addSlotToContainer(slot);
       MCH_Lib.DbgLog(player.worldObj, "MCH_DraftingTableGuiContainer.MCH_DraftingTableGuiContainer", new Object[0]);
    }
 
@@ -398,10 +398,10 @@ public class MCH_DraftingTableGuiContainer extends Container {
 
          Map mapRecipe = MCH_Lib.getItemMapFromRecipe(recipe);
          boolean isEqual = true;
-         Iterator i$ = map.keySet().iterator();
+         Iterator iteratedValueIndex = map.keySet().iterator();
 
-         while(i$.hasNext()) {
-            Item key = (Item)i$.next();
+         while(iteratedValueIndex.hasNext()) {
+            Item key = (Item)iteratedValueIndex.next();
             if(!mapRecipe.containsKey(key) || mapRecipe.get(key) != map.get(key)) {
                isEqual = false;
                break;

@@ -63,50 +63,50 @@ public class MCH_ClientHeliTickHandler extends MCH_BaseVehicleClientTickHandler 
       }
 
       super.isBeforeRiding = super.isRiding;
-      EntityClientPlayerMP var7 = super.mc.thePlayer;
-      MCH_EntityHeli var8 = null;
-      boolean var9 = true;
-      if(var7 != null) {
-         if(var7.ridingEntity instanceof MCH_EntityHeli) {
-            var8 = (MCH_EntityHeli)var7.ridingEntity;
-         } else if(var7.ridingEntity instanceof MCH_EntitySeat) {
-            MCH_EntitySeat var10 = (MCH_EntitySeat)var7.ridingEntity;
-            if(var10.getParent() instanceof MCH_EntityHeli) {
-               var9 = false;
-               var8 = (MCH_EntityHeli)var10.getParent();
+      EntityClientPlayerMP player2 = super.mc.thePlayer;
+      MCH_EntityHeli aircraftEntity = null;
+      boolean isMounted = true;
+      if(player2 != null) {
+         if(player2.ridingEntity instanceof MCH_EntityHeli) {
+            aircraftEntity = (MCH_EntityHeli)player2.ridingEntity;
+         } else if(player2.ridingEntity instanceof MCH_EntitySeat) {
+            MCH_EntitySeat seatEntity = (MCH_EntitySeat)player2.ridingEntity;
+            if(seatEntity.getParent() instanceof MCH_EntityHeli) {
+               isMounted = false;
+               aircraftEntity = (MCH_EntityHeli)seatEntity.getParent();
             }
-         } else if(var7.ridingEntity instanceof MCH_EntityUavStation) {
-            MCH_EntityUavStation var11 = (MCH_EntityUavStation)var7.ridingEntity;
-            if(var11.getControlAircract() instanceof MCH_EntityHeli) {
-               var8 = (MCH_EntityHeli)var11.getControlAircract();
+         } else if(player2.ridingEntity instanceof MCH_EntityUavStation) {
+            MCH_EntityUavStation uavStationEntity = (MCH_EntityUavStation)player2.ridingEntity;
+            if(uavStationEntity.getControlAircract() instanceof MCH_EntityHeli) {
+               aircraftEntity = (MCH_EntityHeli)uavStationEntity.getControlAircract();
             }
          }
       }
 
-      if(var8 != null && var8.getAcInfo() != null) {
-         this.update(var7, var8, var9);
-         MCH_ViewEntityDummy var12 = MCH_ViewEntityDummy.getInstance(super.mc.theWorld);
-         var12.update(var8.camera);
+      if(aircraftEntity != null && aircraftEntity.getAcInfo() != null) {
+         this.update(player2, aircraftEntity, isMounted);
+         MCH_ViewEntityDummy viewEntityDummy2 = MCH_ViewEntityDummy.getInstance(super.mc.theWorld);
+         viewEntityDummy2.update(aircraftEntity.camera);
          if(!inGUI) {
-            if(!var8.isDestroyed()) {
-               this.playerControl(var7, var8, var9);
+            if(!aircraftEntity.isDestroyed()) {
+               this.playerControl(player2, aircraftEntity, isMounted);
             }
          } else {
-            this.playerControlInGUI(var7, var8, var9);
+            this.playerControlInGUI(player2, aircraftEntity, isMounted);
          }
 
          boolean hideHand = true;
-         if((!var9 || !var8.isAlwaysCameraView()) && !var8.getIsGunnerMode(var7)) {
-            MCH_Lib.setRenderViewEntity(var7);
-            if(!var9 && var8.getCurrentWeaponID(var7) < 0) {
+         if((!isMounted || !aircraftEntity.isAlwaysCameraView()) && !aircraftEntity.getIsGunnerMode(player2)) {
+            MCH_Lib.setRenderViewEntity(player2);
+            if(!isMounted && aircraftEntity.getCurrentWeaponID(player2) < 0) {
                hideHand = false;
             }
          } else {
-            MCH_Lib.setRenderViewEntity(var12);
+            MCH_Lib.setRenderViewEntity(viewEntityDummy2);
          }
 
          if(hideHand) {
-            MCH_Lib.disableFirstPersonItemRender(var7.getCurrentEquippedItem());
+            MCH_Lib.disableFirstPersonItemRender(player2.getCurrentEquippedItem());
          }
 
          super.isRiding = true;
@@ -115,12 +115,12 @@ public class MCH_ClientHeliTickHandler extends MCH_BaseVehicleClientTickHandler 
       }
 
       if (!this.isBeforeRiding && this.isRiding) {
-         W_Reflection.setThirdPersonDistance(var8.thirdPersonDist);
+         W_Reflection.setThirdPersonDistance(aircraftEntity.thirdPersonDist);
       } else if (this.isBeforeRiding && !this.isRiding) {
          W_Reflection.restoreDefaultThirdPersonDistance();
          W_Reflection.setCameraRoll(0.0F);
          MCH_Lib.enableFirstPersonItemRender();
-         MCH_Lib.setRenderViewEntity(var7);
+         MCH_Lib.setRenderViewEntity(player2);
       }
 
    }

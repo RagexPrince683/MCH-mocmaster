@@ -170,22 +170,22 @@ public class MCH_WeaponSet {
    public void switchMode() {
       boolean isChanged = false;
       MCH_WeaponBase[] cntSwitch = this.weapons;
-      int len$ = cntSwitch.length;
+      int iteratedValueCount = cntSwitch.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         MCH_WeaponBase w = cntSwitch[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         MCH_WeaponBase w = cntSwitch[iteratedValueIndex];
          if(w != null) {
             isChanged = w.switchMode() || isChanged;
          }
       }
 
       if(isChanged) {
-         byte var6 = 15;
-         if(this.countWait >= -var6) {
-            if(this.countWait > var6) {
+         byte count = 15;
+         if(this.countWait >= -count) {
+            if(this.countWait > count) {
                this.countWait = -this.countWait;
             } else {
-               this.countWait = -var6;
+               this.countWait = -count;
             }
          }
 
@@ -234,14 +234,14 @@ public class MCH_WeaponSet {
             }
          }
 
-         for(int arr$ = 0; arr$ < this.lastUsedCount.length; ++arr$) {
-            if(this.lastUsedCount[arr$] > 0) {
-               if(this.lastUsedCount[arr$] == 4) {
+         for(int iteratedValues = 0; iteratedValues < this.lastUsedCount.length; ++iteratedValues) {
+            if(this.lastUsedCount[iteratedValues] > 0) {
+               if(this.lastUsedCount[iteratedValues] == 4) {
                   if(0 == this.getCurrentWeaponIndex() && this.canUse() && (this.getAmmoNum() > 0 || this.getAllAmmoNum() <= 0)) {
-                     --this.lastUsedCount[arr$];
+                     --this.lastUsedCount[iteratedValues];
                   }
                } else {
-                  --this.lastUsedCount[arr$];
+                  --this.lastUsedCount[iteratedValues];
                }
             }
          }
@@ -268,11 +268,11 @@ public class MCH_WeaponSet {
          this.prevRotationYaw = this.rotationYaw;
          this.prevRotationPitch = this.rotationPitch;
          if(this.weapons != null && this.weapons.length > 0) {
-            MCH_WeaponBase[] var8 = this.weapons;
-            int len$ = var8.length;
+            MCH_WeaponBase[] weaponBase = this.weapons;
+            int iteratedValueCount = weaponBase.length;
 
-            for(int i$ = 0; i$ < len$; ++i$) {
-               MCH_WeaponBase w = var8[i$];
+            for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+               MCH_WeaponBase w = weaponBase[iteratedValueIndex];
                if(w != null) {
                   w.update(this.countWait);
                }
@@ -322,29 +322,29 @@ public class MCH_WeaponSet {
       }
 
       if(index < this.recoilBuf.length) {
-         MCH_WeaponSet.Recoil var8 = this.recoilBuf[index];
-         var8.prevRecoilBuf = var8.recoilBuf;
-         if(isUsed && var8.recoilBufCount <= 0) {
-            var8.recoilBufCount = var8.recoilBufCountMax;
+         MCH_WeaponSet.Recoil recoil = this.recoilBuf[index];
+         recoil.prevRecoilBuf = recoil.recoilBuf;
+         if(isUsed && recoil.recoilBufCount <= 0) {
+            recoil.recoilBufCount = recoil.recoilBufCountMax;
          }
 
-         if(var8.recoilBufCount > 0) {
-            if(var8.recoilBufCountMax <= 1) {
-               var8.recoilBuf = 1.0F;
-            } else if(var8.recoilBufCountMax == 2) {
-               var8.recoilBuf = var8.recoilBufCount == 2?1.0F:0.6F;
+         if(recoil.recoilBufCount > 0) {
+            if(recoil.recoilBufCountMax <= 1) {
+               recoil.recoilBuf = 1.0F;
+            } else if(recoil.recoilBufCountMax == 2) {
+               recoil.recoilBuf = recoil.recoilBufCount == 2?1.0F:0.6F;
             } else {
-               if(var8.recoilBufCount > var8.recoilBufCountMax / 2) {
-                  var8.recoilBufCount -= var8.recoilBufCountSpeed;
+               if(recoil.recoilBufCount > recoil.recoilBufCountMax / 2) {
+                  recoil.recoilBufCount -= recoil.recoilBufCountSpeed;
                }
 
-               rb = (float)var8.recoilBufCount / (float)var8.recoilBufCountMax;
-               var8.recoilBuf = MathHelper.sin(rb * 3.1415927F);
+               rb = (float)recoil.recoilBufCount / (float)recoil.recoilBufCountMax;
+               recoil.recoilBuf = MathHelper.sin(rb * 3.1415927F);
             }
 
-            --var8.recoilBufCount;
+            --recoil.recoilBufCount;
          } else {
-            var8.recoilBuf = 0.0F;
+            recoil.recoilBuf = 0.0F;
          }
       }
 

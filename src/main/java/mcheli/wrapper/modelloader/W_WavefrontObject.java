@@ -63,8 +63,8 @@ public class W_WavefrontObject extends W_ModelCustom {
          try {
             this.loadObjModel(is);
             return;
-         } catch (Exception var3) {
-            throw new ModelFormatException("IO Exception reading model format", var3);
+         } catch (Exception exception) {
+            throw new ModelFormatException("IO Exception reading model format", exception);
          }
       }
 
@@ -84,8 +84,8 @@ public class W_WavefrontObject extends W_ModelCustom {
 
       try {
          this.loadObjModel(resource.openStream());
-      } catch (IOException var4) {
-         throw new ModelFormatException("IO Exception reading model format", var4);
+      } catch (IOException oException) {
+         throw new ModelFormatException("IO Exception reading model format", oException);
       }
    }
 
@@ -95,15 +95,15 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public boolean containsPart(String partName) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
       W_GroupObject groupObject;
       do {
-         if(!i$.hasNext()) {
+         if(!iteratedValueIndex.hasNext()) {
             return false;
          }
 
-         groupObject = (W_GroupObject)i$.next();
+         groupObject = (W_GroupObject)iteratedValueIndex.next();
       } while(!partName.equalsIgnoreCase(groupObject.name));
 
       return true;
@@ -134,26 +134,26 @@ public class W_WavefrontObject extends W_ModelCustom {
                      this.vertexNormals.add(e);
                   }
                } else if(currentLine.startsWith("vt ")) {
-                  W_TextureCoordinate var18 = this.parseTextureCoordinate(currentLine, lineCount);
-                  if(var18 != null) {
-                     this.textureCoordinates.add(var18);
+                  W_TextureCoordinate textureCoordinate2 = this.parseTextureCoordinate(currentLine, lineCount);
+                  if(textureCoordinate2 != null) {
+                     this.textureCoordinates.add(textureCoordinate2);
                   }
                } else if(currentLine.startsWith("f ")) {
                   if(this.currentGroupObject == null) {
                      this.currentGroupObject = new W_GroupObject("Default");
                   }
 
-                  W_Face var19 = this.parseFace(currentLine, lineCount);
-                  if(var19 != null) {
-                     this.currentGroupObject.faces.add(var19);
+                  W_Face result = this.parseFace(currentLine, lineCount);
+                  if(result != null) {
+                     this.currentGroupObject.faces.add(result);
                   }
                } else if(currentLine.startsWith("g ") | currentLine.startsWith("o ") && currentLine.charAt(2) == 36) {
-                  W_GroupObject var20 = this.parseGroupObject(currentLine, lineCount);
-                  if(var20 != null && this.currentGroupObject != null) {
+                  W_GroupObject groupObject2 = this.parseGroupObject(currentLine, lineCount);
+                  if(groupObject2 != null && this.currentGroupObject != null) {
                      this.groupObjects.add(this.currentGroupObject);
                   }
 
-                  this.currentGroupObject = var20;
+                  this.currentGroupObject = groupObject2;
                }
             }
          }
@@ -164,20 +164,20 @@ public class W_WavefrontObject extends W_ModelCustom {
          this.compactFaces();
          this.groupObjects.trimToSize();
          this.releaseLoaderScratch();
-      } catch (IOException var16) {
-         throw new ModelFormatException("IO Exception reading model format", var16);
+      } catch (IOException oException2) {
+         throw new ModelFormatException("IO Exception reading model format", oException2);
       } finally {
          this.checkMinMaxFinal();
 
          try {
             reader.close();
-         } catch (IOException var15) {
+         } catch (IOException oException3) {
             ;
          }
 
          try {
             inputStream.close();
-         } catch (IOException var14) {
+         } catch (IOException oException4) {
             ;
          }
 
@@ -186,9 +186,9 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public void renderAll() {
-      Iterator i$ = this.groupObjects.iterator();
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          if(groupObject != null) {
             groupObject.render();
          }
@@ -196,9 +196,9 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public void renderAllTransformed() {
-      Iterator i$ = this.groupObjects.iterator();
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          if(groupObject != null) {
             groupObject.renderTransformed();
          }
@@ -232,25 +232,25 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public void tessellateAll(Tessellator tessellator) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          groupObject.render(tessellator);
       }
 
    }
 
    public void renderOnly(String ... groupNames) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
-         String[] arr$ = groupNames;
-         int len$ = groupNames.length;
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
+         String[] iteratedValues = groupNames;
+         int iteratedValueCount = groupNames.length;
 
-         for(int i$1 = 0; i$1 < len$; ++i$1) {
-            String groupName = arr$[i$1];
+         for(int iteratedValueIndex1 = 0; iteratedValueIndex1 < iteratedValueCount; ++iteratedValueIndex1) {
+            String groupName = iteratedValues[iteratedValueIndex1];
             if(groupName.equalsIgnoreCase(groupObject.name)) {
                groupObject.render();
             }
@@ -260,15 +260,15 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public void tessellateOnly(Tessellator tessellator, String ... groupNames) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
-         String[] arr$ = groupNames;
-         int len$ = groupNames.length;
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
+         String[] iteratedValues = groupNames;
+         int iteratedValueCount = groupNames.length;
 
-         for(int i$1 = 0; i$1 < len$; ++i$1) {
-            String groupName = arr$[i$1];
+         for(int iteratedValueIndex1 = 0; iteratedValueIndex1 < iteratedValueCount; ++iteratedValueIndex1) {
+            String groupName = iteratedValues[iteratedValueIndex1];
             if(groupName.equalsIgnoreCase(groupObject.name)) {
                groupObject.render(tessellator);
             }
@@ -278,10 +278,10 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public void renderPart(String partName) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          if(partName.equalsIgnoreCase(groupObject.name)) {
             groupObject.render();
          }
@@ -290,10 +290,10 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public void renderPartTransformed(String partName) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          if(partName.equalsIgnoreCase(groupObject.name)) {
             groupObject.renderTransformed();
          }
@@ -302,10 +302,10 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public void tessellatePart(Tessellator tessellator, String partName) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          if(partName.equalsIgnoreCase(groupObject.name)) {
             groupObject.render(tessellator);
          }
@@ -314,16 +314,16 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public void renderAllExcept(String ... excludedGroupNames) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          boolean skipPart = false;
-         String[] arr$ = excludedGroupNames;
-         int len$ = excludedGroupNames.length;
+         String[] iteratedValues = excludedGroupNames;
+         int iteratedValueCount = excludedGroupNames.length;
 
-         for(int i$1 = 0; i$1 < len$; ++i$1) {
-            String excludedGroupName = arr$[i$1];
+         for(int iteratedValueIndex1 = 0; iteratedValueIndex1 < iteratedValueCount; ++iteratedValueIndex1) {
+            String excludedGroupName = iteratedValues[iteratedValueIndex1];
             if(excludedGroupName.equalsIgnoreCase(groupObject.name)) {
                skipPart = true;
             }
@@ -337,16 +337,16 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public void tessellateAllExcept(Tessellator tessellator, String ... excludedGroupNames) {
-      Iterator i$ = this.groupObjects.iterator();
+      Iterator iteratedValueIndex = this.groupObjects.iterator();
 
-      while(i$.hasNext()) {
-         W_GroupObject groupObject = (W_GroupObject)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         W_GroupObject groupObject = (W_GroupObject)iteratedValueIndex.next();
          boolean exclude = false;
-         String[] arr$ = excludedGroupNames;
-         int len$ = excludedGroupNames.length;
+         String[] iteratedValues = excludedGroupNames;
+         int iteratedValueCount = excludedGroupNames.length;
 
-         for(int i$1 = 0; i$1 < len$; ++i$1) {
-            String excludedGroupName = arr$[i$1];
+         for(int iteratedValueIndex1 = 0; iteratedValueIndex1 < iteratedValueCount; ++iteratedValueIndex1) {
+            String excludedGroupName = iteratedValues[iteratedValueIndex1];
             if(excludedGroupName.equalsIgnoreCase(groupObject.name)) {
                exclude = true;
             }
@@ -367,8 +367,8 @@ public class W_WavefrontObject extends W_ModelCustom {
 
          try {
             return (W_Vertex)(tokens.length == 2?new W_Vertex(Float.parseFloat(tokens[0]), Float.parseFloat(tokens[1])):(tokens.length == 3?new W_Vertex(Float.parseFloat(tokens[0]), Float.parseFloat(tokens[1]), Float.parseFloat(tokens[2])):vertex));
-         } catch (NumberFormatException var6) {
-            throw new ModelFormatException(String.format("Number formatting error at line %d", new Object[]{Integer.valueOf(lineCount)}), var6);
+         } catch (NumberFormatException numberFormatException) {
+            throw new ModelFormatException(String.format("Number formatting error at line %d", new Object[]{Integer.valueOf(lineCount)}), numberFormatException);
          }
       } else {
          throw new ModelFormatException("Error parsing entry (\'" + line + "\'" + ", line " + lineCount + ") in file \'" + this.fileName + "\' - Incorrect format");
@@ -383,8 +383,8 @@ public class W_WavefrontObject extends W_ModelCustom {
 
          try {
             return (W_Vertex)(tokens.length == 3?new W_Vertex(Float.parseFloat(tokens[0]), Float.parseFloat(tokens[1]), Float.parseFloat(tokens[2])):vertexNormal);
-         } catch (NumberFormatException var6) {
-            throw new ModelFormatException(String.format("Number formatting error at line %d", new Object[]{Integer.valueOf(lineCount)}), var6);
+         } catch (NumberFormatException numberFormatException) {
+            throw new ModelFormatException(String.format("Number formatting error at line %d", new Object[]{Integer.valueOf(lineCount)}), numberFormatException);
          }
       } else {
          throw new ModelFormatException("Error parsing entry (\'" + line + "\'" + ", line " + lineCount + ") in file \'" + this.fileName + "\' - Incorrect format");
@@ -399,8 +399,8 @@ public class W_WavefrontObject extends W_ModelCustom {
 
          try {
             return (W_TextureCoordinate)(tokens.length == 2?new W_TextureCoordinate(Float.parseFloat(tokens[0]), 1.0F - Float.parseFloat(tokens[1])):(tokens.length == 3?new W_TextureCoordinate(Float.parseFloat(tokens[0]), 1.0F - Float.parseFloat(tokens[1]), Float.parseFloat(tokens[2])):textureCoordinate));
-         } catch (NumberFormatException var6) {
-            throw new ModelFormatException(String.format("Number formatting error at line %d", new Object[]{Integer.valueOf(lineCount)}), var6);
+         } catch (NumberFormatException numberFormatException) {
+            throw new ModelFormatException(String.format("Number formatting error at line %d", new Object[]{Integer.valueOf(lineCount)}), numberFormatException);
          }
       } else {
          throw new ModelFormatException("Error parsing entry (\'" + line + "\'" + ", line " + lineCount + ") in file \'" + this.fileName + "\' - Incorrect format");

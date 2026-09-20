@@ -72,13 +72,13 @@ public class MCH_ItemRenderWrench implements IItemRenderer {
       static {
          try {
             $SwitchMap$net$minecraftforge$client$IItemRenderer$ItemRenderType[ItemRenderType.EQUIPPED.ordinal()] = 1;
-         } catch (NoSuchFieldError var2) {
+         } catch (NoSuchFieldError noSuchFieldError) {
             ;
          }
 
          try {
             $SwitchMap$net$minecraftforge$client$IItemRenderer$ItemRenderType[ItemRenderType.EQUIPPED_FIRST_PERSON.ordinal()] = 2;
-         } catch (NoSuchFieldError var1) {
+         } catch (NoSuchFieldError noSuchFieldError2) {
             ;
          }
 

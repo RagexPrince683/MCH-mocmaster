@@ -163,8 +163,8 @@ public class MCH_PacketHandler extends W_PacketHandler {
    protected int getMessageId(ByteArrayDataInput data) {
       try {
          return data.readInt();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
          return 0;
       }
    }

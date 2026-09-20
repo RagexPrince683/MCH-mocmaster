@@ -60,8 +60,8 @@ public class MCH_BaseVehicleInventory implements IInventory {
       return 10;
    }
 
-   public ItemStack getStackInSlot(int var1) {
-      return this.containerItems[var1];
+   public ItemStack getStackInSlot(int index) {
+      return this.containerItems[index];
    }
 
    public void setDead() {

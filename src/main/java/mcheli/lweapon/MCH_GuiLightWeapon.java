@@ -132,7 +132,7 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
       int posY = super.centerY + 20;
       boolean WID = true;
       boolean INV = true;
-      double[] var10000 = new double[]{(double)(posX - 20), (double)(posY - 10), (double)(posX - 20), (double)(posY - 20), (double)(posX - 20), (double)(posY - 20), (double)(posX - 10), (double)(posY - 20), (double)(posX - 20), (double)(posY + 10), (double)(posX - 20), (double)(posY + 20), (double)(posX - 20), (double)(posY + 20), (double)(posX - 10), (double)(posY + 20), (double)(posX + 20), (double)(posY - 10), (double)(posX + 20), (double)(posY - 20), (double)(posX + 20), (double)(posY - 20), (double)(posX + 10), (double)(posY - 20), (double)(posX + 20), (double)(posY + 10), (double)(posX + 20), (double)(posY + 20), (double)(posX + 20), (double)(posY + 20), (double)(posX + 10), (double)(posY + 20)};
+      double[] positionX = new double[]{(double)(posX - 20), (double)(posY - 10), (double)(posX - 20), (double)(posY - 20), (double)(posX - 20), (double)(posY - 20), (double)(posX - 10), (double)(posY - 20), (double)(posX - 20), (double)(posY + 10), (double)(posX - 20), (double)(posY + 20), (double)(posX - 20), (double)(posY + 20), (double)(posX - 10), (double)(posY + 20), (double)(posX + 20), (double)(posY - 10), (double)(posX + 20), (double)(posY - 20), (double)(posX + 20), (double)(posY - 20), (double)(posX + 10), (double)(posY - 20), (double)(posX + 20), (double)(posY + 10), (double)(posX + 20), (double)(posY + 20), (double)(posX + 20), (double)(posY + 20), (double)(posX + 10), (double)(posY + 20)};
       drawRect(posX - 20, posY + 20 + 1, posX - 20 + 40, posY + 20 + 1 + 1 + 3 + 1, color);
       float lock = (float)cntLock / (float)cntMax;
       drawRect(posX - 20 + 1, posY + 20 + 1 + 1, posX - 20 + 1 + (int)(38.0D * (double)lock), posY + 20 + 1 + 1 + 3, -2161656);
@@ -151,9 +151,9 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
             double dz = target.posZ - player.posZ;
             msgLockDist = String.format("[%.2f]", new Object[]{Double.valueOf(Math.sqrt(dx * dx + dz * dz))});
             color = canFire?color1:color2;
-            MCH_Config var10000 = MCH_MOD.config;
+            MCH_Config positionX = MCH_MOD.config;
             if(!MCH_Config.HideKeybind.prmBool && gs.isLockComplete()) {
-               var10000 = MCH_MOD.config;
+               positionX = MCH_MOD.config;
                String k = MCH_KeyName.getDescOrName(MCH_Config.KeyAttack.prmInt);
                this.drawCenteredString("Shot : " + k, super.centerX, super.centerY + 65, -805306369);
             }
@@ -336,12 +336,12 @@ public class MCH_GuiLightWeapon extends MCH_Gui {
       }
 
       OffX += 60;
-      MCH_Config var10001 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       this.drawString(MCH_KeyName.getDescOrName(MCH_Config.KeyCameraMode.prmInt), OffX, OffY + 10, color);
-      var10001 = MCH_MOD.config;
+      configuration = MCH_MOD.config;
       this.drawString(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt), OffX, OffY + 20, color);
       if(canSwitchMode) {
-         var10001 = MCH_MOD.config;
+         configuration = MCH_MOD.config;
          this.drawString(MCH_KeyName.getDescOrName(MCH_Config.KeySwWeaponMode.prmInt), OffX, OffY + 30, color);
       }
 

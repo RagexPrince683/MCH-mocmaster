@@ -147,7 +147,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    }
 
    public boolean canMountWithNearEmptyMinecart() {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       return MCH_Config.MountMinecartTank.prmBool;
    }
 
@@ -350,9 +350,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       parY = this.calculateYOffset(list, super.boundingBox, parY);
       boolean flag1 = super.onGround || my != parY && my < 0.0D;
       MCH_BoundingBox[] prevPX = super.extraBoundingBox;
-      int len$ = prevPX.length;
+      int iteratedValueCount = prevPX.length;
 
-      for(int prevPZ = 0; prevPZ < len$; ++prevPZ) {
+      for(int prevPZ = 0; prevPZ < iteratedValueCount; ++prevPZ) {
          MCH_BoundingBox ebb = prevPX[prevPZ];
          ebb.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
       }
@@ -360,11 +360,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       parX = this.calculateXOffset(list, super.boundingBox, parX);
       parZ = this.calculateZOffset(list, super.boundingBox, parZ);
       double minX;
-      double var38;
-      double var39;
+      double result;
+      double result2;
       if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F && (mx != parX || mz != parZ)) {
-         var38 = parX;
-         var39 = parY;
+         result = parX;
+         result2 = parY;
          minX = parZ;
          parY = (double)super.stepHeight;
          AxisAlignedBB minZ = super.boundingBox.copy();
@@ -374,25 +374,25 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          parX = this.calculateXOffset(list, super.boundingBox, mx);
          parZ = this.calculateZOffset(list, super.boundingBox, mz);
          parY = this.calculateYOffset(list, super.boundingBox, (double)(-super.stepHeight));
-         if(var38 * var38 + minX * minX >= parX * parX + parZ * parZ) {
-            parX = var38;
-            parY = var39;
+         if(result * result + minX * minX >= parX * parX + parZ * parZ) {
+            parX = result;
+            parY = result2;
             parZ = minX;
             super.boundingBox.setBB(minZ);
          }
       }
 
-      var38 = super.posX;
-      var39 = super.posZ;
+      result = super.posX;
+      result2 = super.posZ;
       super.worldObj.theProfiler.endSection();
       super.worldObj.theProfiler.startSection("rest");
       minX = super.boundingBox.minX;
-      double var40 = super.boundingBox.minZ;
+      double positionX = super.boundingBox.minZ;
       double maxX = super.boundingBox.maxX;
       double maxZ = super.boundingBox.maxZ;
       super.posX = (minX + maxX) / 2.0D;
       super.posY = super.boundingBox.minY + (double)super.yOffset - (double)super.ySize;
-      super.posZ = (var40 + maxZ) / 2.0D;
+      super.posZ = (positionX + maxZ) / 2.0D;
       super.isCollidedHorizontally = mx != parX || mz != parZ;
       super.isCollidedVertically = my != parY;
       super.onGround = my != parY && my < 0.0D;
@@ -412,8 +412,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
       try {
          this.doBlockCollisions();
-      } catch (Throwable var37) {
-         CrashReport crashreport = CrashReport.makeCrashReport(var37, "Checking entity tile collision");
+      } catch (Throwable throwable) {
+         CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Checking entity tile collision");
          CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being checked for collision");
          this.addEntityCrashInfo(crashreportcategory);
       }
@@ -749,34 +749,34 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
                      }
                   }
 
-                  MCH_BoundingBox var15 = (MCH_BoundingBox)this.getTankInfo().extraBoundingBox.get(b);
-                  Vec3 pos = this.getTransformedPosition(var15.offsetX, var15.offsetY, var15.offsetZ);
+                  MCH_BoundingBox result = (MCH_BoundingBox)this.getTankInfo().extraBoundingBox.get(b);
+                  Vec3 pos = this.getTransformedPosition(result.offsetX, result.offsetY, result.offsetZ);
                   py = pos.xCoord;
                   pz = pos.yCoord;
                   double pos1 = pos.zCoord;
                   this.onUpdate_Particle2SpawnSmoke(b, py, pz, pos1, 1.0F);
                }
 
-               boolean var14 = true;
+               boolean result2 = true;
                if((double)this.getHP() >= (double)this.getMaxHP() * 0.2D && this.getMaxHP() > 0) {
                   px = (int)(((double)this.getHP() / (double)this.getMaxHP() - 0.2D) / 0.3D * 15.0D);
                   if(px > 0 && super.rand.nextInt(px) > 0) {
-                     var14 = false;
+                     result2 = false;
                   }
                }
 
-               if(var14) {
-                  double var16 = super.posX;
+               if(result2) {
+                  double positionX = super.posX;
                   py = super.posY;
                   pz = super.posZ;
                   if(this.getSeatInfo(0) != null && this.getSeatInfo(0).pos != null) {
-                     Vec3 var17 = MCH_Lib.RotVec3(0.0D, this.getSeatInfo(0).pos.yCoord, -2.0D, -yaw, -pitch, -roll);
-                     var16 += var17.xCoord;
-                     py += var17.yCoord;
-                     pz += var17.zCoord;
+                     Vec3 position = MCH_Lib.RotVec3(0.0D, this.getSeatInfo(0).pos.yCoord, -2.0D, -yaw, -pitch, -roll);
+                     positionX += position.xCoord;
+                     py += position.yCoord;
+                     pz += position.zCoord;
                   }
 
-                  this.onUpdate_Particle2SpawnSmoke(bbNum, var16, py, pz, bbNum == 0?2.0F:1.0F);
+                  this.onUpdate_Particle2SpawnSmoke(bbNum, positionX, py, pz, bbNum == 0?2.0F:1.0F);
                }
 
                super.isFirstDamageSmoke = false;
@@ -796,9 +796,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       }
 
       Vec3 prev = super.prevDamageSmokePos[ri];
-      double var10000 = x - prev.xCoord;
-      var10000 = y - prev.yCoord;
-      var10000 = z - prev.zCoord;
+      double positionX = x - prev.xCoord;
+      positionX = y - prev.yCoord;
+      positionX = z - prev.zCoord;
       byte num = 1;
 
       for(int i = 0; i < num; ++i) {
@@ -858,10 +858,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
                dist = 1.0D;
             }
 
-            Iterator i$ = this.getAcInfo().particleSplashs.iterator();
+            Iterator iteratedValueIndex = this.getAcInfo().particleSplashs.iterator();
 
-            while(i$.hasNext()) {
-               MCH_BaseVehicleInfo.ParticleSplash p = (MCH_BaseVehicleInfo.ParticleSplash)i$.next();
+            while(iteratedValueIndex.hasNext()) {
+               MCH_BaseVehicleInfo.ParticleSplash p = (MCH_BaseVehicleInfo.ParticleSplash)iteratedValueIndex.next();
 
                for(int i = 0; i < p.num; ++i) {
                   if(dist > 0.03D + (double)super.rand.nextFloat() * 0.1D) {
@@ -1305,14 +1305,14 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    public void updateCollisionBox() {
       if(this.getAcInfo() != null) {
          this.WheelMng.updateBlock();
-         MCH_BoundingBox[] arr$ = this.getCalculatedExtraBoundingBoxes();
-         int len$ = arr$.length;
+         MCH_BoundingBox[] iteratedValues = this.getCalculatedExtraBoundingBoxes();
+         int iteratedValueCount = iteratedValues.length;
 
-         MCH_Config var10000;
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_BoundingBox bb = arr$[i$];
+         MCH_Config configuration;
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_BoundingBox bb = iteratedValues[iteratedValueIndex];
             if(super.rand.nextInt(3) == 0) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                if(MCH_Config.Collision_DestroyBlock.prmBool) {
                   Vec3 v = this.getTransformedPosition(bb.offsetX, bb.offsetY, bb.offsetZ);
                   this.destoryBlockRange(v, (double)bb.width, (double)bb.height);
@@ -1322,7 +1322,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
             }
          }
 
-         var10000 = MCH_MOD.config;
+         configuration = MCH_MOD.config;
          if(MCH_Config.Collision_DestroyBlock.prmBool) {
             this.destoryBlockRange(this.getTransformedPosition(0.0D, 0.0D, 0.0D), (double)super.width * 1.5D, (double)(super.height * 2.0F));
          }
@@ -1333,11 +1333,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    public void destoryBlockRange(Vec3 v, double w, double h) {
       if(this.getAcInfo() != null) {
-         MCH_Config var10000 = MCH_MOD.config;
+         MCH_Config configuration = MCH_MOD.config;
          List destroyBlocks = MCH_Config.getBreakableBlockListFromType(this.getTankInfo().weightType);
-         var10000 = MCH_MOD.config;
+         configuration = MCH_MOD.config;
          List noDestroyBlocks = MCH_Config.getNoBreakableBlockListFromType(this.getTankInfo().weightType);
-         var10000 = MCH_MOD.config;
+         configuration = MCH_MOD.config;
          List destroyMaterials = MCH_Config.getBreakableMaterialListFromType(this.getTankInfo().weightType);
          int ws = (int)(w + 2.0D) / 2;
          int hs = (int)(h + 2.0D) / 2;
@@ -1357,11 +1357,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
                         Block block = by >= 0 && by < 256?super.worldObj.getBlock(bx, by, bz):Blocks.air;
                         Material mat = block.getMaterial();
                         if(!Block.isEqualTo(block, Blocks.air)) {
-                           Iterator i$ = noDestroyBlocks.iterator();
+                           Iterator iteratedValueIndex = noDestroyBlocks.iterator();
 
                            Block m;
-                           while(i$.hasNext()) {
-                              m = (Block)i$.next();
+                           while(iteratedValueIndex.hasNext()) {
+                              m = (Block)iteratedValueIndex.next();
                               if(Block.isEqualTo(block, m)) {
                                  block = null;
                                  break;
@@ -1372,10 +1372,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
                               break label102;
                            }
 
-                           i$ = destroyBlocks.iterator();
+                           iteratedValueIndex = destroyBlocks.iterator();
 
-                           while(i$.hasNext()) {
-                              m = (Block)i$.next();
+                           while(iteratedValueIndex.hasNext()) {
+                              m = (Block)iteratedValueIndex.next();
                               if(Block.isEqualTo(block, m)) {
                                  this.destroyBlock(bx, by, bz);
                                  mat = null;
@@ -1387,11 +1387,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
                               break label102;
                            }
 
-                           i$ = destroyMaterials.iterator();
+                           iteratedValueIndex = destroyMaterials.iterator();
 
-                           while(i$.hasNext()) {
-                              Material var21 = (Material)i$.next();
-                              if(block.getMaterial() == var21) {
+                           while(iteratedValueIndex.hasNext()) {
+                              Material material = (Material)iteratedValueIndex.next();
+                              if(block.getMaterial() == material) {
                                  this.destroyBlock(bx, by, bz);
                                  break;
                               }
@@ -1619,11 +1619,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       super.updateParts(stat);
       if(!this.isDestroyed()) {
          MCH_Parts[] parts = new MCH_Parts[0];
-         MCH_Parts[] arr$ = parts;
-         int len$ = parts.length;
+         MCH_Parts[] iteratedValues = parts;
+         int iteratedValueCount = parts.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            MCH_Parts p = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            MCH_Parts p = iteratedValues[iteratedValueIndex];
             if(p != null) {
                p.updateStatusClient(stat);
                p.update();

@@ -36,10 +36,10 @@ public class MCH_GuiTank extends MCH_BaseVehicleCommonGui {
             this.drawNightVisionNoise();
          }
 
-         MCH_Config var10000;
+         MCH_Config configuration;
          label36: {
             if(isThirdPersonView) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                if(!MCH_Config.DisplayHUDThirdPerson.prmBool) {
                   break label36;
                }
@@ -51,7 +51,7 @@ public class MCH_GuiTank extends MCH_BaseVehicleCommonGui {
          label43: {
             this.drawDebugtInfo(tank);
             if(isThirdPersonView) {
-               var10000 = MCH_MOD.config;
+               configuration = MCH_MOD.config;
                if(!MCH_Config.DisplayHUDThirdPerson.prmBool) {
                   break label43;
                }
@@ -81,7 +81,7 @@ public class MCH_GuiTank extends MCH_BaseVehicleCommonGui {
    }
 
    public void drawDebugtInfo(MCH_EntityTank ac) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.EnableMCHLibDebugLog.prmBool) {
          int LX = super.centerX - 100;
          super.drawDebugtInfo(ac);
@@ -90,7 +90,7 @@ public class MCH_GuiTank extends MCH_BaseVehicleCommonGui {
    }
 
    public void drawKeybind(MCH_EntityTank tank, EntityPlayer player, int seatID) {
-      MCH_Config var10000 = MCH_MOD.config;
+      MCH_Config configuration = MCH_MOD.config;
       if(!MCH_Config.HideKeybind.prmBool) {
          MCH_TankInfo info = tank.getTankInfo();
          if(info != null) {
@@ -100,31 +100,31 @@ public class MCH_GuiTank extends MCH_BaseVehicleCommonGui {
             int LX = super.centerX - 200;
             this.drawKeyBind(tank, info, player, seatID, RX, LX, colorActive, colorInactive);
             String msg;
-            StringBuilder var11;
-            MCH_Config var10001;
+            StringBuilder messageBuilder;
+            MCH_Config configuration2;
             if(seatID == 0 && tank.hasBrake()) {
-               var11 = (new StringBuilder()).append("Brake : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchHovering.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("Brake : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchHovering.prmInt)).toString();
                this.drawString(msg, RX, super.centerY - 30, colorActive);
             }
 
             if(seatID > 0 && tank.canSwitchGunnerModeOtherSeat(player)) {
-               var11 = (new StringBuilder()).append(tank.getIsGunnerMode(player)?"Normal":"Camera").append(" : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchMode.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append(tank.getIsGunnerMode(player)?"Normal":"Camera").append(" : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeySwitchMode.prmInt)).toString();
                this.drawString(msg, RX, super.centerY - 40, colorActive);
             }
 
             if(tank.getIsGunnerMode(player) && info.cameraZoom > 1) {
-               var11 = (new StringBuilder()).append("Zoom : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("Zoom : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
                this.drawString(msg, LX, super.centerY - 80, colorActive);
             } else if(seatID == 0 && (tank.canFoldHatch() || tank.canUnfoldHatch())) {
-               var11 = (new StringBuilder()).append("OpenHatch : ");
-               var10001 = MCH_MOD.config;
-               msg = var11.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
+               messageBuilder = (new StringBuilder()).append("OpenHatch : ");
+               configuration2 = MCH_MOD.config;
+               msg = messageBuilder.append(MCH_KeyName.getDescOrName(MCH_Config.KeyZoom.prmInt)).toString();
                this.drawString(msg, LX, super.centerY - 80, colorActive);
             }
 

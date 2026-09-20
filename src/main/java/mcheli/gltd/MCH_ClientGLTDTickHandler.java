@@ -76,19 +76,19 @@ public class MCH_ClientGLTDTickHandler extends MCH_ClientTickHandlerBase {
       }
 
       this.isBeforeRiding = this.isRiding;
-      EntityClientPlayerMP var6 = super.mc.thePlayer;
-      MCH_ViewEntityDummy var7 = null;
-      if(var6 != null && var6.ridingEntity instanceof MCH_EntityGLTD) {
-         MCH_EntityGLTD var8 = (MCH_EntityGLTD)var6.ridingEntity;
-         this.updateGLTD(var6, var8);
-         MCH_Lib.disableFirstPersonItemRender(var6.getCurrentEquippedItem());
-         var7 = MCH_ViewEntityDummy.getInstance(super.mc.theWorld);
-         var7.update(var8.camera);
+      EntityClientPlayerMP player2 = super.mc.thePlayer;
+      MCH_ViewEntityDummy viewEntityDummy2 = null;
+      if(player2 != null && player2.ridingEntity instanceof MCH_EntityGLTD) {
+         MCH_EntityGLTD gltdEntity = (MCH_EntityGLTD)player2.ridingEntity;
+         this.updateGLTD(player2, gltdEntity);
+         MCH_Lib.disableFirstPersonItemRender(player2.getCurrentEquippedItem());
+         viewEntityDummy2 = MCH_ViewEntityDummy.getInstance(super.mc.theWorld);
+         viewEntityDummy2.update(gltdEntity.camera);
          if(!inGUI) {
-            this.playerControl(var6, var8);
+            this.playerControl(player2, gltdEntity);
          }
 
-         MCH_Lib.setRenderViewEntity(var7);
+         MCH_Lib.setRenderViewEntity(viewEntityDummy2);
          this.isRiding = true;
       } else {
          this.isRiding = false;
@@ -96,14 +96,14 @@ public class MCH_ClientGLTDTickHandler extends MCH_ClientTickHandlerBase {
 
       if(this.isBeforeRiding != this.isRiding) {
          if(this.isRiding) {
-            if(var7 != null) {
-               var7.prevPosX = var7.posX;
-               var7.prevPosY = var7.posY;
-               var7.prevPosZ = var7.posZ;
+            if(viewEntityDummy2 != null) {
+               viewEntityDummy2.prevPosX = viewEntityDummy2.posX;
+               viewEntityDummy2.prevPosY = viewEntityDummy2.posY;
+               viewEntityDummy2.prevPosZ = viewEntityDummy2.posZ;
             }
          } else {
             MCH_Lib.enableFirstPersonItemRender();
-            MCH_Lib.setRenderViewEntity(var6);
+            MCH_Lib.setRenderViewEntity(player2);
          }
       }
 

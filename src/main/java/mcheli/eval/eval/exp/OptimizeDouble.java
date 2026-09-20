@@ -14,7 +14,7 @@ public class OptimizeDouble extends OptimizeObject {
       try {
          double e = exp.evalDouble();
          return NumberExpression.create(exp, Double.toString(e));
-      } catch (Exception var4) {
+      } catch (Exception exception) {
          return exp;
       }
    }

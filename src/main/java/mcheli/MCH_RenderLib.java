@@ -19,11 +19,11 @@ public class MCH_RenderLib {
       GL11.glLineWidth((float)width);
       Tessellator tessellator = Tessellator.instance;
       tessellator.startDrawing(mode);
-      Vec3[] arr$ = points;
-      int len$ = points.length;
+      Vec3[] iteratedValues = points;
+      int iteratedValueCount = points.length;
 
-      for(int i$ = 0; i$ < len$; ++i$) {
-         Vec3 v = arr$[i$];
+      for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+         Vec3 v = iteratedValues[iteratedValueIndex];
          tessellator.addVertex(v.xCoord, v.yCoord, v.zCoord);
       }
 

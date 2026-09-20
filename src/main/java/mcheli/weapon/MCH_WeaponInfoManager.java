@@ -113,15 +113,15 @@ public class MCH_WeaponInfoManager {
    }
 
    private static void setRoundItems(Map snapshot) {
-      Iterator i$ = snapshot.values().iterator();
+      Iterator iteratedValueIndex = snapshot.values().iterator();
 
-      while(i$.hasNext()) {
-         MCH_WeaponInfo w = (MCH_WeaponInfo)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         MCH_WeaponInfo w = (MCH_WeaponInfo)iteratedValueIndex.next();
 
          MCH_WeaponInfo.RoundItem r;
          Item item;
-         for(Iterator i$1 = w.roundItems.iterator(); i$1.hasNext(); r.itemStack = new ItemStack(item, 1, r.damage)) {
-            r = (MCH_WeaponInfo.RoundItem)i$1.next();
+         for(Iterator iteratedValueIndex1 = w.roundItems.iterator(); iteratedValueIndex1.hasNext(); r.itemStack = new ItemStack(item, 1, r.damage)) {
+            r = (MCH_WeaponInfo.RoundItem)iteratedValueIndex1.next();
             item = W_Item.getItemByName(r.itemName);
          }
       }

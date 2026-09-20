@@ -36,7 +36,7 @@ public abstract class AbstractExpression {
       this.ope2 = from.ope2;
    }
 
-   public abstract AbstractExpression dup(ShareExpValue var1);
+   public abstract AbstractExpression dup(ShareExpValue result1);
 
    public final String getOperator() {
       return this.ope1;
@@ -120,7 +120,7 @@ public abstract class AbstractExpression {
 
    protected abstract AbstractExpression replaceVar();
 
-   public abstract boolean equals(Object var1);
+   public abstract boolean equals(Object result1);
 
    public abstract int hashCode();
 
@@ -132,7 +132,7 @@ public abstract class AbstractExpression {
       return str1 == null?str2 == null:str1.equals(str2);
    }
 
-   public abstract void dump(int var1);
+   public abstract void dump(int result1);
 
    public abstract String toString();
 }

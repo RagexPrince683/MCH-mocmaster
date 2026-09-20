@@ -35,8 +35,8 @@ public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
          this.aircraftUUID = new UUID(data.readLong(), data.readLong());
          this.riderUUID = new UUID(data.readLong(), data.readLong());
          this.sequence = data.readInt();
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -51,8 +51,8 @@ public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
          dos.writeLong(this.riderUUID.getMostSignificantBits());
          dos.writeLong(this.riderUUID.getLeastSignificantBits());
          dos.writeInt(this.sequence);
-      } catch (IOException var3) {
-         var3.printStackTrace();
+      } catch (IOException oException) {
+         oException.printStackTrace();
       }
 
    }

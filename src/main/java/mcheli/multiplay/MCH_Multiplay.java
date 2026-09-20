@@ -156,11 +156,11 @@ public class MCH_Multiplay {
       CommandTeleport cmd = new CommandTeleport();
       if(cmd.canCommandSenderUseCommand(player)) {
          MinecraftServer minecraftServer = MinecraftServer.getServer();
-         String[] arr$ = minecraftServer.getConfigurationManager().getAllUsernames();
-         int len$ = arr$.length;
+         String[] iteratedValues = minecraftServer.getConfigurationManager().getAllUsernames();
+         int iteratedValueCount = iteratedValues.length;
 
-         for(int i$ = 0; i$ < len$; ++i$) {
-            String playerName = arr$[i$];
+         for(int iteratedValueIndex = 0; iteratedValueIndex < iteratedValueCount; ++iteratedValueIndex) {
+            String playerName = iteratedValues[iteratedValueIndex];
             EntityPlayerMP jumpPlayer = CommandTeleport.getPlayer(player, playerName);
             ChunkCoordinates cc = null;
             if(jumpPlayer != null && jumpPlayer.dimension == player.dimension) {
@@ -202,22 +202,22 @@ public class MCH_Multiplay {
             }
 
             Collections.shuffle(listTeam);
-            int var9 = 0;
+            int index = 0;
 
-            for(int var10 = 0; var9 < list.size(); ++var9) {
-               listTeam.set(var10, (String)listTeam.get(var10) + " " + (String)list.get(var9));
-               ++var10;
-               if(var10 >= teamNum) {
-                  var10 = 0;
+            for(int index2 = 0; index < list.size(); ++index) {
+               listTeam.set(index2, (String)listTeam.get(index2) + " " + (String)list.get(index));
+               ++index2;
+               if(index2 >= teamNum) {
+                  index2 = 0;
                }
             }
 
-            for(var9 = 0; var9 < listTeam.size(); ++var9) {
-               String var11 = "teams join " + (String)listTeam.get(var9);
-               String[] var12 = var11.split(" ");
-               if(var12.length > 3) {
-                  MCH_Lib.DbgLog(false, "ShuffleTeam:" + var11, new Object[0]);
-                  cmd.processCommand(player, var12);
+            for(index = 0; index < listTeam.size(); ++index) {
+               String token = "teams join " + (String)listTeam.get(index);
+               String[] token2 = token.split(" ");
+               if(token2.length > 3) {
+                  MCH_Lib.DbgLog(false, "ShuffleTeam:" + token, new Object[0]);
+                  cmd.processCommand(player, token2);
                }
             }
          }
@@ -266,13 +266,13 @@ public class MCH_Multiplay {
          }
 
          if(entityList.size() > 0) {
-            int[] var39 = new int[entityList.size()];
+            int[] index = new int[entityList.size()];
 
-            for(int var40 = 0; var40 < var39.length; ++var40) {
-               var39[var40] = ((Integer)entityList.get(var40)).intValue();
+            for(int index2 = 0; index2 < index.length; ++index2) {
+               index[index2] = ((Integer)entityList.get(index2)).intValue();
             }
 
-            sendSpotedEntityListToSameTeam(player, markTime, var39);
+            sendSpotedEntityListToSameTeam(player, markTime, index);
             ret = true;
          } else {
             ret = false;
@@ -380,10 +380,10 @@ public class MCH_Multiplay {
 
    public static void sendSpotedEntityListToSameTeam(EntityLivingBase player, int count, int[] entityId) {
       ServerConfigurationManager svCnf = MinecraftServer.getServer().getConfigurationManager();
-      Iterator i$ = svCnf.playerEntityList.iterator();
+      Iterator iteratedValueIndex = svCnf.playerEntityList.iterator();
 
-      while(i$.hasNext()) {
-         EntityPlayerMP notifyPlayer = (EntityPlayerMP)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         EntityPlayerMP notifyPlayer = (EntityPlayerMP)iteratedValueIndex.next();
          if(player == notifyPlayer || player.isOnSameTeam(notifyPlayer)) {
             MCH_PacketNotifySpotedEntity.send(notifyPlayer, count, entityId);
          }
@@ -407,10 +407,10 @@ public class MCH_Multiplay {
 
    public static void sendMarkPointToSameTeam(EntityPlayer player, int x, int y, int z) {
       ServerConfigurationManager svCnf = MinecraftServer.getServer().getConfigurationManager();
-      Iterator i$ = svCnf.playerEntityList.iterator();
+      Iterator iteratedValueIndex = svCnf.playerEntityList.iterator();
 
-      while(i$.hasNext()) {
-         EntityPlayerMP notifyPlayer = (EntityPlayerMP)i$.next();
+      while(iteratedValueIndex.hasNext()) {
+         EntityPlayerMP notifyPlayer = (EntityPlayerMP)iteratedValueIndex.next();
          if(player == notifyPlayer || player.isOnSameTeam(notifyPlayer)) {
             MCH_PacketNotifyMarkPoint.send(notifyPlayer, x, y, z);
          }

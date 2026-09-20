@@ -25,8 +25,8 @@ public class MCH_PacketLargeData extends MCH_Packet {
          this.imageDataTotalSize = data.readInt();
          this.buf = new byte[this.imageDataSize];
          data.readFully(this.buf);
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
 
    }
@@ -34,8 +34,8 @@ public class MCH_PacketLargeData extends MCH_Packet {
    public void writeData(DataOutputStream dos) {
       try {
          MCH_MultiplayClient.readImageData(dos);
-      } catch (Exception var3) {
-         var3.printStackTrace();
+      } catch (Exception exception) {
+         exception.printStackTrace();
       }
    }
 
