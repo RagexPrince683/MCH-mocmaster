@@ -73,15 +73,27 @@ public class W_GroupObject {
    }
 
    public int getFaceCount() {
-      return this.faceVertexOffsets != null ? this.faceVertexOffsets.length - 1 : this.faces.size();
+      return this.faceVertexOffsets != null ? this.faceVertexOffsets.length - 1
+            : this.faces != null ? this.faces.size() : 0;
    }
 
    public int getVertexCount() {
-      return this.geometry != null ? this.geometry.length / FLOATS_PER_VERTEX : 0;
+      if(this.geometry != null) {
+         return this.geometry.length / FLOATS_PER_VERTEX;
+      }
+      int vertexCount = 0;
+      if(this.faces != null) {
+         for(Object object : this.faces) {
+            vertexCount += ((W_Face)object).getVertexCount();
+         }
+      }
+      return vertexCount;
    }
 
    public long getRetainedGeometryBytes() {
-      return (long)this.geometry.length * 4L + (long)this.faceVertexOffsets.length * 4L;
+      long geometryBytes = this.geometry != null ? (long)this.geometry.length * 4L : 0L;
+      long offsetBytes = this.faceVertexOffsets != null ? (long)this.faceVertexOffsets.length * 4L : 0L;
+      return geometryBytes + offsetBytes;
    }
 
    public int getFaceVertexCount(int face) {
@@ -131,6 +143,11 @@ public class W_GroupObject {
       if(this.vboUnavailable || !GLContext.getCapabilities().OpenGL15) {
          return false;
       }
+      int previousArrayBuffer = GL11.glGetInteger(GL15.GL_ARRAY_BUFFER_BINDING);
+      boolean textureArrayEnabled = GL11.glIsEnabled(GL11.GL_TEXTURE_COORD_ARRAY);
+      boolean normalArrayEnabled = GL11.glIsEnabled(GL11.GL_NORMAL_ARRAY);
+      boolean vertexArrayEnabled = GL11.glIsEnabled(GL11.GL_VERTEX_ARRAY);
+      boolean rendered = false;
       try {
          if(this.vboDirty && this.vertexBufferId != 0) {
             GL15.glDeleteBuffers(this.vertexBufferId);
@@ -143,18 +160,33 @@ public class W_GroupObject {
          GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, this.vertexBufferId);
          GL11.glInterleavedArrays(GL11.GL_T2F_N3F_V3F, 0, 0L);
          GL11.glDrawArrays(this.glDrawingMode, 0, this.getVertexCount());
-         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-         GL11.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY);
-         GL11.glDisableClientState(GL11.GL_NORMAL_ARRAY);
-         GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
-         return true;
-      } catch(RuntimeException ignored) {
+         rendered = true;
+      } catch(RuntimeException failure) {
          this.vboUnavailable = true;
-         return false;
+      } finally {
+         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, previousArrayBuffer);
+         restoreClientState(GL11.GL_TEXTURE_COORD_ARRAY, textureArrayEnabled);
+         restoreClientState(GL11.GL_NORMAL_ARRAY, normalArrayEnabled);
+         restoreClientState(GL11.GL_VERTEX_ARRAY, vertexArrayEnabled);
+      }
+      return rendered;
+   }
+
+   private static void restoreClientState(int state, boolean enabled) {
+      if(enabled) {
+         GL11.glEnableClientState(state);
+      } else {
+         GL11.glDisableClientState(state);
       }
    }
 
    private void createVbo() {
+      if(this.geometry == null) {
+         this.finalizeGeometry();
+      }
+      if(this.geometry == null || this.geometry.length == 0) {
+         return;
+      }
       FloatBuffer upload = BufferUtils.createFloatBuffer(this.geometry.length);
       upload.put(this.geometry).flip();
       this.vertexBufferId = GL15.glGenBuffers();
@@ -170,6 +202,12 @@ public class W_GroupObject {
    public void renderFaces(Tessellator tessellator, int firstFace, int lastFace) {
       int from = Math.max(0, firstFace);
       int to = Math.min(lastFace, this.getFaceCount() - 1);
+      if(this.faceVertexOffsets == null || this.geometry == null) {
+         for(int face = from; face <= to; ++face) {
+            ((W_Face)this.faces.get(face)).addFaceForRender(tessellator);
+         }
+         return;
+      }
       for(int face = from; face <= to; ++face) {
          int firstVertex = this.faceVertexOffsets[face];
          int endVertex = this.faceVertexOffsets[face + 1];

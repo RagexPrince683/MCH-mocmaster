@@ -59,36 +59,37 @@ public class MCH_ModelManager extends W_ModelBase {
 
    public static IModelCustom load(String name, final boolean reload) {
       if (name == null || name.isEmpty()) return null;
-      final String canonicalName = name.replace('\\', '/').toLowerCase(java.util.Locale.ROOT);
+      final String resourceName = normalizeResourceName(name);
+      final String cacheKey = cacheKey(resourceName);
       REQUESTS.incrementAndGet();
 
       if (!reload) {
-         IModelCustom existing = MAP.get(canonicalName);
+         IModelCustom existing = MAP.get(cacheKey);
          if (existing != null) {
             CACHE_HITS.incrementAndGet();
             return existing;
          }
       }
 
-      return MAP.compute(canonicalName, (key, existing) -> {
+      return MAP.compute(cacheKey, (key, existing) -> {
          if (existing != null && !reload) {
             CACHE_HITS.incrementAndGet();
             return existing;
          }
 
          try {
-            String mqoPath = "assets/mcheli/models/" + canonicalName + ".mqo";
-            String objPath = "assets/mcheli/models/" + canonicalName + ".obj";
-            String tcnPath = "assets/mcheli/models/" + canonicalName + ".tcn";
+            String mqoPath = "assets/mcheli/models/" + resourceName + ".mqo";
+            String objPath = "assets/mcheli/models/" + resourceName + ".obj";
+            String tcnPath = "assets/mcheli/models/" + resourceName + ".tcn";
 
             String modelPath = null;
 
             if (MCH_ResourceHelper.resourceExists(mqoPath)) {
-               modelPath = W_ResourcePath.getModelPath() + "models/" + canonicalName + ".mqo";
+               modelPath = W_ResourcePath.getModelPath() + "models/" + resourceName + ".mqo";
             } else if (MCH_ResourceHelper.resourceExists(objPath)) {
-               modelPath = W_ResourcePath.getModelPath() + "models/" + canonicalName + ".obj";
+               modelPath = W_ResourcePath.getModelPath() + "models/" + resourceName + ".obj";
             } else if (MCH_ResourceHelper.resourceExists(tcnPath)) {
-               modelPath = W_ResourcePath.getModelPath() + "models/" + canonicalName + ".tcn";
+               modelPath = W_ResourcePath.getModelPath() + "models/" + resourceName + ".tcn";
             }
 
             IModelCustom loaded = (modelPath != null) ? W_ModelBase.loadModel(modelPath) : null;
@@ -97,14 +98,31 @@ public class MCH_ModelManager extends W_ModelBase {
                return loaded;
             }
             FAILURES.incrementAndGet();
+            MCH_Lib.Log("Model load failed: name=%s resource=assets/mcheli/models/%s.[mqo|obj|tcn] (resource not found or loader returned null)",
+                  name, resourceName);
             return existing;
 
          } catch (Exception e) {
-            e.printStackTrace();
             FAILURES.incrementAndGet();
+            MCH_Lib.Log("Model load failed: name=%s resource=assets/mcheli/models/%s: %s",
+                  name, resourceName, e.toString());
+            e.printStackTrace();
             return existing;
          }
       });
+   }
+
+   private static String normalizeResourceName(String name) {
+      return name.replace('\\', '/');
+   }
+
+   private static String cacheKey(String name) {
+      return normalizeResourceName(name).toLowerCase(java.util.Locale.ROOT);
+   }
+
+   private static IModelCustom getOrLoad(String name) {
+      IModelCustom model = MAP.get(cacheKey(name));
+      return model != null ? model : load(name);
    }
 
    public static void logDiagnostics() {
@@ -137,11 +155,7 @@ public class MCH_ModelManager extends W_ModelBase {
    }
 
    public static void render(String name) {
-      IModelCustom model = MAP.get(name);
-
-      if (model == null) {
-         model = load(name); // triggers load if not present
-      }
+      IModelCustom model = getOrLoad(name);
 
       if (model != null) {
          model.renderAll();
@@ -149,14 +163,14 @@ public class MCH_ModelManager extends W_ModelBase {
    }
 
    public static void renderPart(String name, String partName) {
-      IModelCustom model = MAP.get(name);
+      IModelCustom model = getOrLoad(name);
       if (model != null) {
          model.renderPart(partName);
       }
    }
 
    public static void renderLine(String path, String name, int startLine, int maxLine) {
-      IModelCustom model = MAP.get(path + "/" + name);
+      IModelCustom model = getOrLoad(path + "/" + name);
       if (model instanceof W_ModelCustom) {
          ((W_ModelCustom) model).renderAllLine(startLine, maxLine);
       }
@@ -165,21 +179,21 @@ public class MCH_ModelManager extends W_ModelBase {
 
 
    public static void render(String path, String name, int startFace, int maxFace) {
-      IModelCustom model = MAP.get(path + "/" + name);
+      IModelCustom model = getOrLoad(path + "/" + name);
       if (model instanceof W_ModelCustom) {
          ((W_ModelCustom) model).renderAll(startFace, maxFace);
       }
    }
 
    public static int getVertexNum(String path, String name) {
-      IModelCustom model = MAP.get(path + "/" + name);
+      IModelCustom model = getOrLoad(path + "/" + name);
       return (model instanceof W_ModelCustom)
               ? ((W_ModelCustom) model).getVertexNum()
               : 0;
    }
 
    public static W_ModelCustom get(String path, String name) {
-      IModelCustom model = MAP.get(path + "/" + name);
+      IModelCustom model = getOrLoad(path + "/" + name);
       return (model instanceof W_ModelCustom)
               ? (W_ModelCustom) model
               : null;
@@ -204,6 +218,6 @@ public class MCH_ModelManager extends W_ModelBase {
    }
 
    public static boolean containsModel(String name) {
-      return MAP.containsKey(name);
+      return MAP.containsKey(cacheKey(name));
    }
 }
