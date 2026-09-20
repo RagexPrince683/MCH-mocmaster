@@ -1,3 +1,9 @@
+# Fix Lazy Model Loading Regression (PR pending)
+
+- Fixed MQO parsing after compact geometry finalization and made model groups safe both before and after finalization.
+- Separated case-insensitive model cache keys from case-preserving resource paths across loading, rendering, lookup, and reload paths.
+- Restored OpenGL buffer and client-array state after VBO rendering, including failed VBO attempts.
+
 # Fix Throwable Model Registration Compile Failure (PR pending)
 
 - Restored the throwable model-loading loop with a scoped iterator and descriptive throwable-info variable.

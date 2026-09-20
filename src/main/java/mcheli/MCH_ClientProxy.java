@@ -87,6 +87,9 @@ import mcheli.mob.MCH_RenderGunner;
 
 public class MCH_ClientProxy extends MCH_CommonProxy {
 
+   private static final java.util.Set LOADED_VEHICLE_MODELS = java.util.Collections.newSetFromMap(
+         new java.util.WeakHashMap());
+
    private final MCH_RenderRWR rwrRenderer = new MCH_RenderRWR();
    public String lastLoadHUDPath = "";
    private long nextTargetedReloadId;
@@ -311,6 +314,9 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    }
 
    public void registerModels() {
+      synchronized(MCH_ClientProxy.class) {
+         LOADED_VEHICLE_MODELS.clear();
+      }
       MCH_ModelManager.setForceReloadMode(true);
       MCH_RenderBaseVehicle.debugModel = MCH_ModelManager.load("box");
       MCH_ModelManager.load("a-10");
@@ -405,28 +411,35 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
    }
 
-   public static void ensureVehicleModel(MCH_BaseVehicleInfo info) {
-      if(info == null || info.model != null || !(MCH_MOD.proxy instanceof MCH_ClientProxy)) {
+   public static synchronized void ensureVehicleModel(MCH_BaseVehicleInfo info) {
+      if(info == null || LOADED_VEHICLE_MODELS.contains(info) || !(MCH_MOD.proxy instanceof MCH_ClientProxy)) {
          return;
       }
       MCH_ClientProxy proxy = (MCH_ClientProxy)MCH_MOD.proxy;
-      if(info instanceof MCH_HeliInfo) {
-         proxy.registerModelsHeli(info.name, false);
-      } else if(info instanceof MCP_PlaneInfo) {
-         proxy.registerModelsPlane(info.name, false);
-      } else if(info instanceof MCH_ShipInfo) {
-         proxy.registerModelsShip(info.name, false);
-      } else if(info instanceof MCH_TankInfo) {
-         proxy.registerModelsTank(info.name, false);
-      } else if(info instanceof MCH_TurretInfo) {
-         proxy.registerModelsVehicle(info.name, false);
+      try {
+         if(info instanceof MCH_HeliInfo) {
+            proxy.registerModelsHeli(info.name, false);
+         } else if(info instanceof MCP_PlaneInfo) {
+            proxy.registerModelsPlane(info.name, false);
+         } else if(info instanceof MCH_ShipInfo) {
+            proxy.registerModelsShip(info.name, false);
+         } else if(info instanceof MCH_TankInfo) {
+            proxy.registerModelsTank(info.name, false);
+         } else if(info instanceof MCH_TurretInfo) {
+            proxy.registerModelsVehicle(info.name, false);
+         }
+      } catch(RuntimeException failure) {
+         MCH_Lib.Log("Lazy vehicle model load failed and will be retried: directory=%s name=%s (%s)",
+               info.getDirectoryName(), info.name, failure.getMessage());
       }
       MCH_ModelManager.logDiagnostics();
    }
 
    public void registerModelsHeli(String name, boolean reload) {
       MCH_HeliInfo info = (MCH_HeliInfo)MCH_HeliInfoManager.map.get(name);
+      beginVehicleModelRegistration(info, reload);
       info.model = MCH_ModelManager.load("helicopters", info.name, reload);
+      requireBodyModel("helicopters", info);
 
       MCH_HeliInfo.Rotor rotor;
       for(Iterator i$ = info.rotorList.iterator(); i$.hasNext(); rotor.model = this.loadPartModel("helicopters", info.name, info.model, rotor.modelName)) {
@@ -434,11 +447,14 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       }
 
       this.registerCommonPart("helicopters", info);
+      finishVehicleModelRegistration(info);
    }
 
    public void registerModelsPlane(String name, boolean reload) {
       MCP_PlaneInfo info = (MCP_PlaneInfo)MCP_PlaneInfoManager.map.get(name);
+      beginVehicleModelRegistration(info, reload);
       info.model = MCH_ModelManager.load("planes", info.name, reload);
+      requireBodyModel("planes", info);
 
       Iterator i$;
       MCH_BaseVehicleInfo.DrawnPart w;
@@ -473,11 +489,14 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       }
 
       this.registerCommonPart("planes", info);
+      finishVehicleModelRegistration(info);
    }
 
    public void registerModelsShip(String name, boolean reload) {
       MCH_ShipInfo info = (MCH_ShipInfo)MCH_ShipInfoManager.map.get(name);
+      beginVehicleModelRegistration(info, reload);
       info.model = MCH_ModelManager.load("ships", info.name, reload);
+      requireBodyModel("ships", info);
 
       Iterator i$;
       MCH_BaseVehicleInfo.DrawnPart w;
@@ -512,12 +531,15 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       }
 
       this.registerCommonPart("ships", info);
+      finishVehicleModelRegistration(info);
    }
 
    public void registerModelsVehicle(String name, boolean reload) {
       MCH_TurretInfo info = (MCH_TurretInfo)MCH_TurretInfoManager.map.get(name);
+      beginVehicleModelRegistration(info, reload);
       String turretDirectory = info.getDirectoryName();
       info.model = MCH_ModelManager.load(turretDirectory, info.name, reload);
+      requireBodyModel(turretDirectory, info);
       Iterator i$ = info.partList.iterator();
 
       while(i$.hasNext()) {
@@ -529,12 +551,16 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       }
 
       this.registerCommonPart(turretDirectory, info);
+      finishVehicleModelRegistration(info);
    }
 
    public void registerModelsTank(String name, boolean reload) {
       MCH_TankInfo info = (MCH_TankInfo)MCH_TankInfoManager.map.get(name);
+      beginVehicleModelRegistration(info, reload);
       info.model = MCH_ModelManager.load("tanks", info.name, reload);
+      requireBodyModel("tanks", info);
       this.registerCommonPart("tanks", info);
+      finishVehicleModelRegistration(info);
    }
 
    public MCH_BulletModel loadBulletModel(String name) {
@@ -543,7 +569,33 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    }
 
    private IModelCustom loadPartModel(String path, String name, IModelCustom body, String part) {
-      return body instanceof W_ModelCustom && ((W_ModelCustom)body).containsPart("$" + part)?null:MCH_ModelManager.load(path, name + "_" + part);
+      if(body instanceof W_ModelCustom && ((W_ModelCustom)body).containsPart("$" + part)) {
+         return null;
+      }
+      IModelCustom model = MCH_ModelManager.load(path, name + "_" + part);
+      if(model == null) {
+         throw new IllegalStateException("Missing model " + path + "/" + name + "_" + part);
+      }
+      return model;
+   }
+
+   private static synchronized void beginVehicleModelRegistration(MCH_BaseVehicleInfo info, boolean reload) {
+      if(info == null) {
+         throw new IllegalStateException("Vehicle definition is not registered");
+      }
+      if(reload) {
+         LOADED_VEHICLE_MODELS.remove(info);
+      }
+   }
+
+   private static void requireBodyModel(String path, MCH_BaseVehicleInfo info) {
+      if(info.model == null) {
+         throw new IllegalStateException("Missing model " + path + "/" + info.name);
+      }
+   }
+
+   private static synchronized void finishVehicleModelRegistration(MCH_BaseVehicleInfo info) {
+      LOADED_VEHICLE_MODELS.add(info);
    }
 
    private void registerCommonPart(String path, MCH_BaseVehicleInfo info) {

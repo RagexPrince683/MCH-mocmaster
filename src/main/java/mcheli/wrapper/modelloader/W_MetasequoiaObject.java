@@ -267,7 +267,7 @@ public class W_MetasequoiaObject extends W_ModelCustom {
                   }
 
                   this.vertexNum += this.vertices.size();
-                  this.faceNum += e.faces.size();
+                  this.faceNum += e.getFaceCount();
                   this.vertices.clear();
                   this.groupObjects.add(e);
                }
