@@ -182,6 +182,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    protected final MCH_IEntitySoundUpdater soundUpdater;
    protected Entity lastRiddenByEntity;
    protected Entity lastRidingEntity;
+   /**
+    * @deprecated Retained for addon compatibility only. MC Heli no longer queues or replays
+    * detached-entity positions.
+    */
+   @Deprecated
    public List listUnmountReserve = new ArrayList();
    private int countOnUpdate;
    private MCH_EntityChain towChainEntity;
@@ -2563,24 +2568,6 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.updateControl();
       this.checkServerNoMove();
       this.onUpdate_RidingEntity();
-
-      Iterator itr = this.listUnmountReserve.iterator();
-
-      while(itr.hasNext()) {
-         MCH_EntityBaseVehicle.UnmountReserve ft = (MCH_EntityBaseVehicle.UnmountReserve)itr.next();
-         if(ft.entity != null && !ft.entity.isDead) {
-            ft.entity.setPosition(ft.posX, ft.posY, ft.posZ);
-            ft.entity.fallDistance = super.fallDistance;
-         }
-
-         if(ft.cnt > 0) {
-            --ft.cnt;
-         }
-
-         if(ft.cnt == 0) {
-            itr.remove();
-         }
-      }
 
       //TODO: better damage calc?
 
@@ -5990,10 +5977,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(seatInfo instanceof MCH_SeatRackInfo) {
          Vec3 rackUnmountPosition = this.getRackUnmountPosition((MCH_SeatRackInfo)seatInfo);
          if(rackUnmountPosition != null) {
-            entity.setLocationAndAngles(rackUnmountPosition.xCoord, rackUnmountPosition.yCoord, rackUnmountPosition.zCoord,
-                  this.getRotYaw() + seatInfo.fixYaw, seatInfo.fixPitch);
-            this.listUnmountReserve.add(new MCH_EntityBaseVehicle.UnmountReserve(entity, rackUnmountPosition.xCoord,
-                  rackUnmountPosition.yCoord, rackUnmountPosition.zCoord));
+            this.applyUnmountLocation(entity, rackUnmountPosition.xCoord, rackUnmountPosition.yCoord,
+                  rackUnmountPosition.zCoord, this.getRotYaw() + seatInfo.fixYaw, seatInfo.fixPitch);
          } else {
             this.setUnmountPosition(entity, Vec3.createVectorHelper(seatInfo.pos.xCoord, 0.0D, seatInfo.pos.zCoord));
          }
@@ -6649,14 +6634,35 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                v = this.getTransformedPosition(x, 2.0D, pos.zCoord);
             }
 
-            rByEntity.setPosition(v.xCoord, v.yCoord, v.zCoord);
-            this.listUnmountReserve.add(new MCH_EntityBaseVehicle.UnmountReserve(rByEntity, v.xCoord, v.yCoord, v.zCoord));
+            this.applyUnmountPosition(rByEntity, v.xCoord, v.yCoord, v.zCoord);
          }
 
       } else if(rByEntity != null && !super.worldObj.isRemote) {
          this.returnNewUavPilotToStation(rByEntity, "uav_unmount_position");
       }
 
+   }
+
+   /**
+    * Commits MC Heli's final post-detach player exit through the same server movement
+    * handshake used by vanilla teleports. A plain Entity#setPosition here leaves
+    * NetHandlerPlayServer's accepted position at vanilla's provisional dismount exit.
+    */
+   private void applyUnmountPosition(Entity entity, double x, double y, double z) {
+      if(!super.worldObj.isRemote && entity instanceof EntityPlayerMP && entity.ridingEntity == null) {
+         EntityPlayerMP player = (EntityPlayerMP)entity;
+         player.playerNetServerHandler.setPlayerLocation(x, y, z, player.rotationYaw, player.rotationPitch);
+      } else {
+         entity.setPosition(x, y, z);
+      }
+   }
+
+   private void applyUnmountLocation(Entity entity, double x, double y, double z, float yaw, float pitch) {
+      if(!super.worldObj.isRemote && entity instanceof EntityPlayerMP && entity.ridingEntity == null) {
+         ((EntityPlayerMP)entity).playerNetServerHandler.setPlayerLocation(x, y, z, yaw, pitch);
+      } else {
+         entity.setLocationAndAngles(x, y, z, yaw, pitch);
+      }
    }
 
    public boolean unmountEntityFromSeat(Entity entity) {
@@ -6891,12 +6897,15 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                seat.posY = entity.posY = super.posY + v.yCoord;
                seat.posZ = entity.posZ = super.posZ + v.zCoord;
             }
-            if(!(entity instanceof MCH_EntityBaseVehicle)) {
-               MCH_EntityBaseVehicle.UnmountReserve ur = new MCH_EntityBaseVehicle.UnmountReserve(entity, entity.posX, entity.posY, entity.posZ);
-               ur.cnt = 8;
-               this.listUnmountReserve.add(ur);
-            }
+            // Vanilla may choose another position during mountEntity(null). Preserve the rack's
+            // selected exit once here, rather than forcing the detached entity on later ticks.
+            double unmountX = entity.posX;
+            double unmountY = entity.posY;
+            double unmountZ = entity.posZ;
+            float unmountYaw = entity.rotationYaw;
+            float unmountPitch = entity.rotationPitch;
             entity.mountEntity((Entity)null);
+            this.applyUnmountLocation(entity, unmountX, unmountY, unmountZ, unmountYaw, unmountPitch);
             boolean launchedAircraft = entity instanceof MCH_EntityBaseVehicle && this.isLaunchRack(this, info);
             if(entity instanceof MCH_EntityBaseVehicle) {
                ((MCH_EntityBaseVehicle)entity).applyRackLaunch(this, info);
@@ -9324,6 +9333,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    }
 
+   /**
+    * @deprecated Retained for addon compatibility only. MC Heli no longer queues or replays
+    * detached-entity positions.
+    */
+   @Deprecated
    protected class UnmountReserve {
 
       final Entity entity;

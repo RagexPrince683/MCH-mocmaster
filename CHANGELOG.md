@@ -594,3 +594,25 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
 - Replaced the common proxy and vehicle entity's client-only sound-updater type with a common-side
   update contract while retaining the existing client implementation.
 - Audited the common mod entry point and shared packet initialization path for client linkage.
+
+2026-09-14 05:55 — Make custom vehicle exits single authoritative placements
+
+- Stopped populating and replaying the shared post-dismount placement queue that forced former
+  riders back to MC Heli's selected exit position for five to eight subsequent vehicle ticks and
+  copied vehicle fall distance over their independent post-dismount movement state.
+- Preserved normal pilot, passenger, gunner, and rack exit selection; rack releases now retain the
+  selected coordinates across vanilla detachment with one final post-detach placement.
+- Restored immediate ownership of detached player position to normal Minecraft movement and
+  position-history integrations without adding mod-specific compatibility behavior. Existing
+  public reserve types remain as deprecated no-op API surface for addon compatibility.
+
+2026-09-14 07:05 — Synchronize custom exits with vanilla player movement authority
+
+- Traced MC Heli dismounts through `EntityPlayerMP.mountEntity(null)`: vanilla published its
+  provisional safe exit and reset the server movement handshake before MC Heli replaced the
+  player coordinates with a custom exit using plain `setPosition`.
+- Commit the one final MC Heli-selected player exit through `NetHandlerPlayServer#setPlayerLocation`
+  after detachment, keeping its accepted-position baseline and client correction packet on the
+  same coordinates. Client-side and non-player exit placement remains local and single-shot.
+- Applied the shared final-placement path to pilots, passenger seats, gunners, and rack exits.
+  Java compilation and in-game compatibility validation remain to be performed.
