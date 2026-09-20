@@ -1,3 +1,8 @@
+# Fix Throwable Model Registration Compile Failure (PR pending)
+
+- Restored the throwable model-loading loop with a scoped iterator and descriptive throwable-info variable.
+- Renamed the remaining understandable numbered exception variable in `MCH_ClientProxy`.
+
 # Optimize Lazy Model Geometry Loading (PR pending)
 
 - Replaced retained per-face model graphs with group-sized primitive geometry and face-boundary arrays.
