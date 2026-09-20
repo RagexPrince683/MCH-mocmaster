@@ -647,3 +647,11 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
   same coordinates. Client-side and non-player exit placement remains local and single-shot.
 - Applied the shared final-placement path to pilots, passenger seats, gunners, and rack exits.
   Java compilation and in-game compatibility validation remain to be performed.
+2026-09-20 — Persistent vehicle inventory snapshots (PR pending)
+
+- Replaced live per-icon vehicle geometry in inventories and NEI with persistent, schema-versioned
+  PNG snapshots stored under the Minecraft game directory, while retaining live models for held,
+  dropped, and spawned vehicles.
+- Added one-per-frame scheduling, visibility expiry, FPS gating, conservative generation pacing,
+  deduplicated requests, lazy texture loading, and an LRU texture limit with render-thread cleanup.
+- Added client settings and diagnostics for snapshot generation and documented safe cache clearing.
