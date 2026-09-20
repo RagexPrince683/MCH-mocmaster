@@ -207,7 +207,8 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
             if(MCH_WeaponInfoManager.reload()) ++succeeded;
             if(MCH_ItemInfoManager.reload()) ++succeeded;
             if(MCH_ThrowableInfoManager.reload()) ++succeeded;
-            MCH_VehicleItemModelRender.clearSnapshotCache();
+            // Resource reload releases uploaded textures, but valid on-disk snapshots are reusable.
+            MCH_VehicleItemModelRender.resetForReload();
             MCH_ModelManager.clearForReload();
             registerModels();
             boolean hud = false;
@@ -600,6 +601,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
    private static synchronized void finishVehicleModelRegistration(MCH_BaseVehicleInfo info) {
       LOADED_VEHICLE_MODELS.add(info);
+      MCH_VehicleItemModelRender.onVehicleModelAvailable(info);
    }
 
    private void registerCommonPart(String path, MCH_BaseVehicleInfo info) {

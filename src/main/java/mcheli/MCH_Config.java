@@ -502,8 +502,8 @@ public class MCH_Config {
       AutoGenerateVehicleInventorySnapshots = new MCH_ConfigPrm("AutoGenerateVehicleInventorySnapshots", true);
       AutoGenerateVehicleInventorySnapshots.desc = ";Generate missing vehicle icon PNGs gradually while their items remain visible.";
       VehicleSnapshotResolution = new MCH_ConfigPrm("VehicleSnapshotResolution", 128);
-      VehicleSnapshotGenerationInterval = new MCH_ConfigPrm("VehicleSnapshotGenerationInterval", 2000);
-      VehicleSnapshotGenerationInterval.desc = ";Minimum milliseconds between monolithic vehicle snapshot generations.";
+      VehicleSnapshotGenerationInterval = new MCH_ConfigPrm("VehicleSnapshotGenerationInterval", 500);
+      VehicleSnapshotGenerationInterval.desc = ";Baseline milliseconds between vehicle snapshot generations; pacing adapts to render FPS.";
       VehicleSnapshotMinimumFps = new MCH_ConfigPrm("VehicleSnapshotMinimumFps", 45);
       VehicleSnapshotTextureLimit = new MCH_ConfigPrm("VehicleSnapshotTextureLimit", 128);
       VehicleSnapshotChunkBudgetMs = new MCH_ConfigPrm("VehicleSnapshotChunkBudgetMs", 2);

@@ -29,6 +29,7 @@ import net.minecraftforge.client.model.IModelCustom;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTFramebufferObject;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GLContext;
 
 /**
  * Vehicle item renderer. Inventory views use persistent, face-count-independent
@@ -36,9 +37,12 @@ import org.lwjgl.opengl.GL11;
  */
 public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManagerReloadListener {
 
-   private static final int CACHE_SCHEMA = 1;
-   private static final long VISIBLE_REQUEST_LIFETIME_MS = 750L;
-   private static final Map SNAPSHOT_REQUESTS = new LinkedHashMap();
+   private static final int CACHE_SCHEMA = 2;
+   private static final long RETRY_DELAY_MS = 5000L;
+   private static final Map SNAPSHOT_STATES = new LinkedHashMap();
+   private static final LinkedHashMap VISIBLE_REQUESTS = new LinkedHashMap();
+   private static final LinkedHashMap BACKGROUND_REQUESTS = new LinkedHashMap();
+   private static final Map FAILED_RETRY_TIMES = new LinkedHashMap();
    private static final LinkedHashMap LOADED_SNAPSHOTS = new LinkedHashMap(16, 0.75F, true);
    private static long nextGenerationTime;
    private static long completedSnapshots;
@@ -50,6 +54,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
    private static long cacheHits;
    private static long cacheMisses;
    private static long lastDiagnosticTime;
+   private static Boolean framebufferCapability;
 
    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
       MCH_BaseVehicleInfo info = getInfo(item);
@@ -58,15 +63,18 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
       }
 
       if(type == ItemRenderType.INVENTORY) {
-         if(!snapshotsEnabled() || !OpenGlHelper.isFramebufferEnabled()) {
-            return false;
+         if(!snapshotsEnabled()) {
+            mcheli.MCH_ClientProxy.ensureVehicleModel(info);
+            return info.model != null;
          }
          SnapshotTexture snapshot = getSnapshot(info);
          if(snapshot != null) {
             return true;
          }
-         requestSnapshot(info);
-         return false;
+         requestSnapshot(info, true);
+         // Claim inventory rendering while pending so Forge/NEI cannot substitute
+         // the unrelated legacy 2D icon.
+         return true;
       }
 
       mcheli.MCH_ClientProxy.ensureVehicleModel(info);
@@ -88,9 +96,22 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
       }
 
       if(type == ItemRenderType.INVENTORY) {
+         if(!snapshotsEnabled()) {
+            mcheli.MCH_ClientProxy.ensureVehicleModel(info);
+            if(info.model != null) {
+               renderLiveModel(type, info);
+            }
+            return;
+         }
          SnapshotTexture snapshot = getSnapshot(info);
          if(snapshot != null) {
             renderSnapshot(snapshot.location);
+         } else if(!framebufferHardwareSupported() && info.model != null) {
+            // Hardware without FBOs cannot persist a PNG. Retain the original
+            // 3D appearance rather than silently reverting to legacy item art.
+            renderLiveModel(type, info);
+         } else {
+            renderPendingPlaceholder();
          }
          return;
       }
@@ -110,21 +131,26 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
          recentFramesPerSecond = recentFramesPerSecond * 0.9D + instantaneousFps * 0.1D;
       }
       previousFrameTime = now;
-      removeStaleRequests(now);
       reportDiagnostics(now);
-      if(!automaticGenerationEnabled() || SNAPSHOT_REQUESTS.isEmpty() || now < nextGenerationTime) {
+      if(!automaticGenerationEnabled() || queuesAreEmpty() || now < nextGenerationTime) {
          return;
       }
       if(recentFramesPerSecond < minimumGenerationFps()) {
          return;
       }
 
-      SnapshotRequest request = newestVisibleRequest(now);
+      SnapshotRequest request = nextFairRequest();
       if(request == null) {
          return;
       }
-      SNAPSHOT_REQUESTS.remove(request.cacheKey);
-      nextGenerationTime = now + generationIntervalMs();
+      setState(request.cacheKey, SnapshotState.GENERATING);
+      nextGenerationTime = now + adaptiveGenerationIntervalMs();
+      if(!framebufferHardwareSupported()) {
+         mcheli.MCH_ClientProxy.ensureVehicleModel(request.info);
+         setState(request.cacheKey, SnapshotState.FAILED_RETRY_ALLOWED);
+         FAILED_RETRY_TIMES.put(request.cacheKey, Long.valueOf(now + RETRY_DELAY_MS));
+         return;
+      }
       generateSnapshot(request);
    }
 
@@ -135,10 +161,14 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
          textureManager.deleteTexture(((SnapshotTexture)value).location);
       }
       LOADED_SNAPSHOTS.clear();
-      SNAPSHOT_REQUESTS.clear();
+      VISIBLE_REQUESTS.clear();
+      BACKGROUND_REQUESTS.clear();
+      SNAPSHOT_STATES.clear();
+      FAILED_RETRY_TIMES.clear();
       nextGenerationTime = 0L;
       previousFrameTime = 0L;
       recentFramesPerSecond = 60.0D;
+      framebufferCapability = null;
    }
 
    /** Invalidates only the changed vehicle; unrelated persistent PNGs remain. */
@@ -155,12 +185,10 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             loadedIterator.remove();
          }
       }
-      Iterator requestIterator = SNAPSHOT_REQUESTS.keySet().iterator();
-      while(requestIterator.hasNext()) {
-         if(((String)requestIterator.next()).startsWith(prefix)) {
-            requestIterator.remove();
-         }
-      }
+      removeMatchingRequests(VISIBLE_REQUESTS, prefix);
+      removeMatchingRequests(BACKGROUND_REQUESTS, prefix);
+      removeMatchingRequests(SNAPSHOT_STATES, prefix);
+      removeMatchingRequests(FAILED_RETRY_TIMES, prefix);
       File[] files = cacheDirectory().listFiles();
       if(files != null) {
          for(File file : files) {
@@ -188,13 +216,22 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
       String cacheKey = cacheKey(info);
       SnapshotTexture loaded = (SnapshotTexture)LOADED_SNAPSHOTS.get(cacheKey);
       if(loaded != null) {
+         setState(cacheKey, SnapshotState.READY);
          ++cacheHits;
          return loaded;
+      }
+
+      SnapshotState knownState = (SnapshotState)SNAPSHOT_STATES.get(cacheKey);
+      if(knownState != null && knownState != SnapshotState.READY) {
+         return null;
       }
 
       File png = new File(cacheDirectory(), cacheKey + ".png");
       if(!png.isFile()) {
          ++cacheMisses;
+         if(!SNAPSHOT_STATES.containsKey(cacheKey)) {
+            setState(cacheKey, SnapshotState.MISSING);
+         }
          return null;
       }
       try {
@@ -208,6 +245,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                  .getDynamicTextureLocation("mcheli_vehicle_snapshot", texture);
          loaded = new SnapshotTexture(location);
          LOADED_SNAPSHOTS.put(cacheKey, loaded);
+         setState(cacheKey, SnapshotState.READY);
          evictLoadedTextures();
          diagnostic("loaded snapshot textures: %d", LOADED_SNAPSHOTS.size());
          return loaded;
@@ -218,18 +256,42 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
       }
    }
 
-   private static void requestSnapshot(MCH_BaseVehicleInfo info) {
+   private static void requestSnapshot(MCH_BaseVehicleInfo info, boolean visible) {
       if(!automaticGenerationEnabled()) {
          return;
       }
       String cacheKey = cacheKey(info);
-      SnapshotRequest request = (SnapshotRequest)SNAPSHOT_REQUESTS.get(cacheKey);
-      if(request == null) {
-         request = new SnapshotRequest(info, cacheKey);
-         SNAPSHOT_REQUESTS.put(cacheKey, request);
-         diagnostic("queued snapshot: %s", info.name);
+      SnapshotState state = (SnapshotState)SNAPSHOT_STATES.get(cacheKey);
+      if(state == SnapshotState.READY || state == SnapshotState.GENERATING) {
+         return;
       }
-      request.lastVisibleTime = Minecraft.getSystemTime();
+      SnapshotRequest request = findRequest(cacheKey);
+      if(request != null) {
+         if(visible && BACKGROUND_REQUESTS.remove(cacheKey) != null) {
+            VISIBLE_REQUESTS.put(cacheKey, request);
+         }
+         return;
+      }
+      if(state == SnapshotState.FAILED_RETRY_ALLOWED) {
+         Long retryTime = (Long)FAILED_RETRY_TIMES.get(cacheKey);
+         if(retryTime != null && Minecraft.getSystemTime() < retryTime.longValue()) {
+            return;
+         }
+      }
+      request = new SnapshotRequest(info, cacheKey);
+      (visible ? VISIBLE_REQUESTS : BACKGROUND_REQUESTS).put(cacheKey, request);
+      setState(cacheKey, SnapshotState.QUEUED);
+      int queuePosition = visible ? VISIBLE_REQUESTS.size()
+              : VISIBLE_REQUESTS.size() + BACKGROUND_REQUESTS.size();
+      diagnostic("snapshot state=queued vehicle=%s priority=%s position=%d", info.name,
+              visible ? "visible" : "background", queuePosition);
+   }
+
+   /** Called only after body and required part models have loaded successfully. */
+   public static void onVehicleModelAvailable(MCH_BaseVehicleInfo info) {
+      if(info != null && is3DIconEnabled(info) && getSnapshot(info) == null) {
+         requestSnapshot(info, false);
+      }
    }
 
    private static void generateSnapshot(SnapshotRequest request) {
@@ -238,6 +300,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
       File temporary = new File(cacheDirectory(), request.cacheKey + ".tmp");
       File destination = new File(cacheDirectory(), request.cacheKey + ".png");
       try {
+         diagnostic("generation start: vehicle=%s", info.name);
          // A parser is monolithic and cannot be interrupted by the scheduler budget.
          mcheli.MCH_ClientProxy.ensureVehicleModel(info);
          if(info.model == null) {
@@ -248,11 +311,19 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             throw new IOException("no PNG encoder is available");
          }
          Files.move(temporary.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+         SNAPSHOT_STATES.remove(request.cacheKey);
+         SnapshotTexture loaded = getSnapshot(info);
+         if(loaded == null) {
+            throw new IOException("generated PNG could not be uploaded");
+         }
+         setState(request.cacheKey, SnapshotState.READY);
          ++completedSnapshots;
-         diagnostic("completed snapshot: %s", info.name);
+         diagnostic("completed snapshot: vehicle=%s path=%s", info.name, destination.getAbsolutePath());
       } catch(Exception failure) {
          ++failedSnapshots;
          temporary.delete();
+         setState(request.cacheKey, SnapshotState.FAILED_RETRY_ALLOWED);
+         FAILED_RETRY_TIMES.put(request.cacheKey, Long.valueOf(Minecraft.getSystemTime() + RETRY_DELAY_MS));
          logFailure(info, "generation", failure);
       } finally {
          long duration = Minecraft.getSystemTime() - started;
@@ -289,6 +360,9 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
          GL11.glEnable(GL11.GL_TEXTURE_2D);
          GL11.glEnable(GL11.GL_ALPHA_TEST);
          GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+         // Render conservatively first; pixel-bound cropping below supplies stable
+         // framing even when bodyWidth/bodyHeight omit rotors, wings, or barrels.
+         GL11.glScalef(0.55F, 0.55F, 0.55F);
          renderLiveModel(ItemRenderType.INVENTORY, info);
 
          ByteBuffer pixels = BufferUtils.createByteBuffer(resolution * resolution * 4);
@@ -304,7 +378,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                image.setRGB(x, resolution - y - 1, alpha << 24 | red << 16 | green << 8 | blue);
             }
          }
-         return image;
+         return cropAndPad(image);
       } finally {
          GL11.glMatrixMode(GL11.GL_MODELVIEW);
          GL11.glPopMatrix();
@@ -350,27 +424,107 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
       tessellator.draw();
    }
 
-   private static void removeStaleRequests(long now) {
-      Iterator iterator = SNAPSHOT_REQUESTS.entrySet().iterator();
-      while(iterator.hasNext()) {
-         SnapshotRequest request = (SnapshotRequest)((Map.Entry)iterator.next()).getValue();
-         if(now - request.lastVisibleTime > VISIBLE_REQUEST_LIFETIME_MS) {
-            iterator.remove();
-            diagnostic("stale snapshot removed: %s", request.info.name);
-         }
+   private static void renderPendingPlaceholder() {
+      GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+      try {
+         GL11.glDisable(GL11.GL_TEXTURE_2D);
+         GL11.glDisable(GL11.GL_LIGHTING);
+         GL11.glEnable(GL11.GL_BLEND);
+         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+         Tessellator tessellator = Tessellator.instance;
+         tessellator.startDrawingQuads();
+         tessellator.setColorRGBA(65, 92, 118, 210);
+         tessellator.addVertex(-0.42D, -0.28D, 0.0D);
+         tessellator.addVertex(0.18D, -0.42D, 0.0D);
+         tessellator.addVertex(0.43D, -0.08D, 0.0D);
+         tessellator.addVertex(-0.18D, 0.08D, 0.0D);
+         tessellator.setColorRGBA(118, 151, 178, 220);
+         tessellator.addVertex(-0.18D, 0.08D, 0.0D);
+         tessellator.addVertex(0.43D, -0.08D, 0.0D);
+         tessellator.addVertex(0.12D, 0.38D, 0.0D);
+         tessellator.addVertex(-0.42D, 0.26D, 0.0D);
+         tessellator.draw();
+      } finally {
+         GL11.glPopAttrib();
       }
    }
 
-   private static SnapshotRequest newestVisibleRequest(long now) {
-      SnapshotRequest newest = null;
-      for(Object value : SNAPSHOT_REQUESTS.values()) {
-         SnapshotRequest request = (SnapshotRequest)value;
-         if(now - request.lastVisibleTime <= VISIBLE_REQUEST_LIFETIME_MS
-                 && (newest == null || request.lastVisibleTime > newest.lastVisibleTime)) {
-            newest = request;
+   private static BufferedImage cropAndPad(BufferedImage source) {
+      int minX = source.getWidth();
+      int minY = source.getHeight();
+      int maxX = -1;
+      int maxY = -1;
+      for(int y = 0; y < source.getHeight(); ++y) {
+         for(int x = 0; x < source.getWidth(); ++x) {
+            if((source.getRGB(x, y) >>> 24) != 0) {
+               minX = Math.min(minX, x);
+               minY = Math.min(minY, y);
+               maxX = Math.max(maxX, x);
+               maxY = Math.max(maxY, y);
+            }
          }
       }
-      return newest;
+      if(maxX < minX || maxY < minY) {
+         return source;
+      }
+      int resolution = source.getWidth();
+      int padding = Math.max(2, resolution / 16);
+      int available = resolution - padding * 2;
+      int width = maxX - minX + 1;
+      int height = maxY - minY + 1;
+      double scale = Math.min((double)available / width, (double)available / height);
+      int targetWidth = Math.max(1, (int)Math.round(width * scale));
+      int targetHeight = Math.max(1, (int)Math.round(height * scale));
+      BufferedImage output = new BufferedImage(resolution, resolution, BufferedImage.TYPE_INT_ARGB);
+      java.awt.Graphics2D graphics = output.createGraphics();
+      try {
+         graphics.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,
+                 java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+         int targetX = (resolution - targetWidth) / 2;
+         int targetY = (resolution - targetHeight) / 2;
+         graphics.drawImage(source, targetX, targetY, targetX + targetWidth, targetY + targetHeight,
+                 minX, minY, maxX + 1, maxY + 1, null);
+      } finally {
+         graphics.dispose();
+      }
+      return output;
+   }
+
+   private static SnapshotRequest nextFairRequest() {
+      SnapshotRequest request = removeFirst(VISIBLE_REQUESTS);
+      return request != null ? request : removeFirst(BACKGROUND_REQUESTS);
+   }
+
+   private static SnapshotRequest removeFirst(LinkedHashMap requests) {
+      Iterator iterator = requests.entrySet().iterator();
+      if(!iterator.hasNext()) {
+         return null;
+      }
+      SnapshotRequest request = (SnapshotRequest)((Map.Entry)iterator.next()).getValue();
+      iterator.remove();
+      return request;
+   }
+
+   private static SnapshotRequest findRequest(String cacheKey) {
+      SnapshotRequest request = (SnapshotRequest)VISIBLE_REQUESTS.get(cacheKey);
+      return request != null ? request : (SnapshotRequest)BACKGROUND_REQUESTS.get(cacheKey);
+   }
+
+   private static boolean queuesAreEmpty() {
+      return VISIBLE_REQUESTS.isEmpty() && BACKGROUND_REQUESTS.isEmpty();
+   }
+
+   private static void setState(String cacheKey, SnapshotState state) {
+      SNAPSHOT_STATES.put(cacheKey, state);
+   }
+
+   private static void removeMatchingRequests(Map values, String prefix) {
+      Iterator iterator = values.keySet().iterator();
+      while(iterator.hasNext()) {
+         if(((String)iterator.next()).startsWith(prefix)) {
+            iterator.remove();
+         }
+      }
    }
 
    private static void evictLoadedTextures() {
@@ -449,6 +603,30 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
       return Math.max(250, MCH_Config.VehicleSnapshotGenerationInterval.prmInt);
    }
 
+   private static long adaptiveGenerationIntervalMs() {
+      long baseline = generationIntervalMs();
+      if(recentFramesPerSecond >= minimumGenerationFps() + 20.0D) {
+         return Math.max(100L, baseline / 4L);
+      }
+      if(recentFramesPerSecond >= minimumGenerationFps() + 8.0D) {
+         return Math.max(200L, baseline / 2L);
+      }
+      return Math.max(500L, baseline);
+   }
+
+   private static boolean framebufferHardwareSupported() {
+      if(framebufferCapability != null) {
+         return framebufferCapability.booleanValue();
+      }
+      boolean supported = OpenGlHelper.framebufferSupported
+              || GLContext.getCapabilities().GL_ARB_framebuffer_object
+              || GLContext.getCapabilities().GL_EXT_framebuffer_object;
+      framebufferCapability = Boolean.valueOf(supported);
+      diagnostic("framebuffer capability: supported=%s vanillaEnabled=%s", supported,
+              OpenGlHelper.isFramebufferEnabled());
+      return supported;
+   }
+
    private static boolean diagnosticsEnabled() {
       return MCH_Config.DebugVehicleInventorySnapshots != null
               && MCH_Config.DebugVehicleInventorySnapshots.prmBool;
@@ -467,8 +645,8 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
       lastDiagnosticTime = now;
       long generations = completedSnapshots + failedSnapshots;
       long average = totalGenerationTime / Math.max(1L, generations);
-      MCH_Lib.Log("Vehicle snapshot diagnostics: hits=%d misses=%d queued=%d completed=%d failures=%d loaded=%d average=%dms worst=%dms",
-              cacheHits, cacheMisses, SNAPSHOT_REQUESTS.size(), completedSnapshots, failedSnapshots,
+      MCH_Lib.Log("Vehicle snapshot diagnostics: hits=%d misses=%d visible=%d background=%d completed=%d failures=%d loaded=%d average=%dms worst=%dms",
+              cacheHits, cacheMisses, VISIBLE_REQUESTS.size(), BACKGROUND_REQUESTS.size(), completedSnapshots, failedSnapshots,
               LOADED_SNAPSHOTS.size(), average, worstGenerationTime);
    }
 
@@ -515,12 +693,19 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
    private static final class SnapshotRequest {
       private final MCH_BaseVehicleInfo info;
       private final String cacheKey;
-      private long lastVisibleTime;
 
       private SnapshotRequest(MCH_BaseVehicleInfo info, String cacheKey) {
          this.info = info;
          this.cacheKey = cacheKey;
       }
+   }
+
+   private enum SnapshotState {
+      MISSING,
+      QUEUED,
+      GENERATING,
+      READY,
+      FAILED_RETRY_ALLOWED
    }
 
    private static final class SnapshotTexture {

@@ -103,7 +103,13 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `Ship3DItemIconScale` | `1.0` | Global scale multiplier for ship 3D item icons. |
 | `Tank3DItemIconScale` | `1.0` | Global scale multiplier for tank 3D item icons. |
 | `Turret3DItemIconScale` | `1.0` | Global scale multiplier for turret/static vehicle 3D item icons. |
-| 3D item icon rendering | n/a | Vehicle item models are queued and cached client-side in chunked OpenGL display lists after first render, preventing large creative tabs from compiling every visible model or full vehicle mesh in the same frame while keeping the same config toggles. |
+| `EnableVehicleInventorySnapshots` | `true` | Uses persistent PNG captures of the original 3D model for inventory and NEI icons. |
+| `AutoGenerateVehicleInventorySnapshots` | `true` | Generates missing captures on the render thread with visible items ahead of background work. |
+| `VehicleSnapshotResolution` | `128` | Width and height of generated transparent PNG icons. |
+| `VehicleSnapshotGenerationInterval` | `500` | Baseline generation interval in milliseconds; generation accelerates only while FPS is safely above the configured minimum. |
+| `VehicleSnapshotMinimumFps` | `45` | Pauses snapshot generation below this measured render rate. |
+| `VehicleSnapshotTextureLimit` | `128` | Maximum uploaded snapshot textures retained in the client LRU; evicted PNGs remain on disk. |
+| `DebugVehicleInventorySnapshots` | `false` | Enables bounded snapshot state, queue, cache, capability, failure, and timing diagnostics. |
 | `HideKeybind` | `false` | Hides keybind display/help where implemented. |
 | `RenderDistanceWeight` | `1000.0` | Render-distance weight for mod rendering. |
 | `EnableAircraftLODRender` | `true` | Enables client-only far-distance model displays for aircraft, tanks, turrets, and ships. |
@@ -388,14 +394,15 @@ the pilot seat, press it to ask the server to lock or unlock vehicle entry.
 The server, not the client key binding, decides whether the request is allowed.
 # Vehicle inventory snapshot icons
 
-Vehicle inventory and NEI icons use persistent PNG snapshots by default. Missing snapshots show the
-normal two-dimensional item icon until generation completes; held and dropped items still use live
+Vehicle inventory and NEI icons use persistent PNG snapshots by default. Missing snapshots show a
+shared three-dimensional snapshot placeholder until fair, FPS-paced generation completes; they do
+not fall back to the unrelated legacy item art. Held and dropped items still use live
 three-dimensional models. `EnableVehicleInventorySnapshots` controls the snapshot path and
 `AutoGenerateVehicleInventorySnapshots` controls background generation. Resolution, generation
 interval, minimum generation FPS, loaded texture limit, and diagnostics are configurable through the
 corresponding `VehicleSnapshot*` and `DebugVehicleInventorySnapshots` settings.
 
-Snapshots are stored in `mcheli/cache/vehicle-icons-v1` under the Minecraft game directory. Delete
-that directory while the game is stopped to rebuild every icon. `/mcheli reload` invalidates a
-changed vehicle's snapshot when a targeted definition reload is used; resource reload releases GPU
-textures and lazily reloads the valid PNGs.
+Snapshots are stored in `mcheli/cache/vehicle-icons-v2` under the Minecraft game directory. Delete
+that directory while the game is stopped, or use the snapshot cache clear action, to rebuild every
+icon. A targeted vehicle reload invalidates only that appearance; an ordinary resource reload
+releases GPU textures and lazily reloads the valid PNGs.
