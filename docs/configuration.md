@@ -386,3 +386,16 @@ Hold-freelook is hold-to-orbit: mouse input changes raw orbit yaw/pitch targets,
 `KeyVehicleLock` defaults to LWJGL key code `24` (**O**). While directly riding
 the pilot seat, press it to ask the server to lock or unlock vehicle entry.
 The server, not the client key binding, decides whether the request is allowed.
+# Vehicle inventory snapshot icons
+
+Vehicle inventory and NEI icons use persistent PNG snapshots by default. Missing snapshots show the
+normal two-dimensional item icon until generation completes; held and dropped items still use live
+three-dimensional models. `EnableVehicleInventorySnapshots` controls the snapshot path and
+`AutoGenerateVehicleInventorySnapshots` controls background generation. Resolution, generation
+interval, minimum generation FPS, loaded texture limit, and diagnostics are configurable through the
+corresponding `VehicleSnapshot*` and `DebugVehicleInventorySnapshots` settings.
+
+Snapshots are stored in `mcheli/cache/vehicle-icons-v1` under the Minecraft game directory. Delete
+that directory while the game is stopped to rebuild every icon. `/mcheli reload` invalidates a
+changed vehicle's snapshot when a targeted definition reload is used; resource reload releases GPU
+textures and lazily reloads the valid PNGs.

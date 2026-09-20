@@ -141,6 +141,14 @@ public class MCH_Config {
    public static MCH_ConfigPrm Ship3DItemIconScale;
    public static MCH_ConfigPrm Tank3DItemIconScale;
    public static MCH_ConfigPrm Turret3DItemIconScale;
+   public static MCH_ConfigPrm EnableVehicleInventorySnapshots;
+   public static MCH_ConfigPrm AutoGenerateVehicleInventorySnapshots;
+   public static MCH_ConfigPrm VehicleSnapshotResolution;
+   public static MCH_ConfigPrm VehicleSnapshotGenerationInterval;
+   public static MCH_ConfigPrm VehicleSnapshotMinimumFps;
+   public static MCH_ConfigPrm VehicleSnapshotTextureLimit;
+   public static MCH_ConfigPrm VehicleSnapshotChunkBudgetMs;
+   public static MCH_ConfigPrm DebugVehicleInventorySnapshots;
    public static MCH_ConfigPrm RenderDistanceWeight;
    public static MCH_ConfigPrm EnableAircraftLODRender;
    public static MCH_ConfigPrm AircraftLODStartDistance;
@@ -489,6 +497,19 @@ public class MCH_Config {
       DisableItemRender.desc = ";DisableItemRender = 0 ~ 3 (1 = Recommended)";
       Override3DItemIcon = new MCH_ConfigPrm("Override3DItemIcon", false);
       Override3DItemIcon.desc = ";Global 3D vehicle item icon override. true = force 3D icons off, false = allow per-vehicle 3D icon settings.";
+      EnableVehicleInventorySnapshots = new MCH_ConfigPrm("EnableVehicleInventorySnapshots", true);
+      EnableVehicleInventorySnapshots.desc = ";Use persistent PNGs instead of live models for 3D vehicle icons in inventories and NEI.";
+      AutoGenerateVehicleInventorySnapshots = new MCH_ConfigPrm("AutoGenerateVehicleInventorySnapshots", true);
+      AutoGenerateVehicleInventorySnapshots.desc = ";Generate missing vehicle icon PNGs gradually while their items remain visible.";
+      VehicleSnapshotResolution = new MCH_ConfigPrm("VehicleSnapshotResolution", 128);
+      VehicleSnapshotGenerationInterval = new MCH_ConfigPrm("VehicleSnapshotGenerationInterval", 2000);
+      VehicleSnapshotGenerationInterval.desc = ";Minimum milliseconds between monolithic vehicle snapshot generations.";
+      VehicleSnapshotMinimumFps = new MCH_ConfigPrm("VehicleSnapshotMinimumFps", 45);
+      VehicleSnapshotTextureLimit = new MCH_ConfigPrm("VehicleSnapshotTextureLimit", 128);
+      VehicleSnapshotChunkBudgetMs = new MCH_ConfigPrm("VehicleSnapshotChunkBudgetMs", 2);
+      VehicleSnapshotChunkBudgetMs.desc = ";Strict per-frame budget for interruptible snapshot preparation; model parsing itself cannot be interrupted.";
+      DebugVehicleInventorySnapshots = new MCH_ConfigPrm("DebugVehicleInventorySnapshots", false);
+      DebugVehicleInventorySnapshots.desc = ";Log bounded vehicle snapshot cache, queue, failure, eviction, and timing diagnostics.";
       Heli3DItemIconScale = new MCH_ConfigPrm("Heli3DItemIconScale", 0.3D);
       Heli3DItemIconScale.desc = ";Global scale multiplier for helicopter 3D item icons.";
       Plane3DItemIconScale = new MCH_ConfigPrm("Plane3DItemIconScale", 0.1D);
@@ -867,6 +888,14 @@ public class MCH_Config {
               EnableHandheld,
               DisableItemRender,
               Override3DItemIcon,
+              EnableVehicleInventorySnapshots,
+              AutoGenerateVehicleInventorySnapshots,
+              VehicleSnapshotResolution,
+              VehicleSnapshotGenerationInterval,
+              VehicleSnapshotMinimumFps,
+              VehicleSnapshotTextureLimit,
+              VehicleSnapshotChunkBudgetMs,
+              DebugVehicleInventorySnapshots,
               Heli3DItemIconScale,
               Plane3DItemIconScale,
               Ship3DItemIconScale,

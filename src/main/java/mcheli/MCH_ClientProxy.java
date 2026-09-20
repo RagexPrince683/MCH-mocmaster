@@ -166,6 +166,10 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
    private void registerVehicleItemRenderers() {
       MCH_VehicleItemModelRender renderer = new MCH_VehicleItemModelRender();
+      if(Minecraft.getMinecraft().getResourceManager() instanceof net.minecraft.client.resources.IReloadableResourceManager) {
+         ((net.minecraft.client.resources.IReloadableResourceManager)Minecraft.getMinecraft().getResourceManager())
+                 .registerReloadListener(renderer);
+      }
       registerVehicleItemRenderers(MCH_HeliInfoManager.map.values().iterator(), renderer);
       registerVehicleItemRenderers(MCP_PlaneInfoManager.map.values().iterator(), renderer);
       registerVehicleItemRenderers(MCH_ShipInfoManager.map.values().iterator(), renderer);
@@ -203,7 +207,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
             if(MCH_WeaponInfoManager.reload()) ++succeeded;
             if(MCH_ItemInfoManager.reload()) ++succeeded;
             if(MCH_ThrowableInfoManager.reload()) ++succeeded;
-            MCH_VehicleItemModelRender.resetForReload();
+            MCH_VehicleItemModelRender.clearSnapshotCache();
             MCH_ModelManager.clearForReload();
             registerModels();
             boolean hud = false;
