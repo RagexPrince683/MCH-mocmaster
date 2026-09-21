@@ -716,19 +716,22 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
   established FML render-tick handler. Offline Java compilation passed after this correction; the
   corrected MC Heli icon transition and cache reuse still require another in-game verification.
 
-2026-09-20 22:16 — Stage vehicle icon capture and preserve disk writes
+2026-09-21 01:22 — Bound vehicle icon preparation and finalize disk writes
 
-- Replaced the single-frame cache-miss path with explicit resolve, prepare, render, readback,
-  pixel-processing, upload, and disk-submission states. Source hashing, cache lookup/decoding, crop,
-  and PNG encoding now run on bounded workers; OpenGL work stays on the FML render thread and only
-  one render-thread stage advances per frame.
-- Reused the vehicle model already held by its info object instead of forcibly reparsing it for every
-  icon miss. Texture-repair preparation remains a separate render-thread stage, while canonical
-  orientation, scale, overlay, authored-sprite fallback, and live equipped/entity rendering remain
-  unchanged.
-- Kept fingerprinted writes alive across resource reload and added a normal-shutdown drain. Cache
-  files still use sibling temporary files and atomic replacement; invalid 128×128 PNGs are deleted
-  and regenerated. Diagnostics now report the active stage, per-stage timing, corruption, queue
-  depth/high-water marks, and write failures.
-- Offline `compileJava` passed. Runtime hitch reduction and restart cache hits still require in-game
-  verification.
+Player-facing
+
+- Vehicle inventory icons continue to use their authored sprite while a first icon is prepared, then
+  switch to the captured model image. Complex OBJ/MQO buffer uploads are spread across frames and
+  completed captures remain spaced by at least 350 ms to reduce NEI inventory stalls.
+- Generated icons use compact cache filenames under `cache/mcheli/icons/`; unchanged disk hits upload
+  the saved PNG directly without model preparation, framebuffer capture, or readback.
+
+Developer/backend
+
+- Reused the vehicle info's loaded model, ran texture repair before incremental VBO preparation, and
+  capped preparation at 8,192 vertices per render frame using the existing retained group geometry.
+- Made PNG completion explicit: create the cache parent, encode and verify a sibling `.tmp`, attempt
+  atomic replacement with a normal replace fallback, verify the final file, preserve queued writes
+  across resource reload, and drain the non-daemon writer for a bounded period at shutdown.
+- Replaced the earlier snapshot diagnostic name with the disabled-by-default
+  `DebugVehicleIconCache` lifecycle, timing, cache, VBO, write, and queue diagnostics.

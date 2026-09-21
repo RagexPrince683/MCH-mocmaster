@@ -98,12 +98,12 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `EnableHandheld` | `true` | Enables crafting recipes for hand-held weapons and their ammunition (`Stinger`, `Javelin`, and `RPG`). Set to `false` to prevent those recipes from registering. |
 | `DisableItemRender` | `1` | Valid range noted in source: `0 ~ 3`; `1` recommended. |
 | `Override3DItemIcon` | `false` | Global 3D vehicle item icon override. `true` forces 3D item icons off; `false` allows per-vehicle `Enable3DItemIcon` settings. |
-| `Heli3DItemIconScale` | `1.0` | Global scale multiplier for helicopter 3D item icons. |
-| `Plane3DItemIconScale` | `1.0` | Global scale multiplier for plane 3D item icons. |
-| `Ship3DItemIconScale` | `1.0` | Global scale multiplier for ship 3D item icons. |
-| `Tank3DItemIconScale` | `1.0` | Global scale multiplier for tank 3D item icons. |
-| `Turret3DItemIconScale` | `1.0` | Global scale multiplier for turret/static vehicle 3D item icons. |
-| `DebugVehicleInventorySnapshots` | `false` | Logs aggregate prebaked/disk hits, misses, requests, deduplication, captures, failures, PNG I/O, timing, and queue depth for model-derived icons. |
+| `Heli3DItemIconScale` | `0.3` | Global scale multiplier for helicopter 3D item icons. |
+| `Plane3DItemIconScale` | `0.1` | Global scale multiplier for plane 3D item icons. |
+| `Ship3DItemIconScale` | `0.1` | Global scale multiplier for ship 3D item icons. |
+| `Tank3DItemIconScale` | `0.3` | Global scale multiplier for tank 3D item icons. |
+| `Turret3DItemIconScale` | `0.3` | Global scale multiplier for turret/static vehicle 3D item icons. |
+| `DebugVehicleIconCache` | `false` | Logs concise lifecycle/write events plus aggregate cache, VBO preparation, capture, timing, failure, and queue diagnostics. |
 | `HideKeybind` | `false` | Hides keybind display/help where implemented. |
 | `RenderDistanceWeight` | `1000.0` | Render-distance weight for mod rendering. |
 | `EnableAircraftLODRender` | `true` | Enables client-only far-distance model displays for aircraft, tanks, turrets, and ships. |
@@ -396,22 +396,26 @@ normalization, per-type scale, and `itemIconScaleFactor`.
 
 Inventory, creative-tab, and NEI callbacks only request work or draw the ready textured quad. While
 resolution or capture is pending—or after a session failure—Forge uses the normal authored item
-sprite. Requests are deduplicated in a bounded queue and serviced by the FML render-tick handler. A
-cache miss advances through separate resolve, prepare, model-render, pixel-readback, pixel-processing,
-texture-upload, and disk-submission stages, with no more than one render-thread stage advanced per
-frame. Source hashing, cache reads, transparent crop/padding, and PNG compression run on bounded
-background workers; only model/texture preparation, OpenGL rendering/readback, and dynamic-texture
-upload remain on the render thread. Equipped, dropped, and world/entity rendering remain live.
+sprite. Requests are deduplicated in a bounded queue and serviced by the FML render-tick handler. On
+a cache miss, MC Heli reuses the model already held by the vehicle info. Texture repair runs before
+buffer preparation so any invalidated OBJ/MQO groups are rebuilt incrementally, with at most 8,192
+vertices uploaded per render frame. The final framebuffer captures are paced at least 350 ms apart.
+Source hashing, cache reads, transparent crop/padding, and PNG compression run on bounded background
+workers; OpenGL preparation, rendering/readback, and dynamic-texture upload remain on the render
+thread. Equipped, dropped, and world/entity rendering remain live.
 
 Content hashes for the definition, model, base texture, optional overlay, renderer schema, dimensions,
-scales, and texture-repair settings form the cache name. Resource reload releases dynamic textures and
-reevaluates these hashes without deleting valid disk PNGs or discarding already-queued immutable
-writes. Disk saves use sibling temporary files plus atomic replacement and are drained during normal
-JVM shutdown; an invalid PNG is removed and regenerated. Start a development client with
+scales, and texture-repair settings form the compact cache name. Resource reload releases dynamic
+textures and reevaluates these hashes without deleting valid disk PNGs or discarding already-queued
+immutable writes. Disk saves encode and verify a sibling `.tmp` file, replace the final PNG with a
+non-atomic fallback where required, and verify the final file before recording success. Submitted
+writes use a non-daemon worker with a bounded shutdown drain; an invalid PNG is removed and
+regenerated. Start a development client with
 `-Dmcheli.bakeIcons=true` to walk registered vehicle items through this same generator and export
 ship-ready files below `cache/mcheli/icons/export/assets/mcheli/textures/icons/`. Set
-`DebugVehicleInventorySnapshots = true` for periodic per-stage timing, cache, corruption, failure,
-and queue-depth diagnostics.
+`DebugVehicleIconCache = true` for concise lifecycle/write events plus periodic VBO, capture, cache,
+failure, timing, and queue-depth diagnostics. The option is disabled by default.
+
 ## Technology tiers
 
 MC Heli's independent progression settings are written to `config/mcheli_tech.cfg`. The system is disabled by default so existing worlds and packs retain their former behavior. `enabled` turns enforcement on, `operatorBypass` and `creativeBypass` control non-progression access, and `tierMaximumYears` defines eleven strictly increasing inclusive year ceilings for tiers `0.0` through `5.0`.

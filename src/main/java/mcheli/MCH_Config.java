@@ -141,7 +141,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm Ship3DItemIconScale;
    public static MCH_ConfigPrm Tank3DItemIconScale;
    public static MCH_ConfigPrm Turret3DItemIconScale;
-   public static MCH_ConfigPrm DebugVehicleInventorySnapshots;
+   public static MCH_ConfigPrm DebugVehicleIconCache;
    public static MCH_ConfigPrm RenderDistanceWeight;
    public static MCH_ConfigPrm EnableAircraftLODRender;
    public static MCH_ConfigPrm AircraftLODStartDistance;
@@ -490,8 +490,8 @@ public class MCH_Config {
       DisableItemRender.desc = ";DisableItemRender = 0 ~ 3 (1 = Recommended)";
       Override3DItemIcon = new MCH_ConfigPrm("Override3DItemIcon", false);
       Override3DItemIcon.desc = ";Global 3D vehicle item icon override. true = force 3D icons off, false = allow per-vehicle 3D icon settings.";
-      DebugVehicleInventorySnapshots = new MCH_ConfigPrm("DebugVehicleInventorySnapshots", false);
-      DebugVehicleInventorySnapshots.desc = ";Log aggregate model-derived PNG icon cache, capture, load, writer and queue diagnostics.";
+      DebugVehicleIconCache = new MCH_ConfigPrm("DebugVehicleIconCache", false);
+      DebugVehicleIconCache.desc = ";Log model-derived icon cache lifecycle events, stage timings, writes, and queue diagnostics.";
       Heli3DItemIconScale = new MCH_ConfigPrm("Heli3DItemIconScale", 0.3D);
       Heli3DItemIconScale.desc = ";Global scale multiplier for helicopter 3D item icons.";
       Plane3DItemIconScale = new MCH_ConfigPrm("Plane3DItemIconScale", 0.1D);
@@ -870,7 +870,7 @@ public class MCH_Config {
               EnableHandheld,
               DisableItemRender,
               Override3DItemIcon,
-              DebugVehicleInventorySnapshots,
+              DebugVehicleIconCache,
               Heli3DItemIconScale,
               Plane3DItemIconScale,
               Ship3DItemIconScale,

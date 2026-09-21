@@ -30,10 +30,12 @@ import mcheli.MCH_ConfigPrm;
 /** Model capture produces persistent pixels; ready inventory icons never draw geometry. */
 public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManagerReloadListener {
 
-    public static final int ICON_CACHE_VERSION = 2;
+    public static final int ICON_CACHE_VERSION = 3;
     private static final int SIZE = 128;
     private static final int MAX_REQUESTS = 256;
+    private static final int VBO_VERTICES_PER_FRAME = 8192;
     private static final long BAKE_INTERVAL_MS = 350L;
+    private static final long CAPTURE_INTERVAL_MS = 350L;
     private static final Map<Object, Entry> ENTRIES = new IdentityHashMap<Object, Entry>();
     private static final LinkedHashMap<Object, Entry> QUEUE = new LinkedHashMap<Object, Entry>();
     private static final java.util.concurrent.ArrayBlockingQueue<Runnable> COMPLETIONS =
@@ -42,14 +44,15 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     private static final java.util.concurrent.atomic.AtomicLong writeFailures = new java.util.concurrent.atomic.AtomicLong();
     private static final java.util.concurrent.atomic.AtomicLong writeNanos = new java.util.concurrent.atomic.AtomicLong();
     private static final java.util.concurrent.atomic.AtomicLong corruptFiles = new java.util.concurrent.atomic.AtomicLong();
-    private static final java.util.concurrent.ThreadPoolExecutor WORKER = executor("mcheli icon resolver", 8);
-    private static final java.util.concurrent.ThreadPoolExecutor WRITER = executor("mcheli icon PNG writer", 32);
+    private static final java.util.concurrent.ThreadPoolExecutor WORKER = executor("mcheli icon resolver", 8, true);
+    private static final java.util.concurrent.ThreadPoolExecutor WRITER = executor("mcheli icon PNG writer", 32, false);
     private static Framebuffer framebuffer;
     private static final ByteBuffer PIXELS = BufferUtils.createByteBuffer(SIZE * SIZE * 4);
     private static Entry active;
     private static long epoch;
-    private static long nextBakeWork, lastReport, requests, duplicates, deferred, prebaked, hits, misses, captures, failures, loads;
-    private static long resolveNanos, prepareNanos, renderNanos, readbackNanos, processNanos, uploadNanos;
+    private static long nextBakeWork, nextCaptureWork, lastReport, requests, duplicates, deferred, prebaked, hits, misses, captures, failures, loads;
+    private static long resolveNanos, modelNanos, vboNanos, renderNanos, readbackNanos, processNanos, uploadNanos;
+    private static long vboGroupsPrepared;
     private static int queueHighWater, workerHighWater, writerHighWater;
     private static java.util.Iterator bakeItems;
     private static boolean bakeStarted;
@@ -64,12 +67,12 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         }, "mcheli icon cache shutdown"));
     }
 
-    private static java.util.concurrent.ThreadPoolExecutor executor(final String name, int capacity) {
-        return new java.util.concurrent.ThreadPoolExecutor(1, 1, 0L, java.util.concurrent.TimeUnit.MILLISECONDS,
+    private static java.util.concurrent.ThreadPoolExecutor executor(final String name, int capacity, final boolean daemon) {
+        return new java.util.concurrent.ThreadPoolExecutor(0, 1, 5L, java.util.concurrent.TimeUnit.SECONDS,
                 new java.util.concurrent.ArrayBlockingQueue<Runnable>(capacity), new java.util.concurrent.ThreadFactory() {
             public Thread newThread(Runnable job) {
                 Thread thread = new Thread(job, name);
-                thread.setDaemon(true);
+                thread.setDaemon(daemon);
                 return thread;
             }
         }, new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
@@ -134,10 +137,12 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         try {
             switch(active.state) {
                 case PREPARE_CAPTURE: timedPrepare(active); break;
-                case RENDER_MODEL: timedRender(active); break;
+                case PREPARE_MODEL_BUFFERS: timedVbo(active); break;
+                case RENDER_MODEL:
+                    if(now >= nextCaptureWork) timedRender(active);
+                    break;
                 case READBACK: timedReadback(active); break;
                 case UPLOAD_TEXTURE: timedUpload(active); break;
-                case QUEUE_DISK_WRITE: finish(active); break;
                 default: break;
             }
         } catch(Exception failure) {
@@ -146,7 +151,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     }
 
     private static void submitResolve(final Entry entry) {
-        entry.state = State.RESOLVE_ASSETS;
+        transition(entry, State.RESOLVE_ASSETS, "lookup-queued");
         final File cacheDirectory = directory();
         try {
             WORKER.execute(new Runnable() {
@@ -160,17 +165,19 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                             public void run() {
                                 if(!current(entry)) return;
                                 entry.key = key;
+                                entry.cacheFile = new File(cacheDirectory, key + ".png");
                                 resolveNanos += elapsed;
                                 corruptFiles.addAndGet(result.corrupt);
                                 if(result.image != null) {
                                     entry.image = result.image;
                                     if(result.source == LoadSource.PREBAKED) ++prebaked; else ++hits;
                                     ++loads;
-                                    entry.state = State.UPLOAD_TEXTURE;
+                                    transition(entry, State.UPLOAD_TEXTURE,
+                                            result.source == LoadSource.PREBAKED ? "prebaked-hit" : "disk-hit");
                                 } else {
                                     ++misses;
                                     entry.persist = true;
-                                    entry.state = State.PREPARE_CAPTURE;
+                                    transition(entry, State.PREPARE_CAPTURE, result.reason);
                                 }
                             }
                         });
@@ -200,7 +207,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             }
         } catch(IOException invalid) { ++corrupt; }
         finally { if(stream != null) try { stream.close(); } catch(IOException ignored) {} }
-        if(image != null) return new ResolveResult(image, LoadSource.PREBAKED, corrupt);
+        if(image != null) return new ResolveResult(image, LoadSource.PREBAKED, corrupt, "prebaked-hit");
 
         File file = new File(cacheDirectory, key + ".png");
         if(file.isFile()) {
@@ -211,18 +218,57 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                 try { Files.deleteIfExists(file.toPath()); } catch(IOException ignored) {}
             }
         }
-        return new ResolveResult(image, image != null ? LoadSource.DISK : LoadSource.NONE, corrupt);
+        return new ResolveResult(image, image != null ? LoadSource.DISK : LoadSource.NONE, corrupt,
+                image != null ? "disk-hit" : corrupt > 0 ? "invalid-cache" : "disk-miss");
     }
 
     private static void timedPrepare(Entry entry) throws IOException {
         long started = System.nanoTime();
-        try { prepare(entry); entry.state = State.RENDER_MODEL; }
-        finally { prepareNanos += System.nanoTime() - started; }
+        try {
+            prepare(entry);
+            entry.modelGroups = groups(entry.captureModel);
+            transition(entry, State.PREPARE_MODEL_BUFFERS, "model-and-texture-ready");
+        }
+        finally { modelNanos += System.nanoTime() - started; }
+    }
+
+    private static void timedVbo(Entry entry) {
+        long started = System.nanoTime();
+        try {
+            int budget = VBO_VERTICES_PER_FRAME;
+            while(budget > 0) {
+                if(entry.activeGroup == null) {
+                    if(entry.modelGroups == null || !entry.modelGroups.hasNext()) {
+                        transition(entry, State.RENDER_MODEL, "model-buffers-ready");
+                        return;
+                    }
+                    entry.activeGroup = (mcheli.wrapper.modelloader.W_GroupObject)entry.modelGroups.next();
+                }
+                int pending = entry.activeGroup.getPendingVboVertices();
+                if(pending <= 0) {
+                    entry.activeGroup = null;
+                    continue;
+                }
+                int allowed = Math.min(budget, pending);
+                boolean ready = entry.activeGroup.prepareVboChunk(allowed);
+                budget -= allowed;
+                if(ready) {
+                    ++vboGroupsPrepared;
+                    entry.activeGroup = null;
+                }
+                else break;
+            }
+        } finally { vboNanos += System.nanoTime() - started; }
     }
 
     private static void timedRender(Entry entry) throws IOException {
         long started = System.nanoTime();
-        try { renderCapture(entry); ++captures; entry.state = State.READBACK; }
+        try {
+            renderCapture(entry);
+            ++captures;
+            nextCaptureWork = Minecraft.getSystemTime() + CAPTURE_INTERVAL_MS;
+            transition(entry, State.READBACK, "capture-complete");
+        }
         finally { renderNanos += System.nanoTime() - started; }
     }
 
@@ -231,7 +277,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         final byte[] pixels;
         try { pixels = readback(); }
         finally { readbackNanos += System.nanoTime() - started; }
-        entry.state = State.PROCESS_PIXELS;
+        transition(entry, State.PROCESS_PIXELS, "readback-complete");
         try {
             WORKER.execute(new Runnable() {
                 public void run() {
@@ -244,7 +290,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                                 if(!current(entry)) return;
                                 processNanos += elapsed;
                                 entry.image = image;
-                                entry.state = State.UPLOAD_TEXTURE;
+                                transition(entry, State.UPLOAD_TEXTURE, "pixels-ready");
                             }
                         });
                     } catch(final Exception failure) {
@@ -265,16 +311,12 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         try {
             entry.texture = Minecraft.getMinecraft().getTextureManager()
                     .getDynamicTextureLocation("mcheli_inventory_icon", new DynamicTexture(entry.image));
-            entry.state = State.QUEUE_DISK_WRITE;
+            if(entry.persist) save(entry, entry.image, entry.cacheFile);
+            if(Boolean.getBoolean("mcheli.bakeIcons")) save(entry, entry.image, exportFile(entry.key));
+            entry.image = null;
+            transition(entry, State.READY, entry.persist ? "generated" : "cache-loaded");
+            if(active == entry) active = null;
         } finally { uploadNanos += System.nanoTime() - started; }
-    }
-
-    private static void finish(Entry entry) {
-        if(entry.persist) save(entry.image, new File(directory(), entry.key + ".png"));
-        if(Boolean.getBoolean("mcheli.bakeIcons")) save(entry.image, exportFile(entry.key));
-        entry.image = null;
-        entry.state = State.READY;
-        if(active == entry) active = null;
     }
 
     private static void complete(Runnable completion) {
@@ -291,7 +333,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         entry.captureModel = null;
         entry.captureTexture = null;
         entry.image = null;
-        entry.state = State.FAILED;
+        transition(entry, State.FAILED, failure.getClass().getSimpleName() + ":" + failure.getMessage());
         ++failures;
         if(active == entry) active = null;
         System.err.println("[mcheli icons] Failed at " + stage + " for "
@@ -302,7 +344,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         return image != null && image.getWidth() == SIZE && image.getHeight() == SIZE ? image : null;
     }
 
-    private static void save(final BufferedImage image, final File destination) {
+    private static void save(final Entry entry, final BufferedImage image, final File destination) {
         try {
             WRITER.execute(new Runnable() {
                 public void run() {
@@ -311,17 +353,29 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                     try {
                         File parent = destination.getParentFile();
                         if(!parent.isDirectory() && !parent.mkdirs()) throw new IOException("Cannot create " + parent);
-                        temporary = File.createTempFile("icon-", ".tmp", parent);
+                        temporary = new File(destination.getPath() + ".tmp");
                         if(!ImageIO.write(image, "png", temporary)) throw new IOException("PNG encoder unavailable");
+                        if(!temporary.isFile() || temporary.length() <= 0L)
+                            throw new IOException("PNG encoder produced no data");
                         try {
                             Files.move(temporary.toPath(), destination.toPath(),
                                     StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-                        } catch(java.nio.file.AtomicMoveNotSupportedException unsupported) {
-                            Files.move(temporary.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        } catch(IOException atomicFailure) {
+                            try {
+                                Files.move(temporary.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            } catch(IOException fallbackFailure) {
+                                fallbackFailure.addSuppressed(atomicFailure);
+                                throw fallbackFailure;
+                            }
                         }
+                        if(!destination.isFile() || destination.length() <= 0L)
+                            throw new IOException("Final PNG is missing or empty");
                         writes.incrementAndGet();
+                        cacheEvent(entry, "write=OK path=" + destination.getAbsolutePath());
                     } catch(Exception failure) {
                         writeFailures.incrementAndGet();
+                        cacheEvent(entry, "write=FAILED path=" + destination.getAbsolutePath()
+                                + " reason=" + failure.getClass().getSimpleName() + ":" + failure.getMessage());
                     } finally {
                         writeNanos.addAndGet(System.nanoTime() - started);
                         if(temporary != null) temporary.delete();
@@ -331,6 +385,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             writerHighWater = Math.max(writerHighWater, WRITER.getQueue().size());
         } catch(java.util.concurrent.RejectedExecutionException full) {
             writeFailures.incrementAndGet();
+            cacheEvent(entry, "write=FAILED path=" + destination.getAbsolutePath() + " reason=writer-queue-full");
         }
     }
 
@@ -351,6 +406,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             framebuffer = null;
         }
         nextBakeWork = 0L;
+        nextCaptureWork = 0L;
         bakeStarted = false;
         capturing = false;
     }
@@ -523,10 +579,6 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         return result.toString();
     }
 
-    private static String safeName(String value) {
-        return value.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9._-]", "_");
-    }
-
     private static File directory() { return new File(Minecraft.getMinecraft().mcDataDir, "cache/mcheli/icons"); }
     private static File exportFile(String key) {
         return new File(directory(), "export/assets/mcheli/textures/icons/" + key + ".png");
@@ -536,11 +588,12 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         if(!diagnostics() || now - lastReport < 10000L) return;
         lastReport = now;
         System.out.println(String.format(java.util.Locale.ROOT,
-                "[mcheli icons] stage=%s prebaked=%d hits=%d misses=%d corrupt=%d requests=%d deduplicated=%d deferred=%d captures=%d failures=%d loads=%d writes=%d writeFailures=%d queue=%d/%d workerQueue=%d/%d writerQueue=%d/%d avgResolveMs=%.2f avgPrepareMs=%.2f avgRenderMs=%.2f avgReadbackMs=%.2f avgProcessMs=%.2f avgUploadMs=%.2f avgWriteMs=%.2f",
+                "[MCH IconCache] stage=%s prebaked=%d diskHits=%d diskMisses=%d corrupt=%d requests=%d deduplicated=%d deferred=%d vboGroups=%d captures=%d failures=%d loads=%d writes=%d writeFailures=%d queue=%d/%d workerQueue=%d/%d writerQueue=%d/%d avgResolveMs=%.2f avgModelTextureMs=%.2f totalVboMs=%.2f avgRenderMs=%.2f avgReadbackMs=%.2f avgProcessMs=%.2f avgUploadMs=%.2f avgWriteMs=%.2f",
                 active != null ? active.state : "IDLE", prebaked, hits, misses, corruptFiles.get(), requests, duplicates,
-                deferred, captures, failures, loads, writes.get(), writeFailures.get(), QUEUE.size(), queueHighWater,
+                deferred, vboGroupsPrepared, captures, failures, loads, writes.get(), writeFailures.get(), QUEUE.size(), queueHighWater,
                 WORKER.getQueue().size(), workerHighWater, WRITER.getQueue().size(), writerHighWater,
-                resolveNanos / 1e6 / Math.max(1, hits + misses + prebaked), prepareNanos / 1e6 / Math.max(1, captures + failures),
+                resolveNanos / 1e6 / Math.max(1, hits + misses + prebaked), modelNanos / 1e6 / Math.max(1, captures + failures),
+                vboNanos / 1e6,
                 renderNanos / 1e6 / Math.max(1, captures), readbackNanos / 1e6 / Math.max(1, captures),
                 processNanos / 1e6 / Math.max(1, captures), uploadNanos / 1e6 / Math.max(1, loads + captures),
                 writeNanos.get() / 1e6 / Math.max(1, writes.get() + writeFailures.get())));
@@ -556,16 +609,17 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     }
 
     private enum State {
-        DEFERRED, REQUESTED, RESOLVE_ASSETS, PREPARE_CAPTURE, RENDER_MODEL, READBACK,
-        PROCESS_PIXELS, UPLOAD_TEXTURE, QUEUE_DISK_WRITE, READY, FAILED
+        DEFERRED, REQUESTED, RESOLVE_ASSETS, PREPARE_CAPTURE, PREPARE_MODEL_BUFFERS, RENDER_MODEL, READBACK,
+        PROCESS_PIXELS, UPLOAD_TEXTURE, READY, FAILED
     }
     private enum LoadSource { NONE, PREBAKED, DISK }
     private static final class ResolveResult {
         final BufferedImage image;
         final LoadSource source;
         final int corrupt;
-        ResolveResult(BufferedImage image, LoadSource source, int corrupt) {
-            this.image = image; this.source = source; this.corrupt = corrupt;
+        final String reason;
+        ResolveResult(BufferedImage image, LoadSource source, int corrupt, String reason) {
+            this.image = image; this.source = source; this.corrupt = corrupt; this.reason = reason;
         }
     }
     private static final class Entry {
@@ -574,10 +628,14 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         final long appearance;
         final IItemRenderer renderer;
         final long epoch;
+        final String contentId;
         String key;
+        File cacheFile;
         ResourceLocation texture;
         ResourceLocation captureTexture;
         net.minecraftforge.client.model.IModelCustom captureModel;
+        java.util.Iterator modelGroups;
+        mcheli.wrapper.modelloader.W_GroupObject activeGroup;
         BufferedImage image;
         State state = State.REQUESTED;
         boolean persist;
@@ -585,6 +643,8 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         Entry(Object identity, ItemStack stack, IItemRenderer renderer, long epoch) {
             this.identity = identity; this.stack = stack; this.renderer = renderer; this.epoch = epoch;
             this.appearance = appearance(identity);
+            MCH_BaseVehicleInfo info = (MCH_BaseVehicleInfo)identity;
+            this.contentId = info.getDirectoryName() + "/" + info.name;
         }
     }
 
@@ -625,7 +685,17 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         }
     }
     private static boolean diagnostics() {
-        return MCH_Config.DebugVehicleInventorySnapshots != null && MCH_Config.DebugVehicleInventorySnapshots.prmBool;
+        return MCH_Config.DebugVehicleIconCache != null && MCH_Config.DebugVehicleIconCache.prmBool;
+    }
+    private static void transition(Entry entry, State state, String reason) {
+        entry.state = state;
+        cacheEvent(entry, "state=" + state + (reason != null ? " reason=" + reason : ""));
+    }
+    private static void cacheEvent(Entry entry, String message) {
+        if(!diagnostics()) return;
+        String key = entry != null && entry.key != null ? entry.key : "pending";
+        String id = entry != null ? entry.contentId : "unknown";
+        System.out.println("[MCH IconCache] " + id + " key=" + key + " " + message);
     }
     private static void projection() { GL11.glOrtho(-1, 1, -1, 1, -1000, 1000); }
     private static void prepare(Entry entry) throws IOException {
@@ -634,6 +704,13 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         entry.captureModel = info.model;
         if(entry.captureModel == null) throw new IOException("Missing vehicle model");
         entry.captureTexture = resolveTexture(info, entry.captureModel);
+    }
+    private static java.util.Iterator groups(net.minecraftforge.client.model.IModelCustom model) {
+        if(model instanceof mcheli.wrapper.modelloader.W_WavefrontObject)
+            return ((mcheli.wrapper.modelloader.W_WavefrontObject)model).groupObjects.iterator();
+        if(model instanceof mcheli.wrapper.modelloader.W_MetasequoiaObject)
+            return ((mcheli.wrapper.modelloader.W_MetasequoiaObject)model).groupObjects.iterator();
+        return null;
     }
     private static void renderCanonical(Entry entry) {
         renderModel(ItemRenderType.INVENTORY, (MCH_BaseVehicleInfo)entry.identity,
@@ -686,7 +763,9 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         int overlay = info.name.indexOf("|skinoverlays/");
         if(overlay >= 0) sourceHash(digest, "assets/mcheli/"
                 + MCH_EntityBaseVehicle.getTexturePath(info.getDirectoryName(), info.name.substring(overlay + 1)));
-        return safeName(name) + "-v" + ICON_CACHE_VERSION + "-" + hex(digest.digest());
+        // Keep the final component short enough for legacy Windows instance paths. The full
+        // stable content identity and all source fingerprints are already inside the digest.
+        return "v" + ICON_CACHE_VERSION + "-" + hex(digest.digest());
     }
     private static void sourceHash(MessageDigest digest, String path) throws IOException {
         bytes(digest, path);

@@ -27,6 +27,7 @@ public class W_GroupObject {
    private float[] geometry;
    private int[] faceVertexOffsets;
    private int vertexBufferId;
+   private int vboUploadFloats;
    private boolean vboUnavailable;
    private boolean vboDirty;
 
@@ -149,12 +150,16 @@ public class W_GroupObject {
       boolean vertexArrayEnabled = GL11.glIsEnabled(GL11.GL_VERTEX_ARRAY);
       boolean rendered = false;
       try {
+         if(this.geometry == null) {
+            this.finalizeGeometry();
+         }
          if(this.vboDirty && this.vertexBufferId != 0) {
             GL15.glDeleteBuffers(this.vertexBufferId);
             this.vertexBufferId = 0;
+            this.vboUploadFloats = 0;
             this.vboDirty = false;
          }
-         if(this.vertexBufferId == 0) {
+         if(this.vertexBufferId == 0 || this.vboUploadFloats < this.geometry.length) {
             this.createVbo();
          }
          GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, this.vertexBufferId);
@@ -181,18 +186,72 @@ public class W_GroupObject {
    }
 
    private void createVbo() {
+      this.prepareVboChunk(Integer.MAX_VALUE);
+   }
+
+   /** Number of vertices still requiring a render-thread VBO upload. */
+   public int getPendingVboVertices() {
+      if(this.vboUnavailable || !GLContext.getCapabilities().OpenGL15) {
+         return 0;
+      }
       if(this.geometry == null) {
          this.finalizeGeometry();
       }
       if(this.geometry == null || this.geometry.length == 0) {
-         return;
+         return 0;
       }
-      FloatBuffer upload = BufferUtils.createFloatBuffer(this.geometry.length);
-      upload.put(this.geometry).flip();
-      this.vertexBufferId = GL15.glGenBuffers();
-      GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, this.vertexBufferId);
-      GL15.glBufferData(GL15.GL_ARRAY_BUFFER, upload, GL15.GL_STATIC_DRAW);
-      GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+      return (this.geometry.length - (this.vboDirty ? 0 : this.vboUploadFloats) + FLOATS_PER_VERTEX - 1)
+            / FLOATS_PER_VERTEX;
+   }
+
+   /** Uploads at most maxVertices and returns true when normal rendering will not build more VBO data. */
+   public boolean prepareVboChunk(int maxVertices) {
+      if(this.vboUnavailable || !GLContext.getCapabilities().OpenGL15) {
+         return true;
+      }
+      if(this.geometry == null) {
+         this.finalizeGeometry();
+      }
+      if(this.geometry == null || this.geometry.length == 0) {
+         return true;
+      }
+      int previousArrayBuffer = GL11.glGetInteger(GL15.GL_ARRAY_BUFFER_BINDING);
+      try {
+         if(this.vboDirty && this.vertexBufferId != 0) {
+            GL15.glDeleteBuffers(this.vertexBufferId);
+            this.vertexBufferId = 0;
+            this.vboUploadFloats = 0;
+            this.vboDirty = false;
+         }
+         if(this.vertexBufferId == 0) {
+            this.vertexBufferId = GL15.glGenBuffers();
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, this.vertexBufferId);
+            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, (long)this.geometry.length * 4L, GL15.GL_STATIC_DRAW);
+            // The allocated buffer reflects the current corrected geometry. Future UV changes
+            // will set this flag again and restart the bounded upload from zero.
+            this.vboDirty = false;
+         } else {
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, this.vertexBufferId);
+         }
+         int remaining = this.geometry.length - this.vboUploadFloats;
+         long requested = (long)Math.max(1, maxVertices) * FLOATS_PER_VERTEX;
+         int count = (int)Math.min((long)remaining, requested);
+         if(count > 0) {
+            FloatBuffer upload = BufferUtils.createFloatBuffer(count);
+            upload.put(this.geometry, this.vboUploadFloats, count).flip();
+            GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, (long)this.vboUploadFloats * 4L, upload);
+            this.vboUploadFloats += count;
+         }
+         return this.vboUploadFloats >= this.geometry.length;
+      } catch(RuntimeException failure) {
+         this.vboUnavailable = true;
+         if(this.vertexBufferId != 0) GL15.glDeleteBuffers(this.vertexBufferId);
+         this.vertexBufferId = 0;
+         this.vboUploadFloats = 0;
+         return true;
+      } finally {
+         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, previousArrayBuffer);
+      }
    }
 
    public void render(Tessellator tessellator) {
