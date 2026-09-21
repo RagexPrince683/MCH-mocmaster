@@ -32,14 +32,16 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
 
     public static final int ICON_CACHE_VERSION = 3;
     private static final int SIZE = 128;
-    private static final int MAX_REQUESTS = 256;
+    private static final int MAX_RESOLVE_BACKLOG = 1024;
+    private static final int MAX_CAPTURE_BACKLOG = 1024;
     private static final int VBO_VERTICES_PER_FRAME = 2048;
     private static final int VBO_VERTICES_PER_CHUNK = 512;
     private static final long VBO_TIME_BUDGET_NS = 750000L;
     private static final long BAKE_INTERVAL_MS = 350L;
     private static final long CAPTURE_INTERVAL_MS = 350L;
     private static final Map<Object, Entry> ENTRIES = new IdentityHashMap<Object, Entry>();
-    private static final LinkedHashMap<Object, Entry> QUEUE = new LinkedHashMap<Object, Entry>();
+    private static final LinkedHashMap<Object, Entry> RESOLVE_BACKLOG = new LinkedHashMap<Object, Entry>();
+    private static final LinkedHashMap<Object, Entry> CAPTURE_BACKLOG = new LinkedHashMap<Object, Entry>();
     private static final LinkedHashMap<Object, Entry> READY_UPLOADS = new LinkedHashMap<Object, Entry>();
     private static final java.util.concurrent.ArrayBlockingQueue<Runnable> COMPLETIONS =
             new java.util.concurrent.ArrayBlockingQueue<Runnable>(16);
@@ -53,13 +55,14 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     private static final ByteBuffer PIXELS = BufferUtils.createByteBuffer(SIZE * SIZE * 4);
     private static Entry active;
     private static long epoch;
-    private static long nextBakeWork, nextCaptureWork, lastReport, requests, duplicates, deferred, prebaked, hits, misses, captures, failures, loads;
+    private static long nextBakeWork, nextCaptureWork, lastReport, requests, duplicates, deferred, prebaked, hits, misses,
+            captures, failures, loads, resolverSubmissions, resolverDeferred, resolverFailures, processorDeferred;
     private static long resolveNanos, modelLookupNanos, textureNanos, vboNanos, framebufferNanos, renderNanos,
             readPixelsNanos, pixelCopyNanos, processNanos, uploadNanos, readyNanos;
     private static long resolveWorst, modelLookupWorst, textureWorst, vboWorst, framebufferWorst, renderWorst,
             readPixelsWorst, pixelCopyWorst, processWorst, uploadWorst, readyWorst;
     private static long vboGroupsPrepared;
-    private static int queueHighWater, workerHighWater, writerHighWater;
+    private static int resolveBacklogHighWater, captureBacklogHighWater, workerHighWater, writerHighWater;
     private static java.util.Iterator bakeItems;
     private static boolean bakeStarted;
     private static boolean capturing;
@@ -100,26 +103,26 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         }
         if(entry != null) {
             if(entry.state != State.READY && entry.state != State.FAILED) ++duplicates;
-            if(entry.state == State.DEFERRED) enqueue(entry);
+            if(entry.state == State.DEFERRED) enqueueResolve(entry);
             return entry;
         }
         entry = new Entry(identity, new ItemStack(stack.getItem(), 1, 0), renderer, epoch);
         ENTRIES.put(identity, entry);
-        enqueue(entry);
+        enqueueResolve(entry);
         ++requests;
         return entry;
     }
 
-    private static void enqueue(Entry entry) {
-        if(entry.cancelled || QUEUE.containsKey(entry.identity)) return;
-        if(QUEUE.size() >= MAX_REQUESTS) {
+    private static void enqueueResolve(Entry entry) {
+        if(entry.cancelled || RESOLVE_BACKLOG.containsKey(entry.identity)) return;
+        if(RESOLVE_BACKLOG.size() >= MAX_RESOLVE_BACKLOG) {
             entry.state = State.DEFERRED;
             ++deferred;
             return;
         }
-        entry.state = State.REQUESTED;
-        QUEUE.put(entry.identity, entry);
-        queueHighWater = Math.max(queueHighWater, QUEUE.size());
+        entry.state = State.WAIT_RESOLVE;
+        RESOLVE_BACKLOG.put(entry.identity, entry);
+        resolveBacklogHighWater = Math.max(resolveBacklogHighWater, RESOLVE_BACKLOG.size());
     }
 
     /** Advances cheap states immediately while each expensive render-thread operation remains bounded. */
@@ -141,14 +144,9 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             if(!bakeStarted) { bakeItems = Item.itemRegistry.iterator(); bakeStarted = true; }
             for(int i = 0; i < 16 && bakeItems.hasNext(); ++i) bake((Item)bakeItems.next());
         }
-        if(active == null && !QUEUE.isEmpty()) {
-            active = QUEUE.values().iterator().next();
-            QUEUE.remove(active.identity);
-            if(active.state == State.REQUESTED) {
-                submitResolve(active);
-                active = null;
-                return;
-            }
+        if(active == null && !CAPTURE_BACKLOG.isEmpty()) {
+            active = CAPTURE_BACKLOG.values().iterator().next();
+            CAPTURE_BACKLOG.remove(active.identity);
         }
         if(active == null) return;
         try {
@@ -159,6 +157,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                     if(now >= nextCaptureWork) timedRender(active);
                     break;
                 case READBACK: timedReadback(active); break;
+                case WAIT_PROCESS: trySubmitPixelProcessing(active); break;
                 case UPLOAD_TEXTURE: timedUpload(active); break;
                 default: break;
             }
@@ -167,8 +166,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         }
     }
 
-    private static void submitResolve(final Entry entry) {
-        transition(entry, State.RESOLVE_ASSETS, "lookup-queued");
+    private static boolean submitResolve(final Entry entry) {
         final File cacheDirectory = directory();
         try {
             WORKER.execute(new Runnable() {
@@ -197,20 +195,27 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                                     ++misses;
                                     entry.persist = true;
                                     transition(entry, State.PREPARE_CAPTURE, result.reason);
-                                    QUEUE.put(entry.identity, entry);
+                                    enqueueCapture(entry);
                                 }
                             }
                         });
                     } catch(final Exception failure) {
                         complete(new Runnable() {
-                            public void run() { if(current(entry)) fail(entry, failure); }
+                            public void run() {
+                                if(current(entry)) { ++resolverFailures; fail(entry, failure); }
+                            }
                         });
                     }
                 }
             });
+            transition(entry, State.RESOLVING, "lookup-queued");
+            ++resolverSubmissions;
             workerHighWater = Math.max(workerHighWater, WORKER.getQueue().size());
+            return true;
         } catch(java.util.concurrent.RejectedExecutionException full) {
-            fail(entry, new IOException("Icon resolver queue is full"));
+            entry.state = State.WAIT_RESOLVE;
+            ++resolverDeferred;
+            return false;
         }
     }
 
@@ -305,9 +310,13 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     }
 
     private static void timedReadback(final Entry entry) throws IOException {
-        final byte[] pixels;
-        pixels = readback();
-        transition(entry, State.PROCESS_PIXELS, "readback-complete");
+        entry.pixels = readback();
+        transition(entry, State.WAIT_PROCESS, "readback-complete");
+        trySubmitPixelProcessing(entry);
+    }
+
+    private static void trySubmitPixelProcessing(final Entry entry) {
+        final byte[] pixels = entry.pixels;
         try {
             WORKER.execute(new Runnable() {
                 public void run() {
@@ -319,6 +328,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                             public void run() {
                                 if(!current(entry)) return;
                                 processNanos += elapsed; processWorst = Math.max(processWorst, elapsed);
+                                entry.pixels = null;
                                 entry.image = image;
                                 transition(entry, State.UPLOAD_TEXTURE, "pixels-ready");
                             }
@@ -330,9 +340,11 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                     }
                 }
             });
+            transition(entry, State.PROCESSING, "pixel-processing-queued");
             workerHighWater = Math.max(workerHighWater, WORKER.getQueue().size());
         } catch(java.util.concurrent.RejectedExecutionException full) {
-            throw new IOException("Icon pixel processor queue is full", full);
+            entry.state = State.WAIT_PROCESS;
+            ++processorDeferred;
         }
     }
 
@@ -356,23 +368,33 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     }
 
     private static void submitQueuedLookup() {
-        if(WORKER.getQueue().remainingCapacity() <= 0) return;
-        java.util.Iterator iterator = QUEUE.values().iterator();
-        while(iterator.hasNext()) {
-            Entry entry = (Entry)iterator.next();
-            if(entry.state == State.REQUESTED) {
-                iterator.remove();
-                submitResolve(entry);
-                return;
-            }
+        if(RESOLVE_BACKLOG.isEmpty()) return;
+        if(WORKER.getQueue().remainingCapacity() <= 0) { ++resolverDeferred; return; }
+        Entry entry = RESOLVE_BACKLOG.values().iterator().next();
+        if(submitResolve(entry)) RESOLVE_BACKLOG.remove(entry.identity);
+    }
+
+    private static void enqueueCapture(Entry entry) {
+        if(entry.cancelled || CAPTURE_BACKLOG.containsKey(entry.identity)) return;
+        if(CAPTURE_BACKLOG.size() >= MAX_CAPTURE_BACKLOG) {
+            entry.state = State.DEFERRED;
+            ++deferred;
+            cacheEvent(entry, "capture-backlog-full");
+            return;
         }
+        CAPTURE_BACKLOG.put(entry.identity, entry);
+        captureBacklogHighWater = Math.max(captureBacklogHighWater, CAPTURE_BACKLOG.size());
     }
 
     private static void deferActive(Entry entry, String reason) {
-        QUEUE.put(entry.identity, entry);
-        queueHighWater = Math.max(queueHighWater, QUEUE.size());
-        cacheEvent(entry, reason);
+        deferCapture(entry, reason);
         if(active == entry) active = null;
+    }
+
+    private static void deferCapture(Entry entry, String reason) {
+        CAPTURE_BACKLOG.put(entry.identity, entry);
+        captureBacklogHighWater = Math.max(captureBacklogHighWater, CAPTURE_BACKLOG.size());
+        cacheEvent(entry, reason);
     }
 
     private static boolean current(Entry entry) {
@@ -447,7 +469,8 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         active = null;
         for(Entry entry : ENTRIES.values()) { entry.cancelled = true; release(entry); }
         ENTRIES.clear();
-        QUEUE.clear();
+        RESOLVE_BACKLOG.clear();
+        CAPTURE_BACKLOG.clear();
         READY_UPLOADS.clear();
         WORKER.getQueue().clear();
         COMPLETIONS.clear();
@@ -468,7 +491,8 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         entry.cancelled = true;
         release(entry);
         ENTRIES.remove(entry.identity);
-        QUEUE.remove(entry.identity);
+        RESOLVE_BACKLOG.remove(entry.identity);
+        CAPTURE_BACKLOG.remove(entry.identity);
         READY_UPLOADS.remove(entry.identity);
         if(active == entry) active = null;
     }
@@ -663,9 +687,12 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         if(!diagnostics() || now - lastReport < 10000L) return;
         lastReport = now;
         System.out.println(String.format(java.util.Locale.ROOT,
-                "[MCH IconCache] stage=%s prebaked=%d diskHits=%d diskMisses=%d corrupt=%d requests=%d deduplicated=%d deferred=%d vboGroups=%d captures=%d failures=%d loads=%d writes=%d writeFailures=%d queue=%d/%d workerQueue=%d/%d writerQueue=%d/%d avg/worstMs resolve=%.2f/%.2f modelLookup=%.3f/%.3f textureLookup=%.3f/%.3f vboFrame=%.3f/%.3f framebuffer=%.3f/%.3f draw=%.3f/%.3f glReadPixels=%.3f/%.3f pixelCopy=%.3f/%.3f process=%.3f/%.3f upload=%.3f/%.3f ready=%.1f/%.1f write=%.2f",
+                "[MCH IconCache] stage=%s prebaked=%d diskHits=%d diskMisses=%d corrupt=%d requests=%d deduplicated=%d deferred=%d resolverSubmissions=%d resolverDeferred=%d resolverFailures=%d processorDeferred=%d vboGroups=%d captures=%d failures=%d loads=%d writes=%d writeFailures=%d resolveBacklog=%d/%d captureBacklog=%d/%d workerQueue=%d/%d writerQueue=%d/%d avg/worstMs resolve=%.2f/%.2f modelLookup=%.3f/%.3f textureLookup=%.3f/%.3f vboFrame=%.3f/%.3f framebuffer=%.3f/%.3f draw=%.3f/%.3f glReadPixels=%.3f/%.3f pixelCopy=%.3f/%.3f process=%.3f/%.3f upload=%.3f/%.3f ready=%.1f/%.1f write=%.2f",
                 active != null ? active.state : "IDLE", prebaked, hits, misses, corruptFiles.get(), requests, duplicates,
-                deferred, vboGroupsPrepared, captures, failures, loads, writes.get(), writeFailures.get(), QUEUE.size(), queueHighWater,
+                deferred, resolverSubmissions, resolverDeferred, resolverFailures, processorDeferred,
+                vboGroupsPrepared, captures, failures,
+                loads, writes.get(), writeFailures.get(), RESOLVE_BACKLOG.size(), resolveBacklogHighWater,
+                CAPTURE_BACKLOG.size(), captureBacklogHighWater,
                 WORKER.getQueue().size(), workerHighWater, WRITER.getQueue().size(), writerHighWater,
                 resolveNanos / 1e6 / Math.max(1, hits + misses + prebaked), resolveWorst / 1e6,
                 modelLookupNanos / 1e6 / Math.max(1, captures + failures), modelLookupWorst / 1e6,
@@ -691,8 +718,8 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     }
 
     private enum State {
-        DEFERRED, REQUESTED, RESOLVE_ASSETS, PREPARE_CAPTURE, PREPARE_MODEL_BUFFERS, RENDER_MODEL, READBACK,
-        PROCESS_PIXELS, UPLOAD_TEXTURE, READY, FAILED
+        DEFERRED, WAIT_RESOLVE, RESOLVING, PREPARE_CAPTURE, PREPARE_MODEL_BUFFERS, RENDER_MODEL, READBACK,
+        WAIT_PROCESS, PROCESSING, UPLOAD_TEXTURE, READY, FAILED
     }
     private enum LoadSource { NONE, PREBAKED, DISK }
     private static final class ResolveResult {
@@ -718,8 +745,9 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         net.minecraftforge.client.model.IModelCustom captureModel;
         java.util.Iterator modelGroups;
         mcheli.wrapper.modelloader.W_GroupObject activeGroup;
+        byte[] pixels;
         BufferedImage image;
-        State state = State.REQUESTED;
+        State state = State.WAIT_RESOLVE;
         boolean persist;
         boolean cancelled;
         final long requestedNanos = System.nanoTime();

@@ -755,5 +755,22 @@ Developer/backend
   crop/processing, later final-image upload, 350 ms capture pacing, request deduplication, bounded
   queues, and persistent-cache behavior remain separate. Pending cache lookups continue alongside
   an uncached model's preparation, and completed disk hits are promoted to upload before capture work.
-  Offline Java compilation passed; first-time
-  frame pacing and the diagnostic worst-stage measurements still require in-game validation.
+  Offline Java compilation passed; first-time frame pacing and the diagnostic worst-stage
+  measurements still require in-game validation.
+
+2026-09-21 16:45 — Retain vehicle icon requests under resolver backpressure
+
+- Fixed NEI bursts permanently losing otherwise valid MC Heli icons when the bounded resolver
+  executor rejected a submission. Temporary saturation now leaves the entry in `WAIT_RESOLVE` and
+  retries it on a later render tick instead of transitioning it to `FAILED`.
+- Separated the deduplicated lightweight resolve backlog from uncached capture work. Both backlogs
+  are bounded at 1,024 entries, while the expensive single-worker executor remains bounded at eight
+  queued jobs and receives at most one new resolver admission per render tick. A backlog safety-limit
+  rejection remains retryable when NEI asks for that item again.
+- Preserved completed disk-hit upload priority and made post-readback pixel-processing admission
+  retryable if the shared worker is temporarily saturated. Added aggregate resolver submission,
+  saturation deferral, genuine resolver failure, processing deferral, backlog depth/high-water, and
+  existing deduplication diagnostics without per-item queue-full exceptions.
+- The time-budgeted VBO path, prepared-buffer capture guard, 350 ms capture pacing, asynchronous CPU
+  processing/PNG persistence, and persistent cache format are unchanged. Offline compilation passed;
+  a fresh-cache NEI burst still requires in-game validation.

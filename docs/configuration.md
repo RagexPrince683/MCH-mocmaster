@@ -396,7 +396,9 @@ normalization, per-type scale, and `itemIconScaleFactor`.
 
 Inventory, creative-tab, and NEI callbacks only request work or draw the ready textured quad. While
 resolution or capture is pending—or after a session failure—Forge uses the normal authored item
-sprite. Requests are deduplicated in a bounded queue and serviced by the FML render-tick handler. On
+sprite. Requests are deduplicated in a bounded lightweight resolve backlog and serviced by the FML
+render-tick handler. The backlog admits at most one job per render tick to the eight-slot resolver
+worker queue; temporary saturation remains pending and retries instead of becoming an icon failure. On
 a cache miss, MC Heli reuses the model already held by the vehicle info. Texture repair runs before
 buffer preparation so any invalidated OBJ/MQO groups are rebuilt incrementally, with at most 8,192
 vertices uploaded per render frame. The final framebuffer captures are paced at least 350 ms apart.
@@ -419,6 +421,8 @@ model/texture lookup, per-frame VBO preparation, framebuffer setup, model draw, 
 copy/processing, final texture upload, and READY latency separately. If normal vehicle rendering
 initiates texture repair, its image load, UV coverage, repair, UV correction/VBO invalidation, and
 repaired-texture upload timings are logged separately. The option is disabled by default.
+The periodic cache report also includes resolver submissions, deferred admissions, genuine resolver
+failures, resolver/capture backlog sizes and high-water marks, and duplicate requests avoided.
 
 ## Technology tiers
 
