@@ -396,16 +396,22 @@ normalization, per-type scale, and `itemIconScaleFactor`.
 
 Inventory, creative-tab, and NEI callbacks only request work or draw the ready textured quad. While
 resolution or capture is pending—or after a session failure—Forge uses the normal authored item
-sprite. Queue work is deduplicated and paced to at most one entry every 350 ms on the FML render-tick
-handler. The generated texture becomes available immediately; PNG compression and atomic replacement
-run on one bounded background writer. Equipped, dropped, and world/entity rendering remain live.
+sprite. Requests are deduplicated in a bounded queue and serviced by the FML render-tick handler. A
+cache miss advances through separate resolve, prepare, model-render, pixel-readback, pixel-processing,
+texture-upload, and disk-submission stages, with no more than one render-thread stage advanced per
+frame. Source hashing, cache reads, transparent crop/padding, and PNG compression run on bounded
+background workers; only model/texture preparation, OpenGL rendering/readback, and dynamic-texture
+upload remain on the render thread. Equipped, dropped, and world/entity rendering remain live.
 
 Content hashes for the definition, model, base texture, optional overlay, renderer schema, dimensions,
 scales, and texture-repair settings form the cache name. Resource reload releases dynamic textures and
-reevaluates these hashes without deleting valid disk PNGs. Start a development client with
+reevaluates these hashes without deleting valid disk PNGs or discarding already-queued immutable
+writes. Disk saves use sibling temporary files plus atomic replacement and are drained during normal
+JVM shutdown; an invalid PNG is removed and regenerated. Start a development client with
 `-Dmcheli.bakeIcons=true` to walk registered vehicle items through this same generator and export
 ship-ready files below `cache/mcheli/icons/export/assets/mcheli/textures/icons/`. Set
-`DebugVehicleInventorySnapshots = true` for periodic aggregate diagnostics.
+`DebugVehicleInventorySnapshots = true` for periodic per-stage timing, cache, corruption, failure,
+and queue-depth diagnostics.
 ## Technology tiers
 
 MC Heli's independent progression settings are written to `config/mcheli_tech.cfg`. The system is disabled by default so existing worlds and packs retain their former behavior. `enabled` turns enforcement on, `operatorBypass` and `creativeBypass` control non-progression access, and `tierMaximumYears` defines eleven strictly increasing inclusive year ceilings for tiers `0.0` through `5.0`.

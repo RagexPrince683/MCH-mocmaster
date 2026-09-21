@@ -715,3 +715,20 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
   a handler registered on Forge's gameplay event bus. Queue servicing now also runs from MC Heli's
   established FML render-tick handler. Offline Java compilation passed after this correction; the
   corrected MC Heli icon transition and cache reuse still require another in-game verification.
+
+2026-09-20 22:16 — Stage vehicle icon capture and preserve disk writes
+
+- Replaced the single-frame cache-miss path with explicit resolve, prepare, render, readback,
+  pixel-processing, upload, and disk-submission states. Source hashing, cache lookup/decoding, crop,
+  and PNG encoding now run on bounded workers; OpenGL work stays on the FML render thread and only
+  one render-thread stage advances per frame.
+- Reused the vehicle model already held by its info object instead of forcibly reparsing it for every
+  icon miss. Texture-repair preparation remains a separate render-thread stage, while canonical
+  orientation, scale, overlay, authored-sprite fallback, and live equipped/entity rendering remain
+  unchanged.
+- Kept fingerprinted writes alive across resource reload and added a normal-shutdown drain. Cache
+  files still use sibling temporary files and atomic replacement; invalid 128×128 PNGs are deleted
+  and regenerated. Diagnostics now report the active stage, per-stage timing, corruption, queue
+  depth/high-water marks, and write failures.
+- Offline `compileJava` passed. Runtime hitch reduction and restart cache hits still require in-game
+  verification.

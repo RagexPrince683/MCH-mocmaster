@@ -32,129 +32,281 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
 
     public static final int ICON_CACHE_VERSION = 2;
     private static final int SIZE = 128;
-    private static final long INTERVAL_MS = 350L;
+    private static final int MAX_REQUESTS = 256;
+    private static final long BAKE_INTERVAL_MS = 350L;
     private static final Map<Object, Entry> ENTRIES = new IdentityHashMap<Object, Entry>();
     private static final LinkedHashMap<Object, Entry> QUEUE = new LinkedHashMap<Object, Entry>();
+    private static final java.util.concurrent.ArrayBlockingQueue<Runnable> COMPLETIONS =
+            new java.util.concurrent.ArrayBlockingQueue<Runnable>(16);
     private static final java.util.concurrent.atomic.AtomicLong writes = new java.util.concurrent.atomic.AtomicLong();
     private static final java.util.concurrent.atomic.AtomicLong writeFailures = new java.util.concurrent.atomic.AtomicLong();
-    private static final java.util.concurrent.ThreadPoolExecutor WRITER = new java.util.concurrent.ThreadPoolExecutor(
-            1, 1, 0L, java.util.concurrent.TimeUnit.MILLISECONDS,
-            new java.util.concurrent.ArrayBlockingQueue<Runnable>(32), new java.util.concurrent.ThreadFactory() {
-        public Thread newThread(Runnable job) {
-            Thread thread = new Thread(job, "mcheli icon PNG writer");
-            thread.setDaemon(true);
-            return thread;
-        }
-    }, new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
+    private static final java.util.concurrent.atomic.AtomicLong writeNanos = new java.util.concurrent.atomic.AtomicLong();
+    private static final java.util.concurrent.atomic.AtomicLong corruptFiles = new java.util.concurrent.atomic.AtomicLong();
+    private static final java.util.concurrent.ThreadPoolExecutor WORKER = executor("mcheli icon resolver", 8);
+    private static final java.util.concurrent.ThreadPoolExecutor WRITER = executor("mcheli icon PNG writer", 32);
     private static Framebuffer framebuffer;
     private static final ByteBuffer PIXELS = BufferUtils.createByteBuffer(SIZE * SIZE * 4);
-    private static long nextWork, lastReport, requests, duplicates, prebaked, hits, misses, captures, failures, loads;
-    private static long captureNanos, loadNanos;
+    private static Entry active;
+    private static long epoch;
+    private static long nextBakeWork, lastReport, requests, duplicates, deferred, prebaked, hits, misses, captures, failures, loads;
+    private static long resolveNanos, prepareNanos, renderNanos, readbackNanos, processNanos, uploadNanos;
+    private static int queueHighWater, workerHighWater, writerHighWater;
     private static java.util.Iterator bakeItems;
     private static boolean bakeStarted;
     private static boolean capturing;
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            public void run() {
+                drain(WORKER);
+                drain(WRITER);
+            }
+        }, "mcheli icon cache shutdown"));
+    }
+
+    private static java.util.concurrent.ThreadPoolExecutor executor(final String name, int capacity) {
+        return new java.util.concurrent.ThreadPoolExecutor(1, 1, 0L, java.util.concurrent.TimeUnit.MILLISECONDS,
+                new java.util.concurrent.ArrayBlockingQueue<Runnable>(capacity), new java.util.concurrent.ThreadFactory() {
+            public Thread newThread(Runnable job) {
+                Thread thread = new Thread(job, name);
+                thread.setDaemon(true);
+                return thread;
+            }
+        }, new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
+    }
+
+    private static void drain(java.util.concurrent.ThreadPoolExecutor executor) {
+        executor.shutdown();
+        try { executor.awaitTermination(10L, java.util.concurrent.TimeUnit.SECONDS); }
+        catch(InterruptedException interrupted) { Thread.currentThread().interrupt(); }
+    }
 
     public static boolean isCapturing() { return capturing; }
 
     private static Entry request(Object identity, ItemStack stack, IItemRenderer renderer) {
         Entry entry = ENTRIES.get(identity);
         if(entry != null && entry.appearance != appearance(identity)) {
-            release(entry);
-            ENTRIES.remove(identity);
-            QUEUE.remove(identity);
+            discard(entry);
             entry = null;
         }
         if(entry != null) {
-            if(entry.state == State.QUEUED || entry.state == State.GENERATING) ++duplicates;
+            if(entry.state != State.READY && entry.state != State.FAILED) ++duplicates;
+            if(entry.state == State.DEFERRED) enqueue(entry);
             return entry;
         }
-        entry = new Entry(identity, new ItemStack(stack.getItem(), 1, 0), renderer);
+        entry = new Entry(identity, new ItemStack(stack.getItem(), 1, 0), renderer, epoch);
         ENTRIES.put(identity, entry);
-        QUEUE.put(identity, entry);
+        enqueue(entry);
         ++requests;
         return entry;
     }
 
-    /** One queued resolution/capture per interval; never called from an item callback. */
+    private static void enqueue(Entry entry) {
+        if(entry.cancelled || QUEUE.containsKey(entry.identity)) return;
+        if(QUEUE.size() >= MAX_REQUESTS) {
+            entry.state = State.DEFERRED;
+            ++deferred;
+            return;
+        }
+        entry.state = State.REQUESTED;
+        QUEUE.put(entry.identity, entry);
+        queueHighWater = Math.max(queueHighWater, QUEUE.size());
+    }
+
+    /** Advances at most one capture stage per render frame; item callbacks only request or draw icons. */
     public static void onRenderFrame() {
         long now = Minecraft.getSystemTime();
         report(now);
-        if(now < nextWork) return;
-        nextWork = now + INTERVAL_MS;
-        if(Boolean.getBoolean("mcheli.bakeIcons")) {
+        Runnable completion = COMPLETIONS.poll();
+        if(completion != null) completion.run();
+        if(Boolean.getBoolean("mcheli.bakeIcons") && now >= nextBakeWork) {
+            nextBakeWork = now + BAKE_INTERVAL_MS;
             if(!bakeStarted) { bakeItems = Item.itemRegistry.iterator(); bakeStarted = true; }
-            // Bounded registry walk, using precisely the normal request/generation path.
             for(int i = 0; i < 16 && bakeItems.hasNext(); ++i) bake((Item)bakeItems.next());
         }
-        if(QUEUE.isEmpty()) return;
-        Entry entry = QUEUE.values().iterator().next();
-        QUEUE.remove(entry.identity);
-        entry.state = State.GENERATING;
+        if(active == null && !QUEUE.isEmpty()) {
+            active = QUEUE.values().iterator().next();
+            QUEUE.remove(active.identity);
+            submitResolve(active);
+            return;
+        }
+        if(active == null) return;
         try {
-            entry.key = cacheKey(entry);
-            long started = System.nanoTime();
-            BufferedImage image = loadPrebaked(entry.key);
-            boolean shipped = image != null;
-            if(shipped) ++prebaked;
-            File file = new File(directory(), entry.key + ".png");
-            if(image == null) {
-                image = read(file);
-                if(image != null) ++hits;
-                else ++misses;
+            switch(active.state) {
+                case PREPARE_CAPTURE: timedPrepare(active); break;
+                case RENDER_MODEL: timedRender(active); break;
+                case READBACK: timedReadback(active); break;
+                case UPLOAD_TEXTURE: timedUpload(active); break;
+                case QUEUE_DISK_WRITE: finish(active); break;
+                default: break;
             }
-            loadNanos += System.nanoTime() - started;
-            if(image != null) {
-                ++loads;
-                upload(entry, image);
-                if(Boolean.getBoolean("mcheli.bakeIcons")) save(image, exportFile(entry.key));
-                return;
-            }
-            started = System.nanoTime();
-            try {
-                prepare(entry);
-                image = capture(entry);
-                ++captures;
-            } finally {
-                captureNanos += System.nanoTime() - started;
-            }
-            // Upload before submitting disk work: persistence never gates this session's icon.
-            upload(entry, image);
-            save(image, file);
-            if(Boolean.getBoolean("mcheli.bakeIcons")) save(image, exportFile(entry.key));
         } catch(Exception failure) {
-            entry.state = State.FAILED;
-            ++failures;
-            System.err.println("[mcheli icons] Failed " + entry.stack.getUnlocalizedName() + ": " + failure);
+            fail(active, failure);
         }
     }
 
-    private static BufferedImage loadPrebaked(String key) {
-        try (java.io.InputStream stream = Minecraft.getMinecraft().getResourceManager()
-                .getResource(new ResourceLocation("mcheli", "textures/icons/" + key + ".png")).getInputStream()) {
-            return valid(ImageIO.read(stream));
-        } catch(IOException unavailable) { return null; }
+    private static void submitResolve(final Entry entry) {
+        entry.state = State.RESOLVE_ASSETS;
+        final File cacheDirectory = directory();
+        try {
+            WORKER.execute(new Runnable() {
+                public void run() {
+                    long started = System.nanoTime();
+                    try {
+                        final String key = cacheKey(entry);
+                        final ResolveResult result = resolve(key, cacheDirectory);
+                        final long elapsed = System.nanoTime() - started;
+                        complete(new Runnable() {
+                            public void run() {
+                                if(!current(entry)) return;
+                                entry.key = key;
+                                resolveNanos += elapsed;
+                                corruptFiles.addAndGet(result.corrupt);
+                                if(result.image != null) {
+                                    entry.image = result.image;
+                                    if(result.source == LoadSource.PREBAKED) ++prebaked; else ++hits;
+                                    ++loads;
+                                    entry.state = State.UPLOAD_TEXTURE;
+                                } else {
+                                    ++misses;
+                                    entry.persist = true;
+                                    entry.state = State.PREPARE_CAPTURE;
+                                }
+                            }
+                        });
+                    } catch(final Exception failure) {
+                        complete(new Runnable() {
+                            public void run() { if(current(entry)) fail(entry, failure); }
+                        });
+                    }
+                }
+            });
+            workerHighWater = Math.max(workerHighWater, WORKER.getQueue().size());
+        } catch(java.util.concurrent.RejectedExecutionException full) {
+            fail(entry, new IOException("Icon resolver queue is full"));
+        }
     }
 
-    private static BufferedImage read(File file) {
-        if(!file.isFile()) return null;
-        try { return valid(ImageIO.read(file)); }
-        catch(IOException corrupt) { return null; }
+    private static ResolveResult resolve(String key, File cacheDirectory) {
+        int corrupt = 0;
+        BufferedImage image = null;
+        java.io.InputStream stream = null;
+        try {
+            stream = mcheli.MCH_ResourceHelper.openResourceStream(
+                    "assets/mcheli/textures/icons/" + key + ".png");
+            if(stream != null) {
+                image = valid(ImageIO.read(stream));
+                if(image == null) ++corrupt;
+            }
+        } catch(IOException invalid) { ++corrupt; }
+        finally { if(stream != null) try { stream.close(); } catch(IOException ignored) {} }
+        if(image != null) return new ResolveResult(image, LoadSource.PREBAKED, corrupt);
+
+        File file = new File(cacheDirectory, key + ".png");
+        if(file.isFile()) {
+            try { image = valid(ImageIO.read(file)); }
+            catch(IOException invalid) { image = null; }
+            if(image == null) {
+                ++corrupt;
+                try { Files.deleteIfExists(file.toPath()); } catch(IOException ignored) {}
+            }
+        }
+        return new ResolveResult(image, image != null ? LoadSource.DISK : LoadSource.NONE, corrupt);
+    }
+
+    private static void timedPrepare(Entry entry) throws IOException {
+        long started = System.nanoTime();
+        try { prepare(entry); entry.state = State.RENDER_MODEL; }
+        finally { prepareNanos += System.nanoTime() - started; }
+    }
+
+    private static void timedRender(Entry entry) throws IOException {
+        long started = System.nanoTime();
+        try { renderCapture(entry); ++captures; entry.state = State.READBACK; }
+        finally { renderNanos += System.nanoTime() - started; }
+    }
+
+    private static void timedReadback(final Entry entry) throws IOException {
+        long started = System.nanoTime();
+        final byte[] pixels;
+        try { pixels = readback(); }
+        finally { readbackNanos += System.nanoTime() - started; }
+        entry.state = State.PROCESS_PIXELS;
+        try {
+            WORKER.execute(new Runnable() {
+                public void run() {
+                    long processStarted = System.nanoTime();
+                    try {
+                        final BufferedImage image = processPixels(pixels);
+                        final long elapsed = System.nanoTime() - processStarted;
+                        complete(new Runnable() {
+                            public void run() {
+                                if(!current(entry)) return;
+                                processNanos += elapsed;
+                                entry.image = image;
+                                entry.state = State.UPLOAD_TEXTURE;
+                            }
+                        });
+                    } catch(final Exception failure) {
+                        complete(new Runnable() {
+                            public void run() { if(current(entry)) fail(entry, failure); }
+                        });
+                    }
+                }
+            });
+            workerHighWater = Math.max(workerHighWater, WORKER.getQueue().size());
+        } catch(java.util.concurrent.RejectedExecutionException full) {
+            throw new IOException("Icon pixel processor queue is full", full);
+        }
+    }
+
+    private static void timedUpload(Entry entry) {
+        long started = System.nanoTime();
+        try {
+            entry.texture = Minecraft.getMinecraft().getTextureManager()
+                    .getDynamicTextureLocation("mcheli_inventory_icon", new DynamicTexture(entry.image));
+            entry.state = State.QUEUE_DISK_WRITE;
+        } finally { uploadNanos += System.nanoTime() - started; }
+    }
+
+    private static void finish(Entry entry) {
+        if(entry.persist) save(entry.image, new File(directory(), entry.key + ".png"));
+        if(Boolean.getBoolean("mcheli.bakeIcons")) save(entry.image, exportFile(entry.key));
+        entry.image = null;
+        entry.state = State.READY;
+        if(active == entry) active = null;
+    }
+
+    private static void complete(Runnable completion) {
+        if(!COMPLETIONS.offer(completion)) writeFailures.incrementAndGet();
+    }
+
+    private static boolean current(Entry entry) {
+        return !entry.cancelled && entry.epoch == epoch && ENTRIES.get(entry.identity) == entry;
+    }
+
+    private static void fail(Entry entry, Exception failure) {
+        if(entry == null) return;
+        String stage = entry.state != null ? entry.state.name() : "UNKNOWN";
+        entry.captureModel = null;
+        entry.captureTexture = null;
+        entry.image = null;
+        entry.state = State.FAILED;
+        ++failures;
+        if(active == entry) active = null;
+        System.err.println("[mcheli icons] Failed at " + stage + " for "
+                + entry.stack.getUnlocalizedName() + ": " + failure);
     }
 
     private static BufferedImage valid(BufferedImage image) {
         return image != null && image.getWidth() == SIZE && image.getHeight() == SIZE ? image : null;
     }
 
-    private static void upload(Entry entry, BufferedImage image) {
-        entry.texture = Minecraft.getMinecraft().getTextureManager()
-                .getDynamicTextureLocation("mcheli_inventory_icon", new DynamicTexture(image));
-        entry.state = State.READY;
-    }
-
     private static void save(final BufferedImage image, final File destination) {
         try {
             WRITER.execute(new Runnable() {
                 public void run() {
+                    long started = System.nanoTime();
                     File temporary = null;
                     try {
                         File parent = destination.getParentFile();
@@ -168,33 +320,47 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                             Files.move(temporary.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
                         }
                         writes.incrementAndGet();
-                    } catch(IOException failure) {
+                    } catch(Exception failure) {
                         writeFailures.incrementAndGet();
                     } finally {
+                        writeNanos.addAndGet(System.nanoTime() - started);
                         if(temporary != null) temporary.delete();
                     }
                 }
             });
+            writerHighWater = Math.max(writerHighWater, WRITER.getQueue().size());
         } catch(java.util.concurrent.RejectedExecutionException full) {
-            // Keep READY. A full writer must never block the render thread.
             writeFailures.incrementAndGet();
         }
     }
 
     public static void resetForReload() {
-        for(Entry entry : ENTRIES.values()) release(entry);
+        ++epoch;
+        if(active != null) active.cancelled = true;
+        active = null;
+        for(Entry entry : ENTRIES.values()) { entry.cancelled = true; release(entry); }
         ENTRIES.clear();
         QUEUE.clear();
-        // Already running immutable writes remain safe: their filenames include the old fingerprint.
-        WRITER.getQueue().clear();
+        WORKER.getQueue().clear();
+        COMPLETIONS.clear();
+        // Completed images are immutable and fingerprinted, so queued disk writes remain valid.
         if(framebuffer != null) {
             int previous = GL11.glGetInteger(0x8CA6);
             framebuffer.deleteFramebuffer();
             OpenGlHelper.func_153171_g(0x8D40, previous);
             framebuffer = null;
         }
-        nextWork = 0L;
+        nextBakeWork = 0L;
         bakeStarted = false;
+        capturing = false;
+    }
+
+    private static void discard(Entry entry) {
+        entry.cancelled = true;
+        release(entry);
+        ENTRIES.remove(entry.identity);
+        QUEUE.remove(entry.identity);
+        if(active == entry) active = null;
     }
 
     private static void release(Entry entry) {
@@ -224,7 +390,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         } finally { GL11.glPopAttrib(); }
     }
 
-    private static BufferedImage capture(Entry entry) throws IOException {
+    private static void renderCapture(Entry entry) throws IOException {
         if(!OpenGlHelper.isFramebufferEnabled()) throw new IOException("Framebuffer capture unavailable/disabled");
         int previousFramebuffer = GL11.glGetInteger(0x8CA6);
         int previousMatrixMode = GL11.glGetInteger(GL11.GL_MATRIX_MODE);
@@ -269,19 +435,10 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             net.minecraft.client.renderer.RenderHelper.enableStandardItemLighting();
             capturing = true;
             renderCanonical(entry);
-            capturing = false;
-            PIXELS.clear();
-            GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
-            GL11.glReadPixels(0, 0, SIZE, SIZE, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, PIXELS);
-            BufferedImage image = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_ARGB);
-            for(int y = 0; y < SIZE; ++y) for(int x = 0; x < SIZE; ++x) {
-                int p = (x + y * SIZE) * 4;
-                image.setRGB(x, SIZE - y - 1, (PIXELS.get(p + 3) & 255) << 24
-                        | (PIXELS.get(p) & 255) << 16 | (PIXELS.get(p + 1) & 255) << 8 | PIXELS.get(p + 2) & 255);
-            }
-            return cropAndPad(image);
         } finally {
             capturing = false;
+            entry.captureModel = null;
+            entry.captureTexture = null;
             OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, previousLightX, previousLightY);
             GL11.glMatrixMode(GL11.GL_MODELVIEW);
             GL11.glPopMatrix();
@@ -293,6 +450,38 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             OpenGlHelper.setActiveTexture(previousActiveTexture);
             GL11.glMatrixMode(previousMatrixMode);
         }
+    }
+
+    private static byte[] readback() throws IOException {
+        if(framebuffer == null) throw new IOException("Missing icon framebuffer");
+        int previousFramebuffer = GL11.glGetInteger(0x8CA6);
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+        GL11.glPushClientAttrib(-1);
+        try {
+            framebuffer.bindFramebuffer(true);
+            PIXELS.clear();
+            GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
+            GL11.glReadPixels(0, 0, SIZE, SIZE, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, PIXELS);
+            byte[] result = new byte[SIZE * SIZE * 4];
+            for(int i = 0; i < result.length; ++i) result[i] = PIXELS.get(i);
+            return result;
+        } finally {
+            GL11.glPopClientAttrib();
+            GL11.glPopAttrib();
+            OpenGlHelper.func_153171_g(0x8D40, previousFramebuffer);
+        }
+    }
+
+    private static BufferedImage processPixels(byte[] pixels) throws IOException {
+        int[] argb = new int[SIZE * SIZE];
+        for(int y = 0; y < SIZE; ++y) for(int x = 0; x < SIZE; ++x) {
+            int p = (x + y * SIZE) * 4;
+            argb[x + (SIZE - y - 1) * SIZE] = (pixels[p + 3] & 255) << 24
+                    | (pixels[p] & 255) << 16 | (pixels[p + 1] & 255) << 8 | pixels[p + 2] & 255;
+        }
+        BufferedImage image = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_ARGB);
+        image.setRGB(0, 0, SIZE, SIZE, argb, 0, SIZE);
+        return cropAndPad(image);
     }
 
     private static BufferedImage cropAndPad(BufferedImage source) throws IOException {
@@ -315,13 +504,6 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                     minX, minY, maxX + 1, maxY + 1, null);
         } finally { g.dispose(); }
         return output;
-    }
-
-    private static void resourceHash(MessageDigest digest, ResourceLocation location) throws IOException {
-        bytes(digest, location.toString());
-        try(java.io.InputStream in = Minecraft.getMinecraft().getResourceManager().getResource(location).getInputStream()) {
-            streamHash(digest, in);
-        }
     }
 
     private static void streamHash(MessageDigest digest, java.io.InputStream in) throws IOException {
@@ -354,10 +536,14 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         if(!diagnostics() || now - lastReport < 10000L) return;
         lastReport = now;
         System.out.println(String.format(java.util.Locale.ROOT,
-                "[mcheli icons] prebaked=%d hits=%d misses=%d requests=%d deduplicated=%d captures=%d failures=%d loads=%d writes=%d writeFailures=%d queue=%d writerQueue=%d avgCaptureMs=%.2f totalCaptureMs=%.2f avgResolveLoadMs=%.2f",
-                prebaked, hits, misses, requests, duplicates, captures, failures, loads, writes.get(), writeFailures.get(),
-                QUEUE.size(), WRITER.getQueue().size(), captureNanos / 1e6 / Math.max(1, captures + failures),
-                captureNanos / 1e6, loadNanos / 1e6 / Math.max(1, hits + misses + prebaked)));
+                "[mcheli icons] stage=%s prebaked=%d hits=%d misses=%d corrupt=%d requests=%d deduplicated=%d deferred=%d captures=%d failures=%d loads=%d writes=%d writeFailures=%d queue=%d/%d workerQueue=%d/%d writerQueue=%d/%d avgResolveMs=%.2f avgPrepareMs=%.2f avgRenderMs=%.2f avgReadbackMs=%.2f avgProcessMs=%.2f avgUploadMs=%.2f avgWriteMs=%.2f",
+                active != null ? active.state : "IDLE", prebaked, hits, misses, corruptFiles.get(), requests, duplicates,
+                deferred, captures, failures, loads, writes.get(), writeFailures.get(), QUEUE.size(), queueHighWater,
+                WORKER.getQueue().size(), workerHighWater, WRITER.getQueue().size(), writerHighWater,
+                resolveNanos / 1e6 / Math.max(1, hits + misses + prebaked), prepareNanos / 1e6 / Math.max(1, captures + failures),
+                renderNanos / 1e6 / Math.max(1, captures), readbackNanos / 1e6 / Math.max(1, captures),
+                processNanos / 1e6 / Math.max(1, captures), uploadNanos / 1e6 / Math.max(1, loads + captures),
+                writeNanos.get() / 1e6 / Math.max(1, writes.get() + writeFailures.get())));
     }
 
 
@@ -369,18 +555,35 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         return value * 31 + Float.floatToIntBits(getTypeScale(info));
     }
 
-    private enum State { QUEUED, GENERATING, READY, FAILED }
+    private enum State {
+        DEFERRED, REQUESTED, RESOLVE_ASSETS, PREPARE_CAPTURE, RENDER_MODEL, READBACK,
+        PROCESS_PIXELS, UPLOAD_TEXTURE, QUEUE_DISK_WRITE, READY, FAILED
+    }
+    private enum LoadSource { NONE, PREBAKED, DISK }
+    private static final class ResolveResult {
+        final BufferedImage image;
+        final LoadSource source;
+        final int corrupt;
+        ResolveResult(BufferedImage image, LoadSource source, int corrupt) {
+            this.image = image; this.source = source; this.corrupt = corrupt;
+        }
+    }
     private static final class Entry {
         final Object identity;
         final ItemStack stack;
         final long appearance;
         final IItemRenderer renderer;
+        final long epoch;
         String key;
         ResourceLocation texture;
+        ResourceLocation captureTexture;
         net.minecraftforge.client.model.IModelCustom captureModel;
-        State state = State.QUEUED;
-        Entry(Object identity, ItemStack stack, IItemRenderer renderer) {
-            this.identity = identity; this.stack = stack; this.renderer = renderer;
+        BufferedImage image;
+        State state = State.REQUESTED;
+        boolean persist;
+        boolean cancelled;
+        Entry(Object identity, ItemStack stack, IItemRenderer renderer, long epoch) {
+            this.identity = identity; this.stack = stack; this.renderer = renderer; this.epoch = epoch;
             this.appearance = appearance(identity);
         }
     }
@@ -404,7 +607,10 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     public static void onVehicleModelAvailable(MCH_BaseVehicleInfo info) {
         // Demand driven: loading an entity model does not enqueue an inventory capture.
     }
-    public static void invalidate(MCH_BaseVehicleInfo info) { release(ENTRIES.remove(info)); QUEUE.remove(info); }
+    public static void invalidate(MCH_BaseVehicleInfo info) {
+        Entry entry = ENTRIES.get(info);
+        if(entry != null) discard(entry);
+    }
     private static MCH_BaseVehicleInfo getInfo(ItemStack stack) {
         return stack != null && stack.getItem() instanceof MCH_ItemBaseVehicle ? ((MCH_ItemBaseVehicle)stack.getItem()).getAircraftInfo() : null;
     }
@@ -424,28 +630,32 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     private static void projection() { GL11.glOrtho(-1, 1, -1, 1, -1000, 1000); }
     private static void prepare(Entry entry) throws IOException {
         MCH_BaseVehicleInfo info = (MCH_BaseVehicleInfo)entry.identity;
-        // A resource reload may have retained the world's old model object. Parse the
-        // current source only on a cache miss, without replacing that world's reference.
-        entry.captureModel = mcheli.MCH_ModelManager.load(info.getDirectoryName(), info.name, true);
+        if(info.model == null) mcheli.MCH_ClientProxy.ensureVehicleModel(info);
+        entry.captureModel = info.model;
         if(entry.captureModel == null) throw new IOException("Missing vehicle model");
+        entry.captureTexture = resolveTexture(info, entry.captureModel);
     }
     private static void renderCanonical(Entry entry) {
-        renderModel(ItemRenderType.INVENTORY, (MCH_BaseVehicleInfo)entry.identity, entry.captureModel);
-        entry.captureModel = null;
+        renderModel(ItemRenderType.INVENTORY, (MCH_BaseVehicleInfo)entry.identity,
+                entry.captureModel, entry.captureTexture);
     }
     private static void renderLiveModel(ItemRenderType type, MCH_BaseVehicleInfo info) {
-        renderModel(type, info, info.model);
+        renderModel(type, info, info.model, resolveTexture(info, info.model));
     }
-    private static void renderModel(ItemRenderType type, MCH_BaseVehicleInfo info, net.minecraftforge.client.model.IModelCustom model) {
+    private static ResourceLocation resolveTexture(MCH_BaseVehicleInfo info, net.minecraftforge.client.model.IModelCustom model) {
+        ResourceLocation original = new ResourceLocation("mcheli", "textures/" + info.getDirectoryName()
+                + "/" + MCH_RenderBaseVehicle.getBaseTextureName(info.name) + ".png");
+        return mcheli.texture.MCH_ModelTextureRepairManager.resolve(
+                original, model, info.getDirectoryName() + "/" + info.name);
+    }
+    private static void renderModel(ItemRenderType type, MCH_BaseVehicleInfo info,
+            net.minecraftforge.client.model.IModelCustom model, ResourceLocation texture) {
         GL11.glPushMatrix();
         GL11.glEnable(org.lwjgl.opengl.GL12.GL_RESCALE_NORMAL);
         GL11.glColor4f(1, 1, 1, 1);
         try {
             transform(type, info);
-            ResourceLocation original = new ResourceLocation("mcheli", "textures/" + info.getDirectoryName()
-                    + "/" + MCH_RenderBaseVehicle.getBaseTextureName(info.name) + ".png");
-            Minecraft.getMinecraft().getTextureManager().bindTexture(
-                    mcheli.texture.MCH_ModelTextureRepairManager.resolve(original, model, info.getDirectoryName() + "/" + info.name));
+            Minecraft.getMinecraft().getTextureManager().bindTexture(texture);
             MCH_RenderBaseVehicle.beginSkinOverlayRender(info.getDirectoryName(), info.name);
             try {
                 model.renderAll();
@@ -471,11 +681,11 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             if(mcheli.MCH_ResourceHelper.resourceExists(path)) { sourceHash(digest, path); found = true; break; }
         }
         if(!found) throw new IOException("Missing model source " + name);
-        resourceHash(digest, new ResourceLocation("mcheli", "textures/" + info.getDirectoryName()
-                + "/" + MCH_RenderBaseVehicle.getBaseTextureName(info.name) + ".png"));
+        sourceHash(digest, "assets/mcheli/textures/" + info.getDirectoryName()
+                + "/" + MCH_RenderBaseVehicle.getBaseTextureName(info.name) + ".png");
         int overlay = info.name.indexOf("|skinoverlays/");
-        if(overlay >= 0) resourceHash(digest, new ResourceLocation("mcheli",
-                MCH_EntityBaseVehicle.getTexturePath(info.getDirectoryName(), info.name.substring(overlay + 1))));
+        if(overlay >= 0) sourceHash(digest, "assets/mcheli/"
+                + MCH_EntityBaseVehicle.getTexturePath(info.getDirectoryName(), info.name.substring(overlay + 1)));
         return safeName(name) + "-v" + ICON_CACHE_VERSION + "-" + hex(digest.digest());
     }
     private static void sourceHash(MessageDigest digest, String path) throws IOException {
