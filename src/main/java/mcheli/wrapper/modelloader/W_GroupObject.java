@@ -204,6 +204,22 @@ public class W_GroupObject {
             / FLOATS_PER_VERTEX;
    }
 
+   /** True when rendering this group cannot trigger an on-demand VBO allocation/upload. */
+   public boolean isVboReady() {
+      if(this.vboUnavailable || !GLContext.getCapabilities().OpenGL15) {
+         return true;
+      }
+      if(this.geometry == null) {
+         this.finalizeGeometry();
+      }
+      return this.geometry == null || this.geometry.length == 0
+            || (!this.vboDirty && this.vertexBufferId != 0 && this.vboUploadFloats >= this.geometry.length);
+   }
+
+   public boolean canUseVbo() {
+      return !this.vboUnavailable && GLContext.getCapabilities().OpenGL15;
+   }
+
    /** Uploads at most maxVertices and returns true when normal rendering will not build more VBO data. */
    public boolean prepareVboChunk(int maxVertices) {
       if(this.vboUnavailable || !GLContext.getCapabilities().OpenGL15) {

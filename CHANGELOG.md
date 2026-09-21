@@ -735,3 +735,25 @@ Developer/backend
   across resource reload, and drain the non-daemon writer for a bounded period at shutdown.
 - Replaced the earlier snapshot diagnostic name with the disabled-by-default
   `DebugVehicleIconCache` lifecycle, timing, cache, VBO, write, and queue diagnostics.
+
+2026-09-21 14:27 — Smooth first-time vehicle icon preparation
+
+- Changed icon VBO preparation from an 8,192-vertex-only allowance to a 0.75 ms render-thread
+  budget, using 512-vertex chunks with a 2,048-vertex hard ceiling per frame. Capture now rechecks
+  every OBJ/MQO group and returns to incremental preparation if any VBO could still be built by
+  `renderAll()`.
+- Kept inventory generation lower priority than gameplay: cache misses no longer synchronously load
+  vehicle models or initiate texture repair. They retain the authored sprite and rotate behind other
+  requests until the normal model lifecycle has supplied the model. An already repaired texture is
+  reused; otherwise capture uses the authored base texture without invalidating geometry VBOs.
+- Split production diagnostics into average/worst request resolution, model and texture lookup,
+  per-frame VBO work, framebuffer setup, GPU draw submission, `glReadPixels`, pixel copy/processing,
+  final texture upload, and READY latency. Normal texture repair now separately reports image load,
+  coverage, repair, UV correction, repaired-texture upload, corrected vertices, and invalidated VBO
+  groups.
+- Replaced byte-at-a-time framebuffer copying with one bulk buffer copy. GPU readback, background
+  crop/processing, later final-image upload, 350 ms capture pacing, request deduplication, bounded
+  queues, and persistent-cache behavior remain separate. Pending cache lookups continue alongside
+  an uncached model's preparation, and completed disk hits are promoted to upload before capture work.
+  Offline Java compilation passed; first-time
+  frame pacing and the diagnostic worst-stage measurements still require in-game validation.

@@ -33,18 +33,27 @@ public final class MCH_ModelTextureRepairManager implements IResourceManagerRelo
    private MCH_ModelTextureRepairManager(){}
    public static void register(){IResourceManager r=Minecraft.getMinecraft().getResourceManager();if(r instanceof IReloadableResourceManager)((IReloadableResourceManager)r).registerReloadListener(INSTANCE);}
    public static ResourceLocation resolve(ResourceLocation original,IModelCustom model,String modelPath){return INSTANCE.resolve0(original,model,modelPath);}
+   /** Inventory capture is lower priority and must not initiate synchronous texture repair. */
+   public static ResourceLocation resolveForBackgroundCapture(ResourceLocation original,IModelCustom model){
+      if(MCH_Config.EnableModelTextureRepair==null||!MCH_Config.EnableModelTextureRepair.prmBool||model==null)return original;
+      Entry hit=(Entry)INSTANCE.cache.get(new Key(original,model));return hit!=null?hit.location:original;
+   }
    private ResourceLocation resolve0(ResourceLocation original,IModelCustom model,String modelPath){
       if(MCH_Config.EnableModelTextureRepair==null||!MCH_Config.EnableModelTextureRepair.prmBool||model==null)return original;
       Key key=new Key(original,model);Entry hit=(Entry)cache.get(key);if(hit!=null)return hit.location;
       Entry made=build(original,model,modelPath);cache.put(key,made);return made.location;
    }
    private Entry build(ResourceLocation source,IModelCustom model,String modelPath){InputStream in=null;try{
-      IResource resource=Minecraft.getMinecraft().getResourceManager().getResource(source);in=resource.getInputStream();BufferedImage original=ImageIO.read(in);if(original==null)return new Entry(source,null);
-      boolean[] coverage=new boolean[original.getWidth()*original.getHeight()];if(!coverage(model,coverage,original.getWidth(),original.getHeight()))return new Entry(source,null);
+      long totalStarted=System.nanoTime(),stageStarted=totalStarted;
+      IResource resource=Minecraft.getMinecraft().getResourceManager().getResource(source);in=resource.getInputStream();BufferedImage original=ImageIO.read(in);long loadNanos=System.nanoTime()-stageStarted;if(original==null)return new Entry(source,null);
+      stageStarted=System.nanoTime();boolean[] coverage=new boolean[original.getWidth()*original.getHeight()];if(!coverage(model,coverage,original.getWidth(),original.getHeight()))return new Entry(source,null);long coverageNanos=System.nanoTime()-stageStarted;
+      stageStarted=System.nanoTime();
       MCH_ModelTextureRepairProcessor.Result result=MCH_ModelTextureRepairProcessor.repair(original,coverage,positive(MCH_Config.ModelTextureMaxHoleArea,16),positive(MCH_Config.ModelTextureMaxHoleThickness,2),positive(MCH_Config.ModelTextureRGBBleedRadius,2),positive(MCH_Config.ModelTextureAlphaExpansionRadius,1));
+      long repairNanos=System.nanoTime()-stageStarted;
       if(result.repairedPixels==0)return new Entry(source,null); // RGB-only changes are deliberately not enough confidence for replacement.
-      if(MCH_Config.EnableModelUVCorrection!=null&&MCH_Config.EnableModelUVCorrection.prmBool)correct(model,result.image,positive(MCH_Config.ModelTextureUVCorrectionRadius,2));
-      DynamicTexture dynamic=new DynamicTexture(result.image);ResourceLocation location=Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation("mcheli_model_repair_"+(generation++),dynamic);
+      stageStarted=System.nanoTime();int[] corrected=new int[2];if(MCH_Config.EnableModelUVCorrection!=null&&MCH_Config.EnableModelUVCorrection.prmBool)corrected=correct(model,result.image,positive(MCH_Config.ModelTextureUVCorrectionRadius,2));long correctionNanos=System.nanoTime()-stageStarted;
+      stageStarted=System.nanoTime();DynamicTexture dynamic=new DynamicTexture(result.image);ResourceLocation location=Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation("mcheli_model_repair_"+(generation++),dynamic);long uploadNanos=System.nanoTime()-stageStarted;
+      if(MCH_Config.DebugVehicleIconCache!=null&&MCH_Config.DebugVehicleIconCache.prmBool)MCH_Lib.Log("Icon texture repair: model=%s loadMs=%.3f coverageMs=%.3f repairMs=%.3f uvMs=%.3f uploadMs=%.3f totalMs=%.3f correctedVertices=%d invalidatedVboGroups=%d",modelPath,Double.valueOf(loadNanos/1e6),Double.valueOf(coverageNanos/1e6),Double.valueOf(repairNanos/1e6),Double.valueOf(correctionNanos/1e6),Double.valueOf(uploadNanos/1e6),Double.valueOf((System.nanoTime()-totalStarted)/1e6),Integer.valueOf(corrected[0]),Integer.valueOf(corrected[1]));
       if(MCH_Config.ModelTextureRepairDebugPreviews!=null&&MCH_Config.ModelTextureRepairDebugPreviews.prmBool)preview(modelPath,source,original,coverage,result);
       if(MCH_Config.ModelTextureRepairDebugLogging!=null&&MCH_Config.ModelTextureRepairDebugLogging.prmBool)MCH_Lib.Log("Texture repair: model=%s texture=%s pixels=%d",modelPath,source,Integer.valueOf(result.repairedPixels));
       return new Entry(location,dynamic);
@@ -76,22 +85,27 @@ public final class MCH_ModelTextureRepairManager implements IResourceManagerRelo
       return any;
    }
 
-   private static void correct(IModelCustom model, BufferedImage image, int radius) {
+   private static int[] correct(IModelCustom model, BufferedImage image, int radius) {
       Iterator groups = groups(model);
       if(groups == null) {
-         return;
+         return new int[2];
       }
+      int correctedVertices=0,invalidatedGroups=0;
       while(groups.hasNext()) {
          W_GroupObject group = (W_GroupObject)groups.next();
+         boolean changed=false;
          for(int vertex = 0; vertex < group.getVertexCount(); ++vertex) {
             float u = group.getTextureU(vertex);
             float v = group.getTextureV(vertex);
             float[] corrected = MCH_ModelTextureRepairProcessor.correctUV(u, v, image, radius);
             if(u != corrected[0] || v != corrected[1]) {
                group.setTextureCoordinates(vertex, corrected[0], corrected[1]);
+               ++correctedVertices;changed=true;
             }
          }
+         if(changed)++invalidatedGroups;
       }
+      return new int[]{correctedVertices,invalidatedGroups};
    }
 
    private static Iterator groups(IModelCustom model) {

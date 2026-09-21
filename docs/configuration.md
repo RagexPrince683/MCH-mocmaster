@@ -414,7 +414,11 @@ regenerated. Start a development client with
 `-Dmcheli.bakeIcons=true` to walk registered vehicle items through this same generator and export
 ship-ready files below `cache/mcheli/icons/export/assets/mcheli/textures/icons/`. Set
 `DebugVehicleIconCache = true` for concise lifecycle/write events plus periodic VBO, capture, cache,
-failure, timing, and queue-depth diagnostics. The option is disabled by default.
+failure, timing, and queue-depth diagnostics. Timings report average and worst request resolution,
+model/texture lookup, per-frame VBO preparation, framebuffer setup, model draw, `glReadPixels`, pixel
+copy/processing, final texture upload, and READY latency separately. If normal vehicle rendering
+initiates texture repair, its image load, UV coverage, repair, UV correction/VBO invalidation, and
+repaired-texture upload timings are logged separately. The option is disabled by default.
 
 ## Technology tiers
 
