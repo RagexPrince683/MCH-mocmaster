@@ -103,7 +103,7 @@ Client keybinds and rendering settings are safest to change while the client is 
 | `Ship3DItemIconScale` | `1.0` | Global scale multiplier for ship 3D item icons. |
 | `Tank3DItemIconScale` | `1.0` | Global scale multiplier for tank 3D item icons. |
 | `Turret3DItemIconScale` | `1.0` | Global scale multiplier for turret/static vehicle 3D item icons. |
-| `DebugVehicleLiveIcons` | `false` | Logs bounded live-icon render counts, prepared-model hits, model-load/VBO-preparation timing, duplicate requests avoided, texture lookup time, and average draw time. |
+| `DebugVehicleInventorySnapshots` | `false` | Logs aggregate prebaked/disk hits, misses, requests, deduplication, captures, failures, PNG I/O, timing, and queue depth for model-derived icons. |
 | `HideKeybind` | `false` | Hides keybind display/help where implemented. |
 | `RenderDistanceWeight` | `1000.0` | Render-distance weight for mod rendering. |
 | `EnableAircraftLODRender` | `true` | Enables client-only far-distance model displays for aircraft, tanks, turrets, and ships. |
@@ -386,18 +386,26 @@ Hold-freelook is hold-to-orbit: mouse input changes raw orbit yaw/pitch targets,
 `KeyVehicleLock` defaults to LWJGL key code `24` (**O**). While directly riding
 the pilot seat, press it to ask the server to lock or unlock vehicle entry.
 The server, not the client key binding, decides whether the request is allowed.
-# Live 3D vehicle inventory icons
+# Model-derived vehicle inventory icons
 
-Vehicle inventory, creative-tab, and NEI icons render the actual retained `IModelCustom` geometry.
-They do not use framebuffer captures, PNG snapshots, textured quads, or disk cache files. The
-ordinary item sprite is a temporary fallback only while a requested model is being loaded and its
-retained VBO groups are prepared; the icon switches to genuine 3D as soon as preparation completes.
+Vehicles with `Enable3DItemIcon = true` use the real model as a one-time icon producer. MC Heli
+first checks for a matching shipped PNG under `assets/mcheli/textures/icons/`, then checks the
+persistent `.minecraft/cache/mcheli/icons/` cache. A miss queues a 128×128 transparent framebuffer
+capture using the vehicle texture, texture repair, skin overlay, 30° X/45° Y orientation, body-size
+normalization, per-type scale, and `itemIconScaleFactor`.
 
-Preparation is lazy and deduplicated. At most one monolithic model load or one VBO group is handled
-at the end of a render frame, and item-render callbacks never parse models, upload VBOs, read pixels,
-or write files. Resource and targeted vehicle reloads invalidate the corresponding in-memory
-prepared references. Set `DebugVehicleLiveIcons = true` for periodic aggregate timing and queue
-diagnostics; it does not log every icon draw.
+Inventory, creative-tab, and NEI callbacks only request work or draw the ready textured quad. While
+resolution or capture is pending—or after a session failure—Forge uses the normal authored item
+sprite. Queue work is deduplicated and paced to at most one entry every 350 ms on the FML render-tick
+handler. The generated texture becomes available immediately; PNG compression and atomic replacement
+run on one bounded background writer. Equipped, dropped, and world/entity rendering remain live.
+
+Content hashes for the definition, model, base texture, optional overlay, renderer schema, dimensions,
+scales, and texture-repair settings form the cache name. Resource reload releases dynamic textures and
+reevaluates these hashes without deleting valid disk PNGs. Start a development client with
+`-Dmcheli.bakeIcons=true` to walk registered vehicle items through this same generator and export
+ship-ready files below `cache/mcheli/icons/export/assets/mcheli/textures/icons/`. Set
+`DebugVehicleInventorySnapshots = true` for periodic aggregate diagnostics.
 ## Technology tiers
 
 MC Heli's independent progression settings are written to `config/mcheli_tech.cfg`. The system is disabled by default so existing worlds and packs retain their former behavior. `enabled` turns enforcement on, `operatorBypass` and `creativeBypass` control non-progression access, and `tierMaximumYears` defines eleven strictly increasing inclusive year ceilings for tiers `0.0` through `5.0`.

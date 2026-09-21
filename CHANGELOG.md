@@ -698,16 +698,20 @@ Added shared Air, Ground, Surface, Underwater, and Unknown target-domain classif
   use consistent approximate years instead of falling through to unrestricted behavior. Static
   completeness validation passed; in-game tier display and gating remain to be tested.
 
-2026-09-20 14:58 — Restore retained live 3D vehicle icons
+2026-09-20 14:58 — Cache model-derived vehicle icons as persistent PNGs
 
-- Reversed the semantic regression from `53213ea5`/`73210c3b`: inventory, creative-tab, and NEI
-  vehicle icons again draw the actual retained `IModelCustom` geometry instead of framebuffer PNGs
-  on flat quads. Held, dropped, entity, scale, orientation, texture-repair, and skin-overlay paths
-  remain shared with the existing renderer behavior.
-- Kept expensive work outside item callbacks. First requests enter a deduplicated preparation state
-  machine; render-tick work performs at most one lazy model load or one retained VBO-group upload,
-  and later callbacks only bind the resolved texture and draw prepared geometry.
-- Removed active snapshot-generation settings and documented the temporary ordinary-sprite fallback,
-  reload invalidation, and aggregate `DebugVehicleLiveIcons` counters. Offline Java compilation
-  passed; inventory/creative/NEI depth, framing, skins, and stall reduction still require in-game
-  validation.
+- Replaced repeated inventory/creative/NEI model draws with an independent model-to-PNG pipeline.
+  It resolves shipped prebakes first, persistent `cache/mcheli/icons/` PNGs second, and otherwise
+  queues one canonical 128×128 offscreen capture. Ready icons are ordinary textured quads; equipped,
+  dropped, and world/entity rendering remains live.
+- Preserved the 30° X/45° Y icon transform, `1.35 / max(bodyWidth, bodyHeight, 1)` normalization,
+  per-type and vehicle scale, model texture repair, skin overlay, deterministic lighting/depth, and
+  transparent crop/padding. Cache keys hash actual definition/model/texture/overlay bytes plus all
+  relevant scales, repair settings, renderer identity, and cache schema.
+- Added deduplicated queued states, one capture per 350 ms, a reusable framebuffer/read buffer,
+  immediate dynamic upload, bounded single-thread atomic PNG writes, resource-reload cleanup, aggregate
+  diagnostics, ordinary-sprite pending/failure behavior, and same-generator developer prebake export.
+- User runtime testing exposed that requests remained queued because the service call was attached to
+  a handler registered on Forge's gameplay event bus. Queue servicing now also runs from MC Heli's
+  established FML render-tick handler. Offline Java compilation passed after this correction; the
+  corrected MC Heli icon transition and cache reuse still require another in-game verification.

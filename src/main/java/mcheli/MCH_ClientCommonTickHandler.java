@@ -1114,6 +1114,9 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public void onRenderTickPost(float partialTicks) {
+      // This handler is registered on FML's tick bus; service icon work here so
+      // queued captures cannot depend on the separate Forge gameplay event bus.
+      MCH_VehicleItemModelRender.onRenderFrame();
       if(MCH_ReplayModCompat.isReplayPlaybackActive()) {
          MCH_ThermalParticleFilter.endRender();
          if(this.restoreMouseFocusAfterRender) {

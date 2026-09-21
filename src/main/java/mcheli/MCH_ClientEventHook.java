@@ -17,7 +17,6 @@ import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_BaseVehiclePacketHandler;
 import mcheli.aircraft.MCH_RenderBaseVehicle;
-import mcheli.aircraft.MCH_VehicleItemModelRender;
 import mcheli.lweapon.MCH_ClientLightWeaponTickHandler;
 import mcheli.multiplay.MCH_GuiTargetMarker;
 import mcheli.particles.MCH_ParticlesUtil;
@@ -234,7 +233,6 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
             break;
          case END:
             MCP_PlaneChaseCamera.endOrientCameraBypass(Minecraft.getMinecraft());
-            MCH_VehicleItemModelRender.onRenderFrame();
             break;
       }
    }
