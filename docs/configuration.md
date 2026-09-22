@@ -391,8 +391,13 @@ The server, not the client key binding, decides whether the request is allowed.
 Vehicles with `Enable3DItemIcon = true` use the real model as a one-time icon producer. MC Heli
 first checks for a matching shipped PNG under `assets/mcheli/textures/icons/`, then checks the
 persistent `.minecraft/cache/mcheli/icons/` cache. A miss queues a 128×128 transparent framebuffer
-capture using the vehicle texture, texture repair, skin overlay, 30° X/45° Y orientation, body-size
-normalization, per-type scale, and `itemIconScaleFactor`.
+capture using the vehicle texture, texture repair, and skin overlay. Composition uses class-specific
+plane, helicopter, ground, ship, or fallback angles and occupancy targets. A deliberately wide
+orthographic preview measures the rendered alpha silhouette; a second render then scales and visually
+centers that silhouette with a class-specific safety margin. If the final silhouette breaches its
+margin, one smaller corrective render is made before caching. The per-type scale options retain their
+relative adjustment around their historical defaults, and `itemIconScaleFactor` remains a per-vehicle
+multiplier; edge safety always takes precedence over enlargement.
 
 Inventory, creative-tab, and NEI callbacks only request work or draw the ready textured quad. While
 resolution or capture is pending—or after a session failure—Forge uses the normal authored item
@@ -403,8 +408,8 @@ a cache miss, MC Heli reuses the model already held by the vehicle info or parse
 the bounded worker when normal equipped/world rendering has not initialized it yet. Texture repair is
 never initiated solely for an inventory icon; an existing repaired texture is reused, otherwise the
 authored base texture is warmed before capture. Any required OBJ/MQO VBO upload is limited to a
-0.75 ms/2,048-vertex render-frame budget. Final captures are paced at least 350 ms apart.
-Source hashing, cache reads, transparent crop/padding, and PNG compression run on bounded background
+0.75 ms/2,048-vertex render-frame budget. Capture passes are paced at least 350 ms apart.
+Source hashing, cache reads, silhouette measurement, and PNG compression run on bounded background
 workers. OpenGL preparation, rendering, and dynamic-texture upload remain on the render thread.
 Supported drivers use reusable double-buffered pixel buffer objects and sync fences so framebuffer
 readback completes across frames without blocking; older drivers retain the synchronous 128×128

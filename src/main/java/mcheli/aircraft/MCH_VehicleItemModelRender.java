@@ -36,7 +36,7 @@ import mcheli.MCH_ConfigPrm;
 /** Model capture produces persistent pixels; ready inventory icons never draw geometry. */
 public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManagerReloadListener {
 
-    public static final int ICON_CACHE_VERSION = 3;
+    public static final int ICON_CACHE_VERSION = 4;
     private static final int SIZE = 128;
     private static final int MAX_RESOLVE_BACKLOG = 1024;
     private static final int MAX_CAPTURE_BACKLOG = 1024;
@@ -297,6 +297,10 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         if(!modelSupportsPreparedBuffers(entry.captureModel))
             throw new IOException("Vehicle model has no safe prepared-VBO capture path");
         entry.captureOverlay = resolveOverlayTexture(info);
+        entry.preset = CompositionPreset.forInfo(info);
+        entry.capturePass = CapturePass.PREVIEW;
+        entry.finalAttempts = 0;
+        initializePreviewComposition(entry);
         transition(entry, State.PREPARE_TEXTURE, "capture-resources-resolved");
     }
 
@@ -430,20 +434,35 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
 
     private static void trySubmitPixelProcessing(final Entry entry) {
         final byte[] pixels = entry.pixels;
+        final CapturePass pass = entry.capturePass;
         try {
             WORKER.execute(new Runnable() {
                 public void run() {
                     long processStarted = System.nanoTime();
                     try {
-                        final BufferedImage image = processPixels(pixels);
+                        final PixelResult result = processPixels(pixels, pass == CapturePass.FINAL);
                         final long elapsed = System.nanoTime() - processStarted;
                         complete(new Runnable() {
                             public void run() {
                                 if(!current(entry)) return;
                                 processNanos += elapsed; processWorst = Math.max(processWorst, elapsed);
                                 entry.pixels = null;
-                                entry.image = image;
-                                transition(entry, State.UPLOAD_TEXTURE, "pixels-ready");
+                                if(pass == CapturePass.PREVIEW) {
+                                    applyPreviewComposition(entry, result.bounds);
+                                    entry.capturePass = CapturePass.FINAL;
+                                    transition(entry, State.RENDER_MODEL, "preview-silhouette-measured");
+                                } else if(needsSafetyCorrection(entry, result.bounds)) {
+                                    if(entry.finalAttempts++ < 1) {
+                                        applySafetyCorrection(entry, result.bounds);
+                                        transition(entry, State.RENDER_MODEL, "final-edge-safety-correction");
+                                    } else {
+                                        fail(entry, new IOException("Final icon silhouette exceeds safety margin"));
+                                    }
+                                } else {
+                                    entry.image = result.image;
+                                    clearCaptureResources(entry);
+                                    transition(entry, State.UPLOAD_TEXTURE, "pixels-ready");
+                                }
                             }
                         });
                     } catch(final Exception failure) {
@@ -592,9 +611,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         if(entry == null) return;
         String stage = entry.state != null ? entry.state.name() : "UNKNOWN";
         if(entry.state == State.WAIT_PBO) deletePixelPackFence();
-        entry.captureModel = null;
-        entry.captureTexture = null;
-        entry.captureOverlay = null;
+        clearCaptureResources(entry);
         entry.pixels = null;
         entry.image = null;
         transition(entry, State.FAILED, failure.getClass().getSimpleName() + ":" + failure.getMessage());
@@ -693,6 +710,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     private static void release(Entry entry) {
         if(entry != null && entry.texture != null)
             Minecraft.getMinecraft().getTextureManager().deleteTexture(entry.texture);
+        clearCaptureResources(entry);
     }
 
     private static void draw(Entry entry) {
@@ -795,9 +813,6 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         } finally {
             long restoreStarted = System.nanoTime();
             capturing = false;
-            entry.captureModel = null;
-            entry.captureTexture = null;
-            entry.captureOverlay = null;
             OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, previousLightX, previousLightY);
             GL11.glMatrixMode(GL11.GL_MODELVIEW);
             GL11.glPopMatrix();
@@ -928,38 +943,86 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         transition(entry, State.READBACK, reason);
     }
 
-    private static BufferedImage processPixels(byte[] pixels) throws IOException {
-        int[] argb = new int[SIZE * SIZE];
-        for(int y = 0; y < SIZE; ++y) for(int x = 0; x < SIZE; ++x) {
-            int p = (x + y * SIZE) * 4;
-            argb[x + (SIZE - y - 1) * SIZE] = (pixels[p + 3] & 255) << 24
-                    | (pixels[p] & 255) << 16 | (pixels[p + 1] & 255) << 8 | pixels[p + 2] & 255;
+    private static void initializePreviewComposition(Entry entry) {
+        entry.compositionX = 0.0F;
+        entry.compositionY = 0.0F;
+        entry.modelCenterX = entry.modelCenterY = entry.modelCenterZ = 0.0F;
+        float largest = Math.max(Math.max(((MCH_BaseVehicleInfo)entry.identity).bodyWidth,
+                ((MCH_BaseVehicleInfo)entry.identity).bodyHeight), 1.0F);
+        entry.compositionScale = 0.85F / largest;
+        if(entry.captureModel instanceof mcheli.wrapper.modelloader.W_ModelCustom) {
+            mcheli.wrapper.modelloader.W_ModelCustom model =
+                    (mcheli.wrapper.modelloader.W_ModelCustom)entry.captureModel;
+            float sizeX = model.maxX - model.minX;
+            float sizeY = model.maxY - model.minY;
+            float sizeZ = model.maxZ - model.minZ;
+            largest = Math.max(sizeX, Math.max(sizeY, sizeZ));
+            if(largest > 0.0001F) entry.compositionScale = 1.0F / largest;
+            entry.modelCenterX = (model.minX + model.maxX) * 0.5F;
+            entry.modelCenterY = (model.minY + model.maxY) * 0.5F;
+            entry.modelCenterZ = (model.minZ + model.maxZ) * 0.5F;
         }
-        BufferedImage image = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_ARGB);
-        image.setRGB(0, 0, SIZE, SIZE, argb, 0, SIZE);
-        return cropAndPad(image);
     }
 
-    private static BufferedImage cropAndPad(BufferedImage source) throws IOException {
-        int minX = SIZE, minY = SIZE, maxX = -1, maxY = -1;
+    private static void applyPreviewComposition(Entry entry, SilhouetteBounds bounds) {
+        MCH_BaseVehicleInfo info = (MCH_BaseVehicleInfo)entry.identity;
+        float configuredScale = getCompositionScaleMultiplier(info, entry.preset) * info.itemIconScaleFactor;
+        float desired = Math.min(SIZE * entry.preset.occupancy * configuredScale,
+                SIZE - entry.preset.margin * 2.0F);
+        desired = Math.max(16.0F, desired);
+        float correction = desired / Math.max(bounds.width(), bounds.height());
+        entry.compositionScale *= correction;
+        entry.compositionX = -correction * bounds.centerNdcX();
+        entry.compositionY = -correction * bounds.centerNdcY();
+    }
+
+    private static boolean needsSafetyCorrection(Entry entry, SilhouetteBounds bounds) {
+        int margin = entry.preset.margin;
+        return bounds.minX < margin || bounds.minY < margin
+                || bounds.maxX >= SIZE - margin || bounds.maxY >= SIZE - margin;
+    }
+
+    private static void applySafetyCorrection(Entry entry, SilhouetteBounds bounds) {
+        float available = SIZE - (entry.preset.margin + 1.0F) * 2.0F;
+        float correction = Math.min(1.0F, Math.min(available / bounds.width(), available / bounds.height()));
+        entry.compositionX = -correction * (bounds.centerNdcX() - entry.compositionX);
+        entry.compositionY = -correction * (bounds.centerNdcY() - entry.compositionY);
+        entry.compositionScale *= correction;
+    }
+
+    private static float getCompositionScaleMultiplier(MCH_BaseVehicleInfo info, CompositionPreset preset) {
+        float legacyDefault = preset == CompositionPreset.PLANE || preset == CompositionPreset.SHIP ? 0.1F
+                : preset == CompositionPreset.FALLBACK ? 1.0F : 0.3F;
+        return getTypeScale(info) / legacyDefault;
+    }
+
+    private static void clearCaptureResources(Entry entry) {
+        if(entry == null) return;
+        entry.captureModel = null;
+        entry.captureTexture = null;
+        entry.captureOverlay = null;
+        entry.modelGroups = null;
+        entry.activeGroup = null;
+    }
+
+    private static PixelResult processPixels(byte[] pixels, boolean createImage) throws IOException {
+        int[] argb = createImage ? new int[SIZE * SIZE] : null;
+        SilhouetteBounds bounds = new SilhouetteBounds();
         for(int y = 0; y < SIZE; ++y) for(int x = 0; x < SIZE; ++x) {
-            if((source.getRGB(x, y) >>> 24) != 0) {
-                minX = Math.min(minX, x); minY = Math.min(minY, y);
-                maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
-            }
+            int p = (x + y * SIZE) * 4;
+            int imageY = SIZE - y - 1;
+            int alpha = pixels[p + 3] & 255;
+            if(createImage) argb[x + imageY * SIZE] = alpha << 24
+                    | (pixels[p] & 255) << 16 | (pixels[p + 1] & 255) << 8 | pixels[p + 2] & 255;
+            if(alpha != 0) bounds.include(x, imageY);
         }
-        if(maxX < minX) throw new IOException("Empty model capture");
-        // Trim transparent bounds without normalizing away author scale/offset controls.
-        // Uniform 8px canvas padding preserves relative sizes and displacements.
-        BufferedImage output = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_ARGB);
-        java.awt.Graphics2D g = output.createGraphics();
-        try {
-            g.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            g.drawImage(source, 8 + minX * 112 / SIZE, 8 + minY * 112 / SIZE,
-                    8 + (maxX + 1) * 112 / SIZE, 8 + (maxY + 1) * 112 / SIZE,
-                    minX, minY, maxX + 1, maxY + 1, null);
-        } finally { g.dispose(); }
-        return output;
+        if(bounds.empty()) throw new IOException("Empty model capture");
+        BufferedImage image = null;
+        if(createImage) {
+            image = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_ARGB);
+            image.setRGB(0, 0, SIZE, SIZE, argb, 0, SIZE);
+        }
+        return new PixelResult(image, bounds);
     }
 
     private static void streamHash(MessageDigest digest, java.io.InputStream in) throws IOException {
@@ -1045,6 +1108,44 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         PREPARE_MODEL_BUFFERS, PREPARE_FRAMEBUFFER, RENDER_MODEL, READBACK, WAIT_PBO, WAIT_PROCESS,
         PROCESSING, UPLOAD_TEXTURE, READY, FAILED
     }
+    private enum CapturePass { PREVIEW, FINAL }
+    private enum CompositionPreset {
+        PLANE(22.0F, 42.0F, 0.86F, 9),
+        HELICOPTER(28.0F, 45.0F, 0.83F, 10),
+        GROUND(30.0F, 45.0F, 0.80F, 11),
+        SHIP(24.0F, 40.0F, 0.85F, 10),
+        FALLBACK(30.0F, 45.0F, 0.82F, 10);
+
+        final float pitch, yaw, occupancy;
+        final int margin;
+        CompositionPreset(float pitch, float yaw, float occupancy, int margin) {
+            this.pitch = pitch; this.yaw = yaw; this.occupancy = occupancy; this.margin = margin;
+        }
+        static CompositionPreset forInfo(MCH_BaseVehicleInfo info) {
+            if(info instanceof mcheli.plane.MCP_PlaneInfo) return PLANE;
+            if(info instanceof mcheli.helicopter.MCH_HeliInfo) return HELICOPTER;
+            if(info instanceof mcheli.ship.MCH_ShipInfo) return SHIP;
+            if(info instanceof mcheli.tank.MCH_TankInfo || info instanceof mcheli.vehicle.MCH_TurretInfo) return GROUND;
+            return FALLBACK;
+        }
+    }
+    private static final class SilhouetteBounds {
+        int minX = SIZE, minY = SIZE, maxX = -1, maxY = -1;
+        void include(int x, int y) {
+            minX = Math.min(minX, x); minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+        }
+        boolean empty() { return maxX < minX; }
+        int width() { return maxX - minX + 1; }
+        int height() { return maxY - minY + 1; }
+        float centerNdcX() { return (minX + maxX + 1.0F) / SIZE - 1.0F; }
+        float centerNdcY() { return 1.0F - (minY + maxY + 1.0F) / SIZE; }
+    }
+    private static final class PixelResult {
+        final BufferedImage image;
+        final SilhouetteBounds bounds;
+        PixelResult(BufferedImage image, SilhouetteBounds bounds) { this.image = image; this.bounds = bounds; }
+    }
     private enum LoadSource { NONE, PREBAKED, DISK }
     private enum RequestOrigin { HANDLE_RENDER_TYPE, RENDER_ITEM }
     private static final class ResolveResult {
@@ -1075,6 +1176,11 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         int pixelPackBuffer;
         long pixelPackIssuedNanos;
         BufferedImage image;
+        CompositionPreset preset = CompositionPreset.FALLBACK;
+        CapturePass capturePass = CapturePass.PREVIEW;
+        float compositionScale, compositionX, compositionY;
+        float modelCenterX, modelCenterY, modelCenterZ;
+        int finalAttempts;
         State state = State.WAIT_RESOLVE;
         boolean persist;
         boolean cancelled;
@@ -1171,10 +1277,10 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     }
     private static void renderCanonical(Entry entry) {
         renderModel(ItemRenderType.INVENTORY, (MCH_BaseVehicleInfo)entry.identity,
-                entry.captureModel, entry.captureTexture);
+                entry.captureModel, entry.captureTexture, entry);
     }
     private static void renderLiveModel(ItemRenderType type, MCH_BaseVehicleInfo info) {
-        renderModel(type, info, info.model, resolveTexture(info, info.model));
+        renderModel(type, info, info.model, resolveTexture(info, info.model), null);
     }
     private static ResourceLocation resolveTexture(MCH_BaseVehicleInfo info, net.minecraftforge.client.model.IModelCustom model) {
         ResourceLocation original = new ResourceLocation("mcheli", "textures/" + info.getDirectoryName()
@@ -1193,12 +1299,12 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                 info.getDirectoryName(), info.name.substring(separator + 1))) : null;
     }
     private static void renderModel(ItemRenderType type, MCH_BaseVehicleInfo info,
-            net.minecraftforge.client.model.IModelCustom model, ResourceLocation texture) {
+            net.minecraftforge.client.model.IModelCustom model, ResourceLocation texture, Entry entry) {
         GL11.glPushMatrix();
         GL11.glEnable(org.lwjgl.opengl.GL12.GL_RESCALE_NORMAL);
         GL11.glColor4f(1, 1, 1, 1);
         try {
-            transform(type, info);
+            transform(type, info, entry);
             long stageStarted = System.nanoTime();
             Minecraft.getMinecraft().getTextureManager().bindTexture(texture);
             long elapsed = System.nanoTime() - stageStarted;
@@ -1220,8 +1326,9 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         MCH_BaseVehicleInfo info = (MCH_BaseVehicleInfo)entry.identity;
         String name = info.getDirectoryName() + "/" + info.name;
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        bytes(digest, "mcheli-canonical-renderer-2|" + ICON_CACHE_VERSION + "|" + name
-                + "|rotation:30,45|translate:0,-.35,0|scale:1.35|" + info.bodyWidth + "|" + info.bodyHeight
+        bytes(digest, "mcheli-canonical-renderer-3|" + ICON_CACHE_VERSION + "|" + name
+                + "|two-pass-silhouette-composition|" + CompositionPreset.forInfo(info).name()
+                + "|" + info.bodyWidth + "|" + info.bodyHeight
                 + "|" + getTypeScale(info) + "|" + info.itemIconScaleFactor
                 + "|" + MCH_Config.EnableModelTextureRepair.prmBool + "|" + MCH_Config.EnableModelUVCorrection.prmBool
                 + "|" + MCH_Config.ModelTextureMaxHoleArea.prmInt + "|" + MCH_Config.ModelTextureMaxHoleThickness.prmInt
@@ -1250,7 +1357,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             streamHash(digest, in);
         }
     }
-   private static void transform(ItemRenderType type, MCH_BaseVehicleInfo info) {
+   private static void transform(ItemRenderType type, MCH_BaseVehicleInfo info, Entry entry) {
       switch(type) {
          case ENTITY:
             GL11.glTranslatef(0.0F, 0.35F, 0.0F);
@@ -1268,6 +1375,14 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             GL11.glRotatef(125.0F, 0.0F, 1.0F, 0.0F);
             break;
          case INVENTORY:
+            if(entry != null) {
+               GL11.glTranslatef(entry.compositionX, entry.compositionY, 0.0F);
+               GL11.glRotatef(entry.preset.pitch, 1.0F, 0.0F, 0.0F);
+               GL11.glRotatef(entry.preset.yaw, 0.0F, 1.0F, 0.0F);
+               GL11.glScalef(entry.compositionScale, entry.compositionScale, entry.compositionScale);
+               GL11.glTranslatef(-entry.modelCenterX, -entry.modelCenterY, -entry.modelCenterZ);
+               return;
+            }
             GL11.glTranslatef(0.0F, -0.35F, 0.0F);
             GL11.glRotatef(30.0F, 1.0F, 0.0F, 0.0F);
             GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);

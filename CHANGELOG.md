@@ -795,3 +795,20 @@ Developer/backend
   CPU copy, and GPU upload. Persistent cache priority, resolver backpressure, VBO budgets, 350 ms
   capture pacing, and the cache schema are unchanged. Offline compilation passed; uncached NEI
   generation and capture frame pacing still require in-game validation.
+
+2026-09-21 23:56 — Compose vehicle icons from rendered silhouettes
+
+- Replaced the single generic inventory capture plus pixel crop with a two-pass orthographic
+  compositor. A conservative preview uses model bounds only to keep geometry in frame, then its
+  rendered alpha silhouette supplies the final uniform scale and visual center.
+- Added plane, helicopter, ground, ship, and fallback presentation presets. Their angles and occupancy
+  targets give aircraft and long ships more useful canvas presence while retaining a stable elevated
+  view for tanks and other ground vehicles. Existing global and per-vehicle scale controls remain
+  relative adjustments around the normalized class target.
+- Added hard class margins and a final silhouette check. A final capture that approaches an edge is
+  recentered and reduced once before acceptance, preventing already-clipped geometry from being
+  hidden by post-process padding. Bumped the icon cache schema so older compositions regenerate.
+- Preserved request deduplication, authored-sprite fallback, bounded model/VBO preparation, texture
+  repair reuse, paced framebuffer capture, asynchronous PBO readback, background processing and PNG
+  persistence, and ready textured-quad rendering. Offline Java compilation passed; fresh-cache NEI
+  visual composition and the corrective edge pass still require in-game validation.
