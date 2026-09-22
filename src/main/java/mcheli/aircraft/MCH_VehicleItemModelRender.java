@@ -23,7 +23,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.IItemRenderer;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.ARBSync;
+import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL21;
+import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GLContext;
+import org.lwjgl.opengl.GLSync;
 import mcheli.MCH_Config;
 import mcheli.MCH_ConfigPrm;
 
@@ -34,6 +40,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     private static final int SIZE = 128;
     private static final int MAX_RESOLVE_BACKLOG = 1024;
     private static final int MAX_CAPTURE_BACKLOG = 1024;
+    private static final int PIXEL_BYTES = SIZE * SIZE * 4;
     private static final int VBO_VERTICES_PER_FRAME = 2048;
     private static final int VBO_VERTICES_PER_CHUNK = 512;
     private static final long VBO_TIME_BUDGET_NS = 750000L;
@@ -41,6 +48,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     private static final long CAPTURE_INTERVAL_MS = 350L;
     private static final Map<Object, Entry> ENTRIES = new IdentityHashMap<Object, Entry>();
     private static final LinkedHashMap<Object, Entry> RESOLVE_BACKLOG = new LinkedHashMap<Object, Entry>();
+    private static final LinkedHashMap<Object, Entry> MODEL_BACKLOG = new LinkedHashMap<Object, Entry>();
     private static final LinkedHashMap<Object, Entry> CAPTURE_BACKLOG = new LinkedHashMap<Object, Entry>();
     private static final LinkedHashMap<Object, Entry> READY_UPLOADS = new LinkedHashMap<Object, Entry>();
     private static final java.util.concurrent.ArrayBlockingQueue<Runnable> COMPLETIONS =
@@ -52,15 +60,29 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     private static final java.util.concurrent.ThreadPoolExecutor WORKER = executor("mcheli icon resolver", 8, true);
     private static final java.util.concurrent.ThreadPoolExecutor WRITER = executor("mcheli icon PNG writer", 32, false);
     private static Framebuffer framebuffer;
-    private static final ByteBuffer PIXELS = BufferUtils.createByteBuffer(SIZE * SIZE * 4);
+    private static final ByteBuffer PIXELS = BufferUtils.createByteBuffer(PIXEL_BYTES);
+    private static final int[] PIXEL_PACK_BUFFERS = new int[2];
+    private static int nextPixelPackBuffer;
+    private static GLSync pixelPackFence;
+    private static boolean pixelPackDisabled;
     private static Entry active;
     private static long epoch;
     private static long nextBakeWork, nextCaptureWork, lastReport, requests, duplicates, deferred, prebaked, hits, misses,
-            captures, failures, loads, resolverSubmissions, resolverDeferred, resolverFailures, processorDeferred;
+            captures, failures, loads, resolverSubmissions, resolverDeferred, resolverFailures, processorDeferred,
+            inventoryRequests, handleRequests, renderItemRequests, modelSubmissions, modelDeferred, modelFailures,
+            modelWaits, pboIssues, pboCompletions, pboFallbacks;
     private static long resolveNanos, modelLookupNanos, textureNanos, vboNanos, framebufferNanos, renderNanos,
-            readPixelsNanos, pixelCopyNanos, processNanos, uploadNanos, readyNanos;
+            readPixelsNanos, pixelCopyNanos, processNanos, uploadNanos, readyNanos, modelLoadNanos,
+            textureWarmNanos, framebufferCreateNanos, pboIssueNanos, pboLatencyNanos,
+            framebufferBindNanos, clearNanos, stateSetupNanos, textureBindNanos, modelDrawNanos,
+            overlayDrawNanos, captureRestoreNanos, textureAllocationNanos, textureDataCopyNanos,
+            textureGpuUploadNanos;
     private static long resolveWorst, modelLookupWorst, textureWorst, vboWorst, framebufferWorst, renderWorst,
-            readPixelsWorst, pixelCopyWorst, processWorst, uploadWorst, readyWorst;
+            readPixelsWorst, pixelCopyWorst, processWorst, uploadWorst, readyWorst, modelLoadWorst,
+            textureWarmWorst, framebufferCreateWorst, pboIssueWorst, pboLatencyWorst;
+    private static long framebufferBindWorst, clearWorst, stateSetupWorst, textureBindWorst, modelDrawWorst,
+            overlayDrawWorst, captureRestoreWorst, textureAllocationWorst, textureDataCopyWorst,
+            textureGpuUploadWorst;
     private static long vboGroupsPrepared;
     private static int resolveBacklogHighWater, captureBacklogHighWater, workerHighWater, writerHighWater;
     private static java.util.Iterator bakeItems;
@@ -95,7 +117,9 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
 
     public static boolean isCapturing() { return capturing; }
 
-    private static Entry request(Object identity, ItemStack stack, IItemRenderer renderer) {
+    private static Entry request(Object identity, ItemStack stack, IItemRenderer renderer, RequestOrigin origin) {
+        ++inventoryRequests;
+        if(origin == RequestOrigin.HANDLE_RENDER_TYPE) ++handleRequests; else ++renderItemRequests;
         Entry entry = ENTRIES.get(identity);
         if(entry != null && entry.appearance != appearance(identity)) {
             discard(entry);
@@ -152,11 +176,14 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         try {
             switch(active.state) {
                 case PREPARE_CAPTURE: timedPrepare(active); break;
+                case PREPARE_TEXTURE: timedPrepareTexture(active); break;
                 case PREPARE_MODEL_BUFFERS: timedVbo(active); break;
+                case PREPARE_FRAMEBUFFER: timedPrepareFramebuffer(active); break;
                 case RENDER_MODEL:
                     if(now >= nextCaptureWork) timedRender(active);
                     break;
                 case READBACK: timedReadback(active); break;
+                case WAIT_PBO: timedPboCompletion(active); break;
                 case WAIT_PROCESS: trySubmitPixelProcessing(active); break;
                 case UPLOAD_TEXTURE: timedUpload(active); break;
                 default: break;
@@ -178,7 +205,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                         final long elapsed = System.nanoTime() - started;
                         complete(new Runnable() {
                             public void run() {
-                                if(!current(entry)) return;
+                                if(!current(entry) || entry.state != State.RESOLVING) return;
                                 entry.key = key;
                                 entry.cacheFile = new File(cacheDirectory, key + ".png");
                                 resolveNanos += elapsed;
@@ -194,8 +221,12 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                                 } else {
                                     ++misses;
                                     entry.persist = true;
-                                    transition(entry, State.PREPARE_CAPTURE, result.reason);
-                                    enqueueCapture(entry);
+                                    MCH_BaseVehicleInfo info = (MCH_BaseVehicleInfo)entry.identity;
+                                    if(info.model == null) enqueueModel(entry, result.reason);
+                                    else {
+                                        transition(entry, State.PREPARE_CAPTURE, result.reason);
+                                        enqueueCapture(entry);
+                                    }
                                 }
                             }
                         });
@@ -254,7 +285,8 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         long elapsed = System.nanoTime() - started;
         modelLookupNanos += elapsed; modelLookupWorst = Math.max(modelLookupWorst, elapsed);
         if(entry.captureModel == null) {
-            deferActive(entry, "waiting-for-normal-model-lifecycle");
+            enqueueModel(entry, "body-model-not-yet-ready");
+            if(active == entry) active = null;
             return;
         }
 
@@ -264,8 +296,24 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         textureNanos += elapsed; textureWorst = Math.max(textureWorst, elapsed);
         if(!modelSupportsPreparedBuffers(entry.captureModel))
             throw new IOException("Vehicle model has no safe prepared-VBO capture path");
+        entry.captureOverlay = resolveOverlayTexture(info);
+        transition(entry, State.PREPARE_TEXTURE, "capture-resources-resolved");
+    }
+
+    private static void timedPrepareTexture(Entry entry) {
+        long started = System.nanoTime();
+        int previousTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+        try {
+            net.minecraft.client.renderer.texture.TextureManager manager = Minecraft.getMinecraft().getTextureManager();
+            manager.bindTexture(entry.captureTexture);
+            if(entry.captureOverlay != null) manager.bindTexture(entry.captureOverlay);
+        } finally {
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, previousTexture);
+            long elapsed = System.nanoTime() - started;
+            textureWarmNanos += elapsed; textureWarmWorst = Math.max(textureWarmWorst, elapsed);
+        }
         entry.modelGroups = groups(entry.captureModel);
-        transition(entry, State.PREPARE_MODEL_BUFFERS, "model-and-texture-ready");
+        transition(entry, State.PREPARE_MODEL_BUFFERS, "textures-resident");
     }
 
     private static void timedVbo(Entry entry) {
@@ -276,7 +324,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             while(budget > 0) {
                 if(entry.activeGroup == null) {
                     if(entry.modelGroups == null || !entry.modelGroups.hasNext()) {
-                        transition(entry, State.RENDER_MODEL, "model-buffers-ready");
+                        transition(entry, State.PREPARE_FRAMEBUFFER, "model-buffers-ready");
                         return;
                     }
                     entry.activeGroup = (mcheli.wrapper.modelloader.W_GroupObject)entry.modelGroups.next();
@@ -301,6 +349,20 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         }
     }
 
+    private static void timedPrepareFramebuffer(Entry entry) throws IOException {
+        if(!OpenGlHelper.isFramebufferEnabled()) throw new IOException("Framebuffer capture unavailable/disabled");
+        long started = System.nanoTime();
+        if(framebuffer == null) {
+            int previousFramebuffer = GL11.glGetInteger(0x8CA6);
+            framebuffer = new Framebuffer(SIZE, SIZE, true);
+            OpenGlHelper.func_153171_g(0x8D40, previousFramebuffer);
+        }
+        ensurePixelPackBuffers();
+        long elapsed = System.nanoTime() - started;
+        framebufferCreateNanos += elapsed; framebufferCreateWorst = Math.max(framebufferCreateWorst, elapsed);
+        transition(entry, State.RENDER_MODEL, "capture-target-ready");
+    }
+
     private static void timedRender(Entry entry) throws IOException {
         if(renderCapture(entry)) {
             ++captures;
@@ -310,8 +372,59 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     }
 
     private static void timedReadback(final Entry entry) throws IOException {
-        entry.pixels = readback();
+        if(supportsAsyncReadback()) {
+            try {
+                issuePboReadback(entry);
+                return;
+            } catch(Exception unsupportedAtRuntime) {
+                deletePixelPackFence();
+                pixelPackDisabled = true;
+                ++pboFallbacks;
+            }
+        } else {
+            ++pboFallbacks;
+        }
+        entry.pixels = readbackSynchronously();
         transition(entry, State.WAIT_PROCESS, "readback-complete");
+        trySubmitPixelProcessing(entry);
+    }
+
+    private static void timedPboCompletion(Entry entry) throws IOException {
+        if(pixelPackFence == null) throw new IOException("Missing pixel readback fence");
+        int result = clientWait(pixelPackFence);
+        if(result == ARBSync.GL_TIMEOUT_EXPIRED) return;
+        if(result == ARBSync.GL_WAIT_FAILED) {
+            fallbackFromPbo(entry, "pbo-fence-wait-failed");
+            return;
+        }
+        long started = System.nanoTime();
+        int previousBuffer = GL11.glGetInteger(GL21.GL_PIXEL_PACK_BUFFER_BINDING);
+        GL15.glBindBuffer(GL21.GL_PIXEL_PACK_BUFFER, PIXEL_PACK_BUFFERS[entry.pixelPackBuffer]);
+        boolean valid = false;
+        try {
+            ByteBuffer mapped = GL15.glMapBuffer(GL21.GL_PIXEL_PACK_BUFFER, GL15.GL_READ_ONLY,
+                    PIXEL_BYTES, null);
+            if(mapped != null) {
+                entry.pixels = new byte[PIXEL_BYTES];
+                mapped.position(0);
+                mapped.get(entry.pixels);
+                valid = GL15.glUnmapBuffer(GL21.GL_PIXEL_PACK_BUFFER);
+            }
+        } finally {
+            GL15.glBindBuffer(GL21.GL_PIXEL_PACK_BUFFER, previousBuffer);
+            deletePixelPackFence();
+        }
+        if(!valid) {
+            entry.pixels = null;
+            fallbackFromPbo(entry, "pbo-map-failed");
+            return;
+        }
+        long copyElapsed = System.nanoTime() - started;
+        pixelCopyNanos += copyElapsed; pixelCopyWorst = Math.max(pixelCopyWorst, copyElapsed);
+        long latency = System.nanoTime() - entry.pixelPackIssuedNanos;
+        pboLatencyNanos += latency; pboLatencyWorst = Math.max(pboLatencyWorst, latency);
+        ++pboCompletions;
+        transition(entry, State.WAIT_PROCESS, "pbo-readback-complete");
         trySubmitPixelProcessing(entry);
     }
 
@@ -351,8 +464,21 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     private static void timedUpload(Entry entry) {
         long started = System.nanoTime();
         try {
+            long stageStarted = System.nanoTime();
+            DynamicTexture dynamic = new DynamicTexture(entry.image.getWidth(), entry.image.getHeight());
+            long elapsed = System.nanoTime() - stageStarted;
+            textureAllocationNanos += elapsed; textureAllocationWorst = Math.max(textureAllocationWorst, elapsed);
+            stageStarted = System.nanoTime();
+            entry.image.getRGB(0, 0, entry.image.getWidth(), entry.image.getHeight(),
+                    dynamic.getTextureData(), 0, entry.image.getWidth());
+            elapsed = System.nanoTime() - stageStarted;
+            textureDataCopyNanos += elapsed; textureDataCopyWorst = Math.max(textureDataCopyWorst, elapsed);
+            stageStarted = System.nanoTime();
+            dynamic.updateDynamicTexture();
+            elapsed = System.nanoTime() - stageStarted;
+            textureGpuUploadNanos += elapsed; textureGpuUploadWorst = Math.max(textureGpuUploadWorst, elapsed);
             entry.texture = Minecraft.getMinecraft().getTextureManager()
-                    .getDynamicTextureLocation("mcheli_inventory_icon", new DynamicTexture(entry.image));
+                    .getDynamicTextureLocation("mcheli_inventory_icon", dynamic);
             if(entry.persist) save(entry, entry.image, entry.cacheFile);
             if(Boolean.getBoolean("mcheli.bakeIcons")) save(entry, entry.image, exportFile(entry.key));
             entry.image = null;
@@ -368,10 +494,71 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     }
 
     private static void submitQueuedLookup() {
-        if(RESOLVE_BACKLOG.isEmpty()) return;
-        if(WORKER.getQueue().remainingCapacity() <= 0) { ++resolverDeferred; return; }
-        Entry entry = RESOLVE_BACKLOG.values().iterator().next();
-        if(submitResolve(entry)) RESOLVE_BACKLOG.remove(entry.identity);
+        if(WORKER.getQueue().remainingCapacity() <= 0) {
+            if(!RESOLVE_BACKLOG.isEmpty()) ++resolverDeferred;
+            else if(!MODEL_BACKLOG.isEmpty()) ++modelDeferred;
+            return;
+        }
+        if(!RESOLVE_BACKLOG.isEmpty()) {
+            Entry entry = RESOLVE_BACKLOG.values().iterator().next();
+            if(submitResolve(entry)) RESOLVE_BACKLOG.remove(entry.identity);
+        } else if(!MODEL_BACKLOG.isEmpty()) {
+            Entry entry = MODEL_BACKLOG.values().iterator().next();
+            if(submitModelLoad(entry)) MODEL_BACKLOG.remove(entry.identity);
+        }
+    }
+
+    private static void enqueueModel(Entry entry, String reason) {
+        entry.state = State.WAIT_MODEL;
+        MODEL_BACKLOG.put(entry.identity, entry);
+        ++modelWaits;
+        cacheEvent(entry, "state=WAIT_MODEL reason=" + reason);
+    }
+
+    private static boolean submitModelLoad(final Entry entry) {
+        final MCH_BaseVehicleInfo info = (MCH_BaseVehicleInfo)entry.identity;
+        try {
+            WORKER.execute(new Runnable() {
+                public void run() {
+                    long started = System.nanoTime();
+                    try {
+                        final net.minecraftforge.client.model.IModelCustom loaded =
+                                mcheli.MCH_ModelManager.load(info.getDirectoryName(), info.name);
+                        final long elapsed = System.nanoTime() - started;
+                        complete(new Runnable() {
+                            public void run() {
+                                if(!current(entry) || entry.state != State.LOADING_MODEL) return;
+                                modelLoadNanos += elapsed; modelLoadWorst = Math.max(modelLoadWorst, elapsed);
+                                if(info.model == null) info.model = loaded;
+                                if(info.model == null) {
+                                    ++modelFailures;
+                                    fail(entry, new IOException("Missing vehicle body model"));
+                                    return;
+                                }
+                                transition(entry, State.PREPARE_CAPTURE, "body-model-ready");
+                                enqueueCapture(entry);
+                            }
+                        });
+                    } catch(final Exception failure) {
+                        complete(new Runnable() {
+                            public void run() {
+                                if(current(entry) && entry.state == State.LOADING_MODEL) {
+                                    ++modelFailures; fail(entry, failure);
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+            transition(entry, State.LOADING_MODEL, "body-model-queued");
+            ++modelSubmissions;
+            workerHighWater = Math.max(workerHighWater, WORKER.getQueue().size());
+            return true;
+        } catch(java.util.concurrent.RejectedExecutionException full) {
+            entry.state = State.WAIT_MODEL;
+            ++modelDeferred;
+            return false;
+        }
     }
 
     private static void enqueueCapture(Entry entry) {
@@ -404,8 +591,11 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     private static void fail(Entry entry, Exception failure) {
         if(entry == null) return;
         String stage = entry.state != null ? entry.state.name() : "UNKNOWN";
+        if(entry.state == State.WAIT_PBO) deletePixelPackFence();
         entry.captureModel = null;
         entry.captureTexture = null;
+        entry.captureOverlay = null;
+        entry.pixels = null;
         entry.image = null;
         transition(entry, State.FAILED, failure.getClass().getSimpleName() + ":" + failure.getMessage());
         ++failures;
@@ -470,6 +660,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         for(Entry entry : ENTRIES.values()) { entry.cancelled = true; release(entry); }
         ENTRIES.clear();
         RESOLVE_BACKLOG.clear();
+        MODEL_BACKLOG.clear();
         CAPTURE_BACKLOG.clear();
         READY_UPLOADS.clear();
         WORKER.getQueue().clear();
@@ -481,6 +672,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             OpenGlHelper.func_153171_g(0x8D40, previous);
             framebuffer = null;
         }
+        deletePixelPackBuffers();
         nextBakeWork = 0L;
         nextCaptureWork = 0L;
         bakeStarted = false;
@@ -492,6 +684,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         release(entry);
         ENTRIES.remove(entry.identity);
         RESOLVE_BACKLOG.remove(entry.identity);
+        MODEL_BACKLOG.remove(entry.identity);
         CAPTURE_BACKLOG.remove(entry.identity);
         READY_UPLOADS.remove(entry.identity);
         if(active == entry) active = null;
@@ -526,6 +719,16 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
 
     private static boolean renderCapture(Entry entry) throws IOException {
         if(!OpenGlHelper.isFramebufferEnabled()) throw new IOException("Framebuffer capture unavailable/disabled");
+        if(framebuffer == null) {
+            transition(entry, State.PREPARE_FRAMEBUFFER, "capture-target-lost");
+            return false;
+        }
+        net.minecraft.client.renderer.texture.TextureManager textureManager = Minecraft.getMinecraft().getTextureManager();
+        if(textureManager.getTexture(entry.captureTexture) == null
+                || (entry.captureOverlay != null && textureManager.getTexture(entry.captureOverlay) == null)) {
+            transition(entry, State.PREPARE_TEXTURE, "capture-texture-not-resident");
+            return false;
+        }
         if(!modelBuffersReady(entry.captureModel)) {
             entry.modelGroups = groups(entry.captureModel);
             entry.activeGroup = null;
@@ -543,21 +746,25 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glPushMatrix();
         try {
-            long framebufferStarted = System.nanoTime();
+            long stageStarted = System.nanoTime();
             OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
-            if(framebuffer == null) framebuffer = new Framebuffer(SIZE, SIZE, true);
             framebuffer.bindFramebuffer(true);
             framebuffer.checkFramebufferComplete();
             GL11.glViewport(0, 0, SIZE, SIZE);
+            long elapsed = System.nanoTime() - stageStarted;
+            framebufferBindNanos += elapsed; framebufferBindWorst = Math.max(framebufferBindWorst, elapsed);
+            stageStarted = System.nanoTime();
             GL11.glDisable(GL11.GL_SCISSOR_TEST);
             GL11.glColorMask(true, true, true, true);
             GL11.glDepthMask(true);
             GL11.glClearColor(0, 0, 0, 0);
             GL11.glClearDepth(1);
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-            long framebufferElapsed = System.nanoTime() - framebufferStarted;
+            long framebufferElapsed = System.nanoTime() - stageStarted;
             framebufferNanos += framebufferElapsed;
             framebufferWorst = Math.max(framebufferWorst, framebufferElapsed);
+            clearNanos += framebufferElapsed; clearWorst = Math.max(clearWorst, framebufferElapsed);
+            stageStarted = System.nanoTime();
             GL11.glMatrixMode(GL11.GL_PROJECTION);
             GL11.glLoadIdentity();
             projection();
@@ -577,6 +784,8 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             GL11.glColor4f(1, 1, 1, 1);
             OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240, 240);
             net.minecraft.client.renderer.RenderHelper.enableStandardItemLighting();
+            elapsed = System.nanoTime() - stageStarted;
+            stateSetupNanos += elapsed; stateSetupWorst = Math.max(stateSetupWorst, elapsed);
             capturing = true;
             long drawStarted = System.nanoTime();
             renderCanonical(entry);
@@ -584,9 +793,11 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             renderNanos += drawElapsed; renderWorst = Math.max(renderWorst, drawElapsed);
             return true;
         } finally {
+            long restoreStarted = System.nanoTime();
             capturing = false;
             entry.captureModel = null;
             entry.captureTexture = null;
+            entry.captureOverlay = null;
             OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, previousLightX, previousLightY);
             GL11.glMatrixMode(GL11.GL_MODELVIEW);
             GL11.glPopMatrix();
@@ -597,10 +808,13 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             OpenGlHelper.func_153171_g(0x8D40, previousFramebuffer);
             OpenGlHelper.setActiveTexture(previousActiveTexture);
             GL11.glMatrixMode(previousMatrixMode);
+            long restoreElapsed = System.nanoTime() - restoreStarted;
+            captureRestoreNanos += restoreElapsed;
+            captureRestoreWorst = Math.max(captureRestoreWorst, restoreElapsed);
         }
     }
 
-    private static byte[] readback() throws IOException {
+    private static byte[] readbackSynchronously() throws IOException {
         if(framebuffer == null) throw new IOException("Missing icon framebuffer");
         int previousFramebuffer = GL11.glGetInteger(0x8CA6);
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
@@ -625,6 +839,93 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
             GL11.glPopAttrib();
             OpenGlHelper.func_153171_g(0x8D40, previousFramebuffer);
         }
+    }
+
+    private static boolean supportsAsyncReadback() {
+        org.lwjgl.opengl.ContextCapabilities capabilities = GLContext.getCapabilities();
+        boolean pbo = capabilities.OpenGL21 || capabilities.GL_ARB_pixel_buffer_object;
+        boolean sync = capabilities.OpenGL32 || capabilities.GL_ARB_sync;
+        return !pixelPackDisabled && capabilities.OpenGL15 && pbo && sync;
+    }
+
+    private static void ensurePixelPackBuffers() {
+        if(!supportsAsyncReadback() || PIXEL_PACK_BUFFERS[0] != 0) return;
+        int previousBuffer = GL11.glGetInteger(GL21.GL_PIXEL_PACK_BUFFER_BINDING);
+        try {
+            for(int i = 0; i < PIXEL_PACK_BUFFERS.length; ++i) {
+                PIXEL_PACK_BUFFERS[i] = GL15.glGenBuffers();
+                GL15.glBindBuffer(GL21.GL_PIXEL_PACK_BUFFER, PIXEL_PACK_BUFFERS[i]);
+                GL15.glBufferData(GL21.GL_PIXEL_PACK_BUFFER, PIXEL_BYTES, GL15.GL_STREAM_READ);
+            }
+        } finally {
+            GL15.glBindBuffer(GL21.GL_PIXEL_PACK_BUFFER, previousBuffer);
+        }
+    }
+
+    private static void issuePboReadback(Entry entry) throws IOException {
+        if(framebuffer == null || PIXEL_PACK_BUFFERS[0] == 0)
+            throw new IOException("Missing asynchronous icon readback buffers");
+        int previousFramebuffer = GL11.glGetInteger(0x8CA6);
+        int previousBuffer = GL11.glGetInteger(GL21.GL_PIXEL_PACK_BUFFER_BINDING);
+        int index = nextPixelPackBuffer++ % PIXEL_PACK_BUFFERS.length;
+        long started = System.nanoTime();
+        GL11.glPushAttrib(GL11.GL_VIEWPORT_BIT);
+        GL11.glPushClientAttrib(GL11.GL_CLIENT_PIXEL_STORE_BIT);
+        try {
+            framebuffer.bindFramebuffer(true);
+            GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
+            GL15.glBindBuffer(GL21.GL_PIXEL_PACK_BUFFER, PIXEL_PACK_BUFFERS[index]);
+            GL11.glReadPixels(0, 0, SIZE, SIZE, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, 0L);
+            pixelPackFence = createPixelPackFence();
+            if(pixelPackFence == null) throw new IOException("Unable to create icon readback fence");
+        } finally {
+            GL15.glBindBuffer(GL21.GL_PIXEL_PACK_BUFFER, previousBuffer);
+            GL11.glPopClientAttrib();
+            GL11.glPopAttrib();
+            OpenGlHelper.func_153171_g(0x8D40, previousFramebuffer);
+        }
+        long elapsed = System.nanoTime() - started;
+        pboIssueNanos += elapsed; pboIssueWorst = Math.max(pboIssueWorst, elapsed);
+        ++pboIssues;
+        entry.pixelPackBuffer = index;
+        entry.pixelPackIssuedNanos = System.nanoTime();
+        transition(entry, State.WAIT_PBO, "pbo-readback-issued");
+    }
+
+    private static GLSync createPixelPackFence() {
+        return GLContext.getCapabilities().OpenGL32
+                ? GL32.glFenceSync(GL32.GL_SYNC_GPU_COMMANDS_COMPLETE, 0)
+                : ARBSync.glFenceSync(ARBSync.GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    }
+
+    private static int clientWait(GLSync fence) {
+        return GLContext.getCapabilities().OpenGL32
+                ? GL32.glClientWaitSync(fence, 0, 0L)
+                : ARBSync.glClientWaitSync(fence, 0, 0L);
+    }
+
+    private static void deletePixelPackFence() {
+        if(pixelPackFence == null) return;
+        if(GLContext.getCapabilities().OpenGL32) GL32.glDeleteSync(pixelPackFence);
+        else ARBSync.glDeleteSync(pixelPackFence);
+        pixelPackFence = null;
+    }
+
+    private static void deletePixelPackBuffers() {
+        deletePixelPackFence();
+        for(int i = 0; i < PIXEL_PACK_BUFFERS.length; ++i) {
+            if(PIXEL_PACK_BUFFERS[i] != 0) GL15.glDeleteBuffers(PIXEL_PACK_BUFFERS[i]);
+            PIXEL_PACK_BUFFERS[i] = 0;
+        }
+        nextPixelPackBuffer = 0;
+        pixelPackDisabled = false;
+    }
+
+    private static void fallbackFromPbo(Entry entry, String reason) {
+        deletePixelPackFence();
+        pixelPackDisabled = true;
+        ++pboFallbacks;
+        transition(entry, State.READBACK, reason);
     }
 
     private static BufferedImage processPixels(byte[] pixels) throws IOException {
@@ -687,7 +988,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         if(!diagnostics() || now - lastReport < 10000L) return;
         lastReport = now;
         System.out.println(String.format(java.util.Locale.ROOT,
-                "[MCH IconCache] stage=%s prebaked=%d diskHits=%d diskMisses=%d corrupt=%d requests=%d deduplicated=%d deferred=%d resolverSubmissions=%d resolverDeferred=%d resolverFailures=%d processorDeferred=%d vboGroups=%d captures=%d failures=%d loads=%d writes=%d writeFailures=%d resolveBacklog=%d/%d captureBacklog=%d/%d workerQueue=%d/%d writerQueue=%d/%d avg/worstMs resolve=%.2f/%.2f modelLookup=%.3f/%.3f textureLookup=%.3f/%.3f vboFrame=%.3f/%.3f framebuffer=%.3f/%.3f draw=%.3f/%.3f glReadPixels=%.3f/%.3f pixelCopy=%.3f/%.3f process=%.3f/%.3f upload=%.3f/%.3f ready=%.1f/%.1f write=%.2f",
+                "[MCH IconCache] stage=%s prebaked=%d diskHits=%d diskMisses=%d corrupt=%d requests=%d deduplicated=%d deferred=%d resolverSubmissions=%d resolverDeferred=%d resolverFailures=%d processorDeferred=%d vboGroups=%d captures=%d failures=%d loads=%d writes=%d writeFailures=%d resolveBacklog=%d/%d captureBacklog=%d/%d workerQueue=%d/%d writerQueue=%d/%d avg/worstMs resolve=%.2f/%.2f modelLookup=%.3f/%.3f textureLookup=%.3f/%.3f vboFrame=%.3f/%.3f clear=%.3f/%.3f draw=%.3f/%.3f glReadPixels=%.3f/%.3f pixelCopy=%.3f/%.3f process=%.3f/%.3f upload=%.3f/%.3f ready=%.1f/%.1f write=%.2f",
                 active != null ? active.state : "IDLE", prebaked, hits, misses, corruptFiles.get(), requests, duplicates,
                 deferred, resolverSubmissions, resolverDeferred, resolverFailures, processorDeferred,
                 vboGroupsPrepared, captures, failures,
@@ -706,6 +1007,28 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                 uploadNanos / 1e6 / Math.max(1, loads + captures), uploadWorst / 1e6,
                 readyNanos / 1e6 / Math.max(1, loads + captures), readyWorst / 1e6,
                 writeNanos.get() / 1e6 / Math.max(1, writes.get() + writeFailures.get())));
+        System.out.println(String.format(java.util.Locale.ROOT,
+                "[MCH IconCache prerequisites] inventoryRequests=%d handleRenderType=%d renderItem=%d waitResolve=%d waitModel=%d modelWaitEvents=%d modelSubmissions=%d modelDeferred=%d modelFailures=%d pboSupported=%s pboIssues=%d pboCompletions=%d pboFallbacks=%d avg/worstMs modelLoad=%.2f/%.2f textureWarm=%.2f/%.2f framebufferCreate=%.2f/%.2f pboIssue=%.3f/%.3f pboLatency=%.2f/%.2f",
+                inventoryRequests, handleRequests, renderItemRequests, RESOLVE_BACKLOG.size(), MODEL_BACKLOG.size(),
+                modelWaits, modelSubmissions, modelDeferred, modelFailures, Boolean.valueOf(supportsAsyncReadback()),
+                pboIssues, pboCompletions, pboFallbacks,
+                modelLoadNanos / 1e6 / Math.max(1, modelSubmissions), modelLoadWorst / 1e6,
+                textureWarmNanos / 1e6 / Math.max(1, captures + failures), textureWarmWorst / 1e6,
+                framebufferCreateNanos / 1e6 / Math.max(1, captures + failures), framebufferCreateWorst / 1e6,
+                pboIssueNanos / 1e6 / Math.max(1, pboIssues), pboIssueWorst / 1e6,
+                pboLatencyNanos / 1e6 / Math.max(1, pboCompletions), pboLatencyWorst / 1e6));
+        System.out.println(String.format(java.util.Locale.ROOT,
+                "[MCH IconCache capture] avg/worstMs framebufferBind=%.3f/%.3f clear=%.3f/%.3f stateSetup=%.3f/%.3f textureBind=%.3f/%.3f modelDraw=%.3f/%.3f overlayDraw=%.3f/%.3f restore=%.3f/%.3f textureAllocate=%.3f/%.3f textureCopy=%.3f/%.3f textureGpuUpload=%.3f/%.3f",
+                framebufferBindNanos / 1e6 / Math.max(1, captures), framebufferBindWorst / 1e6,
+                clearNanos / 1e6 / Math.max(1, captures), clearWorst / 1e6,
+                stateSetupNanos / 1e6 / Math.max(1, captures), stateSetupWorst / 1e6,
+                textureBindNanos / 1e6 / Math.max(1, captures), textureBindWorst / 1e6,
+                modelDrawNanos / 1e6 / Math.max(1, captures), modelDrawWorst / 1e6,
+                overlayDrawNanos / 1e6 / Math.max(1, captures), overlayDrawWorst / 1e6,
+                captureRestoreNanos / 1e6 / Math.max(1, captures), captureRestoreWorst / 1e6,
+                textureAllocationNanos / 1e6 / Math.max(1, loads + captures), textureAllocationWorst / 1e6,
+                textureDataCopyNanos / 1e6 / Math.max(1, loads + captures), textureDataCopyWorst / 1e6,
+                textureGpuUploadNanos / 1e6 / Math.max(1, loads + captures), textureGpuUploadWorst / 1e6));
     }
 
 
@@ -718,10 +1041,12 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     }
 
     private enum State {
-        DEFERRED, WAIT_RESOLVE, RESOLVING, PREPARE_CAPTURE, PREPARE_MODEL_BUFFERS, RENDER_MODEL, READBACK,
-        WAIT_PROCESS, PROCESSING, UPLOAD_TEXTURE, READY, FAILED
+        DEFERRED, WAIT_RESOLVE, RESOLVING, WAIT_MODEL, LOADING_MODEL, PREPARE_CAPTURE, PREPARE_TEXTURE,
+        PREPARE_MODEL_BUFFERS, PREPARE_FRAMEBUFFER, RENDER_MODEL, READBACK, WAIT_PBO, WAIT_PROCESS,
+        PROCESSING, UPLOAD_TEXTURE, READY, FAILED
     }
     private enum LoadSource { NONE, PREBAKED, DISK }
+    private enum RequestOrigin { HANDLE_RENDER_TYPE, RENDER_ITEM }
     private static final class ResolveResult {
         final BufferedImage image;
         final LoadSource source;
@@ -742,10 +1067,13 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         File cacheFile;
         ResourceLocation texture;
         ResourceLocation captureTexture;
+        ResourceLocation captureOverlay;
         net.minecraftforge.client.model.IModelCustom captureModel;
         java.util.Iterator modelGroups;
         mcheli.wrapper.modelloader.W_GroupObject activeGroup;
         byte[] pixels;
+        int pixelPackBuffer;
+        long pixelPackIssuedNanos;
         BufferedImage image;
         State state = State.WAIT_RESOLVE;
         boolean persist;
@@ -762,7 +1090,8 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
         MCH_BaseVehicleInfo info = getInfo(item);
         if(info == null || !is3DIconEnabled(info)) return false;
-        if(type == ItemRenderType.INVENTORY) return request(info, item, this).state == State.READY;
+        if(type == ItemRenderType.INVENTORY)
+            return request(info, item, this, RequestOrigin.HANDLE_RENDER_TYPE).state == State.READY;
         mcheli.MCH_ClientProxy.ensureVehicleModel(info);
         return info.model != null;
     }
@@ -770,13 +1099,21 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         MCH_BaseVehicleInfo info = getInfo(item);
         if(info == null || !is3DIconEnabled(info)) return;
-        if(type == ItemRenderType.INVENTORY) { draw(request(info, item, this)); return; }
+        if(type == ItemRenderType.INVENTORY) {
+            draw(request(info, item, this, RequestOrigin.RENDER_ITEM));
+            return;
+        }
         mcheli.MCH_ClientProxy.ensureVehicleModel(info);
         if(info.model != null) renderLiveModel(type, info);
     }
     public void onResourceManagerReload(IResourceManager manager) { resetForReload(); }
     public static void onVehicleModelAvailable(MCH_BaseVehicleInfo info) {
-        // Demand driven: loading an entity model does not enqueue an inventory capture.
+        Entry entry = ENTRIES.get(info);
+        if(entry != null && (entry.state == State.WAIT_MODEL || entry.state == State.LOADING_MODEL)) {
+            MODEL_BACKLOG.remove(info);
+            transition(entry, State.PREPARE_CAPTURE, "normal-model-lifecycle-ready");
+            enqueueCapture(entry);
+        }
     }
     public static void invalidate(MCH_BaseVehicleInfo info) {
         Entry entry = ENTRIES.get(info);
@@ -792,7 +1129,7 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         if(item instanceof MCH_ItemBaseVehicle) {
             ItemStack stack = new ItemStack(item);
             MCH_BaseVehicleInfo info = getInfo(stack);
-            if(info != null && is3DIconEnabled(info)) request(info, stack, null);
+            if(info != null && is3DIconEnabled(info)) request(info, stack, null, RequestOrigin.HANDLE_RENDER_TYPE);
         }
     }
     private static boolean diagnostics() {
@@ -850,6 +1187,11 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
                 + "/" + MCH_RenderBaseVehicle.getBaseTextureName(info.name) + ".png");
         return mcheli.texture.MCH_ModelTextureRepairManager.resolveForBackgroundCapture(original, model);
     }
+    private static ResourceLocation resolveOverlayTexture(MCH_BaseVehicleInfo info) {
+        int separator = info.name.indexOf("|skinoverlays/");
+        return separator >= 0 ? new ResourceLocation("mcheli", MCH_EntityBaseVehicle.getTexturePath(
+                info.getDirectoryName(), info.name.substring(separator + 1))) : null;
+    }
     private static void renderModel(ItemRenderType type, MCH_BaseVehicleInfo info,
             net.minecraftforge.client.model.IModelCustom model, ResourceLocation texture) {
         GL11.glPushMatrix();
@@ -857,11 +1199,20 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         GL11.glColor4f(1, 1, 1, 1);
         try {
             transform(type, info);
+            long stageStarted = System.nanoTime();
             Minecraft.getMinecraft().getTextureManager().bindTexture(texture);
+            long elapsed = System.nanoTime() - stageStarted;
+            if(capturing) { textureBindNanos += elapsed; textureBindWorst = Math.max(textureBindWorst, elapsed); }
             MCH_RenderBaseVehicle.beginSkinOverlayRender(info.getDirectoryName(), info.name);
             try {
+                stageStarted = System.nanoTime();
                 model.renderAll();
+                elapsed = System.nanoTime() - stageStarted;
+                if(capturing) { modelDrawNanos += elapsed; modelDrawWorst = Math.max(modelDrawWorst, elapsed); }
+                stageStarted = System.nanoTime();
                 MCH_RenderBaseVehicle.renderPreparedSkinOverlay(model);
+                elapsed = System.nanoTime() - stageStarted;
+                if(capturing) { overlayDrawNanos += elapsed; overlayDrawWorst = Math.max(overlayDrawWorst, elapsed); }
             } finally { MCH_RenderBaseVehicle.endSkinOverlayRender(); }
         } finally { GL11.glPopMatrix(); GL11.glColor4f(1, 1, 1, 1); GL11.glEnable(GL11.GL_BLEND); }
     }

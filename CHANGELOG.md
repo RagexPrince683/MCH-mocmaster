@@ -774,3 +774,24 @@ Developer/backend
 - The time-budgeted VBO path, prepared-buffer capture guard, 350 ms capture pacing, asynchronous CPU
   processing/PNG persistence, and persistent cache format are unchanged. Offline compilation passed;
   a fresh-cache NEI burst still requires in-game validation.
+
+2026-09-21 23:10 — Drive uncached vehicle icons from inventory requests
+
+- Confirmed inventory/NEI requests were registered by `handleRenderType`, but cache misses stopped
+  waiting for `info.model`; only equipped/world rendering called the lazy model initializer. Added
+  explicit `WAIT_MODEL`/`LOADING_MODEL` states that parse the body through the existing bounded worker
+  and install it on the client thread, so holding or spawning the vehicle is no longer a prerequisite.
+- Moved first-use texture residency and fixed-size framebuffer/PBO allocation into explicit stages
+  before capture. Capture now rechecks model, prepared VBO, resident base/overlay textures, and the
+  reusable framebuffer before drawing, returning to preparation if any invariant changes.
+- Added capability-checked asynchronous framebuffer readback using two reusable pixel-pack buffers
+  and OpenGL sync fences. Supported drivers issue the 128×128 transfer without mapping it, poll the
+  fence on later render frames, then copy completed pixels for worker processing. Drivers lacking
+  both PBO and sync support retain the existing synchronous fallback; resource reload deletes the
+  buffers/fence.
+- Split diagnostics across inventory callback sources, model waits/loads, texture warmup, framebuffer
+  creation/bind/clear, state setup, texture bind, base and overlay VBO draws, capture restore, PBO
+  issue/completion latency, synchronous `glReadPixels`, pixel copying, and final texture allocation,
+  CPU copy, and GPU upload. Persistent cache priority, resolver backpressure, VBO budgets, 350 ms
+  capture pacing, and the cache schema are unchanged. Offline compilation passed; uncached NEI
+  generation and capture frame pacing still require in-game validation.

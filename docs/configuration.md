@@ -399,12 +399,16 @@ resolution or capture is pending—or after a session failure—Forge uses the n
 sprite. Requests are deduplicated in a bounded lightweight resolve backlog and serviced by the FML
 render-tick handler. The backlog admits at most one job per render tick to the eight-slot resolver
 worker queue; temporary saturation remains pending and retries instead of becoming an icon failure. On
-a cache miss, MC Heli reuses the model already held by the vehicle info. Texture repair runs before
-buffer preparation so any invalidated OBJ/MQO groups are rebuilt incrementally, with at most 8,192
-vertices uploaded per render frame. The final framebuffer captures are paced at least 350 ms apart.
+a cache miss, MC Heli reuses the model already held by the vehicle info or parses the body model on
+the bounded worker when normal equipped/world rendering has not initialized it yet. Texture repair is
+never initiated solely for an inventory icon; an existing repaired texture is reused, otherwise the
+authored base texture is warmed before capture. Any required OBJ/MQO VBO upload is limited to a
+0.75 ms/2,048-vertex render-frame budget. Final captures are paced at least 350 ms apart.
 Source hashing, cache reads, transparent crop/padding, and PNG compression run on bounded background
-workers; OpenGL preparation, rendering/readback, and dynamic-texture upload remain on the render
-thread. Equipped, dropped, and world/entity rendering remain live.
+workers. OpenGL preparation, rendering, and dynamic-texture upload remain on the render thread.
+Supported drivers use reusable double-buffered pixel buffer objects and sync fences so framebuffer
+readback completes across frames without blocking; older drivers retain the synchronous 128×128
+fallback. Equipped, dropped, and world/entity rendering remain live.
 
 Content hashes for the definition, model, base texture, optional overlay, renderer schema, dimensions,
 scales, and texture-repair settings form the compact cache name. Resource reload releases dynamic
@@ -417,8 +421,10 @@ regenerated. Start a development client with
 ship-ready files below `cache/mcheli/icons/export/assets/mcheli/textures/icons/`. Set
 `DebugVehicleIconCache = true` for concise lifecycle/write events plus periodic VBO, capture, cache,
 failure, timing, and queue-depth diagnostics. Timings report average and worst request resolution,
-model/texture lookup, per-frame VBO preparation, framebuffer setup, model draw, `glReadPixels`, pixel
-copy/processing, final texture upload, and READY latency separately. If normal vehicle rendering
+model loading/texture residency, per-frame VBO preparation, framebuffer creation/bind/clear, state
+setup, texture bind, base/overlay draw, capture restore, synchronous `glReadPixels`, asynchronous PBO
+issue/completion latency, pixel copy/processing, final texture allocation/upload, and READY latency
+separately. Request-source counters distinguish `handleRenderType` from `renderItem`. If normal vehicle rendering
 initiates texture repair, its image load, UV coverage, repair, UV correction/VBO invalidation, and
 repaired-texture upload timings are logged separately. The option is disabled by default.
 The periodic cache report also includes resolver submissions, deferred admissions, genuine resolver
