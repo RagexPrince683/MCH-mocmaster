@@ -1,0 +1,6 @@
+DisplayName = Yellow Vehicle Camo Skin
+AddDisplayName = ja_JP, Yellow Vehicle Camo Skin
+
+textureoverlay = true
+
+StackSize = 64

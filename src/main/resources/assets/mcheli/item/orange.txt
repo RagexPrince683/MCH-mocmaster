@@ -1,0 +1,6 @@
+DisplayName = Orange Vehicle Camo Skin
+AddDisplayName = ja_JP, Orange Vehicle Camo Skin
+
+textureoverlay = true
+
+StackSize = 64

@@ -1,0 +1,6 @@
+DisplayName = Purple Vehicle Camo Skin
+AddDisplayName = ja_JP, Purple Vehicle Camo Skin
+
+textureoverlay = true
+
+StackSize = 64

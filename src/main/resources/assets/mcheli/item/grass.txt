@@ -1,5 +1,5 @@
-DisplayName = Green Camo Skin
-AddDisplayName = ja_JP, Green Camo Skin
+DisplayName = Green Vehicle Camo Skin
+AddDisplayName = ja_JP, Green Vehicle Camo Skin
 
 AddRecipe = "ABA", "ABA", "   ", A, leaves, B, dirt
 

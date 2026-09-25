@@ -1,0 +1,6 @@
+DisplayName = Gold Vehicle Camo Skin
+AddDisplayName = ja_JP, Gold Vehicle Camo Skin
+
+textureoverlay = true
+
+StackSize = 64

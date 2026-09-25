@@ -1,0 +1,6 @@
+DisplayName = Black Vehicle Camo Skin
+AddDisplayName = ja_JP, Black Vehicle Camo Skin
+
+textureoverlay = true
+
+StackSize = 64
