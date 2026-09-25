@@ -14,20 +14,22 @@
 package mcheli.wrapper;
 
 import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteStreams;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import mcheli.MCH_Lib;
 import mcheli.MCH_MOD;
+import mcheli.MCH_ServerTickHandler;
 import mcheli.wrapper.IPacketHandler;
 import mcheli.wrapper.W_NetworkRegistry;
 import mcheli.wrapper.W_PacketBase;
 import mcheli.wrapper.W_PacketDummy;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
-import net.minecraft.server.MinecraftServer;
 
 public class W_PacketHandler
 implements IPacketHandler,
@@ -36,34 +38,34 @@ IMessageHandler<W_PacketBase, W_PacketDummy> {
     }
 
     public W_PacketDummy onMessage(W_PacketBase message, MessageContext ctx) {
-        if (message.data == null) {
+        final byte[] packetBytes = message.copyPacketData();
+        if (packetBytes == null) {
             return null;
         }
 
-        final ByteArrayDataInput packetData = message.data;
         if (ctx.side.isClient()) {
             MCH_MOD.proxy.scheduleClientTask(new Runnable() {
                 @Override
                 public void run() {
-                    dispatchClientPacket(packetData);
+                    dispatchClientPacket(packetBytes);
                 }
             });
         } else {
             final EntityPlayerMP player = ctx.getServerHandler().playerEntity;
-            MinecraftServer.getServer().func_152344_a(new Runnable() {
+            MCH_ServerTickHandler.scheduleServerTask(new Runnable() {
                 @Override
                 public void run() {
-                    dispatchPacket(packetData, player);
+                    dispatchPacket(ByteStreams.newDataInput(packetBytes), player);
                 }
             });
         }
         return null;
     }
 
-    private static void dispatchClientPacket(ByteArrayDataInput packetData) {
-        EntityPlayer player = MCH_Lib.getClientPlayer();
-        if (player != null) {
-            dispatchPacket(packetData, player);
+    private static void dispatchClientPacket(byte[] packetBytes) {
+        Entity clientPlayer = MCH_Lib.getClientPlayer();
+        if (clientPlayer instanceof EntityPlayer) {
+            dispatchPacket(ByteStreams.newDataInput(packetBytes), (EntityPlayer)clientPlayer);
         }
     }
 

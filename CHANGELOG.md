@@ -237,3 +237,11 @@ Developer/backend
   updates and vehicle controls, preserving server-owned three-second timing and entity thread safety.
 - Added debug-controlled diagnostics for blocked early vanilla detach attempts with the side,
   caller, mount and parent identities, seat, hold state, and elapsed server time.
+
+2026-09-25 21:54 - Correct three-second dismount packet boundaries
+
+- Routed legacy SimpleImpl server callbacks through an ordered server-tick task queue and copied
+  packet payloads before leaving Netty, keeping hold state and vehicle handling on the game thread.
+- Corrected the final client Sneak guard to inject into Forge 1.7.10's mapped
+  `EntityClientPlayerMP.sendMotionUpdates()V` method and require the injection to apply.
+- Added the checked client-player conversion required by the shared client-player accessor.
