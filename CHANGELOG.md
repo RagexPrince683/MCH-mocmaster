@@ -228,3 +228,12 @@ Developer/backend
   release before reuse; explicit ejection, parachute, seat-transfer, destruction, death, and cleanup
   paths remain independent.
 - Documented the input boundary, server authority, lifecycle cancellation, and bounded diagnostics.
+
+2026-09-25 21:46 - Guard the actual vanilla ridden-player detach boundary
+
+- Moved the server Sneak guard from `EntityPlayerMP.onUpdate` to the head of
+  `EntityPlayer.updateRidden`, before vanilla can call `mountEntity(null)` for a sneaking rider.
+- Scheduled SimpleImpl packet callbacks on the client or server game thread before processing hold
+  updates and vehicle controls, preserving server-owned three-second timing and entity thread safety.
+- Added debug-controlled diagnostics for blocked early vanilla detach attempts with the side,
+  caller, mount and parent identities, seat, hold state, and elapsed server time.

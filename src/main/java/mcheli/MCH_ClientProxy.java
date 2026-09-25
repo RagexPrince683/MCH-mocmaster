@@ -219,6 +219,11 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       });
    }
 
+   @Override
+   public void scheduleClientTask(Runnable task) {
+      Minecraft.getMinecraft().func_152344_a(task);
+   }
+
    public boolean requestTargetedVehicleReload(MCH_EntityBaseVehicle vehicle) {
       Minecraft mc = Minecraft.getMinecraft();
       if(this.pendingTargetedReloadId != 0L) {

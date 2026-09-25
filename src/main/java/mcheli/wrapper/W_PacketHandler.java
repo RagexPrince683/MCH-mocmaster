@@ -19,6 +19,7 @@ import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import mcheli.MCH_Lib;
+import mcheli.MCH_MOD;
 import mcheli.wrapper.IPacketHandler;
 import mcheli.wrapper.W_NetworkRegistry;
 import mcheli.wrapper.W_PacketBase;
@@ -26,6 +27,7 @@ import mcheli.wrapper.W_PacketDummy;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.server.MinecraftServer;
 
 public class W_PacketHandler
 implements IPacketHandler,
@@ -34,21 +36,42 @@ IMessageHandler<W_PacketBase, W_PacketDummy> {
     }
 
     public W_PacketDummy onMessage(W_PacketBase message, MessageContext ctx) {
-        try {
-            if (message.data != null) {
-                if (ctx.side.isClient()) {
-                    if (MCH_Lib.getClientPlayer() != null) {
-                        W_NetworkRegistry.packetHandler.onPacket(message.data, (EntityPlayer)MCH_Lib.getClientPlayer());
-                    }
-                } else {
-                    W_NetworkRegistry.packetHandler.onPacket(message.data, (EntityPlayer)ctx.getServerHandler().playerEntity);
-                }
-            }
+        if (message.data == null) {
+            return null;
         }
-        catch (Exception e) {
-            e.printStackTrace();
+
+        final ByteArrayDataInput packetData = message.data;
+        if (ctx.side.isClient()) {
+            MCH_MOD.proxy.scheduleClientTask(new Runnable() {
+                @Override
+                public void run() {
+                    dispatchClientPacket(packetData);
+                }
+            });
+        } else {
+            final EntityPlayerMP player = ctx.getServerHandler().playerEntity;
+            MinecraftServer.getServer().func_152344_a(new Runnable() {
+                @Override
+                public void run() {
+                    dispatchPacket(packetData, player);
+                }
+            });
         }
         return null;
     }
-}
 
+    private static void dispatchClientPacket(ByteArrayDataInput packetData) {
+        EntityPlayer player = MCH_Lib.getClientPlayer();
+        if (player != null) {
+            dispatchPacket(packetData, player);
+        }
+    }
+
+    private static void dispatchPacket(ByteArrayDataInput packetData, EntityPlayer player) {
+        try {
+            W_NetworkRegistry.packetHandler.onPacket(packetData, player);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+}

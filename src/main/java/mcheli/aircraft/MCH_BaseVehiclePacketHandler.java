@@ -42,6 +42,8 @@ public class MCH_BaseVehiclePacketHandler {
    private static final long NORMAL_DISMOUNT_HOLD_NANOS = 3000000000L;
    private static final Map<EntityPlayer, ServerDismountHold> normalDismountHolds =
          new WeakHashMap<EntityPlayer, ServerDismountHold>();
+   private static final Map<EntityPlayer, Boolean> loggedUnexpectedVanillaDismount =
+         new WeakHashMap<EntityPlayer, Boolean>();
 
    private static final class ServerDismountHold {
       final int mountEntityId;
@@ -81,7 +83,7 @@ public class MCH_BaseVehiclePacketHandler {
       }
    }
 
-   /** Runs before EntityPlayerMP can apply vanilla's Sneak dismount. */
+   /** Runs at the head of EntityPlayer.updateRidden, immediately before vanilla's Sneak dismount. */
    public static void suppressEarlyVanillaDismount(EntityPlayer player) {
       if(player == null || player.worldObj.isRemote) {
          return;
@@ -97,13 +99,33 @@ public class MCH_BaseVehiclePacketHandler {
          hold = null;
       }
       if(!player.isSneaking()) {
+         loggedUnexpectedVanillaDismount.remove(player);
          return;
       }
       if(parent == null) {
          return;
       }
       updateNormalDismountHold(player, parent, mount.getEntityId(), parent.getEntityId(), seatId, (byte)1);
+      logUnexpectedVanillaDismount(player, mount, parent, seatId, hold);
       player.setSneaking(false);
+   }
+
+   private static void logUnexpectedVanillaDismount(EntityPlayer player, Entity mount,
+         MCH_EntityBaseVehicle parent, int seatId, ServerDismountHold previousHold) {
+      if(!MCH_MOD.config.EnableMCHLibDebugLog.prmBool) {
+         return;
+      }
+      if(loggedUnexpectedVanillaDismount.put(player, Boolean.TRUE) != null) {
+         return;
+      }
+      ServerDismountHold hold = previousHold != null ? previousHold : normalDismountHolds.get(player);
+      long elapsed = hold != null ? System.nanoTime() - hold.startedNanos : 0L;
+      MCH_Lib.DbgLog(player.worldObj,
+            "[MCH-DISMOUNT] blocked unexpected detach side=SERVER caller=EntityPlayer.updateRidden "
+                  + "player=%s mount=%s#%d parent=%s#%d seatId=%d hold=%s elapsedMs=%d",
+            new Object[]{player, mount.getClass().getName(), Integer.valueOf(mount.getEntityId()),
+                  parent.getClass().getName(), Integer.valueOf(parent.getEntityId()), Integer.valueOf(seatId),
+                  hold != null ? "active" : "missing", Long.valueOf(elapsed / 1000000L)});
    }
 
    public static boolean validateNormalDismount(EntityPlayer player, MCH_EntityBaseVehicle parent,
