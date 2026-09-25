@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_BaseVehicleInfo;
@@ -43,6 +44,14 @@ public class MCH_ServerTickHandler {
    private static long nextLodDiagnosticMs;
    private static final Map<String, PendingMountGraph> PENDING_MOUNT_GRAPHS = new HashMap<String, PendingMountGraph>();
    private static final AtomicInteger NEXT_MOUNT_SEQUENCE = new AtomicInteger();
+   private static final ConcurrentLinkedQueue<Runnable> SERVER_TASKS = new ConcurrentLinkedQueue<Runnable>();
+
+   /** Queues network work in arrival order for execution by the server tick thread. */
+   public static void scheduleServerTask(Runnable task) {
+      if(task != null) {
+         SERVER_TASKS.add(task);
+      }
+   }
 
    private static final class PendingMountGraph {
       final EntityPlayerMP observer;
@@ -79,6 +88,10 @@ public class MCH_ServerTickHandler {
 
    @SubscribeEvent
    public void onServerTickEvent(ServerTickEvent event) {
+      if(event.phase == Phase.START) {
+         runScheduledTasks();
+         return;
+      }
       if(event.phase != Phase.END) return;
       tickMountGraphs();
       if(++this.tick < UPDATE_INTERVAL_TICKS) return;
@@ -102,6 +115,17 @@ public class MCH_ServerTickHandler {
             EntityPlayerMP player = (EntityPlayerMP)playerObject;
             List<PacketVehicleLODSnapshot.Entry> entries = collectSnapshots(world, player, farDistanceSq);
             MCH_MOD.getPacketHandler().sendTo(new PacketVehicleLODSnapshot(world.provider.dimensionId, entries), player);
+         }
+      }
+   }
+
+   private static void runScheduledTasks() {
+      Runnable task;
+      while((task = SERVER_TASKS.poll()) != null) {
+         try {
+            task.run();
+         } catch(Throwable throwable) {
+            throwable.printStackTrace();
          }
       }
    }
