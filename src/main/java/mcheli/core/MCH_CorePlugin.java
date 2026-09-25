@@ -50,4 +50,10 @@ public final class MCH_CorePlugin implements IFMLLoadingPlugin, IEarlyMixinLoade
             ? Arrays.asList("MovementInputFromOptionsMixin", "EntityClientPlayerMPMixin", "EntityPlayerMixin")
             : Arrays.asList("EntityPlayerMixin");
    }
+
+   public static List<String> enabledDismountMixins() {
+      return FMLLaunchHandler.side().isClient()
+            ? Arrays.asList("MovementInputFromOptionsMixin", "EntityClientPlayerMPMixin", "EntityPlayerMixin")
+            : Arrays.asList("EntityPlayerMixin");
+   }
 }

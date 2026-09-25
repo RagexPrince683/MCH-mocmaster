@@ -14,15 +14,26 @@ public final class MCH_DismountInputGate {
 
    public static void filterVehicleSneak(MovementInput movementInput) {
       MCH_ClientCommonTickHandler handler = MCH_ClientCommonTickHandler.instance;
+      Minecraft minecraft = Minecraft.getMinecraft();
+      boolean before = movementInput.sneak;
       if(handler != null && handler.updateDismountHoldFromPhysicalInput()) {
          movementInput.sneak = false;
       }
+      MCH_DismountDiagnostics.inputGuard("movement-poll-return", minecraft.thePlayer,
+            movementInput, before, movementInput.sneak);
    }
 
    public static void filterCurrentPlayerSneak() {
       Minecraft minecraft = Minecraft.getMinecraft();
       if(minecraft.thePlayer != null && minecraft.thePlayer.movementInput != null) {
-         filterVehicleSneak(minecraft.thePlayer.movementInput);
+         MovementInput input = minecraft.thePlayer.movementInput;
+         boolean before = input.sneak;
+         MCH_ClientCommonTickHandler handler = MCH_ClientCommonTickHandler.instance;
+         if(handler != null && handler.updateDismountHoldFromPhysicalInput()) {
+            input.sneak = false;
+         }
+         MCH_DismountDiagnostics.inputGuard("pre-motion-packet", minecraft.thePlayer,
+               input, before, input.sneak);
       }
    }
 }

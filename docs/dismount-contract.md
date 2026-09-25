@@ -1,13 +1,15 @@
 # Normal vehicle dismount contract
 
-## Confirmed instant-dismount path
+## Investigated instant-dismount path
 
 Minecraft polls the configured Sneak `KeyBinding` into `MovementInput.sneak`. The local player then
 copies that state into its Sneak action packet, the server marks `EntityPlayerMP` as sneaking, and
 vanilla `EntityPlayer.updateRidden` sees Sneak and calls `mountEntity(null)` before it delegates to
-the superclass update. The former server guard targeted `EntityPlayerMP.onUpdate`, which is reached
+the superclass update. One previously confirmed defect was that the former server guard targeted `EntityPlayerMP.onUpdate`, which is reached
 only through that later superclass update and therefore ran after the detach branch. The normal
-vanilla packet/detachment path could consequently bypass MC Heli's three-second request timer.
+vanilla packet/detachment path could consequently bypass MC Heli's three-second request timer. That
+defect is corrected, but it is not assumed to explain the remaining report. The cause of the current
+instant dismount remains unconfirmed until the focused trace identifies the first mount change.
 
 ## Client input rule
 
@@ -18,7 +20,7 @@ replay ownership, or any change to that context cancels it. Completion queues ex
 dismount request and requires a physical release before another hold can begin.
 
 The `MovementInputFromOptions` injection remains an early filter. A second guard runs at the head of
-`EntityClientPlayerMP.onUpdateWalkingPlayer`, immediately before vanilla can publish movement state.
+`EntityClientPlayerMP.sendMotionUpdates`, immediately before vanilla can publish movement state.
 That latter boundary reads the current movement object, so replacement input implementations and
 late handler writes cannot expose an incomplete hold. Neither guard changes Sneak on foot or while
 riding a non-MC-Heli entity.
@@ -38,14 +40,26 @@ the server hold. Explicit ejection, parachuting, seat switching,
 vehicle destruction, player death, invalid-seat cleanup, and rack operations continue through their
 existing independent branches and are not treated as normal Sneak dismount requests.
 
-## Diagnostics
+## Focused diagnostics
 
 SimpleImpl invokes packet handlers on its network event loop in this Forge generation. The wrapper
 therefore schedules both client callbacks and server callbacks onto their respective game threads
 before hold state or any vehicle/entity state is read or mutated.
 
-With the existing MC Heli debug logging option enabled, bounded transition-only messages identify
-client starts, resets, completion, request consumption, packet transmission, server start/cancel,
-acceptance/rejection, mount identity, seat identity, elapsed server time, and rejection reason.
-An attempted early vanilla detach also identifies the server side, exact vanilla caller, mount and
-parent identities, seat, server hold state, and elapsed time.
+Set `DebugDismount=true` in `.minecraft/config/mcheli.cfg` on the client and in
+`config/mcheli.cfg` in the dedicated-server directory, then restart both. The switch defaults to
+false and does not require `EnableMCHLibDebugLog`. Client entries are in
+`.minecraft/logs/fml-client-latest.log` (and usually `logs/latest.log`); dedicated-server entries
+are in `logs/fml-server-latest.log` (and usually `logs/latest.log`). Search for
+`MCH-DISMOUNT-DIAG`.
+
+The trace records the loaded version/source/mixins, first callback at every injection, physical
+Sneak edges, both input filters, hold transitions, packet queue/thread boundaries, server decisions,
+vanilla Sneak attempts, and mount-reference changes. `ACTUAL-MOUNT-CHANGE` is the authoritative
+actual-detach marker. `attempt=true actualDetach=false` means that Sneak was blocked and must not be
+reported as a detach. The first unexpected detach in a session includes a short caller stack;
+subsequent stacks and repeated hold samples are suppressed. Client and server elapsed values are
+separately labeled because each side measures its own monotonic interval.
+
+For an instant-dismount report, return both client and server logs, the vehicle type, the occupied
+seat (pilot or seat number), and the wall-clock time of the instant dismount.

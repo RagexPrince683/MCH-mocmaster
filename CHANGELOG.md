@@ -245,3 +245,12 @@ Developer/backend
 - Corrected the final client Sneak guard to inject into Forge 1.7.10's mapped
   `EntityClientPlayerMP.sendMotionUpdates()V` method and require the injection to apply.
 - Added the checked client-player conversion required by the shared client-player accessor.
+
+2026-09-25 22:30 - Add focused dismount diagnostics
+
+- Added a disabled-by-default `DebugDismount` trace independent of general debug logging, with startup
+  and Mixin markers, physical input edges, both Sneak guards, hold/packet transitions, and server decisions.
+- Added MC Heli-scoped mount-change observation on both sides, including bypass detection and one bounded
+  caller stack for the first actual detach in each player/mount/hold session.
+- Updated the dismount contract to treat the remaining instant detach cause as unconfirmed and documented
+  configuration, log locations, the authoritative detach marker, and the requested reproduction details.
