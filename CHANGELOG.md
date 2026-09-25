@@ -215,3 +215,16 @@ Developer/backend
   repair reuse, paced framebuffer capture, asynchronous PBO readback, background processing and PNG
   persistence, and ready textured-quad rendering. Offline Java compilation passed; fresh-cache NEI
   visual composition and the corrective edge pass still require in-game validation.
+
+2026-09-25 00:00 - Enforce server-authoritative three-second Sneak dismounts
+
+- Confirmed that replacement or late-written movement input could bypass the
+  `MovementInputFromOptions` RETURN filter and publish vanilla Sneak, causing the server's normal
+  ridden-player update to detach an MC Heli rider without using the timed control-packet path.
+- Added a final pre-packet client guard and a pre-update server guard for valid MC Heli vehicle and
+  seat riders while preserving configured keyboard and mouse bindings and unrelated mounts.
+- Added mount-bound hold start/cancel signals and server-owned monotonic timing. Normal pilot and
+  passenger requests now reject incomplete, stale, duplicate, and wrong-mount holds and require a
+  release before reuse; explicit ejection, parachute, seat-transfer, destruction, death, and cleanup
+  paths remain independent.
+- Documented the input boundary, server authority, lifecycle cancellation, and bounded diagnostics.

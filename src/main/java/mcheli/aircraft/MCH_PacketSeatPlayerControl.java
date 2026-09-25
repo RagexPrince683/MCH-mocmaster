@@ -13,6 +13,8 @@ public class MCH_PacketSeatPlayerControl extends MCH_Packet {
    public int dismountMountEntityId = -1;
    public int dismountParentEntityId = -1;
    public int dismountSeatId = -1;
+   /** 1 starts a physical hold, 2 cancels it. Normal completion still uses isUnmount. */
+   public byte dismountHoldAction;
 
 
    public int getMessageID() {
@@ -28,6 +30,7 @@ public class MCH_PacketSeatPlayerControl extends MCH_Packet {
          this.dismountMountEntityId = data.readInt();
          this.dismountParentEntityId = data.readInt();
          this.dismountSeatId = data.readInt();
+         this.dismountHoldAction = data.readByte();
       } catch (Exception exception) {
          exception.printStackTrace();
       }
@@ -41,6 +44,7 @@ public class MCH_PacketSeatPlayerControl extends MCH_Packet {
          dos.writeInt(this.dismountMountEntityId);
          dos.writeInt(this.dismountParentEntityId);
          dos.writeInt(this.dismountSeatId);
+         dos.writeByte(this.dismountHoldAction);
       } catch (IOException oException) {
          oException.printStackTrace();
       }
