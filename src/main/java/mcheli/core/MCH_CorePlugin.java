@@ -47,7 +47,7 @@ public final class MCH_CorePlugin implements IFMLLoadingPlugin, IEarlyMixinLoade
    @Override
    public List<String> getMixins(Set<String> loadedCoreMods) {
       return FMLLaunchHandler.side().isClient()
-            ? Arrays.asList("MovementInputFromOptionsMixin", "EntityClientPlayerMPMixin", "EntityPlayerMPMixin")
-            : Arrays.asList("EntityPlayerMPMixin");
+            ? Arrays.asList("MovementInputFromOptionsMixin", "EntityClientPlayerMPMixin", "EntityPlayerMixin")
+            : Arrays.asList("EntityPlayerMixin");
    }
 }

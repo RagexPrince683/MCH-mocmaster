@@ -4,10 +4,10 @@
 
 Minecraft polls the configured Sneak `KeyBinding` into `MovementInput.sneak`. The local player then
 copies that state into its Sneak action packet, the server marks `EntityPlayerMP` as sneaking, and
-vanilla's ridden-player update detaches the rider. The original RETURN injection only filtered the
-specific `MovementInputFromOptions` implementation. Ragecraft can replace that object or write the
-Sneak field later, after the injection, so the normal vanilla packet/detachment path bypassed MC
-Heli's three-second request timer completely.
+vanilla `EntityPlayer.updateRidden` sees Sneak and calls `mountEntity(null)` before it delegates to
+the superclass update. The former server guard targeted `EntityPlayerMP.onUpdate`, which is reached
+only through that later superclass update and therefore ran after the detach branch. The normal
+vanilla packet/detachment path could consequently bypass MC Heli's three-second request timer.
 
 ## Client input rule
 
@@ -31,14 +31,21 @@ A normal exit request is accepted only after three server-observed seconds and o
 still rides the exact entity, parent, and seat from the start signal. Acceptance consumes the server
 hold, so early, stale, duplicate, and wrong-mount requests are rejected.
 
-As defense in depth, the `EntityPlayerMP.onUpdate` head clears early vanilla Sneak for a valid direct
-MC Heli vehicle or seat rider. If another client mod manages to publish Sneak, that first observation
-starts (but does not complete) the server hold. Explicit ejection, parachuting, seat switching,
+As defense in depth, the `EntityPlayer.updateRidden` head clears early vanilla Sneak for a valid
+direct MC Heli vehicle or seat rider, immediately before the actual `mountEntity(null)` branch. If
+another client mod manages to publish Sneak, that first observation starts (but does not complete)
+the server hold. Explicit ejection, parachuting, seat switching,
 vehicle destruction, player death, invalid-seat cleanup, and rack operations continue through their
 existing independent branches and are not treated as normal Sneak dismount requests.
 
 ## Diagnostics
 
+SimpleImpl invokes packet handlers on its network event loop in this Forge generation. The wrapper
+therefore schedules both client callbacks and server callbacks onto their respective game threads
+before hold state or any vehicle/entity state is read or mutated.
+
 With the existing MC Heli debug logging option enabled, bounded transition-only messages identify
 client starts, resets, completion, request consumption, packet transmission, server start/cancel,
 acceptance/rejection, mount identity, seat identity, elapsed server time, and rejection reason.
+An attempted early vanilla detach also identifies the server side, exact vanilla caller, mount and
+parent identities, seat, server hold state, and elapsed time.

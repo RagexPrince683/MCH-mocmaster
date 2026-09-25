@@ -82,6 +82,10 @@ public class MCH_CommonProxy {
    public void reloadHUD() {}
 
    public void scheduleClientInfoReload() {}
+
+   /** Client-only game-thread scheduling hook; ignored by a dedicated server proxy. */
+   public void scheduleClientTask(Runnable task) {}
+
    public boolean requestTargetedVehicleReload(mcheli.aircraft.MCH_EntityBaseVehicle vehicle) { return false; }
    public boolean isTargetedVehicleReloadPending() { return false; }
    public void tickTargetedVehicleReload() {}
