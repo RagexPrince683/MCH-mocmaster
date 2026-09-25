@@ -3,7 +3,7 @@ package mcheli.core;
 import com.gtnewhorizon.gtnhmixins.IEarlyMixinLoader;
 import cpw.mods.fml.relauncher.FMLLaunchHandler;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +47,7 @@ public final class MCH_CorePlugin implements IFMLLoadingPlugin, IEarlyMixinLoade
    @Override
    public List<String> getMixins(Set<String> loadedCoreMods) {
       return FMLLaunchHandler.side().isClient()
-            ? Collections.singletonList("MovementInputFromOptionsMixin")
-            : Collections.<String>emptyList();
+            ? Arrays.asList("MovementInputFromOptionsMixin", "EntityClientPlayerMPMixin", "EntityPlayerMPMixin")
+            : Arrays.asList("EntityPlayerMPMixin");
    }
 }

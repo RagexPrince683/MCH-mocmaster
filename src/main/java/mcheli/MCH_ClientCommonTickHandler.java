@@ -993,6 +993,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          this.dismountHoldStartNanos = now;
          this.dismountHoldState = DismountHoldState.HOLDING;
          this.logDismountState("Hold started", null, 0L);
+         this.sendDismountHoldAction((byte)1);
       } else if(this.dismountHoldState == DismountHoldState.HOLDING
             && now - this.dismountHoldStartNanos >= DISMOUNT_HOLD_NANOS) {
          this.dismountHoldState = DismountHoldState.PENDING;
@@ -1045,6 +1046,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    private void resetDismountHoldState(String reason) {
       if(this.dismountHoldState != DismountHoldState.IDLE) {
          this.logDismountState("Hold reset", reason, this.getDismountElapsedNanos());
+         this.sendDismountHoldAction((byte)2);
       }
       this.dismountHoldState = DismountHoldState.IDLE;
       this.dismountHoldStartNanos = -1L;
@@ -1096,6 +1098,18 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       packet.dismountParentEntityId = this.dismountParent != null ? this.dismountParent.getEntityId() : -1;
       packet.dismountSeatId = this.dismountSeatId;
       this.logDismountState("Packet sent", null, this.getDismountElapsedNanos());
+   }
+
+   private void sendDismountHoldAction(byte action) {
+      if(this.dismountPlayer == null || this.dismountMount == null || this.dismountParent == null) {
+         return;
+      }
+      MCH_PacketSeatPlayerControl packet = new MCH_PacketSeatPlayerControl();
+      packet.dismountHoldAction = action;
+      packet.dismountMountEntityId = this.dismountMount.getEntityId();
+      packet.dismountParentEntityId = this.dismountParent.getEntityId();
+      packet.dismountSeatId = this.dismountSeatId;
+      W_Network.sendToServer(packet);
    }
 
    private long getDismountElapsedNanos() {
