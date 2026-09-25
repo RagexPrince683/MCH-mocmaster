@@ -8,6 +8,8 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.relauncher.FMLLaunchHandler;
+import mcheli.core.MCH_CorePlugin;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartedEvent;
@@ -215,6 +217,8 @@ public class MCH_MOD {
        MCH_Lib.DbgLog(false, "SourcePath: %s", sourcePath);
        //MCH_Lib I have NO FUCKING CLUE HOW TO USE. I LITERALLY DO NOT THINK IT WORKS ANYMORE.
        MCH_Lib.DbgLog(false, "CurrentDirectory: %s", (new File(".")).getAbsolutePath());
+       MCH_DismountDiagnostics.startup(VER, sourcePath, FMLLaunchHandler.side().name(),
+             MCH_CorePlugin.enabledDismountMixins());
 
        // Set up addon directory for user-created content
        // Addons live in <minecraft>/mcheli_addons/ and mirror the assets/mcheli/ structure

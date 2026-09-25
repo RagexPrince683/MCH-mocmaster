@@ -103,6 +103,8 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    private EntityClientPlayerMP dismountPlayer;
    private World dismountWorld;
    private Object dismountConnection;
+   private boolean dismountPhysicalKnown;
+   private boolean dismountPhysicalPressed;
    private boolean restoreMouseFocusAfterRender;
    private boolean replayPlaybackActive;
 
@@ -978,6 +980,16 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       }
 
       boolean pressed = MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak);
+      if(!this.dismountPhysicalKnown || pressed != this.dismountPhysicalPressed) {
+         this.dismountPhysicalKnown = true;
+         this.dismountPhysicalPressed = pressed;
+         MCH_DismountDiagnostics.log(player.worldObj,
+               "session=%s physical-sneak=%s bindingCode=%d player=%s world=%s mount=%s parent=%s seat=%d holdState=%s",
+               MCH_DismountDiagnostics.session(player), pressed ? "PRESS" : "RELEASE",
+               Integer.valueOf(super.mc.gameSettings.keyBindSneak.getKeyCode()), MCH_DismountDiagnostics.identity(player),
+               player.worldObj.provider.getDimensionName(), MCH_DismountDiagnostics.identity(mount),
+               MCH_DismountDiagnostics.identity(parent), Integer.valueOf(seatId), this.dismountHoldState);
+      }
       String invalidReason = this.getDismountInvalidReason(player, mount, parent, pressed);
       if(invalidReason != null) {
          this.resetDismountHoldState(invalidReason);
@@ -988,6 +1000,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       if(this.dismountHoldState == DismountHoldState.IDLE) {
          this.dismountHoldStartNanos = now;
          this.dismountHoldState = DismountHoldState.HOLDING;
+         MCH_DismountDiagnostics.startSession(player, mount, now);
          this.logDismountState("Hold started", null, 0L);
          this.sendDismountHoldAction((byte)1);
       } else if(this.dismountHoldState == DismountHoldState.HOLDING
@@ -1105,6 +1118,11 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       packet.dismountMountEntityId = this.dismountMount.getEntityId();
       packet.dismountParentEntityId = this.dismountParent.getEntityId();
       packet.dismountSeatId = this.dismountSeatId;
+      MCH_DismountDiagnostics.log(this.dismountWorld,
+            "session=%s hold-packet stage=sent action=%d mount=%s parent=%s seat=%d clientElapsedMs=%d",
+            MCH_DismountDiagnostics.session(this.dismountPlayer), Byte.valueOf(action),
+            MCH_DismountDiagnostics.identity(this.dismountMount), MCH_DismountDiagnostics.identity(this.dismountParent),
+            Integer.valueOf(this.dismountSeatId), Long.valueOf(this.getDismountElapsedNanos() / 1000000L));
       W_Network.sendToServer(packet);
    }
 
@@ -1113,14 +1131,12 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    private void logDismountState(String action, String reason, long elapsedNanos) {
-      if(!MCH_Config.EnableMCHLibDebugLog.prmBool) {
-         return;
-      }
-      MCH_Lib.DbgLog(this.dismountWorld,
-            "[MCH-DISMOUNT] action=%s player=%s mountId=%d parentId=%d seatId=%d elapsedMs=%d reason=%s",
-            new Object[]{action, this.dismountPlayer, Integer.valueOf(this.dismountMount != null ? this.dismountMount.getEntityId() : -1),
-                  Integer.valueOf(this.dismountParent != null ? this.dismountParent.getEntityId() : -1),
-                  Integer.valueOf(this.dismountSeatId), Long.valueOf(elapsedNanos / 1000000L), reason != null ? reason : "none"});
+      MCH_DismountDiagnostics.log(this.dismountWorld,
+            "session=%s action=%s player=%s mount=%s parent=%s seat=%d clientElapsedMs=%d reason=%s holdState=%s",
+            MCH_DismountDiagnostics.session(this.dismountPlayer), action,
+            MCH_DismountDiagnostics.identity(this.dismountPlayer), MCH_DismountDiagnostics.identity(this.dismountMount),
+            MCH_DismountDiagnostics.identity(this.dismountParent), Integer.valueOf(this.dismountSeatId),
+            Long.valueOf(elapsedNanos / 1000000L), reason != null ? reason : "none", this.dismountHoldState);
    }
 
    public void onRenderTickPost(float partialTicks) {
