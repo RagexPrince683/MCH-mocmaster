@@ -89,6 +89,9 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
 
    private static final java.util.Set LOADED_VEHICLE_MODELS = java.util.Collections.newSetFromMap(
          new java.util.WeakHashMap());
+   private static final java.util.Set FAILED_VEHICLE_MODELS = java.util.Collections.newSetFromMap(
+         new java.util.WeakHashMap());
+   private static long vehicleModelResourceGeneration;
 
    private final MCH_RenderRWR rwrRenderer = new MCH_RenderRWR();
    public String lastLoadHUDPath = "";
@@ -326,6 +329,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    public void registerModels() {
       synchronized(MCH_ClientProxy.class) {
          LOADED_VEHICLE_MODELS.clear();
+         FAILED_VEHICLE_MODELS.clear();
       }
       MCH_ModelManager.setForceReloadMode(true);
       MCH_RenderBaseVehicle.debugModel = MCH_ModelManager.load("box");
@@ -422,7 +426,8 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    }
 
    public static synchronized void ensureVehicleModel(MCH_BaseVehicleInfo info) {
-      if(info == null || LOADED_VEHICLE_MODELS.contains(info) || !(MCH_MOD.proxy instanceof MCH_ClientProxy)) {
+      if(info == null || LOADED_VEHICLE_MODELS.contains(info) || FAILED_VEHICLE_MODELS.contains(info)
+            || !(MCH_MOD.proxy instanceof MCH_ClientProxy)) {
          return;
       }
       MCH_ClientProxy proxy = (MCH_ClientProxy)MCH_MOD.proxy;
@@ -439,8 +444,12 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
             proxy.registerModelsVehicle(info.name, false);
          }
       } catch(RuntimeException failure) {
-         MCH_Lib.Log("Lazy vehicle model load failed and will be retried: directory=%s name=%s (%s)",
-               info.getDirectoryName(), info.name, failure.getMessage());
+         if(markVehicleModelFailure(info)) {
+            MCH_Lib.Log("Vehicle model registration failed: directory=%s name=%s generation=%d (%s). "
+                        + "This definition will be retried after a resource or targeted vehicle reload.",
+                  info.getDirectoryName(), info.name, Long.valueOf(vehicleModelResourceGeneration),
+                  failure.getMessage());
+         }
       }
       MCH_ModelManager.logDiagnostics();
    }
@@ -448,7 +457,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    public void registerModelsHeli(String name, boolean reload) {
       MCH_HeliInfo info = (MCH_HeliInfo)MCH_HeliInfoManager.map.get(name);
       beginVehicleModelRegistration(info, reload);
-      info.model = MCH_ModelManager.load("helicopters", info.name, reload);
+      info.model = MCH_ModelManager.loadWithoutFailureLog("helicopters", info.name, reload);
       requireBodyModel("helicopters", info);
 
       MCH_HeliInfo.Rotor rotor;
@@ -463,7 +472,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    public void registerModelsPlane(String name, boolean reload) {
       MCP_PlaneInfo info = (MCP_PlaneInfo)MCP_PlaneInfoManager.map.get(name);
       beginVehicleModelRegistration(info, reload);
-      info.model = MCH_ModelManager.load("planes", info.name, reload);
+      info.model = MCH_ModelManager.loadWithoutFailureLog("planes", info.name, reload);
       requireBodyModel("planes", info);
 
       Iterator iteratedValueIndex;
@@ -505,7 +514,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    public void registerModelsShip(String name, boolean reload) {
       MCH_ShipInfo info = (MCH_ShipInfo)MCH_ShipInfoManager.map.get(name);
       beginVehicleModelRegistration(info, reload);
-      info.model = MCH_ModelManager.load("ships", info.name, reload);
+      info.model = MCH_ModelManager.loadWithoutFailureLog("ships", info.name, reload);
       requireBodyModel("ships", info);
 
       Iterator iteratedValueIndex;
@@ -548,7 +557,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       MCH_TurretInfo info = (MCH_TurretInfo)MCH_TurretInfoManager.map.get(name);
       beginVehicleModelRegistration(info, reload);
       String turretDirectory = info.getDirectoryName();
-      info.model = MCH_ModelManager.load(turretDirectory, info.name, reload);
+      info.model = MCH_ModelManager.loadWithoutFailureLog(turretDirectory, info.name, reload);
       requireBodyModel(turretDirectory, info);
       Iterator iteratedValueIndex = info.partList.iterator();
 
@@ -567,7 +576,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    public void registerModelsTank(String name, boolean reload) {
       MCH_TankInfo info = (MCH_TankInfo)MCH_TankInfoManager.map.get(name);
       beginVehicleModelRegistration(info, reload);
-      info.model = MCH_ModelManager.load("tanks", info.name, reload);
+      info.model = MCH_ModelManager.loadWithoutFailureLog("tanks", info.name, reload);
       requireBodyModel("tanks", info);
       this.registerCommonPart("tanks", info);
       finishVehicleModelRegistration(info);
@@ -582,7 +591,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       if(body instanceof W_ModelCustom && ((W_ModelCustom)body).containsPart("$" + part)) {
          return null;
       }
-      IModelCustom model = MCH_ModelManager.load(path, name + "_" + part);
+      IModelCustom model = MCH_ModelManager.loadWithoutFailureLog(path, name + "_" + part, false);
       if(model == null) {
          throw new IllegalStateException("Missing model " + path + "/" + name + "_" + part);
       }
@@ -595,6 +604,7 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       }
       if(reload) {
          LOADED_VEHICLE_MODELS.remove(info);
+         FAILED_VEHICLE_MODELS.remove(info);
       }
    }
 
@@ -604,7 +614,19 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
       }
    }
 
+   private static synchronized boolean markVehicleModelFailure(MCH_BaseVehicleInfo info) {
+      return FAILED_VEHICLE_MODELS.add(info);
+   }
+
+   public static synchronized void onModelResourceReload() {
+      ++vehicleModelResourceGeneration;
+      LOADED_VEHICLE_MODELS.clear();
+      FAILED_VEHICLE_MODELS.clear();
+      MCH_ModelManager.clearForReload();
+   }
+
    private static synchronized void finishVehicleModelRegistration(MCH_BaseVehicleInfo info) {
+      FAILED_VEHICLE_MODELS.remove(info);
       LOADED_VEHICLE_MODELS.add(info);
       MCH_VehicleItemModelRender.onVehicleModelAvailable(info);
    }

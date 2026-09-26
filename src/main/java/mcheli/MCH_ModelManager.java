@@ -58,6 +58,18 @@ public class MCH_ModelManager extends W_ModelBase {
    }
 
    public static IModelCustom load(String name, final boolean reload) {
+      return load(name, reload, true);
+   }
+
+   /**
+    * Loads a model while leaving failure reporting to a caller that can provide
+    * more useful context (for example, the owning vehicle definition).
+    */
+   static IModelCustom loadWithoutFailureLog(String path, String name, boolean reload) {
+      return name != null && !name.isEmpty() ? load(path + "/" + name, reload, false) : null;
+   }
+
+   private static IModelCustom load(String name, final boolean reload, final boolean logFailure) {
       if (name == null || name.isEmpty()) return null;
       final String resourceName = normalizeResourceName(name);
       final String cacheKey = cacheKey(resourceName);
@@ -98,15 +110,19 @@ public class MCH_ModelManager extends W_ModelBase {
                return loaded;
             }
             FAILURES.incrementAndGet();
-            MCH_Lib.Log("Model load failed: name=%s resource=assets/mcheli/models/%s.[mqo|obj|tcn] (resource not found or loader returned null)",
-                  name, resourceName);
+            if(logFailure) {
+               MCH_Lib.Log("Model load failed: name=%s resource=assets/mcheli/models/%s.[mqo|obj|tcn] (resource not found or loader returned null)",
+                     name, resourceName);
+            }
             return existing;
 
          } catch (Exception e) {
             FAILURES.incrementAndGet();
-            MCH_Lib.Log("Model load failed: name=%s resource=assets/mcheli/models/%s: %s",
-                  name, resourceName, e.toString());
-            e.printStackTrace();
+            if(logFailure) {
+               MCH_Lib.Log("Model load failed: name=%s resource=assets/mcheli/models/%s: %s",
+                     name, resourceName, e.toString());
+               e.printStackTrace();
+            }
             return existing;
          }
       });

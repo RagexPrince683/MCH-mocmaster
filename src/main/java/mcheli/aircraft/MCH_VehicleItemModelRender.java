@@ -1212,7 +1212,10 @@ public class MCH_VehicleItemModelRender implements IItemRenderer, IResourceManag
         mcheli.MCH_ClientProxy.ensureVehicleModel(info);
         if(info.model != null) renderLiveModel(type, info);
     }
-    public void onResourceManagerReload(IResourceManager manager) { resetForReload(); }
+    public void onResourceManagerReload(IResourceManager manager) {
+        resetForReload();
+        mcheli.MCH_ClientProxy.onModelResourceReload();
+    }
     public static void onVehicleModelAvailable(MCH_BaseVehicleInfo info) {
         Entry entry = ENTRIES.get(info);
         if(entry != null && (entry.state == State.WAIT_MODEL || entry.state == State.LOADING_MODEL)) {
