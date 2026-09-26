@@ -310,3 +310,10 @@ Developer/backend
   paint action above the selected vehicle name, and separated the vehicle and camo input frames.
 - Gave the Paint screen the clean list-screen background while keeping all inventory artwork, slot
   rendering, and slot interaction exclusive to the main screen.
+
+2026-09-26 04:36 - Isolate painted vehicle overlay state
+
+- Preserved the current OpenGL color around camo and RGB overlay passes so their tint and opacity
+  cannot make later body, turret, barrel, wheel, or external-part base textures dark or transparent.
+- Kept each selected part's normal textured draw ahead of its aligned overlay while leaving
+  unselected parts on the normal base-texture path.
