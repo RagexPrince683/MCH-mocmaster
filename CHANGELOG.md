@@ -295,3 +295,11 @@ Developer/backend
 - Limited both camo and RGB paint passes to enabled named model parts across vehicle bodies, animated
   parts, previews, placement synchronization, and distant rendering.
 - Rearranged the Drafting Table controls and locked inventory interaction while its Paint screen is open.
+
+2026-09-26 00:00 - Align painted overlays with moving vehicle parts
+
+- Reused each body's or moving part's normal geometry path for camo and RGB overlay passes so turrets,
+  barrels, wheels, and external part models retain their prepared animation transforms.
+- Restricted the body overlay to an actual `$body` group and kept unselected parts on their normal
+  texture without redrawing dynamic geometry from an all-model body pass.
+- Restored OpenGL attributes and the previously bound texture after overlay rendering.
