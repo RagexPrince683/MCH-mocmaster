@@ -151,7 +151,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       this.buttonNextPage = new GuiButton(50, super.guiLeft + 270, super.guiTop + 232, 60, 20, "Next Page");
       list.add(this.buttonPrevPage);
       list.add(this.buttonNextPage);
-      GuiButton paintButton = new GuiButton(60, super.guiLeft + 120, super.guiTop + 133, 70, 20, "Paint...");
+      GuiButton paintButton = new GuiButton(60, super.guiLeft + 120, super.guiTop, 70, 20, "Paint...");
       list.add(paintButton);
       list = (List)this.screenButtonList.get(1);
       int i = 0;
@@ -713,7 +713,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
             }
          }
 
-         this.drawString(this.current.displayName, 120, 20, -1);
+         this.drawString(this.current.displayName, 120, 22, -1);
          this.drawItemRecipe(this.current.recipe, 121, 34);
          if(index.size() > 0) {
             this.drawHoveringText(index, mx - 30, my - 0, super.fontRendererObj);
@@ -777,7 +777,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       if(this.getScreenId() == SCREEN_MAIN) {
          super.fontRendererObj.drawString("Output", 198, 94, -1);
          super.fontRendererObj.drawString("Vehicle paint input", 198, 116, -1);
-         super.fontRendererObj.drawString("Vehicle Camo Skin", 198, 138, -1);
+         super.fontRendererObj.drawString("Vehicle Camo Skin", 290, 116, -1);
       }
 
    }
@@ -1109,6 +1109,10 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       W_McClient.MOD_bindTexture("textures/gui/drafting_table.png");
       if(this.getScreenId() == 0) {
          this.drawTexturedModalRect(super.guiLeft, super.guiTop, 0, 0, super.xSize, super.ySize);
+         this.drawSlotFrame(MCH_DraftingTableGuiContainer.VEHICLE_INPUT_SLOT_X,
+                 MCH_DraftingTableGuiContainer.VEHICLE_INPUT_SLOT_Y);
+         this.drawSlotFrame(MCH_DraftingTableGuiContainer.CAMO_INPUT_SLOT_X,
+                 MCH_DraftingTableGuiContainer.CAMO_INPUT_SLOT_Y);
       }
 
       if(this.getScreenId() == 1) {
@@ -1122,10 +1126,16 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       }
 
       if(this.getScreenId() == SCREEN_PAINT) {
-         this.drawTexturedModalRect(super.guiLeft, super.guiTop, 0, 0, super.xSize, super.ySize);
+         this.drawTexturedModalRect(super.guiLeft, super.guiTop, 0, super.ySize, super.xSize, super.ySize);
       }
 
       super.zLevel = z;
+   }
+
+   private void drawSlotFrame(int slotX, int slotY) {
+      this.drawTexturedModalRect(super.guiLeft + slotX - 1, super.guiTop + slotY - 1,
+              MCH_DraftingTableGuiContainer.OUTPUT_SLOT_X - 1,
+              MCH_DraftingTableGuiContainer.OUTPUT_SLOT_Y - 1, 18, 18);
    }
 
    private MCH_VehiclePaint.Design getPaintDesign() {
