@@ -63,6 +63,10 @@ Category = C
 
 ; Tank or Car or Unknown
 WeightType = Car
+CivilianCarGrip = true
+FrontTireSize = 285/30R20
+RearTireSize = 355/25R21
+CarLateralGrip = 0.12
 
 ;PivotTurnThrottle を0より大きい値にすると超信地旋回ができなくなる。デフォルトは0
 PivotTurnThrottle = 500.1

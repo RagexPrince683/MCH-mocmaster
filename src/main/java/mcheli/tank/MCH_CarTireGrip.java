@@ -5,10 +5,9 @@ import java.util.regex.Pattern;
 
 /** Small, tick-based car slip model. All constants are gameplay tuning, not measured friction. */
 public final class MCH_CarTireGrip {
-   public static final float DEFAULT_GRIP = 0.06F;
+   public static final float DEFAULT_GRIP = 0.12F;
    public static final float MAX_GRIP = 0.25F;
-   private static final double SLIP_DAMPING = 0.25D;
-   private static final double LONGITUDINAL_REFERENCE = 0.20D;
+   private static final double SLIP_DAMPING = 0.85D;
    private static final Pattern SIZE = Pattern.compile("(\\d{3})(?:/(\\d{2,3}))?Z?R(\\d{2}(?:\\.5)?)", Pattern.CASE_INSENSITIVE);
 
    private MCH_CarTireGrip() {}
@@ -41,12 +40,36 @@ public final class MCH_CarTireGrip {
    }
 
    /** Signed sideways delta to subtract, never reversing slip or modifying forward velocity/yaw. */
-   public static double lateralCorrection(double sideways, double grip, double contact, double response, double longitudinalDemand) {
-      if(!finite(sideways) || !finite(grip) || !finite(contact) || !finite(response) || !finite(longitudinalDemand)) return 0.0D;
-      double usage = clamp(Math.abs(longitudinalDemand) / LONGITUDINAL_REFERENCE, 0.0D, 0.95D);
-      double limit = clamp(grip, 0.0D, MAX_GRIP) * clamp(contact, 0.0D, 1.0D) * Math.sqrt(1.0D - usage * usage);
-      double requested = Math.abs(sideways) * SLIP_DAMPING * clamp(response, 0.95D, 1.05D) * clamp(contact, 0.0D, 1.0D);
-      return Math.copySign(Math.min(requested, limit), sideways);
+   public static Result calculate(double sideways, double grip, double contact, double response) {
+      if(!finite(sideways) || !finite(grip) || !finite(contact) || !finite(response)) return new Result(0, 0, 0, "invalid_input");
+      double supported = clamp(contact, 0.0D, 1.0D);
+      double limit = clamp(grip, 0.0D, MAX_GRIP) * supported;
+      double requested = sideways * SLIP_DAMPING * clamp(response, 0.95D, 1.05D) * supported;
+      double applied = Math.copySign(Math.min(Math.abs(requested), limit), sideways);
+      String reason = grip <= 0 ? "grip_disabled" : supported <= 0 ? "no_contact" : sideways == 0 ? "no_sideways_speed" : "applied";
+      return new Result(requested, applied, limit, reason);
+   }
+
+   public static double lateralCorrection(double sideways, double grip, double contact, double response) {
+      return calculate(sideways, grip, contact, response).applied;
+   }
+
+   /** Leave 25% of the acceleration budget for residual slip from preceding ticks. */
+   public static float steeringDelta(float requestedDegrees, double speed, double grip, double contact, float tickDelta) {
+      if(!finite(requestedDegrees) || !finite(speed) || !finite(grip) || !finite(contact) || !finite(tickDelta)) return 0.0F;
+      if(speed <= 0.0D || grip <= 0.0D || contact <= 0.0D || tickDelta <= 0.0F) return 0.0F;
+      double fade = speed / (speed + 0.05D);
+      double budget = 0.75D * clamp(grip, 0.0D, MAX_GRIP) * clamp(contact, 0.0D, 1.0D);
+      double maxDegrees = Math.toDegrees(Math.asin(clamp(budget / speed, 0.0D, 1.0D))) * tickDelta * fade;
+      return (float)clamp(requestedDegrees, -maxDegrees, maxDegrees);
+   }
+
+   public static final class Result {
+      public final double requested, applied, limit;
+      public final String reason;
+      Result(double requested, double applied, double limit, String reason) {
+         this.requested = requested; this.applied = applied; this.limit = limit; this.reason = reason;
+      }
    }
 
    private static boolean finite(double value) {

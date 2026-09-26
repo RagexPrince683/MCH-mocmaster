@@ -41,6 +41,7 @@ ArmorMinDamage = 2
 EnableBack = true
 Category = C
 WeightType = Car
+CivilianCarGrip = true
 
 WeightedCenterZ = 0.8
 

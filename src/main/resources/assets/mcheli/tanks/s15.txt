@@ -64,6 +64,7 @@ Category = C
 
 ; Tank or Car or Unknown
 WeightType = Car
+CivilianCarGrip = true
 
 ;PivotTurnThrottle を0より大きい値にすると超信地旋回ができなくなる。デフォルトは0
 PivotTurnThrottle = 0.1

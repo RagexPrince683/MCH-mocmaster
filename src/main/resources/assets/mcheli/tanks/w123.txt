@@ -50,10 +50,11 @@ Category = C
 SetWheelPos =  0.58,  -0.29,  2.14, -1.43
 
 WeightType = Car
+CivilianCarGrip = true
 ; Factory tire source and identity notes: docs/car-tire-grip.md
 FrontTireSize = 175R14
 RearTireSize = 175R14
-CarLateralGrip = 0.06
+CarLateralGrip = 0.12
 
 HUD =  bnr32_hud, none, none, none
 

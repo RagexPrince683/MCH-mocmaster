@@ -62,16 +62,37 @@ public class MCH_WheelManager {
       return false;
    }
 
-   /** Share of all configured wheels supported on this half of the wheelbase. */
-   public double getCarGroundContactFraction(boolean front) {
-      if(this.wheels.length == 0) return 0.0D;
+   /** One read-only snapshot; paired onGround flags never supply grip. */
+   public CarContact getCarGroundContact(boolean diagnostics) {
       double centerZ = (this.minZ + this.maxZ) * 0.5D;
-      int contacts = 0;
+      int front = 0, rear = 0, raw = 0, paired = 0;
       for(MCH_EntityWheel wheel : this.wheels) {
-         if(wheel != null && wheel.pos != null && (wheel.pos.zCoord >= centerZ) == front && wheel.hasGroundContact()) ++contacts;
+         if(wheel == null || wheel.isDead || wheel.pos == null) continue;
+         if(diagnostics) {
+            if(wheel.hasGroundContact()) ++raw;
+            if(wheel.onGround) ++paired;
+         }
+         if(wheel.hasCarGroundContact()) {
+            if(wheel.pos.zCoord >= centerZ) ++front;
+            else ++rear;
+         }
       }
       // Missing/dead wheels cannot raise the available grip by shrinking the denominator.
-      return (double)contacts / this.wheels.length;
+      return new CarContact(this.wheels.length, front, rear, raw, paired);
+   }
+
+   public static final class CarContact {
+      public final int total, front, rear, rawProbe, pairedFlags;
+      CarContact(int total, int front, int rear, int rawProbe, int pairedFlags) {
+         this.total = total; this.front = front; this.rear = rear;
+         this.rawProbe = rawProbe; this.pairedFlags = pairedFlags;
+      }
+      public double fraction() { return this.total > 0 ? (double)(this.front + this.rear) / this.total : 0.0D; }
+      public double response(MCH_TankInfo info) {
+         int supported = this.front + this.rear;
+         return supported > 0 ? (this.front * MCH_CarTireGrip.response(info.frontTireSize)
+                 + this.rear * MCH_CarTireGrip.response(info.rearTireSize)) / supported : 1.0D;
+      }
    }
 
    // fast top-surface query (returns top solid/liquid block Y)

@@ -67,6 +67,11 @@ Category = C
 
 ; Tank or Car or Unknown
 WeightType = Car
+CivilianCarGrip = true
+FrontTireSize = 245/45R20
+RearTireSize = 245/45R20
+; Representative stock 2018 Dodge Challenger R/T, independent of the visual model credit.
+TechYear = 2018
 
 ;PivotTurnThrottle を0より大きい値にすると超信地旋回ができなくなる。デフォルトは0
 PivotTurnThrottle = 0.1

@@ -68,8 +68,24 @@ public class MCH_EntityWheel extends W_Entity {
       return hasGroundSupport(this.boundingBox, boxes);
    }
 
+   /** Grip-only support sweep. The invisible suspension box is not the rendered tire patch. */
+   public boolean hasCarGroundContact() {
+      if(this.isDead || this.worldObj == null || this.boundingBox == null || this.parents == null || this.pos == null) return false;
+      double restGap = Math.max(0.0D, this.parents.yOffset + this.pos.yCoord - this.yOffset);
+      AxisAlignedBB box = this.boundingBox.copy();
+      // A suspension wheel can lag below the body during takeoff. Never use that stale support.
+      double targetBottom = this.parents.getTransformedPosition(this.pos).yCoord - this.yOffset;
+      box.offset(0.0D, Math.max(0.0D, targetBottom - box.minY), 0.0D);
+      double reach = 0.05D + restGap;
+      return hasGroundSupport(box, this.getCollidingBoundingBoxes(this, box.addCoord(0.0D, -reach, 0.0D)), reach);
+   }
+
    static boolean hasGroundSupport(AxisAlignedBB wheelBox, List boxes) {
-      double probe = -0.05D;
+      return hasGroundSupport(wheelBox, boxes, 0.05D);
+   }
+
+   static boolean hasGroundSupport(AxisAlignedBB wheelBox, List boxes, double reach) {
+      double probe = -reach;
       for(int i = 0; i < boxes.size(); ++i) {
          if(((AxisAlignedBB)boxes.get(i)).calculateYOffset(wheelBox, probe) > probe) return true;
       }

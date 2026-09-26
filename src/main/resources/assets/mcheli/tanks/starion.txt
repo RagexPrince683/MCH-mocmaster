@@ -58,6 +58,7 @@ Category = C
 
 ; Tank or Car or Unknown
 WeightType = Car
+CivilianCarGrip = true
 
 ;SetWheelPos =  X座標, Y座標,  Z座標1, Z座標2, Z座標3 ...
 ; X座標のマイナス側は必要なし

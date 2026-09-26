@@ -36,6 +36,7 @@ SetWheelPos =  0.69,  -0.24,  1.79,  -1.74
 WeightedCenterZ = 1.0
 
 WeightType = Car
+CivilianCarGrip = true
 
 Category = C
 

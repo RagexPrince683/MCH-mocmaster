@@ -18,6 +18,8 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    public float weightedCenterZ = 0.0F;
    public int trackMaxHP = 100;
    public boolean enableTurretPop = false;
+   public boolean civilianCarGrip = false;
+   public boolean carGripDiagnostics = false;
    public MCH_CarTireGrip.TireSize frontTireSize = null;
    public MCH_CarTireGrip.TireSize rearTireSize = null;
    public float carLateralGrip = MCH_CarTireGrip.DEFAULT_GRIP;
@@ -73,7 +75,13 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
 
    public void loadItemData(String item, String data) {
       // Handle car-only keys before the shared parser's client HUD/model branch.
-      if(item.equalsIgnoreCase("FrontTireSize")) {
+      if(item.equalsIgnoreCase("CivilianCarGrip")) {
+         this.civilianCarGrip = this.toBool(data, false);
+         return;
+      } else if(item.equalsIgnoreCase("CarGripDiagnostics")) {
+         this.carGripDiagnostics = this.toBool(data, false);
+         return;
+      } else if(item.equalsIgnoreCase("FrontTireSize")) {
          this.frontTireSize = MCH_CarTireGrip.parseTireSize(data);
          return;
       } else if(item.equalsIgnoreCase("RearTireSize")) {
@@ -122,6 +130,8 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
 
    public void preReload() {
       super.preReload();
+      this.civilianCarGrip = false;
+      this.carGripDiagnostics = false;
       this.frontTireSize = null;
       this.rearTireSize = null;
       this.carLateralGrip = MCH_CarTireGrip.DEFAULT_GRIP;

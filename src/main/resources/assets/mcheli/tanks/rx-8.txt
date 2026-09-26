@@ -47,6 +47,7 @@ SweepWingSpeed  = 0.0
 EnableBack = true
 Category = C
 WeightType = Car
+CivilianCarGrip = true
 
 SetWheelPos =  0.96,  -0.29,  1.9563, -1.5413
 

@@ -68,6 +68,10 @@ Category = C
 
 ; Tank or Car or Unknown
 WeightType = Car
+CivilianCarGrip = true
+; Stock 2018 R/T standard tires: Dodge 2018 specifications, p.13 (not the Hellcat model credit).
+FrontTireSize = 245/45R20
+RearTireSize = 245/45R20
 
 ;PivotTurnThrottle を0より大きい値にすると超信地旋回ができなくなる。デフォルトは0
 PivotTurnThrottle = 0.1
@@ -162,4 +166,5 @@ InventorySize = 9
 ;0.1582
 
 ArmorMinDamage = 2
-TechYear = 1970
+; Representative stock 2018 Dodge Challenger R/T.
+TechYear = 2018

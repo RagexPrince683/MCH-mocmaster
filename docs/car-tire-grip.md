@@ -1,50 +1,98 @@
-# Car tire grip
+# Civilian car tire grip
 
-Tire grip applies to `MCH_EntityTank` definitions with `WeightType = Car` (parser value 1), including wheeled military vehicles. `normal` and `tank` handling are unchanged. This is a modest gameplay slip model, not a tire, suspension, or weight simulation. No compound, friction coefficient, curb weight, pressure, or undocumented trim is inferred.
+`CivilianCarGrip = true` explicitly opts a passenger-car definition into the grip and steering model. It defaults to **false**. Neither `WeightType` nor `Category` selects this behavior, and neither is changed. Existing definitions without the field retain their legacy handling, including old `WeightType = Car` packs. Tire metadata alone never enables grip.
+
+This is bounded gameplay slip damping, not a measured tire/suspension/weight simulation. The wheel movement, pitch/roll suspension, rendering, thrust, speed clamp, isotropic `MotionFactor` drag, and all aircraft/boat code remain unchanged. Only opted-in tank-backed civilian cars receive the new correction and steering coupling.
 
 ## Configuration
 
-| Field | Units / accepted values | Default |
+| Field | Units / values | Default |
 |---|---|---|
-| `FrontTireSize` | Metric radial size, e.g. `225/50R16` or `265/35ZR19`: section width in mm / sidewall height as a percentage of width / rim diameter in inches. `175R14` full-profile notation is also accepted without inventing an aspect ratio. Case and spaces are ignored. | Unset; neutral response 1.0. |
-| `RearTireSize` | Same format, independently optional. | Unset; neutral response 1.0. |
-| `CarLateralGrip` | Maximum change in sideways velocity per 20 Hz physics tick, in blocks/tick per tick (blocks/tick²). Range 0–0.25. `0` disables the new grip. | `0.06` (24 blocks/s² before contact and longitudinal sharing). |
-
-Supported dimensions are width 100–500 mm, explicit aspect 20–100%, and rim 10–30 inches, including half-inch rims. Malformed sizes, load/speed suffixes, flotation/inch-width sizes, bias-ply notation, and metric PAX diameters fall back to neutral response; they do not break old definitions. Strip service-description suffixes before entering a sourced metric size. Invalid/nonfinite grip values use 0.06; finite values outside the range are clamped. Reloading a config that removes these fields restores defaults.
+| `CivilianCarGrip` | Boolean, explicit passenger-car opt-in | `false` |
+| `FrontTireSize` | Optional metric radial dimensions, e.g. `225/50R16`, `265/35ZR19`, `175R14` | Unset; neutral response 1.0 |
+| `RearTireSize` | Same, independently optional | Unset; neutral response 1.0 |
+| `CarLateralGrip` | Maximum sideways velocity change per 20 Hz tick, blocks/tick²; 0–0.25 | `0.12`; `0` disables grip and its steering coupling |
+| `CarGripDiagnostics` | Boolean; separate server CSV and in-memory snapshot | `false` |
 
 ```ini
+; Representative stock 2018 Dodge Challenger R/T
 WeightType = Car
-FrontTireSize = 265/35ZR19
-RearTireSize = 335/30ZR20
-CarLateralGrip = 0.06
+CivilianCarGrip = true
+FrontTireSize = 245/45R20
+RearTireSize = 245/45R20
+CarLateralGrip = 0.12
+; Enable only while investigating a specific vehicle:
+CarGripDiagnostics = false
 ```
 
-The example is the sourced Carrera GT fitment. An unidentified car should omit both sizes, retaining neutral size response and the conservative 0.06 grip limit. **No default factory tire size is asserted.** Custom definitions can adjust `CarLateralGrip` independently of their tire dimensions.
+Tire sizes are **sourced metadata**, separate from **gameplay tuning** (`CarLateralGrip`, damping, and steering budget). Unknown sizes stay unset without disabling grip. Width is not the main grip control. The original geometry response remains bounded to 0.95–1.05 and never increases the per-tick limit.
 
-## Calculation and integration
+The parser ignores case and spaces. Accepted dimensions are width 100–500 mm, explicit aspect 20–100%, rim 10–30 inches including half-inch rims. Full-profile `175R14` has no invented aspect ratio. Unsupported/malformed notation, P-metric prefixes, service suffixes, bias-ply, flotation and metric PAX diameters remain neutral. Normalize a sourced P245/45R20 to `245/45R20`; strip H/speed/service designations from a verified metric size. Invalid/nonfinite grip uses 0.12; finite values clamp to 0–0.25. Reload resets removed opt-in, diagnostic and tire fields to their defaults.
 
-The server applies one correction per tick after existing thrust, speed limiting, `MotionFactor` drag, and wheel updates, before body movement. Client position/rotation interpolation and velocity updates remain in the existing path; no render-frame tire forces or yaw torque are added.
+## Contact findings before tuning
 
-1. For yaw θ, horizontal forward is `f = (-sin θ, cos θ)` and sideways is `s = (cos θ, sin θ)`. Velocity splits into `forward = v·f` and `side = v·s`. The correction subtracts only a multiple of `s`, so it preserves forward velocity, including reverse motion, and cannot add horizontal energy.
-2. Each live wheel probes 0.05 blocks below its current collision box for support using collision boxes. Body `onGround`, ground-height samples, and the suspension's copied axle `onGround` flags do not qualify as tire contact. No contact means zero tire grip. Missing/dead wheels count against contact rather than reducing the denominator. Solid collision support can include vehicle collision boxes; water alone provides no collision support.
-3. Front/rear wheels are separated at the midpoint of the configured longitudinal wheel range, with positive local Z forward. Let `Cf` and `Cr` be supported front/rear wheel counts divided by **all configured wheels**. `C = Cf + Cr`. Multiple axles are grouped by this midpoint; this does not implement axle loads or driven-wheel allocation.
-4. For a valid size, `W = width`, `H = W * aspect / 100`, `D = rim * 25.4 + 2H`. Response `R = clamp(1 + 0.02*clamp(ln(W/205),-1,1) - 0.03*clamp((H/D - r0)/r0,-1,1),0.95,1.05)`, where `r0 = 112.75/631.9`. Full-profile sizes omit the sidewall term because the aspect is unknown; unset sizes have `R=1`. The 205/55R16 reference geometry is only a neutral tuning reference. Contact-weighted response is `(Cf*Rf + Cr*Rr)/C`.
-5. Longitudinal demand `A` is the magnitude of the forward velocity change from existing thrust (forward or reverse, including engine braking against motion). If brake or throttle-down is active, also add the magnitude of the existing drag's forward velocity change. Speed-clamp changes and passive coasting drag are not treated as braking demand. Set `u = clamp(A/0.20,0,0.95)`; the available lateral limit is `L = CarLateralGrip * C * sqrt(1-u²)`. The 0.20 reference and 0.95 utilization cap are gameplay choices, retaining a small lateral reserve under strong longitudinal demand. They are not measured acceleration or a claimed friction coefficient. This shares the grip budget without changing existing acceleration/braking behavior.
-6. Subtract `sign(side) * min(abs(side)*0.25*R*C, L)` from the sideways velocity. The proportional term fades continuously at low slip; there is no speed threshold, forced alignment, snapping to zero, or rotation. Opposite directions use the same bound. The new force never increases speed or bypasses existing limits.
+The old 0.05-block probe did **not** reach the road under the invisible passenger-car wheel boxes. `MCH_EntityTank` sets `yOffset = 0.35`. The AE86, Challenger and R32 define wheel Y = −0.24, so a level, grounded body at Y = 0.35 has a target wheel bottom at **Y = 0.11** above the road. `MCH_WheelManager.move` damps vertical movement by 0.15 and converges to that target rather than forcing wheels down to the road. The original `hasGroundContact` therefore counts **0/4** wheels after settling. Increasing tire width or the force limit alone cannot fix a zero contact multiplier.
 
-**Tire width informs small damping differences; it does not determine grip by itself.** Width is a bounded logarithmic contribution to response, not a direct grip multiplier. Rim and sidewall geometry also inform response. The entire response variation is limited to ±5%, and it cannot increase the configured per-tick grip limit. Real grip depends on many properties absent here; these constants are deliberately modest tuning, not empirical tire performance.
+`MCH_CarWheelContactTest` established this **before changing the grip constants** using real `MCH_EntityWheel.moveEntity`, Minecraft collision AABBs and the manager's settling/placement sequence. A headless fixture supplies a flat collision floor; mod/render/chunk initialization is bypassed. This is a reproducible collision test, not a recorded in-game driving session.
 
-### Existing movement inspected
+| Bundled layout | Local Y / front Z / rear Z | Original probe, settled | Grip support sweep, settled |
+|---|---|---|---|
+| `ae86` | −0.24 / 1.99 / −1.70 | 0/4 | 4/4 (front 2, rear 2) |
+| `challenger` | −0.24 / 1.851 / −1.934 | 0/4 | 4/4 (front 2, rear 2) |
+| `bnr32` | −0.24 / 1.965 / −1.789 | 0/4 | 4/4 (front 2, rear 2) |
 
-`MCH_TankInfo` maps `WeightType`, inherits wheel positions and `MotionFactor`, and multiplies `Speed` by `AllTankSpeed` during validation. `MCH_EntityTank` adds thrust from current throttle/10 or `throttleBack`, clamps horizontal speed to the validated per-car speed, then multiplies both horizontal components by `MotionFactor` when grounded/near ground (otherwise 0.9995). `MotionFactor` remains isotropic drag, distinct from the new sideways correction. Brake input currently reduces throttle/reverse control; the new code does not introduce another longitudinal brake force.
+The grip-only collision sweep reaches `0.05 + max(0, parent.yOffset + wheel.localY - wheel.yOffset)` below the wheel box: **0.16 blocks** for those three definitions. This accounts for the configured box rest gap, not `stepHeight` or the suspension's 0.6-block terrain tolerance. If a wheel lags below its current transformed body target during takeoff, the query box is raised to the target before probing, so stale wheels cannot provide airborne grip. The live wheel position/box and flags are never changed. Support must be underneath the actual wheel footprint; walls, ceilings, water alone and terrain elsewhere do not qualify. A 0.05-block collision skin remains intentional.
 
-Steering already changes yaw through `MobilityYawOnGround`, `PivotTurnThrottle`, displacement, and reverse-control logic in `onUpdateAngles`/`onUpdate_ControlSub`. Tire grip reads that heading without changing the steering rules. `MCH_WheelManager` uses invisible `MCH_EntityWheel` collision entities, synthetic axle pairing, terrain filtering, and pitch/roll adjustments. Its existing suspension and rendering behavior remain intact; the new support query is read-only and is used only by the server car-grip branch.
+The manager samples each wheel once per correction. Missing/dead wheels still count in the configured denominator. Front/rear grouping uses the midpoint of min/max local Z, not copied axle `onGround` flags. Removing front support gives **2/4**, losing another wheel gives **1/4**, and an airborne body with stale wheels near the road gives **0/4**. Those cases are covered by collision regressions.
 
-## Bundled identity and factory fitment audit
+## Grounded turn trace and tuning
 
-Audit date: 2026-09-26. There are **74** bundled `WeightType = Car` definitions, all under `src/main/resources/assets/mcheli/tanks/`. `TechYear` is game technology metadata, not proof of an exact model year. Years below describe the definition's evidence; they do not silently correct its metadata. All unverified fitments remain unset with neutral response and the default grip limit. Candidate sizes below are research findings, **not applied factory claims** for an ambiguous bundled model. Each axle has the listed common size unless front/rear are explicitly distinguished.
+1. Steering input originally changed body yaw through `onUpdateAngles` while momentum retained its world direction. Rotation packets deliver that yaw to the server. With zero wheel contact, the old grip performed no correction. Even with hypothetical full contact, 25% damping retained 75% of each tick's lateral slip, allowing yaw to outrun the path.
+2. Existing thrust, the validated `Speed` clamp and `MotionFactor` drag still run in their existing order. The server then updates wheels, takes the contact snapshot, bounds the yaw change accumulated since the preceding physics tick, recomputes the horizontal basis from that applied yaw, applies one lateral correction, and moves the body.
+3. Forward `f = (−sin θ, cos θ)` and sideways `s = (cos θ, sin θ)`. `side = velocity·s`. Contact fraction `C = supported/configured`. Front/rear contact weights the existing tire response `R`.
+4. Requested signed correction is `side * 0.85 * R * C`. Limit is `clamp(CarLateralGrip,0,0.25) * C`. Applied correction is `sign(side) * min(abs(requested), limit)`, subtracted along `s`. This preserves forward velocity relative to the applied heading, never reverses slip, never increases horizontal kinetic energy, and fades continuously to zero at low slip.
+5. Steering may use 75% of that lateral acceleration budget, retaining 25% for residual slip. The yaw limit in degrees is `asin(clamp(0.75*grip*C/speed,0,1)) * tickDelta * speed/(speed+0.05)`, converted to degrees. Requests keep their sign and clamp to that bound. Zero speed/contact gives zero added steering; low-speed response is continuous. Client key steering respects this bound and elapsed tick time; the server also bounds the cumulative yaw delivered by rotation packets once per physics tick. The opted-in reverse path omits the old second, opposing yaw update in `onUpdate_ControlSub`; reverse steering is handled by the same angle path and force budget.
 
-### Sourced sizes applied (7 definitions)
+The default force bound rises from **0.06 to 0.12 blocks/tick²** (48 blocks/s² at full contact). Slip damping rises from **0.25 to 0.85**. These are deliberate gameplay choices after repairing contact. Tire geometry is unchanged: its width term is a bounded logarithm and its sidewall term uses a neutral 205/55R16 reference. Its entire variation remains ±5%, independent of the acceleration cap.
+
+At speed **0.8 blocks/tick**, a 6° heading change produces **0.083623 blocks/tick** sideways velocity. With neutral tire response:
+
+| Case | Requested / applied correction (blocks/tick) | Remaining sideways speed |
+|---|---|---|
+| Old actual contact 0/4 | 0 / **0** | 0.083623 |
+| Old formula if contact had been 4/4 | 0.020906 / **0.020906** | 0.062717 |
+| New actual contact 4/4 | 0.071079 / **0.071079** | 0.012543 |
+| New airborne contact 0/4 | 0 / **0** | 0.083623 |
+
+For a larger `side = 0.30` at full contact, old coasting requested/applied is **0.075/0.060** (under the old 0.10 longitudinal demand, applied was **0.051962**); new requested/applied is **0.255/0.120**. At `side = 0.001`, new correction is **0.000850**, not a snap to zero. Forward/reverse sustained-turn tests at 0.8 and 1.5 blocks/tick keep the velocity direction within 1.5° of the applied body heading. At 1.5, a 6° request is bounded to approximately **3.33°/tick**; at 0.8, it remains 6°.
+
+## Throttle and drivetrain
+
+No drivetrain field is added. The old global longitudinal-demand reduction is removed: throttle and brake inputs do **not** directly consume axle grip in this model. Existing thrust, reverse and drag still change the velocity presented to the grip calculation, but identical velocity/contact yields identical lateral grip when coasting or accelerating. There is no RWD rear-axle power reduction, AWD torque allocation, invented split, or axle-load simulation. Front/rear grouping exists solely for contact and tire metadata. Adding drivetrain metadata without an axle power model would falsely imply behavior.
+
+## Diagnostics
+
+Set `CarGripDiagnostics = true` in the one vehicle definition being investigated, then reload/restart normally. It is safe to enable on an excluded vehicle: it records `not_opted_in` and applies no force. All bundled files leave diagnostics disabled.
+
+The server appends one record per physics tick to **`logs/car-tire-grip.csv`**, relative to the game/server working directory. It never writes these records to normal console output. Columns identify vehicle/entity/tick, configured wheels, front/rear contacts, the original raw 0.05 probe count, suspension paired flags, signed sideways speed, unbounded requested correction, actual applied correction, limit, reason, and requested/applied yaw delta. Velocity is blocks/tick, correction is blocks/tick², yaw is degrees/tick. The old raw and paired counts are diagnostic comparisons only.
+
+Reasons are `not_opted_in`, `grip_disabled`, `no_wheels`, `no_contact` (airborne or unsupported wheels), `no_sideways_speed`, `invalid_input`, and `applied`. An excluded/disabled vehicle may show a hypothetical formula request but its **applied** correction is always zero. The current snapshot is also available through `MCH_EntityTank.getCarGripDiagnostic()`; disabled vehicles return null. File failures disable CSV writes and remain inspectable through `MCH_CarGripDiagnostics.getWriteError()` without log spam or interrupting physics. Turn diagnostics off after capture.
+
+## Bundled eligibility
+
+Exactly **22** runtime definitions opt in; matching `configreference/tanks` definitions mirror the relevant fields:
+
+`2102`, `2105`, `350z`, `ae86`, `altis`, `bcnr33`, `bnr32`, `bnr34`, `bugattichiron`, `carrera_gt`, `challenger`, `dacia`, `delorean`, `fresh_auto`, `impreza`, `phantom`, `rx-8`, `rx7`, `s15`, `silvia_s14`, `starion`, `w123`.
+
+`fresh_auto` is an unarmed civilian drift-car build, so it opts in without claiming stock racing tires. There are 74 bundled `WeightType = Car` definitions; the other 52 retain legacy handling. Explicit exclusions include `bm21`, `bnr32_police`, `fordpolice`, `phantomarmored`, `mc_atv_normal`, `opel_blitz_fuel`, `toyota_unarmed` and all armed Hilux variants, military trucks/utility vehicles, launchers, and military buggies. A car body, `Category = C`, or an unarmed loadout alone does not opt any of them in. Horns, backfire and drift effects in civilian definitions are not armed conversions. Tracked tanks, other military vehicles, aircraft and boats receive no opt-in edits.
+
+## Stock identity and tire sources
+
+The bundled `ae86` is treated as a **representative stock 1983 Toyota Corolla Levin GT APEX**, as requested. Its 1983 `TechYear` stays unchanged. [Toyota's period launch release, dated May 12, 1983](https://www.toyota.co.jp/jpn/company/history/75years/vehicle_lineage/car/id60003763/news/60003763.pdf), pp.12–13, identifies 2/3-door GT APEX grades but the inspected specification tables do not establish their standard tire size. Later databases commonly report 185/70HR13, while [Toyota's retrospective GAZOO listing](https://gazoo.com/catalog/maker/TOYOTA/COROLLA_LEVIN/198301/990003040/) conflicts on rim size. A reliable period tire fitment was not verified, so **both tire fields remain unset and grip stays enabled**; neutral response does not imply generic factory tires.
+
+The bundled `challenger` is explicitly treated as a **stock 2018 Dodge Challenger R/T**, and **`TechYear` changes from 1970 to 2018** to match this chosen definition identity. [Dodge's official 2018 Challenger specifications](https://www.media.stellantis.com/uploads/me/ME/2018/Dodge/Technical-sheet/1806_Dodge_Challenger.pdf), p.13, lists **P245/45R20** all-season performance tires as standard for R/T (stored as `245/45R20` front and rear); pp.15–16 identifies the standard 20×8-inch R/T wheel. The separate SRT/Hellcat table and the model-credit URL are not evidence for R/T tires or handling. No tire compound-specific gameplay coefficient is inferred.
+
+### Verified dimensions stored (8 definitions)
 
 | Definition | Supported identity | Front | Rear | Source and uncertainty |
 |---|---|---|---|---|
@@ -56,74 +104,14 @@ Audit date: 2026-09-26. There are **74** bundled `WeightType = Car` definitions,
 | `delorean` | 1981 DMC-12 DeLorean | 195/60R14 | 235/60R15 | [Classic DeLorean Motor Company factory-fitment statement](https://support.delorean.com/kb/a31/tire-choices-updated.aspx). Uses original sizes rather than the article's smaller optional replacement rear. |
 | `w123` | 1976 Mercedes-Benz W123 240D, standard sedan | 175R14 | 175R14 | [Longstone W123 240D guide](https://www.longstonetyres.co.uk/classic-car-tyres/mercedes/240.html). Excludes long-wheelbase and estate alternatives. Original full-profile notation retained; aspect ratio is deliberately unknown. |
 
-### Civilian, custom, and police definitions using defaults (20 definitions)
+| `challenger` | Representative stock 2018 Dodge Challenger R/T | 245/45R20 | 245/45R20 | Dodge 2018 specifications, p.13, standard R/T fitment; normalized P-metric notation. No Hellcat/Scat Pack upgrade assumed. |
 
-| Definition | Identity/year/trim evidence | Research and reason sizes remain unset |
-|---|---|---|
-| `2102` | VAZ-2102; TechYear 1971; engine/market absent | [Period-model catalog](https://www.njcar.ru/tires/vaz/2102/) lists 155 SR13. A period manufacturer document supporting this bundled configuration was not verified; no aspect ratio or market inferred. |
-| `2105` | Lada 2105; TechYear 1980; version/market absent | [Manufacturer parts catalog, later 2107/2105 family](https://www.lada.co.uk/manuals/2107.pdf) is not a 1980 fitment specification. No verified year-specific front/rear fitment; later 175/70R13 recommendations are not substituted. |
-| `350z` | Nissan 350Z; TechYear 2002; market/grade absent | [Nissan 2003 workshop manual mirror](https://manualzz.com/doc/65248532/nissan-350z-2003-workshop-manual?lang=ta) records 225/50R17 front, 235/50R17 rear and 18-inch alternatives. Export model-year/grade and early Z33 launch year are not resolved. |
-| `ae86` | Toyota Corolla AE86; TechYear 1983; GT/GTV/GT APEX/market not named | [Toyota's 1983 lineage table](https://www.toyota-global.com/company/history_of_toyota/75years/vehicle_lineage/car/id60003763/index.html) identifies multiple grades; [1983 GT APEX period specification](https://www.automobile-catalog.com/tire/1983/3531665/toyota_corolla_levin_3door_1600_gt_apex.html) lists 185/70HR13. The bundled trim/market does not support choosing that specific fitment. |
-| `altis` | Corolla (Altis) 2014; engine/market/grade absent | [Toyota 2014 Altis brochure scan](https://www.scribd.com/document/678577598/Toyota-Corolla-Altis-2014) distinguishes 195/65R15 and 205/55R16. No matching grade established. |
-| `bnr32_police` | R32 GT-R Police; TechYear 1989 | [Nissan stock 1989 GT-R](https://www.nissan-global.com/EN/HERITAGE_COLLECTION/skyline_gt-r_1989.html) has 225/50R16. Police conversion fitment is not documented; ordinary GT-R sizes are not asserted for this modified car. |
-| `challenger` | Named Dodge Challenger R/T, TechYear 1970; model-credit comment points to 2015 SRT Hellcat | [Goodyear's 2015 trim selector](https://www.goodyear.com/en-us/vehicles/Dodge/Challenger/2015/R~s~T) distinguishes 245/45R20 R/T and 275/40R20 Hellcat. Conflicting year and trim prevent either choice. |
-| `dacia` | Display name Sandero (2009), TechYear 1969; trim absent | [June 2009 Dacia brochure archive](https://www.notice-utilisation-voiture.fr/brochures/dacia/sandero/dacia-sandero-2008/FRA-06-2009/) identifies a period document, but a matching trim's tire table was not verified. No size is taken from a later Sandero generation. |
-| `fordpolice` | Ford Mondeo (NYPD); TechYear 1993; engine/trim/conversion absent | [Ford workshop specifications mirror](https://workshop-manuals.com/ford/mondeo_1993_01.1993-07.1996/mechanical_repairs/2_chassis/211_wheels_tyres/211-01_wheels_tyres/specificationsgeneral_specifications/) lists 185/65R14, 195/60R14, 205/55R15. Police fitment and grade unresolved. |
-| `fresh_auto` | 2020 Fresh Auto Team VAZ 2105 drift car | Custom competition car, not a factory trim. [Factory-family catalog](https://www.lada.co.uk/manuals/2107.pdf) cannot establish the modified car's tires. No racing size or compound invented. |
-| `impreza` | Subaru Impreza; TechYear 1992; no WRX/STI or other grade named | [Subaru's early export brochure scan](https://www.auto-brochures.com/makes/Subaru/Impreza/Subaru_US%20Impreza_1994.pdf) concerns a later market/year. No matching 1992 factory trim verified; sports-car performance settings do not identify a trim. |
-| `mc_atv_normal` | Generic ATV; TechYear 2000 | No make/model/trim to research. Neutral defaults; no arbitrary production ATV or flotation tire selected. |
-| `opel_blitz_fuel` | Opel Blitz 1.5T inventory/fuel truck; TechYear 1930 | Historical family/first-production year is not an exact chassis/body identification. No reliable period front/rear factory tire document verified; no inferred truck tire size. |
-| `phantom` | Rolls-Royce Phantom; TechYear 2003; original PAX/conventional wheel option not identified | [Rolls-Royce brochure scan](https://xr793.com/wp-content/uploads/2022/08/2007-Rolls-Royce-Phantom.pdf) lists PAX 265/790R540 on both axles for the later brochure. [Contemporary 2003 specification](https://www.km77.com/coches/rolls-royce/phantom/2003/estandar/estandar/phantom/datos) agrees on PAX. PAX uses overall diameter and metric rim, not aspect/inch-rim notation; it is not converted to a fictional conventional size. |
-| `phantomarmored` | Named only "phantom", same 2003 metadata and geometry; armored texture | [Phantom brochure scan](https://xr793.com/wp-content/uploads/2022/08/2007-Rolls-Royce-Phantom.pdf) does not establish armored conversion tires. PAX ambiguity and conversion both remain unresolved. |
-| `rx-8` | Mazda RX-8; TechYear 2003; transmission/grade/market absent | [Mazda's 2003 production specification](https://newsroom.mazda.com/en/publicity/release/2003/200301/0107e.html) distinguishes 225/45R18 and 225/55R16. No trim/transmission selection supported. |
-| `rx7` | Mazda RX-7 FC; TechYear 1985; trim/market absent | [Mazda FC owner's manual scan](https://www.rx7club.com/attachments/2nd-generation-specific-1986-1992-17/rx-7-fc3s-fc3c-onwers-manual-955370/rx-7-fc3s-owners-manual-741623d1625676319) includes 205/60VR15. The scan does not establish this bundled early-year trim; later/export options are not assumed. |
-| `s15` | Nissan Silvia S15; TechYear 1999; Spec-S/Spec-R absent | [Nissan's 1999 b-package release](https://global.nissannews.com/releases/b?lang=ja-JP) shows a grade-specific 205/55R16 upgrade. [1999 grade table](https://car.rakuten.co.jp/maker/nissan/silvia/fmc461365/) distinguishes 195/65R15 Spec-S and 205/55R16 Spec-R. Grade is unknown. |
-| `silvia_s14` | Nissan Silvia S14; TechYear 1993; Q's/K's/market absent | [Year/grade catalog](https://cars-japan.net/tire/mdl0020036.html) has multiple fitments. [Nissan's heritage Silvia](https://www.nissan-global.com/EN/HERITAGE_COLLECTION/silvia.html) is a 1998 JGTC competition car, which is explicitly rejected as a stock source. No verified matching factory grade. |
-| `starion` | Mitsubishi Starion ESI-R, TechYear 1982 | [Mitsubishi's 1988 brochure scan](https://xr793.com/wp-content/uploads/2024/02/1988-Mitsubishi-Starion.pdf) specifies 205/55VR16 front / 225/50VR16 rear, with different sport-package sizes. It does not support the definition's 1982 ESI-R combination; neither year nor handling package is inferred. |
-
-### Military, utility, and buggy definitions using defaults (47 definitions)
-
-All filenames are listed, including weapon variants sharing a chassis. Traditional inch, bias-ply, and flotation designations below are recorded as written, not converted to guessed metric aspect ratios. A family-level or later vehicle specification is not automatically evidence for the definition's date and variant.
-
-| Definitions | Identity and TechYear evidence | Research and uncertainty |
-|---|---|---|
-| `bal` | MZKT-7930 Bal-e; 2008 | [Manufacturer's 7930 family catalog referenced by the platform history](http://www.volatdefence.com/katalog/362/) could not be verified as a year-specific tire document. No factory front/rear size established. |
-| `bearcat` | Lenco BearCat F-550; 2001, generation absent | [Lenco 2002–07 parts catalog](https://lencoarmor.com/wp-content/uploads/2017/11/Lenco_2002-07_BearCat_Parts_Catalog1.pdf) identifies multiple wheel assemblies, not a verified 2001 front/rear tire specification. |
-| `bm21` | BM-21 Grad "Ural"; 1963; exact truck derivative absent | [Ural-375 manual scan](https://ru.scribd.com/document/873566545/ural-375) identifies 14.00-20 family tires. Bundled launch-year derivative/axles not verified; no numeric aspect invented. |
-| `dra_vdv` | VDV/Ukrainian attack buggy; 2022 | Multiple custom identities in one name; no production make/model or factory trim to research. |
-| `elbrus` | MAZ-543 Scud-B; 1967 | Search did not verify a reliable period factory front/rear tire specification for this chassis/launcher variant. Unset rather than a guessed large truck size. |
-| `flarakrad` | 15T MAN KAT 1 8x8 Roland; 1981 | Search found replacement 14.00R20 applications, but no verified manufacturer tire specification for the wide Roland chassis/year. Replacement listings are not accepted as factory evidence. |
-| `g250-wolf` | Mercedes G250 Wolf; 1990 | [1990 vehicle listing](https://www.armyshark.com/light-vehicles/as-0000341) records 225/75x16, but a used listing does not establish factory fitment or the bundled military variant. |
-| `gaz66zu23` | GAZ-66 with ZU-23; 1964 | Search found 12.00-18 service/replacement references; no verified period factory specification for this weapon conversion. No inferred aspect. |
-| `growler` | Growler ITV; 2009, M1161/other variant not named | [Manufacturer M1161 brochure](http://www.growlerme.com/images/New_M-1161_Brochure10-09-2014.pdf) is later and was not verified for the bundled variant's factory tires. |
-| `hel`, `hel2` | Humvee fast back / wagon back; both 1985 | [AM General M1165 specification](https://www.amgeneral.com/what-we-do/vehicles-chassis/humvee-4ct/) gives 37x12.5R16.5, but is a later expanded-capacity variant. No exact 1985 chassis fitment proved. |
-| `humvee_mk19`, `humvee_tow`, `humveewithweapon` | Humvee Mk19/TOW/M2; all 1985 | [Army tire assembly table](https://www.ascrad.army.mil/Portals/74/PDFs/2021/Tire%20and%20Wheel%20Assy%20Tables.pdf) gives family service fitments 37.0/12.5R16.5, without resolving original 1985 variants. |
-| `humveewithm240` | Humvee M240B; 1990 | [Army service table](https://www.ascrad.army.mil/Portals/74/PDFs/2021/Tire%20and%20Wheel%20Assy%20Tables.pdf) is not year-specific factory evidence; flotation notation is retained only in research. |
-| `humveewithweaponrws` | Humvee M2 RWS; 2006 | [AM General M1165](https://www.amgeneral.com/what-we-do/vehicles-chassis/humvee-4ct/) has 37x12.5R16.5. Bundled chassis variant is unspecified; RWS equipment does not prove M1165. |
-| `hemtt` | M983 HEMTT; 1982, version absent | [Army tire table](https://www.ascrad.army.mil/Portals/74/PDFs/2021/Tire%20and%20Wheel%20Assy%20Tables.pdf) supplies HEMTT family service evidence; [Oshkosh's current HEMTT page](https://oshkoshdefense.com/vehicles/heavy-tactical-vehicles/hemtt/) is specifically A4. Neither resolves original 1982 M983 factory fitment. |
-| `iltis-kdow` | Volkswagen Iltis; 1978; military conversion | [Michelin Iltis selector](https://www.michelin.co.uk/auto/manufacturers/volkswagen/iltis/iltis) lists 6.5R16 front/rear for later dates. No verified 1978 conversion factory specification. |
-| `kamaz` | KamAZ-6350 8x8; 1998, engine/version absent | [KamAZ manufacturer catalog scan, PDF p.12](https://osterlitz.de/ural/diverse/kamaz-catalogue.pdf) has 425/85R21 for a Euro-2 6350. The bundled 1998 engine/emissions version is not established; later catalog size is recorded but not applied. |
-| `m142`, `m142atacms` | M142 HIMARS/M1140; both 2005, rocket/ATACMS variants | [Army tire table](https://www.ascrad.army.mil/Portals/74/PDFs/2021/Tire%20and%20Wheel%20Assy%20Tables.pdf) gives 395/85R20 for listed FMTV vehicles but does not list M1140 there. No chassis-family extrapolation to factory HIMARS tires. |
-| `m151`, `m151_m2` | M151 utility/M2; both 1959 | [US Army technical training document](https://files.eric.ed.gov/fulltext/ED212802.pdf) gives 7.00-16 for the M151 family. It does not establish factory fitment for the early date or weapon conversion; inch bias-ply notation is not converted. |
-| `m151a1c` | M151A1C 106 mm RCL; 1964 | [Army TM 9-2320-218-10 scan, March 1968](https://www.scribd.com/document/811351853/TM-9-2320-218-10-Mar68) gives 7.00x16 family tires, not verified year-specific axle evidence for this conversion. |
-| `m151a2` | M151A2 FAV; 1970 | [Army technical training document](https://files.eric.ed.gov/fulltext/ED212802.pdf) gives 7.00-16 M151 family tires; FAV conversion fitment is not established. |
-| `mxtmvbase`, `mxtmv`, `mxtmv50`, `mxtmvm240`, `mxtmvrws` | MXT-MV Husky TSV, unarmed/GMG/M2/M240/RWS; all 2009 | [Husky/MXT-MVA research index linking a Navistar brochure](https://warwheels.net/maxxpromxt-mvaindex.html). The named MV/MVA distinction and exact 2009 front/rear factory tire specification were not verified. No F-550 or generic MRAP size substituted. |
-| `p4-pc` | Peugeot P4; 1982 | [Michelin P4 selector](https://www.michelin.fr/auto/constructeurs/peugeot/p-4/p-4) includes 215/75R16 for later dates; no period manufacturer fitment matching the 1982 definition verified. |
-| `p-s1` | Pantsir-S1 SA-22; 2012, chassis not named | [KamAZ-6560 technical manual scan](https://ru.scribd.com/document/910360648/Tehnicheskoe-Rukovodstvo-Kamaz-6560) concerns one possible chassis. No bundled chassis/year confirmation or verified factory axle tire specification. |
-| `panzerwerfer` | Sd.Kfz.4/1 Panzerwerfer; 1943 | Half-track: rear contact points represent tracks, not rear tires. No reliable period front tire specification verified. Default gameplay grip follows its existing `Car` classification without claiming rear tire sizes. |
-| `s500` | BAZ-69096 S-500; 2021 | No verified manufacturer year/variant front/rear tire document found. Missile-system date does not prove chassis tire equipment. |
-| `sa8` | 9K33 Osa; 1971 | [Czech Ministry of Defence Osa equipment document](https://www.mo.gov.cz/images/id_7001_8000/7420/crapa-en.pdf) identifies BAZ-5937 on a later Osa-AKM; no verified tire size for the bundled early variant. |
-| `tigr` | GAZ Tigr; 2006, exact chassis variant absent | Research found 335/80R20 for a [2008 GAZ-233014 period-model specification](https://www.automobile-catalog.com/tire/2008/1024430/gaz_233014_tigr.html); no exact 2006 variant verified. |
-| `tigr-a`, `tigr-k`, `tigr-m` | Tigr Arbalet/Kornet/PKM; 2016/2016/2017 | The [233014 specification](https://www.automobile-catalog.com/tire/2008/1024430/gaz_233014_tigr.html) does not establish later Tigr-M/weapon chassis tires; no trim extrapolation. |
-| `toyota_unarmed`, `toyota_dshk`, `toyota_nurs`, `toyota_ub32` | Hilux unarmed/DSHK/B-8V20A/UB-32; all 1989 | [1989 Toyota Hilux brochure scan index](https://manuals.plus/m/5dbeef27e2f0486a088550292538e4cdb53336792d3215d76a47fe26840e1fd5) identifies period market documents. Cab/drivetrain/market are unspecified; factory front/rear fitment was not verified for these configurations, especially conversions. |
-| `uaz-469k-m-2`, `uaz_kpvt` | UAZ-469 base/KPVT; both 1972 | [UAZ manufacturer's 1985 operating manual scan](https://djvu.online/file/g5jchgos1oDSL) lists 215-380 (8.40-15); [later parts catalog extract](https://www.bazauaz.ru/catalog_parts/KatalogT_detalejT_UAZT_469T_%282000%29_TRL%2C%20page%209.pdf) lists alternative wheel/tire equipment. No original-year/base-versus-conversion choice inferred. |
-| `ural4320` | Ural-4320; 1977, exact version absent | [Ural manufacturer operating manual](https://shop.uralaz.ru/upload/iblock/1d3/eggg43decj0q1ze6tsfqs0ee1vvmlnmx.pdf) includes 14.00-20 but is for later 4320M variants. No original 1977 front/rear specification verified. |
-| `vn4` | Norinco VN-4 Rhinoceros; 2009 | [Norinco exhibition release](https://norinco.com.tr/latest-defense-products-of-norinco-shine-at-defense-security-2015-bangkok/) identifies the platform but supplies no factory tire sizes. No reliable matching size established. |
-
-Entries without verified factory sizes explicitly remain research gaps. They can receive sourced sizes later when a document and the bundled model's identity agree; performance numbers, sounds, paint, weapon names, or similar vehicles alone are insufficient.
+The remaining 14 eligible definitions have unset sizes. Their identities/trim/market do not establish a verified period front/rear fitment; existing research gaps are not filled with wider tires to tune handling. The seven previously sourced dimensions are unchanged.
 
 ## Verification
 
-Executed `gradlew.bat compileJava test --offline --no-daemon` on 2026-09-26 using the project's existing cached Gradle/JDK setup: **BUILD SUCCESSFUL**, 43 tests, zero failures, including seven new grip tests. The five changed/new production classes have class-file major version 52 (Java 8). The audit was checked against every bundled `WeightType = Car` file: seven sourced and 67 default definitions, with no missing or duplicate filenames.
+Executed `gradlew.bat compileJava test --offline --no-daemon` on 2026-09-26 with the existing cached Gradle/JDK environment: **BUILD SUCCESSFUL**, **49 tests, zero failures/errors**. The six changed/new production classes have class-file major version **52 (Java 8)**. The asset audit confirms the exact 22 eligible definitions in both trees, all bundled diagnostics disabled, and every existing `WeightType`/`Category` value unchanged.
 
-Focused `MCH_CarTireGripTest` exercises optional/reloaded configuration, invalid size handling, bounded size response, air/contact/disabled limits, longitudinal sharing, reverse/low-speed behavior, preservation of forward velocity, and non-increasing horizontal energy over multiple headings. Collision tests distinguish support below the wheel from walls, ceilings, and unsupported gaps. In-game multiplayer handling was not exercised. Further Forge checks can cover flat-ground turns, one-side/one-axle support, slopes, braking/reversing, jumps, server passengers, and an unchanged tracked tank. Unit tests do not constitute an in-game handling assessment.
+Regression coverage includes real wheel settling/contact, front/rear support loss, dead wheels and stale airborne contact, unmodified collision boxes, opt-in defaults/reload, zero-force diagnostics, bounded forces/size response, low-speed continuity, forward/reverse sustained turns, actual server correction and yaw limits, energy/forward-speed preservation, and the exact bundled eligibility/exclusion list.
+
+A headless collision/physics regression is not an in-game multiplayer playtest. The opt-in CSV makes flat-road driving, slopes, jumps, braking and networked interpolation observable in a running Forge 1.7.10 session without changing normal console output.

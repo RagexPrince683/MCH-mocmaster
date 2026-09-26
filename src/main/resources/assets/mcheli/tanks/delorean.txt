@@ -44,10 +44,11 @@ OnGroundRollFactor  = 4.8
 ;EntityHeight = 0.9
 
 WeightType = Car
+CivilianCarGrip = true
 ; Factory tire source and identity notes: docs/car-tire-grip.md
 FrontTireSize = 195/60R14
 RearTireSize = 235/60R15
-CarLateralGrip = 0.06
+CarLateralGrip = 0.12
 
 StepHeight = 1.2
 

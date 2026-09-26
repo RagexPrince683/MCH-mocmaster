@@ -52,10 +52,11 @@ AddSeat =  -0.46704,  -0.14682, -0.18016
 EnableBack = true
 Category = C
 WeightType = Car
+CivilianCarGrip = true
 ; Factory tire source and identity notes: docs/car-tire-grip.md
 FrontTireSize = 265/35ZR19
 RearTireSize = 335/30ZR20
-CarLateralGrip = 0.06
+CarLateralGrip = 0.12
 AddTexture = carrera_gt_1
 
 PivotTurnThrottle = 0.1

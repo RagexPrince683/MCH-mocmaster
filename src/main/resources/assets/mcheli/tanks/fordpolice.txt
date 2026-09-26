@@ -11,6 +11,11 @@ ThrottleDownFactor = 0.40
 ;(en_EN)made in the Workshop of W&K (the Best military equipment and not only) - https://vk.com/wk_workshop
 ;cool, nice 4,500kb model, now let's fix some problems I found with it
 
+CivilianCarGrip = true
+FrontTireSize = 185/65R14
+RearTireSize = 185/65R14
+CarLateralGrip = 0.12
+
 ExplosionSizeByCrash = 3
 
 ;-11.27

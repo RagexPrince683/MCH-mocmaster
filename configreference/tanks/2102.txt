@@ -40,6 +40,7 @@ AddSeat =  0.6040,  0.32, -0.9
 EnableBack = true
 Category = C
 WeightType = Car
+CivilianCarGrip = true
 
 PivotTurnThrottle = 0.1
 

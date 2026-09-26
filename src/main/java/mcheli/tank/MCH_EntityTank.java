@@ -54,6 +54,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    public float addkeyRotValue;
    public final MCH_WheelManager WheelMng;
    public float partialTicks;
+   private boolean carPhysicsYawInitialized;
+   private float carPhysicsYaw;
+   private MCH_CarGripDiagnostics.Snapshot carGripDiagnostic;
    private int trackDamageTaken;
    public boolean turretPopStarted;
    public boolean turretPopLanded;
@@ -434,7 +437,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    }
 
    public void onUpdateAngles(float partialTicks) {
-      if(this.useNewMobilitySystem()) {
+      if(this.useNewMobilitySystem() || (this.getTankInfo() != null && this.getTankInfo().civilianCarGrip && this.getTankInfo().carLateralGrip > 0)) {
          partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
       }
       if(!this.isDestroyed()) {
@@ -478,11 +481,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
                float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D?-1.0F:1.0F;
                if(super.moveLeft && !super.moveRight) {
-                  this.setRotYaw(this.getRotYaw() - 0.6F * rotonground * partialTicks * flag * sf);
+                  this.steerGroundVehicle(-0.6F * rotonground * partialTicks * flag * sf, partialTicks);
                }
 
                if(super.moveRight && !super.moveLeft) {
-                  this.setRotYaw(this.getRotYaw() + 0.6F * rotonground * partialTicks * flag * sf);
+                  this.steerGroundVehicle(0.6F * rotonground * partialTicks * flag * sf, partialTicks);
                }
 
             }
@@ -526,13 +529,22 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
          float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D?-1.0F:1.0F;
          if(super.moveLeft && !super.moveRight) {
-            this.setRotYaw(this.getRotYaw() - 0.6F * partialTicks * flag * sf);
+            this.steerGroundVehicle(-0.6F * partialTicks * flag * sf, partialTicks);
          }
 
          if(super.moveRight && !super.moveLeft) {
-            this.setRotYaw(this.getRotYaw() + 0.6F * partialTicks * flag * sf);
+            this.steerGroundVehicle(0.6F * partialTicks * flag * sf, partialTicks);
          }
       }
+   }
+
+   private void steerGroundVehicle(float requested, float tickDelta) {
+      MCH_TankInfo info = this.getTankInfo();
+      if(info != null && info.civilianCarGrip && info.carLateralGrip > 0.0F) {
+         requested = MCH_CarTireGrip.steeringDelta(requested, Math.hypot(super.motionX, super.motionZ),
+                 info.carLateralGrip, this.WheelMng.getCarGroundContact(false).fraction(), tickDelta);
+      }
+      this.setRotYaw(this.getRotYaw() + requested);
    }
 
    protected void onUpdate_Control(float partialTicks) {
@@ -676,7 +688,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 //                     super.throttleBack = 0.6F;
 //                  }
                   float pivotTurnThrottle1 = this.getAcInfo().pivotTurnThrottle;
-                  if (pivotTurnThrottle1 > 0) {
+                  // Civilian steering is handled once by onUpdateAngles and the server grip budget.
+                  if (pivotTurnThrottle1 > 0 && !(this.getTankInfo().civilianCarGrip && this.getTankInfo().carLateralGrip > 0)) {
                      if (super.throttleBack > 0) {
                         double dx = super.posX - super.prevPosX;
                         double dz = super.posZ - super.prevPosZ;
@@ -701,11 +714,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
                         float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D ? -1.0F : 1.0F;
                         if(super.moveLeft && !super.moveRight) {
-                           this.setRotYaw(this.getRotYaw() + 0.6F * rotonground * partialTicks * flag * sf);
+                           this.steerGroundVehicle(0.6F * rotonground * partialTicks * flag * sf, partialTicks);
                         }
 
                         if(super.moveRight && !super.moveLeft) {
-                           this.setRotYaw(this.getRotYaw() - 0.6F * rotonground * partialTicks * flag * sf);
+                           this.steerGroundVehicle(-0.6F * rotonground * partialTicks * flag * sf, partialTicks);
                         }
                      }
                   }
@@ -1103,10 +1116,6 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // --------------------------------------------------
       float throttle = (float)(this.getCurrentThrottle() / 10.0D);
       Vec3 v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - 10.0F);
-      double yaw = Math.toRadians(this.getRotYaw());
-      double forwardX = -Math.sin(yaw);
-      double forwardZ = Math.cos(yaw);
-      double forwardBeforeThrust = super.motionX * forwardX + super.motionZ * forwardZ;
 
       if (!levelOff) {
          super.motionY += v.yCoord * throttle / 8.0D;
@@ -1129,8 +1138,6 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
             super.motionZ += v.zCoord * throttle;
          }
       }
-
-      double longitudinalDemand = Math.abs(super.motionX * forwardX + super.motionZ * forwardZ - forwardBeforeThrust);
 
       // --------------------------------------------------
       // B: after acceleration
@@ -1157,7 +1164,6 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // --------------------------------------------------
       // FRICTION / DRAG
       // --------------------------------------------------
-      double forwardBeforeDrag = super.motionX * forwardX + super.motionZ * forwardZ;
       if (super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0) {
          super.motionX *= this.getAcInfo().motionFactor;
          super.motionZ *= this.getAcInfo().motionFactor;
@@ -1165,15 +1171,12 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          super.motionX *= 0.9995D;
          super.motionZ *= 0.9995D;
       }
-      if(this.getBrake() || super.throttleDown) {
-         longitudinalDemand += Math.abs(super.motionX * forwardX + super.motionZ * forwardZ - forwardBeforeDrag);
-      }
 
       // --------------------------------------------------
       // MOVE
       // --------------------------------------------------
       this.updateWheels();
-      this.applyCarLateralGrip(forwardX, forwardZ, longitudinalDemand);
+      this.applyCarLateralGrip();
       double motionYBeforeMove = super.motionY;
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
       this.updateGroundVehicleFallDamage(wasOnGroundBeforeMove, motionYBeforeGravity, motionYBeforeMove);
@@ -1198,21 +1201,52 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.handleDeadPilot();
    }
 
-   private void applyCarLateralGrip(double forwardX, double forwardZ, double longitudinalDemand) {
+   void applyCarLateralGrip() {
       MCH_TankInfo info = this.getTankInfo();
-      if(super.worldObj.isRemote || info == null || info.weightType != 1 || info.carLateralGrip <= 0.0F) return;
-      double frontContact = this.WheelMng.getCarGroundContactFraction(true);
-      double rearContact = this.WheelMng.getCarGroundContactFraction(false);
-      double contact = frontContact + rearContact;
-      if(contact <= 0.0D) return;
-      double response = (frontContact * MCH_CarTireGrip.response(info.frontTireSize)
-              + rearContact * MCH_CarTireGrip.response(info.rearTireSize)) / contact;
+      if(super.worldObj.isRemote || info == null) return;
+      boolean active = info.civilianCarGrip && info.carLateralGrip > 0.0F;
+      this.carGripDiagnostic = null;
+      if(!active && !info.carGripDiagnostics) {
+         this.carPhysicsYawInitialized = false;
+         return;
+      }
+      MCH_WheelManager.CarContact contact = this.WheelMng.getCarGroundContact(info.carGripDiagnostics);
+      float requestedYaw = 0.0F, appliedYaw = 0.0F;
+      if(active) {
+         if(!this.carPhysicsYawInitialized) {
+            this.carPhysicsYaw = this.getRotYaw();
+            this.carPhysicsYawInitialized = true;
+         }
+         // Rotation packets may arrive several times per tick; share one server physics budget.
+         requestedYaw = MathHelper.wrapAngleTo180_float(this.getRotYaw() - this.carPhysicsYaw);
+         appliedYaw = MCH_CarTireGrip.steeringDelta(requestedYaw, Math.hypot(super.motionX, super.motionZ),
+                 info.carLateralGrip, contact.fraction(), 1.0F);
+         this.setRotYaw(this.carPhysicsYaw + appliedYaw);
+         this.carPhysicsYaw = this.getRotYaw();
+      } else {
+         this.carPhysicsYawInitialized = false;
+      }
+      double yaw = Math.toRadians(this.getRotYaw());
+      double forwardX = -Math.sin(yaw), forwardZ = Math.cos(yaw);
       // Orthogonal horizontal basis: forward=(-sin(yaw),cos(yaw)), side=(cos(yaw),sin(yaw)).
       double sideways = super.motionX * forwardZ - super.motionZ * forwardX;
-      double correction = MCH_CarTireGrip.lateralCorrection(sideways, info.carLateralGrip, contact, response, longitudinalDemand);
-      super.motionX -= correction * forwardZ;
-      super.motionZ += correction * forwardX;
+      MCH_CarTireGrip.Result result = MCH_CarTireGrip.calculate(sideways, info.carLateralGrip,
+              contact.fraction(), contact.response(info));
+      String reason = !info.civilianCarGrip ? "not_opted_in" : info.carLateralGrip <= 0 ? "grip_disabled"
+              : contact.total == 0 ? "no_wheels" : result.reason;
+      double correction = active ? result.applied : 0.0D;
+      if(correction != 0.0D) {
+         super.motionX -= correction * forwardZ;
+         super.motionZ += correction * forwardX;
+      }
+      if(info.carGripDiagnostics) {
+         this.carGripDiagnostic = new MCH_CarGripDiagnostics.Snapshot(info.name, this.getEntityId(), this.ticksExisted,
+                 contact, sideways, result.requested, correction, result.limit, reason, requestedYaw, appliedYaw);
+         MCH_CarGripDiagnostics.record(this.carGripDiagnostic);
+      }
    }
+
+   public MCH_CarGripDiagnostics.Snapshot getCarGripDiagnostic() { return this.carGripDiagnostic; }
 
 
 
@@ -1458,8 +1492,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    //set angles is le turret (1.12.2)
    public void setAngles(Entity player, boolean fixRot, float fixYaw, float fixPitch, float deltaX, float deltaY, float x, float y, float partialTicks) {
-      // Keep turret/camera limits tied to elapsed tick time instead of render FPS only for the opt-in mobility path.
-      if(this.useNewMobilitySystem()) {
+      // Use elapsed tick time for opted-in mobility and civilian steering.
+      if(this.useNewMobilitySystem() || (this.getTankInfo() != null && this.getTankInfo().civilianCarGrip && this.getTankInfo().carLateralGrip > 0)) {
          partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
       } else {
          if(partialTicks < 0.03F) {
