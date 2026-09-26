@@ -75,7 +75,13 @@ public class MCH_GuiHeli extends MCH_BaseVehicleCommonGui {
                   MCH_HudLayoutManager.renderBuiltin("heli", "heli.flight_readouts", () -> this.drawNewHeliSharedHud(heli, player));
                   MCH_HudLayoutManager.renderBuiltin("heli", "heli.health", () -> this.drawNewHeliHealthHud(heli, player));
                   MCH_HudLayoutManager.renderBuiltin("heli", "heli.pitch_readout", () -> this.drawNewHeliPitchReadout(heli, player));
-                  MCH_HudLayoutManager.renderBuiltin("heli", "heli.radar", () -> this.drawNewHeliRadarHud(heli));
+                  MCH_HudLayoutManager.renderBuiltin(
+                        "heli",
+                        "heli.radar",
+                        "Radar",
+                        super.centerX + 176.0D,
+                        super.centerY + 97.0D,
+                        () -> this.drawNewHeliRadarHud(heli));
                   MCH_HudLayoutManager.renderBuiltin("heli", "heli.weapon_list", () -> this.drawNewHeliWeaponHud(heli, player));
                }
 
