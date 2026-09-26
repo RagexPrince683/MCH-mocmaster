@@ -55,6 +55,7 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             if(paint != null) {
                 data.writeInt(paint.color);
                 data.writeByte(paint.opacity);
+                writeString(data, paint.camo);
                 data.writeByte(Math.min(64, paint.parts.size()));
                 for(int part = 0; part < paint.parts.size() && part < 64; ++part) writeString(data, (String)paint.parts.get(part));
             }
@@ -138,10 +139,11 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             if(data.readBoolean()) {
                 int color = data.readInt();
                 int opacity = data.readUnsignedByte();
+                String camo = readString(data);
                 int paintPartCount = data.readUnsignedByte();
                 ArrayList paintParts = new ArrayList();
                 for(int part = 0; part < paintPartCount; ++part) paintParts.add(readString(data));
-                entry.paintDesign = new MCH_VehiclePaint.Design(color, opacity, paintParts);
+                entry.paintDesign = new MCH_VehiclePaint.Design(color, opacity, paintParts, camo);
             }
             entry.x = data.readDouble();
             entry.y = data.readDouble();

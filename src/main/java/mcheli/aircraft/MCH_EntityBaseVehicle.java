@@ -1800,6 +1800,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(design == null) return;
       buffer.writeInt(design.color);
       buffer.writeByte(design.opacity);
+      writePaintString(buffer, design.camo);
       buffer.writeShort(design.parts.size());
       for(Object object : design.parts) {
          byte[] value = ((String)object).getBytes(StandardCharsets.UTF_8);
@@ -1812,6 +1813,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       if(!buffer.readBoolean()) return null;
       int color = buffer.readInt();
       int opacity = buffer.readUnsignedByte();
+      String camo = readPaintString(buffer);
       int count = Math.min(256, buffer.readUnsignedShort());
       ArrayList parts = new ArrayList();
       for(int i = 0; i < count; ++i) {
@@ -1820,7 +1822,20 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          buffer.readBytes(value);
          parts.add(new String(value, StandardCharsets.UTF_8));
       }
-      return new MCH_VehiclePaint.Design(color, opacity, parts);
+      return new MCH_VehiclePaint.Design(color, opacity, parts, camo);
+   }
+
+   private static void writePaintString(ByteBuf buffer, String text) {
+      byte[] value = text.getBytes(StandardCharsets.UTF_8);
+      buffer.writeByte(Math.min(64, value.length));
+      buffer.writeBytes(value, 0, Math.min(64, value.length));
+   }
+
+   private static String readPaintString(ByteBuf buffer) {
+      int length = buffer.readUnsignedByte();
+      byte[] value = new byte[length];
+      buffer.readBytes(value);
+      return new String(value, StandardCharsets.UTF_8);
    }
 
    public boolean isUseableByPlayer(EntityPlayer player) {

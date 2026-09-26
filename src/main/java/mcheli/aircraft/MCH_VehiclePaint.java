@@ -20,8 +20,13 @@ public final class MCH_VehiclePaint {
       public final int color;
       public final int opacity;
       public final List parts;
+      public final String camo;
 
       public Design(int color, int opacity, List parts) {
+         this(color, opacity, parts, "");
+      }
+
+      public Design(int color, int opacity, List parts, String camo) {
          this.color = color & 0xFFFFFF;
          this.opacity = Math.max(0, Math.min(255, opacity));
          ArrayList clean = new ArrayList();
@@ -32,10 +37,11 @@ public final class MCH_VehiclePaint {
             }
          }
          this.parts = Collections.unmodifiableList(clean);
+         this.camo = camo != null && camo.length() <= 64 ? camo : "";
       }
 
       public boolean isVisible() {
-         return this.opacity > 0 && !this.parts.isEmpty();
+         return (this.opacity > 0 || !this.camo.isEmpty()) && !this.parts.isEmpty();
       }
    }
 
@@ -62,7 +68,7 @@ public final class MCH_VehiclePaint {
          String[] values = serialized.split("\\n");
          for(String value : values) if(!value.isEmpty()) parts.add(value);
       }
-      return new Design(root.getInteger("Color"), root.getInteger("Opacity"), parts);
+      return new Design(root.getInteger("Color"), root.getInteger("Opacity"), parts, root.getString("Camo"));
    }
 
    public static void write(ItemStack stack, Design design) {
@@ -85,6 +91,7 @@ public final class MCH_VehiclePaint {
          parts.append((String)object);
       }
       tag.setString("Parts", parts.toString());
+      tag.setString("Camo", design.camo);
       return tag;
    }
 

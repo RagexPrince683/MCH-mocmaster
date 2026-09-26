@@ -16,7 +16,8 @@ public class MCH_DraftingTablePacketHandler {
          MCH_Lib.DbgLog(false, "MCH_DraftingTablePacketHandler.onPacketCreate : " + openScreen, new Object[0]);
          if(openScreen) {
             ((MCH_DraftingTableGuiContainer)player.openContainer).createRecipeItem(packet.outputItem, packet.map,
-                    new mcheli.aircraft.MCH_VehiclePaint.Design(packet.paintColor, packet.paintOpacity, packet.paintParts),
+                    new mcheli.aircraft.MCH_VehiclePaint.Design(packet.paintColor, packet.paintOpacity,
+                            packet.paintParts, packet.paintCamo),
                     packet.useAsDefault);
          }
       }

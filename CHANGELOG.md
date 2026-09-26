@@ -287,3 +287,11 @@ Developer/backend
 - Added server-authoritative, per-player and per-vehicle-type defaults that survive world reloads,
   apply to unpainted inventory acquisitions and player placement, and can be disabled without
   stripping paint already saved on items or entities.
+
+2026-09-26 00:00 - Add Drafting Table vehicle camo skins
+
+- Added a validated Vehicle Camo Skin slot that previews and persists existing texture-overlay items,
+  consumes one skin on the first application, and carries camo through per-player vehicle defaults.
+- Limited both camo and RGB paint passes to enabled named model parts across vehicle bodies, animated
+  parts, previews, placement synchronization, and distant rendering.
+- Rearranged the Drafting Table controls and locked inventory interaction while its Paint screen is open.
