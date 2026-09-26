@@ -436,7 +436,11 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       }
 
       int boundTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
-      GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_POLYGON_BIT);
+      // GL_CURRENT_BIT is required here: glColor is current state, not color-buffer
+      // state. Without it, the overlay's alpha/tint leaks into the base pass for the
+      // next moving part even though the blend, alpha-test, and depth state is restored.
+      GL11.glPushAttrib(GL11.GL_CURRENT_BIT | GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT
+            | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_POLYGON_BIT);
       try {
          GL11.glEnable(GL11.GL_BLEND);
          GL11.glDisable(GL11.GL_ALPHA_TEST);
@@ -900,7 +904,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          final IModelCustom fallbackModel) {
       final MCH_VehiclePaint.Design design = activePaintDesign;
       if(design == null || !design.isVisible()) return;
-      GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_POLYGON_BIT);
+      // Preserve the base-pass color as well as blend/depth state. GL_COLOR_BUFFER_BIT
+      // does not include the current glColor value used to tint subsequent geometry.
+      GL11.glPushAttrib(GL11.GL_CURRENT_BIT | GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT
+            | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_POLYGON_BIT);
       GL11.glEnable(GL11.GL_BLEND);
       GL11.glDisable(GL11.GL_ALPHA_TEST);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
