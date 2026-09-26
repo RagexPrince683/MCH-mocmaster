@@ -13,7 +13,7 @@ Weight = 3200
 MaxHp = 100
 ThrottleUpDown = 0.825
 ;8.3s
-Speed = 2.83
+Speed = 1.47
 MobilityYawOnGround = 8.5
 StepHeight = 1.2
 Sound = starion
