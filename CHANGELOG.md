@@ -269,3 +269,11 @@ Developer/backend
   manager diagnostics for non-vehicle loads.
 - Cleared failure state on complete resource registration and targeted vehicle reloads so newly added
   or corrected assets are retried without restarting the client.
+
+2026-09-26 00:00 - Restore saved helicopter radar layout on first join
+
+- Gave the built-in helicopter radar gauge its stable screen-space center as an explicit layout
+  pivot, so saved offsets and scaling apply on the first normal HUD render instead of waiting for
+  the layout editor to capture the gauge geometry.
+- Kept radar availability and active state checks in the vehicle HUD renderer, independent from
+  layout loading and transforms, so existing radar toggles and disabled radars remain unchanged.
