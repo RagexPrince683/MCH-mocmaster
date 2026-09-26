@@ -526,6 +526,7 @@ public abstract class MCH_ItemBaseVehicle extends W_Item {
 
 
    public MCH_EntityBaseVehicle spawnAircraft(ItemStack itemStack, World world, EntityPlayer player, int x, int y, int z) {
+      if(!world.isRemote) MCH_VehiclePaint.applyDefaultIfUnpainted(player, itemStack);
       if(isUavInfo(this.getAircraftInfo())) {
          notifyUavStationRequired(world, player);
          logPlacementDebug(world, "spawnAircraft rejected UAV before placement: item=%s info=%s target=(%d,%d,%d) remote=%s", getItemDebugName(itemStack), getInfoDebugName(), Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z), Boolean.valueOf(world.isRemote));

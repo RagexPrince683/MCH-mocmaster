@@ -109,6 +109,12 @@ public class W_WavefrontObject extends W_ModelCustom {
       return true;
    }
 
+   public java.util.List getPartNames() {
+      ArrayList names = new ArrayList();
+      for(Object object : this.groupObjects) names.add(((W_GroupObject)object).name);
+      return names;
+   }
+
    private void loadObjModel(InputStream inputStream) throws ModelFormatException {
       BufferedReader reader = null;
       String currentLine = null;

@@ -1,5 +1,6 @@
 package mcheli.wrapper.modelloader;
 
+import java.util.List;
 import mcheli.wrapper.modelloader.W_Vertex;
 import net.minecraftforge.client.model.IModelCustom;
 
@@ -78,6 +79,9 @@ public abstract class W_ModelCustom implements IModelCustom {
    }
 
    public abstract boolean containsPart(String result1);
+
+   /** Returns the model's named groups in source order. */
+   public abstract List getPartNames();
 
    public abstract void renderAllTransformed();
 

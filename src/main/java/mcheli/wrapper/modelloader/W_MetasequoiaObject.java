@@ -103,6 +103,12 @@ public class W_MetasequoiaObject extends W_ModelCustom {
       return this.groupObjects.size();
    }
 
+   public java.util.List getPartNames() {
+      ArrayList names = new ArrayList();
+      for(Object object : this.groupObjects) names.add(((W_GroupObject)object).name);
+      return names;
+   }
+
 
    public W_MetasequoiaObject(ResourceLocation resource) throws ModelFormatException {
       this.fileName = resource.toString();

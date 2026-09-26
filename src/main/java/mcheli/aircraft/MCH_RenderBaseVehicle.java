@@ -54,6 +54,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    public static IModelCustom debugModel = null;
    private static ResourceLocation activeSkinOverlayTexture = null;
    private static ResourceLocation activeBaseTexture = null;
+   private static MCH_VehiclePaint.Design activePaintDesign = null;
    private static final boolean ANGELICA_DYNAMIC_PART_COMPAT = Loader.isModLoaded("angelica");
    private static final boolean DEBUG_ANGELICA_DYNAMIC_PART_RENDER = Boolean.getBoolean("mcheli.debugAngelicaDynamicPartRender");
    private static final Set angelicaDynamicPartRenderDiagnostics = new HashSet();
@@ -180,9 +181,11 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          // audited to translate by its position arguments and accepts zero here.
          GL11.glTranslated(posX * depthScale, posY * depthScale, posZ * depthScale);
          GL11.glScaled(depthScale, depthScale, depthScale);
+         beginSkinOverlayRender(info, ac);
          this.renderBaseVehicle(ac, 0.0D, 0.0D, 0.0D, yaw, pitch, roll, tickTime);
          this.renderAircraftLODParts(ac, info, 0.0D, 0.0D, 0.0D, tickTime);
       } finally {
+         endSkinOverlayRender();
          GL11.glPopMatrix();
          GL11.glPopAttrib();
          GL11.glMatrixMode(previousMatrixMode);
@@ -406,6 +409,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    }
 
    private static void beginSkinOverlayRender(MCH_BaseVehicleInfo info, MCH_EntityBaseVehicle ac) {
+      activePaintDesign = ac.getPaintDesign();
       beginSkinOverlayRender(info.getDirectoryName(), ac.getTextureName());
    }
 
@@ -421,6 +425,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    public static void endSkinOverlayRender() {
       activeSkinOverlayTexture = null;
       activeBaseTexture = null;
+      activePaintDesign = null;
    }
 
    private static void renderSkinOverlayPass(RenderRunnable renderer) {
@@ -689,6 +694,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
                renderBodyModel(model);
             }
          });
+         renderPaintPass(model, model instanceof W_ModelCustom && ((W_ModelCustom)model).containsPart("$body") ? "$body" : null, null);
       }
 
    }
@@ -828,6 +834,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
                model.renderAll();
             }
          });
+         renderPaintPass(model, null, null);
       }
 
    }
@@ -851,7 +858,48 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
             renderPartModelTransformed(model, modelBody, partName);
          }
       });
+      renderPaintPass(model, "$" + partName, modelBody);
 
+   }
+
+   public static void beginPaintPreview(MCH_VehiclePaint.Design design) {
+      activePaintDesign = design;
+   }
+
+   public static void endPaintPreview() {
+      activePaintDesign = null;
+   }
+
+   public static void renderPaintPreview(IModelCustom model) {
+      renderPaintPass(model, null, null);
+   }
+
+   private static void renderPaintPass(final IModelCustom model, final String partName,
+         final IModelCustom fallbackModel) {
+      final MCH_VehiclePaint.Design design = activePaintDesign;
+      if(design == null || !design.isVisible()) return;
+      GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_POLYGON_BIT);
+      GL11.glEnable(GL11.GL_BLEND);
+      GL11.glDisable(GL11.GL_ALPHA_TEST);
+      GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+      GL11.glDepthMask(false);
+      GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
+      GL11.glPolygonOffset(-2.0F, -2.0F);
+      float red = (float)(design.color >> 16 & 255) / 255.0F;
+      float green = (float)(design.color >> 8 & 255) / 255.0F;
+      float blue = (float)(design.color & 255) / 255.0F;
+      GL11.glColor4f(red, green, blue, (float)design.opacity / 255.0F);
+      if(partName == null && model instanceof W_ModelCustom) {
+         W_ModelCustom custom = (W_ModelCustom)model;
+         for(Object object : design.parts) if(custom.containsPart((String)object)) custom.renderPartTransformed((String)object);
+      } else if(design.parts.contains(partName)) {
+         if(model != null) renderPartModelTransformed(model, fallbackModel, partName == null ? "" : partName.substring(1));
+         else if(fallbackModel instanceof W_ModelCustom && ((W_ModelCustom)fallbackModel).containsPart(partName))
+            ((W_ModelCustom)fallbackModel).renderPartTransformed(partName);
+      }
+      GL11.glPopAttrib();
+      GL11.glDepthMask(true);
+      GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
    }
 
    private static void renderPartModel(IModelCustom model, IModelCustom modelBody, String partName) {

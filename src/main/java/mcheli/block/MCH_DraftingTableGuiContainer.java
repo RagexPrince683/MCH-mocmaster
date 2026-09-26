@@ -21,6 +21,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCraftResult;
+import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -38,7 +39,9 @@ public class MCH_DraftingTableGuiContainer extends Container {
    public final int posY;
    public final int posZ;
    public final int outputSlotIndex;
+   public final int vehicleInputSlotIndex;
    private IInventory outputSlot = new InventoryCraftResult();
+   private IInventory vehicleInput = new InventoryBasic("Vehicle paint input", false, 1);
 
 
    public MCH_DraftingTableGuiContainer(EntityPlayer player, int posX, int posY, int posZ) {
@@ -65,6 +68,16 @@ public class MCH_DraftingTableGuiContainer extends Container {
          }
       };
       this.addSlotToContainer(slot);
+      this.vehicleInputSlotIndex = super.inventoryItemStacks.size();
+      this.addSlotToContainer(new Slot(this.vehicleInput, 0, 178, 112) {
+         public boolean isItemValid(ItemStack stack) {
+            return mcheli.aircraft.MCH_VehiclePaint.isVehicle(stack);
+         }
+
+         public int getSlotStackLimit() {
+            return 1;
+         }
+      });
       MCH_Lib.DbgLog(player.worldObj, "MCH_DraftingTableGuiContainer.MCH_DraftingTableGuiContainer", new Object[0]);
    }
 
@@ -83,11 +96,13 @@ public class MCH_DraftingTableGuiContainer extends Container {
       if(slot != null && slot.getHasStack()) {
          ItemStack itemstack1 = slot.getStack();
          itemstack = itemstack1.copy();
-         if(slotIndex != this.outputSlotIndex) {
+         if(slotIndex == this.vehicleInputSlotIndex) {
+            if(!this.mergeItemStack(itemstack1, 0, 36, true)) return null;
+         } else if(slotIndex >= 0 && slotIndex < 36 && mcheli.aircraft.MCH_VehiclePaint.isVehicle(itemstack1)) {
+            if(!this.mergeItemStack(itemstack1, this.vehicleInputSlotIndex, this.vehicleInputSlotIndex + 1, false)) return null;
+         } else if(slotIndex != this.outputSlotIndex) {
             return null;
-         }
-
-         if(!this.mergeItemStack(itemstack1, 0, 36, true)) {
+         } else if(!this.mergeItemStack(itemstack1, 0, 36, true)) {
             return null;
          }
 
@@ -333,12 +348,15 @@ public class MCH_DraftingTableGuiContainer extends Container {
          if(itemstack != null) {
             W_EntityPlayer.dropPlayerItemWithRandomChoice(player, itemstack, false, false);
          }
+         ItemStack input = this.getSlot(this.vehicleInputSlotIndex).getStack();
+         if(input != null) W_EntityPlayer.dropPlayerItemWithRandomChoice(player, input, false, false);
       }
 
       MCH_Lib.DbgLog(player.worldObj, "MCH_DraftingTableGuiContainer.onContainerClosed", new Object[0]);
    }
 
-   public void createRecipeItem(Item outputItem, Map map) {
+   public void createRecipeItem(Item outputItem, Map map, mcheli.aircraft.MCH_VehiclePaint.Design design,
+         boolean useAsDefault) {
       boolean isCreativeMode = this.player.capabilities.isCreativeMode;
 
       if(this.getSlot(this.outputSlotIndex).getHasStack() && !isCreativeMode) {
@@ -355,13 +373,15 @@ public class MCH_DraftingTableGuiContainer extends Container {
          return;
       }
 
-      ItemStack outputStack = new ItemStack(outputItem);
+      ItemStack inputStack = this.getSlot(this.vehicleInputSlotIndex).getStack();
+      ItemStack outputStack = inputStack != null ? inputStack : new ItemStack(outputItem);
+      if(inputStack != null && inputStack.getItem() != outputItem) return;
       mcheli.aircraft.MCH_BaseVehicleInfo techInfo = mcheli.tech.MCH_TechTierManager.getInfo(outputStack);
       if(techInfo != null && !mcheli.tech.MCH_TechTierManager.isUnlocked(techInfo, this.player, this.player.worldObj)) {
          mcheli.tech.MCH_TechTierManager.notifyLocked(this.player, techInfo);
          return;
       }
-      IRecipe recipe = this.findRecipeByOutput(outputStack);
+      IRecipe recipe = this.findRecipeByOutput(new ItemStack(outputItem));
 
       if(recipe == null) {
          MCH_Lib.DbgLog(this.player.worldObj,
@@ -375,7 +395,7 @@ public class MCH_DraftingTableGuiContainer extends Container {
                              " output=" + outputItem.getUnlocalizedName(),
                      new Object[0]);
 
-      if(!isCreativeMode) {
+      if(inputStack == null && !isCreativeMode) {
          if(!this.canConsumeRecipeIngredients(recipe)) {
             MCH_Lib.DbgLog(this.player.worldObj,
                            "Error:MCH_DraftingTableGuiContainer.createRecipeItem:not enough ingredients for " + outputItem.getUnlocalizedName(),
@@ -386,7 +406,16 @@ public class MCH_DraftingTableGuiContainer extends Container {
          this.consumeRecipeIngredients(recipe);
       }
 
-      this.getSlot(this.outputSlotIndex).putStack(recipe.getRecipeOutput().copy());
+      ItemStack result = inputStack != null ? inputStack.copy() : recipe.getRecipeOutput().copy();
+      result.stackSize = 1;
+      if(mcheli.aircraft.MCH_VehiclePaint.isVehicle(result)) {
+         mcheli.aircraft.MCH_VehiclePaint.Design savedDesign = design != null && design.isVisible() ? design : null;
+         mcheli.aircraft.MCH_VehiclePaint.write(result, savedDesign);
+         String typeKey = mcheli.aircraft.MCH_VehiclePaint.getTypeKey(result);
+         mcheli.aircraft.MCH_VehiclePaint.setDefault(this.player, typeKey, useAsDefault ? savedDesign : null);
+      }
+      if(inputStack != null) this.getSlot(this.vehicleInputSlotIndex).putStack(null);
+      this.getSlot(this.outputSlotIndex).putStack(result);
       this.getSlot(this.outputSlotIndex).onSlotChanged();
 
       MCH_Lib.DbgLog(this.player.worldObj,

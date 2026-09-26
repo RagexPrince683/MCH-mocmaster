@@ -11,6 +11,7 @@ import mcheli.MCH_MOD;
 import mcheli.network.PacketBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import mcheli.aircraft.MCH_VehiclePaint;
 
 /**
  * A lightweight, read-only description of distant vehicles.  These snapshots are
@@ -49,6 +50,14 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             data.writeByte(entry.category);
             writeString(data, entry.typeName);
             writeString(data, entry.textureName);
+            MCH_VehiclePaint.Design paint = entry.paintDesign;
+            data.writeBoolean(paint != null);
+            if(paint != null) {
+                data.writeInt(paint.color);
+                data.writeByte(paint.opacity);
+                data.writeByte(Math.min(64, paint.parts.size()));
+                for(int part = 0; part < paint.parts.size() && part < 64; ++part) writeString(data, (String)paint.parts.get(part));
+            }
             data.writeDouble(entry.x);
             data.writeDouble(entry.y);
             data.writeDouble(entry.z);
@@ -126,6 +135,14 @@ public class PacketVehicleLODSnapshot extends PacketBase {
             entry.category = data.readByte();
             entry.typeName = readString(data);
             entry.textureName = readString(data);
+            if(data.readBoolean()) {
+                int color = data.readInt();
+                int opacity = data.readUnsignedByte();
+                int paintPartCount = data.readUnsignedByte();
+                ArrayList paintParts = new ArrayList();
+                for(int part = 0; part < paintPartCount; ++part) paintParts.add(readString(data));
+                entry.paintDesign = new MCH_VehiclePaint.Design(color, opacity, paintParts);
+            }
             entry.x = data.readDouble();
             entry.y = data.readDouble();
             entry.z = data.readDouble();
@@ -227,6 +244,7 @@ public class PacketVehicleLODSnapshot extends PacketBase {
         public byte category;
         public String typeName;
         public String textureName;
+        public MCH_VehiclePaint.Design paintDesign;
         public double x;
         public double y;
         public double z;
