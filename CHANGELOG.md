@@ -260,3 +260,12 @@ Developer/backend
 - Declared the client input and server riding guards in `mixins.mcheli.json` so UniMixins prepares them in the full modpack, and removed duplicate dynamic mixin registration.
 - Made hold-start and hold-cancel packets return before all legacy dismount, seat switching, parachute, and placement branches. The completed request still uses the server's three-second validation and existing normal exit.
 - Compared stable player, mount, and parent entity IDs and UUIDs with seat and world identity for hold continuity. Expanded focused diagnostics to print old and new mount context fields, the first changed field, the vanilla Sneak action receipt, and the caller of an unexpected riding-state mutation.
+
+2026-09-26 00:00 - Stop repeated missing vehicle part model retries
+
+- Remembered failed lazy vehicle registrations by weak definition identity so entity, item, NEI, and
+  preview draws do not retry a confirmed missing required part every frame.
+- Consolidated each failed attempt into one vehicle-context diagnostic while retaining normal model
+  manager diagnostics for non-vehicle loads.
+- Cleared failure state on complete resource registration and targeted vehicle reloads so newly added
+  or corrected assets are retried without restarting the client.
