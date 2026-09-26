@@ -46,14 +46,14 @@ public final class MCH_CorePlugin implements IFMLLoadingPlugin, IEarlyMixinLoade
 
    @Override
    public List<String> getMixins(Set<String> loadedCoreMods) {
-      return FMLLaunchHandler.side().isClient()
-            ? Arrays.asList("MovementInputFromOptionsMixin", "EntityClientPlayerMPMixin", "EntityPlayerMixin")
-            : Arrays.asList("EntityPlayerMixin");
+      // The JSON declares the mixins on both sides. Returning them here as well
+      // can register them twice with UniMixins, while an empty JSON prepared none.
+      return java.util.Collections.emptyList();
    }
 
    public static List<String> enabledDismountMixins() {
       return FMLLaunchHandler.side().isClient()
-            ? Arrays.asList("MovementInputFromOptionsMixin", "EntityClientPlayerMPMixin", "EntityPlayerMixin")
-            : Arrays.asList("EntityPlayerMixin");
+            ? Arrays.asList("MovementInputFromOptionsMixin", "EntityClientPlayerMPMixin", "EntityPlayerMixin", "NetHandlerPlayServerMixin")
+            : Arrays.asList("EntityPlayerMixin", "NetHandlerPlayServerMixin");
    }
 }

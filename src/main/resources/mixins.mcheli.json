@@ -5,7 +5,7 @@
   "refmap": "mixins.mcheli.refmap.json",
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [],
-  "client": [],
+  "mixins": ["EntityPlayerMixin", "NetHandlerPlayServerMixin"],
+  "client": ["MovementInputFromOptionsMixin", "EntityClientPlayerMPMixin"],
   "server": []
 }

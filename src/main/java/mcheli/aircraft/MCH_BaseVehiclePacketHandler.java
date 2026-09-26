@@ -50,17 +50,31 @@ public class MCH_BaseVehiclePacketHandler {
       final int mountEntityId;
       final int parentEntityId;
       final int seatId;
+      final UUID mountUuid;
+      final UUID parentUuid;
+      final net.minecraft.world.World world;
       final long startedNanos;
 
-      ServerDismountHold(int mountEntityId, int parentEntityId, int seatId) {
+      ServerDismountHold(EntityPlayer player, Entity mount, MCH_EntityBaseVehicle parent,
+            int mountEntityId, int parentEntityId, int seatId) {
          this.mountEntityId = mountEntityId;
          this.parentEntityId = parentEntityId;
          this.seatId = seatId;
+         this.mountUuid = mount.getUniqueID();
+         this.parentUuid = parent.getUniqueID();
+         this.world = player.worldObj;
          this.startedNanos = System.nanoTime();
       }
 
       boolean matches(int mountId, int parentId, int requestedSeatId) {
          return this.mountEntityId == mountId && this.parentEntityId == parentId && this.seatId == requestedSeatId;
+      }
+
+      boolean matchesCurrent(EntityPlayer player, Entity mount, MCH_EntityBaseVehicle parent, int seatId) {
+         return player != null && player.worldObj == this.world && mount != null && parent != null
+               && matches(mount.getEntityId(), parent.getEntityId(), seatId)
+               && this.mountUuid.equals(mount.getUniqueID())
+               && this.parentUuid.equals(parent.getUniqueID());
       }
    }
 
@@ -71,7 +85,12 @@ public class MCH_BaseVehiclePacketHandler {
             MCH_DismountDiagnostics.session(player), Byte.valueOf(action), MCH_DismountDiagnostics.identity(player),
             Integer.valueOf(mountEntityId), Integer.valueOf(parentEntityId), Integer.valueOf(seatId));
       if(action == 2) {
-         ServerDismountHold removed = normalDismountHolds.remove(player);
+         ServerDismountHold removed = normalDismountHolds.get(player);
+         if(removed != null && removed.matches(mountEntityId, parentEntityId, seatId)) {
+            normalDismountHolds.remove(player);
+         } else {
+            removed = null;
+         }
          logServerDismount(player, removed, "Hold cancelled", "physical Sneak released");
          return;
       }
@@ -81,8 +100,9 @@ public class MCH_BaseVehiclePacketHandler {
          return;
       }
       ServerDismountHold current = normalDismountHolds.get(player);
-      if(current == null || !current.matches(mountEntityId, parentEntityId, seatId)) {
-         current = new ServerDismountHold(mountEntityId, parentEntityId, seatId);
+      if(current == null || !current.matchesCurrent(player, player.ridingEntity, parent, seatId)) {
+         current = new ServerDismountHold(player, player.ridingEntity, parent,
+               mountEntityId, parentEntityId, seatId);
          normalDismountHolds.put(player, current);
          MCH_DismountDiagnostics.startSession(player, player.ridingEntity, current.startedNanos);
          logServerDismount(player, current, "Hold started", "none");
@@ -98,8 +118,9 @@ public class MCH_BaseVehiclePacketHandler {
       MCH_EntityBaseVehicle parent = getDismountParent(mount);
       ServerDismountHold hold = normalDismountHolds.get(player);
       int seatId = mount instanceof MCH_EntitySeat ? ((MCH_EntitySeat)mount).seatID : 0;
-      if(hold != null && !matchesCurrentMount(player, parent, hold.mountEntityId,
-            hold.parentEntityId, hold.seatId)) {
+      if(hold != null && (!matchesCurrentMount(player, parent, hold.mountEntityId,
+            hold.parentEntityId, hold.seatId)
+            || !hold.matchesCurrent(player, mount, parent, seatId))) {
          normalDismountHolds.remove(player);
          logServerDismount(player, hold, "Hold cancelled", "server mount or player context changed");
          hold = null;
@@ -164,7 +185,7 @@ public class MCH_BaseVehiclePacketHandler {
 
       ServerDismountHold hold = normalDismountHolds.get(player);
       long elapsed = hold != null ? System.nanoTime() - hold.startedNanos : 0L;
-      if(rejection == null && (hold == null || !hold.matches(mountEntityId, parentEntityId, seatId))) {
+      if(rejection == null && (hold == null || !hold.matchesCurrent(player, mount, parent, actualSeatId))) {
          rejection = "hold missing, stale, or wrong mount";
       } else if(rejection == null && elapsed < NORMAL_DISMOUNT_HOLD_NANOS) {
          rejection = "three-second server hold incomplete";
@@ -640,8 +661,13 @@ public class MCH_BaseVehiclePacketHandler {
                         } else {
                            Entity rider = player.worldObj.getEntityByID(seatList.riderEntityID[i]);
                            if(rider != null) {
+                              Entity previousMount = rider.ridingEntity;
                               seat.riddenByEntity = rider;
                               rider.ridingEntity = seat;
+                              if(rider instanceof EntityPlayer && previousMount != seat) {
+                                 MCH_DismountDiagnostics.mountChange((EntityPlayer)rider,
+                                       previousMount, seat, "seat-list-response-direct-attach", true);
+                              }
                            }
                         }
                         ac.setSeat(i, seat);
@@ -666,11 +692,23 @@ public class MCH_BaseVehiclePacketHandler {
       if(!player.worldObj.isRemote) {
          MCH_PacketSeatPlayerControl pc1 = new MCH_PacketSeatPlayerControl();
          pc1.readData(data);
-         if(pc1.dismountHoldAction != 0 || pc1.isUnmount) {
+         if(pc1.dismountHoldAction != 0) {
             MCH_DismountDiagnostics.log(player.worldObj,
-                  "session=%s dismount-packet stage=received type=seat action=%d normalExit=%s player=%s",
+                  "session=%s hold-packet stage=received action=%d player=%s",
                   MCH_DismountDiagnostics.session(player), Byte.valueOf(pc1.dismountHoldAction),
-                  Boolean.valueOf(pc1.isUnmount), MCH_DismountDiagnostics.identity(player));
+                  MCH_DismountDiagnostics.identity(player));
+         } else if(pc1.isUnmount) {
+            MCH_DismountDiagnostics.log(player.worldObj,
+                  "session=%s dismount-packet stage=received type=seat normalExit=true player=%s",
+                  MCH_DismountDiagnostics.session(player), MCH_DismountDiagnostics.identity(player));
+         }
+         // Hold packets have no exit or seat-control side effects, even if a
+         // legacy client supplies other flags in the same packet.
+         if(pc1.dismountHoldAction != 0) {
+            updateNormalDismountHold(player, getDismountParent(player.ridingEntity),
+                  pc1.dismountMountEntityId, pc1.dismountParentEntityId,
+                  pc1.dismountSeatId, pc1.dismountHoldAction);
+            return;
          }
          MCH_EntityBaseVehicle ac = null;
          if(player.ridingEntity instanceof MCH_EntitySeat) {
@@ -681,10 +719,7 @@ public class MCH_BaseVehiclePacketHandler {
          }
 
          if(ac != null) {
-            if(pc1.dismountHoldAction != 0) {
-               updateNormalDismountHold(player, ac, pc1.dismountMountEntityId,
-                     pc1.dismountParentEntityId, pc1.dismountSeatId, pc1.dismountHoldAction);
-            } else if(pc1.isUnmount) {
+            if(pc1.isUnmount) {
                if(validateNormalDismount(player, ac, pc1.dismountMountEntityId,
                      pc1.dismountParentEntityId, pc1.dismountSeatId)) {
                   ac.unmountEntityFromSeat(player);

@@ -3,6 +3,7 @@ package mcheli;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.Iterator;
+import java.util.UUID;
 
 import mcheli.aircraft.*;
 import mcheli.command.MCH_GuiTitle;
@@ -100,6 +101,12 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    private Entity dismountMount;
    private MCH_EntityBaseVehicle dismountParent;
    private int dismountSeatId = -1;
+   private int dismountMountId = -1;
+   private int dismountParentId = -1;
+   private UUID dismountMountUuid;
+   private UUID dismountParentUuid;
+   private int dismountPlayerId = -1;
+   private UUID dismountPlayerUuid;
    private EntityClientPlayerMP dismountPlayer;
    private World dismountWorld;
    private Object dismountConnection;
@@ -965,11 +972,23 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       Entity mount = player.ridingEntity;
       MCH_EntityBaseVehicle parent = this.getDismountParent(mount);
       int seatId = mount instanceof MCH_EntitySeat ? ((MCH_EntitySeat)mount).seatID : 0;
-      boolean contextChanged = player != this.dismountPlayer || player.worldObj != this.dismountWorld
-            || player.sendQueue != this.dismountConnection || mount != this.dismountMount
-            || parent != this.dismountParent || seatId != this.dismountSeatId;
+      boolean contextChanged = this.dismountPlayer == null || player.worldObj != this.dismountWorld
+            || player.getEntityId() != this.dismountPlayerId
+            || !player.getUniqueID().equals(this.dismountPlayerUuid)
+            || mount == null || mount.getEntityId() != this.dismountMountId
+            || !mount.getUniqueID().equals(this.dismountMountUuid)
+            || parent == null || parent.getEntityId() != this.dismountParentId
+            || !parent.getUniqueID().equals(this.dismountParentUuid)
+            || seatId != this.dismountSeatId;
 
       if(contextChanged) {
+         if(this.dismountHoldState != DismountHoldState.IDLE) {
+            MCH_DismountDiagnostics.contextChange(player, this.dismountPlayer, this.dismountWorld,
+                  this.dismountConnection, player.sendQueue, this.dismountMount, mount, this.dismountParent, parent,
+                  this.dismountSeatId, seatId, this.dismountPlayerId, this.dismountPlayerUuid,
+                  this.dismountMountId, this.dismountMountUuid, this.dismountParentId,
+                  this.dismountParentUuid, this.dismountHoldState.name(), this.getDismountElapsedNanos());
+         }
          this.resetDismountHoldState("mount context changed");
          this.dismountPlayer = player;
          this.dismountWorld = player.worldObj;
@@ -977,6 +996,12 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          this.dismountMount = mount;
          this.dismountParent = parent;
          this.dismountSeatId = seatId;
+         this.dismountMountId = mount != null ? mount.getEntityId() : -1;
+         this.dismountParentId = parent != null ? parent.getEntityId() : -1;
+         this.dismountMountUuid = mount != null ? mount.getUniqueID() : null;
+         this.dismountParentUuid = parent != null ? parent.getUniqueID() : null;
+         this.dismountPlayerId = player.getEntityId();
+         this.dismountPlayerUuid = player.getUniqueID();
       }
 
       boolean pressed = MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak);
@@ -1006,6 +1031,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       } else if(this.dismountHoldState == DismountHoldState.HOLDING
             && now - this.dismountHoldStartNanos >= DISMOUNT_HOLD_NANOS) {
          this.dismountHoldState = DismountHoldState.PENDING;
+         MCH_DismountDiagnostics.holdState(player, "PENDING");
          this.logDismountState("Hold completed", null, now - this.dismountHoldStartNanos);
          this.logDismountState("Request queued", null, now - this.dismountHoldStartNanos);
       }
@@ -1056,12 +1082,19 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       if(this.dismountHoldState != DismountHoldState.IDLE) {
          this.logDismountState("Hold reset", reason, this.getDismountElapsedNanos());
          this.sendDismountHoldAction((byte)2);
+         MCH_DismountDiagnostics.holdState(this.dismountPlayer, "IDLE");
       }
       this.dismountHoldState = DismountHoldState.IDLE;
       this.dismountHoldStartNanos = -1L;
       this.dismountMount = null;
       this.dismountParent = null;
       this.dismountSeatId = -1;
+      this.dismountMountId = -1;
+      this.dismountParentId = -1;
+      this.dismountMountUuid = null;
+      this.dismountParentUuid = null;
+      this.dismountPlayerId = -1;
+      this.dismountPlayerUuid = null;
       this.dismountPlayer = null;
       this.dismountWorld = null;
       this.dismountConnection = null;
@@ -1072,10 +1105,15 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    public boolean consumeDismountRequest(EntityPlayer player) {
-      if(player == this.dismountPlayer && player.ridingEntity == this.dismountMount
-            && this.getDismountParent(player.ridingEntity) == this.dismountParent
+      if(player == this.dismountPlayer && player.ridingEntity != null
+            && player.ridingEntity.getEntityId() == this.dismountMountId
+            && player.ridingEntity.getUniqueID().equals(this.dismountMountUuid)
+            && this.getDismountParent(player.ridingEntity) != null
+            && this.getDismountParent(player.ridingEntity).getEntityId() == this.dismountParentId
+            && this.getDismountParent(player.ridingEntity).getUniqueID().equals(this.dismountParentUuid)
             && this.dismountHoldState == DismountHoldState.PENDING) {
          this.dismountHoldState = DismountHoldState.CONSUMED_AWAIT_RELEASE;
+         MCH_DismountDiagnostics.holdState(player, "CONSUMED_AWAIT_RELEASE");
          this.logDismountState("Request consumed", null, this.getDismountElapsedNanos());
          return true;
       }
@@ -1084,7 +1122,9 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
 
    public int getDismountHoldRemainingSeconds(EntityPlayer player) {
       if(player == null || player != this.dismountPlayer || player != super.mc.thePlayer
-            || player.ridingEntity != this.dismountMount || this.dismountHoldState != DismountHoldState.HOLDING
+            || player.ridingEntity == null || player.ridingEntity.getEntityId() != this.dismountMountId
+            || !player.ridingEntity.getUniqueID().equals(this.dismountMountUuid)
+            || this.dismountHoldState != DismountHoldState.HOLDING
             || super.mc.currentScreen != null
             || !MCH_Key.isKeyDown(super.mc.gameSettings.keyBindSneak)) {
          return 3;

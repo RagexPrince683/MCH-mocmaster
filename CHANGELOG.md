@@ -254,3 +254,9 @@ Developer/backend
   caller stack for the first actual detach in each player/mount/hold session.
 - Updated the dismount contract to treat the remaining instant detach cause as unconfirmed and documented
   configuration, log locations, the authoritative detach marker, and the requested reproduction details.
+# Fix Ragecraft three-second dismount hold cancellation (PR pending)
+
+- Traced the 145 ms failure to an unguarded vanilla Sneak dismount route: the captured launch log prepared zero MC Heli mixins, leaving `EntityPlayer.updateRidden` able to call `mountEntity(null)` after `START_SNEAKING`. The archived hold trace does not contain the new mount-context values at the reset, so the first changed field could not be proven from that recording. The hold-start seat packet only registered server hold state; it did not request an exit.
+- Declared the client input and server riding guards in `mixins.mcheli.json` so UniMixins prepares them in the full modpack, and removed duplicate dynamic mixin registration.
+- Made hold-start and hold-cancel packets return before all legacy dismount, seat switching, parachute, and placement branches. The completed request still uses the server's three-second validation and existing normal exit.
+- Compared stable player, mount, and parent entity IDs and UUIDs with seat and world identity for hold continuity. Expanded focused diagnostics to print old and new mount context fields, the first changed field, the vanilla Sneak action receipt, and the caller of an unexpected riding-state mutation.

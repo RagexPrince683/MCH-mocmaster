@@ -2,6 +2,7 @@ package mcheli;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 import java.util.WeakHashMap;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
@@ -31,6 +32,7 @@ public final class MCH_DismountDiagnostics {
       final Entity mount;
       final long started;
       final String id;
+      String holdState = "HOLDING";
 
       Session(EntityPlayer player, Entity mount, long started) {
          this.mount = mount;
@@ -73,6 +75,59 @@ public final class MCH_DismountDiagnostics {
          return session.id;
       }
       return player == null ? "none" : player.getUniqueID() + "/" + identity(player.ridingEntity) + "/no-hold";
+   }
+
+   public static void holdState(EntityPlayer player, String state) {
+      Session session = player != null ? SESSIONS.get(player) : null;
+      if(session != null) session.holdState = state;
+   }
+
+   private static String worldIdentity(World world) {
+      return world == null ? "null" : world.getClass().getName() + "@"
+            + Integer.toHexString(System.identityHashCode(world)) + "/dim=" + world.provider.dimensionId;
+   }
+
+   private static String entityContext(Entity entity) {
+      if(entity == null) return "null";
+      MCH_EntityBaseVehicle aircraft = parent(entity);
+      return identity(entity) + "/uuid=" + entity.getUniqueID() + "/dead=" + entity.isDead
+            + "/world=" + worldIdentity(entity.worldObj) + "/riding=" + identity(entity.ridingEntity)
+            + "/ridden=" + identity(entity.riddenByEntity) + "/parent=" + identity(aircraft)
+            + "/parentUuid=" + (aircraft != null ? aircraft.getUniqueID() : null)
+            + "/persistentAircraftId=" + (aircraft != null ? aircraft.getCommonUniqueId() : null)
+            + "/seat=" + seat(entity);
+   }
+
+   public static void contextChange(EntityPlayer nowPlayer, EntityPlayer oldPlayer, World oldWorld,
+         Object oldConnection, Object newConnection, Entity oldMount, Entity newMount, MCH_EntityBaseVehicle oldParent,
+         MCH_EntityBaseVehicle newParent, int oldSeat, int newSeat, int oldPlayerId,
+         UUID oldPlayerUuid, int oldMountId, UUID oldMountUuid, int oldParentId,
+         UUID oldParentUuid, String holdState, long elapsedNanos) {
+      if(!enabled()) return;
+      String first = oldWorld != nowPlayer.worldObj ? "world" : oldPlayerId != nowPlayer.getEntityId()
+            ? "playerId" : !nowPlayer.getUniqueID().equals(oldPlayerUuid) ? "playerUuid"
+            : newMount == null || newMount.getEntityId() != oldMountId ? "mountId"
+            : !newMount.getUniqueID().equals(oldMountUuid) ? "mountUuid"
+            : newParent == null || newParent.getEntityId() != oldParentId ? "parentId"
+            : !newParent.getUniqueID().equals(oldParentUuid) ? "parentUuid"
+            : oldSeat != newSeat ? "seatIndex" : "none";
+      log(nowPlayer.worldObj, "session=%s mount-context-change firstChanged=%s holdState=%s elapsedMs=%d "
+                  + "oldPlayer=%s oldPlayerId=%d oldPlayerUuid=%s newPlayer=%s newPlayerId=%d newPlayerUuid=%s "
+                  + "oldWorld=%s newWorld=%s oldConnection=%s newConnection=%s "
+                  + "oldMountId=%d oldMountUuid=%s oldMount=%s newMount=%s "
+                  + "oldParentId=%d oldParentUuid=%s oldParent=%s newParent=%s oldSeat=%d newSeat=%d "
+                  + "oldRiding=%s newRiding=%s oldRidden=%s newRidden=%s",
+            session(nowPlayer), first, holdState, Long.valueOf(elapsedNanos / 1000000L),
+            identity(oldPlayer), Integer.valueOf(oldPlayerId), oldPlayerUuid,
+            identity(nowPlayer), Integer.valueOf(nowPlayer.getEntityId()), nowPlayer.getUniqueID(),
+            worldIdentity(oldWorld), worldIdentity(nowPlayer.worldObj), identity(oldConnection),
+            identity(newConnection),
+            Integer.valueOf(oldMountId), oldMountUuid, entityContext(oldMount), entityContext(newMount),
+            Integer.valueOf(oldParentId), oldParentUuid, entityContext(oldParent), entityContext(newParent),
+            Integer.valueOf(oldSeat), Integer.valueOf(newSeat),
+            identity(oldPlayer != null ? oldPlayer.ridingEntity : null), identity(nowPlayer.ridingEntity),
+            identity(oldMount != null ? oldMount.riddenByEntity : null),
+            identity(newMount != null ? newMount.riddenByEntity : null));
    }
 
    public static void inputGuard(String guard, EntityPlayer player, Object input, boolean before, boolean after) {
@@ -119,13 +174,18 @@ public final class MCH_DismountDiagnostics {
       String stack = "suppressed-after-first-unexpected-detach";
       boolean detach = oldMount != null && newMount == null;
       Session session = SESSIONS.get(player);
-      boolean unexpected = detach && (session == null || System.nanoTime() - session.started < 3000000000L);
+      boolean unexpected = detach && session != null && "HOLDING".equals(session.holdState);
       if(unexpected && STACK_LOGGED.put(player, Boolean.TRUE) == null) {
          stack = shortStack();
       }
       log(player.worldObj,
-            "session=%s ACTUAL-MOUNT-CHANGE detach=%s bypassMountEntity=%s player=%s old=%s new=%s caller=%s stack=%s",
-            session(player), detach, bypass, identity(player), identity(oldMount), identity(newMount), caller, stack);
+            "session=%s ACTUAL-MOUNT-CHANGE detach=%s bypassMountEntity=%s player=%s old=%s new=%s "
+                  + "parent=%s seat=%d reason=%s holdState=%s elapsedMs=%d caller=%s stack=%s",
+            session(player), detach, bypass, entityContext(player), entityContext(oldMount),
+            entityContext(newMount), identity(parent(oldMount)), Integer.valueOf(seat(oldMount)),
+            detach ? "riding reference cleared" : "riding reference changed",
+            session != null ? session.holdState : "IDLE",
+            Long.valueOf(session != null ? (System.nanoTime() - session.started) / 1000000L : 0L), caller, stack);
    }
 
    public static void observedMountEntity(EntityPlayer player, Entity newMount) {
