@@ -416,9 +416,11 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    public static void beginSkinOverlayRender(String directory, String textureName) {
       activeSkinOverlayTexture = null;
       activeBaseTexture = null;
-      String overlayTextureName = getSkinOverlayTextureName(textureName);
+      String overlayTextureName = activePaintDesign != null && !activePaintDesign.camo.isEmpty()
+              ? "skinoverlays/" + activePaintDesign.camo : getSkinOverlayTextureName(textureName);
       if(overlayTextureName != null && !overlayTextureName.isEmpty()) {
-         activeSkinOverlayTexture = new ResourceLocation(W_MOD.DOMAIN, MCH_EntityBaseVehicle.getTexturePath(directory, overlayTextureName));
+         activeSkinOverlayTexture = new ResourceLocation(W_MOD.DOMAIN,
+                 MCH_EntityBaseVehicle.getTexturePath(directory, overlayTextureName));
       }
    }
 
@@ -689,11 +691,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    public static void renderBody(final IModelCustom model) {
       if(model != null) {
          renderBodyModel(model);
-         renderSkinOverlayPass(new RenderRunnable() {
-            public void render() {
-               renderBodyModel(model);
-            }
-         });
+         renderSelectedSkinOverlay(model, "$body", null);
          renderPaintPass(model, model instanceof W_ModelCustom && ((W_ModelCustom)model).containsPart("$body") ? "$body" : null, null);
       }
 
@@ -709,11 +707,12 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       if(model == null) return;
       final String[] excluded = getDetachedTankTurretGroups(model, turretRoot);
       renderTankBodyModelWithoutPoppedTurret(model, excluded);
-      renderSkinOverlayPass(new RenderRunnable() {
-         public void render() {
-            renderTankBodyModelWithoutPoppedTurret(model, excluded);
-         }
-      });
+      renderSelectedSkinOverlay(model,
+              model instanceof W_ModelCustom && ((W_ModelCustom)model).containsPart("$body") ? "$body" : null,
+              null);
+      renderPaintPass(model,
+              model instanceof W_ModelCustom && ((W_ModelCustom)model).containsPart("$body") ? "$body" : null,
+              null);
    }
 
    private static void renderTankBodyModelWithoutPoppedTurret(IModelCustom model, String[] excluded) {
@@ -829,11 +828,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    public static void renderAllModel(final IModelCustom model) {
       if(model != null) {
          model.renderAll();
-         renderSkinOverlayPass(new RenderRunnable() {
-            public void render() {
-               model.renderAll();
-            }
-         });
+         renderSelectedSkinOverlay(model, null, null);
          renderPaintPass(model, null, null);
       }
 
@@ -853,25 +848,57 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
 
    public static void renderPart(final IModelCustom model, final IModelCustom modelBody, final String partName) {
       renderPartModelTransformed(model, modelBody, partName);
-      renderSkinOverlayPass(new RenderRunnable() {
-         public void render() {
-            renderPartModelTransformed(model, modelBody, partName);
-         }
-      });
+      renderSelectedSkinOverlay(model, "$" + partName, modelBody);
       renderPaintPass(model, "$" + partName, modelBody);
 
    }
 
    public static void beginPaintPreview(MCH_VehiclePaint.Design design) {
       activePaintDesign = design;
+      activeSkinOverlayTexture = design != null && !design.camo.isEmpty()
+              ? new ResourceLocation(W_MOD.DOMAIN, "textures/skinoverlays/" + design.camo + ".png") : null;
    }
 
    public static void endPaintPreview() {
       activePaintDesign = null;
+      activeSkinOverlayTexture = null;
    }
 
    public static void renderPaintPreview(IModelCustom model) {
+      renderSelectedSkinOverlay(model, null, null);
       renderPaintPass(model, null, null);
+   }
+
+   private static void renderSelectedSkinOverlay(final IModelCustom model, final String partName,
+         final IModelCustom fallbackModel) {
+      final MCH_VehiclePaint.Design design = activePaintDesign;
+      if(activeSkinOverlayTexture == null) return;
+      if(design == null) {
+         renderSkinOverlayPass(new RenderRunnable() {
+            public void render() {
+               renderSelectedPart(model, fallbackModel, partName);
+            }
+         });
+         return;
+      }
+      renderSkinOverlayPass(new RenderRunnable() {
+         public void render() {
+            if(partName == null && model instanceof W_ModelCustom) {
+               W_ModelCustom custom = (W_ModelCustom)model;
+               for(Object object : design.parts) {
+                  String selected = (String)object;
+                  if(custom.containsPart(selected)) custom.renderPartTransformed(selected);
+               }
+            } else if(design.parts.contains(partName)) {
+               if(model != null) {
+                  renderSelectedPart(model, fallbackModel, partName);
+               } else if(fallbackModel instanceof W_ModelCustom
+                       && ((W_ModelCustom)fallbackModel).containsPart(partName)) {
+                  ((W_ModelCustom)fallbackModel).renderPartTransformed(partName);
+               }
+            }
+         }
+      });
    }
 
    private static void renderPaintPass(final IModelCustom model, final String partName,
@@ -885,6 +912,7 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       GL11.glDepthMask(false);
       GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
       GL11.glPolygonOffset(-2.0F, -2.0F);
+      GL11.glDisable(GL11.GL_TEXTURE_2D);
       float red = (float)(design.color >> 16 & 255) / 255.0F;
       float green = (float)(design.color >> 8 & 255) / 255.0F;
       float blue = (float)(design.color & 255) / 255.0F;
@@ -893,13 +921,23 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          W_ModelCustom custom = (W_ModelCustom)model;
          for(Object object : design.parts) if(custom.containsPart((String)object)) custom.renderPartTransformed((String)object);
       } else if(design.parts.contains(partName)) {
-         if(model != null) renderPartModelTransformed(model, fallbackModel, partName == null ? "" : partName.substring(1));
+         if(model != null) renderSelectedPart(model, fallbackModel, partName);
          else if(fallbackModel instanceof W_ModelCustom && ((W_ModelCustom)fallbackModel).containsPart(partName))
             ((W_ModelCustom)fallbackModel).renderPartTransformed(partName);
       }
       GL11.glPopAttrib();
       GL11.glDepthMask(true);
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+   }
+
+   private static void renderSelectedPart(IModelCustom model, IModelCustom fallbackModel, String partName) {
+      if(partName == null) {
+         if(model != null) model.renderAll();
+      } else if(model instanceof W_ModelCustom && ((W_ModelCustom)model).containsPart(partName)) {
+         ((W_ModelCustom)model).renderPartTransformed(partName);
+      } else {
+         renderPartModelTransformed(model, fallbackModel, partName.substring(1));
+      }
    }
 
    private static void renderPartModel(IModelCustom model, IModelCustom modelBody, String partName) {
@@ -1053,14 +1091,33 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    public static void renderDetachedTankTurret(final mcheli.tank.MCH_EntityTank tank,
          final MCH_TurretPopModelCache.Entry entry) {
       if(entry == null) return;
-      renderDetachedTankTurretModel(tank, entry);
+      renderDetachedTankTurretModel(tank, entry, false);
       renderSkinOverlayPass(new RenderRunnable() {
-         public void render() { renderDetachedTankTurretModel(tank, entry); }
+         public void render() { renderDetachedTankTurretModel(tank, entry, activePaintDesign != null); }
       });
+      if(activePaintDesign != null && activePaintDesign.opacity > 0) {
+         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT
+                 | GL11.GL_POLYGON_BIT);
+         GL11.glEnable(GL11.GL_BLEND);
+         GL11.glDisable(GL11.GL_ALPHA_TEST);
+         GL11.glDisable(GL11.GL_TEXTURE_2D);
+         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+         GL11.glDepthMask(false);
+         GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
+         GL11.glPolygonOffset(-2.0F, -2.0F);
+         GL11.glColor4f((float)(activePaintDesign.color >> 16 & 255) / 255.0F,
+                 (float)(activePaintDesign.color >> 8 & 255) / 255.0F,
+                 (float)(activePaintDesign.color & 255) / 255.0F,
+                 (float)activePaintDesign.opacity / 255.0F);
+         renderDetachedTankTurretModel(tank, entry, true);
+         GL11.glPopAttrib();
+         GL11.glDepthMask(true);
+         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+      }
    }
 
    private static void renderDetachedTankTurretModel(mcheli.tank.MCH_EntityTank tank,
-         MCH_TurretPopModelCache.Entry entry) {
+         MCH_TurretPopModelCache.Entry entry, boolean selectedOnly) {
       MCH_BaseVehicleInfo.PartWeapon root = entry.mainGun;
       GL11.glPushMatrix();
       try {
@@ -1068,12 +1125,17 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
          // The world origin is already the flying pivot; recenter source geometry
          // instead of translating to turretPosition and applying that pivot twice.
          GL11.glTranslated(-entry.pivot.xCoord, -entry.pivot.yCoord, -entry.pivot.zCoord);
-         entry.detached.renderPart("$turret");
+         if(!selectedOnly || activePaintDesign.parts.contains("$turret")) {
+            entry.detached.renderPart("$turret");
+         }
          if(root == null) return;
          GL11.glPushMatrix();
          try {
             applyFrozenTurretPitch(root.pos, root.pitch, tank.turretPopFrozenPitch);
-            if(entry.detached.containsPart("$" + root.modelName)) entry.detached.renderPart("$" + root.modelName);
+            if(entry.detached.containsPart("$" + root.modelName)
+                    && (!selectedOnly || activePaintDesign.parts.contains("$" + root.modelName))) {
+               entry.detached.renderPart("$" + root.modelName);
+            }
             // Children inherit the root transform, matching renderWeaponChild.
             for(Object object : root.child) {
                MCH_BaseVehicleInfo.PartWeaponChild child = (MCH_BaseVehicleInfo.PartWeaponChild)object;
@@ -1081,7 +1143,9 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
                GL11.glPushMatrix();
                try {
                   applyFrozenTurretPitch(child.pos, child.pitch, tank.turretPopFrozenPitch);
-                  entry.detached.renderPart("$" + child.modelName);
+                  if(!selectedOnly || activePaintDesign.parts.contains("$" + child.modelName)) {
+                     entry.detached.renderPart("$" + child.modelName);
+                  }
                } finally { GL11.glPopMatrix(); }
             }
          } finally { GL11.glPopMatrix(); }

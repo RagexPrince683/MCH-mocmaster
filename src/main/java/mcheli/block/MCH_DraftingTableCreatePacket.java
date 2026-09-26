@@ -23,6 +23,7 @@ public class MCH_DraftingTableCreatePacket extends MCH_Packet {
    public int paintOpacity;
    public boolean useAsDefault;
    public ArrayList paintParts = new ArrayList();
+   public String paintCamo = "";
 
 
    public int getMessageID() {
@@ -47,6 +48,7 @@ public class MCH_DraftingTableCreatePacket extends MCH_Packet {
          this.useAsDefault = data.readBoolean();
          int partCount = data.readUnsignedByte();
          for(int i = 0; i < partCount; ++i) this.paintParts.add(data.readUTF());
+         this.paintCamo = data.readUTF();
       } catch (Exception exception) {
          ;
       }
@@ -69,6 +71,7 @@ public class MCH_DraftingTableCreatePacket extends MCH_Packet {
          dos.writeBoolean(this.useAsDefault);
          dos.writeByte(Math.min(255, this.paintParts.size()));
          for(int i = 0; i < this.paintParts.size() && i < 255; ++i) dos.writeUTF((String)this.paintParts.get(i));
+         dos.writeUTF(this.paintCamo);
       } catch (IOException oException) {
          oException.printStackTrace();
       }
@@ -96,6 +99,7 @@ public class MCH_DraftingTableCreatePacket extends MCH_Packet {
                s.paintColor = design.color;
                s.paintOpacity = design.opacity;
                s.paintParts.addAll(design.parts);
+               s.paintCamo = design.camo;
             }
             s.useAsDefault = useAsDefault;
             W_Network.sendToServer(s);

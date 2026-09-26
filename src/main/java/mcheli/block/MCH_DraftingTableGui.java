@@ -32,6 +32,8 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import mcheli.item.MCH_ItemInfo;
+import mcheli.item.MCH_ItemInfoManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
@@ -88,6 +90,8 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    private final List selectedPaintParts = new ArrayList();
    private final List availablePaintParts = new ArrayList();
    private ItemStack lastInputStack;
+   private ItemStack lastCamoStack;
+   private String selectedCamo = "";
    private int paintPartPage;
    public static float modelZoom = 1.0F;
    public static float modelRotX = 0.0F;
@@ -100,7 +104,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       super(new MCH_DraftingTableGuiContainer(player, posX, posY, posZ));
       this.thePlayer = player;
       super.xSize = 400;
-      super.ySize = 240;
+      super.ySize = 260;
       this.screenButtonList = new ArrayList();
       this.drawFace = 0;
       this.buttonClickWait = 0;
@@ -143,8 +147,8 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       list.add(this.buttonCreate);
       list.add(this.buttonPrev);
       list.add(this.buttonNext);
-      this.buttonPrevPage = new GuiButton(51, super.guiLeft + 210, super.guiTop + 210, 60, 20, "Prev Page");
-      this.buttonNextPage = new GuiButton(50, super.guiLeft + 270, super.guiTop + 210, 60, 20, "Next Page");
+      this.buttonPrevPage = new GuiButton(51, super.guiLeft + 210, super.guiTop + 232, 60, 20, "Prev Page");
+      this.buttonNextPage = new GuiButton(50, super.guiLeft + 270, super.guiTop + 232, 60, 20, "Next Page");
       list.add(this.buttonPrevPage);
       list.add(this.buttonNextPage);
       GuiButton paintButton = new GuiButton(60, super.guiLeft + 120, super.guiTop + 133, 70, 20, "Paint...");
@@ -349,9 +353,18 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
                this.paintOpacity = saved.opacity;
                this.selectedPaintParts.clear();
                this.selectedPaintParts.addAll(saved.parts);
+               this.selectedCamo = saved.camo;
+            } else {
+               this.selectedCamo = "";
             }
          }
          refreshPaintParts();
+      }
+      ItemStack camo = container.getSlot(container.camoInputSlotIndex).getStack();
+      if(camo != this.lastCamoStack) {
+         this.lastCamoStack = camo;
+         MCH_ItemInfo info = camo == null ? null : MCH_ItemInfoManager.get(camo.getItem());
+         if(info != null && info.textureOverlay) this.selectedCamo = info.name;
       }
       this.buttonCreate.enabled = false;
       if(!container.getSlot(container.outputSlotIndex).getHasStack()
@@ -586,7 +599,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    protected void keyTyped(char par1, int keycode) {
 
       //search bar shit
-      if(searchField.textboxKeyTyped(par1, keycode)) {
+      if(this.getScreenId() != SCREEN_PAINT && searchField.textboxKeyTyped(par1, keycode)) {
          String searchText = searchField.getText().trim();
 
          if(searchText.isEmpty()) {
@@ -649,7 +662,17 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    @Override
    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) {
       super.mouseClicked(mouseX, mouseY, mouseButton);
-      searchField.mouseClicked(mouseX, mouseY, mouseButton);
+      if(this.getScreenId() != SCREEN_PAINT) searchField.mouseClicked(mouseX, mouseY, mouseButton);
+   }
+
+   protected void mouseClickMove(int mouseX, int mouseY, int mouseButton, long heldTime) {
+      if(this.getScreenId() != SCREEN_PAINT) {
+         super.mouseClickMove(mouseX, mouseY, mouseButton, heldTime);
+      }
+   }
+
+   protected boolean checkHotbarKeys(int keyCode) {
+      return this.getScreenId() != SCREEN_PAINT && super.checkHotbarKeys(keyCode);
    }
 
    protected void drawGuiContainerForegroundLayer(int mx, int my) {
@@ -751,11 +774,16 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
                  this.paintOpacity * 100 / 255), 12, 166, -1);
          super.fontRendererObj.drawString("Painted model parts", 90, 6, -1);
       }
+      if(this.getScreenId() == SCREEN_MAIN) {
+         super.fontRendererObj.drawString("Output", 198, 94, -1);
+         super.fontRendererObj.drawString("Vehicle paint input", 198, 116, -1);
+         super.fontRendererObj.drawString("Vehicle Camo Skin", 198, 138, -1);
+      }
 
    }
 
    protected void handleMouseClick(Slot p_146984_1_, int p_146984_2_, int p_146984_3_, int p_146984_4_) {
-      if(this.getScreenId() != 1) {
+      if(this.getScreenId() == SCREEN_MAIN) {
          super.handleMouseClick(p_146984_1_, p_146984_2_, p_146984_3_, p_146984_4_);
       }
 
@@ -1011,7 +1039,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          this.drawModel(partialTicks);
       }
 
-      searchField.drawTextBox();
+      if(this.getScreenId() != SCREEN_PAINT) searchField.drawTextBox();
 
 
 
@@ -1101,7 +1129,8 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    }
 
    private MCH_VehiclePaint.Design getPaintDesign() {
-      return new MCH_VehiclePaint.Design(this.paintColor, this.paintOpacity, this.selectedPaintParts);
+      return new MCH_VehiclePaint.Design(this.paintColor, this.paintOpacity, this.selectedPaintParts,
+              this.selectedCamo);
    }
 
    private void adjustColor(int redSubtract, int greenSubtract, int blueSubtract) {

@@ -25,6 +25,8 @@ import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import mcheli.item.MCH_ItemInfo;
+import mcheli.item.MCH_ItemInfoManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
@@ -40,8 +42,10 @@ public class MCH_DraftingTableGuiContainer extends Container {
    public final int posZ;
    public final int outputSlotIndex;
    public final int vehicleInputSlotIndex;
+   public final int camoInputSlotIndex;
    private IInventory outputSlot = new InventoryCraftResult();
    private IInventory vehicleInput = new InventoryBasic("Vehicle paint input", false, 1);
+   private IInventory camoInput = new InventoryBasic("Vehicle camo input", false, 1);
 
 
    public MCH_DraftingTableGuiContainer(EntityPlayer player, int posX, int posY, int posZ) {
@@ -53,12 +57,12 @@ public class MCH_DraftingTableGuiContainer extends Container {
       int a;
       for(a = 0; a < 3; ++a) {
          for(int x = 0; x < 9; ++x) {
-            this.addSlotToContainer(new Slot(player.inventory, 9 + x + a * 9, 30 + x * 18, 140 + a * 18));
+            this.addSlotToContainer(new Slot(player.inventory, 9 + x + a * 9, 30 + x * 18, 158 + a * 18));
          }
       }
 
       for(a = 0; a < 9; ++a) {
-         this.addSlotToContainer(new Slot(player.inventory, a, 30 + a * 18, 198));
+         this.addSlotToContainer(new Slot(player.inventory, a, 30 + a * 18, 216));
       }
 
       this.outputSlotIndex = super.inventoryItemStacks.size();
@@ -72,6 +76,16 @@ public class MCH_DraftingTableGuiContainer extends Container {
       this.addSlotToContainer(new Slot(this.vehicleInput, 0, 178, 112) {
          public boolean isItemValid(ItemStack stack) {
             return mcheli.aircraft.MCH_VehiclePaint.isVehicle(stack);
+         }
+
+         public int getSlotStackLimit() {
+            return 1;
+         }
+      });
+      this.camoInputSlotIndex = super.inventoryItemStacks.size();
+      this.addSlotToContainer(new Slot(this.camoInput, 0, 178, 134) {
+         public boolean isItemValid(ItemStack stack) {
+            return isCamo(stack);
          }
 
          public int getSlotStackLimit() {
@@ -96,10 +110,12 @@ public class MCH_DraftingTableGuiContainer extends Container {
       if(slot != null && slot.getHasStack()) {
          ItemStack itemstack1 = slot.getStack();
          itemstack = itemstack1.copy();
-         if(slotIndex == this.vehicleInputSlotIndex) {
+         if(slotIndex == this.vehicleInputSlotIndex || slotIndex == this.camoInputSlotIndex) {
             if(!this.mergeItemStack(itemstack1, 0, 36, true)) return null;
          } else if(slotIndex >= 0 && slotIndex < 36 && mcheli.aircraft.MCH_VehiclePaint.isVehicle(itemstack1)) {
             if(!this.mergeItemStack(itemstack1, this.vehicleInputSlotIndex, this.vehicleInputSlotIndex + 1, false)) return null;
+         } else if(slotIndex >= 0 && slotIndex < 36 && isCamo(itemstack1)) {
+            if(!this.mergeItemStack(itemstack1, this.camoInputSlotIndex, this.camoInputSlotIndex + 1, false)) return null;
          } else if(slotIndex != this.outputSlotIndex) {
             return null;
          } else if(!this.mergeItemStack(itemstack1, 0, 36, true)) {
@@ -350,6 +366,8 @@ public class MCH_DraftingTableGuiContainer extends Container {
          }
          ItemStack input = this.getSlot(this.vehicleInputSlotIndex).getStack();
          if(input != null) W_EntityPlayer.dropPlayerItemWithRandomChoice(player, input, false, false);
+         ItemStack camo = this.getSlot(this.camoInputSlotIndex).getStack();
+         if(camo != null) W_EntityPlayer.dropPlayerItemWithRandomChoice(player, camo, false, false);
       }
 
       MCH_Lib.DbgLog(player.worldObj, "MCH_DraftingTableGuiContainer.onContainerClosed", new Object[0]);
@@ -390,6 +408,17 @@ public class MCH_DraftingTableGuiContainer extends Container {
          return;
       }
 
+      boolean vehicleOutput = mcheli.aircraft.MCH_VehiclePaint.isVehicle(outputStack);
+      mcheli.aircraft.MCH_VehiclePaint.Design previous = mcheli.aircraft.MCH_VehiclePaint.read(inputStack);
+      String previousCamo = previous == null ? "" : previous.camo;
+      String requestedCamo = design == null ? "" : design.camo;
+      if(!vehicleOutput && !requestedCamo.isEmpty()) return;
+      ItemStack camoStack = this.getSlot(this.camoInputSlotIndex).getStack();
+      if(!requestedCamo.equals(previousCamo)) {
+         MCH_ItemInfo camoInfo = isCamo(camoStack) ? MCH_ItemInfoManager.get(camoStack.getItem()) : null;
+         if(camoInfo == null || !requestedCamo.equals(camoInfo.name)) return;
+      }
+
       MCH_Lib.DbgLog(this.player.worldObj,
                      "Drafting create: recipeClass=" + recipe.getClass().getName() +
                              " output=" + outputItem.getUnlocalizedName(),
@@ -414,6 +443,11 @@ public class MCH_DraftingTableGuiContainer extends Container {
          String typeKey = mcheli.aircraft.MCH_VehiclePaint.getTypeKey(result);
          mcheli.aircraft.MCH_VehiclePaint.setDefault(this.player, typeKey, useAsDefault ? savedDesign : null);
       }
+      if(!requestedCamo.equals(previousCamo) && !isCreativeMode) {
+         --camoStack.stackSize;
+         if(camoStack.stackSize <= 0) this.getSlot(this.camoInputSlotIndex).putStack(null);
+         else this.getSlot(this.camoInputSlotIndex).onSlotChanged();
+      }
       if(inputStack != null) this.getSlot(this.vehicleInputSlotIndex).putStack(null);
       this.getSlot(this.outputSlotIndex).putStack(result);
       this.getSlot(this.outputSlotIndex).onSlotChanged();
@@ -421,6 +455,12 @@ public class MCH_DraftingTableGuiContainer extends Container {
       MCH_Lib.DbgLog(this.player.worldObj,
                      "MCH_DraftingTableGuiContainer.createRecipeItem:SUCCESS output=" + outputItem.getUnlocalizedName(),
                      new Object[0]);
+   }
+
+   private static boolean isCamo(ItemStack stack) {
+      if(stack == null || stack.getItem() == null) return false;
+      MCH_ItemInfo info = MCH_ItemInfoManager.get(stack.getItem());
+      return info != null && info.textureOverlay;
    }
 
    public IRecipe isValidRecipe(MCH_IRecipeList list, ItemStack itemStack, int startIndex, Map map) {
