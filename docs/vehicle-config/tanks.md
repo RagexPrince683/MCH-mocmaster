@@ -9,6 +9,9 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 | Key | Type/range | Default | Notes |
 |---|---:|---:|---|
 | `WeightType` | enum `normal`, `car`, `tank` | `normal` / 0 | Parser maps `car` to 1 and `tank` to 2; any other text is 0. |
+| `FrontTireSize` | metric radial size, e.g. `225/50R16`, `265/35ZR19`, or `175R14` | unset | Optional front tire dimensions; used only for `WeightType = Car`. Unset/invalid sizes use neutral tuning. |
+| `RearTireSize` | same format as `FrontTireSize` | unset | Optional rear tire dimensions, independent of the front. |
+| `CarLateralGrip` | float[0..0.25], blocks/tick² | 0.06 | Server-side sideways velocity correction limit for grounded cars. `0` disables it. Wheel contact and acceleration/braking reduce availability. |
 | `WeightedCenterZ` | float[-1000..1000] | 0 | Moves the simulated center of weight forward/back. Positive/negative effect depends on model orientation. |
 | `TrackMaxHP` | int[1..1000000] | 100 | Track durability. |
 | `EnableTurretPop` | boolean | `false` | When `true`, enables the catastrophic detached-turret destruction effect. Requires a configured dynamic turret assembly. |
@@ -23,6 +26,8 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 - HUD defaults are `tank`, `tank`, then `gunner`.
 
 ## Practical tuning
+
+Car tire grip uses actual wheel collision support and a bounded correction to sideways velocity. Tire sizes alter damping response by at most ±5%; tire width does not directly multiply the grip limit. See [car tire grip](../car-tire-grip.md) for units, defaults, calculation, and the complete bundled-car identity and factory tire source audit. All three fields are safe to omit; tank and normal weight types ignore them.
 
 - Use shared `speed`, `MotionFactor`, `MobilityYawOnGround`, `CanMoveOnGround`, `CanRotOnGround`, and `PivotTurnThrottle` for driving feel.
 - Use `SetWheelPos` for wheel/contact layout and `AddTrackHitBox` for damageable tracks. Moving tanks also use their `SetWheelPos` contact points to trample grass blocks under their wheels into dirt.

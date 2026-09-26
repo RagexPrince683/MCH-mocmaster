@@ -1103,6 +1103,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // --------------------------------------------------
       float throttle = (float)(this.getCurrentThrottle() / 10.0D);
       Vec3 v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - 10.0F);
+      double yaw = Math.toRadians(this.getRotYaw());
+      double forwardX = -Math.sin(yaw);
+      double forwardZ = Math.cos(yaw);
+      double forwardBeforeThrust = super.motionX * forwardX + super.motionZ * forwardZ;
 
       if (!levelOff) {
          super.motionY += v.yCoord * throttle / 8.0D;
@@ -1125,6 +1129,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
             super.motionZ += v.zCoord * throttle;
          }
       }
+
+      double longitudinalDemand = Math.abs(super.motionX * forwardX + super.motionZ * forwardZ - forwardBeforeThrust);
 
       // --------------------------------------------------
       // B: after acceleration
@@ -1151,6 +1157,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // --------------------------------------------------
       // FRICTION / DRAG
       // --------------------------------------------------
+      double forwardBeforeDrag = super.motionX * forwardX + super.motionZ * forwardZ;
       if (super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0) {
          super.motionX *= this.getAcInfo().motionFactor;
          super.motionZ *= this.getAcInfo().motionFactor;
@@ -1158,11 +1165,15 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          super.motionX *= 0.9995D;
          super.motionZ *= 0.9995D;
       }
+      if(this.getBrake() || super.throttleDown) {
+         longitudinalDemand += Math.abs(super.motionX * forwardX + super.motionZ * forwardZ - forwardBeforeDrag);
+      }
 
       // --------------------------------------------------
       // MOVE
       // --------------------------------------------------
       this.updateWheels();
+      this.applyCarLateralGrip(forwardX, forwardZ, longitudinalDemand);
       double motionYBeforeMove = super.motionY;
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
       this.updateGroundVehicleFallDamage(wasOnGroundBeforeMove, motionYBeforeGravity, motionYBeforeMove);
@@ -1185,6 +1196,22 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.updateCollisionBox();
 
       this.handleDeadPilot();
+   }
+
+   private void applyCarLateralGrip(double forwardX, double forwardZ, double longitudinalDemand) {
+      MCH_TankInfo info = this.getTankInfo();
+      if(super.worldObj.isRemote || info == null || info.weightType != 1 || info.carLateralGrip <= 0.0F) return;
+      double frontContact = this.WheelMng.getCarGroundContactFraction(true);
+      double rearContact = this.WheelMng.getCarGroundContactFraction(false);
+      double contact = frontContact + rearContact;
+      if(contact <= 0.0D) return;
+      double response = (frontContact * MCH_CarTireGrip.response(info.frontTireSize)
+              + rearContact * MCH_CarTireGrip.response(info.rearTireSize)) / contact;
+      // Orthogonal horizontal basis: forward=(-sin(yaw),cos(yaw)), side=(cos(yaw),sin(yaw)).
+      double sideways = super.motionX * forwardZ - super.motionZ * forwardX;
+      double correction = MCH_CarTireGrip.lateralCorrection(sideways, info.carLateralGrip, contact, response, longitudinalDemand);
+      super.motionX -= correction * forwardZ;
+      super.motionZ += correction * forwardX;
    }
 
 

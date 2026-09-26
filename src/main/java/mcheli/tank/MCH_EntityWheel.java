@@ -60,6 +60,22 @@ public class MCH_EntityWheel extends W_Entity {
 
    protected void writeEntityToNBT(NBTTagCompound p_70014_1_) {}
 
+   /** Actual support at the current wheel position, independent of paired onGround flags. */
+   public boolean hasGroundContact() {
+      if(this.isDead || this.worldObj == null || this.boundingBox == null) return false;
+      double probe = -0.05D;
+      List boxes = this.getCollidingBoundingBoxes(this, this.boundingBox.addCoord(0.0D, probe, 0.0D));
+      return hasGroundSupport(this.boundingBox, boxes);
+   }
+
+   static boolean hasGroundSupport(AxisAlignedBB wheelBox, List boxes) {
+      double probe = -0.05D;
+      for(int i = 0; i < boxes.size(); ++i) {
+         if(((AxisAlignedBB)boxes.get(i)).calculateYOffset(wheelBox, probe) > probe) return true;
+      }
+      return false;
+   }
+
    public void moveEntity(double parX, double parY, double parZ) {
       super.worldObj.theProfiler.startSection("move");
       super.ySize *= 0.4F;

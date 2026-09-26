@@ -62,6 +62,18 @@ public class MCH_WheelManager {
       return false;
    }
 
+   /** Share of all configured wheels supported on this half of the wheelbase. */
+   public double getCarGroundContactFraction(boolean front) {
+      if(this.wheels.length == 0) return 0.0D;
+      double centerZ = (this.minZ + this.maxZ) * 0.5D;
+      int contacts = 0;
+      for(MCH_EntityWheel wheel : this.wheels) {
+         if(wheel != null && wheel.pos != null && (wheel.pos.zCoord >= centerZ) == front && wheel.hasGroundContact()) ++contacts;
+      }
+      // Missing/dead wheels cannot raise the available grip by shrinking the denominator.
+      return (double)contacts / this.wheels.length;
+   }
+
    // fast top-surface query (returns top solid/liquid block Y)
    private double getGroundYAt(double wx, double wz) {
       int ix = MathHelper.floor_double(wx + 0.5D);

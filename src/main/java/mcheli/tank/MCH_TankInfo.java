@@ -18,6 +18,9 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    public float weightedCenterZ = 0.0F;
    public int trackMaxHP = 100;
    public boolean enableTurretPop = false;
+   public MCH_CarTireGrip.TireSize frontTireSize = null;
+   public MCH_CarTireGrip.TireSize rearTireSize = null;
+   public float carLateralGrip = MCH_CarTireGrip.DEFAULT_GRIP;
 
 
    public Item getItem() {
@@ -69,7 +72,24 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    }
 
    public void loadItemData(String item, String data) {
-      //this is not item data wtf
+      // Handle car-only keys before the shared parser's client HUD/model branch.
+      if(item.equalsIgnoreCase("FrontTireSize")) {
+         this.frontTireSize = MCH_CarTireGrip.parseTireSize(data);
+         return;
+      } else if(item.equalsIgnoreCase("RearTireSize")) {
+         this.rearTireSize = MCH_CarTireGrip.parseTireSize(data);
+         return;
+      } else if(item.equalsIgnoreCase("CarLateralGrip")) {
+         float grip;
+         try {
+            grip = this.toFloat(data);
+         } catch(NumberFormatException ex) {
+            grip = MCH_CarTireGrip.DEFAULT_GRIP;
+         }
+         this.carLateralGrip = Float.isNaN(grip) || Float.isInfinite(grip) ? MCH_CarTireGrip.DEFAULT_GRIP
+                 : Math.max(0.0F, Math.min(MCH_CarTireGrip.MAX_GRIP, grip));
+         return;
+      }
       super.loadItemData(item, data);
       if(item.equalsIgnoreCase("WeightType")) {
          data = data.toLowerCase();
@@ -102,6 +122,9 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
 
    public void preReload() {
       super.preReload();
+      this.frontTireSize = null;
+      this.rearTireSize = null;
+      this.carLateralGrip = MCH_CarTireGrip.DEFAULT_GRIP;
    }
 
    public void postReload() {
