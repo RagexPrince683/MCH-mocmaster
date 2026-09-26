@@ -303,3 +303,10 @@ Developer/backend
 - Restricted the body overlay to an actual `$body` group and kept unselected parts on their normal
   texture without redrawing dynamic geometry from an all-model body pass.
 - Restored OpenGL attributes and the previously bound texture after overlay rendering.
+
+2026-09-26 04:30 - Fix Drafting Table screen layout
+
+- Realigned the main-screen player inventory and hotbar slots with their background artwork, moved the
+  paint action above the selected vehicle name, and separated the vehicle and camo input frames.
+- Gave the Paint screen the clean list-screen background while keeping all inventory artwork, slot
+  rendering, and slot interaction exclusive to the main screen.

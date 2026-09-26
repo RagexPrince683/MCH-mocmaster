@@ -36,6 +36,16 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 public class MCH_DraftingTableGuiContainer extends Container {
 
+   public static final int PLAYER_INVENTORY_X = 30;
+   public static final int PLAYER_INVENTORY_Y = 140;
+   public static final int PLAYER_HOTBAR_Y = 198;
+   public static final int OUTPUT_SLOT_X = 178;
+   public static final int OUTPUT_SLOT_Y = 90;
+   public static final int VEHICLE_INPUT_SLOT_X = 178;
+   public static final int VEHICLE_INPUT_SLOT_Y = 112;
+   public static final int CAMO_INPUT_SLOT_X = 270;
+   public static final int CAMO_INPUT_SLOT_Y = 112;
+
    public final EntityPlayer player;
    public final int posX;
    public final int posY;
@@ -57,23 +67,25 @@ public class MCH_DraftingTableGuiContainer extends Container {
       int a;
       for(a = 0; a < 3; ++a) {
          for(int x = 0; x < 9; ++x) {
-            this.addSlotToContainer(new Slot(player.inventory, 9 + x + a * 9, 30 + x * 18, 158 + a * 18));
+            this.addSlotToContainer(new Slot(player.inventory, 9 + x + a * 9,
+                    PLAYER_INVENTORY_X + x * 18, PLAYER_INVENTORY_Y + a * 18));
          }
       }
 
       for(a = 0; a < 9; ++a) {
-         this.addSlotToContainer(new Slot(player.inventory, a, 30 + a * 18, 216));
+         this.addSlotToContainer(new Slot(player.inventory, a,
+                 PLAYER_INVENTORY_X + a * 18, PLAYER_HOTBAR_Y));
       }
 
       this.outputSlotIndex = super.inventoryItemStacks.size();
-      Slot slot = new Slot(this.outputSlot, this.outputSlotIndex, 178, 90) {
+      Slot slot = new Slot(this.outputSlot, this.outputSlotIndex, OUTPUT_SLOT_X, OUTPUT_SLOT_Y) {
          public boolean isItemValid(ItemStack par1ItemStack) {
             return false;
          }
       };
       this.addSlotToContainer(slot);
       this.vehicleInputSlotIndex = super.inventoryItemStacks.size();
-      this.addSlotToContainer(new Slot(this.vehicleInput, 0, 178, 112) {
+      this.addSlotToContainer(new Slot(this.vehicleInput, 0, VEHICLE_INPUT_SLOT_X, VEHICLE_INPUT_SLOT_Y) {
          public boolean isItemValid(ItemStack stack) {
             return mcheli.aircraft.MCH_VehiclePaint.isVehicle(stack);
          }
@@ -83,7 +95,7 @@ public class MCH_DraftingTableGuiContainer extends Container {
          }
       });
       this.camoInputSlotIndex = super.inventoryItemStacks.size();
-      this.addSlotToContainer(new Slot(this.camoInput, 0, 178, 134) {
+      this.addSlotToContainer(new Slot(this.camoInput, 0, CAMO_INPUT_SLOT_X, CAMO_INPUT_SLOT_Y) {
          public boolean isItemValid(ItemStack stack) {
             return isCamo(stack);
          }
