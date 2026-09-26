@@ -10,6 +10,7 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 import mcheli.aircraft.MCH_EntityBaseVehicle;
 import mcheli.aircraft.MCH_EntitySeat;
 import mcheli.aircraft.MCH_ItemBaseVehicle;
+import mcheli.aircraft.MCH_VehiclePaint;
 import mcheli.uav.MCH_EntityUavStation;
 import mcheli.uav.MCH_UavInventory;
 import mcheli.uav.MCH_UavRegistry;
@@ -240,6 +241,11 @@ public class MCH_EventHook extends W_EventHook {
    @SubscribeEvent
    public void onPlayerTick(TickEvent.PlayerTickEvent event) {
       if(event.phase == TickEvent.Phase.END && event.player instanceof EntityPlayerMP && !event.player.worldObj.isRemote) {
+         boolean inventoryChanged = false;
+         for(ItemStack stack : event.player.inventory.mainInventory) {
+            inventoryChanged |= MCH_VehiclePaint.applyDefaultIfUnpainted(event.player, stack);
+         }
+         if(inventoryChanged) event.player.inventory.markDirty();
          if(MCH_UavInventory.hasStoredPilotInventory(event.player) && !(event.player.ridingEntity instanceof MCH_EntityBaseVehicle)) {
             MCH_UavInventory.restorePilotInventory((EntityPlayerMP)event.player, "not_piloting");
          }

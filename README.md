@@ -50,6 +50,7 @@ MCHeli Overdrive+ is a combined-arms vehicle, weapon, and warfare framework for 
 ### Progression, crafting, and compatibility
 
 - **Expanded crafting framework:** the Drafting Table supports shaped and shapeless recipes, OreDictionary recipes, server-side recipe validation, and recipe display fixes for ore recipes.
+- **Per-vehicle paint:** the Drafting Table can add a translucent color layer to selected named model parts, edit an existing vehicle item, and save server-side per-player defaults. See the [vehicle paint guide](docs/vehicle-paint.md).
 - **Industrialized pack support:** item definitions can register OreDictionary names, and vehicle/weapon recipes can consume ore alternatives, allowing integration with survival, industrial, faction, and warfare progression systems.
 - **Server-owner flexibility:** placement restrictions, terrain damage, collision damage, recipes, command permissions, creative-tab icons, speed multipliers, infinite ammo/fuel, and compatibility lists are exposed through configuration.
 

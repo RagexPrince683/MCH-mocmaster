@@ -170,6 +170,7 @@ public class MCH_ServerTickHandler {
          entry.category = categoryOf(vehicle);
          entry.typeName = vehicle.getAcInfo().name;
          entry.textureName = vehicle.getTextureName();
+         entry.paintDesign = vehicle.getPaintDesign();
          entry.x = vehicle.posX;
          entry.y = vehicle.posY;
          entry.z = vehicle.posZ;

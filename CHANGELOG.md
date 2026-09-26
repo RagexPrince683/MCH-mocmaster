@@ -277,3 +277,13 @@ Developer/backend
   the layout editor to capture the gauge geometry.
 - Kept radar availability and active state checks in the vehicle HUD renderer, independent from
   layout loading and transforms, so existing radar toggles and disabled radars remain unchanged.
+
+2026-09-26 00:00 - Add Drafting Table vehicle paint customization
+
+- Added an existing-vehicle input, translucent RGB/opacity controls, model-derived part selection,
+  and a live painted vehicle preview to the Overdrive Drafting Table.
+- Persisted paint on vehicle items and entities, synchronized it through normal and distant vehicle
+  rendering paths, and retained existing textures and skin overlays beneath the paint layer.
+- Added server-authoritative, per-player and per-vehicle-type defaults that survive world reloads,
+  apply to unpainted inventory acquisitions and player placement, and can be disabled without
+  stripping paint already saved on items or entities.

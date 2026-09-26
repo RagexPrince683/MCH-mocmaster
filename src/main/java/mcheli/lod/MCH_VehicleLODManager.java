@@ -303,6 +303,7 @@ public final class MCH_VehicleLODManager {
             GL11.glRotatef(interpolateAngle(display.previousRoll, display.roll, interpolation), 0.0F, 0.0F, 1.0F);
             GL11.glScalef(renderScale, renderScale, renderScale);
             MCH_RenderBaseVehicle.beginSkinOverlayRender(textureFolder, display.textureName);
+            MCH_RenderBaseVehicle.beginPaintPreview(display.paintDesign);
             try {
                 Minecraft.getMinecraft().renderEngine.bindTexture(
                     new ResourceLocation(W_MOD.DOMAIN, "textures/" + textureFolder + "/"
@@ -425,6 +426,7 @@ public final class MCH_VehicleLODManager {
         private byte category;
         private String typeName;
         private String textureName;
+        private mcheli.aircraft.MCH_VehiclePaint.Design paintDesign;
         private double previousX;
         private double previousY;
         private double previousZ;
@@ -491,6 +493,7 @@ public final class MCH_VehicleLODManager {
             this.category = entry.category;
             this.typeName = entry.typeName;
             this.textureName = entry.textureName;
+            this.paintDesign = entry.paintDesign;
             this.x = entry.x;
             this.y = entry.y;
             this.z = entry.z;

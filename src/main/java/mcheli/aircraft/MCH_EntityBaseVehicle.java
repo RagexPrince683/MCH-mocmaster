@@ -127,6 +127,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public static final byte LIMIT_GROUND_ROLL = 40;
    public boolean isRequestedSyncStatus = false;
    private MCH_BaseVehicleInfo acInfo;
+   private MCH_VehiclePaint.Design paintDesign;
    private int commonStatus;
    private Entity[] partEntities;
    private MCH_EntityHitBox pilotSeat;
@@ -1294,6 +1295,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       buffer.writeInt(this.aps.getAmmoRemaining());
       buffer.writeInt(this.aps.getArmingTimer());
       buffer.writeInt(this.aps.getReloadTimer());
+      writePaintToBuffer(buffer, this.paintDesign);
    }
 
    public void readSpawnData(ByteBuf additionalData) {
@@ -1316,6 +1318,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
          this.aps.applyClientState(additionalData.readByte(), additionalData.readBoolean(),
                  additionalData.readInt(), additionalData.readInt(), additionalData.readInt());
+         this.paintDesign = readPaintFromBuffer(additionalData);
       } catch (Exception exception) {
          exception.printStackTrace();
       }
@@ -1328,6 +1331,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                       nbt.getString("MCH_RackParentUniqueId"), Integer.valueOf(nbt.hasKey("MCH_RackSeatId")?nbt.getInteger("MCH_RackSeatId"):-1)});
       this.setDespawnCount(nbt.getInteger("AcDespawnCount"));
       this.setTextureName(nbt.getString("TextureName"));
+      this.paintDesign = MCH_VehiclePaint.read(nbt.getCompoundTag(MCH_VehiclePaint.TAG_PAINT));
       this.setCommonUniqueId(nbt.getString("AircraftUniqueId"));
       this.setRotRoll(nbt.getFloat("AcRoll"));
       this.prevRotationRoll = this.getRotRoll();
@@ -1405,6 +1409,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       this.debugVehicleState("NBT-WRITE", null);
       this.debugRackState("NBT-WRITE");
       nbt.setString("TextureName", this.getTextureName());
+      if(this.paintDesign != null) nbt.setTag(MCH_VehiclePaint.TAG_PAINT, MCH_VehiclePaint.write(this.paintDesign));
       nbt.setString("AircraftUniqueId", this.getCommonUniqueId());
       nbt.setString("TypeName", this.getTypeName());
       nbt.setInteger("PartStatus", this.getPartStatus() & this.getLastPartStatusMask());
@@ -1759,10 +1764,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       nbt.setString("MCH_VehicleOwnerUUID", this.vehicleOwnerUUID == null ? "" : this.vehicleOwnerUUID.toString());
       nbt.setBoolean("MCH_VehicleAccessLocked", this.isVehicleAccessLocked());
+      MCH_VehiclePaint.write(is, this.paintDesign);
 
    }
 
    public void getAcDataFromItem(ItemStack is) {
+      this.paintDesign = MCH_VehiclePaint.read(is);
       if(is.hasTagCompound()) {
          NBTTagCompound nbt = is.getTagCompound();
          this.setCommandForce(nbt.getString("MCH_Command"));
@@ -1778,6 +1785,42 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
 
       }
+   }
+
+   public MCH_VehiclePaint.Design getPaintDesign() {
+      return this.paintDesign;
+   }
+
+   public void setPaintDesign(MCH_VehiclePaint.Design design) {
+      this.paintDesign = design;
+   }
+
+   private static void writePaintToBuffer(ByteBuf buffer, MCH_VehiclePaint.Design design) {
+      buffer.writeBoolean(design != null);
+      if(design == null) return;
+      buffer.writeInt(design.color);
+      buffer.writeByte(design.opacity);
+      buffer.writeShort(design.parts.size());
+      for(Object object : design.parts) {
+         byte[] value = ((String)object).getBytes(StandardCharsets.UTF_8);
+         buffer.writeByte(Math.min(64, value.length));
+         buffer.writeBytes(value, 0, Math.min(64, value.length));
+      }
+   }
+
+   private static MCH_VehiclePaint.Design readPaintFromBuffer(ByteBuf buffer) {
+      if(!buffer.readBoolean()) return null;
+      int color = buffer.readInt();
+      int opacity = buffer.readUnsignedByte();
+      int count = Math.min(256, buffer.readUnsignedShort());
+      ArrayList parts = new ArrayList();
+      for(int i = 0; i < count; ++i) {
+         int length = buffer.readUnsignedByte();
+         byte[] value = new byte[length];
+         buffer.readBytes(value);
+         parts.add(new String(value, StandardCharsets.UTF_8));
+      }
+      return new MCH_VehiclePaint.Design(color, opacity, parts);
    }
 
    public boolean isUseableByPlayer(EntityPlayer player) {

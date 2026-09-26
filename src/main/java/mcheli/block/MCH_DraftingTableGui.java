@@ -8,6 +8,7 @@ import mcheli.MCH_IRecipeList;
 import mcheli.MCH_ItemRecipe;
 import mcheli.MCH_Lib;
 import mcheli.aircraft.MCH_RenderBaseVehicle;
+import mcheli.aircraft.MCH_VehiclePaint;
 import mcheli.block.MCH_CurrentRecipe;
 import mcheli.block.MCH_DraftingTableCreatePacket;
 import mcheli.block.MCH_DraftingTableGuiContainer;
@@ -80,6 +81,14 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    public int screenId = 0;
    public static final int SCREEN_MAIN = 0;
    public static final int SCREEN_LIST = 1;
+   public static final int SCREEN_PAINT = 2;
+   private int paintColor = 0xFFFFFF;
+   private int paintOpacity = 96;
+   private boolean useAsDefault;
+   private final List selectedPaintParts = new ArrayList();
+   private final List availablePaintParts = new ArrayList();
+   private ItemStack lastInputStack;
+   private int paintPartPage;
    public static float modelZoom = 1.0F;
    public static float modelRotX = 0.0F;
    public static float modelRotY = 0.0F;
@@ -105,6 +114,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
       super.buttonList.clear();
       this.screenButtonList.clear();
+      this.screenButtonList.add(new ArrayList());
       this.screenButtonList.add(new ArrayList());
       this.screenButtonList.add(new ArrayList());
       List list = null;
@@ -137,6 +147,8 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
       this.buttonNextPage = new GuiButton(50, super.guiLeft + 270, super.guiTop + 210, 60, 20, "Next Page");
       list.add(this.buttonPrevPage);
       list.add(this.buttonNextPage);
+      GuiButton paintButton = new GuiButton(60, super.guiLeft + 120, super.guiTop + 133, 70, 20, "Paint...");
+      list.add(paintButton);
       list = (List)this.screenButtonList.get(1);
       int i = 0;
 
@@ -152,6 +164,24 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
       this.listSlider = new MCH_GuiSliderVertical(0, super.guiLeft + 360, super.guiTop + 20, 20, 200, "", 0.0F, 0.0F, 0.0F, 1.0F);
       list.add(this.listSlider);
+
+      list = (List)this.screenButtonList.get(SCREEN_PAINT);
+      list.add(new GuiButton(61, super.guiLeft + 12, super.guiTop + 18, 70, 20, "Done"));
+      list.add(new GuiButton(62, super.guiLeft + 12, super.guiTop + 44, 28, 20, "R-"));
+      list.add(new GuiButton(63, super.guiLeft + 42, super.guiTop + 44, 28, 20, "R+"));
+      list.add(new GuiButton(64, super.guiLeft + 12, super.guiTop + 66, 28, 20, "G-"));
+      list.add(new GuiButton(65, super.guiLeft + 42, super.guiTop + 66, 28, 20, "G+"));
+      list.add(new GuiButton(66, super.guiLeft + 12, super.guiTop + 88, 28, 20, "B-"));
+      list.add(new GuiButton(67, super.guiLeft + 42, super.guiTop + 88, 28, 20, "B+"));
+      list.add(new GuiButton(68, super.guiLeft + 12, super.guiTop + 110, 28, 20, "A-"));
+      list.add(new GuiButton(69, super.guiLeft + 42, super.guiTop + 110, 28, 20, "A+"));
+      list.add(new GuiButton(70, super.guiLeft + 12, super.guiTop + 136, 178, 20, "Use for every vehicle of this type: OFF"));
+      list.add(new GuiButton(71, super.guiLeft + 90, super.guiTop + 116, 48, 20, "Parts <"));
+      list.add(new GuiButton(72, super.guiLeft + 142, super.guiTop + 116, 48, 20, "Parts >"));
+      for(i = 0; i < 8; ++i) {
+         list.add(new GuiButton(100 + i, super.guiLeft + 90 + i % 2 * 105,
+                 super.guiTop + 18 + i / 2 * 24, 100, 20, ""));
+      }
 
       for(i = 0; i < this.screenButtonList.size(); ++i) {
          list = (List)this.screenButtonList.get(i);
@@ -202,6 +232,8 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
             this.switchRecipeList(MCH_ItemRecipe.getInstance());
          }
       }
+
+      refreshPaintParts();
 
 
 
@@ -306,8 +338,24 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
    public void updateScreen() {
       super.updateScreen();
       MCH_DraftingTableGuiContainer container = (MCH_DraftingTableGuiContainer)super.inventorySlots;
+      ItemStack input = container.getSlot(container.vehicleInputSlotIndex).getStack();
+      if(input != this.lastInputStack) {
+         this.lastInputStack = input;
+         if(input != null) {
+            selectRecipeForItem(input);
+            MCH_VehiclePaint.Design saved = MCH_VehiclePaint.read(input);
+            if(saved != null) {
+               this.paintColor = saved.color;
+               this.paintOpacity = saved.opacity;
+               this.selectedPaintParts.clear();
+               this.selectedPaintParts.addAll(saved.parts);
+            }
+         }
+         refreshPaintParts();
+      }
       this.buttonCreate.enabled = false;
-      if(!container.getSlot(container.outputSlotIndex).getHasStack() && MCH_Lib.canPlayerCreateItem(this.current.recipe, this.thePlayer.inventory)) {
+      if(!container.getSlot(container.outputSlotIndex).getHasStack()
+              && (input != null || MCH_Lib.canPlayerCreateItem(this.current.recipe, this.thePlayer.inventory))) {
          this.buttonCreate.enabled = true;
       }
 
@@ -424,7 +472,31 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
                this.current.setDescCurrentPage(page);
                break;
             case 30:
-               MCH_DraftingTableCreatePacket.send(this.current.recipe);
+               MCH_DraftingTableCreatePacket.send(this.current.recipe, getPaintDesign(), this.useAsDefault);
+               break;
+            case 60:
+               refreshPaintParts();
+               this.switchScreen(SCREEN_PAINT);
+               break;
+            case 61:
+               this.switchScreen(SCREEN_MAIN);
+               break;
+            case 62: adjustColor(16, 0, 0); break;
+            case 63: adjustColor(-16, 0, 0); break;
+            case 64: adjustColor(0, 16, 0); break;
+            case 65: adjustColor(0, -16, 0); break;
+            case 66: adjustColor(0, 0, 16); break;
+            case 67: adjustColor(0, 0, -16); break;
+            case 68: this.paintOpacity = Math.max(0, this.paintOpacity - 16); break;
+            case 69: this.paintOpacity = Math.min(255, this.paintOpacity + 16); break;
+            case 70:
+               this.useAsDefault = !this.useAsDefault;
+               button.displayString = "Use for every vehicle of this type: " + (this.useAsDefault ? "ON" : "OFF");
+               break;
+            case 71: this.paintPartPage = Math.max(0, this.paintPartPage - 1); refreshPaintButtons(); break;
+            case 72:
+               if((this.paintPartPage + 1) * 8 < this.availablePaintParts.size()) ++this.paintPartPage;
+               refreshPaintButtons();
                break;
             case 40:
             case 41:
@@ -446,6 +518,15 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
             case 51:
                if(this.current != null) {
                   this.current.switchPrevPage();
+               }
+               break;
+            case 100: case 101: case 102: case 103: case 104: case 105: case 106: case 107:
+               int partIndex = this.paintPartPage * 8 + button.id - 100;
+               if(partIndex < this.availablePaintParts.size()) {
+                  String part = (String)this.availablePaintParts.get(partIndex);
+                  if(this.selectedPaintParts.contains(part)) this.selectedPaintParts.remove(part);
+                  else this.selectedPaintParts.add(part);
+                  refreshPaintButtons();
                }
             }
 
@@ -664,6 +745,11 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
                ++i;
             }
          }
+      }
+      if(this.getScreenId() == SCREEN_PAINT) {
+         super.fontRendererObj.drawString(String.format("#%06X  opacity %d%%", this.paintColor,
+                 this.paintOpacity * 100 / 255), 12, 166, -1);
+         super.fontRendererObj.drawString("Painted model parts", 90, 6, -1);
       }
 
    }
@@ -920,7 +1006,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          super.inventorySlots.inventorySlots = inventory;
       }
 
-      if(this.getScreenId() == 0 && this.current.isCurrentPageModel()) {
+      if((this.getScreenId() == 0 && this.current.isCurrentPageModel()) || this.getScreenId() == SCREEN_PAINT) {
          RenderHelper.enableGUIStandardItemLighting();
          this.drawModel(partialTicks);
       }
@@ -933,6 +1019,7 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
 
    public void drawModel(float partialTicks) {
       W_ModelCustom model = this.current.getModel();
+      if(model == null) return;
       double scl = 162.0D / ((double)MathHelper.abs(model.size) < 0.01D?0.01D:(double)model.size);
       super.mc.getTextureManager().bindTexture(this.current.getModelTexture());
       GL11.glPushMatrix();
@@ -971,6 +1058,9 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          GL11.glColor4d(1.0D, 1.0D, 1.0D, 1.0D);
          model.renderAll(0, this.drawFace - faceNum);
          MCH_RenderBaseVehicle.renderCrawlerTrack(this.current.getAcInfo(), partialTicks);
+         MCH_RenderBaseVehicle.beginPaintPreview(this.getPaintDesign());
+         MCH_RenderBaseVehicle.renderPaintPreview(model);
+         MCH_RenderBaseVehicle.endPaintPreview();
       }
 
       GL11.glEnable('\u803a');
@@ -1003,7 +1093,63 @@ public class MCH_DraftingTableGui extends W_GuiContainer {
          }
       }
 
+      if(this.getScreenId() == SCREEN_PAINT) {
+         this.drawTexturedModalRect(super.guiLeft, super.guiTop, 0, 0, super.xSize, super.ySize);
+      }
+
       super.zLevel = z;
+   }
+
+   private MCH_VehiclePaint.Design getPaintDesign() {
+      return new MCH_VehiclePaint.Design(this.paintColor, this.paintOpacity, this.selectedPaintParts);
+   }
+
+   private void adjustColor(int redSubtract, int greenSubtract, int blueSubtract) {
+      int red = Math.max(0, Math.min(255, (this.paintColor >> 16 & 255) - redSubtract));
+      int green = Math.max(0, Math.min(255, (this.paintColor >> 8 & 255) - greenSubtract));
+      int blue = Math.max(0, Math.min(255, (this.paintColor & 255) - blueSubtract));
+      this.paintColor = red << 16 | green << 8 | blue;
+   }
+
+   private void refreshPaintParts() {
+      this.availablePaintParts.clear();
+      W_ModelCustom model = this.current == null ? null : this.current.getModel();
+      if(model != null) {
+         for(Object object : model.getPartNames()) {
+            String name = (String)object;
+            if(name != null && !name.isEmpty() && !this.availablePaintParts.contains(name))
+               this.availablePaintParts.add(name);
+         }
+      }
+      this.selectedPaintParts.retainAll(this.availablePaintParts);
+      if(this.selectedPaintParts.isEmpty() && this.availablePaintParts.contains("$body")) this.selectedPaintParts.add("$body");
+      refreshPaintButtons();
+   }
+
+   private void refreshPaintButtons() {
+      if(this.screenButtonList.size() <= SCREEN_PAINT) return;
+      List buttons = (List)this.screenButtonList.get(SCREEN_PAINT);
+      for(int i = 0; i < 8; ++i) {
+         GuiButton button = (GuiButton)buttons.get(12 + i);
+         int partIndex = this.paintPartPage * 8 + i;
+         button.enabled = partIndex < this.availablePaintParts.size();
+         button.displayString = button.enabled
+                 ? (this.selectedPaintParts.contains(this.availablePaintParts.get(partIndex)) ? "[x] " : "[ ] ") + this.availablePaintParts.get(partIndex)
+                 : "";
+      }
+   }
+
+   private void selectRecipeForItem(ItemStack stack) {
+      for(MCH_IRecipeList list : Arrays.asList(MCH_HeliInfoManager.getInstance(), MCP_PlaneInfoManager.getInstance(),
+              MCH_TurretInfoManager.getInstance(), MCH_TankInfoManager.getInstance(), MCH_ShipInfoManager.getInstance())) {
+         for(int i = 0; i < list.getRecipeListSize(); ++i) {
+            if(list.getRecipe(i).getRecipeOutput().isItemEqual(stack)) {
+               this.currentList = list;
+               this.setCurrentRecipe(new MCH_CurrentRecipe(list, i));
+               return;
+            }
+         }
+      }
    }
 
    public void drawTexturedModalRect(int par1, int par2, int par3, int par4, int par5, int par6) {

@@ -12,11 +12,17 @@ import mcheli.wrapper.W_Item;
 import mcheli.wrapper.W_Network;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.IRecipe;
+import mcheli.aircraft.MCH_VehiclePaint;
+import java.util.ArrayList;
 
 public class MCH_DraftingTableCreatePacket extends MCH_Packet {
 
    public Item outputItem;
    public Map map = new HashMap();
+   public int paintColor = 0xFFFFFF;
+   public int paintOpacity;
+   public boolean useAsDefault;
+   public ArrayList paintParts = new ArrayList();
 
 
    public int getMessageID() {
@@ -36,6 +42,11 @@ public class MCH_DraftingTableCreatePacket extends MCH_Packet {
                this.map.put(item, Integer.valueOf(0 + num));
             }
          }
+         this.paintColor = data.readInt();
+         this.paintOpacity = data.readUnsignedByte();
+         this.useAsDefault = data.readBoolean();
+         int partCount = data.readUnsignedByte();
+         for(int i = 0; i < partCount; ++i) this.paintParts.add(data.readUTF());
       } catch (Exception exception) {
          ;
       }
@@ -53,6 +64,11 @@ public class MCH_DraftingTableCreatePacket extends MCH_Packet {
             dos.writeUTF(this.getItemName(key));
             dos.writeByte(((Integer)this.map.get(key)).byteValue());
          }
+         dos.writeInt(this.paintColor);
+         dos.writeByte(this.paintOpacity);
+         dos.writeBoolean(this.useAsDefault);
+         dos.writeByte(Math.min(255, this.paintParts.size()));
+         for(int i = 0; i < this.paintParts.size() && i < 255; ++i) dos.writeUTF((String)this.paintParts.get(i));
       } catch (IOException oException) {
          oException.printStackTrace();
       }
@@ -64,6 +80,10 @@ public class MCH_DraftingTableCreatePacket extends MCH_Packet {
    }
 
    public static void send(IRecipe recipe) {
+      send(recipe, new MCH_VehiclePaint.Design(0xFFFFFF, 0, new ArrayList()), false);
+   }
+
+   public static void send(IRecipe recipe, MCH_VehiclePaint.Design design, boolean useAsDefault) {
       if(recipe != null) {
          MCH_DraftingTableCreatePacket s = new MCH_DraftingTableCreatePacket();
          s.outputItem = recipe.getRecipeOutput() != null?recipe.getRecipeOutput().getItem():null;
@@ -72,6 +92,12 @@ public class MCH_DraftingTableCreatePacket extends MCH_Packet {
             // Ore dictionary recipes cannot be represented safely as Map<Item, Integer>.
             // The server should resolve and validate the recipe from the output item.
             s.map = new HashMap();
+            if(design != null) {
+               s.paintColor = design.color;
+               s.paintOpacity = design.opacity;
+               s.paintParts.addAll(design.parts);
+            }
+            s.useAsDefault = useAsDefault;
             W_Network.sendToServer(s);
          }
 
