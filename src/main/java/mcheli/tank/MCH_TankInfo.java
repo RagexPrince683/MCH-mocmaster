@@ -23,6 +23,7 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    public MCH_CarTireGrip.TireSize frontTireSize = null;
    public MCH_CarTireGrip.TireSize rearTireSize = null;
    public float carLateralGrip = MCH_CarTireGrip.DEFAULT_GRIP;
+   public float carMinimumSteering = 0.0F;
 
 
    public Item getItem() {
@@ -97,6 +98,16 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
          this.carLateralGrip = Float.isNaN(grip) || Float.isInfinite(grip) ? MCH_CarTireGrip.DEFAULT_GRIP
                  : Math.max(0.0F, Math.min(MCH_CarTireGrip.MAX_GRIP, grip));
          return;
+      } else if(item.equalsIgnoreCase("CarMinimumSteering")) {
+         float steering;
+         try {
+            steering = this.toFloat(data);
+         } catch(NumberFormatException ex) {
+            steering = 0.0F;
+         }
+         this.carMinimumSteering = Float.isNaN(steering) || Float.isInfinite(steering) ? 0.0F
+                 : Math.max(0.0F, Math.min(10.0F, steering));
+         return;
       }
       super.loadItemData(item, data);
       if(item.equalsIgnoreCase("WeightType")) {
@@ -135,6 +146,7 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
       this.frontTireSize = null;
       this.rearTireSize = null;
       this.carLateralGrip = MCH_CarTireGrip.DEFAULT_GRIP;
+      this.carMinimumSteering = 0.0F;
    }
 
    public void postReload() {

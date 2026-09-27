@@ -317,3 +317,11 @@ Developer/backend
   cannot make later body, turret, barrel, wheel, or external-part base textures dark or transparent.
 - Kept each selected part's normal textured draw ahead of its aligned overlay while leaving
   unselected parts on the normal base-texture path.
+
+2026-09-27 00:00 - Restore Bugatti Chiron high-speed steering
+
+- Added a contact-scaled minimum steering authority for opted-in civilian cars while retaining the
+  lateral grip cap, allowing high-speed understeer instead of an imperceptible yaw response.
+- Applied the setting only to the Bugatti Chiron and kept client prediction aligned with the server.
+- Added opt-in client steering CSV diagnostics before the steering limiter so key input, contact,
+  requested yaw, and applied yaw can be compared with the existing server trace.

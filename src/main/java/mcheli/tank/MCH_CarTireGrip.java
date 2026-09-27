@@ -54,13 +54,22 @@ public final class MCH_CarTireGrip {
       return calculate(sideways, grip, contact, response).applied;
    }
 
-   /** Leave 25% of the acceleration budget for residual slip from preceding ticks. */
-   public static float steeringDelta(float requestedDegrees, double speed, double grip, double contact, float tickDelta) {
-      if(!finite(requestedDegrees) || !finite(speed) || !finite(grip) || !finite(contact) || !finite(tickDelta)) return 0.0F;
+   /** Leave 25% of the acceleration budget for residual slip unless a configured yaw floor applies. */
+   public static float steeringDelta(float requestedDegrees, double speed, double grip, double contact,
+                                     float tickDelta) {
+      return steeringDelta(requestedDegrees, speed, grip, contact, 0.0F, tickDelta);
+   }
+
+   public static float steeringDelta(float requestedDegrees, double speed, double grip, double contact,
+                                     float minimumDegrees, float tickDelta) {
+      if(!finite(requestedDegrees) || !finite(speed) || !finite(grip) || !finite(contact)
+              || !finite(minimumDegrees) || !finite(tickDelta)) return 0.0F;
       if(speed <= 0.0D || grip <= 0.0D || contact <= 0.0D || tickDelta <= 0.0F) return 0.0F;
       double fade = speed / (speed + 0.05D);
       double budget = 0.75D * clamp(grip, 0.0D, MAX_GRIP) * clamp(contact, 0.0D, 1.0D);
       double maxDegrees = Math.toDegrees(Math.asin(clamp(budget / speed, 0.0D, 1.0D))) * tickDelta * fade;
+      double minimum = clamp(minimumDegrees, 0.0D, 10.0D) * tickDelta * clamp(contact, 0.0D, 1.0D);
+      maxDegrees = Math.max(maxDegrees, minimum);
       return (float)clamp(requestedDegrees, -maxDegrees, maxDegrees);
    }
 
