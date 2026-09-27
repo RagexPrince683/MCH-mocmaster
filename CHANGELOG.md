@@ -352,3 +352,12 @@ Developer/backend
   targets to zero so body roll returns smoothly to neutral even after the vehicle stops.
 - Derived terrain pitch and roll from collision-resolved wheel heights instead of compression, removing
   the feedback loop that could preserve an old body angle on flat ground.
+
+2026-09-27 04:42 - Resolve civilian suspension contact and stair movement
+
+- Sampled tire-sized wheel contact only at the body position reached after collision resolution, removing
+  support borrowed from an unreachable prediction or an adjacent bump outside the tire contact patch.
+- Split opted-in civilian-car movement into bounded collision steps and retained the resolved upward
+  offset so successive legal stair edges complete without clipping or bypassing configured step height.
+- Recovered unsupported axle/side pose toward level instead of using world height zero, while preserving
+  responsive pitch and roll whenever opposing supported wheels provide a valid terrain slope.
