@@ -447,8 +447,7 @@ public class MCH_WheelManager {
 
          Vec3 anchor = this.getTransformedPosition(wheel.pos.xCoord, wheel.pos.yCoord, wheel.pos.zCoord,
                car, car.getRotYaw(), this.targetPitch, this.targetRoll);
-         Vec3 predicted = Vec3.createVectorHelper(anchor.xCoord + x, anchor.yCoord + y, anchor.zCoord + z);
-         double measured = wheel.measureSuspensionCompression(anchor, predicted, travel);
+         double measured = wheel.measureSuspensionCompression(anchor, travel);
          float compression = (float)measured;
          if(wheel.suspensionSupported && !wheel.suspensionCompressionInitialized) {
             wheel.prevSuspensionCompression = compression;
@@ -461,7 +460,7 @@ public class MCH_WheelManager {
          wheel.suspensionCompression = compression;
 
          double wheelY = anchor.yCoord - travel + measured;
-         wheel.setPosition(anchor.xCoord + x, wheelY, anchor.zCoord + z);
+         wheel.setPosition(anchor.xCoord, wheelY, anchor.zCoord);
 
          if(!wheel.suspensionSupported) {
             continue;
@@ -498,13 +497,21 @@ public class MCH_WheelManager {
             car.motionY += MathHelper.clamp_double(springAcceleration, -0.06D, 0.06D);
          }
 
-         double frontHeight = frontCount > 0 ? front / frontCount : 0.0D;
-         double rearHeight = rearCount > 0 ? rear / rearCount : 0.0D;
-         double leftHeight = leftCount > 0 ? left / leftCount : 0.0D;
-         double rightHeight = rightCount > 0 ? right / rightCount : 0.0D;
-         float pitch = (float)Math.toDegrees(Math.atan2(frontHeight - rearHeight, Math.max(0.5D, this.maxZ - this.minZ)));
-         double trackWidth = this.getTrackWidth();
-         float roll = (float)-Math.toDegrees(Math.atan2(rightHeight - leftHeight, trackWidth));
+         // A missing axle or side has no height. Never substitute world Y zero: that
+         // turns a transient loss of support into a permanent nose/rear/side-down pose.
+         float pitch = 0.0F;
+         if(frontCount > 0 && rearCount > 0) {
+            double frontHeight = front / frontCount;
+            double rearHeight = rear / rearCount;
+            pitch = (float)Math.toDegrees(Math.atan2(frontHeight - rearHeight,
+                  Math.max(0.5D, this.maxZ - this.minZ)));
+         }
+         float roll = 0.0F;
+         if(leftCount > 0 && rightCount > 0) {
+            double leftHeight = left / leftCount;
+            double rightHeight = right / rightCount;
+            roll = (float)-Math.toDegrees(Math.atan2(rightHeight - leftHeight, this.getTrackWidth()));
+         }
          pitch = MathHelper.clamp_float(pitch, -18.0F, 18.0F);
          roll = MathHelper.clamp_float(roll, -18.0F, 18.0F);
          float smoothing = car.worldObj.isRemote ? 0.28F : 0.45F;

@@ -75,23 +75,26 @@ public class MCH_EntityWheel extends W_Entity {
    }
 
    /**
-    * Sweeps this wheel's real collision shape down from a body-relative anchor.
-    * Both the current and predicted horizontal positions are tested so a fast car
-    * cannot outrun its contact probe between server ticks.
+    * Sweeps a tire-sized contact patch down from the resolved body-relative anchor.
+    * The caller supplies the position reached by body collision resolution, rather
+    * than combining support from two different horizontal positions.
     */
-   public double measureSuspensionCompression(Vec3 currentAnchor, Vec3 predictedAnchor, double travel) {
-      double current = this.measureCompressionAt(currentAnchor, travel);
-      double predicted = this.measureCompressionAt(predictedAnchor, travel);
-      double compression = Math.max(current, predicted);
+   public double measureSuspensionCompression(Vec3 anchor, double travel) {
+      double compression = this.measureCompressionAt(anchor, travel);
       this.suspensionSupported = compression >= 0.0D;
       return this.suspensionSupported ? compression : 0.0D;
    }
 
    private double measureCompressionAt(Vec3 anchor, double travel) {
-      AxisAlignedBB probe = this.boundingBox.copy();
-      double centerX = (probe.minX + probe.maxX) * 0.5D;
-      double centerZ = (probe.minZ + probe.maxZ) * 0.5D;
-      probe.offset(anchor.xCoord - centerX, anchor.yCoord - this.posY, anchor.zCoord - centerZ);
+      // The wheel entity is one block wide for legacy wheel movement. That is much
+      // wider than a car tire and can pick up an adjacent stair which is not beneath
+      // the contact patch. A 0.48-block patch still overlaps narrow collision shapes.
+      double halfContactWidth = 0.24D;
+      double bottom = anchor.yCoord - (double)this.yOffset;
+      AxisAlignedBB probe = AxisAlignedBB.getBoundingBox(
+            anchor.xCoord - halfContactWidth, bottom, anchor.zCoord - halfContactWidth,
+            anchor.xCoord + halfContactWidth, bottom + (double)this.height,
+            anchor.zCoord + halfContactWidth);
 
       double sweep = -(travel + 0.08D);
       List boxes = this.getCollidingBoundingBoxes(this, probe.addCoord(0.0D, sweep, 0.0D));
