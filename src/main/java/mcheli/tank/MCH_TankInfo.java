@@ -24,6 +24,14 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    public MCH_CarTireGrip.TireSize rearTireSize = null;
    public float carLateralGrip = MCH_CarTireGrip.DEFAULT_GRIP;
    public float carMinimumSteering = 0.0F;
+   /** Suspension acceleration at full compression, in blocks/tick squared. */
+   public float suspensionSpring = 0.055F;
+   /** Damper acceleration per block/tick while the tire is compressing. */
+   public float suspensionCompressionDamping = 0.035F;
+   /** Damper acceleration per block/tick while the tire is rebounding. */
+   public float suspensionReboundDamping = 0.050F;
+   /** Maximum vertical wheel travel in blocks. */
+   public float suspensionTravel = 0.45F;
 
 
    public Item getItem() {
@@ -108,6 +116,18 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
          this.carMinimumSteering = Float.isNaN(steering) || Float.isInfinite(steering) ? 0.0F
                  : Math.max(0.0F, Math.min(10.0F, steering));
          return;
+      } else if(item.equalsIgnoreCase("SuspensionSpring")) {
+         this.suspensionSpring = this.toFloat(data, 0.0F, 0.25F);
+         return;
+      } else if(item.equalsIgnoreCase("SuspensionCompressionDamping")) {
+         this.suspensionCompressionDamping = this.toFloat(data, 0.0F, 0.25F);
+         return;
+      } else if(item.equalsIgnoreCase("SuspensionReboundDamping")) {
+         this.suspensionReboundDamping = this.toFloat(data, 0.0F, 0.25F);
+         return;
+      } else if(item.equalsIgnoreCase("SuspensionTravel")) {
+         this.suspensionTravel = this.toFloat(data, 0.05F, 1.5F);
+         return;
       }
       super.loadItemData(item, data);
       if(item.equalsIgnoreCase("WeightType")) {
@@ -147,6 +167,10 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
       this.rearTireSize = null;
       this.carLateralGrip = MCH_CarTireGrip.DEFAULT_GRIP;
       this.carMinimumSteering = 0.0F;
+      this.suspensionSpring = 0.055F;
+      this.suspensionCompressionDamping = 0.035F;
+      this.suspensionReboundDamping = 0.050F;
+      this.suspensionTravel = 0.45F;
    }
 
    public void postReload() {

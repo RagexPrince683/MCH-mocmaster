@@ -137,6 +137,12 @@ public class MCH_WheelManager {
       MCH_EntityBaseVehicle ac = this.parent;
       if (ac.getAcInfo() == null) return;
 
+      MCH_TankInfo tankInfo = ac instanceof MCH_EntityTank ? ((MCH_EntityTank)ac).getTankInfo() : null;
+      if(tankInfo != null && tankInfo.civilianCarGrip) {
+         this.moveCivilianSuspension(x, y, z, tankInfo);
+         return;
+      }
+
       boolean unevenContact = false;
       double frontAvgY = 0.0D;
       double rearAvgY  = 0.0D;
@@ -411,6 +417,137 @@ public class MCH_WheelManager {
          w.posZ = MathHelper.clamp_double(w.posZ, targetZ - rangeH, targetZ + rangeH);
          w.setPositionAndRotation(w.posX, w.posY, w.posZ, 0.0F, 0.0F);
       }
+   }
+
+   /** Civilian-car-only suspension. Collision and vertical force remain server authoritative. */
+   private void moveCivilianSuspension(double x, double y, double z, MCH_TankInfo info) {
+      MCH_EntityBaseVehicle car = this.parent;
+      double travel = info.suspensionTravel;
+      double front = 0.0D;
+      double rear = 0.0D;
+      double left = 0.0D;
+      double right = 0.0D;
+      int frontCount = 0;
+      int rearCount = 0;
+      int leftCount = 0;
+      int rightCount = 0;
+      int supported = 0;
+      double totalResponse = 0.0D;
+
+      for(int i = 0; i < this.wheels.length; ++i) {
+         MCH_EntityWheel wheel = this.wheels[i];
+         if(wheel == null || wheel.pos == null) {
+            continue;
+         }
+
+         wheel.prevPosX = wheel.posX;
+         wheel.prevPosY = wheel.posY;
+         wheel.prevPosZ = wheel.posZ;
+         wheel.prevSuspensionCompression = wheel.suspensionCompression;
+
+         Vec3 anchor = this.getTransformedPosition(wheel.pos.xCoord, wheel.pos.yCoord, wheel.pos.zCoord,
+               car, car.getRotYaw(), this.targetPitch, this.targetRoll);
+         Vec3 predicted = Vec3.createVectorHelper(anchor.xCoord + x, anchor.yCoord + y, anchor.zCoord + z);
+         double measured = wheel.measureSuspensionCompression(anchor, predicted, travel);
+         float compression = (float)measured;
+         float rawRate = compression - wheel.prevSuspensionCompression;
+         wheel.suspensionCompressionRate = wheel.suspensionCompressionRate * 0.35F + rawRate * 0.65F;
+         wheel.suspensionCompression = compression;
+
+         double wheelY = anchor.yCoord - travel + measured;
+         wheel.setPosition(anchor.xCoord + x, wheelY, anchor.zCoord + z);
+
+         if(!wheel.suspensionSupported) {
+            continue;
+         }
+
+         ++supported;
+         double normalized = measured / travel;
+         double damping = wheel.suspensionCompressionRate >= 0.0F
+               ? info.suspensionCompressionDamping : info.suspensionReboundDamping;
+         double response = normalized * info.suspensionSpring + wheel.suspensionCompressionRate * damping;
+         totalResponse += MathHelper.clamp_double(response, -0.08D, 0.08D);
+
+         if(wheel.pos.zCoord >= this.weightedCenter.zCoord) {
+            front += measured;
+            ++frontCount;
+         } else {
+            rear += measured;
+            ++rearCount;
+         }
+         if(wheel.pos.xCoord >= 0.0D) {
+            right += measured;
+            ++rightCount;
+         } else {
+            left += measured;
+            ++leftCount;
+         }
+      }
+
+      if(supported > 0) {
+         if(!car.worldObj.isRemote) {
+            double springAcceleration = totalResponse / this.wheels.length;
+            car.motionY += MathHelper.clamp_double(springAcceleration, -0.06D, 0.06D);
+         }
+
+         double frontHeight = frontCount > 0 ? front / frontCount : 0.0D;
+         double rearHeight = rearCount > 0 ? rear / rearCount : 0.0D;
+         double leftHeight = leftCount > 0 ? left / leftCount : 0.0D;
+         double rightHeight = rightCount > 0 ? right / rightCount : 0.0D;
+         float pitch = (float)Math.toDegrees(Math.atan2(frontHeight - rearHeight, Math.max(0.5D, this.maxZ - this.minZ)));
+         double trackWidth = this.getTrackWidth();
+         float roll = (float)-Math.toDegrees(Math.atan2(rightHeight - leftHeight, trackWidth));
+         pitch = MathHelper.clamp_float(pitch, -18.0F, 18.0F);
+         roll = MathHelper.clamp_float(roll, -18.0F, 18.0F);
+         float smoothing = car.worldObj.isRemote ? 0.28F : 0.45F;
+         this.targetPitch += (pitch - this.targetPitch) * smoothing;
+         this.targetRoll += (roll - this.targetRoll) * smoothing;
+      } else {
+         this.targetPitch *= 0.94F;
+         this.targetRoll *= 0.94F;
+      }
+
+      if(!W_Lib.isClientPlayer(car.getRiddenByEntity())) {
+         car.setRotPitch(this.targetPitch);
+         car.setRotRoll(this.targetRoll);
+      }
+   }
+
+   private double getTrackWidth() {
+      double minX = Double.POSITIVE_INFINITY;
+      double maxX = Double.NEGATIVE_INFINITY;
+      for(MCH_EntityWheel wheel : this.wheels) {
+         if(wheel != null && wheel.pos != null) {
+            minX = Math.min(minX, wheel.pos.xCoord);
+            maxX = Math.max(maxX, wheel.pos.xCoord);
+         }
+      }
+      return minX <= maxX ? Math.max(0.5D, maxX - minX) : 1.0D;
+   }
+
+   public float getRenderWheelTravel(double x, double z, float tickTime) {
+      MCH_EntityWheel closest = null;
+      double closestDistance = Double.POSITIVE_INFINITY;
+      for(MCH_EntityWheel wheel : this.wheels) {
+         if(wheel == null || wheel.pos == null) {
+            continue;
+         }
+         double dx = wheel.pos.xCoord - x;
+         double dz = wheel.pos.zCoord - z;
+         double distance = dx * dx + dz * dz;
+         if(distance < closestDistance) {
+            closest = wheel;
+            closestDistance = distance;
+         }
+      }
+      // Model packs are free to use decorative or differently arranged wheels.
+      if(closest == null || closestDistance > 0.85D * 0.85D) {
+         return 0.0F;
+      }
+      float compression = closest.prevSuspensionCompression
+            + (closest.suspensionCompression - closest.prevSuspensionCompression) * tickTime;
+      return Float.isNaN(closest.suspensionRestCompression)
+            ? 0.0F : compression - closest.suspensionRestCompression;
    }
 
 

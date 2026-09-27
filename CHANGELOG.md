@@ -334,3 +334,12 @@ Developer/backend
   half its step height and falsely losing flat-ground tire contact.
 - Matched the client wheel-before-body update order to the authoritative server physics order so
   steering prediction and server grip sample the same suspension phase.
+
+2026-09-27 00:00 - Add civilian car spring and shock suspension
+
+- Added collision-shape suspension probes, per-wheel compression and compression-rate state, bounded
+  spring response, and separate compression/rebound shock damping for opted-in civilian cars.
+- Applied supported-wheel response to authoritative body height, pitch, and roll while client prediction
+  smooths the visible pose and keeps fast-moving current/predicted contact samples consistent.
+- Mapped nearby rendered wheel parts to collision wheels for suspension travel, with unchanged rendering
+  for decorative or incompatible wheel layouts, and documented the new tuning keys and defaults.

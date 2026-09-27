@@ -37,6 +37,10 @@ WeightedCenterZ = 1.0
 
 WeightType = Car
 CivilianCarGrip = true
+SuspensionSpring = 0.055
+SuspensionCompressionDamping = 0.035
+SuspensionReboundDamping = 0.050
+SuspensionTravel = 0.45
 
 Category = C
 
