@@ -1,5 +1,6 @@
 package mcheli.tank;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import mcheli.MCH_Config;
@@ -15,6 +16,7 @@ import mcheli.wrapper.W_WorldFunc;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -423,12 +425,8 @@ public class MCH_WheelManager {
    private void moveCivilianSuspension(double x, double y, double z, MCH_TankInfo info) {
       MCH_EntityBaseVehicle car = this.parent;
       double travel = info.suspensionTravel;
-      double front = 0.0D;
-      double rear = 0.0D;
       double left = 0.0D;
       double right = 0.0D;
-      int frontCount = 0;
-      int rearCount = 0;
       int leftCount = 0;
       int rightCount = 0;
       int supported = 0;
@@ -474,13 +472,6 @@ public class MCH_WheelManager {
          double response = normalized * info.suspensionSpring + wheel.suspensionCompressionRate * damping;
          totalResponse += MathHelper.clamp_double(response, -0.08D, 0.08D);
 
-         if(wheel.pos.zCoord >= this.weightedCenter.zCoord) {
-            front += wheelY;
-            ++frontCount;
-         } else {
-            rear += wheelY;
-            ++rearCount;
-         }
          if(wheel.pos.xCoord >= 0.0D) {
             right += wheelY;
             ++rightCount;
@@ -498,34 +489,88 @@ public class MCH_WheelManager {
             car.motionY += MathHelper.clamp_double(springAcceleration, -0.06D, 0.06D);
          }
 
-         double frontHeight = frontCount > 0 ? front / frontCount : 0.0D;
-         double rearHeight = rearCount > 0 ? rear / rearCount : 0.0D;
          double leftHeight = leftCount > 0 ? left / leftCount : 0.0D;
          double rightHeight = rightCount > 0 ? right / rightCount : 0.0D;
-         float pitch = (float)Math.toDegrees(Math.atan2(frontHeight - rearHeight, Math.max(0.5D, this.maxZ - this.minZ)));
          double trackWidth = this.getTrackWidth();
          float roll = (float)-Math.toDegrees(Math.atan2(rightHeight - leftHeight, trackWidth));
-         pitch = MathHelper.clamp_float(pitch, -18.0F, 18.0F);
          roll = MathHelper.clamp_float(roll, -18.0F, 18.0F);
          float smoothing = car.worldObj.isRemote ? 0.28F : 0.45F;
-         this.targetPitch += (pitch - this.targetPitch) * smoothing;
          this.targetRoll += (roll - this.targetRoll) * smoothing;
-         if(Math.abs(pitch) < 0.01F && Math.abs(this.targetPitch) < 0.02F) {
-            this.targetPitch = 0.0F;
-         }
          if(Math.abs(roll) < 0.01F && Math.abs(this.targetRoll) < 0.02F) {
             this.targetRoll = 0.0F;
          }
       } else {
-         this.targetPitch *= 0.94F;
          this.targetRoll *= 0.94F;
       }
+
+      // Terrain pitch is independent of suspension compression/contact, including on descent.
+      float terrainPitch = this.getCivilianTerrainPitch(x, z, info);
+      this.targetPitch = MCH_CarTerrainPitch.approach(this.targetPitch, terrainPitch,
+            car.worldObj.isRemote ? 0.28F : 0.45F);
 
       // This method runs every client tick, including while the local driver is stopped.
       // Applying the predicted pose here prevents the last rendered terrain roll from
       // waiting indefinitely for another steering/input angle update.
       car.setRotPitch(this.targetPitch);
       car.setRotRoll(this.targetRoll);
+   }
+
+   /** Existing wheel layout supplies points only; no wheel state is read as terrain height. */
+   float getCivilianTerrainPitch(double x, double z, MCH_TankInfo info) {
+      MCH_EntityBaseVehicle car = this.parent;
+      double step = Math.max(0.0D, info.stepHeight);
+      double referenceY = car.boundingBox.minY;
+      double clearance = car.boundingBox.maxY - referenceY;
+
+      // Probe a small distance forward even at rest, so a bumper stopped at a wall levels.
+      double yaw = Math.toRadians(car.getRotYaw());
+      double forwardX = -Math.sin(yaw) * 0.05D;
+      double forwardZ = Math.cos(yaw) * 0.05D;
+      AxisAlignedBB sweep = car.boundingBox.addCoord(forwardX, step, forwardZ);
+      if(MCH_CarTerrainPitch.facesWall(this.getCivilianTerrainBoxes(sweep),
+            car.boundingBox, step, forwardX, forwardZ)) return 0.0F;
+
+      double front = 0.0D, rear = 0.0D, frontZ = 0.0D, rearZ = 0.0D;
+      int frontCount = 0, rearCount = 0;
+      for(MCH_EntityWheel wheel : this.wheels) {
+         if(wheel == null || wheel.isDead || wheel.pos == null) continue;
+         // Yaw-only locations avoid feeding suspension extension or the previous pitch back
+         // into horizontal terrain selection. This is the pending body's wheel footprint.
+         Vec3 point = this.getTransformedPosition(wheel.pos.xCoord, 0.0D, wheel.pos.zCoord,
+               car, car.getRotYaw(), 0.0F, 0.0F);
+         double wx = point.xCoord + x, wz = point.zCoord + z;
+         AxisAlignedBB column = AxisAlignedBB.getBoundingBox(wx - MCH_CarTerrainPitch.EPSILON,
+               referenceY - step - MCH_CarTerrainPitch.EPSILON, wz - MCH_CarTerrainPitch.EPSILON,
+               wx + MCH_CarTerrainPitch.EPSILON, referenceY + step + clearance
+                     + MCH_CarTerrainPitch.EPSILON, wz + MCH_CarTerrainPitch.EPSILON);
+         double height = MCH_CarTerrainPitch.highestSurface(this.getCivilianTerrainBoxes(column),
+               column, referenceY, step, clearance);
+         if(Double.isNaN(height)) continue;
+         if(wheel.pos.zCoord >= this.weightedCenter.zCoord) {
+            front += height; frontZ += wheel.pos.zCoord; ++frontCount;
+         } else {
+            rear += height; rearZ += wheel.pos.zCoord; ++rearCount;
+         }
+      }
+      if(frontCount == 0 || rearCount == 0) return Float.NaN;
+      return MCH_CarTerrainPitch.angle(front / frontCount, rear / rearCount,
+            frontZ / frontCount - rearZ / rearCount);
+   }
+
+   /** Block collision shapes only: no entity collisions, wheel probes, or world-top shortcut. */
+   List<AxisAlignedBB> getCivilianTerrainBoxes(AxisAlignedBB area) {
+      List<AxisAlignedBB> boxes = new ArrayList<AxisAlignedBB>();
+      World world = this.parent.worldObj;
+      for(int bx = MathHelper.floor_double(area.minX); bx <= MathHelper.floor_double(area.maxX); ++bx) {
+         for(int bz = MathHelper.floor_double(area.minZ); bz <= MathHelper.floor_double(area.maxZ); ++bz) {
+            if(!world.blockExists(bx, 64, bz)) continue;
+            for(int by = MathHelper.floor_double(area.minY) - 1; by <= MathHelper.floor_double(area.maxY); ++by) {
+               Block block = world.getBlock(bx, by, bz);
+               if(block != null) block.addCollisionBoxesToList(world, bx, by, bz, area, boxes, this.parent);
+            }
+         }
+      }
+      return boxes;
    }
 
    /**
