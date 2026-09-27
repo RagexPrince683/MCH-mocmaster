@@ -36,48 +36,11 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 
 Civilian car grip uses wheel collision support adjusted for the invisible wheel box rest gap, a bounded sideways correction, and a steering limit tied to the same contact/grip budget. Tire sizes alter damping response by at most ±5%; tire width does not directly multiply the grip limit. See [car tire grip](../car-tire-grip.md) for the contact reproduction, before/after values, bundled eligibility, sources and diagnostics. Omit `CivilianCarGrip` to preserve existing handling; tire fields, `WeightType` and `Category` alone never enable it.
 
-Civilian suspension sweeps a tire-sized contact patch at each individual wheel through
-`SuspensionTravel`, so full blocks, slabs, stairs, narrow collision shapes, and other terrain contribute
-their actual top surface rather than a heightmap or paired `onGround` flag. The sample is taken after
-body collision resolution at the wheel's resolved position; predicted support from a position the body
-did not reach is never reused. Only supported wheels generate spring/damper response; an entirely
-unsupported car follows normal gravity, falling, body collision, and crash-damage behavior.
-
-Civilian-car horizontal movement is collision-resolved in segments no longer than 0.45 blocks. This
-lets each edge of a successive staircase complete a normal body step while retaining the configured
-`StepHeight` as the hard vertical limit. The step-up collision result is applied before horizontal and
-downward resolution, so suspension does not raise the body through a solid block. If an axle or side
-temporarily loses support, pose calculation treats that direction as unknown and eases it toward level
-instead of substituting world height zero. Supported front/rear and left/right pairs still produce
-responsive terrain pitch and roll, and level support converges back to a neutral pose.
-
-### Civilian suspension collision trace
-
-The suspension failures introduced with the first spring implementation had four related causes:
-
-- The wheel manager ran before lateral grip changed yaw and before body collision resolved movement.
-  It compared current and predicted probes with `max`, then placed the wheel at the predicted position.
-  A higher surface at either location could therefore supply spring force and pose height at the other.
-  This made the Starion dip or stop at a stair and made it appear to float over closely spaced bumps.
-- The legacy one-block-wide wheel entity was also used as the tire probe. It could overlap the side of
-  an adjacent bump beyond the tire, while the current/predicted endpoint-only comparison could skip a
-  narrow shape between endpoints. Resolved-position sampling, a tire-sized patch, and bounded body
-  movement segments keep wheel support and collision traversal on the same path.
-- A fast tick could span more than one staircase edge. The body mover offered only one configured
-  `StepHeight` attempt for the entire displacement, so the combined rise stopped the car on a later
-  step even though each individual edge was legal. Additionally, its upward collision calculation
-  moved the bounding box but discarded the returned allowed rise, leaving the later downward result
-  inconsistent with the body's actual step. Retaining that result and resolving each segment prevents
-  both a stuck step and body penetration without increasing `StepHeight`.
-- Pose averaging used world Y `0.0` whenever an axle or side had no supported wheel. Losing the front
-  after a slab or the rear after a short bumpy section therefore generated a large false pitch which
-  could remain after reaching flat ground. Missing opposing support now requests a level target;
-  genuine opposing support heights continue to drive terrain pitch and roll.
-
-For reference, the bundled Mitsubishi Starion combines `StepHeight = 1.2`,
-`SuspensionTravel = 0.45`, mirrored `SetWheelPos` contacts at X ±0.68 and Z 1.865/-1.489,
-and an `EntityWidth`/`EntityHeight` of 0.85. The correction preserves those authored climbing,
-suspension, and body dimensions.
+Civilian suspension sweeps each individual wheel collision box through `SuspensionTravel`, so full
+blocks, slabs, stairs, and other collision-box terrain contribute their actual top surface rather than
+a heightmap or paired `onGround` flag. Both the current and next-tick horizontal wheel positions are
+sampled. Only supported wheels generate spring/damper response; an entirely unsupported car follows
+normal gravity, falling, body collision, and crash-damage behavior.
 
 Each `AddPartWheel` is matched to the nearest mirrored `SetWheelPos` collision wheel in local X/Z and
 moves vertically with its interpolated compression. Its authored `AddPartWheel` Y position is the

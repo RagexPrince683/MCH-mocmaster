@@ -332,25 +332,6 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    public void moveEntity(double parX, double parY, double parZ) {
 
-      MCH_TankInfo info = this.getTankInfo();
-      if(info != null && info.civilianCarGrip) {
-         double horizontalDistance = Math.sqrt(parX * parX + parZ * parZ);
-         int movementSteps = Math.max(1, (int)Math.ceil(horizontalDistance / 0.45D));
-         double stepX = parX / movementSteps;
-         double stepY = parY / movementSteps;
-         double stepZ = parZ / movementSteps;
-         for(int i = 0; i < movementSteps; ++i) {
-            this.moveEntitySingleStep(stepX, stepY, stepZ);
-         }
-         return;
-      }
-
-      this.moveEntitySingleStep(parX, parY, parZ);
-   }
-
-   /** Resolves one bounded movement segment, allowing each stair edge its own valid step. */
-   private void moveEntitySingleStep(double parX, double parY, double parZ) {
-
       // Check for slowing blocks under the tank, and slow the tank
       Block blockUnder = MCH_Lib.getBlockY(this, 3, -2, false);
       if (BlockUtils.isSlowingBlock(blockUnder, super.worldObj, (int)super.posX, (int)super.posY, (int)super.posZ, this)) {
@@ -392,7 +373,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          AxisAlignedBB minZ = super.boundingBox.copy();
          super.boundingBox.setBB(backUpAxisalignedBB);
          list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(mx, parY, mz));
-         parY = this.calculateYOffset(list, super.boundingBox, parY);
+         this.calculateYOffset(list, super.boundingBox, parY);
          parX = this.calculateXOffset(list, super.boundingBox, mx);
          parZ = this.calculateZOffset(list, super.boundingBox, mz);
          parY = this.calculateYOffset(list, super.boundingBox, (double)(-super.stepHeight));
@@ -1063,10 +1044,12 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 //      }
 
       MCH_TankInfo info = this.getTankInfo();
-      boolean useCivilianSuspension = info != null && info.civilianCarGrip;
-      double positionBeforeMoveX = super.posX;
-      double positionBeforeMoveY = super.posY;
-      double positionBeforeMoveZ = super.posZ;
+      boolean useCarGrip = info != null && info.civilianCarGrip && info.carLateralGrip > 0.0F;
+      if(useCarGrip) {
+         // The server advances the wheels before it advances the vehicle body. Keep car
+         // prediction in the same order so both sides probe the same suspension state.
+         this.updateWheels();
+      }
       if(super.aircraftPosRotInc > 0) {
          this.applyServerPositionAndRotation();
       } else {
@@ -1083,10 +1066,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          }
       }
 
-      if(useCivilianSuspension) {
-         this.WheelMng.move(super.posX - positionBeforeMoveX, super.posY - positionBeforeMoveY,
-               super.posZ - positionBeforeMoveZ);
-      } else {
+      if(!useCarGrip) {
          this.updateWheels();
       }
       this.onUpdate_Particle2();
@@ -1211,21 +1191,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // --------------------------------------------------
       // MOVE
       // --------------------------------------------------
+      this.updateWheels();
       this.applyCarLateralGrip();
-      MCH_TankInfo movementInfo = this.getTankInfo();
-      boolean useCivilianSuspension = movementInfo != null && movementInfo.civilianCarGrip;
-      if(!useCivilianSuspension) {
-         this.updateWheels();
-      }
-      double positionBeforeMoveX = super.posX;
-      double positionBeforeMoveY = super.posY;
-      double positionBeforeMoveZ = super.posZ;
       double motionYBeforeMove = super.motionY;
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
-      if(useCivilianSuspension) {
-         this.WheelMng.move(super.posX - positionBeforeMoveX, super.posY - positionBeforeMoveY,
-               super.posZ - positionBeforeMoveZ);
-      }
       this.updateGroundVehicleFallDamage(wasOnGroundBeforeMove, motionYBeforeGravity, motionYBeforeMove);
 
       // --------------------------------------------------
