@@ -334,47 +334,26 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
       MCH_TankInfo info = this.getTankInfo();
       if(info != null && info.civilianCarGrip) {
-         Block blockUnder = MCH_Lib.getBlockY(this, 3, -2, false);
-         if(BlockUtils.isSlowingBlock(blockUnder, super.worldObj, (int)super.posX, (int)super.posY,
-               (int)super.posZ, this)) {
-            parX *= 0.8D;
-            parZ *= 0.8D;
-         }
-
          double horizontalDistance = Math.sqrt(parX * parX + parZ * parZ);
          int movementSteps = Math.max(1, (int)Math.ceil(horizontalDistance / 0.45D));
          double stepX = parX / movementSteps;
          double stepY = parY / movementSteps;
          double stepZ = parZ / movementSteps;
-         double startingBottom = super.boundingBox.minY;
-         boolean collidedHorizontally = false;
-         boolean collidedVertically = false;
-         boolean foundGround = false;
          for(int i = 0; i < movementSteps; ++i) {
-            double remainingStepHeight = startingBottom + super.stepHeight - super.boundingBox.minY;
-            this.moveEntitySingleStep(stepX, stepY, stepZ, Math.max(0.0D, remainingStepHeight), false);
-            collidedHorizontally |= super.isCollidedHorizontally;
-            collidedVertically |= super.isCollidedVertically;
-            foundGround |= super.onGround;
+            this.moveEntitySingleStep(stepX, stepY, stepZ);
          }
-         super.isCollidedHorizontally = collidedHorizontally;
-         super.isCollidedVertically = collidedVertically;
-         super.onGround = foundGround;
-         super.isCollided = collidedHorizontally || collidedVertically;
          return;
       }
 
-      this.moveEntitySingleStep(parX, parY, parZ, super.stepHeight, true);
+      this.moveEntitySingleStep(parX, parY, parZ);
    }
 
-   /** Resolves one bounded movement segment without exceeding the tick's remaining step allowance. */
-   private void moveEntitySingleStep(double parX, double parY, double parZ, double stepAllowance,
-         boolean applyTerrainSlow) {
+   /** Resolves one bounded movement segment, allowing each stair edge its own valid step. */
+   private void moveEntitySingleStep(double parX, double parY, double parZ) {
 
       // Check for slowing blocks under the tank, and slow the tank
       Block blockUnder = MCH_Lib.getBlockY(this, 3, -2, false);
-      if (applyTerrainSlow && BlockUtils.isSlowingBlock(blockUnder, super.worldObj, (int)super.posX,
-            (int)super.posY, (int)super.posZ, this)) {
+      if (BlockUtils.isSlowingBlock(blockUnder, super.worldObj, (int)super.posX, (int)super.posY, (int)super.posZ, this)) {
          // Apply 20% speed reduction for slowing blocks
          parX *= 0.8; // Reduce X movement by 20%
          parZ *= 0.8; // Reduce Z movement by 20%
@@ -405,20 +384,18 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       double minX;
       double result;
       double result2;
-      double horizontalAttempt = mx * mx + mz * mz;
-      if(stepAllowance > 0.0D && horizontalAttempt > 1.0E-8D && flag1 && super.ySize < 0.05F
-            && (mx != parX || mz != parZ)) {
+      if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F && (mx != parX || mz != parZ)) {
          result = parX;
          result2 = parY;
          minX = parZ;
-         parY = stepAllowance;
+         parY = (double)super.stepHeight;
          AxisAlignedBB minZ = super.boundingBox.copy();
          super.boundingBox.setBB(backUpAxisalignedBB);
          list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(mx, parY, mz));
          parY = this.calculateYOffset(list, super.boundingBox, parY);
          parX = this.calculateXOffset(list, super.boundingBox, mx);
          parZ = this.calculateZOffset(list, super.boundingBox, mz);
-         parY = this.calculateYOffset(list, super.boundingBox, -stepAllowance);
+         parY = this.calculateYOffset(list, super.boundingBox, (double)(-super.stepHeight));
          if(result * result + minX * minX >= parX * parX + parZ * parZ) {
             parX = result;
             parY = result2;
