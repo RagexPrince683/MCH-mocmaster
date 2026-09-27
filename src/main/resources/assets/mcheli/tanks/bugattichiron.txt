@@ -72,6 +72,9 @@ CarLateralGrip = 0.12
 ; Keep visible steering authority at maximum speed; lateral grip still limits the path response.
 CarMinimumSteering = 3.0
 
+;CarGripDiagnostics = true
+;used for debugging because this car wouldn't turn at max speed.
+
 ;PivotTurnThrottle を0より大きい値にすると超信地旋回ができなくなる。デフォルトは0
 PivotTurnThrottle = 500.1
 
