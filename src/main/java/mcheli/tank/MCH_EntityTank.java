@@ -541,8 +541,15 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    private void steerGroundVehicle(float requested, float tickDelta) {
       MCH_TankInfo info = this.getTankInfo();
       if(info != null && info.civilianCarGrip && info.carLateralGrip > 0.0F) {
-         requested = MCH_CarTireGrip.steeringDelta(requested, Math.hypot(super.motionX, super.motionZ),
-                 info.carLateralGrip, this.WheelMng.getCarGroundContact(false).fraction(), tickDelta);
+         double speed = Math.hypot(super.motionX, super.motionZ);
+         double contact = this.WheelMng.getCarGroundContact(info.carGripDiagnostics).fraction();
+         float rawRequested = requested;
+         requested = MCH_CarTireGrip.steeringDelta(rawRequested, speed, info.carLateralGrip, contact,
+                 info.carMinimumSteering, tickDelta);
+         if(super.worldObj.isRemote && info.carGripDiagnostics) {
+            MCH_CarGripDiagnostics.recordClient(info.name, this.getEntityId(), this.ticksExisted,
+                    super.moveLeft, super.moveRight, rawRequested, requested, speed, contact, tickDelta);
+         }
       }
       this.setRotYaw(this.getRotYaw() + requested);
    }
@@ -1220,7 +1227,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          // Rotation packets may arrive several times per tick; share one server physics budget.
          requestedYaw = MathHelper.wrapAngleTo180_float(this.getRotYaw() - this.carPhysicsYaw);
          appliedYaw = MCH_CarTireGrip.steeringDelta(requestedYaw, Math.hypot(super.motionX, super.motionZ),
-                 info.carLateralGrip, contact.fraction(), 1.0F);
+                 info.carLateralGrip, contact.fraction(), info.carMinimumSteering, 1.0F);
          this.setRotYaw(this.carPhysicsYaw + appliedYaw);
          this.carPhysicsYaw = this.getRotYaw();
       } else {

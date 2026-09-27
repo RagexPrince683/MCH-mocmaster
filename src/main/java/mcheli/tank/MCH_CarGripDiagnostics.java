@@ -9,6 +9,7 @@ import java.util.Locale;
 /** Explicit per-definition opt-in, separate CSV output, and no normal console logging. */
 public final class MCH_CarGripDiagnostics {
    private static BufferedWriter writer;
+   private static BufferedWriter clientWriter;
    private static boolean failed;
    private static String writeError;
 
@@ -35,6 +36,40 @@ public final class MCH_CarGripDiagnostics {
          writeError = ex.toString();
          failed = true;
          if(writer != null) try { writer.close(); } catch(IOException ignored) {}
+      }
+   }
+
+   static synchronized void recordClient(String vehicle, int entity, int tick, boolean left, boolean right,
+                                         float requested, float applied, double speed, double contact,
+                                         float tickDelta) {
+      if(failed) return;
+      try {
+         if(clientWriter == null) {
+            File file = new File("logs/car-steering-client.csv");
+            File directory = file.getParentFile();
+            if(!directory.isDirectory() && !directory.mkdirs()) {
+               throw new IOException("Cannot create " + directory);
+            }
+            boolean header = !file.isFile() || file.length() == 0;
+            clientWriter = new BufferedWriter(new FileWriter(file, true));
+            if(header) {
+               clientWriter.write("vehicle,entity,tick,left,right,input_requested,yaw_applied,speed,contact,tick_delta\n");
+            }
+         }
+         clientWriter.write(String.format(Locale.ROOT, "%s,%d,%d,%b,%b,%.5f,%.5f,%.8f,%.5f,%.5f",
+                 vehicle.replace(',', '_').replace('\n', '_').replace('\r', '_'), entity, tick, left, right,
+                 requested, applied, speed, contact, tickDelta));
+         clientWriter.newLine();
+         clientWriter.flush();
+      } catch(IOException ex) {
+         writeError = ex.toString();
+         failed = true;
+         if(clientWriter != null) {
+            try {
+               clientWriter.close();
+            } catch(IOException ignored) {
+            }
+         }
       }
    }
 

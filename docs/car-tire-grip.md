@@ -12,7 +12,10 @@ This is bounded gameplay slip damping, not a measured tire/suspension/weight sim
 | `FrontTireSize` | Optional metric radial dimensions, e.g. `225/50R16`, `265/35ZR19`, `175R14` | Unset; neutral response 1.0 |
 | `RearTireSize` | Same, independently optional | Unset; neutral response 1.0 |
 | `CarLateralGrip` | Maximum sideways velocity change per 20 Hz tick, blocks/tick²; 0–0.25 | `0.12`; `0` disables grip and its steering coupling |
+| `CarMinimumSteering` | Minimum high-speed yaw authority, degrees per 20 Hz tick; 0–10 | `0` (use only the grip-derived limit) |
 | `CarGripDiagnostics` | Boolean; separate server CSV and in-memory snapshot | `false` |
+
+`CarMinimumSteering` is a body-yaw authority floor, not additional tire force. It is scaled by elapsed tick time and wheel contact, and both client prediction and server authority apply the same value. `CarLateralGrip` remains the cap on sideways velocity correction; when the yaw requested through `CarMinimumSteering` exceeds that force budget, the car follows a wider path (controlled understeer) rather than gaining free lateral grip.
 
 ```ini
 ; Representative stock 2018 Dodge Challenger R/T
@@ -77,6 +80,8 @@ Set `CarGripDiagnostics = true` in the one vehicle definition being investigated
 The server appends one record per physics tick to **`logs/car-tire-grip.csv`**, relative to the game/server working directory. It never writes these records to normal console output. Columns identify vehicle/entity/tick, configured wheels, front/rear contacts, the original raw 0.05 probe count, suspension paired flags, signed sideways speed, unbounded requested correction, actual applied correction, limit, reason, and requested/applied yaw delta. Velocity is blocks/tick, correction is blocks/tick², yaw is degrees/tick. The old raw and paired counts are diagnostic comparisons only.
 
 Reasons are `not_opted_in`, `grip_disabled`, `no_wheels`, `no_contact` (airborne or unsupported wheels), `no_sideways_speed`, `invalid_input`, and `applied`. An excluded/disabled vehicle may show a hypothetical formula request but its **applied** correction is always zero. The current snapshot is also available through `MCH_EntityTank.getCarGripDiagnostic()`; disabled vehicles return null. File failures disable CSV writes and remain inspectable through `MCH_CarGripDiagnostics.getWriteError()` without log spam or interrupting physics. Turn diagnostics off after capture.
+
+On the client, the same opt-in also appends **`logs/car-steering-client.csv`** before the steering limiter runs. It records the left/right key state, raw requested yaw, limited yaw, horizontal speed, wheel-contact fraction, and elapsed tick factor. This distinguishes missing input from client-side contact or authority limiting before a rotation packet reaches the server.
 
 ## Bundled eligibility
 
