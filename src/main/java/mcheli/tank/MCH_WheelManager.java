@@ -450,8 +450,14 @@ public class MCH_WheelManager {
          Vec3 predicted = Vec3.createVectorHelper(anchor.xCoord + x, anchor.yCoord + y, anchor.zCoord + z);
          double measured = wheel.measureSuspensionCompression(anchor, predicted, travel);
          float compression = (float)measured;
-         float rawRate = compression - wheel.prevSuspensionCompression;
-         wheel.suspensionCompressionRate = wheel.suspensionCompressionRate * 0.35F + rawRate * 0.65F;
+         if(wheel.suspensionSupported && !wheel.suspensionCompressionInitialized) {
+            wheel.prevSuspensionCompression = compression;
+            wheel.suspensionCompressionRate = 0.0F;
+            wheel.suspensionCompressionInitialized = true;
+         } else {
+            float rawRate = compression - wheel.prevSuspensionCompression;
+            wheel.suspensionCompressionRate = wheel.suspensionCompressionRate * 0.35F + rawRate * 0.65F;
+         }
          wheel.suspensionCompression = compression;
 
          double wheelY = anchor.yCoord - travel + measured;
@@ -469,20 +475,22 @@ public class MCH_WheelManager {
          totalResponse += MathHelper.clamp_double(response, -0.08D, 0.08D);
 
          if(wheel.pos.zCoord >= this.weightedCenter.zCoord) {
-            front += measured;
+            front += wheelY;
             ++frontCount;
          } else {
-            rear += measured;
+            rear += wheelY;
             ++rearCount;
          }
          if(wheel.pos.xCoord >= 0.0D) {
-            right += measured;
+            right += wheelY;
             ++rightCount;
          } else {
-            left += measured;
+            left += wheelY;
             ++leftCount;
          }
       }
+
+      this.updateRenderNeutral(supported);
 
       if(supported > 0) {
          if(!car.worldObj.isRemote) {
@@ -502,14 +510,51 @@ public class MCH_WheelManager {
          float smoothing = car.worldObj.isRemote ? 0.28F : 0.45F;
          this.targetPitch += (pitch - this.targetPitch) * smoothing;
          this.targetRoll += (roll - this.targetRoll) * smoothing;
+         if(Math.abs(pitch) < 0.01F && Math.abs(this.targetPitch) < 0.02F) {
+            this.targetPitch = 0.0F;
+         }
+         if(Math.abs(roll) < 0.01F && Math.abs(this.targetRoll) < 0.02F) {
+            this.targetRoll = 0.0F;
+         }
       } else {
          this.targetPitch *= 0.94F;
          this.targetRoll *= 0.94F;
       }
 
-      if(!W_Lib.isClientPlayer(car.getRiddenByEntity())) {
-         car.setRotPitch(this.targetPitch);
-         car.setRotRoll(this.targetRoll);
+      // This method runs every client tick, including while the local driver is stopped.
+      // Applying the predicted pose here prevents the last rendered terrain roll from
+      // waiting indefinitely for another steering/input angle update.
+      car.setRotPitch(this.targetPitch);
+      car.setRotRoll(this.targetRoll);
+   }
+
+   /**
+    * Establishes rendered neutral travel only after the complete axle set is supported
+    * at an even height. A single tire touching during spawn or landing must not become
+    * the permanent model-space baseline for that tire.
+    */
+   private void updateRenderNeutral(int supported) {
+      if(supported != this.wheels.length || supported == 0) {
+         return;
+      }
+
+      float minimum = Float.POSITIVE_INFINITY;
+      float maximum = Float.NEGATIVE_INFINITY;
+      for(MCH_EntityWheel wheel : this.wheels) {
+         minimum = Math.min(minimum, wheel.suspensionCompression);
+         maximum = Math.max(maximum, wheel.suspensionCompression);
+      }
+      if(maximum - minimum > 0.02F) {
+         return;
+      }
+
+      for(MCH_EntityWheel wheel : this.wheels) {
+         if(Float.isNaN(wheel.suspensionRestCompression)) {
+            wheel.suspensionRestCompression = wheel.suspensionCompression;
+         } else {
+            wheel.suspensionRestCompression +=
+                  (wheel.suspensionCompression - wheel.suspensionRestCompression) * 0.2F;
+         }
       }
    }
 

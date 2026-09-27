@@ -343,3 +343,12 @@ Developer/backend
   smooths the visible pose and keeps fast-moving current/predicted contact samples consistent.
 - Mapped nearby rendered wheel parts to collision wheels for suspension travel, with unchanged rendering
   for decorative or incompatible wheel layouts, and documented the new tuning keys and defaults.
+
+2026-09-27 04:03 - Fix civilian suspension neutral height and roll recovery
+
+- Initialized visible wheel travel from complete, level wheel support instead of each tire's first
+  contact, preserving authored `AddPartWheel` neutral positions and independent `SetWheelPos` geometry.
+- Applied the predicted civilian suspension pose on every client tick and snapped negligible level-ground
+  targets to zero so body roll returns smoothly to neutral even after the vehicle stops.
+- Derived terrain pitch and roll from collision-resolved wheel heights instead of compression, removing
+  the feedback loop that could preserve an old body angle on flat ground.

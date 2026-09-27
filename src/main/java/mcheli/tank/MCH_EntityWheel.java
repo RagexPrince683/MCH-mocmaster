@@ -29,6 +29,7 @@ public class MCH_EntityWheel extends W_Entity {
    public float prevSuspensionCompression;
    public float suspensionCompressionRate;
    public boolean suspensionSupported;
+   public boolean suspensionCompressionInitialized;
    public float suspensionRestCompression = Float.NaN;
 
 
@@ -83,9 +84,6 @@ public class MCH_EntityWheel extends W_Entity {
       double predicted = this.measureCompressionAt(predictedAnchor, travel);
       double compression = Math.max(current, predicted);
       this.suspensionSupported = compression >= 0.0D;
-      if(this.suspensionSupported && Float.isNaN(this.suspensionRestCompression)) {
-         this.suspensionRestCompression = (float)compression;
-      }
       return this.suspensionSupported ? compression : 0.0D;
    }
 

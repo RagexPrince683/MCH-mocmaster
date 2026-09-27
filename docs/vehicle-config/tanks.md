@@ -43,9 +43,17 @@ sampled. Only supported wheels generate spring/damper response; an entirely unsu
 normal gravity, falling, body collision, and crash-damage behavior.
 
 Each `AddPartWheel` is matched to the nearest mirrored `SetWheelPos` collision wheel in local X/Z and
-moves vertically with its interpolated compression. A match farther than 0.85 blocks is considered a
-different/decorative layout and receives the legacy wheel animation without suspension translation.
-This fallback permits model packs to use a different number or arrangement of visible wheels safely.
+moves vertically with its interpolated compression. Its authored `AddPartWheel` Y position is the
+neutral rendered position; it is not replaced by the collision wheel's `SetWheelPos` Y coordinate.
+The neutral compression is initialized only when the complete wheel set has even support, then follows
+the settled level-ground compression slowly. This prevents a single tire's first spawn/landing contact
+from raising or lowering that tire permanently while preserving differential travel on uneven blocks.
+Body pitch and roll continue converging toward the supported wheel heights every tick, including while
+stopped, and settle exactly at zero after level support is restored. These angles use the wheels'
+collision-resolved contact heights rather than compression alone, so an existing body angle cannot feed
+itself back into the next terrain-angle calculation. A match farther than 0.85 blocks is
+considered a different/decorative layout and receives the legacy wheel animation without suspension
+translation. This fallback permits model packs to use a different number or arrangement of visible wheels safely.
 The four suspension defaults are written explicitly into bundled `CivilianCarGrip = true` definitions;
 other tanks, military vehicles, aircraft, and boats remain on their existing wheel behavior.
 
