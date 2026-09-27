@@ -352,13 +352,3 @@ Developer/backend
   targets to zero so body roll returns smoothly to neutral even after the vehicle stops.
 - Derived terrain pitch and roll from collision-resolved wheel heights instead of compression, removing
   the feedback loop that could preserve an old body angle on flat ground.
-
-2026-09-27 22:40 - Restore civilian car terrain pose and legal stair steps
-
-- Sampled actual block collision surfaces beneath wheels after body collision resolution, producing
-  nose-up climb, nose-down descent, and supported-side roll targets with smooth neutral recovery.
-- Kept suspension forces within configured travel while allowing pose support to span the configured
-  step height; military and non-opted-in vehicle wheel behavior remains unchanged.
-- Let actual tire support enter the normal bounded step resolver even when spring motion temporarily
-  clears the body's ground flag, preventing valid horizontal motion from being zeroed without movement
-  segmentation or collision-box rotation.

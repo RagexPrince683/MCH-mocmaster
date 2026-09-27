@@ -365,11 +365,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       double minX;
       double result;
       double result2;
-      MCH_TankInfo movementInfo = this.getTankInfo();
-      boolean civilianWheelSupport = movementInfo != null && movementInfo.civilianCarGrip
-            && this.WheelMng.getCarGroundContact(false).fraction() > 0.0D;
-      boolean canStep = flag1 || civilianWheelSupport;
-      if(super.stepHeight > 0.0F && canStep && super.ySize < 0.05F && (mx != parX || mz != parZ)) {
+      if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F && (mx != parX || mz != parZ)) {
          result = parX;
          result2 = parY;
          minX = parZ;
@@ -1049,9 +1045,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
       MCH_TankInfo info = this.getTankInfo();
       boolean useCarGrip = info != null && info.civilianCarGrip && info.carLateralGrip > 0.0F;
-      double positionBeforeMoveX = super.posX;
-      double positionBeforeMoveY = super.posY;
-      double positionBeforeMoveZ = super.posZ;
+      if(useCarGrip) {
+         // The server advances the wheels before it advances the vehicle body. Keep car
+         // prediction in the same order so both sides probe the same suspension state.
+         this.updateWheels();
+      }
       if(super.aircraftPosRotInc > 0) {
          this.applyServerPositionAndRotation();
       } else {
@@ -1068,10 +1066,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          }
       }
 
-      if(useCarGrip) {
-         this.WheelMng.move(super.posX - positionBeforeMoveX, super.posY - positionBeforeMoveY,
-               super.posZ - positionBeforeMoveZ);
-      } else {
+      if(!useCarGrip) {
          this.updateWheels();
       }
       this.onUpdate_Particle2();
@@ -1196,21 +1191,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // --------------------------------------------------
       // MOVE
       // --------------------------------------------------
+      this.updateWheels();
       this.applyCarLateralGrip();
-      MCH_TankInfo movementInfo = this.getTankInfo();
-      boolean useCivilianSuspension = movementInfo != null && movementInfo.civilianCarGrip;
-      if(!useCivilianSuspension) {
-         this.updateWheels();
-      }
-      double positionBeforeMoveX = super.posX;
-      double positionBeforeMoveY = super.posY;
-      double positionBeforeMoveZ = super.posZ;
       double motionYBeforeMove = super.motionY;
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
-      if(useCivilianSuspension) {
-         this.WheelMng.move(super.posX - positionBeforeMoveX, super.posY - positionBeforeMoveY,
-               super.posZ - positionBeforeMoveZ);
-      }
       this.updateGroundVehicleFallDamage(wasOnGroundBeforeMove, motionYBeforeGravity, motionYBeforeMove);
 
       // --------------------------------------------------

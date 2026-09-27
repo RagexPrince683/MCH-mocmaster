@@ -432,7 +432,6 @@ public class MCH_WheelManager {
       int leftCount = 0;
       int rightCount = 0;
       int supported = 0;
-      int suspensionSupported = 0;
       double totalResponse = 0.0D;
 
       for(int i = 0; i < this.wheels.length; ++i) {
@@ -448,7 +447,8 @@ public class MCH_WheelManager {
 
          Vec3 anchor = this.getTransformedPosition(wheel.pos.xCoord, wheel.pos.yCoord, wheel.pos.zCoord,
                car, car.getRotYaw(), this.targetPitch, this.targetRoll);
-         double measured = wheel.measureSuspensionCompression(anchor, travel);
+         Vec3 predicted = Vec3.createVectorHelper(anchor.xCoord + x, anchor.yCoord + y, anchor.zCoord + z);
+         double measured = wheel.measureSuspensionCompression(anchor, predicted, travel);
          float compression = (float)measured;
          if(wheel.suspensionSupported && !wheel.suspensionCompressionInitialized) {
             wheel.prevSuspensionCompression = compression;
@@ -461,45 +461,36 @@ public class MCH_WheelManager {
          wheel.suspensionCompression = compression;
 
          double wheelY = anchor.yCoord - travel + measured;
-         wheel.setPosition(anchor.xCoord, wheelY, anchor.zCoord);
+         wheel.setPosition(anchor.xCoord + x, wheelY, anchor.zCoord + z);
 
-         // Pose has to follow the actual supporting surfaces, not spring compression.
-         // Looking through the configured step range keeps the lower axle/side in
-         // the slope calculation while the collision body bridges a legal stair.
-         double poseReach = travel + Math.max(0.0D, car.stepHeight);
-         double supportHeight = wheel.measureSupportHeight(anchor, poseReach);
-
-         if(Double.isNaN(supportHeight)) {
+         if(!wheel.suspensionSupported) {
             continue;
          }
 
          ++supported;
-         if(wheel.suspensionSupported) {
-            ++suspensionSupported;
-            double normalized = measured / travel;
-            double damping = wheel.suspensionCompressionRate >= 0.0F
-                  ? info.suspensionCompressionDamping : info.suspensionReboundDamping;
-            double response = normalized * info.suspensionSpring + wheel.suspensionCompressionRate * damping;
-            totalResponse += MathHelper.clamp_double(response, -0.08D, 0.08D);
-         }
+         double normalized = measured / travel;
+         double damping = wheel.suspensionCompressionRate >= 0.0F
+               ? info.suspensionCompressionDamping : info.suspensionReboundDamping;
+         double response = normalized * info.suspensionSpring + wheel.suspensionCompressionRate * damping;
+         totalResponse += MathHelper.clamp_double(response, -0.08D, 0.08D);
 
          if(wheel.pos.zCoord >= this.weightedCenter.zCoord) {
-            front += supportHeight;
+            front += wheelY;
             ++frontCount;
          } else {
-            rear += supportHeight;
+            rear += wheelY;
             ++rearCount;
          }
          if(wheel.pos.xCoord >= 0.0D) {
-            right += supportHeight;
+            right += wheelY;
             ++rightCount;
          } else {
-            left += supportHeight;
+            left += wheelY;
             ++leftCount;
          }
       }
 
-      this.updateRenderNeutral(suspensionSupported);
+      this.updateRenderNeutral(supported);
 
       if(supported > 0) {
          if(!car.worldObj.isRemote) {
@@ -507,19 +498,13 @@ public class MCH_WheelManager {
             car.motionY += MathHelper.clamp_double(springAcceleration, -0.06D, 0.06D);
          }
 
-         float pitch = 0.0F;
-         if(frontCount > 0 && rearCount > 0) {
-            double frontHeight = front / frontCount;
-            double rearHeight = rear / rearCount;
-            pitch = (float)Math.toDegrees(Math.atan2(frontHeight - rearHeight,
-                  Math.max(0.5D, this.maxZ - this.minZ)));
-         }
-         float roll = 0.0F;
-         if(leftCount > 0 && rightCount > 0) {
-            double leftHeight = left / leftCount;
-            double rightHeight = right / rightCount;
-            roll = (float)-Math.toDegrees(Math.atan2(rightHeight - leftHeight, this.getTrackWidth()));
-         }
+         double frontHeight = frontCount > 0 ? front / frontCount : 0.0D;
+         double rearHeight = rearCount > 0 ? rear / rearCount : 0.0D;
+         double leftHeight = leftCount > 0 ? left / leftCount : 0.0D;
+         double rightHeight = rightCount > 0 ? right / rightCount : 0.0D;
+         float pitch = (float)Math.toDegrees(Math.atan2(frontHeight - rearHeight, Math.max(0.5D, this.maxZ - this.minZ)));
+         double trackWidth = this.getTrackWidth();
+         float roll = (float)-Math.toDegrees(Math.atan2(rightHeight - leftHeight, trackWidth));
          pitch = MathHelper.clamp_float(pitch, -18.0F, 18.0F);
          roll = MathHelper.clamp_float(roll, -18.0F, 18.0F);
          float smoothing = car.worldObj.isRemote ? 0.28F : 0.45F;
