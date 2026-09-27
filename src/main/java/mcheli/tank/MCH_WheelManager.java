@@ -396,17 +396,19 @@ public class MCH_WheelManager {
          }
       }
 
-      // final wheel placement clamped to transformed target
+      // The body is moved after the wheels, so their target for this tick includes the
+      // pending horizontal body displacement. Comparing against the body's current
+      // position made any speed above rangeH look like a runaway wheel. The recovery
+      // then lifted the wheel by half its step height, removing real flat-ground contact.
       for (int wi = 0; wi < this.wheels.length; ++wi) {
          MCH_EntityWheel w = this.wheels[wi];
          if (w == null) continue;
          Vec3 v = this.getTransformedPosition(w.pos.xCoord, w.pos.yCoord, w.pos.zCoord, ac, ac.getRotYaw(), this.targetPitch, this.targetRoll);
          double rangeH = 2.0D;
-         double poy = (double)(w.stepHeight / 2.0F);
-         if (w.posX > v.xCoord + rangeH) { w.posX = v.xCoord + rangeH; w.posY = v.yCoord + poy; }
-         if (w.posX < v.xCoord - rangeH) { w.posX = v.xCoord - rangeH; w.posY = v.yCoord + poy; }
-         if (w.posZ > v.zCoord + rangeH) { w.posZ = v.zCoord + rangeH; w.posY = v.yCoord + poy; }
-         if (w.posZ < v.zCoord - rangeH) { w.posZ = v.zCoord - rangeH; w.posY = v.yCoord + poy; }
+         double targetX = v.xCoord + x;
+         double targetZ = v.zCoord + z;
+         w.posX = MathHelper.clamp_double(w.posX, targetX - rangeH, targetX + rangeH);
+         w.posZ = MathHelper.clamp_double(w.posZ, targetZ - rangeH, targetZ + rangeH);
          w.setPositionAndRotation(w.posX, w.posY, w.posZ, 0.0F, 0.0F);
       }
    }

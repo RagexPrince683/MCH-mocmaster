@@ -325,3 +325,12 @@ Developer/backend
 - Applied the setting only to the Bugatti Chiron and kept client prediction aligned with the server.
 - Added opt-in client steering CSV diagnostics before the steering limiter so key input, contact,
   requested yaw, and applied yaw can be compared with the existing server trace.
+
+2026-09-27 00:00 - Fix Bugatti Chiron wheel contact at speed
+
+- Compared the wheel safety clamp with the pending body destination instead of the body's old
+  position, preventing valid wheel travel above two blocks per tick from triggering recovery.
+- Kept collision-resolved wheel height during horizontal recovery rather than lifting the wheel by
+  half its step height and falsely losing flat-ground tire contact.
+- Matched the client wheel-before-body update order to the authoritative server physics order so
+  steering prediction and server grip sample the same suspension phase.
