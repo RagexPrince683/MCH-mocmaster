@@ -198,6 +198,10 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `TrackRollerRot` | All | float | 30.0 | roller rotation speed |
 | `AddPartWheel` | All | part/list | none | wheel render |
 | `PartWheelRot` | All | float | 30.0 | wheel rotation speed |
+| `SuspensionSpring` | Civilian tanks/cars | float[0..0.25] blocks/tick² | 0.055 | Full-compression spring acceleration; active only with `CivilianCarGrip = true`. |
+| `SuspensionCompressionDamping` | Civilian tanks/cars | float[0..0.25] acceleration per block/tick | 0.035 | Shock damping during compression. |
+| `SuspensionReboundDamping` | Civilian tanks/cars | float[0..0.25] acceleration per block/tick | 0.050 | Shock damping during rebound. |
+| `SuspensionTravel` | Civilian tanks/cars | float[0.05..1.5] blocks | 0.45 | Collision-shape wheel sweep and visible wheel travel. |
 | `AddPartSteeringWheel` | All | part/list | none | steering-wheel render |
 | `TurretPosition` | All | vec3 | `0,0,0` | turret pivot position |
 | `RotorSpeed` | All visual rotor users | float[-10000..10000] | family default: base 0, plane/tank/ship 47.94, heli 79.99 | visual rotor speed; parser subtracts/adds 0.01 away from zero |

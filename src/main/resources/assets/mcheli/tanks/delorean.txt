@@ -45,6 +45,10 @@ OnGroundRollFactor  = 4.8
 
 WeightType = Car
 CivilianCarGrip = true
+SuspensionSpring = 0.055
+SuspensionCompressionDamping = 0.035
+SuspensionReboundDamping = 0.050
+SuspensionTravel = 0.45
 ; Factory tire source and identity notes: docs/car-tire-grip.md
 FrontTireSize = 195/60R14
 RearTireSize = 235/60R15

@@ -51,6 +51,10 @@ SetWheelPos =  0.58,  -0.29,  2.14, -1.43
 
 WeightType = Car
 CivilianCarGrip = true
+SuspensionSpring = 0.055
+SuspensionCompressionDamping = 0.035
+SuspensionReboundDamping = 0.050
+SuspensionTravel = 0.45
 ; Factory tire source and identity notes: docs/car-tire-grip.md
 FrontTireSize = 175R14
 RearTireSize = 175R14

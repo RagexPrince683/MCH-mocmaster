@@ -25,6 +25,11 @@ public class MCH_EntityWheel extends W_Entity {
    private MCH_EntityBaseVehicle parents;
    public Vec3 pos;
    boolean isPlus;
+   public float suspensionCompression;
+   public float prevSuspensionCompression;
+   public float suspensionCompressionRate;
+   public boolean suspensionSupported;
+   public float suspensionRestCompression = Float.NaN;
 
 
    public MCH_EntityWheel(World w) {
@@ -66,6 +71,40 @@ public class MCH_EntityWheel extends W_Entity {
       double probe = -0.05D;
       List boxes = this.getCollidingBoundingBoxes(this, this.boundingBox.addCoord(0.0D, probe, 0.0D));
       return hasGroundSupport(this.boundingBox, boxes);
+   }
+
+   /**
+    * Sweeps this wheel's real collision shape down from a body-relative anchor.
+    * Both the current and predicted horizontal positions are tested so a fast car
+    * cannot outrun its contact probe between server ticks.
+    */
+   public double measureSuspensionCompression(Vec3 currentAnchor, Vec3 predictedAnchor, double travel) {
+      double current = this.measureCompressionAt(currentAnchor, travel);
+      double predicted = this.measureCompressionAt(predictedAnchor, travel);
+      double compression = Math.max(current, predicted);
+      this.suspensionSupported = compression >= 0.0D;
+      if(this.suspensionSupported && Float.isNaN(this.suspensionRestCompression)) {
+         this.suspensionRestCompression = (float)compression;
+      }
+      return this.suspensionSupported ? compression : 0.0D;
+   }
+
+   private double measureCompressionAt(Vec3 anchor, double travel) {
+      AxisAlignedBB probe = this.boundingBox.copy();
+      double centerX = (probe.minX + probe.maxX) * 0.5D;
+      double centerZ = (probe.minZ + probe.maxZ) * 0.5D;
+      probe.offset(anchor.xCoord - centerX, anchor.yCoord - this.posY, anchor.zCoord - centerZ);
+
+      double sweep = -(travel + 0.08D);
+      List boxes = this.getCollidingBoundingBoxes(this, probe.addCoord(0.0D, sweep, 0.0D));
+      double allowed = sweep;
+      for(int i = 0; i < boxes.size(); ++i) {
+         allowed = ((AxisAlignedBB)boxes.get(i)).calculateYOffset(probe, allowed);
+      }
+      if(allowed <= sweep + 1.0E-5D) {
+         return -1.0D;
+      }
+      return MathHelper.clamp_double(travel + allowed, 0.0D, travel);
    }
 
    /** Grip-only support sweep. The invisible suspension box is not the rendered tire patch. */

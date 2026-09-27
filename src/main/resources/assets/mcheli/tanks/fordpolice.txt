@@ -12,6 +12,10 @@ ThrottleDownFactor = 0.40
 ;cool, nice 4,500kb model, now let's fix some problems I found with it
 
 CivilianCarGrip = true
+SuspensionSpring = 0.055
+SuspensionCompressionDamping = 0.035
+SuspensionReboundDamping = 0.050
+SuspensionTravel = 0.45
 FrontTireSize = 185/65R14
 RearTireSize = 185/65R14
 CarLateralGrip = 0.12

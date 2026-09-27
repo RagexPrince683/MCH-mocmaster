@@ -14,6 +14,10 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 | `RearTireSize` | same format as `FrontTireSize` | unset | Optional rear tire dimensions, independent of the front. |
 | `CarLateralGrip` | float[0..0.25], blocks/tick² | 0.12 | Server sideways correction limit for opted-in cars; wheel contact scales it. `0` disables grip and its steering coupling. Throttle does not consume axle grip. |
 | `CarMinimumSteering` | float[0..10], degrees/tick | 0 | Optional contact-scaled lower bound on steering yaw authority at speed. Unlike `CarLateralGrip`, it turns the body but does not add sideways force, so excess demand produces understeer. |
+| `SuspensionSpring` | float[0..0.25], blocks/tick² at full compression | 0.055 | Bounded spring acceleration. Used only when `CivilianCarGrip = true`; it is not derived from `Weight`. |
+| `SuspensionCompressionDamping` | float[0..0.25], acceleration per block/tick of compression speed | 0.035 | Shock damping while a supported wheel moves upward into the body. |
+| `SuspensionReboundDamping` | float[0..0.25], acceleration per block/tick of rebound speed | 0.050 | Shock damping while a supported wheel extends; the higher default settles the body after a bump. |
+| `SuspensionTravel` | float[0.05..1.5], blocks | 0.45 | Vertical collision-shape sweep available to each wheel. |
 | `CarGripDiagnostics` | boolean | `false` | Opt-in per-tick server diagnostics in `logs/car-tire-grip.csv`, separate from console output. |
 | `WeightedCenterZ` | float[-1000..1000] | 0 | Moves the simulated center of weight forward/back. Positive/negative effect depends on model orientation. |
 | `TrackMaxHP` | int[1..1000000] | 100 | Track durability. |
@@ -31,6 +35,19 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 ## Practical tuning
 
 Civilian car grip uses wheel collision support adjusted for the invisible wheel box rest gap, a bounded sideways correction, and a steering limit tied to the same contact/grip budget. Tire sizes alter damping response by at most ±5%; tire width does not directly multiply the grip limit. See [car tire grip](../car-tire-grip.md) for the contact reproduction, before/after values, bundled eligibility, sources and diagnostics. Omit `CivilianCarGrip` to preserve existing handling; tire fields, `WeightType` and `Category` alone never enable it.
+
+Civilian suspension sweeps each individual wheel collision box through `SuspensionTravel`, so full
+blocks, slabs, stairs, and other collision-box terrain contribute their actual top surface rather than
+a heightmap or paired `onGround` flag. Both the current and next-tick horizontal wheel positions are
+sampled. Only supported wheels generate spring/damper response; an entirely unsupported car follows
+normal gravity, falling, body collision, and crash-damage behavior.
+
+Each `AddPartWheel` is matched to the nearest mirrored `SetWheelPos` collision wheel in local X/Z and
+moves vertically with its interpolated compression. A match farther than 0.85 blocks is considered a
+different/decorative layout and receives the legacy wheel animation without suspension translation.
+This fallback permits model packs to use a different number or arrangement of visible wheels safely.
+The four suspension defaults are written explicitly into bundled `CivilianCarGrip = true` definitions;
+other tanks, military vehicles, aircraft, and boats remain on their existing wheel behavior.
 
 - Use shared `speed`, `MotionFactor`, `MobilityYawOnGround`, `CanMoveOnGround`, `CanRotOnGround`, and `PivotTurnThrottle` for driving feel.
 - Use `SetWheelPos` for wheel/contact layout and `AddTrackHitBox` for damageable tracks. Moving tanks also use their `SetWheelPos` contact points to trample grass blocks under their wheels into dirt.

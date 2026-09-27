@@ -1037,7 +1037,35 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
    }
 
    public static void renderWheel(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float tickTime) {
-      renderWheel(info, ac.rotWheel, ac.prevRotWheel, ac.rotYawWheel, ac.prevRotYawWheel, tickTime);
+      renderWheel(ac, info, ac.rotWheel, ac.prevRotWheel, ac.rotYawWheel, ac.prevRotYawWheel, tickTime);
+   }
+
+   private static void renderWheel(MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info, float wheelRotation,
+         float previousWheelRotation, float wheelYaw, float previousWheelYaw, float tickTime) {
+      if(info.partWheel.size() > 0) {
+         float yaw = interpolateSnapshotAngle(previousWheelYaw, wheelYaw, tickTime);
+         float rotation = interpolateSnapshotAngle(previousWheelRotation, wheelRotation, tickTime);
+         Iterator iterator = info.partWheel.iterator();
+         mcheli.tank.MCH_WheelManager suspension = ac instanceof mcheli.tank.MCH_EntityTank
+               && ((mcheli.tank.MCH_EntityTank)ac).getTankInfo() != null
+               && ((mcheli.tank.MCH_EntityTank)ac).getTankInfo().civilianCarGrip
+               ? ((mcheli.tank.MCH_EntityTank)ac).WheelMng : null;
+         while(iterator.hasNext()) {
+            MCH_BaseVehicleInfo.PartWheel wheel = (MCH_BaseVehicleInfo.PartWheel)iterator.next();
+            GL11.glPushMatrix();
+            if(suspension != null) {
+               GL11.glTranslated(0.0D, suspension.getRenderWheelTravel(wheel.pos.xCoord, wheel.pos.zCoord, tickTime), 0.0D);
+            }
+            GL11.glTranslated(wheel.pos2.xCoord, wheel.pos2.yCoord, wheel.pos2.zCoord);
+            GL11.glRotated((double)(yaw * wheel.rotDir), wheel.rot.xCoord, wheel.rot.yCoord, wheel.rot.zCoord);
+            GL11.glTranslated(-wheel.pos2.xCoord, -wheel.pos2.yCoord, -wheel.pos2.zCoord);
+            GL11.glTranslated(wheel.pos.xCoord, wheel.pos.yCoord, wheel.pos.zCoord);
+            GL11.glRotatef(rotation, 1.0F, 0.0F, 0.0F);
+            GL11.glTranslated(-wheel.pos.xCoord, -wheel.pos.yCoord, -wheel.pos.zCoord);
+            renderPart(wheel.model, info.model, wheel.modelName);
+            GL11.glPopMatrix();
+         }
+      }
    }
 
    public static void renderWheel(MCH_BaseVehicleInfo info, float wheelRotation, float previousWheelRotation,
