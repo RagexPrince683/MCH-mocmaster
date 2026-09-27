@@ -74,17 +74,17 @@ public class MCH_EntityWheel extends W_Entity {
       return hasGroundSupport(this.boundingBox, boxes);
    }
 
-   /**
-    * Sweeps this wheel's real collision shape down from a body-relative anchor.
-    * Both the current and predicted horizontal positions are tested so a fast car
-    * cannot outrun its contact probe between server ticks.
-    */
-   public double measureSuspensionCompression(Vec3 currentAnchor, Vec3 predictedAnchor, double travel) {
-      double current = this.measureCompressionAt(currentAnchor, travel);
-      double predicted = this.measureCompressionAt(predictedAnchor, travel);
-      double compression = Math.max(current, predicted);
+   /** Sweeps the real wheel collision shape down at the body's resolved position. */
+   public double measureSuspensionCompression(Vec3 anchor, double travel) {
+      double compression = this.measureCompressionAt(anchor, travel);
       this.suspensionSupported = compression >= 0.0D;
       return this.suspensionSupported ? compression : 0.0D;
+   }
+
+   /** Returns the collision-surface height beneath this wheel, or NaN without support. */
+   public double measureSupportHeight(Vec3 anchor, double reach) {
+      double compression = this.measureCompressionAt(anchor, reach);
+      return compression >= 0.0D ? anchor.yCoord - reach + compression : Double.NaN;
    }
 
    private double measureCompressionAt(Vec3 anchor, double travel) {

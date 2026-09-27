@@ -36,11 +36,23 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 
 Civilian car grip uses wheel collision support adjusted for the invisible wheel box rest gap, a bounded sideways correction, and a steering limit tied to the same contact/grip budget. Tire sizes alter damping response by at most ±5%; tire width does not directly multiply the grip limit. See [car tire grip](../car-tire-grip.md) for the contact reproduction, before/after values, bundled eligibility, sources and diagnostics. Omit `CivilianCarGrip` to preserve existing handling; tire fields, `WeightType` and `Category` alone never enable it.
 
-Civilian suspension sweeps each individual wheel collision box through `SuspensionTravel`, so full
-blocks, slabs, stairs, and other collision-box terrain contribute their actual top surface rather than
-a heightmap or paired `onGround` flag. Both the current and next-tick horizontal wheel positions are
-sampled. Only supported wheels generate spring/damper response; an entirely unsupported car follows
+Civilian suspension sweeps each individual wheel collision box at the body position actually reached
+after collision resolution. Full blocks, slabs, stairs, and other collision-box terrain therefore
+contribute their real top surface rather than a heightmap, paired `onGround` flag, or unreachable
+predicted position. Spring/damper response remains limited to `SuspensionTravel`; the terrain pose can
+look through the additional configured `StepHeight` so the lower wheels remain part of the pitch and
+roll calculation while the collision body bridges a legal step. An entirely unsupported car follows
 normal gravity, falling, body collision, and crash-damage behavior.
+
+Body pose and body collision are independent. Pitch and roll are calculated from opposing supported
+wheel surface heights, then smoothed back to zero when those surfaces become level or an opposing side
+has no support. The collision box itself is not rotated. Stair ascent uses the normal entity step path.
+That path used only the body's previous `onGround` flag or a clipped downward move to decide whether a
+step was allowed. Civilian spring motion can clear both tests while the tires are still supported; the
+step attempt was skipped, ordinary horizontal collision clipped X or Z, and the final collision cleanup
+set the corresponding `motionX` or `motionZ` to zero. Actual civilian wheel support now also enables the
+unchanged bounded step resolver. It still applies collision offsets on every axis, so this fix neither
+segments movement nor increases `StepHeight` nor permits the body to enter a solid block.
 
 Each `AddPartWheel` is matched to the nearest mirrored `SetWheelPos` collision wheel in local X/Z and
 moves vertically with its interpolated compression. Its authored `AddPartWheel` Y position is the
