@@ -361,3 +361,12 @@ Developer/backend
   offset so successive legal stair edges complete without clipping or bypassing configured step height.
 - Recovered unsupported axle/side pose toward level instead of using world height zero, while preserving
   responsive pitch and roll whenever opposing supported wheels provide a valid terrain slope.
+
+2026-09-27 05:15 - Stabilize stationary civilian suspension and step ascent
+
+- Stopped supported suspension probes from adding upward spring energy while the collision body is
+  stationary on ground, without disabling wheel travel or terrain pitch and roll updates.
+- Limited segmented collision resolution to one configured `StepHeight` of total rise per tick and
+  prevented negligible horizontal movement from entering the step path.
+- Applied terrain slowdown once per tick and retained collision and ground state across all movement
+  segments, restoring consistent one-block approaches without compounding drag.
