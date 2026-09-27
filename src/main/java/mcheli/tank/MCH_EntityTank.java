@@ -1043,6 +1043,13 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 //         this.getRiddenByEntity().rotationPitch = this.getRiddenByEntity().prevRotationPitch;
 //      }
 
+      MCH_TankInfo info = this.getTankInfo();
+      boolean useCarGrip = info != null && info.civilianCarGrip && info.carLateralGrip > 0.0F;
+      if(useCarGrip) {
+         // The server advances the wheels before it advances the vehicle body. Keep car
+         // prediction in the same order so both sides probe the same suspension state.
+         this.updateWheels();
+      }
       if(super.aircraftPosRotInc > 0) {
          this.applyServerPositionAndRotation();
       } else {
@@ -1059,7 +1066,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          }
       }
 
-      this.updateWheels();
+      if(!useCarGrip) {
+         this.updateWheels();
+      }
       this.onUpdate_Particle2();
       this.updateSound();
       if(super.worldObj.isRemote) {
