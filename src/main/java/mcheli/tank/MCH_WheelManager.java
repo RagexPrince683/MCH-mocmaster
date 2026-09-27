@@ -492,7 +492,9 @@ public class MCH_WheelManager {
       this.updateRenderNeutral(supported);
 
       if(supported > 0) {
-         if(!car.worldObj.isRemote) {
+         double horizontalMovement = Math.sqrt(x * x + z * z);
+         boolean stationaryOnBodyContact = car.onGround && horizontalMovement < 1.0E-4D;
+         if(!car.worldObj.isRemote && !stationaryOnBodyContact) {
             double springAcceleration = totalResponse / this.wheels.length;
             car.motionY += MathHelper.clamp_double(springAcceleration, -0.06D, 0.06D);
          }

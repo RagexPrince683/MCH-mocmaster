@@ -43,17 +43,19 @@ body collision resolution at the wheel's resolved position; predicted support fr
 did not reach is never reused. Only supported wheels generate spring/damper response; an entirely
 unsupported car follows normal gravity, falling, body collision, and crash-damage behavior.
 
-Civilian-car horizontal movement is collision-resolved in segments no longer than 0.45 blocks. This
-lets each edge of a successive staircase complete a normal body step while retaining the configured
-`StepHeight` as the hard vertical limit. The step-up collision result is applied before horizontal and
-downward resolution, so suspension does not raise the body through a solid block. If an axle or side
+Civilian-car horizontal movement is collision-resolved in segments no longer than 0.45 blocks. Each
+segment can complete part of a normal body step, while the sum of all segment rises is limited to the
+configured `StepHeight` for the tick. A near-zero horizontal request cannot enter the step path, and
+terrain slowdown is applied once rather than once per segment. The step-up collision result is applied
+before horizontal and downward resolution, so suspension does not raise the body through a solid block.
+If an axle or side
 temporarily loses support, pose calculation treats that direction as unknown and eases it toward level
 instead of substituting world height zero. Supported front/rear and left/right pairs still produce
 responsive terrain pitch and roll, and level support converges back to a neutral pose.
 
 ### Civilian suspension collision trace
 
-The suspension failures introduced with the first spring implementation had four related causes:
+The suspension failures introduced with the first spring implementation had five related causes:
 
 - The wheel manager ran before lateral grip changed yaw and before body collision resolved movement.
   It compared current and predicted probes with `max`, then placed the wheel at the predicted position.
@@ -73,6 +75,17 @@ The suspension failures introduced with the first spring implementation had four
   after a slab or the rear after a short bumpy section therefore generated a large false pitch which
   could remain after reaching flat ground. Missing opposing support now requests a level target;
   genuine opposing support heights continue to drive terrain pitch and roll.
+- The spring used `compression / SuspensionTravel * SuspensionSpring` directly. The configured
+  `SuspensionSpring = 0.055` can add as much as 0.055 blocks/tick² after collision. That exceeds the
+  roughly 0.047 blocks/tick² stationary downward term for civilian configurations using the default
+  gravity, so contact could raise the collision body until the probe lost its 0.45-block travel, then
+  let it fall and repeat. On tightly packed bumps, residual horizontal motion could additionally enter
+  every 0.45-block collision segment's full 1.2-block Starion step attempt, directly moving both body
+  and model upward more than once in a tick. Body pitch/roll moved subsequent probe anchors, and wheel
+  compression moved individual rendered wheels, but neither was merely a visual offset hiding a fixed
+  body. Grounded civilian cars with negligible resolved horizontal movement now suppress spring-force
+  injection; wheel compression, rendered travel, and terrain pose continue updating without creating
+  stationary energy.
 
 For reference, the bundled Mitsubishi Starion combines `StepHeight = 1.2`,
 `SuspensionTravel = 0.45`, mirrored `SetWheelPos` contacts at X ±0.68 and Z 1.865/-1.489,
