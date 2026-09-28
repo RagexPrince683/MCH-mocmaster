@@ -5,6 +5,8 @@ including its historical fixture results. `fa6d246` subsequently introduced orie
 extra-body sweeps, uses a 45-degree terrain pitch limit, and removed the test
 sources mentioned below. The final sections describe the oriented-primary correction
 and diagonal collision/pose recovery; historical test results do not validate them.
+The final straight-stair section supersedes the earlier terrain-seed, step-pose,
+momentum-cleanup and client-prediction descriptions.
 
 This change applies only to `CivilianCarGrip` vehicles. The checkout was clean before
 the change. `MCH_EntityTank`, `MCH_WheelManager`, `MCH_RenderTank`, and the common
@@ -540,3 +542,112 @@ classes, fixtures, temporary repository files, configuration tuning, game launch
 packaging or reobfuscation were added or performed. The seven driving cases,
 dedicated-server operation and multiplayer pose interpolation need runtime feedback;
 the conservative angular envelope can limit rotation near tight obstacles.
+
+## Straight stairs and slab transitions — 2026-09-28
+
+### Supported causes and limits of the evidence
+
+The supplied screenshots show throttle 1.00, nearly level pitch and horizontal
+motion around 0.15–0.16 block/tick. The car HUD's 91/100 or 100/100 is HP, and its
+tachometer is synchronized engine RPM. The debug `speed` expression is the length
+of XYZ velocity, not measured horizontal displacement; with the pictured zero Y
+velocity it approximately equals horizontal velocity. Throttle/RPM alone do not
+prove tire force or accepted body travel. The drivetrain reads signed horizontal
+velocity along yaw and collision-derived driven-wheel contact.
+
+Source inspection and straight collision-equation calculations identify three
+related failure paths. These calculations use Starion's effective 2.0 x 0.7 primary,
+four configured extra components, actual axle coordinates and StepHeight 1.2. They
+are not captured game ticks or a reproduction of the exact photographed layout.
+
+- The pitch walk starts at the level chassis reference near its center. On a
+  staircase a flat car can be supported by its front underside while that center
+  surface and the rear axle lie more than StepHeight below the reference. The
+  front axle remains directly reachable, but the old fallback does not walk from
+  it to the rear. A missing rear sample returns NaN and decays pitch toward level.
+- The front lower component can touch the next vertical riser. Its conservative
+  angular envelope extends into that riser even for a small nose-up rotation;
+  the independent 0.1-block pose lift cannot clear a half-block riser. A later
+  supported step has more clearance, but previously retained the flat pose.
+- A faster request can accept a partial raised step, land on a tread and still
+  touch the next reachable riser. The final contact probe classifies that axis as
+  blocked and erases its whole velocity, despite successful climbing progress.
+  This is distinct from an invalid landing or an unsupported drivetrain axle.
+
+For an illustrative half-tread staircase with tops rising 0.5 every 0.5 Z, a level
+Starion at Y=2.9, Z=0.15 rests its front underside at Z=3, Y=3. The level chassis
+floor is 2.55, center tread 0.5, front axle tread 2.5 and rear axle tread -1.0.
+Only the front axle is directly within reference reach. Walking adjacent treads
+from it supplies the rear height and a desired pitch capped at -45 degrees.
+With a 1.4-block forward request, the previous step resolves about 1.0 Z and
+1.0 Y, then clears forward velocity at the next riser. Raised rotation resolves
+about 1.005226 Z, 0.918058 Y and -2 degrees; the next-riser clearance check retains
+velocity. Movement still obeys the per-update rise budget and can be shorter than
+the retained velocity request. The HUD speed is not a promise of full requested
+displacement on that update.
+
+### Current movement rules
+
+`MCH_WheelManager` retains the center-to-axle walk and direct axle queries. If an
+axle is still missing, a directly reachable axle can seed a bounded walk over
+actual collision surfaces to it. Every sample retains StepHeight and column
+headroom checks; a missing surface terminates that path. Terrain samples propose
+angles only and never grant physical wheel contact, step permission or propulsion.
+
+`MCH_CarBodyMovement` compares unchanged raised-body sweeps with a candidate
+rotated at the same permitted lift before horizontal translation. The angular
+envelope and final rotated body must clear all primary/extra components. Both
+variants must improve horizontal progress, settle by their actual lift, land on
+physical support, remain within the existing rise budget and finish clear. Equal
+progress may select the valid terrain pose. `MCH_EntityTank` commits candidate
+angles only when that complete path is accepted; total pitch/roll changes stay
+within the existing two-degree update limit. No yaw or lateral movement is added.
+
+After an accepted partial step, a blocked-axis probe may retain velocity only if
+a copy of the landed body can lift within the same step limit, advance a 1e-5-block
+probe on that axis, settle onto support and remain fully clear. This query grants
+no further movement or height in the current update. Walls above the step reach,
+insufficient headroom and invalid landings still remove blocked velocity. Ordinary
+blocked movement, embedded-start rejection and unsupported movement retain their
+existing rules. Stationary movement cannot trigger a step or this continuation.
+
+Client extrapolation now uses the same civilian pose and compound-body resolver.
+Authoritative position interpolation remains unchanged; the local pilot also
+interpolates the server's accepted pitch/roll instead of retaining unchecked wheel
+angles. Direct suspension/frame-angle application is removed for civilian cars.
+Both sides reconcile wheels to the accepted position/pose without another spring
+impulse. Engine/control authority, contact gates, tire grip, gearing, speed limits,
+definitions, persistence and the military movement branch are unchanged.
+
+### Verification and remaining gameplay checks
+
+Completed source review covers throttle/control and drivetrain contact, wheel
+prediction, terrain selection, oriented primary/extras, angular clearance, normal
+and step sweeps, landing, velocity/fall cleanup, pose packets and interpolation,
+HUD values, and changes from fa6d246 through 2d1900bce344c7560217c0928f832a9456fc9f15.
+Read-only save inspection found no car at the photographed stopped coordinates;
+the exact failure tick and block metadata remain unobserved.
+
+In-memory straight collision-equation checks covered slow and partial fast stair
+climbs, slab-to-full-block ascent, level travel, walls, an over-height step, an
+engine-limited ceiling, an unsupported drop, and a valid partial climb ending at
+an unstepable wall. Eight repeated fast stair requests retain forward velocity,
+advance pitch to -16 degrees and finish clear with each Y rise below 1.2. Twenty
+subsequent stationary requests gain zero height. These calculations approximate
+the straight SAT geometry; they do not execute Minecraft, the drivetrain or network
+ticks, and they are not test classes or gameplay verification.
+
+`gradlew.bat compileJava --offline --no-configuration-cache --no-daemon
+--gradle-user-home C:/Users/Owner/.gradle` passed with the existing Java 25/Jabel
+setup and Forge 1.7.10 dependencies. All three changed production classes have
+class major version 52 (Java 8). The sandboxed attempt could not open the existing
+Gradle wrapper lock; the same task passed with authorized cache access.
+No test sources, fixtures, harnesses, debug mods, tuning changes, packaging,
+reobfuscation or game launch were added or performed.
+
+In-game confirmation remains with the user: straight ascent/descent and stopping
+or restarting on the pictured stairs and slab transition; sustained throttle and
+wheel contact after returning to level ground; wall, over-height and low-ceiling
+stops; stationary/airborne height and lateral drift; dedicated server and local/
+remote-player prediction. The exact photographed obstacle and the conservative
+angular envelope near tight headroom remain runtime uncertainties.

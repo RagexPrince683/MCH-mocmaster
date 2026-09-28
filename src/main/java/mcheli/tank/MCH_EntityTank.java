@@ -510,11 +510,22 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       if(this.getTankInfo() != null && this.getTankInfo().civilianCarGrip) {
          final MCH_CarBodyMovement.Collisions collisions = this::getBodyComponentCollisions;
          if(this.getTankInfo().carGripDiagnostics && !super.worldObj.isRemote) civilianTrace = new MCH_CarBodyMovement.Trace();
-         if(!super.worldObj.isRemote) civilianPoseY = this.resolveCivilianPose(collisions);
+         civilianPoseY = this.resolveCivilianPose(collisions);
+         // Keep the whole update within the existing two-degree pitch/roll limit,
+         // including a pose change that the raised step can clear later.
+         final float stepPitch = this.carBodyPitch
+               + MathHelper.clamp_float(this.WheelMng.targetPitch - this.carBodyPitch, -2, 2);
+         final float stepRoll = this.carBodyRoll
+               + MathHelper.clamp_float(this.WheelMng.targetRoll - this.carBodyRoll, -2, 2);
+         MCH_CarBodyMovement.StepPose stepPose = stepPitch == this.getRotPitch() && stepRoll == this.getRotRoll()
+               ? null : lift -> this.civilianStepPose(collisions, lift, stepPitch, stepRoll);
          List<MCH_CarCollisionBox> body = this.carBodyAt(this.getRotYaw(), this.getRotPitch(), this.getRotRoll(), 0, 0);
          civilianMovement = MCH_CarBodyMovement.resolveBody(body, collisions, mx, my, mz,
                super.ySize < 0.05F ? Math.max(0, super.stepHeight - civilianPoseY) : 0,
-               this.hasCurrentCivilianWheelSupport(collisions), civilianTrace);
+               this.hasCurrentCivilianWheelSupport(collisions), civilianTrace, stepPose);
+         if(civilianMovement.rotated) {
+            this.setRotPitch(stepPitch); this.setRotRoll(stepRoll);
+         }
          parX = civilianMovement.x;
          parY = civilianMovement.y;
          parZ = civilianMovement.z;
@@ -570,12 +581,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       super.posZ = civilianMovement != null ? nowPosZ + parZ : (positionX + maxZ) / 2.0D;
       if(civilianMovement != null) {
          this.updateCarPrimaryBounds();
-         if(!super.worldObj.isRemote) {
-            this.carBodyYaw = this.getRotYaw(); this.carBodyPitch = this.getRotPitch(); this.carBodyRoll = this.getRotRoll();
-            this.carBodyPoseInitialized = true;
-            this.carPhysicsYaw = this.carBodyYaw;
-            this.WheelMng.settleCivilianWheels();
-         }
+         this.acceptCivilianBodyPose();
       } else {
          this.carBodyPoseInitialized = false;
       }
@@ -652,7 +658,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       return this.carBodyAt(yaw, pitch, roll, lift, arc, 0);
    }
 
-   /** Server pose changes use a swept angular envelope and a bounded supported lift/settle. */
+   /** Pose changes use a swept angular envelope and a bounded supported lift/settle. */
    private double resolveCivilianPose(MCH_CarBodyMovement.Collisions collisions) {
       float desiredYaw = this.getRotYaw();
       float desiredPitch = this.WheelMng.targetPitch, desiredRoll = this.WheelMng.targetRoll;
@@ -699,6 +705,25 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          return lift + down;
       }
       return 0;
+   }
+
+   /** Raised rotation shares the step's lift, clearance and landing budget. */
+   private List<MCH_CarCollisionBox> civilianStepPose(MCH_CarBodyMovement.Collisions collisions,
+         double lift, float pitch, float roll) {
+      float currentPitch = this.getRotPitch(), currentRoll = this.getRotRoll();
+      double arc = Math.toRadians(Math.abs(pitch - currentPitch) + Math.abs(roll - currentRoll)) * 0.5D;
+      List<MCH_CarCollisionBox> envelope = this.carBodyAt(this.getRotYaw(),
+            (currentPitch + pitch) * 0.5F, (currentRoll + roll) * 0.5F, lift, arc);
+      if(!MCH_CarBodyMovement.clear(envelope, collisions)) return null;
+      List<MCH_CarCollisionBox> body = this.carBodyAt(this.getRotYaw(), pitch, roll, lift, 0);
+      return MCH_CarBodyMovement.clear(body, collisions) ? body : null;
+   }
+
+   private void acceptCivilianBodyPose() {
+      this.carBodyYaw = this.getRotYaw(); this.carBodyPitch = this.getRotPitch(); this.carBodyRoll = this.getRotRoll();
+      this.carBodyPoseInitialized = true;
+      this.carPhysicsYaw = this.carBodyYaw;
+      this.WheelMng.settleCivilianWheels();
    }
 
    /** Read-only support at the present axle footprint, never at the pending destination. */
@@ -756,8 +781,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          }
 
          this.updateRecoil(partialTicks);
-         this.setRotPitch(this.getRotPitch() + (this.WheelMng.targetPitch - this.getRotPitch()) * partialTicks);
-         this.setRotRoll(this.getRotRoll() + (this.WheelMng.targetRoll - this.getRotRoll()) * partialTicks);
+         if(this.getTankInfo() == null || !this.getTankInfo().civilianCarGrip) {
+            this.setRotPitch(this.getRotPitch() + (this.WheelMng.targetPitch - this.getRotPitch()) * partialTicks);
+            this.setRotRoll(this.getRotRoll() + (this.WheelMng.targetRoll - this.getRotRoll()) * partialTicks);
+         }
          boolean isFly = MCH_Lib.getBlockIdY(this, 3, -3) == 0;
          //System.out.println("isfly" + isFly);
 
@@ -1370,19 +1397,33 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 //      }
 
       MCH_TankInfo info = this.getTankInfo();
-      boolean useCarGrip = info != null && info.civilianCarGrip && info.carLateralGrip > 0.0F;
-      if(useCarGrip) {
+      boolean useCarBody = info != null && info.civilianCarGrip;
+      if(useCarBody) {
          // The server advances the wheels before it advances the vehicle body. Keep car
          // prediction in the same order so both sides probe the same suspension state.
          this.updateWheels();
       }
       if(super.aircraftPosRotInc > 0) {
+         if(useCarBody && !this.isDestroyed() && W_Lib.isClientPlayer(this.getRiddenByEntity())
+               && this.getRidingEntity() == null) {
+            // The common interpolation keeps a local pilot's angles. Civilian
+            // pitch/roll instead follow the server's accepted collision pose.
+            this.setRotPitch((float)(this.getRotPitch()
+                  + (super.aircraftPitch - this.getRotPitch()) / super.aircraftPosRotInc));
+            this.setRotRoll((float)(this.getRotRoll()
+                  + MathHelper.wrapAngleTo180_double(this.getServerRoll() - this.getRotRoll()) / super.aircraftPosRotInc));
+         }
          this.applyServerPositionAndRotation();
+         if(useCarBody) this.acceptCivilianBodyPose();
       } else {
          // Use the same reverse clamp for client extrapolation. Server interpolation
          // above continues to follow authoritative positions without locally clipping them.
          this.applyCivilianCarReverseSpeedLimit(this.getAcInfo().enableBack && super.throttleBack > 0.0F);
-         this.setPosition(super.posX + super.motionX, super.posY + super.motionY, super.posZ + super.motionZ);
+         if(useCarBody) {
+            this.moveEntity(super.motionX, super.motionY, super.motionZ);
+         } else {
+            this.setPosition(super.posX + super.motionX, super.posY + super.motionY, super.posZ + super.motionZ);
+         }
          if(this.hasCarDrivetrain()) {
             double speed = Math.hypot(super.motionX, super.motionZ);
             if(speed > 0) {
@@ -1404,7 +1445,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          }
       }
 
-      if(!useCarGrip) {
+      if(!useCarBody) {
          this.updateWheels();
       }
       this.onUpdate_Particle2();

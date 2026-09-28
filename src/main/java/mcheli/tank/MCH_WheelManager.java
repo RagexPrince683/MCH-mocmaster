@@ -527,16 +527,10 @@ public class MCH_WheelManager {
             car.worldObj.isRemote ? 0.28F : 0.45F);
       this.updateRenderNeutral(supported, terrainPitch);
 
-      // This method runs every client tick, including while the local driver is stopped.
-      // Applying the predicted pose here prevents the last rendered terrain roll from
-      // waiting indefinitely for another steering/input angle update.
-      if(car.worldObj.isRemote) {
-         car.setRotPitch(this.targetPitch);
-         car.setRotRoll(this.targetRoll);
-      }
+      // Both sides apply candidate angles through the body's collision resolver.
    }
 
-   /** Reconcile predicted suspension with the accepted server body, without a second spring impulse. */
+   /** Reconcile predicted suspension with the accepted body, without a second spring impulse. */
    void settleCivilianWheels() {
       MCH_EntityBaseVehicle car = this.parent;
       MCH_TankInfo info = ((MCH_EntityTank)car).getTankInfo();
@@ -594,9 +588,17 @@ public class MCH_WheelManager {
       if(MCH_CarTerrainPitch.facesWall(this.getCivilianTerrainBoxes(sweep),
             levelBody, step, forwardX, forwardZ)) return 0.0F;
 
+      double[] axleHeights = new double[this.wheels.length];
+      for(int i = 0; i < this.wheels.length; ++i) {
+         MCH_EntityWheel wheel = this.wheels[i];
+         axleHeights[i] = wheel == null || wheel.isDead || wheel.pos == null ? Double.NaN
+               : this.sampleCivilianTerrainHeight(wheel.pos.xCoord, wheel.pos.zCoord,
+                     x, z, referenceY, step, clearance);
+      }
       double front = 0.0D, rear = 0.0D, frontZ = 0.0D, rearZ = 0.0D;
       int frontCount = 0, rearCount = 0;
-      for(MCH_EntityWheel wheel : this.wheels) {
+      for(int i = 0; i < this.wheels.length; ++i) {
+         MCH_EntityWheel wheel = this.wheels[i];
          if(wheel == null || wheel.isDead || wheel.pos == null) continue;
          // Yaw-only locations avoid feeding suspension extension or the previous pitch back
          // into horizontal terrain selection. This is the pending body's wheel footprint.
@@ -606,15 +608,20 @@ public class MCH_WheelManager {
             // Follow adjacent treads to the axle. StepHeight bounds each local rise,
             // not the total height difference across a long car on a steep slope.
             // These are read-only terrain columns; body movement remains one sweep.
-            int samples = Math.max(1, (int)Math.ceil(Math.abs(wheel.pos.zCoord) / 0.5D));
-            for(int sample = 1; sample <= samples && !Double.isNaN(height); ++sample) {
-               height = this.sampleCivilianTerrainHeight(wheel.pos.xCoord,
-                     wheel.pos.zCoord * sample / samples, x, z, height, step, clearance);
+            height = this.followCivilianTerrain(wheel.pos.xCoord, 0, wheel.pos.xCoord,
+                  wheel.pos.zCoord, x, z, height, step, clearance);
+         }
+         if(Double.isNaN(height)) height = axleHeights[i];
+         if(Double.isNaN(height)) {
+            // A long chassis can rest on its front underside above the center's
+            // sampling reach. Seed from a reachable axle, then follow actual
+            // adjacent treads to the missing axle. Gaps still terminate the path.
+            for(int seed = 0; seed < this.wheels.length && Double.isNaN(height); ++seed) {
+               if(Double.isNaN(axleHeights[seed])) continue;
+               Vec3 start = this.wheels[seed].pos;
+               height = this.followCivilianTerrain(start.xCoord, start.zCoord, wheel.pos.xCoord,
+                     wheel.pos.zCoord, x, z, axleHeights[seed], step, clearance);
             }
-         } else {
-            // A bridge/gap under the center does not erase directly reachable axle terrain.
-            height = this.sampleCivilianTerrainHeight(wheel.pos.xCoord, wheel.pos.zCoord,
-                  x, z, referenceY, step, clearance);
          }
          if(Double.isNaN(height)) continue;
          if(wheel.pos.zCoord >= this.weightedCenter.zCoord) {
@@ -626,6 +633,17 @@ public class MCH_WheelManager {
       if(frontCount == 0 || rearCount == 0) return Float.NaN;
       return MCH_CarTerrainPitch.angle(front / frontCount, rear / rearCount,
             frontZ / frontCount - rearZ / rearCount);
+   }
+
+   private double followCivilianTerrain(double startX, double startZ, double endX, double endZ,
+         double x, double z, double height, double step, double clearance) {
+      int samples = Math.max(1, (int)Math.ceil(Math.hypot(endX - startX, endZ - startZ) / 0.5D));
+      for(int sample = 1; sample <= samples && !Double.isNaN(height); ++sample) {
+         double fraction = (double)sample / samples;
+         height = this.sampleCivilianTerrainHeight(startX + (endX - startX) * fraction,
+               startZ + (endZ - startZ) * fraction, x, z, height, step, clearance);
+      }
+      return height;
    }
 
    private double sampleCivilianTerrainHeight(double localX, double localZ, double x, double z,
