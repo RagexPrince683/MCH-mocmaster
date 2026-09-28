@@ -33,6 +33,8 @@ import mcheli.wrapper.W_MOD;
 import mcheli.wrapper.W_Render;
 import mcheli.wrapper.modelloader.W_ModelCustom;
 import mcheli.tank.MCH_TurretPopModelCache;
+import mcheli.tank.MCH_EntityTank;
+import mcheli.tank.MCH_TankInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.FontRenderer;
@@ -307,7 +309,12 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
 
    public static void renderLight(double x, double y, double z, float tickTime, MCH_EntityBaseVehicle ac, MCH_BaseVehicleInfo info) {
       if(ac.haveSearchLight()) {
-         if(ac.isSearchLightON()) {
+         boolean normalLightsOn = ac.isSearchLightON();
+         boolean brakeLightsOn = ac instanceof MCH_EntityTank
+               && info instanceof MCH_TankInfo
+               && ((MCH_TankInfo)info).enableBrakeLights
+               && ac.getBrake();
+         if(normalLightsOn || brakeLightsOn) {
             Entity entity = ac.getEntityBySeatId(1);
             if(entity != null) {
                ac.lastSearchLightYaw = entity.rotationYaw;
@@ -331,42 +338,48 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
             GL11.glDisable(2884);
             GL11.glDepthMask(false);
             float rot = ac.prevRotYawWheel + (ac.rotYawWheel - ac.prevRotYawWheel) * tickTime;
-            Iterator iteratedValueIndex = info.searchLights.iterator();
+            int renderPasses = normalLightsOn && brakeLightsOn ? 2 : 1;
+            for(int pass = 0; pass < renderPasses; ++pass) {
+               boolean brakeOnlyPass = brakeLightsOn && (!normalLightsOn || pass == 1);
+               Iterator iteratedValueIndex = info.searchLights.iterator();
+               while(iteratedValueIndex.hasNext()) {
+                  MCH_BaseVehicleInfo.SearchLight sl = (MCH_BaseVehicleInfo.SearchLight)iteratedValueIndex.next();
+                  if(brakeOnlyPass && !sl.brakeLight) {
+                     continue;
+                  }
+                  GL11.glPushMatrix();
+                  GL11.glTranslated(sl.pos.xCoord, sl.pos.yCoord, sl.pos.zCoord);
+                  float height;
+                  if(!sl.fixDir) {
+                     GL11.glRotatef(yaw - ac.getRotYaw() + sl.yaw, 0.0F, -1.0F, 0.0F);
+                     GL11.glRotatef(pitch + 90.0F - ac.getRotPitch() + sl.pitch, 1.0F, 0.0F, 0.0F);
+                  } else {
+                     height = 0.0F;
+                     if(sl.steering) {
+                        height = -rot * sl.stRot;
+                     }
 
-            while(iteratedValueIndex.hasNext()) {
-               MCH_BaseVehicleInfo.SearchLight sl = (MCH_BaseVehicleInfo.SearchLight)iteratedValueIndex.next();
-               GL11.glPushMatrix();
-               GL11.glTranslated(sl.pos.xCoord, sl.pos.yCoord, sl.pos.zCoord);
-               float height;
-               if(!sl.fixDir) {
-                  GL11.glRotatef(yaw - ac.getRotYaw() + sl.yaw, 0.0F, -1.0F, 0.0F);
-                  GL11.glRotatef(pitch + 90.0F - ac.getRotPitch() + sl.pitch, 1.0F, 0.0F, 0.0F);
-               } else {
-                  height = 0.0F;
-                  if(sl.steering) {
-                     height = -rot * sl.stRot;
+                     GL11.glRotatef(0.0F + sl.yaw + height, 0.0F, -1.0F, 0.0F);
+                     GL11.glRotatef(90.0F + sl.pitch, 1.0F, 0.0F, 0.0F);
                   }
 
-                  GL11.glRotatef(0.0F + sl.yaw + height, 0.0F, -1.0F, 0.0F);
-                  GL11.glRotatef(90.0F + sl.pitch, 1.0F, 0.0F, 0.0F);
+                  height = sl.height;
+                  float width = sl.width / 2.0F;
+                  Tessellator tessellator = Tessellator.instance;
+                  tessellator.startDrawing(6);
+                  tessellator.setColorRGBA_I(16777215 & sl.colorStart, sl.colorStart >> 24 & 255);
+                  tessellator.addVertex(0.0D, 0.0D, 0.0D);
+                  tessellator.setColorRGBA_I(16777215 & sl.colorEnd, sl.colorEnd >> 24 & 255);
+                  boolean VNUM = true;
+
+                  for(int i = 0; i < 25; ++i) {
+                     float angle = (float)(15.0D * (double)i / 180.0D * 3.141592653589793D);
+                     tessellator.addVertex((double)(MathHelper.sin(angle) * width), (double)height, (double)(MathHelper.cos(angle) * width));
+                  }
+
+                  tessellator.draw();
+                  GL11.glPopMatrix();
                }
-
-               height = sl.height;
-               float width = sl.width / 2.0F;
-               Tessellator tessellator = Tessellator.instance;
-               tessellator.startDrawing(6);
-               tessellator.setColorRGBA_I(16777215 & sl.colorStart, sl.colorStart >> 24 & 255);
-               tessellator.addVertex(0.0D, 0.0D, 0.0D);
-               tessellator.setColorRGBA_I(16777215 & sl.colorEnd, sl.colorEnd >> 24 & 255);
-               boolean VNUM = true;
-
-               for(int i = 0; i < 25; ++i) {
-                  float angle = (float)(15.0D * (double)i / 180.0D * 3.141592653589793D);
-                  tessellator.addVertex((double)(MathHelper.sin(angle) * width), (double)height, (double)(MathHelper.cos(angle) * width));
-               }
-
-               tessellator.draw();
-               GL11.glPopMatrix();
             }
 
             GL11.glDepthMask(true);

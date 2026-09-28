@@ -69,6 +69,7 @@ Category = C
 ; Tank or Car or Unknown
 WeightType = Car
 CivilianCarGrip = true
+EnableBrakeLights = true
 SuspensionSpring = 0.055
 SuspensionCompressionDamping = 0.035
 SuspensionReboundDamping = 0.050
@@ -106,23 +107,23 @@ PartWheelRot = 75
 
 ;テールランプ
 ;L
-AddFixedSearchLight =  0.9082, 0.835,-3.130,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
-AddFixedSearchLight =  0.8332, 0.835,-3.130,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
-AddFixedSearchLight =  0.7332, 0.835,-3.135,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
-AddFixedSearchLight =  0.6332, 0.835,-3.14,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
-AddFixedSearchLight =  0.5332, 0.835,-3.155,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
-AddFixedSearchLight =  0.4332, 0.835,-3.16,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
-AddFixedSearchLight =  0.3332, 0.835,-3.165,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  0.9082, 0.835,-3.130,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  0.8332, 0.835,-3.130,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  0.7332, 0.835,-3.135,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  0.6332, 0.835,-3.14,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  0.5332, 0.835,-3.155,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  0.4332, 0.835,-3.16,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  0.3332, 0.835,-3.165,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
 ;AddFixedSearchLight =  0.2332, 0.835,-3.17,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
 ;R
 
-AddFixedSearchLight =  -0.9082, 0.835,-3.130,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
-AddFixedSearchLight =  -0.8332, 0.835,-3.130,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
-AddFixedSearchLight =  -0.7332, 0.835,-3.135,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
-AddFixedSearchLight =  -0.6332, 0.835,-3.14,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
-AddFixedSearchLight =  -0.5332, 0.835,-3.155,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
-AddFixedSearchLight =  -0.4332, 0.835,-3.16,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
-AddFixedSearchLight =  -0.3332, 0.835,-3.165,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  -0.9082, 0.835,-3.130,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  -0.8332, 0.835,-3.130,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  -0.7332, 0.835,-3.135,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  -0.6332, 0.835,-3.14,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  -0.5332, 0.835,-3.155,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  -0.4332, 0.835,-3.16,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
+AddBrakeLight =  -0.3332, 0.835,-3.165,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  -0.0,  0
 
 ;AddFixedSearchLight = -0.48, 0.835,-3.165,   0xFFFF0000,   0x10FF0000,    0.05, 0.25, -6.0,  0
 ;AddFixedSearchLight = -0.58, 0.835,-3.16,   0xFFFF0000,   0x10FF0000,    0.05, 0.25, -6.0,  0

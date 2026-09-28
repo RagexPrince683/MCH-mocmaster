@@ -37,6 +37,7 @@ WeightedCenterZ = 1.0
 
 WeightType = Car
 CivilianCarGrip = true
+EnableBrakeLights = true
 SuspensionSpring = 0.055
 SuspensionCompressionDamping = 0.035
 SuspensionReboundDamping = 0.050
@@ -88,10 +89,10 @@ AddFixedSearchLight =  0.95, 0.58, 2.77,   0x50FFFFFF,   0x00FFFFC0,    0.25, 0.
 AddFixedSearchLight = -0.95, 0.58, 2.77,   0x50FFFFFF,   0x00FFFFC0,    0.25, 0.55,  -5,  0
 
 ;テールランプ
-AddFixedSearchLight =  0.90, 0.66,-2.95,   0xFFFF0000,   0x10FF0000,    0.05, 0.55,  15.0,  11
-AddFixedSearchLight = -0.90, 0.66,-2.95,   0xFFFF0000,   0x10FF0000,    0.05, 0.55, -15.0,  11
-AddFixedSearchLight =  0.90, 0.86,-2.95,   0xFFFF0000,   0x10FF0000,    0.05, 0.55,  15.0,  11
-AddFixedSearchLight = -0.90, 0.86,-2.95,   0xFFFF0000,   0x10FF0000,    0.05, 0.55, -15.0,  11
+AddBrakeLight =  0.90, 0.66,-2.95,   0xFFFF0000,   0x10FF0000,    0.05, 0.55,  15.0,  11
+AddBrakeLight = -0.90, 0.66,-2.95,   0xFFFF0000,   0x10FF0000,    0.05, 0.55, -15.0,  11
+AddBrakeLight =  0.90, 0.86,-2.95,   0xFFFF0000,   0x10FF0000,    0.05, 0.55,  15.0,  11
+AddBrakeLight = -0.90, 0.86,-2.95,   0xFFFF0000,   0x10FF0000,    0.05, 0.55, -15.0,  11
 
 
 AddWeapon = smoke_none, 1.2,  -0.3,-1.7592,   1.0, 0.0

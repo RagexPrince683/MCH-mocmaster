@@ -43,6 +43,7 @@ EnableBack = true
 Category = C
 WeightType = Car
 CivilianCarGrip = true
+EnableBrakeLights = true
 SuspensionSpring = 0.055
 SuspensionCompressionDamping = 0.035
 SuspensionReboundDamping = 0.050
@@ -66,10 +67,10 @@ AddFixedSearchLight =  -0.5571, 0.5284, 2.5325,   0x50FFFFFF,   0x00FFFFC0,    0
 AddFixedSearchLight =  0.7, 0.5284, 2.5325,   0x50FFFFFF,   0x00FFFFC0,    0.1, 0.5, 0, 0
 AddFixedSearchLight =  -0.7, 0.5284, 2.5325,   0x50FFFFFF,   0x00FFFFC0,    0.1, 0.5,0,0
 
-AddFixedSearchLight =  0.722, 0.5524,-2.4452,   0x80FF0000,   0x00FF0000,    0.02, 0.55,  180.0,  4
-AddFixedSearchLight = -0.722, 0.5524,-2.4452,   0x80FF0000,   0x00FF0000,    0.02, 0.55,  180.0,  4
-AddFixedSearchLight =  0.53, 0.5524,-2.4452,   0x80FF0000,   0x00FF0000,    0.02, 0.55,  180.0,  4
-AddFixedSearchLight = -0.53, 0.5524,-2.4452,   0x80FF0000,   0x00FF0000,    0.02, 0.55,  180.0,  4
+AddBrakeLight =  0.722, 0.5524,-2.4452,   0x80FF0000,   0x00FF0000,    0.02, 0.55,  180.0,  4
+AddBrakeLight = -0.722, 0.5524,-2.4452,   0x80FF0000,   0x00FF0000,    0.02, 0.55,  180.0,  4
+AddBrakeLight =  0.53, 0.5524,-2.4452,   0x80FF0000,   0x00FF0000,    0.02, 0.55,  180.0,  4
+AddBrakeLight = -0.53, 0.5524,-2.4452,   0x80FF0000,   0x00FF0000,    0.02, 0.55,  180.0,  4
 
 ;basic civ car
 AddRecipe = "ABC", "DE ", "   ", A, mcheli:lightchassis, B, mcheli:wheel4, C, mcheli:engine1, D, mcheli:basicmechanicparts, E, glass_pane

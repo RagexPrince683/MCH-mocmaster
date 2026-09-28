@@ -777,7 +777,8 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                float w;
                int index;
                float result;
-               if(!item.equalsIgnoreCase("AddSearchLight") && !item.equalsIgnoreCase("AddFixedSearchLight") && !item.equalsIgnoreCase("AddSteeringSearchLight")) {
+               if(!item.equalsIgnoreCase("AddSearchLight") && !item.equalsIgnoreCase("AddFixedSearchLight")
+                     && !item.equalsIgnoreCase("AddSteeringSearchLight") && !item.equalsIgnoreCase("AddBrakeLight")) {
                   float result2;
                   if(item.equalsIgnoreCase("AddPartLightHatch")) {
                      s = this.splitParam(data);
@@ -1403,7 +1404,8 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
                      w = s.length >= 10?this.toFloat(s[9]):0.0F;
                      boolean mnp = !item.equalsIgnoreCase("AddSearchLight");
                      boolean mxp = item.equalsIgnoreCase("AddSteeringSearchLight");
-                     this.searchLights.add(new MCH_BaseVehicleInfo.SearchLight(df, c, index, rz, result, mnp, py, pz, mxp, w));
+                     boolean brakeLight = item.equalsIgnoreCase("AddBrakeLight");
+                     this.searchLights.add(new MCH_BaseVehicleInfo.SearchLight(df, c, index, rz, result, mnp, py, pz, mxp, w, brakeLight));
                   }
                }
             }
@@ -1666,9 +1668,10 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
       public final float pitch;
       public final boolean steering;
       public final float stRot;
+      public final boolean brakeLight;
 
 
-      public SearchLight(Vec3 pos, int cs, int ce, float h, float w, boolean fix, float y, float p, boolean st, float stRot) {
+      public SearchLight(Vec3 pos, int cs, int ce, float h, float w, boolean fix, float y, float p, boolean st, float stRot, boolean brakeLight) {
          this.colorStart = cs;
          this.colorEnd = ce;
          this.pos = pos;
@@ -1680,6 +1683,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
          this.yaw = y;
          this.pitch = p;
          this.stRot = stRot;
+         this.brakeLight = brakeLight;
       }
    }
 

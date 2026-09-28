@@ -99,7 +99,9 @@ public class MCH_TankPacketHandler {
                      tank.moveRight = false;
                   }
 
-                  tank.setBrake(pc.useBrake);
+                  // Reversing (S) and the dedicated brake (Space) both illuminate brake lamps.
+                  // This changes only the synchronized lamp state; vehicle controls remain untouched.
+                  tank.setBrake(pc.useBrake || pc.throttleDown);
                }
 
                if(pc.useFlareType > 0) {

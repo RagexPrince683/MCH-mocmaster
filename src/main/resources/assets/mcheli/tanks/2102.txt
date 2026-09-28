@@ -42,6 +42,7 @@ EnableBack = true
 Category = C
 WeightType = Car
 CivilianCarGrip = true
+EnableBrakeLights = true
 SuspensionSpring = 0.055
 SuspensionCompressionDamping = 0.035
 SuspensionReboundDamping = 0.050
@@ -62,10 +63,10 @@ AddPartWheel     = -1.1024,  0.1766, -1.3754
 AddFixedSearchLight =  0.9865, 0.6135, 2.9087,   0x50FFFFFF,   0x00FFFFC0,    0.1, 0.5, 0, 0
 AddFixedSearchLight =  -0.9865, 0.6135, 2.9087,   0x50FFFFFF,   0x00FFFFC0,    0.1, 0.5,0,0
 
-AddFixedSearchLight =  1.056, 0.6601,-2.8904,   0x80FF0000,   0x00FF0000,    0.02, 0.35,  180.0,  -20
-AddFixedSearchLight =  -1.056, 0.6601,-2.8904,   0x80FF0000,   0x00FF0000,    0.02, 0.35,  180.0,  -20
-AddFixedSearchLight =  1.056, 0.7413,-2.8604,   0x80FF0000,   0x00FF0000,    0.02, 0.35,  180.0,  -20
-AddFixedSearchLight =  -1.056, 0.7413,-2.8604,   0x80FF0000,   0x00FF0000,    0.02, 0.35,  180.0,  -20
+AddBrakeLight =  1.056, 0.6601,-2.8904,   0x80FF0000,   0x00FF0000,    0.02, 0.35,  180.0,  -20
+AddBrakeLight =  -1.056, 0.6601,-2.8904,   0x80FF0000,   0x00FF0000,    0.02, 0.35,  180.0,  -20
+AddBrakeLight =  1.056, 0.7413,-2.8604,   0x80FF0000,   0x00FF0000,    0.02, 0.35,  180.0,  -20
+AddBrakeLight =  -1.056, 0.7413,-2.8604,   0x80FF0000,   0x00FF0000,    0.02, 0.35,  180.0,  -20
 
 MaxFuel         = 650
 FuelConsumption = 0.7

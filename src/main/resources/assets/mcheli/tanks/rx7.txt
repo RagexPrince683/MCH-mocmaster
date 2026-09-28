@@ -53,6 +53,7 @@ Category = C
 ; Tank or Car or Unknown
 WeightType = Car
 CivilianCarGrip = true
+EnableBrakeLights = true
 SuspensionSpring = 0.055
 SuspensionCompressionDamping = 0.035
 SuspensionReboundDamping = 0.050
@@ -114,10 +115,10 @@ AddFixedSearchLight = -0.754, 0.714, 2.97,   0x50FFFFFF,   0x00FFFFC0,    0.15, 
 AddPartLightHatch =  0.00, 0.735, 2.61,   1,0, 0, -41.5
 
 ;テールランプ
-AddFixedSearchLight =  0.89, 0.55,-2.88,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  6.0,  0
-AddFixedSearchLight =  0.67, 0.55,-2.88,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  6.0,  0
-AddFixedSearchLight = -0.89, 0.55,-2.88,   0xFFFF0000,   0x10FF0000,    0.05, 0.25, -6.0,  0
-AddFixedSearchLight = -0.67, 0.55,-2.88,   0xFFFF0000,   0x10FF0000,    0.05, 0.25, -6.0,  0
+AddBrakeLight =  0.89, 0.55,-2.88,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  6.0,  0
+AddBrakeLight =  0.67, 0.55,-2.88,   0xFFFF0000,   0x10FF0000,    0.05, 0.25,  6.0,  0
+AddBrakeLight = -0.89, 0.55,-2.88,   0xFFFF0000,   0x10FF0000,    0.05, 0.25, -6.0,  0
+AddBrakeLight = -0.67, 0.55,-2.88,   0xFFFF0000,   0x10FF0000,    0.05, 0.25, -6.0,  0
 
 
 ;engine?

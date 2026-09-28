@@ -10,6 +10,7 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 |---|---:|---:|---|
 | `WeightType` | enum `normal`, `car`, `tank` | `normal` / 0 | Parser maps `car` to 1 and `tank` to 2; any other text is 0. |
 | `CivilianCarGrip` | boolean | `false` | Explicit civilian passenger-car grip and steering opt-in, independent of `WeightType` and `Category`. |
+| `EnableBrakeLights` | boolean | `false` | Enables brake-light rendering for this vehicle. This is an independent opt-in and does not infer a civilian car from `CivilianCarGrip`, weight, or category. |
 | `FrontTireSize` | metric radial size, e.g. `225/50R16`, `265/35ZR19`, or `175R14` | unset | Optional front tire dimensions for opted-in civilian cars. Unset/invalid sizes use neutral tuning. |
 | `RearTireSize` | same format as `FrontTireSize` | unset | Optional rear tire dimensions, independent of the front. |
 | `CarLateralGrip` | float[0..0.25], blocks/tick² | 0.12 | Server sideways correction limit for opted-in cars; wheel contact scales it. `0` disables grip and its steering coupling. Throttle does not consume axle grip. |
@@ -57,6 +58,23 @@ translation. This fallback permits model packs to use a different number or arra
 The four suspension defaults are written explicitly into bundled `CivilianCarGrip = true` definitions;
 other tanks, military vehicles, aircraft, and boats remain on their existing wheel behavior.
 
+### Brake lights
+
+Set `EnableBrakeLights = true` and identify each applicable fixed rear lamp with `AddBrakeLight`.
+`AddBrakeLight` accepts the same `x,y,z,startColor,endColor,height,width,yaw,pitch` values as
+`AddFixedSearchLight`; the distinct name prevents headlights, reverse lamps, military lamps, and other
+searchlights from being selected by position or color heuristics. Identified lamps continue to behave as
+normal vehicle lights when the regular light control is on. While the driver holds Space (the existing
+brake input) or S (the existing reverse/throttle-down input), they are also rendered as an additive brake
+pass. Consequently they work with normal lights off and become visibly brighter without replacing the
+existing rear-light pass when normal lights are on. The pressed state is server-authoritative and uses the
+vehicle's synchronized status, so nearby multiplayer clients see the same car-attached lamp geometry.
+
+Omitting `EnableBrakeLights`, setting it to `false`, or using an invalid value disables the brake-light
+pass. `AddBrakeLight` entries remain ordinary fixed lights in that case. Bundled civilian cars opt in;
+`fordpolice.txt` currently has no authored rear light positions, so it is enabled but cannot display brake
+lights until suitable `AddBrakeLight` entries are supplied.
+
 - Use shared `speed`, `MotionFactor`, `MobilityYawOnGround`, `CanMoveOnGround`, `CanRotOnGround`, and `PivotTurnThrottle` for driving feel.
 - Use `SetWheelPos` for wheel/contact layout and `AddTrackHitBox` for damageable tracks. Moving tanks also use their `SetWheelPos` contact points to trample grass blocks under their wheels into dirt.
 - `TrackRollerRot`, `PartWheelRot`, `AddCrawlerTrack`, `AddTrackRoller`, and `AddPartWheel` are visual helpers inherited from the shared parser.
@@ -81,6 +99,6 @@ AddTrackHitBox = -1.2, 0.0, 0.0, 0.5, 0.5, 1.0
 
 ## Safe-to-omit notes
 
-`WeightType`, `WeightedCenterZ`, `TrackMaxHP`, `AddTrackHitBox`, `EnableTurretPop`, and `LWR` are optional. Omitting `EnableTurretPop` keeps the turret attached when the tank is destroyed. Omitting `LWR` leaves tank alert audio disabled; omitting the other keys leaves default ground behavior and no explicit track hitboxes.
+`WeightType`, `WeightedCenterZ`, `TrackMaxHP`, `AddTrackHitBox`, `EnableTurretPop`, `EnableBrakeLights`, and `LWR` are optional. Omitting `EnableTurretPop` keeps the turret attached when the tank is destroyed. Omitting `EnableBrakeLights` disables the brake-light pass. Omitting `LWR` leaves tank alert audio disabled; omitting the other keys leaves default ground behavior and no explicit track hitboxes.
 
 `EnableTurretPop = true` enables a catastrophic destruction effect which launches the exact `$turret` model group and the main (`weapon0`) gun's configured child parts off the chassis. Models without `$turret` skip the effect safely; geometry baked into `$body` cannot be detached.
