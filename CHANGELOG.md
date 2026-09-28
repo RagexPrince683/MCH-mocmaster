@@ -371,3 +371,18 @@ Developer/backend
   ceilings, 21 conservative gameplay estimates, variant choices, sources and identity/fitment gaps.
 - Java 8-target compilation and targeted headless checks passed; changed production classes are major
   version 52. Live Forge 1.7.10 driving and multiplayer road testing remain unverified.
+
+2026-09-27 22:14 — Add civilian FWD, RWD, and AWD propulsion
+
+- Added optional `DriveType` values `FWD`, `RWD`, and `AWD`; omitted/invalid values and removed fields
+  on reload retain legacy thrust. Weight and category do not infer a drivetrain or enable this path.
+- Limited server forward/reverse engine force by collision-derived driven-wheel contact and remaining
+  axle traction, preserving accumulated momentum and existing throttle, braking, steering, collision,
+  gearing, lights, drag, and speed ceilings. AWD pools available capacity without a fixed torque split.
+- Retained configured axle membership/counts so missing or dead wheels cannot increase traction.
+  Added only drivetrain lines to 20 passenger-car definitions (2 FWD, 14 RWD, 4 AWD); left generic
+  Impreza, custom Fresh Auto drift car, and unidentified armored Phantom unset. Police, military,
+  tracked, aircraft, and boat definitions are unchanged.
+- Updated configuration references, traction equations, identity evidence, and reverse-speed guidance.
+  Offline `compileJava` passed with the supported cached Gradle setup; changed classes target Java 8
+  (major version 52). Asset/diff audits passed. End-user in-game and multiplayer driving remain untested.

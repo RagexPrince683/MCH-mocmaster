@@ -1187,9 +1187,23 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // --------------------------------------------------
       float throttle = (float)(this.getCurrentThrottle() / 10.0D);
       Vec3 v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - 10.0F);
+      double driveScale = 1.0D;
+      if(this.tankInfo.driveType != null) {
+         boolean reverse = this.getAcInfo().enableBack && super.throttleBack > 0.0F;
+         double demand = reverse ? -super.throttleBack : throttle;
+         double requested = demand * Math.hypot(v.xCoord, v.zCoord);
+         if(requested != 0.0D) {
+            // Sample current collision support before engine force, not the paired
+            // suspension flags or body onGround. The later wheel update stays in place.
+            MCH_WheelManager.CarContact contact = this.WheelMng.getCarGroundContact(false);
+            double yaw = Math.toRadians(this.getRotYaw());
+            double sideways = super.motionX * Math.cos(yaw) + super.motionZ * Math.sin(yaw);
+            driveScale = MCH_CarTireGrip.driveAcceleration(requested, sideways, this.tankInfo, contact) / requested;
+         }
+      }
 
       if (!levelOff) {
-         super.motionY += v.yCoord * throttle / 8.0D;
+         super.motionY += v.yCoord * throttle / 8.0D * driveScale;
       }
 
       boolean canMove = true;
@@ -1202,11 +1216,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
       if (canMove) {
          if (this.getAcInfo().enableBack && super.throttleBack > 0.0F) {
-            super.motionX -= v.xCoord * super.throttleBack;
-            super.motionZ -= v.zCoord * super.throttleBack;
+            super.motionX -= v.xCoord * super.throttleBack * driveScale;
+            super.motionZ -= v.zCoord * super.throttleBack * driveScale;
          } else {
-            super.motionX += v.xCoord * throttle;
-            super.motionZ += v.zCoord * throttle;
+            super.motionX += v.xCoord * throttle * driveScale;
+            super.motionZ += v.zCoord * throttle * driveScale;
          }
       }
 

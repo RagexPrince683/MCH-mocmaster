@@ -19,6 +19,19 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    public int trackMaxHP = 100;
    public boolean enableTurretPop = false;
    public boolean civilianCarGrip = false;
+   /** Explicit drivetrain opt-in; null preserves legacy propulsion. */
+   public DriveType driveType = null;
+
+   public enum DriveType {
+      FWD, RWD, AWD;
+
+      public static DriveType parse(String value) {
+         if(value != null) for(DriveType type : values()) {
+            if(type.name().equalsIgnoreCase(value.trim())) return type;
+         }
+         return null;
+      }
+   }
    /** Explicit civilian reverse opt-in; zero retains legacy behavior. Blocks/tick, absolute. */
    public float civilianCarReverseSpeed = 0.0F;
    public boolean enableBrakeLights = false;
@@ -89,6 +102,9 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
       // Handle car-only keys before the shared parser's client HUD/model branch.
       if(item.equalsIgnoreCase("CivilianCarGrip")) {
          this.civilianCarGrip = this.toBool(data, false);
+         return;
+      } else if(item.equalsIgnoreCase("DriveType")) {
+         this.driveType = DriveType.parse(data);
          return;
       } else if(item.equalsIgnoreCase("CivilianCarReverseSpeed")) {
          this.civilianCarReverseSpeed = MCH_CarReverseControl.parseSpeed(data);
@@ -171,6 +187,7 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    public void preReload() {
       super.preReload();
       this.civilianCarGrip = false;
+      this.driveType = null;
       this.civilianCarReverseSpeed = 0.0F;
       this.enableBrakeLights = false;
       this.carGripDiagnostics = false;

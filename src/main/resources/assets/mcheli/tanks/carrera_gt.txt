@@ -55,6 +55,7 @@ EnableBack = true
 Category = C
 WeightType = Car
 CivilianCarGrip = true
+DriveType = RWD
 EnableBrakeLights = true
 SuspensionSpring = 0.055
 SuspensionCompressionDamping = 0.035

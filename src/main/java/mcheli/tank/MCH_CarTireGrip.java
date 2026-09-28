@@ -8,6 +8,9 @@ public final class MCH_CarTireGrip {
    public static final float DEFAULT_GRIP = 0.12F;
    public static final float MAX_GRIP = 0.25F;
    private static final double SLIP_DAMPING = 0.85D;
+   // Gameplay longitudinal budget for the entire configured wheel set. A supported
+   // two-wheel axle on a four-wheel car supplies 0.12 blocks/tick squared.
+   private static final double DRIVE_GRIP = 0.24D;
    private static final Pattern SIZE = Pattern.compile("(\\d{3})(?:/(\\d{2,3}))?Z?R(\\d{2}(?:\\.5)?)", Pattern.CASE_INSENSITIVE);
 
    private MCH_CarTireGrip() {}
@@ -52,6 +55,36 @@ public final class MCH_CarTireGrip {
 
    public static double lateralCorrection(double sideways, double grip, double contact, double response) {
       return calculate(sideways, grip, contact, response).applied;
+   }
+
+   /** Limits added propulsion only; existing momentum and lateral/steering rules are untouched. */
+   public static double driveAcceleration(double requested, double sideways, MCH_TankInfo info,
+                                          MCH_WheelManager.CarContact contact) {
+      if(info.driveType == null) return requested;
+      if(!finite(requested) || !finite(sideways) || contact.total <= 0) return 0.0D;
+      boolean front = info.driveType != MCH_TankInfo.DriveType.RWD;
+      boolean rear = info.driveType != MCH_TankInfo.DriveType.FWD;
+      int configured = (front ? contact.configuredFront : 0) + (rear ? contact.configuredRear : 0);
+      int supported = (front ? contact.front : 0) + (rear ? contact.rear : 0);
+      if(configured <= 0 || supported <= 0) return 0.0D;
+      double limit = (front ? axleDriveLimit(sideways, info, contact.front, contact.total, info.frontTireSize) : 0.0D)
+              + (rear ? axleDriveLimit(sideways, info, contact.rear, contact.total, info.rearTireSize) : 0.0D);
+      // Pool AWD's remaining axle capacity; do not prescribe a front/rear torque split.
+      double demand = Math.abs(requested) * clamp((double)supported / configured, 0.0D, 1.0D);
+      return Math.copySign(Math.min(demand, limit), requested);
+   }
+
+   private static double axleDriveLimit(double sideways, MCH_TankInfo info, int supported,
+                                        int total, TireSize tire) {
+      if(supported <= 0) return 0.0D;
+      double fraction = (double)supported / total;
+      double capacity = DRIVE_GRIP * fraction;
+      if(!info.civilianCarGrip || info.carLateralGrip <= 0.0F) return capacity;
+      Result lateral = calculate(sideways, info.carLateralGrip, fraction, response(tire));
+      // A bounded traction ellipse reserves the axle's existing lateral demand first.
+      // Only propulsion is reduced; no extra sideways force or yaw authority is supplied.
+      double usage = lateral.limit > 0.0D ? clamp(Math.abs(lateral.applied) / lateral.limit, 0.0D, 1.0D) : 0.0D;
+      return capacity * Math.sqrt(Math.max(0.0D, 1.0D - usage * usage));
    }
 
    /** Leave 25% of the acceleration budget for residual slip unless a configured yaw floor applies. */

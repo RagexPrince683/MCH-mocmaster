@@ -121,6 +121,11 @@ model. Collision contact, slopes, steering, damage and non-default global speed
 multipliers can lower achievable speed. These factors do not encode measured
 real-car acceleration.
 
+For cars with `DriveType`, the server now bounds reverse engine force by the selected
+axles' contact and remaining traction before this existing drag/clamp sequence.
+Those conditions can further reduce achievable speed; the reverse ceilings and
+throttle factors in this table are unchanged. See [drivetrain behavior](../car-tire-grip.md#throttle-and-drivetrain).
+
 Targeted headless checks exercised the real tank control branch, bounded long-held reverse,
 immediate W response, unchanged forward braking/legacy reverse, heading-dependent
 clamping, coasting and forward preservation, parser/reload defaults, and the exact

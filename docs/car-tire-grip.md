@@ -2,13 +2,14 @@
 
 `CivilianCarGrip = true` explicitly opts a passenger-car definition into the grip and steering model. It defaults to **false**. Neither `WeightType` nor `Category` selects this behavior, and neither is changed. Existing definitions without the field retain their legacy handling, including old `WeightType = Car` packs. Tire metadata alone never enables grip.
 
-This is bounded gameplay slip damping, not a measured tire/suspension/weight simulation. The wheel movement, pitch/roll suspension, rendering, thrust, speed clamp, isotropic `MotionFactor` drag, and all aircraft/boat code remain unchanged. Only opted-in tank-backed civilian cars receive the new correction and steering coupling.
+This is bounded gameplay slip damping, not a measured tire/suspension/weight simulation. Only opted-in tank-backed civilian cars receive the correction and steering coupling. `DriveType` separately opts into axle-based propulsion; absent that field, thrust stays legacy. Existing speed clamps, isotropic `MotionFactor` drag, and all aircraft/boat code remain unchanged. Civilian spring/shock suspension is documented in the [tank reference](vehicle-config/tanks.md).
 
 ## Configuration
 
 | Field | Units / values | Default |
 |---|---|---|
 | `CivilianCarGrip` | Boolean, explicit passenger-car opt-in | `false` |
+| `DriveType` | `FWD`, `RWD`, `AWD`; case-insensitive explicit propulsion opt-in | Unset/invalid: legacy thrust |
 | `FrontTireSize` | Optional metric radial dimensions, e.g. `225/50R16`, `265/35ZR19`, `175R14` | Unset; neutral response 1.0 |
 | `RearTireSize` | Same, independently optional | Unset; neutral response 1.0 |
 | `CarLateralGrip` | Maximum sideways velocity change per 20 Hz tick, blocks/tick²; 0–0.25 | `0.12`; `0` disables grip and its steering coupling |
@@ -21,6 +22,7 @@ This is bounded gameplay slip damping, not a measured tire/suspension/weight sim
 ; Representative stock 2018 Dodge Challenger R/T
 WeightType = Car
 CivilianCarGrip = true
+DriveType = RWD
 FrontTireSize = 245/45R20
 RearTireSize = 245/45R20
 CarLateralGrip = 0.12
@@ -51,7 +53,7 @@ The manager samples each wheel once per correction. Missing/dead wheels still co
 ## Grounded turn trace and tuning
 
 1. Steering input originally changed body yaw through `onUpdateAngles` while momentum retained its world direction. Rotation packets deliver that yaw to the server. With zero wheel contact, the old grip performed no correction. Even with hypothetical full contact, 25% damping retained 75% of each tick's lateral slip, allowing yaw to outrun the path.
-2. Existing thrust, the validated `Speed` clamp and `MotionFactor` drag still run in their existing order. The server then updates wheels, takes the contact snapshot, bounds the yaw change accumulated since the preceding physics tick, recomputes the horizontal basis from that applied yaw, applies one lateral correction, and moves the body.
+2. Thrust, the validated `Speed` clamp and `MotionFactor` drag still run in their existing order. When `DriveType` is configured, current collision support and lateral demand bound added thrust before the clamp/drag. The server then updates wheels, takes the lateral contact snapshot, bounds the yaw change accumulated since the preceding physics tick, recomputes the horizontal basis from that applied yaw, applies one lateral correction, and moves the body.
 3. Forward `f = (−sin θ, cos θ)` and sideways `s = (cos θ, sin θ)`. `side = velocity·s`. Contact fraction `C = supported/configured`. Front/rear contact weights the existing tire response `R`.
 4. Requested signed correction is `side * 0.85 * R * C`. Limit is `clamp(CarLateralGrip,0,0.25) * C`. Applied correction is `sign(side) * min(abs(requested), limit)`, subtracted along `s`. This preserves forward velocity relative to the applied heading, never reverses slip, never increases horizontal kinetic energy, and fades continuously to zero at low slip.
 5. Steering may use 75% of that lateral acceleration budget, retaining 25% for residual slip. The yaw limit in degrees is `asin(clamp(0.75*grip*C/speed,0,1)) * tickDelta * speed/(speed+0.05)`, converted to degrees. Requests keep their sign and clamp to that bound. Zero speed/contact gives zero added steering; low-speed response is continuous. Client key steering respects this bound and elapsed tick time; the server also bounds the cumulative yaw delivered by rotation packets once per physics tick. The opted-in reverse path omits the old second, opposing yaw update in `onUpdate_ControlSub`; reverse steering is handled by the same angle path and force budget.
@@ -71,7 +73,100 @@ For a larger `side = 0.30` at full contact, old coasting requested/applied is **
 
 ## Throttle and drivetrain
 
-No drivetrain field is added. The old global longitudinal-demand reduction is removed: throttle and brake inputs do **not** directly consume axle grip in this model. Existing thrust, reverse and drag still change the velocity presented to the grip calculation, but identical velocity/contact yields identical lateral grip when coasting or accelerating. There is no RWD rear-axle power reduction, AWD torque allocation, invented split, or axle-load simulation. Front/rear grouping exists solely for contact and tire metadata. Adding drivetrain metadata without an axle power model would falsely imply behavior.
+`DriveType = FWD` selects front wheels, `RWD` selects rear wheels, and `AWD` selects both
+axles for **server-authoritative forward and reverse propulsion**. Omitted, empty, or invalid
+values preserve legacy engine force, including on `CivilianCarGrip = true` cars. Reload resets
+removed values to unset. Neither `WeightType` nor `Category` selects a drivetrain. `DriveType`
+does not implicitly enable grip, steering, or suspension.
+
+The manager retains front/rear membership and configured counts when creating the mirrored
+`SetWheelPos` wheels. It divides axles at `(minZ + maxZ)/2`, with greater local Z forward.
+Support is the existing read-only collision sweep, not body `onGround`, copied paired flags,
+water, or the suspension heightmap. Missing, dead, or absent wheel slots contribute no support
+and cannot shrink configured counts. No configured wheels or no configured selected axle means
+zero propulsion. An unsupported driven axle does not borrow a non-driven axle's contact.
+
+Before engine force, let signed horizontal demand be `A` (the existing thrust vector's horizontal
+magnitude times forward throttle or negative reverse demand), supported driven wheels `S`,
+configured driven wheels `N`, and configured total wheels `T`:
+
+1. Contact-scaled demand is `abs(A) * S/N`.
+2. Each driven axle with `s` supported wheels has longitudinal capacity `P = 0.24 * s/T`
+   blocks/tick². This fixed gameplay budget preserves ordinary straight-road thrust on a fully
+   supported two-wheel axle of a four-wheel car (capacity 0.12); it is not a manufacturer friction
+   coefficient or a simulated axle load.
+3. If civilian lateral grip is active, calculate that axle's existing lateral request with
+   `sideways * 0.85 * tireResponse * s/T`, bounded by `CarLateralGrip * s/T`. Its utilization
+   `u` is the absolute bounded correction divided by that lateral limit. Remaining propulsion
+   capacity is `P * sqrt(max(0, 1-u²))`. Otherwise `u = 0`: disabling lateral grip does not
+   disable drivetrain contact or the longitudinal cap.
+4. Add the selected axles' remaining capacities. Applied demand is `sign(A) * min(contact-scaled
+   demand, pooled capacity)`. AWD pools available capacity without prescribing a torque split.
+   Apply the resulting scale only to added engine force, including the pre-existing forward
+   throttle-linked vertical term; never multiply accumulated velocity by wheel contact.
+
+For a neutral-tire four-wheel car with demand 0.10 and no sideways slip:
+
+| Collision support | FWD added acceleration | RWD added acceleration | AWD added acceleration |
+|---|---:|---:|---:|
+| Both axles, 2 front + 2 rear | 0.10 | 0.10 | 0.10 |
+| Front only, 2 front + 0 rear | 0.10 | 0 | 0.05 |
+| Rear only, 0 front + 2 rear | 0 | 0.10 | 0.05 |
+| One front wheel, 1 front + 0 rear | 0.05 | 0 | 0.025 |
+| No support | 0 | 0 | 0 |
+
+At full support and sideways speed 0.10, neutral tires and default lateral grip use
+`u = 0.085/0.12`; each driven two-wheel axle retains approximately **0.084706** propulsion
+capacity. Demand 0.10 is therefore traction-limited for FWD/RWD while AWD can pool both
+axles. At sideways speed at least `0.12/0.85`, lateral demand saturates the budget and added
+propulsion is zero. These are equation examples, not recorded road tests.
+
+Lateral correction and steering retain their existing implementation and priority. Throttle/brake
+inputs do not take lateral authority away; identical velocity/contact still gives identical lateral
+correction. Existing momentum continues through contact loss under normal drag/gravity/collision.
+Throttle buildup, braking, burnouts, gearing, speed ceilings, brake lights, and vehicle collision are
+unchanged. Traction limits can reduce attainable speed without changing the configured ceilings.
+There is no differential, tire rotation/slip simulation, load transfer, or manufacturer torque allocation.
+
+### Bundled drivetrain audit
+
+**20** passenger-car definitions receive a field: **2 FWD, 14 RWD, 4 AWD**. Only `DriveType`
+lines are added to their assets. The stock identities support these choices; generic weight/category
+and cosmetic drift effects are not drivetrain evidence.
+
+| Definition(s) | DriveType | Identity/evidence |
+|---|---|---|
+| `2102`, `2105` | RWD | Stock VAZ-2102 estate / Lada 2105 classic rear-drive chassis; [LADA rear-axle service instruction TI 3100.25100.20405 (reproduction)](https://autodetal-pro.ru/tekhnicheskaya-informatsiya/ti-3100-25100-20405-reduktory-zadnego-perednego-mosta-avtomobiley-lada-snyatiye-i-ustanovka). No modified-build specification inferred. |
+| `350z` | RWD | [Nissan 2003 350Z launch description](https://usa.nissannews.com/en-US/releases/2003-350z-press-kit) specifies front engine/rear-wheel drive. |
+| `ae86` | RWD | [Toyota's AE86 lineage](https://www.toyota-global.com/company/history_of_toyota/75years/vehicle_lineage/car/id60003763/index.html) explicitly retains the FR layout. |
+| `altis` | FWD | Display name identifies a 2014 Corolla; [Toyota's 2014 brochure, specification table (mirror)](https://xr793.com/wp-content/uploads/2017/12/2014-Toyota-Corolla.pdf) lists FWD throughout. No trim-specific torque claim. |
+| `bnr32` | AWD | [Nissan's 1989 BNR32 description](https://www.nissan-global.com/EN/HERITAGE_COLLECTION/skyline_gt-r_1989.html) identifies ATTESA E-TS 4WD. |
+| `bcnr33` | AWD | [Nissan's BCNR33 heritage description](https://www.nissan.co.jp/HERITAGE/DETAIL/152.html) distinguishes production ATTESA E-TS 4WD from the RWD Le Mans conversion. This definition names the production GT-R. |
+| `bnr34` | AWD | [Nissan Fact File 2001–2002, printed p.19 / PDF p.12](https://www.nissan-global.com/PDF/ff_fy01j.pdf) lists BNR34 GT-R as 4WD. No racing conversion assumed. |
+| `bugattichiron` | AWD | [Bugatti's 2016 launch release](https://newsroom.bugatti.com/press-releases/geneva-international-motor-show-2016) identifies permanent four-wheel drive. |
+| `carrera_gt` | RWD | [Porsche Rennsport Reunion 7 press kit, Carrera GT section](https://newsroom.porsche.com/dam/jcr%3Ae134f175-bf3b-46f6-9434-de51f6ab6442/RR7%2520Press%2520Kit.pdf) identifies drive exclusively to the rear wheels. |
+| `challenger` | RWD | [Dodge's 2018 specifications](https://www.media.stellantis.com/uploads/me/ME/2018/Dodge/Technical-sheet/1806_Dodge_Challenger.pdf): the configured R/T 5.7 is RWD; the V6 GT AWD is a different variant. |
+| `dacia` | FWD | Display name identifies 2009 Sandero, despite the existing inconsistent `TechYear`. Standard Sandero front drive; [Dacia's drive-type table](https://cdn.group.renault.com/dac/ie/transversal-assets/brochures/model-brochures/sandero-brochure-oct.pdf) corroborates the model layout, not period gearing or trim. |
+| `delorean` | RWD | DMC-12 rear-engine/rear-transaxle layout, [DMC owner's handbook, transmission/final drive section (mirror)](https://grupomotor.net/descriptions/zss1199_0.6.pdf). |
+| `phantom` | RWD | [Rolls-Royce's Phantom VII description](https://www.press.bmwgroup.com/south-africa/article/detail/T0129326EN/the-rolls-royce-phantom) explicitly drives the rear wheels. |
+| `rx7`, `rx-8` | RWD | [Mazda's rear-drive history](https://www.mazda.com.au/mazda-news/rear-wheel-drive-a-new-beginning-for-mazda/) identifies both model lines; [RX-8 specifications](https://news.mazdausa.com/download/2008-RX-8-Spec.pdf) confirm RWD. |
+| `s15`, `silvia_s14` | RWD | Nissan Silvia S15 / S14 road-car identities; [Nissan's S15 launch release](https://global.nissannews.com/ja-JP/releases/19990119-e_presskit) identifies the rear-drive coupe, and [S14 heritage](https://www.nissan-global.com/EN/HERITAGE_COLLECTION/silvia_ks_s14.html) establishes the stock S14 identity. |
+| `starion` | RWD | Named Starion ESI-R; [Mitsubishi's official parts-store model description](https://parts.mitsubishicars.com/v-mitsubishi-starion) identifies the rear-drive drivetrain. |
+| `w123` | RWD | [Mercedes-Benz 240D factory archive](https://mercedes-benz-publicarchive.com/marsClassic/en/instance/ko/240-D--W-123-D-24-1976---1985.xhtml?oid=5094) lists rear driven wheels. |
+
+Civilian passenger cars left **without `DriveType`** because identity is insufficient:
+
+- `impreza`: generic name and introduction-year 1992 do not identify market/trim. Early Imprezas
+  offered FWD and AWD; the representative AWD choice in the reverse-speed research does not establish
+  the actual bundled car's drivetrain.
+- `fresh_auto`: a modified VAZ-2105 “Tsar Zhiga” Fresh Auto drift build; no build-specific drivetrain
+  evidence was established. Stock 2105 specifications and drift effects cannot prove this conversion.
+- `phantomarmored`: unidentified armored conversion. The stock Phantom's RWD layout does not establish
+  the conversion's mechanical specification; its existing handling stays unchanged.
+
+`bnr32_police` and `fordpolice` are excluded by the task's police-vehicle limit, not assigned a drivetrain.
+Military/utility vehicles, unarmed military-family Hilux, trucks, ATV, bicycle, tractor, tracked tanks,
+aircraft, and boats receive no drivetrain edits.
 
 ## Diagnostics
 
@@ -83,13 +178,20 @@ Reasons are `not_opted_in`, `grip_disabled`, `no_wheels`, `no_contact` (airborne
 
 On the client, the same opt-in also appends **`logs/car-steering-client.csv`** before the steering limiter runs. It records the left/right key state, raw requested yaw, limited yaw, horizontal speed, wheel-contact fraction, and elapsed tick factor. This distinguishes missing input from client-side contact or authority limiting before a rotation packet reaches the server.
 
-## Bundled eligibility
+## Bundled grip eligibility
 
-Exactly **22** runtime definitions opt in; matching `configreference/tanks` definitions mirror the relevant fields:
+The current checkout has **23** runtime definitions with `CivilianCarGrip = true` (a separate
+setting from `DriveType`):
 
-`2102`, `2105`, `350z`, `ae86`, `altis`, `bcnr33`, `bnr32`, `bnr34`, `bugattichiron`, `carrera_gt`, `challenger`, `dacia`, `delorean`, `fresh_auto`, `impreza`, `phantom`, `rx-8`, `rx7`, `s15`, `silvia_s14`, `starion`, `w123`.
+`2102`, `2105`, `350z`, `ae86`, `altis`, `bcnr33`, `bnr32`, `bnr34`, `bugattichiron`, `carrera_gt`, `challenger`, `dacia`, `delorean`, `fordpolice`, `fresh_auto`, `impreza`, `phantom`, `rx-8`, `rx7`, `s15`, `silvia_s14`, `starion`, `w123`.
 
-`fresh_auto` is an unarmed civilian drift-car build, so it opts in without claiming stock racing tires. There are 74 bundled `WeightType = Car` definitions; the other 52 retain legacy handling. Explicit exclusions include `bm21`, `bnr32_police`, `fordpolice`, `phantomarmored`, `mc_atv_normal`, `opel_blitz_fuel`, `toyota_unarmed` and all armed Hilux variants, military trucks/utility vehicles, launchers, and military buggies. A car body, `Category = C`, or an unarmed loadout alone does not opt any of them in. Horns, backfire and drift effects in civilian definitions are not armed conversions. Tracked tanks, other military vehicles, aircraft and boats receive no opt-in edits.
+`fresh_auto` is an unarmed civilian drift-car build, so it opts into lateral grip without claiming
+stock tires or a known drivetrain. `fordpolice` already has a grip opt-in; its configuration is
+unchanged by the drivetrain task. Explicit grip exclusions include `bm21`, `bnr32_police`,
+`phantomarmored`, `mc_atv_normal`, `opel_blitz_fuel`, `toyota_unarmed` and the armed Hilux variants,
+military trucks/utility vehicles, launchers, and military buggies. A car body, `Category = C`, or an
+unarmed loadout alone selects neither grip nor a drivetrain. Horns, backfire and drift effects are
+not armed conversions. No existing grip opt-ins are changed by this task.
 
 ## Stock identity and tire sources
 
@@ -97,7 +199,7 @@ The bundled `ae86` is treated as a **representative stock 1983 Toyota Corolla Le
 
 The bundled `challenger` is explicitly treated as a **stock 2018 Dodge Challenger R/T**, and **`TechYear` changes from 1970 to 2018** to match this chosen definition identity. [Dodge's official 2018 Challenger specifications](https://www.media.stellantis.com/uploads/me/ME/2018/Dodge/Technical-sheet/1806_Dodge_Challenger.pdf), p.13, lists **P245/45R20** all-season performance tires as standard for R/T (stored as `245/45R20` front and rear); pp.15–16 identifies the standard 20×8-inch R/T wheel. The separate SRT/Hellcat table and the model-credit URL are not evidence for R/T tires or handling. No tire compound-specific gameplay coefficient is inferred.
 
-### Verified dimensions stored (8 definitions)
+### Original tire metadata audit (8 definitions)
 
 | Definition | Supported identity | Front | Rear | Source and uncertainty |
 |---|---|---|---|---|
@@ -111,9 +213,24 @@ The bundled `challenger` is explicitly treated as a **stock 2018 Dodge Challenge
 
 | `challenger` | Representative stock 2018 Dodge Challenger R/T | 245/45R20 | 245/45R20 | Dodge 2018 specifications, p.13, standard R/T fitment; normalized P-metric notation. No Hellcat/Scat Pack upgrade assumed. |
 
-The remaining 14 eligible definitions have unset sizes. Their identities/trim/market do not establish a verified period front/rear fitment; existing research gaps are not filled with wider tires to tune handling. The seven previously sourced dimensions are unchanged.
+The remaining 14 definitions from the original 22-car grip audit had unset sizes. Their identities/trim/market did not establish a verified period front/rear fitment; existing research gaps were not filled with wider tires to tune handling. This drivetrain change leaves all existing tire metadata untouched.
 
 ## Verification
+
+Drivetrain verification on **2026-09-27**: with launch JDK 21 and the existing cached convention/Jabel
+Java 8 compiler, `gradlew.bat compileJava --offline --no-daemon --gradle-user-home C:/Users/Owner/.gradle`
+completed **BUILD SUCCESSFUL** against Forge 1.7.10-10.13.4.1614. The wrapper also required
+`GRADLE_USER_HOME=C:/Users/Owner/.gradle` in this sandbox; no build configuration was changed.
+The four changed production classes and the new/changed nested enum/contact classes are class-file
+major version **52 (Java 8)**. The asset diff contains exactly 20 additions of `DriveType` and no other
+asset changes; unresolved cars and police definitions are unchanged. `git diff --check` passed.
+Source review covered both signed thrust paths, configured contact denominators, default/reload
+behavior, and momentum preservation. No drivetrain runtime tests or in-game driving were performed.
+The examples above are calculations, not test results. End-user Forge driving and multiplayer
+feedback remains necessary, particularly on slopes, jumps, single-axle support, and sustained turns.
+Existing grip CSVs report lateral behavior/contact; they do not record applied propulsion.
+
+### Earlier grip-only verification
 
 Executed `gradlew.bat compileJava test --offline --no-daemon` on 2026-09-26 with the existing cached Gradle/JDK environment: **BUILD SUCCESSFUL**, **49 tests, zero failures/errors**. The six changed/new production classes have class-file major version **52 (Java 8)**. The asset audit confirms the exact 22 eligible definitions in both trees, all bundled diagnostics disabled, and every existing `WeightType`/`Category` value unchanged.
 

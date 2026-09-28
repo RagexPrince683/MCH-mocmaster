@@ -30,6 +30,9 @@ public class MCH_WheelManager {
    private double minZ;
    private double maxZ;
    private double avgZ;
+   private boolean[] configuredFront = new boolean[0];
+   private int configuredFrontCount;
+   private int configuredRearCount;
    public Vec3 weightedCenter;
    public float targetPitch;
    public float targetRoll;
@@ -66,27 +69,29 @@ public class MCH_WheelManager {
 
    /** One read-only snapshot; paired onGround flags never supply grip. */
    public CarContact getCarGroundContact(boolean diagnostics) {
-      double centerZ = (this.minZ + this.maxZ) * 0.5D;
       int front = 0, rear = 0, raw = 0, paired = 0;
-      for(MCH_EntityWheel wheel : this.wheels) {
+      for(int i = 0; i < Math.min(this.wheels.length, this.configuredFront.length); ++i) {
+         MCH_EntityWheel wheel = this.wheels[i];
          if(wheel == null || wheel.isDead || wheel.pos == null) continue;
          if(diagnostics) {
             if(wheel.hasGroundContact()) ++raw;
             if(wheel.onGround) ++paired;
          }
          if(wheel.hasCarGroundContact()) {
-            if(wheel.pos.zCoord >= centerZ) ++front;
+            if(this.configuredFront[i]) ++front;
             else ++rear;
          }
       }
       // Missing/dead wheels cannot raise the available grip by shrinking the denominator.
-      return new CarContact(this.wheels.length, front, rear, raw, paired);
+      return new CarContact(this.configuredFrontCount, this.configuredRearCount, front, rear, raw, paired);
    }
 
    public static final class CarContact {
       public final int total, front, rear, rawProbe, pairedFlags;
-      CarContact(int total, int front, int rear, int rawProbe, int pairedFlags) {
-         this.total = total; this.front = front; this.rear = rear;
+      public final int configuredFront, configuredRear;
+      CarContact(int configuredFront, int configuredRear, int front, int rear, int rawProbe, int pairedFlags) {
+         this.configuredFront = configuredFront; this.configuredRear = configuredRear;
+         this.total = configuredFront + configuredRear; this.front = front; this.rear = rear;
          this.rawProbe = rawProbe; this.pairedFlags = pairedFlags;
       }
       public double fraction() { return this.total > 0 ? (double)(this.front + this.rear) / this.total : 0.0D; }
@@ -130,6 +135,15 @@ public class MCH_WheelManager {
       }
 
       this.avgZ = this.maxZ - this.minZ;
+      this.configuredFront = new boolean[this.wheels.length];
+      this.configuredFrontCount = 0;
+      this.configuredRearCount = 0;
+      double centerZ = (this.minZ + this.maxZ) * 0.5D;
+      for(int i = 0; i < this.wheels.length; ++i) {
+         this.configuredFront[i] = this.wheels[i].pos.zCoord >= centerZ;
+         if(this.configuredFront[i]) ++this.configuredFrontCount;
+         else ++this.configuredRearCount;
+      }
    }
 
 

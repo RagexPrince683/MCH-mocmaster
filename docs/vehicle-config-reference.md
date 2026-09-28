@@ -295,6 +295,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `HelicopterMaxBackwardSpeedScale` | Helicopter | float >= 0 | omitted = 1.0 | optional new-heli-only backward speed cap scale; omitted preserves prior symmetry |
 | `WeightType` | Tank | enum `normal`, `car`, `tank` | `normal`/0 | ground physics weight behavior |
 | `CivilianCarReverseSpeed` | Tank civilian cars | float[0..4], blocks/tick | 0 | Explicit reverse-control opt-in. Positive values cap powered backward horizontal movement; zero/unset/invalid keeps legacy behavior. Absolute value, not multiplied by `AllTankSpeed`; the effective limit cannot exceed validated `Speed`. See [all bundled values and evidence](vehicle-config/civilian-car-reverse-speeds.md). |
+| `DriveType` | Tank civilian cars | enum `FWD`, `RWD`, `AWD` | unset (legacy) | Case-insensitive explicit drivetrain. Server forward/reverse propulsion uses front, rear, or pooled axle contact and available traction; missing wheels retain configured denominators. Does not enable grip/suspension/steering. Omitted/invalid values preserve legacy thrust. See [drivetrain behavior](vehicle-config/tanks.md#civilian-car-drivetrain). |
 | `WeightedCenterZ` | Tank | float[-1000..1000] | 0.0 | fore/aft center of weight |
 | `TrackMaxHP` | Tank | int[1..1000000] | 100 | track durability |
 | `EnableTurretPop` | Tank | boolean | `false` | `true` detaches the exact `$turret` model group and its main-gun child assembly on destruction; models without it skip the effect |

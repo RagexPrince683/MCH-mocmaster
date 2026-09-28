@@ -10,11 +10,12 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 |---|---:|---:|---|
 | `WeightType` | enum `normal`, `car`, `tank` | `normal` / 0 | Parser maps `car` to 1 and `tank` to 2; any other text is 0. |
 | `CivilianCarGrip` | boolean | `false` | Explicit civilian passenger-car grip and steering opt-in, independent of `WeightType` and `Category`. |
+| `DriveType` | enum `FWD`, `RWD`, `AWD` | unset (legacy) | Explicit server propulsion opt-in, independent of grip/weight/category. Front, rear, or both axles supply traction in forward and reverse. Case-insensitive; omitted/invalid values preserve legacy thrust. |
 | `CivilianCarReverseSpeed` | float[0..4], blocks/tick | 0 | Explicit civilian reverse-control opt-in, independent of grip/weight/category. Positive values cap powered backward horizontal movement. Zero, omitted, malformed, NaN or infinity preserves legacy behavior. Finite values are clamped to the range. |
 | `EnableBrakeLights` | boolean | `false` | Enables brake-light rendering for this vehicle. This is an independent opt-in and does not infer a civilian car from `CivilianCarGrip`, weight, or category. |
 | `FrontTireSize` | metric radial size, e.g. `225/50R16`, `265/35ZR19`, or `175R14` | unset | Optional front tire dimensions for opted-in civilian cars. Unset/invalid sizes use neutral tuning. |
 | `RearTireSize` | same format as `FrontTireSize` | unset | Optional rear tire dimensions, independent of the front. |
-| `CarLateralGrip` | float[0..0.25], blocks/tick² | 0.12 | Server sideways correction limit for opted-in cars; wheel contact scales it. `0` disables grip and its steering coupling. Throttle does not consume axle grip. |
+| `CarLateralGrip` | float[0..0.25], blocks/tick² | 0.12 | Server sideways correction limit for opted-in cars; wheel contact scales it. `0` disables lateral grip and its steering coupling. With `DriveType`, lateral demand also reduces available propulsion; propulsion never reduces the existing lateral correction. |
 | `CarMinimumSteering` | float[0..10], degrees/tick | 0 | Optional contact-scaled lower bound on steering yaw authority at speed. Unlike `CarLateralGrip`, it turns the body but does not add sideways force, so excess demand produces understeer. |
 | `SuspensionSpring` | float[0..0.25], blocks/tick² at full compression | 0.055 | Bounded spring acceleration. Used only when `CivilianCarGrip = true`; it is not derived from `Weight`. |
 | `SuspensionCompressionDamping` | float[0..0.25], acceleration per block/tick of compression speed | 0.035 | Shock damping while a supported wheel moves upward into the body. |
@@ -37,6 +38,33 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 ## Practical tuning
 
 Civilian car grip uses wheel collision support adjusted for the invisible wheel box rest gap, a bounded sideways correction, and a steering limit tied to the same contact/grip budget. Tire sizes alter damping response by at most ±5%; tire width does not directly multiply the grip limit. See [car tire grip](../car-tire-grip.md) for the contact reproduction, before/after values, bundled eligibility, sources and diagnostics. Omit `CivilianCarGrip` to preserve existing handling; tire fields, `WeightType` and `Category` alone never enable it.
+
+### Civilian car drivetrain
+
+`DriveType = FWD` uses front wheel support; `RWD` uses rear wheel support; `AWD` pools
+both axles' available traction without a prescribed torque split. The field enables propulsion
+limiting independently of `CivilianCarGrip`; it does not enable suspension, lateral grip, or steering.
+Omit it to retain legacy thrust even on a grip-enabled car. Invalid values also select legacy thrust,
+and reload clears a removed field.
+
+The server samples current collision-derived wheel support before adding forward or reverse thrust.
+Front/rear membership and counts come from the configured mirrored `SetWheelPos` layout, divided at
+the midpoint of its minimum/maximum local Z. Positive Z is forward. Missing/dead wheels keep their
+configured place in the denominator; a missing driven axle supplies no propulsion.
+
+Added acceleration scales by supported/configured **driven** wheels and is capped by the driven
+axles' remaining traction. The gameplay longitudinal budget is 0.24 blocks/tick² for the complete
+configured wheel set, apportioned by supported wheel count: a fully supported two-wheel axle on a
+four-wheel car supplies 0.12. When civilian lateral grip is active, each driven axle's lateral demand
+reserves part of that capacity through a bounded traction ellipse. AWD pools the remaining capacity;
+this is a gameplay force budget, not a manufacturer torque split, differential, or load-transfer model.
+See [the equations and car audit](../car-tire-grip.md#throttle-and-drivetrain).
+
+No driven contact means no added engine force, including the existing throttle-linked vertical term.
+Existing momentum remains subject to normal drag, gravity, collision, and speed limits. Throttle ramp,
+braking inputs, gearing, steering, brake lights, and collision are unchanged. Braking is not redistributed
+to the driven axle. Reaching a traction limit can lower acceleration or attainable speed without changing
+either configured speed ceiling.
 
 Civilian suspension sweeps each individual wheel collision box through `SuspensionTravel`, so full
 blocks, slabs, stairs, and other collision-box terrain contribute their actual top surface rather than
@@ -137,6 +165,6 @@ AddTrackHitBox = -1.2, 0.0, 0.0, 0.5, 0.5, 1.0
 
 ## Safe-to-omit notes
 
-`WeightType`, `WeightedCenterZ`, `TrackMaxHP`, `AddTrackHitBox`, `EnableTurretPop`, `EnableBrakeLights`, `CivilianCarReverseSpeed`, and `LWR` are optional. Omitting `CivilianCarReverseSpeed` keeps legacy reverse movement and throttle behavior. Omitting `EnableTurretPop` keeps the turret attached when the tank is destroyed. Omitting `EnableBrakeLights` disables the brake-light pass. Omitting `LWR` leaves tank alert audio disabled; omitting the other keys leaves default ground behavior and no explicit track hitboxes.
+`WeightType`, `WeightedCenterZ`, `TrackMaxHP`, `AddTrackHitBox`, `EnableTurretPop`, `EnableBrakeLights`, `DriveType`, `CivilianCarReverseSpeed`, and `LWR` are optional. Omitting `DriveType` keeps legacy propulsion. Omitting `CivilianCarReverseSpeed` keeps legacy reverse controls and speed limiting; a separately configured `DriveType` can still limit reverse traction. Omitting `EnableTurretPop` keeps the turret attached when the tank is destroyed. Omitting `EnableBrakeLights` disables the brake-light pass. Omitting `LWR` leaves tank alert audio disabled; omitting the other keys leaves default ground behavior and no explicit track hitboxes.
 
 `EnableTurretPop = true` enables a catastrophic destruction effect which launches the exact `$turret` model group and the main (`weapon0`) gun's configured child parts off the chassis. Models without `$turret` skip the effect safely; geometry baked into `$body` cannot be detached.
