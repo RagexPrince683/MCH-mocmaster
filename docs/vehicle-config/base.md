@@ -56,7 +56,7 @@ Applies to planes, helicopters, tanks, turret/static weapons, ships, and any oth
 | `throttleupdown` | float[0..3] | 1 | Pilot throttle step multiplier. |
 | `ThrottleUpDownOnEntity` | float[0..100000] | 2 | Throttle multiplier when moving on a carried/ridden entity. |
 | `EnableBack` | boolean | false | Enables reverse throttle/backing behavior. |
-| `ThrottleDownFactor` | float[0..10] | 1 | Reverse/deceleration tuning. |
+| `ThrottleDownFactor` | float[0..10] | 1 | Tank reverse throttle buildup multiplier: `0.0025 * ThrottleUpDown * ThrottleDownFactor` per control tick. Does not set reverse top speed or change forward braking. See [tank reverse controls](tanks.md#civilian-car-reverse-controls). |
 | `PivotTurnThrottle` | float[0..1] | 0 | If turning on the ground below this throttle, code can auto-raise throttle for pivot turning. |
 | `CanMoveOnGround` / `CanRotOnGround` | boolean | true | Gates ground movement/yaw. |
 | `ongroundpitch` | float[-90..90] | 0 | Parser stores the negative value. |

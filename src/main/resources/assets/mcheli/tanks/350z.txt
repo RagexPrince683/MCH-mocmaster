@@ -7,7 +7,9 @@ NameOnModernAARadar = Nissan 350Z
 LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
-ThrottleDownFactor = 0.45
+; Reverse target 69 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
+CivilianCarReverseSpeed = 0.958333
+ThrottleDownFactor = 4.20
 
 ItemID = 28745
 Weight = 3200

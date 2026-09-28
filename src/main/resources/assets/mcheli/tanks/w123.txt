@@ -6,7 +6,9 @@ NameOnEarlyAARadar = Tank
 NameOnModernAARadar = Mercedes-Benz W123 240D
 ChaffWaitTime = 0
 ChaffUseTime = 0
-ThrottleDownFactor = 0.40
+; Reverse target 25 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
+CivilianCarReverseSpeed = 0.347222
+ThrottleDownFactor = 2.00
 MaxHp = 200
 ThrottleUpDown = 0.81
 Speed = 0.89

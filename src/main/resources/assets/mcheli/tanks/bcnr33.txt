@@ -7,7 +7,9 @@ NameOnEarlyAARadar = Tank
 NameOnModernAARadar = Nissan Skyline GT-R BCNR33
 ChaffWaitTime = 0
 ChaffUseTime = 0
-ThrottleDownFactor = 0.40
+; Reverse target 35 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
+CivilianCarReverseSpeed = 0.486111
+ThrottleDownFactor = 2.40
 ItemID = 30033
 Weight = 3373
 MaxHp = 200

@@ -358,3 +358,16 @@ Developer/backend
 - Added an opt-in tank brake-light setting with explicit rear-lamp definitions and a disabled default.
 - Synchronized the existing Space and S input states so brake lamps remain independent from normal lights.
 - Enabled bundled civilian cars and reused their authored rear-light geometry where available.
+
+2026-09-27 21:54 — Set bundled civilian car reverse speed ceilings
+
+- Added optional `CivilianCarReverseSpeed` in blocks/tick, preserving legacy movement when absent.
+- Limited powered backward movement on the server and matched client extrapolation; preserved forward
+  speed, acceleration, braking and authoritative position interpolation.
+- Bounded reverse demand and made W respond immediately for opted-in cars. Kept S's forward braking
+  and Space damping while preventing the shared brake-lamp state from damping powered reverse.
+- Configured all 25 bundled passenger cars, including the R32 police car and armored Phantom, without
+  changing existing `Speed` values or military/other vehicle definitions. Documented four calculated
+  ceilings, 21 conservative gameplay estimates, variant choices, sources and identity/fitment gaps.
+- Java 8-target compilation and targeted headless checks passed; changed production classes are major
+  version 52. Live Forge 1.7.10 driving and multiplayer road testing remain unverified.

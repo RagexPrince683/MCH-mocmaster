@@ -7,7 +7,9 @@ NameOnEarlyAARadar = Tank
 NameOnModernAARadar = phantom
 ChaffWaitTime = 0
 ChaffUseTime = 0
-ThrottleDownFactor = 0.40
+; Reverse target 20 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
+CivilianCarReverseSpeed = 0.277778
+ThrottleDownFactor = 1.60
 ItemID = 30111
 Weight = 7000
 MaxHp = 200

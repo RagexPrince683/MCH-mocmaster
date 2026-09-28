@@ -626,7 +626,12 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
       super.throttleBack = (float)((double)super.throttleBack * 0.8D);
       if(this.getBrake()) {
-         super.throttleBack = (float)((double)super.throttleBack * 0.5D); //todo: add braking force variable here
+         // S shares the brake-lamp status with Space. Once forward throttle is zero,
+         // S requests reverse power; Space clears throttleDown in the input handler.
+         if(!MCH_CarReverseControl.isReverseInput(this.getTankInfo().civilianCarReverseSpeed,
+                 super.throttleDown, this.getCurrentThrottle())) {
+            super.throttleBack = (float)((double)super.throttleBack * 0.5D);
+         }
          if(this.getCurrentThrottle() > 0.0D) {
             this.addCurrentThrottle(-0.02D * (double)this.getAcInfo().throttleUpDown);
          } else {
@@ -702,6 +707,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       if(!super.isGunnerMode) {
          float throttleUpDown = this.getAcInfo().throttleUpDown;
          if(super.throttleUp) {
+            if(this.getTankInfo().civilianCarReverseSpeed > 0.0F) {
+               // A bounded reverse demand must not delay the driver's forward input.
+               super.throttleBack = 0.0F;
+            }
             float f = throttleUpDown;
             if(this.getRidingEntity() != null) {
                double mx = this.getRidingEntity().motionX;
@@ -733,11 +742,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
             } else {
                this.setCurrentThrottle(0.0D);
                if(this.getAcInfo().enableBack) {
-                 // super.throttleBack = (float)((double)super.throttleBack + 0.0025D * (double)throttleUpDown);
                   super.throttleBack = (float)((double)super.throttleBack + 0.0025D * (double)throttleUpDown * getAcInfo().throttleDownFactor);
-//                  if(super.throttleBack > 0.6F) { //todno: add a new variable here for reversespeed
-//                     super.throttleBack = 0.6F;
-//                  }
+                  if(this.getTankInfo().civilianCarReverseSpeed > 0.0F) {
+                     super.throttleBack = MCH_CarReverseControl.boundThrottle(super.throttleBack);
+                  }
                   float pivotTurnThrottle1 = this.getAcInfo().pivotTurnThrottle;
                   // Civilian steering is handled once by onUpdateAngles and the server grip budget.
                   if (pivotTurnThrottle1 > 0 && !(this.getTankInfo().civilianCarGrip && this.getTankInfo().carLateralGrip > 0)) {
@@ -1097,6 +1105,9 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       if(super.aircraftPosRotInc > 0) {
          this.applyServerPositionAndRotation();
       } else {
+         // Use the same reverse clamp for client extrapolation. Server interpolation
+         // above continues to follow authoritative positions without locally clipping them.
+         this.applyCivilianCarReverseSpeedLimit(this.getAcInfo().enableBack && super.throttleBack > 0.0F);
          this.setPosition(super.posX + super.motionX, super.posY + super.motionY, super.posZ + super.motionZ);
          if(!this.isDestroyed() && (super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0)) {
             super.motionX *= 0.95D;
@@ -1237,6 +1248,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // --------------------------------------------------
       this.updateWheels();
       this.applyCarLateralGrip();
+      // Clamp after drag and the server's final steering/grip heading, before movement.
+      this.applyCivilianCarReverseSpeedLimit(canMove && this.getAcInfo().enableBack && super.throttleBack > 0.0F);
       double motionYBeforeMove = super.motionY;
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
       this.updateGroundVehicleFallDamage(wasOnGroundBeforeMove, motionYBeforeGravity, motionYBeforeMove);
@@ -1259,6 +1272,15 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.updateCollisionBox();
 
       this.handleDeadPilot();
+   }
+
+   private void applyCivilianCarReverseSpeedLimit(boolean powered) {
+      MCH_TankInfo info = this.getTankInfo();
+      if(info == null || info.civilianCarReverseSpeed <= 0.0F) return;
+      float limit = Math.min(info.speed, info.civilianCarReverseSpeed);
+      double scale = MCH_CarReverseControl.speedScale(super.motionX, super.motionZ, this.getRotYaw(), limit, powered);
+      super.motionX *= scale;
+      super.motionZ *= scale;
    }
 
    void applyCarLateralGrip() {

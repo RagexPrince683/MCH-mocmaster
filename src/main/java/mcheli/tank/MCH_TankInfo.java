@@ -19,6 +19,8 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    public int trackMaxHP = 100;
    public boolean enableTurretPop = false;
    public boolean civilianCarGrip = false;
+   /** Explicit civilian reverse opt-in; zero retains legacy behavior. Blocks/tick, absolute. */
+   public float civilianCarReverseSpeed = 0.0F;
    public boolean enableBrakeLights = false;
    public boolean carGripDiagnostics = false;
    public MCH_CarTireGrip.TireSize frontTireSize = null;
@@ -87,6 +89,9 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
       // Handle car-only keys before the shared parser's client HUD/model branch.
       if(item.equalsIgnoreCase("CivilianCarGrip")) {
          this.civilianCarGrip = this.toBool(data, false);
+         return;
+      } else if(item.equalsIgnoreCase("CivilianCarReverseSpeed")) {
+         this.civilianCarReverseSpeed = MCH_CarReverseControl.parseSpeed(data);
          return;
       } else if(item.equalsIgnoreCase("EnableBrakeLights")) {
          this.enableBrakeLights = this.toBool(data, false);
@@ -166,6 +171,7 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    public void preReload() {
       super.preReload();
       this.civilianCarGrip = false;
+      this.civilianCarReverseSpeed = 0.0F;
       this.enableBrakeLights = false;
       this.carGripDiagnostics = false;
       this.frontTireSize = null;

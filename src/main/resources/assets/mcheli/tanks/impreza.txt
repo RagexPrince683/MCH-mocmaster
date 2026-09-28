@@ -8,7 +8,9 @@ NameOnModernAARadar = Subaru Impreza
 LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
-ThrottleDownFactor = 0.45
+; Reverse target 30 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
+CivilianCarReverseSpeed = 0.416667
+ThrottleDownFactor = 2.20
 ItemID = 30555
 Weight = 3200
 MaxHp = 200

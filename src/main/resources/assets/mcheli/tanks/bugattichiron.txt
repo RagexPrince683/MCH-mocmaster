@@ -7,7 +7,9 @@ NameOnModernAARadar = Bugatti Chiron
 LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
-ThrottleDownFactor = 0.45
+; Reverse target 30 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
+CivilianCarReverseSpeed = 0.416667
+ThrottleDownFactor = 2.00
 ItemID = 99901
 Weight = 4398
 MaxHp = 200

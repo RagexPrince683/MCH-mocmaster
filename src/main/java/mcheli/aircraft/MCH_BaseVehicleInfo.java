@@ -241,7 +241,7 @@ public abstract class MCH_BaseVehicleInfo extends MCH_BaseInfo {
     */
    public float explosionSizeByCrash = 5;
    /**
-    * Reverse speed multiplier, default 1
+    * Tank reverse throttle buildup multiplier, default 1; not a speed limit.
     */
    public float throttleDownFactor = 1;
 

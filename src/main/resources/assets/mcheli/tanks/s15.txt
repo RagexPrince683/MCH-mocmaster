@@ -8,7 +8,9 @@ NameOnModernAARadar = Nissan Silvia S15
 LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
-ThrottleDownFactor = 0.40
+; Reverse target 35 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
+CivilianCarReverseSpeed = 0.486111
+ThrottleDownFactor = 2.60
 ItemID = 33406
 Weight = 3200
 MaxHp = 200

@@ -106,7 +106,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `throttleupdown` | All | float | 1.0 | pilot throttle change multiplier |
 | `ThrottleUpDownOnEntity` | All | float | 2.0 | throttle multiplier while carried/riding |
 | `EnableBack` | All | boolean | false | enables reverse throttle |
-| `ThrottleDownFactor` | All | float[0..10] | 1.0 | reverse/deceleration factor |
+| `ThrottleDownFactor` | All | float[0..10] | 1.0 | Tank reverse throttle buildup multiplier; not a speed limit or forward-braking factor. See [reverse controls](vehicle-config/tanks.md#civilian-car-reverse-controls). |
 | `PivotTurnThrottle` | All ground-capable | float | 0.0 | auto-throttle for pivot turns |
 | `CanMoveOnGround` | All | boolean | true | ground movement gate |
 | `CanRotOnGround` | All | boolean | true | ground yaw gate |
@@ -294,6 +294,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `HelicopterBackwardThrustScale` | Helicopter | float >= 0 | omitted = 1.0 | optional new-heli-only backward thrust scale; omitted preserves prior symmetry |
 | `HelicopterMaxBackwardSpeedScale` | Helicopter | float >= 0 | omitted = 1.0 | optional new-heli-only backward speed cap scale; omitted preserves prior symmetry |
 | `WeightType` | Tank | enum `normal`, `car`, `tank` | `normal`/0 | ground physics weight behavior |
+| `CivilianCarReverseSpeed` | Tank civilian cars | float[0..4], blocks/tick | 0 | Explicit reverse-control opt-in. Positive values cap powered backward horizontal movement; zero/unset/invalid keeps legacy behavior. Absolute value, not multiplied by `AllTankSpeed`; the effective limit cannot exceed validated `Speed`. See [all bundled values and evidence](vehicle-config/civilian-car-reverse-speeds.md). |
 | `WeightedCenterZ` | Tank | float[-1000..1000] | 0.0 | fore/aft center of weight |
 | `TrackMaxHP` | Tank | int[1..1000000] | 100 | track durability |
 | `EnableTurretPop` | Tank | boolean | `false` | `true` detaches the exact `$turret` model group and its main-gun child assembly on destruction; models without it skip the effect |

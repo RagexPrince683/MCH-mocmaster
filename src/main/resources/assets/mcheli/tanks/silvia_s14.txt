@@ -7,7 +7,9 @@ NameOnEarlyAARadar = Tank
 NameOnModernAARadar = Nissan Silvia S14
 ChaffWaitTime = 0
 ChaffUseTime = 0
-ThrottleDownFactor = 0.40
+; Reverse target 35 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
+CivilianCarReverseSpeed = 0.486111
+ThrottleDownFactor = 2.60
 MaxHp = 200
 ThrottleUpDown = 0.84
 ;6.4s

@@ -8,7 +8,9 @@ NameOnModernAARadar = Rolls-Royce Phantom
 LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
-ThrottleDownFactor = 0.40
+; Reverse target 25 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
+CivilianCarReverseSpeed = 0.347222
+ThrottleDownFactor = 2.00
 ItemID = 30111
 Weight = 5600
 MaxHp = 200

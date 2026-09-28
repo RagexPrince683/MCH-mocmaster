@@ -6,7 +6,9 @@ NameOnEarlyAARadar = Tank
 NameOnModernAARadar = Mazda RX-8
 ChaffWaitTime = 0
 ChaffUseTime = 0
-ThrottleDownFactor = 0.40
+; Reverse target 70 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
+CivilianCarReverseSpeed = 0.972222
+ThrottleDownFactor = 4.20
 MaxHp = 200
 ThrottleUpDown = 0.86
 ;5.9s

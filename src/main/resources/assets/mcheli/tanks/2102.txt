@@ -8,7 +8,9 @@ NameOnModernAARadar = VAZ-2102
 LWR = false
 ChaffWaitTime = 0
 ChaffUseTime = 0
-ThrottleDownFactor = 0.40
+; Reverse target 20 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
+CivilianCarReverseSpeed = 0.277778
+ThrottleDownFactor = 1.60
 MaxHp = 200
 Speed = 0.85
 Sound = lada

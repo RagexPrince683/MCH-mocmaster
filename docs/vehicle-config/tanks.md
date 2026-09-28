@@ -10,6 +10,7 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 |---|---:|---:|---|
 | `WeightType` | enum `normal`, `car`, `tank` | `normal` / 0 | Parser maps `car` to 1 and `tank` to 2; any other text is 0. |
 | `CivilianCarGrip` | boolean | `false` | Explicit civilian passenger-car grip and steering opt-in, independent of `WeightType` and `Category`. |
+| `CivilianCarReverseSpeed` | float[0..4], blocks/tick | 0 | Explicit civilian reverse-control opt-in, independent of grip/weight/category. Positive values cap powered backward horizontal movement. Zero, omitted, malformed, NaN or infinity preserves legacy behavior. Finite values are clamped to the range. |
 | `EnableBrakeLights` | boolean | `false` | Enables brake-light rendering for this vehicle. This is an independent opt-in and does not infer a civilian car from `CivilianCarGrip`, weight, or category. |
 | `FrontTireSize` | metric radial size, e.g. `225/50R16`, `265/35ZR19`, or `175R14` | unset | Optional front tire dimensions for opted-in civilian cars. Unset/invalid sizes use neutral tuning. |
 | `RearTireSize` | same format as `FrontTireSize` | unset | Optional rear tire dimensions, independent of the front. |
@@ -58,6 +59,43 @@ translation. This fallback permits model packs to use a different number or arra
 The four suspension defaults are written explicitly into bundled `CivilianCarGrip = true` definitions;
 other tanks, military vehicles, aircraft, and boats remain on their existing wheel behavior.
 
+### Civilian car reverse controls
+
+Use `CivilianCarReverseSpeed` for an absolute reverse speed ceiling, and shared
+`ThrottleDownFactor` for reverse acceleration. At 20 ticks/second, one block/tick is
+72 km/h; this is the conversion used by `MCH_HudShared.getRawSpeedKmh`. For example,
+25 km/h is `CivilianCarReverseSpeed = 0.347222`. Do not divide by the existing
+`Speed` value. `AllTankSpeed` still scales `Speed`, but does not scale this field;
+the effective reverse ceiling is the smaller of those two validated speeds.
+
+The server applies the new ceiling after drag, wheel updates and civilian grip,
+immediately before moving. It scales horizontal velocity only when reverse thrust
+is active and the velocity points backward relative to the final vehicle heading.
+Forward motion while S brakes, unpowered rolling, lateral-only motion and vertical
+motion keep their existing handling. Client extrapolation uses the same clamp;
+position interpolation continues to follow the server. Existing synchronized
+throttle/reverse controls are used, with no new network packet.
+
+In tanks, holding S first reduces positive forward throttle by
+`0.01 * ThrottleUpDown` per tick, plus the existing brake-state reduction of
+`0.02 * ThrottleUpDown` while that state is active. After forward throttle reaches zero, it adds
+`0.0025 * ThrottleUpDown * ThrottleDownFactor` to reverse demand. Demand already
+decays by 0.8 each tick (and by another 0.5 while braking). S also sets the existing
+synchronized brake-lamp state. For opted-in cars, that additional 0.5 damping
+stops once S requests reverse with zero forward throttle; Space clears S in the
+input handler and retains the original brake damping. With a positive
+`CivilianCarReverseSpeed`, demand is additionally bounded to `[0, 0.1]`, matching
+maximum forward thrust, and W clears it immediately so forward acceleration starts
+on that tick. Without the field these additions do not run. Forward throttle
+increments, drag, the existing `Speed` clamp, forward braking and Space brake
+damping are unchanged.
+
+The new bundled factors are gameplay acceleration choices, not measured 0-to-speed
+times. They allow each target to be reached against the existing ground drag;
+holding S longer does not store increasing force. See the [25-car research and
+configuration table](civilian-car-reverse-speeds.md) for variants, tire evidence,
+calculations, conservative estimates and unresolved identities.
+
 ### Brake lights
 
 Set `EnableBrakeLights = true` and identify each applicable fixed rear lamp with `AddBrakeLight`.
@@ -99,6 +137,6 @@ AddTrackHitBox = -1.2, 0.0, 0.0, 0.5, 0.5, 1.0
 
 ## Safe-to-omit notes
 
-`WeightType`, `WeightedCenterZ`, `TrackMaxHP`, `AddTrackHitBox`, `EnableTurretPop`, `EnableBrakeLights`, and `LWR` are optional. Omitting `EnableTurretPop` keeps the turret attached when the tank is destroyed. Omitting `EnableBrakeLights` disables the brake-light pass. Omitting `LWR` leaves tank alert audio disabled; omitting the other keys leaves default ground behavior and no explicit track hitboxes.
+`WeightType`, `WeightedCenterZ`, `TrackMaxHP`, `AddTrackHitBox`, `EnableTurretPop`, `EnableBrakeLights`, `CivilianCarReverseSpeed`, and `LWR` are optional. Omitting `CivilianCarReverseSpeed` keeps legacy reverse movement and throttle behavior. Omitting `EnableTurretPop` keeps the turret attached when the tank is destroyed. Omitting `EnableBrakeLights` disables the brake-light pass. Omitting `LWR` leaves tank alert audio disabled; omitting the other keys leaves default ground behavior and no explicit track hitboxes.
 
 `EnableTurretPop = true` enables a catastrophic destruction effect which launches the exact `$turret` model group and the main (`weapon0`) gun's configured child parts off the chassis. Models without `$turret` skip the effect safely; geometry baked into `$body` cannot be detached.
