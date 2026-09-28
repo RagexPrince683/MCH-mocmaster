@@ -3,6 +3,8 @@ package mcheli.tank;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import mcheli.MCH_Config;
 import mcheli.MCH_Lib;
@@ -348,40 +350,61 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       double mx = parX;
       double my = parY;
       double mz = parZ;
-      AxisAlignedBB backUpAxisalignedBB = super.boundingBox.copy();
-      List list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(parX, parY, parZ));
-      parY = this.calculateYOffset(list, super.boundingBox, parY);
-      boolean flag1 = super.onGround || my != parY && my < 0.0D;
-      MCH_BoundingBox[] prevPX = super.extraBoundingBox;
-      int iteratedValueCount = prevPX.length;
-
-      for(int prevPZ = 0; prevPZ < iteratedValueCount; ++prevPZ) {
-         MCH_BoundingBox ebb = prevPX[prevPZ];
-         ebb.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
-      }
-
-      parX = this.calculateXOffset(list, super.boundingBox, parX);
-      parZ = this.calculateZOffset(list, super.boundingBox, parZ);
       double minX;
       double result;
       double result2;
-      if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F && (mx != parX || mz != parZ)) {
-         result = parX;
-         result2 = parY;
-         minX = parZ;
-         parY = (double)super.stepHeight;
-         AxisAlignedBB minZ = super.boundingBox.copy();
-         super.boundingBox.setBB(backUpAxisalignedBB);
-         list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(mx, parY, mz));
-         this.calculateYOffset(list, super.boundingBox, parY);
-         parX = this.calculateXOffset(list, super.boundingBox, mx);
-         parZ = this.calculateZOffset(list, super.boundingBox, mz);
-         parY = this.calculateYOffset(list, super.boundingBox, (double)(-super.stepHeight));
-         if(result * result + minX * minX >= parX * parX + parZ * parZ) {
-            parX = result;
-            parY = result2;
-            parZ = minX;
-            super.boundingBox.setBB(minZ);
+      MCH_CarBodyMovement.Result civilianMovement = null;
+      if(this.getTankInfo() != null && this.getTankInfo().civilianCarGrip) {
+         final MCH_CarBodyMovement.Collisions collisions = this::getBodyComponentCollisions;
+         List<MCH_CarCollisionBox> body = new ArrayList<MCH_CarCollisionBox>();
+         body.add(new MCH_CarCollisionBox(super.boundingBox));
+         // Use fresh transforms after updateWheels changes pitch/roll. Candidate sweeps
+         // operate on copies and do not advance the extra-box history/cache.
+         for(MCH_BoundingBox definition : super.extraBoundingBox) {
+            MCH_BoundingBox current = definition.copy();
+            current.updatePosition(super.posX, super.posY, super.posZ,
+                  this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
+            body.add(new MCH_CarCollisionBox(current));
+         }
+         civilianMovement = MCH_CarBodyMovement.resolveBody(body, collisions, mx, my, mz,
+               super.ySize < 0.05F ? super.stepHeight : 0, this.hasCurrentCivilianWheelSupport(collisions));
+         parX = civilianMovement.x;
+         parY = civilianMovement.y;
+         parZ = civilianMovement.z;
+         super.boundingBox.offset(parX, parY, parZ);
+      } else {
+         AxisAlignedBB backUpAxisalignedBB = super.boundingBox.copy();
+         List list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(parX, parY, parZ));
+         parY = this.calculateYOffset(list, super.boundingBox, parY);
+         boolean flag1 = super.onGround || my != parY && my < 0.0D;
+         MCH_BoundingBox[] prevPX = super.extraBoundingBox;
+         int iteratedValueCount = prevPX.length;
+
+         for(int prevPZ = 0; prevPZ < iteratedValueCount; ++prevPZ) {
+            MCH_BoundingBox ebb = prevPX[prevPZ];
+            ebb.updatePosition(super.posX, super.posY, super.posZ, this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
+         }
+
+         parX = this.calculateXOffset(list, super.boundingBox, parX);
+         parZ = this.calculateZOffset(list, super.boundingBox, parZ);
+         if(super.stepHeight > 0.0F && flag1 && super.ySize < 0.05F && (mx != parX || mz != parZ)) {
+            result = parX;
+            result2 = parY;
+            minX = parZ;
+            parY = (double)super.stepHeight;
+            AxisAlignedBB minZ = super.boundingBox.copy();
+            super.boundingBox.setBB(backUpAxisalignedBB);
+            list = getCollidingBoundingBoxes(this, super.boundingBox.addCoord(mx, parY, mz));
+            this.calculateYOffset(list, super.boundingBox, parY);
+            parX = this.calculateXOffset(list, super.boundingBox, mx);
+            parZ = this.calculateZOffset(list, super.boundingBox, mz);
+            parY = this.calculateYOffset(list, super.boundingBox, (double)(-super.stepHeight));
+            if(result * result + minX * minX >= parX * parX + parZ * parZ) {
+               parX = result;
+               parY = result2;
+               parZ = minX;
+               super.boundingBox.setBB(minZ);
+            }
          }
       }
 
@@ -398,7 +421,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       super.posZ = (positionX + maxZ) / 2.0D;
       super.isCollidedHorizontally = mx != parX || mz != parZ;
       super.isCollidedVertically = my != parY;
-      super.onGround = my != parY && my < 0.0D;
+      super.onGround = civilianMovement != null ? civilianMovement.grounded : my != parY && my < 0.0D;
       super.isCollided = super.isCollidedHorizontally || super.isCollidedVertically;
       this.updateFallState(parY, super.onGround);
       if(mx != parX) {
@@ -422,6 +445,25 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       }
 
       super.worldObj.theProfiler.endSection();
+   }
+
+   /** Read-only support at the present axle footprint, never at the pending destination. */
+   private boolean hasCurrentCivilianWheelSupport(MCH_CarBodyMovement.Collisions collisions) {
+      if(this.WheelMng == null || this.WheelMng.wheels == null) return false;
+      double travel = this.getTankInfo().suspensionTravel;
+      for(MCH_EntityWheel wheel : this.WheelMng.wheels) {
+         if(wheel == null || wheel.isDead || wheel.pos == null || wheel.boundingBox == null) continue;
+         Vec3 anchor = this.getTransformedPosition(wheel.pos);
+         double anchorBottom = anchor.yCoord - wheel.yOffset;
+         // Reject wheels left below the body during takeoff, even if their flags say grounded.
+         if(wheel.boundingBox.minY < anchorBottom - travel - 1.0E-5D
+               || wheel.boundingBox.minY > anchorBottom + 1.0E-5D) continue;
+         AxisAlignedBB present = wheel.boundingBox.copy();
+         present.offset(anchor.xCoord - (present.minX + present.maxX) * 0.5D, 0,
+               anchor.zCoord - (present.minZ + present.maxZ) * 0.5D);
+         if(MCH_CarBodyMovement.supported(Collections.singletonList(present), collisions)) return true;
+      }
+      return false;
    }
 //help
    private void rotationByKey(float partialTicks) {

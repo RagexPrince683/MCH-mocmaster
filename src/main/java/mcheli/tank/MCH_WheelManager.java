@@ -536,15 +536,22 @@ public class MCH_WheelManager {
          if(wheel == null || wheel.isDead || wheel.pos == null) continue;
          // Yaw-only locations avoid feeding suspension extension or the previous pitch back
          // into horizontal terrain selection. This is the pending body's wheel footprint.
-         Vec3 point = this.getTransformedPosition(wheel.pos.xCoord, 0.0D, wheel.pos.zCoord,
-               car, car.getRotYaw(), 0.0F, 0.0F);
-         double wx = point.xCoord + x, wz = point.zCoord + z;
-         AxisAlignedBB column = AxisAlignedBB.getBoundingBox(wx - MCH_CarTerrainPitch.EPSILON,
-               referenceY - step - MCH_CarTerrainPitch.EPSILON, wz - MCH_CarTerrainPitch.EPSILON,
-               wx + MCH_CarTerrainPitch.EPSILON, referenceY + step + clearance
-                     + MCH_CarTerrainPitch.EPSILON, wz + MCH_CarTerrainPitch.EPSILON);
-         double height = MCH_CarTerrainPitch.highestSurface(this.getCivilianTerrainBoxes(column),
-               column, referenceY, step, clearance);
+         double height = this.sampleCivilianTerrainHeight(wheel.pos.xCoord, 0, x, z,
+               referenceY, step, clearance);
+         if(!Double.isNaN(height)) {
+            // Follow adjacent treads to the axle. StepHeight bounds each local rise,
+            // not the total height difference across a long car on a steep slope.
+            // These are read-only terrain columns; body movement remains one sweep.
+            int samples = Math.max(1, (int)Math.ceil(Math.abs(wheel.pos.zCoord) / 0.5D));
+            for(int sample = 1; sample <= samples && !Double.isNaN(height); ++sample) {
+               height = this.sampleCivilianTerrainHeight(wheel.pos.xCoord,
+                     wheel.pos.zCoord * sample / samples, x, z, height, step, clearance);
+            }
+         } else {
+            // A bridge/gap under the center does not erase directly reachable axle terrain.
+            height = this.sampleCivilianTerrainHeight(wheel.pos.xCoord, wheel.pos.zCoord,
+                  x, z, referenceY, step, clearance);
+         }
          if(Double.isNaN(height)) continue;
          if(wheel.pos.zCoord >= this.weightedCenter.zCoord) {
             front += height; frontZ += wheel.pos.zCoord; ++frontCount;
@@ -555,6 +562,19 @@ public class MCH_WheelManager {
       if(frontCount == 0 || rearCount == 0) return Float.NaN;
       return MCH_CarTerrainPitch.angle(front / frontCount, rear / rearCount,
             frontZ / frontCount - rearZ / rearCount);
+   }
+
+   private double sampleCivilianTerrainHeight(double localX, double localZ, double x, double z,
+         double referenceY, double step, double clearance) {
+      Vec3 point = this.getTransformedPosition(localX, 0, localZ,
+            this.parent, this.parent.getRotYaw(), 0, 0);
+      double wx = point.xCoord + x, wz = point.zCoord + z;
+      AxisAlignedBB column = AxisAlignedBB.getBoundingBox(wx - MCH_CarTerrainPitch.EPSILON,
+            referenceY - step - MCH_CarTerrainPitch.EPSILON, wz - MCH_CarTerrainPitch.EPSILON,
+            wx + MCH_CarTerrainPitch.EPSILON, referenceY + step + clearance
+                  + MCH_CarTerrainPitch.EPSILON, wz + MCH_CarTerrainPitch.EPSILON);
+      return MCH_CarTerrainPitch.highestSurface(this.getCivilianTerrainBoxes(column),
+            column, referenceY, step, clearance);
    }
 
    /** Block collision shapes only: no entity collisions, wheel probes, or world-top shortcut. */

@@ -5053,6 +5053,15 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public static List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+      return getCollidingBoundingBoxes(par1Entity, par2AxisAlignedBB, true);
+   }
+
+   /** World-space obstacles for a single civilian body component, without legacy remapping. */
+   protected List<AxisAlignedBB> getBodyComponentCollisions(AxisAlignedBB sweep) {
+      return getCollidingBoundingBoxes(this, sweep, false);
+   }
+
+   private static List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB, boolean includeExtraBoxes) {
       //todo: make creative players/non survival mode players not collide with aircraft collisions
       ArrayList collidingBoundingBoxes = new ArrayList();
       collidingBoundingBoxes.clear();
@@ -5076,7 +5085,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          }
       }
 
-      if(par1Entity instanceof MCH_EntityBaseVehicle) {
+      if(includeExtraBoxes && par1Entity instanceof MCH_EntityBaseVehicle) {
          MCH_EntityBaseVehicle vehicle = (MCH_EntityBaseVehicle)par1Entity;
          vehicle.addExtraBoundingBoxBlockCollisions(par2AxisAlignedBB, collidingBoundingBoxes);
       }

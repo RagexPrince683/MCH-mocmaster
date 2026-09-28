@@ -6,6 +6,7 @@ import net.minecraft.util.AxisAlignedBB;
 /** Read-only collision geometry for civilian body pitch; never moves a wheel or body. */
 final class MCH_CarTerrainPitch {
    static final double EPSILON = 1.0E-5D;
+   static final float MAX_PITCH = 45.0F;
 
    private MCH_CarTerrainPitch() {}
 
@@ -53,7 +54,7 @@ final class MCH_CarTerrainPitch {
 
    static float angle(double front, double rear, double wheelbase) {
       // The model faces +Z. GL's positive X rotation lowers +Z, so nose-up is negative.
-      return (float)Math.max(-18.0D, Math.min(18.0D,
+      return (float)Math.max(-MAX_PITCH, Math.min(MAX_PITCH,
             -Math.toDegrees(Math.atan2(front - rear, Math.max(0.5D, wheelbase)))));
    }
 
