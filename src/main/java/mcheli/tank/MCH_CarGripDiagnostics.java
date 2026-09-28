@@ -10,12 +10,47 @@ import java.util.Locale;
 public final class MCH_CarGripDiagnostics {
    private static BufferedWriter writer;
    private static BufferedWriter clientWriter;
+   private static BufferedWriter movementWriter;
    private static boolean failed;
    private static String writeError;
 
    private MCH_CarGripDiagnostics() {}
 
    public static String getWriteError() { return writeError; }
+
+   /** Opt-in server trace taken after collision cleanup and wheel reconciliation. */
+   static synchronized void recordMovement(MCH_EntityTank car, MCH_CarBodyMovement.Trace trace,
+         MCH_CarBodyMovement.Result result, MCH_WheelManager.CarContact driveContact, double force,
+         double oldX, double oldY, double oldZ, double x, double y, double z, double poseY,
+         float oldYaw, float oldPitch, float oldRoll) {
+      if(failed) return;
+      try {
+         if(movementWriter == null) {
+            File file = new File("logs/car-body-movement.csv");
+            File directory = file.getParentFile();
+            if(!directory.isDirectory() && !directory.mkdirs()) throw new IOException("Cannot create " + directory);
+            boolean header = !file.isFile() || file.length() == 0;
+            movementWriter = new BufferedWriter(new FileWriter(file, true));
+            if(header) movementWriter.write("vehicle,entity,tick,w,s,gear,throttle,rpm,service_brake,handbrake,drive_front,drive_rear,drive_force,old_x,old_y,old_z,request_x,request_y,request_z,pose_y,old_yaw,old_pitch,old_roll,yaw,pitch,roll,paths,step,blocked_x,blocked_z,grounded,final_front,final_rear,final_x,final_y,final_z,motion_x,motion_y,motion_z\n");
+         }
+         MCH_CarDrivetrain engine = car.carDrivetrain;
+         MCH_WheelManager.CarContact contact = car.WheelMng.getCarGroundContact(false);
+         movementWriter.write(String.format(Locale.ROOT,
+               "%s,%d,%d,%b,%b,%d,%.6f,%.2f,%b,%b,%d,%d,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%s,%b,%b,%b,%b,%d,%d,%.9f,%.9f,%.9f,%.9f,%.9f,%.9f",
+               car.getTankInfo().name.replace(',', '_').replace('\n', '_').replace('\r', '_'), car.getEntityId(), car.ticksExisted,
+               car.throttleUp, car.throttleDown, engine.gear, engine.throttle, engine.rpm, engine.serviceBrake, engine.handbrake,
+               driveContact != null ? driveContact.front : -1, driveContact != null ? driveContact.rear : -1, force,
+               oldX, oldY, oldZ, x, y, z, poseY, oldYaw, oldPitch, oldRoll,
+               car.getRotYaw(), car.getRotPitch(), car.getRotRoll(), trace.paths,
+               result.stepped, result.blockedX, result.blockedZ, result.grounded, contact.front, contact.rear,
+               car.posX, car.posY, car.posZ, car.motionX, car.motionY, car.motionZ));
+         movementWriter.newLine();
+         movementWriter.flush();
+      } catch(IOException ex) {
+         writeError = ex.toString(); failed = true;
+         if(movementWriter != null) try { movementWriter.close(); } catch(IOException ignored) {}
+      }
+   }
 
    static synchronized void record(Snapshot snapshot) {
       if(failed) return;

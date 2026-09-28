@@ -490,10 +490,10 @@ public class MCH_WheelManager {
          totalResponse += MathHelper.clamp_double(response, -0.08D, 0.08D);
 
          if(wheel.pos.xCoord >= 0.0D) {
-            right += wheelY;
+            right += wheel.suspensionSupportY;
             ++rightCount;
          } else {
-            left += wheelY;
+            left += wheel.suspensionSupportY;
             ++leftCount;
          }
       }
@@ -503,9 +503,11 @@ public class MCH_WheelManager {
             double springAcceleration = totalResponse / this.wheels.length;
             car.motionY += MathHelper.clamp_double(springAcceleration, -0.06D, 0.06D);
          }
+      }
 
-         double leftHeight = leftCount > 0 ? left / leftCount : 0.0D;
-         double rightHeight = rightCount > 0 ? right / rightCount : 0.0D;
+      if(leftCount > 0 && rightCount > 0) {
+         double leftHeight = left / leftCount;
+         double rightHeight = right / rightCount;
          double trackWidth = this.getTrackWidth();
          float roll = (float)-Math.toDegrees(Math.atan2(rightHeight - leftHeight, trackWidth));
          roll = MathHelper.clamp_float(roll, -18.0F, 18.0F);
@@ -516,6 +518,7 @@ public class MCH_WheelManager {
          }
       } else {
          this.targetRoll *= 0.94F;
+         if(Math.abs(this.targetRoll) < 0.02F) this.targetRoll = 0;
       }
 
       // Terrain pitch is independent of suspension compression/contact, including on descent.
@@ -527,8 +530,26 @@ public class MCH_WheelManager {
       // This method runs every client tick, including while the local driver is stopped.
       // Applying the predicted pose here prevents the last rendered terrain roll from
       // waiting indefinitely for another steering/input angle update.
-      car.setRotPitch(this.targetPitch);
-      car.setRotRoll(this.targetRoll);
+      if(car.worldObj.isRemote) {
+         car.setRotPitch(this.targetPitch);
+         car.setRotRoll(this.targetRoll);
+      }
+   }
+
+   /** Reconcile predicted suspension with the accepted server body, without a second spring impulse. */
+   void settleCivilianWheels() {
+      MCH_EntityBaseVehicle car = this.parent;
+      MCH_TankInfo info = ((MCH_EntityTank)car).getTankInfo();
+      this.targetPitch = car.getRotPitch();
+      this.targetRoll = car.getRotRoll();
+      for(MCH_EntityWheel wheel : this.wheels) {
+         if(wheel == null || wheel.isDead || wheel.pos == null) continue;
+         Vec3 anchor = car.getTransformedPosition(wheel.pos);
+         double compression = wheel.measureSuspensionCompression(anchor, anchor, info.suspensionTravel);
+         wheel.suspensionCompression = (float)compression;
+         wheel.setPosition(anchor.xCoord, anchor.yCoord + wheel.getSuspensionAnchorOffset()
+               - info.suspensionTravel + compression, anchor.zCoord);
+      }
    }
 
    public boolean isFrontAxle(double z) {
@@ -559,16 +580,19 @@ public class MCH_WheelManager {
    float getCivilianTerrainPitch(double x, double z, MCH_TankInfo info) {
       MCH_EntityBaseVehicle car = this.parent;
       double step = Math.max(0.0D, info.stepHeight);
-      double referenceY = car.boundingBox.minY;
-      double clearance = car.boundingBox.maxY - referenceY;
+      double referenceY = car.getUnrotatedBodyFloor();
+      double clearance = car.height;
+      AxisAlignedBB levelBody = AxisAlignedBB.getBoundingBox(car.posX - car.width * 0.5D, referenceY,
+            car.posZ - car.width * 0.5D, car.posX + car.width * 0.5D, referenceY + clearance,
+            car.posZ + car.width * 0.5D);
 
       // Probe a small distance forward even at rest, so a bumper stopped at a wall levels.
       double yaw = Math.toRadians(car.getRotYaw());
       double forwardX = -Math.sin(yaw) * 0.05D;
       double forwardZ = Math.cos(yaw) * 0.05D;
-      AxisAlignedBB sweep = car.boundingBox.addCoord(forwardX, step, forwardZ);
+      AxisAlignedBB sweep = levelBody.addCoord(forwardX, step, forwardZ);
       if(MCH_CarTerrainPitch.facesWall(this.getCivilianTerrainBoxes(sweep),
-            car.boundingBox, step, forwardX, forwardZ)) return 0.0F;
+            levelBody, step, forwardX, forwardZ)) return 0.0F;
 
       double front = 0.0D, rear = 0.0D, frontZ = 0.0D, rearZ = 0.0D;
       int frontCount = 0, rearCount = 0;
@@ -639,7 +663,7 @@ public class MCH_WheelManager {
     * cannot distinguish level ground from saturated suspension on uneven terrain.
     */
    private void updateRenderNeutral(int supported, float terrainPitch) {
-      double bodyFloor = this.parent.boundingBox.minY;
+      double bodyFloor = this.parent.getUnrotatedBodyFloor();
       boolean settledHeight = !Double.isNaN(this.previousSuspensionBodyFloor)
             && Math.abs(bodyFloor - this.previousSuspensionBodyFloor) < 0.001D;
       this.previousSuspensionBodyFloor = bodyFloor;

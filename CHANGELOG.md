@@ -528,3 +528,55 @@ Developer/backend
   the existing pilot or passenger dismount and exit-position routines.
 - Document the destroyed-vehicle exception. No test files were added, and in-game behavior was not
   observed.
+
+2026-09-28 14:39 — Rotate civilian primary collision with the chassis
+
+- Matched the saved Starion position/pitch to the screenshots and the user's observed static blue
+  primary box. Its effective collider is 2.0 x 0.7; EntityWidth/EntityHeight control rider rendering.
+  Saved-terrain collision equations identify the unpitched primary's flat bottom as an early floor;
+  the extra boxes start clear. The existing grip CSV contains no Starion movement/contact capture.
+- Use an oriented primary in civilian compound-body sweeps, intersections, damage rays, and debug
+  rendering. Keep its enclosing AABB for vanilla compatibility and advance the vehicle origin by
+  resolved motion. Refresh position/pose bounds and restore the legacy box when the opt-in is removed.
+  Retain an explicit level chassis reference for terrain and wheel queries so envelope rotation
+  cannot change suspension/grip reach. No collider is removed or shrunk; tanks, engine force, gearing,
+  speed limits, brakes, wheel-contact gates, and step/solid-clearance rules remain unchanged.
+- Updated the existing physics document and feedback cases. Offline compileJava passed; all six
+  changed classes target Java 8 (major 52). Saved-world/geometry, source/lifecycle and diff checks ran.
+  The reconstructed downward result changes from zero to -0.4302565 blocks before real contact.
+  No test files, temporary repository artifacts, packaging, reobfuscation, or game launch were added
+  or run. Escape from the photographed ledge, live wheel-contact recovery and multiplayer behavior
+  have not been verified in-game.
+
+2026-09-28 16:17 — Recover civilian cars at diagonal block edges
+
+- Confirmed a saved Starion's level-ground +18-degree roll trap: only the low-side wheels
+  are within suspension reach, and the missing side was assigned world height zero.
+  Roll now requires measured surfaces on both sides and otherwise approaches level.
+  A saved Chiron also has front underside overlap with a full grass/dirt block; its
+  original overlap-producing tick and RPM/drive-force sequence remain unobserved.
+- Compare X/Z, Z/X and continuous diagonal civilian body sweeps. Compare raised candidates
+  after landing, retaining support, full-body clearance, headroom and configured step bounds.
+  Check server pose changes through conservative angular envelopes; supported lift/settle
+  and outward recovery are capped at 0.1 block per tick. New obstacles still clip recovery;
+  unsafe angles and ordinary travel from an embedded start are rejected. Include pose Y in
+  final displacement/fall accounting and deduct its rise from the same tick's step budget.
+- Reconcile wheels with the accepted server position/pose without applying springs twice.
+  Clear completely rejected momentum and supported brake residue below 1e-5 block/tick.
+  Preserve existing oriented-primary working changes, body dimensions, suspension tuning,
+  gearing, engine force, speed limits and brake forces. The military collision/step branch
+  matches HEAD; drivetrain and vehicle tuning parser are unchanged.
+- Extend the existing disabled-by-default CarGripDiagnostics opt-in with a server movement
+  CSV covering W/S, force/contact, both axes, step candidates, pose and final position.
+  Update the existing physics document with evidence, recovery rules and seven feedback cases.
+- Two offline compileJava passes succeeded with the existing Java 25/Jabel/Forge 1.7.10 cache;
+  all six changed Java classes have major version 52. Saved NBT/terrain inspection, source
+  authority/lifecycle checks, diagnostic field-count checks and collision-equation checks ran.
+  Mathematical cases covered mirrored forward/reverse corners, one-sided corner support,
+  straight steps, wall/ceiling rejection, unsupported drops and continuous angular clearance.
+  The saved Starion levels with four supported wheels by reconstructed tick 21; the Chiron
+  overlap clears in four bounded outward moves. Final diff whitespace validation passed.
+  No test/fixture files, temporary repository files, tuning changes, commits or packaging
+  were added. The diagonal failure was not reproduced or verified fixed in-game; stairs into
+  the hole, live W/S/braking recovery, tight-obstacle rotation, dedicated server and multiplayer
+  interpolation still require driving feedback. Equation results are not gameplay verification.

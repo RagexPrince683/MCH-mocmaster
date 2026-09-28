@@ -3,8 +3,8 @@
 The earlier sections record the pitch and body-collision work after `a94f5f0`,
 including its historical fixture results. `fa6d246` subsequently introduced oriented
 extra-body sweeps, uses a 45-degree terrain pitch limit, and removed the test
-sources mentioned below. The final section describes the current pause correction;
-those historical test results are not validation of this correction.
+sources mentioned below. The final sections describe the oriented-primary correction
+and diagonal collision/pose recovery; historical test results do not validate them.
 
 This change applies only to `CivilianCarGrip` vehicles. The checkout was clean before
 the change. `MCH_EntityTank`, `MCH_WheelManager`, `MCH_RenderTank`, and the common
@@ -122,8 +122,8 @@ the normal clipped movement. Finally, `if(mx != parX) motionX = 0` and
 `if(mz != parZ) motionZ = 0` discard velocity on blocked axes. This is the exact
 cleanup branch that turns a clipped request into a persistent throttle/speed stall.
 
-There were also geometry and step-accounting problems. Starion configures an
-unchanged **0.85 x 0.85** primary box, `StepHeight = 1.2`, and these extra boxes
+There were also geometry and step-accounting problems. The historical fixture used
+a **0.85 x 0.85** primary box, `StepHeight = 1.2`, and these Starion extra boxes
 (local center; width x height x depth):
 
 | Component | Center | Dimensions |
@@ -132,6 +132,13 @@ unchanged **0.85 x 0.85** primary box, `StepHeight = 1.2`, and these extra boxes
 | Middle | (0, 0.20, 0) | 2.1 x 0.2 x 2.1 |
 | Front | (0, 0.20, 1.8) | 2.1 x 0.2 x 2.1 |
 | Rear | (0, 0.20, -1.6) | 2.1 x 0.2 x 2.1 |
+
+Correction from the 2026-09-28 saved-world investigation: Starion's
+`EntityWidth = 0.85` / `EntityHeight = 0.85` affect rider rendering, not the primary
+collision dimensions. `Width` / `Height` are the collision fields; Starion leaves
+them unset. Its effective primary is the tank constructor/default **2.0 x 0.7**.
+The 0.85-primary numerical examples and historical fixtures below therefore do
+not reproduce the effective primary collider in the reported game.
 
 At level pitch and primary bottom Y=0, entity Y is 0.35: the constructor's
 `yOffset` remains 0.35 after the configured primary size is applied. The front box
@@ -207,8 +214,9 @@ are unchanged. No wheel changes from reverted `dc3ad8a` are restored.
 The original pitch test's collision fixture has `extraBoundingBox = new
 MCH_BoundingBox[0]` and no civilian configuration. It still exercises the untouched
 legacy step gate; it is not proof of full Starion clearance. The separate
-`MCH_CarBodyMovementTest` parses Starion's real body dimensions, four extra boxes,
-step height, suspension travel, and wheel layout from the configuration. It exercises
+`MCH_CarBodyMovementTest` covered Starion's four extra boxes, step height,
+suspension travel, and wheel layout. The earlier description here incorrectly
+identified the rider dimensions as the real primary dimensions. It exercises
 the production `moveEntity` and collision collector against explicit full blocks,
 stair parts, outer-edge walls, engine ceilings, rear support at -16.60-degree pitch,
 new pitch transforms, stale body/wheel flags, clipped upward clearance, vertical
@@ -330,3 +338,205 @@ passes. Final scope review contains only the two civilian collision helpers,
 Gameplay verification of the reported pause, sustained block/stair ascent, wall
 stops, and headroom remains with the user's feedback. Compilation alone cannot
 verify that the pause is gone or that live staircase climbing is preserved.
+
+## Oriented civilian primary collider — 2026-09-28
+
+The user identified the static blue primary box in the reported game. Read-only
+inspection of `run/client/saves/___/region/r.3.-4.mca` identifies the vehicle as
+`starion`, texture `starion`, at (1781.9936197, 12.349999994, -1537.6528281), yaw
+2.2108634, pitch -41.8111763, roll 0, zero saved motion, and `OnGround = true`.
+This matches the screenshots. The saved nearby collision terrain is full grass/dirt
+blocks; the adjacent stone stairs are not the blocking shape at this pose.
+
+The confirmed geometry error is that `moveEntity` put the unpitched primary AABB
+into the compound SAT sweep while transforming the extra boxes. A collision-equation
+reconstruction using the saved blocks, effective 2.0 x 0.7 primary, configured extra
+boxes, and Minecraft's float/trigonometric conventions clips a -0.617 downward
+request to zero at the primary's flat bottom. None of the extra boxes initially
+penetrates a saved block. With the primary transformed about the same vehicle
+origin, the same request permits -0.4302565 Y, then stops at an actual rotated face.
+These are saved-runtime geometry calculations, not execution of a game tick.
+
+For `CivilianCarGrip` vehicles, `getPrimaryBoundingBox()` now supplies a cached
+oriented primary with the entity's actual width/height and original local center
+(`height/2 - yOffset + ySize`). The primary and extras use the same SAT movement
+resolver. The ordinary entity AABB encloses that primary for vanilla compatibility;
+it is not used as the civilian car's primary block collider. Position is advanced
+from the vehicle origin by the accepted XYZ displacement, never recovered from the
+enclosing minimum Y. Position/pose updates and definition changes refresh the bounds;
+removing the opt-in restores the legacy AABB. Primary intersections, damage rays,
+and the blue debug model use the oriented volume. Legacy tanks retain their path.
+
+Terrain selection, suspension anchor correction, grip normalization, and level-road
+render calibration use the explicit **unrotated chassis floor**, not the new
+envelope's lowest corner. Suspension travel, grip reach/skin, contact gates, drive
+force, gearing, speed limits, and brakes are unchanged. All body dimensions and
+solid-block collision sweeps remain present. Step support, rise/headroom limits,
+landing, final clearance, and the normal overlap-rejection guard remain required.
+
+Missing wheel support is a separate remaining question: at the saved pose the
+nominal wheel anchors are beyond suspension reach of their respective surfaces.
+That is consistent with a chassis held above its wheels; the RWD car cannot gain
+propulsion from unsupported rear wheels. The existing CSV is an earlier Chiron
+capture and contains no Starion pre-drive or movement trace. High RPM alone does
+not establish applied drive force. The saved pose does not demonstrate an embedded
+extra box rejecting both travel directions, and it does not prove that contact will
+return or that driving will escape after the geometry correction.
+
+Validation: `gradlew.bat compileJava --offline --no-configuration-cache --no-daemon
+--gradle-user-home C:/Users/Owner/.gradle` passed with the existing cached Java 25
+launcher/Jabel compiler and Forge 1.7.10 dependencies. All six changed production
+classes have class-file major version 52 (Java 8). Read-only world/NBT inspection,
+collision-equation reconstruction, lifecycle/call-site review, and `git diff --check`
+were performed. No test sources, fixtures, temporary repository files, diagnostic
+capture, packaging, reobfuscation, game launch, or in-game fix verification were done.
+
+### Driving feedback for the corrected build
+
+Release Space and pedals first, allow the body to settle, then test each case:
+
+| Case | Feedback to check |
+| --- | --- |
+| Pictured ledge, forward | Blue primary rotates with the chassis; W in gear 1 makes progress when driven-wheel contact and full-body clearance permit it. Report continued RPM-only stalls. |
+| Pictured ledge, reverse | Hold S through the normal direction change to R; check descent/backward progress and rear contact, without clipping through the grass edge. |
+| Level ground | Forward/reverse launch, stopping height, wheel position, and released-pedal settling retain their previous behavior. |
+| Full blocks | Reachable steps within configured StepHeight climb only with current support, landing, and clearance; over-height rises stop the car. |
+| Stone stairs | Both ascent and descent follow individual treads; stop/restart and reverse without hanging on the primary's old flat bottom. |
+| Solid wall | Face the wall in forward and reverse runs: motion into it stops, with no body penetration or unsupported step over it. |
+
+The photographed stuck position was recovered from the save, but was **not
+reproduced or verified fixed in-game** during this work. Full release, wheel-contact
+recovery, stair behavior, ceiling clearance, and multiplayer interpolation need
+feedback from the corrected build.
+
+## Diagonal corners, supported roll and bounded recovery — 2026-09-28
+
+### Confirmed evidence and remaining hypotheses
+
+The latest saved runtime state in `run/client/saves/___/region/r.3.-4.mca` contains
+a Starion at (1769.4165221, 4.64182984, -1923.6273878), yaw -187.75746, pitch 0,
+roll +17.999998, and `OnGround = true`. Reconstructing its configured wheel anchors
+and the saved full grass/dirt collision surfaces gives two low-side wheels supported
+at Y=4 and two high-side anchors outside suspension reach. The old roll calculation
+substitutes Y=0 for the unsupported side, so the desired roll clamps to +18 degrees
+again. This is a confirmed self-maintaining roll trap on level terrain, rather than
+evidence that the terrain itself requires that roll.
+
+The same saved region contains a stationary Chiron at
+(1782.0373094, 5.4117375, -1661.0832613), yaw 3.576782, pitch 8.130101, roll -6.387097.
+Its configured front underside components overlap the saved full block at
+(1782, 4, -1659). Applying pitch/roll before translation can introduce this overlap;
+previously the normal candidate rejected horizontal movement while still permitting
+an overlap to be interpreted as a downward landing. The save confirms the overlap,
+but does not record the earlier tick that introduced it.
+
+Separately, a collision-equation corner check with the unchanged Starion components,
+yaw -45, origin (-1.2, 0.349999994, 1.32), level floor Y=0, and a full block occupying
+X/Z=[0,1], Y=[0,1] demonstrates axis-order clipping. For requested X=Z=0.12 and
+Y=-0.617, X then Z permits (0.035075852, 0.12); Z then X and the direct diagonal
+sweep permit (0.12, 0.12). The old raised retry succeeds in this example, but is
+unnecessary: the diagonal path is already clear. This establishes the ordering
+limitation, not a captured in-game failure of the retry. Opposite travel and mirrored
+approaches are feedback cases below.
+
+The existing grip CSV contains only earlier Chiron lateral/contact samples, with
+no current movement, step, engine force, or RPM trace. High RPM alone cannot prove
+that drive force was applied, that contact was absent, or which candidate failed.
+The contribution of sweep order to the reported stall, the exact stair-to-hole
+sequence, client prediction effects, and the original overlap-producing tick remain
+runtime hypotheses. The diagonal failure has **not been reproduced or verified fixed
+in-game** during this task.
+
+### Current authoritative rules
+
+- Roll uses measured collision-surface heights and requires samples on both sides.
+  With either side missing, it decays toward level instead of inventing a height.
+  The existing 18-degree limit and spring/damping tuning are retained.
+- The server treats suspension pitch/roll and incoming yaw as candidate angles.
+  Pitch/roll advance by at most 2 degrees per tick, with smaller fractions when
+  clearance requires them. A conservative midpoint volume encloses the continuous
+  angular path, including the Minecraft trigonometric lookup error allowance.
+  Pure level yaw does not gain a vertical envelope merely because it turns.
+- A supported pose transition may sweep up at most 0.1 block, rotate only with
+  clearance throughout its angular path, then sweep down by that actual rise.
+  A ceiling clips the lift; missing support forbids it. No position or angle is
+  reset to a presumed road height, and gravity still resolves the final descent.
+- An already embedded body may recover upward by at most 0.1 block per tick only
+  when every existing overlap has an outward separating face within `StepHeight`.
+  That separating distance decreases throughout the movement. Non-overlapping
+  obstacles still clip the entire sweep. A blocked ceiling or an overlap with no
+  outward upward exit prevents recovery. Until the start is clear, ordinary travel
+  and stepping are rejected, and rejected horizontal velocity is removed.
+- Normal and raised horizontal candidates compare X→Z, Z→X, and continuous
+  diagonal SAT sweeps. A fully permitted first path avoids unnecessary retries.
+  Raised paths are compared after settling and must improve progress, land on
+  actual support, and leave every body component clear. Recovery/pose rise is
+  deducted from the remaining step budget for the same tick.
+- Final position includes pose/recovery Y and resolved translation. Fall accounting
+  and vertical cleanup use that total. Wheels are reconciled to this accepted
+  position/pose without another spring impulse, so rejected predicted movement
+  does not supply the next tick's wheel locations. An identical current/final wheel
+  anchor needs only one suspension query.
+- Completely rejected travel clears its residual velocity. With wheel
+  contact and either brake held, horizontal residue below 1e-5 block/tick snaps to
+  rest. Engine force, inertia, traction limits, direction-change dwell, gears,
+  speed limits and brake forces are unchanged. The military movement branch is
+  unchanged; all new body rules require `CivilianCarGrip`.
+
+### Diagnostics and feedback
+
+Opt in with the existing per-vehicle `CarGripDiagnostics = true` setting and restart
+or use the existing definition reload. The server now also writes
+`logs/car-body-movement.csv`: W/S, gear, throttle, RPM, brakes, pre-drive front/rear
+contact and applied drive force; requested movement; pose displacement and angles;
+normal/raised candidates; blocked axes, landing, reconciled contact, final position
+and velocity. This is optional diagnostic I/O, disabled in unchanged definitions.
+Pre-drive contact -1 and force NaN mean no drivetrain sample was available.
+`paths` entries contain `stage:x|y|z|rise|landing|clear`, separated by semicolons.
+Candidate order 0 is X→Z, 1 is Z→X, and 2 is direct diagonal; straight or fully clear
+requests omit redundant candidates. `rise` records permitted headroom even when
+no raised candidate can run. `embedded` records rejection pending recovery.
+
+Use the same vehicle and surface for each feedback case, release Space before
+launching, and capture the movement CSV when a failure occurs:
+
+| Case | Feedback to check |
+| --- | --- |
+| Diagonal, left wheels leading | Cross a full-block corner at about 45 degrees in W and then S/R. Confirm progress with driven-wheel contact, bounded roll and no body penetration; repeat slowly and at ordinary road speed. |
+| Diagonal, right wheels leading | Mirror the course and repeat forward/reverse. Report a directional difference and capture both candidate axes, step landing and final position. |
+| Straight crossing | Ascend/descend the same reachable block edge squarely. Existing step reach, speed and throttle response should remain; an over-height rise must stop travel. |
+| Stairs → hole → level | Descend the original stairs into the hole, return to level terrain, release pedals, then launch with W and S. Body and wheels should settle, with no persistent RPM-only stall. |
+| Level-ground recovery | Return a rolled car to a flat supported surface, stop, and let it settle. Expect gradual level pose and restored contact; apply each brake and check that residual drift stops. No instantaneous height/angle reset should occur. |
+| Unsupported drop | Drive off an edge with no reachable wheel/body support. It must fall normally, gain no recovery/step lift in free space, and gain no tire drive force without contact. |
+| Solid wall / low ceiling | Hold W, test S/R, and brake against an unstepable wall. The body must stop at contact; reversing along a clear supported path should respond normally. A low ceiling must reject unsafe rise/rotation/recovery. |
+
+### Checks actually run
+
+Read all six requested implementations, their server/client ordering, raw component
+collision collector, pose packet handler, definitions, existing diagnostics and
+physics documentation. Read the saved NBT and nearby full-block terrain without
+modifying the world. Ran in-memory collision-equation checks, not test classes or
+game ticks: both travel signs and mirrored diagonal corners; X→Z/Z→X/direct comparison;
+straight supported ascent (0.12 horizontal, 0.550000007 Y); held wall contact;
+low-ceiling rejection; unsupported descent (-0.617 Y, no step); shallow overlap
+escape with ceiling rejection; and 101 samples of an accepted angular envelope.
+An additional Chiron corner calculation at (-2, 5.39, 0.85), yaw -45, over a floor
+at Y=4 and a full block X/Z=[0,1], Y=[4,5], has one supported right-front wheel
+and no supported left wheels. The diagonal request (0.12, -0.617, 0.12) remains
+fully permitted. The unchanged stationary AWD launch equation with one contacting
+front tire gives +0.004105134 block/tick², with zero force from the unsupported axle;
+this is an equation check, not a captured engine tick.
+The saved Starion reconstruction reached roll 0, Y=4.349999994 and four supported
+wheels by tick 21; the saved Chiron overlap cleared in four outward moves totaling
+0.315857737 Y. These are mathematical reconstructions, not in-game fix verification.
+
+`gradlew.bat compileJava --offline --no-configuration-cache --no-daemon
+--gradle-user-home C:/Users/Owner/.gradle` ran with `GRADLE_USER_HOME` set to the same
+existing cache, using the configured Java 25/Jabel compiler and Forge 1.7.10
+dependencies. The first default wrapper invocation could not create its lock under
+`C:\.gradle`; the explicit existing cache resolved that environment issue. Final
+compilation, bytecode and diff results are recorded in `CHANGELOG.md`. No test
+classes, fixtures, temporary repository files, configuration tuning, game launch,
+packaging or reobfuscation were added or performed. The seven driving cases,
+dedicated-server operation and multiplayer pose interpolation need runtime feedback;
+the conservative angular envelope can limit rotation near tight obstacles.

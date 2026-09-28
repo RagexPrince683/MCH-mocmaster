@@ -83,7 +83,7 @@ public class MCH_EntityWheel extends W_Entity {
    public double measureSuspensionCompression(Vec3 currentAnchor, Vec3 predictedAnchor, double travel) {
       this.suspensionSupportY = Double.NaN;
       double current = this.measureCompressionAt(currentAnchor, travel);
-      double predicted = this.measureCompressionAt(predictedAnchor, travel);
+      double predicted = currentAnchor == predictedAnchor ? current : this.measureCompressionAt(predictedAnchor, travel);
       double compression = Math.max(current, predicted);
       this.suspensionSupported = compression >= 0.0D;
       return this.suspensionSupported ? compression : 0.0D;
@@ -92,7 +92,7 @@ public class MCH_EntityWheel extends W_Entity {
    /** Correct low collision anchors without changing authored model positions or terrain pose. */
    double getSuspensionAnchorOffset() {
       double levelBottom = this.parents.posY + this.pos.yCoord + this.boundingBox.minY - this.posY;
-      return Math.max(0.0D, Math.min(this.parents.boundingBox.minY - levelBottom,
+      return Math.max(0.0D, Math.min(this.parents.getUnrotatedBodyFloor() - levelBottom,
             this.boundingBox.maxY - this.boundingBox.minY));
    }
 
@@ -132,7 +132,7 @@ public class MCH_EntityWheel extends W_Entity {
       // Use the actual box offset/height, including ySize, rather than assuming
       // every authored wheel anchor is above the body's collision floor.
       double targetBottom = this.parents.getTransformedPosition(this.pos).yCoord + box.minY - this.posY;
-      double bodyBottom = this.parents.boundingBox.minY;
+      double bodyBottom = this.parents.getUnrotatedBodyFloor();
       double restGap = Math.max(0.0D, targetBottom - bodyBottom);
       // Low anchors (e.g. Chiron Y=-0.74) put the invisible box through the road.
       // calculateYOffset cannot find downward support from an overlapping box.

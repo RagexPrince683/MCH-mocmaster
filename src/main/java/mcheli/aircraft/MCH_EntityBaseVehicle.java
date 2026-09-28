@@ -3272,6 +3272,16 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return this.vehicleBoxCache.getBoxes(this);
    }
 
+   /** Optional oriented primary volume; null retains the legacy axis-aligned primary. */
+   public MCH_BoundingBox getPrimaryBoundingBox() {
+      return null;
+   }
+
+   /** Level chassis reference, independent of an oriented box's enclosing AABB. */
+   public double getUnrotatedBodyFloor() {
+      return super.posY - (double)super.yOffset + (double)super.ySize;
+   }
+
    public void markVehicleBoxCacheDirty(String reason) {
       this.vehicleBoxCache.markDirty(reason);
    }

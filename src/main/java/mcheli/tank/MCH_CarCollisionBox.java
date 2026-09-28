@@ -69,13 +69,18 @@ final class MCH_CarCollisionBox {
    }
 
    double clip(AxisAlignedBB obstacle, int direction, double requested) {
-      if(requested == 0) return 0;
+      return requested * clipFraction(obstacle, direction == 0 ? requested : 0,
+            direction == 1 ? requested : 0, direction == 2 ? requested : 0);
+   }
+
+   double clipFraction(AxisAlignedBB obstacle, double dx, double dy, double dz) {
+      if(dx == 0 && dy == 0 && dz == 0) return 1;
       double enter = Double.NEGATIVE_INFINITY, exit = Double.POSITIVE_INFINITY;
       double leastPenetration = Double.POSITIVE_INFINITY, outwardMovement = 0;
       for(int i = 0; i < axes.length; ++i) {
          double[] axis = axes[i];
          double d = distance(obstacle, axis), r = radius(obstacle, i);
-         double v = requested * axis[direction];
+         double v = dx * axis[0] + dy * axis[1] + dz * axis[2];
          double penetration = r - Math.abs(d);
          if(penetration < leastPenetration) {
             leastPenetration = penetration;
@@ -83,23 +88,35 @@ final class MCH_CarCollisionBox {
          }
          if(Math.abs(v) < 1.0E-12D) {
             // A touching face parallel to the request must permit sliding.
-            if(penetration <= EPSILON) return requested;
+            if(penetration <= EPSILON) return 1;
          } else {
             double first = (-r - d) / v, last = (r - d) / v;
             enter = Math.max(enter, Math.min(first, last));
             exit = Math.min(exit, Math.max(first, last));
          }
       }
-      if(enter >= exit || exit <= 0 || enter >= 1) return requested;
+      if(enter >= exit || exit <= 0 || enter >= 1) return 1;
       // enter is a fraction of the request; penetration is a distance along a
       // normalized SAT axis. Use the same contact distance as intersects(), even
       // for tiny support probes, rather than comparing a fraction to that distance.
-      if(enter >= 0) return requested * enter;
-      if(leastPenetration <= EPSILON) return outwardMovement < 0 ? 0 : requested;
+      if(enter >= 0) return enter;
+      if(leastPenetration <= EPSILON) return outwardMovement < 0 ? 0 : 1;
       // A rotation can introduce overlap before translation. Prevent movement deeper
       // through its nearest face, but permit escape; a supported step must still clear
       // every component before it can be accepted.
-      return outwardMovement < -EPSILON ? 0 : requested;
+      return outwardMovement < -EPSILON ? 0 : 1;
+   }
+
+   /** A separating face must move outward throughout an already overlapping upward escape. */
+   double upwardEscape(AxisAlignedBB obstacle) {
+      double distance = Double.POSITIVE_INFINITY;
+      for(int i = 0; i < axes.length; ++i) {
+         double d = distance(obstacle, axes[i]), vertical = axes[i][1];
+         if(d * vertical > EPSILON) {
+            distance = Math.min(distance, (radius(obstacle, i) - Math.abs(d)) / Math.abs(vertical));
+         }
+      }
+      return distance;
    }
 
    private double distance(AxisAlignedBB box, double[] axis) {

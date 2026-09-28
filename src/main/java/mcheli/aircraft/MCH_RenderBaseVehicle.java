@@ -623,6 +623,13 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
       if(MCH_Config.TestMode.prmBool && debugModel != null) {
          GL11.glPushMatrix();
          GL11.glTranslated(x, y, z);
+         MCH_BoundingBox primary = e.getPrimaryBoundingBox();
+         if(primary != null) {
+            GL11.glRotatef(yaw, 0.0F, -1.0F, 0.0F);
+            GL11.glRotatef(pitch, 1.0F, 0.0F, 0.0F);
+            GL11.glRotatef(roll, 0.0F, 0.0F, 1.0F);
+            GL11.glTranslated(primary.offsetX, primary.offsetY, primary.offsetZ);
+         }
          GL11.glScalef(e.width, e.height, e.width);
          this.bindTexture("textures/hit_box.png");
          debugModel.renderAll();

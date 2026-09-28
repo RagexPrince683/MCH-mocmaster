@@ -55,9 +55,16 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    public float prevRotationRotor;
    public float addkeyRotValue;
    public final MCH_WheelManager WheelMng;
+   private MCH_BoundingBox carPrimaryBox;
+   private double carPrimaryX, carPrimaryY, carPrimaryZ;
+   private float carPrimaryYaw, carPrimaryPitch, carPrimaryRoll;
    public float partialTicks;
    private boolean carPhysicsYawInitialized;
    private float carPhysicsYaw;
+   private boolean carBodyPoseInitialized;
+   private float carBodyYaw, carBodyPitch, carBodyRoll;
+   private double carDiagnosticDriveForce;
+   private MCH_WheelManager.CarContact carDiagnosticDriveContact;
    private MCH_CarGripDiagnostics.Snapshot carGripDiagnostic;
    public final MCH_CarDrivetrain carDrivetrain = new MCH_CarDrivetrain();
    private Entity carInputPilot;
@@ -125,6 +132,67 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       return this.tankInfo;
    }
 
+   @Override
+   public MCH_BoundingBox getPrimaryBoundingBox() {
+      if(this.tankInfo == null || !this.tankInfo.civilianCarGrip) return null;
+      double centerY = (double)super.height * 0.5D - (double)super.yOffset + (double)super.ySize;
+      boolean resized = this.carPrimaryBox == null || this.carPrimaryBox.width != super.width
+            || this.carPrimaryBox.height != super.height || this.carPrimaryBox.offsetY != centerY;
+      if(resized) {
+         this.carPrimaryBox = new MCH_BoundingBox(0, centerY, 0, super.width, super.height, super.width, 1.0F);
+      }
+      float yaw = this.getRotYaw(), pitch = this.getRotPitch(), roll = this.getRotRoll();
+      if(resized || this.carPrimaryX != super.posX || this.carPrimaryY != super.posY
+            || this.carPrimaryZ != super.posZ || this.carPrimaryYaw != yaw
+            || this.carPrimaryPitch != pitch || this.carPrimaryRoll != roll) {
+         this.carPrimaryBox.updatePosition(super.posX, super.posY, super.posZ, yaw, pitch, roll);
+         this.carPrimaryX = super.posX; this.carPrimaryY = super.posY; this.carPrimaryZ = super.posZ;
+         this.carPrimaryYaw = yaw; this.carPrimaryPitch = pitch; this.carPrimaryRoll = roll;
+      }
+      return this.carPrimaryBox;
+   }
+
+   private void updateCarPrimaryBounds() {
+      MCH_BoundingBox primary = this.getPrimaryBoundingBox();
+      if(primary != null) {
+         super.boundingBox.setBB(primary.boundingBox);
+      } else if(this.carPrimaryBox != null) {
+         // A definition reload can remove the opt-in while the vehicle is pitched.
+         this.carPrimaryBox = null;
+         super.setPosition(super.posX, super.posY, super.posZ);
+      }
+   }
+
+   @Override
+   public AxisAlignedBB getBoundingBox() {
+      this.updateCarPrimaryBounds();
+      return super.getBoundingBox();
+   }
+
+   @Override
+   public void setPosition(double x, double y, double z) {
+      super.setPosition(x, y, z);
+      this.updateCarPrimaryBounds();
+   }
+
+   @Override
+   public void setRotYaw(float yaw) {
+      super.setRotYaw(yaw);
+      this.updateCarPrimaryBounds();
+   }
+
+   @Override
+   public void setRotPitch(float pitch) {
+      super.setRotPitch(pitch);
+      this.updateCarPrimaryBounds();
+   }
+
+   @Override
+   public void setRotRoll(float roll) {
+      super.setRotRoll(roll);
+      this.updateCarPrimaryBounds();
+   }
+
    public void changeType(String type) {
       if(!type.isEmpty()) {
          this.tankInfo = MCH_TankInfoManager.get(type);
@@ -140,6 +208,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          super.weapons = this.createWeapon(1 + this.getSeatNum());
          this.initPartRotation(this.getRotYaw(), this.getRotPitch());
          this.WheelMng.createWheels(super.worldObj, this.getAcInfo().wheels, Vec3.createVectorHelper(0.0D, -0.35D, (double)this.getTankInfo().weightedCenterZ));
+         this.carBodyPoseInitialized = false;
+         this.updateCarPrimaryBounds();
       }
 
    }
@@ -434,20 +504,17 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       double result;
       double result2;
       MCH_CarBodyMovement.Result civilianMovement = null;
+      double civilianPoseY = 0;
+      MCH_CarBodyMovement.Trace civilianTrace = null;
+      float poseYaw = this.getRotYaw(), posePitch = this.getRotPitch(), poseRoll = this.getRotRoll();
       if(this.getTankInfo() != null && this.getTankInfo().civilianCarGrip) {
          final MCH_CarBodyMovement.Collisions collisions = this::getBodyComponentCollisions;
-         List<MCH_CarCollisionBox> body = new ArrayList<MCH_CarCollisionBox>();
-         body.add(new MCH_CarCollisionBox(super.boundingBox));
-         // Use fresh transforms after updateWheels changes pitch/roll. Candidate sweeps
-         // operate on copies and do not advance the extra-box history/cache.
-         for(MCH_BoundingBox definition : super.extraBoundingBox) {
-            MCH_BoundingBox current = definition.copy();
-            current.updatePosition(super.posX, super.posY, super.posZ,
-                  this.getRotYaw(), this.getRotPitch(), this.getRotRoll());
-            body.add(new MCH_CarCollisionBox(current));
-         }
+         if(this.getTankInfo().carGripDiagnostics && !super.worldObj.isRemote) civilianTrace = new MCH_CarBodyMovement.Trace();
+         if(!super.worldObj.isRemote) civilianPoseY = this.resolveCivilianPose(collisions);
+         List<MCH_CarCollisionBox> body = this.carBodyAt(this.getRotYaw(), this.getRotPitch(), this.getRotRoll(), 0, 0);
          civilianMovement = MCH_CarBodyMovement.resolveBody(body, collisions, mx, my, mz,
-               super.ySize < 0.05F ? super.stepHeight : 0, this.hasCurrentCivilianWheelSupport(collisions));
+               super.ySize < 0.05F ? Math.max(0, super.stepHeight - civilianPoseY) : 0,
+               this.hasCurrentCivilianWheelSupport(collisions), civilianTrace);
          parX = civilianMovement.x;
          parY = civilianMovement.y;
          parZ = civilianMovement.z;
@@ -496,16 +563,29 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       double positionX = super.boundingBox.minZ;
       double maxX = super.boundingBox.maxX;
       double maxZ = super.boundingBox.maxZ;
-      super.posX = (minX + maxX) / 2.0D;
-      super.posY = super.boundingBox.minY + (double)super.yOffset - (double)super.ySize;
-      super.posZ = (positionX + maxZ) / 2.0D;
+      // An oriented primary's enclosing minimum/center is not the vehicle origin.
+      super.posX = civilianMovement != null ? nowPosX + parX : (minX + maxX) / 2.0D;
+      super.posY = civilianMovement != null ? nowPosY + civilianPoseY + parY
+            : super.boundingBox.minY + (double)super.yOffset - (double)super.ySize;
+      super.posZ = civilianMovement != null ? nowPosZ + parZ : (positionX + maxZ) / 2.0D;
+      if(civilianMovement != null) {
+         this.updateCarPrimaryBounds();
+         if(!super.worldObj.isRemote) {
+            this.carBodyYaw = this.getRotYaw(); this.carBodyPitch = this.getRotPitch(); this.carBodyRoll = this.getRotRoll();
+            this.carBodyPoseInitialized = true;
+            this.carPhysicsYaw = this.carBodyYaw;
+            this.WheelMng.settleCivilianWheels();
+         }
+      } else {
+         this.carBodyPoseInitialized = false;
+      }
       boolean blockedX = civilianMovement != null ? civilianMovement.blockedX : mx != parX;
       boolean blockedZ = civilianMovement != null ? civilianMovement.blockedZ : mz != parZ;
       super.isCollidedHorizontally = blockedX || blockedZ;
-      super.isCollidedVertically = civilianMovement != null ? MCH_CarBodyMovement.changed(my, parY) : my != parY;
+      super.isCollidedVertically = civilianMovement != null ? MCH_CarBodyMovement.changed(my, parY + civilianPoseY) : my != parY;
       super.onGround = civilianMovement != null ? civilianMovement.grounded : my != parY && my < 0.0D;
       super.isCollided = super.isCollidedHorizontally || super.isCollidedVertically;
-      this.updateFallState(parY, super.onGround);
+      this.updateFallState(parY + civilianPoseY, super.onGround);
       if(blockedX) {
          super.motionX = 0.0D;
       }
@@ -518,6 +598,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          super.motionZ = 0.0D;
       }
 
+      if(civilianTrace != null) {
+         MCH_CarGripDiagnostics.recordMovement(this, civilianTrace, civilianMovement, carDiagnosticDriveContact,
+               carDiagnosticDriveForce, nowPosX, nowPosY, nowPosZ, mx, my, mz, civilianPoseY, poseYaw, posePitch, poseRoll);
+      }
+
       try {
          this.doBlockCollisions();
       } catch (Throwable throwable) {
@@ -527,6 +612,93 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       }
 
       super.worldObj.theProfiler.endSection();
+   }
+
+   /** Build candidates without changing collider history or the vehicle origin. */
+   private List<MCH_CarCollisionBox> carBodyAt(float yaw, float pitch, float roll, double lift,
+         double pitchRollArc, double yawArc) {
+      List<MCH_CarCollisionBox> body = new ArrayList<MCH_CarCollisionBox>(super.extraBoundingBox.length + 1);
+      MCH_BoundingBox[] definitions = new MCH_BoundingBox[super.extraBoundingBox.length + 1];
+      definitions[0] = this.getPrimaryBoundingBox();
+      System.arraycopy(super.extraBoundingBox, 0, definitions, 1, super.extraBoundingBox.length);
+      for(MCH_BoundingBox definition : definitions) {
+         MCH_BoundingBox current = definition.copy();
+         if(pitchRollArc != 0 || yawArc != 0) {
+            double rx = Math.abs(definition.offsetX) + definition.width * 0.5D;
+            double ry = Math.abs(definition.offsetY) + definition.height * 0.5D;
+            double rz = Math.abs(definition.offsetZ) + definition.depth * 0.5D;
+            double radius = Math.sqrt(rx * rx + ry * ry + rz * rz);
+            double[] margins = new double[3];
+            for(int axis = 0; axis < 3; ++axis) {
+               Vec3 basis = MCH_Lib.RotVec3(axis == 0 ? 1 : 0, axis == 1 ? 1 : 0, axis == 2 ? 1 : 0,
+                     -yaw, -pitch, -roll);
+               // Any intermediate corner lies inside the midpoint box expanded by
+               // its maximum angular displacement. Pure yaw has no vertical arc.
+               margins[axis] = radius * (pitchRollArc + yawArc * Math.hypot(basis.xCoord, basis.zCoord));
+               if(margins[axis] > 0) margins[axis] += 0.001D * radius;
+            }
+            current = new MCH_BoundingBox(definition.offsetX, definition.offsetY, definition.offsetZ,
+                  Math.nextUp((float)(definition.width + 2 * margins[0])),
+                  Math.nextUp((float)(definition.height + 2 * margins[1])),
+                  Math.nextUp((float)(definition.depth + 2 * margins[2])), definition.damegeFactor);
+         }
+         current.updatePosition(super.posX, super.posY + lift, super.posZ, yaw, pitch, roll);
+         body.add(new MCH_CarCollisionBox(current));
+      }
+      return body;
+   }
+
+   private List<MCH_CarCollisionBox> carBodyAt(float yaw, float pitch, float roll, double lift, double arc) {
+      return this.carBodyAt(yaw, pitch, roll, lift, arc, 0);
+   }
+
+   /** Server pose changes use a swept angular envelope and a bounded supported lift/settle. */
+   private double resolveCivilianPose(MCH_CarBodyMovement.Collisions collisions) {
+      float desiredYaw = this.getRotYaw();
+      float desiredPitch = this.WheelMng.targetPitch, desiredRoll = this.WheelMng.targetRoll;
+      if(!this.carBodyPoseInitialized) {
+         this.carBodyYaw = desiredYaw; this.carBodyPitch = this.getRotPitch(); this.carBodyRoll = this.getRotRoll();
+      }
+      this.setRotYaw(this.carBodyYaw); this.setRotPitch(this.carBodyPitch); this.setRotRoll(this.carBodyRoll);
+      List<MCH_CarCollisionBox> initial = this.carBodyAt(this.carBodyYaw, this.carBodyPitch, this.carBodyRoll, 0, 0);
+      if(!MCH_CarBodyMovement.clear(initial, collisions)) {
+         double up = MCH_CarBodyMovement.recoverUp(initial, collisions, 0.1D, super.stepHeight);
+         super.posY += up;
+         this.updateCarPrimaryBounds();
+         return up;
+      }
+
+      float yawDelta = MathHelper.wrapAngleTo180_float(desiredYaw - this.carBodyYaw);
+      float pitchDelta = MathHelper.clamp_float(desiredPitch - this.carBodyPitch, -2, 2);
+      float rollDelta = MathHelper.clamp_float(desiredRoll - this.carBodyRoll, -2, 2);
+      if(yawDelta == 0 && pitchDelta == 0 && rollDelta == 0) return 0;
+      boolean supported = MCH_CarBodyMovement.supportedBody(initial, collisions)
+            || this.hasCurrentCivilianWheelSupport(collisions);
+      double rise = supported ? MCH_CarBodyMovement.move(initial, collisions, 1, Math.min(0.1D, super.stepHeight)) : 0;
+      for(float fraction = 1; fraction >= 0.015625F; fraction *= 0.5F) {
+         float yaw = this.carBodyYaw + yawDelta * fraction;
+         float pitch = this.carBodyPitch + pitchDelta * fraction;
+         float roll = this.carBodyRoll + rollDelta * fraction;
+         double pitchRollArc = Math.toRadians((Math.abs(pitchDelta) + Math.abs(rollDelta)) * fraction) * 0.5D;
+         double yawArc = Math.toRadians(Math.abs(yawDelta) * fraction) * 0.5D;
+         float midYaw = this.carBodyYaw + yawDelta * fraction * 0.5F;
+         float midPitch = this.carBodyPitch + pitchDelta * fraction * 0.5F;
+         float midRoll = this.carBodyRoll + rollDelta * fraction * 0.5F;
+         double lift = 0;
+         if(!MCH_CarBodyMovement.clear(this.carBodyAt(midYaw, midPitch, midRoll, 0, pitchRollArc, yawArc), collisions)) {
+            if(rise <= 0 || !MCH_CarBodyMovement.clear(
+                  this.carBodyAt(midYaw, midPitch, midRoll, rise, pitchRollArc, yawArc), collisions)) continue;
+            lift = rise;
+         }
+         List<MCH_CarCollisionBox> finalBody = this.carBodyAt(yaw, pitch, roll, lift, 0);
+         if(!MCH_CarBodyMovement.clear(finalBody, collisions)) continue;
+         double down = MCH_CarBodyMovement.move(finalBody, collisions, 1, -lift);
+         this.setRotYaw(yaw); this.setRotPitch(pitch); this.setRotRoll(roll);
+         super.posY += lift + down;
+         this.updateCarPrimaryBounds();
+         return lift + down;
+      }
+      return 0;
    }
 
    /** Read-only support at the present axle footprint, never at the pending destination. */
@@ -1256,6 +1428,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    private void onUpdate_Server() {
 
       final boolean DEBUG = false;
+      this.carDiagnosticDriveForce = Double.NaN;
+      this.carDiagnosticDriveContact = null;
       //gpt was right, drag coeff is nerfing my grabbed MPH logic.
 
       // --------------------------------------------------
@@ -1334,8 +1508,12 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          double forwardX = -Math.sin(yaw), forwardZ = Math.cos(yaw);
          double speed = super.motionX * forwardX + super.motionZ * forwardZ;
          double sideways = super.motionX * Math.cos(yaw) + super.motionZ * Math.sin(yaw);
-         double force = this.carDrivetrain.acceleration(this.tankInfo, this.WheelMng.getCarGroundContact(false),
-               speed, sideways, canMove);
+         MCH_WheelManager.CarContact driveContact = this.WheelMng.getCarGroundContact(false);
+         double force = this.carDrivetrain.acceleration(this.tankInfo, driveContact, speed, sideways, canMove);
+         if(this.tankInfo.carGripDiagnostics) {
+            this.carDiagnosticDriveForce = force;
+            this.carDiagnosticDriveContact = driveContact;
+         }
          super.motionX += forwardX * force;
          super.motionZ += forwardZ * force;
          this.syncCarDrivetrain();
@@ -1406,6 +1584,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       }
       // Clamp after drag and the server's final steering/grip heading, before movement.
       this.applyCivilianCarReverseSpeedLimit(canMove && this.getAcInfo().enableBack && super.throttleBack > 0.0F);
+      if(this.hasCarDrivetrain() && (this.carDrivetrain.serviceBrake || this.carDrivetrain.handbrake)
+            && (this.carDrivetrain.frontContact || this.carDrivetrain.rearContact)
+            && Math.hypot(super.motionX, super.motionZ) < 1.0E-5D) {
+         super.motionX = super.motionZ = 0;
+      }
       double motionYBeforeMove = super.motionY;
       this.moveEntity(super.motionX, super.motionY, super.motionZ);
       this.updateGroundVehicleFallDamage(wasOnGroundBeforeMove, motionYBeforeGravity, motionYBeforeMove);

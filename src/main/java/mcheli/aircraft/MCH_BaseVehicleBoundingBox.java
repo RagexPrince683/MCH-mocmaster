@@ -120,7 +120,8 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
 
    /** Physical queries never change the damage selected by calculateIntercept. */
    public boolean intersectsWith(AxisAlignedBB aabb) {
-      if(super.intersectsWith(aabb)) return true;
+      MCH_BoundingBox primary = this.ac.getPrimaryBoundingBox();
+      if(primary != null ? primary.intersectsWith(aabb) : super.intersectsWith(aabb)) return true;
       for(MCH_BoundingBox box : this.ac.getCalculatedExtraBoundingBoxes()) {
          if(this.ac.isPhysicalBoundingBox(box)) {
             // The movement resolver uses these same axis-aligned envelopes.
@@ -215,7 +216,8 @@ public class MCH_BaseVehicleBoundingBox extends AxisAlignedBB {
    public MovingObjectPosition calculateIntercept(Vec3 v1, Vec3 v2) {
       this.ac.lastBBDamageFactor = 1.0F;
       this.ac.lastHitBoundingBoxType = EnumBoundingBoxType.DEFAULT;
-      MovingObjectPosition mop = super.calculateIntercept(v1, v2);
+      MCH_BoundingBox primary = this.ac.getPrimaryBoundingBox();
+      MovingObjectPosition mop = primary != null ? primary.calculateIntercept(v1, v2) : super.calculateIntercept(v1, v2);
       double dist = 1.0E7D;
       if(mop != null) {
          dist = v1.distanceTo(mop.hitVec);
