@@ -580,3 +580,30 @@ Developer/backend
   were added. The diagonal failure was not reproduced or verified fixed in-game; stairs into
   the hole, live W/S/braking recovery, tight-obstacle rotation, dedicated server and multiplayer
   interpolation still require driving feedback. Equation results are not gameplay verification.
+
+2026-09-28 19:04 — Trace civilian stair and mixed-bump momentum loss
+
+- Confirmed both failed attempts are fully reverted on MCHRgithub: each revert's tree matches
+  its attempt's parent, and HEAD matches the tree before either attempt. Treat the reported
+  flat stair pauses and worse mixed-bump/choppy driving as observations, not verified causes.
+- Traced controls, drivetrain contact/force, drag, suspension/terrain targets, pose clearance,
+  compound-body normal/step selection, wheel reconciliation and velocity cleanup. Source permits
+  final-contact cleanup after a partial accepted step, but no failing-tick movement CSV exists
+  in this checkout's logs or run/logs to distinguish it from lost contact or rejected pose/step.
+- Extend the existing per-definition CarGripDiagnostics movement CSV with selected path and
+  step gate, accepted translation, effective budget/support, exact horizontal cleanup reason,
+  pre-reconciliation pose targets/decision, terrain sample result/heights/counts and engine/tire
+  state. Record input before slowing-block scaling. Append a session header to identify the
+  expanded schema when an old log exists; preserve captures. Document fields and the precise
+  held-W stairs/mixed-bump capture plus wall control in the existing terrain document.
+- Movement, step/pose selection, collision limits, velocity decisions, wheel reconciliation,
+  client prediction, drivetrain, tuning and definitions are unchanged. No failed StepPose,
+  terrain-seed walk, continuation probe or second movement solve was restored. A driving fix
+  remains pending runtime evidence; this diagnostics-only change does not claim smooth travel.
+- Offline compileJava passed with the repository's existing Gradle/Java 25/Jabel/Forge 1.7.10
+  setup after authorized existing-cache access resolved a sandbox wrapper-lock denial. All four
+  changed production classes and both changed/new diagnostic nested classes have Java 8 major
+  version 52. Source/diff review covered full accepted steps, partial-step contact and solid-wall
+  cleanup; CSV header/format counts match at 67 fields. No tests/harnesses, packaging,
+  reobfuscation or game launch were performed. Runtime capture, driving continuity, live CSV
+  emission and dedicated-server/multiplayer behavior remain unverified.

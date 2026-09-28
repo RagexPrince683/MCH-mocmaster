@@ -540,3 +540,74 @@ classes, fixtures, temporary repository files, configuration tuning, game launch
 packaging or reobfuscation were added or performed. The seven driving cases,
 dedicated-server operation and multiplayer pose interpolation need runtime feedback;
 the conservative angular envelope can limit rotation near tight obstacles.
+
+## Stair and mixed-bump capture — 2026-09-28
+
+Both failed attempts are reverted on `MCHRgithub`: `bfcfcb61` restores the parent
+tree of `7ff3e69c`, and `1eefd194` restores the parent tree of `f0b48211`. The
+reported pauses on straight stairs and the worse mixed-bump/choppy behavior in
+those attempts are driving observations. Neither compilation nor the historical
+geometry calculations above establish their cause. No movement capture was found
+in this checkout's `logs` or `run/logs`.
+
+The current server tick updates controls, samples physical wheel contact for
+drivetrain force, applies drag, predicts suspension and terrain pose, applies
+lateral grip and speed limits, then calls `moveEntity`. That method applies any
+slowing-block displacement scale, resolves the supported angular pose, and sweeps
+the oriented primary and extra body components once through the existing resolver.
+Step selection requires current support or a downward landing, permitted headroom,
+bounded net rise, improved horizontal progress, final support and full clearance.
+The server commits displacement and pose, reconciles the wheels without another
+spring impulse, updates collision/fall flags, and clears blocked velocity axes.
+The movement CSV is recorded here, before block callbacks and the final Y damping.
+
+There are several distinguishable source paths, and none is established as the
+original failing tick. Missing front/rear terrain samples return NaN and decay
+the pitch target; the angular envelope can reject a requested pose; a raised
+candidate can fail height, progress, support or clearance; and an accepted partial
+step can still clear a velocity axis if its final pose touches an obstacle in
+that direction. The last case uses the same contact classification needed for
+an unstepable wall. This change records those decisions without changing them.
+
+The existing `CarGripDiagnostics = true` per-definition opt-in now appends these
+fields to `logs/car-body-movement.csv` in the **game/server working directory**:
+
+| Fields | Meaning |
+| --- | --- |
+| `input_x/z`, `accepted_x/y/z` | Movement entering `moveEntity` before slowing-block scaling, and selected body translation. Accepted Y excludes `pose_y`; total Y is their sum. Existing `request_x/y/z` is the resolver request after scaling. Distances/velocity use blocks and blocks/tick. |
+| `selected`, `step_gate` | Selected `normal_0/1/2`, `normal_none`, `step_0/1/2` or `embedded`; step gate is `unclipped`, `no_step_height`, `unsupported`, `no_rise`, `no_valid_improvement`, `accepted_step` or `embedded`. `normal_none` means the default zero-horizontal path won. |
+| `step_height`, `step_base_y`, `vertical_y`, `wheel_support`, `body_support` | Effective step budget after pose displacement and ySize gating; base Y when a step was attempted; resolved initial vertical sweep; current-footprint wheel support and body support at the resolver start. Embedded rejection has no vertical sweep. |
+| `cleanup_x/z` | Exact horizontal cleanup branch: `none`, `embedded`, `no_progress` (clipped request with total horizontal progress at most collision epsilon), or `final_contact` (clipped axis blocked by the existing 1e-5 contact probe at the accepted pose). These are observations, not additional probes or continuation solves. |
+| `desired_yaw`, `target_pitch/roll`, `pose_decision`, `pose_fraction` | Requested angles before wheel reconciliation overwrites targets; pose result is `unchanged`, `embedded_recovery`, `embedded_blocked`, `clearance_rejected`, `accepted_lift` or `accepted_unlifted`. Fraction is the accepted fraction of the bounded angular delta, or zero without an accepted rotation. Angles use degrees. |
+| `terrain_reason`, `terrain_pitch`, `terrain_front/rear_y`, `terrain_front/rear_count` | Actual terrain query result before smoothing: `wall_probe`, `missing_axle`, `sampled` or `not_sampled`; averaged world surface heights and sample counts used by that query. Terrain samples do not grant wheel contact. NaN means no sample; `wall_probe` skips axle sampling. |
+| `running`, `front/rear_wheel_speed` | Engine active state and tire surface speeds after this tick's drivetrain force integration. Combine with existing pre-drive contact, force, throttle, RPM and brakes to distinguish lost propulsion from rejected movement. |
+
+Existing `paths` retains its format and records all tried translations, permitted
+rise, final support and clearance. Compare each settled candidate's Y with
+`step_base_y`/`step_height` and horizontal progress with the normal/selected path
+to identify a rejected candidate. A full accepted step has no clipped horizontal
+axis and retains horizontal velocity. A partial step may still record
+`final_contact`; a solid wall records contact or no progress and clears its
+blocked axis. Ceiling clipping, excessive height and unsupported-step rejection
+retain their existing rules. Position, pose, wheel reconciliation and cleanup are
+unchanged for all of these cases.
+
+The movement writer appends a header on each process's first movement record,
+including when an old capture already exists, so the appended schema is explicit.
+For a fresh capture, stop the game/server and move the old movement CSV aside.
+When reading a combined file, treat each header as the schema for following rows.
+Other diagnostic CSV formats and all bundled definitions remain unchanged.
+
+Required capture: use the same civilian car and the original problem course.
+Enable `CarGripDiagnostics = true` only for that definition and restart/reload.
+Capture continuously from at least two seconds of flat-ground approach, through
+straight reachable stairs with W held, through the pause/stop, and for two seconds
+afterward. Release S and Space and avoid steering during the straight run. Repeat
+on the mixed half-slab/full-block course at the speed that previously failed.
+Include a solid-wall control run with W held. Provide the server movement CSV
+and corresponding tire-grip CSV, vehicle definition/name, course coordinates and
+block layout (stair facing/shape, upper/lower slabs, headroom), plus a short video
+or timestamp/entity/tick identifying each visible pause. Use the authoritative
+server's logs for multiplayer; client HUD speed is velocity, not accepted travel.
+Turn diagnostics off afterward. This evidence is needed to select a movement fix;
+continuous driving has not been verified and is not claimed by this diagnostic change.

@@ -14,6 +14,11 @@ final class MCH_CarBodyMovement {
 
    static final class Trace {
       final StringBuilder paths = new StringBuilder();
+      String selected = "normal_none", stepGate = "not_checked";
+      String cleanupX = "none", cleanupZ = "none", pose = "not_checked";
+      double inputX, inputZ, stepHeight, baseY, verticalY;
+      float desiredYaw, targetPitch, targetRoll, poseFraction;
+      boolean wheelSupport, bodySupport;
       void path(String stage, double x, double y, double z, double rise, boolean landed, boolean clear) {
          if(paths.length() != 0) paths.append(';');
          paths.append(stage).append(':').append(x).append('|').append(y).append('|').append(z)
@@ -51,46 +56,69 @@ final class MCH_CarBodyMovement {
 
    static Result resolveBody(List<MCH_CarCollisionBox> initial, Collisions collisions,
          double x, double y, double z, double stepHeight, boolean wheelSupport, Trace trace) {
+      if(trace != null) {
+         trace.stepHeight = stepHeight;
+         trace.wheelSupport = wheelSupport;
+         trace.bodySupport = supportedBody(initial, collisions);
+      }
       // Recovery is a separate bounded outward sweep. An overlapping start cannot
       // claim a landing from a rejected inward request or retain rejected velocity.
       if(!clear(initial, collisions)) {
-         if(trace != null) trace.path("embedded", 0, 0, 0, 0, false, false);
+         if(trace != null) {
+            trace.selected = "embedded";
+            trace.stepGate = "embedded";
+            trace.cleanupX = x != 0 ? "embedded" : "none";
+            trace.cleanupZ = z != 0 ? "embedded" : "none";
+            trace.path("embedded", 0, 0, 0, 0, false, false);
+         }
          return new Result(0, 0, 0, false, false, x != 0, z != 0);
       }
       List<MCH_CarCollisionBox> vertical = copy(initial);
       double dy = move(vertical, collisions, 1, y);
+      if(trace != null) trace.verticalY = dy;
       Horizontal normal = horizontal(vertical, collisions, x, z, trace, dy);
       double dx = normal.x, dz = normal.z;
       boolean landed = y < 0 && changed(y, dy);
       if(stepHeight <= 0 || (!changed(x, dx) && !changed(z, dz))) {
-         return result(normal.body, collisions, x, z, dx, dy, dz, landed, false);
+         if(trace != null) trace.stepGate = stepHeight <= 0 ? "no_step_height" : "unclipped";
+         return result(normal.body, collisions, x, z, dx, dy, dz, landed, false, trace);
       }
       // Support must exist now, or have been reached by this downward movement.
       // onGround, suspension flags and terrain within stepHeight are not evidence.
       boolean support = wheelSupport || supportedBody(initial, collisions) || landed;
-      if(!support) return result(normal.body, collisions, x, z, dx, dy, dz, landed, false);
+      if(!support) {
+         if(trace != null) trace.stepGate = "unsupported";
+         return result(normal.body, collisions, x, z, dx, dy, dz, landed, false, trace);
+      }
 
       // Retain downward movement already resolved this tick. Starting again at the
       // higher initial pose can leave an otherwise clear retry above its landing.
       double baseY = Math.min(0, dy);
+      if(trace != null) trace.baseY = baseY;
       List<MCH_CarCollisionBox> step = copy(dy < 0 ? vertical : initial);
       double rise = move(step, collisions, 1, stepHeight);
       if(trace != null) trace.path("rise", 0, baseY, 0, rise, false, clear(step, collisions));
       // Compare after landing: the furthest raised path may have no support while
       // another sweep order reaches a valid tread. Every path sweeps real volumes.
-      Result best = result(normal.body, collisions, x, z, dx, dy, dz, landed, false);
+      if(trace != null) trace.stepGate = rise > 0 ? "no_valid_improvement" : "no_rise";
+      Result best = result(normal.body, collisions, x, z, dx, dy, dz, landed, false, trace);
       if(rise > 0) {
          int order = 0;
          for(Horizontal candidate : horizontalCandidates(step, collisions, x, z)) {
             double down = move(candidate.body, collisions, 1, -rise);
             double netY = baseY + rise + down;
-            if(trace != null) trace.path("step_" + order++, candidate.x, netY, candidate.z, rise,
+            if(trace != null) trace.path("step_" + order, candidate.x, netY, candidate.z, rise,
                   supportedBody(candidate.body, collisions), clear(candidate.body, collisions));
             if(netY >= baseY && netY <= stepHeight
                   && Math.hypot(candidate.x, candidate.z) > Math.hypot(best.x, best.z) + MCH_CarCollisionBox.EPSILON
                   && supportedBody(candidate.body, collisions) && clear(candidate.body, collisions)) {
-               best = result(candidate.body, collisions, x, z, candidate.x, netY, candidate.z, true, true);
+               best = result(candidate.body, collisions, x, z, candidate.x, netY, candidate.z, true, true, trace);
+               if(trace != null) {
+                  trace.selected = "step_" + order;
+                  trace.stepGate = "accepted_step";
+               }
             }
+            ++order;
          }
       }
       return best;
@@ -109,9 +137,13 @@ final class MCH_CarBodyMovement {
       Horizontal best = new Horizontal(copy(initial), 0, 0);
       int order = 0;
       for(Horizontal candidate : horizontalCandidates(initial, collisions, x, z)) {
-         if(trace != null) trace.path("normal_" + order++, candidate.x, y, candidate.z, 0, false, clear(candidate.body, collisions));
+         if(trace != null) trace.path("normal_" + order, candidate.x, y, candidate.z, 0, false, clear(candidate.body, collisions));
          if(clear(candidate.body, collisions)
-               && Math.hypot(candidate.x, candidate.z) > Math.hypot(best.x, best.z)) best = candidate;
+               && Math.hypot(candidate.x, candidate.z) > Math.hypot(best.x, best.z)) {
+            best = candidate;
+            if(trace != null) trace.selected = "normal_" + order;
+         }
+         ++order;
       }
       return best;
    }
@@ -158,12 +190,16 @@ final class MCH_CarBodyMovement {
    }
 
    private static Result result(List<MCH_CarCollisionBox> body, Collisions collisions,
-         double requestedX, double requestedZ, double x, double y, double z, boolean grounded, boolean stepped) {
-      return new Result(x, y, z, grounded, stepped,
-            changed(requestedX, x) && Math.hypot(x, z) <= MCH_CarCollisionBox.EPSILON
-                  || blocked(body, collisions, 0, requestedX, x),
-            changed(requestedZ, z) && Math.hypot(x, z) <= MCH_CarCollisionBox.EPSILON
-                  || blocked(body, collisions, 2, requestedZ, z));
+         double requestedX, double requestedZ, double x, double y, double z, boolean grounded, boolean stepped, Trace trace) {
+      boolean rejectedX = changed(requestedX, x) && Math.hypot(x, z) <= MCH_CarCollisionBox.EPSILON;
+      boolean rejectedZ = changed(requestedZ, z) && Math.hypot(x, z) <= MCH_CarCollisionBox.EPSILON;
+      boolean blockedX = rejectedX || blocked(body, collisions, 0, requestedX, x);
+      boolean blockedZ = rejectedZ || blocked(body, collisions, 2, requestedZ, z);
+      if(trace != null) {
+         trace.cleanupX = rejectedX ? "no_progress" : blockedX ? "final_contact" : "none";
+         trace.cleanupZ = rejectedZ ? "no_progress" : blockedZ ? "final_contact" : "none";
+      }
+      return new Result(x, y, z, grounded, stepped, blockedX, blockedZ);
    }
 
    private static boolean blocked(List<MCH_CarCollisionBox> body, Collisions collisions,

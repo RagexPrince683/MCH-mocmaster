@@ -37,6 +37,14 @@ public class MCH_WheelManager {
    public float targetPitch;
    public float targetRoll;
    public float prevYaw;
+   // Only populated while the existing server diagnostics opt-in is enabled.
+   TerrainTrace carDiagnosticTerrain;
+   static final class TerrainTrace {
+      String reason = "missing_axle";
+      float pitch = Float.NaN;
+      double front = Double.NaN, rear = Double.NaN;
+      int frontCount, rearCount;
+   }
    private double previousSuspensionBodyFloor = Double.NaN;
    private static Random rand = new Random();
 
@@ -579,6 +587,8 @@ public class MCH_WheelManager {
    /** Existing wheel layout supplies points only; no wheel state is read as terrain height. */
    float getCivilianTerrainPitch(double x, double z, MCH_TankInfo info) {
       MCH_EntityBaseVehicle car = this.parent;
+      TerrainTrace trace = info.carGripDiagnostics && !car.worldObj.isRemote ? new TerrainTrace() : null;
+      this.carDiagnosticTerrain = trace;
       double step = Math.max(0.0D, info.stepHeight);
       double referenceY = car.getUnrotatedBodyFloor();
       double clearance = car.height;
@@ -592,7 +602,10 @@ public class MCH_WheelManager {
       double forwardZ = Math.cos(yaw) * 0.05D;
       AxisAlignedBB sweep = levelBody.addCoord(forwardX, step, forwardZ);
       if(MCH_CarTerrainPitch.facesWall(this.getCivilianTerrainBoxes(sweep),
-            levelBody, step, forwardX, forwardZ)) return 0.0F;
+            levelBody, step, forwardX, forwardZ)) {
+         if(trace != null) { trace.reason = "wall_probe"; trace.pitch = 0; }
+         return 0.0F;
+      }
 
       double front = 0.0D, rear = 0.0D, frontZ = 0.0D, rearZ = 0.0D;
       int frontCount = 0, rearCount = 0;
@@ -623,9 +636,16 @@ public class MCH_WheelManager {
             rear += height; rearZ += wheel.pos.zCoord; ++rearCount;
          }
       }
+      if(trace != null) {
+         trace.frontCount = frontCount; trace.rearCount = rearCount;
+         trace.front = frontCount > 0 ? front / frontCount : Double.NaN;
+         trace.rear = rearCount > 0 ? rear / rearCount : Double.NaN;
+      }
       if(frontCount == 0 || rearCount == 0) return Float.NaN;
-      return MCH_CarTerrainPitch.angle(front / frontCount, rear / rearCount,
+      float pitch = MCH_CarTerrainPitch.angle(front / frontCount, rear / rearCount,
             frontZ / frontCount - rearZ / rearCount);
+      if(trace != null) { trace.reason = "sampled"; trace.pitch = pitch; }
+      return pitch;
    }
 
    private double sampleCivilianTerrainHeight(double localX, double localZ, double x, double z,

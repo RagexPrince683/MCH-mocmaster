@@ -484,6 +484,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    public void moveEntity(double parX, double parY, double parZ) {
 
+      double inputX = parX, inputZ = parZ;
       // Check for slowing blocks under the tank, and slow the tank
       Block blockUnder = MCH_Lib.getBlockY(this, 3, -2, false);
       if (BlockUtils.isSlowingBlock(blockUnder, super.worldObj, (int)super.posX, (int)super.posY, (int)super.posZ, this)) {
@@ -509,8 +510,14 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       float poseYaw = this.getRotYaw(), posePitch = this.getRotPitch(), poseRoll = this.getRotRoll();
       if(this.getTankInfo() != null && this.getTankInfo().civilianCarGrip) {
          final MCH_CarBodyMovement.Collisions collisions = this::getBodyComponentCollisions;
-         if(this.getTankInfo().carGripDiagnostics && !super.worldObj.isRemote) civilianTrace = new MCH_CarBodyMovement.Trace();
-         if(!super.worldObj.isRemote) civilianPoseY = this.resolveCivilianPose(collisions);
+         if(this.getTankInfo().carGripDiagnostics && !super.worldObj.isRemote) {
+            civilianTrace = new MCH_CarBodyMovement.Trace();
+            civilianTrace.inputX = inputX; civilianTrace.inputZ = inputZ;
+            civilianTrace.desiredYaw = this.getRotYaw();
+            civilianTrace.targetPitch = this.WheelMng.targetPitch;
+            civilianTrace.targetRoll = this.WheelMng.targetRoll;
+         }
+         if(!super.worldObj.isRemote) civilianPoseY = this.resolveCivilianPose(collisions, civilianTrace);
          List<MCH_CarCollisionBox> body = this.carBodyAt(this.getRotYaw(), this.getRotPitch(), this.getRotRoll(), 0, 0);
          civilianMovement = MCH_CarBodyMovement.resolveBody(body, collisions, mx, my, mz,
                super.ySize < 0.05F ? Math.max(0, super.stepHeight - civilianPoseY) : 0,
@@ -653,7 +660,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    }
 
    /** Server pose changes use a swept angular envelope and a bounded supported lift/settle. */
-   private double resolveCivilianPose(MCH_CarBodyMovement.Collisions collisions) {
+   private double resolveCivilianPose(MCH_CarBodyMovement.Collisions collisions, MCH_CarBodyMovement.Trace trace) {
       float desiredYaw = this.getRotYaw();
       float desiredPitch = this.WheelMng.targetPitch, desiredRoll = this.WheelMng.targetRoll;
       if(!this.carBodyPoseInitialized) {
@@ -663,6 +670,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       List<MCH_CarCollisionBox> initial = this.carBodyAt(this.carBodyYaw, this.carBodyPitch, this.carBodyRoll, 0, 0);
       if(!MCH_CarBodyMovement.clear(initial, collisions)) {
          double up = MCH_CarBodyMovement.recoverUp(initial, collisions, 0.1D, super.stepHeight);
+         if(trace != null) trace.pose = up > 0 ? "embedded_recovery" : "embedded_blocked";
          super.posY += up;
          this.updateCarPrimaryBounds();
          return up;
@@ -671,7 +679,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       float yawDelta = MathHelper.wrapAngleTo180_float(desiredYaw - this.carBodyYaw);
       float pitchDelta = MathHelper.clamp_float(desiredPitch - this.carBodyPitch, -2, 2);
       float rollDelta = MathHelper.clamp_float(desiredRoll - this.carBodyRoll, -2, 2);
-      if(yawDelta == 0 && pitchDelta == 0 && rollDelta == 0) return 0;
+      if(yawDelta == 0 && pitchDelta == 0 && rollDelta == 0) {
+         if(trace != null) trace.pose = "unchanged";
+         return 0;
+      }
+      if(trace != null) trace.pose = "clearance_rejected";
       boolean supported = MCH_CarBodyMovement.supportedBody(initial, collisions)
             || this.hasCurrentCivilianWheelSupport(collisions);
       double rise = supported ? MCH_CarBodyMovement.move(initial, collisions, 1, Math.min(0.1D, super.stepHeight)) : 0;
@@ -693,6 +705,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          List<MCH_CarCollisionBox> finalBody = this.carBodyAt(yaw, pitch, roll, lift, 0);
          if(!MCH_CarBodyMovement.clear(finalBody, collisions)) continue;
          double down = MCH_CarBodyMovement.move(finalBody, collisions, 1, -lift);
+         if(trace != null) {
+            trace.pose = lift > 0 ? "accepted_lift" : "accepted_unlifted";
+            trace.poseFraction = fraction;
+         }
          this.setRotYaw(yaw); this.setRotPitch(pitch); this.setRotRoll(roll);
          super.posY += lift + down;
          this.updateCarPrimaryBounds();

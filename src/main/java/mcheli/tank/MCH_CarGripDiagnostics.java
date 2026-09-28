@@ -29,9 +29,9 @@ public final class MCH_CarGripDiagnostics {
             File file = new File("logs/car-body-movement.csv");
             File directory = file.getParentFile();
             if(!directory.isDirectory() && !directory.mkdirs()) throw new IOException("Cannot create " + directory);
-            boolean header = !file.isFile() || file.length() == 0;
             movementWriter = new BufferedWriter(new FileWriter(file, true));
-            if(header) movementWriter.write("vehicle,entity,tick,w,s,gear,throttle,rpm,service_brake,handbrake,drive_front,drive_rear,drive_force,old_x,old_y,old_z,request_x,request_y,request_z,pose_y,old_yaw,old_pitch,old_roll,yaw,pitch,roll,paths,step,blocked_x,blocked_z,grounded,final_front,final_rear,final_x,final_y,final_z,motion_x,motion_y,motion_z\n");
+            // A session header also identifies the schema when appending to an older capture.
+            movementWriter.write("vehicle,entity,tick,w,s,gear,throttle,rpm,service_brake,handbrake,drive_front,drive_rear,drive_force,old_x,old_y,old_z,request_x,request_y,request_z,pose_y,old_yaw,old_pitch,old_roll,yaw,pitch,roll,paths,step,blocked_x,blocked_z,grounded,final_front,final_rear,final_x,final_y,final_z,motion_x,motion_y,motion_z,input_x,input_z,accepted_x,accepted_y,accepted_z,selected,step_gate,step_height,step_base_y,vertical_y,wheel_support,body_support,cleanup_x,cleanup_z,desired_yaw,target_pitch,target_roll,pose_decision,pose_fraction,terrain_reason,terrain_pitch,terrain_front_y,terrain_rear_y,terrain_front_count,terrain_rear_count,running,front_wheel_speed,rear_wheel_speed\n");
          }
          MCH_CarDrivetrain engine = car.carDrivetrain;
          MCH_WheelManager.CarContact contact = car.WheelMng.getCarGroundContact(false);
@@ -44,6 +44,16 @@ public final class MCH_CarGripDiagnostics {
                car.getRotYaw(), car.getRotPitch(), car.getRotRoll(), trace.paths,
                result.stepped, result.blockedX, result.blockedZ, result.grounded, contact.front, contact.rear,
                car.posX, car.posY, car.posZ, car.motionX, car.motionY, car.motionZ));
+         MCH_WheelManager.TerrainTrace terrain = car.WheelMng.carDiagnosticTerrain;
+         movementWriter.write(String.format(Locale.ROOT,
+               ",%.9f,%.9f,%.9f,%.9f,%.9f,%s,%s,%.9f,%.9f,%.9f,%b,%b,%s,%s,%.5f,%.5f,%.5f,%s,%.6f,%s,%.5f,%.9f,%.9f,%d,%d,%b,%.9f,%.9f",
+               trace.inputX, trace.inputZ, result.x, result.y, result.z, trace.selected, trace.stepGate,
+               trace.stepHeight, trace.baseY, trace.verticalY, trace.wheelSupport, trace.bodySupport,
+               trace.cleanupX, trace.cleanupZ, trace.desiredYaw, trace.targetPitch, trace.targetRoll,
+               trace.pose, trace.poseFraction, terrain != null ? terrain.reason : "not_sampled",
+               terrain != null ? terrain.pitch : Float.NaN, terrain != null ? terrain.front : Double.NaN,
+               terrain != null ? terrain.rear : Double.NaN, terrain != null ? terrain.frontCount : 0,
+               terrain != null ? terrain.rearCount : 0, engine.running, engine.frontWheelSpeed, engine.rearWheelSpeed));
          movementWriter.newLine();
          movementWriter.flush();
       } catch(IOException ex) {
