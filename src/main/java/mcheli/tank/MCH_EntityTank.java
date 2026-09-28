@@ -419,20 +419,22 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       super.posX = (minX + maxX) / 2.0D;
       super.posY = super.boundingBox.minY + (double)super.yOffset - (double)super.ySize;
       super.posZ = (positionX + maxZ) / 2.0D;
-      super.isCollidedHorizontally = mx != parX || mz != parZ;
-      super.isCollidedVertically = my != parY;
+      boolean blockedX = civilianMovement != null ? civilianMovement.blockedX : mx != parX;
+      boolean blockedZ = civilianMovement != null ? civilianMovement.blockedZ : mz != parZ;
+      super.isCollidedHorizontally = blockedX || blockedZ;
+      super.isCollidedVertically = civilianMovement != null ? MCH_CarBodyMovement.changed(my, parY) : my != parY;
       super.onGround = civilianMovement != null ? civilianMovement.grounded : my != parY && my < 0.0D;
       super.isCollided = super.isCollidedHorizontally || super.isCollidedVertically;
       this.updateFallState(parY, super.onGround);
-      if(mx != parX) {
+      if(blockedX) {
          super.motionX = 0.0D;
       }
 
-      if(my != parY) {
+      if(super.isCollidedVertically) {
          super.motionY = 0.0D;
       }
 
-      if(mz != parZ) {
+      if(blockedZ) {
          super.motionZ = 0.0D;
       }
 

@@ -1,5 +1,11 @@
 # Civilian car terrain pitch
 
+The earlier sections record the pitch and body-collision work after `a94f5f0`,
+including its historical fixture results. `fa6d246` subsequently introduced oriented
+extra-body sweeps, uses a 45-degree terrain pitch limit, and removed the test
+sources mentioned below. The final section describes the current pause correction;
+those historical test results are not validation of this correction.
+
 This change applies only to `CivilianCarGrip` vehicles. The checkout was clean before
 the change. `MCH_EntityTank`, `MCH_WheelManager`, `MCH_RenderTank`, and the common
 vehicle collision code were inspected before implementation. No wheel sampling or
@@ -127,11 +133,12 @@ unchanged **0.85 x 0.85** primary box, `StepHeight = 1.2`, and these extra boxes
 | Front | (0, 0.20, 1.8) | 2.1 x 0.2 x 2.1 |
 | Rear | (0, 0.20, -1.6) | 2.1 x 0.2 x 2.1 |
 
-At level pitch and primary bottom Y=0, entity Y is 0.425. The front box extends
-to Z=2.85 and its bottom is Y=0.525. A full block face at Z=2.90, top Y=1,
+At level pitch and primary bottom Y=0, entity Y is 0.35: the constructor's
+`yOffset` remains 0.35 after the configured primary size is applied. The front box
+extends to Z=2.85 and its bottom is Y=0.45. A full block face at Z=2.90, top Y=1,
 therefore clips a +Z request of 0.20 to 0.05 at the **front lower body**; clearing
-it requires a 0.475 body rise, not a one-block rise of the primary box. The engine
-box, whose top is Y=1.225, can independently block upward clearance under a low
+it requires a 0.55 body rise, not a one-block rise of the primary box. The engine
+box, whose top is Y=1.15, can independently block upward clearance under a low
 ceiling even when the primary box has room. Stair fixtures use separate half-height
 lower treads and upper risers; the next riser similarly catches the low front box.
 The pitched fixture supports the rear box outside the primary footprint and raises
@@ -226,3 +233,100 @@ cannot prove live stair climbing. Expected behavior is preserved nose-up terrain
 pitch with forward movement over reachable steps, settling onto their surfaces,
 and a stop at real walls or insufficient clearance, without accumulating height
 while stationary or airborne.
+
+## Brief stop before full-block ascent after fa6d246
+
+This correction is confined to the `CivilianCarGrip = true` body movement path.
+The existing stair step sequence is retained. Travel direction, terrain pitch, roll, wheel movement,
+suspension, update order, and vehicle definitions are unchanged. No test files were
+created or restored.
+
+### Confirmed branches and remaining runtime uncertainty
+
+`moveCivilianSuspension` applies the smoothed terrain pitch before `moveEntity`
+constructs the current oriented extra boxes. Rotation can therefore introduce body
+overlap before translation. The `!clear(normal, collisions)` branch cancels both
+horizontal offsets when that overlap survives the normal Y/X/Z sweeps. That guard
+remains: an uncleared body candidate is not permitted progress. A supported step
+still has to clear every component. The screenshots do not establish which box was
+overlapping on a particular tick.
+
+There is also a definite landing mismatch independent of overlap. The normal Y
+sweep can move downward and reach support before the horizontal sweep is blocked.
+Previously the step retry discarded that completed Y movement, started at the
+original higher pose, and settled only by its own rise. It could clear the block
+horizontally but remain above the reachable tread. `supportedBody(step, collisions)`
+then rejected it and returned normal movement, often with zero horizontal progress.
+This is a rejected step, rather than an accepted climb losing speed afterward.
+
+For example, consider the configured Starion boxes at yaw/roll zero, pitch -6,
+entity Y=0.65, Z=0.20, above a floor at Y=0 with a row of full blocks occupying
+X=[-4,4], Z=[3,4], Y=[0,1]. With requested Y=-0.57 and Z=0.12, the front underside reaches
+the blocks during the downward sweep (approximately -0.045 Y), then blocks Z.
+The old raised candidate permits Z=0.12 but settles back to the original Y=0.65,
+where it has no landing contact. Starting from the completed downward sweep instead
+lands at approximately Y=0.618 while permitting the full Z request. These numbers
+illustrate the geometric branch using all configured body components; they are
+not telemetry from the photographed run or a gameplay test.
+
+The strict `netY >= 0` / `netY <= stepHeight` comparisons were inspected. The old
+settling request was `-rise`, so its clipped result could not be more negative than
+that request: `rise + down` stayed between zero and the permitted rise. Floating
+point error in those bounds is not established as the pause's cause. The rejected
+landing above is a mismatch of starting positions. The completed displacement can
+legitimately be negative when the car descends onto support while stepping forward.
+
+Separately, both accepted partial steps and microscopic clipping differences reached
+`if(mx != parX) motionX = 0` / `if(mz != parZ) motionZ = 0`. Those exact comparisons
+erased an entire velocity component even if settling had cleared the clipping
+contact. This is a successful-step cleanup failure, distinct from the landing
+rejection. Pitch sampling and smoothing continue while stationary; changes in pose
+and present support can make a later candidate pass, after which thrust rebuilds
+the erased speed. These code paths explain a possible stop/resume sequence; which
+path dominated the reported pause still requires in-game feedback.
+
+### Same-update landing and momentum
+
+The retry now retains the completed downward Y sweep as its starting pose. Positive
+Y requests keep the original retry base. It still needs blocked horizontal movement
+and current physical body/wheel support or support reached by the downward sweep.
+It lifts by at most `StepHeight`, clips the raised X/Z movement, then settles by
+the actual permitted rise. The final Y displacement includes the completed descent,
+rise, and settling; collision state and fall accounting consume that displacement.
+A landing, full-body clearance, improved horizontal progress, and the configured
+rise bound remain mandatory. Existing stair retries with no downward displacement
+use the same starting geometry as before.
+
+For a meaningfully clipped horizontal axis, the resolver checks a 1e-5-block probe
+in the requested direction at the final accepted body pose. Velocity is removed
+only if that axis is still blocked there. A raised-sweep contact that disappeared
+after settling no longer erases permitted momentum. Fully permitted axes retain
+their existing velocity; this adds no acceleration or boost. Real walls and low
+ceilings still limit candidate translation/rise, and remaining wall contacts still
+clear velocity directed into them.
+
+Movement comparisons, support/progress decisions, and SAT contact classification
+use the existing 1e-7-block geometric tolerance. SAT entry time is a fraction of a
+movement request, so it is no longer compared to that distance tolerance. Instead,
+near-contact classification uses penetration along normalized SAT axes, permits
+escape, and blocks motion into the contact. The tolerance does not excuse a real
+penetration: final `clear` remains required. No rise-limit tolerance is added.
+
+Floating prevention is preserved: no stale wheel flags or distant terrain grants
+permission, no candidate without a landing is accepted, and no impulse, height
+nudge, forced grounded state, box shrinking, or collision bypass is introduced.
+The military/other-vehicle path retains its original movement and exact cleanup.
+
+### Current validation
+
+`gradlew.bat compileJava --offline --no-configuration-cache` passed using the
+existing Gradle cache and configured Java 25 daemon/Jabel compiler. The three
+changed production classes have class major version 52 (Java 8). This verifies
+compilation against the existing project dependencies and bytecode target; no test
+files were created/restored and no gameplay checks were run. `git diff --check`
+passes. Final scope review contains only the two civilian collision helpers,
+`MCH_EntityTank`'s civilian result handling, and this document.
+
+Gameplay verification of the reported pause, sustained block/stair ascent, wall
+stops, and headroom remains with the user's feedback. Compilation alone cannot
+verify that the pause is gone or that live staircase climbing is preserved.

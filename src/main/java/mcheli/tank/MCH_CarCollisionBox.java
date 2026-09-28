@@ -8,7 +8,7 @@ import net.minecraft.util.Vec3;
 
 /** Translation-only SAT sweeps of the configured civilian body volume at its current pose. */
 final class MCH_CarCollisionBox {
-   private static final double EPSILON = 1.0E-7D;
+   static final double EPSILON = 1.0E-7D;
    final AxisAlignedBB bounds;
    private final double[][] axes;
    private final double[] radii;
@@ -91,7 +91,11 @@ final class MCH_CarCollisionBox {
          }
       }
       if(enter >= exit || exit <= 0 || enter >= 1) return requested;
-      if(enter >= -EPSILON) return requested * Math.max(0, enter);
+      // enter is a fraction of the request; penetration is a distance along a
+      // normalized SAT axis. Use the same contact distance as intersects(), even
+      // for tiny support probes, rather than comparing a fraction to that distance.
+      if(enter >= 0) return requested * enter;
+      if(leastPenetration <= EPSILON) return outwardMovement < 0 ? 0 : requested;
       // A rotation can introduce overlap before translation. Prevent movement deeper
       // through its nearest face, but permit escape; a supported step must still clear
       // every component before it can be accepted.
