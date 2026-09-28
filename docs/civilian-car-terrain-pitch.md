@@ -5,9 +5,8 @@ including its historical fixture results. `fa6d246` subsequently introduced orie
 extra-body sweeps, uses a 45-degree terrain pitch limit, and removed the test
 sources mentioned below. The final sections describe the oriented-primary correction
 and diagonal collision/pose recovery; historical test results do not validate them.
-The final mixed-bump regression section supersedes the earlier step selection,
-momentum cleanup and client prediction descriptions. Earlier geometry calculations
-did not establish smooth in-game movement; the Starion regression was reported in-game.
+The final straight-stair section supersedes the earlier terrain-seed, step-pose,
+momentum-cleanup and client-prediction descriptions.
 
 This change applies only to `CivilianCarGrip` vehicles. The checkout was clean before
 the change. `MCH_EntityTank`, `MCH_WheelManager`, `MCH_RenderTank`, and the common
@@ -652,82 +651,3 @@ wheel contact after returning to level ground; wall, over-height and low-ceiling
 stops; stationary/airborne height and lateral drift; dedicated server and local/
 remote-player prediction. The exact photographed obstacle and the conservative
 angular envelope near tight headroom remain runtime uncertainties.
-
-## Mixed-bump regression after f0b48211 — 2026-09-28
-
-The user reports that the Starion stops on mixed half slabs/full blocks and climbs
-uneven terrain very choppily after `f0b48211b9675c338796303230433c4c10880779`.
-Compared that commit with its parent in the body resolver, tank update and wheel
-manager. Traced controls, drivetrain force/contact, suspension prediction, pose
-selection, normal/raised movement, settling, velocity cleanup and client snapshots.
-No movement CSV from this failure is available. The exact server stopping tick,
-including whether driven-wheel force was lost, is still unconfirmed.
-
-### Corrected branches
-
-- Ordinary velocity cleanup now requires contact in the requested direction at
-  the accepted body. Zero accepted horizontal distance alone does not establish
-  a collision. An embedded initial body still rejects travel: its actual overlap
-  must first clear through the existing bounded recovery path.
-- Removed the independent `canContinueStep` lift/1e-5 horizontal-probe/landing
-  classifier. After a partial supported step ends at contact, resolve the actual
-  unconsumed X/Z request from the landed compound body using the existing normal
-  and step solver. This read-only resolution has no recursive continuation or
-  extra rotation. Retain each contacted velocity axis only when that axis makes
-  progress to a supported result. No second displacement or rise is applied.
-  Walls, excessive heights, low ceilings and invalid landings still constrain
-  every actual sweep and leave rejected contact axes stopped.
-- Removed the equal-progress preference for a rotated `StepPose`. Equal horizontal
-  travel keeps the existing pose instead of introducing a different landing height
-  and wheel footprint solely to follow the terrain target. A rotated candidate
-  still requires strictly better progress, continuous angular clearance, bounded
-  rise, a supported landing and final full-body clearance. The existing two-degree
-  pitch/roll budget and shared pose/step rise budget remain in effect.
-- Removed civilian client `moveEntity` extrapolation introduced by `f0b48211`.
-  Network positions are quantized/interpolated rather than accepted collision
-  poses; resolving them could reject travel, erase replicated velocity or add
-  local recovery height before the next server correction. Client extrapolation
-  again follows server velocity. Accepted server pitch/roll interpolation remains,
-  and wheels reconcile after interpolation and extrapolation without another spring
-  impulse. Physical collision, stepping and recovery remain server authoritative.
-
-The terrain walks added by `f0b48211` remain read-only angle proposals. They do not
-supply physical support or drive force. No power, grip, drag, speed, suspension
-tuning, vehicle definition or military collision behavior was changed. The accepted
-origin and angles still rebuild primary bounds and reconcile wheels; extra-body
-geometry uses the existing position/pose-aware cache.
-
-### Capture the remaining Starion failure
-
-Enable `CarGripDiagnostics = true` in `config/mcheli.cfg` and restart or use
-`/mcheli reconfig`. This new general switch enables the existing diagnostic paths
-for all `CivilianCarGrip` cars; its default is false, and independent per-definition
-opt-ins still work. On a dedicated server, enable it there for movement data.
-No vehicle definitions need editing. Disable the general switch after capture.
-
-`logs/car-body-movement.csv` retains its force/contact, candidate, position and
-velocity fields and adds:
-
-| Field | Meaning |
-| --- | --- |
-| `selected` | `unclipped`, `no_step_height`, `unsupported`, `embedded`, `normal`, `step_N` or `step_pose_N`; identifies the accepted path or rejection gate. |
-| `accepted_x/y/z` | Solver translation, before adding the separately recorded `pose_y`. |
-| `step_height` | Available step budget after pose/recovery rise. |
-| `wheel_support`, `body_support` | Current support gates at the resolver start, independent of pre-drive axle contact. |
-| `rotated` | Whether the selected raised path committed its candidate pitch/roll. |
-| `contact_x/z` | Rejected contact axes before partial-step momentum classification; `embedded` denotes initial overlap rejection instead of a final directional face probe. |
-| `continuation_x/y/z` | Read-only resolution of the unconsumed request; zero when no continuation resolution ran. |
-| `target_pitch/roll` | Suspension/terrain proposals before pose acceptance and wheel reconciliation. |
-
-Hold W over the same mixed bumps in the Starion and capture the stop/choppiness.
-Positive `drive_force` and nonzero `request_x/z` with rejected `accepted_x/z`
-identify body rejection; lost driven-axle contact/force points to propulsion support
-instead. Candidate paths, selected gate, pose budget and contact markers distinguish
-these cases without using RPM or the HUD velocity as proof of displacement.
-
-Offline `compileJava` passed with the existing Forge 1.7.10/Jabel configuration.
-No game was launched, no terrain-driving result was observed, and earlier geometry
-calculations were not rerun as proof of smooth driving. In-game feedback remains
-required for Starion sustained-throttle slab/full-block and stair climbs, partial
-steps, descent/restart, wall/over-height/headroom stops, stationary height, lateral
-drift and local/remote client corrections.

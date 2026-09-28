@@ -19,10 +19,6 @@ final class MCH_CarBodyMovement {
 
    static final class Trace {
       final StringBuilder paths = new StringBuilder();
-      String selected = "normal";
-      double stepHeight, continuationX, continuationY, continuationZ;
-      float targetPitch, targetRoll;
-      boolean wheelSupport, bodySupport, contactX, contactZ;
       void path(String stage, double x, double y, double z, double rise, boolean landed, boolean clear) {
          if(paths.length() != 0) paths.append(';');
          paths.append(stage).append(':').append(x).append('|').append(y).append('|').append(z)
@@ -33,10 +29,7 @@ final class MCH_CarBodyMovement {
    static final class Result {
       final double x, y, z;
       final boolean grounded, stepped, rotated, blockedX, blockedZ;
-      final List<MCH_CarCollisionBox> body;
-      Result(List<MCH_CarCollisionBox> body, double x, double y, double z,
-            boolean grounded, boolean stepped, boolean rotated, boolean blockedX, boolean blockedZ) {
-         this.body = body;
+      Result(double x, double y, double z, boolean grounded, boolean stepped, boolean rotated, boolean blockedX, boolean blockedZ) {
          this.x = x; this.y = y; this.z = z;
          this.grounded = grounded; this.stepped = stepped; this.rotated = rotated;
          this.blockedX = blockedX; this.blockedZ = blockedZ;
@@ -68,29 +61,11 @@ final class MCH_CarBodyMovement {
 
    static Result resolveBody(List<MCH_CarCollisionBox> initial, Collisions collisions,
          double x, double y, double z, double stepHeight, boolean wheelSupport, Trace trace, StepPose stepPose) {
-      Result result = resolveBody(initial, collisions, x, y, z, stepHeight, wheelSupport, trace, stepPose, true);
-      if(trace != null && !result.stepped) {
-         trace.contactX = result.blockedX; trace.contactZ = result.blockedZ;
-      }
-      return result;
-   }
-
-   private static Result resolveBody(List<MCH_CarCollisionBox> initial, Collisions collisions,
-         double x, double y, double z, double stepHeight, boolean wheelSupport, Trace trace,
-         StepPose stepPose, boolean classifyContinuation) {
-      if(trace != null) {
-         trace.stepHeight = stepHeight;
-         trace.wheelSupport = wheelSupport;
-         trace.bodySupport = supportedBody(initial, collisions);
-      }
       // Recovery is a separate bounded outward sweep. An overlapping start cannot
       // claim a landing from a rejected inward request or retain rejected velocity.
       if(!clear(initial, collisions)) {
-         if(trace != null) {
-            trace.selected = "embedded";
-            trace.path("embedded", 0, 0, 0, 0, false, false);
-         }
-         return new Result(initial, 0, 0, 0, false, false, false, x != 0, z != 0);
+         if(trace != null) trace.path("embedded", 0, 0, 0, 0, false, false);
+         return new Result(0, 0, 0, false, false, false, x != 0, z != 0);
       }
       List<MCH_CarCollisionBox> vertical = copy(initial);
       double dy = move(vertical, collisions, 1, y);
@@ -98,17 +73,12 @@ final class MCH_CarBodyMovement {
       double dx = normal.x, dz = normal.z;
       boolean landed = y < 0 && changed(y, dy);
       if(stepHeight <= 0 || (!changed(x, dx) && !changed(z, dz))) {
-         if(trace != null) trace.selected = stepHeight <= 0 ? "no_step_height" : "unclipped";
          return result(normal.body, collisions, x, z, dx, dy, dz, landed, false);
       }
       // Support must exist now, or have been reached by this downward movement.
       // onGround, suspension flags and terrain within stepHeight are not evidence.
-      boolean bodySupport = trace != null ? trace.bodySupport : supportedBody(initial, collisions);
-      boolean support = wheelSupport || bodySupport || landed;
-      if(!support) {
-         if(trace != null) trace.selected = "unsupported";
-         return result(normal.body, collisions, x, z, dx, dy, dz, landed, false);
-      }
+      boolean support = wheelSupport || supportedBody(initial, collisions) || landed;
+      if(!support) return result(normal.body, collisions, x, z, dx, dy, dz, landed, false);
 
       // Retain downward movement already resolved this tick. Starting again at the
       // higher initial pose can leave an otherwise clear retry above its landing.
@@ -133,33 +103,16 @@ final class MCH_CarBodyMovement {
                if(trace != null) trace.path((pose == 0 ? "step_" : "step_pose_") + order,
                      candidate.x, netY, candidate.z, rise, supportedBody(candidate.body, collisions), clear(candidate.body, collisions));
                if(netY >= baseY && netY <= stepHeight
-                     && progress > bestProgress + MCH_CarCollisionBox.EPSILON
+                     && (progress > bestProgress + MCH_CarCollisionBox.EPSILON
+                           || pose != 0 && best.stepped && !best.rotated
+                                 && Math.abs(progress - bestProgress) <= MCH_CarCollisionBox.EPSILON)
                      && supportedBody(candidate.body, collisions) && clear(candidate.body, collisions)) {
                   best = result(candidate.body, collisions, x, z, candidate.x, netY, candidate.z, true, true,
-                        pose != 0);
-                  if(trace != null) trace.selected = (pose == 0 ? "step_" : "step_pose_") + order;
+                        pose != 0, stepHeight);
                }
                ++order;
             }
          }
-      }
-      if(trace != null) {
-         trace.contactX = best.blockedX;
-         trace.contactZ = best.blockedZ;
-      }
-      if(classifyContinuation && best.stepped && (best.blockedX || best.blockedZ)) {
-         // Resolve the actual unconsumed request from the landed body. This uses
-         // exactly the movement/landing rules above, with no recursive lookahead,
-         // pose change, or extra displacement applied to the car.
-         Result next = resolveBody(best.body, collisions, x - best.x, 0, z - best.z,
-               stepHeight, false, null, null, false);
-         boolean supportedNext = next.grounded || supportedBody(next.body, collisions);
-         if(trace != null) {
-            trace.continuationX = next.x; trace.continuationY = next.y; trace.continuationZ = next.z;
-         }
-         best = new Result(best.body, best.x, best.y, best.z, best.grounded, best.stepped, best.rotated,
-               best.blockedX && (!supportedNext || Math.abs(next.x) <= MCH_CarCollisionBox.EPSILON),
-               best.blockedZ && (!supportedNext || Math.abs(next.z) <= MCH_CarCollisionBox.EPSILON));
       }
       return best;
    }
@@ -227,15 +180,31 @@ final class MCH_CarBodyMovement {
 
    private static Result result(List<MCH_CarCollisionBox> body, Collisions collisions,
          double requestedX, double requestedZ, double x, double y, double z, boolean grounded, boolean stepped) {
-      return result(body, collisions, requestedX, requestedZ, x, y, z, grounded, stepped, false);
+      return result(body, collisions, requestedX, requestedZ, x, y, z, grounded, stepped, false, 0);
    }
 
    private static Result result(List<MCH_CarCollisionBox> body, Collisions collisions,
          double requestedX, double requestedZ, double x, double y, double z,
-         boolean grounded, boolean stepped, boolean rotated) {
-      boolean blockedX = blocked(body, collisions, 0, requestedX, x);
-      boolean blockedZ = blocked(body, collisions, 2, requestedZ, z);
-      return new Result(body, x, y, z, grounded, stepped, rotated, blockedX, blockedZ);
+         boolean grounded, boolean stepped, boolean rotated, double stepHeight) {
+      return new Result(x, y, z, grounded, stepped, rotated,
+            changed(requestedX, x) && Math.hypot(x, z) <= MCH_CarCollisionBox.EPSILON
+                  || blocked(body, collisions, 0, requestedX, x)
+                        && (!stepped || !canContinueStep(body, collisions, 0, requestedX, stepHeight)),
+            changed(requestedZ, z) && Math.hypot(x, z) <= MCH_CarCollisionBox.EPSILON
+                  || blocked(body, collisions, 2, requestedZ, z)
+                        && (!stepped || !canContinueStep(body, collisions, 2, requestedZ, stepHeight)));
+   }
+
+   /** Classify the next riser without moving the accepted body or granting another rise this tick. */
+   private static boolean canContinueStep(List<MCH_CarCollisionBox> body, Collisions collisions,
+         int axis, double requested, double stepHeight) {
+      List<MCH_CarCollisionBox> next = copy(body);
+      double rise = move(next, collisions, 1, stepHeight);
+      double contact = Math.copySign(CONTACT_EPSILON, requested);
+      if(rise <= 0 || changed(contact, move(next, collisions, axis, contact))) return false;
+      double down = move(next, collisions, 1, -rise);
+      return rise + down >= 0 && rise + down <= stepHeight
+            && supportedBody(next, collisions) && clear(next, collisions);
    }
 
    private static boolean blocked(List<MCH_CarCollisionBox> body, Collisions collisions,

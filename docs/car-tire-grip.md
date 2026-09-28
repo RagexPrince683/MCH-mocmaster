@@ -313,15 +313,9 @@ aircraft, and boats receive no drivetrain edits.
 
 ## Diagnostics
 
-Set `CarGripDiagnostics = true` in `config/mcheli.cfg` to trace all `CivilianCarGrip` cars without editing definitions, then use `/mcheli reconfig` or restart. The general switch defaults to false. The existing per-vehicle `CarGripDiagnostics = true` opt-in also remains available, independently of the general switch. It is safe to enable the per-vehicle setting on an excluded vehicle: it records `not_opted_in` and applies no force.
+Set `CarGripDiagnostics = true` in the one vehicle definition being investigated, then reload/restart normally. It is safe to enable on an excluded vehicle: it records `not_opted_in` and applies no force. All bundled files leave diagnostics disabled.
 
 The server appends one record per physics tick to **`logs/car-tire-grip.csv`**, relative to the game/server working directory. It never writes these records to normal console output. Columns identify vehicle/entity/tick, configured wheels, front/rear contacts, the original raw 0.05 probe count, suspension paired flags, signed sideways speed, unbounded requested correction, actual applied correction, limit, reason, and requested/applied yaw delta. Velocity is blocks/tick, correction is blocks/tick², yaw is degrees/tick. The old raw and paired counts are diagnostic comparisons only. This snapshot runs **after** the wheel/suspension update; propulsion samples contact **before** that update. CSV `requested`, `applied`, and `limit` describe lateral correction, not engine/body force, so they cannot establish the earlier thrust contact or a fuel-cut/brake fault.
-
-The same opt-in writes **`logs/car-body-movement.csv`** on the server, including throttle,
-pre-drive axle contact, applied drive force, requested and accepted displacement, selected
-collision path, pose, support and velocity cleanup. Use this file to distinguish a terrain
-collision from loss of driven-wheel force. Its fields and current movement rules are described
-in [Civilian car terrain pitch](civilian-car-terrain-pitch.md#mixed-bump-regression-after-f0b48211--2026-09-28).
 
 Reasons are `not_opted_in`, `grip_disabled`, `no_wheels`, `no_contact` (airborne or unsupported wheels), `no_sideways_speed`, `invalid_input`, and `applied`. An excluded/disabled vehicle may show a hypothetical formula request but its **applied** correction is always zero. The current snapshot is also available through `MCH_EntityTank.getCarGripDiagnostic()`; disabled vehicles return null. File failures disable CSV writes and remain inspectable through `MCH_CarGripDiagnostics.getWriteError()` without log spam or interrupting physics. Turn diagnostics off after capture.
 

@@ -602,32 +602,3 @@ Developer/backend
   height. Updated the existing terrain document. No test/fixture files, packaging,
   reobfuscation or game launch were performed. Live stair behavior, contact recovery,
   dedicated-server operation and multiplayer prediction still require user gameplay checks.
-
-2026-09-28 18:45 — Correct civilian partial-step cleanup and client extrapolation
-
-- Compared f0b48211 with its parent and traced Starion control, driven-wheel force,
-  terrain sampling, pose, accepted travel and cleanup. The user confirms mixed
-  slab/full-block stops and choppy climbing in-game; no movement capture is available
-  to confirm the exact server stopping tick. Earlier collision equations do not
-  establish smooth driving or the reported failure's runtime cause.
-- Require directional contact before ordinary horizontal velocity cleanup. Replace
-  canContinueStep's independent tiny-probe classifier with read-only resolution of
-  the actual unconsumed request through the existing compound-body movement solver,
-  without recursive continuation, another pose change or additional actual rise.
-  Keep momentum only on axes with supported continuation progress. Equal-distance
-  raised paths retain the existing pose instead of selecting a different landing.
-- Remove f0b48211's civilian client collision/recovery extrapolation; follow server
-  velocity and accepted pitch/roll, reconciling wheels after either client position
-  path. Keep physical collision/recovery server-owned, real wall/headroom/height
-  limits, and existing terrain proposals, tuning, definitions and military movement.
-- Add default-false general CarGripDiagnostics in mcheli.cfg for all civilian cars,
-  preserving independent per-definition opt-ins. Extend the existing movement CSV
-  with the selected gate, accepted translation, step budget/support, candidate angles,
-  rotation, contact markers and resolved continuation. Update existing documentation.
-- Offline compileJava succeeded using the existing authorized Gradle cache and
-  Forge 1.7.10/Jabel configuration; all four changed Java classes have major version
-  52. CSV header/format counts match (54); source/call-site review and diff whitespace
-  checks passed. No test infrastructure, temporary repository files, packaging,
-  reobfuscation or game launch was added or run. Smooth Starion climbing, drive-force
-  recovery, wall/ceiling stops, stationary height/drift and multiplayer corrections
-  remain unverified in-game and require driving feedback/diagnostic capture.

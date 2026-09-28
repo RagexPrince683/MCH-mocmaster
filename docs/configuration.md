@@ -35,7 +35,6 @@ Client keybinds and rendering settings are safest to change while the client is 
 | Option | Default | Notes |
 | --- | --- | --- |
 | `TestMode` | `false` | Development/test toggle. |
-| `CarGripDiagnostics` | `false` | Enables the existing grip, body movement and client steering CSV traces for every `CivilianCarGrip` vehicle. Per-vehicle opt-ins remain independent. Enable on the server for movement/force traces; enable on the client for steering traces. Reload with `/mcheli reconfig` or restart. |
 | `EnableCommand` | `true` | Enables `/mcheli` subcommands. |
 | `EnableNEIHandler` | `true` | `true` registers the MCHeli vehicle ammunition recipe and usage handler in NotEnoughItems; `false` prevents the handler from registering. Changing NEI registration requires a client restart and is not applied by `/mcheli reconfig`. |
 | `PlaceableOnSpongeOnly` | `false` | Restricts vehicle placement to sponge blocks. |
