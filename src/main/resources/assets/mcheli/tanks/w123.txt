@@ -51,6 +51,7 @@ SetWheelPos =  0.58,  -0.29,  2.14, -1.43
 
 WeightType = Car
 CivilianCarGrip = true
+EnableBrakeLights = true
 SuspensionSpring = 0.055
 SuspensionCompressionDamping = 0.035
 SuspensionReboundDamping = 0.050
@@ -107,8 +108,8 @@ AddPartCanopy =  1.0917, 0.3419,  1.3074,  0,1,0, -60
 AddFixedSearchLight =  0.817, 0.537, 2.93,   0x50FFFFFF,   0x00FFFFC0,    0.13, 0.6,  -5,  0
 AddFixedSearchLight = -0.817, 0.537, 2.93,   0x50FFFFFF,   0x00FFFFC0,    0.13, 0.6,   5,  0
 
-AddFixedSearchLight =  0.599, 0.513,-2.805,   0x80FF0000,   0x00FF0000,    0.02, 0.5,  -180.0,  0
-AddFixedSearchLight =  -0.599, 0.513,-2.805,   0x80FF0000,   0x00FF0000,    0.02, 0.5,  -180.0,  0
+AddBrakeLight =  0.599, 0.513,-2.805,   0x80FF0000,   0x00FF0000,    0.02, 0.5,  -180.0,  0
+AddBrakeLight =  -0.599, 0.513,-2.805,   0x80FF0000,   0x00FF0000,    0.02, 0.5,  -180.0,  0
 
 
 AddPartSteeringWheel =  0.4856,  0.8552,  0.7596,  0, 0.488, -1,  130

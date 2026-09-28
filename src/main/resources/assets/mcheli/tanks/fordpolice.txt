@@ -12,6 +12,7 @@ ThrottleDownFactor = 0.40
 ;cool, nice 4,500kb model, now let's fix some problems I found with it
 
 CivilianCarGrip = true
+EnableBrakeLights = true
 SuspensionSpring = 0.055
 SuspensionCompressionDamping = 0.035
 SuspensionReboundDamping = 0.050

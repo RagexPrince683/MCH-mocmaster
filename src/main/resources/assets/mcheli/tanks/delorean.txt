@@ -45,6 +45,7 @@ OnGroundRollFactor  = 4.8
 
 WeightType = Car
 CivilianCarGrip = true
+EnableBrakeLights = true
 SuspensionSpring = 0.055
 SuspensionCompressionDamping = 0.035
 SuspensionReboundDamping = 0.050
@@ -96,13 +97,13 @@ InventorySize = 18
 
 ;0.57
 
-AddFixedSearchLight = 0.675, 0.95, -3.54,   0xFFFF0000,   0x10FF0000,    0.0, 0.25,  -0.0,  18.4
-AddFixedSearchLight = 0.675, 0.83, -3.57,   0xFFFF0000,   0x10FF0000,    0.0, 0.25,  -0.0,  19.4
-AddFixedSearchLight = 0.675, 0.70, -3.60,   0xFFFF0000,   0x10FF0000,    0.0, 0.25,  -0.0,  20.4
+AddBrakeLight = 0.675, 0.95, -3.54,   0xFFFF0000,   0x10FF0000,    0.0, 0.25,  -0.0,  18.4
+AddBrakeLight = 0.675, 0.83, -3.57,   0xFFFF0000,   0x10FF0000,    0.0, 0.25,  -0.0,  19.4
+AddBrakeLight = 0.675, 0.70, -3.60,   0xFFFF0000,   0x10FF0000,    0.0, 0.25,  -0.0,  20.4
 
-AddFixedSearchLight = -0.675, 0.95, -3.54,   0xFFFF0000,   0x10FF0000,    0.0, 0.25,  -0.0,  18.4
-AddFixedSearchLight = -0.675, 0.83, -3.57,   0xFFFF0000,   0x10FF0000,    0.0, 0.25,  -0.0,  19.4
-AddFixedSearchLight = -0.675, 0.70, -3.60,   0xFFFF0000,   0x10FF0000,    0.0, 0.25,  -0.0,  20.4
+AddBrakeLight = -0.675, 0.95, -3.54,   0xFFFF0000,   0x10FF0000,    0.0, 0.25,  -0.0,  18.4
+AddBrakeLight = -0.675, 0.83, -3.57,   0xFFFF0000,   0x10FF0000,    0.0, 0.25,  -0.0,  19.4
+AddBrakeLight = -0.675, 0.70, -3.60,   0xFFFF0000,   0x10FF0000,    0.0, 0.25,  -0.0,  20.4
 
 PartWheelRot = 75
 
