@@ -509,8 +509,12 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       float poseYaw = this.getRotYaw(), posePitch = this.getRotPitch(), poseRoll = this.getRotRoll();
       if(this.getTankInfo() != null && this.getTankInfo().civilianCarGrip) {
          final MCH_CarBodyMovement.Collisions collisions = this::getBodyComponentCollisions;
-         if(this.getTankInfo().carGripDiagnostics && !super.worldObj.isRemote) civilianTrace = new MCH_CarBodyMovement.Trace();
-         civilianPoseY = this.resolveCivilianPose(collisions);
+         if(MCH_CarGripDiagnostics.enabled(this.getTankInfo()) && !super.worldObj.isRemote) {
+            civilianTrace = new MCH_CarBodyMovement.Trace();
+            civilianTrace.targetPitch = this.WheelMng.targetPitch;
+            civilianTrace.targetRoll = this.WheelMng.targetRoll;
+         }
+         if(!super.worldObj.isRemote) civilianPoseY = this.resolveCivilianPose(collisions);
          // Keep the whole update within the existing two-degree pitch/roll limit,
          // including a pose change that the raised step can clear later.
          final float stepPitch = this.carBodyPitch
@@ -877,11 +881,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       MCH_TankInfo info = this.getTankInfo();
       if(info != null && info.civilianCarGrip && info.carLateralGrip > 0.0F) {
          double speed = Math.hypot(super.motionX, super.motionZ);
-         double contact = this.WheelMng.getCarGroundContact(info.carGripDiagnostics).fraction();
+         double contact = this.WheelMng.getCarGroundContact(MCH_CarGripDiagnostics.enabled(info)).fraction();
          float rawRequested = requested;
          requested = MCH_CarTireGrip.steeringDelta(rawRequested, speed, info.carLateralGrip, contact,
                  info.carMinimumSteering, tickDelta);
-         if(super.worldObj.isRemote && info.carGripDiagnostics) {
+         if(super.worldObj.isRemote && MCH_CarGripDiagnostics.enabled(info)) {
             MCH_CarGripDiagnostics.recordClient(info.name, this.getEntityId(), this.ticksExisted,
                     super.moveLeft, super.moveRight, rawRequested, requested, speed, contact, tickDelta);
          }
@@ -1419,11 +1423,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          // Use the same reverse clamp for client extrapolation. Server interpolation
          // above continues to follow authoritative positions without locally clipping them.
          this.applyCivilianCarReverseSpeedLimit(this.getAcInfo().enableBack && super.throttleBack > 0.0F);
-         if(useCarBody) {
-            this.moveEntity(super.motionX, super.motionY, super.motionZ);
-         } else {
-            this.setPosition(super.posX + super.motionX, super.posY + super.motionY, super.posZ + super.motionZ);
-         }
+         // Snapshot positions are interpolated and quantized, not accepted server
+         // collision poses. Do not recover/step them or erase replicated velocity.
+         this.setPosition(super.posX + super.motionX, super.posY + super.motionY, super.posZ + super.motionZ);
+         if(useCarBody) this.acceptCivilianBodyPose();
          if(this.hasCarDrivetrain()) {
             double speed = Math.hypot(super.motionX, super.motionZ);
             if(speed > 0) {
@@ -1551,7 +1554,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          double sideways = super.motionX * Math.cos(yaw) + super.motionZ * Math.sin(yaw);
          MCH_WheelManager.CarContact driveContact = this.WheelMng.getCarGroundContact(false);
          double force = this.carDrivetrain.acceleration(this.tankInfo, driveContact, speed, sideways, canMove);
-         if(this.tankInfo.carGripDiagnostics) {
+         if(MCH_CarGripDiagnostics.enabled(this.tankInfo)) {
             this.carDiagnosticDriveForce = force;
             this.carDiagnosticDriveContact = driveContact;
          }
@@ -1668,11 +1671,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       if(super.worldObj.isRemote || info == null) return;
       boolean active = info.civilianCarGrip && info.carLateralGrip > 0.0F;
       this.carGripDiagnostic = null;
-      if(!active && !info.carGripDiagnostics) {
+      if(!active && !MCH_CarGripDiagnostics.enabled(info)) {
          this.carPhysicsYawInitialized = false;
          return;
       }
-      MCH_WheelManager.CarContact contact = this.WheelMng.getCarGroundContact(info.carGripDiagnostics);
+      MCH_WheelManager.CarContact contact = this.WheelMng.getCarGroundContact(MCH_CarGripDiagnostics.enabled(info));
       float requestedYaw = 0.0F, appliedYaw = 0.0F;
       if(active) {
          if(!this.carPhysicsYawInitialized) {
@@ -1701,7 +1704,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          super.motionX -= correction * forwardZ;
          super.motionZ += correction * forwardX;
       }
-      if(info.carGripDiagnostics) {
+      if(MCH_CarGripDiagnostics.enabled(info)) {
          this.carGripDiagnostic = new MCH_CarGripDiagnostics.Snapshot(info.name, this.getEntityId(), this.ticksExisted,
                  contact, sideways, result.requested, correction, result.limit, reason, requestedYaw, appliedYaw);
          MCH_CarGripDiagnostics.record(this.carGripDiagnostic);

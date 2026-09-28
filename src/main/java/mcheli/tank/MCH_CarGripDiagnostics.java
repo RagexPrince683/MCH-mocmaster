@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Locale;
+import mcheli.MCH_Config;
 
 /** Explicit per-definition opt-in, separate CSV output, and no normal console logging. */
 public final class MCH_CarGripDiagnostics {
@@ -17,6 +18,11 @@ public final class MCH_CarGripDiagnostics {
    private MCH_CarGripDiagnostics() {}
 
    public static String getWriteError() { return writeError; }
+
+   static boolean enabled(MCH_TankInfo info) {
+      return info != null && (info.carGripDiagnostics || info.civilianCarGrip
+            && MCH_Config.CarGripDiagnostics != null && MCH_Config.CarGripDiagnostics.prmBool);
+   }
 
    /** Opt-in server trace taken after collision cleanup and wheel reconciliation. */
    static synchronized void recordMovement(MCH_EntityTank car, MCH_CarBodyMovement.Trace trace,
@@ -31,7 +37,7 @@ public final class MCH_CarGripDiagnostics {
             if(!directory.isDirectory() && !directory.mkdirs()) throw new IOException("Cannot create " + directory);
             boolean header = !file.isFile() || file.length() == 0;
             movementWriter = new BufferedWriter(new FileWriter(file, true));
-            if(header) movementWriter.write("vehicle,entity,tick,w,s,gear,throttle,rpm,service_brake,handbrake,drive_front,drive_rear,drive_force,old_x,old_y,old_z,request_x,request_y,request_z,pose_y,old_yaw,old_pitch,old_roll,yaw,pitch,roll,paths,step,blocked_x,blocked_z,grounded,final_front,final_rear,final_x,final_y,final_z,motion_x,motion_y,motion_z\n");
+            if(header) movementWriter.write("vehicle,entity,tick,w,s,gear,throttle,rpm,service_brake,handbrake,drive_front,drive_rear,drive_force,old_x,old_y,old_z,request_x,request_y,request_z,pose_y,old_yaw,old_pitch,old_roll,yaw,pitch,roll,paths,step,blocked_x,blocked_z,grounded,final_front,final_rear,final_x,final_y,final_z,motion_x,motion_y,motion_z,selected,accepted_x,accepted_y,accepted_z,step_height,wheel_support,body_support,rotated,contact_x,contact_z,continuation_x,continuation_y,continuation_z,target_pitch,target_roll\n");
          }
          MCH_CarDrivetrain engine = car.carDrivetrain;
          MCH_WheelManager.CarContact contact = car.WheelMng.getCarGroundContact(false);
@@ -44,6 +50,11 @@ public final class MCH_CarGripDiagnostics {
                car.getRotYaw(), car.getRotPitch(), car.getRotRoll(), trace.paths,
                result.stepped, result.blockedX, result.blockedZ, result.grounded, contact.front, contact.rear,
                car.posX, car.posY, car.posZ, car.motionX, car.motionY, car.motionZ));
+         movementWriter.write(String.format(Locale.ROOT,
+               ",%s,%.9f,%.9f,%.9f,%.9f,%b,%b,%b,%b,%b,%.9f,%.9f,%.9f,%.5f,%.5f",
+               trace.selected, result.x, result.y, result.z, trace.stepHeight,
+               trace.wheelSupport, trace.bodySupport, result.rotated, trace.contactX, trace.contactZ,
+               trace.continuationX, trace.continuationY, trace.continuationZ, trace.targetPitch, trace.targetRoll));
          movementWriter.newLine();
          movementWriter.flush();
       } catch(IOException ex) {

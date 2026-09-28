@@ -31,6 +31,7 @@ public class MCH_Config {
    public static MCH_ConfigPrm EnableMCHLibLog;
    public static MCH_ConfigPrm EnableMCHLibDebugLog;
    public static MCH_ConfigPrm DebugDismount;
+   public static MCH_ConfigPrm CarGripDiagnostics;
    public static MCH_ConfigPrm EnableNEIHandler;
    public static String configVer;
    public static int hitMarkColorRGB;
@@ -446,6 +447,8 @@ public class MCH_Config {
       EnableMCHLibDebugLog.desc = ";Write verbose MCH_Lib.DbgLog messages to the Minecraft log.";
       DebugDismount = new MCH_ConfigPrm("DebugDismount", false);
       DebugDismount.desc = ";Log focused Sneak dismount diagnostics. Does not require EnableMCHLibDebugLog.";
+      CarGripDiagnostics = new MCH_ConfigPrm("CarGripDiagnostics", false);
+      CarGripDiagnostics.desc = ";Write the existing grip, movement and client steering CSV diagnostics for all CivilianCarGrip vehicles. Per-vehicle opt-ins still apply.";
       EnableNEIHandler = new MCH_ConfigPrm("EnableNEIHandler", true);
       EnableNEIHandler.desc = ";Controls the MCHeli vehicle ammunition category in NotEnoughItems. Requires a client restart.";
       TestMode = new MCH_ConfigPrm("TestMode", false);
@@ -766,6 +769,7 @@ public class MCH_Config {
               EnableMCHLibLog,
               EnableMCHLibDebugLog,
               DebugDismount,
+              CarGripDiagnostics,
               EnableNEIHandler,
               TestMode,
               EnableCommand,
