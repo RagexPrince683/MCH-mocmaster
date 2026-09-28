@@ -726,7 +726,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       if(this.getBrake()) {
          // S shares the brake-lamp status with Space. Once forward throttle is zero,
          // S requests reverse power; Space clears throttleDown in the input handler.
-         if(!MCH_CarReverseControl.isReverseInput(this.getTankInfo().civilianCarReverseSpeed,
+         // Preserve declared civilian controls, including cars without a reverse-speed opt-in.
+         boolean legacyMilitaryReverse = this.getAcInfo().enableBack && super.throttleDown
+                 && !super.throttleUp && this.getCurrentThrottle() <= 0.0D
+                 && !this.getTankInfo().civilianCarGrip && !"C".equals(this.getAcInfo().category);
+         if(!legacyMilitaryReverse && !MCH_CarReverseControl.isReverseInput(this.getTankInfo().civilianCarReverseSpeed,
                  super.throttleDown, this.getCurrentThrottle())) {
             super.throttleBack = (float)((double)super.throttleBack * 0.5D);
          }

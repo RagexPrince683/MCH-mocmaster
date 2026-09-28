@@ -105,7 +105,8 @@ public class MCH_TankPacketHandler {
                   }
 
                   // Reversing (S) and the dedicated brake (Space) both illuminate brake lamps.
-                  // Lamp state is separate from the opted-in car's two physical brakes.
+                  // Legacy military controls ignore lamp-only damping during powered reverse;
+                  // opted-in cars keep their separate service brake and handbrake.
                   tank.setBrake(pc.useBrake || pc.throttleDown);
                }
 

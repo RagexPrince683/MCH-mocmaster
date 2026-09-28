@@ -497,3 +497,24 @@ Developer/backend
   travel bounds, and baseline recovery. No test files or temporary diagnostics were added. No current
   suspension runtime capture, packaging, game launch, or terrain driving was performed; wheel/body
   recovery over uneven terrain and multiplayer visuals still require end-user feedback.
+
+2026-09-28 13:21 — Restore powered reverse in legacy military tanks
+
+- Confirmed that 328847d8 first made S set the physical brake/lamp status, applying an extra
+  0.5 reverse-demand reduction on top of the existing 0.8 decay. Comparing 16346a39 with its
+  parent shows that its later exception covered only positive CivilianCarReverseSpeed controls.
+- Exempt powered legacy military reverse from that extra brake damping once forward throttle
+  reaches zero. Keep S forward braking, Space braking/pedal suppression, W forward recovery,
+  existing reverse buildup/decay, speed caps and synchronized lamps. External legacy packs
+  need no civilian drivetrain or reverse-speed setting. Explicit civilian controls and Category C
+  definitions retain existing behavior, including civilian utilities without drivetrain opt-ins.
+- Audited all 247 bundled tank definitions and documented every effective movement configuration
+  in the existing tank control guide: 216 military (213 reverse-enabled, 212 mobile), 30 civilian
+  and one police/security armored vehicle. Preserve stationary/creep-speed exceptions, parser
+  clamps and last-key overrides; no configuration defect was established and no pack values changed.
+- Existing offline compileJava/check passed; both edited Java classes target Java 8 (major 52).
+  In-memory control/movement equation checks covered S/Space/W across the 212 mobile military
+  definitions with automatic throttle-down both off/on and 1,792 unchanged legacy civilian input
+  states; 53,840 legacy non-reverse combinations were unchanged, and 23 civilian drivetrain definitions
+  still bypass the edited block. No validation files or diagnostics were added. Packaging, live
+  Forge 1.7.10 driving, slopes/collisions, steering and multiplayer lamp visuals remain untested.
