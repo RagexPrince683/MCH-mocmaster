@@ -59,6 +59,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    private boolean carPhysicsYawInitialized;
    private float carPhysicsYaw;
    private MCH_CarGripDiagnostics.Snapshot carGripDiagnostic;
+   public final MCH_CarDrivetrain carDrivetrain = new MCH_CarDrivetrain();
+   private Entity carInputPilot;
+   private boolean carHandbrakeInput;
+   private float frontWheelRotation, prevFrontWheelRotation, rearWheelRotation, prevRearWheelRotation;
    private int trackDamageTaken;
    public boolean turretPopStarted;
    public boolean turretPopLanded;
@@ -74,13 +78,6 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    private boolean turretPopMissingPartWarned;
    /** Persisted destruction edge latch; prevents old wrecks from starting after reload. */
    private boolean turretPopDestructionObserved;
-
-   //TODO
-   private int currentGear = 1;  // Starting gear
-   private final int maxGear = 5;  // Number of gears
-   private double[] gearSpeedLimits = {5.0D, 10.0D, 20.0D, 30.0D, 40.0D};  // Speed limits for each gear
-   private double[] gearAccelerationMultipliers = {1.0D, 0.8D, 0.6D, 0.4D, 0.2D};  // Acceleration dampening for higher gears
-
 
    public MCH_EntityTank(World world) {
       super(world);
@@ -158,6 +155,89 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    protected void entityInit() {
       super.entityInit();
+      this.getDataWatcher().addObject(17, Integer.valueOf(2 << 22));
+      this.getDataWatcher().addObject(18, Integer.valueOf(0));
+      this.getDataWatcher().addObject(30, Integer.valueOf(0));
+   }
+
+   public boolean hasCarDrivetrain() {
+      return this.tankInfo != null && this.tankInfo.civilianCarDrivetrain;
+   }
+
+   public void setCarControlInput(Entity pilot, boolean up, boolean down, boolean handbrake) {
+      this.carInputPilot = pilot;
+      this.throttleUp = up;
+      this.throttleDown = down;
+      this.carHandbrakeInput = handbrake;
+   }
+
+   private void clearCarControlInput() {
+      this.carInputPilot = null;
+      this.carHandbrakeInput = false;
+      this.throttleUp = this.throttleDown = this.moveLeft = this.moveRight = false;
+      this.throttleBack = 0;
+      this.carDrivetrain.clearInputs();
+      this.setCurrentThrottle(0);
+      this.setThrottle(0);
+      this.setBrake(false);
+   }
+
+   @Override
+   public void unmountEntity() {
+      super.unmountEntity();
+      if(this.hasCarDrivetrain()) this.clearCarControlInput();
+   }
+
+   private void updateCarControl() {
+      if(super.worldObj.isRemote) {
+         this.carDrivetrain.readState(this.getDataWatcher().getWatchableObjectInt(17),
+               this.getDataWatcher().getWatchableObjectInt(18), this.getDataWatcher().getWatchableObjectInt(30));
+         this.setCurrentThrottle(this.carDrivetrain.throttle);
+         this.throttleBack = this.carDrivetrain.gear < 0 && this.carDrivetrain.throttle > 0 ? 0.1F : 0;
+         return;
+      }
+      Entity pilot = this.getRiddenByEntity();
+      if(pilot != this.carInputPilot) {
+         this.clearCarControlInput();
+         this.carInputPilot = pilot;
+      }
+      boolean active = pilot != null && !pilot.isDead
+            && !this.isDestroyed() && !this.isTrackDestroyed() && !this.isGunnerMode && !this.isRepelling()
+            && this.isCanopyClose() && this.canUseFuel() && !this.isEngineWaterboarded()
+            && this.getHP() * 100 / this.getMaxHP() >= this.getAcInfo().engineShutdownThreshold;
+      if(!active) this.clearCarControlInput();
+      double yaw = Math.toRadians(this.getRotYaw());
+      double speed = -super.motionX * Math.sin(yaw) + super.motionZ * Math.cos(yaw);
+      this.carDrivetrain.updateControls(this.tankInfo, this.throttleUp, this.throttleDown,
+            this.carHandbrakeInput, active, speed, Math.hypot(super.motionX, super.motionZ));
+      this.setCurrentThrottle(this.carDrivetrain.throttle);
+      this.setThrottle(this.carDrivetrain.throttle);
+      this.throttleBack = active && this.carDrivetrain.gear < 0 && this.throttleDown && !this.throttleUp
+            ? 0.1F * this.carDrivetrain.throttle : 0;
+      this.setBrake(active && (this.throttleDown || this.carHandbrakeInput));
+   }
+
+   private void syncCarDrivetrain() {
+      this.getDataWatcher().updateObject(17, Integer.valueOf(this.carDrivetrain.engineState()));
+      this.getDataWatcher().updateObject(18, Integer.valueOf(this.carDrivetrain.axleState(true)));
+      this.getDataWatcher().updateObject(30, Integer.valueOf(this.carDrivetrain.axleState(false)));
+   }
+
+   public float getCarWheelRotation(double z, float tickTime) {
+      return this.WheelMng.isFrontAxle(z)
+            ? this.prevFrontWheelRotation + (this.frontWheelRotation - this.prevFrontWheelRotation) * tickTime
+            : this.prevRearWheelRotation + (this.rearWheelRotation - this.prevRearWheelRotation) * tickTime;
+   }
+
+   private void updateCarWheelAnimation() {
+      this.prevFrontWheelRotation = this.frontWheelRotation;
+      this.prevRearWheelRotation = this.rearWheelRotation;
+      this.frontWheelRotation += this.carDrivetrain.frontWheelSpeed * this.tankInfo.partWheelRot;
+      this.rearWheelRotation += this.carDrivetrain.rearWheelSpeed * this.tankInfo.partWheelRot;
+      float frontWrap = (float)Math.floor(this.frontWheelRotation / 360.0F) * 360.0F;
+      float rearWrap = (float)Math.floor(this.rearWheelRotation / 360.0F) * 360.0F;
+      this.frontWheelRotation -= frontWrap; this.prevFrontWheelRotation -= frontWrap;
+      this.rearWheelRotation -= rearWrap; this.prevRearWheelRotation -= rearWrap;
    }
 
    public float getGiveDamageRot() {
@@ -480,6 +560,15 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    }
 
+   private float getCarSteeringDirection(double dx, double dz) {
+      // Engine throttle also opens in reverse now; it cannot select steering direction.
+      double yaw = Math.toRadians(this.getRotYaw());
+      double signed = -dx * Math.sin(yaw) + dz * Math.cos(yaw);
+      if(Math.abs(signed) < 1.0E-6D) signed = -super.motionX * Math.sin(yaw) + super.motionZ * Math.cos(yaw);
+      return Math.abs(signed) >= 1.0E-6D ? (signed < 0 ? -1.0F : 1.0F)
+            : this.carDrivetrain.gear < 0 ? -1.0F : 1.0F;
+   }
+
    public void onUpdateAngles(float partialTicks) {
       if(this.useNewMobilitySystem() || (this.getTankInfo() != null && this.getTankInfo().civilianCarGrip && this.getTankInfo().carLateralGrip > 0)) {
          partialTicks = MCH_FlightModel.getBoundedTickDelta(partialTicks);
@@ -523,7 +612,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
                   sf = 1.0F;
                }
 
-               float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D?-1.0F:1.0F;
+               float flag = this.hasCarDrivetrain() ? this.getCarSteeringDirection(dx, dz)
+                     : !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D?-1.0F:1.0F;
                if(super.moveLeft && !super.moveRight) {
                   this.steerGroundVehicle(-0.6F * rotonground * partialTicks * flag * sf, partialTicks);
                }
@@ -549,7 +639,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
     */
    private void applyMovingAirborneSteering(float partialTicks) {
       float pivotTurnThrottle1 = this.getAcInfo().pivotTurnThrottle;
-      if(pivotTurnThrottle1 > 0.0F && this.getAcInfo().enableBack && super.throttleDown && this.getCurrentThrottle() <= 0.0D && super.throttleBack > 0.0F) {
+      if(!this.hasCarDrivetrain() && pivotTurnThrottle1 > 0.0F && this.getAcInfo().enableBack && super.throttleDown && this.getCurrentThrottle() <= 0.0D && super.throttleBack > 0.0F) {
          // onUpdate_ControlSub already applies the established reverse yaw here.
          return;
       }
@@ -571,7 +661,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
             sf = 1.0F;
          }
 
-         float flag = !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D?-1.0F:1.0F;
+         float flag = this.hasCarDrivetrain() ? this.getCarSteeringDirection(dx, dz)
+               : !super.throttleUp && super.throttleDown && this.getCurrentThrottle() < (double)pivotTurnThrottle1 + 0.05D?-1.0F:1.0F;
          if(super.moveLeft && !super.moveRight) {
             this.steerGroundVehicle(-0.6F * partialTicks * flag * sf, partialTicks);
          }
@@ -599,6 +690,12 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    }
 
    protected void onUpdate_Control(float partialTicks) {
+
+      if(this.hasCarDrivetrain()) {
+         this.updateCarControl();
+         return;
+      }
+      if(this.carInputPilot != null) this.clearCarControlInput();
 
       if(this.isTrackDestroyed()) {
          this.setCurrentThrottle(0.0D);
@@ -1125,6 +1222,10 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          this.updateWheels();
       }
       this.onUpdate_Particle2();
+      if(this.hasCarDrivetrain()) {
+         this.updateCarWheelAnimation();
+         this.WheelMng.particleCarWheelSlip(this.carDrivetrain);
+      }
       this.updateSound();
       if(super.worldObj.isRemote) {
          this.onUpdate_ParticleLandingGear();
@@ -1188,7 +1289,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       float throttle = (float)(this.getCurrentThrottle() / 10.0D);
       Vec3 v = MCH_Lib.Rot2Vec3(this.getRotYaw(), this.getRotPitch() - 10.0F);
       double driveScale = 1.0D;
-      if(this.tankInfo.driveType != null) {
+      if(!this.hasCarDrivetrain() && this.tankInfo.driveType != null) {
          boolean reverse = this.getAcInfo().enableBack && super.throttleBack > 0.0F;
          double demand = reverse ? -super.throttleBack : throttle;
          double requested = demand * Math.hypot(v.xCoord, v.zCoord);
@@ -1202,7 +1303,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          }
       }
 
-      if (!levelOff) {
+      if (!levelOff && !this.hasCarDrivetrain()) {
          super.motionY += v.yCoord * throttle / 8.0D * driveScale;
       }
 
@@ -1214,7 +1315,17 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          }
       }
 
-      if (canMove) {
+      if(this.hasCarDrivetrain()) {
+         double yaw = Math.toRadians(this.getRotYaw());
+         double forwardX = -Math.sin(yaw), forwardZ = Math.cos(yaw);
+         double speed = super.motionX * forwardX + super.motionZ * forwardZ;
+         double sideways = super.motionX * Math.cos(yaw) + super.motionZ * Math.sin(yaw);
+         double force = this.carDrivetrain.acceleration(this.tankInfo, this.WheelMng.getCarGroundContact(false),
+               speed, sideways, canMove);
+         super.motionX += forwardX * force;
+         super.motionZ += forwardZ * force;
+         this.syncCarDrivetrain();
+      } else if (canMove) {
          if (this.getAcInfo().enableBack && super.throttleBack > 0.0F) {
             super.motionX -= v.xCoord * super.throttleBack * driveScale;
             super.motionZ -= v.zCoord * super.throttleBack * driveScale;
@@ -1727,6 +1838,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    public void updateSound() {
       float target = (float)this.getCurrentThrottle();
+      if(this.hasCarDrivetrain()) {
+         target = this.carDrivetrain.running ? 0.15F + 0.85F * this.carDrivetrain.throttle : 0;
+         this.soundVolume += (target - this.soundVolume) * 0.15F;
+         return;
+      }
       if(this.getRiddenByEntity() != null && (super.partCanopy == null || this.getCanopyRotation() < 1.0F)) {
          target += 0.1F;
       }
@@ -1759,6 +1875,11 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    }
 
    public float getSoundPitch() {
+      if(this.hasCarDrivetrain()) {
+         float rev = Math.max(0, Math.min(1, (this.carDrivetrain.rpm - this.tankInfo.carIdleRpm)
+               / (this.tankInfo.carRedlineRpm - this.tankInfo.carIdleRpm)));
+         return 0.65F + rev * 0.75F;
+      }
       float target1 = (float)(0.5D + this.getCurrentThrottle() * 0.5D);
       float target2 = (float)(0.5D + (double)this.soundVolumeTarget * 0.5D);
       return target1 > target2?target1:target2;

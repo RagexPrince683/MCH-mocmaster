@@ -4,6 +4,13 @@ Research date: 2026-09-28. Settings apply to the passenger cars in
 `src/main/resources/assets/mcheli/tanks/`. Read the [runtime/config contract](tanks.md#civilian-car-reverse-controls)
 before treating these values as physical measurements.
 
+The later `CivilianCarDrivetrain` opt-in replaces throttle/brake sequencing for 23 civilian
+passenger definitions while retaining every ceiling and `ThrottleDownFactor` in this inventory.
+See [engine, gears and brakes](tanks.md#civilian-car-drivetrain) and the
+[current opt-in list](../car-tire-grip.md#engine-gears-brakes-and-longitudinal-slip).
+The two police definitions retain the earlier controls. Reverse gear/RPM in the new model uses
+documented gameplay defaults; the research below does not establish its real transmission ratios.
+
 ## Inventory and identity
 
 The 23 requested definitions are present. Inspection of display/radar names,

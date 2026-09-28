@@ -89,18 +89,23 @@ public class MCH_TankPacketHandler {
                }
 
                if(tank.isPilot(player)) {
+                  if(tank.hasCarDrivetrain()) {
+                     tank.setCarControlInput(player, pc.throttleUp, pc.throttleDown, pc.useBrake);
+                     tank.moveLeft = pc.moveLeft;
+                     tank.moveRight = pc.moveRight;
+                  }
                   tank.throttleUp = pc.throttleUp;
                   tank.throttleDown = pc.throttleDown;
                   double dx1 = tank.posX - tank.prevPosX;
                   double dz = tank.posZ - tank.prevPosZ;
                   double dist = dx1 * dx1 + dz * dz;
-                  if(pc.useBrake && tank.getCurrentThrottle() <= 0.03D && dist < 0.01D) {
+                  if(!tank.hasCarDrivetrain() && pc.useBrake && tank.getCurrentThrottle() <= 0.03D && dist < 0.01D) {
                      tank.moveLeft = false;
                      tank.moveRight = false;
                   }
 
                   // Reversing (S) and the dedicated brake (Space) both illuminate brake lamps.
-                  // This changes only the synchronized lamp state; vehicle controls remain untouched.
+                  // Lamp state is separate from the opted-in car's two physical brakes.
                   tank.setBrake(pc.useBrake || pc.throttleDown);
                }
 

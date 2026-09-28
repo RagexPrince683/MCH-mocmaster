@@ -529,6 +529,30 @@ public class MCH_WheelManager {
       car.setRotRoll(this.targetRoll);
    }
 
+   public boolean isFrontAxle(double z) {
+      return z >= (this.minZ + this.maxZ) * 0.5D;
+   }
+
+   /** At most one small puff per supported spinning axle every four client ticks. */
+   public void particleCarWheelSlip(MCH_CarDrivetrain state) {
+      if(!this.parent.worldObj.isRemote || this.parent.ticksExisted % 4 != 0) return;
+      boolean frontDone = false, rearDone = false;
+      for(int i = 0; i < Math.min(this.wheels.length, this.configuredFront.length); ++i) {
+         MCH_EntityWheel wheel = this.wheels[i];
+         boolean front = this.configuredFront[i];
+         if(wheel == null || wheel.isDead || (front ? frontDone : rearDone)) continue;
+         if(front ? !state.frontContact || state.frontSlip < 0.35F : !state.rearContact || state.rearSlip < 0.35F) continue;
+         if(!wheel.hasCarGroundContact()) continue;
+         mcheli.particles.MCH_ParticleParam puff = new mcheli.particles.MCH_ParticleParam(this.parent.worldObj,
+               "smoke", wheel.posX, wheel.posY - wheel.yOffset + 0.02D, wheel.posZ);
+         puff.size = 0.6F; puff.age = 12; puff.motionY = 0.025D;
+         puff.setColor(0.35F, 0.65F, 0.65F, 0.65F);
+         MCH_ParticlesUtil.spawnParticle(puff);
+         if(front) frontDone = true;
+         else rearDone = true;
+      }
+   }
+
    /** Existing wheel layout supplies points only; no wheel state is read as terrain height. */
    float getCivilianTerrainPitch(double x, double z, MCH_TankInfo info) {
       MCH_EntityBaseVehicle car = this.parent;

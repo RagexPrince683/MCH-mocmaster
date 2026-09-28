@@ -259,6 +259,16 @@ public abstract class MCH_BaseVehicleClientTickHandler extends MCH_ClientTickHan
             pc.throttleUp = ac.throttleUp = false;
             pc.moveRight = ac.moveRight = false;
             pc.moveLeft = ac.moveLeft = false;
+         } else if (ac instanceof mcheli.tank.MCH_EntityTank
+               && ((mcheli.tank.MCH_EntityTank)ac).hasCarDrivetrain()) {
+            // Preserve both pedal keys while Space holds the independent rear handbrake.
+            MCH_Key[] carKeys = { this.KeyUp, this.KeyDown, this.KeyRight, this.KeyLeft, this.KeyBrake };
+            for(MCH_Key key : carKeys) send |= key.isKeyDown() || key.isKeyUp();
+            pc.throttleUp = ac.throttleUp = this.KeyUp.isKeyPress();
+            pc.throttleDown = ac.throttleDown = this.KeyDown.isKeyPress();
+            pc.moveRight = ac.moveRight = this.KeyRight.isKeyPress();
+            pc.moveLeft = ac.moveLeft = this.KeyLeft.isKeyPress();
+            pc.useBrake = this.KeyBrake.isKeyPress();
          } else if (ac.hasBrake() && this.KeyBrake.isKeyPress()) {
             send |= this.KeyBrake.isKeyDown();
             pc.throttleDown = ac.throttleDown = false;

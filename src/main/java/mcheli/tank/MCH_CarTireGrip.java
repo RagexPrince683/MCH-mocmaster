@@ -74,7 +74,7 @@ public final class MCH_CarTireGrip {
       return Math.copySign(Math.min(demand, limit), requested);
    }
 
-   private static double axleDriveLimit(double sideways, MCH_TankInfo info, int supported,
+   static double axleDriveLimit(double sideways, MCH_TankInfo info, int supported,
                                         int total, TireSize tire) {
       if(supported <= 0) return 0.0D;
       double fraction = (double)supported / total;

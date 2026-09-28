@@ -386,3 +386,24 @@ Developer/backend
 - Updated configuration references, traction equations, identity evidence, and reverse-speed guidance.
   Offline `compileJava` passed with the supported cached Gradle setup; changed classes target Java 8
   (major version 52). Asset/diff audits passed. End-user in-game and multiplayer driving remain untested.
+
+2026-09-27 22:45 — Add civilian car throttle, gearing, brakes and longitudinal slip
+
+- Added explicit `CivilianCarDrivetrain` with disabled default and bounded gameplay throttle response,
+  idle/redline RPM, automatic forward/reverse gears and torque blending without velocity resets.
+- Separated S service braking, Space rear handbraking and synchronized lamp state. W remains available
+  with Space; W+S combines throttle/braking without reverse. Direction changes brake before drive, and
+  pilot/control loss or GUI entry releases held inputs. Steering direction follows actual travel while
+  preserving the existing steering/grip limits.
+- Integrated axle wheel inertia and longitudinal slip with existing collision support and lateral-first
+  traction capacity. Existing `DriveType` selects powered axles; unset layouts use a neutral fallback.
+  Added synchronized engine/gear/brake and axle speed/slip/contact state, RPM sound, independent axle
+  wheel animation and restrained supported-wheel spin particles. Legacy controls/physics remain for
+  vehicles without the new opt-in; suspension, lateral grip and collision systems are retained.
+- Added only an opt-in line to 23 civilian passenger definitions, including the custom drift car and
+  armored limousine, preserving every `Speed`, reverse ceiling and `ThrottleDownFactor`. Police and
+  other excluded vehicle definitions are unchanged. Settings are gameplay defaults, not inferred specs.
+- Updated tank/civilian references and end-user driving checks. Final offline `compileJava` succeeded
+  with the supported cached Gradle setup; all nine changed/new classes target Java 8 (major 52).
+  Source, asset, force-equation, encoding and diff checks passed. No packaging or game launch was done;
+  shifts, hill holding, burnout intensity, suspension interaction and multiplayer visuals need feedback.

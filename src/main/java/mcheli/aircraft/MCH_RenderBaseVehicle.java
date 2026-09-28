@@ -1073,7 +1073,10 @@ public abstract class MCH_RenderBaseVehicle extends W_Render {
             GL11.glRotated((double)(yaw * wheel.rotDir), wheel.rot.xCoord, wheel.rot.yCoord, wheel.rot.zCoord);
             GL11.glTranslated(-wheel.pos2.xCoord, -wheel.pos2.yCoord, -wheel.pos2.zCoord);
             GL11.glTranslated(wheel.pos.xCoord, wheel.pos.yCoord, wheel.pos.zCoord);
-            GL11.glRotatef(rotation, 1.0F, 0.0F, 0.0F);
+            float tireRotation = ac instanceof mcheli.tank.MCH_EntityTank
+                  && ((mcheli.tank.MCH_EntityTank)ac).hasCarDrivetrain()
+                  ? ((mcheli.tank.MCH_EntityTank)ac).getCarWheelRotation(wheel.pos.zCoord, tickTime) : rotation;
+            GL11.glRotatef(tireRotation, 1.0F, 0.0F, 0.0F);
             GL11.glTranslated(-wheel.pos.xCoord, -wheel.pos.yCoord, -wheel.pos.zCoord);
             renderPart(wheel.model, info.model, wheel.modelName);
             GL11.glPopMatrix();

@@ -21,6 +21,7 @@ public class MCH_ClientTankTickHandler extends MCH_BaseVehicleClientTickHandler 
    public MCH_Key KeySwitchMode;
    public MCH_Key KeyZoom;
    public MCH_Key[] Keys;
+   private MCH_EntityTank carGuiReleasedTank;
 
 
    public MCH_ClientTankTickHandler(Minecraft minecraft, MCH_Config config) {
@@ -106,6 +107,7 @@ public class MCH_ClientTankTickHandler extends MCH_BaseVehicleClientTickHandler 
          super.isRiding = true;
       } else {
          super.isRiding = false;
+         this.carGuiReleasedTank = null;
       }
 
       if (!this.isBeforeRiding && this.isRiding && aircraftEntity != null) {
@@ -121,10 +123,20 @@ public class MCH_ClientTankTickHandler extends MCH_BaseVehicleClientTickHandler 
    }
 
    protected void playerControlInGUI(EntityPlayer player, MCH_EntityTank tank, boolean isPilot) {
+      if(tank.hasCarDrivetrain() && isPilot && tank.isPilot(player)) {
+         // The shared GUI hook is empty; explicitly release car controls on entering a GUI.
+         tank.throttleUp = tank.throttleDown = tank.moveLeft = tank.moveRight = false;
+         if(this.carGuiReleasedTank != tank || player.ticksExisted % 100 == 0) {
+            W_Network.sendToServer(new MCH_TankPacketPlayerControl());
+            this.carGuiReleasedTank = tank;
+         }
+         return;
+      }
       this.commonPlayerControlInGUI(player, tank, isPilot, new MCH_TankPacketPlayerControl());
    }
 
    protected void playerControl(EntityPlayer player, MCH_EntityTank tank, boolean isPilot) {
+      this.carGuiReleasedTank = null;
       MCH_TankPacketPlayerControl pc = new MCH_TankPacketPlayerControl();
       boolean send = false;
       send = this.commonPlayerControl(player, tank, isPilot, pc);

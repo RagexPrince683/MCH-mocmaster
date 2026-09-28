@@ -2,7 +2,7 @@
 
 `CivilianCarGrip = true` explicitly opts a passenger-car definition into the grip and steering model. It defaults to **false**. Neither `WeightType` nor `Category` selects this behavior, and neither is changed. Existing definitions without the field retain their legacy handling, including old `WeightType = Car` packs. Tire metadata alone never enables grip.
 
-This is bounded gameplay slip damping, not a measured tire/suspension/weight simulation. Only opted-in tank-backed civilian cars receive the correction and steering coupling. `DriveType` separately opts into axle-based propulsion; absent that field, thrust stays legacy. Existing speed clamps, isotropic `MotionFactor` drag, and all aircraft/boat code remain unchanged. Civilian spring/shock suspension is documented in the [tank reference](vehicle-config/tanks.md).
+This is bounded gameplay slip damping, not a measured tire/suspension/weight simulation. Only opted-in tank-backed civilian cars receive the correction and steering coupling. `DriveType` separately opts into axle-based propulsion. Without `CivilianCarDrivetrain`, absent `DriveType` keeps legacy thrust; with the new engine opt-in, it uses an axle-neutral wheel model. Existing speed clamps, isotropic `MotionFactor` drag, and all aircraft/boat code remain unchanged. Civilian spring/shock suspension is documented in the [tank reference](vehicle-config/tanks.md).
 
 ## Configuration
 
@@ -73,6 +73,10 @@ For a larger `side = 0.30` at full contact, old coasting requested/applied is **
 
 ## Throttle and drivetrain
 
+This section records the earlier `DriveType`-only propulsion path. Cars with
+`CivilianCarDrivetrain = true` use the engine and longitudinal wheel state described below,
+reusing the same axle layout, contact sampling and lateral-first traction capacity.
+
 `DriveType = FWD` selects front wheels, `RWD` selects rear wheels, and `AWD` selects both
 axles for **server-authoritative forward and reverse propulsion**. Omitted, empty, or invalid
 values preserve legacy engine force, including on `CivilianCarGrip = true` cars. Reload resets
@@ -126,9 +130,68 @@ inputs do not take lateral authority away; identical velocity/contact still give
 correction. Existing momentum continues through contact loss under normal drag/gravity/collision.
 Throttle buildup, braking, burnouts, gearing, speed ceilings, brake lights, and vehicle collision are
 unchanged. Traction limits can reduce attainable speed without changing the configured ceilings.
-There is no differential, tire rotation/slip simulation, load transfer, or manufacturer torque allocation.
+That earlier path has no differential, tire rotation/slip simulation, load transfer, or manufacturer torque allocation.
 
-### Bundled drivetrain audit
+## Engine, gears, brakes and longitudinal slip
+
+`CivilianCarDrivetrain = true` explicitly opts a passenger car into server-owned engine throttle,
+automatic forward/reverse gears and longitudinal wheel inertia/slip. It defaults to **false**;
+grip, tire metadata, `DriveType`, weight/category and reverse settings do not enable it implicitly.
+The new settings, bounded defaults, force equations and synchronization contract are documented
+in the [tank configuration reference](vehicle-config/tanks.md#civilian-car-drivetrain).
+
+Bundled opt-ins are these **23 civilian passenger definitions**:
+
+`2102`, `2105`, `350z`, `ae86`, `altis`, `bcnr33`, `bnr32`, `bnr34`, `bugattichiron`,
+`carrera_gt`, `challenger`, `dacia`, `delorean`, `fresh_auto`, `impreza`, `phantom`,
+`phantomarmored`, `rx-8`, `rx7`, `s15`, `silvia_s14`, `starion`, `w123`.
+
+Only the new opt-in line is added to each definition. Existing speed ceilings, reverse factors,
+tires, suspension and axle identity fields remain unchanged. All use the same documented gameplay
+defaults: response 0.25/tick, 800 idle / 6500 redline RPM, five forward gears, eight-tick torque blend,
+0.24 service brake and 0.20 rear handbrake demand. No real gearing, torque or brake specification
+is inferred. `fresh_auto`, `impreza` and `phantomarmored` retain unset `DriveType` and use the
+axle-neutral fallback. The armored limousine retains its existing suspension/grip selection.
+Police definitions `fordpolice` and `bnr32_police`, utility/military vehicles, trucks, ATV, bicycle,
+tractor, tanks, aircraft and boats receive no opt-in and retain their existing behavior.
+
+W opens throttle promptly; releasing it closes throttle. S brakes forward motion before four ticks
+near rest select reverse. W brakes backward motion before forward drive. W+S combines engine and
+service brake and never requests reverse. Space applies separate rear brake torque even at rest and
+keeps W/S available. Both S and Space retain `EnableBrakeLights` behavior independently of physics.
+Launch torque can exceed powered axle traction, increasing wheel surface speed rather than giving
+unlimited body acceleration. W+S can create a restrained burnout when torque exceeds rear traction
+and the other axle's brakes hold the body; whether it does depends on layout, contact, speed band,
+and lateral demand. Handbrake torque can also suppress powered rear rotation. Airborne spin cannot
+provide body force or road smoke. These are gameplay mechanics, not guaranteed burnout behavior
+for every car.
+
+Engine/gear/brake and axle speed/slip/contact state is synchronized to observers. Sound follows
+smoothed RPM; front/rear rendered rotation follows smoothed tire surface speed, so a powered tire
+can spin while the body is nearly stopped. Small supported-axle smoke puffs require excess surface
+speed over 0.12 blocks/tick and normalized slip over 0.35. Existing lateral correction, steering,
+suspension and collision remain authoritative in their original paths.
+
+### End-user driving checks
+
+Use a level solid road, then repeat on a slope and in multiplayer:
+
+1. In an opted-in RWD car, hold W from rest. Listen for smooth RPM/shift changes and verify shifts
+   do not stop the body. Compare top speed against the same existing `Speed` setting.
+2. At forward speed hold S continuously: expect braking, a short near-stop direction dwell, then
+   smooth reverse within the configured ceiling. Press W in reverse: expect braking before forward drive.
+3. Hold W+S at rest and at speed: verify service braking and throttle coexist and reverse never engages.
+   Try W+Space and Space alone at rest/on a slope; the rear brake must remain active with W available.
+4. Compare FWD `altis`, RWD `ae86`, AWD `bnr32`, and unset-layout `impreza`. Watch supported powered
+   wheels during launches/burnouts, then lift the powered axle or jump: no unsupported propulsion or road smoke.
+5. Observe from a second client: check wheel spin, restrained smoke, engine sound, and brake lamps with
+   regular lights on/off. Release each key independently, open a GUI, exit/change pilot, and verify controls clear.
+6. Drive a police car, tracked tank and other excluded vehicle to confirm their controls remain unchanged.
+
+Compile/static validation does not establish road feel. Shift hunting, low-speed stopping, hill holding,
+burnout intensity, suspension interaction, wheel visual matching and multiplayer smoothing need in-game feedback.
+
+## Earlier drivetrain identity audit
 
 **20** passenger-car definitions receive a field: **2 FWD, 14 RWD, 4 AWD**. Only `DriveType`
 lines are added to their assets. The stock identities support these choices; generic weight/category
@@ -162,7 +225,8 @@ Civilian passenger cars left **without `DriveType`** because identity is insuffi
 - `fresh_auto`: a modified VAZ-2105 “Tsar Zhiga” Fresh Auto drift build; no build-specific drivetrain
   evidence was established. Stock 2105 specifications and drift effects cannot prove this conversion.
 - `phantomarmored`: unidentified armored conversion. The stock Phantom's RWD layout does not establish
-  the conversion's mechanical specification; its existing handling stays unchanged.
+  the conversion's mechanical specification; axle identity stays unset. Its new engine opt-in uses
+  the axle-neutral fallback and leaves its grip/suspension selection unchanged.
 
 `bnr32_police` and `fordpolice` are excluded by the task's police-vehicle limit, not assigned a drivetrain.
 Military/utility vehicles, unarmed military-family Hilux, trucks, ATV, bicycle, tractor, tracked tanks,
@@ -216,6 +280,20 @@ The bundled `challenger` is explicitly treated as a **stock 2018 Dodge Challenge
 The remaining 14 definitions from the original 22-car grip audit had unset sizes. Their identities/trim/market did not establish a verified period front/rear fitment; existing research gaps were not filled with wider tires to tune handling. This drivetrain change leaves all existing tire metadata untouched.
 
 ## Verification
+
+Engine/gearing/brake/slip verification on **2026-09-27**:
+`gradlew.bat compileJava --offline --no-daemon --gradle-user-home C:/Users/Owner/.gradle`
+completed **BUILD SUCCESSFUL** using launch JDK 21, the existing cached convention/Jabel compiler,
+and `GRADLE_USER_HOME=C:/Users/Owner/.gradle`. All nine changed/new production classes are
+class-file major version **52 (Java 8)**. No build configuration/dependency changes were needed.
+The asset diff is exactly 23 added opt-in lines, with no changes to speed ceilings, reverse factors,
+drivetrain identities or excluded assets. `git diff --check` passed. Source review covered pilot-only
+packets, the existing main-thread network task dispatch, brake/lamp separation, direction transitions,
+legacy path guards, contact/traction bounds, observer state and control cleanup. One-step mathematical
+checks covered traction-limited launch, stationary handbrake torque, locked braking and zero airborne
+body force; 36 boundary encoding checks covered synchronized engine/axle fields. These are equation
+and static checks, not execution of Java physics tests or in-game driving. No game launch, packaging,
+remap/reobfuscation or multiplayer drive test was performed. Use the driving checks above for feedback.
 
 Drivetrain verification on **2026-09-27**: with launch JDK 21 and the existing cached convention/Jabel
 Java 8 compiler, `gradlew.bat compileJava --offline --no-daemon --gradle-user-home C:/Users/Owner/.gradle`

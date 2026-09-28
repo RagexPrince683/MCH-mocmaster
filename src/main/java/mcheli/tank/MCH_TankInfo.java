@@ -19,7 +19,15 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    public int trackMaxHP = 100;
    public boolean enableTurretPop = false;
    public boolean civilianCarGrip = false;
-   /** Explicit drivetrain opt-in; null preserves legacy propulsion. */
+   public boolean civilianCarDrivetrain = false;
+   public float carThrottleResponse = 0.25F;
+   public float carIdleRpm = 800.0F;
+   public float carRedlineRpm = 6500.0F;
+   public int carForwardGears = 5;
+   public int carShiftTicks = 8;
+   public float carServiceBrake = 0.24F;
+   public float carHandbrake = 0.20F;
+   /** Explicit axle selection; null is legacy propulsion or axle-neutral with the engine opt-in. */
    public DriveType driveType = null;
 
    public enum DriveType {
@@ -100,7 +108,31 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
 
    public void loadItemData(String item, String data) {
       // Handle car-only keys before the shared parser's client HUD/model branch.
-      if(item.equalsIgnoreCase("CivilianCarGrip")) {
+      if(item.equalsIgnoreCase("CivilianCarDrivetrain")) {
+         this.civilianCarDrivetrain = this.toBool(data, false);
+         return;
+      } else if(item.equalsIgnoreCase("CarThrottleResponse")) {
+         this.carThrottleResponse = carValue(data, 0.25F, 0.05F, 1.0F);
+         return;
+      } else if(item.equalsIgnoreCase("CarIdleRPM")) {
+         this.carIdleRpm = carValue(data, 800, 500, 2000);
+         return;
+      } else if(item.equalsIgnoreCase("CarRedlineRPM")) {
+         this.carRedlineRpm = carValue(data, 6500, 3000, 12000);
+         return;
+      } else if(item.equalsIgnoreCase("CarForwardGears")) {
+         this.carForwardGears = (int)carValue(data, 5, 1, 8);
+         return;
+      } else if(item.equalsIgnoreCase("CarShiftTicks")) {
+         this.carShiftTicks = (int)carValue(data, 8, 1, 40);
+         return;
+      } else if(item.equalsIgnoreCase("CarServiceBrake")) {
+         this.carServiceBrake = carValue(data, 0.24F, 0.01F, 0.5F);
+         return;
+      } else if(item.equalsIgnoreCase("CarHandbrake")) {
+         this.carHandbrake = carValue(data, 0.20F, 0.01F, 0.5F);
+         return;
+      } else if(item.equalsIgnoreCase("CivilianCarGrip")) {
          this.civilianCarGrip = this.toBool(data, false);
          return;
       } else if(item.equalsIgnoreCase("DriveType")) {
@@ -180,12 +212,29 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
       return "tanks";
    }
 
+   private static float carValue(String data, float fallback, float min, float max) {
+      try {
+         float value = Float.parseFloat(data.trim());
+         return Float.isNaN(value) || Float.isInfinite(value) ? fallback : Math.max(min, Math.min(max, value));
+      } catch(NumberFormatException ex) {
+         return fallback;
+      }
+   }
+
    public String getKindName() {
       return "tank";
    }
 
    public void preReload() {
       super.preReload();
+      this.civilianCarDrivetrain = false;
+      this.carThrottleResponse = 0.25F;
+      this.carIdleRpm = 800.0F;
+      this.carRedlineRpm = 6500.0F;
+      this.carForwardGears = 5;
+      this.carShiftTicks = 8;
+      this.carServiceBrake = 0.24F;
+      this.carHandbrake = 0.20F;
       this.civilianCarGrip = false;
       this.driveType = null;
       this.civilianCarReverseSpeed = 0.0F;

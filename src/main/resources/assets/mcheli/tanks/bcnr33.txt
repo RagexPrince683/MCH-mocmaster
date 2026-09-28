@@ -9,6 +9,7 @@ ChaffWaitTime = 0
 ChaffUseTime = 0
 ; Reverse target 35 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.486111
+CivilianCarDrivetrain = true
 ThrottleDownFactor = 2.40
 ItemID = 30033
 Weight = 3373
