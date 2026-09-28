@@ -1021,6 +1021,11 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          return false;
       }
 
+      if(parent.isDestroyed()) {
+         this.queueDestroyedVehicleDismount(player);
+         return true;
+      }
+
       long now = System.nanoTime();
       if(this.dismountHoldState == DismountHoldState.IDLE) {
          this.dismountHoldStartNanos = now;
@@ -1036,6 +1041,19 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
          this.logDismountState("Request queued", null, now - this.dismountHoldStartNanos);
       }
       return true;
+   }
+
+   private void queueDestroyedVehicleDismount(EntityClientPlayerMP player) {
+      if(this.dismountHoldState == DismountHoldState.PENDING) {
+         return;
+      }
+      if(this.dismountHoldState != DismountHoldState.IDLE) {
+         this.sendDismountHoldAction((byte)2);
+      }
+      this.dismountHoldStartNanos = -1L;
+      this.dismountHoldState = DismountHoldState.PENDING;
+      MCH_DismountDiagnostics.holdState(player, "PENDING_DESTROYED");
+      this.logDismountState("Destroyed vehicle request queued", null, 0L);
    }
 
    private void updateDismountHoldState() {
@@ -1069,7 +1087,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       if(mount.isDead) {
          return "mount became invalid";
       }
-      if(parent == null || parent.isDead || parent.isDestroyed()) {
+      if(parent == null || parent.isDead) {
          return "parent vehicle became invalid";
       }
       if(mount instanceof MCH_EntitySeat && ((MCH_EntitySeat)mount).getParent() != parent) {
