@@ -452,3 +452,22 @@ Developer/backend
   Source/equation checks covered different wheel heights, unsupported force, gradual launch and
   traction recovery. No current pre-thrust runtime trace or in-game driving was captured; launch,
   shifts, traction recovery, braking and unsupported smoke still require Forge 1.7.10 driving checks.
+
+2026-09-28 02:29 — Recover Chiron client steering on tracked road positions
+
+- Fresh internal-game diagnostics for Chiron entity 26904 show all 495 client turn samples
+  rejecting yaw with zero contact, including after slowing down, while all 239 server snapshots
+  retain four supported wheels. Both turn keys remain present; the user confirmed ordinary
+  driving also cannot turn. The first rejection is the client grip limiter, before added yaw
+  reaches the server's physics budget.
+- Traced the matching collision failure to Minecraft's 1/32-block tracked-position rounding:
+  the client body floor can overlap the road slightly, and normalization to that floor still
+  leaves calculateYOffset unable to find downward support. Lift the shared grip query within
+  its existing 0.05-block skin and anchored height, adding exactly the lift to the sweep so its
+  lowest endpoint and unsupported-wheel rejection remain intact. Live wheel/suspension state,
+  lateral grip, steering floor, AWD force, gearing, top speed and brakes are unchanged.
+- Restored the Chiron's prior disabled diagnostic definition and updated the existing grip
+  document with the capture and collision reconstruction. Offline compileJava passed; the
+  changed wheel class is Java 8 (major 52). Collision-equation checks covered road recovery,
+  stale airborne wheels, a wholly low box and missing terrain. No test files were added.
+  Corrected in-game steering, high-speed understeer and multiplayer recovery remain unobserved.

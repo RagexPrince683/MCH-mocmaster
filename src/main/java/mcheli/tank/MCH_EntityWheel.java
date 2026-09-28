@@ -118,10 +118,18 @@ public class MCH_EntityWheel extends W_Entity {
       // calculateYOffset cannot find downward support from an overlapping box.
       // Move only the query bottom to the body floor within the anchored wheel's
       // real height; never promote a box wholly below that floor into contact.
-      double supportBottom = Math.max(targetBottom, Math.min(bodyBottom, targetBottom + box.maxY - box.minY));
+      double height = box.maxY - box.minY;
+      double supportBottom = Math.max(targetBottom, Math.min(bodyBottom, targetBottom + height));
       // A suspension wheel can lag below the body during takeoff. Never use that stale support.
-      box.offset(0.0D, Math.max(0.0D, supportBottom - box.minY), 0.0D);
-      double reach = 0.05D + restGap;
+      double queryBottom = Math.max(box.minY, supportBottom);
+      // Entity tracking floors client positions to 1/32 block. A grounded body's
+      // interpolated floor can therefore sit just inside the road, where a downward
+      // calculateYOffset finds no support. Lift through the existing collision skin,
+      // within the anchored box height, and extend the sweep by exactly that lift.
+      // Its lower endpoint is unchanged: unsupported/airborne wheels gain no reach.
+      double lift = Math.max(0.0D, Math.min(0.05D, targetBottom + height - queryBottom));
+      box.offset(0.0D, queryBottom + lift - box.minY, 0.0D);
+      double reach = 0.05D + restGap + lift;
       return hasGroundSupport(box, this.getCollidingBoundingBoxes(this, box.addCoord(0.0D, -reach, 0.0D)), reach);
    }
 
