@@ -283,6 +283,12 @@ public abstract class MCH_HudItem extends Gui {
       updateVarMapItem("max_hp", (double)ac.getMaxHP());
       updateVarMapItem("hp_rto", ac.getMaxHP() > 0?(double)ac.getHP() / (double)ac.getMaxHP():0.0D);
       updateVarMapItem("throttle", ac.getCurrentThrottle());
+      mcheli.tank.MCH_EntityTank car = ac instanceof mcheli.tank.MCH_EntityTank
+            && ((mcheli.tank.MCH_EntityTank)ac).hasCarDrivetrain() ? (mcheli.tank.MCH_EntityTank)ac : null;
+      updateVarMapItem("car_drivetrain", car != null ? 1 : 0);
+      updateVarMapItem("car_gear", car != null ? car.carDrivetrain.gear : 0);
+      updateVarMapItem("car_rpm", car != null ? car.carDrivetrain.rpm : 0);
+      updateVarMapItem("car_rpm_norm", car != null ? car.carDrivetrain.rpm / car.getTankInfo().carRedlineRpm : 0);
       updateVarMapItem("pos_x", ac.posX);
       updateVarMapItem("pos_y", ac.posY);
       updateVarMapItem("pos_z", ac.posZ);

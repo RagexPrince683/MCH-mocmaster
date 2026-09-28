@@ -2,13 +2,13 @@
 if = time<=13000
 	; 昼用の計器
 	DrawTexture = Lamborghini Huracan_hud,  144, 40,  64,64,  317,  0, 128,128
-	DrawTexture = Lamborghini Huracan_hud,  168, 40,  16,64,  445,  0,  32,128, Throttle*230-180
+	DrawTexture = Lamborghini Huracan_hud,  168, 40,  16,64,  445,  0,  32,128, (car_drivetrain?car_rpm_norm:throttle)*230-180
 Endif
 
 if = time> 13000
 	; 夜間用の計器
 	DrawTexture = Lamborghini Huracan_hud,  144, 40,  64,64,  317,128, 128,128
-	DrawTexture = Lamborghini Huracan_hud,  168, 40,  16,64,  477,  0,  32,128, Throttle*230-180
+	DrawTexture = Lamborghini Huracan_hud,  168, 40,  16,64,  477,  0,  32,128, (car_drivetrain?car_rpm_norm:throttle)*230-180
 Endif
 
 ; 燃料(Fuel)
@@ -78,3 +78,9 @@ If = auto_pilot==1
 Endif
 
 DrawString = -200, 130, "%s",  WPN_NAME
+
+; Server synchronized car transmission and engine speed
+If = car_drivetrain
+Color = 0xCFFFFFFF
+DrawString = 84, 118, "Gear %s  %4.0f RPM", CAR_GEAR, CAR_RPM
+EndIf

@@ -2,14 +2,14 @@
 
 `CivilianCarGrip = true` explicitly opts a passenger-car definition into the grip and steering model. It defaults to **false**. Neither `WeightType` nor `Category` selects this behavior, and neither is changed. Existing definitions without the field retain their legacy handling, including old `WeightType = Car` packs. Tire metadata alone never enables grip.
 
-This is bounded gameplay slip damping, not a measured tire/suspension/weight simulation. Only opted-in tank-backed civilian cars receive the correction and steering coupling. `DriveType` separately opts into axle-based propulsion. Without `CivilianCarDrivetrain`, absent `DriveType` keeps legacy thrust; with the new engine opt-in, it uses an axle-neutral wheel model. Existing speed clamps, isotropic `MotionFactor` drag, and all aircraft/boat code remain unchanged. Civilian spring/shock suspension is documented in the [tank reference](vehicle-config/tanks.md).
+This is bounded gameplay slip damping, not a measured tire/suspension/weight simulation. Only opted-in tank-backed civilian cars receive the correction and steering coupling. `DriveType` separately opts into axle-based propulsion. Without `CivilianCarDrivetrain`, absent `DriveType` keeps legacy thrust; with the new engine opt-in, it uses an axle-neutral wheel model. Legacy engines retain isotropic `MotionFactor` drag. Opted-in car engines use explicit force/drag/gearing with a final safety cap, described below. Aircraft/boat code is unchanged. Civilian spring/shock suspension is documented in the [tank reference](vehicle-config/tanks.md).
 
 ## Configuration
 
 | Field | Units / values | Default |
 |---|---|---|
 | `CivilianCarGrip` | Boolean, explicit passenger-car opt-in | `false` |
-| `DriveType` | `FWD`, `RWD`, `AWD`; case-insensitive explicit propulsion opt-in | Unset/invalid: legacy thrust |
+| `DriveType` | `FWD`, `RWD`, `AWD`; case-insensitive explicit propulsion opt-in | Unset/invalid: legacy thrust, or axle-neutral with the engine opt-in |
 | `FrontTireSize` | Optional metric radial dimensions, e.g. `225/50R16`, `265/35ZR19`, `175R14` | Unset; neutral response 1.0 |
 | `RearTireSize` | Same, independently optional | Unset; neutral response 1.0 |
 | `CarLateralGrip` | Maximum sideways velocity change per 20 Hz tick, blocks/tick²; 0–0.25 | `0.12`; `0` disables grip and its steering coupling |
@@ -53,7 +53,7 @@ The manager samples each wheel once per correction. Missing/dead wheels still co
 ## Grounded turn trace and tuning
 
 1. Steering input originally changed body yaw through `onUpdateAngles` while momentum retained its world direction. Rotation packets deliver that yaw to the server. With zero wheel contact, the old grip performed no correction. Even with hypothetical full contact, 25% damping retained 75% of each tick's lateral slip, allowing yaw to outrun the path.
-2. Thrust, the validated `Speed` clamp and `MotionFactor` drag still run in their existing order. When `DriveType` is configured, current collision support and lateral demand bound added thrust before the clamp/drag. The server then updates wheels, takes the lateral contact snapshot, bounds the yaw change accumulated since the preceding physics tick, recomputes the horizontal basis from that applied yaw, applies one lateral correction, and moves the body.
+2. In the legacy engine path, thrust, the validated `Speed` clamp and `MotionFactor` drag retain their existing order. The opted-in car engine uses the force/drag/final-cap sequence documented below. When `DriveType` is configured, current collision support and lateral demand bound added thrust before the clamp/drag. The server then updates wheels, takes the lateral contact snapshot, bounds the yaw change accumulated since the preceding physics tick, recomputes the horizontal basis from that applied yaw, applies one lateral correction, and moves the body.
 3. Forward `f = (−sin θ, cos θ)` and sideways `s = (cos θ, sin θ)`. `side = velocity·s`. Contact fraction `C = supported/configured`. Front/rear contact weights the existing tire response `R`.
 4. Requested signed correction is `side * 0.85 * R * C`. Limit is `clamp(CarLateralGrip,0,0.25) * C`. Applied correction is `sign(side) * min(abs(requested), limit)`, subtracted along `s`. This preserves forward velocity relative to the applied heading, never reverses slip, never increases horizontal kinetic energy, and fades continuously to zero at low slip.
 5. Steering may use 75% of that lateral acceleration budget, retaining 25% for residual slip. The yaw limit in degrees is `asin(clamp(0.75*grip*C/speed,0,1)) * tickDelta * speed/(speed+0.05)`, converted to degrees. Requests keep their sign and clamp to that bound. Zero speed/contact gives zero added steering; low-speed response is continuous. Client key steering respects this bound and elapsed tick time; the server also bounds the cumulative yaw delivered by rotation packets once per physics tick. The opted-in reverse path omits the old second, opposing yaw update in `onUpdate_ControlSub`; reverse steering is handled by the same angle path and force budget.
@@ -134,62 +134,125 @@ That earlier path has no differential, tire rotation/slip simulation, load trans
 
 ## Engine, gears, brakes and longitudinal slip
 
-`CivilianCarDrivetrain = true` explicitly opts a passenger car into server-owned engine throttle,
-automatic forward/reverse gears and longitudinal wheel inertia/slip. It defaults to **false**;
-grip, tire metadata, `DriveType`, weight/category and reverse settings do not enable it implicitly.
-The new settings, bounded defaults, force equations and synchronization contract are documented
-in the [tank configuration reference](vehicle-config/tanks.md#civilian-car-drivetrain).
+`CivilianCarDrivetrain = true` explicitly selects the server engine and longitudinal wheel model;
+its default is false. Grip, weight, category and tire metadata do not enable it. The
+[tank reference](vehicle-config/tanks.md#civilian-car-drivetrain) defines the force/RPM/drag equations,
+bounded parser defaults, reload behavior and synchronization contract.
 
-Bundled opt-ins are these **23 civilian passenger definitions**:
+The 23 passenger definitions below configure throttle response, idle/redline, forward ratios/count,
+reverse ratio, final drive, wheel radius, engine force, drag, longitudinal traction, shift duration,
+service brake and rear handbrake explicitly. Car-specific force, drag, response, shift and brake values
+are gameplay tuning. Even a published gearbox uses the automatic gameplay shift controller; this
+is not a factory torque, clutch, differential or braking simulation. Existing `ThrottleDownFactor`,
+reverse ceilings, tire metadata, suspension and `DriveType` are retained. `fresh_auto`, `impreza`,
+and `phantomarmored` keep the axle-neutral fallback because their powered-wheel identity is unresolved.
+Police definitions `fordpolice` and `bnr32_police`, military/utility vehicles, aircraft and boats retain
+their existing engines and controls.
 
-`2102`, `2105`, `350z`, `ae86`, `altis`, `bcnr33`, `bnr32`, `bnr34`, `bugattichiron`,
-`carrera_gt`, `challenger`, `dacia`, `delorean`, `fresh_auto`, `impreza`, `phantom`,
-`phantomarmored`, `rx-8`, `rx7`, `s15`, `silvia_s14`, `starion`, `w123`.
+W builds drive force over time. S service-brakes forward travel before a near-stop dwell permits
+reverse; W+S supplies both throttle and braking without reverse. Space adds held rear brake torque
+and leaves W/S available. Axle contact and `DriveType` select powered-wheel traction and slip.
+A sufficiently powerful car can spin tires against either brake; a brake can also lock a powered axle.
+Airborne spin supplies neither body force nor road smoke. S and Space retain brake-light behavior.
+Shifts alter active gear, wheel torque and RPM without resetting body velocity. Sound and axle
+animation follow synchronized engine/wheel state. The existing car HUDs now show gear/RPM and
+use RPM for their tachometers; other vehicles using those HUDs retain their previous needles.
 
-Only the new opt-in line is added to each definition. Existing speed ceilings, reverse factors,
-tires, suspension and axle identity fields remain unchanged. All use the same documented gameplay
-defaults: response 0.25/tick, 800 idle / 6500 redline RPM, five forward gears, eight-tick torque blend,
-0.24 service brake and 0.20 rear handbrake demand. No real gearing, torque or brake specification
-is inferred. `fresh_auto`, `impreza` and `phantomarmored` retain unset `DriveType` and use the
-axle-neutral fallback. The armored limousine retains its existing suspension/grip selection.
-Police definitions `fordpolice` and `bnr32_police`, utility/military vehicles, trucks, ATV, bicycle,
-tractor, tanks, aircraft and boats receive no opt-in and retain their existing behavior.
+### Bundled drivetrain values and speed audit
 
-W opens throttle promptly; releasing it closes throttle. S brakes forward motion before four ticks
-near rest select reverse. W brakes backward motion before forward drive. W+S combines engine and
-service brake and never requests reverse. Space applies separate rear brake torque even at rest and
-keeps W/S available. Both S and Space retain `EnableBrakeLights` behavior independently of physics.
-Launch torque can exceed powered axle traction, increasing wheel surface speed rather than giving
-unlimited body acceleration. W+S can create a restrained burnout when torque exceeds rear traction
-and the other axle's brakes hold the body; whether it does depends on layout, contact, speed band,
-and lateral demand. Handbrake torque can also suppress powered rear rotation. Airborne spin cannot
-provide body force or road smoke. These are gameplay mechanics, not guaranteed burnout behavior
-for every car.
+At 20 Hz, `Speed * 72` is km/h, not mph. The first numeric column below audits every original
+ceiling against the named year/trim. Only Chiron, Carrera GT and the standard 1976 240D have corrected
+ceilings here: their identities and cited factory speeds support the change. Other top speeds remain
+explicit gameplay ceilings while market, trim, fitted gearbox or limiter evidence is unresolved.
+The authoritative files are `src/main/resources/assets/mcheli/tanks/<definition>.txt`; the deprecated
+`configreference` tree is not used or recreated. No 400R, Hellcat, WRX/STi or tuned-build performance
+is inferred from a generic model name.
 
-Engine/gear/brake and axle speed/slip/contact state is synchronized to observers. Sound follows
-smoothed RPM; front/rear rendered rotation follows smoothed tire surface speed, so a powered tire
-can spin while the body is nearly stopped. Small supported-axle smoke puffs require excess surface
-speed over 0.12 blocks/tick and normalized slip over 0.35. Existing lateral correction, steering,
-suspension and collision remain authoritative in their original paths.
+| Definition | Original km/h | Current Speed / km/h | Identity, verified basis and remaining gaps |
+|---|---:|---:|---|
+| `2102` | 61.20 | 0.85 / 61.20 | 1971 VAZ-2102; selected 4MT gameplay ratios. Period engine/gearing/top speed incomplete. |
+| `2105` | 66.24 | 0.92 / 66.24 | 1980 Lada 2105; engine/gearbox variant unresolved. Four-speed gameplay tuning. |
+| `350z` | 125.28 | 1.74 / 125.28 | 2002 launch identity; representative early VQ35DE 6MT [factory MT][car-z-mt]/[final drive][car-z-fd]. Market/trim/top speed unresolved; 6600 RPM from Canadian brochure in the reverse inventory. |
+| `ae86` | 86.40 | 1.2 / 86.40 | 1983 AE86; [Toyota][car-ae86] establishes five-speed GT baseline. Exact grade/gearing/top speed unresolved; ratios/RPM/radius tuned. |
+| `altis` | 84.24 | 1.17 / 84.24 | 2014 Corolla/Altis: [Toyota][car-altis] documents 4AT, 6MT and CVT alternatives. Representative four-speed gameplay gearing; actual market/trim/transmission/ratios/RPM/top speed unresolved. Radius uses the representative US L tire in the reverse inventory. |
+| `bcnr33` | 111.60 | 1.55 / 111.60 | 1995 BCNR33; selected five-speed baseline. Exact factory ratios and limiter/top speed not verified; gameplay gearing. |
+| `bnr32` | 112.32 | 1.56 / 112.32 | 1989 BNR32; [Nissan][car-r32] verifies five speeds. Representative [factory manual][car-r32-manual] C2/C5 supplies ratios/final drive. Exact 1989 market match, usable redline and top speed unresolved. |
+| `bnr34` | 125.28 | 1.74 / 125.28 | 1999 BNR34; six-speed ratios from [Nissan's 2000 table][car-r34]. Exact 1999 match/redline/limiter/top speed unresolved. |
+| `bugattichiron` | 187.92 | 5.83333 / 420.00 | 2016 Chiron: [factory launch][car-chiron] verifies seven gears and 420 km/h. [Published gear speeds][car-chiron-spec] at 6700 RPM inform approximate ratios; absolute gearbox/final-drive ratios remain unverified. |
+| `carrera_gt` | 147.60 | 4.58333 / 330.00 | 2004 Carrera GT: [Porsche][car-carrera] verifies 330 km/h; [factory sheet][car-carrera-sheet] supplies six ratios, final drive and 8400 RPM. Nominal radius from 335/30ZR20. |
+| `challenger` | 111.60 | 1.55 / 111.60 | 2018 R/T 5.7: [Dodge][car-challenger] verifies standard six-speed ratios/final drive and 5800 RPM. Actual 6MT/8AT and trim-specific top speed unresolved. |
+| `dacia` | 78.48 | 1.09 / 78.48 | Display says 2009 Sandero but TechYear is 1969. Engine/trim/transmission unresolved; five-speed gameplay gearing. [2009 brochure][car-dacia] covers different engines/speeds. |
+| `delorean` | 93.60 | 1.3 / 93.60 | 1981 DMC-12: representative five-speed [factory handbook][car-dmc] ratios/final drive. Actual 5MT/3AT and top speed unresolved; RPM tuned. |
+| `fresh_auto` | 68.40 | 0.95 / 68.40 | 2020 Tsar Zhiga custom drift build: build-specific gearbox, final drive, engine, layout and top speed unresolved. Entire drivetrain is gameplay tuning. |
+| `impreza` | 103.68 | 1.44 / 103.68 | Generic 1992 Impreza: engine/market/trim/gearbox/layout unresolved. Five-speed gameplay tuning; no WRX/STi performance assumed. |
+| `phantom` | 111.60 | 1.55 / 111.60 | 2003 Phantom VII: [manufacturer][car-phantom] verifies six speeds, 240 km/h summer/208 km/h all-season limits. Market/tires unresolved, so old ceiling retained. Representative [ZF ratios][car-zf]; installed variant/final drive/RPM unverified. |
+| `phantomarmored` | 111.60 | 1.55 / 111.60 | 2003 armored Phantom: conversion, transmission, final drive, axle identity, limiter/top speed unresolved. Six-speed gameplay tuning. |
+| `rx-8` | 105.84 | 1.47 / 105.84 | 2003 launch RX-8: representative [2004 US 6MT][car-rx8] ratios/final drive and 9000 RPM. Exact market/6MT versus other gearbox/top speed unresolved; reverse ratio retained from the 2008 factory table in the reverse inventory. |
+| `rx7` | 102.96 | 1.43 / 102.96 | 1985 RX-7 FC: turbo/non-turbo, market and fitted transmission unresolved. Five-speed ratios/RPM/radius and ceiling are gameplay tuning. |
+| `s15` | 111.60 | 1.55 / 111.60 | 1999 S15: representative [spec-R 6MT][car-s15] factory ratios/final drive. Bundled spec-R/spec-S, usable redline and top speed unresolved; RPM/radius tuned. |
+| `silvia_s14` | 126.72 | 1.76 / 126.72 | 1993 S14: K/Q grade, transmission, factory ratios/redline/limiter/top speed unresolved. Five-speed gameplay gearing. |
+| `starion` | 105.84 | 1.47 / 105.84 | ESI-R display name conflicts with introduction-year 1982. Exact year/transmission/gearing/top speed unresolved; five-speed gameplay tuning. |
+| `w123` | 64.08 | 1.91667 / 138.00 | 1976 W123 240D standard 4MT: [Mercedes archive][car-w123] verifies four ratios/final drive and 138 km/h. Full-profile tire radius and usable redline unverified and tuned. |
 
-### End-user driving checks
+The following is the explicit forward transmission and acceleration inventory; reverse ratios,
+radii, pedal response, shift/brake/traction settings remain readable alongside it in each asset.
+A published or representative ratio does not validate the remaining engine tuning.
 
-Use a level solid road, then repeat on a slope and in multiplayer:
+| Definition | Forward ratios (first to top) | Final drive | Idle / redline RPM | Drive force | Drag |
+|---|---|---:|---:|---:|---:|
+| `2102` | 3.75, 2.3, 1.5, 1 | 4.44 | 850 / 5500 | 0.00065 | 0.00525234 |
+| `2105` | 3.67, 2.1, 1.36, 1 | 4.3 | 850 / 5600 | 0.0007 | 0.00430593 |
+| `350z` | 3.794, 2.324, 1.624, 1.271, 1, 0.794 | 3.538 | 750 / 6600 | 0.0021 | 0.00320084 |
+| `ae86` | 3.6, 2.02, 1.38, 1, 0.86 | 4.3 | 900 / 7500 | 0.0014 | 0.00669428 |
+| `altis` | 2.85, 1.55, 1, 0.7 | 4.2 | 750 / 6500 | 0.00105 | 0.00433714 |
+| `bcnr33` | 3.25, 1.95, 1.31, 1, 0.76 | 4.1 | 850 / 8000 | 0.00215 | 0.00443421 |
+| `bnr32` | 3.214, 1.925, 1.302, 1, 0.752 | 4.111 | 850 / 8000 | 0.0021 | 0.00421173 |
+| `bnr34` | 3.827, 2.36, 1.685, 1.312, 1, 0.793 | 3.545 | 850 / 8000 | 0.0022 | 0.00369136 |
+| `bugattichiron` | 3.325, 1.995, 1.496, 1.151, 0.935, 0.767, 0.713 | 3 | 800 / 6700 | 0.004 | 0.00006930 |
+| `carrera_gt` | 3.2, 1.87, 1.36, 1.07, 0.9, 0.75 | 4.44 | 900 / 8400 | 0.0045 | 0.00034252 |
+| `challenger` | 2.97, 2.1, 1.46, 1, 0.74, 0.5 | 3.9 | 750 / 5800 | 0.0023 | 0.00451870 |
+| `dacia` | 3.73, 2.05, 1.39, 1.03, 0.82 | 4.5 | 800 / 6000 | 0.0009 | 0.00411579 |
+| `delorean` | 3.364, 2.059, 1.381, 1.057, 0.8205 | 3.44 | 850 / 6500 | 0.0011 | 0.00376410 |
+| `fresh_auto` | 3.1, 2.25, 1.72, 1.36, 1.1, 0.88 | 4.7 | 950 / 7800 | 0.0035 | 0.03254031 |
+| `impreza` | 3.4, 2.02, 1.44, 1.07, 0.82 | 4.2 | 850 / 6800 | 0.0017 | 0.00411460 |
+| `phantom` | 4.17, 2.34, 1.52, 1.14, 0.87, 0.69 | 3.15 | 650 / 6000 | 0.0018 | 0.00332359 |
+| `phantomarmored` | 4.2, 2.5, 1.65, 1.22, 0.96, 0.75 | 3.2 | 650 / 6000 | 0.0013 | 0.00255608 |
+| `rx-8` | 3.76, 2.27, 1.65, 1.19, 1, 0.84 | 4.44 | 900 / 9000 | 0.0018 | 0.00536628 |
+| `rx7` | 3.45, 2.02, 1.39, 1, 0.76 | 4.1 | 900 / 7500 | 0.0015 | 0.00372219 |
+| `s15` | 3.626, 2.2, 1.541, 1.213, 1, 0.767 | 3.692 | 850 / 7000 | 0.002 | 0.00401146 |
+| `silvia_s14` | 3.3, 1.95, 1.32, 1, 0.76 | 4.1 | 850 / 7000 | 0.0019 | 0.00271635 |
+| `starion` | 3.35, 1.96, 1.36, 1, 0.82 | 3.55 | 850 / 6500 | 0.0016 | 0.00319441 |
+| `w123` | 3.9, 2.3, 1.41, 1 | 3.69 | 750 / 4800 | 0.00042 | 0.00029913 |
 
-1. In an opted-in RWD car, hold W from rest. Listen for smooth RPM/shift changes and verify shifts
-   do not stop the body. Compare top speed against the same existing `Speed` setting.
-2. At forward speed hold S continuously: expect braking, a short near-stop direction dwell, then
-   smooth reverse within the configured ceiling. Press W in reverse: expect braking before forward drive.
-3. Hold W+S at rest and at speed: verify service braking and throttle coexist and reverse never engages.
-   Try W+Space and Space alone at rest/on a slope; the rear brake must remain active with W available.
-4. Compare FWD `altis`, RWD `ae86`, AWD `bnr32`, and unset-layout `impreza`. Watch supported powered
-   wheels during launches/burnouts, then lift the powered axle or jump: no unsupported propulsion or road smoke.
-5. Observe from a second client: check wheel spin, restrained smoke, engine sound, and brake lamps with
-   regular lights on/off. Release each key independently, open a GUI, exit/change pilot, and verify controls clear.
-6. Drive a police car, tracked tank and other excluded vehicle to confirm their controls remain unchanged.
+Drive/drag coefficients target about 99.8% of each configured ceiling through the force balance,
+with full contact, no sideways demand and the active road-RPM gear. That mathematical target does
+not demonstrate acceleration times or in-game terminal speed. Some retained low gameplay ceilings
+are reached before top gear; the higher ratios remain distinct usable ranges, not fictitious equal
+bands forced below the cap. Changing only Speed raises a safety boundary and cannot add engine power.
 
-Compile/static validation does not establish road feel. Shift hunting, low-speed stopping, hill holding,
-burnout intensity, suspension interaction, wheel visual matching and multiplayer smoothing need in-game feedback.
+Compilation and static review do not establish road feel. Gradients, braking distance, shift hunting,
+contact loss, burnout intensity, tire animation, multiplayer interpolation and HUD readability still
+require runtime observation. No game launch or live driving was performed for this change.
+
+[car-z-mt]: https://boredmder.com/FSMs/Nissan/350z/2003/MT.pdf
+[car-z-fd]: https://boredmder.com/FSMs/Nissan/350z/2003/RFD.pdf
+[car-ae86]: https://www.toyota.co.jp/jpn/company/history/75years/vehicle_lineage/car/id60003763/
+[car-altis]: https://pressroom.toyota.com/toyota-2014-corolla-efficiency-driving-dynamics/
+[car-r32]: https://www.nissan-global.com/EN/HERITAGE_COLLECTION/skyline_gt-r_1989.html
+[car-r32-manual]: https://www.scribd.com/doc/4967393/BNR32-Service-Manual-Bookmarked
+[car-r34]: https://global.nissannews.com/en/releases/skyline-and-skyline-gt-r-undergo-minor-model-change
+[car-chiron]: https://newsroom.bugatti.com/press-releases/geneva-international-motor-show-2016
+[car-chiron-spec]: https://bugatti-newsroom.imgix.net/66703700d9bf8f4b7ce9211c/211122_BU_Chiron%20ENG.pdf
+[car-carrera]: https://newsroom.porsche.com/en/2025/history/porsche-25-years-world-premiere-carrera-gt-40609.html
+[car-carrera-sheet]: https://www.ausmotive.com/downloads/Porsche/Carrera-GT-specs.pdf
+[car-challenger]: https://www.media.stellantis.com/uploads/me/ME/2018/Dodge/Technical-sheet/1806_Dodge_Challenger.pdf
+[car-dacia]: https://daciaclubnederland.nl/storage/downloads/netherlands/nl-brochure-dacia-sandero-2009-08.pdf
+[car-dmc]: https://grupomotor.net/descriptions/zss1199_0.6.pdf
+[car-phantom]: https://www.press.bmwgroup.com/south-africa/article/detail/T0129326EN/the-rolls-royce-phantom
+[car-zf]: https://aston1936.com/wp-content/uploads/2018/12/ZF-6HP26-DataSheet.pdf
+[car-rx8]: https://news.mazdausa.com/download/RX-8-Spec-Sheet-Final.pdf
+[car-s15]: https://global.nissannews.com/ja-JP/releases/19990119-e_presskit
+[car-w123]: https://mercedes-benz-publicarchive.com/marsClassic/en/instance/ko/240-D--W-123-D-24-1976---1985.xhtml?oid=5094
 
 ## Earlier drivetrain identity audit
 

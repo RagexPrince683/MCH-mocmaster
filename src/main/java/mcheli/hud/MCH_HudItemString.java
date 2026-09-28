@@ -48,6 +48,14 @@ public class MCH_HudItemString extends MCH_HudItem {
       double hp_per = MCH_HudItem.ac.getMaxHP() > 0?(double)MCH_HudItem.ac.getHP() / (double)MCH_HudItem.ac.getMaxHP():0.0D;
 
       for(int i = 0; i < prm.length; ++i) {
+         if(this.args[i] == MCH_HudItemStringArgs.CAR_GEAR || this.args[i] == MCH_HudItemStringArgs.CAR_RPM) {
+            mcheli.tank.MCH_EntityTank car = MCH_HudItem.ac instanceof mcheli.tank.MCH_EntityTank
+                  && ((mcheli.tank.MCH_EntityTank)MCH_HudItem.ac).hasCarDrivetrain()
+                  ? (mcheli.tank.MCH_EntityTank)MCH_HudItem.ac : null;
+            prm[i] = this.args[i] == MCH_HudItemStringArgs.CAR_RPM ? Float.valueOf(car != null ? car.carDrivetrain.rpm : 0)
+                  : car == null ? "-" : car.carDrivetrain.gear < 0 ? "R" : Integer.toString(car.carDrivetrain.gear);
+            continue;
+         }
          switch(MCH_HudItemString.NamelessClass1090813585.$SwitchMap$mcheliteratedValueIndexhud$MCH_HudItemStringArgs[this.args[i].ordinal()]) {
          case 1:
             prm[i] = MCH_HudItem.ac.getAcInfo().displayName;

@@ -10,6 +10,23 @@ ChaffUseTime = 0
 ; Reverse target 20 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.277778
 CivilianCarDrivetrain = true
+; 2003 armored Phantom; gameplay 6AT; conversion/gearbox/layout/top speed unresolved
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.14
+CarIdleRPM = 650
+CarRedlineRPM = 6000
+CarForwardGears = 6
+CarGearRatios = 4.2, 2.5, 1.65, 1.22, 0.96, 0.75
+CarReverseGearRatio = 3.4
+CarFinalDrive = 3.2
+CarWheelRadius = 0.395
+CarDriveForce = 0.0013
+CarDrag = 0.00255608
+CarLongitudinalGrip = 0.031
+CarShiftTicks = 10
+CarServiceBrake = 0.021
+CarHandbrake = 0.014
 ThrottleDownFactor = 1.60
 ItemID = 30111
 Weight = 7000

@@ -407,3 +407,30 @@ Developer/backend
   with the supported cached Gradle setup; all nine changed/new classes target Java 8 (major 52).
   Source, asset, force-equation, encoding and diff checks passed. No packaging or game launch was done;
   shifts, hill holding, burnout intensity, suspension interaction and multiplayer visuals need feedback.
+
+2026-09-28 00:00 — Finish civilian car force, gearing and instruments
+
+- Traced the reported rapid acceleration/braking to oversized normalized drive/brake demands and
+  equal Speed-based gear bands; the existing tachometers displayed throttle instead of engine RPM.
+  Replaced those demands with ratio/final-drive torque, a bounded gameplay torque curve, wheel-RPM
+  fuel cut and explicit quadratic drag. Speed is the final safety cap, not an acceleration target.
+- Made throttle response, idle/redline, gear count, shift time and both brake settings authoritative
+  in the opt-in server drivetrain. Shifts blend ratios/RPM without clearing momentum; stopped launches
+  and driven-wheel spin affect RPM. S brakes gradually before near-stop reverse, Space supplies held
+  rear brake torque, combined pedals remain available, and brake reaction cannot reverse body travel.
+- Retained existing input packets, server authority, axle selection/contact/slip, brake lights and RPM
+  sound. Added synchronized gear/RPM HUD arguments and RPM tachometers with fallback for shared
+  non-car HUDs. Military/police engines, steering, suspension and collision paths are preserved.
+- Wrote explicit drivetrain values in all 23 supported civilian car assets. Verified and representative
+  factory gearing is distinguished from gameplay tuning; all existing reverse ceilings and
+  ThrottleDownFactor values remain. Corrected Speed unit conversions for the 2016 Chiron (420 km/h),
+  Carrera GT (330 km/h) and standard 1976 W123 240D (138 km/h); the other 20 ceilings remain pending
+  exact variant/speed evidence. Chiron absolute ratios/final drive remain approximate gameplay tuning.
+- Extended only opted-in tank Speed parsing to 8 blocks/tick, resolving the opt-in after all keys;
+  other tanks retain the 4-block/tick parser limit. Added bounded defaults and reload handling for
+  ratios, final drive, tire radius, drive force, drag and longitudinal traction. Updated existing
+  configuration, drivetrain, reverse-speed and HUD documents; deprecated configreference is unused.
+- Existing offline compileJava succeeded twice, including the final source. All six changed production
+  classes target Java 8 (major 52). Static asset/documentation, steady-force and diff audits passed.
+  No tests, packaging, remap/reobfuscation or game launch ran. Driving feel, shifts, braking distance,
+  burnouts, contact/gradient effects, HUD readability and multiplayer behavior remain unobserved.

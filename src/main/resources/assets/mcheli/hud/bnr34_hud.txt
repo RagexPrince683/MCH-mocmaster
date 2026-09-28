@@ -2,13 +2,13 @@
 if = time<=13000
 	; 昼用の計器
 	DrawTexture = bnr34_hud,  144, 21,  64,64,  256,  0, 128,128
-	DrawTexture = bnr34_hud,  168, 21,  16,64,  384,  0,  32,128, Throttle*180-126
+	DrawTexture = bnr34_hud,  168, 21,  16,64,  384,  0,  32,128, (car_drivetrain?car_rpm_norm:throttle)*180-126
 Endif
 
 if = time> 13000
 	; 夜間用の計器
 	DrawTexture = bnr34_hud,  144, 21,  64,64,  256,128, 128,128
-	DrawTexture = bnr34_hud,  168, 21,  16,64,  416,  0,  32,128, Throttle*180-126
+	DrawTexture = bnr34_hud,  168, 21,  16,64,  416,  0,  32,128, (car_drivetrain?car_rpm_norm:throttle)*180-126
 Endif
 
 ; 燃料(Fuel)
@@ -102,3 +102,10 @@ EndIf
 If = auto_pilot==1
 	DrawString = 50, 0, "Auto Pilot"
 Endif
+
+
+; Server synchronized car transmission and engine speed
+If = car_drivetrain
+Color = 0xCFFFFFFF
+DrawString = 84, 118, "Gear %s  %4.0f RPM", CAR_GEAR, CAR_RPM
+EndIf

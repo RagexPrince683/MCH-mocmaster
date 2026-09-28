@@ -10,11 +10,28 @@ ChaffUseTime = 0
 ; Reverse target 30 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.416667
 CivilianCarDrivetrain = true
+; 2016 Chiron: 7 gears, 420 km/h; gameplay ratios derived from published gear speed ranges; final drive unverified
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.3
+CarIdleRPM = 800
+CarRedlineRPM = 6700
+CarForwardGears = 7
+CarGearRatios = 3.325, 1.995, 1.496, 1.151, 0.935, 0.767, 0.713
+CarReverseGearRatio = 3.3
+CarFinalDrive = 3
+CarWheelRadius = 0.35545
+CarDriveForce = 0.004
+CarDrag = 0.00006930
+CarLongitudinalGrip = 0.048
+CarShiftTicks = 3
+CarServiceBrake = 0.03
+CarHandbrake = 0.02
 ThrottleDownFactor = 2.00
 ItemID = 99901
 Weight = 4398
 MaxHp = 200
-Speed = 2.61
+Speed = 5.833333
 Sound = bugattic
 MobilityYawOnGround = 12.0
 ThrottleUpDown = 1.2

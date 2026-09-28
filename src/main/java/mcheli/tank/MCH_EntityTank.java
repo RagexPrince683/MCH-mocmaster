@@ -1206,7 +1206,16 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          // above continues to follow authoritative positions without locally clipping them.
          this.applyCivilianCarReverseSpeedLimit(this.getAcInfo().enableBack && super.throttleBack > 0.0F);
          this.setPosition(super.posX + super.motionX, super.posY + super.motionY, super.posZ + super.motionZ);
-         if(!this.isDestroyed() && (super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0)) {
+         if(this.hasCarDrivetrain()) {
+            double speed = Math.hypot(super.motionX, super.motionZ);
+            if(speed > 0) {
+               double drag = this.carDrivetrain.drag(info, speed,
+                     this.carDrivetrain.frontContact || this.carDrivetrain.rearContact);
+               double scale = Math.max(0, 1.0D - drag / speed);
+               super.motionX *= scale;
+               super.motionZ *= scale;
+            }
+         } else if(!this.isDestroyed() && (super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0)) {
             super.motionX *= 0.95D;
             super.motionZ *= 0.95D;
             this.applyOnGroundPitch(0.95F);
@@ -1351,7 +1360,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // --------------------------------------------------
       float maxSpeed = this.getTankInfo().speed;
 
-      if (afterAccel > maxSpeed) {
+      if (!this.hasCarDrivetrain() && afterAccel > maxSpeed) {
          double scale = maxSpeed / afterAccel;
          super.motionX *= scale;
          super.motionZ *= scale;
@@ -1360,7 +1369,15 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // --------------------------------------------------
       // FRICTION / DRAG
       // --------------------------------------------------
-      if (super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0) {
+      if(this.hasCarDrivetrain()) {
+         if(afterAccel > 0) {
+            double drag = this.carDrivetrain.drag(this.tankInfo, afterAccel,
+                  this.carDrivetrain.frontContact || this.carDrivetrain.rearContact);
+            double scale = Math.max(0, 1.0D - drag / afterAccel);
+            super.motionX *= scale;
+            super.motionZ *= scale;
+         }
+      } else if (super.onGround || MCH_Lib.getBlockIdY(this, 1, -2) > 0) {
          super.motionX *= this.getAcInfo().motionFactor;
          super.motionZ *= this.getAcInfo().motionFactor;
       } else {
@@ -1373,6 +1390,15 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       // --------------------------------------------------
       this.updateWheels();
       this.applyCarLateralGrip();
+      // For the force/drag car model, Speed is only the final safety boundary.
+      if(this.hasCarDrivetrain()) {
+         double speed = Math.hypot(super.motionX, super.motionZ);
+         if(speed > maxSpeed) {
+            double scale = maxSpeed / speed;
+            super.motionX *= scale;
+            super.motionZ *= scale;
+         }
+      }
       // Clamp after drag and the server's final steering/grip heading, before movement.
       this.applyCivilianCarReverseSpeedLimit(canMove && this.getAcInfo().enableBack && super.throttleBack > 0.0F);
       double motionYBeforeMove = super.motionY;

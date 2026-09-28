@@ -10,6 +10,23 @@ ChaffUseTime = 0
 ; Reverse target 25 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.347222
 CivilianCarDrivetrain = true
+; Display says 2009 Sandero, TechYear says 1969; gameplay 5MT; engine/trim unresolved
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.16
+CarIdleRPM = 800
+CarRedlineRPM = 6000
+CarForwardGears = 5
+CarGearRatios = 3.73, 2.05, 1.39, 1.03, 0.82
+CarReverseGearRatio = 3.5
+CarFinalDrive = 4.5
+CarWheelRadius = 0.31075
+CarDriveForce = 0.0009
+CarDrag = 0.00411579
+CarLongitudinalGrip = 0.026
+CarShiftTicks = 10
+CarServiceBrake = 0.02
+CarHandbrake = 0.012
 ThrottleDownFactor = 2.00
 
 ExplosionSizeByCrash = 3

@@ -25,8 +25,16 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    public float carRedlineRpm = 6500.0F;
    public int carForwardGears = 5;
    public int carShiftTicks = 8;
-   public float carServiceBrake = 0.24F;
-   public float carHandbrake = 0.20F;
+   public float carServiceBrake = 0.025F;
+   public float carHandbrake = 0.015F;
+   public float[] carGearRatios = null;
+   public float carReverseGearRatio = 3.2F;
+   public float carFinalDrive = 4.0F;
+   public float carWheelRadius = 0.32F;
+   public float carDriveForce = 0.0015F;
+   public float carDrag = 0.0015F;
+   public float carLongitudinalGrip = 0.03F;
+   private float configuredSpeed = -1.0F;
    /** Explicit axle selection; null is legacy propulsion or axle-neutral with the engine opt-in. */
    public DriveType driveType = null;
 
@@ -86,9 +94,7 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    }
 
    public float getMaxSpeed() {
-      return 4.0F;
-      //does not affect tanks for some reason?
-      //seems to make rot speed faster in third person, absolutely nothing else changes (1.15 max speed cap)
+      return this.civilianCarDrivetrain ? 8.0F : 4.0F;
    }
 
    public int getDefaultMaxZoom() {
@@ -100,7 +106,15 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
    }
 
    public boolean isValidData() throws Exception {
-      double result = (double)super.speed;
+      // Resolve after all keys: a car opt-in may appear after Speed in a content pack.
+      double result = this.configuredSpeed >= 0 ? Math.min(this.configuredSpeed, this.getMaxSpeed()) : super.speed;
+      if(this.carGearRatios == null || this.carGearRatios.length != this.carForwardGears) {
+         this.carGearRatios = new float[this.carForwardGears];
+         for(int i = 0; i < this.carForwardGears; ++i) {
+            this.carGearRatios[i] = this.carForwardGears == 1 ? 1.0F
+                  : (float)(3.5D * Math.pow(0.22D, (double)i / (this.carForwardGears - 1)));
+         }
+      }
       MCH_Config configuration = MCH_MOD.config;
       super.speed = (float)(result * MCH_Config.AllTankSpeed.prmDouble);
       return super.isValidData();
@@ -126,11 +140,36 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
       } else if(item.equalsIgnoreCase("CarShiftTicks")) {
          this.carShiftTicks = (int)carValue(data, 8, 1, 40);
          return;
+      } else if(item.equalsIgnoreCase("CarGearRatios")) {
+         this.carGearRatios = parseCarRatios(data);
+         return;
+      } else if(item.equalsIgnoreCase("CarReverseGearRatio")) {
+         this.carReverseGearRatio = carValue(data, 3.2F, 0.2F, 6.0F);
+         return;
+      } else if(item.equalsIgnoreCase("CarFinalDrive")) {
+         this.carFinalDrive = carValue(data, 4.0F, 1.0F, 8.0F);
+         return;
+      } else if(item.equalsIgnoreCase("CarWheelRadius")) {
+         this.carWheelRadius = carValue(data, 0.32F, 0.2F, 0.6F);
+         return;
+      } else if(item.equalsIgnoreCase("CarDriveForce")) {
+         this.carDriveForce = carValue(data, 0.0015F, 0.0001F, 0.02F);
+         return;
+      } else if(item.equalsIgnoreCase("CarDrag")) {
+         this.carDrag = carValue(data, 0.0015F, 0.00001F, 0.1F);
+         return;
+      } else if(item.equalsIgnoreCase("CarLongitudinalGrip")) {
+         this.carLongitudinalGrip = carValue(data, 0.03F, 0.005F, 0.24F);
+         return;
       } else if(item.equalsIgnoreCase("CarServiceBrake")) {
-         this.carServiceBrake = carValue(data, 0.24F, 0.01F, 0.5F);
+         this.carServiceBrake = carValue(data, 0.025F, 0.001F, 0.5F);
          return;
       } else if(item.equalsIgnoreCase("CarHandbrake")) {
-         this.carHandbrake = carValue(data, 0.20F, 0.01F, 0.5F);
+         this.carHandbrake = carValue(data, 0.015F, 0.001F, 0.5F);
+         return;
+      } else if(item.equalsIgnoreCase("Speed")) {
+         this.configuredSpeed = this.toFloat(data, 0.0F, 8.0F);
+         super.speed = Math.min(this.configuredSpeed, 4.0F);
          return;
       } else if(item.equalsIgnoreCase("CivilianCarGrip")) {
          this.civilianCarGrip = this.toBool(data, false);
@@ -212,6 +251,23 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
       return "tanks";
    }
 
+   private static float[] parseCarRatios(String data) {
+      String[] values = data.split(",", -1);
+      if(values.length < 1 || values.length > 8) return null;
+      float[] ratios = new float[values.length];
+      try {
+         for(int i = 0; i < values.length; ++i) {
+            float ratio = Float.parseFloat(values[i].trim());
+            if(Float.isNaN(ratio) || Float.isInfinite(ratio) || ratio < 0.2F || ratio > 6.0F
+                  || i > 0 && ratio >= ratios[i - 1]) return null;
+            ratios[i] = ratio;
+         }
+      } catch(NumberFormatException ex) {
+         return null;
+      }
+      return ratios;
+   }
+
    private static float carValue(String data, float fallback, float min, float max) {
       try {
          float value = Float.parseFloat(data.trim());
@@ -233,8 +289,16 @@ public class MCH_TankInfo extends MCH_BaseVehicleInfo {
       this.carRedlineRpm = 6500.0F;
       this.carForwardGears = 5;
       this.carShiftTicks = 8;
-      this.carServiceBrake = 0.24F;
-      this.carHandbrake = 0.20F;
+      this.carServiceBrake = 0.025F;
+      this.carHandbrake = 0.015F;
+      this.carGearRatios = null;
+      this.carReverseGearRatio = 3.2F;
+      this.carFinalDrive = 4.0F;
+      this.carWheelRadius = 0.32F;
+      this.carDriveForce = 0.0015F;
+      this.carDrag = 0.0015F;
+      this.carLongitudinalGrip = 0.03F;
+      this.configuredSpeed = -1.0F;
       this.civilianCarGrip = false;
       this.driveType = null;
       this.civilianCarReverseSpeed = 0.0F;

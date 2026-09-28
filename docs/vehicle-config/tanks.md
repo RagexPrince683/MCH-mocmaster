@@ -11,13 +11,20 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 | `WeightType` | enum `normal`, `car`, `tank` | `normal` / 0 | Parser maps `car` to 1 and `tank` to 2; any other text is 0. |
 | `CivilianCarGrip` | boolean | `false` | Explicit civilian passenger-car grip and steering opt-in, independent of `WeightType` and `Category`. |
 | `CivilianCarDrivetrain` | boolean | `false` | Explicit passenger-car engine, automatic gears, longitudinal slip, and separate service/handbrake opt-in. Independent of grip, weight, category and `DriveType`. |
-| `CarThrottleResponse` | float[0.05..1], fraction/tick | 0.25 | Pedal response toward full/released throttle, at 20 Hz. |
-| `CarIdleRPM` | float[500..2000], RPM | 800 | Gameplay idle engine speed. |
-| `CarRedlineRPM` | float[3000..12000], RPM | 6500 | Gameplay redline; wheel-speed governor softens engine torque above the current gear's band. |
-| `CarForwardGears` | integer[1..8] | 5 | Automatic forward gear count; reverse is a separate gear. |
-| `CarShiftTicks` | integer[1..40], ticks | 8 | Torque ratio blend duration; default 0.4 seconds. No velocity reset or shift pause. |
-| `CarServiceBrake` | float[0.01..0.5], blocks/tick² equivalent wheel torque | 0.24 | Total service brake demand, distributed across all configured wheels. Contact/traction bounds body force. |
-| `CarHandbrake` | float[0.01..0.5], blocks/tick² equivalent wheel torque | 0.20 | Separate rear-axle brake demand while Space is held, including at rest. |
+| `CarThrottleResponse` | float[0.05..1], fraction/tick | 0.25 | Pedal and released drive demand approach the target at 20 Hz; does not set body speed. |
+| `CarIdleRPM` | float[500..2000], RPM | 800 | Running idle and launch clutch/converter RPM floor. |
+| `CarRedlineRPM` | float[3000..12000], RPM | 6500 | Engine ceiling, gear speed ranges, shift thresholds and wheel-speed fuel cut. |
+| `CarForwardGears` | integer[1..8] | 5 | Ratio list must have exactly this many descending entries. |
+| `CarGearRatios` | comma-separated float[0.2..6], strictly descending | generated | First through top gear. Invalid/count-mismatched lists use geometric gameplay ratios from 3.5 to 0.77; one gear uses 1.0. |
+| `CarReverseGearRatio` | float[0.2..6] | 3.2 | Positive reverse ratio; selected direction supplies the sign. |
+| `CarFinalDrive` | float[1..8] | 4.0 | Multiplies wheel demand and wheel-to-engine RPM coupling. |
+| `CarWheelRadius` | float[0.2..0.6], metres | 0.32 | Nominal driven tire radius for RPM/gearing, independent of grip metadata and visual scale. Unverified radii are gameplay tuning. |
+| `CarDriveForce` | float[0.0001..0.02], blocks/tick² per unit overall ratio | 0.0015 | Peak normalized drive demand before gearing, throttle, torque curve, shift reduction and fuel cut. Gameplay tuning, not newtons or measured engine torque. |
+| `CarDrag` | float[0.00001..0.1], inverse blocks | 0.0015 | Quadratic horizontal deceleration coefficient; replaces `MotionFactor` in this engine path. |
+| `CarLongitudinalGrip` | float[0.005..0.24], blocks/tick² | 0.03 | Full-wheel-set traction budget, apportioned by support after reserving existing lateral grip; does not change steering/suspension. |
+| `CarShiftTicks` | integer[1..40], ticks | 8 | Ratio/RPM blend and reduced drive torque during a shift; default 0.4 s. Retains vehicle momentum. |
+| `CarServiceBrake` | float[0.001..0.5], blocks/tick² equivalent wheel torque | 0.025 | S demand distributed across all configured wheels; body deceleration is contact/traction limited. |
+| `CarHandbrake` | float[0.001..0.5], blocks/tick² equivalent wheel torque | 0.015 | Separate rear-axle brake demand while Space is held, including at rest. |
 | `DriveType` | enum `FWD`, `RWD`, `AWD` | unset | Front, rear, or both axles supply drive torque/traction. Case-insensitive; unset/invalid keeps legacy thrust without `CivilianCarDrivetrain`, or uses axle-neutral propulsion with it. |
 | `CivilianCarReverseSpeed` | float[0..4], blocks/tick | 0 | Explicit civilian reverse-control opt-in, independent of grip/weight/category. Positive values cap powered backward horizontal movement. Zero, omitted, malformed, NaN or infinity preserves legacy behavior. Finite values are clamped to the range. |
 | `EnableBrakeLights` | boolean | `false` | Enables brake-light rendering for this vehicle. This is an independent opt-in and does not infer a civilian car from `CivilianCarGrip`, weight, or category. |
@@ -49,57 +56,80 @@ Civilian car grip uses wheel collision support adjusted for the invisible wheel 
 
 ### Civilian car drivetrain
 
-`CivilianCarDrivetrain = true` selects the new server-owned passenger-car engine/transmission and
-longitudinal wheel-speed model. All eight settings above are gameplay defaults, not specifications
-inferred from a car name. Malformed/nonfinite numeric settings use their documented defaults;
-finite values clamp to their ranges (integer settings truncate after clamping). Removed settings reset
-on reload. Omission preserves the existing engine/brake path, including any separately configured
-`DriveType`, grip, reverse ceiling and lamp behavior.
+`CivilianCarDrivetrain = true` selects the server engine/transmission and longitudinal wheel state.
+All 23 supported passenger definitions explicitly configure these fields in the authoritative
+`src/main/resources/assets/mcheli/tanks/` assets. The deprecated `configreference` directory is not
+used. Published gearing and gameplay tuning are distinguished in each asset and the
+[car inventory](../car-tire-grip.md#bundled-drivetrain-values-and-speed-audit).
 
-W supplies engine throttle; S service-brakes forward motion, then selects reverse after four consecutive
-ticks within 0.025 blocks/tick longitudinal and 0.06 blocks/tick horizontal speed. W brakes backward
-motion before selecting forward drive. W+S always supplies throttle and service braking and cannot
-select reverse. Space independently brakes the rear wheels without suppressing either pedal key.
-S and Space still illuminate opted-in brake lamps, including S during powered reverse; lamps do not
-control physical brake torque. Leaving the pilot seat, changing pilot, entering a GUI, or ending control
-releases inputs. Engine shutdown/fuel loss also releases drive and brake inputs.
-Steering retains its existing force/yaw limits; the direction sign uses actual forward/backward motion
-rather than engine throttle, which now rises in both gears. Braking with S while still moving forward
-therefore keeps forward steering, and W while braking backward motion keeps reverse steering.
+Malformed/nonfinite scalar settings use the defaults above; finite values clamp to their ranges
+(integer settings truncate). Invalid, non-descending or count-mismatched ratio lists use generated
+ratios. Removed fields restore defaults on reload. Omission preserves the legacy engine/brake path
+and independent grip, reverse, axle and lamp opt-ins.
 
-Forward gears divide the configured `Speed` into equal gameplay bands, upshifting at 88% of the current
-band and downshifting below 65% of the preceding band; shifts blend ratios from 3.0 in first to 1.0 in
-top gear. A one-gear setup uses 1.0. At rest the transmission returns to first; reverse uses 1.0.
-Shifts never clear momentum. RPM follows powered wheel speed and pedal demand between idle and
-redline; an above-band soft torque governor limits sustained wheel overspeed. `Speed` still bounds
-vehicle speed, `CivilianCarReverseSpeed` still bounds powered reverse, and `ThrottleDownFactor`
-still scales reverse torque (the old steady demand, bounded to 0.1). These fields are unchanged in
-bundled definitions. Gear ratios, inertia, RPM and brake torques make no manufacturer accuracy claim.
+W supplies throttle: `throttle += (pedal-throttle)*CarThrottleResponse` each tick. Release decays
+remaining drive demand through the same response. S cuts forward drive and service-brakes forward
+motion, selecting reverse only after four consecutive ticks below 0.025 blocks/tick longitudinal
+and 0.06 blocks/tick horizontal speed (1.8 and 4.32 km/h). W brakes backward motion before selecting
+forward. W+S combines throttle and service braking without requesting reverse. Space supplies rear
+brake torque while held and keeps both pedals available. Brakes oppose wheel rotation even at rest;
+combined pedals cannot brake the body through zero into opposite travel. S and Space still illuminate
+opted-in lamps, including S in reverse. Pilot/control loss, GUI entry, fuel loss and shutdown release inputs.
 
-`DriveType` selects which axles receive engine torque. If it is absent/invalid, this opt-in uses all
-configured wheels equally without assigning a drivetrain identity. Front/rear wheel surface speeds
-integrate drive torque, independently opposed by service and rear handbrake torque. Contact reaction
-is bounded by the existing 0.24 blocks/tick² longitudinal budget, with the existing lateral demand
-reserved first. Unsupported wheels can spin but cannot propel/brake the body; missing wheels keep
-their configured denominator. Braking at rest opposes drive torque rather than relying on motion.
-Excess wheel torque becomes longitudinal spin; brake-only body force cannot push motion through zero.
-For an axle with `n` configured wheels out of `T`, gameplay inverse wheel inertia is `k = 4*T/n`.
-Its surface speed first receives `driveDemand*k`; brake demand opposes that speed without reversing it.
-Free tire reaction is `(wheelSurfaceSpeed - bodyLongitudinalSpeed)/(k+1)`, clamped to the axle's
-remaining traction. Reaction accelerates the body and subtracts `reaction*k` from wheel surface speed.
-Unused brake torque holds a stopped wheel against that reaction, so brakes also work at low speed/rest.
-Wheel surface speed is bounded to ±8 blocks/tick; spin is the excess magnitude over the resulting body
-speed divided by `max(0.1, abs(bodySpeed))`, bounded to 3 for synchronization/effects.
-Engine force is horizontal; the new path omits the old pitch-linked vertical thrust while preserving
-gravity, drag, suspension, lateral grip, steering, collision and speed clamps.
+For ratio `G`, final drive `F`, tire radius `r`, and wheel surface speed `v`,
+`wheelRPM = abs(v)*1200*G*F/(2*pi*r)`. A gear's nominal redline road speed is
+`CarRedlineRPM*2*pi*r/(1200*G*F)`. Each descending ratio therefore supplies less wheel torque and
+a higher speed range. `Speed` does not define gear bands or supply thrust. With W and neither brake
+held, road RPM upshifts at 88% of redline; it downshifts below 30% only if the preceding gear would
+remain below 70%. The box returns to first near rest. Road RPM chooses gears so stationary burnouts
+and airborne spin do not race through the transmission.
 
-Three changed-only tank DataWatcher integers synchronize RPM, throttle, gear, both brake states,
-engine-running state, axle surface speeds, spin slip and axle contact. Clients smooth sound pitch/volume
-and independently animate each axle using the existing `PartWheelRot` visual scale. Supported powered
-axles emit at most one small smoke puff every four ticks when excess wheel speed exceeds 0.12
-blocks/tick and normalized spin exceeds 0.35; air-spinning wheels produce no road smoke. This is a
-gameplay surface-speed/inertia model, not a differential, load-transfer or measured tire simulation.
-See [the civilian opt-in list and driving checks](../car-tire-grip.md#engine-gears-brakes-and-longitudinal-slip).
+A shift changes the active gear immediately, blends the previous ratio into the new ratio over
+`CarShiftTicks`, and recovers drive torque from 25% toward full. It never writes body velocity.
+Engine RPM follows the blended ratio and powered-wheel surface speed, smoothed by 0.3/tick.
+A gameplay slipping launch clutch/converter supplies a floor
+`idle+(redline-idle)*throttle*0.4`, so RPM responds at a stop against brakes. Wheel spin can raise RPM
+independently of road speed.
+
+Forward demand is `CarDriveForce*G*F*throttle*torqueCurve*shiftFactor*fuelCut`. The gameplay curve
+rises from 0.7 toward 1.0 at half redline, then falls to 0.75 at redline. Wheel-RPM fuel cut tapers from
+full at 95% to zero at 103% of redline. Reverse multiplies the same demand by
+`-ThrottleUpDown*ThrottleDownFactor/2.4`; existing bundled factors are preserved. The reverse
+wheel-speed governor and absolute `CivilianCarReverseSpeed` ceiling remain separate.
+
+`DriveType` selects powered axles; unset/invalid uses all configured wheels equally without assigning
+an identity. Axles receive their configured share of engine/service brake demand; Space adds rear
+braking. Existing collision support and lateral-first reservation bound road reaction, scaled to
+`CarLongitudinalGrip`. Unsupported wheels spin without propelling/braking the body; missing wheels
+retain their configured denominator. Excess torque becomes powered-wheel slip. Combined pedals
+can create restrained launches/burnouts where torque exceeds available traction and brake torque;
+a strong held rear brake can instead lock powered rear wheels.
+
+For an axle with `n` configured wheels out of `T`, inverse gameplay inertia is `k=4*T/n`.
+Drive adds `driveDemand*k` to surface speed; braking opposes rotation without reversing it.
+Reaction `(wheelSpeed-bodySpeed)/(k+1)` is traction limited, accelerates the body, and subtracts
+`reaction*k` from wheel speed. Unused brake torque holds a stopped wheel against road reaction.
+Wheel speed remains bounded to ±8 blocks/tick. This is gameplay inertia, not measured differential,
+load-transfer or tire dynamics.
+
+After engine/contact force, horizontal drag removes
+`CarDrag*horizontalSpeed^2 + 0.00015` blocks/tick of speed; the rolling term requires wheel support.
+Drag cannot reverse motion. Bundled coefficients balance sustained drive near 99.8% of the configured
+ceiling on a straight, fully supported level road. This is an equation-based tuning target, not an
+observed road result; slip, cornering, gradients and contact loss change it. `Speed` is then the final
+horizontal safety cap before movement. Opted-in car definitions accept up to 8 blocks/tick; other
+tanks retain their 4-block/tick parser limit, independent of key order. `AllTankSpeed` scales the safety
+cap; raising it alone cannot add engine power or raise force/drag terminal speed. Retune force/drag/
+gearing for another desired road speed. Other tanks retain `MotionFactor`. Client extrapolation uses
+car drag between server updates. Gravity, steering, suspension and collision retain their existing paths.
+
+Three existing tank DataWatcher integers synchronize throttle, RPM, gear, brake states, running state,
+axle speeds, slip and contact. Existing sound follows smoothed RPM; each axle animates its wheel
+surface speed through `PartWheelRot`. Supported powered spin above 0.12 blocks/tick and normalized
+slip 0.35 emits restrained smoke; unsupported spin emits none. Bundled car HUDs show the forward
+gear or `R` plus RPM, with RPM-driven tachometers. Non-car uses retain throttle needles.
+HUD expressions expose `car_drivetrain`, `car_gear`, `car_rpm`, `car_rpm_norm`; string arguments
+`CAR_GEAR` (`%s`) and `CAR_RPM` (`%4.0f`) use synchronized server state.
 
 The following `DriveType`-only rules describe the legacy engine path when
 `CivilianCarDrivetrain` is omitted/false:
@@ -232,6 +262,6 @@ AddTrackHitBox = -1.2, 0.0, 0.0, 0.5, 0.5, 1.0
 
 ## Safe-to-omit notes
 
-`WeightType`, `WeightedCenterZ`, `TrackMaxHP`, `AddTrackHitBox`, `EnableTurretPop`, `EnableBrakeLights`, `DriveType`, `CivilianCarReverseSpeed`, and `LWR` are optional. Omitting `DriveType` keeps legacy propulsion. Omitting `CivilianCarReverseSpeed` keeps legacy reverse controls and speed limiting; a separately configured `DriveType` can still limit reverse traction. Omitting `EnableTurretPop` keeps the turret attached when the tank is destroyed. Omitting `EnableBrakeLights` disables the brake-light pass. Omitting `LWR` leaves tank alert audio disabled; omitting the other keys leaves default ground behavior and no explicit track hitboxes.
+`WeightType`, `WeightedCenterZ`, `TrackMaxHP`, `AddTrackHitBox`, `EnableTurretPop`, `EnableBrakeLights`, `DriveType`, `CivilianCarReverseSpeed`, and `LWR` are optional. Without the engine opt-in, omitting `DriveType` keeps legacy propulsion and omitting `CivilianCarReverseSpeed` keeps legacy reverse controls/limiting. With the engine opt-in, missing `DriveType` uses axle-neutral wheel propulsion and missing reverse speed leaves the gear/RPM governor plus `Speed` safety cap. Omitting `EnableTurretPop` keeps the turret attached when destroyed. Omitting `EnableBrakeLights` disables the brake-light pass. Omitting `LWR` leaves tank alert audio disabled; other omitted keys retain default ground behavior and no explicit track hitboxes.
 
 `EnableTurretPop = true` enables a catastrophic destruction effect which launches the exact `$turret` model group and the main (`weapon0`) gun's configured child parts off the chassis. Models without `$turret` skip the effect safely; geometry baked into `$body` cannot be detached.

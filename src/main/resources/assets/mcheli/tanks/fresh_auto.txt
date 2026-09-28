@@ -11,6 +11,23 @@ ChaffUseTime = 0
 ; Reverse target 20 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.277778
 CivilianCarDrivetrain = true
+; Custom Tsar Zhiga drift build; entire drivetrain is gameplay tuning; build specs/layout unresolved
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.3
+CarIdleRPM = 950
+CarRedlineRPM = 7800
+CarForwardGears = 6
+CarGearRatios = 3.1, 2.25, 1.72, 1.36, 1.1, 0.88
+CarReverseGearRatio = 3.1
+CarFinalDrive = 4.7
+CarWheelRadius = 0.31
+CarDriveForce = 0.0035
+CarDrag = 0.03254031
+CarLongitudinalGrip = 0.032
+CarShiftTicks = 5
+CarServiceBrake = 0.024
+CarHandbrake = 0.013
 ThrottleDownFactor = 1.50
 MaxHp = 200
 Speed = 0.95

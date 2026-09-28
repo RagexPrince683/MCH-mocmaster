@@ -9,6 +9,23 @@ ChaffUseTime = 0
 ; Reverse target 70 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.972222
 CivilianCarDrivetrain = true
+; Representative launch US RX-8 6MT factory ratios/RPM; exact market/transmission/top speed unresolved
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.24
+CarIdleRPM = 900
+CarRedlineRPM = 9000
+CarForwardGears = 6
+CarGearRatios = 3.76, 2.27, 1.65, 1.19, 1, 0.84
+CarReverseGearRatio = 3.564
+CarFinalDrive = 4.44
+CarWheelRadius = 0.32985
+CarDriveForce = 0.0018
+CarDrag = 0.00536628
+CarLongitudinalGrip = 0.03
+CarShiftTicks = 6
+CarServiceBrake = 0.024
+CarHandbrake = 0.014
 ThrottleDownFactor = 4.20
 MaxHp = 200
 ThrottleUpDown = 0.86

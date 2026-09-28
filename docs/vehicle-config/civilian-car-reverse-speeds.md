@@ -8,8 +8,11 @@ The later `CivilianCarDrivetrain` opt-in replaces throttle/brake sequencing for 
 passenger definitions while retaining every ceiling and `ThrottleDownFactor` in this inventory.
 See [engine, gears and brakes](tanks.md#civilian-car-drivetrain) and the
 [current opt-in list](../car-tire-grip.md#engine-gears-brakes-and-longitudinal-slip).
-The two police definitions retain the earlier controls. Reverse gear/RPM in the new model uses
-documented gameplay defaults; the research below does not establish its real transmission ratios.
+The two police definitions retain the earlier controls. The engine now uses explicit per-car ratios
+and RPM; published forward gearing and unresolved variants appear in the
+[drivetrain inventory](../car-tire-grip.md#bundled-drivetrain-values-and-speed-audit).
+The original reverse ceilings/factors below remain unchanged. Representative reverse calculations
+do not establish the exact bundled transmission or prove a forward top speed.
 
 ## Inventory and identity
 
@@ -80,7 +83,7 @@ A dash in the input discussion means unverified, not zero.
 | `2102.txt` | Representative 1971 VAZ-2102 1.2 estate, 4MT | Historic 6.45-13 / 165-13 fitment appears in the reproduced operating instructions. Exact 1971 gearbox, tire circumference and rpm ceiling remain unverified. | 20 | Estimate; [operating instructions reproduction][2102] | 20/72 | 0.277778 | 1.60 |
 | `w123.txt` | 1976 Mercedes-Benz W123 240D sedan, standard 4MT | 175 SR14 88S; reverse 3.66, final drive 3.69 for pre-09/1980 manual. No inferred aspect ratio; 4200 rpm is peak power, not documented governor speed. | 25 | Estimate; [Mercedes-Benz factory archive][w123] | 25/72 | 0.347222 | 2.00 |
 | `dacia.txt` | 2009 Dutch Sandero 1.4 MPI 75, 5MT | 185/65R15 in manufacturer brochure p.11. Reverse ratio/final drive/limiter not provided. Display name says 2009 Sandero but `TechYear = 1969` is inconsistent. | 25 | Estimate; [Dacia 2009 brochure (club mirror)][dacia] | 25/72 | 0.347222 | 2.00 |
-| `bnr32.txt` | 1989 JDM Skyline GT-R BNR32, standard 5MT | 225/50R16 factory heritage fitment. Complete gear/final-drive/redline evidence set not verified; no V-Spec tire assumption. | 35 | Estimate; [Nissan heritage][bnr32] | 35/72 | 0.486111 | 2.40 |
+| `bnr32.txt` | 1989 JDM Skyline GT-R BNR32, standard 5MT | 225/50R16 factory heritage fitment. Representative R32 manual gearing/final drive is now recorded in the [drivetrain inventory](../car-tire-grip.md#bundled-drivetrain-values-and-speed-audit); exact market match and usable reverse RPM/limiter remain unverified. No V-Spec tire assumption. | 35 | Estimate; [Nissan heritage][bnr32] | 35/72 | 0.486111 | 2.40 |
 | `bnr34.txt` | 1999 JDM Skyline GT-R BNR34, Getrag 6MT | 245/40ZR18 factory table. Six-speed identity documented by Nissan; complete reverse gearing/limiter set not verified. | 40 | Estimate; [Nissan tire table][bnr34], [Nissan GT-R history brochure][gtr-history] | 40/72 | 0.555556 | 2.60 |
 | `altis.txt` | Representative 2014 US Corolla L 1.8, 4AT; Altis market/trim unresolved | P195/65R15 documented for US L in Toyota brochure. Toyota documents 6MT, 4AT and CVTi-S alternatives; the 4AT is explicitly selected. Reverse gearing/limiter for chosen 4AT unverified. | 25 | Estimate; [Toyota transmission release][altis], [Toyota US brochure (mirror)][altis-tires] | 25/72 | 0.347222 | 2.00 |
 | `bcnr33.txt` | 1995 JDM Skyline GT-R BCNR33, standard 5MT | Existing 245/45ZR17 fitment supported by tire specialist's guide; OEM catalog identifies 5MT. No NISMO 400R/LM or prototype gearing/tires assumed. Complete reverse calculation data unverified. | 35 | Estimate; [Nissan OEM catalog reproduction][bcnr33], [Longstone fitment guide][bcnr33-tires] | 35/72 | 0.486111 | 2.40 |

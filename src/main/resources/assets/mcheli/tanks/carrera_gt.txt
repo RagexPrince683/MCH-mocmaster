@@ -11,9 +11,26 @@ ChaffUseTime = 0
 ; Reverse target 88 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 1.222222
 CivilianCarDrivetrain = true
+; 2004 Carrera GT: factory 6MT ratios and 330 km/h; force/drag/response/brakes are gameplay tuning
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.26
+CarIdleRPM = 900
+CarRedlineRPM = 8400
+CarForwardGears = 6
+CarGearRatios = 3.2, 1.87, 1.36, 1.07, 0.9, 0.75
+CarReverseGearRatio = 2.86
+CarFinalDrive = 4.44
+CarWheelRadius = 0.3545
+CarDriveForce = 0.0045
+CarDrag = 0.00034252
+CarLongitudinalGrip = 0.038
+CarShiftTicks = 5
+CarServiceBrake = 0.028
+CarHandbrake = 0.017
 ThrottleDownFactor = 4.60
 MaxHp = 200
-Speed = 2.05
+Speed = 4.583333
 Sound = porsche_meighty
 MobilityYawOnGround = 11.0
 ThrottleUpDown = 0.98

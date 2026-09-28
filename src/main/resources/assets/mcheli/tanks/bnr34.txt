@@ -10,6 +10,23 @@ ChaffUseTime = 0
 ; Reverse target 40 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.555556
 CivilianCarDrivetrain = true
+; R34 6MT ratios verified in Nissan 2000 table; 1999 match/top speed unresolved
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.24
+CarIdleRPM = 850
+CarRedlineRPM = 8000
+CarForwardGears = 6
+CarGearRatios = 3.827, 2.36, 1.685, 1.312, 1, 0.793
+CarReverseGearRatio = 3.28
+CarFinalDrive = 3.545
+CarWheelRadius = 0.3266
+CarDriveForce = 0.0022
+CarDrag = 0.00369136
+CarLongitudinalGrip = 0.033
+CarShiftTicks = 6
+CarServiceBrake = 0.026
+CarHandbrake = 0.015
 ThrottleDownFactor = 2.60
 ItemID = 30034
 Weight = 3200

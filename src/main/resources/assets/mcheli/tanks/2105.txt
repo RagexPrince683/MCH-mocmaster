@@ -10,6 +10,23 @@ ChaffUseTime = 0
 ; Reverse target 20 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.277778
 CivilianCarDrivetrain = true
+; 1980 Lada 2105; gameplay gearing/force/RPM; engine/gearbox variant unresolved
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.16
+CarIdleRPM = 850
+CarRedlineRPM = 5600
+CarForwardGears = 4
+CarGearRatios = 3.67, 2.1, 1.36, 1
+CarReverseGearRatio = 3.5
+CarFinalDrive = 4.3
+CarWheelRadius = 0.288
+CarDriveForce = 0.0007
+CarDrag = 0.00430593
+CarLongitudinalGrip = 0.026
+CarShiftTicks = 12
+CarServiceBrake = 0.02
+CarHandbrake = 0.011
 ThrottleDownFactor = 1.60
 ItemID = 300341
 Weight = 3200

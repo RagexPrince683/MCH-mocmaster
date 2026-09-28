@@ -16,6 +16,14 @@ The HUD text file owns author metadata and original coordinates. User changes ne
 
 Parsed identities contain the root HUD, nested call path (including the call source line), source HUD, source line, directive, duplicate ordinal, and optional stable group ID. This keeps repeated and nested `Call` instances independent. Resolution prefers an exact ID, then an unambiguous fingerprint in the same source HUD; ambiguous stale entries are retained but not applied.
 
+## Civilian car instruments
+
+Car expressions expose `car_drivetrain` (0/1), `car_gear` (-1 reverse, 1..N forward),
+`car_rpm` and `car_rpm_norm` (RPM/redline). `DrawString` arguments `CAR_GEAR` and `CAR_RPM`
+format synchronized gear with `%s` (R or its forward number) and RPM with `%4.0f`.
+Gate car-only instruments with `If = car_drivetrain`. Bundled tachometers use
+`car_drivetrain?car_rpm_norm:throttle` so shared HUDs preserve other vehicles' needles.
+
 ## Scaling and multi-selection
 
 In the direct HUD editor, right-click movable elements to add or remove them from an ordered selection; right-click empty space to clear it. Left-click any selected element and drag to move the entire selection without changing the spacing between elements. Left-clicking an unselected element replaces the selection. Arrow keys move the selection by one pixel, or five while Shift is held.

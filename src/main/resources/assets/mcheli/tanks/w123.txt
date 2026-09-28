@@ -9,10 +9,27 @@ ChaffUseTime = 0
 ; Reverse target 25 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.347222
 CivilianCarDrivetrain = true
+; 1976 W123 240D standard 4MT: factory ratios and 138 km/h; radius/redline/force/brakes are gameplay tuning
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.12
+CarIdleRPM = 750
+CarRedlineRPM = 4800
+CarForwardGears = 4
+CarGearRatios = 3.9, 2.3, 1.41, 1
+CarReverseGearRatio = 3.66
+CarFinalDrive = 3.69
+CarWheelRadius = 0.315
+CarDriveForce = 0.00042
+CarDrag = 0.00029913
+CarLongitudinalGrip = 0.024
+CarShiftTicks = 12
+CarServiceBrake = 0.019
+CarHandbrake = 0.011
 ThrottleDownFactor = 2.00
 MaxHp = 200
 ThrottleUpDown = 0.81
-Speed = 0.89
+Speed = 1.916667
 MobilityYawOnGround = 6.5
 StepHeight = 1.2
 Sound = wonetwothree

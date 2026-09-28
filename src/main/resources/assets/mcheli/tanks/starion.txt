@@ -10,6 +10,23 @@ ChaffUseTime = 0
 ; Reverse target 30 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.416667
 CivilianCarDrivetrain = true
+; Starion ESI-R name conflicts with 1982 TechYear; gameplay 5MT ratios/RPM; exact year/speed unresolved
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.22
+CarIdleRPM = 850
+CarRedlineRPM = 6500
+CarForwardGears = 5
+CarGearRatios = 3.35, 1.96, 1.36, 1, 0.82
+CarReverseGearRatio = 3.3
+CarFinalDrive = 3.55
+CarWheelRadius = 0.315
+CarDriveForce = 0.0016
+CarDrag = 0.00319441
+CarLongitudinalGrip = 0.028
+CarShiftTicks = 8
+CarServiceBrake = 0.023
+CarHandbrake = 0.013
 ThrottleDownFactor = 2.40
 ItemID = 28745
 Weight = 3200

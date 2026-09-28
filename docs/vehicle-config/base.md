@@ -40,8 +40,8 @@ Applies to planes, helicopters, tanks, turret/static weapons, ships, and any oth
 
 | Key | Type/range | Default | Practical tuning notes |
 |---|---:|---:|---|
-| `speed` | float[0..family max] | 0.1 | Family global multipliers are applied during validation. Plane/tank max is 4, ship max is 1.8. |
-| `MotionFactor` | float[0..1] | 0.96; plane constructor 0.97 | Per-tick horizontal damping after acceleration. Higher values retain more speed. |
+| `speed` | float[0..family max] | 0.1 | Family global multipliers are applied during validation. Plane/tank max is 4, ship max is 1.8; opted-in civilian car tanks accept 8. Car `Speed` is a final safety cap; force/drag/gearing determine road performance. |
+| `MotionFactor` | float[0..1] | 0.96; plane constructor 0.97 | Per-tick horizontal damping after acceleration. Opted-in car engines use `CarDrag` instead. Higher legacy values retain more speed. |
 | `gravity` | float[-50..50] | -0.04 | Vertical acceleration in air. |
 | `gravityinwater` | float[-50..50] | -0.04 | Vertical acceleration while in water. |
 | `NewFlightGravity` / `FlightGravity` / `GravityOverride` | float[0..1] | global `NewFlightGravity` | Per-vehicle downward acceleration override for new-flight-model aircraft only. Omit to use the global config default. |
@@ -56,7 +56,7 @@ Applies to planes, helicopters, tanks, turret/static weapons, ships, and any oth
 | `throttleupdown` | float[0..3] | 1 | Pilot throttle step multiplier. |
 | `ThrottleUpDownOnEntity` | float[0..100000] | 2 | Throttle multiplier when moving on a carried/ridden entity. |
 | `EnableBack` | boolean | false | Enables reverse throttle/backing behavior. |
-| `ThrottleDownFactor` | float[0..10] | 1 | Tank reverse throttle buildup multiplier: `0.0025 * ThrottleUpDown * ThrottleDownFactor` per control tick. Does not set reverse top speed or change forward braking. See [tank reverse controls](tanks.md#civilian-car-reverse-controls). |
+| `ThrottleDownFactor` | float[0..10] | 1 | Legacy tank reverse throttle buildup: `0.0025 * ThrottleUpDown * ThrottleDownFactor` per tick. Opted-in car engines use it as a reverse drive-force multiplier. Does not set reverse top speed or change forward braking. See [tank reverse controls](tanks.md#civilian-car-reverse-controls). |
 | `PivotTurnThrottle` | float[0..1] | 0 | If turning on the ground below this throttle, code can auto-raise throttle for pivot turning. |
 | `CanMoveOnGround` / `CanRotOnGround` | boolean | true | Gates ground movement/yaw. |
 | `ongroundpitch` | float[-90..90] | 0 | Parser stores the negative value. |

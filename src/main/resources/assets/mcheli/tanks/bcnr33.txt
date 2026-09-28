@@ -10,6 +10,23 @@ ChaffUseTime = 0
 ; Reverse target 35 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.486111
 CivilianCarDrivetrain = true
+; 1995 BCNR33 5MT; gameplay ratios/force/RPM; factory gearing and speed not verified
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.23
+CarIdleRPM = 850
+CarRedlineRPM = 8000
+CarForwardGears = 5
+CarGearRatios = 3.25, 1.95, 1.31, 1, 0.76
+CarReverseGearRatio = 3.3
+CarFinalDrive = 4.1
+CarWheelRadius = 0.32615
+CarDriveForce = 0.00215
+CarDrag = 0.00443421
+CarLongitudinalGrip = 0.032
+CarShiftTicks = 7
+CarServiceBrake = 0.025
+CarHandbrake = 0.014
 ThrottleDownFactor = 2.40
 ItemID = 30033
 Weight = 3373

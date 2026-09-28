@@ -10,6 +10,23 @@ ChaffUseTime = 0
 ; Reverse target 35 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.486111
 CivilianCarDrivetrain = true
+; 1993 Silvia S14; gameplay 5MT; K/Q trim, gearing and top speed unresolved
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.22
+CarIdleRPM = 850
+CarRedlineRPM = 7000
+CarForwardGears = 5
+CarGearRatios = 3.3, 1.95, 1.32, 1, 0.76
+CarReverseGearRatio = 3.3
+CarFinalDrive = 4.1
+CarWheelRadius = 0.316
+CarDriveForce = 0.0019
+CarDrag = 0.00271635
+CarLongitudinalGrip = 0.029
+CarShiftTicks = 7
+CarServiceBrake = 0.024
+CarHandbrake = 0.014
 ThrottleDownFactor = 2.60
 MaxHp = 200
 ThrottleUpDown = 0.84

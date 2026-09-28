@@ -93,8 +93,8 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `FlightCeiling` | Aircraft/heli/plane/shared | float | 9100.0 | soft altitude limit; new flight model |
 | `FlightCeilingRange` | Aircraft/heli/plane/shared | float | 24.0 | lift fade band below ceiling; new flight model |
 | `NewFlightGravity` / `FlightGravity` / `GravityOverride` | Aircraft/plane/shared | float[0..1] | global `NewFlightGravity` | optional per-vehicle new-flight gravity override |
-| `speed` | All | float | 0.1 | top horizontal speed before family global multiplier |
-| `MotionFactor` | All | float | 0.96; plane constructor 0.97 | per-tick horizontal damping |
+| `speed` | All | float | 0.1 | horizontal safety ceiling before family global multiplier; opted-in cars accept 0..8 and accelerate through force/drag/gearing |
+| `MotionFactor` | All | float | 0.96; plane constructor 0.97 | per-tick horizontal damping; opted-in car engines use `CarDrag` instead |
 | `MobilityYaw` | All | float | 1.0 | yaw control multiplier |
 | `MobilityPitch` | All | float | 1.0 | pitch control multiplier |
 | `MobilityRoll` | All | float | 1.0 | roll control multiplier |
@@ -106,7 +106,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `throttleupdown` | All | float | 1.0 | pilot throttle change multiplier |
 | `ThrottleUpDownOnEntity` | All | float | 2.0 | throttle multiplier while carried/riding |
 | `EnableBack` | All | boolean | false | enables reverse throttle |
-| `ThrottleDownFactor` | All | float[0..10] | 1.0 | Tank reverse throttle buildup multiplier; not a speed limit or forward-braking factor. See [reverse controls](vehicle-config/tanks.md#civilian-car-reverse-controls). |
+| `ThrottleDownFactor` | All | float[0..10] | 1.0 | Legacy tank reverse throttle buildup multiplier; opted-in car engines multiply reverse drive force by it. Not a speed limit or forward-braking factor. See [reverse controls](vehicle-config/tanks.md#civilian-car-reverse-controls). |
 | `PivotTurnThrottle` | All ground-capable | float | 0.0 | auto-throttle for pivot turns |
 | `CanMoveOnGround` | All | boolean | true | ground movement gate |
 | `CanRotOnGround` | All | boolean | true | ground yaw gate |
@@ -295,7 +295,8 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `HelicopterMaxBackwardSpeedScale` | Helicopter | float >= 0 | omitted = 1.0 | optional new-heli-only backward speed cap scale; omitted preserves prior symmetry |
 | `WeightType` | Tank | enum `normal`, `car`, `tank` | `normal`/0 | ground physics weight behavior |
 | `CivilianCarReverseSpeed` | Tank civilian cars | float[0..4], blocks/tick | 0 | Explicit reverse-control opt-in. Positive values cap powered backward horizontal movement; zero/unset/invalid keeps legacy behavior. Absolute value, not multiplied by `AllTankSpeed`; the effective limit cannot exceed validated `Speed`. See [all bundled values and evidence](vehicle-config/civilian-car-reverse-speeds.md). |
-| `DriveType` | Tank civilian cars | enum `FWD`, `RWD`, `AWD` | unset (legacy) | Case-insensitive explicit drivetrain. Server forward/reverse propulsion uses front, rear, or pooled axle contact and available traction; missing wheels retain configured denominators. Does not enable grip/suspension/steering. Omitted/invalid values preserve legacy thrust. See [drivetrain behavior](vehicle-config/tanks.md#civilian-car-drivetrain). |
+| `CivilianCarDrivetrain` | Tank civilian cars | boolean | false | Server engine, ratio-based automatic gears, RPM, independent brakes and powered-wheel slip. See [all car fields and equations](vehicle-config/tanks.md#civilian-car-drivetrain). |
+| `DriveType` | Tank civilian cars | enum `FWD`, `RWD`, `AWD` | unset | Selects powered axles and their slip. Without the engine opt-in, omitted/invalid values preserve legacy thrust; opted-in engines use all wheels equally. Missing wheels retain configured denominators. Does not enable grip/suspension/steering. See [drivetrain behavior](vehicle-config/tanks.md#civilian-car-drivetrain). |
 | `WeightedCenterZ` | Tank | float[-1000..1000] | 0.0 | fore/aft center of weight |
 | `TrackMaxHP` | Tank | int[1..1000000] | 100 | track durability |
 | `EnableTurretPop` | Tank | boolean | `false` | `true` detaches the exact `$turret` model group and its main-gun child assembly on destruction; models without it skip the effect |

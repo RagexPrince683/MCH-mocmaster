@@ -10,7 +10,7 @@ if = time> 13000
 	DrawTexture = car, 148, 21,  64,64,  256,128, 128,128
 Endif
 ;DrawTexture = car,    179, 21,  16,64,  416,0,  32,128, sea_alt*0.036
-DrawTexture = car,    172, 21,  16,64,  384,0,  32,128, Throttle*275-155
+DrawTexture = car,    172, 21,  16,64,  384,0,  32,128, (car_drivetrain?car_rpm_norm:throttle)*275-155
 
 ; 燃料の低下を警告表示
 If = low_fuel
@@ -31,7 +31,7 @@ DrawTexture = car, -207+8, 83, 16,32,  96,192, 32,64, fuel*270-135
 
 ; スロットル(Throttle)
 ;DrawTexture = car, -170,   83, 32,32,   0,192, 64,64
-;DrawTexture = car, -170+8, 83, 16,32,  96,192, 32,64, Throttle*270-180
+;DrawTexture = car, -170+8, 83, 16,32,  96,192, 32,64, (car_drivetrain?car_rpm_norm:throttle)*270-180
 
 ; ワーニングランプ
 DrawTexture = car,      193, 8, 16, 16,   0,256, 64,64
@@ -79,3 +79,10 @@ If = free_look==1
 	Color = 0xCFFFFFFF
 	DrawString = -90, -80, "FREE LOOK"
 Endif
+
+
+; Server synchronized car transmission and engine speed
+If = car_drivetrain
+Color = 0xCFFFFFFF
+DrawString = 84, 118, "Gear %s  %4.0f RPM", CAR_GEAR, CAR_RPM
+EndIf

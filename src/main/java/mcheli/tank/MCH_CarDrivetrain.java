@@ -10,7 +10,7 @@ public final class MCH_CarDrivetrain {
    public boolean frontContact, rearContact;
    private boolean initialized;
    private int directionTicks, shiftTicks;
-   private double torqueRatio = 3.0D, shiftFrom = 3.0D;
+   private double torqueRatio, shiftFrom;
    private boolean forwardDrive, reverseDrive;
 
    public void clearInputs() {
@@ -39,21 +39,25 @@ public final class MCH_CarDrivetrain {
          } else {
             this.directionTicks = 0;
          }
-         this.forwardDrive = forwardRequest && this.gear > 0 && speed >= -0.025D;
-         this.reverseDrive = reverseRequest && this.gear < 0 && speed <= 0.025D;
+         // Released throttle decays through the same pedal response; an opposing pedal cuts drive.
+         this.forwardDrive = !reverseRequest && this.gear > 0 && speed >= -0.025D;
+         this.reverseDrive = !up && this.gear < 0 && speed <= 0.025D;
          // S remains a service brake throughout the stop-to-reverse dwell.
          this.serviceBrake = down && (up || this.gear > 0 || speed > 0.025D) || up && !this.forwardDrive;
-         float target = up || this.reverseDrive ? 1.0F : 0.0F;
+         float target = up || reverseRequest && this.reverseDrive ? 1.0F : 0.0F;
          this.throttle += (target - this.throttle) * info.carThrottleResponse;
          if(this.throttle < 0.001F) this.throttle = 0;
          if(this.gear > info.carForwardGears) this.shift(info, info.carForwardGears);
          if(this.gear > 0 && this.shiftTicks == 0) {
-            double band = Math.max(0.05D, info.speed) / info.carForwardGears;
-            if(this.forwardDrive && this.gear < info.carForwardGears && speed > band * this.gear * 0.88D) {
+            // Road RPM chooses gears; spinning/airborne tires rev the engine without racing through gears.
+            double roadRpm = this.wheelRpm(info, Math.abs(speed), this.ratio(info, this.gear));
+            if(up && !down && !handbrake && this.forwardDrive && this.gear < info.carForwardGears
+                  && roadRpm >= info.carRedlineRpm * 0.88D) {
                this.shift(info, this.gear + 1);
             } else if(this.gear > 1 && Math.abs(speed) <= 0.025D) {
                this.shift(info, 1);
-            } else if(this.gear > 1 && speed < band * (this.gear - 1) * 0.65D) {
+            } else if(this.gear > 1 && roadRpm < info.carRedlineRpm * 0.30D
+                  && this.wheelRpm(info, Math.abs(speed), this.ratio(info, this.gear - 1)) < info.carRedlineRpm * 0.70D) {
                this.shift(info, this.gear - 1);
             }
          }
@@ -67,24 +71,34 @@ public final class MCH_CarDrivetrain {
       } else {
          this.torqueRatio = targetRatio;
       }
-      double wheelSpeed = info.driveType == MCH_TankInfo.DriveType.FWD ? Math.abs(this.frontWheelSpeed)
+   }
+
+   private double drivenWheelSpeed(MCH_TankInfo info) {
+      return info.driveType == MCH_TankInfo.DriveType.FWD ? Math.abs(this.frontWheelSpeed)
             : info.driveType == MCH_TankInfo.DriveType.RWD ? Math.abs(this.rearWheelSpeed)
             : Math.max(Math.abs(this.frontWheelSpeed), Math.abs(this.rearWheelSpeed));
-      double gearSpeed = this.gear < 0 ? Math.max(0.05D, info.civilianCarReverseSpeed > 0 ? info.civilianCarReverseSpeed : info.speed)
-            : Math.max(0.05D, info.speed * this.gear / info.carForwardGears);
-      double rev = Math.min(1.0D, Math.max(this.throttle * 0.25D, wheelSpeed / gearSpeed * 0.95D));
-      float targetRpm = active ? (float)(info.carIdleRpm + (info.carRedlineRpm - info.carIdleRpm) * rev) : 0;
+   }
+
+   private double wheelRpm(MCH_TankInfo info, double wheelSpeed, double ratio) {
+      // blocks/tick -> metres/minute at 20 Hz; radius is independent of visual wheel scale.
+      return wheelSpeed * 1200.0D / (2.0D * Math.PI * info.carWheelRadius) * ratio * info.carFinalDrive;
+   }
+
+   private void updateRpm(MCH_TankInfo info) {
+      double coupled = this.wheelRpm(info, this.drivenWheelSpeed(info), this.torqueRatio);
+      // Gameplay slipping launch clutch/torque converter permits revs against held brakes at rest.
+      double launch = info.carIdleRpm + (info.carRedlineRpm - info.carIdleRpm) * this.throttle * 0.4D;
+      float targetRpm = this.running ? (float)Math.min(info.carRedlineRpm, Math.max(launch, coupled)) : 0;
       this.rpm += (targetRpm - this.rpm) * 0.3F;
       this.rpm = Math.min(info.carRedlineRpm, this.rpm);
    }
 
    private double ratio(MCH_TankInfo info, int gear) {
-      return gear < 0 || info.carForwardGears == 1 ? 1.0D
-            : 3.0D - 2.0D * (gear - 1) / (info.carForwardGears - 1);
+      return gear < 0 ? info.carReverseGearRatio : info.carGearRatios[Math.max(0, Math.min(info.carForwardGears - 1, gear - 1))];
    }
 
    private void shift(MCH_TankInfo info, int gear) {
-      this.shiftFrom = this.torqueRatio;
+      this.shiftFrom = this.torqueRatio > 0 ? this.torqueRatio : this.ratio(info, this.gear);
       this.shiftTicks = info.carShiftTicks;
       this.gear = gear;
    }
@@ -103,22 +117,30 @@ public final class MCH_CarDrivetrain {
       int driven = (front ? contact.configuredFront : 0) + (rear ? contact.configuredRear : 0);
       double demand = 0;
       if(canDrive && this.running) {
-         if(this.forwardDrive) demand = 0.1D * this.throttle * this.torqueRatio;
+         double engineForce = info.carDriveForce * this.torqueRatio * info.carFinalDrive * this.throttle;
+         double rev = Math.max(info.carIdleRpm, this.rpm) / info.carRedlineRpm;
+         // Bounded gameplay torque curve: broad midrange peak, falling torque near redline.
+         engineForce *= 0.7D + 0.3D * Math.min(1.0D, rev / 0.5D) - 0.25D * Math.max(0, (rev - 0.5D) / 0.5D);
+         if(this.shiftTicks > 0) engineForce *= 0.25D + 0.75D * (1.0D - (double)this.shiftTicks / info.carShiftTicks);
+         if(this.forwardDrive) demand = engineForce;
          if(this.reverseDrive) {
-            // Preserve the former steady reverse demand and the configured acceleration factor.
-            demand = -Math.min(0.1D, 0.0125D * info.throttleUpDown * info.throttleDownFactor) * this.throttle;
+            // Retain reverse acceleration tuning at this boundary; reverse speed has its own ceiling.
+            demand = -engineForce * info.throttleUpDown * info.throttleDownFactor / 2.4D;
          }
-         double wheelSpeed = front && rear ? Math.max(Math.abs(this.frontWheelSpeed), Math.abs(this.rearWheelSpeed))
-               : Math.abs(front ? this.frontWheelSpeed : this.rearWheelSpeed);
-         double redlineSpeed = this.gear < 0 ? Math.max(0.05D, info.civilianCarReverseSpeed > 0
-               ? info.civilianCarReverseSpeed : info.speed) : Math.max(0.05D, info.speed * this.gear / info.carForwardGears);
-         // Soft fuel cut above the gear's redline; wheel inertia carries motion through the cut.
-         demand *= Math.max(0.0D, Math.min(1.0D, (1.15D - wheelSpeed / redlineSpeed) / 0.15D));
+         double wheelSpeed = this.drivenWheelSpeed(info);
+         double wheelRpm = this.wheelRpm(info, wheelSpeed, this.torqueRatio);
+         demand *= Math.max(0.0D, Math.min(1.0D, (1.03D - wheelRpm / info.carRedlineRpm) / 0.08D));
+         if(this.gear < 0 && info.civilianCarReverseSpeed > 0) {
+            demand *= Math.max(0, Math.min(1, (1.10D - wheelSpeed / info.civilianCarReverseSpeed) / 0.10D));
+         }
       }
       double frontDrive = front && driven > 0 ? demand * contact.configuredFront / driven : 0;
       double rearDrive = rear && driven > 0 ? demand * contact.configuredRear / driven : 0;
       double frontLimit = MCH_CarTireGrip.axleDriveLimit(sideways, info, contact.front, contact.total, info.frontTireSize);
       double rearLimit = MCH_CarTireGrip.axleDriveLimit(sideways, info, contact.rear, contact.total, info.rearTireSize);
+      // Use the existing contact/lateral reservation with a car-scale longitudinal traction budget.
+      frontLimit *= info.carLongitudinalGrip / 0.24D;
+      rearLimit *= info.carLongitudinalGrip / 0.24D;
       double frontBrake = contact.total > 0 && this.serviceBrake
             ? info.carServiceBrake * contact.configuredFront / contact.total : 0;
       double rearBrake = contact.total > 0 && this.serviceBrake
@@ -131,10 +153,19 @@ public final class MCH_CarDrivetrain {
       if(demand == 0 && (this.serviceBrake || this.handbrake)) {
          if(speed == 0 || force * speed > 0) force = 0;
          else force = Math.copySign(Math.min(Math.abs(force), Math.abs(speed)), force);
+      } else if((this.serviceBrake || this.handbrake) && force * speed < 0) {
+         // Combined pedals may restrain a launch, but brake reaction cannot reverse travel.
+         force = Math.copySign(Math.min(Math.abs(force), Math.abs(speed)), force);
       }
       this.frontSlip = this.spinSlip(this.frontWheelSpeed, speed + force, front && canDrive && this.running);
       this.rearSlip = this.spinSlip(this.rearWheelSpeed, speed + force, rear && canDrive && this.running);
+      this.updateRpm(info);
       return force;
+   }
+
+   /** Explicit quadratic air drag; tiny contact rolling resistance, no speed-target servo. */
+   public double drag(MCH_TankInfo info, double speed, boolean supported) {
+      return Math.min(speed, info.carDrag * speed * speed + (supported ? 0.00015D : 0.0D));
    }
 
    private double axle(boolean front, double speed, double drive, double brake, double capacity, int count, int total) {

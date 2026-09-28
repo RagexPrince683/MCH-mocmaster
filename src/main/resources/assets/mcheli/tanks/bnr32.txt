@@ -10,6 +10,23 @@ ChaffUseTime = 0
 ; Reverse target 35 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.486111
 CivilianCarDrivetrain = true
+; R32 factory 5MT manual ratios/final drive; exact 1989 market match/redline/top speed unresolved
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.22
+CarIdleRPM = 850
+CarRedlineRPM = 8000
+CarForwardGears = 5
+CarGearRatios = 3.214, 1.925, 1.302, 1, 0.752
+CarReverseGearRatio = 3.369
+CarFinalDrive = 4.111
+CarWheelRadius = 0.3157
+CarDriveForce = 0.0021
+CarDrag = 0.00421173
+CarLongitudinalGrip = 0.032
+CarShiftTicks = 8
+CarServiceBrake = 0.024
+CarHandbrake = 0.014
 ThrottleDownFactor = 2.40
 ItemID = 28745
 Weight = 3200

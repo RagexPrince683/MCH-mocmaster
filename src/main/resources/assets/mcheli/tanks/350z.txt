@@ -10,6 +10,23 @@ ChaffUseTime = 0
 ; Reverse target 69 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.958333
 CivilianCarDrivetrain = true
+; Representative early VQ35DE 6MT; factory ratios; market/trim and top speed unresolved
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.2
+CarIdleRPM = 750
+CarRedlineRPM = 6600
+CarForwardGears = 6
+CarGearRatios = 3.794, 2.324, 1.624, 1.271, 1, 0.794
+CarReverseGearRatio = 3.446
+CarFinalDrive = 3.538
+CarWheelRadius = 0.33885
+CarDriveForce = 0.0021
+CarDrag = 0.00320084
+CarLongitudinalGrip = 0.03
+CarShiftTicks = 6
+CarServiceBrake = 0.026
+CarHandbrake = 0.015
 ThrottleDownFactor = 4.20
 
 ItemID = 28745

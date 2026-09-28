@@ -10,6 +10,23 @@ ChaffUseTime = 0
 ; Reverse target 35 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.486111
 CivilianCarDrivetrain = true
+; 1985 RX-7 FC; gameplay 5MT ratios/RPM; turbo/market/transmission/top speed unresolved
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.23
+CarIdleRPM = 900
+CarRedlineRPM = 7500
+CarForwardGears = 5
+CarGearRatios = 3.45, 2.02, 1.39, 1, 0.76
+CarReverseGearRatio = 3.4
+CarFinalDrive = 4.1
+CarWheelRadius = 0.31
+CarDriveForce = 0.0015
+CarDrag = 0.00372219
+CarLongitudinalGrip = 0.028
+CarShiftTicks = 7
+CarServiceBrake = 0.023
+CarHandbrake = 0.013
 ThrottleDownFactor = 2.60
 ItemID = 28745
 Weight = 3200

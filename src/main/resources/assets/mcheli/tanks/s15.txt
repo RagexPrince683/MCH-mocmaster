@@ -11,6 +11,23 @@ ChaffUseTime = 0
 ; Reverse target 35 km/h; evidence and variant: docs/vehicle-config/civilian-car-reverse-speeds.md
 CivilianCarReverseSpeed = 0.486111
 CivilianCarDrivetrain = true
+; 1999 Silvia representative spec-R 6MT factory ratios; bundled trim/redline/top speed unresolved
+; Force, drag, response, shift duration and brake forces are gameplay tuning.
+; Evidence, unit conversion and unresolved identities: docs/car-tire-grip.md
+CarThrottleResponse = 0.24
+CarIdleRPM = 850
+CarRedlineRPM = 7000
+CarForwardGears = 6
+CarGearRatios = 3.626, 2.2, 1.541, 1.213, 1, 0.767
+CarReverseGearRatio = 3.437
+CarFinalDrive = 3.692
+CarWheelRadius = 0.31595
+CarDriveForce = 0.002
+CarDrag = 0.00401146
+CarLongitudinalGrip = 0.03
+CarShiftTicks = 6
+CarServiceBrake = 0.025
+CarHandbrake = 0.014
 ThrottleDownFactor = 2.60
 ItemID = 33406
 Weight = 3200
