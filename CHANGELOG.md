@@ -471,3 +471,29 @@ Developer/backend
   changed wheel class is Java 8 (major 52). Collision-equation checks covered road recovery,
   stale airborne wheels, a wholly low box and missing terrain. No test files were added.
   Corrected in-game steering, high-speed understeer and multiplayer recovery remain unobserved.
+
+2026-09-28 03:00 — Restore Chiron suspension support and level wheel position
+
+- Source and Minecraft collision geometry confirm that the Chiron's level wheel anchor puts its
+  collision bottom 0.39 blocks inside the road. The separate suspension sweep missed support,
+  reported zero compression, and extended the invisible box to 0.84 blocks below the surface.
+  A positive rest compression learned on earlier terrain would then produce negative visible wheel travel;
+  body pitch samples terrain independently and does not explain that persistent level-ground offset.
+- Normalize the suspension anchor using the real wheel bottom offset/height and the level body floor.
+  Preserve terrain pose, use actual block collision boxes within the wheel footprint, and compensate
+  the bounded tracking-skin lift in both sweep distance and compression. Place collision wheels and
+  check body-movement wheel support against the same corrected anchor, with travel still bounded by
+  SuspensionTravel. Current/predicted horizontal samples share one vertical reference so pending
+  gravity cannot inflate compression. Other bundled civilian anchor heights need no normalization.
+- Calibrate rendered rest compression only with complete, even collision-surface support at the body
+  floor and settled body height, pitch, and roll. Retain the baseline on unsuitable terrain, then
+  converge and snap its final small error after level support returns. The Chiron's level compression
+  is now 0.45 blocks, its collision bottom is at the road, and settled render travel is zero relative
+  to the authored model. No wheel model/config, rotation, steering/grip query, AWD force, gearing,
+  speed ceiling, or brake tuning changed; the recent client contact correction remains intact.
+- Updated the existing suspension description and historical grip findings. Offline compileJava
+  succeeded with the existing cached convention/Jabel setup; changed classes target Java 8 (major 52).
+  Source and collision-equation checks covered bundled anchor heights, client rounding, finite reach,
+  travel bounds, and baseline recovery. No test files or temporary diagnostics were added. No current
+  suspension runtime capture, packaging, game launch, or terrain driving was performed; wheel/body
+  recovery over uneven terrain and multiplayer visuals still require end-user feedback.

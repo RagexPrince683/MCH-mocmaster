@@ -37,6 +37,7 @@ public class MCH_WheelManager {
    public float targetPitch;
    public float targetRoll;
    public float prevYaw;
+   private double previousSuspensionBodyFloor = Double.NaN;
    private static Random rand = new Random();
 
    // per-wheel state (persist during runtime)
@@ -448,7 +449,7 @@ public class MCH_WheelManager {
 
       for(int i = 0; i < this.wheels.length; ++i) {
          MCH_EntityWheel wheel = this.wheels[i];
-         if(wheel == null || wheel.pos == null) {
+         if(wheel == null || wheel.isDead || wheel.pos == null || wheel.boundingBox == null) {
             continue;
          }
 
@@ -459,7 +460,9 @@ public class MCH_WheelManager {
 
          Vec3 anchor = this.getTransformedPosition(wheel.pos.xCoord, wheel.pos.yCoord, wheel.pos.zCoord,
                car, car.getRotYaw(), this.targetPitch, this.targetRoll);
-         Vec3 predicted = Vec3.createVectorHelper(anchor.xCoord + x, anchor.yCoord + y, anchor.zCoord + z);
+         // Both footprints use the current vertical reference. Pending gravity is
+         // not terrain compression and must not become the rendered rest baseline.
+         Vec3 predicted = Vec3.createVectorHelper(anchor.xCoord + x, anchor.yCoord, anchor.zCoord + z);
          double measured = wheel.measureSuspensionCompression(anchor, predicted, travel);
          float compression = (float)measured;
          if(wheel.suspensionSupported && !wheel.suspensionCompressionInitialized) {
@@ -472,7 +475,7 @@ public class MCH_WheelManager {
          }
          wheel.suspensionCompression = compression;
 
-         double wheelY = anchor.yCoord - travel + measured;
+         double wheelY = anchor.yCoord + wheel.getSuspensionAnchorOffset() - travel + measured;
          wheel.setPosition(anchor.xCoord + x, wheelY, anchor.zCoord + z);
 
          if(!wheel.suspensionSupported) {
@@ -494,8 +497,6 @@ public class MCH_WheelManager {
             ++leftCount;
          }
       }
-
-      this.updateRenderNeutral(supported);
 
       if(supported > 0) {
          if(!car.worldObj.isRemote) {
@@ -521,6 +522,7 @@ public class MCH_WheelManager {
       float terrainPitch = this.getCivilianTerrainPitch(x, z, info);
       this.targetPitch = MCH_CarTerrainPitch.approach(this.targetPitch, terrainPitch,
             car.worldObj.isRemote ? 0.28F : 0.45F);
+      this.updateRenderNeutral(supported, terrainPitch);
 
       // This method runs every client tick, including while the local driver is stopped.
       // Applying the predicted pose here prevents the last rendered terrain roll from
@@ -632,27 +634,40 @@ public class MCH_WheelManager {
    }
 
    /**
-    * Establishes rendered neutral travel only after the complete axle set is supported
-    * at an even height. A single tire touching during spawn or landing must not become
-    * the permanent model-space baseline for that tire.
+    * Establishes rendered neutral travel only with a settled level pose and complete
+    * support on one collision-surface plane at the body floor. Equal compression alone
+    * cannot distinguish level ground from saturated suspension on uneven terrain.
     */
-   private void updateRenderNeutral(int supported) {
-      if(supported != this.wheels.length || supported == 0) {
+   private void updateRenderNeutral(int supported, float terrainPitch) {
+      double bodyFloor = this.parent.boundingBox.minY;
+      boolean settledHeight = !Double.isNaN(this.previousSuspensionBodyFloor)
+            && Math.abs(bodyFloor - this.previousSuspensionBodyFloor) < 0.001D;
+      this.previousSuspensionBodyFloor = bodyFloor;
+      if(!settledHeight || supported != this.wheels.length || supported == 0 || Float.isNaN(terrainPitch)
+            || Math.abs(terrainPitch) > 0.01F || Math.abs(this.targetPitch) > 0.02F
+            || Math.abs(this.targetRoll) > 0.02F) {
          return;
       }
 
       float minimum = Float.POSITIVE_INFINITY;
       float maximum = Float.NEGATIVE_INFINITY;
+      double minimumHeight = Double.POSITIVE_INFINITY;
+      double maximumHeight = Double.NEGATIVE_INFINITY;
       for(MCH_EntityWheel wheel : this.wheels) {
+         if(Double.isNaN(wheel.suspensionSupportY)
+               || Math.abs(wheel.suspensionSupportY - bodyFloor) > 0.05D) return;
          minimum = Math.min(minimum, wheel.suspensionCompression);
          maximum = Math.max(maximum, wheel.suspensionCompression);
+         minimumHeight = Math.min(minimumHeight, wheel.suspensionSupportY);
+         maximumHeight = Math.max(maximumHeight, wheel.suspensionSupportY);
       }
-      if(maximum - minimum > 0.02F) {
+      if(maximum - minimum > 0.02F || maximumHeight - minimumHeight > 0.02D) {
          return;
       }
 
       for(MCH_EntityWheel wheel : this.wheels) {
-         if(Float.isNaN(wheel.suspensionRestCompression)) {
+         if(Float.isNaN(wheel.suspensionRestCompression)
+               || Math.abs(wheel.suspensionCompression - wheel.suspensionRestCompression) < 0.001F) {
             wheel.suspensionRestCompression = wheel.suspensionCompression;
          } else {
             wheel.suspensionRestCompression +=

@@ -161,20 +161,29 @@ either configured speed ceiling.
 
 Civilian suspension sweeps each individual wheel collision box through `SuspensionTravel`, so full
 blocks, slabs, stairs, and other collision-box terrain contribute their actual top surface rather than
-a heightmap or paired `onGround` flag. Both the current and next-tick horizontal wheel positions are
-sampled. Only supported wheels generate spring/damper response; an entirely unsupported car follows
-normal gravity, falling, body collision, and crash-damage behavior.
+a heightmap, entity collision, or paired `onGround` flag. A wheel whose level anchor puts its collision
+bottom below the body floor uses a correction bounded by that wheel's actual collision height. The
+same corrected anchor controls its collision position and travel bounds; authored model positions
+are unchanged. The probe also lifts within a 0.05-block tracking skin and adds exactly that lift to
+the sweep, preserving its lower endpoint and compression reference. Support requires a block collision
+surface underneath the wheel footprint. Both current and next-tick horizontal positions use the same
+current vertical reference, so pending gravity cannot inflate compression. Only supported wheels
+generate spring/damper response; an entirely unsupported car follows normal gravity, falling, body
+collision, and crash-damage behavior. The separate grip query retains its own contact reach and client
+tracking correction.
 
 Each `AddPartWheel` is matched to the nearest mirrored `SetWheelPos` collision wheel in local X/Z and
 moves vertically with its interpolated compression. Its authored `AddPartWheel` Y position is the
 neutral rendered position; it is not replaced by the collision wheel's `SetWheelPos` Y coordinate.
-The neutral compression is initialized only when the complete wheel set has even support, then follows
-the settled level-ground compression slowly. This prevents a single tire's first spawn/landing contact
-from raising or lowering that tire permanently while preserving differential travel on uneven blocks.
-Body pitch and roll continue converging toward the supported wheel heights every tick, including while
-stopped, and settle exactly at zero after level support is restored. These angles use the wheels'
-collision-resolved contact heights rather than compression alone, so an existing body angle cannot feed
-itself back into the next terrain-angle calculation. A match farther than 0.85 blocks is
+The neutral compression is initialized or adjusted only with complete support on one level collision
+surface at the body floor, even compression, and settled body height/pitch/roll. Equal compression on
+a slope, partial contact, or a car still falling through suspension reach cannot establish the baseline.
+The baseline follows settled level compression slowly and snaps the final sub-0.001-block difference to
+that compression, returning rendered travel to zero without removing suspension movement on terrain.
+Body pitch and roll converge every tick, including while stopped, and settle exactly at zero after
+level support is restored. Roll uses supported collision-wheel heights; pitch independently samples
+reachable block collision surfaces at yaw-only wheel locations, so wheel extension and the previous
+pitch do not determine its terrain selection. A match farther than 0.85 blocks is
 considered a different/decorative layout and receives the legacy wheel animation without suspension
 translation. This fallback permits model packs to use a different number or arrangement of visible wheels safely.
 The four suspension defaults are written explicitly into bundled `CivilianCarGrip = true` definitions;

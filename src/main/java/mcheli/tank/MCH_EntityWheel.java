@@ -31,6 +31,7 @@ public class MCH_EntityWheel extends W_Entity {
    public boolean suspensionSupported;
    public boolean suspensionCompressionInitialized;
    public float suspensionRestCompression = Float.NaN;
+   public double suspensionSupportY = Double.NaN;
 
 
    public MCH_EntityWheel(World w) {
@@ -80,6 +81,7 @@ public class MCH_EntityWheel extends W_Entity {
     * cannot outrun its contact probe between server ticks.
     */
    public double measureSuspensionCompression(Vec3 currentAnchor, Vec3 predictedAnchor, double travel) {
+      this.suspensionSupportY = Double.NaN;
       double current = this.measureCompressionAt(currentAnchor, travel);
       double predicted = this.measureCompressionAt(predictedAnchor, travel);
       double compression = Math.max(current, predicted);
@@ -87,14 +89,28 @@ public class MCH_EntityWheel extends W_Entity {
       return this.suspensionSupported ? compression : 0.0D;
    }
 
+   /** Correct low collision anchors without changing authored model positions or terrain pose. */
+   double getSuspensionAnchorOffset() {
+      double levelBottom = this.parents.posY + this.pos.yCoord + this.boundingBox.minY - this.posY;
+      return Math.max(0.0D, Math.min(this.parents.boundingBox.minY - levelBottom,
+            this.boundingBox.maxY - this.boundingBox.minY));
+   }
+
    private double measureCompressionAt(Vec3 anchor, double travel) {
       AxisAlignedBB probe = this.boundingBox.copy();
       double centerX = (probe.minX + probe.maxX) * 0.5D;
       double centerZ = (probe.minZ + probe.maxZ) * 0.5D;
-      probe.offset(anchor.xCoord - centerX, anchor.yCoord - this.posY, anchor.zCoord - centerZ);
+      double anchorOffset = this.getSuspensionAnchorOffset();
+      // Keep the level reference independent of pitch/roll so unequal wheel heights
+      // still describe terrain. Bound normalization and the tracking skin by the
+      // original wheel height; a box wholly below the body floor gains no reach.
+      double lift = Math.max(0.0D, Math.min(0.05D, probe.maxY - probe.minY - anchorOffset));
+      probe.offset(anchor.xCoord - centerX, anchor.yCoord - this.posY + anchorOffset + lift,
+            anchor.zCoord - centerZ);
 
-      double sweep = -(travel + 0.08D);
-      List boxes = this.getCollidingBoundingBoxes(this, probe.addCoord(0.0D, sweep, 0.0D));
+      // The skin changes only the start; the normalized suspension endpoint stays fixed.
+      double sweep = -(travel + 0.08D + lift);
+      List boxes = this.getBlockCollisionBoxes(this, probe.addCoord(0.0D, sweep, 0.0D));
       double allowed = sweep;
       for(int i = 0; i < boxes.size(); ++i) {
          allowed = ((AxisAlignedBB)boxes.get(i)).calculateYOffset(probe, allowed);
@@ -102,7 +118,11 @@ public class MCH_EntityWheel extends W_Entity {
       if(allowed <= sweep + 1.0E-5D) {
          return -1.0D;
       }
-      return MathHelper.clamp_double(travel + allowed, 0.0D, travel);
+      double supportY = probe.minY + allowed;
+      if(Double.isNaN(this.suspensionSupportY) || supportY > this.suspensionSupportY) {
+         this.suspensionSupportY = supportY;
+      }
+      return MathHelper.clamp_double(travel + allowed + lift, 0.0D, travel);
    }
 
    /** Grip-only support sweep. The invisible suspension box is not the rendered tire patch. */
@@ -253,7 +273,7 @@ public class MCH_EntityWheel extends W_Entity {
       super.worldObj.theProfiler.endSection();
    }
 
-   public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+   private List getBlockCollisionBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
       ArrayList collidingBoundingBoxes = new ArrayList();
       collidingBoundingBoxes.clear();
       int i = MathHelper.floor_double(par2AxisAlignedBB.minX);
@@ -276,6 +296,11 @@ public class MCH_EntityWheel extends W_Entity {
          }
       }
 
+      return collidingBoundingBoxes;
+   }
+
+   public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+      List collidingBoundingBoxes = this.getBlockCollisionBoxes(par1Entity, par2AxisAlignedBB);
       double result = 0.25D;
       List entities = par1Entity.worldObj.getEntitiesWithinAABBExcludingEntity(par1Entity, par2AxisAlignedBB.expand(result, result, result));
 

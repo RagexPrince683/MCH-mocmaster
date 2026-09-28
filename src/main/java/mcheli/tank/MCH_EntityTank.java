@@ -536,7 +536,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       for(MCH_EntityWheel wheel : this.WheelMng.wheels) {
          if(wheel == null || wheel.isDead || wheel.pos == null || wheel.boundingBox == null) continue;
          Vec3 anchor = this.getTransformedPosition(wheel.pos);
-         double anchorBottom = anchor.yCoord - wheel.yOffset;
+         double anchorBottom = anchor.yCoord + wheel.getSuspensionAnchorOffset()
+               + wheel.boundingBox.minY - wheel.posY;
          // Reject wheels left below the body during takeoff, even if their flags say grounded.
          if(wheel.boundingBox.minY < anchorBottom - travel - 1.0E-5D
                || wheel.boundingBox.minY > anchorBottom + 1.0E-5D) continue;
