@@ -434,3 +434,21 @@ Developer/backend
   classes target Java 8 (major 52). Static asset/documentation, steady-force and diff audits passed.
   No tests, packaging, remap/reobfuscation or game launch ran. Driving feel, shifts, braking distance,
   burnouts, contact/gradient effects, HUD readability and multiplayer behavior remain unobserved.
+
+2026-09-28 01:08 — Fix low wheel anchors losing civilian car propulsion
+
+- Source comparison identifies f5dde8e3 as the first of the three recent propulsion commits to
+  expose the Chiron's existing support-probe error: its nominal invisible wheel bottom lies
+  0.39 blocks below level ground, where a downward calculateYOffset sweep cannot find support.
+  The later wheel-spin and gearing commits retain that probe, leaving both axle force limits zero.
+- Normalize the shared grip query using the actual wheel AABB bottom offset/height and body
+  collision floor. Preserve the wheel footprint, bounded reach, takeoff rejection and configured
+  denominator; live suspension placement/travel, steering, brakes, AWD, ratios and speed limits
+  are unchanged. Restored contact lets existing wheel reaction recover stored spin during fuel cut;
+  unsupported axles still supply zero body force and cannot emit road smoke.
+- Updated the existing contact document, including the distinction between pre-thrust contact and
+  the later lateral-grip CSV snapshot. The available CSV predates these commits and cannot validate
+  the reported failure. Offline compileJava passed; MCH_EntityWheel targets Java 8 (major 52).
+  Source/equation checks covered different wheel heights, unsupported force, gradual launch and
+  traction recovery. No current pre-thrust runtime trace or in-game driving was captured; launch,
+  shifts, traction recovery, braking and unsupported smoke still require Forge 1.7.10 driving checks.

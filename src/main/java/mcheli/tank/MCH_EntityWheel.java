@@ -108,11 +108,19 @@ public class MCH_EntityWheel extends W_Entity {
    /** Grip-only support sweep. The invisible suspension box is not the rendered tire patch. */
    public boolean hasCarGroundContact() {
       if(this.isDead || this.worldObj == null || this.boundingBox == null || this.parents == null || this.pos == null) return false;
-      double restGap = Math.max(0.0D, this.parents.yOffset + this.pos.yCoord - this.yOffset);
       AxisAlignedBB box = this.boundingBox.copy();
+      // Use the actual box offset/height, including ySize, rather than assuming
+      // every authored wheel anchor is above the body's collision floor.
+      double targetBottom = this.parents.getTransformedPosition(this.pos).yCoord + box.minY - this.posY;
+      double bodyBottom = this.parents.boundingBox.minY;
+      double restGap = Math.max(0.0D, targetBottom - bodyBottom);
+      // Low anchors (e.g. Chiron Y=-0.74) put the invisible box through the road.
+      // calculateYOffset cannot find downward support from an overlapping box.
+      // Move only the query bottom to the body floor within the anchored wheel's
+      // real height; never promote a box wholly below that floor into contact.
+      double supportBottom = Math.max(targetBottom, Math.min(bodyBottom, targetBottom + box.maxY - box.minY));
       // A suspension wheel can lag below the body during takeoff. Never use that stale support.
-      double targetBottom = this.parents.getTransformedPosition(this.pos).yCoord - this.yOffset;
-      box.offset(0.0D, Math.max(0.0D, targetBottom - box.minY), 0.0D);
+      box.offset(0.0D, Math.max(0.0D, supportBottom - box.minY), 0.0D);
       double reach = 0.05D + restGap;
       return hasGroundSupport(box, this.getCollidingBoundingBoxes(this, box.addCoord(0.0D, -reach, 0.0D)), reach);
    }
