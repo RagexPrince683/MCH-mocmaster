@@ -580,25 +580,3 @@ Developer/backend
   were added. The diagonal failure was not reproduced or verified fixed in-game; stairs into
   the hole, live W/S/braking recovery, tight-obstacle rotation, dedicated server and multiplayer
   interpolation still require driving feedback. Equation results are not gameplay verification.
-
-2026-09-28 17:15 — Preserve civilian car pitch and momentum on stairs
-
-- Source and straight collision equations identify missing rear pitch samples when a flat
-  chassis rests above center sampling reach, front-riser rejection of the small pose lift,
-  and velocity cleanup at the next reachable riser after a valid partial climb. The exact
-  photographed failure tick is unobserved; HUD speed is XYZ velocity and 91/100 is HP.
-- Seed missing terrain pitch samples from reachable axle surfaces along bounded tread walks.
-  Compare supported steps with rotation at their existing lift before horizontal sweeps;
-  commit pose only after clearance, bounded rise, valid landing and improved progress.
-  Retain partial-climb momentum only when a copied final body passes next-step clearance
-  and landing checks. That probe adds no movement or height; real wall/headroom stops remain.
-- Apply the same civilian collision rules during client extrapolation, interpolate accepted
-  server pitch/roll for the local pilot, and reconcile wheels on both sides. Preserve engine
-  and throttle authority, contact gates, tuning, definitions and non-civilian movement.
-- Offline compileJava passed with authorized access to the existing Gradle cache after the
-  sandboxed wrapper lock was denied. All three changed classes target Java 8 (major 52).
-  Source/diff checks and in-memory straight geometry calculations cover stairs, slabs, level
-  travel, wall/over-height/ceiling stops, unsupported drops, repeated climbs and stationary
-  height. Updated the existing terrain document. No test/fixture files, packaging,
-  reobfuscation or game launch were performed. Live stair behavior, contact recovery,
-  dedicated-server operation and multiplayer prediction still require user gameplay checks.
