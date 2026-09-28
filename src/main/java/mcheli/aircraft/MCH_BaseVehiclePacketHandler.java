@@ -169,11 +169,12 @@ public class MCH_BaseVehiclePacketHandler {
       }
 
       String rejection = null;
+      boolean destroyed = parent != null && parent.isDestroyed();
       if(player == null || player.isDead) {
          rejection = "player missing or dead";
       } else if(mount == null || mount.isDead) {
          rejection = "mount missing or dead";
-      } else if(parent == null || parent.isDead || parent.isDestroyed()) {
+      } else if(parent == null || parent.isDead) {
          rejection = "parent missing or invalid";
       } else if(mount.getEntityId() != mountEntityId) {
          rejection = "mount entity mismatch";
@@ -185,9 +186,10 @@ public class MCH_BaseVehiclePacketHandler {
 
       ServerDismountHold hold = normalDismountHolds.get(player);
       long elapsed = hold != null ? System.nanoTime() - hold.startedNanos : 0L;
-      if(rejection == null && (hold == null || !hold.matchesCurrent(player, mount, parent, actualSeatId))) {
+      if(rejection == null && !destroyed
+            && (hold == null || !hold.matchesCurrent(player, mount, parent, actualSeatId))) {
          rejection = "hold missing, stale, or wrong mount";
-      } else if(rejection == null && elapsed < NORMAL_DISMOUNT_HOLD_NANOS) {
+      } else if(rejection == null && !destroyed && elapsed < NORMAL_DISMOUNT_HOLD_NANOS) {
          rejection = "three-second server hold incomplete";
       }
 
@@ -195,10 +197,16 @@ public class MCH_BaseVehiclePacketHandler {
          normalDismountHolds.remove(player);
       }
 
+      String exitPath;
+      if(destroyed) {
+         exitPath = actualSeatId == 0 ? "destroyed-pilot-immediate" : "destroyed-passenger-immediate";
+      } else {
+         exitPath = actualSeatId == 0 ? "normal-pilot-control" : "normal-passenger-control";
+      }
       MCH_DismountDiagnostics.log(player != null ? player.worldObj : null,
             "session=%s normal-exit-request action=%s path=%s player=%s mountId=%d parentId=%d seatId=%d serverElapsedMs=%d reason=%s",
             MCH_DismountDiagnostics.session(player), rejection == null ? "accepted" : "rejected",
-                  actualSeatId == 0 ? "normal-pilot-control" : "normal-passenger-control", player,
+                  exitPath, player,
                   Integer.valueOf(mount != null ? mount.getEntityId() : -1),
                   Integer.valueOf(actualParent != null ? actualParent.getEntityId() : -1),
                   Integer.valueOf(actualSeatId), Long.valueOf(elapsed / 1000000L), rejection != null ? rejection : "none");

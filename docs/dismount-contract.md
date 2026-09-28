@@ -19,6 +19,13 @@ player, world, connection, direct mount, parent vehicle, and seat. Release, deat
 replay ownership, or any change to that context cancels it. Completion queues exactly one normal
 dismount request and requires a physical release before another hold can begin.
 
+When the claimed parent vehicle reports `isDestroyed()`, a physical Sneak press queues the same
+pilot or passenger exit request immediately instead of starting or completing the three-second
+hold. This also applies if destruction occurs while Sneak is already held: the client cancels the
+active hold and queues the immediate request on the next input update. Sneak remains filtered from
+vanilla, so the exit still uses MC Heli's existing pilot or passenger dismount and exit-position
+code rather than waiting for the destroyed vehicle to despawn.
+
 The `MovementInputFromOptions` injection remains an early filter. A second guard runs at the head of
 `EntityClientPlayerMP.sendMotionUpdates`, immediately before vanilla can publish movement state.
 That latter boundary reads the current movement object, so replacement input implementations and
@@ -32,6 +39,12 @@ server records its own monotonic start time; no client elapsed duration is trans
 A normal exit request is accepted only after three server-observed seconds and only while the player
 still rides the exact entity, parent, and seat from the start signal. Acceptance consumes the server
 hold, so early, stale, duplicate, and wrong-mount requests are rejected.
+
+The server waives only the elapsed-hold requirement when the claimed parent vehicle currently
+reports `isDestroyed()`. It still requires the player to be alive and riding the exact claimed live
+vehicle or seat, with the same parent and seat number. Acceptance removes any recorded hold before
+the existing pilot or passenger unmount routine selects the exit position. Undestroyed vehicles
+continue to require the complete server-timed hold.
 
 As defense in depth, the `EntityPlayer.updateRidden` head clears early vanilla Sneak for a valid
 direct MC Heli vehicle or seat rider, immediately before the actual `mountEntity(null)` branch. If

@@ -518,3 +518,13 @@ Developer/backend
   states; 53,840 legacy non-reverse combinations were unchanged, and 23 civilian drivetrain definitions
   still bypass the edited block. No validation files or diagnostics were added. Packaging, live
   Forge 1.7.10 driving, slopes/collisions, steering and multiplayer lamp visuals remain untested.
+
+2026-09-28 17:35 - Exit destroyed vehicles immediately
+
+- Let pilot and passenger Sneak input queue the existing vehicle exit request immediately when the
+  ridden parent vehicle is destroyed, including when destruction occurs during an active hold.
+- Keep exact mount, parent, and seat validation on the server while waiving only the three-second
+  hold for a currently destroyed vehicle. Immediate acceptance clears any recorded hold and uses
+  the existing pilot or passenger dismount and exit-position routines.
+- Document the destroyed-vehicle exception. No test files were added, and in-game behavior was not
+  observed.
