@@ -3,8 +3,10 @@
 The earlier sections record the pitch and body-collision work after `a94f5f0`,
 including its historical fixture results. `fa6d246` subsequently introduced oriented
 extra-body sweeps, uses a 45-degree terrain pitch limit, and removed the test
-sources mentioned below. The final sections describe the oriented-primary correction
-and diagonal collision/pose recovery; historical test results do not validate them.
+sources mentioned below. The final section, "Reachable full-block steps", describes
+the current correction relative to `dab51cd493d08260e4095218919013d308e53808`.
+Earlier sections are historical; their tests and driving procedures do not validate
+the current implementation.
 
 This change applies only to `CivilianCarGrip` vehicles. The checkout was clean before
 the change. `MCH_EntityTank`, `MCH_WheelManager`, `MCH_RenderTank`, and the common
@@ -598,16 +600,63 @@ For a fresh capture, stop the game/server and move the old movement CSV aside.
 When reading a combined file, treat each header as the schema for following rows.
 Other diagnostic CSV formats and all bundled definitions remain unchanged.
 
-Required capture: use the same civilian car and the original problem course.
-Enable `CarGripDiagnostics = true` only for that definition and restart/reload.
-Capture continuously from at least two seconds of flat-ground approach, through
-straight reachable stairs with W held, through the pause/stop, and for two seconds
-afterward. Release S and Space and avoid steering during the straight run. Repeat
-on the mixed half-slab/full-block course at the speed that previously failed.
-Include a solid-wall control run with W held. Provide the server movement CSV
-and corresponding tire-grip CSV, vehicle definition/name, course coordinates and
-block layout (stair facing/shape, upper/lower slabs, headroom), plus a short video
-or timestamp/entity/tick identifying each visible pause. Use the authoritative
-server's logs for multiplayer; client HUD speed is velocity, not accepted travel.
-Turn diagnostics off afterward. This evidence is needed to select a movement fix;
-continuous driving has not been verified and is not claimed by this diagnostic change.
+That baseline was a diagnostics change, not a climbing fix. It did not establish
+which branch caused the photographed stall.
+
+## Reachable full-block steps — 2026-09-28
+
+The Starion screenshot shows full throttle, about 6,500 RPM, zero pitch and about
+0.01 speed on full grass-block steps. Its definition remains RWD, StepHeight 1.2,
+SuspensionTravel 0.45, with axle Z positions 1.865 and -1.489 (spacing 3.354).
+These observations do not distinguish missing terrain, rejected rotation or lost
+rear contact. The available grip CSV contains Chiron data, not a Starion movement
+capture. Both reverted attempts were inspected; their reported driving regressions
+remain unisolated. Their client-prediction changes, cross-axle terrain seeding and
+momentum-continuation probes are not reinstated.
+
+Current terrain selection retries the direct axle column whenever the center-to-axle
+walk fails, including an intermediate gap. The fallback is bounded by StepHeight
+from the unrotated chassis floor and still requires an actual block collision top
+and clear space above it. It never substitutes the preceding tread or another axle's
+height. Missing axles still return NaN and use the existing target decay; equal
+sampled heights alone establish level terrain. The old level-body wall probe no
+longer overrides terrain sampling with zero pitch. Full compound-body sweeps and
+angular envelopes remain responsible for rejecting walls and ceilings.
+
+On the server, a rotation rejected or shortened at the original position can use
+the supported step lift. Candidates rotate before or after the horizontal sweep,
+then settle onto real body support. Every leg uses the configured full-size
+components, and the conservative envelope checks the entire angular interval.
+Only the remainder of the original two-degree pitch/roll delta is available.
+Candidates must improve horizontal travel, or tie travel with a lower supported
+landing; angle change alone cannot select a higher stationary pose. The original
+downward request can be consumed after rotation frees a lower landing, allowing
+settling even at zero horizontal speed. The actual first pose lift (before its
+settle), rather than just its net Y, is deducted from the remaining step budget.
+The sum of upward pose/recovery and step sweeps cannot exceed StepHeight.
+
+Civilian tire grip now uses the same corrected body-relative anchor as suspension.
+Its query starts no lower than the live wheel bottom or full suspension extension,
+at the current transformed footprint, and requires a downward collision hit
+within the existing 0.05 skin. Pitch no longer clamps a lowered rear wheel back to
+the level chassis floor. Terrain samples and suspension flags never grant traction;
+stale wheels below extension cannot provide drive after takeoff. Force, grip,
+spring tuning, throttle input and wheel reconciliation remain unchanged, as does
+non-civilian behavior. No pedal-release or minimum-speed gate was introduced.
+
+Existing movement diagnostics distinguish the paths: `terrain_reason` is
+`sampled_fallback` when a direct fallback contributes to a complete axle pair;
+`missing_axle`, NaN and axle counts retain their meanings. `target_pitch` is still
+recorded before reconciliation. `pose_decision` and `step_gate` can now report
+`accepted_step_rotation`; `selected`/`paths` identify `step_rotate_first_*` or
+`step_rotate_last_*`, including the remaining-angle fraction. `pose_fraction`
+includes the accepted pitch/roll retry. Appended `pose_rise` records the initial
+pose's upward sweep, while `pose_y` remains its net displacement. Pre-drive and
+final axle contact plus `drive_force` distinguish propulsion loss from clearance
+rejection; RPM alone cannot establish transferred force.
+
+Source review covers fallback reach, continuous clearance, support/landing gates,
+total lift accounting, accepted-angle commit and wheel reconciliation. Compilation
+results are recorded in CHANGELOG.md. No new test infrastructure or gameplay
+capture was created. Continuous climbing, live diagnostics and dedicated-server/
+multiplayer behavior have not been observed for this change.

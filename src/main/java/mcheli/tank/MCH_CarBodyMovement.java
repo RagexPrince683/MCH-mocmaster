@@ -12,11 +12,17 @@ final class MCH_CarBodyMovement {
       List<AxisAlignedBB> query(AxisAlignedBB sweep);
    }
 
+   interface StepRotation {
+      /** Check the whole angular path at this offset; null means obstructed. */
+      List<MCH_CarCollisionBox> at(double x, double y, double z, float fraction);
+   }
+
    static final class Trace {
       final StringBuilder paths = new StringBuilder();
       String selected = "normal_none", stepGate = "not_checked";
       String cleanupX = "none", cleanupZ = "none", pose = "not_checked";
       double inputX, inputZ, stepHeight, baseY, verticalY;
+      double poseRise;
       float desiredYaw, targetPitch, targetRoll, poseFraction;
       boolean wheelSupport, bodySupport;
       void path(String stage, double x, double y, double z, double rise, boolean landed, boolean clear) {
@@ -29,10 +35,16 @@ final class MCH_CarBodyMovement {
    static final class Result {
       final double x, y, z;
       final boolean grounded, stepped, blockedX, blockedZ;
+      final float rotationFraction;
       Result(double x, double y, double z, boolean grounded, boolean stepped, boolean blockedX, boolean blockedZ) {
+         this(x, y, z, grounded, stepped, blockedX, blockedZ, 0);
+      }
+      Result(double x, double y, double z, boolean grounded, boolean stepped, boolean blockedX, boolean blockedZ,
+            float rotationFraction) {
          this.x = x; this.y = y; this.z = z;
          this.grounded = grounded; this.stepped = stepped;
          this.blockedX = blockedX; this.blockedZ = blockedZ;
+         this.rotationFraction = rotationFraction;
       }
    }
 
@@ -56,6 +68,11 @@ final class MCH_CarBodyMovement {
 
    static Result resolveBody(List<MCH_CarCollisionBox> initial, Collisions collisions,
          double x, double y, double z, double stepHeight, boolean wheelSupport, Trace trace) {
+      return resolveBody(initial, collisions, x, y, z, stepHeight, wheelSupport, trace, null);
+   }
+
+   static Result resolveBody(List<MCH_CarCollisionBox> initial, Collisions collisions,
+         double x, double y, double z, double stepHeight, boolean wheelSupport, Trace trace, StepRotation rotation) {
       if(trace != null) {
          trace.stepHeight = stepHeight;
          trace.wheelSupport = wheelSupport;
@@ -79,7 +96,7 @@ final class MCH_CarBodyMovement {
       Horizontal normal = horizontal(vertical, collisions, x, z, trace, dy);
       double dx = normal.x, dz = normal.z;
       boolean landed = y < 0 && changed(y, dy);
-      if(stepHeight <= 0 || (!changed(x, dx) && !changed(z, dz))) {
+      if(stepHeight <= 0 || (rotation == null && !changed(x, dx) && !changed(z, dz))) {
          if(trace != null) trace.stepGate = stepHeight <= 0 ? "no_step_height" : "unclipped";
          return result(normal.body, collisions, x, z, dx, dy, dz, landed, false, trace);
       }
@@ -119,6 +136,53 @@ final class MCH_CarBodyMovement {
                }
             }
             ++order;
+         }
+         if(rotation != null) {
+            // Rotation can need the step's clearance, or the space beyond the
+            // riser. Try both orders using this same swept lift, never a second
+            // rise or a momentum-only continuation probe.
+            for(float fraction = 1; fraction >= 0.015625F; fraction *= 0.5F) {
+               for(int rotationOrder = 0; rotationOrder < 2; ++rotationOrder) {
+                  List<MCH_CarCollisionBox> raised = rotationOrder == 0
+                        ? rotation.at(0, baseY + rise, 0, fraction) : step;
+                  if(raised == null) continue;
+                  order = 0;
+                  for(Horizontal candidate : horizontalCandidates(raised, collisions, x, z)) {
+                     List<MCH_CarCollisionBox> rotated = rotationOrder == 0 ? candidate.body
+                           : rotation.at(candidate.x, baseY + rise, candidate.z, fraction);
+                     if(rotated == null) { ++order; continue; }
+                     // Rotation can free a lower landing even when the old pose
+                     // blocked gravity. Consume only the original downward request.
+                     double down = move(rotated, collisions, 1, -rise + Math.min(0, y - baseY));
+                     double netY = baseY + rise + down;
+                     double progress = Math.hypot(candidate.x, candidate.z);
+                     double bestProgress = Math.hypot(best.x, best.z);
+                     boolean landedRotation = supportedBody(rotated, collisions);
+                     boolean clearRotation = clear(rotated, collisions);
+                     String stage = rotationOrder == 0 ? "step_rotate_first_" : "step_rotate_last_";
+                     if(trace != null) trace.path(stage + order + "_" + fraction, candidate.x, netY,
+                           candidate.z, rise, landedRotation, clearRotation);
+                     // Equal travel wins only with a lower supported landing.
+                     // Merely changing angle must not lift a stationary body or
+                     // replace a better-supported lower path with a higher one.
+                     if(netY >= Math.min(baseY, y) - MCH_CarCollisionBox.EPSILON
+                           && netY <= stepHeight && landedRotation && clearRotation
+                           && (progress > bestProgress + MCH_CarCollisionBox.EPSILON
+                                 || Math.abs(progress - bestProgress) <= MCH_CarCollisionBox.EPSILON
+                                       && netY < best.y - MCH_CarCollisionBox.EPSILON)) {
+                        Result moved = result(rotated, collisions, x, z, candidate.x, netY, candidate.z,
+                              true, true, trace);
+                        best = new Result(moved.x, moved.y, moved.z, moved.grounded, moved.stepped,
+                              moved.blockedX, moved.blockedZ, fraction);
+                        if(trace != null) {
+                           trace.selected = stage + order + "_" + fraction;
+                           trace.stepGate = "accepted_step_rotation";
+                        }
+                     }
+                     ++order;
+                  }
+               }
+            }
          }
       }
       return best;

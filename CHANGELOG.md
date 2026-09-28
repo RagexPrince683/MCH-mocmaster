@@ -607,3 +607,37 @@ Developer/backend
   cleanup; CSV header/format counts match at 67 fields. No tests/harnesses, packaging,
   reobfuscation or game launch were performed. Runtime capture, driving continuity, live CSV
   emission and dedicated-server/multiplayer behavior remain unverified.
+
+2026-09-28 19:38 — Resolve civilian pitch and contact across reachable block steps
+
+- Started from clean `dab51cd493d08260e4095218919013d308e53808`, a diagnostics-only
+  baseline. The Starion screenshot shows full throttle, about 6,500 RPM, zero pitch
+  and about 0.01 speed on full grass-block steps; no Starion movement capture is
+  available to identify the exact failing branch. Inspected both reverted attempts.
+- Retry independently reachable axle collision surfaces after any failed terrain
+  walk column, including intermediate gaps. Keep real-surface/headroom/StepHeight
+  bounds and NaN for missing axles. Remove the level-body wall probe's premature
+  zero-pitch override; actual body/rotation sweeps still enforce walls and ceilings.
+- Evaluate supported step candidates with rotation before or after translation,
+  using the unconsumed portion of the original two-degree pitch/roll target.
+  Require continuous full-body clearance, real landing support and improved travel
+  or equal travel with a lower landing. Allow the original gravity request to settle
+  a rotated body at rest. Charge actual pose lift, not net pose Y, to the step budget.
+  No velocity-continuation probe, extra rise, client-prediction rewrite or pedal reset.
+- Align civilian grip queries with suspension's corrected, pitched anchor and full
+  extension bound. The former level-floor clamp could erase supported rear contact.
+  Require actual collision support with the existing skin and entity exclusions;
+  terrain predictions and stale airborne wheels cannot supply traction. Preserve
+  RWD force gates, engine/grip tuning, StepHeight 1.2, SuspensionTravel 0.45, Starion
+  axle positions, all collider sizes and the non-civilian movement/contact paths.
+- Extend existing diagnostic reasons/paths and append pose_rise; update the existing
+  terrain and tire-grip documentation without adding end-user testing procedures.
+  Source/call-site review, contact/budget arithmetic and 68-field CSV schema checks
+  were performed. No tests, harnesses, fixtures or temporary Java files were added.
+  Final offline compileJava passed with the existing Gradle/Java 25/Jabel/Forge
+  1.7.10 setup; the six changed production classes and their nested classes have
+  Java 8 major version 52. Compilation caught and resolved a local-variable naming
+  conflict. Final diff whitespace checks passed; build configuration is unchanged.
+  In-game climbing, driving continuity, live diagnostics, dedicated-server operation
+  and multiplayer behavior remain unverified; the conservative angular envelope
+  can still reject tight-clearance candidates. No packaging or reobfuscation was run.

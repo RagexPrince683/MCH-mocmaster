@@ -592,23 +592,12 @@ public class MCH_WheelManager {
       double step = Math.max(0.0D, info.stepHeight);
       double referenceY = car.getUnrotatedBodyFloor();
       double clearance = car.height;
-      AxisAlignedBB levelBody = AxisAlignedBB.getBoundingBox(car.posX - car.width * 0.5D, referenceY,
-            car.posZ - car.width * 0.5D, car.posX + car.width * 0.5D, referenceY + clearance,
-            car.posZ + car.width * 0.5D);
-
-      // Probe a small distance forward even at rest, so a bumper stopped at a wall levels.
-      double yaw = Math.toRadians(car.getRotYaw());
-      double forwardX = -Math.sin(yaw) * 0.05D;
-      double forwardZ = Math.cos(yaw) * 0.05D;
-      AxisAlignedBB sweep = levelBody.addCoord(forwardX, step, forwardZ);
-      if(MCH_CarTerrainPitch.facesWall(this.getCivilianTerrainBoxes(sweep),
-            levelBody, step, forwardX, forwardZ)) {
-         if(trace != null) { trace.reason = "wall_probe"; trace.pitch = 0; }
-         return 0.0F;
-      }
+      // A blocked level-body probe is not evidence of level axle terrain. The
+      // compound-body solver checks walls/headroom using the requested pose.
 
       double front = 0.0D, rear = 0.0D, frontZ = 0.0D, rearZ = 0.0D;
       int frontCount = 0, rearCount = 0;
+      boolean axleFallback = false;
       for(MCH_EntityWheel wheel : this.wheels) {
          if(wheel == null || wheel.isDead || wheel.pos == null) continue;
          // Yaw-only locations avoid feeding suspension extension or the previous pitch back
@@ -624,10 +613,14 @@ public class MCH_WheelManager {
                height = this.sampleCivilianTerrainHeight(wheel.pos.xCoord,
                      wheel.pos.zCoord * sample / samples, x, z, height, step, clearance);
             }
-         } else {
-            // A bridge/gap under the center does not erase directly reachable axle terrain.
+         }
+         if(Double.isNaN(height)) {
+            // Any gap in the walk, including an intermediate column, must still
+            // allow an independently reachable axle surface. Do not reuse the last
+            // tread's height as support across the gap.
             height = this.sampleCivilianTerrainHeight(wheel.pos.xCoord, wheel.pos.zCoord,
                   x, z, referenceY, step, clearance);
+            axleFallback |= !Double.isNaN(height);
          }
          if(Double.isNaN(height)) continue;
          if(wheel.pos.zCoord >= this.weightedCenter.zCoord) {
@@ -644,7 +637,7 @@ public class MCH_WheelManager {
       if(frontCount == 0 || rearCount == 0) return Float.NaN;
       float pitch = MCH_CarTerrainPitch.angle(front / frontCount, rear / rearCount,
             frontZ / frontCount - rearZ / rearCount);
-      if(trace != null) { trace.reason = "sampled"; trace.pitch = pitch; }
+      if(trace != null) { trace.reason = axleFallback ? "sampled_fallback" : "sampled"; trace.pitch = pitch; }
       return pitch;
    }
 

@@ -131,7 +131,21 @@ public class MCH_EntityWheel extends W_Entity {
       AxisAlignedBB box = this.boundingBox.copy();
       // Use the actual box offset/height, including ySize, rather than assuming
       // every authored wheel anchor is above the body's collision floor.
-      double targetBottom = this.parents.getTransformedPosition(this.pos).yCoord + box.minY - this.posY;
+      Vec3 anchor = this.parents.getTransformedPosition(this.pos);
+      double targetBottom = anchor.yCoord + box.minY - this.posY;
+      MCH_TankInfo info = this.parents instanceof MCH_EntityTank ? ((MCH_EntityTank)this.parents).getTankInfo() : null;
+      if(info != null && info.civilianCarGrip) {
+         // Match suspension's body-relative normalization. Clamping a pitched
+         // rear wheel to the LEVEL chassis floor erases real downhill contact.
+         // A stale wheel below full extension cannot supply traction after takeoff.
+         double anchorBottom = targetBottom + this.getSuspensionAnchorOffset();
+         double queryBottom = Math.max(box.minY, anchorBottom - info.suspensionTravel);
+         double lift = Math.max(0, Math.min(0.05D, targetBottom + box.maxY - box.minY - queryBottom));
+         box.offset(anchor.xCoord - (box.minX + box.maxX) * 0.5D,
+               queryBottom + lift - box.minY, anchor.zCoord - (box.minZ + box.maxZ) * 0.5D);
+         double reach = 0.05D + lift;
+         return hasGroundSupport(box, this.getCollidingBoundingBoxes(this, box.addCoord(0, -reach, 0)), reach);
+      }
       double bodyBottom = this.parents.getUnrotatedBodyFloor();
       double restGap = Math.max(0.0D, targetBottom - bodyBottom);
       // Low anchors (e.g. Chiron Y=-0.74) put the invisible box through the road.

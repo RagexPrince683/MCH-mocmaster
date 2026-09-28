@@ -37,21 +37,6 @@ final class MCH_CarTerrainPitch {
       return highest;
    }
 
-   /** Test clearance using a copy of the unchanged body box, without movement/contact gates. */
-   static boolean facesWall(List<AxisAlignedBB> boxes, AxisAlignedBB body,
-         double stepHeight, double x, double z) {
-      AxisAlignedBB raised = body.copy();
-      double up = stepHeight;
-      for(AxisAlignedBB box : boxes) up = box.calculateYOffset(raised, up);
-      raised.offset(0.0D, up, 0.0D);
-      double allowedX = x;
-      for(AxisAlignedBB box : boxes) allowedX = box.calculateXOffset(raised, allowedX);
-      raised.offset(allowedX, 0.0D, 0.0D);
-      double allowedZ = z;
-      for(AxisAlignedBB box : boxes) allowedZ = box.calculateZOffset(raised, allowedZ);
-      return Math.abs(allowedX - x) > EPSILON || Math.abs(allowedZ - z) > EPSILON;
-   }
-
    static float angle(double front, double rear, double wheelbase) {
       // The model faces +Z. GL's positive X rotation lowers +Z, so nose-up is negative.
       return (float)Math.max(-MAX_PITCH, Math.min(MAX_PITCH,
