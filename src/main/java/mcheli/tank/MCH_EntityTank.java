@@ -65,6 +65,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
    private float carBodyYaw, carBodyPitch, carBodyRoll;
    private double carDiagnosticDriveForce;
    private MCH_WheelManager.CarContact carDiagnosticDriveContact;
+   int wheelDebugTick = -1;
+   List<String> wheelDebugMovement;
    private MCH_CarGripDiagnostics.Snapshot carGripDiagnostic;
    public final MCH_CarDrivetrain carDrivetrain = new MCH_CarDrivetrain();
    private Entity carInputPilot;
@@ -510,7 +512,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       float poseYaw = this.getRotYaw(), posePitch = this.getRotPitch(), poseRoll = this.getRotRoll();
       if(this.getTankInfo() != null && this.getTankInfo().civilianCarGrip) {
          final MCH_CarBodyMovement.Collisions collisions = this::getBodyComponentCollisions;
-         if(this.getTankInfo().carGripDiagnostics && !super.worldObj.isRemote) {
+         if(!super.worldObj.isRemote && (this.getTankInfo().carGripDiagnostics || MCH_WheelDiagnostics.hasViewer(this))) {
             civilianTrace = new MCH_CarBodyMovement.Trace();
             civilianTrace.inputX = inputX; civilianTrace.inputZ = inputZ;
             civilianTrace.desiredYaw = this.getRotYaw();
@@ -631,7 +633,12 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       }
 
       if(civilianTrace != null) {
-         MCH_CarGripDiagnostics.recordMovement(this, civilianTrace, civilianMovement, carDiagnosticDriveContact,
+         if(MCH_WheelDiagnostics.hasViewer(this)) {
+            this.wheelDebugTick = this.ticksExisted;
+            this.wheelDebugMovement = MCH_WheelDiagnostics.movement(this, civilianTrace, civilianMovement,
+                  carDiagnosticDriveForce, carDiagnosticDriveContact, mx, my, mz, civilianPoseY);
+         }
+         if(this.getTankInfo().carGripDiagnostics) MCH_CarGripDiagnostics.recordMovement(this, civilianTrace, civilianMovement, carDiagnosticDriveContact,
                carDiagnosticDriveForce, nowPosX, nowPosY, nowPosZ, mx, my, mz, civilianPoseY, poseYaw, posePitch, poseRoll);
       }
 
@@ -1489,6 +1496,8 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       final boolean DEBUG = false;
       this.carDiagnosticDriveForce = Double.NaN;
       this.carDiagnosticDriveContact = null;
+      this.wheelDebugMovement = null;
+      this.WheelMng.carDiagnosticTerrain = null;
       //gpt was right, drag coeff is nerfing my grabbed MPH logic.
 
       // --------------------------------------------------
@@ -1569,7 +1578,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          double sideways = super.motionX * Math.cos(yaw) + super.motionZ * Math.sin(yaw);
          MCH_WheelManager.CarContact driveContact = this.WheelMng.getCarGroundContact(false);
          double force = this.carDrivetrain.acceleration(this.tankInfo, driveContact, speed, sideways, canMove);
-         if(this.tankInfo.carGripDiagnostics) {
+         if(this.tankInfo.carGripDiagnostics || MCH_WheelDiagnostics.hasViewer(this)) {
             this.carDiagnosticDriveForce = force;
             this.carDiagnosticDriveContact = driveContact;
          }

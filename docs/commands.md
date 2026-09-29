@@ -44,7 +44,52 @@ Permissions are per subcommand. Granting `status` does not grant `fill` or `kill
 | `removeentity` | `/mcheli removeentity <entityClassNameFragment>` | Marks matching loaded non-player entities dead by setting `isDead = true`. |
 | `attackentity` | `/mcheli attackentity <entityClassNameFragment> <damage> [damageSource]` | Damages matching loaded non-player entities. |
 | `showboundingbox` | `/mcheli showboundingbox <true|false>` | Toggles MCHeli debug bounding boxes and broadcasts server settings. This does not save the config file. |
+| `debugwheels` | `/mcheli debugwheels [true|false]` | Toggles live wheel/suspension diagnostics for the civilian car the sender is riding. Omit the argument to report the current setting. Players only; the client HUD requires Test mode. |
 | `enablenukes` | `/mcheli enablenukes [true|false]` | Without an argument, prints usage and the current MCHeli nuke status. With `true` or `false`, changes whether MCHeli HBM-style nuclear weapon effects are enabled, broadcasts the colored `ENABLED`/`DISABLED` state, and plays the Wither spawn sound for players. When HBM/NTM registers `/ntmenablenukes`, this subcommand mirrors that command's current status and forwards changes back to HBM. |
+
+## Live wheel diagnostics
+
+`/mcheli debugwheels true` enables a session-local setting for the sender;
+`/mcheli debugwheels false` disables it and clears the display. The normal command
+permissions apply (`CommandPermission = debugwheels:PlayerName` for non-operators).
+Enable Test Mode in the client configuration, then ride a civilian car directly or
+in one of its seats. Remote control and nearby vehicles do not qualify. Leaving
+the car clears its snapshot; the setting remains enabled for the next car ride.
+Reconnects start with the setting disabled. `CarGripDiagnostics` is not required,
+and this command does not enable CSV output or continuous chat/console logging.
+
+The Test mode HUD replaces its general variable dump with two diagnostic columns
+while this display is active. Every value is prefixed `S` (authoritative server)
+or `C` (client). Server snapshots are sent only to subscribed riders after each
+server tick through the existing packet channel. The server supplies each wheel's
+configured axle, authored local position, settled world position, physical grip
+contact probe, suspension support, compression, filtered compression rate,
+support height, and configured travel limit. Compression and support are the
+post-movement reconciliation values; rate is the rate used by that tick's spring
+and damping calculation. Distances are blocks, movement/velocity are blocks per
+tick, compression rate is blocks per tick, pitch is degrees, RPM is revolutions
+per minute, throttle is 0–1, and drive force is the drivetrain's longitudinal
+velocity increment per tick.
+
+Server contact counts and horizontal velocity are end-of-tick state. Drive contact
+counts and force are captured at acceleration; terrain sample result, axle heights
+and counts, terrain pitch, target pitch, accepted body pitch, pose decision, step
+gate, selected path, effective step budget, requested/accepted movement, and
+horizontal velocity cleanup describe the actual server movement decision.
+Accepted XYZ is the collision solver's translation; total accepted Y also includes
+the pose lift/settle. Input X/Z precedes movement's existing slowdown handling.
+The displayed normal/step candidates compare X-then-Z, Z-then-X, and diagonal
+sweeps. Rotation candidates are summarized by evaluated/landed/clear counts,
+clearance rejections, and the selected rotation path to keep four wheels readable.
+These are existing decisions, not alternate movement simulations.
+
+Client body pitch and horizontal velocity are displayed separately for comparison.
+Unavailable, uninitialized, missing, or expired snapshot values show `N/A`.
+Snapshots expire after one second without an update and are discarded on vehicle
+changes, death, world unload, or reconnect. The current solver does not retain
+the identity of the blocking block/collider or detailed per-column terrain
+rejection causes; those are not inferred by the HUD. Normal-path landing is not
+sampled by the existing trace and is explicitly `N/A`.
 
 ## `attackentity` damage sources
 

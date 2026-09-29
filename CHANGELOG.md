@@ -641,3 +641,26 @@ Developer/backend
   In-game climbing, driving continuity, live diagnostics, dedicated-server operation
   and multiplayer behavior remain unverified; the conservative angular envelope
   can still reject tight-clearance candidates. No packaging or reobfuscation was run.
+
+2026-09-28 20:02 — Player-specific live wheel diagnostics
+
+- Add `/mcheli debugwheels [true|false]` with existing subcommand permissions,
+  boolean completion, and current-setting reporting. The session-local setting
+  subscribes only the sender to the civilian car they directly ride or occupy
+  through a seat; remote control and nearby vehicles are excluded.
+- Send authoritative server wheel, suspension, drivetrain, terrain, pose, step,
+  requested/accepted movement, cleanup, and candidate-path diagnostics through
+  the existing packet channel after server ticks. Reuse decision traces without
+  requiring CarGripDiagnostics or enabling its CSV writers. Add only diagnostic
+  counters at rejected rotation-clearance decisions; physics and tuning are unchanged.
+- Show readable server/client columns in the existing Test mode HUD, replacing
+  its general variable dump while active. Label S/C values, show N/A for unavailable
+  data, expire silent snapshots, and clear on dismount, disable, death, or world
+  changes. Update the existing command reference with units and capture semantics.
+- Inspected command permissions/completion, rider ownership, packet registration
+  and main-thread delivery, HUD gating, suspension reconciliation, movement traces,
+  drivetrain capture, and final diffs. Offline compileJava passed using existing
+  Gradle/Java 25/Jabel tooling; inspected production class files have Java 8 major
+  version 52. No tests, harnesses, fixtures, or temporary Java files were created.
+  HUD readability, diagonal climbing diagnosis, dedicated-server and multiplayer
+  behavior still require in-game verification. No packaging/reobfuscation was run.

@@ -74,7 +74,7 @@ public class MCH_Command extends CommandBase {
    public static final String CMD_LIST = "list";
    public static final String CMD_ENABLE_NUKES = "enablenukes";
    public static final String CMD_RELOAD = "reload";
-   public static String[] ALL_COMMAND = new String[]{"sendss", "modlist", "reconfig", "reload", "tier", "title", "fill", "status", "killentity", "removeentity", "attackentity", "showboundingbox", "enablenukes", "list"};
+   public static String[] ALL_COMMAND = new String[]{"sendss", "modlist", "reconfig", "reload", "tier", "title", "fill", "status", "killentity", "removeentity", "attackentity", "showboundingbox", "debugwheels", "enablenukes", "list"};
    public static MCH_Command instance = new MCH_Command();
 
 
@@ -155,7 +155,20 @@ public class MCH_Command extends CommandBase {
             sender.addChatMessage(chatComponentTranslation);
          } else {
             EntityPlayerMP msg;
-            if(prm[0].equalsIgnoreCase("sendss")) {
+            if(prm[0].equalsIgnoreCase("debugwheels")) {
+               if(!(sender instanceof EntityPlayerMP) || prm.length > 2) {
+                  throw new CommandException("Usage: /mcheli debugwheels [true|false] (players only)", new Object[0]);
+               }
+               EntityPlayerMP player = (EntityPlayerMP)sender;
+               if(prm.length == 2) {
+                  if(!"true".equalsIgnoreCase(prm[1]) && !"false".equalsIgnoreCase(prm[1])) {
+                     throw new CommandException("Usage: /mcheli debugwheels [true|false]", new Object[0]);
+                  }
+                  mcheli.tank.MCH_WheelDiagnostics.setEnabled(player, Boolean.parseBoolean(prm[1]));
+               }
+               sender.addChatMessage(new ChatComponentText("debugwheels = "
+                     + mcheli.tank.MCH_WheelDiagnostics.isEnabled(player) + " (HUD requires Test mode)"));
+            } else if(prm[0].equalsIgnoreCase("sendss")) {
                if(prm.length != 2) {
                   throw new CommandException("Parameter error! : /mcheli sendss playerName", new Object[0]);
                }
@@ -732,7 +745,7 @@ public class MCH_Command extends CommandBase {
                if(prm.length == 4) {
                   return getListOfStringsMatchingLastWord(prm, new String[]{"player", "inFire", "onFire", "lava", "inWall", "drown", "starve", "cactus", "fall", "outOfWorld", "generic", "magic", "wither", "anvil", "fallingBlock"});
                }
-            } else if(prm[0].equalsIgnoreCase("showboundingbox") && prm.length == 2) {
+            } else if((prm[0].equalsIgnoreCase("showboundingbox") || prm[0].equalsIgnoreCase("debugwheels")) && prm.length == 2) {
                return getListOfStringsMatchingLastWord(prm, new String[]{"true", "false"});
             } else if(prm[0].equalsIgnoreCase("enablenukes") && prm.length == 2) {
                return getListOfStringsMatchingLastWord(prm, new String[]{"true", "false"});

@@ -127,6 +127,7 @@ public class PacketHandler extends MessageToMessageCodec<FMLProxyPacket, PacketB
         registerPacket(PacketLockTarget.class);
         registerPacket(PacketVehicleLODSnapshot.class);
         registerPacket(PacketVehicleMountGraph.class);
+        registerPacket(mcheli.network.packets.PacketWheelDiagnostics.class);
     }
 
     /**

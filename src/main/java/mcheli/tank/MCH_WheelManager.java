@@ -37,7 +37,7 @@ public class MCH_WheelManager {
    public float targetPitch;
    public float targetRoll;
    public float prevYaw;
-   // Only populated while the existing server diagnostics opt-in is enabled.
+   // Captured at the actual terrain decision, for CSV or subscribed HUD diagnostics.
    TerrainTrace carDiagnosticTerrain;
    static final class TerrainTrace {
       String reason = "missing_axle";
@@ -74,6 +74,10 @@ public class MCH_WheelManager {
          }
       }
       return false;
+   }
+
+   boolean isFrontWheel(int index) {
+      return index >= 0 && index < this.configuredFront.length && this.configuredFront[index];
    }
 
    /** One read-only snapshot; paired onGround flags never supply grip. */
@@ -587,7 +591,8 @@ public class MCH_WheelManager {
    /** Existing wheel layout supplies points only; no wheel state is read as terrain height. */
    float getCivilianTerrainPitch(double x, double z, MCH_TankInfo info) {
       MCH_EntityBaseVehicle car = this.parent;
-      TerrainTrace trace = info.carGripDiagnostics && !car.worldObj.isRemote ? new TerrainTrace() : null;
+      TerrainTrace trace = !car.worldObj.isRemote && (info.carGripDiagnostics
+            || car instanceof MCH_EntityTank && MCH_WheelDiagnostics.hasViewer((MCH_EntityTank)car)) ? new TerrainTrace() : null;
       this.carDiagnosticTerrain = trace;
       double step = Math.max(0.0D, info.stepHeight);
       double referenceY = car.getUnrotatedBodyFloor();

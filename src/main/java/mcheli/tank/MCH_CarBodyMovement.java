@@ -25,6 +25,7 @@ final class MCH_CarBodyMovement {
       double poseRise;
       float desiredYaw, targetPitch, targetRoll, poseFraction;
       boolean wheelSupport, bodySupport;
+      int rotationClearanceRejected;
       void path(String stage, double x, double y, double z, double rise, boolean landed, boolean clear) {
          if(paths.length() != 0) paths.append(';');
          paths.append(stage).append(':').append(x).append('|').append(y).append('|').append(z)
@@ -145,12 +146,19 @@ final class MCH_CarBodyMovement {
                for(int rotationOrder = 0; rotationOrder < 2; ++rotationOrder) {
                   List<MCH_CarCollisionBox> raised = rotationOrder == 0
                         ? rotation.at(0, baseY + rise, 0, fraction) : step;
-                  if(raised == null) continue;
+                  if(raised == null) {
+                     if(trace != null) ++trace.rotationClearanceRejected;
+                     continue;
+                  }
                   order = 0;
                   for(Horizontal candidate : horizontalCandidates(raised, collisions, x, z)) {
                      List<MCH_CarCollisionBox> rotated = rotationOrder == 0 ? candidate.body
                            : rotation.at(candidate.x, baseY + rise, candidate.z, fraction);
-                     if(rotated == null) { ++order; continue; }
+                     if(rotated == null) {
+                        if(trace != null) ++trace.rotationClearanceRejected;
+                        ++order;
+                        continue;
+                     }
                      // Rotation can free a lower landing even when the old pose
                      // blocked gravity. Consume only the original downward request.
                      double down = move(rotated, collisions, 1, -rise + Math.min(0, y - baseY));

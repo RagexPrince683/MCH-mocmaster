@@ -179,6 +179,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
       MCH_MOD.proxy.clearVehicleLODSnapshots();
       MCH_BaseVehiclePacketHandler.clearPendingMounts();
       mcheli.network.packets.PacketVehicleMountGraph.clearClientQueue();
+      mcheli.network.packets.PacketWheelDiagnostics.clearClient();
    }
 
    public void entityJoinWorldEvent(EntityJoinWorldEvent event) {
@@ -192,6 +193,7 @@ public class MCH_ClientEventHook extends W_ClientEventHook {
          MCH_MOD.proxy.clearVehicleLODSnapshots();
          MCH_BaseVehiclePacketHandler.clearPendingMounts();
          mcheli.network.packets.PacketVehicleMountGraph.clearClientQueue();
+         mcheli.network.packets.PacketWheelDiagnostics.clearClient();
       }
 
    }

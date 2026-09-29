@@ -334,6 +334,7 @@ public abstract class MCH_HudItem extends Gui {
    }
 
    public static void drawVarMap() {
+      if(mcheli.tank.MCH_GuiWheelDiagnostics.visible(net.minecraft.client.Minecraft.getMinecraft().thePlayer)) return;
       MCH_Config configuration = MCH_MOD.config;
       if(MCH_Config.TestMode.prmBool) {
          int i = 0;

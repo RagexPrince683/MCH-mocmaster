@@ -94,6 +94,7 @@ public class MCH_ServerTickHandler {
       }
       if(event.phase != Phase.END) return;
       tickMountGraphs();
+      mcheli.tank.MCH_WheelDiagnostics.tickServer();
       if(++this.tick < UPDATE_INTERVAL_TICKS) return;
       this.tick = 0;
 

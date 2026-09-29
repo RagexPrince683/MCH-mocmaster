@@ -936,10 +936,12 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       if(player == super.mc.thePlayer) {
          MCH_BaseVehiclePacketHandler.tickPendingMounts(player);
          mcheli.network.packets.PacketVehicleMountGraph.tickClient(player);
+         mcheli.network.packets.PacketWheelDiagnostics.tickClient(player);
          if(player.isDead) {
             MCH_MOD.proxy.clearVehicleLODSnapshots();
             MCH_BaseVehiclePacketHandler.clearPendingMounts();
             mcheli.network.packets.PacketVehicleMountGraph.clearClientQueue();
+            mcheli.network.packets.PacketWheelDiagnostics.clearClient();
          }
       }
       if(player.worldObj.isRemote) {
