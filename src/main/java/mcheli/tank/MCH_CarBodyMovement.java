@@ -10,6 +10,7 @@ final class MCH_CarBodyMovement {
 
    interface Collisions {
       List<AxisAlignedBB> query(AxisAlignedBB sweep);
+      default String describe(AxisAlignedBB obstacle) { return "source unavailable"; }
    }
 
    interface StepRotation {
@@ -19,9 +20,10 @@ final class MCH_CarBodyMovement {
 
    static final class Trace {
       final StringBuilder paths = new StringBuilder();
+      final List<String> decisions = new ArrayList<String>();
       String selected = "normal_none", stepGate = "not_checked";
       String cleanupX = "none", cleanupZ = "none", pose = "not_checked";
-      double inputX, inputZ, stepHeight, baseY, verticalY;
+      double inputX, inputZ, preMotionX, preMotionZ, stepHeight, baseY, verticalY;
       double poseRise;
       float desiredYaw, targetPitch, targetRoll, poseFraction;
       boolean wheelSupport, bodySupport;
@@ -30,6 +32,11 @@ final class MCH_CarBodyMovement {
          if(paths.length() != 0) paths.append(';');
          paths.append(stage).append(':').append(x).append('|').append(y).append('|').append(z)
                .append('|').append(rise).append('|').append(landed).append('|').append(clear);
+      }
+      void candidate(String stage, double y, double rise, double progress, boolean support, boolean clear, String reason) {
+         decisions.add("S " + stage + " rise=" + MCH_WheelDiagnostics.n(rise)
+               + " Y=" + MCH_WheelDiagnostics.n(y) + " progress=" + MCH_WheelDiagnostics.n(progress));
+         decisions.add("S support/clear=" + support + "/" + clear + " decision=" + reason);
       }
    }
 
@@ -122,11 +129,19 @@ final class MCH_CarBodyMovement {
       Result best = result(normal.body, collisions, x, z, dx, dy, dz, landed, false, trace);
       if(rise > 0) {
          int order = 0;
-         for(Horizontal candidate : horizontalCandidates(step, collisions, x, z)) {
+         for(Horizontal candidate : horizontalCandidates(step, collisions, x, z, trace != null)) {
+            if(trace != null && !candidate.blocker.isEmpty()) trace.decisions.add("S step_" + order + " clipped: " + candidate.blocker);
             double down = move(candidate.body, collisions, 1, -rise);
             double netY = baseY + rise + down;
             if(trace != null) trace.path("step_" + order, candidate.x, netY, candidate.z, rise,
                   supportedBody(candidate.body, collisions), clear(candidate.body, collisions));
+            if(trace != null) trace.candidate("step_" + order, netY, rise, Math.hypot(candidate.x, candidate.z),
+                  supportedBody(candidate.body, collisions), clear(candidate.body, collisions),
+                  netY < baseY || netY > stepHeight ? "outside_vertical_budget"
+                  : !supportedBody(candidate.body, collisions) ? "no_final_support"
+                  : !clear(candidate.body, collisions) ? "final_overlap"
+                  : Math.hypot(candidate.x, candidate.z) <= Math.hypot(best.x, best.z) + MCH_CarCollisionBox.EPSILON
+                        ? "no_progress_improvement" : "eligible");
             if(netY >= baseY && netY <= stepHeight
                   && Math.hypot(candidate.x, candidate.z) > Math.hypot(best.x, best.z) + MCH_CarCollisionBox.EPSILON
                   && supportedBody(candidate.body, collisions) && clear(candidate.body, collisions)) {
@@ -148,14 +163,22 @@ final class MCH_CarBodyMovement {
                         ? rotation.at(0, baseY + rise, 0, fraction) : step;
                   if(raised == null) {
                      if(trace != null) ++trace.rotationClearanceRejected;
+                     if(trace != null) trace.decisions.add("S rotate_first f=" + fraction + " rise="
+                           + MCH_WheelDiagnostics.n(rise) + " progress/support=N/A clear=false: rejected before sweep");
                      continue;
                   }
                   order = 0;
-                  for(Horizontal candidate : horizontalCandidates(raised, collisions, x, z)) {
+                  for(Horizontal candidate : horizontalCandidates(raised, collisions, x, z, trace != null)) {
+                     if(trace != null && !candidate.blocker.isEmpty()) trace.decisions.add("S rotate_"
+                           + rotationOrder + "_" + order + " f=" + fraction + " clipped: " + candidate.blocker);
                      List<MCH_CarCollisionBox> rotated = rotationOrder == 0 ? candidate.body
                            : rotation.at(candidate.x, baseY + rise, candidate.z, fraction);
                      if(rotated == null) {
                         if(trace != null) ++trace.rotationClearanceRejected;
+                        if(trace != null) trace.decisions.add("S rotate_last_" + order + " f=" + fraction
+                              + " rise=" + MCH_WheelDiagnostics.n(rise) + " progress="
+                              + MCH_WheelDiagnostics.n(Math.hypot(candidate.x, candidate.z))
+                              + " support=N/A clear=false: rotation rejected before landing");
                         ++order;
                         continue;
                      }
@@ -170,6 +193,14 @@ final class MCH_CarBodyMovement {
                      String stage = rotationOrder == 0 ? "step_rotate_first_" : "step_rotate_last_";
                      if(trace != null) trace.path(stage + order + "_" + fraction, candidate.x, netY,
                            candidate.z, rise, landedRotation, clearRotation);
+                     if(trace != null) trace.candidate(stage + order + "_" + fraction, netY, rise, progress,
+                           landedRotation, clearRotation,
+                           netY < Math.min(baseY, y) - MCH_CarCollisionBox.EPSILON || netY > stepHeight
+                                 ? "outside_vertical_budget" : !landedRotation ? "no_final_support"
+                           : !clearRotation ? "final_overlap"
+                           : progress > bestProgress + MCH_CarCollisionBox.EPSILON
+                                 || Math.abs(progress - bestProgress) <= MCH_CarCollisionBox.EPSILON
+                                       && netY < best.y - MCH_CarCollisionBox.EPSILON ? "eligible" : "no_travel_or_lower_landing");
                      // Equal travel wins only with a lower supported landing.
                      // Merely changing angle must not lift a stationary body or
                      // replace a better-supported lower path with a higher one.
@@ -199,6 +230,7 @@ final class MCH_CarBodyMovement {
    private static final class Horizontal {
       final List<MCH_CarCollisionBox> body;
       final double x, z;
+      String blocker = "";
       Horizontal(List<MCH_CarCollisionBox> body, double x, double z) {
          this.body = body; this.x = x; this.z = z;
       }
@@ -208,7 +240,8 @@ final class MCH_CarBodyMovement {
          double x, double z, Trace trace, double y) {
       Horizontal best = new Horizontal(copy(initial), 0, 0);
       int order = 0;
-      for(Horizontal candidate : horizontalCandidates(initial, collisions, x, z)) {
+      for(Horizontal candidate : horizontalCandidates(initial, collisions, x, z, trace != null)) {
+         if(trace != null && !candidate.blocker.isEmpty()) trace.decisions.add("S normal_" + order + " clipped: " + candidate.blocker);
          if(trace != null) trace.path("normal_" + order, candidate.x, y, candidate.z, 0, false, clear(candidate.body, collisions));
          if(clear(candidate.body, collisions)
                && Math.hypot(candidate.x, candidate.z) > Math.hypot(best.x, best.z)) {
@@ -221,25 +254,38 @@ final class MCH_CarBodyMovement {
    }
 
    private static List<Horizontal> horizontalCandidates(List<MCH_CarCollisionBox> initial,
-         Collisions collisions, double x, double z) {
+         Collisions collisions, double x, double z, boolean diagnostics) {
       List<Horizontal> candidates = new ArrayList<Horizontal>(3);
       List<MCH_CarCollisionBox> xz = copy(initial);
-      double dx = move(xz, collisions, 0, x), dz = move(xz, collisions, 2, z);
-      candidates.add(new Horizontal(xz, dx, dz));
+      StringBuilder blockers = diagnostics ? new StringBuilder() : null;
+      double dx = move(xz, collisions, 0, x, blockers), dz = move(xz, collisions, 2, z, blockers);
+      Horizontal first = new Horizontal(xz, dx, dz);
+      if(blockers != null) first.blocker = blockers.toString();
+      candidates.add(first);
       if(!changed(x, dx) && !changed(z, dz) && clear(xz, collisions)) return candidates;
       if(x != 0 && z != 0) {
          List<MCH_CarCollisionBox> zx = copy(initial);
-         double sz = move(zx, collisions, 2, z), sx = move(zx, collisions, 0, x);
-         candidates.add(new Horizontal(zx, sx, sz));
+         if(blockers != null) blockers.setLength(0);
+         double sz = move(zx, collisions, 2, z, blockers), sx = move(zx, collisions, 0, x, blockers);
+         Horizontal second = new Horizontal(zx, sx, sz);
+         if(blockers != null) second.blocker = blockers.toString();
+         candidates.add(second);
          List<MCH_CarCollisionBox> diagonal = copy(initial);
          double fraction = 1;
+         String diagonalBlocker = "";
+         int componentIndex = 0;
          for(MCH_CarCollisionBox component : diagonal) {
             for(AxisAlignedBB obstacle : collisions.query(component.bounds.addCoord(x, 0, z))) {
-               fraction = Math.min(fraction, component.clipFraction(obstacle, x, 0, z));
+               double clipped = component.clipFraction(obstacle, x, 0, z);
+               if(diagnostics && clipped < fraction) diagonalBlocker = "component=" + componentIndex + " " + collisions.describe(obstacle);
+               fraction = Math.min(fraction, clipped);
             }
+            ++componentIndex;
          }
          for(MCH_CarCollisionBox component : diagonal) component.offset(x * fraction, 0, z * fraction);
-         candidates.add(new Horizontal(diagonal, x * fraction, z * fraction));
+         Horizontal third = new Horizontal(diagonal, x * fraction, z * fraction);
+         third.blocker = diagonalBlocker;
+         candidates.add(third);
       }
       return candidates;
    }
@@ -296,6 +342,17 @@ final class MCH_CarBodyMovement {
       return true;
    }
 
+   /** Diagnostic only; uses the same obstacles and SAT overlap as clear(). */
+   static String obstruction(List<MCH_CarCollisionBox> body, Collisions collisions) {
+      for(int i = 0; i < body.size(); ++i) {
+         MCH_CarCollisionBox component = body.get(i);
+         for(AxisAlignedBB obstacle : collisions.query(component.bounds)) {
+            if(component.intersects(obstacle)) return "component=" + i + " " + collisions.describe(obstacle);
+         }
+      }
+      return "no overlap";
+   }
+
    private static List<MCH_CarCollisionBox> copy(List<MCH_CarCollisionBox> body) {
       List<MCH_CarCollisionBox> result = new ArrayList<MCH_CarCollisionBox>(body.size());
       for(MCH_CarCollisionBox component : body) result.add(component.copy());
@@ -309,19 +366,36 @@ final class MCH_CarBodyMovement {
    }
 
    private static double clip(List<MCH_CarCollisionBox> body, Collisions collisions, int axis, double requested) {
+      return clip(body, collisions, axis, requested, null);
+   }
+
+   private static double clip(List<MCH_CarCollisionBox> body, Collisions collisions, int axis,
+         double requested, StringBuilder blockers) {
       double allowed = requested;
+      String blocker = "";
+      int componentIndex = 0;
       for(MCH_CarCollisionBox component : body) {
          AxisAlignedBB sweep = component.bounds.addCoord(axis == 0 ? requested : 0,
                axis == 1 ? requested : 0, axis == 2 ? requested : 0);
          for(AxisAlignedBB obstacle : collisions.query(sweep)) {
-            allowed = component.clip(obstacle, axis, allowed);
+            double clipped = component.clip(obstacle, axis, allowed);
+            if(blockers != null && Math.abs(clipped) < Math.abs(allowed))
+               blocker = "axis=" + axis + " component=" + componentIndex + " " + collisions.describe(obstacle);
+            allowed = clipped;
          }
+         ++componentIndex;
       }
+      if(blockers != null && !blocker.isEmpty()) blockers.append(blocker).append(' ');
       return allowed;
    }
 
    static double move(List<MCH_CarCollisionBox> body, Collisions collisions, int axis, double requested) {
-      double allowed = clip(body, collisions, axis, requested);
+      return move(body, collisions, axis, requested, null);
+   }
+
+   private static double move(List<MCH_CarCollisionBox> body, Collisions collisions, int axis,
+         double requested, StringBuilder blockers) {
+      double allowed = clip(body, collisions, axis, requested, blockers);
       for(MCH_CarCollisionBox component : body) {
          component.offset(axis == 0 ? allowed : 0, axis == 1 ? allowed : 0, axis == 2 ? allowed : 0);
       }

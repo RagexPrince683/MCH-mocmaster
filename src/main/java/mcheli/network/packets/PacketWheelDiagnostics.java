@@ -17,15 +17,18 @@ import net.minecraft.world.World;
 /** Server-to-one-rider text snapshot; network callbacks never mutate world/entity state. */
 public class PacketWheelDiagnostics extends PacketBase {
    private static final Charset UTF8 = Charset.forName("UTF-8");
-   private static final int MAX_LINES = 128, MAX_BYTES = 512;
+   private static final int MAX_LINES = 256, MAX_BYTES = 512;
    private static final AtomicReference<PacketWheelDiagnostics> PENDING = new AtomicReference<PacketWheelDiagnostics>();
    private static PacketWheelDiagnostics current;
    private static EntityPlayer clientPlayer;
    private static World clientWorld;
    private static long receivedAt;
    private static boolean clientEnabled;
+   private static String unavailable = "waiting for server packet";
+   private static int lastServerTick = -1;
    private int observer, dimension, vehicle = -1;
-   private String uuid = "";
+   private String vehicleIdentity = "";
+   public int serverTick = -1;
    private boolean enabled;
    public List<String> left = Collections.emptyList(), right = Collections.emptyList();
 
@@ -33,17 +36,22 @@ public class PacketWheelDiagnostics extends PacketBase {
    public PacketWheelDiagnostics(EntityPlayerMP player, MCH_EntityTank car, boolean enabled,
          List<String> left, List<String> right) {
       this.observer = player.getEntityId(); this.dimension = player.dimension; this.enabled = enabled;
-      if(car != null) { this.vehicle = car.getEntityId(); this.uuid = car.getUniqueID().toString(); }
+      if(car != null) {
+         this.vehicle = car.getEntityId(); this.vehicleIdentity = car.getCommonUniqueId();
+         this.serverTick = car.ticksExisted;
+      }
       this.left = left; this.right = right;
    }
 
    public void encodeInto(ChannelHandlerContext ctx, ByteBuf data) {
       data.writeInt(observer); data.writeInt(dimension); data.writeInt(vehicle); data.writeBoolean(enabled);
-      writeString(data, uuid); writeLines(data, left); writeLines(data, right);
+      data.writeInt(serverTick);
+      writeString(data, vehicleIdentity); writeLines(data, left); writeLines(data, right);
    }
    public void decodeInto(ChannelHandlerContext ctx, ByteBuf data) {
       observer = data.readInt(); dimension = data.readInt(); vehicle = data.readInt(); enabled = data.readBoolean();
-      uuid = readString(data); left = readLines(data); right = readLines(data);
+      serverTick = data.readInt();
+      vehicleIdentity = readString(data); left = readLines(data); right = readLines(data);
    }
    private static void writeString(ByteBuf data, String value) {
       byte[] bytes = value.getBytes(UTF8);
@@ -71,23 +79,58 @@ public class PacketWheelDiagnostics extends PacketBase {
 
    public static void clearClient() {
       PENDING.set(null); current = null; clientPlayer = null; clientWorld = null; clientEnabled = false;
+      unavailable = "waiting for server packet"; lastServerTick = -1; receivedAt = 0;
    }
    public static void tickClient(EntityPlayer player) {
       if(player != clientPlayer || player.worldObj != clientWorld) {
          current = null; clientEnabled = false;
+         unavailable = "player/world changed; waiting for server packet";
+         lastServerTick = -1; receivedAt = 0;
          clientPlayer = player; clientWorld = player.worldObj;
       }
       PacketWheelDiagnostics packet = PENDING.getAndSet(null);
-      if(packet != null && packet.observer == player.getEntityId() && packet.dimension == player.dimension) {
-         clientEnabled = packet.enabled;
-         current = packet.enabled && matches(packet, player) ? packet : null;
-         receivedAt = System.nanoTime();
+      if(packet != null) {
+         if(packet.observer != player.getEntityId() || packet.dimension != player.dimension) {
+            current = null;
+            unavailable = "packet rejected: observer/dimension mismatch";
+         } else {
+            clientEnabled = packet.enabled;
+            unavailable = !packet.enabled ? "disabled" : mismatch(packet, player);
+            current = packet.enabled && unavailable == null ? packet : null;
+            lastServerTick = packet.serverTick;
+            receivedAt = System.nanoTime();
+         }
       }
-      if(current != null && (!matches(current, player) || System.nanoTime() - receivedAt > 1000000000L)) current = null;
+      if(current != null) {
+         String reason = mismatch(current, player);
+         if(reason != null || ageMillis() > 1000) {
+            current = null;
+            unavailable = reason != null ? reason : "expired: no packet for >1000 ms";
+         }
+      }
+      if(MCH_WheelDiagnostics.riddenCar(player) == null) {
+         current = null; lastServerTick = -1; receivedAt = 0;
+         unavailable = "no client civilian vehicle (dismounted/dead)";
+      }
+   }
+   private static String mismatch(PacketWheelDiagnostics packet, EntityPlayer player) {
+      if(packet.vehicle < 0) return "no server civilian vehicle";
+      MCH_EntityTank car = MCH_WheelDiagnostics.riddenCar(player);
+      if(car == null) return "no client civilian vehicle";
+      if(car.getEntityId() != packet.vehicle) return "vehicle entity ID mismatch";
+      if(packet.vehicleIdentity.isEmpty() || !packet.vehicleIdentity.equals(car.getCommonUniqueId()))
+         return "vehicle synchronized identity mismatch";
+      return null;
    }
    private static boolean matches(PacketWheelDiagnostics packet, EntityPlayer player) {
-      MCH_EntityTank car = MCH_WheelDiagnostics.riddenCar(player);
-      return car != null && car.getEntityId() == packet.vehicle && car.getUniqueID().toString().equals(packet.uuid);
+      return mismatch(packet, player) == null;
+   }
+   public static long ageMillis() { return receivedAt == 0 ? -1 : (System.nanoTime() - receivedAt) / 1000000L; }
+   public static String status(EntityPlayer player) {
+      String reason = current != null ? mismatch(current, player) : unavailable;
+      if(reason == null && ageMillis() > 1000) reason = "expired: no packet for >1000 ms";
+      return "S snapshot=" + (reason == null ? "current" : "N/A (" + reason + ")")
+            + " tick=" + lastServerTick + " age=" + ageMillis() + " ms";
    }
    public static boolean isVisible(EntityPlayer player) {
       return clientEnabled && player == clientPlayer && player.worldObj == clientWorld

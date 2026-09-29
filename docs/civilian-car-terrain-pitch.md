@@ -660,3 +660,14 @@ total lift accounting, accepted-angle commit and wheel reconciliation. Compilati
 results are recorded in CHANGELOG.md. No new test infrastructure or gameplay
 capture was created. Continuous climbing, live diagnostics and dedicated-server/
 multiplayer behavior have not been observed for this change.
+
+The player-specific `/mcheli debugwheels true` HUD now matches the spawn-synchronized
+common vehicle identity and reports packet rejection/expiry reasons, server tick and
+receipt age. Its wrapped, paged columns retain every evaluated step and rotation
+decision, collision component/block attribution, pre/post-movement velocity,
+yaw-relative requested/accepted travel, and exact blocked-axis cleanup conditions.
+See `commands.md` for field timing and paging. This diagnostic repair changes no
+movement rules. The supplied stopped-car screenshots had no authoritative snapshot;
+they cannot select a failing terrain, clearance, support, drive or cleanup branch.
+Straight bumps and diagonal repeated steps still require a current server capture
+before a further climbing correction can be attributed to a confirmed cause.

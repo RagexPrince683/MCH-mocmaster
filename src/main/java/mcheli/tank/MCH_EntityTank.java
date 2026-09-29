@@ -511,10 +511,21 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       MCH_CarBodyMovement.Trace civilianTrace = null;
       float poseYaw = this.getRotYaw(), posePitch = this.getRotPitch(), poseRoll = this.getRotRoll();
       if(this.getTankInfo() != null && this.getTankInfo().civilianCarGrip) {
-         final MCH_CarBodyMovement.Collisions collisions = this::getBodyComponentCollisions;
+         final boolean diagnostics = !super.worldObj.isRemote
+               && (this.getTankInfo().carGripDiagnostics || MCH_WheelDiagnostics.hasViewer(this));
+         final MCH_CarBodyMovement.Collisions collisions = !diagnostics ? this::getBodyComponentCollisions
+               : new MCH_CarBodyMovement.Collisions() {
+                  final java.util.Map<AxisAlignedBB, String> sources = new java.util.IdentityHashMap<AxisAlignedBB, String>();
+                  public List<AxisAlignedBB> query(AxisAlignedBB sweep) {
+                     sources.clear();
+                     return getBodyComponentCollisions(sweep, sources);
+                  }
+                  public String describe(AxisAlignedBB obstacle) { return sources.get(obstacle); }
+               };
          if(!super.worldObj.isRemote && (this.getTankInfo().carGripDiagnostics || MCH_WheelDiagnostics.hasViewer(this))) {
             civilianTrace = new MCH_CarBodyMovement.Trace();
             civilianTrace.inputX = inputX; civilianTrace.inputZ = inputZ;
+            civilianTrace.preMotionX = super.motionX; civilianTrace.preMotionZ = super.motionZ;
             civilianTrace.desiredYaw = this.getRotYaw();
             civilianTrace.targetPitch = this.WheelMng.targetPitch;
             civilianTrace.targetRoll = this.WheelMng.targetRoll;
@@ -526,6 +537,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
             poseRise = pose.rise;
          }
          final float startPitch = this.getRotPitch(), startRoll = this.getRotRoll();
+         final MCH_CarBodyMovement.Trace rotationTrace = civilianTrace;
          // The raised retry may use only the unconsumed part of this tick's
          // original two-degree target, not another two degrees after pose solving.
          final float pitchDelta = this.carBodyPitch
@@ -535,7 +547,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          MCH_CarBodyMovement.StepRotation rotation = super.worldObj.isRemote
                || pitchDelta == 0 && rollDelta == 0 ? null
                : (x, y, z, fraction) -> this.civilianStepRotation(collisions, x, y, z,
-                     startPitch, startRoll, pitchDelta * fraction, rollDelta * fraction);
+                     startPitch, startRoll, pitchDelta * fraction, rollDelta * fraction, rotationTrace);
          List<MCH_CarCollisionBox> body = this.carBodyAt(this.getRotYaw(), this.getRotPitch(), this.getRotRoll(), 0, 0);
          civilianMovement = MCH_CarBodyMovement.resolveBody(body, collisions, mx, my, mz,
                super.ySize < 0.05F ? Math.max(0, super.stepHeight - poseRise) : 0,
@@ -706,6 +718,7 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       this.setRotYaw(this.carBodyYaw); this.setRotPitch(this.carBodyPitch); this.setRotRoll(this.carBodyRoll);
       List<MCH_CarCollisionBox> initial = this.carBodyAt(this.carBodyYaw, this.carBodyPitch, this.carBodyRoll, 0, 0);
       if(!MCH_CarBodyMovement.clear(initial, collisions)) {
+         if(trace != null) trace.decisions.add("S initial pose: " + MCH_CarBodyMovement.obstruction(initial, collisions));
          double up = MCH_CarBodyMovement.recoverUp(initial, collisions, 0.1D, super.stepHeight);
          if(trace != null) trace.pose = up > 0 ? "embedded_recovery" : "embedded_blocked";
          super.posY += up;
@@ -736,11 +749,20 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
          double lift = 0;
          if(!MCH_CarBodyMovement.clear(this.carBodyAt(midYaw, midPitch, midRoll, 0, pitchRollArc, yawArc), collisions)) {
             if(rise <= 0 || !MCH_CarBodyMovement.clear(
-                  this.carBodyAt(midYaw, midPitch, midRoll, rise, pitchRollArc, yawArc), collisions)) continue;
+                  this.carBodyAt(midYaw, midPitch, midRoll, rise, pitchRollArc, yawArc), collisions)) {
+               if(trace != null) trace.decisions.add("S pose f=" + fraction + " angular clearance rejected: "
+                     + MCH_CarBodyMovement.obstruction(this.carBodyAt(midYaw, midPitch, midRoll,
+                           rise, pitchRollArc, yawArc), collisions));
+               continue;
+            }
             lift = rise;
          }
          List<MCH_CarCollisionBox> finalBody = this.carBodyAt(yaw, pitch, roll, lift, 0);
-         if(!MCH_CarBodyMovement.clear(finalBody, collisions)) continue;
+         if(!MCH_CarBodyMovement.clear(finalBody, collisions)) {
+            if(trace != null) trace.decisions.add("S pose f=" + fraction + " final clearance rejected: "
+                  + MCH_CarBodyMovement.obstruction(finalBody, collisions));
+            continue;
+         }
          double down = MCH_CarBodyMovement.move(finalBody, collisions, 1, -lift);
          if(trace != null) {
             trace.pose = lift > 0 ? "accepted_lift" : "accepted_unlifted";
@@ -756,15 +778,23 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
 
    /** Read-only raised pose candidate, at either end of the checked horizontal sweep. */
    private List<MCH_CarCollisionBox> civilianStepRotation(MCH_CarBodyMovement.Collisions collisions,
-         double x, double y, double z, float pitch, float roll, float pitchDelta, float rollDelta) {
+         double x, double y, double z, float pitch, float roll, float pitchDelta, float rollDelta,
+         MCH_CarBodyMovement.Trace trace) {
       double arc = Math.toRadians(Math.abs(pitchDelta) + Math.abs(rollDelta)) * 0.5D;
       List<MCH_CarCollisionBox> envelope = this.carBodyAt(this.getRotYaw(), pitch + pitchDelta * 0.5F,
             roll + rollDelta * 0.5F, y, arc);
       for(MCH_CarCollisionBox component : envelope) component.offset(x, 0, z);
-      if(!MCH_CarBodyMovement.clear(envelope, collisions)) return null;
+      if(!MCH_CarBodyMovement.clear(envelope, collisions)) {
+         if(trace != null) trace.decisions.add("S rotation at " + MCH_WheelDiagnostics.xyz(x, y, z)
+               + " pitch=" + MCH_WheelDiagnostics.n(pitch + pitchDelta) + " angular: "
+               + MCH_CarBodyMovement.obstruction(envelope, collisions));
+         return null;
+      }
       List<MCH_CarCollisionBox> body = this.carBodyAt(this.getRotYaw(), pitch + pitchDelta, roll + rollDelta, y, 0);
       for(MCH_CarCollisionBox component : body) component.offset(x, 0, z);
-      return MCH_CarBodyMovement.clear(body, collisions) ? body : null;
+      if(MCH_CarBodyMovement.clear(body, collisions)) return body;
+      if(trace != null) trace.decisions.add("S rotation final: " + MCH_CarBodyMovement.obstruction(body, collisions));
+      return null;
    }
 
    /** Read-only support at the present axle footprint, never at the pending destination. */

@@ -664,3 +664,35 @@ Developer/backend
   version 52. No tests, harnesses, fixtures, or temporary Java files were created.
   HUD readability, diagonal climbing diagnosis, dedicated-server and multiplayer
   behavior still require in-game verification. No packaging/reobfuscation was run.
+
+2026-09-28 21:09 — Repair authoritative civilian wheel snapshot acceptance
+
+- On the current ea615ed2 branch including 9fcc3e1e, traced command permissions,
+  rider subscriptions, server END-tick delivery, client acceptance/expiry and HUD,
+  plus drive, terrain, pose, compound sweeps, steps, contact and velocity cleanup.
+  Inspected both reverted climbing attempts without restoring their logic.
+- Fix snapshot matching to use the common vehicle identity synchronized by this
+  mod's spawn data. Forge 1.7.10 creates client mod entities without synchronizing
+  their vanilla entity UUID; the previous UUID comparison rejected valid snapshots
+  while leaving the subscribed HUD visible. Preserve observer, dimension, entity-ID
+  and rider checks, private delivery and clearing on dismount/world changes.
+- Show explicit unavailable reasons, server vehicle tick and monotonic receipt age
+  on every HUD page. Wrap both columns within the viewport and page long traces
+  with PgUp/PgDn while preserving readable font size and enclosing background.
+- Record pre/post-movement horizontal velocity, yaw-relative requested/accepted
+  travel, blocked-axis conditions, and every evaluated step/rotation candidate's
+  rise, progress, support, clearance and selection/rejection reason. Attribute
+  clipped sweeps and rejected poses to collision components and actual block
+  positions or entity IDs from the existing collector. Mark unperformed sweep or
+  landing fields N/A; retain terrain heights/counts, actual drive force and physical
+  wheel contacts. Use six decimal places for small forces and sideways travel.
+- No movement correction is asserted: neither supplied screenshot contains a
+  server movement snapshot, so the stop's terrain/clearance/support/drive/cleanup
+  branch remains unidentified. Physics, traction, collider sizes, step budget,
+  definitions and non-civilian behavior are unchanged. Updated existing docs.
+- Final offline compileJava passed with existing Gradle/Java 25/Jabel tooling after
+  correcting a packet tick-access compile error. All six changed top-level Java
+  classes have Java 8 class version 52. Source/diff review and whitespace checks
+  performed; no test artifacts, packaging, reobfuscation or game launch. Live HUD
+  fit/paging, server delivery, dedicated-server/multiplayer operation and straight
+  or diagonal climbing still require in-game verification and authoritative captures.

@@ -5071,7 +5071,16 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return getCollidingBoundingBoxes(this, sweep, false);
    }
 
+   protected List<AxisAlignedBB> getBodyComponentCollisions(AxisAlignedBB sweep, java.util.Map<AxisAlignedBB, String> sources) {
+      return getCollidingBoundingBoxes(this, sweep, false, sources);
+   }
+
    private static List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB, boolean includeExtraBoxes) {
+      return getCollidingBoundingBoxes(par1Entity, par2AxisAlignedBB, includeExtraBoxes, null);
+   }
+
+   private static List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
+         boolean includeExtraBoxes, java.util.Map<AxisAlignedBB, String> sources) {
       //todo: make creative players/non survival mode players not collide with aircraft collisions
       ArrayList collidingBoundingBoxes = new ArrayList();
       collidingBoundingBoxes.clear();
@@ -5088,7 +5097,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                for(int list = k - 1; list < l; ++list) {
                   Block j2 = W_WorldFunc.getBlock(par1Entity.worldObj, d0, list, l1);
                   if(j2 != null) {
+                     int first = collidingBoundingBoxes.size();
                      j2.addCollisionBoxesToList(par1Entity.worldObj, d0, list, l1, par2AxisAlignedBB, collidingBoundingBoxes, par1Entity);
+                     if(sources != null) for(int index = first; index < collidingBoundingBoxes.size(); ++index)
+                        sources.put((AxisAlignedBB)collidingBoundingBoxes.get(index), "block=" + d0 + "," + list + "," + l1);
                   }
                }
             }
@@ -5113,11 +5125,13 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             AxisAlignedBB axisalignedbb1 = entity.getBoundingBox();
             if(axisalignedbb1 != null && axisalignedbb1.intersectsWith(par2AxisAlignedBB)) {
                collidingBoundingBoxes.add(axisalignedbb1);
+               if(sources != null) sources.put(axisalignedbb1, "entity=" + entity.getEntityId());
             }
 
             axisalignedbb1 = par1Entity.getCollisionBox(entity);
             if(axisalignedbb1 != null && axisalignedbb1.intersectsWith(par2AxisAlignedBB)) {
                collidingBoundingBoxes.add(axisalignedbb1);
+               if(sources != null) sources.put(axisalignedbb1, "entity=" + entity.getEntityId());
             }
          }
       }

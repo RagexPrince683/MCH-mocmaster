@@ -59,7 +59,8 @@ public final class MCH_WheelDiagnostics {
       List<String> left = new ArrayList<String>(), right = new ArrayList<String>();
       if(car != null) {
          boolean fresh = car.wheelDebugTick == car.ticksExisted && car.wheelDebugMovement != null;
-         left.add("S tick=" + car.ticksExisted + " (blocks, blocks/tick)");
+         left.add("S vehicle tick=" + car.ticksExisted + " decision tick=" + car.wheelDebugTick);
+         left.add("S movement=" + (fresh ? "current" : "not captured this tick") + " (blocks, blocks/tick)");
          MCH_WheelManager.CarContact contact = car.WheelMng.getCarGroundContact(false);
          left.add("S contact front/rear=" + (fresh ? contact.front + "/" + contact.rear : "N/A"));
          MCH_CarDrivetrain engine = car.carDrivetrain;
@@ -67,6 +68,8 @@ public final class MCH_WheelDiagnostics {
          left.add("S driven axle=" + (drivetrain ? car.getTankInfo().driveType : "N/A"));
          left.add("S throttle=" + (drivetrain ? n(engine.throttle) : "N/A")
                + " RPM=" + (drivetrain ? n(engine.rpm) : "N/A") + " gear=" + (drivetrain ? engine.gear : "N/A"));
+         left.add("S W/S=" + car.throttleUp + "/" + car.throttleDown + " running=" + (drivetrain && engine.running));
+         left.add("S service/handbrake=" + (drivetrain ? engine.serviceBrake + "/" + engine.handbrake : "N/A"));
          left.add("S horizontal velocity=" + n(car.motionX) + "," + n(car.motionZ)
                + " speed=" + n(Math.hypot(car.motionX, car.motionZ)));
          if(fresh) left.addAll(car.wheelDebugMovement);
@@ -111,6 +114,14 @@ public final class MCH_WheelDiagnostics {
       lines.add("S input X/Z=" + n(trace.inputX) + "," + n(trace.inputZ));
       lines.add("S requested XYZ=" + xyz(x, y, z));
       lines.add("S accepted XYZ=" + xyz(result.x, result.y, result.z));
+      lines.add("S pre-move velocity X/Z=" + n(trace.preMotionX) + "," + n(trace.preMotionZ));
+      lines.add("S post-move velocity X/Z=" + n(car.motionX) + "," + n(car.motionZ));
+      double yaw = Math.toRadians(car.getRotYaw());
+      lines.add("S translation basis yaw=" + n(car.getRotYaw()));
+      lines.add("S requested forward/side=" + n(-x * Math.sin(yaw) + z * Math.cos(yaw))
+            + "/" + n(x * Math.cos(yaw) + z * Math.sin(yaw)));
+      lines.add("S accepted forward/side=" + n(-result.x * Math.sin(yaw) + result.z * Math.cos(yaw))
+            + "/" + n(result.x * Math.cos(yaw) + result.z * Math.sin(yaw)));
       lines.add("S total accepted Y=" + n(result.y + poseY));
       // Intermediate candidate evaluations can overwrite the CSV trace's cleanup fields.
       // Describe the actual returned result that controlled velocity cleanup.
@@ -118,6 +129,10 @@ public final class MCH_WheelDiagnostics {
       String cleanupX = result.blockedX ? ("embedded".equals(trace.selected) ? "embedded" : noProgress ? "no_progress" : "final_contact") : "none";
       String cleanupZ = result.blockedZ ? ("embedded".equals(trace.selected) ? "embedded" : noProgress ? "no_progress" : "final_contact") : "none";
       lines.add("S cleanup X/Z=" + cleanupX + "/" + cleanupZ);
+      lines.add("S blocked X/Z=" + result.blockedX + "/" + result.blockedZ + " => zero axis velocity");
+      lines.add("S no_progress: clipped request AND travel <=1e-7");
+      lines.add("S final_contact: clipped request AND 1e-5 axis probe clipped >1e-7");
+      lines.add("S embedded: initial overlap AND nonzero axis request");
       // Include sweep-order and diagonal candidates already recorded by the solver.
       int rotationCount = 0, rotationClear = 0, rotationLanded = 0;
       for(String path : trace.paths.toString().split(";")) {
@@ -130,7 +145,7 @@ public final class MCH_WheelDiagnostics {
             ++rotationCount;
             if(Boolean.parseBoolean(values[4])) ++rotationLanded;
             if(Boolean.parseBoolean(values[5])) ++rotationClear;
-            if(!stage.equals(trace.selected)) continue;
+            continue; // Detailed decisions below include every rotation candidate.
          }
          lines.add("S " + stage + " XYZ=" + xyz(Double.parseDouble(values[0]),
                Double.parseDouble(values[1]), Double.parseDouble(values[2]))
@@ -141,11 +156,12 @@ public final class MCH_WheelDiagnostics {
       lines.add("S rotation clearance rejections=" + trace.rotationClearanceRejected);
       lines.add("S paths: 0=X then Z, 1=Z then X, 2=diagonal");
       lines.add("S L/C=landed/clear (N/A=not sampled)");
+      lines.addAll(trace.decisions);
       return lines;
    }
 
    public static String n(double value) {
-      return Double.isNaN(value) || Double.isInfinite(value) ? "N/A" : String.format(Locale.ROOT, "%.3f", value);
+      return Double.isNaN(value) || Double.isInfinite(value) ? "N/A" : String.format(Locale.ROOT, "%.6f", value);
    }
    public static String xyz(double x, double y, double z) { return n(x) + "," + n(y) + "," + n(z); }
 }
