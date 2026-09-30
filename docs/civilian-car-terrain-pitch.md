@@ -3,8 +3,8 @@
 The earlier sections record the pitch and body-collision work after `a94f5f0`,
 including its historical fixture results. `fa6d246` subsequently introduced oriented
 extra-body sweeps, uses a 45-degree terrain pitch limit, and removed the test
-sources mentioned below. The final section, "Reachable full-block steps", describes
-the current correction relative to `dab51cd493d08260e4095218919013d308e53808`.
+sources mentioned below. The latest section describes the current pitch behavior;
+earlier sections record the changes made at the time.
 Earlier sections are historical; their tests and driving procedures do not validate
 the current implementation.
 
@@ -581,7 +581,7 @@ fields to `logs/car-body-movement.csv` in the **game/server working directory**:
 | `step_height`, `step_base_y`, `vertical_y`, `wheel_support`, `body_support` | Effective step budget after pose displacement and ySize gating; base Y when a step was attempted; resolved initial vertical sweep; current-footprint wheel support and body support at the resolver start. Embedded rejection has no vertical sweep. |
 | `cleanup_x/z` | Exact horizontal cleanup branch: `none`, `embedded`, `no_progress` (clipped request with total horizontal progress at most collision epsilon), or `final_contact` (clipped axis blocked by the existing 1e-5 contact probe at the accepted pose). These are observations, not additional probes or continuation solves. |
 | `desired_yaw`, `target_pitch/roll`, `pose_decision`, `pose_fraction` | Requested angles before wheel reconciliation overwrites targets; pose result is `unchanged`, `embedded_recovery`, `embedded_blocked`, `clearance_rejected`, `accepted_lift` or `accepted_unlifted`. Fraction is the accepted fraction of the bounded angular delta, or zero without an accepted rotation. Angles use degrees. |
-| `terrain_reason`, `terrain_pitch`, `terrain_front/rear_y`, `terrain_front/rear_count` | Actual terrain query result before smoothing: `wall_probe`, `missing_axle`, `sampled` or `not_sampled`; averaged world surface heights and sample counts used by that query. Terrain samples do not grant wheel contact. NaN means no sample; `wall_probe` skips axle sampling. |
+| `terrain_reason`, `terrain_pitch`, `terrain_front/rear_y`, `terrain_front/rear_count` | Actual terrain query result before smoothing: `missing_axle`, `sampled`, `sampled_fallback`, `sampled_axle_walk` or `not_sampled`; averaged world surface heights and sample counts used by that query. Terrain samples do not grant wheel contact. NaN means no sample. |
 | `running`, `front/rear_wheel_speed` | Engine active state and tire surface speeds after this tick's drivetrain force integration. Combine with existing pre-drive contact, force, throttle, RPM and brakes to distinguish lost propulsion from rejected movement. |
 
 Existing `paths` retains its format and records all tried translations, permitted
@@ -706,3 +706,25 @@ terrain prediction alone. Straight and diagonal stairs, full blocks, half slabs,
 one-block balance, overhanging center of mass, multiplayer interpolation and
 dedicated-server behavior need in-game checks; `compileJava` only checks source
 compatibility.
+
+## Sustained staircase pitch — 2026-09-30
+
+The pitch sampler still reads actual collision tops at the pending wheel footprints.
+The center-to-axle walk can start only when its first center column is within
+`StepHeight` of the unrotated chassis floor. On a sustained climb, the compound
+body can step high enough that this center tread and the trailing axle are both
+below that range. The missing axle then makes terrain pitch unavailable, and the
+smoothed target decays toward level. When this happens, a reachable opposite axle
+now seeds a second walk across the same wheel side. Each adjacent column must
+contain a real, clear collision surface within `StepHeight` of the preceding one;
+gaps still stop the walk. `sampled_axle_walk` identifies this route in diagnostics.
+
+At a full-block riser, accepted motion can briefly fall below 0.03 block per tick.
+The stopped-car support-balance path previously replaced a valid uphill terrain
+pitch with its support-footprint tip at that speed. A valid front/rear height
+difference now keeps the terrain pitch authoritative, including during a pause.
+Support balance still applies when terrain pitch is unavailable or level. The
+existing pitch smoothing, suspension response, server pose/step clearance, and
+render interpolation are unchanged. Pitch approaches level when the sampled
+front and rear terrain heights become equal. Stair blocks, repeated full blocks,
+isolated bumps, half slabs and the return to level require in-game validation.

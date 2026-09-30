@@ -721,3 +721,14 @@ Developer/backend
 - Updated terrain-pitch and configuration documentation. Final offline `compileJava`
   passed with the existing Forge cache; straight/diagonal stairs, blocks, slabs,
   narrow supports and multiplayer behavior still require in-game verification.
+
+2026-09-30 01:21 — Hold civilian car pitch through staircase climbs
+
+- Let a reachable axle seed a collision-surface walk to the opposite axle when
+  the stepped chassis floor is too high for the center and trailing samples.
+  Each local tread remains bounded by `StepHeight` and requires clearance.
+- Keep a valid unequal front/rear terrain angle through brief low-speed step
+  contact; use the existing support-balance tip when terrain is level or missing.
+  `WeightedCenterZ`, suspension, body collision, and other vehicles are unchanged.
+- Updated terrain-pitch documentation. Offline `compileJava` and diff whitespace
+  checks passed; stair, block, slab and level-transition behavior need in-game checks.

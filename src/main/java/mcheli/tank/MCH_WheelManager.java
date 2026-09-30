@@ -554,7 +554,10 @@ public class MCH_WheelManager {
       float terrainPitch = this.getCivilianTerrainPitch(x, z, info);
       // Weight transfer around a narrow support applies when settling. While
       // driving, the pending tread heights must lead the pitch into a climb.
-      if(Math.hypot(car.motionX, car.motionZ) < 0.03D) {
+      // A real front/rear tread difference remains the pitch reference even if
+      // a step briefly slows the car below the stationary balance threshold.
+      if(Math.hypot(car.motionX, car.motionZ) < 0.03D
+            && (Float.isNaN(terrainPitch) || Math.abs(terrainPitch) < 0.01F)) {
          if(!support.exists() && car instanceof MCH_EntityTank) {
             support = ((MCH_EntityTank)car).getCivilianBodySupportBounds();
          }
@@ -641,22 +644,13 @@ public class MCH_WheelManager {
       double front = 0.0D, rear = 0.0D, frontZ = 0.0D, rearZ = 0.0D;
       int frontCount = 0, rearCount = 0;
       boolean axleFallback = false;
+      boolean axleWalk = false;
       for(MCH_EntityWheel wheel : this.wheels) {
          if(wheel == null || wheel.isDead || wheel.pos == null) continue;
          // Yaw-only locations avoid feeding suspension extension or the previous pitch back
          // into horizontal terrain selection. This is the pending body's wheel footprint.
-         double height = this.sampleCivilianTerrainHeight(wheel.pos.xCoord, 0, x, z,
-               referenceY, step, clearance);
-         if(!Double.isNaN(height)) {
-            // Follow adjacent treads to the axle. StepHeight bounds each local rise,
-            // not the total height difference across a long car on a steep slope.
-            // These are read-only terrain columns; body movement remains one sweep.
-            int samples = Math.max(1, (int)Math.ceil(Math.abs(wheel.pos.zCoord) / 0.5D));
-            for(int sample = 1; sample <= samples && !Double.isNaN(height); ++sample) {
-               height = this.sampleCivilianTerrainHeight(wheel.pos.xCoord,
-                     wheel.pos.zCoord * sample / samples, x, z, height, step, clearance);
-            }
-         }
+         double height = this.walkCivilianTerrainHeight(wheel.pos.xCoord, 0,
+               wheel.pos.zCoord, x, z, referenceY, step, clearance);
          if(Double.isNaN(height)) {
             // Any gap in the walk, including an intermediate column, must still
             // allow an independently reachable axle surface. Do not reuse the last
@@ -664,6 +658,16 @@ public class MCH_WheelManager {
             height = this.sampleCivilianTerrainHeight(wheel.pos.xCoord, wheel.pos.zCoord,
                   x, z, referenceY, step, clearance);
             axleFallback |= !Double.isNaN(height);
+         }
+         if(Double.isNaN(height)) {
+            // A stepped body can sit more than StepHeight above the center or
+            // trailing axle while its leading axle is still reachable. Walk the
+            // real treads back from that axle, bounding every local height change.
+            double otherZ = wheel.pos.zCoord >= (this.minZ + this.maxZ) * 0.5D
+                  ? this.minZ : this.maxZ;
+            height = this.walkCivilianTerrainHeight(wheel.pos.xCoord, otherZ,
+                  wheel.pos.zCoord, x, z, referenceY, step, clearance);
+            axleWalk |= !Double.isNaN(height);
          }
          if(Double.isNaN(height)) continue;
          if(wheel.pos.zCoord >= this.weightedCenter.zCoord) {
@@ -680,8 +684,24 @@ public class MCH_WheelManager {
       if(frontCount == 0 || rearCount == 0) return Float.NaN;
       float pitch = MCH_CarTerrainPitch.angle(front / frontCount, rear / rearCount,
             frontZ / frontCount - rearZ / rearCount);
-      if(trace != null) { trace.reason = axleFallback ? "sampled_fallback" : "sampled"; trace.pitch = pitch; }
+      if(trace != null) { trace.reason = axleWalk ? "sampled_axle_walk"
+            : axleFallback ? "sampled_fallback" : "sampled"; trace.pitch = pitch; }
       return pitch;
+   }
+
+   private double walkCivilianTerrainHeight(double localX, double startZ, double endZ,
+         double x, double z, double referenceY, double step, double clearance) {
+      double height = this.sampleCivilianTerrainHeight(localX, startZ, x, z,
+            referenceY, step, clearance);
+      // StepHeight bounds each adjacent tread, not the total rise across a car.
+      // No missing column can inherit the preceding tread as support.
+      int samples = Math.max(1, (int)Math.ceil(Math.abs(endZ - startZ) / 0.5D));
+      for(int sample = 1; sample <= samples && !Double.isNaN(height); ++sample) {
+         height = this.sampleCivilianTerrainHeight(localX,
+               startZ + (endZ - startZ) * sample / samples,
+               x, z, height, step, clearance);
+      }
+      return height;
    }
 
    private double sampleCivilianTerrainHeight(double localX, double localZ, double x, double z,
