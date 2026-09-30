@@ -17,9 +17,10 @@ Normal pilot and passenger exits use the physical state of Minecraft's configure
 both positive keyboard codes and negative mouse-button codes are supported. A hold belongs to one
 player, world, connection, direct mount, parent vehicle, and seat. Release, death, a blocking GUI,
 replay ownership, or any change to that context cancels it. Completion queues exactly one normal
-dismount request and requires a physical release before another hold can begin.
+dismount request and requires a physical release before another hold can begin. The server may
+complete that request on a later tick if its hold started after the client's clock.
 
-When the claimed parent vehicle reports `isDestroyed()`, a physical Sneak press queues the same
+When the claimed parent vehicle reports `isDestroyed()`, a physical Sneak press sends the same
 pilot or passenger exit request immediately instead of starting or completing the three-second
 hold. This also applies if destruction occurs while Sneak is already held: the client cancels the
 active hold and queues the immediate request on the next input update. Sneak remains filtered from
@@ -36,9 +37,11 @@ riding a non-MC-Heli entity.
 
 The client sends a mount-bound hold-start signal immediately and a cancellation on every reset. The
 server records its own monotonic start time; no client elapsed duration is transmitted or trusted.
-A normal exit request is accepted only after three server-observed seconds and only while the player
-still rides the exact entity, parent, and seat from the start signal. Acceptance consumes the server
-hold, so early, stale, duplicate, and wrong-mount requests are rejected.
+A normal exit request completes only after three server-observed seconds and only while the player
+still rides the exact entity, parent, and seat from the start signal. If the completed client
+request arrives before the server clock reaches three seconds, the server retains it and completes
+the exit on a later tick. Acceptance consumes the server hold; stale, duplicate, and wrong-mount
+requests cannot detach the player.
 
 The server waives only the elapsed-hold requirement when the claimed parent vehicle currently
 reports `isDestroyed()`. It still requires the player to be alive and riding the exact claimed live

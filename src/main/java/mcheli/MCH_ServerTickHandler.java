@@ -93,6 +93,7 @@ public class MCH_ServerTickHandler {
          return;
       }
       if(event.phase != Phase.END) return;
+      mcheli.aircraft.MCH_BaseVehiclePacketHandler.tickNormalDismountHolds();
       tickMountGraphs();
       mcheli.tank.MCH_WheelDiagnostics.tickServer();
       if(++this.tick < UPDATE_INTERVAL_TICKS) return;

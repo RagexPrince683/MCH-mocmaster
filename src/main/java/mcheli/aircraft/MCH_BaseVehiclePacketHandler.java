@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.Iterator;
 import mcheli.MCH_Lib;
 import mcheli.MCH_DismountDiagnostics;
 import mcheli.MCH_MOD;
@@ -54,6 +55,7 @@ public class MCH_BaseVehiclePacketHandler {
       final UUID parentUuid;
       final net.minecraft.world.World world;
       final long startedNanos;
+      boolean exitRequested;
 
       ServerDismountHold(EntityPlayer player, Entity mount, MCH_EntityBaseVehicle parent,
             int mountEntityId, int parentEntityId, int seatId) {
@@ -86,12 +88,16 @@ public class MCH_BaseVehiclePacketHandler {
             Integer.valueOf(mountEntityId), Integer.valueOf(parentEntityId), Integer.valueOf(seatId));
       if(action == 2) {
          ServerDismountHold removed = normalDismountHolds.get(player);
-         if(removed != null && removed.matches(mountEntityId, parentEntityId, seatId)) {
+         boolean alreadyRequested = removed != null && removed.exitRequested;
+         if(removed != null && removed.matches(mountEntityId, parentEntityId, seatId)
+               && !removed.exitRequested) {
             normalDismountHolds.remove(player);
          } else {
             removed = null;
          }
-         logServerDismount(player, removed, "Hold cancelled", "physical Sneak released");
+         logServerDismount(player, removed,
+               alreadyRequested ? "Completed request retained" : "Hold cancelled",
+               "physical Sneak released");
          return;
       }
       if(action != 1 || !matchesCurrentMount(player, parent, mountEntityId, parentEntityId, seatId)) {
@@ -190,7 +196,10 @@ public class MCH_BaseVehiclePacketHandler {
             && (hold == null || !hold.matchesCurrent(player, mount, parent, actualSeatId))) {
          rejection = "hold missing, stale, or wrong mount";
       } else if(rejection == null && !destroyed && elapsed < NORMAL_DISMOUNT_HOLD_NANOS) {
-         rejection = "three-second server hold incomplete";
+         // The client's three seconds begin before the start packet reaches the server.
+         // Retain the completed request until the server's own clock catches up.
+         hold.exitRequested = true;
+         rejection = "waiting for three-second server hold";
       }
 
       if(rejection == null) {
@@ -213,13 +222,38 @@ public class MCH_BaseVehiclePacketHandler {
       return rejection == null;
    }
 
+   /** Completes a received exit request once the server hold has elapsed. Runs on the server tick thread. */
+   public static void tickNormalDismountHolds() {
+      Iterator<Map.Entry<EntityPlayer, ServerDismountHold>> iterator = normalDismountHolds.entrySet().iterator();
+      while(iterator.hasNext()) {
+         Map.Entry<EntityPlayer, ServerDismountHold> entry = iterator.next();
+         EntityPlayer player = entry.getKey();
+         ServerDismountHold hold = entry.getValue();
+         Entity mount = player != null ? player.ridingEntity : null;
+         MCH_EntityBaseVehicle parent = getDismountParent(mount);
+         int seatId = mount instanceof MCH_EntitySeat ? ((MCH_EntitySeat)mount).seatID : 0;
+         if(!matchesCurrentMount(player, parent, hold.mountEntityId, hold.parentEntityId, hold.seatId)
+               || !hold.matchesCurrent(player, mount, parent, seatId)) {
+            iterator.remove();
+         } else if(hold.exitRequested && System.nanoTime() - hold.startedNanos >= NORMAL_DISMOUNT_HOLD_NANOS) {
+            iterator.remove();
+            logServerDismount(player, hold, "Deferred exit accepted", "server hold complete");
+            if(mount instanceof MCH_EntitySeat) {
+               parent.unmountEntityFromSeat(player);
+            } else {
+               parent.unmountEntity();
+            }
+         }
+      }
+   }
+
    private static boolean matchesCurrentMount(EntityPlayer player, MCH_EntityBaseVehicle parent,
          int mountEntityId, int parentEntityId, int seatId) {
       Entity mount = player != null ? player.ridingEntity : null;
       MCH_EntityBaseVehicle actualParent = getDismountParent(mount);
       int actualSeatId = mount instanceof MCH_EntitySeat ? ((MCH_EntitySeat)mount).seatID : 0;
       return player != null && !player.isDead && mount != null && !mount.isDead
-            && parent != null && !parent.isDead && !parent.isDestroyed()
+            && parent != null && !parent.isDead
             && mount.getEntityId() == mountEntityId && actualParent == parent
             && parent.getEntityId() == parentEntityId && actualSeatId == seatId;
    }
@@ -730,7 +764,11 @@ public class MCH_BaseVehiclePacketHandler {
             if(pc1.isUnmount) {
                if(validateNormalDismount(player, ac, pc1.dismountMountEntityId,
                      pc1.dismountParentEntityId, pc1.dismountSeatId)) {
-                  ac.unmountEntityFromSeat(player);
+                  if(player.ridingEntity instanceof MCH_EntitySeat) {
+                     ac.unmountEntityFromSeat(player);
+                  } else if(player.ridingEntity == ac) {
+                     ac.unmountEntity();
+                  }
                }
             } else if(pc1.switchSeat > 0) {
                if(pc1.switchSeat == 3) {

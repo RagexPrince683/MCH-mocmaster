@@ -696,3 +696,15 @@ Developer/backend
   performed; no test artifacts, packaging, reobfuscation or game launch. Live HUD
   fit/paging, server delivery, dedicated-server/multiplayer operation and straight
   or diagonal climbing still require in-game verification and authoritative captures.
+
+2026-09-30 00:11 — Complete first-hold and smoking-vehicle dismounts
+
+- Retain a completed normal dismount request when it reaches the server before the
+  server's own three-second hold expires. Finish it on a later server tick while
+  the same player, vehicle, and seat remain valid, preserving server authority.
+- Send destroyed-vehicle exit requests from the common client input path because
+  vehicle control ticks stop when the vehicle is destroyed. Route pilot and
+  passenger requests through their existing server unmount and safe-exit paths.
+- Updated the dismount contract. Offline `compileJava` passed; first-hold,
+  release/repress, multiplayer synchronization, and 0-health smoking-vehicle
+  behavior still require in-game verification in the current modpack.

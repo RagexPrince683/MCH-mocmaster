@@ -1046,7 +1046,7 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
    }
 
    private void queueDestroyedVehicleDismount(EntityClientPlayerMP player) {
-      if(this.dismountHoldState == DismountHoldState.PENDING) {
+      if(this.dismountHoldState == DismountHoldState.CONSUMED_AWAIT_RELEASE) {
          return;
       }
       if(this.dismountHoldState != DismountHoldState.IDLE) {
@@ -1056,6 +1056,12 @@ public class MCH_ClientCommonTickHandler extends W_TickHandler {
       this.dismountHoldState = DismountHoldState.PENDING;
       MCH_DismountDiagnostics.holdState(player, "PENDING_DESTROYED");
       this.logDismountState("Destroyed vehicle request queued", null, 0L);
+      // Destroyed vehicles no longer run their normal client control handlers.
+      MCH_PacketSeatPlayerControl packet = new MCH_PacketSeatPlayerControl();
+      packet.isUnmount = true;
+      this.populateDismountContext(packet);
+      W_Network.sendToServer(packet);
+      this.dismountHoldState = DismountHoldState.CONSUMED_AWAIT_RELEASE;
    }
 
    private void updateDismountHoldState() {
