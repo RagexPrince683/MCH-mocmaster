@@ -45,6 +45,15 @@ public class MCH_WheelManager {
       double front = Double.NaN, rear = Double.NaN;
       int frontCount, rearCount;
    }
+   static final class SupportBounds {
+      double minX = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY;
+      double minZ = Double.POSITIVE_INFINITY, maxZ = Double.NEGATIVE_INFINITY;
+      void add(double x, double z) {
+         minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+         minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z);
+      }
+      boolean exists() { return minX <= maxX; }
+   }
    private double previousSuspensionBodyFloor = Double.NaN;
    private static Random rand = new Random();
 
@@ -458,6 +467,7 @@ public class MCH_WheelManager {
       int rightCount = 0;
       int supported = 0;
       double totalResponse = 0.0D;
+      SupportBounds support = new SupportBounds();
 
       for(int i = 0; i < this.wheels.length; ++i) {
          MCH_EntityWheel wheel = this.wheels[i];
@@ -486,6 +496,13 @@ public class MCH_WheelManager {
             wheel.suspensionCompressionRate = wheel.suspensionCompressionRate * 0.35F + rawRate * 0.65F;
          }
          wheel.suspensionCompression = compression;
+
+         if(wheel.suspensionCurrentSupported) {
+            double halfX = (wheel.boundingBox.maxX - wheel.boundingBox.minX) * 0.5D;
+            double halfZ = (wheel.boundingBox.maxZ - wheel.boundingBox.minZ) * 0.5D;
+            support.add(wheel.pos.xCoord - halfX, wheel.pos.zCoord - halfZ);
+            support.add(wheel.pos.xCoord + halfX, wheel.pos.zCoord + halfZ);
+         }
 
          double wheelY = anchor.yCoord + wheel.getSuspensionAnchorOffset() - travel + measured;
          wheel.setPosition(anchor.xCoord + x, wheelY, anchor.zCoord + z);
@@ -535,6 +552,20 @@ public class MCH_WheelManager {
 
       // Terrain pitch is independent of suspension compression/contact, including on descent.
       float terrainPitch = this.getCivilianTerrainPitch(x, z, info);
+      // Weight transfer around a narrow support applies when settling. While
+      // driving, the pending tread heights must lead the pitch into a climb.
+      if(Math.hypot(car.motionX, car.motionZ) < 0.03D) {
+         if(!support.exists() && car instanceof MCH_EntityTank) {
+            support = ((MCH_EntityTank)car).getCivilianBodySupportBounds();
+         }
+         if(support.exists()) {
+            float tipPitch = tip(this.weightedCenter.zCoord, support.minZ, support.maxZ);
+            float tipRoll = tip(0.0D, support.minX, support.maxX);
+            if(!Float.isNaN(tipPitch)) terrainPitch = tipPitch;
+            if(!Float.isNaN(tipRoll)) this.targetRoll = MCH_CarTerrainPitch.approach(
+                  this.targetRoll, tipRoll, car.worldObj.isRemote ? 0.28F : 0.45F);
+         }
+      }
       this.targetPitch = MCH_CarTerrainPitch.approach(this.targetPitch, terrainPitch,
             car.worldObj.isRemote ? 0.28F : 0.45F);
       this.updateRenderNeutral(supported, terrainPitch);
@@ -546,6 +577,13 @@ public class MCH_WheelManager {
          car.setRotPitch(this.targetPitch);
          car.setRotRoll(this.targetRoll);
       }
+   }
+
+   private static float tip(double center, double minimum, double maximum) {
+      double overhang = center > maximum + 0.03D ? center - maximum
+            : center < minimum - 0.03D ? center - minimum : 0.0D;
+      return overhang == 0.0D ? Float.NaN
+            : (float)MathHelper.clamp_double(Math.toDegrees(Math.atan2(overhang, 0.5D)), -45.0D, 45.0D);
    }
 
    /** Reconcile predicted suspension with the accepted server body, without a second spring impulse. */

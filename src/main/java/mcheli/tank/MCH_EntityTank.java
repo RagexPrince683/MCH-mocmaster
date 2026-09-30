@@ -797,6 +797,33 @@ public class MCH_EntityTank extends MCH_EntityBaseVehicle {
       return null;
    }
 
+   /** Present body contacts supply a balance patch when no suspension wheel reaches ground. */
+   MCH_WheelManager.SupportBounds getCivilianBodySupportBounds() {
+      MCH_WheelManager.SupportBounds support = new MCH_WheelManager.SupportBounds();
+      double yaw = Math.toRadians(this.getRotYaw());
+      double rightX = Math.cos(yaw), rightZ = Math.sin(yaw);
+      double forwardX = -rightZ, forwardZ = rightX;
+      for(MCH_CarCollisionBox component : this.carBodyAt(this.getRotYaw(), this.getRotPitch(),
+            this.getRotRoll(), 0, 0)) {
+         for(AxisAlignedBB obstacle : this.getBodyComponentCollisions(
+               component.bounds.addCoord(0, -0.02D, 0))) {
+            if(!MCH_CarBodyMovement.changed(-0.02D, component.clip(obstacle, 1, -0.02D))) continue;
+            double minX = Math.max(component.bounds.minX, obstacle.minX);
+            double maxX = Math.min(component.bounds.maxX, obstacle.maxX);
+            double minZ = Math.max(component.bounds.minZ, obstacle.minZ);
+            double maxZ = Math.min(component.bounds.maxZ, obstacle.maxZ);
+            if(minX >= maxX || minZ >= maxZ) continue;
+            for(double wx : new double[]{minX, maxX}) {
+               for(double wz : new double[]{minZ, maxZ}) {
+                  double dx = wx - super.posX, dz = wz - super.posZ;
+                  support.add(dx * rightX + dz * rightZ, dx * forwardX + dz * forwardZ);
+               }
+            }
+         }
+      }
+      return support;
+   }
+
    /** Read-only support at the present axle footprint, never at the pending destination. */
    private boolean hasCurrentCivilianWheelSupport(MCH_CarBodyMovement.Collisions collisions) {
       if(this.WheelMng == null || this.WheelMng.wheels == null) return false;

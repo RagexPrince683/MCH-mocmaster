@@ -297,7 +297,7 @@ The table below maps every vehicle text key found in vehicle parser classes to v
 | `CivilianCarReverseSpeed` | Tank civilian cars | float[0..4], blocks/tick | 0 | Explicit reverse-control opt-in. Positive values cap powered backward horizontal movement; zero/unset/invalid keeps legacy behavior. Absolute value, not multiplied by `AllTankSpeed`; the effective limit cannot exceed validated `Speed`. See [all bundled values and evidence](vehicle-config/civilian-car-reverse-speeds.md). |
 | `CivilianCarDrivetrain` | Tank civilian cars | boolean | false | Server engine, ratio-based automatic gears, RPM, independent brakes and powered-wheel slip. See [all car fields and equations](vehicle-config/tanks.md#civilian-car-drivetrain). |
 | `DriveType` | Tank civilian cars | enum `FWD`, `RWD`, `AWD` | unset | Selects powered axles and their slip. Without the engine opt-in, omitted/invalid values preserve legacy thrust; opted-in engines use all wheels equally. Missing wheels retain configured denominators. Does not enable grip/suspension/steering. See [drivetrain behavior](vehicle-config/tanks.md#civilian-car-drivetrain). |
-| `WeightedCenterZ` | Tank | float[-1000..1000] | 0.0 | fore/aft center of weight |
+| `WeightedCenterZ` | Tank | float[-1000..1000], local blocks | 0.0 | Fore/aft center of mass; positive +Z is forward. Civilian cars use it when balancing on narrow support. |
 | `TrackMaxHP` | Tank | int[1..1000000] | 100 | track durability |
 | `EnableTurretPop` | Tank | boolean | `false` | `true` detaches the exact `$turret` model group and its main-gun child assembly on destruction; models without it skip the effect |
 | `AddTrackHitBox` | Tank | `x,y,z,width,height[,damageFactor]` | damageFactor 1.0 | track hitbox |

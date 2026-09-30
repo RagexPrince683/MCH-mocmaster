@@ -135,15 +135,15 @@ final class MCH_CarBodyMovement {
             double netY = baseY + rise + down;
             if(trace != null) trace.path("step_" + order, candidate.x, netY, candidate.z, rise,
                   supportedBody(candidate.body, collisions), clear(candidate.body, collisions));
-            if(trace != null) trace.candidate("step_" + order, netY, rise, Math.hypot(candidate.x, candidate.z),
+            if(trace != null) trace.candidate("step_" + order, netY, rise, progress(candidate.x, candidate.z, x, z),
                   supportedBody(candidate.body, collisions), clear(candidate.body, collisions),
                   netY < baseY || netY > stepHeight ? "outside_vertical_budget"
                   : !supportedBody(candidate.body, collisions) ? "no_final_support"
                   : !clear(candidate.body, collisions) ? "final_overlap"
-                  : Math.hypot(candidate.x, candidate.z) <= Math.hypot(best.x, best.z) + MCH_CarCollisionBox.EPSILON
+                  : progress(candidate.x, candidate.z, x, z) <= progress(best.x, best.z, x, z) + MCH_CarCollisionBox.EPSILON
                         ? "no_progress_improvement" : "eligible");
             if(netY >= baseY && netY <= stepHeight
-                  && Math.hypot(candidate.x, candidate.z) > Math.hypot(best.x, best.z) + MCH_CarCollisionBox.EPSILON
+                  && progress(candidate.x, candidate.z, x, z) > progress(best.x, best.z, x, z) + MCH_CarCollisionBox.EPSILON
                   && supportedBody(candidate.body, collisions) && clear(candidate.body, collisions)) {
                best = result(candidate.body, collisions, x, z, candidate.x, netY, candidate.z, true, true, trace);
                if(trace != null) {
@@ -186,8 +186,8 @@ final class MCH_CarBodyMovement {
                      // blocked gravity. Consume only the original downward request.
                      double down = move(rotated, collisions, 1, -rise + Math.min(0, y - baseY));
                      double netY = baseY + rise + down;
-                     double progress = Math.hypot(candidate.x, candidate.z);
-                     double bestProgress = Math.hypot(best.x, best.z);
+                     double progress = progress(candidate.x, candidate.z, x, z);
+                     double bestProgress = progress(best.x, best.z, x, z);
                      boolean landedRotation = supportedBody(rotated, collisions);
                      boolean clearRotation = clear(rotated, collisions);
                      String stage = rotationOrder == 0 ? "step_rotate_first_" : "step_rotate_last_";
@@ -199,16 +199,15 @@ final class MCH_CarBodyMovement {
                                  ? "outside_vertical_budget" : !landedRotation ? "no_final_support"
                            : !clearRotation ? "final_overlap"
                            : progress > bestProgress + MCH_CarCollisionBox.EPSILON
-                                 || Math.abs(progress - bestProgress) <= MCH_CarCollisionBox.EPSILON
-                                       && netY < best.y - MCH_CarCollisionBox.EPSILON ? "eligible" : "no_travel_or_lower_landing");
-                     // Equal travel wins only with a lower supported landing.
-                     // Merely changing angle must not lift a stationary body or
-                     // replace a better-supported lower path with a higher one.
+                                 || rotationImproves(best, progress, bestProgress, netY, fraction)
+                                       ? "eligible" : "no_travel_or_pose_improvement");
+                     // At meaningful equal travel, prefer a clear rotation with at
+                     // most the pose solver's small lift. Otherwise the level step
+                     // wins indefinitely and the pitch never catches the incline.
                      if(netY >= Math.min(baseY, y) - MCH_CarCollisionBox.EPSILON
                            && netY <= stepHeight && landedRotation && clearRotation
                            && (progress > bestProgress + MCH_CarCollisionBox.EPSILON
-                                 || Math.abs(progress - bestProgress) <= MCH_CarCollisionBox.EPSILON
-                                       && netY < best.y - MCH_CarCollisionBox.EPSILON)) {
+                                 || rotationImproves(best, progress, bestProgress, netY, fraction))) {
                         Result moved = result(rotated, collisions, x, z, candidate.x, netY, candidate.z,
                               true, true, trace);
                         best = new Result(moved.x, moved.y, moved.z, moved.grounded, moved.stepped,
@@ -236,6 +235,22 @@ final class MCH_CarBodyMovement {
       }
    }
 
+   private static boolean rotationImproves(Result best, double progress, double bestProgress,
+         double y, float fraction) {
+      return progress > MCH_CarCollisionBox.EPSILON
+            && progress >= bestProgress - (best.rotationFraction == 0 ? 0.02D : 0.0D)
+            && y <= best.y + 0.1D
+            && (best.rotationFraction < fraction || progress >= bestProgress
+                  && y < best.y - MCH_CarCollisionBox.EPSILON);
+   }
+
+   /** Travel in the requested direction, with equal cost for unwanted sideways motion. */
+   private static double progress(double x, double z, double requestedX, double requestedZ) {
+      double length = Math.hypot(requestedX, requestedZ);
+      return length <= MCH_CarCollisionBox.EPSILON ? 0
+            : (x * requestedX + z * requestedZ - Math.abs(x * requestedZ - z * requestedX)) / length;
+   }
+
    private static Horizontal horizontal(List<MCH_CarCollisionBox> initial, Collisions collisions,
          double x, double z, Trace trace, double y) {
       Horizontal best = new Horizontal(copy(initial), 0, 0);
@@ -244,7 +259,7 @@ final class MCH_CarBodyMovement {
          if(trace != null && !candidate.blocker.isEmpty()) trace.decisions.add("S normal_" + order + " clipped: " + candidate.blocker);
          if(trace != null) trace.path("normal_" + order, candidate.x, y, candidate.z, 0, false, clear(candidate.body, collisions));
          if(clear(candidate.body, collisions)
-               && Math.hypot(candidate.x, candidate.z) > Math.hypot(best.x, best.z)) {
+               && progress(candidate.x, candidate.z, x, z) > progress(best.x, best.z, x, z)) {
             best = candidate;
             if(trace != null) trace.selected = "normal_" + order;
          }
@@ -311,8 +326,11 @@ final class MCH_CarBodyMovement {
          double requestedX, double requestedZ, double x, double y, double z, boolean grounded, boolean stepped, Trace trace) {
       boolean rejectedX = changed(requestedX, x) && Math.hypot(x, z) <= MCH_CarCollisionBox.EPSILON;
       boolean rejectedZ = changed(requestedZ, z) && Math.hypot(x, z) <= MCH_CarCollisionBox.EPSILON;
-      boolean blockedX = rejectedX || blocked(body, collisions, 0, requestedX, x);
-      boolean blockedZ = rejectedZ || blocked(body, collisions, 2, requestedZ, z);
+      // A supported partial step has already made forward progress. Keep its
+      // heading for the next collision sweep instead of killing one velocity axis.
+      boolean movingStep = stepped && progress(x, z, requestedX, requestedZ) > MCH_CarCollisionBox.EPSILON;
+      boolean blockedX = !movingStep && (rejectedX || blocked(body, collisions, 0, requestedX, x));
+      boolean blockedZ = !movingStep && (rejectedZ || blocked(body, collisions, 2, requestedZ, z));
       if(trace != null) {
          trace.cleanupX = rejectedX ? "no_progress" : blockedX ? "final_contact" : "none";
          trace.cleanupZ = rejectedZ ? "no_progress" : blockedZ ? "final_contact" : "none";

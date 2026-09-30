@@ -669,5 +669,40 @@ yaw-relative requested/accepted travel, and exact blocked-axis cleanup condition
 See `commands.md` for field timing and paging. This diagnostic repair changes no
 movement rules. The supplied stopped-car screenshots had no authoritative snapshot;
 they cannot select a failing terrain, clearance, support, drive or cleanup branch.
-Straight bumps and diagonal repeated steps still require a current server capture
-before a further climbing correction can be attributed to a confirmed cause.
+At that point, straight bumps and diagonal repeated steps still required a current
+server capture before their specific failure tick could be identified.
+
+## Support balance and climbing pose — 2026-09-30
+
+The civilian tick still applies drivetrain force and drag, predicts wheel suspension
+and terrain pitch, then sweeps the oriented body through the configured collision
+shapes. The previous step comparison favored a level raised pose whenever a clear
+rotated pose made the same horizontal progress but landed no lower. A partial
+accepted step could also clear one velocity axis on its final contact probe. These
+source decisions explain how a reachable tread could leave the car level and lose
+speed; they are not a captured in-game failure tick.
+
+Supported step candidates now compare progress along the requested heading with
+sideways deviation charged equally. A clear rotation may win at nearly equal
+progress when its landing is within 0.1 block of the previously selected landing;
+the configured `StepHeight`, final support and full body clearance still bound it.
+A supported partial step with forward progress retains its heading velocity for the
+next collision sweep. A completely rejected movement or an unstepable wall still
+clears blocked velocity. This avoids turning diagonal step contact into a one-axis
+speed reset and sideways slide.
+
+At rest, present wheel collision contacts form a support footprint. If no wheel
+reaches ground, present body contacts form the fallback footprint. A center of mass
+outside that footprint requests a bounded tip. `WeightedCenterZ` is the existing
+fore/aft center in local blocks relative to the vehicle origin; positive +Z is
+forward, and omitted means 0. The lateral center stays at X=0. Predicted wheel
+contacts cannot balance a stopped car, and the terrain pitch of a moving car leads
+the nose into upcoming stairs instead of a rear-only contact pitching it downward.
+With no contact, gravity remains responsible for falling; terrain pitch decays.
+
+Short bumps and slabs still use the existing collision-height samples, pitch
+smoothing and two-degree server pose limit. The body never acquires support from
+terrain prediction alone. Straight and diagonal stairs, full blocks, half slabs,
+one-block balance, overhanging center of mass, multiplayer interpolation and
+dedicated-server behavior need in-game checks; `compileJava` only checks source
+compatibility.

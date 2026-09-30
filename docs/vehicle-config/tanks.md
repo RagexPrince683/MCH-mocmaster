@@ -37,7 +37,7 @@ Set the shared `LWR = true` option to enable the existing tank laser warning ale
 | `SuspensionReboundDamping` | float[0..0.25], acceleration per block/tick of rebound speed | 0.050 | Shock damping while a supported wheel extends; the higher default settles the body after a bump. |
 | `SuspensionTravel` | float[0.05..1.5], blocks | 0.45 | Vertical collision-shape sweep available to each wheel. |
 | `CarGripDiagnostics` | boolean | `false` | Opt-in per-tick server diagnostics in `logs/car-tire-grip.csv`, separate from console output. |
-| `WeightedCenterZ` | float[-1000..1000] | 0 | Moves the simulated center of weight forward/back. Positive/negative effect depends on model orientation. |
+| `WeightedCenterZ` | float[-1000..1000], local blocks | 0 | Fore/aft center of mass relative to the vehicle origin; positive is toward the +Z/front axle. For opted-in civilian cars settling on narrow support, a center beyond the present wheel contact footprint (or body contact if no wheel reaches ground) makes the body tip. |
 | `TrackMaxHP` | int[1..1000000] | 100 | Track durability. |
 | `EnableTurretPop` | boolean | `false` | When `true`, enables the catastrophic detached-turret destruction effect. Requires a configured dynamic turret assembly. |
 | `AddTrackHitBox` | `x,y,z,width,height[,damageFactor]` | none; damage factor 1 | Adds a track-typed extra bounding box. |

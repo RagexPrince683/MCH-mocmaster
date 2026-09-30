@@ -708,3 +708,16 @@ Developer/backend
 - Updated the dismount contract. Offline `compileJava` passed; first-hold,
   release/repress, multiplayer synchronization, and 0-health smoking-vehicle
   behavior still require in-game verification in the current modpack.
+
+2026-09-30 00:52 — Balance civilian cars on real support and follow stair climbs
+
+- Use present wheel contacts, then actual body contacts when no wheel reaches
+  ground, to tip a settled car whose existing `WeightedCenterZ` lies beyond its
+  support. Keep terrain pitch in charge while moving into a climb.
+- Prefer headed progress over contact-induced sideways travel in civilian body
+  sweeps. Permit a clear, supported small rotation at nearly equal step travel and
+  retain heading velocity after a partial supported step; walls and fully rejected
+  travel still stop at collision.
+- Updated terrain-pitch and configuration documentation. Final offline `compileJava`
+  passed with the existing Forge cache; straight/diagonal stairs, blocks, slabs,
+  narrow supports and multiplayer behavior still require in-game verification.

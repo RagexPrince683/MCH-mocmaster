@@ -29,6 +29,8 @@ public class MCH_EntityWheel extends W_Entity {
    public float prevSuspensionCompression;
    public float suspensionCompressionRate;
    public boolean suspensionSupported;
+   /** Contact at the present footprint; predicted contact must not balance a stationary car. */
+   public boolean suspensionCurrentSupported;
    public boolean suspensionCompressionInitialized;
    public float suspensionRestCompression = Float.NaN;
    public double suspensionSupportY = Double.NaN;
@@ -83,6 +85,7 @@ public class MCH_EntityWheel extends W_Entity {
    public double measureSuspensionCompression(Vec3 currentAnchor, Vec3 predictedAnchor, double travel) {
       this.suspensionSupportY = Double.NaN;
       double current = this.measureCompressionAt(currentAnchor, travel);
+      this.suspensionCurrentSupported = current >= 0.0D;
       double predicted = currentAnchor == predictedAnchor ? current : this.measureCompressionAt(predictedAnchor, travel);
       double compression = Math.max(current, predicted);
       this.suspensionSupported = compression >= 0.0D;
