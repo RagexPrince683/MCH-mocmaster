@@ -732,3 +732,10 @@ Developer/backend
   `WeightedCenterZ`, suspension, body collision, and other vehicles are unchanged.
 - Updated terrain-pitch documentation. Offline `compileJava` and diff whitespace
   checks passed; stair, block, slab and level-transition behavior need in-game checks.
+
+2026-09-30 02:44 — Expose door lock control and clarify lock status
+
+- Added the existing vehicle access lock key as Door Lock in the Controls menu,
+  retaining its O default, saved config value, and server-side permission checks.
+- Renamed the pilot HUD status to Door Lock: LOCKED/UNLOCKED and updated the
+  vehicle control documentation. In-game validation remains.

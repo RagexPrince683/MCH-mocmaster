@@ -249,7 +249,7 @@ public class MCH_ConfigGui extends W_GuiContainer {
       this.listKeyBindingButtons.add(new W_GuiButton(54, x1 + 90, y + 220, 60, 20, "Reset All"));
       boolean isValid = true;
       boolean isValid2 = true;
-      MCH_GuiListItemKeyBind[] guiListItemKeyBind = new MCH_GuiListItemKeyBind[32];
+      MCH_GuiListItemKeyBind[] guiListItemKeyBind = new MCH_GuiListItemKeyBind[33];
       MCH_GuiListItemKeyBind guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(200, 300, x1, "Up", MCH_Config.KeyUp);
       MCH_Config configuration = MCH_MOD.config;
       guiListItemKeyBind[0] = guiListItemKeyBind2;
@@ -349,6 +349,8 @@ public class MCH_ConfigGui extends W_GuiContainer {
       guiListItemKeyBind[30] = guiListItemKeyBind2;
       guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(231, 331, x1, "Toggle Active Radar", MCH_Config.KeyRadar);
       guiListItemKeyBind[31] = guiListItemKeyBind2;
+      guiListItemKeyBind2 = new MCH_GuiListItemKeyBind(232, 332, x1, "Door Lock", MCH_Config.KeyVehicleLock);
+      guiListItemKeyBind[32] = guiListItemKeyBind2;
       //calculatedValue = new MCH_GuiListItemKeyBind(227, 327, x1, "Use Weapon Vehicle", MCH_Config.KeyUseWeapon);
       //calculatedValue = MCH_MOD.config;
       //calculatedValue[26] = calculatedValue;

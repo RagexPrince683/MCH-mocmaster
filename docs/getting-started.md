@@ -85,6 +85,7 @@ The config stores key codes rather than names. Common defaults:
 | Switch weapon mode | `KeySwitchWeaponMode` | X |
 | Zoom | `KeyZoom` | Z |
 | Camera mode | `KeyCameraMode` | C |
+| Door Lock | `KeyVehicleLock` | O |
 | Dismount vehicle | Minecraft Sneak control | Hold the configured keyboard or mouse Sneak binding continuously for 3 real-time seconds (Left Shift by default); the HUD shows the remaining hold time. Opening a GUI, releasing the binding, or changing mounts cancels the hold. |
 | Dismount mob/crew action | `KeyUnmountMob` | Y |
 | Flares/chaff/maintenance/APS | `KeyFlare`, `KeyChaff`, `KeyMaintenance`, `KeyAPS` | V |

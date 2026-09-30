@@ -109,7 +109,7 @@ public abstract class MCH_BaseVehicleCommonGui extends MCH_Gui {
       StringBuilder configuration;
       MCH_Config configuration2;
       if(seatID == 0) {
-         this.drawString(ac.isVehicleAccessLocked() ? "Lock: LOCKED" : "Lock: UNLOCKED", LX, super.centerY + 50, colorActive);
+         this.drawString(ac.isVehicleAccessLocked() ? "Door Lock: LOCKED" : "Door Lock: UNLOCKED", LX, super.centerY + 50, colorActive);
       }
       this.drawRadarKeyBind(ac, player, seatID, RX, super.centerY + 20, colorActive, colorInactive);
       if(seatID == 0 && ac.canPutToRack()) {

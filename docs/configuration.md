@@ -365,6 +365,7 @@ The custom cursor is required because the vanilla Minecraft crosshair is locked 
 | `KeyUseWeapon` | `-99` | Right Click |
 | `KeyAttack` | `-100` | Left Click |
 | `KeyCurrentWeaponLock` | `-100` | Left Click |
+| `KeyVehicleLock` | `24` | O |
 
 `KeyEjectHeli` is initialized with `54` (Right Shift), but it is not included in the current `KeyConfig` array and therefore is not written with the generated key config.
 
@@ -383,7 +384,8 @@ For awareness, prefer stable distance plus a wider FOV rather than large dynamic
 Hold-freelook is hold-to-orbit: mouse input changes raw orbit yaw/pitch targets, while `PlaneFreelookYawSmoothing` and `PlaneFreelookPitchSmoothing` smooth the rendered orbit. `PlaneFreelookReturnSmoothing` controls the blend back to rear chase after release. Recommended starting values are sensitivity 0.15, yaw/pitch smoothing around 0.18-0.28, return smoothing around 0.12-0.22, max pitch up around 75 degrees, and max pitch down around 65 degrees. Freelook should feel smooth and camera-like, not raw or jittery.
 # Vehicle access lock key
 
-`KeyVehicleLock` defaults to LWJGL key code `24` (**O**). While directly riding
+`KeyVehicleLock` appears as **Door Lock** in the Controls menu and defaults to
+LWJGL key code `24` (**O**). While directly riding
 the pilot seat, press it to ask the server to lock or unlock vehicle entry.
 The server, not the client key binding, decides whether the request is allowed.
 # Model-derived vehicle inventory icons
