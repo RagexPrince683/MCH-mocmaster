@@ -771,6 +771,7 @@ public class MCH_BaseVehiclePacketHandler {
                   }
                }
             } else if(pc1.switchSeat > 0) {
+               if(!ac.canPlayerEnterVehicle(player)) return;
                if(pc1.switchSeat == 3) {
                   player.mountEntity((Entity)null);
                   ac.keepOnRideRotation = true;

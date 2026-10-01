@@ -739,3 +739,11 @@ Developer/backend
   retaining its O default, saved config value, and server-side permission checks.
 - Renamed the pilot HUD status to Door Lock: LOCKED/UNLOCKED and updated the
   vehicle control documentation. In-game validation remains.
+
+2026-09-30 20:12 — Block all player entry while door lock is locked
+
+- Reject locked vehicle boarding for every player, including owners and operators,
+  through direct vehicle, passenger-seat, and New UAV station handoff paths.
+- Reject seat-change requests before a rider is detached, while retaining normal
+  dismount handling and unlocked entry. Offline `compileJava` passed; in-game
+  validation remains.

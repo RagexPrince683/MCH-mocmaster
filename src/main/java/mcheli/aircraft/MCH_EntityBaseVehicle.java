@@ -739,7 +739,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    public boolean mountNewUavPilot(EntityPlayerMP player, MCH_EntityUavStation station) {
       if(super.worldObj.isRemote || player == null || station == null || !this.isNewUAV()
             || this.isDead || this.isDestroyed() || station.isDead
-            || player.ridingEntity != station || !this.isLinkedToStation(station)) {
+            || player.ridingEntity != station || !this.isLinkedToStation(station)
+            || !this.canPlayerEnterVehicle(player)) {
          return false;
       }
       if(super.riddenByEntity != null && super.riddenByEntity != player) {
@@ -810,9 +811,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public boolean canPlayerEnterVehicle(EntityPlayer player) {
-      return player != null && (!this.isVehicleAccessLocked()
-              || player.getUniqueID().equals(this.vehicleOwnerUUID)
-              || this.isVehicleAccessOperator(player));
+      return player != null && !this.isVehicleAccessLocked();
    }
 
    private void notifyVehicleAccessDenied(EntityPlayer player) {
@@ -5923,7 +5922,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          mcheli.tech.MCH_TechTierManager.notifyLocked(player, this.getAcInfo());
          return false;
       }
-      if(!super.worldObj.isRemote && !this.switchSeat && !this.canPlayerEnterVehicle(player)) {
+      if(!super.worldObj.isRemote && !this.canPlayerEnterVehicle(player)) {
          this.notifyVehicleAccessDenied(player);
          return false;
       }
@@ -7695,7 +7694,7 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          if(!canRideSeatOrRack(0, player)) {
             return this.rejectInteraction(player, "pilot_seat_exclusion");
          }
-         if(!super.worldObj.isRemote && !this.switchSeat && !this.canPlayerEnterVehicle(player)) {
+         if(!super.worldObj.isRemote && !this.canPlayerEnterVehicle(player)) {
             this.notifyVehicleAccessDenied(player);
             return false;
          }
@@ -7791,6 +7790,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void switchNextSeat(Entity entity) {
+      if(!super.worldObj.isRemote && entity instanceof EntityPlayer
+            && !this.canPlayerEnterVehicle((EntityPlayer)entity)) return;
       if(entity != null) {
          if(this.seats != null && this.seats.length > 0) {
             if(this.isMountedEntity(entity)) {
@@ -7843,6 +7844,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public void switchPrevSeat(Entity entity) {
+      if(!super.worldObj.isRemote && entity instanceof EntityPlayer
+            && !this.canPlayerEnterVehicle((EntityPlayer)entity)) return;
       if(entity != null) {
          if(this.seats != null && this.seats.length > 0) {
             if(this.isMountedEntity(entity)) {
