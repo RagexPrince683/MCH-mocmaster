@@ -11,6 +11,7 @@ import mcheli.wrapper.W_Entity;
 import mcheli.wrapper.W_Network;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 
 public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
 
@@ -22,6 +23,7 @@ public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
    public int sequence;
    public int exitSeat;
    public double feetX, feetY, feetZ;
+   public double deniedX, deniedY, deniedZ;
    private static final AtomicInteger NEXT_SEQUENCE = new AtomicInteger();
 
 
@@ -42,6 +44,10 @@ public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
             this.feetX = data.readDouble();
             this.feetY = data.readDouble();
             this.feetZ = data.readDouble();
+         } else if(this.seatID == -3) {
+            this.deniedX = data.readDouble();
+            this.deniedY = data.readDouble();
+            this.deniedZ = data.readDouble();
          }
       } catch (Exception exception) {
          exception.printStackTrace();
@@ -64,6 +70,10 @@ public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
             dos.writeDouble(this.feetX);
             dos.writeDouble(this.feetY);
             dos.writeDouble(this.feetZ);
+         } else if(this.seatID == -3) {
+            dos.writeDouble(this.deniedX);
+            dos.writeDouble(this.deniedY);
+            dos.writeDouble(this.deniedZ);
          }
       } catch (IOException oException) {
          oException.printStackTrace();
@@ -97,6 +107,19 @@ public class MCH_PacketNotifyOnMountEntity extends MCH_Packet {
 
    public static void sendDismount(MCH_EntityBaseVehicle ac, EntityPlayer rider) {
       sendToRider(ac, rider, -1);
+   }
+
+   /** Correct a local click prediction without changing the server's rider state. */
+   public static void sendEntryDenied(MCH_EntityBaseVehicle ac, EntityPlayerMP player) {
+      MCH_PacketNotifyOnMountEntity packet = new MCH_PacketNotifyOnMountEntity();
+      packet.entityID_Ac = ac.getEntityId();
+      packet.entityID_rider = player.getEntityId();
+      packet.seatID = -3;
+      packet.deniedX = player.posX;
+      packet.deniedY = player.boundingBox.minY;
+      packet.deniedZ = player.posZ;
+      populateIdentity(packet, ac, player);
+      W_Network.sendToPlayer(packet, player);
    }
 
    public static int nextSequence() {

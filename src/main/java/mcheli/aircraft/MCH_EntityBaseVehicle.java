@@ -814,9 +814,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       return player != null && !this.isVehicleAccessLocked();
    }
 
-   private void notifyVehicleAccessDenied(EntityPlayer player) {
+   void notifyVehicleAccessDenied(EntityPlayer player) {
       if(!super.worldObj.isRemote) {
          player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "This vehicle is locked."));
+         if(player instanceof EntityPlayerMP && player.ridingEntity == null) {
+            MCH_PacketNotifyOnMountEntity.sendEntryDenied(this, (EntityPlayerMP)player);
+         }
       }
    }
 
@@ -1905,6 +1908,10 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       MCH_Dismount.observeMount(this, this.getRiddenByEntity(), this, 0);
       if(super.worldObj.isRemote && W_Lib.isClientPlayer(this.getRiddenByEntity())) {
          this.updateClientSettings(0);
+         this.setCameraId(0);
+         this.initPilotWeapon();
+         this.lowPassPartialTicks.clear();
+         this.onInteractFirst((EntityPlayer)this.getRiddenByEntity());
       }
 
       Entity pilot = this.getRiddenByEntity();
@@ -6010,6 +6017,15 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
    }
 
+   void finishRejectedClientMount(EntityPlayer player, Entity mount) {
+      if(mount == this && this.lastRiddenByEntity == player) {
+         this.lastRiddenByEntity = null;
+      } else if(mount instanceof MCH_EntitySeat) {
+         ((MCH_EntitySeat)mount).finishDismount(player);
+      }
+      this.camera.initCamera(0, player);
+   }
+
    public MCH_WeaponInfo getWeaponInfoById(int id) {
       if(id >= 0) {
          MCH_WeaponSet ws = this.getWeapon(id);
@@ -7698,6 +7714,11 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             this.notifyVehicleAccessDenied(player);
             return false;
          }
+         // The click is only a request on the client. Entry effects start when
+         // the server's mount reaches onRidePilotFirstUpdate.
+         if(super.worldObj.isRemote) {
+            return true;
+         }
          if(!this.switchSeat) {
             if(getAcInfo().haveCanopy() && isCanopyClose()) {
                openCanopy();
@@ -7710,20 +7731,16 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
          closeCanopy();
          this.lastRiddenByEntity = null;
          initRadar();
-         if(!this.worldObj.isRemote) {
-            this.clearPlacementMotionLock();
-            player.mountEntity(this);
-            if(player.ridingEntity == this) {
-               MCH_PacketNotifyOnMountEntity.sendToRider(this, player, 0);
-            }
-            if(player.ridingEntity == this && this.vehicleOwnerUUID == null) {
-               this.vehicleOwnerUUID = player.getUniqueID();
-            }
-            if(!this.keepOnRideRotation) {
-               mountMobToSeats();
-            }
-         } else {
-            updateClientSettings(0);
+         this.clearPlacementMotionLock();
+         player.mountEntity(this);
+         if(player.ridingEntity == this) {
+            MCH_PacketNotifyOnMountEntity.sendToRider(this, player, 0);
+         }
+         if(player.ridingEntity == this && this.vehicleOwnerUUID == null) {
+            this.vehicleOwnerUUID = player.getUniqueID();
+         }
+         if(!this.keepOnRideRotation) {
+            mountMobToSeats();
          }
          setCameraId(0);
          initPilotWeapon();

@@ -258,9 +258,10 @@ the first player who successfully enters its pilot position; passenger entry and
 inventory, repair, fuel, or ammunition actions never claim it.
 
 Only the current pilot may toggle the lock, and that pilot must be the owner or
-a server operator. Owners and operators may enter a locked vehicle; everyone
-else is denied both pilot and passenger entry. Existing occupants are not
-ejected, may leave normally, and may switch seats inside the same vehicle.
+a server operator. While locked, every player, including the owner and operators,
+is denied pilot and passenger entry and seat changes. Existing occupants stay
+mounted and may leave normally. Clients enter only after the server accepts the
+mount; a rejected local mount is detached and returned to the server position.
 
 Ownership is stored as a Java-compatible UUID string in
 `MCH_VehicleOwnerUUID`, and the state is stored in

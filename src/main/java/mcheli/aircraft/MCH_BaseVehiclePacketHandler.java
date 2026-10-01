@@ -390,6 +390,21 @@ public class MCH_BaseVehiclePacketHandler {
       return rider.ridingEntity == mount && mount.riddenByEntity == rider;
    }
 
+   private static void applyEntryDenied(EntityPlayer player, MCH_PacketNotifyOnMountEntity packet) {
+      if(packet.entityID_rider != player.getEntityId() || !player.getUniqueID().equals(packet.riderUUID)) return;
+      Entity mount = player.ridingEntity;
+      Entity parent = mount instanceof MCH_EntitySeat ? ((MCH_EntitySeat)mount).getParent() : mount;
+      if(!(parent instanceof MCH_EntityBaseVehicle) || parent.getEntityId() != packet.entityID_Ac
+            || !parent.getUniqueID().equals(packet.aircraftUUID)) return;
+      player.mountEntity((Entity)null);
+      ((MCH_EntityBaseVehicle)parent).finishRejectedClientMount(player, mount);
+      // Server feet and client posY differ by the local player's yOffset.
+      player.setPosition(packet.deniedX, packet.deniedY + player.yOffset - player.ySize, packet.deniedZ);
+      player.prevPosX = player.lastTickPosX = packet.deniedX;
+      player.prevPosY = player.lastTickPosY = player.posY;
+      player.prevPosZ = player.lastTickPosZ = packet.deniedZ;
+   }
+
    public static void handleVehicleAccessLockToggle(EntityPlayer player, MCH_EntityBaseVehicle vehicle,
                                                      MCH_PacketPlayerControlBase control) {
       if(control.toggleVehicleAccessLock) {
@@ -464,6 +479,10 @@ public class MCH_BaseVehiclePacketHandler {
             for(int i = pendingMounts.size() - 1; i >= 0; --i) {
                if(pendingMounts.get(i).riderId == req.entityID_rider) pendingMounts.remove(i);
             }
+             if(req.seatID == -3) {
+                applyEntryDenied(player, req);
+                return;
+             }
             if(req.seatID == -2) {
                if(req.entityID_rider == player.getEntityId() && player.getUniqueID().equals(req.riderUUID)) {
                   pendingExit = req;

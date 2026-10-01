@@ -14,8 +14,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 
 public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnData {
@@ -333,7 +331,7 @@ public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnDa
          return false;
       }
       if(!this.worldObj.isRemote && !getParent().canPlayerEnterVehicle(player)) {
-         player.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "This vehicle is locked."));
+         getParent().notifyVehicleAccessDenied(player);
          return false;
       }
       if(!canRideMob(player)) {
@@ -343,10 +341,12 @@ public class MCH_EntitySeat extends W_Entity implements IEntityAdditionalSpawnDa
       if(!this.worldObj.isRemote) {
          getParent().clearPlacementMotionLock();
       }
-      player.mountEntity(this);
-      if(!this.worldObj.isRemote && player.ridingEntity == this && getParent() != null
-              && !getParent().isUAV() && !getParent().isNewUAV()) {
-         MCH_PacketNotifyOnMountEntity.sendToRider(getParent(), player, this.seatID + 1);
+      if(!this.worldObj.isRemote) {
+         player.mountEntity(this);
+         if(player.ridingEntity == this && getParent() != null
+                 && !getParent().isUAV() && !getParent().isNewUAV()) {
+            MCH_PacketNotifyOnMountEntity.sendToRider(getParent(), player, this.seatID + 1);
+         }
       }
       return true;
    }

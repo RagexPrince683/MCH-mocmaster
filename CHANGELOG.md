@@ -747,3 +747,13 @@ Developer/backend
 - Reject seat-change requests before a rider is detached, while retaining normal
   dismount handling and unlocked entry. Offline `compileJava` passed; in-game
   validation remains.
+
+2026-09-30 20:37 — Correct client mount state after locked entry rejection
+
+- Let the server mount direct and passenger-seat entrants before client pilot or
+  seat entry effects run. A locked rejection now sends a sequenced correction
+  that detaches a local prediction for that vehicle and restores the server
+  player position without disturbing existing riders.
+- Corrected the vehicle access documentation. Offline `compileJava` and diff
+  whitespace checks passed; repeated-click and multiplayer behavior still need
+  in-game validation.
