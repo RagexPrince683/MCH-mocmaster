@@ -105,9 +105,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    private static final int CMN_ID_CNTRL_UP = 9;
    private static final int CMN_ID_CNTRL_DOWN = 10;
    private static final int CMN_ID_CNTRL_BRAKE = 11;
-   /** Vehicle access lock occupies bit 12 in the shared status watcher. */
-   private static final int CMN_ID_VEHICLE_ACCESS_LOCK = 12;
+   private static final int CMN_ID_GUNNER_STATUS = 12;
    private static final int CMN_ID_ACTIVE_RADAR = 13;
+   private static final int CMN_ID_VEHICLE_ACCESS_LOCK = 14;
    private static final int DATAWT_ID_USE_WEAPON = 24;
    private static final int DATAWT_ID_FUEL = 25;
    private static final int DATAWT_ID_ROT_ROLL = 26;
@@ -811,7 +811,30 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public boolean canPlayerEnterVehicle(EntityPlayer player) {
+      if(!super.worldObj.isRemote) {
+         this.unlockIfNoRiders();
+      }
       return player != null && !this.isVehicleAccessLocked();
+   }
+
+   private void unlockIfNoRiders() {
+      if(!this.isVehicleAccessLocked()) {
+         return;
+      }
+      Entity pilot = this.getRiddenByEntity();
+      if(pilot != null && !pilot.isDead && (pilot.ridingEntity == this
+            || this.isUAV() && this.uavStation != null && pilot.ridingEntity == this.uavStation)) {
+         return;
+      }
+      if(this.seats != null) {
+         for(MCH_EntitySeat seat : this.seats) {
+            if(seat != null && seat.riddenByEntity != null && !seat.riddenByEntity.isDead
+                  && seat.riddenByEntity.ridingEntity == seat) {
+               return;
+            }
+         }
+      }
+      this.setVehicleAccessLocked(false);
    }
 
    void notifyVehicleAccessDenied(EntityPlayer player) {
@@ -2948,6 +2971,9 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
 
       this.lastRiddenByEntity = this.getRiddenByEntity();
       this.lastRidingEntity = this.getRidingEntity();
+      if(!super.worldObj.isRemote) {
+         this.unlockIfNoRiders();
+      }
       this.prevPosition.put(Vec3.createVectorHelper(super.posX, super.posY, super.posZ));
    }
 
@@ -9347,12 +9373,12 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
    }
 
    public boolean getGunnerStatus() {
-      return getCommonStatus(12);
+      return getCommonStatus(CMN_ID_GUNNER_STATUS);
    }
 
    public void setGunnerStatus(boolean b) {
       if (!this.worldObj.isRemote)
-         setCommonStatus(12, b);
+         setCommonStatus(CMN_ID_GUNNER_STATUS, b);
    }
 
    public MCH_EntityChain getTowChainEntity() {

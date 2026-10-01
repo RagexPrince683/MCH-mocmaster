@@ -757,3 +757,14 @@ Developer/backend
 - Corrected the vehicle access documentation. Offline `compileJava` and diff
   whitespace checks passed; repeated-click and multiplayer behavior still need
   in-game validation.
+
+2026-09-30 20:56 — Keep empty vehicle doors unlocked
+
+- Moved the door lock out of gunner status bit 12, which was set during vehicle
+  initialization and made newly placed vehicles appear locked. Gunner status stays
+  on bit 12; the lock now uses its own synchronized status bit.
+- Explicitly unlock dispenser placements and clear a saved lock on the server when
+  no pilot or passenger remains. The entry check also clears an empty vehicle's
+  stale lock before rejecting a click. Occupied vehicles retain their lock.
+- Updated vehicle access documentation. Offline `compileJava` passed; in-game
+  validation remains.

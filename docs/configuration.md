@@ -390,7 +390,8 @@ the pilot seat, press it to ask the server to lock or unlock vehicle entry.
 The server, not the client key binding, decides whether the request is allowed.
 When locked, the server rejects vehicle and passenger-seat boarding for every
 player, including the owner and operators, and rejects seat changes. Riders can
-still dismount. Unlocking restores normal entry behavior.
+still dismount. The server unlocks a vehicle when its last rider leaves, including
+after loading an empty vehicle. Unlocking restores normal entry behavior.
 
 # Model-derived vehicle inventory icons
 
