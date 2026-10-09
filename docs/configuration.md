@@ -327,6 +327,61 @@ This first implementation uses global client config keys. Per-plane mouse-aim ov
 
 The custom cursor is required because the vanilla Minecraft crosshair is locked to screen center and would otherwise represent the plane/nose reticle, not the desired mouse-follow aim point. Mouse aim never directly sets aircraft rotation. It only generates pitch/yaw/roll commands that continue through the same new-flight control-authority, compressibility, unsupported-climb, stall, and angular-velocity integration code as other plane controls, so slow, stalled, damaged, or authority-limited aircraft may lag or fail to follow the cursor. Manual roll input is added to auto-bank in a predictable way, so roll keys remain available for corrections.
 
+## Resource and fuel compatibility
+
+With HBM or Ragex's Nuclear Tech fork (`hbm`) loaded, all configured recipes producing
+MCHeli aluminum, steel or depleted uranium are disabled, including external-to-MCHeli
+conversion recipes. The items stay registered and existing stacks remain valid MCHeli
+inputs. Without that provider, their standalone recipes remain available. Other vanilla
+material recipes and coal-fuel crafting/refilling remain available with or without tech mods.
+Synthetic resource items (`item.ingot_steel`, `item.ingot_aluminum`, `plastic`, `rubber`,
+`du`, `lap`, `map`, and `hap`) do not publish their generic OreDictionary declarations.
+They therefore cannot stand in for processed tech-mod resources. Other addon items keep
+their declared OreDictionary behavior.
+
+Recipes referencing these eight MCHeli items also accept real external equivalents through
+private `mcheliInput_*` ingredient keys. HBM/RTM registry items are resolved explicitly,
+followed by other valid OreDictionary inputs in a stable order. The local fallback remains
+an accepted input. Armor categories accept suitable external plates locally without claiming
+that steel, stainless steel, weapon steel, Saturnite and DuraSteel are globally interchangeable.
+The external depleted-uranium substitute is a whole U-238 ingot, rather than waste or a nugget.
+Material resolution happens at startup; restart after changing the installed mod set.
+
+Ragex's Nuclear Tech fork and HBM use the same `hbm` mod ID and registry namespace; they are
+alternative providers, rather than two mods that can be loaded together. Integration is
+optional and uses the provider's native fluid-container registry, including its canisters,
+tanks and barrels. Numeric fluid metadata is resolved from that registry, not hardcoded.
+
+To refill a can, right-click a partly empty MCHeli fuel can with a supported full petroleum
+container in your inventory. One container is consumed, its empty is returned, and all
+converted fuel remains in the can, including surplus beyond the legacy 600-unit gauge.
+Vehicles consume that reserve automatically. A finite `GasPump` support vehicle can instead
+consume the same full containers from cargo and retain the converted charge in its service
+reserve. Empty-container overflow is dropped. Coal/charcoal refilling and coal-block service
+retain their original values: 100, 75 and 900 units respectively.
+
+Native combustion-energy ratios determine petroleum conversion, normalized to **6,000 MCH
+fuel units per 1,000 mB of diesel**. Low-grade oils receive a 0.25 suitability factor,
+medium-grade and gaseous products 0.5, high-grade fuels 1, and aviation-grade fuels 2.
+This makes processed bulk fuels much more efficient than coal. A 16,000 mB diesel barrel
+provides 96,000 units. RTM fluid-trait configuration changes also affect these ratios after
+restart. Crude/hot oil, bitumen, lubricants and ungraded chemical intermediates remain
+processing inputs; exotic fuels are not accepted by this petroleum integration.
+
+Supported families include heavy/heating/reclaimed oils, petroil, naphtha, light oil,
+diesel, gasoline, kerosene, reformate, xylene, refinery gas, petroleum gas, LPG, coal-derived
+fuel, and processed biofuel/alcohol/syngas alternatives. Available desulfurized, cracked,
+vacuum, reformed and leaded variants use their own native energy values. Only audited
+products with an actual combustion grade and a registered returnable container are accepted.
+There is no pipe connection or reverse MCHeli-fuel-to-native-fluid conversion: retaining
+coal refilling must never let a repaired MCHeli can create real petroleum.
+
+Identical fuel cans stack to **16**, including empties and matching partially filled cans.
+Fuel level and reserve must match before cans merge. Right-click refilling separates one
+can from a stack; each vehicle fuel slot equips one can, including when shift-clicking a
+stack. The normal iron-and-coal can recipe remains configurable through `ItemRecipe_Fuel`;
+an additional five-iron empty-can recipe is available while that recipe setting is enabled.
+
 ## Key config defaults
 
 | Option | Default code | Default input |

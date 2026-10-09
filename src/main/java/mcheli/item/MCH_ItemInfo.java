@@ -12,11 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-//this is our craft items/ammo items. These have a way to oredict already. The method used to oredict these
-// needs to be caught in where our vehicle recipes are made,
-// and the oredict name needs to be added to the vehicle recipe instead of the itemstack.
-// This is because we want to be able to use oredict items in our recipes,
-// but we also want to be able to use our items in other mod's recipes that use oredict.
+// Addon OreDictionary declarations are retained, except for the audited synthetic resources
+// isolated by MCH_MaterialCompat. External materials are accepted through private recipe keys.
 public class MCH_ItemInfo extends MCH_BaseInfo {
     public final String name;
     public String displayName;

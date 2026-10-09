@@ -37,6 +37,8 @@ import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
+import mcheli.compat.MCH_MaterialCompat;
+import net.minecraft.init.Items;
 
 
 //Drafting table stuff and recipes for ALL vehicles/items
@@ -69,7 +71,14 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
       commonItemRecipe.clear();
       GameRegistry.addRecipe(new MCH_RecipeFuel());
       MCH_Config configuration = MCH_MOD.config;
-      addRecipeList(addRecipe(MCH_MOD.itemFuel, MCH_Config.ItemRecipe_Fuel.prmString));
+      IRecipe fullCan = addRecipe(MCH_MOD.itemFuel, MCH_Config.ItemRecipe_Fuel.prmString);
+      addRecipeList(fullCan);
+      if (fullCan != null) {
+         IRecipe emptyCan = new ShapedOreRecipe(new ItemStack(MCH_MOD.itemFuel, 1, 600),
+                 "I I", "III", 'I', Items.iron_ingot);
+         GameRegistry.addRecipe(emptyCan);
+         addRecipeList(emptyCan);
+      }
       configuration = MCH_MOD.config;
       addRecipeList(addRecipe(MCH_MOD.itemGLTD, MCH_Config.ItemRecipe_GLTD.prmString));
       configuration = MCH_MOD.config;
@@ -179,7 +188,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
             String s = (String)iteratedValueIndex1.next();
             if(s.length() >= 3) {
                IRecipe recipe = addRecipe(info4.item, s, info4.isShapedRecipe);
-               info4.recipe.add(recipe);
+               if (recipe != null) info4.recipe.add(recipe);
                addRecipeList(recipe);
             }
          }
@@ -197,7 +206,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
             String s = (String)iteratedValueIndex1.next();
             if(s.length() >= 3) {
                IRecipe recipe = addRecipe(info5.item, s, info5.isShapedRecipe);
-               info5.recipe.add(recipe);
+               if (recipe != null) info5.recipe.add(recipe);
                addRecipeList(recipe);
             }
          }
@@ -211,6 +220,10 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
 
       ItemStack stack = (ItemStack)obj;
       if (stack.getItem() == null) return obj;
+
+      if (MCH_MaterialCompat.isPrivateMaterial(stack.getItem())) {
+         return MCH_MaterialCompat.recipeInput(stack);
+      }
 
       int[] oreIDs = OreDictionary.getOreIDs(stack);
       if (oreIDs != null && oreIDs.length > 0) {
@@ -233,12 +246,27 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
          ++count;
          if(s.length() >= 3) {
             IRecipe recipe = addRecipe(item, s, info.isShapedRecipe);
+            if (recipe == null && hasMissingOptionalItem(s)) continue;
             info.recipe.add(recipe);
             im.addRecipe(recipe, count, info.name, s);
          }
       }
 
       info.recipeString = null;
+   }
+
+   private static boolean hasMissingOptionalItem(String data) {
+      for (String token : data.split("\\s*,\\s*")) {
+         String name = token.trim().toLowerCase();
+         int separator = name.indexOf(':');
+         if (separator <= 0 || name.indexOf('"') >= 0) continue;
+         String domain = name.substring(0, separator);
+         if (!domain.equals("mcheli") && !domain.equals("minecraft") && W_Item.getItemByName(name) == null) {
+            MCH_Lib.Log("Skipping recipe with absent optional item %s", name);
+            return true;
+         }
+      }
+      return false;
    }
 
    public static IRecipe addRecipe(Item item, String data) {
@@ -250,6 +278,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
    }
 
    public static IRecipe addShapedRecipe(Item item, String data) {
+      if (!mcheli.compat.MCH_MaterialCompat.allowOutput(item)) return null;
       ArrayList rcp = new ArrayList();
       String[] s = data.split("\\s*,\\s*");
       if(s.length < 3) {
@@ -306,7 +335,9 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
                      return null;
                   }
 
-                  ItemStack stack = new ItemStack(W_Item.getItemByName(text), 1, r);
+                  Item ingredient = W_Item.getItemByName(text);
+                  if (ingredient == null) return null; // Optional provider is absent.
+                  ItemStack stack = new ItemStack(ingredient, 1, r);
                   rcp.add(autoOre(stack));
 
                }
@@ -351,6 +382,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
    }
 
    public static IRecipe addShapelessRecipe(Item item, String data) {
+      if (!mcheli.compat.MCH_MaterialCompat.allowOutput(item)) return null;
       ArrayList rcp = new ArrayList();
       String[] s = data.split("\\s*,\\s*");
       if(s.length < 1) {
@@ -391,7 +423,9 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
                   rcp.add(new ItemStack(W_Item.getItemById(is + 256), 1, i));
                }
             } else {
-               ItemStack stack = new ItemStack(W_Item.getItemByName(r), 1, i);
+               Item ingredient = W_Item.getItemByName(r);
+               if (ingredient == null) return null;
+               ItemStack stack = new ItemStack(ingredient, 1, i);
                rcp.add(autoOre(stack));
 
             }
@@ -400,7 +434,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
          Object[] object = new Object[rcp.size()];
 
          for(int index = 0; index < object.length; ++index) {
-            object[index] = rcp.get(index);
+            object[index] = autoOre(rcp.get(index)); // Include legacy numeric item references.
          }
 
          boolean usesOre = false;

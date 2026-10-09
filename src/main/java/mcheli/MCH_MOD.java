@@ -101,7 +101,7 @@ import java.util.List;
 @Mod(
    modid = "mcheli",
    name = "Mcheli Overdrive Reforged Plus",
-   dependencies = "required-after:Forge@[10.13.2.1230,)"
+   dependencies = "required-after:Forge@[10.13.2.1230,);after:hbm"
 )
 @NetworkMod(
    clientSideRequired = true,
@@ -375,6 +375,8 @@ public class MCH_MOD {
 
 
 
+      mcheli.compat.MCH_MaterialCompat.initialize();
+      mcheli.compat.MCH_FuelCompat.initialize();
       MCH_ItemRecipe.registerItemRecipe();
       MCH_WeaponInfoManager.resolveAllExternalItems();
       proxy.readClientModList();
@@ -474,7 +476,8 @@ public class MCH_MOD {
          W_LanguageRegistry.addName(info.item, info.displayName);
 
          // ---- THEN REGISTER OREDICT ----
-         if (info.oreDictNames != null && !info.oreDictNames.isEmpty()) {
+         if (!mcheli.compat.MCH_MaterialCompat.isPrivateMaterial(name)
+                 && info.oreDictNames != null && !info.oreDictNames.isEmpty()) {
             for (String ore : info.oreDictNames) {
                if (ore == null || ore.isEmpty()) continue;
 

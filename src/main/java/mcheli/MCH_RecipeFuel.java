@@ -47,7 +47,8 @@ public class MCH_RecipeFuel implements IRecipe {
       for(i = 0; i < inv.getSizeInventory(); ++i) {
          is = inv.getStackInSlot(i);
          if(is != null && is.getItem() instanceof MCH_ItemFuel) {
-            output.setItemDamage(is.getItemDamage());
+            output = is.copy();
+            output.stackSize = 1;
             break;
          }
       }

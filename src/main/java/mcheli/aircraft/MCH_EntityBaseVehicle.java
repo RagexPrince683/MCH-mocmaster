@@ -4195,10 +4195,21 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       for(int slot = 0; slot < this.getSizeInventory(); ++slot) {
          ItemStack stack = this.getStackInSlot(slot);
          long value = 0L;
+         ItemStack empty = null;
          if(stack != null && stack.stackSize > 0) {
             if(stack.getItem() == Items.coal && stack.getItemDamage() == 0) value = 100L;
             else if(stack.getItem() == Items.coal && stack.getItemDamage() == 1) value = 75L;
             else if(stack.getItem() == Item.getItemFromBlock(Blocks.coal_block)) value = 900L;
+            else if(stack.getItem() instanceof MCH_ItemFuel) {
+               value = mcheli.compat.MCH_FuelCompat.getFuel(stack);
+               empty = new ItemStack(stack.getItem(), 1, stack.getMaxDamage());
+            } else {
+               mcheli.compat.MCH_FuelCompat.FuelContainer input = mcheli.compat.MCH_FuelCompat.getInput(stack);
+               if(input != null) {
+                  value = input.units;
+                  empty = input.getEmpty();
+               }
+            }
          }
          if(value > 0L) {
             int count = 0;
@@ -4208,7 +4219,37 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
             }
             if(count > 0) this.decrStackSize(slot, count);
             if(this.getStackInSlot(slot) != null && this.getStackInSlot(slot).stackSize <= 0) this.setInventorySlotContents(slot, (ItemStack)null);
+            if(empty != null && count > 0) this.returnFuelContainers(slot, empty, count);
          }
+      }
+   }
+
+   private void returnFuelContainers(int sourceSlot, ItemStack empty, int count) {
+      // Use the consumed slot and cargo space before dropping any overflow on the owning server thread.
+      if(this.getStackInSlot(sourceSlot) == null) {
+         ItemStack returned = empty.copy();
+         returned.stackSize = Math.min(count, returned.getMaxStackSize());
+         this.setInventorySlotContents(sourceSlot, returned);
+         count -= returned.stackSize;
+      }
+      for(int slot = 0; count > 0 && slot < this.getSizeInventory(); ++slot) {
+         ItemStack present = this.getStackInSlot(slot);
+         if(present != null && (!present.isItemEqual(empty) || !ItemStack.areItemStackTagsEqual(present, empty))) continue;
+         int space = empty.getMaxStackSize() - (present == null ? 0 : present.stackSize);
+         int moved = Math.min(space, count);
+         if(moved <= 0) continue;
+         if(present == null) {
+            present = empty.copy();
+            present.stackSize = moved;
+         } else present.stackSize += moved;
+         this.setInventorySlotContents(slot, present);
+         count -= moved;
+      }
+      while(count > 0) {
+         ItemStack overflow = empty.copy();
+         overflow.stackSize = Math.min(count, overflow.getMaxStackSize());
+         this.worldObj.spawnEntityInWorld(new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, overflow));
+         count -= overflow.stackSize;
       }
    }
 
@@ -4217,10 +4258,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
       for(int slot = 0; moved < wanted && slot < this.getSizeInventory(); ++slot) {
          ItemStack stack = this.getStackInSlot(slot);
          if(stack != null && stack.getItem() instanceof MCH_ItemFuel) {
-            int remaining = Math.max(0, stack.getMaxDamage() - stack.getItemDamage());
-            int amount = Math.min(wanted - moved, remaining);
+            int amount = mcheli.compat.MCH_FuelCompat.drain(stack, wanted - moved);
             if(amount > 0) {
-               stack.setItemDamage(stack.getItemDamage() + amount);
                this.setInventorySlotContents(slot, stack);
                moved += amount;
             }
@@ -4255,17 +4294,8 @@ public abstract class MCH_EntityBaseVehicle extends W_EntityContainer implements
                for(int i = 0; i < 3; ++i) {
                   if(result < this.getMaxFuel()) {
                      ItemStack itemStack = this.getGuiInventory().getFuelSlotItemStack(i);
-                     if(itemStack != null && itemStack.getItem() instanceof MCH_ItemFuel && itemStack.getItemDamage() < itemStack.getMaxDamage()) {
-                        int fc = this.getMaxFuel() - result;
-                        if(fc > 100) {
-                           fc = 100;
-                        }
-
-                        if(itemStack.getItemDamage() > itemStack.getMaxDamage() - fc) {
-                           fc = itemStack.getMaxDamage() - itemStack.getItemDamage();
-                        }
-
-                        itemStack.setItemDamage(itemStack.getItemDamage() + fc);
+                     if(itemStack != null && itemStack.getItem() instanceof MCH_ItemFuel) {
+                        int fc = mcheli.compat.MCH_FuelCompat.drain(itemStack, Math.min(100, this.getMaxFuel() - result));
                         result += fc;
                      }
                   }

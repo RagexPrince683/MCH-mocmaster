@@ -768,3 +768,24 @@ Developer/backend
   stale lock before rejecting a click. Occupied vehicles retain their lock.
 - Updated vehicle access documentation. Offline `compileJava` passed; in-game
   validation remains.
+
+2026-10-08 23:04 — Isolate synthetic resources and support bulk petroleum fuel
+
+- Keep vanilla material production and coal-fuel crafting/refilling available, while preventing
+  synthetic aluminum, steel, plastic, rubber, depleted uranium and armor plates from entering
+  generic OreDictionary material namespaces. Accept real external materials through private
+  MCHeli ingredient keys without exporting fallback substitutes to HBM/RTM progression.
+- Resolve optional HBM/RTM materials and native petroleum containers after provider initialization.
+  Convert processed fuels by native combustion energy, grade and container volume; retain surplus
+  fuel and return empty containers. Support both portable cans and finite gas-pump cargo, without
+  reverse fluid export or hard tech-mod dependencies.
+- Stack matching fuel cans to 16, split one can when refilling/equipping, preserve fuel reserve
+  through coal crafting and persistence, and add an iron-only empty-can recipe.
+- Skip recipes referencing absent optional items and document the resource/fuel compatibility rules.
+
+2026-10-08 23:52 — Give RTM ownership of aluminum, steel and depleted uranium production
+
+- Disable all MCHeli recipes producing aluminum, steel or depleted uranium when RTM/HBM
+  is loaded, including material conversion recipes, while keeping the items registered and
+  external materials accepted as MCHeli ingredients. Retain standalone production recipes.
+- Preserve other vanilla material and coal-fuel recipes, and clarify the compatibility rules.

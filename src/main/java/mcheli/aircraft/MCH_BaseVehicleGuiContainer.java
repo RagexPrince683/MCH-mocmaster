@@ -28,11 +28,11 @@ extends Container {
         this.aircraft = ac;
         MCH_BaseVehicleInventory iv = this.aircraft.getGuiInventory();
         iv.getClass();
-        this.addSlotToContainer(new Slot((IInventory)iv, 0, 10, 30));
+        this.addSlotToContainer(fuelSlot(iv, 0, 30));
         iv.getClass();
-        this.addSlotToContainer(new Slot((IInventory)iv, 1, 10, 48));
+        this.addSlotToContainer(fuelSlot(iv, 1, 48));
         iv.getClass();
-        this.addSlotToContainer(new Slot((IInventory)iv, 2, 10, 66));
+        this.addSlotToContainer(fuelSlot(iv, 2, 66));
         int num = this.aircraft.getNumEjectionSeat();
         for (int i = 0; i < num; ++i) {
             iv.getClass();
@@ -53,6 +53,15 @@ extends Container {
             return 3;
         }
         return 3 + this.aircraft.getNumEjectionSeat();
+    }
+
+    private Slot fuelSlot(IInventory inventory, int index, int y) {
+        return new Slot(inventory, index, 10, y) {
+            @Override public int getSlotStackLimit() { return 1; }
+            @Override public boolean isItemValid(ItemStack stack) {
+                return stack != null && stack.getItem() instanceof MCH_ItemFuel;
+            }
+        };
     }
 
     public void detectAndSendChanges() {
@@ -105,9 +114,11 @@ extends Container {
                 for (int i = 0; i < 3; ++i) {
                     if (iv.getFuelSlotItemStack(i) != null) continue;
                     iv.getClass();
-                    iv.setInventorySlotContents(0 + i, itemStack);
-                    slot.putStack(null);
-                    return itemStack;
+                    ItemStack equipped = itemStack.splitStack(1);
+                    iv.setInventorySlotContents(0 + i, equipped);
+                    if (itemStack.stackSize <= 0) slot.putStack(null);
+                    else slot.onSlotChanged();
+                    return equipped;
                 }
                 break block6;
             }
