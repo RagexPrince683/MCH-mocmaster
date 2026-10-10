@@ -48,7 +48,7 @@ public class MCH_MetallurgyGui extends GuiContainer {
             MCH_FoundryTile foundry = (MCH_FoundryTile) tile;
             bar(26, 91, 124, foundry.steel, MCH_Metallurgy.MAX_STEEL, 0xFFD98627);
             bar(66, 68, 10, foundry.heat, MCH_Metallurgy.MAX_HEAT, 0xFFBD5232);
-            bar(80, 76, 26, foundry.progress, MCH_Metallurgy.CAST_TICKS, 0xFF447F42);
+            bar(80, 68, 26, foundry.progress, MCH_Metallurgy.CAST_TICKS, 0xFF447F42);
             MCH_Metallurgy.Cast cast = foundry.selected();
             if (cast != null) {
                 RenderHelper.enableGUIStandardItemLighting();
