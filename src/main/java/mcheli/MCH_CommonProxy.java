@@ -26,6 +26,9 @@ public class MCH_CommonProxy {
 
    public void registerBlockRenderer() {}
 
+   public Object createMetallurgyGui(int id, net.minecraft.entity.player.EntityPlayer player,
+       net.minecraft.world.World world, int x, int y, int z) { return null; }
+
    public void registerModels() {}
 
    public void registerModelsHeli(String name, boolean reload) {}

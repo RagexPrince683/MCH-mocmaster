@@ -278,6 +278,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
    }
 
    public static IRecipe addShapedRecipe(Item item, String data) {
+      if (mcheli.metallurgy.MCH_Metallurgy.isCastOnly(item)) return null;
       if (!mcheli.compat.MCH_MaterialCompat.allowOutput(item)) return null;
       ArrayList rcp = new ArrayList();
       String[] s = data.split("\\s*,\\s*");
@@ -382,6 +383,7 @@ public class MCH_ItemRecipe implements MCH_IRecipeList {
    }
 
    public static IRecipe addShapelessRecipe(Item item, String data) {
+      if (mcheli.metallurgy.MCH_Metallurgy.isCastOnly(item)) return null;
       if (!mcheli.compat.MCH_MaterialCompat.allowOutput(item)) return null;
       ArrayList rcp = new ArrayList();
       String[] s = data.split("\\s*,\\s*");

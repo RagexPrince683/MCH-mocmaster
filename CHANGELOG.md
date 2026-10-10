@@ -789,3 +789,36 @@ Developer/backend
   is loaded, including material conversion recipes, while keeping the items registered and
   external materials accepted as MCHeli ingredients. Retain standalone production recipes.
 - Preserve other vanilla material and coal-fuel recipes, and clarify the compatibility rules.
+
+2026-10-09 23:16 — Extract vehicle steel production and casting from Xenofactions
+
+- Add native coal-fired Blast Furnace and Steel Foundry machines with MCHeli-owned
+  blocks, tile persistence, containers, GUI state, optional NEI pages and rehomed machine art.
+  Replace XF foundations, multiblock proxies, faction/prestige hooks and broad gauge packets
+  with single-block sided inventories and vanilla container/visual synchronization.
+- Merge seven vehicle casts into existing MCHeli items at XF costs: grate 3, large spring 3,
+  light armor plate 5, light ship hull 15, basic mechanic parts 4, rims 3 and track piece 2.
+  Remove crafting/conversion recipes for these cast-only parts, while keeping larger
+  assemblies crafted from them. Remove XF conversion shortcuts from their vehicle assemblies.
+- Replace direct steel crafting with 300-tick iron/carbon processing; retain a 32-ingot
+  foundry reservoir, 21-tick melting, four melts per coal and 100-tick reusable casting.
+  Persist heat and partial timers, and make output transfer respect inventory limits and NBT.
+- Preserve HBM/RTM steel-production ownership and private material compatibility. Accept
+  legitimate external steel for casting without global exports, component recycling or
+  ingot-production bypasses. Coal blocks supply exactly nine coal worth of processing.
+- Exclude gun parts, weapon casts, unused sawblades, RF infrastructure and unrelated metallurgy.
+
+2026-10-10 01:00 — Restore metallurgy machine models and multiblock footprints
+
+- Render the original Blast Furnace and Steel Foundry at native scale, preserving facing,
+  foundry translation and crucible pivot, section textures, furnace fill and molten-metal pouring.
+  Opt into ordinary OBJ object names for these models while preserving existing addon parsing.
+- Replace single-block placement with MCHeli-owned controllers and linked inventory-only
+  sections: a 3×3×5 furnace with an open shaft and a rotated 3×5×4 foundry. Validate the
+  entire placement, retain Forge placement cancellation, and clean up linked sections and
+  controller contents without duplicate drops. Save controller links and defer unloaded
+  orphan cleanup without loading chunks.
+- Use solid-topped blocks or hoppers for the furnace foundation, with no XF or RF dependency.
+  Cover the full native models in render bounds and retain server-owned casting and XF costs.
+  Existing single-block saves keep their inventory/data but require manual replacement;
+  never expand their footprint automatically into surrounding blocks.

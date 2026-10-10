@@ -8,4 +8,3 @@ AddRecipe = "AAA", "   ", "   ", A, mcheli:hap
 ;default hfr:
 ;15lightship*5=75mediumship*5=375steel
 ;yeah here's ur recipes bro enjoy grinding vanilla
-AddRecipe = " A ", "   ", "   ", A, hfr:item.part_hull_3

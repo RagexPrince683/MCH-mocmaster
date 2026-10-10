@@ -87,6 +87,17 @@ import mcheli.mob.MCH_RenderGunner;
 
 public class MCH_ClientProxy extends MCH_CommonProxy {
 
+   @Override
+   public Object createMetallurgyGui(int id, net.minecraft.entity.player.EntityPlayer player,
+       net.minecraft.world.World world, int x, int y, int z) {
+      net.minecraft.tileentity.TileEntity tile = world.getTileEntity(x, y, z);
+      if ((id == mcheli.gui.MCH_GuiCommonHandler.GUIID_BLAST_FURNACE && tile instanceof mcheli.metallurgy.MCH_BlastFurnaceTile)
+          || (id == mcheli.gui.MCH_GuiCommonHandler.GUIID_STEEL_FOUNDRY && tile instanceof mcheli.metallurgy.MCH_FoundryTile)) {
+         return new mcheli.metallurgy.MCH_MetallurgyGui(player.inventory, (mcheli.metallurgy.MCH_MetallurgyTile) tile);
+      }
+      return null;
+   }
+
    private static final java.util.Set LOADED_VEHICLE_MODELS = java.util.Collections.newSetFromMap(
          new java.util.WeakHashMap());
    private static final java.util.Set FAILED_VEHICLE_MODELS = java.util.Collections.newSetFromMap(
@@ -192,6 +203,12 @@ public class MCH_ClientProxy extends MCH_CommonProxy {
    public void registerBlockRenderer() {
       ClientRegistry.bindTileEntitySpecialRenderer(MCH_DraftingTableTileEntity.class, new MCH_DraftingTableRenderer());
       W_MinecraftForgeClient.registerItemRenderer(W_Item.getItemFromBlock(MCH_MOD.blockDraftingTable), new MCH_DraftingTableItemRender());
+      mcheli.metallurgy.MCH_MetallurgyRenderer blast = new mcheli.metallurgy.MCH_MetallurgyRenderer(false);
+      mcheli.metallurgy.MCH_MetallurgyRenderer foundry = new mcheli.metallurgy.MCH_MetallurgyRenderer(true);
+      ClientRegistry.bindTileEntitySpecialRenderer(mcheli.metallurgy.MCH_BlastFurnaceTile.class, blast);
+      ClientRegistry.bindTileEntitySpecialRenderer(mcheli.metallurgy.MCH_FoundryTile.class, foundry);
+      W_MinecraftForgeClient.registerItemRenderer(W_Item.getItemFromBlock(mcheli.metallurgy.MCH_Metallurgy.blastFurnace), blast);
+      W_MinecraftForgeClient.registerItemRenderer(W_Item.getItemFromBlock(mcheli.metallurgy.MCH_Metallurgy.foundry), foundry);
    }
 
 

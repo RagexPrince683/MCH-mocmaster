@@ -51,9 +51,16 @@ public class W_WavefrontObject extends W_ModelCustom {
    private int faceNum = 0;
    private W_GroupObject currentGroupObject;
    private String fileName;
+   private boolean ordinaryObjectNames;
 
 
    public W_WavefrontObject(ResourceLocation resource) throws ModelFormatException {
+      this(resource, false);
+   }
+
+   /** Opt in for OBJ exports using ordinary object names, without changing addon group semantics. */
+   public W_WavefrontObject(ResourceLocation resource, boolean ordinaryObjectNames) throws ModelFormatException {
+      this.ordinaryObjectNames = ordinaryObjectNames;
       this.fileName = resource.toString();
 
       // Use the shared resolver first so editable files beat stale resource packs.
@@ -90,6 +97,11 @@ public class W_WavefrontObject extends W_ModelCustom {
    }
 
    public W_WavefrontObject(String filename, InputStream inputStream) throws ModelFormatException {
+      this(filename, inputStream, false);
+   }
+
+   public W_WavefrontObject(String filename, InputStream inputStream, boolean ordinaryObjectNames) throws ModelFormatException {
+      this.ordinaryObjectNames = ordinaryObjectNames;
       this.fileName = filename;
       this.loadObjModel(inputStream);
    }
@@ -153,7 +165,8 @@ public class W_WavefrontObject extends W_ModelCustom {
                   if(result != null) {
                      this.currentGroupObject.faces.add(result);
                   }
-               } else if(currentLine.startsWith("g ") | currentLine.startsWith("o ") && currentLine.charAt(2) == 36) {
+               } else if(currentLine.startsWith("g ") || currentLine.startsWith("o ")
+                     && (this.ordinaryObjectNames || currentLine.charAt(2) == 36)) {
                   W_GroupObject groupObject2 = this.parseGroupObject(currentLine, lineCount);
                   if(groupObject2 != null && this.currentGroupObject != null) {
                      this.groupObjects.add(this.currentGroupObject);

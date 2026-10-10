@@ -8,4 +8,3 @@ AddRecipe = "AAA", "   ", "   ", A, mcheli:map
 ;default hfr:
 ;15steelper*5lighthull=75
 ;huh that's nice thanks math, I didn't do you!
-AddRecipe = " A ", "   ", "   ", A, hfr:item.part_hull_2

@@ -294,6 +294,7 @@ public class MCH_MOD {
       GameRegistry.registerBlock(blockDraftingTable, "drafting_table");
       //GameRegistry.registerBlock(lightBlock, "mcheli_lightblock");
       GameRegistry.registerBlock(blockDraftingTableLit, "lit_drafting_table");
+      mcheli.metallurgy.MCH_Metallurgy.register();
       W_LanguageRegistry.addName(blockDraftingTable, "Drafting Table");
       W_LanguageRegistry.addNameForObject(blockDraftingTable, "ja_JP", "製図台");
       MCH_Achievement.PreInit();
@@ -377,6 +378,7 @@ public class MCH_MOD {
 
       mcheli.compat.MCH_MaterialCompat.initialize();
       mcheli.compat.MCH_FuelCompat.initialize();
+      mcheli.metallurgy.MCH_Metallurgy.registerRecipes();
       MCH_ItemRecipe.registerItemRecipe();
       MCH_WeaponInfoManager.resolveAllExternalItems();
       proxy.readClientModList();

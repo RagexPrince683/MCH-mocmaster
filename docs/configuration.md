@@ -332,7 +332,8 @@ The custom cursor is required because the vanilla Minecraft crosshair is locked 
 With HBM or Ragex's Nuclear Tech fork (`hbm`) loaded, all configured recipes producing
 MCHeli aluminum, steel or depleted uranium are disabled, including external-to-MCHeli
 conversion recipes. The items stay registered and existing stacks remain valid MCHeli
-inputs. Without that provider, their standalone recipes remain available. Other vanilla
+inputs. Without that provider, aluminum and depleted uranium keep their standalone recipes;
+steel is produced in the Blast Furnace. Other vanilla
 material recipes and coal-fuel crafting/refilling remain available with or without tech mods.
 Synthetic resource items (`item.ingot_steel`, `item.ingot_aluminum`, `plastic`, `rubber`,
 `du`, `lap`, `map`, and `hap`) do not publish their generic OreDictionary declarations.
@@ -346,6 +347,90 @@ an accepted input. Armor categories accept suitable external plates locally with
 that steel, stainless steel, weapon steel, Saturnite and DuraSteel are globally interchangeable.
 The external depleted-uranium substitute is a whole U-238 ingot, rather than waste or a nugget.
 Material resolution happens at startup; restart after changing the installed mod set.
+
+### Vehicle steel production and casting
+
+The Blast Furnace (`mcheli:blast_furnace`) and Steel Foundry (`mcheli:steel_foundry`)
+are native multiblock machines using the original full-size machine models. They do
+not require factions, claims, prestige, Xenofactions, electricity or RF. Right-click
+the controller or any occupied machine section to open the controller inventory.
+Their fixed processing values are independent of vehicle fuel settings. NEI pages
+use the existing `EnableNEIHandler` setting and are optional.
+
+Placement faces toward the player, with the controller one block behind the
+clicked placement point. The Blast Furnace occupies a 3×3 base and five blocks of
+height, with an open central shaft above its controller (41 occupied cells). Build
+a 3×3 foundation of blocks with solid top faces or hoppers beneath it. Removing
+support stops processing and resets its current timer until support is restored.
+The foundry occupies a rotated 3×5 base and four blocks of height (60 occupied cells);
+its model retains the original scaffold/crucible overhang beyond that block volume.
+Leave room around and above it for the visible model and pouring animation.
+All occupied cells must be loaded, replaceable, free of tile entities and entities,
+and editable by the player. Failed placement consumes no machine item. Sections
+have the original full-cell collision and selection bounds; the furnace shaft is open.
+
+Craft the Blast Furnace with stone bricks around two iron ingots above a furnace
+(`BIB / BIB / BFB`). Craft the foundry with iron, a bucket, four steel ingots,
+a furnace and a stone slab (`IBI / SFS / SDS`, where B is the bucket and D the slab).
+The foundry recipe accepts the same legitimate steel providers as vehicle recipes.
+
+- **Blast Furnace:** insert iron ingots or iron ore in its three input slots and coal
+  or charcoal in its fuel slot. Equivalent `ingotIron`/`oreIron` inputs are accepted.
+  One iron becomes one steel in 300 loaded server ticks. Coal/charcoal supplies four
+  operations; a coal block supplies 36, equivalent to its nine coal. Up to 256 fuel
+  operations can be stored. Hoppers on any machine section insert iron from above, fuel from the sides,
+  and extract steel from the three output slots below. Invalid/blocked processing
+  resets its current timer without consuming iron or stored fuel.
+- **Steel Foundry:** insert MCHeli steel or a legitimate external steel ingot above,
+  and coal/charcoal at the sides. Each ingot melts in 21 loaded server ticks; one coal
+  melts four ingots. The internal reservoir holds 32 ingots and exposes no fluid API.
+  Choose a built-in reusable cast with the arrows. No mold item is consumed or needed.
+  Casting takes 100 ticks and consumes steel only when the output can be delivered.
+  Changing the cast or blocking the output resets casting progress. Extract below;
+  the foundry also pushes output into a compatible inventory below every eight ticks.
+  Components and external armor plates cannot be melted back into steel.
+
+| Cast output (existing item ID) | Steel ingots | Used for |
+| --- | ---: | --- |
+| Grate (`mcheli:grate`) | 3 | Engine assemblies |
+| Large spring (`mcheli:largespring`) | 3 | Engine/suspension assemblies |
+| Light armor plate (`mcheli:lap`) | 5 | Chassis, armor and hull assemblies |
+| Light ship hull (`mcheli:shiphull1`) | 15 | Ship crafting |
+| Basic mechanic parts (`mcheli:basicmechanicparts`) | 4 | Engines, upgraded mechanics and aircraft |
+| Steel rims (`mcheli:rims`) | 3 | Wheels and tank tracks |
+| Tank track piece (`mcheli:tanktrackpiece`) | 2 | Tank tracks |
+
+These seven parts have no crafting or conversion recipes; addon definitions cannot
+restore those recipes. Combine them at a crafting table or the Drafting Table using
+the existing recipes for engines, chassis, wheels, tracks and other larger assemblies.
+Existing external armor substitutes remain valid *ingredients* through private
+compatibility keys, without creating MCHeli armor or steel conversion outputs.
+The foundry can also cast one stored steel ingot back into the existing private
+`mcheli:item.ingot_steel` item in standalone packs. Direct crafting of steel is disabled.
+No firearm barrels, small gun springs, receivers, ammunition, missiles or weapon casts
+are registered by these machines.
+
+With HBM/RTM installed, the Blast Furnace performs no production and consumes no
+inputs or fuel. Obtain real steel from that provider and cast vehicle parts in the
+foundry; its steel-ingot recovery cast is also disabled. MCHeli steel and armor remain
+private materials with no generic OreDictionary export. Other mods must not export
+these private items into generic material keys.
+
+Machine inventories, stored fuel/steel/heat, both processing timers, the selected
+cast and each section's controller link are saved in native MCHeli tile NBT. Unloaded
+machines pause; a normal save/restart resumes a valid process. Breaking the controller
+or any section removes the full footprint and drops the controller inventory once.
+Survival breaking returns one machine item; creative breaking returns none. Breaking
+loses stored heat, fuel and molten steel. Unloaded edge sections remove themselves
+when their saved controller is confirmed absent on load; cleanup never force-loads
+chunks. Client animation is visual-only; production and cast selection remain server-owned.
+Earlier single-block MCHeli machines retain their saved inventory and process data,
+but must be emptied, broken and placed again to form the new footprint. They do not
+process while unformed. No automatic expansion overwrites surrounding world blocks.
+Existing MCHeli material/component item IDs are preserved. XF machines and old XF
+tile data are not converted or reassigned automatically.
+
+### Petroleum fuel
 
 Ragex's Nuclear Tech fork and HBM use the same `hbm` mod ID and registry namespace; they are
 alternative providers, rather than two mods that can be loaded together. Integration is

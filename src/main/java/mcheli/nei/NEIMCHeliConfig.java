@@ -22,6 +22,17 @@ public class NEIMCHeliConfig implements IConfigureNEI {
         MCH_VehicleAmmoRecipeHandler handler = new MCH_VehicleAmmoRecipeHandler();
         API.registerRecipeHandler(handler);
         API.registerUsageHandler(handler);
+        registerMetallurgy(false);
+        registerMetallurgy(true);
+    }
+
+    private void registerMetallurgy(boolean casting) {
+        MCH_MetallurgyRecipeHandler handler = new MCH_MetallurgyRecipeHandler(casting);
+        API.registerRecipeHandler(handler);
+        API.registerUsageHandler(handler);
+        API.addRecipeCatalyst(new net.minecraft.item.ItemStack(casting
+            ? mcheli.metallurgy.MCH_Metallurgy.foundry : mcheli.metallurgy.MCH_Metallurgy.blastFurnace),
+            handler.getOverlayIdentifier());
     }
 
     @Override

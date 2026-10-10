@@ -28,9 +28,19 @@ public class MCH_GuiCommonHandler implements IGuiHandler {
    public static final int GUIID_INVENTORY = 3;
    public static final int GUIID_DRAFTING = 4;
    public static final int GUIID_MULTI_MNG = 5;
+   public static final int GUIID_BLAST_FURNACE = 6;
+   public static final int GUIID_STEEL_FOUNDRY = 7;
 
 
    public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
+      if (id == GUIID_BLAST_FURNACE || id == GUIID_STEEL_FOUNDRY) {
+         net.minecraft.tileentity.TileEntity tile = world.getTileEntity(x, y, z);
+         if ((id == GUIID_BLAST_FURNACE && tile instanceof mcheli.metallurgy.MCH_BlastFurnaceTile)
+             || (id == GUIID_STEEL_FOUNDRY && tile instanceof mcheli.metallurgy.MCH_FoundryTile)) {
+            return new mcheli.metallurgy.MCH_MetallurgyContainer(player.inventory, (mcheli.metallurgy.MCH_MetallurgyTile) tile);
+         }
+         return null;
+      }
       MCH_Lib.DbgLog(world, "MCH_GuiCommonHandler.getServerGuiElement ID=%d (%d, %d, %d)", new Object[]{Integer.valueOf(id), Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z)});
       switch(id) {
       case 0:
@@ -72,6 +82,9 @@ public class MCH_GuiCommonHandler implements IGuiHandler {
    }
 
    public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
+      if (id == GUIID_BLAST_FURNACE || id == GUIID_STEEL_FOUNDRY) {
+         return MCH_MOD.proxy.createMetallurgyGui(id, player, world, x, y, z);
+      }
       MCH_Lib.DbgLog(world, "MCH_GuiCommonHandler.getClientGuiElement ID=%d (%d, %d, %d)", new Object[]{Integer.valueOf(id), Integer.valueOf(x), Integer.valueOf(y), Integer.valueOf(z)});
       switch(id) {
       case 0:

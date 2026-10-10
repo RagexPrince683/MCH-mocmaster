@@ -15,6 +15,4 @@ oredict = plateStainlessSteel
 
 AddRecipe = " A ", "AAA", " A ", A, mcheli:lap
 
-AddRecipe = " A ", "   ", "   ", A, hfr:item.part_plating_2
-
 

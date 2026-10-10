@@ -16,6 +16,4 @@ oredict = plateDuraSteel
 
 AddRecipe = "AAA", "A A", "AAA", A, mcheli:map
 
-AddRecipe = " A ", "   ", "   ", A, hfr:item.part_plating_3
-
 
